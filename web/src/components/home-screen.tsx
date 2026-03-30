@@ -5,47 +5,57 @@ import { ChatPanel, type ChatMessage } from "@/components/chat-panel";
 import { LawRevisionList } from "@/components/law-revision-list";
 import { SummaryPanel } from "@/components/summary-panel";
 import { TabNavigation, type TabId } from "@/components/tab-navigation";
-import { lawRevisions } from "@/data/law-revisions";
+import { createChatResponse, createInitialChatMessages } from "@/lib/services/chat-service";
+import { getLawRevisions } from "@/lib/services/revision-service";
+import { getSummaryByRevisionId } from "@/lib/services/summary-service";
+import type { RevisionSummary } from "@/lib/types/domain";
 
 type HomeScreenProps = {
   children: React.ReactNode;
 };
 
 export function HomeScreen({ children }: HomeScreenProps) {
+  const revisions = useMemo(() => getLawRevisions(), []);
+  const firstRevisionId = revisions[0]?.id ?? "";
   const [activeTab, setActiveTab] = useState<TabId>("laws");
-  const [selectedRevisionId, setSelectedRevisionId] = useState(lawRevisions[0]?.id ?? "");
+  const [selectedRevisionId, setSelectedRevisionId] = useState<string>(firstRevisionId);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
-    {
-      id: "assistant-initial",
-      role: "assistant",
-      content: "質問を入力すると、選択中の法改正に沿ったダミー回答を表示します。",
-    },
-  ]);
+  const [isChatSending, setIsChatSending] = useState(false);
+  const [loadingRevisionId, setLoadingRevisionId] = useState<string | null>(null);
+  const [selectedSummary, setSelectedSummary] = useState<RevisionSummary | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(createInitialChatMessages());
   const [chatInput, setChatInput] = useState("");
   const chatListRef = useRef<HTMLDivElement | null>(null);
 
   const selectedRevision = useMemo(
-    () => lawRevisions.find((revision) => revision.id === selectedRevisionId) ?? null,
-    [selectedRevisionId]
+    () => revisions.find((revision) => revision.id === selectedRevisionId) ?? null,
+    [revisions, selectedRevisionId]
   );
 
   useEffect(() => {
-    if (!isSummaryLoading) {
-      return;
-    }
+    if (!isSummaryLoading) return;
 
     const timer = window.setTimeout(() => {
       setIsSummaryLoading(false);
+      setLoadingRevisionId(null);
     }, 700);
 
     return () => window.clearTimeout(timer);
   }, [isSummaryLoading]);
 
   const handleSelectSummary = (revisionId: string) => {
+    if (revisionId === selectedRevisionId) {
+      void getSummaryByRevisionId(revisionId).then((data) => {
+        setSelectedSummary(data);
+        setIsSummaryLoading(false);
+        setLoadingRevisionId(null);
+      });
+    }
     setSelectedRevisionId(revisionId);
     setActiveTab("summary");
     setIsSummaryLoading(true);
+    setLoadingRevisionId(revisionId);
+    setSelectedSummary(null);
   };
 
   const handleSelectForQuestion = (revisionId: string) => {
@@ -56,6 +66,23 @@ export function HomeScreen({ children }: HomeScreenProps) {
   const selectedRevisionTitle = selectedRevision?.title ?? "法改正が未選択です";
 
   useEffect(() => {
+    if (!selectedRevisionId) return;
+    let active = true;
+
+    async function loadSummary() {
+      const data = await getSummaryByRevisionId(selectedRevisionId);
+      if (active) {
+        setSelectedSummary(data);
+      }
+    }
+
+    loadSummary();
+    return () => {
+      active = false;
+    };
+  }, [selectedRevisionId]);
+
+  useEffect(() => {
     if (!chatListRef.current) {
       return;
     }
@@ -64,20 +91,25 @@ export function HomeScreen({ children }: HomeScreenProps) {
 
   const handleSendChat = () => {
     const trimmed = chatInput.trim();
-    if (!trimmed) {
+    if (!trimmed || isChatSending) {
       return;
     }
 
+    setIsChatSending(true);
+
     const userMessageId = `user-${Date.now()}`;
-    const assistantMessageId = `assistant-${Date.now() + 1}`;
-    const assistantText = `${selectedRevisionTitle} について、質問「${trimmed}」へのダミー回答です。現場の作業手順と責任者確認の流れを先に見直してください。`;
+    const assistantMessage = createChatResponse({
+      revision: selectedRevision,
+      question: trimmed,
+    });
 
     setChatMessages((prev) => [
       ...prev,
       { id: userMessageId, role: "user", content: trimmed },
-      { id: assistantMessageId, role: "assistant", content: assistantText },
+      assistantMessage,
     ]);
     setChatInput("");
+    window.setTimeout(() => setIsChatSending(false), 320);
   };
 
   return (
@@ -88,15 +120,21 @@ export function HomeScreen({ children }: HomeScreenProps) {
       <div className="grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-5 lg:items-start">
         {activeTab === "laws" && (
           <LawRevisionList
-            revisions={lawRevisions}
+            revisions={revisions}
             selectedRevisionId={selectedRevisionId}
+            loadingRevisionId={loadingRevisionId}
             onSelectSummary={handleSelectSummary}
             onSelectForQuestion={handleSelectForQuestion}
           />
         )}
 
         {activeTab === "summary" && (
-          <SummaryPanel selectedRevision={selectedRevision} isLoading={isSummaryLoading} />
+          <SummaryPanel
+            selectedRevisionId={selectedRevisionId}
+            selectedRevisionTitle={selectedRevisionTitle}
+            summaryContent={selectedSummary}
+            isLoading={isSummaryLoading}
+          />
         )}
 
         {activeTab === "chat" && (
@@ -104,6 +142,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
             selectedRevisionTitle={selectedRevisionTitle}
             chatMessages={chatMessages}
             chatInput={chatInput}
+            isSending={isChatSending}
             onChatInputChange={setChatInput}
             onSend={handleSendChat}
             chatListRef={chatListRef}
@@ -112,8 +151,9 @@ export function HomeScreen({ children }: HomeScreenProps) {
 
         {activeTab !== "laws" && (
           <LawRevisionList
-            revisions={lawRevisions}
+            revisions={revisions}
             selectedRevisionId={selectedRevisionId}
+            loadingRevisionId={loadingRevisionId}
             onSelectSummary={handleSelectSummary}
             onSelectForQuestion={handleSelectForQuestion}
           />

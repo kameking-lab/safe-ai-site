@@ -12,6 +12,7 @@ type ChatPanelProps = {
   selectedRevisionTitle: string;
   chatMessages: ChatMessage[];
   chatInput: string;
+  isSending: boolean;
   chatListRef: RefObject<HTMLDivElement | null>;
   onChatInputChange: (value: string) => void;
   onSend: () => void;
@@ -21,18 +22,19 @@ export function ChatPanel({
   selectedRevisionTitle,
   chatMessages,
   chatInput,
+  isSending,
   chatListRef,
   onChatInputChange,
   onSend,
 }: ChatPanelProps) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-24">
       <h2 className="text-base font-bold text-slate-900">質問チャット</h2>
       <p className="mt-1 text-sm font-medium text-slate-700">対象: {selectedRevisionTitle}</p>
 
       <div
         ref={chatListRef}
-        className="mt-3 h-64 space-y-2 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50/90 p-3"
+        className="mt-3 h-64 space-y-2 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50/90 p-3 sm:h-72"
       >
         {chatMessages.map((message) => {
           const isUser = message.role === "user";
@@ -54,6 +56,7 @@ export function ChatPanel({
       <div className="mt-3 flex gap-2">
         <input
           value={chatInput}
+          disabled={isSending}
           onChange={(event) => onChatInputChange(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") {
@@ -67,10 +70,15 @@ export function ChatPanel({
         />
         <button
           type="button"
+          disabled={isSending}
           onClick={onSend}
-          className="shrink-0 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-700 active:scale-[0.99]"
+          className={`shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-white transition ${
+            isSending
+              ? "cursor-not-allowed bg-emerald-300"
+              : "bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99]"
+          }`}
         >
-          送信
+          {isSending ? "送信中..." : "送信"}
         </button>
       </div>
       <p className="mt-2 text-xs leading-5 text-slate-500">

@@ -123,3 +123,24 @@
 - TASKS 36: progress.md を最終更新する
   - プロジェクト状況を「TASKS 1〜36 完了」へ更新
   - 最終確認結果とアーティファクト情報を反映
+- 任意改善 ブロックA: 実API接続しやすい構造へ整理
+  - `web/src/data/mock/` に法改正基本情報・要約モック・チャット応答ルールを分離
+  - `web/src/lib/services/` に `revision-service` / `summary-service` / `chat-service` を追加
+  - `home-screen.tsx` を service 経由に切り替え、UIからモックデータ直参照を除去
+  - 既存UIを維持しつつ要約/チャットの責務分離を実施
+- 任意改善 ブロックB: UI改善
+  - 一覧カードに読みやすさ向上の補助文、選択/ホバー状態、要約ロード中ボタン状態を追加
+  - タブに `aria-current` を付与し、選択状態の認知性を改善
+  - チャット送信中の入力/送信ボタン状態を追加し、送信体験を安定化
+  - 要約/チャット/一覧カードをPC時に `sticky` で追従させ、2カラム閲覧性を向上
+- 任意改善 ブロックC: ダミーデータ拡張
+  - 法改正ダミーを 3件→5件へ拡張
+  - 要約文・現場アクション・対象業種を法改正ごとに具体化
+  - チャット応答をキーワード連動で自然な文面に改善
+  - API置換しやすいようデータ型を `lib/types/domain.ts` へ集約
+- 任意改善 ブロックD: 最終確認
+  - `web/` で `npm run lint` / `npm run build` を実行し成功
+  - iPhone 12 Pro（390x844）で手動確認し、要約・再要約・チャット履歴の導線を再確認
+  - 確認用アーティファクトを保存
+    - `/opt/cursor/artifacts/optional_improvements_api_ready_and_ui_polish.mp4`
+    - `/opt/cursor/artifacts/optional_improvements_api_ready_and_ui_polish.webp`

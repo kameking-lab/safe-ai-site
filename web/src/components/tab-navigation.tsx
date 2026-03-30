@@ -29,6 +29,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
               <button
                 type="button"
                 onClick={() => onTabChange(tab.id)}
+                aria-current={isActive ? "page" : undefined}
                 className={`rounded-full px-4 py-2 text-sm font-medium shadow-sm transition-colors ${
                   isActive
                     ? "bg-blue-600 text-white"
