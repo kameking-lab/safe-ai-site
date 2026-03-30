@@ -52,3 +52,8 @@
   - 各カードに「AIで要約」ボタンを追加（将来の連携用UI）
 - TASKS 15: 「質問する」ボタンを付ける
   - 各カードに「質問する」ボタンを追加（将来の連携用UI）
+  - `npm run lint` でESLintエラーなしを確認
+  - iPhone 12 Pro（390x844）相当で手動確認し、法改正カード3件と各カードの表示要素（タイトル/発行日/概要/2ボタン）を確認
+  - 確認用アーティファクトを保存
+    - `/opt/cursor/artifacts/tasks_11_15_law_revision_cards_mobile_check.mp4`
+    - `/opt/cursor/artifacts/tasks_11_15_law_revision_cards_mobile_check.webp`
