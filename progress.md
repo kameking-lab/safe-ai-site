@@ -31,3 +31,12 @@
 - TASKS 9: タブナビゲーションのUIを作る
   - `web/src/components/tab-navigation.tsx` を新規作成（クライアントコンポーネント）
   - `web/src/app/page.tsx` で `Header` と `TabNavigation` を配置し、初期プレースホルダ文を表示
+- TASKS 10: スマホで崩れないか確認する
+  - `npm run lint` を実行し、ESLintエラーがないことを確認
+  - iPhone 12 Pro（390x844）相当で手動確認し、以下を確認
+    - ヘッダー文言（日本語）が可読
+    - タブUI（法改正一覧 / AI要約 / 質問チャット）が崩れず操作可能
+    - 不要な横スクロールが発生しない
+  - 確認用アーティファクトを保存
+    - `/opt/cursor/artifacts/tasks_10_mobile_layout_check.mp4`
+    - `/opt/cursor/artifacts/tasks_10_mobile_layout_check.webp`
