@@ -45,3 +45,19 @@
 - 外部APIの本接続
 - 画像入力や音声入力の実装
 - MVP外のページ追加
+
+## Cursor Cloud specific instructions
+
+### サービス概要
+Next.js 16 (App Router) + TypeScript + Tailwind CSS v4 のシングルサービス構成。外部DB・API接続なし、ダミーデータのみ。
+
+### 起動コマンド
+- **依存関係インストール**: `cd web && npm install`
+- **開発サーバー**: `cd web && npm run dev` → http://localhost:3000
+- **Lint**: `cd web && npm run lint`
+- **ビルド**: `cd web && npm run build`
+
+### 注意点
+- パッケージマネージャは **npm**（`package-lock.json` あり）。yarn/pnpm は使わないこと。
+- Next.js 16.2.1 は訓練データと異なるAPIを持つ場合がある。コード変更前に `node_modules/next/dist/docs/` のガイドを参照すること（`web/AGENTS.md` 参照）。
+- 環境変数・シークレットは不要（ダミーデータMVP）。
