@@ -91,3 +91,13 @@
   - `chatMessages` の履歴を role別スタイルで表示
 - TASKS 29: スクロール挙動を整える
   - 新規メッセージ追加時にチャット末尾へ自動スクロール
+- TASKS 30: スマホ表示を確認する
+  - iPhone 12 Pro（390x844）で以下を手動確認
+    - 法改正カード表示が崩れない
+    - 「AIで要約」操作で要約タブ表示に遷移
+    - 3行要約 / 現場でやること / 対象業種 が表示
+    - 質問チャットで入力送信し、質問・回答の履歴表示と自動スクロールを確認
+  - PC幅に戻して2カラム表示（要約/チャット と 法改正一覧）を確認
+  - 確認用アーティファクトを保存
+    - `/opt/cursor/artifacts/tasks_16_30_responsive_summary_chat_check.mp4`
+    - `/opt/cursor/artifacts/tasks_16_30_responsive_summary_chat_check.webp`
