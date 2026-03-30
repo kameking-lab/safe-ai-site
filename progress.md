@@ -2,8 +2,8 @@
 
 ## プロジェクト状況
 - 状態: 進行中
-- 現在の目標: MVPの初期実装（セットアップ）
-- 次にやること: TASKS.md の 6 から開始（基本レイアウト）
+- 現在の目標: MVPの基本レイアウト実装
+- 次にやること: TASKS.md の 11（法改正ダミーデータ作成）
 
 ## 作業ログ
 
@@ -21,3 +21,13 @@
   - `web/src/components` / `web/src/data` / `web/src/lib` を作成（今後のMVP実装で分割しやすくするため）
 - TASKS 5: 開発サーバーが起動することを確認する
   - `web/` で `npm run dev` を実行し、`http://localhost:3000` で Ready を確認
+- TASKS 6: 共通レイアウトを作成する
+  - `web/src/app/layout.tsx` を更新し、スマホ優先の共通コンテナ（`max-w-md`）を追加
+  - `lang` を `ja` に変更し、メタデータ（タイトル/説明）をMVP向けに更新
+- TASKS 7: ヘッダーを作成する
+  - `web/src/components/header.tsx` を新規作成し、上部ヘッダーをコンポーネント分割
+- TASKS 8: サイトタイトルと説明文を表示する
+  - `Header` 内にサイト名、タイトル、説明文（日本語）を追加
+- TASKS 9: タブナビゲーションのUIを作る
+  - `web/src/components/tab-navigation.tsx` を新規作成（クライアントコンポーネント）
+  - `web/src/app/page.tsx` で `Header` と `TabNavigation` を配置し、初期プレースホルダ文を表示
