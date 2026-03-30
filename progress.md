@@ -40,3 +40,15 @@
   - 確認用アーティファクトを保存
     - `/opt/cursor/artifacts/tasks_10_mobile_layout_check.mp4`
     - `/opt/cursor/artifacts/tasks_10_mobile_layout_check.webp`
+- TASKS 11: 法改正のダミーデータファイルを作る
+  - `web/src/data/law-revisions.ts` を新規作成
+  - 法改正カード表示用に `id` / `title` / `publishedAt` / `summary` を持つダミーデータを3件追加
+- TASKS 12: 法改正カード一覧コンポーネントを作る
+  - `web/src/components/law-revision-list.tsx` を新規作成
+  - `web/src/app/page.tsx` に一覧コンポーネントを組み込み
+- TASKS 13: カードにタイトル、日付、概要を表示する
+  - 各カードに `title` / `publishedAt`（`YYYY/MM/DD`）/ `summary` を表示
+- TASKS 14: 「AIで要約」ボタンを付ける
+  - 各カードに「AIで要約」ボタンを追加（将来の連携用UI）
+- TASKS 15: 「質問する」ボタンを付ける
+  - 各カードに「質問する」ボタンを追加（将来の連携用UI）
