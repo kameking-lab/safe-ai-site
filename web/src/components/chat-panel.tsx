@@ -1,6 +1,7 @@
 "use client";
 
 import type { RefObject } from "react";
+import type { ServiceStatus } from "@/lib/types/api";
 
 export type ChatMessage = {
   id: string;
@@ -13,9 +14,12 @@ type ChatPanelProps = {
   chatMessages: ChatMessage[];
   chatInput: string;
   isSending: boolean;
+  status: ServiceStatus;
+  errorMessage: string | null;
   chatListRef: RefObject<HTMLDivElement | null>;
   onChatInputChange: (value: string) => void;
   onSend: () => void;
+  onRetry: () => void;
 };
 
 export function ChatPanel({
@@ -23,9 +27,12 @@ export function ChatPanel({
   chatMessages,
   chatInput,
   isSending,
+  status,
+  errorMessage,
   chatListRef,
   onChatInputChange,
   onSend,
+  onRetry,
 }: ChatPanelProps) {
   return (
     <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-24">
@@ -84,6 +91,23 @@ export function ChatPanel({
       <p className="mt-2 text-xs leading-5 text-slate-500">
         ※ 現在はダミー回答です。後でAPI連携に差し替えます。
       </p>
+      {status === "success" && !errorMessage && (
+        <p className="mt-2 text-xs leading-5 text-emerald-700">
+          応答を受信しました。
+        </p>
+      )}
+      {errorMessage && (
+        <div className="mt-3 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+          <p>{errorMessage}</p>
+          <button
+            type="button"
+            onClick={onRetry}
+            className="mt-2 inline-flex rounded-md border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-100"
+          >
+            再試行
+          </button>
+        </div>
+      )}
     </section>
   );
 }

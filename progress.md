@@ -144,3 +144,19 @@
   - 確認用アーティファクトを保存
     - `/opt/cursor/artifacts/optional_improvements_api_ready_and_ui_polish.mp4`
     - `/opt/cursor/artifacts/optional_improvements_api_ready_and_ui_polish.webp`
+- 本番接続に近づける改善 ブロック1: 実API接続しやすい構造を強化
+  - `web/src/lib/types/api.ts` を拡張し、`ServiceResult` / `ServiceError` / API request/response 型を整理
+  - `revision-service` / `summary-service` / `chat-service` に mock/api 差し替え可能な実装を追加
+  - `service-factory.ts` で `ApiMode`（`mock` / `live`）に応じた service 生成を統一
+  - `home-screen.tsx` は service戻り値（`ServiceResult`）前提で処理を統一
+- 本番接続に近づける改善 ブロック2: 失敗時UIと状態管理
+  - 要約取得失敗時に `SummaryPanel` でエラーメッセージと再試行ボタンを表示
+  - チャット送信失敗時に `ChatPanel` でエラーメッセージと再試行導線を表示
+  - `idle / loading / success / error` 状態をUI反映し、スマホでも認識しやすい表示を維持
+- 本番接続に近づける改善 ブロック3: テスト導入の最小構成
+  - Vitest を導入し、`vitest.config.mts` / `vitest.setup.ts` / `npm run test` を追加
+  - `revision-service.test.ts` / `summary-service.test.ts` / `chat-service.test.ts` を追加
+  - service層を UI から独立してテスト可能な構成へ整理
+- 本番接続に近づける改善 ブロック4: 最終確認
+  - `web/` で `npm run lint` / `npm run build` / `npm run test` を実行し成功
+  - （dev は既存起動中）最新変更のビルド・テストを確認

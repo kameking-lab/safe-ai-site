@@ -1,0 +1,38 @@
+import type { RevisionSummary } from "@/lib/types/domain";
+
+export type ApiMode = "mock" | "live";
+
+export type ServiceStatus = "idle" | "loading" | "success" | "error";
+
+export type ServiceErrorCode = "NETWORK" | "NOT_FOUND" | "UNAVAILABLE" | "VALIDATION" | "UNKNOWN";
+
+export type ServiceError = {
+  code: ServiceErrorCode;
+  message: string;
+  retryable: boolean;
+};
+
+export type ServiceResult<T> = { ok: true; data: T } | { ok: false; error: ServiceError };
+
+export type SummaryApiRequest = {
+  revisionId: string;
+};
+
+export type SummaryApiResponse = {
+  revisionId: string;
+  summary: RevisionSummary;
+};
+
+export type ChatApiRequest = {
+  revisionId: string;
+  revisionTitle: string;
+  question: string;
+};
+
+export type ChatApiResponse = {
+  reply: string;
+};
+
+export type RevisionListApiResponse = {
+  revisions: import("@/lib/types/domain").LawRevision[];
+};

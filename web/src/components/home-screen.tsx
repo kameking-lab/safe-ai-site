@@ -5,25 +5,29 @@ import { ChatPanel, type ChatMessage } from "@/components/chat-panel";
 import { LawRevisionList } from "@/components/law-revision-list";
 import { SummaryPanel } from "@/components/summary-panel";
 import { TabNavigation, type TabId } from "@/components/tab-navigation";
-import { createChatResponse, createInitialChatMessages } from "@/lib/services/chat-service";
-import { getLawRevisions } from "@/lib/services/revision-service";
-import { getSummaryByRevisionId } from "@/lib/services/summary-service";
+import { createServices } from "@/lib/services/service-factory";
+import type { ServiceStatus } from "@/lib/types/api";
 import type { RevisionSummary } from "@/lib/types/domain";
-
 type HomeScreenProps = {
   children: React.ReactNode;
 };
 
 export function HomeScreen({ children }: HomeScreenProps) {
-  const revisions = useMemo(() => getLawRevisions(), []);
+  const services = useMemo(() => createServices(), []);
+  const [revisions, setRevisions] = useState(() => services.revision.getCachedRevisions());
   const firstRevisionId = revisions[0]?.id ?? "";
   const [activeTab, setActiveTab] = useState<TabId>("laws");
   const [selectedRevisionId, setSelectedRevisionId] = useState<string>(firstRevisionId);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const [isChatSending, setIsChatSending] = useState(false);
   const [loadingRevisionId, setLoadingRevisionId] = useState<string | null>(null);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [chatError, setChatError] = useState<string | null>(null);
+  const [, setRevisionStatus] = useState<ServiceStatus>("idle");
+  const [summaryStatus, setSummaryStatus] = useState<ServiceStatus>("idle");
+  const [chatStatus, setChatStatus] = useState<ServiceStatus>("idle");
   const [selectedSummary, setSelectedSummary] = useState<RevisionSummary | null>(null);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(createInitialChatMessages());
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(services.chat.createInitialMessages());
   const [chatInput, setChatInput] = useState("");
   const chatListRef = useRef<HTMLDivElement | null>(null);
 
@@ -31,6 +35,32 @@ export function HomeScreen({ children }: HomeScreenProps) {
     () => revisions.find((revision) => revision.id === selectedRevisionId) ?? null,
     [revisions, selectedRevisionId]
   );
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadRevisions() {
+      setRevisionStatus("loading");
+      const result = await services.revision.getLawRevisions();
+      if (!active) return;
+
+      if (result.ok) {
+        setRevisions(result.data);
+        setRevisionStatus("success");
+        if (!selectedRevisionId && result.data.length > 0) {
+          setSelectedRevisionId(result.data[0].id);
+        }
+        return;
+      }
+
+      setRevisionStatus("error");
+    }
+
+    loadRevisions();
+    return () => {
+      active = false;
+    };
+  }, [services.revision, selectedRevisionId]);
 
   useEffect(() => {
     if (!isSummaryLoading) return;
@@ -44,9 +74,18 @@ export function HomeScreen({ children }: HomeScreenProps) {
   }, [isSummaryLoading]);
 
   const handleSelectSummary = (revisionId: string) => {
+    setSummaryError(null);
     if (revisionId === selectedRevisionId) {
-      void getSummaryByRevisionId(revisionId).then((data) => {
-        setSelectedSummary(data);
+      setSummaryStatus("loading");
+      void services.summary.getSummaryByRevisionId({ revisionId }).then((response) => {
+        if (!response.ok) {
+          setSummaryStatus("error");
+          setSummaryError(response.error.message);
+          setSelectedSummary(null);
+        } else {
+          setSummaryStatus("success");
+          setSelectedSummary(response.data.summary);
+        }
         setIsSummaryLoading(false);
         setLoadingRevisionId(null);
       });
@@ -70,9 +109,19 @@ export function HomeScreen({ children }: HomeScreenProps) {
     let active = true;
 
     async function loadSummary() {
-      const data = await getSummaryByRevisionId(selectedRevisionId);
+      setSummaryStatus("loading");
+      const response = await services.summary.getSummaryByRevisionId({
+        revisionId: selectedRevisionId,
+      });
       if (active) {
-        setSelectedSummary(data);
+        if (!response.ok) {
+          setSummaryStatus("error");
+          setSummaryError(response.error.message);
+          setSelectedSummary(null);
+          return;
+        }
+        setSummaryStatus("success");
+        setSelectedSummary(response.data.summary);
       }
     }
 
@@ -80,7 +129,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
     return () => {
       active = false;
     };
-  }, [selectedRevisionId]);
+  }, [selectedRevisionId, services.summary]);
 
   useEffect(() => {
     if (!chatListRef.current) {
@@ -89,27 +138,42 @@ export function HomeScreen({ children }: HomeScreenProps) {
     chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
   }, [chatMessages, activeTab]);
 
-  const handleSendChat = () => {
+  const handleSendChat = async () => {
     const trimmed = chatInput.trim();
     if (!trimmed || isChatSending) {
       return;
     }
 
     setIsChatSending(true);
+    setChatStatus("loading");
+    setChatError(null);
 
     const userMessageId = `user-${Date.now()}`;
-    const assistantMessage = createChatResponse({
+    const response = await services.chat.sendMessage({
       revision: selectedRevision,
       question: trimmed,
     });
 
+    if (!response.ok) {
+      setChatStatus("error");
+      setChatError(response.error.message);
+      setIsChatSending(false);
+      return;
+    }
+
     setChatMessages((prev) => [
       ...prev,
       { id: userMessageId, role: "user", content: trimmed },
-      assistantMessage,
+      response.data,
     ]);
+    setChatStatus("success");
     setChatInput("");
     window.setTimeout(() => setIsChatSending(false), 320);
+  };
+
+  const retrySummary = () => {
+    if (!selectedRevisionId) return;
+    handleSelectSummary(selectedRevisionId);
   };
 
   return (
@@ -134,6 +198,9 @@ export function HomeScreen({ children }: HomeScreenProps) {
             selectedRevisionTitle={selectedRevisionTitle}
             summaryContent={selectedSummary}
             isLoading={isSummaryLoading}
+            status={summaryStatus}
+            errorMessage={summaryError}
+            onRetry={retrySummary}
           />
         )}
 
@@ -143,8 +210,11 @@ export function HomeScreen({ children }: HomeScreenProps) {
             chatMessages={chatMessages}
             chatInput={chatInput}
             isSending={isChatSending}
+            status={chatStatus}
+            errorMessage={chatError}
             onChatInputChange={setChatInput}
             onSend={handleSendChat}
+            onRetry={handleSendChat}
             chatListRef={chatListRef}
           />
         )}

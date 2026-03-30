@@ -29,6 +29,9 @@ npm run lint
 # 本番ビルド確認
 npm run build
 
+# Service層の単体テスト
+npm run test
+
 # 本番起動
 npm run start
 ```
@@ -50,15 +53,27 @@ npm run start
 - `src/data/mock/chat-responses.ts`
   - チャット応答ルール（キーワード連動）
 - `src/lib/services/revision-service.ts`
-  - 一覧取得の窓口（将来API化ポイント）
+  - 一覧取得の窓口（`RevisionService` インターフェース）
 - `src/lib/services/summary-service.ts`
-  - 要約取得の窓口（将来API化ポイント）
+  - 要約取得の窓口（`SummaryService` インターフェース）
 - `src/lib/services/chat-service.ts`
-  - チャット応答生成の窓口（将来API化ポイント）
+  - チャット応答生成の窓口（`ChatService` インターフェース）
+- `src/lib/services/service-factory.ts`
+  - `NEXT_PUBLIC_API_MODE` で `mock` / `live` の実装を切替
+- `src/lib/types/api.ts`
+  - API入出力型（request/response）と `ServiceResult` の共通型
 
 ## 次にAPI接続する場所
 
-1. `revision-service.ts` の `getLawRevisions()` を API fetch に置換
-2. `summary-service.ts` の `getSummaryByRevisionId()` を API fetch に置換
-3. `chat-service.ts` の `createChatResponse()` を API呼び出し（LLM/Backend）に置換
-4. UI（`home-screen.tsx`）は service 呼び出しを維持し、直接モックデータへ依存しない
+1. `NEXT_PUBLIC_API_MODE=live` で `service-factory.ts` 経由の実装に切替
+2. `revision-service.ts` の `createApiRevisionService()` で `/api/revisions` fetch を本番APIへ置換
+3. `summary-service.ts` の `ApiSummaryService` で `/api/summaries?revisionId=...` を本番APIへ置換
+4. `chat-service.ts` の `ApiChatService` で `/api/chat` POST をLLM/Backend APIへ置換
+5. UI（`home-screen.tsx`）は `ServiceResult` だけを扱うため、UI層の大きな変更なしで接続先を差し替え可能
+
+## 最小テスト方針（service層）
+
+- 目的: API接続前でも、service契約（成功/失敗・戻り値形）を壊さないことを担保する
+- 対象: `revision-service` / `summary-service` / `chat-service`
+- 手段: Vitestでモック実装の単体テストを実行
+- 実行コマンド: `npm run test`
