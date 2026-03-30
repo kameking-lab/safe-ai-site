@@ -19,8 +19,11 @@ export function LawRevisionList({
   onSelectForQuestion,
 }: LawRevisionListProps) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-4" aria-label="法改正一覧">
-      <h2 className="text-base font-bold text-slate-900">法改正一覧</h2>
+    <section
+      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+      aria-label="法改正一覧"
+    >
+      <h2 className="text-base font-bold text-slate-900 sm:text-lg">法改正一覧</h2>
       <ul className="mt-3 space-y-3">
         {revisions.map((revision) => {
           const isSelected = selectedRevisionId === revision.id;
@@ -29,7 +32,9 @@ export function LawRevisionList({
             <li
               key={revision.id}
               className={`rounded-xl border bg-white p-4 transition ${
-                isSelected ? "border-emerald-300 ring-1 ring-emerald-200" : "border-slate-200"
+                isSelected
+                  ? "border-emerald-300 bg-emerald-50/30 ring-1 ring-emerald-200"
+                  : "border-slate-200"
               }`}
             >
               <div className="space-y-2">

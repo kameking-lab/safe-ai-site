@@ -8,12 +8,16 @@ type SummaryPanelProps = {
 export function SummaryPanel({ selectedRevision, isLoading }: SummaryPanelProps) {
   if (isLoading) {
     return (
-      <section aria-label="AI要約" className="rounded-xl border border-slate-200 bg-white p-4">
+      <section
+        aria-label="AI要約"
+        className="rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm"
+      >
         <h2 className="text-base font-bold text-slate-900">AI要約</h2>
         <div className="mt-3 space-y-3">
           <div className="h-4 w-1/2 animate-pulse rounded bg-slate-200" />
           <div className="h-4 w-full animate-pulse rounded bg-slate-200" />
           <div className="h-4 w-10/12 animate-pulse rounded bg-slate-200" />
+          <div className="h-20 w-full animate-pulse rounded bg-slate-100" />
         </div>
       </section>
     );
@@ -21,7 +25,10 @@ export function SummaryPanel({ selectedRevision, isLoading }: SummaryPanelProps)
 
   if (!selectedRevision) {
     return (
-      <section aria-label="AI要約" className="rounded-xl border border-slate-200 bg-white p-4">
+      <section
+        aria-label="AI要約"
+        className="rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm"
+      >
         <h2 className="text-base font-bold text-slate-900">AI要約</h2>
         <p className="mt-3 text-sm leading-6 text-slate-600">
           法改正カードの「AIで要約」ボタンを押すと、ここに要約が表示されます。
@@ -31,7 +38,10 @@ export function SummaryPanel({ selectedRevision, isLoading }: SummaryPanelProps)
   }
 
   return (
-    <section aria-label="AI要約" className="rounded-xl border border-slate-200 bg-white p-4">
+    <section
+      aria-label="AI要約"
+      className="rounded-2xl border border-slate-200 bg-white/95 p-4 shadow-sm"
+    >
       <h2 className="text-base font-bold text-slate-900">AI要約</h2>
       <p className="mt-1 text-sm font-medium text-slate-700">{selectedRevision.title}</p>
 

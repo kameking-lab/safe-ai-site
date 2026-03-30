@@ -1,9 +1,9 @@
 # progress.md
 
 ## プロジェクト状況
-- 状態: 進行中
-- 現在の目標: MVPの基本レイアウト実装
-- 次にやること: TASKS.md の 11（法改正ダミーデータ作成）
+- 状態: TASKS 1〜36 完了
+- 現在の目標: MVP初期実装の完了確認
+- 次にやること: 追加要望があれば改善タスク化して対応
 
 ## 作業ログ
 
@@ -101,3 +101,25 @@
   - 確認用アーティファクトを保存
     - `/opt/cursor/artifacts/tasks_16_30_responsive_summary_chat_check.mp4`
     - `/opt/cursor/artifacts/tasks_16_30_responsive_summary_chat_check.webp`
+- TASKS 31: 全体デザインを整える
+  - `Header` / `TabNavigation` / `LawRevisionList` / `SummaryPanel` / チャットUIの配色・余白・角丸を統一
+  - スマホ優先で可読性が高い行間・文字サイズへ調整
+  - PC時の見た目を崩さず、カード表現とセクション階層を明確化
+- TASKS 32: 不要コードを削除する
+  - `home-screen.tsx` のチャットメッセージ型定義を `ChatMessage` として分離し、重複したインライン型記述を削除
+  - 既存機能を維持したまま、状態定義の可読性と保守性を向上
+- TASKS 33: コンポーネントを分割整理する
+  - `web/src/components/chat-panel.tsx` を新規作成し、チャット表示・入力UIを分離
+  - `web/src/components/home-screen.tsx` からチャット描画詳細を切り出し、画面状態管理に責務を集中
+- TASKS 34: README用の起動手順を追記する
+  - `web/README.md` を日本語化し、前提条件・インストール・起動・lint/build確認手順を追記
+  - MVP範囲（法改正一覧 / AI要約 / 質問チャットUI）と主要ディレクトリ構成を明記
+- TASKS 35: 最終確認を行う
+  - `web/` で `npm run lint` と `npm run build` を実行し、エラーなく完了
+  - iPhone 12 Pro（390x844）で最終手動確認を実施し、一覧・要約・チャット導線が正常動作することを確認
+  - 確認用アーティファクトを保存
+    - `/opt/cursor/artifacts/tasks_31_36_final_verification_mobile.mp4`
+    - `/opt/cursor/artifacts/tasks_31_36_final_verification_mobile.webp`
+- TASKS 36: progress.md を最終更新する
+  - プロジェクト状況を「TASKS 1〜36 完了」へ更新
+  - 最終確認結果とアーティファクト情報を反映
