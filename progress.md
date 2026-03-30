@@ -57,3 +57,37 @@
   - 確認用アーティファクトを保存
     - `/opt/cursor/artifacts/tasks_11_15_law_revision_cards_mobile_check.mp4`
     - `/opt/cursor/artifacts/tasks_11_15_law_revision_cards_mobile_check.webp`
+- TASKS 16: スマホ表示を調整する
+  - `web/src/components/home-screen.tsx` でスマホ優先の1カラム表示を維持し、タブ別の表示を整理
+  - `web/src/components/law-revision-list.tsx` をカード化し、スマホ画面で読みやすい余白に調整
+- TASKS 17: PC表示を調整する
+  - `web/src/components/home-screen.tsx` で `lg:` 以上を2カラム表示に変更
+  - 法改正一覧と要約/チャットを同時に見られるレイアウトを追加
+- TASKS 18: 要約表示エリアのコンポーネントを作る
+  - `web/src/components/summary-panel.tsx` を新規作成し、要約エリアを分離
+- TASKS 19: 「AIで要約」ボタン押下で該当要約を表示する
+  - `web/src/components/home-screen.tsx` で選択中法改正を state 管理
+  - `LawRevisionList` の「AIで要約」押下で summary タブへ遷移して対象要約を表示
+- TASKS 20: 3行要約を表示する
+  - `web/src/data/law-revisions.ts` に `aiSummary.threeLineSummary` を追加
+  - `SummaryPanel` で3行要約をリスト表示
+- TASKS 21: 「現場でやること」を表示する
+  - `web/src/data/law-revisions.ts` に `aiSummary.workplaceActions` を追加
+  - `SummaryPanel` に「現場でやること」リストを追加
+- TASKS 22: 「対象業種」を表示する
+  - `web/src/data/law-revisions.ts` に `aiSummary.targetIndustries` を追加
+  - `SummaryPanel` に対象業種バッジ表示を追加
+- TASKS 23: ローディング風UIを追加する
+  - `SummaryPanel` にスケルトン表示を実装（要約切替時のローディング表現）
+- TASKS 24: チャット表示領域を作る
+  - `web/src/components/home-screen.tsx` にチャットメッセージ表示領域を追加
+- TASKS 25: 入力欄と送信ボタンを作る
+  - チャット入力欄と送信ボタンを追加（Enter送信対応）
+- TASKS 26: 選択中の法改正タイトルをチャット上部に表示する
+  - チャット領域上部に `対象: {選択中タイトル}` を表示
+- TASKS 27: ダミー回答ロジックを作る
+  - 入力送信時に質問文とダミー回答を連続追加するロジックを実装
+- TASKS 28: 会話履歴を画面に表示する
+  - `chatMessages` の履歴を role別スタイルで表示
+- TASKS 29: スクロール挙動を整える
+  - 新規メッセージ追加時にチャット末尾へ自動スクロール
