@@ -1,5 +1,9 @@
 import { weatherSnapshotsMock } from "@/data/mock/weather-risk";
-import type { ServiceResult } from "@/lib/types/api";
+import type {
+  ApiErrorResponse,
+  ServiceResult,
+  WeatherRiskApiResponse,
+} from "@/lib/types/api";
 import type {
   SiteRiskWeather,
   WeatherRiskLevel,
@@ -146,6 +150,18 @@ function toSiteRisk(snapshot: WeatherSnapshot): SiteRiskWeather {
   };
 }
 
+function toWeatherSnapshotFromApi(snapshot: WeatherSnapshot): WeatherSnapshot {
+  return {
+    regionName: snapshot.regionName,
+    date: snapshot.date,
+    overview: snapshot.overview,
+    temperatureCelsius: snapshot.temperatureCelsius,
+    windSpeedMs: snapshot.windSpeedMs,
+    precipitationMm: snapshot.precipitationMm,
+    alerts: snapshot.alerts,
+  };
+}
+
 function pickSnapshotByRegion(
   snapshots: WeatherSnapshot[],
   regionName?: string
@@ -220,6 +236,80 @@ export const mockWeatherRiskService: WeatherRiskService = {
   },
 };
 
+function normalizeApiError(payload: unknown, fallbackMessage: string): ApiErrorResponse["error"] {
+  if (payload && typeof payload === "object" && "error" in payload) {
+    const maybe = payload as ApiErrorResponse;
+    if (maybe.error?.code && maybe.error?.message) {
+      return {
+        code: maybe.error.code,
+        message: maybe.error.message,
+        retryable: maybe.error.retryable ?? true,
+      };
+    }
+  }
+  return {
+    code: "NETWORK",
+    message: fallbackMessage,
+    retryable: true,
+  };
+}
+
+type FetchWithTimeout = (
+  input: RequestInfo | URL,
+  init?: RequestInit & { timeoutMs?: number }
+) => Promise<Response>;
+
+export class ApiWeatherRiskService implements WeatherRiskService {
+  constructor(
+    private readonly fetchImpl: FetchWithTimeout,
+    private readonly endpoint = "/api/weather-risk"
+  ) {}
+
+  getAvailableRegions(): WeatherRegionOption[] {
+    return regionOptions;
+  }
+
+  async getTodaySiteRisk(input?: { regionName?: string }): Promise<ServiceResult<SiteRiskWeather>> {
+    try {
+      const query = new URLSearchParams();
+      if (input?.regionName) {
+        query.set("regionName", input.regionName);
+      }
+      const target = `${this.endpoint}?${query.toString()}`;
+      const response = await this.fetchImpl(target, { timeoutMs: 4500 });
+      if (!response.ok) {
+        const body = (await response.json().catch(() => null)) as unknown;
+        return {
+          ok: false,
+          error: normalizeApiError(body, "天気・警報リスクを取得できませんでした。"),
+        };
+      }
+      const payload = (await response.json()) as WeatherRiskApiResponse;
+      const snapshot = toWeatherSnapshotFromApi(payload.snapshot);
+      return {
+        ok: true,
+        data: toSiteRisk(snapshot),
+      };
+    } catch {
+      return {
+        ok: false,
+        error: {
+          code: "NETWORK",
+          message: "天気・警報リスクの取得がタイムアウトしました。再試行してください。",
+          retryable: true,
+        },
+      };
+    }
+  }
+}
+
 export function createMockWeatherRiskService(): WeatherRiskService {
   return mockWeatherRiskService;
+}
+
+export function createApiWeatherRiskService(
+  fetchImpl: FetchWithTimeout = (input, init) => fetch(input, init),
+  endpoint?: string
+): WeatherRiskService {
+  return new ApiWeatherRiskService(fetchImpl, endpoint);
 }

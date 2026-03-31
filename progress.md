@@ -393,6 +393,30 @@
     - アーティファクトを保存:
       - `/opt/cursor/artifacts/weather_risk_evidence_desktop.png`
       - `/opt/cursor/artifacts/weather_risk_evidence_mobile.png`
+- 公開可否確認（今回）
+  - Vercel関連を確認:
+    - `vercel` CLI 未導入（`vercel: command not found`）
+    - `VERCEL_TOKEN` 未設定
+    - GitHub Deployments も空（既存自動デプロイなし）
+  - そのため公開URL発行はこの環境のみでは未実施
+  - 停止せず次善策として「live天気API最小接続」へ移行
+- live天気API 最小接続（今回）
+  - `web/src/app/api/weather-risk/route.ts` を追加
+    - Open-Meteo API から `東京/大阪/名古屋` の日次データを取得（最小版）
+    - 気温・風速・降水量・天気概要・警報相当情報を返却
+    - 失敗時はエラーレスポンスを返し、UI側で既存エラー表示を利用
+  - `web/src/lib/services/weather-risk-service.ts`
+    - `createApiWeatherRiskService()` を追加し、`/api/weather-risk` 経由の live 取得に対応
+    - 取得データを既存ルール（riskLevel / evidences / cautions / actions）へ変換
+  - `web/src/lib/services/service-factory.ts`
+    - `NEXT_PUBLIC_API_MODE=live` のとき weather service を API 実装へ切替
+    - `mock` の場合は既存挙動を維持
+  - `web/src/lib/types/api.ts`
+    - 天気API route の response 型 `WeatherRiskApiResponse` を追加
+  - `web/.env.example` / `web/README.md`
+    - `NEXT_PUBLIC_WEATHER_API_MODE=mock|live`（任意）
+    - `NEXT_PUBLIC_WEATHER_API_TIMEOUT_MS`
+    - `/api/weather-risk?regionName=...` の使い方を追記
 - 地域選択UI（最小）追加（今回）
   - 実行計画:
     1. weather mock を 5地域（東京/大阪/名古屋/福岡/札幌）に拡張

@@ -75,6 +75,14 @@ export type SiteRiskWeather = {
   recommendedActions: string[];
 };
 
+export type LiveWeatherCurrent = {
+  time: string;
+  temperature_2m: number;
+  precipitation: number;
+  wind_speed_10m: number;
+  weather_code: number;
+};
+
 // API接続時に差し替えしやすいよう、UI側はこの別名を利用する。
 export type LawRevision = LawRevisionCore;
 export type RevisionSummary = LawRevisionSummary;

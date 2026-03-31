@@ -10,6 +10,7 @@ import {
   type SummaryService,
 } from "@/lib/services/summary-service";
 import {
+  createApiWeatherRiskService,
   createMockWeatherRiskService,
   type WeatherRiskService,
 } from "@/lib/services/weather-risk-service";
@@ -165,8 +166,8 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
     mode === "live" ? createApiRevisionService(scopedFetch) : createMockRevisionService();
   const summary = mode === "live" ? createApiSummaryService(scopedFetch) : createMockSummaryService();
   const chat = mode === "live" ? createApiChatService(scopedFetch) : createMockChatService();
-  // 最小実装段階では weather は mock service で提供する。
-  const weatherRisk = createMockWeatherRiskService();
+  const weatherRisk =
+    mode === "live" ? createApiWeatherRiskService(scopedFetch) : createMockWeatherRiskService();
 
   return { mode, revision, summary, chat, weatherRisk };
 }

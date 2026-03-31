@@ -134,6 +134,7 @@ npm run start
   - 天気・警報のモックデータ（地域/気温/風/雨/警報）
 - `src/lib/services/weather-risk-service.ts`
   - 天気・警報データから現場向けリスクを算出する service（暑さ/強風/雨/警報ルール）
+  - `mock` と `live` の両方を保持し、`NEXT_PUBLIC_API_MODE=live` では `/api/weather-risk` から取得
 - `src/components/weather-risk-card.tsx`
   - 「今日の現場リスク」表示UI（リスク高の視覚強調）
 
@@ -209,10 +210,25 @@ npm run start
 
 ### 将来の live API 置換ポイント
 
-1. `weather-risk-service.ts` に API 実装（`createApiWeatherRiskService`）を追加
-2. `service-factory.ts` で `NEXT_PUBLIC_API_MODE=live` 時に weather service を API 実装へ切替
-3. 必要なら `app/api/weather-risk/route.ts` を追加し、BFF経由で天気APIを吸収
-4. UI（`weather-risk-card.tsx`）は `SiteRiskWeather` を受けるだけに保ち、表示層は変更最小にする
+1. `app/api/weather-risk/route.ts` で天気ソース（現在はOpen-Meteo）から `WeatherSnapshot` へ変換
+2. `weather-risk-service.ts` の `createApiWeatherRiskService()` で route 結果を既存のリスク算出ロジックへ適用
+3. `service-factory.ts` が `NEXT_PUBLIC_API_MODE=live` 時に weather service を live 実装へ切替
+4. UI（`weather-risk-card.tsx`）は `SiteRiskWeather` 表示のまま維持し、表示層の変更を最小化
+
+### live天気API（最小版）の使い方
+
+- `NEXT_PUBLIC_API_MODE=live` を設定すると、`今日の現場リスク` は `/api/weather-risk` 経由で取得します。
+- 地域ごとの座標は route 側で最小マップを持ちます（東京/大阪/名古屋/福岡/札幌）。
+- 取得失敗時はサービス層で分かりやすいエラーを返し、UIは既存のエラー表示を使います。
+
+```bash
+# web/.env.local
+NEXT_PUBLIC_API_MODE=live
+```
+
+オプション（任意）:
+- `WEATHER_API_MODE=mock|live`（未設定時は `NEXT_PUBLIC_API_MODE` に従う）
+- `WEATHER_API_TIMEOUT_MS=4500`（weather route fetch timeout）
 
 ### realSourceUrl の安全ルール
 

@@ -1,5 +1,6 @@
 import type { RevisionSummary } from "@/lib/types/domain";
 import type { LawRevision } from "@/lib/types/domain";
+import type { WeatherSnapshot } from "@/lib/types/domain";
 
 export type ApiMode = "mock" | "live";
 
@@ -61,3 +62,9 @@ export type RevisionListApiResponse = {
 export type SummaryApiRouteResponse =
   | { ok: true; data: SummaryApiResponse }
   | { ok: false; error: ServiceError };
+
+export type WeatherRiskApiResponse = {
+  snapshot: WeatherSnapshot;
+  provider: "open-meteo" | "mock-fallback";
+  fetchedAt: string;
+};
