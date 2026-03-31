@@ -73,12 +73,7 @@ export function createMockRevisionService(): RevisionService {
     async getLawRevisions() {
       return {
         ok: true,
-        data: lawRevisionCores.map((revision) => ({
-          id: revision.id,
-          title: revision.title,
-          publishedAt: revision.publishedAt,
-          summary: revision.summary,
-        })),
+        data: lawRevisionCores,
       };
     },
   };

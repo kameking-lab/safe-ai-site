@@ -1,72 +1,28 @@
+import { loadSampleRevisions } from "@/lib/revisions-ingest";
 import type { LawRevisionCore } from "@/lib/types/domain";
 
-export const lawRevisionCores: LawRevisionCore[] = [
+// 将来の外部データ取込に備え、手書き配列ではなく ingest 済みデータを利用する。
+const fallbackLawRevisions: LawRevisionCore[] = [
   {
-    id: "lr-001",
-    title: "高所作業時の墜落防止措置の強化",
-    publishedAt: "2026-01-15",
-    revisionNumber: "令和8年 厚生労働省令 第1号",
-    category: "省令",
-    source: {
-      issuer: "厚生労働省",
-      url: "https://www.mhlw.go.jp/",
-    },
-    summary:
-      "足場の点検頻度と安全帯の使用基準が見直され、現場責任者による作業前確認の明確化が求められます。",
-  },
-  {
-    id: "lr-002",
-    title: "化学物質のリスクアセスメント対象拡大",
-    publishedAt: "2025-11-01",
-    revisionNumber: "令和7年 厚生労働省告示 第210号",
+    id: "lr-fallback-001",
+    title: "法改正データを準備中です",
+    publishedAt: "1970-01-01",
+    revisionNumber: "未設定",
+    kind: "notice",
     category: "通達",
+    issuer: "発出元未設定",
+    summary: "サンプル法改正データの読み込みに失敗しました。設定を確認してください。",
     source: {
-      issuer: "厚生労働省",
-      url: "https://www.mhlw.go.jp/",
+      url: "",
+      label: "参照元",
     },
-    summary:
-      "対象物質の範囲が拡大され、保管・取扱い工程ごとのリスク評価と作業手順書の更新が必要になります。",
-  },
-  {
-    id: "lr-003",
-    title: "熱中症対策に関する管理体制の明確化",
-    publishedAt: "2025-07-10",
-    revisionNumber: "令和7年 労働基準局長通達 第77号",
-    category: "通達",
-    source: {
-      issuer: "厚生労働省 労働基準局",
-      url: "https://www.mhlw.go.jp/",
-    },
-    summary:
-      "WBGT値を踏まえた休憩計画、給水管理、体調報告の運用が明記され、夏季の現場管理基準が具体化されました。",
-  },
-  {
-    id: "lr-004",
-    title: "フォークリフト作業時の接触災害防止基準改定",
-    publishedAt: "2025-05-20",
-    revisionNumber: "令和7年 厚生労働省令 第38号",
-    category: "省令",
-    source: {
-      issuer: "厚生労働省",
-      url: "https://www.mhlw.go.jp/",
-    },
-    summary:
-      "歩行者動線とフォークリフト動線の分離、バック時の合図運用、点検記録の厳格化が求められます。",
-  },
-  {
-    id: "lr-005",
-    title: "騒音作業における健康管理の強化",
-    publishedAt: "2025-03-01",
-    revisionNumber: "令和7年 厚生労働省令 第12号",
-    category: "省令",
-    source: {
-      issuer: "厚生労働省",
-      url: "https://www.mhlw.go.jp/",
-    },
-    summary:
-      "騒音ばく露評価の見直しと保護具着用の監督強化、健康診断結果の活用手順が明確化されました。",
   },
 ];
+
+export const lawRevisionCores = (() => {
+  const loaded = loadSampleRevisions();
+  return loaded.length > 0 ? loaded : fallbackLawRevisions;
+})();
 
 export function getLawRevisionById(revisionId: string) {
   return lawRevisionCores.find((revision) => revision.id === revisionId) ?? null;

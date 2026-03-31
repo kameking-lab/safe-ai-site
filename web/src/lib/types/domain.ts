@@ -1,14 +1,29 @@
+export type RevisionKind = "law" | "ordinance" | "notice" | "guideline" | "other";
+
+export type RevisionCategory =
+  | "労働安全衛生法"
+  | "省令"
+  | "通達"
+  | "告示"
+  | "指針"
+  | "ガイドライン"
+  | string;
+
+export type RevisionSource = {
+  url?: string;
+  label?: string;
+};
+
 export type LawRevisionCore = {
   id: string;
   title: string;
   publishedAt: string;
-  revisionNumber?: string;
-  category?: "労働安全衛生法" | "省令" | "通達";
-  source?: {
-    issuer: string;
-    url?: string;
-  };
+  revisionNumber: string;
+  category: RevisionCategory;
+  kind: RevisionKind;
+  issuer: string;
   summary: string;
+  source?: RevisionSource;
 };
 
 export type LawRevisionSummary = {

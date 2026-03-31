@@ -100,7 +100,13 @@ npm run start
 ## 現在の構成（任意改善後）
 
 - `src/data/mock/law-revisions.ts`
-  - 法改正の基本情報（一覧表示用の最小データ）
+  - ingest経由で整形済みの法改正一覧データ（UI表示用）
+- `src/lib/revisions-ingest/`
+  - 実データ取り込み前提の入口
+  - `sample-revisions.json`: サンプル入力（実データ想定）
+  - `types.ts`: 取り込み入力型
+  - `normalize.ts`: 入力→`LawRevision` 正規化
+  - `load-sample.ts`: サンプル読み込み
 - `src/data/mock/summaries.ts`
   - 要約モック（3行要約 / 現場でやること / 対象業種）
 - `src/data/mock/chat-responses.ts`
@@ -122,6 +128,21 @@ npm run start
 - `src/lib/types/api.ts`
   - API入出力型（request/response）と `ServiceResult` の共通型
 
+## revisions データ構造（現在）
+
+`LawRevision`（一覧表示の正規化済み型）は以下を扱います。
+
+- `id`
+- `title`
+- `publishedAt`
+- `revisionNumber`
+- `kind`（`law` / `ordinance` / `notice` / `guideline`）
+- `category`
+- `issuer`
+- `summary`
+- `source.url`
+- `source.label`
+
 ## 次にAPI接続する場所
 
 1. `NEXT_PUBLIC_API_MODE=live` で `service-factory.ts` 経由の実装に切替
@@ -129,6 +150,12 @@ npm run start
 3. `summary-service.ts` の `ApiSummaryService` で `/api/summaries?revisionId=...` を本番APIへ置換
 4. `chat-service.ts` の `ApiChatService` で `/api/chat` POST をLLM/Backend APIへ置換
 5. UI（`home-screen.tsx`）は `ServiceResult` だけを扱うため、UI層の大きな変更なしで接続先を差し替え可能
+
+### 法改正の実データ取得へ置き換えるポイント
+
+1. `src/lib/revisions-ingest/sample-revisions.json` を、外部取得データ（JSON/CSV/APIレスポンス）に置換
+2. `src/lib/revisions-ingest/normalize.ts` で外部データ形式差分を吸収
+3. `src/data/mock/law-revisions.ts` は ingest出力を利用するため、UI/Service層変更は最小で差し替え可能
 
 ## liveモードでの最小確認手順
 

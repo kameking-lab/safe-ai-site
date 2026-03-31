@@ -7,6 +7,27 @@ function formatPublishedDate(value: string) {
   return `${year}/${month}/${day}`;
 }
 
+function resolveSourceLabel(revision: LawRevision) {
+  if (revision.source?.label) {
+    return revision.source.label;
+  }
+  return revision.issuer ?? null;
+}
+
+function resolveKindLabel(revision: LawRevision) {
+  switch (revision.kind) {
+    case "ordinance":
+      return "省令";
+    case "law":
+      return "法律";
+    case "guideline":
+      return "ガイドライン";
+    case "notice":
+    default:
+      return "通達";
+  }
+}
+
 type LawRevisionListProps = {
   revisions: LawRevision[];
   selectedRevisionId: string;
@@ -69,7 +90,31 @@ export function LawRevisionList({
                 <p className="text-xs text-slate-500">
                   発行日: {formatPublishedDate(revision.publishedAt)}
                 </p>
+                {(revision.kind || revision.revisionNumber) && (
+                  <p className="text-xs text-slate-500">
+                    {revision.kind ? resolveKindLabel(revision) : ""}
+                    {revision.kind && revision.revisionNumber ? " / " : ""}
+                    {revision.revisionNumber ?? ""}
+                  </p>
+                )}
                 <p className="text-sm leading-6 text-slate-700">{revision.summary}</p>
+                {resolveSourceLabel(revision) && (
+                  <div className="text-xs text-slate-500">
+                    出典:{" "}
+                    {revision.source?.url ? (
+                      <a
+                        href={revision.source.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="underline hover:text-slate-700"
+                      >
+                        {resolveSourceLabel(revision)}
+                      </a>
+                    ) : (
+                      <span>{resolveSourceLabel(revision)}</span>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">

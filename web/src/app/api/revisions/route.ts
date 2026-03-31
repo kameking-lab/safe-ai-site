@@ -60,8 +60,10 @@ export async function GET(request: NextRequest) {
       title: revision.title,
       publishedAt: revision.publishedAt,
       summary: revision.summary,
+      kind: revision.kind,
       category: revision.category,
       revisionNumber: revision.revisionNumber,
+      issuer: revision.issuer,
       source: revision.source,
     })),
   };

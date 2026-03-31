@@ -231,3 +231,25 @@
   - `.github/workflows/web-ci.yml` を `smoke`（PR向け軽量）と `full`（main向け網羅）に分離
   - Playwrightレポートを workflow artifact として保存する手順を追加
   - `web/.env.example` に `NEXT_PUBLIC_FORCE_ERROR` と `NEXT_PUBLIC_FORCE_ERROR_TRANSPORT` の例を追加
+- 法改正データ実データ化準備 ブロック1: データモデル整理
+  - `web/src/lib/types/domain.ts` の revisions 型を実データ前提に再整理
+    - `id`, `title`, `publishedAt`, `revisionNumber`, `category`, `kind`, `issuer`, `summary`, `source.url`, `source.label`
+  - 将来の実データ取り込みを意識し、UI/Serviceで同一型を扱える形に統一
+- 法改正データ実データ化準備 ブロック2: 取り込み口の作成
+  - `web/src/lib/revisions-ingest/` を新設
+    - `types.ts`: import 用入力型
+    - `normalize.ts`: import レコードを `LawRevision` へ正規化
+    - `load-sample.ts`: サンプルJSONを読み込み変換する入口
+    - `sample-revisions.json`: 実データ形式に近いサンプル5件
+    - `index.ts`: ingest モジュール公開窓口
+  - `web/src/data/mock/law-revisions.ts` を ingest 経由の読み込みへ変更
+- 法改正データ実データ化準備 ブロック3: サンプル実データ化とUI導線
+  - sample revisions に `source.url`/`source.label`/`issuer`/`kind`/`category` を付与
+  - `web/src/components/law-revision-list.tsx` に以下を追加
+    - `kind` と `revisionNumber` の表示
+    - source 情報（URLがあればリンク）表示
+    - source 未設定時でも壊れないフォールバック表示
+  - `web/src/app/api/revisions/route.ts` と `revision-service.ts` で拡張項目を維持
+- 法改正データ実データ化準備 ブロック4: 検証と整理
+  - `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e` を実行し成功
+  - `web/README.md` に revisions データ構造、ingest 入口、今後の本物データ置換ポイントを追記
