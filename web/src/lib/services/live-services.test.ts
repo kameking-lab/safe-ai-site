@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createApiRevisionService } from "@/lib/services/revision-service";
 import { createApiSummaryService } from "@/lib/services/summary-service";
 import { createApiChatService } from "@/lib/services/chat-service";
+import { createServices } from "@/lib/services/service-factory";
 
 function createJsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -156,5 +157,32 @@ describe("live services", () => {
       expect(result.error.code).toBe("VALIDATION");
       expect(result.error.retryable).toBe(false);
     }
+  });
+
+  it("service-factory: ingestSource/realSourcePayload を revisions API へ透過する", async () => {
+    const originalUrl = window.location.href;
+    window.history.replaceState(
+      {},
+      "",
+      "/?ingestSource=real&realSourcePayload=%5B%7B%22id%22%3A%22x1%22%2C%22title%22%3A%22t%22%2C%22published_at%22%3A%222026-01-01%22%2C%22summary%22%3A%22s%22%7D%5D"
+    );
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      createJsonResponse({
+        revisions: [],
+      })
+    );
+
+    const services = createServices("live");
+    await services.revision.getLawRevisions();
+
+    expect(fetchSpy).toHaveBeenCalled();
+    const calledUrl = String(fetchSpy.mock.calls[0]?.[0]);
+    expect(calledUrl).toContain("/api/revisions");
+    expect(calledUrl).toContain("ingestSource=real");
+    expect(calledUrl).toContain("realSourcePayload=");
+
+    fetchSpy.mockRestore();
+    window.history.replaceState({}, "", originalUrl);
   });
 });

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { lawRevisionCores } from "@/data/mock/law-revisions";
+import { loadRealRevisionsFromPayload, loadSampleRevisions } from "@/lib/revisions-ingest";
 import type { RevisionListApiResponse, ServiceErrorResponse } from "@/lib/types/api";
+import type { LawRevision } from "@/lib/types/domain";
 
 function parseDelay(value: string | null, fallbackMs: number): number {
   const parsed = Number(value);
@@ -54,8 +56,12 @@ export async function GET(request: NextRequest) {
     return errorResponse(400, "法改正一覧APIの入力検証エラーです。", "VALIDATION", false);
   }
 
+  const ingestSource = request.nextUrl.searchParams.get("ingestSource");
+  const realSourcePayload = request.nextUrl.searchParams.get("realSourcePayload");
+  const revisions = resolveRevisions({ ingestSource, realSourcePayload });
+
   const body: RevisionListApiResponse = {
-    revisions: lawRevisionCores.map((revision) => ({
+    revisions: revisions.map((revision) => ({
       id: revision.id,
       title: revision.title,
       publishedAt: revision.publishedAt,
@@ -68,4 +74,34 @@ export async function GET(request: NextRequest) {
     })),
   };
   return NextResponse.json(body);
+}
+
+function resolveRevisions(options: {
+  ingestSource: string | null;
+  realSourcePayload: string | null;
+}): LawRevision[] {
+  if (options.ingestSource === "real") {
+    if (!options.realSourcePayload) {
+      return lawRevisionCores;
+    }
+    try {
+      const payload = JSON.parse(options.realSourcePayload);
+      const loaded = loadRealRevisionsFromPayload(payload);
+      if (loaded.length > 0) {
+        return loaded;
+      }
+      return lawRevisionCores;
+    } catch {
+      return lawRevisionCores;
+    }
+  }
+
+  if (options.ingestSource === "sample") {
+    const sampleLoaded = loadSampleRevisions();
+    if (sampleLoaded.length > 0) {
+      return sampleLoaded;
+    }
+  }
+
+  return lawRevisionCores;
 }

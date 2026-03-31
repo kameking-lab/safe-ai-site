@@ -101,12 +101,15 @@ npm run start
 
 - `src/data/mock/law-revisions.ts`
   - ingest経由で整形済みの法改正一覧データ（UI表示用）
+  - `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE=sample|real` で入力源を切替
 - `src/lib/revisions-ingest/`
   - 実データ取り込み前提の入口
   - `sample-revisions.json`: サンプル入力（実データ想定）
   - `types.ts`: 取り込み入力型
+  - `parse.ts`: 外部入力 payload を `RevisionImportRecord[]` へ変換
   - `normalize.ts`: 入力→`LawRevision` 正規化
-  - `load-sample.ts`: サンプル読み込み
+  - `load-sample.ts`: サンプルJSONを読み込むローダー
+  - `load-real.ts`: 実データ向けローダー（payload同期読込 / endpoint非同期fetch）
 - `src/data/mock/summaries.ts`
   - 要約モック（3行要約 / 現場でやること / 対象業種）
 - `src/data/mock/chat-responses.ts`
@@ -143,6 +146,27 @@ npm run start
 - `source.url`
 - `source.label`
 
+## revisions ingest の正規化ルール（最小）
+
+- `kind`: `law | ordinance | notice | guideline | other` へ正規化（不明値は `other`）
+- `category`: 既知カテゴリを優先し、未設定時は `kind` から補完（最終的に `"通達"` フォールバック）
+- `issuer`: `record.issuer` → `record.source.issuer` → `"発出元未設定"` の順で補完
+- `revisionNumber`: 未設定時は `<publishedAt> <kind> 未設定` を補完
+- `source.url`: `http/https` のみ採用し、不正URLは空文字へフォールバック
+- `summary`: 未設定時 `"概要未設定"` を補完
+
+## load-sample / load-real の役割
+
+- `loadSampleRevisions()`
+  - `sample-revisions.json` を読み込み、parse/normalize を経て `LawRevision[]` を返す
+  - ローカル開発の既定入力
+- `loadRealRevisionsFromPayload(payload)`
+  - 外部取得済み payload（JSON配列/`records`）を同期的に正規化
+  - 現状のUI/Routeで「実データ形式の注入」に使う
+- `loadRealRevisions({ endpoint, fetchImpl, timeoutMs })`
+  - 実データ取得URLから非同期fetchして正規化
+  - 将来の本物データ接続時に `route` / `service` から呼ぶ入口
+
 ## 次にAPI接続する場所
 
 1. `NEXT_PUBLIC_API_MODE=live` で `service-factory.ts` 経由の実装に切替
@@ -153,9 +177,11 @@ npm run start
 
 ### 法改正の実データ取得へ置き換えるポイント
 
-1. `src/lib/revisions-ingest/sample-revisions.json` を、外部取得データ（JSON/CSV/APIレスポンス）に置換
-2. `src/lib/revisions-ingest/normalize.ts` で外部データ形式差分を吸収
-3. `src/data/mock/law-revisions.ts` は ingest出力を利用するため、UI/Service層変更は最小で差し替え可能
+1. `src/lib/revisions-ingest/load-real.ts` の `endpoint` を本番取得先（法令DB/内部API）へ接続
+2. 取得レスポンス差分は `src/lib/revisions-ingest/parse.ts` で吸収
+3. 項目品質ルール（URL/issuer/kind/revisionNumber）は `src/lib/revisions-ingest/normalize.ts` に集約
+4. `src/app/api/revisions/route.ts` で `ingestSource=real` 時に `loadRealRevisions()` を使う構成へ段階移行
+5. UI側は `LawRevision` 受け取りのまま維持し、`service-factory` と `revision-service` の差し替えで対応
 
 ## liveモードでの最小確認手順
 

@@ -65,6 +65,21 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
     };
   };
 
+  const resolveIngestOptions = () => {
+    if (typeof window === "undefined") {
+      return {
+        ingestSource: undefined as "sample" | "real" | undefined,
+        realSourcePayload: undefined as string | undefined,
+      };
+    }
+    const current = new URL(window.location.href);
+    const ingestSource = current.searchParams.get("ingestSource");
+    return {
+      ingestSource: ingestSource === "real" ? "real" : ingestSource === "sample" ? "sample" : undefined,
+      realSourcePayload: current.searchParams.get("realSourcePayload") ?? undefined,
+    };
+  };
+
   const scopedFetch: typeof fetch = (input, init) => {
     if (typeof window === "undefined") {
       return fetch(input, init);
@@ -77,6 +92,7 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
           : new URL(input.url);
 
     const options = resolveErrorInjectionOptions();
+    const ingestOptions = resolveIngestOptions();
     const sharedForceError = options.envForceError;
     const useHeaderTransport = options.useHeaderTransport === true;
     const nextHeaders = new Headers(init?.headers);
@@ -116,6 +132,14 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
     const passThroughRevisionsDelay = options.revisionsDelayMs;
     if (passThroughRevisionsDelay && url.pathname === "/api/revisions") {
       url.searchParams.set("delayMs", passThroughRevisionsDelay);
+    }
+    if (url.pathname === "/api/revisions") {
+      if (ingestOptions.ingestSource) {
+        url.searchParams.set("ingestSource", ingestOptions.ingestSource);
+      }
+      if (ingestOptions.realSourcePayload) {
+        url.searchParams.set("realSourcePayload", ingestOptions.realSourcePayload);
+      }
     }
 
     return fetch(url.toString(), {

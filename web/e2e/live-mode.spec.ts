@@ -25,6 +25,43 @@ test.describe("live mode", () => {
     await expect(page.getByText("に関するダミー回答です。")).toBeVisible();
   });
 
+  test("正常系: source 未設定レコード混在でも一覧表示が壊れない @smoke", async ({ page }) => {
+    const payload = encodeURIComponent(
+      JSON.stringify([
+        {
+          id: "real-mixed-001",
+          title: "sourceなしレコード",
+          published_at: "2026-02-01",
+          summary: "source未設定でも一覧表示できることを確認する。",
+          kind: "notice",
+          category: "通達",
+          issuer: "検証用発出元",
+        },
+        {
+          id: "real-mixed-002",
+          title: "sourceありレコード",
+          published_at: "2026-02-02",
+          summary: "sourceありの通常表示も維持する。",
+          kind: "ordinance",
+          category: "省令",
+          issuer: "検証用発出元",
+          source: {
+            url: "https://www.mhlw.go.jp/",
+            label: "厚生労働省",
+          },
+        },
+      ])
+    );
+
+    await page.goto(`/?ingestSource=real&realSourcePayload=${payload}`);
+    await page.getByRole("button", { name: "法改正一覧" }).click();
+
+    await expect(page.getByText("sourceなしレコード")).toBeVisible();
+    await expect(page.getByText("sourceありレコード")).toBeVisible();
+    await expect(page.getByText("出典: 検証用発出元")).toBeVisible();
+    await expect(page.getByRole("link", { name: "厚生労働省" })).toBeVisible();
+  });
+
   test("失敗系: 一覧API 5xx でエラー通知表示 @failure", async ({ page }) => {
     await page.goto("/?forceRevisionsError=5xx");
     await page.getByRole("button", { name: "法改正一覧" }).click();

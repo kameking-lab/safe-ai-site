@@ -253,3 +253,33 @@
 - 法改正データ実データ化準備 ブロック4: 検証と整理
   - `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e` を実行し成功
   - `web/README.md` に revisions データ構造、ingest 入口、今後の本物データ置換ポイントを追記
+- revisions-ingest 実データ取得強化 ブロック1: 実データローダー入口作成
+  - `web/src/lib/revisions-ingest/load-real.ts` を追加
+    - `loadRealRevisionsFromPayload(payload)`: 同期的に payload を正規化
+    - `loadRealRevisions({ endpoint, fetchImpl, timeoutMs })`: 非同期 fetch で実データ取得
+  - `web/src/lib/revisions-ingest/parse.ts` を追加し、外部入力（配列 / `records` / `default`）を統一パース
+  - `web/src/lib/revisions-ingest/load-sample.ts` を `parse.ts` 利用へ整理
+  - `web/src/lib/revisions-ingest/index.ts` に real loader export を追加
+  - `web/src/data/mock/law-revisions.ts` を `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE` で sample/real を切替できる構造へ更新
+- revisions-ingest 実データ取得強化 ブロック2: 正規化/検証強化
+  - `web/src/lib/revisions-ingest/normalize.ts` を更新
+    - `source.url` は `http/https` のみ採用し、不正値は空文字へフォールバック
+    - `issuer` は `record.issuer` → `source.issuer` → `"発出元未設定"` で補完
+    - `kind` は不明値を `other` へ正規化
+    - `revisionNumber` は未設定時に `<publishedAt> <kind> 未設定` を補完
+    - `summary` は未設定時 `"概要未設定"` を補完
+    - 欠損データ混在でも `id` / `title` があるレコードを優先して正規化
+  - `web/src/lib/revisions-ingest/types.ts` で `publishedAt` を optional に拡張し欠損入力を許容
+- revisions-ingest 実データ取得強化 ブロック3: UIとテスト補強
+  - `web/src/app/api/revisions/route.ts` を更新し、`ingestSource` / `realSourcePayload` query で ingest 入力源切替を追加
+  - `web/src/lib/services/service-factory.ts` で `ingestSource` / `realSourcePayload` を revisions API へ透過
+  - 追加テスト:
+    - `web/src/lib/revisions-ingest/normalize.test.ts`
+    - `web/src/lib/revisions-ingest/load-real.test.ts`
+    - `web/src/lib/services/live-services.test.ts` に ingest query 透過テストを追加
+  - E2E拡張:
+    - `web/e2e/live-mode.spec.ts` に `@smoke` ケース「source未設定混在でも一覧表示が壊れない」を追加
+- revisions-ingest 実データ取得強化 ブロック4: 検証と整理
+  - `npm run test` / `npm run lint` / `npm run build` / `npm run test:e2e:smoke` を実行し成功
+  - `web/README.md` に `load-sample` / `load-real` の役割、正規化ルール、実データ置換ポイントを追記
+  - `web/.env.example` に `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE` と real payload 注入例を追記
