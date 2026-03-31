@@ -1,5 +1,6 @@
 import { summaryMockByRevisionId } from "@/data/mock/summaries";
 import type {
+  ApiErrorResponse,
   ServiceResult,
   SummaryApiRequest,
   SummaryApiResponse,
@@ -7,7 +8,10 @@ import type {
 } from "@/lib/types/api";
 
 export type SummaryService = {
-  getSummaryByRevisionId: (input: SummaryApiRequest) => Promise<ServiceResult<SummaryApiResponse>>;
+  getSummaryByRevisionId: (
+    input: SummaryApiRequest,
+    options?: { forceError?: string; delayMs?: number }
+  ) => Promise<ServiceResult<SummaryApiResponse>>;
 };
 
 type FetchWithTimeout = (
@@ -50,28 +54,40 @@ export class ApiSummaryService implements SummaryService {
     private readonly endpoint = "/api/summaries"
   ) {}
 
-  async getSummaryByRevisionId(input: SummaryApiRequest): Promise<ServiceResult<SummaryApiResponse>> {
+  async getSummaryByRevisionId(
+    input: SummaryApiRequest,
+    options?: { forceError?: string; delayMs?: number }
+  ): Promise<ServiceResult<SummaryApiResponse>> {
     try {
-      const query = new URLSearchParams({ revisionId: input.revisionId }).toString();
-      const response = await this.fetchImpl(`${this.endpoint}?${query}`, {
+      const query = new URLSearchParams({ revisionId: input.revisionId });
+      if (options?.forceError) {
+        query.set("forceError", options.forceError);
+      }
+      if (typeof options?.delayMs === "number") {
+        query.set("delayMs", String(options.delayMs));
+      }
+      const response = await this.fetchImpl(`${this.endpoint}?${query.toString()}`, {
         timeoutMs: 4500,
       });
       if (!response.ok) {
-        if (response.status >= 500) {
+        const errorBody = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+        if (errorBody?.error) {
           return {
             ok: false,
             error: {
-              code: "UNAVAILABLE",
-              message: "要約APIが一時的に利用できません。時間をおいて再試行してください。",
-              retryable: true,
+              ...errorBody.error,
+              retryable: errorBody.error.retryable ?? response.status >= 500,
             },
           };
         }
         return {
           ok: false,
           error: {
-            code: "NETWORK",
-            message: "要約の取得に失敗しました。時間をおいて再試行してください。",
+            code: response.status >= 500 ? "UNAVAILABLE" : "NETWORK",
+            message:
+              response.status >= 500
+                ? "要約APIが一時的に利用できません。時間をおいて再試行してください。"
+                : "要約の取得に失敗しました。時間をおいて再試行してください。",
             retryable: true,
           },
         };

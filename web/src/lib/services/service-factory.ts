@@ -36,12 +36,47 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
           : new URL(input.url);
 
     const current = new URL(window.location.href);
+    const errorTransport = current.searchParams.get("forceErrorTransport");
+    const useHeaderTransport = errorTransport === "header";
+    const nextHeaders = new Headers(init?.headers);
+
     const passThroughForceError = current.searchParams.get("forceRevisionsError");
     if (passThroughForceError && url.pathname === "/api/revisions") {
-      url.searchParams.set("forceError", passThroughForceError);
+      if (useHeaderTransport) {
+        nextHeaders.set("x-force-error", passThroughForceError);
+      } else {
+        url.searchParams.set("forceError", passThroughForceError);
+      }
+    }
+    const passThroughSummaryError = current.searchParams.get("forceSummaryError");
+    if (passThroughSummaryError && url.pathname === "/api/summaries") {
+      if (useHeaderTransport) {
+        nextHeaders.set("x-force-error", passThroughSummaryError);
+      } else {
+        url.searchParams.set("forceError", passThroughSummaryError);
+      }
+    }
+    const passThroughChatError = current.searchParams.get("forceChatError");
+    if (passThroughChatError && url.pathname === "/api/chat") {
+      if (useHeaderTransport) {
+        nextHeaders.set("x-force-error", passThroughChatError);
+      } else {
+        url.searchParams.set("forceError", passThroughChatError);
+      }
+    }
+    const passThroughSummaryDelay = current.searchParams.get("forceSummaryDelayMs");
+    if (passThroughSummaryDelay && url.pathname === "/api/summaries") {
+      url.searchParams.set("delayMs", passThroughSummaryDelay);
+    }
+    const passThroughChatDelay = current.searchParams.get("forceChatDelayMs");
+    if (passThroughChatDelay && url.pathname === "/api/chat") {
+      url.searchParams.set("delayMs", passThroughChatDelay);
     }
 
-    return fetch(url.toString(), init);
+    return fetch(url.toString(), {
+      ...init,
+      headers: nextHeaders,
+    });
   };
 
   const revision =

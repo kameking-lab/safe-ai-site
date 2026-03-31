@@ -193,3 +193,25 @@
 - live モード信頼性改善 ブロック4: 検証と整理
   - `web/` で `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e` を実行し成功
   - `web/README.md` に E2E 実行手順と検証観点を追記
+- live モード失敗網羅/CI基盤強化 ブロック1: summary/chat 失敗注入を拡張
+  - `web/src/app/api/summaries/route.ts` で `forceError` を query/header 両対応し、`5xx` / `timeout` / `validation` を追加
+  - `web/src/app/api/chat/route.ts` で `forceError` を query/header 両対応し、`5xx` / `timeout` / `validation` を追加
+  - `web/src/lib/services/summary-service.ts` / `chat-service.ts` で APIエラーボディを `ServiceError` として受け取り、UIへ透過
+  - `web/src/lib/services/service-factory.ts` で一覧のみの透過を廃止し、E2Eで route interception による注入を使う方針へ整理
+- live モード失敗網羅/CI基盤強化 ブロック2: E2E失敗系の拡張
+  - `web/e2e/live-mode.spec.ts` を 6シナリオへ拡張
+    - 正常系: 一覧→要約→チャット
+    - 失敗系: 一覧5xx / 要約5xx / 要約timeout / チャットvalidation
+    - 回復系: 要約5xx → 再試行で回復
+  - ErrorNotice と再試行導線（retryable true/false）の表示差分を自動検証
+- live モード失敗網羅/CI基盤強化 ブロック3: CI向け整理
+  - `web/.env.example` に `NEXT_PUBLIC_API_MODE=live` と失敗注入パラメータ例を追記
+  - `web/package.json` に `test:e2e:headed` を追加
+  - `web/README.md` を再構成し、「ローカル検証」「live検証」「失敗注入検証」「CI手順」を分離して追記
+  - `.github/workflows/web-ci.yml` を追加し、`lint/build/test/test:e2e` を実行する最小GitHub Actions雛形を作成
+- live モード失敗網羅/CI基盤強化 ブロック4: 最終確認
+  - `web/` で `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e` を再実行し全て成功
+  - 次の改善候補:
+    - E2Eで chat timeout / chat 5xx / summary validation も段階的に追加
+    - CI高速化のため Playwright trace/video 保存ポリシーを job 条件で切替
+    - `vite-tsconfig-paths` 警告対応（設定内蔵機能へ移行）

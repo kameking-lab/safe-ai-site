@@ -45,6 +45,14 @@ NEXT_PUBLIC_API_MODE=live
 
 `mock` に戻す場合は `NEXT_PUBLIC_API_MODE=mock`、または環境変数を未設定にしてください。
 
+## CI向け環境変数（失敗注入）
+
+E2Eで失敗パターンを再現する場合は、以下の query を URL に付けるか、`x-force-error` header を利用します。
+
+- `forceError=5xx`: 503系の一時障害を再現
+- `forceError=timeout`: timeout系（summary/chat）を再現
+- `forceError=validation`: validation系（summary/chat）を再現
+
 ## よく使うコマンド
 
 ```bash
@@ -56,6 +64,12 @@ npm run build
 
 # Service層の単体テスト
 npm run test
+
+# liveモード E2E
+npm run test:e2e
+
+# CIと同等の一括チェック
+npm run check:ci
 
 # 本番起動
 npm run start
@@ -117,20 +131,62 @@ npm run dev
 - チャット送信で回答表示
 を確認してください。
 
-## forceError（query/header）で失敗状態を再現
+## 検証手順の整理
 
-Route Handler は `forceError=5xx` を query/header のどちらでも受け付けます。
+### 1) ローカル検証（mock中心）
 
 ```bash
-# query で再現
-curl "http://localhost:3000/api/revisions?forceError=5xx"
-curl "http://localhost:3000/api/summaries?revisionId=lr-001&forceError=5xx"
-curl -X POST "http://localhost:3000/api/chat?forceError=5xx" -H "content-type: application/json" -d '{"revisionId":"lr-001","revisionTitle":"高所作業時の墜落防止措置の強化","question":"施行日はいつですか"}'
+cd web
+npm install
+npm run lint
+npm run test
+npm run dev
+```
 
-# header で再現
+### 2) live検証（正常系）
+
+```bash
+cd web
+cp .env.example .env.local
+# .env.local: NEXT_PUBLIC_API_MODE=live
+npm run dev
+```
+
+ブラウザで以下を確認:
+- 一覧表示
+- AI要約表示
+- チャット送信
+
+## forceError（query/header）で失敗状態を再現
+
+Route Handler は `forceError` を query/header のどちらでも受け付けます。
+
+```bash
+# query で再現（revisions）
+curl "http://localhost:3000/api/revisions?forceError=5xx"
+
+# query で再現（summaries）
+curl "http://localhost:3000/api/summaries?revisionId=lr-001&forceError=5xx"
+curl "http://localhost:3000/api/summaries?revisionId=lr-001&forceError=timeout"
+curl "http://localhost:3000/api/summaries?revisionId=lr-001&forceError=validation"
+
+# query で再現（chat）
+curl -X POST "http://localhost:3000/api/chat?forceError=5xx" -H "content-type: application/json" -d '{"revisionId":"lr-001","revisionTitle":"高所作業時の墜落防止措置の強化","question":"施行日はいつですか"}'
+curl -X POST "http://localhost:3000/api/chat?forceError=timeout" -H "content-type: application/json" -d '{"revisionId":"lr-001","revisionTitle":"高所作業時の墜落防止措置の強化","question":"施行日はいつですか"}'
+curl -X POST "http://localhost:3000/api/chat?forceError=validation" -H "content-type: application/json" -d '{"revisionId":"lr-001","revisionTitle":"高所作業時の墜落防止措置の強化","question":"施行日はいつですか"}'
+
+# header で再現（revisions）
 curl -H "x-force-error: 5xx" "http://localhost:3000/api/revisions"
+
+# header で再現（summaries）
 curl -H "x-force-error: 5xx" "http://localhost:3000/api/summaries?revisionId=lr-001"
+curl -H "x-force-error: timeout" "http://localhost:3000/api/summaries?revisionId=lr-001"
+curl -H "x-force-error: validation" "http://localhost:3000/api/summaries?revisionId=lr-001"
+
+# header で再現（chat）
 curl -X POST "http://localhost:3000/api/chat" -H "x-force-error: 5xx" -H "content-type: application/json" -d '{"revisionId":"lr-001","revisionTitle":"高所作業時の墜落防止措置の強化","question":"施行日はいつですか"}'
+curl -X POST "http://localhost:3000/api/chat" -H "x-force-error: timeout" -H "content-type: application/json" -d '{"revisionId":"lr-001","revisionTitle":"高所作業時の墜落防止措置の強化","question":"施行日はいつですか"}'
+curl -X POST "http://localhost:3000/api/chat" -H "x-force-error: validation" -H "content-type: application/json" -d '{"revisionId":"lr-001","revisionTitle":"高所作業時の墜落防止措置の強化","question":"施行日はいつですか"}'
 ```
 
 ## 最小テスト方針（service層）
@@ -142,7 +198,7 @@ curl -X POST "http://localhost:3000/api/chat" -H "x-force-error: 5xx" -H "conten
 
 ## E2E テスト（Playwright 最小構成）
 
-- 目的: `live` モードでの基本導線（一覧→要約→チャット）と、一覧API失敗時の通知表示を自動検証
+- 目的: `live` モードでの基本導線と失敗注入時の通知・再試行導線を自動検証
 - 設定:
   - `playwright.config.ts`
   - `e2e/live-mode.spec.ts`
@@ -154,4 +210,19 @@ npm run test:e2e
 
 - 検証内容:
   - 正常系: 一覧表示 / AI要約表示 / チャット送信
-  - 失敗系: `/?forceRevisionsError=5xx` で一覧取得失敗通知を表示
+  - 失敗系:
+    - 一覧 5xx
+    - 要約 5xx
+    - 要約 timeout
+    - チャット validation
+  - 回復系:
+    - 要約 5xx 失敗後、再試行で回復
+
+## GitHub Actions（最小CI）
+
+リポジトリ直下の `.github/workflows/web-ci.yml` で、以下を実行する最小CIを追加済みです。
+
+1. `npm run lint`
+2. `npm run build`
+3. `npm run test`
+4. `npm run test:e2e`
