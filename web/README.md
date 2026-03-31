@@ -181,6 +181,31 @@ npm run start
 - `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE=real` を設定すると、query未指定時の既定 ingest source を real にできます。
 - real取得が未設定・失敗・不正payloadの場合は、安全に既存の sample/mock データへフォールバックします。
 
+### realSourceUrl の安全ルール
+
+- `realSourceUrl` / `REVISIONS_REAL_SOURCE_URL` は **https URLのみ** 許可します。
+- 許可ホストは `REVISIONS_REAL_SOURCE_ALLOW_HOSTS`（カンマ区切り）で明示します。
+  - 例: `example.com,api.example.jp`
+  - サブドメインは許可（`api.example.com` は `example.com` 指定で許可）
+- 許可外/不正URL/未設定は real ingest を拒否し、安全フォールバックします。
+- route レスポンスヘッダで判定可能:
+  - `x-revisions-ingest-fallback-reason`: `endpoint_missing` / `endpoint_invalid` / `endpoint_not_allowed` / ...
+  - `x-revisions-ingest-endpoint-host`: 判定対象ホスト（取得できた場合）
+
+## official-db mapper の想定（最小）
+
+`sourceFormat=official-db` では、以下を `parse.ts` で `RevisionImportRecord.meta` に取り込み、`normalize.ts` で最終 `LawRevision` へ反映します。
+
+- 施行日: `effectiveDate` / `effective_date` / `enforcedAt` / `enforced_at`
+- 改正種別: `amendmentType` / `amendment_type` / `revisionType` / `revision_type`
+- 法令番号: `lawNumber` / `law_number` / `actNumber` / `act_number`
+- 発出元: `issuedBy` / `issued_by` / `issuer` / `sourceIssuer`
+
+役割分離:
+- `parse.ts`: 取得元フォーマット差分の吸収
+- `normalize.ts`: 欠損補完・型正規化・安全化
+- `load-real.ts`: 入力源選択（payload/endpoint）と endpoint 安全検証
+
 ## ingest パイプラインの流れ
 
 1. `load-real.ts` / `load-sample.ts`: 入力源（payload or endpoint or sample）を選択
@@ -199,11 +224,12 @@ npm run start
 
 ### 法改正の実データ取得へ置き換えるポイント
 
-1. `src/lib/revisions-ingest/load-real.ts` の `endpoint` を本番取得先（法令DB/内部API）へ接続（現状は実呼び出し可能）
-2. 取得元ごとの差分は `src/lib/revisions-ingest/parse.ts` に mapper 追加で吸収
-3. 項目品質ルール（URL/issuer/kind/revisionNumber）は `src/lib/revisions-ingest/normalize.ts` に集約
-4. `src/app/api/revisions/route.ts` の fallback 戦略（header付き）を維持しつつ、real取得成功率を段階的に上げる
-5. UI側は `LawRevision` 受け取りのまま維持し、`service-factory` と `revision-service` の透過設定で対応
+1. `REVISIONS_REAL_SOURCE_ALLOW_HOSTS` を本番取得先の正式ドメインで管理し、運用時に明示する
+2. `src/lib/revisions-ingest/load-real.ts` の endpoint を本番取得先（法令DB/内部API）へ接続（現状は実呼び出し可能）
+3. 取得元ごとの差分は `src/lib/revisions-ingest/parse.ts` に mapper 追加で吸収
+4. 項目品質ルール（URL/issuer/kind/revisionNumber）は `src/lib/revisions-ingest/normalize.ts` に集約
+5. `src/app/api/revisions/route.ts` の fallback 戦略（reason/header付き）を維持しつつ、real取得成功率を段階的に上げる
+6. UI側は `LawRevision` 受け取りのまま維持し、`service-factory` と `revision-service` の透過設定で対応
 
 ## liveモードでの最小確認手順
 

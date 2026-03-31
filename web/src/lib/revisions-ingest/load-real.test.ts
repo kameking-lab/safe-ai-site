@@ -44,6 +44,7 @@ describe("revisions-ingest load-real", () => {
     const result = await loadRealRevisions({
       endpoint: "https://example.com/revisions.json",
       fetchImpl: fetchMock as unknown as typeof fetch,
+      allowHosts: ["example.com"],
     });
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("real-2");
@@ -73,6 +74,7 @@ describe("revisions-ingest load-real", () => {
       endpoint: "https://example.com/official.json",
       fetchImpl: fetchMock as unknown as typeof fetch,
       sourceFormat: "official-db",
+      allowHosts: ["example.com"],
     });
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe("real-3");

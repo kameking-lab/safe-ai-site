@@ -323,3 +323,31 @@
 - revisions real ingest 実利用化 ブロック4: 最終確認
   - `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e:smoke` を実行し成功
   - `web/README.md` に real ingest 実行条件、ingest パイプライン、次の接続候補を追記
+- real revisions ingest 運用安全性/観測性 強化 ブロック1: realSourceUrl 安全性
+  - `web/src/lib/revisions-ingest/load-real.ts` に endpoint 検証を追加
+    - `https` のみ許可
+    - `REVISIONS_REAL_SOURCE_ALLOW_HOSTS`（または query `realSourceAllowHosts`）のホワイトリストで許可判定
+    - 非許可/不正/未設定時は `endpoint_not_allowed` / `endpoint_invalid` / `endpoint_missing` で fallback
+  - `web/src/app/api/revisions/route.ts` で allow hosts を解決して loader へ渡す
+  - `web/.env.example` に real ingest 用 env 例（URL/allow hosts/format）を追記
+- real revisions ingest 運用安全性/観測性 強化 ブロック2: official-db mapper 強化
+  - `web/src/lib/revisions-ingest/types.ts` に `RevisionImportMeta` を追加
+  - `web/src/lib/revisions-ingest/parse.ts` official-db mapper を拡張
+    - 施行日 (`effectiveDate` / `enforcedAt`)
+    - 改正種別 (`amendmentType` / `revisionType`)
+    - 法令番号 (`lawNumber` / `actNumber`)
+    - 発出元 (`issuedBy` / `issuer`)
+  - `web/src/lib/revisions-ingest/normalize.ts` で meta を使った補完ロジックを追加
+    - publishedAt / kind / revisionNumber / issuer を運用実態に近く補完
+- real revisions ingest 運用安全性/観測性 強化 ブロック3: fallback reason 可視化
+  - `loadRealRevisionsWithMeta` の meta に `endpointHost` を追加
+  - `/api/revisions` ヘッダに `x-revisions-ingest-endpoint-host` を追加
+  - 既存 `x-revisions-ingest-fallback-reason` と組み合わせ、失敗原因追跡を強化
+  - テスト追加/更新:
+    - `web/src/lib/revisions-ingest/load-real.test.ts`（endpoint検証・allow host・fallback理由）
+    - `web/src/lib/revisions-ingest/parse.test.ts`（official-db meta取り込み）
+    - `web/src/lib/revisions-ingest/normalize.test.ts`（meta補完）
+    - `web/e2e/live-mode.spec.ts`（real ingest failure header 検証）
+- real revisions ingest 運用安全性/観測性 強化 ブロック4: 最終確認
+  - `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e:failure` を実行し成功
+  - `web/README.md` にホワイトリスト運用方針、official-db mapper 強化点、fallback reason の見方を追記
