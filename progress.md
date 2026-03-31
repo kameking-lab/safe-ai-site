@@ -393,6 +393,24 @@
     - アーティファクトを保存:
       - `/opt/cursor/artifacts/weather_risk_evidence_desktop.png`
       - `/opt/cursor/artifacts/weather_risk_evidence_mobile.png`
+- 地域選択UI（最小）追加（今回）
+  - 実行計画:
+    1. weather mock を 5地域（東京/大阪/名古屋/福岡/札幌）に拡張
+    2. weather service で選択候補地域を返す `getAvailableRegions()` を追加
+    3. `home-screen.tsx` に最小 state（`selectedRegionName`）を追加し、地域変更時に再取得
+    4. `weather-risk-card.tsx` に地域セレクトを追加（スマホでも押しやすいUI）
+  - 実装:
+    - `web/src/data/mock/weather-risk.ts` を 5地域データへ拡張
+    - `web/src/lib/services/weather-risk-service.ts` に `WeatherRegionOption` と `getAvailableRegions()` を追加
+    - `web/src/components/home-screen.tsx` で地域選択stateを管理し、`getTodaySiteRisk({ regionName })` を実行
+    - `web/src/components/weather-risk-card.tsx` に地域選択セレクトを追加し、カード内表示の切替を一体化
+  - 確認:
+    - `npm run lint` / `npm run test` / `npm run build` を実行し成功
+    - UIで地域切替（東京→福岡→札幌）時に、リスクレベル/判定根拠/主な注意点/推奨アクションが切り替わることを確認
+    - アーティファクトを保存:
+      - `/opt/cursor/artifacts/weather_region_selector_desktop.png`
+      - `/opt/cursor/artifacts/weather_region_selector_mobile.png`
+      - `/opt/cursor/artifacts/weather_region_selector_manual_demo.mp4`
 - 地域選択の最小UI 追加（今回）
   - 実行計画:
     1. 天気モックを 5 地域（東京/大阪/名古屋/福岡/札幌）へ拡張
