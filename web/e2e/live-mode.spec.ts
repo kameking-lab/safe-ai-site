@@ -112,6 +112,16 @@ test.describe("live mode", () => {
     await expect(page.getByRole("button", { name: "一覧を再取得" })).toHaveCount(0);
   });
 
+  test("失敗系: real ingest 失敗時に fallback reason header が返る @failure", async ({ page }) => {
+    const responsePromise = page.waitForResponse((response) => response.url().includes("/api/revisions"));
+    await page.goto("/?ingestSource=real&realSourceUrl=https%3A%2F%2Fevil.com%2Frevisions.json");
+    const response = await responsePromise;
+    const fallbackReason = response.headers()["x-revisions-ingest-fallback-reason"];
+    expect(fallbackReason).toBe("endpoint_not_allowed");
+    await page.getByRole("button", { name: "法改正一覧" }).click();
+    await expect(page.getByRole("heading", { name: "法改正一覧" }).first()).toBeVisible();
+  });
+
   test("失敗系: 要約API 5xx で ErrorNotice と再試行表示 @failure", async ({ page }) => {
     await page.goto("/?forceSummaryError=5xx");
     await page.getByRole("button", { name: "AI要約" }).click();

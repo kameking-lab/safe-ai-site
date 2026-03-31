@@ -10,12 +10,15 @@ export type RealRevisionsLoaderConfig = {
   timeoutMs?: number;
   payload?: unknown;
   sourceFormat?: string;
+  allowHosts?: string[];
 };
 
 export type RealRevisionsLoadStatus = "ok" | "fallback";
 
 export type RealRevisionsLoadReason =
   | "endpoint_missing"
+  | "endpoint_invalid"
+  | "endpoint_not_allowed"
   | "fetch_failed"
   | "invalid_payload"
   | "empty_records"
@@ -27,7 +30,65 @@ export type RealRevisionsLoadMeta = {
   endpointUsed: boolean;
   recordCount: number;
   sourceFormat: string;
+  endpointHost: string | null;
 };
+
+export type RevisionsEndpointValidationResult =
+  | { ok: true; endpoint: string; host: string | null }
+  | { ok: false; reason: "endpoint_missing" | "endpoint_invalid" | "endpoint_not_allowed"; host: string | null };
+
+function parseAllowHosts(input?: string): string[] {
+  if (!input) {
+    return [];
+  }
+  return input
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter((item) => item.length > 0);
+}
+
+function normalizeHosts(input?: string[]): string[] {
+  return (input ?? []).map((item) => item.trim().toLowerCase()).filter((item) => item.length > 0);
+}
+
+function isHostAllowed(host: string, allowedHosts: string[]) {
+  if (allowedHosts.length === 0) {
+    return false;
+  }
+  return allowedHosts.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
+}
+
+export function validateRealSourceEndpoint(
+  endpoint: string | undefined,
+  allowHostsInput?: string[]
+): RevisionsEndpointValidationResult {
+  if (!endpoint) {
+    return { ok: false, reason: "endpoint_missing", host: null };
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(endpoint);
+  } catch {
+    return { ok: false, reason: "endpoint_invalid", host: null };
+  }
+  if (parsed.protocol !== "https:") {
+    return { ok: false, reason: "endpoint_invalid", host: parsed.hostname || null };
+  }
+  const allowedHosts = normalizeHosts(allowHostsInput);
+  const host = parsed.hostname.toLowerCase();
+  if (!isHostAllowed(host, allowedHosts)) {
+    return { ok: false, reason: "endpoint_not_allowed", host };
+  }
+  return { ok: true, endpoint: parsed.toString(), host };
+}
+
+export function resolveRealSourceAllowHosts(configAllowHosts?: string[]): string[] {
+  const envHosts = parseAllowHosts(process.env.REVISIONS_REAL_SOURCE_ALLOW_HOSTS);
+  if (configAllowHosts && configAllowHosts.length > 0) {
+    return normalizeHosts(configAllowHosts);
+  }
+  return envHosts;
+}
 
 async function fetchJsonWithTimeout(
   fetchImpl: typeof fetch,
@@ -70,18 +131,20 @@ export async function loadRealRevisions(config: RealRevisionsLoaderConfig = {}):
   const endpoint = config.endpoint ?? process.env.REVISIONS_REAL_SOURCE_URL ?? "";
   const fetchImpl = config.fetchImpl ?? fetch;
   const timeoutMs = config.timeoutMs ?? 5000;
+  const allowHosts = resolveRealSourceAllowHosts(config.allowHosts);
 
   if (config.payload !== undefined) {
     return loadRealRevisionsFromPayload(config.payload, config.sourceFormat ?? "default");
   }
 
-  if (!endpoint) {
+  const endpointValidation = validateRealSourceEndpoint(endpoint, allowHosts);
+  if (!endpointValidation.ok) {
     return [];
   }
 
   let payload: unknown = null;
   try {
-    payload = await fetchJsonWithTimeout(fetchImpl, endpoint, timeoutMs);
+    payload = await fetchJsonWithTimeout(fetchImpl, endpointValidation.endpoint, timeoutMs);
   } catch {
     return [];
   }
@@ -98,6 +161,7 @@ export async function loadRealRevisionsWithMeta(
 ): Promise<{ revisions: LawRevision[]; meta: RealRevisionsLoadMeta }> {
   const endpoint = config.endpoint ?? process.env.REVISIONS_REAL_SOURCE_URL ?? "";
   const sourceFormat = config.sourceFormat ?? "default";
+  const allowHosts = resolveRealSourceAllowHosts(config.allowHosts);
 
   if (config.payload !== undefined) {
     const parsed = parseRevisionImportPayload(config.payload, { sourceFormat });
@@ -110,6 +174,7 @@ export async function loadRealRevisionsWithMeta(
           endpointUsed: false,
           recordCount: 0,
           sourceFormat,
+          endpointHost: null,
         },
       };
     }
@@ -123,6 +188,7 @@ export async function loadRealRevisionsWithMeta(
           endpointUsed: false,
           recordCount: 0,
           sourceFormat,
+          endpointHost: null,
         },
       };
     }
@@ -134,19 +200,22 @@ export async function loadRealRevisionsWithMeta(
         endpointUsed: false,
         recordCount: normalized.length,
         sourceFormat,
+        endpointHost: null,
       },
     };
   }
 
-  if (!endpoint) {
+  const endpointValidation = validateRealSourceEndpoint(endpoint, allowHosts);
+  if (!endpointValidation.ok) {
     return {
       revisions: [],
       meta: {
         status: "fallback",
-        reason: "endpoint_missing",
+        reason: endpointValidation.reason,
         endpointUsed: false,
         recordCount: 0,
         sourceFormat,
+        endpointHost: endpointValidation.host,
       },
     };
   }
@@ -155,7 +224,7 @@ export async function loadRealRevisionsWithMeta(
   try {
     const fetchImpl = config.fetchImpl ?? fetch;
     const timeoutMs = config.timeoutMs ?? 5000;
-    payload = await fetchJsonWithTimeout(fetchImpl, endpoint, timeoutMs);
+    payload = await fetchJsonWithTimeout(fetchImpl, endpointValidation.endpoint, timeoutMs);
   } catch {
     return {
       revisions: [],
@@ -165,6 +234,7 @@ export async function loadRealRevisionsWithMeta(
         endpointUsed: true,
         recordCount: 0,
         sourceFormat,
+        endpointHost: endpointValidation.host,
       },
     };
   }
@@ -179,6 +249,7 @@ export async function loadRealRevisionsWithMeta(
         endpointUsed: true,
         recordCount: 0,
         sourceFormat,
+        endpointHost: endpointValidation.host,
       },
     };
   }
@@ -193,6 +264,7 @@ export async function loadRealRevisionsWithMeta(
         endpointUsed: true,
         recordCount: 0,
         sourceFormat,
+        endpointHost: endpointValidation.host,
       },
     };
   }
@@ -205,6 +277,7 @@ export async function loadRealRevisionsWithMeta(
       endpointUsed: true,
       recordCount: normalized.length,
       sourceFormat,
+      endpointHost: endpointValidation.host,
     },
   };
 }

@@ -64,11 +64,16 @@ export async function GET(request: NextRequest) {
     process.env.REVISIONS_REAL_SOURCE_FORMAT ??
     "default";
   const realSourceUrl = request.nextUrl.searchParams.get("realSourceUrl") ?? process.env.REVISIONS_REAL_SOURCE_URL;
+  const realAllowHosts = resolveAllowHosts(
+    request.nextUrl.searchParams.get("realSourceAllowHosts"),
+    process.env.REVISIONS_REAL_SOURCE_ALLOW_HOSTS
+  );
   const revisionsResult = await resolveRevisions({
     ingestSource,
     realSourcePayload,
     realSourceFormat,
     realSourceUrl,
+    realAllowHosts,
   });
 
   const body: RevisionListApiResponse = {
@@ -90,6 +95,9 @@ export async function GET(request: NextRequest) {
     response.headers.set("x-revisions-ingest-status", revisionsResult.meta.status);
     response.headers.set("x-revisions-ingest-record-count", String(revisionsResult.meta.recordCount));
     response.headers.set("x-revisions-ingest-source-format", revisionsResult.meta.sourceFormat);
+    if (revisionsResult.meta.endpointHost) {
+      response.headers.set("x-revisions-ingest-endpoint-host", revisionsResult.meta.endpointHost);
+    }
     if (revisionsResult.meta.reason) {
       response.headers.set("x-revisions-ingest-fallback-reason", revisionsResult.meta.reason);
     }
@@ -104,6 +112,7 @@ async function resolveRevisions(options: {
   realSourcePayload: string | null;
   realSourceFormat: string;
   realSourceUrl?: string;
+  realAllowHosts: string[];
 }): Promise<{
   revisions: LawRevision[];
   source: "sample" | "real";
@@ -112,6 +121,7 @@ async function resolveRevisions(options: {
     reason: string | null;
     recordCount: number;
     sourceFormat: string;
+    endpointHost: string | null;
   };
 }> {
   if (options.ingestSource === "real") {
@@ -121,10 +131,12 @@ async function resolveRevisions(options: {
         ? {
             payload,
             sourceFormat: options.realSourceFormat,
+            allowHosts: options.realAllowHosts,
           }
         : {
             endpoint: options.realSourceUrl,
             sourceFormat: options.realSourceFormat,
+            allowHosts: options.realAllowHosts,
           }
     );
     if (loaded.revisions.length > 0) {
@@ -136,6 +148,7 @@ async function resolveRevisions(options: {
           reason: loaded.meta.reason,
           recordCount: loaded.meta.recordCount,
           sourceFormat: loaded.meta.sourceFormat,
+          endpointHost: loaded.meta.endpointHost,
         },
       };
     }
@@ -147,6 +160,7 @@ async function resolveRevisions(options: {
         reason: loaded.meta.reason,
         recordCount: lawRevisionCores.length,
         sourceFormat: loaded.meta.sourceFormat,
+        endpointHost: loaded.meta.endpointHost,
       },
     };
   }
@@ -162,6 +176,7 @@ async function resolveRevisions(options: {
           reason: null,
           recordCount: sampleLoaded.length,
           sourceFormat: "default",
+          endpointHost: null,
         },
       };
     }
@@ -175,6 +190,7 @@ async function resolveRevisions(options: {
       reason: "sample_fallback",
       recordCount: lawRevisionCores.length,
       sourceFormat: "default",
+      endpointHost: null,
     },
   };
 }
@@ -192,4 +208,12 @@ function resolveIngestSource(value: string | null): "sample" | "real" {
     return value;
   }
   return process.env.NEXT_PUBLIC_REVISIONS_INGEST_SOURCE === "real" ? "real" : "sample";
+}
+
+function resolveAllowHosts(queryValue: string | null, envValue: string | undefined): string[] {
+  const source = queryValue ?? envValue ?? "";
+  return source
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter((item) => item.length > 0);
 }

@@ -51,6 +51,37 @@ describe("revisions-ingest normalize", () => {
     expect(normalized.source?.label).toBe("source issuer");
   });
 
+  it("official-db由来メタ情報で publishedAt/kind/revisionNumber/issuer を補完できる", () => {
+    const record: RevisionImportRecord = {
+      id: "r-meta-1",
+      title: "official-db補完テスト",
+      publishedAt: "2026-01-01",
+      revisionNumber: null,
+      kind: null,
+      category: null,
+      issuer: null,
+      summary: "概要",
+      source: {
+        url: "https://elaws.e-gov.go.jp/",
+        label: "e-Gov法令検索",
+        issuer: "デジタル庁",
+      },
+      meta: {
+        effectiveDate: "2026-02-01",
+        amendmentType: "省令改正",
+        lawNumber: "令和8年 省令 第1号",
+        issuedBy: "厚生労働省",
+      },
+    };
+
+    const normalized = normalizeRevisionRecord(record);
+    expect(normalized.publishedAt).toBe("2026-02-01");
+    expect(normalized.kind).toBe("ordinance");
+    expect(normalized.category).toBe("省令");
+    expect(normalized.revisionNumber).toBe("令和8年 省令 第1号");
+    expect(normalized.issuer).toBe("厚生労働省");
+  });
+
   it("id/title があるレコードのみ残し、source欠損が混在しても落ちない", () => {
     const records: RevisionImportRecord[] = [
       {

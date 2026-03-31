@@ -75,6 +75,32 @@ function normalizeCategoryFromKind(kind: RevisionKind): RevisionCategory {
   return "通達";
 }
 
+function normalizeKindFromAmendmentType(
+  amendmentType: string | null | undefined,
+  fallbackKind: RevisionKind
+): RevisionKind {
+  const value = amendmentType?.trim() ?? "";
+  if (!value) {
+    return fallbackKind;
+  }
+  if (
+    value.includes("法律") ||
+    value.includes("法改正")
+  ) {
+    return "law";
+  }
+  if (value.includes("省令")) {
+    return "ordinance";
+  }
+  if (value.includes("通達") || value.includes("告示")) {
+    return "notice";
+  }
+  if (value.includes("指針") || value.includes("ガイドライン")) {
+    return "guideline";
+  }
+  return fallbackKind;
+}
+
 function normalizeIssuer(rawIssuer: string | null | undefined, source: RevisionImportSource | null | undefined) {
   const issuer = rawIssuer?.trim();
   if (issuer) {
@@ -89,6 +115,7 @@ function normalizeIssuer(rawIssuer: string | null | undefined, source: RevisionI
 
 function normalizeRevisionNumber(
   rawRevisionNumber: string | null | undefined,
+  lawNumber: string | null | undefined,
   kind: RevisionKind,
   publishedAt: string
 ) {
@@ -96,15 +123,20 @@ function normalizeRevisionNumber(
   if (revisionNumber) {
     return revisionNumber;
   }
+  const normalizedLawNumber = lawNumber?.trim();
+  if (normalizedLawNumber) {
+    return normalizedLawNumber;
+  }
   return `${publishedAt} ${kind} 未設定`;
 }
 
 export function normalizeRevisionRecord(raw: RevisionImportRecord): LawRevision {
-  const kind = normalizeKind(raw.kind);
+  const provisionalKind = normalizeKind(raw.kind);
+  const kind = normalizeKindFromAmendmentType(raw.meta?.amendmentType, provisionalKind);
   const category = raw.category ? normalizeCategory(raw.category) : normalizeCategoryFromKind(kind);
-  const publishedAt = ensureDateString(raw.publishedAt);
-  const issuer = normalizeIssuer(raw.issuer, raw.source);
-  const revisionNumber = normalizeRevisionNumber(raw.revisionNumber, kind, publishedAt);
+  const publishedAt = ensureDateString(raw.meta?.effectiveDate ?? raw.publishedAt);
+  const issuer = normalizeIssuer(raw.issuer ?? raw.meta?.issuedBy, raw.source);
+  const revisionNumber = normalizeRevisionNumber(raw.revisionNumber, raw.meta?.lawNumber, kind, publishedAt);
   const title = raw.title.trim() || "名称未設定";
   const summary = (raw.summary || "").trim() || "概要未設定";
 

@@ -10,6 +10,10 @@ describe("revisions-ingest parse", () => {
             lawId: "off-001",
             lawTitle: "公式DBテスト",
             promulgatedAt: "2026-07-01",
+            effectiveDate: "2026-07-10",
+            amendmentType: "省令改正",
+            lawNumber: "令和8年 省令 第45号",
+            issuedBy: "厚生労働省",
             summary: "概要",
             sourceUrl: "https://elaws.e-gov.go.jp/",
             sourceLabel: "e-Gov法令検索",
@@ -23,6 +27,10 @@ describe("revisions-ingest parse", () => {
     expect(records[0].id).toBe("off-001");
     expect(records[0].title).toBe("公式DBテスト");
     expect(records[0].publishedAt).toBe("2026-07-01");
+    expect(records[0].meta?.effectiveDate).toBe("2026-07-10");
+    expect(records[0].meta?.amendmentType).toBe("省令改正");
+    expect(records[0].meta?.lawNumber).toBe("令和8年 省令 第45号");
+    expect(records[0].meta?.issuedBy).toBe("厚生労働省");
     expect(records[0].source?.label).toBe("e-Gov法令検索");
   });
 

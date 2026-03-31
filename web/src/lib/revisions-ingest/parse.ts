@@ -55,6 +55,12 @@ function mapDefaultRecord(raw: unknown): RevisionImportRecord | null {
     issuer: toStringOrNull(item.issuer),
     summary: toStringOrNull(item.summary),
     source: toSource(item.source),
+    meta: {
+      effectiveDate: toStringOrNull(item.effectiveDate) ?? toStringOrNull(item.effective_date),
+      amendmentType: toStringOrNull(item.amendmentType) ?? toStringOrNull(item.amendment_type),
+      lawNumber: toStringOrNull(item.lawNumber) ?? toStringOrNull(item.law_number),
+      issuedBy: toStringOrNull(item.issuedBy) ?? toStringOrNull(item.issued_by),
+    },
   };
 }
 
@@ -73,6 +79,27 @@ function mapOfficialDbRecord(raw: unknown): RevisionImportRecord | null {
   const sourceUrl = toStringOrNull(item.sourceUrl);
   const sourceLabel = toStringOrNull(item.sourceLabel);
   const sourceIssuer = toStringOrNull(item.sourceIssuer);
+  const effectiveDate =
+    toStringOrNull(item.effectiveDate) ??
+    toStringOrNull(item.effective_date) ??
+    toStringOrNull(item.enforcedAt) ??
+    toStringOrNull(item.enforced_at);
+  const amendmentType =
+    toStringOrNull(item.amendmentType) ??
+    toStringOrNull(item.amendment_type) ??
+    toStringOrNull(item.revisionType) ??
+    toStringOrNull(item.revision_type);
+  const lawNumber =
+    toStringOrNull(item.lawNumber) ??
+    toStringOrNull(item.law_number) ??
+    toStringOrNull(item.actNumber) ??
+    toStringOrNull(item.act_number);
+  const issuedBy =
+    toStringOrNull(item.issuer) ??
+    toStringOrNull(item.issuedBy) ??
+    toStringOrNull(item.issued_by) ??
+    sourceIssuer;
+  const officialKind = toStringOrNull(item.kind) ?? toStringOrNull(item.amendmentKind);
 
   return {
     id,
@@ -85,10 +112,11 @@ function mapOfficialDbRecord(raw: unknown): RevisionImportRecord | null {
     revisionNumber:
       toStringOrNull(item.revisionNumber) ??
       toStringOrNull(item.revision_number) ??
+      lawNumber ??
       null,
     category: toStringOrNull(item.category),
-    kind: toStringOrNull(item.kind),
-    issuer: toStringOrNull(item.issuer),
+    kind: officialKind,
+    issuer: issuedBy,
     summary: toStringOrNull(item.summary),
     source:
       sourceUrl || sourceLabel || sourceIssuer
@@ -98,6 +126,12 @@ function mapOfficialDbRecord(raw: unknown): RevisionImportRecord | null {
             issuer: sourceIssuer,
           }
         : toSource(item.source),
+    meta: {
+      effectiveDate,
+      amendmentType,
+      lawNumber,
+      issuedBy,
+    },
   };
 }
 

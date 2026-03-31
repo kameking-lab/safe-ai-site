@@ -6,6 +6,13 @@ export type RevisionImportSource = {
   issuer?: string | null;
 };
 
+export type RevisionImportMeta = {
+  effectiveDate?: string | null;
+  amendmentType?: string | null;
+  lawNumber?: string | null;
+  issuedBy?: string | null;
+};
+
 export type RevisionImportRecord = {
   id: string;
   title: string;
@@ -16,6 +23,7 @@ export type RevisionImportRecord = {
   issuer?: string | null;
   summary?: string | null;
   source?: RevisionImportSource | null;
+  meta?: RevisionImportMeta | null;
 };
 
 export type RevisionImportPayload = {
