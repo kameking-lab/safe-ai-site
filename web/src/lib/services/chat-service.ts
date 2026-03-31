@@ -1,5 +1,6 @@
 import { buildMockChatReply } from "@/data/mock/chat-responses";
 import type {
+  ApiErrorResponse,
   ChatApiRequest,
   ChatApiResponse,
   ServiceError,
@@ -51,6 +52,23 @@ function mapToError(
   return { code, message, retryable };
 }
 
+const REQUEST_TIMEOUT_MS = 4000;
+
+async function fetchWithTimeout(
+  fetchImpl: typeof fetch,
+  input: RequestInfo | URL,
+  init: RequestInit = {},
+  timeoutMs = REQUEST_TIMEOUT_MS
+) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetchImpl(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export function createMockChatService(): ChatService {
   return {
     createInitialMessages,
@@ -88,18 +106,30 @@ export class ApiChatService implements ChatService {
   async sendMessage(input: SendChatMessageInput): Promise<ServiceResult<ChatMessage>> {
     try {
       const request = toApiRequest(input);
-      const response = await this.fetchImpl(this.endpoint, {
+      const response = await fetchWithTimeout(this.fetchImpl, this.endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request),
       });
 
       if (!response.ok) {
+        const errorBody = (await response.json().catch(() => null)) as ApiErrorResponse | null;
+        if (errorBody?.error) {
+          return {
+            ok: false,
+            error: {
+              ...errorBody.error,
+              retryable: errorBody.error.retryable ?? response.status >= 500,
+            },
+          };
+        }
         return {
           ok: false,
           error: mapToError(
-            "NETWORK",
-            "チャットの取得に失敗しました。時間をおいて再試行してください。",
+            response.status >= 500 ? "UNAVAILABLE" : "NETWORK",
+            response.status >= 500
+              ? "チャットAPIが一時的に利用できません。時間をおいて再試行してください。"
+              : "チャットの取得に失敗しました。時間をおいて再試行してください。",
             true
           ),
         };
@@ -110,7 +140,13 @@ export class ApiChatService implements ChatService {
         ok: true,
         data: createMessage(payload.reply),
       };
-    } catch {
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return {
+          ok: false,
+          error: mapToError("NETWORK", "チャット応答がタイムアウトしました。再試行してください。", true),
+        };
+      }
       return {
         ok: false,
         error: mapToError("UNKNOWN", "チャット応答の取得中に予期しないエラーが発生しました。", true),

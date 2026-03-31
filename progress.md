@@ -160,3 +160,21 @@
 - 本番接続に近づける改善 ブロック4: 最終確認
   - `web/` で `npm run lint` / `npm run build` / `npm run test` を実行し成功
   - （dev は既存起動中）最新変更のビルド・テストを確認
+- mock から live モードへ進む最小実装 ブロック1: Next.js Route Handler 実装
+  - `web/src/app/api/revisions/route.ts` を追加し、法改正一覧JSONを返すAPIを実装
+  - `web/src/app/api/summaries/route.ts` を追加し、`revisionId` 指定で要約を返すAPIを実装（`forceError=5xx` 対応）
+  - `web/src/app/api/chat/route.ts` を追加し、チャット応答JSONを返すAPIを実装（`forceError=5xx` 対応）
+  - APIレスポンス型を `web/src/lib/types/api.ts` に追加し、Routeとserviceで型整合
+- mock から live モードへ進む最小実装 ブロック2: live モード接続
+  - `service-factory.ts` を `mode` 付きで返す設計に拡張し、`NEXT_PUBLIC_API_MODE=live` で Route Handler fetch へ切替
+  - `revision-service.ts` / `summary-service.ts` / `chat-service.ts` の live 実装を Route Handler 接続前提で調整
+  - `web/.env.example` を追加し、`NEXT_PUBLIC_API_MODE` の設定例を追記
+  - `web/README.md` に live/mock 切替方法と環境変数利用方法を追記
+- mock から live モードへ進む最小実装 ブロック3: 失敗パターン改善
+  - 一覧取得失敗時のUIを `LawRevisionList` と `home-screen` で明示し、再取得ボタン導線を追加
+  - 要約・チャット失敗時の表示を維持しつつ、retryable判定を使った文言改善
+  - service層に timeout / 5xx / validation / unknown の最低限処理を追加
+- mock から live モードへ進む最小実装 ブロック4: 検証と整理
+  - `web/src/lib/services/live-services.test.ts` を追加し、live実装の成功/失敗/timeout系を最小検証
+  - `web/` で `npm run lint` / `npm run build` / `npm run test` を実行し成功
+  - `progress.md` と `web/README.md` を更新し、現状構成と切替方法を明確化

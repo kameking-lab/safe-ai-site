@@ -1,4 +1,5 @@
 import type { RevisionSummary } from "@/lib/types/domain";
+import type { LawRevision } from "@/lib/types/domain";
 
 export type ApiMode = "mock" | "live";
 
@@ -13,6 +14,11 @@ export type ServiceError = {
 };
 
 export type ServiceResult<T> = { ok: true; data: T } | { ok: false; error: ServiceError };
+
+export type ApiErrorResponse = {
+  error: ServiceError;
+};
+export type ServiceErrorResponse = ApiErrorResponse;
 
 export type SummaryApiRequest = {
   revisionId: string;
@@ -34,5 +40,9 @@ export type ChatApiResponse = {
 };
 
 export type RevisionListApiResponse = {
-  revisions: import("@/lib/types/domain").LawRevision[];
+  revisions: LawRevision[];
 };
+
+export type SummaryApiRouteResponse =
+  | { ok: true; data: SummaryApiResponse }
+  | { ok: false; error: ServiceError };

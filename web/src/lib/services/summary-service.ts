@@ -1,9 +1,19 @@
 import { summaryMockByRevisionId } from "@/data/mock/summaries";
-import type { ServiceResult, SummaryApiRequest, SummaryApiResponse } from "@/lib/types/api";
+import type {
+  ServiceResult,
+  SummaryApiRequest,
+  SummaryApiResponse,
+  SummaryApiRouteResponse,
+} from "@/lib/types/api";
 
 export type SummaryService = {
   getSummaryByRevisionId: (input: SummaryApiRequest) => Promise<ServiceResult<SummaryApiResponse>>;
 };
+
+type FetchWithTimeout = (
+  input: RequestInfo | URL,
+  init?: RequestInit & { timeoutMs?: number }
+) => Promise<Response>;
 
 async function getSummaryByRevisionIdMock(
   input: SummaryApiRequest
@@ -36,15 +46,27 @@ export const mockSummaryService: SummaryService = {
 
 export class ApiSummaryService implements SummaryService {
   constructor(
-    private readonly fetchImpl: typeof fetch,
+    private readonly fetchImpl: FetchWithTimeout,
     private readonly endpoint = "/api/summaries"
   ) {}
 
   async getSummaryByRevisionId(input: SummaryApiRequest): Promise<ServiceResult<SummaryApiResponse>> {
     try {
       const query = new URLSearchParams({ revisionId: input.revisionId }).toString();
-      const response = await this.fetchImpl(`${this.endpoint}?${query}`);
+      const response = await this.fetchImpl(`${this.endpoint}?${query}`, {
+        timeoutMs: 4500,
+      });
       if (!response.ok) {
+        if (response.status >= 500) {
+          return {
+            ok: false,
+            error: {
+              code: "UNAVAILABLE",
+              message: "要約APIが一時的に利用できません。時間をおいて再試行してください。",
+              retryable: true,
+            },
+          };
+        }
         return {
           ok: false,
           error: {
@@ -55,17 +77,23 @@ export class ApiSummaryService implements SummaryService {
         };
       }
 
-      const payload = (await response.json()) as SummaryApiResponse;
+      const payload = (await response.json()) as SummaryApiRouteResponse;
+      if (!payload.ok) {
+        return {
+          ok: false,
+          error: payload.error,
+        };
+      }
       return {
         ok: true,
-        data: payload,
+        data: payload.data,
       };
     } catch {
       return {
         ok: false,
         error: {
-          code: "UNKNOWN",
-          message: "要約取得中に予期しないエラーが発生しました。",
+          code: "NETWORK",
+          message: "要約取得がタイムアウトまたはネットワークエラーになりました。再試行してください。",
           retryable: true,
         },
       };
@@ -78,7 +106,7 @@ export function createMockSummaryService(): SummaryService {
 }
 
 export function createApiSummaryService(
-  fetchImpl: typeof fetch = fetch,
+  fetchImpl: FetchWithTimeout = fetch,
   endpoint?: string
 ): SummaryService {
   return new ApiSummaryService(fetchImpl, endpoint);

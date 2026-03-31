@@ -1,5 +1,10 @@
 import { lawRevisionCores } from "@/data/mock/law-revisions";
-import type { RevisionListApiResponse, ServiceError, ServiceResult } from "@/lib/types/api";
+import type {
+  RevisionListApiResponse,
+  ServiceError,
+  ServiceResult,
+  ApiErrorResponse,
+} from "@/lib/types/api";
 import type { LawRevision } from "@/lib/types/domain";
 
 export type RevisionService = {
@@ -8,11 +13,39 @@ export type RevisionService = {
   getLawRevisions: () => Promise<ServiceResult<LawRevision[]>>;
 };
 
+type FetchWithTimeout = (
+  input: RequestInfo | URL,
+  init?: RequestInit & { timeoutMs?: number }
+) => Promise<Response>;
+
 function toUnknownError(message: string): ServiceError {
   return {
     code: "UNKNOWN",
     message,
     retryable: true,
+  };
+}
+
+function toTimeoutError(): ServiceError {
+  return {
+    code: "NETWORK",
+    message: "法改正一覧の取得がタイムアウトしました。再試行してください。",
+    retryable: true,
+  };
+}
+
+function parseErrorResponse(payload: unknown): ServiceError | null {
+  if (!payload || typeof payload !== "object" || !("error" in payload)) {
+    return null;
+  }
+  const maybe = payload as ApiErrorResponse;
+  if (!maybe.error?.code || !maybe.error?.message) {
+    return null;
+  }
+  return {
+    code: maybe.error.code,
+    message: maybe.error.message,
+    retryable: maybe.error.retryable ?? true,
   };
 }
 
@@ -34,7 +67,7 @@ export function createMockRevisionService(): RevisionService {
 }
 
 export function createApiRevisionService(
-  fetchImpl: typeof fetch = fetch,
+  fetchImpl: FetchWithTimeout = fetch,
   endpoint = "/api/revisions"
 ): RevisionService {
   const cachedFallback: LawRevision[] = lawRevisionCores;
@@ -48,13 +81,21 @@ export function createApiRevisionService(
     },
     async getLawRevisions() {
       try {
-        const response = await fetchImpl(endpoint);
+        const response = await fetchImpl(endpoint, { timeoutMs: 3500 });
         if (!response.ok) {
+          const body = (await response.json().catch(() => null)) as unknown;
+          const parsed = parseErrorResponse(body);
+          if (parsed) {
+            return { ok: false, error: parsed };
+          }
           return {
             ok: false,
             error: {
-              code: "NETWORK",
-              message: "法改正一覧の取得に失敗しました。",
+              code: response.status >= 500 ? "UNAVAILABLE" : "NETWORK",
+              message:
+                response.status >= 500
+                  ? "法改正一覧APIが一時的に利用できません。"
+                  : "法改正一覧の取得に失敗しました。",
               retryable: true,
             },
           };
@@ -64,7 +105,13 @@ export function createApiRevisionService(
           ok: true,
           data: payload.revisions,
         };
-      } catch {
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return {
+            ok: false,
+            error: toTimeoutError(),
+          };
+        }
         return {
           ok: false,
           error: toUnknownError("法改正一覧の取得中に予期しないエラーが発生しました。"),

@@ -20,6 +20,31 @@ npm install
 npm run dev
 ```
 
+## 環境変数（live/mock切替）
+
+- `NEXT_PUBLIC_API_MODE=mock`
+  - 既存モック service を直接利用（従来どおり）
+- `NEXT_PUBLIC_API_MODE=live`
+  - Next.js Route Handler (`/api/revisions`, `/api/summaries`, `/api/chat`) を fetch して取得
+
+`.env.example` をコピーして `.env.local` を作成してください。
+
+```bash
+cp .env.example .env.local
+```
+
+### live / mock 切替
+
+- 既定は `mock`（環境変数未指定時）
+- `live` にすると Next.js Route Handler (`/api/revisions`, `/api/summaries`, `/api/chat`) 経由で取得
+
+```bash
+# web/.env.local を作成
+NEXT_PUBLIC_API_MODE=live
+```
+
+`mock` に戻す場合は `NEXT_PUBLIC_API_MODE=mock`、または環境変数を未設定にしてください。
+
 ## よく使うコマンド
 
 ```bash
@@ -60,6 +85,12 @@ npm run start
   - チャット応答生成の窓口（`ChatService` インターフェース）
 - `src/lib/services/service-factory.ts`
   - `NEXT_PUBLIC_API_MODE` で `mock` / `live` の実装を切替
+- `src/app/api/revisions/route.ts`
+  - 法改正一覧の Route Handler（liveモード用）
+- `src/app/api/summaries/route.ts`
+  - 要約取得の Route Handler（`revisionId` 必須、失敗レスポンス対応）
+- `src/app/api/chat/route.ts`
+  - チャット応答の Route Handler（入力検証、失敗レスポンス対応）
 - `src/lib/types/api.ts`
   - API入出力型（request/response）と `ServiceResult` の共通型
 
@@ -70,6 +101,21 @@ npm run start
 3. `summary-service.ts` の `ApiSummaryService` で `/api/summaries?revisionId=...` を本番APIへ置換
 4. `chat-service.ts` の `ApiChatService` で `/api/chat` POST をLLM/Backend APIへ置換
 5. UI（`home-screen.tsx`）は `ServiceResult` だけを扱うため、UI層の大きな変更なしで接続先を差し替え可能
+
+## liveモードでの最小確認手順
+
+```bash
+cd web
+cp .env.example .env.local
+# .env.local の NEXT_PUBLIC_API_MODE=live に変更
+npm run dev
+```
+
+ブラウザで `http://localhost:3000` を開き、
+- 法改正一覧の表示
+- 「AIで要約」で要約表示
+- チャット送信で回答表示
+を確認してください。
 
 ## 最小テスト方針（service層）
 
