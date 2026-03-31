@@ -2,7 +2,6 @@ import { weatherSnapshotsMock } from "@/data/mock/weather-risk";
 import type { ServiceResult } from "@/lib/types/api";
 import type {
   SiteRiskWeather,
-  WeatherAlert,
   WeatherRiskLevel,
   WeatherSnapshot,
 } from "@/lib/types/domain";

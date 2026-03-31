@@ -351,3 +351,30 @@
 - real revisions ingest 運用安全性/観測性 強化 ブロック4: 最終確認
   - `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e:failure` を実行し成功
   - `web/README.md` にホワイトリスト運用方針、official-db mapper 強化点、fallback reason の見方を追記
+- 今日の現場リスク（天気・警報）最小機能 ブロック1: データ構造とservice追加
+  - `web/src/lib/types/domain.ts` に気象リスク型を追加
+    - 地域名 / 日付 / 天気概要 / 気温 / 風 / 雨 / 警報注意報 / リスクレベル / 推奨アクション
+  - `web/src/data/mock/weather-risk.ts` を新規追加（3地域の mock スナップショット）
+  - `web/src/lib/services/weather-risk-service.ts` を新規追加
+    - 気象条件（暑さ・強風・雨・警報）からリスクスコアを算出し、`低/中/高` と推奨アクションを返却
+  - `web/src/lib/services/service-factory.ts` に `weatherRisk` service を統合
+- 今日の現場リスク（天気・警報）最小機能 ブロック2: UI追加
+  - `web/src/components/weather-risk-card.tsx` を新規追加
+  - `web/src/components/home-screen.tsx` のヘッダー直下に「今日の現場リスク」セクションを追加
+  - スマホ優先のカードUIで以下を表示
+    - 地域
+    - 今日のリスクレベル
+    - 主な注意点
+    - 推奨アクション
+  - 高リスク時は赤系配色で視覚強調
+- 今日の現場リスク（天気・警報）最小機能 ブロック3: 簡易ルール実装
+  - `weather-risk-service.ts` でルール化
+    - 気温が高いほどリスク加点
+    - 風速が強いほどリスク加点
+    - 降雨量が多いほどリスク加点
+    - 警報/注意報の発表で加点
+  - 算出結果を `ServiceResult` として返却し、将来 live API へ差し替えやすい責務分離を維持
+  - `web/e2e/live-mode.spec.ts` に「今日の現場リスクカード表示」smoke ケースを追加
+- 今日の現場リスク（天気・警報）最小機能 ブロック4: 最終確認
+  - `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e:smoke` を実行し成功
+  - `web/README.md` に現在構成と live API 置換ポイントを追記

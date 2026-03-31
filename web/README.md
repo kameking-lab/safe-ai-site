@@ -130,6 +130,12 @@ npm run start
   - チャット応答の Route Handler（入力検証、失敗レスポンス対応）
 - `src/lib/types/api.ts`
   - API入出力型（request/response）と `ServiceResult` の共通型
+- `src/data/mock/weather-risk.ts`
+  - 天気・警報のモックデータ（地域/気温/風/雨/警報）
+- `src/lib/services/weather-risk-service.ts`
+  - 天気・警報データから現場向けリスクを算出する service（暑さ/強風/雨/警報ルール）
+- `src/components/weather-risk-card.tsx`
+  - 「今日の現場リスク」表示UI（リスク高の視覚強調）
 
 ## revisions データ構造（現在）
 
@@ -180,6 +186,33 @@ npm run start
   - `official-db` は最小実装済み（`lawId` / `lawTitle` / `promulgatedAt` など）
 - `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE=real` を設定すると、query未指定時の既定 ingest source を real にできます。
 - real取得が未設定・失敗・不正payloadの場合は、安全に既存の sample/mock データへフォールバックします。
+
+## 天気・警報リスク機能（最小）
+
+### 現在の構成
+
+- `src/data/mock/weather-risk.ts`
+  - 地域名/日付/天気概要/気温/風/雨/警報・注意報のモックデータ
+- `src/lib/services/weather-risk-service.ts`
+  - 簡易ルールで `riskLevel`（低/中/高）、`primaryCautions`、`recommendedActions` を算出
+  - ルール例:
+    - 暑さ（気温）で加点
+    - 強風で加点
+    - 雨量で加点
+    - 警報/注意報で加点（警報は重め）
+- `src/components/weather-risk-card.tsx`
+  - ホーム上部に「今日の現場リスク」カードを表示
+  - 地域、リスクレベル、主な注意点、推奨アクションを表示
+  - リスク高は赤系で強調
+- `src/components/home-screen.tsx`
+  - `services.weatherRisk.getTodaySiteRisk()` でデータ取得し、カードを表示
+
+### 将来の live API 置換ポイント
+
+1. `weather-risk-service.ts` に API 実装（`createApiWeatherRiskService`）を追加
+2. `service-factory.ts` で `NEXT_PUBLIC_API_MODE=live` 時に weather service を API 実装へ切替
+3. 必要なら `app/api/weather-risk/route.ts` を追加し、BFF経由で天気APIを吸収
+4. UI（`weather-risk-card.tsx`）は `SiteRiskWeather` を受けるだけに保ち、表示層は変更最小にする
 
 ### realSourceUrl の安全ルール
 
