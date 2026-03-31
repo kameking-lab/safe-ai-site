@@ -167,6 +167,28 @@ npm run start
   - 実データ取得URLから非同期fetchして正規化
   - 将来の本物データ接続時に `route` / `service` から呼ぶ入口
 
+## real ingest の実行条件（現行）
+
+- `ingestSource=real` のとき、`/api/revisions` は real ingest を優先します。
+- 入力優先順位:
+  1. `realSourcePayload`（query）
+  2. `realSourceUrl`（query）
+  3. `REVISIONS_REAL_SOURCE_URL`（server env）
+- マッパー形式:
+  - `realSourceFormat`（query）または `REVISIONS_REAL_SOURCE_FORMAT`（server env）
+  - 未指定時は `default`
+  - `official-db` は最小実装済み（`lawId` / `lawTitle` / `promulgatedAt` など）
+- `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE=real` を設定すると、query未指定時の既定 ingest source を real にできます。
+- real取得が未設定・失敗・不正payloadの場合は、安全に既存の sample/mock データへフォールバックします。
+
+## ingest パイプラインの流れ
+
+1. `load-real.ts` / `load-sample.ts`: 入力源（payload or endpoint or sample）を選択
+2. `parse.ts`: 取得元フォーマットごとに `RevisionImportRecord` へ変換（mapper）
+3. `normalize.ts`: 欠損補完・URL検証を行い `LawRevision` へ正規化
+4. `route.ts` (`/api/revisions`): ingest結果を API レスポンス化し、状態ヘッダを付与
+5. `revision-service` / `service-factory`: UIから query 指定で real ingest 条件を透過
+
 ## 次にAPI接続する場所
 
 1. `NEXT_PUBLIC_API_MODE=live` で `service-factory.ts` 経由の実装に切替
@@ -177,11 +199,11 @@ npm run start
 
 ### 法改正の実データ取得へ置き換えるポイント
 
-1. `src/lib/revisions-ingest/load-real.ts` の `endpoint` を本番取得先（法令DB/内部API）へ接続
-2. 取得レスポンス差分は `src/lib/revisions-ingest/parse.ts` で吸収
+1. `src/lib/revisions-ingest/load-real.ts` の `endpoint` を本番取得先（法令DB/内部API）へ接続（現状は実呼び出し可能）
+2. 取得元ごとの差分は `src/lib/revisions-ingest/parse.ts` に mapper 追加で吸収
 3. 項目品質ルール（URL/issuer/kind/revisionNumber）は `src/lib/revisions-ingest/normalize.ts` に集約
-4. `src/app/api/revisions/route.ts` で `ingestSource=real` 時に `loadRealRevisions()` を使う構成へ段階移行
-5. UI側は `LawRevision` 受け取りのまま維持し、`service-factory` と `revision-service` の差し替えで対応
+4. `src/app/api/revisions/route.ts` の fallback 戦略（header付き）を維持しつつ、real取得成功率を段階的に上げる
+5. UI側は `LawRevision` 受け取りのまま維持し、`service-factory` と `revision-service` の透過設定で対応
 
 ## liveモードでの最小確認手順
 

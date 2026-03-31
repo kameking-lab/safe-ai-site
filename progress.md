@@ -283,3 +283,43 @@
   - `npm run test` / `npm run lint` / `npm run build` / `npm run test:e2e:smoke` を実行し成功
   - `web/README.md` に `load-sample` / `load-real` の役割、正規化ルール、実データ置換ポイントを追記
   - `web/.env.example` に `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE` と real payload 注入例を追記
+- revisions real ingest 実利用化 ブロック1: route で real ingest を有効化
+  - `web/src/app/api/revisions/route.ts` を更新し、`ingestSource=real` で `loadRealRevisionsWithMeta()` を実際に利用
+  - real ingest の入力優先順位を整理:
+    1) `realSourcePayload`（query）
+    2) `realSourceUrl`（query）
+    3) `REVISIONS_REAL_SOURCE_URL`（env）
+  - `ingestSource` は query 優先、未指定時は `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE` を利用
+  - real ingest 成功/失敗状態をレスポンスヘッダで可視化
+    - `x-revisions-ingest-source`
+    - `x-revisions-ingest-status`
+    - `x-revisions-ingest-record-count`
+    - `x-revisions-ingest-source-format`
+    - `x-revisions-ingest-fallback-reason`
+  - real ソース未設定/取得失敗/不正payload時は `lawRevisionCores` へフォールバックし、UIが壊れないことを優先
+- revisions real ingest 実利用化 ブロック2: 取得元差分吸収の基盤整理
+  - `web/src/lib/revisions-ingest/parse.ts` を mapper 指向へ整理
+    - `defaultRevisionImportMapper`
+    - `officialDbRevisionImportMapper`（将来の公式法令DB形式の最小サンプル）
+    - `resolveRevisionImportMapper` / `revisionImportMappers`
+  - `web/src/lib/revisions-ingest/types.ts` に `RevisionImportMapper` 型を追加
+  - `web/src/lib/revisions-ingest/load-real.ts` へ `sourceFormat` 対応を追加し、`parse → normalize` の責務分離を明確化
+  - `web/src/lib/services/service-factory.ts` で `realSourceFormat` / `realSourceUrl` を revisions API へ透過
+- revisions real ingest 実利用化 ブロック3: 検証強化
+  - 追加/更新テスト
+    - `web/src/lib/revisions-ingest/load-real.test.ts`
+      - `sourceFormat=official-db` の取り込み検証
+      - 不正payload時の安全動作検証
+    - `web/src/lib/revisions-ingest/parse.test.ts`（新規）
+      - official-db mapper の変換検証
+      - 未知format時の default fallback 検証
+    - `web/src/lib/services/live-services.test.ts`
+      - `realSourceFormat` / `realSourceUrl` 透過検証を追加
+    - `web/e2e/live-mode.spec.ts`
+      - `real ingest official-db payload` の smoke ケースを追加
+  - 確認内容:
+    - mock/live/real ingest 条件でも一覧表示が壊れないことを確認
+    - route/service/UI の責務分離を維持
+- revisions real ingest 実利用化 ブロック4: 最終確認
+  - `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e:smoke` を実行し成功
+  - `web/README.md` に real ingest 実行条件、ingest パイプライン、次の接続候補を追記
