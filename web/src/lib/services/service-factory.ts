@@ -77,6 +77,8 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
     return {
       ingestSource: ingestSource === "real" ? "real" : ingestSource === "sample" ? "sample" : undefined,
       realSourcePayload: current.searchParams.get("realSourcePayload") ?? undefined,
+      realSourceFormat: current.searchParams.get("realSourceFormat") ?? undefined,
+      realSourceUrl: current.searchParams.get("realSourceUrl") ?? undefined,
     };
   };
 
@@ -139,6 +141,12 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
       }
       if (ingestOptions.realSourcePayload) {
         url.searchParams.set("realSourcePayload", ingestOptions.realSourcePayload);
+      }
+      if (ingestOptions.realSourceFormat) {
+        url.searchParams.set("realSourceFormat", ingestOptions.realSourceFormat);
+      }
+      if (ingestOptions.realSourceUrl) {
+        url.searchParams.set("realSourceUrl", ingestOptions.realSourceUrl);
       }
     }
 

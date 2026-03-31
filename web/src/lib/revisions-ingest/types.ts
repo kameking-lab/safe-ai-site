@@ -25,3 +25,8 @@ export type RevisionImportPayload = {
 export type RevisionNormalizer = (input: RevisionImportRecord) => LawRevision | null;
 
 export type RevisionsIngestSource = "sample" | "real";
+
+export type RevisionImportMapper = {
+  sourceName: string;
+  mapRecord: (raw: unknown) => RevisionImportRecord | null;
+};

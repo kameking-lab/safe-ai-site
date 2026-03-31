@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { lawRevisionCores } from "@/data/mock/law-revisions";
-import { loadRealRevisionsFromPayload, loadSampleRevisions } from "@/lib/revisions-ingest";
+import { loadRealRevisionsWithMeta } from "@/lib/revisions-ingest/load-real";
+import { loadSampleRevisions } from "@/lib/revisions-ingest/load-sample";
 import type { RevisionListApiResponse, ServiceErrorResponse } from "@/lib/types/api";
 import type { LawRevision } from "@/lib/types/domain";
 
@@ -56,12 +57,22 @@ export async function GET(request: NextRequest) {
     return errorResponse(400, "法改正一覧APIの入力検証エラーです。", "VALIDATION", false);
   }
 
-  const ingestSource = request.nextUrl.searchParams.get("ingestSource");
+  const ingestSource = resolveIngestSource(request.nextUrl.searchParams.get("ingestSource"));
   const realSourcePayload = request.nextUrl.searchParams.get("realSourcePayload");
-  const revisions = resolveRevisions({ ingestSource, realSourcePayload });
+  const realSourceFormat =
+    request.nextUrl.searchParams.get("realSourceFormat") ??
+    process.env.REVISIONS_REAL_SOURCE_FORMAT ??
+    "default";
+  const realSourceUrl = request.nextUrl.searchParams.get("realSourceUrl") ?? process.env.REVISIONS_REAL_SOURCE_URL;
+  const revisionsResult = await resolveRevisions({
+    ingestSource,
+    realSourcePayload,
+    realSourceFormat,
+    realSourceUrl,
+  });
 
   const body: RevisionListApiResponse = {
-    revisions: revisions.map((revision) => ({
+    revisions: revisionsResult.revisions.map((revision) => ({
       id: revision.id,
       title: revision.title,
       publishedAt: revision.publishedAt,
@@ -73,35 +84,112 @@ export async function GET(request: NextRequest) {
       source: revision.source,
     })),
   };
-  return NextResponse.json(body);
+  const response = NextResponse.json(body);
+  if (revisionsResult.source === "real") {
+    response.headers.set("x-revisions-ingest-source", "real");
+    response.headers.set("x-revisions-ingest-status", revisionsResult.meta.status);
+    response.headers.set("x-revisions-ingest-record-count", String(revisionsResult.meta.recordCount));
+    response.headers.set("x-revisions-ingest-source-format", revisionsResult.meta.sourceFormat);
+    if (revisionsResult.meta.reason) {
+      response.headers.set("x-revisions-ingest-fallback-reason", revisionsResult.meta.reason);
+    }
+  } else {
+    response.headers.set("x-revisions-ingest-source", "sample");
+  }
+  return response;
 }
 
-function resolveRevisions(options: {
-  ingestSource: string | null;
+async function resolveRevisions(options: {
+  ingestSource: "sample" | "real";
   realSourcePayload: string | null;
-}): LawRevision[] {
+  realSourceFormat: string;
+  realSourceUrl?: string;
+}): Promise<{
+  revisions: LawRevision[];
+  source: "sample" | "real";
+  meta: {
+    status: "ok" | "fallback";
+    reason: string | null;
+    recordCount: number;
+    sourceFormat: string;
+  };
+}> {
   if (options.ingestSource === "real") {
-    if (!options.realSourcePayload) {
-      return lawRevisionCores;
+    const payload = options.realSourcePayload ? safeJsonParse(options.realSourcePayload) : undefined;
+    const loaded = await loadRealRevisionsWithMeta(
+      payload !== undefined
+        ? {
+            payload,
+            sourceFormat: options.realSourceFormat,
+          }
+        : {
+            endpoint: options.realSourceUrl,
+            sourceFormat: options.realSourceFormat,
+          }
+    );
+    if (loaded.revisions.length > 0) {
+      return {
+        revisions: loaded.revisions,
+        source: "real",
+        meta: {
+          status: loaded.meta.status,
+          reason: loaded.meta.reason,
+          recordCount: loaded.meta.recordCount,
+          sourceFormat: loaded.meta.sourceFormat,
+        },
+      };
     }
-    try {
-      const payload = JSON.parse(options.realSourcePayload);
-      const loaded = loadRealRevisionsFromPayload(payload);
-      if (loaded.length > 0) {
-        return loaded;
-      }
-      return lawRevisionCores;
-    } catch {
-      return lawRevisionCores;
-    }
+    return {
+      revisions: lawRevisionCores,
+      source: "real",
+      meta: {
+        status: "fallback",
+        reason: loaded.meta.reason,
+        recordCount: lawRevisionCores.length,
+        sourceFormat: loaded.meta.sourceFormat,
+      },
+    };
   }
 
   if (options.ingestSource === "sample") {
     const sampleLoaded = loadSampleRevisions();
     if (sampleLoaded.length > 0) {
-      return sampleLoaded;
+      return {
+        revisions: sampleLoaded,
+        source: "sample",
+        meta: {
+          status: "ok",
+          reason: null,
+          recordCount: sampleLoaded.length,
+          sourceFormat: "default",
+        },
+      };
     }
   }
 
-  return lawRevisionCores;
+  return {
+    revisions: lawRevisionCores,
+    source: "sample",
+    meta: {
+      status: "fallback",
+      reason: "sample_fallback",
+      recordCount: lawRevisionCores.length,
+      sourceFormat: "default",
+    },
+  };
+}
+
+function safeJsonParse(input: string): unknown {
+  try {
+    return JSON.parse(input);
+  } catch {
+    return undefined;
+  }
+}
+
+function resolveIngestSource(value: string | null): "sample" | "real" {
+  if (value === "real" || value === "sample") {
+    return value;
+  }
+  return process.env.NEXT_PUBLIC_REVISIONS_INGEST_SOURCE === "real" ? "real" : "sample";
 }

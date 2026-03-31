@@ -185,4 +185,31 @@ describe("live services", () => {
     fetchSpy.mockRestore();
     window.history.replaceState({}, "", originalUrl);
   });
+
+  it("service-factory: realSourceFormat/realSourceUrl を revisions API へ透過する", async () => {
+    const originalUrl = window.location.href;
+    window.history.replaceState(
+      {},
+      "",
+      "/?ingestSource=real&realSourceFormat=official-db&realSourceUrl=https%3A%2F%2Fexample.com%2Fofficial.json"
+    );
+
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      createJsonResponse({
+        revisions: [],
+      })
+    );
+
+    const services = createServices("live");
+    await services.revision.getLawRevisions();
+
+    expect(fetchSpy).toHaveBeenCalled();
+    const calledUrl = String(fetchSpy.mock.calls[0]?.[0]);
+    expect(calledUrl).toContain("/api/revisions");
+    expect(calledUrl).toContain("realSourceFormat=official-db");
+    expect(calledUrl).toContain("realSourceUrl=");
+
+    fetchSpy.mockRestore();
+    window.history.replaceState({}, "", originalUrl);
+  });
 });

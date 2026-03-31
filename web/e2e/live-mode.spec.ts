@@ -62,6 +62,35 @@ test.describe("live mode", () => {
     await expect(page.getByRole("link", { name: "厚生労働省" })).toBeVisible();
   });
 
+  test("正常系: realSourceUrl + official-db format でも一覧表示が壊れない @smoke", async ({ page }) => {
+    await page.route("**/official-revisions.json", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          records: [
+            {
+              lawId: "official-001",
+              lawTitle: "公式DB形式の法改正",
+              promulgatedAt: "2026-06-01",
+              summary: "公式DB形式を ingest mapper で吸収して表示する。",
+              sourceUrl: "https://elaws.e-gov.go.jp/",
+              sourceLabel: "e-Gov法令検索",
+              sourceIssuer: "デジタル庁",
+            },
+          ],
+        }),
+      });
+    });
+
+    await page.goto(
+      "/?ingestSource=real&realSourceFormat=official-db&realSourceUrl=http%3A%2F%2F127.0.0.1%3A3002%2Fofficial-revisions.json"
+    );
+    await page.getByRole("button", { name: "法改正一覧" }).click();
+    await expect(page.getByText("公式DB形式の法改正")).toBeVisible();
+    await expect(page.getByRole("link", { name: "e-Gov法令検索" })).toBeVisible();
+  });
+
   test("失敗系: 一覧API 5xx でエラー通知表示 @failure", async ({ page }) => {
     await page.goto("/?forceRevisionsError=5xx");
     await page.getByRole("button", { name: "法改正一覧" }).click();
