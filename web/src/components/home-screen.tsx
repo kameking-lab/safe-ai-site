@@ -32,6 +32,9 @@ export function HomeScreen({ children }: HomeScreenProps) {
   const [selectedSummary, setSelectedSummary] = useState<RevisionSummary | null>(null);
   const [weatherRisk, setWeatherRisk] = useState<SiteRiskWeather | null>(null);
   const [weatherRiskError, setWeatherRiskError] = useState<ServiceError | null>(null);
+  const [selectedRegionName, setSelectedRegionName] = useState(
+    () => services.weatherRisk.getAvailableRegions()[0]?.regionName ?? ""
+  );
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(services.chat.createInitialMessages());
   const [chatInput, setChatInput] = useState("");
   const chatListRef = useRef<HTMLDivElement | null>(null);
@@ -153,7 +156,9 @@ export function HomeScreen({ children }: HomeScreenProps) {
     let active = true;
     async function loadWeatherRisk() {
       setWeatherRiskStatus("loading");
-      const result = await services.weatherRisk.getTodaySiteRisk();
+      const result = await services.weatherRisk.getTodaySiteRisk({
+        regionName: selectedRegionName || undefined,
+      });
       if (!active) return;
       if (!result.ok) {
         setWeatherRiskStatus("error");
@@ -169,7 +174,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
     return () => {
       active = false;
     };
-  }, [services.weatherRisk]);
+  }, [services.weatherRisk, selectedRegionName]);
 
   const handleSendChat = async () => {
     const trimmed = chatInput.trim();
@@ -230,6 +235,9 @@ export function HomeScreen({ children }: HomeScreenProps) {
           data={weatherRisk}
           status={weatherRiskStatus}
           errorMessage={weatherRiskError?.message ?? null}
+          availableRegions={services.weatherRisk.getAvailableRegions()}
+          selectedRegionName={selectedRegionName}
+          onRegionChange={setSelectedRegionName}
         />
       </div>
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />

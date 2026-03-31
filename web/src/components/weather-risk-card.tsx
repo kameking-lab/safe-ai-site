@@ -36,13 +36,44 @@ type WeatherRiskCardProps = {
   data: SiteRiskWeather | null;
   status: "idle" | "loading" | "success" | "error";
   errorMessage?: string | null;
+  availableRegions: {
+    id: string;
+    label: string;
+    regionName: string;
+  }[];
+  selectedRegionName: string;
+  onRegionChange: (regionName: string) => void;
 };
 
-export function WeatherRiskCard({ data, status, errorMessage }: WeatherRiskCardProps) {
+export function WeatherRiskCard({
+  data,
+  status,
+  errorMessage,
+  availableRegions,
+  selectedRegionName,
+  onRegionChange,
+}: WeatherRiskCardProps) {
   if (status === "loading") {
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-label="今日の現場リスク">
         <h2 className="text-base font-bold text-slate-900 sm:text-lg">今日の現場リスク</h2>
+        <div className="mt-3">
+          <label htmlFor="region-select-loading" className="block text-xs font-semibold text-slate-600">
+            確認する地域
+          </label>
+          <select
+            id="region-select-loading"
+            value={selectedRegionName}
+            onChange={(event) => onRegionChange(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+          >
+            {availableRegions.map((region) => (
+              <option key={region.id} value={region.regionName}>
+                {region.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <p className="mt-2 text-sm text-slate-500">天気・警報データを確認中です...</p>
       </section>
     );
@@ -52,6 +83,23 @@ export function WeatherRiskCard({ data, status, errorMessage }: WeatherRiskCardP
     return (
       <section className="rounded-2xl border border-rose-200 bg-rose-50/80 p-4 shadow-sm sm:p-5" aria-label="今日の現場リスク">
         <h2 className="text-base font-bold text-rose-900 sm:text-lg">今日の現場リスク</h2>
+        <div className="mt-3">
+          <label htmlFor="region-select-error" className="block text-xs font-semibold text-rose-700">
+            確認する地域
+          </label>
+          <select
+            id="region-select-error"
+            value={selectedRegionName}
+            onChange={(event) => onRegionChange(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm text-slate-900"
+          >
+            {availableRegions.map((region) => (
+              <option key={region.id} value={region.regionName}>
+                {region.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <p className="mt-2 text-sm text-rose-700">{errorMessage ?? "天気・警報リスクを取得できませんでした。"}</p>
       </section>
     );
@@ -61,6 +109,23 @@ export function WeatherRiskCard({ data, status, errorMessage }: WeatherRiskCardP
     return (
       <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-label="今日の現場リスク">
         <h2 className="text-base font-bold text-slate-900 sm:text-lg">今日の現場リスク</h2>
+        <div className="mt-3">
+          <label htmlFor="region-select-empty" className="block text-xs font-semibold text-slate-600">
+            確認する地域
+          </label>
+          <select
+            id="region-select-empty"
+            value={selectedRegionName}
+            onChange={(event) => onRegionChange(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+          >
+            {availableRegions.map((region) => (
+              <option key={region.id} value={region.regionName}>
+                {region.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <p className="mt-2 text-sm text-slate-500">表示できるデータがありません。</p>
       </section>
     );
@@ -78,6 +143,24 @@ export function WeatherRiskCard({ data, status, errorMessage }: WeatherRiskCardP
         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${style.badge}`}>
           リスク {data.riskLevel}
         </span>
+      </div>
+
+      <div className="mt-3">
+        <label htmlFor="region-select" className="block text-xs font-semibold text-slate-600">
+          確認する地域
+        </label>
+        <select
+          id="region-select"
+          value={selectedRegionName}
+          onChange={(event) => onRegionChange(event.target.value)}
+          className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-sky-500 focus:outline-none"
+        >
+          {availableRegions.map((region) => (
+            <option key={region.id} value={region.regionName}>
+              {region.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="mt-3 space-y-1 text-sm text-slate-700">

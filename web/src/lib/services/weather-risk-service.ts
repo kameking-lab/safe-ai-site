@@ -6,8 +6,15 @@ import type {
   WeatherSnapshot,
 } from "@/lib/types/domain";
 
+export type WeatherRegionOption = {
+  id: string;
+  label: string;
+  regionName: string;
+};
+
 export type WeatherRiskService = {
   getTodaySiteRisk: (input?: { regionName?: string }) => Promise<ServiceResult<SiteRiskWeather>>;
+  getAvailableRegions: () => WeatherRegionOption[];
 };
 
 function scoreFromWeather(snapshot: WeatherSnapshot) {
@@ -156,6 +163,39 @@ function pickSnapshotByRegion(
   return snapshots.find((item) => item.regionName.includes(regionName)) ?? snapshots[0];
 }
 
+function toRegionId(regionName: string) {
+  const compact = regionName.replace(/[都道府県市区町村\s]/g, "");
+  return compact.toLowerCase();
+}
+
+function toRegionLabel(regionName: string) {
+  const [prefecture = regionName, city] = regionName.split(" ");
+  if (!city) {
+    return prefecture;
+  }
+  return `${prefecture} (${city})`;
+}
+
+function buildRegionOptions(snapshots: WeatherSnapshot[]): WeatherRegionOption[] {
+  const used = new Set<string>();
+  return snapshots
+    .map((snapshot) => {
+      const id = toRegionId(snapshot.regionName);
+      if (!id || used.has(id)) {
+        return null;
+      }
+      used.add(id);
+      return {
+        id,
+        label: toRegionLabel(snapshot.regionName),
+        regionName: snapshot.regionName,
+      } satisfies WeatherRegionOption;
+    })
+    .filter((item): item is WeatherRegionOption => item !== null);
+}
+
+const regionOptions = buildRegionOptions(weatherSnapshotsMock);
+
 export const mockWeatherRiskService: WeatherRiskService = {
   async getTodaySiteRisk(input) {
     const picked = pickSnapshotByRegion(weatherSnapshotsMock, input?.regionName);
@@ -174,6 +214,9 @@ export const mockWeatherRiskService: WeatherRiskService = {
       ok: true,
       data: toSiteRisk(picked),
     };
+  },
+  getAvailableRegions() {
+    return regionOptions;
   },
 };
 

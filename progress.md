@@ -393,3 +393,9 @@
     - アーティファクトを保存:
       - `/opt/cursor/artifacts/weather_risk_evidence_desktop.png`
       - `/opt/cursor/artifacts/weather_risk_evidence_mobile.png`
+- 地域選択の最小UI 追加（今回）
+  - 実行計画:
+    1. 天気モックを 5 地域（東京/大阪/名古屋/福岡/札幌）へ拡張
+    2. `weather-risk-service.ts` に地域一覧を返す最小関数を追加し、既存の地域別取得を維持
+    3. `home-screen.tsx` で選択地域 state を持ち、地域変更時にリスクカード再取得
+    4. `weather-risk-card.tsx` にスマホでも使いやすい地域選択UIを追加
