@@ -227,8 +227,8 @@ NEXT_PUBLIC_API_MODE=live
 ```
 
 オプション（任意）:
-- `WEATHER_API_MODE=mock|live`（未設定時は `NEXT_PUBLIC_API_MODE` に従う）
-- `WEATHER_API_TIMEOUT_MS=4500`（weather route fetch timeout）
+- `NEXT_PUBLIC_WEATHER_API_MODE=mock|live`（未設定時は `NEXT_PUBLIC_API_MODE` に従う）
+- `NEXT_PUBLIC_WEATHER_API_TIMEOUT_MS=4500`（weather service の route fetch timeout）
 
 ### realSourceUrl の安全ルール
 

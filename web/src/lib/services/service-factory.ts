@@ -34,6 +34,14 @@ function resolveApiMode(): ApiMode {
   return process.env.NEXT_PUBLIC_API_MODE === "live" ? "live" : "mock";
 }
 
+function resolveWeatherMode(defaultMode: ApiMode): ApiMode {
+  const override = process.env.NEXT_PUBLIC_WEATHER_API_MODE;
+  if (override === "live" || override === "mock") {
+    return override;
+  }
+  return defaultMode;
+}
+
 function toForceErrorType(value: string | null | undefined): ApiForceErrorType | undefined {
   if (value === "5xx" || value === "timeout" || value === "validation") {
     return value;
@@ -166,8 +174,9 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
     mode === "live" ? createApiRevisionService(scopedFetch) : createMockRevisionService();
   const summary = mode === "live" ? createApiSummaryService(scopedFetch) : createMockSummaryService();
   const chat = mode === "live" ? createApiChatService(scopedFetch) : createMockChatService();
+  const weatherMode = resolveWeatherMode(mode);
   const weatherRisk =
-    mode === "live" ? createApiWeatherRiskService(scopedFetch) : createMockWeatherRiskService();
+    weatherMode === "live" ? createApiWeatherRiskService(scopedFetch) : createMockWeatherRiskService();
 
   return { mode, revision, summary, chat, weatherRisk };
 }
