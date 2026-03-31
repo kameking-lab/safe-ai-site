@@ -378,3 +378,18 @@
 - 今日の現場リスク（天気・警報）最小機能 ブロック4: 最終確認
   - `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e:smoke` を実行し成功
   - `web/README.md` に現在構成と live API 置換ポイントを追記
+- リスク根拠の説明性 強化（今回）
+  - 実行計画:
+    1. `SiteRiskWeather` に判定根拠を表す `riskEvidences` を追加
+    2. `weather-risk-service.ts` の判定ロジックで、気温/風速/雨量/警報に応じた短文根拠を生成
+    3. `weather-risk-card.tsx` に「判定根拠」を追加し、スマホで読める分量として 2〜3件表示
+  - 実装:
+    - `web/src/lib/types/domain.ts` に `riskEvidences: string[]` を追加
+    - `web/src/lib/services/weather-risk-service.ts` で根拠短文を返却（例: 気温31℃、風速11m/s、注意報発表）
+    - `web/src/components/weather-risk-card.tsx` に「判定根拠」セクションを追加し、`slice(0, 3)` で表示量を制御
+  - 確認:
+    - `npm run lint` / `npm run test` / `npm run build` を実行し成功
+    - Playwright で `http://127.0.0.1:3003` を表示し、「判定根拠」文言がカード内に表示されることを確認
+    - アーティファクトを保存:
+      - `/opt/cursor/artifacts/weather_risk_evidence_desktop.png`
+      - `/opt/cursor/artifacts/weather_risk_evidence_mobile.png`

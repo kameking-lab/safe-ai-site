@@ -108,6 +108,15 @@ export function WeatherRiskCard({ data, status, errorMessage }: WeatherRiskCardP
       </div>
 
       <div className="mt-3">
+        <p className="text-sm font-semibold text-slate-900">判定根拠</p>
+        <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700">
+          {data.riskEvidences.slice(0, 3).map((evidence) => (
+            <li key={evidence}>{evidence}</li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="mt-3">
         <p className="text-sm font-semibold text-slate-900">推奨アクション</p>
         <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700">
           {data.recommendedActions.map((action) => (

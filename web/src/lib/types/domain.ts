@@ -71,6 +71,7 @@ export type SiteRiskWeather = {
   alerts: WeatherAlert[];
   riskLevel: WeatherRiskLevel;
   primaryCautions: string[];
+  riskEvidences: string[];
   recommendedActions: string[];
 };
 
