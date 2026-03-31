@@ -1,4 +1,6 @@
 import type { LawRevision } from "@/lib/types/domain";
+import type { ServiceError } from "@/lib/types/api";
+import { ErrorNotice } from "@/components/error-notice";
 
 function formatPublishedDate(value: string) {
   const [year, month, day] = value.split("-");
@@ -9,8 +11,9 @@ type LawRevisionListProps = {
   revisions: LawRevision[];
   selectedRevisionId: string;
   loadingRevisionId: string | null;
-  errorMessage?: string | null;
-  onRetryLoad?: () => void;
+  error?: ServiceError | null;
+  onRetry?: () => void;
+  retryLabel?: string;
   onSelectSummary: (revisionId: string) => void;
   onSelectForQuestion: (revisionId: string) => void;
 };
@@ -19,8 +22,9 @@ export function LawRevisionList({
   revisions,
   selectedRevisionId,
   loadingRevisionId,
-  errorMessage,
-  onRetryLoad,
+  error,
+  onRetry,
+  retryLabel = "一覧を再取得",
   onSelectSummary,
   onSelectForQuestion,
 }: LawRevisionListProps) {
@@ -33,19 +37,8 @@ export function LawRevisionList({
       <p className="mt-1 text-xs text-slate-500 sm:text-sm">
         改正内容を確認し、要約または質問に進んでください。
       </p>
-      {errorMessage && (
-        <div className="mt-3 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
-          <p>{errorMessage}</p>
-          {onRetryLoad && (
-            <button
-              type="button"
-              onClick={onRetryLoad}
-              className="mt-2 rounded-md border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-100"
-            >
-              一覧を再取得
-            </button>
-          )}
-        </div>
+      {error && (
+        <ErrorNotice title="一覧の取得に失敗しました" error={error} onRetry={onRetry} retryLabel={retryLabel} />
       )}
       <ul className="mt-3 space-y-3">
         {revisions.map((revision) => {

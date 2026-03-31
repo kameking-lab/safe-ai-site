@@ -19,9 +19,13 @@ function jsonError(status: number, code: ApiErrorResponse["error"]["code"], mess
   );
 }
 
+function resolveForceError(requestUrl: URL, request: Request) {
+  return requestUrl.searchParams.get("forceError") ?? request.headers.get("x-force-error");
+}
+
 export async function POST(request: Request) {
   const requestUrl = new URL(request.url);
-  const forceError = requestUrl.searchParams.get("forceError");
+  const forceError = resolveForceError(requestUrl, request);
 
   if (forceError === "5xx") {
     return jsonError(503, "UNAVAILABLE", "チャットAPIが一時的に利用できません。");

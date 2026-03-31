@@ -117,9 +117,41 @@ npm run dev
 - チャット送信で回答表示
 を確認してください。
 
+## forceError（query/header）で失敗状態を再現
+
+Route Handler は `forceError=5xx` を query/header のどちらでも受け付けます。
+
+```bash
+# query で再現
+curl "http://localhost:3000/api/revisions?forceError=5xx"
+curl "http://localhost:3000/api/summaries?revisionId=lr-001&forceError=5xx"
+curl -X POST "http://localhost:3000/api/chat?forceError=5xx" -H "content-type: application/json" -d '{"revisionId":"lr-001","revisionTitle":"高所作業時の墜落防止措置の強化","question":"施行日はいつですか"}'
+
+# header で再現
+curl -H "x-force-error: 5xx" "http://localhost:3000/api/revisions"
+curl -H "x-force-error: 5xx" "http://localhost:3000/api/summaries?revisionId=lr-001"
+curl -X POST "http://localhost:3000/api/chat" -H "x-force-error: 5xx" -H "content-type: application/json" -d '{"revisionId":"lr-001","revisionTitle":"高所作業時の墜落防止措置の強化","question":"施行日はいつですか"}'
+```
+
 ## 最小テスト方針（service層）
 
 - 目的: API接続前でも、service契約（成功/失敗・戻り値形）を壊さないことを担保する
 - 対象: `revision-service` / `summary-service` / `chat-service`
 - 手段: Vitestでモック実装の単体テストを実行
 - 実行コマンド: `npm run test`
+
+## E2E テスト（Playwright 最小構成）
+
+- 目的: `live` モードでの基本導線（一覧→要約→チャット）と、一覧API失敗時の通知表示を自動検証
+- 設定:
+  - `playwright.config.ts`
+  - `e2e/live-mode.spec.ts`
+- 実行コマンド:
+
+```bash
+npm run test:e2e
+```
+
+- 検証内容:
+  - 正常系: 一覧表示 / AI要約表示 / チャット送信
+  - 失敗系: `/?forceRevisionsError=5xx` で一覧取得失敗通知を表示

@@ -1,4 +1,5 @@
-import type { ServiceStatus } from "@/lib/types/api";
+import { ErrorNotice } from "@/components/error-notice";
+import type { ServiceError, ServiceStatus } from "@/lib/types/api";
 import type { RevisionSummary } from "@/lib/types/domain";
 
 type SummaryPanelProps = {
@@ -7,7 +8,7 @@ type SummaryPanelProps = {
   summaryContent: RevisionSummary | null;
   isLoading: boolean;
   status: ServiceStatus;
-  errorMessage: string | null;
+  error: ServiceError | null;
   onRetry: () => void;
 };
 
@@ -17,7 +18,7 @@ export function SummaryPanel({
   summaryContent,
   isLoading,
   status,
-  errorMessage,
+  error,
   onRetry,
 }: SummaryPanelProps) {
   if (isLoading) {
@@ -37,6 +38,23 @@ export function SummaryPanel({
     );
   }
 
+  if (status === "error" && error) {
+    return (
+      <section
+        aria-label="AI要約"
+        className="rounded-2xl border border-rose-200 bg-rose-50/60 p-4 shadow-sm lg:sticky lg:top-24"
+      >
+        <h2 className="text-base font-bold text-rose-900 sm:text-lg">AI要約</h2>
+        <ErrorNotice
+          title="要約の取得に失敗しました"
+          error={error}
+          onRetry={onRetry}
+          retryLabel="要約を再取得"
+        />
+      </section>
+    );
+  }
+
   if (!selectedRevisionId || !summaryContent) {
     return (
       <section
@@ -47,25 +65,6 @@ export function SummaryPanel({
         <p className="mt-3 text-sm leading-6 text-slate-600">
           法改正カードの「AIで要約」ボタンを押すと、ここに要約が表示されます。
         </p>
-      </section>
-    );
-  }
-
-  if (status === "error" && errorMessage) {
-    return (
-      <section
-        aria-label="AI要約"
-        className="rounded-2xl border border-rose-200 bg-rose-50/60 p-4 shadow-sm lg:sticky lg:top-24"
-      >
-        <h2 className="text-base font-bold text-rose-900 sm:text-lg">AI要約</h2>
-        <p className="mt-2 text-sm leading-6 text-rose-700">{errorMessage}</p>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="mt-3 rounded-lg bg-rose-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-rose-700"
-        >
-          もう一度試す
-        </button>
       </section>
     );
   }

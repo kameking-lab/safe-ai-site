@@ -8,7 +8,8 @@ async function wait(ms: number) {
 
 export async function GET(request: NextRequest) {
   const delayMs = Number(request.nextUrl.searchParams.get("delayMs") ?? "0");
-  const forceError = request.nextUrl.searchParams.get("forceError");
+  const forceError =
+    request.nextUrl.searchParams.get("forceError") ?? request.headers.get("x-force-error");
 
   if (delayMs > 0) {
     await wait(delayMs);

@@ -24,9 +24,30 @@ function resolveApiMode(): ApiMode {
 }
 
 export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
-  const revision = mode === "live" ? createApiRevisionService(fetch) : createMockRevisionService();
-  const summary = mode === "live" ? createApiSummaryService(fetch) : createMockSummaryService();
-  const chat = mode === "live" ? createApiChatService(fetch) : createMockChatService();
+  const scopedFetch: typeof fetch = (input, init) => {
+    if (typeof window === "undefined") {
+      return fetch(input, init);
+    }
+    const url =
+      typeof input === "string"
+        ? new URL(input, window.location.origin)
+        : input instanceof URL
+          ? new URL(input.toString())
+          : new URL(input.url);
+
+    const current = new URL(window.location.href);
+    const passThroughForceError = current.searchParams.get("forceRevisionsError");
+    if (passThroughForceError && url.pathname === "/api/revisions") {
+      url.searchParams.set("forceError", passThroughForceError);
+    }
+
+    return fetch(url.toString(), init);
+  };
+
+  const revision =
+    mode === "live" ? createApiRevisionService(scopedFetch) : createMockRevisionService();
+  const summary = mode === "live" ? createApiSummaryService(scopedFetch) : createMockSummaryService();
+  const chat = mode === "live" ? createApiChatService(scopedFetch) : createMockChatService();
 
   return { mode, revision, summary, chat };
 }

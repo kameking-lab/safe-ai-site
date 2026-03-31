@@ -178,3 +178,18 @@
   - `web/src/lib/services/live-services.test.ts` を追加し、live実装の成功/失敗/timeout系を最小検証
   - `web/` で `npm run lint` / `npm run build` / `npm run test` を実行し成功
   - `progress.md` と `web/README.md` を更新し、現状構成と切替方法を明確化
+- live モード信頼性改善 ブロック1: 共通エラー通知の整理
+  - `web/src/components/error-notice.tsx` を新規作成し、一覧/要約/チャットで共通利用
+  - `LawRevisionList` / `SummaryPanel` / `ChatPanel` のエラーUIを共通通知へ寄せ、`retryable` に応じて再試行導線を出し分け
+  - スマホ表示でも読める余白・文字サイズ・ボタンサイズに統一
+- live モード信頼性改善 ブロック2: APIエラー切替改善
+  - `revisions` / `summaries` / `chat` の Route Handler で `forceError` を query + `x-force-error` header 両対応
+  - `service-factory` で `/api/revisions` 呼び出し時に URL クエリの `forceRevisionsError` を `forceError` として透過できるよう調整
+  - `web/README.md` に query/header 両方の再現手順を追記
+- live モード信頼性改善 ブロック3: 最小E2E導入（Playwright）
+  - `@playwright/test` を導入し、`playwright.config.ts` と `e2e/live-mode.spec.ts` を追加
+  - live モード正常系（一覧→要約→チャット）と失敗系（一覧 API 5xx）の最小自動化を追加
+  - `npm run test:e2e` を追加して実行可能化
+- live モード信頼性改善 ブロック4: 検証と整理
+  - `web/` で `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e` を実行し成功
+  - `web/README.md` に E2E 実行手順と検証観点を追記

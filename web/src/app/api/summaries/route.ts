@@ -17,7 +17,8 @@ async function wait(ms: number) {
 export async function GET(request: NextRequest) {
   const revisionId = request.nextUrl.searchParams.get("revisionId");
   const delayMs = parseDelay(request.nextUrl.searchParams.get("delayMs"), 650);
-  const forceError = request.nextUrl.searchParams.get("forceError");
+  const forceError =
+    request.nextUrl.searchParams.get("forceError") ?? request.headers.get("x-force-error");
 
   await wait(delayMs);
 

@@ -6,7 +6,7 @@ import { LawRevisionList } from "@/components/law-revision-list";
 import { SummaryPanel } from "@/components/summary-panel";
 import { TabNavigation, type TabId } from "@/components/tab-navigation";
 import { createServices } from "@/lib/services/service-factory";
-import type { ServiceStatus } from "@/lib/types/api";
+import type { ServiceError, ServiceStatus } from "@/lib/types/api";
 import type { RevisionSummary } from "@/lib/types/domain";
 type HomeScreenProps = {
   children: React.ReactNode;
@@ -15,15 +15,15 @@ type HomeScreenProps = {
 export function HomeScreen({ children }: HomeScreenProps) {
   const services = useMemo(() => createServices(), []);
   const [revisions, setRevisions] = useState(() => services.revision.getCachedRevisions());
-  const firstRevisionId = revisions[0]?.id ?? "";
+  const firstRevisionId = services.revision.getInitialRevisionId() ?? "";
   const [activeTab, setActiveTab] = useState<TabId>("laws");
   const [selectedRevisionId, setSelectedRevisionId] = useState<string>(firstRevisionId);
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const [isChatSending, setIsChatSending] = useState(false);
   const [loadingRevisionId, setLoadingRevisionId] = useState<string | null>(null);
-  const [summaryError, setSummaryError] = useState<string | null>(null);
-  const [chatError, setChatError] = useState<string | null>(null);
-  const [revisionError, setRevisionError] = useState<string | null>(null);
+  const [summaryError, setSummaryError] = useState<ServiceError | null>(null);
+  const [chatError, setChatError] = useState<ServiceError | null>(null);
+  const [revisionError, setRevisionError] = useState<ServiceError | null>(null);
   const [revisionStatus, setRevisionStatus] = useState<ServiceStatus>("idle");
   const [summaryStatus, setSummaryStatus] = useState<ServiceStatus>("idle");
   const [chatStatus, setChatStatus] = useState<ServiceStatus>("idle");
@@ -56,10 +56,10 @@ export function HomeScreen({ children }: HomeScreenProps) {
       }
 
       setRevisionStatus("error");
-      setRevisionError(result.error.message);
+      setRevisionError(result.error);
     }
 
-    loadRevisions();
+    void loadRevisions();
     return () => {
       active = false;
     };
@@ -79,21 +79,26 @@ export function HomeScreen({ children }: HomeScreenProps) {
   const handleSelectSummary = (revisionId: string) => {
     setSummaryError(null);
     if (revisionId === selectedRevisionId) {
+      setActiveTab("summary");
       setIsSummaryLoading(true);
       setLoadingRevisionId(revisionId);
-      void services.summary.getSummaryByRevisionId({ revisionId }).then((response) => {
-        if (!response.ok) {
-          setSummaryStatus("error");
-          setSummaryError(response.error.message);
-          setSelectedSummary(null);
-        } else {
-          setSummaryStatus("success");
-          setSelectedSummary(response.data.summary);
-        }
-      }).finally(() => {
-        setIsSummaryLoading(false);
-        setLoadingRevisionId(null);
-      });
+      void services.summary
+        .getSummaryByRevisionId({ revisionId })
+        .then((response) => {
+          if (!response.ok) {
+            setSummaryStatus("error");
+            setSummaryError(response.error);
+            setSelectedSummary(null);
+          } else {
+            setSummaryStatus("success");
+            setSummaryError(null);
+            setSelectedSummary(response.data.summary);
+          }
+        })
+        .finally(() => {
+          setIsSummaryLoading(false);
+          setLoadingRevisionId(null);
+        });
       return;
     }
     setSelectedRevisionId(revisionId);
@@ -119,11 +124,12 @@ export function HomeScreen({ children }: HomeScreenProps) {
       if (!active) return;
       if (!response.ok) {
         setSummaryStatus("error");
-        setSummaryError(response.error.message);
+        setSummaryError(response.error);
         setSelectedSummary(null);
         return;
       }
       setSummaryStatus("success");
+      setSummaryError(null);
       setSelectedSummary(response.data.summary);
     }
     void loadSummary();
@@ -157,7 +163,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
 
     if (!response.ok) {
       setChatStatus("error");
-      setChatError(response.error.message);
+      setChatError(response.error);
       setIsChatSending(false);
       return;
     }
@@ -182,7 +188,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
     const result = await services.revision.getLawRevisions();
     if (!result.ok) {
       setRevisionStatus("error");
-      setRevisionError(result.error.message);
+      setRevisionError(result.error);
       return;
     }
     setRevisions(result.data);
@@ -194,18 +200,6 @@ export function HomeScreen({ children }: HomeScreenProps) {
     <main className="flex flex-1 flex-col">
       {children}
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-      {revisionError && (
-        <div className="mx-4 mt-3 rounded-xl border border-rose-200 bg-rose-50 p-3">
-          <p className="text-sm text-rose-700">{revisionError}</p>
-          <button
-            type="button"
-            onClick={retryRevisions}
-            className="mt-2 rounded-md border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium text-rose-700 transition hover:bg-rose-100"
-          >
-            一覧を再取得
-          </button>
-        </div>
-      )}
       {revisionStatus === "loading" && (
         <p className="mx-4 mt-2 text-xs text-slate-500">法改正一覧を読み込み中です...</p>
       )}
@@ -216,8 +210,8 @@ export function HomeScreen({ children }: HomeScreenProps) {
             revisions={revisions}
             selectedRevisionId={selectedRevisionId}
             loadingRevisionId={loadingRevisionId}
-            errorMessage={revisionError}
-            onRetryLoad={retryRevisions}
+            error={revisionError}
+            onRetry={retryRevisions}
             onSelectSummary={handleSelectSummary}
             onSelectForQuestion={handleSelectForQuestion}
           />
@@ -230,7 +224,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
             summaryContent={selectedSummary}
             isLoading={isSummaryLoading}
             status={summaryStatus}
-            errorMessage={summaryError}
+            error={summaryError}
             onRetry={retrySummary}
           />
         )}
@@ -242,7 +236,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
             chatInput={chatInput}
             isSending={isChatSending}
             status={chatStatus}
-            errorMessage={chatError}
+            error={chatError}
             onChatInputChange={setChatInput}
             onSend={handleSendChat}
             onRetry={handleSendChat}
@@ -255,8 +249,8 @@ export function HomeScreen({ children }: HomeScreenProps) {
             revisions={revisions}
             selectedRevisionId={selectedRevisionId}
             loadingRevisionId={loadingRevisionId}
-            errorMessage={revisionError}
-            onRetryLoad={retryRevisions}
+            error={revisionError}
+            onRetry={retryRevisions}
             onSelectSummary={handleSelectSummary}
             onSelectForQuestion={handleSelectForQuestion}
           />

@@ -10,7 +10,7 @@ import type { LawRevision } from "@/lib/types/domain";
 export type RevisionService = {
   getCachedRevisions: () => LawRevision[];
   getInitialRevisionId: () => string | null;
-  getLawRevisions: () => Promise<ServiceResult<LawRevision[]>>;
+  getLawRevisions: (options?: { forceError?: string }) => Promise<ServiceResult<LawRevision[]>>;
 };
 
 type FetchWithTimeout = (
@@ -79,9 +79,14 @@ export function createApiRevisionService(
     getInitialRevisionId() {
       return cachedFallback[0]?.id ?? null;
     },
-    async getLawRevisions() {
+    async getLawRevisions(options) {
       try {
-        const response = await fetchImpl(endpoint, { timeoutMs: 3500 });
+        const url = new URL(endpoint, "http://localhost");
+        if (options?.forceError) {
+          url.searchParams.set("forceError", options.forceError);
+        }
+        const target = endpoint.startsWith("http") ? url.toString() : `${url.pathname}${url.search}`;
+        const response = await fetchImpl(target, { timeoutMs: 3500 });
         if (!response.ok) {
           const body = (await response.json().catch(() => null)) as unknown;
           const parsed = parseErrorResponse(body);
