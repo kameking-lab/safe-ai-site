@@ -5,9 +5,10 @@ import { ChatPanel, type ChatMessage } from "@/components/chat-panel";
 import { LawRevisionList } from "@/components/law-revision-list";
 import { SummaryPanel } from "@/components/summary-panel";
 import { TabNavigation, type TabId } from "@/components/tab-navigation";
+import { WeatherRiskCard } from "@/components/weather-risk-card";
 import { createServices } from "@/lib/services/service-factory";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
-import type { RevisionSummary } from "@/lib/types/domain";
+import type { RevisionSummary, SiteRiskWeather } from "@/lib/types/domain";
 type HomeScreenProps = {
   children: React.ReactNode;
 };
@@ -27,7 +28,10 @@ export function HomeScreen({ children }: HomeScreenProps) {
   const [revisionStatus, setRevisionStatus] = useState<ServiceStatus>("idle");
   const [summaryStatus, setSummaryStatus] = useState<ServiceStatus>("idle");
   const [chatStatus, setChatStatus] = useState<ServiceStatus>("idle");
+  const [weatherRiskStatus, setWeatherRiskStatus] = useState<ServiceStatus>("idle");
   const [selectedSummary, setSelectedSummary] = useState<RevisionSummary | null>(null);
+  const [weatherRisk, setWeatherRisk] = useState<SiteRiskWeather | null>(null);
+  const [weatherRiskError, setWeatherRiskError] = useState<ServiceError | null>(null);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(services.chat.createInitialMessages());
   const [chatInput, setChatInput] = useState("");
   const chatListRef = useRef<HTMLDivElement | null>(null);
@@ -145,6 +149,28 @@ export function HomeScreen({ children }: HomeScreenProps) {
     chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
   }, [chatMessages, activeTab]);
 
+  useEffect(() => {
+    let active = true;
+    async function loadWeatherRisk() {
+      setWeatherRiskStatus("loading");
+      const result = await services.weatherRisk.getTodaySiteRisk();
+      if (!active) return;
+      if (!result.ok) {
+        setWeatherRiskStatus("error");
+        setWeatherRiskError(result.error);
+        setWeatherRisk(null);
+        return;
+      }
+      setWeatherRiskStatus("success");
+      setWeatherRiskError(null);
+      setWeatherRisk(result.data);
+    }
+    void loadWeatherRisk();
+    return () => {
+      active = false;
+    };
+  }, [services.weatherRisk]);
+
   const handleSendChat = async () => {
     const trimmed = chatInput.trim();
     if (!trimmed || isChatSending) {
@@ -199,6 +225,13 @@ export function HomeScreen({ children }: HomeScreenProps) {
   return (
     <main className="flex flex-1 flex-col">
       {children}
+      <div className="px-4 pt-4">
+        <WeatherRiskCard
+          data={weatherRisk}
+          status={weatherRiskStatus}
+          errorMessage={weatherRiskError?.message ?? null}
+        />
+      </div>
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-5 lg:items-start">
