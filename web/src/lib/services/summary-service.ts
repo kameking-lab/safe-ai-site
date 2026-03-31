@@ -1,5 +1,6 @@
 import { summaryMockByRevisionId } from "@/data/mock/summaries";
 import type {
+  ApiForceErrorType,
   ApiErrorResponse,
   ServiceResult,
   SummaryApiRequest,
@@ -10,7 +11,7 @@ import type {
 export type SummaryService = {
   getSummaryByRevisionId: (
     input: SummaryApiRequest,
-    options?: { forceError?: string; delayMs?: number }
+    options?: { forceError?: ApiForceErrorType; delayMs?: number }
   ) => Promise<ServiceResult<SummaryApiResponse>>;
 };
 
@@ -56,7 +57,7 @@ export class ApiSummaryService implements SummaryService {
 
   async getSummaryByRevisionId(
     input: SummaryApiRequest,
-    options?: { forceError?: string; delayMs?: number }
+    options?: { forceError?: ApiForceErrorType; delayMs?: number }
   ): Promise<ServiceResult<SummaryApiResponse>> {
     try {
       const query = new URLSearchParams({ revisionId: input.revisionId });
@@ -122,7 +123,7 @@ export function createMockSummaryService(): SummaryService {
 }
 
 export function createApiSummaryService(
-  fetchImpl: FetchWithTimeout = fetch,
+  fetchImpl: FetchWithTimeout = (input, init) => fetch(input, init),
   endpoint?: string
 ): SummaryService {
   return new ApiSummaryService(fetchImpl, endpoint);

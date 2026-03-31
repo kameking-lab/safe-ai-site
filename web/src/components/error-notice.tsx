@@ -5,6 +5,8 @@ type ErrorNoticeProps = {
   error: ServiceError;
   onRetry?: () => void;
   retryLabel?: string;
+  className?: string;
+  compact?: boolean;
 };
 
 export function ErrorNotice({
@@ -12,9 +14,15 @@ export function ErrorNotice({
   error,
   onRetry,
   retryLabel = "もう一度試す",
+  className = "",
+  compact = false,
 }: ErrorNoticeProps) {
   return (
-    <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700 sm:p-4">
+    <div
+      className={`rounded-xl border border-rose-200 bg-rose-50 text-sm text-rose-700 ${
+        compact ? "mt-2 p-2.5 sm:p-3" : "mt-3 p-3 sm:p-4"
+      } ${className}`}
+    >
       <p className="font-semibold text-rose-800">{title}</p>
       <p className="mt-1 leading-6">{error.message}</p>
       {!error.retryable && (

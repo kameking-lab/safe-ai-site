@@ -215,3 +215,19 @@
     - E2Eで chat timeout / chat 5xx / summary validation も段階的に追加
     - CI高速化のため Playwright trace/video 保存ポリシーを job 条件で切替
     - `vite-tsconfig-paths` 警告対応（設定内蔵機能へ移行）
+- 継続改善 P1: APIと失敗注入の強化
+  - `web/src/app/api/revisions/route.ts` で `forceError=timeout|5xx|validation` を明示切り分け（query/header 両対応）
+  - `web/src/lib/services/revision-service.ts` で `delayMs` と `forceError`（統一型）を受け取り、`retryable` をステータス連動で返却
+  - `web/src/lib/services/service-factory.ts` で `revisions/summaries/chat` の失敗注入・delay注入を一箇所へ整理
+  - `NEXT_PUBLIC_FORCE_ERROR` による共通注入（必要時のみ）を追加し、query/header/env の3経路を扱えるようにした
+  - `ErrorNotice` の compact 表示を追加し、一覧/要約/チャットの再試行導線UIを統一
+- 継続改善 P2: E2Eと検証基盤の強化
+  - `web/e2e/live-mode.spec.ts` をタグ付き（`@smoke` / `@failure` / `@recovery`）へ整理
+  - 一覧の `timeout` / `validation`、要約の `validation`、チャットの `5xx` / `timeout` 失敗系を追加
+  - 回復系（要約5xx→成功、チャット5xx→成功）を追加して再現性の高い導線を拡張
+  - `web/playwright.config.ts` で `trace/video/screenshot` を `retain-on-failure` にしてCI保存しやすく調整
+  - `web/package.json` に `test:e2e:smoke` / `test:e2e:failure` / `test:e2e:recovery` / `test:e2e:ci` / `check:ci` を追加
+- 継続改善 P3: CIと運用整理
+  - `.github/workflows/web-ci.yml` を `smoke`（PR向け軽量）と `full`（main向け網羅）に分離
+  - Playwrightレポートを workflow artifact として保存する手順を追加
+  - `web/.env.example` に `NEXT_PUBLIC_FORCE_ERROR` と `NEXT_PUBLIC_FORCE_ERROR_TRANSPORT` の例を追加

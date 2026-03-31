@@ -1,5 +1,6 @@
 import { lawRevisionCores } from "@/data/mock/law-revisions";
 import type {
+  ApiForceErrorType,
   RevisionListApiResponse,
   ServiceError,
   ServiceResult,
@@ -10,13 +11,25 @@ import type { LawRevision } from "@/lib/types/domain";
 export type RevisionService = {
   getCachedRevisions: () => LawRevision[];
   getInitialRevisionId: () => string | null;
-  getLawRevisions: (options?: { forceError?: string }) => Promise<ServiceResult<LawRevision[]>>;
+  getLawRevisions: (
+    options?: { forceError?: ApiForceErrorType; delayMs?: number }
+  ) => Promise<ServiceResult<LawRevision[]>>;
 };
 
-type FetchWithTimeout = (
+async function fetchWithTimeout(
+  fetchImpl: typeof fetch,
   input: RequestInfo | URL,
-  init?: RequestInit & { timeoutMs?: number }
-) => Promise<Response>;
+  init: RequestInit = {},
+  timeoutMs = 3500
+) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetchImpl(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
 
 function toUnknownError(message: string): ServiceError {
   return {
@@ -60,14 +73,19 @@ export function createMockRevisionService(): RevisionService {
     async getLawRevisions() {
       return {
         ok: true,
-        data: lawRevisionCores,
+        data: lawRevisionCores.map((revision) => ({
+          id: revision.id,
+          title: revision.title,
+          publishedAt: revision.publishedAt,
+          summary: revision.summary,
+        })),
       };
     },
   };
 }
 
 export function createApiRevisionService(
-  fetchImpl: FetchWithTimeout = fetch,
+  fetchImpl: typeof fetch = fetch,
   endpoint = "/api/revisions"
 ): RevisionService {
   const cachedFallback: LawRevision[] = lawRevisionCores;
@@ -85,8 +103,11 @@ export function createApiRevisionService(
         if (options?.forceError) {
           url.searchParams.set("forceError", options.forceError);
         }
+        if (typeof options?.delayMs === "number") {
+          url.searchParams.set("delayMs", String(options.delayMs));
+        }
         const target = endpoint.startsWith("http") ? url.toString() : `${url.pathname}${url.search}`;
-        const response = await fetchImpl(target, { timeoutMs: 3500 });
+        const response = await fetchWithTimeout(fetchImpl, target, {}, 3500);
         if (!response.ok) {
           const body = (await response.json().catch(() => null)) as unknown;
           const parsed = parseErrorResponse(body);
@@ -96,12 +117,12 @@ export function createApiRevisionService(
           return {
             ok: false,
             error: {
-              code: response.status >= 500 ? "UNAVAILABLE" : "NETWORK",
+              code: response.status >= 500 ? "UNAVAILABLE" : "VALIDATION",
               message:
                 response.status >= 500
                   ? "法改正一覧APIが一時的に利用できません。"
-                  : "法改正一覧の取得に失敗しました。",
-              retryable: true,
+                  : "法改正一覧APIの入力検証エラーです。",
+              retryable: response.status >= 500,
             },
           };
         }

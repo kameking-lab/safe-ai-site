@@ -1,5 +1,6 @@
 import { buildMockChatReply } from "@/data/mock/chat-responses";
 import type {
+  ApiForceErrorType,
   ApiErrorResponse,
   ChatApiRequest,
   ChatApiResponse,
@@ -15,7 +16,10 @@ export type SendChatMessageInput = {
 
 export type ChatService = {
   createInitialMessages: () => ChatMessage[];
-  sendMessage: (input: SendChatMessageInput) => Promise<ServiceResult<ChatMessage>>;
+  sendMessage: (
+    input: SendChatMessageInput,
+    options?: { forceError?: ApiForceErrorType; delayMs?: number }
+  ) => Promise<ServiceResult<ChatMessage>>;
 };
 
 function createInitialMessages(): ChatMessage[] {
@@ -103,10 +107,22 @@ export class ApiChatService implements ChatService {
     return createInitialMessages();
   }
 
-  async sendMessage(input: SendChatMessageInput): Promise<ServiceResult<ChatMessage>> {
+  async sendMessage(
+    input: SendChatMessageInput,
+    options?: { forceError?: ApiForceErrorType; delayMs?: number }
+  ): Promise<ServiceResult<ChatMessage>> {
     try {
       const request = toApiRequest(input);
-      const response = await fetchWithTimeout(this.fetchImpl, this.endpoint, {
+      const url = new URL(this.endpoint, "http://localhost");
+      if (options?.forceError) {
+        url.searchParams.set("forceError", options.forceError);
+      }
+      if (typeof options?.delayMs === "number") {
+        url.searchParams.set("delayMs", String(options.delayMs));
+      }
+      const target = this.endpoint.startsWith("http") ? url.toString() : `${url.pathname}${url.search}`;
+
+      const response = await fetchWithTimeout(this.fetchImpl, target, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request),

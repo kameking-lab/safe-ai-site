@@ -200,9 +200,6 @@ export function HomeScreen({ children }: HomeScreenProps) {
     <main className="flex flex-1 flex-col">
       {children}
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-      {revisionStatus === "loading" && (
-        <p className="mx-4 mt-2 text-xs text-slate-500">法改正一覧を読み込み中です...</p>
-      )}
 
       <div className="grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-5 lg:items-start">
         {activeTab === "laws" && (
@@ -210,8 +207,10 @@ export function HomeScreen({ children }: HomeScreenProps) {
             revisions={revisions}
             selectedRevisionId={selectedRevisionId}
             loadingRevisionId={loadingRevisionId}
+            status={revisionStatus}
             error={revisionError}
             onRetry={retryRevisions}
+            retryLabel="一覧を再取得"
             onSelectSummary={handleSelectSummary}
             onSelectForQuestion={handleSelectForQuestion}
           />
@@ -240,6 +239,8 @@ export function HomeScreen({ children }: HomeScreenProps) {
             onChatInputChange={setChatInput}
             onSend={handleSendChat}
             onRetry={handleSendChat}
+            errorTitle="チャット応答の取得に失敗しました"
+            retryLabel="同じ質問を再送"
             chatListRef={chatListRef}
           />
         )}
@@ -249,8 +250,10 @@ export function HomeScreen({ children }: HomeScreenProps) {
             revisions={revisions}
             selectedRevisionId={selectedRevisionId}
             loadingRevisionId={loadingRevisionId}
+            status={revisionStatus}
             error={revisionError}
             onRetry={retryRevisions}
+            retryLabel="一覧を再取得"
             onSelectSummary={handleSelectSummary}
             onSelectForQuestion={handleSelectForQuestion}
           />

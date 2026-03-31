@@ -23,6 +23,48 @@ describe("live services", () => {
     }
   });
 
+  it("revision-service: live mode validation を VALIDATION として扱う", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        createJsonResponse(
+          {
+            error: {
+              code: "VALIDATION",
+              message: "法改正一覧APIの入力検証エラーです。",
+              retryable: false,
+            },
+          },
+          400
+        )
+      );
+    const service = createApiRevisionService(fetchMock as unknown as typeof fetch);
+
+    const result = await service.getLawRevisions({ forceError: "validation" });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("VALIDATION");
+      expect(result.error.retryable).toBe(false);
+    }
+  });
+
+  it("revision-service: live mode timeout を NETWORK として扱う", async () => {
+    const fetchMock = vi.fn().mockImplementation(
+      () =>
+        new Promise((_resolve, reject) => {
+          reject(Object.assign(new Error("aborted"), { name: "AbortError" }));
+        })
+    );
+    const service = createApiRevisionService(fetchMock as unknown as typeof fetch);
+
+    const result = await service.getLawRevisions({ forceError: "timeout" });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe("NETWORK");
+      expect(result.error.retryable).toBe(true);
+    }
+  });
+
   it("summary-service: live mode 成功レスポンスを返す", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       createJsonResponse({

@@ -12,6 +12,7 @@ type LawRevisionListProps = {
   selectedRevisionId: string;
   loadingRevisionId: string | null;
   error?: ServiceError | null;
+  status?: "idle" | "loading" | "success" | "error";
   onRetry?: () => void;
   retryLabel?: string;
   onSelectSummary: (revisionId: string) => void;
@@ -23,11 +24,14 @@ export function LawRevisionList({
   selectedRevisionId,
   loadingRevisionId,
   error,
+  status = "idle",
   onRetry,
   retryLabel = "一覧を再取得",
   onSelectSummary,
   onSelectForQuestion,
 }: LawRevisionListProps) {
+  const showEmptyState = status === "success" && !error && revisions.length === 0;
+
   return (
     <section
       className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:sticky lg:top-24"
@@ -39,6 +43,12 @@ export function LawRevisionList({
       </p>
       {error && (
         <ErrorNotice title="一覧の取得に失敗しました" error={error} onRetry={onRetry} retryLabel={retryLabel} />
+      )}
+      {status === "loading" && (
+        <p className="mt-2 text-xs text-slate-500">法改正一覧を読み込み中です...</p>
+      )}
+      {showEmptyState && (
+        <p className="mt-2 text-xs text-slate-500">表示できる法改正データがありません。</p>
       )}
       <ul className="mt-3 space-y-3">
         {revisions.map((revision) => {

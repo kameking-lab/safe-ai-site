@@ -20,6 +20,21 @@ export type ApiErrorResponse = {
 };
 export type ServiceErrorResponse = ApiErrorResponse;
 
+export type ForceErrorType = "5xx" | "timeout" | "validation";
+export type ApiForceErrorType = ForceErrorType;
+export type ForceErrorTransport = "query" | "header";
+
+export type ServiceErrorInjectionOptions = {
+  revisions?: ApiForceErrorType;
+  summaries?: ApiForceErrorType;
+  chat?: ApiForceErrorType;
+  revisionsDelayMs?: string;
+  summaryDelayMs?: string;
+  chatDelayMs?: string;
+  useHeaderTransport?: boolean;
+  envForceError?: ApiForceErrorType;
+};
+
 export type SummaryApiRequest = {
   revisionId: string;
 };

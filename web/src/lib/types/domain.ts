@@ -2,6 +2,12 @@ export type LawRevisionCore = {
   id: string;
   title: string;
   publishedAt: string;
+  revisionNumber?: string;
+  category?: "労働安全衛生法" | "省令" | "通達";
+  source?: {
+    issuer: string;
+    url?: string;
+  };
   summary: string;
 };
 

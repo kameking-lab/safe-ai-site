@@ -50,6 +50,7 @@ export function SummaryPanel({
           error={error}
           onRetry={onRetry}
           retryLabel="要約を再取得"
+          className="mt-4"
         />
       </section>
     );

@@ -17,6 +17,7 @@ type ChatPanelProps = {
   isSending: boolean;
   status: ServiceStatus;
   error: ServiceError | null;
+  errorTitle?: string;
   retryLabel?: string;
   chatListRef: RefObject<HTMLDivElement | null>;
   onChatInputChange: (value: string) => void;
@@ -31,6 +32,7 @@ export function ChatPanel({
   isSending,
   status,
   error,
+  errorTitle = "チャット送信に失敗しました",
   retryLabel = "再試行",
   chatListRef,
   onChatInputChange,
@@ -99,7 +101,15 @@ export function ChatPanel({
           応答を受信しました。
         </p>
       )}
-      {error && <ErrorNotice error={error} onRetry={onRetry} retryLabel={retryLabel} />}
+      {error && (
+        <ErrorNotice
+          title={errorTitle}
+          error={error}
+          onRetry={error.retryable ? onRetry : undefined}
+          retryLabel={retryLabel}
+          className="mt-3"
+        />
+      )}
     </section>
   );
 }
