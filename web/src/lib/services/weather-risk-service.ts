@@ -26,7 +26,7 @@ function scoreFromWeather(snapshot: WeatherSnapshot) {
   const cautions: string[] = [];
   const riskEvidences: string[] = [];
   const actions = new Set<string>([
-    "作業前ミーティングで天候リスクと退避基準を再確認する",
+    "朝礼で天候リスクと中止基準を30秒共有する",
   ]);
 
   if (snapshot.temperatureCelsius >= 33) {
@@ -35,21 +35,21 @@ function scoreFromWeather(snapshot: WeatherSnapshot) {
     riskEvidences.push(
       `気温${snapshot.temperatureCelsius}℃のため暑熱リスクが高いです`
     );
-    actions.add("熱中症指数を確認し、30分ごとの水分補給・休憩を徹底する");
+    actions.add("WBGTを確認し、30分ごとに給水休憩を入れる");
   } else if (snapshot.temperatureCelsius >= 30) {
     score += 2;
     cautions.push("暑熱リスク");
     riskEvidences.push(
       `気温${snapshot.temperatureCelsius}℃のため暑熱リスクに注意が必要です`
     );
-    actions.add("送風・冷却資材を配置し、体調不良者を早期離脱させる");
+    actions.add("送風・日陰を確保し、体調不良者を即申告させる");
   } else if (snapshot.temperatureCelsius >= 28) {
     score += 1;
     cautions.push("気温上昇");
     riskEvidences.push(
       `気温${snapshot.temperatureCelsius}℃で体調変化が出やすいため注意が必要です`
     );
-    actions.add("こまめな給水と声かけを実施する");
+    actions.add("小休止と声かけを増やし、無理な連続作業を避ける");
   }
 
   if (snapshot.windSpeedMs >= 15) {
@@ -58,21 +58,21 @@ function scoreFromWeather(snapshot: WeatherSnapshot) {
     riskEvidences.push(
       `風速${snapshot.windSpeedMs}m/sのため飛来落下・高所作業に特に注意が必要です`
     );
-    actions.add("高所作業・揚重作業を停止し、資材固定を強化する");
+    actions.add("高所・揚重作業を見合わせ、資材固定を再点検する");
   } else if (snapshot.windSpeedMs >= 10) {
     score += 2;
     cautions.push("風が強い");
     riskEvidences.push(
       `風速${snapshot.windSpeedMs}m/sのため飛来落下・高所作業に注意が必要です`
     );
-    actions.add("足場・仮設材・シートの緩みを追加点検する");
+    actions.add("足場とシートの緩みを作業前に再点検する");
   } else if (snapshot.windSpeedMs >= 7) {
     score += 1;
     cautions.push("やや強い風");
     riskEvidences.push(
       `風速${snapshot.windSpeedMs}m/sのため資材飛散リスクに注意が必要です`
     );
-    actions.add("飛散しやすい資材を整理する");
+    actions.add("飛散しやすい資材を優先して固定・整理する");
   }
 
   if (snapshot.precipitationMm >= 20) {
@@ -81,21 +81,21 @@ function scoreFromWeather(snapshot: WeatherSnapshot) {
     riskEvidences.push(
       `降水量${snapshot.precipitationMm}mmのため足場悪化・視界悪化に注意が必要です`
     );
-    actions.add("排水経路・滑りやすい導線を確認し、必要時は作業を中断する");
+    actions.add("滑りやすい導線を閉鎖し、排水確認後に再開判断する");
   } else if (snapshot.precipitationMm >= 10) {
     score += 2;
     cautions.push("降雨");
     riskEvidences.push(
       `降水量${snapshot.precipitationMm}mmのため足場悪化・感電リスクに注意が必要です`
     );
-    actions.add("感電・転倒リスクのある工程を優先的に見直す");
+    actions.add("感電・転倒リスクのある工程を先に手順見直しする");
   } else if (snapshot.precipitationMm >= 1) {
     score += 1;
     cautions.push("小雨");
     riskEvidences.push(
       `降水量${snapshot.precipitationMm}mmのため足元の滑りに注意が必要です`
     );
-    actions.add("足元養生を実施し、視界不良箇所を周知する");
+    actions.add("足元養生を追加し、滑りやすい場所を全員へ周知する");
   }
 
   const warningAlerts = snapshot.alerts.filter((alert) => alert.level === "warning");
@@ -107,14 +107,14 @@ function scoreFromWeather(snapshot: WeatherSnapshot) {
     riskEvidences.push(
       `${warningAlerts.map((alert) => alert.type).join("・")}が発表中のため危険工程の停止判断が必要です`
     );
-    actions.add("管理者判断で危険工程の停止・退避判断を即時実施する");
+    actions.add("管理者が退避・中止判断者を明確にして即時判断する");
   } else if (advisoryAlerts.length > 0) {
     score += 2;
     cautions.push("注意報発表中");
     riskEvidences.push(
       `${advisoryAlerts.map((alert) => alert.type).join("・")}が出ているため現場監視の強化が必要です`
     );
-    actions.add("注意報対象の災害シナリオを共有し、監視体制を強化する");
+    actions.add("注意報対象の災害シナリオを朝礼で共有して監視を強化する");
   }
 
   const riskLevel: WeatherRiskLevel = score >= 7 ? "高" : score >= 4 ? "中" : "低";
