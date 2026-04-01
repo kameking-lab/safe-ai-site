@@ -231,7 +231,8 @@ npm run start
 - `src/data/mock/weather-risk.ts`
   - 地域名/日付/天気概要/気温/風/雨/警報・注意報のモックデータ
 - `src/lib/services/weather-risk-service.ts`
-  - 簡易ルールで `riskLevel`（低/中/高）、`primaryCautions`、`recommendedActions` を算出
+  - 簡易ルールで `riskLevel`（低/中/高）、`primaryCautions`、`riskEvidences`、`recommendedActions` を算出
+  - 推奨アクションは朝礼/KYで読み上げやすい短文に調整
   - ルール例:
     - 暑さ（気温）で加点
     - 強風で加点
@@ -239,8 +240,10 @@ npm run start
     - 警報/注意報で加点（警報は重め）
 - `src/components/weather-risk-card.tsx`
   - ホーム上部に「今日の現場リスク」カードを表示
-  - 地域、リスクレベル、主な注意点、推奨アクションを表示
-  - リスク高は赤系で強調
+  - 地域、リスクレベル、主な注意点、判定根拠、推奨アクションを表示
+  - 「主な注意点（何に気をつけるか）」と「推奨アクション（今すぐやること）」を分けて表示
+  - 「朝礼で伝える要点（30秒）」を補助表示
+  - リスク高は赤系の強調メッセージで視認性を向上
 - `src/components/home-screen.tsx`
   - `services.weatherRisk.getTodaySiteRisk()` でデータ取得し、カードを表示
 

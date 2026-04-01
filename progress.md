@@ -483,3 +483,26 @@
     2. 高リスク時の視認性を強めるため、バッジ/注意枠/朝礼要点を段階表示し、注意点と推奨アクションの役割差を明確化
     3. 地域選択UIに補助文と状態文言を追加し、切替時の変化が分かる最小UXを維持したままスマホ操作性を改善
     4. `README.md` / `progress.md` 更新後に `lint` / `build` / `test` と手動UI確認（動画）を実施
+  - 実装:
+    - `web/src/components/weather-risk-card.tsx`
+      - カード上部にリスク段階メッセージ（高/中/低）を追加し、初見で意味が伝わる構成へ整理
+      - 「主な注意点（何に気をつけるか）」「推奨アクション（今すぐやること）」の見出しを分離し、用途差を明示
+      - 「朝礼で伝える要点（30秒）」を追加し、現場共有しやすい短い補助文を表示
+      - 地域選択に補助文を追加し、切替時の意味（注意点と行動指示が切替）を明確化
+      - loading/error/empty 状態でも同じ選択導線を維持し、スマホで押しやすい `py-3` の select UI へ調整
+    - `web/src/lib/services/weather-risk-service.ts`
+      - 推奨アクション文言を朝礼/KYで使いやすい短文へ更新（中止基準共有、給水休憩、点検・退避判断）
+      - 注意点・判定根拠は維持しつつ、現場で指示に使える語尾へ調整
+    - `web/README.md`
+      - 現場リスク機能の改善点（情報構造、朝礼要点、地域切替UX）を追記
+  - 確認:
+    - `npm run lint` / `npm run build` / `npm run test` を実行し成功
+    - 手動確認（Playwright操作）で以下を確認
+      - 地域切替（福岡→札幌）でリスクレベル・注意点・推奨アクション・判定根拠が切り替わる
+      - 高リスク時の強調メッセージと「朝礼で伝える要点（30秒）」が表示される
+      - 法改正一覧UI・事故データベースUIが継続表示され、崩れていない
+    - アーティファクトを保存:
+      - `/opt/cursor/artifacts/weather_risk_value_walkthrough.webm`
+      - `/opt/cursor/artifacts/weather_risk_high_region_desktop.png`
+      - `/opt/cursor/artifacts/weather_risk_region_switched_desktop.png`
+      - `/opt/cursor/artifacts/weather_risk_mobile_firstview.png`
