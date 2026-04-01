@@ -452,3 +452,9 @@
     - リポジトリルートに `vercel.json` を追加（`web/` を project root として固定）
     - `web/.env.example` に `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` 例を追記
     - `web/README.md` に公開手順（認証方式2パターン）と URL取得手順を追記
+- ホーム価値訴求 + 事故データベース最小版（今回）
+  - 実行計画:
+    1. ホームのファーストビューに価値訴求セクションを追加し、今日使う理由を3点で明示
+    2. 事故データを mock + service 分離で追加し、一覧表示と事故種別フィルタを実装
+    3. `home-screen.tsx` へ事故DBセクションを統合し、既存の法改正/天気/要約/チャット導線を壊さず接続
+    4. スマホ優先の可読性を確認し、`progress.md` へ結果を追記

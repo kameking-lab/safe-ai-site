@@ -2,13 +2,20 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatPanel, type ChatMessage } from "@/components/chat-panel";
+import { AccidentDatabasePanel } from "@/components/accident-database-panel";
+import { HomeValueHero } from "@/components/home-value-hero";
 import { LawRevisionList } from "@/components/law-revision-list";
 import { SummaryPanel } from "@/components/summary-panel";
 import { TabNavigation, type TabId } from "@/components/tab-navigation";
 import { WeatherRiskCard } from "@/components/weather-risk-card";
 import { createServices } from "@/lib/services/service-factory";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
-import type { RevisionSummary, SiteRiskWeather } from "@/lib/types/domain";
+import type {
+  AccidentCase,
+  AccidentType,
+  RevisionSummary,
+  SiteRiskWeather,
+} from "@/lib/types/domain";
 type HomeScreenProps = {
   children: React.ReactNode;
 };
@@ -32,6 +39,10 @@ export function HomeScreen({ children }: HomeScreenProps) {
   const [selectedSummary, setSelectedSummary] = useState<RevisionSummary | null>(null);
   const [weatherRisk, setWeatherRisk] = useState<SiteRiskWeather | null>(null);
   const [weatherRiskError, setWeatherRiskError] = useState<ServiceError | null>(null);
+  const [accidentCases, setAccidentCases] = useState<AccidentCase[]>([]);
+  const [accidentStatus, setAccidentStatus] = useState<ServiceStatus>("idle");
+  const [accidentError, setAccidentError] = useState<ServiceError | null>(null);
+  const [selectedAccidentType, setSelectedAccidentType] = useState<AccidentType | "すべて">("すべて");
   const [selectedRegionName, setSelectedRegionName] = useState(
     () => services.weatherRisk.getAvailableRegions()[0]?.regionName ?? ""
   );
@@ -176,6 +187,30 @@ export function HomeScreen({ children }: HomeScreenProps) {
     };
   }, [services.weatherRisk, selectedRegionName]);
 
+  useEffect(() => {
+    let active = true;
+    async function loadAccidentCases() {
+      setAccidentStatus("loading");
+      const result = await services.accident.getAccidentCases({
+        type: selectedAccidentType === "すべて" ? "all" : selectedAccidentType,
+      });
+      if (!active) return;
+      if (!result.ok) {
+        setAccidentStatus("error");
+        setAccidentError(result.error);
+        setAccidentCases([]);
+        return;
+      }
+      setAccidentStatus("success");
+      setAccidentError(null);
+      setAccidentCases(result.data);
+    }
+    void loadAccidentCases();
+    return () => {
+      active = false;
+    };
+  }, [services.accident, selectedAccidentType]);
+
   const handleSendChat = async () => {
     const trimmed = chatInput.trim();
     if (!trimmed || isChatSending) {
@@ -231,6 +266,17 @@ export function HomeScreen({ children }: HomeScreenProps) {
     <main className="flex flex-1 flex-col">
       {children}
       <div className="px-4 pt-4">
+        <HomeValueHero
+          onJumpToRisk={() => {
+            document
+              .querySelector<HTMLElement>('section[aria-label="今日の現場リスク"]')
+              ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }}
+          onJumpToLaws={() => setActiveTab("laws")}
+          onJumpToChat={() => setActiveTab("chat")}
+        />
+      </div>
+      <div className="px-4 pt-4">
         <WeatherRiskCard
           data={weatherRisk}
           status={weatherRiskStatus}
@@ -238,6 +284,15 @@ export function HomeScreen({ children }: HomeScreenProps) {
           availableRegions={services.weatherRisk.getAvailableRegions()}
           selectedRegionName={selectedRegionName}
           onRegionChange={setSelectedRegionName}
+        />
+      </div>
+      <div className="px-4 pt-4">
+        <AccidentDatabasePanel
+          cases={accidentCases}
+          selectedType={selectedAccidentType}
+          onSelectType={setSelectedAccidentType}
+          status={accidentStatus}
+          error={accidentError}
         />
       </div>
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />

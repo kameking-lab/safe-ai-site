@@ -14,6 +14,10 @@ import {
   createMockWeatherRiskService,
   type WeatherRiskService,
 } from "@/lib/services/weather-risk-service";
+import {
+  createMockAccidentService,
+  type AccidentService,
+} from "@/lib/services/accident-service";
 import type {
   ApiMode,
   ApiForceErrorType,
@@ -27,6 +31,7 @@ export type AppServices = {
   summary: SummaryService;
   chat: ChatService;
   weatherRisk: WeatherRiskService;
+  accident: AccidentService;
 };
 
 function resolveApiMode(): ApiMode {
@@ -177,6 +182,7 @@ export function createServices(mode: ApiMode = resolveApiMode()): AppServices {
   const weatherMode = resolveWeatherMode(mode);
   const weatherRisk =
     weatherMode === "live" ? createApiWeatherRiskService(scopedFetch) : createMockWeatherRiskService();
+  const accident = createMockAccidentService();
 
-  return { mode, revision, summary, chat, weatherRisk };
+  return { mode, revision, summary, chat, weatherRisk, accident };
 }

@@ -75,12 +75,16 @@ export type SiteRiskWeather = {
   recommendedActions: string[];
 };
 
-export type LiveWeatherCurrent = {
-  time: string;
-  temperature_2m: number;
-  precipitation: number;
-  wind_speed_10m: number;
-  weather_code: number;
+export type AccidentType = "墜落" | "転倒" | "挟まれ" | "飛来落下" | "感電";
+
+export type AccidentCase = {
+  id: string;
+  title: string;
+  occurredOn: string;
+  type: AccidentType;
+  summary: string;
+  mainCauses: string[];
+  preventionPoints: string[];
 };
 
 // API接続時に差し替えしやすいよう、UI側はこの別名を利用する。
