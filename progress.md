@@ -1,9 +1,9 @@
 # progress.md
 
 ## プロジェクト状況
-- 状態: 進行中
-- 現在の目標: MVPの基本レイアウト実装
-- 次にやること: TASKS.md の 11（法改正ダミーデータ作成）
+- 状態: TASKS 1〜36 完了
+- 現在の目標: MVP初期実装の完了確認
+- 次にやること: 追加要望があれば改善タスク化して対応
 
 ## 作業ログ
 
@@ -40,3 +40,440 @@
   - 確認用アーティファクトを保存
     - `/opt/cursor/artifacts/tasks_10_mobile_layout_check.mp4`
     - `/opt/cursor/artifacts/tasks_10_mobile_layout_check.webp`
+- TASKS 11: 法改正のダミーデータファイルを作る
+  - `web/src/data/law-revisions.ts` を新規作成
+  - 法改正カード表示用に `id` / `title` / `publishedAt` / `summary` を持つダミーデータを3件追加
+- TASKS 12: 法改正カード一覧コンポーネントを作る
+  - `web/src/components/law-revision-list.tsx` を新規作成
+  - `web/src/app/page.tsx` に一覧コンポーネントを組み込み
+- TASKS 13: カードにタイトル、日付、概要を表示する
+  - 各カードに `title` / `publishedAt`（`YYYY/MM/DD`）/ `summary` を表示
+- TASKS 14: 「AIで要約」ボタンを付ける
+  - 各カードに「AIで要約」ボタンを追加（将来の連携用UI）
+- TASKS 15: 「質問する」ボタンを付ける
+  - 各カードに「質問する」ボタンを追加（将来の連携用UI）
+  - `npm run lint` でESLintエラーなしを確認
+  - iPhone 12 Pro（390x844）相当で手動確認し、法改正カード3件と各カードの表示要素（タイトル/発行日/概要/2ボタン）を確認
+  - 確認用アーティファクトを保存
+    - `/opt/cursor/artifacts/tasks_11_15_law_revision_cards_mobile_check.mp4`
+    - `/opt/cursor/artifacts/tasks_11_15_law_revision_cards_mobile_check.webp`
+- TASKS 16: スマホ表示を調整する
+  - `web/src/components/home-screen.tsx` でスマホ優先の1カラム表示を維持し、タブ別の表示を整理
+  - `web/src/components/law-revision-list.tsx` をカード化し、スマホ画面で読みやすい余白に調整
+- TASKS 17: PC表示を調整する
+  - `web/src/components/home-screen.tsx` で `lg:` 以上を2カラム表示に変更
+  - 法改正一覧と要約/チャットを同時に見られるレイアウトを追加
+- TASKS 18: 要約表示エリアのコンポーネントを作る
+  - `web/src/components/summary-panel.tsx` を新規作成し、要約エリアを分離
+- TASKS 19: 「AIで要約」ボタン押下で該当要約を表示する
+  - `web/src/components/home-screen.tsx` で選択中法改正を state 管理
+  - `LawRevisionList` の「AIで要約」押下で summary タブへ遷移して対象要約を表示
+- TASKS 20: 3行要約を表示する
+  - `web/src/data/law-revisions.ts` に `aiSummary.threeLineSummary` を追加
+  - `SummaryPanel` で3行要約をリスト表示
+- TASKS 21: 「現場でやること」を表示する
+  - `web/src/data/law-revisions.ts` に `aiSummary.workplaceActions` を追加
+  - `SummaryPanel` に「現場でやること」リストを追加
+- TASKS 22: 「対象業種」を表示する
+  - `web/src/data/law-revisions.ts` に `aiSummary.targetIndustries` を追加
+  - `SummaryPanel` に対象業種バッジ表示を追加
+- TASKS 23: ローディング風UIを追加する
+  - `SummaryPanel` にスケルトン表示を実装（要約切替時のローディング表現）
+- TASKS 24: チャット表示領域を作る
+  - `web/src/components/home-screen.tsx` にチャットメッセージ表示領域を追加
+- TASKS 25: 入力欄と送信ボタンを作る
+  - チャット入力欄と送信ボタンを追加（Enter送信対応）
+- TASKS 26: 選択中の法改正タイトルをチャット上部に表示する
+  - チャット領域上部に `対象: {選択中タイトル}` を表示
+- TASKS 27: ダミー回答ロジックを作る
+  - 入力送信時に質問文とダミー回答を連続追加するロジックを実装
+- TASKS 28: 会話履歴を画面に表示する
+  - `chatMessages` の履歴を role別スタイルで表示
+- TASKS 29: スクロール挙動を整える
+  - 新規メッセージ追加時にチャット末尾へ自動スクロール
+- TASKS 30: スマホ表示を確認する
+  - iPhone 12 Pro（390x844）で以下を手動確認
+    - 法改正カード表示が崩れない
+    - 「AIで要約」操作で要約タブ表示に遷移
+    - 3行要約 / 現場でやること / 対象業種 が表示
+    - 質問チャットで入力送信し、質問・回答の履歴表示と自動スクロールを確認
+  - PC幅に戻して2カラム表示（要約/チャット と 法改正一覧）を確認
+  - 確認用アーティファクトを保存
+    - `/opt/cursor/artifacts/tasks_16_30_responsive_summary_chat_check.mp4`
+    - `/opt/cursor/artifacts/tasks_16_30_responsive_summary_chat_check.webp`
+- TASKS 31: 全体デザインを整える
+  - `Header` / `TabNavigation` / `LawRevisionList` / `SummaryPanel` / チャットUIの配色・余白・角丸を統一
+  - スマホ優先で可読性が高い行間・文字サイズへ調整
+  - PC時の見た目を崩さず、カード表現とセクション階層を明確化
+- TASKS 32: 不要コードを削除する
+  - `home-screen.tsx` のチャットメッセージ型定義を `ChatMessage` として分離し、重複したインライン型記述を削除
+  - 既存機能を維持したまま、状態定義の可読性と保守性を向上
+- TASKS 33: コンポーネントを分割整理する
+  - `web/src/components/chat-panel.tsx` を新規作成し、チャット表示・入力UIを分離
+  - `web/src/components/home-screen.tsx` からチャット描画詳細を切り出し、画面状態管理に責務を集中
+- TASKS 34: README用の起動手順を追記する
+  - `web/README.md` を日本語化し、前提条件・インストール・起動・lint/build確認手順を追記
+  - MVP範囲（法改正一覧 / AI要約 / 質問チャットUI）と主要ディレクトリ構成を明記
+- TASKS 35: 最終確認を行う
+  - `web/` で `npm run lint` と `npm run build` を実行し、エラーなく完了
+  - iPhone 12 Pro（390x844）で最終手動確認を実施し、一覧・要約・チャット導線が正常動作することを確認
+  - 確認用アーティファクトを保存
+    - `/opt/cursor/artifacts/tasks_31_36_final_verification_mobile.mp4`
+    - `/opt/cursor/artifacts/tasks_31_36_final_verification_mobile.webp`
+- TASKS 36: progress.md を最終更新する
+  - プロジェクト状況を「TASKS 1〜36 完了」へ更新
+  - 最終確認結果とアーティファクト情報を反映
+- 任意改善 ブロックA: 実API接続しやすい構造へ整理
+  - `web/src/data/mock/` に法改正基本情報・要約モック・チャット応答ルールを分離
+  - `web/src/lib/services/` に `revision-service` / `summary-service` / `chat-service` を追加
+  - `home-screen.tsx` を service 経由に切り替え、UIからモックデータ直参照を除去
+  - 既存UIを維持しつつ要約/チャットの責務分離を実施
+- 任意改善 ブロックB: UI改善
+  - 一覧カードに読みやすさ向上の補助文、選択/ホバー状態、要約ロード中ボタン状態を追加
+  - タブに `aria-current` を付与し、選択状態の認知性を改善
+  - チャット送信中の入力/送信ボタン状態を追加し、送信体験を安定化
+  - 要約/チャット/一覧カードをPC時に `sticky` で追従させ、2カラム閲覧性を向上
+- 任意改善 ブロックC: ダミーデータ拡張
+  - 法改正ダミーを 3件→5件へ拡張
+  - 要約文・現場アクション・対象業種を法改正ごとに具体化
+  - チャット応答をキーワード連動で自然な文面に改善
+  - API置換しやすいようデータ型を `lib/types/domain.ts` へ集約
+- 任意改善 ブロックD: 最終確認
+  - `web/` で `npm run lint` / `npm run build` を実行し成功
+  - iPhone 12 Pro（390x844）で手動確認し、要約・再要約・チャット履歴の導線を再確認
+  - 確認用アーティファクトを保存
+    - `/opt/cursor/artifacts/optional_improvements_api_ready_and_ui_polish.mp4`
+    - `/opt/cursor/artifacts/optional_improvements_api_ready_and_ui_polish.webp`
+- 本番接続に近づける改善 ブロック1: 実API接続しやすい構造を強化
+  - `web/src/lib/types/api.ts` を拡張し、`ServiceResult` / `ServiceError` / API request/response 型を整理
+  - `revision-service` / `summary-service` / `chat-service` に mock/api 差し替え可能な実装を追加
+  - `service-factory.ts` で `ApiMode`（`mock` / `live`）に応じた service 生成を統一
+  - `home-screen.tsx` は service戻り値（`ServiceResult`）前提で処理を統一
+- 本番接続に近づける改善 ブロック2: 失敗時UIと状態管理
+  - 要約取得失敗時に `SummaryPanel` でエラーメッセージと再試行ボタンを表示
+  - チャット送信失敗時に `ChatPanel` でエラーメッセージと再試行導線を表示
+  - `idle / loading / success / error` 状態をUI反映し、スマホでも認識しやすい表示を維持
+- 本番接続に近づける改善 ブロック3: テスト導入の最小構成
+  - Vitest を導入し、`vitest.config.mts` / `vitest.setup.ts` / `npm run test` を追加
+  - `revision-service.test.ts` / `summary-service.test.ts` / `chat-service.test.ts` を追加
+  - service層を UI から独立してテスト可能な構成へ整理
+- 本番接続に近づける改善 ブロック4: 最終確認
+  - `web/` で `npm run lint` / `npm run build` / `npm run test` を実行し成功
+  - （dev は既存起動中）最新変更のビルド・テストを確認
+- mock から live モードへ進む最小実装 ブロック1: Next.js Route Handler 実装
+  - `web/src/app/api/revisions/route.ts` を追加し、法改正一覧JSONを返すAPIを実装
+  - `web/src/app/api/summaries/route.ts` を追加し、`revisionId` 指定で要約を返すAPIを実装（`forceError=5xx` 対応）
+  - `web/src/app/api/chat/route.ts` を追加し、チャット応答JSONを返すAPIを実装（`forceError=5xx` 対応）
+  - APIレスポンス型を `web/src/lib/types/api.ts` に追加し、Routeとserviceで型整合
+- mock から live モードへ進む最小実装 ブロック2: live モード接続
+  - `service-factory.ts` を `mode` 付きで返す設計に拡張し、`NEXT_PUBLIC_API_MODE=live` で Route Handler fetch へ切替
+  - `revision-service.ts` / `summary-service.ts` / `chat-service.ts` の live 実装を Route Handler 接続前提で調整
+  - `web/.env.example` を追加し、`NEXT_PUBLIC_API_MODE` の設定例を追記
+  - `web/README.md` に live/mock 切替方法と環境変数利用方法を追記
+- mock から live モードへ進む最小実装 ブロック3: 失敗パターン改善
+  - 一覧取得失敗時のUIを `LawRevisionList` と `home-screen` で明示し、再取得ボタン導線を追加
+  - 要約・チャット失敗時の表示を維持しつつ、retryable判定を使った文言改善
+  - service層に timeout / 5xx / validation / unknown の最低限処理を追加
+- mock から live モードへ進む最小実装 ブロック4: 検証と整理
+  - `web/src/lib/services/live-services.test.ts` を追加し、live実装の成功/失敗/timeout系を最小検証
+  - `web/` で `npm run lint` / `npm run build` / `npm run test` を実行し成功
+  - `progress.md` と `web/README.md` を更新し、現状構成と切替方法を明確化
+- live モード信頼性改善 ブロック1: 共通エラー通知の整理
+  - `web/src/components/error-notice.tsx` を新規作成し、一覧/要約/チャットで共通利用
+  - `LawRevisionList` / `SummaryPanel` / `ChatPanel` のエラーUIを共通通知へ寄せ、`retryable` に応じて再試行導線を出し分け
+  - スマホ表示でも読める余白・文字サイズ・ボタンサイズに統一
+- live モード信頼性改善 ブロック2: APIエラー切替改善
+  - `revisions` / `summaries` / `chat` の Route Handler で `forceError` を query + `x-force-error` header 両対応
+  - `service-factory` で `/api/revisions` 呼び出し時に URL クエリの `forceRevisionsError` を `forceError` として透過できるよう調整
+  - `web/README.md` に query/header 両方の再現手順を追記
+- live モード信頼性改善 ブロック3: 最小E2E導入（Playwright）
+  - `@playwright/test` を導入し、`playwright.config.ts` と `e2e/live-mode.spec.ts` を追加
+  - live モード正常系（一覧→要約→チャット）と失敗系（一覧 API 5xx）の最小自動化を追加
+  - `npm run test:e2e` を追加して実行可能化
+- live モード信頼性改善 ブロック4: 検証と整理
+  - `web/` で `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e` を実行し成功
+  - `web/README.md` に E2E 実行手順と検証観点を追記
+- live モード失敗網羅/CI基盤強化 ブロック1: summary/chat 失敗注入を拡張
+  - `web/src/app/api/summaries/route.ts` で `forceError` を query/header 両対応し、`5xx` / `timeout` / `validation` を追加
+  - `web/src/app/api/chat/route.ts` で `forceError` を query/header 両対応し、`5xx` / `timeout` / `validation` を追加
+  - `web/src/lib/services/summary-service.ts` / `chat-service.ts` で APIエラーボディを `ServiceError` として受け取り、UIへ透過
+  - `web/src/lib/services/service-factory.ts` で一覧のみの透過を廃止し、E2Eで route interception による注入を使う方針へ整理
+- live モード失敗網羅/CI基盤強化 ブロック2: E2E失敗系の拡張
+  - `web/e2e/live-mode.spec.ts` を 6シナリオへ拡張
+    - 正常系: 一覧→要約→チャット
+    - 失敗系: 一覧5xx / 要約5xx / 要約timeout / チャットvalidation
+    - 回復系: 要約5xx → 再試行で回復
+  - ErrorNotice と再試行導線（retryable true/false）の表示差分を自動検証
+- live モード失敗網羅/CI基盤強化 ブロック3: CI向け整理
+  - `web/.env.example` に `NEXT_PUBLIC_API_MODE=live` と失敗注入パラメータ例を追記
+  - `web/package.json` に `test:e2e:headed` を追加
+  - `web/README.md` を再構成し、「ローカル検証」「live検証」「失敗注入検証」「CI手順」を分離して追記
+  - `.github/workflows/web-ci.yml` を追加し、`lint/build/test/test:e2e` を実行する最小GitHub Actions雛形を作成
+- live モード失敗網羅/CI基盤強化 ブロック4: 最終確認
+  - `web/` で `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e` を再実行し全て成功
+  - 次の改善候補:
+    - E2Eで chat timeout / chat 5xx / summary validation も段階的に追加
+    - CI高速化のため Playwright trace/video 保存ポリシーを job 条件で切替
+    - `vite-tsconfig-paths` 警告対応（設定内蔵機能へ移行）
+- 継続改善 P1: APIと失敗注入の強化
+  - `web/src/app/api/revisions/route.ts` で `forceError=timeout|5xx|validation` を明示切り分け（query/header 両対応）
+  - `web/src/lib/services/revision-service.ts` で `delayMs` と `forceError`（統一型）を受け取り、`retryable` をステータス連動で返却
+  - `web/src/lib/services/service-factory.ts` で `revisions/summaries/chat` の失敗注入・delay注入を一箇所へ整理
+  - `NEXT_PUBLIC_FORCE_ERROR` による共通注入（必要時のみ）を追加し、query/header/env の3経路を扱えるようにした
+  - `ErrorNotice` の compact 表示を追加し、一覧/要約/チャットの再試行導線UIを統一
+- 継続改善 P2: E2Eと検証基盤の強化
+  - `web/e2e/live-mode.spec.ts` をタグ付き（`@smoke` / `@failure` / `@recovery`）へ整理
+  - 一覧の `timeout` / `validation`、要約の `validation`、チャットの `5xx` / `timeout` 失敗系を追加
+  - 回復系（要約5xx→成功、チャット5xx→成功）を追加して再現性の高い導線を拡張
+  - `web/playwright.config.ts` で `trace/video/screenshot` を `retain-on-failure` にしてCI保存しやすく調整
+  - `web/package.json` に `test:e2e:smoke` / `test:e2e:failure` / `test:e2e:recovery` / `test:e2e:ci` / `check:ci` を追加
+- 継続改善 P3: CIと運用整理
+  - `.github/workflows/web-ci.yml` を `smoke`（PR向け軽量）と `full`（main向け網羅）に分離
+  - Playwrightレポートを workflow artifact として保存する手順を追加
+  - `web/.env.example` に `NEXT_PUBLIC_FORCE_ERROR` と `NEXT_PUBLIC_FORCE_ERROR_TRANSPORT` の例を追加
+- 法改正データ実データ化準備 ブロック1: データモデル整理
+  - `web/src/lib/types/domain.ts` の revisions 型を実データ前提に再整理
+    - `id`, `title`, `publishedAt`, `revisionNumber`, `category`, `kind`, `issuer`, `summary`, `source.url`, `source.label`
+  - 将来の実データ取り込みを意識し、UI/Serviceで同一型を扱える形に統一
+- 法改正データ実データ化準備 ブロック2: 取り込み口の作成
+  - `web/src/lib/revisions-ingest/` を新設
+    - `types.ts`: import 用入力型
+    - `normalize.ts`: import レコードを `LawRevision` へ正規化
+    - `load-sample.ts`: サンプルJSONを読み込み変換する入口
+    - `sample-revisions.json`: 実データ形式に近いサンプル5件
+    - `index.ts`: ingest モジュール公開窓口
+  - `web/src/data/mock/law-revisions.ts` を ingest 経由の読み込みへ変更
+- 法改正データ実データ化準備 ブロック3: サンプル実データ化とUI導線
+  - sample revisions に `source.url`/`source.label`/`issuer`/`kind`/`category` を付与
+  - `web/src/components/law-revision-list.tsx` に以下を追加
+    - `kind` と `revisionNumber` の表示
+    - source 情報（URLがあればリンク）表示
+    - source 未設定時でも壊れないフォールバック表示
+  - `web/src/app/api/revisions/route.ts` と `revision-service.ts` で拡張項目を維持
+- 法改正データ実データ化準備 ブロック4: 検証と整理
+  - `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e` を実行し成功
+  - `web/README.md` に revisions データ構造、ingest 入口、今後の本物データ置換ポイントを追記
+- revisions-ingest 実データ取得強化 ブロック1: 実データローダー入口作成
+  - `web/src/lib/revisions-ingest/load-real.ts` を追加
+    - `loadRealRevisionsFromPayload(payload)`: 同期的に payload を正規化
+    - `loadRealRevisions({ endpoint, fetchImpl, timeoutMs })`: 非同期 fetch で実データ取得
+  - `web/src/lib/revisions-ingest/parse.ts` を追加し、外部入力（配列 / `records` / `default`）を統一パース
+  - `web/src/lib/revisions-ingest/load-sample.ts` を `parse.ts` 利用へ整理
+  - `web/src/lib/revisions-ingest/index.ts` に real loader export を追加
+  - `web/src/data/mock/law-revisions.ts` を `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE` で sample/real を切替できる構造へ更新
+- revisions-ingest 実データ取得強化 ブロック2: 正規化/検証強化
+  - `web/src/lib/revisions-ingest/normalize.ts` を更新
+    - `source.url` は `http/https` のみ採用し、不正値は空文字へフォールバック
+    - `issuer` は `record.issuer` → `source.issuer` → `"発出元未設定"` で補完
+    - `kind` は不明値を `other` へ正規化
+    - `revisionNumber` は未設定時に `<publishedAt> <kind> 未設定` を補完
+    - `summary` は未設定時 `"概要未設定"` を補完
+    - 欠損データ混在でも `id` / `title` があるレコードを優先して正規化
+  - `web/src/lib/revisions-ingest/types.ts` で `publishedAt` を optional に拡張し欠損入力を許容
+- revisions-ingest 実データ取得強化 ブロック3: UIとテスト補強
+  - `web/src/app/api/revisions/route.ts` を更新し、`ingestSource` / `realSourcePayload` query で ingest 入力源切替を追加
+  - `web/src/lib/services/service-factory.ts` で `ingestSource` / `realSourcePayload` を revisions API へ透過
+  - 追加テスト:
+    - `web/src/lib/revisions-ingest/normalize.test.ts`
+    - `web/src/lib/revisions-ingest/load-real.test.ts`
+    - `web/src/lib/services/live-services.test.ts` に ingest query 透過テストを追加
+  - E2E拡張:
+    - `web/e2e/live-mode.spec.ts` に `@smoke` ケース「source未設定混在でも一覧表示が壊れない」を追加
+- revisions-ingest 実データ取得強化 ブロック4: 検証と整理
+  - `npm run test` / `npm run lint` / `npm run build` / `npm run test:e2e:smoke` を実行し成功
+  - `web/README.md` に `load-sample` / `load-real` の役割、正規化ルール、実データ置換ポイントを追記
+  - `web/.env.example` に `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE` と real payload 注入例を追記
+- revisions real ingest 実利用化 ブロック1: route で real ingest を有効化
+  - `web/src/app/api/revisions/route.ts` を更新し、`ingestSource=real` で `loadRealRevisionsWithMeta()` を実際に利用
+  - real ingest の入力優先順位を整理:
+    1) `realSourcePayload`（query）
+    2) `realSourceUrl`（query）
+    3) `REVISIONS_REAL_SOURCE_URL`（env）
+  - `ingestSource` は query 優先、未指定時は `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE` を利用
+  - real ingest 成功/失敗状態をレスポンスヘッダで可視化
+    - `x-revisions-ingest-source`
+    - `x-revisions-ingest-status`
+    - `x-revisions-ingest-record-count`
+    - `x-revisions-ingest-source-format`
+    - `x-revisions-ingest-fallback-reason`
+  - real ソース未設定/取得失敗/不正payload時は `lawRevisionCores` へフォールバックし、UIが壊れないことを優先
+- revisions real ingest 実利用化 ブロック2: 取得元差分吸収の基盤整理
+  - `web/src/lib/revisions-ingest/parse.ts` を mapper 指向へ整理
+    - `defaultRevisionImportMapper`
+    - `officialDbRevisionImportMapper`（将来の公式法令DB形式の最小サンプル）
+    - `resolveRevisionImportMapper` / `revisionImportMappers`
+  - `web/src/lib/revisions-ingest/types.ts` に `RevisionImportMapper` 型を追加
+  - `web/src/lib/revisions-ingest/load-real.ts` へ `sourceFormat` 対応を追加し、`parse → normalize` の責務分離を明確化
+  - `web/src/lib/services/service-factory.ts` で `realSourceFormat` / `realSourceUrl` を revisions API へ透過
+- revisions real ingest 実利用化 ブロック3: 検証強化
+  - 追加/更新テスト
+    - `web/src/lib/revisions-ingest/load-real.test.ts`
+      - `sourceFormat=official-db` の取り込み検証
+      - 不正payload時の安全動作検証
+    - `web/src/lib/revisions-ingest/parse.test.ts`（新規）
+      - official-db mapper の変換検証
+      - 未知format時の default fallback 検証
+    - `web/src/lib/services/live-services.test.ts`
+      - `realSourceFormat` / `realSourceUrl` 透過検証を追加
+    - `web/e2e/live-mode.spec.ts`
+      - `real ingest official-db payload` の smoke ケースを追加
+  - 確認内容:
+    - mock/live/real ingest 条件でも一覧表示が壊れないことを確認
+    - route/service/UI の責務分離を維持
+- revisions real ingest 実利用化 ブロック4: 最終確認
+  - `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e:smoke` を実行し成功
+  - `web/README.md` に real ingest 実行条件、ingest パイプライン、次の接続候補を追記
+- real revisions ingest 運用安全性/観測性 強化 ブロック1: realSourceUrl 安全性
+  - `web/src/lib/revisions-ingest/load-real.ts` に endpoint 検証を追加
+    - `https` のみ許可
+    - `REVISIONS_REAL_SOURCE_ALLOW_HOSTS`（または query `realSourceAllowHosts`）のホワイトリストで許可判定
+    - 非許可/不正/未設定時は `endpoint_not_allowed` / `endpoint_invalid` / `endpoint_missing` で fallback
+  - `web/src/app/api/revisions/route.ts` で allow hosts を解決して loader へ渡す
+  - `web/.env.example` に real ingest 用 env 例（URL/allow hosts/format）を追記
+- real revisions ingest 運用安全性/観測性 強化 ブロック2: official-db mapper 強化
+  - `web/src/lib/revisions-ingest/types.ts` に `RevisionImportMeta` を追加
+  - `web/src/lib/revisions-ingest/parse.ts` official-db mapper を拡張
+    - 施行日 (`effectiveDate` / `enforcedAt`)
+    - 改正種別 (`amendmentType` / `revisionType`)
+    - 法令番号 (`lawNumber` / `actNumber`)
+    - 発出元 (`issuedBy` / `issuer`)
+  - `web/src/lib/revisions-ingest/normalize.ts` で meta を使った補完ロジックを追加
+    - publishedAt / kind / revisionNumber / issuer を運用実態に近く補完
+- real revisions ingest 運用安全性/観測性 強化 ブロック3: fallback reason 可視化
+  - `loadRealRevisionsWithMeta` の meta に `endpointHost` を追加
+  - `/api/revisions` ヘッダに `x-revisions-ingest-endpoint-host` を追加
+  - 既存 `x-revisions-ingest-fallback-reason` と組み合わせ、失敗原因追跡を強化
+  - テスト追加/更新:
+    - `web/src/lib/revisions-ingest/load-real.test.ts`（endpoint検証・allow host・fallback理由）
+    - `web/src/lib/revisions-ingest/parse.test.ts`（official-db meta取り込み）
+    - `web/src/lib/revisions-ingest/normalize.test.ts`（meta補完）
+    - `web/e2e/live-mode.spec.ts`（real ingest failure header 検証）
+- real revisions ingest 運用安全性/観測性 強化 ブロック4: 最終確認
+  - `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e:failure` を実行し成功
+  - `web/README.md` にホワイトリスト運用方針、official-db mapper 強化点、fallback reason の見方を追記
+- 今日の現場リスク（天気・警報）最小機能 ブロック1: データ構造とservice追加
+  - `web/src/lib/types/domain.ts` に気象リスク型を追加
+    - 地域名 / 日付 / 天気概要 / 気温 / 風 / 雨 / 警報注意報 / リスクレベル / 推奨アクション
+  - `web/src/data/mock/weather-risk.ts` を新規追加（3地域の mock スナップショット）
+  - `web/src/lib/services/weather-risk-service.ts` を新規追加
+    - 気象条件（暑さ・強風・雨・警報）からリスクスコアを算出し、`低/中/高` と推奨アクションを返却
+  - `web/src/lib/services/service-factory.ts` に `weatherRisk` service を統合
+- 今日の現場リスク（天気・警報）最小機能 ブロック2: UI追加
+  - `web/src/components/weather-risk-card.tsx` を新規追加
+  - `web/src/components/home-screen.tsx` のヘッダー直下に「今日の現場リスク」セクションを追加
+  - スマホ優先のカードUIで以下を表示
+    - 地域
+    - 今日のリスクレベル
+    - 主な注意点
+    - 推奨アクション
+  - 高リスク時は赤系配色で視覚強調
+- 今日の現場リスク（天気・警報）最小機能 ブロック3: 簡易ルール実装
+  - `weather-risk-service.ts` でルール化
+    - 気温が高いほどリスク加点
+    - 風速が強いほどリスク加点
+    - 降雨量が多いほどリスク加点
+    - 警報/注意報の発表で加点
+  - 算出結果を `ServiceResult` として返却し、将来 live API へ差し替えやすい責務分離を維持
+  - `web/e2e/live-mode.spec.ts` に「今日の現場リスクカード表示」smoke ケースを追加
+- 今日の現場リスク（天気・警報）最小機能 ブロック4: 最終確認
+  - `npm run lint` / `npm run build` / `npm run test` / `npm run test:e2e:smoke` を実行し成功
+  - `web/README.md` に現在構成と live API 置換ポイントを追記
+- リスク根拠の説明性 強化（今回）
+  - 実行計画:
+    1. `SiteRiskWeather` に判定根拠を表す `riskEvidences` を追加
+    2. `weather-risk-service.ts` の判定ロジックで、気温/風速/雨量/警報に応じた短文根拠を生成
+    3. `weather-risk-card.tsx` に「判定根拠」を追加し、スマホで読める分量として 2〜3件表示
+  - 実装:
+    - `web/src/lib/types/domain.ts` に `riskEvidences: string[]` を追加
+    - `web/src/lib/services/weather-risk-service.ts` で根拠短文を返却（例: 気温31℃、風速11m/s、注意報発表）
+    - `web/src/components/weather-risk-card.tsx` に「判定根拠」セクションを追加し、`slice(0, 3)` で表示量を制御
+  - 確認:
+    - `npm run lint` / `npm run test` / `npm run build` を実行し成功
+    - Playwright で `http://127.0.0.1:3003` を表示し、「判定根拠」文言がカード内に表示されることを確認
+    - アーティファクトを保存:
+      - `/opt/cursor/artifacts/weather_risk_evidence_desktop.png`
+      - `/opt/cursor/artifacts/weather_risk_evidence_mobile.png`
+- 公開可否確認（今回）
+  - Vercel関連を確認:
+    - `vercel` CLI 未導入（`vercel: command not found`）
+    - `VERCEL_TOKEN` 未設定
+    - GitHub Deployments も空（既存自動デプロイなし）
+  - そのため公開URL発行はこの環境のみでは未実施
+  - 停止せず次善策として「live天気API最小接続」へ移行
+- live天気API 最小接続（今回）
+  - `web/src/app/api/weather-risk/route.ts` を追加
+    - Open-Meteo API から `東京/大阪/名古屋` の日次データを取得（最小版）
+    - 気温・風速・降水量・天気概要・警報相当情報を返却
+    - 失敗時はエラーレスポンスを返し、UI側で既存エラー表示を利用
+  - `web/src/lib/services/weather-risk-service.ts`
+    - `createApiWeatherRiskService()` を追加し、`/api/weather-risk` 経由の live 取得に対応
+    - 取得データを既存ルール（riskLevel / evidences / cautions / actions）へ変換
+  - `web/src/lib/services/service-factory.ts`
+    - `NEXT_PUBLIC_API_MODE=live` のとき weather service を API 実装へ切替
+    - `mock` の場合は既存挙動を維持
+  - `web/src/lib/types/api.ts`
+    - 天気API route の response 型 `WeatherRiskApiResponse` を追加
+  - `web/.env.example` / `web/README.md`
+    - `NEXT_PUBLIC_WEATHER_API_MODE=mock|live`（任意）
+    - `NEXT_PUBLIC_WEATHER_API_TIMEOUT_MS`
+    - `/api/weather-risk?regionName=...` の使い方を追記
+- 地域選択UI（最小）追加（今回）
+  - 実行計画:
+    1. weather mock を 5地域（東京/大阪/名古屋/福岡/札幌）に拡張
+    2. weather service で選択候補地域を返す `getAvailableRegions()` を追加
+    3. `home-screen.tsx` に最小 state（`selectedRegionName`）を追加し、地域変更時に再取得
+    4. `weather-risk-card.tsx` に地域セレクトを追加（スマホでも押しやすいUI）
+  - 実装:
+    - `web/src/data/mock/weather-risk.ts` を 5地域データへ拡張
+    - `web/src/lib/services/weather-risk-service.ts` に `WeatherRegionOption` と `getAvailableRegions()` を追加
+    - `web/src/components/home-screen.tsx` で地域選択stateを管理し、`getTodaySiteRisk({ regionName })` を実行
+    - `web/src/components/weather-risk-card.tsx` に地域選択セレクトを追加し、カード内表示の切替を一体化
+  - 確認:
+    - `npm run lint` / `npm run test` / `npm run build` を実行し成功
+    - UIで地域切替（東京→福岡→札幌）時に、リスクレベル/判定根拠/主な注意点/推奨アクションが切り替わることを確認
+    - アーティファクトを保存:
+      - `/opt/cursor/artifacts/weather_region_selector_desktop.png`
+      - `/opt/cursor/artifacts/weather_region_selector_mobile.png`
+      - `/opt/cursor/artifacts/weather_region_selector_manual_demo.mp4`
+- 地域選択の最小UI 追加（今回）
+  - 実行計画:
+    1. 天気モックを 5 地域（東京/大阪/名古屋/福岡/札幌）へ拡張
+    2. `weather-risk-service.ts` に地域一覧を返す最小関数を追加し、既存の地域別取得を維持
+    3. `home-screen.tsx` で選択地域 state を持ち、地域変更時にリスクカード再取得
+    4. `weather-risk-card.tsx` にスマホでも使いやすい地域選択UIを追加
+- 公開URL導線の開通準備（今回）
+  - 公開可否確認:
+    - `npx vercel --version` は npm キャッシュ不整合で失敗
+    - `npm i -D vercel` 後に `./node_modules/.bin/vercel --version` は成功
+    - `./node_modules/.bin/vercel whoami` / `vercel link` はデバイス認証待ちで停止（未認証）
+    - `VERCEL_TOKEN` 未設定、既存 Deployments なし
+  - 進めた設定（トークン投入後すぐ公開できる状態へ前進）:
+    - `web/package.json` に `deploy:preview` / `deploy:prod` / `vercel:link` を追加
+    - リポジトリルートに `vercel.json` を追加（`web/` を project root として固定）
+    - `web/.env.example` に `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` 例を追記
+    - `web/README.md` に公開手順（認証方式2パターン）と URL取得手順を追記
+- ホーム価値訴求 + 事故データベース最小版（今回）
+  - 実行計画:
+    1. ホーム1画面目で価値が伝わるヒーロー文言とCTAを追加
+    2. 事故データを mock + service で分離し、一覧UIを追加
+    3. 事故種別フィルタで朝礼向けに必要情報へ絞り込める最小体験を作る
+  - 実装:
+    - `web/src/components/home-value-hero.tsx` を追加
+    - `web/src/data/mock/accident-cases.ts` を追加（事故5件）
+    - `web/src/lib/services/accident-service.ts` を追加（mock service）
+    - `web/src/components/accident-database-panel.tsx` を追加（一覧 + 種別フィルタ）
+    - `web/src/components/home-screen.tsx` に価値ヒーロー/事故DBを統合
+    - `web/src/lib/services/service-factory.ts` に `accident` service を統合
+    - `web/src/lib/types/domain.ts` に `AccidentType` / `AccidentCase` を追加
+  - 確認:
+    - `npm run lint` / `npm run test` / `npm run build` を実行し成功
+    - UI確認ログ: 事故種別フィルタ操作で `ACCIDENT_COUNT=5->1->1` を確認
+    - アーティファクトを保存:
+      - `/opt/cursor/artifacts/home_value_and_accident_db_desktop.png`
+      - `/opt/cursor/artifacts/home_value_and_accident_db_mobile.png`
+- ホーム価値訴求 + 事故データベース最小版（今回）
+  - 実行計画:
+    1. ホームのファーストビューに価値訴求セクションを追加し、今日使う理由を3点で明示
+    2. 事故データを mock + service 分離で追加し、一覧表示と事故種別フィルタを実装
+    3. `home-screen.tsx` へ事故DBセクションを統合し、既存の法改正/天気/要約/チャット導線を壊さず接続
+    4. スマホ優先の可読性を確認し、`progress.md` へ結果を追記
