@@ -20,6 +20,42 @@ npm install
 npm run dev
 ```
 
+## 公開（Vercel）最小手順
+
+このリポジトリは `web/` がアプリ本体です。Vercel公開時は **Root Directory を `web`** に設定してください。
+
+### 1) 事前準備
+
+- Vercelログイン（CLIまたはGitHub連携）
+- 必要なら Vercel Project の Root Directory を `web` に設定
+
+### 2) CLIでPreview URLを出す（最短）
+
+```bash
+cd web
+npm run vercel:login
+npm run vercel:link
+npm run vercel:preview
+```
+
+成功すると Preview URL（`https://*.vercel.app`）が表示されます。
+
+### 3) Production公開
+
+```bash
+cd web
+npm run vercel:prod
+```
+
+### 4) トークン利用（非対話）
+
+CIや非対話環境では `VERCEL_TOKEN` を設定して実行します。
+
+```bash
+cd web
+VERCEL_TOKEN=*** npm run vercel:preview
+```
+
 ## 環境変数（live/mock切替）
 
 - `NEXT_PUBLIC_API_MODE=mock`

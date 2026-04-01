@@ -14,7 +14,11 @@
     "test:e2e:recovery": "playwright test --grep @recovery",
     "test:e2e:ci": "CI=1 playwright test",
     "test:live": "NEXT_PUBLIC_API_MODE=live playwright test",
-    "check:ci": "npm run lint && npm run build && npm run test && npm run test:e2e:ci"
+    "check:ci": "npm run lint && npm run build && npm run test && npm run test:e2e:ci",
+    "vercel:whoami": "vercel whoami",
+    "vercel:link": "vercel link --yes --cwd .",
+    "vercel:preview": "vercel deploy --yes --cwd .",
+    "vercel:prod": "vercel deploy --prod --yes --cwd ."
   },
   "dependencies": {
     "next": "16.2.1",
@@ -35,6 +39,7 @@
     "jsdom": "^29.0.1",
     "tailwindcss": "^4",
     "typescript": "^5",
+    "vercel": "^50.37.3",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.2"
   }

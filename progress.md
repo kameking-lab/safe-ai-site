@@ -441,3 +441,14 @@
     2. `weather-risk-service.ts` に地域一覧を返す最小関数を追加し、既存の地域別取得を維持
     3. `home-screen.tsx` で選択地域 state を持ち、地域変更時にリスクカード再取得
     4. `weather-risk-card.tsx` にスマホでも使いやすい地域選択UIを追加
+- 公開URL導線の開通準備（今回）
+  - 公開可否確認:
+    - `npx vercel --version` は npm キャッシュ不整合で失敗
+    - `npm i -D vercel` 後に `./node_modules/.bin/vercel --version` は成功
+    - `./node_modules/.bin/vercel whoami` / `vercel link` はデバイス認証待ちで停止（未認証）
+    - `VERCEL_TOKEN` 未設定、既存 Deployments なし
+  - 進めた設定（トークン投入後すぐ公開できる状態へ前進）:
+    - `web/package.json` に `deploy:preview` / `deploy:prod` / `vercel:link` を追加
+    - リポジトリルートに `vercel.json` を追加（`web/` を project root として固定）
+    - `web/.env.example` に `VERCEL_TOKEN` / `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` 例を追記
+    - `web/README.md` に公開手順（認証方式2パターン）と URL取得手順を追記
