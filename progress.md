@@ -454,6 +454,25 @@
     - `web/README.md` に公開手順（認証方式2パターン）と URL取得手順を追記
 - ホーム価値訴求 + 事故データベース最小版（今回）
   - 実行計画:
+    1. ホーム1画面目で価値が伝わるヒーロー文言とCTAを追加
+    2. 事故データを mock + service で分離し、一覧UIを追加
+    3. 事故種別フィルタで朝礼向けに必要情報へ絞り込める最小体験を作る
+  - 実装:
+    - `web/src/components/home-value-hero.tsx` を追加
+    - `web/src/data/mock/accident-cases.ts` を追加（事故5件）
+    - `web/src/lib/services/accident-service.ts` を追加（mock service）
+    - `web/src/components/accident-database-panel.tsx` を追加（一覧 + 種別フィルタ）
+    - `web/src/components/home-screen.tsx` に価値ヒーロー/事故DBを統合
+    - `web/src/lib/services/service-factory.ts` に `accident` service を統合
+    - `web/src/lib/types/domain.ts` に `AccidentType` / `AccidentCase` を追加
+  - 確認:
+    - `npm run lint` / `npm run test` / `npm run build` を実行し成功
+    - UI確認ログ: 事故種別フィルタ操作で `ACCIDENT_COUNT=5->1->1` を確認
+    - アーティファクトを保存:
+      - `/opt/cursor/artifacts/home_value_and_accident_db_desktop.png`
+      - `/opt/cursor/artifacts/home_value_and_accident_db_mobile.png`
+- ホーム価値訴求 + 事故データベース最小版（今回）
+  - 実行計画:
     1. ホームのファーストビューに価値訴求セクションを追加し、今日使う理由を3点で明示
     2. 事故データを mock + service 分離で追加し、一覧表示と事故種別フィルタを実装
     3. `home-screen.tsx` へ事故DBセクションを統合し、既存の法改正/天気/要約/チャット導線を壊さず接続

@@ -192,7 +192,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
     async function loadAccidentCases() {
       setAccidentStatus("loading");
       const result = await services.accident.getAccidentCases({
-        type: selectedAccidentType === "すべて" ? "all" : selectedAccidentType,
+        type: selectedAccidentType,
       });
       if (!active) return;
       if (!result.ok) {
@@ -289,10 +289,11 @@ export function HomeScreen({ children }: HomeScreenProps) {
       <div className="px-4 pt-4">
         <AccidentDatabasePanel
           cases={accidentCases}
+          allCases={services.accident.getAllAccidentCases()}
           selectedType={selectedAccidentType}
           onSelectType={setSelectedAccidentType}
           status={accidentStatus}
-          error={accidentError}
+          errorMessage={accidentError?.message ?? null}
         />
       </div>
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />

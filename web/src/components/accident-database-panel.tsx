@@ -3,12 +3,11 @@
 import type { AccidentCase, AccidentType } from "@/lib/types/domain";
 
 const ACCIDENT_TYPE_ORDER: AccidentType[] = [
-  "墜落・転落",
+  "墜落",
   "転倒",
-  "挟まれ・巻き込まれ",
-  "飛来・落下",
+  "挟まれ",
+  "飛来落下",
   "感電",
-  "その他",
 ];
 
 type AccidentDatabasePanelProps = {
@@ -95,7 +94,7 @@ export function AccidentDatabasePanel({
                 <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-800">
                   {accident.type}
                 </span>
-                <span className="text-xs text-slate-500">{accident.occurredAt}</span>
+                <span className="text-xs text-slate-500">{accident.occurredOn}</span>
               </div>
 
               <h3 className="mt-2 text-sm font-semibold text-slate-900">{accident.title}</h3>
@@ -104,11 +103,11 @@ export function AccidentDatabasePanel({
               <dl className="mt-2 space-y-1 text-xs text-slate-700">
                 <div>
                   <dt className="inline font-semibold text-slate-900">主な原因:</dt>
-                  <dd className="inline"> {accident.primaryCause}</dd>
+                  <dd className="inline"> {accident.mainCauses.join(" / ")}</dd>
                 </div>
                 <div>
                   <dt className="inline font-semibold text-slate-900">再発防止の要点:</dt>
-                  <dd className="inline"> {accident.preventionKeypoint}</dd>
+                  <dd className="inline"> {accident.preventionPoints.join(" / ")}</dd>
                 </div>
               </dl>
 

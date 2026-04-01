@@ -4,6 +4,7 @@ import type { AccidentCase, AccidentType } from "@/lib/types/domain";
 
 export type AccidentService = {
   getAccidentTypes: () => { value: AccidentType | "すべて"; label: string }[];
+  getAllAccidentCases: () => AccidentCase[];
   getAccidentCases: (input?: {
     type?: AccidentType | "すべて";
   }) => Promise<ServiceResult<AccidentCase[]>>;
@@ -21,6 +22,9 @@ const accidentTypeOptions: { value: AccidentType | "すべて"; label: string }[
 export const mockAccidentService: AccidentService = {
   getAccidentTypes() {
     return accidentTypeOptions;
+  },
+  getAllAccidentCases() {
+    return accidentCasesMock;
   },
   async getAccidentCases(input) {
     const filterType = input?.type ?? "すべて";
