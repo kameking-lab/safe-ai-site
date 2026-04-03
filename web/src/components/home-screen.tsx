@@ -46,6 +46,9 @@ export function HomeScreen({ children }: HomeScreenProps) {
   const [selectedRegionName, setSelectedRegionName] = useState(
     () => services.weatherRisk.getAvailableRegions()[0]?.regionName ?? ""
   );
+  const [selectedWorkType, setSelectedWorkType] = useState<"高所作業" | "電気作業" | "足場作業" | "一般作業">(
+    "一般作業"
+  );
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(services.chat.createInitialMessages());
   const [chatInput, setChatInput] = useState("");
   const chatListRef = useRef<HTMLDivElement | null>(null);
@@ -263,9 +266,11 @@ export function HomeScreen({ children }: HomeScreenProps) {
   };
 
   return (
-    <main className="flex flex-1 flex-col">
-      {children}
-      <div className="px-4 pt-4">
+    <>
+      <section id="section-home" className="px-4 pt-4">
+        {children}
+      </section>
+      <section id="section-home-hero" className="px-4 pt-4">
         <HomeValueHero
           onJumpToRisk={() => {
             document
@@ -275,8 +280,8 @@ export function HomeScreen({ children }: HomeScreenProps) {
           onJumpToLaws={() => setActiveTab("laws")}
           onJumpToChat={() => setActiveTab("chat")}
         />
-      </div>
-      <div className="px-4 pt-4">
+      </section>
+      <section id="section-weather-risk" className="px-4 pt-4">
         <WeatherRiskCard
           data={weatherRisk}
           status={weatherRiskStatus}
@@ -284,9 +289,11 @@ export function HomeScreen({ children }: HomeScreenProps) {
           availableRegions={services.weatherRisk.getAvailableRegions()}
           selectedRegionName={selectedRegionName}
           onRegionChange={setSelectedRegionName}
+          workType={selectedWorkType}
+          onWorkTypeChange={setSelectedWorkType}
         />
-      </div>
-      <div className="px-4 pt-4">
+      </section>
+      <section id="section-accidents" className="px-4 pt-4">
         <AccidentDatabasePanel
           cases={accidentCases}
           allCases={services.accident.getAllAccidentCases()}
@@ -295,10 +302,13 @@ export function HomeScreen({ children }: HomeScreenProps) {
           status={accidentStatus}
           errorMessage={accidentError?.message ?? null}
         />
-      </div>
+      </section>
       <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-5 lg:items-start">
+      <section
+        id="section-laws"
+        className="grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-5 lg:items-start"
+      >
         {activeTab === "laws" && (
           <LawRevisionList
             revisions={revisions}
@@ -355,7 +365,33 @@ export function HomeScreen({ children }: HomeScreenProps) {
             onSelectForQuestion={handleSelectForQuestion}
           />
         )}
-      </div>
-    </main>
+      </section>
+
+      {/* 将来拡張プレースホルダ */}
+      <section id="section-elearning" className="px-4 pb-3">
+        <div className="mt-1 rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-4">
+          <h2 className="text-sm font-semibold text-slate-900">Eラーニング（準備中）</h2>
+          <p className="mt-1 text-xs text-slate-600">
+            将来、事故事例や法改正をクイズ形式で学べるコンテンツをここから開けるようにします。
+          </p>
+        </div>
+      </section>
+      <section id="section-ky-sheet" className="px-4 pb-3">
+        <div className="mt-1 rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-4">
+          <h2 className="text-sm font-semibold text-slate-900">KY用紙（準備中）</h2>
+          <p className="mt-1 text-xs text-slate-600">
+            AIが提案するKY用紙フォーマットを作成し、印刷やPDF出力につながる入口をここに配置する予定です。
+          </p>
+        </div>
+      </section>
+      <section id="section-notification-settings" className="px-4 pb-5">
+        <div className="mt-1 rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-4">
+          <h2 className="text-sm font-semibold text-slate-900">通知設定（準備中）</h2>
+          <p className="mt-1 text-xs text-slate-600">
+            気象警報や法改正をピン保存し、高リスク時にメール通知するための設定画面をここに追加します。
+          </p>
+        </div>
+      </section>
+    </>
   );
 }

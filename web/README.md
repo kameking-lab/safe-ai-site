@@ -173,6 +173,7 @@ npm run start
   - `mock` と `live` の両方を保持し、`NEXT_PUBLIC_API_MODE=live` では `/api/weather-risk` から取得
 - `src/components/weather-risk-card.tsx`
   - 「今日の現場リスク」表示UI（リスク高の視覚強調）
+  - 地域選択 + 作業種別選択（高所作業/電気作業/足場作業/一般作業）を持ち、朝礼用ブリーフィングを自動生成
 
 ## revisions データ構造（現在）
 
@@ -231,7 +232,8 @@ npm run start
 - `src/data/mock/weather-risk.ts`
   - 地域名/日付/天気概要/気温/風/雨/警報・注意報のモックデータ
 - `src/lib/services/weather-risk-service.ts`
-  - 簡易ルールで `riskLevel`（低/中/高）、`primaryCautions`、`recommendedActions` を算出
+  - 簡易ルールで `riskLevel`（低/中/高）、`primaryCautions`、`riskEvidences`、`recommendedActions` を算出
+  - 推奨アクションは朝礼/KYで読み上げやすい短文に調整
   - ルール例:
     - 暑さ（気温）で加点
     - 強風で加点
@@ -239,8 +241,10 @@ npm run start
     - 警報/注意報で加点（警報は重め）
 - `src/components/weather-risk-card.tsx`
   - ホーム上部に「今日の現場リスク」カードを表示
-  - 地域、リスクレベル、主な注意点、推奨アクションを表示
-  - リスク高は赤系で強調
+  - 地域、リスクレベル、主な注意点、判定根拠、推奨アクションを表示
+  - 「主な注意点（何に気をつけるか）」と「推奨アクション（今すぐやること）」を分けて表示
+  - 「朝礼で伝える要点（30秒）」を補助表示
+  - リスク高は赤系の強調メッセージで視認性を向上
 - `src/components/home-screen.tsx`
   - `services.weatherRisk.getTodaySiteRisk()` でデータ取得し、カードを表示
 
