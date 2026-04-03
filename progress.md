@@ -528,3 +528,41 @@
       - 「朝礼で伝える要点（30秒）」の文言が作業種別に応じて切り替わること
       - 既存の法改正UI・事故DB・チャットUI・サイドバーに崩れがないこと
       を目視で確認
+
+### 2026-04-03
+- ルール文書の現行化（フェーズ更新）
+  - `AGENTS.md` を初期MVP限定から現フェーズ運用へ更新
+    - サイネージ、現場リスク、地域選択、作業種別、事故DB、第2弾たたき台を明記
+    - 危険な禁止事項（秘密情報埋め込み、外部本接続、認証/課金等）へ絞って再定義
+    - ページ追加・音声入力は「たたき台なら可」に調整
+  - `PRD.md` を「現場運用ポータル」像に更新
+    - 朝礼広場、社内サイネージ、常時表示モニター用途を明記
+    - 第1弾完了範囲と第2弾たたき台範囲を分離
+  - `TASKS.md` を現フェーズ順へ再編
+    - サイネージ完了整理、ホーム再構成、通知/配信、Eラーニング、KY、PDF、マイク、事故DB拡張、service/types/route整理を追加
+- 第2弾たたき台（広め）の実装
+  - ホーム再構成:
+    - `HomeScreen` にポータル導線を追加し、サイネージ/リスク/事故DB/法改正/KY/Eラーニング/通知/PDFへジャンプ可能化
+  - 通知/配信:
+    - `NotificationSettingsPanel` と `MailDeliveryPanel` を追加
+    - ローカル保存（localStorage）と配信プレビュー生成を `operations-service` として分離
+  - Eラーニング:
+    - `ELearningPanel` を追加（テーマ一覧、テーマ詳細、3問クイズ、学習チェック）
+  - KY用紙:
+    - `KySheetPanel` を追加（日付/現場名/作業内容/危険/対策/指差呼称/メモ）
+    - 音声入力UI（録音開始/停止、文字起こしエリア、手入力フォールバック）を追加
+  - PDF出力:
+    - `PdfExportPanel` を追加（対象選択、プレビュー、印刷/PDF保存導線）
+  - 事故DB拡張:
+    - 事故データへ `workCategory`（高所/電気/足場/重機/一般）と `severity` を追加
+    - カテゴリタブ + 種別フィルタ + 学習/KY導線を追加
+  - service/types/route整理:
+    - `lib/types/operations.ts` を追加し設定系型を集約
+    - `lib/services/operations-service.ts` を追加し通知/配信/KY/PDFプレビュー責務を分離
+    - `service-factory.ts` に `operations` service を統合
+    - route たたき台として `api/notifications` と `api/export-preview` を追加
+  - /signage 接続強化:
+    - `signage-header.tsx` に「ポータルへ戻る / KY用紙へ / 通知設定へ」リンクを追加
+  - 確認:
+    - `web/` で `npm run lint` / `npm run test` / `npm run build` を実行し成功
+    - `npm run test:e2e:smoke` は Windows PowerShell 環境で `NEXT_PUBLIC_API_MODE=live ...` の起動構文が非対応のため失敗（既存設定課題）

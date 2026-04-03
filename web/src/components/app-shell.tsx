@@ -10,11 +10,12 @@ type NavItem = {
   id: string;
   label: string;
   target?: string;
-  status: "ready" | "coming-soon";
+  status: "ready" | "beta";
 };
 
 const navItems: NavItem[] = [
   { id: "home", label: "ホーム", status: "ready" },
+  { id: "signage", label: "サイネージ", target: "section-home-hero", status: "ready" },
   { id: "laws", label: "法改正", target: "section-laws", status: "ready" },
   {
     id: "today-risk",
@@ -32,20 +33,21 @@ const navItems: NavItem[] = [
     id: "elearning",
     label: "Eラーニング",
     target: "section-elearning",
-    status: "coming-soon",
+    status: "beta",
   },
   {
     id: "ky-sheet",
     label: "KY用紙",
     target: "section-ky-sheet",
-    status: "coming-soon",
+    status: "beta",
   },
   {
     id: "notification-settings",
-    label: "通知設定",
+    label: "通知/配信",
     target: "section-notification-settings",
-    status: "coming-soon",
+    status: "beta",
   },
+  { id: "pdf", label: "PDF出力", target: "section-pdf-export", status: "beta" },
 ];
 
 function scrollToTarget(target?: string) {
@@ -88,9 +90,9 @@ export function AppShell({ children }: AppShellProps) {
               className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-slate-800 hover:bg-emerald-50"
             >
               <span>{item.label}</span>
-              {item.status === "coming-soon" && (
-                <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
-                  準備中
+              {item.status === "beta" && (
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                  beta
                 </span>
               )}
             </button>
@@ -129,9 +131,9 @@ export function AppShell({ children }: AppShellProps) {
                   className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-slate-800 hover:bg-emerald-50"
                 >
                   <span>{item.label}</span>
-                  {item.status === "coming-soon" && (
-                    <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
-                      準備中
+                  {item.status === "beta" && (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                      beta
                     </span>
                   )}
                 </button>

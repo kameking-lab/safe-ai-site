@@ -6,6 +6,8 @@ export const accidentCasesMock: AccidentCase[] = [
     title: "足場上での墜落災害（外壁改修工事）",
     occurredOn: "2026-02-14",
     type: "墜落",
+    workCategory: "高所",
+    severity: "重傷",
     summary:
       "3層足場での移動中、手すり未設置区間から作業員が約4m墜落し重傷となった。",
     mainCauses: [
@@ -24,6 +26,8 @@ export const accidentCasesMock: AccidentCase[] = [
     title: "搬送導線での転倒災害（倉庫内）",
     occurredOn: "2026-01-28",
     type: "転倒",
+    workCategory: "一般",
+    severity: "中等傷",
     summary:
       "雨天後の床面で台車搬送中に作業員が滑って転倒し、腰部を負傷した。",
     mainCauses: [
@@ -42,6 +46,8 @@ export const accidentCasesMock: AccidentCase[] = [
     title: "機械設備での挟まれ災害（製造ライン）",
     occurredOn: "2025-12-09",
     type: "挟まれ",
+    workCategory: "重機",
+    severity: "重傷",
     summary:
       "設備清掃中にロックアウト未実施でラインが再起動し、作業員の手指が挟まれた。",
     mainCauses: [
@@ -60,6 +66,8 @@ export const accidentCasesMock: AccidentCase[] = [
     title: "資材落下による接触災害（解体現場）",
     occurredOn: "2026-03-03",
     type: "飛来落下",
+    workCategory: "足場",
+    severity: "中等傷",
     summary:
       "強風下で仮置きしていた資材が落下し、下部作業員に接触して負傷した。",
     mainCauses: [
@@ -78,6 +86,8 @@ export const accidentCasesMock: AccidentCase[] = [
     title: "分電盤作業中の感電災害（設備更新工事）",
     occurredOn: "2025-11-19",
     type: "感電",
+    workCategory: "電気",
+    severity: "重傷",
     summary:
       "停電範囲の誤認により活線部へ接触し、作業員が感電して救急搬送された。",
     mainCauses: [
@@ -90,5 +100,60 @@ export const accidentCasesMock: AccidentCase[] = [
       "作業前検電を必須化し記録を残す",
       "電気作業は有資格者と監督者のダブルチェックを行う",
     ],
+  },
+  {
+    id: "ac-006",
+    title: "高所配管点検時の踏み外し（屋上）",
+    occurredOn: "2026-03-11",
+    type: "墜落",
+    workCategory: "高所",
+    severity: "中等傷",
+    summary: "屋上端部のマーキングが薄く、後退時に足を踏み外して転落しかけた。",
+    mainCauses: ["立入境界表示の劣化", "補助監視者の未配置"],
+    preventionPoints: ["境界表示の週次更新", "高所点検時の二人一組運用"],
+  },
+  {
+    id: "ac-007",
+    title: "仮設分電盤の誤復電（内装工事）",
+    occurredOn: "2026-02-26",
+    type: "感電",
+    workCategory: "電気",
+    severity: "中等傷",
+    summary: "停電札の記載不備により別班が誤復電し、点検者が軽度感電した。",
+    mainCauses: ["停電札フォーマット未統一", "復電前確認不足"],
+    preventionPoints: ["停電札の標準化", "復電前の責任者コールバック"],
+  },
+  {
+    id: "ac-008",
+    title: "足場解体時の資材接触（改修工事）",
+    occurredOn: "2026-01-15",
+    type: "飛来落下",
+    workCategory: "足場",
+    severity: "軽傷",
+    summary: "解体資材の受け渡し時に工具が落下し、通行中の作業員に接触した。",
+    mainCauses: ["上下分離の合図不足", "工具落下防止具の未使用"],
+    preventionPoints: ["受け渡し時の合図徹底", "工具落下防止具の常時装着"],
+  },
+  {
+    id: "ac-009",
+    title: "バックホウ旋回時の接触ヒヤリ",
+    occurredOn: "2026-03-19",
+    type: "挟まれ",
+    workCategory: "重機",
+    severity: "軽傷",
+    summary: "誘導者の死角進入でバックホウ旋回部へ接近し、接触直前で停止した。",
+    mainCauses: ["死角エリア教育不足", "誘導ルールの曖昧さ"],
+    preventionPoints: ["旋回半径の明示", "誘導者以外立入禁止の徹底"],
+  },
+  {
+    id: "ac-010",
+    title: "資材搬入路の段差で転倒（一般作業）",
+    occurredOn: "2026-03-25",
+    type: "転倒",
+    workCategory: "一般",
+    severity: "軽傷",
+    summary: "夕方の照度低下時に段差へつまずき、運搬中の作業員が転倒した。",
+    mainCauses: ["段差表示不足", "照明の死角"],
+    preventionPoints: ["段差テープの更新", "仮設照明の増設"],
   },
 ];

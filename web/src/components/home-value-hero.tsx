@@ -14,10 +14,10 @@ export function HomeValueHero({
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-label="ホームの価値案内">
       <h2 className="text-base font-bold text-slate-900 sm:text-lg">
-        今日の安全判断を、1画面で。
+        今日の安全判断を、現場運用ポータルで。
       </h2>
       <p className="mt-2 text-sm leading-6 text-slate-700">
-        現場責任者・安全担当向けに、今日のリスク確認、法改正チェック、AI要約と質問をすぐ使える形でまとめています。
+        現場責任者・安全担当向けに、サイネージ、今日のリスク確認、法改正チェック、AI要約と質問、事故DBを1画面で扱えます。
       </p>
 
       <ul className="mt-3 space-y-2 text-sm text-slate-700">

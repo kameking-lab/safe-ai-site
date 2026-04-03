@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { ApiMode } from "@/lib/types/api";
 
 type SignageHeaderProps = {
@@ -29,6 +30,20 @@ export function SignageHeader({ regionLabel, nowText, mode, lastUpdatedText }: S
         <p className="mt-2 text-base text-slate-200">
           朝礼・常時表示向けに、今日のリスク・事故要点・法改正ポイントを1画面で確認できます。
         </p>
+        <div className="mt-3 flex flex-wrap gap-2 text-xs">
+          <Link className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/">
+            ポータルへ戻る
+          </Link>
+          <Link className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/#section-ky-sheet">
+            KY用紙へ
+          </Link>
+          <Link
+            className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800"
+            href="/#section-notification-settings"
+          >
+            通知設定へ
+          </Link>
+        </div>
       </div>
       <div className="flex flex-wrap items-end gap-3 text-sm">
         <div className="flex flex-col items-end gap-1 text-right">

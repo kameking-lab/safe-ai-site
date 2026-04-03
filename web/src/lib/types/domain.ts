@@ -76,12 +76,15 @@ export type SiteRiskWeather = {
 };
 
 export type AccidentType = "墜落" | "転倒" | "挟まれ" | "飛来落下" | "感電";
+export type AccidentWorkCategory = "高所" | "電気" | "足場" | "重機" | "一般";
 
 export type AccidentCase = {
   id: string;
   title: string;
   occurredOn: string;
   type: AccidentType;
+  workCategory: AccidentWorkCategory;
+  severity: "軽傷" | "中等傷" | "重傷";
   summary: string;
   mainCauses: string[];
   preventionPoints: string[];

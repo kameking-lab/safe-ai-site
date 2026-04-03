@@ -63,12 +63,23 @@ export default function SignagePage() {
       hour: "2-digit",
       minute: "2-digit",
     });
-    const timer = window.setInterval(() => {
+
+    const updateNow = () => {
       setState((prev) => ({
         ...prev,
         nowText: formatter.format(new Date()),
       }));
+    };
+
+    // 即時1回反映し、その後は1分ごとに更新
+    updateNow();
+    const timer = window.setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+        return;
+      }
+      updateNow();
     }, 60 * 1000);
+
     return () => window.clearInterval(timer);
   }, []);
 
@@ -85,9 +96,10 @@ export default function SignagePage() {
     async function refreshAll() {
       setState((prev) => ({
         ...prev,
-        riskStatus: "loading",
-        accidentStatus: "loading",
-        lawStatus: "loading",
+        // 初回読み込み時のみローディング表示にし、それ以降はレイアウトを保ったまま裏側で更新
+        riskStatus: prev.riskStatus === "idle" ? "loading" : prev.riskStatus,
+        accidentStatus: prev.accidentStatus === "idle" ? "loading" : prev.accidentStatus,
+        lawStatus: prev.lawStatus === "idle" ? "loading" : prev.lawStatus,
       }));
 
       const [riskResult, accidentResult, revisionResult] = await Promise.all([
@@ -133,13 +145,27 @@ export default function SignagePage() {
     }
 
     void refreshAll();
+
     const intervalId = window.setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "hidden") {
+        return;
+      }
       void refreshAll();
     }, REFRESH_INTERVAL_MS);
+
+    const handleVisibility = () => {
+      if (typeof document === "undefined") return;
+      if (document.visibilityState === "visible") {
+        void refreshAll();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
       cancelled = true;
       window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [services]);
 
@@ -149,7 +175,20 @@ export default function SignagePage() {
           "現地の天候・足元・仮設設備を確認し、危険と感じる作業は無理に開始しないこと。",
           "「おかしい」と感じたら必ず作業を止めて、責任者に報告すること。",
         ]
-      : [];
+      : state.riskData.riskLevel === "高"
+        ? [
+            "「墜落・転落・挟まれ」を想定し、危険作業は一度止めて手順と人員を見直すこと。",
+            "強風・足元不良・重機接近時は、必ず退避場所と合図役を決めてから作業を再開すること。",
+          ]
+        : state.riskData.riskLevel === "中"
+          ? [
+              "足場・通路・仮設設備のぐらつきや段差を、作業前に一緒に歩いて確認すること。",
+              "慣れた作業ほど「声出し指差呼称」を行い、危ない動きがあればその場で声をかけ合うこと。",
+            ]
+          : [
+              "いつもどおりの作業でも「足元・頭上・周囲の動き」を意識して、危ないと感じたらすぐ共有すること。",
+              "小さなヒヤリでも朝礼後に1件だけ共有し、似た作業のメンバーと対策を話し合うこと。",
+            ];
 
   return (
     <SignageShell>

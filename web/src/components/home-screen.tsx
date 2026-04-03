@@ -3,8 +3,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatPanel, type ChatMessage } from "@/components/chat-panel";
 import { AccidentDatabasePanel } from "@/components/accident-database-panel";
+import { ELearningPanel } from "@/components/elearning-panel";
 import { HomeValueHero } from "@/components/home-value-hero";
+import { KySheetPanel } from "@/components/ky-sheet-panel";
 import { LawRevisionList } from "@/components/law-revision-list";
+import { MailDeliveryPanel } from "@/components/mail-delivery-panel";
+import { NotificationSettingsPanel } from "@/components/notification-settings-panel";
+import { PdfExportPanel } from "@/components/pdf-export-panel";
+import { PortalQuickLinks } from "@/components/portal-quick-links";
 import { SummaryPanel } from "@/components/summary-panel";
 import { TabNavigation, type TabId } from "@/components/tab-navigation";
 import { WeatherRiskCard } from "@/components/weather-risk-card";
@@ -12,10 +18,12 @@ import { createServices } from "@/lib/services/service-factory";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
 import type {
   AccidentCase,
+  AccidentWorkCategory,
   AccidentType,
   RevisionSummary,
   SiteRiskWeather,
 } from "@/lib/types/domain";
+import type { KySheetDraft, MailDeliverySettings, NotificationSettings, PdfExportTarget } from "@/lib/types/operations";
 type HomeScreenProps = {
   children: React.ReactNode;
 };
@@ -43,12 +51,42 @@ export function HomeScreen({ children }: HomeScreenProps) {
   const [accidentStatus, setAccidentStatus] = useState<ServiceStatus>("idle");
   const [accidentError, setAccidentError] = useState<ServiceError | null>(null);
   const [selectedAccidentType, setSelectedAccidentType] = useState<AccidentType | "すべて">("すべて");
+  const [selectedAccidentCategory, setSelectedAccidentCategory] = useState<AccidentWorkCategory | "すべて">("すべて");
   const [selectedRegionName, setSelectedRegionName] = useState(
     () => services.weatherRisk.getAvailableRegions()[0]?.regionName ?? ""
   );
   const [selectedWorkType, setSelectedWorkType] = useState<"高所作業" | "電気作業" | "足場作業" | "一般作業">(
     "一般作業"
   );
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
+    weatherAlerts: true,
+    lawRevisions: true,
+    accidentUpdates: true,
+    morningReminder: false,
+    reminderTime: "07:45",
+  });
+  const [mailSettings, setMailSettings] = useState<MailDeliverySettings>({
+    enabled: false,
+    email: "",
+    frequency: "daily",
+    includeWeather: true,
+    includeLaws: true,
+    includeAccidents: true,
+    includeLearning: false,
+  });
+  const [kySheetDraft, setKySheetDraft] = useState<KySheetDraft>({
+    date: new Date().toISOString().slice(0, 10),
+    siteName: "",
+    workSummary: "",
+    expectedRisks: "",
+    countermeasures: "",
+    callAndResponse: "",
+    notes: "",
+  });
+  const [pdfTarget, setPdfTarget] = useState<PdfExportTarget>("ky-sheet");
+  const [mailPreview, setMailPreview] = useState("配信プレビューを表示します。");
+  const [pdfPreview, setPdfPreview] = useState("PDFプレビューを表示します。");
+  const [opsSavedLabel, setOpsSavedLabel] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(services.chat.createInitialMessages());
   const [chatInput, setChatInput] = useState("");
   const chatListRef = useRef<HTMLDivElement | null>(null);
@@ -196,6 +234,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
       setAccidentStatus("loading");
       const result = await services.accident.getAccidentCases({
         type: selectedAccidentType,
+        category: selectedAccidentCategory,
       });
       if (!active) return;
       if (!result.ok) {
@@ -212,7 +251,26 @@ export function HomeScreen({ children }: HomeScreenProps) {
     return () => {
       active = false;
     };
-  }, [services.accident, selectedAccidentType]);
+  }, [services.accident, selectedAccidentType, selectedAccidentCategory]);
+
+  useEffect(() => {
+    let active = true;
+    async function loadOps() {
+      const [noti, mail, ky] = await Promise.all([
+        services.operations.getNotificationSettings(),
+        services.operations.getMailSettings(),
+        services.operations.getKyDraft(),
+      ]);
+      if (!active) return;
+      if (noti.ok) setNotificationSettings(noti.data);
+      if (mail.ok) setMailSettings(mail.data);
+      if (ky.ok) setKySheetDraft(ky.data);
+    }
+    void loadOps();
+    return () => {
+      active = false;
+    };
+  }, [services.operations]);
 
   const handleSendChat = async () => {
     const trimmed = chatInput.trim();
@@ -281,6 +339,19 @@ export function HomeScreen({ children }: HomeScreenProps) {
           onJumpToChat={() => setActiveTab("chat")}
         />
       </section>
+      <section id="section-portal-links" className="px-4 pt-4">
+        <PortalQuickLinks
+          onJumpToAccident={() => document.getElementById("section-accidents")?.scrollIntoView({ behavior: "smooth" })}
+          onJumpToKy={() => document.getElementById("section-ky-sheet")?.scrollIntoView({ behavior: "smooth" })}
+          onJumpToLaws={() => setActiveTab("laws")}
+          onJumpToLearning={() => document.getElementById("section-elearning")?.scrollIntoView({ behavior: "smooth" })}
+          onJumpToNotification={() =>
+            document.getElementById("section-notification-settings")?.scrollIntoView({ behavior: "smooth" })
+          }
+          onJumpToRisk={() => document.getElementById("section-weather-risk")?.scrollIntoView({ behavior: "smooth" })}
+          onJumpToWeather={() => document.getElementById("section-weather-risk")?.scrollIntoView({ behavior: "smooth" })}
+        />
+      </section>
       <section id="section-weather-risk" className="px-4 pt-4">
         <WeatherRiskCard
           data={weatherRisk}
@@ -297,7 +368,14 @@ export function HomeScreen({ children }: HomeScreenProps) {
         <AccidentDatabasePanel
           cases={accidentCases}
           allCases={services.accident.getAllAccidentCases()}
+          selectedCategory={selectedAccidentCategory}
           selectedType={selectedAccidentType}
+          onJumpToKy={() => document.getElementById("section-ky-sheet")?.scrollIntoView({ behavior: "smooth" })}
+          onJumpToLearning={(theme) => {
+            document.getElementById("section-elearning")?.scrollIntoView({ behavior: "smooth" });
+            setKySheetDraft((prev) => ({ ...prev, expectedRisks: `${prev.expectedRisks}\n[${theme}] 由来の危険を再確認` }));
+          }}
+          onSelectCategory={setSelectedAccidentCategory}
           onSelectType={setSelectedAccidentType}
           status={accidentStatus}
           errorMessage={accidentError?.message ?? null}
@@ -367,29 +445,83 @@ export function HomeScreen({ children }: HomeScreenProps) {
         )}
       </section>
 
-      {/* 将来拡張プレースホルダ */}
       <section id="section-elearning" className="px-4 pb-3">
-        <div className="mt-1 rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-4">
-          <h2 className="text-sm font-semibold text-slate-900">Eラーニング（準備中）</h2>
-          <p className="mt-1 text-xs text-slate-600">
-            将来、事故事例や法改正をクイズ形式で学べるコンテンツをここから開けるようにします。
-          </p>
-        </div>
+        <ELearningPanel onJumpToKy={() => document.getElementById("section-ky-sheet")?.scrollIntoView({ behavior: "smooth" })} />
       </section>
       <section id="section-ky-sheet" className="px-4 pb-3">
-        <div className="mt-1 rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-4">
-          <h2 className="text-sm font-semibold text-slate-900">KY用紙（準備中）</h2>
-          <p className="mt-1 text-xs text-slate-600">
-            AIが提案するKY用紙フォーマットを作成し、印刷やPDF出力につながる入口をここに配置する予定です。
-          </p>
-        </div>
+        <KySheetPanel
+          briefingLines={
+            weatherRisk?.riskEvidences?.slice(0, 3) ?? ["現地確認を優先し、危険を感じたら作業を止める", "退避導線と連絡系統を先に共有する"]
+          }
+          onBuildPdfPreview={() => {
+            void services.operations
+              .buildPdfPreview({
+                target: "ky-sheet",
+                kyDraft: kySheetDraft,
+                briefingLines: weatherRisk?.riskEvidences ?? [],
+              })
+              .then((result) => {
+                if (result.ok) setPdfPreview(result.data);
+              });
+          }}
+          onChange={setKySheetDraft}
+          onSave={() => {
+            void services.operations.saveKyDraft(kySheetDraft).then((result) => {
+              if (result.ok) setOpsSavedLabel(`KY保存: ${new Date().toLocaleTimeString("ja-JP")}`);
+            });
+          }}
+          savedLabel={opsSavedLabel}
+          value={kySheetDraft}
+        />
+      </section>
+      <section id="section-pdf-export" className="px-4 pb-3">
+        <PdfExportPanel
+          onRefreshPreview={() => {
+            void services.operations
+              .buildPdfPreview({
+                target: pdfTarget,
+                kyDraft: kySheetDraft,
+                briefingLines: weatherRisk?.riskEvidences ?? [],
+              })
+              .then((result) => {
+                if (result.ok) setPdfPreview(result.data);
+              });
+          }}
+          onTargetChange={setPdfTarget}
+          previewText={pdfPreview}
+          target={pdfTarget}
+        />
       </section>
       <section id="section-notification-settings" className="px-4 pb-5">
-        <div className="mt-1 rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 p-4">
-          <h2 className="text-sm font-semibold text-slate-900">通知設定（準備中）</h2>
-          <p className="mt-1 text-xs text-slate-600">
-            気象警報や法改正をピン保存し、高リスク時にメール通知するための設定画面をここに追加します。
-          </p>
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <NotificationSettingsPanel
+            onChange={setNotificationSettings}
+            onSave={() => {
+              void services.operations.saveNotificationSettings(notificationSettings).then((result) => {
+                if (result.ok) setOpsSavedLabel(`通知設定を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
+              });
+            }}
+            savedLabel={opsSavedLabel}
+            value={notificationSettings}
+          />
+          <MailDeliveryPanel
+            onBuildPreview={() => {
+              void services.operations
+                .buildMailPreview({ notification: notificationSettings, mail: mailSettings })
+                .then((result) => {
+                  if (result.ok) setMailPreview(result.data);
+                });
+            }}
+            onChange={setMailSettings}
+            onSave={() => {
+              void services.operations.saveMailSettings(mailSettings).then((result) => {
+                if (result.ok) setOpsSavedLabel(`配信設定を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
+              });
+            }}
+            previewText={mailPreview}
+            savedLabel={opsSavedLabel}
+            value={mailSettings}
+          />
         </div>
       </section>
     </>

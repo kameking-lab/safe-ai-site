@@ -11,7 +11,7 @@ export function LawHighlightsPanel({ revisions, status }: LawHighlightsPanelProp
   if (status === "loading") {
     return (
       <section className="flex h-full flex-col rounded-2xl border border-slate-700 bg-slate-900/80 p-4">
-        <p className="text-sm font-semibold text-slate-200">最近の法改正要点</p>
+        <p className="text-sm font-semibold tracking-wide text-slate-200">最近の法改正要点</p>
         <div className="mt-3 space-y-2">
           <div className="h-4 w-3/4 animate-pulse rounded bg-slate-700/70" />
           <div className="h-4 w-2/3 animate-pulse rounded bg-slate-700/60" />
@@ -23,10 +23,12 @@ export function LawHighlightsPanel({ revisions, status }: LawHighlightsPanelProp
   if (status === "error") {
     return (
       <section className="flex h-full flex-col rounded-2xl border border-rose-500/80 bg-slate-900/80 p-4">
-        <p className="text-sm font-semibold text-rose-200">最近の法改正要点</p>
-        <p className="mt-2 text-base font-semibold text-rose-100">法改正情報を取得できません</p>
-        <p className="mt-2 text-sm text-rose-100/90">
-          本日の朝礼では「自社ルール・安全基準の変更点」がないかを確認し、気になる点があれば管理部門に確認してください。
+        <p className="text-sm font-semibold tracking-wide text-rose-200">最近の法改正要点</p>
+        <p className="mt-2 text-base font-bold text-rose-50">自動で法改正を表示できません</p>
+        <p className="mt-2 text-sm leading-relaxed text-rose-100/90">
+          画面はこのままで構いません。
+          <span className="font-semibold">自社ルール・安全基準の最近の変更点がないか</span>
+          を確認し、気になる点があれば管理部門に相談してください。
         </p>
       </section>
     );
@@ -37,10 +39,12 @@ export function LawHighlightsPanel({ revisions, status }: LawHighlightsPanelProp
   if (list.length === 0) {
     return (
       <section className="flex h-full flex-col rounded-2xl border border-slate-700 bg-slate-900/80 p-4">
-        <p className="text-sm font-semibold text-slate-200">最近の法改正要点</p>
+        <p className="text-sm font-semibold tracking-wide text-slate-200">最近の法改正要点</p>
         <p className="mt-2 text-base font-semibold text-slate-50">本日共有すべき新着法改正はありません</p>
-        <p className="mt-2 text-sm text-slate-200/90">
-          代わりに、既に施行済みの重要な改正（墜落・重機・感電など）が守られているか、現場の実態とズレがないかを確認してください。
+        <p className="mt-2 text-sm leading-relaxed text-slate-200/90">
+          代わりに、
+          <span className="font-semibold">既に施行済みの重要な改正（墜落・重機・感電など）が守られているか</span>
+          を確認し、現場の実態とのズレがあれば朝礼で共有してください。
         </p>
       </section>
     );
@@ -48,7 +52,7 @@ export function LawHighlightsPanel({ revisions, status }: LawHighlightsPanelProp
 
   return (
     <section className="flex h-full flex-col rounded-2xl border border-slate-700 bg-slate-900/80 p-4">
-      <p className="text-sm font-semibold text-slate-200">最近の法改正要点</p>
+      <p className="text-sm font-semibold tracking-wide text-slate-200">最近の法改正要点</p>
       <div className="mt-3 space-y-3">
         {list.map((rev) => (
           <article key={rev.id} className="rounded-xl border border-slate-700/80 bg-slate-900/80 p-3">
