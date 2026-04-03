@@ -506,3 +506,25 @@
       - `/opt/cursor/artifacts/weather_risk_high_region_desktop.png`
       - `/opt/cursor/artifacts/weather_risk_region_switched_desktop.png`
       - `/opt/cursor/artifacts/weather_risk_mobile_firstview.png`
+- 今日の現場リスク 作業種別別ブリーフィング（今回）
+  - 実行計画:
+    1. 「今日の現場リスク」カードに作業種別セレクト（高所作業/電気作業/足場作業/一般作業）を追加
+    2. リスクレベルと作業種別に応じて「朝礼で伝える要点（30秒）」の文言を切り替える
+    3. 地域選択UIと並べて、スマホでも意味が分かりやすい2カラム構成へ調整
+  - 実装:
+    - `web/src/components/home-screen.tsx`
+      - `selectedWorkType` state を追加し、`WeatherRiskCard` に渡すように変更
+    - `web/src/components/weather-risk-card.tsx`
+      - `WorkType` 型（"高所作業" | "電気作業" | "足場作業" | "一般作業"）を追加
+      - props に `workType` / `onWorkTypeChange` を追加し、呼び出し元から作業種別を受け取る構成に変更
+      - 地域セレクトの横に「今日の主な作業」セレクトを追加し、スマホでは1列、PCでは2列で表示
+      - `buildBriefingPoints` 関数を追加し、リスクレベルと作業種別に応じた朝礼用の3行メッセージを生成
+      - 高リスク時の「朝礼で伝える要点」枠を一段強い配色（赤系）にして視認性を向上
+      - ローディング/エラー/データなしの各状態でも、地域・作業種別セレクトを共通で表示するように整理
+  - 確認:
+    - `web/` で `npm run lint` / `npm run build` / `npm run test` を実行し成功
+    - ブラウザで地域（福岡/札幌）と作業種別（高所作業/電気作業/足場作業/一般作業）を切り替え、
+      - リスクレベルと注意点、推奨アクションが従来どおり地域に応じて変化すること
+      - 「朝礼で伝える要点（30秒）」の文言が作業種別に応じて切り替わること
+      - 既存の法改正UI・事故DB・チャットUI・サイドバーに崩れがないこと
+      を目視で確認

@@ -173,6 +173,7 @@ npm run start
   - `mock` と `live` の両方を保持し、`NEXT_PUBLIC_API_MODE=live` では `/api/weather-risk` から取得
 - `src/components/weather-risk-card.tsx`
   - 「今日の現場リスク」表示UI（リスク高の視覚強調）
+  - 地域選択 + 作業種別選択（高所作業/電気作業/足場作業/一般作業）を持ち、朝礼用ブリーフィングを自動生成
 
 ## revisions データ構造（現在）
 
