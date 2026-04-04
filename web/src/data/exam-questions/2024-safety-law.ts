@@ -4,6 +4,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-001",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 1,
@@ -24,6 +25,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-002",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 2,
@@ -44,6 +46,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-003",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 3,
@@ -64,6 +67,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-004",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 4,
@@ -84,6 +88,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-005",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 5,
@@ -104,6 +109,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-006",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 6,
@@ -124,6 +130,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-007",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 7,
@@ -144,6 +151,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-008",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 8,
@@ -164,6 +172,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-009",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 9,
@@ -184,6 +193,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-010",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 10,
@@ -204,6 +214,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-011",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 11,
@@ -224,6 +235,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-012",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 12,
@@ -244,6 +256,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-013",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 13,
@@ -264,6 +277,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-014",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 14,
@@ -284,6 +298,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-015",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 15,
@@ -304,6 +319,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-016",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 16,
@@ -324,6 +340,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-017",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 17,
@@ -344,6 +361,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-018",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 18,
@@ -364,6 +382,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-019",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 19,
@@ -384,6 +403,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-020",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 20,
@@ -404,6 +424,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-021",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 21,
@@ -424,6 +445,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-022",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 22,
@@ -444,6 +466,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-023",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 23,
@@ -464,6 +487,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-024",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 24,
@@ -484,6 +508,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-025",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 25,
@@ -503,6 +528,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-026",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 26,
@@ -523,6 +549,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-027",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 27,
@@ -543,6 +570,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-028",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 28,
@@ -563,6 +591,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-029",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 29,
@@ -583,6 +612,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2024-sl-030",
     year: 2024,
+    category: "safety-consultant",
     subject: "safety-law",
     subjectLabel: "産業安全関係法令",
     questionNumber: 30,

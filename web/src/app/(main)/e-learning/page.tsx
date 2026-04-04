@@ -1,22 +1,24 @@
 import type { Metadata } from "next";
 import { GraduationCap } from "lucide-react";
-import { HomeScreen } from "@/components/home-screen";
 import { PageHeader } from "@/components/page-header";
+import { ALL_ELEARNING_QUESTIONS } from "@/data/e-learning";
+import { ELearningClient } from "./e-learning-client";
 
 export const metadata: Metadata = {
-  title: "Eラーニング",
-  description: "労働安全に関するテーマ別学習コンテンツとクイズで知識を確認。",
+  title: "Eラーニング | 災害の型別学習",
+  description: "厚労省分類の20種の災害の型ごとに問題を解いて、労働安全の知識を確認できます。",
 };
 
 export default function ELearningPage() {
   return (
-    <HomeScreen variant="elearning">
+    <div className="mx-auto max-w-7xl">
       <PageHeader
         title="Eラーニング"
-        description="労働安全に関するテーマ別学習コンテンツとクイズ"
+        description="災害の型別に問題を解いて知識を確認しましょう（全20分野）"
         icon={GraduationCap}
         iconColor="emerald"
       />
-    </HomeScreen>
+      <ELearningClient questions={ALL_ELEARNING_QUESTIONS} />
+    </div>
   );
 }

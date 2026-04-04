@@ -1,8 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { filterQuestions, AVAILABLE_YEARS, SUBJECT_LABELS } from "@/data/exam-questions";
-import type { ExamQuestion, ExamSubject } from "@/data/exam-questions";
+import {
+  filterQuestions,
+  AVAILABLE_YEARS,
+  SUBJECT_LABELS,
+  CATEGORY_LABELS,
+  CATEGORY_SUBJECTS,
+} from "@/data/exam-questions";
+import type { ExamQuestion, ExamSubject, ExamCategory } from "@/data/exam-questions";
 
 const LS_KEY = "exam-quiz-history";
 
@@ -31,9 +37,8 @@ function saveAnswer(record: AnswerRecord) {
 }
 
 function calcStats(history: AnswerRecord[]) {
-  if (history.length === 0) return { total: 0, correct: 0, rate: 0, bySubject: {} };
+  if (history.length === 0) return { total: 0, correct: 0, rate: 0, byCategory: {} };
 
-  // Use the last attempt per question
   const latestByQuestion = new Map<string, AnswerRecord>();
   for (const rec of history) {
     latestByQuestion.set(rec.questionId, rec);
@@ -44,22 +49,44 @@ function calcStats(history: AnswerRecord[]) {
   const total = records.length;
   const rate = total > 0 ? Math.round((correct / total) * 100) : 0;
 
-  const subjectMap: Record<string, { correct: number; total: number }> = {};
+  // Group by category code (2nd segment of id like "2024-hm1g-001" → "hm1g")
+  const categoryMap: Record<string, { correct: number; total: number; label: string }> = {};
   for (const rec of records) {
-    const subj = rec.questionId.split("-")[1] ?? "other";
-    if (!subjectMap[subj]) subjectMap[subj] = { correct: 0, total: 0 };
-    subjectMap[subj].total++;
-    if (rec.isCorrect) subjectMap[subj].correct++;
+    const parts = rec.questionId.split("-");
+    const code = parts[1] ?? "other";
+    const label = getCategoryLabelFromCode(code);
+    if (!categoryMap[code]) categoryMap[code] = { correct: 0, total: 0, label };
+    categoryMap[code].total++;
+    if (rec.isCorrect) categoryMap[code].correct++;
   }
 
-  return { total, correct, rate, bySubject: subjectMap };
+  return { total, correct, rate, byCategory: categoryMap };
 }
 
-const SUBJECT_OPTIONS: { value: ExamSubject | "all"; label: string }[] = [
-  { value: "all", label: "すべての科目" },
-  { value: "safety-general", label: SUBJECT_LABELS["safety-general"] },
-  { value: "safety-law", label: SUBJECT_LABELS["safety-law"] },
-];
+function getCategoryLabelFromCode(code: string): string {
+  if (code === "sg") return "産業安全一般";
+  if (code === "sl") return "産業安全関係法令";
+  if (code === "hm1g") return "衛生管理者1種・労働衛生";
+  if (code === "hm1lh") return "衛生管理者1種・法令（有害）";
+  if (code === "hm1lo") return "衛生管理者1種・法令（その他）";
+  if (code === "hm1p") return "衛生管理者1種・労働生理";
+  if (code === "hm2g") return "衛生管理者2種・労働衛生";
+  if (code === "hm2l") return "衛生管理者2種・法令";
+  if (code === "hm2p") return "衛生管理者2種・労働生理";
+  if (code === "hcg") return "衛生コンサルタント・一般";
+  if (code === "hcl") return "衛生コンサルタント・法令";
+  if (code === "b1s") return "ボイラー1級・構造";
+  if (code === "b1o") return "ボイラー1級・取扱い";
+  if (code === "b1f") return "ボイラー1級・燃料燃焼";
+  if (code === "b1l") return "ボイラー1級・法令";
+  if (code === "crk") return "クレーン・知識";
+  if (code === "cre") return "クレーン・電気";
+  if (code === "crl") return "クレーン・法令";
+  if (code === "crm") return "クレーン・力学";
+  return code;
+}
+
+const ALL_CATEGORIES = Object.keys(CATEGORY_LABELS) as ExamCategory[];
 
 function FilterBtn({
   label,
@@ -117,6 +144,7 @@ function StatRow({
 }
 
 export function ExamQuizClient() {
+  const [category, setCategory] = useState<ExamCategory | "all">("all");
   const [subject, setSubject] = useState<ExamSubject | "all">("all");
   const [year, setYear] = useState<number | "all">("all");
   const [mode, setMode] = useState<"sequential" | "random">("sequential");
@@ -133,8 +161,34 @@ export function ExamQuizClient() {
     setHistory(loadHistory());
   }, []);
 
+  // 資格種別が変わったら科目をリセット
+  const handleCategoryChange = (cat: ExamCategory | "all") => {
+    setCategory(cat);
+    setSubject("all");
+  };
+
+  // 選択中のカテゴリの科目リスト
+  const subjectOptions: Array<{ value: ExamSubject | "all"; label: string }> =
+    category === "all"
+      ? [{ value: "all", label: "すべての科目" }]
+      : [
+          { value: "all", label: "すべての科目" },
+          ...CATEGORY_SUBJECTS[category].map((s) => ({
+            value: s as ExamSubject,
+            label: SUBJECT_LABELS[s],
+          })),
+        ];
+
+  // フィルター後の問題数プレビュー
+  const previewCount = filterQuestions({
+    category: category === "all" ? undefined : category,
+    subject: subject === "all" ? undefined : subject,
+    year: year === "all" ? undefined : year,
+  }).length;
+
   const startQuiz = useCallback(() => {
     const qs = filterQuestions({
+      category: category === "all" ? undefined : category,
       subject: subject === "all" ? undefined : subject,
       year: year === "all" ? undefined : year,
       shuffle: mode === "random",
@@ -145,7 +199,7 @@ export function ExamQuizClient() {
     setShowExplanation(false);
     setAiExplanation(null);
     setStarted(true);
-  }, [subject, year, mode]);
+  }, [category, subject, year, mode]);
 
   const handleSelect = useCallback(
     (choice: string) => {
@@ -407,10 +461,31 @@ export function ExamQuizClient() {
           <h2 className="mb-4 text-sm font-bold text-slate-800">出題設定</h2>
 
           <div className="space-y-4">
+            {/* Step 1: 資格種別 */}
             <div>
-              <p className="mb-2 text-xs font-semibold text-slate-500">科目</p>
+              <p className="mb-2 text-xs font-semibold text-slate-500">① 資格種別</p>
               <div className="flex flex-wrap gap-2">
-                {SUBJECT_OPTIONS.map((opt) => (
+                <FilterBtn
+                  label="すべての資格"
+                  active={category === "all"}
+                  onClick={() => handleCategoryChange("all")}
+                />
+                {ALL_CATEGORIES.map((cat) => (
+                  <FilterBtn
+                    key={cat}
+                    label={CATEGORY_LABELS[cat]}
+                    active={category === cat}
+                    onClick={() => handleCategoryChange(cat)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Step 2: 科目 */}
+            <div>
+              <p className="mb-2 text-xs font-semibold text-slate-500">② 科目</p>
+              <div className="flex flex-wrap gap-2">
+                {subjectOptions.map((opt) => (
                   <FilterBtn
                     key={opt.value}
                     label={opt.label}
@@ -421,8 +496,9 @@ export function ExamQuizClient() {
               </div>
             </div>
 
+            {/* Step 3: 年度 */}
             <div>
-              <p className="mb-2 text-xs font-semibold text-slate-500">年度</p>
+              <p className="mb-2 text-xs font-semibold text-slate-500">③ 年度</p>
               <div className="flex flex-wrap gap-2">
                 <FilterBtn
                   label="すべての年度"
@@ -440,6 +516,7 @@ export function ExamQuizClient() {
               </div>
             </div>
 
+            {/* 出題順 */}
             <div>
               <p className="mb-2 text-xs font-semibold text-slate-500">出題順</p>
               <div className="flex gap-2">
@@ -457,10 +534,16 @@ export function ExamQuizClient() {
             </div>
           </div>
 
+          {/* 問題数プレビュー */}
+          <div className="mt-4 rounded-lg bg-slate-50 px-4 py-2.5 text-sm text-slate-600">
+            対象問題数：<span className="font-bold text-amber-600">{previewCount}問</span>
+          </div>
+
           <button
             type="button"
             onClick={startQuiz}
-            className="mt-5 w-full rounded-xl bg-amber-500 py-3 text-sm font-bold text-white hover:bg-amber-600"
+            disabled={previewCount === 0}
+            className="mt-4 w-full rounded-xl bg-amber-500 py-3 text-sm font-bold text-white hover:bg-amber-600 disabled:opacity-40"
           >
             クイズを開始する
           </button>
@@ -484,19 +567,11 @@ export function ExamQuizClient() {
 
             <StatRow label="全体" correct={stats.correct} total={stats.total} />
 
-            {Object.entries(stats.bySubject).map(([subj, data]) => {
-              const label =
-                subj === "sg"
-                  ? "産業安全一般"
-                  : subj === "sl"
-                  ? "産業安全関係法令"
-                  : subj;
-              return (
-                <div key={subj} className="mt-3">
-                  <StatRow label={label} correct={data.correct} total={data.total} />
-                </div>
-              );
-            })}
+            {Object.entries(stats.byCategory).map(([code, data]) => (
+              <div key={code} className="mt-3">
+                <StatRow label={data.label} correct={data.correct} total={data.total} />
+              </div>
+            ))}
           </div>
         )}
       </div>
