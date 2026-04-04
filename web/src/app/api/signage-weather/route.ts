@@ -160,6 +160,7 @@ function buildHourlySeries(payload: HourlyPayload, now: Date, maxSlots = 48): Si
       precipMm: Math.round(precip * 10) / 10,
       windMs: windKmhToMs(wind),
       weatherLabel: codeToOverview(code),
+      weatherCode: code,
     });
   }
   return out;

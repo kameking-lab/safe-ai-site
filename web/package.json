@@ -21,6 +21,7 @@
     "vercel:prod": "vercel deploy --prod --yes --cwd ."
   },
   "dependencies": {
+    "d3-geo": "^3.1.1",
     "next": "16.2.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -30,6 +31,7 @@
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
+    "@types/d3-geo": "^3.1.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

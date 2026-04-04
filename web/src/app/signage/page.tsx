@@ -3,26 +3,32 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
-import { JapanWeatherMap } from "@/components/signage/japan-weather-map";
+import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture-warning-map";
 import { SignageHeader } from "@/components/signage/signage-header";
-import { SignageHourlyWeather } from "@/components/signage/signage-hourly-weather";
+import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
 import { SignageShell } from "@/components/signage/signage-shell";
-import type { JapanRegionId, MapAlertLevel } from "@/data/mock/japan-weather-map-mock";
-import { todayRegionAlerts, weekMaxRegionAlerts } from "@/data/mock/japan-weather-map-mock";
-import { newsLaborAccidentsMock } from "@/data/mock/signage-news-accidents";
-import {
-  buildSignageNewsUrl,
-  getStoredNewsEngine,
-  setStoredNewsEngine,
-  type SignageNewsEngine,
-} from "@/lib/signage-news-url";
+import { getSignageLocationById, signageLocations } from "@/data/signage-locations";
 import { createServices } from "@/lib/services/service-factory";
+import type { SignageDataApiResponse } from "@/lib/types/signage-data";
 import type { LawRevision, SiteRiskWeather } from "@/lib/types/domain";
-import type { SignageHourlyPoint, SignageWeatherApiResponse } from "@/lib/types/signage-weather";
 import type { ApiMode, ServiceStatus } from "@/lib/types/api";
 
-const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
-const REGION_STORAGE_KEY = "signage-weather-region";
+/** 気象庁JSONの code をざっくり表示用に（公式名称はPDF参照） */
+const JMA_CODE_HINT: Record<string, string> = {
+  "02": "大雪注意報",
+  "03": "大雨注意報",
+  "05": "強風注意報",
+  "12": "雷雨注意報",
+  "15": "波浪注意報",
+  "16": "波浪注意報",
+};
+
+function hintForJmaCode(code: string) {
+  return JMA_CODE_HINT[code] ?? `コード ${code}`;
+}
+
+const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
+const LOCATION_STORAGE_KEY = "signage-location-id";
 
 type DashboardState = {
   mode: ApiMode;
@@ -37,14 +43,14 @@ type DashboardState = {
 
 export default function SignagePage() {
   const services = useMemo(() => createServices(), []);
-  const regions = useMemo(() => services.weatherRisk.getAvailableRegions(), [services]);
+  const [selectedLocationId, setSelectedLocationId] = useState("tokyo-shinjuku");
+  const [bundle, setBundle] = useState<SignageDataApiResponse | null>(null);
+  const [bundleStatus, setBundleStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  const [mapMode, setMapMode] = useState<"today" | "week">("today");
-  const [selectedRegionName, setSelectedRegionName] = useState(() => regions[0]?.regionName ?? "東京都 新宿区");
-  const [mapLevels, setMapLevels] = useState<Record<JapanRegionId, MapAlertLevel> | null>(null);
-  const [hourly, setHourly] = useState<SignageHourlyPoint[]>([]);
-  const [signageWeatherStatus, setSignageWeatherStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [newsEngine, setNewsEngine] = useState<SignageNewsEngine>("google");
+  const selectedLocation = useMemo(
+    () => getSignageLocationById(selectedLocationId) ?? getSignageLocationById("tokyo-shinjuku")!,
+    [selectedLocationId]
+  );
 
   const [state, setState] = useState<DashboardState>(() => {
     const now = new Date();
@@ -58,7 +64,7 @@ export default function SignagePage() {
     const nowText = formatter.format(now);
     return {
       mode: services.mode,
-      regionLabel: regions[0]?.label ?? "地域未選択",
+      regionLabel: selectedLocation.label,
       nowText,
       lastUpdatedText: nowText,
       riskStatus: "idle",
@@ -73,18 +79,13 @@ export default function SignagePage() {
     return [...state.lawRevisions].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)).slice(0, 5);
   }, [state.lawRevisions]);
 
-  const fallbackLevels = mapMode === "today" ? todayRegionAlerts : weekMaxRegionAlerts;
-  const displayLevels = mapLevels ?? fallbackLevels;
-  const mapLabel = mapMode === "today" ? "本日（1時間予報ベース）" : "今後1週間（日次最大イメージ）";
-
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem(REGION_STORAGE_KEY);
-    if (stored && regions.some((r) => r.regionName === stored)) {
-      setSelectedRegionName(stored);
+    const stored = window.localStorage.getItem(LOCATION_STORAGE_KEY);
+    if (stored && signageLocations.some((l) => l.id === stored)) {
+      setSelectedLocationId(stored);
     }
-    setNewsEngine(getStoredNewsEngine());
-  }, [regions]);
+  }, []);
 
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat("ja-JP", {
@@ -124,44 +125,37 @@ export default function SignagePage() {
     });
 
     async function refreshAll() {
+      setBundleStatus((s) => (s === "idle" ? "loading" : s));
       setState((prev) => ({
         ...prev,
         riskStatus: prev.riskStatus === "idle" ? "loading" : prev.riskStatus,
         lawStatus: prev.lawStatus === "idle" ? "loading" : prev.lawStatus,
       }));
 
-      setSignageWeatherStatus((s) => (s === "idle" ? "loading" : s));
-      const params = new URLSearchParams();
-      params.set("mapMode", mapMode);
-      params.set("regionName", selectedRegionName);
-      const signagePromise = fetch(`/api/signage-weather?${params.toString()}`, { cache: "no-store" });
+      const loc = getSignageLocationById(selectedLocationId) ?? getSignageLocationById("tokyo-shinjuku")!;
+      const dataUrl = `/api/signage-data?locationId=${encodeURIComponent(selectedLocationId)}`;
 
-      const [riskResult, revisionResult, swRes] = await Promise.all([
-        services.weatherRisk.getTodaySiteRisk({ regionName: selectedRegionName }),
+      const [dataRes, riskResult, revisionResult] = await Promise.all([
+        fetch(dataUrl, { cache: "no-store" }),
+        services.weatherRisk.getTodaySiteRisk({ regionName: loc.regionName }),
         services.revision.getLawRevisions(),
-        signagePromise,
       ]);
 
       if (cancelled) return;
 
-      if (swRes.ok) {
+      if (dataRes.ok) {
         try {
-          const data = (await swRes.json()) as SignageWeatherApiResponse;
-          setMapLevels(data.mapLevels);
-          setHourly(data.hourly);
-          setSignageWeatherStatus("success");
+          const json = (await dataRes.json()) as SignageDataApiResponse;
+          setBundle(json);
+          setBundleStatus("success");
         } catch {
-          setSignageWeatherStatus("error");
-          setMapLevels(null);
-          setHourly([]);
+          setBundle(null);
+          setBundleStatus("error");
         }
       } else {
-        setSignageWeatherStatus("error");
-        setMapLevels(null);
-        setHourly([]);
+        setBundle(null);
+        setBundleStatus("error");
       }
-
-      if (cancelled) return;
 
       setState((prev) => {
         const next: DashboardState = { ...prev };
@@ -212,23 +206,21 @@ export default function SignagePage() {
       window.clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [services, selectedRegionName, mapMode]);
+  }, [services, selectedLocationId]);
 
-  const onRegionChange = (name: string) => {
-    setSelectedRegionName(name);
+  const onLocationChange = (id: string) => {
+    setSelectedLocationId(id);
     if (typeof window !== "undefined") {
-      window.localStorage.setItem(REGION_STORAGE_KEY, name);
+      window.localStorage.setItem(LOCATION_STORAGE_KEY, id);
     }
-    const opt = regions.find((r) => r.regionName === name);
-    if (opt) {
-      setState((prev) => ({ ...prev, regionLabel: opt.label }));
+    const loc = getSignageLocationById(id);
+    if (loc) {
+      setState((prev) => ({ ...prev, regionLabel: loc.label }));
     }
   };
 
-  const onNewsEngineChange = (engine: SignageNewsEngine) => {
-    setNewsEngine(engine);
-    setStoredNewsEngine(engine);
-  };
+  const prefectureLevels = bundle?.prefectureLevels ?? {};
+  const jmaLink = `https://www.jma.go.jp/bosai/warning/#area_type=class20s&area_code=${selectedLocation.jmaCityCode ?? "130000"}`;
 
   return (
     <SignageShell>
@@ -243,109 +235,115 @@ export default function SignagePage() {
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden xl:grid-cols-12 xl:gap-3">
         <div className="flex min-h-0 flex-col gap-2 overflow-hidden xl:col-span-7">
           <div className="flex shrink-0 flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setMapMode("today")}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold sm:px-4 sm:py-2 sm:text-sm ${
-                mapMode === "today"
-                  ? "bg-emerald-500 text-white"
-                  : "border border-slate-600 bg-slate-800 text-slate-200"
-              }`}
-            >
-              本日
-            </button>
-            <button
-              type="button"
-              onClick={() => setMapMode("week")}
-              className={`rounded-lg px-3 py-1.5 text-xs font-semibold sm:px-4 sm:py-2 sm:text-sm ${
-                mapMode === "week"
-                  ? "bg-emerald-500 text-white"
-                  : "border border-slate-600 bg-slate-800 text-slate-200"
-              }`}
-            >
-              1週間
-            </button>
-            <label className="ml-auto flex items-center gap-2 text-[10px] text-slate-300 sm:text-xs">
-              <span className="whitespace-nowrap">地点</span>
+            <label className="ml-auto flex max-w-full items-center gap-2 text-[10px] text-slate-300 sm:text-xs">
+              <span className="shrink-0 whitespace-nowrap">地点</span>
               <select
-                className="max-w-[200px] rounded-lg border border-slate-600 bg-slate-950 px-2 py-1 text-xs text-slate-100"
-                value={selectedRegionName}
-                onChange={(e) => onRegionChange(e.target.value)}
+                className="max-w-[min(100%,280px)] truncate rounded-lg border border-slate-600 bg-slate-950 px-2 py-1 text-xs text-slate-100"
+                value={selectedLocationId}
+                onChange={(e) => onLocationChange(e.target.value)}
               >
-                {regions.map((r) => (
-                  <option key={r.id} value={r.regionName}>
-                    {r.label}
+                {signageLocations.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.label}
                   </option>
                 ))}
               </select>
             </label>
           </div>
 
-          <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1.15fr)_minmax(220px,0.85fr)]">
-            <JapanWeatherMap
-              levels={displayLevels}
-              modeLabel={mapLabel}
-              dataSourceNote={
-                signageWeatherStatus === "success"
-                  ? "地図の色は代表都市の Open-Meteo 予報から算出した目安です（気象庁の警報・注意報ではありません）。"
-                  : signageWeatherStatus === "error"
-                    ? "地図はフォールバック表示です。通信・API を確認してください。"
-                    : undefined
-              }
-            />
-            <SignageHourlyWeather
-              hourly={hourly}
-              regionLabel={selectedRegionName}
-              status={signageWeatherStatus}
+          <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden rounded-2xl border border-slate-600 bg-slate-950/60 p-2 sm:p-3">
+            <div className="flex shrink-0 flex-wrap items-start justify-between gap-2">
+              <div>
+                <p className="text-xs font-bold text-slate-100 sm:text-sm">気象庁 注意報・警報（都道府県）</p>
+                <p className="mt-0.5 text-[9px] text-slate-400 sm:text-[10px]">
+                  地図は{" "}
+                  <a href="https://www.jma.go.jp/bosai/warning/" className="text-emerald-400 underline" target="_blank" rel="noreferrer">
+                    気象庁 警報・注意報
+                  </a>
+                  の公開JSONを約1時間キャッシュして描画しています。
+                </p>
+              </div>
+              <a
+                href={jmaLink}
+                target="_blank"
+                rel="noreferrer"
+                className="shrink-0 rounded-lg border border-sky-600/60 bg-sky-950/50 px-2 py-1 text-[9px] font-semibold text-sky-200 hover:bg-sky-900/50 sm:text-[10px]"
+              >
+                選択地点の詳細（気象庁）→
+              </a>
+            </div>
+            {bundle?.jmaHeadline ? (
+              <p className="shrink-0 text-[11px] leading-snug text-amber-100 sm:text-sm">{bundle.jmaHeadline}</p>
+            ) : null}
+            {bundle?.jmaReportTime ? (
+              <p className="text-[9px] text-slate-500">気象庁データ時刻: {bundle.jmaReportTime}</p>
+            ) : null}
+            {selectedLocation.jmaCityCode && bundle?.selectedWarnings && bundle.selectedWarnings.length > 0 ? (
+              <ul className="shrink-0 space-y-0.5 text-[10px] text-slate-200">
+                {bundle.selectedWarnings.map((w, i) => (
+                  <li key={`${w.code}-${i}`}>
+                    {hintForJmaCode(w.code)}（{w.status}）
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
+            <JapanPrefectureWarningMap levelsByIso={prefectureLevels} highlightIso={selectedLocation.prefectureIso} />
+
+            <SignageHourlyStrip
+              hourly={bundle?.hourly ?? []}
+              locationLabel={bundle?.locationLabel ?? selectedLocation.label}
+              status={bundleStatus}
             />
           </div>
+
           {state.riskStatus === "error" && (
-            <p className="shrink-0 text-[10px] text-amber-200 sm:text-xs">地点リスクの取得に失敗しました。</p>
+            <p className="shrink-0 text-[10px] text-amber-200 sm:text-xs">地点リスク（日次）の取得に失敗しました。</p>
           )}
         </div>
 
         <div className="flex min-h-0 flex-col gap-2 overflow-hidden xl:col-span-5 xl:min-h-0">
           <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3">
-            <div className="flex shrink-0 flex-wrap items-end justify-between gap-2">
-              <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm">労働災害関連ニュース（検索）</h2>
-              <label className="flex items-center gap-1 text-[10px] text-slate-400">
-                出典
-                <select
-                  className="rounded border border-slate-600 bg-slate-950 px-1 py-0.5 text-[10px] text-slate-100"
-                  value={newsEngine}
-                  onChange={(e) => onNewsEngineChange(e.target.value as SignageNewsEngine)}
-                >
-                  <option value="google">Googleニュース</option>
-                  <option value="yahoo">Yahoo!ニュース</option>
-                  <option value="duckduckgo">DuckDuckGo</option>
-                </select>
-              </label>
-            </div>
+            <h2 className="shrink-0 text-xs font-bold tracking-wide text-slate-100 sm:text-sm">
+              トレンド（労働災害・建設事故）
+            </h2>
             <p className="mt-0.5 shrink-0 text-[9px] text-slate-400 sm:text-[10px]">
-              見出しに基づくニュース検索へ遷移します（特定記事の捏造はしていません）。
+              GoogleニュースのRSSから取得（サーバー側で約1時間キャッシュ）。記事元へ直接リンクします。
             </p>
             <ul className="mt-2 min-h-0 flex-1 space-y-2 overflow-y-auto pr-0.5">
-              {newsLaborAccidentsMock.map((item) => (
-                <li key={item.id}>
+              {bundleStatus === "success" && bundle && bundle.laborTrend.length === 0 ? (
+                <li className="text-xs text-slate-400">現在取得できるニュースがありません。</li>
+              ) : null}
+              {(bundle?.laborTrend ?? []).map((item, idx) => (
+                <li key={`${item.link}-${idx}`}>
                   <a
-                    href={buildSignageNewsUrl(newsEngine, item.title, item.searchKeyword)}
+                    href={item.link}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block rounded-lg border border-slate-700 bg-slate-950/60 p-2 text-left transition hover:border-emerald-600/80 hover:bg-slate-900 sm:rounded-xl sm:p-3"
                   >
-                    <p className="text-[9px] text-slate-400 sm:text-[10px]">
-                      {item.occurredOn} · {item.source}
-                    </p>
+                    <p className="text-[9px] text-slate-400 sm:text-[10px]">{item.pubDate || "日時不明"}</p>
                     <p className="mt-0.5 text-sm font-semibold leading-snug text-slate-50 sm:text-base">{item.title}</p>
-                    <p className="mt-1 text-[10px] font-semibold text-emerald-400 sm:text-xs">ニュースを検索 →</p>
+                    <p className="mt-1 text-[10px] font-semibold text-emerald-400 sm:text-xs">記事を開く →</p>
                   </a>
                 </li>
               ))}
+              {bundleStatus === "loading" || bundleStatus === "idle" ? (
+                <li className="h-20 animate-pulse rounded-lg bg-slate-800/80" />
+              ) : null}
             </ul>
           </section>
 
           <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3">
-            <h2 className="shrink-0 text-xs font-bold tracking-wide text-slate-100 sm:text-sm">直近の法改正（5件・要約）</h2>
+            <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
+              <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm">直近の法改正（5件・要約）</h2>
+              <Link
+                href="/laws"
+                className="rounded-lg border border-emerald-600/60 px-2 py-1 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-950/50"
+              >
+                一覧ページへ
+              </Link>
+            </div>
             {state.lawStatus === "loading" && (
               <div className="mt-2 space-y-2">
                 <div className="h-5 w-full animate-pulse rounded bg-slate-700/80" />

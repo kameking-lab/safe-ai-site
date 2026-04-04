@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { signageMeteoRegions } from "@/data/signage-locations";
 import type { ApiErrorResponse, WeatherRiskApiResponse } from "@/lib/types/api";
 import type { WeatherAlert, WeatherSnapshot } from "@/lib/types/domain";
 
@@ -18,16 +19,7 @@ type RegionDefinition = {
   longitude: number;
 };
 
-const WEATHER_REGIONS: RegionDefinition[] = [
-  { regionName: "東京都 新宿区", latitude: 35.6938, longitude: 139.7034 },
-  { regionName: "北海道 札幌市", latitude: 43.0618, longitude: 141.3545 },
-  { regionName: "宮城県 仙台市", latitude: 38.2682, longitude: 140.8694 },
-  { regionName: "愛知県 名古屋市", latitude: 35.1815, longitude: 136.9066 },
-  { regionName: "大阪府 大阪市", latitude: 34.6937, longitude: 135.5023 },
-  { regionName: "広島県 広島市", latitude: 34.3853, longitude: 132.4553 },
-  { regionName: "香川県 高松市", latitude: 34.3403, longitude: 134.0439 },
-  { regionName: "福岡県 福岡市", latitude: 33.5902, longitude: 130.4017 },
-];
+const WEATHER_REGIONS: RegionDefinition[] = signageMeteoRegions;
 
 function errorResponse(
   status: number,

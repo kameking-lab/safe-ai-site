@@ -7,6 +7,8 @@ export type SignageHourlyPoint = {
   precipMm: number;
   windMs: number;
   weatherLabel: string;
+  /** WMO Open-Meteo weathercode */
+  weatherCode: number;
 };
 
 export type SignageWeatherApiResponse = {

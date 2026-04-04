@@ -1,79 +1,19 @@
+import { signageLocations } from "@/data/signage-locations";
 import type { WeatherSnapshot } from "@/lib/types/domain";
 
-export const weatherSnapshotsMock: WeatherSnapshot[] = [
-  {
-    regionName: "東京都 新宿区",
-    date: "2026-03-31",
-    overview: "晴れ時々くもり",
-    temperatureCelsius: 31,
-    windSpeedMs: 9,
-    precipitationMm: 2,
-    alerts: [{ type: "強風注意報", level: "advisory" }],
-  },
-  {
-    regionName: "北海道 札幌市",
-    date: "2026-03-31",
-    overview: "雪まじりの雨",
-    temperatureCelsius: 4,
-    windSpeedMs: 12,
-    precipitationMm: 13,
-    alerts: [{ type: "風雪注意報", level: "advisory" }],
-  },
-  {
-    regionName: "宮城県 仙台市",
-    date: "2026-03-31",
-    overview: "くもり",
-    temperatureCelsius: 12,
-    windSpeedMs: 7,
-    precipitationMm: 3,
-    alerts: [],
-  },
-  {
-    regionName: "愛知県 名古屋市",
-    date: "2026-03-31",
-    overview: "晴れ時々雨",
-    temperatureCelsius: 29,
-    windSpeedMs: 8,
-    precipitationMm: 6,
-    alerts: [{ type: "雷注意報", level: "advisory" }],
-  },
-  {
-    regionName: "大阪府 大阪市",
-    date: "2026-03-31",
-    overview: "くもり一時雨",
-    temperatureCelsius: 24,
-    windSpeedMs: 6,
-    precipitationMm: 11,
-    alerts: [{ type: "大雨注意報", level: "advisory" }],
-  },
-  {
-    regionName: "広島県 広島市",
-    date: "2026-03-31",
-    overview: "晴れ",
-    temperatureCelsius: 22,
-    windSpeedMs: 5,
-    precipitationMm: 0,
-    alerts: [],
-  },
-  {
-    regionName: "香川県 高松市",
-    date: "2026-03-31",
-    overview: "くもり",
-    temperatureCelsius: 23,
-    windSpeedMs: 6,
-    precipitationMm: 1,
-    alerts: [],
-  },
-  {
-    regionName: "福岡県 福岡市",
-    date: "2026-03-31",
-    overview: "暴風雨",
-    temperatureCelsius: 27,
-    windSpeedMs: 16,
-    precipitationMm: 24,
-    alerts: [
-      { type: "暴風警報", level: "warning" },
-      { type: "大雨警報", level: "warning" },
-    ],
-  },
-];
+function mockForRegion(regionName: string, i: number): WeatherSnapshot {
+  const t = 12 + (i % 12);
+  return {
+    regionName,
+    date: new Date().toISOString().slice(0, 10),
+    overview: i % 3 === 0 ? "晴れ" : i % 3 === 1 ? "くもり" : "雨のちくもり",
+    temperatureCelsius: t,
+    windSpeedMs: 4 + (i % 8),
+    precipitationMm: (i * 3) % 15,
+    alerts: i % 5 === 0 ? [{ type: "強風注意報", level: "advisory" }] : [],
+  };
+}
+
+export const weatherSnapshotsMock: WeatherSnapshot[] = signageLocations.map((loc, i) =>
+  mockForRegion(loc.regionName, i)
+);
