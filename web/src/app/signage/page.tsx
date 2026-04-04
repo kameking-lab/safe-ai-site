@@ -256,7 +256,7 @@ export default function SignagePage() {
           <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-600 bg-slate-950/60 p-2 sm:p-3">
             <div className="flex shrink-0 flex-wrap items-start justify-between gap-2">
               <div>
-                <p className="text-xs font-bold text-slate-100 sm:text-sm">気象庁 注意報・警報（都道府県）</p>
+                <p className="text-xs font-bold text-slate-100 sm:text-sm lg:text-base">気象庁 注意報・警報（都道府県）</p>
                 <p className="mt-0.5 text-[9px] text-slate-400 sm:text-[10px]">
                   地図は{" "}
                   <a href="https://www.jma.go.jp/bosai/warning/" className="text-emerald-400 underline" target="_blank" rel="noreferrer">
@@ -306,7 +306,7 @@ export default function SignagePage() {
 
         <div className="flex min-h-0 flex-col gap-2 overflow-hidden xl:col-span-5 xl:min-h-0">
           <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3">
-            <h2 className="shrink-0 text-xs font-bold tracking-wide text-slate-100 sm:text-sm">
+            <h2 className="shrink-0 text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">
               トレンド（労働災害・建設事故）
             </h2>
             <p className="mt-0.5 shrink-0 text-[9px] text-slate-400 sm:text-[10px]">
@@ -324,8 +324,8 @@ export default function SignagePage() {
                     rel="noopener noreferrer"
                     className="block rounded-lg border border-slate-700 bg-slate-950/60 p-2 text-left transition hover:border-emerald-600/80 hover:bg-slate-900 sm:rounded-xl sm:p-3"
                   >
-                    <p className="text-[9px] text-slate-400 sm:text-[10px]">{item.pubDate || "日時不明"}</p>
-                    <p className="mt-0.5 text-sm font-semibold leading-snug text-slate-50 sm:text-base">{item.title}</p>
+                    <p className="text-[9px] text-slate-300 sm:text-[10px]">{item.pubDate || "日時不明"}</p>
+                    <p className="mt-0.5 text-sm font-semibold leading-snug text-slate-50 sm:text-base lg:text-lg">{item.title}</p>
                     <p className="mt-1 text-[10px] font-semibold text-emerald-400 sm:text-xs">記事を開く →</p>
                   </a>
                 </li>
@@ -338,7 +338,7 @@ export default function SignagePage() {
 
           <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3">
             <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
-              <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm">直近の法改正（5件・要約）</h2>
+              <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">直近の法改正（5件・要約）</h2>
               <Link
                 href="/laws"
                 className="rounded-lg border border-emerald-600/60 px-2 py-1 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-950/50"
@@ -366,8 +366,8 @@ export default function SignagePage() {
                     <span>{rev.publishedAt}</span>
                     <span>{rev.issuer}</span>
                   </div>
-                  <h3 className="mt-1 text-sm font-bold text-slate-50 sm:text-base">{rev.title}</h3>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-200 sm:text-sm">{rev.summary || "要約は未設定です。"}</p>
+                  <h3 className="mt-1 text-sm font-bold text-slate-50 sm:text-base lg:text-lg">{rev.title}</h3>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-200 sm:text-sm lg:text-base">{rev.summary || "要約は未設定です。"}</p>
                   {rev.source?.url ? (
                     <a
                       href={rev.source.url}

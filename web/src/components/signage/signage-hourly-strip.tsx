@@ -60,15 +60,15 @@ export function SignageHourlyStrip({ hourly, locationLabel, status }: SignageHou
           <div
             key={h.time}
             role="listitem"
-            className="flex min-h-[4.5rem] min-w-0 flex-col items-center justify-start rounded-lg border border-slate-700/90 bg-slate-900/80 px-0.5 py-1 text-center"
+            className="flex min-h-[4.5rem] min-w-0 flex-col items-center justify-start rounded-lg border border-slate-700/90 bg-slate-900/80 px-0.5 py-1 text-center lg:min-h-[5.5rem]"
           >
-            <span className="line-clamp-2 text-[7px] leading-tight text-slate-400 sm:text-[8px]">{h.hourLabel}</span>
-            <span className="my-0.5 text-lg leading-none sm:text-xl" aria-hidden>
+            <span className="line-clamp-2 text-[7px] leading-tight text-slate-300 sm:text-[8px] lg:text-[9px]">{h.hourLabel}</span>
+            <span className="my-0.5 text-lg leading-none sm:text-xl lg:text-2xl" aria-hidden>
               {weatherIcon(h.weatherCode, h.precipMm)}
             </span>
-            <span className="text-[9px] font-semibold tabular-nums text-slate-100 sm:text-[10px]">{h.tempC}°</span>
+            <span className="text-[9px] font-semibold tabular-nums text-white sm:text-[10px] lg:text-xs">{h.tempC}°</span>
             {h.precipMm >= 0.1 ? (
-              <span className="text-[7px] tabular-nums text-sky-300 sm:text-[8px]">{h.precipMm}mm</span>
+              <span className="text-[7px] tabular-nums text-sky-300 sm:text-[8px] lg:text-[9px]">{h.precipMm}mm</span>
             ) : (
               <span className="text-[7px] text-slate-600 sm:text-[8px]">—</span>
             )}

@@ -1,5 +1,8 @@
 import type { AccidentCase } from "@/lib/types/domain";
 import { realAccidentCases } from "@/data/mock/real-accident-cases";
+import { realAccidentCasesExtra } from "@/data/mock/real-accident-cases-extra";
+import { realAccidentCasesExtra2 } from "@/data/mock/real-accident-cases-extra2";
+import { realAccidentCasesExtra3 } from "@/data/mock/real-accident-cases-extra3";
 import { buildGeneratedAccidentCases } from "@/data/mock/accident-cases-generate";
 
 /**
@@ -13,7 +16,7 @@ let cachedAccidents: AccidentCase[] | null = null;
 export function getAccidentCasesDataset(): AccidentCase[] {
   if (!cachedAccidents) {
     const generated = buildGeneratedAccidentCases(GENERATED_COUNT);
-    cachedAccidents = [...realAccidentCases, ...generated];
+    cachedAccidents = [...realAccidentCases, ...realAccidentCasesExtra, ...realAccidentCasesExtra2, ...realAccidentCasesExtra3, ...generated];
   }
   return cachedAccidents;
 }
