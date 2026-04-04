@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 背景 -->
+  <rect width="32" height="32" rx="6" fill="#059669"/>
+  <!-- ヘルメット本体 -->
+  <path d="M6 17 C6 11 10.5 7 16 7 C21.5 7 26 11 26 17 L26 19 L6 19 Z" fill="white"/>
+  <!-- ヘルメットのつば -->
+  <rect x="4" y="19" width="24" height="3" rx="1.5" fill="white"/>
+  <!-- ヘルメット中央ライン -->
+  <rect x="14.5" y="7" width="3" height="12" rx="1" fill="#059669" opacity="0.3"/>
+</svg>
