@@ -8,6 +8,8 @@ type SignageHeaderProps = {
   nowText: string;
   mode: ApiMode;
   lastUpdatedText: string;
+  /** 横長サイネージ向けに説明文を省略 */
+  compact?: boolean;
 };
 
 function modeLabel(mode: ApiMode) {
@@ -17,20 +19,28 @@ function modeLabel(mode: ApiMode) {
   return { text: "mock（訓練データ）", className: "bg-slate-500/20 text-slate-200 border-slate-400/60" };
 }
 
-export function SignageHeader({ regionLabel, nowText, mode, lastUpdatedText }: SignageHeaderProps) {
+export function SignageHeader({
+  regionLabel,
+  nowText,
+  mode,
+  lastUpdatedText,
+  compact,
+}: SignageHeaderProps) {
   const label = modeLabel(mode);
 
   return (
-    <header className="flex flex-col gap-4 border-b border-slate-700/60 pb-4 lg:flex-row lg:items-end lg:justify-between">
-      <div>
-        <p className="text-sm font-semibold tracking-wide text-emerald-300">安全AIサイト サイネージモード</p>
-        <h1 className="mt-1 text-3xl font-bold leading-tight text-slate-50 lg:text-4xl">
+    <header className="flex shrink-0 flex-col gap-2 border-b border-slate-700/60 pb-2 sm:gap-3 sm:pb-3 lg:flex-row lg:items-end lg:justify-between">
+      <div className="min-w-0">
+        <p className="text-xs font-semibold tracking-wide text-emerald-300 sm:text-sm">安全AIサイト サイネージ</p>
+        <h1 className="mt-0.5 text-xl font-bold leading-tight text-slate-50 sm:text-2xl lg:text-3xl">
           今日の現場リスクと安全要点
         </h1>
-        <p className="mt-2 text-base text-slate-200">
-          朝礼・常時表示向けに、今日のリスク・事故要点・法改正ポイントを1画面で確認できます。
-        </p>
-        <div className="mt-3 flex flex-wrap gap-2 text-xs">
+        {!compact && (
+          <p className="mt-1 hidden text-sm text-slate-200 md:block">
+            朝礼・常時表示向けに、リスク・事故要点・法改正を1画面で確認できます。
+          </p>
+        )}
+        <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] sm:text-xs">
           <Link className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/">
             ポータルへ戻る
           </Link>
@@ -45,18 +55,18 @@ export function SignageHeader({ regionLabel, nowText, mode, lastUpdatedText }: S
           </Link>
         </div>
       </div>
-      <div className="flex flex-wrap items-end gap-3 text-sm">
-        <div className="flex flex-col items-end gap-1 text-right">
-          <p className="text-xs text-slate-300">対象地域</p>
-          <p className="text-lg font-semibold text-slate-50">{regionLabel}</p>
+      <div className="flex flex-wrap items-end gap-2 text-xs sm:gap-3 sm:text-sm">
+        <div className="flex flex-col items-end gap-0.5 text-right">
+          <p className="text-[10px] text-slate-300 sm:text-xs">地点（天気）</p>
+          <p className="max-w-[200px] truncate text-sm font-semibold text-slate-50 sm:text-base">{regionLabel}</p>
         </div>
-        <div className="flex flex-col items-end gap-1 text-right">
-          <p className="text-xs text-slate-300">現在時刻</p>
-          <p className="text-lg font-semibold text-slate-50 tabular-nums">{nowText}</p>
-          <p className="text-[11px] text-slate-400">最終更新: {lastUpdatedText}</p>
+        <div className="flex flex-col items-end gap-0.5 text-right">
+          <p className="text-[10px] text-slate-300 sm:text-xs">現在時刻</p>
+          <p className="text-sm font-semibold tabular-nums text-slate-50 sm:text-base">{nowText}</p>
+          <p className="text-[10px] text-slate-400 sm:text-[11px]">更新: {lastUpdatedText}</p>
         </div>
         <span
-          className={`flex items-center gap-1 rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide ${label.className}`}
+          className={`flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-wide sm:px-3 sm:text-[11px] ${label.className}`}
         >
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-300" />
           API MODE: {label.text}

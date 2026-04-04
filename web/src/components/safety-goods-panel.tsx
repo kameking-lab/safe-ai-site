@@ -8,8 +8,11 @@ import {
   type SafetyGoodsCategory,
   type SafetyGoodsItem,
 } from "@/data/mock/safety-goods";
+import { withAmazonAssociateTag, withRakutenAffiliateId } from "@/lib/affiliate-links";
 
 function GoodsCard({ item }: { item: SafetyGoodsItem }) {
+  const amazonHref = withAmazonAssociateTag(item.amazonUrl);
+  const rakutenHref = withRakutenAffiliateId(item.rakutenUrl);
   return (
     <article className="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
       <div className="flex h-36 items-center justify-center rounded-t-xl bg-slate-100 text-3xl">
@@ -31,7 +34,7 @@ function GoodsCard({ item }: { item: SafetyGoodsItem }) {
         <p className="mt-2 text-sm font-bold text-emerald-700">{item.price}</p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <a
-            href={item.amazonUrl}
+            href={amazonHref}
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-lg bg-amber-500 py-2 text-center text-xs font-bold text-white hover:bg-amber-600"
@@ -39,7 +42,7 @@ function GoodsCard({ item }: { item: SafetyGoodsItem }) {
             Amazonで見る
           </a>
           <a
-            href={item.rakutenUrl}
+            href={rakutenHref}
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-lg bg-rose-500 py-2 text-center text-xs font-bold text-white hover:bg-rose-600"

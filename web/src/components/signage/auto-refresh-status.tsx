@@ -7,12 +7,12 @@ type AutoRefreshStatusProps = {
 
 export function AutoRefreshStatus({ intervalMinutes, lastUpdatedText }: AutoRefreshStatusProps) {
   return (
-    <div className="flex items-center justify-between text-xs text-slate-300">
+    <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-t border-slate-700/50 pt-2 text-[10px] text-slate-400 sm:text-xs">
       <p>
-        自動更新間隔: <span className="font-semibold">{intervalMinutes}分ごと</span>
+        自動更新 <span className="font-semibold text-slate-300">{intervalMinutes}分</span>
       </p>
-      <p>
-        最終更新: <span className="font-mono">{lastUpdatedText}</span>
+      <p className="tabular-nums">
+        更新 <span className="text-slate-300">{lastUpdatedText}</span>
       </p>
     </div>
   );

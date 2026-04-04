@@ -1,46 +1,47 @@
-/** 報道ベースの労働災害ニュース（モック）。リンク先は公開ニュース例。 */
+/** 報道ベースの労働災害ニュース（見出し例）。リンクは検索エンジン経由で偽URLを避ける。 */
 export type NewsLaborAccident = {
   id: string;
   title: string;
   source: string;
   occurredOn: string;
-  url: string;
+  /** 検索クエリに足す語（省略時は「労働災害」） */
+  searchKeyword?: string;
 };
 
 export const newsLaborAccidentsMock: NewsLaborAccident[] = [
   {
     id: "news-1",
     title: "建設現場で足場から転落、作業員が重体",
-    source: "共同通信",
+    source: "報道検索",
     occurredOn: "2026-03-28",
-    url: "https://www.mhlw.go.jp/",
+    searchKeyword: "建設 転落",
   },
   {
     id: "news-2",
     title: "工場内で挟まれ事故、生産ライン停止",
-    source: "地方紙",
+    source: "報道検索",
     occurredOn: "2026-03-22",
-    url: "https://www.mhlw.go.jp/",
+    searchKeyword: "工場 挟まれ",
   },
   {
     id: "news-3",
     title: "高所作業中の墜落、安全帯未着用が焦点",
-    source: "日経",
+    source: "報道検索",
     occurredOn: "2026-03-15",
-    url: "https://www.mhlw.go.jp/",
+    searchKeyword: "高所作業 墜落",
   },
   {
     id: "news-4",
     title: "解体現場で飛来物、歩行者に軽傷",
-    source: "報道各社",
+    source: "報道検索",
     occurredOn: "2026-03-10",
-    url: "https://www.mhlw.go.jp/",
+    searchKeyword: "解体 飛来物",
   },
   {
     id: "news-5",
     title: "熱中症疑いで搬送、屋外作業の見直し呼びかけ",
-    source: "NHK",
+    source: "報道検索",
     occurredOn: "2026-03-05",
-    url: "https://www.mhlw.go.jp/",
+    searchKeyword: "熱中症 労働",
   },
 ];

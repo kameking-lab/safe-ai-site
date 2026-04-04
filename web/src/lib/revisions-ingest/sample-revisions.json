@@ -9,8 +9,8 @@
     "issuer": "厚生労働省",
     "summary": "足場の点検頻度と安全帯の使用基準が見直され、現場責任者による作業前確認の明確化が求められます。",
     "source": {
-      "url": "https://www.mhlw.go.jp/",
-      "label": "厚生労働省 法令・通知",
+      "url": "https://elaws.e-gov.go.jp/document?lawid=322AC0000000057",
+      "label": "e-Gov 法令検索（労働安全衛生法）",
       "issuer": "厚生労働省"
     }
   },
@@ -24,8 +24,8 @@
     "issuer": "厚生労働省",
     "summary": "対象物質の範囲が拡大され、保管・取扱い工程ごとのリスク評価と作業手順書の更新が必要になります。",
     "source": {
-      "url": "https://www.mhlw.go.jp/",
-      "label": "厚生労働省 化学物質対策",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/roudoukijun/chemical_man/",
+      "label": "厚生労働省 化学物質等による健康障害防止指針",
       "issuer": "厚生労働省"
     }
   },
@@ -39,8 +39,8 @@
     "issuer": "厚生労働省 労働基準局",
     "summary": "WBGT値を踏まえた休憩計画、給水管理、体調報告の運用が明記され、夏季の現場管理基準が具体化されました。",
     "source": {
-      "url": "https://www.mhlw.go.jp/",
-      "label": "厚生労働省 熱中症予防情報",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/roudoukijun/netuityou01.html",
+      "label": "厚生労働省 職場の熱中症予防",
       "issuer": "厚生労働省 労働基準局"
     }
   },
@@ -54,8 +54,8 @@
     "issuer": "厚生労働省",
     "summary": "歩行者動線とフォークリフト動線の分離、バック時の合図運用、点検記録の厳格化が求められます。",
     "source": {
-      "url": "https://www.mhlw.go.jp/",
-      "label": "厚生労働省 労働安全衛生法関連",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/roudou/seisakunitsuite13/",
+      "label": "厚生労働省 労働者の安全と健康確保",
       "issuer": "厚生労働省"
     }
   },
@@ -69,8 +69,8 @@
     "issuer": "厚生労働省",
     "summary": "騒音ばく露評価の見直しと保護具着用の監督強化、健康診断結果の活用手順が明確化されました。",
     "source": {
-      "url": "https://www.mhlw.go.jp/",
-      "label": "厚生労働省 騒音障害防止対策",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/kenkou_iryou/rousaihoken/",
+      "label": "厚生労働省 労災保険・安全衛生",
       "issuer": "厚生労働省"
     }
   }
