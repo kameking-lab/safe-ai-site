@@ -105,7 +105,7 @@ export function AppShell({ children }: AppShellProps) {
         )}
 
         <main className="flex flex-1 flex-col">
-          <div className="mx-auto w-full max-w-6xl flex-1">{children}</div>
+          <div className="mx-auto w-full max-w-7xl flex-1">{children}</div>
         </main>
       </div>
     </div>

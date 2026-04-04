@@ -149,7 +149,7 @@ const defaultKyInstructionRecord: KyInstructionRecordState = {
 
 function normalizeKyInstructionRecord(raw: KyInstructionRecordState): KyInstructionRecordState {
   const merged = { ...defaultKyInstructionRecord, ...raw };
-  let participants = Array.isArray(merged.participants) ? [...merged.participants] : [];
+  const participants = Array.isArray(merged.participants) ? [...merged.participants] : [];
   if (participants.length < 2) {
     while (participants.length < 6) participants.push(emptyParticipant());
   }
