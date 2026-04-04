@@ -28,6 +28,7 @@ export function SignageFeaturedGoods() {
               key={item.id}
               className="flex flex-col overflow-hidden rounded-lg border border-slate-700 bg-slate-950/70"
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               {item.imageUrl ? (
                 <img
                   src={item.imageUrl}

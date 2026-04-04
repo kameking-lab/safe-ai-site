@@ -6,7 +6,7 @@ export function Header() {
         現場の安全情報を、すばやく確認
       </h1>
       <p className="mt-2 text-sm leading-7 text-slate-600">
-        法改正の一覧、AI要約、質問チャットを1つの画面で使えるMVPです。
+        法改正・現場リスク・事故DB・KY用紙をまとめて確認できます。
       </p>
     </header>
   );

@@ -44,7 +44,15 @@ type DashboardState = {
 
 export default function SignagePage() {
   const services = useMemo(() => createServices(), []);
-  const [selectedLocationId, setSelectedLocationId] = useState("tokyo-shinjuku");
+  const [selectedLocationId, setSelectedLocationId] = useState(() => {
+    if (typeof window !== "undefined") {
+      const stored = window.localStorage.getItem(LOCATION_STORAGE_KEY);
+      if (stored && signageLocations.some((l) => l.id === stored)) {
+        return stored;
+      }
+    }
+    return "tokyo-shinjuku";
+  });
   const [bundle, setBundle] = useState<SignageDataApiResponse | null>(null);
   const [bundleStatus, setBundleStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
@@ -80,13 +88,6 @@ export default function SignagePage() {
     return [...state.lawRevisions].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)).slice(0, 5);
   }, [state.lawRevisions]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = window.localStorage.getItem(LOCATION_STORAGE_KEY);
-    if (stored && signageLocations.some((l) => l.id === stored)) {
-      setSelectedLocationId(stored);
-    }
-  }, []);
 
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat("ja-JP", {

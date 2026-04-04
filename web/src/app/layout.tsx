@@ -13,8 +13,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "安全AIサイト",
-  description: "法改正の確認・要約・質問をまとめて行えるMVP",
+  title: {
+    default: "安全AIサイト｜労働安全の現場運用ポータル",
+    template: "%s｜安全AIサイト",
+  },
+  description:
+    "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。建設・製造現場の安全担当者を支援します。",
+  metadataBase: new URL("https://safe-ai-site.vercel.app"),
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    siteName: "安全AIサイト",
+  },
 };
 
 export default function RootLayout({

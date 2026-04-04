@@ -187,7 +187,7 @@ export function KyInstructionRecordForm({ value, onChange, onSave, savedLabel }:
         <table className="w-full min-w-[720px] border-collapse text-xs">
           <thead>
             <tr className="bg-slate-100">
-              {["報告確認", "統括安全衛生責任者", "元方安全衛生管理者", "担当者", "協力会社責任者"].map((h, i) => (
+              {["報告確認", "統括安全衛生責任者", "元方安全衛生管理者", "担当者", "協力会社責任者"].map((h) => (
                 <th key={h} className="border border-slate-300 px-1 py-2 font-semibold text-slate-800">
                   {h}
                 </th>
