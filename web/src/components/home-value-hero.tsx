@@ -2,48 +2,95 @@
 
 import Link from "next/link";
 
+const FEATURES = [
+  {
+    icon: "⛈",
+    color: "bg-emerald-50 border-emerald-200",
+    labelColor: "text-emerald-800",
+    label: "朝礼・現場リスク",
+    desc: "今日の天気・警報から現場向け注意事項を自動生成。朝礼ネタがすぐ揃う",
+    href: "/risk",
+    btnColor: "bg-emerald-600 hover:bg-emerald-700",
+    btnLabel: "今日のリスクを確認",
+  },
+  {
+    icon: "⚖",
+    color: "bg-sky-50 border-sky-200",
+    labelColor: "text-sky-800",
+    label: "法改正チェック",
+    desc: "労安法・化学物質管理など100件以上の改正を一覧。AI要約・質問で即理解",
+    href: "/laws",
+    btnColor: "bg-sky-600 hover:bg-sky-700",
+    btnLabel: "法改正を見る",
+  },
+  {
+    icon: "📋",
+    color: "bg-orange-50 border-orange-200",
+    labelColor: "text-orange-800",
+    label: "KY・事故DB・Eラーニング",
+    desc: "KY用紙の作成・事故事例200件以上の検索・Eラーニングをワンストップで",
+    href: "/ky",
+    btnColor: "bg-orange-600 hover:bg-orange-700",
+    btnLabel: "KY用紙を作成",
+  },
+] as const;
+
 export function HomeValueHero() {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-label="ホームの価値案内">
-      <h2 className="text-base font-bold text-slate-900 sm:text-lg">
-        今日の安全判断を、現場運用ポータルで。
-      </h2>
-      <p className="mt-2 text-sm leading-6 text-slate-700">
-        現場責任者・安全担当向けに、サイネージ、今日のリスク確認、法改正チェック、AI要約と質問、事故DBをまとめて扱えます。
-      </p>
-
-      <ul className="mt-3 space-y-2 text-sm text-slate-700">
-        <li className="rounded-lg bg-emerald-50 px-3 py-2">
-          <span className="font-semibold text-emerald-800">今日の現場リスク:</span>{" "}
-          地域ごとの天気・警報から、朝礼で伝える注意点をすぐ確認
-        </li>
-        <li className="rounded-lg bg-sky-50 px-3 py-2">
-          <span className="font-semibold text-sky-800">法改正チェック:</span>{" "}
-          重要な改正を一覧で見て、影響範囲を短時間で把握
-        </li>
-        <li className="rounded-lg bg-amber-50 px-3 py-2">
-          <span className="font-semibold text-amber-800">AI要約 / 質問チャット:</span>{" "}
-          現場向けに要点を掴み、疑問をその場で整理
-        </li>
-      </ul>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Link
-          href="/risk"
-          className="rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
-        >
-          今日の現場リスクを見る
-        </Link>
-        <Link href="/laws" className="rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-700">
-          法改正を確認する
-        </Link>
-        <Link
-          href="/laws?tab=chat"
-          className="rounded-md bg-amber-600 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-700"
-        >
-          質問チャットを使う
-        </Link>
+    <div className="space-y-4" aria-label="ホームの価値案内">
+      {/* メインキャッチ */}
+      <div className="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-800 to-slate-700 px-5 py-5 text-white shadow-md">
+        <p className="text-xs font-semibold uppercase tracking-widest text-slate-300">
+          労働安全コンサルタント監修
+        </p>
+        <h2 className="mt-1 text-xl font-bold leading-snug sm:text-2xl">
+          現場の安全判断を、<br className="sm:hidden" />
+          今すぐ・ここで完結。
+        </h2>
+        <p className="mt-2 text-sm leading-6 text-slate-300">
+          建設・製造・林業の現場責任者・安全担当向け。
+          朝礼用リスク確認・法改正・KY用紙・事故DB・Eラーニングを一つのポータルに集約。
+          スマホでも大画面サイネージでも使えます。
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link
+            href="/signage"
+            className="rounded-md bg-emerald-500 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-400"
+          >
+            サイネージ表示
+          </Link>
+          <Link
+            href="/risk"
+            className="rounded-md border border-slate-500 bg-slate-700 px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-600"
+          >
+            今日の現場リスク
+          </Link>
+        </div>
       </div>
-    </section>
+
+      {/* 3大機能カード */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {FEATURES.map((f) => (
+          <div
+            key={f.label}
+            className={`flex flex-col justify-between rounded-xl border p-4 ${f.color}`}
+          >
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl" aria-hidden="true">{f.icon}</span>
+                <span className={`text-xs font-bold ${f.labelColor}`}>{f.label}</span>
+              </div>
+              <p className="mt-2 text-xs leading-5 text-slate-700">{f.desc}</p>
+            </div>
+            <Link
+              href={f.href}
+              className={`mt-3 inline-block rounded-md px-3 py-2 text-center text-xs font-semibold text-white ${f.btnColor}`}
+            >
+              {f.btnLabel}
+            </Link>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
