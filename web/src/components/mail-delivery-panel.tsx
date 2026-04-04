@@ -1,5 +1,6 @@
 "use client";
 
+import { InputWithVoice } from "@/components/voice-input-field";
 import type { MailDeliverySettings } from "@/lib/types/operations";
 
 type MailDeliveryPanelProps = {
@@ -30,9 +31,9 @@ export function MailDeliveryPanel({
         </label>
         <div>
           <label className="block text-xs font-semibold text-slate-700" htmlFor="mail-email">宛先メール</label>
-          <input
+          <InputWithVoice
             id="mail-email"
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full"
             onChange={(event) => update({ email: event.target.value })}
             placeholder="safety-team@example.com"
             type="email"

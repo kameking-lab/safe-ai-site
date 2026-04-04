@@ -1,11 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { LearningTheme } from "@/lib/types/operations";
-
-type ELearningPanelProps = {
-  onJumpToKy?: () => void;
-};
 
 const themes: LearningTheme[] = [
   {
@@ -70,7 +67,7 @@ const themes: LearningTheme[] = [
   },
 ];
 
-export function ELearningPanel({ onJumpToKy }: ELearningPanelProps) {
+export function ELearningPanel() {
   const [themeId, setThemeId] = useState(themes[0].id);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const selectedTheme = useMemo(() => themes.find((theme) => theme.id === themeId) ?? themes[0], [themeId]);
@@ -132,9 +129,9 @@ export function ELearningPanel({ onJumpToKy }: ELearningPanelProps) {
       </div>
       <div className="mt-3 flex items-center justify-between">
         <p className="text-sm font-semibold text-slate-800">学習チェック: {score} / {selectedTheme.questions.length}</p>
-        <button className="rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white" onClick={onJumpToKy} type="button">
+        <Link className="rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white" href="/ky">
           KY用紙へ
-        </button>
+        </Link>
       </div>
     </section>
   );

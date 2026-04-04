@@ -1,6 +1,10 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import type { LawRevision } from "@/lib/types/domain";
 import type { ServiceError } from "@/lib/types/api";
 import { ErrorNotice } from "@/components/error-notice";
+import { InputWithVoice } from "@/components/voice-input-field";
 
 function formatPublishedDate(value: string) {
   const [year, month, day] = value.split("-");
@@ -51,7 +55,26 @@ export function LawRevisionList({
   onSelectSummary,
   onSelectForQuestion,
 }: LawRevisionListProps) {
-  const showEmptyState = status === "success" && !error && revisions.length === 0;
+  const [search, setSearch] = useState("");
+  const [yearFrom, setYearFrom] = useState(2016);
+  const [yearTo, setYearTo] = useState(2026);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return revisions.filter((r) => {
+      const y = Number(r.publishedAt.slice(0, 4));
+      if (y < yearFrom || y > yearTo) return false;
+      if (!q) return true;
+      return (
+        r.title.toLowerCase().includes(q) ||
+        r.summary.toLowerCase().includes(q) ||
+        r.issuer.toLowerCase().includes(q) ||
+        r.revisionNumber.toLowerCase().includes(q)
+      );
+    });
+  }, [revisions, search, yearFrom, yearTo]);
+
+  const showEmptyState = status === "success" && !error && filtered.length === 0;
 
   return (
     <section
@@ -60,8 +83,46 @@ export function LawRevisionList({
     >
       <h2 className="text-base font-bold text-slate-900 sm:text-lg">法改正一覧</h2>
       <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-        改正内容を確認し、要約または質問に進んでください。
+        直近10年相当のサンプルを含みます。キーワード・年で絞り込みできます（音声入力対応）。
       </p>
+      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="sm:col-span-2">
+          <label className="text-xs font-semibold text-slate-700" htmlFor="law-search">
+            キーワード
+          </label>
+          <InputWithVoice
+            className="mt-1"
+            id="law-search"
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="タイトル・概要・発出元で検索"
+            value={search}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <label className="text-xs font-semibold text-slate-700">
+            年（自）
+            <input
+              className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"
+              max={2026}
+              min={1990}
+              onChange={(e) => setYearFrom(Number(e.target.value))}
+              type="number"
+              value={yearFrom}
+            />
+          </label>
+          <label className="text-xs font-semibold text-slate-700">
+            年（至）
+            <input
+              className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"
+              max={2030}
+              min={1990}
+              onChange={(e) => setYearTo(Number(e.target.value))}
+              type="number"
+              value={yearTo}
+            />
+          </label>
+        </div>
+      </div>
       {error && (
         <ErrorNotice title="一覧の取得に失敗しました" error={error} onRetry={onRetry} retryLabel={retryLabel} />
       )}
@@ -71,8 +132,8 @@ export function LawRevisionList({
       {showEmptyState && (
         <p className="mt-2 text-xs text-slate-500">表示できる法改正データがありません。</p>
       )}
-      <ul className="mt-3 space-y-3">
-        {revisions.map((revision) => {
+      <ul className="mt-3 max-h-[70vh] space-y-3 overflow-y-auto pr-1">
+        {filtered.map((revision) => {
           const isSelected = selectedRevisionId === revision.id;
           const isLoadingSummary = loadingRevisionId === revision.id;
 

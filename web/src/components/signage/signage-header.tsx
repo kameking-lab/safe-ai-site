@@ -34,12 +34,12 @@ export function SignageHeader({ regionLabel, nowText, mode, lastUpdatedText }: S
           <Link className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/">
             ポータルへ戻る
           </Link>
-          <Link className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/#section-ky-sheet">
+          <Link className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/ky">
             KY用紙へ
           </Link>
           <Link
             className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800"
-            href="/#section-notification-settings"
+            href="/notifications"
           >
             通知設定へ
           </Link>

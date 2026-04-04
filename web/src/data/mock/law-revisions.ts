@@ -1,3 +1,4 @@
+import { buildDecadeLawRevisionMocks } from "@/data/mock/decade-law-revisions";
 import { loadRealRevisionsFromPayload, loadSampleRevisions, type RevisionsIngestSource } from "@/lib/revisions-ingest";
 import type { LawRevisionCore } from "@/lib/types/domain";
 
@@ -40,7 +41,9 @@ export const lawRevisionCores = (() => {
   }
 
   const loaded = loadSampleRevisions();
-  return loaded.length > 0 ? loaded : fallbackLawRevisions;
+  const decade = buildDecadeLawRevisionMocks();
+  const merged = [...loaded, ...decade].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  return merged.length > 0 ? merged : fallbackLawRevisions;
 })();
 
 function toIngestSource(value: string | undefined): RevisionsIngestSource {

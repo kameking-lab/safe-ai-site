@@ -4,7 +4,7 @@ test.describe.configure({ mode: "serial" });
 
 test.describe("live mode", () => {
   test("正常系: 一覧表示→要約表示→チャット送信 @smoke", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/laws");
 
     await page.getByRole("button", { name: "法改正一覧" }).click();
     await expect(page.getByRole("heading", { name: "法改正一覧" }).first()).toBeVisible();
@@ -26,7 +26,7 @@ test.describe("live mode", () => {
   });
 
   test("正常系: 今日の現場リスクカードが表示される @smoke", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/risk");
     await expect(page.getByRole("heading", { name: "今日の現場リスク" })).toBeVisible();
     await expect(page.getByText("地域:")).toBeVisible();
     await expect(page.getByText("主な注意点")).toBeVisible();
@@ -61,7 +61,7 @@ test.describe("live mode", () => {
       ])
     );
 
-    await page.goto(`/?ingestSource=real&realSourcePayload=${payload}`);
+    await page.goto(`/laws?ingestSource=real&realSourcePayload=${payload}`);
     await page.getByRole("button", { name: "法改正一覧" }).click();
 
     await expect(page.getByText("sourceなしレコード")).toBeVisible();
@@ -86,7 +86,7 @@ test.describe("live mode", () => {
     );
 
     await page.goto(
-      `/?ingestSource=real&realSourceFormat=official-db&realSourcePayload=${officialPayload}`
+      `/laws?ingestSource=real&realSourceFormat=official-db&realSourcePayload=${officialPayload}`
     );
     await page.getByRole("button", { name: "法改正一覧" }).click();
     await expect(page.getByText("公式DB形式の法改正")).toBeVisible();
@@ -94,7 +94,7 @@ test.describe("live mode", () => {
   });
 
   test("失敗系: 一覧API 5xx でエラー通知表示 @failure", async ({ page }) => {
-    await page.goto("/?forceRevisionsError=5xx");
+    await page.goto("/laws?forceRevisionsError=5xx");
     await page.getByRole("button", { name: "法改正一覧" }).click();
     await expect(page.getByText("一覧の取得に失敗しました")).toBeVisible();
     await expect(page.getByText("法改正一覧APIが一時的に利用できません。")).toBeVisible();
@@ -104,7 +104,7 @@ test.describe("live mode", () => {
   });
 
   test("失敗系: 一覧API timeout でエラー通知表示 @failure", async ({ page }) => {
-    await page.goto("/?forceRevisionsError=timeout");
+    await page.goto("/laws?forceRevisionsError=timeout");
     await page.getByRole("button", { name: "法改正一覧" }).click();
     await expect(page.getByText("一覧の取得に失敗しました")).toBeVisible();
     await expect(page.getByText("法改正一覧の取得がタイムアウトしました。再試行してください。")).toBeVisible();
@@ -112,7 +112,7 @@ test.describe("live mode", () => {
   });
 
   test("失敗系: 一覧API validation で再試行なし表示 @failure", async ({ page }) => {
-    await page.goto("/?forceRevisionsError=validation");
+    await page.goto("/laws?forceRevisionsError=validation");
     await page.getByRole("button", { name: "法改正一覧" }).click();
     await expect(page.getByText("一覧の取得に失敗しました")).toBeVisible();
     await expect(page.getByText("法改正一覧APIの入力検証エラーです。")).toBeVisible();
@@ -122,7 +122,7 @@ test.describe("live mode", () => {
 
   test("失敗系: real ingest 失敗時に fallback reason header が返る @failure", async ({ page }) => {
     const responsePromise = page.waitForResponse((response) => response.url().includes("/api/revisions"));
-    await page.goto("/?ingestSource=real&realSourceUrl=https%3A%2F%2Fevil.com%2Frevisions.json");
+    await page.goto("/laws?ingestSource=real&realSourceUrl=https%3A%2F%2Fevil.com%2Frevisions.json");
     const response = await responsePromise;
     const fallbackReason = response.headers()["x-revisions-ingest-fallback-reason"];
     expect(fallbackReason).toBe("endpoint_not_allowed");
@@ -131,7 +131,7 @@ test.describe("live mode", () => {
   });
 
   test("失敗系: 要約API 5xx で ErrorNotice と再試行表示 @failure", async ({ page }) => {
-    await page.goto("/?forceSummaryError=5xx");
+    await page.goto("/laws?forceSummaryError=5xx");
     await page.getByRole("button", { name: "AI要約" }).click();
     await page.getByRole("button", { name: "AIで要約" }).first().click();
     await expect(page.getByText("要約の取得に失敗しました")).toBeVisible();
@@ -140,7 +140,7 @@ test.describe("live mode", () => {
   });
 
   test("失敗系: 要約API timeout で ErrorNotice 表示 @failure", async ({ page }) => {
-    await page.goto("/?forceSummaryError=timeout");
+    await page.goto("/laws?forceSummaryError=timeout");
     await page.getByRole("button", { name: "AI要約" }).click();
     await page.getByRole("button", { name: "AIで要約" }).first().click();
     await expect(page.getByText("要約API応答がタイムアウトしました。")).toBeVisible({ timeout: 12000 });
@@ -148,7 +148,7 @@ test.describe("live mode", () => {
   });
 
   test("失敗系: 要約API validation で再試行なし表示 @failure", async ({ page }) => {
-    await page.goto("/?forceSummaryError=validation");
+    await page.goto("/laws?forceSummaryError=validation");
     await page.getByRole("button", { name: "AI要約" }).click();
     await page.getByRole("button", { name: "AIで要約" }).first().click();
     await expect(page.getByText("要約APIの入力検証エラーです。")).toBeVisible();
@@ -157,7 +157,7 @@ test.describe("live mode", () => {
   });
 
   test("失敗系: チャットAPI validation で再試行なし表示 @failure", async ({ page }) => {
-    await page.goto("/?forceChatError=validation");
+    await page.goto("/laws?forceChatError=validation");
     await page.getByRole("button", { name: "質問チャット" }).click();
     await page.getByRole("button", { name: "質問する" }).first().click();
     await page.getByLabel("質問入力").fill("施行日はいつですか");
@@ -167,7 +167,7 @@ test.describe("live mode", () => {
   });
 
   test("失敗系: チャットAPI 5xx で再試行表示 @failure", async ({ page }) => {
-    await page.goto("/?forceChatError=5xx");
+    await page.goto("/laws?forceChatError=5xx");
     await page.getByRole("button", { name: "質問チャット" }).click();
     await page.getByRole("button", { name: "質問する" }).first().click();
     await page.getByLabel("質問入力").fill("施行日はいつですか");
@@ -177,7 +177,7 @@ test.describe("live mode", () => {
   });
 
   test("失敗系: チャットAPI timeout で再試行表示 @failure", async ({ page }) => {
-    await page.goto("/?forceChatError=timeout");
+    await page.goto("/laws?forceChatError=timeout");
     await page.getByRole("button", { name: "質問チャット" }).click();
     await page.getByRole("button", { name: "質問する" }).first().click();
     await page.getByLabel("質問入力").fill("施行日はいつですか");
@@ -189,26 +189,26 @@ test.describe("live mode", () => {
   });
 
   test("回復系: 要約API 5xx から再試行で回復 @recovery", async ({ page }) => {
-    await page.goto("/?forceSummaryError=5xx");
+    await page.goto("/laws?forceSummaryError=5xx");
     await page.getByRole("button", { name: "AI要約" }).click();
     await page.getByRole("button", { name: "AIで要約" }).first().click();
     await expect(page.getByText("要約の取得に失敗しました")).toBeVisible();
 
-    await page.goto("/");
+    await page.goto("/laws");
     await page.getByRole("button", { name: "AI要約" }).click();
     await page.getByRole("button", { name: "AIで要約" }).first().click();
     await expect(page.getByText("3行要約")).toBeVisible();
   });
 
   test("回復系: チャットAPI 5xx から再送で回復 @recovery", async ({ page }) => {
-    await page.goto("/?forceChatError=5xx");
+    await page.goto("/laws?forceChatError=5xx");
     await page.getByRole("button", { name: "質問チャット" }).click();
     await page.getByRole("button", { name: "質問する" }).first().click();
     await page.getByLabel("質問入力").fill("施行日はいつですか");
     await page.getByRole("button", { name: "送信" }).click();
     await expect(page.getByText("チャットAPIが一時的に利用できません。")).toBeVisible();
 
-    await page.goto("/");
+    await page.goto("/laws");
     await page.getByRole("button", { name: "質問チャット" }).click();
     await page.getByRole("button", { name: "質問する" }).first().click();
     await page.getByLabel("質問入力").fill("施行日はいつですか");

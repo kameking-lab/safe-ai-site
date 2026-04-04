@@ -1,9 +1,9 @@
 import { HomeScreen } from "@/components/home-screen";
 import { Header } from "@/components/header";
 
-export default function Home() {
+export default function NotificationsPage() {
   return (
-    <HomeScreen>
+    <HomeScreen variant="notifications">
       <Header />
     </HomeScreen>
   );

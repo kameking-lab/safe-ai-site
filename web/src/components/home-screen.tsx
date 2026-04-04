@@ -6,8 +6,10 @@ import { AccidentDatabasePanel } from "@/components/accident-database-panel";
 import { ELearningPanel } from "@/components/elearning-panel";
 import { HomeValueHero } from "@/components/home-value-hero";
 import { KySheetPanel } from "@/components/ky-sheet-panel";
+import { KyPaperForm } from "@/components/ky-paper-form";
 import { LawRevisionList } from "@/components/law-revision-list";
 import { MailDeliveryPanel } from "@/components/mail-delivery-panel";
+import { MhlwDisasterDatabasesPanel } from "@/components/mhlw-disaster-databases-panel";
 import { NotificationSettingsPanel } from "@/components/notification-settings-panel";
 import { PdfExportPanel } from "@/components/pdf-export-panel";
 import { PortalQuickLinks } from "@/components/portal-quick-links";
@@ -23,17 +25,67 @@ import type {
   RevisionSummary,
   SiteRiskWeather,
 } from "@/lib/types/domain";
-import type { KySheetDraft, MailDeliverySettings, NotificationSettings, PdfExportTarget } from "@/lib/types/operations";
+import type {
+  KyPaperFormState,
+  KySheetDraft,
+  MailDeliverySettings,
+  NotificationSettings,
+  PdfExportTarget,
+} from "@/lib/types/operations";
+
+export type HomeScreenVariant =
+  | "portal"
+  | "risk"
+  | "laws"
+  | "accidents"
+  | "elearning"
+  | "ky"
+  | "notifications"
+  | "pdf";
+
 type HomeScreenProps = {
   children: React.ReactNode;
+  variant?: HomeScreenVariant;
+  initialLawTab?: TabId;
 };
 
-export function HomeScreen({ children }: HomeScreenProps) {
+function makeInitialKyPaper(): KyPaperFormState {
+  const d = new Date().toISOString().slice(0, 10);
+  const row = (): KyPaperFormState["rows"][number] => ({
+    predictedHarm: "",
+    magnitude: 1,
+    probability: 1,
+    evaluation: 1,
+    riskGrade: "D",
+    reductionMeasures: "",
+    reMagnitude: 1,
+    reProbability: 1,
+    reEvaluation: 1,
+    reRiskGrade: "D",
+    reMeasures: "",
+  });
+  return {
+    date: d,
+    companyName: "",
+    personInCharge: "",
+    workContent: "",
+    supervisorInstructions: "",
+    rows: [row(), row()],
+    participantNames: "",
+    pointingCall: "",
+    siteAgentSign: "",
+    supervisorSign: "",
+  };
+}
+
+export function HomeScreen({ children, variant: variantProp, initialLawTab }: HomeScreenProps) {
+  const variant = variantProp ?? "portal";
   const services = useMemo(() => createServices(), []);
   const [revisions, setRevisions] = useState(() => services.revision.getCachedRevisions());
-  const firstRevisionId = services.revision.getInitialRevisionId() ?? "";
-  const [activeTab, setActiveTab] = useState<TabId>("laws");
-  const [selectedRevisionId, setSelectedRevisionId] = useState<string>(firstRevisionId);
+  const [activeTab, setActiveTab] = useState<TabId>(() => initialLawTab ?? "laws");
+  const [selectedRevisionId, setSelectedRevisionId] = useState(
+    () => services.revision.getInitialRevisionId() ?? ""
+  );
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const [isChatSending, setIsChatSending] = useState(false);
   const [loadingRevisionId, setLoadingRevisionId] = useState<string | null>(null);
@@ -83,6 +135,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
     callAndResponse: "",
     notes: "",
   });
+  const [kyPaperForm, setKyPaperForm] = useState<KyPaperFormState>(makeInitialKyPaper);
   const [pdfTarget, setPdfTarget] = useState<PdfExportTarget>("ky-sheet");
   const [mailPreview, setMailPreview] = useState("配信プレビューを表示します。");
   const [pdfPreview, setPdfPreview] = useState("PDFプレビューを表示します。");
@@ -97,6 +150,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
   );
 
   useEffect(() => {
+    if (variant !== "laws") return;
     let active = true;
 
     async function loadRevisions() {
@@ -108,9 +162,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
         setRevisions(result.data);
         setRevisionStatus("success");
         setRevisionError(null);
-        if (!selectedRevisionId && result.data.length > 0) {
-          setSelectedRevisionId(result.data[0].id);
-        }
+        setSelectedRevisionId((prev) => prev || result.data[0]?.id || "");
         return;
       }
 
@@ -122,7 +174,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
     return () => {
       active = false;
     };
-  }, [services.revision, selectedRevisionId]);
+  }, [variant, services.revision]);
 
   useEffect(() => {
     if (!isSummaryLoading) return;
@@ -175,7 +227,7 @@ export function HomeScreen({ children }: HomeScreenProps) {
   const selectedRevisionTitle = selectedRevision?.title ?? "法改正が未選択です";
 
   useEffect(() => {
-    if (!selectedRevisionId) return;
+    if (variant !== "laws" || !selectedRevisionId) return;
     let active = true;
     async function loadSummary() {
       setSummaryStatus("loading");
@@ -195,16 +247,18 @@ export function HomeScreen({ children }: HomeScreenProps) {
     return () => {
       active = false;
     };
-  }, [selectedRevisionId, services.summary]);
+  }, [variant, selectedRevisionId, services.summary]);
 
   useEffect(() => {
+    if (variant !== "laws") return;
     if (!chatListRef.current) {
       return;
     }
     chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
-  }, [chatMessages, activeTab]);
+  }, [chatMessages, activeTab, variant]);
 
   useEffect(() => {
+    if (variant !== "risk" && variant !== "ky" && variant !== "pdf") return;
     let active = true;
     async function loadWeatherRisk() {
       setWeatherRiskStatus("loading");
@@ -226,9 +280,10 @@ export function HomeScreen({ children }: HomeScreenProps) {
     return () => {
       active = false;
     };
-  }, [services.weatherRisk, selectedRegionName]);
+  }, [variant, services.weatherRisk, selectedRegionName]);
 
   useEffect(() => {
+    if (variant !== "accidents") return;
     let active = true;
     async function loadAccidentCases() {
       setAccidentStatus("loading");
@@ -251,26 +306,37 @@ export function HomeScreen({ children }: HomeScreenProps) {
     return () => {
       active = false;
     };
-  }, [services.accident, selectedAccidentType, selectedAccidentCategory]);
+  }, [variant, services.accident, selectedAccidentType, selectedAccidentCategory]);
 
   useEffect(() => {
+    if (variant !== "notifications" && variant !== "pdf" && variant !== "ky") return;
     let active = true;
     async function loadOps() {
-      const [noti, mail, ky] = await Promise.all([
-        services.operations.getNotificationSettings(),
-        services.operations.getMailSettings(),
-        services.operations.getKyDraft(),
-      ]);
-      if (!active) return;
-      if (noti.ok) setNotificationSettings(noti.data);
-      if (mail.ok) setMailSettings(mail.data);
-      if (ky.ok) setKySheetDraft(ky.data);
+      if (variant === "notifications") {
+        const [noti, mail] = await Promise.all([
+          services.operations.getNotificationSettings(),
+          services.operations.getMailSettings(),
+        ]);
+        if (!active) return;
+        if (noti.ok) setNotificationSettings(noti.data);
+        if (mail.ok) setMailSettings(mail.data);
+      }
+      if (variant === "pdf" || variant === "ky") {
+        const ky = await services.operations.getKyDraft();
+        if (!active) return;
+        if (ky.ok) setKySheetDraft(ky.data);
+      }
+      if (variant === "ky") {
+        const paper = await services.operations.getKyPaperForm();
+        if (!active) return;
+        if (paper.ok) setKyPaperForm(paper.data);
+      }
     }
     void loadOps();
     return () => {
       active = false;
     };
-  }, [services.operations]);
+  }, [variant, services.operations]);
 
   const handleSendChat = async () => {
     const trimmed = chatInput.trim();
@@ -325,205 +391,239 @@ export function HomeScreen({ children }: HomeScreenProps) {
 
   return (
     <>
-      <section id="section-home" className="px-4 pt-4">
-        {children}
-      </section>
-      <section id="section-home-hero" className="px-4 pt-4">
-        <HomeValueHero
-          onJumpToRisk={() => {
-            document
-              .querySelector<HTMLElement>('section[aria-label="今日の現場リスク"]')
-              ?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }}
-          onJumpToLaws={() => setActiveTab("laws")}
-          onJumpToChat={() => setActiveTab("chat")}
-        />
-      </section>
-      <section id="section-portal-links" className="px-4 pt-4">
-        <PortalQuickLinks
-          onJumpToAccident={() => document.getElementById("section-accidents")?.scrollIntoView({ behavior: "smooth" })}
-          onJumpToKy={() => document.getElementById("section-ky-sheet")?.scrollIntoView({ behavior: "smooth" })}
-          onJumpToLaws={() => setActiveTab("laws")}
-          onJumpToLearning={() => document.getElementById("section-elearning")?.scrollIntoView({ behavior: "smooth" })}
-          onJumpToNotification={() =>
-            document.getElementById("section-notification-settings")?.scrollIntoView({ behavior: "smooth" })
-          }
-          onJumpToRisk={() => document.getElementById("section-weather-risk")?.scrollIntoView({ behavior: "smooth" })}
-          onJumpToWeather={() => document.getElementById("section-weather-risk")?.scrollIntoView({ behavior: "smooth" })}
-        />
-      </section>
-      <section id="section-weather-risk" className="px-4 pt-4">
-        <WeatherRiskCard
-          data={weatherRisk}
-          status={weatherRiskStatus}
-          errorMessage={weatherRiskError?.message ?? null}
-          availableRegions={services.weatherRisk.getAvailableRegions()}
-          selectedRegionName={selectedRegionName}
-          onRegionChange={setSelectedRegionName}
-          workType={selectedWorkType}
-          onWorkTypeChange={setSelectedWorkType}
-        />
-      </section>
-      <section id="section-accidents" className="px-4 pt-4">
-        <AccidentDatabasePanel
-          cases={accidentCases}
-          allCases={services.accident.getAllAccidentCases()}
-          selectedCategory={selectedAccidentCategory}
-          selectedType={selectedAccidentType}
-          onJumpToKy={() => document.getElementById("section-ky-sheet")?.scrollIntoView({ behavior: "smooth" })}
-          onJumpToLearning={(theme) => {
-            document.getElementById("section-elearning")?.scrollIntoView({ behavior: "smooth" });
-            setKySheetDraft((prev) => ({ ...prev, expectedRisks: `${prev.expectedRisks}\n[${theme}] 由来の危険を再確認` }));
-          }}
-          onSelectCategory={setSelectedAccidentCategory}
-          onSelectType={setSelectedAccidentType}
-          status={accidentStatus}
-          errorMessage={accidentError?.message ?? null}
-        />
-      </section>
-      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+      {variant === "portal" ? (
+        <>
+          <section id="section-home" className="px-4 pt-4 lg:px-8">
+            {children}
+          </section>
+          <section id="section-home-hero" className="px-4 pt-4 lg:px-8">
+            <HomeValueHero />
+          </section>
+          <section id="section-portal-links" className="px-4 pt-4 pb-6 lg:px-8">
+            <PortalQuickLinks />
+          </section>
+        </>
+      ) : null}
 
-      <section
-        id="section-laws"
-        className="grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:gap-5 lg:items-start"
-      >
-        {activeTab === "laws" && (
-          <LawRevisionList
-            revisions={revisions}
-            selectedRevisionId={selectedRevisionId}
-            loadingRevisionId={loadingRevisionId}
-            status={revisionStatus}
-            error={revisionError}
-            onRetry={retryRevisions}
-            retryLabel="一覧を再取得"
-            onSelectSummary={handleSelectSummary}
-            onSelectForQuestion={handleSelectForQuestion}
-          />
-        )}
+      {variant === "risk" || variant === "ky" ? (
+        <>
+          <section className="px-4 pt-4 lg:px-8">{children}</section>
+          <section id="section-weather-risk" className="px-4 pt-4 lg:px-8">
+            <WeatherRiskCard
+              data={weatherRisk}
+              status={weatherRiskStatus}
+              errorMessage={weatherRiskError?.message ?? null}
+              availableRegions={services.weatherRisk.getAvailableRegions()}
+              selectedRegionName={selectedRegionName}
+              onRegionChange={setSelectedRegionName}
+              workType={selectedWorkType}
+              onWorkTypeChange={setSelectedWorkType}
+            />
+          </section>
+        </>
+      ) : null}
 
-        {activeTab === "summary" && (
-          <SummaryPanel
-            selectedRevisionId={selectedRevisionId}
-            selectedRevisionTitle={selectedRevisionTitle}
-            summaryContent={selectedSummary}
-            isLoading={isSummaryLoading}
-            status={summaryStatus}
-            error={summaryError}
-            onRetry={retrySummary}
-          />
-        )}
+      {variant === "accidents" ? (
+        <>
+          <section className="px-4 pt-4 lg:px-8">{children}</section>
+          <section id="section-accidents" className="space-y-4 px-4 pt-4 lg:px-8">
+            <AccidentDatabasePanel
+              cases={accidentCases}
+              allCases={services.accident.getAllAccidentCases()}
+              selectedCategory={selectedAccidentCategory}
+              selectedType={selectedAccidentType}
+              onSelectCategory={setSelectedAccidentCategory}
+              onSelectType={setSelectedAccidentType}
+              status={accidentStatus}
+              errorMessage={accidentError?.message ?? null}
+            />
+            <MhlwDisasterDatabasesPanel />
+          </section>
+        </>
+      ) : null}
 
-        {activeTab === "chat" && (
-          <ChatPanel
-            selectedRevisionTitle={selectedRevisionTitle}
-            chatMessages={chatMessages}
-            chatInput={chatInput}
-            isSending={isChatSending}
-            status={chatStatus}
-            error={chatError}
-            onChatInputChange={setChatInput}
-            onSend={handleSendChat}
-            onRetry={handleSendChat}
-            errorTitle="チャット応答の取得に失敗しました"
-            retryLabel="同じ質問を再送"
-            chatListRef={chatListRef}
-          />
-        )}
+      {variant === "laws" ? (
+        <>
+          <section className="px-4 pt-4 lg:px-8">{children}</section>
+          <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
+          <section
+            id="section-laws"
+            className="grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start lg:gap-6 lg:px-8"
+          >
+            {activeTab === "laws" && (
+              <LawRevisionList
+                revisions={revisions}
+                selectedRevisionId={selectedRevisionId}
+                loadingRevisionId={loadingRevisionId}
+                status={revisionStatus}
+                error={revisionError}
+                onRetry={retryRevisions}
+                retryLabel="一覧を再取得"
+                onSelectSummary={handleSelectSummary}
+                onSelectForQuestion={handleSelectForQuestion}
+              />
+            )}
 
-        {activeTab !== "laws" && (
-          <LawRevisionList
-            revisions={revisions}
-            selectedRevisionId={selectedRevisionId}
-            loadingRevisionId={loadingRevisionId}
-            status={revisionStatus}
-            error={revisionError}
-            onRetry={retryRevisions}
-            retryLabel="一覧を再取得"
-            onSelectSummary={handleSelectSummary}
-            onSelectForQuestion={handleSelectForQuestion}
-          />
-        )}
-      </section>
+            {activeTab === "summary" && (
+              <SummaryPanel
+                selectedRevisionId={selectedRevisionId}
+                selectedRevisionTitle={selectedRevisionTitle}
+                summaryContent={selectedSummary}
+                isLoading={isSummaryLoading}
+                status={summaryStatus}
+                error={summaryError}
+                onRetry={retrySummary}
+              />
+            )}
 
-      <section id="section-elearning" className="px-4 pb-3">
-        <ELearningPanel onJumpToKy={() => document.getElementById("section-ky-sheet")?.scrollIntoView({ behavior: "smooth" })} />
-      </section>
-      <section id="section-ky-sheet" className="px-4 pb-3">
-        <KySheetPanel
-          briefingLines={
-            weatherRisk?.riskEvidences?.slice(0, 3) ?? ["現地確認を優先し、危険を感じたら作業を止める", "退避導線と連絡系統を先に共有する"]
-          }
-          onBuildPdfPreview={() => {
-            void services.operations
-              .buildPdfPreview({
-                target: "ky-sheet",
-                kyDraft: kySheetDraft,
-                briefingLines: weatherRisk?.riskEvidences ?? [],
-              })
-              .then((result) => {
-                if (result.ok) setPdfPreview(result.data);
-              });
-          }}
-          onChange={setKySheetDraft}
-          onSave={() => {
-            void services.operations.saveKyDraft(kySheetDraft).then((result) => {
-              if (result.ok) setOpsSavedLabel(`KY保存: ${new Date().toLocaleTimeString("ja-JP")}`);
-            });
-          }}
-          savedLabel={opsSavedLabel}
-          value={kySheetDraft}
-        />
-      </section>
-      <section id="section-pdf-export" className="px-4 pb-3">
-        <PdfExportPanel
-          onRefreshPreview={() => {
-            void services.operations
-              .buildPdfPreview({
-                target: pdfTarget,
-                kyDraft: kySheetDraft,
-                briefingLines: weatherRisk?.riskEvidences ?? [],
-              })
-              .then((result) => {
-                if (result.ok) setPdfPreview(result.data);
-              });
-          }}
-          onTargetChange={setPdfTarget}
-          previewText={pdfPreview}
-          target={pdfTarget}
-        />
-      </section>
-      <section id="section-notification-settings" className="px-4 pb-5">
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <NotificationSettingsPanel
-            onChange={setNotificationSettings}
-            onSave={() => {
-              void services.operations.saveNotificationSettings(notificationSettings).then((result) => {
-                if (result.ok) setOpsSavedLabel(`通知設定を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
+            {activeTab === "chat" && (
+              <ChatPanel
+                selectedRevisionTitle={selectedRevisionTitle}
+                chatMessages={chatMessages}
+                chatInput={chatInput}
+                isSending={isChatSending}
+                status={chatStatus}
+                error={chatError}
+                onChatInputChange={setChatInput}
+                onSend={handleSendChat}
+                onRetry={handleSendChat}
+                errorTitle="チャット応答の取得に失敗しました"
+                retryLabel="同じ質問を再送"
+                chatListRef={chatListRef}
+              />
+            )}
+
+            {activeTab !== "laws" && (
+              <LawRevisionList
+                revisions={revisions}
+                selectedRevisionId={selectedRevisionId}
+                loadingRevisionId={loadingRevisionId}
+                status={revisionStatus}
+                error={revisionError}
+                onRetry={retryRevisions}
+                retryLabel="一覧を再取得"
+                onSelectSummary={handleSelectSummary}
+                onSelectForQuestion={handleSelectForQuestion}
+              />
+            )}
+          </section>
+        </>
+      ) : null}
+
+      {variant === "elearning" ? (
+        <>
+          <section className="px-4 pt-4 lg:px-8">{children}</section>
+          <section id="section-elearning" className="px-4 pb-3 lg:px-8">
+            <ELearningPanel />
+          </section>
+        </>
+      ) : null}
+
+      {variant === "ky" ? (
+        <section id="section-ky-sheet" className="px-4 pb-3 lg:px-8">
+          <KyPaperForm
+            onChange={setKyPaperForm}
+            onSave={(current) => {
+              void services.operations.saveKyPaperForm(current).then((result) => {
+                if (result.ok) setOpsSavedLabel(`KY用紙を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
               });
             }}
             savedLabel={opsSavedLabel}
-            value={notificationSettings}
+            value={kyPaperForm}
           />
-          <MailDeliveryPanel
-            onBuildPreview={() => {
-              void services.operations
-                .buildMailPreview({ notification: notificationSettings, mail: mailSettings })
-                .then((result) => {
-                  if (result.ok) setMailPreview(result.data);
+        </section>
+      ) : null}
+
+      {variant === "pdf" ? (
+        <>
+          <section className="px-4 pt-4 lg:px-8">{children}</section>
+          <section id="section-ky-sheet" className="px-4 pb-3 lg:px-8">
+            <KySheetPanel
+              briefingLines={
+                weatherRisk?.riskEvidences?.slice(0, 3) ?? [
+                  "現地確認を優先し、危険を感じたら作業を止める",
+                  "退避導線と連絡系統を先に共有する",
+                ]
+              }
+              onBuildPdfPreview={() => {
+                void services.operations
+                  .buildPdfPreview({
+                    target: "ky-sheet",
+                    kyDraft: kySheetDraft,
+                    briefingLines: weatherRisk?.riskEvidences ?? [],
+                  })
+                  .then((result) => {
+                    if (result.ok) setPdfPreview(result.data);
+                  });
+              }}
+              onChange={setKySheetDraft}
+              onSave={() => {
+                void services.operations.saveKyDraft(kySheetDraft).then((result) => {
+                  if (result.ok) setOpsSavedLabel(`KY保存: ${new Date().toLocaleTimeString("ja-JP")}`);
                 });
-            }}
-            onChange={setMailSettings}
-            onSave={() => {
-              void services.operations.saveMailSettings(mailSettings).then((result) => {
-                if (result.ok) setOpsSavedLabel(`配信設定を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
-              });
-            }}
-            previewText={mailPreview}
-            savedLabel={opsSavedLabel}
-            value={mailSettings}
-          />
-        </div>
-      </section>
+              }}
+              savedLabel={opsSavedLabel}
+              value={kySheetDraft}
+            />
+          </section>
+          <section id="section-pdf-export" className="px-4 pb-3 lg:px-8">
+            <PdfExportPanel
+              onRefreshPreview={() => {
+                void services.operations
+                  .buildPdfPreview({
+                    target: pdfTarget,
+                    kyDraft: kySheetDraft,
+                    briefingLines: weatherRisk?.riskEvidences ?? [],
+                  })
+                  .then((result) => {
+                    if (result.ok) setPdfPreview(result.data);
+                  });
+              }}
+              onTargetChange={setPdfTarget}
+              previewText={pdfPreview}
+              target={pdfTarget}
+            />
+          </section>
+        </>
+      ) : null}
+
+      {variant === "notifications" ? (
+        <>
+          <section className="px-4 pt-4 lg:px-8">{children}</section>
+          <section id="section-notification-settings" className="px-4 pb-5 lg:px-8">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <NotificationSettingsPanel
+                onChange={setNotificationSettings}
+                onSave={() => {
+                  void services.operations.saveNotificationSettings(notificationSettings).then((result) => {
+                    if (result.ok) setOpsSavedLabel(`通知設定を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
+                  });
+                }}
+                savedLabel={opsSavedLabel}
+                value={notificationSettings}
+              />
+              <MailDeliveryPanel
+                onBuildPreview={() => {
+                  void services.operations
+                    .buildMailPreview({ notification: notificationSettings, mail: mailSettings })
+                    .then((result) => {
+                      if (result.ok) setMailPreview(result.data);
+                    });
+                }}
+                onChange={setMailSettings}
+                onSave={() => {
+                  void services.operations.saveMailSettings(mailSettings).then((result) => {
+                    if (result.ok) setOpsSavedLabel(`配信設定を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
+                  });
+                }}
+                previewText={mailPreview}
+                savedLabel={opsSavedLabel}
+                value={mailSettings}
+              />
+            </div>
+          </section>
+        </>
+      ) : null}
     </>
   );
 }

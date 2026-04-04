@@ -1,5 +1,6 @@
 "use client";
 
+import { InputWithVoice } from "@/components/voice-input-field";
 import type { NotificationSettings } from "@/lib/types/operations";
 
 type NotificationSettingsPanelProps = {
@@ -35,9 +36,9 @@ export function NotificationSettingsPanel({ value, onChange, onSave, savedLabel 
       </div>
       <div className="mt-3">
         <label className="block text-xs font-semibold text-slate-700" htmlFor="reminder-time">朝礼リマインド時刻</label>
-        <input
+        <InputWithVoice
           id="reminder-time"
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="mt-1 w-full"
           onChange={(event) => update({ reminderTime: event.target.value })}
           type="time"
           value={value.reminderTime}

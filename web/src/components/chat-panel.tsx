@@ -2,6 +2,7 @@
 
 import type { RefObject } from "react";
 import { ErrorNotice } from "@/components/error-notice";
+import { InputWithVoice } from "@/components/voice-input-field";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
 
 export type ChatMessage = {
@@ -66,7 +67,7 @@ export function ChatPanel({
       </div>
 
       <div className="mt-3 flex gap-2">
-        <input
+        <InputWithVoice
           value={chatInput}
           disabled={isSending}
           onChange={(event) => onChatInputChange(event.target.value)}
@@ -76,7 +77,7 @@ export function ChatPanel({
               onSend();
             }
           }}
-          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none ring-emerald-200 placeholder:text-slate-400 focus:ring-2"
+          className="w-full bg-white text-slate-900 outline-none ring-emerald-200 placeholder:text-slate-400 focus:ring-2"
           placeholder="この法改正について質問を入力"
           aria-label="質問入力"
         />

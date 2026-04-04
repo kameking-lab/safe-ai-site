@@ -52,3 +52,31 @@ export type KySheetDraft = {
 };
 
 export type PdfExportTarget = "ky-sheet" | "morning-briefing";
+
+/** 危険予知活動（KY）用紙・紙フォーム相当 */
+export type KyPaperRiskRow = {
+  predictedHarm: string;
+  magnitude: number;
+  probability: number;
+  evaluation: number;
+  riskGrade: string;
+  reductionMeasures: string;
+  reMagnitude: number;
+  reProbability: number;
+  reEvaluation: number;
+  reRiskGrade: string;
+  reMeasures: string;
+};
+
+export type KyPaperFormState = {
+  date: string;
+  companyName: string;
+  personInCharge: string;
+  workContent: string;
+  supervisorInstructions: string;
+  rows: KyPaperRiskRow[];
+  participantNames: string;
+  pointingCall: string;
+  siteAgentSign: string;
+  supervisorSign: string;
+};

@@ -1,23 +1,15 @@
 "use client";
 
-type HomeValueHeroProps = {
-  onJumpToRisk?: () => void;
-  onJumpToLaws?: () => void;
-  onJumpToChat?: () => void;
-};
+import Link from "next/link";
 
-export function HomeValueHero({
-  onJumpToRisk,
-  onJumpToLaws,
-  onJumpToChat,
-}: HomeValueHeroProps) {
+export function HomeValueHero() {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5" aria-label="ホームの価値案内">
       <h2 className="text-base font-bold text-slate-900 sm:text-lg">
         今日の安全判断を、現場運用ポータルで。
       </h2>
       <p className="mt-2 text-sm leading-6 text-slate-700">
-        現場責任者・安全担当向けに、サイネージ、今日のリスク確認、法改正チェック、AI要約と質問、事故DBを1画面で扱えます。
+        現場責任者・安全担当向けに、サイネージ、今日のリスク確認、法改正チェック、AI要約と質問、事故DBをまとめて扱えます。
       </p>
 
       <ul className="mt-3 space-y-2 text-sm text-slate-700">
@@ -36,27 +28,21 @@ export function HomeValueHero({
       </ul>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={onJumpToRisk}
+        <Link
+          href="/risk"
           className="rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
         >
           今日の現場リスクを見る
-        </button>
-        <button
-          type="button"
-          onClick={onJumpToLaws}
-          className="rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-700"
-        >
+        </Link>
+        <Link href="/laws" className="rounded-md bg-sky-600 px-3 py-2 text-xs font-semibold text-white hover:bg-sky-700">
           法改正を確認する
-        </button>
-        <button
-          type="button"
-          onClick={onJumpToChat}
+        </Link>
+        <Link
+          href="/laws?tab=chat"
           className="rounded-md bg-amber-600 px-3 py-2 text-xs font-semibold text-white hover:bg-amber-700"
         >
           質問チャットを使う
-        </button>
+        </Link>
       </div>
     </section>
   );

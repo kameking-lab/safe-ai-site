@@ -1,5 +1,6 @@
 import type { ServiceResult } from "@/lib/types/api";
 import type {
+  KyPaperFormState,
   KySheetDraft,
   MailDeliverySettings,
   NotificationSettings,
@@ -10,6 +11,7 @@ const STORAGE_KEYS = {
   notification: "safe-ai:notification-settings:v1",
   mail: "safe-ai:mail-settings:v1",
   ky: "safe-ai:ky-sheet:v1",
+  kyPaper: "safe-ai:ky-paper:v1",
 } as const;
 
 const defaultNotificationSettings: NotificationSettings = {
@@ -44,6 +46,35 @@ const defaultKySheetDraft: KySheetDraft = {
   notes: "",
 };
 
+function emptyKyPaperRow() {
+  return {
+    predictedHarm: "",
+    magnitude: 1,
+    probability: 1,
+    evaluation: 1,
+    riskGrade: "D",
+    reductionMeasures: "",
+    reMagnitude: 1,
+    reProbability: 1,
+    reEvaluation: 1,
+    reRiskGrade: "D",
+    reMeasures: "",
+  };
+}
+
+const defaultKyPaperForm: KyPaperFormState = {
+  date: todayISODate(),
+  companyName: "",
+  personInCharge: "",
+  workContent: "",
+  supervisorInstructions: "",
+  rows: [emptyKyPaperRow(), emptyKyPaperRow()],
+  participantNames: "",
+  pointingCall: "",
+  siteAgentSign: "",
+  supervisorSign: "",
+};
+
 function readFromStorage<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   const raw = window.localStorage.getItem(key);
@@ -67,6 +98,8 @@ export type OperationsService = {
   saveMailSettings: (value: MailDeliverySettings) => Promise<ServiceResult<MailDeliverySettings>>;
   getKyDraft: () => Promise<ServiceResult<KySheetDraft>>;
   saveKyDraft: (value: KySheetDraft) => Promise<ServiceResult<KySheetDraft>>;
+  getKyPaperForm: () => Promise<ServiceResult<KyPaperFormState>>;
+  saveKyPaperForm: (value: KyPaperFormState) => Promise<ServiceResult<KyPaperFormState>>;
   buildMailPreview: (input: {
     notification: NotificationSettings;
     mail: MailDeliverySettings;
@@ -99,6 +132,13 @@ export function createOperationsService(): OperationsService {
     },
     async saveKyDraft(value) {
       writeToStorage(STORAGE_KEYS.ky, value);
+      return { ok: true, data: value };
+    },
+    async getKyPaperForm() {
+      return { ok: true, data: readFromStorage(STORAGE_KEYS.kyPaper, defaultKyPaperForm) };
+    },
+    async saveKyPaperForm(value) {
+      writeToStorage(STORAGE_KEYS.kyPaper, value);
       return { ok: true, data: value };
     },
     async buildMailPreview({ notification, mail }) {

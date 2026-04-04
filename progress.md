@@ -566,3 +566,10 @@
   - 確認:
     - `web/` で `npm run lint` / `npm run test` / `npm run build` を実行し成功
     - `npm run test:e2e:smoke` は Windows PowerShell 環境で `NEXT_PUBLIC_API_MODE=live ...` の起動構文が非対応のため失敗（既存設定課題）
+
+### 2026-04-04
+- ルート分割とナビ: `app/(main)/layout.tsx` で `AppShell` をラップし、`/` はポータル、`/laws` `/risk` `/accidents` `/e-learning` `/ky` `/notifications` `/pdf` を追加。サイドバーは `Link` で各画面へ遷移（`/signage` はグループ外でフルスクリーン維持）。
+- サイネージ: 中央に `JapanWeatherMap`（本日／1週間トグル）、右列に報道ベース労災（外部リンク）と法改正5件の大きい要約。
+- KY: 紙様式に近い `KyPaperForm` を追加し `operations-service` に `ky-paper` の保存キーを追加。PDF用は従来 `KySheetPanel` を `/pdf` に集約し音声入力対応。
+- 音声: チャット・メール宛先・通知リマインド時刻・KY簡易版の各入力に `InputWithVoice` / `TextareaWithVoice` を適用。
+- E2E: `live-mode.spec` の起点URLを `/laws`・`/risk` に合わせ、`signage-smoke` の文言を新レイアウトに合わせて更新。

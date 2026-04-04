@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { SignageShell } from "@/components/signage/signage-shell";
-import { SignageHeader } from "@/components/signage/signage-header";
-import { RiskHeroCard } from "@/components/signage/risk-hero-card";
-import { WeatherAlertPanel } from "@/components/signage/weather-alert-panel";
-import { IncidentHighlightsPanel } from "@/components/signage/incident-highlights-panel";
-import { LawHighlightsPanel } from "@/components/signage/law-highlights-panel";
+import Link from "next/link";
 import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
+import { JapanWeatherMap } from "@/components/signage/japan-weather-map";
+import { SignageHeader } from "@/components/signage/signage-header";
+import { SignageShell } from "@/components/signage/signage-shell";
+import { todayRegionAlerts, weekMaxRegionAlerts } from "@/data/mock/japan-weather-map-mock";
+import { newsLaborAccidentsMock } from "@/data/mock/signage-news-accidents";
 import { createServices } from "@/lib/services/service-factory";
-import type { LawRevision, SiteRiskWeather, AccidentCase } from "@/lib/types/domain";
+import type { LawRevision, SiteRiskWeather } from "@/lib/types/domain";
 import type { ApiMode, ServiceStatus } from "@/lib/types/api";
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
@@ -21,15 +21,13 @@ type DashboardState = {
   lastUpdatedText: string;
   riskStatus: ServiceStatus;
   riskData: SiteRiskWeather | null;
-  accidentStatus: ServiceStatus;
-  accidentCases: AccidentCase[] | null;
   lawStatus: ServiceStatus;
   lawRevisions: LawRevision[] | null;
-  workType: "高所作業" | "電気作業" | "足場作業" | "一般作業";
 };
 
 export default function SignagePage() {
   const services = useMemo(() => createServices(), []);
+  const [mapMode, setMapMode] = useState<"today" | "week">("today");
   const [state, setState] = useState<DashboardState>(() => {
     const now = new Date();
     const formatter = new Intl.DateTimeFormat("ja-JP", {
@@ -47,13 +45,18 @@ export default function SignagePage() {
       lastUpdatedText: nowText,
       riskStatus: "idle",
       riskData: null,
-      accidentStatus: "idle",
-      accidentCases: null,
       lawStatus: "idle",
       lawRevisions: null,
-      workType: "一般作業",
     };
   });
+
+  const topLaws = useMemo(() => {
+    if (!state.lawRevisions?.length) return [];
+    return [...state.lawRevisions].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)).slice(0, 5);
+  }, [state.lawRevisions]);
+
+  const mapLevels = mapMode === "today" ? todayRegionAlerts : weekMaxRegionAlerts;
+  const mapLabel = mapMode === "today" ? "本日" : "今後1週間（最大リスクイメージ）";
 
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat("ja-JP", {
@@ -71,7 +74,6 @@ export default function SignagePage() {
       }));
     };
 
-    // 即時1回反映し、その後は1分ごとに更新
     updateNow();
     const timer = window.setInterval(() => {
       if (typeof document !== "undefined" && document.visibilityState === "hidden") {
@@ -96,15 +98,12 @@ export default function SignagePage() {
     async function refreshAll() {
       setState((prev) => ({
         ...prev,
-        // 初回読み込み時のみローディング表示にし、それ以降はレイアウトを保ったまま裏側で更新
         riskStatus: prev.riskStatus === "idle" ? "loading" : prev.riskStatus,
-        accidentStatus: prev.accidentStatus === "idle" ? "loading" : prev.accidentStatus,
         lawStatus: prev.lawStatus === "idle" ? "loading" : prev.lawStatus,
       }));
 
-      const [riskResult, accidentResult, revisionResult] = await Promise.all([
+      const [riskResult, revisionResult] = await Promise.all([
         services.weatherRisk.getTodaySiteRisk(),
-        services.accident.getAccidentCases({ type: "すべて" }),
         services.revision.getLawRevisions(),
       ]);
 
@@ -122,14 +121,6 @@ export default function SignagePage() {
         } else {
           next.riskStatus = "error";
           next.riskData = null;
-        }
-
-        if (accidentResult.ok) {
-          next.accidentStatus = "success";
-          next.accidentCases = accidentResult.data;
-        } else {
-          next.accidentStatus = "error";
-          next.accidentCases = null;
         }
 
         if (revisionResult.ok) {
@@ -169,27 +160,6 @@ export default function SignagePage() {
     };
   }, [services]);
 
-  const briefingLines =
-    state.riskData == null
-      ? [
-          "現地の天候・足元・仮設設備を確認し、危険と感じる作業は無理に開始しないこと。",
-          "「おかしい」と感じたら必ず作業を止めて、責任者に報告すること。",
-        ]
-      : state.riskData.riskLevel === "高"
-        ? [
-            "「墜落・転落・挟まれ」を想定し、危険作業は一度止めて手順と人員を見直すこと。",
-            "強風・足元不良・重機接近時は、必ず退避場所と合図役を決めてから作業を再開すること。",
-          ]
-        : state.riskData.riskLevel === "中"
-          ? [
-              "足場・通路・仮設設備のぐらつきや段差を、作業前に一緒に歩いて確認すること。",
-              "慣れた作業ほど「声出し指差呼称」を行い、危ない動きがあればその場で声をかけ合うこと。",
-            ]
-          : [
-              "いつもどおりの作業でも「足元・頭上・周囲の動き」を意識して、危ないと感じたらすぐ共有すること。",
-              "小さなヒヤリでも朝礼後に1件だけ共有し、似た作業のメンバーと対策を話し合うこと。",
-            ];
-
   return (
     <SignageShell>
       <SignageHeader
@@ -199,20 +169,94 @@ export default function SignagePage() {
         lastUpdatedText={state.lastUpdatedText}
       />
 
-      <div className="flex flex-1 flex-col gap-4">
-        <div className="grid flex-1 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2.1fr)_minmax(0,1.1fr)]">
-          <RiskHeroCard data={state.riskData} status={state.riskStatus} workBriefingLines={briefingLines} />
-          <WeatherAlertPanel data={state.riskData} status={state.riskStatus} />
+      <div className="grid flex-1 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:items-start">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setMapMode("today")}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold ${
+                mapMode === "today"
+                  ? "bg-emerald-500 text-white"
+                  : "border border-slate-600 bg-slate-800 text-slate-200"
+              }`}
+            >
+              本日の予想
+            </button>
+            <button
+              type="button"
+              onClick={() => setMapMode("week")}
+              className={`rounded-lg px-4 py-2 text-sm font-semibold ${
+                mapMode === "week"
+                  ? "bg-emerald-500 text-white"
+                  : "border border-slate-600 bg-slate-800 text-slate-200"
+              }`}
+            >
+              今後1週間の予想
+            </button>
+          </div>
+          <JapanWeatherMap levels={mapLevels} modeLabel={mapLabel} />
+          {state.riskStatus === "error" && (
+            <p className="text-sm text-amber-200">地域リスクの取得に失敗しましたが、地図モックは表示しています。</p>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <IncidentHighlightsPanel cases={state.accidentCases} status={state.accidentStatus} />
-          <LawHighlightsPanel revisions={state.lawRevisions} status={state.lawStatus} />
-        </div>
+        <div className="flex flex-col gap-4">
+          <section className="rounded-2xl border border-slate-600 bg-slate-900/90 p-4">
+            <h2 className="text-sm font-bold tracking-wide text-slate-100">報道ベースの労働災害（参考）</h2>
+            <p className="mt-1 text-[11px] text-slate-400">クリックで公開情報ページへ（モックURL）。朝礼での注意喚起に。</p>
+            <ul className="mt-3 space-y-3">
+              {newsLaborAccidentsMock.map((item) => (
+                <li key={item.id}>
+                  <Link
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-left transition hover:border-emerald-600/80 hover:bg-slate-900"
+                  >
+                    <p className="text-[11px] text-slate-400">
+                      {item.occurredOn} · {item.source}
+                    </p>
+                    <p className="mt-1 text-base font-semibold leading-snug text-slate-50">{item.title}</p>
+                    <p className="mt-2 text-xs font-semibold text-emerald-400">詳細を開く →</p>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
 
-        <AutoRefreshStatus intervalMinutes={REFRESH_INTERVAL_MS / 60000} lastUpdatedText={state.lastUpdatedText} />
+          <section className="rounded-2xl border border-slate-600 bg-slate-900/90 p-4">
+            <h2 className="text-sm font-bold tracking-wide text-slate-100">直近の法改正（5件・要約）</h2>
+            {state.lawStatus === "loading" && (
+              <div className="mt-4 space-y-2">
+                <div className="h-6 w-full animate-pulse rounded bg-slate-700/80" />
+                <div className="h-20 w-full animate-pulse rounded bg-slate-700/60" />
+              </div>
+            )}
+            {state.lawStatus === "error" && (
+              <p className="mt-3 text-sm text-rose-200">法改正一覧を表示できませんでした。</p>
+            )}
+            {state.lawStatus === "success" && topLaws.length === 0 && (
+              <p className="mt-3 text-sm text-slate-300">表示できる法改正がありません。</p>
+            )}
+            <ul className="mt-4 space-y-4">
+              {topLaws.map((rev) => (
+                <li key={rev.id} className="rounded-xl border border-slate-700 bg-slate-950/50 p-4">
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                    <span className="rounded-full bg-sky-600/90 px-2 py-0.5 font-semibold text-white">{rev.kind}</span>
+                    <span>{rev.publishedAt}</span>
+                    <span>{rev.issuer}</span>
+                  </div>
+                  <h3 className="mt-2 text-lg font-bold text-slate-50">{rev.title}</h3>
+                  <p className="mt-3 text-base leading-relaxed text-slate-200">{rev.summary || "要約は未設定です。"}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        </div>
       </div>
+
+      <AutoRefreshStatus intervalMinutes={REFRESH_INTERVAL_MS / 60000} lastUpdatedText={state.lastUpdatedText} />
     </SignageShell>
   );
 }
-

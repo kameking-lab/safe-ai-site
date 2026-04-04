@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { AccidentCase, AccidentType, AccidentWorkCategory } from "@/lib/types/domain";
 
 const ACCIDENT_TYPE_ORDER: AccidentType[] = [
@@ -17,8 +18,6 @@ type AccidentDatabasePanelProps = {
   selectedCategory: AccidentWorkCategory | "すべて";
   onSelectType: (type: AccidentType | "すべて") => void;
   onSelectCategory: (category: AccidentWorkCategory | "すべて") => void;
-  onJumpToLearning?: (theme: string) => void;
-  onJumpToKy?: () => void;
   status: "idle" | "loading" | "success" | "error";
   errorMessage?: string | null;
 };
@@ -41,8 +40,6 @@ export function AccidentDatabasePanel({
   selectedCategory,
   onSelectType,
   onSelectCategory,
-  onJumpToLearning,
-  onJumpToKy,
   status,
   errorMessage,
 }: AccidentDatabasePanelProps) {
@@ -151,20 +148,18 @@ export function AccidentDatabasePanel({
               </dl>
 
               <div className="mt-2 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => onJumpToLearning?.(accident.workCategory)}
+                <Link
+                  href="/e-learning"
                   className="text-xs font-semibold text-emerald-700 underline decoration-emerald-300 underline-offset-2"
                 >
                   この事例で学習する
-                </button>
-                <button
-                  type="button"
-                  onClick={onJumpToKy}
+                </Link>
+                <Link
+                  href="/ky"
                   className="text-xs font-semibold text-sky-700 underline decoration-sky-300 underline-offset-2"
                 >
                   KY用紙へ反映する
-                </button>
+                </Link>
               </div>
             </article>
           ))
