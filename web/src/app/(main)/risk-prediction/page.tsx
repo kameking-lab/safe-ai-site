@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Header } from "@/components/header";
+import { Brain } from "lucide-react";
+import { PageHeader } from "@/components/page-header";
 import { RiskPredictionPanel } from "@/components/risk-prediction-panel";
 
 export const metadata: Metadata = {
@@ -10,9 +11,13 @@ export const metadata: Metadata = {
 export default function RiskPredictionPage() {
   return (
     <>
-      <section className="px-4 pt-4 lg:px-8">
-        <Header />
-      </section>
+      <PageHeader
+        title="AIリスク予測"
+        description="作業内容から事故事例を検索し、AIがリスクを予測"
+        icon={Brain}
+        iconColor="blue"
+        badge="AI"
+      />
       <RiskPredictionPanel />
     </>
   );
