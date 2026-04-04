@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { Zap } from "lucide-react";
 import { HomeScreen } from "@/components/home-screen";
-import { Header } from "@/components/header";
+import { PageHeader } from "@/components/page-header";
 
 export const metadata: Metadata = {
   title: "今日の現場リスク",
@@ -10,7 +11,12 @@ export const metadata: Metadata = {
 export default function RiskPage() {
   return (
     <HomeScreen variant="risk">
-      <Header />
+      <PageHeader
+        title="今日の現場リスク"
+        description="地域・作業種別ごとの気象リスクを確認。朝礼での安全確認に"
+        icon={Zap}
+        iconColor="amber"
+      />
     </HomeScreen>
   );
 }
