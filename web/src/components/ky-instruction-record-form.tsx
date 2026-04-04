@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { VoiceMicButton } from "@/components/voice-input-field";
 import type {
   KyInstructionFallCheck,
   KyInstructionParticipant,
@@ -159,6 +160,13 @@ export function KyInstructionRecordForm({ value, onChange, onSave, savedLabel }:
               >
                 保存
               </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="rounded-lg border border-white/20 bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-500"
+              >
+                PDF出力
+              </button>
             </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-1.5">
@@ -187,7 +195,7 @@ export function KyInstructionRecordForm({ value, onChange, onSave, savedLabel }:
         <table className="w-full min-w-[720px] border-collapse text-xs">
           <thead>
             <tr className="bg-slate-100">
-              {["報告確認", "統括安全衛生責任者", "元方安全衛生管理者", "担当者", "協力会社責任者"].map((h, i) => (
+              {["報告確認", "統括安全衛生責任者", "元方安全衛生管理者", "担当者", "協力会社責任者"].map((h) => (
                 <th key={h} className="border border-slate-300 px-1 py-2 font-semibold text-slate-800">
                   {h}
                 </th>
@@ -365,12 +373,24 @@ export function KyInstructionRecordForm({ value, onChange, onSave, savedLabel }:
                       placeholder="親綱、安全帯、保護メガネ、防塵マスク、耳栓、防振手袋、発炎筒他必要毎記載"
                     />
                   </td>
-                  <td className="border border-slate-300 p-0">
-                    <textarea
-                      className="min-h-[4rem] w-full resize-y border-0 bg-transparent px-1 py-1"
-                      value={row.safetyInstruction}
-                      onChange={(e) => setWorkRow(i, { ...row, safetyInstruction: e.target.value })}
-                    />
+                  <td className="border border-slate-300 p-0 align-top">
+                    <div className="flex flex-col gap-0.5 p-0.5">
+                      <div className="flex justify-end">
+                        <VoiceMicButton
+                          onFinalText={(text) =>
+                            setWorkRow(i, {
+                              ...row,
+                              safetyInstruction: row.safetyInstruction ? `${row.safetyInstruction}\n${text}` : text,
+                            })
+                          }
+                        />
+                      </div>
+                      <textarea
+                        className="min-h-[3rem] w-full resize-y border-0 bg-transparent px-1 py-1"
+                        value={row.safetyInstruction}
+                        onChange={(e) => setWorkRow(i, { ...row, safetyInstruction: e.target.value })}
+                      />
+                    </div>
                   </td>
                   <td className="border border-slate-300 p-0">
                     <input
@@ -446,29 +466,36 @@ export function KyInstructionRecordForm({ value, onChange, onSave, savedLabel }:
                 <td className="border border-slate-300 px-1 py-1 text-center font-bold">{row.targetLabel}</td>
                 <td className="border border-slate-300 p-0 align-top">
                   <div className="flex flex-col gap-1 p-1">
-                    <button
-                      type="button"
-                      disabled={aiBusy === `hz-${i}`}
-                      onClick={async () => {
-                        setAiBusy(`hz-${i}`);
-                        try {
-                          const text = await fetchAssist({
-                            field: "hazard",
-                            targetLabel: row.targetLabel,
-                            workContext: workContextFrom(value),
-                            seed: Date.now() + i,
-                          });
-                          setRiskRow(i, { ...row, hazard: text });
-                        } catch {
-                          setRiskRow(i, { ...row, hazard: row.hazard + "\n（AI取得に失敗しました）" });
-                        } finally {
-                          setAiBusy(null);
+                    <div className="flex flex-wrap gap-1">
+                      <button
+                        type="button"
+                        disabled={aiBusy === `hz-${i}`}
+                        onClick={async () => {
+                          setAiBusy(`hz-${i}`);
+                          try {
+                            const text = await fetchAssist({
+                              field: "hazard",
+                              targetLabel: row.targetLabel,
+                              workContext: workContextFrom(value),
+                              seed: Date.now() + i,
+                            });
+                            setRiskRow(i, { ...row, hazard: text });
+                          } catch {
+                            setRiskRow(i, { ...row, hazard: row.hazard + "\n（AI取得に失敗しました）" });
+                          } finally {
+                            setAiBusy(null);
+                          }
+                        }}
+                        className="rounded border border-sky-300 bg-sky-50 px-1.5 py-0.5 text-[9px] font-bold text-sky-900 hover:bg-sky-100 disabled:opacity-50"
+                      >
+                        {aiBusy === `hz-${i}` ? "生成中…" : "AIで危険を下書き"}
+                      </button>
+                      <VoiceMicButton
+                        onFinalText={(text) =>
+                          setRiskRow(i, { ...row, hazard: row.hazard ? `${row.hazard}\n${text}` : text })
                         }
-                      }}
-                      className="rounded border border-sky-300 bg-sky-50 px-1.5 py-0.5 text-[9px] font-bold text-sky-900 hover:bg-sky-100 disabled:opacity-50"
-                    >
-                      {aiBusy === `hz-${i}` ? "生成中…" : "AIで危険を下書き"}
-                    </button>
+                      />
+                    </div>
                     <textarea
                       className="min-h-[3.5rem] w-full resize-y rounded border border-slate-200 bg-white px-1 py-1 text-[10px]"
                       value={row.hazard}
@@ -517,6 +544,11 @@ export function KyInstructionRecordForm({ value, onChange, onSave, savedLabel }:
                 <td className="border border-slate-300 p-0 align-top">
                   <div className="flex flex-col gap-1 p-1">
                     <div className="flex flex-wrap gap-1">
+                      <VoiceMicButton
+                        onFinalText={(text) =>
+                          setRiskRow(i, { ...row, reduction: row.reduction ? `${row.reduction}\n${text}` : text })
+                        }
+                      />
                       <button
                         type="button"
                         disabled={aiBusy === `rd-${i}`}
