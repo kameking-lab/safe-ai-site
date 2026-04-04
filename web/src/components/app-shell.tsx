@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { Footer } from "@/components/footer";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -12,20 +13,21 @@ type NavItem = {
   id: string;
   label: string;
   href: string;
-  status: "ready" | "beta";
+  highlight?: boolean;
 };
 
 const navItems: NavItem[] = [
-  { id: "home", label: "ホーム", href: "/", status: "ready" },
-  { id: "signage", label: "サイネージ", href: "/signage", status: "ready" },
-  { id: "laws", label: "法改正", href: "/laws", status: "ready" },
-  { id: "today-risk", label: "今日の現場リスク", href: "/risk", status: "ready" },
-  { id: "accidents", label: "事故データベース", href: "/accidents", status: "ready" },
-  { id: "elearning", label: "Eラーニング", href: "/e-learning", status: "beta" },
-  { id: "ky-sheet", label: "KY用紙", href: "/ky", status: "beta" },
-  { id: "notification-settings", label: "通知/配信", href: "/notifications", status: "beta" },
-  { id: "pdf", label: "PDF出力", href: "/pdf", status: "beta" },
-  { id: "goods", label: "安全グッズ", href: "/goods", status: "ready" },
+  { id: "home", label: "ホーム", href: "/" },
+  { id: "signage", label: "サイネージ", href: "/signage" },
+  { id: "risk-prediction", label: "AIリスク予測", href: "/risk-prediction", highlight: true },
+  { id: "today-risk", label: "今日の現場リスク", href: "/risk" },
+  { id: "laws", label: "法改正", href: "/laws" },
+  { id: "accidents", label: "事故データベース", href: "/accidents" },
+  { id: "elearning", label: "Eラーニング", href: "/e-learning" },
+  { id: "ky-sheet", label: "KY用紙", href: "/ky" },
+  { id: "notification-settings", label: "通知/配信", href: "/notifications" },
+  { id: "pdf", label: "PDF出力", href: "/pdf" },
+  { id: "goods", label: "安全グッズ", href: "/goods" },
 ];
 
 function navActive(pathname: string, href: string) {
@@ -37,10 +39,13 @@ export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const linkClass = (href: string) =>
-    `flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-slate-800 hover:bg-emerald-50 ${
-      navActive(pathname, href) ? "bg-emerald-100/80 font-semibold text-emerald-900" : ""
-    }`;
+  const linkClass = (item: NavItem) => {
+    const active = navActive(pathname, item.href);
+    const base = "flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm";
+    if (active) return `${base} bg-emerald-100/80 font-semibold text-emerald-900`;
+    if (item.highlight) return `${base} font-semibold text-blue-700 hover:bg-blue-50`;
+    return `${base} text-slate-800 hover:bg-emerald-50`;
+  };
 
   return (
     <div className="flex min-h-full w-full bg-white shadow-sm">
@@ -53,11 +58,11 @@ export function AppShell({ children }: AppShellProps) {
         </div>
         <nav aria-label="サイト全体ナビゲーション" className="space-y-1 text-sm">
           {navItems.map((item) => (
-            <Link key={item.id} href={item.href} className={linkClass(item.href)}>
+            <Link key={item.id} href={item.href} className={linkClass(item)}>
               <span>{item.label}</span>
-              {item.status === "beta" && (
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-                  beta
+              {item.highlight && !navActive(pathname, item.href) && (
+                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                  AI
                 </span>
               )}
             </Link>
@@ -89,13 +94,13 @@ export function AppShell({ children }: AppShellProps) {
                 <Link
                   key={item.id}
                   href={item.href}
-                  className={linkClass(item.href)}
+                  className={linkClass(item)}
                   onClick={() => setIsSidebarOpen(false)}
                 >
                   <span>{item.label}</span>
-                  {item.status === "beta" && (
-                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
-                      beta
+                  {item.highlight && !navActive(pathname, item.href) && (
+                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                      AI
                     </span>
                   )}
                 </Link>
@@ -107,6 +112,7 @@ export function AppShell({ children }: AppShellProps) {
         <main className="flex flex-1 flex-col">
           <div className="mx-auto w-full max-w-7xl flex-1">{children}</div>
         </main>
+        <Footer />
       </div>
     </div>
   );
