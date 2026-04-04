@@ -87,18 +87,22 @@ export async function POST(request: Request) {
   const context = buildContextFromArticles(relevantArticles);
 
   // Gemini Flash API呼び出し
+  console.log("[chatbot] API key present:", !!apiKey);
   let answer: string;
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.0-flash",
       systemInstruction: SYSTEM_PROMPT,
     });
 
     const userPrompt = buildUserPrompt(message, context);
+    console.log("[chatbot] Calling Gemini API, question length:", message.length);
     const result = await model.generateContent(userPrompt);
     answer = result.response.text();
+    console.log("[chatbot] Gemini API response received, answer length:", answer.length);
   } catch (err) {
+    console.error("[chatbot] Gemini API error:", err instanceof Error ? err.message : String(err));
     const isOverload =
       err instanceof Error && err.message.toLowerCase().includes("quota");
     return jsonError(
