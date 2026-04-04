@@ -7,6 +7,7 @@ import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture
 import { SignageHeader } from "@/components/signage/signage-header";
 import { SignageFeaturedGoods } from "@/components/signage/signage-featured-goods";
 import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
+import { SignageRiskPrediction } from "@/components/signage/signage-risk-prediction";
 import { SignageShell } from "@/components/signage/signage-shell";
 import { getSignageLocationById, signageLocations } from "@/data/signage-locations";
 import { createServices } from "@/lib/services/service-factory";
@@ -382,6 +383,8 @@ export default function SignagePage() {
               ))}
             </ul>
           </section>
+
+          <SignageRiskPrediction weatherData={state.riskData} />
 
           <SignageFeaturedGoods />
         </div>

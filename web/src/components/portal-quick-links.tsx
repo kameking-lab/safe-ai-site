@@ -8,6 +8,7 @@ const LINKS = [
     items: [
       { href: "/signage", label: "サイネージ", sub: "常時表示用フルスクリーン", color: "bg-emerald-600 text-white" },
       { href: "/risk", label: "今日の現場リスク", sub: "天気・警報・注意点", color: "bg-slate-100 text-slate-800" },
+      { href: "/risk-prediction", label: "AIリスク予測", sub: "作業別・事例検索・PDF出力", color: "bg-blue-600 text-white" },
     ],
   },
   {
