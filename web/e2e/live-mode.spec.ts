@@ -10,10 +10,10 @@ test.describe("live mode", () => {
     await expect(page.getByRole("heading", { name: "法改正一覧" }).first()).toBeVisible();
     await expect(page.getByText("高所作業時の墜落防止措置の強化")).toBeVisible();
 
+    await page.getByRole("button", { name: "AI要約" }).click();
     // 「高所作業...」カードの AIで要約 をクリック（summaryMock が存在する lr-001 を対象とする）
     const targetCard = page.locator("li").filter({ hasText: "高所作業時の墜落防止措置の強化" });
     await targetCard.getByRole("button", { name: "AIで要約" }).click();
-    await page.getByRole("button", { name: "AI要約" }).click();
     await expect(page.getByText("3行要約")).toBeVisible();
     await expect(page.getByText("現場でやること")).toBeVisible();
     await expect(page.getByText("対象業種")).toBeVisible();
