@@ -4,6 +4,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-001",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 1,
@@ -21,6 +22,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-002",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 2,
@@ -39,6 +41,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-003",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 3,
@@ -57,6 +60,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-004",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 4,
@@ -74,6 +78,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-005",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 5,
@@ -92,6 +97,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-006",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 6,
@@ -109,6 +115,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-007",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 7,
@@ -126,6 +133,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-008",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 8,
@@ -143,6 +151,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-009",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 9,
@@ -161,6 +170,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-010",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 10,
@@ -178,6 +188,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-011",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 11,
@@ -196,6 +207,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-012",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 12,
@@ -213,6 +225,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-013",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 13,
@@ -230,6 +243,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-014",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 14,
@@ -247,6 +261,7 @@ export const questions: ExamQuestion[] = [
   {
     id: "2025-sg-015",
     year: 2025,
+    category: "safety-consultant",
     subject: "safety-general",
     subjectLabel: "産業安全一般",
     questionNumber: 15,
