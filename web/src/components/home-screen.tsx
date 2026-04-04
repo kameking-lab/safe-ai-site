@@ -467,7 +467,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
         <>
           <section className="px-4 pt-4 lg:px-8">{children}</section>
           <section className="border-b border-slate-200/80 bg-slate-50 px-4 py-2 lg:px-8">
-            <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
+            <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
               <p>
                 KY用紙専用画面です。天候・リスクの朝礼用サマリーは
                 <a href="/risk" className="mx-1 font-semibold text-emerald-700 underline">

@@ -2,6 +2,38 @@
 
 import type { SignageHourlyPoint } from "@/lib/types/signage-weather";
 
+function RowSet({ rows, label }: { rows: SignageHourlyPoint[]; label: string }) {
+  return (
+    <div className="min-w-0">
+      <p className="mb-1 text-[9px] font-bold uppercase tracking-wide text-emerald-300/90">{label}</p>
+      <div className="max-h-[28vh] overflow-x-auto overflow-y-auto xl:max-h-[min(32vh,320px)]">
+        <table className="w-full min-w-[200px] border-collapse text-[9px] text-slate-200">
+          <thead>
+            <tr className="border-b border-slate-600 text-left text-slate-400">
+              <th className="py-0.5 pr-1 font-medium">時</th>
+              <th className="py-0.5 pr-1 font-medium">天気</th>
+              <th className="py-0.5 pr-1 font-medium">℃</th>
+              <th className="py-0.5 pr-1 font-medium">雨mm</th>
+              <th className="py-0.5 font-medium">風m/s</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.slice(0, 24).map((r) => (
+              <tr key={r.time} className="border-b border-slate-800/80">
+                <td className="py-0.5 pr-1 tabular-nums text-slate-300">{r.hourLabel}</td>
+                <td className="py-0.5 pr-1 text-slate-200">{r.weatherLabel}</td>
+                <td className="py-0.5 pr-1 tabular-nums">{r.tempC}</td>
+                <td className="py-0.5 pr-1 tabular-nums">{r.precipMm}</td>
+                <td className="py-0.5 tabular-nums">{r.windMs}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 type SignageHourlyWeatherProps = {
   hourly: SignageHourlyPoint[];
   regionLabel: string;
@@ -40,38 +72,6 @@ function splitByJstDate(hourly: SignageHourlyPoint[]) {
   }
 
   return { today, tomorrow };
-}
-
-function RowSet({ rows, label }: { rows: SignageHourlyPoint[]; label: string }) {
-  return (
-    <div className="min-w-0">
-      <p className="mb-1 text-[9px] font-bold uppercase tracking-wide text-emerald-300/90">{label}</p>
-      <div className="max-h-[28vh] overflow-x-auto overflow-y-auto xl:max-h-[min(32vh,320px)]">
-        <table className="w-full min-w-[200px] border-collapse text-[9px] text-slate-200">
-          <thead>
-            <tr className="border-b border-slate-600 text-left text-slate-400">
-              <th className="py-0.5 pr-1 font-medium">時</th>
-              <th className="py-0.5 pr-1 font-medium">天気</th>
-              <th className="py-0.5 pr-1 font-medium">℃</th>
-              <th className="py-0.5 pr-1 font-medium">雨mm</th>
-              <th className="py-0.5 font-medium">風m/s</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.slice(0, 24).map((r) => (
-              <tr key={r.time} className="border-b border-slate-800/80">
-                <td className="py-0.5 pr-1 tabular-nums text-slate-300">{r.hourLabel}</td>
-                <td className="py-0.5 pr-1 text-slate-200">{r.weatherLabel}</td>
-                <td className="py-0.5 pr-1 tabular-nums">{r.tempC}</td>
-                <td className="py-0.5 pr-1 tabular-nums">{r.precipMm}</td>
-                <td className="py-0.5 tabular-nums">{r.windMs}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
 }
 
 export function SignageHourlyWeather({ hourly, regionLabel, status }: SignageHourlyWeatherProps) {
