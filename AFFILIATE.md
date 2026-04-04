@@ -24,6 +24,26 @@
 
 楽天は公式の「リンク生成ツール」で得たURLに差し替える運用も可能です。その場合は `safety-goods.ts` の `rakutenUrl` を直接編集してください。
 
+## Vercel で環境変数を入れる手順（ボタン単位）
+
+※ こちら（開発側）でできること: リポジトリに `web/.env.example` を置き、コードが `process.env.NEXT_PUBLIC_*` を読むようにしてあります。**実際のタグの発行と Vercel への入力はあなたのアカウント作業**になります。
+
+1. ブラウザで [https://vercel.com](https://vercel.com) を開き、ログインする。
+2. 画面上部またはダッシュボードから **「Dashboard」** を選ぶ。
+3. このサイトのプロジェクト（例: `safe-ai-site`）の **名前をクリック** してプロジェクト詳細へ入る。
+4. 上部タブの **「Settings」** をクリックする。
+5. 左メニューの **「Environment Variables」** をクリックする。
+6. **「Key」** 欄に `NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG` と入力する。
+7. **「Value」** 欄に、Amazonアソシエイトで発行したストアID（例 `yourname-22`）だけを貼り付ける。
+8. **「Environments」** で Production（必要なら Preview も）にチェックが付いていることを確認する。
+9. **「Save」** ボタンを押す。
+10. 同様に **「Add Another」** または新しい行で Key に `NEXT_PUBLIC_RAKUTEN_AFID`、Value に楽天の afid を入れて **Save** する。
+11. 画面上部の **「Deployments」** タブへ移動し、最新デプロイの **「⋯」メニュー → 「Redeploy」** から再デプロイする（環境変数はデプロイ時にビルドへ取り込まれるため）。
+
+## ローカルで試す
+
+`web/.env.local` を作成し（Git にコミットしない）、`.env.example` と同じキー名に値を入れる。`npm run dev` を再起動する。
+
 ## 注意
 
 - **APIキーやログイン秘密情報はリポジトリにコミットしない**でください。`NEXT_PUBLIC_*` はブラウザに送られるため、公開前提のIDのみを使います。

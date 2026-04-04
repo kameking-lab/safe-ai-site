@@ -12,6 +12,10 @@ export type SafetyGoodsItem = {
   description: string;
   price: string;
   imageAlt: string;
+  /** サイネージ・カード用（外部画像URL） */
+  imageUrl?: string;
+  /** /signage の「おすすめ安全グッズ」に載せる */
+  signageFeatured?: boolean;
   amazonUrl: string;
   rakutenUrl: string;
   tags: string[];
@@ -89,6 +93,8 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     description: "新規格適合のフルハーネス + ショックアブソーバ付きランヤードのセット。胴ベルト不要で軽量設計。特別教育修了者向け。",
     price: "¥15,000〜¥25,000",
     imageAlt: "フルハーネスセットの製品イメージ",
+    imageUrl: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E3%83%95%E3%83%AB%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9+%E5%A2%9C%E8%90%BD%E5%88%B6%E6%AD%A2",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E3%83%95%E3%83%AB%E3%83%8F%E3%83%BC%E3%83%8D%E3%82%B9+%E5%A2%9C%E8%90%BD%E5%88%B6%E6%AD%A2/",
     tags: ["新規格適合", "6.75m超必須"],
@@ -100,6 +106,8 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     description: "常時接続を維持できるダブルフック方式。移動時もどちらかが必ず接続状態を保ちます。",
     price: "¥8,000〜¥15,000",
     imageAlt: "ダブルランヤードの製品イメージ",
+    imageUrl: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E3%83%80%E3%83%96%E3%83%AB%E3%83%A9%E3%83%B3%E3%83%A4%E3%83%BC%E3%83%89",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E3%83%80%E3%83%96%E3%83%AB%E3%83%A9%E3%83%B3%E3%83%A4%E3%83%BC%E3%83%89/",
     tags: ["常時接続", "移動時安全"],
@@ -111,6 +119,8 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     description: "屋根作業・鉄骨作業の移動範囲全体に安全な接続点を確保。支柱・親綱・緊張器のセット。",
     price: "¥20,000〜¥50,000",
     imageAlt: "親綱設置キットの製品イメージ",
+    imageUrl: "https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E8%A6%AA%E7%B6%B1+%E6%B0%B4%E5%B9%B3%E3%83%A9%E3%82%A4%E3%83%95%E3%83%A9%E3%82%A4%E3%83%B3",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E8%A6%AA%E7%B6%B1+%E6%B0%B4%E5%B9%B3%E3%83%A9%E3%82%A4%E3%83%95%E3%83%A9%E3%82%A4%E3%83%B3/",
     tags: ["屋根作業", "鉄骨作業"],
@@ -123,6 +133,8 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     description: "溶接ヒューム・粉塵・アスベスト除去作業対応のDS2規格マスク。排気弁付きで息苦しさを軽減。",
     price: "¥2,500〜¥4,000",
     imageAlt: "DS2防塵マスクの製品イメージ",
+    imageUrl: "https://images.unsplash.com/photo-1584036561566-baf8f0f1b144?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=DS2+%E9%98%B2%E5%A1%B5%E3%83%9E%E3%82%B9%E3%82%AF",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/DS2+%E9%98%B2%E5%A1%B5%E3%83%9E%E3%82%B9%E3%82%AF/",
     tags: ["DS2規格", "溶接ヒューム"],
@@ -145,6 +157,8 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     description: "電動ファンで給気し、長時間作業でも負担が少ない。溶接・解体・トンネル工事に最適。",
     price: "¥30,000〜¥80,000",
     imageAlt: "電動ファン付き呼吸用保護具の製品イメージ",
+    imageUrl: "https://images.unsplash.com/photo-1452860606245-08befc0ff44b?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E9%9B%BB%E5%8B%95%E3%83%95%E3%82%A1%E3%83%B3%E4%BB%98%E3%81%8D+%E5%91%BC%E5%90%B8%E7%94%A8%E4%BF%9D%E8%AD%B7%E5%85%B7",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E9%9B%BB%E5%8B%95%E3%83%95%E3%82%A1%E3%83%B3%E4%BB%98%E3%81%8D+%E5%91%BC%E5%90%B8%E7%94%A8%E4%BF%9D%E8%AD%B7%E5%85%B7/",
     tags: ["PAPR", "長時間作業"],
@@ -157,6 +171,8 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     description: "ABS樹脂製・軽量280g。通気孔付きで夏場も蒸れにくい。内装は洗えるライナー。",
     price: "¥2,500〜¥5,000",
     imageAlt: "産業用ヘルメットの製品イメージ",
+    imageUrl: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E7%94%A3%E6%A5%AD%E7%94%A8+%E3%83%98%E3%83%AB%E3%83%A1%E3%83%83%E3%83%88+%E9%80%9A%E6%B0%97",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E7%94%A3%E6%A5%AD%E7%94%A8+%E3%83%98%E3%83%AB%E3%83%A1%E3%83%83%E3%83%88+%E9%80%9A%E6%B0%97/",
     tags: ["軽量", "通気性"],
@@ -192,6 +208,8 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     description: "スズメバチ・アシナガバチ対策。既存ヘルメットに装着可能な防蜂ネット。林業・造園作業に必須。",
     price: "¥1,500〜¥3,500",
     imageAlt: "防蜂ネットの製品イメージ",
+    imageUrl: "https://images.unsplash.com/photo-1473968512647-3e447244af8f?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E9%98%B2%E8%9C%82%E3%83%8D%E3%83%83%E3%83%88+%E3%83%98%E3%83%AB%E3%83%A1%E3%83%83%E3%83%88",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E9%98%B2%E8%9C%82%E3%83%8D%E3%83%83%E3%83%88+%E3%83%98%E3%83%AB%E3%83%A1%E3%83%83%E3%83%88/",
     tags: ["スズメバチ", "造園作業"],
@@ -226,6 +244,8 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     description: "ファンで外気を取り込み汗を気化冷却。WBGT高い日の屋外作業に。バッテリーで8時間駆動。",
     price: "¥10,000〜¥25,000",
     imageAlt: "空調服の製品イメージ",
+    imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E7%A9%BA%E8%AA%BF%E6%9C%8D+%E3%83%95%E3%82%A1%E3%83%B3%E4%BB%98%E3%81%8D+%E3%83%90%E3%83%83%E3%83%86%E3%83%AA%E3%83%BC%E3%82%BB%E3%83%83%E3%83%88",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E7%A9%BA%E8%AA%BF%E6%9C%8D+%E3%83%95%E3%82%A1%E3%83%B3%E4%BB%98%E3%81%8D+%E3%83%90%E3%83%83%E3%83%86%E3%83%AA%E3%83%BC%E3%82%BB%E3%83%83%E3%83%88/",
     tags: ["熱中症予防", "屋外作業"],
@@ -238,6 +258,8 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     description: "ポリカーボネートレンズで飛来物・粉塵から目を保護。曇り止めコートで作業中もクリアな視界。",
     price: "¥800〜¥2,500",
     imageAlt: "保護メガネの製品イメージ",
+    imageUrl: "https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E4%BF%9D%E8%AD%B7%E3%83%A1%E3%82%AC%E3%83%8D+%E6%9B%87%E3%82%8A%E6%AD%A2%E3%82%81",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E4%BF%9D%E8%AD%B7%E3%83%A1%E3%82%AC%E3%83%8D+%E6%9B%87%E3%82%8A%E6%AD%A2%E3%82%81/",
     tags: ["曇り止め", "UVカット"],
@@ -261,6 +283,8 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     description: "先芯入りで足先を保護。耐油底で油まみれの現場でも滑りにくい。スニーカータイプで軽量。",
     price: "¥4,000〜¥10,000",
     imageAlt: "安全靴の製品イメージ",
+    imageUrl: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E5%AE%89%E5%85%A8%E9%9D%B4+JSAA+A%E7%A8%AE+%E8%BB%BD%E9%87%8F",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E5%AE%89%E5%85%A8%E9%9D%B4+JSAA+A%E7%A8%AE+%E8%BB%BD%E9%87%8F/",
     tags: ["JSAA A種", "耐油底"],
@@ -273,11 +297,39 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     description: "労働安全衛生規則に基づく備品を網羅したセット。包帯・消毒液・三角巾・ピンセット・はさみ等。",
     price: "¥5,000〜¥12,000",
     imageAlt: "現場用救急箱の製品イメージ",
+    imageUrl: "https://images.unsplash.com/photo-1603398938378-e54eab446dde?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E7%8F%BE%E5%A0%B4%E7%94%A8+%E6%95%91%E6%80%A5%E7%AE%B1+%E5%8A%B4%E5%AE%89%E5%89%87",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E7%8F%BE%E5%A0%B4%E7%94%A8+%E6%95%91%E6%80%A5%E7%AE%B1+%E5%8A%B4%E5%AE%89%E5%89%87/",
     tags: ["50人用", "労安則対応"],
   },
   // 標識・バリケード
+  {
+    id: "hc-002",
+    categoryId: "heat-cold",
+    name: "携帯型WBGT計（熱中症指数モニター）",
+    description: "屋外作業前のWBGT確認に。警報閾値設定と履歴表示付きのモデルがおすすめ。",
+    price: "¥8,000〜¥25,000",
+    imageAlt: "WBGT計のイメージ",
+    imageUrl: "https://images.unsplash.com/photo-1581092160562-40aa08f7880a?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
+    amazonUrl: "https://www.amazon.co.jp/s?k=WBGT+%E8%A8%88+%E6%90%BA%E5%B8%AF",
+    rakutenUrl: "https://search.rakuten.co.jp/search/mall/WBGT+%E8%A8%88/",
+    tags: ["熱中症", "WBGT", "屋外"],
+  },
+  {
+    id: "sb-002",
+    categoryId: "signs-barriers",
+    name: "高視認性安全ベスト（反射テープ付・メッシュ）",
+    description: "夜間・薄暮の車両誘導・現場巡回に。ANSI/EN相当の反射材付きモデルを選定。",
+    price: "¥1,200〜¥4,500",
+    imageAlt: "安全ベストのイメージ",
+    imageUrl: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
+    amazonUrl: "https://www.amazon.co.jp/s?k=%E5%AE%89%E5%85%A8%E3%83%99%E3%82%B9%E3%83%88+%E5%8F%8D%E5%B0%84",
+    rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E5%AE%89%E5%85%A8%E3%83%99%E3%82%B9%E3%83%88+%E5%8F%8D%E5%B0%84/",
+    tags: ["反射", "夜間", "誘導"],
+  },
   {
     id: "sb-001",
     categoryId: "signs-barriers",
@@ -285,8 +337,16 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     description: "道路工事・現場誘導に。ソーラー充電で電源不要。折りたたみ式で持ち運びに便利。",
     price: "¥15,000〜¥30,000",
     imageAlt: "LED矢印板の製品イメージ",
+    imageUrl: "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=400&auto=format&fit=crop&q=70",
+    signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=LED+%E7%9F%A2%E5%8D%B0%E6%9D%BF+%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/LED+%E7%9F%A2%E5%8D%B0%E6%9D%BF+%E3%82%BD%E3%83%BC%E3%83%A9%E3%83%BC/",
     tags: ["ソーラー充電", "折りたたみ"],
   },
 ];
+
+/** サイネージ向け：おすすめフラグ付きをカテゴリ横断で返す */
+export function getSignageFeaturedSafetyGoods(limit = 12): SafetyGoodsItem[] {
+  const picked = safetyGoodsItems.filter((i) => i.signageFeatured && i.imageUrl);
+  return picked.slice(0, limit);
+}

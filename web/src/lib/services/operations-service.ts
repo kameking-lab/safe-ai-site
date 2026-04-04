@@ -1,5 +1,6 @@
 import type { ServiceResult } from "@/lib/types/api";
 import type {
+  KyInstructionRecordState,
   KyPaperFormState,
   KySheetDraft,
   MailDeliverySettings,
@@ -12,6 +13,7 @@ const STORAGE_KEYS = {
   mail: "safe-ai:mail-settings:v1",
   ky: "safe-ai:ky-sheet:v1",
   kyPaper: "safe-ai:ky-paper:v1",
+  kyInstruction: "safe-ai:ky-instruction-record:v1",
 } as const;
 
 const defaultNotificationSettings: NotificationSettings = {
@@ -75,6 +77,85 @@ const defaultKyPaperForm: KyPaperFormState = {
   supervisorSign: "",
 };
 
+function emptyWorkRow(): KyInstructionRecordState["workRows"][number] {
+  return {
+    workPlace: "",
+    workDetail: "",
+    machinery: "",
+    fireMark: "",
+    heightMark: "",
+    ppeNote: "",
+    safetyInstruction: "",
+    responsible: "",
+    primeSign: "",
+  };
+}
+
+function emptyRiskRow(label: string): KyInstructionRecordState["riskRows"][number] {
+  return {
+    targetLabel: label,
+    hazard: "",
+    qualNo: "",
+    likelihood: 1,
+    severity: 1,
+    reduction: "",
+    reLikelihood: 1,
+    reSeverity: 1,
+    reducedBelow2: "",
+    primeSign: "",
+  };
+}
+
+function emptyParticipant(): KyInstructionRecordState["participants"][number] {
+  return { name: "", qualNo: "", preWork: "", onExit: "" };
+}
+
+const defaultKyInstructionRecord: KyInstructionRecordState = {
+  reportStamps: ["", "", "", "", ""],
+  workDateYear: new Date().getFullYear().toString(),
+  workDateMonth: String(new Date().getMonth() + 1),
+  workDateDay: String(new Date().getDate()),
+  workDateNote: "",
+  weather: "",
+  coop1Name: "",
+  coop1Chief: "",
+  coop2Name: "",
+  coop2Chief: "",
+  coop3Name: "",
+  coop3Chief: "",
+  workRows: [emptyWorkRow(), emptyWorkRow(), emptyWorkRow(), emptyWorkRow()],
+  riskRows: [
+    emptyRiskRow("上記"),
+    emptyRiskRow("①"),
+    emptyRiskRow("②"),
+    emptyRiskRow("③"),
+    emptyRiskRow("④"),
+  ],
+  participants: Array.from({ length: 6 }, () => emptyParticipant()),
+  participantTotal: "",
+  breaks: ["", "", "", "", ""],
+  safetyVest: "",
+  exitLarge: "",
+  exitMedium: "",
+  exitSmall: "",
+  closingNote: "",
+  fallChecks: [
+    { good: "", bad: "", done: "" },
+    { good: "", bad: "", done: "" },
+    { good: "", bad: "", done: "" },
+  ],
+  correctionNote: "",
+};
+
+function normalizeKyInstructionRecord(raw: KyInstructionRecordState): KyInstructionRecordState {
+  const merged = { ...defaultKyInstructionRecord, ...raw };
+  let participants = Array.isArray(merged.participants) ? [...merged.participants] : [];
+  if (participants.length < 2) {
+    while (participants.length < 6) participants.push(emptyParticipant());
+  }
+  return { ...merged, participants };
+}
+
 function readFromStorage<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   const raw = window.localStorage.getItem(key);
@@ -100,6 +181,8 @@ export type OperationsService = {
   saveKyDraft: (value: KySheetDraft) => Promise<ServiceResult<KySheetDraft>>;
   getKyPaperForm: () => Promise<ServiceResult<KyPaperFormState>>;
   saveKyPaperForm: (value: KyPaperFormState) => Promise<ServiceResult<KyPaperFormState>>;
+  getKyInstructionRecord: () => Promise<ServiceResult<KyInstructionRecordState>>;
+  saveKyInstructionRecord: (value: KyInstructionRecordState) => Promise<ServiceResult<KyInstructionRecordState>>;
   buildMailPreview: (input: {
     notification: NotificationSettings;
     mail: MailDeliverySettings;
@@ -139,6 +222,14 @@ export function createOperationsService(): OperationsService {
     },
     async saveKyPaperForm(value) {
       writeToStorage(STORAGE_KEYS.kyPaper, value);
+      return { ok: true, data: value };
+    },
+    async getKyInstructionRecord() {
+      const raw = readFromStorage(STORAGE_KEYS.kyInstruction, defaultKyInstructionRecord);
+      return { ok: true, data: normalizeKyInstructionRecord(raw) };
+    },
+    async saveKyInstructionRecord(value) {
+      writeToStorage(STORAGE_KEYS.kyInstruction, value);
       return { ok: true, data: value };
     },
     async buildMailPreview({ notification, mail }) {

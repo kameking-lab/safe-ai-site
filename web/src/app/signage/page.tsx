@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
 import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture-warning-map";
 import { SignageHeader } from "@/components/signage/signage-header";
+import { SignageFeaturedGoods } from "@/components/signage/signage-featured-goods";
 import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
 import { SignageShell } from "@/components/signage/signage-shell";
 import { getSignageLocationById, signageLocations } from "@/data/signage-locations";
@@ -233,7 +234,7 @@ export default function SignagePage() {
       />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden xl:grid-cols-12 xl:gap-3">
-        <div className="flex min-h-0 flex-col gap-2 overflow-hidden xl:col-span-7">
+        <div className="flex min-h-0 flex-col gap-2 overflow-y-auto overflow-x-hidden xl:col-span-7">
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             <label className="ml-auto flex max-w-full items-center gap-2 text-[10px] text-slate-300 sm:text-xs">
               <span className="shrink-0 whitespace-nowrap">地点</span>
@@ -251,7 +252,7 @@ export default function SignagePage() {
             </label>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden rounded-2xl border border-slate-600 bg-slate-950/60 p-2 sm:p-3">
+          <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-600 bg-slate-950/60 p-2 sm:p-3">
             <div className="flex shrink-0 flex-wrap items-start justify-between gap-2">
               <div>
                 <p className="text-xs font-bold text-slate-100 sm:text-sm">気象庁 注意報・警報（都道府県）</p>
@@ -380,6 +381,8 @@ export default function SignagePage() {
               ))}
             </ul>
           </section>
+
+          <SignageFeaturedGoods />
         </div>
       </div>
 

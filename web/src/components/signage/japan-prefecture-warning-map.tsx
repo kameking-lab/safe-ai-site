@@ -16,10 +16,14 @@ type JapanPrefectureWarningMapProps = {
   highlightIso?: string;
 };
 
+/**
+ * コンテナ幅に合わせ、GeoJSON の実バウンディングボックスから高さを算出する。
+ * 横長コンテナでも北海道〜沖縄が収まるよう、fitWidth 後の bounds で縦ピクセルを決める。
+ */
 export function JapanPrefectureWarningMap({ levelsByIso, highlightIso }: JapanPrefectureWarningMapProps) {
   const [fc, setFc] = useState<GeoJSON.FeatureCollection | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState({ w: 560, h: 600 });
+  const [width, setWidth] = useState(560);
 
   useEffect(() => {
     void fetch("/geo/japan-prefectures-ne10m.json")
@@ -33,45 +37,66 @@ export function JapanPrefectureWarningMap({ levelsByIso, highlightIso }: JapanPr
     const ro = new ResizeObserver((entries) => {
       for (const e of entries) {
         const w = e.contentRect.width;
-        if (w > 48) setSize({ w, h: Math.max(300, w * 1.12) });
+        if (w > 48) setWidth(w);
       }
     });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
-  const paths = useMemo(() => {
-    if (!fc) return [];
+  const { paths, svgW, svgH } = useMemo(() => {
+    if (!fc) {
+      return { paths: [] as { d: string; iso: string; level: JmaMapLevel; key: string }[], svgW: width, svgH: 400 };
+    }
+    const pad = 12;
+    const w = Math.max(280, Math.floor(width));
     const projection = geoMercator();
     const path = geoPath(projection);
+    const geo = fc as unknown as GeoPermissibleObjects;
+
+    projection.fitWidth(w - pad * 2, geo);
+    const b = path.bounds(geo);
+    const bh = Math.ceil(b[1][1] - b[0][1]);
+    let h = Math.max(280, bh + pad * 2);
+    const maxH = Math.round(w * 2.15);
+    h = Math.min(Math.max(h, Math.round(w * 1.25)), maxH);
+
     projection.fitExtent(
-      [[6, 6], [size.w - 6, size.h - 6]],
-      fc as unknown as GeoPermissibleObjects
+      [
+        [pad, pad],
+        [w - pad, h - pad],
+      ],
+      geo
     );
-    return fc.features.map((feature, i) => {
+
+    const segments = fc.features.map((feature, i) => {
       const iso = (feature.properties as { iso_3166_2?: string } | null)?.iso_3166_2 ?? "";
       const level = levelsByIso[iso] ?? "none";
       const d = path(feature as unknown as GeoPermissibleObjects);
-      return { d, iso, level, key: iso || `f-${i}` };
+      return { d: d ?? "", iso, level, key: iso || `f-${i}` };
     });
-  }, [fc, levelsByIso, size.w, size.h]);
+
+    return { paths: segments, svgW: w, svgH: h };
+  }, [fc, levelsByIso, width]);
 
   return (
-    <div ref={wrapperRef} className="flex min-h-0 w-full flex-1 flex-col">
-      <div className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+    <div ref={wrapperRef} className="w-full shrink-0">
+      <div className="flex w-full justify-center">
         <svg
-          width={size.w}
-          height={size.h}
-          className="max-h-[min(58vh,560px)] max-w-full"
+          width={svgW}
+          height={svgH}
+          className="max-w-full"
+          viewBox={`0 0 ${svgW} ${svgH}`}
+          preserveAspectRatio="xMidYMid meet"
           role="img"
           aria-label="気象庁の注意報・警報に基づく都道府県別の色分け地図"
         >
-          <rect width={size.w} height={size.h} className="fill-slate-950" rx={4} />
+          <rect width={svgW} height={svgH} className="fill-slate-950" rx={4} />
           <title>日本地図（都道府県・気象庁データ）</title>
           {paths.map((p) => (
             <path
               key={p.key}
-              d={p.d ?? ""}
+              d={p.d}
               fill={FILL[p.level]}
               stroke={p.iso === highlightIso ? "#4ade80" : "#0f172a"}
               strokeWidth={p.iso === highlightIso ? 2.4 : 0.55}

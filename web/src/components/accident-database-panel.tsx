@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import type { AccidentCase, AccidentType, AccidentWorkCategory } from "@/lib/types/domain";
+import { useMemo, useState } from "react";
+import {
+  ALL_ACCIDENT_CATEGORIES,
+  ALL_ACCIDENT_TYPES,
+  type AccidentCase,
+  type AccidentType,
+  type AccidentWorkCategory,
+} from "@/lib/types/domain";
 
-const ACCIDENT_TYPE_ORDER: AccidentType[] = [
-  "墜落",
-  "転倒",
-  "挟まれ",
-  "飛来落下",
-  "感電",
-];
+const PAGE_SIZE = 40;
 
 type AccidentDatabasePanelProps = {
   cases: AccidentCase[];
@@ -22,14 +23,12 @@ type AccidentDatabasePanelProps = {
   errorMessage?: string | null;
 };
 
-const CATEGORY_ORDER: AccidentWorkCategory[] = ["高所", "電気", "足場", "重機", "一般"];
-
 function filterOptions(cases: AccidentCase[]) {
   const set = new Set<AccidentType>();
   for (const item of cases) {
     set.add(item.type);
   }
-  const ordered = ACCIDENT_TYPE_ORDER.filter((type) => set.has(type));
+  const ordered = ALL_ACCIDENT_TYPES.filter((type) => set.has(type));
   return ["すべて", ...ordered] as const;
 }
 
@@ -44,7 +43,15 @@ export function AccidentDatabasePanel({
   errorMessage,
 }: AccidentDatabasePanelProps) {
   const options = filterOptions(allCases);
-  const categoryOptions = ["すべて", ...CATEGORY_ORDER] as const;
+  const categoryOptions = ["すべて", ...ALL_ACCIDENT_CATEGORIES] as const;
+  const [page, setPage] = useState(0);
+
+  const pageItems = useMemo(() => {
+    const start = page * PAGE_SIZE;
+    return cases.slice(start, start + PAGE_SIZE);
+  }, [cases, page]);
+
+  const totalPages = Math.max(1, Math.ceil(cases.length / PAGE_SIZE));
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
@@ -52,17 +59,15 @@ export function AccidentDatabasePanel({
         <div>
           <h2 className="text-base font-bold text-slate-900 sm:text-lg">事故データベース</h2>
           <p className="mt-1 text-xs text-slate-600">
-            カテゴリ・事故種別で絞り込み、要因と再発防止を朝礼・学習・KYに接続できます。
+            ブラウザ内で再現した事例 {allCases.length.toLocaleString("ja-JP")}
+            件を収録。種別・作業カテゴリで絞り込み、再発防止をKY・朝礼に接続できます。公的統計Excelの取込みに差し替え可能な構造です。
           </p>
         </div>
-        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-700">
-          mock
-        </span>
       </div>
 
       <div className="mt-3 space-y-3">
         <div>
-          <p className="text-xs font-semibold text-slate-700">カテゴリ</p>
+          <p className="text-xs font-semibold text-slate-700">作業カテゴリ</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {categoryOptions.map((option) => {
               const isActive = option === selectedCategory;
@@ -70,7 +75,10 @@ export function AccidentDatabasePanel({
                 <button
                   key={option}
                   type="button"
-                  onClick={() => onSelectCategory(option)}
+                  onClick={() => {
+                    onSelectCategory(option);
+                    setPage(0);
+                  }}
                   className={`rounded-full px-3 py-1 text-xs font-semibold ${
                     isActive ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700"
                   }`}
@@ -88,8 +96,11 @@ export function AccidentDatabasePanel({
           <select
             id="accident-type-filter"
             value={selectedType}
-            onChange={(event) => onSelectType(event.target.value as AccidentType | "すべて")}
-            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none"
+            onChange={(event) => {
+              onSelectType(event.target.value as AccidentType | "すべて");
+              setPage(0);
+            }}
+            className="mt-1 max-w-md rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none"
           >
             {options.map((option) => (
               <option key={option} value={option}>
@@ -99,6 +110,11 @@ export function AccidentDatabasePanel({
           </select>
         </div>
       </div>
+
+      <p className="mt-2 text-xs text-slate-500">
+        表示: {cases.length.toLocaleString("ja-JP")}件中 {page * PAGE_SIZE + 1}〜
+        {Math.min((page + 1) * PAGE_SIZE, cases.length)}件
+      </p>
 
       <div className="mt-3 space-y-3">
         {status === "loading" ? (
@@ -114,7 +130,7 @@ export function AccidentDatabasePanel({
             条件に一致する事故データがありません。
           </p>
         ) : (
-          cases.map((accident) => (
+          pageItems.map((accident) => (
             <article
               key={accident.id}
               className="rounded-xl border border-slate-200 bg-slate-50/60 p-3"
@@ -165,6 +181,30 @@ export function AccidentDatabasePanel({
           ))
         )}
       </div>
+
+      {totalPages > 1 && status === "success" && cases.length > 0 ? (
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <button
+            type="button"
+            disabled={page === 0}
+            onClick={() => setPage((p) => p - 1)}
+            className="rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-40"
+          >
+            前へ
+          </button>
+          <span className="text-xs text-slate-600">
+            {page + 1} / {totalPages}
+          </span>
+          <button
+            type="button"
+            disabled={page >= totalPages - 1}
+            onClick={() => setPage((p) => p + 1)}
+            className="rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-40"
+          >
+            次へ
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }

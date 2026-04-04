@@ -1,6 +1,12 @@
-import { accidentCasesMock } from "@/data/mock/accident-cases";
+import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import type { ServiceResult } from "@/lib/types/api";
-import type { AccidentCase, AccidentType, AccidentWorkCategory } from "@/lib/types/domain";
+import {
+  ALL_ACCIDENT_CATEGORIES,
+  ALL_ACCIDENT_TYPES,
+  type AccidentCase,
+  type AccidentType,
+  type AccidentWorkCategory,
+} from "@/lib/types/domain";
 
 export type AccidentService = {
   getAccidentTypes: () => { value: AccidentType | "すべて"; label: string }[];
@@ -14,20 +20,12 @@ export type AccidentService = {
 
 const accidentTypeOptions: { value: AccidentType | "すべて"; label: string }[] = [
   { value: "すべて", label: "すべて" },
-  { value: "墜落", label: "墜落" },
-  { value: "転倒", label: "転倒" },
-  { value: "挟まれ", label: "挟まれ" },
-  { value: "飛来落下", label: "飛来落下" },
-  { value: "感電", label: "感電" },
+  ...ALL_ACCIDENT_TYPES.map((t) => ({ value: t, label: t })),
 ];
 
 const accidentCategoryOptions: { value: AccidentWorkCategory | "すべて"; label: string }[] = [
   { value: "すべて", label: "すべて" },
-  { value: "高所", label: "高所" },
-  { value: "電気", label: "電気" },
-  { value: "足場", label: "足場" },
-  { value: "重機", label: "重機" },
-  { value: "一般", label: "一般" },
+  ...ALL_ACCIDENT_CATEGORIES.map((c) => ({ value: c, label: c })),
 ];
 
 export const mockAccidentService: AccidentService = {
@@ -38,12 +36,12 @@ export const mockAccidentService: AccidentService = {
     return accidentCategoryOptions;
   },
   getAllAccidentCases() {
-    return accidentCasesMock;
+    return getAccidentCasesDataset();
   },
   async getAccidentCases(input) {
     const filterType = input?.type ?? "すべて";
     const filterCategory = input?.category ?? "すべて";
-    const data = accidentCasesMock.filter((item) => {
+    const data = getAccidentCasesDataset().filter((item) => {
       const typeMatched = filterType === "すべて" || item.type === filterType;
       const categoryMatched = filterCategory === "すべて" || item.workCategory === filterCategory;
       return typeMatched && categoryMatched;

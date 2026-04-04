@@ -75,8 +75,54 @@ export type SiteRiskWeather = {
   recommendedActions: string[];
 };
 
-export type AccidentType = "墜落" | "転倒" | "挟まれ" | "飛来落下" | "感電";
-export type AccidentWorkCategory = "高所" | "電気" | "足場" | "重機" | "一般";
+export type AccidentType =
+  | "墜落"
+  | "転倒"
+  | "挟まれ"
+  | "飛来落下"
+  | "感電"
+  | "車両"
+  | "崩壊"
+  | "火災"
+  | "中毒"
+  | "溺水";
+
+export type AccidentWorkCategory =
+  | "高所"
+  | "電気"
+  | "足場"
+  | "重機"
+  | "一般"
+  | "解体"
+  | "製造"
+  | "建設"
+  | "倉庫";
+
+/** UIの並び順（フィルタ用） */
+export const ALL_ACCIDENT_TYPES: AccidentType[] = [
+  "墜落",
+  "転倒",
+  "挟まれ",
+  "飛来落下",
+  "感電",
+  "車両",
+  "崩壊",
+  "火災",
+  "中毒",
+  "溺水",
+];
+
+export const ALL_ACCIDENT_CATEGORIES: AccidentWorkCategory[] = [
+  "高所",
+  "電気",
+  "足場",
+  "重機",
+  "一般",
+  "解体",
+  "製造",
+  "建設",
+  "倉庫",
+];
 
 export type AccidentCase = {
   id: string;
@@ -84,7 +130,7 @@ export type AccidentCase = {
   occurredOn: string;
   type: AccidentType;
   workCategory: AccidentWorkCategory;
-  severity: "軽傷" | "中等傷" | "重傷";
+  severity: "軽傷" | "中等傷" | "重傷" | "死亡";
   summary: string;
   mainCauses: string[];
   preventionPoints: string[];

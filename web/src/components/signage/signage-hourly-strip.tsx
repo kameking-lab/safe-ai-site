@@ -22,7 +22,7 @@ export function SignageHourlyStrip({ hourly, locationLabel, status }: SignageHou
   if (status === "loading" || status === "idle") {
     return (
       <div className="rounded-xl border border-slate-600 bg-slate-950/90 p-2">
-        <p className="text-[10px] font-bold text-slate-200">時間別の天気（横スクロール）</p>
+        <p className="text-[10px] font-bold text-slate-200">時間別の天気</p>
         <div className="mt-2 h-24 animate-pulse rounded-lg bg-slate-800/80" />
       </div>
     );
@@ -39,24 +39,38 @@ export function SignageHourlyStrip({ hourly, locationLabel, status }: SignageHou
   return (
     <div className="rounded-xl border border-slate-600 bg-slate-950/90 p-2">
       <div className="flex flex-wrap items-baseline justify-between gap-1">
-        <p className="text-[10px] font-bold text-slate-100 sm:text-xs">1時間ごとの天気（Open-Meteo・参考）</p>
+        <p className="text-[10px] font-bold text-slate-100 sm:text-xs">1時間ごとの天気（現在の時台〜明日・Open-Meteo）</p>
         <p className="max-w-[55%] truncate text-[9px] text-slate-400">{locationLabel}</p>
       </div>
-      <div className="mt-2 flex gap-1 overflow-x-auto pb-1 pt-1 [scrollbar-width:thin]">
+      <p className="mt-0.5 text-[8px] text-slate-500">先頭が現在の時間帯。幅に応じて折り返し表示（横スクロールなし）。</p>
+      <div
+        className="mt-2 grid gap-1 [grid-template-columns:repeat(auto-fill,minmax(46px,1fr))]"
+        role="list"
+        aria-label="1時間ごとの天気予報"
+      >
+        <div
+          className="flex min-h-[4.5rem] min-w-[2.75rem] flex-col items-center justify-center rounded-lg border border-cyan-700/50 bg-cyan-950/40 px-0.5 py-1 text-center"
+          role="presentation"
+        >
+          <span className="text-[8px] font-bold leading-tight text-cyan-200">現在</span>
+          <span className="text-[7px] leading-tight text-cyan-400/90">の時台</span>
+          <span className="text-[7px] leading-tight text-cyan-500/80">から</span>
+        </div>
         {hourly.map((h) => (
           <div
             key={h.time}
-            className="flex w-[52px] shrink-0 flex-col items-center rounded-lg border border-slate-700/90 bg-slate-900/80 px-1 py-1.5 text-center"
+            role="listitem"
+            className="flex min-h-[4.5rem] min-w-0 flex-col items-center justify-start rounded-lg border border-slate-700/90 bg-slate-900/80 px-0.5 py-1 text-center"
           >
-            <span className="text-[8px] leading-tight text-slate-400">{h.hourLabel}</span>
-            <span className="my-0.5 text-xl leading-none" aria-hidden>
+            <span className="line-clamp-2 text-[7px] leading-tight text-slate-400 sm:text-[8px]">{h.hourLabel}</span>
+            <span className="my-0.5 text-lg leading-none sm:text-xl" aria-hidden>
               {weatherIcon(h.weatherCode, h.precipMm)}
             </span>
-            <span className="text-[10px] font-semibold tabular-nums text-slate-100">{h.tempC}°</span>
+            <span className="text-[9px] font-semibold tabular-nums text-slate-100 sm:text-[10px]">{h.tempC}°</span>
             {h.precipMm >= 0.1 ? (
-              <span className="text-[8px] tabular-nums text-sky-300">{h.precipMm}mm</span>
+              <span className="text-[7px] tabular-nums text-sky-300 sm:text-[8px]">{h.precipMm}mm</span>
             ) : (
-              <span className="text-[8px] text-slate-600">—</span>
+              <span className="text-[7px] text-slate-600 sm:text-[8px]">—</span>
             )}
           </div>
         ))}

@@ -80,3 +80,69 @@ export type KyPaperFormState = {
   siteAgentSign: string;
   supervisorSign: string;
 };
+
+/** 作業指示・安全指示書及び現地KY記録表（横長様式） */
+export type KyInstructionWorkRow = {
+  workPlace: string;
+  workDetail: string;
+  machinery: string;
+  fireMark: string;
+  heightMark: string;
+  ppeNote: string;
+  safetyInstruction: string;
+  responsible: string;
+  primeSign: string;
+};
+
+export type KyInstructionRiskRow = {
+  targetLabel: string;
+  hazard: string;
+  qualNo: string;
+  likelihood: 1 | 2 | 3;
+  severity: 1 | 2 | 3;
+  reduction: string;
+  reLikelihood: 1 | 2 | 3;
+  reSeverity: 1 | 2 | 3;
+  reducedBelow2: string;
+  primeSign: string;
+};
+
+export type KyInstructionParticipant = {
+  name: string;
+  qualNo: string;
+  preWork: string;
+  onExit: string;
+};
+
+export type KyInstructionFallCheck = {
+  good: string;
+  bad: string;
+  done: string;
+};
+
+export type KyInstructionRecordState = {
+  reportStamps: [string, string, string, string, string];
+  workDateYear: string;
+  workDateMonth: string;
+  workDateDay: string;
+  workDateNote: string;
+  weather: string;
+  coop1Name: string;
+  coop1Chief: string;
+  coop2Name: string;
+  coop2Chief: string;
+  coop3Name: string;
+  coop3Chief: string;
+  workRows: KyInstructionWorkRow[];
+  riskRows: KyInstructionRiskRow[];
+  participants: KyInstructionParticipant[];
+  participantTotal: string;
+  breaks: string[];
+  safetyVest: string;
+  exitLarge: string;
+  exitMedium: string;
+  exitSmall: string;
+  closingNote: string;
+  fallChecks: KyInstructionFallCheck[];
+  correctionNote: string;
+};

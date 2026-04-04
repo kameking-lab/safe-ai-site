@@ -2,70 +2,10 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { elearningThemesCatalog } from "@/data/mock/elearning-themes-data";
 import type { LearningTheme } from "@/lib/types/operations";
 
-const themes: LearningTheme[] = [
-  {
-    id: "learn-highfall",
-    title: "高所作業の墜落防止",
-    sourceType: "事故DB",
-    description: "足場・親綱・手すり・フルハーネスの基本確認を3問で復習します。",
-    level: "重点",
-    questions: [
-      {
-        id: "q1",
-        question: "高所作業で最優先で確認すべき項目は？",
-        options: ["作業服の色", "墜落防止設備と装着状態", "休憩場所"],
-        correctIndex: 1,
-        explanation: "墜落防止設備の有無・装着状態が最優先です。",
-      },
-      {
-        id: "q2",
-        question: "手すり未設置区間を見つけた時の行動は？",
-        options: ["急いで通過", "作業を止めて責任者へ報告", "注意して続行"],
-        correctIndex: 1,
-        explanation: "危険区間発見時は作業停止と報告を徹底します。",
-      },
-      {
-        id: "q3",
-        question: "朝礼で共有すべき内容として適切なのは？",
-        options: ["個人の感想だけ", "危険箇所・退避導線・合図役", "天気予報だけ"],
-        correctIndex: 1,
-        explanation: "具体的な危険箇所と連絡導線を共有します。",
-      },
-    ],
-  },
-  {
-    id: "learn-electric",
-    title: "感電防止と停電確認",
-    sourceType: "法改正",
-    description: "停電範囲・検電・復電前確認の流れを短時間で確認します。",
-    level: "標準",
-    questions: [
-      {
-        id: "q1",
-        question: "停電作業で必須なのは？",
-        options: ["検電を省略", "停電札と検電の実施", "日報のみ記録"],
-        correctIndex: 1,
-        explanation: "停電札掲示と検電実施が必須です。",
-      },
-      {
-        id: "q2",
-        question: "復電前の確認で正しいのは？",
-        options: ["担当者単独で判断", "責任者を含む複数確認", "定時なら自動復電"],
-        correctIndex: 1,
-        explanation: "復電前は複数確認で誤復電を防止します。",
-      },
-      {
-        id: "q3",
-        question: "活線接触リスクが疑われる時の対応は？",
-        options: ["そのまま続行", "即時停止と連絡", "様子見で対応"],
-        correctIndex: 1,
-        explanation: "疑い段階でも即時停止が原則です。",
-      },
-    ],
-  },
-];
+const themes: LearningTheme[] = elearningThemesCatalog;
 
 export function ELearningPanel() {
   const [themeId, setThemeId] = useState(themes[0].id);
@@ -78,15 +18,19 @@ export function ELearningPanel() {
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="text-base font-bold text-slate-900 sm:text-lg">Eラーニング</h2>
-          <p className="mt-1 text-xs text-slate-600">事故DB・法改正・現場リスクから、朝礼後に学習できる入口です。</p>
+          <p className="mt-1 text-xs text-slate-600">
+            12分野×各10問（計120問）。事故・法改正・現場リスクの判断を短時間で反復できます。
+          </p>
         </div>
-        <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-700">たたき台</span>
+        <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-800">
+          12×10問
+        </span>
       </div>
       <div className="mt-3">
         <label className="block text-xs font-semibold text-slate-700" htmlFor="learning-theme">学習テーマ</label>
         <select
           id="learning-theme"
-          className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="mt-1 max-w-xl rounded-lg border border-slate-300 px-3 py-2 text-sm"
           onChange={(event) => {
             setThemeId(event.target.value);
             setAnswers({});

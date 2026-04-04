@@ -6,7 +6,7 @@ import { AccidentDatabasePanel } from "@/components/accident-database-panel";
 import { ELearningPanel } from "@/components/elearning-panel";
 import { HomeValueHero } from "@/components/home-value-hero";
 import { KySheetPanel } from "@/components/ky-sheet-panel";
-import { KyPaperForm } from "@/components/ky-paper-form";
+import { KyInstructionRecordForm } from "@/components/ky-instruction-record-form";
 import { LawRevisionList } from "@/components/law-revision-list";
 import { MailDeliveryPanel } from "@/components/mail-delivery-panel";
 import { MhlwDisasterDatabasesPanel } from "@/components/mhlw-disaster-databases-panel";
@@ -26,7 +26,7 @@ import type {
   SiteRiskWeather,
 } from "@/lib/types/domain";
 import type {
-  KyPaperFormState,
+  KyInstructionRecordState,
   KySheetDraft,
   MailDeliverySettings,
   NotificationSettings,
@@ -49,32 +49,72 @@ type HomeScreenProps = {
   initialLawTab?: TabId;
 };
 
-function makeInitialKyPaper(): KyPaperFormState {
-  const d = new Date().toISOString().slice(0, 10);
-  const row = (): KyPaperFormState["rows"][number] => ({
-    predictedHarm: "",
-    magnitude: 1,
-    probability: 1,
-    evaluation: 1,
-    riskGrade: "D",
-    reductionMeasures: "",
-    reMagnitude: 1,
-    reProbability: 1,
-    reEvaluation: 1,
-    reRiskGrade: "D",
-    reMeasures: "",
+function makeInitialKyInstruction(): KyInstructionRecordState {
+  const y = new Date().getFullYear().toString();
+  const emptyWork = (): KyInstructionRecordState["workRows"][number] => ({
+    workPlace: "",
+    workDetail: "",
+    machinery: "",
+    fireMark: "",
+    heightMark: "",
+    ppeNote: "",
+    safetyInstruction: "",
+    responsible: "",
+    primeSign: "",
+  });
+  const emptyRisk = (label: string): KyInstructionRecordState["riskRows"][number] => ({
+    targetLabel: label,
+    hazard: "",
+    qualNo: "",
+    likelihood: 1,
+    severity: 1,
+    reduction: "",
+    reLikelihood: 1,
+    reSeverity: 1,
+    reducedBelow2: "",
+    primeSign: "",
+  });
+  const emptyP = (): KyInstructionRecordState["participants"][number] => ({
+    name: "",
+    qualNo: "",
+    preWork: "",
+    onExit: "",
   });
   return {
-    date: d,
-    companyName: "",
-    personInCharge: "",
-    workContent: "",
-    supervisorInstructions: "",
-    rows: [row(), row()],
-    participantNames: "",
-    pointingCall: "",
-    siteAgentSign: "",
-    supervisorSign: "",
+    reportStamps: ["", "", "", "", ""],
+    workDateYear: y,
+    workDateMonth: String(new Date().getMonth() + 1),
+    workDateDay: String(new Date().getDate()),
+    workDateNote: "",
+    weather: "",
+    coop1Name: "",
+    coop1Chief: "",
+    coop2Name: "",
+    coop2Chief: "",
+    coop3Name: "",
+    coop3Chief: "",
+    workRows: [emptyWork(), emptyWork(), emptyWork(), emptyWork()],
+    riskRows: [
+      emptyRisk("上記"),
+      emptyRisk("①"),
+      emptyRisk("②"),
+      emptyRisk("③"),
+      emptyRisk("④"),
+    ],
+    participants: Array.from({ length: 6 }, () => emptyP()),
+    participantTotal: "",
+    breaks: ["", "", "", "", ""],
+    safetyVest: "",
+    exitLarge: "",
+    exitMedium: "",
+    exitSmall: "",
+    closingNote: "",
+    fallChecks: [
+      { good: "", bad: "", done: "" },
+      { good: "", bad: "", done: "" },
+      { good: "", bad: "", done: "" },
+    ],
+    correctionNote: "",
   };
 }
 
@@ -135,7 +175,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
     callAndResponse: "",
     notes: "",
   });
-  const [kyPaperForm, setKyPaperForm] = useState<KyPaperFormState>(makeInitialKyPaper);
+  const [kyInstructionRecord, setKyInstructionRecord] = useState<KyInstructionRecordState>(makeInitialKyInstruction);
   const [pdfTarget, setPdfTarget] = useState<PdfExportTarget>("ky-sheet");
   const [mailPreview, setMailPreview] = useState("配信プレビューを表示します。");
   const [pdfPreview, setPdfPreview] = useState("PDFプレビューを表示します。");
@@ -258,7 +298,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
   }, [chatMessages, activeTab, variant]);
 
   useEffect(() => {
-    if (variant !== "risk" && variant !== "ky" && variant !== "pdf") return;
+    if (variant !== "risk" && variant !== "pdf") return;
     let active = true;
     async function loadWeatherRisk() {
       setWeatherRiskStatus("loading");
@@ -327,9 +367,9 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
         if (ky.ok) setKySheetDraft(ky.data);
       }
       if (variant === "ky") {
-        const paper = await services.operations.getKyPaperForm();
+        const paper = await services.operations.getKyInstructionRecord();
         if (!active) return;
-        if (paper.ok) setKyPaperForm(paper.data);
+        if (paper.ok) setKyInstructionRecord(paper.data);
       }
     }
     void loadOps();
@@ -405,7 +445,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
         </>
       ) : null}
 
-      {variant === "risk" || variant === "ky" ? (
+      {variant === "risk" ? (
         <>
           <section className="px-4 pt-4 lg:px-8">{children}</section>
           <section id="section-weather-risk" className="px-4 pt-4 lg:px-8">
@@ -419,6 +459,23 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
               workType={selectedWorkType}
               onWorkTypeChange={setSelectedWorkType}
             />
+          </section>
+        </>
+      ) : null}
+
+      {variant === "ky" ? (
+        <>
+          <section className="px-4 pt-4 lg:px-8">{children}</section>
+          <section className="border-b border-slate-200/80 bg-slate-50 px-4 py-2 lg:px-8">
+            <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
+              <p>
+                KY用紙専用画面です。天候・リスクの朝礼用サマリーは
+                <a href="/risk" className="mx-1 font-semibold text-emerald-700 underline">
+                  今日の現場リスク
+                </a>
+                で確認できます。
+              </p>
+            </div>
           </section>
         </>
       ) : null}
@@ -520,16 +577,21 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
       ) : null}
 
       {variant === "ky" ? (
-        <section id="section-ky-sheet" className="px-4 pb-3 lg:px-8">
-          <KyPaperForm
-            onChange={setKyPaperForm}
+        <section
+          id="section-ky-sheet"
+          className="px-4 pb-3 lg:px-8"
+        >
+          <KyInstructionRecordForm
+            onChange={setKyInstructionRecord}
             onSave={(current) => {
-              void services.operations.saveKyPaperForm(current).then((result) => {
-                if (result.ok) setOpsSavedLabel(`KY用紙を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
+              void services.operations.saveKyInstructionRecord(current).then((result) => {
+                if (result.ok) {
+                  setOpsSavedLabel(`作業指示・現地KY記録を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
+                }
               });
             }}
             savedLabel={opsSavedLabel}
-            value={kyPaperForm}
+            value={kyInstructionRecord}
           />
         </section>
       ) : null}
