@@ -169,6 +169,118 @@ const templates: Template[] = [
       label: "厚生労働省 労災保険・安全衛生",
     },
   },
+  // 告示レベル
+  {
+    title: "粉じん障害防止規則の一部を改正する省令の施行について（告示）",
+    kind: "other",
+    category: "告示",
+    issuer: "厚生労働省",
+    summary: "特定粉じん作業の範囲拡大に伴い、呼吸用保護具の選定・管理基準を告示として制定。フィットテスト実施の義務付け。",
+    source: {
+      url: LAW_SOURCE_HUB.mhlwRoudou,
+      label: "厚生労働省 労働政策（粉じん対策）",
+    },
+  },
+  {
+    title: "有機溶剤中毒予防規則の管理濃度に関する告示改正",
+    kind: "other",
+    category: "告示",
+    issuer: "厚生労働省",
+    summary: "トルエン・キシレン等15物質の管理濃度を最新の知見に基づき改定。測定機器の精度基準も告示で明記。",
+    source: {
+      url: LAW_SOURCE_HUB.mhlwRoudou,
+      label: "厚生労働省 労働政策（化学物質）",
+    },
+  },
+  {
+    title: "特化則第2類物質の許容濃度告示改正（鉛化合物等）",
+    kind: "other",
+    category: "告示",
+    issuer: "厚生労働省",
+    summary: "鉛・クロム・マンガン化合物の許容濃度を国際基準に合わせて引き下げ。血中鉛濃度の健康診断基準も改定。",
+    source: {
+      url: LAW_SOURCE_HUB.mhlwRoudou,
+      label: "厚生労働省 労働政策（特定化学物質）",
+    },
+  },
+  {
+    title: "石綿則に基づく作業の届出様式の改正（告示）",
+    kind: "other",
+    category: "告示",
+    issuer: "厚生労働省",
+    summary: "アスベスト含有建材の事前調査結果報告様式を改正。電子申請フォームへの対応と添付書類の統一化を実施。",
+    source: {
+      url: LAW_SOURCE_HUB.mhlwRoudou,
+      label: "厚生労働省 労働政策（石綿対策）",
+    },
+  },
+  // 追加通達
+  {
+    title: "建設現場における熱中症予防対策の徹底について（通達）",
+    kind: "notice",
+    category: "通達",
+    issuer: "厚生労働省 労働基準局長",
+    summary: "WBGT測定器の設置・記録義務と、熱中症発症時の救護体制の整備を事業者に求める。水分・塩分補給の基準を明記。",
+    source: {
+      url: LAW_SOURCE_HUB.mhlwRoudou,
+      label: "厚生労働省 労働政策（熱中症）",
+    },
+  },
+  {
+    title: "足場からの墜落防止に関する技術指針の改定通達",
+    kind: "notice",
+    category: "通達",
+    issuer: "厚生労働省 安全衛生部長",
+    summary: "足場組立・解体時の先行手すり方式の導入を強く推奨。段差・開口部への覆い・手すりの二段設置基準を明確化。",
+    source: {
+      url: LAW_SOURCE_HUB.mhlwRoudou,
+      label: "厚生労働省 労働政策（足場・墜落防止）",
+    },
+  },
+  {
+    title: "重機による労働災害防止に関する通達（建設機械安全指針）",
+    kind: "notice",
+    category: "通達",
+    issuer: "厚生労働省 労働基準局長",
+    summary: "バックホウ・クレーン等の誘導員配置基準を更新。重機の死角・接触リスクへの対策として立入禁止区域設定を義務化。",
+    source: {
+      url: LAW_SOURCE_HUB.mhlwRoudou,
+      label: "厚生労働省 労働政策（建設機械）",
+    },
+  },
+  {
+    title: "ロックアウト・タグアウト実施のための指針通達",
+    kind: "notice",
+    category: "通達",
+    issuer: "厚生労働省 安全衛生部",
+    summary: "機械設備の保全・修理・清掃作業時のエネルギー隔離手順（LOTO）を標準化。手順書の作成・掲示を義務化。",
+    source: {
+      url: LAW_SOURCE_HUB.mhlwRoudou,
+      label: "厚生労働省 労働政策（機械安全）",
+    },
+  },
+  {
+    title: "作業環境測定の方法及び結果の記録に関する指針（指針公示）",
+    kind: "guideline",
+    category: "指針",
+    issuer: "厚生労働省",
+    summary: "有機溶剤・特定化学物質の作業環境測定の実施頻度・測定点の設定方法・記録保存年数を指針として整理。",
+    source: {
+      url: LAW_SOURCE_HUB.mhlwRoudou,
+      label: "厚生労働省 労働政策（作業環境）",
+    },
+  },
+  {
+    title: "個人サンプリング法による化学物質のばく露評価指針",
+    kind: "guideline",
+    category: "指針",
+    issuer: "厚生労働省",
+    summary: "個人ばく露測定の採用を推奨する指針。リスクアセスメント結果の活用と測定業者の要件を明確化。",
+    source: {
+      url: LAW_SOURCE_HUB.mhlwRoudou,
+      label: "厚生労働省 労働政策（化学物質管理）",
+    },
+  },
 ];
 
 export function buildDecadeLawRevisionMocks(): LawRevisionCore[] {

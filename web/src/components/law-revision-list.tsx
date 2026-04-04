@@ -26,11 +26,21 @@ function resolveKindLabel(revision: LawRevision) {
       return "法律";
     case "guideline":
       return "ガイドライン";
+    case "other":
+      return "告示";
     case "notice":
     default:
       return "通達";
   }
 }
+
+const KIND_BADGE_CLASS: Record<string, string> = {
+  法律: "bg-red-100 text-red-800",
+  省令: "bg-orange-100 text-orange-800",
+  通達: "bg-blue-100 text-blue-800",
+  告示: "bg-purple-100 text-purple-800",
+  ガイドライン: "bg-green-100 text-green-800",
+};
 
 type LawRevisionListProps = {
   revisions: LawRevision[];
@@ -58,12 +68,14 @@ export function LawRevisionList({
   const [search, setSearch] = useState("");
   const [yearFrom, setYearFrom] = useState(2016);
   const [yearTo, setYearTo] = useState(2026);
+  const [selectedKind, setSelectedKind] = useState<string>("すべて");
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return revisions.filter((r) => {
       const y = Number(r.publishedAt.slice(0, 4));
       if (y < yearFrom || y > yearTo) return false;
+      if (selectedKind !== "すべて" && resolveKindLabel(r) !== selectedKind) return false;
       if (!q) return true;
       return (
         r.title.toLowerCase().includes(q) ||
@@ -72,7 +84,7 @@ export function LawRevisionList({
         r.revisionNumber.toLowerCase().includes(q)
       );
     });
-  }, [revisions, search, yearFrom, yearTo]);
+  }, [revisions, search, yearFrom, yearTo, selectedKind]);
 
   const showEmptyState = status === "success" && !error && filtered.length === 0;
 
@@ -123,6 +135,25 @@ export function LawRevisionList({
           </label>
         </div>
       </div>
+      <div className="mt-3">
+        <p className="text-xs font-semibold text-slate-700">種別フィルタ</p>
+        <div className="mt-1 flex flex-wrap gap-2">
+          {["すべて", "法律", "省令", "通達", "告示", "ガイドライン"].map((k) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setSelectedKind(k)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                selectedKind === k
+                  ? "bg-emerald-600 text-white"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              }`}
+            >
+              {k}
+            </button>
+          ))}
+        </div>
+      </div>
       {error && (
         <ErrorNotice title="一覧の取得に失敗しました" error={error} onRetry={onRetry} retryLabel={retryLabel} />
       )}
@@ -152,9 +183,16 @@ export function LawRevisionList({
                   発行日: {formatPublishedDate(revision.publishedAt)}
                 </p>
                 {(revision.kind || revision.revisionNumber) && (
-                  <p className="text-xs text-slate-500">
-                    {revision.kind ? resolveKindLabel(revision) : ""}
-                    {revision.kind && revision.revisionNumber ? " / " : ""}
+                  <p className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                    {revision.kind && (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                          KIND_BADGE_CLASS[resolveKindLabel(revision)] ?? "bg-slate-100 text-slate-700"
+                        }`}
+                      >
+                        {resolveKindLabel(revision)}
+                      </span>
+                    )}
                     {revision.revisionNumber ?? ""}
                   </p>
                 )}
