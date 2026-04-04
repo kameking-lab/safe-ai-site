@@ -21,6 +21,7 @@ const navItems: NavItem[] = [
   { id: "signage", label: "サイネージ", href: "/signage" },
   { id: "risk-prediction", label: "AIリスク予測", href: "/risk-prediction", highlight: true },
   { id: "today-risk", label: "今日の現場リスク", href: "/risk" },
+  { id: "chatbot", label: "安衛法チャットボット", href: "/chatbot", highlight: true },
   { id: "laws", label: "法改正", href: "/laws" },
   { id: "accidents", label: "事故データベース", href: "/accidents" },
   { id: "elearning", label: "Eラーニング", href: "/e-learning" },
