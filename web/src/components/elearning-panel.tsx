@@ -3,15 +3,66 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { elearningThemesCatalog } from "@/data/mock/elearning-themes-data";
+import { ELearningEditorPanel } from "@/components/elearning-editor-panel";
 import type { LearningTheme } from "@/lib/types/operations";
 
-const themes: LearningTheme[] = elearningThemesCatalog;
+const STORAGE_KEY = "el-theme-overrides";
+
+function loadOverrides(): Record<string, LearningTheme> {
+  if (typeof window === "undefined") return {};
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    return JSON.parse(raw) as Record<string, LearningTheme>;
+  } catch {
+    return {};
+  }
+}
+
+function saveOverrides(overrides: Record<string, LearningTheme>) {
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
+}
 
 export function ELearningPanel() {
-  const [themeId, setThemeId] = useState(themes[0].id);
+  const [overrides, setOverrides] = useState<Record<string, LearningTheme>>(loadOverrides);
+  const [themeId, setThemeId] = useState(elearningThemesCatalog[0].id);
   const [answers, setAnswers] = useState<Record<string, number>>({});
-  const selectedTheme = useMemo(() => themes.find((theme) => theme.id === themeId) ?? themes[0], [themeId]);
-  const score = selectedTheme.questions.reduce((sum, q) => sum + (answers[q.id] === q.correctIndex ? 1 : 0), 0);
+  const [editMode, setEditMode] = useState(false);
+
+  const themes = useMemo<LearningTheme[]>(
+    () => elearningThemesCatalog.map((t) => overrides[t.id] ?? t),
+    [overrides]
+  );
+
+  const selectedTheme = useMemo(() => themes.find((t) => t.id === themeId) ?? themes[0], [themes, themeId]);
+  const score = selectedTheme.questions.reduce(
+    (sum, q) => sum + (answers[q.id] === q.correctIndex ? 1 : 0),
+    0
+  );
+
+  const handleSaveEdit = (updated: LearningTheme) => {
+    const next = { ...overrides, [updated.id]: updated };
+    setOverrides(next);
+    saveOverrides(next);
+    setEditMode(false);
+  };
+
+  const handleResetTheme = () => {
+    const next = { ...overrides };
+    delete next[themeId];
+    setOverrides(next);
+    saveOverrides(next);
+  };
+
+  if (editMode) {
+    return (
+      <ELearningEditorPanel
+        theme={selectedTheme}
+        onSave={handleSaveEdit}
+        onCancel={() => setEditMode(false)}
+      />
+    );
+  }
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
@@ -34,19 +85,43 @@ export function ELearningPanel() {
           onChange={(event) => {
             setThemeId(event.target.value);
             setAnswers({});
+            setEditMode(false);
           }}
           value={themeId}
         >
           {themes.map((theme) => (
             <option key={theme.id} value={theme.id}>
               {theme.title}（{theme.sourceType} / {theme.level}）
+              {overrides[theme.id] ? " ✎" : ""}
             </option>
           ))}
         </select>
       </div>
       <article className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
-        <h3 className="font-semibold text-slate-900">{selectedTheme.title}</h3>
-        <p className="mt-1 text-xs text-slate-600">{selectedTheme.description}</p>
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <h3 className="font-semibold text-slate-900">{selectedTheme.title}</h3>
+            <p className="mt-1 text-xs text-slate-600">{selectedTheme.description}</p>
+          </div>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <button
+              type="button"
+              onClick={() => setEditMode(true)}
+              className="rounded-lg border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-800 hover:bg-amber-100"
+            >
+              ✎ 編集
+            </button>
+            {overrides[themeId] && (
+              <button
+                type="button"
+                onClick={handleResetTheme}
+                className="text-[10px] text-slate-400 underline hover:text-rose-600"
+              >
+                初期化
+              </button>
+            )}
+          </div>
+        </div>
       </article>
       <div className="mt-3 space-y-3">
         {selectedTheme.questions.map((question, index) => (
