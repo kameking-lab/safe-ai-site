@@ -42,28 +42,8 @@ function splitByJstDate(hourly: SignageHourlyPoint[]) {
   return { today, tomorrow };
 }
 
-export function SignageHourlyWeather({ hourly, regionLabel, status }: SignageHourlyWeatherProps) {
-  const { today, tomorrow } = splitByJstDate(hourly);
-
-  if (status === "loading" || status === "idle") {
-    return (
-      <div className="flex h-full min-h-[120px] flex-col rounded-xl border border-slate-600 bg-slate-950/80 p-2">
-        <p className="text-[10px] font-bold text-slate-300">1時間ごとの予報（今日・明日）</p>
-        <div className="mt-2 flex-1 animate-pulse rounded-lg bg-slate-800/80" />
-      </div>
-    );
-  }
-
-  if (status === "error") {
-    return (
-      <div className="flex h-full min-h-[120px] flex-col rounded-xl border border-amber-700/50 bg-slate-950/80 p-2">
-        <p className="text-[10px] font-bold text-amber-200">1時間ごとの予報</p>
-        <p className="mt-2 text-[10px] text-amber-100/90">取得できませんでした。</p>
-      </div>
-    );
-  }
-
-  const RowSet = ({ rows, label }: { rows: SignageHourlyPoint[]; label: string }) => (
+function RowSet({ rows, label }: { rows: SignageHourlyPoint[]; label: string }) {
+  return (
     <div className="min-w-0">
       <p className="mb-1 text-[9px] font-bold uppercase tracking-wide text-emerald-300/90">{label}</p>
       <div className="max-h-[28vh] overflow-x-auto overflow-y-auto xl:max-h-[min(32vh,320px)]">
@@ -92,6 +72,28 @@ export function SignageHourlyWeather({ hourly, regionLabel, status }: SignageHou
       </div>
     </div>
   );
+}
+
+export function SignageHourlyWeather({ hourly, regionLabel, status }: SignageHourlyWeatherProps) {
+  const { today, tomorrow } = splitByJstDate(hourly);
+
+  if (status === "loading" || status === "idle") {
+    return (
+      <div className="flex h-full min-h-[120px] flex-col rounded-xl border border-slate-600 bg-slate-950/80 p-2">
+        <p className="text-[10px] font-bold text-slate-300">1時間ごとの予報（今日・明日）</p>
+        <div className="mt-2 flex-1 animate-pulse rounded-lg bg-slate-800/80" />
+      </div>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <div className="flex h-full min-h-[120px] flex-col rounded-xl border border-amber-700/50 bg-slate-950/80 p-2">
+        <p className="text-[10px] font-bold text-amber-200">1時間ごとの予報</p>
+        <p className="mt-2 text-[10px] text-amber-100/90">取得できませんでした。</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full min-h-0 flex-col rounded-xl border border-slate-600 bg-slate-950/80 p-2">
