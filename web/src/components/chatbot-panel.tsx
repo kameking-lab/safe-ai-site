@@ -83,6 +83,14 @@ export function ChatbotPanel() {
 
   return (
     <div className="flex h-full flex-col gap-4">
+      {/* 免責バナー */}
+      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+        <p className="text-xs text-amber-800 leading-5">
+          <span className="font-bold">⚠ 免責事項：</span>
+          本サービスは法的助言ではありません。実際の判断は必ず専門家（労働安全コンサルタント等）にご確認ください。
+        </p>
+      </div>
+
       {/* チャット履歴 */}
       <div
         ref={listRef}

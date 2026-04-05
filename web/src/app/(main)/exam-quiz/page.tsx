@@ -4,8 +4,12 @@ import { PageHeader } from "@/components/page-header";
 import { ExamQuizClient } from "./exam-quiz-client";
 
 export const metadata: Metadata = {
-  title: "過去問クイズ（全資格対応）",
-  description: "労働安全・衛生コンサルタント、衛生管理者、ボイラー技士など全資格対応の過去問クイズ。科目・年度・出題モードを選択できます。",
+  title: "過去問クイズ｜ANZEN AI",
+  description: "労働安全・衛生コンサルタント、衛生管理者、ボイラー技士など全資格対応の過去問クイズ。科目・年度別に本番形式で挑戦できます。",
+  openGraph: {
+    title: "過去問クイズ｜ANZEN AI",
+    description: "労働安全・衛生コンサルタント、衛生管理者、ボイラー技士など全資格対応の過去問クイズ。科目・年度別に本番形式で挑戦できます。",
+  },
 };
 
 export default function ExamQuizPage() {

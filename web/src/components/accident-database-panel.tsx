@@ -45,6 +45,7 @@ export function AccidentDatabasePanel({
   const options = filterOptions(allCases);
   const categoryOptions = ["すべて", ...ALL_ACCIDENT_CATEGORIES] as const;
   const [page, setPage] = useState(0);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const pageItems = useMemo(() => {
     const start = page * PAGE_SIZE;
@@ -131,55 +132,95 @@ export function AccidentDatabasePanel({
             条件に一致する事故データがありません。
           </p>
         ) : (
-          pageItems.map((accident) => (
-            <article
-              key={accident.id}
-              className="rounded-xl border border-slate-200 bg-slate-50/60 p-3"
-              aria-label={`事故データ ${accident.title}`}
-            >
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-800">
-                  {accident.type}
-                </span>
-                <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-semibold text-sky-800">
-                  {accident.workCategory}
-                </span>
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
-                  {accident.severity}
-                </span>
-                <span className="text-xs text-slate-500">{accident.occurredOn}</span>
-              </div>
-
-              <h3 className="mt-2 text-sm font-semibold text-slate-900">{accident.title}</h3>
-              <p className="mt-1 text-sm text-slate-700">{accident.summary}</p>
-
-              <dl className="mt-2 space-y-1 text-xs text-slate-700">
-                <div>
-                  <dt className="inline font-semibold text-slate-900">主な原因:</dt>
-                  <dd className="inline"> {accident.mainCauses.join(" / ")}</dd>
+          pageItems.map((accident) => {
+            const isExpanded = expandedId === accident.id;
+            return (
+              <article
+                key={accident.id}
+                className="rounded-xl border border-slate-200 bg-slate-50/60 p-3"
+                aria-label={`事故データ ${accident.title}`}
+              >
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-800">
+                    {accident.type}
+                  </span>
+                  <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-semibold text-sky-800">
+                    {accident.workCategory}
+                  </span>
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                    {accident.severity}
+                  </span>
+                  <span className="text-xs text-slate-500">{accident.occurredOn}</span>
                 </div>
-                <div>
-                  <dt className="inline font-semibold text-slate-900">再発防止の要点:</dt>
-                  <dd className="inline"> {accident.preventionPoints.join(" / ")}</dd>
-                </div>
-              </dl>
 
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Link
-                  href="/e-learning"
-                  className="text-xs font-semibold text-emerald-700 underline decoration-emerald-300 underline-offset-2"
-                >
-                  この事例で学習する
-                </Link>
-                <Link
-                  href="/ky"
-                  className="text-xs font-semibold text-sky-700 underline decoration-sky-300 underline-offset-2"
-                >
-                  KY用紙へ反映する
-                </Link>
-              </div>
-            </article>
-          ))
+                <h3 className="mt-2 text-sm font-semibold text-slate-900">{accident.title}</h3>
+                <p className="mt-1 text-sm text-slate-700">{accident.summary}</p>
+
+                <dl className="mt-2 space-y-1 text-xs text-slate-700">
+                  <div>
+                    <dt className="inline font-semibold text-slate-900">主な原因:</dt>
+                    <dd className="inline"> {accident.mainCauses.join(" / ")}</dd>
+                  </div>
+                  <div>
+                    <dt className="inline font-semibold text-slate-900">再発防止の要点:</dt>
+                    <dd className="inline"> {accident.preventionPoints.join(" / ")}</dd>
+                  </div>
+                </dl>
+
+                {/* 詳細展開 */}
+                {isExpanded && (
+                  <div className="mt-3 space-y-2 rounded-lg border border-slate-200 bg-white p-3 text-xs text-slate-700">
+                    {"description" in accident && accident.description ? (
+                      <div>
+                        <p className="font-semibold text-slate-900">発生状況</p>
+                        <p className="mt-1 leading-5">{String(accident.description)}</p>
+                      </div>
+                    ) : null}
+                    {"causes" in accident && accident.causes ? (
+                      <div>
+                        <p className="font-semibold text-slate-900">原因</p>
+                        <p className="mt-1 leading-5">{String(accident.causes)}</p>
+                      </div>
+                    ) : null}
+                    {"countermeasures" in accident && accident.countermeasures ? (
+                      <div>
+                        <p className="font-semibold text-slate-900">対策</p>
+                        <p className="mt-1 leading-5">{String(accident.countermeasures)}</p>
+                      </div>
+                    ) : null}
+                    {"recurrencePrevention" in accident && accident.recurrencePrevention ? (
+                      <div>
+                        <p className="font-semibold text-slate-900">再発防止策</p>
+                        <p className="mt-1 leading-5">{String(accident.recurrencePrevention)}</p>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setExpandedId(isExpanded ? null : accident.id)}
+                    className="text-xs font-semibold text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
+                  >
+                    {isExpanded ? "閉じる" : "詳細を見る"}
+                  </button>
+                  <Link
+                    href="/e-learning"
+                    className="text-xs font-semibold text-emerald-700 underline decoration-emerald-300 underline-offset-2"
+                  >
+                    この事例で学習する
+                  </Link>
+                  <Link
+                    href="/ky"
+                    className="text-xs font-semibold text-sky-700 underline decoration-sky-300 underline-offset-2"
+                  >
+                    KY用紙へ反映する
+                  </Link>
+                </div>
+              </article>
+            );
+          })
         )}
       </div>
 

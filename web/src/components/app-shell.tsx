@@ -50,7 +50,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "学ぶ",
     items: [
       { id: "elearning", label: "Eラーニング", href: "/e-learning", icon: GraduationCap },
-      { id: "exam-quiz", label: "過去問クイズ", href: "/exam-quiz", icon: BookOpen },
+      { id: "exam-quiz", label: "過去問", href: "/exam-quiz", icon: BookOpen },
     ],
   },
   {
@@ -59,8 +59,8 @@ const NAV_CATEGORIES: NavCategory[] = [
       { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database },
       { id: "laws", label: "法改正", href: "/laws", icon: Scale },
       { id: "law-search", label: "法令検索", href: "/law-search", icon: Search },
-      { id: "risk-prediction", label: "AIリスク予測", href: "/risk-prediction", icon: Brain, badge: "AI" },
-      { id: "chatbot", label: "安衛法チャットボット", href: "/chatbot", icon: MessageSquare, badge: "AI" },
+      { id: "risk-prediction", label: "リスク予測", href: "/risk-prediction", icon: Brain, badge: "AI" },
+      { id: "chatbot", label: "法令チャット", href: "/chatbot", icon: MessageSquare, badge: "AI" },
     ],
   },
   {
