@@ -20,7 +20,7 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
       aria-label="メインタブ"
       className="sticky top-0 z-10 border-b border-slate-200/80 bg-white/95 px-4 py-3 backdrop-blur"
     >
-      <ul className="flex gap-2 overflow-x-auto">
+      <ul className="scrollbar-hide flex gap-2 overflow-x-auto pb-0.5">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTab;
 
