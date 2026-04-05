@@ -30,6 +30,9 @@ import { questions as qEnvMeasure2nd } from "./env-measure-2nd";
 // Batch 5: Occupational Health Manager
 import { questions as qHealth1st } from "./health-1st";
 import { questions as qHealth2nd } from "./health-2nd";
+// Batch 6: First-class Boiler & Health Consultant
+import { questions as qBoiler1stClass } from "./boiler-1st-class";
+import { questions as qHealthConsultant } from "./health-consultant";
 
 export type { ExamQuestion, ExamSubject, ExamCertification };
 export type { ExamCertSubject } from "./types";
@@ -66,6 +69,8 @@ export const ALL_QUESTIONS: ExamQuestion[] = [
   ...qEnvMeasure2nd,
   ...qHealth1st,
   ...qHealth2nd,
+  ...qBoiler1stClass,
+  ...qHealthConsultant,
 ];
 
 export const AVAILABLE_YEARS = [2023, 2024, 2025] as const;
@@ -313,6 +318,29 @@ export const EXAM_CATEGORIES: ExamCertification[] = [
     subjects: [
       { id: "h2-health-general", label: "労働衛生一般" },
       { id: "h2-health-law", label: "労働衛生関係法令" },
+    ],
+  },
+  // Batch 6: First-class Boiler & Health Consultant
+  {
+    id: "boiler-1st-class",
+    name: "一級ボイラー技士",
+    shortName: "一級ボイラー技士",
+    category: "boiler",
+    subjects: [
+      { id: "b1c-structure", label: "ボイラーの構造" },
+      { id: "b1c-operation", label: "ボイラーの取扱い" },
+      { id: "b1c-fuel", label: "燃料及び燃焼" },
+      { id: "b1c-law", label: "関係法令" },
+    ],
+  },
+  {
+    id: "health-consultant",
+    name: "労働衛生コンサルタント試験",
+    shortName: "衛生コンサルタント",
+    category: "health",
+    subjects: [
+      { id: "hc-health-general", label: "労働衛生一般" },
+      { id: "hc-health-law", label: "労働衛生関係法令" },
     ],
   },
 ];
