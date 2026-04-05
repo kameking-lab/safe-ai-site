@@ -65,7 +65,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "その他",
     items: [
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
-      { id: "notification-settings", label: "通知/配信", href: "/notifications", icon: Bell },
+      { id: "notification-settings", label: "通知/配信", href: "/notifications", icon: Bell, badge: "soon" },
     ],
   },
 ];
@@ -105,8 +105,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           />
           <span className="flex-1 truncate">{item.label}</span>
           {item.badge && !active && (
-            <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold text-blue-700">
-              {item.badge}
+            <span
+              className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
+                item.badge === "soon"
+                  ? "bg-slate-200 text-slate-500"
+                  : "bg-blue-100 text-blue-700"
+              }`}
+            >
+              {item.badge === "soon" ? "準備中" : item.badge}
             </span>
           )}
         </Link>

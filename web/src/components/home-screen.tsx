@@ -12,7 +12,6 @@ import { MailDeliveryPanel } from "@/components/mail-delivery-panel";
 import { MhlwDisasterDatabasesPanel } from "@/components/mhlw-disaster-databases-panel";
 import { NotificationSettingsPanel } from "@/components/notification-settings-panel";
 import { PdfExportPanel } from "@/components/pdf-export-panel";
-import { PortalQuickLinks } from "@/components/portal-quick-links";
 import { SummaryPanel } from "@/components/summary-panel";
 import { TabNavigation, type TabId } from "@/components/tab-navigation";
 import { WeatherRiskCard } from "@/components/weather-risk-card";
@@ -436,11 +435,8 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
           <section id="section-home" className="px-4 pt-4 lg:px-8">
             {children}
           </section>
-          <section id="section-home-hero" className="px-4 pt-4 lg:px-8">
+          <section id="section-home-hero" className="px-4 pt-4 pb-6 lg:px-8">
             <HomeValueHero />
-          </section>
-          <section id="section-portal-links" className="px-4 pt-4 pb-6 lg:px-8">
-            <PortalQuickLinks />
           </section>
         </>
       ) : null}
