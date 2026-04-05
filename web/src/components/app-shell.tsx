@@ -16,6 +16,7 @@ import {
   MessageSquare,
   ShoppingBag,
   Bell,
+  Search,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 
@@ -57,6 +58,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database },
       { id: "laws", label: "法改正", href: "/laws", icon: Scale },
+      { id: "law-search", label: "法令検索", href: "/law-search", icon: Search },
       { id: "risk-prediction", label: "AIリスク予測", href: "/risk-prediction", icon: Brain, badge: "AI" },
       { id: "chatbot", label: "安衛法チャットボット", href: "/chatbot", icon: MessageSquare, badge: "AI" },
     ],

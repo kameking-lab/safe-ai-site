@@ -72,14 +72,8 @@ const SELECTION_GUIDES = [
 ];
 
 
-const SVG_CATEGORY_IDS = new Set(["fall-protection", "respiratory", "head-protection", "eye-ear-protection", "hand-foot"]);
-
 function GoodsIconDisplay({ categoryId }: { categoryId: string }) {
-  if (SVG_CATEGORY_IDS.has(categoryId)) {
-    return <GoodsCategoryIcon categoryId={categoryId} size={64} />;
-  }
-  const icon = safetyGoodsCategories.find((c) => c.id === categoryId)?.icon ?? "📦";
-  return <span className="text-4xl">{icon}</span>;
+  return <GoodsCategoryIcon categoryId={categoryId} size={64} />;
 }
 
 function GoodsCard({ item }: { item: SafetyGoodsItem }) {
