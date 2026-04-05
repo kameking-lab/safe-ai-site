@@ -85,22 +85,22 @@ export function HomeValueHero() {
   return (
     <div className="space-y-5" aria-label="ホームの価値案内">
       {/* メインキャッチ */}
-      <div className="rounded-2xl border border-slate-700 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 px-5 py-6 text-white shadow-lg">
+      <div className="rounded-2xl border border-[#155a38] bg-gradient-to-br from-[#1a7a4c] via-[#166640] to-[#0f4d2e] px-5 py-6 text-white shadow-lg">
         <div className="flex items-center gap-2">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 text-white" aria-hidden="true">
               <polyline points="20 6 9 17 4 12" />
             </svg>
           </span>
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-300">
-            労働安全コンサルタント監修
+          <p className="text-xs font-semibold uppercase tracking-widest text-green-200">
+            ANZEN AI — 労働安全コンサルタント監修
           </p>
         </div>
         <h2 className="mt-2 text-xl font-bold leading-snug sm:text-2xl">
-          現場の安全判断を、<br className="sm:hidden" />
-          今すぐ・ここで完結。
+          現場の安全を、<br className="sm:hidden" />
+          AIで変える。
         </h2>
-        <p className="mt-2 text-sm leading-6 text-slate-300">
+        <p className="mt-2 text-sm leading-6 text-green-100">
           建設・製造・林業の現場責任者・安全担当向け。
           朝礼用リスク確認・法改正・KY用紙・事故DB・Eラーニングを一つのポータルに集約。
           スマホでも大画面サイネージでも使えます。
