@@ -12,6 +12,12 @@ export function Footer() {
           <Link href="/terms" className="hover:text-slate-800 hover:underline">
             利用規約
           </Link>
+          <Link href="/feedback" className="hover:text-slate-800 hover:underline">
+            サイトへのご要望
+          </Link>
+          <Link href="/contact" className="hover:text-slate-800 hover:underline">
+            お問い合わせ
+          </Link>
         </nav>
       </div>
     </footer>
