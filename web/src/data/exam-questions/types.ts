@@ -1,14 +1,13 @@
-export type ExamSubject = "safety-general" | "safety-law" | "health-general" | "health-law";
-
 export interface ExamChoice {
   label: string; // "ア", "イ", "ウ", "エ", "オ"
   text: string;
 }
 
 export interface ExamQuestion {
-  id: string; // e.g. "2023-sg-001"
+  id: string;
   year: number;
-  subject: ExamSubject;
+  certificationId?: string; // e.g. "anzen-consultant", "boiler-1st"
+  subject: string;          // subject ID within the certification
   subjectLabel: string;
   questionNumber: number;
   questionText: string;
@@ -16,4 +15,20 @@ export interface ExamQuestion {
   correctAnswer: string; // "ア"|"イ"|"ウ"|"エ"|"オ"
   explanation?: string;
   relatedLaw?: string;
+}
+
+// Kept for backward compatibility with legacy subject filtering
+export type ExamSubject = string;
+
+export interface ExamCertSubject {
+  id: string;
+  label: string;
+}
+
+export interface ExamCertification {
+  id: string;
+  name: string;
+  shortName: string;
+  category: "consultant" | "boiler" | "crane" | "special" | "radiation" | "environment";
+  subjects: ExamCertSubject[];
 }
