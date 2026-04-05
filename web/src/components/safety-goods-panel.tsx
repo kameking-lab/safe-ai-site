@@ -9,6 +9,67 @@ import {
   type SafetyGoodsItem,
 } from "@/data/mock/safety-goods";
 import { withAmazonAssociateTag, withRakutenAffiliateId } from "@/lib/affiliate-links";
+import { amazonSearchUrl, rakutenSearchUrl } from "@/lib/affiliate";
+
+const SELECTION_GUIDES = [
+  {
+    id: "mask",
+    icon: "😷",
+    title: "防毒マスク の選び方",
+    lawBasis: "労働安全衛生法 第22条・有機溶剤中毒予防規則 第33条",
+    points: [
+      "作業環境に合わせた吸収缶を選ぶ（有機溶剤用・酸性ガス用・一酸化炭素用など）",
+      "DS2規格（防塵）または使用ガス濃度に応じた規格品を使用",
+      "吸収缶の交換標準時間を守り、色変化・破過前に交換",
+      "作業者の顔型に合うフィットテストを実施",
+      "電動ファン付き呼吸用保護具（PAPR）は高濃度・長時間作業に有効",
+    ],
+    searchQuery: "防毒マスク 吸収缶",
+  },
+  {
+    id: "harness",
+    icon: "🪢",
+    title: "墜落制止用器具 の選び方",
+    lawBasis: "労働安全衛生法施行令 第13条・安全衛生規則 第518条〜",
+    points: [
+      "作業高さ6.75m超はフルハーネス型が原則（2019年法改正）",
+      "ランヤードはショックアブソーバー付きを選定",
+      "EN規格・日本産業規格（JIS T 8165）適合品を確認",
+      "胴ベルト型は6.75m以下の低所作業に限定使用可",
+      "定期点検：使用前に外観点検、年1回以上の自主点検",
+    ],
+    searchQuery: "フルハーネス 墜落制止用器具",
+  },
+  {
+    id: "helmet",
+    icon: "⛑️",
+    title: "保護帽（ヘルメット）の選び方",
+    lawBasis: "労働安全衛生規則 第539条・飛来落下物用規格（JIS T 8131）",
+    points: [
+      "作業区分に応じて「飛来・落下物用」「墜落時保護用」兼用品を選ぶ",
+      "JIS T 8131 / ANSI Z89.1 適合品を使用",
+      "帽体の亀裂・変形・衝撃履歴があれば即交換（目安：製造後3年）",
+      "通気孔付き・内装交換可のモデルは着用率向上に有効",
+      "電気用は絶縁クラスA・B・Eを確認",
+    ],
+    searchQuery: "保護帽 産業用ヘルメット",
+  },
+  {
+    id: "glasses",
+    icon: "🥽",
+    title: "保護メガネ の選び方",
+    lawBasis: "労働安全衛生規則 第593条・JIS T 8147",
+    points: [
+      "飛散物対策はEN166/JIS T 8147「衝撃」等級を確認",
+      "化学薬品・液体スプラッシュにはゴーグルタイプを選択",
+      "溶接作業は遮光度番号（#3〜#14）を溶接電流に合わせる",
+      "粉塵・微粒子にはフォームガスケット付きを選定",
+      "普通眼鏡の上から使える「オーバーグラス」タイプも有効",
+    ],
+    searchQuery: "保護メガネ 安全ゴーグル",
+  },
+];
+
 
 function GoodsCard({ item }: { item: SafetyGoodsItem }) {
   const amazonHref = withAmazonAssociateTag(item.amazonUrl);
@@ -82,6 +143,56 @@ function CategoryCard({
         <p className="mt-0.5 text-[11px] text-slate-500">{count}件</p>
       </div>
     </button>
+  );
+}
+
+function SelectionGuideSection() {
+  return (
+    <section className="mt-8 space-y-4">
+      <h2 className="text-lg font-bold text-slate-900">選び方ガイド</h2>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        {SELECTION_GUIDES.map((guide) => (
+          <div
+            key={guide.id}
+            className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">{guide.icon}</span>
+              <h3 className="text-base font-bold text-slate-900">{guide.title}</h3>
+            </div>
+            <p className="mt-1 text-[11px] text-emerald-700 font-medium">
+              法令根拠: {guide.lawBasis}
+            </p>
+            <ul className="mt-3 space-y-1.5">
+              {guide.points.map((point, i) => (
+                <li key={i} className="flex gap-2 text-xs text-slate-700">
+                  <span className="mt-0.5 shrink-0 text-emerald-500">✓</span>
+                  {point}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <a
+                href={amazonSearchUrl(guide.searchQuery)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg bg-amber-500 py-2 text-center text-xs font-bold text-white hover:bg-amber-600"
+              >
+                Amazonで探す
+              </a>
+              <a
+                href={rakutenSearchUrl(guide.searchQuery)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg bg-rose-500 py-2 text-center text-xs font-bold text-white hover:bg-rose-600"
+              >
+                楽天で探す
+              </a>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -189,6 +300,8 @@ export function SafetyGoodsPanel() {
           </p>
         </div>
       </div>
+
+      <SelectionGuideSection />
     </div>
   );
 }
