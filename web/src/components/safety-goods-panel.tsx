@@ -142,11 +142,7 @@ function CategoryCard({
           : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
       }`}
     >
-      {SVG_CATEGORY_IDS.has(cat.id) ? (
-        <GoodsCategoryIcon categoryId={cat.id} size={28} />
-      ) : (
-        <span className="text-2xl">{cat.icon}</span>
-      )}
+      <GoodsCategoryIcon categoryId={cat.id} size={28} />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-bold text-slate-900">{cat.name}</p>
         <p className="mt-0.5 text-[11px] text-slate-500">{count}件</p>
