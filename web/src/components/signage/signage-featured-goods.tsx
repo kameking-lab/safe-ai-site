@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { getSignageFeaturedSafetyGoods, safetyGoodsCategories } from "@/data/mock/safety-goods";
 import { withAmazonAssociateTag, withRakutenAffiliateId } from "@/lib/affiliate-links";
+import { GoodsCategoryIcon } from "@/components/goods-icons";
+
+const SVG_CATEGORY_IDS = new Set(["fall-protection", "respiratory", "head-protection", "eye-ear-protection", "hand-foot"]);
 
 export function SignageFeaturedGoods() {
   const items = getSignageFeaturedSafetyGoods(14);
@@ -28,8 +31,14 @@ export function SignageFeaturedGoods() {
               key={item.id}
               className="flex flex-col overflow-hidden rounded-lg border border-slate-700 bg-slate-950/70"
             >
-              <div className="flex h-20 w-full items-center justify-center bg-slate-800 text-4xl sm:h-24" aria-hidden>
-                {safetyGoodsCategories.find((c) => c.id === item.categoryId)?.icon ?? "🔧"}
+              <div className="flex h-20 w-full items-center justify-center bg-slate-800 sm:h-24" aria-hidden>
+                {SVG_CATEGORY_IDS.has(item.categoryId) ? (
+                  <GoodsCategoryIcon categoryId={item.categoryId} size={48} />
+                ) : (
+                  <span className="text-4xl">
+                    {safetyGoodsCategories.find((c) => c.id === item.categoryId)?.icon ?? "🔧"}
+                  </span>
+                )}
               </div>
               <div className="flex flex-1 flex-col gap-1 p-2">
                 <p className="line-clamp-2 text-[11px] font-bold leading-tight text-slate-50 sm:text-xs">{item.name}</p>

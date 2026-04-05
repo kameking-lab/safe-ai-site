@@ -10,6 +10,7 @@ import {
 } from "@/data/mock/safety-goods";
 import { withAmazonAssociateTag, withRakutenAffiliateId } from "@/lib/affiliate-links";
 import { amazonSearchUrl, rakutenSearchUrl } from "@/lib/affiliate";
+import { GoodsCategoryIcon } from "@/components/goods-icons";
 
 const SELECTION_GUIDES = [
   {
@@ -71,13 +72,23 @@ const SELECTION_GUIDES = [
 ];
 
 
+const SVG_CATEGORY_IDS = new Set(["fall-protection", "respiratory", "head-protection", "eye-ear-protection", "hand-foot"]);
+
+function GoodsIconDisplay({ categoryId }: { categoryId: string }) {
+  if (SVG_CATEGORY_IDS.has(categoryId)) {
+    return <GoodsCategoryIcon categoryId={categoryId} size={64} />;
+  }
+  const icon = safetyGoodsCategories.find((c) => c.id === categoryId)?.icon ?? "📦";
+  return <span className="text-4xl">{icon}</span>;
+}
+
 function GoodsCard({ item }: { item: SafetyGoodsItem }) {
   const amazonHref = withAmazonAssociateTag(item.amazonUrl);
   const rakutenHref = withRakutenAffiliateId(item.rakutenUrl);
   return (
     <article className="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
-      <div className="flex h-36 items-center justify-center rounded-t-xl bg-slate-100 text-3xl">
-        {safetyGoodsCategories.find((c) => c.id === item.categoryId)?.icon ?? "📦"}
+      <div className="flex h-36 items-center justify-center rounded-t-xl bg-slate-100">
+        <GoodsIconDisplay categoryId={item.categoryId} />
       </div>
       <div className="flex flex-1 flex-col p-4">
         <div className="flex flex-wrap gap-1">
@@ -137,7 +148,11 @@ function CategoryCard({
           : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
       }`}
     >
-      <span className="text-2xl">{cat.icon}</span>
+      {SVG_CATEGORY_IDS.has(cat.id) ? (
+        <GoodsCategoryIcon categoryId={cat.id} size={28} />
+      ) : (
+        <span className="text-2xl">{cat.icon}</span>
+      )}
       <div className="min-w-0 flex-1">
         <p className="text-sm font-bold text-slate-900">{cat.name}</p>
         <p className="mt-0.5 text-[11px] text-slate-500">{count}件</p>
