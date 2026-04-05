@@ -21,7 +21,7 @@ const LINKS = [
   {
     group: "調べる",
     items: [
-      { href: "/accidents", label: "事故DB", sub: "事例3,800件以上を検索", color: "bg-slate-100 text-slate-800" },
+      { href: "/accidents", label: "事故DB", sub: "実事例200件を検索", color: "bg-slate-100 text-slate-800" },
       { href: "/chatbot", label: "安衛法ChatBot", sub: "法令条文RAG・Gemini", color: "bg-blue-700 text-white" },
       { href: "/laws", label: "法改正", sub: "AI要約・質問チャット", color: "bg-slate-100 text-slate-800" },
       { href: "/risk-prediction", label: "AIリスク予測", sub: "作業別・事例検索・PDF出力", color: "bg-blue-600 text-white" },

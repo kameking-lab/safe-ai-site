@@ -1,6 +1,7 @@
 export interface ExamChoice {
   label: string; // "ア", "イ", "ウ", "エ", "オ"
   text: string;
+  explanation?: string; // 選択肢ごとの解説（根拠条文付き）
 }
 
 export interface ExamQuestion {

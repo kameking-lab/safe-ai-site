@@ -109,6 +109,18 @@ export const EXAM_CATEGORIES: ExamCertification[] = [
     ],
   },
   {
+    id: "boiler-1st-class",
+    name: "一級ボイラー技士",
+    shortName: "一級ボイラー技士",
+    category: "boiler",
+    subjects: [
+      { id: "b1-structure", label: "ボイラーの構造" },
+      { id: "b1-combustion", label: "燃焼及び燃焼装置" },
+      { id: "b1-water", label: "ボイラーの取扱い" },
+      { id: "b1-law", label: "関係法令" },
+    ],
+  },
+  {
     id: "boiler-2nd",
     name: "二級ボイラー技士",
     shortName: "二級ボイラー技士",

@@ -3,7 +3,7 @@ import type { ExamQuestion } from "./types";
 // 一級ボイラー技士 追加問題セット
 export const questions: ExamQuestion[] = [
   // ===== b1-structure 構造 =====
-  { id:"b1c-str-001", year:2024, certificationId:"boiler-1st", subject:"b1-structure", subjectLabel:"ボイラーの構造", questionNumber:101,
+  { id:"b1c-str-001", year:2024, certificationId:"boiler-1st-class", subject:"b1-structure", subjectLabel:"ボイラーの構造", questionNumber:101,
     questionText:"貫流ボイラーの特徴として、正しいものはどれか。",
     choices:[
       {label:"ア",text:"ドラムを持ち、大量の保有水による安定した蒸気発生が特徴である"},
@@ -13,7 +13,7 @@ export const questions: ExamQuestion[] = [
     correctAnswer:"イ",
     explanation:"貫流ボイラーはドラムを持たず給水が管を一方向に流れながら蒸発する。起動が速く高圧大容量に適する。",
   },
-  { id:"b1c-str-002", year:2024, certificationId:"boiler-1st", subject:"b1-structure", subjectLabel:"ボイラーの構造", questionNumber:102,
+  { id:"b1c-str-002", year:2024, certificationId:"boiler-1st-class", subject:"b1-structure", subjectLabel:"ボイラーの構造", questionNumber:102,
     questionText:"安全弁の吹出し圧力調整に関する記述として、誤っているものはどれか。",
     choices:[
       {label:"ア",text:"安全弁の吹出し圧力は最高使用圧力以下に設定しなければならない"},
@@ -23,7 +23,7 @@ export const questions: ExamQuestion[] = [
     correctAnswer:"ウ",
     explanation:"安全弁の吹出し圧力は最高使用圧力を超えてはならない（1.03倍以内が上限）。1.1倍超は許容されない。",
   },
-  { id:"b1c-str-003", year:2024, certificationId:"boiler-1st", subject:"b1-structure", subjectLabel:"ボイラーの構造", questionNumber:103,
+  { id:"b1c-str-003", year:2024, certificationId:"boiler-1st-class", subject:"b1-structure", subjectLabel:"ボイラーの構造", questionNumber:103,
     questionText:"水位制御装置に関する記述として、正しいものはどれか。",
     choices:[
       {label:"ア",text:"フロート式水位検出器は水位変動に対する応答が遅いため大型ボイラーには不向き"},
@@ -34,7 +34,7 @@ export const questions: ExamQuestion[] = [
     explanation:"差圧式水位計はドラム上部（蒸気側）と下部（水側）の差圧から水位を算出する方式。電極式は水の電気伝導率を利用。",
   },
   // ===== b1-combustion 燃焼 =====
-  { id:"b1c-cmb-001", year:2024, certificationId:"boiler-1st", subject:"b1-combustion", subjectLabel:"燃焼及び燃焼装置", questionNumber:101,
+  { id:"b1c-cmb-001", year:2024, certificationId:"boiler-1st-class", subject:"b1-combustion", subjectLabel:"燃焼及び燃焼装置", questionNumber:101,
     questionText:"重油バーナの燃焼に関して、一次空気と二次空気の役割として正しいものはどれか。",
     choices:[
       {label:"ア",text:"一次空気は燃料の気化・微粒化を助け、二次空気は燃焼完結のために供給される"},
@@ -44,7 +44,7 @@ export const questions: ExamQuestion[] = [
     correctAnswer:"ア",
     explanation:"一次空気はアトマイジング（微粒化）と初期燃焼に関与し、二次空気は燃焼完結・過剰酸素確保のために炉内に供給される。",
   },
-  { id:"b1c-cmb-002", year:2024, certificationId:"boiler-1st", subject:"b1-combustion", subjectLabel:"燃焼及び燃焼装置", questionNumber:102,
+  { id:"b1c-cmb-002", year:2024, certificationId:"boiler-1st-class", subject:"b1-combustion", subjectLabel:"燃焼及び燃焼装置", questionNumber:102,
     questionText:"ボイラーの通風方式のうち、平衡通風の特徴として正しいものはどれか。",
     choices:[
       {label:"ア",text:"送風機のみを使用し、炉内を正圧に保つ方式"},
@@ -55,7 +55,7 @@ export const questions: ExamQuestion[] = [
     explanation:"平衡通風（バランスドドラフト）は押込・誘引両方の送風機を使い炉内圧力を±ゼロ付近に維持する。大容量ボイラーに採用。",
   },
   // ===== b1-law 関係法令 =====
-  { id:"b1c-law-001", year:2024, certificationId:"boiler-1st", subject:"b1-law", subjectLabel:"関係法令", questionNumber:101,
+  { id:"b1c-law-001", year:2024, certificationId:"boiler-1st-class", subject:"b1-law", subjectLabel:"関係法令", questionNumber:101,
     questionText:"一級ボイラー技士が取り扱える伝熱面積の制限として、正しいものはどれか。",
     choices:[
       {label:"ア",text:"伝熱面積500m²以上のボイラーは取り扱えない"},
@@ -65,7 +65,7 @@ export const questions: ExamQuestion[] = [
     correctAnswer:"ウ",
     explanation:"一級ボイラー技士はすべてのボイラーを取り扱える（伝熱面積制限なし）。制限があるのは二級（25m²未満）と特級（制限なし）。",
   },
-  { id:"b1c-law-002", year:2024, certificationId:"boiler-1st", subject:"b1-law", subjectLabel:"関係法令", questionNumber:102,
+  { id:"b1c-law-002", year:2024, certificationId:"boiler-1st-class", subject:"b1-law", subjectLabel:"関係法令", questionNumber:102,
     questionText:"ボイラー室の管理に関する記述として、ボイラー及び圧力容器安全規則上、誤っているものはどれか。",
     choices:[
       {label:"ア",text:"ボイラー室には関係者以外の立入りを禁止しなければならない"},
@@ -75,7 +75,7 @@ export const questions: ExamQuestion[] = [
     correctAnswer:"イ",
     explanation:"ボイラー則にボイラー室の出入口数についての規定はない。立入禁止標識や諸元の掲示は義務付けられている。",
   },
-  { id:"b1c-law-003", year:2024, certificationId:"boiler-1st", subject:"b1-law", subjectLabel:"関係法令", questionNumber:103,
+  { id:"b1c-law-003", year:2024, certificationId:"boiler-1st-class", subject:"b1-law", subjectLabel:"関係法令", questionNumber:103,
     questionText:"ボイラーの定期自主検査の実施頻度として正しいものはどれか。",
     choices:[
       {label:"ア",text:"1か月以内ごとに1回"},
@@ -86,7 +86,7 @@ export const questions: ExamQuestion[] = [
     explanation:"ボイラー則第32条：定期自主検査は1か月以内ごとに1回実施。検査記録は3年間保存。",
   },
   // ===== b1-water 取扱い =====
-  { id:"b1c-op-001", year:2024, certificationId:"boiler-1st", subject:"b1-water", subjectLabel:"ボイラーの取扱い", questionNumber:101,
+  { id:"b1c-op-001", year:2024, certificationId:"boiler-1st-class", subject:"b1-water", subjectLabel:"ボイラーの取扱い", questionNumber:101,
     questionText:"ボイラー水の吹出し（ブロー）の目的として、最も適切なものはどれか。",
     choices:[
       {label:"ア",text:"炉内の燃焼ガスを排出し通風を改善するため"},
@@ -96,7 +96,7 @@ export const questions: ExamQuestion[] = [
     correctAnswer:"イ",
     explanation:"吹出し（ブロー）はボイラー水の濃縮を防ぎ、溶存塩類・スラッジを排出することでスケール付着・蒸気品質悪化を防ぐ。",
   },
-  { id:"b1c-op-002", year:2024, certificationId:"boiler-1st", subject:"b1-water", subjectLabel:"ボイラーの取扱い", questionNumber:102,
+  { id:"b1c-op-002", year:2024, certificationId:"boiler-1st-class", subject:"b1-water", subjectLabel:"ボイラーの取扱い", questionNumber:102,
     questionText:"ボイラーの「キャリーオーバー」の説明として正しいものはどれか。",
     choices:[
       {label:"ア",text:"ボイラー水が蒸気とともに送出され、蒸気品質が低下する現象"},
@@ -105,5 +105,57 @@ export const questions: ExamQuestion[] = [
     ],
     correctAnswer:"ア",
     explanation:"キャリーオーバーはボイラー水滴が蒸気に同伴して送り出される現象。水処理不良・負荷急増・水位過高が原因。タービン損傷等につながる。",
+  },
+
+  // ===== b1-law 関係法令 =====
+  { id:"b1c-law-001", year:2024, certificationId:"boiler-1st-class", subject:"b1-law", subjectLabel:"関係法令", questionNumber:101,
+    questionText:"ボイラー技士免許に関する記述として、正しいものはどれか。",
+    choices:[
+      {label:"ア",text:"一級ボイラー技士は、伝熱面積が25㎡以上500㎡未満のボイラーの取扱作業主任者になることができる"},
+      {label:"イ",text:"二級ボイラー技士は、伝熱面積にかかわらずすべてのボイラーの取扱作業主任者になることができる"},
+      {label:"ウ",text:"特級ボイラー技士でなければ伝熱面積25㎡以上のボイラーを取り扱うことができない"},
+    ],
+    correctAnswer:"ア",
+    explanation:"ボイラー則第24条：一級ボイラー技士は伝熱面積25㎡以上500㎡未満のボイラー取扱作業主任者になれる。500㎡以上は特級が必要。",
+  },
+  { id:"b1c-law-002", year:2024, certificationId:"boiler-1st-class", subject:"b1-law", subjectLabel:"関係法令", questionNumber:102,
+    questionText:"ボイラーの設置に関して、所轄労働基準監督署長に設置届を提出しなければならないボイラーはどれか。",
+    choices:[
+      {label:"ア",text:"最高使用圧力0.1MPa以下で伝熱面積1㎡以下の蒸気ボイラー"},
+      {label:"イ",text:"伝熱面積3㎡の貫流ボイラー"},
+      {label:"ウ",text:"温水ボイラーで最高使用圧力0.5MPa・伝熱面積12㎡のもの"},
+    ],
+    correctAnswer:"ウ",
+    explanation:"労安法・ボイラー則：最高使用圧力0.1MPaを超えるか伝熱面積3㎡超（貫流ボイラーは10㎡超）のボイラーは設置届が必要。",
+  },
+  { id:"b1c-str-004", year:2024, certificationId:"boiler-1st-class", subject:"b1-structure", subjectLabel:"ボイラーの構造", questionNumber:104,
+    questionText:"水管ボイラーの特徴として最も適切なものはどれか。",
+    choices:[
+      {label:"ア",text:"保有水量が多く、負荷変動に強いが高圧に不向きである"},
+      {label:"イ",text:"保有水量が少なく、起動が速い。高圧大容量に適し、ドラムやヘッダーに細管を接続した構造"},
+      {label:"ウ",text:"煙管式と比べて製造コストが安く、小規模施設に最適である"},
+    ],
+    correctAnswer:"イ",
+    explanation:"水管ボイラーは細管の水を加熱する方式。保有水量が少なく起動が速い。高圧・大容量に適し、発電所等に採用される。",
+  },
+  { id:"b1c-cmb-003", year:2024, certificationId:"boiler-1st-class", subject:"b1-combustion", subjectLabel:"燃焼及び燃焼装置", questionNumber:103,
+    questionText:"バーナの微粒化方式（重油バーナ）として、最も広く使用されるものはどれか。",
+    choices:[
+      {label:"ア",text:"圧力噴霧式（圧力アトマイジング）"},
+      {label:"イ",text:"蒸気噴霧式（スチームアトマイジング）"},
+      {label:"ウ",text:"回転式（ロータリーカップ）"},
+    ],
+    correctAnswer:"ア",
+    explanation:"圧力噴霧式は重油を高圧で噴射し微粒化する方式。構造が単純で最も広く使われる。流量調節範囲は比較的狭い。",
+  },
+  { id:"b1c-op-003", year:2024, certificationId:"boiler-1st-class", subject:"b1-water", subjectLabel:"ボイラーの取扱い", questionNumber:103,
+    questionText:"ボイラーの点火前の確認事項として、最も重要なものはどれか。",
+    choices:[
+      {label:"ア",text:"燃焼室・煙道のパージ（換気）と安全装置の動作確認"},
+      {label:"イ",text:"水位計の交換とスケール除去"},
+      {label:"ウ",text:"燃料の加熱温度を最大値に設定"},
+    ],
+    correctAnswer:"ア",
+    explanation:"点火前は燃焼室・煙道内の残留可燃性ガスをパージし、水位・圧力・安全装置を確認することが必須。爆発事故防止の基本手順。",
   },
 ];

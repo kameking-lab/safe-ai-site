@@ -70,6 +70,7 @@ export default function SignagePage() {
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
+      second: "2-digit",
     });
     const nowText = formatter.format(now);
     return {
@@ -97,6 +98,7 @@ export default function SignagePage() {
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
+      second: "2-digit",
     });
 
     const updateNow = () => {
@@ -112,7 +114,7 @@ export default function SignagePage() {
         return;
       }
       updateNow();
-    }, 60 * 1000);
+    }, 1000);
 
     return () => window.clearInterval(timer);
   }, []);
@@ -231,7 +233,6 @@ export default function SignagePage() {
         compact
         regionLabel={state.regionLabel}
         nowText={state.nowText}
-        mode={state.mode}
         lastUpdatedText={state.lastUpdatedText}
       />
 

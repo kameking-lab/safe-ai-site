@@ -1,32 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import type { ApiMode } from "@/lib/types/api";
 
 type SignageHeaderProps = {
   regionLabel: string;
   nowText: string;
-  mode: ApiMode;
   lastUpdatedText: string;
   /** 横長サイネージ向けに説明文を省略 */
   compact?: boolean;
 };
 
-function modeLabel(mode: ApiMode) {
-  if (mode === "live") {
-    return { text: "live（本番相当）", className: "bg-emerald-500/20 text-emerald-200 border-emerald-400/60" };
-  }
-  return { text: "mock（訓練データ）", className: "bg-slate-500/20 text-slate-200 border-slate-400/60" };
-}
-
 export function SignageHeader({
   regionLabel,
   nowText,
-  mode,
   lastUpdatedText,
   compact,
 }: SignageHeaderProps) {
-  const label = modeLabel(mode);
 
   return (
     <header className="flex shrink-0 flex-col gap-2 border-b border-slate-700/60 pb-2 sm:gap-3 sm:pb-3 lg:flex-row lg:items-end lg:justify-between">
@@ -71,12 +60,6 @@ export function SignageHeader({
           <p className="text-sm font-semibold tabular-nums text-white sm:text-base lg:text-xl">{nowText}</p>
           <p className="text-[10px] text-slate-400 sm:text-[11px]">更新: {lastUpdatedText}</p>
         </div>
-        <span
-          className={`flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-wide sm:px-3 sm:text-[11px] ${label.className}`}
-        >
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-300" />
-          API MODE: {label.text}
-        </span>
       </div>
     </header>
   );

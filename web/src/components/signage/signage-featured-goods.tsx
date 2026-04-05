@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { getSignageFeaturedSafetyGoods } from "@/data/mock/safety-goods";
+import { getSignageFeaturedSafetyGoods, safetyGoodsCategories } from "@/data/mock/safety-goods";
 import { withAmazonAssociateTag, withRakutenAffiliateId } from "@/lib/affiliate-links";
 
 export function SignageFeaturedGoods() {
@@ -28,15 +28,9 @@ export function SignageFeaturedGoods() {
               key={item.id}
               className="flex flex-col overflow-hidden rounded-lg border border-slate-700 bg-slate-950/70"
             >
-              {item.imageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.imageUrl}
-                  alt={item.imageAlt}
-                  className="h-24 w-full object-cover sm:h-28"
-                  loading="lazy"
-                />
-              ) : null}
+              <div className="flex h-20 w-full items-center justify-center bg-slate-800 text-4xl sm:h-24" aria-hidden>
+                {safetyGoodsCategories.find((c) => c.id === item.categoryId)?.icon ?? "🔧"}
+              </div>
               <div className="flex flex-1 flex-col gap-1 p-2">
                 <p className="line-clamp-2 text-[11px] font-bold leading-tight text-slate-50 sm:text-xs">{item.name}</p>
                 <p className="text-[9px] text-amber-100/90">{item.price}</p>

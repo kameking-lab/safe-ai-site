@@ -4,8 +4,17 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { elearningThemesCatalog } from "@/data/mock/elearning-themes-data";
 import { elearningExtraThemes } from "@/data/mock/elearning-extra-themes";
+import { elearningExtraQuestions } from "@/data/mock/elearning-extra-questions";
+import type { LearningTheme as LearningThemeType } from "@/lib/types/operations";
 
-const allThemes = [...elearningThemesCatalog, ...elearningExtraThemes];
+// Merge extra questions into extra themes to expand from 3 to 10 questions per theme
+const mergedExtraThemes: LearningThemeType[] = elearningExtraThemes.map((theme) => {
+  const extras = elearningExtraQuestions.find((e) => e.themeId === theme.id);
+  if (!extras) return theme;
+  return { ...theme, questions: [...theme.questions, ...extras.questions] };
+});
+
+const allThemes = [...elearningThemesCatalog, ...mergedExtraThemes];
 import { ELearningEditorPanel } from "@/components/elearning-editor-panel";
 import type { LearningTheme } from "@/lib/types/operations";
 
