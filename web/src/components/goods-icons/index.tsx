@@ -156,6 +156,73 @@ export function SafetyBootIcon({ size = 48, ...props }: IconProps) {
   );
 }
 
+export function MountainIcon({ size = 48, ...props }: IconProps) {
+  return base(
+    size,
+    <>
+      <path d="M4 40 L16 16 L24 28 L30 20 L44 40 Z" fill="#6b8e6b" />
+      <path d="M30 20 L36 12 L44 28" fill="white" opacity="0.8" />
+      <circle cx="36" cy="10" r="4" fill="white" />
+    </>,
+    props
+  );
+}
+
+export function BeeIcon({ size = 48, ...props }: IconProps) {
+  return base(
+    size,
+    <>
+      <ellipse cx="24" cy="26" rx="10" ry="13" fill="#f59e0b" />
+      <rect x="14" y="22" width="20" height="4" rx="2" fill="#1c1c1c" opacity="0.7" />
+      <rect x="14" y="29" width="20" height="4" rx="2" fill="#1c1c1c" opacity="0.7" />
+      <ellipse cx="24" cy="14" rx="5" ry="4" fill="#f59e0b" />
+      <ellipse cx="14" cy="20" rx="7" ry="4" fill="white" opacity="0.7" transform="rotate(-20 14 20)" />
+      <ellipse cx="34" cy="20" rx="7" ry="4" fill="white" opacity="0.7" transform="rotate(20 34 20)" />
+    </>,
+    props
+  );
+}
+
+export function ThermometerIcon({ size = 48, ...props }: IconProps) {
+  return base(
+    size,
+    <>
+      <rect x="20" y="6" width="8" height="28" rx="4" fill="#e2e8f0" stroke="#94a3b8" strokeWidth="1" />
+      <rect x="22" y="20" width="4" height="14" rx="2" fill="#ef4444" />
+      <circle cx="24" cy="36" r="6" fill="#ef4444" />
+      <path d="M28 10 h4 M28 15 h3 M28 20 h4" stroke="#94a3b8" strokeWidth="1.5" strokeLinecap="round" />
+    </>,
+    props
+  );
+}
+
+export function FirstAidIcon({ size = 48, ...props }: IconProps) {
+  return base(
+    size,
+    <>
+      <rect x="6" y="6" width="36" height="36" rx="6" fill="#ef4444" />
+      <rect x="20" y="12" width="8" height="24" rx="2" fill="white" />
+      <rect x="12" y="20" width="24" height="8" rx="2" fill="white" />
+    </>,
+    props
+  );
+}
+
+export function BarrierIcon({ size = 48, ...props }: IconProps) {
+  return base(
+    size,
+    <>
+      <rect x="4" y="18" width="40" height="12" rx="3" fill="#f59e0b" />
+      <path d="M4 18 L16 30 M16 18 L28 30 M28 18 L40 30" stroke="#1c1c1c" strokeWidth="4" strokeLinecap="round" />
+      <rect x="6" y="10" width="6" height="8" rx="1" fill="#94a3b8" />
+      <rect x="36" y="10" width="6" height="8" rx="1" fill="#94a3b8" />
+      <rect x="4" y="30" width="8" height="8" rx="1" fill="#94a3b8" />
+      <rect x="36" y="30" width="8" height="8" rx="1" fill="#94a3b8" />
+    </>,
+    props
+  );
+}
+
 /** カテゴリIDからアイコンコンポーネントを返すユーティリティ */
 export function GoodsCategoryIcon({
   categoryId,
@@ -175,7 +242,17 @@ export function GoodsCategoryIcon({
       return <GlassesIcon size={size} />;
     case "hand-foot":
       return <GlovesIcon size={size} />;
+    case "mountain-outdoor":
+      return <MountainIcon size={size} />;
+    case "harmful-organisms":
+      return <BeeIcon size={size} />;
+    case "heat-cold":
+      return <ThermometerIcon size={size} />;
+    case "first-aid":
+      return <FirstAidIcon size={size} />;
+    case "signs-barriers":
+      return <BarrierIcon size={size} />;
     default:
-      return null;
+      return <HelmetIcon size={size} />;
   }
 }

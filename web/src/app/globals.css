@@ -10,6 +10,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* ANZEN AI brand colors */
+  --color-brand-primary: #1a7a4c;
+  --color-brand-accent: #e67e22;
+  --color-brand-danger: #e74c3c;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -16,6 +16,7 @@ import {
   MessageSquare,
   ShoppingBag,
   Bell,
+  Search,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 
@@ -57,6 +58,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database },
       { id: "laws", label: "法改正", href: "/laws", icon: Scale },
+      { id: "law-search", label: "法令検索", href: "/law-search", icon: Search },
       { id: "risk-prediction", label: "AIリスク予測", href: "/risk-prediction", icon: Brain, badge: "AI" },
       { id: "chatbot", label: "安衛法チャットボット", href: "/chatbot", icon: MessageSquare, badge: "AI" },
     ],
@@ -124,9 +126,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* PC sidebar */}
       <aside className="hidden w-60 shrink-0 flex-col border-r border-slate-200 bg-slate-50/80 px-3 py-5 lg:flex">
         <div className="mb-4 px-1">
-          <p className="text-xs font-bold tracking-wide text-emerald-700">安全AIサイト</p>
+          <p className="text-xs font-bold tracking-wide text-emerald-700">ANZEN AI</p>
           <p className="mt-0.5 text-[10px] text-slate-500">
-            労働安全の現場運用ポータル
+            現場の安全を、AIで変える。
           </p>
         </div>
         <nav aria-label="サイト全体ナビゲーション" className="space-y-4">
@@ -147,8 +149,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Mobile header */}
         <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-b from-emerald-50 to-white px-4 py-3 lg:hidden">
           <div>
-            <p className="text-[11px] font-bold tracking-wide text-emerald-700">安全AIサイト</p>
-            <p className="text-xs text-slate-700">労働安全の現場運用ポータル</p>
+            <p className="text-[11px] font-bold tracking-wide text-emerald-700">ANZEN AI</p>
+            <p className="text-xs text-slate-700">現場の安全を、AIで変える。</p>
           </div>
           <button
             type="button"

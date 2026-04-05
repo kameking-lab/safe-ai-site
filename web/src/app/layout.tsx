@@ -19,19 +19,21 @@ const geistMono = Geist_Mono({
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#059669",
+  themeColor: "#1a7a4c",
 };
 
 export const metadata: Metadata = {
+  manifest: "/manifest.json",
   icons: {
     icon: [
       { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico" },
     ],
+    apple: "/icons/icon-192.svg",
   },
   title: {
-    default: "安全AIサイト｜労働安全の現場運用ポータル",
-    template: "%s｜安全AIサイト",
+    default: "ANZEN AI｜現場の安全を、AIで変える。",
+    template: "%s｜ANZEN AI",
   },
   description:
     "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。建設・製造現場の安全担当者を支援します。",
@@ -39,13 +41,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ja_JP",
-    siteName: "安全AIサイト",
-    title: "安全AIサイト｜労働安全の現場運用ポータル",
+    siteName: "ANZEN AI",
+    title: "ANZEN AI｜現場の安全を、AIで変える。",
     description: "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。",
   },
   twitter: {
     card: "summary",
-    title: "安全AIサイト｜労働安全の現場運用ポータル",
+    title: "ANZEN AI｜現場の安全を、AIで変える。",
     description: "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。",
   },
 };

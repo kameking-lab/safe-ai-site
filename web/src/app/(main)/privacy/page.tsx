@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
-  description: "安全AIサイトのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
+  description: "ANZEN AIのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
 };
 
 export default function PrivacyPage() {
@@ -17,7 +17,7 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">1. 基本方針</h2>
           <p className="text-sm leading-7 text-slate-600">
-            安全AIサイト（以下「本サービス」）は、利用者のプライバシーを尊重し、個人情報の保護に努めます。
+            ANZEN AI（以下「本サービス」）は、利用者のプライバシーを尊重し、個人情報の保護に努めます。
             本ポリシーは、本サービスにおける個人情報の取り扱いについて説明します。
           </p>
         </section>
