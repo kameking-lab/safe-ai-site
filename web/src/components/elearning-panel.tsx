@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { elearningThemesCatalog } from "@/data/mock/elearning-themes-data";
+import { elearningExtraThemes } from "@/data/mock/elearning-extra-themes";
+
+const allThemes = [...elearningThemesCatalog, ...elearningExtraThemes];
 import { ELearningEditorPanel } from "@/components/elearning-editor-panel";
 import type { LearningTheme } from "@/lib/types/operations";
 
@@ -25,12 +28,12 @@ function saveOverrides(overrides: Record<string, LearningTheme>) {
 
 export function ELearningPanel() {
   const [overrides, setOverrides] = useState<Record<string, LearningTheme>>(loadOverrides);
-  const [themeId, setThemeId] = useState(elearningThemesCatalog[0].id);
+  const [themeId, setThemeId] = useState(allThemes[0].id);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [editMode, setEditMode] = useState(false);
 
   const themes = useMemo<LearningTheme[]>(
-    () => elearningThemesCatalog.map((t) => overrides[t.id] ?? t),
+    () => allThemes.map((t) => overrides[t.id] ?? t),
     [overrides]
   );
 
@@ -70,11 +73,11 @@ export function ELearningPanel() {
         <div>
           <h2 className="text-base font-bold text-slate-900 sm:text-lg">Eラーニング</h2>
           <p className="mt-1 text-xs text-slate-600">
-            12分野×各10問（計120問）。事故・法改正・現場リスクの判断を短時間で反復できます。
+            20分野・計102問。事故・法改正・現場リスクの判断を短時間で反復できます。
           </p>
         </div>
         <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-800">
-          12×10問
+          20分野・102問
         </span>
       </div>
       <div className="mt-3">
