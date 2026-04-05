@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { Scale } from "lucide-react";
 import { ChatbotPanel } from "@/components/chatbot-panel";
+import { PageHeader } from "@/components/page-header";
 
 export const metadata: Metadata = {
   title: "安衛法AIチャットボット",
@@ -9,33 +11,23 @@ export const metadata: Metadata = {
 export default function ChatbotPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 sm:py-8">
-      {/* ヘッダー */}
-      <div className="mb-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white text-lg">
-            ⚖
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-slate-900 sm:text-xl">
-              安衛法AIチャットボット
-            </h1>
-            <p className="text-sm text-slate-500">
-              労働安全衛生法・関連規則に基づいてAIが回答
-            </p>
-          </div>
-        </div>
+      <PageHeader
+        title="安衛法AIチャットボット"
+        description="労働安全衛生法・関連規則に基づいてAIが回答"
+        icon={Scale}
+        iconColor="blue"
+      />
 
-        {/* 対応法令バッジ */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          {["安衛法", "安衛則", "クレーン則", "有機則", "特化則", "酸欠則"].map((law) => (
-            <span
-              key={law}
-              className="rounded-full border border-blue-100 bg-blue-50 px-3 py-0.5 text-xs font-medium text-blue-700"
-            >
-              {law}
-            </span>
-          ))}
-        </div>
+      {/* 対応法令バッジ */}
+      <div className="mt-4 mb-6 flex flex-wrap gap-2">
+        {["安衛法", "安衛則", "クレーン則", "有機則", "特化則", "酸欠則"].map((law) => (
+          <span
+            key={law}
+            className="rounded-full border border-blue-100 bg-blue-50 px-3 py-0.5 text-xs font-medium text-blue-700"
+          >
+            {law}
+          </span>
+        ))}
       </div>
 
       {/* チャット本体 */}

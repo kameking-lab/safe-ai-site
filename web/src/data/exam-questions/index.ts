@@ -27,6 +27,9 @@ import { questions as qXray } from "./xray";
 import { questions as qGamma } from "./gamma";
 import { questions as qEnvMeasure1st } from "./env-measure-1st";
 import { questions as qEnvMeasure2nd } from "./env-measure-2nd";
+// Batch 5: Occupational Health Manager
+import { questions as qHealth1st } from "./health-1st";
+import { questions as qHealth2nd } from "./health-2nd";
 
 export type { ExamQuestion, ExamSubject, ExamCertification };
 export type { ExamCertSubject } from "./types";
@@ -61,6 +64,8 @@ export const ALL_QUESTIONS: ExamQuestion[] = [
   ...qGamma,
   ...qEnvMeasure1st,
   ...qEnvMeasure2nd,
+  ...qHealth1st,
+  ...qHealth2nd,
 ];
 
 export const AVAILABLE_YEARS = [2023, 2024, 2025] as const;
@@ -286,6 +291,28 @@ export const EXAM_CATEGORIES: ExamCertification[] = [
     subjects: [
       { id: "em2-design", label: "デザイン・サンプリング" },
       { id: "em2-law", label: "関係法令" },
+    ],
+  },
+  // Batch 5: Occupational Health Manager
+  {
+    id: "health-1st",
+    name: "第一種衛生管理者",
+    shortName: "第一種衛生管理者",
+    category: "health",
+    subjects: [
+      { id: "h1-health-general", label: "労働衛生一般" },
+      { id: "h1-health-law", label: "労働衛生関係法令" },
+      { id: "h1-hazardous", label: "有害業務" },
+    ],
+  },
+  {
+    id: "health-2nd",
+    name: "第二種衛生管理者",
+    shortName: "第二種衛生管理者",
+    category: "health",
+    subjects: [
+      { id: "h2-health-general", label: "労働衛生一般" },
+      { id: "h2-health-law", label: "労働衛生関係法令" },
     ],
   },
 ];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { filterQuestions, AVAILABLE_YEARS, EXAM_CATEGORIES } from "@/data/exam-questions";
 import type { ExamQuestion } from "@/data/exam-questions";
 
@@ -113,6 +113,7 @@ function StatRow({
 
 const CATEGORY_LABELS: Record<string, string> = {
   consultant: "安全コンサルタント",
+  health: "衛生管理者",
   boiler: "ボイラー・圧力容器",
   crane: "クレーン・デリック",
   special: "特殊作業",
@@ -130,18 +131,7 @@ export function ExamQuizClient() {
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [aiExplanation, setAiExplanation] = useState<string | null>(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [history, setHistory] = useState<AnswerRecord[]>([]);
-
-  useEffect(() => {
-    setHistory(loadHistory());
-  }, []);
-
-  // Reset subject when certification changes
-  useEffect(() => {
-    setSubject("all");
-  }, [certId]);
+  const [history, setHistory] = useState<AnswerRecord[]>(() => loadHistory());
 
   const selectedCert = EXAM_CATEGORIES.find((c) => c.id === certId);
 
@@ -156,7 +146,6 @@ export function ExamQuizClient() {
     setIndex(0);
     setSelected(null);
     setShowExplanation(false);
-    setAiExplanation(null);
     setStarted(true);
   }, [certId, subject, year, mode]);
 
@@ -180,46 +169,16 @@ export function ExamQuizClient() {
     [selected, questions, index]
   );
 
-  const fetchAiExplanation = useCallback(async () => {
-    const q = questions[index];
-    if (!q || aiLoading) return;
-    setAiLoading(true);
-    try {
-      const res = await fetch("/api/quiz-explain", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          questionText: q.questionText,
-          choices: q.choices,
-          correctAnswer: q.correctAnswer,
-          selectedAnswer: selected,
-          relatedLaw: q.relatedLaw,
-          fallbackExplanation: q.explanation,
-        }),
-      });
-      if (res.ok) {
-        const data = (await res.json()) as { explanation: string };
-        setAiExplanation(data.explanation);
-      }
-    } catch {
-      // no-op; will show fallback explanation
-    } finally {
-      setAiLoading(false);
-    }
-  }, [questions, index, selected, aiLoading]);
-
   const goNext = () => {
     setIndex((i) => i + 1);
     setSelected(null);
     setShowExplanation(false);
-    setAiExplanation(null);
   };
 
   const goPrev = () => {
     setIndex((i) => Math.max(0, i - 1));
     setSelected(null);
     setShowExplanation(false);
-    setAiExplanation(null);
   };
 
   const resetHistory = () => {
@@ -356,10 +315,7 @@ export function ExamQuizClient() {
               {!showExplanation ? (
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowExplanation(true);
-                    void fetchAiExplanation();
-                  }}
+                  onClick={() => setShowExplanation(true)}
                   className="text-sm font-semibold text-amber-600 hover:text-amber-700"
                 >
                   解説を見る ▼
@@ -367,13 +323,9 @@ export function ExamQuizClient() {
               ) : (
                 <div className="rounded-xl border border-amber-100 bg-amber-50 p-4 text-sm text-slate-700">
                   <p className="mb-1 font-semibold text-amber-800">解説</p>
-                  {aiLoading ? (
-                    <p className="animate-pulse text-slate-500">AI解説を生成中…</p>
-                  ) : (
-                    <p className="whitespace-pre-line leading-relaxed">
-                      {aiExplanation ?? q.explanation ?? "解説は準備中です。"}
-                    </p>
-                  )}
+                  <p className="whitespace-pre-line leading-relaxed">
+                    {q.explanation ?? "解説は準備中です。"}
+                  </p>
                   {q.relatedLaw && (
                     <p className="mt-2 text-xs text-amber-700">
                       <span className="font-semibold">関連法令：</span>
@@ -432,7 +384,7 @@ export function ExamQuizClient() {
               <p className="mb-2 text-xs font-semibold text-slate-500">資格</p>
               <select
                 value={certId}
-                onChange={(e) => setCertId(e.target.value)}
+                onChange={(e) => { setCertId(e.target.value); setSubject("all"); }}
                 className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-amber-400 focus:outline-none"
               >
                 <option value="all">すべての資格（混合）</option>
