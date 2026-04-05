@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "利用規約",
-  description: "安全AIサイトの利用規約。本サービスの利用条件について説明しています。",
+  description: "ANZEN AIの利用規約。本サービスの利用条件について説明しています。",
 };
 
 export default function TermsPage() {
@@ -17,7 +17,7 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">第1条（適用）</h2>
           <p className="text-sm leading-7 text-slate-600">
-            本規約は、安全AIサイト（以下「本サービス」）の利用条件を定めます。
+            本規約は、ANZEN AI（以下「本サービス」）の利用条件を定めます。
             本サービスを利用するすべての方（以下「利用者」）は、本規約に同意したものとみなします。
           </p>
         </section>

@@ -23,7 +23,7 @@ export function Header() {
         </div>
         <div>
           <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700">
-            安全AIサイト
+            ANZEN AI
           </p>
           <h1 className="text-lg font-bold leading-tight text-slate-900 sm:text-xl">
             現場の安全情報を、すばやく確認
