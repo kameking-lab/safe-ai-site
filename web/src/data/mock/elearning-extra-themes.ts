@@ -87,14 +87,14 @@ export const elearningExtraThemes: LearningTheme[] = [
     ]
   },
   {
-    "id": "el-confined",
+    "id": "el-confined-ex",
     "title": "酸素欠乏・硫化水素危険作業",
     "sourceType": "法改正",
     "description": "酸欠則の要点と救助手順を3問で確認します。",
     "level": "重点",
     "questions": [
       {
-        "id": "el-confined-q1",
+        "id": "el-confined-ex-q1",
         "question": "酸素欠乏危険作業において作業開始前に測定が必要な酸素濃度の下限基準はどれか。",
         "options": [
           "16%",
@@ -105,7 +105,7 @@ export const elearningExtraThemes: LearningTheme[] = [
         "explanation": "酸欠則第3条：作業環境の酸素濃度が18%未満になるおそれがある場合は酸欠危険作業に該当し作業前測定が義務。"
       },
       {
-        "id": "el-confined-q2",
+        "id": "el-confined-ex-q2",
         "question": "酸素欠乏危険作業主任者の職務として正しいものはどれか。",
         "options": [
           "作業員の給与計算",
@@ -116,7 +116,7 @@ export const elearningExtraThemes: LearningTheme[] = [
         "explanation": "酸欠則第11条：主任者は作業方法決定・指揮、測定器具・保護具の点検、酸欠発生時の救出・退避指揮が職務。"
       },
       {
-        "id": "el-confined-q3",
+        "id": "el-confined-ex-q3",
         "question": "酸欠事故で倒れた作業員を救助する際に最初にすべきことはどれか。",
         "options": [
           "空気呼吸器を装着せずに直ちに救助に入る",
