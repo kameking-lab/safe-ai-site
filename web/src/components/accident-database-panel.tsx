@@ -112,8 +112,9 @@ export function AccidentDatabasePanel({
       </div>
 
       <p className="mt-2 text-xs text-slate-500">
-        表示: {cases.length.toLocaleString("ja-JP")}件中 {page * PAGE_SIZE + 1}〜
-        {Math.min((page + 1) * PAGE_SIZE, cases.length)}件
+        {cases.length === 0
+          ? "0件"
+          : `表示: ${cases.length.toLocaleString("ja-JP")}件中 ${page * PAGE_SIZE + 1}〜${Math.min((page + 1) * PAGE_SIZE, cases.length)}件`}
       </p>
 
       <div className="mt-3 space-y-3" aria-live="polite" aria-atomic="false">
