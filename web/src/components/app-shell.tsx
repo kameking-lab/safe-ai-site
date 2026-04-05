@@ -17,6 +17,7 @@ import {
   ShoppingBag,
   Bell,
   Search,
+  Mail,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 
@@ -44,6 +45,7 @@ const NAV_CATEGORIES: NavCategory[] = [
       { id: "today-risk", label: "今日の現場リスク", href: "/risk", icon: Zap },
       { id: "ky-sheet", label: "KY用紙", href: "/ky", icon: ClipboardList },
       { id: "signage", label: "サイネージ", href: "/signage", icon: Monitor },
+      { id: "bear-map", label: "クマ出没マップ", href: "/bear-map", icon: Database },
     ],
   },
   {
@@ -68,6 +70,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
       { id: "notification-settings", label: "通知/配信", href: "/notifications", icon: Bell, badge: "soon" },
+      { id: "contact", label: "お問い合わせ", href: "/contact", icon: Mail },
     ],
   },
 ];
