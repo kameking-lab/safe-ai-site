@@ -40,6 +40,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ja_JP",
     siteName: "安全AIサイト",
+    title: "安全AIサイト｜労働安全の現場運用ポータル",
+    description: "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。",
+  },
+  twitter: {
+    card: "summary",
+    title: "安全AIサイト｜労働安全の現場運用ポータル",
+    description: "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。",
   },
 };
 

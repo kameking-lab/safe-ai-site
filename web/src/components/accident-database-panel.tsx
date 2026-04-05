@@ -116,7 +116,7 @@ export function AccidentDatabasePanel({
         {Math.min((page + 1) * PAGE_SIZE, cases.length)}件
       </p>
 
-      <div className="mt-3 space-y-3">
+      <div className="mt-3 space-y-3" aria-live="polite" aria-atomic="false">
         {status === "loading" ? (
           <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
             事故データを読み込み中です...
@@ -188,6 +188,7 @@ export function AccidentDatabasePanel({
             type="button"
             disabled={page === 0}
             onClick={() => setPage((p) => p - 1)}
+            aria-label="前のページへ"
             className="rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-40"
           >
             前へ
@@ -199,6 +200,7 @@ export function AccidentDatabasePanel({
             type="button"
             disabled={page >= totalPages - 1}
             onClick={() => setPage((p) => p + 1)}
+            aria-label="次のページへ"
             className="rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-40"
           >
             次へ
