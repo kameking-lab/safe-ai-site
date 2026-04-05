@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { filterQuestions, AVAILABLE_YEARS, SUBJECT_LABELS } from "@/data/exam-questions";
-import type { ExamQuestion, ExamSubject } from "@/data/exam-questions";
+import { filterQuestions, AVAILABLE_YEARS, EXAM_CATEGORIES } from "@/data/exam-questions";
+import type { ExamQuestion } from "@/data/exam-questions";
 
 const LS_KEY = "exam-quiz-history";
 
@@ -31,9 +31,8 @@ function saveAnswer(record: AnswerRecord) {
 }
 
 function calcStats(history: AnswerRecord[]) {
-  if (history.length === 0) return { total: 0, correct: 0, rate: 0, bySubject: {} };
+  if (history.length === 0) return { total: 0, correct: 0, rate: 0, byCert: {} };
 
-  // Use the last attempt per question
   const latestByQuestion = new Map<string, AnswerRecord>();
   for (const rec of history) {
     latestByQuestion.set(rec.questionId, rec);
@@ -44,22 +43,18 @@ function calcStats(history: AnswerRecord[]) {
   const total = records.length;
   const rate = total > 0 ? Math.round((correct / total) * 100) : 0;
 
-  const subjectMap: Record<string, { correct: number; total: number }> = {};
+  // Group by certification prefix in questionId
+  const byCert: Record<string, { correct: number; total: number }> = {};
   for (const rec of records) {
-    const subj = rec.questionId.split("-")[1] ?? "other";
-    if (!subjectMap[subj]) subjectMap[subj] = { correct: 0, total: 0 };
-    subjectMap[subj].total++;
-    if (rec.isCorrect) subjectMap[subj].correct++;
+    const parts = rec.questionId.split("-");
+    const certKey = parts.slice(0, 2).join("-");
+    if (!byCert[certKey]) byCert[certKey] = { correct: 0, total: 0 };
+    byCert[certKey].total++;
+    if (rec.isCorrect) byCert[certKey].correct++;
   }
 
-  return { total, correct, rate, bySubject: subjectMap };
+  return { total, correct, rate, byCert };
 }
-
-const SUBJECT_OPTIONS: { value: ExamSubject | "all"; label: string }[] = [
-  { value: "all", label: "すべての科目" },
-  { value: "safety-general", label: SUBJECT_LABELS["safety-general"] },
-  { value: "safety-law", label: SUBJECT_LABELS["safety-law"] },
-];
 
 function FilterBtn({
   label,
@@ -116,8 +111,18 @@ function StatRow({
   );
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  consultant: "安全コンサルタント",
+  boiler: "ボイラー・圧力容器",
+  crane: "クレーン・デリック",
+  special: "特殊作業",
+  radiation: "放射線・X線",
+  environment: "作業環境測定",
+};
+
 export function ExamQuizClient() {
-  const [subject, setSubject] = useState<ExamSubject | "all">("all");
+  const [certId, setCertId] = useState<string>("all");
+  const [subject, setSubject] = useState<string>("all");
   const [year, setYear] = useState<number | "all">("all");
   const [mode, setMode] = useState<"sequential" | "random">("sequential");
   const [started, setStarted] = useState(false);
@@ -133,8 +138,16 @@ export function ExamQuizClient() {
     setHistory(loadHistory());
   }, []);
 
+  // Reset subject when certification changes
+  useEffect(() => {
+    setSubject("all");
+  }, [certId]);
+
+  const selectedCert = EXAM_CATEGORIES.find((c) => c.id === certId);
+
   const startQuiz = useCallback(() => {
     const qs = filterQuestions({
+      certificationId: certId === "all" ? undefined : certId,
       subject: subject === "all" ? undefined : subject,
       year: year === "all" ? undefined : year,
       shuffle: mode === "random",
@@ -145,7 +158,7 @@ export function ExamQuizClient() {
     setShowExplanation(false);
     setAiExplanation(null);
     setStarted(true);
-  }, [subject, year, mode]);
+  }, [certId, subject, year, mode]);
 
   const handleSelect = useCallback(
     (choice: string) => {
@@ -215,6 +228,13 @@ export function ExamQuizClient() {
   };
 
   const stats = calcStats(history);
+
+  // Group certifications by category
+  const categories = Object.entries(CATEGORY_LABELS).map(([key, label]) => ({
+    key,
+    label,
+    certs: EXAM_CATEGORIES.filter((c) => c.category === key),
+  }));
 
   // --- Finished screen ---
   if (started && index >= questions.length) {
@@ -407,19 +427,51 @@ export function ExamQuizClient() {
           <h2 className="mb-4 text-sm font-bold text-slate-800">出題設定</h2>
 
           <div className="space-y-4">
+            {/* Certification selector */}
             <div>
-              <p className="mb-2 text-xs font-semibold text-slate-500">科目</p>
-              <div className="flex flex-wrap gap-2">
-                {SUBJECT_OPTIONS.map((opt) => (
-                  <FilterBtn
-                    key={opt.value}
-                    label={opt.label}
-                    active={subject === opt.value}
-                    onClick={() => setSubject(opt.value)}
-                  />
-                ))}
-              </div>
+              <p className="mb-2 text-xs font-semibold text-slate-500">資格</p>
+              <select
+                value={certId}
+                onChange={(e) => setCertId(e.target.value)}
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-amber-400 focus:outline-none"
+              >
+                <option value="all">すべての資格（混合）</option>
+                {categories.map(
+                  ({ key, label, certs }) =>
+                    certs.length > 0 && (
+                      <optgroup key={key} label={label}>
+                        {certs.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )
+                )}
+              </select>
             </div>
+
+            {/* Subject filter (only shown when a specific cert is selected) */}
+            {selectedCert && (
+              <div>
+                <p className="mb-2 text-xs font-semibold text-slate-500">科目</p>
+                <div className="flex flex-wrap gap-2">
+                  <FilterBtn
+                    label="すべての科目"
+                    active={subject === "all"}
+                    onClick={() => setSubject("all")}
+                  />
+                  {selectedCert.subjects.map((s) => (
+                    <FilterBtn
+                      key={s.id}
+                      label={s.label}
+                      active={subject === s.id}
+                      onClick={() => setSubject(s.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div>
               <p className="mb-2 text-xs font-semibold text-slate-500">年度</p>
@@ -484,16 +536,17 @@ export function ExamQuizClient() {
 
             <StatRow label="全体" correct={stats.correct} total={stats.total} />
 
-            {Object.entries(stats.bySubject).map(([subj, data]) => {
-              const label =
-                subj === "sg"
-                  ? "産業安全一般"
-                  : subj === "sl"
-                  ? "産業安全関係法令"
-                  : subj;
+            {Object.entries(stats.byCert).map(([certKey, data]) => {
+              const cert = EXAM_CATEGORIES.find(
+                (c) => c.id.startsWith(certKey) || certKey.startsWith(c.id.split("-")[0] ?? "")
+              );
               return (
-                <div key={subj} className="mt-3">
-                  <StatRow label={label} correct={data.correct} total={data.total} />
+                <div key={certKey} className="mt-3">
+                  <StatRow
+                    label={cert?.shortName ?? certKey}
+                    correct={data.correct}
+                    total={data.total}
+                  />
                 </div>
               );
             })}
