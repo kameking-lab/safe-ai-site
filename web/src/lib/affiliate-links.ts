@@ -16,15 +16,13 @@ export function withAmazonAssociateTag(url: string): string {
   }
 }
 
-/** 楽天の検索URLに afid を付与（アフィリエイト管理画面で発行したID） */
+/** 楽天URLをアフィリエイトリダイレクト形式（hb.afl.rakuten.co.jp）でラップする */
 export function withRakutenAffiliateId(url: string): string {
-  const afid = process.env.NEXT_PUBLIC_RAKUTEN_AFID?.trim();
-  if (!afid) return url;
+  const affiliateId = process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID?.trim() || "5291f19d.a0fc3c16.5291f19e.b91d11f6";
   try {
     const u = new URL(url);
     if (!u.hostname.includes("rakuten.co.jp")) return url;
-    u.searchParams.set("afid", afid);
-    return u.toString();
+    return `https://hb.afl.rakuten.co.jp/ichiba/${affiliateId}/?pc=${encodeURIComponent(url)}`;
   } catch {
     return url;
   }
