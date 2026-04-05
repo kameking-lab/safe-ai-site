@@ -59,8 +59,8 @@ export function AccidentDatabasePanel({
         <div>
           <h2 className="text-base font-bold text-slate-900 sm:text-lg">事故データベース</h2>
           <p className="mt-1 text-xs text-slate-600">
-            ブラウザ内で再現した事例 {allCases.length.toLocaleString("ja-JP")}
-            件を収録。種別・作業カテゴリで絞り込み、再発防止をKY・朝礼に接続できます。公的統計Excelの取込みに差し替え可能な構造です。
+            厚労省「職場のあんぜんサイト」等の実事例 {allCases.length.toLocaleString("ja-JP")}
+            件を収録。種別・作業カテゴリで絞り込み、再発防止をKY・朝礼に接続できます。
           </p>
         </div>
       </div>
