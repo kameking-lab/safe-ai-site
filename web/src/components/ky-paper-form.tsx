@@ -97,7 +97,94 @@ export function KyPaperForm({ value, onChange, onSave, savedLabel }: KyPaperForm
         />
       </label>
 
-      <div className="mt-4 overflow-x-auto">
+      {/* モバイル: 各行をカード表示 */}
+      <div className="mt-4 sm:hidden space-y-4">
+        {value.rows.map((row, idx) => (
+          <div key={idx} className="rounded-lg border border-slate-300 bg-slate-50 p-3 space-y-2">
+            <p className="text-[11px] font-semibold text-slate-700">リスク #{idx + 1}</p>
+            <label className="block space-y-1">
+              <span className="text-[11px] text-slate-600">予測される危険性・有害性</span>
+              <TextareaWithVoice
+                rows={3}
+                value={row.predictedHarm}
+                onChange={(e) => setRow(idx, { predictedHarm: e.target.value })}
+                className="text-xs"
+              />
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="space-y-1">
+                <span className="text-[11px] text-slate-600">大きさ</span>
+                <select
+                  className="w-full rounded border border-slate-300 bg-white px-1 py-1 text-xs"
+                  value={row.magnitude}
+                  onChange={(e) => setRow(idx, { magnitude: Number(e.target.value) })}
+                >
+                  {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </label>
+              <label className="space-y-1">
+                <span className="text-[11px] text-slate-600">可能性</span>
+                <select
+                  className="w-full rounded border border-slate-300 bg-white px-1 py-1 text-xs"
+                  value={row.probability}
+                  onChange={(e) => setRow(idx, { probability: Number(e.target.value) })}
+                >
+                  {[0, 1, 3, 5].map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </label>
+            </div>
+            <p className="text-[11px] text-slate-700">
+              評価: <span className="font-mono font-bold">{row.evaluation}</span>　危険度: <span className="font-bold">{row.riskGrade}</span>
+            </p>
+            <label className="block space-y-1">
+              <span className="text-[11px] text-slate-600">低減対策</span>
+              <TextareaWithVoice
+                rows={2}
+                value={row.reductionMeasures}
+                onChange={(e) => setRow(idx, { reductionMeasures: e.target.value })}
+                className="text-xs"
+              />
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="space-y-1">
+                <span className="text-[11px] text-slate-600">再評価・大きさ</span>
+                <select
+                  className="w-full rounded border border-slate-300 bg-white px-1 py-1 text-xs"
+                  value={row.reMagnitude}
+                  onChange={(e) => setRow(idx, { reMagnitude: Number(e.target.value) })}
+                >
+                  {[1, 2, 3, 4].map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </label>
+              <label className="space-y-1">
+                <span className="text-[11px] text-slate-600">再評価・可能性</span>
+                <select
+                  className="w-full rounded border border-slate-300 bg-white px-1 py-1 text-xs"
+                  value={row.reProbability}
+                  onChange={(e) => setRow(idx, { reProbability: Number(e.target.value) })}
+                >
+                  {[0, 1, 3, 5].map((n) => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </label>
+            </div>
+            <p className="text-[11px] text-slate-700">
+              再評価: <span className="font-mono font-bold">{row.reEvaluation}</span>　危険度: <span className="font-bold">{row.reRiskGrade}</span>
+            </p>
+            <label className="block space-y-1">
+              <span className="text-[11px] text-slate-600">再対策</span>
+              <TextareaWithVoice
+                rows={2}
+                value={row.reMeasures}
+                onChange={(e) => setRow(idx, { reMeasures: e.target.value })}
+                className="text-xs"
+              />
+            </label>
+          </div>
+        ))}
+      </div>
+
+      {/* PC: テーブル表示 */}
+      <div className="mt-4 hidden overflow-x-auto sm:block">
         <table className="w-full min-w-[720px] border-collapse border border-slate-400 text-xs">
           <thead>
             <tr className="bg-slate-100">
