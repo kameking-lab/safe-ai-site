@@ -6,5 +6,7 @@ export function amazonSearchUrl(query: string): string {
 }
 
 export function rakutenSearchUrl(query: string): string {
-  return `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(query)}/?f=1&grp=product&sid=${RAKUTEN_ID}`;
+  const affiliateId = process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID || "5291f19d.a0fc3c16.5291f19e.b91d11f6";
+  const searchUrl = `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(query)}/`;
+  return `https://hb.afl.rakuten.co.jp/ichiba/${affiliateId}/?pc=${encodeURIComponent(searchUrl)}`;
 }
