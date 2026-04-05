@@ -1,0 +1,1 @@
+{"permissions":{"allow":["Bash(*)","Edit(*)","Write(*)","Read(*)"],"deny":["Bash(rm -rf*)","Bash(git push --force*)"]}}

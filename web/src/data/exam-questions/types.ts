@@ -29,6 +29,6 @@ export interface ExamCertification {
   id: string;
   name: string;
   shortName: string;
-  category: "consultant" | "boiler" | "crane" | "special" | "radiation" | "environment";
+  category: "consultant" | "boiler" | "crane" | "special" | "radiation" | "environment" | "health";
   subjects: ExamCertSubject[];
 }
