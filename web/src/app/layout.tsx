@@ -38,17 +38,29 @@ export const metadata: Metadata = {
   description:
     "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。建設・製造現場の安全担当者を支援します。",
   metadataBase: new URL("https://safe-ai-site.vercel.app"),
+  alternates: {
+    canonical: "https://safe-ai-site.vercel.app",
+  },
   openGraph: {
     type: "website",
     locale: "ja_JP",
     siteName: "ANZEN AI",
     title: "ANZEN AI｜現場の安全を、AIで変える。",
     description: "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。",
+    images: [
+      {
+        url: "/api/og",
+        width: 1200,
+        height: 630,
+        alt: "ANZEN AI — 現場の安全を、AIで変える。",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "ANZEN AI｜現場の安全を、AIで変える。",
     description: "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。",
+    images: ["/api/og"],
   },
 };
 
