@@ -116,24 +116,24 @@ export function HomeValueHero() {
           ))}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          <Link
-            href="/signage"
-            className="rounded-md bg-emerald-500 px-4 py-2 text-xs font-bold text-white hover:bg-emerald-400 transition-colors"
-          >
-            サイネージ表示
-          </Link>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <Link
             href="/risk-prediction"
             className="rounded-md bg-blue-500 px-4 py-2 text-xs font-bold text-white hover:bg-blue-400 transition-colors"
           >
-            AIリスク予測
+            AIリスク予測を使う
           </Link>
           <Link
-            href="/risk"
-            className="rounded-md border border-slate-500 bg-slate-700 px-4 py-2 text-xs font-semibold text-slate-200 hover:bg-slate-600 transition-colors"
+            href="/exam-quiz"
+            className="rounded-md border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors"
           >
-            今日の現場リスク
+            過去問クイズを解く
+          </Link>
+          <Link
+            href="/law-search"
+            className="text-xs font-semibold text-green-200 underline decoration-green-400/60 underline-offset-2 hover:text-white transition-colors"
+          >
+            法令を検索する
           </Link>
         </div>
       </div>
