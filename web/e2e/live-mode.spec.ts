@@ -29,7 +29,7 @@ test.describe("live mode", () => {
 
   test("正常系: 今日の現場リスクカードが表示される @smoke", async ({ page }) => {
     await page.goto("/risk");
-    await expect(page.getByRole("heading", { name: "今日の現場リスク" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "今日の現場リスク" }).first()).toBeVisible();
     await expect(page.getByText("地域:")).toBeVisible();
     await expect(page.getByText("主な注意点")).toBeVisible();
     await expect(page.getByText("推奨アクション")).toBeVisible();
