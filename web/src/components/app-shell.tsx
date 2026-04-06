@@ -17,6 +17,7 @@ import {
   ShoppingBag,
   Bell,
   Search,
+  MapPin,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 
@@ -61,6 +62,7 @@ const NAV_CATEGORIES: NavCategory[] = [
       { id: "law-search", label: "法令検索", href: "/law-search", icon: Search },
       { id: "risk-prediction", label: "リスク予測", href: "/risk-prediction", icon: Brain, badge: "AI" },
       { id: "chatbot", label: "法令チャット", href: "/chatbot", icon: MessageSquare, badge: "AI" },
+      { id: "bear-map", label: "クママップ", href: "/bear-map", icon: MapPin },
     ],
   },
   {
