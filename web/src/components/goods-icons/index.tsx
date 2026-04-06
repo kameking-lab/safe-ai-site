@@ -59,28 +59,103 @@ export function HarnessIcon({ size = 48, ...props }: IconProps) {
   );
 }
 
-/** 防毒マスク */
+/** 防毒マスク（半面形・両側フィルター） */
 export function MaskIcon({ size = 48, ...props }: IconProps) {
   return base(
     size,
     <>
-      {/* face piece */}
-      <ellipse cx="24" cy="24" rx="16" ry="14" fill="#6B7280" />
-      {/* eye lenses */}
-      <ellipse cx="17" cy="20" rx="5" ry="4" fill="#BAE6FD" opacity="0.85" />
-      <ellipse cx="31" cy="20" rx="5" ry="4" fill="#BAE6FD" opacity="0.85" />
-      <ellipse cx="17" cy="20" rx="3" ry="2.5" fill="#7DD3FC" />
-      <ellipse cx="31" cy="20" rx="3" ry="2.5" fill="#7DD3FC" />
-      {/* canister */}
-      <rect x="16" y="30" width="16" height="8" rx="3" fill="#4B5563" />
-      {/* canister grid */}
-      <line x1="20" y1="30" x2="20" y2="38" stroke="#9CA3AF" strokeWidth="1" />
-      <line x1="24" y1="30" x2="24" y2="38" stroke="#9CA3AF" strokeWidth="1" />
-      <line x1="28" y1="30" x2="28" y2="38" stroke="#9CA3AF" strokeWidth="1" />
-      <line x1="16" y1="34" x2="32" y2="34" stroke="#9CA3AF" strokeWidth="1" />
+      {/* face piece body */}
+      <path d="M12 18 Q12 8 24 8 Q36 8 36 18 L36 30 Q36 40 24 40 Q12 40 12 30 Z" fill="#6B7280" />
+      {/* nose bridge ridge */}
+      <path d="M19 10 Q24 8 29 10" stroke="#9CA3AF" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      {/* left canister */}
+      <rect x="3" y="22" width="10" height="14" rx="3" fill="#374151" />
+      <rect x="5" y="24" width="6" height="2" rx="1" fill="#4B5563" />
+      <rect x="5" y="27" width="6" height="2" rx="1" fill="#4B5563" />
+      <rect x="5" y="30" width="6" height="2" rx="1" fill="#4B5563" />
+      <circle cx="8" cy="35" r="1.5" fill="#6B7280" />
+      <rect x="12" y="26" width="4" height="4" rx="1.5" fill="#4B5563" />
+      {/* right canister */}
+      <rect x="35" y="22" width="10" height="14" rx="3" fill="#374151" />
+      <rect x="37" y="24" width="6" height="2" rx="1" fill="#4B5563" />
+      <rect x="37" y="27" width="6" height="2" rx="1" fill="#4B5563" />
+      <rect x="37" y="30" width="6" height="2" rx="1" fill="#4B5563" />
+      <circle cx="40" cy="35" r="1.5" fill="#6B7280" />
+      <rect x="32" y="26" width="4" height="4" rx="1.5" fill="#4B5563" />
       {/* head straps */}
-      <path d="M8 20 Q6 10 14 8" stroke="#374151" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M40 20 Q42 10 34 8" stroke="#374151" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M12 16 Q6 12 6 6" stroke="#374151" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M36 16 Q42 12 42 6" stroke="#374151" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M14 32 Q6 34 6 40" stroke="#374151" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M34 32 Q42 34 42 40" stroke="#374151" strokeWidth="2" fill="none" strokeLinecap="round" />
+      {/* exhale valve */}
+      <circle cx="24" cy="30" r="3.5" fill="#9CA3AF" />
+      <circle cx="24" cy="30" r="2" fill="#6B7280" />
+    </>,
+    props
+  );
+}
+
+/** 耳栓/イヤーマフ（ヘッドバンド型） */
+export function EarMuffIcon({ size = 48, ...props }: IconProps) {
+  return base(
+    size,
+    <>
+      {/* headband arc */}
+      <path d="M10 24 Q10 6 24 6 Q38 6 38 24" stroke="#374151" strokeWidth="3" fill="none" strokeLinecap="round" />
+      {/* left ear cup outer */}
+      <ellipse cx="10" cy="28" rx="7" ry="9" fill="#374151" />
+      {/* left ear cup inner */}
+      <ellipse cx="10" cy="28" rx="5" ry="7" fill="#1F2937" />
+      {/* left foam pad */}
+      <ellipse cx="10" cy="28" rx="3.5" ry="5.5" fill="#F59E0B" />
+      {/* right ear cup outer */}
+      <ellipse cx="38" cy="28" rx="7" ry="9" fill="#374151" />
+      {/* right ear cup inner */}
+      <ellipse cx="38" cy="28" rx="5" ry="7" fill="#1F2937" />
+      {/* right foam pad */}
+      <ellipse cx="38" cy="28" rx="3.5" ry="5.5" fill="#F59E0B" />
+      {/* NRR label hint */}
+      <rect x="6" y="25" width="8" height="6" rx="1" fill="#F59E0B" opacity="0" />
+    </>,
+    props
+  );
+}
+
+/** 空調服（ファン付きベスト） */
+export function AirCooledVestIcon({ size = 48, ...props }: IconProps) {
+  return base(
+    size,
+    <>
+      {/* vest body */}
+      <path d="M14 14 L8 20 L8 42 L40 42 L40 20 L34 14 Z" fill="#3B82F6" />
+      {/* collar */}
+      <path d="M14 14 Q24 10 34 14 L30 20 Q24 16 18 20 Z" fill="#2563EB" />
+      {/* left armhole */}
+      <path d="M8 20 Q4 24 6 30" stroke="#1D4ED8" strokeWidth="2" fill="none" strokeLinecap="round" />
+      {/* right armhole */}
+      <path d="M40 20 Q44 24 42 30" stroke="#1D4ED8" strokeWidth="2" fill="none" strokeLinecap="round" />
+      {/* left fan circle */}
+      <circle cx="15" cy="34" r="6" fill="#1D4ED8" />
+      <circle cx="15" cy="34" r="4.5" fill="#3B82F6" stroke="#93C5FD" strokeWidth="0.5" />
+      {/* left fan blades */}
+      <path d="M15 29.5 Q17 32 15 34" stroke="#BFDBFE" strokeWidth="1.5" fill="none" />
+      <path d="M19.5 34 Q17 32 15 34" stroke="#BFDBFE" strokeWidth="1.5" fill="none" />
+      <path d="M15 38.5 Q13 36 15 34" stroke="#BFDBFE" strokeWidth="1.5" fill="none" />
+      <path d="M10.5 34 Q13 36 15 34" stroke="#BFDBFE" strokeWidth="1.5" fill="none" />
+      <circle cx="15" cy="34" r="1.2" fill="#BFDBFE" />
+      {/* right fan circle */}
+      <circle cx="33" cy="34" r="6" fill="#1D4ED8" />
+      <circle cx="33" cy="34" r="4.5" fill="#3B82F6" stroke="#93C5FD" strokeWidth="0.5" />
+      {/* right fan blades */}
+      <path d="M33 29.5 Q35 32 33 34" stroke="#BFDBFE" strokeWidth="1.5" fill="none" />
+      <path d="M37.5 34 Q35 32 33 34" stroke="#BFDBFE" strokeWidth="1.5" fill="none" />
+      <path d="M33 38.5 Q31 36 33 34" stroke="#BFDBFE" strokeWidth="1.5" fill="none" />
+      <path d="M28.5 34 Q31 36 33 34" stroke="#BFDBFE" strokeWidth="1.5" fill="none" />
+      <circle cx="33" cy="34" r="1.2" fill="#BFDBFE" />
+      {/* zipper */}
+      <line x1="24" y1="16" x2="24" y2="42" stroke="#1D4ED8" strokeWidth="1.5" strokeDasharray="2 2" />
+      {/* airflow arrows hint */}
+      <path d="M20 24 L24 20 L28 24" stroke="#93C5FD" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
     </>,
     props
   );
@@ -240,6 +315,8 @@ export function GoodsCategoryIcon({
       return <HelmetIcon size={size} />;
     case "eye-ear-protection":
       return <GlassesIcon size={size} />;
+    case "ear-protection":
+      return <EarMuffIcon size={size} />;
     case "hand-foot":
       return <GlovesIcon size={size} />;
     case "mountain-outdoor":
@@ -247,7 +324,7 @@ export function GoodsCategoryIcon({
     case "harmful-organisms":
       return <BeeIcon size={size} />;
     case "heat-cold":
-      return <ThermometerIcon size={size} />;
+      return <AirCooledVestIcon size={size} />;
     case "first-aid":
       return <FirstAidIcon size={size} />;
     case "signs-barriers":
