@@ -6,23 +6,6 @@ const FEATURES = [
   {
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
-        <path d="M12 2C7.03 2 3 6.03 3 11v2h18v-2c0-4.97-4.03-9-9-9z" />
-        <path d="M2 13h20" />
-        <path d="M3 15a9 9 0 0 0 18 0" />
-      </svg>
-    ),
-    color: "bg-emerald-50 border-emerald-200",
-    iconBg: "bg-emerald-600 text-white",
-    labelColor: "text-emerald-800",
-    label: "朝礼・現場リスク",
-    desc: "今日の天気・警報から現場向け注意事項を自動生成。朝礼ネタがすぐ揃う。",
-    href: "/risk",
-    btnColor: "bg-emerald-600 hover:bg-emerald-700 text-white",
-    btnLabel: "今日のリスクを確認",
-  },
-  {
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
         <circle cx="12" cy="12" r="10" />
         <path d="M12 8v4" />
         <path d="M12 16h.01" />
@@ -128,6 +111,12 @@ export function HomeValueHero() {
             className="rounded-md border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors"
           >
             過去問クイズを解く
+          </Link>
+          <Link
+            href="/risk"
+            className="text-xs font-semibold text-amber-200 underline decoration-amber-400/60 underline-offset-2 hover:text-white transition-colors"
+          >
+            今日の気象リスクを確認
           </Link>
           <Link
             href="/law-search"
