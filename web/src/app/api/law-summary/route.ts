@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   const prompt = `以下の労働安全衛生法令の条文を、現場担当者向けに3〜5行で分かりやすく要約してください。法令名・条番号を冒頭に示し、重要なポイントを箇条書きで補足してください。\n\n法令: ${law} ${articleNum}\n\n条文:\n${text}`;
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
