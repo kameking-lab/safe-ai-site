@@ -74,7 +74,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
       { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },
-      { id: "notification-settings", label: "通知/配信", href: "/notifications", icon: Bell, badge: "soon" },
+      { id: "notification-settings", label: "通知/配信", href: "/notifications", icon: Bell },
       { id: "contact", label: "お問い合わせ", href: "/contact", icon: Mail },
     ],
   },
