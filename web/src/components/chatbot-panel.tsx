@@ -2,6 +2,10 @@
 
 import { useRef, useState } from "react";
 import type { ChatbotSource } from "@/app/api/chatbot/route";
+import { useUsageLimit } from "@/lib/hooks/use-usage-limit";
+import { UpgradePrompt } from "@/components/upgrade-prompt";
+
+const FREE_CHAT_LIMIT = 5;
 
 type ChatMessage = {
   id: string;
@@ -25,10 +29,16 @@ export function ChatbotPanel() {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const { isExceeded: chatLimitReached, increment: incrementChat, reset: resetChat } = useUsageLimit({
+    key: "chatbot_usage",
+    limit: FREE_CHAT_LIMIT,
+    period: "day",
+  });
 
   async function handleSend(question?: string) {
     const text = (question ?? input).trim();
     if (!text || isSending) return;
+    if (chatLimitReached) return;
 
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
@@ -45,6 +55,8 @@ export function ChatbotPanel() {
     setTimeout(() => {
       listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
     }, 50);
+
+    incrementChat();
 
     try {
       const res = await fetch("/api/chatbot", {
@@ -181,7 +193,7 @@ export function ChatbotPanel() {
         <input
           type="text"
           value={input}
-          disabled={isSending}
+          disabled={isSending || chatLimitReached}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -195,13 +207,23 @@ export function ChatbotPanel() {
         />
         <button
           type="button"
-          disabled={isSending || !input.trim()}
+          disabled={isSending || !input.trim() || chatLimitReached}
           onClick={() => handleSend()}
           className="shrink-0 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
         >
           送信
         </button>
       </div>
+
+      {/* 利用上限 */}
+      {chatLimitReached && (
+        <UpgradePrompt
+          featureName="AIチャットボット"
+          limit={FREE_CHAT_LIMIT}
+          period="day"
+          onReset={resetChat}
+        />
+      )}
 
       {/* 免責注記 */}
       <p className="text-xs text-slate-400 leading-5">
