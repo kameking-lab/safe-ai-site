@@ -3,7 +3,9 @@
 // 対象期間: 2023年12月〜2024年5月
 // 対象地域: 高岡市・氷見市・朝日町・富山市（追加）
 
-export const BEAR_TOYAMA_BATCH2 = [
+import type { BearSighting } from "./bear-sightings-real";
+
+export const BEAR_TOYAMA_BATCH2: BearSighting[] = [
   // === 高岡市 (28件) ===
   { id: 160, date: "2023-12-02", prefecture: "富山県", city: "高岡市", location: "二上山 北側", lat: 36.7547 + 0.022, lng: 137.0256 + 0.018, type: "目撃", description: "ハイキング客が二上山登山道でクマを目撃。体長約1m。鐘を鳴らして追い払った。", source: "富山県 クマっぷ（富山県環境政策課）" },
   { id: 161, date: "2023-12-10", prefecture: "富山県", city: "高岡市", location: "二上山 南側", lat: 36.7547 + 0.018, lng: 137.0256 + 0.012, type: "痕跡", description: "登山道脇の木にクマの爪痕を発見。冬眠前の行動跡とみられる。", source: "富山県 クマっぷ（富山県環境政策課）" },
