@@ -95,7 +95,7 @@ export function ChatPanel({
         </button>
       </div>
       <p className="mt-2 text-xs leading-5 text-slate-500">
-        ※ 現在はダミー回答です。後でAPI連携に差し替えます。
+        ※ 法令条文RAG（Gemini）で回答します。回答内容は必ず原典でご確認ください。
       </p>
       {status === "success" && !error && (
         <p className="mt-2 text-xs leading-5 text-emerald-700">

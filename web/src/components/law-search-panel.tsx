@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { allLawArticles, type LawArticle } from "@/data/laws";
+import { InputWithVoice } from "@/components/voice-input-field";
 
 /** 漢数字を算用数字に変換（例: 第二十一条 → 第21条） */
 function kanjiToNum(str: string): string {
@@ -180,14 +181,16 @@ export function LawSearchPanel() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="フリーワード検索（例: 安全帯、有機溶剤）"
-          className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 sm:col-span-2"
-        />
-        <input
+        <div className="sm:col-span-2">
+          <InputWithVoice
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="フリーワード検索（例: 安全帯、有機溶剤）"
+            className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 w-full"
+          />
+        </div>
+        <InputWithVoice
           type="search"
           value={articleNumQuery}
           onChange={(e) => setArticleNumQuery(e.target.value)}

@@ -299,6 +299,22 @@ export default function SignagePage() {
               locationLabel={bundle?.locationLabel ?? selectedLocation.label}
               status={bundleStatus}
             />
+
+            {state.riskData?.riskEvidences && state.riskData.riskEvidences.length > 0 && (
+              <div className="shrink-0 rounded-lg border border-amber-600/50 bg-amber-950/60 px-2.5 py-2 sm:rounded-xl">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-amber-400 sm:text-[10px]">
+                  本日の現場注意事項
+                </p>
+                <p className="mt-0.5 text-[10px] leading-snug text-amber-100 sm:text-xs">
+                  {state.riskData.riskEvidences[0]}
+                </p>
+                {state.riskData.riskEvidences[1] && (
+                  <p className="mt-0.5 text-[9px] leading-snug text-amber-200/80 sm:text-[10px]">
+                    {state.riskData.riskEvidences[1]}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
 
           {state.riskStatus === "error" && (

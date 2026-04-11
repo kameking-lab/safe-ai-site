@@ -5,6 +5,11 @@
 //   石川県: https://www.pref.ishikawa.lg.jp/sizen/kuma/r7mokugeki.html
 //   長野県: https://www.pref.nagano.lg.jp/shinrin/sangyo/ringyo/choju/joho/kuma-map.html
 //   新潟県: https://www.pref.niigata.lg.jp/site/tyoujyutaisakusienn/1319666477308.html
+import { BEAR_TOYAMA_BATCH1 } from "@/data/bear-toyama-batch1";
+import { BEAR_TOYAMA_BATCH2 } from "@/data/bear-toyama-batch2";
+import { BEAR_TOYAMA_BATCH3 } from "@/data/bear-toyama-batch3";
+import { BEAR_TOYAMA_BATCH4 } from "@/data/bear-toyama-batch4";
+import { BEAR_TOYAMA_BATCH5 } from "@/data/bear-toyama-batch5";
 
 export type BearSightingType = "目撃" | "被害" | "捕獲" | "痕跡";
 
@@ -85,8 +90,8 @@ export const MUNICIPALITY_COORDS: Record<string, { lat: number; lng: number }> =
   "十日町市": { lat: 37.1280, lng: 138.7580 },
 };
 
-export const BEAR_SIGHTINGS_REAL: BearSighting[] = [
-  // ===== 富山県 (20件) =====
+const BEAR_SIGHTINGS_BASE: BearSighting[] = [
+  // ===== 富山県 (基本20件) =====
   {
     id: 1,
     date: "2024-04-15",
@@ -1311,6 +1316,24 @@ export const BEAR_SIGHTINGS_REAL: BearSighting[] = [
   { id: 509, date: "2025-09-25", prefecture: "新潟県", city: "魚沼市", location: "湯之谷 農地", lat: 37.2100, lng: 138.9700, type: "捕獲", description: "農地被害が続き箱わなで成獣捕獲。今年最後の捕獲。放獣。", source: "新潟県 にいがたクマ出没マップ" },
   { id: 510, date: "2025-10-05", prefecture: "富山県", city: "富山市", location: "大庄 農地", lat: 36.6700, lng: 137.2200, type: "目撃", description: "秋の出没ピーク。市内の農地でクマを目撃。地元紙が報道。", source: "富山県 クマっぷ" },
 ];
+
+// 富山県拡張データ（クマっぷ 2023-2025年 約480件追加）
+const BEAR_TOYAMA_EXTENDED: BearSighting[] = [
+  ...BEAR_TOYAMA_BATCH1,
+  ...BEAR_TOYAMA_BATCH2,
+  ...BEAR_TOYAMA_BATCH3,
+  ...BEAR_TOYAMA_BATCH4,
+  ...BEAR_TOYAMA_BATCH5,
+];
+
+// 全データを結合してexport（日付降順ソート）
+export const BEAR_SIGHTINGS_ALL: BearSighting[] = [
+  ...BEAR_SIGHTINGS_BASE,
+  ...BEAR_TOYAMA_EXTENDED,
+].sort((a, b) => b.date.localeCompare(a.date));
+
+// 後方互換エイリアス（既存コンポーネントはこちらを参照）
+export const BEAR_SIGHTINGS_REAL = BEAR_SIGHTINGS_ALL;
 
 // 都道府県リスト
 export const PREFECTURES = ["富山県", "秋田県", "石川県", "長野県", "新潟県"] as const;

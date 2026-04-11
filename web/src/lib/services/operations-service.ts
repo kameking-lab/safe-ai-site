@@ -2,6 +2,7 @@ import type { ServiceResult } from "@/lib/types/api";
 import type {
   KyInstructionRecordState,
   KyPaperFormState,
+  KyRecordSummary,
   KySheetDraft,
   MailDeliverySettings,
   NotificationSettings,
@@ -14,7 +15,10 @@ const STORAGE_KEYS = {
   ky: "safe-ai:ky-sheet:v1",
   kyPaper: "safe-ai:ky-paper:v1",
   kyInstruction: "safe-ai:ky-instruction-record:v1",
+  kyList: "safe-ai:ky-record-list:v1",
 } as const;
+
+const MAX_KY_LIST = 30;
 
 const defaultNotificationSettings: NotificationSettings = {
   weatherAlerts: true,
@@ -183,6 +187,8 @@ export type OperationsService = {
   saveKyPaperForm: (value: KyPaperFormState) => Promise<ServiceResult<KyPaperFormState>>;
   getKyInstructionRecord: () => Promise<ServiceResult<KyInstructionRecordState>>;
   saveKyInstructionRecord: (value: KyInstructionRecordState) => Promise<ServiceResult<KyInstructionRecordState>>;
+  getKyRecordList: () => Promise<ServiceResult<KyRecordSummary[]>>;
+  deleteKyRecord: (id: string) => Promise<ServiceResult<KyRecordSummary[]>>;
   buildMailPreview: (input: {
     notification: NotificationSettings;
     mail: MailDeliverySettings;
@@ -230,7 +236,28 @@ export function createOperationsService(): OperationsService {
     },
     async saveKyInstructionRecord(value) {
       writeToStorage(STORAGE_KEYS.kyInstruction, value);
+      // 一覧に追加
+      const list = readFromStorage<KyRecordSummary[]>(STORAGE_KEYS.kyList, []);
+      const summary: KyRecordSummary = {
+        id: Date.now().toString(),
+        workDate: `${value.workDateYear}-${value.workDateMonth.padStart(2, "0")}-${value.workDateDay.padStart(2, "0")}`,
+        companyName: value.coop1Name || value.coop2Name || value.coop3Name || "未入力",
+        workDetail: value.workRows[0]?.workDetail || "未入力",
+        weather: value.weather || "未入力",
+        savedAt: new Date().toISOString(),
+      };
+      const updated = [summary, ...list].slice(0, MAX_KY_LIST);
+      writeToStorage(STORAGE_KEYS.kyList, updated);
       return { ok: true, data: value };
+    },
+    async getKyRecordList() {
+      return { ok: true, data: readFromStorage<KyRecordSummary[]>(STORAGE_KEYS.kyList, []) };
+    },
+    async deleteKyRecord(id) {
+      const list = readFromStorage<KyRecordSummary[]>(STORAGE_KEYS.kyList, []);
+      const updated = list.filter((r) => r.id !== id);
+      writeToStorage(STORAGE_KEYS.kyList, updated);
+      return { ok: true, data: updated };
     },
     async buildMailPreview({ notification, mail }) {
       const lines = [
