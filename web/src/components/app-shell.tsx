@@ -19,6 +19,7 @@ import {
   Search,
   MapPin,
   Mail,
+  CreditCard,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 
@@ -71,6 +72,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "その他",
     items: [
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
+      { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },
       { id: "notification-settings", label: "通知/配信", href: "/notifications", icon: Bell, badge: "soon" },
       { id: "contact", label: "お問い合わせ", href: "/contact", icon: Mail },
     ],
