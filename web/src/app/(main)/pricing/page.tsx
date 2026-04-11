@@ -206,8 +206,47 @@ export default function PricingPage() {
         </dl>
       </div>
 
-      {/* Cost transparency */}
-      <p className="mt-6 text-center text-xs text-slate-400">
+      {/* Cost breakdown (transparency) */}
+      <div className="mt-8 rounded-2xl border border-slate-100 bg-slate-50 p-6">
+        <h2 className="mb-1 text-sm font-bold text-slate-700">運営コスト試算（月額）</h2>
+        <p className="mb-4 text-xs text-slate-500">
+          価格設定の根拠として、主要サービスの月額コストを公開します。
+          ユーザー数 100人・月間チャット 3,000回・クイズ 10,000問を想定した試算です。
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs text-slate-700">
+            <thead>
+              <tr className="border-b border-slate-200 text-slate-500">
+                <th className="pb-2 text-left font-semibold">サービス</th>
+                <th className="pb-2 text-left font-semibold">用途</th>
+                <th className="pb-2 text-right font-semibold">月額概算</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {[
+                { service: "Google Gemini 2.5 Flash", use: "AIチャット・解説・要約（3,000回）", cost: "~¥1,500" },
+                { service: "Vercel Pro", use: "ホスティング・Edge Functions", cost: "~¥3,000" },
+                { service: "Resend", use: "メール通知（月5,000通まで無料）", cost: "~¥0" },
+                { service: "Stripe", use: "決済手数料（売上の3.6%）", cost: "売上依存" },
+                { service: "NextAuth / DB (将来)", use: "ユーザー管理・セッション", cost: "~¥0〜1,000" },
+                { service: "合計（固定費）", use: "", cost: "~¥4,500〜5,000/月" },
+              ].map((row) => (
+                <tr key={row.service} className={row.service.startsWith("合計") ? "font-bold text-slate-900" : ""}>
+                  <td className="py-2 pr-4">{row.service}</td>
+                  <td className="py-2 pr-4 text-slate-500">{row.use}</td>
+                  <td className="py-2 text-right">{row.cost}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-xs text-slate-400 leading-5">
+          固定費 ~¥5,000/月 をカバーするには プレミアム会員 6人以上、または Pro会員 3人以上で収支均衡。
+          ¥980〜¥1,980の価格帯は「現場の安全投資として気軽に払える水準」を意識して設定しています。
+        </p>
+      </div>
+
+      <p className="mt-4 text-center text-xs text-slate-400">
         ※ 価格は税込表示です。消費税10%が含まれます。
       </p>
     </main>
