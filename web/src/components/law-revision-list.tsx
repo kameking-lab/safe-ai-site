@@ -95,7 +95,7 @@ export function LawRevisionList({
     >
       <h2 className="text-base font-bold text-slate-900 sm:text-lg">法改正一覧</h2>
       <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-        直近10年相当のサンプルを含みます。キーワード・年で絞り込みできます（音声入力対応）。
+        直近10年の主要な労働安全衛生関連の改正を収録。キーワード・年で絞り込みできます（音声入力対応）。
       </p>
       <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
         <div className="sm:col-span-2">
