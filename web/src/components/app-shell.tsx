@@ -19,6 +19,8 @@ import {
   Search,
   MapPin,
   Mail,
+  NotebookPen,
+  FlaskConical,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 
@@ -45,6 +47,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "today-risk", label: "今日の現場リスク", href: "/risk", icon: Zap },
       { id: "ky-sheet", label: "KY用紙", href: "/ky", icon: ClipboardList },
+      { id: "safety-diary", label: "安全衛生日誌", href: "/safety-diary", icon: NotebookPen },
       { id: "signage", label: "サイネージ", href: "/signage", icon: Monitor },
       { id: "bear-map", label: "クマ出没マップ", href: "/bear-map", icon: Database },
     ],
@@ -64,6 +67,7 @@ const NAV_CATEGORIES: NavCategory[] = [
       { id: "law-search", label: "法令検索", href: "/law-search", icon: Search },
       { id: "risk-prediction", label: "リスク予測", href: "/risk-prediction", icon: Brain, badge: "AI" },
       { id: "chatbot", label: "法令チャット", href: "/chatbot", icon: MessageSquare, badge: "AI" },
+      { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: FlaskConical },
       { id: "bear-map", label: "クママップ", href: "/bear-map", icon: MapPin },
     ],
   },
