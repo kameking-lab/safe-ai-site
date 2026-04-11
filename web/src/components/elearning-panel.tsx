@@ -93,7 +93,7 @@ export function ELearningPanel() {
         <label className="block text-xs font-semibold text-slate-700" htmlFor="learning-theme">学習テーマ</label>
         <select
           id="learning-theme"
-          className="mt-1 max-w-xl rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="mt-1 w-full max-w-xl rounded-lg border border-slate-300 px-3 py-2 text-sm"
           onChange={(event) => {
             setThemeId(event.target.value);
             setAnswers({});
