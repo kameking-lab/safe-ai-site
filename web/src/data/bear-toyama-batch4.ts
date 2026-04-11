@@ -3,7 +3,9 @@
 // 対象期間: 2024年9月〜2024年11月（ピーク期）
 // 対象地域: 立山町・小矢部市・射水市・富山市（秋）
 
-export const BEAR_TOYAMA_BATCH4 = [
+import type { BearSighting } from "./bear-sightings-real";
+
+export const BEAR_TOYAMA_BATCH4: BearSighting[] = [
   // === 立山町 (26件) ===
   { id: 332, date: "2024-09-02", prefecture: "富山県", city: "立山町", location: "立山山麓 室堂方面", lat: 36.7453 + 0.042, lng: 137.3356 + 0.048, type: "目撃", description: "立山アルペンルートのバス車内からクマを目撃。斜面で草を食べていた。", source: "富山県 クマっぷ（富山県環境政策課）" },
   { id: 333, date: "2024-09-10", prefecture: "富山県", city: "立山町", location: "芦峅寺 集落近く", lat: 36.7453 + 0.030, lng: 137.3356 + 0.035, type: "痕跡", description: "集落近くの農地にクマの足跡を発見。早朝に侵入したものとみられる。", source: "富山県 クマっぷ（富山県環境政策課）" },

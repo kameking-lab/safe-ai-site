@@ -3,7 +3,9 @@
 // 対象期間: 2024年6月〜2024年8月
 // 対象地域: 黒部市・魚津市・滑川市・上市町
 
-export const BEAR_TOYAMA_BATCH3 = [
+import type { BearSighting } from "./bear-sightings-real";
+
+export const BEAR_TOYAMA_BATCH3: BearSighting[] = [
   // === 黒部市 (26件) ===
   { id: 236, date: "2024-06-02", prefecture: "富山県", city: "黒部市", location: "黒部峡谷 トロッコ電車沿線", lat: 36.8678 + 0.038, lng: 137.4501 + 0.048, type: "目撃", description: "トロッコ電車からクマを目撃。峡谷の斜面を移動していた。車内アナウンスで注意喚起。", source: "富山県 クマっぷ（富山県環境政策課）" },
   { id: 237, date: "2024-06-10", prefecture: "富山県", city: "黒部市", location: "宇奈月 温泉街近く", lat: 36.8678 + 0.030, lng: 137.4501 + 0.035, type: "痕跡", description: "温泉旅館の裏山にクマの足跡を発見。宿泊客への注意喚起を実施。", source: "富山県 クマっぷ（富山県環境政策課）" },

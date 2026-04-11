@@ -3,7 +3,9 @@
 // 対象期間: 2024年12月〜2025年3月、2025年春夏
 // 対象地域: 全市町村（冬眠明け〜2025年春活動期）
 
-export const BEAR_TOYAMA_BATCH5 = [
+import type { BearSighting } from "./bear-sightings-real";
+
+export const BEAR_TOYAMA_BATCH5: BearSighting[] = [
   // === 2025年春（冬眠明け期 3月〜5月）===
 
   // 富山市 2025年 (20件)

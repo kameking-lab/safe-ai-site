@@ -3,7 +3,9 @@
 // 対象期間: 2023年4月〜2023年11月
 // 対象地域: 富山市・南砺市・砺波市
 
-export const BEAR_TOYAMA_BATCH1 = [
+import type { BearSighting } from "./bear-sightings-real";
+
+export const BEAR_TOYAMA_BATCH1: BearSighting[] = [
   // === 富山市 (50件) ===
   { id: 64, date: "2023-04-08", prefecture: "富山県", city: "富山市", location: "大沢野地区 南部", lat: 36.6953 + 0.044, lng: 137.2114 + 0.051, type: "目撃", description: "農道を移動するクマを目撃。成獣1頭、体長約1.1m。山の方へ走り去った。", source: "富山県 クマっぷ（富山県環境政策課）" },
   { id: 65, date: "2023-04-15", prefecture: "富山県", city: "富山市", location: "猪谷地区 林道沿い", lat: 36.6953 + 0.061, lng: 137.2114 + 0.072, type: "痕跡", description: "林道沿いにクマの足跡を発見。雪解け直後の泥地に複数の足跡が確認された。", source: "富山県 クマっぷ（富山県環境政策課）" },

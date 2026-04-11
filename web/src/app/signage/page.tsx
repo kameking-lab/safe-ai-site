@@ -29,7 +29,7 @@ function hintForJmaCode(code: string) {
   return JMA_CODE_HINT[code] ?? `コード ${code}`;
 }
 
-const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
+const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
 const LOCATION_STORAGE_KEY = "signage-location-id";
 
 type DashboardState = {
