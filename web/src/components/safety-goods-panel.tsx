@@ -152,8 +152,18 @@ function GoodsCard({ item }: { item: SafetyGoodsItem }) {
   const rakutenHref = withRakutenAffiliateId(item.rakutenUrl);
   return (
     <article className="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
-      <div className="flex h-36 items-center justify-center rounded-t-xl bg-slate-100">
-        <GoodsIconDisplay categoryId={item.categoryId} />
+      <div className="flex h-36 items-center justify-center rounded-t-xl bg-slate-100 overflow-hidden">
+        {item.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={item.imageUrl}
+            alt={item.imageAlt}
+            className="h-full w-full object-contain p-2"
+            loading="lazy"
+          />
+        ) : (
+          <GoodsIconDisplay categoryId={item.categoryId} />
+        )}
       </div>
       <div className="flex flex-1 flex-col p-4">
         <div className="flex flex-wrap gap-1">
