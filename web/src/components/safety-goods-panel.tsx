@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { InputWithVoice } from "@/components/voice-input-field";
+import { GoodsChatbot } from "@/components/goods-chatbot";
 import {
   safetyGoodsCategories,
   safetyGoodsItems,
@@ -377,6 +378,7 @@ export function SafetyGoodsPanel() {
       </div>
 
       <SelectionGuideSection />
+      <GoodsChatbot />
     </div>
   );
 }
