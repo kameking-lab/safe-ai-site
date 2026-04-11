@@ -101,7 +101,7 @@ export function AccidentDatabasePanel({
               onSelectType(event.target.value as AccidentType | "すべて");
               setPage(0);
             }}
-            className="mt-1 max-w-md rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none"
+            className="mt-1 w-full max-w-md rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none"
           >
             {options.map((option) => (
               <option key={option} value={option}>

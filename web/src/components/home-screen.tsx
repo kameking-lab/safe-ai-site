@@ -5,6 +5,7 @@ import { ChatPanel, type ChatMessage } from "@/components/chat-panel";
 import { AccidentDatabasePanel } from "@/components/accident-database-panel";
 import { ELearningPanel } from "@/components/elearning-panel";
 import { HomeValueHero } from "@/components/home-value-hero";
+import { KyRecordList } from "@/components/ky-record-list";
 import { KySheetPanel } from "@/components/ky-sheet-panel";
 import { KyInstructionRecordForm } from "@/components/ky-instruction-record-form";
 import { LawRevisionList } from "@/components/law-revision-list";
@@ -26,6 +27,7 @@ import type {
 } from "@/lib/types/domain";
 import type {
   KyInstructionRecordState,
+  KyRecordSummary,
   KySheetDraft,
   MailDeliverySettings,
   NotificationSettings,
@@ -175,6 +177,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
     notes: "",
   });
   const [kyInstructionRecord, setKyInstructionRecord] = useState<KyInstructionRecordState>(makeInitialKyInstruction);
+  const [kyRecordList, setKyRecordList] = useState<KyRecordSummary[]>([]);
   const [pdfTarget, setPdfTarget] = useState<PdfExportTarget>("ky-sheet");
   const [mailPreview, setMailPreview] = useState("配信プレビューを表示します。");
   const [pdfPreview, setPdfPreview] = useState("PDFプレビューを表示します。");
@@ -369,6 +372,9 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
         const paper = await services.operations.getKyInstructionRecord();
         if (!active) return;
         if (paper.ok) setKyInstructionRecord(paper.data);
+        const list = await services.operations.getKyRecordList();
+        if (!active) return;
+        if (list.ok) setKyRecordList(list.data);
       }
     }
     void loadOps();
@@ -580,14 +586,29 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
           <KyInstructionRecordForm
             onChange={setKyInstructionRecord}
             onSave={(current) => {
-              void services.operations.saveKyInstructionRecord(current).then((result) => {
+              void services.operations.saveKyInstructionRecord(current).then(async (result) => {
                 if (result.ok) {
                   setOpsSavedLabel(`作業指示・現地KY記録を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
+                  const list = await services.operations.getKyRecordList();
+                  if (list.ok) setKyRecordList(list.data);
                 }
               });
             }}
             savedLabel={opsSavedLabel}
             value={kyInstructionRecord}
+          />
+        </section>
+      ) : null}
+
+      {variant === "ky" ? (
+        <section className="px-4 pb-6 lg:px-8">
+          <KyRecordList
+            records={kyRecordList}
+            onDelete={(id) => {
+              void services.operations.deleteKyRecord(id).then((result) => {
+                if (result.ok) setKyRecordList(result.data);
+              });
+            }}
           />
         </section>
       ) : null}
