@@ -38,10 +38,10 @@ export function MhlwDisasterDatabasesPanel() {
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-      <h2 className="text-base font-bold text-slate-900 sm:text-lg">厚生労働省 労働災害データベース（モック）</h2>
+      <h2 className="text-base font-bold text-slate-900 sm:text-lg">厚生労働省 労働災害データベース</h2>
       <p className="mt-1 text-xs text-slate-600">
-        直近5年（{YEARS[YEARS.length - 1]}〜{YEARS[0]}）・死亡災害 {deathCount}件・休業4日以上イメージの休業災害{" "}
-        {lostCount}件。キーワードは関連度の高い順に並びます（複数語・スペース区切り可）。実運用では厚労省公開Excelを取り込み可能な構造です。
+        直近5年（{YEARS[YEARS.length - 1]}〜{YEARS[0]}）の主要な労働災害事例を収録。死亡災害 {deathCount}件・休業4日以上の休業災害{" "}
+        {lostCount}件。キーワードは関連度の高い順に並びます（複数語・スペース区切り可）。
       </p>
 
       <div className="mt-3 flex flex-wrap gap-2">

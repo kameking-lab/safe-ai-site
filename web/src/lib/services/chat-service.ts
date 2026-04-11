@@ -1,4 +1,3 @@
-import { buildMockChatReply } from "@/data/mock/chat-responses";
 import type {
   ApiForceErrorType,
   ApiErrorResponse,
@@ -27,7 +26,8 @@ function createInitialMessages(): ChatMessage[] {
     {
       id: "assistant-initial",
       role: "assistant",
-      content: "質問を入力すると、選択中の法改正に沿ったダミー回答を表示します。",
+      content:
+        "選択中の法改正についてご質問ください。労働安全衛生法の条文をRAG検索して、Gemini AIが根拠条文付きで回答します。",
     },
   ];
 }
@@ -74,27 +74,9 @@ async function fetchWithTimeout(
 }
 
 export function createMockChatService(): ChatService {
-  return {
-    createInitialMessages,
-    async sendMessage(input) {
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      const request = toApiRequest(input);
-      if (!request.question) {
-        return {
-          ok: false,
-          error: mapToError("VALIDATION", "質問文を入力してください。", false),
-        };
-      }
-
-      const reply = buildMockChatReply(request.revisionTitle, request.question);
-
-      return {
-        ok: true,
-        data: createMessage(reply),
-      };
-    },
-  };
+  // 法改正チャットは Gemini ベースの実APIに統一されたため、
+  // 従来のローカルダミー応答は廃止し、ApiChatService を返す。
+  return new ApiChatService(fetch);
 }
 
 export class ApiChatService implements ChatService {
