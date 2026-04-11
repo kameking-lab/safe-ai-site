@@ -22,6 +22,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
+import { UserMenu } from "@/components/user-menu";
 
 type NavItem = {
   id: string;
@@ -84,7 +85,12 @@ function navActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+interface AppShellProps {
+  children: React.ReactNode;
+  user?: { name?: string | null; email?: string | null; image?: string | null } | null;
+}
+
+export function AppShell({ children, user }: AppShellProps) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -138,7 +144,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             現場の安全を、AIで変える。
           </p>
         </div>
-        <nav aria-label="サイト全体ナビゲーション" className="space-y-4">
+        <nav aria-label="サイト全体ナビゲーション" className="flex-1 space-y-4">
           {NAV_CATEGORIES.map((cat) => (
             <div key={cat.label || "__top__"}>
               {cat.label && (
@@ -150,6 +156,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           ))}
         </nav>
+        <div className="mt-4 border-t border-slate-200 pt-4">
+          <UserMenu user={user} />
+        </div>
       </aside>
 
       <div className="flex min-h-full flex-1 flex-col">
@@ -159,15 +168,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <p className="text-[11px] font-bold tracking-wide text-emerald-700">ANZEN AI</p>
             <p className="text-xs text-slate-700">現場の安全を、AIで変える。</p>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsSidebarOpen((prev) => !prev)}
-            className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm"
-            aria-expanded={isSidebarOpen}
-            aria-label="メニューを開閉"
-          >
-            {isSidebarOpen ? "閉じる" : "メニュー"}
-          </button>
+          <div className="flex items-center gap-2">
+            <UserMenu user={user} />
+            <button
+              type="button"
+              onClick={() => setIsSidebarOpen((prev) => !prev)}
+              className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm"
+              aria-expanded={isSidebarOpen}
+              aria-label="メニューを開閉"
+            >
+              {isSidebarOpen ? "閉じる" : "メニュー"}
+            </button>
+          </div>
         </div>
 
         {/* Mobile nav dropdown */}
