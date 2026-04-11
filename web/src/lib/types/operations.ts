@@ -146,3 +146,13 @@ export type KyInstructionRecordState = {
   fallChecks: KyInstructionFallCheck[];
   correctionNote: string;
 };
+
+/** KY記録一覧用のサマリー */
+export type KyRecordSummary = {
+  id: string;
+  workDate: string;
+  companyName: string;
+  workDetail: string;
+  weather: string;
+  savedAt: string;
+};
