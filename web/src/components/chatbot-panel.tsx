@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { ChatbotSource } from "@/app/api/chatbot/route";
+import { VoiceMicButton } from "@/components/voice-input-field";
 
 type ChatMessage = {
   id: string;
@@ -190,8 +191,12 @@ export function ChatbotPanel() {
             }
           }}
           placeholder="安衛法について質問を入力..."
-          className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
+          className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
           aria-label="質問入力"
+        />
+        <VoiceMicButton
+          onFinalText={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
+          className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
         />
         <button
           type="button"
