@@ -5,6 +5,10 @@ import { CheckCircle } from "lucide-react";
 export const metadata: Metadata = {
   title: "お申し込み完了",
   description: "プレミアムプランへのお申し込みが完了しました。",
+  openGraph: {
+    title: "お申し込み完了｜ANZEN AI",
+    description: "プレミアムプランへのお申し込みが完了しました。",
+  },
 };
 
 export default function PricingSuccessPage() {

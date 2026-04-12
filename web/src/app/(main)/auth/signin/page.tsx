@@ -5,6 +5,10 @@ import { signIn } from "@/auth";
 export const metadata: Metadata = {
   title: "ログイン",
   description: "ANZEN AIにログインしてプレミアム機能を利用しましょう。",
+  openGraph: {
+    title: "ログイン｜ANZEN AI",
+    description: "ANZEN AIにログインしてプレミアム機能を利用しましょう。",
+  },
 };
 
 export default function SignInPage() {

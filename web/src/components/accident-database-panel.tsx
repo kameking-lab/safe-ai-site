@@ -55,7 +55,7 @@ export function AccidentDatabasePanel({
   const totalPages = Math.max(1, Math.ceil(cases.length / PAGE_SIZE));
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 overflow-hidden">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-bold text-slate-900 sm:text-lg">事故データベース</h2>

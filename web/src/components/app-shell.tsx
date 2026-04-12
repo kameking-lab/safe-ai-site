@@ -186,7 +186,7 @@ export function AppShell({ children, user }: AppShellProps) {
         </div>
       </aside>
 
-      <div className="flex min-h-full flex-1 flex-col">
+      <div className="flex min-h-full flex-1 flex-col overflow-x-hidden">
         {/* Mobile header */}
         <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-b from-emerald-50 to-white px-4 py-3 lg:hidden">
           <div>
