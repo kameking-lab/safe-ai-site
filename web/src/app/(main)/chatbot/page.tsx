@@ -4,7 +4,7 @@ import { ChatbotPanel } from "@/components/chatbot-panel";
 import { PageHeader } from "@/components/page-header";
 
 export const metadata: Metadata = {
-  title: "安衛法AIチャットボット｜ANZEN AI",
+  title: "安衛法AIチャットボット",
   description: "労働安全衛生法・安全規則の条文をAIが検索・回答。安衛法・安衛則・クレーン則・有機則・特化則・酸欠則に対応。",
   openGraph: {
     title: "安衛法AIチャットボット｜ANZEN AI",

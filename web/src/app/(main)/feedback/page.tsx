@@ -27,17 +27,15 @@ export default function FeedbackPage() {
           </iframe>
         </div>
       ) : (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-6 py-10 text-center">
-          <p className="text-sm font-medium text-amber-800">フィードバックフォームは準備中です。</p>
-          <p className="mt-1 text-xs text-amber-600">
-            環境変数 NEXT_PUBLIC_FEEDBACK_FORM_URL を設定するとフォームが表示されます。
-          </p>
-          <p className="mt-4 text-sm text-slate-600">
-            ご要望は{" "}
-            <a href="/contact" className="font-semibold text-[#1a7a4c] underline">
-              お問い合わせフォーム
-            </a>{" "}
-            からも受け付けています。
+        <div className="rounded-xl border border-slate-200 bg-slate-50 px-6 py-10 text-center">
+          <p className="text-sm font-medium text-slate-700">ご要望・バグ報告は下記からお送りください。</p>
+          <p className="mt-4">
+            <a
+              href="/contact"
+              className="inline-block rounded-xl bg-[#1a7a4c] px-6 py-3 text-sm font-bold text-white hover:bg-[#15633e]"
+            >
+              お問い合わせフォームへ
+            </a>
           </p>
         </div>
       )}

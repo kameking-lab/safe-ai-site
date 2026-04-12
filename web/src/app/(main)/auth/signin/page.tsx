@@ -3,7 +3,7 @@ import { LogIn } from "lucide-react";
 import { signIn } from "@/auth";
 
 export const metadata: Metadata = {
-  title: "ログイン｜ANZEN AI",
+  title: "ログイン",
   description: "ANZEN AIにログインしてプレミアム機能を利用しましょう。",
 };
 

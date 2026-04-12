@@ -57,8 +57,8 @@ export function SignageHeader({
         </div>
         <div className="flex flex-col items-end gap-0.5 text-right">
           <p className="text-[10px] text-slate-300 sm:text-xs lg:text-sm">現在時刻</p>
-          <p className="text-sm font-semibold tabular-nums text-white sm:text-base lg:text-xl">{nowText}</p>
-          <p className="text-[10px] text-slate-400 sm:text-[11px]">更新: {lastUpdatedText}</p>
+          <p className="text-sm font-semibold tabular-nums text-white sm:text-base lg:text-xl" suppressHydrationWarning>{nowText}</p>
+          <p className="text-[10px] text-slate-400 sm:text-[11px]" suppressHydrationWarning>更新: {lastUpdatedText}</p>
         </div>
       </div>
     </header>

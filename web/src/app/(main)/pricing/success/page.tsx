@@ -3,7 +3,7 @@ import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "お申し込み完了｜ANZEN AI",
+  title: "お申し込み完了",
   description: "プレミアムプランへのお申し込みが完了しました。",
 };
 
