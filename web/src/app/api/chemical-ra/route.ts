@@ -139,7 +139,7 @@ const DEMO_RESPONSE: ChemicalRaResponse = {
     "特定化学物質（第2類物質）には該当しない",
     "危険物取扱規則 第4類 第1石油類（非水溶性）",
   ],
-  rawReply: "【デモ回答】Gemini APIキーが設定されていません。上記はトルエンのサンプルデータです。",
+  rawReply: "Gemini APIキーが未設定のため、参考データを表示しています。",
 };
 
 export async function POST(request: Request) {

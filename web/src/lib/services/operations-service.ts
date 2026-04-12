@@ -261,7 +261,7 @@ export function createOperationsService(): OperationsService {
     },
     async buildMailPreview({ notification, mail }) {
       const lines = [
-        "【ANZEN AI】配信サンプル",
+        "【ANZEN AI】配信プレビュー",
         `配信先: ${mail.email || "未設定"}`,
         `頻度: ${mail.frequency}`,
         "",
