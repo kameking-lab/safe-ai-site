@@ -26,10 +26,9 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico" },
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48", type: "image/x-icon" },
     ],
-    apple: "/icons/icon-192.svg",
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
   },
   title: {
     default: "ANZEN AI｜現場の安全を、AIで変える。",
@@ -49,7 +48,7 @@ export const metadata: Metadata = {
     description: "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。",
     images: [
       {
-        url: "/api/og",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "ANZEN AI — 現場の安全を、AIで変える。",
@@ -60,7 +59,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "ANZEN AI｜現場の安全を、AIで変える。",
     description: "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。",
-    images: ["/api/og"],
+    images: ["/og-image.png"],
   },
 };
 

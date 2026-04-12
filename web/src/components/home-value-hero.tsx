@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 const FEATURES = [
@@ -69,6 +70,8 @@ export function HomeValueHero() {
     <div className="space-y-5" aria-label="ホームの価値案内">
       {/* メインキャッチ */}
       <div className="rounded-2xl border border-[#155a38] bg-gradient-to-br from-[#1a7a4c] via-[#166640] to-[#0f4d2e] px-5 py-6 text-white shadow-lg">
+        <div className="flex items-start justify-between gap-3">
+        <div className="flex-1">
         <div className="flex items-center gap-2">
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-white/20">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 text-white" aria-hidden="true">
@@ -124,6 +127,18 @@ export function HomeValueHero() {
           >
             法令を検索する
           </Link>
+        </div>
+        </div>
+        {/* マスコット */}
+        <div className="hidden sm:flex flex-shrink-0 items-end self-end pb-1">
+          <Image
+            src="/mascot/mascot-chihuahua-4.png"
+            alt="ANZEN AI マスコット"
+            width={80}
+            height={80}
+            className="drop-shadow-md"
+          />
+        </div>
         </div>
       </div>
 
