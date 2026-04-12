@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { ExamQuizClient } from "./exam-quiz-client";
 
 export const metadata: Metadata = {
-  title: "過去問クイズ｜ANZEN AI",
+  title: "過去問クイズ",
   description: "労働安全・衛生コンサルタント、衛生管理者、ボイラー技士など全資格対応の過去問クイズ。科目・年度別に本番形式で挑戦できます。",
   openGraph: {
     title: "過去問クイズ｜ANZEN AI",

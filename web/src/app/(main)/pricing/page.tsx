@@ -3,7 +3,7 @@ import { Check, Zap, Shield, Star } from "lucide-react";
 import { PricingCheckout } from "./pricing-checkout";
 
 export const metadata: Metadata = {
-  title: "料金プラン｜ANZEN AI",
+  title: "料金プラン",
   description: "ANZEN AIのフリーミアムプラン。無料で基本機能を利用。プレミアムプランで過去問・AIチャット・法令検索が無制限に。",
   openGraph: {
     title: "料金プラン｜ANZEN AI",

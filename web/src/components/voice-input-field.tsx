@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState, useSyncExternalStore } from "react";
 
 type BrowserSpeechRecognition = {
   lang: string;
@@ -28,9 +28,11 @@ function useSpeechToText() {
   const ref = useRef<BrowserSpeechRecognition | null>(null);
   const textRef = useRef("");
 
-  const canUse = useMemo(
-    () => typeof window !== "undefined" && !!(window.SpeechRecognition || window.webkitSpeechRecognition),
-    []
+  // useSyncExternalStore で SSR/クライアント間のハイドレーションを安全に処理
+  const canUse = useSyncExternalStore(
+    () => () => {},
+    () => !!(window.SpeechRecognition || window.webkitSpeechRecognition),
+    () => false,
   );
 
   const start = useCallback((onEnded?: (text: string) => void) => {

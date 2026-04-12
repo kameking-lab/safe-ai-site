@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Turbopack のルートディレクトリを明示（monorepo/worktree 環境での誤検知防止）
+  turbopack: {
+    root: process.cwd(),
+  },
   // 画像最適化（AVIF/WebP）
   images: {
     formats: ["image/avif", "image/webp"],

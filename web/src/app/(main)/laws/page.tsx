@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { LawsPageClient } from "@/components/laws-page-client";
 
 export const metadata: Metadata = {
-  title: "法改正一覧｜ANZEN AI",
+  title: "法改正一覧",
   description: "労働安全衛生法・化学物質管理など100件以上の法改正をAI要約付きで確認。最新の法令改正を見逃さずキャッチアップ。",
   openGraph: {
     title: "法改正一覧｜ANZEN AI",

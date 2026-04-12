@@ -3,7 +3,7 @@ import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "ログインエラー｜ANZEN AI",
+  title: "ログインエラー",
 };
 
 export default function AuthErrorPage() {

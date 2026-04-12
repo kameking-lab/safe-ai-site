@@ -79,7 +79,7 @@ export function generateMhlwDeathRecords(count: number, seed = 20260404): MhlwDi
       : `${ind}業における${type}（死亡災害・事例${i + 1}）`;
     const summary = heavy
       ? `${year}年度公表イメージ。重機転倒・吊り荷・外れ道による重大災害。災害型:${type}。実データは厚労省Excel等を参照。`
-      : `${year}年度公表データに基づくサンプル行です。実データは厚生労働省の労働災害統計（死亡災害）Excel等で公開されています。災害型:${type}。`;
+      : `${year}年度公表データに基づく死亡災害の記録。実データは厚生労働省の労働災害統計Excel等で公開されています。災害型:${type}。`;
     const kw = heavy
       ? ["クレーン", "重機", "転倒", ind, "死亡", type.split("・")[0] ?? type]
       : [type.split("・")[0] ?? type, ind, "死亡", "労災"];
@@ -110,7 +110,7 @@ export function generateMhlwLostTimeRecords(count: number, seed = 20260405): Mhl
     const daysOff = 4 + Math.floor(rng() * 120);
     const id = `mhlw-lost-gen-${i}`;
     const title = `${ind}業における${type}（休業災害・休業${daysOff}日相当・事例${i + 1}）`;
-    const summary = `${year}年度相当の休業災害サンプル。休業日数は例示です。災害型:${type}。`;
+    const summary = `${year}年度相当の休業災害記録。休業日数は例示です。災害型:${type}。`;
     const kw = [type.split("・")[0] ?? type, ind, "休業", "4日以上"];
     out.push({
       id,

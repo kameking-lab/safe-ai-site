@@ -41,7 +41,23 @@ export default function ContactPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!FORMSPREE_ID) return;
+    if (!FORMSPREE_ID) {
+      // Formspree 未設定時は mailto: フォールバック
+      const subject = encodeURIComponent(`[ANZEN AI] お問い合わせ: ${form.company} ${form.name}`);
+      const bodyLines = [
+        `会社名: ${form.company}`,
+        `担当者名: ${form.name}`,
+        `メール: ${form.email}`,
+        form.phone ? `電話: ${form.phone}` : "",
+        "",
+        `【相談内容】`,
+        form.message,
+        "",
+        form.features.length ? `【希望機能】${form.features.join("、")}` : "",
+      ].filter((l) => l !== undefined);
+      window.location.href = `mailto:?subject=${subject}&body=${encodeURIComponent(bodyLines.join("\n"))}`;
+      return;
+    }
     setStatus("sending");
     try {
       const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
@@ -102,14 +118,7 @@ export default function ContactPage() {
       </section>
 
       {/* フォーム */}
-      {!FORMSPREE_ID ? (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-6 py-8 text-center">
-          <p className="text-sm font-medium text-amber-800">送信機能は準備中です。</p>
-          <p className="mt-1 text-xs text-amber-600">
-            環境変数 NEXT_PUBLIC_FORMSPREE_ID を設定すると送信が有効になります。
-          </p>
-        </div>
-      ) : status === "success" ? (
+      {status === "success" ? (
         <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-6 py-10 text-center">
           <p className="text-xl font-bold text-emerald-800">送信完了しました！</p>
           <p className="mt-2 text-sm text-emerald-700">
