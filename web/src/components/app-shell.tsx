@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   Home,
-  Zap,
   ClipboardList,
   Monitor,
   GraduationCap,
@@ -20,6 +19,10 @@ import {
   MapPin,
   Mail,
   CreditCard,
+  CloudRain,
+  FileText,
+  TestTube2,
+  RefreshCw,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { UserMenu } from "@/components/user-menu";
@@ -43,38 +46,49 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [{ id: "home", label: "ホーム", href: "/", icon: Home }],
   },
   {
-    label: "現場で使う",
+    label: "マップ",
     items: [
-      { id: "today-risk", label: "今日の現場リスク", href: "/risk", icon: Zap },
-      { id: "ky-sheet", label: "KY用紙", href: "/ky", icon: ClipboardList },
       { id: "signage", label: "サイネージ", href: "/signage", icon: Monitor },
-      { id: "bear-map", label: "クマ出没マップ", href: "/bear-map", icon: Database },
+      { id: "bear-map", label: "クマ出没マップ", href: "/bear-map", icon: MapPin },
+      { id: "weather-risk", label: "気象リスク", href: "/risk", icon: CloudRain },
     ],
   },
   {
-    label: "学ぶ",
+    label: "学習",
     items: [
       { id: "elearning", label: "Eラーニング", href: "/e-learning", icon: GraduationCap },
       { id: "exam-quiz", label: "過去問", href: "/exam-quiz", icon: BookOpen },
     ],
   },
   {
-    label: "調べる",
+    label: "法律",
     items: [
-      { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database },
       { id: "laws", label: "法改正", href: "/laws", icon: Scale },
       { id: "law-search", label: "法令検索", href: "/law-search", icon: Search },
-      { id: "risk-prediction", label: "リスク予測", href: "/risk-prediction", icon: Brain, badge: "AI" },
       { id: "chatbot", label: "法令チャット", href: "/chatbot", icon: MessageSquare, badge: "AI" },
-      { id: "bear-map", label: "クママップ", href: "/bear-map", icon: MapPin },
     ],
   },
   {
-    label: "その他",
+    label: "現場ツール",
+    items: [
+      { id: "ky-sheet", label: "KY用紙", href: "/ky", icon: ClipboardList },
+      { id: "risk-prediction", label: "リスク予測", href: "/risk-prediction", icon: Brain, badge: "AI" },
+      { id: "safety-diary", label: "安全衛生日誌", href: "/safety-diary", icon: FileText, badge: "soon" },
+    ],
+  },
+  {
+    label: "事例・データ",
+    items: [
+      { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database },
+      { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2, badge: "soon" },
+    ],
+  },
+  {
+    label: "ショップ",
     items: [
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
       { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },
-      { id: "notification-settings", label: "通知/配信", href: "/notifications", icon: Bell },
+      { id: "notifications", label: "通知/配信", href: "/notifications", icon: Bell, badge: "soon" },
       { id: "contact", label: "お問い合わせ", href: "/contact", icon: Mail },
     ],
   },
@@ -138,11 +152,22 @@ export function AppShell({ children, user }: AppShellProps) {
     <div className="flex min-h-full w-full bg-white shadow-sm">
       {/* PC sidebar */}
       <aside className="hidden w-60 shrink-0 flex-col border-r border-slate-200 bg-slate-50/80 px-3 py-5 lg:flex">
-        <div className="mb-4 px-1">
-          <p className="text-xs font-bold tracking-wide text-emerald-700">ANZEN AI</p>
-          <p className="mt-0.5 text-[10px] text-slate-500">
-            現場の安全を、AIで変える。
-          </p>
+        <div className="mb-4 flex items-start justify-between px-1">
+          <div>
+            <p className="text-xs font-bold tracking-wide text-emerald-700">ANZEN AI</p>
+            <p className="mt-0.5 text-[10px] text-slate-500">
+              現場の安全を、AIで変える。
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="rounded-full p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-600"
+            title="ページを更新"
+            aria-label="ページを更新"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+          </button>
         </div>
         <nav aria-label="サイト全体ナビゲーション" className="flex-1 space-y-4">
           {NAV_CATEGORIES.map((cat) => (
@@ -169,6 +194,15 @@ export function AppShell({ children, user }: AppShellProps) {
             <p className="text-xs text-slate-700">現場の安全を、AIで変える。</p>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              title="ページを更新"
+              aria-label="ページを更新"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </button>
             <UserMenu user={user} />
             <button
               type="button"

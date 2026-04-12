@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import {
   BEAR_SIGHTINGS_REAL,
   PREFECTURES,
@@ -21,18 +21,19 @@ const BearMapLeaflet = dynamic(() => import("@/components/bear-map-leaflet"), {
   ),
 });
 
+// 種別色（目撃=緑大、被害=赤大、捕獲=青、痕跡=灰）
 const TYPE_COLORS: Record<BearSightingType, string> = {
-  目撃: "bg-yellow-100 text-yellow-800 border-yellow-300",
+  目撃: "bg-green-100 text-green-800 border-green-400",
   被害: "bg-red-100 text-red-800 border-red-300",
   捕獲: "bg-blue-100 text-blue-800 border-blue-300",
-  痕跡: "bg-green-100 text-green-800 border-green-300",
+  痕跡: "bg-gray-100 text-gray-700 border-gray-300",
 };
 
 const TYPE_DOT: Record<BearSightingType, string> = {
-  目撃: "bg-yellow-500",
+  目撃: "bg-green-500",
   被害: "bg-red-500",
   捕獲: "bg-blue-500",
-  痕跡: "bg-green-500",
+  痕跡: "bg-gray-400",
 };
 
 export function BearMapPanel() {
@@ -44,6 +45,10 @@ export function BearMapPanel() {
     new Set(SIGHTING_TYPES)
   );
   const [selectedSighting, setSelectedSighting] = useState<BearSighting | null>(null);
+  const [citySearch, setCitySearch] = useState("");
+  // 都道府県ズーム用：最後に単一選択した都道府県
+  const [focusPrefecture, setFocusPrefecture] = useState<string | null>(null);
+  const prevPrefecturesRef = useRef<Set<Prefecture>>(new Set(PREFECTURES));
 
   const togglePref = (pref: Prefecture) => {
     setSelectedPrefectures((prev) => {
@@ -53,6 +58,13 @@ export function BearMapPanel() {
       } else {
         next.add(pref);
       }
+      // 1県のみ選択 → ズーム。複数 or 0 → ズームしない
+      if (next.size === 1) {
+        setFocusPrefecture([...next][0]);
+      } else {
+        setFocusPrefecture(null);
+      }
+      prevPrefecturesRef.current = next;
       return next;
     });
   };
@@ -82,6 +94,7 @@ export function BearMapPanel() {
   };
 
   const filtered = useMemo(() => {
+    const cityQ = citySearch.trim().toLowerCase();
     return BEAR_SIGHTINGS_REAL.filter((s) => {
       if (!selectedPrefectures.has(s.prefecture as Prefecture)) return false;
       if (!selectedTypes.has(s.type)) return false;
@@ -89,9 +102,12 @@ export function BearMapPanel() {
         const month = parseInt(s.date.split("-")[1], 10);
         if (!selectedMonths.has(month)) return false;
       }
+      if (cityQ && !s.city.toLowerCase().includes(cityQ) && !s.location.toLowerCase().includes(cityQ)) {
+        return false;
+      }
       return true;
     });
-  }, [selectedPrefectures, selectedMonths, selectedTypes]);
+  }, [selectedPrefectures, selectedMonths, selectedTypes, citySearch]);
 
   // 統計
   const stats = useMemo(() => {
@@ -125,9 +141,36 @@ export function BearMapPanel() {
 
       {/* フィルター */}
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
-        {/* 都道府県フィルター */}
+        {/* 市区町村テキスト検索 */}
         <div>
-          <p className="mb-1.5 text-xs font-semibold text-slate-600">都道府県</p>
+          <p className="mb-1.5 text-xs font-semibold text-slate-600">市区町村・地名検索</p>
+          <input
+            type="text"
+            value={citySearch}
+            onChange={(e) => setCitySearch(e.target.value)}
+            placeholder="例: 富山市 / 南砺市 / 宇奈月..."
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 placeholder-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+          />
+          {citySearch && (
+            <p className="mt-1 text-xs text-slate-400">
+              「{citySearch}」で絞り込み中（{filtered.length}件）
+              <button
+                type="button"
+                onClick={() => setCitySearch("")}
+                className="ml-2 text-slate-500 underline hover:text-slate-700"
+              >
+                クリア
+              </button>
+            </p>
+          )}
+        </div>
+
+        {/* 都道府県フィルター（単一選択でズーム連動） */}
+        <div>
+          <p className="mb-1.5 text-xs font-semibold text-slate-600">
+            都道府県
+            <span className="ml-1 font-normal text-slate-400">（1県のみ選択で地図ズーム）</span>
+          </p>
           <div className="flex flex-wrap gap-1.5">
             {PREFECTURES.map((pref) => (
               <button
@@ -211,6 +254,7 @@ export function BearMapPanel() {
           sightings={filtered}
           onSelectSighting={setSelectedSighting}
           selectedSighting={selectedSighting}
+          focusPrefecture={focusPrefecture}
         />
       </div>
 

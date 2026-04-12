@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import {
   buildRiskMatrix,
@@ -380,8 +381,6 @@ export function RiskPredictionPanel() {
   const [activeTab, setActiveTab] = useState<TabId>("search");
   const [results, setResults] = useState<ScoredAccidentCase[]>([]);
   const [searched, setSearched] = useState(false);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   const handleSearch = useCallback(() => {
@@ -433,9 +432,8 @@ export function RiskPredictionPanel() {
             <label className="block text-xs font-semibold text-slate-700" htmlFor="risk-query">
               作業内容
             </label>
-            <textarea
+            <TextareaWithVoice
               id="risk-query"
-              ref={inputRef}
               className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               placeholder="例: 高所での鉄骨組立作業、足場解体、電気工事など"
               rows={2}
@@ -448,7 +446,7 @@ export function RiskPredictionPanel() {
                 }
               }}
             />
-            <input
+            <InputWithVoice
               className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               placeholder="現場名（任意 - PDF出力時に記載）"
               type="text"
