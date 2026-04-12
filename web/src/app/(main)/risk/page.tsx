@@ -1,22 +1,11 @@
 import type { Metadata } from "next";
-import { Zap } from "lucide-react";
-import { HomeScreen } from "@/components/home-screen";
-import { PageHeader } from "@/components/page-header";
+import { WeatherForecastPanel } from "@/components/weather-forecast-panel";
 
 export const metadata: Metadata = {
-  title: "今日の現場リスク",
-  description: "地域・作業種別ごとの気象リスクを確認。朝礼での安全確認に活用できます。",
+  title: "気象警報マップ",
+  description: "都道府県別の気象警報・注意報と向こう1週間の天気予報マップ。地域ブロックをクリックすると市区町村別の詳細を確認できます。",
 };
 
 export default function RiskPage() {
-  return (
-    <HomeScreen variant="risk">
-      <PageHeader
-        title="今日の現場リスク"
-        description="地域・作業種別ごとの気象リスクを確認。朝礼での安全確認に"
-        icon={Zap}
-        iconColor="amber"
-      />
-    </HomeScreen>
-  );
+  return <WeatherForecastPanel />;
 }
