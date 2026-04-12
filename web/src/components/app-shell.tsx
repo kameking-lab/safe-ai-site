@@ -18,12 +18,14 @@ import {
   Search,
   MapPin,
   Mail,
+  CreditCard,
   CloudRain,
   FileText,
   TestTube2,
   RefreshCw,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
+import { UserMenu } from "@/components/user-menu";
 
 type NavItem = {
   id: string;
@@ -85,6 +87,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "ショップ",
     items: [
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
+      { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },
       { id: "notifications", label: "通知/配信", href: "/notifications", icon: Bell, badge: "soon" },
       { id: "contact", label: "お問い合わせ", href: "/contact", icon: Mail },
     ],
@@ -96,7 +99,12 @@ function navActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+interface AppShellProps {
+  children: React.ReactNode;
+  user?: { name?: string | null; email?: string | null; image?: string | null } | null;
+}
+
+export function AppShell({ children, user }: AppShellProps) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -161,7 +169,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <RefreshCw className="h-3.5 w-3.5" />
           </button>
         </div>
-        <nav aria-label="サイト全体ナビゲーション" className="space-y-4">
+        <nav aria-label="サイト全体ナビゲーション" className="flex-1 space-y-4">
           {NAV_CATEGORIES.map((cat) => (
             <div key={cat.label || "__top__"}>
               {cat.label && (
@@ -173,6 +181,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           ))}
         </nav>
+        <div className="mt-4 border-t border-slate-200 pt-4">
+          <UserMenu user={user} />
+        </div>
       </aside>
 
       <div className="flex min-h-full flex-1 flex-col">
@@ -192,6 +203,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <RefreshCw className="h-4 w-4" />
             </button>
+            <UserMenu user={user} />
             <button
               type="button"
               onClick={() => setIsSidebarOpen((prev) => !prev)}

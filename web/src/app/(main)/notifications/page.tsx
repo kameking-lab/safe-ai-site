@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bell, CheckCircle } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { SubscribeForm } from "./subscribe-form";
 
 export const metadata: Metadata = {
   title: "通知・配信設定｜ANZEN AI",
@@ -47,18 +48,17 @@ export default function NotificationsPage() {
         iconColor="blue"
       />
 
-      {/* Coming soon バナー */}
-      <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
-        <div className="flex items-start gap-3">
-          <Bell className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
-          <div>
-            <p className="text-sm font-bold text-amber-900">この機能は現在準備中です</p>
-            <p className="mt-1 text-xs text-amber-800 leading-5">
-              通知・配信機能は開発中です。サービスが開始し次第、このページで設定できるようになります。
-              下記のロードマップで予定している機能をご確認ください。
-            </p>
-          </div>
+      {/* 気象警報メール登録フォーム */}
+      <div className="mt-6 rounded-2xl border border-blue-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <Bell className="h-5 w-5 text-blue-600" />
+          <h2 className="text-sm font-bold text-slate-800">気象警報メール通知を登録する</h2>
         </div>
+        <p className="mb-4 text-xs text-slate-600 leading-5">
+          大雨・暴風・高温注意情報などの気象警報が発令された際に、現場担当者へメールでお知らせします。
+          登録は無料です（プレミアムプランで地域指定通知が利用可能）。
+        </p>
+        <SubscribeForm />
       </div>
 
       {/* ロードマップ */}
