@@ -51,5 +51,5 @@
 ## Phase 5: SEO・ブランディング（Phase 4後）
 
 - [ ] 5-1. サイト名・キャラクター再検討: Google検索で埋もれない個性的な名前を提案。イメージキャラクターのプロンプト案を作成。
-- [ ] 5-2. Google Search Console登録用のsitemap.xml/robots.txt最終確認
-- [ ] 5-3. 各ページのOGP最終チェック
+- [x] 5-2. Google Search Console登録用のsitemap.xml/robots.txt最終確認
+- [x] 5-3. 各ページのOGP最終チェック
