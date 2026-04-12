@@ -4,6 +4,9 @@ import { AlertTriangle } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "ログインエラー",
+  openGraph: {
+    title: "ログインエラー｜ANZEN AI",
+  },
 };
 
 export default function AuthErrorPage() {
