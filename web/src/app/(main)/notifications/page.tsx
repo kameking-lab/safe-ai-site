@@ -6,6 +6,10 @@ import { SubscribeForm } from "./subscribe-form";
 export const metadata: Metadata = {
   title: "通知・配信設定",
   description: "気象警報・法改正・事故情報の通知とメール配信設定（準備中）。",
+  openGraph: {
+    title: "通知・配信設定｜ANZEN AI",
+    description: "気象警報・法改正・事故情報の通知とメール配信設定。",
+  },
 };
 
 const ROADMAP = [
