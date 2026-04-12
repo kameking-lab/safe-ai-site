@@ -53,7 +53,7 @@ export function buildKyAssistText(input: KyAssistInput): string {
 
   if (input.field === "hazard") {
     const base = pick(HAZARDS);
-    return `【${input.targetLabel}】${base}\n作業文脈: ${ctx}\n※現場の実状に合わせて加筆・削除してください（AI下書き・モック）。`;
+    return `【${input.targetLabel}】${base}\n作業文脈: ${ctx}\n※現場の実状に合わせて加筆・削除してください。`;
   }
   if (input.field === "reduction") {
     const hz = (input.hazardSoFar || "（危険未入力）").slice(0, 200);
