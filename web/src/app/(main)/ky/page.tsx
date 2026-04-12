@@ -6,6 +6,10 @@ import { PageHeader } from "@/components/page-header";
 export const metadata: Metadata = {
   title: "KY用紙",
   description: "危険予知活動表の作成・記録。音声入力対応で現場から入力できます。",
+  openGraph: {
+    title: "KY用紙｜ANZEN AI",
+    description: "危険予知活動表の作成・記録。音声入力対応で現場から入力できます。",
+  },
 };
 
 export default function KyPage() {

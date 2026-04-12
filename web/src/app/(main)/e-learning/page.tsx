@@ -6,6 +6,10 @@ import { PageHeader } from "@/components/page-header";
 export const metadata: Metadata = {
   title: "Eラーニング",
   description: "労働安全に関するテーマ別学習コンテンツとクイズで知識を確認。",
+  openGraph: {
+    title: "Eラーニング｜ANZEN AI",
+    description: "労働安全に関するテーマ別学習コンテンツとクイズで知識を確認。",
+  },
 };
 
 export default function ELearningPage() {

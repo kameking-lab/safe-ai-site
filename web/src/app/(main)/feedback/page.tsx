@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "フィードバック",
+  description: "ANZEN AIへの機能改善要望・バグ報告・新機能アイデアをお聞かせください。",
+  openGraph: {
+    title: "フィードバック｜ANZEN AI",
+    description: "ANZEN AIへの機能改善要望・バグ報告・新機能アイデアをお聞かせください。",
+  },
 };
 
 const FEEDBACK_FORM_URL = process.env.NEXT_PUBLIC_FEEDBACK_FORM_URL;

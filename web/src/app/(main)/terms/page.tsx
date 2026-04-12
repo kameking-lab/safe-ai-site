@@ -3,6 +3,10 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "利用規約",
   description: "ANZEN AIの利用規約。本サービスの利用条件について説明しています。",
+  openGraph: {
+    title: "利用規約｜ANZEN AI",
+    description: "ANZEN AIの利用規約。本サービスの利用条件について説明しています。",
+  },
 };
 
 export default function TermsPage() {
