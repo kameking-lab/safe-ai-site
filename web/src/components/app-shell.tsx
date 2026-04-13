@@ -73,18 +73,18 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "ky-sheet", label: "KY用紙", href: "/ky", icon: ClipboardList },
       { id: "risk-prediction", label: "リスク予測", href: "/risk-prediction", icon: Brain, badge: "AI" },
-      { id: "safety-diary", label: "安全衛生日誌", href: "/safety-diary", icon: FileText, badge: "soon" },
+      { id: "safety-diary", label: "安全衛生日誌", href: "/safety-diary", icon: FileText },
     ],
   },
   {
     label: "事例・データ",
     items: [
       { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database },
-      { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2, badge: "soon" },
+      { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2, badge: "AI" },
     ],
   },
   {
-    label: "ショップ",
+    label: "その他",
     items: [
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
       { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },

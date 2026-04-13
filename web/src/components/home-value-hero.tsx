@@ -51,17 +51,17 @@ const FEATURES = [
     iconBg: "bg-orange-600 text-white",
     labelColor: "text-orange-800",
     label: "事故DB・KY用紙",
-    desc: "事故事例200件以上を業種・種別で検索。KY用紙の作成・Eラーニングもワンストップで。",
+    desc: "厚労省の事故事例200件以上を業種・種別で検索。現場の危険予知活動に役立てられます。",
     href: "/accidents",
     btnColor: "bg-orange-600 hover:bg-orange-700 text-white",
-    btnLabel: "事故DBを見る",
+    btnLabel: "事故事例を検索する",
   },
 ] as const;
 
 const STATS = [
   { value: "200+", label: "事故事例" },
   { value: "100+", label: "法改正データ" },
-  { value: "3画面", label: "PC/スマホ/サイネージ" },
+  { value: "3対応", label: "PC・スマホ・大画面" },
   { value: "AI対応", label: "リスク予測・要約" },
 ] as const;
 
