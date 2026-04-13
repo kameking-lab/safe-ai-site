@@ -5,10 +5,10 @@ import { SubscribeForm } from "./subscribe-form";
 
 export const metadata: Metadata = {
   title: "通知・配信設定",
-  description: "気象警報・法改正・事故情報の通知とメール配信設定（準備中）。",
+  description: "気象警報・法改正・事故情報の通知とメール配信設定。",
   openGraph: {
     title: "通知・配信設定｜ANZEN AI",
-    description: "気象警報・法改正・事故情報の通知とメール配信設定（準備中）。",
+    description: "気象警報・法改正・事故情報の通知とメール配信設定。",
   },
 };
 
@@ -44,7 +44,7 @@ const ROADMAP = [
 
 export default function NotificationsPage() {
   return (
-    <div className="px-4 py-6 sm:py-8">
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <PageHeader
         title="通知・配信設定"
         description="気象警報・法改正・事故情報の通知とメール配信の設定"
@@ -55,7 +55,7 @@ export default function NotificationsPage() {
       {/* 気象警報メール登録フォーム */}
       <div className="mt-6 rounded-2xl border border-blue-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="mb-4 flex items-center gap-2">
-          <Bell className="h-5 w-5 text-blue-600" />
+          <Bell className="h-5 w-5 text-blue-600" aria-hidden="true" />
           <h2 className="text-sm font-bold text-slate-800">気象警報メール通知を登録する</h2>
         </div>
         <p className="mb-4 text-xs text-slate-600 leading-5">
@@ -91,7 +91,7 @@ export default function NotificationsPage() {
               <ul className="mt-3 space-y-2">
                 {phase.items.map((item) => (
                   <li key={item} className="flex items-start gap-2 text-xs text-slate-700">
-                    <CheckCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                    <CheckCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden="true" />
                     {item}
                   </li>
                 ))}

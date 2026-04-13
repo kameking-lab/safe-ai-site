@@ -129,10 +129,11 @@ export default function ContactForm() {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-semibold text-slate-700">
+              <label htmlFor="contact-company" className="block text-sm font-semibold text-slate-700">
                 会社名 <span className="text-red-500">*</span>
               </label>
               <input
+                id="contact-company"
                 name="company"
                 required
                 value={form.company}
@@ -142,10 +143,11 @@ export default function ContactForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700">
+              <label htmlFor="contact-name" className="block text-sm font-semibold text-slate-700">
                 担当者名 <span className="text-red-500">*</span>
               </label>
               <input
+                id="contact-name"
                 name="name"
                 required
                 value={form.name}
@@ -158,10 +160,11 @@ export default function ContactForm() {
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-semibold text-slate-700">
+              <label htmlFor="contact-email" className="block text-sm font-semibold text-slate-700">
                 メールアドレス <span className="text-red-500">*</span>
               </label>
               <input
+                id="contact-email"
                 name="email"
                 type="email"
                 required
@@ -172,10 +175,11 @@ export default function ContactForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700">
+              <label htmlFor="contact-phone" className="block text-sm font-semibold text-slate-700">
                 電話番号 <span className="text-xs text-slate-400">（任意）</span>
               </label>
               <input
+                id="contact-phone"
                 name="phone"
                 type="tel"
                 value={form.phone}
@@ -187,10 +191,11 @@ export default function ContactForm() {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-slate-700">
+            <label htmlFor="contact-message" className="block text-sm font-semibold text-slate-700">
               相談内容 <span className="text-red-500">*</span>
             </label>
             <textarea
+              id="contact-message"
               name="message"
               required
               value={form.message}

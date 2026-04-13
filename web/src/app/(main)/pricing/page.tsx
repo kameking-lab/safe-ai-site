@@ -126,7 +126,7 @@ export default function PricingPage() {
               <div className={`mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl ${
                 plan.id === "free" ? "bg-slate-100" : plan.id === "premium" ? "bg-amber-50" : "bg-blue-50"
               }`}>
-                <Icon className={`h-5 w-5 ${plan.iconColor}`} />
+                <Icon className={`h-5 w-5 ${plan.iconColor}`} aria-hidden="true" />
               </div>
 
               <p className="text-sm font-semibold text-slate-600">{plan.name}</p>

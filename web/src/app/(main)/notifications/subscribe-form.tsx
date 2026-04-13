@@ -97,7 +97,7 @@ export function SubscribeForm() {
         disabled={status === "loading"}
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-60"
       >
-        <Mail className="h-4 w-4" />
+        <Mail className="h-4 w-4" aria-hidden="true" />
         {status === "loading" ? "登録中..." : "気象警報通知を登録する"}
       </button>
       <p className="text-xs text-slate-400 text-center leading-5">
