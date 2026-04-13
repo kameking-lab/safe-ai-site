@@ -4,12 +4,18 @@
  * 厚労省「職場のあんぜんサイト」の情報を参考にしたRAG方式。
  */
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export type ChemicalRaRequest = {
   chemicalName: string;
   workContent?: string;
 };
+
+const chemicalRaSchema = z.object({
+  chemicalName: z.string().min(1, "化学物質名を入力してください。").max(200, "化学物質名は200文字以内で入力してください。"),
+  workContent: z.string().max(500, "作業内容は500文字以内で入力してください。").optional(),
+});
 
 export type GhsHazard = {
   category: string;      // ハザードクラス名
@@ -143,17 +149,20 @@ const DEMO_RESPONSE: ChemicalRaResponse = {
 };
 
 export async function POST(request: Request) {
-  let body: ChemicalRaRequest | null = null;
+  let raw: unknown;
   try {
-    body = (await request.json()) as ChemicalRaRequest;
+    raw = await request.json();
   } catch {
     return NextResponse.json({ error: { code: "VALIDATION", message: "リクエスト形式が不正です。" } }, { status: 400 });
   }
 
-  const chemicalName = body?.chemicalName?.trim();
-  if (!chemicalName) {
-    return NextResponse.json({ error: { code: "VALIDATION", message: "化学物質名を入力してください。" } }, { status: 400 });
+  const parsedBody = chemicalRaSchema.safeParse(raw);
+  if (!parsedBody.success) {
+    return NextResponse.json({ error: { code: "VALIDATION", message: parsedBody.error.errors[0]?.message ?? "入力内容が不正です。" } }, { status: 400 });
   }
+
+  const body: ChemicalRaRequest = parsedBody.data;
+  const chemicalName = body.chemicalName.trim();
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === "dummy") {
@@ -163,7 +172,7 @@ export async function POST(request: Request) {
 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
-  const workPart = body?.workContent?.trim()
+  const workPart = body.workContent?.trim()
     ? `\n\n【作業内容】\n${body.workContent.trim()}`
     : "";
 

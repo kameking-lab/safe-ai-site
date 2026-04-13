@@ -1,17 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 
-interface QuizExplainRequest {
-  questionText: string;
-  choices: { label: string; text: string }[];
-  correctAnswer: string;
-  selectedAnswer: string | null;
-  relatedLaw?: string;
-  fallbackExplanation?: string;
-}
+const quizExplainSchema = z.object({
+  questionText: z.string().min(1, "問題文を入力してください。").max(2000, "問題文は2000文字以内で入力してください。"),
+  choices: z.array(z.object({
+    label: z.string().max(10),
+    text: z.string().max(500),
+  })).min(1).max(10),
+  correctAnswer: z.string().max(10, "正答は10文字以内で入力してください。"),
+  selectedAnswer: z.string().max(10).nullable().optional(),
+  relatedLaw: z.string().max(200, "関連法令は200文字以内で入力してください。").optional(),
+  fallbackExplanation: z.string().max(1000, "フォールバック解説は1000文字以内で入力してください。").optional(),
+});
 
 export async function POST(req: NextRequest) {
-  const body = (await req.json()) as QuizExplainRequest;
-  const { questionText, choices, correctAnswer, relatedLaw, fallbackExplanation } = body;
+  let raw: unknown;
+  try {
+    raw = await req.json();
+  } catch {
+    return NextResponse.json({ error: "リクエストボディのJSON形式が不正です。" }, { status: 400 });
+  }
+
+  const parsed = quizExplainSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.errors[0]?.message ?? "入力内容が不正です。" }, { status: 400 });
+  }
+
+  const { questionText, choices, correctAnswer, relatedLaw, fallbackExplanation } = parsed.data;
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {

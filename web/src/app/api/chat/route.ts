@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { searchRelevantArticles, buildContextFromArticles } from "@/lib/rag-search";
 import type {
-  ChatApiRequest,
   ChatApiResponse,
   ApiErrorResponse,
 } from "@/lib/types/api";
+
+const chatRequestSchema = z.object({
+  question: z.string().min(1, "質問文を入力してください。").max(2000, "質問は2000文字以内で入力してください。"),
+  revisionTitle: z.string().max(200, "タイトルは200文字以内で入力してください。").optional(),
+  revisionId: z.string().max(100).optional(),
+});
 
 function jsonError(status: number, code: ApiErrorResponse["error"]["code"], message: string) {
   return NextResponse.json<ApiErrorResponse>(
@@ -79,19 +85,25 @@ export async function POST(request: Request) {
     return jsonError(400, "VALIDATION", "チャットの入力形式が不正です。");
   }
 
-  let body: ChatApiRequest | null = null;
+  let raw: unknown;
   try {
-    body = (await request.json()) as ChatApiRequest;
+    raw = await request.json();
   } catch {
     return jsonError(400, "VALIDATION", "リクエストボディのJSON形式が不正です。");
   }
 
-  const question = body?.question?.trim();
+  const parsed = chatRequestSchema.safeParse(raw);
+  if (!parsed.success) {
+    return jsonError(400, "VALIDATION", parsed.error.errors[0]?.message ?? "入力内容が不正です。");
+  }
+
+  const body = parsed.data;
+  const question = body.question.trim();
   if (!question) {
     return jsonError(400, "VALIDATION", "質問文を入力してください。");
   }
 
-  const revisionTitle = body?.revisionTitle?.trim() || "選択中の法改正";
+  const revisionTitle = body.revisionTitle?.trim() || "選択中の法改正";
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === "dummy") {

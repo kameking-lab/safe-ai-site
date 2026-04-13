@@ -67,7 +67,7 @@ const STATS = [
 
 export function HomeValueHero() {
   return (
-    <div className="space-y-5" aria-label="ホームの価値案内">
+    <div className="mx-auto max-w-7xl space-y-5" aria-label="ホームの価値案内">
       {/* メインキャッチ */}
       <div className="rounded-2xl border border-[#155a38] bg-gradient-to-br from-[#1a7a4c] via-[#166640] to-[#0f4d2e] px-5 py-6 text-white shadow-lg">
         <div className="flex items-start justify-between gap-3">

@@ -3,11 +3,16 @@
  * 作業内容に応じた保護具選びをGemini APIで回答し、アフィリエイトリンクに誘導する。
  */
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export type GoodsChatRequest = {
   question: string;
 };
+
+const goodsChatSchema = z.object({
+  question: z.string().min(1, "作業内容を入力してください。").max(2000, "作業内容は2000文字以内で入力してください。"),
+});
 
 export type GoodsRecommendation = {
   item: string;           // 保護具名
@@ -73,17 +78,20 @@ function removeJsonBlock(text: string): string {
 }
 
 export async function POST(request: Request) {
-  let body: GoodsChatRequest | null = null;
+  let raw: unknown;
   try {
-    body = (await request.json()) as GoodsChatRequest;
+    raw = await request.json();
   } catch {
     return NextResponse.json({ error: { code: "VALIDATION", message: "リクエスト形式が不正です。" } }, { status: 400 });
   }
 
-  const question = body?.question?.trim();
-  if (!question || question.length === 0) {
-    return NextResponse.json({ error: { code: "VALIDATION", message: "作業内容を入力してください。" } }, { status: 400 });
+  const parsedBody = goodsChatSchema.safeParse(raw);
+  if (!parsedBody.success) {
+    return NextResponse.json({ error: { code: "VALIDATION", message: parsedBody.error.errors[0]?.message ?? "入力内容が不正です。" } }, { status: 400 });
   }
+
+  const body: GoodsChatRequest = parsedBody.data;
+  const question = body.question.trim();
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === "dummy") {

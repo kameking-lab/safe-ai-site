@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { searchRelevantArticles, buildContextFromArticles } from "@/lib/rag-search";
 import type { LawArticle } from "@/data/laws";
@@ -7,6 +8,11 @@ export type ChatbotRequest = {
   message: string;
   history?: Array<{ role: string; content: string }>;
 };
+
+const chatbotRequestSchema = z.object({
+  message: z.string().min(1, "質問文を入力してください。").max(2000, "質問は2000文字以内で入力してください。"),
+  history: z.array(z.object({ role: z.string(), content: z.string() })).optional(),
+});
 
 export type ChatbotSource = {
   law: string;
@@ -56,14 +62,20 @@ ${question}
 }
 
 export async function POST(request: Request) {
-  let body: ChatbotRequest | null = null;
+  let raw: unknown;
   try {
-    body = (await request.json()) as ChatbotRequest;
+    raw = await request.json();
   } catch {
     return jsonError(400, "リクエストボディのJSON形式が不正です。");
   }
 
-  const message = body?.message?.trim();
+  const parsed = chatbotRequestSchema.safeParse(raw);
+  if (!parsed.success) {
+    return jsonError(400, parsed.error.errors[0]?.message ?? "入力内容が不正です。");
+  }
+
+  const body = parsed.data;
+  const message = body.message.trim();
   if (!message) {
     return jsonError(400, "質問文を入力してください。");
   }

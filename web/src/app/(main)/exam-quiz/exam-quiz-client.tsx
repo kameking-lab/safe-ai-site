@@ -3,10 +3,11 @@
 import { useCallback, useState } from "react";
 import { filterQuestions, AVAILABLE_YEARS, EXAM_CATEGORIES } from "@/data/exam-questions";
 import type { ExamQuestion } from "@/data/exam-questions";
-import { useUsageLimit } from "@/lib/hooks/use-usage-limit";
-import { UpgradePrompt } from "@/components/upgrade-prompt";
+// TODO(freemium): サブスク実装後に再有効化
+// import { useUsageLimit } from "@/lib/hooks/use-usage-limit";
+// import { UpgradePrompt } from "@/components/upgrade-prompt";
 
-const FREE_QUIZ_LIMIT = 5;
+// const FREE_QUIZ_LIMIT = 5;
 
 const LS_KEY = "exam-quiz-history";
 
@@ -135,13 +136,15 @@ export function ExamQuizClient() {
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [showPaywall, setShowPaywall] = useState(false);
+  // TODO(freemium): サブスク実装後に再有効化
+  // const [showPaywall, setShowPaywall] = useState(false);
   const [history, setHistory] = useState<AnswerRecord[]>(() => loadHistory());
-  const { isExceeded: quizLimitReached, increment: incrementQuiz, reset: resetQuiz } = useUsageLimit({
-    key: "quiz_usage",
-    limit: FREE_QUIZ_LIMIT,
-    period: "session",
-  });
+  // const { isExceeded: quizLimitReached, increment: incrementQuiz, reset: resetQuiz } = useUsageLimit({
+  //   key: "quiz_usage",
+  //   limit: FREE_QUIZ_LIMIT,
+  //   period: "session",
+  // });
+  const incrementQuiz = useCallback(() => {}, []);
 
   const selectedCert = EXAM_CATEGORIES.find((c) => c.id === certId);
 
@@ -156,7 +159,6 @@ export function ExamQuizClient() {
     setIndex(0);
     setSelected(null);
     setShowExplanation(false);
-    setShowPaywall(false);
     setStarted(true);
   }, [certId, subject, year, mode]);
 
@@ -182,10 +184,11 @@ export function ExamQuizClient() {
   );
 
   const goNext = () => {
-    if (quizLimitReached) {
-      setShowPaywall(true);
-      return;
-    }
+    // TODO(freemium): サブスク実装後に再有効化
+    // if (quizLimitReached) {
+    //   setShowPaywall(true);
+    //   return;
+    // }
     setIndex((i) => i + 1);
     setSelected(null);
     setShowExplanation(false);
@@ -248,25 +251,25 @@ export function ExamQuizClient() {
     );
   }
 
-  // --- Paywall screen (after free limit) ---
-  if (started && showPaywall) {
-    return (
-      <div className="mx-auto max-w-2xl px-4 py-6">
-        <UpgradePrompt
-          featureName="過去問クイズ"
-          limit={FREE_QUIZ_LIMIT}
-          period="session"
-          onReset={() => {
-            resetQuiz();
-            setShowPaywall(false);
-            setIndex(0);
-            setSelected(null);
-            setShowExplanation(false);
-          }}
-        />
-      </div>
-    );
-  }
+  // --- Paywall screen (after free limit) - TODO(freemium): サブスク実装後に再有効化 ---
+  // if (started && showPaywall) {
+  //   return (
+  //     <div className="mx-auto max-w-2xl px-4 py-6">
+  //       <UpgradePrompt
+  //         featureName="過去問クイズ"
+  //         limit={FREE_QUIZ_LIMIT}
+  //         period="session"
+  //         onReset={() => {
+  //           resetQuiz();
+  //           setShowPaywall(false);
+  //           setIndex(0);
+  //           setSelected(null);
+  //           setShowExplanation(false);
+  //         }}
+  //       />
+  //     </div>
+  //   );
+  // }
 
   // --- Quiz screen ---
   if (started && questions.length > 0) {
@@ -316,7 +319,7 @@ export function ExamQuizClient() {
                   key={choice.label}
                   type="button"
                   disabled={selected !== null}
-                  className={btnClass}
+                  className={`${btnClass} disabled:cursor-not-allowed`}
                   onClick={() => handleSelect(choice.label)}
                 >
                   <span className="shrink-0 font-bold">{choice.label}</span>

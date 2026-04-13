@@ -1,11 +1,26 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
+
+const lawSummarySchema = z.object({
+  law: z.string().min(1, "法令名を入力してください。").max(100, "法令名は100文字以内で入力してください。"),
+  articleNum: z.string().min(1, "条文番号を入力してください。").max(50, "条文番号は50文字以内で入力してください。"),
+  text: z.string().min(1, "条文テキストを入力してください。").max(5000, "条文テキストは5000文字以内で入力してください。"),
+});
 
 export async function POST(req: Request) {
-  const { law, articleNum, text } = (await req.json()) as {
-    law: string;
-    articleNum: string;
-    text: string;
-  };
+  let raw: unknown;
+  try {
+    raw = await req.json();
+  } catch {
+    return NextResponse.json({ error: "リクエストボディのJSON形式が不正です。" }, { status: 400 });
+  }
+
+  const parsed = lawSummarySchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.errors[0]?.message ?? "入力内容が不正です。" }, { status: 400 });
+  }
+
+  const { law, articleNum, text } = parsed.data;
 
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey || apiKey === "dummy") {

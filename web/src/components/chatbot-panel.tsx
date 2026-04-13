@@ -2,11 +2,12 @@
 
 import { useRef, useState } from "react";
 import type { ChatbotSource } from "@/app/api/chatbot/route";
-import { useUsageLimit } from "@/lib/hooks/use-usage-limit";
-import { UpgradePrompt } from "@/components/upgrade-prompt";
+// TODO(freemium): サブスク実装後に再有効化
+// import { useUsageLimit } from "@/lib/hooks/use-usage-limit";
+// import { UpgradePrompt } from "@/components/upgrade-prompt";
 import { VoiceMicButton } from "@/components/voice-input-field";
 
-const FREE_CHAT_LIMIT = 5;
+// const FREE_CHAT_LIMIT = 5;
 
 type ChatMessage = {
   id: string;
@@ -30,11 +31,14 @@ export function ChatbotPanel() {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
-  const { isExceeded: chatLimitReached, increment: incrementChat, reset: resetChat } = useUsageLimit({
-    key: "chatbot_usage",
-    limit: FREE_CHAT_LIMIT,
-    period: "day",
-  });
+  // TODO(freemium): サブスク実装後に再有効化
+  // const { isExceeded: chatLimitReached, increment: incrementChat, reset: resetChat } = useUsageLimit({
+  //   key: "chatbot_usage",
+  //   limit: FREE_CHAT_LIMIT,
+  //   period: "day",
+  // });
+  const chatLimitReached = false;
+  const incrementChat = () => {};
 
   async function handleSend(question?: string) {
     const text = (question ?? input).trim();
@@ -220,7 +224,7 @@ export function ChatbotPanel() {
         </button>
       </div>
 
-      {/* 利用上限 */}
+      {/* 利用上限 - TODO(freemium): サブスク実装後に再有効化
       {chatLimitReached && (
         <UpgradePrompt
           featureName="AIチャットボット"
@@ -228,7 +232,7 @@ export function ChatbotPanel() {
           period="day"
           onReset={resetChat}
         />
-      )}
+      )} */}
 
       {/* 免責注記 */}
       <p className="text-xs text-slate-400 leading-5">
