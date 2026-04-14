@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Database } from "lucide-react";
 import { HomeScreen } from "@/components/home-screen";
 import { PageHeader } from "@/components/page-header";
+import { RelatedPageCards } from "@/components/related-page-cards";
 
 export const metadata: Metadata = {
   title: "事故データベース",
@@ -14,13 +15,34 @@ export const metadata: Metadata = {
 
 export default function AccidentsPage() {
   return (
-    <HomeScreen variant="accidents">
-      <PageHeader
-        title="事故データベース"
-        description="労働災害の事故事例を検索・閲覧。厚労省データベースへのリンクも掲載"
-        icon={Database}
-        iconColor="red"
+    <>
+      <HomeScreen variant="accidents">
+        <PageHeader
+          title="事故データベース"
+          description="労働災害の事故事例を検索・閲覧。厚労省データベースへのリンクも掲載"
+          icon={Database}
+          iconColor="red"
+        />
+      </HomeScreen>
+      <RelatedPageCards
+        heading="このデータを活かす"
+        pages={[
+          {
+            href: "/risk-prediction",
+            label: "AIリスク予測",
+            description: "事故事例と照合しながらAIが潜在リスクを予測。朝礼・KY活動に役立てられます。",
+            color: "blue",
+            cta: "AIリスク予測を使う",
+          },
+          {
+            href: "/ky",
+            label: "KY用紙",
+            description: "事故事例を参考に危険予知活動表を作成。音声入力対応で現場から記録できます。",
+            color: "emerald",
+            cta: "KY用紙を作成する",
+          },
+        ]}
       />
-    </HomeScreen>
+    </>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { LawRevision } from "@/lib/types/domain";
+import type { LawRevision, RevisionImpact } from "@/lib/types/domain";
 import type { ServiceError } from "@/lib/types/api";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
@@ -54,6 +54,12 @@ type LawRevisionListProps = {
   onSelectForQuestion: (revisionId: string) => void;
 };
 
+const IMPACT_BADGE_CLASS: Record<RevisionImpact, string> = {
+  高: "bg-red-100 text-red-700",
+  中: "bg-amber-100 text-amber-700",
+  低: "bg-slate-100 text-slate-500",
+};
+
 export function LawRevisionList({
   revisions,
   selectedRevisionId,
@@ -69,13 +75,16 @@ export function LawRevisionList({
   const [yearFrom, setYearFrom] = useState(2016);
   const [yearTo, setYearTo] = useState(2026);
   const [selectedKind, setSelectedKind] = useState<string>("すべて");
+  const [selectedImpact, setSelectedImpact] = useState<RevisionImpact | "すべて">("すべて");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return revisions.filter((r) => {
+    const results = revisions.filter((r) => {
       const y = Number(r.publishedAt.slice(0, 4));
       if (y < yearFrom || y > yearTo) return false;
       if (selectedKind !== "すべて" && resolveKindLabel(r) !== selectedKind) return false;
+      if (selectedImpact !== "すべて" && r.impact !== selectedImpact) return false;
       if (!q) return true;
       return (
         r.title.toLowerCase().includes(q) ||
@@ -84,7 +93,11 @@ export function LawRevisionList({
         r.revisionNumber.toLowerCase().includes(q)
       );
     });
-  }, [revisions, search, yearFrom, yearTo, selectedKind]);
+    return results.sort((a, b) => {
+      const diff = a.publishedAt.localeCompare(b.publishedAt);
+      return sortOrder === "desc" ? -diff : diff;
+    });
+  }, [revisions, search, yearFrom, yearTo, selectedKind, selectedImpact, sortOrder]);
 
   const showEmptyState = status === "success" && !error && filtered.length === 0;
 
@@ -154,6 +167,56 @@ export function LawRevisionList({
           ))}
         </div>
       </div>
+
+      {/* 影響度フィルタ + 施行日ソート */}
+      <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div>
+          <p className="text-xs font-semibold text-slate-700">影響度</p>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {(["すべて", "高", "中", "低"] as const).map((imp) => (
+              <button
+                key={imp}
+                type="button"
+                onClick={() => setSelectedImpact(imp)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  selectedImpact === imp
+                    ? "bg-indigo-600 text-white"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                {imp === "すべて" ? "すべて" : `影響度：${imp}`}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-slate-700">施行日順</p>
+          <div className="mt-1 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setSortOrder("desc")}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                sortOrder === "desc"
+                  ? "bg-slate-700 text-white"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              }`}
+            >
+              新しい順
+            </button>
+            <button
+              type="button"
+              onClick={() => setSortOrder("asc")}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                sortOrder === "asc"
+                  ? "bg-slate-700 text-white"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              }`}
+            >
+              古い順
+            </button>
+          </div>
+        </div>
+      </div>
       {error && (
         <ErrorNotice title="一覧の取得に失敗しました" error={error} onRetry={onRetry} retryLabel={retryLabel} />
       )}
@@ -182,7 +245,7 @@ export function LawRevisionList({
                 <p className="text-xs text-slate-500">
                   発行日: {formatPublishedDate(revision.publishedAt)}
                 </p>
-                {(revision.kind || revision.revisionNumber) && (
+                {(revision.kind || revision.revisionNumber || revision.impact) && (
                   <p className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
                     {revision.kind && (
                       <span
@@ -191,6 +254,15 @@ export function LawRevisionList({
                         }`}
                       >
                         {resolveKindLabel(revision)}
+                      </span>
+                    )}
+                    {revision.impact && (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                          IMPACT_BADGE_CLASS[revision.impact]
+                        }`}
+                      >
+                        影響度：{revision.impact}
                       </span>
                     )}
                     {revision.revisionNumber ?? ""}

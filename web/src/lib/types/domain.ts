@@ -14,6 +14,8 @@ export type RevisionSource = {
   label?: string;
 };
 
+export type RevisionImpact = "高" | "中" | "低";
+
 export type LawRevisionCore = {
   id: string;
   title: string;
@@ -24,6 +26,8 @@ export type LawRevisionCore = {
   issuer: string;
   summary: string;
   source?: RevisionSource;
+  /** 影響度（現場への影響の大きさ） */
+  impact?: RevisionImpact;
 };
 
 export type LawRevisionSummary = {
