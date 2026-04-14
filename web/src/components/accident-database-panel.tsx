@@ -12,6 +12,18 @@ import {
 
 const PAGE_SIZE = 40;
 
+type IndustryFilter = "全業種" | "建設業" | "製造業";
+
+const CONSTRUCTION_CATEGORIES: AccidentWorkCategory[] = ["建設", "高所", "足場", "重機", "解体"];
+const MANUFACTURING_CATEGORIES: AccidentWorkCategory[] = ["製造", "化学", "造船"];
+
+function matchesIndustry(workCategory: AccidentWorkCategory, industry: IndustryFilter): boolean {
+  if (industry === "全業種") return true;
+  if (industry === "建設業") return CONSTRUCTION_CATEGORIES.includes(workCategory);
+  if (industry === "製造業") return MANUFACTURING_CATEGORIES.includes(workCategory);
+  return true;
+}
+
 type AccidentDatabasePanelProps = {
   cases: AccidentCase[];
   allCases: AccidentCase[];
@@ -46,13 +58,21 @@ export function AccidentDatabasePanel({
   const categoryOptions = ["すべて", ...ALL_ACCIDENT_CATEGORIES] as const;
   const [page, setPage] = useState(0);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [selectedIndustry, setSelectedIndustry] = useState<IndustryFilter>("全業種");
+
+  const filteredByIndustry = useMemo(
+    () => cases.filter((c) => matchesIndustry(c.workCategory, selectedIndustry)),
+    [cases, selectedIndustry]
+  );
 
   const pageItems = useMemo(() => {
     const start = page * PAGE_SIZE;
-    return cases.slice(start, start + PAGE_SIZE);
-  }, [cases, page]);
+    return filteredByIndustry.slice(start, start + PAGE_SIZE);
+  }, [filteredByIndustry, page]);
 
-  const totalPages = Math.max(1, Math.ceil(cases.length / PAGE_SIZE));
+  const totalCasesForDisplay = filteredByIndustry.length;
+
+  const totalPages = Math.max(1, Math.ceil(totalCasesForDisplay / PAGE_SIZE));
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 overflow-hidden">
@@ -61,12 +81,32 @@ export function AccidentDatabasePanel({
           <h2 className="text-base font-bold text-slate-900 sm:text-lg">事故データベース</h2>
           <p className="mt-1 text-xs text-slate-600">
             厚労省「職場のあんぜんサイト」等の実事例 {allCases.length.toLocaleString("ja-JP")}
-            件を収録。種別・作業カテゴリで絞り込み、再発防止をKY・朝礼に接続できます。
+            件を収録。業種・種別・作業カテゴリで絞り込み、再発防止をKY・朝礼に接続できます。
           </p>
         </div>
       </div>
 
       <div className="mt-3 space-y-3">
+        <div>
+          <p className="text-xs font-semibold text-slate-700">業種フィルタ</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {(["全業種", "建設業", "製造業"] as IndustryFilter[]).map((ind) => (
+              <button
+                key={ind}
+                type="button"
+                onClick={() => {
+                  setSelectedIndustry(ind);
+                  setPage(0);
+                }}
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  ind === selectedIndustry ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                {ind}
+              </button>
+            ))}
+          </div>
+        </div>
         <div>
           <p className="text-xs font-semibold text-slate-700">作業カテゴリ</p>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -113,9 +153,9 @@ export function AccidentDatabasePanel({
       </div>
 
       <p className="mt-2 text-xs text-slate-500">
-        {cases.length === 0
+        {totalCasesForDisplay === 0
           ? "0件"
-          : `表示: ${cases.length.toLocaleString("ja-JP")}件中 ${page * PAGE_SIZE + 1}〜${Math.min((page + 1) * PAGE_SIZE, cases.length)}件`}
+          : `表示: ${totalCasesForDisplay.toLocaleString("ja-JP")}件中 ${page * PAGE_SIZE + 1}〜${Math.min((page + 1) * PAGE_SIZE, totalCasesForDisplay)}件`}
       </p>
 
       <div className="mt-3 space-y-3" aria-live="polite" aria-atomic="false">
@@ -127,7 +167,7 @@ export function AccidentDatabasePanel({
           <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
             {errorMessage ?? "事故データを取得できませんでした。"}
           </p>
-        ) : cases.length === 0 ? (
+        ) : totalCasesForDisplay === 0 ? (
           <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
             条件に一致する事故データがありません。
           </p>

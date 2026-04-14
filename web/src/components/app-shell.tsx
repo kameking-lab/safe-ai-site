@@ -49,7 +49,6 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "マップ",
     items: [
       { id: "signage", label: "サイネージ", href: "/signage", icon: Monitor },
-      { id: "bear-map", label: "クマ出没マップ", href: "/bear-map", icon: MapPin },
       { id: "weather-risk", label: "気象リスク", href: "/risk", icon: CloudRain },
     ],
   },
@@ -86,6 +85,7 @@ const NAV_CATEGORIES: NavCategory[] = [
   {
     label: "その他",
     items: [
+      { id: "bear-map", label: "クマ出没マップ", href: "/bear-map", icon: MapPin },
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
       { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },
       { id: "notifications", label: "通知/配信", href: "/notifications", icon: Bell, badge: "soon" },

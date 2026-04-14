@@ -155,9 +155,19 @@ export function ChatbotPanel() {
                     <div className="mt-2 space-y-2">
                       {msg.sources.map((src, i) => (
                         <div key={i} className="rounded-md bg-slate-50 p-2 text-xs">
-                          <p className="font-semibold text-blue-700">
-                            {src.law} {src.article}
-                          </p>
+                          <div className="flex flex-wrap items-center justify-between gap-1">
+                            <p className="font-semibold text-blue-700">
+                              {src.law} {src.article}
+                            </p>
+                            <a
+                              href={`https://elaws.e-gov.go.jp/search/elawsSearch/elaws_search/lsg0100/?keyword=${encodeURIComponent(src.law)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shrink-0 rounded border border-blue-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-blue-600 hover:bg-blue-50"
+                            >
+                              e-Gov で確認
+                            </a>
+                          </div>
                           <p className="mt-1 text-slate-600 leading-5">{src.text}</p>
                         </div>
                       ))}
