@@ -178,6 +178,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
   });
   const [kyInstructionRecord, setKyInstructionRecord] = useState<KyInstructionRecordState>(makeInitialKyInstruction);
   const [kyRecordList, setKyRecordList] = useState<KyRecordSummary[]>([]);
+  const [kySimpleMode, setKySimpleMode] = useState(false);
   const [pdfTarget, setPdfTarget] = useState<PdfExportTarget>("ky-sheet");
   const [mailPreview, setMailPreview] = useState("配信プレビューを表示します。");
   const [pdfPreview, setPdfPreview] = useState("PDFプレビューを表示します。");
@@ -477,6 +478,33 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
                 </a>
                 で確認できます。
               </p>
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-slate-700">表示モード:</span>
+                <button
+                  type="button"
+                  onClick={() => setKySimpleMode(false)}
+                  className={`rounded-l-full border px-3 py-1 text-xs font-semibold transition ${
+                    !kySimpleMode
+                      ? "border-emerald-500 bg-emerald-600 text-white"
+                      : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
+                  aria-pressed={!kySimpleMode}
+                >
+                  詳細モード
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setKySimpleMode(true)}
+                  className={`rounded-r-full border px-3 py-1 text-xs font-semibold transition ${
+                    kySimpleMode
+                      ? "border-emerald-500 bg-emerald-600 text-white"
+                      : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
+                  }`}
+                  aria-pressed={kySimpleMode}
+                >
+                  シンプルモード
+                </button>
+              </div>
             </div>
           </section>
         </>
@@ -578,7 +606,129 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
         </>
       ) : null}
 
-      {variant === "ky" ? (
+      {variant === "ky" && kySimpleMode ? (
+        <section id="section-ky-simple" className="px-4 pb-3 lg:px-8">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+            <h2 className="text-base font-bold text-slate-900 sm:text-lg">KY用紙（シンプルモード）</h2>
+            <p className="mt-1 text-xs text-slate-500">必須5項目のみ入力できます。詳細モードで全項目を編集できます。</p>
+            <div className="mt-4 space-y-3">
+              {[
+                { key: "workDateYear", label: "日付", type: "row" },
+              ].map(() => (
+                <div key="date-row" className="grid grid-cols-3 gap-2">
+                  <label className="text-xs font-semibold text-slate-700">
+                    年
+                    <input
+                      className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"
+                      type="number"
+                      value={kyInstructionRecord.workDateYear}
+                      onChange={(e) => setKyInstructionRecord((prev) => ({ ...prev, workDateYear: e.target.value }))}
+                    />
+                  </label>
+                  <label className="text-xs font-semibold text-slate-700">
+                    月
+                    <input
+                      className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"
+                      type="number"
+                      min={1}
+                      max={12}
+                      value={kyInstructionRecord.workDateMonth}
+                      onChange={(e) => setKyInstructionRecord((prev) => ({ ...prev, workDateMonth: e.target.value }))}
+                    />
+                  </label>
+                  <label className="text-xs font-semibold text-slate-700">
+                    日
+                    <input
+                      className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"
+                      type="number"
+                      min={1}
+                      max={31}
+                      value={kyInstructionRecord.workDateDay}
+                      onChange={(e) => setKyInstructionRecord((prev) => ({ ...prev, workDateDay: e.target.value }))}
+                    />
+                  </label>
+                </div>
+              ))}
+              <label className="block text-xs font-semibold text-slate-700">
+                場所（作業場所）
+                <input
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  placeholder="例: 〇〇ビル3階 外壁工事エリア"
+                  value={kyInstructionRecord.workRows[0]?.workPlace ?? ""}
+                  onChange={(e) =>
+                    setKyInstructionRecord((prev) => {
+                      const rows = prev.workRows.map((r, i) => (i === 0 ? { ...r, workPlace: e.target.value } : r));
+                      return { ...prev, workRows: rows };
+                    })
+                  }
+                />
+              </label>
+              <label className="block text-xs font-semibold text-slate-700">
+                作業内容
+                <textarea
+                  className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  placeholder="例: 高所足場組み立て・鉄筋配筋作業"
+                  value={kyInstructionRecord.workRows[0]?.workDetail ?? ""}
+                  onChange={(e) =>
+                    setKyInstructionRecord((prev) => {
+                      const rows = prev.workRows.map((r, i) => (i === 0 ? { ...r, workDetail: e.target.value } : r));
+                      return { ...prev, workRows: rows };
+                    })
+                  }
+                />
+              </label>
+              <label className="block text-xs font-semibold text-slate-700">
+                危険要因
+                <textarea
+                  className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  placeholder="例: 墜落・転落、資材落下"
+                  value={kyInstructionRecord.riskRows[0]?.hazard ?? ""}
+                  onChange={(e) =>
+                    setKyInstructionRecord((prev) => {
+                      const rows = prev.riskRows.map((r, i) => (i === 0 ? { ...r, hazard: e.target.value } : r));
+                      return { ...prev, riskRows: rows };
+                    })
+                  }
+                />
+              </label>
+              <label className="block text-xs font-semibold text-slate-700">
+                対策
+                <textarea
+                  className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  placeholder="例: 安全帯使用、作業区画内立入禁止"
+                  value={kyInstructionRecord.riskRows[0]?.reduction ?? ""}
+                  onChange={(e) =>
+                    setKyInstructionRecord((prev) => {
+                      const rows = prev.riskRows.map((r, i) => (i === 0 ? { ...r, reduction: e.target.value } : r));
+                      return { ...prev, riskRows: rows };
+                    })
+                  }
+                />
+              </label>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-800"
+                onClick={() => {
+                  void services.operations.saveKyInstructionRecord(kyInstructionRecord).then(async (result) => {
+                    if (result.ok) {
+                      setOpsSavedLabel(`KY記録を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
+                      const list = await services.operations.getKyRecordList();
+                      if (list.ok) setKyRecordList(list.data);
+                    }
+                  });
+                }}
+              >
+                保存
+              </button>
+            </div>
+            {opsSavedLabel && <p className="mt-2 text-[11px] text-slate-500">{opsSavedLabel}</p>}
+          </div>
+        </section>
+      ) : null}
+
+      {variant === "ky" && !kySimpleMode ? (
         <section
           id="section-ky-sheet"
           className="px-4 pb-3 lg:px-8"

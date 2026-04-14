@@ -54,6 +54,23 @@ type LawRevisionListProps = {
   onSelectForQuestion: (revisionId: string) => void;
 };
 
+type IndustryFilter = "全業種" | "建設業" | "製造業";
+
+const CONSTRUCTION_KEYWORDS = ["建設", "足場", "高所作業", "解体", "土木", "鉛", "石綿", "アスベスト", "掘削", "型枠"];
+const MANUFACTURING_KEYWORDS = ["化学物質", "有機溶剤", "製造業", "機械", "プレス", "研削", "ボイラー", "特定化学", "粉じん", "爆発物"];
+
+function resolveIndustry(revision: LawRevision): IndustryFilter[] {
+  const text = `${revision.title} ${revision.summary} ${revision.category ?? ""}`.toLowerCase();
+  const industries: IndustryFilter[] = [];
+  if (CONSTRUCTION_KEYWORDS.some((kw) => text.includes(kw.toLowerCase()))) {
+    industries.push("建設業");
+  }
+  if (MANUFACTURING_KEYWORDS.some((kw) => text.includes(kw.toLowerCase()))) {
+    industries.push("製造業");
+  }
+  return industries.length > 0 ? industries : ["全業種"];
+}
+
 export function LawRevisionList({
   revisions,
   selectedRevisionId,
@@ -69,6 +86,7 @@ export function LawRevisionList({
   const [yearFrom, setYearFrom] = useState(2016);
   const [yearTo, setYearTo] = useState(2026);
   const [selectedKind, setSelectedKind] = useState<string>("すべて");
+  const [selectedIndustry, setSelectedIndustry] = useState<IndustryFilter>("全業種");
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -76,6 +94,10 @@ export function LawRevisionList({
       const y = Number(r.publishedAt.slice(0, 4));
       if (y < yearFrom || y > yearTo) return false;
       if (selectedKind !== "すべて" && resolveKindLabel(r) !== selectedKind) return false;
+      if (selectedIndustry !== "全業種") {
+        const industries = resolveIndustry(r);
+        if (!industries.includes(selectedIndustry) && !industries.includes("全業種")) return false;
+      }
       if (!q) return true;
       return (
         r.title.toLowerCase().includes(q) ||
@@ -84,7 +106,7 @@ export function LawRevisionList({
         r.revisionNumber.toLowerCase().includes(q)
       );
     });
-  }, [revisions, search, yearFrom, yearTo, selectedKind]);
+  }, [revisions, search, yearFrom, yearTo, selectedKind, selectedIndustry]);
 
   const showEmptyState = status === "success" && !error && filtered.length === 0;
 
@@ -133,6 +155,25 @@ export function LawRevisionList({
               value={yearTo}
             />
           </label>
+        </div>
+      </div>
+      <div className="mt-3">
+        <p className="text-xs font-semibold text-slate-700">業種フィルタ</p>
+        <div className="mt-1 flex flex-wrap gap-2">
+          {(["全業種", "建設業", "製造業"] as IndustryFilter[]).map((ind) => (
+            <button
+              key={ind}
+              type="button"
+              onClick={() => setSelectedIndustry(ind)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                selectedIndustry === ind
+                  ? "bg-blue-600 text-white"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              }`}
+            >
+              {ind}
+            </button>
+          ))}
         </div>
       </div>
       <div className="mt-3">
