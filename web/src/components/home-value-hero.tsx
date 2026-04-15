@@ -138,6 +138,29 @@ export function HomeValueHero() {
         </div>
       </div>
 
+      {/* 導入効果 */}
+      <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-4 sm:p-5">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">導入効果</p>
+        <h3 className="mt-1 text-base font-bold text-slate-900 sm:text-lg">
+          現場の安全管理を効率化
+        </h3>
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {([
+            { icon: "⏱", metric: "朝礼準備", before: "10分", after: "1分", color: "bg-blue-50 border-blue-200 text-blue-800" },
+            { icon: "📋", metric: "法改正の見落とし", before: "見落としリスク", after: "ゼロ", color: "bg-sky-50 border-sky-200 text-sky-800" },
+            { icon: "📝", metric: "KY作成時間", before: "従来比", after: "75%削減", color: "bg-emerald-50 border-emerald-200 text-emerald-800" },
+            { icon: "🔍", metric: "事故事例の検索", before: "数十分", after: "即座に", color: "bg-amber-50 border-amber-200 text-amber-800" },
+          ] as const).map((item) => (
+            <div key={item.metric} className={`rounded-xl border p-3 ${item.color}`}>
+              <p className="text-lg" aria-hidden="true">{item.icon}</p>
+              <p className="mt-1 text-[11px] font-semibold leading-4">{item.metric}</p>
+              <p className="mt-1.5 text-xs text-slate-500 line-through">{item.before}</p>
+              <p className="text-sm font-bold">{item.after}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* 4大機能カード */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {FEATURES.map((f) => (
