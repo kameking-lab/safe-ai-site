@@ -6,6 +6,7 @@ import { elearningThemesCatalog } from "@/data/mock/elearning-themes-data";
 import { elearningExtraThemes } from "@/data/mock/elearning-extra-themes";
 import { elearningExtraQuestions } from "@/data/mock/elearning-extra-questions";
 import { elearningIntroCourse } from "@/data/mock/elearning-intro-course";
+import { elearningManufacturingThemes } from "@/data/mock/elearning-manufacturing-themes";
 import type { LearningTheme as LearningThemeType } from "@/lib/types/operations";
 
 // Merge extra questions into extra themes to expand from 3 to 10 questions per theme
@@ -15,8 +16,8 @@ const mergedExtraThemes: LearningThemeType[] = elearningExtraThemes.map((theme) 
   return { ...theme, questions: [...theme.questions, ...extras.questions] };
 });
 
-// 入門コースを先頭に配置
-const allThemes = [...elearningIntroCourse, ...elearningThemesCatalog, ...mergedExtraThemes];
+// 入門コースを先頭に配置、製造業テーマを末尾に追加
+const allThemes = [...elearningIntroCourse, ...elearningThemesCatalog, ...mergedExtraThemes, ...elearningManufacturingThemes];
 import { ELearningEditorPanel } from "@/components/elearning-editor-panel";
 import type { LearningTheme } from "@/lib/types/operations";
 

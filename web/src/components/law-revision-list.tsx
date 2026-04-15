@@ -54,6 +54,27 @@ type LawRevisionListProps = {
   onSelectForQuestion: (revisionId: string) => void;
 };
 
+const EGOV_LAW_NUMBERS: Record<string, string> = {
+  "労働安全衛生法": "347AC0000000057",
+  "労働基準法": "322AC0000000049",
+  "じん肺法": "335AC0000000030",
+  "労働安全衛生規則": "347M50002000032",
+  "クレーン等安全規則": "347M50002000034",
+  "有機溶剤中毒予防規則": "347M50002000036",
+  "特定化学物質障害予防規則": "347M50002000040",
+  "酸素欠乏症等防止規則": "347M50002000042",
+};
+
+function getEGovUrl(revision: LawRevision): string | null {
+  const text = revision.title;
+  for (const [lawName, lawNum] of Object.entries(EGOV_LAW_NUMBERS)) {
+    if (text.includes(lawName) || text.includes(lawName.replace("労働安全衛生", "安衛"))) {
+      return `https://laws.e-gov.go.jp/law/${lawNum}`;
+    }
+  }
+  return null;
+}
+
 // #40: 影響度バッジ
 const IMPACT_BADGE_CLASS: Record<RevisionImpact, string> = {
   高: "bg-red-100 text-red-700",
@@ -336,6 +357,20 @@ export function LawRevisionList({
                   </div>
                 )}
               </div>
+
+              {(() => {
+                const eGovUrl = getEGovUrl(revision);
+                return eGovUrl ? (
+                  <a
+                    href={eGovUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 underline decoration-blue-200 underline-offset-2 hover:text-blue-800"
+                  >
+                    e-Gov法令検索で原文を確認
+                  </a>
+                ) : null;
+              })()}
 
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <button

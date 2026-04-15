@@ -43,18 +43,20 @@ const FEATURES = [
   {
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true">
-        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z" />
-        <circle cx="12" cy="12" r="3" />
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="16" y1="13" x2="8" y2="13" />
+        <line x1="16" y1="17" x2="8" y2="17" />
       </svg>
     ),
     color: "bg-orange-50 border-orange-200",
     iconBg: "bg-orange-600 text-white",
     labelColor: "text-orange-800",
-    label: "事故DB・KY用紙",
-    desc: "厚労省の事故事例200件以上を業種・種別で検索。現場の危険予知活動に役立てられます。",
-    href: "/accidents",
+    label: "KY用紙",
+    desc: "現場の危険予知活動をデジタル化。シンプルモード・詳細モード対応。リスクをその場で記録できます。",
+    href: "/ky",
     btnColor: "bg-orange-600 hover:bg-orange-700 text-white",
-    btnLabel: "事故事例を検索する",
+    btnLabel: "KY用紙を作成する",
   },
 ] as const;
 
@@ -112,16 +114,16 @@ export function HomeValueHero() {
           </Link>
           {/* サブCTA */}
           <Link
+            href="/ky"
+            className="rounded-md border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors text-center"
+          >
+            KY用紙を作る
+          </Link>
+          <Link
             href="/law-search"
             className="rounded-md border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors text-center"
           >
             法令を調べる
-          </Link>
-          <Link
-            href="/exam-quiz"
-            className="rounded-md border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors text-center"
-          >
-            過去問に挑戦
           </Link>
         </div>
         </div>

@@ -11,6 +11,17 @@ type ChatMessage = {
   sources?: ChatbotSource[];
 };
 
+const EGOV_LAW_NUMBERS: Record<string, string> = {
+  "労働安全衛生法": "347AC0000000057",
+  "労働基準法": "322AC0000000049",
+  "じん肺法": "335AC0000000030",
+  "労働安全衛生規則": "347M50002000032",
+  "クレーン等安全規則": "347M50002000034",
+  "有機溶剤中毒予防規則": "347M50002000036",
+  "特定化学物質障害予防規則": "347M50002000040",
+  "酸素欠乏症等防止規則": "347M50002000042",
+};
+
 const EXAMPLE_QUESTIONS = [
   "安全管理者の選任要件を教えてください",
   "フォークリフトの運転に必要な資格は？",
@@ -131,7 +142,18 @@ export function ChatbotPanel() {
                       : "border border-slate-200 bg-white text-slate-800"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                  {msg.role === "assistant" ? (
+                    <div className="whitespace-pre-wrap">
+                      {msg.content.split(/(\*\*[^*]+\*\*)/).map((part, idx) => {
+                        if (part.startsWith("**") && part.endsWith("**")) {
+                          return <strong key={idx}>{part.slice(2, -2)}</strong>;
+                        }
+                        return part;
+                      })}
+                    </div>
+                  ) : (
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                  )}
                 </div>
 
                 {/* 根拠条文の表示 */}
@@ -148,7 +170,9 @@ export function ChatbotPanel() {
                               {src.law} {src.article}
                             </p>
                             <a
-                              href={`https://elaws.e-gov.go.jp/search/elawsSearch/elaws_search/lsg0100/?keyword=${encodeURIComponent(src.law)}`}
+                              href={EGOV_LAW_NUMBERS[src.law]
+                                ? `https://laws.e-gov.go.jp/law/${EGOV_LAW_NUMBERS[src.law]}`
+                                : `https://laws.e-gov.go.jp/search?keyword=${encodeURIComponent(src.law)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="shrink-0 rounded border border-blue-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-blue-600 hover:bg-blue-50"

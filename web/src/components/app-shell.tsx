@@ -34,6 +34,7 @@ type NavItem = {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
+  description?: string;
 };
 
 type NavCategory = {
@@ -86,12 +87,12 @@ const NAV_CATEGORIES: NavCategory[] = [
   {
     label: "その他",
     items: [
-      { id: "bear-map", label: "クマ出没マップ", href: "/bear-map", icon: MapPin },
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
       { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },
       { id: "notifications", label: "通知/配信", href: "/notifications", icon: Bell, badge: "soon" },
       { id: "contact", label: "お問い合わせ", href: "/contact", icon: Mail },
       { id: "about", label: "運営者情報", href: "/about", icon: Info },
+      { id: "bear-map", label: "クマ出没マップ", href: "/bear-map", icon: MapPin, description: "林業・山間部向け" },
     ],
   },
 ];
@@ -134,7 +135,12 @@ export function AppShell({ children, user }: AppShellProps) {
               active ? "text-emerald-700" : item.badge ? "text-blue-500" : "text-slate-400"
             }`}
           />
-          <span className="flex-1 truncate">{item.label}</span>
+          <span className="flex-1 truncate">
+            {item.label}
+            {item.description && (
+              <span className="ml-1 text-[10px] font-normal text-slate-400">{item.description}</span>
+            )}
+          </span>
           {item.badge && !active && (
             <span
               className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
