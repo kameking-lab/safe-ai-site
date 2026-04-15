@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // pdfjs-dist はブラウザ専用。canvas モジュールを無効化してSSRビルドエラーを防ぐ
+  webpack: (config) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (config.resolve as any).alias["canvas"] = false;
+    return config;
+  },
   // Turbopack のルートディレクトリを明示（monorepo/worktree 環境での誤検知防止）
   turbopack: {
     root: process.cwd(),
