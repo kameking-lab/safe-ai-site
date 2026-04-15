@@ -9,6 +9,7 @@ import { SignageFeaturedGoods } from "@/components/signage/signage-featured-good
 import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
 import { SignageRiskPrediction } from "@/components/signage/signage-risk-prediction";
 import { SignageShell } from "@/components/signage/signage-shell";
+import { SignageTodayDocuments } from "@/components/signage/signage-today-documents";
 import { getSignageLocationById, signageLocations } from "@/data/signage-locations";
 import { createServices } from "@/lib/services/service-factory";
 import type { SignageDataApiResponse } from "@/lib/types/signage-data";
@@ -320,6 +321,8 @@ export default function SignagePage() {
           {state.riskStatus === "error" && (
             <p className="shrink-0 text-[10px] text-amber-200 sm:text-xs">地点リスク（日次）の取得に失敗しました。</p>
           )}
+
+          <SignageTodayDocuments />
         </div>
 
         <div className="flex min-h-0 flex-col gap-2 overflow-hidden xl:col-span-5 xl:min-h-0">
