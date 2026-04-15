@@ -102,30 +102,26 @@ export function HomeValueHero() {
           ))}
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          {/* メインCTA */}
           <Link
             href="/risk-prediction"
-            className="rounded-md bg-blue-500 px-4 py-2 text-xs font-bold text-white hover:bg-blue-400 transition-colors"
+            className="rounded-md bg-blue-500 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-400 transition-colors text-center"
           >
-            AIリスク予測を使う
+            今すぐ使ってみる → AIリスク予測
+          </Link>
+          {/* サブCTA */}
+          <Link
+            href="/law-search"
+            className="rounded-md border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors text-center"
+          >
+            法令を調べる
           </Link>
           <Link
             href="/exam-quiz"
-            className="rounded-md border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors"
+            className="rounded-md border border-white/30 bg-white/10 px-4 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors text-center"
           >
-            過去問クイズを解く
-          </Link>
-          <Link
-            href="/risk"
-            className="text-xs font-semibold text-amber-200 underline decoration-amber-400/60 underline-offset-2 hover:text-white transition-colors"
-          >
-            今日の気象リスクを確認
-          </Link>
-          <Link
-            href="/law-search"
-            className="text-xs font-semibold text-green-200 underline decoration-green-400/60 underline-offset-2 hover:text-white transition-colors"
-          >
-            法令を検索する
+            過去問に挑戦
           </Link>
         </div>
         </div>

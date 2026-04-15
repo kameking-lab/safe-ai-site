@@ -3,10 +3,6 @@
 import { useCallback, useState } from "react";
 import { filterQuestions, AVAILABLE_YEARS, EXAM_CATEGORIES } from "@/data/exam-questions";
 import type { ExamQuestion } from "@/data/exam-questions";
-import { useUsageLimit } from "@/lib/hooks/use-usage-limit";
-import { UpgradePrompt } from "@/components/upgrade-prompt";
-
-const FREE_QUIZ_LIMIT = 5;
 
 const LS_KEY = "exam-quiz-history";
 
@@ -135,13 +131,7 @@ export function ExamQuizClient() {
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
-  const [showPaywall, setShowPaywall] = useState(false);
   const [history, setHistory] = useState<AnswerRecord[]>(() => loadHistory());
-  const { isExceeded: quizLimitReached, increment: incrementQuiz, reset: resetQuiz } = useUsageLimit({
-    key: "quiz_usage",
-    limit: FREE_QUIZ_LIMIT,
-    period: "session",
-  });
 
   const selectedCert = EXAM_CATEGORIES.find((c) => c.id === certId);
 
@@ -156,7 +146,6 @@ export function ExamQuizClient() {
     setIndex(0);
     setSelected(null);
     setShowExplanation(false);
-    setShowPaywall(false);
     setStarted(true);
   }, [certId, subject, year, mode]);
 
@@ -176,16 +165,11 @@ export function ExamQuizClient() {
       saveAnswer(record);
       setHistory(loadHistory());
       setSelected(choice);
-      incrementQuiz();
     },
-    [selected, questions, index, incrementQuiz]
+    [selected, questions, index]
   );
 
   const goNext = () => {
-    if (quizLimitReached) {
-      setShowPaywall(true);
-      return;
-    }
     setIndex((i) => i + 1);
     setSelected(null);
     setShowExplanation(false);
@@ -244,26 +228,6 @@ export function ExamQuizClient() {
             </button>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  // --- Paywall screen (after free limit) ---
-  if (started && showPaywall) {
-    return (
-      <div className="mx-auto max-w-2xl px-4 py-6">
-        <UpgradePrompt
-          featureName="過去問クイズ"
-          limit={FREE_QUIZ_LIMIT}
-          period="session"
-          onReset={() => {
-            resetQuiz();
-            setShowPaywall(false);
-            setIndex(0);
-            setSelected(null);
-            setShowExplanation(false);
-          }}
-        />
       </div>
     );
   }

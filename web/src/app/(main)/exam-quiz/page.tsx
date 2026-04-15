@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { BookOpen } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { ExamQuizClient } from "./exam-quiz-client";
+import { RelatedPageCards } from "@/components/related-page-cards";
 
 export const metadata: Metadata = {
   title: "過去問クイズ",
@@ -22,6 +23,25 @@ export default function ExamQuizPage() {
         iconColor="amber"
       />
       <ExamQuizClient />
+      <RelatedPageCards
+        heading="合わせて使う"
+        pages={[
+          {
+            href: "/e-learning",
+            label: "Eラーニング",
+            description: "テーマ別の解説付きクイズで知識を体系的に整理。過去問の前に基礎固めするのにも最適です。",
+            color: "emerald",
+            cta: "Eラーニングで学ぶ",
+          },
+          {
+            href: "/law-search",
+            label: "法令検索",
+            description: "問題で出てきた条文を原文で確認。労安法・安衛則などをキーワード検索できます。",
+            color: "sky",
+            cta: "法令を検索する",
+          },
+        ]}
+      />
     </>
   );
 }

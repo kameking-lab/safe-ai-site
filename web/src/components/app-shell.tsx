@@ -23,6 +23,7 @@ import {
   FileText,
   TestTube2,
   RefreshCw,
+  Info,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { UserMenu } from "@/components/user-menu";
@@ -90,6 +91,7 @@ const NAV_CATEGORIES: NavCategory[] = [
       { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },
       { id: "notifications", label: "通知/配信", href: "/notifications", icon: Bell, badge: "soon" },
       { id: "contact", label: "お問い合わせ", href: "/contact", icon: Mail },
+      { id: "about", label: "運営者情報", href: "/about", icon: Info },
     ],
   },
 ];

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Scale } from "lucide-react";
 import { ChatbotPanel } from "@/components/chatbot-panel";
 import { PageHeader } from "@/components/page-header";
+import { RelatedPageCards } from "@/components/related-page-cards";
 
 export const metadata: Metadata = {
   title: "安衛法AIチャットボット",
@@ -49,6 +50,25 @@ export default function ChatbotPage() {
           <li>・ 現在対応中の法令：労働安全衛生法、労働安全衛生規則、クレーン等安全規則、有機溶剤中毒予防規則、特定化学物質障害予防規則、酸素欠乏症等防止規則</li>
         </ul>
       </div>
+      <RelatedPageCards
+        heading="合わせて使う"
+        pages={[
+          {
+            href: "/law-search",
+            label: "法令検索",
+            description: "チャットで出てきた条文を原文で確認。安衛法・安衛則をキーワード検索できます。",
+            color: "sky",
+            cta: "法令を検索する",
+          },
+          {
+            href: "/e-learning",
+            label: "Eラーニング",
+            description: "法令知識をクイズ形式で定着。20テーマ・100問以上で体系的に学べます。",
+            color: "emerald",
+            cta: "Eラーニングで学ぶ",
+          },
+        ]}
+      />
     </main>
   );
 }

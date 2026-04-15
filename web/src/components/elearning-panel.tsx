@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { elearningThemesCatalog } from "@/data/mock/elearning-themes-data";
 import { elearningExtraThemes } from "@/data/mock/elearning-extra-themes";
 import { elearningExtraQuestions } from "@/data/mock/elearning-extra-questions";
+import { elearningIntroCourse } from "@/data/mock/elearning-intro-course";
 import type { LearningTheme as LearningThemeType } from "@/lib/types/operations";
 
 // Merge extra questions into extra themes to expand from 3 to 10 questions per theme
@@ -14,7 +15,8 @@ const mergedExtraThemes: LearningThemeType[] = elearningExtraThemes.map((theme) 
   return { ...theme, questions: [...theme.questions, ...extras.questions] };
 });
 
-const allThemes = [...elearningThemesCatalog, ...mergedExtraThemes];
+// 入門コースを先頭に配置
+const allThemes = [...elearningIntroCourse, ...elearningThemesCatalog, ...mergedExtraThemes];
 import { ELearningEditorPanel } from "@/components/elearning-editor-panel";
 import type { LearningTheme } from "@/lib/types/operations";
 
@@ -76,20 +78,50 @@ export function ELearningPanel() {
     );
   }
 
+  const isIntroCourse = themeId.startsWith("intro-");
+
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+      {/* 初めての方へのバナー */}
+      <div className="mb-4 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white text-sm font-bold">
+          入門
+        </span>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-emerald-800">初めての方はここから</p>
+          <p className="text-xs text-emerald-700 leading-5">
+            「初めての安全担当者」コース（4ステップ・全20問）で安全管理の基本を学べます。
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setThemeId("intro-step1");
+            setAnswers({});
+          }}
+          className="shrink-0 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+        >
+          Step1から始める
+        </button>
+      </div>
+
       <div className="flex items-start justify-between gap-2">
         <div>
           <h2 className="text-base font-bold text-slate-900 sm:text-lg">Eラーニング</h2>
           <p className="mt-1 text-xs text-slate-600">
-            20分野・計102問。事故・法改正・現場リスクの判断を短時間で反復できます。
+            20分野・計102問 ＋ 入門コース（20問）。事故・法改正・現場リスクの判断を短時間で反復できます。
           </p>
         </div>
         <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-800">
-          20分野・102問
+          全24テーマ
         </span>
       </div>
       <div className="mt-3">
+        {isIntroCourse && (
+          <p className="mb-2 text-xs font-semibold text-emerald-700">
+            ▶ 初めての安全担当者コース（Step1〜4）
+          </p>
+        )}
         <label className="block text-xs font-semibold text-slate-700" htmlFor="learning-theme">学習テーマ</label>
         <select
           id="learning-theme"
