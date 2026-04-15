@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+// pdfjs-distはクライアントサイドのみ動的インポート（SSRではDOMMatrixが未定義のため）
 
 type DocumentItem = {
   id: string;
   title: string;
   memo: string;
   dataUrl: string;
+  type: "image" | "pdf";
 };
 
 const STORAGE_KEY = "signage-today-documents";
@@ -36,21 +38,49 @@ function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
+/** PDFの全ページをcanvasでレンダリングしてBase64 dataURLの配列を返す */
+async function renderPdfPages(file: File): Promise<string[]> {
+  // 動的インポートでSSRを回避
+  const pdfjsLib = await import("pdfjs-dist");
+  if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+      "pdfjs-dist/build/pdf.worker.min.mjs",
+      import.meta.url,
+    ).toString();
+  }
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const images: string[] = [];
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 1.5 });
+    const canvas = document.createElement("canvas");
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    await page.render({ canvas, viewport }).promise;
+    images.push(canvas.toDataURL("image/jpeg", 0.85));
+  }
+  return images;
+}
+
 export function SignageTodayDocuments() {
-  // lazy initializer でクライアント側のみ localStorage から初期値を読む
   const [items, setItems] = useState<DocumentItem[]>(loadStoredItems);
   const [current, setCurrent] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [warningMsg, setWarningMsg] = useState<string | null>(null);
+  // ドラッグ&ドロップ
+  const [draggingIdx, setDraggingIdx] = useState<number | null>(null);
+  const [dragOverIdx, setDragOverIdx] = useState<number | null>(null);
+  const dragSrcRef = useRef<number | null>(null);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const fileInputEmptyRef = useRef<HTMLInputElement>(null);
   // 初回マウント後のみ保存（SSRハイドレーションで上書きしない）
   const savedOnceRef = useRef(false);
 
   // items が変化したら localStorage に保存
   useEffect(() => {
-    // 初回はlazy initializerで読み込んだ値そのままなので保存をスキップ
     if (!savedOnceRef.current) {
       savedOnceRef.current = true;
       return;
@@ -64,12 +94,17 @@ export function SignageTodayDocuments() {
 
   // フルスクリーン状態の同期
   useEffect(() => {
-    const handleChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
+    const handleChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener("fullscreenchange", handleChange);
     return () => document.removeEventListener("fullscreenchange", handleChange);
   }, []);
+
+  // 警告メッセージを3秒後に自動クリア
+  useEffect(() => {
+    if (!warningMsg) return;
+    const t = setTimeout(() => setWarningMsg(null), 3000);
+    return () => clearTimeout(t);
+  }, [warningMsg]);
 
   const goNext = useCallback(() => {
     setCurrent((c) => (c + 1) % items.length);
@@ -82,24 +117,57 @@ export function SignageTodayDocuments() {
   const processFiles = useCallback(
     async (files: FileList) => {
       const remaining = MAX_ITEMS - items.length;
-      if (remaining <= 0) return;
-      const toProcess = Array.from(files).slice(0, remaining);
+      if (remaining <= 0) {
+        setWarningMsg(`上限（${MAX_ITEMS}枚）に達しています`);
+        return;
+      }
       const newItems: DocumentItem[] = [];
-      for (const file of toProcess) {
+      let truncated = false;
+
+      for (const file of Array.from(files)) {
+        if (newItems.length >= remaining) {
+          truncated = true;
+          break;
+        }
         try {
-          const dataUrl = await readFileAsDataUrl(file);
-          newItems.push({
-            id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-            title: file.name.replace(/\.[^/.]+$/, ""),
-            memo: "",
-            dataUrl,
-          });
+          if (file.type === "application/pdf") {
+            const pages = await renderPdfPages(file);
+            const baseName = file.name.replace(/\.[^/.]+$/, "");
+            for (let i = 0; i < pages.length; i++) {
+              if (newItems.length >= remaining) {
+                truncated = true;
+                break;
+              }
+              newItems.push({
+                id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+                title: pages.length === 1 ? baseName : `${baseName}（${i + 1}/${pages.length}ページ）`,
+                memo: "",
+                dataUrl: pages[i],
+                type: "pdf",
+              });
+            }
+          } else {
+            const dataUrl = await readFileAsDataUrl(file);
+            newItems.push({
+              id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+              title: file.name.replace(/\.[^/.]+$/, ""),
+              memo: "",
+              dataUrl,
+              type: "image",
+            });
+          }
         } catch {
           /* 変換失敗はスキップ */
         }
       }
+
+      if (truncated) {
+        setWarningMsg(`上限（${MAX_ITEMS}枚）のため、一部の資料が追加されませんでした`);
+      }
+
+      const wasEmpty = items.length === 0;
       setItems((prev) => [...prev, ...newItems].slice(0, MAX_ITEMS));
-      setCurrent((c) => (items.length === 0 ? 0 : c));
+      if (wasEmpty && newItems.length > 0) setCurrent(0);
     },
     [items.length],
   );
@@ -119,10 +187,18 @@ export function SignageTodayDocuments() {
     setCurrent(0);
   };
 
-  const handleRemove = (id: string) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
-    setCurrent((c) => Math.max(0, Math.min(c, items.length - 2)));
-  };
+  const handleRemove = useCallback((id: string) => {
+    setItems((prev) => {
+      const idx = prev.findIndex((item) => item.id === id);
+      const next = prev.filter((item) => item.id !== id);
+      setCurrent((c) => {
+        if (next.length === 0) return 0;
+        if (idx < c) return c - 1;
+        return Math.min(c, next.length - 1);
+      });
+      return next;
+    });
+  }, []);
 
   const handleUpdateItem = (id: string, field: "title" | "memo", value: string) => {
     setItems((prev) =>
@@ -157,6 +233,49 @@ export function SignageTodayDocuments() {
     touchStartX.current = null;
   };
 
+  // ── Drag & Drop ──────────────────────────────────────────
+  const handleDragStart = (idx: number) => {
+    dragSrcRef.current = idx;
+    setDraggingIdx(idx);
+  };
+
+  const handleDragOver = (idx: number) => {
+    setDragOverIdx(idx);
+  };
+
+  const handleDrop = (dropIdx: number) => {
+    const srcIdx = dragSrcRef.current;
+    if (srcIdx === null || srcIdx === dropIdx) {
+      setDraggingIdx(null);
+      setDragOverIdx(null);
+      dragSrcRef.current = null;
+      return;
+    }
+    setItems((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(srcIdx, 1);
+      next.splice(dropIdx, 0, moved);
+      setCurrent((c) => {
+        if (c === srcIdx) return dropIdx;
+        if (srcIdx < c && dropIdx >= c) return c - 1;
+        if (srcIdx > c && dropIdx <= c) return c + 1;
+        return c;
+      });
+      return next;
+    });
+    setDraggingIdx(null);
+    setDragOverIdx(null);
+    dragSrcRef.current = null;
+  };
+
+  const handleDragEnd = () => {
+    setDraggingIdx(null);
+    setDragOverIdx(null);
+    dragSrcRef.current = null;
+  };
+  // ─────────────────────────────────────────────────────────
+
+  const atLimit = items.length >= MAX_ITEMS;
   const currentItem = items[current] ?? null;
 
   return (
@@ -170,19 +289,23 @@ export function SignageTodayDocuments() {
         <h2 className="text-sm font-bold tracking-wide text-slate-100 sm:text-base lg:text-xl">
           今日の作業資料
         </h2>
-        <div className="flex items-center gap-2">
-          {items.length < MAX_ITEMS && items.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          {atLimit ? (
+            <span className="text-xs font-semibold text-amber-400">
+              上限（{MAX_ITEMS}枚）に達しています
+            </span>
+          ) : (
             <>
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-600 sm:text-sm"
               >
-                ＋ 画像を追加
+                ＋ 資料を追加
               </button>
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,.pdf"
                 multiple
                 className="hidden"
                 onChange={handleFileChange}
@@ -194,35 +317,37 @@ export function SignageTodayDocuments() {
               onClick={handleClearAll}
               className="rounded-lg border border-rose-600/60 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-950/50 sm:text-sm"
             >
-              今日の資料をクリア
+              一括クリア
             </button>
           )}
         </div>
       </div>
 
-      {/* 画像なし：案内表示 */}
+      {/* 警告メッセージ */}
+      {warningMsg && (
+        <p className="mt-2 rounded-lg bg-amber-950/60 px-3 py-2 text-xs text-amber-300">
+          {warningMsg}
+        </p>
+      )}
+
+      {/* 資料なし：案内表示 */}
       {items.length === 0 ? (
-        <div className="mt-4 flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-600 py-10">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
+          className="mt-4 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-slate-600 py-10 hover:border-slate-400"
+        >
           <p className="text-base font-semibold text-slate-300 sm:text-xl">
             今日の作業資料を登録してください
           </p>
           <p className="text-xs text-slate-400 sm:text-sm">
-            図面・写真・資料などの画像ファイルをアップロードできます（最大{MAX_ITEMS}枚）
+            図面・写真・PDF などをアップロードできます（最大{MAX_ITEMS}枚）
           </p>
-          <button
-            onClick={() => fileInputEmptyRef.current?.click()}
-            className="mt-2 rounded-xl bg-emerald-700 px-8 py-3 text-sm font-bold text-white hover:bg-emerald-600 sm:text-base"
-          >
-            ＋ 画像を選択
-          </button>
-          <input
-            ref={fileInputEmptyRef}
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={handleFileChange}
-          />
+          <span className="mt-2 rounded-xl bg-emerald-700 px-8 py-3 text-sm font-bold text-white hover:bg-emerald-600 sm:text-base">
+            ＋ 資料を選択
+          </span>
         </div>
       ) : (
         <div className="mt-3 flex flex-col gap-3">
@@ -240,6 +365,17 @@ export function SignageTodayDocuments() {
                 alt={currentItem.title || `資料 ${current + 1}`}
                 className="mx-auto max-h-[50vh] w-full object-contain"
               />
+            )}
+
+            {/* カルーセル上の個別削除ボタン */}
+            {currentItem && (
+              <button
+                onClick={() => handleRemove(currentItem.id)}
+                aria-label="この資料を削除"
+                className="absolute left-2 top-2 z-10 rounded-lg bg-rose-900/80 px-2 py-1 text-xs font-bold text-rose-200 hover:bg-rose-800 active:bg-rose-700"
+              >
+                ✕ 削除
+              </button>
             )}
 
             {/* 前へ / 次へ ボタン */}
@@ -342,40 +478,71 @@ export function SignageTodayDocuments() {
                 rows={2}
                 className="w-full resize-none rounded-lg bg-slate-700 px-3 py-2 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 sm:text-base"
               />
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-slate-400">
-                  {items.length}/{MAX_ITEMS}枚
-                </p>
-                <button
-                  onClick={() => handleRemove(currentItem.id)}
-                  className="rounded px-2 py-1 text-xs text-rose-400 hover:bg-rose-950/40 hover:text-rose-300"
-                >
-                  この資料を削除
-                </button>
-              </div>
+              <p className="text-xs text-slate-400">
+                {items.length}/{MAX_ITEMS}枚 ・ サムネイルをドラッグして並び替え
+              </p>
             </div>
           )}
 
-          {/* サムネイル一覧 */}
+          {/* サムネイル一覧（D&D + 個別削除） */}
           <div className="flex gap-2 overflow-x-auto pb-1">
             {items.map((item, idx) => (
-              <button
+              <div
                 key={item.id}
-                onClick={() => setCurrent(idx)}
-                aria-label={`資料 ${idx + 1}: ${item.title || "無題"}`}
-                className={`shrink-0 overflow-hidden rounded-lg border-2 transition ${
-                  idx === current
-                    ? "border-emerald-400 opacity-100"
-                    : "border-slate-600 opacity-60 hover:border-slate-400 hover:opacity-80"
-                }`}
+                draggable
+                onDragStart={() => handleDragStart(idx)}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  handleDragOver(idx);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  handleDrop(idx);
+                }}
+                onDragEnd={handleDragEnd}
+                className={`relative shrink-0 cursor-grab transition-all active:cursor-grabbing ${
+                  draggingIdx === idx ? "opacity-40" : ""
+                } ${dragOverIdx === idx && draggingIdx !== idx ? "scale-105 ring-2 ring-emerald-400" : ""}`}
               >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={item.dataUrl}
-                  alt={item.title || `資料 ${idx + 1}`}
-                  className="h-14 w-20 object-cover sm:h-16 sm:w-24"
-                />
-              </button>
+                {/* サムネイル（クリックで選択） */}
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setCurrent(idx)}
+                  onKeyDown={(e) => e.key === "Enter" && setCurrent(idx)}
+                  aria-label={`資料 ${idx + 1}: ${item.title || "無題"}`}
+                  className={`overflow-hidden rounded-lg border-2 transition ${
+                    idx === current
+                      ? "border-emerald-400 opacity-100"
+                      : "border-slate-600 opacity-60 hover:border-slate-400 hover:opacity-80"
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.dataUrl}
+                    alt={item.title || `資料 ${idx + 1}`}
+                    className="h-14 w-20 object-cover sm:h-16 sm:w-24"
+                    draggable={false}
+                  />
+                  {/* PDFアイコン */}
+                  {item.type === "pdf" && (
+                    <div className="absolute bottom-0 left-0 rounded-tr bg-rose-900/90 px-1 py-0.5">
+                      <span className="text-[9px] font-bold leading-none text-rose-200">PDF</span>
+                    </div>
+                  )}
+                </div>
+                {/* 個別削除ボタン（右上の×） */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemove(item.id);
+                  }}
+                  aria-label={`資料 ${idx + 1} を削除`}
+                  className="absolute -right-1.5 -top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-rose-700 text-[11px] font-bold text-white shadow hover:bg-rose-500"
+                >
+                  ✕
+                </button>
+              </div>
             ))}
           </div>
         </div>
