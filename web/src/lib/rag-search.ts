@@ -1,5 +1,6 @@
 import { allLawArticles } from "@/data/laws";
 import type { LawArticle } from "@/data/laws";
+import { normalizeSearchText } from "@/lib/fuzzy-search";
 
 /**
  * キーワードマッチングによる関連条文のRAG検索
@@ -28,10 +29,14 @@ export function searchRelevantArticles(query: string, topK = 10): LawArticle[] {
 
 /**
  * 日本語テキストをトークン化（形態素解析の代替として単純分割）
+ * normalizeSearchText で表記ゆれを吸収してからトークン化する。
  */
 function tokenize(text: string): string[] {
+  // 表記ゆれ正規化（長音符・全角半角・小書き等）
+  const fuzzyNormalized = normalizeSearchText(text);
+
   // 記号・空白で分割し、2文字以上のトークンを抽出
-  const normalized = text
+  const normalized = fuzzyNormalized
     .replace(/[？?！!。、.,\s　]/g, " ")
     .replace(/[（）()「」『』【】\[\]]/g, " ");
 
@@ -49,8 +54,9 @@ function tokenize(text: string): string[] {
  */
 function calcScore(article: LawArticle, queryTokens: string[]): number {
   let score = 0;
-  const textLower = article.text.toLowerCase();
-  const titleLower = article.articleTitle.toLowerCase();
+  // 条文テキストも正規化してスコア計算
+  const textLower = normalizeSearchText(article.text);
+  const titleLower = normalizeSearchText(article.articleTitle);
   const articleNumLower = article.articleNum.toLowerCase();
 
   for (const token of queryTokens) {
