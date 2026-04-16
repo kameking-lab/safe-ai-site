@@ -1,8 +1,11 @@
-# Daily Review プロンプトテンプレート（スケーラブル版）
+# Daily Review - 5人（日次軽量巡回）
+
+> **推奨モデル: Sonnet 4.6**
+> このタスクは軽量（5 ペルソナ）なので Sonnet 4.6 で十分。Opus を使うとコスト過剰。
 
 このファイルは Cowork の予定済みタスクとして Claude に渡すプロンプトの完成形です。
 ペルソナは `web/scripts/personas/` 配下の JSON ファイルに 100 人分定義されており、
-`REVIEW_SIZE` 変数で毎回の巡回人数を切り替えられます。
+本タスクはその中から日次 5 人を抽出して巡回します。
 
 ---
 
@@ -28,16 +31,6 @@
 REVIEW_SIZE = 5
 ```
 
-**利用可能な値**: `5` / `10` / `20` / `50` / `100`
-
-| サイズ | 用途 | 推奨モデル |
-|-------|------|----------|
-| 5     | 毎日の軽量巡回（Daily） | Sonnet 4.6 |
-| 10    | 隔日のやや広めレビュー   | Sonnet 4.6 |
-| 20    | 週次レビュー（Weekly）  | Sonnet 4.6 |
-| 50    | 月次レビュー（Monthly） | Opus 4.6 1M 推奨 |
-| 100   | 四半期レビュー（Quarterly） | Opus 4.6 1M 必須、複数セッション分割可 |
-
 ---
 
 ## グループ割当ルール（デフォルト）
@@ -52,10 +45,7 @@ REVIEW_SIZE = 5
 | 土   | B        |
 | 日   | A        |
 
-`REVIEW_SIZE` に応じて、以下のロジックでペルソナを選出する：
-
-- `REVIEW_SIZE <= 50` のとき: **当日グループ（A or B）からランダムに REVIEW_SIZE 人を抽出**
-- `REVIEW_SIZE == 100` のとき: **全ペルソナを参加させる（グループ指定は無視）**
+`REVIEW_SIZE = 5` のとき: **当日グループ（A or B）からランダムに 5 人を抽出**
 
 ---
 
@@ -64,7 +54,7 @@ REVIEW_SIZE = 5
 ```
 あなたは safe-ai-site の Daily Review エージェントです。
 今日の日付: {{TODAY}}
-REVIEW_SIZE: {{REVIEW_SIZE}}  # 5/10/20/50/100 のいずれか
+REVIEW_SIZE: 5
 
 ## 大前提（必ず読む）
 これらのペルソナは全員、サイトの繁栄を願う辛口クリティックである。
@@ -92,9 +82,7 @@ REVIEW_SIZE: {{REVIEW_SIZE}}  # 5/10/20/50/100 のいずれか
 - 今日の曜日からグループを決める:
   - 月・水・金・日 → グループ A
   - 火・木・土 → グループ B
-- 選出ロジック:
-  - REVIEW_SIZE <= 50 なら、当日グループから REVIEW_SIZE 人をランダム抽出（業種・職種・性別が偏らないよう配慮）
-  - REVIEW_SIZE == 100 なら、全 100 人（A50 + B50）を参加させる
+- 当日グループから 5 人をランダム抽出（業種・職種・性別が偏らないよう配慮）
 - 選出したペルソナの id・name・group を一覧にしてレポートの冒頭に列挙する
 
 ## Step 3: ローカル確認
@@ -130,13 +118,12 @@ PM ロール（ペルソナではない、司会役）として：
 
 レポート構成:
 ```markdown
-# 🗓 Daily Review - {{TODAY}}（REVIEW_SIZE={{REVIEW_SIZE}} / グループ: {{GROUP}}）
+# 🗓 Daily Review - {{TODAY}}（REVIEW_SIZE=5 / グループ: {{GROUP}}）
 
-## 👥 参加ペルソナ（{{REVIEW_SIZE}}人）
+## 👥 参加ペルソナ（5人）
 <!-- id / group / name / role を列挙 -->
 
 ## 🔥 ペルソナ別 本音レビュー（辛口）
-<!-- 各ペルソナごとに見出しを立て、事実ベースで辛口に -->
 ### ID {{id}}: {{name}}（{{role}}）
 - **ダメだと思った点 1**: ...
 - **ダメだと思った点 2**: ...
@@ -150,19 +137,17 @@ PM ロール（ペルソナではない、司会役）として：
 ### 提案N: タイトル
 - 提案者: 誰
 - 深刻度: High / Mid / Low
-- 工数: S（1h以内）/ M（半日）/ L（1日以上）
+- 工数: S / M / L
 - 優先度: 高 / 中 / 低
-- 理由（事実ベース・複数ペルソナの共通見解なら強調）
+- 理由: 事実ベース
 
 ## 📊 総合スコア: X.X/5.0
-採点基準: ユーザビリティ + コンテンツ品質 + 信頼性 + SEO/技術品質 + モバイル対応 の 5 点満点
 
 ## 🏆 今日のMVPペルソナ
-- ID / name / 理由（最も鋭い指摘をした人）
+- ID / name / 理由
 
 ## 🧊 冷静な総括（PMの本音）
-1-3 段落で、今日のサイトの姿を率直に書く。
-「改善の方向性がぶれていないか」「競合と比べてどうか」を明記。
+1-3 段落で率直に。
 ```
 
 ## Step 8: GitHub Issue 作成
@@ -170,7 +155,7 @@ PM ロール（ペルソナではない、司会役）として：
 
 ```bash
 cd C:\Users\kanet\OneDrive\ドキュメント\safe-ai-site
-bash web/scripts/create-review-issue.sh {{TODAY}} "REVIEW_SIZE={{REVIEW_SIZE}} / {{GROUP}}" web/scripts/daily-review-{{TODAY}}.md
+bash web/scripts/create-review-issue.sh {{TODAY}} "REVIEW_SIZE=5 / {{GROUP}}" web/scripts/daily-review-{{TODAY}}.md
 ```
 
 ## Step 9: Push / PR
@@ -179,23 +164,3 @@ bash web/scripts/create-review-issue.sh {{TODAY}} "REVIEW_SIZE={{REVIEW_SIZE}} /
   - 必要に応じて PR を作成（`gh pr create`）
 - 修正がなくても、生成したレポートはコミット・push すること
 ```
-
----
-
-## プロンプト利用時の置換
-
-| プレースホルダ | 例 | 備考 |
-|--------------|----|----|
-| `{{TODAY}}` | `2026-04-17` | ISO 8601 の日付 |
-| `{{REVIEW_SIZE}}` | `5` | 冒頭の REVIEW_SIZE と一致させる |
-| `{{GROUP}}` | `A` | 曜日から自動判定（100 の場合は `ALL`） |
-
----
-
-## 実行後の確認事項
-
-1. `web/scripts/daily-review-{{TODAY}}.md` が作成されている
-2. レビューが **薄まっていない**（各ペルソナで最低 2 件のダメ出しがある）
-3. 軽微修正のコミットがあれば build/lint が通っている
-4. PM の「冷静な総括」が書かれている
-5. 総合スコアが数値として記録されている
