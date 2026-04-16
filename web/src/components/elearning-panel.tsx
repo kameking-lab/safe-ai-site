@@ -23,6 +23,12 @@ import type { LearningTheme } from "@/lib/types/operations";
 
 const STORAGE_KEY = "el-theme-overrides";
 
+const WORKER_ATTRIBUTE_OPTIONS = ["すべて", "女性労働者", "高齢者", "外国人", "非正規", "若年", "一般"] as const;
+type WorkerAttributeFilter = (typeof WORKER_ATTRIBUTE_OPTIONS)[number];
+
+const COMPANY_SIZE_OPTIONS = ["全規模", "大企業", "中小企業", "個人事業主"] as const;
+type CompanySizeFilter = (typeof COMPANY_SIZE_OPTIONS)[number];
+
 function loadOverrides(): Record<string, LearningTheme> {
   if (typeof window === "undefined") return {};
   try {
@@ -43,13 +49,27 @@ export function ELearningPanel() {
   const [themeId, setThemeId] = useState(allThemes[0].id);
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [editMode, setEditMode] = useState(false);
+  const [selectedWorkerAttribute, setSelectedWorkerAttribute] = useState<WorkerAttributeFilter>("すべて");
+  const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
 
-  const themes = useMemo<LearningTheme[]>(
-    () => allThemes.map((t) => overrides[t.id] ?? t),
-    [overrides]
-  );
+  const themes = useMemo<LearningTheme[]>(() => {
+    const withOverrides = allThemes.map((t) => overrides[t.id] ?? t);
+    return withOverrides.filter((t) => {
+      if (selectedWorkerAttribute !== "すべて") {
+        const attrs = t.worker_attribute ?? ["一般"];
+        if (!attrs.includes(selectedWorkerAttribute) && !attrs.includes("一般")) return false;
+      }
+      if (selectedCompanySize !== "全規模") {
+        const size = t.company_size ?? "全規模";
+        if (size !== "全規模" && size !== selectedCompanySize) return false;
+      }
+      return true;
+    });
+  }, [overrides, selectedWorkerAttribute, selectedCompanySize]);
 
-  const selectedTheme = useMemo(() => themes.find((t) => t.id === themeId) ?? themes[0], [themes, themeId]);
+  const selectedTheme = useMemo(() => {
+    return themes.find((t) => t.id === themeId) ?? themes[0] ?? allThemes[0];
+  }, [themes, themeId]);
   const score = selectedTheme.questions.reduce(
     (sum, q) => sum + (answers[q.id] === q.correctIndex ? 1 : 0),
     0
@@ -116,6 +136,47 @@ export function ELearningPanel() {
         <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-800">
           全24テーマ
         </span>
+      </div>
+      {/* 属性・規模フィルタ */}
+      <div className="mt-3 flex flex-wrap gap-x-6 gap-y-3">
+        <div>
+          <p className="text-xs font-semibold text-slate-700">対象属性</p>
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            {WORKER_ATTRIBUTE_OPTIONS.map((attr) => (
+              <button
+                key={attr}
+                type="button"
+                onClick={() => setSelectedWorkerAttribute(attr)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  selectedWorkerAttribute === attr
+                    ? "bg-violet-600 text-white"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                {attr}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-slate-700">事業所規模</p>
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            {COMPANY_SIZE_OPTIONS.map((size) => (
+              <button
+                key={size}
+                type="button"
+                onClick={() => setSelectedCompanySize(size)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  selectedCompanySize === size
+                    ? "bg-teal-600 text-white"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
       <div className="mt-3">
         {isIntroCourse && (

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { LawRevision, RevisionImpact } from "@/lib/types/domain";
 import type { ServiceError } from "@/lib/types/api";
+import { fuzzyMatchAll } from "@/lib/fuzzy-search";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
 
@@ -64,6 +65,13 @@ const IMPACT_BADGE_CLASS: Record<RevisionImpact, string> = {
 
 // main: 業種フィルタ
 type IndustryFilter = "全業種" | "建設業" | "製造業";
+
+// 属性・規模フィルタ用定数
+const WORKER_ATTRIBUTE_OPTIONS = ["すべて", "女性労働者", "高齢者", "外国人", "非正規", "若年", "一般"] as const;
+type WorkerAttributeFilter = (typeof WORKER_ATTRIBUTE_OPTIONS)[number];
+
+const COMPANY_SIZE_OPTIONS = ["全規模", "大企業", "中小企業", "個人事業主"] as const;
+type CompanySizeFilter = (typeof COMPANY_SIZE_OPTIONS)[number];
 
 const CONSTRUCTION_KEYWORDS = ["建設", "足場", "高所作業", "解体", "土木", "鉛", "石綿", "アスベスト", "掘削", "型枠"];
 const MANUFACTURING_KEYWORDS = ["化学物質", "有機溶剤", "製造業", "機械", "プレス", "研削", "ボイラー", "特定化学", "粉じん", "爆発物"];
@@ -149,6 +157,9 @@ export function LawRevisionList({
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   // main: 業種フィルタ
   const [selectedIndustry, setSelectedIndustry] = useState<IndustryFilter>("全業種");
+  // 属性・規模フィルタ
+  const [selectedWorkerAttribute, setSelectedWorkerAttribute] = useState<WorkerAttributeFilter>("すべて");
+  const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
   // 詳細展開中のカードID
   const [expandedDetailId, setExpandedDetailId] = useState<string | null>(null);
 
@@ -165,20 +176,26 @@ export function LawRevisionList({
         const industries = resolveIndustry(r);
         if (!industries.includes(selectedIndustry) && !industries.includes("全業種")) return false;
       }
+      // 属性フィルタ
+      if (selectedWorkerAttribute !== "すべて") {
+        const attrs = r.worker_attribute ?? ["一般"];
+        if (!attrs.includes(selectedWorkerAttribute) && !attrs.includes("一般")) return false;
+      }
+      // 規模フィルタ
+      if (selectedCompanySize !== "全規模") {
+        const size = r.company_size ?? "全規模";
+        if (size !== "全規模" && size !== selectedCompanySize) return false;
+      }
       if (!q) return true;
-      return (
-        r.title.toLowerCase().includes(q) ||
-        r.summary.toLowerCase().includes(q) ||
-        r.issuer.toLowerCase().includes(q) ||
-        r.revisionNumber.toLowerCase().includes(q)
-      );
+      const target = `${r.title} ${r.summary} ${r.issuer} ${r.revisionNumber}`;
+      return fuzzyMatchAll(search.trim(), target);
     });
     // #40: 施行日ソート
     return results.sort((a, b) => {
       const diff = a.publishedAt.localeCompare(b.publishedAt);
       return sortOrder === "desc" ? -diff : diff;
     });
-  }, [revisions, search, yearFrom, yearTo, selectedKind, selectedImpact, sortOrder, selectedIndustry]);
+  }, [revisions, search, yearFrom, yearTo, selectedKind, selectedImpact, sortOrder, selectedIndustry, selectedWorkerAttribute, selectedCompanySize]);
 
   const showEmptyState = status === "success" && !error && filtered.length === 0;
 
@@ -246,6 +263,47 @@ export function LawRevisionList({
               {ind}
             </button>
           ))}
+        </div>
+      </div>
+      {/* 属性・規模フィルタ */}
+      <div className="mt-3 flex flex-wrap gap-x-6 gap-y-3">
+        <div>
+          <p className="text-xs font-semibold text-slate-700">対象属性</p>
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            {WORKER_ATTRIBUTE_OPTIONS.map((attr) => (
+              <button
+                key={attr}
+                type="button"
+                onClick={() => setSelectedWorkerAttribute(attr)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  selectedWorkerAttribute === attr
+                    ? "bg-violet-600 text-white"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                {attr}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-slate-700">事業所規模</p>
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            {COMPANY_SIZE_OPTIONS.map((size) => (
+              <button
+                key={size}
+                type="button"
+                onClick={() => setSelectedCompanySize(size)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  selectedCompanySize === size
+                    ? "bg-teal-600 text-white"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
       <div className="mt-3">

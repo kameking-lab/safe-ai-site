@@ -39,6 +39,12 @@ export type LearningTheme = {
   description: string;
   level: "入門" | "標準" | "重点";
   questions: LearningQuestion[];
+  /** 業種詳細 */
+  industry_detail?: string;
+  /** 対象労働者属性 */
+  worker_attribute?: string[];
+  /** 事業所規模 */
+  company_size?: string;
 };
 
 export type KySheetDraft = {

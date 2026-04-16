@@ -36,6 +36,12 @@ export type LawRevisionCore = {
   source_url?: string;
   /** 公布日（YYYY-MM-DD形式。不明なら空文字""） */
   publication_date?: string;
+  /** 業種詳細（建設/製造/林業/運輸/医療福祉/食品/化学/電気/農業/サービス/小売/IT/全業種 等） */
+  industry_detail?: string;
+  /** 対象労働者属性（女性労働者/高齢者/外国人/非正規/若年/一般） */
+  worker_attribute?: string[];
+  /** 事業所規模（大企業/中小企業/個人事業主/全規模） */
+  company_size?: string;
 };
 
 export type LawRevisionSummary = {
@@ -184,6 +190,12 @@ export type AccidentCase = {
   summary: string;
   mainCauses: string[];
   preventionPoints: string[];
+  /** 業種詳細 */
+  industry_detail?: string;
+  /** 対象労働者属性 */
+  worker_attribute?: string[];
+  /** 事業所規模 */
+  company_size?: string;
 };
 
 // API接続時に差し替えしやすいよう、UI側はこの別名を利用する。

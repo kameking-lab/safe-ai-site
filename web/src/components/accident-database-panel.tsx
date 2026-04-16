@@ -9,6 +9,7 @@ import {
   type AccidentType,
   type AccidentWorkCategory,
 } from "@/lib/types/domain";
+import { fuzzyMatchAll } from "@/lib/fuzzy-search";
 
 const PAGE_SIZE = 40;
 
@@ -16,6 +17,12 @@ type IndustryFilter = "全業種" | "建設業" | "製造業";
 
 const CONSTRUCTION_CATEGORIES: AccidentWorkCategory[] = ["建設", "高所", "足場", "重機", "解体"];
 const MANUFACTURING_CATEGORIES: AccidentWorkCategory[] = ["製造", "化学", "造船"];
+
+const WORKER_ATTRIBUTE_OPTIONS = ["すべて", "女性労働者", "高齢者", "外国人", "非正規", "若年", "一般"] as const;
+type WorkerAttributeFilter = (typeof WORKER_ATTRIBUTE_OPTIONS)[number];
+
+const COMPANY_SIZE_OPTIONS = ["全規模", "大企業", "中小企業", "個人事業主"] as const;
+type CompanySizeFilter = (typeof COMPANY_SIZE_OPTIONS)[number];
 
 function matchesIndustry(workCategory: AccidentWorkCategory, industry: IndustryFilter): boolean {
   if (industry === "全業種") return true;
@@ -59,10 +66,28 @@ export function AccidentDatabasePanel({
   const [page, setPage] = useState(0);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedIndustry, setSelectedIndustry] = useState<IndustryFilter>("全業種");
+  const [keyword, setKeyword] = useState("");
+  const [selectedWorkerAttribute, setSelectedWorkerAttribute] = useState<WorkerAttributeFilter>("すべて");
+  const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
 
   const filteredByIndustry = useMemo(
-    () => cases.filter((c) => matchesIndustry(c.workCategory, selectedIndustry)),
-    [cases, selectedIndustry]
+    () => cases.filter((c) => {
+      if (!matchesIndustry(c.workCategory, selectedIndustry)) return false;
+      if (selectedWorkerAttribute !== "すべて") {
+        const attrs = c.worker_attribute ?? ["一般"];
+        if (!attrs.includes(selectedWorkerAttribute) && !attrs.includes("一般")) return false;
+      }
+      if (selectedCompanySize !== "全規模") {
+        const size = c.company_size ?? "全規模";
+        if (size !== "全規模" && size !== selectedCompanySize) return false;
+      }
+      if (keyword.trim()) {
+        const target = `${c.title} ${c.summary} ${c.type} ${c.workCategory}`;
+        if (!fuzzyMatchAll(keyword.trim(), target)) return false;
+      }
+      return true;
+    }),
+    [cases, selectedIndustry, selectedWorkerAttribute, selectedCompanySize, keyword]
   );
 
   const pageItems = useMemo(() => {
@@ -88,6 +113,19 @@ export function AccidentDatabasePanel({
 
       <div className="mt-3 space-y-3">
         <div>
+          <label htmlFor="accident-keyword" className="block text-xs font-semibold text-slate-700">
+            キーワード検索
+          </label>
+          <input
+            id="accident-keyword"
+            type="text"
+            value={keyword}
+            onChange={(e) => { setKeyword(e.target.value); setPage(0); }}
+            placeholder="タイトル・概要・種別で検索（表記ゆれ対応）"
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none"
+          />
+        </div>
+        <div>
           <p className="text-xs font-semibold text-slate-700">業種フィルタ</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {(["全業種", "建設業", "製造業"] as IndustryFilter[]).map((ind) => (
@@ -105,6 +143,49 @@ export function AccidentDatabasePanel({
                 {ind}
               </button>
             ))}
+          </div>
+        </div>
+        {/* 属性・規模フィルタ */}
+        <div className="flex flex-wrap gap-x-6 gap-y-3">
+          <div>
+            <p className="text-xs font-semibold text-slate-700">対象属性</p>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {WORKER_ATTRIBUTE_OPTIONS.map((attr) => (
+                <button
+                  key={attr}
+                  type="button"
+                  onClick={() => {
+                    setSelectedWorkerAttribute(attr);
+                    setPage(0);
+                  }}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    attr === selectedWorkerAttribute ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  }`}
+                >
+                  {attr}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-xs font-semibold text-slate-700">事業所規模</p>
+            <div className="mt-1 flex flex-wrap gap-1.5">
+              {COMPANY_SIZE_OPTIONS.map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => {
+                    setSelectedCompanySize(size);
+                    setPage(0);
+                  }}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    size === selectedCompanySize ? "bg-teal-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
         <div>
