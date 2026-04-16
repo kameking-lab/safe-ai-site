@@ -246,7 +246,7 @@ export function ChatbotPanel() {
       <p className="text-xs text-slate-400 leading-5">
         ※ 回答は提供済み法令条文に基づくものです。最新の法令は
         <a
-          href="https://elaws.e-gov.go.jp/"
+          href="https://laws.e-gov.go.jp/"
           target="_blank"
           rel="noopener noreferrer"
           className="underline hover:text-slate-600"

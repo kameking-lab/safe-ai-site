@@ -92,7 +92,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
       { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },
-      { id: "notifications", label: "通知/配信", href: "/notifications", icon: Bell, badge: "soon" },
+      { id: "notifications", label: "通知/配信", href: "/notifications", icon: Bell },
       { id: "contact", label: "お問い合わせ", href: "/contact", icon: Mail },
       { id: "about", label: "運営者情報", href: "/about", icon: Info },
       { id: "bear-map", label: "クマ出没マップ", href: "/bear-map", icon: MapPin, description: "林業・山間部向け" },

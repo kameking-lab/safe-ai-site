@@ -160,7 +160,7 @@ export function HomeValueHero() {
         </div>
       </div>
 
-      {/* 4大機能カード */}
+      {/* 主要機能カード */}
       <div id="features-section" className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {FEATURES.map((f) => (
           <div
