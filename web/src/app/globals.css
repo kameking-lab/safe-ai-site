@@ -40,6 +40,49 @@ body {
   display: none;
 }
 
+/* モバイル基本文字サイズ */
+@media (max-width: 1023px) {
+  body {
+    font-size: 16px;
+  }
+  h2 {
+    font-size: 1.125rem; /* 18px */
+  }
+  h3 {
+    font-size: 1rem; /* 16px */
+  }
+}
+
+/* 文字大モード */
+html.large-font {
+  font-size: 18px;
+}
+html.large-font h1 {
+  font-size: 1.5rem;
+}
+html.large-font h2 {
+  font-size: 1.375rem;
+}
+html.large-font h3 {
+  font-size: 1.25rem;
+}
+html.large-font p,
+html.large-font li,
+html.large-font span,
+html.large-font button {
+  font-size: 1.05em;
+}
+
+/* ルビ（ふりがな）スタイル */
+ruby {
+  ruby-align: center;
+}
+ruby rt {
+  font-size: 0.5em;
+  color: #475569; /* slate-600 */
+  line-height: 1.2;
+}
+
 /* KY用紙 PDF/印刷スタイル */
 @media print {
   header,
