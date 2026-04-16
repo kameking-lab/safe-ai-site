@@ -87,6 +87,11 @@ export async function GET(request: NextRequest) {
       revisionNumber: revision.revisionNumber,
       issuer: revision.issuer,
       source: revision.source,
+      impact: revision.impact,
+      official_notice_number: revision.official_notice_number,
+      enforcement_date: revision.enforcement_date,
+      source_url: revision.source_url,
+      publication_date: revision.publication_date,
     })),
   };
   const response = NextResponse.json(body);
