@@ -23,6 +23,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://laws.e-gov.go.jp/law/347AC0000000057",
       label: "e-Gov 労働安全衛生法",
     },
+    official_notice_number: "",
+    publication_date: "2015-06-19",
+    enforcement_date: "2016-06-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-real-2016-002",
@@ -39,6 +43,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei12/",
       label: "厚生労働省 ストレスチェック制度",
     },
+    official_notice_number: "",
+    publication_date: "2014-06-25",
+    enforcement_date: "2015-12-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-real-2016-003",
@@ -55,6 +63,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://laws.e-gov.go.jp/law/428AC1000000111",
       label: "e-Gov 建設工事従事者安全健康確保推進法",
     },
+    official_notice_number: "",
+    publication_date: "2016-12-16",
+    enforcement_date: "2016-12-16",
+    source_url: "https://laws.e-gov.go.jp/law/428AC1000000111",
   },
 
   // ── 2017年 ──────────────────────────────────────────
@@ -73,6 +85,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000160837.html",
       label: "厚生労働省 産業医制度",
     },
+    official_notice_number: "厚生労働省令第29号",
+    publication_date: "2017-02-22",
+    enforcement_date: "2017-06-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-real-2017-002",
@@ -89,6 +105,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000117365.html",
       label: "厚生労働省 安全衛生教育",
     },
+    official_notice_number: "厚生労働省令第172号",
+    publication_date: "2016-12-28",
+    enforcement_date: "2017-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
 
   // ── 2018年 ──────────────────────────────────────────
@@ -107,6 +127,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000148322.html",
       label: "厚生労働省 働き方改革",
     },
+    official_notice_number: "",
+    publication_date: "2018-07-06",
+    enforcement_date: "2019-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-real-2018-002",
@@ -123,6 +147,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/newpage_01188.html",
       label: "厚生労働省 墜落制止用器具",
     },
+    official_notice_number: "厚生労働省告示第249号",
+    publication_date: "2018-06-22",
+    enforcement_date: "2019-02-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-real-2018-003",
@@ -139,6 +167,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000189195.html",
       label: "厚生労働省 受動喫煙対策",
     },
+    official_notice_number: "",
+    publication_date: "2018-07-25",
+    enforcement_date: "2020-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/330AC0000000103",
   },
 
   // ── 2019年 ──────────────────────────────────────────
@@ -157,6 +189,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000148322.html",
       label: "厚生労働省 働き方改革",
     },
+    official_notice_number: "",
+    publication_date: "2018-07-06",
+    enforcement_date: "2019-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-real-2019-002",
@@ -173,6 +209,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/newpage_01188.html",
       label: "厚生労働省 墜落制止用器具",
     },
+    official_notice_number: "厚生労働省告示第249号",
+    publication_date: "2018-06-22",
+    enforcement_date: "2019-02-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
 
   // ── 2020年 ──────────────────────────────────────────
@@ -191,6 +231,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/newpage_10178.html",
       label: "厚生労働省 エイジフレンドリーガイドライン",
     },
+    official_notice_number: "基発0316第1号",
+    publication_date: "2020-03-16",
+    enforcement_date: "2020-03-16",
+    source_url: "",
   },
   {
     id: "lr-real-2020-002",
@@ -207,6 +251,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000124546.html",
       label: "厚生労働省 化学物質管理",
     },
+    official_notice_number: "厚生労働省令第89号",
+    publication_date: "2020-04-22",
+    enforcement_date: "2021-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000040",
   },
   {
     id: "lr-real-2020-003",
@@ -223,6 +271,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000113878.html",
       label: "厚生労働省 石綿対策",
     },
+    official_notice_number: "",
+    publication_date: "2020-06-05",
+    enforcement_date: "2022-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/343AC0000000097",
   },
 
   // ── 2021年 ──────────────────────────────────────────
@@ -241,6 +293,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000124546.html",
       label: "厚生労働省 化学物質管理",
     },
+    official_notice_number: "厚生労働省令第89号",
+    publication_date: "2020-04-22",
+    enforcement_date: "2021-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000040",
   },
   {
     id: "lr-real-2021-002",
@@ -257,6 +313,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/shigoto/guideline.html",
       label: "厚生労働省 テレワークガイドライン",
     },
+    official_notice_number: "",
+    publication_date: "2021-03-25",
+    enforcement_date: "2021-03-25",
+    source_url: "",
   },
 
   // ── 2022年 ──────────────────────────────────────────
@@ -275,6 +335,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/newpage_01188.html",
       label: "厚生労働省 墜落制止用器具",
     },
+    official_notice_number: "厚生労働省告示第249号",
+    publication_date: "2018-06-22",
+    enforcement_date: "2022-01-02",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-real-2022-002",
@@ -291,6 +355,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html",
       label: "厚生労働省 化学物質の自律的管理",
     },
+    official_notice_number: "厚生労働省令第91号",
+    publication_date: "2022-05-31",
+    enforcement_date: "2023-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-real-2022-003",
@@ -307,6 +375,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html",
       label: "厚生労働省 安全衛生対策",
     },
+    official_notice_number: "厚生労働省令第82号",
+    publication_date: "2022-04-15",
+    enforcement_date: "2023-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
 
   // ── 2023年 ──────────────────────────────────────────
@@ -325,6 +397,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html",
       label: "厚生労働省 化学物質の自律的管理",
     },
+    official_notice_number: "厚生労働省令第91号",
+    publication_date: "2022-05-31",
+    enforcement_date: "2023-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-real-2023-002",
@@ -341,6 +417,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000113878.html",
       label: "厚生労働省 石綿対策",
     },
+    official_notice_number: "",
+    publication_date: "2020-06-05",
+    enforcement_date: "2023-10-01",
+    source_url: "https://laws.e-gov.go.jp/law/343AC0000000097",
   },
   {
     id: "lr-real-2023-003",
@@ -357,6 +437,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/newpage_32408.html",
       label: "厚生労働省 足場からの墜落防止",
     },
+    official_notice_number: "厚生労働省令第35号",
+    publication_date: "2023-03-29",
+    enforcement_date: "2023-10-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
 
   // ── 2024年 ──────────────────────────────────────────
@@ -375,6 +459,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000148322.html",
       label: "厚生労働省 働き方改革",
     },
+    official_notice_number: "",
+    publication_date: "2018-07-06",
+    enforcement_date: "2024-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/324AC0000000049",
   },
   {
     id: "lr-real-2024-002",
@@ -391,6 +479,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html",
       label: "厚生労働省 化学物質の自律的管理",
     },
+    official_notice_number: "厚生労働省令第91号",
+    publication_date: "2022-05-31",
+    enforcement_date: "2024-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-real-2024-003",
@@ -407,6 +499,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html",
       label: "厚生労働省 化学物質管理",
     },
+    official_notice_number: "厚生労働省告示第177号",
+    publication_date: "2023-04-28",
+    enforcement_date: "2024-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
 
   // ── 2025年 ──────────────────────────────────────────
@@ -425,6 +521,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00048.html",
       label: "厚生労働省 安衛法改正",
     },
+    official_notice_number: "",
+    publication_date: "2025-05-14",
+    enforcement_date: "2026-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-real-2025-002",
@@ -441,6 +541,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/anzen/denshishinsei.html",
       label: "厚生労働省 電子申請義務化",
     },
+    official_notice_number: "厚生労働省令第131号",
+    publication_date: "2024-11-29",
+    enforcement_date: "2025-01-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-real-2025-003",
@@ -457,6 +561,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000116133.html",
       label: "厚生労働省 熱中症対策",
     },
+    official_notice_number: "",
+    publication_date: "",
+    enforcement_date: "2025-06-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-real-2025-004",
@@ -473,6 +581,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00048.html",
       label: "厚生労働省 安衛法改正",
     },
+    official_notice_number: "",
+    publication_date: "",
+    enforcement_date: "2025-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
 
   // ── 2026年 ──────────────────────────────────────────
@@ -491,6 +603,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00048.html",
       label: "厚生労働省 安衛法改正",
     },
+    official_notice_number: "",
+    publication_date: "2025-05-14",
+    enforcement_date: "2026-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-real-2026-002",
@@ -507,6 +623,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00048.html",
       label: "厚生労働省 安衛法改正",
     },
+    official_notice_number: "",
+    publication_date: "2025-05-14",
+    enforcement_date: "2026-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-real-2026-003",
@@ -523,6 +643,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html",
       label: "厚生労働省 化学物質の自律的管理",
     },
+    official_notice_number: "",
+    publication_date: "",
+    enforcement_date: "2026-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
 
   // ── 2027年（予定） ──────────────────────────────────
@@ -541,6 +665,10 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00048.html",
       label: "厚生労働省 安衛法改正",
     },
+    official_notice_number: "",
+    publication_date: "2025-05-14",
+    enforcement_date: "2027-01-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-real-2027-002",
@@ -557,5 +685,9 @@ export const realLawRevisions: LawRevisionCore[] = [
       url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00048.html",
       label: "厚生労働省 安衛法改正",
     },
+    official_notice_number: "",
+    publication_date: "2025-05-14",
+    enforcement_date: "2027-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
 ];

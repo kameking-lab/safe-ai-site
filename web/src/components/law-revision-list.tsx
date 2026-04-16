@@ -6,7 +6,8 @@ import type { ServiceError } from "@/lib/types/api";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
 
-function formatPublishedDate(value: string) {
+function formatDate(value: string) {
+  if (!value) return null;
   const [year, month, day] = value.split("-");
   return `${year}/${month}/${day}`;
 }
@@ -54,27 +55,6 @@ type LawRevisionListProps = {
   onSelectForQuestion: (revisionId: string) => void;
 };
 
-const EGOV_LAW_NUMBERS: Record<string, string> = {
-  "労働安全衛生法": "347AC0000000057",
-  "労働基準法": "322AC0000000049",
-  "じん肺法": "335AC0000000030",
-  "労働安全衛生規則": "347M50002000032",
-  "クレーン等安全規則": "347M50002000034",
-  "有機溶剤中毒予防規則": "347M50002000036",
-  "特定化学物質障害予防規則": "347M50002000040",
-  "酸素欠乏症等防止規則": "347M50002000042",
-};
-
-function getEGovUrl(revision: LawRevision): string | null {
-  const text = revision.title;
-  for (const [lawName, lawNum] of Object.entries(EGOV_LAW_NUMBERS)) {
-    if (text.includes(lawName) || text.includes(lawName.replace("労働安全衛生", "安衛"))) {
-      return `https://laws.e-gov.go.jp/law/${lawNum}`;
-    }
-  }
-  return null;
-}
-
 // #40: 影響度バッジ
 const IMPACT_BADGE_CLASS: Record<RevisionImpact, string> = {
   高: "bg-red-100 text-red-700",
@@ -100,6 +80,55 @@ function resolveIndustry(revision: LawRevision): IndustryFilter[] {
   return industries.length > 0 ? industries : ["全業種"];
 }
 
+/** 出典情報ボックス（詳細展開時に表示） */
+function SourceInfoBox({ revision }: { revision: LawRevision }) {
+  const eGovUrl = revision.source_url ?? revision.source?.url ?? null;
+  const hasNoticeNumber = revision.official_notice_number && revision.official_notice_number !== "";
+  const hasPubDate = revision.publication_date && revision.publication_date !== "";
+  const hasEnfDate = revision.enforcement_date && revision.enforcement_date !== "";
+  const hasEGovUrl = eGovUrl && eGovUrl !== "";
+
+  if (!hasNoticeNumber && !hasPubDate && !hasEnfDate && !hasEGovUrl) return null;
+
+  return (
+    <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs">
+      <p className="mb-1.5 font-semibold text-blue-800">出典・施行情報</p>
+      <dl className="space-y-1">
+        {hasNoticeNumber && (
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="text-blue-700 font-medium whitespace-nowrap">告示番号</dt>
+            <dd className="text-blue-900">{revision.official_notice_number}</dd>
+          </div>
+        )}
+        {hasPubDate && (
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="text-blue-700 font-medium whitespace-nowrap">公布日</dt>
+            <dd className="text-blue-900">{formatDate(revision.publication_date!)}</dd>
+          </div>
+        )}
+        {hasEnfDate && (
+          <div className="flex flex-wrap gap-x-2">
+            <dt className="text-blue-700 font-medium whitespace-nowrap">施行日</dt>
+            <dd className="text-blue-900 font-semibold">{formatDate(revision.enforcement_date!)}</dd>
+          </div>
+        )}
+        {hasEGovUrl && (
+          <div className="mt-2">
+            <a
+              href={eGovUrl!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 rounded bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-blue-700 transition"
+            >
+              e-Govで原文を確認 →
+            </a>
+          </div>
+        )}
+      </dl>
+    </div>
+  );
+}
+
 export function LawRevisionList({
   revisions,
   selectedRevisionId,
@@ -120,6 +149,8 @@ export function LawRevisionList({
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   // main: 業種フィルタ
   const [selectedIndustry, setSelectedIndustry] = useState<IndustryFilter>("全業種");
+  // 詳細展開中のカードID
+  const [expandedDetailId, setExpandedDetailId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -300,6 +331,11 @@ export function LawRevisionList({
         {filtered.map((revision) => {
           const isSelected = selectedRevisionId === revision.id;
           const isLoadingSummary = loadingRevisionId === revision.id;
+          const isDetailExpanded = expandedDetailId === revision.id;
+          const hasEnfDate = revision.enforcement_date && revision.enforcement_date !== "";
+          const hasPubDate = revision.publication_date && revision.publication_date !== "";
+          const hasNoticeNum = revision.official_notice_number && revision.official_notice_number !== "";
+          const eGovUrl = revision.source_url && revision.source_url !== "" ? revision.source_url : null;
 
           return (
             <li
@@ -312,9 +348,22 @@ export function LawRevisionList({
             >
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold leading-6 text-slate-900">{revision.title}</h3>
-                <p className="text-xs text-slate-500">
-                  発行日: {formatPublishedDate(revision.publishedAt)}
-                </p>
+
+                {/* 日付行：公布日 / 施行日を別表示 */}
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
+                  {hasPubDate ? (
+                    <span>公布日: {formatDate(revision.publication_date!)}</span>
+                  ) : (
+                    <span>発行日: {formatDate(revision.publishedAt)}</span>
+                  )}
+                  {hasEnfDate && (
+                    <span className="font-medium text-slate-700">
+                      施行日: {formatDate(revision.enforcement_date!)}
+                    </span>
+                  )}
+                </div>
+
+                {/* 種別・影響度・法令番号バッジ行 */}
                 {(revision.kind || revision.revisionNumber || revision.impact) && (
                   <p className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
                     {revision.kind && (
@@ -338,7 +387,17 @@ export function LawRevisionList({
                     {revision.revisionNumber ?? ""}
                   </p>
                 )}
+
+                {/* 告示番号 */}
+                {hasNoticeNum && (
+                  <p className="text-xs text-slate-500">
+                    <span className="font-medium">告示番号:</span> {revision.official_notice_number}
+                  </p>
+                )}
+
                 <p className="text-sm leading-6 text-slate-700">{revision.summary}</p>
+
+                {/* 出典リンク */}
                 {resolveSourceLabel(revision) && (
                   <div className="text-xs text-slate-500">
                     出典:{" "}
@@ -356,21 +415,31 @@ export function LawRevisionList({
                     )}
                   </div>
                 )}
-              </div>
 
-              {(() => {
-                const eGovUrl = getEGovUrl(revision);
-                return eGovUrl ? (
+                {/* e-Govボタン（source_urlがあれば表示） */}
+                {eGovUrl && (
                   <a
                     href={eGovUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-600 underline decoration-blue-200 underline-offset-2 hover:text-blue-800"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 underline decoration-blue-200 underline-offset-2 hover:text-blue-800"
                   >
-                    e-Gov法令検索で原文を確認
+                    e-Govで原文を確認 →
                   </a>
-                ) : null;
-              })()}
+                )}
+              </div>
+
+              {/* 詳細展開ボタン */}
+              <button
+                type="button"
+                onClick={() => setExpandedDetailId(isDetailExpanded ? null : revision.id)}
+                className="mt-2 text-xs font-medium text-slate-500 hover:text-slate-700 transition"
+              >
+                {isDetailExpanded ? "▲ 出典情報を閉じる" : "▼ 出典情報を表示"}
+              </button>
+
+              {/* 詳細展開パネル */}
+              {isDetailExpanded && <SourceInfoBox revision={revision} />}
 
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <button

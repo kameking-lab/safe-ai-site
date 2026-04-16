@@ -28,6 +28,14 @@ export type LawRevisionCore = {
   source?: RevisionSource;
   /** 影響度（現場への影響の大きさ） */
   impact?: RevisionImpact;
+  /** 告示番号（例:「厚生労働省告示第XX号」。不明の場合は空文字""） */
+  official_notice_number?: string;
+  /** 施行日（YYYY-MM-DD形式。不明なら空文字""） */
+  enforcement_date?: string;
+  /** e-Gov直リンク（条文レベル。不明なら空文字""） */
+  source_url?: string;
+  /** 公布日（YYYY-MM-DD形式。不明なら空文字""） */
+  publication_date?: string;
 };
 
 export type LawRevisionSummary = {

@@ -17,6 +17,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "石綿含有製品の製造・使用の原則禁止を完全施行。一部代替困難な用途の特例措置を縮小。解体工事での石綿事前調査義務を明確化。",
     source: { url: "https://laws.e-gov.go.jp/law/417M50002000021", label: "e-Gov 石綿障害予防規則" },
+    official_notice_number: "厚生労働省令第2号",
+    publication_date: "2007-01-18",
+    enforcement_date: "2007-02-01",
+    source_url: "https://laws.e-gov.go.jp/law/417M50002000021",
   },
   {
     id: "lr-extra-2007-002",
@@ -28,6 +32,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "高所作業車・フォークリフト・移動式クレーン等の特別教育の内容を充実。実技教育時間を延長し安全操作の習熟を強化。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei36/", label: "厚生労働省 特別教育" },
+    official_notice_number: "厚生労働省告示第313号",
+    publication_date: "2007-06-01",
+    enforcement_date: "2007-07-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-extra-2007-003",
@@ -39,6 +47,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "1994年以来の腰痛予防対策指針を見直す中間まとめを公表。福祉・医療業界における介護作業での腰痛リスク軽減策を追加。",
     source: { url: "https://www.mhlw.go.jp/topics/bukyoku/roudou/an-eihou/index.html", label: "厚生労働省 腰痛予防" },
+    official_notice_number: "",
+    publication_date: "2007-09-01",
+    enforcement_date: "2007-09-01",
+    source_url: "",
   },
   // ── 2008年 ──
   {
@@ -51,6 +63,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "クレーン・移動式クレーン・デリックの構造規格に係る強度計算方法を改正。過負荷防止装置の設置・検査基準を強化。",
     source: { url: "https://laws.e-gov.go.jp/law/347M50002000034", label: "e-Gov クレーン等安全規則" },
+    official_notice_number: "厚生労働省令第7号",
+    publication_date: "2008-02-15",
+    enforcement_date: "2008-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000034",
   },
   {
     id: "lr-extra-2008-002",
@@ -62,6 +78,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省・経済産業省・環境省",
     summary: "化学物質の安全データシート（SDS）の記載内容についてGHSに対応した記載要領に改訂。16項目の統一フォーマットを導入。",
     source: { url: "https://www.mhlw.go.jp/new-info/kobetu/roudou/gyousei/anzen/dl/100601-1.pdf", label: "SDS記載要領" },
+    official_notice_number: "",
+    publication_date: "2008-03-01",
+    enforcement_date: "2008-05-27",
+    source_url: "",
   },
   {
     id: "lr-extra-2008-003",
@@ -73,6 +93,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "じん肺法に基づく健康診断の実施方法と管理区分判定基準を見直し。電子線マイクロアナライザーを用いた粉じん種別検査の導入。",
     source: { url: "https://laws.e-gov.go.jp/law/335AC0000000030", label: "e-Gov じん肺法" },
+    official_notice_number: "厚生労働省令第150号",
+    publication_date: "2008-08-25",
+    enforcement_date: "2008-10-01",
+    source_url: "https://laws.e-gov.go.jp/law/335AC0000000030",
   },
   // ── 2009年 ──
   {
@@ -85,6 +109,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "建築物の解体・改修工事における石綿事前調査の義務範囲を拡大。石綿含有材料の調査結果の記録・保管・報告義務を強化。",
     source: { url: "https://laws.e-gov.go.jp/law/417M50002000021", label: "e-Gov 石綿障害予防規則" },
+    official_notice_number: "厚生労働省令第24号",
+    publication_date: "2009-02-10",
+    enforcement_date: "2009-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/417M50002000021",
   },
   {
     id: "lr-extra-2009-002",
@@ -96,6 +124,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "OSHMS（労働安全衛生マネジメントシステム）指針を改訂。OHSAS 18001との整合を図り、危険性・有害性の調査（リスクアセスメント）の実施を強化。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei14/", label: "厚生労働省 OSHMS" },
+    official_notice_number: "厚生労働省告示第529号",
+    publication_date: "2009-11-10",
+    enforcement_date: "2009-11-10",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-extra-2009-003",
@@ -107,6 +139,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "足場の組立・解体時の作業の安全確保のため手すり先行工法を義務化。作業床の幅・隙間基準を強化し、安全帯取付設備の設置を義務化。",
     source: { url: "https://laws.e-gov.go.jp/law/347M50002000032", label: "e-Gov 労働安全衛生規則（足場）" },
+    official_notice_number: "厚生労働省令第57号",
+    publication_date: "2009-03-30",
+    enforcement_date: "2009-06-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   // ── 2010年 ──
   {
@@ -119,6 +155,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "特定化学物質障害予防規則等の局所排気装置・プッシュプル型換気装置の定期自主検査について、特定自主検査制度の適用範囲を拡大し検査者資格を明確化。",
     source: { url: "https://laws.e-gov.go.jp/law/347M50002000039", label: "e-Gov 特化則" },
+    official_notice_number: "厚生労働省令第28号",
+    publication_date: "2010-02-10",
+    enforcement_date: "2010-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000040",
   },
   {
     id: "lr-extra-2010-002",
@@ -130,6 +170,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "有機溶剤作業主任者技能講習のカリキュラムを充実。新規の有機溶剤の追加と健康影響の最新知見を反映し、リスクアセスメントの教育を追加。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei36/", label: "厚生労働省 技能講習" },
+    official_notice_number: "厚生労働省告示第316号",
+    publication_date: "2010-06-01",
+    enforcement_date: "2010-07-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000036",
   },
   // ── 2011年 ──
   {
@@ -142,6 +186,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "東京電力福島第一原子力発電所の事故対応に伴い緊急作業従事者の線量限度を100mSvから250mSvに引き上げ（特例措置）。事後は20mSv/年の通常基準に戻す。",
     source: { url: "https://www.mhlw.go.jp/stf/houdou/2r9852000001558w.html", label: "厚生労働省 原発対応" },
+    official_notice_number: "厚生労働省令第51号",
+    publication_date: "2011-04-22",
+    enforcement_date: "2011-04-22",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000041",
   },
   {
     id: "lr-extra-2011-002",
@@ -153,6 +201,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "金属アーク溶接・金属の溶断等での溶接ヒューム規制を強化。全体換気・局所排気の義務化対象を拡大し、呼吸用保護具の使用基準を明確化。",
     source: { url: "https://laws.e-gov.go.jp/law/352M50002000018", label: "e-Gov 粉じん障害防止規則" },
+    official_notice_number: "厚生労働省令第74号",
+    publication_date: "2011-05-25",
+    enforcement_date: "2011-08-01",
+    source_url: "https://laws.e-gov.go.jp/law/352M50002000018",
   },
   {
     id: "lr-extra-2011-003",
@@ -164,6 +216,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "製造業等の元方事業者（メーカー）と関係請負人の統括管理義務を強化。元方事業者による協議組織の設置・運営、作業間の連絡調整、巡視を義務化。",
     source: { url: "https://laws.e-gov.go.jp/law/347M50002000032", label: "e-Gov 安衛則（統括管理）" },
+    official_notice_number: "厚生労働省令第100号",
+    publication_date: "2011-08-31",
+    enforcement_date: "2011-11-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   // ── 2012年 ──
   {
@@ -176,6 +232,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "労働安全衛生法第57条の危険有害化学物質の表示についてGHS（国連勧告）に基づく表示（絵表示・シグナルワード・危険有害性情報等）を完全適用。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei50/", label: "厚生労働省 GHS" },
+    official_notice_number: "厚生労働省告示第63号",
+    publication_date: "2012-02-20",
+    enforcement_date: "2012-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-extra-2012-002",
@@ -187,6 +247,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省労働基準局安全衛生部",
     summary: "建設業での墜落・転落災害が引き続き死亡災害の主因であることから、足場の組立・解体時の安全帯使用、手すり設置の徹底を重点的に指導する通達を発出。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei28/index.html", label: "厚生労働省 建設業安全" },
+    official_notice_number: "基安発0601第1号",
+    publication_date: "2012-06-01",
+    enforcement_date: "2012-06-01",
+    source_url: "",
   },
   {
     id: "lr-extra-2012-003",
@@ -198,6 +262,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "溶接ヒューム（マンガン化合物を含む）の職業性発がんリスクの調査を本格化。IARCの発がん性評価（グループ1）を受け特定化学物質への追加を検討開始。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei50/", label: "厚生労働省 溶接ヒューム" },
+    official_notice_number: "",
+    publication_date: "2012-10-01",
+    enforcement_date: "",
+    source_url: "",
   },
   // ── 2013年 ──
   {
@@ -210,6 +278,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "化学物質のリスクアセスメント義務化・受動喫煙防止の努力義務・特定機械等の定期自主検査記録の3年保存義務等を規定。ストレスチェック制度の創設（2015年施行）。",
     source: { url: "https://laws.e-gov.go.jp/law/347AC0000000057", label: "e-Gov 労働安全衛生法" },
+    official_notice_number: "",
+    publication_date: "2013-06-26",
+    enforcement_date: "2014-06-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-extra-2013-002",
@@ -221,6 +293,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "安全帯の規格（昭和55年告示）を改正。フルハーネス型安全帯を対応規格に追加し性能試験方法を更新。5m以上の高所でのフルハーネス普及を後押し。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei28/index.html", label: "厚生労働省 安全帯規格" },
+    official_notice_number: "厚生労働省告示第318号",
+    publication_date: "2013-08-01",
+    enforcement_date: "2013-09-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-extra-2013-003",
@@ -232,6 +308,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "外国人技能実習生の労働災害が増加していることを受け、雇用事業主に対し母国語での安全衛生教育実施・テキスト整備を義務付けた通達を発出。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei36/", label: "厚生労働省 外国人技能実習" },
+    official_notice_number: "基発0325第1号",
+    publication_date: "2013-03-25",
+    enforcement_date: "2013-03-25",
+    source_url: "",
   },
   // ── 2014年 ──
   {
@@ -244,6 +324,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "化学物質のリスクアセスメント義務化（2016年施行）・ストレスチェック制度の義務化（2015年施行）・高熱作業等の特殊健康診断の追加・特定機械の輸入時規制強化等を含む改正。",
     source: { url: "https://laws.e-gov.go.jp/law/347AC0000000057", label: "e-Gov 労働安全衛生法" },
+    official_notice_number: "",
+    publication_date: "2014-06-25",
+    enforcement_date: "2015-12-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-extra-2014-002",
@@ -255,6 +339,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "放射線業務従事者の被曝線量限度・測定記録の管理方法を改正。外部被曝・内部被曝の実効線量の算定方法をIAEA安全基準に準拠させ、女性への配慮規定を強化。",
     source: { url: "https://laws.e-gov.go.jp/law/347M50002000041", label: "e-Gov 電離則" },
+    official_notice_number: "厚生労働省令第131号",
+    publication_date: "2014-08-20",
+    enforcement_date: "2014-11-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000041",
   },
   {
     id: "lr-extra-2014-003",
@@ -266,6 +354,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "建設業における一人親方等の自営業者の労働災害が深刻であることから、元方事業者による一人親方への安全衛生教育・保護具支給の推奨と安全衛生計画への組込みを促進する通達。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei50/", label: "厚生労働省 一人親方安全" },
+    official_notice_number: "基発0401第6号",
+    publication_date: "2014-04-01",
+    enforcement_date: "2014-04-01",
+    source_url: "",
   },
   // ── 2015年 ──
   {
@@ -278,6 +370,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "2016年6月施行の化学物質リスクアセスメント義務化（安衛法改正）に向け、事業場がリスクアセスメント実施に必要な準備（対象物質確認・担当者選任・手法選択等）の指導通達。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei50/", label: "厚生労働省 化学物質RA" },
+    official_notice_number: "基発0918第3号",
+    publication_date: "2015-09-18",
+    enforcement_date: "2015-09-18",
+    source_url: "",
   },
   {
     id: "lr-extra-2015-002",
@@ -289,6 +385,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "高所作業でのフルハーネス型安全帯の普及促進のため、使用対象・選択・使用方法・点検・廃棄基準を示したガイドラインを策定。胴ベルト型との選択基準を明確化。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei28/index.html", label: "厚生労働省 フルハーネス" },
+    official_notice_number: "",
+    publication_date: "2015-03-01",
+    enforcement_date: "2015-03-01",
+    source_url: "",
   },
   {
     id: "lr-extra-2015-003",
@@ -300,6 +400,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "石綿含有製品の代替化状況を確認し、残存する一部特例製品（高温・腐食環境用ガスケット等）への規制継続と代替化の促進を求める通達。石綿代替の健康安全性評価も要求。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/sekimen/", label: "厚生労働省 石綿代替" },
+    official_notice_number: "基発0601第4号",
+    publication_date: "2015-06-01",
+    enforcement_date: "2015-06-01",
+    source_url: "",
   },
   {
     id: "lr-extra-2015-004",
@@ -311,6 +415,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "常時50人以上の労働者を使用する事業場に対しストレスチェックの実施を義務化。高ストレス者への医師による面接指導・就業上の措置の実施を規定。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei12/", label: "厚生労働省 ストレスチェック" },
+    official_notice_number: "",
+    publication_date: "2014-06-25",
+    enforcement_date: "2015-12-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   // ── 2017年 追加 ──
   {
@@ -323,6 +431,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "産業医の職場巡視頻度を原則月1回から「2か月に1回可」に緩和（ただし情報提供条件付）。その代わり産業医への情報提供義務（長時間労働者名簿・労働環境情報等）を強化。",
     source: { url: "https://laws.e-gov.go.jp/law/347M50002000032", label: "e-Gov 安衛則（産業医）" },
+    official_notice_number: "厚生労働省令第49号",
+    publication_date: "2017-04-14",
+    enforcement_date: "2017-06-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-extra-2017-002",
@@ -334,6 +446,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "建設業等の一人親方の労働者災害補償保険の特別加入について、対象範囲の確認と特別加入団体の管理強化。一人親方の特別加入促進のための周知活動を強化。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/rousaihoken06/03.html", label: "厚生労働省 特別加入" },
+    official_notice_number: "厚生労働省令第23号",
+    publication_date: "2017-02-17",
+    enforcement_date: "2017-04-01",
+    source_url: "",
   },
   {
     id: "lr-extra-2017-003",
@@ -345,6 +461,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "溶接ヒュームについて、労働政策審議会安全衛生分科会での審議が本格化。IARCの発がん性分類グループ1（ヒトに対する発がん性あり）を受け特定化学物質第二類への追加を審議。",
     source: { url: "https://www.mhlw.go.jp/stf/houdou/newpage_00025.html", label: "厚生労働省 溶接ヒューム" },
+    official_notice_number: "",
+    publication_date: "2017-10-01",
+    enforcement_date: "",
+    source_url: "",
   },
   // ── 2018年 追加 ──
   {
@@ -357,6 +477,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "「働き方改革関連法」として安衛法を改正。産業医・産業保健機能を強化し、長時間労働者への医師面接指導の要件を月100時間超から80時間超に厳格化。面接指導記録の5年保存義務を新設。",
     source: { url: "https://laws.e-gov.go.jp/law/347AC0000000057", label: "e-Gov 労働安全衛生法" },
+    official_notice_number: "",
+    publication_date: "2018-07-06",
+    enforcement_date: "2019-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-extra-2018-002",
@@ -368,6 +492,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "60歳以上の高年齢労働者の労働災害が全体の約30%を占めることを踏まえ、転倒・転落・腰痛予防の重点対策と高年齢者向け安全衛生教育の実施を促進する通達を発出。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00048.html", label: "厚生労働省 高年齢者安全" },
+    official_notice_number: "基発0831第1号",
+    publication_date: "2018-08-31",
+    enforcement_date: "2018-08-31",
+    source_url: "",
   },
   {
     id: "lr-extra-2018-003",
@@ -379,6 +507,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "職場での熱中症による死亡・重篤災害が続いていることを受け、「WBGT値の測定・活用」「水分・塩分補給の実施」「作業中の体調確認」を3本柱とするキャンペーンを開始。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000116133.html", label: "厚生労働省 熱中症予防" },
+    official_notice_number: "",
+    publication_date: "2018-04-26",
+    enforcement_date: "2018-05-01",
+    source_url: "",
   },
   // ── 2019年 追加 ──
   {
@@ -391,6 +523,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "高所作業での墜落制止用器具について、名称を「安全帯」から「墜落制止用器具」に変更。6.75m超の高所（建設業は5m超）ではフルハーネス型の使用を原則義務化（2022年1月完全施行）。",
     source: { url: "https://laws.e-gov.go.jp/law/347M50002000032", label: "e-Gov 安衛則（墜落制止）" },
+    official_notice_number: "厚生労働省令第6号",
+    publication_date: "2018-06-22",
+    enforcement_date: "2019-02-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-extra-2019-002",
@@ -402,6 +538,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "新たな在留資格「特定技能」の創設に伴い、特定技能外国人に対する安全衛生教育の実施・多言語対応・母国語での指導を事業者に徹底するよう通達。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00048.html", label: "厚生労働省 外国人労働者安全" },
+    official_notice_number: "基発0401第29号",
+    publication_date: "2019-04-01",
+    enforcement_date: "2019-04-01",
+    source_url: "",
   },
   {
     id: "lr-extra-2019-003",
@@ -413,6 +553,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "2013年改訂の腰痛予防対策指針をさらに見直し、ICT活用（ウェアラブルセンサーによる負荷計測）や介護ロボット活用などの新技術に対応した腰痛予防策を追加。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/anzen/anzeneisei_index.html", label: "厚生労働省 腰痛予防" },
+    official_notice_number: "",
+    publication_date: "2019-03-29",
+    enforcement_date: "2019-03-29",
+    source_url: "",
   },
   // ── 2020年 追加 ──
   {
@@ -425,6 +569,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "コロナ禍でのテレワーク急速普及に対応し、在宅勤務の安全衛生管理・作業環境の確保・長時間労働防止・メンタルヘルスケアに関するガイドラインを策定。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/an-eihou/telework_20200708.html", label: "厚生労働省 テレワーク安全" },
+    official_notice_number: "",
+    publication_date: "2020-05-25",
+    enforcement_date: "2020-05-25",
+    source_url: "",
   },
   {
     id: "lr-extra-2020-002",
@@ -436,6 +584,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "新型コロナウイルス感染症の労働現場での拡大防止のため、マスク着用・換気・手洗い・3密回避・体調不良者の出勤禁止等の感染予防措置を事業者に求める通達。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000121431_00182.html", label: "厚生労働省 コロナ対策" },
+    official_notice_number: "基発0402第1号",
+    publication_date: "2020-04-02",
+    enforcement_date: "2020-04-02",
+    source_url: "",
   },
   {
     id: "lr-extra-2020-003",
@@ -447,6 +599,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "GHS分類で危険有害性が明らかな全約2,900物質を管理対象とする「自律的管理」制度への転換について本格検討を開始。EUのREACH規制を参考にした日本版制度の設計着手。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html", label: "厚生労働省 化学物質自律管理" },
+    official_notice_number: "",
+    publication_date: "2020-10-01",
+    enforcement_date: "",
+    source_url: "",
   },
   // ── 2021年 追加 ──
   {
@@ -459,6 +615,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "溶接ヒュームを特定化学物質第二類物質に追加。溶接作業での呼吸用保護具使用義務・特殊健康診断の実施義務・特定化学物質作業主任者の選任義務が発生。2022年4月施行。",
     source: { url: "https://laws.e-gov.go.jp/law/347M50002000039", label: "e-Gov 特化則（溶接ヒューム）" },
+    official_notice_number: "厚生労働省令第36号",
+    publication_date: "2021-02-26",
+    enforcement_date: "2021-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000040",
   },
   {
     id: "lr-extra-2021-002",
@@ -470,6 +630,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "70歳までの就業確保措置を努力義務化。高年齢者の増加を見据え、高年齢者の安全配慮・作業負荷軽減・健康管理の重要性が一層高まった。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00048.html", label: "厚生労働省 高年齢者雇用" },
+    official_notice_number: "",
+    publication_date: "2020-03-31",
+    enforcement_date: "2021-04-01",
+    source_url: "",
   },
   {
     id: "lr-extra-2021-003",
@@ -481,6 +645,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "化学物質管理の「自律的管理」への転換を定めた安衛法改正が公布。リスクアセスメント対象物質への対応・事業者が自らリスクを評価し措置する仕組みを中心に規制を再構築。",
     source: { url: "https://laws.e-gov.go.jp/law/347AC0000000057", label: "e-Gov 労働安全衛生法" },
+    official_notice_number: "",
+    publication_date: "2021-05-18",
+    enforcement_date: "2023-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-extra-2021-004",
@@ -492,6 +660,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "建設業を中心とした墜落・転落災害の抜本的防止のため、フルハーネス型墜落制止用器具の適切な使用、足場点検の実施、安全帯取付設備の設置を重点的に推進する改訂要綱を通達。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei28/index.html", label: "厚生労働省 墜落防止" },
+    official_notice_number: "基発0331第1号",
+    publication_date: "2021-03-31",
+    enforcement_date: "2021-03-31",
+    source_url: "",
   },
   // ── 2022年 追加 ──
   {
@@ -504,6 +676,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "安衛則・特化則・有機則等を大改正。GHS分類で危険有害性がある約2,900物質をリスクアセスメント対象物質として一元管理。化学物質管理者・保護具着用管理責任者の選任義務を新設。2023年4月施行。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html", label: "厚生労働省 化学物質管理" },
+    official_notice_number: "厚生労働省令第91号",
+    publication_date: "2022-05-31",
+    enforcement_date: "2023-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-extra-2022-002",
@@ -515,6 +691,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "2019年2月改正安衛則の経過措置が終了し、6.75m超（建設業は5m超）の高所でのフルハーネス型墜落制止用器具の使用義務が完全施行。胴ベルト型のみでの高所作業が原則不可。",
     source: { url: "https://laws.e-gov.go.jp/law/347M50002000032", label: "e-Gov 安衛則（フルハーネス）" },
+    official_notice_number: "厚生労働省令第6号",
+    publication_date: "2018-06-22",
+    enforcement_date: "2022-01-02",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-extra-2022-003",
@@ -526,6 +706,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "低圧電気取扱業務の特別教育について、蓄電池（EVバッテリー等）を扱う業務を追加。直流750V超1000V以下の低圧蓄電池充電作業の特別教育を義務化。",
     source: { url: "https://laws.e-gov.go.jp/law/347M50002000032", label: "e-Gov 安衛則（電気特別教育）" },
+    official_notice_number: "厚生労働省令第118号",
+    publication_date: "2022-08-24",
+    enforcement_date: "2022-10-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-extra-2022-004",
@@ -537,6 +721,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "職場における熱中症予防基本対策要綱を改訂。WBGT値（暑さ指数）を基準とした作業管理の具体的な手順・休憩付与の基準を明確化。作業開始前のWBGT測定を事業者に義務付け。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000116133.html", label: "厚生労働省 熱中症対策要綱" },
+    official_notice_number: "基発0331第1号",
+    publication_date: "2022-03-31",
+    enforcement_date: "2022-04-01",
+    source_url: "",
   },
   {
     id: "lr-extra-2022-005",
@@ -548,6 +736,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "建築物の解体・改修工事前の石綿事前調査を「建築物石綿含有建材調査者（有資格者）」が実施することを義務化（一定規模以上）。調査結果の都道府県知事への報告義務も新設。",
     source: { url: "https://laws.e-gov.go.jp/law/417M50002000021", label: "e-Gov 石綿障害予防規則" },
+    official_notice_number: "厚生労働省令第139号",
+    publication_date: "2021-08-17",
+    enforcement_date: "2022-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/417M50002000021",
   },
   // ── 2023年 追加 ──
   {
@@ -560,6 +752,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "改正安衛則の第1段階施行。リスクアセスメント対象物を製造・取扱う事業場への化学物質管理者の選任義務、保護具着用管理責任者の選任義務、SDSの通知義務強化等が発効。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html", label: "厚生労働省 化学物質管理" },
+    official_notice_number: "厚生労働省令第91号",
+    publication_date: "2022-05-31",
+    enforcement_date: "2023-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-extra-2023-002",
@@ -571,6 +767,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "一人親方等の個人事業者に対して安全衛生対策（特別教育・健康診断・保護具着用等）を適用する安衛法改正が公布。2024年から段階施行。建設業・製造業・林業が優先対象。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00048.html", label: "厚生労働省 個人事業者安全" },
+    official_notice_number: "",
+    publication_date: "2023-05-12",
+    enforcement_date: "2024-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-extra-2023-003",
@@ -582,6 +782,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "化学物質管理の第2段階施行。SDS交付義務対象物質の拡大（約1,000物質追加）・皮膚等障害化学物質への不浸透性保護具の使用義務化・リスクアセスメント結果に基づく措置義務の強化が発効。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html", label: "厚生労働省 化学物質RA" },
+    official_notice_number: "厚生労働省令第91号",
+    publication_date: "2022-05-31",
+    enforcement_date: "2023-10-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-extra-2023-004",
@@ -593,6 +797,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "屋外作業での熱中症対策（WBGT測定・水分補給・休憩）の実施を努力義務として安衛法に明記。事業者が熱中症対策を怠った場合の行政指導の根拠を法的に整備。",
     source: { url: "https://laws.e-gov.go.jp/law/347AC0000000057", label: "e-Gov 労働安全衛生法" },
+    official_notice_number: "",
+    publication_date: "2023-06-09",
+    enforcement_date: "2024-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-extra-2023-005",
@@ -604,6 +812,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "建設業での墜落・転落災害防止のため、フルハーネス型墜落制止用器具の使用に必要な取付設備（親綱・アンカー）の事前設置を建設現場の計画段階から確保するよう指導する通達。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei28/index.html", label: "厚生労働省 高所作業" },
+    official_notice_number: "基発0331第2号",
+    publication_date: "2023-03-31",
+    enforcement_date: "2023-03-31",
+    source_url: "",
   },
   // ── 2024年 追加 ──
   {
@@ -616,6 +828,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "建設業・製造業・林業等で働く一人親方等個人事業者への安全衛生規制が本格施行。特別教育受講義務・健康診断実施義務・保護具着用義務の適用が開始。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000188411_00048.html", label: "厚生労働省 個人事業者安全" },
+    official_notice_number: "",
+    publication_date: "2023-05-12",
+    enforcement_date: "2024-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
   },
   {
     id: "lr-extra-2024-002",
@@ -627,6 +843,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "「働き方改革関連法」による時間外労働の上限規制（原則月45時間・年360時間、特例でも年720時間）が建設業にも適用開始。長時間労働の抑制によるメンタルヘルス・疲労蓄積による事故防止が期待。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000060037.html", label: "厚生労働省 建設業時間外" },
+    official_notice_number: "",
+    publication_date: "2018-07-06",
+    enforcement_date: "2024-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/324AC0000000049",
   },
   {
     id: "lr-extra-2024-003",
@@ -638,6 +858,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "化学物質管理の自律的管理の第2段階が完全施行。リスクアセスメント対象物のばく露低減措置・ばく露記録の30年保存（がん原性物質）・呼吸用保護具の選択・使用義務が発効。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html", label: "厚生労働省 化学物質管理" },
+    official_notice_number: "厚生労働省令第91号",
+    publication_date: "2022-05-31",
+    enforcement_date: "2024-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-extra-2024-004",
@@ -649,6 +873,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "環境省・厚生労働省",
     summary: "大気汚染防止法改正による石綿（アスベスト）の規制が完全施行。全ての解体・改修工事で事前調査結果の行政報告が義務化。作業計画・飛散防止措置・作業終了確認の義務も強化。",
     source: { url: "https://www.env.go.jp/air/asbestos/", label: "環境省 石綿対策" },
+    official_notice_number: "",
+    publication_date: "2020-06-05",
+    enforcement_date: "2024-01-01",
+    source_url: "https://laws.e-gov.go.jp/law/343AC0000000097",
   },
   {
     id: "lr-extra-2024-005",
@@ -660,6 +888,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "精神障害の業務上認定（労災認定）基準を改正。パワーハラスメント・カスタマーハラスメントを新たな具体的出来事として追加。長時間労働（月100時間超）との複合要因評価も明確化。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/rousaihoken04/040325.html", label: "厚生労働省 精神障害労災認定" },
+    official_notice_number: "基発0926第1号",
+    publication_date: "2024-09-26",
+    enforcement_date: "2024-09-26",
+    source_url: "",
   },
   // ── 2025年 追加 ──
   {
@@ -672,6 +904,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "化学物質管理の自律的管理制度の定着状況を踏まえ、化学物質管理者の能力向上・ばく露測定の実施推進・中小事業場へのサポート強化を図る通達を発出。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121_00005.html", label: "厚生労働省 化学物質管理" },
+    official_notice_number: "基発0325第5号",
+    publication_date: "2025-03-25",
+    enforcement_date: "2025-03-25",
+    source_url: "",
   },
   {
     id: "lr-extra-2025-002",
@@ -683,6 +919,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "建設業の重層下請構造において元方事業者の安全衛生管理責任範囲を明確化。下請業者の安全管理状況確認義務・書面による安全衛生計画の共有義務を強化。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei28/index.html", label: "厚生労働省 建設業安全" },
+    official_notice_number: "",
+    publication_date: "",
+    enforcement_date: "2025-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-extra-2025-003",
@@ -694,6 +934,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "製造・物流現場へのAI・協働ロボット・AGV（自動搬送機器）の導入に際し、機械との接触事故・誤作動による災害防止のためのリスクアセスメント手法とセーフティ設計ガイドラインを策定。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei50/", label: "厚生労働省 AI・ロボット安全" },
+    official_notice_number: "",
+    publication_date: "2025-03-01",
+    enforcement_date: "2025-03-01",
+    source_url: "",
   },
   {
     id: "lr-extra-2016-004",
@@ -705,6 +949,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "じん肺健診結果・管理区分の電子申請・データ管理の仕組みを整備。エックス線写真の電子化・読影基準の更新を実施し、都道府県労働局への報告効率を改善。",
     source: { url: "https://laws.e-gov.go.jp/law/335AC0000000030", label: "e-Gov じん肺法" },
+    official_notice_number: "厚生労働省令第55号",
+    publication_date: "2016-02-29",
+    enforcement_date: "2016-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/335AC0000000030",
   },
   {
     id: "lr-extra-2020-004",
@@ -716,6 +964,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "じん肺健康診断においてX線写真に加えCT検査を補完的に活用できることを明確化。特に初期病変の検出精度向上を目的とし、じん肺管理区分判定の精度を高める通達を発出。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei50/", label: "厚生労働省 じん肺" },
+    official_notice_number: "基発0331第27号",
+    publication_date: "2020-03-31",
+    enforcement_date: "2020-03-31",
+    source_url: "",
   },
   {
     id: "lr-extra-2024-006",
@@ -727,6 +979,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "記録的猛暑を背景に、屋外・屋内高温作業での熱中症対策を強化。WBGT28以上での作業開始前の体調確認義務化・冷房休憩施設の設置推奨・応急処置（AED・冷却）訓練を推進する通達を改訂。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000116133.html", label: "厚生労働省 熱中症対策" },
+    official_notice_number: "",
+    publication_date: "2024-05-17",
+    enforcement_date: "2024-05-17",
+    source_url: "",
   },
   {
     id: "lr-extra-2025-004",
@@ -738,6 +994,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "林業の死亡災害率が依然高い状況を受け、伐木作業の安全基準を改訂。受け口・追い口の設定基準の明確化・チェーンソー防護衣の義務化対象の拡大・ヘルメット・チャップス着用の法定化。",
     source: { url: "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei28/index.html", label: "厚生労働省 林業安全" },
+    official_notice_number: "",
+    publication_date: "",
+    enforcement_date: "2025-04-01",
+    source_url: "https://laws.e-gov.go.jp/law/347M50002000032",
   },
   {
     id: "lr-extra-2025-005",
@@ -749,6 +1009,10 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "厚生労働省",
     summary: "顧客・取引先等からの著しい迷惑行為（カスタマーハラスメント）への対処方針策定・体制整備・相談窓口設置等を事業者に義務付ける法律が公布。労働者のメンタルヘルスへの深刻な影響に対処。",
     source: { url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyoukintou/seisaku06/index.html", label: "厚生労働省 カスハラ対策" },
+    official_notice_number: "",
+    publication_date: "2025-05-21",
+    enforcement_date: "",
+    source_url: "",
   },
   {
     id: "lr-extra-2023-006",
@@ -760,5 +1024,9 @@ export const realLawRevisionsExtra: LawRevisionCore[] = [
     issuer: "国土交通省・厚生労働省",
     summary: "建設工事の下請契約において、安全衛生対策費用を工事価格と別に明示・計上することを促進する通達。安全対策費用が圧縮されることによる災害増加を防止するため、見積り段階からの安全コスト明示を指導。",
     source: { url: "https://www.mlit.go.jp/tochi_fudousan_kensetsugyo/const/tochi_fudousan_kensetsugyo_const_tk2_000001_00017.html", label: "国土交通省 安全衛生経費" },
+    official_notice_number: "",
+    publication_date: "2023-10-01",
+    enforcement_date: "2023-10-01",
+    source_url: "",
   },
 ];
