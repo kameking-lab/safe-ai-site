@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { allLawArticles, type LawArticle } from "@/data/laws";
 import { InputWithVoice } from "@/components/voice-input-field";
+import { LastUpdatedBadge } from "@/components/last-updated-badge";
 
 /** 漢数字を算用数字に変換（例: 第二十一条 → 第21条） */
 function kanjiToNum(str: string): string {
@@ -209,7 +210,10 @@ export function LawSearchPanel() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
       <div>
-        <h1 className="text-xl font-bold text-slate-900 lg:text-2xl">法令全文検索</h1>
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-xl font-bold text-slate-900 lg:text-2xl">法令全文検索</h1>
+          <LastUpdatedBadge />
+        </div>
         <p className="mt-1 text-sm text-slate-600">
           キーワード・条番号・法令名で条文を検索できます。漢数字（第二十一条）と算用数字（第21条）は同等に検索されます。
         </p>

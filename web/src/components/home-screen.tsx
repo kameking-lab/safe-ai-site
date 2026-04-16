@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChatPanel, type ChatMessage } from "@/components/chat-panel";
 import { AccidentDatabasePanel } from "@/components/accident-database-panel";
+import { AccidentAnalysisPanel } from "@/components/accident-analysis-panel";
 import { ELearningPanel } from "@/components/elearning-panel";
 import { HomeValueHero } from "@/components/home-value-hero";
 import { KyRecordList } from "@/components/ky-record-list";
@@ -145,6 +146,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
   const [accidentError, setAccidentError] = useState<ServiceError | null>(null);
   const [selectedAccidentType, setSelectedAccidentType] = useState<AccidentType | "すべて">("すべて");
   const [selectedAccidentCategory, setSelectedAccidentCategory] = useState<AccidentWorkCategory | "すべて">("すべて");
+  const [accidentActiveTab, setAccidentActiveTab] = useState<"list" | "analysis">("list");
   const [selectedRegionName, setSelectedRegionName] = useState(
     () => services.weatherRisk.getAvailableRegions()[0]?.regionName ?? ""
   );
@@ -513,18 +515,42 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
       {variant === "accidents" ? (
         <>
           <section className="px-4 pt-4 lg:px-8">{children}</section>
+          {/* タブ切り替え */}
+          <div className="px-4 pt-4 lg:px-8">
+            <div className="flex gap-1 rounded-xl bg-slate-100 p-1 w-fit">
+              {(["list", "analysis"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setAccidentActiveTab(tab)}
+                  className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+                    accidentActiveTab === tab
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
+                >
+                  {tab === "list" ? "一覧" : "分析"}
+                </button>
+              ))}
+            </div>
+          </div>
           <section id="section-accidents" className="space-y-4 px-4 pt-4 lg:px-8">
-            <AccidentDatabasePanel
-              cases={accidentCases}
-              allCases={services.accident.getAllAccidentCases()}
-              selectedCategory={selectedAccidentCategory}
-              selectedType={selectedAccidentType}
-              onSelectCategory={setSelectedAccidentCategory}
-              onSelectType={setSelectedAccidentType}
-              status={accidentStatus}
-              errorMessage={accidentError?.message ?? null}
-            />
-            <MhlwDisasterDatabasesPanel />
+            {accidentActiveTab === "list" ? (
+              <>
+                <AccidentDatabasePanel
+                  cases={accidentCases}
+                  allCases={services.accident.getAllAccidentCases()}
+                  selectedCategory={selectedAccidentCategory}
+                  selectedType={selectedAccidentType}
+                  onSelectCategory={setSelectedAccidentCategory}
+                  onSelectType={setSelectedAccidentType}
+                  status={accidentStatus}
+                  errorMessage={accidentError?.message ?? null}
+                />
+                <MhlwDisasterDatabasesPanel />
+              </>
+            ) : (
+              <AccidentAnalysisPanel cases={services.accident.getAllAccidentCases()} />
+            )}
           </section>
         </>
       ) : null}

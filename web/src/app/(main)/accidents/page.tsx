@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Database } from "lucide-react";
 import { HomeScreen } from "@/components/home-screen";
+import { LastUpdatedBadge } from "@/components/last-updated-badge";
 import { PageHeader } from "@/components/page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 
@@ -23,6 +24,9 @@ export default function AccidentsPage() {
           icon={Database}
           iconColor="red"
         />
+        <div className="mt-2">
+          <LastUpdatedBadge />
+        </div>
       </HomeScreen>
       <RelatedPageCards
         heading="このデータを活かす"
