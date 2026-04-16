@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { Scale } from "lucide-react";
 import { HomeScreen } from "@/components/home-screen";
+import { LastUpdatedBadge } from "@/components/last-updated-badge";
 import { PageHeader } from "@/components/page-header";
 import type { TabId } from "@/components/tab-navigation";
 
@@ -19,6 +20,9 @@ export function LawsPageClient() {
         icon={Scale}
         iconColor="blue"
       />
+      <div className="mt-2">
+        <LastUpdatedBadge />
+      </div>
     </HomeScreen>
   );
 }
