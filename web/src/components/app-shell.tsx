@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Home,
   ClipboardList,
@@ -27,6 +27,9 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { UserMenu } from "@/components/user-menu";
+import { useFurigana } from "@/contexts/furigana-context";
+
+const LARGE_FONT_KEY = "large-font-enabled";
 
 type NavItem = {
   id: string;
@@ -110,6 +113,38 @@ interface AppShellProps {
 export function AppShell({ children, user }: AppShellProps) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { furiganaEnabled, toggleFurigana } = useFurigana();
+
+  // largeFontEnabledをlocalStorageから遅延初期化
+  const [largeFontEnabled, setLargeFontEnabled] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem(LARGE_FONT_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  // largeFontEnabledの変化をhtmlクラスに反映（DOM同期のみ、setState不使用）
+  useEffect(() => {
+    if (largeFontEnabled) {
+      document.documentElement.classList.add("large-font");
+    } else {
+      document.documentElement.classList.remove("large-font");
+    }
+  }, [largeFontEnabled]);
+
+  const toggleLargeFont = () => {
+    setLargeFontEnabled((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(LARGE_FONT_KEY, String(next));
+      } catch {
+        // localStorage利用不可の場合は無視
+      }
+      return next;
+    });
+  };
 
   const linkClass = (item: NavItem) => {
     const active = navActive(pathname, item.href);
@@ -189,7 +224,36 @@ export function AppShell({ children, user }: AppShellProps) {
             </div>
           ))}
         </nav>
-        <div className="mt-4 border-t border-slate-200 pt-4">
+        <div className="mt-4 border-t border-slate-200 pt-4 space-y-2">
+          {/* アクセシビリティトグル */}
+          <div className="flex items-center gap-1.5 px-1">
+            <button
+              type="button"
+              onClick={toggleFurigana}
+              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                furiganaEnabled
+                  ? "bg-emerald-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+              title="ふりがなを表示"
+              aria-pressed={furiganaEnabled}
+            >
+              ふりがな
+            </button>
+            <button
+              type="button"
+              onClick={toggleLargeFont}
+              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                largeFontEnabled
+                  ? "bg-emerald-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+              title="文字を大きくする"
+              aria-pressed={largeFontEnabled}
+            >
+              文字大
+            </button>
+          </div>
           <UserMenu user={user} />
         </div>
       </aside>
@@ -201,7 +265,7 @@ export function AppShell({ children, user }: AppShellProps) {
             <p className="text-[11px] font-bold tracking-wide text-emerald-700">ANZEN AI</p>
             <p className="text-xs text-slate-700">現場の安全を、AIで変える。</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={() => window.location.reload()}
@@ -210,6 +274,38 @@ export function AppShell({ children, user }: AppShellProps) {
               aria-label="ページを更新"
             >
               <RefreshCw className="h-4 w-4" />
+            </button>
+            {/* ふりがなトグル */}
+            <button
+              type="button"
+              onClick={toggleFurigana}
+              className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
+                furiganaEnabled
+                  ? "bg-emerald-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+              title="ふりがなを表示"
+              aria-label="ふりがなを表示"
+              aria-pressed={furiganaEnabled}
+            >
+              <ruby className="leading-none">
+                あ<rt className="text-[8px]">ふりがな</rt>
+              </ruby>
+            </button>
+            {/* 文字大トグル */}
+            <button
+              type="button"
+              onClick={toggleLargeFont}
+              className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
+                largeFontEnabled
+                  ? "bg-emerald-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+              title="文字を大きくする"
+              aria-label="文字を大きくする"
+              aria-pressed={largeFontEnabled}
+            >
+              Aa
             </button>
             <UserMenu user={user} />
             <button

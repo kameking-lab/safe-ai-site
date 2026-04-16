@@ -1,4 +1,5 @@
 import type { LucideIcon } from "lucide-react";
+import { RubyText } from "@/components/ruby-text";
 
 type IconColor = "emerald" | "blue" | "amber" | "red";
 
@@ -35,7 +36,9 @@ export function PageHeader({ title, description, icon: Icon, iconColor, badge }:
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-lg font-bold leading-tight text-slate-900 sm:text-xl">{title}</h1>
+            <h1 className="text-lg font-bold leading-tight text-slate-900 sm:text-xl">
+              <RubyText text={title} />
+            </h1>
             {badge && (
               <span
                 className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${badgeBgMap[iconColor]}`}
@@ -44,7 +47,9 @@ export function PageHeader({ title, description, icon: Icon, iconColor, badge }:
               </span>
             )}
           </div>
-          <p className="mt-0.5 text-sm leading-snug text-slate-500">{description}</p>
+          <p className="mt-0.5 text-sm leading-snug text-slate-500">
+            <RubyText text={description} />
+          </p>
         </div>
       </div>
     </header>
