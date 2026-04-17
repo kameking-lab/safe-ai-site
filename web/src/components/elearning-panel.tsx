@@ -11,6 +11,7 @@ import { elearningHealthcareThemes } from "@/data/mock/elearning-healthcare-them
 import { elearningTransportThemes } from "@/data/mock/elearning-transport-themes";
 import { elearningForestryThemes } from "@/data/mock/elearning-forestry-themes";
 import { elearningFoodThemes } from "@/data/mock/elearning-food-themes";
+import { elearningRetailThemes } from "@/data/mock/elearning-retail-themes";
 import type { LearningTheme as LearningThemeType } from "@/lib/types/operations";
 
 // Merge extra questions into extra themes to expand from 3 to 10 questions per theme
@@ -20,8 +21,8 @@ const mergedExtraThemes: LearningThemeType[] = elearningExtraThemes.map((theme) 
   return { ...theme, questions: [...theme.questions, ...extras.questions] };
 });
 
-// 入門コースを先頭に配置、製造業・医療福祉・運輸・林業・食品テーマを末尾に追加
-const allThemes = [...elearningIntroCourse, ...elearningThemesCatalog, ...mergedExtraThemes, ...elearningManufacturingThemes, ...elearningHealthcareThemes, ...elearningTransportThemes, ...elearningForestryThemes, ...elearningFoodThemes];
+// 入門コースを先頭に配置、製造業・医療福祉・運輸・林業・食品・小売サービステーマを末尾に追加
+const allThemes = [...elearningIntroCourse, ...elearningThemesCatalog, ...mergedExtraThemes, ...elearningManufacturingThemes, ...elearningHealthcareThemes, ...elearningTransportThemes, ...elearningForestryThemes, ...elearningFoodThemes, ...elearningRetailThemes];
 import { ELearningEditorPanel } from "@/components/elearning-editor-panel";
 import type { LearningTheme } from "@/lib/types/operations";
 
@@ -33,7 +34,7 @@ type WorkerAttributeFilter = (typeof WORKER_ATTRIBUTE_OPTIONS)[number];
 const COMPANY_SIZE_OPTIONS = ["全規模", "大企業", "中小企業", "個人事業主"] as const;
 type CompanySizeFilter = (typeof COMPANY_SIZE_OPTIONS)[number];
 
-const INDUSTRY_OPTIONS = ["すべて", "医療福祉", "製造業", "運輸", "林業", "食品"] as const;
+const INDUSTRY_OPTIONS = ["すべて", "医療福祉", "製造業", "運輸", "林業", "食品", "小売・サービス"] as const;
 type IndustryFilter = (typeof INDUSTRY_OPTIONS)[number];
 
 function loadOverrides(): Record<string, LearningTheme> {
