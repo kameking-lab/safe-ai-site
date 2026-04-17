@@ -9,6 +9,8 @@ type ChatMessage = {
   role: "user" | "assistant";
   content: string;
   sources?: ChatbotSource[];
+  source_type?: "rag" | "ai_inference";
+  confidence?: "high" | "medium" | "low";
 };
 
 const EGOV_LAW_NUMBERS: Record<string, string> = {
@@ -70,13 +72,20 @@ export function ChatbotPanel() {
         throw new Error(errBody.error ?? "エラーが発生しました");
       }
 
-      const data = (await res.json()) as { answer: string; sources: ChatbotSource[] };
+      const data = (await res.json()) as {
+        answer: string;
+        sources: ChatbotSource[];
+        source_type: "rag" | "ai_inference";
+        confidence: "high" | "medium" | "low";
+      };
 
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
         content: data.answer,
         sources: data.sources,
+        source_type: data.source_type,
+        confidence: data.confidence,
       };
 
       setMessages((prev) => [...prev, assistantMsg]);
@@ -155,6 +164,30 @@ export function ChatbotPanel() {
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                   )}
                 </div>
+
+                {/* RAGソース・信頼度バッジ */}
+                {msg.role === "assistant" && msg.source_type && (
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    {msg.source_type === "rag" ? (
+                      <span className="inline-flex items-center rounded border border-green-200 bg-green-50 px-2 py-0.5 text-[11px] font-semibold text-green-700">
+                        📚 法令データベースから検索
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center rounded border border-orange-200 bg-orange-50 px-2 py-0.5 text-[11px] font-semibold text-orange-700">
+                        🤖 AI推論
+                      </span>
+                    )}
+                    {msg.confidence === "high" && (
+                      <span className="text-[11px] text-slate-500">🟢 信頼度：高</span>
+                    )}
+                    {msg.confidence === "medium" && (
+                      <span className="text-[11px] text-slate-500">🟡 信頼度：中</span>
+                    )}
+                    {msg.confidence === "low" && (
+                      <span className="text-[11px] text-slate-500">🔴 信頼度：低</span>
+                    )}
+                  </div>
+                )}
 
                 {/* 根拠条文の表示 */}
                 {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (

@@ -6,25 +6,40 @@ import { normalizeSearchText } from "@/lib/fuzzy-search";
  * キーワードマッチングによる関連条文のRAG検索
  */
 export function searchRelevantArticles(query: string, topK = 10): LawArticle[] {
-  // クエリを正規化・トークン化
+  return searchRelevantArticlesWithScore(query, topK).articles;
+}
+
+/**
+ * RAG検索結果と最高スコアを返す（信頼度計算用）
+ * normalizedScore: topScore / 20 を [0,1] にクランプした値
+ */
+export function searchRelevantArticlesWithScore(
+  query: string,
+  topK = 10
+): { articles: LawArticle[]; topScore: number; normalizedScore: number } {
   const queryTokens = tokenize(query);
 
   if (queryTokens.length === 0) {
-    return [];
+    return { articles: [], topScore: 0, normalizedScore: 0 };
   }
 
-  // 各条文にスコアを付ける
-  const scored = allLawArticles.map((article) => {
-    const score = calcScore(article, queryTokens);
-    return { article, score };
-  });
+  const scored = allLawArticles.map((article) => ({
+    article,
+    score: calcScore(article, queryTokens),
+  }));
 
-  // スコア降順でソートし、上位topK件を返す
-  return scored
+  const filtered = scored
     .filter((item) => item.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, topK)
-    .map((item) => item.article);
+    .sort((a, b) => b.score - a.score);
+
+  const topScore = filtered[0]?.score ?? 0;
+  const normalizedScore = Math.min(topScore / 20, 1.0);
+
+  return {
+    articles: filtered.slice(0, topK).map((item) => item.article),
+    topScore,
+    normalizedScore,
+  };
 }
 
 /**

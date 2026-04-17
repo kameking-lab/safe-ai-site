@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { searchRelevantArticles, buildContextFromArticles } from "@/lib/rag-search";
+import { searchRelevantArticlesWithScore, buildContextFromArticles } from "@/lib/rag-search";
 import type { LawArticle } from "@/data/laws";
 
 export type ChatbotRequest = {
@@ -17,6 +17,8 @@ export type ChatbotSource = {
 export type ChatbotResponse = {
   answer: string;
   sources: ChatbotSource[];
+  source_type: "rag" | "ai_inference";
+  confidence: "high" | "medium" | "low";
 };
 
 type ApiErrorBody = {
@@ -77,14 +79,22 @@ export async function POST(request: Request) {
           "現在、AIチャットボット機能はAPIキーが設定されていないため利用できません。\n\n" +
           "GEMINI_API_KEYを環境変数に設定することで、労働安全衛生法に関するご質問にお答えできます。",
         sources: [],
+        source_type: "ai_inference",
+        confidence: "medium",
       },
       { status: 200 }
     );
   }
 
-  // RAG: 関連条文の検索
-  const relevantArticles = searchRelevantArticles(message, 10);
+  // RAG: 関連条文の検索（スコア付き）
+  const { articles: relevantArticles, normalizedScore } = searchRelevantArticlesWithScore(message, 10);
   const context = buildContextFromArticles(relevantArticles);
+
+  const hasRagHits = relevantArticles.length > 0;
+  const source_type: "rag" | "ai_inference" = hasRagHits ? "rag" : "ai_inference";
+  const confidence: "high" | "medium" | "low" = hasRagHits
+    ? normalizedScore >= 0.8 ? "high" : normalizedScore >= 0.5 ? "medium" : "low"
+    : "medium";
 
   // Gemini Flash API呼び出し
   console.log("[chatbot] API key present:", !!apiKey);
@@ -121,5 +131,5 @@ export async function POST(request: Request) {
     text: a.text.length > 200 ? a.text.slice(0, 200) + "…" : a.text,
   }));
 
-  return NextResponse.json<ChatbotResponse>({ answer, sources }, { status: 200 });
+  return NextResponse.json<ChatbotResponse>({ answer, sources, source_type, confidence }, { status: 200 });
 }
