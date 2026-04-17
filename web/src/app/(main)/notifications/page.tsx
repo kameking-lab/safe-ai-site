@@ -2,13 +2,23 @@ import type { Metadata } from "next";
 import { Bell, CheckCircle } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { SubscribeForm } from "./subscribe-form";
+import { ogImageUrl } from "@/lib/og-url";
+
+const _title = "安全情報 通知・メール配信設定";
+const _desc =
+  "気象警報・労働安全衛生法改正・労働災害情報の通知とメール配信設定。重要な安全情報を見逃さない。";
 
 export const metadata: Metadata = {
-  title: "通知・配信設定",
-  description: "気象警報・法改正・事故情報の通知とメール配信設定。",
+  title: _title,
+  description: _desc,
   openGraph: {
-    title: "通知・配信設定｜ANZEN AI",
-    description: "気象警報・法改正・事故情報の通知とメール配信設定。",
+    title: `${_title}｜ANZEN AI`,
+    description: _desc,
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 

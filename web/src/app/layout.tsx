@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { FuriganaProvider } from "@/contexts/furigana-context";
+import { JsonLd, organizationSchema, webSiteSchema } from "@/components/json-ld";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,7 +50,7 @@ export const metadata: Metadata = {
     description: "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。",
     images: [
       {
-        url: "/og-image.png",
+        url: "/api/og",
         width: 1200,
         height: 630,
         alt: "ANZEN AI — 現場の安全を、AIで変える。",
@@ -60,7 +61,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "ANZEN AI｜現場の安全を、AIで変える。",
     description: "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。",
-    images: ["/og-image.png"],
+    images: ["/api/og"],
   },
 };
 
@@ -75,6 +76,8 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-slate-50 font-sans text-slate-900">
+        <JsonLd schema={organizationSchema()} />
+        <JsonLd schema={webSiteSchema()} />
         <FuriganaProvider>{children}</FuriganaProvider>
       </body>
     </html>

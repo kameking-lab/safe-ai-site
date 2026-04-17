@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/signage"],
+      disallow: "/api/",
     },
     sitemap: "https://safe-ai-site.vercel.app/sitemap.xml",
   };

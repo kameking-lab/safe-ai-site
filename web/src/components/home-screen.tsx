@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { ChatPanel, type ChatMessage } from "@/components/chat-panel";
 import { AccidentDatabasePanel } from "@/components/accident-database-panel";
-import { AccidentAnalysisPanel } from "@/components/accident-analysis-panel";
+
+const AccidentAnalysisPanel = dynamic(
+  () => import("@/components/accident-analysis-panel").then((m) => m.AccidentAnalysisPanel),
+  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
+);
 import { ELearningPanel } from "@/components/elearning-panel";
 import { HomeValueHero } from "@/components/home-value-hero";
 import { KyRecordList } from "@/components/ky-record-list";

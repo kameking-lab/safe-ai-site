@@ -1,8 +1,15 @@
 import { ImageResponse } from "next/og";
+import type { NextRequest } from "next/server";
 
 export const runtime = "edge";
 
-export function GET() {
+export function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const title = searchParams.get("title") ?? "現場の安全を、AIで変える。";
+  const desc =
+    searchParams.get("desc") ??
+    "法改正・現場リスク・事故DB・KY用紙・Eラーニングを一つのポータルに集約";
+
   return new ImageResponse(
     (
       <div
@@ -13,11 +20,11 @@ export function GET() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #1a7a4c 0%, #166640 60%, #0f4d2e 100%)",
+          background:
+            "linear-gradient(135deg, #1a7a4c 0%, #166640 60%, #0f4d2e 100%)",
           padding: "60px",
         }}
       >
-        {/* Helmet icon */}
         <div
           style={{
             width: "96px",
@@ -36,12 +43,12 @@ export function GET() {
 
         <div
           style={{
-            fontSize: "22px",
+            fontSize: "20px",
             fontWeight: "700",
             color: "#a7f3d0",
             letterSpacing: "0.15em",
             textTransform: "uppercase",
-            marginBottom: "16px",
+            marginBottom: "20px",
           }}
         >
           ANZEN AI — 労働安全コンサルタント監修
@@ -49,26 +56,28 @@ export function GET() {
 
         <div
           style={{
-            fontSize: "56px",
+            fontSize: title.length > 20 ? "40px" : "52px",
             fontWeight: "900",
             color: "#ffffff",
             textAlign: "center",
-            lineHeight: 1.2,
+            lineHeight: 1.25,
             marginBottom: "24px",
+            maxWidth: "900px",
           }}
         >
-          現場の安全を、AIで変える。
+          {title}
         </div>
 
         <div
           style={{
-            fontSize: "24px",
+            fontSize: "22px",
             color: "#d1fae5",
             textAlign: "center",
             lineHeight: 1.6,
+            maxWidth: "800px",
           }}
         >
-          法改正・現場リスク・事故DB・KY用紙・Eラーニングを一つのポータルに集約
+          {desc}
         </div>
 
         <div

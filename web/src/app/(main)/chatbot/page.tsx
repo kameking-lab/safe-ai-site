@@ -3,13 +3,23 @@ import { Scale } from "lucide-react";
 import { ChatbotPanel } from "@/components/chatbot-panel";
 import { PageHeader } from "@/components/page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
+import { ogImageUrl } from "@/lib/og-url";
+
+const _title = "安衛法 AI チャットボット｜法令質問";
+const _desc =
+  "労働安全衛生法・安衛則・クレーン則・有機則・特化則・酸欠則の条文をAIが即答。現場の法令の疑問をその場で解決。";
 
 export const metadata: Metadata = {
-  title: "安衛法AIチャットボット",
-  description: "労働安全衛生法・安全規則の条文をAIが検索・回答。安衛法・安衛則・クレーン則・有機則・特化則・酸欠則に対応。",
+  title: _title,
+  description: _desc,
   openGraph: {
-    title: "安衛法AIチャットボット｜ANZEN AI",
-    description: "労働安全衛生法・安全規則の条文をAIが検索・回答。安衛法・安衛則・クレーン則・有機則・特化則・酸欠則に対応。",
+    title: `${_title}｜ANZEN AI`,
+    description: _desc,
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 

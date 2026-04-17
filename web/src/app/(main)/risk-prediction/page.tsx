@@ -3,13 +3,23 @@ import { Brain } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { RiskPredictionPanel } from "@/components/risk-prediction-panel";
 import { RelatedPageCards } from "@/components/related-page-cards";
+import { ogImageUrl } from "@/lib/og-url";
+
+const _title = "AI 労働災害リスク予測｜KY活動支援";
+const _desc =
+  "作業内容を入力すると類似事故を検索し、AIが潜在リスクを予測。建設・製造・林業の朝礼KY活動・危険予知活動を支援。";
 
 export const metadata: Metadata = {
-  title: "AIリスク予測",
-  description: "作業内容から類似事故を検索し、AIがリスクを予測。建設・製造・林業現場のKY活動を支援します。",
+  title: _title,
+  description: _desc,
   openGraph: {
-    title: "AIリスク予測｜ANZEN AI",
-    description: "作業内容から類似事故を検索し、AIがリスクを予測。建設・製造・林業現場のKY活動を支援します。",
+    title: `${_title}｜ANZEN AI`,
+    description: _desc,
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 

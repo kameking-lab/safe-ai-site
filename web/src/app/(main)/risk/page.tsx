@@ -1,12 +1,22 @@
 import type { Metadata } from "next";
 import { WeatherForecastPanel } from "@/components/weather-forecast-panel";
+import { ogImageUrl } from "@/lib/og-url";
+
+const _title = "気象警報マップ｜現場 作業リスク管理";
+const _desc =
+  "都道府県別の気象警報・注意報と向こう1週間の天気予報。屋外作業・建設現場の安全管理に。市区町村別詳細も確認できます。";
 
 export const metadata: Metadata = {
-  title: "気象警報マップ",
-  description: "都道府県別の気象警報・注意報と向こう1週間の天気予報マップ。地域ブロックをクリックすると市区町村別の詳細を確認できます。",
+  title: _title,
+  description: _desc,
   openGraph: {
-    title: "気象警報マップ｜ANZEN AI",
-    description: "都道府県別の気象警報・注意報と向こう1週間の天気予報マップ。地域ブロックをクリックすると市区町村別の詳細を確認できます。",
+    title: `${_title}｜ANZEN AI`,
+    description: _desc,
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 

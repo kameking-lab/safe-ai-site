@@ -4,19 +4,41 @@ import { HomeScreen } from "@/components/home-screen";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
 import { PageHeader } from "@/components/page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
+import { ogImageUrl } from "@/lib/og-url";
+import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
+import { realAccidentCases } from "@/data/mock/real-accident-cases";
+
+const _title = "労働災害 事故事例データベース";
+const _desc =
+  "厚労省「職場のあんぜんサイト」実事例200件以上を収録。業種・事故種別で検索し再発防止に活用。建設・製造・林業の安全管理に。";
 
 export const metadata: Metadata = {
-  title: "事故データベース",
-  description: "厚労省「職場のあんぜんサイト」等の実事例200件以上を収録。業種・事故種別で検索し、再発防止に活用できます。",
+  title: _title,
+  description: _desc,
   openGraph: {
-    title: "事故データベース｜ANZEN AI",
-    description: "厚労省「職場のあんぜんサイト」等の実事例200件以上を収録。業種・事故種別で検索し、再発防止に活用できます。",
+    title: `${_title}｜ANZEN AI`,
+    description: _desc,
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 
 export default function AccidentsPage() {
+  const accidentSchema = newsArticleListSchema(
+    realAccidentCases.map((c) => ({
+      headline: c.title,
+      datePublished: c.occurredOn,
+      url: "https://safe-ai-site.vercel.app/accidents",
+      description: c.summary,
+    }))
+  );
+
   return (
     <>
+      <JsonLd schema={accidentSchema} />
       <HomeScreen variant="accidents">
         <PageHeader
           title="事故データベース"

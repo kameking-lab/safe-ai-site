@@ -1,13 +1,23 @@
 import type { Metadata } from "next";
 import { Check, Zap, Shield, Star } from "lucide-react";
 import { PricingCheckout } from "./pricing-checkout";
+import { ogImageUrl } from "@/lib/og-url";
+
+const _title = "料金プラン｜無料で始める安全管理";
+const _desc =
+  "ANZEN AIの料金プラン。無料プランで基本機能を利用。プレミアムで過去問・AIチャットボット・法令検索が無制限に利用可能。";
 
 export const metadata: Metadata = {
-  title: "料金プラン",
-  description: "ANZEN AIのフリーミアムプラン。無料で基本機能を利用。プレミアムプランで過去問・AIチャット・法令検索が無制限に。",
+  title: _title,
+  description: _desc,
   openGraph: {
-    title: "料金プラン｜ANZEN AI",
-    description: "ANZEN AIのフリーミアムプラン。無料で基本機能を利用。プレミアムプランで過去問・AIチャット・法令検索が無制限に。",
+    title: `${_title}｜ANZEN AI`,
+    description: _desc,
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 

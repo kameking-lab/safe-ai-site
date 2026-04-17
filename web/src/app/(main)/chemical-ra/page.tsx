@@ -1,12 +1,22 @@
 import type { Metadata } from "next";
 import { ChemicalRaPanel } from "@/components/chemical-ra-panel";
+import { ogImageUrl } from "@/lib/og-url";
+
+const _title = "化学物質 リスクアセスメント ツール";
+const _desc =
+  "化学物質名を入力するとSDS・GHS分類・必要保護具・安全対策チェックリストを表示。安衛法令和4年改正対応。厚労省データ参考。";
 
 export const metadata: Metadata = {
-  title: "化学物質リスクアセスメント",
-  description: "化学物質名を入力するとSDS情報・GHS分類・必要保護具・安全対策チェックリストを表示します。厚労省「職場のあんぜんサイト」参考。",
+  title: _title,
+  description: _desc,
   openGraph: {
-    title: "化学物質リスクアセスメント｜ANZEN AI",
-    description: "化学物質名を入力するとSDS情報・GHS分類・必要保護具・安全対策チェックリストを表示します。厚労省「職場のあんぜんサイト」参考。",
+    title: `${_title}｜ANZEN AI`,
+    description: _desc,
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 

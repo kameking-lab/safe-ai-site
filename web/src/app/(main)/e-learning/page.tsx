@@ -3,19 +3,39 @@ import { GraduationCap } from "lucide-react";
 import { HomeScreen } from "@/components/home-screen";
 import { PageHeader } from "@/components/page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
+import { ogImageUrl } from "@/lib/og-url";
+import { JsonLd, courseListSchema } from "@/components/json-ld";
+import { elearningThemesCatalog } from "@/data/mock/elearning-themes-data";
+
+const _title = "安全衛生 Eラーニング 教育コンテンツ";
+const _desc =
+  "高所作業・化学物質・電気安全など労働安全衛生のテーマ別学習コンテンツ。安全衛生管理者・安全担当者の知識定着に活用できます。";
 
 export const metadata: Metadata = {
-  title: "Eラーニング",
-  description: "労働安全に関するテーマ別学習コンテンツとクイズで知識を確認。",
+  title: _title,
+  description: _desc,
   openGraph: {
-    title: "Eラーニング｜ANZEN AI",
-    description: "労働安全に関するテーマ別学習コンテンツとクイズで知識を確認。",
+    title: `${_title}｜ANZEN AI`,
+    description: _desc,
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 
 export default function ELearningPage() {
+  const courseSchema = courseListSchema(
+    elearningThemesCatalog.map((t) => ({
+      name: t.title,
+      description: t.description,
+    }))
+  );
+
   return (
     <>
+      <JsonLd schema={courseSchema} />
       <HomeScreen variant="elearning">
         <PageHeader
           title="Eラーニング"
