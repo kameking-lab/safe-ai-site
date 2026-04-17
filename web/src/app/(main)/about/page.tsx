@@ -70,25 +70,32 @@ const COLOR_MAP = {
 } as const;
 
 const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
-  { label: "販売業者名", value: "金田 義太" },
+  {
+    label: "販売業者名",
+    value: "金田 義太（労働安全コンサルタント 登録番号 260022）",
+  },
   {
     label: "所在地",
     value: (
       <>
-        お問い合わせください（
-        <Link href="/contact" className="underline hover:text-slate-800">
+        消費者庁「特定商取引法に基づく表記」ガイドラインに基づき、消費者からのご請求があれば遅滞なく書面にて開示いたします。
+        <Link href="/contact" className="ml-1 underline hover:text-slate-800">
           お問い合わせフォーム
         </Link>
-        ）
+        よりご連絡ください。
       </>
     ),
   },
   {
     label: "連絡先",
     value: (
-      <Link href="/contact" className="underline hover:text-slate-800">
-        お問い合わせフォームよりご連絡ください
-      </Link>
+      <>
+        電話番号も同様に、ご請求があれば遅滞なく開示いたします。通常のご連絡は
+        <Link href="/contact" className="mx-1 underline hover:text-slate-800">
+          お問い合わせフォーム
+        </Link>
+        からお願いいたします（原則3営業日以内に返信）。
+      </>
     ),
   },
   {
@@ -156,6 +163,18 @@ export default function AboutPage() {
                 労働安全衛生に関するコンサルティング・安全管理システムの開発・提供を行っています。
                 現場の安全を支えるデジタルツールとして ANZEN AI を監修・運営しています。
               </p>
+              <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3 text-left">
+                <p className="text-xs font-semibold text-emerald-800">監修範囲</p>
+                <ul className="mt-1 list-disc pl-4 text-xs leading-5 text-slate-700">
+                  <li>法令・法改正情報の選定および要約方針のレビュー</li>
+                  <li>KY用紙・リスクアセスメント様式の適合性確認</li>
+                  <li>事故データベース掲載基準および出典の取扱い</li>
+                  <li>Eラーニング・過去問の内容整合性のスポットチェック</li>
+                </ul>
+                <p className="mt-2 text-[11px] leading-5 text-slate-500">
+                  ※ AI生成の要約・回答は最新法令や個別事案の判断を保証するものではありません。具体的な判断は必ず一次資料・専門家をご確認ください。
+                </p>
+              </div>
             </div>
           </div>
         </section>

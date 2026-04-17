@@ -52,8 +52,8 @@ const FEATURES = [
     color: "bg-orange-50 border-orange-200",
     iconBg: "bg-orange-600 text-white",
     labelColor: "text-orange-800",
-    label: "KY用紙",
-    desc: "現場の危険予知活動をデジタル化。シンプルモード・詳細モード対応。リスクをその場で記録できます。",
+    label: "KY用紙（危険予知）",
+    desc: "KY（危険予知）活動をデジタル化。シンプルモード・詳細モード対応。リスクをその場で記録できます。",
     href: "/ky",
     btnColor: "bg-orange-600 hover:bg-orange-700 text-white",
     btnLabel: "KY用紙を作成する",
@@ -112,6 +112,13 @@ export function HomeValueHero() {
           >
             無料で使ってみる → AIリスク予測
           </Link>
+          {/* 入門者向けCTA（新人・初学者向け） */}
+          <Link
+            href="/e-learning"
+            className="rounded-md border border-white/40 bg-white/15 px-4 py-2 text-xs font-semibold text-white hover:bg-white/25 transition-colors text-center"
+          >
+            はじめての方へ → 入門Eラーニング
+          </Link>
           {/* サブCTA: ページ内スクロール */}
           <button
             type="button"
@@ -139,7 +146,7 @@ export function HomeValueHero() {
 
       {/* 導入効果 */}
       <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-4 sm:p-5">
-        <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">導入効果</p>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">導入効果（想定値）</p>
         <h3 className="mt-1 text-base font-bold text-slate-900 sm:text-lg">
           現場の安全管理を効率化
         </h3>
@@ -158,6 +165,9 @@ export function HomeValueHero() {
             </div>
           ))}
         </div>
+        <p className="mt-3 text-[10px] leading-4 text-slate-500">
+          ※ 数値は監修者（労働安全コンサルタント）の社内テストおよびβ運用の試算に基づく想定値です。実際の効果は現場・運用により異なります。
+        </p>
       </div>
 
       {/* 主要機能カード */}
