@@ -7,6 +7,7 @@ import { elearningExtraThemes } from "@/data/mock/elearning-extra-themes";
 import { elearningExtraQuestions } from "@/data/mock/elearning-extra-questions";
 import { elearningIntroCourse } from "@/data/mock/elearning-intro-course";
 import { elearningManufacturingThemes } from "@/data/mock/elearning-manufacturing-themes";
+import { elearningHealthcareThemes } from "@/data/mock/elearning-healthcare-themes";
 import type { LearningTheme as LearningThemeType } from "@/lib/types/operations";
 
 // Merge extra questions into extra themes to expand from 3 to 10 questions per theme
@@ -16,8 +17,8 @@ const mergedExtraThemes: LearningThemeType[] = elearningExtraThemes.map((theme) 
   return { ...theme, questions: [...theme.questions, ...extras.questions] };
 });
 
-// 入門コースを先頭に配置、製造業テーマを末尾に追加
-const allThemes = [...elearningIntroCourse, ...elearningThemesCatalog, ...mergedExtraThemes, ...elearningManufacturingThemes];
+// 入門コースを先頭に配置、製造業・医療福祉テーマを末尾に追加
+const allThemes = [...elearningIntroCourse, ...elearningThemesCatalog, ...mergedExtraThemes, ...elearningManufacturingThemes, ...elearningHealthcareThemes];
 import { ELearningEditorPanel } from "@/components/elearning-editor-panel";
 import type { LearningTheme } from "@/lib/types/operations";
 
@@ -28,6 +29,9 @@ type WorkerAttributeFilter = (typeof WORKER_ATTRIBUTE_OPTIONS)[number];
 
 const COMPANY_SIZE_OPTIONS = ["全規模", "大企業", "中小企業", "個人事業主"] as const;
 type CompanySizeFilter = (typeof COMPANY_SIZE_OPTIONS)[number];
+
+const INDUSTRY_OPTIONS = ["すべて", "医療福祉", "製造業"] as const;
+type IndustryFilter = (typeof INDUSTRY_OPTIONS)[number];
 
 function loadOverrides(): Record<string, LearningTheme> {
   if (typeof window === "undefined") return {};
@@ -51,6 +55,7 @@ export function ELearningPanel() {
   const [editMode, setEditMode] = useState(false);
   const [selectedWorkerAttribute, setSelectedWorkerAttribute] = useState<WorkerAttributeFilter>("すべて");
   const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
+  const [selectedIndustry, setSelectedIndustry] = useState<IndustryFilter>("すべて");
 
   const themes = useMemo<LearningTheme[]>(() => {
     const withOverrides = allThemes.map((t) => overrides[t.id] ?? t);
@@ -63,9 +68,13 @@ export function ELearningPanel() {
         const size = t.company_size ?? "全規模";
         if (size !== "全規模" && size !== selectedCompanySize) return false;
       }
+      if (selectedIndustry !== "すべて") {
+        const ind = t.industry_detail;
+        if (ind != null && ind !== selectedIndustry) return false;
+      }
       return true;
     });
-  }, [overrides, selectedWorkerAttribute, selectedCompanySize]);
+  }, [overrides, selectedWorkerAttribute, selectedCompanySize, selectedIndustry]);
 
   const selectedTheme = useMemo(() => {
     return themes.find((t) => t.id === themeId) ?? themes[0] ?? allThemes[0];
@@ -130,11 +139,11 @@ export function ELearningPanel() {
         <div>
           <h2 className="text-base font-bold text-slate-900 sm:text-lg">Eラーニング</h2>
           <p className="mt-1 text-xs text-slate-600">
-            20分野・計102問 ＋ 入門コース（20問）。事故・法改正・現場リスクの判断を短時間で反復できます。
+            23分野・計132問 ＋ 入門コース（20問）。事故・法改正・現場リスクの判断を短時間で反復できます。
           </p>
         </div>
         <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-800">
-          全24テーマ
+          全27テーマ
         </span>
       </div>
       {/* 属性・規模フィルタ */}
@@ -173,6 +182,25 @@ export function ELearningPanel() {
                 }`}
               >
                 {size}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-slate-700">業種</p>
+          <div className="mt-1 flex flex-wrap gap-1.5">
+            {INDUSTRY_OPTIONS.map((ind) => (
+              <button
+                key={ind}
+                type="button"
+                onClick={() => setSelectedIndustry(ind)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  selectedIndustry === ind
+                    ? "bg-rose-600 text-white"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                {ind}
               </button>
             ))}
           </div>
