@@ -8,6 +8,7 @@ import { elearningExtraQuestions } from "@/data/mock/elearning-extra-questions";
 import { elearningIntroCourse } from "@/data/mock/elearning-intro-course";
 import { elearningManufacturingThemes } from "@/data/mock/elearning-manufacturing-themes";
 import { elearningHealthcareThemes } from "@/data/mock/elearning-healthcare-themes";
+import { elearningTransportThemes } from "@/data/mock/elearning-transport-themes";
 import type { LearningTheme as LearningThemeType } from "@/lib/types/operations";
 
 // Merge extra questions into extra themes to expand from 3 to 10 questions per theme
@@ -17,8 +18,8 @@ const mergedExtraThemes: LearningThemeType[] = elearningExtraThemes.map((theme) 
   return { ...theme, questions: [...theme.questions, ...extras.questions] };
 });
 
-// 入門コースを先頭に配置、製造業・医療福祉テーマを末尾に追加
-const allThemes = [...elearningIntroCourse, ...elearningThemesCatalog, ...mergedExtraThemes, ...elearningManufacturingThemes, ...elearningHealthcareThemes];
+// 入門コースを先頭に配置、製造業・医療福祉・運輸テーマを末尾に追加
+const allThemes = [...elearningIntroCourse, ...elearningThemesCatalog, ...mergedExtraThemes, ...elearningManufacturingThemes, ...elearningHealthcareThemes, ...elearningTransportThemes];
 import { ELearningEditorPanel } from "@/components/elearning-editor-panel";
 import type { LearningTheme } from "@/lib/types/operations";
 
@@ -30,7 +31,7 @@ type WorkerAttributeFilter = (typeof WORKER_ATTRIBUTE_OPTIONS)[number];
 const COMPANY_SIZE_OPTIONS = ["全規模", "大企業", "中小企業", "個人事業主"] as const;
 type CompanySizeFilter = (typeof COMPANY_SIZE_OPTIONS)[number];
 
-const INDUSTRY_OPTIONS = ["すべて", "医療福祉", "製造業"] as const;
+const INDUSTRY_OPTIONS = ["すべて", "医療福祉", "製造業", "運輸"] as const;
 type IndustryFilter = (typeof INDUSTRY_OPTIONS)[number];
 
 function loadOverrides(): Record<string, LearningTheme> {
@@ -139,11 +140,11 @@ export function ELearningPanel() {
         <div>
           <h2 className="text-base font-bold text-slate-900 sm:text-lg">Eラーニング</h2>
           <p className="mt-1 text-xs text-slate-600">
-            23分野・計132問 ＋ 入門コース（20問）。事故・法改正・現場リスクの判断を短時間で反復できます。
+            26分野・計162問 ＋ 入門コース（20問）。事故・法改正・現場リスクの判断を短時間で反復できます。
           </p>
         </div>
         <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-semibold text-emerald-800">
-          全27テーマ
+          全30テーマ
         </span>
       </div>
       {/* 属性・規模フィルタ */}
