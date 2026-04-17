@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { LawRevision, RevisionImpact } from "@/lib/types/domain";
 import type { ServiceError } from "@/lib/types/api";
 import { fuzzyMatchAll } from "@/lib/fuzzy-search";
@@ -145,6 +146,27 @@ function SourceInfoBox({ revision }: { revision: LawRevision }) {
   );
 }
 
+const INDUSTRY_TO_PARAM: Record<IndustryFilter, string> = {
+  全業種: "",
+  建設業: "construction",
+  製造業: "manufacturing",
+};
+const PARAM_TO_INDUSTRY: Record<string, IndustryFilter> = {
+  construction: "建設業",
+  manufacturing: "製造業",
+};
+const IMPACT_TO_PARAM: Record<RevisionImpact | "すべて", string> = {
+  すべて: "",
+  高: "high",
+  中: "medium",
+  低: "low",
+};
+const PARAM_TO_IMPACT: Record<string, RevisionImpact | "すべて"> = {
+  high: "高",
+  medium: "中",
+  low: "低",
+};
+
 export function LawRevisionList({
   revisions,
   selectedRevisionId,
@@ -156,15 +178,61 @@ export function LawRevisionList({
   onSelectSummary,
   onSelectForQuestion,
 }: LawRevisionListProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [search, setSearch] = useState("");
   const [yearFrom, setYearFrom] = useState(2016);
   const [yearTo, setYearTo] = useState(2026);
   const [selectedKind, setSelectedKind] = useState<string>("すべて");
-  // #40: 影響度フィルタ + ソート
-  const [selectedImpact, setSelectedImpact] = useState<RevisionImpact | "すべて">("すべて");
-  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
-  // main: 業種フィルタ
-  const [selectedIndustry, setSelectedIndustry] = useState<IndustryFilter>("全業種");
+  // 影響度フィルタ + ソート (URLパラメータ連動)
+  const [selectedImpact, setSelectedImpactState] = useState<RevisionImpact | "すべて">(
+    () => PARAM_TO_IMPACT[searchParams.get("impact") ?? ""] ?? "すべて"
+  );
+  const [sortOrder, setSortOrderState] = useState<"desc" | "asc">(
+    () => (searchParams.get("sort") === "asc" ? "asc" : "desc")
+  );
+  // 業種フィルタ (URLパラメータ連動)
+  const [selectedIndustry, setSelectedIndustryState] = useState<IndustryFilter>(
+    () => PARAM_TO_INDUSTRY[searchParams.get("industry") ?? ""] ?? "全業種"
+  );
+
+  const updateUrl = useCallback(
+    (industry: IndustryFilter, impact: RevisionImpact | "すべて", sort: "desc" | "asc") => {
+      const params = new URLSearchParams(searchParams.toString());
+      const industryVal = INDUSTRY_TO_PARAM[industry];
+      const impactVal = IMPACT_TO_PARAM[impact];
+      if (industryVal) params.set("industry", industryVal); else params.delete("industry");
+      if (impactVal) params.set("impact", impactVal); else params.delete("impact");
+      if (sort !== "desc") params.set("sort", sort); else params.delete("sort");
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams]
+  );
+
+  const setSelectedImpact = useCallback(
+    (val: RevisionImpact | "すべて") => {
+      setSelectedImpactState(val);
+      updateUrl(selectedIndustry, val, sortOrder);
+    },
+    [updateUrl, selectedIndustry, sortOrder]
+  );
+
+  const setSortOrder = useCallback(
+    (val: "desc" | "asc") => {
+      setSortOrderState(val);
+      updateUrl(selectedIndustry, selectedImpact, val);
+    },
+    [updateUrl, selectedIndustry, selectedImpact]
+  );
+
+  const setSelectedIndustry = useCallback(
+    (val: IndustryFilter) => {
+      setSelectedIndustryState(val);
+      updateUrl(val, selectedImpact, sortOrder);
+    },
+    [updateUrl, selectedImpact, sortOrder]
+  );
   // 属性・規模フィルタ
   const [selectedWorkerAttribute, setSelectedWorkerAttribute] = useState<WorkerAttributeFilter>("すべて");
   const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
