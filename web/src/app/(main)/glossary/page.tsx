@@ -1,6 +1,5 @@
 "use client";
 
-import type { Metadata } from "next";
 import { useState, useRef, useCallback } from "react";
 import { BookMarked, Search, ExternalLink } from "lucide-react";
 import Link from "next/link";
