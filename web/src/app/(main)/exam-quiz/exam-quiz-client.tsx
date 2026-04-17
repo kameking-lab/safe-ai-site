@@ -121,8 +121,30 @@ const CATEGORY_LABELS: Record<string, string> = {
   environment: "作業環境測定",
 };
 
+const DIFFICULTY_LEVEL: Record<string, "入門" | "中級" | "上級"> = {
+  health: "入門",
+  special: "入門",
+  boiler: "中級",
+  crane: "中級",
+  radiation: "中級",
+  environment: "中級",
+  consultant: "上級",
+};
+
+const DIFFICULTY_BADGE_CLASS: Record<"入門" | "中級" | "上級", string> = {
+  入門: "bg-green-100 text-green-700",
+  中級: "bg-yellow-100 text-yellow-700",
+  上級: "bg-red-100 text-red-700",
+};
+
+const DIFFICULTY_QUICK: Array<{ level: "入門" | "中級" | "上級"; certId: string; label: string }> = [
+  { level: "入門", certId: "health-2nd", label: "衛生管理者・特別教育" },
+  { level: "中級", certId: "boiler-2nd", label: "作業主任者・技能講習" },
+  { level: "上級", certId: "anzen-consultant", label: "労働安全コンサルタント等" },
+];
+
 export function ExamQuizClient() {
-  const [certId, setCertId] = useState<string>("all");
+  const [certId, setCertId] = useState<string>("health-2nd");
   const [subject, setSubject] = useState<string>("all");
   const [year, setYear] = useState<number | "all">("all");
   const [mode, setMode] = useState<"sequential" | "random">("sequential");
@@ -379,9 +401,33 @@ export function ExamQuizClient() {
           <h2 className="mb-4 text-sm font-bold text-slate-800">出題設定</h2>
 
           <div className="space-y-4">
+            {/* Difficulty quick-select */}
+            <div>
+              <p className="mb-2 text-xs font-semibold text-slate-500">難易度クイック選択</p>
+              <div className="grid grid-cols-3 gap-2">
+                {DIFFICULTY_QUICK.map(({ level, certId: qCertId, label }) => (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => { setCertId(qCertId); setSubject("all"); }}
+                    className={`flex flex-col items-center gap-1 rounded-xl border py-2.5 px-2 text-center transition ${
+                      certId === qCertId
+                        ? "border-amber-400 bg-amber-50"
+                        : "border-slate-200 bg-white hover:border-amber-200 hover:bg-amber-50"
+                    }`}
+                  >
+                    <span className={`text-xs rounded-full px-2 py-0.5 font-semibold ${DIFFICULTY_BADGE_CLASS[level]}`}>
+                      {level}
+                    </span>
+                    <span className="text-[10px] text-slate-600 leading-tight">{label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Certification selector */}
             <div>
-              <p className="mb-2 text-xs font-semibold text-slate-500">資格</p>
+              <p className="mb-2 text-xs font-semibold text-slate-500">資格（詳細選択）</p>
               <select
                 value={certId}
                 onChange={(e) => { setCertId(e.target.value); setSubject("all"); }}
@@ -391,7 +437,7 @@ export function ExamQuizClient() {
                 {categories.map(
                   ({ key, label, certs }) =>
                     certs.length > 0 && (
-                      <optgroup key={key} label={label}>
+                      <optgroup key={key} label={`${label}（${DIFFICULTY_LEVEL[key] ?? "中級"}）`}>
                         {certs.map((c) => (
                           <option key={c.id} value={c.id}>
                             {c.name}
