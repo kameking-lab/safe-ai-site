@@ -5,7 +5,7 @@
       "name": "safe-ai-site",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "cwd": "C:\\Users\\kanet\\OneDrive\\ドキュメント\\safe-ai-site\\web",
+      "cwd": "web",
       "port": 3000
     }
   ]
