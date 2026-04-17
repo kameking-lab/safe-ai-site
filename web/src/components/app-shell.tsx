@@ -24,6 +24,7 @@ import {
   TestTube2,
   RefreshCw,
   Info,
+  BookMarked,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { UserMenu } from "@/components/user-menu";
@@ -90,6 +91,7 @@ const NAV_CATEGORIES: NavCategory[] = [
   {
     label: "その他",
     items: [
+      { id: "glossary", label: "安全用語辞書", href: "/glossary", icon: BookMarked },
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
       { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },
       { id: "notifications", label: "通知/配信", href: "/notifications", icon: Bell },
