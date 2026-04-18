@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ALL_ACCIDENT_CATEGORIES,
   ALL_ACCIDENT_TYPES,
@@ -11,27 +12,67 @@ import {
 } from "@/lib/types/domain";
 import { fuzzyMatchAll } from "@/lib/fuzzy-search";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
-import { getSubcategories, type IndustryParent } from "@/data/industry-subcategories";
 
 const PAGE_SIZE = 40;
 
-type IndustryFilter = "全業種" | "建設業" | "製造業";
+type IndustryKey =
+  | "construction"
+  | "manufacturing"
+  | "healthcare"
+  | "transport"
+  | "forestry"
+  | "food"
+  | "retail"
+  | "cleaning"
+  | "chemical"
+  | "electrical";
 
-const CONSTRUCTION_CATEGORIES: AccidentWorkCategory[] = ["建設", "高所", "足場", "重機", "解体"];
-const MANUFACTURING_CATEGORIES: AccidentWorkCategory[] = ["製造", "化学", "造船"];
+const INDUSTRY_OPTIONS: { key: IndustryKey; label: string }[] = [
+  { key: "construction", label: "建設" },
+  { key: "manufacturing", label: "製造" },
+  { key: "healthcare", label: "医療福祉" },
+  { key: "transport", label: "運輸" },
+  { key: "forestry", label: "林業" },
+  { key: "food", label: "食品" },
+  { key: "retail", label: "小売" },
+  { key: "cleaning", label: "清掃" },
+  { key: "chemical", label: "化学" },
+  { key: "electrical", label: "電気" },
+];
+
+const INDUSTRY_CATEGORIES: Record<IndustryKey, AccidentWorkCategory[]> = {
+  construction: ["建設", "高所", "足場", "重機", "解体"],
+  manufacturing: ["製造", "造船", "整備", "縫製"],
+  healthcare: ["医療", "介護"],
+  transport: ["運輸", "物流", "倉庫"],
+  forestry: ["林業", "造園"],
+  food: ["食品"],
+  retail: ["小売", "警備"],
+  cleaning: ["清掃"],
+  chemical: ["化学"],
+  electrical: ["電気"],
+};
+
+function matchesAnyIndustry(workCategory: AccidentWorkCategory, industries: Set<IndustryKey>): boolean {
+  if (industries.size === 0) return true;
+  return Array.from(industries).some((key) => INDUSTRY_CATEGORIES[key].includes(workCategory));
+}
+
+function parseIndustriesParam(raw: string | null): Set<IndustryKey> {
+  if (!raw) return new Set();
+  const valid = new Set(INDUSTRY_OPTIONS.map((o) => o.key));
+  const result = new Set<IndustryKey>();
+  for (const part of raw.split(",")) {
+    if (valid.has(part as IndustryKey)) result.add(part as IndustryKey);
+  }
+  return result;
+}
 
 const WORKER_ATTRIBUTE_OPTIONS = ["すべて", "女性労働者", "高齢者", "外国人", "非正規", "若年", "一般"] as const;
 type WorkerAttributeFilter = (typeof WORKER_ATTRIBUTE_OPTIONS)[number];
 
 const COMPANY_SIZE_OPTIONS = ["全規模", "大企業", "中小企業", "個人事業主"] as const;
 type CompanySizeFilter = (typeof COMPANY_SIZE_OPTIONS)[number];
-
-function matchesIndustry(workCategory: AccidentWorkCategory, industry: IndustryFilter): boolean {
-  if (industry === "全業種") return true;
-  if (industry === "建設業") return CONSTRUCTION_CATEGORIES.includes(workCategory);
-  if (industry === "製造業") return MANUFACTURING_CATEGORIES.includes(workCategory);
-  return true;
-}
 
 type AccidentDatabasePanelProps = {
   cases: AccidentCase[];
@@ -63,27 +104,56 @@ export function AccidentDatabasePanel({
   status,
   errorMessage,
 }: AccidentDatabasePanelProps) {
+  const router = useRouter();
   const options = filterOptions(allCases);
   const categoryOptions = ["すべて", ...ALL_ACCIDENT_CATEGORIES] as const;
   const [page, setPage] = useState(0);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [selectedIndustry, setSelectedIndustry] = useState<IndustryFilter>("全業種");
-  const [selectedSubId, setSelectedSubId] = useState<string>("");
+  const [selectedIndustries, setSelectedIndustriesState] = useState<Set<IndustryKey>>(new Set());
   const [keyword, setKeyword] = useState("");
   const [selectedWorkerAttribute, setSelectedWorkerAttribute] = useState<WorkerAttributeFilter>("すべて");
   const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
 
+  // クライアントマウント後にURLパラメータを読み込む（SSR互換）
+  useEffect(() => {
+    const sp = new URLSearchParams(window.location.search);
+    const initial = parseIndustriesParam(sp.get("acc_industries"));
+    if (initial.size > 0) setSelectedIndustriesState(initial);
+  }, []);
+
+  const updateIndustriesUrl = useCallback(
+    (industries: Set<IndustryKey>) => {
+      const sp = new URLSearchParams(window.location.search);
+      const val = Array.from(industries).join(",");
+      if (val) sp.set("acc_industries", val); else sp.delete("acc_industries");
+      router.replace(`?${sp.toString()}`, { scroll: false });
+    },
+    [router]
+  );
+
+  const toggleIndustry = useCallback(
+    (key: IndustryKey) => {
+      setSelectedIndustriesState((prev) => {
+        const next = new Set(prev);
+        if (next.has(key)) next.delete(key); else next.add(key);
+        updateIndustriesUrl(next);
+        setPage(0);
+        return next;
+      });
+    },
+    [updateIndustriesUrl]
+  );
+
+  const resetIndustries = useCallback(() => {
+    const empty = new Set<IndustryKey>();
+    setSelectedIndustriesState(empty);
+    updateIndustriesUrl(empty);
+    setPage(0);
+  }, [updateIndustriesUrl]);
+
   const filteredByIndustry = useMemo(
     () => cases.filter((c) => {
-      if (!matchesIndustry(c.workCategory, selectedIndustry)) return false;
-      if (selectedSubId) {
-        const subcats = getSubcategories(selectedIndustry as IndustryParent);
-        const sub = subcats.find((s) => s.id === selectedSubId);
-        if (sub) {
-          const text = `${c.title} ${c.summary} ${c.type} ${c.workCategory}`.toLowerCase();
-          if (!sub.keywords.some((kw) => text.includes(kw.toLowerCase()))) return false;
-        }
-      }
+      if (!matchesAnyIndustry(c.workCategory, selectedIndustries)) return false;
       if (selectedWorkerAttribute !== "すべて") {
         const attrs = c.worker_attribute ?? ["一般"];
         if (!attrs.includes(selectedWorkerAttribute) && !attrs.includes("一般")) return false;
@@ -98,7 +168,7 @@ export function AccidentDatabasePanel({
       }
       return true;
     }),
-    [cases, selectedIndustry, selectedSubId, selectedWorkerAttribute, selectedCompanySize, keyword]
+    [cases, selectedIndustries, selectedWorkerAttribute, selectedCompanySize, keyword]
   );
 
   const pageItems = useMemo(() => {
@@ -137,43 +207,39 @@ export function AccidentDatabasePanel({
           />
         </div>
         <div>
-          <p className="text-xs font-semibold text-slate-700">業種フィルタ</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {(["全業種", "建設業", "製造業"] as IndustryFilter[]).map((ind) => (
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-semibold text-slate-700">
+              業種フィルタ（複数選択可）
+              {selectedIndustries.size > 0 && (
+                <span className="ml-1.5 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                  {selectedIndustries.size}業種選択中 / {filteredByIndustry.length}件
+                </span>
+              )}
+            </p>
+            {selectedIndustries.size > 0 && (
               <button
-                key={ind}
                 type="button"
-                onClick={() => {
-                  setSelectedIndustry(ind);
-                  setSelectedSubId("");
-                  setPage(0);
-                }}
-                className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                  ind === selectedIndustry ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                onClick={resetIndustries}
+                className="text-[11px] font-semibold text-slate-400 hover:text-red-500 transition"
+              >
+                フィルタをリセット
+              </button>
+            )}
+          </div>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {INDUSTRY_OPTIONS.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => toggleIndustry(key)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  selectedIndustries.has(key) ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}
               >
-                {ind}
+                {label}
               </button>
             ))}
           </div>
-          {selectedIndustry !== "全業種" && getSubcategories(selectedIndustry as IndustryParent).length > 0 && (
-            <div className="mt-2">
-              <label className="text-xs font-semibold text-slate-700" htmlFor="accident-subindustry">
-                細分業種
-              </label>
-              <select
-                id="accident-subindustry"
-                value={selectedSubId}
-                onChange={(e) => { setSelectedSubId(e.target.value); setPage(0); }}
-                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                <option value="">{selectedIndustry}（すべて）</option>
-                {getSubcategories(selectedIndustry as IndustryParent).map((sub) => (
-                  <option key={sub.id} value={sub.id}>{sub.label}</option>
-                ))}
-              </select>
-            </div>
-          )}
         </div>
         {/* 属性・規模フィルタ */}
         <div className="flex flex-wrap gap-x-6 gap-y-3">

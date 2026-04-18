@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { LawRevision, RevisionImpact } from "@/lib/types/domain";
 import type { ServiceError } from "@/lib/types/api";
 import { fuzzyMatchAll } from "@/lib/fuzzy-search";
-import { getSubcategories, type IndustryParent } from "@/data/industry-subcategories";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
 
@@ -65,8 +64,76 @@ const IMPACT_BADGE_CLASS: Record<RevisionImpact, string> = {
   低: "bg-slate-100 text-slate-500",
 };
 
-// main: 業種フィルタ
-type IndustryFilter = "全業種" | "建設業" | "製造業";
+// 業種マルチセレクトフィルタ
+type IndustryKey =
+  | "construction"
+  | "manufacturing"
+  | "healthcare"
+  | "transport"
+  | "forestry"
+  | "food"
+  | "retail"
+  | "cleaning"
+  | "chemical"
+  | "electrical";
+
+const INDUSTRY_OPTIONS: { key: IndustryKey; label: string }[] = [
+  { key: "construction", label: "建設" },
+  { key: "manufacturing", label: "製造" },
+  { key: "healthcare", label: "医療福祉" },
+  { key: "transport", label: "運輸" },
+  { key: "forestry", label: "林業" },
+  { key: "food", label: "食品" },
+  { key: "retail", label: "小売" },
+  { key: "cleaning", label: "清掃" },
+  { key: "chemical", label: "化学" },
+  { key: "electrical", label: "電気" },
+];
+
+const INDUSTRY_KEYWORDS: Record<IndustryKey, string[]> = {
+  construction: ["建設", "足場", "高所作業", "解体", "土木", "石綿", "アスベスト", "掘削", "型枠", "鉛作業"],
+  manufacturing: ["製造業", "機械", "プレス", "研削", "ボイラー", "粉じん", "爆発物", "溶接", "鋳造"],
+  healthcare: ["医療", "福祉", "介護", "看護", "病院", "腰痛", "感染症", "職業感染", "医療機関"],
+  transport: ["運輸", "トラック", "バス", "運転", "荷役", "港湾", "物流", "陸運"],
+  forestry: ["林業", "伐木", "チェーンソー", "木材", "架線", "伐採", "山岳"],
+  food: ["食品", "飲食", "厨房", "冷凍", "調理", "食料"],
+  retail: ["小売", "商業", "百貨店", "スーパー", "販売業", "接客"],
+  cleaning: ["清掃", "廃棄物", "ゴミ", "汚水", "環境衛生"],
+  chemical: ["化学物質", "有機溶剤", "特定化学", "危険物", "有害物", "SDS", "化学品"],
+  electrical: ["電気", "電圧", "感電", "高圧", "アーク", "電力", "送配電"],
+};
+
+function industryMatchesRevision(key: IndustryKey, revision: LawRevision): boolean {
+  if (revision.industry_detail) {
+    const d = revision.industry_detail.toLowerCase();
+    if (d === "全業種" || d === "全産業") return true;
+    const labelMap: Record<IndustryKey, string[]> = {
+      construction: ["建設"],
+      manufacturing: ["製造"],
+      healthcare: ["医療", "福祉", "介護"],
+      transport: ["運輸", "物流"],
+      forestry: ["林業"],
+      food: ["食品", "飲食"],
+      retail: ["小売", "商業"],
+      cleaning: ["清掃"],
+      chemical: ["化学"],
+      electrical: ["電気"],
+    };
+    return labelMap[key].some((l) => d.includes(l));
+  }
+  const text = `${revision.title} ${revision.summary} ${revision.category ?? ""}`.toLowerCase();
+  return INDUSTRY_KEYWORDS[key].some((kw) => text.includes(kw.toLowerCase()));
+}
+
+function parseIndustriesParam(raw: string | null): Set<IndustryKey> {
+  if (!raw) return new Set();
+  const valid = new Set(INDUSTRY_OPTIONS.map((o) => o.key));
+  const result = new Set<IndustryKey>();
+  for (const part of raw.split(",")) {
+    if (valid.has(part as IndustryKey)) result.add(part as IndustryKey);
+  }
+  return result;
+}
 
 // 属性・規模フィルタ用定数
 const WORKER_ATTRIBUTE_OPTIONS = ["すべて", "女性労働者", "高齢者", "外国人", "非正規", "若年", "一般"] as const;
@@ -74,29 +141,6 @@ type WorkerAttributeFilter = (typeof WORKER_ATTRIBUTE_OPTIONS)[number];
 
 const COMPANY_SIZE_OPTIONS = ["全規模", "大企業", "中小企業", "個人事業主"] as const;
 type CompanySizeFilter = (typeof COMPANY_SIZE_OPTIONS)[number];
-
-const CONSTRUCTION_KEYWORDS = ["建設", "足場", "高所作業", "解体", "土木", "鉛", "石綿", "アスベスト", "掘削", "型枠"];
-const MANUFACTURING_KEYWORDS = ["化学物質", "有機溶剤", "製造業", "機械", "プレス", "研削", "ボイラー", "特定化学", "粉じん", "爆発物"];
-
-function resolveIndustry(revision: LawRevision): IndustryFilter[] {
-  if (revision.industry_detail) {
-    const detail = revision.industry_detail;
-    if (detail === "全業種") return ["全業種"];
-    const industries: IndustryFilter[] = [];
-    if (detail.includes("建設")) industries.push("建設業");
-    if (detail.includes("製造")) industries.push("製造業");
-    return industries.length > 0 ? industries : ["全業種"];
-  }
-  const text = `${revision.title} ${revision.summary} ${revision.category ?? ""}`.toLowerCase();
-  const industries: IndustryFilter[] = [];
-  if (CONSTRUCTION_KEYWORDS.some((kw) => text.includes(kw.toLowerCase()))) {
-    industries.push("建設業");
-  }
-  if (MANUFACTURING_KEYWORDS.some((kw) => text.includes(kw.toLowerCase()))) {
-    industries.push("製造業");
-  }
-  return industries.length > 0 ? industries : ["全業種"];
-}
 
 /** 出典情報ボックス（詳細展開時に表示） */
 function SourceInfoBox({ revision }: { revision: LawRevision }) {
@@ -147,15 +191,6 @@ function SourceInfoBox({ revision }: { revision: LawRevision }) {
   );
 }
 
-const INDUSTRY_TO_PARAM: Record<IndustryFilter, string> = {
-  全業種: "",
-  建設業: "construction",
-  製造業: "manufacturing",
-};
-const PARAM_TO_INDUSTRY: Record<string, IndustryFilter> = {
-  construction: "建設業",
-  manufacturing: "製造業",
-};
 const IMPACT_TO_PARAM: Record<RevisionImpact | "すべて", string> = {
   すべて: "",
   高: "high",
@@ -193,17 +228,17 @@ export function LawRevisionList({
   const [sortOrder, setSortOrderState] = useState<"desc" | "asc">(
     () => (searchParams.get("sort") === "asc" ? "asc" : "desc")
   );
-  // 業種フィルタ (URLパラメータ連動)
-  const [selectedIndustry, setSelectedIndustryState] = useState<IndustryFilter>(
-    () => PARAM_TO_INDUSTRY[searchParams.get("industry") ?? ""] ?? "全業種"
+  // 業種マルチセレクト (URLパラメータ連動: ?industries=construction,manufacturing)
+  const [selectedIndustries, setSelectedIndustriesState] = useState<Set<IndustryKey>>(
+    () => parseIndustriesParam(searchParams.get("industries"))
   );
 
   const updateUrl = useCallback(
-    (industry: IndustryFilter, impact: RevisionImpact | "すべて", sort: "desc" | "asc") => {
+    (industries: Set<IndustryKey>, impact: RevisionImpact | "すべて", sort: "desc" | "asc") => {
       const params = new URLSearchParams(searchParams.toString());
-      const industryVal = INDUSTRY_TO_PARAM[industry];
+      const industryVal = Array.from(industries).join(",");
       const impactVal = IMPACT_TO_PARAM[impact];
-      if (industryVal) params.set("industry", industryVal); else params.delete("industry");
+      if (industryVal) params.set("industries", industryVal); else params.delete("industries");
       if (impactVal) params.set("impact", impactVal); else params.delete("impact");
       if (sort !== "desc") params.set("sort", sort); else params.delete("sort");
       router.replace(`?${params.toString()}`, { scroll: false });
@@ -214,30 +249,37 @@ export function LawRevisionList({
   const setSelectedImpact = useCallback(
     (val: RevisionImpact | "すべて") => {
       setSelectedImpactState(val);
-      updateUrl(selectedIndustry, val, sortOrder);
+      updateUrl(selectedIndustries, val, sortOrder);
     },
-    [updateUrl, selectedIndustry, sortOrder]
+    [updateUrl, selectedIndustries, sortOrder]
   );
 
   const setSortOrder = useCallback(
     (val: "desc" | "asc") => {
       setSortOrderState(val);
-      updateUrl(selectedIndustry, selectedImpact, val);
+      updateUrl(selectedIndustries, selectedImpact, val);
     },
-    [updateUrl, selectedIndustry, selectedImpact]
+    [updateUrl, selectedIndustries, selectedImpact]
   );
 
-  // 細分業種フィルタ
-  const [selectedSubId, setSelectedSubId] = useState<string>("");
-
-  const setSelectedIndustry = useCallback(
-    (val: IndustryFilter) => {
-      setSelectedIndustryState(val);
-      setSelectedSubId("");
-      updateUrl(val, selectedImpact, sortOrder);
+  const toggleIndustry = useCallback(
+    (key: IndustryKey) => {
+      setSelectedIndustriesState((prev) => {
+        const next = new Set(prev);
+        if (next.has(key)) next.delete(key); else next.add(key);
+        updateUrl(next, selectedImpact, sortOrder);
+        return next;
+      });
     },
     [updateUrl, selectedImpact, sortOrder]
   );
+
+  const resetIndustries = useCallback(() => {
+    const empty = new Set<IndustryKey>();
+    setSelectedIndustriesState(empty);
+    updateUrl(empty, selectedImpact, sortOrder);
+  }, [updateUrl, selectedImpact, sortOrder]);
+
   // 属性・規模フィルタ
   const [selectedWorkerAttribute, setSelectedWorkerAttribute] = useState<WorkerAttributeFilter>("すべて");
   const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
@@ -252,19 +294,10 @@ export function LawRevisionList({
       if (selectedKind !== "すべて" && resolveKindLabel(r) !== selectedKind) return false;
       // #40: 影響度フィルタ
       if (selectedImpact !== "すべて" && r.impact !== selectedImpact) return false;
-      // main: 業種フィルタ
-      if (selectedIndustry !== "全業種") {
-        const industries = resolveIndustry(r);
-        if (!industries.includes(selectedIndustry) && !industries.includes("全業種")) return false;
-      }
-      // 細分業種フィルタ
-      if (selectedSubId) {
-        const subcats = getSubcategories(selectedIndustry as IndustryParent);
-        const sub = subcats.find((s) => s.id === selectedSubId);
-        if (sub) {
-          const text = `${r.title} ${r.summary} ${r.category ?? ""} ${r.industry_detail ?? ""}`.toLowerCase();
-          if (!sub.keywords.some((kw) => text.includes(kw.toLowerCase()))) return false;
-        }
+      // 業種マルチセレクトフィルタ（OR条件）
+      if (selectedIndustries.size > 0) {
+        const matches = Array.from(selectedIndustries).some((key) => industryMatchesRevision(key, r));
+        if (!matches) return false;
       }
       // 属性フィルタ
       if (selectedWorkerAttribute !== "すべて") {
@@ -285,7 +318,7 @@ export function LawRevisionList({
       const diff = a.publishedAt.localeCompare(b.publishedAt);
       return sortOrder === "desc" ? -diff : diff;
     });
-  }, [revisions, search, yearFrom, yearTo, selectedKind, selectedImpact, sortOrder, selectedIndustry, selectedSubId, selectedWorkerAttribute, selectedCompanySize]);
+  }, [revisions, search, yearFrom, yearTo, selectedKind, selectedImpact, sortOrder, selectedIndustries, selectedWorkerAttribute, selectedCompanySize]);
 
   const showEmptyState = status === "success" && !error && filtered.length === 0;
 
@@ -337,43 +370,42 @@ export function LawRevisionList({
         </div>
       </div>
       <div className="mt-3">
-        <p className="text-xs font-semibold text-slate-700">業種フィルタ</p>
-        <div className="mt-1 flex flex-wrap gap-2">
-          {(["全業種", "建設業", "製造業"] as IndustryFilter[]).map((ind) => (
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs font-semibold text-slate-700">
+            業種フィルタ（複数選択可）
+            {selectedIndustries.size > 0 && (
+              <span className="ml-1.5 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold text-blue-700">
+                {selectedIndustries.size}業種選択中 / {filtered.length}件
+              </span>
+            )}
+          </p>
+          {selectedIndustries.size > 0 && (
             <button
-              key={ind}
               type="button"
-              onClick={() => setSelectedIndustry(ind)}
+              onClick={resetIndustries}
+              className="text-[11px] font-semibold text-slate-400 hover:text-red-500 transition"
+            >
+              フィルタをリセット
+            </button>
+          )}
+        </div>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {INDUSTRY_OPTIONS.map(({ key, label }) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => toggleIndustry(key)}
               className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                selectedIndustry === ind
+                selectedIndustries.has(key)
                   ? "bg-blue-600 text-white"
                   : "bg-slate-100 text-slate-700 hover:bg-slate-200"
               }`}
             >
-              {ind}
+              {label}
             </button>
           ))}
         </div>
       </div>
-      {/* 細分業種セレクト */}
-      {selectedIndustry !== "全業種" && getSubcategories(selectedIndustry as IndustryParent).length > 0 && (
-        <div className="mt-2">
-          <label className="text-xs font-semibold text-slate-700" htmlFor="law-subindustry">
-            細分業種
-          </label>
-          <select
-            id="law-subindustry"
-            value={selectedSubId}
-            onChange={(e) => setSelectedSubId(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            <option value="">{selectedIndustry}（すべて）</option>
-            {getSubcategories(selectedIndustry as IndustryParent).map((sub) => (
-              <option key={sub.id} value={sub.id}>{sub.label}</option>
-            ))}
-          </select>
-        </div>
-      )}
       {/* 属性・規模フィルタ */}
       <div className="mt-3 flex flex-wrap gap-x-6 gap-y-3">
         <div>
