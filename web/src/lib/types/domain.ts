@@ -42,6 +42,16 @@ export type LawRevisionCore = {
   worker_attribute?: string[];
   /** 事業所規模（大企業/中小企業/個人事業主/全規模） */
   company_size?: string;
+  /** 通達番号（例:「基発0115第1号」。不明なら空文字"" / 任意） */
+  notice_no?: string;
+  /** 厚労省通達検索または所管省庁の通達公開URL（任意） */
+  notice_link?: string;
+  /** 関連判例の事件番号（例:「最三小判平24.3.13」「最一小判平12.3.24」） */
+  court_case?: string;
+  /** 判例要旨（短文） */
+  court_case_summary?: string;
+  /** 判例の公式出典URL（裁判所サイト等） */
+  court_case_url?: string;
 };
 
 export type LawRevisionSummary = {

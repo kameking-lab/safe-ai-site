@@ -44,6 +44,13 @@ export default function LawsPage() {
         heading="合わせて使う"
         pages={[
           {
+            href: "/laws/notices-precedents",
+            label: "通達・判例（第2層出典）",
+            description: "条文だけでは読めない行政解釈（通達15件）と最高裁判例（15件）。監督官・士業向けの実務出典集。",
+            color: "emerald",
+            cta: "通達と判例を見る",
+          },
+          {
             href: "/chatbot",
             label: "法令チャット",
             description: "法改正の内容について安衛法AIチャットボットに質問。条文の根拠を確認できます。",

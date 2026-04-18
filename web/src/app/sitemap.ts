@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/e-learning", priority: 0.9, changeFrequency: "weekly" as const },
     { url: "/exam-quiz", priority: 0.9, changeFrequency: "weekly" as const },
     { url: "/laws", priority: 0.9, changeFrequency: "weekly" as const },
+    { url: "/laws/notices-precedents", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/ky", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/risk", priority: 0.8, changeFrequency: "daily" as const },
     { url: "/chatbot", priority: 0.8, changeFrequency: "monthly" as const },
