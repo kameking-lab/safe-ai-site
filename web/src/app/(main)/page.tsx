@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Shield } from "lucide-react";
 import { HomeScreen } from "@/components/home-screen";
-import { PageHeader } from "@/components/page-header";
+import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { ogImageUrl } from "@/lib/og-url";
 
 export const metadata: Metadata = {
@@ -23,10 +22,12 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <HomeScreen variant="portal">
-      <PageHeader
-        title="現場の安全情報を、すばやく確認"
-        description="法改正・現場リスク・事故DB・KY用紙をまとめて確認"
-        icon={Shield}
+      <TranslatedPageHeader
+        titleJa="現場の安全情報を、すばやく確認"
+        titleEn="Quick access to workplace safety information"
+        descriptionJa="法改正・現場リスク・事故DB・KY用紙をまとめて確認"
+        descriptionEn="Review law updates, field risks, accident DB, and KY forms in one place"
+        iconName="Shield"
         iconColor="emerald"
       />
     </HomeScreen>

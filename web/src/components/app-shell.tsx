@@ -33,6 +33,7 @@ import { Footer } from "@/components/footer";
 import { UserMenu } from "@/components/user-menu";
 import { useFurigana } from "@/contexts/furigana-context";
 import { useEasyJapanese } from "@/contexts/easy-japanese-context";
+import { useLanguage } from "@/contexts/language-context";
 
 const LARGE_FONT_KEY = "large-font-enabled";
 const HIGH_CONTRAST_KEY = "high-contrast-enabled";
@@ -130,6 +131,7 @@ export function AppShell({ children, user }: AppShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { furiganaEnabled, toggleFurigana } = useFurigana();
   const { easyJapaneseEnabled, toggleEasyJapanese } = useEasyJapanese();
+  const { language, setLanguage } = useLanguage();
 
   // largeFontEnabledをlocalStorageから遅延初期化
   const [largeFontEnabled, setLargeFontEnabled] = useState<boolean>(() => {
@@ -325,6 +327,19 @@ export function AppShell({ children, user }: AppShellProps) {
             >
               屋外
             </button>
+            <button
+              type="button"
+              onClick={() => setLanguage(language === "ja" ? "en" : "ja")}
+              className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                language === "en"
+                  ? "bg-indigo-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+              title={language === "ja" ? "Switch to English" : "日本語に切替"}
+              aria-label={language === "ja" ? "Switch to English" : "日本語に切替"}
+            >
+              {language === "ja" ? "EN" : "日本語"}
+            </button>
           </div>
           <UserMenu user={user} />
         </div>
@@ -408,6 +423,20 @@ export function AppShell({ children, user }: AppShellProps) {
               aria-pressed={highContrastEnabled}
             >
               屋外
+            </button>
+            {/* 言語切替 */}
+            <button
+              type="button"
+              onClick={() => setLanguage(language === "ja" ? "en" : "ja")}
+              className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
+                language === "en"
+                  ? "bg-indigo-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+              title={language === "ja" ? "Switch to English" : "日本語に切替"}
+              aria-label={language === "ja" ? "Switch to English" : "日本語に切替"}
+            >
+              {language === "ja" ? "EN" : "日本"}
             </button>
             <UserMenu user={user} />
             <button

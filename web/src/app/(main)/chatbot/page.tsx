@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { Scale } from "lucide-react";
 import { ChatbotPanel } from "@/components/chatbot-panel";
-import { PageHeader } from "@/components/page-header";
+import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -26,10 +25,12 @@ export const metadata: Metadata = {
 export default function ChatbotPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 sm:py-8">
-      <PageHeader
-        title="安衛法AIチャットボット"
-        description="労働安全衛生法・関連規則に基づいてAIが回答"
-        icon={Scale}
+      <TranslatedPageHeader
+        titleJa="安衛法AIチャットボット"
+        titleEn="Occupational Safety Law AI Chat"
+        descriptionJa="労働安全衛生法・関連規則に基づいてAIが回答"
+        descriptionEn="AI answers your questions based on occupational safety and health laws"
+        iconName="Scale"
         iconColor="blue"
       />
 

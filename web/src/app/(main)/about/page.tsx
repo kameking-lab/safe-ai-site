@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Info,
   FileText,
   AlertCircle,
   BookOpen,
@@ -16,7 +15,7 @@ import {
   Minus,
   ExternalLink,
 } from "lucide-react";
-import { PageHeader } from "@/components/page-header";
+import { TranslatedPageHeader } from "@/components/translated-page-header";
 
 export const metadata: Metadata = {
   title: "運営者情報・特定商取引法に基づく表記",
@@ -130,10 +129,12 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
 export default function AboutPage() {
   return (
     <main className="mx-auto max-w-2xl px-4 py-6 sm:py-8">
-      <PageHeader
-        title="運営者情報・特定商取引法に基づく表記"
-        description="ANZEN AI の運営者情報と特商法表記"
-        icon={Info}
+      <TranslatedPageHeader
+        titleJa="運営者情報・特定商取引法に基づく表記"
+        titleEn="About ANZEN AI"
+        descriptionJa="ANZEN AI の運営者情報と特商法表記"
+        descriptionEn="Operator information and legal disclosures for ANZEN AI"
+        iconName="Info"
         iconColor="emerald"
       />
 

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { GraduationCap } from "lucide-react";
 import { HomeScreen } from "@/components/home-screen";
-import { PageHeader } from "@/components/page-header";
+import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, courseListSchema } from "@/components/json-ld";
@@ -37,10 +36,12 @@ export default function ELearningPage() {
     <>
       <JsonLd schema={courseSchema} />
       <HomeScreen variant="elearning">
-        <PageHeader
-          title="Eラーニング"
-          description="労働安全に関するテーマ別学習コンテンツとクイズ"
-          icon={GraduationCap}
+        <TranslatedPageHeader
+          titleJa="Eラーニング"
+          titleEn="E-Learning"
+          descriptionJa="労働安全に関するテーマ別学習コンテンツとクイズ"
+          descriptionEn="Topic-based safety training content and quizzes"
+          iconName="GraduationCap"
           iconColor="emerald"
         />
       </HomeScreen>

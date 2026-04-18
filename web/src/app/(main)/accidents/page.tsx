@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Database } from "lucide-react";
 import { HomeScreen } from "@/components/home-screen";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
-import { PageHeader } from "@/components/page-header";
+import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
@@ -40,10 +39,12 @@ export default function AccidentsPage() {
     <>
       <JsonLd schema={accidentSchema} />
       <HomeScreen variant="accidents">
-        <PageHeader
-          title="事故データベース"
-          description="労働災害の事故事例を検索・閲覧。厚労省データベースへのリンクも掲載"
-          icon={Database}
+        <TranslatedPageHeader
+          titleJa="事故データベース"
+          titleEn="Accident Database"
+          descriptionJa="労働災害の事故事例を検索・閲覧。厚労省データベースへのリンクも掲載"
+          descriptionEn="Search and browse workplace accident cases. Links to MHLW database included."
+          iconName="Database"
           iconColor="red"
         />
         <div className="mt-2">

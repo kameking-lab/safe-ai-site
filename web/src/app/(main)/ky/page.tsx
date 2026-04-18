@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
-import { ClipboardList } from "lucide-react";
 import { HomeScreen } from "@/components/home-screen";
-import { PageHeader } from "@/components/page-header";
+import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -27,10 +26,12 @@ export default function KyPage() {
   return (
     <>
       <HomeScreen variant="ky">
-        <PageHeader
-          title="KY用紙"
-          description="危険予知活動表の作成・記録。音声入力対応で現場から入力"
-          icon={ClipboardList}
+        <TranslatedPageHeader
+          titleJa="KY用紙"
+          titleEn="KY Form (Hazard Identification)"
+          descriptionJa="危険予知活動表の作成・記録。音声入力対応で現場から入力"
+          descriptionEn="Create and record hazard identification sheets. Voice input supported."
+          iconName="ClipboardList"
           iconColor="emerald"
         />
       </HomeScreen>

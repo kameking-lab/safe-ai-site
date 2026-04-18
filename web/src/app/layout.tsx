@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { FuriganaProvider } from "@/contexts/furigana-context";
 import { EasyJapaneseProvider } from "@/contexts/easy-japanese-context";
+import { LanguageProvider } from "@/contexts/language-context";
 import { JsonLd, organizationSchema, webSiteSchema } from "@/components/json-ld";
 
 const geistSans = Geist({
@@ -79,9 +80,11 @@ export default function RootLayout({
       <body className="min-h-full bg-slate-50 font-sans text-slate-900">
         <JsonLd schema={organizationSchema()} />
         <JsonLd schema={webSiteSchema()} />
-        <FuriganaProvider>
-          <EasyJapaneseProvider>{children}</EasyJapaneseProvider>
-        </FuriganaProvider>
+        <LanguageProvider>
+          <FuriganaProvider>
+            <EasyJapaneseProvider>{children}</EasyJapaneseProvider>
+          </FuriganaProvider>
+        </LanguageProvider>
       </body>
     </html>
   );
