@@ -1,6 +1,9 @@
 # Claude Code local worktrees
 .claude/worktrees/
 
+# MHLW downloaded data (large, not versioned)
+mhlw-data/
+
 # Build artifacts
 .next/
 node_modules/
