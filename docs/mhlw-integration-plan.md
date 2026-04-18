@@ -163,6 +163,47 @@ build-time ETL でゼロ加工の JSONL → 軽量 JSON に整形して `dynamic
    は推測値。オーナー側で PDF 内容を確認して正式名称に差し替えると引用精度が
    上がる。
 
+### ステップ 2d: 統合ビューの高度化（UI/検索強化） ✅ (2026-04-19 完了)
+
+2c で物理的には 4 カテゴリ（事故/死亡災害/化学物質/法令）が UI に乗ったが、
+フラット羅列ではオーナー要件（CAS 単位のグルーピング、複数選択フィルタ、
+PDF 出典の可視化）に届かなかったので仕上げを別コミットに分離した。
+
+- `web/src/lib/mhlw-chemicals.ts` — compact.json の 3,943 行を CAS 番号でマージし、
+  1,389 物質の `MergedChemical[]` を返すユーティリティ。カテゴリ → 関連法令文字列
+  テーブル（`安衛法 57/57の2`、`安衛則 577の2`、`594の2` など）を同梱。
+- `web/src/components/mhlw-chemical-aggregated-panel.tsx` (新設、~290 行) —
+  `MergedChemical` ベースのパネル。SDS義務 / 皮膚障害 / がん原性 / 濃度基準値の
+  複数選択チップ（OR 合成）、ハイフン非依存の CAS ファジー検索、
+  折り畳みで適用日と関連法令を開示、CAS Common Chemistry と職場のあんぜんサイト
+  への外部リンク。pagination 40件/ページ。
+- `web/src/components/mhlw-chemical-search-panel.tsx` は不要になったので削除。
+- `web/src/components/mhlw-accident-analysis-panel.tsx` — 死亡災害セクションを追加:
+  (a) `年次推移オーバーレイ` は dual-axis LineChart で 休業4日以上（2006〜2021）
+  vs 死亡災害（2019〜2023）を `connectNulls=false` で描画。重なる 3 年のみ
+  両シリーズが描画される。(b) 死亡災害の業種別 / 事故型別 Top10 ランキングを
+  `deaths-by-year.json` / `deaths-by-industry.json` から集計。
+- `web/src/components/mhlw-law-articles-panel.tsx` (新設、~210 行) +
+  `law-search-panel.tsx` のタブ化 — `/law-search` に
+  「キュレーション（既存）」と「MHLW公式法令PDF」の切替を入れ、MHLW タブでは
+  295 条文を条番号・法令名・本文・キーワードで横断検索。各カードに出典 PDF
+  ファイル名と `site:mhlw.go.jp <filename>` の Google 検索リンクを配置
+  （PDF 自体はアプリ外ホストのため直接リンク不可）。
+- 相当する commit:
+  - `feat(chemicals): integrate 1389 MHLW substances`
+  - `feat(accidents): integrate 4043 MHLW death accidents`
+  - `feat(laws): integrate 588 MHLW law articles`
+
+#### ステップ 2d 完了で解消した事項 / 残る事項
+
+- **解消**: フェーズ 5 の「CAS RN でグルーピング + 4 種フラグ化」は事実上完了
+  （サーバ側 JSON は作らず、ランタイムで mergeByCas する方針）。これで
+  `/chemical-database` の UI 上の目的は達成されたため、フェーズ 5 は
+  `/chemical-ra` 連携と化学物質 PDF の RAG 取り込みのみが残る。
+- **残る**: PDF 実ファイルを `/public/mhlw-data/laws/` 配下にデプロイするか、
+  MHLW サイトの実 URL を LAW_SOURCE_URL マップに入れるか、いずれかを
+  オーナーに確認（現状は Google 検索フォールバック）。
+
 ---
 
 ## フェーズ 3: 法令 RAG / チャットボット強化
@@ -226,19 +267,25 @@ build-time ETL でゼロ加工の JSONL → 軽量 JSON に整形して `dynamic
 
 ### タスク
 
-1. 統合ビュー: `Chemical[]` を CAS RN でグルーピングし、
+1. ~~統合ビュー: `Chemical[]` を CAS RN でグルーピングし、
    「がん原性 / 濃度基準 / 皮膚障害 / SDS 対象」のフラグを付けた
-   `chemicals-merged.json` を生成する `scripts/etl/merge-chemicals.py` を追加。
-2. `/chemical-database` を検索式 (物質名・CAS RN) で引ける UI に改修。
-   - 詳細ページで 4 種リストの該当フラグと適用日を表示。
-3. `/chemical-ra`（リスクアセスメント）で、選んだ物質の濃度基準値を自動反映。
-4. 化学物質関連 PDF (`shishin*.pdf`, `kihatsu_*.pdf`) を
+   `chemicals-merged.json` を生成する~~ → **2d で完了**。ランタイム mergeByCas
+   方式で `Chemical[]` を 1,389 物質に集約済み。
+2. ~~`/chemical-database` を検索式 (物質名・CAS RN) で引ける UI に改修。
+   詳細ページで 4 種リストの該当フラグと適用日を表示。~~ → **2d で完了**。
+   複数選択フィルタ + CAS ファジー検索 + 折り畳み詳細で適用日表示済み。
+3. **残タスク**: `/chemical-ra`（リスクアセスメント）で、選んだ物質の
+   濃度基準値を自動反映。現在 /chemical-ra は `chemicalSubstances` (50 物質)
+   を参照しているため、`mergeByCas` 結果の `concentration` フラグ付き物質
+   （207 件）を候補に追加する必要がある。
+4. **残タスク**: 化学物質関連 PDF (`shishin*.pdf`, `kihatsu_*.pdf`) を
    法令 RAG インデックスに追加（フェーズ 3 の拡張）。
 
 ### セーブポイント
 
-- commit 1: `feat(chemicals): merge 4 MHLW lists into single lookup index`
-- commit 2: `feat(chemical-ra): auto-populate exposure limits from MHLW concentration standards`
+- ~~commit 1: `feat(chemicals): merge 4 MHLW lists into single lookup index`~~ → 2d で完了
+- commit 2 (残): `feat(chemical-ra): auto-populate exposure limits from MHLW concentration standards`
+- commit 3 (残): `feat(laws-rag): index MHLW chemical guidance PDFs`
 
 ---
 
@@ -250,10 +297,11 @@ Phase 0 (done) ✅
     │       ├── Phase 2a (accidents aggregates UI) ✅
     │       ├── Phase 2b (Blob search infra) ✅ ← オーナー作業待ち
     │       ├── Phase 2c (chemicals / deaths / laws 横断統合) ✅
-    │       │       └── 残: /accidents/[id], モック整理, PDF 再抽出
+    │       ├── Phase 2d (CAS統合・死亡災害オーバーレイ・MHLW法令タブ) ✅
+    │       │       └── 残: /accidents/[id], モック整理, PDF 再抽出, PDF URL マップ
     │       ├── Phase 3 (law RAG, embedding) ← 要オーナー確認: API キー
     │       ├── Phase 4 (analytics)
-    │       └── Phase 5 (chemicals, chemical-ra 連携)
+    │       └── Phase 5 (chemical-ra 連携 + 化学物質PDF RAG) ← 2d で 1/4,2/4 が完了
 ```
 
 - フェーズ 2, 4, 5 は並列実行可能（相互依存なし）。
@@ -267,3 +315,8 @@ Phase 0 (done) ✅
 2. **Embedding API の選定**: OpenAI `text-embedding-3-small` / Anthropic / ローカル (multilingual-e5)。
 3. **集計スクリプトを Python で書き続けるか / TypeScript で書き直すか**: 配布形態（Vercel 上で動かす必要があるか）次第。
 4. **死亡災害の cross-tab シート**: 業種×局 / 業種×事故型 の 2 軸で分けてそれぞれ JSON 化でよいか。
+5. **MHLW PDF 実ファイルのデプロイ**: フェーズ 2d 時点で /law-search の MHLW タブは
+   PDF ファイル名を表示するだけで直接ダウンロードはできない。
+   (A) `/public/mhlw-data/laws/*.pdf` として Vercel に同梱（+10 MB 程度）、
+   (B) MHLW サイトの実 URL を手動でマップする、(C) 現状維持（Google 検索フォールバック）
+   の 3 択。
