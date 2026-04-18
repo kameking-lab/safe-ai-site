@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { searchRelevantArticlesWithScore, buildContextFromArticles } from "@/lib/rag-search";
+import { searchRelevantArticlesWithScore, buildContextFromArticles, formatSourceCitations } from "@/lib/rag-search";
 import type { LawArticle } from "@/data/laws";
 
 export type ChatbotRequest = {
@@ -122,6 +122,11 @@ export async function POST(request: Request) {
         : "AIサービスへの接続に失敗しました。しばらくしてから再試行してください。",
       true
     );
+  }
+
+  // 出典引用を回答末尾に追記
+  if (relevantArticles.length > 0) {
+    answer += formatSourceCitations(relevantArticles);
   }
 
   // sourcesを整形
