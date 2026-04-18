@@ -172,7 +172,7 @@ export function ChemicalRaPanel() {
       const res = await fetch("/api/chemical-ra", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chemicalName: chemicalName.trim(), workContent: workContent.trim() }),
+        body: JSON.stringify({ chemicalName: chemicalName.trim(), workContent: workContent.trim(), casNumber: mhlwSelected?.cas ?? undefined }),
       });
       const data = (await res.json()) as ChemicalRaResponse | { error: { message: string } };
       if ("error" in data) {

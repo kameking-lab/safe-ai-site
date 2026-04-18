@@ -5,10 +5,12 @@
  */
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { findByCas, searchMergedChemicals, regulatoryLabels, relatedLawTexts } from "@/lib/mhlw-chemicals";
 
 export type ChemicalRaRequest = {
   chemicalName: string;
   workContent?: string;
+  casNumber?: string;
 };
 
 export type GhsHazard = {
@@ -106,6 +108,38 @@ function removeJsonBlock(text: string): string {
   return text.replace(/```json[\s\S]*?```/g, "").trim();
 }
 
+function buildMhlwFallbackResponse(chemicalName: string, casNumber?: string): ChemicalRaResponse {
+  let mhlw = casNumber ? findByCas(casNumber) : undefined;
+  if (!mhlw) {
+    const results = searchMergedChemicals(chemicalName, 1);
+    if (results.length > 0) mhlw = results[0];
+  }
+
+  const notes: string[] = [];
+  if (mhlw) {
+    notes.push(...regulatoryLabels(mhlw.flags));
+    notes.push(...relatedLawTexts(mhlw.flags));
+  }
+
+  const exposureLimit = mhlw?.details?.limit8h
+    ? `8時間濃度基準値: ${mhlw.details.limit8h}${mhlw.details.limitShort ? ` / 短時間: ${mhlw.details.limitShort}` : ""}`
+    : undefined;
+
+  return {
+    chemicalName,
+    casNumber: casNumber ?? mhlw?.cas ?? undefined,
+    ghsHazards: [],
+    flashPoint: undefined,
+    exposureLimit,
+    ppeRecommendations: [],
+    safetyMeasures: [],
+    emergencyMeasures: [],
+    regulatoryNotes: notes,
+    rawReply:
+      "⚠️ AI生成は現在利用できません。以下は厚労省公式データによる規制情報です。\nGHS分類・保護具推奨・緊急措置については製品の公式SDSをご確認ください。",
+  };
+}
+
 const DEMO_RESPONSE: ChemicalRaResponse = {
   chemicalName: "トルエン（デモ）",
   casNumber: "108-88-3",
@@ -155,14 +189,26 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: { code: "VALIDATION", message: "化学物質名を入力してください。" } }, { status: 400 });
   }
 
+  const casNumber = body?.casNumber?.trim() || undefined;
+
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey || apiKey === "dummy") {
-    // APIキー未設定時はデモ回答
+    // APIキー未設定時はMHLWデータ + デモ回答
+    const mhlwFallback = buildMhlwFallbackResponse(chemicalName, casNumber);
+    if (mhlwFallback.regulatoryNotes.length > 0 || mhlwFallback.exposureLimit) {
+      return NextResponse.json({
+        ...mhlwFallback,
+        rawReply: "⚠️ GEMINI_API_KEYが未設定のため、AI生成は利用できません。以下は厚労省公式データによる規制情報です。\nGHS分類・保護具推奨については製品の公式SDSをご確認ください。",
+      }, { status: 200 });
+    }
     return NextResponse.json({ ...DEMO_RESPONSE, chemicalName }, { status: 200 });
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    systemInstruction: SYSTEM_PROMPT,
+  });
   const workPart = body?.workContent?.trim()
     ? `\n\n【作業内容】\n${body.workContent.trim()}`
     : "";
@@ -175,15 +221,14 @@ ${chemicalName}${workPart}
 JSONブロック形式で安全データを提供し、物質の基本的な性状と取扱い上の注意点を説明してください。`;
 
   try {
-    const chat = model.startChat({ systemInstruction: SYSTEM_PROMPT });
-    const result = await chat.sendMessage(userPrompt);
+    const result = await model.generateContent(userPrompt);
     const rawReply = result.response.text();
     const extracted = extractJsonBlock(rawReply);
     const cleanReply = removeJsonBlock(rawReply);
 
     const response: ChemicalRaResponse = {
       chemicalName,
-      casNumber: extracted.casNumber,
+      casNumber: extracted.casNumber ?? casNumber,
       ghsHazards: extracted.ghsHazards ?? [],
       flashPoint: extracted.flashPoint,
       exposureLimit: extracted.exposureLimit,
@@ -195,9 +240,7 @@ JSONブロック形式で安全データを提供し、物質の基本的な性�
     };
     return NextResponse.json(response, { status: 200 });
   } catch {
-    return NextResponse.json(
-      { error: { code: "UNAVAILABLE", message: "リスクアセスメントの生成に失敗しました。しばらく経ってから再試行してください。" } },
-      { status: 503 }
-    );
+    // AI失敗時はMHLWデータでフォールバック
+    return NextResponse.json(buildMhlwFallbackResponse(chemicalName, casNumber), { status: 200 });
   }
 }

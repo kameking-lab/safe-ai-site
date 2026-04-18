@@ -119,7 +119,10 @@ export async function POST(request: Request) {
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    systemInstruction: SYSTEM_PROMPT,
+  });
 
   const userPrompt = `以下の作業内容・環境に対して、必要な保護具を推薦してください。
 
@@ -129,8 +132,7 @@ ${question}
 保護具の選定根拠となる法令条文を引用し、JSONブロックに含めて回答してください。`;
 
   try {
-    const chat = model.startChat({ systemInstruction: SYSTEM_PROMPT });
-    const result = await chat.sendMessage(userPrompt);
+    const result = await model.generateContent(userPrompt);
     const rawReply = result.response.text();
     const recommendations = extractRecommendations(rawReply);
     const cleanReply = removeJsonBlock(rawReply);
