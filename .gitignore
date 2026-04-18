@@ -4,6 +4,9 @@
 # MHLW downloaded data (large, not versioned)
 mhlw-data/
 
+# Generated raw accident JSONL (~400MB, regenerate via scripts/etl/parse-shisho-db.py)
+web/src/data/accidents-mhlw/
+
 # Build artifacts
 .next/
 node_modules/
