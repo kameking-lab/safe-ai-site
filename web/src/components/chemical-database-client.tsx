@@ -19,10 +19,10 @@ import {
   type ChemicalSubstance,
 } from "@/data/mock/chemical-substances-db";
 
-const MhlwChemicalSearchPanel = dynamic(
+const MhlwChemicalAggregatedPanel = dynamic(
   () =>
-    import("@/components/mhlw-chemical-search-panel").then(
-      (m) => m.MhlwChemicalSearchPanel
+    import("@/components/mhlw-chemical-aggregated-panel").then(
+      (m) => m.MhlwChemicalAggregatedPanel
     ),
   { ssr: false, loading: () => <div className="h-40 animate-pulse rounded-lg bg-slate-100" /> }
 );
@@ -60,7 +60,7 @@ function matches(sub: ChemicalSubstance, q: string): boolean {
 }
 
 export function ChemicalDatabaseClient() {
-  const [mode, setMode] = useState<"curated" | "mhlw">("curated");
+  const [mode, setMode] = useState<"curated" | "mhlw">("mhlw");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<ChemicalCategory | "">("");
   const [skinOnly, setSkinOnly] = useState(false);
@@ -82,24 +82,23 @@ export function ChemicalDatabaseClient() {
           化学物質検索DB β版
         </div>
         <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
-          化学物質 50物質 横断検索
+          化学物質データベース（MHLW 1,389物質 ＋ 専門解説50物質）
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700">
-          リスクアセスメント対象物質（674物質拡大予定）・特化則・有機則・鉛則・皮膚等障害化学物質等を
-          物質名・CAS番号・用途から横断検索。化学物質管理者・自律的管理の実務に。
+          厚生労働省の公開 4 リスト（皮膚等障害・SDS交付義務・がん原性・濃度基準値）を CAS 番号で統合した
+          1,389 物質を CAS・物質名で横断検索。労働安全コンサルタントによる専門解説 50 物質も併読できます。
         </p>
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-          ⚠️ β版（50物質）。次フェーズで674物質→900物質まで拡大予定。
-          最終判断は必ず厚生労働省 <Link href="https://anzeninfo.mhlw.go.jp/" className="font-semibold underline" target="_blank" rel="noopener noreferrer">職場のあんぜんサイト</Link>
-          と各SDSをご確認ください。
+          ⚠️ 最終判断は必ず厚生労働省 <Link href="https://anzeninfo.mhlw.go.jp/" className="font-semibold underline" target="_blank" rel="noopener noreferrer">職場のあんぜんサイト</Link>
+          と各物質の SDS をご確認ください。本データベースは管理補助を目的としています。
         </div>
       </header>
 
       <div className="mb-4 flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 w-fit">
         {(
           [
-            { id: "curated", label: "専門50物質（詳細）" },
-            { id: "mhlw", label: "MHLW 3,943物質（横断）" },
+            { id: "mhlw", label: "MHLW 1,389物質（CAS統合）" },
+            { id: "curated", label: "専門解説 50物質" },
           ] as const
         ).map((tab) => (
           <button
@@ -117,7 +116,7 @@ export function ChemicalDatabaseClient() {
         ))}
       </div>
 
-      {mode === "mhlw" && <MhlwChemicalSearchPanel />}
+      {mode === "mhlw" && <MhlwChemicalAggregatedPanel />}
 
       {mode === "curated" && (<>
 
