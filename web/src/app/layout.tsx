@@ -5,6 +5,7 @@ import { FuriganaProvider } from "@/contexts/furigana-context";
 import { EasyJapaneseProvider } from "@/contexts/easy-japanese-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { JsonLd, organizationSchema, webSiteSchema } from "@/components/json-ld";
+import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -80,6 +81,7 @@ export default function RootLayout({
       <body className="min-h-full bg-slate-50 font-sans text-slate-900">
         <JsonLd schema={organizationSchema()} />
         <JsonLd schema={webSiteSchema()} />
+        <ServiceWorkerRegistrar />
         <LanguageProvider>
           <FuriganaProvider>
             <EasyJapaneseProvider>{children}</EasyJapaneseProvider>
