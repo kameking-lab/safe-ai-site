@@ -216,12 +216,18 @@ export function ExamQuizClient() {
 
   const stats = calcStats(history);
 
-  // Group certifications by category
-  const categories = Object.entries(CATEGORY_LABELS).map(([key, label]) => ({
-    key,
-    label,
-    certs: EXAM_CATEGORIES.filter((c) => c.category === key),
-  }));
+  // Group certifications by category, sorted by difficulty (入門→最上級)
+  const categories = Object.entries(CATEGORY_LABELS)
+    .map(([key, label]) => ({
+      key,
+      label,
+      difficulty: DIFFICULTY_LEVEL[key] ?? ("上級" as DifficultyLevel),
+      certs: EXAM_CATEGORIES.filter((c) => c.category === key),
+    }))
+    .sort(
+      (a, b) =>
+        DIFFICULTY_ORDER.indexOf(a.difficulty) - DIFFICULTY_ORDER.indexOf(b.difficulty)
+    );
 
   // --- Finished screen ---
   if (started && index >= questions.length) {
@@ -446,9 +452,9 @@ export function ExamQuizClient() {
               >
                 <option value="all">すべての資格（混合）</option>
                 {categories.map(
-                  ({ key, label, certs }) =>
+                  ({ key, label, difficulty, certs }) =>
                     certs.length > 0 && (
-                      <optgroup key={key} label={`${label}（${DIFFICULTY_LEVEL[key] ?? "中級"}）`}>
+                      <optgroup key={key} label={`${label}（${difficulty}）`}>
                         {certs.map((c) => (
                           <option key={c.id} value={c.id}>
                             {c.name}
