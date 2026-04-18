@@ -23,37 +23,54 @@
 
 ---
 
-## フェーズ 1: 全ファイルのパース
+## フェーズ 1: 全ファイルのパース ✅ (2026-04-19 完了)
 
 **目的**: 231 ファイル全量を JSONL に変換し、以降のフェーズで扱える基礎データを用意する。
 
-### タスク
+### 実行結果
 
-1. 依存ライブラリの導入
-   - `xlrd` (← h18〜h24 の `.xls` 84 ファイルを読むため)
-   - `pypdf` または `pdfplumber` (← 法令 PDF 11 本 + deaths/chemicals 内の PDF)
-   - Python は既存の 3.12.4 を利用。インストール先は user site でも可。
-2. `parse-shisho-db.py` を全件実行
-   - 期待出力: `web/src/data/accidents-mhlw/{YYYY}-{MM}.jsonl` が 192 本。
-   - 総件数は概算 30〜50 万行（r03_12 で 2,634 行 × 192 なら最大 50 万）。
-   - 必要なら年単位に結合 (`{YYYY}.jsonl`) するスクリプトも追加検討。
-3. `parse-deaths.py` で `sibou_db_r01〜r05.xlsx` を本実行 (5 本 × ~900 行)。
-4. `parse-chemicals.py` で 4 本の xlsx を統合 JSONL に。
-5. `parse-laws-pdf.py` で 11 本の PDF を条文 JSONL に。
-6. 集計系 `*_16_sibou*.xlsx` / `20-kakutei.xlsx` の cross-tab 用パーサを追加
-   (`parse-deaths-aggregate.py` を新設、出力 `aggregate-{YYYY}.json`)。
+| データ種別 | 出力 | 件数 | ファイルサイズ | リポジトリに含める |
+|---|---|---|---|---|
+| accidents (shisho-db) | `web/src/data/accidents-mhlw/*.jsonl` | 504,415 行 × 192 本 | 403 MB | **No (gitignore)** |
+| accidents 集計 | `web/src/data/aggregates-mhlw/*.json` | 8 JSON | 65 KB | Yes |
+| deaths | `web/src/data/deaths-mhlw/records-{YYYY}.jsonl` | 4,043 行 × 5 年 | 3.7 MB | Yes |
+| chemicals | `web/src/data/chemicals-mhlw/chemicals.jsonl` | 3,984 行 | 3.9 MB | Yes |
+| laws | `web/src/data/laws-mhlw/articles.jsonl` | 588 条文 | 796 KB | Yes |
 
-### 検証
+- accidents の年レンジ: **2006 (H18) 〜 2021 (R3) の 16 年間**、月平均 2,600 件前後で安定。
+- 事故の型 41 種、業種（大）31 種、年齢帯 7 バケット（-19/20s/30s/40s/50s/60s/70+）に集計済。
+- deaths は 2019 (R1) 〜 2023 (R5) の 5 年、年 ~800 件。cross-tab 10 本 + 分析 PDF 3 本はフェーズ 2 で処理。
+- chemicals は label_sds(2,341) / skin(1,237) / concentration(207) / carcinogenic(199) の 4 リスト統合。
+  有効 CAS 1,591 行 / ユニーク 1,389、うち 186 CAS が 2 リスト以上に登場（＝クロス参照価値あり）。
+- laws は 11 PDF で 588 条文。ただし縦書きレイアウトの PDF が多く
+  articleNumber が null のレコードが 42% (249 件)。フェーズ 3 で再チャンク方針を見直す。
 
-- 各 JSONL を `head -3 | jq .` で目視。
-- 件数サマリを `scripts/etl/summarize.py` (新設) で出力。
-- Next.js 側はまだ参照しないので build は影響しない。
+### データ配置の決定事項
 
-### セーブポイント
+**raw accidents JSONL (403 MB) はリポジトリに含めない**（.gitignore 追加済み）。理由:
+- GitHub の push 上限 / Vercel のデプロイサイズ上限（50 MB 圧縮）を超える
+- 検索/絞込/類似事例の UI は「全件シリアライズ送信」ではなく API 越しで十分
 
-- commit: `feat(etl): parse all MHLW xls/xlsx to JSONL`
-- 出力 JSONL も同コミットに含める（全量で ~50 MB 目安。GitHub 100MB 未満なので可）。
-- 50MB を超えるようなら `web/src/data/accidents-mhlw/` 配下のみ `.gitignore` にし、CI/ビルド時生成へ切り替える意思決定をこのフェーズで行う。
+代替:
+- **集計は `aggregates-mhlw/` (65 KB) をコミット済**。`/analytics` や `/accidents` の統計表示で即利用可能。
+- **raw データを使う機能はフェーズ 2 以降で再生成方針**: 開発時は `scripts/etl/parse-shisho-db.py` で再生成、
+  本番は CI / Vercel Build Hook / 外部ストレージ（S3 / Vercel Blob）のいずれかを選択する（→ 下記 Q1）。
+
+### 成果物のまとめ
+
+- commit 1 `feat(etl): parse all 192 shisho-db files (504,415 accidents)` — gitignore + aggregates + scripts
+- commit 2 `feat(etl): parse all deaths files (5 years, 4,043 records)`
+- commit 3 `feat(etl): parse all chemicals files (3,984 records, 1,389 unique CAS)`
+- commit 4 `feat(etl): parse all law PDFs (588 articles from 11 PDFs)`
+- 追加スクリプト: `scripts/etl/summarize.py`（バリデーション）、`scripts/etl/build-aggregates.py`（集計）
+
+### オーナー確認事項（フェーズ 2 着手前）
+
+- **Q1. raw accident データの配置先**:
+  - A: gitignore のまま、開発時のみ `parse-shisho-db.py` で再生成（シンプル、Vercel デプロイはモック相当）
+  - B: Vercel Blob / S3 にアップロードし、API Route から fetch（コスト数百円/月、本番で全件検索可）
+  - C: Supabase に投入（CLAUDE.md の「要確認」対象。RAG 以外でも重宝）
+- **Q2. 法令 PDF の縦書き問題**: 既存の pypdf から pdfplumber / pdf2htmlEX などに切替えてよいか
 
 ---
 
@@ -65,30 +82,72 @@
 
 - `web/src/data/mock/real-accident-cases.ts` 等に手動で 100 件程度。
 - `/accidents` ページ (`web/src/app/(main)/accidents/`) はモック配列を読んで一覧 / 検索表示。
+- フェーズ 1 で `aggregates-mhlw/*.json` (65 KB) がリポジトリに入ったので、
+  統計・グラフだけなら即実装可能。
+- 生の 504k 行 JSONL は gitignored のため、Q1（配置先）の決定次第で
+  詳細検索機能の実装アーキテクチャが変わる。
 
-### タスク
+### 実行計画（オーナー確認 Q1 の答えに応じて分岐）
 
-1. ランタイムローダの実装
-   - `web/src/lib/mhlw-loader.ts` を新設。`web/src/data/accidents-mhlw/*.jsonl` を
-     Node 側で `fs.readFileSync` + `split('\n')` で読み込み、
-     型付き配列 `Accident[]` を返す関数を提供。
-   - ビルド時は Next.js の Server Component で読む（bundle に含めない）。
-2. 一覧 API 化
-   - `web/src/app/api/accidents/search/route.ts` を新設し、業種・事故型・年月・
-     キーワードで絞り込めるようにする。モックのフィルタ実装を流用。
-3. `/accidents` ページを一新
-   - 事故件数の年次推移グラフ（accidentType 別）。
-   - フィルタ: 業種（3階層）・事故の型・年齢帯・事業場規模。
-   - ページング (10/50/100 件切替)。URL に query を反映。
-4. 「類似災害を見る」ボタン
-   - 個別詳細から、同業種×同事故型の最近 10 件を引く。
-5. 既存モック (`real-accident-cases*.ts`) は削除しない。最初は
-   MHLW データが無い場合のフォールバックとして残す（`|| mockCases`）。
+#### ステップ 1: 集計ドリブン UI (配置先決定を待たずに着手可)
+
+1. **`web/src/lib/mhlw-aggregates.ts`** を新設
+   - `aggregates-mhlw/*.json` を import して型付きで返すユーティリティ群
+   - 型は `web/src/types/mhlw.ts` に追加 (`AccidentAggregate`, `YearlyBreakdown` 等)
+2. **`/accidents` の統計セクション強化**
+   - 16 年分の事故件数折れ線 × accidentType stacked
+   - 年 × 業種のヒートマップ、年齢帯 × 年の積み上げ棒
+   - 描画は既存 UI で使われているチャートライブラリ（要調査: recharts or 軽量自作）
+3. **`/analytics` をスキャフォールド**（フェーズ 4 の前倒し半分）
+   - 集計 JSON だけで完結するダッシュボード（トップ 5 事故型/業種 等）
+
+commit 目標: `feat(accidents): surface MHLW 16-year aggregates on /accidents`
+
+#### ステップ 2: 詳細検索 (Q1 確定後)
+
+- **配置 A (gitignore 維持 / 開発用途)**: ローカル dev 時のみ動く詳細検索。
+  `fs.readFileSync` で JSONL を読み、SSR で結果を返す。`NODE_ENV=development` ガード。
+  Vercel 本番では機能無効化（統計のみ閲覧可）。
+- **配置 B (Vercel Blob)**: `scripts/etl/upload-to-blob.py` で 192 JSONL をアップロード。
+  API Route が範囲を指定して `ReadableStream` を受け、サーバ側でフィルタリング。
+  メモリ節約のため `accidentType` / `industry.majorCode` で早期 break。
+- **配置 C (Supabase)**: CLAUDE.md「要確認」。スキーマ: `accidents(id, year, month,
+  industry_major_code, industry_major_name, accident_type_code, description, ...)`。
+  GIN index で全文検索、btree で fast filter。
+
+API design (配置に依らず共通):
+
+```
+GET /api/accidents/search
+  ?yearFrom=2015&yearTo=2021
+  &industryMajor=03
+  &accidentType=15
+  &ageBucket=50-59
+  &q=墜落 脚立
+  &limit=50&offset=0
+→ { total, items: Accident[], facets: { byYear, byIndustry, byType } }
+```
+
+フィルタ実装はモック版 (`web/src/data/mock/accident-search.ts` 等) のロジックを
+再利用し、バックエンドだけ配置に応じて差し替え。
+
+#### ステップ 3: 類似災害機能
+
+- 個別詳細ページ `/accidents/[id]` を新設（id は `{year}-{mm}-{seq}`）
+- 「同業種（中分類一致） × 同事故型 × 直近 2 年」の 10 件を横並び表示
+- 実装は上記 API の `related` エンドポイント
+
+#### ステップ 4: フォールバック整理
+
+- 既存モック (`real-accident-cases*.ts`) は削除せず、MHLW 配置 A で本番無効化
+  される環境のみフォールバック。配置 B/C を選んだ時点でモック削除を検討。
 
 ### セーブポイント
 
-- commit: `feat(accidents): replace mock cases with MHLW shisho-db data`
-- 変更ページ: `/accidents`, `/accidents/[id]` (新設)。
+- commit 1 `feat(accidents): surface MHLW 16-year aggregates on /accidents` (ステップ 1)
+- commit 2 `feat(accidents): add search API backed by MHLW shisho-db` (ステップ 2)
+- commit 3 `feat(accidents): show similar accidents on detail page` (ステップ 3)
+- 変更ページ: `/accidents`, `/accidents/[id]` (新設), `/analytics` (スキャフォールド)
 
 ---
 
