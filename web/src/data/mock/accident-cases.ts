@@ -3,6 +3,7 @@ import { realAccidentCases } from "@/data/mock/real-accident-cases";
 import { realAccidentCasesExtra } from "@/data/mock/real-accident-cases-extra";
 import { realAccidentCasesExtra2 } from "@/data/mock/real-accident-cases-extra2";
 import { realAccidentCasesExtra3 } from "@/data/mock/real-accident-cases-extra3";
+import { realAccidentCasesDiverseIndustries } from "@/data/mock/real-accident-cases-diverse-industries";
 
 /**
  * 実データ（厚労省「職場のあんぜんサイト」労働災害事例）のみ収録。
@@ -31,6 +32,7 @@ export function getAccidentCasesDataset(): AccidentCase[] {
       ...realAccidentCasesExtra,
       ...realAccidentCasesExtra2,
       ...realAccidentCasesExtra3,
+      ...realAccidentCasesDiverseIndustries,
     ];
     // 最新の発生日が先頭に来るよう降順ソート
     merged.sort((a, b) => toSortKey(b.occurredOn) - toSortKey(a.occurredOn));

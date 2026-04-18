@@ -133,7 +133,17 @@ export type AccidentWorkCategory =
   | "化学"
   | "林業"
   | "物流"
-  | "造船";
+  | "造船"
+  | "警備"
+  | "造園"
+  | "整備"
+  | "縫製"
+  | "小売"
+  | "医療"
+  | "介護"
+  | "食品"
+  | "運輸"
+  | "清掃";
 
 /** UIの並び順（フィルタ用） */
 export const ALL_ACCIDENT_TYPES: AccidentType[] = [
@@ -178,6 +188,16 @@ export const ALL_ACCIDENT_CATEGORIES: AccidentWorkCategory[] = [
   "林業",
   "物流",
   "造船",
+  "警備",
+  "造園",
+  "整備",
+  "縫製",
+  "小売",
+  "医療",
+  "介護",
+  "食品",
+  "運輸",
+  "清掃",
 ];
 
 export type AccidentCase = {
