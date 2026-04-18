@@ -142,11 +142,13 @@
 ## 8. PM 判断
 
 ### 8-1. 即時修正すべき（本 PR / 1 週間以内）
-- `app/sitemap.ts` `app/robots.ts` `app/manifest.ts` の 3 ファイル追加（ID_010）
+- ✅ **sitemap.ts に `/glossary`・`/pdf` 追加**（本 PR で実施済み / ID_010 の補足）
+- `app/manifest.ts` 検証（`public/manifest.json` は存在するが App Router 規約ファイル化で動的化）
 - 全タップ要素 min 56×56px 統一（ID_091）
 - 初回訪問時の onboarding（文字・屋外・やさ日 3 択）（ID_093）
 - ふりがな ON 時の表レイアウト崩れ修正（ID_011）
 - `/about` の監修者プロフィール（氏名・資格・顔写真）追加（ID_008／048／060）
+- `generateMetadata` 個別化（ID_010）で各ページ `<title>` `<meta description>` を動的化
 
 ### 8-2. オーナー判断待ち（翌 Q の戦略）
 **最優先トラック 2 本**（前回と一貫）
