@@ -9,6 +9,13 @@ const AccidentAnalysisPanel = dynamic(
   () => import("@/components/accident-analysis-panel").then((m) => m.AccidentAnalysisPanel),
   { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
 );
+const MhlwAccidentAnalysisPanel = dynamic(
+  () =>
+    import("@/components/mhlw-accident-analysis-panel").then(
+      (m) => m.MhlwAccidentAnalysisPanel
+    ),
+  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
+);
 import { ELearningPanel } from "@/components/elearning-panel";
 import { HomeValueHero } from "@/components/home-value-hero";
 import { KyRecordList } from "@/components/ky-record-list";
@@ -152,7 +159,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
   const [accidentError, setAccidentError] = useState<ServiceError | null>(null);
   const [selectedAccidentType, setSelectedAccidentType] = useState<AccidentType | "すべて">("すべて");
   const [selectedAccidentCategory, setSelectedAccidentCategory] = useState<AccidentWorkCategory | "すべて">("すべて");
-  const [accidentActiveTab, setAccidentActiveTab] = useState<"list" | "analysis">("list");
+  const [accidentActiveTab, setAccidentActiveTab] = useState<"list" | "mhlw" | "analysis">("list");
   const [selectedRegionName, setSelectedRegionName] = useState(
     () => services.weatherRisk.getAvailableRegions()[0]?.regionName ?? ""
   );
@@ -523,24 +530,30 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
           <section className="px-4 pt-4 lg:px-8">{children}</section>
           {/* タブ切り替え */}
           <div className="px-4 pt-4 lg:px-8">
-            <div className="flex gap-1 rounded-xl bg-slate-100 p-1 w-fit">
-              {(["list", "analysis"] as const).map((tab) => (
+            <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 w-fit">
+              {(
+                [
+                  { id: "list", label: "一覧" },
+                  { id: "mhlw", label: "MHLW実データ分析" },
+                  { id: "analysis", label: "収録事例（参考）" },
+                ] as const
+              ).map((tab) => (
                 <button
-                  key={tab}
-                  onClick={() => setAccidentActiveTab(tab)}
+                  key={tab.id}
+                  onClick={() => setAccidentActiveTab(tab.id)}
                   className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
-                    accidentActiveTab === tab
+                    accidentActiveTab === tab.id
                       ? "bg-white text-slate-900 shadow-sm"
                       : "text-slate-500 hover:text-slate-700"
                   }`}
                 >
-                  {tab === "list" ? "一覧" : "分析"}
+                  {tab.label}
                 </button>
               ))}
             </div>
           </div>
           <section id="section-accidents" className="space-y-4 px-4 pt-4 lg:px-8">
-            {accidentActiveTab === "list" ? (
+            {accidentActiveTab === "list" && (
               <>
                 <AccidentDatabasePanel
                   cases={accidentCases}
@@ -554,7 +567,9 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
                 />
                 <MhlwDisasterDatabasesPanel />
               </>
-            ) : (
+            )}
+            {accidentActiveTab === "mhlw" && <MhlwAccidentAnalysisPanel />}
+            {accidentActiveTab === "analysis" && (
               <AccidentAnalysisPanel cases={services.accident.getAllAccidentCases()} />
             )}
           </section>
