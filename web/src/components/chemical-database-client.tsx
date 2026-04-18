@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   Search,
   FlaskConical,
@@ -17,6 +18,14 @@ import {
   type ChemicalCategory,
   type ChemicalSubstance,
 } from "@/data/mock/chemical-substances-db";
+
+const MhlwChemicalSearchPanel = dynamic(
+  () =>
+    import("@/components/mhlw-chemical-search-panel").then(
+      (m) => m.MhlwChemicalSearchPanel
+    ),
+  { ssr: false, loading: () => <div className="h-40 animate-pulse rounded-lg bg-slate-100" /> }
+);
 
 const CATEGORY_FILTERS: ChemicalCategory[] = [
   "特化則1類",
@@ -51,6 +60,7 @@ function matches(sub: ChemicalSubstance, q: string): boolean {
 }
 
 export function ChemicalDatabaseClient() {
+  const [mode, setMode] = useState<"curated" | "mhlw">("curated");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<ChemicalCategory | "">("");
   const [skinOnly, setSkinOnly] = useState(false);
@@ -84,6 +94,32 @@ export function ChemicalDatabaseClient() {
           と各SDSをご確認ください。
         </div>
       </header>
+
+      <div className="mb-4 flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 w-fit">
+        {(
+          [
+            { id: "curated", label: "専門50物質（詳細）" },
+            { id: "mhlw", label: "MHLW 3,943物質（横断）" },
+          ] as const
+        ).map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setMode(tab.id)}
+            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+              mode === tab.id
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {mode === "mhlw" && <MhlwChemicalSearchPanel />}
+
+      {mode === "curated" && (<>
 
       <section aria-labelledby="search-heading" className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 id="search-heading" className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-800">
@@ -236,6 +272,8 @@ export function ChemicalDatabaseClient() {
           </ul>
         )}
       </section>
+
+      </>)}
 
       <aside className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
         <p className="flex items-center gap-2 font-semibold">
