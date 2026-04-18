@@ -237,8 +237,16 @@ export default function SignagePage() {
         lastUpdatedText={state.lastUpdatedText}
       />
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden xl:grid-cols-12 xl:gap-3">
-        <div className="flex min-h-0 flex-col gap-2 overflow-y-auto overflow-x-hidden xl:col-span-7">
+      {/* スマホ向け注意バナー */}
+      <div className="xl:hidden rounded-lg border border-amber-500/50 bg-amber-950/70 px-3 py-2.5">
+        <p className="text-sm font-bold text-amber-100">この画面はPC・大画面TV表示用です</p>
+        <p className="mt-1 text-xs text-amber-200">
+          スマホでは縦スクロールで全セクションを確認できます。PC/大画面TVで開くと本来のサイネージレイアウトが表示されます。
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 xl:min-h-0 xl:flex-1 xl:grid-cols-12 xl:gap-3 xl:overflow-hidden">
+        <div className="flex flex-col gap-2 overflow-x-hidden xl:col-span-7 xl:min-h-0 xl:overflow-y-auto">
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             <label className="ml-auto flex max-w-full items-center gap-2 text-[10px] text-slate-300 sm:text-xs">
               <span className="shrink-0 whitespace-nowrap">地点</span>
@@ -256,7 +264,7 @@ export default function SignagePage() {
             </label>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden rounded-2xl border border-slate-600 bg-slate-950/60 p-2 sm:p-3">
+          <div className="flex flex-col gap-2 overflow-x-hidden rounded-2xl border border-slate-600 bg-slate-950/60 p-2 sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
             <div className="flex shrink-0 flex-wrap items-start justify-between gap-2">
               <div>
                 <p className="text-xs font-bold text-slate-100 sm:text-sm lg:text-base">気象庁 注意報・警報（都道府県）</p>
@@ -325,15 +333,15 @@ export default function SignagePage() {
           <SignageTodayDocuments />
         </div>
 
-        <div className="flex min-h-0 flex-col gap-2 overflow-hidden xl:col-span-5 xl:min-h-0">
-          <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3">
+        <div className="flex flex-col gap-2 xl:col-span-5 xl:min-h-0 xl:overflow-hidden">
+          <section className="flex flex-col rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden">
             <h2 className="shrink-0 text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">
               トレンド（労働災害・建設事故）
             </h2>
             <p className="mt-0.5 shrink-0 text-[9px] text-slate-400 sm:text-[10px]">
               GoogleニュースのRSSから取得（サーバー側で約1時間キャッシュ）。記事元へ直接リンクします。
             </p>
-            <ul className="mt-2 min-h-0 flex-1 space-y-2 overflow-y-auto pr-0.5">
+            <ul className="mt-2 space-y-2 pr-0.5 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
               {bundleStatus === "success" && bundle && bundle.laborTrend.length === 0 ? (
                 <li className="text-xs text-slate-400">現在取得できるニュースがありません。</li>
               ) : null}
@@ -357,7 +365,7 @@ export default function SignagePage() {
             </ul>
           </section>
 
-          <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3">
+          <section className="flex flex-col rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden">
             <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
               <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">直近の法改正（5件・要約）</h2>
               <Link
@@ -379,7 +387,7 @@ export default function SignagePage() {
             {state.lawStatus === "success" && topLaws.length === 0 && (
               <p className="mt-2 text-xs text-slate-300">表示できる法改正がありません。</p>
             )}
-            <ul className="mt-2 min-h-0 flex-1 space-y-2 overflow-y-auto pr-0.5">
+            <ul className="mt-2 space-y-2 pr-0.5 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
               {topLaws.map((rev) => (
                 <li key={rev.id} className="rounded-lg border border-slate-700 bg-slate-950/50 p-2 sm:rounded-xl sm:p-3">
                   <div className="flex flex-wrap items-center gap-1.5 text-[9px] text-slate-400 sm:text-xs">
