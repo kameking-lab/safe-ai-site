@@ -112,27 +112,91 @@ html.high-contrast .bg-red-600 {
   filter: contrast(1.25) saturate(1.1);
 }
 
-/* ルビ（ふりがな）スタイル */
+/* ルビ（ふりがな）スタイル — 表レイアウトの折返し崩れを抑制（ID_006/011） */
 ruby {
   ruby-align: center;
+  display: inline-block;
+  line-height: 1.9;
+  word-break: keep-all;
 }
 ruby rt {
   font-size: 0.5em;
   color: #475569; /* slate-600 */
   line-height: 1.2;
 }
+/* ふりがなを含むテーブルは幅固定を外し、セルを自然折返しに */
+table {
+  table-layout: auto;
+}
 
-/* KY用紙 PDF/印刷スタイル */
+/* アクセシビリティ: 最小タップ領域 44px / WCAG AAA は 56px（ID_091） */
+@media (max-width: 1023px) {
+  .tap-target,
+  button.tap-target,
+  a.tap-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* prefers-contrast: more にも屋外モードを適用 */
+@media (prefers-contrast: more) {
+  html {
+    filter: contrast(1.1);
+  }
+}
+
+/* prefers-reduced-motion に対応 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 印刷 A4 1 枚リーフレット対応（ID_003/072） */
 @media print {
+  @page {
+    size: A4;
+    margin: 15mm 12mm;
+  }
   header,
   nav,
-  .no-print {
+  aside,
+  footer,
+  .no-print,
+  [role="navigation"],
+  .print\:hidden {
     display: none !important;
   }
+  html,
   body {
     background: white !important;
     color: black !important;
     font-size: 10pt;
+    line-height: 1.5;
+  }
+  h1 {
+    font-size: 14pt;
+    page-break-after: avoid;
+  }
+  h2,
+  h3 {
+    font-size: 12pt;
+    page-break-after: avoid;
+  }
+  a {
+    color: black !important;
+    text-decoration: none !important;
+  }
+  /* URL を脚注のように表示（外部リンクのみ） */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 8pt;
+    color: #333;
   }
   .print\:text-black {
     color: black !important;
@@ -146,5 +210,29 @@ ruby rt {
     border: 1px solid #999 !important;
     background: white !important;
     color: black !important;
+  }
+  /* カード影・背景・ボーダーを印刷向けに単純化 */
+  .shadow,
+  .shadow-sm,
+  .shadow-md,
+  .shadow-lg {
+    box-shadow: none !important;
+  }
+  ul,
+  ol {
+    page-break-inside: avoid;
+  }
+  /* 全ページ共通 A4 フッター情報（`.print-footer` を各ページで追記可能） */
+  .print-footer {
+    position: fixed;
+    bottom: 5mm;
+    left: 12mm;
+    right: 12mm;
+    font-size: 8pt;
+    color: #666;
+    border-top: 1px solid #999;
+    padding-top: 2mm;
+    display: flex !important;
+    justify-content: space-between;
   }
 }
