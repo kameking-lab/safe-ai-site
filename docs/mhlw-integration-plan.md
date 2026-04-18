@@ -119,12 +119,49 @@
 
 未実施でもサイト全体は正常動作（フォールバック UI のみ表示）。
 
-### ステップ 2c: 残タスク
+### ステップ 2c: 化学物質・死亡災害・法令を横断統合 ✅ (2026-04-19 完了)
 
-- **個別詳細ページ `/accidents/[id]`** (類似災害機能付き) — Blob 投入後に着手。
-- **モック (`real-accident-cases*.ts`) の削除可否** — Blob 投入後、実データで代替できると
-  判断した時点で別コミットで整理。現状はフォールバックとしてバンドル済み。
-- **ファセット (byYear / byIndustry / byType)** の search API 追加 — 現状は総件数＋ページングのみ。
+事故データに続き、残り 3 カテゴリ（化学物質・死亡災害・法令）を UI/RAG に組み込んだ。
+raw データが軒並み gitignore されておらず中規模（4 MB 前後）だったので、
+build-time ETL でゼロ加工の JSONL → 軽量 JSON に整形して `dynamic()` 遅延読み込みする方針を採用。
+
+#### 実装サマリ
+
+- `scripts/etl/build-chemicals-compact.mjs` — chemicals.jsonl (3,984 行) から
+  ヘッダ / 注記 / CAS単独行を落とし、`col1`/`col2` (GHS名 / 法令名) を昇格。
+  `web/src/data/chemicals-mhlw/compact.json` (865 KB, 3,943 物質) を生成。
+- `scripts/etl/build-deaths-compact.mjs` — 5 年分の死亡災害 JSONL を 1 ファイルに
+  集約し、byYear / byType / byIndustry ヒストグラムを同梱した compact.json
+  (2.4 MB, 4,043 件) を生成。
+- `scripts/etl/build-laws-compact.mjs` — 縦書き PDF 抽出で 1 字ごとに入る `\n`
+  を除去し、articleNumber が null の目次/前文を除外。
+  `web/src/data/laws-mhlw/compact.json` (210 KB, 295 条文) を生成。
+- `web/src/components/mhlw-chemical-search-panel.tsx` — /chemical-database に
+  「MHLW 3,943物質（横断）」タブとして追加。カテゴリ別件数バッジ、名称 / CAS
+  / 備考検索、50件/ページの paginated list。
+- `web/src/components/mhlw-deaths-panel.tsx` — /accidents に「死亡災害 (4,043件)」
+  タブとして追加。業種・事故種別・年・キーワード絞り込み。
+- `web/src/data/laws/mhlw-extras.ts` + `web/src/data/laws/index.ts` 修正 — 295 条文を
+  `LawArticle` 形式で `allLawArticles` に追加。`rag-search.ts` の実装には触れず、
+  既存キーワード RAG が自動的に新条文をスコアリング対象にするようになった。
+- 相当する commit:
+  - `ed8f247 feat(mhlw): surface chemicals 3,943 and deaths 4,043 from MHLW`
+  - `0f039ee feat(laws): merge MHLW 295 extra articles into RAG index`
+
+#### フェーズ 2 後の残タスク（優先度順）
+
+1. **オーナー作業: Blob トークン設定 + 年別シャード投入** (2b)。
+2. **個別詳細ページ `/accidents/[id]`** (類似災害機能付き) — Blob 投入後に着手。
+3. **モック (`real-accident-cases*.ts`) の削除可否** — Blob 投入後、実データで
+   代替できると判断した時点で別コミットで整理。現状はフォールバックとして残置。
+4. **ファセット (byYear / byIndustry / byType)** を search API に追加 — 現状は
+   総件数＋ページングのみ。
+5. **法令 PDF の再抽出** — 現状の縦書き抽出は単語単位で壊れている（articleNumber
+   が null の 293 レコードが残る）。pdfplumber / pdf2htmlEX 等で再パースすれば
+   RAG カバレッジをほぼ倍にできる。フェーズ 3 で対応。
+6. **LAW_NAME_HINTS の精緻化** — build-laws-compact.mjs の PDF → 法令名マッピング
+   は推測値。オーナー側で PDF 内容を確認して正式名称に差し替えると引用精度が
+   上がる。
 
 ---
 
@@ -212,10 +249,11 @@ Phase 0 (done) ✅
     ├── Phase 1 (all-file parse) ✅
     │       ├── Phase 2a (accidents aggregates UI) ✅
     │       ├── Phase 2b (Blob search infra) ✅ ← オーナー作業待ち
-    │       ├── Phase 2c (残: /accidents/[id] + モック整理)
-    │       ├── Phase 3 (law RAG) ← 要オーナー確認: API キー
+    │       ├── Phase 2c (chemicals / deaths / laws 横断統合) ✅
+    │       │       └── 残: /accidents/[id], モック整理, PDF 再抽出
+    │       ├── Phase 3 (law RAG, embedding) ← 要オーナー確認: API キー
     │       ├── Phase 4 (analytics)
-    │       └── Phase 5 (chemicals)
+    │       └── Phase 5 (chemicals, chemical-ra 連携)
 ```
 
 - フェーズ 2, 4, 5 は並列実行可能（相互依存なし）。
