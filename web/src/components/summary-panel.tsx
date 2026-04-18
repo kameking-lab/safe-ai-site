@@ -1,4 +1,5 @@
 import { ErrorNotice } from "@/components/error-notice";
+import { EasyJapaneseText } from "@/components/easy-japanese-text";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
 import type { RevisionSummary } from "@/lib/types/domain";
 
@@ -86,7 +87,7 @@ export function SummaryPanel({
               key={line}
               className="rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-sm leading-6 text-slate-800"
             >
-              {line}
+              <EasyJapaneseText>{line}</EasyJapaneseText>
             </li>
           ))}
         </ul>
@@ -96,7 +97,7 @@ export function SummaryPanel({
         <h3 className="text-sm font-semibold text-slate-900">現場でやること</h3>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-6 text-slate-700">
           {summaryContent.workplaceActions.map((action) => (
-            <li key={action}>{action}</li>
+            <li key={action}><EasyJapaneseText>{action}</EasyJapaneseText></li>
           ))}
         </ul>
       </div>

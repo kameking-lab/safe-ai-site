@@ -32,6 +32,7 @@ import {
 import { Footer } from "@/components/footer";
 import { UserMenu } from "@/components/user-menu";
 import { useFurigana } from "@/contexts/furigana-context";
+import { useEasyJapanese } from "@/contexts/easy-japanese-context";
 
 const LARGE_FONT_KEY = "large-font-enabled";
 const HIGH_CONTRAST_KEY = "high-contrast-enabled";
@@ -128,6 +129,7 @@ export function AppShell({ children, user }: AppShellProps) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { furiganaEnabled, toggleFurigana } = useFurigana();
+  const { easyJapaneseEnabled, toggleEasyJapanese } = useEasyJapanese();
 
   // largeFontEnabledをlocalStorageから遅延初期化
   const [largeFontEnabled, setLargeFontEnabled] = useState<boolean>(() => {
@@ -270,11 +272,11 @@ export function AppShell({ children, user }: AppShellProps) {
         </nav>
         <div className="mt-4 border-t border-slate-200 pt-4 space-y-2">
           {/* アクセシビリティトグル */}
-          <div className="flex items-center gap-1.5 px-1">
+          <div className="flex flex-wrap items-center gap-1 px-1">
             <button
               type="button"
               onClick={toggleFurigana}
-              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+              className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
                 furiganaEnabled
                   ? "bg-emerald-600 text-white"
                   : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
@@ -286,8 +288,21 @@ export function AppShell({ children, user }: AppShellProps) {
             </button>
             <button
               type="button"
+              onClick={toggleEasyJapanese}
+              className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                easyJapaneseEnabled
+                  ? "bg-blue-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+              title="やさしい日本語モード（専門用語を平易な表現に置き換え）"
+              aria-pressed={easyJapaneseEnabled}
+            >
+              やさしい
+            </button>
+            <button
+              type="button"
               onClick={toggleLargeFont}
-              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+              className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
                 largeFontEnabled
                   ? "bg-emerald-600 text-white"
                   : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
@@ -300,7 +315,7 @@ export function AppShell({ children, user }: AppShellProps) {
             <button
               type="button"
               onClick={toggleHighContrast}
-              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+              className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
                 highContrastEnabled
                   ? "bg-slate-900 text-white"
                   : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
@@ -348,6 +363,21 @@ export function AppShell({ children, user }: AppShellProps) {
               <ruby className="leading-none">
                 あ<rt className="text-[8px]">ふりがな</rt>
               </ruby>
+            </button>
+            {/* やさしい日本語トグル */}
+            <button
+              type="button"
+              onClick={toggleEasyJapanese}
+              className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
+                easyJapaneseEnabled
+                  ? "bg-blue-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+              title="やさしい日本語モード"
+              aria-label="やさしい日本語モード"
+              aria-pressed={easyJapaneseEnabled}
+            >
+              やさしい
             </button>
             {/* 文字大トグル */}
             <button

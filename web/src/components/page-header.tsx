@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { RubyText } from "@/components/ruby-text";
+import { EasyJapaneseText } from "@/components/easy-japanese-text";
 
 type IconColor = "emerald" | "blue" | "amber" | "red";
 
@@ -48,7 +49,7 @@ export function PageHeader({ title, description, icon: Icon, iconColor, badge }:
             )}
           </div>
           <p className="mt-0.5 text-sm leading-snug text-slate-500">
-            <RubyText text={description} />
+            <EasyJapaneseText>{description}</EasyJapaneseText>
           </p>
         </div>
       </div>

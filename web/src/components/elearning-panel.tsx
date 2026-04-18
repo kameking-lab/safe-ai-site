@@ -24,6 +24,7 @@ const mergedExtraThemes: LearningThemeType[] = elearningExtraThemes.map((theme) 
 // 入門コースを先頭に配置、製造業・医療福祉・運輸・林業・食品・小売サービステーマを末尾に追加
 const allThemes = [...elearningIntroCourse, ...elearningThemesCatalog, ...mergedExtraThemes, ...elearningManufacturingThemes, ...elearningHealthcareThemes, ...elearningTransportThemes, ...elearningForestryThemes, ...elearningFoodThemes, ...elearningRetailThemes];
 import { ELearningEditorPanel } from "@/components/elearning-editor-panel";
+import { EasyJapaneseText } from "@/components/easy-japanese-text";
 import type { LearningTheme } from "@/lib/types/operations";
 
 const STORAGE_KEY = "el-theme-overrides";
@@ -239,7 +240,7 @@ export function ELearningPanel() {
         <div className="flex items-start justify-between gap-2">
           <div>
             <h3 className="font-semibold text-slate-900">{selectedTheme.title}</h3>
-            <p className="mt-1 text-xs text-slate-600">{selectedTheme.description}</p>
+            <p className="mt-1 text-xs text-slate-600"><EasyJapaneseText>{selectedTheme.description}</EasyJapaneseText></p>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-1">
             <button
@@ -264,7 +265,7 @@ export function ELearningPanel() {
       <div className="mt-3 space-y-3">
         {selectedTheme.questions.map((question, index) => (
           <div key={question.id} className="rounded-lg border border-slate-200 p-3">
-            <p className="text-sm font-semibold text-slate-900">{index + 1}. {question.question}</p>
+            <p className="text-sm font-semibold text-slate-900">{index + 1}. <EasyJapaneseText>{question.question}</EasyJapaneseText></p>
             <div className="mt-2 space-y-1 text-xs">
               {question.options.map((option, optionIndex) => (
                 <label key={option} className="block rounded border border-slate-200 px-2 py-1">
@@ -279,7 +280,7 @@ export function ELearningPanel() {
               ))}
             </div>
             {answers[question.id] != null && (
-              <p className="mt-2 text-xs text-slate-700">解説: {question.explanation}</p>
+              <p className="mt-2 text-xs text-slate-700">解説: <EasyJapaneseText>{question.explanation}</EasyJapaneseText></p>
             )}
           </div>
         ))}

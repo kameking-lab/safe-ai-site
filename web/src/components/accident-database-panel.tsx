@@ -10,6 +10,7 @@ import {
   type AccidentWorkCategory,
 } from "@/lib/types/domain";
 import { fuzzyMatchAll } from "@/lib/fuzzy-search";
+import { EasyJapaneseText } from "@/components/easy-japanese-text";
 
 const PAGE_SIZE = 40;
 
@@ -275,7 +276,7 @@ export function AccidentDatabasePanel({
                 </div>
 
                 <h3 className="mt-2 text-sm font-semibold text-slate-900">{accident.title}</h3>
-                <p className="mt-1 text-sm text-slate-700">{accident.summary}</p>
+                <p className="mt-1 text-sm text-slate-700"><EasyJapaneseText>{accident.summary}</EasyJapaneseText></p>
 
                 <dl className="mt-2 space-y-1 text-xs text-slate-700">
                   <div>
@@ -294,7 +295,7 @@ export function AccidentDatabasePanel({
                     {"description" in accident && accident.description ? (
                       <div>
                         <p className="font-semibold text-slate-900">発生状況</p>
-                        <p className="mt-1 leading-5">{String(accident.description)}</p>
+                        <p className="mt-1 leading-5"><EasyJapaneseText>{String(accident.description)}</EasyJapaneseText></p>
                       </div>
                     ) : null}
                     {"causes" in accident && accident.causes ? (

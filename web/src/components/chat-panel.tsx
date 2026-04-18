@@ -3,6 +3,7 @@
 import type { RefObject } from "react";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
+import { EasyJapaneseText } from "@/components/easy-japanese-text";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
 
 export type ChatMessage = {
@@ -60,7 +61,9 @@ export function ChatPanel({
                   : "border border-slate-200 bg-white text-slate-700"
               }`}
             >
-              {message.content}
+              {message.role === "assistant" ? (
+                <EasyJapaneseText>{message.content}</EasyJapaneseText>
+              ) : message.content}
             </div>
           );
         })}
