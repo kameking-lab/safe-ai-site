@@ -1,9 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { allLawArticles, type LawArticle } from "@/data/laws";
 import { InputWithVoice } from "@/components/voice-input-field";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
+
+const MhlwLawArticlesPanel = dynamic(
+  () =>
+    import("@/components/mhlw-law-articles-panel").then(
+      (m) => m.MhlwLawArticlesPanel
+    ),
+  { ssr: false, loading: () => <div className="h-40 animate-pulse rounded-lg bg-slate-100" /> }
+);
 
 /** 漢数字を算用数字に変換（例: 第二十一条 → 第21条） */
 function kanjiToNum(str: string): string {
@@ -191,6 +200,7 @@ export function LawSearchPanel() {
   const [selectedLaw, setSelectedLaw] = useState<string>("all");
   const [articleNumQuery, setArticleNumQuery] = useState("");
   const [summaryTarget, setSummaryTarget] = useState<LawArticle | null>(null);
+  const [mode, setMode] = useState<"curated" | "mhlw">("curated");
 
   const filtered = useMemo(() => {
     const nq = normalizeQuery(query);
@@ -218,6 +228,32 @@ export function LawSearchPanel() {
           キーワード・条番号・法令名で条文を検索できます。漢数字（第二十一条）と算用数字（第21条）は同等に検索されます。
         </p>
       </div>
+
+      <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 w-fit">
+        {(
+          [
+            { id: "curated", label: `キュレーション（${allLawArticles.length.toLocaleString()}条文）` },
+            { id: "mhlw", label: "MHLW公式法令PDF" },
+          ] as const
+        ).map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setMode(tab.id)}
+            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+              mode === tab.id
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {mode === "mhlw" && <MhlwLawArticlesPanel />}
+
+      {mode === "curated" && (<>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <div className="sm:col-span-2">
@@ -289,6 +325,8 @@ export function LawSearchPanel() {
       {summaryTarget && (
         <AiSummaryModal article={summaryTarget} onClose={() => setSummaryTarget(null)} />
       )}
+
+      </>)}
     </div>
   );
 }
