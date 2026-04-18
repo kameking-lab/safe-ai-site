@@ -11,6 +11,7 @@ import {
   ShieldAlert,
   ExternalLink,
   Info,
+  ClipboardCheck,
 } from "lucide-react";
 import {
   chemicalSubstances,
@@ -253,17 +254,30 @@ export function ChemicalDatabaseClient() {
                       )}
                     </dl>
 
-                    {s.sds_url && (
-                      <a
-                        href={s.sds_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-3 inline-flex min-h-[36px] items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Link
+                        href={
+                          s.cas
+                            ? `/chemical-ra?cas=${encodeURIComponent(s.cas)}`
+                            : `/chemical-ra?name=${encodeURIComponent(s.name)}`
+                        }
+                        className="inline-flex min-h-[36px] items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-700"
                       >
-                        <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-                        厚労省SDS情報を見る
-                      </a>
-                    )}
+                        <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                        この物質のリスクアセスメントを実施
+                      </Link>
+                      {s.sds_url && (
+                        <a
+                          href={s.sds_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex min-h-[36px] items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                          厚労省SDS情報を見る
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               </li>

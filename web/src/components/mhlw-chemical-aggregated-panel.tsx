@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FlaskConical, Search, ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { FlaskConical, Search, ExternalLink, ClipboardCheck } from "lucide-react";
 import {
   rawCompact,
   mergeByCas,
@@ -270,28 +271,41 @@ export function MhlwChemicalAggregatedPanel() {
                       <dd className="break-words">{item.notes.slice(0, 6).join(" / ")}</dd>
                     </div>
                   )}
-                  {item.cas && (
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      <a
-                        href={`https://anzeninfo.mhlw.go.jp/anzen_pg/KAG_FND.aspx?mc=&wd=${encodeURIComponent(item.cas)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        職場のあんぜんサイトで検索
-                      </a>
-                      <a
-                        href={`https://commonchemistry.cas.org/results?q=${encodeURIComponent(item.cas)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
-                      >
-                        <ExternalLink className="h-3 w-3" />
-                        CAS Common Chemistry
-                      </a>
-                    </div>
-                  )}
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <Link
+                      href={
+                        item.cas
+                          ? `/chemical-ra?cas=${encodeURIComponent(item.cas)}`
+                          : `/chemical-ra?name=${encodeURIComponent(item.primaryName)}`
+                      }
+                      className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-3 py-1 text-[11px] font-semibold text-white shadow hover:bg-emerald-700"
+                    >
+                      <ClipboardCheck className="h-3 w-3" />
+                      この物質のリスクアセスメントを実施
+                    </Link>
+                    {item.cas && (
+                      <>
+                        <a
+                          href={`https://anzeninfo.mhlw.go.jp/anzen_pg/KAG_FND.aspx?mc=&wd=${encodeURIComponent(item.cas)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          職場のあんぜんサイトで検索
+                        </a>
+                        <a
+                          href={`https://commonchemistry.cas.org/results?q=${encodeURIComponent(item.cas)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          CAS Common Chemistry
+                        </a>
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
             </li>
