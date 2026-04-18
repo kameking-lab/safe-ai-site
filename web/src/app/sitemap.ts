@@ -16,6 +16,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/chatbot", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/law-search", priority: 0.8, changeFrequency: "monthly" as const },
     { url: "/chemical-ra", priority: 0.7, changeFrequency: "monthly" as const },
+    { url: "/chemical-database", priority: 0.7, changeFrequency: "monthly" as const },
     { url: "/risk-prediction", priority: 0.7, changeFrequency: "monthly" as const },
     { url: "/pricing", priority: 0.7, changeFrequency: "monthly" as const },
     { url: "/subsidies", priority: 0.7, changeFrequency: "monthly" as const },

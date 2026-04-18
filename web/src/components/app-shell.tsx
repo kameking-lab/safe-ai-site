@@ -23,6 +23,7 @@ import {
   CloudRain,
   FileText,
   TestTube2,
+  FlaskConical,
   RefreshCw,
   Info,
   BookMarked,
@@ -98,6 +99,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database },
       { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2, badge: "AI" },
+      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "50物質β" },
     ],
   },
   {
