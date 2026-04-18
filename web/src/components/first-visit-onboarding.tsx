@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Type, Sun, Sparkles, X, Check } from "lucide-react";
 import { useFurigana } from "@/contexts/furigana-context";
 import { useEasyJapanese } from "@/contexts/easy-japanese-context";
@@ -15,22 +15,21 @@ const HIGH_CONTRAST_KEY = "high-contrast-enabled";
  * 3つの主要アクセシビリティ設定（文字大・屋外モード・やさしい日本語）を
  * 最初に大きな選択肢として提示する。スキップ可能。
  */
+function shouldOpenInitially(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return !localStorage.getItem(ONBOARDING_KEY);
+  } catch {
+    return false;
+  }
+}
+
 export function FirstVisitOnboarding() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<boolean>(shouldOpenInitially);
   const [largeFont, setLargeFont] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const { easyJapaneseEnabled, setEasyJapaneseEnabled } = useEasyJapaneseCompat();
   const { furiganaEnabled } = useFurigana();
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      const seen = localStorage.getItem(ONBOARDING_KEY);
-      if (!seen) setOpen(true);
-    } catch {
-      // localStorage利用不可の場合はスキップ
-    }
-  }, []);
 
   const save = () => {
     try {

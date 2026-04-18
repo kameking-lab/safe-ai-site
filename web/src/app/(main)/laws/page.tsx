@@ -66,6 +66,32 @@ export default function LawsPage() {
           },
         ]}
       />
+      <RelatedPageCards
+        heading="新設 特集ページ（β骨組み）"
+        pages={[
+          {
+            href: "/laws/bcp",
+            label: "BCP 策定義務化",
+            description: "介護施設等で2024年4月義務化。労安衛法との接続と中小向けテンプレート。",
+            color: "amber",
+            cta: "BCP を整理する",
+          },
+          {
+            href: "/laws/freelance-rosai",
+            label: "フリーランス労災特別加入",
+            description: "一人親方・フリーランス新法。加入団体選び・給付基礎日額・認定事例。",
+            color: "sky",
+            cta: "特別加入を見る",
+          },
+          {
+            href: "/laws/gig-work",
+            label: "スポットワーク × 労災",
+            description: "タイミー等アプリ型雇用の労災適用・拒否権・若年保護。",
+            color: "purple",
+            cta: "ギグワーク労災",
+          },
+        ]}
+      />
     </>
   );
 }

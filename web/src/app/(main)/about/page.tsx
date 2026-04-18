@@ -139,6 +139,54 @@ export default function AboutPage() {
       />
 
       <div className="mt-6 space-y-6">
+        {/* One Big Thing — サイトの独自価値宣言（ID_060・ID_002・ID_048） */}
+        <section
+          aria-labelledby="one-big-thing-heading"
+          className="rounded-2xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 shadow-sm"
+        >
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-800">
+            <Sparkles className="h-4 w-4 text-amber-500" aria-hidden="true" />
+            ANZEN AI の One Big Thing
+          </div>
+          <h2
+            id="one-big-thing-heading"
+            className="mt-2 text-xl font-bold leading-snug text-slate-900 sm:text-2xl"
+          >
+            100人辛口レビューで週次進化する、国内唯一の安全ポータル
+          </h2>
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            私たちの差別化は、機能の数ではありません。
+            <strong className="font-bold text-emerald-900">
+              「辛口ペルソナ100人 × 3〜7日サイクルの PDCA」
+            </strong>
+            を公開しながら回している事業運営そのものです。
+            毎回の指摘・賞賛・スコア・原文コメントは
+            <code className="mx-1 rounded bg-white px-1 font-mono text-xs">web/scripts/reviews/</code>
+            に全件保存・Gitに残り、
+            翌3日で20〜25項目を実装して再レビューで検証します。
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            <Pill
+              k="レビュー頻度"
+              v="四半期+日次"
+              note="REVIEW_SIZE=100"
+            />
+            <Pill
+              k="透明性"
+              v="100%"
+              note="原文・スコア・減点を全件公開"
+            />
+            <Pill
+              k="出典必須"
+              v="RAG 33 法令"
+              note="e-Gov直リンク・通達・判例併記"
+            />
+          </div>
+          <p className="mt-3 text-[11px] leading-5 text-slate-500">
+            ※ この仕組みは競合（中災防・e-Gov・大手LMS・ChatGPT）のいずれも採用していません。批判を隠さず受け止めて前進する PDCA 速度そのものが、サイト全体の一次差別化軸です。
+          </p>
+        </section>
+
         {/* 監修者プロフィール */}
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-base font-bold text-slate-900">
@@ -399,5 +447,15 @@ export default function AboutPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function Pill({ k, v, note }: { k: string; v: string; note: string }) {
+  return (
+    <div className="rounded-xl border border-emerald-200 bg-white px-3 py-2 text-center shadow-sm">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">{k}</p>
+      <p className="mt-1 text-lg font-bold leading-tight text-slate-900">{v}</p>
+      <p className="mt-0.5 text-[10px] leading-4 text-slate-500">{note}</p>
+    </div>
   );
 }

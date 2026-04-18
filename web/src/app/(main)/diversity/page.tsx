@@ -402,8 +402,50 @@ export default function DiversityPage() {
         })}
       </div>
 
+      {/* 個別深掘りページ（骨組み公開中） */}
+      <section className="mt-10">
+        <h2 className="mb-3 text-lg font-bold text-slate-900">
+          個別深掘りページ（β骨組み公開中）
+        </h2>
+        <ul className="grid gap-3 sm:grid-cols-3">
+          <li>
+            <Link
+              href="/diversity/disability"
+              className="block min-h-[56px] rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 hover:bg-emerald-100"
+            >
+              障害者雇用 × 労働安全衛生
+              <span className="mt-0.5 block text-[11px] font-normal text-emerald-700">
+                合理的配慮・ジョブコーチ制度・特例子会社
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/diversity/sogi"
+              className="block min-h-[56px] rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 hover:bg-emerald-100"
+            >
+              SOGI と職場の安全衛生
+              <span className="mt-0.5 block text-[11px] font-normal text-emerald-700">
+                パワハラ防止法 × 経産省トイレ事件判例
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/diversity/foreign-workers"
+              className="block min-h-[56px] rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 hover:bg-emerald-100"
+            >
+              外国人労働者 × 労働安全衛生
+              <span className="mt-0.5 block text-[11px] font-normal text-emerald-700">
+                OTIT・JITCO 相談窓口 / 多言語KY
+              </span>
+            </Link>
+          </li>
+        </ul>
+      </section>
+
       <p className="mt-10 text-center text-xs text-slate-400">
-        最終更新：2026年4月。多言語ページの本格展開は次期開発課題として認識しています。
+        最終更新：2026年4月。多言語ページ（ja/en/vi/zh/pt/tl）は現在6言語骨組み公開中。
       </p>
     </main>
   );
