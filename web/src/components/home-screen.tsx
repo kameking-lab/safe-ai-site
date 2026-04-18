@@ -16,6 +16,13 @@ const MhlwAccidentAnalysisPanel = dynamic(
     ),
   { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
 );
+const MhlwAccidentSearchPanel = dynamic(
+  () =>
+    import("@/components/mhlw-accident-search-panel").then(
+      (m) => m.MhlwAccidentSearchPanel
+    ),
+  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
+);
 import { ELearningPanel } from "@/components/elearning-panel";
 import { HomeValueHero } from "@/components/home-value-hero";
 import { KyRecordList } from "@/components/ky-record-list";
@@ -159,7 +166,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
   const [accidentError, setAccidentError] = useState<ServiceError | null>(null);
   const [selectedAccidentType, setSelectedAccidentType] = useState<AccidentType | "すべて">("すべて");
   const [selectedAccidentCategory, setSelectedAccidentCategory] = useState<AccidentWorkCategory | "すべて">("すべて");
-  const [accidentActiveTab, setAccidentActiveTab] = useState<"list" | "mhlw" | "analysis">("list");
+  const [accidentActiveTab, setAccidentActiveTab] = useState<"list" | "mhlw-search" | "mhlw" | "analysis">("list");
   const [selectedRegionName, setSelectedRegionName] = useState(
     () => services.weatherRisk.getAvailableRegions()[0]?.regionName ?? ""
   );
@@ -534,6 +541,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
               {(
                 [
                   { id: "list", label: "一覧" },
+                  { id: "mhlw-search", label: "MHLW 50万件検索" },
                   { id: "mhlw", label: "MHLW実データ分析" },
                   { id: "analysis", label: "収録事例（参考）" },
                 ] as const
@@ -568,6 +576,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
                 <MhlwDisasterDatabasesPanel />
               </>
             )}
+            {accidentActiveTab === "mhlw-search" && <MhlwAccidentSearchPanel />}
             {accidentActiveTab === "mhlw" && <MhlwAccidentAnalysisPanel />}
             {accidentActiveTab === "analysis" && (
               <AccidentAnalysisPanel cases={services.accident.getAllAccidentCases()} />
