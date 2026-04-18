@@ -110,6 +110,64 @@ export default function PricingPage() {
         </p>
       </div>
 
+      {/* 規模別早見表 */}
+      <div className="mx-auto mb-8 max-w-3xl rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5">
+        <h2 className="text-sm font-bold text-emerald-900">
+          規模別 おすすめプラン早見表
+        </h2>
+        <p className="mt-1 text-xs leading-5 text-emerald-900/80">
+          「うちの規模ならどれを選べばいいか」を3秒で判断できる早見表です。
+        </p>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full min-w-[480px] text-xs sm:text-sm">
+            <thead className="bg-white/70 text-slate-600">
+              <tr>
+                <th className="px-3 py-2 text-left font-semibold">事業規模</th>
+                <th className="px-3 py-2 text-left font-semibold">推奨プラン</th>
+                <th className="px-3 py-2 text-right font-semibold">月額</th>
+                <th className="px-3 py-2 text-left font-semibold">想定用途</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-emerald-100 text-slate-800">
+              <tr>
+                <td className="px-3 py-2 font-semibold">個人・一人親方</td>
+                <td className="px-3 py-2">フリー</td>
+                <td className="px-3 py-2 text-right">0円</td>
+                <td className="px-3 py-2 text-slate-600">KY用紙・法改正・事故DBを自分の勉強用に</td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2 font-semibold">〜10名（町工場・一人社労士）</td>
+                <td className="px-3 py-2">フリー → プレミアム1席</td>
+                <td className="px-3 py-2 text-right">0〜¥980</td>
+                <td className="px-3 py-2 text-slate-600">担当者1名が無制限で使える</td>
+              </tr>
+              <tr className="bg-emerald-100/60 font-semibold">
+                <td className="px-3 py-2">11〜30名（中小建設・介護）</td>
+                <td className="px-3 py-2">プロ（5席）</td>
+                <td className="px-3 py-2 text-right">¥1,980</td>
+                <td className="px-3 py-2 text-slate-700">職長・安全担当複数名で共有、管理ダッシュボード付</td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2 font-semibold">31〜100名（地方ゼネコン・製造）</td>
+                <td className="px-3 py-2">プロ × 複数契約 or エンタープライズ相談</td>
+                <td className="px-3 py-2 text-right">¥1,980〜</td>
+                <td className="px-3 py-2 text-slate-600">部署ごとに契約 or 個別相談</td>
+              </tr>
+              <tr>
+                <td className="px-3 py-2 font-semibold">100名超</td>
+                <td className="px-3 py-2">エンタープライズ（個別見積）</td>
+                <td className="px-3 py-2 text-right">要相談</td>
+                <td className="px-3 py-2 text-slate-600">SSO・請求書払い・カスタム教材</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-[11px] leading-5 text-emerald-900/70">
+          ※ KY用紙・チャット回数に業種・人数別の制限は設けていません。β期間中は制限なし。
+          助成金活用は <a href="/subsidies" className="underline hover:text-emerald-700">/subsidies</a> を参照。
+        </p>
+      </div>
+
       {/* β期間中のお知らせ */}
       <div className="mx-auto mb-8 max-w-2xl rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
         <p className="font-semibold">β期間中のお知らせ</p>

@@ -9,6 +9,12 @@ import {
   GraduationCap,
   Scale,
   Mail,
+  Handshake,
+  Users2,
+  Sparkles,
+  Check,
+  Minus,
+  ExternalLink,
 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 
@@ -208,6 +214,138 @@ export default function AboutPage() {
               );
             })}
           </div>
+        </section>
+
+        {/* パートナー／連携先 */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-2 flex items-center gap-2 text-base font-bold text-slate-900">
+            <Handshake className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+            パートナー／連携先
+          </h2>
+          <p className="mb-4 text-xs leading-5 text-slate-500">
+            当サイトは下記の公的機関・団体が公開する一次資料を引用・参照しています。
+            連携・相互リンク等のご提案はお問い合わせフォームよりご連絡ください。
+          </p>
+          <ul className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+            {[
+              { name: "厚生労働省 労働基準局", url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/index.html", role: "法令・通達・統計の一次出典" },
+              { name: "e-Gov 法令検索", url: "https://laws.e-gov.go.jp/", role: "条文の原文リンク先" },
+              { name: "中央労働災害防止協会（中災防）", url: "https://www.jisha.or.jp/", role: "RST・安全大会・OSHMS資料" },
+              { name: "建設業労働災害防止協会（建災防）", url: "https://www.kensaibou.or.jp/", role: "建設業の講習・安全衛生計画" },
+              { name: "独立行政法人 労働者健康安全機構", url: "https://www.johas.go.jp/", role: "労災認定・エイジフレンドリー補助金" },
+              { name: "外国人技能実習機構（OTIT）", url: "https://www.otit.go.jp/", role: "技能実習生相談窓口（多言語）" },
+            ].map((p) => (
+              <li
+                key={p.name}
+                className="rounded-lg border border-slate-200 bg-slate-50/60 p-3"
+              >
+                <a
+                  href={p.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-slate-800 hover:text-emerald-700"
+                >
+                  {p.name}
+                  <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                </a>
+                <p className="mt-0.5 text-[11px] leading-5 text-slate-500">{p.role}</p>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-[11px] leading-5 text-slate-400">
+            ※ 上記は公開資料の参照・リンク関係であり、各団体との公式な業務提携・推薦関係を意味するものではありません。
+          </p>
+        </section>
+
+        {/* 競合比較 */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-2 flex items-center gap-2 text-base font-bold text-slate-900">
+            <Sparkles className="h-4 w-4 text-amber-500" aria-hidden="true" />
+            競合比較
+          </h2>
+          <p className="mb-4 text-xs leading-5 text-slate-500">
+            他の労働安全情報サイト・公的資源と比較した本サイトの位置づけです。
+            それぞれに得意領域があるため、目的に応じて併用されることを推奨します。
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[540px] text-xs sm:text-sm">
+              <thead className="bg-slate-50 text-slate-600">
+                <tr>
+                  <th className="px-3 py-2 text-left font-semibold">機能・特徴</th>
+                  <th className="px-3 py-2 text-center font-semibold">ANZEN AI</th>
+                  <th className="px-3 py-2 text-center font-semibold">厚労省<br />e-Gov</th>
+                  <th className="px-3 py-2 text-center font-semibold">中災防</th>
+                  <th className="px-3 py-2 text-center font-semibold">大手有料LMS</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700">
+                {[
+                  { label: "法令条文の一次出典", self: true, egov: true, jisha: true, lms: false },
+                  { label: "事故DBのグラフ可視化", self: true, egov: false, jisha: false, lms: true },
+                  { label: "KY用紙（シンプル/詳細切替）", self: true, egov: false, jisha: false, lms: true },
+                  { label: "化学物質RA入力ツール", self: true, egov: false, jisha: false, lms: false },
+                  { label: "過去問1,000問超", self: true, egov: false, jisha: true, lms: true },
+                  { label: "Eラーニング（業種別250問+）", self: true, egov: false, jisha: true, lms: true },
+                  { label: "助成金早見（中小向け）", self: true, egov: false, jisha: false, lms: false },
+                  { label: "現場向けスマホ導線", self: true, egov: false, jisha: false, lms: false },
+                  { label: "無料で全機能試せる", self: true, egov: true, jisha: false, lms: false },
+                  { label: "多言語（やさしい日本語以外）", self: false, egov: false, jisha: false, lms: false },
+                  { label: "SCORM/xAPI対応", self: false, egov: false, jisha: false, lms: true },
+                ].map((r) => (
+                  <tr key={r.label}>
+                    <td className="px-3 py-2 font-medium">{r.label}</td>
+                    <td className="px-3 py-2 text-center">
+                      {r.self ? <Check className="mx-auto h-4 w-4 text-emerald-600" aria-label="対応" /> : <Minus className="mx-auto h-4 w-4 text-slate-300" aria-label="未対応" />}
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      {r.egov ? <Check className="mx-auto h-4 w-4 text-emerald-600" aria-label="対応" /> : <Minus className="mx-auto h-4 w-4 text-slate-300" aria-label="未対応" />}
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      {r.jisha ? <Check className="mx-auto h-4 w-4 text-emerald-600" aria-label="対応" /> : <Minus className="mx-auto h-4 w-4 text-slate-300" aria-label="未対応" />}
+                    </td>
+                    <td className="px-3 py-2 text-center">
+                      {r.lms ? <Check className="mx-auto h-4 w-4 text-emerald-600" aria-label="対応" /> : <Minus className="mx-auto h-4 w-4 text-slate-300" aria-label="未対応" />}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-[11px] leading-5 text-slate-400">
+            ※ 2026年4月時点の各サービス公開情報をもとに比較。機能は随時変更されます。多言語・SCORM対応は今後の開発課題として認識しています。
+          </p>
+        </section>
+
+        {/* サイト設計思想 */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-2 flex items-center gap-2 text-base font-bold text-slate-900">
+            <Users2 className="h-4 w-4 text-sky-600" aria-hidden="true" />
+            誰のためのサイトか
+          </h2>
+          <p className="text-sm leading-6 text-slate-700">
+            労働安全は、建設業の男性ベテランのためだけにある領域ではありません。
+            外国人実習生・女性施工管理・高齢パート・在宅フリーランス・障害者・LGBTQ当事者の労働者にも、等しく届く情報ポータルを目指しています。
+          </p>
+          <ul className="mt-3 grid grid-cols-2 gap-2 text-xs sm:grid-cols-3">
+            {[
+              "建設・製造の現場職長",
+              "中小企業の経営者",
+              "新人安全衛生担当者",
+              "外国人技能実習の指導員",
+              "医療・介護の管理職",
+              "行政・協会・士業",
+              "高齢・非正規労働者",
+              "女性施工管理・現場監督",
+              "障害者雇用の担当者",
+            ].map((u) => (
+              <li
+                key={u}
+                className="rounded-lg bg-sky-50 px-2.5 py-1.5 text-center font-medium text-sky-800"
+              >
+                {u}
+              </li>
+            ))}
+          </ul>
         </section>
 
         {/* お問い合わせ */}
