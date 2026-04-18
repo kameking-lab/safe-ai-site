@@ -9,6 +9,7 @@ import {
   Monitor,
   GraduationCap,
   BookOpen,
+  LibraryBig,
   Database,
   Scale,
   Brain,
@@ -112,6 +113,7 @@ const NAV_CATEGORIES: NavCategory[] = [
   {
     label: "その他",
     items: [
+      { id: "lms", label: "LMS（多拠点管理）", href: "/lms", icon: LibraryBig, badge: "soon", description: "2026年秋" },
       { id: "glossary", label: "安全用語辞書", href: "/glossary", icon: BookMarked },
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
       { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },
