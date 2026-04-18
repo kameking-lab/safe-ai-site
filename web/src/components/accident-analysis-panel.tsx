@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   PieChart,
   Pie,
@@ -16,7 +16,7 @@ import {
   Line,
   Legend,
 } from "recharts";
-import { Download } from "lucide-react";
+import { Download, Info, ChevronDown, ChevronUp } from "lucide-react";
 import type { AccidentCase } from "@/lib/types/domain";
 
 const PIE_COLORS = [
@@ -67,6 +67,60 @@ function downloadCsv(cases: AccidentCase[]) {
   URL.revokeObjectURL(url);
 }
 
+function DataSourceNote({ yearRange, count }: { yearRange: string; count: number }) {
+  return (
+    <p className="mt-2 text-[10px] text-slate-400">
+      データ出典: 厚生労働省 労働災害統計 + 当サイト収録事例　|　集計期間: {yearRange}　|　N={count}
+    </p>
+  );
+}
+
+function MethodologyAccordion({ yearRange, count }: { yearRange: string; count: number }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+        aria-expanded={open}
+      >
+        <span className="flex items-center gap-1.5">
+          <Info className="h-3.5 w-3.5 text-slate-400" />
+          このデータについて
+        </span>
+        {open ? <ChevronUp className="h-3.5 w-3.5 text-slate-400" /> : <ChevronDown className="h-3.5 w-3.5 text-slate-400" />}
+      </button>
+      {open && (
+        <div className="border-t border-slate-200 px-4 py-3 text-xs text-slate-600 space-y-2">
+          <div>
+            <p className="font-semibold text-slate-700">データ収集方法</p>
+            <p>厚生労働省が公表する労働災害統計（死傷病報告・休業4日以上の労働災害）および当サイトで独自収録した事故事例を組み合わせています。</p>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-700">集計基準</p>
+            <ul className="mt-0.5 list-disc pl-4 space-y-0.5">
+              <li>集計期間: {yearRange}（発生年ベース）</li>
+              <li>総収録件数: N={count} 件</li>
+              <li>業種分類は厚労省の業種区分に準拠（一部簡略化）</li>
+              <li>事故種別は労働安全衛生法施行規則の区分に基づく</li>
+            </ul>
+          </div>
+          <div>
+            <p className="font-semibold text-slate-700">注意事項</p>
+            <ul className="mt-0.5 list-disc pl-4 space-y-0.5 text-slate-500">
+              <li>当サイト収録事例は独自収集のため、統計的偏りがあります</li>
+              <li>全労働災害を網羅するものではありません</li>
+              <li>軽微な災害（休業3日以内）は含まれない場合があります</li>
+              <li>正確な統計は<a href="https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei11.html" target="_blank" rel="noreferrer" className="underline text-blue-600">厚生労働省公式サイト</a>をご確認ください</li>
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function AccidentAnalysisPanel({ cases }: Props) {
   const typeData = useMemo(() => countBy(cases, (c) => c.type).slice(0, 10), [cases]);
   const industryData = useMemo(() => countBy(cases, (c) => c.workCategory).slice(0, 10), [cases]);
@@ -76,6 +130,14 @@ export function AccidentAnalysisPanel({ cases }: Props) {
       .filter((d) => d.name !== "不明")
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [cases]);
+
+  const yearRange = useMemo(() => {
+    if (yearData.length === 0) return "—";
+    const years = yearData.map((d) => d.name);
+    const min = years[0];
+    const max = years[years.length - 1];
+    return min === max ? min : `${min}〜${max}年`;
+  }, [yearData]);
 
   return (
     <div className="space-y-6">
@@ -129,6 +191,7 @@ export function AccidentAnalysisPanel({ cases }: Props) {
               </span>
             ))}
           </div>
+          <DataSourceNote yearRange={yearRange} count={cases.length} />
         </div>
 
         {/* 業種別 棒グラフ */}
@@ -148,6 +211,7 @@ export function AccidentAnalysisPanel({ cases }: Props) {
               <Bar dataKey="value" fill="#3b82f6" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
+          <DataSourceNote yearRange={yearRange} count={cases.length} />
         </div>
       </div>
 
@@ -171,7 +235,10 @@ export function AccidentAnalysisPanel({ cases }: Props) {
             />
           </LineChart>
         </ResponsiveContainer>
+        <DataSourceNote yearRange={yearRange} count={cases.length} />
       </div>
+
+      <MethodologyAccordion yearRange={yearRange} count={cases.length} />
     </div>
   );
 }
