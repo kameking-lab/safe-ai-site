@@ -26,6 +26,8 @@ import {
   RefreshCw,
   Info,
   BookMarked,
+  Users2,
+  Heart,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { UserMenu } from "@/components/user-menu";
@@ -87,6 +89,13 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database },
       { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2, badge: "AI" },
+    ],
+  },
+  {
+    label: "多様な働き方",
+    items: [
+      { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2 },
+      { id: "mental-health", label: "メンタル・カスハラ", href: "/mental-health", icon: Heart },
     ],
   },
   {
