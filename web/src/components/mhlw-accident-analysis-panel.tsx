@@ -21,6 +21,8 @@ import byYear from "@/data/aggregates-mhlw/accidents-by-year.json";
 import byIndustry from "@/data/aggregates-mhlw/accidents-by-industry.json";
 import byAge from "@/data/aggregates-mhlw/accidents-by-age.json";
 import byMonth from "@/data/aggregates-mhlw/accidents-by-month.json";
+import deathsByYear from "@/data/aggregates-mhlw/deaths-by-year.json";
+import deathsByIndustry from "@/data/aggregates-mhlw/deaths-by-industry.json";
 import meta from "@/data/aggregates-mhlw/meta.json";
 
 const PIE_COLORS = [
@@ -37,6 +39,12 @@ const byYearData = byYear as YearMap;
 const byIndustryData = byIndustry as YearMap;
 const byAgeData = byAge as YearMap;
 const byMonthData = byMonth as MonthMap;
+const deathsByYearData = deathsByYear as YearMap;
+const deathsByIndustryData = deathsByIndustry as YearMap;
+
+const DEATHS_RANGE_LABEL = "令和元年〜令和5年（2019〜2023）";
+const DEATHS_SOURCE_URL = "https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.aspx";
+const DEATHS_SOURCE_LABEL = "厚生労働省 職場のあんぜんサイト 死亡災害DB";
 
 const AGE_LABELS: Record<string, string> = {
   "-19": "〜19歳",
@@ -221,6 +229,40 @@ export function MhlwAccidentAnalysisPanel() {
   const monthlyAvg = useMemo(() => monthlyAverage(byMonthData), []);
   const updatedAt = useMemo(() => formatUpdatedAt(meta.generatedAt), []);
 
+  // 死亡災害 vs 休業4日以上 の年次推移オーバーレイ
+  const yearOverlay = useMemo(() => {
+    const allYears = Array.from(
+      new Set([...Object.keys(byYearData), ...Object.keys(deathsByYearData)])
+    ).sort();
+    const accTotals = new Map<string, number>();
+    for (const y of Object.keys(byYearData)) {
+      accTotals.set(y, Object.values(byYearData[y]).reduce((a, b) => a + b, 0));
+    }
+    const deathTotals = new Map<string, number>();
+    for (const y of Object.keys(deathsByYearData)) {
+      deathTotals.set(y, Object.values(deathsByYearData[y]).reduce((a, b) => a + b, 0));
+    }
+    return allYears.map((y) => ({
+      name: y,
+      accident: accTotals.get(y) ?? null,
+      death: deathTotals.get(y) ?? null,
+    }));
+  }, []);
+
+  // 死亡災害 業種別 / 事故型別 ランキング（全期間合計）
+  const deathsByIndustryRanking = useMemo(
+    () => sumNested(deathsByIndustryData).slice(0, 10),
+    []
+  );
+  const deathsByTypeRanking = useMemo(
+    () => sumNested(deathsByYearData).slice(0, 10),
+    []
+  );
+  const deathsTotal = useMemo(
+    () => yearOverlay.reduce((s, r) => s + (r.death ?? 0), 0),
+    [yearOverlay]
+  );
+
   return (
     <div className="space-y-6">
       {/* ヘッダーバナー */}
@@ -381,6 +423,114 @@ export function MhlwAccidentAnalysisPanel() {
             </LineChart>
           </ResponsiveContainer>
           <SourceFooter />
+        </div>
+      </div>
+
+      {/* 死亡災害セクション */}
+      <div className="rounded-2xl border border-rose-200 bg-gradient-to-r from-rose-50 to-amber-50 p-4 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-bold text-slate-800">
+              死亡災害 N={deathsTotal.toLocaleString()}件（{DEATHS_RANGE_LABEL}）
+            </h3>
+            <p className="mt-1 text-xs text-slate-600">
+              死亡災害（死亡 1 名以上）と休業 4 日以上の労働災害を並べて比較。休業 4 日以上データは 2006〜2021、死亡災害データは 2019〜2023 のため重複期間（2019〜2021）で両者が描画されます。
+            </p>
+            <p className="mt-0.5 text-[11px] text-slate-500">
+              出典:&nbsp;
+              <a href={DEATHS_SOURCE_URL} target="_blank" rel="noreferrer" className="underline text-blue-700">
+                {DEATHS_SOURCE_LABEL}
+              </a>
+              　|　最終更新: {updatedAt}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <h3 className="mb-4 text-sm font-bold text-slate-800">
+          年次推移オーバーレイ（死亡災害 vs 休業4日以上）
+        </h3>
+        <ResponsiveContainer width="100%" height={260}>
+          <LineChart data={yearOverlay} margin={{ left: 0, right: 16 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+            <YAxis yAxisId="left" tick={{ fontSize: 11 }} />
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              tick={{ fontSize: 11 }}
+              label={{ value: "死亡", angle: -90, position: "insideRight", fontSize: 10 }}
+            />
+            <Tooltip
+              formatter={(v, name) => {
+                if (v == null) return ["-", name];
+                return [`${Number(v).toLocaleString()}件`, name];
+              }}
+            />
+            <Legend />
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="accident"
+              name="休業4日以上（左軸）"
+              stroke="#3b82f6"
+              strokeWidth={2}
+              connectNulls={false}
+              dot={{ r: 3 }}
+            />
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="death"
+              name="死亡災害（右軸）"
+              stroke="#ef4444"
+              strokeWidth={2}
+              connectNulls={false}
+              dot={{ r: 3 }}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+        <p className="mt-2 text-[10px] text-slate-400">
+          左軸: 休業4日以上（N={meta.accidents.total.toLocaleString()}、期間{YEAR_RANGE_LABEL}） / 右軸: 死亡災害（N={deathsTotal.toLocaleString()}、期間{DEATHS_RANGE_LABEL}）
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h3 className="mb-4 text-sm font-bold text-slate-800">
+            死亡災害 業種別ランキング（トップ10）
+          </h3>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={deathsByIndustryRanking} layout="vertical" margin={{ left: 8, right: 24 }}>
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 11 }} />
+              <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 11 }} />
+              <Tooltip formatter={(v) => [`${Number(v).toLocaleString()}件`, "死亡"]} />
+              <Bar dataKey="value" fill="#ef4444" radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+          <p className="mt-2 text-[10px] text-slate-400">
+            期間: {DEATHS_RANGE_LABEL} / 出典: {DEATHS_SOURCE_LABEL}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h3 className="mb-4 text-sm font-bold text-slate-800">
+            死亡災害 事故型別ランキング（トップ10）
+          </h3>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={deathsByTypeRanking} layout="vertical" margin={{ left: 8, right: 24 }}>
+              <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 11 }} />
+              <YAxis type="category" dataKey="name" width={90} tick={{ fontSize: 11 }} />
+              <Tooltip formatter={(v) => [`${Number(v).toLocaleString()}件`, "死亡"]} />
+              <Bar dataKey="value" fill="#f97316" radius={[0, 4, 4, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+          <p className="mt-2 text-[10px] text-slate-400">
+            期間: {DEATHS_RANGE_LABEL} / 出典: {DEATHS_SOURCE_LABEL}
+          </p>
         </div>
       </div>
 
