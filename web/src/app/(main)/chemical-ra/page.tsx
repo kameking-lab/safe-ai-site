@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ChemicalRaPanel } from "@/components/chemical-ra-panel";
 import { ogImageUrl } from "@/lib/og-url";
@@ -21,5 +22,9 @@ export const metadata: Metadata = {
 };
 
 export default function ChemicalRaPage() {
-  return <ChemicalRaPanel />;
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-500">読み込み中…</div>}>
+      <ChemicalRaPanel />
+    </Suspense>
+  );
 }

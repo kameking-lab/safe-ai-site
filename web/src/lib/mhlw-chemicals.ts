@@ -7,6 +7,17 @@ export type MhlwChemicalCategory =
   | "label_sds"
   | "other";
 
+export type MhlwChemicalDetails = {
+  /** 八時間濃度基準値 (例: "20 ppm" / "5 ㎎/㎥") */
+  limit8h?: string;
+  /** 短時間濃度基準値 */
+  limitShort?: string;
+  /** モデル SDS の推奨用途 */
+  uses?: string;
+  /** 厚労省 公式 SDS PDF リンク */
+  link?: string;
+};
+
 export type MhlwChemicalEntry = {
   name: string;
   cas: string | null;
@@ -14,6 +25,7 @@ export type MhlwChemicalEntry = {
   categoryLabel: string;
   appliedDate: string | null;
   notes: string[];
+  details?: MhlwChemicalDetails;
 };
 
 export type MhlwChemicalCompact = {
@@ -41,6 +53,8 @@ export type MergedChemical = {
   appliedDates: Partial<Record<MhlwChemicalCategory, string>>;
   /** カテゴリ別の備考（あれば） */
   notes: string[];
+  /** 詳細値（濃度基準値・推奨用途・SDS リンクなど） */
+  details?: MhlwChemicalDetails;
   /** 元データの件数（デバッグ用） */
   entryCount: number;
 };
@@ -125,6 +139,11 @@ export function mergeByCas(entries: MhlwChemicalEntry[]): MergedChemical[] {
         if (n && n.trim()) noteSet.add(n.trim());
       }
     }
+    let details: MhlwChemicalDetails | undefined;
+    for (const e of arr) {
+      if (!e.details) continue;
+      details = { ...(details ?? {}), ...e.details };
+    }
     merged.push({
       cas,
       primaryName: primary,
@@ -132,6 +151,7 @@ export function mergeByCas(entries: MhlwChemicalEntry[]): MergedChemical[] {
       flags,
       appliedDates,
       notes: Array.from(noteSet),
+      details,
       entryCount: arr.length,
     });
   }
@@ -164,6 +184,11 @@ export function mergeByCas(entries: MhlwChemicalEntry[]): MergedChemical[] {
         if (n && n.trim()) noteSet.add(n.trim());
       }
     }
+    let details: MhlwChemicalDetails | undefined;
+    for (const e of arr) {
+      if (!e.details) continue;
+      details = { ...(details ?? {}), ...e.details };
+    }
     merged.push({
       cas: null,
       primaryName: name,
@@ -171,6 +196,7 @@ export function mergeByCas(entries: MhlwChemicalEntry[]): MergedChemical[] {
       flags,
       appliedDates,
       notes: Array.from(noteSet),
+      details,
       entryCount: arr.length,
     });
   }
@@ -206,4 +232,71 @@ export function casMatches(query: string, cas: string | null): boolean {
   if (nc.includes(q)) return true;
   // ハイフン無しで比較
   return nc.replace(/-/g, "").includes(q.replace(/-/g, ""));
+}
+
+/** カテゴリフラグ → 規制区分のラベル（推定） */
+export function regulatoryLabels(flags: MergedChemical["flags"]): string[] {
+  const out: string[] = [];
+  if (flags.label_sds) out.push("リスクアセスメント対象物（SDS交付義務）");
+  if (flags.concentration) out.push("濃度基準値設定物質（自律的管理）");
+  if (flags.carcinogenic) out.push("がん原性物質（記録30年保存）");
+  if (flags.skin) out.push("皮膚等障害化学物質（不浸透性保護具必要）");
+  return out;
+}
+
+/** カテゴリフラグ → 関連法令の文字列 */
+export function relatedLawTexts(flags: MergedChemical["flags"]): string[] {
+  const out: string[] = [];
+  if (flags.label_sds) out.push(CATEGORY_TO_LAW.label_sds);
+  if (flags.concentration) out.push(CATEGORY_TO_LAW.concentration);
+  if (flags.carcinogenic) out.push(CATEGORY_TO_LAW.carcinogenic);
+  if (flags.skin) out.push(CATEGORY_TO_LAW.skin);
+  return out.filter(Boolean);
+}
+
+let _mergedCache: MergedChemical[] | null = null;
+/** CAS 統合済みの全物質。クライアント側でキャッシュ。 */
+export function getAllMergedChemicals(): MergedChemical[] {
+  if (!_mergedCache) {
+    _mergedCache = mergeByCas(rawCompact.entries);
+  }
+  return _mergedCache;
+}
+
+/** 物質名 / CAS / 別名でフリーワード検索（先頭 limit 件）。 */
+export function searchMergedChemicals(
+  query: string,
+  limit = 30
+): MergedChemical[] {
+  const all = getAllMergedChemicals();
+  if (!query.trim()) return all.slice(0, limit);
+  const qNorm = normalizeText(query);
+  const scored: { m: MergedChemical; score: number }[] = [];
+  for (const m of all) {
+    let score = 0;
+    if (m.cas && casMatches(query, m.cas)) score += 100;
+    const pn = normalizeText(m.primaryName);
+    if (pn === qNorm) score += 80;
+    else if (pn.startsWith(qNorm)) score += 40;
+    else if (pn.includes(qNorm)) score += 20;
+    for (const a of m.aliases) {
+      const an = normalizeText(a);
+      if (an.includes(qNorm)) {
+        score += 10;
+        break;
+      }
+    }
+    if (score > 0) scored.push({ m, score });
+  }
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, limit).map((s) => s.m);
+}
+
+/** CAS 完全一致で 1 件取得。 */
+export function findByCas(cas: string): MergedChemical | undefined {
+  const target = normalizeCas(cas);
+  if (!target) return undefined;
+  return getAllMergedChemicals().find(
+    (m) => m.cas && normalizeCas(m.cas) === target
+  );
 }

@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Search, AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag } from "lucide-react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import { amazonSearchUrl, rakutenSearchUrl } from "@/lib/affiliate";
+import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
+import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
+import { findByCas, type MergedChemical } from "@/lib/mhlw-chemicals";
 import type {
   ChemicalRaResponse,
   GhsHazard,
@@ -128,11 +132,35 @@ const QUICK_CHEMICALS = [
 // ────────────────────────────────────────────────────────────
 
 export function ChemicalRaPanel() {
+  const searchParams = useSearchParams();
   const [chemicalName, setChemicalName] = useState("");
   const [workContent, setWorkContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ChemicalRaResponse | null>(null);
+  const [mhlwSelected, setMhlwSelected] = useState<MergedChemical | null>(null);
+
+  // /chemical-ra?cas=108-88-3 などで起動した場合、自動選択
+  useEffect(() => {
+    const cas = searchParams?.get("cas");
+    if (cas) {
+      const found = findByCas(cas);
+      if (found) {
+        setMhlwSelected(found);
+        setChemicalName(found.primaryName);
+        return;
+      }
+    }
+    const name = searchParams?.get("name");
+    if (name) setChemicalName(name);
+  }, [searchParams]);
+
+  const handleSelectMhlw = (m: MergedChemical | null) => {
+    setMhlwSelected(m);
+    if (m) {
+      setChemicalName(m.primaryName);
+    }
+  };
 
   const handleSearch = async () => {
     if (!chemicalName.trim()) return;
@@ -181,13 +209,24 @@ export function ChemicalRaPanel() {
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              化学物質名（日本語・英語・IUPAC名・俗称いずれも可）
+              ① 厚労省 1,389 物質から選ぶ（推奨）— 濃度基準値・規制区分が即座に表示されます
+            </label>
+            <MhlwChemicalSelector value={mhlwSelected} onSelect={handleSelectMhlw} />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              ② 物質名を直接入力（リストにない物質・俗称・英語名）
             </label>
             <div className="flex gap-2">
               <InputWithVoice
                 className="flex-1"
                 value={chemicalName}
-                onChange={(e) => setChemicalName(e.target.value)}
+                onChange={(e) => {
+                  setChemicalName(e.target.value);
+                  if (mhlwSelected && e.target.value !== mhlwSelected.primaryName) {
+                    setMhlwSelected(null);
+                  }
+                }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") void handleSearch();
                 }}
@@ -200,7 +239,7 @@ export function ChemicalRaPanel() {
                 className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow hover:bg-emerald-700 disabled:opacity-50"
               >
                 <Search className="h-4 w-4" />
-                調査
+                AI 詳細調査
               </button>
             </div>
           </div>
@@ -236,6 +275,9 @@ export function ChemicalRaPanel() {
           </div>
         </div>
       </div>
+
+      {/* MHLW 物質詳細（選択時のみ） */}
+      {mhlwSelected && <MhlwChemicalInfoCard chemical={mhlwSelected} />}
 
       {/* ローディング */}
       {loading && (

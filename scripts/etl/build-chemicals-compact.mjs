@@ -68,6 +68,31 @@ function pickNotes(row) {
   return notes;
 }
 
+function pickDetails(row) {
+  const attrs = row.attributes ?? {};
+  const out = {};
+  // 濃度基準値（八時間 / 短時間）
+  const limit8h = attrs["八時間濃度基準値"];
+  const limitShort = attrs["短時間濃度基準値"];
+  if (typeof limit8h === "string" && limit8h.trim() && limit8h.trim() !== "－") {
+    out.limit8h = limit8h.trim();
+  }
+  if (typeof limitShort === "string" && limitShort.trim() && limitShort.trim() !== "－") {
+    out.limitShort = limitShort.trim();
+  }
+  // モデルSDSの推奨用途
+  for (const k of Object.keys(attrs)) {
+    if (k.startsWith("モデルSDSにおける推奨用途")) {
+      const v = attrs[k];
+      if (typeof v === "string" && v.trim()) out.uses = v.trim();
+    }
+  }
+  // 公式 SDS リンク
+  const link = attrs["リンクURL"];
+  if (typeof link === "string" && link.startsWith("http")) out.link = link.trim();
+  return Object.keys(out).length ? out : undefined;
+}
+
 async function main() {
   const raw = await readFile(SRC, "utf8");
   const lines = raw.split("\n").filter((l) => l.trim());
@@ -89,14 +114,17 @@ async function main() {
     }
     const key = `${cas ?? "no-cas"}|${name}|${row.category}`;
     if (seen.has(key)) continue;
-    seen.set(key, {
+    const entry = {
       name,
       cas,
       category: row.category,
       categoryLabel: CATEGORY_LABELS[row.category] ?? row.category,
       appliedDate: row.appliedDate ?? null,
       notes: pickNotes(row),
-    });
+    };
+    const details = pickDetails(row);
+    if (details) entry.details = details;
+    seen.set(key, entry);
   }
   const entries = Array.from(seen.values()).sort((a, b) =>
     a.name.localeCompare(b.name, "ja")
