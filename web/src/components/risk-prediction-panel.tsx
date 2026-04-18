@@ -1,8 +1,22 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
+
+const MhlwSimilarCasesPanel = dynamic(
+  () =>
+    import("@/components/mhlw-similar-cases-panel").then(
+      (m) => m.MhlwSimilarCasesPanel
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-32 animate-pulse rounded-2xl bg-slate-100" />
+    ),
+  }
+);
 import {
   buildRiskMatrix,
   computeIndustryTrends,
@@ -512,17 +526,23 @@ export function RiskPredictionPanel() {
 
       {/* タブコンテンツ */}
       {activeTab === "search" && (
-        <div>
+        <div className="space-y-4">
+          {/* MHLW 実データから類似事例 TOP5（検索後のみ） */}
+          {searched && <MhlwSimilarCasesPanel query={query} />}
+
           {!searched ? (
             // 未検索時: 傾向分析をデフォルト表示
             <MonthlyTrendsPanel cases={allCases} />
           ) : results.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-              <p className="text-sm text-slate-400">関連する事故事例が見つかりませんでした</p>
+              <p className="text-sm text-slate-400">サイト収録 300 件の事故事例には該当が見つかりませんでした（MHLW 実データの結果は上記参照）</p>
               <p className="mt-1 text-xs text-slate-400">別の作業内容や、より具体的なキーワードで試してください</p>
             </div>
           ) : (
             <div className="space-y-3">
+              <p className="text-xs font-semibold text-slate-600">
+                サイト収録事例（300 件）からの類似結果
+              </p>
               {results.map((c, i) => (
                 <AccidentCard key={c.id} c={c} index={i} />
               ))}
