@@ -33,7 +33,9 @@ export { mentalHealthShishin } from "./mental-health-shishin";
 export { ashibaSagyoKisoku } from "./ashiba-sagyo-kisoku";
 export { kajuRodoTaisaku } from "./jiritsushinkei-setsumeisho";
 export { koyoKintoHo } from "./koyo-kinto-ho";
+export { mhlwLawArticles } from "./mhlw-extras";
 
+import { mhlwLawArticles } from "./mhlw-extras";
 import { rodoAnzenEiseiHo } from "./rodo-anzen-eisei-ho";
 import { anzenEiseiKisoku } from "./anzen-eisei-kisoku";
 import { craneKisoku } from "./crane-kisoku";
@@ -103,4 +105,5 @@ export const allLawArticles = [
   ...ashibaSagyoKisoku,
   ...kajuRodoTaisaku,
   ...koyoKintoHo,
+  ...mhlwLawArticles,
 ];
