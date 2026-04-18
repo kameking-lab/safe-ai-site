@@ -34,6 +34,7 @@ import { UserMenu } from "@/components/user-menu";
 import { useFurigana } from "@/contexts/furigana-context";
 
 const LARGE_FONT_KEY = "large-font-enabled";
+const HIGH_CONTRAST_KEY = "high-contrast-enabled";
 
 type NavItem = {
   id: string;
@@ -159,6 +160,36 @@ export function AppShell({ children, user }: AppShellProps) {
     });
   };
 
+  // ハイコントラストモード（屋外視認性）
+  const [highContrastEnabled, setHighContrastEnabled] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return localStorage.getItem(HIGH_CONTRAST_KEY) === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    if (highContrastEnabled) {
+      document.documentElement.classList.add("high-contrast");
+    } else {
+      document.documentElement.classList.remove("high-contrast");
+    }
+  }, [highContrastEnabled]);
+
+  const toggleHighContrast = () => {
+    setHighContrastEnabled((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(HIGH_CONTRAST_KEY, String(next));
+      } catch {
+        // localStorage利用不可の場合は無視
+      }
+      return next;
+    });
+  };
+
   const linkClass = (item: NavItem) => {
     const active = navActive(pathname, item.href);
     const base = "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm";
@@ -266,6 +297,19 @@ export function AppShell({ children, user }: AppShellProps) {
             >
               文字大
             </button>
+            <button
+              type="button"
+              onClick={toggleHighContrast}
+              className={`flex-1 rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                highContrastEnabled
+                  ? "bg-slate-900 text-white"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+              title="屋外視認性（ハイコントラスト）"
+              aria-pressed={highContrastEnabled}
+            >
+              屋外
+            </button>
           </div>
           <UserMenu user={user} />
         </div>
@@ -319,6 +363,21 @@ export function AppShell({ children, user }: AppShellProps) {
               aria-pressed={largeFontEnabled}
             >
               Aa
+            </button>
+            {/* ハイコントラスト（屋外視認性） */}
+            <button
+              type="button"
+              onClick={toggleHighContrast}
+              className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
+                highContrastEnabled
+                  ? "bg-slate-900 text-white"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+              title="屋外視認性（ハイコントラスト）"
+              aria-label="屋外視認性（ハイコントラスト）"
+              aria-pressed={highContrastEnabled}
+            >
+              屋外
             </button>
             <UserMenu user={user} />
             <button

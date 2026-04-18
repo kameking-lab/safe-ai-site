@@ -73,6 +73,45 @@ html.large-font button {
   font-size: 1.05em;
 }
 
+/* 屋外視認性向上：ハイコントラストモード（ID_11・ID_93対応） */
+html.high-contrast {
+  background: #000000 !important;
+}
+html.high-contrast body {
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+html.high-contrast .bg-slate-50,
+html.high-contrast .bg-slate-50\/80,
+html.high-contrast .bg-slate-50\/60,
+html.high-contrast .bg-white\/70,
+html.high-contrast .bg-white\/60 {
+  background-color: #ffffff !important;
+}
+html.high-contrast .text-slate-400,
+html.high-contrast .text-slate-500,
+html.high-contrast .text-slate-600 {
+  color: #1e293b !important; /* slate-800 */
+}
+html.high-contrast .border-slate-100,
+html.high-contrast .border-slate-200 {
+  border-color: #000000 !important;
+}
+html.high-contrast a,
+html.high-contrast a:visited {
+  color: #0000ee !important;
+  text-decoration: underline !important;
+}
+html.high-contrast button,
+html.high-contrast .bg-emerald-600,
+html.high-contrast .bg-emerald-700,
+html.high-contrast .bg-blue-600,
+html.high-contrast .bg-amber-500,
+html.high-contrast .bg-amber-600,
+html.high-contrast .bg-red-600 {
+  filter: contrast(1.25) saturate(1.1);
+}
+
 /* ルビ（ふりがな）スタイル */
 ruby {
   ruby-align: center;
