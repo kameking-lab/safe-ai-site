@@ -9,6 +9,11 @@ mhlw-data/
 node_modules/
 dist/
 
+# Python ETL artifacts
+__pycache__/
+*.pyc
+.mypy_cache/
+
 # OS / editor
 .DS_Store
 Thumbs.db
