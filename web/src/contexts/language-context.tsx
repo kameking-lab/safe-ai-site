@@ -2,7 +2,34 @@
 
 import { createContext, useContext, useState, type ReactNode } from "react";
 
-type Language = "ja" | "en";
+export type Language = "ja" | "en" | "vi" | "zh" | "pt" | "tl";
+
+export const SUPPORTED_LANGUAGES: readonly Language[] = [
+  "ja",
+  "en",
+  "vi",
+  "zh",
+  "pt",
+  "tl",
+];
+
+export const LANGUAGE_LABELS: Record<Language, string> = {
+  ja: "日本語",
+  en: "English",
+  vi: "Tiếng Việt",
+  zh: "中文",
+  pt: "Português",
+  tl: "Tagalog",
+};
+
+export const LANGUAGE_SHORT: Record<Language, string> = {
+  ja: "日",
+  en: "EN",
+  vi: "VI",
+  zh: "中",
+  pt: "PT",
+  tl: "TL",
+};
 
 interface LanguageContextValue {
   language: Language;
@@ -14,11 +41,15 @@ const LanguageContext = createContext<LanguageContextValue>({
   setLanguage: () => undefined,
 });
 
+function isLanguage(v: unknown): v is Language {
+  return typeof v === "string" && (SUPPORTED_LANGUAGES as readonly string[]).includes(v);
+}
+
 function loadLanguage(): Language {
   if (typeof window === "undefined") return "ja";
   try {
     const stored = localStorage.getItem("language");
-    if (stored === "en" || stored === "ja") return stored;
+    if (isLanguage(stored)) return stored;
   } catch {
     // localStorage unavailable
   }

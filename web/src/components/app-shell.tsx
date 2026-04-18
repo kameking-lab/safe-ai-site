@@ -33,7 +33,13 @@ import { Footer } from "@/components/footer";
 import { UserMenu } from "@/components/user-menu";
 import { useFurigana } from "@/contexts/furigana-context";
 import { useEasyJapanese } from "@/contexts/easy-japanese-context";
-import { useLanguage } from "@/contexts/language-context";
+import {
+  useLanguage,
+  SUPPORTED_LANGUAGES,
+  LANGUAGE_LABELS,
+  LANGUAGE_SHORT,
+  type Language,
+} from "@/contexts/language-context";
 
 const LARGE_FONT_KEY = "large-font-enabled";
 const HIGH_CONTRAST_KEY = "high-contrast-enabled";
@@ -327,19 +333,26 @@ export function AppShell({ children, user }: AppShellProps) {
             >
               屋外
             </button>
-            <button
-              type="button"
-              onClick={() => setLanguage(language === "ja" ? "en" : "ja")}
+            <label className="sr-only" htmlFor="app-lang-select-pc">
+              言語 / Language
+            </label>
+            <select
+              id="app-lang-select-pc"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as Language)}
               className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
-                language === "en"
-                  ? "bg-indigo-600 text-white"
-                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                language === "ja"
+                  ? "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  : "bg-indigo-600 text-white"
               }`}
-              title={language === "ja" ? "Switch to English" : "日本語に切替"}
-              aria-label={language === "ja" ? "Switch to English" : "日本語に切替"}
+              title="言語を切り替え / Switch language"
             >
-              {language === "ja" ? "EN" : "日本語"}
-            </button>
+              {SUPPORTED_LANGUAGES.map((l) => (
+                <option key={l} value={l}>
+                  {LANGUAGE_LABELS[l]}
+                </option>
+              ))}
+            </select>
           </div>
           <UserMenu user={user} />
         </div>
@@ -425,19 +438,27 @@ export function AppShell({ children, user }: AppShellProps) {
               屋外
             </button>
             {/* 言語切替 */}
-            <button
-              type="button"
-              onClick={() => setLanguage(language === "ja" ? "en" : "ja")}
-              className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
-                language === "en"
-                  ? "bg-indigo-600 text-white"
-                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+            <label className="sr-only" htmlFor="app-lang-select-mobile">
+              言語 / Language
+            </label>
+            <select
+              id="app-lang-select-mobile"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as Language)}
+              className={`min-h-[44px] rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
+                language === "ja"
+                  ? "border border-slate-200 bg-white text-slate-600"
+                  : "bg-indigo-600 text-white"
               }`}
-              title={language === "ja" ? "Switch to English" : "日本語に切替"}
-              aria-label={language === "ja" ? "Switch to English" : "日本語に切替"}
+              title="言語を切り替え / Switch language"
+              aria-label={`現在の言語: ${LANGUAGE_LABELS[language]}`}
             >
-              {language === "ja" ? "EN" : "日本"}
-            </button>
+              {SUPPORTED_LANGUAGES.map((l) => (
+                <option key={l} value={l}>
+                  {LANGUAGE_SHORT[l]}
+                </option>
+              ))}
+            </select>
             <UserMenu user={user} />
             <button
               type="button"
