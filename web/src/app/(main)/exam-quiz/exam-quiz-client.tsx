@@ -121,26 +121,32 @@ const CATEGORY_LABELS: Record<string, string> = {
   environment: "作業環境測定",
 };
 
-const DIFFICULTY_LEVEL: Record<string, "入門" | "中級" | "上級"> = {
+type DifficultyLevel = "入門" | "中級" | "上級" | "最上級";
+
+const DIFFICULTY_LEVEL: Record<string, DifficultyLevel> = {
   health: "入門",
   special: "入門",
   boiler: "中級",
   crane: "中級",
   radiation: "中級",
   environment: "中級",
-  consultant: "上級",
+  consultant: "最上級",
 };
 
-const DIFFICULTY_BADGE_CLASS: Record<"入門" | "中級" | "上級", string> = {
+const DIFFICULTY_ORDER: DifficultyLevel[] = ["入門", "中級", "上級", "最上級"];
+
+const DIFFICULTY_BADGE_CLASS: Record<DifficultyLevel, string> = {
   入門: "bg-green-100 text-green-700",
   中級: "bg-yellow-100 text-yellow-700",
-  上級: "bg-red-100 text-red-700",
+  上級: "bg-orange-100 text-orange-700",
+  最上級: "bg-red-100 text-red-700",
 };
 
-const DIFFICULTY_QUICK: Array<{ level: "入門" | "中級" | "上級"; certId: string; label: string }> = [
-  { level: "入門", certId: "health-2nd", label: "衛生管理者・特別教育" },
-  { level: "中級", certId: "boiler-2nd", label: "作業主任者・技能講習" },
-  { level: "上級", certId: "anzen-consultant", label: "労働安全コンサルタント等" },
+const DIFFICULTY_QUICK: Array<{ level: DifficultyLevel; certId: string; label: string }> = [
+  { level: "入門", certId: "health-2nd", label: "第二種衛生管理者" },
+  { level: "中級", certId: "boiler-2nd", label: "二級ボイラー技士" },
+  { level: "上級", certId: "health-1st", label: "第一種衛生管理者" },
+  { level: "最上級", certId: "anzen-consultant", label: "労働安全コンサルタント" },
 ];
 
 export function ExamQuizClient() {
@@ -403,8 +409,10 @@ export function ExamQuizClient() {
           <div className="space-y-4">
             {/* Difficulty quick-select */}
             <div>
-              <p className="mb-2 text-xs font-semibold text-slate-500">難易度クイック選択</p>
-              <div className="grid grid-cols-3 gap-2">
+              <p className="mb-2 text-xs font-semibold text-slate-500">
+                難易度クイック選択（入門から始めましょう）
+              </p>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {DIFFICULTY_QUICK.map(({ level, certId: qCertId, label }) => (
                   <button
                     key={level}
@@ -412,7 +420,7 @@ export function ExamQuizClient() {
                     onClick={() => { setCertId(qCertId); setSubject("all"); }}
                     className={`flex flex-col items-center gap-1 rounded-xl border py-2.5 px-2 text-center transition ${
                       certId === qCertId
-                        ? "border-amber-400 bg-amber-50"
+                        ? "border-amber-400 bg-amber-50 ring-1 ring-amber-300"
                         : "border-slate-200 bg-white hover:border-amber-200 hover:bg-amber-50"
                     }`}
                   >
@@ -423,6 +431,9 @@ export function ExamQuizClient() {
                   </button>
                 ))}
               </div>
+              <p className="mt-1.5 text-[10px] text-slate-400">
+                ※ 初めての方は「入門」からスタートしてください
+              </p>
             </div>
 
             {/* Certification selector */}
