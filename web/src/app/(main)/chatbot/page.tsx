@@ -6,7 +6,7 @@ import { ogImageUrl } from "@/lib/og-url";
 
 const _title = "安衛法 AI チャットボット｜法令質問";
 const _desc =
-  "労働安全衛生法・安衛則・クレーン則・有機則・特化則・酸欠則の条文をAIが即答。現場の法令の疑問をその場で解決。";
+  "労働安全衛生法・安衛則・石綿則・じん肺法・粉じん則・有機則・特化則・酸欠則・ボイラー則など30法令以上の条文をAIが即答。現場の法令の疑問をその場で解決。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -35,8 +35,28 @@ export default function ChatbotPage() {
       />
 
       {/* 対応法令バッジ */}
-      <div className="mt-4 mb-6 flex flex-wrap gap-2">
-        {["安衛法", "安衛則", "クレーン則", "有機則", "特化則", "酸欠則"].map((law) => (
+      <div className="mt-4 mb-2 flex flex-wrap gap-2">
+        {[
+          "安衛法",
+          "安衛則",
+          "クレーン則",
+          "有機則",
+          "特化則",
+          "酸欠則",
+          "石綿則",
+          "じん肺法",
+          "粉じん則",
+          "電離則",
+          "ボイラー則",
+          "ゴンドラ則",
+          "足場則",
+          "高圧則",
+          "作業環境測定法",
+          "労基法",
+          "労災保険法",
+          "育児介護休業法",
+          "雇用均等法",
+        ].map((law) => (
           <span
             key={law}
             className="rounded-full border border-blue-100 bg-blue-50 px-3 py-0.5 text-xs font-medium text-blue-700"
@@ -44,7 +64,13 @@ export default function ChatbotPage() {
             {law}
           </span>
         ))}
+        <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-medium text-slate-600">
+          ほか全30法令以上
+        </span>
       </div>
+      <p className="mb-6 text-[11px] leading-5 text-slate-500">
+        ※ 上記は対応法令の一部です。労働基準法・職業安定法・職業能力開発促進法・メンタルヘルス指針など、全33法令以上の条文をRAG検索に使用しています。
+      </p>
 
       {/* チャット本体 */}
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
@@ -58,7 +84,7 @@ export default function ChatbotPage() {
           <li>・ 回答は登録済み法令条文に基づくRAG方式で生成されます</li>
           <li>・ 法改正により条文内容が変わる場合があります。最新情報はe-Govで確認ください</li>
           <li>・ 本ツールの回答は法的アドバイスではありません。具体的な判断は専門家にご相談ください</li>
-          <li>・ 現在対応中の法令：労働安全衛生法、労働安全衛生規則、クレーン等安全規則、有機溶剤中毒予防規則、特定化学物質障害予防規則、酸素欠乏症等防止規則</li>
+          <li>・ 現在対応中の法令：労働安全衛生法・安衛則・クレーン則・有機則・特化則・酸欠則・石綿則・じん肺法・粉じん則・電離則・ボイラー則・ゴンドラ則・足場則・高圧則・作業環境測定法・労基法・労災保険法・育児介護休業法・雇用均等法 ほか（全33法令以上）</li>
         </ul>
       </div>
       <RelatedPageCards

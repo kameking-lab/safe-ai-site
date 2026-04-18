@@ -172,7 +172,7 @@ export default function PricingPage() {
       <div className="mx-auto mb-8 max-w-2xl rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
         <p className="font-semibold">β期間中のお知らせ</p>
         <p className="mt-1">
-          現在はβ運用期間のため、フリープランでも過去問クイズ・AIチャットボットを制限なしでお試しいただけます。
+          現在はβ運用期間のため、フリープランでも過去問クイズ・AIチャットボット・化学物質リスクアセスメントを含む全機能を制限なしでお試しいただけます。
           正式リリース以降は上記の利用制限を順次適用予定です。
         </p>
       </div>
