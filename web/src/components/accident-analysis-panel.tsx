@@ -69,9 +69,18 @@ function downloadCsv(cases: AccidentCase[]) {
 
 function DataSourceNote({ yearRange, count }: { yearRange: string; count: number }) {
   return (
-    <p className="mt-2 text-[10px] text-slate-400">
-      データ出典: 厚生労働省 労働災害統計 + 当サイト収録事例　|　集計期間: {yearRange}　|　N={count}
+    <p className="mt-2 text-[10px] text-amber-600">
+      出典: 当サイト収録事例（参考・統計的代表性なし）　|　集計期間: {yearRange}　|　N={count}件
     </p>
+  );
+}
+
+function SiteDataDisclaimer() {
+  return (
+    <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
+      ⚠ このタブは当サイト独自収集の参考事例です。統計的代表性はありません。
+      厚労省公式統計（N=504,415件）は「<strong>MHLW実データ分析</strong>」タブをご覧ください。
+    </div>
   );
 }
 
@@ -141,10 +150,11 @@ export function AccidentAnalysisPanel({ cases }: Props) {
 
   return (
     <div className="space-y-6">
+      <SiteDataDisclaimer />
       {/* CSVエクスポート */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">
-          {cases.length}件のデータを集計しています
+          {cases.length}件のデータを集計しています（当サイト収録事例）
         </p>
         <button
           onClick={() => downloadCsv(cases)}

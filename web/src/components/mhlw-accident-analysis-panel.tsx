@@ -213,10 +213,18 @@ function MethodologyAccordion() {
   );
 }
 
-function SourceFooter() {
+function SourceFooter({ label }: { label?: string } = {}) {
   return (
     <p className="mt-2 text-[10px] text-slate-400">
-      データ出典: {DATA_SOURCE_LABEL}　|　集計期間: {YEAR_RANGE_LABEL}　|　N={meta.accidents.total.toLocaleString()}
+      出典: {label ?? DATA_SOURCE_LABEL}　|　集計期間: {YEAR_RANGE_LABEL}　|　N={meta.accidents.total.toLocaleString()}件
+    </p>
+  );
+}
+
+function DeathSourceFooter() {
+  return (
+    <p className="mt-2 text-[10px] text-slate-400">
+      出典: {DEATHS_SOURCE_LABEL}　|　集計期間: {DEATHS_RANGE_LABEL}　|　N=4,043件（死亡災害）
     </p>
   );
 }
@@ -492,7 +500,8 @@ export function MhlwAccidentAnalysisPanel() {
           </LineChart>
         </ResponsiveContainer>
         <p className="mt-2 text-[10px] text-slate-400">
-          左軸: 休業4日以上（N={meta.accidents.total.toLocaleString()}、期間{YEAR_RANGE_LABEL}） / 右軸: 死亡災害（N={deathsTotal.toLocaleString()}、期間{DEATHS_RANGE_LABEL}）
+          出典（左軸）: {DATA_SOURCE_LABEL} N={meta.accidents.total.toLocaleString()}件 {YEAR_RANGE_LABEL} /
+          出典（右軸）: {DEATHS_SOURCE_LABEL} N=4,043件 {DEATHS_RANGE_LABEL}
         </p>
       </div>
 
@@ -510,9 +519,7 @@ export function MhlwAccidentAnalysisPanel() {
               <Bar dataKey="value" fill="#ef4444" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
-          <p className="mt-2 text-[10px] text-slate-400">
-            期間: {DEATHS_RANGE_LABEL} / 出典: {DEATHS_SOURCE_LABEL}
-          </p>
+          <DeathSourceFooter />
         </div>
 
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -528,9 +535,7 @@ export function MhlwAccidentAnalysisPanel() {
               <Bar dataKey="value" fill="#f97316" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
-          <p className="mt-2 text-[10px] text-slate-400">
-            期間: {DEATHS_RANGE_LABEL} / 出典: {DEATHS_SOURCE_LABEL}
-          </p>
+          <DeathSourceFooter />
         </div>
       </div>
 
