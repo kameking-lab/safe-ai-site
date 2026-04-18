@@ -78,76 +78,53 @@
 
 **目的**: `/accidents` を手書きモックではなく実データで駆動する。
 
-### 現状
+### ステップ 2a: 集計ドリブン UI ✅ (2026-04-19 完了)
 
-- `web/src/data/mock/real-accident-cases.ts` 等に手動で 100 件程度。
-- `/accidents` ページ (`web/src/app/(main)/accidents/`) はモック配列を読んで一覧 / 検索表示。
-- フェーズ 1 で `aggregates-mhlw/*.json` (65 KB) がリポジトリに入ったので、
-  統計・グラフだけなら即実装可能。
-- 生の 504k 行 JSONL は gitignored のため、Q1（配置先）の決定次第で
-  詳細検索機能の実装アーキテクチャが変わる。
+配置先決定 (Q1) を待たずに集計 JSON (65 KB, リポジトリ同梱) だけで動く統計 UI を実装した。
 
-### 実行計画（オーナー確認 Q1 の答えに応じて分岐）
+- `web/src/components/mhlw-accident-analysis-panel.tsx` (新設、390 行) — recharts で
+  事故の型 / 業種 / 年次推移 / 年齢帯 / 月別平均の 5 チャートを描画。
+- `aggregates-mhlw/{accidents-by-year, accidents-by-industry, accidents-by-age,
+  accidents-by-month, meta}.json` の 5 本を import し、`useMemo` で集計。
+- `/accidents` の「分析」タブを 3 分割:
+  - **一覧** (既存 `AccidentDatabasePanel`)
+  - **MHLW実データ分析** (新 `MhlwAccidentAnalysisPanel`, 504,415 件ベース)
+  - **収録事例（参考）** (旧 `AccidentAnalysisPanel`, ~300 件の手動収録)
+- 相当する commit: `bf10012 feat(accidents): integrate MHLW 504K real statistics into analysis`
 
-#### ステップ 1: 集計ドリブン UI (配置先決定を待たずに着手可)
+### ステップ 2b: Vercel Blob 検索インフラ ✅ (2026-04-19 完了, オーナー作業待ち)
 
-1. **`web/src/lib/mhlw-aggregates.ts`** を新設
-   - `aggregates-mhlw/*.json` を import して型付きで返すユーティリティ群
-   - 型は `web/src/types/mhlw.ts` に追加 (`AccidentAggregate`, `YearlyBreakdown` 等)
-2. **`/accidents` の統計セクション強化**
-   - 16 年分の事故件数折れ線 × accidentType stacked
-   - 年 × 業種のヒートマップ、年齢帯 × 年の積み上げ棒
-   - 描画は既存 UI で使われているチャートライブラリ（要調査: recharts or 軽量自作）
-3. **`/analytics` をスキャフォールド**（フェーズ 4 の前倒し半分）
-   - 集計 JSON だけで完結するダッシュボード（トップ 5 事故型/業種 等）
+配置 B (Vercel Blob) を前提として、年別シャードで raw JSONL を配信する仕組みを実装した。
+**Blob 未設定時はフォールバックメッセージを返して UI が壊れないように設計**。
 
-commit 目標: `feat(accidents): surface MHLW 16-year aggregates on /accidents`
+- `scripts/etl/upload-to-blob.mjs` (新設、142 行) — 年別 16 シャード (~25 MB/本) として
+  `mhlw-accidents/{YYYY}.jsonl` に同期。`--only 2021` / `--dry-run` 対応。成功後に
+  `aggregates-mhlw/blob-manifest.json` を書き出す。
+- `web/src/app/api/mhlw/search/route.ts` (新設、202 行) — Blob から JSONL をストリーム取得し、
+  year / industry / type / keyword / limit / offset でサーバ側フィルタ。`availableYears`
+  をレスポンスに同梱。Blob 未設定時は `{ ok: false, fallback: true, source: "fallback" }`
+  で早期リターン。
+- `web/src/components/mhlw-accident-search-panel.tsx` (新設、263 行) — 検索フォーム +
+  結果カード。フォールバック時はアンバー色の注意帯を表示。
+- 依存追加: `@vercel/blob`。
+- 相当する commit: `fad8693 feat(accidents): add MHLW Blob search infrastructure`
 
-#### ステップ 2: 詳細検索 (Q1 確定後)
+#### オーナー作業 (Q1 = B を選んだ場合に必要)
 
-- **配置 A (gitignore 維持 / 開発用途)**: ローカル dev 時のみ動く詳細検索。
-  `fs.readFileSync` で JSONL を読み、SSR で結果を返す。`NODE_ENV=development` ガード。
-  Vercel 本番では機能無効化（統計のみ閲覧可）。
-- **配置 B (Vercel Blob)**: `scripts/etl/upload-to-blob.py` で 192 JSONL をアップロード。
-  API Route が範囲を指定して `ReadableStream` を受け、サーバ側でフィルタリング。
-  メモリ節約のため `accidentType` / `industry.majorCode` で早期 break。
-- **配置 C (Supabase)**: CLAUDE.md「要確認」。スキーマ: `accidents(id, year, month,
-  industry_major_code, industry_major_name, accident_type_code, description, ...)`。
-  GIN index で全文検索、btree で fast filter。
+1. Vercel ダッシュボードで Blob ストア作成
+2. `BLOB_READ_WRITE_TOKEN` を環境変数に設定
+3. ローカルで `web/src/data/accidents-mhlw/*.jsonl` (403 MB) を再生成
+4. `node scripts/etl/upload-to-blob.mjs` 実行でシャード投入 (~5 分見込)
+5. デプロイ後、`/accidents` の検索タブで Blob ソースに切替わる
 
-API design (配置に依らず共通):
+未実施でもサイト全体は正常動作（フォールバック UI のみ表示）。
 
-```
-GET /api/accidents/search
-  ?yearFrom=2015&yearTo=2021
-  &industryMajor=03
-  &accidentType=15
-  &ageBucket=50-59
-  &q=墜落 脚立
-  &limit=50&offset=0
-→ { total, items: Accident[], facets: { byYear, byIndustry, byType } }
-```
+### ステップ 2c: 残タスク
 
-フィルタ実装はモック版 (`web/src/data/mock/accident-search.ts` 等) のロジックを
-再利用し、バックエンドだけ配置に応じて差し替え。
-
-#### ステップ 3: 類似災害機能
-
-- 個別詳細ページ `/accidents/[id]` を新設（id は `{year}-{mm}-{seq}`）
-- 「同業種（中分類一致） × 同事故型 × 直近 2 年」の 10 件を横並び表示
-- 実装は上記 API の `related` エンドポイント
-
-#### ステップ 4: フォールバック整理
-
-- 既存モック (`real-accident-cases*.ts`) は削除せず、MHLW 配置 A で本番無効化
-  される環境のみフォールバック。配置 B/C を選んだ時点でモック削除を検討。
-
-### セーブポイント
-
-- commit 1 `feat(accidents): surface MHLW 16-year aggregates on /accidents` (ステップ 1)
-- commit 2 `feat(accidents): add search API backed by MHLW shisho-db` (ステップ 2)
-- commit 3 `feat(accidents): show similar accidents on detail page` (ステップ 3)
-- 変更ページ: `/accidents`, `/accidents/[id]` (新設), `/analytics` (スキャフォールド)
+- **個別詳細ページ `/accidents/[id]`** (類似災害機能付き) — Blob 投入後に着手。
+- **モック (`real-accident-cases*.ts`) の削除可否** — Blob 投入後、実データで代替できると
+  判断した時点で別コミットで整理。現状はフォールバックとしてバンドル済み。
+- **ファセット (byYear / byIndustry / byType)** の search API 追加 — 現状は総件数＋ページングのみ。
 
 ---
 
@@ -231,9 +208,11 @@ GET /api/accidents/search
 ## 依存関係と優先順位
 
 ```
-Phase 0 (done)
-    ├── Phase 1 (all-file parse)
-    │       ├── Phase 2 (accidents DB)
+Phase 0 (done) ✅
+    ├── Phase 1 (all-file parse) ✅
+    │       ├── Phase 2a (accidents aggregates UI) ✅
+    │       ├── Phase 2b (Blob search infra) ✅ ← オーナー作業待ち
+    │       ├── Phase 2c (残: /accidents/[id] + モック整理)
     │       ├── Phase 3 (law RAG) ← 要オーナー確認: API キー
     │       ├── Phase 4 (analytics)
     │       └── Phase 5 (chemicals)
@@ -241,6 +220,8 @@ Phase 0 (done)
 
 - フェーズ 2, 4, 5 は並列実行可能（相互依存なし）。
 - フェーズ 3 は API キーと課金発生のため、必ずオーナー承認後に着手。
+- フェーズ 2b のオーナー作業（Blob トークン設定 + シャード投入）が完了するまで、
+  2c のうち類似災害ロジックは着手できない（raw データが無いと集計しか返せない）。
 
 ## 未解決の論点（オーナー確認事項）
 
