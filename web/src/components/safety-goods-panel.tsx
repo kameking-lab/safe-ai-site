@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { InputWithVoice } from "@/components/voice-input-field";
 import { GoodsChatbot } from "@/components/goods-chatbot";
 import {
@@ -283,11 +284,16 @@ function SelectionGuideSection() {
 }
 
 export function SafetyGoodsPanel() {
+  const searchParams = useSearchParams();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [womenFilter, setWomenFilter] = useState(() => searchParams.get("filter") === "women");
 
   const filteredItems = useMemo(() => {
     let items = safetyGoodsItems;
+    if (womenFilter) {
+      items = items.filter((item) => item.tags.includes("女性向け"));
+    }
     if (selectedCategoryId) {
       items = items.filter((item) => item.categoryId === selectedCategoryId);
     }
@@ -301,7 +307,7 @@ export function SafetyGoodsPanel() {
       );
     }
     return items;
-  }, [selectedCategoryId, query]);
+  }, [selectedCategoryId, query, womenFilter]);
 
   const selectedCategory = selectedCategoryId
     ? safetyGoodsCategories.find((c) => c.id === selectedCategoryId)
@@ -319,6 +325,24 @@ export function SafetyGoodsPanel() {
       <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
         <div className="w-full shrink-0 lg:w-64">
           <p className="mb-2 text-xs font-semibold text-slate-700">カテゴリ</p>
+          {/* 女性向けフィルター */}
+          <button
+            type="button"
+            onClick={() => setWomenFilter((prev) => !prev)}
+            className={`mb-2 flex w-full items-center gap-2 rounded-xl border px-4 py-2.5 text-left text-sm font-semibold transition ${
+              womenFilter
+                ? "border-rose-400 bg-rose-50 text-rose-800 shadow-sm"
+                : "border-slate-200 bg-white text-slate-700 hover:border-rose-200 hover:bg-rose-50"
+            }`}
+          >
+            <span>👩</span>
+            女性向け
+            {womenFilter && (
+              <span className="ml-auto rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] text-rose-700">
+                ON
+              </span>
+            )}
+          </button>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-1">
             <button
               type="button"

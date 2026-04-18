@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { SafetyGoodsPanel } from "@/components/safety-goods-panel";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -21,5 +22,9 @@ export const metadata: Metadata = {
 };
 
 export default function GoodsPage() {
-  return <SafetyGoodsPanel />;
+  return (
+    <Suspense>
+      <SafetyGoodsPanel />
+    </Suspense>
+  );
 }

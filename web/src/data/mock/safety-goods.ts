@@ -169,7 +169,7 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E7%94%A3%E6%A5%AD%E7%94%A8+%E3%83%98%E3%83%AB%E3%83%A1%E3%83%83%E3%83%88+%E9%80%9A%E6%B0%97",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E7%94%A3%E6%A5%AD%E7%94%A8+%E3%83%98%E3%83%AB%E3%83%A1%E3%83%83%E3%83%88+%E9%80%9A%E6%B0%97/",
-    tags: ["軽量", "通気性"],
+    tags: ["軽量", "通気性", "女性向け"],
   },
   // 山岳グッズ
   {
@@ -240,7 +240,7 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E7%A9%BA%E8%AA%BF%E6%9C%8D+%E3%83%95%E3%82%A1%E3%83%B3%E4%BB%98%E3%81%8D+%E3%83%90%E3%83%83%E3%83%86%E3%83%AA%E3%83%BC%E3%82%BB%E3%83%83%E3%83%88",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E7%A9%BA%E8%AA%BF%E6%9C%8D+%E3%83%95%E3%82%A1%E3%83%B3%E4%BB%98%E3%81%8D+%E3%83%90%E3%83%83%E3%83%86%E3%83%AA%E3%83%BC%E3%82%BB%E3%83%83%E3%83%88/",
-    tags: ["熱中症予防", "屋外作業"],
+    tags: ["熱中症予防", "屋外作業", "女性向け"],
   },
   // 目・耳の保護具
   {
@@ -253,7 +253,7 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E4%BF%9D%E8%AD%B7%E3%83%A1%E3%82%AC%E3%83%8D+%E6%9B%87%E3%82%8A%E6%AD%A2%E3%82%81",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E4%BF%9D%E8%AD%B7%E3%83%A1%E3%82%AC%E3%83%8D+%E6%9B%87%E3%82%8A%E6%AD%A2%E3%82%81/",
-    tags: ["曇り止め", "UVカット"],
+    tags: ["曇り止め", "UVカット", "女性向け"],
   },
   // 手・足の保護
   {
@@ -277,7 +277,7 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E5%AE%89%E5%85%A8%E9%9D%B4+JSAA+A%E7%A8%AE+%E8%BB%BD%E9%87%8F",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E5%AE%89%E5%85%A8%E9%9D%B4+JSAA+A%E7%A8%AE+%E8%BB%BD%E9%87%8F/",
-    tags: ["JSAA A種", "耐油底"],
+    tags: ["JSAA A種", "耐油底", "女性向け"],
   },
   // 救急・応急処置
   {
@@ -421,7 +421,7 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     imageAlt: "防虫作業服",
     amazonUrl: "https://www.amazon.co.jp/s?k=%E9%98%B2%E8%99%AB+%E4%BD%9C%E6%A5%AD%E6%9C%8D+%E9%95%B7%E8%A2%96",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E9%98%B2%E8%99%AB+%E4%BD%9C%E6%A5%AD%E6%9C%8D/",
-    tags: ["マダニ", "草刈り", "防虫加工"],
+    tags: ["マダニ", "草刈り", "防虫加工", "女性向け"],
   },
   // 暑さ・寒さ対策 追加
   {
@@ -433,7 +433,7 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     imageAlt: "冷却ベストの製品イメージ",
     amazonUrl: "https://www.amazon.co.jp/s?k=%E5%86%B7%E5%8D%B4%E3%83%99%E3%82%B9%E3%83%88+%E4%BF%9D%E5%86%B7%E5%89%A4",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E5%86%B7%E5%8D%B4%E3%83%99%E3%82%B9%E3%83%88/",
-    tags: ["精密作業", "保冷剤", "熱中症"],
+    tags: ["精密作業", "保冷剤", "熱中症", "女性向け"],
   },
   {
     id: "hc-004",
