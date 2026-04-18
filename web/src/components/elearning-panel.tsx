@@ -13,6 +13,7 @@ import { elearningForestryThemes } from "@/data/mock/elearning-forestry-themes";
 import { elearningFoodThemes } from "@/data/mock/elearning-food-themes";
 import { elearningRetailThemes } from "@/data/mock/elearning-retail-themes";
 import type { LearningTheme as LearningThemeType } from "@/lib/types/operations";
+import { getSubcategories, INDUSTRY_SUBCATEGORIES, type IndustryParent } from "@/data/industry-subcategories";
 
 // Merge extra questions into extra themes to expand from 3 to 10 questions per theme
 const mergedExtraThemes: LearningThemeType[] = elearningExtraThemes.map((theme) => {
@@ -61,6 +62,7 @@ export function ELearningPanel() {
   const [selectedWorkerAttribute, setSelectedWorkerAttribute] = useState<WorkerAttributeFilter>("すべて");
   const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
   const [selectedIndustry, setSelectedIndustry] = useState<IndustryFilter>("すべて");
+  const [selectedSubId, setSelectedSubId] = useState<string>("");
 
   const themes = useMemo<LearningTheme[]>(() => {
     const withOverrides = allThemes.map((t) => overrides[t.id] ?? t);
@@ -77,9 +79,16 @@ export function ELearningPanel() {
         const ind = t.industry_detail;
         if (ind != null && ind !== selectedIndustry) return false;
       }
+      if (selectedSubId) {
+        const sub = INDUSTRY_SUBCATEGORIES.find((s) => s.id === selectedSubId);
+        if (sub) {
+          const text = `${t.title} ${t.description ?? ""}`.toLowerCase();
+          if (!sub.keywords.some((kw) => text.includes(kw.toLowerCase()))) return false;
+        }
+      }
       return true;
     });
-  }, [overrides, selectedWorkerAttribute, selectedCompanySize, selectedIndustry]);
+  }, [overrides, selectedWorkerAttribute, selectedCompanySize, selectedIndustry, selectedSubId]);
 
   const selectedTheme = useMemo(() => {
     return themes.find((t) => t.id === themeId) ?? themes[0] ?? allThemes[0];
@@ -198,7 +207,7 @@ export function ELearningPanel() {
               <button
                 key={ind}
                 type="button"
-                onClick={() => setSelectedIndustry(ind)}
+                onClick={() => { setSelectedIndustry(ind); setSelectedSubId(""); }}
                 className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
                   selectedIndustry === ind
                     ? "bg-rose-600 text-white"
@@ -209,6 +218,24 @@ export function ELearningPanel() {
               </button>
             ))}
           </div>
+          {selectedIndustry !== "すべて" && getSubcategories(selectedIndustry as IndustryParent).length > 0 && (
+            <div className="mt-2">
+              <label className="text-xs font-semibold text-slate-700" htmlFor="el-subindustry">
+                細分業種
+              </label>
+              <select
+                id="el-subindustry"
+                value={selectedSubId}
+                onChange={(e) => setSelectedSubId(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500"
+              >
+                <option value="">{selectedIndustry}（すべて）</option>
+                {getSubcategories(selectedIndustry as IndustryParent).map((sub) => (
+                  <option key={sub.id} value={sub.id}>{sub.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
       </div>
       <div className="mt-3">

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { LawRevision, RevisionImpact } from "@/lib/types/domain";
 import type { ServiceError } from "@/lib/types/api";
 import { fuzzyMatchAll } from "@/lib/fuzzy-search";
+import { getSubcategories, type IndustryParent } from "@/data/industry-subcategories";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
 
@@ -226,9 +227,13 @@ export function LawRevisionList({
     [updateUrl, selectedIndustry, selectedImpact]
   );
 
+  // 細分業種フィルタ
+  const [selectedSubId, setSelectedSubId] = useState<string>("");
+
   const setSelectedIndustry = useCallback(
     (val: IndustryFilter) => {
       setSelectedIndustryState(val);
+      setSelectedSubId("");
       updateUrl(val, selectedImpact, sortOrder);
     },
     [updateUrl, selectedImpact, sortOrder]
@@ -252,6 +257,15 @@ export function LawRevisionList({
         const industries = resolveIndustry(r);
         if (!industries.includes(selectedIndustry) && !industries.includes("全業種")) return false;
       }
+      // 細分業種フィルタ
+      if (selectedSubId) {
+        const subcats = getSubcategories(selectedIndustry as IndustryParent);
+        const sub = subcats.find((s) => s.id === selectedSubId);
+        if (sub) {
+          const text = `${r.title} ${r.summary} ${r.category ?? ""} ${r.industry_detail ?? ""}`.toLowerCase();
+          if (!sub.keywords.some((kw) => text.includes(kw.toLowerCase()))) return false;
+        }
+      }
       // 属性フィルタ
       if (selectedWorkerAttribute !== "すべて") {
         const attrs = r.worker_attribute ?? ["一般"];
@@ -271,7 +285,7 @@ export function LawRevisionList({
       const diff = a.publishedAt.localeCompare(b.publishedAt);
       return sortOrder === "desc" ? -diff : diff;
     });
-  }, [revisions, search, yearFrom, yearTo, selectedKind, selectedImpact, sortOrder, selectedIndustry, selectedWorkerAttribute, selectedCompanySize]);
+  }, [revisions, search, yearFrom, yearTo, selectedKind, selectedImpact, sortOrder, selectedIndustry, selectedSubId, selectedWorkerAttribute, selectedCompanySize]);
 
   const showEmptyState = status === "success" && !error && filtered.length === 0;
 
@@ -341,6 +355,25 @@ export function LawRevisionList({
           ))}
         </div>
       </div>
+      {/* 細分業種セレクト */}
+      {selectedIndustry !== "全業種" && getSubcategories(selectedIndustry as IndustryParent).length > 0 && (
+        <div className="mt-2">
+          <label className="text-xs font-semibold text-slate-700" htmlFor="law-subindustry">
+            細分業種
+          </label>
+          <select
+            id="law-subindustry"
+            value={selectedSubId}
+            onChange={(e) => setSelectedSubId(e.target.value)}
+            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          >
+            <option value="">{selectedIndustry}（すべて）</option>
+            {getSubcategories(selectedIndustry as IndustryParent).map((sub) => (
+              <option key={sub.id} value={sub.id}>{sub.label}</option>
+            ))}
+          </select>
+        </div>
+      )}
       {/* 属性・規模フィルタ */}
       <div className="mt-3 flex flex-wrap gap-x-6 gap-y-3">
         <div>

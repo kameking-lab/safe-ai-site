@@ -11,6 +11,7 @@ import {
 } from "@/lib/types/domain";
 import { fuzzyMatchAll } from "@/lib/fuzzy-search";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
+import { getSubcategories, type IndustryParent } from "@/data/industry-subcategories";
 
 const PAGE_SIZE = 40;
 
@@ -67,6 +68,7 @@ export function AccidentDatabasePanel({
   const [page, setPage] = useState(0);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedIndustry, setSelectedIndustry] = useState<IndustryFilter>("全業種");
+  const [selectedSubId, setSelectedSubId] = useState<string>("");
   const [keyword, setKeyword] = useState("");
   const [selectedWorkerAttribute, setSelectedWorkerAttribute] = useState<WorkerAttributeFilter>("すべて");
   const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
@@ -74,6 +76,14 @@ export function AccidentDatabasePanel({
   const filteredByIndustry = useMemo(
     () => cases.filter((c) => {
       if (!matchesIndustry(c.workCategory, selectedIndustry)) return false;
+      if (selectedSubId) {
+        const subcats = getSubcategories(selectedIndustry as IndustryParent);
+        const sub = subcats.find((s) => s.id === selectedSubId);
+        if (sub) {
+          const text = `${c.title} ${c.summary} ${c.type} ${c.workCategory}`.toLowerCase();
+          if (!sub.keywords.some((kw) => text.includes(kw.toLowerCase()))) return false;
+        }
+      }
       if (selectedWorkerAttribute !== "すべて") {
         const attrs = c.worker_attribute ?? ["一般"];
         if (!attrs.includes(selectedWorkerAttribute) && !attrs.includes("一般")) return false;
@@ -88,7 +98,7 @@ export function AccidentDatabasePanel({
       }
       return true;
     }),
-    [cases, selectedIndustry, selectedWorkerAttribute, selectedCompanySize, keyword]
+    [cases, selectedIndustry, selectedSubId, selectedWorkerAttribute, selectedCompanySize, keyword]
   );
 
   const pageItems = useMemo(() => {
@@ -135,6 +145,7 @@ export function AccidentDatabasePanel({
                 type="button"
                 onClick={() => {
                   setSelectedIndustry(ind);
+                  setSelectedSubId("");
                   setPage(0);
                 }}
                 className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -145,6 +156,24 @@ export function AccidentDatabasePanel({
               </button>
             ))}
           </div>
+          {selectedIndustry !== "全業種" && getSubcategories(selectedIndustry as IndustryParent).length > 0 && (
+            <div className="mt-2">
+              <label className="text-xs font-semibold text-slate-700" htmlFor="accident-subindustry">
+                細分業種
+              </label>
+              <select
+                id="accident-subindustry"
+                value={selectedSubId}
+                onChange={(e) => { setSelectedSubId(e.target.value); setPage(0); }}
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="">{selectedIndustry}（すべて）</option>
+                {getSubcategories(selectedIndustry as IndustryParent).map((sub) => (
+                  <option key={sub.id} value={sub.id}>{sub.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
         {/* 属性・規模フィルタ */}
         <div className="flex flex-wrap gap-x-6 gap-y-3">
