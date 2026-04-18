@@ -14,6 +14,7 @@ import { HomeValueHero } from "@/components/home-value-hero";
 import { KyRecordList } from "@/components/ky-record-list";
 import { KySheetPanel } from "@/components/ky-sheet-panel";
 import { KyInstructionRecordForm } from "@/components/ky-instruction-record-form";
+import { KyIndustryPresetPicker } from "@/components/ky-industry-preset-picker";
 import { LawRevisionList } from "@/components/law-revision-list";
 import { MailDeliveryPanel } from "@/components/mail-delivery-panel";
 import { MhlwDisasterDatabasesPanel } from "@/components/mhlw-disaster-databases-panel";
@@ -642,6 +643,23 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
             <h2 className="text-base font-bold text-slate-900 sm:text-lg">KY用紙（シンプルモード）</h2>
             <p className="mt-1 text-xs text-slate-500">必須5項目のみ入力できます。詳細モードで全項目を編集できます。</p>
+            <div className="mt-3">
+              <KyIndustryPresetPicker
+                onApply={(preset) => {
+                  setKyInstructionRecord((prev) => {
+                    const workRows = prev.workRows.map((r, i) =>
+                      i === 0 ? { ...r, workDetail: preset.workExamples[0] ?? r.workDetail } : r
+                    );
+                    const riskRows = prev.riskRows.map((r, i) => {
+                      const p = preset.risks[i - 1];
+                      if (i === 0 || !p) return r;
+                      return { ...r, hazard: p.hazard, reduction: p.reduction };
+                    });
+                    return { ...prev, workRows, riskRows };
+                  });
+                }}
+              />
+            </div>
             <div className="mt-4 space-y-3">
               {[
                 { key: "workDateYear", label: "日付", type: "row" },
@@ -762,8 +780,23 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
       {variant === "ky" && !kySimpleMode ? (
         <section
           id="section-ky-sheet"
-          className="px-4 pb-3 lg:px-8"
+          className="px-4 pb-3 lg:px-8 space-y-3"
         >
+          <KyIndustryPresetPicker
+            onApply={(preset) => {
+              setKyInstructionRecord((prev) => {
+                const workRows = prev.workRows.map((r, i) =>
+                  i === 0 ? { ...r, workDetail: preset.workExamples[0] ?? r.workDetail } : r
+                );
+                const riskRows = prev.riskRows.map((r, i) => {
+                  const p = preset.risks[i - 1];
+                  if (i === 0 || !p) return r;
+                  return { ...r, hazard: p.hazard, reduction: p.reduction };
+                });
+                return { ...prev, workRows, riskRows };
+              });
+            }}
+          />
           <KyInstructionRecordForm
             onChange={setKyInstructionRecord}
             onSave={(current) => {
