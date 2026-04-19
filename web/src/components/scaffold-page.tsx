@@ -75,8 +75,8 @@ export function ScaffoldPage({
         </p>
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
           🛠 この特集ページは<strong>骨組み公開中</strong>です。
-          4/19 の100人レビューで要望があったテーマを確定版に先んじて立ち上げています。
-          解説本文・図表・事例集は今後のレビューサイクルで拡充していきます。
+          利用者の要望が多いテーマを確定版に先んじて立ち上げています。
+          解説本文・図表・事例集は今後のアップデートで拡充していきます。
         </div>
       </header>
 

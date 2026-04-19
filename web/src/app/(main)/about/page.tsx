@@ -152,29 +152,26 @@ export default function AboutPage() {
             id="one-big-thing-heading"
             className="mt-2 text-xl font-bold leading-snug text-slate-900 sm:text-2xl"
           >
-            100人辛口レビューで週次進化する、国内唯一の安全ポータル
+            現場の声を反映して継続的に進化する、国内唯一の安全ポータル
           </h2>
           <p className="mt-3 text-sm leading-6 text-slate-700">
             私たちの差別化は、機能の数ではありません。
             <strong className="font-bold text-emerald-900">
-              「辛口ペルソナ100人 × 3〜7日サイクルの PDCA」
+              現場担当者・安全管理者・外国人労働者など多様な立場からのフィードバックを公開 PDCA で回し続ける運営
             </strong>
-            を公開しながら回している事業運営そのものです。
-            毎回の指摘・賞賛・スコア・原文コメントは
-            <code className="mx-1 rounded bg-white px-1 font-mono text-xs">web/scripts/reviews/</code>
-            に全件保存・Gitに残り、
-            翌3日で20〜25項目を実装して再レビューで検証します。
+            そのものです。
+            労働安全コンサルタント監修のもと、ユーザーの指摘は全件確認し、短いサイクルで実装・検証を繰り返します。
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <Pill
-              k="レビュー頻度"
-              v="四半期+日次"
-              note="REVIEW_SIZE=100"
+              k="更新頻度"
+              v="週次"
+              note="法改正・事故DB・UIを継続改善"
             />
             <Pill
               k="透明性"
-              v="100%"
-              note="原文・スコア・減点を全件公開"
+              v="公開PDCA"
+              note="指摘と対応はコミット履歴で追跡可能"
             />
             <Pill
               k="出典必須"
@@ -183,7 +180,7 @@ export default function AboutPage() {
             />
           </div>
           <p className="mt-3 text-[11px] leading-5 text-slate-500">
-            ※ この仕組みは競合（中災防・e-Gov・大手LMS・ChatGPT）のいずれも採用していません。批判を隠さず受け止めて前進する PDCA 速度そのものが、サイト全体の一次差別化軸です。
+            ※ 批判を隠さず受け止めて前進する運用速度そのものが、サイト全体の一次差別化軸です。
           </p>
         </section>
 
