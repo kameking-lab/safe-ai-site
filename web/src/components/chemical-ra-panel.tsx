@@ -172,6 +172,7 @@ export function ChemicalRaPanel() {
   const [workContent, setWorkContent] = useState("");
   const [measuredConc, setMeasuredConc] = useState("");
   const [loading, setLoading] = useState(false);
+  const [retryStatus, setRetryStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [errorHint, setErrorHint] = useState<string | null>(null);
   const [result, setResult] = useState<ChemicalRaResponse | null>(null);
@@ -247,41 +248,61 @@ export function ChemicalRaPanel() {
   const handleSearch = async () => {
     if (!chemicalName.trim()) return;
     setLoading(true);
+    setRetryStatus(null);
     setError(null);
     setErrorHint(null);
     setResult(null);
 
-    try {
-      const res = await fetch("/api/chemical-ra", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chemicalName: chemicalName.trim(), workContent: workContent.trim(), casNumber: mhlwSelected?.cas ?? undefined }),
-      });
-      const data = (await res.json()) as ChemicalRaResponse | { error: { message: string } };
-      if ("error" in data) {
-        const { hint } = categorizeError(data.error.message);
-        setError(data.error.message);
-        setErrorHint(hint);
-      } else {
-        setResult(data);
-        if (data.aiStatus && data.aiStatus !== "ok") {
-          const statusLabel: Record<string, string> = {
-            apikey_missing: "GEMINI_API_KEY未設定",
-            ai_failed: "AI生成失敗",
-            demo: "デモモード",
-          };
-          const detail = data.aiErrorDetail ? `（${data.aiErrorDetail}）` : "";
-          setErrorHint(`${statusLabel[data.aiStatus] ?? data.aiStatus}${detail}：厚労省データによるフォールバック表示です。`);
+    const MAX_RETRIES = 3;
+    const body = JSON.stringify({ chemicalName: chemicalName.trim(), workContent: workContent.trim(), casNumber: mhlwSelected?.cas ?? undefined });
+
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        const res = await fetch("/api/chemical-ra", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+        });
+
+        if (res.status === 503 && attempt < MAX_RETRIES - 1) {
+          setRetryStatus(`再試行中... (${attempt + 1}/${MAX_RETRIES - 1})`);
+          await new Promise((r) => setTimeout(r, Math.pow(2, attempt + 1) * 500));
+          continue;
         }
+
+        const data = (await res.json()) as ChemicalRaResponse | { error: { message: string } };
+        if ("error" in data) {
+          const { hint } = categorizeError(data.error.message);
+          setError(data.error.message);
+          setErrorHint(hint);
+        } else {
+          setResult(data);
+          if (data.aiStatus && data.aiStatus !== "ok") {
+            const statusLabel: Record<string, string> = {
+              apikey_missing: "GEMINI_API_KEY未設定",
+              ai_failed: "AI生成失敗",
+              demo: "デモモード",
+            };
+            const detail = data.aiErrorDetail ? `（${data.aiErrorDetail}）` : "";
+            setErrorHint(`${statusLabel[data.aiStatus] ?? data.aiStatus}${detail}：厚労省データによるフォールバック表示です。`);
+          }
+        }
+        break;
+      } catch (err) {
+        if (attempt < MAX_RETRIES - 1) {
+          setRetryStatus(`再試行中... (${attempt + 1}/${MAX_RETRIES - 1})`);
+          await new Promise((r) => setTimeout(r, Math.pow(2, attempt + 1) * 500));
+          continue;
+        }
+        const msg = err instanceof Error ? err.message : "通信エラーが発生しました";
+        const { hint } = categorizeError(msg);
+        setError(msg);
+        setErrorHint(hint);
       }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "通信エラーが発生しました";
-      const { hint } = categorizeError(msg);
-      setError(msg);
-      setErrorHint(hint);
-    } finally {
-      setLoading(false);
     }
+
+    setRetryStatus(null);
+    setLoading(false);
   };
 
   return (
@@ -423,6 +444,12 @@ export function ChemicalRaPanel() {
       {/* ローディング */}
       {loading && (
         <div className="space-y-3">
+          {retryStatus && (
+            <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
+              {retryStatus}
+            </div>
+          )}
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-24 animate-pulse rounded-xl bg-slate-100" />
           ))}
