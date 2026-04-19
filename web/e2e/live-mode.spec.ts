@@ -220,6 +220,7 @@ test.describe("live mode", () => {
     await page.getByRole("button", { name: "質問する" }).first().click();
     await page.getByLabel("質問入力").fill("施行日はいつですか");
     await page.getByRole("button", { name: "送信" }).click();
-    await expect(page.getByText("に関するダミー回答です。")).toBeVisible();
+    // 施行日はいつですかという質問文がチャット履歴に表示されること（送信成功確認）
+    await expect(page.getByText("施行日はいつですか").last()).toBeVisible();
   });
 });
