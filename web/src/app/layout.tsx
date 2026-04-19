@@ -4,7 +4,7 @@ import "./globals.css";
 import { FuriganaProvider } from "@/contexts/furigana-context";
 import { EasyJapaneseProvider } from "@/contexts/easy-japanese-context";
 import { LanguageProvider } from "@/contexts/language-context";
-import { JsonLd, organizationSchema, webSiteSchema } from "@/components/json-ld";
+import { JsonLd, organizationSchema, webSiteSchema, personSchema } from "@/components/json-ld";
 import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
 
 const geistSans = Geist({
@@ -39,6 +39,8 @@ export const metadata: Metadata = {
     default: "ANZEN AI｜現場の安全を、AIで変える。",
     template: "%s｜ANZEN AI",
   },
+  // Google Search Console verification — uncomment and set env var after registering property
+  // verification: { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION },
   description:
     "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。建設・製造現場の安全担当者を支援します。",
   metadataBase: new URL("https://safe-ai-site.vercel.app"),
@@ -81,6 +83,7 @@ export default function RootLayout({
       <body className="min-h-full bg-slate-50 font-sans text-slate-900">
         <JsonLd schema={organizationSchema()} />
         <JsonLd schema={webSiteSchema()} />
+        <JsonLd schema={personSchema()} />
         <ServiceWorkerRegistrar />
         <LanguageProvider>
           <FuriganaProvider>

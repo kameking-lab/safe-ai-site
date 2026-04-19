@@ -9,7 +9,47 @@ export function JsonLd({ schema }: { schema: Schema | Schema[] }) {
   );
 }
 
+export function personSchema(): Schema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: "金田義太",
+    alternateName: ["かねた よした", "Kaneta Yoshita", "金田 義太"],
+    jobTitle: "労働安全コンサルタント",
+    hasCredential: {
+      "@type": "EducationalOccupationalCredential",
+      credentialCategory: "労働安全コンサルタント",
+      name: "労働安全コンサルタント 登録番号 260022",
+    },
+    knowsAbout: [
+      "労働安全衛生",
+      "建設業安全管理",
+      "製造業安全管理",
+      "リスクアセスメント",
+      "AIシステム開発",
+      "業務自動化",
+    ],
+    memberOf: {
+      "@type": "Organization",
+      name: "日本労働安全衛生コンサルタント会",
+    },
+    url: "https://safe-ai-site.vercel.app/about",
+    worksFor: {
+      "@type": "Organization",
+      name: "ANZEN AI",
+      url: "https://safe-ai-site.vercel.app",
+    },
+  };
+}
+
 export function organizationSchema(): Schema {
+  const founder = {
+    "@type": "Person",
+    name: "金田義太",
+    alternateName: ["かねた よした", "Kaneta Yoshita"],
+    jobTitle: "労働安全コンサルタント",
+    url: "https://safe-ai-site.vercel.app/about",
+  };
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -19,6 +59,7 @@ export function organizationSchema(): Schema {
     description:
       "労働安全衛生の現場運用を支援するポータルサービス。法改正情報・事故データベース・KY用紙・Eラーニング・AIチャットボットを提供。",
     sameAs: ["https://safe-ai-site.vercel.app"],
+    founder,
   };
 }
 
@@ -30,6 +71,13 @@ export function webSiteSchema(): Schema {
     url: "https://safe-ai-site.vercel.app",
     description:
       "労働安全衛生の現場運用ポータル。法改正・リスク管理・KY用紙・Eラーニングをまとめて確認。",
+    author: {
+      "@type": "Person",
+      name: "金田義太",
+      alternateName: ["かねた よした", "Kaneta Yoshita"],
+      jobTitle: "労働安全コンサルタント",
+      url: "https://safe-ai-site.vercel.app/about",
+    },
     potentialAction: {
       "@type": "SearchAction",
       target: {

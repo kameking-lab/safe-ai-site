@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { JsonLd, personSchema } from "@/components/json-ld";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -18,13 +19,14 @@ import {
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 
 export const metadata: Metadata = {
-  title: "運営者情報・特定商取引法に基づく表記",
+  title: "金田義太（かねた よした）| 労働安全コンサルタント | ANZEN AI 監修者",
   description:
-    "ANZEN AI の運営者情報および特定商取引法に基づく表記ページです。",
+    "ANZEN AI 監修者の金田義太（労働安全コンサルタント登録番号260022）のプロフィール、特定商取引法表記、監修範囲、お問い合わせ先を掲載。建設・製造・林業の労働安全衛生コンサルティングも受託しています。",
+  keywords: ["金田義太", "かねた よした", "Kaneta Yoshita", "労働安全コンサルタント", "ANZEN AI", "登録番号260022", "安全管理", "建設安全"],
   openGraph: {
-    title: "運営者情報・特定商取引法に基づく表記｜ANZEN AI",
+    title: "金田義太（かねた よした）| 労働安全コンサルタント | ANZEN AI 監修者",
     description:
-      "ANZEN AI の運営者情報および特定商取引法に基づく表記ページです。",
+      "ANZEN AI 監修者の金田義太（労働安全コンサルタント登録番号260022）のプロフィール、特定商取引法表記、監修範囲、お問い合わせ先を掲載。建設・製造・林業の労働安全衛生コンサルティングも受託しています。",
   },
 };
 
@@ -130,6 +132,7 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
 export default function AboutPage() {
   return (
     <main className="mx-auto max-w-2xl px-4 py-6 sm:py-8">
+      <JsonLd schema={personSchema()} />
       <TranslatedPageHeader
         titleJa="運営者情報・特定商取引法に基づく表記"
         titleEn="About ANZEN AI"
@@ -227,6 +230,38 @@ export default function AboutPage() {
                 <p className="mt-2 text-[11px] leading-5 text-slate-500">
                   ※ AI生成の要約・回答は最新法令や個別事案の判断を保証するものではありません。具体的な判断は必ず一次資料・専門家をご確認ください。
                 </p>
+              </div>
+
+              {/* 資格・経歴 */}
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 text-left">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs font-semibold text-slate-700 mb-1">取得資格</p>
+                  <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
+                    <li>・ 労働安全コンサルタント（登録番号 260022）</li>
+                    <li>・ 1級土木施工管理技士</li>
+                    <li>・ 監理技術者</li>
+                  </ul>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs font-semibold text-slate-700 mb-1">専門分野</p>
+                  <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
+                    <li>・ 建設・製造業の安全管理</li>
+                    <li>・ AIシステム開発・業務自動化</li>
+                    <li>・ 安全書類のデジタル化</li>
+                  </ul>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs font-semibold text-slate-700 mb-1">受賞歴</p>
+                  <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
+                    <li>・ NEXCO東日本 優良事例表彰</li>
+                  </ul>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs font-semibold text-slate-700 mb-1">所属</p>
+                  <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
+                    <li>・ 日本労働安全衛生コンサルタント会</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
