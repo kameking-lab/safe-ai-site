@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { KyPageContent } from "@/components/ky-page-content";
 import { ogImageUrl } from "@/lib/og-url";
@@ -21,5 +22,9 @@ export const metadata: Metadata = {
 };
 
 export default function KyPage() {
-  return <KyPageContent />;
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-8 text-sm text-slate-500">読み込み中...</div>}>
+      <KyPageContent />
+    </Suspense>
+  );
 }

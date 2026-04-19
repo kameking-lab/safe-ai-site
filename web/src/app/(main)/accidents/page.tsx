@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HomeScreen } from "@/components/home-screen";
+import { LadderStatsCard } from "@/components/ladder-stats-card";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
@@ -49,6 +50,9 @@ export default function AccidentsPage() {
         />
         <div className="mt-2">
           <LastUpdatedBadge />
+        </div>
+        <div className="mt-4">
+          <LadderStatsCard />
         </div>
       </HomeScreen>
       <RelatedPageCards

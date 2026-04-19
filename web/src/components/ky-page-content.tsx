@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { KyIndustryPresetPicker } from "@/components/ky-industry-preset-picker";
 import { KyInitialWizard } from "@/components/ky-initial-wizard";
-import type { KyIndustryPreset } from "@/data/mock/ky-industry-presets";
+import { getPresetById, type KyIndustryPreset } from "@/data/mock/ky-industry-presets";
 import { KyRecordList } from "@/components/ky-record-list";
 import { KySignatureCanvas } from "@/components/ky-signature-canvas";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
@@ -284,6 +285,15 @@ export function KyPageContent() {
       return { ...prev, workRows, riskRows };
     });
   }, []);
+
+  // /ky?preset=<id> で来た場合にプリセットを自動適用する（脚立・業種リンクから）
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const presetId = searchParams?.get("preset");
+    if (!presetId) return;
+    const preset = getPresetById(presetId);
+    if (preset) handlePresetApply(preset);
+  }, [searchParams, handlePresetApply]);
 
   const setWorkRow = useCallback((i: number, row: KyInstructionWorkRow) => {
     setRecord((prev) => ({
