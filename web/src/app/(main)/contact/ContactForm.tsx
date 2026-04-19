@@ -15,15 +15,37 @@ const FEATURE_OPTIONS = [
 ];
 
 const INQUIRY_CATEGORIES = [
-  { value: "safety-mgmt", label: "安全管理コンサルティング" },
-  { value: "automation", label: "業務自動化（Excel・ルーティン）" },
-  { value: "system", label: "システム構築・DX" },
-  { value: "education", label: "安全衛生教育・監修" },
+  { value: "safety-consulting", label: "労働安全コンサルティング" },
+  { value: "education", label: "特別教育・安全衛生教育" },
+  { value: "automation", label: "業務自動化（Excel VBA・AI）" },
+  { value: "web", label: "Webサイト・LP 制作" },
+  { value: "monthly-retainer", label: "月額顧問契約（安全 / AI・DX）" },
   { value: "demo", label: "本サービスのデモ・導入相談" },
   { value: "other", label: "その他" },
 ] as const;
 
 type InquiryCategory = typeof INQUIRY_CATEGORIES[number]["value"];
+
+const BUDGET_OPTIONS = [
+  { value: "under-200k", label: "〜20万円" },
+  { value: "200k-500k", label: "20〜50万円" },
+  { value: "500k-1m", label: "50〜100万円" },
+  { value: "1m-3m", label: "100〜300万円" },
+  { value: "over-3m", label: "300万円以上" },
+  { value: "monthly", label: "月額顧問契約を希望" },
+  { value: "tbd", label: "未定・要相談" },
+] as const;
+
+type BudgetValue = typeof BUDGET_OPTIONS[number]["value"];
+
+const CONTACT_METHODS = [
+  { value: "online", label: "オンライン会議（Zoom / Teams 等）" },
+  { value: "phone", label: "電話" },
+  { value: "email", label: "メールのみ" },
+  { value: "onsite", label: "対面（訪問）" },
+] as const;
+
+type ContactMethodValue = typeof CONTACT_METHODS[number]["value"];
 
 export default function ContactForm() {
   const [form, setForm] = useState({
@@ -32,7 +54,9 @@ export default function ContactForm() {
     email: "",
     phone: "",
     message: "",
-    category: "demo" as InquiryCategory,
+    category: "safety-consulting" as InquiryCategory,
+    budget: "tbd" as BudgetValue,
+    contactMethod: "online" as ContactMethodValue,
     features: [] as string[],
   });
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
@@ -54,20 +78,24 @@ export default function ContactForm() {
     e.preventDefault();
     if (!FORMSPREE_ID) {
       // Formspree 未設定時は mailto: フォールバック
-      const subject = encodeURIComponent(`[ANZEN AI] お問い合わせ: ${form.company} ${form.name}`);
+      const subject = encodeURIComponent(`[ANZEN AI 事務局] お問い合わせ: ${form.company} ${form.name}`);
       const categoryLabel = INQUIRY_CATEGORIES.find((c) => c.value === form.category)?.label ?? form.category;
+      const budgetLabel = BUDGET_OPTIONS.find((b) => b.value === form.budget)?.label ?? form.budget;
+      const methodLabel = CONTACT_METHODS.find((m) => m.value === form.contactMethod)?.label ?? form.contactMethod;
       const bodyLines = [
         `会社名: ${form.company}`,
         `担当者名: ${form.name}`,
         `メール: ${form.email}`,
         form.phone ? `電話: ${form.phone}` : "",
         `相談カテゴリ: ${categoryLabel}`,
+        `ご予算感: ${budgetLabel}`,
+        `希望相談方法: ${methodLabel}`,
         "",
         `【相談内容】`,
         form.message,
         "",
         form.features.length ? `【希望機能】${form.features.join("、")}` : "",
-      ].filter((l) => l !== undefined);
+      ].filter((l) => l !== "");
       window.location.href = `mailto:?subject=${subject}&body=${encodeURIComponent(bodyLines.join("\n"))}`;
       return;
     }
@@ -254,9 +282,50 @@ export default function ContactForm() {
             </div>
           </div>
 
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label htmlFor="contact-budget" className="block text-sm font-semibold text-slate-700">
+                ご予算感 <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="contact-budget"
+                name="budget"
+                value={form.budget}
+                onChange={(e) => setForm((f) => ({ ...f, budget: e.target.value as BudgetValue }))}
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#1a7a4c] focus:ring-2 focus:ring-[#1a7a4c]/20"
+              >
+                {BUDGET_OPTIONS.map((b) => (
+                  <option key={b.value} value={b.value}>
+                    {b.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="contact-method" className="block text-sm font-semibold text-slate-700">
+                希望相談方法 <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="contact-method"
+                name="contactMethod"
+                value={form.contactMethod}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, contactMethod: e.target.value as ContactMethodValue }))
+                }
+                className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-[#1a7a4c] focus:ring-2 focus:ring-[#1a7a4c]/20"
+              >
+                {CONTACT_METHODS.map((m) => (
+                  <option key={m.value} value={m.value}>
+                    {m.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div>
             <label htmlFor="contact-message" className="block text-sm font-semibold text-slate-700">
-              相談内容 <span className="text-red-500">*</span>
+              相談内容（自由記述） <span className="text-red-500">*</span>
             </label>
             <textarea
               id="contact-message"
