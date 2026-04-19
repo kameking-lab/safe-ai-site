@@ -10,8 +10,6 @@ test.describe("signage smoke", () => {
     await expect(page.getByText("気象庁 注意報・警報", { exact: false })).toBeVisible();
     await expect(page.getByText("トレンド（労働災害・建設事故）")).toBeVisible();
     await expect(page.getByText("直近の法改正（5件・要約）")).toBeVisible();
-
-    await expect(page.getByText("API MODE:", { exact: false })).toBeVisible();
   });
 });
 

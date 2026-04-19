@@ -3,6 +3,13 @@ import { expect, test } from "@playwright/test";
 test.describe.configure({ mode: "serial" });
 
 test.describe("live mode", () => {
+  test.beforeEach(async ({ page }) => {
+    // オンボーディングモーダルが UI をブロックしないよう、初回訪問済みとしてマーク
+    await page.addInitScript(() => {
+      localStorage.setItem("anzen-onboarding-v1-seen", "1");
+    });
+  });
+
   test("正常系: 一覧表示→要約表示→チャット送信 @smoke", async ({ page }) => {
     await page.goto("/laws");
 
