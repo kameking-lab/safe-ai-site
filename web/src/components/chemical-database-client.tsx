@@ -19,6 +19,7 @@ import {
   type ChemicalCategory,
   type ChemicalSubstance,
 } from "@/data/mock/chemical-substances-db";
+import { getAllMergedChemicals } from "@/lib/mhlw-chemicals";
 
 const MhlwChemicalAggregatedPanel = dynamic(
   () =>
@@ -61,6 +62,7 @@ function matches(sub: ChemicalSubstance, q: string): boolean {
 }
 
 export function ChemicalDatabaseClient() {
+  const mhlwCount = useMemo(() => getAllMergedChemicals().length, []);
   const [mode, setMode] = useState<"curated" | "mhlw">("mhlw");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<ChemicalCategory | "">("");
@@ -83,7 +85,7 @@ export function ChemicalDatabaseClient() {
           化学物質検索DB β版
         </div>
         <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
-          化学物質データベース（MHLW 1,389物質 ＋ 専門解説50物質）
+          化学物質データベース（MHLW {mhlwCount.toLocaleString()}物質 ＋ 専門解説50物質）
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700">
           厚生労働省の公開 4 リスト（皮膚等障害・SDS交付義務・がん原性・濃度基準値）を CAS 番号で統合した
@@ -98,7 +100,7 @@ export function ChemicalDatabaseClient() {
       <div className="mb-4 flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 w-fit">
         {(
           [
-            { id: "mhlw", label: "MHLW 1,389物質（CAS統合）" },
+            { id: "mhlw", label: `MHLW ${mhlwCount.toLocaleString()}物質（CAS統合）` },
             { id: "curated", label: "専門解説 50物質" },
           ] as const
         ).map((tab) => (

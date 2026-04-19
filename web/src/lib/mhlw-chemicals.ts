@@ -97,7 +97,7 @@ function isPlaceholderName(name: string): boolean {
 
 function pickPrimaryName(candidates: string[]): string {
   const good = candidates.filter((n) => !isPlaceholderName(n));
-  if (good.length === 0) return candidates[0] ?? "（名称不明）";
+  if (good.length === 0) return "（物質名不明）";
   // 最も長い（情報量が多そうな）名称
   return good.sort((a, b) => b.length - a.length)[0];
 }
