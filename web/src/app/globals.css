@@ -129,13 +129,42 @@ table {
   table-layout: auto;
 }
 
-/* アクセシビリティ: 最小タップ領域 44px / WCAG AAA は 56px（ID_091） */
+/**
+ * アクセシビリティ: 最小タップ領域 48px（手袋でも押せるサイズ）
+ * - 100人調査 ID_091 / ID_001「手袋で押せない」を根拠に WCAG 推奨 44px を上回る 48px を採用。
+ * - 塗り潰し系の主要CTA（emerald/sky/blue/amber/red 系の濃色）と submit はモバイルで48px以上に自動調整。
+ * - 詳細リンクなどインラインの小さなテキストボタンはそのまま（視覚崩れを避ける）。
+ * - 意図的に48px未満にしたい場合は data-compact 属性でオプトアウト可能。
+ */
 @media (max-width: 1023px) {
   .tap-target,
   button.tap-target,
   a.tap-target {
-    min-height: 44px;
-    min-width: 44px;
+    min-height: 48px;
+    min-width: 48px;
+    touch-action: manipulation;
+  }
+  button.bg-emerald-600,
+  button.bg-emerald-700,
+  button.bg-sky-600,
+  button.bg-blue-600,
+  button.bg-amber-600,
+  button.bg-red-600,
+  button.bg-rose-600,
+  button.bg-violet-600,
+  button.bg-teal-600,
+  a.bg-emerald-600,
+  a.bg-blue-600,
+  a.bg-sky-600,
+  button[type="submit"] {
+    min-height: 48px;
+    min-width: 48px;
+    touch-action: manipulation;
+  }
+  button[data-compact],
+  a[data-compact] {
+    min-height: 0;
+    min-width: 0;
   }
 }
 
