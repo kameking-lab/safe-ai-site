@@ -71,6 +71,93 @@ function TabButton({ id, activeTab, label, onClick }: { id: TabId; activeTab: Ta
   );
 }
 
+/**
+ * 検索直後に一目で「スコア＋主要対策」を見せるカード。
+ * 詳細はタブで切替可能だが、このカードで意思決定できることを目指す。
+ */
+function TopSummaryCard({
+  score,
+  results,
+  onShowDetail,
+}: {
+  score: SafetyScore;
+  results: ScoredAccidentCase[];
+  onShowDetail: () => void;
+}) {
+  const topPreventions = useMemo(() => {
+    const seen = new Set<string>();
+    const out: { point: string; from: string }[] = [];
+    for (const c of results) {
+      for (const p of c.preventionPoints) {
+        const key = p.slice(0, 24);
+        if (!seen.has(key)) {
+          seen.add(key);
+          out.push({ point: p, from: c.title });
+          if (out.length >= 3) break;
+        }
+      }
+      if (out.length >= 3) break;
+    }
+    return out;
+  }, [results]);
+
+  const severeCount = results.filter((c) => c.severity === "死亡" || c.severity === "重傷").length;
+  const scoreColor =
+    score.riskLevel === "高"
+      ? "bg-rose-50 border-rose-300 text-rose-900"
+      : score.riskLevel === "中"
+        ? "bg-amber-50 border-amber-300 text-amber-900"
+        : "bg-emerald-50 border-emerald-300 text-emerald-900";
+
+  return (
+    <section
+      className={`rounded-2xl border-2 p-4 shadow-sm sm:p-5 ${scoreColor}`}
+      aria-label="検索結果の要約カード"
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider opacity-80">リスク指数</p>
+          <p className="text-3xl font-black leading-none">
+            {score.overall}
+            <span className="ml-1 text-base font-semibold opacity-70">/100</span>
+          </p>
+          <p className="mt-1 text-sm font-bold">
+            {score.riskLevel}リスク
+            {severeCount > 0 && (
+              <span className="ml-2 rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold">
+                類似の死亡・重傷 {severeCount}件
+              </span>
+            )}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onShowDetail}
+          className="rounded-lg border border-white/40 bg-white/60 px-3 py-2 text-xs font-semibold hover:bg-white/80"
+        >
+          詳細スコアを見る →
+        </button>
+      </div>
+      <p className="mt-2 text-sm leading-relaxed">{score.comment}</p>
+      {topPreventions.length > 0 && (
+        <div className="mt-3 rounded-xl bg-white/70 p-3">
+          <p className="text-[11px] font-bold uppercase tracking-wider opacity-80">今朝の主要対策（上位3件）</p>
+          <ul className="mt-1.5 space-y-1 text-sm leading-relaxed">
+            {topPreventions.map((p, idx) => (
+              <li key={idx} className="flex gap-2">
+                <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[11px] font-bold text-white">
+                  {idx + 1}
+                </span>
+                <span className="text-slate-800">{p.point}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
+}
+
 // 事故カード
 function AccidentCard({ c, index }: { c: ScoredAccidentCase; index: number }) {
   const [open, setOpen] = useState(false);
@@ -549,6 +636,11 @@ export function RiskPredictionPanel() {
           </div>
         </div>
       </section>
+
+      {/* 検索直後のトップサマリー（スクロール不要でスコア＋主要対策が目に入る） */}
+      {searched && safetyScore && (
+        <TopSummaryCard score={safetyScore} results={results} onShowDetail={() => setActiveTab("score")} />
+      )}
 
       {/* 検索結果サマリー & タブナビ */}
       {searched && (
