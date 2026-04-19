@@ -25,22 +25,35 @@ async function getSummaryByRevisionIdMock(
 ): Promise<ServiceResult<SummaryApiResponse>> {
   await new Promise((resolve) => setTimeout(resolve, 650));
   const summary = summaryMockByRevisionId[input.revisionId];
-  if (!summary) {
+  if (summary) {
     return {
-      ok: false,
-      error: {
-        code: "NOT_FOUND",
-        message: "要約データが見つかりませんでした。",
-        retryable: false,
+      ok: true,
+      data: {
+        revisionId: input.revisionId,
+        summary,
       },
     };
   }
 
+  // 事前要約が無い場合も /api/summaries のAIフォールバックへ委譲
+  try {
+    const res = await fetch(`/api/summaries?revisionId=${encodeURIComponent(input.revisionId)}`);
+    if (res.ok) {
+      const data = (await res.json()) as { ok: true; data: SummaryApiResponse } | { ok: false; error: { code: "NOT_FOUND" | "VALIDATION" | "UNAVAILABLE" | "NETWORK"; message: string; retryable: boolean } };
+      if (data.ok) {
+        return { ok: true, data: data.data };
+      }
+      return { ok: false, error: data.error };
+    }
+  } catch {
+    // fall through
+  }
   return {
-    ok: true,
-    data: {
-      revisionId: input.revisionId,
-      summary,
+    ok: false,
+    error: {
+      code: "NOT_FOUND",
+      message: "要約データが見つかりませんでした。時間をおいて再試行するか、/law-search のAI要約もお試しください。",
+      retryable: true,
     },
   };
 }

@@ -53,6 +53,12 @@ export function SummaryPanel({
           retryLabel="要約を再取得"
           className="mt-4"
         />
+        <a
+          href="/law-search"
+          className="mt-3 inline-flex items-center gap-1 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50"
+        >
+          /law-search のAI要約を試す →
+        </a>
       </section>
     );
   }
