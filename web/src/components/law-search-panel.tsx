@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { allLawArticles, type LawArticle } from "@/data/laws";
 import { InputWithVoice } from "@/components/voice-input-field";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
+import { SimpleMarkdown } from "@/components/simple-markdown";
 
 const MhlwLawArticlesPanel = dynamic(
   () =>
@@ -180,7 +181,7 @@ function AiSummaryModal({
           )}
           {status === "done" && (
             <>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{summary}</p>
+              <SimpleMarkdown content={summary} className="text-sm leading-relaxed text-slate-700" />
               <p className="mt-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-800">
                 ※ この要約はAIが生成したものです。正確な内容はe-Gov法令検索で原文をご確認ください。
               </p>

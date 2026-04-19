@@ -7,6 +7,7 @@ import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-fiel
 import { amazonSearchUrl, rakutenSearchUrl } from "@/lib/affiliate";
 import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
 import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
+import { SimpleMarkdown } from "@/components/simple-markdown";
 import { findByCas, type MergedChemical } from "@/lib/mhlw-chemicals";
 import type {
   ChemicalRaResponse,
@@ -467,8 +468,8 @@ export function ChemicalRaPanel() {
               </p>
             )}
             {result.rawReply && (
-              <div className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-700" style={{ whiteSpace: "pre-wrap" }}>
-                {result.rawReply}
+              <div className="mt-3 rounded-lg bg-slate-50 p-3">
+                <SimpleMarkdown content={result.rawReply} />
               </div>
             )}
           </div>
