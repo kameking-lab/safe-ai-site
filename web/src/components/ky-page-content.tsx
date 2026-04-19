@@ -56,7 +56,7 @@ const FALL_CHECK_LABELS = [
 ] as const;
 
 function makeInitialRecord(): KyInstructionRecordState {
-  const d = new Date();
+  // SSR/hydration対策: 日付は初期値を空文字にして、マウント後 useEffect で現在日付を入れる
   const emptyWork = (): KyInstructionWorkRow => ({
     workPlace: "",
     workDetail: "",
@@ -83,9 +83,9 @@ function makeInitialRecord(): KyInstructionRecordState {
   const emptyP = (): KyInstructionParticipant => ({ name: "", qualNo: "", preWork: "", onExit: "" });
   return {
     reportStamps: ["", "", "", "", ""],
-    workDateYear: String(d.getFullYear()),
-    workDateMonth: String(d.getMonth() + 1),
-    workDateDay: String(d.getDate()),
+    workDateYear: "",
+    workDateMonth: "",
+    workDateDay: "",
     workDateNote: "",
     weather: "",
     coop1Name: "",
@@ -148,6 +148,17 @@ export function KyPageContent() {
 
   // Load from localStorage on mount, then load record list
   useEffect(() => {
+    // 日付の初期化はマウント後に（SSR hydration mismatch を避ける）
+    setRecord((prev) => {
+      if (prev.workDateYear || prev.workDateMonth || prev.workDateDay) return prev;
+      const d = new Date();
+      return {
+        ...prev,
+        workDateYear: String(d.getFullYear()),
+        workDateMonth: String(d.getMonth() + 1),
+        workDateDay: String(d.getDate()),
+      };
+    });
     try {
       const saved = localStorage.getItem("ky-record");
       if (saved) {

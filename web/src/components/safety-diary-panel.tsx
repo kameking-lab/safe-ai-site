@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Plus, Trash2, Save, FileText, Download } from "lucide-react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 
@@ -75,10 +75,10 @@ const DEFAULT_TABLES: DiaryTable[] = [
 ];
 
 function createEntry(): DiaryEntry {
-  const today = new Date().toISOString().split("T")[0];
+  // SSR hydration対策: 日付とID は空で初期化し、useEffect で埋める
   return {
-    id: Date.now().toString(),
-    date: today,
+    id: "",
+    date: "",
     siteName: "",
     weather: "",
     supervisor: "",
@@ -287,6 +287,18 @@ export function SafetyDiaryPanel() {
   const [current, setCurrent] = useState<DiaryEntry>(createEntry);
   const [savedLabel, setSavedLabel] = useState("");
   const [activeTab, setActiveTab] = useState<"edit" | "list">("edit");
+
+  // マウント後に日付・ID を初期化（SSR hydration mismatch 対策）
+  useEffect(() => {
+    setCurrent((prev) => {
+      if (prev.date && prev.id) return prev;
+      return {
+        ...prev,
+        id: prev.id || Date.now().toString(),
+        date: prev.date || new Date().toISOString().split("T")[0],
+      };
+    });
+  }, []);
 
   const updateEntry = useCallback((patch: Partial<DiaryEntry>) => {
     setCurrent((prev) => ({ ...prev, ...patch }));

@@ -82,7 +82,7 @@ type HomeScreenProps = {
 };
 
 function makeInitialKyInstruction(): KyInstructionRecordState {
-  const y = new Date().getFullYear().toString();
+  // SSR hydration対策: 日付は空に初期化し、マウント後 useEffect で現在日付に差し替える
   const emptyWork = (): KyInstructionRecordState["workRows"][number] => ({
     workPlace: "",
     workDetail: "",
@@ -114,9 +114,9 @@ function makeInitialKyInstruction(): KyInstructionRecordState {
   });
   return {
     reportStamps: ["", "", "", "", ""],
-    workDateYear: y,
-    workDateMonth: String(new Date().getMonth() + 1),
-    workDateDay: String(new Date().getDate()),
+    workDateYear: "",
+    workDateMonth: "",
+    workDateDay: "",
     workDateNote: "",
     weather: "",
     coop1Name: "",
@@ -202,7 +202,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
     includeLearning: false,
   });
   const [kySheetDraft, setKySheetDraft] = useState<KySheetDraft>({
-    date: new Date().toISOString().slice(0, 10),
+    date: "",
     siteName: "",
     workSummary: "",
     expectedRisks: "",
@@ -225,6 +225,22 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
     () => revisions.find((revision) => revision.id === selectedRevisionId) ?? null,
     [revisions, selectedRevisionId]
   );
+
+  // マウント後に日付を初期化（SSR hydration mismatch 対策）
+  useEffect(() => {
+    const d = new Date();
+    setKySheetDraft((prev) => (prev.date ? prev : { ...prev, date: d.toISOString().slice(0, 10) }));
+    setKyInstructionRecord((prev) =>
+      prev.workDateYear || prev.workDateMonth || prev.workDateDay
+        ? prev
+        : {
+            ...prev,
+            workDateYear: String(d.getFullYear()),
+            workDateMonth: String(d.getMonth() + 1),
+            workDateDay: String(d.getDate()),
+          },
+    );
+  }, []);
 
   useEffect(() => {
     if (variant !== "laws") return;
