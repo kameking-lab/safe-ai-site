@@ -26,6 +26,7 @@ type SearchResponse = {
   total: number;
   records: Accident[];
   message?: string;
+  warning?: string;
 };
 
 function parseSearchParams(url: URL): SearchParams {
@@ -169,6 +170,7 @@ export async function GET(request: Request) {
       return NextResponse.json(payload);
     }
 
+    const requestedYearInvalid = params.year !== null && !shards.has(params.year);
     const targetYear =
       params.year && shards.has(params.year)
         ? params.year
@@ -184,6 +186,9 @@ export async function GET(request: Request) {
       availableYears: [...shards.keys()].sort((a, b) => a - b),
       total,
       records,
+      ...(requestedYearInvalid && {
+        warning: `指定された年 ${params.year} はデータが存在しないため、最新年 ${targetYear} にフォールバックしました。`,
+      }),
     };
     return NextResponse.json(payload);
   } catch (err) {
