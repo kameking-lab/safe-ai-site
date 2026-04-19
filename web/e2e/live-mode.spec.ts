@@ -21,9 +21,9 @@ test.describe("live mode", () => {
 
     // 先頭カードの「AIで要約」をクリック（クリックで自動的にAI要約タブへ切り替わる）
     await revisionList.locator("li").first().getByRole("button", { name: "AIで要約" }).click();
-    await expect(page.getByText("3行要約")).toBeVisible();
-    await expect(page.getByText("現場でやること")).toBeVisible();
-    await expect(page.getByText("対象業種")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "3行要約" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "現場でやること" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "対象業種", exact: true })).toBeVisible();
     await page.waitForTimeout(700);
 
     await page.getByRole("button", { name: "質問チャット" }).click();
