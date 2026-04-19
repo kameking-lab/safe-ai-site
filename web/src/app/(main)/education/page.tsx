@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { GraduationCap, Mail, Clock, BookOpen, Users, Building2 } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
+import { JsonLd, serviceSchema } from "@/components/json-ld";
 
 const TITLE = "特別教育・安全衛生教育｜21種の教育メニュー";
 const DESCRIPTION =
@@ -85,6 +86,15 @@ const FORMATS = [
 export default function EducationPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      <JsonLd
+        schema={serviceSchema({
+          name: "ANZEN AI 特別教育・安全衛生教育",
+          description: DESCRIPTION,
+          url: "https://safe-ai-site.vercel.app/education",
+          serviceType: "EducationalService",
+          priceFrom: 50000,
+        })}
+      />
       <header className="mb-8">
         <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
           <GraduationCap className="h-3.5 w-3.5" />

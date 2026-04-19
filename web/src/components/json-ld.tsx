@@ -137,6 +137,49 @@ export function newsArticleListSchema(
   };
 }
 
+export function serviceSchema(input: {
+  name: string;
+  description: string;
+  url: string;
+  serviceType: string;
+  priceFrom?: number;
+  priceCurrency?: string;
+}): Schema {
+  const { name, description, url, serviceType, priceFrom, priceCurrency = "JPY" } = input;
+  const provider = {
+    "@type": "Organization",
+    name: "ANZEN AI",
+    url: "https://safe-ai-site.vercel.app",
+  };
+  const offers = priceFrom
+    ? {
+        offers: {
+          "@type": "Offer",
+          price: priceFrom,
+          priceCurrency,
+          priceSpecification: {
+            "@type": "PriceSpecification",
+            price: priceFrom,
+            priceCurrency,
+            valueAddedTaxIncluded: false,
+          },
+          availability: "https://schema.org/InStock",
+        },
+      }
+    : {};
+  return {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    name,
+    description,
+    url,
+    serviceType,
+    provider,
+    areaServed: { "@type": "Country", name: "Japan" },
+    ...offers,
+  };
+}
+
 export function courseListSchema(
   courses: { name: string; description: string }[]
 ): Schema {

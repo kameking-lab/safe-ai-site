@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Handshake, Mail, ShieldCheck, Sparkles, Crown, Check } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
+import { JsonLd, serviceSchema } from "@/components/json-ld";
 
 const TITLE = "月額顧問サービス｜労働安全顧問・AI/DX 顧問";
 const DESCRIPTION =
@@ -103,6 +104,15 @@ const yen = new Intl.NumberFormat("ja-JP");
 export default function ConsultingPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      <JsonLd
+        schema={serviceSchema({
+          name: "ANZEN AI 月額顧問サービス",
+          description: DESCRIPTION,
+          url: "https://safe-ai-site.vercel.app/consulting",
+          serviceType: "ProfessionalService",
+          priceFrom: 150000,
+        })}
+      />
       <header className="mb-8">
         <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
           <Handshake className="h-3.5 w-3.5" />

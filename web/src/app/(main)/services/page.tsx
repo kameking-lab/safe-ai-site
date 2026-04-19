@@ -11,6 +11,7 @@ import {
   Zap,
 } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
+import { JsonLd, serviceSchema } from "@/components/json-ld";
 
 const TITLE = "受託業務｜安全診断・KYシステム・Excel VBA・AI研修";
 const DESCRIPTION =
@@ -103,6 +104,15 @@ const SERVICES = [
 export default function ServicesPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      <JsonLd
+        schema={serviceSchema({
+          name: "ANZEN AI 受託業務サービス",
+          description: DESCRIPTION,
+          url: "https://safe-ai-site.vercel.app/services",
+          serviceType: "ProfessionalService",
+          priceFrom: 198000,
+        })}
+      />
       <header className="mb-8">
         <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
           <Zap className="h-3.5 w-3.5" />
