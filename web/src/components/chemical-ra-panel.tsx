@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search, AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag } from "lucide-react";
+import { Search, AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag, Gauge, Database } from "lucide-react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import { amazonSearchUrl, rakutenSearchUrl } from "@/lib/affiliate";
 import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
@@ -131,14 +131,85 @@ const QUICK_CHEMICALS = [
 // メインパネル
 // ────────────────────────────────────────────────────────────
 
+type ErrorKind = "validation" | "ratelimit" | "apikey" | "timeout" | "network" | "unknown";
+
+function categorizeError(message: string): { kind: ErrorKind; hint: string } {
+  const lower = message.toLowerCase();
+  if (lower.includes("api key") || lower.includes("apikey") || message.includes("APIキー") || message.includes("未設定")) {
+    return { kind: "apikey", hint: "GEMINI_API_KEYが未設定のようです。厚労省データによる結果を表示します。" };
+  }
+  if (lower.includes("rate") || lower.includes("429") || message.includes("制限")) {
+    return { kind: "ratelimit", hint: "AIのレート制限に達しました。時間を置いて再試行してください。" };
+  }
+  if (lower.includes("timeout") || lower.includes("タイムアウト") || lower.includes("deadline")) {
+    return { kind: "timeout", hint: "AI応答がタイムアウトしました。再試行してください。" };
+  }
+  if (lower.includes("network") || lower.includes("fetch") || message.includes("通信")) {
+    return { kind: "network", hint: "ネットワーク接続を確認してください。" };
+  }
+  if (message.includes("入力") || message.includes("validation")) {
+    return { kind: "validation", hint: "入力内容を確認してください。" };
+  }
+  return { kind: "unknown", hint: "原因不明のエラー。厚労省データによる結果のみ表示します。" };
+}
+
+function parseLimitValue(limitStr: string | undefined): { value: number; unit: string } | null {
+  if (!limitStr) return null;
+  const normalized = limitStr
+    .replace(/[０-９．]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
+  const m = normalized.match(/([\d.]+)\s*([^\d\s]+)?/);
+  if (!m) return null;
+  const value = parseFloat(m[1]);
+  if (!Number.isFinite(value) || value <= 0) return null;
+  const unit = (m[2] ?? "ppm").replace(/[()（）]/g, "").trim();
+  return { value, unit };
+}
+
 export function ChemicalRaPanel() {
   const searchParams = useSearchParams();
   const [chemicalName, setChemicalName] = useState("");
   const [workContent, setWorkContent] = useState("");
+  const [measuredConc, setMeasuredConc] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorHint, setErrorHint] = useState<string | null>(null);
   const [result, setResult] = useState<ChemicalRaResponse | null>(null);
   const [mhlwSelected, setMhlwSelected] = useState<MergedChemical | null>(null);
+
+  // 判定ロジック: MHLW 8h 基準値 → AI exposureLimit の順で採用
+  const activeLimit = useMemo(() => {
+    const mhlwLimit = mhlwSelected?.details?.limit8h;
+    const aiLimit = result?.exposureLimit;
+    return mhlwLimit || aiLimit || null;
+  }, [mhlwSelected, result]);
+
+  const concentrationVerdict = useMemo(() => {
+    if (!measuredConc.trim() || !activeLimit) return null;
+    const parsed = parseLimitValue(activeLimit);
+    if (!parsed) return null;
+    const measuredNum = parseFloat(measuredConc.replace(/[^\d.]/g, ""));
+    if (!Number.isFinite(measuredNum)) return null;
+    const ratio = measuredNum / parsed.value;
+    if (measuredNum > parsed.value) {
+      return {
+        level: "danger" as const,
+        label: `基準値超過（${ratio.toFixed(2)}倍）`,
+        detail: `測定値 ${measuredNum}${parsed.unit} > 基準値 ${parsed.value}${parsed.unit}。直ちに作業改善が必要です。`,
+      };
+    }
+    if (ratio >= 0.5) {
+      return {
+        level: "warn" as const,
+        label: `基準値の ${Math.round(ratio * 100)}%`,
+        detail: "余裕は小さく、改善の検討が推奨されます。",
+      };
+    }
+    return {
+      level: "safe" as const,
+      label: `基準値の ${Math.round(ratio * 100)}%`,
+      detail: "現時点で基準値内ですが、継続的な測定が必要です。",
+    };
+  }, [measuredConc, activeLimit]);
 
   // /chemical-ra?cas=108-88-3 などで起動した場合、自動選択
   useEffect(() => {
@@ -166,6 +237,7 @@ export function ChemicalRaPanel() {
     if (!chemicalName.trim()) return;
     setLoading(true);
     setError(null);
+    setErrorHint(null);
     setResult(null);
 
     try {
@@ -176,12 +248,26 @@ export function ChemicalRaPanel() {
       });
       const data = (await res.json()) as ChemicalRaResponse | { error: { message: string } };
       if ("error" in data) {
+        const { hint } = categorizeError(data.error.message);
         setError(data.error.message);
+        setErrorHint(hint);
       } else {
         setResult(data);
+        if (data.aiStatus && data.aiStatus !== "ok") {
+          const statusLabel: Record<string, string> = {
+            apikey_missing: "GEMINI_API_KEY未設定",
+            ai_failed: "AI生成失敗",
+            demo: "デモモード",
+          };
+          const detail = data.aiErrorDetail ? `（${data.aiErrorDetail}）` : "";
+          setErrorHint(`${statusLabel[data.aiStatus] ?? data.aiStatus}${detail}：厚労省データによるフォールバック表示です。`);
+        }
       }
-    } catch {
-      setError("通信エラーが発生しました。しばらく経ってから再試行してください。");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "通信エラーが発生しました";
+      const { hint } = categorizeError(msg);
+      setError(msg);
+      setErrorHint(hint);
     } finally {
       setLoading(false);
     }
@@ -254,6 +340,50 @@ export function ChemicalRaPanel() {
               placeholder="例: 塗装作業（局所排気なし）、溶接、配管洗浄など"
             />
           </div>
+
+          {/* ③ 測定濃度入力と判定 */}
+          <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3">
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-amber-900">
+              <Gauge className="h-3.5 w-3.5" />
+              ③ 作業環境の測定濃度（任意）— 基準値との判定
+            </label>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <input
+                type="text"
+                inputMode="decimal"
+                value={measuredConc}
+                onChange={(e) => setMeasuredConc(e.target.value)}
+                placeholder="例: 15"
+                className="w-32 rounded-md border border-amber-300 bg-white px-2.5 py-1.5 text-sm"
+              />
+              <span className="text-xs text-amber-800">
+                {activeLimit ? (
+                  <>
+                    基準値: <span className="font-bold">{activeLimit}</span>（同じ単位で入力）
+                  </>
+                ) : (
+                  "物質を選択すると基準値が表示されます"
+                )}
+              </span>
+            </div>
+            {concentrationVerdict && (
+              <div
+                className={`mt-2 rounded-md px-3 py-2 text-xs ${
+                  concentrationVerdict.level === "danger"
+                    ? "bg-rose-100 text-rose-900"
+                    : concentrationVerdict.level === "warn"
+                      ? "bg-amber-100 text-amber-900"
+                      : "bg-emerald-100 text-emerald-900"
+                }`}
+              >
+                <p className="font-bold">
+                  {concentrationVerdict.level === "danger" ? "⚠ " : ""}
+                  {concentrationVerdict.label}
+                </p>
+                <p className="mt-0.5">{concentrationVerdict.detail}</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* クイック検索 */}
@@ -290,9 +420,27 @@ export function ChemicalRaPanel() {
 
       {/* エラー */}
       {error && (
-        <div className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
-          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-          {error}
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <div className="flex-1">
+              <p className="font-semibold">AIによる生成に失敗しました</p>
+              <p className="mt-1 text-xs">{error}</p>
+              {errorHint && <p className="mt-1 text-xs text-rose-700">{errorHint}</p>}
+            </div>
+          </div>
+          {mhlwSelected && (
+            <p className="mt-3 rounded-md bg-white px-3 py-2 text-[11px] text-slate-700">
+              <Database className="mr-1 inline h-3 w-3 text-emerald-600" />
+              厚労省データ（濃度基準値・規制区分・関連法令）は下のカードに表示されています。
+            </p>
+          )}
+        </div>
+      )}
+      {errorHint && !error && result && (
+        <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+          <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          {errorHint}
         </div>
       )}
 
