@@ -10,7 +10,11 @@ type Props = {
 
 export function KySignatureCanvas({ label, savedData, onSave }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  // 既に署名済みなら閉じる、未署名なら最初から開いておく（レビュー指摘：手書き署名が見当たらない）
+  const hasExistingSignature =
+    savedData?.startsWith("data:image") ||
+    (savedData?.startsWith("text:") && savedData.length > 5);
+  const [isOpen, setIsOpen] = useState(!hasExistingSignature);
   const [method, setMethod] = useState<"canvas" | "text">("canvas");
   const [textVal, setTextVal] = useState("");
   const [isDrawing, setIsDrawing] = useState(false);
@@ -84,14 +88,14 @@ export function KySignatureCanvas({ label, savedData, onSave }: Props) {
     setIsOpen(false);
   };
 
-  const hasSignature =
-    savedData?.startsWith("data:image") ||
-    (savedData?.startsWith("text:") && savedData.length > 5);
+  const hasSignature = hasExistingSignature;
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50/50 p-2.5">
+    <div className="rounded-lg border border-emerald-200 bg-emerald-50/30 p-2.5">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[11px] font-semibold text-slate-700">{label}</span>
+        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800">
+          ✍️ {label}（手書き対応）
+        </span>
         {hasSignature ? (
           <div className="flex items-center gap-2">
             {savedData?.startsWith("data:image") ? (
