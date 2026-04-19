@@ -39,8 +39,9 @@ export const metadata: Metadata = {
     default: "ANZEN AI｜現場の安全を、AIで変える。",
     template: "%s｜ANZEN AI",
   },
-  // Google Search Console verification — uncomment and set env var after registering property
-  // verification: { google: process.env.NEXT_PUBLIC_GSC_VERIFICATION },
+  verification: {
+    google: 'y_-VOPrIGDyyHEdjP0PtPk96E7V5KTh4zdTzhKy9ZBE',
+  },
   description:
     "法改正・現場リスク・事故データベース・KY用紙・Eラーニングをまとめた労働安全ポータル。建設・製造現場の安全担当者を支援します。",
   metadataBase: new URL("https://safe-ai-site.vercel.app"),
