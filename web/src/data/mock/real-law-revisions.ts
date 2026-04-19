@@ -99,6 +99,7 @@ export const realLawRevisions: LawRevisionCore[] = [
     category: "省令",
     issuer: "厚生労働省",
     impact: "低",
+    industry_tags: ["food", "manufacturing"],
     summary:
       "職長等に対する安全衛生教育の対象業種に、食料品製造業、新聞業、出版業、製本業、印刷物加工業を追加。",
     source: {
@@ -141,6 +142,7 @@ export const realLawRevisions: LawRevisionCore[] = [
     category: "告示",
     issuer: "厚生労働省",
     impact: "高",
+    industry_tags: ["construction", "manufacturing", "electrical"],
     summary:
       "「安全帯」の名称を「墜落制止用器具」に変更。6.75m超の高所作業ではフルハーネス型を原則義務化（経過措置2022年1月まで）。特別教育の実施を義務化。",
     source: {
@@ -203,6 +205,7 @@ export const realLawRevisions: LawRevisionCore[] = [
     category: "告示",
     issuer: "厚生労働省",
     impact: "中",
+    industry_tags: ["construction", "manufacturing", "electrical"],
     summary:
       "墜落制止用器具の新規格が施行。フルハーネス型の特別教育が必須に。2022年1月1日までの経過措置期間内は旧規格品の使用可。",
     source: {
@@ -245,6 +248,7 @@ export const realLawRevisions: LawRevisionCore[] = [
     category: "省令",
     issuer: "厚生労働省",
     impact: "高",
+    industry_tags: ["manufacturing", "construction", "electrical", "chemical"],
     summary:
       "溶接ヒュームを特定化学物質（第2類物質）に追加。屋内溶接作業での個人ばく露測定の実施と呼吸用保護具の選定・使用を義務化。2021年4月施行。",
     source: {
@@ -265,6 +269,7 @@ export const realLawRevisions: LawRevisionCore[] = [
     category: "労働安全衛生法",
     issuer: "厚生労働省・環境省",
     impact: "高",
+    industry_tags: ["construction", "cleaning"],
     summary:
       "解体・改修工事前のアスベスト事前調査を義務化。レベル3建材の除去作業にも規制を拡大。有資格者による調査を2023年10月から義務化。",
     source: {
@@ -287,6 +292,7 @@ export const realLawRevisions: LawRevisionCore[] = [
     category: "省令",
     issuer: "厚生労働省",
     impact: "高",
+    industry_tags: ["manufacturing", "construction", "electrical", "chemical"],
     summary:
       "溶接ヒュームの個人ばく露測定と呼吸用保護具の使用義務が全面施行。屋内アーク溶接等を行う全事業場が対象。",
     source: {
@@ -329,6 +335,7 @@ export const realLawRevisions: LawRevisionCore[] = [
     category: "告示",
     issuer: "厚生労働省",
     impact: "高",
+    industry_tags: ["construction", "manufacturing", "electrical"],
     summary:
       "旧規格の安全帯の使用経過措置が2022年1月1日で終了。6.75m超の高所作業では新規格フルハーネス型の使用が完全義務化。",
     source: {
@@ -431,6 +438,7 @@ export const realLawRevisions: LawRevisionCore[] = [
     category: "省令",
     issuer: "厚生労働省",
     impact: "高",
+    industry_tags: ["construction"],
     summary:
       "足場の点検者に十分な知識・経験を有する者の指名を義務化。一側足場の使用範囲の明確化。足場の組立て等作業時の墜落防止措置を強化。",
     source: {
@@ -453,6 +461,7 @@ export const realLawRevisions: LawRevisionCore[] = [
     category: "労働安全衛生法",
     issuer: "厚生労働省",
     impact: "高",
+    industry_tags: ["construction", "transport", "healthcare"],
     summary:
       "2024年問題。建設業・自動車運転業・医師に時間外労働の上限規制（年720時間、月100時間未満、複数月平均80時間以内）を適用開始。",
     source: {

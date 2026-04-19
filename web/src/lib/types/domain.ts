@@ -16,6 +16,31 @@ export type RevisionSource = {
 
 export type RevisionImpact = "高" | "中" | "低";
 
+export type IndustryTag =
+  | "construction"
+  | "manufacturing"
+  | "healthcare"
+  | "transport"
+  | "forestry"
+  | "food"
+  | "retail"
+  | "cleaning"
+  | "chemical"
+  | "electrical";
+
+export const ALL_INDUSTRY_TAGS: readonly IndustryTag[] = [
+  "construction",
+  "manufacturing",
+  "healthcare",
+  "transport",
+  "forestry",
+  "food",
+  "retail",
+  "cleaning",
+  "chemical",
+  "electrical",
+];
+
 export type LawRevisionCore = {
   id: string;
   title: string;
@@ -28,6 +53,8 @@ export type LawRevisionCore = {
   source?: RevisionSource;
   /** 影響度（現場への影響の大きさ） */
   impact?: RevisionImpact;
+  /** 業種タグ（手動指定優先、未指定なら推定器が導出） */
+  industry_tags?: IndustryTag[];
   /** 告示番号（例:「厚生労働省告示第XX号」。不明の場合は空文字""） */
   official_notice_number?: string;
   /** 施行日（YYYY-MM-DD形式。不明なら空文字""） */

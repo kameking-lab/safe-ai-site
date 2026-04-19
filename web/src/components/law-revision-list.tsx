@@ -2,9 +2,10 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { LawRevision, RevisionImpact } from "@/lib/types/domain";
+import type { IndustryTag, LawRevision, RevisionImpact } from "@/lib/types/domain";
 import type { ServiceError } from "@/lib/types/api";
 import { fuzzyMatchAll } from "@/lib/fuzzy-search";
+import { revisionMatchesIndustry } from "@/lib/law-revision-industry-tags";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
 
@@ -65,17 +66,7 @@ const IMPACT_BADGE_CLASS: Record<RevisionImpact, string> = {
 };
 
 // 業種マルチセレクトフィルタ
-type IndustryKey =
-  | "construction"
-  | "manufacturing"
-  | "healthcare"
-  | "transport"
-  | "forestry"
-  | "food"
-  | "retail"
-  | "cleaning"
-  | "chemical"
-  | "electrical";
+type IndustryKey = IndustryTag;
 
 const INDUSTRY_OPTIONS: { key: IndustryKey; label: string }[] = [
   { key: "construction", label: "建設" },
@@ -90,39 +81,8 @@ const INDUSTRY_OPTIONS: { key: IndustryKey; label: string }[] = [
   { key: "electrical", label: "電気" },
 ];
 
-const INDUSTRY_KEYWORDS: Record<IndustryKey, string[]> = {
-  construction: ["建設", "足場", "高所作業", "解体", "土木", "石綿", "アスベスト", "掘削", "型枠", "鉛作業"],
-  manufacturing: ["製造業", "機械", "プレス", "研削", "ボイラー", "粉じん", "爆発物", "溶接", "鋳造"],
-  healthcare: ["医療", "福祉", "介護", "看護", "病院", "腰痛", "感染症", "職業感染", "医療機関"],
-  transport: ["運輸", "トラック", "バス", "運転", "荷役", "港湾", "物流", "陸運"],
-  forestry: ["林業", "伐木", "チェーンソー", "木材", "架線", "伐採", "山岳"],
-  food: ["食品", "飲食", "厨房", "冷凍", "調理", "食料"],
-  retail: ["小売", "商業", "百貨店", "スーパー", "販売業", "接客"],
-  cleaning: ["清掃", "廃棄物", "ゴミ", "汚水", "環境衛生"],
-  chemical: ["化学物質", "有機溶剤", "特定化学", "危険物", "有害物", "SDS", "化学品"],
-  electrical: ["電気", "電圧", "感電", "高圧", "アーク", "電力", "送配電"],
-};
-
 function industryMatchesRevision(key: IndustryKey, revision: LawRevision): boolean {
-  if (revision.industry_detail) {
-    const d = revision.industry_detail.toLowerCase();
-    if (d === "全業種" || d === "全産業") return true;
-    const labelMap: Record<IndustryKey, string[]> = {
-      construction: ["建設"],
-      manufacturing: ["製造"],
-      healthcare: ["医療", "福祉", "介護"],
-      transport: ["運輸", "物流"],
-      forestry: ["林業"],
-      food: ["食品", "飲食"],
-      retail: ["小売", "商業"],
-      cleaning: ["清掃"],
-      chemical: ["化学"],
-      electrical: ["電気"],
-    };
-    return labelMap[key].some((l) => d.includes(l));
-  }
-  const text = `${revision.title} ${revision.summary} ${revision.category ?? ""}`.toLowerCase();
-  return INDUSTRY_KEYWORDS[key].some((kw) => text.includes(kw.toLowerCase()));
+  return revisionMatchesIndustry(revision, key);
 }
 
 function parseIndustriesParam(raw: string | null): Set<IndustryKey> {
