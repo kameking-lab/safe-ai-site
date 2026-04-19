@@ -66,45 +66,42 @@
 - **対応**: β協力者向け特典（例: 正式リリース後3ヶ月50%オフ、β協力者バッジ、フィードバック採用時リリースノート記載）を追記
 - **ファイル**: `web/src/app/(main)/pricing/page.tsx`
 
-## B. 中規模（次ターン以降で段階対応）
+## B. 中規模（2026-04-19 対応済み）
 
-### B1. 事故事例に「職場のあんぜんサイト」出典番号・URL を明記
+### B1. 事故事例に「職場のあんぜんさいと」出典番号・URL を明記 [x] 対応済み
 - **根拠**: Daily 2026-04-19 提案6（佐藤健二・労基監督官）
-- **現状**: `AccidentDatabasePanel` は集計値として「職場のあんぜんサイト等」表示、各事例には個別URLなし
-- **対応**: `RealAccidentCase` に `source: { site, caseId?, url? }` を追加し、既存モック200+件に出典を付加
-- **工数**: L（メタデータ整備）
+- **対応**: `AccidentCase` に `source: { site, caseId?, url? }` を追加。`resolveAccidentSource` が mhlw-プレフィックスのIDから anzeninfo.mhlw.go.jp 直URLを導出し、詳細カードに「出典: 職場のあんぜんサイト（No.XXXXXX）↗」として表示。
+- **コミット**: `949e0b0` feat(accidents): expose source link per case in detail card
 
-### B2. 法改正フィルタの業種判定を手動タグに切替
+### B2. 法改正フィルタの業種判定を手動タグに切替 [x] 対応済み
 - **根拠**: Daily 2026-04-17/18/19 で3回連続指摘（鈴木・中村）
-- **現状**: `LawRevisionCore` はキーワード一致ベース
-- **対応**: `industry_tags: (...)[]` フィールド追加、100件の手動タグ付け、キーワードはフォールバック
-- **工数**: M
+- **対応**: `IndustryTag` 型と `industry_tags: IndustryTag[]` フィールドを `LawRevisionCore` に追加。推定優先度は 明示タグ > industry_detail マップ > 強キーワード（例「建設業」必須）> 全業種フォールバック。2017〜2024 の 9件のクロス業種改正に手動タグを付与して機構動作を検証。
+- **コミット**: `c73d9e2` feat(laws): precise industry matching via explicit tags and stricter keywords
 
-### B3. KY用紙 業種×工種 2クリックウィザード
+### B3. KY用紙 業種×工種 2クリックウィザード [x] 対応済み
 - **根拠**: Daily 2026-04-19 提案1（田中雄太）
-- **現状**: `KyIndustryPresetPicker` はあるが select ボックスで目立たない
-- **対応**: 初回ロード時に業種→工種の2クリックウィザードを出し、プリセットを注入した上で編集画面へ
-- **工数**: M
+- **対応**: 初回訪問時にモーダル表示。業種（建設/製造/医療福祉/運輸/林業/食品/小売/清掃/脚立はしご）→ 工種3種から選択でプリセット注入。localStorage でスキップ状態を保持。既存のセレクト式 Picker は再選択用に併存。
+- **コミット**: `39e6a64` feat(ky): 2-click industry/work wizard on first KY visit
 
-### B4. /subsidies 事業規模×業種×都道府県レコメンダー
+### B4. /subsidies 事業規模×業種×都道府県レコメンダー [x] 対応済み
 - **根拠**: Daily 2026-04-19 提案9（橋本勝）
-- **対応**: 3軸フィルタを追加し、条件マッチ助成金を優先表示・根拠明示
-- **工数**: M
+- **対応**: `SubsidiesRecommender` コンポーネント新設。事業規模×業種×地域の3軸チップフィルタと `scale_tags`/`industry_tags`/`region_tags` スコアリング（軸ごと 0〜2、合計4以上で「おすすめ」バッジ）。東京都限定助成金を追加して地域軸の機能性を確認。
+- **コミット**: `a625add` feat(subsidies): 3-axis recommender for scale x industry x region
 
-### B5. タップ領域 min 48×48px 統一
+### B5. タップ領域 min 48×48px 統一 [x] 対応済み
 - **根拠**: 100人 ID_091 / ID_001（手袋で押せない）
-- **対応**: 共通ボタンコンポーネントの min-height/min-width を 48px に
-- **工数**: S〜M
+- **対応**: globals.css の `.tap-target` を 44→48px に引き上げ、主要CTAの塗り色（emerald/sky/blue/amber/red/rose/violet/teal 600）と `type=submit` はモバイル幅で自動 48px 以上に。`touch-action: manipulation` で 300ms 遅延を抑制。`data-compact` でオプトアウト可能。タブナビのボタンにも `.tap-target` を付与。
+- **コミット**: `3d3903b` feat(a11y): enforce 48x48 tap targets on primary CTAs and tab nav
 
-### B6. /risk-prediction 結果の要約を先頭に（スクロール不要化）
+### B6. /risk-prediction 結果の要約を先頭に（スクロール不要化） [x] 対応済み
 - **根拠**: Daily 2026-04-17（田中雄太）
-- **対応**: 検索後すぐ「スコア＋主要対策」のカードを表示、詳細は下
-- **工数**: S
+- **対応**: 検索直後に `TopSummaryCard` を表示。リスク指数・死亡/重傷件数・対応アドバイス・主要対策上位3件（類似事例の preventionPoints を重複除去して集約）を rose/amber/emerald の色分けで提示。タブナビは従来通り下に残して詳細に進める。
+- **コミット**: `fd232bd` feat(risk-prediction): lead with summary card after search
 
-### B7. 脚立・はしご使用ガイドページ
+### B7. 脚立・はしご使用ガイド [x] 対応済み
 - **根拠**: 100人 ID_020（電気工事業の死亡事故最多）
-- **対応**: `/ky` プリセットに「脚立3点支持チェック8項目」を追加、事故DBトップに脚立墜落統計カードをピン留め
-- **工数**: M
+- **対応**: `LadderStatsCard` を `/accidents` トップへピン留め（平均墜落高さ・主因・多発時期の3カード＋脚立3点支持チェック 8項目の折りたたみ）。`/ky` の KY_INDUSTRY_PRESETS に新プリセット「脚立・はしご」を追加し、`/ky?preset=ladder` で自動適用。Suspense でラップして `useSearchParams` の静的ビルド除外を回避。
+- **コミット**: `a2606f6` feat(ladder): pin ladder-fall stats to /accidents and add KY preset
 
 ## C. 要判断（オーナー判断待ち・大規模）
 
@@ -141,4 +138,4 @@
 - **判断**: `docs/business-setup-2026-04-19.md` により意図的に匿名化（個人名は完全削除、資格番号のみで信頼担保）。現行方針を維持するため **対応しない**。
 
 ## 本 PR 実施範囲
-A1〜A5 を本 PR で実装。B・C は別タスクで合意後。
+A1〜A5 を本 PR で実装。B1〜B7 は 2026-04-19 の追加セッションで完了（上記参照）。C は別タスクで合意後。
