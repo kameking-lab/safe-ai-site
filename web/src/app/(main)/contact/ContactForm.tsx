@@ -10,10 +10,20 @@ const FEATURE_OPTIONS = [
   "事故データベース",
   "Eラーニング編集",
   "PDF出力",
-  "クマ出没マップ",
   "安全グッズ情報",
   "その他",
 ];
+
+const INQUIRY_CATEGORIES = [
+  { value: "safety-mgmt", label: "安全管理コンサルティング" },
+  { value: "automation", label: "業務自動化（Excel・ルーティン）" },
+  { value: "system", label: "システム構築・DX" },
+  { value: "education", label: "安全衛生教育・監修" },
+  { value: "demo", label: "本サービスのデモ・導入相談" },
+  { value: "other", label: "その他" },
+] as const;
+
+type InquiryCategory = typeof INQUIRY_CATEGORIES[number]["value"];
 
 export default function ContactForm() {
   const [form, setForm] = useState({
@@ -22,6 +32,7 @@ export default function ContactForm() {
     email: "",
     phone: "",
     message: "",
+    category: "demo" as InquiryCategory,
     features: [] as string[],
   });
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
@@ -44,11 +55,13 @@ export default function ContactForm() {
     if (!FORMSPREE_ID) {
       // Formspree 未設定時は mailto: フォールバック
       const subject = encodeURIComponent(`[ANZEN AI] お問い合わせ: ${form.company} ${form.name}`);
+      const categoryLabel = INQUIRY_CATEGORIES.find((c) => c.value === form.category)?.label ?? form.category;
       const bodyLines = [
         `会社名: ${form.company}`,
         `担当者名: ${form.name}`,
         `メール: ${form.email}`,
         form.phone ? `電話: ${form.phone}` : "",
+        `相談カテゴリ: ${categoryLabel}`,
         "",
         `【相談内容】`,
         form.message,
@@ -85,6 +98,29 @@ export default function ContactForm() {
           通常2〜3営業日以内にご返信いたします。
         </p>
       </div>
+
+      {/* 受託可能業務 */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-base font-bold text-slate-900">受託可能な業務</h2>
+        <p className="mt-2 text-sm text-slate-600">
+          サイト運営のかたわら、以下のご依頼をお受けしています。自社の業務を効率化したい方・安全管理体制を見直したい方はお気軽にご相談ください。
+        </p>
+        <ul className="mt-4 grid grid-cols-1 gap-2 text-sm text-slate-700 sm:grid-cols-2">
+          {[
+            "労働安全衛生コンサルティング",
+            "安全管理システム構築",
+            "Excel・ルーティン業務の自動化",
+            "KYシート・安全書類のデジタル化",
+            "AI活用による業務効率化全般",
+            "安全衛生教育・研修",
+          ].map((label) => (
+            <li key={label} className="flex items-start gap-2 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
+              <span className="mt-0.5 shrink-0 text-emerald-600">✓</span>
+              {label}
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {/* プロフィールセクション */}
       <section className="flex flex-col gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 sm:flex-row sm:items-start sm:gap-6">
@@ -187,6 +223,35 @@ export default function ContactForm() {
                 placeholder="03-0000-0000"
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none focus:border-[#1a7a4c] focus:ring-2 focus:ring-[#1a7a4c]/20"
               />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="contact-category" className="block text-sm font-semibold text-slate-700">
+              相談カテゴリ <span className="text-red-500">*</span>
+            </label>
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {INQUIRY_CATEGORIES.map((c) => (
+                <label
+                  key={c.value}
+                  className={`flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+                    form.category === c.value
+                      ? "border-[#1a7a4c] bg-emerald-50 font-semibold text-emerald-900"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-emerald-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    id="contact-category"
+                    name="category"
+                    value={c.value}
+                    checked={form.category === c.value}
+                    onChange={() => setForm((f) => ({ ...f, category: c.value }))}
+                    className="h-4 w-4"
+                  />
+                  {c.label}
+                </label>
+              ))}
             </div>
           </div>
 
