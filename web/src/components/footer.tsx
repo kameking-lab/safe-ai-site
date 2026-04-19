@@ -28,6 +28,15 @@ export function Footer() {
             </Link>
           </p>
           <nav aria-label="フッターナビゲーション" className="flex flex-wrap justify-center gap-4 text-xs text-slate-500">
+            <Link href="/services" className="hover:text-slate-800 hover:underline">
+              受託業務
+            </Link>
+            <Link href="/education" className="hover:text-slate-800 hover:underline">
+              特別教育
+            </Link>
+            <Link href="/consulting" className="hover:text-slate-800 hover:underline">
+              月額顧問
+            </Link>
             <Link href="/privacy" className="hover:text-slate-800 hover:underline">
               プライバシーポリシー
             </Link>

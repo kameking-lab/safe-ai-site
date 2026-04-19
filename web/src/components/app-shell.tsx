@@ -29,6 +29,8 @@ import {
   BookMarked,
   Users2,
   Heart,
+  Briefcase,
+  Handshake,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { UserMenu } from "@/components/user-menu";
@@ -107,6 +109,14 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2 },
       { id: "mental-health", label: "メンタル・カスハラ", href: "/mental-health", icon: Heart },
+    ],
+  },
+  {
+    label: "サービス",
+    items: [
+      { id: "services", label: "受託業務", href: "/services", icon: Briefcase },
+      { id: "education", label: "特別教育", href: "/education", icon: GraduationCap },
+      { id: "consulting", label: "月額顧問", href: "/consulting", icon: Handshake },
     ],
   },
   {

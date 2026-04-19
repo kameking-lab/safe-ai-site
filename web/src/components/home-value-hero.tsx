@@ -195,6 +195,64 @@ export function HomeValueHero() {
           </div>
         ))}
       </div>
+
+      {/* サービス導線（受託業務 / 特別教育 / 月額顧問） */}
+      <section
+        aria-labelledby="services-section-heading"
+        className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 shadow-sm"
+      >
+        <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">
+          ANZEN AI サービス
+        </p>
+        <h3 id="services-section-heading" className="mt-1 text-base font-bold text-slate-900 sm:text-lg">
+          安全 × AI/DX を、現場で形にします。
+        </h3>
+        <p className="mt-1 text-xs leading-5 text-slate-600">
+          労働安全コンサルタント監修。安全診断・KY システム化・特別教育・月額顧問まで、現場の課題に合わせて選べます。
+        </p>
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {[
+            {
+              href: "/services",
+              title: "受託業務",
+              desc: "安全診断・KY システム・VBA・AI 研修まで対応。¥198,000〜。",
+              cta: "受託メニューを見る",
+              color: "bg-white border-emerald-200 hover:border-emerald-400",
+              accent: "text-emerald-700",
+            },
+            {
+              href: "/education",
+              title: "特別教育（21種）",
+              desc: "オンデマンド・カスタマイズ・講師派遣。¥50,000〜。",
+              cta: "教育メニューを見る",
+              color: "bg-white border-amber-200 hover:border-amber-400",
+              accent: "text-amber-700",
+            },
+            {
+              href: "/consulting",
+              title: "月額顧問",
+              desc: "労働安全顧問 / AI・DX 顧問 / セット。¥150,000〜/月。",
+              cta: "顧問プランを見る",
+              color: "bg-white border-violet-200 hover:border-violet-400",
+              accent: "text-violet-700",
+            },
+          ].map((card) => (
+            <Link
+              key={card.href}
+              href={card.href}
+              className={`flex flex-col justify-between rounded-xl border p-4 transition-shadow hover:shadow-md ${card.color}`}
+            >
+              <div>
+                <p className={`text-sm font-bold ${card.accent}`}>{card.title}</p>
+                <p className="mt-1 text-xs leading-5 text-slate-700">{card.desc}</p>
+              </div>
+              <span className={`mt-3 inline-flex items-center gap-1 text-xs font-bold ${card.accent}`}>
+                {card.cta} →
+              </span>
+            </Link>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
