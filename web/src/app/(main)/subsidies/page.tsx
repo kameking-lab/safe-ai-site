@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Banknote, TrendingUp, ExternalLink, CheckCircle2, AlertCircle } from "lucide-react";
+import { Banknote, TrendingUp, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { ogImageUrl } from "@/lib/og-url";
+import { SubsidiesRecommender, type Subsidy } from "@/components/subsidies-recommender";
 
 const _title = "助成金・補助金ガイド｜中小企業の安全投資ROI";
 const _desc =
@@ -16,17 +17,6 @@ export const metadata: Metadata = {
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
   },
-};
-
-type Subsidy = {
-  id: string;
-  name: string;
-  target: string;
-  amount: string;
-  purpose: string[];
-  operator: string;
-  url: string;
-  note?: string;
 };
 
 const SUBSIDIES: Subsidy[] = [
@@ -44,6 +34,9 @@ const SUBSIDIES: Subsidy[] = [
     operator: "厚生労働省（独立行政法人労働者健康安全機構）",
     url: "https://www.mhlw.go.jp/stf/newpage_42107.html",
     note: "毎年度公募。予算到達で打切り。",
+    scale_tags: ["small", "mid"],
+    industry_tags: ["any"],
+    region_tags: ["nationwide"],
   },
   {
     id: "hatarakikata",
@@ -59,6 +52,9 @@ const SUBSIDIES: Subsidy[] = [
     operator: "厚生労働省（都道府県労働局）",
     url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/jikan/syoukeihatten.html",
     note: "労働時間削減や年休5日以上取得などの成果目標設定が必須。",
+    scale_tags: ["small", "mid"],
+    industry_tags: ["any"],
+    region_tags: ["nationwide"],
   },
   {
     id: "kentaikyo",
@@ -72,6 +68,9 @@ const SUBSIDIES: Subsidy[] = [
     ],
     operator: "勤労者退職金共済機構 建退共事業本部",
     url: "https://www.kentaikyo.taisyokukin.go.jp/",
+    scale_tags: ["small", "mid", "medium-large"],
+    industry_tags: ["construction"],
+    region_tags: ["nationwide"],
   },
   {
     id: "employment-dev",
@@ -86,6 +85,9 @@ const SUBSIDIES: Subsidy[] = [
     ],
     operator: "厚生労働省（都道府県労働局）",
     url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyufukin/d01-1.html",
+    scale_tags: ["small", "mid", "medium-large"],
+    industry_tags: ["any"],
+    region_tags: ["nationwide"],
   },
   {
     id: "small-biz-support",
@@ -101,6 +103,9 @@ const SUBSIDIES: Subsidy[] = [
     operator: "厚生労働省 各都道府県労働局",
     url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyufukin/index_00007.html",
     note: "年度により名称・内容が変更されます。最新情報は各労働局へ。",
+    scale_tags: ["small", "mid"],
+    industry_tags: ["transport", "construction", "forestry", "healthcare"],
+    region_tags: ["nationwide"],
   },
   {
     id: "sme-dx-2026",
@@ -115,6 +120,26 @@ const SUBSIDIES: Subsidy[] = [
     operator: "中小企業庁",
     url: "https://www.chusho.meti.go.jp/",
     note: "安全関連と直接紐づかないものも多いため、対象製品カタログを要確認。",
+    scale_tags: ["small", "mid"],
+    industry_tags: ["any"],
+    region_tags: ["nationwide"],
+  },
+  {
+    id: "tokyo-ccs",
+    name: "東京都 中小企業安全衛生職場環境改善事業",
+    target: "東京都内の中小企業",
+    amount: "上限200万円（補助率1/2）",
+    purpose: [
+      "墜落防止設備・安全通路の整備",
+      "職場の受動喫煙防止設備（屋外喫煙所等）",
+      "化学物質ばく露防止の局所排気装置導入",
+    ],
+    operator: "東京都産業労働局 労働環境改善担当",
+    url: "https://www.hataraku.metro.tokyo.lg.jp/",
+    note: "東京都内の事業所限定。年度ごとに公募要領を確認のこと。",
+    scale_tags: ["small", "mid"],
+    industry_tags: ["any"],
+    region_tags: ["tokyo-kanto"],
   },
 ];
 
@@ -146,66 +171,7 @@ export default function SubsidiesPage() {
         </div>
       </section>
 
-      {/* 助成金一覧 */}
-      <section className="mt-8">
-        <h2 className="text-lg font-bold text-slate-900">
-          主な助成金・補助金
-        </h2>
-        <p className="mt-1 text-xs text-slate-500">
-          最終更新：2026年4月。制度改正が頻繁な領域のため、申請前に各公式ページで最新条件を確認してください。
-        </p>
-
-        <div className="mt-4 space-y-4">
-          {SUBSIDIES.map((s) => (
-            <article
-              key={s.id}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <h3 className="text-base font-bold text-slate-900">{s.name}</h3>
-                <a
-                  href={s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100"
-                >
-                  公式ページ <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                </a>
-              </div>
-              <dl className="mt-3 space-y-1.5 text-xs text-slate-700 sm:text-sm">
-                <div className="grid grid-cols-[70px_1fr] gap-2 sm:grid-cols-[100px_1fr]">
-                  <dt className="font-semibold text-slate-500">対象</dt>
-                  <dd>{s.target}</dd>
-                </div>
-                <div className="grid grid-cols-[70px_1fr] gap-2 sm:grid-cols-[100px_1fr]">
-                  <dt className="font-semibold text-slate-500">金額</dt>
-                  <dd>{s.amount}</dd>
-                </div>
-                <div className="grid grid-cols-[70px_1fr] gap-2 sm:grid-cols-[100px_1fr]">
-                  <dt className="font-semibold text-slate-500">所管</dt>
-                  <dd>{s.operator}</dd>
-                </div>
-              </dl>
-              <div className="mt-3 rounded-lg bg-slate-50 p-3">
-                <p className="text-xs font-semibold text-slate-600">主な使い道</p>
-                <ul className="mt-1.5 space-y-1 text-xs leading-5 text-slate-700">
-                  {s.purpose.map((p) => (
-                    <li key={p} className="flex items-start gap-1.5">
-                      <CheckCircle2 className="mt-0.5 h-3 w-3 shrink-0 text-emerald-600" aria-hidden="true" />
-                      <span>{p}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              {s.note && (
-                <p className="mt-2 text-[11px] leading-5 text-slate-500">
-                  ※ {s.note}
-                </p>
-              )}
-            </article>
-          ))}
-        </div>
-      </section>
+      <SubsidiesRecommender subsidies={SUBSIDIES} />
 
       {/* ROI試算 */}
       <section className="mt-10">
