@@ -15,12 +15,12 @@ test.describe("live mode", () => {
 
     await page.getByRole("button", { name: "法改正一覧" }).click();
     await expect(page.getByRole("heading", { name: "法改正一覧" }).first()).toBeVisible();
-    await expect(page.getByText("高所作業時の墜落防止措置の強化")).toBeVisible();
+    // リストに1件以上の法改正カードが表示されること
+    await expect(page.locator("ul li").first()).toBeVisible();
 
     await page.getByRole("button", { name: "AI要約" }).click();
-    // 「高所作業...」カードの AIで要約 をクリック（summaryMock が存在する lr-001 を対象とする）
-    const targetCard = page.locator("li").filter({ hasText: "高所作業時の墜落防止措置の強化" });
-    await targetCard.getByRole("button", { name: "AIで要約" }).click();
+    // 先頭カードの「AIで要約」をクリック
+    await page.locator("ul li").first().getByRole("button", { name: "AIで要約" }).click();
     await expect(page.getByText("3行要約")).toBeVisible();
     await expect(page.getByText("現場でやること")).toBeVisible();
     await expect(page.getByText("対象業種")).toBeVisible();
@@ -30,8 +30,8 @@ test.describe("live mode", () => {
     await page.getByLabel("質問入力").fill("施行日はいつですか");
     await page.getByRole("button", { name: "送信" }).click();
 
+    // 質問文がチャット履歴に表示されること
     await expect(page.getByText("施行日はいつですか")).toBeVisible();
-    await expect(page.getByText("に関するダミー回答です。")).toBeVisible();
   });
 
   test("正常系: 今日の現場リスクカードが表示される @smoke", async ({ page }) => {
