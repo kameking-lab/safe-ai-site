@@ -13,13 +13,12 @@ export function personSchema(): Schema {
   return {
     "@context": "https://schema.org",
     "@type": "Person",
-    name: "金田義太",
-    alternateName: ["かねた よした", "Kaneta Yoshita", "金田 義太"],
+    name: "労働安全コンサルタント（登録番号260022）",
     jobTitle: "労働安全コンサルタント",
     hasCredential: {
       "@type": "EducationalOccupationalCredential",
       credentialCategory: "労働安全コンサルタント",
-      name: "労働安全コンサルタント 登録番号 260022",
+      name: "労働安全コンサルタント 登録番号 260022（土木区分）",
     },
     knowsAbout: [
       "労働安全衛生",
@@ -45,8 +44,7 @@ export function personSchema(): Schema {
 export function organizationSchema(): Schema {
   const founder = {
     "@type": "Person",
-    name: "金田義太",
-    alternateName: ["かねた よした", "Kaneta Yoshita"],
+    name: "労働安全コンサルタント（登録番号260022）",
     jobTitle: "労働安全コンサルタント",
     url: "https://safe-ai-site.vercel.app/about",
   };
@@ -73,8 +71,7 @@ export function webSiteSchema(): Schema {
       "労働安全衛生の現場運用ポータル。法改正・リスク管理・KY用紙・Eラーニングをまとめて確認。",
     author: {
       "@type": "Person",
-      name: "金田義太",
-      alternateName: ["かねた よした", "Kaneta Yoshita"],
+      name: "労働安全コンサルタント（登録番号260022）",
       jobTitle: "労働安全コンサルタント",
       url: "https://safe-ai-site.vercel.app/about",
     },

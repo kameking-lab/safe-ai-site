@@ -24,7 +24,7 @@ export function Footer() {
           <p className="text-xs text-slate-500">
             © 2026 ANZEN AI ·{" "}
             <Link href="/about" className="hover:text-slate-800 hover:underline">
-              監修：金田義太（労働安全コンサルタント）
+              監修：労働安全コンサルタント（登録番号260022）
             </Link>
           </p>
           <nav aria-label="フッターナビゲーション" className="flex flex-wrap justify-center gap-4 text-xs text-slate-500">

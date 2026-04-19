@@ -19,14 +19,14 @@ import {
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 
 export const metadata: Metadata = {
-  title: "金田義太（かねた よした）| 労働安全コンサルタント | ANZEN AI 監修者",
+  title: "運営者情報・特商法表記 | ANZEN AI",
   description:
-    "ANZEN AI 監修者の金田義太（労働安全コンサルタント登録番号260022）のプロフィール、特定商取引法表記、監修範囲、お問い合わせ先を掲載。建設・製造・林業の労働安全衛生コンサルティングも受託しています。",
-  keywords: ["金田義太", "かねた よした", "Kaneta Yoshita", "労働安全コンサルタント", "ANZEN AI", "登録番号260022", "安全管理", "建設安全"],
+    "ANZEN AI（屋号）の運営者情報・特定商取引法に基づく表記・監修範囲を掲載。労働安全コンサルタント（登録番号260022・土木区分）が監修。建設・製造・林業の労働安全衛生コンサルティングも受託しています。",
+  keywords: ["ANZEN AI", "労働安全コンサルタント", "登録番号260022", "労働安全衛生", "安全管理", "特定商取引法"],
   openGraph: {
-    title: "金田義太（かねた よした）| 労働安全コンサルタント | ANZEN AI 監修者",
+    title: "運営者情報・特商法表記 | ANZEN AI",
     description:
-      "ANZEN AI 監修者の金田義太（労働安全コンサルタント登録番号260022）のプロフィール、特定商取引法表記、監修範囲、お問い合わせ先を掲載。建設・製造・林業の労働安全衛生コンサルティングも受託しています。",
+      "ANZEN AI（屋号）の運営者情報・特定商取引法に基づく表記・監修範囲を掲載。労働安全コンサルタント（登録番号260022・土木区分）が監修。",
   },
 };
 
@@ -80,7 +80,7 @@ const COLOR_MAP = {
 const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
   {
     label: "販売業者名",
-    value: "金田 義太（労働安全コンサルタント 登録番号 260022）",
+    value: "ANZEN AI 事務局（労働安全コンサルタント 登録番号 260022・土木区分）",
   },
   {
     label: "所在地",
@@ -206,14 +206,14 @@ export default function AboutPage() {
             </div>
             <div className="flex-1 text-center sm:text-left">
               <p className="text-2xl font-bold text-slate-900 sm:text-3xl">
-                金田 義太
+                労働安全コンサルタント
               </p>
               <p className="mt-1 text-base text-slate-500">
-                かねた よした
+                登録番号 260022（土木区分）
               </p>
               <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700 border border-emerald-200">
                 <Scale className="h-4 w-4" />
-                労働安全コンサルタント 登録番号 260022
+                屋号：ANZEN AI
               </div>
               <p className="mt-3 text-sm leading-6 text-slate-600">
                 労働安全衛生に関するコンサルティング・安全管理システムの開発・提供を行っています。

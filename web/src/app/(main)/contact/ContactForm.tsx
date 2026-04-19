@@ -124,24 +124,23 @@ export default function ContactForm() {
 
       {/* プロフィールセクション */}
       <section className="flex flex-col gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 sm:flex-row sm:items-start sm:gap-6">
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[#1a7a4c] text-3xl font-bold text-white">
-          金
+        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-[#1a7a4c] text-2xl font-bold text-white">
+          安
         </div>
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
             ANZEN AI 監修
           </p>
           <h2 className="mt-1 text-lg font-bold text-slate-900">
-            労働安全コンサルタント　金田 義太
+            労働安全コンサルタント（登録番号260022・土木区分）
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-slate-700">
-            中小企業から大手建設業まで、現場の安全管理体制の構築・改善を支援してきた労働安全コンサルタント。
-            厚生労働省登録労働安全コンサルタント（機械・建設工事）。
-            安全衛生教育、リスクアセスメント導入、化学物質管理の指針策定を専門とする。
+            スーパーゼネコンでの大型土木インフラの施工管理経験をもつ労働安全コンサルタント。
+            現場目線での安全衛生教育・リスクアセスメント導入・化学物質管理の指針策定を専門としています。
             本サービスのコンテンツ監修を担当。
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            {["労働安全コンサルタント（機械）", "労働安全コンサルタント（建設工事）", "リスクアセスメント専門"].map((badge) => (
+            {["労働安全コンサルタント（土木）", "1級土木施工管理技士", "監理技術者"].map((badge) => (
               <span
                 key={badge}
                 className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800"
