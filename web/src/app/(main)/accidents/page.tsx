@@ -9,7 +9,7 @@ import { realAccidentCases } from "@/data/mock/real-accident-cases";
 
 const _title = "労働災害 事故事例データベース";
 const _desc =
-  "厚労省「職場のあんぜんサイト」実事例200件以上を収録。業種・事故種別で検索し再発防止に活用。建設・製造・林業の安全管理に。";
+  "厚労省「職場のあんぜんサイト」504,415件の全件検索に加え、死亡災害4,043件、サイト収録268件の詳細事例を業種・事故種別で検索し再発防止に活用。";
 
 export const metadata: Metadata = {
   title: _title,

@@ -1218,7 +1218,7 @@ export function KyPageContent() {
               href: "/accidents",
               label: "事故データベース",
               description:
-                "200件以上の実事故事例を業種・種別で検索。危険予知の根拠として活用できます。",
+                "504,415件のMHLW全件検索と268件の詳細事例を業種・種別で検索。危険予知の根拠として活用できます。",
               color: "orange",
               cta: "事故事例を確認する",
             },
