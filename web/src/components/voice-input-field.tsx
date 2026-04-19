@@ -2,16 +2,42 @@
 
 import { useCallback, useRef, useState, useSyncExternalStore } from "react";
 
+type SpeechErrorEvent = { error?: string; message?: string };
+
 type BrowserSpeechRecognition = {
   lang: string;
   interimResults: boolean;
   continuous: boolean;
   onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript?: string }>> }) => void) | null;
-  onerror: (() => void) | null;
+  onerror: ((event: SpeechErrorEvent) => void) | null;
   onend: (() => void) | null;
   start: () => void;
   stop: () => void;
 };
+
+function describeVoiceError(err: string | undefined): string {
+  switch (err) {
+    case "not-allowed":
+    case "NotAllowedError":
+    case "permission-denied":
+      return "マイクが許可されていません。ブラウザのアドレスバー🔒から「マイク」を許可してください。";
+    case "no-speech":
+      return "音声が検出されませんでした。もう一度お試しください。";
+    case "audio-capture":
+      return "マイクが見つかりません。デバイスを接続してください。";
+    case "network":
+      return "ネットワークエラーが発生しました。接続を確認してください。";
+    case "not-supported":
+    case "service-not-allowed":
+      return "このブラウザは音声入力に未対応です（推奨：Chrome/Edge）。";
+    case "aborted":
+      return "音声入力が中断されました。";
+    case "language-not-supported":
+      return "日本語が設定されていません。ブラウザ言語を確認してください。";
+    default:
+      return err ? `音声エラー: ${err}` : "音声エラー";
+  }
+}
 
 type SpeechRecognitionCtor = new () => BrowserSpeechRecognition;
 
@@ -40,28 +66,37 @@ function useSpeechToText() {
     textRef.current = "";
     const Ctor = typeof window !== "undefined" ? window.SpeechRecognition || window.webkitSpeechRecognition : null;
     if (!Ctor) {
-      setError("音声入力未対応");
+      setError(describeVoiceError("not-supported"));
       return;
     }
-    const recognition = new Ctor();
-    recognition.lang = "ja-JP";
-    recognition.interimResults = true;
-    recognition.continuous = false;
-    recognition.onresult = (event) => {
-      let t = "";
-      for (let i = 0; i < event.results.length; i += 1) {
-        t += event.results[i][0]?.transcript ?? "";
-      }
-      textRef.current = t;
-    };
-    recognition.onerror = () => setError("音声エラー");
-    recognition.onend = () => {
+    try {
+      const recognition = new Ctor();
+      recognition.lang = "ja-JP";
+      recognition.interimResults = true;
+      recognition.continuous = false;
+      recognition.onresult = (event) => {
+        let t = "";
+        for (let i = 0; i < event.results.length; i += 1) {
+          t += event.results[i][0]?.transcript ?? "";
+        }
+        textRef.current = t;
+      };
+      recognition.onerror = (event) => {
+        setListening(false);
+        setError(describeVoiceError(event?.error));
+      };
+      recognition.onend = () => {
+        setListening(false);
+        onEnded?.(textRef.current.trim());
+      };
+      ref.current = recognition;
+      recognition.start();
+      setListening(true);
+    } catch (err) {
+      const name = err instanceof Error ? err.name : undefined;
+      setError(describeVoiceError(name));
       setListening(false);
-      onEnded?.(textRef.current.trim());
-    };
-    ref.current = recognition;
-    recognition.start();
-    setListening(true);
+    }
   }, []);
 
   const stop = useCallback(() => {
@@ -105,7 +140,15 @@ export function VoiceMicButton({ onFinalText, className }: VoiceMicButtonProps) 
       >
         {listening ? "停止" : "音声"}
       </button>
-      {error && <span className="text-[9px] text-rose-600">{error}</span>}
+      {error && (
+        <span
+          className="max-w-[240px] text-[10px] leading-snug text-rose-600"
+          role="alert"
+          title={error}
+        >
+          {error}
+        </span>
+      )}
     </span>
   );
 }
