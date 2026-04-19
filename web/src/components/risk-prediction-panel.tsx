@@ -379,6 +379,19 @@ function PrintableReport({
 
 // ---------- メインコンポーネント ----------
 
+// 朝礼5分前の職長向け：業種・工種を1タップで呼び出すチップ
+const QUICK_WORK_CHIPS: { label: string; query: string }[] = [
+  { label: "足場", query: "足場の組立・解体作業" },
+  { label: "高所", query: "高所作業（2m以上の墜落防止）" },
+  { label: "電気", query: "電気設備・活線近接作業" },
+  { label: "解体", query: "解体・はつり作業" },
+  { label: "重機", query: "バックホー・クレーン等の重機作業" },
+  { label: "運搬", query: "玉掛け・荷役・運搬作業" },
+  { label: "化学", query: "有機溶剤・特化物の取扱い作業" },
+  { label: "酸欠", query: "閉所・酸素欠乏危険作業" },
+];
+
+// 従来のサンプル文（補助的に残す）
 const QUICK_EXAMPLES = [
   "高所での鉄骨組立作業",
   "足場解体",
@@ -484,9 +497,36 @@ export function RiskPredictionPanel() {
           </div>
         </div>
 
-        {/* クイック入力例 */}
+        {/* 業種・工種チップ（朝礼5分前の1タップ呼び出し） */}
         <div className="mt-3">
-          <p className="text-[11px] text-slate-400">クイック入力例:</p>
+          <p className="text-[11px] font-semibold text-slate-600">
+            業種・工種から呼び出す（1タップ）:
+          </p>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {QUICK_WORK_CHIPS.map((chip) => (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() => {
+                  setQuery(chip.query);
+                  setTimeout(() => {
+                    const found = searchAccidentCases(chip.query, allCases, 30);
+                    setResults(found);
+                    setSearched(true);
+                    setActiveTab("search");
+                  }, 0);
+                }}
+                className="min-h-[44px] min-w-[64px] rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 hover:border-emerald-400 hover:bg-emerald-100"
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 従来のサンプル文入力例 */}
+        <div className="mt-3">
+          <p className="text-[11px] text-slate-400">サンプル作業内容:</p>
           <div className="mt-1 flex flex-wrap gap-1.5">
             {QUICK_EXAMPLES.map((ex) => (
               <button

@@ -193,7 +193,7 @@ export function AccidentDatabasePanel({
         </div>
       </div>
 
-      <div className="mt-3 space-y-3">
+      <div className="mt-3 space-y-3 print:hidden">
         <div>
           <label htmlFor="accident-keyword" className="block text-xs font-semibold text-slate-700">
             キーワード検索

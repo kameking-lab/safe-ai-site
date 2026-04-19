@@ -331,7 +331,7 @@ export function LawRevisionList({
       <p className="mt-1 text-xs text-slate-500 sm:text-sm">
         直近10年の主要な労働安全衛生関連の改正を収録。キーワード・年で絞り込みできます（音声入力対応）。
       </p>
-      <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-3 grid grid-cols-1 gap-2 print:hidden sm:grid-cols-2 lg:grid-cols-3">
         <div className="sm:col-span-2">
           <label className="text-xs font-semibold text-slate-700" htmlFor="law-search">
             キーワード
@@ -369,7 +369,7 @@ export function LawRevisionList({
           </label>
         </div>
       </div>
-      <div className="mt-3">
+      <div className="mt-3 print:hidden">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-semibold text-slate-700">
             業種フィルタ（複数選択可）
@@ -407,7 +407,7 @@ export function LawRevisionList({
         </div>
       </div>
       {/* 属性・規模フィルタ */}
-      <div className="mt-3 flex flex-wrap gap-x-6 gap-y-3">
+      <div className="mt-3 flex flex-wrap gap-x-6 gap-y-3 print:hidden">
         <div>
           <p className="text-xs font-semibold text-slate-700">対象属性</p>
           <div className="mt-1 flex flex-wrap gap-1.5">
@@ -447,7 +447,7 @@ export function LawRevisionList({
           </div>
         </div>
       </div>
-      <div className="mt-3">
+      <div className="mt-3 print:hidden">
         <p className="text-xs font-semibold text-slate-700">種別フィルタ</p>
         <div className="mt-1 flex flex-wrap gap-2">
           {["すべて", "法律", "省令", "通達", "告示", "ガイドライン"].map((k) => (
@@ -468,7 +468,7 @@ export function LawRevisionList({
       </div>
 
       {/* 影響度フィルタ + 施行日ソート */}
-      <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+      <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2 print:hidden">
         <div>
           <p className="text-xs font-semibold text-slate-700">影響度</p>
           <div className="mt-1 flex flex-wrap gap-2">
@@ -526,7 +526,7 @@ export function LawRevisionList({
       {showEmptyState && (
         <p className="mt-2 text-xs text-slate-500">表示できる法改正データがありません。</p>
       )}
-      <ul className="mt-3 max-h-[70vh] space-y-3 overflow-y-auto pr-1">
+      <ul className="mt-3 max-h-[70vh] space-y-3 overflow-y-auto pr-1 print:max-h-none print:overflow-visible print:pr-0">
         {filtered.map((revision) => {
           const isSelected = selectedRevisionId === revision.id;
           const isLoadingSummary = loadingRevisionId === revision.id;

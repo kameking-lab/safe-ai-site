@@ -89,7 +89,7 @@ export function HomeValueHero() {
           AIで変える。
         </h2>
         <p className="mt-2 text-sm leading-6 text-green-100">
-          建設・製造・林業の現場責任者・安全担当向け。
+          建設・製造・林業・運輸・医療福祉の現場責任者・安全担当向け。
           朝礼用リスク確認・法改正・KY用紙・事故DB・Eラーニングを一つのポータルに集約。
           スマホでも大画面サイネージでも使えます。
         </p>

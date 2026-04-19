@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type { ChatbotSource } from "@/app/api/chatbot/route";
 import { VoiceMicButton } from "@/components/voice-input-field";
 
@@ -39,6 +40,17 @@ export function ChatbotPanel() {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+  const prefillAppliedRef = useRef(false);
+
+  useEffect(() => {
+    if (prefillAppliedRef.current) return;
+    const q = searchParams?.get("q");
+    if (q && q.trim()) {
+      prefillAppliedRef.current = true;
+      setInput(q.trim());
+    }
+  }, [searchParams]);
 
   async function handleSend(question?: string) {
     const text = (question ?? input).trim();

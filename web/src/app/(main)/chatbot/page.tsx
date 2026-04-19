@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ChatbotPanel } from "@/components/chatbot-panel";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
@@ -74,7 +75,9 @@ export default function ChatbotPage() {
 
       {/* チャット本体 */}
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <ChatbotPanel />
+        <Suspense fallback={<div className="text-sm text-slate-400">読み込み中…</div>}>
+          <ChatbotPanel />
+        </Suspense>
       </div>
 
       {/* 使い方ガイド */}

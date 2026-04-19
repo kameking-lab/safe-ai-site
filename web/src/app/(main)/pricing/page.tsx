@@ -175,6 +175,19 @@ export default function PricingPage() {
           現在はβ運用期間のため、フリープランでも過去問クイズ・AIチャットボット・化学物質リスクアセスメントを含む全機能を制限なしでお試しいただけます。
           正式リリース以降は上記の利用制限を順次適用予定です。
         </p>
+        <div className="mt-3 rounded-lg border border-amber-300/70 bg-white/60 p-3">
+          <p className="font-semibold text-amber-900">β協力者特典（予定）</p>
+          <ul className="mt-1 list-disc space-y-0.5 pl-5 text-amber-900/90">
+            <li>正式リリース後3ヶ月：プロプラン 50% オフ</li>
+            <li>β協力者バッジをアカウントに付与</li>
+            <li>フィードバック採用時はリリースノートに匿名掲載</li>
+          </ul>
+          <p className="mt-2 text-[11px] text-amber-900/70">
+            ※ 特典適用にはβ期間中に
+            <a href="/contact" className="underline hover:text-amber-950">お問い合わせフォーム</a>
+            から「β協力希望」とご連絡ください。
+          </p>
+        </div>
       </div>
 
       {/* Plans grid */}

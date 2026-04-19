@@ -589,6 +589,28 @@ export function ChemicalRaPanel() {
             </div>
           )}
 
+          {/* 法令チャットへの導線 */}
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+            <h3 className="text-sm font-bold text-blue-900">この物質の法令取扱いを確認</h3>
+            <p className="mt-1 text-xs text-blue-900/80">
+              特化則・有機則・酸欠則など、業務で必要な取扱基準・作業主任者選任・作業環境測定の要件を法令チャットで確認できます。
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a
+                href={`/chatbot?q=${encodeURIComponent(`${result.chemicalName} の取扱い基準と関連する特化則・有機則の条文を教えて`)}`}
+                className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500"
+              >
+                法令チャットで質問する →
+              </a>
+              <a
+                href={`/law-search?q=${encodeURIComponent(result.chemicalName)}`}
+                className="inline-flex items-center gap-1 rounded-lg border border-blue-300 bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+              >
+                法令全文検索で調べる →
+              </a>
+            </div>
+          </div>
+
           {/* 免責事項 */}
           <p className="text-[11px] leading-relaxed text-slate-400">
             ※ 本情報はAIが一般的なSDS・GHSデータに基づいて生成した参考情報です。
