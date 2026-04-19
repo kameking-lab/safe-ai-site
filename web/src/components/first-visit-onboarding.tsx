@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Type, Sun, Sparkles, X, Check } from "lucide-react";
 import { useFurigana } from "@/contexts/furigana-context";
 import { useEasyJapanese } from "@/contexts/easy-japanese-context";
@@ -13,19 +13,21 @@ const HIGH_CONTRAST_KEY = "high-contrast-enabled";
  * 初回訪問時のアクセシビリティ設定モーダル。
  * ID_093（70代清掃員・孫がいないと文字大を見つけられない）の指摘に応じ、
  * 3つの主要アクセシビリティ設定（文字大・屋外モード・やさしい日本語）を
- * 最初に大きな選択肢として提示する。スキップ可能。
+ * 最初に大きな選択肢として提示する。一度スキップしたら二度と表示しない。
  */
-function shouldOpenInitially(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return !localStorage.getItem(ONBOARDING_KEY);
-  } catch {
-    return false;
-  }
-}
 
 export function FirstVisitOnboarding() {
-  const [open, setOpen] = useState<boolean>(shouldOpenInitially);
+  // SSR・hydration後に localStorage をチェックして開く（一度閉じたら二度と開かない）
+  const [open, setOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      const seen = localStorage.getItem(ONBOARDING_KEY);
+      if (!seen) setOpen(true);
+    } catch {
+      /* noop */
+    }
+  }, []);
   const [largeFont, setLargeFont] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const { easyJapaneseEnabled, setEasyJapaneseEnabled } = useEasyJapaneseCompat();
@@ -47,8 +49,10 @@ export function FirstVisitOnboarding() {
   };
 
   const skip = () => {
+    // 厳格化: スキップしたら二度と開かないよう、複数のマーカーを書く
     try {
       localStorage.setItem(ONBOARDING_KEY, "1");
+      localStorage.setItem(`${ONBOARDING_KEY}:dismissed-at`, new Date().toISOString());
     } catch {
       /* noop */
     }
