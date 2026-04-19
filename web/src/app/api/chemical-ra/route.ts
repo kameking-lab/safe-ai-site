@@ -210,11 +210,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ ...DEMO_RESPONSE, chemicalName, aiStatus: "demo", aiErrorDetail: "GEMINI_API_KEY未設定" }, { status: 200 });
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    systemInstruction: SYSTEM_PROMPT,
-  });
   const workPart = body?.workContent?.trim()
     ? `\n\n【作業内容】\n${body.workContent.trim()}`
     : "";
@@ -227,6 +222,11 @@ ${chemicalName}${workPart}
 JSONブロック形式で安全データを提供し、物質の基本的な性状と取扱い上の注意点を説明してください。`;
 
   try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      systemInstruction: SYSTEM_PROMPT,
+    });
     const result = await model.generateContent(userPrompt);
     const rawReply = result.response.text();
     const extracted = extractJsonBlock(rawReply);

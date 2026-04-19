@@ -8,7 +8,7 @@ import { amazonSearchUrl, rakutenSearchUrl } from "@/lib/affiliate";
 import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
 import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
 import { SimpleMarkdown } from "@/components/simple-markdown";
-import { findByCas, type MergedChemical } from "@/lib/mhlw-chemicals";
+import { findByCas, searchMergedChemicals, type MergedChemical } from "@/lib/mhlw-chemicals";
 import type {
   ChemicalRaResponse,
   GhsHazard,
@@ -177,12 +177,22 @@ export function ChemicalRaPanel() {
   const [result, setResult] = useState<ChemicalRaResponse | null>(null);
   const [mhlwSelected, setMhlwSelected] = useState<MergedChemical | null>(null);
 
+  // 物質名から自動MHLW検索（セレクター選択が優先）
+  const autoMhlw = useMemo(() => {
+    if (mhlwSelected) return null;
+    if (!chemicalName.trim()) return null;
+    const results = searchMergedChemicals(chemicalName.trim(), 1);
+    return results.length > 0 ? results[0] : null;
+  }, [chemicalName, mhlwSelected]);
+
+  const displayedMhlw = mhlwSelected ?? autoMhlw;
+
   // 判定ロジック: MHLW 8h 基準値 → AI exposureLimit の順で採用
   const activeLimit = useMemo(() => {
-    const mhlwLimit = mhlwSelected?.details?.limit8h;
+    const mhlwLimit = displayedMhlw?.details?.limit8h;
     const aiLimit = result?.exposureLimit;
     return mhlwLimit || aiLimit || null;
-  }, [mhlwSelected, result]);
+  }, [displayedMhlw, result]);
 
   const concentrationVerdict = useMemo(() => {
     if (!measuredConc.trim() || !activeLimit) return null;
@@ -407,8 +417,8 @@ export function ChemicalRaPanel() {
         </div>
       </div>
 
-      {/* MHLW 物質詳細（選択時のみ） */}
-      {mhlwSelected && <MhlwChemicalInfoCard chemical={mhlwSelected} />}
+      {/* MHLW 物質詳細（選択時 or 名称一致時に即表示） */}
+      {displayedMhlw && <MhlwChemicalInfoCard chemical={displayedMhlw} />}
 
       {/* ローディング */}
       {loading && (
