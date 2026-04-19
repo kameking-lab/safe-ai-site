@@ -451,6 +451,7 @@ export function RiskPredictionPanel() {
               className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               placeholder="例: 高所での鉄骨組立作業、足場解体、電気工事など"
               rows={2}
+              maxLength={500}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -460,6 +461,9 @@ export function RiskPredictionPanel() {
                 }
               }}
             />
+            <p className={`text-right text-[11px] ${query.length >= 490 ? "text-rose-500 font-semibold" : "text-slate-400"}`}>
+              {query.length}/500文字
+            </p>
             <InputWithVoice
               className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               placeholder="現場名（任意 - PDF出力時に記載）"
@@ -543,9 +547,11 @@ export function RiskPredictionPanel() {
               <p className="text-xs font-semibold text-slate-600">
                 サイト収録事例（300 件）からの類似結果
               </p>
-              {results.map((c, i) => (
-                <AccidentCard key={c.id} c={c} index={i} />
-              ))}
+              <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1">
+                {results.map((c, i) => (
+                  <AccidentCard key={c.id} c={c} index={i} />
+                ))}
+              </div>
             </div>
           )}
         </div>
