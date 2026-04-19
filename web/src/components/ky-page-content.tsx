@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { KyIndustryPresetPicker } from "@/components/ky-industry-preset-picker";
+import { KyInitialWizard } from "@/components/ky-initial-wizard";
 import type { KyIndustryPreset } from "@/data/mock/ky-industry-presets";
 import { KyRecordList } from "@/components/ky-record-list";
 import { KySignatureCanvas } from "@/components/ky-signature-canvas";
@@ -270,6 +271,20 @@ export function KyPageContent() {
     });
   }, []);
 
+  const handleWizardApply = useCallback((preset: KyIndustryPreset, selectedWork: string) => {
+    setRecord((prev) => {
+      const workRows = prev.workRows.map((r, i) =>
+        i === 0 ? { ...r, workDetail: selectedWork } : r
+      );
+      const riskRows = prev.riskRows.map((r, i) => {
+        const p = preset.risks[i - 1];
+        if (i === 0 || !p) return r;
+        return { ...r, hazard: p.hazard, reduction: p.reduction };
+      });
+      return { ...prev, workRows, riskRows };
+    });
+  }, []);
+
   const setWorkRow = useCallback((i: number, row: KyInstructionWorkRow) => {
     setRecord((prev) => ({
       ...prev,
@@ -366,6 +381,7 @@ export function KyPageContent() {
 
   return (
     <div className="pb-20 print:pb-0">
+      <KyInitialWizard onApply={handleWizardApply} />
       {/* Sticky mode selector */}
       <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur-sm lg:px-8 print:hidden">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2">
