@@ -81,7 +81,7 @@ export function HomeValueHero() {
             </svg>
           </span>
           <p className="text-xs font-semibold uppercase tracking-widest text-green-200">
-            ANZEN AI — 労働安全コンサルタント監修
+            ANZEN AI — 労働安全コンサルタント（登録番号260022）監修
           </p>
         </div>
         <h2 className="mt-2 text-xl font-bold leading-snug sm:text-2xl">
@@ -166,7 +166,7 @@ export function HomeValueHero() {
           ))}
         </div>
         <p className="mt-3 text-[10px] leading-4 text-slate-500">
-          ※ 数値は監修者（労働安全コンサルタント）の社内テストおよびβ運用の試算に基づく想定値です。実際の効果は現場・運用により異なります。
+          ※ 数値は監修者（労働安全コンサルタント・登録番号260022）の検証およびβ運用の試算に基づく想定値です。実際の効果は現場・運用により異なります。
         </p>
       </div>
 
@@ -208,7 +208,7 @@ export function HomeValueHero() {
           安全 × AI/DX を、現場で形にします。
         </h3>
         <p className="mt-1 text-xs leading-5 text-slate-600">
-          労働安全コンサルタント監修。安全診断・KY システム化・特別教育・月額顧問まで、現場の課題に合わせて選べます。
+          労働安全コンサルタント（登録番号260022）が監修。安全診断・KY システム化・特別教育・月額顧問まで、現場の課題に合わせて選べます。
         </p>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
           {[
