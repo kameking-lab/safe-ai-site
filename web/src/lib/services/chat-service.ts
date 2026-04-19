@@ -74,9 +74,18 @@ async function fetchWithTimeout(
 }
 
 export function createMockChatService(): ChatService {
-  // 法改正チャットは Gemini ベースの実APIに統一されたため、
-  // 従来のローカルダミー応答は廃止し、ApiChatService を返す。
-  return new ApiChatService(fetch);
+  return {
+    createInitialMessages,
+    async sendMessage(_: SendChatMessageInput): Promise<ServiceResult<ChatMessage>> {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      return {
+        ok: true,
+        data: createMessage(
+          "この法改正は現場の安全管理に影響します。詳細は法令原文と厚生労働省ガイドラインをご確認ください。"
+        ),
+      };
+    },
+  };
 }
 
 export class ApiChatService implements ChatService {
