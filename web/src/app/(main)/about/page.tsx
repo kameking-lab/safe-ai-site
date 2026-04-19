@@ -216,8 +216,8 @@ export default function AboutPage() {
                 屋号：ANZEN AI
               </div>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                労働安全衛生に関するコンサルティング・安全管理システムの開発・提供を行っています。
-                現場の安全を支えるデジタルツールとして ANZEN AI を監修・運営しています。
+                スーパーゼネコンでの大型インフラ施工管理の実務経験を活かし、労働安全衛生コンサルティングと安全管理システムの開発・提供を行っています。
+                AI・DX の活用で現場の安全業務を効率化するデジタルツールとして、屋号 ANZEN AI のもと本サイトを監修・運営しています。
               </p>
               <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3 text-left">
                 <p className="text-xs font-semibold text-emerald-800">監修範囲</p>
@@ -237,23 +237,39 @@ export default function AboutPage() {
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <p className="text-xs font-semibold text-slate-700 mb-1">取得資格</p>
                   <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
-                    <li>・ 労働安全コンサルタント（登録番号 260022）</li>
+                    <li>・ 労働安全コンサルタント（土木区分・登録番号 260022）</li>
                     <li>・ 1級土木施工管理技士</li>
                     <li>・ 監理技術者</li>
                   </ul>
                 </div>
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs font-semibold text-slate-700 mb-1">専門分野</p>
+                  <p className="text-xs font-semibold text-slate-700 mb-1">実務経験</p>
                   <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
-                    <li>・ 建設・製造業の安全管理</li>
-                    <li>・ AIシステム開発・業務自動化</li>
-                    <li>・ 安全書類のデジタル化</li>
+                    <li>・ スーパーゼネコンでの施工管理</li>
+                    <li>・ 大型インフラ工事の安全管理</li>
+                    <li>・ 下請・協力会社を含む現場統括</li>
                   </ul>
                 </div>
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs font-semibold text-slate-700 mb-1">受賞歴</p>
+                  <p className="text-xs font-semibold text-slate-700 mb-1">AI・DX 活用</p>
                   <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
-                    <li>・ NEXCO東日本 優良事例表彰</li>
+                    <li>・ Python / OpenAI API による安全業務自動化</li>
+                    <li>・ Excel VBA で帳票・KY・安全書類をデジタル化</li>
+                    <li>・ Claude Code を用いた高速 Web 開発</li>
+                  </ul>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs font-semibold text-slate-700 mb-1">専門分野</p>
+                  <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
+                    <li>・ 建設・製造業の労働安全衛生</li>
+                    <li>・ リスクアセスメント・KY の仕組み化</li>
+                    <li>・ 安全衛生教育・特別教育の企画運営</li>
+                  </ul>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xs font-semibold text-slate-700 mb-1">表彰実績</p>
+                  <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
+                    <li>・ 大規模プロジェクトで表彰実績あり</li>
                   </ul>
                 </div>
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
