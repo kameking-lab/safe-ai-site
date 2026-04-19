@@ -210,6 +210,15 @@ export const ALL_ACCIDENT_CATEGORIES: AccidentWorkCategory[] = [
   "清掃",
 ];
 
+export type AccidentSource = {
+  /** 出典サイト名（例: 職場のあんぜんサイト） */
+  site: string;
+  /** 出典側の事例ID（判別できる場合） */
+  caseId?: string;
+  /** 事例ページへの直接URL */
+  url?: string;
+};
+
 export type AccidentCase = {
   id: string;
   title: string;
@@ -226,6 +235,8 @@ export type AccidentCase = {
   worker_attribute?: string[];
   /** 事業所規模 */
   company_size?: string;
+  /** 出典情報（職場のあんぜんサイト等） */
+  source?: AccidentSource;
 };
 
 // API接続時に差し替えしやすいよう、UI側はこの別名を利用する。

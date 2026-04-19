@@ -11,6 +11,7 @@ import {
   type AccidentWorkCategory,
 } from "@/lib/types/domain";
 import { fuzzyMatchAll } from "@/lib/fuzzy-search";
+import { resolveAccidentSource } from "@/lib/accident-source";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
 
 const PAGE_SIZE = 40;
@@ -352,6 +353,7 @@ export function AccidentDatabasePanel({
         ) : (
           pageItems.map((accident) => {
             const isExpanded = expandedId === accident.id;
+            const source = resolveAccidentSource(accident);
             return (
               <article
                 key={accident.id}
@@ -435,6 +437,24 @@ export function AccidentDatabasePanel({
                   >
                     KY用紙へ反映する
                   </Link>
+                  {source ? (
+                    source.url ? (
+                      <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-semibold text-amber-800 underline decoration-amber-300 underline-offset-2"
+                      >
+                        出典: {source.site}
+                        {source.caseId ? `（No.${source.caseId}）` : ""} ↗
+                      </a>
+                    ) : (
+                      <span className="text-xs font-semibold text-slate-500">
+                        出典: {source.site}
+                        {source.caseId ? `（No.${source.caseId}）` : ""}
+                      </span>
+                    )
+                  ) : null}
                 </div>
               </article>
             );
