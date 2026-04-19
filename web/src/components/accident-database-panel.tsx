@@ -118,6 +118,7 @@ export function AccidentDatabasePanel({
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     const initial = parseIndustriesParam(sp.get("acc_industries"));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (initial.size > 0) setSelectedIndustriesState(initial);
   }, []);
 
@@ -141,7 +142,7 @@ export function AccidentDatabasePanel({
         return next;
       });
     },
-    [updateIndustriesUrl]
+    [updateIndustriesUrl, setPage]
   );
 
   const resetIndustries = useCallback(() => {
@@ -149,7 +150,7 @@ export function AccidentDatabasePanel({
     setSelectedIndustriesState(empty);
     updateIndustriesUrl(empty);
     setPage(0);
-  }, [updateIndustriesUrl]);
+  }, [updateIndustriesUrl, setPage]);
 
   const filteredByIndustry = useMemo(
     () => cases.filter((c) => {

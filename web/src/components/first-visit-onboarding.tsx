@@ -23,6 +23,7 @@ export function FirstVisitOnboarding() {
   useEffect(() => {
     try {
       const seen = localStorage.getItem(ONBOARDING_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (!seen) setOpen(true);
     } catch {
       /* noop */

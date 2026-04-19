@@ -290,6 +290,7 @@ export function SafetyDiaryPanel() {
 
   // マウント後に日付・ID を初期化（SSR hydration mismatch 対策）
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrent((prev) => {
       if (prev.date && prev.id) return prev;
       return {

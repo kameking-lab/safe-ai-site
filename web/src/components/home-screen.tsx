@@ -229,6 +229,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
   // マウント後に日付を初期化（SSR hydration mismatch 対策）
   useEffect(() => {
     const d = new Date();
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setKySheetDraft((prev) => (prev.date ? prev : { ...prev, date: d.toISOString().slice(0, 10) }));
     setKyInstructionRecord((prev) =>
       prev.workDateYear || prev.workDateMonth || prev.workDateDay

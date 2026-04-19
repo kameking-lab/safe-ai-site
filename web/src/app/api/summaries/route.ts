@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { summaryMockByRevisionId } from "@/data/mock/summaries";
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
-import type { SummaryApiResponse, SummaryApiRouteResponse } from "@/lib/types/api";
+import type { SummaryApiRouteResponse } from "@/lib/types/api";
 import type { LawRevisionSummary } from "@/lib/types/domain";
 
 function parseDelay(value: string | null, fallbackMs: number): number {
