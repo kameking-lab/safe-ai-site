@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 
 export type Language = "ja" | "en" | "vi" | "zh" | "pt" | "tl";
 
@@ -45,19 +45,18 @@ function isLanguage(v: unknown): v is Language {
   return typeof v === "string" && (SUPPORTED_LANGUAGES as readonly string[]).includes(v);
 }
 
-function loadLanguage(): Language {
-  if (typeof window === "undefined") return "ja";
-  try {
-    const stored = localStorage.getItem("language");
-    if (isLanguage(stored)) return stored;
-  } catch {
-    // localStorage unavailable
-  }
-  return "ja";
-}
-
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(loadLanguage);
+  // SSR/hydration対策: 初期値は"ja"で統一し、マウント後にlocalStorageから読む
+  const [language, setLanguageState] = useState<Language>("ja");
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("language");
+      if (isLanguage(stored)) setLanguageState(stored);
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);

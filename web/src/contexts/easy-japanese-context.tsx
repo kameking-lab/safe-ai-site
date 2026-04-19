@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
 } from "react";
 
 const STORAGE_KEY = "easy-japanese-enabled";
@@ -16,17 +17,17 @@ interface EasyJapaneseContextValue {
 
 const EasyJapaneseContext = createContext<EasyJapaneseContextValue | null>(null);
 
-function readStoredValue(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return localStorage.getItem(STORAGE_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
-
 export function EasyJapaneseProvider({ children }: { children: React.ReactNode }) {
-  const [easyJapaneseEnabled, setEasyJapaneseEnabled] = useState<boolean>(readStoredValue);
+  // SSR/hydration対策: 初期値はfalseで統一し、マウント後にlocalStorageから読む
+  const [easyJapaneseEnabled, setEasyJapaneseEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(STORAGE_KEY) === "true") setEasyJapaneseEnabled(true);
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
 
   const toggleEasyJapanese = useCallback(() => {
     setEasyJapaneseEnabled((prev) => {

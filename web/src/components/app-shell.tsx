@@ -141,15 +141,16 @@ export function AppShell({ children, user }: AppShellProps) {
   const { easyJapaneseEnabled, toggleEasyJapanese } = useEasyJapanese();
   const { language, setLanguage } = useLanguage();
 
-  // largeFontEnabledをlocalStorageから遅延初期化
-  const [largeFontEnabled, setLargeFontEnabled] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
+  // SSR/hydration対策: 初期値はfalseで統一し、マウント後にlocalStorageから読む
+  const [largeFontEnabled, setLargeFontEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
     try {
-      return localStorage.getItem(LARGE_FONT_KEY) === "true";
+      if (localStorage.getItem(LARGE_FONT_KEY) === "true") setLargeFontEnabled(true);
     } catch {
-      return false;
+      // localStorage unavailable
     }
-  });
+  }, []);
 
   // largeFontEnabledの変化をhtmlクラスに反映（DOM同期のみ、setState不使用）
   useEffect(() => {
@@ -172,15 +173,16 @@ export function AppShell({ children, user }: AppShellProps) {
     });
   };
 
-  // ハイコントラストモード（屋外視認性）
-  const [highContrastEnabled, setHighContrastEnabled] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
+  // SSR/hydration対策: 初期値はfalseで統一し、マウント後にlocalStorageから読む
+  const [highContrastEnabled, setHighContrastEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
     try {
-      return localStorage.getItem(HIGH_CONTRAST_KEY) === "true";
+      if (localStorage.getItem(HIGH_CONTRAST_KEY) === "true") setHighContrastEnabled(true);
     } catch {
-      return false;
+      // localStorage unavailable
     }
-  });
+  }, []);
 
   useEffect(() => {
     if (highContrastEnabled) {

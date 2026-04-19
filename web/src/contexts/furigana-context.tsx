@@ -5,6 +5,7 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
 } from "react";
 
 const STORAGE_KEY = "furigana-enabled";
@@ -16,18 +17,17 @@ interface FuriganaContextValue {
 
 const FuriganaContext = createContext<FuriganaContextValue | null>(null);
 
-function readStoredFurigana(): boolean {
-  if (typeof window === "undefined") return false;
-  try {
-    return localStorage.getItem(STORAGE_KEY) === "true";
-  } catch {
-    return false;
-  }
-}
-
 export function FuriganaProvider({ children }: { children: React.ReactNode }) {
-  // lazily initialize from localStorage to avoid cascading re-render
-  const [furiganaEnabled, setFuriganaEnabled] = useState<boolean>(readStoredFurigana);
+  // SSR/hydration対策: 初期値はfalseで統一し、マウント後にlocalStorageから読む
+  const [furiganaEnabled, setFuriganaEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(STORAGE_KEY) === "true") setFuriganaEnabled(true);
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
 
   const toggleFurigana = useCallback(() => {
     setFuriganaEnabled((prev) => {
