@@ -10,6 +10,7 @@ import { RelatedPageCards } from "@/components/related-page-cards";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import { KY_INDUSTRY_PRESETS } from "@/data/mock/ky-industry-presets";
 import { createServices } from "@/lib/services/service-factory";
+import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
 import type {
   KyInstructionFallCheck,
   KyInstructionParticipant,
@@ -142,16 +143,31 @@ export function KyPageContent() {
   const [guideOpen, setGuideOpen] = useState(false);
   const [recordList, setRecordList] = useState<KyRecordSummary[]>([]);
   const [savedLabel, setSavedLabel] = useState("記入すると自動保存されます");
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState<string | null>(null);
 
   // Load from localStorage on mount, then load record list
   useEffect(() => {
     try {
       const saved = localStorage.getItem("ky-record");
-      if (saved) setRecord(JSON.parse(saved) as KyInstructionRecordState);
+      if (saved) {
+        const parsed: unknown = JSON.parse(saved);
+        setRecord(normalizeKyInstructionRecord(parsed));
+      }
       const sigs = localStorage.getItem("ky-signatures");
-      if (sigs) setSignatures(JSON.parse(sigs) as Record<number, string>);
-    } catch {}
+      if (sigs) {
+        const parsed: unknown = JSON.parse(sigs);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          setSignatures(parsed as Record<number, string>);
+        }
+      }
+    } catch {
+      // corrupted data — reset
+      try {
+        localStorage.removeItem("ky-record");
+        localStorage.removeItem("ky-signatures");
+      } catch {}
+    }
     void services.operations.getKyRecordList().then((r) => {
       if (r.ok) setRecordList(r.data);
     });
@@ -180,11 +196,18 @@ export function KyPageContent() {
   }, []);
 
   const handleManualSave = async () => {
-    const result = await services.operations.saveKyInstructionRecord(record);
-    if (result.ok) {
-      setSavedLabel(`手動保存: ${new Date().toLocaleTimeString("ja-JP")}`);
-      const list = await services.operations.getKyRecordList();
-      if (list.ok) setRecordList(list.data);
+    setSaveError(null);
+    try {
+      const result = await services.operations.saveKyInstructionRecord(record);
+      if (result.ok) {
+        setSavedLabel(`手動保存: ${new Date().toLocaleTimeString("ja-JP")}`);
+        const list = await services.operations.getKyRecordList();
+        if (list.ok) setRecordList(list.data);
+      } else {
+        setSaveError(result.error?.message ?? "保存に失敗しました");
+      }
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : "保存に失敗しました");
     }
   };
 
@@ -1182,6 +1205,27 @@ export function KyPageContent() {
 
       {/* Fixed bottom bar */}
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-2.5 shadow-lg backdrop-blur-sm print:hidden">
+        {saveError && (
+          <div className="mx-auto mb-1 max-w-7xl rounded border border-rose-300 bg-rose-50 px-3 py-1.5 text-[11px] text-rose-800">
+            保存に失敗しました: {saveError}
+            <button
+              type="button"
+              className="ml-2 underline"
+              onClick={() => {
+                try {
+                  localStorage.removeItem("ky-record");
+                  localStorage.removeItem("ky-signatures");
+                  localStorage.removeItem("safe-ai:ky-instruction-record:v1");
+                  localStorage.removeItem("safe-ai:ky-record-list:v1");
+                } catch {}
+                setSaveError(null);
+                window.location.reload();
+              }}
+            >
+              データをリセットして再読込
+            </button>
+          </div>
+        )}
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2">
           <span className="text-[11px] text-slate-500">{savedLabel}</span>
           <div className="flex gap-2">

@@ -151,13 +151,53 @@ const defaultKyInstructionRecord: KyInstructionRecordState = {
   correctionNote: "",
 };
 
-function normalizeKyInstructionRecord(raw: KyInstructionRecordState): KyInstructionRecordState {
-  const merged = { ...defaultKyInstructionRecord, ...raw };
-  const participants = Array.isArray(merged.participants) ? [...merged.participants] : [];
-  if (participants.length < 2) {
+function ensureArray<T>(value: unknown, fallback: T[]): T[] {
+  if (Array.isArray(value)) return value as T[];
+  if (value && typeof value === "object") {
+    const keys = Object.keys(value as Record<string, unknown>);
+    const numeric = keys.every((k) => /^\d+$/.test(k));
+    if (numeric && keys.length > 0) {
+      return keys
+        .sort((a, b) => Number(a) - Number(b))
+        .map((k) => (value as Record<string, unknown>)[k]) as T[];
+    }
+  }
+  return fallback;
+}
+
+export function normalizeKyInstructionRecord(raw: unknown): KyInstructionRecordState {
+  const base = (raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {}) as Partial<KyInstructionRecordState>;
+  const merged: KyInstructionRecordState = { ...defaultKyInstructionRecord, ...base };
+  const workRows = ensureArray<KyInstructionRecordState["workRows"][number]>(merged.workRows, []);
+  if (workRows.length < 4) {
+    while (workRows.length < 4) workRows.push(emptyWorkRow());
+  }
+  const riskLabels = ["上記", "①", "②", "③", "④"];
+  const riskRows = ensureArray<KyInstructionRecordState["riskRows"][number]>(merged.riskRows, []);
+  if (riskRows.length < 5) {
+    while (riskRows.length < 5) riskRows.push(emptyRiskRow(riskLabels[riskRows.length] ?? `(${riskRows.length})`));
+  }
+  const participants = ensureArray<KyInstructionRecordState["participants"][number]>(merged.participants, []);
+  if (participants.length < 6) {
     while (participants.length < 6) participants.push(emptyParticipant());
   }
-  return { ...merged, participants };
+  const fallChecks = ensureArray<KyInstructionRecordState["fallChecks"][number]>(merged.fallChecks, []);
+  if (fallChecks.length < 3) {
+    while (fallChecks.length < 3) fallChecks.push({ good: "", bad: "", done: "" });
+  }
+  const breaks = ensureArray<string>(merged.breaks, ["", "", "", "", ""]);
+  while (breaks.length < 5) breaks.push("");
+  const reportStamps = ensureArray<string>(merged.reportStamps, ["", "", "", "", ""]);
+  while (reportStamps.length < 5) reportStamps.push("");
+  return {
+    ...merged,
+    workRows,
+    riskRows,
+    participants,
+    fallChecks,
+    breaks,
+    reportStamps: reportStamps.slice(0, 5) as [string, string, string, string, string],
+  };
 }
 
 function readFromStorage<T>(key: string, fallback: T): T {
@@ -165,7 +205,14 @@ function readFromStorage<T>(key: string, fallback: T): T {
   const raw = window.localStorage.getItem(key);
   if (!raw) return fallback;
   try {
-    return { ...fallback, ...(JSON.parse(raw) as Record<string, unknown>) } as T;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(fallback)) {
+      return ensureArray(parsed, fallback as unknown as unknown[]) as unknown as T;
+    }
+    if (parsed && typeof parsed === "object") {
+      return { ...fallback, ...(parsed as Record<string, unknown>) } as T;
+    }
+    return fallback;
   } catch {
     return fallback;
   }
@@ -235,27 +282,43 @@ export function createOperationsService(): OperationsService {
       return { ok: true, data: normalizeKyInstructionRecord(raw) };
     },
     async saveKyInstructionRecord(value) {
-      writeToStorage(STORAGE_KEYS.kyInstruction, value);
-      // 一覧に追加
-      const list = readFromStorage<KyRecordSummary[]>(STORAGE_KEYS.kyList, []);
-      const summary: KyRecordSummary = {
-        id: Date.now().toString(),
-        workDate: `${value.workDateYear}-${value.workDateMonth.padStart(2, "0")}-${value.workDateDay.padStart(2, "0")}`,
-        companyName: value.coop1Name || value.coop2Name || value.coop3Name || "未入力",
-        workDetail: value.workRows[0]?.workDetail || "未入力",
-        weather: value.weather || "未入力",
-        savedAt: new Date().toISOString(),
-      };
-      const updated = [summary, ...list].slice(0, MAX_KY_LIST);
-      writeToStorage(STORAGE_KEYS.kyList, updated);
-      return { ok: true, data: value };
+      try {
+        const normalized = normalizeKyInstructionRecord(value);
+        writeToStorage(STORAGE_KEYS.kyInstruction, normalized);
+        // 一覧に追加
+        const list = readFromStorage<KyRecordSummary[]>(STORAGE_KEYS.kyList, []);
+        const safeList = Array.isArray(list) ? list : [];
+        const pad = (s: string) => String(s ?? "").padStart(2, "0");
+        const summary: KyRecordSummary = {
+          id: Date.now().toString(),
+          workDate: `${normalized.workDateYear}-${pad(normalized.workDateMonth)}-${pad(normalized.workDateDay)}`,
+          companyName: normalized.coop1Name || normalized.coop2Name || normalized.coop3Name || "未入力",
+          workDetail: normalized.workRows[0]?.workDetail || "未入力",
+          weather: normalized.weather || "未入力",
+          savedAt: new Date().toISOString(),
+        };
+        const updated = [summary, ...safeList].slice(0, MAX_KY_LIST);
+        writeToStorage(STORAGE_KEYS.kyList, updated);
+        return { ok: true, data: normalized };
+      } catch (err) {
+        return {
+          ok: false,
+          error: {
+            code: "UNKNOWN",
+            message: err instanceof Error ? err.message : "保存に失敗しました",
+            retryable: true,
+          },
+        };
+      }
     },
     async getKyRecordList() {
-      return { ok: true, data: readFromStorage<KyRecordSummary[]>(STORAGE_KEYS.kyList, []) };
+      const data = readFromStorage<KyRecordSummary[]>(STORAGE_KEYS.kyList, []);
+      return { ok: true, data: Array.isArray(data) ? data : [] };
     },
     async deleteKyRecord(id) {
       const list = readFromStorage<KyRecordSummary[]>(STORAGE_KEYS.kyList, []);
-      const updated = list.filter((r) => r.id !== id);
+      const safeList = Array.isArray(list) ? list : [];
+      const updated = safeList.filter((r) => r.id !== id);
       writeToStorage(STORAGE_KEYS.kyList, updated);
       return { ok: true, data: updated };
     },
