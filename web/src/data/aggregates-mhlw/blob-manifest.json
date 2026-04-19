@@ -1,0 +1,118 @@
+{
+  "generatedAt": "2026-04-19T03:30:49.863Z",
+  "prefix": "mhlw-accidents",
+  "entries": [
+    {
+      "year": "2006",
+      "key": "mhlw-accidents/2006.jsonl",
+      "lines": 34167,
+      "bytes": 28456888,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2006.jsonl"
+    },
+    {
+      "year": "2007",
+      "key": "mhlw-accidents/2007.jsonl",
+      "lines": 33318,
+      "bytes": 28275957,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2007.jsonl"
+    },
+    {
+      "year": "2008",
+      "key": "mhlw-accidents/2008.jsonl",
+      "lines": 29210,
+      "bytes": 23706113,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2008.jsonl"
+    },
+    {
+      "year": "2009",
+      "key": "mhlw-accidents/2009.jsonl",
+      "lines": 30031,
+      "bytes": 25759179,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2009.jsonl"
+    },
+    {
+      "year": "2010",
+      "key": "mhlw-accidents/2010.jsonl",
+      "lines": 32012,
+      "bytes": 28834551,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2010.jsonl"
+    },
+    {
+      "year": "2011",
+      "key": "mhlw-accidents/2011.jsonl",
+      "lines": 30669,
+      "bytes": 26822657,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2011.jsonl"
+    },
+    {
+      "year": "2012",
+      "key": "mhlw-accidents/2012.jsonl",
+      "lines": 31596,
+      "bytes": 25861506,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2012.jsonl"
+    },
+    {
+      "year": "2013",
+      "key": "mhlw-accidents/2013.jsonl",
+      "lines": 31422,
+      "bytes": 24309750,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2013.jsonl"
+    },
+    {
+      "year": "2014",
+      "key": "mhlw-accidents/2014.jsonl",
+      "lines": 31201,
+      "bytes": 25989453,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2014.jsonl"
+    },
+    {
+      "year": "2015",
+      "key": "mhlw-accidents/2015.jsonl",
+      "lines": 29957,
+      "bytes": 24742617,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2015.jsonl"
+    },
+    {
+      "year": "2016",
+      "key": "mhlw-accidents/2016.jsonl",
+      "lines": 31317,
+      "bytes": 26287933,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2016.jsonl"
+    },
+    {
+      "year": "2017",
+      "key": "mhlw-accidents/2017.jsonl",
+      "lines": 31496,
+      "bytes": 27828044,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2017.jsonl"
+    },
+    {
+      "year": "2018",
+      "key": "mhlw-accidents/2018.jsonl",
+      "lines": 33663,
+      "bytes": 27754295,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2018.jsonl"
+    },
+    {
+      "year": "2019",
+      "key": "mhlw-accidents/2019.jsonl",
+      "lines": 34795,
+      "bytes": 28525582,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2019.jsonl"
+    },
+    {
+      "year": "2020",
+      "key": "mhlw-accidents/2020.jsonl",
+      "lines": 29956,
+      "bytes": 24499104,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2020.jsonl"
+    },
+    {
+      "year": "2021",
+      "key": "mhlw-accidents/2021.jsonl",
+      "lines": 29605,
+      "bytes": 24190649,
+      "url": "https://amy9t8zecqq14wrl.private.blob.vercel-storage.com/mhlw-accidents/2021.jsonl"
+    }
+  ]
+}

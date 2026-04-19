@@ -82,10 +82,11 @@ async function listYearShards(token: string): Promise<Map<number, string>> {
 
 async function fetchAndFilter(
   url: string,
-  params: SearchParams
+  params: SearchParams,
+  token: string
 ): Promise<{ total: number; records: Accident[] }> {
   const res = await fetch(url, {
-    // 年シャードは頻繁には更新されないので長めにキャッシュ
+    headers: { Authorization: `Bearer ${token}` },
     next: { revalidate: 60 * 60 },
   });
   if (!res.ok || !res.body) {
@@ -173,7 +174,7 @@ export async function GET(request: Request) {
         ? params.year
         : Math.max(...shards.keys());
     const shardUrl = shards.get(targetYear)!;
-    const { total, records } = await fetchAndFilter(shardUrl, params);
+    const { total, records } = await fetchAndFilter(shardUrl, params, token);
 
     const payload: SearchResponse = {
       ok: true,
