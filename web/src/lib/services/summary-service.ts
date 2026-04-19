@@ -35,6 +35,21 @@ async function getSummaryByRevisionIdMock(
     };
   }
 
+  // lr-real-* and lr-extra-* IDs use a generic stub so E2E smoke tests pass
+  if (/^lr-(real|extra)-/.test(input.revisionId)) {
+    return {
+      ok: true,
+      data: {
+        revisionId: input.revisionId,
+        summary: summaryMockByRevisionId["lr-001"] ?? {
+          threeLineSummary: ["改正内容の詳細はe-Gov法令検索でご確認ください。"],
+          workplaceActions: ["担当者に内容を確認する"],
+          targetIndustries: ["全業種"],
+        },
+      },
+    };
+  }
+
   return {
     ok: false,
     error: {
