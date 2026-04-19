@@ -132,6 +132,40 @@ function evalScore(a: number, b: number) {
   return a * b;
 }
 
+function ChipSelect<V extends 1 | 2 | 3>({
+  value,
+  onChange,
+  options,
+}: {
+  value: V;
+  onChange: (v: V) => void;
+  options: { value: V; label: string }[];
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5" role="radiogroup">
+      {options.map((opt) => {
+        const selected = value === opt.value;
+        return (
+          <button
+            key={String(opt.value)}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(opt.value)}
+            className={`min-h-[36px] rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+              selected
+                ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
+                : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400 hover:bg-emerald-50"
+            }`}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 const WORK_NUMBERS = ["①", "②", "③", "④"] as const;
 
 export function KyPageContent() {
@@ -775,43 +809,35 @@ export function KyPageContent() {
                       </label>
 
                       {mode !== "simple" && (
-                        <div className="grid grid-cols-3 gap-2">
-                          <label className="space-y-1">
-                            <span className="text-[11px] text-slate-600">可能性</span>
-                            <select
-                              className="w-full rounded border border-slate-300 bg-white px-1 py-2 text-xs"
+                        <div className="space-y-2">
+                          <div>
+                            <p className="mb-1 text-[11px] font-semibold text-slate-600">可能性</p>
+                            <ChipSelect
                               value={row.likelihood}
-                              onChange={(e) =>
-                                setRiskRow(i, { ...row, likelihood: Number(e.target.value) as 1 | 2 | 3 })
-                              }
-                            >
-                              {[3, 2, 1].map((n) => (
-                                <option key={n} value={n}>
-                                  {n}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                          <label className="space-y-1">
-                            <span className="text-[11px] text-slate-600">重大性</span>
-                            <select
-                              className="w-full rounded border border-slate-300 bg-white px-1 py-2 text-xs"
+                              onChange={(v) => setRiskRow(i, { ...row, likelihood: v })}
+                              options={[
+                                { value: 3, label: "3 高い" },
+                                { value: 2, label: "2 中" },
+                                { value: 1, label: "1 低い" },
+                              ]}
+                            />
+                          </div>
+                          <div>
+                            <p className="mb-1 text-[11px] font-semibold text-slate-600">重大性</p>
+                            <ChipSelect
                               value={row.severity}
-                              onChange={(e) =>
-                                setRiskRow(i, { ...row, severity: Number(e.target.value) as 1 | 2 | 3 })
-                              }
-                            >
-                              {[3, 2, 1].map((n) => (
-                                <option key={n} value={n}>
-                                  {n}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                          <div className="space-y-1">
-                            <span className="text-[11px] text-slate-600">評価値</span>
+                              onChange={(v) => setRiskRow(i, { ...row, severity: v })}
+                              options={[
+                                { value: 3, label: "3 重大" },
+                                { value: 2, label: "2 中" },
+                                { value: 1, label: "1 軽微" },
+                              ]}
+                            />
+                          </div>
+                          <div>
+                            <p className="mb-1 text-[11px] font-semibold text-slate-600">評価値</p>
                             <div
-                              className={`rounded border px-2 py-2 text-center text-sm font-bold ${
+                              className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-sm font-bold ${
                                 evalScore(row.likelihood, row.severity) >= 6
                                   ? "border-red-300 bg-red-50 text-red-700"
                                   : evalScore(row.likelihood, row.severity) >= 4
@@ -837,56 +863,42 @@ export function KyPageContent() {
 
                       {mode !== "simple" && (
                         <>
-                          <div className="grid grid-cols-3 gap-2">
-                            <label className="space-y-1">
-                              <span className="text-[11px] text-slate-600">再評価・可能性</span>
-                              <select
-                                className="w-full rounded border border-slate-300 bg-white px-1 py-2 text-xs"
+                          <div className="space-y-2">
+                            <div>
+                              <p className="mb-1 text-[11px] font-semibold text-slate-600">再評価・可能性</p>
+                              <ChipSelect
                                 value={row.reLikelihood}
-                                onChange={(e) =>
-                                  setRiskRow(i, {
-                                    ...row,
-                                    reLikelihood: Number(e.target.value) as 1 | 2 | 3,
-                                  })
-                                }
-                              >
-                                {[3, 2, 1].map((n) => (
-                                  <option key={n} value={n}>
-                                    {n}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-                            <label className="space-y-1">
-                              <span className="text-[11px] text-slate-600">再評価・重大性</span>
-                              <select
-                                className="w-full rounded border border-slate-300 bg-white px-1 py-2 text-xs"
-                                value={row.reSeverity}
-                                onChange={(e) =>
-                                  setRiskRow(i, {
-                                    ...row,
-                                    reSeverity: Number(e.target.value) as 1 | 2 | 3,
-                                  })
-                                }
-                              >
-                                {[3, 2, 1].map((n) => (
-                                  <option key={n} value={n}>
-                                    {n}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-                            <div className="space-y-1">
-                              <span className="text-[11px] text-slate-600">再評価値</span>
-                              <div
-                                className={`rounded border px-2 py-2 text-center text-sm font-bold ${
-                                  evalScore(row.reLikelihood, row.reSeverity) <= 2
-                                    ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                                    : "border-amber-300 bg-amber-50 text-amber-700"
-                                }`}
-                              >
-                                {evalScore(row.reLikelihood, row.reSeverity)}
-                              </div>
+                                onChange={(v) => setRiskRow(i, { ...row, reLikelihood: v })}
+                                options={[
+                                  { value: 3, label: "3 高い" },
+                                  { value: 2, label: "2 中" },
+                                  { value: 1, label: "1 低い" },
+                                ]}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <p className="mb-1 text-[11px] font-semibold text-slate-600">再評価・重大性</p>
+                            <ChipSelect
+                              value={row.reSeverity}
+                              onChange={(v) => setRiskRow(i, { ...row, reSeverity: v })}
+                              options={[
+                                { value: 3, label: "3 重大" },
+                                { value: 2, label: "2 中" },
+                                { value: 1, label: "1 軽微" },
+                              ]}
+                            />
+                          </div>
+                          <div>
+                            <p className="mb-1 text-[11px] font-semibold text-slate-600">再評価値</p>
+                            <div
+                              className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-sm font-bold ${
+                                evalScore(row.reLikelihood, row.reSeverity) <= 2
+                                  ? "border-emerald-300 bg-emerald-50 text-emerald-700"
+                                  : "border-amber-300 bg-amber-50 text-amber-700"
+                              }`}
+                            >
+                              {evalScore(row.reLikelihood, row.reSeverity)}
                             </div>
                           </div>
                           <label className="block space-y-1">
