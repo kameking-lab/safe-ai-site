@@ -178,7 +178,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
   const [selectedAccidentCategory, setSelectedAccidentCategory] = useState<AccidentWorkCategory | "すべて">("すべて");
   const [accidentActiveTab, setAccidentActiveTab] = useState<
     "list" | "mhlw-search" | "mhlw-deaths" | "mhlw" | "industry" | "analysis"
-  >("mhlw-search");
+  >("mhlw-deaths");
   const [selectedRegionName, setSelectedRegionName] = useState(
     () => services.weatherRisk.getAvailableRegions()[0]?.regionName ?? ""
   );
@@ -569,12 +569,12 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
             <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 w-fit">
               {(
                 [
-                  { id: "mhlw-search", label: "全件検索 (504,415件)" },
                   { id: "mhlw-deaths", label: "死亡災害 (4,043件)" },
                   { id: "industry", label: "業種別ランキング" },
                   { id: "mhlw", label: "MHLW実データ分析" },
                   { id: "list", label: "サイト収録事例 (268件)" },
                   { id: "analysis", label: "詳細事例（参考）" },
+                  { id: "mhlw-search", label: "全件検索 [準備中]" },
                 ] as const
               ).map((tab) => (
                 <button

@@ -193,8 +193,11 @@ export function MhlwAccidentSearchPanel() {
 
       {/* 結果 */}
       {state.kind === "idle" && (
-        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
-          条件を指定して「検索する」を押すと、MHLW 実データから絞り込み結果を取得します。
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <p className="font-semibold">504,415件の個別事例検索は現在準備中です。</p>
+          <p className="mt-1 text-xs">
+            条件を入力して検索するとMHLW集計データが確認できます。個別事例の全件検索はVercel Blobセットアップ後に提供開始します。
+          </p>
         </div>
       )}
 
@@ -209,15 +212,20 @@ export function MhlwAccidentSearchPanel() {
       )}
 
       {state.kind === "ready" && showFallbackNote && (
-        <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+        <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-800">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-          <div>
-            <p className="font-semibold">現在は準備中（フォールバック）</p>
-            <p className="mt-0.5">
-              {state.data.message ??
-                "MHLW 50万件検索はオーナーが Vercel Blob を有効化するまで利用できません。"}
-              &nbsp;代わりに当サイト収録の 300 件データベースをご利用ください。
+          <div className="space-y-1.5">
+            <p className="font-semibold text-sm">504,415件の個別事例検索は準備中です</p>
+            <p>
+              Vercel Blobセットアップ完了後に504,415件の個別事例が検索可能になります。
+              現在は下記からご利用ください：
             </p>
+            <ul className="mt-1 space-y-0.5 list-disc list-inside text-amber-900">
+              <li>死亡災害 4,043件（「死亡災害」タブ）</li>
+              <li>業種別ランキング（集計 504,415件ベース）</li>
+              <li>サイト収録事例 268件</li>
+              <li>MHLW実データ分析（集計グラフ）</li>
+            </ul>
           </div>
         </div>
       )}
