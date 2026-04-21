@@ -69,6 +69,7 @@ const FORMATS = [
     desc: "全21種を動画で受講。受講進捗の管理画面に対応。スマホ・PC両対応。",
     price: "¥50,000〜 / 1社（10名まで）",
     badge: "2026年秋リリース予定",
+    preorder: "事前予約受付中",
   },
   {
     icon: Users,
@@ -129,6 +130,11 @@ export default function EducationPage() {
                   {"badge" in f && f.badge ? (
                     <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
                       {f.badge}
+                    </span>
+                  ) : null}
+                  {"preorder" in f && f.preorder ? (
+                    <span className="inline-flex items-center rounded-full border border-emerald-300 bg-emerald-600 px-2 py-0.5 text-[10px] font-semibold text-white">
+                      {f.preorder}
                     </span>
                   ) : null}
                 </div>
