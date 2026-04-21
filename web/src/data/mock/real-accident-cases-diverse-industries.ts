@@ -14,7 +14,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "深夜巡回中の階段転落で大腿骨骨折（警備業・65歳）",
     occurredOn: "2023-02-18",
     type: "転倒",
-    workCategory: "警備",
+    workCategory: "その他の事業",
     severity: "重傷",
     summary:
       "商業ビル深夜巡回中、消灯エリアの階段で踏み外し転落。加齢による暗所視力低下とバランス機能低下が背景。",
@@ -37,7 +37,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "交通誘導警備中に通行車両に接触（警備業）",
     occurredOn: "2024-05-10",
     type: "交通事故",
-    workCategory: "警備",
+    workCategory: "その他の事業",
     severity: "重傷",
     summary:
       "道路工事現場の交通誘導中、合図を確認しなかった車両と接触。反射ベスト着用していたが薄暮時のため視認性不足。",
@@ -60,7 +60,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "高木剪定中にスズメバチに刺され救急搬送（造園業）",
     occurredOn: "2023-08-22",
     type: "激突され",
-    workCategory: "造園",
+    workCategory: "その他の事業",
     severity: "重傷",
     summary:
       "8月中旬の庭木剪定中、樹冠内のスズメバチの巣を破壊。複数個所刺され、アナフィラキシーショックで救急搬送。",
@@ -81,7 +81,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "外構工事現場で通行人の子どもが資材に接触（造園・外構）",
     occurredOn: "2024-03-14",
     type: "激突され",
-    workCategory: "造園",
+    workCategory: "その他の事業",
     severity: "軽傷",
     summary:
       "住宅街の外構工事で、仮置きしていた縁石ブロックが通行中の子どもの足に倒れる第三者災害。歩行者動線の養生が不十分。",
@@ -104,7 +104,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "リフト下の整備中にリフト落下で作業員が下敷きに（自動車整備）",
     occurredOn: "2023-11-05",
     type: "崩壊・倒壊",
-    workCategory: "整備",
+    workCategory: "その他の事業",
     severity: "死亡",
     summary:
       "自動車整備工場で2柱リフトに上昇させた乗用車下で作業中、リフトの油圧シリンダーが経年劣化で降下し車両が落下。",
@@ -125,7 +125,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "EVバッテリー点検中に高電圧感電（ハイブリッド整備）",
     occurredOn: "2024-07-20",
     type: "感電",
-    workCategory: "整備",
+    workCategory: "その他の事業",
     severity: "重傷",
     summary:
       "ハイブリッド車の高電圧バッテリー系統点検中、サービスプラグ未取り外しのまま触れ、200Vを超える感電で心室細動。AEDで回復。",
@@ -148,7 +148,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "工業用ミシンで指を縫い通す災害（縫製業・実習生）",
     occurredOn: "2024-01-30",
     type: "はさまれ・巻き込まれ",
-    workCategory: "縫製",
+    workCategory: "製造業",
     severity: "重傷",
     summary:
       "技能実習1年目の外国人実習生が工業用ミシン操作中、生地送りに気を取られ針で指を縫い通した。日本語の作業指示書が理解できていなかった。",
@@ -172,7 +172,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "バックヤードで脚立から転落（総合スーパー）",
     occurredOn: "2024-02-15",
     type: "墜落",
-    workCategory: "小売",
+    workCategory: "商業",
     severity: "重傷",
     summary:
       "総合スーパーのバックヤードで商品補充中、脚立天板に立って作業していて転落。女性パートで2m高さから腰椎圧迫骨折。",
@@ -194,7 +194,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "精肉スライサーで指切創（小売・食品加工場）",
     occurredOn: "2023-09-12",
     type: "切れ・こすれ",
-    workCategory: "小売",
+    workCategory: "商業",
     severity: "中等傷",
     summary:
       "スーパー内精肉加工場でスライサー清掃中、電源を切らずに刃部を拭いて左手人差し指を切創。",
@@ -217,7 +217,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "使用済み注射針で指刺し（病院・看護師）",
     occurredOn: "2024-04-02",
     type: "切れ・こすれ",
-    workCategory: "医療",
+    workCategory: "保健衛生業",
     severity: "軽傷",
     summary:
       "急性期病棟で採血後、使用済み針のリキャップを試みた際に左手親指を刺した。HIV・HBV・HCV陽性患者で、曝露後予防投与開始。",
@@ -239,7 +239,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "入浴介助中の腰痛で3ヶ月休業（介護施設）",
     occurredOn: "2023-10-18",
     type: "動作の反動・無理な動作",
-    workCategory: "介護",
+    workCategory: "保健衛生業",
     severity: "中等傷",
     summary:
       "特別養護老人ホームで要介護4の利用者を浴槽に移乗中、中腰姿勢で抱え上げて急性腰痛。ヘルニア発症。3ヶ月の休業。",
@@ -261,7 +261,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "利用者からの暴力による頭部打撲（介護職）",
     occurredOn: "2024-06-25",
     type: "激突され",
-    workCategory: "介護",
+    workCategory: "保健衛生業",
     severity: "中等傷",
     summary:
       "認知症対応型グループホームで、興奮状態の利用者から杖で殴打され頭部打撲。労災申請し認定（精神疾患併発）。",
@@ -284,7 +284,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "冷凍倉庫の凍結床で転倒（食品工場）",
     occurredOn: "2023-12-14",
     type: "転倒",
-    workCategory: "食品",
+    workCategory: "製造業",
     severity: "中等傷",
     summary:
       "食品工場の-25℃冷凍庫内で、床の凍結水に滑り転倒。女性作業員が膝半月板損傷。",
@@ -305,8 +305,8 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     id: "industry-shokuhin-002",
     title: "熱湯釜からの熱湯飛散で顔面やけど（食品加工）",
     occurredOn: "2024-03-28",
-    type: "高温物との接触",
-    workCategory: "食品",
+    type: "高温・低温の物との接触",
+    workCategory: "製造業",
     severity: "重傷",
     summary:
       "惣菜製造工場で大型釜（容量300L・95℃）の湯を別鍋に移す際に泡立ちで熱湯が飛散。顔面・首に2度熱傷。",
@@ -329,7 +329,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "長時間運転後の仮眠不足で追突事故（運輸業）",
     occurredOn: "2024-04-10",
     type: "交通事故",
-    workCategory: "運輸",
+    workCategory: "運輸交通業",
     severity: "重傷",
     summary:
       "長距離トラック運行で改善基準告示違反の連続運転後、高速道路で追突事故。運転手はSAS（睡眠時無呼吸症候群）診断も事業者未把握。",
@@ -351,7 +351,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "倉庫フォークリフト後退時の歩行者接触（物流倉庫）",
     occurredOn: "2023-07-06",
     type: "車両",
-    workCategory: "物流",
+    workCategory: "運輸交通業",
     severity: "重傷",
     summary:
       "物流センターでフォーク後退時、フォーク通路を横切った作業員と接触。運転席からは死角で視認できず。",
@@ -374,7 +374,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     title: "高所窓清掃で脚立転倒・墜落（ビルメンテナンス）",
     occurredOn: "2023-11-22",
     type: "墜落",
-    workCategory: "清掃",
+    workCategory: "その他の事業",
     severity: "重傷",
     summary:
       "商業施設2階の窓清掃で、脚立の脚が水濡れ床で滑り転倒。70歳女性清掃員が上腕骨骨折。",
@@ -395,8 +395,8 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     id: "industry-seisou-002",
     title: "業務用洗剤の混合で塩素ガス発生（清掃業）",
     occurredOn: "2024-02-08",
-    type: "中毒",
-    workCategory: "清掃",
+    type: "有害物等との接触",
+    workCategory: "その他の事業",
     severity: "中等傷",
     summary:
       "ビル清掃で酸性洗剤と塩素系漂白剤を混合し塩素ガスが発生。作業員2名が咳・吐き気で救急搬送。",

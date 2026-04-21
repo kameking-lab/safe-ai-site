@@ -42,16 +42,16 @@ const INDUSTRY_OPTIONS: { key: IndustryKey; label: string }[] = [
 ];
 
 const INDUSTRY_CATEGORIES: Record<IndustryKey, AccidentWorkCategory[]> = {
-  construction: ["建設", "高所", "足場", "重機", "解体"],
-  manufacturing: ["製造", "造船", "整備", "縫製"],
-  healthcare: ["医療", "介護"],
-  transport: ["運輸", "物流", "倉庫"],
-  forestry: ["林業", "造園"],
-  food: ["食品"],
-  retail: ["小売", "警備"],
-  cleaning: ["清掃"],
+  construction: ["建設業"],
+  manufacturing: ["製造業"],
+  healthcare: ["保健衛生業"],
+  transport: ["運輸交通業"],
+  forestry: ["林業"],
+  food: ["製造業"],
+  retail: ["商業"],
+  cleaning: ["その他の事業"],
   chemical: ["化学"],
-  electrical: ["電気"],
+  electrical: ["電気業"],
 };
 
 function matchesAnyIndustry(workCategory: AccidentWorkCategory, industries: Set<IndustryKey>): boolean {
