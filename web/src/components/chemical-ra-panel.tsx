@@ -8,7 +8,12 @@ import { amazonSearchUrl, rakutenSearchUrl } from "@/lib/affiliate";
 import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
 import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
 import { SimpleMarkdown } from "@/components/simple-markdown";
-import { findByCas, searchMergedChemicals, type MergedChemical } from "@/lib/mhlw-chemicals";
+import {
+  findByCas,
+  getSupplementalInfo,
+  searchMergedChemicals,
+  type MergedChemical,
+} from "@/lib/mhlw-chemicals";
 import type {
   ChemicalRaResponse,
   GhsHazard,
@@ -188,11 +193,12 @@ export function ChemicalRaPanel() {
 
   const displayedMhlw = mhlwSelected ?? autoMhlw;
 
-  // 判定ロジック: MHLW 8h 基準値 → AI exposureLimit の順で採用
+  // 判定ロジック: MHLW 8h 基準値 → 特化則・有機則 管理濃度 → AI exposureLimit の順で採用
   const activeLimit = useMemo(() => {
     const mhlwLimit = displayedMhlw?.details?.limit8h;
+    const oelSupplement = getSupplementalInfo(displayedMhlw?.cas ?? null)?.oel;
     const aiLimit = result?.exposureLimit;
-    return mhlwLimit || aiLimit || null;
+    return mhlwLimit || oelSupplement || aiLimit || null;
   }, [displayedMhlw, result]);
 
   const concentrationVerdict = useMemo(() => {

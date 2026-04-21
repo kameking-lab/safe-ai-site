@@ -5,6 +5,7 @@ import { AlertTriangle, BookOpen, Database, ExternalLink, Gauge } from "lucide-r
 import {
   regulatoryLabels,
   relatedLawTexts,
+  getSupplementalInfo,
   type MergedChemical,
 } from "@/lib/mhlw-chemicals";
 
@@ -16,9 +17,18 @@ import {
 export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical }) {
   const reg = regulatoryLabels(chemical.flags);
   const laws = relatedLawTexts(chemical.flags);
-  const limit8h = chemical.details?.limit8h;
+  const supplemental = getSupplementalInfo(chemical.cas);
+  // MHLW 濃度基準値 (八時間) 優先、なければ特化則・有機則の管理濃度で補完
+  const limit8h = chemical.details?.limit8h ?? supplemental?.oel;
+  const limit8hSource: "mhlw" | "oel" | null = chemical.details?.limit8h
+    ? "mhlw"
+    : supplemental?.oel
+      ? "oel"
+      : null;
   const limitShort = chemical.details?.limitShort;
   const link = chemical.details?.link;
+  const isCarcinogenic =
+    chemical.flags.carcinogenic || supplemental?.carcinogenic === true;
 
   const [measured, setMeasured] = useState("");
   const verdict = useMemo(() => evaluateConcentration(measured, limit8h), [measured, limit8h]);
@@ -43,10 +53,21 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
         <div className="rounded-lg bg-white p-3">
           <dt className="flex items-center gap-1 font-semibold text-amber-700">
             <Gauge className="h-3.5 w-3.5" aria-hidden="true" />
-            濃度基準値（八時間）
+            {limit8hSource === "oel" ? "管理濃度（八時間）" : "濃度基準値（八時間）"}
           </dt>
           <dd className="mt-1 text-base font-bold text-slate-900">
-            {limit8h ?? <span className="text-slate-400 text-sm font-normal">未設定</span>}
+            {limit8h ? (
+              <>
+                {limit8h}
+                {limit8hSource === "oel" && (
+                  <span className="ml-1 text-[10px] font-normal text-slate-500">
+                    ※特化則・有機則の管理濃度
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="text-slate-400 text-sm font-normal">データ未登録</span>
+            )}
           </dd>
         </div>
         <div className="rounded-lg bg-white p-3">
@@ -55,7 +76,9 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
             濃度基準値（短時間）
           </dt>
           <dd className="mt-1 text-base font-bold text-slate-900">
-            {limitShort ?? <span className="text-slate-400 text-sm font-normal">未設定</span>}
+            {limitShort ?? (
+              <span className="text-slate-400 text-sm font-normal">データ未登録</span>
+            )}
           </dd>
         </div>
       </dl>
@@ -64,8 +87,31 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
         <FlagBadge label="SDS交付義務" on={chemical.flags.label_sds} />
         <FlagBadge label="濃度基準値設定" on={chemical.flags.concentration} />
         <FlagBadge label="皮膚等障害" on={chemical.flags.skin} />
-        <FlagBadge label="がん原性" on={chemical.flags.carcinogenic} />
+        <FlagBadge label="がん原性" on={isCarcinogenic} />
       </div>
+
+      {supplemental?.ghs && supplemental.ghs.length > 0 && (
+        <div className="mt-3 rounded-lg bg-white p-3">
+          <p className="text-xs font-semibold text-slate-600">GHS分類（主要ハザード）</p>
+          <div className="mt-1 flex flex-wrap gap-1">
+            {supplemental.ghs.map((g) => (
+              <span
+                key={g}
+                className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800"
+              >
+                {g}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {supplemental?.healthEffects && (
+        <div className="mt-3 rounded-lg bg-white p-3">
+          <p className="text-xs font-semibold text-slate-600">主な健康影響</p>
+          <p className="mt-1 text-xs text-slate-700">{supplemental.healthEffects}</p>
+        </div>
+      )}
 
       {reg.length > 0 && (
         <div className="mt-3 rounded-lg bg-white p-3">
@@ -162,7 +208,7 @@ function FlagBadge({ label, on }: { label: string; on: boolean }) {
       }`}
     >
       <span className="text-xs font-semibold">{label}</span>
-      <span className="text-xs font-bold">{on ? "該当" : "—"}</span>
+      <span className="text-xs font-bold">{on ? "該当" : "非該当"}</span>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import compact from "@/data/chemicals-mhlw/compact.json";
+import { chemicalSubstances } from "@/data/mock/chemical-substances-db";
 
 export type MhlwChemicalCategory =
   | "carcinogenic"
@@ -88,6 +89,38 @@ export const rawCompact = compact as unknown as MhlwChemicalCompact;
 
 export const MHLW_CHEMICALS_SOURCE =
   "厚生労働省 皮膚等障害化学物質リスト・SDS交付義務物質一覧・がん原性物質一覧・濃度基準値設定物質";
+
+/**
+ * CAS 番号 → 管理濃度 / OEL / 健康影響 / GHS の補助テーブル。
+ * 厚労省「濃度基準値」には未掲載だが特化則・有機則で管理濃度が定められている
+ * 代表物質をカバーするため、chemical-substances-db.ts のデータを CAS 索引化する。
+ */
+const supplementalByCas = new Map<
+  string,
+  {
+    oel?: string;
+    healthEffects?: string;
+    ghs?: string[];
+    carcinogenic: boolean;
+  }
+>();
+for (const c of chemicalSubstances) {
+  if (!/^\d{2,7}-\d{2,3}-\d{1,2}$/.test(c.cas)) continue;
+  const carcinogenic =
+    (c.ghs ?? []).some((g) => /発がん性1[AB]?/.test(g)) ||
+    /発がん|がん|胆管がん|白血病/.test(c.health_effects);
+  supplementalByCas.set(c.cas, {
+    oel: c.oel,
+    healthEffects: c.health_effects,
+    ghs: c.ghs,
+    carcinogenic,
+  });
+}
+
+export function getSupplementalInfo(cas: string | null | undefined) {
+  if (!cas) return undefined;
+  return supplementalByCas.get(cas);
+}
 
 function isPlaceholderName(name: string): boolean {
   if (!name) return true;
