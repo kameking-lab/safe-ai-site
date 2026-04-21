@@ -108,6 +108,8 @@ function ProgressTab() {
           <tbody className="divide-y divide-slate-100">
             {MOCK_USERS.map((user) => {
               const pct = Math.round((user.completed / user.total) * 100);
+              const fullyComplete = user.completed >= user.total;
+              const canIssueCert = fullyComplete && user.certified;
               return (
                 <tr key={user.id} className="hover:bg-slate-50">
                   <td className="px-3 py-2.5 font-medium text-slate-900">{user.name}</td>
@@ -127,19 +129,20 @@ function ProgressTab() {
                   </td>
                   <td className="px-3 py-2.5 text-xs text-slate-500">{user.lastAt}</td>
                   <td className="px-3 py-2.5">
-                    {user.certified ? (
-                      <button
-                        type="button"
-                        onClick={() => handleIssueCert(user.id)}
-                        className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
-                        disabled={certIssuing === user.id}
-                      >
-                        <Award className="h-3 w-3" />
-                        {certIssuing === user.id ? "発行中..." : "修了証発行"}
-                      </button>
-                    ) : (
-                      <span className="text-xs text-slate-400">未修了</span>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleIssueCert(user.id)}
+                      className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500"
+                      disabled={!canIssueCert || certIssuing === user.id}
+                      title={!fullyComplete ? `進捗未完了（${user.completed}/${user.total}）のため発行できません` : undefined}
+                    >
+                      <Award className="h-3 w-3" />
+                      {certIssuing === user.id
+                        ? "発行中..."
+                        : !fullyComplete
+                          ? "未修了"
+                          : "修了証発行"}
+                    </button>
                   </td>
                 </tr>
               );
