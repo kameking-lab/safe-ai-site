@@ -40,7 +40,6 @@ import {
   useLanguage,
   SUPPORTED_LANGUAGES,
   LANGUAGE_LABELS,
-  LANGUAGE_SHORT,
   type Language,
 } from "@/contexts/language-context";
 
@@ -395,7 +394,7 @@ export function AppShell({ children, user }: AppShellProps) {
               id="app-lang-select-mobile"
               value={mounted ? language : "ja"}
               onChange={(e) => setLanguage(e.target.value as Language)}
-              className={`min-h-[44px] rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
+              className={`min-h-[44px] max-w-[140px] truncate rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
                 !mounted || language === "ja"
                   ? "border border-slate-200 bg-white text-slate-600"
                   : "bg-indigo-600 text-white"
@@ -406,7 +405,7 @@ export function AppShell({ children, user }: AppShellProps) {
             >
               {SUPPORTED_LANGUAGES.map((l) => (
                 <option key={l} value={l}>
-                  {LANGUAGE_SHORT[l]}
+                  {LANGUAGE_LABELS[l]}
                 </option>
               ))}
             </select>
