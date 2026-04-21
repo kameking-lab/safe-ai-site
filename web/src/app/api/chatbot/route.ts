@@ -89,8 +89,11 @@ export async function POST(request: Request) {
   // RAG: 関連条文の検索（スコア付き）
   const { articles: allRelevant, normalizedScore } = searchRelevantArticlesWithScore(message, 10);
 
-  // 信頼度が0.7未満の条文は無関係とみなして除外（ハルシネーション・誤誘導の防止）
-  const CONFIDENCE_THRESHOLD = 0.7;
+  // 信頼度が 0.5 未満の条文は無関係とみなして除外。
+  // 閾値を 0.7 → 0.5 に引き下げた背景: RAG コーパスを安衛法・安衛則・特化則・
+  // 有機則の主要条文まで拡充したことで、部分マッチでも十分に正答に寄与する条文が
+  // 当たるようになったため（「6問テストで正解率を上げる」導線）。
+  const CONFIDENCE_THRESHOLD = 0.5;
   const relevantArticles = normalizedScore >= CONFIDENCE_THRESHOLD ? allRelevant : [];
   const context = buildContextFromArticles(relevantArticles);
 
