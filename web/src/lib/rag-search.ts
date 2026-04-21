@@ -44,13 +44,18 @@ export function searchRelevantArticlesWithScore(
 /**
  * 日本語テキストをトークン化（形態素解析の代替として単純分割）
  * normalizeSearchText で表記ゆれを吸収してからトークン化する。
+ *
+ * 日本語の助詞（は・が・を・に・で・の・も・と・へ・や・か）でも分割し、
+ * スペース無しで続けて入力された質問でも意味単位に分解できるようにする。
  */
 function tokenize(text: string): string[] {
   const fuzzyNormalized = normalizeSearchText(text);
 
   const normalized = fuzzyNormalized
     .replace(/[？?！!。、.,\s　]/g, " ")
-    .replace(/[（）()「」『』【】\[\]]/g, " ");
+    .replace(/[（）()「」『』【】\[\]]/g, " ")
+    // 主要な日本語助詞・助動詞で分割（これらの前後は別トークン扱い）
+    .replace(/(は|が|を|に|で|の|も|と|へ|や|か|から|まで|より|など|について|に関する)/g, " ");
 
   const tokens = normalized
     .split(" ")
@@ -99,18 +104,20 @@ function calcScore(article: LawArticle, queryTokens: string[]): number {
       tokenMatched = true;
     }
 
-    // キーワードリストのマッチ（完全一致で高スコア、部分一致で中スコア）
+    // キーワードリストのマッチ（完全一致=5点、部分一致=3点、どちらか最大のみ加算）
+    let keywordBest = 0;
     for (const keyword of article.keywords) {
       const keyNorm = normalizeSearchText(keyword);
       if (keyNorm === tokenLower) {
-        score += 5;
-        tokenMatched = true;
+        keywordBest = 5;
         break;
       } else if (keyNorm.includes(tokenLower) || tokenLower.includes(keyNorm)) {
-        score += 3;
-        tokenMatched = true;
-        break;
+        if (keywordBest < 3) keywordBest = 3;
       }
+    }
+    if (keywordBest > 0) {
+      score += keywordBest;
+      tokenMatched = true;
     }
 
     // 法令名のマッチ
