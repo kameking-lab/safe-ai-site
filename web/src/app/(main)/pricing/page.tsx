@@ -249,10 +249,10 @@ export default function PricingPage() {
                   </div>
                 ) : (
                   <PricingCheckout
+                    planId={plan.id}
                     planName={plan.name}
-                    priceId={plan.priceId ?? ""}
                     label={plan.ctaLabel}
-                    variant={plan.id === "pro" ? "blue" : "amber"}
+                    variant={plan.id === "enterprise" ? "blue" : "amber"}
                   />
                 )}
               </div>

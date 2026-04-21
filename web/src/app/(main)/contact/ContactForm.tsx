@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 const FORMSPREE_ID = process.env.NEXT_PUBLIC_FORMSPREE_ID;
 
@@ -47,19 +48,63 @@ const CONTACT_METHODS = [
 
 type ContactMethodValue = typeof CONTACT_METHODS[number]["value"];
 
+const PLAN_PRESET: Record<
+  string,
+  { label: string; budget: BudgetValue; category: InquiryCategory }
+> = {
+  starter: {
+    label: "Starter（月額¥30,000・〜20名）",
+    budget: "monthly",
+    category: "demo",
+  },
+  business: {
+    label: "Business（月額¥98,000・21〜100名）",
+    budget: "monthly",
+    category: "demo",
+  },
+  enterprise: {
+    label: "Enterprise（月額¥198,000・100名超）",
+    budget: "monthly",
+    category: "demo",
+  },
+};
+
 export default function ContactForm() {
-  const [form, setForm] = useState({
+  const searchParams = useSearchParams();
+  const plan = searchParams?.get("plan") ?? "";
+  const preset = plan && plan in PLAN_PRESET ? PLAN_PRESET[plan] : null;
+
+  const [form, setForm] = useState(() => ({
     company: "",
     name: "",
     email: "",
     phone: "",
-    message: "",
-    category: "safety-consulting" as InquiryCategory,
-    budget: "tbd" as BudgetValue,
+    message: preset
+      ? `${preset.label} の導入について相談したいです。\n\n（事業規模・想定アカウント数・ご相談内容をご記入ください）`
+      : "",
+    category: (preset?.category ?? "safety-consulting") as InquiryCategory,
+    budget: (preset?.budget ?? "tbd") as BudgetValue,
     contactMethod: "online" as ContactMethodValue,
     features: [] as string[],
-  });
+  }));
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // /contact?plan=business などで起動した場合、URLが後から変わったケースに備えて再同期
+  useEffect(() => {
+    if (!preset) return;
+    setForm((f) =>
+      f.company || f.name || f.email || f.message
+        ? f
+        : {
+            ...f,
+            message: `${preset.label} の導入について相談したいです。\n\n（事業規模・想定アカウント数・ご相談内容をご記入ください）`,
+            category: preset.category,
+            budget: preset.budget,
+          }
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -76,41 +121,35 @@ export default function ContactForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!FORMSPREE_ID) {
-      // Formspree 未設定時は mailto: フォールバック
-      const subject = encodeURIComponent(`[ANZEN AI 事務局] お問い合わせ: ${form.company} ${form.name}`);
-      const categoryLabel = INQUIRY_CATEGORIES.find((c) => c.value === form.category)?.label ?? form.category;
-      const budgetLabel = BUDGET_OPTIONS.find((b) => b.value === form.budget)?.label ?? form.budget;
-      const methodLabel = CONTACT_METHODS.find((m) => m.value === form.contactMethod)?.label ?? form.contactMethod;
-      const bodyLines = [
-        `会社名: ${form.company}`,
-        `担当者名: ${form.name}`,
-        `メール: ${form.email}`,
-        form.phone ? `電話: ${form.phone}` : "",
-        `相談カテゴリ: ${categoryLabel}`,
-        `ご予算感: ${budgetLabel}`,
-        `希望相談方法: ${methodLabel}`,
-        "",
-        `【相談内容】`,
-        form.message,
-        "",
-        form.features.length ? `【希望機能】${form.features.join("、")}` : "",
-      ].filter((l) => l !== "");
-      window.location.href = `mailto:?subject=${subject}&body=${encodeURIComponent(bodyLines.join("\n"))}`;
-      return;
-    }
     setStatus("sending");
+    setSuccessMessage(null);
     try {
-      const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+      // まずは /api/contact へ送信（サーバーログに保存）
+      const apiRes = await fetch("/api/contact", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ ...form, features: form.features.join("、") }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, plan }),
       });
-      if (res.ok) {
-        setStatus("success");
-      } else {
+      const apiData = (await apiRes.json().catch(() => ({}))) as {
+        ok?: boolean;
+        message?: string;
+      };
+      if (!apiRes.ok || !apiData.ok) {
         setStatus("error");
+        return;
       }
+
+      // Formspree が設定されていればメール転送（ベストエフォート）
+      if (FORMSPREE_ID) {
+        void fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ ...form, plan, features: form.features.join("、") }),
+        }).catch(() => undefined);
+      }
+
+      setSuccessMessage(apiData.message ?? "送信が完了しました。");
+      setStatus("success");
     } catch {
       setStatus("error");
     }
@@ -180,12 +219,27 @@ export default function ContactForm() {
         </div>
       </section>
 
+      {/* プラン選択で遷移してきた場合のバナー */}
+      {preset && (
+        <div className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+          <p className="font-semibold">{preset.label}の導入相談として受け付けます</p>
+          <p className="mt-1 text-xs text-emerald-800">
+            相談カテゴリ・ご予算感を自動で入力しました。内容は自由に変更できます。
+          </p>
+        </div>
+      )}
+
       {/* フォーム */}
       {status === "success" ? (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-6 py-10 text-center">
+        <div
+          role="status"
+          aria-live="polite"
+          className="rounded-xl border border-emerald-200 bg-emerald-50 px-6 py-10 text-center"
+        >
           <p className="text-xl font-bold text-emerald-800">送信完了しました！</p>
           <p className="mt-2 text-sm text-emerald-700">
-            2〜3営業日以内にご入力のメールアドレスへご返信いたします。
+            {successMessage ??
+              "2〜3営業日以内にご入力のメールアドレスへご返信いたします。"}
           </p>
         </div>
       ) : (
