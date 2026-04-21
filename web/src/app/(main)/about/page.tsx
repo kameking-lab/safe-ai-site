@@ -160,7 +160,7 @@ export default function AboutPage() {
             id="one-big-thing-heading"
             className="mt-2 text-xl font-bold leading-snug text-slate-900 sm:text-2xl"
           >
-            現場の声を反映して継続的に進化する、国内唯一の安全ポータル
+            現場の声を反映して継続的に進化する、公開PDCA型の安全ポータル
           </h2>
           <p className="mt-3 text-sm leading-6 text-slate-700">
             私たちの差別化は、機能の数ではありません。
