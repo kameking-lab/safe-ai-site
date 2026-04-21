@@ -3,9 +3,9 @@ import { Check, Zap, Shield, Star } from "lucide-react";
 import { PricingCheckout } from "./pricing-checkout";
 import { ogImageUrl } from "@/lib/og-url";
 
-const _title = "料金プラン｜無料で始める安全管理";
+const _title = "料金プラン｜法人向け3ティア";
 const _desc =
-  "ANZEN AIの料金プラン。無料プランで基本機能を利用。プレミアムで過去問・AIチャットボット・法令検索が無制限に利用可能。";
+  "ANZEN AI 法人向け料金プラン。Starter ¥30,000 / Business ¥98,000 / Enterprise ¥198,000。現場規模に合わせて3ティアから選択。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -23,73 +23,78 @@ export const metadata: Metadata = {
 
 const PLANS = [
   {
-    id: "free",
-    name: "フリープラン",
-    price: 0,
-    period: null,
+    id: "starter",
+    name: "Starter（小規模）",
+    price: 30000,
+    period: "月（税抜）",
     icon: Shield,
-    iconColor: "text-slate-500",
-    borderColor: "border-slate-200",
+    iconColor: "text-slate-600",
+    borderColor: "border-slate-300",
     badgeColor: "bg-slate-100 text-slate-700",
-    ctaLabel: "現在のプラン",
-    ctaDisabled: true,
-    priceId: null,
+    ctaLabel: "Starterを相談する",
+    ctaDisabled: false,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_STARTER ?? "",
+    target: "〜20名の事業所・一人親方チーム",
     features: [
-      "サイネージ・気象マップ（無制限）",
-      "クマ出没マップ（無制限）",
-      "法改正ニュース閲覧",
-      "過去問クイズ（β期間中：制限なし・将来は1セッション5問まで予定）",
-      "AIチャットボット（β期間中：制限なし・将来は1日5回まで予定）",
-      "KY用紙（基本機能）",
+      "全機能（KY用紙・法改正・事故DB・Eラーニング）",
+      "気象リスク・サイネージ（1拠点）",
+      "AIチャットボット・リスク予測（基本枠）",
+      "利用アカウント：最大10名",
+      "請求書払い対応",
+      "メールサポート",
     ],
     limitations: [
-      "チャット履歴の保存",
-      "KY用紙のPDF出力（高度機能）",
+      "多拠点LMSダッシュボード",
+      "SSO連携",
     ],
   },
   {
-    id: "premium",
-    name: "プレミアムプラン",
-    price: 980,
-    period: "月",
+    id: "business",
+    name: "Business（中規模）",
+    price: 98000,
+    period: "月（税抜）",
     icon: Zap,
     iconColor: "text-amber-600",
     borderColor: "border-amber-400",
     badgeColor: "bg-amber-500 text-white",
-    ctaLabel: "プレミアムに申し込む",
+    ctaLabel: "Businessを相談する",
     ctaDisabled: false,
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PREMIUM ?? "",
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_BUSINESS ?? "",
+    target: "21〜100名／多拠点展開する事業所",
     features: [
-      "フリープランの全機能",
-      "過去問クイズ 無制限",
-      "AIチャットボット 無制限",
-      "法令条文AI要約 無制限",
-      "チャット履歴の保存・エクスポート",
-      "KY用紙のPDF出力",
-      "優先サポート",
+      "Starterの全機能",
+      "利用アカウント：最大50名",
+      "多拠点サイネージ（最大5拠点）",
+      "LMS（学習進捗・修了証）管理ダッシュボード",
+      "化学物質リスクアセスメント",
+      "気象警報メール通知",
+      "電話・メールサポート",
     ],
-    limitations: [],
+    limitations: [
+      "SSO連携（Enterprise）",
+    ],
   },
   {
-    id: "pro",
-    name: "プロプラン",
-    price: 1980,
-    period: "月",
+    id: "enterprise",
+    name: "Enterprise（大規模・複数拠点）",
+    price: 198000,
+    period: "月（税抜）",
     icon: Star,
     iconColor: "text-blue-600",
     borderColor: "border-blue-400",
     badgeColor: "bg-blue-600 text-white",
-    ctaLabel: "プロに申し込む",
+    ctaLabel: "Enterpriseを相談する",
     ctaDisabled: false,
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO ?? "",
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ENTERPRISE ?? "",
+    target: "100名超・全社導入・SSOが必要な事業所",
     features: [
-      "プレミアムプランの全機能",
-      "複数ユーザー（5アカウントまで）",
-      "気象警報メール通知",
-      "化学物質リスクアセスメント",
-      "管理ダッシュボード（組織全体の利用状況）",
-      "請求書払い対応",
-      "電話・メールサポート",
+      "Businessの全機能",
+      "利用アカウント：無制限",
+      "多拠点サイネージ：無制限",
+      "SSO（SAML／OIDC）連携",
+      "カスタム教材・現場別KYテンプレート",
+      "専任カスタマーサクセス担当",
+      "監査ログ・利用状況レポート",
     ],
     limitations: [],
   },
@@ -101,12 +106,14 @@ export default function PricingPage() {
       {/* Header */}
       <div className="text-center mb-10">
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-          料金プラン
+          料金プラン（法人向け3ティア）
         </h1>
         <p className="mt-3 text-slate-600 text-sm leading-7 max-w-xl mx-auto">
-          まずは無料でお試しください。業務が広がったらプレミアムへ。
+          事業所規模・拠点数に合わせて
+          <strong>Starter ¥30,000／Business ¥98,000／Enterprise ¥198,000</strong>
+          の3プランから選べます。
           <br />
-          月額サブスクリプション・クレジットカード払い。いつでもキャンセル可能。
+          月額・請求書払い対応。最低契約期間なし。
         </p>
       </div>
 
@@ -124,47 +131,34 @@ export default function PricingPage() {
               <tr>
                 <th className="px-3 py-2 text-left font-semibold">事業規模</th>
                 <th className="px-3 py-2 text-left font-semibold">推奨プラン</th>
-                <th className="px-3 py-2 text-right font-semibold">月額</th>
+                <th className="px-3 py-2 text-right font-semibold">月額（税抜）</th>
                 <th className="px-3 py-2 text-left font-semibold">想定用途</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-emerald-100 text-slate-800">
               <tr>
-                <td className="px-3 py-2 font-semibold">個人・一人親方</td>
-                <td className="px-3 py-2">フリー</td>
-                <td className="px-3 py-2 text-right">0円</td>
-                <td className="px-3 py-2 text-slate-600">KY用紙・法改正・事故DBを自分の勉強用に</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2 font-semibold">〜10名（町工場・一人社労士）</td>
-                <td className="px-3 py-2">フリー → プレミアム1席</td>
-                <td className="px-3 py-2 text-right">0〜¥980</td>
-                <td className="px-3 py-2 text-slate-600">担当者1名が無制限で使える</td>
+                <td className="px-3 py-2 font-semibold">〜20名（町工場・一人親方チーム）</td>
+                <td className="px-3 py-2">Starter</td>
+                <td className="px-3 py-2 text-right">¥30,000</td>
+                <td className="px-3 py-2 text-slate-600">KY用紙・法改正・事故DBを最大10名で利用</td>
               </tr>
               <tr className="bg-emerald-100/60 font-semibold">
-                <td className="px-3 py-2">11〜30名（中小建設・介護）</td>
-                <td className="px-3 py-2">プロ（5席）</td>
-                <td className="px-3 py-2 text-right">¥1,980</td>
-                <td className="px-3 py-2 text-slate-700">職長・安全担当複数名で共有、管理ダッシュボード付</td>
+                <td className="px-3 py-2">21〜100名（中小建設・介護・製造）</td>
+                <td className="px-3 py-2">Business</td>
+                <td className="px-3 py-2 text-right">¥98,000</td>
+                <td className="px-3 py-2 text-slate-700">多拠点LMS・化学物質RA・気象警報通知まで</td>
               </tr>
               <tr>
-                <td className="px-3 py-2 font-semibold">31〜100名（地方ゼネコン・製造）</td>
-                <td className="px-3 py-2">プロ × 複数契約 or エンタープライズ相談</td>
-                <td className="px-3 py-2 text-right">¥1,980〜</td>
-                <td className="px-3 py-2 text-slate-600">部署ごとに契約 or 個別相談</td>
-              </tr>
-              <tr>
-                <td className="px-3 py-2 font-semibold">100名超</td>
-                <td className="px-3 py-2">エンタープライズ（個別見積）</td>
-                <td className="px-3 py-2 text-right">要相談</td>
-                <td className="px-3 py-2 text-slate-600">SSO・請求書払い・カスタム教材</td>
+                <td className="px-3 py-2 font-semibold">100名超・全社導入</td>
+                <td className="px-3 py-2">Enterprise</td>
+                <td className="px-3 py-2 text-right">¥198,000</td>
+                <td className="px-3 py-2 text-slate-600">SSO・監査ログ・無制限アカウント・専任CS</td>
               </tr>
             </tbody>
           </table>
         </div>
         <p className="mt-3 text-[11px] leading-5 text-emerald-900/70">
-          ※ KY用紙・チャット回数に業種・人数別の制限は設けていません。β期間中は制限なし。
-          助成金活用は <a href="/subsidies" className="underline hover:text-emerald-700">/subsidies</a> を参照。
+          ※ 助成金活用は <a href="/subsidies" className="underline hover:text-emerald-700">/subsidies</a> を参照。上記は標準プラン。業種特化カスタマイズはお問い合わせください。
         </p>
       </div>
 
@@ -194,7 +188,7 @@ export default function PricingPage() {
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
         {PLANS.map((plan) => {
           const Icon = plan.icon;
-          const isPopular = plan.id === "premium";
+          const isPopular = plan.id === "business";
 
           return (
             <div
@@ -226,6 +220,9 @@ export default function PricingPage() {
                   <span className="text-sm text-slate-500">/{plan.period}</span>
                 )}
               </div>
+              {"target" in plan && plan.target ? (
+                <p className="mt-2 text-xs leading-5 text-slate-500">想定: {plan.target}</p>
+              ) : null}
 
               <div className="my-5 border-t border-slate-100" />
 
