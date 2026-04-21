@@ -19,6 +19,16 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
+  // /feedback は /contact に一本化（恒久リダイレクト）
+  async redirects() {
+    return [
+      {
+        source: "/feedback",
+        destination: "/contact?category=demo",
+        permanent: true,
+      },
+    ];
+  },
   // セキュリティ・キャッシュヘッダー
   async headers() {
     return [

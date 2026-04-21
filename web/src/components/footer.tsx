@@ -46,11 +46,8 @@ export function Footer() {
             <Link href="/about" className="hover:text-slate-800 hover:underline">
               運営者情報
             </Link>
-            <Link href="/feedback" className="hover:text-slate-800 hover:underline">
-              サイトへのご要望
-            </Link>
             <Link href="/contact" className="hover:text-slate-800 hover:underline">
-              お問い合わせ
+              お問い合わせ・ご要望
             </Link>
           </nav>
         </div>
