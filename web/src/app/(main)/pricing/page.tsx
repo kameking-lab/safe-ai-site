@@ -162,17 +162,25 @@ export default function PricingPage() {
         </p>
       </div>
 
-      {/* β期間中のお知らせ */}
-      <div className="mx-auto mb-8 max-w-2xl rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
-        <p className="font-semibold">β期間中のお知らせ</p>
+      {/* 課金受付ステータス（特商法対応） */}
+      <div className="mx-auto mb-8 max-w-2xl rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-900">
+        <p className="font-semibold">月額プラン課金は現在「準備中」です</p>
         <p className="mt-1">
-          現在はβ運用期間のため、フリープランでも過去問クイズ・AIチャットボット・化学物質リスクアセスメントを含む全機能を制限なしでお試しいただけます。
-          正式リリース以降は上記の利用制限を順次適用予定です。
+          本ページに表示している Starter／Business／Enterprise プランは、現時点では
+          オンライン決済の受付を行っておりません（特定商取引法上の表示事項整備中のため）。
+          導入ご希望の方は
+          <a href="/contact" className="underline hover:text-amber-950">お問い合わせフォーム</a>
+          よりご連絡ください。個別にお見積り・契約書面をお送りします。
+        </p>
+        <p className="mt-2">
+          β運用期間中は、過去問クイズ・AIチャットボット・化学物質リスクアセスメントを
+          含む全機能を制限なしでご利用いただけます。正式リリース以降は上記プランの
+          利用制限を順次適用予定です。
         </p>
         <div className="mt-3 rounded-lg border border-amber-300/70 bg-white/60 p-3">
           <p className="font-semibold text-amber-900">β協力者特典（予定）</p>
           <ul className="mt-1 list-disc space-y-0.5 pl-5 text-amber-900/90">
-            <li>正式リリース後3ヶ月：プロプラン 50% オフ</li>
+            <li>正式リリース後3ヶ月：Starter プラン 50% オフ</li>
             <li>β協力者バッジをアカウントに付与</li>
             <li>フィードバック採用時はリリースノートに匿名掲載</li>
           </ul>
@@ -211,7 +219,12 @@ export default function PricingPage() {
                 <Icon className={`h-5 w-5 ${plan.iconColor}`} aria-hidden="true" />
               </div>
 
-              <p className="text-sm font-semibold text-slate-600">{plan.name}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold text-slate-600">{plan.name}</p>
+                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                  課金準備中
+                </span>
+              </div>
               <div className="mt-2 flex items-baseline gap-1">
                 <span className="text-3xl font-bold text-slate-900">
                   {plan.price === 0 ? "無料" : `¥${plan.price.toLocaleString()}`}
@@ -220,6 +233,9 @@ export default function PricingPage() {
                   <span className="text-sm text-slate-500">/{plan.period}</span>
                 )}
               </div>
+              <p className="mt-1 text-[11px] leading-5 text-amber-700">
+                現在オンライン決済は停止中。/contact より個別相談にて受付します。
+              </p>
               {"target" in plan && plan.target ? (
                 <p className="mt-2 text-xs leading-5 text-slate-500">想定: {plan.target}</p>
               ) : null}
