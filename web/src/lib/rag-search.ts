@@ -31,8 +31,10 @@ export function searchRelevantArticlesWithScore(
     .sort((a, b) => b.score - a.score);
 
   const topScore = filtered[0]?.score ?? 0;
-  // スコア閾値を30に上げて信頼度をより厳しく評価
-  const normalizedScore = Math.min(topScore / 30, 1.0);
+  // 正規化の分母: 25 (タイトル一致6 + キーワード完全一致5 + テキスト一致数回 + 共起ボーナスで
+  // 現実的な上限がおよそ25点になるため)。以前は30だったが、日本語助詞で分割した後の
+  // 3トークン質問でも上位条文が 0.7 を十分に超えるよう緩和。
+  const normalizedScore = Math.min(topScore / 25, 1.0);
 
   return {
     articles: filtered.slice(0, topK).map((item) => item.article),
