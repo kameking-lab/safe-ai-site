@@ -61,10 +61,10 @@ const FEATURES = [
 ] as const;
 
 const STATS = [
-  { value: "200+", label: "事故事例" },
-  { value: "100+", label: "法改正データ" },
-  { value: "3対応", label: "PC・スマホ・大画面" },
-  { value: "AI対応", label: "リスク予測・要約" },
+  { value: "504,415", label: "厚労省 事故DB（全件検索）" },
+  { value: "1,389", label: "死亡労災（R5・建設業）" },
+  { value: "1,127", label: "法改正データ（10年間）" },
+  { value: "21", label: "特別教育 対応種別" },
 ] as const;
 
 export function HomeValueHero() {
