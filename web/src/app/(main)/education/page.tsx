@@ -66,8 +66,9 @@ const FORMATS = [
   {
     icon: BookOpen,
     title: "オンデマンド配信",
-    desc: "全21種を動画で受講。受講進捗の管理画面・修了証PDFの自動発行に対応。スマホ・PC両対応。",
+    desc: "全21種を動画で受講。受講進捗の管理画面に対応。スマホ・PC両対応。",
     price: "¥50,000〜 / 1社（10名まで）",
+    badge: "2026年秋リリース予定",
   },
   {
     icon: Users,
@@ -123,7 +124,14 @@ export default function EducationPage() {
                 <div className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
                   <Icon className="h-5 w-5" />
                 </div>
-                <h3 className="mt-3 text-base font-bold text-slate-900">{f.title}</h3>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <h3 className="text-base font-bold text-slate-900">{f.title}</h3>
+                  {"badge" in f && f.badge ? (
+                    <span className="inline-flex items-center rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
+                      {f.badge}
+                    </span>
+                  ) : null}
+                </div>
                 <p className="mt-2 text-xs leading-5 text-slate-600">{f.desc}</p>
                 <p className="mt-3 text-sm font-bold text-emerald-700">{f.price}</p>
               </div>
