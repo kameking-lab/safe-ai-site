@@ -356,32 +356,24 @@ export function AppShell({ children, user }: AppShellProps) {
             <label className="sr-only" htmlFor="app-lang-select-pc">
               言語 / Language
             </label>
-            {mounted ? (
-              <select
-                id="app-lang-select-pc"
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as Language)}
-                className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
-                  language === "ja"
-                    ? "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                    : "bg-indigo-600 text-white"
-                }`}
-                title="言語を切り替え / Switch language"
-              >
-                {SUPPORTED_LANGUAGES.map((l) => (
-                  <option key={l} value={l}>
-                    {LANGUAGE_LABELS[l]}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span
-                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-600"
-                aria-hidden="true"
-              >
-                日本語
-              </span>
-            )}
+            <select
+              id="app-lang-select-pc"
+              value={mounted ? language : "ja"}
+              onChange={(e) => setLanguage(e.target.value as Language)}
+              className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                !mounted || language === "ja"
+                  ? "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                  : "bg-indigo-600 text-white"
+              }`}
+              title="言語を切り替え / Switch language"
+              suppressHydrationWarning
+            >
+              {SUPPORTED_LANGUAGES.map((l) => (
+                <option key={l} value={l}>
+                  {LANGUAGE_LABELS[l]}
+                </option>
+              ))}
+            </select>
           </div>
           <UserMenu user={user} />
         </div>
@@ -399,33 +391,25 @@ export function AppShell({ children, user }: AppShellProps) {
             <label className="sr-only" htmlFor="app-lang-select-mobile">
               言語 / Language
             </label>
-            {mounted ? (
-              <select
-                id="app-lang-select-mobile"
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as Language)}
-                className={`min-h-[44px] rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
-                  language === "ja"
-                    ? "border border-slate-200 bg-white text-slate-600"
-                    : "bg-indigo-600 text-white"
-                }`}
-                title="言語を切り替え / Switch language"
-                aria-label={`現在の言語: ${LANGUAGE_LABELS[language]}`}
-              >
-                {SUPPORTED_LANGUAGES.map((l) => (
-                  <option key={l} value={l}>
-                    {LANGUAGE_SHORT[l]}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <span
-                className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600"
-                aria-hidden="true"
-              >
-                日
-              </span>
-            )}
+            <select
+              id="app-lang-select-mobile"
+              value={mounted ? language : "ja"}
+              onChange={(e) => setLanguage(e.target.value as Language)}
+              className={`min-h-[44px] rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
+                !mounted || language === "ja"
+                  ? "border border-slate-200 bg-white text-slate-600"
+                  : "bg-indigo-600 text-white"
+              }`}
+              title="言語を切り替え / Switch language"
+              aria-label={`現在の言語: ${LANGUAGE_LABELS[mounted ? language : "ja"]}`}
+              suppressHydrationWarning
+            >
+              {SUPPORTED_LANGUAGES.map((l) => (
+                <option key={l} value={l}>
+                  {LANGUAGE_SHORT[l]}
+                </option>
+              ))}
+            </select>
             <UserMenu user={user} />
             <button
               type="button"
