@@ -461,7 +461,7 @@ export function MhlwAccidentSearchPanel() {
       {state.kind === "ready" && !showFallbackNote && state.data.source === "blob" && (
         <div className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs text-emerald-800">
           <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
-          Vercel Blob 実稼働中 — {meta.accidents.total.toLocaleString()} 件から検索
+          MHLW 事故データ 全件検索稼働中 — {meta.accidents.total.toLocaleString()} 件から検索
         </div>
       )}
 

@@ -148,7 +148,7 @@ export async function GET(request: Request) {
       total: 0,
       records: [],
       message:
-        "Vercel Blob が未接続のため、MHLW 50万件検索は利用できません。オーナー側で BLOB_READ_WRITE_TOKEN を設定してください。",
+        "事故データベースのフルシャードストレージが未接続のため、MHLW 50万件検索は利用できません。サーバー側で BLOB_READ_WRITE_TOKEN を設定してください。",
     };
     return NextResponse.json(payload);
   }
