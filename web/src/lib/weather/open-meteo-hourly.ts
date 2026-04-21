@@ -77,7 +77,9 @@ export function buildSignageHourlyFromPayload(
   const hourly = payload.hourly;
   const times = hourly?.time ?? [];
   const out: SignageHourlyPoint[] = [];
-  const hourFmt = new Intl.DateTimeFormat("ja-JP", {
+  // ja-JP の numeric hour は "14時" を返すため、末尾の「時」を付けると「14時時」と
+  // 二重表示になる。en-US で純粋な数値に寄せる。
+  const hourFmt = new Intl.DateTimeFormat("en-US", {
     timeZone: "Asia/Tokyo",
     hour: "numeric",
     hour12: false,
