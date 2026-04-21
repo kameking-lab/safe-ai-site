@@ -151,6 +151,12 @@ export function AppShell({ children, user }: AppShellProps) {
   const { easyJapaneseEnabled, toggleEasyJapanese } = useEasyJapanese();
   const { language, setLanguage } = useLanguage();
 
+  // SSR/hydration対策: マウント後にのみ localStorage 依存のUI(言語セレクタ含む)を描画
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // SSR/hydration対策: 初期値はfalseで統一し、マウント後にlocalStorageから読む
   const [largeFontEnabled, setLargeFontEnabled] = useState<boolean>(false);
 
@@ -350,134 +356,81 @@ export function AppShell({ children, user }: AppShellProps) {
             <label className="sr-only" htmlFor="app-lang-select-pc">
               言語 / Language
             </label>
-            <select
-              id="app-lang-select-pc"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as Language)}
-              className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
-                language === "ja"
-                  ? "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                  : "bg-indigo-600 text-white"
-              }`}
-              title="言語を切り替え / Switch language"
-            >
-              {SUPPORTED_LANGUAGES.map((l) => (
-                <option key={l} value={l}>
-                  {LANGUAGE_LABELS[l]}
-                </option>
-              ))}
-            </select>
+            {mounted ? (
+              <select
+                id="app-lang-select-pc"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+                className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
+                  language === "ja"
+                    ? "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                    : "bg-indigo-600 text-white"
+                }`}
+                title="言語を切り替え / Switch language"
+              >
+                {SUPPORTED_LANGUAGES.map((l) => (
+                  <option key={l} value={l}>
+                    {LANGUAGE_LABELS[l]}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span
+                className="rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs font-semibold text-slate-600"
+                aria-hidden="true"
+              >
+                日本語
+              </span>
+            )}
           </div>
           <UserMenu user={user} />
         </div>
       </aside>
 
       <div className="flex min-h-full flex-1 flex-col overflow-x-hidden">
-        {/* Mobile header */}
-        <div className="flex items-center justify-between border-b border-slate-200 bg-gradient-to-b from-emerald-50 to-white px-4 py-3 lg:hidden">
-          <div>
-            <p className="text-[11px] font-bold tracking-wide text-emerald-700">ANZEN AI</p>
-            <p className="text-xs text-slate-700">現場の安全を、AIで変える。</p>
+        {/* Mobile header — 375px で縦積みしないように要素を絞る（a11yトグルはドロップダウン内へ移設） */}
+        <div className="flex flex-nowrap items-center justify-between gap-2 border-b border-slate-200 bg-gradient-to-b from-emerald-50 to-white px-3 py-3 lg:hidden">
+          <div className="min-w-0 shrink">
+            <p className="truncate text-[11px] font-bold tracking-wide text-emerald-700">ANZEN AI</p>
+            <p className="truncate text-[11px] text-slate-700 sm:text-xs">現場の安全を、AIで変える。</p>
           </div>
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-              title="ページを更新"
-              aria-label="ページを更新"
-            >
-              <RefreshCw className="h-4 w-4" />
-            </button>
-            {/* ふりがなトグル */}
-            <button
-              type="button"
-              onClick={toggleFurigana}
-              className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
-                furiganaEnabled
-                  ? "bg-emerald-600 text-white"
-                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-              title="ふりがなを表示"
-              aria-label="ふりがなを表示"
-              aria-pressed={furiganaEnabled}
-            >
-              <ruby className="leading-none">
-                あ<rt className="text-[8px]">ふりがな</rt>
-              </ruby>
-            </button>
-            {/* やさしい日本語トグル */}
-            <button
-              type="button"
-              onClick={toggleEasyJapanese}
-              className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
-                easyJapaneseEnabled
-                  ? "bg-blue-600 text-white"
-                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-              title="やさしい日本語モード"
-              aria-label="やさしい日本語モード"
-              aria-pressed={easyJapaneseEnabled}
-            >
-              やさしい
-            </button>
-            {/* 文字大トグル */}
-            <button
-              type="button"
-              onClick={toggleLargeFont}
-              className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
-                largeFontEnabled
-                  ? "bg-emerald-600 text-white"
-                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-              title="文字を大きくする"
-              aria-label="文字を大きくする"
-              aria-pressed={largeFontEnabled}
-            >
-              Aa
-            </button>
-            {/* ハイコントラスト（屋外視認性） */}
-            <button
-              type="button"
-              onClick={toggleHighContrast}
-              className={`rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
-                highContrastEnabled
-                  ? "bg-slate-900 text-white"
-                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-              }`}
-              title="屋外視認性（ハイコントラスト）"
-              aria-label="屋外視認性（ハイコントラスト）"
-              aria-pressed={highContrastEnabled}
-            >
-              屋外
-            </button>
-            {/* 言語切替 */}
+          <div className="flex shrink-0 items-center gap-1">
+            {/* 言語切替 — mounted が揃うまでは静的プレースホルダで hydration 安定化 */}
             <label className="sr-only" htmlFor="app-lang-select-mobile">
               言語 / Language
             </label>
-            <select
-              id="app-lang-select-mobile"
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as Language)}
-              className={`min-h-[44px] rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
-                language === "ja"
-                  ? "border border-slate-200 bg-white text-slate-600"
-                  : "bg-indigo-600 text-white"
-              }`}
-              title="言語を切り替え / Switch language"
-              aria-label={`現在の言語: ${LANGUAGE_LABELS[language]}`}
-            >
-              {SUPPORTED_LANGUAGES.map((l) => (
-                <option key={l} value={l}>
-                  {LANGUAGE_SHORT[l]}
-                </option>
-              ))}
-            </select>
+            {mounted ? (
+              <select
+                id="app-lang-select-mobile"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+                className={`min-h-[44px] rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
+                  language === "ja"
+                    ? "border border-slate-200 bg-white text-slate-600"
+                    : "bg-indigo-600 text-white"
+                }`}
+                title="言語を切り替え / Switch language"
+                aria-label={`現在の言語: ${LANGUAGE_LABELS[language]}`}
+              >
+                {SUPPORTED_LANGUAGES.map((l) => (
+                  <option key={l} value={l}>
+                    {LANGUAGE_SHORT[l]}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span
+                className="rounded-full border border-slate-200 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600"
+                aria-hidden="true"
+              >
+                日
+              </span>
+            )}
             <UserMenu user={user} />
             <button
               type="button"
               onClick={() => setIsSidebarOpen((prev) => !prev)}
-              className="inline-flex items-center rounded-full border border-emerald-200 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm"
+              className="inline-flex shrink-0 items-center rounded-full border border-emerald-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-emerald-700 shadow-sm sm:px-3 sm:text-xs"
               aria-expanded={isSidebarOpen}
               aria-label="メニューを開閉"
             >
@@ -489,6 +442,68 @@ export function AppShell({ children, user }: AppShellProps) {
         {/* Mobile nav dropdown */}
         {isSidebarOpen && (
           <div className="z-20 border-b border-slate-200 bg-slate-50/95 px-3 py-3 shadow-sm lg:hidden">
+            {/* モバイル: アクセシビリティトグル（ヘッダから移設） */}
+            <div className="mb-3 flex flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-white p-2">
+              <p className="w-full px-1 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                表示・入力支援
+              </p>
+              <button
+                type="button"
+                onClick={toggleFurigana}
+                className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                  furiganaEnabled
+                    ? "bg-emerald-600 text-white"
+                    : "border border-slate-200 bg-white text-slate-600"
+                }`}
+                aria-pressed={furiganaEnabled}
+              >
+                ふりがな
+              </button>
+              <button
+                type="button"
+                onClick={toggleEasyJapanese}
+                className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                  easyJapaneseEnabled
+                    ? "bg-blue-600 text-white"
+                    : "border border-slate-200 bg-white text-slate-600"
+                }`}
+                aria-pressed={easyJapaneseEnabled}
+              >
+                やさしい
+              </button>
+              <button
+                type="button"
+                onClick={toggleLargeFont}
+                className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                  largeFontEnabled
+                    ? "bg-emerald-600 text-white"
+                    : "border border-slate-200 bg-white text-slate-600"
+                }`}
+                aria-pressed={largeFontEnabled}
+              >
+                文字大
+              </button>
+              <button
+                type="button"
+                onClick={toggleHighContrast}
+                className={`rounded-lg px-2.5 py-1.5 text-xs font-semibold transition-colors ${
+                  highContrastEnabled
+                    ? "bg-slate-900 text-white"
+                    : "border border-slate-200 bg-white text-slate-600"
+                }`}
+                aria-pressed={highContrastEnabled}
+              >
+                屋外（ハイコントラスト）
+              </button>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600"
+                aria-label="ページを更新"
+              >
+                <RefreshCw className="inline h-3.5 w-3.5" /> 更新
+              </button>
+            </div>
             <nav aria-label="サイト全体ナビゲーション（モバイル）" className="space-y-3">
               {NAV_CATEGORIES.map((cat) => (
                 <div key={cat.label || "__top__"}>

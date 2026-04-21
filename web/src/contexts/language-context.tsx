@@ -15,20 +15,20 @@ export const SUPPORTED_LANGUAGES: readonly Language[] = [
 
 export const LANGUAGE_LABELS: Record<Language, string> = {
   ja: "日本語",
-  en: "English",
-  vi: "Tiếng Việt",
-  zh: "中文",
-  pt: "Português",
-  tl: "Tagalog",
+  en: "English (Beta)",
+  vi: "Tiếng Việt (準備中)",
+  zh: "中文 (準備中)",
+  pt: "Português (準備中)",
+  tl: "Tagalog (準備中)",
 };
 
 export const LANGUAGE_SHORT: Record<Language, string> = {
   ja: "日",
   en: "EN",
-  vi: "VI",
-  zh: "中",
-  pt: "PT",
-  tl: "TL",
+  vi: "VI*",
+  zh: "中*",
+  pt: "PT*",
+  tl: "TL*",
 };
 
 interface LanguageContextValue {
