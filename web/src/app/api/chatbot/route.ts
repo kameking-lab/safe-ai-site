@@ -87,14 +87,36 @@ export async function POST(request: Request) {
   }
 
   // RAG: 関連条文の検索（スコア付き）
-  const { articles: relevantArticles, normalizedScore } = searchRelevantArticlesWithScore(message, 10);
+  const { articles: allRelevant, normalizedScore } = searchRelevantArticlesWithScore(message, 10);
+
+  // 信頼度が0.7未満の条文は無関係とみなして除外（ハルシネーション・誤誘導の防止）
+  const CONFIDENCE_THRESHOLD = 0.7;
+  const relevantArticles = normalizedScore >= CONFIDENCE_THRESHOLD ? allRelevant : [];
   const context = buildContextFromArticles(relevantArticles);
 
   const hasRagHits = relevantArticles.length > 0;
   const source_type: "rag" | "ai_inference" = hasRagHits ? "rag" : "ai_inference";
   const confidence: "high" | "medium" | "low" = hasRagHits
-    ? normalizedScore >= 0.8 ? "high" : normalizedScore >= 0.5 ? "medium" : "low"
-    : "medium";
+    ? normalizedScore >= 0.85 ? "high" : normalizedScore >= 0.75 ? "medium" : "low"
+    : "low";
+
+  // 低信頼時はe-Gov誘導のテンプレートを返す（AI呼び出しをスキップ）
+  if (!hasRagHits) {
+    return NextResponse.json<ChatbotResponse>(
+      {
+        answer:
+          "ご質問に合致する法令条文を十分な確信度で特定できませんでした。\n\n" +
+          "最新・正確な条文は以下のe-Gov法令検索でご確認ください：\n" +
+          "https://laws.e-gov.go.jp/\n\n" +
+          "質問を具体的にしていただくか、対象の法令名（例：労働安全衛生規則、有機則、クレーン則）を含めて再度お尋ねください。\n" +
+          "※ 本回答はあくまで参考情報です。法的判断は労働安全コンサルタント等の専門家にご相談ください。",
+        sources: [],
+        source_type: "ai_inference",
+        confidence: "low",
+      },
+      { status: 200 }
+    );
+  }
 
   // Gemini Flash API呼び出し
   console.log("[chatbot] API key present:", !!apiKey);
