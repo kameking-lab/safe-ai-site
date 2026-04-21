@@ -15,7 +15,7 @@ export default function TermsPage() {
       <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">利用規約</h1>
-          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月1日</p>
+          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月22日</p>
         </div>
 
         <section className="space-y-3">
@@ -44,12 +44,34 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-base font-bold text-slate-900">第3条（免責事項）</h2>
+          <h2 className="text-base font-bold text-slate-900">第3条（情報の性質・免責事項）</h2>
           <p className="text-sm leading-7 text-slate-600">
-            本サービスが提供する情報は、一般的な教育・参考目的のものです。
-            実際の安全管理・法令遵守にあたっては、必ず最新の法令・官公庁の公式情報および
-            専門家の助言を確認してください。本サービスの情報に基づく判断・行動により
-            生じた損害について、運営者は責任を負いません。
+            本サービスが提供する情報は、一般的な教育・参考目的のものであり、個別具体的な
+            作業現場における法的判断・安全判断を代替するものではありません。実際の安全管理・
+            法令遵守にあたっては、必ず最新の法令・官公庁の公式情報（e-Gov・厚生労働省 等）
+            および労働安全コンサルタント等の専門家の助言を確認してください。
+          </p>
+          <p className="text-sm leading-7 text-slate-600">
+            AI チャットボット、化学物質リスクアセスメント、KY 支援、Eラーニング解説、
+            事故事例分析などの AI 生成コンテンツは、出典条文・出典データに基づく参考情報です。
+            回答の正確性・網羅性・最新性を保証するものではなく、個別の判断に用いる際は
+            必ず原典および専門家の確認を行ってください。
+          </p>
+          <p className="text-sm leading-7 text-slate-600">
+            当方は、本サービスの利用により利用者に生じた損害について、次の各号に定める場合を除き、
+            賠償責任を負いません。
+          </p>
+          <ul className="ml-4 space-y-1 text-sm text-slate-600">
+            <li className="list-disc">当方の故意または重大な過失による場合</li>
+            <li className="list-disc">消費者契約法その他の強行法規により、責任の全部または一部を免除することができない場合</li>
+          </ul>
+          <p className="text-sm leading-7 text-slate-600">
+            消費者契約法第 8 条・第 8 条の 2 の趣旨に従い、事業者の損害賠償責任を全部免除する条項、
+            および事業者の故意・重過失による損害賠償責任を一部免除する条項は本規約に含まれません。
+            消費者である利用者の解除権を放棄させる条項（同法第 8 条の 3）も設けていません。
+            利用者が消費者に該当する場合、賠償責任が生じるときは、当方が受領した対価の額を
+            上限として責任を負います。対価の授受がない場合（無償利用）は、通常生ずべき直接かつ
+            現実の損害に限り、金 1 万円を上限として責任を負います。
           </p>
           <p className="text-sm leading-7 text-slate-600">
             事故データベースの事例は、学習・再発防止目的で提供するものであり、
