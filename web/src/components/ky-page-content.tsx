@@ -677,7 +677,7 @@ export function KyPageContent() {
                             rows={2}
                             value={row.ppeNote}
                             onChange={(e) => setWorkRow(i, { ...row, ppeNote: e.target.value })}
-                            placeholder="安全帯・ヘルメット・保護メガネ等"
+                            placeholder="要求性能墜落制止用器具・ヘルメット・保護メガネ等"
                             className="text-xs"
                           />
                         </label>

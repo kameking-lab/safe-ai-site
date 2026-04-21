@@ -262,7 +262,7 @@ export function LawSearchPanel() {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="フリーワード検索（例: 安全帯、有機溶剤）"
+            placeholder="フリーワード検索（例: 墜落制止用器具、有機溶剤）"
             className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 w-full"
           />
         </div>

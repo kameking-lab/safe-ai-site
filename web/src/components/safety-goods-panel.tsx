@@ -130,7 +130,7 @@ const SELECTION_GUIDES = [
   {
     id: "safety-harness-wp",
     icon: "🔗",
-    title: "安全帯（ワークポジショニング） の選び方",
+    title: "ワークポジショニング用器具（旧：安全帯）の選び方",
     lawBasis: "労働安全衛生規則 第521条・JIS T 8165",
     points: [
       "2019年2月施行の改正省令でU字つり（胴ベルト型）はワークポジショニング専用器具として整理",

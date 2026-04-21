@@ -370,7 +370,7 @@ export function KyInstructionRecordForm({ value, onChange, onSave, savedLabel }:
                       className="min-h-[4rem] w-full resize-y border-0 bg-transparent px-1 py-0.5 text-[10px] leading-tight text-slate-600"
                       value={row.ppeNote}
                       onChange={(e) => setWorkRow(i, { ...row, ppeNote: e.target.value })}
-                      placeholder="親綱、安全帯、保護メガネ、防塵マスク、耳栓、防振手袋、発炎筒他必要毎記載"
+                      placeholder="親綱、要求性能墜落制止用器具、保護メガネ、防塵マスク、耳栓、防振手袋、発炎筒他必要毎記載"
                     />
                   </td>
                   <td className="border border-slate-300 p-0 align-top">

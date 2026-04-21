@@ -801,7 +801,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
                 対策
                 <textarea
                   className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                  placeholder="例: 安全帯使用、作業区画内立入禁止"
+                  placeholder="例: 要求性能墜落制止用器具使用、作業区画内立入禁止"
                   value={kyInstructionRecord.riskRows[0]?.reduction ?? ""}
                   onChange={(e) =>
                     setKyInstructionRecord((prev) => {

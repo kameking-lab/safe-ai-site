@@ -38,7 +38,7 @@ export const elearningThemesCatalog: LearningTheme[] = [
         options: [
           "通路幅を90cm以上に拡幅する",
           "踏さん（ステップ）等の滑止めを設ける",
-          "安全帯を常時使用させる",
+          "要求性能墜落制止用器具を常時使用させる",
           "通路の使用を禁止し、別の経路を確保する",
         ],
         correctIndex: 1,
