@@ -17,6 +17,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
+import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 
 export const metadata: Metadata = {
   title: "運営者情報・特商法表記 | ANZEN AI",
@@ -34,7 +35,7 @@ const STATS = [
   { icon: AlertCircle, label: "事故データベース", value: "504,415件", color: "red" },
   { icon: AlertCircle, label: "死亡災害", value: "4,043件", color: "red" },
   { icon: FileText, label: "法令条文", value: "1,127条文", color: "emerald" },
-  { icon: Scale, label: "化学物質", value: "1,389物質", color: "sky" },
+  { icon: Scale, label: "化学物質", value: `${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()}物質`, color: "sky" },
   { icon: GraduationCap, label: "過去問", value: "1,000問+", color: "amber" },
   { icon: BookOpen, label: "Eラーニング", value: "200問+", color: "violet" },
 ] as const;

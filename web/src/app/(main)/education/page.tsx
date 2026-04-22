@@ -28,6 +28,8 @@ type Program = {
   basis: string;
   hours: string;
   category: "建設" | "機械" | "化学" | "電気" | "その他";
+  /** /contact への遷移時に使うコース識別子（name と同一でもよい） */
+  slug?: string;
 };
 
 const PROGRAMS: Program[] = [
@@ -153,26 +155,36 @@ export default function EducationPage() {
       <section className="mb-10">
         <h2 className="mb-4 text-lg font-bold text-slate-900">対応する特別教育（21種）</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {PROGRAMS.map((p) => (
-            <article
-              key={p.name}
-              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm hover:border-emerald-300 hover:shadow"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="text-sm font-bold leading-snug text-slate-900">{p.name}</h3>
-                <span
-                  className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${CATEGORY_COLOR[p.category]}`}
-                >
-                  {p.category}
-                </span>
-              </div>
-              <p className="mt-2 text-[11px] text-slate-500">{p.basis}</p>
-              <div className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-slate-700">
-                <Clock className="h-3 w-3" aria-hidden="true" />
-                {p.hours}
-              </div>
-            </article>
-          ))}
+          {PROGRAMS.map((p) => {
+            const contactHref = `/contact?category=education&course=${encodeURIComponent(p.name)}`;
+            return (
+              <Link
+                key={p.name}
+                href={contactHref}
+                aria-label={`${p.name} についてお問い合わせ`}
+                className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-emerald-400 hover:bg-emerald-50/30 hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-sm font-bold leading-snug text-slate-900 group-hover:text-emerald-900">
+                    {p.name}
+                  </h3>
+                  <span
+                    className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${CATEGORY_COLOR[p.category]}`}
+                  >
+                    {p.category}
+                  </span>
+                </div>
+                <p className="mt-2 text-[11px] text-slate-500">{p.basis}</p>
+                <div className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-slate-700">
+                  <Clock className="h-3 w-3" aria-hidden="true" />
+                  {p.hours}
+                </div>
+                <p className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 group-hover:underline">
+                  この教育を相談する →
+                </p>
+              </Link>
+            );
+          })}
         </div>
         <p className="mt-3 text-xs leading-5 text-slate-500">
           ※ 法定時間は厚労省告示・通達に基づく目安です。実際の所要時間は受講者の知識・経験に応じ調整します。

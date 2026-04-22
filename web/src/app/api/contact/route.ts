@@ -21,7 +21,66 @@ function isValidEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 }
 
+// ────────────────────────────────────────────────────────────
+// In-memory rate limiter: 同一IPあたり 1分間で最大 5 リクエスト
+// 本番ではプロセスごとにカウントが独立するため厳密ではないが、
+// 単一のお問い合わせAPIに対する素朴なスパム/連投抑制には十分。
+// ────────────────────────────────────────────────────────────
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
+const RATE_LIMIT_MAX = 5;
+const rateBuckets = new Map<string, number[]>();
+
+function resolveClientIp(request: Request): string {
+  const xff = request.headers.get("x-forwarded-for");
+  if (xff) {
+    const first = xff.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  const real = request.headers.get("x-real-ip");
+  if (real) return real.trim();
+  return "unknown";
+}
+
+function isRateLimited(ip: string, now: number): boolean {
+  const windowStart = now - RATE_LIMIT_WINDOW_MS;
+  const bucket = rateBuckets.get(ip) ?? [];
+  const recent = bucket.filter((ts) => ts > windowStart);
+  if (recent.length >= RATE_LIMIT_MAX) {
+    rateBuckets.set(ip, recent);
+    return true;
+  }
+  recent.push(now);
+  rateBuckets.set(ip, recent);
+  // バケット数爆発を防ぐ簡易GC
+  if (rateBuckets.size > 2048) {
+    for (const [key, ts] of rateBuckets) {
+      if (ts.length === 0 || ts[ts.length - 1] < windowStart) {
+        rateBuckets.delete(key);
+      }
+    }
+  }
+  return false;
+}
+
 export async function POST(request: Request) {
+  const ip = resolveClientIp(request);
+  const now = Date.now();
+  if (isRateLimited(ip, now)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "rate_limited",
+        message: "短時間に多数の送信が行われました。1分ほどおいて再度お試しください。",
+      },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(RATE_LIMIT_WINDOW_MS / 1000)),
+        },
+      }
+    );
+  }
+
   let body: ContactPayload;
   try {
     body = (await request.json()) as ContactPayload;

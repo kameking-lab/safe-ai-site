@@ -49,16 +49,48 @@ function parseSearchParams(url: URL): SearchParams {
   };
 }
 
+/**
+ * 業種・事故種別カテゴリの表記ゆれを吸収する正規化関数。
+ * 統合規則:
+ *  - 全角／半角カッコを統一（（）[ ] → ()）
+ *  - 読点「、」→ 中黒「・」
+ *  - 空白（半角/全角/タブ）を除去
+ *  - よくある誤記: 「保険」→「保健」（例: 医療保険業 → 医療保健業）
+ *  - 全角数字・英字 → 半角
+ *  - 小文字化（英字のみ）
+ */
+export function normalizeCategory(value: string | null | undefined): string {
+  if (!value) return "";
+  let s = value;
+  // 全角英数字 → 半角
+  s = s.replace(/[！-～]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
+  // 括弧の統一（全角・半角・角括弧）
+  s = s.replace(/[（[【]/g, "(").replace(/[)）\]】]/g, ")");
+  // 読点「、」→ 中黒「・」
+  s = s.replace(/、/g, "・");
+  // カンマ類 → 中黒（英数字カンマを含むので最後）
+  s = s.replace(/[,，]/g, "・");
+  // 「保険」→「保健」(医療保健業の誤記対策)
+  s = s.replace(/保険/g, "保健");
+  // 空白類を除去
+  s = s.replace(/[\s\u3000]+/g, "");
+  return s.toLowerCase();
+}
+
 function matches(record: Accident, params: SearchParams): boolean {
   if (params.type) {
-    if (!record.accidentType?.name || !record.accidentType.name.includes(params.type)) {
+    const needle = normalizeCategory(params.type);
+    const hay = normalizeCategory(record.accidentType?.name);
+    if (!hay || !hay.includes(needle)) {
       return false;
     }
   }
   if (params.industry) {
-    const major = record.industry?.majorName ?? "";
-    const medium = record.industry?.mediumName ?? "";
-    if (!major.includes(params.industry) && !medium.includes(params.industry)) {
+    const needle = normalizeCategory(params.industry);
+    const major = normalizeCategory(record.industry?.majorName);
+    const medium = normalizeCategory(record.industry?.mediumName);
+    const minor = normalizeCategory(record.industry?.minorName);
+    if (!major.includes(needle) && !medium.includes(needle) && !minor.includes(needle)) {
       return false;
     }
   }

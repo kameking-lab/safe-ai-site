@@ -69,20 +69,35 @@ const PLAN_PRESET: Record<
   },
 };
 
+function isInquiryCategory(v: string): v is InquiryCategory {
+  return INQUIRY_CATEGORIES.some((c) => c.value === v);
+}
+
 export default function ContactForm() {
   const searchParams = useSearchParams();
   const plan = searchParams?.get("plan") ?? "";
   const preset = plan && plan in PLAN_PRESET ? PLAN_PRESET[plan] : null;
+  const urlCategoryRaw = searchParams?.get("category") ?? "";
+  const urlCourse = searchParams?.get("course") ?? "";
+  const urlCategory: InquiryCategory | null = isInquiryCategory(urlCategoryRaw)
+    ? urlCategoryRaw
+    : null;
+
+  const initialCategory: InquiryCategory =
+    urlCategory ?? preset?.category ?? "safety-consulting";
+  const initialMessage = preset
+    ? `${preset.label} の導入について相談したいです。\n\n（事業規模・想定アカウント数・ご相談内容をご記入ください）`
+    : urlCategory === "education" && urlCourse
+      ? `${urlCourse} の受講についてご相談したいです。\n\n（受講人数・希望時期・実施形式（オンデマンド／講師派遣等）をご記入ください）`
+      : "";
 
   const [form, setForm] = useState(() => ({
     company: "",
     name: "",
     email: "",
     phone: "",
-    message: preset
-      ? `${preset.label} の導入について相談したいです。\n\n（事業規模・想定アカウント数・ご相談内容をご記入ください）`
-      : "",
-    category: (preset?.category ?? "safety-consulting") as InquiryCategory,
+    message: initialMessage,
+    category: initialCategory,
     budget: (preset?.budget ?? "tbd") as BudgetValue,
     contactMethod: "online" as ContactMethodValue,
     features: [] as string[],

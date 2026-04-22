@@ -6,6 +6,7 @@ import {
   regulatoryLabels,
   relatedLawTexts,
   getSupplementalInfo,
+  MHLW_MERGED_CHEMICAL_COUNT,
   type MergedChemical,
 } from "@/lib/mhlw-chemicals";
 
@@ -37,7 +38,7 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
     <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">
       <div className="flex items-center gap-2 text-xs font-semibold text-emerald-800">
         <Database className="h-3.5 w-3.5" aria-hidden="true" />
-        厚生労働省データ（MHLW 1,389 物質）
+        厚生労働省データ（MHLW {MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()} 物質）
       </div>
       <h3 className="mt-1 text-base font-bold text-slate-900">{chemical.primaryName}</h3>
       <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-600">

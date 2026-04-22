@@ -2,6 +2,59 @@ import { allLawArticles } from "@/data/laws";
 import type { LawArticle } from "@/data/laws";
 import { normalizeSearchText } from "@/lib/fuzzy-search";
 
+/**
+ * トピック別の必須条文プライン（キーワードに該当する場合、RAG 検索結果の先頭に
+ * 強制的に差し込む）。安衛法第60条のように「政令で定めるもの」で参照切れに
+ * なる条文はスコアだけでは十分に引けないため、施行令・規則とセットで返す。
+ */
+type PinnedTopic = {
+  /** このトピックに該当させるキーワード（いずれか1つが query に含まれれば適用） */
+  triggers: string[];
+  /** 先頭に差し込む条文の { law, articleNum } ペア */
+  pins: { law: string; articleNum: string }[];
+};
+
+const PINNED_TOPICS: PinnedTopic[] = [
+  {
+    // 職長教育：安衛法第60条＋施行令第19条（対象業種）をセットで返す
+    triggers: ["職長教育", "職長", "第60条", "60条", "第六十条"],
+    pins: [
+      { law: "労働安全衛生法", articleNum: "第60条" },
+      { law: "労働安全衛生法施行令", articleNum: "第19条" },
+    ],
+  },
+  {
+    // 熱中症：令和7年6月1日施行の安衛則第612条の2
+    triggers: ["熱中症", "WBGT", "暑熱", "第612条の2", "612条の2"],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第612条の2" }],
+  },
+];
+
+function applyPinnedTopics(query: string, articles: LawArticle[]): LawArticle[] {
+  const lowered = query.toLowerCase();
+  const pinned: LawArticle[] = [];
+  const seen = new Set<string>();
+  for (const topic of PINNED_TOPICS) {
+    if (!topic.triggers.some((t) => query.includes(t) || lowered.includes(t.toLowerCase()))) {
+      continue;
+    }
+    for (const pin of topic.pins) {
+      const found = allLawArticles.find(
+        (a) => a.law === pin.law && a.articleNum === pin.articleNum
+      );
+      if (!found) continue;
+      const key = `${found.law}:${found.articleNum}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      pinned.push(found);
+    }
+  }
+  if (pinned.length === 0) return articles;
+  const pinnedKeys = new Set(pinned.map((a) => `${a.law}:${a.articleNum}`));
+  const rest = articles.filter((a) => !pinnedKeys.has(`${a.law}:${a.articleNum}`));
+  return [...pinned, ...rest];
+}
+
 /** キーワードマッチングによる関連条文のRAG検索 */
 export function searchRelevantArticles(query: string, topK = 10): LawArticle[] {
   return searchRelevantArticlesWithScore(query, topK).articles;
@@ -36,10 +89,20 @@ export function searchRelevantArticlesWithScore(
   // 3トークン質問でも上位条文が 0.7 を十分に超えるよう緩和。
   const normalizedScore = Math.min(topScore / 25, 1.0);
 
+  const scoredArticles = filtered.slice(0, topK).map((item) => item.article);
+  const finalArticles = applyPinnedTopics(query, scoredArticles).slice(0, topK);
+
+  // 強制ピンが刺さった場合は、ヒット扱いで信頼度を最低 0.7 まで引き上げる
+  // （ピンは明示的トピックでの確定ソースのため、キーワードスコア不足でも
+  //  「関連条文なし」扱いにならないようにする）
+  const hasPinned = finalArticles.length !== scoredArticles.length ||
+    finalArticles.some((a, i) => scoredArticles[i] !== a);
+  const adjustedScore = hasPinned ? Math.max(normalizedScore, 0.7) : normalizedScore;
+
   return {
-    articles: filtered.slice(0, topK).map((item) => item.article),
+    articles: finalArticles,
     topScore,
-    normalizedScore,
+    normalizedScore: adjustedScore,
   };
 }
 

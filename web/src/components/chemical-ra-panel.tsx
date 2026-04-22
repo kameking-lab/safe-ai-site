@@ -12,6 +12,7 @@ import {
   findByCas,
   getSupplementalInfo,
   searchMergedChemicals,
+  MHLW_MERGED_CHEMICAL_COUNT,
   type MergedChemical,
 } from "@/lib/mhlw-chemicals";
 import type {
@@ -333,7 +334,7 @@ export function ChemicalRaPanel() {
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
-              ① 厚労省 1,389 物質から選ぶ（推奨）— 濃度基準値・規制区分が即座に表示されます
+              ① 厚労省 {MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()} 物質から選ぶ（推奨）— 濃度基準値・規制区分が即座に表示されます
             </label>
             <MhlwChemicalSelector value={mhlwSelected} onSelect={handleSelectMhlw} />
           </div>

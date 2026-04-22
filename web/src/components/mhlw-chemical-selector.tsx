@@ -4,17 +4,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown, FlaskConical, X } from "lucide-react";
 import {
   searchMergedChemicals,
+  MHLW_MERGED_CHEMICAL_COUNT,
   type MergedChemical,
 } from "@/lib/mhlw-chemicals";
 
 /**
- * 厚労省 1,389 物質から CAS / 名称で検索し選択するコンボボックス。
+ * 厚労省データの全物質から CAS / 名称で検索し選択するコンボボックス。
  * 選択結果は onSelect コールバックで通知する。
  */
 export function MhlwChemicalSelector({
   value,
   onSelect,
-  placeholder = "MHLW 1,389 物質から CAS / 名称で検索",
+  placeholder = `MHLW ${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()} 物質から CAS / 名称で検索`,
 }: {
   value: MergedChemical | null;
   onSelect: (m: MergedChemical | null) => void;

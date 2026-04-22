@@ -1,5 +1,6 @@
 export type { LawArticle } from "./law-types";
 export { rodoAnzenEiseiHo } from "./rodo-anzen-eisei-ho";
+export { rodoAnzenEiseiHoSikokiregu } from "./rodo-anzen-eisei-ho-sikokiregu";
 export { anzenEiseiKisoku } from "./anzen-eisei-kisoku";
 export { craneKisoku } from "./crane-kisoku";
 export { yukiKisoku } from "./yuki-kisoku";
@@ -37,6 +38,7 @@ export { mhlwLawArticles } from "./mhlw-extras";
 
 import { mhlwLawArticles } from "./mhlw-extras";
 import { rodoAnzenEiseiHo } from "./rodo-anzen-eisei-ho";
+import { rodoAnzenEiseiHoSikokiregu } from "./rodo-anzen-eisei-ho-sikokiregu";
 import { anzenEiseiKisoku } from "./anzen-eisei-kisoku";
 import { craneKisoku } from "./crane-kisoku";
 import { yukiKisoku } from "./yuki-kisoku";
@@ -73,6 +75,7 @@ import { koyoKintoHo } from "./koyo-kinto-ho";
 /** 全法令条文をまとめた配列（33法令以上） */
 export const allLawArticles = [
   ...rodoAnzenEiseiHo,
+  ...rodoAnzenEiseiHoSikokiregu,
   ...anzenEiseiKisoku,
   ...craneKisoku,
   ...yukiKisoku,

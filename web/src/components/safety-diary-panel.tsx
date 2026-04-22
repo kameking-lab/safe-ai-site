@@ -283,14 +283,16 @@ function DiaryTableEditor({
 // ────────────────────────────────────────────────────────────
 
 export function SafetyDiaryPanel() {
-  const [entries, setEntries] = useState<DiaryEntry[]>(loadEntries);
+  // SSR hydration #418 対策: 初期値は空配列で統一し、マウント後に localStorage から読む
+  const [entries, setEntries] = useState<DiaryEntry[]>([]);
   const [current, setCurrent] = useState<DiaryEntry>(createEntry);
   const [savedLabel, setSavedLabel] = useState("");
   const [activeTab, setActiveTab] = useState<"edit" | "list">("edit");
 
-  // マウント後に日付・ID を初期化（SSR hydration mismatch 対策）
+  // マウント後に日付・ID を初期化 ＋ 保存済みエントリを読み込み（SSR hydration mismatch 対策）
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEntries(loadEntries());
     setCurrent((prev) => {
       if (prev.date && prev.id) return prev;
       return {

@@ -91,6 +91,32 @@ export const MHLW_CHEMICALS_SOURCE =
   "厚生労働省 皮膚等障害化学物質リスト・SDS交付義務物質一覧・がん原性物質一覧・濃度基準値設定物質";
 
 /**
+ * 厚生労働省告示第177号（化学物質の濃度基準値）に基づく主要物質の濃度基準値。
+ * 当サイトの compact.json（自動抽出）では一部の基幹物質で濃度基準値カテゴリが
+ * 欠落するため、基準値が確定している物質は CAS 番号ベースでここに明示する。
+ * 出典: 厚生労働省 令和5年4月告示第177号（別表・追加告示含む）。
+ */
+type ConcentrationOverride = {
+  /** 8時間濃度基準値（例: "1 ppm"） */
+  limit8h: string;
+  /** 短時間濃度基準値（例: "0.5 ppm"） */
+  limitShort?: string;
+  /** 告示番号・根拠 */
+  source?: string;
+};
+
+const CONCENTRATION_OVERRIDES_BY_CAS: Record<string, ConcentrationOverride> = {
+  // ベンゼン — 告示第177号
+  "71-43-2": { limit8h: "1 ppm", limitShort: "0.5 ppm", source: "告示第177号" },
+  // トルエン — 告示第177号
+  "108-88-3": { limit8h: "20 ppm", source: "告示第177号" },
+};
+
+/** 管理濃度（作業環境評価基準告示）と濃度基準値は別物である旨の説明ラベル */
+export const MANAGEMENT_VS_LIMIT_DISCLAIMER =
+  "※ 「濃度基準値」（安衛則577条の2・告示第177号）と「管理濃度」（作業環境評価基準）は別の指標です。両者の数値が一致する物質もあれば、異なる物質もあります。";
+
+/**
  * CAS 番号 → 管理濃度 / OEL / 健康影響 / GHS の補助テーブル。
  * 厚労省「濃度基準値」には未掲載だが特化則・有機則で管理濃度が定められている
  * 代表物質をカバーするため、chemical-substances-db.ts のデータを CAS 索引化する。
@@ -287,14 +313,32 @@ export function relatedLawTexts(flags: MergedChemical["flags"]): string[] {
   return out.filter(Boolean);
 }
 
+function applyConcentrationOverrides(merged: MergedChemical[]): MergedChemical[] {
+  for (const m of merged) {
+    if (!m.cas) continue;
+    const override = CONCENTRATION_OVERRIDES_BY_CAS[m.cas];
+    if (!override) continue;
+    m.flags.concentration = true;
+    m.details = {
+      ...(m.details ?? {}),
+      limit8h: override.limit8h,
+      ...(override.limitShort ? { limitShort: override.limitShort } : {}),
+    };
+  }
+  return merged;
+}
+
 let _mergedCache: MergedChemical[] | null = null;
 /** CAS 統合済みの全物質。クライアント側でキャッシュ。 */
 export function getAllMergedChemicals(): MergedChemical[] {
   if (!_mergedCache) {
-    _mergedCache = mergeByCas(rawCompact.entries);
+    _mergedCache = applyConcentrationOverrides(mergeByCas(rawCompact.entries));
   }
   return _mergedCache;
 }
+
+/** UI 表示用: CAS 統合後の物質件数（単一の真実の源泉） */
+export const MHLW_MERGED_CHEMICAL_COUNT: number = getAllMergedChemicals().length;
 
 /** 物質名 / CAS / 別名でフリーワード検索（先頭 limit 件）。 */
 export function searchMergedChemicals(

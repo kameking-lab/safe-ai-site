@@ -59,7 +59,9 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "71-43-2",
     synonyms: ["ベンゾール", "C6H6"],
     categories: ["特化則2類", "リスクアセスメント対象物", "皮膚等障害化学物質等"],
-    oel: "1 ppm（管理濃度）",
+    // 濃度基準値（安衛則577条の2／厚労省告示第177号）: 8時間値 1 ppm / 短時間値 0.5 ppm
+    // 管理濃度（作業環境評価基準）: 1 ppm
+    oel: "濃度基準値: 8時間値 1 ppm / 短時間値 0.5 ppm（告示第177号）",
     skin_hazard: true,
     uses: "溶剤、合成原料、ゴム、塗料、石油精製（古い用途多数）",
     health_effects: "白血病、再生不良性貧血、中枢神経抑制、皮膚刺激",
@@ -74,7 +76,9 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "108-88-3",
     synonyms: ["メチルベンゼン", "フェニルメタン"],
     categories: ["有機溶剤2種", "リスクアセスメント対象物"],
-    oel: "20 ppm（管理濃度）",
+    // 濃度基準値（告示第177号）: 8時間値 20 ppm
+    // 管理濃度: 20 ppm
+    oel: "濃度基準値: 8時間値 20 ppm（告示第177号）",
     skin_hazard: false,
     uses: "塗料・接着剤・印刷インキの溶剤、化学原料",
     health_effects: "中枢神経抑制、頭痛めまい、皮膚脱脂、生殖毒性（高濃度長期）",
