@@ -4,7 +4,7 @@ interface Props {
   planId: string;
   planName: string;
   label: string;
-  variant: "amber" | "blue";
+  variant: "amber" | "blue" | "emerald";
 }
 
 /**
@@ -15,7 +15,9 @@ export function PricingCheckout({ planId, label, variant }: Props) {
   const btnClass =
     variant === "amber"
       ? "bg-amber-500 hover:bg-amber-600 text-white"
-      : "bg-blue-600 hover:bg-blue-700 text-white";
+      : variant === "emerald"
+        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+        : "bg-blue-600 hover:bg-blue-700 text-white";
 
   return (
     <Link
