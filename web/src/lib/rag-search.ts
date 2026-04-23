@@ -30,7 +30,10 @@ const PINNED_TOPICS: PinnedTopic[] = [
   },
 ];
 
-function applyPinnedTopics(query: string, articles: LawArticle[]): LawArticle[] {
+function applyPinnedTopics(
+  query: string,
+  articles: LawArticle[]
+): { articles: LawArticle[]; hadPins: boolean } {
   const lowered = query.toLowerCase();
   const pinned: LawArticle[] = [];
   const seen = new Set<string>();
@@ -49,10 +52,10 @@ function applyPinnedTopics(query: string, articles: LawArticle[]): LawArticle[] 
       pinned.push(found);
     }
   }
-  if (pinned.length === 0) return articles;
+  if (pinned.length === 0) return { articles, hadPins: false };
   const pinnedKeys = new Set(pinned.map((a) => `${a.law}:${a.articleNum}`));
   const rest = articles.filter((a) => !pinnedKeys.has(`${a.law}:${a.articleNum}`));
-  return [...pinned, ...rest];
+  return { articles: [...pinned, ...rest], hadPins: true };
 }
 
 /** キーワードマッチングによる関連条文のRAG検索 */
@@ -90,14 +93,13 @@ export function searchRelevantArticlesWithScore(
   const normalizedScore = Math.min(topScore / 25, 1.0);
 
   const scoredArticles = filtered.slice(0, topK).map((item) => item.article);
-  const finalArticles = applyPinnedTopics(query, scoredArticles).slice(0, topK);
+  const { articles: pinnedArticles, hadPins } = applyPinnedTopics(query, scoredArticles);
+  const finalArticles = pinnedArticles.slice(0, topK);
 
   // 強制ピンが刺さった場合は、ヒット扱いで信頼度を最低 0.7 まで引き上げる
   // （ピンは明示的トピックでの確定ソースのため、キーワードスコア不足でも
   //  「関連条文なし」扱いにならないようにする）
-  const hasPinned = finalArticles.length !== scoredArticles.length ||
-    finalArticles.some((a, i) => scoredArticles[i] !== a);
-  const adjustedScore = hasPinned ? Math.max(normalizedScore, 0.7) : normalizedScore;
+  const adjustedScore = hadPins ? Math.max(normalizedScore, 0.7) : normalizedScore;
 
   return {
     articles: finalArticles,
