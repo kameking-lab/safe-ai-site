@@ -39,7 +39,7 @@ export function SignageHourlyStrip({ hourly, locationLabel, status }: SignageHou
   return (
     <div className="rounded-xl border border-slate-600 bg-slate-950/90 p-2">
       <div className="flex flex-wrap items-baseline justify-between gap-1">
-        <p className="text-[10px] font-bold text-slate-100 sm:text-xs">1時間ごとの天気（現在の時台〜明日・Open-Meteo）</p>
+        <p className="text-[10px] font-bold text-slate-100 sm:text-xs">1時間ごとの天気（現在の時間帯〜明日・Open-Meteo）</p>
         <p className="max-w-[55%] truncate text-[9px] text-slate-400">{locationLabel}</p>
       </div>
       <p className="mt-0.5 text-[8px] text-slate-500">先頭が現在の時間帯。幅に応じて折り返し表示（横スクロールなし）。</p>
@@ -53,7 +53,7 @@ export function SignageHourlyStrip({ hourly, locationLabel, status }: SignageHou
           role="presentation"
         >
           <span className="text-[8px] font-bold leading-tight text-cyan-200">現在</span>
-          <span className="text-[7px] leading-tight text-cyan-400/90">の時台</span>
+          <span className="text-[7px] leading-tight text-cyan-400/90">の時間帯</span>
           <span className="text-[7px] leading-tight text-cyan-500/80">から</span>
         </div>
         {hourly.map((h) => (

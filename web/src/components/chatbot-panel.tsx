@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ChatbotSource } from "@/app/api/chatbot/route";
 import { VoiceMicButton } from "@/components/voice-input-field";
@@ -13,6 +13,16 @@ type ChatMessage = {
   source_type?: "rag" | "ai_inference";
   confidence?: "high" | "medium" | "low";
 };
+
+type SavedSession = {
+  id: string;
+  title: string;
+  savedAt: number;
+  messages: ChatMessage[];
+};
+
+const STORAGE_KEY = "chatbot_history_v2";
+const MAX_SESSIONS = 15;
 
 const EGOV_LAW_NUMBERS: Record<string, string> = {
   "労働安全衛生法": "347AC0000000057",
@@ -34,14 +44,84 @@ const EXAMPLE_QUESTIONS = [
   "クレーン運転士の就業制限は？",
 ];
 
+function loadSessions(): SavedSession[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as SavedSession[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveSessions(sessions: SavedSession[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions.slice(0, MAX_SESSIONS)));
+  } catch {
+    // ignore storage errors
+  }
+}
+
+function messagesToMarkdown(messages: ChatMessage[]): string {
+  return messages
+    .map((m) => {
+      const role = m.role === "user" ? "**あなた**" : "**ANZEN AI**";
+      const body = m.content;
+      const sources =
+        m.sources && m.sources.length > 0
+          ? "\n\n> 参照条文: " + m.sources.map((s) => `${s.law} ${s.article}`).join(" / ")
+          : "";
+      return `${role}\n\n${body}${sources}`;
+    })
+    .join("\n\n---\n\n");
+}
+
+function messagesToText(messages: ChatMessage[]): string {
+  return messages
+    .map((m) => {
+      const role = m.role === "user" ? "あなた" : "ANZEN AI";
+      return `[${role}]\n${m.content}`;
+    })
+    .join("\n\n");
+}
+
+function downloadFile(content: string, filename: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function encodeShare(messages: ChatMessage[]): string {
+  const data = messages.map((m) => ({
+    r: m.role === "user" ? "u" : "a",
+    c: m.content,
+    s: m.sources?.map((src) => ({ l: src.law, a: src.article })),
+  }));
+  return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+}
+
 export function ChatbotPanel() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [sessions, setSessions] = useState<SavedSession[]>([]);
+  const [copyStates, setCopyStates] = useState<Record<string, boolean>>({});
+  const [shareToast, setShareToast] = useState<string | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
   const prefillAppliedRef = useRef(false);
+
+  useEffect(() => {
+    setSessions(loadSessions());
+  }, []);
 
   useEffect(() => {
     if (prefillAppliedRef.current) return;
@@ -51,6 +131,24 @@ export function ChatbotPanel() {
       setInput(q.trim());
     }
   }, [searchParams]);
+
+  function saveCurrentSession(msgs: ChatMessage[]) {
+    if (msgs.length < 2) return;
+    const firstUser = msgs.find((m) => m.role === "user");
+    const title = firstUser ? firstUser.content.slice(0, 40) : "チャット";
+    const session: SavedSession = {
+      id: crypto.randomUUID(),
+      title,
+      savedAt: Date.now(),
+      messages: msgs,
+    };
+    const updated = [session, ...loadSessions().filter((s) => s.title !== title)].slice(
+      0,
+      MAX_SESSIONS
+    );
+    saveSessions(updated);
+    setSessions(updated);
+  }
 
   async function handleSend(question?: string) {
     const text = (question ?? input).trim();
@@ -62,12 +160,12 @@ export function ChatbotPanel() {
       content: text,
     };
 
-    setMessages((prev) => [...prev, userMsg]);
+    const nextMessages = [...messages, userMsg];
+    setMessages(nextMessages);
     setInput("");
     setIsSending(true);
     setError(null);
 
-    // スクロールを一番下へ
     setTimeout(() => {
       listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
     }, 50);
@@ -100,7 +198,9 @@ export function ChatbotPanel() {
         confidence: data.confidence,
       };
 
-      setMessages((prev) => [...prev, assistantMsg]);
+      const finalMessages = [...nextMessages, assistantMsg];
+      setMessages(finalMessages);
+      saveCurrentSession(finalMessages);
     } catch (err) {
       const message = err instanceof Error ? err.message : "通信エラーが発生しました";
       setError(message);
@@ -112,10 +212,177 @@ export function ChatbotPanel() {
     }
   }
 
+  const handleCopyMessage = useCallback(async (id: string, text: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopyStates((prev) => ({ ...prev, [id]: true }));
+    setTimeout(() => setCopyStates((prev) => ({ ...prev, [id]: false })), 1500);
+  }, []);
+
+  function handleShare() {
+    if (messages.length === 0) return;
+    const encoded = encodeShare(messages);
+    const url = `${window.location.origin}/chatbot/share/${encoded}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setShareToast("共有URLをコピーしました");
+      setTimeout(() => setShareToast(null), 2500);
+    });
+  }
+
+  function handleExportMD() {
+    downloadFile(messagesToMarkdown(messages), "chatbot-session.md", "text/markdown;charset=utf-8");
+    setExportOpen(false);
+  }
+
+  function handleExportTXT() {
+    downloadFile(messagesToText(messages), "chatbot-session.txt", "text/plain;charset=utf-8");
+    setExportOpen(false);
+  }
+
+  function handleExportJSON() {
+    downloadFile(JSON.stringify(messages, null, 2), "chatbot-session.json", "application/json");
+    setExportOpen(false);
+  }
+
+  function handleLoadSession(session: SavedSession) {
+    setMessages(session.messages);
+    setShowHistory(false);
+  }
+
+  function handleDeleteSession(id: string, e: React.MouseEvent) {
+    e.stopPropagation();
+    const updated = sessions.filter((s) => s.id !== id);
+    saveSessions(updated);
+    setSessions(updated);
+  }
+
+  function handleImportJSON(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target?.result as string) as ChatMessage[];
+        if (Array.isArray(parsed) && parsed[0]?.role) {
+          setMessages(parsed);
+          setExportOpen(false);
+        }
+      } catch {
+        // ignore parse errors
+      }
+    };
+    reader.readAsText(file);
+  }
+
   const isEmpty = messages.length === 0;
+  const hasMessages = messages.length > 0;
 
   return (
     <div className="flex h-full flex-col gap-4">
+      {/* ツールバー */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          {/* 履歴ボタン */}
+          <button
+            type="button"
+            onClick={() => setShowHistory((v) => !v)}
+            className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            aria-label="履歴を表示"
+          >
+            🕐 履歴{sessions.length > 0 && <span className="text-blue-600">({sessions.length})</span>}
+          </button>
+        </div>
+        {hasMessages && (
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* 共有ボタン */}
+            <button
+              type="button"
+              onClick={handleShare}
+              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            >
+              🔗 共有URL
+            </button>
+            {/* エクスポートドロップダウン */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setExportOpen((v) => !v)}
+                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                ⬇ エクスポート ▾
+              </button>
+              {exportOpen && (
+                <div className="absolute right-0 top-full z-20 mt-1 w-44 rounded-lg border border-slate-200 bg-white shadow-lg">
+                  <button
+                    type="button"
+                    onClick={handleExportMD}
+                    className="block w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+                  >
+                    📄 Markdown (.md)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExportTXT}
+                    className="block w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+                  >
+                    📝 テキスト (.txt)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleExportJSON}
+                    className="block w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+                  >
+                    🗄 JSON (.json)
+                  </button>
+                  <label className="block cursor-pointer w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50 border-t border-slate-100">
+                    ⬆ JSONをインポート
+                    <input type="file" accept=".json" className="sr-only" onChange={handleImportJSON} />
+                  </label>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 履歴サイドバー */}
+      {showHistory && (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <p className="mb-2 text-xs font-bold text-slate-600">保存された会話履歴</p>
+          {sessions.length === 0 ? (
+            <p className="text-xs text-slate-400">まだ履歴がありません</p>
+          ) : (
+            <ul className="space-y-1 max-h-48 overflow-y-auto">
+              {sessions.map((s) => (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => handleLoadSession(s)}
+                    className="flex w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-xs text-slate-700 hover:bg-blue-50 hover:border-blue-200"
+                  >
+                    <span className="truncate max-w-[200px]">{s.title}</span>
+                    <span className="flex items-center gap-2 shrink-0">
+                      <span className="text-slate-400">
+                        {new Date(s.savedAt).toLocaleDateString("ja-JP")}
+                      </span>
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => handleDeleteSession(s.id, e)}
+                        onKeyDown={(e) => e.key === "Enter" && handleDeleteSession(s.id, e as unknown as React.MouseEvent)}
+                        className="text-slate-300 hover:text-red-500"
+                        aria-label="削除"
+                      >
+                        ✕
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       {/* 免責バナー */}
       <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
         <p className="text-xs text-amber-800 leading-5">
@@ -177,6 +444,18 @@ export function ChatbotPanel() {
                   )}
                 </div>
 
+                {/* コピーボタン */}
+                <div className="mt-1 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleCopyMessage(msg.id, msg.content)}
+                    className="rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-400 hover:text-slate-600 transition"
+                    aria-label="コピー"
+                  >
+                    {copyStates[msg.id] ? "✓ コピー済" : "📋 コピー"}
+                  </button>
+                </div>
+
                 {/* RAGソース・信頼度バッジ */}
                 {msg.role === "assistant" && msg.source_type && (
                   <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
@@ -195,8 +474,8 @@ export function ChatbotPanel() {
                     {msg.confidence === "medium" && (
                       <span className="text-[11px] text-slate-500">🟡 信頼度：中</span>
                     )}
-                    {msg.confidence === "low" && (
-                      <span className="text-[11px] text-slate-500">🔴 信頼度：低</span>
+                    {msg.confidence === "low" && msg.source_type !== "rag" && (
+                      <span className="text-[11px] text-slate-500">🔴 条文を特定できず</span>
                     )}
                   </div>
                 )}
@@ -258,33 +537,35 @@ export function ChatbotPanel() {
 
       {/* 入力エリア */}
       <div className="flex gap-2">
-        <input
-          type="text"
+        <textarea
+          rows={3}
           value={input}
           disabled={isSending}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
+            if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
               e.preventDefault();
               handleSend();
             }
           }}
-          placeholder="安衛法について質問を入力..."
-          className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
+          placeholder={"安衛法について質問を入力…\nCmd/Ctrl+Enter で送信"}
+          className="min-w-0 flex-1 resize-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
           aria-label="質問入力"
         />
-        <VoiceMicButton
-          onFinalText={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
-          className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
-        />
-        <button
-          type="button"
-          disabled={isSending || !input.trim()}
-          onClick={() => handleSend()}
-          className="shrink-0 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          送信
-        </button>
+        <div className="flex flex-col gap-2">
+          <VoiceMicButton
+            onFinalText={(text) => setInput((prev) => (prev ? `${prev} ${text}` : text))}
+            className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+          />
+          <button
+            type="button"
+            disabled={isSending || !input.trim()}
+            onClick={() => handleSend()}
+            className="shrink-0 rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            送信
+          </button>
+        </div>
       </div>
 
       {/* 免責注記 */}
@@ -300,6 +581,13 @@ export function ChatbotPanel() {
         </a>
         で確認してください。法的判断は専門家にご相談ください。
       </p>
+
+      {/* 共有URLコピー完了トースト */}
+      {shareToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-slate-800 px-5 py-2.5 text-sm font-semibold text-white shadow-lg z-50">
+          {shareToast}
+        </div>
+      )}
     </div>
   );
 }

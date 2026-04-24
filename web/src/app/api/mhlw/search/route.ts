@@ -66,12 +66,16 @@ export function normalizeCategory(value: string | null | undefined): string {
   s = s.replace(/[！-～]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
   // 括弧の統一（全角・半角・角括弧）
   s = s.replace(/[（[【]/g, "(").replace(/[)）\]】]/g, ")");
+  // 半角中黒（U+FF65）→ 全角中黒
+  s = s.replace(/\uFF65/g, "・");
   // 読点「、」→ 中黒「・」
   s = s.replace(/、/g, "・");
   // カンマ類 → 中黒（英数字カンマを含むので最後）
   s = s.replace(/[,，]/g, "・");
   // 「保険」→「保健」(医療保健業の誤記対策)
   s = s.replace(/保険/g, "保健");
+  // 誤字修正: 「到壊」→「倒壊」
+  s = s.replace(/到壊/g, "倒壊");
   // 空白類を除去
   s = s.replace(/[\s\u3000]+/g, "");
   return s.toLowerCase();

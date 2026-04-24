@@ -170,7 +170,7 @@ export default function OrganizationPage() {
           {[
             { icon: FileText, label: "安全衛生日誌の全社集計", desc: "部署ごとの日誌提出状況を確認" },
             { icon: PieChart, label: "事故統計レポート（四半期）", desc: "業種別・種類別に傾向を把握" },
-            { icon: Award, label: "特別教育 修了証一括発行", desc: "LMSと連携。Businessプラン以上" },
+            { icon: Award, label: "特別教育 修了証一括発行", desc: "LMSと連携。Standardプラン以上" },
           ].map((item) => {
             const Icon = item.icon;
             return (

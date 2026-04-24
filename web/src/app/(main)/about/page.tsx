@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
+import { SITE_STATS } from "@/data/site-stats";
 
 export const metadata: Metadata = {
   title: "運営者情報・特商法表記 | ANZEN AI",
@@ -32,9 +33,9 @@ export const metadata: Metadata = {
 };
 
 const STATS = [
-  { icon: AlertCircle, label: "事故データベース", value: "504,415件", color: "red" },
+  { icon: AlertCircle, label: "事故データベース", value: `${SITE_STATS.accidentDbCount}件`, color: "red" },
   { icon: AlertCircle, label: "死亡災害", value: "4,043件", color: "red" },
-  { icon: FileText, label: "法令条文", value: "1,127条文", color: "emerald" },
+  { icon: FileText, label: "法令条文", value: `${SITE_STATS.lawArticleCount}条文`, color: "emerald" },
   { icon: Scale, label: "化学物質", value: `${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()}物質`, color: "sky" },
   { icon: GraduationCap, label: "過去問", value: "1,000問+", color: "amber" },
   { icon: BookOpen, label: "Eラーニング", value: "200問+", color: "violet" },
@@ -81,7 +82,7 @@ const COLOR_MAP = {
 const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
   {
     label: "販売業者名",
-    value: "ANZEN AI 事務局",
+    value: "個人事業主（氏名は請求により開示）",
   },
   {
     label: "運営責任者",
@@ -91,7 +92,7 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
     label: "所在地",
     value: (
       <>
-        消費者庁「特定商取引法に基づく表記」ガイドラインに基づき、消費者からのご請求があれば遅滞なく書面にて開示いたします。
+        東京都内（請求により詳細開示）。消費者からのご請求があれば遅滞なく書面にて開示いたします。
         <Link href="/contact" className="ml-1 underline hover:text-slate-800">
           お問い合わせフォーム
         </Link>
@@ -100,10 +101,10 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
     ),
   },
   {
-    label: "連絡先",
+    label: "電話番号",
     value: (
       <>
-        電話番号も同様に、ご請求があれば遅滞なく開示いたします。通常のご連絡は
+        請求により開示（原則メール対応）。通常のご連絡は
         <Link href="/contact" className="mx-1 underline hover:text-slate-800">
           お問い合わせフォーム
         </Link>
@@ -488,6 +489,11 @@ export default function AboutPage() {
               </div>
             ))}
           </dl>
+          <p className="mt-4 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-800 leading-5">
+            当サイトのサブスクリプション商品は正式提供開始時に特定商取引法上の全表示事項を完備いたします。現時点では個別相談のみ受け付けております（
+            <Link href="/pricing" className="underline hover:text-blue-900">料金プランページ</Link>
+            参照）。
+          </p>
         </section>
 
         {/* 免責事項 */}
