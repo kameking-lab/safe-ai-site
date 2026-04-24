@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { GraduationCap, Mail, Clock, BookOpen, Users, Building2 } from "lucide-react";
+import { GraduationCap, Mail, Clock, BookOpen, Users, Building2, MessageSquare } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, serviceSchema } from "@/components/json-ld";
 
-const TITLE = "特別教育・安全衛生教育｜21種の教育メニュー";
+const TITLE = "特別教育・安全衛生教育｜12種 対応教育＋要相談多数";
 const DESCRIPTION =
-  "労働安全衛生法に基づく特別教育（安衛則第36条）21種を提供。オンデマンド配信・カスタマイズ研修・講師派遣に対応。¥50,000〜の明朗会計、修了証発行まで一括対応。";
+  "労働安全衛生法に基づく特別教育・法定教育・労働衛生教育12種に対応。フルハーネス・足場・低圧電気・職長教育など。オンデマンド配信・カスタマイズ研修・講師派遣。¥50,000〜の明朗会計、修了証発行まで一括対応。";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -23,52 +23,120 @@ export const metadata: Metadata = {
   },
 };
 
+type CategoryKey = "tokubetsu" | "hoteikyoiku" | "roudoueisei";
+
 type Program = {
   name: string;
   basis: string;
   hours: string;
-  category: "建設" | "機械" | "化学" | "電気" | "その他";
-  /** /contact への遷移時に使うコース識別子（name と同一でもよい） */
-  slug?: string;
+  category: CategoryKey;
+  note?: string;
+};
+
+const CATEGORY_LABEL: Record<CategoryKey, string> = {
+  tokubetsu: "特別教育",
+  hoteikyoiku: "法定教育",
+  roudoueisei: "労働衛生教育",
+};
+
+const CATEGORY_COLOR: Record<CategoryKey, string> = {
+  tokubetsu: "bg-amber-50 text-amber-800 border-amber-200",
+  hoteikyoiku: "bg-sky-50 text-sky-800 border-sky-200",
+  roudoueisei: "bg-emerald-50 text-emerald-800 border-emerald-200",
+};
+
+const CATEGORY_HEADING_COLOR: Record<CategoryKey, string> = {
+  tokubetsu: "border-amber-400 text-amber-900",
+  hoteikyoiku: "border-sky-400 text-sky-900",
+  roudoueisei: "border-emerald-400 text-emerald-900",
 };
 
 const PROGRAMS: Program[] = [
-  { name: "アーク溶接等の業務", basis: "安衛則第36条第3号", hours: "11時間以上", category: "機械" },
-  { name: "低圧電気取扱い業務", basis: "安衛則第36条第4号", hours: "7〜14時間", category: "電気" },
-  { name: "高圧・特別高圧電気取扱い業務", basis: "安衛則第36条第4号", hours: "11〜15時間", category: "電気" },
-  { name: "フォークリフト運転（最大荷重1t未満）", basis: "安衛則第36条第5号", hours: "12時間以上", category: "機械" },
-  { name: "ショベルローダー等運転（機体質量3t未満）", basis: "安衛則第36条第5号の3", hours: "12時間以上", category: "機械" },
-  { name: "車両系建設機械（小型・整地等）", basis: "安衛則第36条第9号", hours: "13時間以上", category: "建設" },
-  { name: "高所作業車運転（作業床高さ10m未満）", basis: "安衛則第36条第10号の5", hours: "9時間以上", category: "機械" },
-  { name: "玉掛け業務（吊り上げ荷重1t未満）", basis: "安衛則第36条第19号", hours: "9時間以上", category: "建設" },
-  { name: "クレーン運転（吊り上げ荷重5t未満）", basis: "クレーン則第21条", hours: "9時間以上", category: "建設" },
-  { name: "床上操作式クレーン運転", basis: "クレーン則第21条", hours: "9〜13時間", category: "建設" },
-  { name: "移動式クレーン運転（吊り上げ荷重1t未満）", basis: "クレーン則第67条", hours: "9〜13時間", category: "建設" },
-  { name: "デリック運転（吊り上げ荷重5t未満）", basis: "クレーン則第107条", hours: "9〜13時間", category: "建設" },
-  { name: "巻上げ機（ウインチ）の運転", basis: "安衛則第36条第11号", hours: "9時間以上", category: "建設" },
-  { name: "丸のこ等取扱い作業", basis: "安衛則第36条（通達）", hours: "6時間以上", category: "機械" },
-  { name: "刈払機（草刈機）取扱い作業", basis: "安衛則第36条（通達）", hours: "6時間以上", category: "機械" },
-  { name: "チェーンソー取扱い業務", basis: "安衛則第36条第8号", hours: "18時間以上", category: "建設" },
-  { name: "酸素欠乏・硫化水素危険作業", basis: "酸欠則第12条", hours: "5.5時間以上", category: "化学" },
-  { name: "石綿（アスベスト）取扱い作業", basis: "石綿則第27条", hours: "4.5時間以上", category: "化学" },
-  { name: "粉じん作業", basis: "粉じん則第22条", hours: "4.5時間以上", category: "化学" },
-  { name: "高さ2m以上のフルハーネス型墜落制止用器具", basis: "安衛則第36条第41号", hours: "6時間以上", category: "建設" },
-  { name: "ロープ高所作業（特別教育）", basis: "安衛則第36条第40号", hours: "7時間以上", category: "建設" },
+  // 特別教育（安衛則第36条）
+  {
+    name: "研削といしの取替え・試運転の業務",
+    basis: "安衛則第36条第1号",
+    hours: "4時間以上",
+    category: "tokubetsu",
+  },
+  {
+    name: "低圧電気取扱い業務",
+    basis: "安衛則第36条第4号",
+    hours: "7〜14時間",
+    category: "tokubetsu",
+  },
+  {
+    name: "足場の組立て・解体・変更の作業",
+    basis: "安衛則第36条第39号",
+    hours: "6時間以上",
+    category: "tokubetsu",
+  },
+  {
+    name: "フルハーネス型墜落制止用器具の使用",
+    basis: "安衛則第36条第41号",
+    hours: "6時間以上",
+    category: "tokubetsu",
+  },
+  {
+    name: "つり上げ荷重1t未満の玉掛け業務",
+    basis: "安衛則第36条第19号",
+    hours: "9時間以上",
+    category: "tokubetsu",
+  },
+  {
+    name: "酸素欠乏危険作業",
+    basis: "酸素欠乏症等防止規則第12条",
+    hours: "5.5時間以上",
+    category: "tokubetsu",
+  },
+  // 法定教育
+  {
+    name: "職長等教育",
+    basis: "安衛法第60条・安衛則第40条",
+    hours: "12時間以上",
+    category: "hoteikyoiku",
+  },
+  {
+    name: "化学物質のリスクアセスメント実務教育",
+    basis: "安衛法第57条の3",
+    hours: "2.5〜4時間",
+    category: "hoteikyoiku",
+    note: "2026年4月 自律管理制度対応",
+  },
+  // 労働衛生教育
+  {
+    name: "腰痛予防教育",
+    basis: "基発0618第1号通達",
+    hours: "2時間以上",
+    category: "roudoueisei",
+  },
+  {
+    name: "熱中症予防教育",
+    basis: "基発0420第3号通達",
+    hours: "1.5時間以上",
+    category: "roudoueisei",
+  },
+  {
+    name: "振動障害予防教育",
+    basis: "振動障害予防のための作業管理指針",
+    hours: "2時間以上",
+    category: "roudoueisei",
+  },
+  {
+    name: "騒音障害防止教育",
+    basis: "騒音障害防止ガイドライン（令和5年改訂）",
+    hours: "1.5時間以上",
+    category: "roudoueisei",
+  },
 ];
 
-const CATEGORY_COLOR: Record<Program["category"], string> = {
-  建設: "bg-amber-50 text-amber-800 border-amber-200",
-  機械: "bg-sky-50 text-sky-800 border-sky-200",
-  化学: "bg-violet-50 text-violet-800 border-violet-200",
-  電気: "bg-rose-50 text-rose-800 border-rose-200",
-  その他: "bg-slate-50 text-slate-800 border-slate-200",
-};
+const CATEGORY_ORDER: CategoryKey[] = ["tokubetsu", "hoteikyoiku", "roudoueisei"];
 
 const FORMATS = [
   {
     icon: BookOpen,
     title: "オンデマンド配信",
-    desc: "全21種を動画で受講。受講進捗の管理画面に対応。スマホ・PC両対応。",
+    desc: "対応12種を動画で受講。受講進捗の管理画面に対応。スマホ・PC両対応。",
     price: "¥50,000〜 / 1社（10名まで）",
     badge: "2026年秋リリース予定",
     preorder: "事前予約受付中",
@@ -86,6 +154,18 @@ const FORMATS = [
     price: "¥80,000〜 / 半日（交通費別）",
   },
 ] as const;
+
+const OTHER_EDUCATION_EXAMPLES = [
+  "雇入れ時の安全衛生教育（安衛法第59条）",
+  "安全衛生責任者教育",
+  "アーク溶接等の業務（特別教育）",
+  "高所作業車運転（特別教育）",
+  "フォークリフト運転（特別教育）",
+  "石綿（アスベスト）取扱い作業（特別教育）",
+  "粉じん作業（特別教育）",
+  "化学物質管理者講習",
+  "保護具着用管理責任者教育",
+];
 
 export default function EducationPage() {
   return (
@@ -105,11 +185,12 @@ export default function EducationPage() {
           特別教育・安全衛生教育サービス
         </div>
         <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
-          21種の特別教育に対応。修了証発行までワンストップ。
+          12種の対応教育＋要相談多数。修了証発行までワンストップ。
         </h1>
         <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
-          労働安全衛生法・安衛則第36条に基づく特別教育を中心に、現場で必要な安全衛生教育を ANZEN AI が提供します。
+          労働安全衛生法に基づく特別教育・法定教育・労働衛生教育を ANZEN AI が提供します。
           労働安全コンサルタント（登録番号260022・土木区分）が監修。オンデマンド配信から講師派遣まで、企業規模・業種に合わせた最適な形で受講いただけます。
+          掲載以外の教育もお気軽にご相談ください。
         </p>
       </header>
 
@@ -151,45 +232,92 @@ export default function EducationPage() {
         </p>
       </section>
 
-      {/* 21種教育メニュー */}
+      {/* 12種 教育メニュー（カテゴリ別） */}
       <section className="mb-10">
-        <h2 className="mb-4 text-lg font-bold text-slate-900">対応する特別教育（21種）</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {PROGRAMS.map((p) => {
-            const contactHref = `/contact?category=education&course=${encodeURIComponent(p.name)}`;
+        <h2 className="mb-6 text-lg font-bold text-slate-900">対応する教育メニュー（12種）</h2>
+        <div className="space-y-8">
+          {CATEGORY_ORDER.map((catKey) => {
+            const programs = PROGRAMS.filter((p) => p.category === catKey);
             return (
-              <Link
-                key={p.name}
-                href={contactHref}
-                aria-label={`${p.name} についてお問い合わせ`}
-                className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-emerald-400 hover:bg-emerald-50/30 hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-sm font-bold leading-snug text-slate-900 group-hover:text-emerald-900">
-                    {p.name}
-                  </h3>
-                  <span
-                    className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${CATEGORY_COLOR[p.category]}`}
-                  >
-                    {p.category}
+              <div key={catKey}>
+                <h3
+                  className={`mb-3 border-l-4 pl-3 text-base font-bold ${CATEGORY_HEADING_COLOR[catKey]}`}
+                >
+                  {CATEGORY_LABEL[catKey]}
+                  <span className="ml-2 text-sm font-normal text-slate-500">
+                    （{programs.length}種）
                   </span>
+                </h3>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {programs.map((p) => {
+                    const contactHref = `/contact?category=education&course=${encodeURIComponent(p.name)}`;
+                    return (
+                      <Link
+                        key={p.name}
+                        href={contactHref}
+                        aria-label={`${p.name} についてお問い合わせ`}
+                        className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-emerald-400 hover:bg-emerald-50/30 hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <h4 className="text-sm font-bold leading-snug text-slate-900 group-hover:text-emerald-900">
+                            {p.name}
+                          </h4>
+                          <span
+                            className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${CATEGORY_COLOR[catKey]}`}
+                          >
+                            {CATEGORY_LABEL[catKey]}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-[11px] text-slate-500">{p.basis}</p>
+                        {p.note && (
+                          <p className="mt-1 text-[10px] font-semibold text-sky-700 bg-sky-50 rounded px-1.5 py-0.5 w-fit">
+                            {p.note}
+                          </p>
+                        )}
+                        <div className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-slate-700">
+                          <Clock className="h-3 w-3" aria-hidden="true" />
+                          {p.hours}
+                        </div>
+                        <p className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 group-hover:underline">
+                          この教育を相談する →
+                        </p>
+                      </Link>
+                    );
+                  })}
                 </div>
-                <p className="mt-2 text-[11px] text-slate-500">{p.basis}</p>
-                <div className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-slate-700">
-                  <Clock className="h-3 w-3" aria-hidden="true" />
-                  {p.hours}
-                </div>
-                <p className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 group-hover:underline">
-                  この教育を相談する →
-                </p>
-              </Link>
+              </div>
             );
           })}
         </div>
-        <p className="mt-3 text-xs leading-5 text-slate-500">
+        <p className="mt-4 text-xs leading-5 text-slate-500">
           ※ 法定時間は厚労省告示・通達に基づく目安です。実際の所要時間は受講者の知識・経験に応じ調整します。
-          上記以外の教育（職長・安全衛生責任者教育、雇入れ時教育、化学物質管理者講習など）にもご相談に応じて対応可能です。
         </p>
+      </section>
+
+      {/* その他の教育（要相談） */}
+      <section className="mb-10 rounded-2xl border border-slate-200 bg-slate-50 p-6">
+        <div className="flex items-center gap-2 mb-3">
+          <MessageSquare className="h-5 w-5 text-slate-600" />
+          <h2 className="text-base font-bold text-slate-900">その他の教育（要相談）</h2>
+        </div>
+        <p className="text-sm text-slate-600 mb-4">
+          下記以外にも、現場のニーズに応じてカリキュラムを設計します。法定要件の有無に関わらず、まずはご相談ください。
+        </p>
+        <ul className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+          {OTHER_EDUCATION_EXAMPLES.map((item) => (
+            <li key={item} className="flex items-start gap-1.5 text-xs text-slate-700">
+              <span className="mt-0.5 text-slate-400">•</span>
+              {item}
+            </li>
+          ))}
+        </ul>
+        <Link
+          href="/contact?category=education&course=その他"
+          className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-emerald-700 hover:text-emerald-900 hover:underline"
+        >
+          <Mail className="h-4 w-4" />
+          掲載外の教育についてお問い合わせ →
+        </Link>
       </section>
 
       {/* CTA */}

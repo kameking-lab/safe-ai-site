@@ -9,6 +9,6 @@ export const SITE_STATS = {
   fatalDisastersR5: "1,389",
   /** RAG 検索対応の法令条文データ数（compact.json total: 1,127）*/
   lawArticleCount: "1,127",
-  /** 特別教育の種類数（安衛則第36条） */
-  specialEdKinds: "21",
+  /** 対応教育の種類数（特別教育・法定・労働衛生、要相談含む） */
+  specialEdKinds: "12+",
 } as const;
