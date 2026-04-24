@@ -320,6 +320,26 @@ export default function EducationPage() {
         </Link>
       </section>
 
+      {/* 新設：腰痛予防労働衛生教育 */}
+      <section className="mb-10 rounded-2xl border border-emerald-300 bg-emerald-50 p-6">
+        <div className="flex flex-wrap items-center gap-2 mb-2">
+          <span className="inline-flex items-center rounded-full border border-emerald-400 bg-emerald-600 px-2.5 py-0.5 text-[11px] font-bold text-white">
+            新設
+          </span>
+          <h2 className="text-base font-bold text-emerald-900">腰痛予防労働衛生教育</h2>
+        </div>
+        <p className="text-sm text-slate-700 mb-4">
+          重量物取扱い・介護・VDT作業向けに、厚生労働省「腰痛予防対策指針」（基発0618第1号）に基づく2時間以上の教育を提供します。オンデマンド・カスタマイズ・講師派遣の3形式。
+        </p>
+        <Link
+          href="/education/roudoueisei/youtsu-yobou"
+          className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700 transition-colors"
+        >
+          <GraduationCap className="h-4 w-4" />
+          詳細ページを見る →
+        </Link>
+      </section>
+
       {/* CTA */}
       <section className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 text-center">
         <p className="text-sm font-semibold text-emerald-800">教育プログラムのご相談・お見積り</p>
