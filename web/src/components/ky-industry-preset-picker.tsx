@@ -1,21 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { KY_INDUSTRY_PRESETS, getPresetById, type KyIndustryPreset } from "@/data/mock/ky-industry-presets";
 
 type Props = {
   onApply: (preset: KyIndustryPreset) => void;
 };
 
+const LAST_PRESET_KEY = "ky-last-preset-id";
+
 export function KyIndustryPresetPicker({ onApply }: Props) {
   const [selectedId, setSelectedId] = useState("");
   const [applied, setApplied] = useState(false);
+  const [lastPresetId, setLastPresetId] = useState<string>("");
+
+  // マウント後に前回選択業種を localStorage から復元
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LAST_PRESET_KEY);
+      if (saved && getPresetById(saved)) {
+        setLastPresetId(saved);
+      }
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
 
   const preset = getPresetById(selectedId);
+  const lastPreset = lastPresetId ? getPresetById(lastPresetId) : null;
 
   const handleApply = () => {
     if (!preset) return;
     onApply(preset);
+    setApplied(true);
+    try {
+      localStorage.setItem(LAST_PRESET_KEY, preset.id);
+      setLastPresetId(preset.id);
+    } catch {
+      // localStorage unavailable
+    }
+    setTimeout(() => setApplied(false), 2000);
+  };
+
+  const handleReapplyLast = () => {
+    if (!lastPreset) return;
+    onApply(lastPreset);
     setApplied(true);
     setTimeout(() => setApplied(false), 2000);
   };
@@ -23,6 +52,25 @@ export function KyIndustryPresetPicker({ onApply }: Props) {
   return (
     <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-3">
       <p className="mb-2 text-xs font-bold text-emerald-800">業種別プリセット</p>
+      {lastPreset && selectedId === "" && (
+        <div className="mb-2 flex flex-wrap items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] text-amber-900">
+          <span>前回：<span className="font-semibold">{lastPreset.label}</span></span>
+          <button
+            type="button"
+            onClick={handleReapplyLast}
+            className="rounded-md bg-amber-600 px-2 py-0.5 text-[11px] font-semibold text-white hover:bg-amber-700"
+          >
+            再適用
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelectedId(lastPreset.id)}
+            className="text-[11px] font-semibold text-amber-800 underline hover:text-amber-900"
+          >
+            変更する
+          </button>
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-2">
         <select
           value={selectedId}

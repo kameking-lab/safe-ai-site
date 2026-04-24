@@ -4,10 +4,10 @@ import { signIn } from "@/auth";
 
 export const metadata: Metadata = {
   title: "ログイン",
-  description: "ANZEN AIにログインしてプレミアム機能を利用しましょう。",
+  description: "ANZEN AIにログインしてKY用紙・チャット履歴・法人プラン機能をご利用ください。",
   openGraph: {
     title: "ログイン｜ANZEN AI",
-    description: "ANZEN AIにログインしてプレミアム機能を利用しましょう。",
+    description: "ANZEN AIにログインしてKY用紙・チャット履歴・法人プラン機能をご利用ください。",
   },
 };
 
@@ -20,7 +20,7 @@ export default function SignInPage() {
         </div>
         <h1 className="text-xl font-bold text-slate-900 mb-2">ログイン</h1>
         <p className="text-sm text-slate-500 mb-8 leading-6">
-          アカウントにログインして、KY用紙・チャット履歴・プレミアム機能をご利用ください。
+          アカウントにログインして、KY用紙・チャット履歴・法人プラン機能をご利用ください。
         </p>
 
         <form

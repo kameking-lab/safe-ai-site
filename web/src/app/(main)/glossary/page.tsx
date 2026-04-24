@@ -173,7 +173,7 @@ export default function GlossaryPage() {
           </span>
           <div>
             <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">安全用語辞書</h1>
-            <p className="text-sm text-slate-500">労働安全衛生の主要用語100語を五十音順で収録</p>
+            <p className="text-sm text-slate-500">労働安全衛生の主要用語 全{TERMS.length}語 を五十音順で収録</p>
           </div>
         </div>
       </div>

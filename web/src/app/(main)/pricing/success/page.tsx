@@ -3,11 +3,12 @@ import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "お申し込み完了",
-  description: "プレミアムプランへのお申し込みが完了しました。",
+  title: "お問い合わせ受付完了",
+  description: "法人プランのお問い合わせを受け付けました。担当者より3営業日以内にご連絡します。",
+  robots: { index: false, follow: false },
   openGraph: {
-    title: "お申し込み完了｜ANZEN AI",
-    description: "プレミアムプランへのお申し込みが完了しました。",
+    title: "お問い合わせ受付完了｜ANZEN AI",
+    description: "法人プランのお問い合わせを受け付けました。",
   },
 };
 
@@ -18,12 +19,14 @@ export default function PricingSuccessPage() {
         <CheckCircle className="h-9 w-9 text-emerald-500" />
       </div>
       <h1 className="text-2xl font-bold text-slate-900 mb-3">
-        お申し込みありがとうございます！
+        お問い合わせを受け付けました
       </h1>
       <p className="text-slate-600 text-sm leading-7 mb-8">
-        ご登録のメールアドレスに領収書をお送りしました。
+        法人プランへのお問い合わせを受け付けました。
         <br />
-        プレミアム機能がすぐにご利用いただけます。
+        担当者より原則3営業日以内にご連絡いたします。
+        <br />
+        β期間中は、下記リンクから全機能をそのままご利用いただけます。
       </p>
       <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
         <Link

@@ -6,11 +6,11 @@ import { ogImageUrl } from "@/lib/og-url";
 export const metadata: Metadata = {
   title: { absolute: "ANZEN AI｜現場の安全を、AIで変える。" },
   description:
-    "労働安全衛生法改正・事故データベース・KY用紙・危険予知活動・Eラーニングをまとめた安全管理ポータル。建設・製造業の安全担当者を支援します。",
+    "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。建設・製造・林業・運輸・医療福祉の安全担当者を支援します。",
   openGraph: {
     title: "ANZEN AI｜現場の安全を、AIで変える。",
     description:
-      "労働安全衛生法改正・事故データベース・KY用紙・危険予知活動・Eラーニングをまとめた安全管理ポータル。建設・製造業の安全担当者を支援します。",
+      "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。建設・製造・林業・運輸・医療福祉の安全担当者を支援します。",
     images: [{ url: ogImageUrl("現場の安全を、AIで変える。"), width: 1200, height: 630 }],
   },
   twitter: {

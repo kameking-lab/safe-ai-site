@@ -291,6 +291,9 @@ export function LawRevisionList({
       <p className="mt-1 text-xs text-slate-500 sm:text-sm">
         直近10年の主要な労働安全衛生関連の改正を収録。キーワード・年で絞り込みできます（音声入力対応）。
       </p>
+      <p className="mt-1 text-[11px] leading-5 text-amber-700">
+        ⚠ 要約・条番号は<strong>施行当時</strong>のものです。現行条文は各カードの「e-Govで原文を確認」から最新版をご確認ください。
+      </p>
       <div className="mt-3 grid grid-cols-1 gap-2 print:hidden sm:grid-cols-2 lg:grid-cols-3">
         <div className="sm:col-span-2">
           <label className="text-xs font-semibold text-slate-700" htmlFor="law-search">

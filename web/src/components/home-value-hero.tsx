@@ -6,7 +6,7 @@ import Link from "next/link";
 const STATS = [
   { value: "504,415", label: "厚労省 事故DB収録件数", hint: "全件検索対応" },
   { value: "1,389", label: "死亡労災（R5・建設業）", hint: "厚労省統計" },
-  { value: "1,127", label: "法改正データ", hint: "10年分を横断" },
+  { value: "1,127", label: "法令条文データ", hint: "RAG検索で即照合" },
   { value: "21", label: "特別教育 対応種別", hint: "過去問クイズ付" },
 ] as const;
 

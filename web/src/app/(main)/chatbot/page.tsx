@@ -7,7 +7,7 @@ import { ogImageUrl } from "@/lib/og-url";
 
 const _title = "安衛法 AI チャットボット｜法令質問";
 const _desc =
-  "労働安全衛生法・安衛則・石綿則・じん肺法・粉じん則・有機則・特化則・酸欠則・ボイラー則など30法令以上の条文をAIが即答。現場の法令の疑問をその場で解決。";
+  "労働安全衛生法・安衛則・石綿則・じん肺法・粉じん則・有機則・特化則・酸欠則・ボイラー則など全33法令以上の条文をAIが即答。現場の法令の疑問をその場で解決。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 
 export default function ChatbotPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6 sm:py-8">
+    <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
       <TranslatedPageHeader
         titleJa="安衛法AIチャットボット"
         titleEn="Occupational Safety Law AI Chat"
@@ -35,39 +35,53 @@ export default function ChatbotPage() {
         iconColor="blue"
       />
 
-      {/* 対応法令バッジ */}
-      <div className="mt-4 mb-2 flex flex-wrap gap-2">
-        {[
-          "安衛法",
-          "安衛則",
-          "クレーン則",
-          "有機則",
-          "特化則",
-          "酸欠則",
-          "石綿則",
-          "じん肺法",
-          "粉じん則",
-          "電離則",
-          "ボイラー則",
-          "ゴンドラ則",
-          "足場則",
-          "高圧則",
-          "作業環境測定法",
-          "労基法",
-          "労災保険法",
-          "育児介護休業法",
-          "雇用均等法",
-        ].map((law) => (
-          <span
-            key={law}
-            className="rounded-full border border-blue-100 bg-blue-50 px-3 py-0.5 text-xs font-medium text-blue-700"
-          >
-            {law}
+      {/* 対応法令バッジ（コア4法令＋関連規則で視覚的に重みづけ） */}
+      <div className="mt-4 mb-2 space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-blue-700">
+            コア法令（一般作業者向け）
           </span>
-        ))}
-        <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-medium text-slate-600">
-          ほか全30法令以上
-        </span>
+          {["安衛法", "安衛則", "足場則", "クレーン則"].map((law) => (
+            <span
+              key={law}
+              className="rounded-full border border-blue-200 bg-blue-100 px-3 py-0.5 text-xs font-bold text-blue-800"
+            >
+              {law}
+            </span>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+            特定業種・有害業務向け
+          </span>
+          {[
+            "有機則",
+            "特化則",
+            "酸欠則",
+            "石綿則",
+            "じん肺法",
+            "粉じん則",
+            "電離則",
+            "ボイラー則",
+            "ゴンドラ則",
+            "高圧則",
+            "作業環境測定法",
+            "労基法",
+            "労災保険法",
+            "育児介護休業法",
+            "雇用均等法",
+          ].map((law) => (
+            <span
+              key={law}
+              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-medium text-slate-600"
+            >
+              {law}
+            </span>
+          ))}
+          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-medium text-slate-500">
+            ほか全33法令以上
+          </span>
+        </div>
       </div>
       <p className="mb-6 text-[11px] leading-5 text-slate-500">
         ※ 上記は対応法令の一部です。労働基準法・職業安定法・職業能力開発促進法・メンタルヘルス指針など、全33法令以上の条文をRAG検索に使用しています。

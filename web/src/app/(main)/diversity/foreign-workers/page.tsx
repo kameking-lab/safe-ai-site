@@ -38,9 +38,10 @@ export default function DiversityForeignWorkersPage() {
         },
       ]}
       resources={[
-        { label: "やさしい日本語モード（ヘッダー右上から）", href: "/" },
-        { label: "多言語切替（ja/en/vi/zh/pt/tl）", href: "/" },
-        { label: "労災申請フロー", href: "/laws/freelance-rosai" },
+        { label: "KY用紙（やさしい日本語モード対応）", href: "/ky" },
+        { label: "安全用語辞書（ふりがな・多言語表記併記）", href: "/glossary" },
+        { label: "Eラーニング（雇入れ時教育の素材）", href: "/e-learning" },
+        { label: "労災申請フロー（特別加入制度）", href: "/laws/freelance-rosai" },
       ]}
       officialRefs={[
         {
