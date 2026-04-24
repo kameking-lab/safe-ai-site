@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
-import "leaflet/dist/leaflet.css";
 import type { BearSighting, BearSightingType } from "@/data/bear-sightings-real";
 
 // 種別ごとの色（目撃=緑大、被害=赤大、捕獲=青、痕跡=灰）

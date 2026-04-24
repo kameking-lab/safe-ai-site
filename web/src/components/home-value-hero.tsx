@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { SITE_STATS } from "@/data/site-stats";
 
 const STATS = [
-  { value: "504,415", label: "厚労省 事故DB収録件数", hint: "全件検索対応" },
-  { value: "1,389", label: "死亡労災（R5・建設業）", hint: "厚労省統計" },
-  { value: "1,127", label: "法令条文データ", hint: "RAG検索で即照合" },
-  { value: "21", label: "特別教育 対応種別", hint: "過去問クイズ付" },
+  { value: SITE_STATS.accidentDbCount, label: "厚労省 事故DB収録件数", hint: "全件検索対応" },
+  { value: SITE_STATS.fatalDisastersR5, label: "死亡労災（R5・建設業）", hint: "厚労省統計" },
+  { value: SITE_STATS.lawArticleCount, label: "法令条文データ", hint: "RAG検索で即照合" },
+  { value: SITE_STATS.specialEdKinds, label: "特別教育 対応種別", hint: "過去問クイズ付" },
 ] as const;
 
 const TARGET_PROFILES = [

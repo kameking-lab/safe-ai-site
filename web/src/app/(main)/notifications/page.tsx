@@ -70,7 +70,7 @@ export default function NotificationsPage() {
         </div>
         <p className="mb-4 text-xs text-slate-600 leading-5">
           大雨・暴風・高温注意情報などの気象警報が発令された際に、現場担当者へメールでお知らせします。
-          登録は無料です（地域指定・拠点別通知は Business プラン以上で利用可能）。
+          登録は無料です（地域指定・拠点別通知は Standard プラン以上で利用可能）。
         </p>
         <SubscribeForm />
       </div>
