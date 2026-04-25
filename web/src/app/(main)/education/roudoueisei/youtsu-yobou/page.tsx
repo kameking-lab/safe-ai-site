@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, GraduationCap, MessageSquare, Mail } from "lucide-react";
+import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, GraduationCap, MessageSquare, Mail, Download } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 
@@ -268,6 +268,36 @@ export default function YoutsuyobouPage() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* サンプル資料ダウンロード */}
+      <section className="mb-8 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 sm:p-6">
+        <div className="flex flex-wrap items-start gap-4">
+          <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+            <FileText className="h-6 w-6" />
+          </div>
+          <div className="flex-1 min-w-[240px]">
+            <h2 className="text-base font-bold text-slate-900">
+              サンプル資料ダウンロード <span className="ml-1 text-xs font-normal text-slate-500">PowerPoint 形式 / 10スライド</span>
+            </h2>
+            <p className="mt-1 text-xs leading-5 text-slate-600">
+              実際のカリキュラム構成に沿ったセミナー資料の一部を無料でご覧いただけます。表紙・目次・指針の4要素・作業別リスクプロファイル・体操ルーチン等、労働衛生教育の構成がそのまま把握できます。
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <a
+                href="/seminars/youtsu-yobou.pptx"
+                download
+                className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-slate-800 transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                PPTXサンプルをダウンロード
+              </a>
+              <span className="inline-flex items-center text-xs text-slate-500">
+                ※ カスタマイズ版・講師派遣版はお問い合わせください
+              </span>
+            </div>
+          </div>
         </div>
       </section>
 
