@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { KyIndustryPresetPicker } from "@/components/ky-industry-preset-picker";
 import { KyInitialWizard } from "@/components/ky-initial-wizard";
 import { getPresetById, type KyIndustryPreset } from "@/data/mock/ky-industry-presets";
+import { SITE_STATS } from "@/data/site-stats";
 import { KyRecordList } from "@/components/ky-record-list";
 import { KySignatureCanvas } from "@/components/ky-signature-canvas";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
@@ -1244,7 +1245,7 @@ export function KyPageContent() {
               href: "/accidents",
               label: "事故データベース",
               description:
-                "504,415件のMHLW全件検索と268件の詳細事例を業種・種別で検索。危険予知の根拠として活用できます。",
+                `${SITE_STATS.accidentDbCount}件のMHLW全件検索と${SITE_STATS.siteCuratedCaseCount}件の詳細事例を業種・種別で検索。危険予知の根拠として活用できます。`,
               color: "orange",
               cta: "事故事例を確認する",
             },

@@ -111,9 +111,10 @@ export default async function HandoverPage({ searchParams }: Props) {
           <Table
             rows={[
               ["事故データベース（Vercel Blob）", "504,415 件"],
-              ["化学物質", "1,389 件"],
+              ["化学物質", "3,984 件"],
               ["法令条文", "1,127 条文"],
               ["死亡災害", "4,043 件"],
+              ["死亡労災（R5・建設業）", "1,389 件"],
             ]}
           />
           <div className="mt-3 p-3 bg-slate-100 rounded-lg text-sm text-slate-600">

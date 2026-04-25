@@ -6,6 +6,7 @@ import type { Accident } from "@/types/mhlw";
 import meta from "@/data/aggregates-mhlw/meta.json";
 import byIndustry from "@/data/aggregates-mhlw/accidents-by-industry.json";
 import byYear from "@/data/aggregates-mhlw/accidents-by-year.json";
+import { SITE_STATS } from "@/data/site-stats";
 
 type YearMap = Record<string, Record<string, number>>;
 
@@ -322,7 +323,7 @@ export function MhlwAccidentSearchPanel() {
           </span>
           <div>
             <h3 className="text-sm font-bold text-slate-800">
-              MHLW 504,415件検索 — 厚労省 労働災害データベース
+              MHLW {SITE_STATS.accidentDbCount}件検索 — 厚労省 労働災害データベース
             </h3>
             <p className="mt-1 text-xs text-slate-600">
               N={meta.accidents.total.toLocaleString()}件 / 2006〜2021年 の 16 年分から
@@ -450,9 +451,9 @@ export function MhlwAccidentSearchPanel() {
             )}
             <p>代わりに以下をご利用ください：</p>
             <ul className="mt-1 space-y-0.5 list-disc list-inside text-amber-900">
-              <li>死亡災害 4,043件（「死亡災害」タブ）</li>
-              <li>業種別ランキング（集計 504,415件ベース）</li>
-              <li>サイト収録事例 268件</li>
+              <li>死亡災害 {SITE_STATS.mhlwDeathsCount}件（「死亡災害」タブ）</li>
+              <li>業種別ランキング（集計 {SITE_STATS.accidentDbCount}件ベース）</li>
+              <li>サイト収録事例 {SITE_STATS.siteCuratedCaseCount}件</li>
             </ul>
           </div>
         </div>

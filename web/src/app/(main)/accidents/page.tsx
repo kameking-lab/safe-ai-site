@@ -6,11 +6,11 @@ import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
-import { realAccidentCases } from "@/data/mock/real-accident-cases";
+import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
+import { SITE_STATS } from "@/data/site-stats";
 
 const _title = "労働災害 事故事例データベース";
-const _desc =
-  "厚労省「職場のあんぜんサイト」504,415件の全件検索に加え、死亡災害4,043件、サイト収録268件の詳細事例を業種・事故種別で検索し再発防止に活用。";
+const _desc = `厚労省「職場のあんぜんサイト」${SITE_STATS.accidentDbCount}件の全件検索に加え、死亡災害${SITE_STATS.mhlwDeathsCount}件、サイト収録${SITE_STATS.siteCuratedCaseCount}件の詳細事例を業種・事故種別で検索し再発防止に活用。`;
 
 export const metadata: Metadata = {
   title: _title,
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 
 export default function AccidentsPage() {
   const accidentSchema = newsArticleListSchema(
-    realAccidentCases.map((c) => ({
+    getAccidentCasesDataset().map((c) => ({
       headline: c.title,
       datePublished: c.occurredOn,
       url: "https://safe-ai-site.vercel.app/accidents",

@@ -23,6 +23,7 @@ import byAge from "@/data/aggregates-mhlw/accidents-by-age.json";
 import byMonth from "@/data/aggregates-mhlw/accidents-by-month.json";
 import deathsByYear from "@/data/aggregates-mhlw/deaths-by-year.json";
 import deathsByIndustry from "@/data/aggregates-mhlw/deaths-by-industry.json";
+import { SITE_STATS } from "@/data/site-stats";
 import meta from "@/data/aggregates-mhlw/meta.json";
 
 const PIE_COLORS = [
@@ -224,7 +225,7 @@ function SourceFooter({ label }: { label?: string } = {}) {
 function DeathSourceFooter() {
   return (
     <p className="mt-2 text-[10px] text-slate-400">
-      出典: {DEATHS_SOURCE_LABEL}　|　集計期間: {DEATHS_RANGE_LABEL}　|　N=4,043件（死亡災害）
+      出典: {DEATHS_SOURCE_LABEL}　|　集計期間: {DEATHS_RANGE_LABEL}　|　N={SITE_STATS.mhlwDeathsCount}件（死亡災害）
     </p>
   );
 }
@@ -501,7 +502,7 @@ export function MhlwAccidentAnalysisPanel() {
         </ResponsiveContainer>
         <p className="mt-2 text-[10px] text-slate-400">
           出典（左軸）: {DATA_SOURCE_LABEL} N={meta.accidents.total.toLocaleString()}件 {YEAR_RANGE_LABEL} /
-          出典（右軸）: {DEATHS_SOURCE_LABEL} N=4,043件 {DEATHS_RANGE_LABEL}
+          出典（右軸）: {DEATHS_SOURCE_LABEL} N={SITE_STATS.mhlwDeathsCount}件 {DEATHS_RANGE_LABEL}
         </p>
       </div>
 

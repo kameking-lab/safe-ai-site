@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import { Download, Info, ChevronDown, ChevronUp } from "lucide-react";
 import type { AccidentCase } from "@/lib/types/domain";
+import { SITE_STATS } from "@/data/site-stats";
 
 const PIE_COLORS = [
   "#ef4444", "#f97316", "#eab308", "#22c55e",
@@ -79,7 +80,7 @@ function SiteDataDisclaimer() {
   return (
     <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
       ⚠ このタブは当サイト独自収集の参考事例です。統計的代表性はありません。
-      厚労省公式統計（N=504,415件）は「<strong>MHLW実データ分析</strong>」タブをご覧ください。
+      厚労省公式統計（N={SITE_STATS.accidentDbCount}件）は「<strong>MHLW実データ分析</strong>」タブをご覧ください。
     </div>
   );
 }

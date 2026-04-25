@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "共有チャット | ANZEN AI 安衛法チャットボット",
   description: "ANZEN AI の安衛法チャットボットで行われた会話の共有ビューです。",
+  robots: { index: false, follow: false },
 };
 
 type SharedMessage = {
@@ -12,12 +13,44 @@ type SharedMessage = {
   s?: { l: string; a: string }[];
 };
 
+const MAX_SHARE_ID_BYTES = 16 * 1024;
+const MAX_MESSAGES = 200;
+const MAX_MESSAGE_LEN = 8000;
+const MAX_SOURCES_PER_MESSAGE = 20;
+
 function decodeShare(id: string): SharedMessage[] | null {
+  if (id.length > MAX_SHARE_ID_BYTES) return null;
   try {
-    const json = decodeURIComponent(escape(atob(id)));
-    const parsed = JSON.parse(json) as SharedMessage[];
-    if (!Array.isArray(parsed)) return null;
-    return parsed;
+    const binary = atob(id);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const json = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    const parsed: unknown = JSON.parse(json);
+    if (!Array.isArray(parsed) || parsed.length > MAX_MESSAGES) return null;
+    const messages: SharedMessage[] = [];
+    for (const item of parsed) {
+      if (!item || typeof item !== "object") return null;
+      const m = item as Record<string, unknown>;
+      const r = m.r;
+      const c = m.c;
+      if (r !== "u" && r !== "a") return null;
+      if (typeof c !== "string" || c.length > MAX_MESSAGE_LEN) return null;
+      const result: SharedMessage = { r, c };
+      if (Array.isArray(m.s)) {
+        if (m.s.length > MAX_SOURCES_PER_MESSAGE) return null;
+        const sources: { l: string; a: string }[] = [];
+        for (const src of m.s) {
+          if (!src || typeof src !== "object") return null;
+          const s = src as Record<string, unknown>;
+          if (typeof s.l !== "string" || typeof s.a !== "string") return null;
+          if (s.l.length > 200 || s.a.length > 2000) return null;
+          sources.push({ l: s.l, a: s.a });
+        }
+        result.s = sources;
+      }
+      messages.push(result);
+    }
+    return messages;
   } catch {
     return null;
   }
