@@ -326,6 +326,61 @@ export default function ServicesPage() {
         </p>
       </section>
 
+      {/* 助成金活用 概算試算 */}
+      <section className="mb-10 rounded-2xl border border-amber-200 bg-amber-50/40 p-6">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-amber-700">
+          助成金活用 概算試算
+        </p>
+        <h2 className="mt-1 text-lg font-bold text-slate-900">
+          実質負担を最大75%削減できる組み合わせがあります。
+        </h2>
+        <p className="mt-2 text-xs leading-5 text-slate-600">
+          以下は典型ケースの概算です。実際の支給率・上限額は事業規模・業種・要件達成状況で変動します。申請書類の作成サポートも対応可能。
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+          {[
+            {
+              name: "人材開発支援助成金（人への投資促進コース）",
+              rate: "賃金助成 ¥760／人時 ＋ 経費助成 45〜75%",
+              example: "教育コンテンツ ¥500,000 → 実質負担 ¥125,000〜¥275,000",
+              link: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000216097_00007.html",
+            },
+            {
+              name: "業務改善助成金",
+              rate: "設備・コンサル費の 1/2〜9/10（上限¥6M）",
+              example: "安全管理自動化 ¥300,000 → 実質負担 ¥30,000〜¥150,000",
+              link: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/zigyonushi/shienjigyou/03.html",
+            },
+            {
+              name: "エイジフレンドリー補助金",
+              rate: "高年齢労働者の安全衛生対策 1/2（上限¥1M）",
+              example: "化学物質管理体制構築 ¥500,000 → 実質負担 ¥250,000",
+              link: "https://www.jashcon.or.jp/contents/age-friendly/",
+            },
+          ].map((s) => (
+            <article
+              key={s.name}
+              className="rounded-xl border border-amber-100 bg-white p-4"
+            >
+              <p className="text-sm font-bold text-slate-900">{s.name}</p>
+              <p className="mt-2 text-[11px] font-semibold text-amber-700">{s.rate}</p>
+              <p className="mt-2 text-xs leading-5 text-slate-600">{s.example}</p>
+              <a
+                href={s.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 inline-block text-[11px] font-semibold text-emerald-700 underline hover:text-emerald-800"
+              >
+                公式情報 ↗
+              </a>
+            </article>
+          ))}
+        </div>
+        <p className="mt-4 text-[11px] text-slate-500">
+          ※ 助成金は「事前申請・要件確認」が必須です。導入前にご相談ください。
+        </p>
+      </section>
+
       {/* 導入事例（パイロット中・サンプル） */}
       <section className="mb-10 rounded-2xl border border-slate-200 bg-white p-6">
         <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700">
