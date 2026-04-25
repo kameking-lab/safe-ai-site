@@ -74,6 +74,16 @@ const courseSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
+    { "@type": "ListItem", position: 3, name: "足場の組立て等 特別教育", item: "https://safe-ai-site.vercel.app/education/tokubetsu/ashiba" },
+  ],
+};
+
 const CURRICULUM = [
   { title: "足場・作業の方法に関する知識", minutes: 180, desc: "足場の種類・構造、組立・解体・変更の方法、墜落・崩壊防止の作業手順を解説。" },
   { title: "工事用設備・機械・器具・作業環境", minutes: 30, desc: "鋼管・くさび緊結式・枠組足場の部材、移動式足場、作業床・手すり・幅木の理解。" },
@@ -142,6 +152,7 @@ export default function AshibaPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd schema={courseSchema} />
+      <JsonLd schema={breadcrumbSchema} />
 
       {/* パンくず */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-slate-500" aria-label="パンくずリスト">

@@ -75,6 +75,16 @@ const courseSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
+    { "@type": "ListItem", position: 3, name: "化学物質RA実務教育", item: "https://safe-ai-site.vercel.app/education/hoteikyoiku/chemical-ra" },
+  ],
+};
+
 const CURRICULUM = [
   { title: "化学物質規制の自律管理制度の概要", minutes: 30, desc: "2022年5月公布の化学物質規制見直し、2024年4月／2026年4月段階施行のポイントを整理。" },
   { title: "SDS・GHS の読み方と化学物質特定", minutes: 30, desc: "SDS（安全データシート）の構成、GHS分類・ラベル表示、取扱物質一覧化の実務。" },
@@ -145,6 +155,7 @@ export default function ChemicalRaPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd schema={courseSchema} />
+      <JsonLd schema={breadcrumbSchema} />
 
       {/* パンくず */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-slate-500" aria-label="パンくずリスト">

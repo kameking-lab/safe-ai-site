@@ -240,7 +240,7 @@ export default function SignagePage() {
             <label className="ml-auto flex max-w-full items-center gap-2 text-[10px] text-slate-300 sm:text-xs">
               <span className="shrink-0 whitespace-nowrap">地点</span>
               <select
-                className="max-w-[min(100%,280px)] truncate rounded-lg border border-slate-600 bg-slate-950 px-2 py-1 text-xs text-slate-100"
+                className="max-w-[min(100%,280px)] truncate rounded-lg border border-slate-600 bg-slate-950 px-2 py-2.5 text-xs text-slate-100 min-h-[44px]"
                 value={selectedLocationId}
                 onChange={(e) => onLocationChange(e.target.value)}
               >
@@ -269,7 +269,7 @@ export default function SignagePage() {
                 href={jmaLink}
                 target="_blank"
                 rel="noreferrer"
-                className="shrink-0 rounded-lg border border-sky-600/60 bg-sky-950/50 px-2 py-1 text-[9px] font-semibold text-sky-200 hover:bg-sky-900/50 sm:text-[10px]"
+                className="shrink-0 flex items-center rounded-lg border border-sky-600/60 bg-sky-950/50 px-2 py-2.5 text-[9px] font-semibold text-sky-200 hover:bg-sky-900/50 sm:text-[10px] min-h-[44px]"
               >
                 選択地点の詳細（気象庁）→
               </a>
@@ -359,7 +359,7 @@ export default function SignagePage() {
               <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">直近の法改正（5件・要約）</h2>
               <Link
                 href="/laws"
-                className="rounded-lg border border-emerald-600/60 px-2 py-1 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-950/50"
+                className="flex items-center rounded-lg border border-emerald-600/60 px-2 py-2.5 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-950/50 min-h-[44px]"
               >
                 一覧ページへ
               </Link>

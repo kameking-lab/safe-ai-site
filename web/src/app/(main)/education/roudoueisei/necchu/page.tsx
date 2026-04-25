@@ -74,6 +74,16 @@ const courseSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
+    { "@type": "ListItem", position: 3, name: "熱中症予防 労働衛生教育", item: "https://safe-ai-site.vercel.app/education/roudoueisei/necchu" },
+  ],
+};
+
 const CURRICULUM = [
   { title: "熱中症の発生メカニズムと症状", minutes: 15, desc: "体温調節の破綻と段階別症状（I〜III度）、業務上熱中症の発生動向を解説。" },
   { title: "WBGT測定と作業環境管理", minutes: 30, desc: "JIS Z 8504準拠のWBGT測定、作業強度別基準値、遮熱・送風・休憩室整備の実務。" },
@@ -142,6 +152,7 @@ export default function NecchuPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd schema={courseSchema} />
+      <JsonLd schema={breadcrumbSchema} />
 
       {/* パンくず */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-slate-500" aria-label="パンくずリスト">

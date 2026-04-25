@@ -74,6 +74,16 @@ const courseSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
+    { "@type": "ListItem", position: 3, name: "騒音障害防止 労働衛生教育", item: "https://safe-ai-site.vercel.app/education/roudoueisei/souon" },
+  ],
+};
+
 const CURRICULUM = [
   { title: "騒音性難聴の発生機序と聴覚特性", minutes: 15, desc: "蝸牛有毛細胞の障害と4000Hz中心の閾値上昇、不可逆性とその予防原則を解説。" },
   { title: "等価騒音レベル LAeq,8h の測定と管理区分", minutes: 30, desc: "令和5年改訂で導入されたLAeq,8h、第I/II/III管理区分の判定と作業環境測定の頻度。" },
@@ -142,6 +152,7 @@ export default function SouonPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd schema={courseSchema} />
+      <JsonLd schema={breadcrumbSchema} />
 
       {/* パンくず */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-slate-500" aria-label="パンくずリスト">

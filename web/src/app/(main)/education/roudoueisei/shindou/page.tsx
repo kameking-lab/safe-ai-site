@@ -74,6 +74,16 @@ const courseSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
+    { "@type": "ListItem", position: 3, name: "振動障害予防 労働衛生教育", item: "https://safe-ai-site.vercel.app/education/roudoueisei/shindou" },
+  ],
+};
+
 const CURRICULUM = [
   { title: "振動障害（白蝋病等）の発生機序", minutes: 30, desc: "末梢循環障害・末梢神経障害・運動器障害の3類型と累積ばく露の影響を解説。" },
   { title: "振動工具のばく露評価（A(8)、限界値5.0m/s²）", minutes: 30, desc: "ISO 5349準拠の3軸合成値、メーカー公表値の活用、対策値2.5m/s²の運用。" },
@@ -142,6 +152,7 @@ export default function ShindouPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd schema={courseSchema} />
+      <JsonLd schema={breadcrumbSchema} />
 
       {/* パンくず */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-slate-500" aria-label="パンくずリスト">

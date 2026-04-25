@@ -113,6 +113,18 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
     ),
   },
   {
+    label: "メールアドレス",
+    value: (
+      <>
+        お問い合わせは
+        <Link href="/contact" className="mx-1 underline hover:text-slate-800">
+          お問い合わせフォーム
+        </Link>
+        よりご連絡ください。メールアドレスは消費者からのご請求により遅滞なく開示いたします。
+      </>
+    ),
+  },
+  {
     label: "販売価格",
     value: "各サービスページに記載（税抜表示／受託業務・顧問契約は別途見積）",
   },

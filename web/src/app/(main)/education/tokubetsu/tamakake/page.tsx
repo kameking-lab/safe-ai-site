@@ -75,6 +75,16 @@ const courseSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
+    { "@type": "ListItem", position: 3, name: "玉掛け特別教育（1t未満）", item: "https://safe-ai-site.vercel.app/education/tokubetsu/tamakake" },
+  ],
+};
+
 const CURRICULUM = [
   { title: "クレーン等に関する知識", minutes: 60, desc: "クレーン・移動式クレーン・デリック等の種類・構造・取扱いに関する基礎知識。" },
   { title: "玉掛けの方法", minutes: 120, desc: "玉掛け用具の選定・使用方法、質量目測、力学の基礎、玉掛け作業の手順を学習。" },
@@ -145,6 +155,7 @@ export default function TamakakePage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd schema={courseSchema} />
+      <JsonLd schema={breadcrumbSchema} />
 
       {/* パンくず */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-slate-500" aria-label="パンくずリスト">

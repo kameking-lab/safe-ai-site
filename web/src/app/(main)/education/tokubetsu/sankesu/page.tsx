@@ -75,6 +75,16 @@ const courseSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
+    { "@type": "ListItem", position: 3, name: "酸素欠乏危険作業 特別教育", item: "https://safe-ai-site.vercel.app/education/tokubetsu/sankesu" },
+  ],
+};
+
 const CURRICULUM = [
   { title: "酸欠の発生原因と症状", minutes: 60, desc: "微生物による酸素消費・酸化反応・不活性ガス置換などの発生機序と濃度別の症状を解説。" },
   { title: "換気・保護具・救助方法", minutes: 120, desc: "強制換気、酸素濃度計、空気呼吸器、送気マスク、命綱・墜落制止用器具の選定と使用方法を学習。" },
@@ -144,6 +154,7 @@ export default function SankesuPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd schema={courseSchema} />
+      <JsonLd schema={breadcrumbSchema} />
 
       {/* パンくず */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-slate-500" aria-label="パンくずリスト">

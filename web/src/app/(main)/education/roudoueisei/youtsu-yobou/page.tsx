@@ -74,6 +74,16 @@ const courseSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
+    { "@type": "ListItem", position: 3, name: "腰痛予防労働衛生教育", item: "https://safe-ai-site.vercel.app/education/roudoueisei/youtsu-yobou" },
+  ],
+};
+
 const CURRICULUM = [
   { title: "腰痛発生のメカニズム", minutes: 30, desc: "椎間板・筋・靭帯への負荷、急性腰痛と慢性腰痛の違いを解説。" },
   { title: "腰痛のリスク要因と予防対策", minutes: 30, desc: "作業・環境・個人リスクを整理し、指針に基づく対策を確認。" },
@@ -142,6 +152,7 @@ export default function YoutsuyobouPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd schema={courseSchema} />
+      <JsonLd schema={breadcrumbSchema} />
 
       {/* パンくず */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-slate-500" aria-label="パンくずリスト">

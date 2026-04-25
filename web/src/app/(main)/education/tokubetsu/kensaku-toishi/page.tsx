@@ -75,6 +75,16 @@ const courseSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
+    { "@type": "ListItem", position: 3, name: "研削といし取替え等 特別教育", item: "https://safe-ai-site.vercel.app/education/tokubetsu/kensaku-toishi" },
+  ],
+};
+
 const CURRICULUM = [
   { title: "取扱業務に関する知識", minutes: 30, desc: "研削盤の種類・構造・用途、研削加工の基礎、作業手順、危険性と防護を解説。" },
   { title: "研削といし・取付具に関する知識", minutes: 30, desc: "といしの種類・表示記号・構造強度、フランジ・ブッシュ等取付具の選定方法。" },
@@ -144,6 +154,7 @@ export default function KensakuToishiPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd schema={courseSchema} />
+      <JsonLd schema={breadcrumbSchema} />
 
       {/* パンくず */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-slate-500" aria-label="パンくずリスト">

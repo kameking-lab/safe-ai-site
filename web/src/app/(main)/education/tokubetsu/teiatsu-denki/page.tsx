@@ -75,6 +75,16 @@ const courseSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
+    { "@type": "ListItem", position: 3, name: "低圧電気取扱い 特別教育", item: "https://safe-ai-site.vercel.app/education/tokubetsu/teiatsu-denki" },
+  ],
+};
+
 const CURRICULUM = [
   { title: "低圧の電気に関する基礎知識", minutes: 60, desc: "電圧・電流・電力、抵抗とオームの法則、交流と直流、感電の人体影響を解説。" },
   { title: "低圧の電気設備に関する基礎知識", minutes: 120, desc: "配線・開閉器・電動機・配電盤、絶縁・接地、電気機器の構造と用途を整理。" },
@@ -145,6 +155,7 @@ export default function TeiatsuDenkiPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd schema={courseSchema} />
+      <JsonLd schema={breadcrumbSchema} />
 
       {/* パンくず */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-slate-500" aria-label="パンくずリスト">

@@ -75,6 +75,16 @@ const courseSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
+    { "@type": "ListItem", position: 3, name: "フルハーネス型墜落制止用器具 特別教育", item: "https://safe-ai-site.vercel.app/education/tokubetsu/fullharness" },
+  ],
+};
+
 const CURRICULUM = [
   { title: "作業に関する知識", minutes: 60, desc: "高所作業の種類・設備・取扱い、作業に伴う災害事例とその防止方法を解説。" },
   { title: "墜落制止用器具に関する知識", minutes: 120, desc: "フルハーネス・ランヤード・接続器具の構造・規格・点検・選定基準を学習。" },
@@ -144,6 +154,7 @@ export default function FullharnessPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd schema={courseSchema} />
+      <JsonLd schema={breadcrumbSchema} />
 
       {/* パンくず */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-slate-500" aria-label="パンくずリスト">

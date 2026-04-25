@@ -12,6 +12,7 @@ import {
   Zap,
   CheckCircle2,
   Truck,
+  ExternalLink,
 } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, serviceSchema } from "@/components/json-ld";
@@ -156,6 +157,12 @@ const SERVICES = [
     price: "¥200,000〜",
     accent: "sky",
   },
+] as const;
+
+const SPECIAL_EDU_LAWS = [
+  { label: "安衛法 第59条第3項", href: "https://laws.e-gov.go.jp/law/347AC0000000057" },
+  { label: "安衛法 第60条（職長等）", href: "https://laws.e-gov.go.jp/law/347AC0000000057" },
+  { label: "安衛則 第36条（特別教育12種）", href: "https://laws.e-gov.go.jp/law/347M50002000032" },
 ] as const;
 
 type AccentKey = (typeof SERVICES)[number]["accent"];
@@ -324,6 +331,25 @@ export default function ServicesPage() {
                     </li>
                   ))}
                 </ul>
+                {s.id === "special-edu" && (
+                  <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2">
+                    <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wider text-amber-700">根拠条文（e-Gov）</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {SPECIAL_EDU_LAWS.map((law) => (
+                        <a
+                          key={law.label}
+                          href={law.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 rounded border border-amber-300 bg-white px-2 py-0.5 text-[10px] font-medium text-amber-800 hover:bg-amber-100 transition-colors"
+                        >
+                          {law.label}
+                          <ExternalLink className="h-2.5 w-2.5" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
                   <p className={`text-base font-bold ${accent.price}`}>{s.price}</p>
                   <Link

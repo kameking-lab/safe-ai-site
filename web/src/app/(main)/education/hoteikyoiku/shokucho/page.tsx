@@ -75,6 +75,16 @@ const courseSchema = {
   },
 };
 
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
+    { "@type": "ListItem", position: 3, name: "職長等教育", item: "https://safe-ai-site.vercel.app/education/hoteikyoiku/shokucho" },
+  ],
+};
+
 const CURRICULUM = [
   { title: "作業方法の決定及び労働者の配置", minutes: 120, desc: "作業手順書の作成、適性配置、未経験者へのOJT、機械・工具の選定。" },
   { title: "労働者に対する指導又は監督の方法", minutes: 150, desc: "5W1Hによる指示の具体化、確認、フィードバック、記録の整備。" },
@@ -145,6 +155,7 @@ export default function ShokuchoPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd schema={courseSchema} />
+      <JsonLd schema={breadcrumbSchema} />
 
       {/* パンくず */}
       <nav className="mb-4 flex items-center gap-1.5 text-xs text-slate-500" aria-label="パンくずリスト">
