@@ -121,7 +121,7 @@ const NAV_CATEGORIES: NavCategory[] = [
   {
     label: "その他",
     items: [
-      { id: "lms", label: "LMS（多拠点管理）", href: "/lms", icon: LibraryBig, badge: "soon", description: "2026年秋" },
+      { id: "lms", label: "LMS（多拠点管理）", href: "/lms", icon: LibraryBig, badge: "beta", description: "先行登録" },
       { id: "glossary", label: "安全用語辞書", href: "/glossary", icon: BookMarked },
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
       { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },
@@ -254,10 +254,16 @@ export function AppShell({ children, user }: AppShellProps) {
               className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
                 item.badge === "soon"
                   ? "bg-slate-200 text-slate-500"
-                  : "bg-blue-100 text-blue-700"
+                  : item.badge === "beta"
+                    ? "bg-violet-100 text-violet-700"
+                    : "bg-blue-100 text-blue-700"
               }`}
             >
-              {item.badge === "soon" ? "準備中" : item.badge}
+              {item.badge === "soon"
+                ? "準備中"
+                : item.badge === "beta"
+                  ? "β"
+                  : item.badge}
             </span>
           )}
         </Link>
