@@ -4,14 +4,20 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { FlaskConical, Search, ExternalLink, ClipboardCheck } from "lucide-react";
 import {
-  rawCompact,
-  mergeByCas,
+  getAllMergedChemicals,
   normalizeText,
   casMatches,
   CATEGORY_LABELS_JA,
   CATEGORY_BADGE,
   CATEGORY_TO_LAW,
+  CONCENTRATION_LIMITS,
   MHLW_CHEMICALS_SOURCE,
+  SOURCE_LABEL,
+  SOURCE_BADGE,
+  TIER_LABEL,
+  TIER_BADGE,
+  rawCompact,
+  type DataTier,
   type MergedChemical,
   type MhlwChemicalCategory,
 } from "@/lib/mhlw-chemicals";
@@ -35,7 +41,8 @@ function formatUpdatedAt(iso: string): string {
 }
 
 export function MhlwChemicalAggregatedPanel() {
-  const merged = useMemo(() => mergeByCas(rawCompact.entries), []);
+  // CAS統合 + 濃度基準値・許容濃度・IARC のオーバーレイを反映
+  const merged = useMemo(() => getAllMergedChemicals(), []);
   const totals = useMemo(() => {
     return {
       label_sds: merged.filter((m) => m.flags.label_sds).length,
@@ -44,6 +51,9 @@ export function MhlwChemicalAggregatedPanel() {
       concentration: merged.filter((m) => m.flags.concentration).length,
       unique: merged.length,
       withCas: merged.filter((m) => m.cas).length,
+      withMhlw177: merged.filter((m) => m.details?.tier === "mhlw_177").length,
+      withIarc: merged.filter((m) => m.details?.limits?.carcinogenicity).length,
+      withJsoh: merged.filter((m) => m.details?.limits?.jsoh).length,
     };
   }, [merged]);
 
@@ -126,10 +136,17 @@ export function MhlwChemicalAggregatedPanel() {
               <span className="rounded-full border border-amber-200 bg-white px-2 py-0.5 font-semibold text-amber-800">
                 濃度基準値 {totals.concentration.toLocaleString()}
               </span>
+              <span className="rounded-full border border-violet-200 bg-white px-2 py-0.5 font-semibold text-violet-800">
+                IARC分類 {totals.withIarc.toLocaleString()}
+              </span>
               <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 font-semibold text-slate-700">
                 CAS登録 {totals.withCas.toLocaleString()}
               </span>
             </div>
+            <p className="mt-1 text-[11px] text-slate-500">
+              濃度・発がん性データ出典: 厚労告示第177号 / 産業衛生学会許容濃度（{CONCENTRATION_LIMITS.summary.withJsoh}物質） /
+              IARC Monographs（{CONCENTRATION_LIMITS.summary.withIarc}物質） / ACGIH TLV（参考）
+            </p>
           </div>
         </div>
       </div>
@@ -229,6 +246,22 @@ export function MhlwChemicalAggregatedPanel() {
                         </span>
                       ) : null
                     )}
+                    {item.details?.tier && item.details.tier !== "none" && (
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${TIER_BADGE[item.details.tier as DataTier]}`}
+                        title="数値データの階層: 厚労告示 > 産業衛生学会 > ACGIH"
+                      >
+                        {TIER_LABEL[item.details.tier as DataTier]}
+                      </span>
+                    )}
+                    {item.details?.limits?.carcinogenicity?.iarc && (
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SOURCE_BADGE.IARC}`}
+                        title={`IARC ${item.details.limits.carcinogenicity.monograph ?? ""}`}
+                      >
+                        IARC Group {item.details.limits.carcinogenicity.iarc}
+                      </span>
+                    )}
                   </div>
                 </div>
                 <span className="text-xs text-slate-400">{isOpen ? "▲閉じる" : "▼詳細"}</span>
@@ -240,6 +273,86 @@ export function MhlwChemicalAggregatedPanel() {
                     <div>
                       <dt className="font-semibold text-slate-500">別名・表記揺れ</dt>
                       <dd>{item.aliases.join(" / ")}</dd>
+                    </div>
+                  )}
+                  {item.details?.limits && (
+                    <div className="rounded-lg border border-amber-200 bg-amber-50/40 p-2">
+                      <dt className="mb-1 font-semibold text-amber-900">濃度値・発がん性（出典明示）</dt>
+                      <dd className="space-y-1">
+                        {item.details.limits.twa && (
+                          <div className="flex flex-wrap items-baseline gap-2">
+                            <span className="font-semibold">8時間TWA:</span>
+                            <span>{item.details.limits.twa.value} {item.details.limits.twa.unit}</span>
+                            {item.details.limits.twa.source && (
+                              <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold border ${SOURCE_BADGE[item.details.limits.twa.source] ?? ""}`}>
+                                {SOURCE_LABEL[item.details.limits.twa.source] ?? item.details.limits.twa.source}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {item.details.limits.stel && (
+                          <div className="flex flex-wrap items-baseline gap-2">
+                            <span className="font-semibold">短時間STEL:</span>
+                            <span>{item.details.limits.stel.value} {item.details.limits.stel.unit}</span>
+                            {item.details.limits.stel.source && (
+                              <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold border ${SOURCE_BADGE[item.details.limits.stel.source] ?? ""}`}>
+                                {SOURCE_LABEL[item.details.limits.stel.source] ?? item.details.limits.stel.source}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {item.details.limits.ceiling && (
+                          <div className="flex flex-wrap items-baseline gap-2">
+                            <span className="font-semibold">天井値:</span>
+                            <span>{item.details.limits.ceiling.value} {item.details.limits.ceiling.unit}</span>
+                            {item.details.limits.ceiling.source && (
+                              <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold border ${SOURCE_BADGE[item.details.limits.ceiling.source] ?? ""}`}>
+                                {SOURCE_LABEL[item.details.limits.ceiling.source] ?? item.details.limits.ceiling.source}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {item.details.limits.carcinogenicity?.iarc && (
+                          <div className="flex flex-wrap items-baseline gap-2">
+                            <span className="font-semibold">IARC発がん性:</span>
+                            <span>Group {item.details.limits.carcinogenicity.iarc}</span>
+                            {item.details.limits.carcinogenicity.monograph && (
+                              <span className="text-slate-500">
+                                （{item.details.limits.carcinogenicity.monograph}）
+                              </span>
+                            )}
+                            <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold border ${SOURCE_BADGE.IARC}`}>
+                              {SOURCE_LABEL.IARC}
+                            </span>
+                          </div>
+                        )}
+                        {item.details.limits.jsoh && (
+                          <div className="flex flex-wrap items-baseline gap-2">
+                            <span className="font-semibold">産業衛生学会:</span>
+                            <span>
+                              {item.details.limits.jsoh.twa && `TWA ${item.details.limits.jsoh.twa.value} ${item.details.limits.jsoh.twa.unit}`}
+                              {item.details.limits.jsoh.stel && ` / STEL ${item.details.limits.jsoh.stel.value} ${item.details.limits.jsoh.stel.unit}`}
+                              {item.details.limits.jsoh.ceiling && ` / 天井 ${item.details.limits.jsoh.ceiling.value} ${item.details.limits.jsoh.ceiling.unit}`}
+                            </span>
+                            <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold border ${SOURCE_BADGE.JSOH}`}>
+                              {SOURCE_LABEL.JSOH}
+                            </span>
+                          </div>
+                        )}
+                        {item.details.limits.acgih && (
+                          <div className="flex flex-wrap items-baseline gap-2 text-slate-600">
+                            <span className="font-semibold">ACGIH（参考）:</span>
+                            <span>
+                              {item.details.limits.acgih.twa && `TWA ${item.details.limits.acgih.twa.value} ${item.details.limits.acgih.twa.unit}`}
+                              {item.details.limits.acgih.stel && ` / STEL ${item.details.limits.acgih.stel.value} ${item.details.limits.acgih.stel.unit}`}
+                              {item.details.limits.acgih.ceiling && ` / 天井 ${item.details.limits.acgih.ceiling.value} ${item.details.limits.acgih.ceiling.unit}`}
+                            </span>
+                            <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold border ${SOURCE_BADGE.ACGIH}`}>
+                              {SOURCE_LABEL.ACGIH}
+                            </span>
+                          </div>
+                        )}
+                      </dd>
                     </div>
                   )}
                   <div>
