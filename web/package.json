@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "postinstall": "prisma generate --no-hints || true",
     "lint": "eslint",
     "test": "vitest run",
     "test:e2e": "playwright test",
@@ -21,7 +22,9 @@
     "vercel:prod": "vercel deploy --prod --yes --cwd ."
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.2",
     "@google/generative-ai": "^0.24.1",
+    "@prisma/client": "^6.19.3",
     "@stripe/stripe-js": "^9.1.0",
     "@types/leaflet": "^1.9.21",
     "@vercel/blob": "^2.3.3",
@@ -52,6 +55,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "jsdom": "^29.0.1",
+    "prisma": "^6.19.3",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5",
