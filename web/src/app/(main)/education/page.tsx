@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { GraduationCap, Mail, Clock, BookOpen, Users, Building2, MessageSquare } from "lucide-react";
+import { GraduationCap, Mail, Clock, BookOpen, Users, Building2, MessageSquare, Download } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, serviceSchema } from "@/components/json-ld";
 
@@ -26,6 +26,7 @@ export const metadata: Metadata = {
 type CategoryKey = "tokubetsu" | "hoteikyoiku" | "roudoueisei";
 
 type Program = {
+  slug: string;
   name: string;
   basis: string;
   hours: string;
@@ -54,36 +55,42 @@ const CATEGORY_HEADING_COLOR: Record<CategoryKey, string> = {
 const PROGRAMS: Program[] = [
   // 特別教育（安衛則第36条）
   {
+    slug: "kensaku-toishi",
     name: "研削といしの取替え・試運転の業務",
     basis: "安衛則第36条第1号",
     hours: "4時間以上",
     category: "tokubetsu",
   },
   {
+    slug: "teiatsu-denki",
     name: "低圧電気取扱い業務",
     basis: "安衛則第36条第4号",
     hours: "7〜14時間",
     category: "tokubetsu",
   },
   {
+    slug: "ashiba",
     name: "足場の組立て・解体・変更の作業",
     basis: "安衛則第36条第39号",
     hours: "6時間以上",
     category: "tokubetsu",
   },
   {
+    slug: "fullharness",
     name: "フルハーネス型墜落制止用器具の使用",
     basis: "安衛則第36条第41号",
     hours: "6時間以上",
     category: "tokubetsu",
   },
   {
+    slug: "tamakake",
     name: "つり上げ荷重1t未満の玉掛け業務",
     basis: "安衛則第36条第19号",
     hours: "9時間以上",
     category: "tokubetsu",
   },
   {
+    slug: "sankesu",
     name: "酸素欠乏危険作業",
     basis: "酸素欠乏症等防止規則第12条",
     hours: "5.5時間以上",
@@ -91,12 +98,14 @@ const PROGRAMS: Program[] = [
   },
   // 法定教育
   {
+    slug: "shokucho",
     name: "職長等教育",
     basis: "安衛法第60条・安衛則第40条",
     hours: "12時間以上",
     category: "hoteikyoiku",
   },
   {
+    slug: "chemical-ra",
     name: "化学物質のリスクアセスメント実務教育",
     basis: "安衛法第57条の3",
     hours: "2.5〜4時間",
@@ -105,24 +114,28 @@ const PROGRAMS: Program[] = [
   },
   // 労働衛生教育
   {
+    slug: "youtsu-yobou",
     name: "腰痛予防教育",
     basis: "基発0618第1号通達",
     hours: "2時間以上",
     category: "roudoueisei",
   },
   {
+    slug: "necchu",
     name: "熱中症予防教育",
     basis: "基発0420第3号通達",
     hours: "1.5時間以上",
     category: "roudoueisei",
   },
   {
+    slug: "shindou",
     name: "振動障害予防教育",
     basis: "振動障害予防のための作業管理指針",
     hours: "2時間以上",
     category: "roudoueisei",
   },
   {
+    slug: "souon",
     name: "騒音障害防止教育",
     basis: "騒音障害防止ガイドライン（令和5年改訂）",
     hours: "1.5時間以上",
@@ -250,38 +263,52 @@ export default function EducationPage() {
                 </h3>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {programs.map((p) => {
-                    const contactHref = `/contact?category=education&course=${encodeURIComponent(p.name)}`;
+                    const detailHref = `/education/${p.category}/${p.slug}`;
+                    const pptxHref = `/seminars/${p.slug}.pptx`;
                     return (
-                      <Link
-                        key={p.name}
-                        href={contactHref}
-                        aria-label={`${p.name} についてお問い合わせ`}
-                        className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-emerald-400 hover:bg-emerald-50/30 hover:shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                      <div
+                        key={p.slug}
+                        className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-emerald-400 hover:shadow"
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <h4 className="text-sm font-bold leading-snug text-slate-900 group-hover:text-emerald-900">
-                            {p.name}
-                          </h4>
-                          <span
-                            className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${CATEGORY_COLOR[catKey]}`}
-                          >
-                            {CATEGORY_LABEL[catKey]}
-                          </span>
-                        </div>
-                        <p className="mt-2 text-[11px] text-slate-500">{p.basis}</p>
-                        {p.note && (
-                          <p className="mt-1 text-[10px] font-semibold text-sky-700 bg-sky-50 rounded px-1.5 py-0.5 w-fit">
-                            {p.note}
+                        <Link
+                          href={detailHref}
+                          aria-label={`${p.name} 詳細ページへ`}
+                          className="flex flex-1 flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="text-sm font-bold leading-snug text-slate-900 group-hover:text-emerald-900">
+                              {p.name}
+                            </h4>
+                            <span
+                              className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${CATEGORY_COLOR[catKey]}`}
+                            >
+                              {CATEGORY_LABEL[catKey]}
+                            </span>
+                          </div>
+                          <p className="mt-2 text-[11px] text-slate-500">{p.basis}</p>
+                          {p.note && (
+                            <p className="mt-1 text-[10px] font-semibold text-sky-700 bg-sky-50 rounded px-1.5 py-0.5 w-fit">
+                              {p.note}
+                            </p>
+                          )}
+                          <div className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-slate-700">
+                            <Clock className="h-3 w-3" aria-hidden="true" />
+                            {p.hours}
+                          </div>
+                          <p className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 group-hover:underline">
+                            詳細を見る →
                           </p>
-                        )}
-                        <div className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-slate-700">
-                          <Clock className="h-3 w-3" aria-hidden="true" />
-                          {p.hours}
-                        </div>
-                        <p className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 group-hover:underline">
-                          この教育を相談する →
-                        </p>
-                      </Link>
+                        </Link>
+                        <a
+                          href={pptxHref}
+                          download
+                          aria-label={`${p.name} PPTXサンプルをダウンロード`}
+                          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-700 hover:border-slate-900 hover:bg-slate-900 hover:text-white transition-colors"
+                        >
+                          <Download className="h-3 w-3" aria-hidden="true" />
+                          PPTXサンプル
+                        </a>
+                      </div>
                     );
                   })}
                 </div>
@@ -317,26 +344,6 @@ export default function EducationPage() {
         >
           <Mail className="h-4 w-4" />
           掲載外の教育についてお問い合わせ →
-        </Link>
-      </section>
-
-      {/* 新設：腰痛予防労働衛生教育 */}
-      <section className="mb-10 rounded-2xl border border-emerald-300 bg-emerald-50 p-6">
-        <div className="flex flex-wrap items-center gap-2 mb-2">
-          <span className="inline-flex items-center rounded-full border border-emerald-400 bg-emerald-600 px-2.5 py-0.5 text-[11px] font-bold text-white">
-            新設
-          </span>
-          <h2 className="text-base font-bold text-emerald-900">腰痛予防労働衛生教育</h2>
-        </div>
-        <p className="text-sm text-slate-700 mb-4">
-          重量物取扱い・介護・VDT作業向けに、厚生労働省「腰痛予防対策指針」（基発0618第1号）に基づく2時間以上の教育を提供します。オンデマンド・カスタマイズ・講師派遣の3形式。
-        </p>
-        <Link
-          href="/education/roudoueisei/youtsu-yobou"
-          className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2 text-sm font-bold text-white hover:bg-emerald-700 transition-colors"
-        >
-          <GraduationCap className="h-4 w-4" />
-          詳細ページを見る →
         </Link>
       </section>
 
