@@ -181,12 +181,42 @@ export default function ChemicalRaPage() {
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
             <dt className="w-28 shrink-0 font-semibold text-slate-700">根拠</dt>
             <dd className="text-slate-600">
-              労働安全衛生法 第57条の3（リスクアセスメント実施義務）
+              <a
+                href="https://laws.e-gov.go.jp/law/347AC0000000057"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sky-700 hover:underline"
+              >
+                労働安全衛生法 第57条の3
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              （リスクアセスメント実施義務）
             </dd>
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
             <dt className="w-28 shrink-0 font-semibold text-slate-700">関連条文</dt>
-            <dd className="text-slate-600">労働安全衛生規則 第34条の2の7／第577条の2／化学物質規制の見直し（2022年5月公布、2024年4月／2026年4月段階施行）</dd>
+            <dd className="text-slate-600">
+              <a
+                href="https://laws.e-gov.go.jp/law/347M50002000032"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sky-700 hover:underline"
+              >
+                労働安全衛生規則 第34条の2の7
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              ／
+              <a
+                href="https://laws.e-gov.go.jp/law/347M50002000032"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-sky-700 hover:underline"
+              >
+                同 第577条の2
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              ／化学物質規制の見直し（2022年5月公布、2024年4月／2026年4月段階施行）
+            </dd>
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
             <dt className="w-28 shrink-0 font-semibold text-slate-700">指針原文</dt>

@@ -183,7 +183,27 @@ export default function YoutsuyobouPage() {
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
             <dt className="w-28 shrink-0 font-semibold text-slate-700">関連条文</dt>
-            <dd className="text-slate-600">労働安全衛生法第59条、第60条の2</dd>
+            <dd className="text-slate-600">
+              <a
+                href="https://laws.e-gov.go.jp/law/347AC0000000057"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-emerald-700 hover:underline"
+              >
+                労働安全衛生法 第59条
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              ／
+              <a
+                href="https://laws.e-gov.go.jp/law/347AC0000000057"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-emerald-700 hover:underline"
+              >
+                同 第60条の2
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </dd>
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
             <dt className="w-28 shrink-0 font-semibold text-slate-700">指針原文</dt>

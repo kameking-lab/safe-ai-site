@@ -183,7 +183,28 @@ export default function NecchuPage() {
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
             <dt className="w-28 shrink-0 font-semibold text-slate-700">関連条文</dt>
-            <dd className="text-slate-600">労働安全衛生規則（2025年6月1日施行 改正による熱中症対策の義務化）／労働安全衛生法 第22条（健康障害防止措置）</dd>
+            <dd className="text-slate-600">
+              <a
+                href="https://laws.e-gov.go.jp/law/347M50002000032"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-emerald-700 hover:underline"
+              >
+                労働安全衛生規則 第612条の2（2025年6月1日施行）
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              ／
+              <a
+                href="https://laws.e-gov.go.jp/law/347AC0000000057"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-emerald-700 hover:underline"
+              >
+                労働安全衛生法 第22条
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              （健康障害防止措置）
+            </dd>
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
             <dt className="w-28 shrink-0 font-semibold text-slate-700">指針原文</dt>

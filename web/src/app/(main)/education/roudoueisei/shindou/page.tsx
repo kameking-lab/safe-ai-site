@@ -183,7 +183,18 @@ export default function ShindouPage() {
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
             <dt className="w-28 shrink-0 font-semibold text-slate-700">関連条文</dt>
-            <dd className="text-slate-600">労働安全衛生規則 第13条（特殊健康診断）／粉じん障害防止規則 等</dd>
+            <dd className="text-slate-600">
+              <a
+                href="https://laws.e-gov.go.jp/law/347M50002000032"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-emerald-700 hover:underline"
+              >
+                労働安全衛生規則 第13条
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              （特殊健康診断）／粉じん障害防止規則 等
+            </dd>
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
             <dt className="w-28 shrink-0 font-semibold text-slate-700">指針原文</dt>
