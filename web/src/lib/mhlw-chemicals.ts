@@ -110,6 +110,16 @@ const CONCENTRATION_OVERRIDES_BY_CAS: Record<string, ConcentrationOverride> = {
   "71-43-2": { limit8h: "1 ppm", limitShort: "0.5 ppm", source: "告示第177号" },
   // トルエン — 告示第177号
   "108-88-3": { limit8h: "20 ppm", source: "告示第177号" },
+  // 硫酸 — 安衛法577条の2
+  "7664-93-9": { limit8h: "0.1 mg/m³", source: "安衛法577条の2" },
+  // アセトン — 告示第177号
+  "67-64-1": { limit8h: "200 ppm", limitShort: "500 ppm", source: "告示第177号" },
+  // ホルムアルデヒド — 告示第177号（がん原性 IARC Group 1）
+  "50-00-0": { limit8h: "0.1 ppm", limitShort: "0.3 ppm", source: "告示第177号" },
+  // アンモニア — 告示第177号
+  "7664-41-7": { limit8h: "25 ppm", limitShort: "35 ppm", source: "告示第177号" },
+  // 塩化水素 — 告示第177号（天井値）
+  "7647-01-0": { limitShort: "2 ppm（天井値）", limit8h: "—", source: "告示第177号" },
 };
 
 /** 管理濃度（作業環境評価基準告示）と濃度基準値は別物である旨の説明ラベル */
