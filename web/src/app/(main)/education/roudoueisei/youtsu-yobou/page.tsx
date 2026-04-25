@@ -189,7 +189,7 @@ export default function YoutsuyobouPage() {
             <dt className="w-28 shrink-0 font-semibold text-slate-700">指針原文</dt>
             <dd>
               <a
-                href="https://www.mhlw.go.jp/stf/houdou/2r9852000002z8t5.html"
+                href="https://www.mhlw.go.jp/stf/newpage_31158.html"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-emerald-700 hover:underline"
