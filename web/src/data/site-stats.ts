@@ -16,3 +16,38 @@ export const SITE_STATS = {
   /** 対応教育の種類数（特別教育・法定・労働衛生、要相談含む） */
   specialEdKinds: "12+",
 } as const;
+
+/**
+ * 各統計値の出典・取得日（YYYY-MM）。サイト上にツールチップ／脚注として表示する。
+ * 数字を更新するときは asOf も合わせて更新すること。
+ */
+export type SiteStatKey = keyof typeof SITE_STATS;
+
+export const SITE_STATS_META: Record<
+  SiteStatKey,
+  { source: string; sourceUrl?: string; asOf: string }
+> = {
+  accidentDbCount: {
+    source: "厚労省 職場のあんぜんサイト 死傷災害データベース",
+    sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx",
+    asOf: "2026-01",
+  },
+  fatalDisastersR5: {
+    source: "厚労省『令和5年労働災害発生状況』建設業計",
+    sourceUrl: "https://www.mhlw.go.jp/stf/newpage_38791.html",
+    asOf: "2024-05",
+  },
+  lawArticleCount: {
+    source: "e-Gov 法令検索（curated 主要33法令）",
+    sourceUrl: "https://laws.e-gov.go.jp/",
+    asOf: "2026-04",
+  },
+  ragArticleCount: {
+    source: "ANZEN AI RAG（compact.json 条文インデックス）",
+    asOf: "2026-04",
+  },
+  specialEdKinds: {
+    source: "安衛則第36条／酸欠則／粉じん則ほか（要相談含む）",
+    asOf: "2026-04",
+  },
+};

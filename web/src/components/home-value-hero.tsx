@@ -2,14 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { SITE_STATS } from "@/data/site-stats";
+import { SITE_STATS, SITE_STATS_META, type SiteStatKey } from "@/data/site-stats";
 
-const STATS = [
-  { value: SITE_STATS.accidentDbCount, label: "厚労省 事故DB収録件数", hint: "全件検索対応" },
-  { value: SITE_STATS.fatalDisastersR5, label: "死亡労災（R5・建設業）", hint: "厚労省統計" },
-  { value: SITE_STATS.lawArticleCount, label: "法令条文データ", hint: "RAG検索で即照合" },
-  { value: SITE_STATS.specialEdKinds, label: "特別教育 対応種別", hint: "過去問クイズ付" },
-] as const;
+const STATS: { key: SiteStatKey; value: string; label: string; hint: string }[] = [
+  { key: "accidentDbCount", value: SITE_STATS.accidentDbCount, label: "厚労省 事故DB収録件数", hint: "全件検索対応" },
+  { key: "fatalDisastersR5", value: SITE_STATS.fatalDisastersR5, label: "死亡労災（R5・建設業）", hint: "厚労省統計" },
+  { key: "lawArticleCount", value: SITE_STATS.lawArticleCount, label: "法令条文データ", hint: "RAG検索で即照合" },
+  { key: "specialEdKinds", value: SITE_STATS.specialEdKinds, label: "特別教育 対応種別", hint: "過去問クイズ付" },
+];
 
 const TARGET_PROFILES = [
   {
@@ -111,16 +111,46 @@ export function HomeValueHero() {
               <strong className="text-white">業務の自動化や教育制作の受託</strong>もワンストップで対応します。
             </p>
 
-            {/* 統計バッジ */}
+            {/* 統計バッジ — 出典・取得日をtitle属性で開示 */}
             <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {STATS.map((s) => (
-                <div key={s.label} className="rounded-lg bg-white/10 px-3 py-2.5 text-center">
-                  <p className="text-xl font-bold text-white">{s.value}</p>
-                  <p className="mt-0.5 text-[10px] leading-4 text-green-100">{s.label}</p>
-                  <p className="text-[9px] text-green-200/80">{s.hint}</p>
-                </div>
-              ))}
+              {STATS.map((s) => {
+                const meta = SITE_STATS_META[s.key];
+                const tooltip = `${meta.source}（取得: ${meta.asOf}）`;
+                return (
+                  <div
+                    key={s.label}
+                    className="rounded-lg bg-white/10 px-3 py-2.5 text-center"
+                    title={tooltip}
+                  >
+                    <p className="text-xl font-bold text-white">{s.value}</p>
+                    <p className="mt-0.5 text-[10px] leading-4 text-green-100">{s.label}</p>
+                    <p className="text-[9px] text-green-200/80">
+                      {s.hint}・{meta.asOf}時点
+                    </p>
+                  </div>
+                );
+              })}
             </div>
+            <p className="mt-2 text-[10px] text-green-200/80">
+              ※ 出典は各統計値にカーソルを合わせると表示。
+              <a
+                href="https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-white"
+              >
+                厚労省 職場のあんぜんサイト
+              </a>
+              ・
+              <a
+                href="https://www.mhlw.go.jp/stf/newpage_38791.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-white"
+              >
+                令和5年労働災害発生状況
+              </a>
+            </p>
 
             {/* 3つのメインCTA */}
             <div className="mt-6 grid gap-2 sm:grid-cols-3">
