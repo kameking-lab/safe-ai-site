@@ -75,3 +75,24 @@ model Subscription {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+/// SDS検索＋RA自動実行の履歴。/account から閲覧可能。
+model SdsSearch {
+  id            String   @id @default(cuid())
+  userId        String?
+  productName   String
+  manufacturer  String?
+  ventilation   String
+  amount        String
+  durationHours Float
+  /// 検索でヒットした製品（NITE-CHRIPまたは内蔵DB）。primaryHit があれば JSON
+  productHit    Json?
+  /// 全体リスクレベル: I, II, III, IV
+  riskLevel     String?
+  /// 各成分のRA結果（[{ cas, name, level, exposure, ... }]）
+  componentRa   Json?
+  source        String   @default("internal-db")
+  createdAt     DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
