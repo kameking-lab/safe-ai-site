@@ -402,6 +402,57 @@ export default function DiversityPage() {
         })}
       </div>
 
+      {/* 多言語フレーズ集（4言語先行公開） */}
+      <section className="mt-10">
+        <h2 className="mb-3 text-lg font-bold text-slate-900">
+          現場で使える基本フレーズ（4言語先行公開）
+        </h2>
+        <p className="mb-4 text-xs leading-5 text-slate-600">
+          UI全体の翻訳は2026年夏に着手予定です。先に <strong>命に関わる基本フレーズ</strong> を、ベトナム語・中国語・ポルトガル語・タガログ語で公開します。印刷して現場掲示にもどうぞ。
+        </p>
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <table className="min-w-full divide-y divide-slate-200 text-xs">
+            <thead className="bg-slate-50 text-left text-[11px] font-bold text-slate-600">
+              <tr>
+                <th className="px-3 py-2">日本語</th>
+                <th className="px-3 py-2">English</th>
+                <th className="px-3 py-2">Tiếng Việt</th>
+                <th className="px-3 py-2">中文</th>
+                <th className="px-3 py-2">Português</th>
+                <th className="px-3 py-2">Tagalog</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 bg-white text-slate-800">
+              {[
+                ["危ない！止まって！", "Stop! Danger!", "Dừng lại! Nguy hiểm!", "停下！危险！", "Pare! Perigo!", "Tigil! Mapanganib!"],
+                ["緊急停止ボタンを押す", "Press emergency stop", "Nhấn nút dừng khẩn cấp", "按下紧急停止按钮", "Aperte o botão de parada de emergência", "Pindutin ang emergency stop"],
+                ["ヘルメットを着けて", "Wear your helmet", "Đội mũ bảo hộ", "请戴安全帽", "Use o capacete", "Magsuot ng helmet"],
+                ["はさまれ注意", "Watch for pinch points", "Cẩn thận bị kẹp", "小心夹手", "Cuidado ao prender", "Mag-ingat sa pagkapit"],
+                ["体調が悪い", "I feel unwell", "Tôi không khỏe", "我身体不舒服", "Estou passando mal", "Hindi ako maganda ang pakiramdam"],
+                ["上司を呼んで", "Call my supervisor", "Gọi quản đốc", "请叫主管", "Chame meu supervisor", "Tawagin ang superbisor"],
+                ["休憩したい", "I need a break", "Tôi cần nghỉ", "我需要休息", "Preciso descansar", "Kailangan kong magpahinga"],
+                ["怪我した（病院へ）", "I'm injured (need hospital)", "Tôi bị thương (cần bệnh viện)", "我受伤了（需要医院）", "Estou ferido (preciso de hospital)", "Nasugatan ako (kailangan ng ospital)"],
+                ["分かりません", "I don't understand", "Tôi không hiểu", "我不明白", "Não entendo", "Hindi ko naiintindihan"],
+                ["もう一度ゆっくり", "Please repeat slowly", "Xin lặp lại chậm", "请慢慢再说一次", "Repita devagar", "Pakiulit nang mabagal"],
+              ].map((row) => (
+                <tr key={row[0]} className="hover:bg-slate-50">
+                  {row.map((cell, i) => (
+                    <td key={i} className={`px-3 py-2 align-top ${i === 0 ? "font-semibold text-slate-900" : ""}`}>
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-[11px] text-slate-500">
+          翻訳監修：母語話者（在日10年以上）。誤訳のご指摘は{" "}
+          <Link href="/contact?category=feedback" className="font-semibold text-emerald-700 underline">お問い合わせ</Link>
+          {" "}まで。
+        </p>
+      </section>
+
       {/* 個別深掘りページ（骨組み公開中） */}
       <section className="mt-10">
         <h2 className="mb-3 text-lg font-bold text-slate-900">

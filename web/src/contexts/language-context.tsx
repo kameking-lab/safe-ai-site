@@ -13,13 +13,18 @@ export const SUPPORTED_LANGUAGES: readonly Language[] = [
   "tl",
 ];
 
+// UI翻訳ロードマップ:
+//  - ja: 完全対応
+//  - en: ベータ（主要画面の主要文言は翻訳済、AIチャット応答は英語可）
+//  - vi/zh/pt/tl: 2026年夏に主要画面の翻訳着手予定。先行して /diversity に
+//    現場で使える基本フレーズ集（4言語）を提供している
 export const LANGUAGE_LABELS: Record<Language, string> = {
   ja: "日本語",
   en: "English (Beta)",
-  vi: "Tiếng Việt (準備中)",
-  zh: "中文 (準備中)",
-  pt: "Português (準備中)",
-  tl: "Tagalog (準備中)",
+  vi: "Tiếng Việt（2026夏予定／フレーズ集あり）",
+  zh: "中文（2026夏予定／フレーズ集あり）",
+  pt: "Português（2026夏予定／フレーズ集あり）",
+  tl: "Tagalog（2026夏予定／フレーズ集あり）",
 };
 
 export const LANGUAGE_SHORT: Record<Language, string> = {
@@ -83,8 +88,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const setLanguage = useCallback((lang: Language) => {
     if (isPreparationLanguage(lang)) {
-      // 準備中言語: 選択を保存せず、日本語のまま維持してトースト表示
-      setToast(`${LANGUAGE_LABELS[lang]}は現在準備中です。日本語表示のまま継続します。`);
+      // 準備中言語: 選択を保存せず、日本語のまま維持してトースト表示。
+      // 主要フレーズ集（4言語）を /diversity で先行提供している旨を案内。
+      setToast(
+        `${LANGUAGE_LABELS[lang]}：UI翻訳は2026年夏予定。現場で使える基本フレーズ集は /diversity にあります。`
+      );
       applyHtmlLang("ja");
       return;
     }
