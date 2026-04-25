@@ -137,26 +137,6 @@ export default function PricingPage() {
         </p>
       </div>
 
-      {/* 課金受付ステータス（特商法対応） */}
-      <div className="mx-auto mb-8 max-w-3xl rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-900">
-        <p className="font-semibold">月額プラン課金は現在「準備中」です</p>
-        <p className="mt-1">
-          スタンダード／プロ プランは、現時点ではオンライン決済の受付を行っておりません
-          （特定商取引法上の表示事項整備中のため）。
-          ご希望の方は
-          <Link href="/contact" className="underline hover:text-amber-950">お問い合わせフォーム</Link>
-          より β協力者としてご連絡ください。β運用期間中は全機能を制限なしで利用いただけます。
-        </p>
-        <div className="mt-3 rounded-lg border border-amber-300/70 bg-white/60 p-3">
-          <p className="font-semibold text-amber-900">β協力者特典（予定）</p>
-          <ul className="mt-1 list-disc space-y-0.5 pl-5 text-amber-900/90">
-            <li>正式リリース後3ヶ月：スタンダードプラン 50% オフ</li>
-            <li>β協力者バッジをアカウントに付与</li>
-            <li>フィードバック採用時はリリースノートに匿名掲載</li>
-          </ul>
-        </div>
-      </div>
-
       {/* Plans grid */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {PLANS.map((plan) => {
@@ -186,11 +166,6 @@ export default function PricingPage() {
 
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="text-sm font-bold text-slate-800">{plan.name}</p>
-                {!isFree && !isCustom && (
-                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
-                    課金準備中
-                  </span>
-                )}
               </div>
 
               <div className="mt-2 flex items-baseline gap-1">
@@ -279,7 +254,7 @@ export default function PricingPage() {
           {[
             {
               q: "いつでもキャンセルできますか？",
-              a: "はい。マイページからいつでもキャンセル可能です。キャンセル後も当月末まではご利用いただけます。",
+              a: "はい。マイページの「プラン管理」（Stripe Customer Portal）からいつでも解約可能です。解約後も当該請求期間の末日まではご利用いただけます。日割り返金はありません。",
             },
             {
               q: "無料プランのまま使い続けられますか？",
@@ -287,7 +262,7 @@ export default function PricingPage() {
             },
             {
               q: "支払い方法は？",
-              a: "クレジットカード（Visa / Mastercard / American Express / JCB）に対応予定。プロプランは請求書払いも可能です。",
+              a: "クレジットカード（Visa / Mastercard / American Express / JCB）に対応。決済処理はStripeに委託しています。プロプランは請求書払いもご相談ください。",
             },
             {
               q: "受託（カスタム）はどんな内容まで依頼できますか？",

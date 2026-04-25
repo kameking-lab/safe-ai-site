@@ -118,7 +118,7 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
   },
   {
     label: "支払方法",
-    value: "銀行振込（受託業務・顧問契約）／クレジットカード（サブスクリプション、準備中）",
+    value: "クレジットカード（Visa／Mastercard／American Express／JCB、Stripeにて処理）／銀行振込（受託業務・顧問契約）",
   },
   {
     label: "支払時期",
@@ -490,9 +490,11 @@ export default function AboutPage() {
             ))}
           </dl>
           <p className="mt-4 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs text-blue-800 leading-5">
-            当サイトのサブスクリプション商品は正式提供開始時に特定商取引法上の全表示事項を完備いたします。現時点では個別相談のみ受け付けております（
+            プラン詳細・解約方法は
             <Link href="/pricing" className="underline hover:text-blue-900">料金プランページ</Link>
-            参照）。
+            および
+            <Link href="/terms" className="underline hover:text-blue-900">利用規約</Link>
+            をご確認ください。
           </p>
         </section>
 

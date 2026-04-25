@@ -90,7 +90,7 @@ export default function PrivacyPage() {
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">決済</span>
-              ：Stripe, Inc.（米国）— 将来の月額プラン決済を受け付ける場合。現時点では決済を受け付けず/contact 経由の個別相談のみ
+              ：Stripe, Inc.（米国）— 月額プランの決済処理。当サイトはカード番号を保持せず、Stripeに委託しています
             </li>
             <li className="list-disc">
               <span className="font-semibold text-slate-700">メール送信</span>

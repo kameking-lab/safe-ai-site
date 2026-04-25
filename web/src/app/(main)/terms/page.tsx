@@ -15,7 +15,7 @@ export default function TermsPage() {
       <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">利用規約</h1>
-          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月22日</p>
+          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月25日</p>
         </div>
 
         <section className="space-y-3">
@@ -112,7 +112,26 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-base font-bold text-slate-900">第7条（規約の変更）</h2>
+          <h2 className="text-base font-bold text-slate-900">第7条（有料プランの申込・解約・返金）</h2>
+          <p className="text-sm leading-7 text-slate-600">
+            利用者は、本サービスの有料プラン（スタンダード／プロ）に申し込むことにより、本規約および特定商取引法に基づく表示記載事項に同意したものとみなします。
+          </p>
+          <p className="text-sm leading-7 text-slate-600">
+            <span className="font-semibold text-slate-700">解約：</span>
+            利用者は、マイページの「プラン管理」（Stripe Customer Portal）からいつでも解約手続きを行うことができます。解約後も、解約処理時点の請求期間の終了日までは引き続きサービスをご利用いただけます。
+          </p>
+          <p className="text-sm leading-7 text-slate-600">
+            <span className="font-semibold text-slate-700">返金：</span>
+            有料プランは月額課金制であり、原則として日割り返金は行いません。利用者の都合による中途解約の場合、未利用期間分の返金は致しかねます。決済システム障害・誤課金など運営者の責に帰すべき事由がある場合に限り、個別にご相談のうえ返金対応いたします。
+          </p>
+          <p className="text-sm leading-7 text-slate-600">
+            <span className="font-semibold text-slate-700">支払いの停止：</span>
+            支払いに失敗した場合、Stripeより自動的にリトライが実行されます。一定期間支払いが完了しない場合、運営者は当該プランの提供を停止することができます。
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-base font-bold text-slate-900">第8条（規約の変更）</h2>
           <p className="text-sm leading-7 text-slate-600">
             運営者は、必要に応じて本規約を変更することがあります。
             変更後の規約は、本ページに掲載した時点で効力を生じます。
@@ -121,7 +140,7 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-base font-bold text-slate-900">第8条（準拠法・管轄）</h2>
+          <h2 className="text-base font-bold text-slate-900">第9条（準拠法・管轄）</h2>
           <p className="text-sm leading-7 text-slate-600">
             本規約の解釈・適用は日本法に準拠します。
             本サービスに関して紛争が生じた場合は、運営者の所在地を管轄する裁判所を
