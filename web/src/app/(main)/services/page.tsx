@@ -146,10 +146,10 @@ const SERVICES = [
     id: "claude-code",
     icon: Sparkles,
     title: "Claude Code 活用自動化",
-    tag: "2〜5倍の開発速度",
-    desc: "Claude Code を使った高速開発で、社内ツール・業務Webアプリ・Chatbotを短納期で構築。本サイト ANZEN AI 自体が実例。",
+    tag: "短納期開発",
+    desc: "Claude Code を使った高速開発で、社内ツール・業務Webアプリ・Chatbotを短納期で構築。本サイト ANZEN AI 自体が実例（要件定義〜初版納品 約2週間）。",
     bullets: [
-      "要件ヒアリング → 実装まで最短2週間",
+      "要件ヒアリング → 初版納品 最短2週間（規模・要件により別途調整）",
       "Next.js + Vercel + Supabase 構成",
       "社内LLM・RAG・Chatbot構築",
       "運用引き継ぎ・社内人材育成込み",
