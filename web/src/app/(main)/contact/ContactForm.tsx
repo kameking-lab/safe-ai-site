@@ -183,7 +183,7 @@ export default function ContactForm() {
   }
 
   const inputClass =
-    "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-[#1a7a4c] focus:ring-2 focus:ring-[#1a7a4c]/20 sm:text-sm";
+    "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-[#1a7a4c] focus:ring-2 focus:ring-[#1a7a4c]/40 focus-visible:ring-offset-2 sm:text-sm";
 
   return (
     <div className="mx-auto max-w-3xl space-y-10 px-4 py-8 lg:px-8">

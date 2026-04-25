@@ -30,10 +30,10 @@ export function TabNavigation({ activeTab, onTabChange }: TabNavigationProps) {
                 type="button"
                 onClick={() => onTabChange(tab.id)}
                 aria-current={isActive ? "page" : undefined}
-                className={`tap-target touch-manipulation rounded-full px-4 py-2 text-sm font-medium shadow-sm transition-colors ${
+                className={`tap-target touch-manipulation rounded-full px-4 py-2 text-sm font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
                   isActive
-                    ? "bg-blue-600 text-white"
-                    : "border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    ? "bg-blue-600 text-white focus-visible:ring-blue-400"
+                    : "border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 focus-visible:ring-blue-500"
                 }`}
               >
                 {tab.label}

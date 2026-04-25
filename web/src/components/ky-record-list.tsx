@@ -66,9 +66,13 @@ export function KyRecordList({ records, onDelete }: Props) {
             </div>
             <button
               type="button"
-              onClick={() => onDelete(rec.id)}
-              className="shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-              aria-label="この記録を削除"
+              onClick={() => {
+                if (window.confirm(`${rec.companyName} ${rec.workDate} の記録を削除します。よろしいですか？`)) {
+                  onDelete(rec.id);
+                }
+              }}
+              className="shrink-0 min-h-[44px] min-w-[44px] rounded-lg p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+              aria-label={`${rec.companyName} ${rec.workDate} の記録を削除`}
               title="削除"
             >
               <Trash2 className="h-3.5 w-3.5" />
