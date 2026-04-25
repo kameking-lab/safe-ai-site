@@ -54,6 +54,13 @@ export function UserMenu({ user }: Props) {
             <p className="truncate px-3 py-2 text-xs text-slate-500">{user.email}</p>
             <div className="my-1 border-t border-slate-100" />
             <Link
+              href="/account"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              マイページ
+            </Link>
+            <Link
               href="/pricing"
               onClick={() => setOpen(false)}
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50"
