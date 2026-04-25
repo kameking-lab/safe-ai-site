@@ -326,6 +326,74 @@ export default function PricingPage() {
       <p className="mt-6 text-center text-xs text-slate-400">
         ※ 月額プランは税込表示です。受託業務は税抜見積となります（別途消費税10%）。
       </p>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "いつでもキャンセルできますか？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "はい。マイページの「プラン管理」（Stripe Customer Portal）からいつでも解約可能です。解約後も当該請求期間の末日まではご利用いただけます。日割り返金はありません。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "無料プランのまま使い続けられますか？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "はい。広告表示もなく、期限なしでお使いいただけます。必要に応じて月額プランへアップグレードしてください。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "支払い方法は？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "クレジットカード（Visa / Mastercard / American Express / JCB）に対応。決済処理はStripeに委託しています。プロプランは請求書払いもご相談ください。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "受託（カスタム）はどんな内容まで依頼できますか？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "KYシートのデジタル化、Excel VBA 自動化、Web・LP 制作、AI 研修、労働安全コンサル顧問契約など。要件ヒアリング後に個別見積を提示します。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "法人契約・請求書払いは可能ですか？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "プロ／ビジネス／受託は請求書払い対応可能。ビジネスは年契で10%割引。お問い合わせフォームからご連絡ください。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "教育機関（高専・専門学校・大学）向けの割引はありますか？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "あります。高専・専門学校・大学・労安コンサル協会等の教育用途は、申請のうえ承認後に「教育機関ライセンス」を無償または優待価格で発行します。学籍簿・在職証明等の確認後、3営業日以内にご返信。",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "授業や講演で本サイトの図表・統計データを引用してもよいですか？",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: "教育・研究・非営利目的の引用は CC BY-NC 4.0（出典明記・非営利）で許諾します。スライド・教科書・論文に「出典：ANZEN AI（safe-ai-site.vercel.app）／取得日」を明記してください。商用利用・転載は別途ご相談ください。",
+                },
+              },
+            ],
+          }),
+        }}
+      />
     </main>
   );
 }

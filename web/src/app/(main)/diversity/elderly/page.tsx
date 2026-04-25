@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ScaffoldPage } from "@/components/scaffold-page";
+import { ogImageUrl } from "@/lib/og-url";
 
 const TITLE = "高齢労働者の安全衛生｜エイジフレンドリーガイドライン";
 const DESCRIPTION =
@@ -8,6 +9,15 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
+  openGraph: {
+    title: `${TITLE}｜ANZEN AI`,
+    description: DESCRIPTION,
+    images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImageUrl(TITLE, DESCRIPTION)],
+  },
 };
 
 export default function DiversityElderlyPage() {
