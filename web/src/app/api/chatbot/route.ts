@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     return jsonError(400, "質問文を入力してください。");
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey || apiKey === "dummy") {
     // APIキー未設定時はフォールバックレスポンス
     return NextResponse.json<ChatbotResponse>(

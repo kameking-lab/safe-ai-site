@@ -29,8 +29,8 @@ export const SITE_STATS = {
   chemicalsMhlwCount: "3,984",
   /** /law-search に収録された全条文件数（curated 33法令+） */
   lawArticleCount: allLawArticles.length.toLocaleString(),
-  /** RAG 検索（chatbot/法令要約）対応の compact.json 条文数 */
-  ragArticleCount: "1,127",
+  /** RAG 検索（chatbot/法令要約）対応の全条文数（curated + 厚労省PDF抽出フィルタ後） */
+  ragArticleCount: allLawArticles.length.toLocaleString(),
   /** 対応教育の種類数（特別教育・法定・労働衛生、要相談含む） */
   specialEdKinds: "12+",
 } as const;
@@ -75,7 +75,7 @@ export const SITE_STATS_META: Record<
     asOf: "2026-04",
   },
   ragArticleCount: {
-    source: "ANZEN AI RAG（compact.json 条文インデックス）",
+    source: "ANZEN AI RAG（curated 33法令 + 厚労省PDF抽出フィルタ後インデックス）",
     asOf: "2026-04",
   },
   specialEdKinds: {

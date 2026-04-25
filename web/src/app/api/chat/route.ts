@@ -93,7 +93,7 @@ export async function POST(request: Request) {
 
   const revisionTitle = body?.revisionTitle?.trim() || "選択中の法改正";
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey || apiKey === "dummy") {
     return NextResponse.json<ChatApiResponse>(
       {

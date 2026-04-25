@@ -6,7 +6,7 @@ const CSP = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://formspree.io",
+  "connect-src 'self' https://formspree.io https://generativelanguage.googleapis.com",
   "frame-src 'none'",
   "frame-ancestors 'none'",
   "object-src 'none'",
