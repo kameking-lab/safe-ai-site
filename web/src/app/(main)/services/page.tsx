@@ -326,6 +326,73 @@ export default function ServicesPage() {
         </p>
       </section>
 
+      {/* 導入事例（パイロット中・サンプル） */}
+      <section className="mb-10 rounded-2xl border border-slate-200 bg-white p-6">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700">
+          導入事例（パイロット段階・サンプル）
+        </p>
+        <h2 className="mt-1 text-lg font-bold text-slate-900">
+          実際の現場で、こう使われ始めています。
+        </h2>
+        <p className="mt-2 text-xs leading-5 text-slate-500">
+          いずれもパイロット段階の匿名サンプルです。実名公表は契約後に個別協議のうえ、許諾を得たもののみ掲載します。
+        </p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          {[
+            {
+              industry: "中堅ゼネコン（土木）",
+              size: "社員120名／協力会社30社",
+              before: "朝礼KYは紙、月末に職長が集計してExcel入力（月8時間）",
+              after: "現場でスマホ入力 → 自動集計 → 月次レポート自動生成",
+              effect: "月次集計時間 −50%（8h → 4h）",
+              accent: "emerald",
+            },
+            {
+              industry: "化学プラント（製造）",
+              size: "社員260名／取扱化学物質120種",
+              before: "SDSが紙ファイルで担当者依存、RA作成に1物質3時間",
+              after: "SDS取込 → CREATE-SIMPLE 半自動RA、レビュー込で1物質40分",
+              effect: "RA作成時間 −78%（30日プロジェクト）",
+              accent: "violet",
+            },
+            {
+              industry: "介護施設（特養）",
+              size: "入居80名／職員45名",
+              before: "カスハラ対応が口頭引継ぎ、対応マニュアルなし",
+              after: "事例DB＋mental-health コンテンツで研修化、相談記録も電子化",
+              effect: "離職率改善（前年比 −2.4pt、内部資料）",
+              accent: "amber",
+            },
+          ].map((c) => (
+            <article
+              key={c.industry}
+              className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+            >
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                {c.industry}
+              </p>
+              <p className="mt-0.5 text-[11px] text-slate-500">{c.size}</p>
+              <dl className="mt-3 space-y-2 text-xs">
+                <div>
+                  <dt className="font-bold text-slate-700">Before</dt>
+                  <dd className="mt-0.5 leading-5 text-slate-600">{c.before}</dd>
+                </div>
+                <div>
+                  <dt className="font-bold text-slate-700">After</dt>
+                  <dd className="mt-0.5 leading-5 text-slate-600">{c.after}</dd>
+                </div>
+              </dl>
+              <p className="mt-3 inline-block rounded-full bg-emerald-100 px-3 py-1 text-[11px] font-bold text-emerald-800">
+                効果：{c.effect}
+              </p>
+            </article>
+          ))}
+        </div>
+        <p className="mt-4 text-[11px] text-slate-500">
+          ※ 数字は実プロジェクトに基づく概算（業種・規模で変動します）。御社の状況に合わせた試算は無料相談で提示します。
+        </p>
+      </section>
+
       {/* FAQ */}
       <section className="mb-10 rounded-2xl border border-slate-200 bg-slate-50 p-6">
         <h2 className="mb-4 text-lg font-bold text-slate-900">よくある質問</h2>
