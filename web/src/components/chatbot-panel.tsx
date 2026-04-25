@@ -549,7 +549,7 @@ export function ChatbotPanel() {
             }
           }}
           placeholder={"安衛法について質問を入力…\nCmd/Ctrl+Enter で送信"}
-          className="min-w-0 flex-1 resize-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:opacity-60"
+          className="min-w-0 flex-1 resize-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 disabled:opacity-60 sm:text-sm"
           aria-label="質問入力"
         />
         <div className="flex flex-col gap-2">

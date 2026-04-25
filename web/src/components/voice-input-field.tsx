@@ -131,7 +131,7 @@ export function VoiceMicButton({ onFinalText, className }: VoiceMicButtonProps) 
         aria-label={listening ? "音声入力を停止" : "音声入力"}
         className={
           className ??
-          `rounded-full border px-2 py-1 text-[10px] font-semibold ${
+          `min-h-9 rounded-full border px-3 py-1 text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
             listening ? "border-rose-400 bg-rose-50 text-rose-800" : "border-slate-300 bg-white text-slate-700"
           }`
         }
@@ -161,7 +161,7 @@ export function InputWithVoice({ value, onChange, className, ...rest }: InputWit
     <div className="flex items-center gap-2">
       <input
         {...rest}
-        className={`min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm ${className ?? ""}`}
+        className={`min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-sm ${className ?? ""}`}
         onChange={onChange}
         value={v}
       />
@@ -192,7 +192,7 @@ export function TextareaWithVoice({ value, onChange, className, ...rest }: Texta
       </div>
       <textarea
         {...rest}
-        className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-sm ${className ?? ""}`}
+        className={`w-full rounded-lg border border-slate-300 px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 sm:text-sm ${className ?? ""}`}
         onChange={onChange}
         value={v}
       />

@@ -66,14 +66,14 @@ export function KySheetPanel({ value, onChange, onSave, onBuildPdfPreview, saved
       </div>
       <div className="mt-3 flex flex-wrap gap-2">
         <button
-          className="rounded-md bg-emerald-700 px-3 py-2 text-xs font-semibold text-white"
+          className="min-h-11 rounded-md bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
           onClick={onSave}
           type="button"
         >
           KY用紙を保存
         </button>
         <button
-          className="rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white"
+          className="min-h-11 rounded-md bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2"
           onClick={onBuildPdfPreview}
           type="button"
         >
