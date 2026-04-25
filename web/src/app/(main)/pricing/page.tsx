@@ -31,7 +31,7 @@ const PLANS = [
     icon: Shield,
     iconColor: "text-slate-600",
     borderColor: "border-slate-300",
-    ctaLabel: "今すぐ無料で試す",
+    ctaLabel: "ログインして使う",
     ctaDisabled: false,
     target: "まずは試したい個人・一人親方",
     features: [
@@ -231,14 +231,14 @@ export default function PricingPage() {
               <div className="mt-5">
                 {isFree ? (
                   <Link
-                    href="/"
+                    href="/api/auth/signin?callbackUrl=%2F"
                     className="block w-full rounded-xl bg-slate-800 py-2.5 text-center text-sm font-bold text-white transition hover:bg-slate-700 active:scale-[0.98]"
                   >
                     {plan.ctaLabel}
                   </Link>
                 ) : isCustom ? (
                   <Link
-                    href="/contact?category=automation"
+                    href="/contact?category=enterprise"
                     className="block w-full rounded-xl bg-blue-600 py-2.5 text-center text-sm font-bold text-white transition hover:bg-blue-700 active:scale-[0.98]"
                   >
                     {plan.ctaLabel}
