@@ -96,7 +96,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       // localStorage unavailable
     }
     if (lang === "en") {
-      setToast("English beta UI is partial. Most content remains in Japanese.");
+      setToast("This page is partially translated. Beta.");
     } else {
       setToast(null);
     }
