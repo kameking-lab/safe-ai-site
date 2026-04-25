@@ -1,0 +1,2109 @@
+{
+  "generatedAt": "2026-04-25T07:35:25.357Z",
+  "version": "1.0.0",
+  "sources": {
+    "MHLW_177": "厚生労働省告示第177号（令和5年4月公示・以降改正分含む）",
+    "JSOH": "日本産業衛生学会 許容濃度等の勧告（2024年度）",
+    "ACGIH": "ACGIH TLV (2024)",
+    "IARC": "IARC Monographs (List of Classifications, 2024)",
+    "GHS_MHLW": "厚生労働省 国によるGHS分類"
+  },
+  "summary": {
+    "total": 198,
+    "withMhlw": 182,
+    "withIarc": 34,
+    "withJsoh": 15,
+    "withAcgih": 9
+  },
+  "substances": {
+    "34590-94-8": {
+      "name": "１－（２－メトキシ－２－メチルエトキシ）－２－プロパノール",
+      "twa": {
+        "value": "50",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/34590-94-8.pdf"
+    },
+    "106-92-3": {
+      "name": "１－アリルオキシ－２，３－エポキシプロパン",
+      "twa": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/106-92-3.pdf"
+    },
+    "63-25-2": {
+      "name": "１－ナフチル－Ｎ－メチルカルバメート（別名カルバリル）※４",
+      "twa": {
+        "value": "0.5",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/63-25-2.pdf"
+    },
+    "106-94-5": {
+      "name": "１－ブロモプロパン",
+      "twa": {
+        "value": "0.1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/106-94-5.pdf"
+    },
+    "72-43-5": {
+      "name": "１，１，１－トリクロロ－２，２－ビス（４－メトキシフェニル）エタン（別名メトキシクロル）",
+      "twa": {
+        "value": "1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/72-43-5.pdf"
+    },
+    "76-13-1": {
+      "name": "１，１，２－トリクロロ－１，２，２－トリフルオロエタン",
+      "twa": {
+        "value": "500",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/76-13-1.pdf"
+    },
+    "72-20-8": {
+      "name": "１，２，３，４，１０，１０－ヘキサクロロ－６，７－エポキシ－１，４，４ａ，５，６，７，８，８ａ－オクタヒドロ－エンド－１，４－エンド－５，８－ジメタノナフタレン（別名エンドリン）",
+      "twa": {
+        "value": "0.1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/72-20-8.pdf"
+    },
+    "552-30-7": {
+      "name": "１，２，４－ベンゼントリカルボン酸１，２－無水物",
+      "twa": {
+        "value": "0.0005",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "0.002",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/552-30-7.pdf"
+    },
+    "57-74-9": {
+      "name": "１，２，４，５，６，７，８，８－オクタクロロ－２，３，３ａ，４，７，７ａ－ヘキサヒドロ－４，７－メタノ－１Ｈ－インデン（別名クロルデン）※６",
+      "twa": {
+        "value": "0.5",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/57-74-9.pdf"
+    },
+    "542-75-6": {
+      "name": "１，３－ジクロロプロペン",
+      "twa": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/542-75-6.pdf"
+    },
+    "100-37-8": {
+      "name": "２－（ジエチルアミノ）エタノール",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/100-37-8.pdf"
+    },
+    "141-43-5": {
+      "name": "２－アミノエタノール",
+      "twa": {
+        "value": "20",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/141-43-5.pdf"
+    },
+    "149-57-5": {
+      "name": "２－エチルヘキサン酸",
+      "twa": {
+        "value": "5",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/149-57-5.pdf"
+    },
+    "13838-16-9": {
+      "name": "２－クロロ－１，１，２－トリフルオロエチルジフルオロメチルエーテル（別名エンフルラン）",
+      "twa": {
+        "value": "20",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/13838-16-9.pdf"
+    },
+    "1912-24-9": {
+      "name": "２－クロロ－４－エチルアミノ－６－イソプロピルアミノ－１，３，５－トリアジン（別名アトラジン）",
+      "twa": {
+        "value": "2",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/1912-24-9.pdf"
+    },
+    "137-05-3": {
+      "name": "２－シアノアクリル酸メチル",
+      "twa": {
+        "value": "0.2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/137-05-3.pdf"
+    },
+    "4170-30-3": {
+      "name": "２－ブテナール",
+      "stel": {
+        "value": "0.3",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/4170-30-3.pdf"
+    },
+    "107-41-5": {
+      "name": "２－メチル－２，４－ペンタンジオール",
+      "twa": {
+        "value": "120",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/107-41-5.pdf"
+    },
+    "122-60-1": {
+      "name": "２，３－エポキシプロピル＝フェニルエーテル",
+      "twa": {
+        "value": "0.1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/122-60-1.pdf"
+    },
+    "94-75-7": {
+      "name": "２，４－ジクロロフェノキシ酢酸",
+      "twa": {
+        "value": "2",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/94-75-7.pdf"
+    },
+    "93-76-5": {
+      "name": "２，４，５－トリクロロフェノキシ酢酸",
+      "twa": {
+        "value": "2",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/93-76-5.pdf"
+    },
+    "128-37-0": {
+      "name": "２，６－ジ－ターシャリ－ブチル－４－クレゾール",
+      "twa": {
+        "value": "10",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/128-37-0.pdf"
+    },
+    "81-81-2": {
+      "name": "３－（アルファ－アセトニルベンジル）－４－ヒドロキシクマリン（別名ワルファリン）",
+      "twa": {
+        "value": "0.01",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/81-81-2.pdf"
+    },
+    "61-82-5": {
+      "name": "３－アミノ－１Ｈ－１，２，４－トリアゾール（別名アミトロール）",
+      "twa": {
+        "value": "0.2",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/61-82-5.pdf"
+    },
+    "4098-71-9": {
+      "name": "３－イソシアナトメチル－３，５，５－トリメチルシクロヘキシル＝イソシアネート",
+      "twa": {
+        "value": "0.005",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/4098-71-9.pdf"
+    },
+    "101-77-9": {
+      "name": "４，４′－メチレンジアニリン",
+      "twa": {
+        "value": "0.4",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/101-77-9.pdf"
+    },
+    "110-12-3": {
+      "name": "５－メチル－２－ヘキサノン",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/110-12-3.pdf"
+    },
+    "17804-35-2": {
+      "name": "Ｎ－［１－（Ｎ－ノルマル－ブチルカルバモイル）－１Ｈ－２－ベンゾイミダゾリル］カルバミン酸メチル（別名ベノミル）",
+      "twa": {
+        "value": "1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/17804-35-2.pdf"
+    },
+    "88-12-0": {
+      "name": "Ｎ－ビニル－２－ピロリドン",
+      "twa": {
+        "value": "0.01",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/88-12-0.pdf"
+    },
+    "100-61-8": {
+      "name": "Ｎ－メチルアニリン",
+      "twa": {
+        "value": "2",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/100-61-8.pdf"
+    },
+    "114-26-1": {
+      "name": "Ｎ－メチルカルバミン酸２－イソプロピルオキシフェニル（別名プロポキスル）※６",
+      "twa": {
+        "value": "0.5",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/114-26-1.pdf"
+    },
+    "127-19-5": {
+      "name": "Ｎ，Ｎ－ジメチルアセトアミド",
+      "twa": {
+        "value": "5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/127-19-5.pdf"
+    },
+    "121-69-7": {
+      "name": "Ｎ，Ｎ－ジメチルアニリン",
+      "twa": {
+        "value": "25",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/121-69-7.pdf"
+    },
+    "79-10-7": {
+      "name": "アクリル酸",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/79-10-7.pdf"
+    },
+    "140-88-5": {
+      "name": "アクリル酸エチル",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/140-88-5.pdf"
+    },
+    "141-32-2": {
+      "name": "アクリル酸ノルマル－ブチル",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/141-32-2.pdf"
+    },
+    "96-33-3": {
+      "name": "アクリル酸メチル",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/96-33-3.pdf"
+    },
+    "107-02-8": {
+      "name": "アクロレイン",
+      "stel": {
+        "value": "0.1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/107-02-8.pdf"
+    },
+    "50-78-2": {
+      "name": "アセチルサリチル酸（別名アスピリン）",
+      "twa": {
+        "value": "5",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/50-78-2.pdf"
+    },
+    "75-07-0": {
+      "name": "アセトアルデヒド",
+      "stel": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-07-0.pdf",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.71",
+        "source": "IARC"
+      }
+    },
+    "75-05-8": {
+      "name": "アセトニトリル",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-05-8.pdf",
+      "jsoh": {
+        "twa": {
+          "value": "10",
+          "unit": "ppm"
+        }
+      }
+    },
+    "75-86-5": {
+      "name": "アセトンシアノヒドリン",
+      "stel": {
+        "value": "5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-86-5.pdf"
+    },
+    "62-53-3": {
+      "name": "アニリン",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/62-53-3.pdf",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.127",
+        "source": "IARC"
+      }
+    },
+    "2179-59-1": {
+      "name": "アリル－ノルマル－プロピルジスルフィド",
+      "stel": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/2179-59-1.pdf"
+    },
+    "107-18-6": {
+      "name": "アリルアルコール",
+      "twa": {
+        "value": "0.5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/107-18-6.pdf"
+    },
+    "98-83-9": {
+      "name": "アルファ－メチルスチレン",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/98-83-9.pdf"
+    },
+    "624-83-9": {
+      "name": "イソシアン酸メチル",
+      "twa": {
+        "value": "0.02",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "0.04",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/624-83-9.pdf"
+    },
+    "78-79-5": {
+      "name": "イソプレン",
+      "twa": {
+        "value": "3",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/78-79-5.pdf"
+    },
+    "75-31-0": {
+      "name": "イソプロピルアミン",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-31-0.pdf"
+    },
+    "108-20-3": {
+      "name": "イソプロピルエーテル",
+      "twa": {
+        "value": "250",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "500",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/108-20-3.pdf"
+    },
+    "78-59-1": {
+      "name": "イソホロン",
+      "stel": {
+        "value": "5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/78-59-1.pdf"
+    },
+    "105-60-2": {
+      "name": "イプシロン－カプロラクタム※６",
+      "twa": {
+        "value": "5",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/105-60-2.pdf"
+    },
+    "16219-75-3": {
+      "name": "エチリデンノルボルネン",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "4",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/16219-75-3.pdf"
+    },
+    "541-85-5": {
+      "name": "エチル－セカンダリ－ペンチルケトン",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/541-85-5.pdf"
+    },
+    "2104-64-5": {
+      "name": "エチル－パラ－ニトロフェニルチオノベンゼンホスホネイト（別名ＥＰＮ）",
+      "twa": {
+        "value": "0.1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/2104-64-5.pdf"
+    },
+    "75-04-7": {
+      "name": "エチルアミン",
+      "twa": {
+        "value": "5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-04-7.pdf"
+    },
+    "107-21-1": {
+      "name": "エチレングリコール",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "50",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/107-21-1.pdf"
+    },
+    "112-07-2": {
+      "name": "エチレングリコールモノブチルエーテルアセタート",
+      "twa": {
+        "value": "20",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/112-07-2.pdf"
+    },
+    "110-49-6": {
+      "name": "エチレングリコールモノメチルエーテルアセテート",
+      "twa": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/110-49-6.pdf"
+    },
+    "107-07-3": {
+      "name": "エチレンクロロヒドリン",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/107-07-3.pdf"
+    },
+    "107-15-3": {
+      "name": "エチレンジアミン",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/107-15-3.pdf"
+    },
+    "106-89-8": {
+      "name": "エピクロロヒドリン",
+      "twa": {
+        "value": "0.5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/106-89-8.pdf"
+    },
+    "10028-15-6": {
+      "name": "オゾン",
+      "stel": {
+        "value": "0.1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/10028-15-6.pdf"
+    },
+    "90-04-0": {
+      "name": "オルト－アニシジン",
+      "twa": {
+        "value": "0.1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/90-04-0.pdf"
+    },
+    "87-59-2": {
+      "name": "キシリジン",
+      "twa": {
+        "value": "0.5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/87-59-2.pdf"
+    },
+    "107-31-3": {
+      "name": "ぎ酸メチル",
+      "twa": {
+        "value": "50",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "100",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/107-31-3.pdf"
+    },
+    "98-82-8": {
+      "name": "クメン",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/98-82-8.pdf"
+    },
+    "111-30-8": {
+      "name": "グルタルアルデヒド",
+      "stel": {
+        "value": "0.03",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/111-30-8.pdf"
+    },
+    "7440-47-3": {
+      "name": "クロム",
+      "twa": {
+        "value": "0.5",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/7440-47-3.pdf",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100C",
+        "source": "IARC"
+      }
+    },
+    "75-00-3": {
+      "name": "クロロエタン（別名塩化エチル）",
+      "twa": {
+        "value": "100",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-00-3.pdf"
+    },
+    "76-06-2": {
+      "name": "クロロピクリン",
+      "stel": {
+        "value": "0.1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/76-06-2.pdf"
+    },
+    "79-11-8": {
+      "name": "クロロ酢酸",
+      "twa": {
+        "value": "0.5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/79-11-8.pdf"
+    },
+    "123-42-2": {
+      "name": "ジアセトンアルコール",
+      "twa": {
+        "value": "20",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/123-42-2.pdf"
+    },
+    "111-42-2": {
+      "name": "ジエタノールアミン",
+      "twa": {
+        "value": "1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/111-42-2.pdf"
+    },
+    "56-38-2": {
+      "name": "ジエチル－パラ－ニトロフェニルチオホスフェイト（別名パラチオン）",
+      "twa": {
+        "value": "0.05",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/56-38-2.pdf"
+    },
+    "109-89-7": {
+      "name": "ジエチルアミン",
+      "twa": {
+        "value": "5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "15",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/109-89-7.pdf"
+    },
+    "96-22-0": {
+      "name": "ジエチルケトン",
+      "stel": {
+        "value": "300",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/96-22-0.pdf"
+    },
+    "112-34-5": {
+      "name": "ジエチレングリコールモノブチルエーテル※６",
+      "twa": {
+        "value": "60",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/112-34-5.pdf"
+    },
+    "110-82-7": {
+      "name": "シクロヘキサン",
+      "twa": {
+        "value": "100",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/110-82-7.pdf"
+    },
+    "108-91-8": {
+      "name": "シクロヘキシルアミン",
+      "stel": {
+        "value": "5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/108-91-8.pdf"
+    },
+    "75-34-3": {
+      "name": "ジクロロエタン（１，１－ジクロロエタンに限る。）",
+      "twa": {
+        "value": "100",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-34-3.pdf"
+    },
+    "75-35-4": {
+      "name": "ジクロロエチレン（１，１－ジクロロエチレンに限る。）",
+      "twa": {
+        "value": "5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-35-4.pdf"
+    },
+    "75-43-4": {
+      "name": "ジクロロフルオロメタン（別名ＨＣＦＣ－２１）",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-43-4.pdf"
+    },
+    "77-73-6": {
+      "name": "ジシクロペンタジエン",
+      "twa": {
+        "value": "0.5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/77-73-6.pdf"
+    },
+    "86-50-0": {
+      "name": "ジチオりん酸Ｏ，Ｏ－ジメチル－Ｓ－［（４－オキソ－１，２，３－ベンゾトリアジン－３（４Ｈ）－イル）メチル］（別名アジンホスメチル）",
+      "twa": {
+        "value": "1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/86-50-0.pdf"
+    },
+    "122-39-4": {
+      "name": "ジフェニルアミン※６",
+      "twa": {
+        "value": "5",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/122-39-4.pdf"
+    },
+    "101-84-8": {
+      "name": "ジフェニルエーテル",
+      "twa": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/101-84-8.pdf"
+    },
+    "19287-45-7": {
+      "name": "ジボラン",
+      "twa": {
+        "value": "0.01",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/19287-45-7.pdf"
+    },
+    "124-40-3": {
+      "name": "ジメチルアミン",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/124-40-3.pdf"
+    },
+    "76-22-2": {
+      "name": "しよう脳",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/76-22-2.pdf"
+    },
+    "7782-49-2": {
+      "name": "セレン",
+      "twa": {
+        "value": "0.02",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/7782-49-2.pdf",
+      "carcinogenicity": {
+        "iarc": "3",
+        "monograph": "Vol.9",
+        "source": "IARC"
+      }
+    },
+    "7440-28-0": {
+      "name": "タリウム",
+      "twa": {
+        "value": "0.02",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/7440-28-0.pdf"
+    },
+    "333-41-5": {
+      "name": "チオりん酸Ｏ，Ｏ－ジエチル－Ｏ－（２－イソプロピル－６－メチル－４－ピリミジニル）（別名ダイアジノン）",
+      "twa": {
+        "value": "0.01",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/333-41-5.pdf"
+    },
+    "97-77-8": {
+      "name": "テトラエチルチウラムジスルフィド（別名ジスルフィラム）",
+      "twa": {
+        "value": "2",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/97-77-8.pdf"
+    },
+    "107-49-3": {
+      "name": "テトラエチルピロホスフェイト（別名ＴＥＰＰ）",
+      "twa": {
+        "value": "0.01",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/107-49-3.pdf"
+    },
+    "76-12-0": {
+      "name": "テトラクロロジフルオロエタン（別名ＣＦＣ－１１２）",
+      "twa": {
+        "value": "50",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/76-12-0.pdf"
+    },
+    "137-26-8": {
+      "name": "テトラメチルチウラムジスルフィド（別名チウラム）",
+      "twa": {
+        "value": "0.2",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/137-26-8.pdf"
+    },
+    "102-71-6": {
+      "name": "トリエタノールアミン",
+      "twa": {
+        "value": "1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/102-71-6.pdf"
+    },
+    "79-00-5": {
+      "name": "トリクロロエタン（１，１，２－トリクロロエタンに限る。）",
+      "twa": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/79-00-5.pdf"
+    },
+    "76-03-9": {
+      "name": "トリクロロ酢酸",
+      "twa": {
+        "value": "0.5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/76-03-9.pdf"
+    },
+    "118-96-7": {
+      "name": "トリニトロトルエン",
+      "twa": {
+        "value": "0.05",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/118-96-7.pdf"
+    },
+    "75-25-2": {
+      "name": "トリブロモメタン",
+      "twa": {
+        "value": "0.5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-25-2.pdf",
+      "carcinogenicity": {
+        "iarc": "2B",
+        "monograph": "Vol.71",
+        "source": "IARC"
+      }
+    },
+    "75-50-3": {
+      "name": "トリメチルアミン",
+      "twa": {
+        "value": "3",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-50-3.pdf"
+    },
+    "25551-13-7": {
+      "name": "トリメチルベンゼン",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/25551-13-7.pdf"
+    },
+    "7440-02-0": {
+      "name": "ニッケル",
+      "twa": {
+        "value": "1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/7440-02-0.pdf",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100C",
+        "source": "IARC"
+      }
+    },
+    "79-24-3": {
+      "name": "ニトロエタン",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/79-24-3.pdf"
+    },
+    "55-63-0": {
+      "name": "ニトログリセリン",
+      "twa": {
+        "value": "0.01",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/55-63-0.pdf"
+    },
+    "108-03-2": {
+      "name": "ニトロプロパン（１－ニトロプロパンに限る。）",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/108-03-2.pdf"
+    },
+    "98-95-3": {
+      "name": "ニトロベンゼン",
+      "twa": {
+        "value": "0.1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/98-95-3.pdf",
+      "carcinogenicity": {
+        "iarc": "2B",
+        "monograph": "Vol.65",
+        "source": "IARC"
+      }
+    },
+    "75-52-5": {
+      "name": "ニトロメタン",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-52-5.pdf"
+    },
+    "111-84-2": {
+      "name": "ノナン（ノルマル－ノナンに限る。）",
+      "twa": {
+        "value": "200",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/111-84-2.pdf"
+    },
+    "106-35-4": {
+      "name": "ノルマル－ブチルエチルケトン",
+      "twa": {
+        "value": "70",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/106-35-4.pdf"
+    },
+    "104-94-9": {
+      "name": "パラ－アニシジン",
+      "twa": {
+        "value": "0.5",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/104-94-9.pdf"
+    },
+    "106-46-7": {
+      "name": "パラ－ジクロロベンゼン",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/106-46-7.pdf"
+    },
+    "98-51-1": {
+      "name": "パラ－ターシャリ－ブチルトルエン",
+      "twa": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/98-51-1.pdf"
+    },
+    "100-01-6": {
+      "name": "パラ－ニトロアニリン",
+      "twa": {
+        "value": "3",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/100-01-6.pdf"
+    },
+    "302-01-2": {
+      "name": "ヒドラジン及びその一水和物",
+      "twa": {
+        "value": "0.01",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/302-01-2.pdf",
+      "carcinogenicity": {
+        "iarc": "2B",
+        "monograph": "Vol.115",
+        "source": "IARC"
+      }
+    },
+    "123-31-9": {
+      "name": "ヒドロキノン",
+      "twa": {
+        "value": "1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/123-31-9.pdf"
+    },
+    "25013-15-4": {
+      "name": "ビニルトルエン",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/25013-15-4.pdf"
+    },
+    "92-52-4": {
+      "name": "ビフェニル",
+      "twa": {
+        "value": "3",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/92-52-4.pdf"
+    },
+    "110-86-1": {
+      "name": "ピリジン",
+      "twa": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/110-86-1.pdf"
+    },
+    "96-09-3": {
+      "name": "フェニルオキシラン",
+      "twa": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/96-09-3.pdf"
+    },
+    "106-50-3": {
+      "name": "フェニレンジアミン（パラ－フェニレンジアミンに限る。）",
+      "twa": {
+        "value": "0.1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/106-50-3.pdf"
+    },
+    "92-84-2": {
+      "name": "フェノチアジン",
+      "twa": {
+        "value": "0.5",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/92-84-2.pdf"
+    },
+    "75-65-0": {
+      "name": "ブタノール（ターシャリ－ブタノールに限る。）",
+      "twa": {
+        "value": "20",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/75-65-0.pdf"
+    },
+    "84-74-2": {
+      "name": "フタル酸ジ－ノルマル－ブチル",
+      "twa": {
+        "value": "0.5",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/84-74-2.pdf"
+    },
+    "84-66-2": {
+      "name": "フタル酸ジエチル※６",
+      "twa": {
+        "value": "30",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/84-66-2.pdf"
+    },
+    "117-81-7": {
+      "name": "フタル酸ビス（２－エチルヘキシル）（別名ＤＥＨＰ）",
+      "twa": {
+        "value": "1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/117-81-7.pdf"
+    },
+    "98-01-1": {
+      "name": "フルフラール",
+      "twa": {
+        "value": "0.2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/98-01-1.pdf"
+    },
+    "98-00-0": {
+      "name": "フルフリルアルコール",
+      "twa": {
+        "value": "0.2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/98-00-0.pdf"
+    },
+    "79-09-4": {
+      "name": "プロピオン酸",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/79-09-4.pdf"
+    },
+    "107-98-2": {
+      "name": "プロピレングリコールモノメチルエーテル",
+      "twa": {
+        "value": "50",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/107-98-2.pdf"
+    },
+    "67-72-1": {
+      "name": "ヘキサクロロエタン",
+      "twa": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/67-72-1.pdf"
+    },
+    "822-06-0": {
+      "name": "ヘキサメチレン＝ジイソシアネート",
+      "twa": {
+        "value": "0.005",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/822-06-0.pdf"
+    },
+    "142-82-5": {
+      "name": "ヘプタン（ノルマル－ヘプタンに限る。）",
+      "twa": {
+        "value": "500",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/142-82-5.pdf"
+    },
+    "79-41-4": {
+      "name": "メタクリル酸",
+      "twa": {
+        "value": "20",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/79-41-4.pdf"
+    },
+    "80-62-6": {
+      "name": "メタクリル酸メチル",
+      "twa": {
+        "value": "20",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/80-62-6.pdf"
+    },
+    "126-98-7": {
+      "name": "メタクリロニトリル",
+      "twa": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/126-98-7.pdf"
+    },
+    "1634-04-4": {
+      "name": "メチル－ターシャリ－ブチルエーテル（別名ＭＴＢＥ）",
+      "twa": {
+        "value": "50",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/1634-04-4.pdf"
+    },
+    "74-89-5": {
+      "name": "メチルアミン",
+      "twa": {
+        "value": "4",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/74-89-5.pdf"
+    },
+    "5124-30-1": {
+      "name": "メチレンビス（４，１－シクロヘキシレン）＝ジイソシアネート",
+      "twa": {
+        "value": "0.05",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/5124-30-1.pdf"
+    },
+    "7803-51-2": {
+      "name": "りん化水素",
+      "twa": {
+        "value": "0.05",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "0.15",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/7803-51-2.pdf"
+    },
+    "7664-38-2": {
+      "name": "りん酸",
+      "twa": {
+        "value": "1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/7664-38-2.pdf"
+    },
+    "7786-34-7": {
+      "name": "りん酸ジメチル＝１－メトキシカルボニル－１－プロペン－２－イル（別名メビンホス）",
+      "twa": {
+        "value": "0.01",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/7786-34-7.pdf"
+    },
+    "126-73-8": {
+      "name": "りん酸トリ－ノルマル－ブチル※６",
+      "twa": {
+        "value": "5",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/126-73-8.pdf"
+    },
+    "78-30-8": {
+      "name": "りん酸トリトリル（りん酸トリ（オルト－トリル）に限る。）",
+      "twa": {
+        "value": "0.03",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/78-30-8.pdf"
+    },
+    "115-86-6": {
+      "name": "りん酸トリフェニル",
+      "twa": {
+        "value": "3",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/115-86-6.pdf"
+    },
+    "108-46-3": {
+      "name": "レソルシノール",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/108-46-3.pdf"
+    },
+    "10024-97-2": {
+      "name": "一酸化二窒素",
+      "twa": {
+        "value": "100",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/10024-97-2.pdf"
+    },
+    "107-05-1": {
+      "name": "塩化アリル",
+      "twa": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/107-05-1.pdf"
+    },
+    "10025-87-3": {
+      "name": "塩化ホスホリル",
+      "twa": {
+        "value": "0.6",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/10025-87-3.pdf"
+    },
+    "7722-84-1": {
+      "name": "過酸化水素",
+      "twa": {
+        "value": "0.5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/7722-84-1.pdf"
+    },
+    "7719-12-2": {
+      "name": "三塩化りん",
+      "twa": {
+        "value": "0.2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "0.5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/7719-12-2.pdf"
+    },
+    "1305-78-8": {
+      "name": "酸化カルシウム",
+      "twa": {
+        "value": "0.2",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/1305-78-8.pdf"
+    },
+    "141-79-7": {
+      "name": "酸化メシチル",
+      "twa": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/141-79-7.pdf"
+    },
+    "7726-95-6": {
+      "name": "臭素",
+      "stel": {
+        "value": "0.2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/7726-95-6.pdf"
+    },
+    "64-19-7": {
+      "name": "酢酸",
+      "stel": {
+        "value": "15",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/64-19-7.pdf"
+    },
+    "108-05-4": {
+      "name": "酢酸ビニル",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "15",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/108-05-4.pdf"
+    },
+    "540-88-5": {
+      "name": "酢酸ブチル（酢酸ターシャリ－ブチルに限る。）",
+      "twa": {
+        "value": "20",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "150",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/540-88-5.pdf"
+    },
+    "1305-62-0": {
+      "name": "水酸化カルシウム",
+      "twa": {
+        "value": "0.2",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/1305-62-0.pdf"
+    },
+    "10102-44-0": {
+      "name": "二酸化窒素",
+      "twa": {
+        "value": "0.2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/10102-44-0.pdf"
+    },
+    "108-31-6": {
+      "name": "無水マレイン酸",
+      "twa": {
+        "value": "0.08",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/108-31-6.pdf"
+    },
+    "108-24-7": {
+      "name": "無水酢酸",
+      "twa": {
+        "value": "0.2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/108-24-7.pdf"
+    },
+    "7553-56-2": {
+      "name": "沃(よう)素",
+      "twa": {
+        "value": "0.02",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/7553-56-2.pdf"
+    },
+    "87-68-3": {
+      "name": "六塩化ブタジエン",
+      "twa": {
+        "value": "0.01",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "mhlwSdsUrl": "https://anzeninfo.mhlw.go.jp/user/anzen/kag/pdf/noudo/87-68-3.pdf"
+    },
+    "71-43-2": {
+      "name": "ベンゼン",
+      "twa": {
+        "value": "1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "0.5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100F",
+        "source": "IARC"
+      },
+      "jsoh": {
+        "twa": {
+          "value": "1",
+          "unit": "ppm"
+        }
+      },
+      "acgih": {
+        "twa": {
+          "value": "0.5",
+          "unit": "ppm"
+        },
+        "stel": {
+          "value": "2.5",
+          "unit": "ppm"
+        }
+      }
+    },
+    "108-88-3": {
+      "name": "トルエン",
+      "twa": {
+        "value": "20",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "carcinogenicity": {
+        "iarc": "3",
+        "monograph": "Vol.71",
+        "source": "IARC"
+      },
+      "jsoh": {
+        "twa": {
+          "value": "20",
+          "unit": "ppm"
+        }
+      },
+      "acgih": {
+        "twa": {
+          "value": "20",
+          "unit": "ppm"
+        }
+      }
+    },
+    "7664-93-9": {
+      "name": "硫酸",
+      "twa": {
+        "value": "0.1",
+        "unit": "mg/m³",
+        "source": "MHLW_177"
+      },
+      "jsoh": {
+        "twa": {
+          "value": "0.1",
+          "unit": "mg/m³"
+        }
+      },
+      "acgih": {
+        "twa": {
+          "value": "0.2",
+          "unit": "mg/m³"
+        }
+      }
+    },
+    "67-64-1": {
+      "name": "アセトン",
+      "twa": {
+        "value": "200",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "500",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "carcinogenicity": {
+        "iarc": "3",
+        "monograph": "Suppl.7",
+        "source": "IARC"
+      },
+      "jsoh": {
+        "twa": {
+          "value": "200",
+          "unit": "ppm"
+        }
+      },
+      "acgih": {
+        "twa": {
+          "value": "250",
+          "unit": "ppm"
+        },
+        "stel": {
+          "value": "500",
+          "unit": "ppm"
+        }
+      }
+    },
+    "50-00-0": {
+      "name": "ホルムアルデヒド",
+      "twa": {
+        "value": "0.1",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "0.3",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100F",
+        "source": "IARC"
+      },
+      "jsoh": {
+        "twa": {
+          "value": "0.1",
+          "unit": "ppm"
+        }
+      },
+      "acgih": {
+        "ceiling": {
+          "value": "0.3",
+          "unit": "ppm"
+        }
+      }
+    },
+    "7664-41-7": {
+      "name": "アンモニア",
+      "twa": {
+        "value": "25",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "35",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "jsoh": {
+        "twa": {
+          "value": "25",
+          "unit": "ppm"
+        }
+      },
+      "acgih": {
+        "twa": {
+          "value": "25",
+          "unit": "ppm"
+        },
+        "stel": {
+          "value": "35",
+          "unit": "ppm"
+        }
+      }
+    },
+    "7647-01-0": {
+      "name": "塩化水素",
+      "ceiling": {
+        "value": "2",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "jsoh": {
+        "ceiling": {
+          "value": "2",
+          "unit": "ppm"
+        }
+      },
+      "acgih": {
+        "ceiling": {
+          "value": "2",
+          "unit": "ppm"
+        }
+      }
+    },
+    "75-09-2": {
+      "name": "ジクロロメタン",
+      "twa": {
+        "value": "50",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "carcinogenicity": {
+        "iarc": "2A",
+        "monograph": "Vol.110",
+        "source": "IARC"
+      },
+      "jsoh": {
+        "twa": {
+          "value": "50",
+          "unit": "ppm"
+        }
+      },
+      "acgih": {
+        "twa": {
+          "value": "50",
+          "unit": "ppm"
+        }
+      }
+    },
+    "127-18-4": {
+      "name": "テトラクロロエチレン",
+      "twa": {
+        "value": "25",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "carcinogenicity": {
+        "iarc": "2A",
+        "monograph": "Vol.106",
+        "source": "IARC"
+      }
+    },
+    "79-01-6": {
+      "name": "トリクロロエチレン",
+      "twa": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "carcinogenicity": {
+        "iarc": "2A",
+        "monograph": "Vol.106",
+        "source": "IARC"
+      }
+    },
+    "100-41-4": {
+      "name": "エチルベンゼン",
+      "twa": {
+        "value": "20",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "carcinogenicity": {
+        "iarc": "2B",
+        "monograph": "Vol.77",
+        "source": "IARC"
+      },
+      "jsoh": {
+        "twa": {
+          "value": "50",
+          "unit": "ppm"
+        }
+      }
+    },
+    "1330-20-7": {
+      "name": "キシレン",
+      "twa": {
+        "value": "50",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "carcinogenicity": {
+        "iarc": "3",
+        "monograph": "Vol.71",
+        "source": "IARC"
+      },
+      "jsoh": {
+        "twa": {
+          "value": "50",
+          "unit": "ppm"
+        }
+      }
+    },
+    "108-95-2": {
+      "name": "フェノール",
+      "twa": {
+        "value": "5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "carcinogenicity": {
+        "iarc": "3",
+        "monograph": "Vol.71",
+        "source": "IARC"
+      }
+    },
+    "67-56-1": {
+      "name": "メタノール",
+      "twa": {
+        "value": "200",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "250",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "jsoh": {
+        "twa": {
+          "value": "200",
+          "unit": "ppm"
+        }
+      },
+      "acgih": {
+        "twa": {
+          "value": "200",
+          "unit": "ppm"
+        },
+        "stel": {
+          "value": "250",
+          "unit": "ppm"
+        }
+      }
+    },
+    "78-93-3": {
+      "name": "メチルエチルケトン",
+      "twa": {
+        "value": "200",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "jsoh": {
+        "twa": {
+          "value": "200",
+          "unit": "ppm"
+        }
+      }
+    },
+    "7782-50-5": {
+      "name": "塩素",
+      "ceiling": {
+        "value": "0.5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "jsoh": {
+        "ceiling": {
+          "value": "0.5",
+          "unit": "ppm"
+        }
+      }
+    },
+    "7783-06-4": {
+      "name": "硫化水素",
+      "twa": {
+        "value": "5",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "stel": {
+        "value": "10",
+        "unit": "ppm",
+        "source": "MHLW_177"
+      },
+      "jsoh": {
+        "twa": {
+          "value": "5",
+          "unit": "ppm"
+        }
+      }
+    },
+    "75-01-4": {
+      "name": "塩化ビニル",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100F",
+        "source": "IARC"
+      }
+    },
+    "1332-21-4": {
+      "name": "アスベスト",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100C",
+        "source": "IARC"
+      }
+    },
+    "75-21-8": {
+      "name": "エチレンオキシド",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100F",
+        "source": "IARC"
+      }
+    },
+    "106-99-0": {
+      "name": "1,3-ブタジエン",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100F",
+        "source": "IARC"
+      }
+    },
+    "7440-41-7": {
+      "name": "ベリリウム",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100C",
+        "source": "IARC"
+      }
+    },
+    "7440-43-9": {
+      "name": "カドミウム",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100C",
+        "source": "IARC"
+      }
+    },
+    "92-87-5": {
+      "name": "ベンジジン",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100F",
+        "source": "IARC"
+      }
+    },
+    "1336-36-3": {
+      "name": "ポリ塩化ビフェニル類",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.107",
+        "source": "IARC"
+      }
+    },
+    "7440-38-2": {
+      "name": "無機ヒ素化合物",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100C",
+        "source": "IARC"
+      }
+    },
+    "8001-58-9": {
+      "name": "コールタール",
+      "carcinogenicity": {
+        "iarc": "1",
+        "monograph": "Vol.100F",
+        "source": "IARC"
+      }
+    },
+    "100-44-7": {
+      "name": "塩化ベンジル",
+      "carcinogenicity": {
+        "iarc": "2A",
+        "monograph": "Vol.71",
+        "source": "IARC"
+      }
+    },
+    "111-44-4": {
+      "name": "ビス(2-クロロエチル)エーテル",
+      "carcinogenicity": {
+        "iarc": "2A",
+        "monograph": "Vol.71",
+        "source": "IARC"
+      }
+    },
+    "100-42-5": {
+      "name": "スチレン",
+      "carcinogenicity": {
+        "iarc": "2A",
+        "monograph": "Vol.121",
+        "source": "IARC"
+      }
+    },
+    "108-90-7": {
+      "name": "クロロベンゼン",
+      "carcinogenicity": {
+        "iarc": "2B",
+        "monograph": "Vol.73",
+        "source": "IARC"
+      }
+    },
+    "151-56-4": {
+      "name": "エチレンイミン",
+      "carcinogenicity": {
+        "iarc": "2B",
+        "monograph": "Vol.71",
+        "source": "IARC"
+      }
+    },
+    "7440-50-8": {
+      "name": "銅",
+      "carcinogenicity": {
+        "iarc": "3",
+        "monograph": "Vol.118",
+        "source": "IARC"
+      }
+    }
+  }
+}

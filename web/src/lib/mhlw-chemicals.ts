@@ -1,4 +1,5 @@
 import compact from "@/data/chemicals-mhlw/compact.json";
+import concentrationLimitsRaw from "@/data/concentration-limits.json";
 import { chemicalSubstances } from "@/data/mock/chemical-substances-db";
 
 export type MhlwChemicalCategory =
@@ -7,6 +8,55 @@ export type MhlwChemicalCategory =
   | "skin"
   | "label_sds"
   | "other";
+
+/** 濃度値（{value, unit, source}） */
+export type LimitValue = {
+  value: string;
+  unit: string;
+  /** SOURCES マップのキー */
+  source?: string;
+};
+
+/** 物質単位の濃度・発がん性データ（concentration-limits.json） */
+export type ConcentrationLimitEntry = {
+  name?: string;
+  twa?: LimitValue;
+  stel?: LimitValue;
+  ceiling?: LimitValue;
+  carcinogenicity?: {
+    iarc?: string;
+    monograph?: string;
+    ghs?: string;
+    source?: string;
+  };
+  jsoh?: {
+    twa?: { value: string; unit: string };
+    stel?: { value: string; unit: string };
+    ceiling?: { value: string; unit: string };
+  };
+  acgih?: {
+    twa?: { value: string; unit: string };
+    stel?: { value: string; unit: string };
+    ceiling?: { value: string; unit: string };
+  };
+  mhlwSdsUrl?: string;
+};
+
+type ConcentrationLimitsFile = {
+  generatedAt: string;
+  version: string;
+  sources: Record<string, string>;
+  summary: {
+    total: number;
+    withMhlw: number;
+    withIarc: number;
+    withJsoh: number;
+    withAcgih: number;
+  };
+  substances: Record<string, ConcentrationLimitEntry>;
+};
+
+export const CONCENTRATION_LIMITS = concentrationLimitsRaw as unknown as ConcentrationLimitsFile;
 
 export type MhlwChemicalDetails = {
   /** 八時間濃度基準値 (例: "20 ppm" / "5 ㎎/㎥") */
@@ -17,6 +67,10 @@ export type MhlwChemicalDetails = {
   uses?: string;
   /** 厚労省 公式 SDS PDF リンク */
   link?: string;
+  /** 濃度・発がん性の構造化データ（concentration-limits.json）*/
+  limits?: ConcentrationLimitEntry;
+  /** データの優先度: 厚労省告示 > 産業衛生学会 > ACGIH > 参考値 */
+  tier?: "mhlw_177" | "jsoh" | "acgih" | "reference" | "none";
 };
 
 export type MhlwChemicalEntry = {
@@ -91,36 +145,68 @@ export const MHLW_CHEMICALS_SOURCE =
   "厚生労働省 皮膚等障害化学物質リスト・SDS交付義務物質一覧・がん原性物質一覧・濃度基準値設定物質";
 
 /**
- * 厚生労働省告示第177号（化学物質の濃度基準値）に基づく主要物質の濃度基準値。
- * 当サイトの compact.json（自動抽出）では一部の基幹物質で濃度基準値カテゴリが
- * 欠落するため、基準値が確定している物質は CAS 番号ベースでここに明示する。
- * 出典: 厚生労働省 令和5年4月告示第177号（別表・追加告示含む）。
+ * 濃度基準値・許容濃度・発がん性分類は scripts/etl/fetch-concentration-limits.mjs で
+ * 生成された web/src/data/concentration-limits.json を出典とする。
+ *
+ *   優先度: 厚労省告示第177号 > 産業衛生学会許容濃度 > ACGIH > 参考値
+ *
+ * 拡張する場合は ETL スクリプトの CARCINOGENS_IARC / JSOH_LIMITS / ACGIH_LIMITS /
+ * MHLW_177_OVERRIDES マップに追記し、`node scripts/etl/fetch-concentration-limits.mjs`
+ * を再実行する。
  */
-type ConcentrationOverride = {
-  /** 8時間濃度基準値（例: "1 ppm"） */
-  limit8h: string;
-  /** 短時間濃度基準値（例: "0.5 ppm"） */
-  limitShort?: string;
-  /** 告示番号・根拠 */
-  source?: string;
+function formatLimitValue(v?: LimitValue | { value: string; unit: string }): string | undefined {
+  if (!v) return undefined;
+  return `${v.value} ${v.unit}`;
+}
+
+/** UI 表示用ラベル: 出典タグ → 短縮ラベル */
+export const SOURCE_LABEL: Record<string, string> = {
+  MHLW_177: "厚労告示第177号",
+  JSOH: "産業衛生学会",
+  ACGIH: "ACGIH",
+  IARC: "IARC",
+  GHS_MHLW: "国GHS分類",
 };
 
-const CONCENTRATION_OVERRIDES_BY_CAS: Record<string, ConcentrationOverride> = {
-  // ベンゼン — 告示第177号
-  "71-43-2": { limit8h: "1 ppm", limitShort: "0.5 ppm", source: "告示第177号" },
-  // トルエン — 告示第177号
-  "108-88-3": { limit8h: "20 ppm", source: "告示第177号" },
-  // 硫酸 — 安衛法577条の2
-  "7664-93-9": { limit8h: "0.1 mg/m³", source: "安衛法577条の2" },
-  // アセトン — 告示第177号
-  "67-64-1": { limit8h: "200 ppm", limitShort: "500 ppm", source: "告示第177号" },
-  // ホルムアルデヒド — 告示第177号（がん原性 IARC Group 1）
-  "50-00-0": { limit8h: "0.1 ppm", limitShort: "0.3 ppm", source: "告示第177号" },
-  // アンモニア — 告示第177号
-  "7664-41-7": { limit8h: "25 ppm", limitShort: "35 ppm", source: "告示第177号" },
-  // 塩化水素 — 告示第177号（天井値）
-  "7647-01-0": { limitShort: "2 ppm（天井値）", limit8h: "—", source: "告示第177号" },
+/** UI 表示用バッジ色 */
+export const SOURCE_BADGE: Record<string, string> = {
+  MHLW_177: "bg-amber-100 text-amber-900 border-amber-200",
+  JSOH: "bg-violet-100 text-violet-900 border-violet-200",
+  ACGIH: "bg-sky-100 text-sky-900 border-sky-200",
+  IARC: "bg-rose-100 text-rose-900 border-rose-200",
+  GHS_MHLW: "bg-emerald-100 text-emerald-900 border-emerald-200",
 };
+
+/** データ階層バッジ: 「濃度基準値あり」「許容濃度のみ」「参考値のみ」 */
+export type DataTier = "mhlw_177" | "jsoh" | "acgih" | "reference" | "none";
+
+export const TIER_LABEL: Record<DataTier, string> = {
+  mhlw_177: "濃度基準値あり",
+  jsoh: "許容濃度のみ",
+  acgih: "参考値のみ",
+  reference: "参考値",
+  none: "数値データなし",
+};
+
+export const TIER_BADGE: Record<DataTier, string> = {
+  mhlw_177: "bg-amber-100 text-amber-900 border-amber-300",
+  jsoh: "bg-violet-100 text-violet-900 border-violet-300",
+  acgih: "bg-sky-100 text-sky-900 border-sky-300",
+  reference: "bg-slate-100 text-slate-700 border-slate-200",
+  none: "bg-slate-50 text-slate-400 border-slate-100",
+};
+
+function determineTier(entry: ConcentrationLimitEntry | undefined): DataTier {
+  if (!entry) return "none";
+  const isMhlw =
+    entry.twa?.source === "MHLW_177" ||
+    entry.stel?.source === "MHLW_177" ||
+    entry.ceiling?.source === "MHLW_177";
+  if (isMhlw) return "mhlw_177";
+  if (entry.jsoh) return "jsoh";
+  if (entry.acgih) return "acgih";
+  return "reference";
+}
 
 /** 管理濃度（作業環境評価基準告示）と濃度基準値は別物である旨の説明ラベル */
 export const MANAGEMENT_VS_LIMIT_DISCLAIMER =
@@ -326,14 +412,32 @@ export function relatedLawTexts(flags: MergedChemical["flags"]): string[] {
 function applyConcentrationOverrides(merged: MergedChemical[]): MergedChemical[] {
   for (const m of merged) {
     if (!m.cas) continue;
-    const override = CONCENTRATION_OVERRIDES_BY_CAS[m.cas];
-    if (!override) continue;
-    m.flags.concentration = true;
+    const entry = CONCENTRATION_LIMITS.substances[m.cas];
+    if (!entry) {
+      m.details = { ...(m.details ?? {}), tier: "none" };
+      continue;
+    }
+
+    const tier = determineTier(entry);
+
+    // tier が mhlw_177 の場合は flag を立て、limit8h/limitShort をテキストに反映
+    if (tier === "mhlw_177") m.flags.concentration = true;
+
+    const limit8h = formatLimitValue(entry.twa);
+    const limitShort = formatLimitValue(entry.stel) ?? formatLimitValue(entry.ceiling);
+
     m.details = {
       ...(m.details ?? {}),
-      limit8h: override.limit8h,
-      ...(override.limitShort ? { limitShort: override.limitShort } : {}),
+      ...(limit8h ? { limit8h } : {}),
+      ...(limitShort ? { limitShort } : {}),
+      limits: entry,
+      tier,
     };
+
+    // IARC 発がん性が記録されていれば flags.carcinogenic を立てる
+    if (entry.carcinogenicity?.iarc && /^(1|2A)$/.test(entry.carcinogenicity.iarc)) {
+      m.flags.carcinogenic = true;
+    }
   }
   return merged;
 }
