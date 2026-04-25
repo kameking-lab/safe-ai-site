@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check, Zap, Shield, Star, Briefcase } from "lucide-react";
+import { Check, Zap, Shield, Star, Briefcase, Building2 } from "lucide-react";
 import { PricingCheckout } from "./pricing-checkout";
 import { ogImageUrl } from "@/lib/og-url";
 
-const _title = "料金プラン｜無料・月額・受託までの4プラン";
+const _title = "料金プラン｜無料・月額・受託までの5プラン";
 const _desc =
-  "ANZEN AI の料金プラン。無料¥0／スタンダード¥980／プロ¥2,980／受託（個別見積）の4層。個人から事業所まで、段階的に導入できます。";
+  "ANZEN AI の料金プラン。無料¥0／スタンダード¥980／プロ¥2,980／ビジネス¥29,800／受託（個別見積）の5層。個人から500名規模まで、段階的に導入できます。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -97,6 +97,32 @@ const PLANS = [
     limitations: [],
   },
   {
+    id: "business",
+    name: "ビジネス",
+    price: 29800,
+    period: "月（税込）",
+    icon: Building2,
+    iconColor: "text-violet-600",
+    borderColor: "border-violet-400",
+    ctaLabel: "ビジネスを相談する",
+    ctaDisabled: false,
+    target: "中規模法人（50〜500名）",
+    features: [
+      "プロの全機能",
+      "利用アカウント：最大100名",
+      "多拠点サイネージ表示（無制限）",
+      "LMS βアクセス（先行招待）",
+      "法令通知の業種別カスタムルール",
+      "請求書払い・年契払い割引（−10%）",
+      "初期サポート（ハンズオン1回／導入時）",
+      "SSO（Google Workspace）対応",
+    ],
+    limitations: [
+      "SAML/OIDC SSO（受託扱いで別途）",
+      "オンプレ／専用環境（受託扱いで別途）",
+    ],
+  },
+  {
     id: "custom",
     name: "受託（カスタム）",
     price: null,
@@ -131,19 +157,20 @@ export default function PricingPage() {
         <p className="mt-3 text-slate-600 text-sm leading-7 max-w-2xl mx-auto">
           <strong>無料¥0</strong> から始めて、必要に応じて
           <strong> ¥980／¥2,980 </strong>
-          の月額プラン、または受託（個別見積）にステップアップできます。
+          の月額プラン、または <strong>ビジネス¥29,800（〜100名）</strong>・受託（個別見積）にステップアップできます。
           <br />
           最低契約期間なし・いつでもキャンセル可能。
         </p>
       </div>
 
       {/* Plans grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {PLANS.map((plan) => {
           const Icon = plan.icon;
           const isPopular = "popular" in plan && plan.popular;
           const isFree = plan.id === "free";
           const isCustom = plan.id === "custom";
+          const isBusiness = plan.id === "business";
 
           return (
             <div
@@ -215,6 +242,13 @@ export default function PricingPage() {
                   <Link
                     href="/contact?category=enterprise"
                     className="block w-full rounded-xl bg-blue-600 py-2.5 text-center text-sm font-bold text-white transition hover:bg-blue-700 active:scale-[0.98]"
+                  >
+                    {plan.ctaLabel}
+                  </Link>
+                ) : isBusiness ? (
+                  <Link
+                    href="/contact?category=business-plan"
+                    className="block w-full rounded-xl bg-violet-600 py-2.5 text-center text-sm font-bold text-white transition hover:bg-violet-700 active:scale-[0.98]"
                   >
                     {plan.ctaLabel}
                   </Link>
