@@ -25,6 +25,7 @@ export default function DiversityElderlyPage() {
     <ScaffoldPage
       backLabel="多様性と安全に戻る"
       backHref="/diversity"
+      canonicalPath="/diversity/elderly"
       eyebrow="多様性 / 高齢労働者"
       title={TITLE}
       lead={DESCRIPTION}

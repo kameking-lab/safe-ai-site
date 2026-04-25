@@ -25,6 +25,7 @@ export default function DiversitySogiPage() {
     <ScaffoldPage
       backLabel="多様性と安全に戻る"
       backHref="/diversity"
+      canonicalPath="/diversity/sogi"
       eyebrow="多様性 / SOGI"
       title={TITLE}
       lead={DESCRIPTION}

@@ -25,6 +25,7 @@ export default function DiversityDisabilityPage() {
     <ScaffoldPage
       backLabel="多様性と安全に戻る"
       backHref="/diversity"
+      canonicalPath="/diversity/disability"
       eyebrow="多様性 / 障害者雇用"
       title={TITLE}
       lead={DESCRIPTION}

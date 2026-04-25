@@ -25,6 +25,7 @@ export default function DiversityRemotePage() {
     <ScaffoldPage
       backLabel="多様性と安全に戻る"
       backHref="/diversity"
+      canonicalPath="/diversity/remote"
       eyebrow="多様性 / 在宅勤務・テレワーク"
       title={TITLE}
       lead={DESCRIPTION}

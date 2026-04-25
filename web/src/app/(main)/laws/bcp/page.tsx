@@ -25,6 +25,7 @@ export default function LawsBcpPage() {
     <ScaffoldPage
       backLabel="法改正一覧に戻る"
       backHref="/laws"
+      canonicalPath="/laws/bcp"
       eyebrow="法改正 / BCP義務化"
       title={TITLE}
       lead={DESCRIPTION}

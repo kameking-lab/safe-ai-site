@@ -25,6 +25,7 @@ export default function LawsFreelanceRosaiPage() {
     <ScaffoldPage
       backLabel="法改正一覧に戻る"
       backHref="/laws"
+      canonicalPath="/laws/freelance-rosai"
       eyebrow="法改正 / 特別加入"
       title={TITLE}
       lead={DESCRIPTION}

@@ -25,6 +25,7 @@ export default function LawsGigWorkPage() {
     <ScaffoldPage
       backLabel="法改正一覧に戻る"
       backHref="/laws"
+      canonicalPath="/laws/gig-work"
       eyebrow="法改正 / スポットワーク"
       title={TITLE}
       lead={DESCRIPTION}

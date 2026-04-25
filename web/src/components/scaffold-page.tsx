@@ -9,10 +9,14 @@ export type ScaffoldLink = {
   description?: string;
 };
 
+const SITE_ORIGIN = "https://anzen-ai.com";
+
 export type ScaffoldPageProps = {
   /** Breadcrumb back-link label */
   backLabel: string;
   backHref: string;
+  /** Canonical path for this page (e.g. "/laws/bcp"). Enables BreadcrumbList JSON-LD. */
+  canonicalPath?: string;
   /** Small uppercase eyebrow above the H1 */
   eyebrow: string;
   title: string;
@@ -41,6 +45,7 @@ export type ScaffoldPageProps = {
 export function ScaffoldPage({
   backLabel,
   backHref,
+  canonicalPath,
   eyebrow,
   title,
   lead,
@@ -50,8 +55,27 @@ export function ScaffoldPage({
   officialRefs = [],
   cta,
 }: ScaffoldPageProps) {
+  const sectionName = backLabel.replace(/に戻る$/, "");
+  const breadcrumbLd = canonicalPath
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "ANZEN AI", item: `${SITE_ORIGIN}/` },
+          { "@type": "ListItem", position: 2, name: sectionName, item: `${SITE_ORIGIN}${backHref}` },
+          { "@type": "ListItem", position: 3, name: title, item: `${SITE_ORIGIN}${canonicalPath}` },
+        ],
+      }
+    : null;
+
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
+      {breadcrumbLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
+        />
+      )}
       <div className="mb-4">
         <Link
           href={backHref}

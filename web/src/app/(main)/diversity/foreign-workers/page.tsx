@@ -25,6 +25,7 @@ export default function DiversityForeignWorkersPage() {
     <ScaffoldPage
       backLabel="多様性と安全に戻る"
       backHref="/diversity"
+      canonicalPath="/diversity/foreign-workers"
       eyebrow="多様性 / 外国人労働者"
       title={TITLE}
       lead={DESCRIPTION}
