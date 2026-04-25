@@ -125,7 +125,7 @@ export function HomeValueHero() {
             {/* 3つのメインCTA */}
             <div className="mt-6 grid gap-2 sm:grid-cols-3">
               <Link
-                href="/risk-prediction"
+                href="/pricing#free"
                 className="rounded-lg bg-white px-5 py-3 text-center text-sm font-bold text-[#1a7a4c] hover:bg-emerald-50 transition-colors shadow"
               >
                 無料で使ってみる →
@@ -143,8 +143,23 @@ export function HomeValueHero() {
                 料金プランを見る →
               </Link>
             </div>
+            {/* 無料登録3ステップ — 初訪問者の登録迷子を防ぐ */}
+            <ol className="mt-4 grid gap-2 text-[11px] leading-5 text-green-50 sm:grid-cols-3">
+              <li className="rounded-md border border-white/20 bg-white/10 px-3 py-2">
+                <span className="font-bold text-white">① クレカ登録不要</span>
+                <span className="ml-1 text-green-100/90">— 課金は明示同意した時のみ</span>
+              </li>
+              <li className="rounded-md border border-white/20 bg-white/10 px-3 py-2">
+                <span className="font-bold text-white">② Googleで30秒登録</span>
+                <span className="ml-1 text-green-100/90">— メール認証も可</span>
+              </li>
+              <li className="rounded-md border border-white/20 bg-white/10 px-3 py-2">
+                <span className="font-bold text-white">③ 全機能の制限版を試せる</span>
+                <span className="ml-1 text-green-100/90">— KY/事故DB/法令検索/AI要約</span>
+              </li>
+            </ol>
             <p className="mt-3 text-[11px] text-green-100">
-              ※ 無料プランはクレカ登録不要。24時間以内にお問い合わせへ返信します（土日祝除く）。
+              ※ 24時間以内にお問い合わせへ返信します（土日祝除く）。
             </p>
           </div>
           {/* マスコット */}
