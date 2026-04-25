@@ -21,6 +21,10 @@ export const SITE_STATS = {
   accidentDbCount: "504,415",
   /** 厚労省 死亡災害データベース収録件数（2019〜2023・5年分） */
   mhlwDeathsCount: "4,043",
+  /** data/accidents-10years.jsonl 統合件数（2015〜2024・死亡災害DB＋curated事例） */
+  accidents10yCount: "4,257",
+  /** data/law-updates-10years.jsonl 統合件数（2015〜2024・労働安全衛生関連法令改正） */
+  lawUpdates10yCount: "65",
   /** 死亡労災件数（令和5年・建設業）厚労省統計 */
   fatalDisastersR5: "1,389",
   /** サイト独自に curated した詳細事故事例の件数（real-accident-cases* 全合算） */
@@ -54,6 +58,16 @@ export const SITE_STATS_META: Record<
     source: "厚労省 死亡災害データベース（2019〜2023・5年分）",
     sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen_pg/SHISHO_FND.aspx",
     asOf: "2026-01",
+  },
+  accidents10yCount: {
+    source: "ANZEN AI ETL: data/accidents-10years.jsonl（厚労省死亡災害DB＋curated事例の10年統合）",
+    sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen_pg/SHISHO_FND.aspx",
+    asOf: "2026-04",
+  },
+  lawUpdates10yCount: {
+    source: "ANZEN AI ETL: data/law-updates-10years.jsonl（e-Gov・厚労省通達の10年統合）",
+    sourceUrl: "https://laws.e-gov.go.jp/",
+    asOf: "2026-04",
   },
   fatalDisastersR5: {
     source: "厚労省『令和5年労働災害発生状況』建設業計",
