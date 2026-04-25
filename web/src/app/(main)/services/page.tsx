@@ -11,6 +11,7 @@ import {
   Mail,
   Zap,
   CheckCircle2,
+  Truck,
 } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, serviceSchema } from "@/components/json-ld";
@@ -124,6 +125,21 @@ const SERVICES = [
     ],
     price: "¥150,000〜",
     accent: "amber",
+  },
+  {
+    id: "truck-2024",
+    icon: Truck,
+    title: "運送業 2024年問題対応",
+    tag: "改善基準告示・拘束時間",
+    desc: "2024年4月施行の改善基準告示（拘束時間・休息時間）への対応を、運行管理デジタル化と教育コンテンツでサポート。",
+    bullets: [
+      "運行前点呼・点検記録の電子化（タブレット入力）",
+      "拘束時間・休息時間の自動チェックとアラート",
+      "ドライバー向け教育（過労運転・カスハラ・健康管理）",
+      "運行管理者向け改善基準告示研修",
+    ],
+    price: "¥300,000〜",
+    accent: "sky",
   },
   {
     id: "claude-code",
@@ -271,7 +287,7 @@ export default function ServicesPage() {
       {/* サービス一覧 */}
       <section id="services" className="mb-10">
         <h2 className="mb-4 text-lg font-bold text-slate-900">
-          受託メニュー（全7種）
+          受託メニュー（全8種）
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
           {SERVICES.map((s) => {
