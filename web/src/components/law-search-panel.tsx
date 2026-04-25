@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { allLawArticles, type LawArticle } from "@/data/laws";
+import { SITE_STATS } from "@/data/site-stats";
 import { InputWithVoice } from "@/components/voice-input-field";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
 import { SimpleMarkdown } from "@/components/simple-markdown";
@@ -233,7 +234,7 @@ export function LawSearchPanel() {
       <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 w-fit">
         {(
           [
-            { id: "curated", label: `キュレーション（${allLawArticles.length.toLocaleString()}条文）` },
+            { id: "curated", label: `キュレーション（${SITE_STATS.lawArticleCount}条文）` },
             { id: "mhlw", label: "MHLW公式法令PDF" },
           ] as const
         ).map((tab) => (
@@ -304,7 +305,7 @@ export function LawSearchPanel() {
       </div>
 
       <p className="text-xs text-slate-500">
-        {filtered.length}件の条文が見つかりました（全{allLawArticles.length}件）
+        {filtered.length}件の条文が見つかりました（全{SITE_STATS.lawArticleCount}件）
       </p>
 
       <div className="space-y-4">
