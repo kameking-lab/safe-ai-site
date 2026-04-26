@@ -32,6 +32,7 @@ import {
   Briefcase,
   Handshake,
   ListChecks,
+  Building2,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { UserMenu } from "@/components/user-menu";
@@ -119,6 +120,7 @@ const NAV_CATEGORIES: NavCategory[] = [
       { id: "education", label: "特別教育", href: "/education", icon: GraduationCap },
       { id: "consulting", label: "月額顧問", href: "/consulting", icon: Handshake },
       { id: "wizard", label: "コンプラ診断", href: "/wizard", icon: ListChecks, badge: "NEW" },
+      { id: "cases", label: "導入事例", href: "/cases", icon: Building2 },
     ],
   },
   {
