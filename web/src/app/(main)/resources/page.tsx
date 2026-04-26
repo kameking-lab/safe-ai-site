@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Library } from "lucide-react";
 import { ResourcesClient } from "@/components/resources-client";
+import { LegalDocBadgeLegend } from "@/components/LegalDocBadge";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { mhlwLeaflets } from "@/data/mhlw-leaflets";
 
@@ -62,6 +63,7 @@ export default function ResourcesPage() {
           ⚠️ 本ページの全エントリは一次ソース（厚労省／安全衛生情報センター）からの自動収集です。
           実務適用前に必ず原文を確認してください。
         </div>
+        <LegalDocBadgeLegend />
       </header>
 
       <ResourcesClient notices={mhlwNotices} leaflets={mhlwLeaflets} />

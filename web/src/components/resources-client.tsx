@@ -14,6 +14,12 @@ import {
 } from "lucide-react";
 import type { MhlwNotice } from "@/data/mhlw-notices";
 import type { MhlwLeaflet } from "@/data/mhlw-leaflets";
+import {
+  BindingBadge,
+  FreshnessBadge,
+  RevisionBadge,
+  freshnessFromDate,
+} from "@/components/LegalDocBadge";
 
 type Tab = "通達" | "告示" | "指針" | "リーフレット";
 
@@ -79,20 +85,6 @@ const TARGET_LABELS: Record<string, string> = {
   medical: "医療従事者向け",
 };
 
-const BINDING_LABELS: Record<string, { label: string; cls: string }> = {
-  binding: {
-    label: "拘束力あり（告示）",
-    cls: "bg-amber-100 text-amber-900 border-amber-300",
-  },
-  indirect: {
-    label: "間接拘束（通達・行政解釈）",
-    cls: "bg-blue-100 text-blue-900 border-blue-300",
-  },
-  reference: {
-    label: "参考（指針・ガイドライン）",
-    cls: "bg-emerald-100 text-emerald-900 border-emerald-300",
-  },
-};
 
 function normalize(v: string) {
   return v.toLowerCase().replace(/\s+/g, "");
@@ -343,7 +335,6 @@ function NoticeList({ items }: { items: MhlwNotice[] }) {
   return (
     <ul className="space-y-2">
       {items.slice(0, 200).map((n) => {
-        const binding = BINDING_LABELS[n.bindingLevel];
         const cat = NOTICE_CATEGORY_LABELS[n.category] || n.category;
         return (
           <li
@@ -359,11 +350,9 @@ function NoticeList({ items }: { items: MhlwNotice[] }) {
               {n.issuedDateRaw && (
                 <span className="text-xs text-slate-500">{n.issuedDateRaw}</span>
               )}
-              <span
-                className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${binding.cls}`}
-              >
-                {binding.label}
-              </span>
+              <BindingBadge level={n.bindingLevel} />
+              <FreshnessBadge level={freshnessFromDate(n.issuedDate)} />
+              <RevisionBadge status="current" />
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
                 {cat}
               </span>
