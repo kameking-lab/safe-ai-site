@@ -4,6 +4,26 @@
 import type Stripe from "stripe";
 import type { PrismaClient } from "@prisma/client";
 
+// 最大3回、指数バックオフでリトライ（DBの一時障害に対応）
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  attempts = 3,
+  baseDelayMs = 200,
+): Promise<T> {
+  let lastErr: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      if (i < attempts - 1) {
+        await new Promise((r) => setTimeout(r, baseDelayMs * 2 ** i));
+      }
+    }
+  }
+  throw lastErr;
+}
+
 function priceToPlanName(priceId: string | null | undefined): string {
   if (!priceId) return "free";
   if (priceId === process.env.NEXT_PUBLIC_STRIPE_PRICE_PRO) return "pro";
@@ -56,26 +76,28 @@ export async function handleCheckoutCompleted(
 
   const planName = priceToPlanName(priceId);
 
-  await prisma.subscription.upsert({
-    where: { userId },
-    create: {
-      userId,
-      stripeCustomerId: customerId ?? null,
-      stripeSubscriptionId: subscriptionId ?? null,
-      stripePriceId: priceId,
-      planName,
-      status: "active",
-      currentPeriodEnd,
-    },
-    update: {
-      stripeCustomerId: customerId ?? undefined,
-      stripeSubscriptionId: subscriptionId ?? undefined,
-      stripePriceId: priceId ?? undefined,
-      planName,
-      status: "active",
-      currentPeriodEnd: currentPeriodEnd ?? undefined,
-    },
-  });
+  await withRetry(() =>
+    prisma.subscription.upsert({
+      where: { userId },
+      create: {
+        userId,
+        stripeCustomerId: customerId ?? null,
+        stripeSubscriptionId: subscriptionId ?? null,
+        stripePriceId: priceId,
+        planName,
+        status: "active",
+        currentPeriodEnd,
+      },
+      update: {
+        stripeCustomerId: customerId ?? undefined,
+        stripeSubscriptionId: subscriptionId ?? undefined,
+        stripePriceId: priceId ?? undefined,
+        planName,
+        status: "active",
+        currentPeriodEnd: currentPeriodEnd ?? undefined,
+      },
+    }),
+  );
 }
 
 export async function handleSubscriptionUpdated(
@@ -86,28 +108,59 @@ export async function handleSubscriptionUpdated(
   const planName = priceToPlanName(priceId);
   const currentPeriodEnd = periodEnd(sub);
 
-  await prisma.subscription.updateMany({
-    where: { stripeSubscriptionId: sub.id },
-    data: {
-      stripePriceId: priceId,
-      planName,
-      status: sub.status,
-      currentPeriodEnd: currentPeriodEnd ?? undefined,
-    },
-  });
+  const result = await withRetry(() =>
+    prisma.subscription.updateMany({
+      where: { stripeSubscriptionId: sub.id },
+      data: {
+        stripePriceId: priceId,
+        planName,
+        status: sub.status,
+        currentPeriodEnd: currentPeriodEnd ?? undefined,
+      },
+    }),
+  );
+
+  // 自己修復: subscriptionIdで見つからない場合、customerId経由で紐付けを修正
+  if (result.count === 0) {
+    const customerId =
+      typeof sub.customer === "string" ? sub.customer : (sub.customer as { id: string } | null)?.id ?? null;
+    if (!customerId) {
+      console.warn("[stripe/webhook] subscription not found, no customerId to recover", sub.id);
+      return;
+    }
+    const recovered = await withRetry(() =>
+      prisma.subscription.updateMany({
+        where: { stripeCustomerId: customerId },
+        data: {
+          stripeSubscriptionId: sub.id,
+          stripePriceId: priceId,
+          planName,
+          status: sub.status,
+          currentPeriodEnd: currentPeriodEnd ?? undefined,
+        },
+      }),
+    );
+    if (recovered.count === 0) {
+      console.warn("[stripe/webhook] self-heal failed: no record for customer", customerId, sub.id);
+    } else {
+      console.info("[stripe/webhook] self-healed subscription", sub.id, "via customer", customerId);
+    }
+  }
 }
 
 export async function handleSubscriptionDeleted(
   prisma: PrismaClient,
   sub: Stripe.Subscription,
 ): Promise<void> {
-  await prisma.subscription.updateMany({
-    where: { stripeSubscriptionId: sub.id },
-    data: {
-      planName: "free",
-      status: "canceled",
-    },
-  });
+  await withRetry(() =>
+    prisma.subscription.updateMany({
+      where: { stripeSubscriptionId: sub.id },
+      data: {
+        planName: "free",
+        status: "canceled",
+      },
+    }),
+  );
 }
 
 export async function handleInvoicePaymentFailed(
@@ -119,8 +172,28 @@ export async function handleInvoicePaymentFailed(
   const stripeSubscriptionId = typeof subId === "string" ? subId : subId?.id;
   if (!stripeSubscriptionId) return;
 
-  await prisma.subscription.updateMany({
-    where: { stripeSubscriptionId },
-    data: { status: "past_due" },
-  });
+  await withRetry(() =>
+    prisma.subscription.updateMany({
+      where: { stripeSubscriptionId },
+      data: { status: "past_due" },
+    }),
+  );
+}
+
+// 支払い回復時にactive状態へ復元（past_due → active の自己修復）
+export async function handleInvoicePaymentSucceeded(
+  prisma: PrismaClient,
+  invoice: Stripe.Invoice,
+): Promise<void> {
+  const subId =
+    (invoice as unknown as { subscription?: string | { id: string } | null }).subscription;
+  const stripeSubscriptionId = typeof subId === "string" ? subId : subId?.id;
+  if (!stripeSubscriptionId) return;
+
+  await withRetry(() =>
+    prisma.subscription.updateMany({
+      where: { stripeSubscriptionId },
+      data: { status: "active" },
+    }),
+  );
 }
