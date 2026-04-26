@@ -28,6 +28,7 @@ const MhlwDeathsPanel = dynamic(
 );
 import { ELearningPanel } from "@/components/elearning-panel";
 import { HomeValueHero } from "@/components/home-value-hero";
+import { PersonaEntry } from "@/components/persona-entry";
 import { KyRecordList } from "@/components/ky-record-list";
 import { KySheetPanel } from "@/components/ky-sheet-panel";
 import { KyInstructionRecordForm } from "@/components/ky-instruction-record-form";
@@ -487,8 +488,11 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
           <section id="section-home" className="px-4 pt-4 lg:px-8">
             {children}
           </section>
-          <section id="section-home-hero" className="px-4 pt-4 pb-6 lg:px-8">
+          <section id="section-home-hero" className="px-4 pt-4 lg:px-8">
             <HomeValueHero />
+          </section>
+          <section id="section-persona-entry" className="px-4 pt-4 pb-6 lg:px-8">
+            <PersonaEntry />
           </section>
         </>
       ) : null}
