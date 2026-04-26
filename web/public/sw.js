@@ -1,15 +1,34 @@
 // ANZEN AI Service Worker
 // Cache-first: static assets / Network-first: API calls
+// v2: モバイル LCP 改善のため主要ページをプリキャッシュ
 
-const CACHE_NAME = "anzen-ai-v1";
+const CACHE_NAME = "anzen-ai-v2";
 const OFFLINE_URL = "/offline.html";
+
+// 山田職長レベルのモバイルでも初回以降サクサク動くよう、
+// ボトムナビからの 5 ページ + ホーム関連を先読みキャッシュ。
+const PRECACHE_URLS = [
+  OFFLINE_URL,
+  "/",
+  "/ky",
+  "/law-search",
+  "/chatbot",
+  "/account",
+  "/manifest.json",
+];
 
 // ----- Install -----
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      // offlineページだけは必ずキャッシュ
-      return cache.addAll([OFFLINE_URL]);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      // 個別に addAll せず Promise.allSettled で 1 件失敗しても継続
+      await Promise.allSettled(
+        PRECACHE_URLS.map((url) =>
+          fetch(url, { credentials: "same-origin" })
+            .then((res) => (res.ok ? cache.put(url, res.clone()) : undefined))
+            .catch(() => undefined)
+        )
+      );
     })
   );
   // 新しいSWを即座にアクティブにする

@@ -56,6 +56,73 @@ body {
   }
 }
 
+/**
+ * 375px 徹底最適化（山田職長：iPhone SE 想定）
+ * - 「重い・密・使えない」の解消が目的
+ * - 本文は最低 16px（縮小しない）／行間 1.7／段落の余白を確保
+ * - 入力欄も 16px 以上で iOS 自動ズーム回避
+ * - スクロール時のオーバースクロール抑制で視覚ノイズを減らす
+ */
+@media (max-width: 480px) {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    font-size: 16px;
+    line-height: 1.7;
+    /* ボトムナビ高さ + iOS safe-area の余白を本文側で確保 */
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+  }
+  p,
+  li {
+    line-height: 1.7;
+  }
+  h1 {
+    font-size: 1.375rem; /* 22px */
+    line-height: 1.4;
+  }
+  h2 {
+    font-size: 1.1875rem; /* 19px */
+    line-height: 1.45;
+  }
+  h3 {
+    font-size: 1.0625rem; /* 17px */
+    line-height: 1.5;
+  }
+  /* iOS Safari での自動ズーム回避（input/textarea/select は 16px 以上必須） */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+  /* 横スクロール抑止（密集を防ぐ） */
+  html,
+  body {
+    overflow-x: hidden;
+  }
+}
+
+/**
+ * MobileBottomNav: 480px 以下で表示。
+ * デフォルトは hidden、対象ビューポートでのみ flex 表示にする。
+ * 印刷時は確実に非表示。
+ */
+.mobile-bottom-nav {
+  display: none;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (max-width: 480px) {
+  .mobile-bottom-nav {
+    display: block;
+  }
+}
+@media print {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+}
+
 /* 文字大モード */
 html.large-font {
   font-size: 18px;

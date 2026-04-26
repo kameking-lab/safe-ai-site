@@ -1,6 +1,7 @@
 import { AppShell } from "@/components/app-shell";
 import { auth } from "@/auth";
 import { FirstVisitOnboarding } from "@/components/first-visit-onboarding";
+import { MobileBottomNav } from "@/components/MobileBottomNav";
 
 export default async function MainLayout({ children }: { children: React.ReactNode }) {
   let user: { name?: string | null; email?: string | null; image?: string | null } | null = null;
@@ -14,6 +15,7 @@ export default async function MainLayout({ children }: { children: React.ReactNo
     <AppShell user={user}>
       <FirstVisitOnboarding />
       {children}
+      <MobileBottomNav />
     </AppShell>
   );
 }
