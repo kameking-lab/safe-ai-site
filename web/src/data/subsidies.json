@@ -1,0 +1,227 @@
+{
+  "meta": {
+    "version": "2026-04",
+    "sourceNote": "各省庁公式ページより収集。金額・条件は改正により変更される場合があります。申請前に必ず最新の公募要領をご確認ください。",
+    "lastVerified": "2026-04"
+  },
+  "subsidies": [
+    {
+      "id": "gyomu-kaizen",
+      "name": "業務改善助成金",
+      "operator": "厚生労働省",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/zigyonushi/shienjigyou/02.html",
+      "sourceNote": "厚労省「業務改善助成金」公式ページ（2026年4月確認）",
+      "eligibility": {
+        "maxEmployees": 300,
+        "minEmployees": null,
+        "industries": ["any"],
+        "conditions": [
+          "中小企業事業主であること",
+          "事業場内最低賃金と地域別最低賃金の差額が50円以内であること",
+          "最低賃金を30円以上引き上げること"
+        ]
+      },
+      "measures": ["equipment"],
+      "subsidyRates": [
+        { "maxEmployees": 30, "rate": 0.9 },
+        { "maxEmployees": 100, "rate": 0.8 },
+        { "maxEmployees": 300, "rate": 0.75 }
+      ],
+      "defaultRate": 0.9,
+      "maxAmount": 6000000,
+      "rateNote": "30人以下: 補助率9/10 / 31〜100人: 4/5 / 101〜300人: 3/4。賃金引上げコースにより上限30万〜600万円",
+      "deadline": "毎年度末（直近の申請締切は厚労省公式ページで確認）",
+      "requiredDocs": [
+        "業務改善助成金支給申請書",
+        "事業場内最低賃金の引上げに係る就業規則等の写し",
+        "設備投資等の見積書・領収書",
+        "賃金台帳の写し（引上げ前後）",
+        "登記事項証明書または確定申告書の写し"
+      ],
+      "applicationNote": "生産性向上のための設備・器具・備品等の購入と賃金引上げがセット要件。単純な賃上げのみでは申請不可。"
+    },
+    {
+      "id": "jinzai-kaihatsu",
+      "name": "人材開発支援助成金",
+      "operator": "厚生労働省（都道府県労働局）",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyufukin/d01-1.html",
+      "sourceNote": "厚労省「人材開発支援助成金」公式ページ（2026年4月確認）",
+      "eligibility": {
+        "maxEmployees": null,
+        "minEmployees": null,
+        "industries": ["any"],
+        "conditions": [
+          "雇用保険適用事業主であること",
+          "訓練受講者が雇用保険被保険者であること"
+        ]
+      },
+      "measures": ["education"],
+      "subsidyRates": [
+        { "maxEmployees": 300, "rate": 0.6 },
+        { "maxEmployees": null, "rate": 0.45 }
+      ],
+      "defaultRate": 0.6,
+      "maxAmount": 1500000,
+      "rateNote": "中小企業（300人以下）: 訓練費用の60%（Off-JT）。大企業: 45%。賃金助成（480〜960円/時間）も別途支給",
+      "deadline": "訓練開始1か月前までに訓練計画届の提出が必要（随時申請）",
+      "requiredDocs": [
+        "訓練計画届（事前届出・訓練開始1か月前まで）",
+        "人材開発支援助成金支給申請書",
+        "訓練実施に要した経費の領収書",
+        "訓練実施機関の訓練実施証明書",
+        "出勤簿・賃金台帳の写し"
+      ],
+      "applicationNote": "特別教育（フォークリフト・高所作業車・玉掛け等）・職長教育・技能講習費用に活用可。事前に訓練計画届が必須。"
+    },
+    {
+      "id": "age-friendly",
+      "name": "中小企業エイジフレンドリー補助金",
+      "operator": "厚生労働省（独立行政法人労働者健康安全機構）",
+      "url": "https://www.mhlw.go.jp/stf/newpage_42107.html",
+      "sourceNote": "厚労省「中小企業エイジフレンドリー補助金」公式ページ（2026年4月確認）",
+      "eligibility": {
+        "maxEmployees": 300,
+        "minEmployees": null,
+        "industries": ["any"],
+        "conditions": [
+          "中小企業事業主（資本金3億円以下または従業員300人以下）",
+          "60歳以上の労働者を1人以上雇用していること"
+        ]
+      },
+      "measures": ["equipment"],
+      "subsidyRates": null,
+      "defaultRate": 0.5,
+      "maxAmount": 1000000,
+      "rateNote": "補助率1/2（コラボヘルスコースは2/3）。上限100万円",
+      "deadline": "毎年度公募（予算到達次第受付終了）",
+      "requiredDocs": [
+        "補助金交付申請書",
+        "事業計画書",
+        "見積書（2社以上）",
+        "60歳以上労働者の雇用を確認できる書類（雇用保険被保険者名簿等）",
+        "完了実績報告書（事業完了後）"
+      ],
+      "applicationNote": "転倒防止設備・段差解消・照明改善・重量物搬送の機械化など高齢労働者の安全対策設備が対象。"
+    },
+    {
+      "id": "shokuba-ishiki",
+      "name": "職場意識改善助成金（勤務間インターバル導入コース）",
+      "operator": "厚生労働省（都道府県労働局）",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/jikan/syokuba_kaizen.html",
+      "sourceNote": "厚労省「職場意識改善助成金」公式ページ（2026年4月確認）",
+      "eligibility": {
+        "maxEmployees": 300,
+        "minEmployees": null,
+        "industries": ["any"],
+        "conditions": [
+          "中小企業事業主（業種ごとの資本金・従業員数上限内）",
+          "勤務間インターバルを新規導入または拡充すること"
+        ]
+      },
+      "measures": ["work-reform"],
+      "subsidyRates": null,
+      "defaultRate": 0.8,
+      "maxAmount": 1000000,
+      "rateNote": "成果目標達成時: 補助率4/5。未達成時: 1/2。上限100万円（1事業所）",
+      "deadline": "年度内（詳細は厚労省公式ページで最新公募要領を確認）",
+      "requiredDocs": [
+        "交付申請書",
+        "事業実施計画書",
+        "労働時間等設定改善実施計画書",
+        "就業規則等の写し（勤務間インターバル規定を含む）",
+        "賃金台帳・出勤簿の写し"
+      ],
+      "applicationNote": "勤務間インターバル9時間以上の導入・拡充が必須要件。勤怠管理システム・労務管理ソフト導入費も対象。"
+    },
+    {
+      "id": "judoku-kitsuenboushi",
+      "name": "受動喫煙防止対策助成金",
+      "operator": "厚生労働省",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000049868.html",
+      "sourceNote": "厚労省「受動喫煙防止対策助成金」公式ページ（2026年4月確認）",
+      "eligibility": {
+        "maxEmployees": 300,
+        "minEmployees": null,
+        "industries": ["any"],
+        "conditions": [
+          "中小企業事業主（資本金3億円以下または従業員300人以下）",
+          "労働者を1人以上雇用していること"
+        ]
+      },
+      "measures": ["equipment", "smoking"],
+      "subsidyRates": null,
+      "defaultRate": 0.667,
+      "maxAmount": 2000000,
+      "rateNote": "補助率2/3。上限200万円。屋外喫煙所設置の場合は補助率1/2",
+      "deadline": "随時申請（予算が尽き次第終了）",
+      "requiredDocs": [
+        "受動喫煙防止対策助成金支給申請書",
+        "喫煙室等の設置・改修工事の設計図・施工写真",
+        "見積書・領収書",
+        "事業場の平面図",
+        "労働保険概算・確定保険料申告書の写し"
+      ],
+      "applicationNote": "喫煙専用室・指定たばこ専用喫煙室・屋外喫煙所の新設または改修が対象。換気設備等の付帯工事も含む。"
+    },
+    {
+      "id": "hatarakikata-kaikaku",
+      "name": "働き方改革推進支援助成金",
+      "operator": "厚生労働省（都道府県労働局）",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000148322_00001.html",
+      "sourceNote": "厚労省「働き方改革推進支援助成金」公式ページ（2026年4月確認）",
+      "eligibility": {
+        "maxEmployees": 300,
+        "minEmployees": null,
+        "industries": ["any"],
+        "conditions": [
+          "中小企業事業主（業種ごとの資本金・従業員数の上限内）",
+          "労働時間等の課題を抱えていること"
+        ]
+      },
+      "measures": ["work-reform", "equipment"],
+      "subsidyRates": null,
+      "defaultRate": 0.8,
+      "maxAmount": 2500000,
+      "rateNote": "補助率4/5（達成目標により変動）。労働時間短縮・年休促進コースは上限250万円〜730万円",
+      "deadline": "毎年度公募（年度内に申請計画提出が必要）",
+      "requiredDocs": [
+        "交付申請書",
+        "事業実施計画書",
+        "労働時間等の現状および改善目標を記載した書類",
+        "就業規則等の写し",
+        "賃金台帳・出勤簿の写し"
+      ],
+      "applicationNote": "勤怠管理システム・労務管理ソフト・業務効率化機器の導入費、外部専門家による指導費が対象。"
+    },
+    {
+      "id": "sangyo-hoken",
+      "name": "小規模事業場産業医活動助成金",
+      "operator": "独立行政法人労働者健康安全機構（JOHAS）",
+      "url": "https://www.johas.go.jp/sangyohoken/jigyoshaheno/tabid/1005/Default.aspx",
+      "sourceNote": "労働者健康安全機構「産業保健活動総合支援事業」公式ページ（2026年4月確認）",
+      "eligibility": {
+        "maxEmployees": 49,
+        "minEmployees": null,
+        "industries": ["any"],
+        "conditions": [
+          "常時使用する労働者数が50人未満の事業場",
+          "産業医または産業保健師と委嘱契約を締結すること"
+        ]
+      },
+      "measures": ["health"],
+      "subsidyRates": null,
+      "defaultRate": 1.0,
+      "maxAmount": 500000,
+      "rateNote": "産業医コース: 年間上限50万円（実費補填）。保健師コース: 年間上限45万円",
+      "deadline": "随時申請（年度内・予算の範囲内）",
+      "requiredDocs": [
+        "助成金支給申請書",
+        "産業医または保健師との委嘱契約書の写し",
+        "産業医・保健師の資格証明書の写し",
+        "請求書・領収書",
+        "活動記録（職場巡視記録等）"
+      ],
+      "applicationNote": "50人未満の小規模事業場向け。産業医・保健師による職場巡視・健康相談・保健指導・健康教育などの活動費を補助。"
+    }
+  ]
+}
