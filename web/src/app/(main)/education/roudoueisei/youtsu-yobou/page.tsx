@@ -4,6 +4,7 @@ import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, GraduationCa
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
+import { TranslatedPageHeader } from "@/components/translated-page-header";
 
 const TITLE = "腰痛予防労働衛生教育｜ANZEN AI";
 const DESCRIPTION =
@@ -177,10 +178,14 @@ export default function YoutsuyobouPage() {
             2時間以上
           </span>
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">腰痛予防労働衛生教育</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
-          重量物取扱い作業や介護作業、VDT作業に従事する労働者を対象に、厚生労働省の腰痛予防対策指針に基づく労働衛生教育を実施します。
-        </p>
+        <TranslatedPageHeader
+          titleJa="腰痛予防労働衛生教育"
+          titleEn="Low Back Pain Prevention Training"
+          descriptionJa="重量物取扱い作業や介護作業、VDT作業に従事する労働者を対象に、厚生労働省の腰痛予防対策指針（職場における腰痛予防対策指針）に基づく労働衛生教育を実施します。"
+          descriptionEn="Occupational health education for workers in heavy lifting, care work, and VDT operations — based on the MHLW Low Back Pain Prevention Guideline (職場における腰痛予防対策指針, Notice No. 基発0618第1号)."
+          iconName="GraduationCap"
+          iconColor="emerald"
+        />
       </header>
 
       {/* 法的根拠 */}

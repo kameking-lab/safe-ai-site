@@ -1,6 +1,11 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import en from "@/data/translations/en.json";
+import ja from "@/data/translations/ja.json";
+
+type TranslationDict = typeof en;
+type TranslationKey = keyof TranslationDict;
 
 export type Language = "ja" | "en" | "vi" | "zh" | "pt" | "tl";
 
@@ -147,4 +152,13 @@ function LanguageToast({ message, onDismiss }: { message: string; onDismiss: () 
 
 export function useLanguage() {
   return useContext(LanguageContext);
+}
+
+export function useTranslation() {
+  const { language } = useLanguage();
+  const dict: TranslationDict = language === "en" ? en : (ja as TranslationDict);
+  return {
+    t: (key: TranslationKey): string => dict[key] ?? key,
+    language,
+  };
 }

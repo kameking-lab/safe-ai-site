@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ChemicalRaPanel } from "@/components/chemical-ra-panel";
+import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { ogImageUrl } from "@/lib/og-url";
 
 const _title = "化学物質 リスクアセスメント ツール";
@@ -23,8 +24,20 @@ export const metadata: Metadata = {
 
 export default function ChemicalRaPage() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-500">読み込み中…</div>}>
-      <ChemicalRaPanel />
-    </Suspense>
+    <>
+      <div className="mx-auto max-w-7xl px-4 pt-6">
+        <TranslatedPageHeader
+          titleJa="化学物質リスクアセスメント"
+          titleEn="Chemical Substance Risk Assessment"
+          descriptionJa="化学物質名を入力してSDS・GHS分類・保護具・安全対策を確認。安衛法令和4年改正（自律管理）対応"
+          descriptionEn="Enter a substance name to view SDS, GHS classification, required PPE, and safety checklists. Compliant with the 2024 OSH Act chemical management reforms (安衛法令和4年改正)"
+          iconName="Search"
+          iconColor="blue"
+        />
+      </div>
+      <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-500">読み込み中…</div>}>
+        <ChemicalRaPanel />
+      </Suspense>
+    </>
   );
 }
