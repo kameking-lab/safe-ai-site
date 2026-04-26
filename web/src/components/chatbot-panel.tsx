@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import type { ChatbotSource } from "@/app/api/chatbot/route";
+import type { ChatbotSource, FollowupSuggestion } from "@/app/api/chatbot/route";
 import { VoiceMicButton } from "@/components/voice-input-field";
 
 type ChatMessage = {
@@ -12,6 +12,8 @@ type ChatMessage = {
   sources?: ChatbotSource[];
   source_type?: "rag" | "ai_inference";
   confidence?: "high" | "medium" | "low";
+  confidenceScore?: number;
+  followups?: FollowupSuggestion[];
 };
 
 type SavedSession = {
@@ -171,10 +173,12 @@ export function ChatbotPanel() {
     }, 50);
 
     try {
+      // 直近の会話履歴を最大8ターン送信（多ターン会話の文脈保持）
+      const history = messages.slice(-8).map((m) => ({ role: m.role, content: m.content }));
       const res = await fetch("/api/chatbot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: text, history }),
       });
 
       if (!res.ok) {
@@ -187,6 +191,8 @@ export function ChatbotPanel() {
         sources: ChatbotSource[];
         source_type: "rag" | "ai_inference";
         confidence: "high" | "medium" | "low";
+        confidenceScore?: number;
+        followups?: FollowupSuggestion[];
       };
 
       const assistantMsg: ChatMessage = {
@@ -196,6 +202,8 @@ export function ChatbotPanel() {
         sources: data.sources,
         source_type: data.source_type,
         confidence: data.confidence,
+        confidenceScore: data.confidenceScore,
+        followups: data.followups,
       };
 
       const finalMessages = [...nextMessages, assistantMsg];
@@ -469,10 +477,16 @@ export function ChatbotPanel() {
                       </span>
                     )}
                     {msg.confidence === "high" && (
-                      <span className="text-[11px] text-slate-500">🟢 信頼度：高</span>
+                      <span className="text-[11px] text-slate-500">
+                        🟢 信頼度：高
+                        {typeof msg.confidenceScore === "number" && ` (${Math.round(msg.confidenceScore * 100)}%)`}
+                      </span>
                     )}
                     {msg.confidence === "medium" && (
-                      <span className="text-[11px] text-slate-500">🟡 信頼度：中</span>
+                      <span className="text-[11px] text-slate-500">
+                        🟡 信頼度：中
+                        {typeof msg.confidenceScore === "number" && ` (${Math.round(msg.confidenceScore * 100)}%)`}
+                      </span>
                     )}
                     {msg.confidence === "low" && msg.source_type !== "rag" && (
                       <span className="text-[11px] text-slate-500">🔴 条文を特定できず</span>
@@ -482,7 +496,7 @@ export function ChatbotPanel() {
 
                 {/* 根拠条文の表示 */}
                 {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
-                  <details className="mt-2 max-w-[88%] rounded-lg border border-slate-200 bg-white p-3">
+                  <details className="mt-2 max-w-[88%] rounded-lg border border-slate-200 bg-white p-3" open={msg.sources.length <= 2}>
                     <summary className="cursor-pointer text-xs font-semibold text-slate-500 hover:text-slate-700">
                       参照条文 ({msg.sources.length}件)
                     </summary>
@@ -494,8 +508,8 @@ export function ChatbotPanel() {
                               {src.law} {src.article}
                             </p>
                             <a
-                              href={EGOV_LAW_NUMBERS[src.law]
-                                ? `https://laws.e-gov.go.jp/law/${EGOV_LAW_NUMBERS[src.law]}`
+                              href={EGOV_LAW_NUMBERS[src.law.replace(/（[^）]+）$/, "")]
+                                ? `https://laws.e-gov.go.jp/law/${EGOV_LAW_NUMBERS[src.law.replace(/（[^）]+）$/, "")]}`
                                 : `https://laws.e-gov.go.jp/search?keyword=${encodeURIComponent(src.law)}`}
                               target="_blank"
                               rel="noopener noreferrer"
@@ -504,11 +518,35 @@ export function ChatbotPanel() {
                               e-Gov で確認
                             </a>
                           </div>
+                          {src.snippet && src.snippet !== src.text && (
+                            <p className="mt-1 rounded bg-yellow-50 px-1.5 py-1 text-[11px] text-amber-900 leading-5">
+                              💡 該当箇所: {src.snippet}
+                            </p>
+                          )}
                           <p className="mt-1 text-slate-600 leading-5">{src.text}</p>
                         </div>
                       ))}
                     </div>
                   </details>
+                )}
+
+                {/* フォローアップ質問サジェスト */}
+                {msg.role === "assistant" && msg.followups && msg.followups.length > 0 && !isSending && (
+                  <div className="mt-2 max-w-[88%]">
+                    <p className="mb-1 text-[11px] text-slate-500">続けて質問する：</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {msg.followups.map((fu, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => handleSend(fu.prompt)}
+                          className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-semibold text-blue-700 transition hover:bg-blue-100 active:scale-[0.98]"
+                        >
+                          {fu.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             ))}

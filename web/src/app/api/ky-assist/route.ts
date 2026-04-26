@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
-import { buildKyAssistText, type KyAssistField } from "@/data/mock/ky-assist-responses";
+import { buildKyAssistText, buildRiskAssessmentTable, type KyAssistField } from "@/data/mock/ky-assist-responses";
 
 type Body = {
+  /** "table" を指定するとリスクアセスメント表を一括生成。未指定時は単項目補完。 */
+  mode?: "single" | "table";
   field?: KyAssistField;
   targetLabel?: string;
   workContext?: string;
@@ -12,6 +14,8 @@ type Body = {
   reLikelihood?: number;
   reSeverity?: number;
   seed?: number;
+  /** 業種プリセットID（建設/製造/物流/医療/介護施設…） */
+  industryId?: string;
 };
 
 export async function POST(request: Request) {
@@ -22,6 +26,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "JSONが不正です" }, { status: 400 });
   }
 
+  // モード: リスクアセスメント表の一括生成
+  if (body.mode === "table") {
+    const result = buildRiskAssessmentTable({
+      workContext: body.workContext?.trim() || "",
+      industryId: body.industryId,
+    });
+    return NextResponse.json(result, { status: 200 });
+  }
+
+  // モード: 単一項目（hazard/reduction/rereduction）の補完
   const field = body.field;
   if (field !== "hazard" && field !== "reduction" && field !== "rereduction") {
     return NextResponse.json({ error: "field が不正です" }, { status: 400 });
@@ -38,6 +52,7 @@ export async function POST(request: Request) {
     reLikelihood: body.reLikelihood,
     reSeverity: body.reSeverity,
     seed: typeof body.seed === "number" ? body.seed : Date.now(),
+    industryId: body.industryId,
   });
 
   return NextResponse.json({ text }, { status: 200 });

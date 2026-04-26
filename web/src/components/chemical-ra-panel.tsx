@@ -101,19 +101,37 @@ const MEASURE_CATEGORY_STYLE: Record<string, string> = {
   工学的対策: "bg-blue-100 text-blue-800",
   管理的対策: "bg-purple-100 text-purple-800",
   保護具: "bg-emerald-100 text-emerald-800",
+  代替化: "bg-indigo-100 text-indigo-800",
+};
+
+const PRIORITY_LABEL: Record<1 | 2 | 3, string> = {
+  1: "① 最優先",
+  2: "② 次に優先",
+  3: "③ 補助",
 };
 
 function MeasureItem({ measure }: { measure: SafetyMeasure }) {
   const badgeClass = MEASURE_CATEGORY_STYLE[measure.category] ?? "bg-slate-100 text-slate-700";
+  const priority = (measure.priority ?? 2) as 1 | 2 | 3;
   return (
     <li className="flex items-start gap-2 text-sm text-slate-700">
+      <span className="mt-0.5 shrink-0 rounded-full bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-600 border border-slate-200">
+        {PRIORITY_LABEL[priority]}
+      </span>
       <span className={`mt-0.5 shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold ${badgeClass}`}>
         {measure.category}
       </span>
-      {measure.action}
+      <span>{measure.action}</span>
     </li>
   );
 }
+
+const LEVEL_BADGE: Record<"I" | "II" | "III" | "IV", string> = {
+  I: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  II: "bg-amber-100 text-amber-800 border-amber-200",
+  III: "bg-orange-100 text-orange-800 border-orange-200",
+  IV: "bg-rose-100 text-rose-900 border-rose-300",
+};
 
 // ────────────────────────────────────────────────────────────
 // クイック検索候補
@@ -177,6 +195,9 @@ export function ChemicalRaPanel() {
   const [chemicalName, setChemicalName] = useState("");
   const [workContent, setWorkContent] = useState("");
   const [measuredConc, setMeasuredConc] = useState("");
+  const [ventilation, setVentilation] = useState<"none" | "general" | "local" | "">("");
+  const [amount, setAmount] = useState<"small" | "medium" | "large" | "">("");
+  const [durationHours, setDurationHours] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [retryStatus, setRetryStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -261,7 +282,15 @@ export function ChemicalRaPanel() {
     setResult(null);
 
     const MAX_RETRIES = 3;
-    const body = JSON.stringify({ chemicalName: chemicalName.trim(), workContent: workContent.trim(), casNumber: mhlwSelected?.cas ?? undefined });
+    const dur = durationHours.trim() ? parseFloat(durationHours) : undefined;
+    const body = JSON.stringify({
+      chemicalName: chemicalName.trim(),
+      workContent: workContent.trim(),
+      casNumber: mhlwSelected?.cas ?? undefined,
+      ventilation: ventilation || undefined,
+      amount: amount || undefined,
+      durationHours: typeof dur === "number" && Number.isFinite(dur) ? dur : undefined,
+    });
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
@@ -380,11 +409,62 @@ export function ChemicalRaPanel() {
             />
           </div>
 
-          {/* ③ 測定濃度入力と判定 */}
+          {/* ③ CREATE-SIMPLE 入力（取扱量・換気・作業時間） */}
+          <div className="rounded-lg border border-blue-200 bg-blue-50/40 p-3">
+            <p className="text-xs font-semibold text-blue-900">
+              ③ CREATE-SIMPLE 簡易判定（任意）— 4段階リスクレベル（I〜IV）を算出
+            </p>
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <label className="text-[11px] text-slate-700">
+                換気
+                <select
+                  value={ventilation}
+                  onChange={(e) => setVentilation(e.target.value as "none" | "general" | "local" | "")}
+                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
+                >
+                  <option value="">選択してください</option>
+                  <option value="none">換気なし</option>
+                  <option value="general">全体換気</option>
+                  <option value="local">局所排気</option>
+                </select>
+              </label>
+              <label className="text-[11px] text-slate-700">
+                取扱量
+                <select
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value as "small" | "medium" | "large" | "")}
+                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
+                >
+                  <option value="">選択してください</option>
+                  <option value="small">少量（&lt;1L/日）</option>
+                  <option value="medium">中量（1〜10L/日）</option>
+                  <option value="large">大量（&gt;10L/日）</option>
+                </select>
+              </label>
+              <label className="text-[11px] text-slate-700">
+                作業時間（時間/日）
+                <input
+                  type="number"
+                  min="0"
+                  max="24"
+                  step="0.5"
+                  value={durationHours}
+                  onChange={(e) => setDurationHours(e.target.value)}
+                  placeholder="例: 4"
+                  className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs"
+                />
+              </label>
+            </div>
+            <p className="mt-1 text-[10px] text-slate-500">
+              ※ CREATE-SIMPLE は厚労省「化学物質リスクアセスメント支援ツール」を参考にした簡略判定です。最終判断は公式版または専門家（労働衛生コンサルタント等）の判断によること。
+            </p>
+          </div>
+
+          {/* ④ 測定濃度入力と判定 */}
           <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3">
             <label className="flex items-center gap-1.5 text-xs font-semibold text-amber-900">
               <Gauge className="h-3.5 w-3.5" />
-              ③ 作業環境の測定濃度（任意）— 基準値との判定
+              ④ 作業環境の測定濃度（任意）— 基準値との判定
             </label>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <input
@@ -518,6 +598,62 @@ export function ChemicalRaPanel() {
             )}
           </div>
 
+          {/* CREATE-SIMPLE 4段階判定 */}
+          {result.createSimple && (
+            <div className={`rounded-xl border p-5 shadow-sm ${LEVEL_BADGE[result.createSimple.level]}`}>
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <h2 className="flex items-center gap-2 text-base font-bold">
+                  <Gauge className="h-5 w-5" />
+                  CREATE-SIMPLE 判定: {result.createSimple.label}
+                </h2>
+                <span className="rounded-full bg-white/80 px-3 py-0.5 text-xs font-bold">
+                  ばく露指数: {result.createSimple.exposureRatio.toFixed(2)}
+                </span>
+              </div>
+              <p className="mt-2 text-xs">
+                換気: <span className="font-semibold">{result.createSimple.inputSummary.ventilation}</span> /
+                {" "}取扱量: <span className="font-semibold">{result.createSimple.inputSummary.amount}</span> /
+                {" "}作業時間: <span className="font-semibold">{result.createSimple.inputSummary.durationHours}h</span>
+                {result.createSimple.limit8h && (
+                  <> / 8h基準値: <span className="font-semibold">{result.createSimple.limit8h}</span></>
+                )}
+              </p>
+              <details className="mt-2">
+                <summary className="cursor-pointer text-[11px] font-semibold underline-offset-2 hover:underline">
+                  判定根拠
+                </summary>
+                <ul className="mt-1 space-y-0.5 text-[11px]">
+                  {result.createSimple.rationale.map((r, i) => (
+                    <li key={i}>・{r}</li>
+                  ))}
+                </ul>
+              </details>
+              {result.createSimple.level === "IV" && (
+                <p className="mt-2 rounded-md bg-white/90 px-2 py-1 text-xs font-bold text-rose-900">
+                  ⚠ 直ちに作業を中止し、代替化・密閉化・局所排気装置の即時設置が必要です
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* 関連ハザード情報の自動引用 */}
+          {result.relatedHazards && result.relatedHazards.length > 0 && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
+              <h3 className="flex items-center gap-2 text-sm font-bold text-amber-900">
+                <Database className="h-4 w-4" />
+                関連ハザード情報（厚労省データから自動引用）
+              </h3>
+              <ul className="mt-2 space-y-1">
+                {result.relatedHazards.map((h, i) => (
+                  <li key={i} className="flex items-start gap-2 text-xs text-amber-900">
+                    <span className="mt-0.5 shrink-0 text-amber-600">▶</span>
+                    {h}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {/* GHSハザード */}
           {result.ghsHazards.length > 0 && (
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -548,13 +684,16 @@ export function ChemicalRaPanel() {
             </div>
           )}
 
-          {/* 安全対策 */}
+          {/* 安全対策（厚労省指針の優先順位順） */}
           {result.safetyMeasures.length > 0 && (
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900">
+              <h2 className="mb-1 flex items-center gap-2 text-sm font-bold text-slate-900">
                 <BookOpen className="h-4 w-4 text-blue-600" />
-                安全対策チェックリスト
+                安全対策チェックリスト（優先順位順）
               </h2>
+              <p className="mb-3 text-[11px] text-slate-500">
+                厚労省指針：① 代替化／工学的対策 → ② 管理的対策 → ③ 個人保護具 の順で適用
+              </p>
               <ul className="space-y-2">
                 {result.safetyMeasures.map((measure, i) => (
                   <MeasureItem key={i} measure={measure} />
