@@ -10,6 +10,7 @@ import {
   CreditCard,
   Search,
   MessageSquare,
+  Handshake,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { PageHeader } from "@/components/page-header";
@@ -24,6 +25,7 @@ const ICON_MAP = {
   CreditCard,
   Search,
   MessageSquare,
+  Handshake,
 } as const;
 
 export type TranslatedPageHeaderIconName = keyof typeof ICON_MAP;

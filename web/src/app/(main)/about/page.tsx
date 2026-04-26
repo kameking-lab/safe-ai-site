@@ -325,7 +325,7 @@ export default function AboutPage() {
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <p className="text-xs font-semibold text-slate-700 mb-1">所属</p>
                   <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
-                    <li>・ 日本労働安全衛生コンサルタント会</li>
+                    <li>・ 公益社団法人 日本労働安全衛生コンサルタント会 東京支部 会員</li>
                   </ul>
                 </div>
               </div>
