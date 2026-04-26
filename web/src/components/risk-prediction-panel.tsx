@@ -531,13 +531,45 @@ export function RiskPredictionPanel() {
             </p>
           </div>
           {searched && results.length > 0 && (
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="rounded-lg bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700"
-            >
-              PDF出力（朝礼資料）
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  // 上位3件のリスクをペイロードにしてKY用紙に転記
+                  try {
+                    const payload = {
+                      query,
+                      generatedAt: new Date().toISOString(),
+                      risks: results.slice(0, 3).map((c) => ({
+                        targetLabel: c.title.slice(0, 30),
+                        hazard:
+                          c.mainCauses[0]
+                            ? `${c.title}：${c.mainCauses[0]}`
+                            : c.title,
+                        reduction:
+                          c.preventionPoints[0] ?? "（対策を確認のうえ追記）",
+                      })),
+                    };
+                    window.localStorage.setItem(
+                      "ky-import-payload",
+                      JSON.stringify(payload)
+                    );
+                  } catch {}
+                  window.location.href = "/ky?import=risk-prediction";
+                }}
+                className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+                title="検索結果の上位3件をKY用紙の危険要因・対策欄に自動転記します"
+              >
+                このリスクをKY用紙に転記 →
+              </button>
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="rounded-lg bg-slate-800 px-4 py-2 text-xs font-semibold text-white hover:bg-slate-700"
+              >
+                PDF出力（朝礼資料）
+              </button>
+            </div>
           )}
         </div>
 

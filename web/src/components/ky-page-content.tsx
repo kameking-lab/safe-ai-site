@@ -296,6 +296,47 @@ export function KyPageContent() {
     if (preset) handlePresetApply(preset);
   }, [searchParams, handlePresetApply]);
 
+  // /ky?import=risk-prediction で来た場合に localStorage の payload を取り込む
+  // （/risk-prediction の「このリスクをKY用紙に転記」ボタン経由）
+  const [importNotice, setImportNotice] = useState<string | null>(null);
+  useEffect(() => {
+    const importKind = searchParams?.get("import");
+    if (importKind !== "risk-prediction") return;
+    try {
+      const raw = localStorage.getItem("ky-import-payload");
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as {
+        query?: string;
+        risks?: { targetLabel?: string; hazard?: string; reduction?: string }[];
+      };
+      const incoming = parsed.risks ?? [];
+      if (incoming.length === 0) return;
+      setRecord((prev) => {
+        // 空の行から優先的に詰める（1行目「上記」はスキップ）
+        const next = prev.riskRows.map((r) => ({ ...r }));
+        let cursor = 1;
+        for (const item of incoming) {
+          while (cursor < next.length && next[cursor].hazard) cursor++;
+          if (cursor >= next.length) break;
+          next[cursor] = {
+            ...next[cursor],
+            hazard: item.hazard ?? next[cursor].hazard,
+            reduction: item.reduction ?? next[cursor].reduction,
+          };
+          cursor++;
+        }
+        return { ...prev, riskRows: next };
+      });
+      setImportNotice(
+        `「${parsed.query ?? "リスク予測"}」から ${incoming.length}件のリスクを転記しました`
+      );
+      // ペイロードはワンショットで消費（再訪問時の再適用を避ける）
+      localStorage.removeItem("ky-import-payload");
+    } catch {
+      // 破損データは黙って無視
+    }
+  }, [searchParams]);
+
   const setWorkRow = useCallback((i: number, row: KyInstructionWorkRow) => {
     setRecord((prev) => ({
       ...prev,
@@ -487,6 +528,23 @@ export function KyPageContent() {
             </div>
           )}
         </div>
+
+        {/* リスク予測からの転記通知 */}
+        {importNotice && (
+          <div className="mt-3 flex items-start justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3">
+            <p className="text-sm font-semibold text-emerald-900">
+              ✓ {importNotice}（③現地KY のリスク欄を確認・編集してください）
+            </p>
+            <button
+              type="button"
+              onClick={() => setImportNotice(null)}
+              className="rounded px-1.5 text-emerald-700 hover:bg-emerald-100"
+              aria-label="通知を閉じる"
+            >
+              ×
+            </button>
+          </div>
+        )}
 
         {/* Industry preset */}
         <div className="mt-3">

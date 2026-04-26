@@ -181,6 +181,13 @@ export function MhlwLawArticlesPanel() {
                 {a.articleTitle && (
                   <span className="text-[11px] text-slate-500">{a.articleTitle}</span>
                 )}
+                {/* 出典区別バッジ：MHLW PDFはPDF発行時点の条番号・条文（施行当時版） */}
+                <span
+                  className="inline-flex items-center gap-0.5 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800"
+                  title="厚労省PDF由来。PDF発行時点の条番号・条文を採録しています。最新の現行条文は『キュレーション』タブまたはe-Govでご確認ください。"
+                >
+                  <span aria-hidden>●</span> 施行当時（MHLW PDF）
+                </span>
               </div>
               <a
                 href={mhlwSearchUrl(a.sourceFile)}
