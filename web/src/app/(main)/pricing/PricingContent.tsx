@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Check, Zap, Shield, Star, Briefcase, Building2 } from "lucide-react";
 import { PricingCheckout } from "./pricing-checkout";
 import { useTranslation } from "@/contexts/language-context";
+import { PricingMatrix } from "@/components/PricingMatrix";
 
 const PLAN_FEATURES = {
   free: {
@@ -294,6 +295,9 @@ export function PricingContent() {
           );
         })}
       </div>
+
+      {/* Plan feature comparison matrix */}
+      <PricingMatrix />
 
       {/* Free consultation banner */}
       <div className="mt-10 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 text-center">
