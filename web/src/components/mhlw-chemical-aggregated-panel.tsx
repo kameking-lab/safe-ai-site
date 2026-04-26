@@ -16,10 +16,16 @@ import {
   SOURCE_BADGE,
   TIER_LABEL,
   TIER_BADGE,
+  PRIMARY_SOURCE_LABEL,
+  PRIMARY_SOURCE_BADGE,
+  IARC_BADGE,
+  IARC_LABEL,
   rawCompact,
   type DataTier,
   type MergedChemical,
   type MhlwChemicalCategory,
+  type LimitSource,
+  type IarcGroup,
 } from "@/lib/mhlw-chemicals";
 
 const PAGE_SIZE = 40;
@@ -29,6 +35,20 @@ const FLAG_FILTERS: { key: keyof MergedChemical["flags"]; label: string; legal: 
   { key: "skin", label: "皮膚等障害", legal: "安衛則 594の2" },
   { key: "carcinogenic", label: "がん原性物質", legal: "安衛則 577の2 Ⅲ" },
   { key: "concentration", label: "濃度基準値", legal: "安衛則 577の2" },
+];
+
+const SOURCE_FILTERS: { key: LimitSource; label: string; hint: string }[] = [
+  { key: "mhlw", label: "公式（厚労告示）", hint: "厚生労働省告示第177号" },
+  { key: "jsoh", label: "学会（産衛）", hint: "日本産業衛生学会 許容濃度" },
+  { key: "acgih", label: "参考（ACGIH）", hint: "ACGIH TLV（参考値）" },
+  { key: "reference", label: "参考値", hint: "出典は参考のみ" },
+];
+
+const IARC_FILTERS: { key: IarcGroup; label: string; hint: string }[] = [
+  { key: "1", label: "Group 1", hint: "発がん性あり" },
+  { key: "2A", label: "Group 2A", hint: "おそらく発がん性" },
+  { key: "2B", label: "Group 2B", hint: "発がん性の可能性" },
+  { key: "3", label: "Group 3", hint: "分類できない" },
 ];
 
 function formatUpdatedAt(iso: string): string {
@@ -64,21 +84,42 @@ export function MhlwChemicalAggregatedPanel() {
     carcinogenic: false,
     concentration: false,
   });
+  const [activeSources, setActiveSources] = useState<Record<LimitSource, boolean>>({
+    mhlw: false,
+    jsoh: false,
+    acgih: false,
+    reference: false,
+  });
+  const [activeIarc, setActiveIarc] = useState<Record<IarcGroup, boolean>>({
+    "1": false,
+    "2A": false,
+    "2B": false,
+    "3": false,
+  });
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const anyFlagActive = Object.values(activeFlags).some(Boolean);
+  const anySourceActive = Object.values(activeSources).some(Boolean);
+  const anyIarcActive = Object.values(activeIarc).some(Boolean);
 
   const filtered = useMemo(() => {
     const nq = normalizeText(query);
     return merged.filter((m) => {
       if (anyFlagActive) {
-        // OR 検索: いずれかのフラグに該当
         let ok = false;
         (Object.keys(activeFlags) as (keyof MergedChemical["flags"])[]).forEach((k) => {
           if (activeFlags[k] && m.flags[k]) ok = true;
         });
         if (!ok) return false;
+      }
+      if (anySourceActive) {
+        const src = m.details?.limits?.source;
+        if (!src || !activeSources[src]) return false;
+      }
+      if (anyIarcActive) {
+        const g = m.details?.limits?.iarcGroup;
+        if (!g || !activeIarc[g]) return false;
       }
       if (!nq) return true;
       if (casMatches(query, m.cas)) return true;
@@ -87,10 +128,10 @@ export function MhlwChemicalAggregatedPanel() {
       );
       return hay.includes(nq);
     });
-  }, [merged, query, activeFlags, anyFlagActive]);
+  }, [merged, query, activeFlags, anyFlagActive, activeSources, anySourceActive, activeIarc, anyIarcActive]);
 
-  // フィルタ変更時にページを 1 に戻す（useEffect ではなくレンダー中の同期更新）
-  const filterKey = `${query}|${activeFlags.label_sds}|${activeFlags.skin}|${activeFlags.carcinogenic}|${activeFlags.concentration}`;
+  // フィルタ変更時にページを 1 に戻す
+  const filterKey = `${query}|${Object.values(activeFlags).join(",")}|${Object.values(activeSources).join(",")}|${Object.values(activeIarc).join(",")}`;
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
   if (filterKey !== prevFilterKey) {
     setPrevFilterKey(filterKey);
@@ -103,6 +144,12 @@ export function MhlwChemicalAggregatedPanel() {
 
   function toggleFlag(k: keyof MergedChemical["flags"]) {
     setActiveFlags((prev) => ({ ...prev, [k]: !prev[k] }));
+  }
+  function toggleSource(k: LimitSource) {
+    setActiveSources((prev) => ({ ...prev, [k]: !prev[k] }));
+  }
+  function toggleIarc(k: IarcGroup) {
+    setActiveIarc((prev) => ({ ...prev, [k]: !prev[k] }));
   }
 
   return (
@@ -200,6 +247,76 @@ export function MhlwChemicalAggregatedPanel() {
             </button>
           )}
         </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="text-xs font-semibold text-slate-600 self-center">
+            データ出典（複数選択可 / OR）:
+          </span>
+          {SOURCE_FILTERS.map((f) => {
+            const active = activeSources[f.key];
+            return (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => toggleSource(f.key)}
+                className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                  active
+                    ? `${PRIMARY_SOURCE_BADGE[f.key]} ring-2 ring-offset-1 ring-current`
+                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+                aria-pressed={active}
+                title={f.hint}
+              >
+                {active ? "☑" : "☐"} {f.label}
+              </button>
+            );
+          })}
+          {anySourceActive && (
+            <button
+              type="button"
+              onClick={() =>
+                setActiveSources({ mhlw: false, jsoh: false, acgih: false, reference: false })
+              }
+              className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-50"
+            >
+              クリア
+            </button>
+          )}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="text-xs font-semibold text-slate-600 self-center">
+            IARC発がん性分類（複数選択可 / OR）:
+          </span>
+          {IARC_FILTERS.map((f) => {
+            const active = activeIarc[f.key];
+            return (
+              <button
+                key={f.key}
+                type="button"
+                onClick={() => toggleIarc(f.key)}
+                className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                  active
+                    ? `${IARC_BADGE[f.key]} ring-2 ring-offset-1 ring-current`
+                    : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+                aria-pressed={active}
+                title={f.hint}
+              >
+                {active ? "☑" : "☐"} {f.label}
+              </button>
+            );
+          })}
+          {anyIarcActive && (
+            <button
+              type="button"
+              onClick={() =>
+                setActiveIarc({ "1": false, "2A": false, "2B": false, "3": false })
+              }
+              className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-500 hover:bg-slate-50"
+            >
+              クリア
+            </button>
+          )}
+        </div>
         <p className="mt-3 text-xs text-slate-500">
           該当 <span className="font-semibold text-slate-700">{filtered.length.toLocaleString()}</span> 件 /
           全 {totals.unique.toLocaleString()} 物質
@@ -254,12 +371,20 @@ export function MhlwChemicalAggregatedPanel() {
                         {TIER_LABEL[item.details.tier as DataTier]}
                       </span>
                     )}
-                    {item.details?.limits?.carcinogenicity?.iarc && (
+                    {item.details?.limits?.source && (
                       <span
-                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${SOURCE_BADGE.IARC}`}
-                        title={`IARC ${item.details.limits.carcinogenicity.monograph ?? ""}`}
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${PRIMARY_SOURCE_BADGE[item.details.limits.source]}`}
+                        title="主要データ出典"
                       >
-                        IARC Group {item.details.limits.carcinogenicity.iarc}
+                        {PRIMARY_SOURCE_LABEL[item.details.limits.source]}
+                      </span>
+                    )}
+                    {item.details?.limits?.iarcGroup && (
+                      <span
+                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${IARC_BADGE[item.details.limits.iarcGroup]}`}
+                        title={IARC_LABEL[item.details.limits.iarcGroup]}
+                      >
+                        IARC {item.details.limits.iarcGroup}
                       </span>
                     )}
                   </div>
