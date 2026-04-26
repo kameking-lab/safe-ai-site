@@ -25,7 +25,15 @@ export const metadata: Metadata = {
   description:
     "ANZEN AI（屋号）の運営者情報・特定商取引法に基づく表記・監修範囲を掲載。労働安全コンサルタント（登録番号260022・土木区分）が監修。建設・製造・林業の労働安全衛生コンサルティングも受託しています。",
   keywords: ["ANZEN AI", "労働安全コンサルタント", "登録番号260022", "労働安全衛生", "安全管理", "特定商取引法"],
+  alternates: { canonical: "/about" },
   openGraph: {
+    title: "運営者情報・特商法表記 | ANZEN AI",
+    description:
+      "ANZEN AI（屋号）の運営者情報・特定商取引法に基づく表記・監修範囲を掲載。労働安全コンサルタント（登録番号260022・土木区分）が監修。",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
     title: "運営者情報・特商法表記 | ANZEN AI",
     description:
       "ANZEN AI（屋号）の運営者情報・特定商取引法に基づく表記・監修範囲を掲載。労働安全コンサルタント（登録番号260022・土木区分）が監修。",

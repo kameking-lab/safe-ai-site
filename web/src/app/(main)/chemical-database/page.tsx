@@ -8,7 +8,14 @@ const DESCRIPTION = `厚生労働省の皮膚等障害化学物質リスト・SD
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
+  alternates: { canonical: "/chemical-database" },
   openGraph: {
+    title: `${TITLE}｜ANZEN AI`,
+    description: DESCRIPTION,
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
     title: `${TITLE}｜ANZEN AI`,
     description: DESCRIPTION,
   },
