@@ -17,9 +17,16 @@ export type LimitValue = {
   source?: string;
 };
 
+/** 主要出典の判定ラベル */
+export type LimitSource = "mhlw" | "jsoh" | "acgih" | "reference";
+
+/** IARC 発がん性分類 */
+export type IarcGroup = "1" | "2A" | "2B" | "3";
+
 /** 物質単位の濃度・発がん性データ（concentration-limits.json） */
 export type ConcentrationLimitEntry = {
   name?: string;
+  nameEn?: string;
   twa?: LimitValue;
   stel?: LimitValue;
   ceiling?: LimitValue;
@@ -40,6 +47,15 @@ export type ConcentrationLimitEntry = {
     ceiling?: { value: string; unit: string };
   };
   mhlwSdsUrl?: string;
+  notes?: string[];
+  /** v2: 主要出典の判定（mhlw > jsoh > acgih > reference） */
+  source?: LimitSource;
+  /** v2: IARC 分類のフラット参照 */
+  iarcGroup?: IarcGroup | null;
+  /** v2: JSOH TWA 数値（フィルタ・ソート用） */
+  jsohOel?: { value: number; unit: string } | null;
+  /** v2: ACGIH TLV-TWA 数値（フィルタ・ソート用） */
+  acgihTlv?: { value: number; unit: string } | null;
 };
 
 type ConcentrationLimitsFile = {
@@ -175,6 +191,38 @@ export const SOURCE_BADGE: Record<string, string> = {
   ACGIH: "bg-sky-100 text-sky-900 border-sky-200",
   IARC: "bg-rose-100 text-rose-900 border-rose-200",
   GHS_MHLW: "bg-emerald-100 text-emerald-900 border-emerald-200",
+};
+
+/** v2: フラット source フィールド用ラベル */
+export const PRIMARY_SOURCE_LABEL: Record<LimitSource, string> = {
+  mhlw: "公式（厚労告示）",
+  jsoh: "学会（産衛）",
+  acgih: "参考（ACGIH）",
+  reference: "参考値",
+};
+
+/** v2: フラット source フィールド用バッジ色 */
+export const PRIMARY_SOURCE_BADGE: Record<LimitSource, string> = {
+  mhlw: "bg-amber-100 text-amber-900 border-amber-300",
+  jsoh: "bg-violet-100 text-violet-900 border-violet-300",
+  acgih: "bg-sky-100 text-sky-900 border-sky-300",
+  reference: "bg-slate-100 text-slate-700 border-slate-200",
+};
+
+/** v2: IARC 分類の表示色 */
+export const IARC_BADGE: Record<IarcGroup, string> = {
+  "1": "bg-rose-200 text-rose-900 border-rose-300",
+  "2A": "bg-orange-100 text-orange-900 border-orange-300",
+  "2B": "bg-amber-100 text-amber-800 border-amber-200",
+  "3": "bg-slate-100 text-slate-700 border-slate-200",
+};
+
+/** v2: IARC 分類のラベル */
+export const IARC_LABEL: Record<IarcGroup, string> = {
+  "1": "Group 1（発がん性あり）",
+  "2A": "Group 2A（おそらく発がん性）",
+  "2B": "Group 2B（発がん性の可能性）",
+  "3": "Group 3（分類できない）",
 };
 
 /** データ階層バッジ: 「濃度基準値あり」「許容濃度のみ」「参考値のみ」 */
@@ -410,6 +458,8 @@ export function relatedLawTexts(flags: MergedChemical["flags"]): string[] {
 }
 
 function applyConcentrationOverrides(merged: MergedChemical[]): MergedChemical[] {
+  const handledCas = new Set<string>();
+
   for (const m of merged) {
     if (!m.cas) continue;
     const entry = CONCENTRATION_LIMITS.substances[m.cas];
@@ -417,6 +467,7 @@ function applyConcentrationOverrides(merged: MergedChemical[]): MergedChemical[]
       m.details = { ...(m.details ?? {}), tier: "none" };
       continue;
     }
+    handledCas.add(m.cas);
 
     const tier = determineTier(entry);
 
@@ -439,6 +490,40 @@ function applyConcentrationOverrides(merged: MergedChemical[]): MergedChemical[]
       m.flags.carcinogenic = true;
     }
   }
+
+  // concentration-limits.json にしか存在しない CAS（拡張データセット由来）は
+  // 新規 MergedChemical として追加し、UI に表示できるようにする。
+  for (const [cas, entry] of Object.entries(CONCENTRATION_LIMITS.substances)) {
+    if (handledCas.has(cas)) continue;
+    if (!/^\d{2,7}-\d{2,3}-\d{1,2}$/.test(cas)) continue;
+    const tier = determineTier(entry);
+    const isMhlw = tier === "mhlw_177";
+    const isCarc = !!entry.carcinogenicity?.iarc && /^(1|2A)$/.test(entry.carcinogenicity.iarc);
+    const limit8h = formatLimitValue(entry.twa);
+    const limitShort = formatLimitValue(entry.stel) ?? formatLimitValue(entry.ceiling);
+    const aliases = entry.nameEn ? [entry.nameEn] : [];
+    merged.push({
+      cas,
+      primaryName: entry.name ?? `CAS ${cas}`,
+      aliases,
+      flags: {
+        carcinogenic: isCarc,
+        concentration: isMhlw,
+        skin: false,
+        label_sds: false,
+      },
+      appliedDates: {},
+      notes: entry.notes ?? [],
+      details: {
+        ...(limit8h ? { limit8h } : {}),
+        ...(limitShort ? { limitShort } : {}),
+        limits: entry,
+        tier,
+      },
+      entryCount: 0,
+    });
+  }
+
   return merged;
 }
 
