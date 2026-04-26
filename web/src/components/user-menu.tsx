@@ -61,11 +61,12 @@ export function UserMenu({ user }: Props) {
             onClick={() => setOpen(false)}
             aria-hidden="true"
           />
-          <div className="absolute right-0 z-20 mt-1 w-48 rounded-xl border border-slate-200 bg-white p-1 shadow-lg">
+          <div role="menu" aria-orientation="vertical" className="absolute right-0 z-20 mt-1 w-48 rounded-xl border border-slate-200 bg-white p-1 shadow-lg">
             <p className="truncate px-3 py-2 text-xs text-slate-500">{user.email}</p>
             <div className="my-1 border-t border-slate-100" />
             <Link
               href="/account"
+              role="menuitem"
               onClick={() => setOpen(false)}
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
@@ -73,6 +74,7 @@ export function UserMenu({ user }: Props) {
             </Link>
             <Link
               href="/pricing"
+              role="menuitem"
               onClick={() => setOpen(false)}
               className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50"
             >
@@ -84,6 +86,7 @@ export function UserMenu({ user }: Props) {
             >
               <button
                 type="submit"
+                role="menuitem"
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50"
               >
                 <LogOut className="h-3.5 w-3.5" />

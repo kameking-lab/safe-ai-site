@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { allLawArticles, type LawArticle } from "@/data/laws";
 import { SITE_STATS } from "@/data/site-stats";
@@ -148,6 +148,14 @@ function AiSummaryModal({
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [summary, setSummary] = useState("");
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   async function fetchSummary() {
     setStatus("loading");
     try {
@@ -169,17 +177,27 @@ function AiSummaryModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ai-summary-title"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-2xl bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <div>
             <p className="text-xs text-slate-500">{article.lawShort} {article.articleNum}</p>
-            <p className="text-sm font-bold text-slate-900">{article.articleTitle || "AI要約"}</p>
+            <p id="ai-summary-title" className="text-sm font-bold text-slate-900">{article.articleTitle || "AI要約"}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 text-xl leading-none"
+            aria-label="このダイアログを閉じる"
+            className="text-slate-600 hover:text-slate-900 text-xl leading-none min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
           >
             ×
           </button>
@@ -281,6 +299,7 @@ export function LawSearchPanel() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="フリーワード検索（例: 墜落制止用器具、有機溶剤）"
+            aria-label="法令フリーワード検索"
             className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 w-full"
           />
         </div>
@@ -289,6 +308,7 @@ export function LawSearchPanel() {
           value={articleNumQuery}
           onChange={(e) => setArticleNumQuery(e.target.value)}
           placeholder="条番号（例: 第21条）"
+          aria-label="条番号で検索"
           className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
         />
       </div>
