@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { SITE_STATS, SITE_STATS_META, type SiteStatKey } from "@/data/site-stats";
+import { PersonaEntry } from "@/components/PersonaEntry";
 
 const STATS: { key: SiteStatKey; value: string; label: string; hint: string }[] = [
   { key: "accidentDbCount", value: SITE_STATS.accidentDbCount, label: "厚労省 事故DB収録件数", hint: "全件検索対応" },
@@ -10,25 +11,6 @@ const STATS: { key: SiteStatKey; value: string; label: string; hint: string }[] 
   { key: "lawArticleCount", value: SITE_STATS.lawArticleCount, label: "法令条文データ", hint: "RAG検索で即照合" },
   { key: "specialEdKinds", value: SITE_STATS.specialEdKinds, label: "特別教育 対応種別", hint: "過去問クイズ付" },
 ];
-
-const TARGET_PROFILES = [
-  {
-    title: "現場の安全担当者",
-    desc: "朝礼のKY・法改正チェック・事故事例検索を、スマホ一台で済ませたい方。",
-  },
-  {
-    title: "中小企業の経営者",
-    desc: "安全管理の属人化・Excel地獄・紙のKY用紙から脱出したい方。",
-  },
-  {
-    title: "安全衛生責任者",
-    desc: "特別教育・化学物質RA・安衛法対応を体系化し、労基署対応を楽にしたい方。",
-  },
-  {
-    title: "DX推進担当",
-    desc: "AI・Claude Codeを安全分野に組み込み、業務を数倍速にしたい方。",
-  },
-] as const;
 
 const CAPABILITIES = [
   {
@@ -205,29 +187,8 @@ export function HomeValueHero() {
         </div>
       </div>
 
-      {/* 「こんな方に」セクション */}
-      <section
-        aria-labelledby="targets-heading"
-        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6"
-      >
-        <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-300">
-          こんな方に
-        </p>
-        <h3 id="targets-heading" className="mt-1 text-base font-bold text-slate-900 dark:text-slate-100 sm:text-lg">
-          1人でも、1社でも、成果が出るまで伴走します。
-        </h3>
-        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {TARGET_PROFILES.map((p) => (
-            <div
-              key={p.title}
-              className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10"
-            >
-              <p className="text-sm font-bold text-emerald-800 dark:text-emerald-200">✓ {p.title}</p>
-              <p className="mt-1.5 text-xs leading-5 text-slate-700 dark:text-slate-200">{p.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* 「こんな方に」セクション — 8カテゴリのペルソナ別入口 */}
+      <PersonaEntry />
 
       {/* 「できること」セクション */}
       <section
