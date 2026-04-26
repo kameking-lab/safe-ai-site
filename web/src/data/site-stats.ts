@@ -24,7 +24,7 @@ export const SITE_STATS = {
   /** data/accidents-10years.jsonl 統合件数（2015〜2024・死亡災害DB＋curated事例） */
   accidents10yCount: "4,257",
   /** data/law-updates-10years.jsonl 統合件数（2015〜2024・労働安全衛生関連法令改正） */
-  lawUpdates10yCount: "65",
+  lawUpdates10yCount: "31",
   /** 死亡労災件数（令和5年・建設業）厚労省統計 */
   fatalDisastersR5: "1,389",
   /** サイト独自に curated した詳細事故事例の件数（real-accident-cases* 全合算） */
