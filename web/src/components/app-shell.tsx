@@ -33,11 +33,14 @@ import {
   Handshake,
   ListChecks,
   Building2,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { UserMenu } from "@/components/user-menu";
 import { EnglishBetaBanner } from "@/components/english-beta-banner";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useCommandPalette } from "@/components/CommandPaletteProvider";
 import { useFurigana } from "@/contexts/furigana-context";
 import { useEasyJapanese } from "@/contexts/easy-japanese-context";
 import {
@@ -155,6 +158,7 @@ export function AppShell({ children, user }: AppShellProps) {
   const { furiganaEnabled, toggleFurigana } = useFurigana();
   const { easyJapaneseEnabled, toggleEasyJapanese } = useEasyJapanese();
   const { language, setLanguage } = useLanguage();
+  const { open: openCommandPalette } = useCommandPalette();
 
   // SSR/hydration対策: マウント後にのみ localStorage 依存のUI(言語セレクタ含む)を描画
   const [mounted, setMounted] = useState(false);
@@ -407,6 +411,30 @@ export function AppShell({ children, user }: AppShellProps) {
             <p className="truncate text-[11px] text-slate-700 dark:text-slate-300 sm:text-xs">現場の安全を、AIで変える。</p>
           </div>
           <div className="flex shrink-0 items-center gap-1">
+            {/* 検索（⌘K）— モバイルはアイコンのみ */}
+            <button
+              type="button"
+              onClick={openCommandPalette}
+              aria-label="検索を開く（Ctrl+K）"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"
+            >
+              <Search className="h-4 w-4" aria-hidden="true" />
+            </button>
+            {/* 屋外（ハイコントラスト）モードトグル */}
+            <button
+              type="button"
+              onClick={toggleHighContrast}
+              aria-label={highContrastEnabled ? "屋外モードをオフ" : "屋外モードをオン"}
+              aria-pressed={highContrastEnabled}
+              className={`inline-flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition-colors ${
+                highContrastEnabled
+                  ? "bg-slate-900 text-white"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+              title="屋外（ハイコントラスト）モード切替"
+            >
+              {highContrastEnabled ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
             {/* 言語切替 — mounted が揃うまでは静的プレースホルダで hydration 安定化 */}
             <label className="sr-only" htmlFor="app-lang-select-mobile">
               言語 / Language
@@ -526,6 +554,45 @@ export function AppShell({ children, user }: AppShellProps) {
           </div>
         )}
 
+        {/* Desktop top bar — ⌘K検索ヒント + 屋外モードトグルを右上に常設 */}
+        <div className="hidden items-center justify-end gap-2 border-b border-slate-200 bg-white/70 px-6 py-2 backdrop-blur lg:flex">
+          <button
+            type="button"
+            onClick={openCommandPalette}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50"
+            title="検索を開く"
+            aria-label="検索を開く（Ctrl+K）"
+          >
+            <Search className="h-3.5 w-3.5" aria-hidden="true" />
+            <span>検索</span>
+            <kbd className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-500">
+              Ctrl+K
+            </kbd>
+          </button>
+          <button
+            type="button"
+            onClick={toggleHighContrast}
+            aria-pressed={highContrastEnabled}
+            className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors ${
+              highContrastEnabled
+                ? "bg-slate-900 text-white"
+                : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+            }`}
+            title="屋外（ハイコントラスト）モード切替"
+          >
+            {highContrastEnabled ? (
+              <>
+                <Sun className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>屋外モード ON</span>
+              </>
+            ) : (
+              <>
+                <Moon className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>屋外モード</span>
+              </>
+            )}
+          </button>
+        </div>
         <EnglishBetaBanner />
         <main className="flex flex-1 flex-col">
           <div className="mx-auto w-full max-w-7xl flex-1">{children}</div>
