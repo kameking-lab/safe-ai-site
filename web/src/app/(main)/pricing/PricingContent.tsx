@@ -132,7 +132,7 @@ const FAQ_JA = [
   },
   {
     q: "教育機関（高専・専門学校・大学）向けの割引はありますか？",
-    a: "あります。高専・専門学校・大学・労安コンサル協会等の教育用途は、申請のうえ承認後に「教育機関ライセンス」を無償または優待価格で発行します。学籍簿・在職証明等の確認後、3営業日以内にご返信。",
+    a: "高専・専門学校・大学・労安コンサル協会等の非営利教育用途は、申請内容を個別審査のうえ「教育機関ライセンス」を優待価格で提供する場合があります（無償提供は授業実施・研究等の条件を満たす場合に限定）。学籍簿・在職証明等の確認後、3営業日以内にご返信。問い合わせは category=education でお送りください。",
   },
   {
     q: "授業や講演で本サイトの図表・統計データを引用してもよいですか？",
@@ -177,7 +177,7 @@ export function PricingContent() {
   const faq = isEn ? FAQ_EN : FAQ_JA;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
+    <main className="mx-auto max-w-7xl px-4 py-8">
       {/* Header */}
       <div className="text-center mb-10">
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">

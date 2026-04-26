@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import {
   Search,
   FlaskConical,
@@ -21,13 +20,6 @@ import {
 } from "@/data/mock/chemical-substances-db";
 import { getAllMergedChemicals } from "@/lib/mhlw-chemicals";
 
-const MhlwChemicalAggregatedPanel = dynamic(
-  () =>
-    import("@/components/mhlw-chemical-aggregated-panel").then(
-      (m) => m.MhlwChemicalAggregatedPanel
-    ),
-  { ssr: false, loading: () => <div className="h-40 animate-pulse rounded-lg bg-slate-100" /> }
-);
 
 const CATEGORY_FILTERS: ChemicalCategory[] = [
   "特化則1類",
@@ -119,7 +111,7 @@ export function ChemicalDatabaseClient() {
         ))}
       </div>
 
-      {mode === "mhlw" && <MhlwChemicalAggregatedPanel />}
+      {mode === "mhlw" && <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">厚労省化学物質データベース（準備中）</div>}
 
       {mode === "curated" && (<>
 

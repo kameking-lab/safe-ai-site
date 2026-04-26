@@ -16,13 +16,6 @@ const MhlwAccidentAnalysisPanel = dynamic(
     ),
   { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
 );
-const MhlwAccidentSearchPanel = dynamic(
-  () =>
-    import("@/components/mhlw-accident-search-panel").then(
-      (m) => m.MhlwAccidentSearchPanel
-    ),
-  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
-);
 const IndustryRiskRanking = dynamic(
   () =>
     import("@/components/industry-risk-ranking").then((m) => m.IndustryRiskRanking),
@@ -608,7 +601,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
                 <MhlwDisasterDatabasesPanel />
               </>
             )}
-            {accidentActiveTab === "mhlw-search" && <MhlwAccidentSearchPanel />}
+            {accidentActiveTab === "mhlw-search" && <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">厚労省全件検索（準備中）</div>}
             {accidentActiveTab === "mhlw-deaths" && <MhlwDeathsPanel />}
             {accidentActiveTab === "industry" && <IndustryRiskRanking />}
             {accidentActiveTab === "mhlw" && <MhlwAccidentAnalysisPanel />}
