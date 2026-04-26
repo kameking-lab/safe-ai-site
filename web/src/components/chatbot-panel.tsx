@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import type { ChatbotSource, FollowupSuggestion } from "@/app/api/chatbot/route";
 import type { NoticeHit } from "@/lib/notice-search";
 import { VoiceMicButton } from "@/components/voice-input-field";
+import { BindingBadge } from "@/components/AIResponseCard";
 
 type ChatMessage = {
   id: string;
@@ -18,11 +19,6 @@ type ChatMessage = {
   notices?: NoticeHit[];
 };
 
-const NOTICE_BINDING_BADGE: Record<NoticeHit["bindingLevel"], { label: string; cls: string }> = {
-  binding: { label: "拘束力あり（告示）", cls: "bg-amber-100 text-amber-900 border-amber-300" },
-  indirect: { label: "行政解釈（通達）", cls: "bg-blue-100 text-blue-900 border-blue-300" },
-  reference: { label: "参考（指針）", cls: "bg-emerald-100 text-emerald-900 border-emerald-300" },
-};
 
 type SavedSession = {
   id: string;
@@ -548,7 +544,6 @@ export function ChatbotPanel() {
                     </summary>
                     <div className="mt-2 space-y-2">
                       {msg.notices.map((n) => {
-                        const badge = NOTICE_BINDING_BADGE[n.bindingLevel];
                         return (
                           <div key={n.id} className="rounded-md bg-white p-2 text-xs">
                             <div className="flex flex-wrap items-center gap-1.5">
@@ -560,9 +555,7 @@ export function ChatbotPanel() {
                                   {n.noticeNumber}
                                 </span>
                               )}
-                              <span className={`rounded-full border px-1.5 py-0.5 text-[10px] font-semibold ${badge.cls}`}>
-                                {badge.label}
-                              </span>
+                              <BindingBadge level={n.bindingLevel} />
                               {n.issuedDateRaw && (
                                 <span className="text-[10px] text-slate-500">{n.issuedDateRaw}</span>
                               )}

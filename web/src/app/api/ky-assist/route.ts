@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildKyAssistText, buildRiskAssessmentTable, type KyAssistField } from "@/data/mock/ky-assist-responses";
+import { AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
 
 type Body = {
   /** "table" を指定するとリスクアセスメント表を一括生成。未指定時は単項目補完。 */
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
       workContext: body.workContext?.trim() || "",
       industryId: body.industryId,
     });
-    return NextResponse.json(result, { status: 200 });
+    return NextResponse.json({ ...result, disclaimer: AI_LEGAL_DISCLAIMER }, { status: 200 });
   }
 
   // モード: 単一項目（hazard/reduction/rereduction）の補完
@@ -55,5 +56,5 @@ export async function POST(request: Request) {
     industryId: body.industryId,
   });
 
-  return NextResponse.json({ text }, { status: 200 });
+  return NextResponse.json({ text, disclaimer: AI_LEGAL_DISCLAIMER }, { status: 200 });
 }

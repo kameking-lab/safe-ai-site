@@ -9,6 +9,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findByCas, searchMergedChemicals, regulatoryLabels, relatedLawTexts, type MergedChemical } from "@/lib/mhlw-chemicals";
+import { AI_DISCLAIMER_SYSTEM_INSTRUCTION } from "@/lib/gemini";
 
 export type ChemicalRaRequest = {
   chemicalName: string;
@@ -137,7 +138,10 @@ const SYSTEM_PROMPT = `あなたは化学物質の安全性と職場の化学物
 - 日本語で回答し、現場担当者が理解しやすい表現を使う
 - 回答の冒頭に物質の基本的な性状説明を2〜3行で加える
 - safetyMeasures は厚労省指針の優先順位（① 代替化／工学的対策 → ② 管理的対策 → ③ 個人保護具）を必ず守ること
-- safetyMeasures.priority は 1=工学的対策・代替化、2=管理的対策、3=保護具 とし、配列は priority 順に並べること`;
+- safetyMeasures.priority は 1=工学的対策・代替化、2=管理的対策、3=保護具 とし、配列は priority 順に並べること
+- 濃度基準値・許容濃度は「参考値」として提示し、実際の作業環境測定結果によって判断すること
+- 断定的な断言（「〜に該当します」）より「〜と考えられます」「〜とされています」を使うこと
+${AI_DISCLAIMER_SYSTEM_INSTRUCTION}`;
 
 // 安全対策カテゴリの優先度（厚労省「化学物質管理の優先順位」に準拠）
 const CATEGORY_PRIORITY: Record<string, 1 | 2 | 3> = {
