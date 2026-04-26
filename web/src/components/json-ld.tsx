@@ -180,6 +180,44 @@ export function serviceSchema(input: {
   };
 }
 
+export function howToSchema(input: {
+  name: string;
+  description: string;
+  url?: string;
+  totalTime?: string;
+  steps: { name: string; text: string; url?: string }[];
+}): Schema {
+  const { name, description, url, totalTime, steps } = input;
+  return {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name,
+    description,
+    ...(url ? { url } : {}),
+    ...(totalTime ? { totalTime } : {}),
+    step: steps.map((s, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: s.name,
+      text: s.text,
+      ...(s.url ? { url: s.url } : {}),
+    })),
+  };
+}
+
+export function breadcrumbSchema(items: { name: string; url: string }[]): Schema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((it, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: it.name,
+      item: it.url,
+    })),
+  };
+}
+
 export function courseListSchema(
   courses: { name: string; description: string }[]
 ): Schema {

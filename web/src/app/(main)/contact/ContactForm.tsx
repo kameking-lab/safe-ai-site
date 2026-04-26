@@ -187,7 +187,7 @@ export default function ContactForm() {
   }
 
   const inputClass =
-    "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-[#1a7a4c] focus:ring-2 focus:ring-[#1a7a4c]/20 sm:text-sm";
+    "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-[#1a7a4c] focus:ring-2 focus:ring-[#1a7a4c]/40 focus-visible:ring-offset-2 sm:text-sm";
 
   return (
     <div className="mx-auto max-w-3xl space-y-10 px-4 py-8 lg:px-8">
@@ -341,10 +341,10 @@ export default function ContactForm() {
           </div>
 
           {/* 業種 */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700">
+          <fieldset>
+            <legend className="block text-sm font-semibold text-slate-700">
               業種 <span className="text-red-500">*</span>
-            </label>
+            </legend>
             <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
               {INDUSTRY_OPTIONS.map((opt) => (
                 <label
@@ -367,7 +367,7 @@ export default function ContactForm() {
                 </label>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           {/* 会社規模 */}
           <div>

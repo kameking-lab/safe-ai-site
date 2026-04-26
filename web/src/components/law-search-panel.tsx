@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { allLawArticles, type LawArticle } from "@/data/laws";
 import { SITE_STATS } from "@/data/site-stats";
@@ -65,6 +65,23 @@ const EGOV_LAW_NUMBERS: Record<string, string> = {
   "有機溶剤中毒予防規則": "347M50002000036",
   "特定化学物質障害予防規則": "347M50002000040",
   "酸素欠乏症等防止規則": "347M50002000042",
+  "ボイラー及び圧力容器安全規則": "347M50002000033",
+  "ゴンドラ安全規則": "347M50002000035",
+  "電離放射線障害防止規則": "347M50002000041",
+  "粉じん障害防止規則": "354M50002000018",
+  "石綿障害予防規則": "417M60000100021",
+  "高気圧作業安全衛生規則": "347M50002000040",
+  "事務所衛生基準規則": "347M50002000043",
+  "労働者災害補償保険法": "322AC0000000050",
+  "労働契約法": "419AC0000000128",
+  "雇用機会均等法": "347AC0000000113",
+  "育児介護休業法": "403AC0000000076",
+  "建設業法": "324AC1000000100",
+  "作業環境測定法": "350AC0000000028",
+  "短時間労働者管理法": "405AC0000000076",
+  "職業安定法": "322AC0000000141",
+  "職業能力開発促進法": "344AC0000000064",
+  "最低賃金法": "334AC0000000137",
 };
 
 function getEGovUrl(lawName: string): string | null {
@@ -138,6 +155,14 @@ function AiSummaryModal({
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [summary, setSummary] = useState("");
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   async function fetchSummary() {
     setStatus("loading");
     try {
@@ -159,17 +184,27 @@ function AiSummaryModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ai-summary-title"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-lg rounded-2xl bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <div>
             <p className="text-xs text-slate-500">{article.lawShort} {article.articleNum}</p>
-            <p className="text-sm font-bold text-slate-900">{article.articleTitle || "AI要約"}</p>
+            <p id="ai-summary-title" className="text-sm font-bold text-slate-900">{article.articleTitle || "AI要約"}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 text-xl leading-none"
+            aria-label="このダイアログを閉じる"
+            className="text-slate-600 hover:text-slate-900 text-xl leading-none min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
           >
             ×
           </button>
@@ -280,6 +315,7 @@ export function LawSearchPanel() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="フリーワード検索（例: 墜落制止用器具、有機溶剤）"
+            aria-label="法令フリーワード検索"
             className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 w-full"
           />
         </div>
@@ -288,6 +324,7 @@ export function LawSearchPanel() {
           value={articleNumQuery}
           onChange={(e) => setArticleNumQuery(e.target.value)}
           placeholder="条番号（例: 第21条）"
+          aria-label="条番号で検索"
           className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
         />
       </div>

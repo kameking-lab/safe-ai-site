@@ -79,7 +79,7 @@ export function ScaffoldPage({
       <div className="mb-4">
         <Link
           href={backHref}
-          className="inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 py-1 text-sm text-slate-600 hover:bg-slate-50"
+          className="inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 py-1 text-sm text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           {backLabel}
