@@ -76,6 +76,42 @@ model Subscription {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+/// 資格別100問クイズの問題（モックデータからシード可能）。
+model ExamQuestion {
+  id            String   @id @default(cuid())
+  /// 資格スラッグ（例: "health-1st"）
+  examSlug      String
+  /// 問題番号（資格内の連番）
+  number        Int
+  question      String   @db.Text
+  /// 4択選択肢（["...","...","...","..."]）
+  choices       Json
+  /// 正解インデックス（0..3）
+  correctAnswer Int
+  explanation   String   @db.Text
+  /// 法令根拠等（["安衛則36条","..."]）
+  lawRefs       Json?
+  difficulty    String   @default("標準")
+  topic         String?
+
+  @@unique([examSlug, number])
+  @@index([examSlug])
+}
+
+/// 資格別クイズの受験記録（プラン別の弱点分析・PDF出力に使用）。
+model ExamAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  examSlug  String
+  /// 正解数
+  score     Int
+  /// 受験回答（[{questionId,selected,correct,topic,difficulty}]）
+  answers   Json
+  createdAt DateTime @default(now())
+
+  @@index([userId, examSlug, createdAt])
+}
+
 /// SDS検索＋RA自動実行の履歴。/account から閲覧可能。
 model SdsSearch {
   id            String   @id @default(cuid())
