@@ -15,6 +15,8 @@ import {
   Check,
   Minus,
   ExternalLink,
+  HardHat,
+  ArrowRight,
 } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
@@ -248,6 +250,18 @@ export default function AboutPage() {
                 <p className="mt-2 text-[11px] leading-5 text-slate-500">
                   ※ AI生成の要約・回答は最新法令や個別事案の判断を保証するものではありません。具体的な判断は必ず一次資料・専門家をご確認ください。
                 </p>
+              </div>
+
+              {/* 施工安全事例へのリンク */}
+              <div className="mt-4">
+                <Link
+                  href="/about/cases"
+                  className="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 hover:bg-amber-100 transition-colors"
+                >
+                  <HardHat className="h-4 w-4" />
+                  監修者の施工安全事例を見る（5事例）
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
 
               {/* 資格・経歴 */}
