@@ -44,7 +44,8 @@ export function KyPaperForm({ value, onChange, onSave, savedLabel }: KyPaperForm
         <button
           type="button"
           onClick={() => onSave(value)}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+          className="min-h-[44px] rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+          aria-label="KY内容を保存"
         >
           保存
         </button>

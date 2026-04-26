@@ -148,7 +148,7 @@ const PLANS = [
 
 export default function PricingPage() {
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
+    <main className="mx-auto max-w-7xl px-4 py-8">
       {/* Header */}
       <div className="text-center mb-10">
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
