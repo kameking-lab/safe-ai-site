@@ -218,7 +218,69 @@ export default function SecurityPage() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-base font-bold text-slate-900">7. セキュリティ認証・コンプライアンス</h2>
+          <h2 className="text-base font-bold text-slate-900">7. AI基盤（Gemini API）</h2>
+          <p className="text-sm leading-7 text-slate-600">
+            ANZEN AI の生成AI機能（法令チャットボット、化学物質RA、KY支援、Eラーニング解説等）は
+            Google LLC が提供する <strong>Gemini API（Google AI Studio）</strong>
+            を経由して処理しています。
+          </p>
+          <ul className="space-y-3 text-sm text-slate-600">
+            <li className="flex items-start gap-2">
+              <Badge type="現状" />
+              <span>
+                <span className="font-semibold text-slate-700">学習データ非利用</span>
+                ：Gemini API（有料・Google AI Studio 経由）への入力は、Google のポリシーに基づき
+                <strong>モデルの学習には利用されません</strong>
+                。コンシューマ向け Gemini アプリとは扱いが異なります。
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Badge type="現状" />
+              <span>
+                <span className="font-semibold text-slate-700">プロンプト・応答ログの保持期間</span>
+                ：当方サーバ上に保存するプロンプト・応答ログは
+                <strong>30日で自動削除</strong>
+                します（不正アクセス調査・品質改善目的の最低限）。Google 側の処理ログは
+                <a
+                  className="ml-0.5 underline hover:text-emerald-700"
+                  href="https://ai.google.dev/gemini-api/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Gemini API 利用規約
+                </a>
+                に従って取り扱われます。
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Badge type="現状" />
+              <span>
+                <span className="font-semibold text-slate-700">個人情報マスキング推奨</span>
+                ：氏名・住所・電話番号・社員番号・契約金額等の個人情報や機密情報は、
+                <strong>入力前に伏字（◯◯）等でマスキング</strong>
+                して送信することを推奨します。AI入力欄には注意書きを表示しています。
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Badge type="現状" />
+              <span>
+                <span className="font-semibold text-slate-700">越境移転</span>
+                ：Gemini API の処理は米国およびその他の Google データセンターで行われます。
+                個人情報を含む入力を行う場合は、利用者自身の責任において送信してください。
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <Badge type="予定" />
+              <span>
+                <span className="font-semibold text-slate-700">入力前自動マスキング</span>
+                ：氏名・電話番号・メールアドレス等のパターンを検知して送信前に自動で伏字化する機能を実装予定（独立後3〜6ヶ月）。
+              </span>
+            </li>
+          </ul>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-base font-bold text-slate-900">8. セキュリティ認証・コンプライアンス</h2>
           <ul className="space-y-3 text-sm text-slate-600">
             <li className="flex items-start gap-2">
               <Badge type="未対応" />

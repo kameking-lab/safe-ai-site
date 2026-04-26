@@ -109,6 +109,53 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-3">
+          <h2 className="text-base font-bold text-slate-900">4-2. AI機能のデータ処理（Gemini API）</h2>
+          <p className="text-sm leading-7 text-slate-600">
+            本サービスの生成AI機能は、Google LLC が提供する
+            <strong>Gemini API（Google AI Studio）</strong>
+            を利用しています。利用にあたり、以下の点をご了承ください。
+          </p>
+          <ul className="ml-4 space-y-1 text-sm text-slate-600">
+            <li className="list-disc">
+              <span className="font-semibold text-slate-700">モデル学習への非利用</span>
+              ：Gemini API（有料 API 経由）への入力は、Google のポリシーに従い、Google のモデル学習には利用されません。コンシューマ向け Gemini アプリとは扱いが異なります。
+            </li>
+            <li className="list-disc">
+              <span className="font-semibold text-slate-700">ログ保持期間</span>
+              ：当方が保有するプロンプト・応答ログは、不正アクセス調査・品質改善目的のため最大 30 日間保持し、その後自動削除されます。Google 側の処理ログは
+              <a
+                className="ml-0.5 underline hover:text-emerald-700"
+                href="https://ai.google.dev/gemini-api/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Gemini API 利用規約
+              </a>
+              に従って取り扱われます。
+            </li>
+            <li className="list-disc">
+              <span className="font-semibold text-slate-700">個人情報の入力に関する注意</span>
+              ：氏名・住所・電話番号・社員番号・契約金額等の個人情報、および顧客先・現場の機密情報は、
+              <strong>入力前に伏字（◯◯）等でマスキング</strong>
+              することを強く推奨します。AI入力欄にも注意書きを表示しています。
+            </li>
+            <li className="list-disc">
+              <span className="font-semibold text-slate-700">越境移転</span>
+              ：Gemini API の処理は米国およびその他の Google データセンターで行われます。
+            </li>
+            <li className="list-disc">
+              <span className="font-semibold text-slate-700">出力の正確性</span>
+              ：AIの応答は最新法令や個別事案を保証するものではなく、必ず一次資料（e-Gov、厚労省等）または専門家にご確認ください。
+            </li>
+          </ul>
+          <p className="text-sm leading-7 text-slate-600">
+            技術的なセキュリティ対策の詳細は
+            <a className="underline hover:text-emerald-700" href="/security">セキュリティページ</a>
+            をご参照ください。
+          </p>
+        </section>
+
+        <section className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">5. 保有期間</h2>
           <ul className="ml-4 space-y-1 text-sm text-slate-600">
             <li className="list-disc">お問い合わせ情報：対応終了後 3 年間</li>
