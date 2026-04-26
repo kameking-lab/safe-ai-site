@@ -26,11 +26,17 @@ const STATUS_LABEL: Record<string, string> = {
   unpaid: "未払い",
 };
 
-export default async function AccountPage() {
+interface Props {
+  searchParams: Promise<{ portal_return?: string }>;
+}
+
+export default async function AccountPage({ searchParams }: Props) {
   const session = await auth();
   if (!session?.user) {
     redirect("/api/auth/signin?callbackUrl=%2Faccount");
   }
+
+  const { portal_return } = await searchParams;
 
   const userId = (session.user as { id?: string }).id;
   let planName = "free";
@@ -72,11 +78,51 @@ export default async function AccountPage() {
   const planLabel = PLAN_LABEL[planName] ?? planName;
   const statusLabel = STATUS_LABEL[status] ?? status;
   const isFree = planName === "free";
+  const isCanceled = status === "canceled";
+  const isPastDue = status === "past_due";
+  const isUnpaid = status === "unpaid";
+  const hasAlert = isPastDue || isUnpaid || isCanceled;
+
+  // 期間終了日の表示ラベル
+  const periodEndLabel = currentPeriodEnd
+    ? currentPeriodEnd.toLocaleDateString("ja-JP")
+    : null;
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
       <h1 className="text-2xl font-bold text-slate-900">マイページ</h1>
       <p className="mt-2 text-sm text-slate-500">{session.user.email}</p>
+
+      {/* ポータル返遷成功バナー */}
+      {portal_return === "1" && (
+        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          プラン情報を更新しました。反映まで数分かかる場合があります。
+        </div>
+      )}
+
+      {/* 状態アラートバナー */}
+      {isPastDue && (
+        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800">
+          <p className="font-semibold">支払いに失敗しました</p>
+          <p>登録済みのカードへの請求が失敗しています。「プラン管理」から支払い方法を更新してください。更新がない場合、サービスが停止されます。</p>
+        </div>
+      )}
+      {isUnpaid && (
+        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800">
+          <p className="font-semibold">未払いがあります</p>
+          <p>請求が未払いです。「プラン管理」から対応してください。</p>
+        </div>
+      )}
+      {isCanceled && (
+        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
+          <p className="font-semibold">プランが解約されました</p>
+          <p>
+            {periodEndLabel
+              ? `${periodEndLabel}まで現在の機能をご利用いただけます。その後フリープランに移行します。`
+              : "請求期間の終了後、フリープランに移行します。"}
+          </p>
+        </div>
+      )}
 
       <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="text-base font-bold text-slate-800">現在のプラン</h2>
@@ -86,7 +132,9 @@ export default async function AccountPage() {
             className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
               status === "active"
                 ? "bg-emerald-100 text-emerald-700"
-                : "bg-amber-100 text-amber-700"
+                : hasAlert
+                  ? "bg-red-100 text-red-700"
+                  : "bg-amber-100 text-amber-700"
             }`}
           >
             {statusLabel}
@@ -94,7 +142,7 @@ export default async function AccountPage() {
         </div>
         {currentPeriodEnd && (
           <p className="mt-3 text-xs text-slate-500">
-            次回更新日：{currentPeriodEnd.toLocaleDateString("ja-JP")}
+            {isCanceled ? "利用期限" : "次回更新日"}：{periodEndLabel}
           </p>
         )}
 
@@ -109,12 +157,13 @@ export default async function AccountPage() {
               プランをアップグレード
             </Link>
           )}
-          {isFree && hasStripeCustomer && (
+          {/* フリープランまたは解約済みでStripe顧客なし → アップグレード誘導 */}
+          {(isFree || isCanceled) && hasStripeCustomer && (
             <Link
               href="/pricing"
               className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
             >
-              他のプランを見る
+              {isCanceled ? "再加入する" : "他のプランを見る"}
             </Link>
           )}
         </div>
@@ -167,6 +216,7 @@ export default async function AccountPage() {
           <li>プラン変更・解約・支払い方法の更新は「プラン管理」から行えます。</li>
           <li>解約後は当該請求期間の終了まで機能をご利用いただけます。</li>
           <li>領収書・請求履歴もプラン管理から確認できます。</li>
+          <li>再加入時は以前の顧客情報が引き継がれます。</li>
         </ul>
       </section>
     </main>
