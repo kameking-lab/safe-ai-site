@@ -208,22 +208,22 @@ export function HomeValueHero() {
       {/* 「こんな方に」セクション */}
       <section
         aria-labelledby="targets-heading"
-        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6"
       >
-        <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-600">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-600 dark:text-emerald-300">
           こんな方に
         </p>
-        <h3 id="targets-heading" className="mt-1 text-base font-bold text-slate-900 sm:text-lg">
+        <h3 id="targets-heading" className="mt-1 text-base font-bold text-slate-900 dark:text-slate-100 sm:text-lg">
           1人でも、1社でも、成果が出るまで伴走します。
         </h3>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {TARGET_PROFILES.map((p) => (
             <div
               key={p.title}
-              className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4"
+              className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10"
             >
-              <p className="text-sm font-bold text-emerald-800">✓ {p.title}</p>
-              <p className="mt-1.5 text-xs leading-5 text-slate-700">{p.desc}</p>
+              <p className="text-sm font-bold text-emerald-800 dark:text-emerald-200">✓ {p.title}</p>
+              <p className="mt-1.5 text-xs leading-5 text-slate-700 dark:text-slate-200">{p.desc}</p>
             </div>
           ))}
         </div>
@@ -233,12 +233,12 @@ export function HomeValueHero() {
       <section
         id="features-section"
         aria-labelledby="capabilities-heading"
-        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
+        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800 sm:p-6"
       >
-        <p className="text-[11px] font-bold uppercase tracking-widest text-sky-600">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-sky-600 dark:text-sky-300">
           できること
         </p>
-        <h3 id="capabilities-heading" className="mt-1 text-base font-bold text-slate-900 sm:text-lg">
+        <h3 id="capabilities-heading" className="mt-1 text-base font-bold text-slate-900 dark:text-slate-100 sm:text-lg">
           現場で使える6つの機能を、無料ですぐ試せます。
         </h3>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -246,16 +246,16 @@ export function HomeValueHero() {
             <Link
               key={c.label}
               href={c.href}
-              className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-emerald-400 hover:shadow-md"
+              className="group flex flex-col rounded-xl border border-slate-200 bg-white p-4 transition-all hover:border-emerald-400 hover:shadow-md dark:border-slate-700 dark:bg-slate-900 dark:hover:border-emerald-400/70"
             >
               <div className="flex items-center gap-2.5">
                 <span className="text-2xl" aria-hidden="true">
                   {c.emoji}
                 </span>
-                <span className="text-sm font-bold text-slate-900">{c.label}</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-slate-100">{c.label}</span>
               </div>
-              <p className="mt-2 text-xs leading-5 text-slate-600">{c.desc}</p>
-              <span className="mt-3 text-xs font-bold text-emerald-700 group-hover:text-emerald-800">
+              <p className="mt-2 text-xs leading-5 text-slate-600 dark:text-slate-300">{c.desc}</p>
+              <span className="mt-3 text-xs font-bold text-emerald-700 group-hover:text-emerald-800 dark:text-emerald-300 dark:group-hover:text-emerald-200">
                 使ってみる →
               </span>
             </Link>
@@ -266,26 +266,26 @@ export function HomeValueHero() {
       {/* Claude Code × 安全 の強み */}
       <section
         aria-labelledby="strength-heading"
-        className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-emerald-50 p-5 shadow-sm sm:p-6"
+        className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-emerald-50 p-5 shadow-sm dark:border-amber-500/30 dark:from-amber-500/10 dark:via-slate-800 dark:to-emerald-500/10 sm:p-6"
       >
-        <p className="text-[11px] font-bold uppercase tracking-widest text-amber-700">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-300">
           Claude Code × 安全 の強み
         </p>
-        <h3 id="strength-heading" className="mt-1 text-base font-bold text-slate-900 sm:text-lg">
+        <h3 id="strength-heading" className="mt-1 text-base font-bold text-slate-900 dark:text-slate-100 sm:text-lg">
           「現場を知る人間」が「最新AIで実装する」からこそ、速くて正しい。
         </h3>
         <div className="mt-4 space-y-3">
           {STRENGTH_ITEMS.map((s, i) => (
             <div
               key={s.title}
-              className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-4"
+              className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-700">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-700 dark:bg-amber-500/20 dark:text-amber-200">
                 {i + 1}
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-900">{s.title}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-600">{s.desc}</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{s.title}</p>
+                <p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">{s.desc}</p>
               </div>
             </div>
           ))}
@@ -295,12 +295,12 @@ export function HomeValueHero() {
       {/* サービス導線 */}
       <section
         aria-labelledby="services-section-heading"
-        className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 shadow-sm sm:p-6"
+        className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 shadow-sm dark:border-emerald-500/30 dark:from-emerald-500/10 dark:via-slate-800 dark:to-amber-500/10 sm:p-6"
       >
-        <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700">
+        <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
           ANZEN AI サービス
         </p>
-        <h3 id="services-section-heading" className="mt-1 text-base font-bold text-slate-900 sm:text-lg">
+        <h3 id="services-section-heading" className="mt-1 text-base font-bold text-slate-900 dark:text-slate-100 sm:text-lg">
           用途に合わせて、無料から受託まで選べます。
         </h3>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -310,24 +310,24 @@ export function HomeValueHero() {
               title: "月額プラン（¥0〜）",
               desc: "フリー／スタンダード¥980／プロ¥2,980。いつでもキャンセル可。",
               cta: "プランを見る",
-              color: "bg-white border-emerald-200 hover:border-emerald-400",
-              accent: "text-emerald-700",
+              color: "bg-white border-emerald-200 hover:border-emerald-400 dark:bg-slate-800 dark:border-emerald-500/30 dark:hover:border-emerald-400/70",
+              accent: "text-emerald-700 dark:text-emerald-300",
             },
             {
               href: "/services",
               title: "受託業務（¥150k〜）",
               desc: "KY・安全管理・教育・法改正通知・Claude Code 開発まで。",
               cta: "受託メニューを見る",
-              color: "bg-white border-amber-200 hover:border-amber-400",
-              accent: "text-amber-700",
+              color: "bg-white border-amber-200 hover:border-amber-400 dark:bg-slate-800 dark:border-amber-500/30 dark:hover:border-amber-400/70",
+              accent: "text-amber-700 dark:text-amber-300",
             },
             {
               href: "/contact",
               title: "無料相談30分",
               desc: "課題整理から最適プラン提案まで。強引な営業は一切なし。",
               cta: "相談を申し込む",
-              color: "bg-white border-violet-200 hover:border-violet-400",
-              accent: "text-violet-700",
+              color: "bg-white border-violet-200 hover:border-violet-400 dark:bg-slate-800 dark:border-violet-500/30 dark:hover:border-violet-400/70",
+              accent: "text-violet-700 dark:text-violet-300",
             },
           ].map((card) => (
             <Link
@@ -337,7 +337,7 @@ export function HomeValueHero() {
             >
               <div>
                 <p className={`text-sm font-bold ${card.accent}`}>{card.title}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-700">{card.desc}</p>
+                <p className="mt-1 text-xs leading-5 text-slate-700 dark:text-slate-300">{card.desc}</p>
               </div>
               <span className={`mt-3 inline-flex items-center gap-1 text-xs font-bold ${card.accent}`}>
                 {card.cta} →

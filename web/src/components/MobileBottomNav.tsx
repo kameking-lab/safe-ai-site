@@ -32,7 +32,7 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="モバイル ボトムナビゲーション"
-      className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80"
+      className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-slate-700 dark:bg-slate-900/95 dark:supports-[backdrop-filter]:bg-slate-900/80"
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-between px-1">
         {ITEMS.map((item) => {
@@ -45,12 +45,12 @@ export function MobileBottomNav() {
                 aria-current={active ? "page" : undefined}
                 className={`tap-target flex flex-col items-center justify-center gap-0.5 px-1 py-1.5 text-[11px] leading-tight ${
                   active
-                    ? "font-bold text-emerald-700"
-                    : "font-medium text-slate-600"
+                    ? "font-bold text-emerald-700 dark:text-emerald-300"
+                    : "font-medium text-slate-600 dark:text-slate-300"
                 }`}
               >
                 <Icon
-                  className={`h-6 w-6 ${active ? "text-emerald-700" : "text-slate-500"}`}
+                  className={`h-6 w-6 ${active ? "text-emerald-700 dark:text-emerald-300" : "text-slate-500 dark:text-slate-400"}`}
                   aria-hidden="true"
                 />
                 <span className="truncate">{item.label}</span>

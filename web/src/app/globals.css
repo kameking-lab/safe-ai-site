@@ -3,9 +3,28 @@
 @import "leaflet.markercluster/dist/MarkerCluster.css";
 @import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 
+/**
+ * ダークモード: html.dark を起点にする class 戦略
+ * Tailwind v4 では @custom-variant でクラス戦略を宣言する。
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --surface-card: #ffffff;
+  --surface-muted: #f8fafc; /* slate-50 */
+  --border-subtle: #e2e8f0; /* slate-200 */
+}
+
+html.dark {
+  /* ダーク背景: slate-900 / カード: slate-800 / 文字: slate-100 / 境界: slate-700 */
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --surface-card: #1e293b;
+  --surface-muted: #0b1220;
+  --border-subtle: #334155;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -19,19 +38,13 @@
   --color-brand-danger: #e74c3c;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   /* PWAプルリフレッシュを有効にする */
   overscroll-behavior-y: auto;
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 /* スクロールバー非表示（モバイルタブ等） */
@@ -141,6 +154,18 @@ html.large-font li,
 html.large-font span,
 html.large-font button {
   font-size: 1.05em;
+}
+
+/* ダークモード: 印刷時は強制ライトに戻す（ID_003 印刷リーフレット対応との両立） */
+@media print {
+  html.dark {
+    --background: #ffffff;
+    --foreground: #000000;
+    --surface-card: #ffffff;
+    --surface-muted: #ffffff;
+    --border-subtle: #cbd5e1;
+    color-scheme: light;
+  }
 }
 
 /* 屋外視認性向上：ハイコントラストモード（ID_11・ID_93対応） */

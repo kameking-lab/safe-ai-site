@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/contexts/language-context";
 import { JsonLd, organizationSchema, webSiteSchema, personSchema } from "@/components/json-ld";
 import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
 import { CommandPaletteProvider } from "@/components/CommandPaletteProvider";
+import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -81,21 +82,28 @@ export default function RootLayout({
     <html
       lang="ja"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full bg-slate-50 font-sans text-slate-900">
+      <head>
+        {/* FOUC 抑止: hydration 前に html.dark を確定させる */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body className="min-h-full bg-slate-50 font-sans text-slate-900 dark:bg-slate-900 dark:text-slate-100">
         <JsonLd schema={organizationSchema()} />
         <JsonLd schema={webSiteSchema()} />
         <JsonLd schema={personSchema()} />
         <ServiceWorkerRegistrar />
-        <LanguageProvider>
-          <FuriganaProvider>
-            <EasyJapaneseProvider>
-              <CommandPaletteProvider>
-                {children}
-              </CommandPaletteProvider>
-            </EasyJapaneseProvider>
-          </FuriganaProvider>
-        </LanguageProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <FuriganaProvider>
+              <EasyJapaneseProvider>
+                <CommandPaletteProvider>
+                  {children}
+                </CommandPaletteProvider>
+              </EasyJapaneseProvider>
+            </FuriganaProvider>
+          </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -2,7 +2,7 @@
 
 export function Header() {
   return (
-    <header className="border-b border-slate-200 bg-white px-4 py-4 sm:py-5">
+    <header className="border-b border-slate-200 bg-white px-4 py-4 dark:border-slate-700 dark:bg-slate-900 sm:py-5">
       <div className="flex items-center gap-3">
         {/* ヘルメットアイコン */}
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 shadow-sm">
@@ -23,10 +23,10 @@ export function Header() {
           </svg>
         </div>
         <div className="flex-1">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700">
+          <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
             ANZEN AI
           </p>
-          <h1 className="text-lg font-bold leading-tight text-slate-900 sm:text-xl">
+          <h1 className="text-lg font-bold leading-tight text-slate-900 dark:text-slate-100 sm:text-xl">
             現場の安全情報を、すばやく確認
           </h1>
         </div>
@@ -34,7 +34,7 @@ export function Header() {
         <button
           onClick={() => window.location.reload()}
           aria-label="ページを更新"
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-slate-100 dark:focus-visible:ring-emerald-400 dark:focus-visible:ring-offset-slate-900"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -54,7 +54,7 @@ export function Header() {
           </svg>
         </button>
       </div>
-      <p className="mt-2 text-sm leading-relaxed text-slate-600">
+      <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
         法改正・現場リスク・事故DB・KY用紙をまとめて確認できます。
       </p>
     </header>
