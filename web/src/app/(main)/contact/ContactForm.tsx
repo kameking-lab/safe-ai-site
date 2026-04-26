@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Clock, MailCheck, ShieldCheck } from "lucide-react";
+import { TranslatedPageHeader } from "@/components/translated-page-header";
+import { useLanguage } from "@/contexts/language-context";
 
 const FORMSPREE_ID = process.env.NEXT_PUBLIC_FORMSPREE_ID;
 
@@ -80,6 +82,8 @@ const SERVICE_LABEL: Record<string, string> = {
 };
 
 export default function ContactForm() {
+  const { language } = useLanguage();
+  const isEn = language === "en";
   const searchParams = useSearchParams();
   const plan = searchParams?.get("plan") ?? "";
   const service = searchParams?.get("service") ?? "";
@@ -189,25 +193,28 @@ export default function ContactForm() {
     <div className="mx-auto max-w-3xl space-y-10 px-4 py-8 lg:px-8">
       {/* ヘッダー */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">お問い合わせ・無料相談</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          導入相談・受託業務のご依頼・顧問契約・機能要望など、お気軽にご連絡ください。
-          現状の課題に合わせて、最適なプラン・受託メニューをご提案します。
-        </p>
+        <TranslatedPageHeader
+          titleJa="お問い合わせ・無料相談"
+          titleEn="Contact Us / Free Consultation"
+          descriptionJa="導入相談・受託業務のご依頼・顧問契約・機能要望など、お気軽にご連絡ください。現状の課題に合わせて、最適なプラン・受託メニューをご提案します。"
+          descriptionEn="Implementation inquiries, custom projects, retainer contracts, or feature requests — feel free to reach out. We'll suggest the best plan or service for your current challenges."
+          iconName="MessageSquare"
+          iconColor="emerald"
+        />
 
         {/* 返信約束バッジ */}
         <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
           <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
             <Clock className="h-4 w-4" />
-            24時間以内にご返信（土日祝除く）
+            {isEn ? "Reply within 24 hrs (Mon–Fri)" : "24時間以内にご返信（土日祝除く）"}
           </div>
           <div className="flex items-center gap-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-800">
             <MailCheck className="h-4 w-4" />
-            無料相談30分を必ず実施
+            {isEn ? "Free 30-min consultation included" : "無料相談30分を必ず実施"}
           </div>
           <div className="flex items-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-800">
             <ShieldCheck className="h-4 w-4" />
-            強引な営業は一切ありません
+            {isEn ? "No hard sales, ever" : "強引な営業は一切ありません"}
           </div>
         </div>
       </div>

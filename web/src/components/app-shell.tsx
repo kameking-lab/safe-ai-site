@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { UserMenu } from "@/components/user-menu";
+import { EnglishBetaBanner } from "@/components/english-beta-banner";
 import { useFurigana } from "@/contexts/furigana-context";
 import { useEasyJapanese } from "@/contexts/easy-japanese-context";
 import {
@@ -510,6 +511,7 @@ export function AppShell({ children, user }: AppShellProps) {
           </div>
         )}
 
+        <EnglishBetaBanner />
         <main className="flex flex-1 flex-col">
           <div className="mx-auto w-full max-w-7xl flex-1">{children}</div>
         </main>
