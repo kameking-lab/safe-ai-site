@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ChatbotSource, FollowupSuggestion } from "@/app/api/chatbot/route";
+import type { NoticeHit } from "@/lib/notice-search";
 import { VoiceMicButton } from "@/components/voice-input-field";
 
 type ChatMessage = {
@@ -14,6 +15,13 @@ type ChatMessage = {
   confidence?: "high" | "medium" | "low";
   confidenceScore?: number;
   followups?: FollowupSuggestion[];
+  notices?: NoticeHit[];
+};
+
+const NOTICE_BINDING_BADGE: Record<NoticeHit["bindingLevel"], { label: string; cls: string }> = {
+  binding: { label: "拘束力あり（告示）", cls: "bg-amber-100 text-amber-900 border-amber-300" },
+  indirect: { label: "行政解釈（通達）", cls: "bg-blue-100 text-blue-900 border-blue-300" },
+  reference: { label: "参考（指針）", cls: "bg-emerald-100 text-emerald-900 border-emerald-300" },
 };
 
 type SavedSession = {
@@ -193,6 +201,7 @@ export function ChatbotPanel() {
         confidence: "high" | "medium" | "low";
         confidenceScore?: number;
         followups?: FollowupSuggestion[];
+        notices?: NoticeHit[];
       };
 
       const assistantMsg: ChatMessage = {
@@ -204,6 +213,7 @@ export function ChatbotPanel() {
         confidence: data.confidence,
         confidenceScore: data.confidenceScore,
         followups: data.followups,
+        notices: data.notices,
       };
 
       const finalMessages = [...nextMessages, assistantMsg];
@@ -527,6 +537,56 @@ export function ChatbotPanel() {
                         </div>
                       ))}
                     </div>
+                  </details>
+                )}
+
+                {/* 関連通達・告示・指針（厚労省一次資料DB由来） */}
+                {msg.role === "assistant" && msg.notices && msg.notices.length > 0 && (
+                  <details className="mt-2 max-w-[88%] rounded-lg border border-amber-200 bg-amber-50 p-3" open>
+                    <summary className="cursor-pointer text-xs font-semibold text-amber-900 hover:text-amber-700">
+                      関連通達・告示 ({msg.notices.length}件・拘束力レベル付き)
+                    </summary>
+                    <div className="mt-2 space-y-2">
+                      {msg.notices.map((n) => {
+                        const badge = NOTICE_BINDING_BADGE[n.bindingLevel];
+                        return (
+                          <div key={n.id} className="rounded-md bg-white p-2 text-xs">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-700">
+                                {n.docType}
+                              </span>
+                              {n.noticeNumber && (
+                                <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-mono font-semibold text-blue-900">
+                                  {n.noticeNumber}
+                                </span>
+                              )}
+                              <span className={`rounded-full border px-1.5 py-0.5 text-[10px] font-semibold ${badge.cls}`}>
+                                {badge.label}
+                              </span>
+                              {n.issuedDateRaw && (
+                                <span className="text-[10px] text-slate-500">{n.issuedDateRaw}</span>
+                              )}
+                            </div>
+                            <p className="mt-1 font-semibold text-slate-900 leading-snug">{n.title}</p>
+                            {n.issuer && (
+                              <p className="mt-0.5 text-[11px] text-slate-600">発出: {n.issuer}</p>
+                            )}
+                            <a
+                              href={n.detailUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="mt-1 inline-flex items-center gap-1 rounded border border-amber-300 bg-white px-2 py-0.5 text-[10px] font-semibold text-amber-700 hover:bg-amber-50"
+                            >
+                              原文（安全衛生情報センター）
+                            </a>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-2 text-[10px] text-amber-800">
+                      ※ 出典: 厚労省・中央労働災害防止協会 安全衛生情報センター。
+                      <a href="/resources" className="ml-1 underline">一次資料DB</a> も参照ください。
+                    </p>
                   </details>
                 )}
 

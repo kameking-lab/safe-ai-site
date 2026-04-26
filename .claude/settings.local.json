@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "WebFetch(domain:www.mhlw.go.jp)"
+      "WebFetch(domain:www.mhlw.go.jp)",
+      "WebFetch(domain:anzeninfo.mhlw.go.jp)",
+      "WebFetch(domain:www.jaish.gr.jp)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }

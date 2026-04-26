@@ -51,6 +51,13 @@ export default function LawsPage() {
             cta: "通達と判例を見る",
           },
           {
+            href: "/resources",
+            label: "厚労省一次資料DB",
+            description: "通達527件・告示244件・指針98件・リーフレット289件を分類検索。一次ソース直リンク。",
+            color: "amber",
+            cta: "一次資料DBを開く",
+          },
+          {
             href: "/chatbot",
             label: "法令チャット",
             description: "法改正の内容について安衛法AIチャットボットに質問。条文の根拠を確認できます。",

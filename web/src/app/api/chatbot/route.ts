@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { searchRelevantArticlesWithScore, buildContextFromArticles, formatSourceCitations } from "@/lib/rag-search";
+import { searchRelevantNotices, NOTICE_BINDING_LABELS, type NoticeHit } from "@/lib/notice-search";
 import type { LawArticle } from "@/data/laws";
 import { searchMlitResources, type MlitResource } from "@/data/mlit-resources";
 
@@ -39,6 +40,8 @@ export type ChatbotResponse = {
   confidenceScore?: number;
   /** フォローアップ質問サジェスト（最大3件） */
   followups?: FollowupSuggestion[];
+  /** 関連する厚労省通達・告示・指針（一次資料DB由来） */
+  notices?: NoticeHit[];
 };
 
 type ApiErrorBody = {
@@ -180,6 +183,8 @@ export async function POST(request: Request) {
     return jsonError(400, "質問文を入力してください。");
   }
 
+  const relatedNotices = searchRelevantNotices(message, 3);
+
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey || apiKey === "dummy") {
     // APIキー未設定時もRAG検索による条文引用は提供する
@@ -204,6 +209,7 @@ export async function POST(request: Request) {
         source_type: articles.length > 0 || mlitMatches.length > 0 ? "rag" : "ai_inference",
         confidence: articles.length > 0 || mlitMatches.length > 0 ? "medium" : "low",
         followups: buildFollowups(message, articles),
+        notices: relatedNotices,
       },
       { status: 200 }
     );
@@ -246,6 +252,9 @@ export async function POST(request: Request) {
       {
         answer:
           "ご質問に合致する法令条文を十分な確信度で特定できませんでした。\n\n" +
+          (relatedNotices.length > 0
+            ? "ただし、以下の通達・告示が関連する可能性があります（下部の「関連通達」セクションをご参照ください）。\n\n"
+            : "") +
           "最新・正確な条文は以下のe-Gov法令検索でご確認ください：\n" +
           "https://laws.e-gov.go.jp/\n\n" +
           "質問を具体的にしていただくか、対象の法令名（例：労働安全衛生規則、有機則、クレーン則）を含めて再度お尋ねください。\n" +
@@ -259,6 +268,7 @@ export async function POST(request: Request) {
           { label: "🔁 別の言い方で質問", prompt: `${message}（別の言い方で再度質問させてください。法令名や条文番号を含めた言い方で教えてください）` },
           { label: "📚 関連する法令を調べる", prompt: `${message} に関連する労働安全衛生法令にはどのようなものがありますか？` },
         ],
+        notices: relatedNotices,
       },
       { status: 200 }
     );
@@ -306,6 +316,16 @@ export async function POST(request: Request) {
     answer += `\n\n🏛 所管省庁資料: ${ministryRefs.join("、")}`;
   }
 
+  // 関連通達を回答末尾に追記（拘束力レベル付き）
+  if (relatedNotices.length > 0) {
+    answer += "\n\n【関連通達・告示】\n";
+    for (const n of relatedNotices) {
+      const num = n.noticeNumber ? `${n.noticeNumber}・` : "";
+      const date = n.issuedDateRaw ? `${n.issuedDateRaw}・` : "";
+      answer += `- ${num}${date}${n.title}（${NOTICE_BINDING_LABELS[n.bindingLevel]}）\n`;
+    }
+  }
+
   // sourcesを整形（質問に該当するスニペットも生成）
   const sources: ChatbotSource[] = [
     ...relevantArticles.map((a: LawArticle) => ({
@@ -341,6 +361,7 @@ export async function POST(request: Request) {
       confidence,
       confidenceScore,
       followups: buildFollowups(message, relevantArticles),
+      notices: relatedNotices,
     },
     { status: 200 }
   );
