@@ -37,6 +37,9 @@ export function Footer() {
             <Link href="/consulting" className="hover:text-slate-800 hover:underline">
               月額顧問
             </Link>
+            <Link href="/wizard" className="hover:text-slate-800 hover:underline">
+              コンプラ診断
+            </Link>
             <Link href="/privacy" className="hover:text-slate-800 hover:underline">
               プライバシーポリシー
             </Link>

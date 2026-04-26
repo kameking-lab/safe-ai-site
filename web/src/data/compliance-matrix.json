@@ -1,0 +1,440 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2026-04-26",
+  "source": "労働安全衛生法・同施行令・関連規則（厚生労働省「労働安全衛生法のあらまし」準拠）",
+  "industries": [
+    { "id": "construction", "label": "建設業", "anzenManagerRequired": true, "souguoThreshold": 100, "suishinKind": "anzen-eisei", "lawCategory": "group1" },
+    { "id": "manufacturing", "label": "製造業", "anzenManagerRequired": true, "souguoThreshold": 300, "suishinKind": "anzen-eisei", "lawCategory": "group2" },
+    { "id": "transport", "label": "運輸業", "anzenManagerRequired": true, "souguoThreshold": 100, "suishinKind": "anzen-eisei", "lawCategory": "group1" },
+    { "id": "healthcare", "label": "医療福祉", "anzenManagerRequired": false, "souguoThreshold": 1000, "suishinKind": "eisei", "lawCategory": "other" },
+    { "id": "service", "label": "サービス業", "anzenManagerRequired": false, "souguoThreshold": 1000, "suishinKind": "eisei", "lawCategory": "other" },
+    { "id": "it", "label": "IT・情報通信", "anzenManagerRequired": false, "souguoThreshold": 1000, "suishinKind": "eisei", "lawCategory": "other" }
+  ],
+  "sizes": [
+    { "id": "under10", "label": "10人未満", "min": 1, "max": 9 },
+    { "id": "10-49", "label": "10〜49人", "min": 10, "max": 49 },
+    { "id": "50-99", "label": "50〜99人", "min": 50, "max": 99 },
+    { "id": "100-299", "label": "100〜299人", "min": 100, "max": 299 },
+    { "id": "300+", "label": "300人以上", "min": 300, "max": 99999 }
+  ],
+  "hazards": [
+    { "id": "organic-solvent", "label": "有機溶剤", "category": "chemical" },
+    { "id": "specified-chemical", "label": "特定化学物質", "category": "chemical" },
+    { "id": "dust", "label": "粉じん", "category": "chemical" },
+    { "id": "asbestos", "label": "石綿（アスベスト）", "category": "chemical" },
+    { "id": "high-place", "label": "高所作業（2m以上）", "category": "work" },
+    { "id": "crane", "label": "クレーン・玉掛け", "category": "work" },
+    { "id": "forklift", "label": "フォークリフト", "category": "work" }
+  ],
+  "appointments": [
+    {
+      "id": "souguo-group1",
+      "title": "総括安全衛生管理者",
+      "lawRef": "安衛法第10条 / 安衛令第2条第1号",
+      "summary": "事業場の安全衛生業務を統括管理する者を選任",
+      "deadline": "選任すべき事由が発生した日から14日以内に選任、遅滞なく所轄労働基準監督署長へ報告",
+      "note": "建設業・運輸業（運送業）等は100人以上で必要",
+      "condition": { "industries": ["construction", "transport"], "minHeadcount": 100 }
+    },
+    {
+      "id": "souguo-group2",
+      "title": "総括安全衛生管理者",
+      "lawRef": "安衛法第10条 / 安衛令第2条第2号",
+      "summary": "事業場の安全衛生業務を統括管理する者を選任",
+      "deadline": "選任後14日以内に所轄労基署へ選任報告書",
+      "note": "製造業等は300人以上で必要",
+      "condition": { "industries": ["manufacturing"], "minHeadcount": 300 }
+    },
+    {
+      "id": "souguo-other",
+      "title": "総括安全衛生管理者（1,000人以上の場合）",
+      "lawRef": "安衛法第10条 / 安衛令第2条第3号",
+      "summary": "医療福祉・サービス業・IT等（その他業種）は1,000人以上で必要",
+      "deadline": "選任後14日以内に所轄労基署へ選任報告書",
+      "note": "300人以上のうち1,000人未満の場合は対象外。1,000人以上の場合のみ必要",
+      "condition": { "industries": ["healthcare", "service", "it"], "minHeadcount": 300 }
+    },
+    {
+      "id": "anzen-manager",
+      "title": "安全管理者",
+      "lawRef": "安衛法第11条 / 安衛令第3条",
+      "summary": "建設業・製造業・運輸業等の50人以上の事業場で選任義務",
+      "deadline": "選任後14日以内に所轄労基署へ選任報告書（様式第3号）",
+      "note": "厚生労働大臣が定める研修を修了した者等から選任。事業場専属が原則",
+      "condition": { "industries": ["construction", "manufacturing", "transport"], "minHeadcount": 50 }
+    },
+    {
+      "id": "eisei-manager",
+      "title": "衛生管理者",
+      "lawRef": "安衛法第12条 / 安衛則第7条",
+      "summary": "常時50人以上の労働者を使用する全業種の事業場で選任義務",
+      "deadline": "選任後14日以内に所轄労基署へ選任報告書（様式第3号）",
+      "note": "50〜200人:1人／201〜500人:2人／501〜1000人:3人。免許または資格者から選任",
+      "condition": { "minHeadcount": 50 }
+    },
+    {
+      "id": "industrial-physician",
+      "title": "産業医",
+      "lawRef": "安衛法第13条 / 安衛則第13条",
+      "summary": "常時50人以上の労働者を使用する事業場で選任義務",
+      "deadline": "選任後14日以内に所轄労基署へ選任報告書（様式第3号）",
+      "note": "1,000人以上（または特定業務500人以上）は専属の産業医が必要",
+      "condition": { "minHeadcount": 50 }
+    },
+    {
+      "id": "anzen-eisei-suishin",
+      "title": "安全衛生推進者",
+      "lawRef": "安衛法第12条の2 / 安衛則第12条の2",
+      "summary": "常時10〜49人の建設業・製造業・運輸業等で選任義務",
+      "deadline": "選任後、事業場で周知（労基署への報告は不要）",
+      "note": "厚生労働大臣指定の講習修了者または同等以上の能力を有する者",
+      "condition": { "industries": ["construction", "manufacturing", "transport"], "minHeadcount": 10, "maxHeadcount": 49 }
+    },
+    {
+      "id": "eisei-suishin",
+      "title": "衛生推進者",
+      "lawRef": "安衛法第12条の2",
+      "summary": "常時10〜49人のその他業種（医療福祉・サービス業・IT等）で選任義務",
+      "deadline": "選任後、事業場で周知（労基署への報告は不要）",
+      "note": "衛生面の業務を担当",
+      "condition": { "industries": ["healthcare", "service", "it"], "minHeadcount": 10, "maxHeadcount": 49 }
+    },
+    {
+      "id": "yuki-shunin",
+      "title": "有機溶剤作業主任者",
+      "lawRef": "安衛法第14条 / 有機則第19条",
+      "summary": "有機溶剤を取り扱う作業で選任義務（規模を問わない）",
+      "deadline": "選任後、事業場で氏名等を周知（労基署への報告は不要）",
+      "note": "技能講習修了者から選任。屋内作業場等で第1種・第2種有機溶剤を扱う場合は必須",
+      "condition": { "requiresAnyHazard": ["organic-solvent"] }
+    },
+    {
+      "id": "tokka-shunin",
+      "title": "特定化学物質作業主任者",
+      "lawRef": "安衛法第14条 / 特化則第27条",
+      "summary": "特定化学物質を製造・取扱う作業で選任義務",
+      "deadline": "選任後、事業場で氏名等を周知",
+      "note": "特定化学物質及び四アルキル鉛等作業主任者技能講習修了者から選任",
+      "condition": { "requiresAnyHazard": ["specified-chemical"] }
+    },
+    {
+      "id": "asbestos-shunin",
+      "title": "石綿作業主任者",
+      "lawRef": "安衛法第14条 / 石綿則第19条",
+      "summary": "石綿等を取り扱う作業（解体・除去含む）で選任義務",
+      "deadline": "選任後、事業場で氏名等を周知",
+      "note": "石綿作業主任者技能講習修了者から選任。建築物等の解体は事前調査結果報告も必要",
+      "condition": { "requiresAnyHazard": ["asbestos"] }
+    },
+    {
+      "id": "ashiba-shunin",
+      "title": "足場の組立て等作業主任者",
+      "lawRef": "安衛法第14条 / 安衛則第565条",
+      "summary": "高さ5m以上の足場の組立・解体・変更作業で選任義務",
+      "deadline": "選任後、事業場で氏名等を周知",
+      "note": "足場の組立て等作業主任者技能講習修了者から選任（建設業で高所作業がある場合）",
+      "condition": { "industries": ["construction"], "requiresAnyHazard": ["high-place"] }
+    }
+  ],
+  "healthChecks": [
+    {
+      "id": "general-periodic",
+      "title": "一般定期健康診断",
+      "lawRef": "安衛法第66条 / 安衛則第44条",
+      "frequency": "年1回（深夜業等は6ヶ月以内ごと）",
+      "summary": "常時使用する全労働者に実施",
+      "note": "健康診断個人票は5年間保管。費用は事業者負担",
+      "condition": {}
+    },
+    {
+      "id": "hire-checkup",
+      "title": "雇入時の健康診断",
+      "lawRef": "安衛法第66条 / 安衛則第43条",
+      "frequency": "雇入れ時",
+      "summary": "常時使用する労働者を雇い入れる際に実施",
+      "note": "3ヶ月以内に医師の健診を受けて結果を提出した者は省略可",
+      "condition": {}
+    },
+    {
+      "id": "yuki-checkup",
+      "title": "有機溶剤健康診断（特殊健診）",
+      "lawRef": "有機則第29条",
+      "frequency": "雇入れ時・配置替え時・6ヶ月以内ごと",
+      "summary": "有機溶剤業務に常時従事する労働者に実施",
+      "note": "結果は有機溶剤等健康診断個人票（5年保管）に記録",
+      "condition": { "requiresAnyHazard": ["organic-solvent"] }
+    },
+    {
+      "id": "tokka-checkup",
+      "title": "特定化学物質健康診断（特殊健診）",
+      "lawRef": "特化則第39条",
+      "frequency": "雇入れ時・配置替え時・6ヶ月以内ごと（一部物質は1年以内ごと）",
+      "summary": "特定化学物質業務に常時従事する労働者に実施",
+      "note": "対象物質ごとに検査項目が定められている。個人票は5年（特別管理物質は30年）保管",
+      "condition": { "requiresAnyHazard": ["specified-chemical"] }
+    },
+    {
+      "id": "jinpai-checkup",
+      "title": "じん肺健康診断",
+      "lawRef": "じん肺法第7〜9条",
+      "frequency": "就業時・定期（管理区分により1〜3年ごと）・離職時",
+      "summary": "粉じん作業に常時従事する労働者に実施",
+      "note": "じん肺健康診断結果証明書を都道府県労働局長へ提出。個人票は7年保管",
+      "condition": { "requiresAnyHazard": ["dust"] }
+    },
+    {
+      "id": "asbestos-checkup",
+      "title": "石綿健康診断（特殊健診）",
+      "lawRef": "石綿則第40条",
+      "frequency": "雇入れ時・配置替え時・6ヶ月以内ごと",
+      "summary": "石綿業務に常時従事した労働者に実施。離職後も継続実施義務",
+      "note": "個人票は40年間保管（離職後も含む）。健康管理手帳の交付対象",
+      "condition": { "requiresAnyHazard": ["asbestos"] }
+    }
+  ],
+  "envMeasurements": [
+    {
+      "id": "yuki-measure",
+      "title": "有機溶剤作業環境測定",
+      "lawRef": "安衛法第65条 / 作業環境測定法 / 有機則第28条",
+      "frequency": "6ヶ月以内ごとに1回",
+      "summary": "第1種・第2種有機溶剤を取り扱う屋内作業場で測定",
+      "note": "作業環境測定士による測定。記録は3年間保管。第3管理区分は改善義務",
+      "condition": { "requiresAnyHazard": ["organic-solvent"] }
+    },
+    {
+      "id": "tokka-measure",
+      "title": "特定化学物質作業環境測定",
+      "lawRef": "特化則第36条",
+      "frequency": "6ヶ月以内ごとに1回",
+      "summary": "第1類・第2類特定化学物質を取り扱う屋内作業場で測定",
+      "note": "記録は3年間（特別管理物質は30年）保管",
+      "condition": { "requiresAnyHazard": ["specified-chemical"] }
+    },
+    {
+      "id": "dust-measure",
+      "title": "粉じん作業環境測定",
+      "lawRef": "粉じん則第26条",
+      "frequency": "6ヶ月以内ごとに1回",
+      "summary": "特定粉じん発生源を有する屋内作業場で測定",
+      "note": "記録は7年間保管",
+      "condition": { "requiresAnyHazard": ["dust"] }
+    },
+    {
+      "id": "asbestos-measure",
+      "title": "石綿作業環境測定",
+      "lawRef": "石綿則第36条",
+      "frequency": "6ヶ月以内ごとに1回",
+      "summary": "石綿を取り扱う屋内作業場で測定",
+      "note": "記録は40年間保管",
+      "condition": { "requiresAnyHazard": ["asbestos"] }
+    }
+  ],
+  "specialEducations": [
+    {
+      "id": "harness-training",
+      "title": "フルハーネス型墜落制止用器具 特別教育",
+      "lawRef": "安衛則第36条第41号",
+      "summary": "高さ2m以上で作業床のない箇所等でフルハーネスを用いる作業者",
+      "duration": "学科4.5h＋実技1.5h（経験により短縮可）",
+      "condition": { "requiresAnyHazard": ["high-place"] }
+    },
+    {
+      "id": "kousho-vehicle",
+      "title": "高所作業車（10m未満）特別教育",
+      "lawRef": "安衛則第36条第10号の5",
+      "summary": "作業床の高さ10m未満の高所作業車運転（10m以上は技能講習必須）",
+      "duration": "学科6h＋実技3h",
+      "condition": { "requiresAnyHazard": ["high-place"] }
+    },
+    {
+      "id": "crane-small",
+      "title": "小型移動式クレーン（5t未満）特別教育",
+      "lawRef": "安衛則第36条第15号",
+      "summary": "つり上げ荷重1t未満の小型移動式クレーン運転（1t以上5t未満は技能講習）",
+      "duration": "学科6h＋実技3h",
+      "condition": { "requiresAnyHazard": ["crane"] }
+    },
+    {
+      "id": "tamagake",
+      "title": "玉掛け（1t未満）特別教育",
+      "lawRef": "安衛則第36条第19号",
+      "summary": "つり上げ荷重1t未満のクレーン等の玉掛け作業（1t以上は技能講習必須）",
+      "duration": "学科5h＋実技4h",
+      "condition": { "requiresAnyHazard": ["crane"] }
+    },
+    {
+      "id": "forklift-small",
+      "title": "フォークリフト（1t未満）特別教育",
+      "lawRef": "安衛則第36条第5号",
+      "summary": "最大荷重1t未満のフォークリフト運転（1t以上は技能講習必須）",
+      "duration": "学科7h＋実技6h",
+      "condition": { "requiresAnyHazard": ["forklift"] }
+    },
+    {
+      "id": "dust-training",
+      "title": "粉じん作業特別教育",
+      "lawRef": "安衛則第36条第29号 / 粉じん則第22条",
+      "summary": "特定粉じん作業に従事する労働者全員に実施",
+      "duration": "学科4.5h",
+      "condition": { "requiresAnyHazard": ["dust"] }
+    },
+    {
+      "id": "asbestos-training",
+      "title": "石綿取扱業務特別教育",
+      "lawRef": "安衛則第36条第37号 / 石綿則第27条",
+      "summary": "石綿等が使用されている建築物等の解体・改修作業者に実施",
+      "duration": "学科4.5h",
+      "condition": { "requiresAnyHazard": ["asbestos"] }
+    }
+  ],
+  "documents": [
+    {
+      "id": "doc-anzen-senin",
+      "title": "安全管理者選任報告書（様式第3号）",
+      "submitTo": "所轄労働基準監督署",
+      "deadline": "選任後遅滞なく（14日以内）",
+      "lawRef": "安衛則第2条",
+      "condition": { "industries": ["construction", "manufacturing", "transport"], "minHeadcount": 50 }
+    },
+    {
+      "id": "doc-eisei-senin",
+      "title": "衛生管理者選任報告書（様式第3号）",
+      "submitTo": "所轄労働基準監督署",
+      "deadline": "選任後遅滞なく（14日以内）",
+      "lawRef": "安衛則第2条",
+      "condition": { "minHeadcount": 50 }
+    },
+    {
+      "id": "doc-sangyo-senin",
+      "title": "産業医選任報告書（様式第3号）",
+      "submitTo": "所轄労働基準監督署",
+      "deadline": "選任後遅滞なく（14日以内）",
+      "lawRef": "安衛則第2条",
+      "condition": { "minHeadcount": 50 }
+    },
+    {
+      "id": "doc-souguo-senin-group1",
+      "title": "総括安全衛生管理者選任報告書（様式第3号）",
+      "submitTo": "所轄労働基準監督署",
+      "deadline": "選任後遅滞なく（14日以内）",
+      "lawRef": "安衛則第2条",
+      "condition": { "industries": ["construction", "transport"], "minHeadcount": 100 }
+    },
+    {
+      "id": "doc-souguo-senin-group2",
+      "title": "総括安全衛生管理者選任報告書（様式第3号）",
+      "submitTo": "所轄労働基準監督署",
+      "deadline": "選任後遅滞なく（14日以内）",
+      "lawRef": "安衛則第2条",
+      "condition": { "industries": ["manufacturing"], "minHeadcount": 300 }
+    },
+    {
+      "id": "doc-teiki-kenshin",
+      "title": "定期健康診断結果報告書（様式第6号）",
+      "submitTo": "所轄労働基準監督署",
+      "deadline": "毎年（健診実施後遅滞なく）",
+      "lawRef": "安衛則第52条",
+      "note": "常時50人以上の事業場が対象",
+      "condition": { "minHeadcount": 50 }
+    },
+    {
+      "id": "doc-tokushu-kenshin",
+      "title": "特殊健康診断結果報告書（有機溶剤等／特化物等）",
+      "submitTo": "所轄労働基準監督署",
+      "deadline": "健診実施後遅滞なく",
+      "lawRef": "有機則第30条の3 / 特化則第41条 等",
+      "condition": { "requiresAnyHazard": ["organic-solvent", "specified-chemical"] }
+    },
+    {
+      "id": "doc-jinpai-kenshin",
+      "title": "じん肺健康診断結果証明書",
+      "submitTo": "都道府県労働局長",
+      "deadline": "毎年（健診実施後遅滞なく）",
+      "lawRef": "じん肺法第8条",
+      "condition": { "requiresAnyHazard": ["dust"] }
+    },
+    {
+      "id": "doc-asbestos-kenshin",
+      "title": "石綿健康診断結果報告書",
+      "submitTo": "所轄労働基準監督署",
+      "deadline": "健診実施後遅滞なく",
+      "lawRef": "石綿則第41条",
+      "condition": { "requiresAnyHazard": ["asbestos"] }
+    },
+    {
+      "id": "doc-asbestos-jizen",
+      "title": "建築物等の解体等の作業に関する事前調査結果報告（石綿）",
+      "submitTo": "所轄労働基準監督署（電子申請）",
+      "deadline": "作業開始前",
+      "lawRef": "石綿則第3条",
+      "note": "請負金額100万円以上等の解体・改修工事が対象",
+      "condition": { "industries": ["construction"], "requiresAnyHazard": ["asbestos"] }
+    }
+  ],
+  "subsidies": [
+    {
+      "id": "sub-age-friendly",
+      "name": "エイジフレンドリー補助金",
+      "amount": "上限100万円（補助率1/2〜2/3）",
+      "purpose": "高齢労働者の作業環境改善・転倒防止・健康管理",
+      "url": "https://www.mhlw.go.jp/stf/newpage_42107.html",
+      "operator": "厚生労働省（労働者健康安全機構）",
+      "condition": { "maxHeadcount": 299 }
+    },
+    {
+      "id": "sub-business-improvement",
+      "name": "業務改善助成金",
+      "amount": "上限600万円（事業場内最賃の引上げ＋設備投資）",
+      "purpose": "生産性向上のための設備投資（安全装置・自動化機器含む）",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/zigyonushi/shienjigyou/03.html",
+      "operator": "厚生労働省（都道府県労働局）",
+      "condition": { "maxHeadcount": 299 }
+    },
+    {
+      "id": "sub-hatarakikata",
+      "name": "働き方改革推進支援助成金",
+      "amount": "上限250万〜730万円",
+      "purpose": "労働時間短縮・年休取得促進、勤怠ソフト・業務効率化機器導入",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/jikan/syoukeihatten.html",
+      "operator": "厚生労働省（都道府県労働局）",
+      "condition": { "maxHeadcount": 299 }
+    },
+    {
+      "id": "sub-jinzai-kaihatsu",
+      "name": "人材開発支援助成金",
+      "amount": "訓練費の45〜75%＋賃金助成",
+      "purpose": "特別教育・技能講習（フォーク・玉掛け・フルハーネス等）の受講費",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/koyou/kyufukin/d01-1.html",
+      "operator": "厚生労働省（都道府県労働局）",
+      "condition": {}
+    },
+    {
+      "id": "sub-judo-kitsuen",
+      "name": "受動喫煙防止対策助成金",
+      "amount": "上限100万円（補助率1/2〜2/3）",
+      "purpose": "喫煙専用室・指定たばこ専用喫煙室等の設置",
+      "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000189195.html",
+      "operator": "厚生労働省（都道府県労働局）",
+      "condition": { "maxHeadcount": 299 }
+    },
+    {
+      "id": "sub-kentaikyo",
+      "name": "建設業退職金共済（建退共）新規加入助成",
+      "amount": "初回1年分の掛金補助等",
+      "purpose": "建設労働者の退職金積立",
+      "url": "https://www.kentaikyo.taisyokukin.go.jp/",
+      "operator": "勤労者退職金共済機構",
+      "condition": { "industries": ["construction"] }
+    },
+    {
+      "id": "sub-syouryoku",
+      "name": "中小企業省力化投資補助金",
+      "amount": "上限1,000万〜1,500万円",
+      "purpose": "AI画像認識・搬送ロボ等のカタログ掲載省力化機器導入",
+      "url": "https://www.chusho.meti.go.jp/",
+      "operator": "中小企業庁",
+      "condition": { "maxHeadcount": 299 }
+    }
+  ]
+}
