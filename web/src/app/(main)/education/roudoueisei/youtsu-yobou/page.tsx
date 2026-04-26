@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, GraduationCap, MessageSquare, Mail, Download } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
+import { EducationContextSections } from "@/components/education/EducationContextSections";
 
 const TITLE = "腰痛予防労働衛生教育｜ANZEN AI";
 const DESCRIPTION =
@@ -342,6 +343,9 @@ export default function YoutsuyobouPage() {
           </p>
         </div>
       </section>
+
+      {/* 業種別統計・実事故事例・関連法令・チェックリスト・監修者コメント */}
+      <EducationContextSections slug="roudoueisei/youtsu-yobou" />
 
       {/* FAQ */}
       <section className="mb-8">
