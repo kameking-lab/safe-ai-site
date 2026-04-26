@@ -46,6 +46,18 @@ export function Footer() {
             <Link href="/about" className="hover:text-slate-800 hover:underline">
               運営者情報
             </Link>
+            <Link href="/security" className="hover:text-slate-800 hover:underline">
+              セキュリティ
+            </Link>
+            <Link href="/dpa" className="hover:text-slate-800 hover:underline">
+              DPA
+            </Link>
+            <Link href="/bcp" className="hover:text-slate-800 hover:underline">
+              BCP
+            </Link>
+            <Link href="/insurance" className="hover:text-slate-800 hover:underline">
+              保険加入状況
+            </Link>
             <Link href="/contact" className="hover:text-slate-800 hover:underline">
               お問い合わせ・ご要望
             </Link>
