@@ -1,0 +1,54 @@
+name: lint-articles
+
+on:
+  push:
+    paths:
+      - "web/src/data/seo-articles/**"
+  pull_request:
+    paths:
+      - "web/src/data/seo-articles/**"
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: 第1層 - 法令引用チェック
+        id: law-lint
+        run: |
+          node scripts/lint-law-citation.mjs --target "web/src/data/seo-articles/*.json"
+
+      - name: 第2層 - URL生存確認
+        id: url-lint
+        # URLチェックは warning 扱いなので continue-on-error
+        continue-on-error: true
+        run: |
+          node scripts/lint-urls.mjs --target "web/src/data/seo-articles/*.json"
+
+      - name: URL確認結果をアーティファクトとして保存
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: url-check-results
+          path: logs/url-check-results.json
+          if-no-files-found: ignore
+
+      - name: 結果サマリー
+        if: always()
+        run: |
+          echo "### 法令引用チェック: ${{ steps.law-lint.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "### URL生存確認: ${{ steps.url-lint.outcome }} (warning扱い)" >> $GITHUB_STEP_SUMMARY
+          if [ -f logs/url-check-results.json ]; then
+            BROKEN=$(node -e "const r=require('./logs/url-check-results.json'); console.log(r.brokenCount)")
+            echo "壊れたURL: ${BROKEN}件" >> $GITHUB_STEP_SUMMARY
+          fi
