@@ -1,8 +1,8 @@
 {
   "name": "ANZEN AI",
-  "short_name": "ANZEN",
+  "short_name": "安全AI",
   "description": "現場の安全を、AIで変える。",
-  "start_url": "/",
+  "start_url": "/quick-start",
   "display": "standalone",
   "orientation": "any",
   "theme_color": "#1a7a4c",
