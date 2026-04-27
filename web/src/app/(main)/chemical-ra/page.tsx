@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { ChemicalRaPanel } from "@/components/chemical-ra-panel";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
+import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { ogImageUrl } from "@/lib/og-url";
 
 const _title = "化学物質 リスクアセスメント ツール";
@@ -38,6 +39,11 @@ export default function ChemicalRaPage() {
       <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-500">読み込み中…</div>}>
         <ChemicalRaPanel />
       </Suspense>
+      <EnterpriseFunnel
+        service="chemical"
+        headline="化学物質の自律管理体制を、まるごと整備"
+        subline="SDS収集 → リスクアセスメント → 教育 → 記録保存まで、安衛法令和4年改正に沿った運用フローを貴社向けに設計します。"
+      />
     </>
   );
 }

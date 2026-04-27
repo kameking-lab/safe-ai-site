@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ChemicalDatabaseClient } from "@/components/chemical-database-client";
+import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 
 const TITLE = "化学物質検索DB（MHLW規制物質 + 専門解説50物質）";
@@ -22,5 +23,14 @@ export const metadata: Metadata = {
 };
 
 export default function ChemicalDatabasePage() {
-  return <ChemicalDatabaseClient />;
+  return (
+    <>
+      <ChemicalDatabaseClient />
+      <EnterpriseFunnel
+        service="chemical"
+        headline="貴社の取扱物質に絞った社内データベースへ"
+        subline="社内SDS統合・濃度基準値の自動アラート・改正影響レポートまで、貴社専用の化学物質管理基盤として運用できます。"
+      />
+    </>
+  );
 }

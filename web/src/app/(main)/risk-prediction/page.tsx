@@ -3,6 +3,7 @@ import { Brain } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { RiskPredictionPanel } from "@/components/risk-prediction-panel";
 import { RelatedPageCards } from "@/components/related-page-cards";
+import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { ogImageUrl } from "@/lib/og-url";
 
 const _title = "AI 労働災害リスク予測｜KY活動支援";
@@ -84,6 +85,11 @@ export default function RiskPredictionPage() {
             cta: "事故事例を確認する",
           },
         ]}
+      />
+      <EnterpriseFunnel
+        service="claude-code"
+        headline="貴社のヒヤリハット・事故DBを学習させたAI予測"
+        subline="社内の事故・ヒヤリハットデータを取り込み、貴社特化のリスク予測モデルを構築。朝礼・KY活動の精度を一段引き上げます。"
       />
     </>
   );

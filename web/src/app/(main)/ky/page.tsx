@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { KyPageContent } from "@/components/ky-page-content";
+import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, howToSchema } from "@/components/json-ld";
 
@@ -44,6 +45,11 @@ export default function KyPage() {
       <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-8 text-sm text-slate-500">読み込み中...</div>}>
         <KyPageContent />
       </Suspense>
+      <EnterpriseFunnel
+        service="ky-digital"
+        headline="KY運用を、貴社の現場に最適化しませんか？"
+        subline="業種別テンプレート・現場別カスタム・PDF一括ダウンロード・労基署提出フォーマット対応など、貴社専用に作り込みます。"
+      />
     </>
   );
 }

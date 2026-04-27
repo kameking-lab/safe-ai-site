@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LmsPanel } from "@/components/lms-panel";
+import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { ogImageUrl } from "@/lib/og-url";
 
 const _title = "多拠点 学習管理システム（LMS）β";
@@ -49,6 +50,11 @@ export default function LmsPage() {
         </div>
       </div>
       <LmsPanel />
+      <EnterpriseFunnel
+        service="edu-content"
+        headline="多拠点・グループ会社のLMS統合運用"
+        subline="拠点別・部署別の進捗管理、SCORM教材取込、SSO連携まで。安衛法59条・60条対応の教育記録を一元管理します。"
+      />
     </>
   );
 }

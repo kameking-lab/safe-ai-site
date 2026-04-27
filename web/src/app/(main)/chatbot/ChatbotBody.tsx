@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { ChatbotPanel } from "@/components/chatbot-panel";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
+import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { useTranslation } from "@/contexts/language-context";
 
 const CORE_LAWS = [
@@ -143,6 +144,11 @@ export function ChatbotBody() {
             cta: isEn ? "Start e-learning" : "Eラーニングで学ぶ",
           },
         ]}
+      />
+      <EnterpriseFunnel
+        service="law-notify"
+        headline="貴社専用の安衛法AIアシスタントを構築"
+        subline="社内規程・安全マニュアル・過去通達を学習させた専用チャットボット。法改正の影響評価レポートまでまとめて提供します。"
       />
     </main>
   );

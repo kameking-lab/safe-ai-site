@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { GraduationCap, Mail, Clock, BookOpen, Users, Building2, MessageSquare, Download } from "lucide-react";
 import { JsonLd, serviceSchema } from "@/components/json-ld";
+import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { useTranslation } from "@/contexts/language-context";
 
 const DESCRIPTION =
@@ -291,6 +292,13 @@ export function EducationContent() {
           {t("education.contact.cta")}
         </Link>
       </section>
+
+      <EnterpriseFunnel
+        service="edu-content"
+        headline="貴社専用の教育プログラム・LMSをまるごと構築"
+        subline="脚本・撮影・テスト・修了証発行・LMS組み込みまで一括対応。複数拠点・多言語・年次更新もまとめて運用支援します。"
+        spacing="compact"
+      />
     </main>
   );
 }

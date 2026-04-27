@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { HomeScreen } from "@/components/home-screen";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
+import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, courseListSchema } from "@/components/json-ld";
 import { elearningThemesCatalog } from "@/data/mock/elearning-themes-data";
@@ -63,6 +64,11 @@ export default function ELearningPage() {
             cta: "実際の事故事例を見る",
           },
         ]}
+      />
+      <EnterpriseFunnel
+        service="edu-content"
+        headline="貴社オリジナル教材＋進捗管理を一気通貫"
+        subline="社内教材の動画化・テスト作成・LMS組み込み・修了証発行まで。複数拠点の安全教育を一元管理できます。"
       />
     </>
   );
