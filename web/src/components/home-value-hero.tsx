@@ -14,19 +14,9 @@ const STATS: { key: SiteStatKey; value: string; label: string; hint: string }[] 
   { key: "specialEdKinds", value: SITE_STATS.specialEdKinds, label: "特別教育 対応種別", hint: "過去問クイズ付" },
 ];
 
+// 主役5機能（戦略V2準拠: KY / AIチャット / 化学物質RA / 事故DB / ダイジェスト）
+// 二軍機能（法改正・Eラーニング・リスク予測）はフッター・⌘K検索・サブナビから到達。
 const CAPABILITIES = [
-  {
-    emoji: "🛡",
-    label: "AIリスク予測",
-    desc: "作業種別×環境条件で潜在リスクをAI予測。事故事例根拠付き。",
-    href: "/risk-prediction",
-  },
-  {
-    emoji: "📋",
-    label: "法改正チェック",
-    desc: "労安法・化学物質管理の改正100件以上。AI要約・質問で即理解。",
-    href: "/laws",
-  },
   {
     emoji: "📝",
     label: "KY用紙（危険予知）",
@@ -34,22 +24,28 @@ const CAPABILITIES = [
     href: "/ky",
   },
   {
+    emoji: "💬",
+    label: "安衛法AIチャット",
+    desc: "「これって違反？」の疑問を即解決。条文根拠付きで回答。",
+    href: "/chatbot",
+  },
+  {
+    emoji: "⚗️",
+    label: "化学物質リスクアセスメント",
+    desc: "640物質+のRA。CREATE-SIMPLE/コントロール・バンディング自動判定。",
+    href: "/chemical-ra",
+  },
+  {
     emoji: "🗂",
     label: "事故データベース",
-    desc: "厚労省50万件を横断検索。業種・原因別に傾向を把握。",
+    desc: "厚労省データを横断検索。業種・原因別に傾向を把握。",
     href: "/accidents",
   },
   {
-    emoji: "🎓",
-    label: "Eラーニング・過去問",
-    desc: "特別教育12種（＋要相談多数）の過去問クイズ。動画教材・修了証発行に対応。",
-    href: "/e-learning",
-  },
-  {
-    emoji: "💬",
-    label: "安衛法チャットボット",
-    desc: "「これって違反？」の疑問を即解決。条文根拠を示して回答。",
-    href: "/chatbot",
+    emoji: "📰",
+    label: "朝のダイジェスト",
+    desc: "通達アラート・事故事例・法改正カレンダーを業種別に毎日配信。",
+    href: "/#section-home",
   },
 ] as const;
 
@@ -254,8 +250,17 @@ export function HomeValueHero() {
           できること
         </p>
         <h3 id="capabilities-heading" className="mt-1 text-base font-bold text-slate-900 dark:text-slate-100 sm:text-lg">
-          現場で使える6つの機能を、無料ですぐ試せます。
+          毎日使う5機能を、無料ですぐ試せます。
         </h3>
+        <p className="mt-1 text-[11px] text-slate-500">
+          法改正チェック・Eラーニング・AIリスク予測など、その他の機能は{" "}
+          <span className="font-semibold text-slate-600">⌘K（または Ctrl+K）</span>{" "}
+          のサイト内検索、または
+          <a href="#features-secondary" className="font-semibold text-slate-600 underline">
+            こちらの一覧
+          </a>
+          から開けます。
+        </p>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {CAPABILITIES.map((c) => (
             <Link
@@ -273,6 +278,37 @@ export function HomeValueHero() {
               <span className="mt-3 text-xs font-bold text-emerald-700 group-hover:text-emerald-800 dark:text-emerald-300 dark:group-hover:text-emerald-200">
                 使ってみる →
               </span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* サブ機能（二軍） — 主役5機能の補助。スペース小さくシンプルに。 */}
+      <section
+        id="features-secondary"
+        aria-label="その他の機能"
+        className="rounded-2xl border border-slate-200 bg-slate-50/40 p-4"
+      >
+        <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">
+          その他の機能
+        </p>
+        <div className="mt-2 flex flex-wrap gap-2 text-xs">
+          {[
+            { href: "/laws", label: "📋 法改正チェック" },
+            { href: "/e-learning", label: "🎓 Eラーニング・過去問" },
+            { href: "/risk-prediction", label: "🛡 AIリスク予測" },
+            { href: "/circulars", label: "📄 通達一覧" },
+            { href: "/articles", label: "📰 解説記事" },
+            { href: "/equipment-finder", label: "🛡 保護具AI" },
+            { href: "/law-search", label: "🔍 条文検索" },
+            { href: "/exam-quiz", label: "🧠 過去問クイズ" },
+          ].map((f) => (
+            <Link
+              key={f.href}
+              href={f.href}
+              className="rounded-full border border-slate-200 bg-white px-3 py-1 font-semibold text-slate-700 hover:border-emerald-300 hover:text-emerald-700"
+            >
+              {f.label}
             </Link>
           ))}
         </div>
