@@ -234,6 +234,20 @@ export default function SignagePage() {
         </p>
       </div>
 
+      {/* 地図モードへの導線 */}
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-700/60 bg-emerald-950/40 px-3 py-2 text-xs">
+        <span className="font-semibold text-emerald-200">🗺️ 地図モード（新）</span>
+        <span className="text-emerald-100/80">
+          全国の警報・天気・地震を地図上に表示。ピン登録・通知・フルスクリーン対応。
+        </span>
+        <Link
+          href="/signage/map"
+          className="ml-auto rounded border border-emerald-400 bg-emerald-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
+        >
+          地図モードを開く →
+        </Link>
+      </div>
+
       <div className="grid grid-cols-1 gap-2 xl:min-h-0 xl:flex-1 xl:grid-cols-12 xl:gap-3 xl:overflow-hidden">
         <div className="flex flex-col gap-2 overflow-x-hidden xl:col-span-7 xl:min-h-0 xl:overflow-y-auto">
           <div className="flex shrink-0 flex-wrap items-center gap-2">
