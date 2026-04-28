@@ -281,6 +281,25 @@ export function HomeValueHero() {
             </Link>
           ))}
         </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+          <p className="text-xs text-emerald-900 sm:text-sm">
+            <span className="font-bold">全{26}機能</span>をスクショ付きで一覧できます。
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/features"
+              className="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
+            >
+              機能紹介を見る →
+            </Link>
+            <Link
+              href="/features/quick-tour"
+              className="inline-flex items-center rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100"
+            >
+              5分ツアー
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* サブ機能（二軍） — 主役5機能の補助。スペース小さくシンプルに。 */}

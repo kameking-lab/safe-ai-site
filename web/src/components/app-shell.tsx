@@ -36,6 +36,7 @@ import {
   Sun,
   Moon,
   BarChart3,
+  Sparkles,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { PAID_MODE } from "@/lib/paid-mode";
@@ -81,7 +82,10 @@ const PAID_SERVICE_ITEMS: NavItem[] = [
 const NAV_CATEGORIES: NavCategory[] = [
   {
     label: "",
-    items: [{ id: "home", label: "ホーム", href: "/", icon: Home }],
+    items: [
+      { id: "home", label: "ホーム", href: "/", icon: Home },
+      { id: "features", label: "機能紹介", href: "/features", icon: Sparkles, badge: "NEW" },
+    ],
   },
   {
     label: "マップ",

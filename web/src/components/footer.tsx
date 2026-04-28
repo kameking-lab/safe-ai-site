@@ -50,6 +50,11 @@ export function Footer() {
             </p>
             <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li>
+                <Link href="/features" className="font-semibold text-emerald-700 hover:underline dark:text-emerald-300">
+                  機能紹介（全26機能）
+                </Link>
+              </li>
+              <li>
                 <Link href="/about" className="hover:text-slate-900 hover:underline dark:hover:text-white">
                   研究プロジェクトについて
                 </Link>
