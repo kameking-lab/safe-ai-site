@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { PAID_MODE } from "@/lib/paid-mode";
+import { ShareButtons } from "@/components/share-buttons";
 import { UserMenu } from "@/components/user-menu";
 import { EnglishBetaBanner } from "@/components/english-beta-banner";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -622,6 +623,7 @@ export function AppShell({ children, user }: AppShellProps) {
         </main>
         <Footer />
       </div>
+      <ShareButtons fixed />
     </div>
   );
 }
