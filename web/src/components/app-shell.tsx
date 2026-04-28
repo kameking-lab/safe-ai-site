@@ -35,8 +35,10 @@ import {
   Building2,
   Sun,
   Moon,
+  BarChart3,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
+import { PAID_MODE } from "@/lib/paid-mode";
 import { UserMenu } from "@/components/user-menu";
 import { EnglishBetaBanner } from "@/components/english-beta-banner";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -66,6 +68,14 @@ type NavCategory = {
   label: string;
   items: NavItem[];
 };
+
+const PAID_SERVICE_ITEMS: NavItem[] = [
+  { id: "services", label: "受託業務", href: "/services", icon: Briefcase },
+  { id: "education", label: "特別教育", href: "/education", icon: GraduationCap },
+  { id: "consulting", label: "月額顧問", href: "/consulting", icon: Handshake },
+  { id: "wizard", label: "コンプラ診断", href: "/wizard", icon: ListChecks, badge: "NEW" },
+  { id: "cases", label: "導入事例", href: "/cases", icon: Building2 },
+];
 
 const NAV_CATEGORIES: NavCategory[] = [
   {
@@ -117,14 +127,27 @@ const NAV_CATEGORIES: NavCategory[] = [
       { id: "mental-health", label: "メンタル・カスハラ", href: "/mental-health", icon: Heart },
     ],
   },
+  ...(PAID_MODE
+    ? [
+        {
+          label: "サービス",
+          items: PAID_SERVICE_ITEMS,
+        },
+      ]
+    : [
+        {
+          label: "サービス",
+          items: [
+            { id: "wizard", label: "コンプラ診断", href: "/wizard", icon: ListChecks, badge: "NEW" },
+          ] as NavItem[],
+        },
+      ]),
   {
-    label: "サービス",
+    label: "プロジェクト",
     items: [
-      { id: "services", label: "受託業務", href: "/services", icon: Briefcase },
-      { id: "education", label: "特別教育", href: "/education", icon: GraduationCap },
-      { id: "consulting", label: "月額顧問", href: "/consulting", icon: Handshake },
-      { id: "wizard", label: "コンプラ診断", href: "/wizard", icon: ListChecks, badge: "NEW" },
-      { id: "cases", label: "導入事例", href: "/cases", icon: Building2 },
+      { id: "about", label: "研究プロジェクトについて", href: "/about", icon: Info },
+      { id: "stats", label: "利用統計", href: "/stats", icon: BarChart3 },
+      { id: "contact", label: "ご意見・改善提案", href: "/contact", icon: Mail },
     ],
   },
   {
@@ -133,11 +156,11 @@ const NAV_CATEGORIES: NavCategory[] = [
       { id: "lms", label: "LMS（多拠点管理）", href: "/lms", icon: LibraryBig, badge: "beta", description: "先行登録" },
       { id: "glossary", label: "安全用語辞書", href: "/glossary", icon: BookMarked },
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
-      { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard },
+      ...(PAID_MODE
+        ? [{ id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard } as NavItem]
+        : []),
       { id: "subsidies", label: "助成金ガイド", href: "/subsidies", icon: Banknote },
       { id: "notifications", label: "通知/配信", href: "/notifications", icon: Bell },
-      { id: "contact", label: "お問い合わせ", href: "/contact", icon: Mail },
-      { id: "about", label: "運営者情報", href: "/about", icon: Info },
     ],
   },
 ];

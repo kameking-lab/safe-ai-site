@@ -45,7 +45,7 @@ export const metadata: Metadata = {
     google: 'y_-VOPrIGDyyHEdjP0PtPk96E7V5KTh4zdTzhKy9ZBE',
   },
   description:
-    "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。建設・製造・林業・運輸・医療福祉の安全担当者を支援します。",
+    "労働安全衛生分野のAI・DX活用研究プロジェクト。通達・事故事例・化学物質情報を一次ソース付きで無料公開。",
   metadataBase: new URL("https://safe-ai-site.vercel.app"),
   alternates: {
     canonical: "https://safe-ai-site.vercel.app",

@@ -1,111 +1,166 @@
 import Link from "next/link";
-
-type FooterLink = {
-  label: string;
-  href: string;
-};
-
-type FooterColumn = {
-  heading: string;
-  links: FooterLink[];
-};
-
-const FOOTER_COLUMNS: FooterColumn[] = [
-  {
-    heading: "サービス",
-    links: [
-      { label: "受託業務", href: "/services" },
-      { label: "特別教育", href: "/education" },
-      { label: "月額顧問", href: "/consulting" },
-      { label: "コンプラ診断", href: "/wizard" },
-      { label: "料金プラン", href: "/pricing" },
-      { label: "導入事例", href: "/cases" },
-    ],
-  },
-  {
-    heading: "サポート",
-    links: [
-      { label: "お問い合わせ・ご要望", href: "/contact" },
-      { label: "助成金ガイド", href: "/subsidies" },
-      { label: "通知/配信", href: "/notifications" },
-      { label: "BCP", href: "/bcp" },
-      { label: "保険加入状況", href: "/insurance" },
-      { label: "セキュリティ", href: "/security" },
-    ],
-  },
-  {
-    heading: "会社情報",
-    links: [
-      { label: "運営者情報", href: "/about" },
-      { label: "プライバシーポリシー", href: "/privacy" },
-      { label: "利用規約", href: "/terms" },
-      { label: "DPA（データ処理契約）", href: "/dpa" },
-    ],
-  },
-];
+import { PAID_MODE } from "@/lib/paid-mode";
 
 export function Footer() {
   return (
     <footer className="mt-auto border-t border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-900/80">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:py-8">
-        {/* CTAバナー */}
-        <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 text-center dark:border-emerald-500/30 dark:from-emerald-500/10 dark:to-slate-800 sm:flex sm:items-center sm:justify-between sm:text-left">
-          <div>
-            <p className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
-              業務自動化・安全管理コンサルのご相談を受付中
-            </p>
-            <p className="mt-0.5 text-xs text-emerald-800 dark:text-emerald-200/80">
-              Excel・KY・安全書類のデジタル化、AI活用の業務効率化、お気軽にご相談ください。
-            </p>
-          </div>
-          <Link
-            href="/contact"
-            className="mt-3 inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-emerald-700 sm:mt-0"
-          >
-            業務のご相談 →
-          </Link>
-        </div>
-
-        {/* 3カラムリンク */}
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
-          {FOOTER_COLUMNS.map((col) => (
-            <nav
-              key={col.heading}
-              aria-label={`フッター: ${col.heading}`}
-              className="text-xs"
+        {/* CTA: 相談・改善案受付（PAID_MODE時は受託CTA、無料モード時は意見受付） */}
+        {PAID_MODE ? (
+          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 text-center dark:border-emerald-500/30 dark:from-emerald-500/10 dark:to-slate-800 sm:flex sm:items-center sm:justify-between sm:text-left">
+            <div>
+              <p className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                業務自動化・安全管理コンサルのご相談を受付中
+              </p>
+              <p className="mt-0.5 text-xs text-emerald-800 dark:text-emerald-200/80">
+                Excel・KY・安全書類のデジタル化、AI活用の業務効率化、お気軽にご相談ください。
+              </p>
+            </div>
+            <Link
+              href="/contact"
+              className="mt-3 inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-emerald-700 sm:mt-0"
             >
-              <h2 className="mb-2 text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                {col.heading}
-              </h2>
-              <ul className="space-y-1.5">
-                {col.links.map((link) => (
-                  <li key={link.href}>
-                    <Link
-                      href={link.href}
-                      className="text-slate-600 hover:text-slate-900 hover:underline dark:text-slate-300 dark:hover:text-slate-100"
-                    >
-                      {link.label}
+              ご相談はこちら →
+            </Link>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 text-center dark:border-emerald-500/30 dark:from-emerald-500/10 dark:to-slate-800 sm:flex sm:items-center sm:justify-between sm:text-left">
+            <div>
+              <p className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                改善提案・データ誤りの指摘を募集中
+              </p>
+              <p className="mt-0.5 text-xs text-emerald-800 dark:text-emerald-200/80">
+                個人運営の研究プロジェクトです。気付いた点・追加してほしい機能など、お気軽にお寄せください。
+              </p>
+            </div>
+            <Link
+              href="/contact"
+              className="mt-3 inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-emerald-700 sm:mt-0"
+            >
+              ご意見を送る →
+            </Link>
+          </div>
+        )}
+
+        {/* 3カラム構成 */}
+        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              プロジェクト
+            </p>
+            <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+              <li>
+                <Link href="/about" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  研究プロジェクトについて
+                </Link>
+              </li>
+              <li>
+                <Link href="/stats" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  利用統計
+                </Link>
+              </li>
+              <li>
+                <Link href="/leaflet" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  リーフレット（PDF）
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  ご意見・改善提案
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              法務・運営
+            </p>
+            <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+              <li>
+                <Link href="/privacy" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  プライバシーポリシー
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  利用規約
+                </Link>
+              </li>
+              <li>
+                <Link href="/security" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  セキュリティ
+                </Link>
+              </li>
+              <li>
+                <Link href="/dpa" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  DPA
+                </Link>
+              </li>
+              <li>
+                <Link href="/bcp" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  BCP
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              {PAID_MODE ? "サービス" : "主なコンテンツ"}
+            </p>
+            <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+              {PAID_MODE ? (
+                <>
+                  <li>
+                    <Link href="/services" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                      受託業務
                     </Link>
                   </li>
-                ))}
-              </ul>
-            </nav>
-          ))}
+                  <li>
+                    <Link href="/consulting" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                      月額顧問
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/pricing" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                      料金プラン
+                    </Link>
+                  </li>
+                </>
+              ) : null}
+              <li>
+                <Link href="/laws" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  法令・通達
+                </Link>
+              </li>
+              <li>
+                <Link href="/accidents" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  事故データベース
+                </Link>
+              </li>
+              <li>
+                <Link href="/chemical-database" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  化学物質検索
+                </Link>
+              </li>
+              <li>
+                <Link href="/wizard" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  コンプラ診断
+                </Link>
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* コピーライト */}
-        <div className="mt-6 border-t border-slate-200 pt-4 text-center text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400 sm:flex sm:items-center sm:justify-between sm:text-left">
-          <p>
+        <div className="mt-6 flex flex-col items-center gap-1 border-t border-slate-200 pt-4 dark:border-slate-700 sm:flex-row sm:justify-between">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             © 2026 ANZEN AI ·{" "}
-            <Link
-              href="/about"
-              className="hover:text-slate-800 hover:underline dark:hover:text-slate-200"
-            >
+            <Link href="/about" className="hover:text-slate-800 hover:underline dark:hover:text-slate-200">
               監修：労働安全コンサルタント（登録番号260022）
             </Link>
           </p>
-          <p className="mt-2 text-[11px] sm:mt-0">
-            現場の安全を、AIで変える。
+          <p className="text-[11px] text-slate-400 dark:text-slate-500">
+            個人運営の研究プロジェクト
           </p>
         </div>
       </div>

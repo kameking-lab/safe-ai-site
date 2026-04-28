@@ -21,24 +21,25 @@ import {
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import { SITE_STATS } from "@/data/site-stats";
+import { PAID_MODE } from "@/lib/paid-mode";
 
 export const metadata: Metadata = {
-  title: "運営者情報・特商法表記 | ANZEN AI",
+  title: "研究・実証プロジェクトについて | ANZEN AI",
   description:
-    "ANZEN AI（屋号）の運営者情報・特定商取引法に基づく表記・監修範囲を掲載。労働安全コンサルタント（登録番号260022・土木区分）が監修。建設・製造・林業の労働安全衛生コンサルティングも受託しています。",
-  keywords: ["ANZEN AI", "労働安全コンサルタント", "登録番号260022", "労働安全衛生", "安全管理", "特定商取引法"],
+    "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。運営者は労働安全コンサルタント（登録番号260022・土木区分）。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
+  keywords: ["ANZEN AI", "研究プロジェクト", "労働安全コンサルタント", "登録番号260022", "AI", "DX", "労働安全衛生"],
   alternates: { canonical: "/about" },
   openGraph: {
-    title: "運営者情報・特商法表記 | ANZEN AI",
+    title: "研究・実証プロジェクトについて | ANZEN AI",
     description:
-      "ANZEN AI（屋号）の運営者情報・特定商取引法に基づく表記・監修範囲を掲載。労働安全コンサルタント（登録番号260022・土木区分）が監修。",
+      "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。労働安全コンサルタント（登録番号260022）が運営。",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "運営者情報・特商法表記 | ANZEN AI",
+    title: "研究・実証プロジェクトについて | ANZEN AI",
     description:
-      "ANZEN AI（屋号）の運営者情報・特定商取引法に基づく表記・監修範囲を掲載。労働安全コンサルタント（登録番号260022・土木区分）が監修。",
+      "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
   },
 };
 
@@ -172,13 +173,35 @@ export default function AboutPage() {
     <main className="mx-auto max-w-2xl px-4 py-6 sm:py-8">
       <JsonLd schema={personSchema()} />
       <TranslatedPageHeader
-        titleJa="運営者情報・特定商取引法に基づく表記"
-        titleEn="About ANZEN AI"
-        descriptionJa="ANZEN AI の運営者情報と特商法表記"
-        descriptionEn="Operator information and legal disclosures for ANZEN AI"
+        titleJa="研究・実証プロジェクトについて"
+        titleEn="About ANZEN AI Research Project"
+        descriptionJa="個人運営の労働安全 × AI・DX 研究プロジェクト"
+        descriptionEn="An independent research project on AI/DX in occupational safety"
         iconName="Info"
         iconColor="emerald"
       />
+
+      {/* 研究プロジェクト宣言（最上部） */}
+      <section
+        aria-labelledby="research-project-heading"
+        className="mt-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-5 shadow-sm"
+      >
+        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-800">
+          <Sparkles className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+          研究・実証プロジェクト
+        </div>
+        <h2 id="research-project-heading" className="mt-2 text-base font-bold leading-snug text-slate-900 sm:text-lg">
+          ANZEN AI は、労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。
+        </h2>
+        <p className="mt-3 text-sm leading-6 text-slate-700">
+          運営者は労働安全コンサルタント（<strong className="font-bold">登録番号260022・土木区分</strong>）。
+          運営費用は運営者個人が負担しています。通達・事故事例・化学物質情報を一次ソース付きで無料公開し、
+          現場担当者・研究者・行政の皆さまから広くフィードバックを募っています。
+        </p>
+        <p className="mt-2 text-[11px] leading-5 text-slate-500">
+          ※ 本サイトは現時点で課金機能を提供していません。M6 期に検討される料金設計はあくまで構想段階です。
+        </p>
+      </section>
 
       <div className="mt-6 space-y-6">
         {/* One Big Thing — サイトの独自価値宣言（ID_060・ID_002・ID_048） */}
@@ -513,7 +536,8 @@ export default function AboutPage() {
           </Link>
         </div>
 
-        {/* 特定商取引法 */}
+        {/* 特定商取引法（PAID_MODE時のみ表示） */}
+        {PAID_MODE ? (
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-base font-bold text-slate-900">
             特定商取引法に基づく表記
@@ -541,6 +565,7 @@ export default function AboutPage() {
             をご確認ください。
           </p>
         </section>
+        ) : null}
 
         {/* 免責事項 */}
         <div className="rounded-xl border border-amber-100 bg-amber-50 p-4 text-xs text-amber-800 leading-6">
