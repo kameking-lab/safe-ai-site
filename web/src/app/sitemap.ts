@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { mhlwNotices } from "@/data/mhlw-notices";
+import { getPublishedArticleIndex } from "@/lib/articles";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://safe-ai-site.vercel.app";
@@ -73,7 +74,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "yearly",
   }));
 
-  return [...filtered, ...circularPages].map(
+  // 時限公開: publishedAt > now() の記事は sitemap に含めない
+  const articlePages: typeof pages = getPublishedArticleIndex().map((a) => ({
+    url: `/articles/${a.slug}`,
+    lastModified: a.lastReviewedAt,
+    priority: 0.7,
+    changeFrequency: "monthly",
+  }));
+
+  return [...filtered, ...circularPages, ...articlePages].map(
     ({ url, lastModified, priority, changeFrequency }) => ({
       url: `${base}${url}`,
       lastModified,

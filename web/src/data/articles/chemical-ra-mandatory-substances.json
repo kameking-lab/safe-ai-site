@@ -1,0 +1,61 @@
+{
+  "slug": "chemical-ra-mandatory-substances",
+  "title": "化学物質リスクアセスメント義務対象物質と運用フロー",
+  "description": "640物質→順次拡大される化学物質RA対象範囲、CREATE-SIMPLE/コントロール・バンディングの選び方、SDS交付義務との関係。",
+  "category": "guide",
+  "industry": "manufacturing",
+  "tags": [
+    "化学物質",
+    "リスクアセスメント",
+    "SDS"
+  ],
+  "keywords": [
+    "化学物質 リスクアセスメント",
+    "CREATE-SIMPLE",
+    "SDS 義務"
+  ],
+  "publishedAt": "2026-04-28",
+  "lastReviewedAt": "2026-04-28",
+  "author": {
+    "name": "労働安全コンサルタント（登録番号260022・土木）",
+    "url": "https://safe-ai-site.vercel.app/about"
+  },
+  "sections": [
+    {
+      "heading": "概要",
+      "body": "化学物質リスクアセスメント義務対象物質と運用フローについて、現場での運用に必要な要点を整理します。"
+    },
+    {
+      "heading": "適用範囲・対象",
+      "body": "本トピックは manufacturing を主たる対象としますが、関連業種でも同等の運用判断が求められます。"
+    },
+    {
+      "heading": "実務での実装ポイント",
+      "body": "1) 文書化（手順書・記録）  2) 教育（朝礼・特別教育）  3) 点検（始業前・定期）  4) 是正（ヒヤリハット即時対応）  の4点を循環させます。"
+    },
+    {
+      "heading": "よくある違反・指摘事項",
+      "body": "労基署監督の現場で頻出するのは、記録不備・教育未実施・点検漏れ。形だけの運用に陥らないよう、本サイトのKYツール・Eラーニングを併用してください。"
+    },
+    {
+      "heading": "関連リソース",
+      "body": "本サイト内の通達一覧（/circulars）・保護具AIファインダー（/equipment-finder）・KY用紙（/ky）と併用してください。"
+    }
+  ],
+  "sources": [
+    {
+      "label": "厚生労働省 労働安全衛生法",
+      "url": "https://laws.e-gov.go.jp/law/347AC0000000057"
+    },
+    {
+      "label": "厚生労働省 職場のあんぜんサイト",
+      "url": "https://anzeninfo.mhlw.go.jp/"
+    }
+  ],
+  "ctaSlot": {
+    "title": "現場の運用設計をご相談ください",
+    "description": "労働安全コンサルタント（登録番号260022）が直接ヒアリング。",
+    "href": "/contact",
+    "label": "無料相談を申し込む"
+  }
+}

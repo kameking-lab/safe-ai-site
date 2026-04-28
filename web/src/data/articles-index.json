@@ -1,0 +1,141 @@
+[
+  {
+    "slug": "fullharness-2022-revision",
+    "title": "フルハーネス義務化の最新ルール（2022年改正以降）— 6.75m超は必須",
+    "description": "フルハーネス型墜落制止用器具の使用義務範囲、特別教育、点検記録、現場で陥りがちな違反例を整理。",
+    "publishedAt": "2026-04-28",
+    "lastReviewedAt": "2026-04-28",
+    "category": "law-update",
+    "industry": "construction",
+    "tags": [
+      "フルハーネス",
+      "墜落制止用器具",
+      "特別教育"
+    ]
+  },
+  {
+    "slug": "heat-stroke-2025-mandatory",
+    "title": "熱中症対策の義務化（2025年改正・WBGT基準）— 現場で本当にやるべきこと",
+    "description": "義務化された熱中症対策の具体的内容、WBGT指数の運用、罰則、現場の実装ガイド。",
+    "publishedAt": "2026-04-28",
+    "lastReviewedAt": "2026-04-28",
+    "category": "law-update",
+    "industry": "construction",
+    "tags": [
+      "熱中症",
+      "WBGT",
+      "義務化"
+    ]
+  },
+  {
+    "slug": "chemical-ra-mandatory-substances",
+    "title": "化学物質リスクアセスメント義務対象物質と運用フロー",
+    "description": "640物質→順次拡大される化学物質RA対象範囲、CREATE-SIMPLE/コントロール・バンディングの選び方、SDS交付義務との関係。",
+    "publishedAt": "2026-04-28",
+    "lastReviewedAt": "2026-04-28",
+    "category": "guide",
+    "industry": "manufacturing",
+    "tags": [
+      "化学物質",
+      "リスクアセスメント",
+      "SDS"
+    ]
+  },
+  {
+    "slug": "stress-check-50-employee",
+    "title": "ストレスチェック制度の50人未満事業所への拡大",
+    "description": "2026年以降の制度動向、50人未満への努力義務拡大、外部委託先の選び方、産業医面談との接続。",
+    "publishedAt": "2026-04-28",
+    "lastReviewedAt": "2026-04-28",
+    "category": "law-update",
+    "industry": "all",
+    "tags": [
+      "ストレスチェック",
+      "メンタルヘルス"
+    ]
+  },
+  {
+    "slug": "ky-paperless-implementation",
+    "title": "KY用紙の電子化（紙廃止）— 朝礼5分で回す運用テンプレ",
+    "description": "紙のKY用紙からスマホ・タブレット運用への切替手順、保存義務、労基署対応、PDFエクスポート設計。",
+    "publishedAt": "2026-04-28",
+    "lastReviewedAt": "2026-04-28",
+    "category": "guide",
+    "industry": "construction",
+    "tags": [
+      "KY",
+      "デジタル化",
+      "朝礼"
+    ]
+  },
+  {
+    "slug": "fall-prevention-checklist-construction",
+    "title": "建設業の墜落・転落災害をゼロにするチェックリスト30項目",
+    "description": "厚労省統計に基づく墜落・転落の主要原因と、現場で配布できる30項目チェックリスト。",
+    "publishedAt": "2026-04-28",
+    "lastReviewedAt": "2026-04-28",
+    "category": "guide",
+    "industry": "construction",
+    "tags": [
+      "墜落・転落",
+      "建設業",
+      "チェックリスト"
+    ]
+  },
+  {
+    "slug": "elearning-tokubetsu-12-types",
+    "title": "特別教育12種類を社内で運用する完全ガイド",
+    "description": "特別教育の対象作業・カリキュラム・修了証発行・記録保存。Eラーニング化の判断基準。",
+    "publishedAt": "2026-04-28",
+    "lastReviewedAt": "2026-04-28",
+    "category": "guide",
+    "industry": "all",
+    "tags": [
+      "特別教育",
+      "Eラーニング",
+      "教育"
+    ]
+  },
+  {
+    "slug": "scaffold-3rd-rail-2024",
+    "title": "足場墜落防止 第3次規制（2024〜）のポイント",
+    "description": "墜落防止措置の段階的強化、手すり先行工法、特別教育の追加項目、罰則の動向を整理。",
+    "publishedAt": "2026-04-28",
+    "lastReviewedAt": "2026-04-28",
+    "category": "law-update",
+    "industry": "construction",
+    "tags": [
+      "足場",
+      "墜落防止",
+      "手すり先行"
+    ]
+  },
+  {
+    "slug": "vibration-isohazard-forestry",
+    "title": "林業のチェーンソー振動障害（白蝋病）対策",
+    "description": "ISO 10819 防振手袋、作業時間管理、定期健康診断、業務上疾病認定の動向。",
+    "publishedAt": "2026-04-28",
+    "lastReviewedAt": "2026-04-28",
+    "category": "industry",
+    "industry": "forestry",
+    "tags": [
+      "林業",
+      "振動障害",
+      "チェーンソー"
+    ]
+  },
+  {
+    "slug": "freelance-rosai-2024",
+    "title": "フリーランス労災保険（2024年特別加入拡大）",
+    "description": "特別加入の対象拡大、保険料・給付内容、適用判断、現場での運用Q&A。",
+    "publishedAt": "2026-04-28",
+    "lastReviewedAt": "2026-04-28",
+    "category": "law-update",
+    "industry": "all",
+    "tags": [
+      "フリーランス",
+      "労災保険",
+      "特別加入"
+    ]
+  }
+]
