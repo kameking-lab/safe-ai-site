@@ -69,7 +69,7 @@ const FEEDBACK_DATA = [
 const FEEDBACK_COLORS = ["#1a7a4c", "#0891b2", "#dc2626", "#7c3aed", "#ea580c", "#64748b"];
 
 export function StatsDashboard() {
-  const dailyUu = useMemo(buildDailyUu, []);
+  const dailyUu = useMemo(() => buildDailyUu(), []);
   const cumulativeUu = useMemo(() => {
     let acc = 0;
     return MONTHLY_UU.map((m) => {

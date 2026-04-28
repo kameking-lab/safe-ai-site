@@ -11,6 +11,7 @@ import {
   Search,
   MessageSquare,
   Handshake,
+  BarChart3,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { PageHeader } from "@/components/page-header";
@@ -26,6 +27,7 @@ const ICON_MAP = {
   Search,
   MessageSquare,
   Handshake,
+  BarChart3,
 } as const;
 
 export type TranslatedPageHeaderIconName = keyof typeof ICON_MAP;

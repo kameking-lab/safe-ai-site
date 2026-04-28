@@ -59,7 +59,7 @@ function parseSearchParams(url: URL): SearchParams {
  *  - 全角数字・英字 → 半角
  *  - 小文字化（英字のみ）
  */
-export function normalizeCategory(value: string | null | undefined): string {
+function normalizeCategory(value: string | null | undefined): string {
   if (!value) return "";
   let s = value;
   // 全角英数字 → 半角

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Share2, Linkedin, Facebook, Link2, Check, MessageSquare } from "lucide-react";
+import { Share2, Link2, Check, MessageSquare } from "lucide-react";
 import { SITE_STATS } from "@/data/site-stats";
 
 const SUPPORT_TEMPLATE = `ANZEN AI を応援しています。労働安全衛生分野の AI・DX 研究プロジェクトで、通達 ${SITE_STATS.lawArticleCount} 条文・事故DB ${SITE_STATS.accidentDbCount} 件・化学物質情報を一次ソース付きで無料公開しています。`;
@@ -30,6 +30,7 @@ export function ShareButtons({ title, hashtags, fixed = true }: ShareButtonsProp
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- SSR hydration: 固定バーは mount 後にのみ描画
     setMounted(true);
   }, []);
 
@@ -136,7 +137,10 @@ function ShareGrid({
         className={itemClass}
         aria-label="LinkedIn でシェア"
       >
-        <Linkedin className="h-4 w-4 text-[#0a66c2]" /> LinkedIn
+        <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-[#0a66c2] text-[8px] font-extrabold text-white">
+          in
+        </span>
+        LinkedIn
       </a>
       <a
         href={links.threads}
@@ -154,7 +158,10 @@ function ShareGrid({
         className={itemClass}
         aria-label="Facebook でシェア"
       >
-        <Facebook className="h-4 w-4 text-[#1877f2]" /> Facebook
+        <span className="flex h-4 w-4 items-center justify-center rounded-sm bg-[#1877f2] text-[10px] font-extrabold text-white">
+          f
+        </span>
+        Facebook
       </a>
       <a
         href={links.note}
