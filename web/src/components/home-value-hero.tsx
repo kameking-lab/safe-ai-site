@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { SITE_STATS, SITE_STATS_META, type SiteStatKey } from "@/data/site-stats";
 import { PersonaEntry } from "@/components/PersonaEntry";
+import { PAID_MODE } from "@/lib/paid-mode";
 
 const STATS: { key: SiteStatKey; value: string; label: string; hint: string }[] = [
   { key: "accidentDbCount", value: SITE_STATS.accidentDbCount, label: "厚労省 事故DB収録件数", hint: "全件検索対応" },
@@ -69,6 +71,30 @@ const STRENGTH_ITEMS = [
 export function HomeValueHero() {
   return (
     <div className="space-y-6" aria-label="ホームの価値案内">
+      {/* 研究プロジェクト・無料公開バナー（ヒーロー直下のSticky） */}
+      {!PAID_MODE && (
+        <div
+          className="flex items-center justify-between gap-3 rounded-2xl border-2 border-emerald-300 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 px-4 py-3 shadow-sm"
+          role="note"
+        >
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+            <p className="text-xs font-bold text-emerald-900 sm:text-sm">
+              研究プロジェクト 無料公開中
+              <span className="ml-2 hidden font-normal text-emerald-800 sm:inline">
+                — 個人運営の労働安全 × AI/DX 実証ポータル
+              </span>
+            </p>
+          </div>
+          <Link
+            href="/about"
+            className="shrink-0 rounded-full bg-emerald-600 px-3 py-1 text-[11px] font-bold text-white hover:bg-emerald-700"
+          >
+            詳しく
+          </Link>
+        </div>
+      )}
+
       {/* メインヒーロー */}
       <div className="rounded-2xl border border-[#155a38] bg-gradient-to-br from-[#1a7a4c] via-[#166640] to-[#0f4d2e] px-5 py-6 text-white shadow-lg sm:px-8 sm:py-8">
         <div className="flex items-start justify-between gap-3">
@@ -89,8 +115,9 @@ export function HomeValueHero() {
             </h2>
             <p className="mt-3 text-sm leading-6 text-green-100 sm:text-base">
               建設・製造・介護・林業・運輸の現場向け。
-              朝礼KY・法改正・事故DB・Eラーニングを1つのポータルに集約。
-              <strong className="text-white">業務の自動化や教育制作の受託</strong>もワンストップで対応します。
+              朝礼KY・法改正・事故DB・Eラーニングを1つのポータルに集約した
+              <strong className="text-white">労働安全 × AI・DX の研究・実証プロジェクト</strong>
+              として、すべての機能を無料で公開しています。
             </p>
 
             {/* 統計バッジ — 出典・取得日をtitle属性で開示 */}
@@ -136,42 +163,69 @@ export function HomeValueHero() {
 
             {/* 3つのメインCTA */}
             <div className="mt-6 grid gap-2 sm:grid-cols-3">
-              <Link
-                href="/pricing#free"
-                className="rounded-lg bg-white px-5 py-3 text-center text-sm font-bold text-[#1a7a4c] hover:bg-emerald-50 transition-colors shadow"
-              >
-                無料で使ってみる →
-              </Link>
-              <Link
-                href="/contact"
-                className="rounded-lg border-2 border-white/60 bg-white/10 px-5 py-3 text-center text-sm font-bold text-white hover:bg-white/20 transition-colors"
-              >
-                受託業務のご相談 →
-              </Link>
-              <Link
-                href="/pricing"
-                className="rounded-lg bg-amber-500 px-5 py-3 text-center text-sm font-bold text-white hover:bg-amber-400 transition-colors shadow"
-              >
-                料金プランを見る →
-              </Link>
+              {PAID_MODE ? (
+                <>
+                  <Link
+                    href="/pricing#free"
+                    className="rounded-lg bg-white px-5 py-3 text-center text-sm font-bold text-[#1a7a4c] hover:bg-emerald-50 transition-colors shadow"
+                  >
+                    無料で使ってみる →
+                  </Link>
+                  <Link
+                    href="/contact"
+                    className="rounded-lg border-2 border-white/60 bg-white/10 px-5 py-3 text-center text-sm font-bold text-white hover:bg-white/20 transition-colors"
+                  >
+                    受託業務のご相談 →
+                  </Link>
+                  <Link
+                    href="/pricing"
+                    className="rounded-lg bg-amber-500 px-5 py-3 text-center text-sm font-bold text-white hover:bg-amber-400 transition-colors shadow"
+                  >
+                    料金プランを見る →
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="#features-section"
+                    className="rounded-lg bg-white px-5 py-3 text-center text-sm font-bold text-[#1a7a4c] hover:bg-emerald-50 transition-colors shadow"
+                  >
+                    機能を試す →
+                  </Link>
+                  <Link
+                    href="/contact"
+                    className="rounded-lg border-2 border-white/60 bg-white/10 px-5 py-3 text-center text-sm font-bold text-white hover:bg-white/20 transition-colors"
+                  >
+                    ご意見を送る →
+                  </Link>
+                  <Link
+                    href="/leaflet"
+                    className="rounded-lg bg-amber-500 px-5 py-3 text-center text-sm font-bold text-white hover:bg-amber-400 transition-colors shadow"
+                  >
+                    サイトを応援する →
+                  </Link>
+                </>
+              )}
             </div>
-            {/* 無料登録3ステップ — 初訪問者の登録迷子を防ぐ */}
+            {/* 無料登録3ステップ */}
             <ol className="mt-4 grid gap-2 text-[11px] leading-5 text-green-50 sm:grid-cols-3">
               <li className="rounded-md border border-white/20 bg-white/10 px-3 py-2">
-                <span className="font-bold text-white">① クレカ登録不要</span>
-                <span className="ml-1 text-green-100/90">— 課金は明示同意した時のみ</span>
+                <span className="font-bold text-white">① 登録不要</span>
+                <span className="ml-1 text-green-100/90">
+                  {PAID_MODE ? "— 課金は明示同意した時のみ" : "— 全機能を無料で試せます"}
+                </span>
               </li>
               <li className="rounded-md border border-white/20 bg-white/10 px-3 py-2">
-                <span className="font-bold text-white">② Googleで30秒登録</span>
-                <span className="ml-1 text-green-100/90">— メール認証も可</span>
+                <span className="font-bold text-white">② 一次ソース付き</span>
+                <span className="ml-1 text-green-100/90">— 厚労省・e-Govの原本リンクあり</span>
               </li>
               <li className="rounded-md border border-white/20 bg-white/10 px-3 py-2">
-                <span className="font-bold text-white">③ 全機能の制限版を試せる</span>
-                <span className="ml-1 text-green-100/90">— KY/事故DB/法令検索/AI要約</span>
+                <span className="font-bold text-white">③ フィードバック歓迎</span>
+                <span className="ml-1 text-green-100/90">— ご意見でサイトが進化します</span>
               </li>
             </ol>
             <p className="mt-3 text-[11px] text-green-100">
-              ※ 24時間以内にお問い合わせへ返信します（土日祝除く）。
+              ※ ご意見・ご質問には原則3営業日以内に返信します（土日祝除く）。
             </p>
           </div>
           {/* マスコット */}
@@ -253,44 +307,74 @@ export function HomeValueHero() {
         </div>
       </section>
 
-      {/* サービス導線 */}
+      {/* 関連動線 — PAID_MODE で内容が切り替わる */}
       <section
         aria-labelledby="services-section-heading"
         className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 shadow-sm dark:border-emerald-500/30 dark:from-emerald-500/10 dark:via-slate-800 dark:to-amber-500/10 sm:p-6"
       >
         <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
-          ANZEN AI サービス
+          {PAID_MODE ? "ANZEN AI サービス" : "ANZEN AI 研究プロジェクト"}
         </p>
         <h3 id="services-section-heading" className="mt-1 text-base font-bold text-slate-900 dark:text-slate-100 sm:text-lg">
-          用途に合わせて、無料から受託まで選べます。
+          {PAID_MODE
+            ? "用途に合わせて、無料から受託まで選べます。"
+            : "プロジェクトに参加するには、3つの方法があります。"}
         </h3>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {[
-            {
-              href: "/pricing",
-              title: "月額プラン（¥0〜）",
-              desc: "フリー／スタンダード¥980／プロ¥2,980。いつでもキャンセル可。",
-              cta: "プランを見る",
-              color: "bg-white border-emerald-200 hover:border-emerald-400 dark:bg-slate-800 dark:border-emerald-500/30 dark:hover:border-emerald-400/70",
-              accent: "text-emerald-700 dark:text-emerald-300",
-            },
-            {
-              href: "/services",
-              title: "受託業務（¥150k〜）",
-              desc: "KY・安全管理・教育・法改正通知・Claude Code 開発まで。",
-              cta: "受託メニューを見る",
-              color: "bg-white border-amber-200 hover:border-amber-400 dark:bg-slate-800 dark:border-amber-500/30 dark:hover:border-amber-400/70",
-              accent: "text-amber-700 dark:text-amber-300",
-            },
-            {
-              href: "/contact",
-              title: "無料相談30分",
-              desc: "課題整理から最適プラン提案まで。強引な営業は一切なし。",
-              cta: "相談を申し込む",
-              color: "bg-white border-violet-200 hover:border-violet-400 dark:bg-slate-800 dark:border-violet-500/30 dark:hover:border-violet-400/70",
-              accent: "text-violet-700 dark:text-violet-300",
-            },
-          ].map((card) => (
+          {(PAID_MODE
+            ? [
+                {
+                  href: "/pricing",
+                  title: "月額プラン（¥0〜）",
+                  desc: "フリー／スタンダード¥980／プロ¥2,980。いつでもキャンセル可。",
+                  cta: "プランを見る",
+                  color: "bg-white border-emerald-200 hover:border-emerald-400 dark:bg-slate-800 dark:border-emerald-500/30 dark:hover:border-emerald-400/70",
+                  accent: "text-emerald-700 dark:text-emerald-300",
+                },
+                {
+                  href: "/services",
+                  title: "受託業務（¥150k〜）",
+                  desc: "KY・安全管理・教育・法改正通知・Claude Code 開発まで。",
+                  cta: "受託メニューを見る",
+                  color: "bg-white border-amber-200 hover:border-amber-400 dark:bg-slate-800 dark:border-amber-500/30 dark:hover:border-amber-400/70",
+                  accent: "text-amber-700 dark:text-amber-300",
+                },
+                {
+                  href: "/contact",
+                  title: "無料相談30分",
+                  desc: "課題整理から最適プラン提案まで。強引な営業は一切なし。",
+                  cta: "相談を申し込む",
+                  color: "bg-white border-violet-200 hover:border-violet-400 dark:bg-slate-800 dark:border-violet-500/30 dark:hover:border-violet-400/70",
+                  accent: "text-violet-700 dark:text-violet-300",
+                },
+              ]
+            : [
+                {
+                  href: "/stats",
+                  title: "利用統計を見る",
+                  desc: "公開ダッシュボードでコンテンツ規模・UU推移・AI利用を共有しています。",
+                  cta: "統計を見る",
+                  color: "bg-white border-emerald-200 hover:border-emerald-400 dark:bg-slate-800 dark:border-emerald-500/30 dark:hover:border-emerald-400/70",
+                  accent: "text-emerald-700 dark:text-emerald-300",
+                },
+                {
+                  href: "/contact",
+                  title: "ご意見・改善提案",
+                  desc: "データの誤り・追加してほしい機能・現場で使いにくい点をお知らせください。匿名でも投稿可。",
+                  cta: "意見を送る",
+                  color: "bg-white border-amber-200 hover:border-amber-400 dark:bg-slate-800 dark:border-amber-500/30 dark:hover:border-amber-400/70",
+                  accent: "text-amber-700 dark:text-amber-300",
+                },
+                {
+                  href: "/leaflet",
+                  title: "リーフレットで応援",
+                  desc: "A4両面の紹介リーフレットを配布・印刷し、プロジェクトを広めてください。",
+                  cta: "リーフレットを開く",
+                  color: "bg-white border-violet-200 hover:border-violet-400 dark:bg-slate-800 dark:border-violet-500/30 dark:hover:border-violet-400/70",
+                  accent: "text-violet-700 dark:text-violet-300",
+                },
+              ]
+          ).map((card) => (
             <Link
               key={card.href}
               href={card.href}
