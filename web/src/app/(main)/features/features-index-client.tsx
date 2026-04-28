@@ -17,6 +17,8 @@ type CaseEntry = {
   industry: string;
   useCase: string;
   headline: string;
+  results?: string[];
+  tags?: string[];
 };
 
 const QUICK_LINKS = [
@@ -188,7 +190,7 @@ export function FeaturesIndexClient() {
               <Link
                 key={c.slug}
                 href={`/cases/${c.slug}`}
-                className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 <p className="text-[11px] font-bold tracking-widest text-emerald-700">
                   {c.industry}
@@ -197,11 +199,35 @@ export function FeaturesIndexClient() {
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">
                   「{c.headline}」
                 </p>
-                <p className="mt-3 inline-block rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
-                  {c.useCase}
-                </p>
+                {c.results && c.results.length > 0 && (
+                  <ul className="mt-3 space-y-1 border-t border-slate-100 pt-2 text-[11px] text-slate-600">
+                    {c.results.slice(0, 2).map((r) => (
+                      <li key={r} className="flex items-start gap-1">
+                        <span aria-hidden className="text-emerald-600">✓</span>
+                        <span className="line-clamp-2">{r}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="mt-auto flex items-center justify-between gap-2 pt-3">
+                  <span className="inline-block rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
+                    {c.useCase}
+                  </span>
+                  <span className="text-[11px] font-bold text-emerald-700">詳しく →</span>
+                </div>
               </Link>
             ))}
+          </div>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <p className="text-xs text-emerald-900">
+              ご利用中の方へ：改善提案・追加機能の要望は随時受付中です。
+            </p>
+            <Link
+              href="/contact"
+              className="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
+            >
+              ご意見を送る →
+            </Link>
           </div>
         </section>
       )}
