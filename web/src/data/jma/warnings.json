@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-04-28T16:21:01.497Z",
+  "fetchedAt": "2026-04-28T18:06:28.308Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -4193,52 +4193,15 @@
       ]
     },
     "JP-35": {
-      "level": "advisory",
+      "level": "none",
       "entries": [
         {
           "sourceCode": "350000",
-          "level": "advisory",
-          "headline": "西部、北部では、２９日未明まで強風に注意してください。",
-          "reportDatetime": "2026-04-28T15:43:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-04-29T02:43:00+09:00",
           "publishingOffice": "下関地方気象台",
-          "warnings": [
-            {
-              "areaCode": "350010",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "350040",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3520100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3520400",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3521100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3550200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
