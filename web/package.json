@@ -19,7 +19,8 @@
     "vercel:whoami": "vercel whoami",
     "vercel:link": "vercel link --yes --cwd .",
     "vercel:preview": "vercel deploy --yes --cwd .",
-    "vercel:prod": "vercel deploy --prod --yes --cwd ."
+    "vercel:prod": "vercel deploy --prod --yes --cwd .",
+    "capture": "node ../scripts/capture-screenshots.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",

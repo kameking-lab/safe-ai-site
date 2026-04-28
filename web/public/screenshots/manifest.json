@@ -1,0 +1,136 @@
+{
+  "generatedAt": "2026-04-28T22:08:42.772Z",
+  "baseUrl": "https://safe-ai-site.vercel.app",
+  "targets": [
+    {
+      "slug": "home",
+      "path": "/",
+      "label": "ホーム"
+    },
+    {
+      "slug": "chatbot",
+      "path": "/chatbot",
+      "label": "安衛法チャットボット"
+    },
+    {
+      "slug": "chemical-ra",
+      "path": "/chemical-ra",
+      "label": "化学物質リスクアセスメント"
+    },
+    {
+      "slug": "ky",
+      "path": "/ky",
+      "label": "KY用紙"
+    },
+    {
+      "slug": "equipment-finder",
+      "path": "/goods",
+      "label": "安全グッズ・装備検索"
+    },
+    {
+      "slug": "resources",
+      "path": "/resources",
+      "label": "資料ライブラリ"
+    },
+    {
+      "slug": "accidents",
+      "path": "/accidents",
+      "label": "事故データベース"
+    },
+    {
+      "slug": "chemical-database",
+      "path": "/chemical-database",
+      "label": "化学物質検索DB"
+    },
+    {
+      "slug": "law-search",
+      "path": "/law-search",
+      "label": "法令検索"
+    },
+    {
+      "slug": "circulars",
+      "path": "/laws",
+      "label": "通達・法改正"
+    },
+    {
+      "slug": "education",
+      "path": "/education",
+      "label": "特別教育"
+    },
+    {
+      "slug": "exam-quiz",
+      "path": "/exam-quiz",
+      "label": "資格試験過去問"
+    },
+    {
+      "slug": "wizard",
+      "path": "/wizard",
+      "label": "コンプラ診断"
+    },
+    {
+      "slug": "subsidies-calculator",
+      "path": "/subsidies/calculator",
+      "label": "助成金シミュレーター"
+    },
+    {
+      "slug": "signage",
+      "path": "/signage",
+      "label": "サイネージ"
+    },
+    {
+      "slug": "quick",
+      "path": "/quick",
+      "label": "クイックアクセス"
+    },
+    {
+      "slug": "community-cases",
+      "path": "/cases",
+      "label": "導入事例・利用者の声"
+    },
+    {
+      "slug": "qa-knowledge",
+      "path": "/glossary",
+      "label": "安全用語辞書"
+    },
+    {
+      "slug": "stats",
+      "path": "/about",
+      "label": "サイト統計"
+    },
+    {
+      "slug": "about-cases",
+      "path": "/cases",
+      "label": "導入事例"
+    },
+    {
+      "slug": "e-learning",
+      "path": "/e-learning",
+      "label": "Eラーニング"
+    },
+    {
+      "slug": "risk-prediction",
+      "path": "/risk-prediction",
+      "label": "AIリスク予測"
+    },
+    {
+      "slug": "safety-diary",
+      "path": "/safety-diary",
+      "label": "安全衛生日誌"
+    },
+    {
+      "slug": "lms",
+      "path": "/lms",
+      "label": "LMS（多拠点管理）"
+    },
+    {
+      "slug": "consulting",
+      "path": "/consulting",
+      "label": "月額顧問"
+    },
+    {
+      "slug": "services",
+      "path": "/services",
+      "label": "受託業務"
+    }
+  ]
+}
