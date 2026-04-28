@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { PAID_MODE } from "@/lib/paid-mode";
+import { mhlwNotices } from "@/data/mhlw-notices";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://safe-ai-site.vercel.app";
@@ -9,6 +10,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/", lastModified: "2026-04-19", priority: 1.0, changeFrequency: "daily" },
     { url: "/stats", lastModified: "2026-04-28", priority: 0.6, changeFrequency: "weekly" },
     { url: "/leaflet", lastModified: "2026-04-28", priority: 0.5, changeFrequency: "monthly" },
+    { url: "/circulars", lastModified: "2026-04-28", priority: 0.8, changeFrequency: "weekly" },
+    { url: "/equipment-finder", lastModified: "2026-04-28", priority: 0.7, changeFrequency: "monthly" },
+    { url: "/articles", lastModified: "2026-04-28", priority: 0.8, changeFrequency: "daily" },
     { url: "/accidents", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
     { url: "/e-learning", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
     { url: "/exam-quiz", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
@@ -62,10 +66,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const PAID_ONLY = new Set(["/pricing", "/services", "/consulting"]);
   const filtered = PAID_MODE ? pages : pages.filter((p) => !PAID_ONLY.has(p.url));
 
-  return filtered.map(({ url, lastModified, priority, changeFrequency }) => ({
-    url: `${base}${url}`,
-    lastModified,
-    changeFrequency,
-    priority,
+  const circularPages: typeof pages = mhlwNotices.map((n) => ({
+    url: `/circulars/${n.id}`,
+    lastModified: n.issuedDate ?? "2026-04-28",
+    priority: 0.5,
+    changeFrequency: "yearly",
   }));
+
+  return [...filtered, ...circularPages].map(
+    ({ url, lastModified, priority, changeFrequency }) => ({
+      url: `${base}${url}`,
+      lastModified,
+      changeFrequency,
+      priority,
+    })
+  );
 }

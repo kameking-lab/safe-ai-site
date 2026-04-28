@@ -218,6 +218,43 @@ export function breadcrumbSchema(items: { name: string; url: string }[]): Schema
   };
 }
 
+export function legalDocumentSchema(input: {
+  url: string;
+  title: string;
+  noticeNumber: string | null;
+  issuer: string | null;
+  issuedDate: string | null;
+  description: string;
+  legislationApplies?: string;
+}): Schema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "LegalDocument",
+    name: input.title,
+    headline: input.title,
+    url: input.url,
+    description: input.description,
+    ...(input.noticeNumber ? { identifier: input.noticeNumber } : {}),
+    ...(input.issuedDate ? { datePublished: input.issuedDate } : {}),
+    ...(input.issuer
+      ? {
+          author: {
+            "@type": "Organization",
+            name: input.issuer,
+          },
+          publisher: {
+            "@type": "Organization",
+            name: input.issuer,
+          },
+        }
+      : {}),
+    ...(input.legislationApplies
+      ? { legislationApplies: input.legislationApplies }
+      : {}),
+    inLanguage: "ja",
+  };
+}
+
 export function courseListSchema(
   courses: { name: string; description: string }[]
 ): Schema {
