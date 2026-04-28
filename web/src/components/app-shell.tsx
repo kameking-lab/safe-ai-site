@@ -137,7 +137,7 @@ const NAV_CATEGORIES: NavCategory[] = [
       ]
     : [
         {
-          label: "サービス",
+          label: "ツール",
           items: [
             { id: "wizard", label: "コンプラ診断", href: "/wizard", icon: ListChecks, badge: "NEW" },
           ] as NavItem[],
