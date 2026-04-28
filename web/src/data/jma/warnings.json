@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-04-28T22:32:46.432Z",
+  "fetchedAt": "2026-04-28T23:39:58.428Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -2688,16 +2688,10 @@
         {
           "sourceCode": "200000",
           "level": "advisory",
-          "headline": "中部では、２９日昼前まで濃霧による視程障害に、２９日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-04-29T05:02:00+09:00",
+          "headline": "中部では、２９日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-04-29T07:39:00+09:00",
           "publishingOffice": "長野地方気象台",
           "warnings": [
-            {
-              "areaCode": "200020",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
             {
               "areaCode": "200020",
               "code": "21",
@@ -2736,12 +2730,6 @@
             },
             {
               "areaCode": "2020800",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2020800",
               "code": "21",
               "status": "継続",
               "level": "advisory"
@@ -2756,12 +2744,6 @@
               "areaCode": "2021501",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2021700",
-              "code": "20",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -2784,20 +2766,8 @@
             },
             {
               "areaCode": "2030300",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2030300",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2030400",
-              "code": "20",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -2808,20 +2778,8 @@
             },
             {
               "areaCode": "2030500",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2030500",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2030600",
-              "code": "20",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -2832,20 +2790,8 @@
             },
             {
               "areaCode": "2030700",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2030700",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2030900",
-              "code": "20",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -2856,32 +2802,14 @@
             },
             {
               "areaCode": "2032100",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2032100",
               "code": "21",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "2032300",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2032300",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2032400",
-              "code": "20",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3591,30 +3519,11 @@
         },
         {
           "sourceCode": "472000",
-          "level": "advisory",
-          "headline": "大東島地方では、２９日未明から２９日朝まで濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-04-28T16:10:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-04-29T07:46:00+09:00",
           "publishingOffice": "南大東島地方気象台",
-          "warnings": [
-            {
-              "areaCode": "472000",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4735700",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4735800",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         },
         {
           "sourceCode": "473000",
