@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HomeScreen } from "@/components/home-screen";
+import { MorningDigest } from "@/components/morning-digest";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -30,6 +31,9 @@ export default function HomePage() {
         iconName="Shield"
         iconColor="emerald"
       />
+      <div className="mt-4">
+        <MorningDigest />
+      </div>
     </HomeScreen>
   );
 }
