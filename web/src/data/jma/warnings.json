@@ -1,0 +1,13 @@
+{
+  "fetchedAt": "2026-04-28T09:00:00.000Z",
+  "byIso": {
+    "JP-01": { "level": "advisory", "entries": [{ "sourceCode": "016000", "level": "advisory", "headline": "石狩・空知・後志地方では強風に注意してください。", "reportDatetime": "2026-04-28T08:45:00+09:00", "publishingOffice": "札幌管区気象台", "warnings": [{ "areaCode": "0110000", "code": "15", "status": "発表", "level": "advisory" }] }] },
+    "JP-13": { "level": "warning", "entries": [{ "sourceCode": "130000", "level": "warning", "headline": "東京都は大雨警報・洪水注意報を発表中です。低い土地の浸水・河川の増水に警戒してください。", "reportDatetime": "2026-04-28T08:50:00+09:00", "publishingOffice": "気象庁", "warnings": [{ "areaCode": "1310400", "code": "03", "status": "発表", "level": "warning" }, { "areaCode": "1310400", "code": "10", "status": "発表", "level": "advisory" }] }] },
+    "JP-14": { "level": "warning", "entries": [{ "sourceCode": "140000", "level": "warning", "headline": "神奈川県東部で大雨警報を発表しています。", "reportDatetime": "2026-04-28T08:50:00+09:00", "publishingOffice": "横浜地方気象台", "warnings": [{ "areaCode": "1410000", "code": "03", "status": "発表", "level": "warning" }] }] },
+    "JP-23": { "level": "advisory", "entries": [{ "sourceCode": "230000", "level": "advisory", "headline": "愛知県では強風および落雷に注意してください。", "reportDatetime": "2026-04-28T08:30:00+09:00", "publishingOffice": "名古屋地方気象台", "warnings": [{ "areaCode": "2310000", "code": "12", "status": "発表", "level": "advisory" }] }] },
+    "JP-27": { "level": "advisory", "entries": [{ "sourceCode": "270000", "level": "advisory", "headline": "大阪府では雷および強風注意報を発表中。", "reportDatetime": "2026-04-28T08:30:00+09:00", "publishingOffice": "大阪管区気象台", "warnings": [{ "areaCode": "2710000", "code": "14", "status": "発表", "level": "advisory" }] }] },
+    "JP-40": { "level": "special", "entries": [{ "sourceCode": "400000", "level": "special", "headline": "福岡県北部に大雨特別警報を発表しています。直ちに命を守る行動を取ってください。", "reportDatetime": "2026-04-28T08:55:00+09:00", "publishingOffice": "福岡管区気象台", "warnings": [{ "areaCode": "4010000", "code": "33", "status": "発表", "level": "special" }] }] },
+    "JP-04": { "level": "none", "entries": [] },
+    "JP-34": { "level": "none", "entries": [] }
+  }
+}

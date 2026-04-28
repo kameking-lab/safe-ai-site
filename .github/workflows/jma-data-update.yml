@@ -1,0 +1,53 @@
+name: JMA data update
+
+on:
+  schedule:
+    # 15分間隔（cron は最短5分だが、レート制限と運用余裕のため15分）
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Fetch JMA data
+        run: node scripts/fetch-jma-data.mjs
+        env:
+          NODE_OPTIONS: "--no-warnings"
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- web/src/data/jma; then
+            echo "No JMA changes"
+            exit 0
+          fi
+          git add web/src/data/jma
+          git commit -m "chore(jma): scheduled data update [skip ci]"
+          # 並行 push の競合に備えて pull --rebase してから push
+          for i in 1 2 3; do
+            git pull --rebase origin "${{ github.ref_name }}" || true
+            if git push origin HEAD:"${{ github.ref_name }}"; then
+              echo "Pushed on attempt $i"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Failed to push after retries"
+          exit 1

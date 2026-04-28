@@ -1,0 +1,12 @@
+{
+  "fetchedAt": "2026-04-28T09:00:00.000Z",
+  "byIso": {
+    "JP-01": { "label": "北海道（石狩・空知・後志）", "reportDatetime": "2026-04-28T05:00:00+09:00", "publishingOffice": "札幌管区気象台", "todayWeatherCode": "201", "todayWeatherText": "くもり 後 晴れ" },
+    "JP-04": { "label": "宮城県", "reportDatetime": "2026-04-28T05:00:00+09:00", "publishingOffice": "仙台管区気象台", "todayWeatherCode": "100", "todayWeatherText": "晴れ" },
+    "JP-13": { "label": "東京都", "reportDatetime": "2026-04-28T05:00:00+09:00", "publishingOffice": "気象庁", "todayWeatherCode": "302", "todayWeatherText": "雨 時々 くもり" },
+    "JP-23": { "label": "愛知県", "reportDatetime": "2026-04-28T05:00:00+09:00", "publishingOffice": "名古屋地方気象台", "todayWeatherCode": "200", "todayWeatherText": "くもり" },
+    "JP-27": { "label": "大阪府", "reportDatetime": "2026-04-28T05:00:00+09:00", "publishingOffice": "大阪管区気象台", "todayWeatherCode": "201", "todayWeatherText": "くもり 時々 晴れ" },
+    "JP-34": { "label": "広島県", "reportDatetime": "2026-04-28T05:00:00+09:00", "publishingOffice": "広島地方気象台", "todayWeatherCode": "100", "todayWeatherText": "晴れ" },
+    "JP-40": { "label": "福岡県", "reportDatetime": "2026-04-28T05:00:00+09:00", "publishingOffice": "福岡管区気象台", "todayWeatherCode": "300", "todayWeatherText": "雨" }
+  }
+}

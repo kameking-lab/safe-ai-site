@@ -1,0 +1,9 @@
+{
+  "fetchedAt": "2026-04-28T09:00:00.000Z",
+  "source": "気象庁 (Japan Meteorological Agency)",
+  "sourceUrl": "https://www.jma.go.jp/bosai/",
+  "license": "気象庁ホームページ コンテンツ利用ルール（出典明記）",
+  "counts": { "warningsPrefectures": 8, "forecastOffices": 7, "earthquakes": 3 },
+  "errors": { "warnings": [], "forecast": [], "earthquakes": null },
+  "note": "初回はモックデータ。本番は GitHub Actions の jma-data-update.yml で15分間隔更新。"
+}
