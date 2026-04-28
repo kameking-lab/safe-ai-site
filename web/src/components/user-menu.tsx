@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { User, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
+import { PAID_MODE } from "@/lib/paid-mode";
 
 interface Props {
   user?: {
@@ -72,14 +73,16 @@ export function UserMenu({ user }: Props) {
             >
               マイページ
             </Link>
-            <Link
-              href="/pricing"
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50"
-            >
-              プランを確認する
-            </Link>
+            {PAID_MODE ? (
+              <Link
+                href="/pricing"
+                role="menuitem"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-amber-700 hover:bg-amber-50"
+              >
+                プランを確認する
+              </Link>
+            ) : null}
             <form
               action="/api/auth/signout"
               method="POST"

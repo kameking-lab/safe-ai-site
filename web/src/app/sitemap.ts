@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { PAID_MODE } from "@/lib/paid-mode";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://safe-ai-site.vercel.app";
@@ -6,6 +7,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   type Freq = "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   const pages: { url: string; lastModified: string; priority: number; changeFrequency: Freq }[] = [
     { url: "/", lastModified: "2026-04-19", priority: 1.0, changeFrequency: "daily" },
+    { url: "/stats", lastModified: "2026-04-28", priority: 0.6, changeFrequency: "weekly" },
+    { url: "/leaflet", lastModified: "2026-04-28", priority: 0.5, changeFrequency: "monthly" },
     { url: "/accidents", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
     { url: "/e-learning", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
     { url: "/exam-quiz", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
@@ -55,7 +58,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/terms", lastModified: "2025-10-01", priority: 0.3, changeFrequency: "yearly" },
   ];
 
-  return pages.map(({ url, lastModified, priority, changeFrequency }) => ({
+  // PAID_MODE が無効な研究プロジェクト期間は、課金関連ページをサイトマップから除外
+  const PAID_ONLY = new Set(["/pricing", "/services", "/consulting"]);
+  const filtered = PAID_MODE ? pages : pages.filter((p) => !PAID_ONLY.has(p.url));
+
+  return filtered.map(({ url, lastModified, priority, changeFrequency }) => ({
     url: `${base}${url}`,
     lastModified,
     changeFrequency,
