@@ -1,41 +1,4 @@
 {
-  "fetchedAt": "2026-04-28T09:00:00.000Z",
-  "items": [
-    {
-      "eventId": "20260428080300",
-      "reportDatetime": "2026-04-28T08:08:00+09:00",
-      "occurredAt": "2026-04-28T08:03:00+09:00",
-      "hypocenter": "宮城県沖",
-      "magnitude": "5.4",
-      "maxIntensity": "5-",
-      "title": "震度速報",
-      "lat": 38.5,
-      "lng": 141.7,
-      "depth": "50km"
-    },
-    {
-      "eventId": "20260427231500",
-      "reportDatetime": "2026-04-27T23:20:00+09:00",
-      "occurredAt": "2026-04-27T23:15:00+09:00",
-      "hypocenter": "石川県能登地方",
-      "magnitude": "4.1",
-      "maxIntensity": "3",
-      "title": "各地の震度",
-      "lat": 37.5,
-      "lng": 137.3,
-      "depth": "10km"
-    },
-    {
-      "eventId": "20260427164200",
-      "reportDatetime": "2026-04-27T16:46:00+09:00",
-      "occurredAt": "2026-04-27T16:42:00+09:00",
-      "hypocenter": "千葉県東方沖",
-      "magnitude": "4.7",
-      "maxIntensity": "4",
-      "title": "各地の震度",
-      "lat": 35.6,
-      "lng": 140.9,
-      "depth": "30km"
-    }
-  ]
+  "fetchedAt": "2026-04-28T16:21:01.497Z",
+  "items": []
 }
