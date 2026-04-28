@@ -3,10 +3,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink } from "lucide-react";
 import { JsonLd, breadcrumbSchema } from "@/components/json-ld";
+import { LanguageButton } from "@/components/language-button";
 import {
   getPublishedArticleBySlug,
   getPublishedArticleSlugs,
 } from "@/lib/articles";
+import type { LanguageCode } from "@/lib/translation-cache";
+import multilingualTitles from "@/data/translations/multilingual-titles.json";
 import { ogImageUrl } from "@/lib/og-url";
 
 const SITE_BASE = "https://safe-ai-site.vercel.app";
@@ -48,6 +51,31 @@ export default async function ArticleDetailPage({
   if (!article) notFound();
 
   const url = `${SITE_BASE}/articles/${slug}`;
+
+  const titleEntry = (multilingualTitles.entries as Array<{
+    resourceType: string;
+    id: string;
+    en: string;
+    zh: string;
+    vi: string;
+    pt: string;
+    tl: string;
+  }>).find((e) => e.resourceType === "article" && e.id === slug);
+  const prebuiltTitles: Partial<Record<LanguageCode, string>> = titleEntry
+    ? {
+        en: titleEntry.en,
+        zh: titleEntry.zh,
+        vi: titleEntry.vi,
+        pt: titleEntry.pt,
+        tl: titleEntry.tl,
+      }
+    : {};
+
+  const sourceText = [
+    article.title,
+    article.description,
+    ...article.sections.map((s) => `${s.heading}\n${s.body}`),
+  ].join("\n\n");
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 sm:py-8">
@@ -119,6 +147,13 @@ export default async function ArticleDetailPage({
             <p className="mt-2 text-sm leading-7 text-slate-700">{s.body}</p>
           </section>
         ))}
+
+        <LanguageButton
+          sourceText={sourceText}
+          resource="article"
+          resourceId={slug}
+          prebuiltTitles={prebuiltTitles}
+        />
 
         <section className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
           <h2 className="text-sm font-bold text-slate-900">出典・参考</h2>

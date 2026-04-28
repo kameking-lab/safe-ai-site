@@ -1,0 +1,2113 @@
+{
+  "generatedAt": "2026-04-28",
+  "totalTitles": 210,
+  "languages": [
+    "en",
+    "zh",
+    "vi",
+    "pt",
+    "tl"
+  ],
+  "entries": [
+    {
+      "resourceType": "article",
+      "id": "chemical-ra-mandatory-substances",
+      "ja": "化学物質リスクアセスメント義務対象物質と運用フロー",
+      "en": "Chemical SubstanceRisk Assessment義務対象物質と運用フロー",
+      "zh": "化学物质风险评估義務対象物質と運用フロー",
+      "vi": "Chất hóa họcĐánh giá rủi ro義務対象物質と運用フロー",
+      "pt": "Substância QuímicaAvaliação de Risco義務対象物質と運用フロー",
+      "tl": "KemikalPagtatasa ng Panganib義務対象物質と運用フロー"
+    },
+    {
+      "resourceType": "article",
+      "id": "elearning-tokubetsu-12-types",
+      "ja": "特別教育12種類を社内で運用する完全ガイド",
+      "en": "Special Education12種類を社内で運用する完全ガイド",
+      "zh": "特别教育12種類を社内で運用する完全ガイド",
+      "vi": "Đào tạo đặc biệt12種類を社内で運用する完全ガイド",
+      "pt": "Treinamento Especial12種類を社内で運用する完全ガイド",
+      "tl": "Espesyal na Pagsasanay12種類を社内で運用する完全ガイド"
+    },
+    {
+      "resourceType": "article",
+      "id": "fall-prevention-checklist-construction",
+      "ja": "建設業の墜落・転落災害をゼロにするチェックリスト30項目",
+      "en": "Construction Industry of Fall from height・FallDisasterをゼロにするチェックリスト30項目",
+      "zh": "建筑业的坠落・跌落灾害をゼロにするチェックリスト30項目",
+      "vi": "Ngành xây dựng 墜落・転落災害をゼロにするチェックリスト30項目",
+      "pt": "Construção de 墜落・転落災害をゼロにするチェックリスト30項目",
+      "tl": "Industriya ng Konstruksyon ng 墜落・転落災害をゼロにするチェックリスト30項目"
+    },
+    {
+      "resourceType": "article",
+      "id": "freelance-rosai-2024",
+      "ja": "フリーランス労災保険（2024年特別加入拡大）",
+      "en": "FreelancerWorkers' Compensation保険（2024 特別加入拡大）",
+      "zh": "自由职业者工伤保险保険（2024年特別加入拡大）",
+      "vi": "フリーランス労災保険（2024年特別加入拡大）",
+      "pt": "フリーランス労災保険（2024年特別加入拡大）",
+      "tl": "フリーランス労災保険（2024年特別加入拡大）"
+    },
+    {
+      "resourceType": "article",
+      "id": "fullharness-2022-revision",
+      "ja": "フルハーネス義務化の最新ルール（2022年改正以降）— 6.75m超は必須",
+      "en": "Full HarnessMandatory of 最新ルール（2022 Amendment以降）— 6.75m超は必須",
+      "zh": "全身式安全带强制化的最新ルール（2022年修订以降）— 6.75m超は必須",
+      "vi": "Dây an toàn toàn thânBắt buộc 最新ルール（2022年Sửa đổi以降）— 6.75m超は必須",
+      "pt": "フルハーネスObrigatório de 最新ルール（2022年Emenda以降）— 6.75m超は必須",
+      "tl": "フルハーネスSapilitan ng 最新ルール（2022年Pagbabago以降）— 6.75m超は必須"
+    },
+    {
+      "resourceType": "article",
+      "id": "heat-stroke-2025-mandatory",
+      "ja": "熱中症対策の義務化（2025年改正・WBGT基準）— 現場で本当にやるべきこと",
+      "en": "Heat Stroke対策 of Mandatory（2025 Amendment・WBGT基準）— 現場で本当にやるべきこと",
+      "zh": "中暑対策的强制化（2025年修订・WBGT基準）— 現場で本当にやるべきこと",
+      "vi": "Sốc nhiệt対策 Bắt buộc（2025年Sửa đổi・WBGT基準）— 現場で本当にやるべきこと",
+      "pt": "Insolação対策 de Obrigatório（2025年Emenda・WBGT基準）— 現場で本当にやるべきこと",
+      "tl": "Heat Stroke対策 ng Sapilitan（2025年Pagbabago・WBGT基準）— 現場で本当にやるべきこと"
+    },
+    {
+      "resourceType": "article",
+      "id": "ky-paperless-implementation",
+      "ja": "KY用紙の電子化（紙廃止）— 朝礼5分で回す運用テンプレ",
+      "en": "Hazard Prediction Sheet (KY) of 電子化（紙廃止）— 朝礼5分で回す運用テンプレ",
+      "zh": "危险预知表的電子化（紙廃止）— 朝礼5分で回す運用テンプレ",
+      "vi": "Phiếu dự báo nguy cơ (KY) 電子化（紙廃止）— 朝礼5分で回す運用テンプレ",
+      "pt": "Folha de Previsão de Risco (KY) de 電子化（紙廃止）— 朝礼5分で回す運用テンプレ",
+      "tl": "KY Form ng 電子化（紙廃止）— 朝礼5分で回す運用テンプレ"
+    },
+    {
+      "resourceType": "article",
+      "id": "scaffold-3rd-rail-2024",
+      "ja": "足場墜落防止 第3次規制（2024〜）のポイント",
+      "en": "ScaffoldFall from height防止 第3次規制（2024〜） of ポイント",
+      "zh": "脚手架坠落防止 第3次規制（2024〜）的ポイント",
+      "vi": "足場墜落防止 第3次規制（2024〜） ポイント",
+      "pt": "足場墜落防止 第3次規制（2024〜） de ポイント",
+      "tl": "足場墜落防止 第3次規制（2024〜） ng ポイント"
+    },
+    {
+      "resourceType": "article",
+      "id": "stress-check-50-employee",
+      "ja": "ストレスチェック制度の50人未満事業所への拡大",
+      "en": "Stress Check制度 of 50人未満事業所へ of 拡大",
+      "zh": "心理压力检查制度的50人未満事業所へ的拡大",
+      "vi": "ストレスチェック制度 50人未満事業所へ 拡大",
+      "pt": "ストレスチェック制度 de 50人未満事業所へ de 拡大",
+      "tl": "ストレスチェック制度 ng 50人未満事業所へ ng 拡大"
+    },
+    {
+      "resourceType": "article",
+      "id": "vibration-isohazard-forestry",
+      "ja": "林業のチェーンソー振動障害（白蝋病）対策",
+      "en": "Forestry of チェーンソーVibration Disorder（白蝋病）対策",
+      "zh": "林业的チェーンソー振动障碍（白蝋病）対策",
+      "vi": "林業 チェーンソー振動障害（白蝋病）対策",
+      "pt": "林業 de チェーンソー振動障害（白蝋病）対策",
+      "tl": "林業 ng チェーンソー振動障害（白蝋病）対策"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0001",
+      "ja": "「職場における熱中症防止対策のためのガイドライン」の策定について",
+      "en": "「職場におけるHeat Stroke防止対策 of ため of Guideline」 of Establishment (overview)",
+      "zh": "「職場における中暑防止対策的ため的指南」的制定（概要）",
+      "vi": "「職場におけるSốc nhiệt防止対策 ため ガイドライン」 策定(Tổng quan)",
+      "pt": "「職場におけるInsolação防止対策 de ため de ガイドライン」 de 策定 (visão geral)",
+      "tl": "「職場におけるHeat Stroke防止対策 ng ため ng ガイドライン」 ng 策定 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0002",
+      "ja": "労働安全衛生法及び作業環境測定法の一部を改正する法律等(代替化学名等関係)の施行について",
+      "en": "Occupational Safety and Health法及び作業環境測定法 of 一部をAmendmentする法律等(代替化学名等関係) of Enforcement (overview)",
+      "zh": "劳动安全卫生法及び作業環境測定法的一部を修订する法律等(代替化学名等関係)的实施（概要）",
+      "vi": "An toàn vệ sinh lao động法及び作業環境測定法 一部をSửa đổiする法律等(代替化学名等関係) 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional法及び作業環境測定法 de 一部をEmendaする法律等(代替化学名等関係) de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho法及び作業環境測定法 ng 一部をPagbabagoする法律等(代替化学名等関係) ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0003",
+      "ja": "労働安全衛生法の改正等に伴う特定自主検査制度の適切な運用に向けた対応のお願いについて(要請)",
+      "en": "Occupational Safety and Health法 of Amendment等に伴う特定自主検査制度 of 適切な運用に向けた対応 of お願い (overview)(要請)",
+      "zh": "劳动安全卫生法的修订等に伴う特定自主検査制度的適切な運用に向けた対応的お願い（概要）(要請)",
+      "vi": "An toàn vệ sinh lao động法 Sửa đổi等に伴う特定自主検査制度 適切な運用に向けた対応 お願い(Tổng quan)(要請)",
+      "pt": "Saúde e Segurança Ocupacional法 de Emenda等に伴う特定自主検査制度 de 適切な運用に向けた対応 de お願い (visão geral)(要請)",
+      "tl": "Kaligtasan sa Trabaho法 ng Pagbabago等に伴う特定自主検査制度 ng 適切な運用に向けた対応 ng お願い (pangkalahatan)(要請)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0004",
+      "ja": "高所作業車特定自主検査基準等の制定等について",
+      "en": "高所作業車特定自主検査基準等 of 制定等 (overview)",
+      "zh": "高所作業車特定自主検査基準等的制定等（概要）",
+      "vi": "高所作業車特定自主検査基準等 制定等(Tổng quan)",
+      "pt": "高所作業車特定自主検査基準等 de 制定等 (visão geral)",
+      "tl": "高所作業車特定自主検査基準等 ng 制定等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0005",
+      "ja": "変異原性が認められた化学物質の取扱いについて",
+      "en": "変異原性が認められたChemical Substance of 取扱い (overview)",
+      "zh": "変異原性が認められた化学物质的取扱い（概要）",
+      "vi": "変異原性が認められたChất hóa học 取扱い(Tổng quan)",
+      "pt": "変異原性が認められたSubstância Química de 取扱い (visão geral)",
+      "tl": "変異原性が認められたKemikal ng 取扱い (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0006",
+      "ja": "皮膚吸収性有害物質に該当する化学物質等について",
+      "en": "皮膚吸収性有害物質に該当するChemical Substance等 (overview)",
+      "zh": "皮膚吸収性有害物質に該当する化学物质等（概要）",
+      "vi": "皮膚吸収性有害物質に該当するChất hóa học等(Tổng quan)",
+      "pt": "皮膚吸収性有害物質に該当するSubstância Química等 (visão geral)",
+      "tl": "皮膚吸収性有害物質に該当するKemikal等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0007",
+      "ja": "労働安全衛生規則の一部を改正する省令等の施行について",
+      "en": "Occupational Safety and HealthRegulation of 一部をAmendmentする省令等 of Enforcement (overview)",
+      "zh": "劳动安全卫生规则的一部を修订する省令等的实施（概要）",
+      "vi": "An toàn vệ sinh lao động規則 一部をSửa đổiする省令等 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則 de 一部をEmendaする省令等 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則 ng 一部をPagbabagoする省令等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0008",
+      "ja": "ボイラー構造規格等の一部改正について",
+      "en": "ボイラー構造規格等 of 一部Amendment (overview)",
+      "zh": "ボイラー構造規格等的一部修订（概要）",
+      "vi": "ボイラー構造規格等 一部Sửa đổi(Tổng quan)",
+      "pt": "ボイラー構造規格等 de 一部Emenda (visão geral)",
+      "tl": "ボイラー構造規格等 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0009",
+      "ja": "労働安全衛生規則及び電離放射線障害防止規則の一部を改正する省令等の施行等について",
+      "en": "Occupational Safety and HealthRegulation及び電離放射線障害防止Regulation of 一部をAmendmentする省令等 of Enforcement等 (overview)",
+      "zh": "劳动安全卫生规则及び電離放射線障害防止规则的一部を修订する省令等的实施等（概要）",
+      "vi": "An toàn vệ sinh lao động規則及び電離放射線障害防止規則 一部をSửa đổiする省令等 施行等(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則及び電離放射線障害防止規則 de 一部をEmendaする省令等 de 施行等 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則及び電離放射線障害防止規則 ng 一部をPagbabagoする省令等 ng 施行等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0010",
+      "ja": "労働安全衛生規則及び電離放射線障害防止規則の一部を改正する省令等の施行等について",
+      "en": "Occupational Safety and HealthRegulation及び電離放射線障害防止Regulation of 一部をAmendmentする省令等 of Enforcement等 (overview)",
+      "zh": "劳动安全卫生规则及び電離放射線障害防止规则的一部を修订する省令等的实施等（概要）",
+      "vi": "An toàn vệ sinh lao động規則及び電離放射線障害防止規則 一部をSửa đổiする省令等 施行等(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則及び電離放射線障害防止規則 de 一部をEmendaする省令等 de 施行等 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則及び電離放射線障害防止規則 ng 一部をPagbabagoする省令等 ng 施行等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0011",
+      "ja": "1ピン式グラップルのつり具としての取扱いについて",
+      "en": "1ピン式グラップル of つり具として of 取扱い (overview)",
+      "zh": "1ピン式グラップル的つり具として的取扱い（概要）",
+      "vi": "1ピン式グラップル つり具として 取扱い(Tổng quan)",
+      "pt": "1ピン式グラップル de つり具として de 取扱い (visão geral)",
+      "tl": "1ピン式グラップル ng つり具として ng 取扱い (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0012",
+      "ja": "「労働安全衛生規則第五百七十七条の二第二項の規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度の基準の一部を改正する件」の告示等について",
+      "en": "「Occupational Safety and HealthRegulation第五百七十七条 of 二第二項 of 規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度 of 基準 of 一部をAmendmentする件」 of Public Notice等 (overview)",
+      "zh": "「劳动安全卫生规则第五百七十七条的二第二項的規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度的基準的一部を修订する件」的公告等（概要）",
+      "vi": "「An toàn vệ sinh lao động規則第五百七十七条 二第二項 規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度 基準 一部をSửa đổiする件」 Thông báo等(Tổng quan)",
+      "pt": "「Saúde e Segurança Ocupacional規則第五百七十七条 de 二第二項 de 規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度 de 基準 de 一部をEmendaする件」 de Notificação等 (visão geral)",
+      "tl": "「Kaligtasan sa Trabaho規則第五百七十七条 ng 二第二項 ng 規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度 ng 基準 ng 一部をPagbabagoする件」 ng 告示等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0013",
+      "ja": "労働安全衛生規則の一部を改正する省令等の施行について",
+      "en": "Occupational Safety and HealthRegulation of 一部をAmendmentする省令等 of Enforcement (overview)",
+      "zh": "劳动安全卫生规则的一部を修订する省令等的实施（概要）",
+      "vi": "An toàn vệ sinh lao động規則 一部をSửa đổiする省令等 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則 de 一部をEmendaする省令等 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則 ng 一部をPagbabagoする省令等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0014",
+      "ja": "労働安全衛生規則の一部を改正する省令の施行等について",
+      "en": "Occupational Safety and HealthRegulation of 一部をAmendmentする省令 of Enforcement等 (overview)",
+      "zh": "劳动安全卫生规则的一部を修订する省令的实施等（概要）",
+      "vi": "An toàn vệ sinh lao động規則 一部をSửa đổiする省令 施行等(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則 de 一部をEmendaする省令 de 施行等 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則 ng 一部をPagbabagoする省令 ng 施行等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0015",
+      "ja": "労働安全衛生法及び作業環境測定法の一部を改正する法律について",
+      "en": "Occupational Safety and Health法及び作業環境測定法 of 一部をAmendmentする法律 (overview)",
+      "zh": "劳动安全卫生法及び作業環境測定法的一部を修订する法律（概要）",
+      "vi": "An toàn vệ sinh lao động法及び作業環境測定法 一部をSửa đổiする法律(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional法及び作業環境測定法 de 一部をEmendaする法律 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho法及び作業環境測定法 ng 一部をPagbabagoする法律 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0016",
+      "ja": "一年単位の変形労働時間制に関する協定の本社一括届出について",
+      "en": "一 単位 of 変形労働時間制に関する協定 of 本社一括届出 (overview)",
+      "zh": "一年単位的変形労働時間制に関する協定的本社一括届出（概要）",
+      "vi": "一年単位 変形労働時間制に関する協定 本社一括届出(Tổng quan)",
+      "pt": "一年単位 de 変形労働時間制に関する協定 de 本社一括届出 (visão geral)",
+      "tl": "一年単位 ng 変形労働時間制に関する協定 ng 本社一括届出 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0017",
+      "ja": "「じん肺健康診断及びじん肺管理区分の決定におけるDR(FPD)写真及びCR写真の取扱い等について」の一部改正について",
+      "en": "「じん肺健康診断及びじん肺管理区分 of 決定におけるDR(FPD)写真及びCR写真 of 取扱い等 (overview)」 of 一部Amendment (overview)",
+      "zh": "「じん肺健康診断及びじん肺管理区分的決定におけるDR(FPD)写真及びCR写真的取扱い等（概要）」的一部修订（概要）",
+      "vi": "「じん肺健康診断及びじん肺管理区分 決定におけるDR(FPD)写真及びCR写真 取扱い等(Tổng quan)」 一部Sửa đổi(Tổng quan)",
+      "pt": "「じん肺健康診断及びじん肺管理区分 de 決定におけるDR(FPD)写真及びCR写真 de 取扱い等 (visão geral)」 de 一部Emenda (visão geral)",
+      "tl": "「じん肺健康診断及びじん肺管理区分 ng 決定におけるDR(FPD)写真及びCR写真 ng 取扱い等 (pangkalahatan)」 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0018",
+      "ja": "「労働安全衛生法施行令第十八条第三号及び第十八条の二第三号の規定に基づき厚生労働大臣の定める基準の一部を改正する件」の告示について",
+      "en": "「Occupational Safety and Health法Enforcement令第十八条第三号及び第十八条 of 二第三号 of 規定に基づき厚生労働大臣 of 定める基準 of 一部をAmendmentする件」 of Public Notice (overview)",
+      "zh": "「劳动安全卫生法实施令第十八条第三号及び第十八条的二第三号的規定に基づき厚生労働大臣的定める基準的一部を修订する件」的公告（概要）",
+      "vi": "「An toàn vệ sinh lao động法施行令第十八条第三号及び第十八条 二第三号 規定に基づき厚生労働大臣 定める基準 一部をSửa đổiする件」 Thông báo(Tổng quan)",
+      "pt": "「Saúde e Segurança Ocupacional法施行令第十八条第三号及び第十八条 de 二第三号 de 規定に基づき厚生労働大臣 de 定める基準 de 一部をEmendaする件」 de Notificação (visão geral)",
+      "tl": "「Kaligtasan sa Trabaho法施行令第十八条第三号及び第十八条 ng 二第三号 ng 規定に基づき厚生労働大臣 ng 定める基準 ng 一部をPagbabagoする件」 ng 告示 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0019",
+      "ja": "「労働安全衛生規則第五百七十七条の二第五項の規定に基づきがん原性がある物として厚生労働大臣が定めるものの一部を改正する告示」について",
+      "en": "「Occupational Safety and HealthRegulation第五百七十七条 of 二第五項 of 規定に基づきがん原性がある物として厚生労働大臣が定めるも of  of 一部をAmendmentするPublic Notice」 (overview)",
+      "zh": "「劳动安全卫生规则第五百七十七条的二第五項的規定に基づきがん原性がある物として厚生労働大臣が定めるも的的一部を修订する公告」（概要）",
+      "vi": "「An toàn vệ sinh lao động規則第五百七十七条 二第五項 規定に基づきがん原性がある物として厚生労働大臣が定めるも  一部をSửa đổiするThông báo」(Tổng quan)",
+      "pt": "「Saúde e Segurança Ocupacional規則第五百七十七条 de 二第五項 de 規定に基づきがん原性がある物として厚生労働大臣が定めるも de  de 一部をEmendaするNotificação」 (visão geral)",
+      "tl": "「Kaligtasan sa Trabaho規則第五百七十七条 ng 二第五項 ng 規定に基づきがん原性がある物として厚生労働大臣が定めるも ng  ng 一部をPagbabagoする告示」 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0020",
+      "ja": "労働安全衛生法施行令の一部を改正する政令等の施行について",
+      "en": "Occupational Safety and Health法Enforcement令 of 一部をAmendmentする政令等 of Enforcement (overview)",
+      "zh": "劳动安全卫生法实施令的一部を修订する政令等的实施（概要）",
+      "vi": "An toàn vệ sinh lao động法施行令 一部をSửa đổiする政令等 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional法施行令 de 一部をEmendaする政令等 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho法施行令 ng 一部をPagbabagoする政令等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0021",
+      "ja": "エックス線装置構造規格の一部を改正する件の公布等について",
+      "en": "エックス線装置構造規格 of 一部をAmendmentする件 of 公布等 (overview)",
+      "zh": "エックス線装置構造規格的一部を修订する件的公布等（概要）",
+      "vi": "エックス線装置構造規格 一部をSửa đổiする件 公布等(Tổng quan)",
+      "pt": "エックス線装置構造規格 de 一部をEmendaする件 de 公布等 (visão geral)",
+      "tl": "エックス線装置構造規格 ng 一部をPagbabagoする件 ng 公布等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0022",
+      "ja": "変異原性が認められた化学物質の取扱いについて",
+      "en": "変異原性が認められたChemical Substance of 取扱い (overview)",
+      "zh": "変異原性が認められた化学物质的取扱い（概要）",
+      "vi": "変異原性が認められたChất hóa học 取扱い(Tổng quan)",
+      "pt": "変異原性が認められたSubstância Química de 取扱い (visão geral)",
+      "tl": "変異原性が認められたKemikal ng 取扱い (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0023",
+      "ja": "特定元方事業者による作業場所の巡視に係るデジタル技術の活用について",
+      "en": "特定元方事業者による作業場所 of 巡視に係るデジタル技術 of 活用 (overview)",
+      "zh": "特定元方事業者による作業場所的巡視に係るデジタル技術的活用（概要）",
+      "vi": "特定元方事業者による作業場所 巡視に係るデジタル技術 活用(Tổng quan)",
+      "pt": "特定元方事業者による作業場所 de 巡視に係るデジタル技術 de 活用 (visão geral)",
+      "tl": "特定元方事業者による作業場所 ng 巡視に係るデジタル技術 ng 活用 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0024",
+      "ja": "電気自動車の整備の業務等に係る特別教育に係る労働安全衛生規則等の改正について",
+      "en": "電気自動車 of 整備 of 業務等に係るSpecial Educationに係るOccupational Safety and HealthRegulation等 of Amendment (overview)",
+      "zh": "電気自動車的整備的業務等に係る特别教育に係る劳动安全卫生规则等的修订（概要）",
+      "vi": "電気自動車 整備 業務等に係るĐào tạo đặc biệtに係るAn toàn vệ sinh lao động規則等 Sửa đổi(Tổng quan)",
+      "pt": "電気自動車 de 整備 de 業務等に係るTreinamento Especialに係るSaúde e Segurança Ocupacional規則等 de Emenda (visão geral)",
+      "tl": "電気自動車 ng 整備 ng 業務等に係るEspesyal na Pagsasanayに係るKaligtasan sa Trabaho規則等 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0025",
+      "ja": "個人ばく露測定定着促進補助金の実施に係る周知について",
+      "en": "個人ばく露測定定着促進補助金 of 実施に係る周知 (overview)",
+      "zh": "個人ばく露測定定着促進補助金的実施に係る周知（概要）",
+      "vi": "個人ばく露測定定着促進補助金 実施に係る周知(Tổng quan)",
+      "pt": "個人ばく露測定定着促進補助金 de 実施に係る周知 (visão geral)",
+      "tl": "個人ばく露測定定着促進補助金 ng 実施に係る周知 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0026",
+      "ja": "「労働安全衛生規則第577条の2第2項の規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度の基準の一部を改正する件」の告示等について",
+      "en": "「Occupational Safety and HealthRegulation第577条 of 2第2項 of 規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度 of 基準 of 一部をAmendmentする件」 of Public Notice等 (overview)",
+      "zh": "「劳动安全卫生规则第577条的2第2項的規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度的基準的一部を修订する件」的公告等（概要）",
+      "vi": "「An toàn vệ sinh lao động規則第577条 2第2項 規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度 基準 一部をSửa đổiする件」 Thông báo等(Tổng quan)",
+      "pt": "「Saúde e Segurança Ocupacional規則第577条 de 2第2項 de 規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度 de 基準 de 一部をEmendaする件」 de Notificação等 (visão geral)",
+      "tl": "「Kaligtasan sa Trabaho規則第577条 ng 2第2項 ng 規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度 ng 基準 ng 一部をPagbabagoする件」 ng 告示等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0027",
+      "ja": "「化学物質による健康障害防止のための濃度の基準の適用等に関する技術上の指針の一部を改正する件」について",
+      "en": "「Chemical Substanceによる健康障害防止 of ため of 濃度 of 基準 of 適用等に関する技術上 of Guideline of 一部をAmendmentする件」 (overview)",
+      "zh": "「化学物质による健康障害防止的ため的濃度的基準的適用等に関する技術上的指南的一部を修订する件」（概要）",
+      "vi": "「Chất hóa họcによる健康障害防止 ため 濃度 基準 適用等に関する技術上 指針 一部をSửa đổiする件」(Tổng quan)",
+      "pt": "「Substância Químicaによる健康障害防止 de ため de 濃度 de 基準 de 適用等に関する技術上 de 指針 de 一部をEmendaする件」 (visão geral)",
+      "tl": "「Kemikalによる健康障害防止 ng ため ng 濃度 ng 基準 ng 適用等に関する技術上 ng 指針 ng 一部をPagbabagoする件」 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0028",
+      "ja": "労働安全衛生規則等の一部を改正する省令の施行等について",
+      "en": "Occupational Safety and HealthRegulation等 of 一部をAmendmentする省令 of Enforcement等 (overview)",
+      "zh": "劳动安全卫生规则等的一部を修订する省令的实施等（概要）",
+      "vi": "An toàn vệ sinh lao động規則等 一部をSửa đổiする省令 施行等(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則等 de 一部をEmendaする省令 de 施行等 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則等 ng 一部をPagbabagoする省令 ng 施行等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0029",
+      "ja": "労働安全衛生規則の一部を改正する省令の施行について",
+      "en": "Occupational Safety and HealthRegulation of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "劳动安全卫生规则的一部を修订する省令的实施（概要）",
+      "vi": "An toàn vệ sinh lao động規則 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0030",
+      "ja": "個人サンプリング法による作業環境測定及びその結果の評価に関するガイドラインの一部改正について",
+      "en": "個人サンプリング法による作業環境測定及びそ of 結果 of 評価に関するGuideline of 一部Amendment (overview)",
+      "zh": "個人サンプリング法による作業環境測定及びそ的結果的評価に関する指南的一部修订（概要）",
+      "vi": "個人サンプリング法による作業環境測定及びそ 結果 評価に関するガイドライン 一部Sửa đổi(Tổng quan)",
+      "pt": "個人サンプリング法による作業環境測定及びそ de 結果 de 評価に関するガイドライン de 一部Emenda (visão geral)",
+      "tl": "個人サンプリング法による作業環境測定及びそ ng 結果 ng 評価に関するガイドライン ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0031",
+      "ja": "作業環境測定基準等の一部を改正する告示の適用について",
+      "en": "作業環境測定基準等 of 一部をAmendmentするPublic Notice of 適用 (overview)",
+      "zh": "作業環境測定基準等的一部を修订する公告的適用（概要）",
+      "vi": "作業環境測定基準等 一部をSửa đổiするThông báo 適用(Tổng quan)",
+      "pt": "作業環境測定基準等 de 一部をEmendaするNotificação de 適用 (visão geral)",
+      "tl": "作業環境測定基準等 ng 一部をPagbabagoする告示 ng 適用 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0032",
+      "ja": "「インターネット等を介したeラーニング等により行われる労働安全衛生法に基づく安全衛生教育等の実施について」の改正について",
+      "en": "「インターネット等を介したeラーニング等により行われるOccupational Safety and Health法に基づく安全衛生教育等 of 実施 (overview)」 of Amendment (overview)",
+      "zh": "「インターネット等を介したeラーニング等により行われる劳动安全卫生法に基づく安全衛生教育等的実施（概要）」的修订（概要）",
+      "vi": "「インターネット等を介したeラーニング等により行われるAn toàn vệ sinh lao động法に基づく安全衛生教育等 実施(Tổng quan)」 Sửa đổi(Tổng quan)",
+      "pt": "「インターネット等を介したeラーニング等により行われるSaúde e Segurança Ocupacional法に基づく安全衛生教育等 de 実施 (visão geral)」 de Emenda (visão geral)",
+      "tl": "「インターネット等を介したeラーニング等により行われるKaligtasan sa Trabaho法に基づく安全衛生教育等 ng 実施 (pangkalahatan)」 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0033",
+      "ja": "有機溶剤中毒予防規則等の一部を改正する省令等の施行について",
+      "en": "有機溶剤中毒予防Regulation等 of 一部をAmendmentする省令等 of Enforcement (overview)",
+      "zh": "有機溶剤中毒予防规则等的一部を修订する省令等的实施（概要）",
+      "vi": "有機溶剤中毒予防規則等 一部をSửa đổiする省令等 施行(Tổng quan)",
+      "pt": "有機溶剤中毒予防規則等 de 一部をEmendaする省令等 de 施行 (visão geral)",
+      "tl": "有機溶剤中毒予防規則等 ng 一部をPagbabagoする省令等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0034",
+      "ja": "介護施設における労働災害の防止について",
+      "en": "Care Work施設におけるWorkplace Accident of 防止 (overview)",
+      "zh": "护理施設における工伤事故的防止（概要）",
+      "vi": "介護施設におけるTai nạn lao động 防止(Tổng quan)",
+      "pt": "介護施設におけるAcidente de Trabalho de 防止 (visão geral)",
+      "tl": "介護施設におけるAksidente sa Trabaho ng 防止 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0035",
+      "ja": "介護施設における労働災害の防止について",
+      "en": "Care Work施設におけるWorkplace Accident of 防止 (overview)",
+      "zh": "护理施設における工伤事故的防止（概要）",
+      "vi": "介護施設におけるTai nạn lao động 防止(Tổng quan)",
+      "pt": "介護施設におけるAcidente de Trabalho de 防止 (visão geral)",
+      "tl": "介護施設におけるAksidente sa Trabaho ng 防止 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0036",
+      "ja": "じん肺法施行規則等の一部を改正する省令の公布について",
+      "en": "じん肺法EnforcementRegulation等 of 一部をAmendmentする省令 of 公布 (overview)",
+      "zh": "じん肺法实施规则等的一部を修订する省令的公布（概要）",
+      "vi": "じん肺法施行規則等 一部をSửa đổiする省令 公布(Tổng quan)",
+      "pt": "じん肺法施行規則等 de 一部をEmendaする省令 de 公布 (visão geral)",
+      "tl": "じん肺法施行規則等 ng 一部をPagbabagoする省令 ng 公布 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0037",
+      "ja": "山岳トンネル工事の切羽における肌落ち災害防止対策に係るガイドラインの改正について",
+      "en": "山岳トンネル工事 of 切羽における肌落ちDisaster防止対策に係るGuideline of Amendment (overview)",
+      "zh": "山岳トンネル工事的切羽における肌落ち灾害防止対策に係る指南的修订（概要）",
+      "vi": "山岳トンネル工事 切羽における肌落ち災害防止対策に係るガイドライン Sửa đổi(Tổng quan)",
+      "pt": "山岳トンネル工事 de 切羽における肌落ち災害防止対策に係るガイドライン de Emenda (visão geral)",
+      "tl": "山岳トンネル工事 ng 切羽における肌落ち災害防止対策に係るガイドライン ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0038",
+      "ja": "日本標準産業分類の改定に伴う労働安全衛生法施行令第2条等の取扱いについて",
+      "en": "本標準産業分類 of 改定に伴うOccupational Safety and Health法Enforcement令第2条等 of 取扱い (overview)",
+      "zh": "日本標準産業分類的改定に伴う劳动安全卫生法实施令第2条等的取扱い（概要）",
+      "vi": "日本標準産業分類 改定に伴うAn toàn vệ sinh lao động法施行令第2条等 取扱い(Tổng quan)",
+      "pt": "日本標準産業分類 de 改定に伴うSaúde e Segurança Ocupacional法施行令第2条等 de 取扱い (visão geral)",
+      "tl": "日本標準産業分類 ng 改定に伴うKaligtasan sa Trabaho法施行令第2条等 ng 取扱い (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0039",
+      "ja": "一箇月単位の変形労働時間制に関する協定等の本社一括届出について",
+      "en": "一箇/単位 of 変形労働時間制に関する協定等 of 本社一括届出 (overview)",
+      "zh": "一箇月単位的変形労働時間制に関する協定等的本社一括届出（概要）",
+      "vi": "一箇月単位 変形労働時間制に関する協定等 本社一括届出(Tổng quan)",
+      "pt": "一箇月単位 de 変形労働時間制に関する協定等 de 本社一括届出 (visão geral)",
+      "tl": "一箇月単位 ng 変形労働時間制に関する協定等 ng 本社一括届出 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0040",
+      "ja": "「労働安全衛生法等の一部を改正する法律等の施行等(化学物質等に係る表示及び文書交付制度の改善関係)に係る留意事項について」の改正について",
+      "en": "「Occupational Safety and Health法等 of 一部をAmendmentする法律等 of Enforcement等(Chemical Substance等に係る表示及び文書交付制度 of 改善関係)に係る留意事項 (overview)」 of Amendment (overview)",
+      "zh": "「劳动安全卫生法等的一部を修订する法律等的实施等(化学物质等に係る表示及び文書交付制度的改善関係)に係る留意事項（概要）」的修订（概要）",
+      "vi": "「An toàn vệ sinh lao động法等 一部をSửa đổiする法律等 施行等(Chất hóa học等に係る表示及び文書交付制度 改善関係)に係る留意事項(Tổng quan)」 Sửa đổi(Tổng quan)",
+      "pt": "「Saúde e Segurança Ocupacional法等 de 一部をEmendaする法律等 de 施行等(Substância Química等に係る表示及び文書交付制度 de 改善関係)に係る留意事項 (visão geral)」 de Emenda (visão geral)",
+      "tl": "「Kaligtasan sa Trabaho法等 ng 一部をPagbabagoする法律等 ng 施行等(Kemikal等に係る表示及び文書交付制度 ng 改善関係)に係る留意事項 (pangkalahatan)」 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0041",
+      "ja": "令和6年能登半島地震による災害の復旧工事における労働災害防止対策の徹底について",
+      "en": "令和6 能登半島地震によるDisaster of 復旧工事におけるWorkplace Accident防止対策 of 徹底 (overview)",
+      "zh": "令和6年能登半島地震による灾害的復旧工事における工伤事故防止対策的徹底（概要）",
+      "vi": "令和6年能登半島地震による災害 復旧工事におけるTai nạn lao động防止対策 徹底(Tổng quan)",
+      "pt": "令和6年能登半島地震による災害 de 復旧工事におけるAcidente de Trabalho防止対策 de 徹底 (visão geral)",
+      "tl": "令和6年能登半島地震による災害 ng 復旧工事におけるAksidente sa Trabaho防止対策 ng 徹底 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0042",
+      "ja": "デジタル社会の形成を図るための規制改革を推進するための厚生労働省関係省令の一部を改正する省令の施行について",
+      "en": "デジタル社会 of 形成を図るため of 規制改革を推進するため of 厚生労働省関係省令 of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "デジタル社会的形成を図るため的規制改革を推進するため的厚生労働省関係省令的一部を修订する省令的实施（概要）",
+      "vi": "デジタル社会 形成を図るため 規制改革を推進するため 厚生労働省関係省令 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "デジタル社会 de 形成を図るため de 規制改革を推進するため de 厚生労働省関係省令 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "デジタル社会 ng 形成を図るため ng 規制改革を推進するため ng 厚生労働省関係省令 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0043",
+      "ja": "「手すり先行工法等に関するガイドライン」について",
+      "en": "「手すり先行工法等に関するGuideline」 (overview)",
+      "zh": "「手すり先行工法等に関する指南」（概要）",
+      "vi": "「手すり先行工法等に関するガイドライン」(Tổng quan)",
+      "pt": "「手すり先行工法等に関するガイドライン」 (visão geral)",
+      "tl": "「手すり先行工法等に関するガイドライン」 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0044",
+      "ja": "墜落制止用器具に係る質疑応答集の改訂について",
+      "en": "Fall from height制止用器具に係る質疑応答集 of 改訂 (overview)",
+      "zh": "坠落制止用器具に係る質疑応答集的改訂（概要）",
+      "vi": "墜落制止用器具に係る質疑応答集 改訂(Tổng quan)",
+      "pt": "墜落制止用器具に係る質疑応答集 de 改訂 (visão geral)",
+      "tl": "墜落制止用器具に係る質疑応答集 ng 改訂 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0045",
+      "ja": "労働安全衛生規則及びボイラー及び圧力容器安全規則の一部を改正する省令の施行について",
+      "en": "Occupational Safety and HealthRegulation及びボイラー及び圧力容器安全Regulation of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "劳动安全卫生规则及びボイラー及び圧力容器安全规则的一部を修订する省令的实施（概要）",
+      "vi": "An toàn vệ sinh lao động規則及びボイラー及び圧力容器安全規則 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則及びボイラー及び圧力容器安全規則 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則及びボイラー及び圧力容器安全規則 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0046",
+      "ja": "変異原性が認められた化学物質の取扱いについて",
+      "en": "変異原性が認められたChemical Substance of 取扱い (overview)",
+      "zh": "変異原性が認められた化学物质的取扱い（概要）",
+      "vi": "変異原性が認められたChất hóa học 取扱い(Tổng quan)",
+      "pt": "変異原性が認められたSubstância Química de 取扱い (visão geral)",
+      "tl": "変異原性が認められたKemikal ng 取扱い (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0047",
+      "ja": "デジタル原則を踏まえたアナログ規制の見直しに係る工程表を踏まえた対応について",
+      "en": "デジタル原則を踏まえたアナログ規制 of 見直しに係る工程表を踏まえた対応 (overview)",
+      "zh": "デジタル原則を踏まえたアナログ規制的見直しに係る工程表を踏まえた対応（概要）",
+      "vi": "デジタル原則を踏まえたアナログ規制 見直しに係る工程表を踏まえた対応(Tổng quan)",
+      "pt": "デジタル原則を踏まえたアナログ規制 de 見直しに係る工程表を踏まえた対応 (visão geral)",
+      "tl": "デジタル原則を踏まえたアナログ規制 ng 見直しに係る工程表を踏まえた対応 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0048",
+      "ja": "労働安全衛生法施行令第18条第3号及び第18条の2第3号の規定に基づき厚生労働大臣の定める基準の適用について",
+      "en": "Occupational Safety and Health法Enforcement令第18条第3号及び第18条 of 2第3号 of 規定に基づき厚生労働大臣 of 定める基準 of 適用 (overview)",
+      "zh": "劳动安全卫生法实施令第18条第3号及び第18条的2第3号的規定に基づき厚生労働大臣的定める基準的適用（概要）",
+      "vi": "An toàn vệ sinh lao động法施行令第18条第3号及び第18条 2第3号 規定に基づき厚生労働大臣 定める基準 適用(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional法施行令第18条第3号及び第18条 de 2第3号 de 規定に基づき厚生労働大臣 de 定める基準 de 適用 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho法施行令第18条第3号及び第18条 ng 2第3号 ng 規定に基づき厚生労働大臣 ng 定める基準 ng 適用 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0049",
+      "ja": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等の認定基準に係る運用上の留意点の改正について",
+      "en": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 of 認定基準に係る運用上 of 留意点 of Amendment (overview)",
+      "zh": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等的認定基準に係る運用上的留意点的修订（概要）",
+      "vi": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 認定基準に係る運用上 留意点 Sửa đổi(Tổng quan)",
+      "pt": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 de 認定基準に係る運用上 de 留意点 de Emenda (visão geral)",
+      "tl": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 ng 認定基準に係る運用上 ng 留意点 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0050",
+      "ja": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等の認定基準の改正について",
+      "en": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 of 認定基準 of Amendment (overview)",
+      "zh": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等的認定基準的修订（概要）",
+      "vi": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 認定基準 Sửa đổi(Tổng quan)",
+      "pt": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 de 認定基準 de Emenda (visão geral)",
+      "tl": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 ng 認定基準 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0051",
+      "ja": "防毒機能を有する電動ファン付き呼吸用保護具に係る登録型式検定機関の登録について",
+      "en": "防毒機能を有する電動ファン付き呼吸用Personal Protective Equipmentに係る登録型式検定機関 of 登録 (overview)",
+      "zh": "防毒機能を有する電動ファン付き呼吸用防护用品に係る登録型式検定機関的登録（概要）",
+      "vi": "防毒機能を有する電動ファン付き呼吸用保護具に係る登録型式検定機関 登録(Tổng quan)",
+      "pt": "防毒機能を有する電動ファン付き呼吸用保護具に係る登録型式検定機関 de 登録 (visão geral)",
+      "tl": "防毒機能を有する電動ファン付き呼吸用保護具に係る登録型式検定機関 ng 登録 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0052",
+      "ja": "労働安全衛生規則の一部を改正する省令の施行について",
+      "en": "Occupational Safety and HealthRegulation of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "劳动安全卫生规则的一部を修订する省令的实施（概要）",
+      "vi": "An toàn vệ sinh lao động規則 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0053",
+      "ja": "作業環境測定の記録のモデル様式の改正について",
+      "en": "作業環境測定 of 記録 of モデル様式 of Amendment (overview)",
+      "zh": "作業環境測定的記録的モデル様式的修订（概要）",
+      "vi": "作業環境測定 記録 モデル様式 Sửa đổi(Tổng quan)",
+      "pt": "作業環境測定 de 記録 de モデル様式 de Emenda (visão geral)",
+      "tl": "作業環境測定 ng 記録 ng モデル様式 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0054",
+      "ja": "ボイラー及び圧力容器の肉盛溶接補修について",
+      "en": "ボイラー及び圧力容器 of 肉盛溶接補修 (overview)",
+      "zh": "ボイラー及び圧力容器的肉盛溶接補修（概要）",
+      "vi": "ボイラー及び圧力容器 肉盛溶接補修(Tổng quan)",
+      "pt": "ボイラー及び圧力容器 de 肉盛溶接補修 (visão geral)",
+      "tl": "ボイラー及び圧力容器 ng 肉盛溶接補修 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0055",
+      "ja": "金属アーク溶接等作業主任者限定技能講習の修了試験の採点の基準等について",
+      "en": "金属アーク溶接等作業主任者限定技能講習 of 修了試験 of 採点 of 基準等 (overview)",
+      "zh": "金属アーク溶接等作業主任者限定技能講習的修了試験的採点的基準等（概要）",
+      "vi": "金属アーク溶接等作業主任者限定技能講習 修了試験 採点 基準等(Tổng quan)",
+      "pt": "金属アーク溶接等作業主任者限定技能講習 de 修了試験 de 採点 de 基準等 (visão geral)",
+      "tl": "金属アーク溶接等作業主任者限定技能講習 ng 修了試験 ng 採点 ng 基準等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0056",
+      "ja": "心理的負荷による精神障害の認定基準に係る運用上の留意点について",
+      "en": "心理的負荷による精神障害 of 認定基準に係る運用上 of 留意点 (overview)",
+      "zh": "心理的負荷による精神障害的認定基準に係る運用上的留意点（概要）",
+      "vi": "心理的負荷による精神障害 認定基準に係る運用上 留意点(Tổng quan)",
+      "pt": "心理的負荷による精神障害 de 認定基準に係る運用上 de 留意点 (visão geral)",
+      "tl": "心理的負荷による精神障害 ng 認定基準に係る運用上 ng 留意点 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0057",
+      "ja": "心理的負荷による精神障害の認定基準について",
+      "en": "心理的負荷による精神障害 of 認定基準 (overview)",
+      "zh": "心理的負荷による精神障害的認定基準（概要）",
+      "vi": "心理的負荷による精神障害 認定基準(Tổng quan)",
+      "pt": "心理的負荷による精神障害 de 認定基準 (visão geral)",
+      "tl": "心理的負荷による精神障害 ng 認定基準 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0058",
+      "ja": "労働安全衛生法施行令の一部を改正する政令等の施行について",
+      "en": "Occupational Safety and Health法Enforcement令 of 一部をAmendmentする政令等 of Enforcement (overview)",
+      "zh": "劳动安全卫生法实施令的一部を修订する政令等的实施（概要）",
+      "vi": "An toàn vệ sinh lao động法施行令 一部をSửa đổiする政令等 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional法施行令 de 一部をEmendaする政令等 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho法施行令 ng 一部をPagbabagoする政令等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0059",
+      "ja": "石綿障害予防規則の一部を改正する省令の施行について",
+      "en": "石綿障害予防Regulation of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "石綿障害予防规则的一部を修订する省令的实施（概要）",
+      "vi": "石綿障害予防規則 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "石綿障害予防規則 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "石綿障害予防規則 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0060",
+      "ja": "防じんマスク及び防毒マスクの型式の取り扱いについて",
+      "en": "防じんマスク及び防毒マスク of 型式 of 取り扱い (overview)",
+      "zh": "防じんマスク及び防毒マスク的型式的取り扱い（概要）",
+      "vi": "防じんマスク及び防毒マスク 型式 取り扱い(Tổng quan)",
+      "pt": "防じんマスク及び防毒マスク de 型式 de 取り扱い (visão geral)",
+      "tl": "防じんマスク及び防毒マスク ng 型式 ng 取り扱い (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0061",
+      "ja": "貨物自動車の昇降設備の設置、保護帽の着用等に関する問答について(労働安全衛生規則の一部を改正する省令(令和5年厚生労働省令第33号)関係問答)",
+      "en": "貨物自動車 of 昇降設備 of 設置、保護帽 of 着用等に関する問答 (overview)(Occupational Safety and HealthRegulation of 一部をAmendmentする省令(令和5 厚生労働省令第33号)関係問答)",
+      "zh": "貨物自動車的昇降設備的設置、保護帽的着用等に関する問答（概要）(劳动安全卫生规则的一部を修订する省令(令和5年厚生労働省令第33号)関係問答)",
+      "vi": "貨物自動車 昇降設備 設置、保護帽 着用等に関する問答(Tổng quan)(An toàn vệ sinh lao động規則 一部をSửa đổiする省令(令和5年厚生労働省令第33号)関係問答)",
+      "pt": "貨物自動車 de 昇降設備 de 設置、保護帽 de 着用等に関する問答 (visão geral)(Saúde e Segurança Ocupacional規則 de 一部をEmendaする省令(令和5年厚生労働省令第33号)関係問答)",
+      "tl": "貨物自動車 ng 昇降設備 ng 設置、保護帽 ng 着用等に関する問答 (pangkalahatan)(Kaligtasan sa Trabaho規則 ng 一部をPagbabagoする省令(令和5年厚生労働省令第33号)関係問答)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0062",
+      "ja": "「労働安全衛生規則第12条の5第3項第2号イの規定に基づき厚生労働大臣が定める化学物質の管理に関する講習等の適用等について」の改正について",
+      "en": "「Occupational Safety and HealthRegulation第12条 of 5第3項第2号イ of 規定に基づき厚生労働大臣が定めるChemical Substance of 管理に関する講習等 of 適用等 (overview)」 of Amendment (overview)",
+      "zh": "「劳动安全卫生规则第12条的5第3項第2号イ的規定に基づき厚生労働大臣が定める化学物质的管理に関する講習等的適用等（概要）」的修订（概要）",
+      "vi": "「An toàn vệ sinh lao động規則第12条 5第3項第2号イ 規定に基づき厚生労働大臣が定めるChất hóa học 管理に関する講習等 適用等(Tổng quan)」 Sửa đổi(Tổng quan)",
+      "pt": "「Saúde e Segurança Ocupacional規則第12条 de 5第3項第2号イ de 規定に基づき厚生労働大臣が定めるSubstância Química de 管理に関する講習等 de 適用等 (visão geral)」 de Emenda (visão geral)",
+      "tl": "「Kaligtasan sa Trabaho規則第12条 ng 5第3項第2号イ ng 規定に基づき厚生労働大臣が定めるKemikal ng 管理に関する講習等 ng 適用等 (pangkalahatan)」 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0063",
+      "ja": "橋梁建設工事における橋桁等構造物の落下防止等に関する安全総点検について",
+      "en": "橋梁建設工事における橋桁等構造物 of 落下防止等に関する安全総点検 (overview)",
+      "zh": "橋梁建設工事における橋桁等構造物的落下防止等に関する安全総点検（概要）",
+      "vi": "橋梁建設工事における橋桁等構造物 落下防止等に関する安全総点検(Tổng quan)",
+      "pt": "橋梁建設工事における橋桁等構造物 de 落下防止等に関する安全総点検 (visão geral)",
+      "tl": "橋梁建設工事における橋桁等構造物 ng 落下防止等に関する安全総点検 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0064",
+      "ja": "「労働安全衛生規則第12条の5第3項第2号イの規定に基づき厚生労働大臣が定める化学物質の管理に関する講習等の適用等について」の改正について",
+      "en": "「Occupational Safety and HealthRegulation第12条 of 5第3項第2号イ of 規定に基づき厚生労働大臣が定めるChemical Substance of 管理に関する講習等 of 適用等 (overview)」 of Amendment (overview)",
+      "zh": "「劳动安全卫生规则第12条的5第3項第2号イ的規定に基づき厚生労働大臣が定める化学物质的管理に関する講習等的適用等（概要）」的修订（概要）",
+      "vi": "「An toàn vệ sinh lao động規則第12条 5第3項第2号イ 規定に基づき厚生労働大臣が定めるChất hóa học 管理に関する講習等 適用等(Tổng quan)」 Sửa đổi(Tổng quan)",
+      "pt": "「Saúde e Segurança Ocupacional規則第12条 de 5第3項第2号イ de 規定に基づき厚生労働大臣が定めるSubstância Química de 管理に関する講習等 de 適用等 (visão geral)」 de Emenda (visão geral)",
+      "tl": "「Kaligtasan sa Trabaho規則第12条 ng 5第3項第2号イ ng 規定に基づき厚生労働大臣が定めるKemikal ng 管理に関する講習等 ng 適用等 (pangkalahatan)」 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0065",
+      "ja": "皮膚等障害化学物質等に該当する化学物質について",
+      "en": "皮膚等障害Chemical Substance等に該当するChemical Substance (overview)",
+      "zh": "皮膚等障害化学物质等に該当する化学物质（概要）",
+      "vi": "皮膚等障害Chất hóa học等に該当するChất hóa học(Tổng quan)",
+      "pt": "皮膚等障害Substância Química等に該当するSubstância Química (visão geral)",
+      "tl": "皮膚等障害Kemikal等に該当するKemikal (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0066",
+      "ja": "防じんマスク、防毒マスク及び電動ファン付き呼吸用保護具の選択、使用等について",
+      "en": "防じんマスク、防毒マスク及び電動ファン付き呼吸用Personal Protective Equipment of 選択、使用等 (overview)",
+      "zh": "防じんマスク、防毒マスク及び電動ファン付き呼吸用防护用品的選択、使用等（概要）",
+      "vi": "防じんマスク、防毒マスク及び電動ファン付き呼吸用保護具 選択、使用等(Tổng quan)",
+      "pt": "防じんマスク、防毒マスク及び電動ファン付き呼吸用保護具 de 選択、使用等 (visão geral)",
+      "tl": "防じんマスク、防毒マスク及び電動ファン付き呼吸用保護具 ng 選択、使用等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0067",
+      "ja": "除染等業務に従事する労働者の放射線障害防止のためのガイドライン等の改正について",
+      "en": "除染等業務に従事する労働者 of 放射線障害防止 of ため of Guideline等 of Amendment (overview)",
+      "zh": "除染等業務に従事する労働者的放射線障害防止的ため的指南等的修订（概要）",
+      "vi": "除染等業務に従事する労働者 放射線障害防止 ため ガイドライン等 Sửa đổi(Tổng quan)",
+      "pt": "除染等業務に従事する労働者 de 放射線障害防止 de ため de ガイドライン等 de Emenda (visão geral)",
+      "tl": "除染等業務に従事する労働者 ng 放射線障害防止 ng ため ng ガイドライン等 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0068",
+      "ja": "「化学物質等による危険性又は有害性等の調査等に関する指針の一部を改正する指針」について",
+      "en": "「Chemical Substance等による危険性又は有害性等 of 調査等に関するGuideline of 一部をAmendmentするGuideline」 (overview)",
+      "zh": "「化学物质等による危険性又は有害性等的調査等に関する指南的一部を修订する指南」（概要）",
+      "vi": "「Chất hóa học等による危険性又は有害性等 調査等に関する指針 一部をSửa đổiする指針」(Tổng quan)",
+      "pt": "「Substância Química等による危険性又は有害性等 de 調査等に関する指針 de 一部をEmendaする指針」 (visão geral)",
+      "tl": "「Kemikal等による危険性又は有害性等 ng 調査等に関する指針 ng 一部をPagbabagoする指針」 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0069",
+      "ja": "「化学物質による健康障害防止のための濃度の基準の適用等に関する技術上の指針」の制定について",
+      "en": "「Chemical Substanceによる健康障害防止 of ため of 濃度 of 基準 of 適用等に関する技術上 of Guideline」 of 制定 (overview)",
+      "zh": "「化学物质による健康障害防止的ため的濃度的基準的適用等に関する技術上的指南」的制定（概要）",
+      "vi": "「Chất hóa họcによる健康障害防止 ため 濃度 基準 適用等に関する技術上 指針」 制定(Tổng quan)",
+      "pt": "「Substância Químicaによる健康障害防止 de ため de 濃度 de 基準 de 適用等に関する技術上 de 指針」 de 制定 (visão geral)",
+      "tl": "「Kemikalによる健康障害防止 ng ため ng 濃度 ng 基準 ng 適用等に関する技術上 ng 指針」 ng 制定 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0070",
+      "ja": "労働安全衛生規則第577条の2第2項の規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度の基準の適用について",
+      "en": "Occupational Safety and HealthRegulation第577条 of 2第2項 of 規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度 of 基準 of 適用 (overview)",
+      "zh": "劳动安全卫生规则第577条的2第2項的規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度的基準的適用（概要）",
+      "vi": "An toàn vệ sinh lao động規則第577条 2第2項 規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度 基準 適用(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則第577条 de 2第2項 de 規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度 de 基準 de 適用 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則第577条 ng 2第2項 ng 規定に基づき厚生労働大臣が定める物及び厚生労働大臣が定める濃度 ng 基準 ng 適用 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0071",
+      "ja": "「労働安全衛生法等の一部を改正する法律等の施行等(化学物質等に係る表示及び文書交付制度の改善関係)に係る留意事項について」の改正について",
+      "en": "「Occupational Safety and Health法等 of 一部をAmendmentする法律等 of Enforcement等(Chemical Substance等に係る表示及び文書交付制度 of 改善関係)に係る留意事項 (overview)」 of Amendment (overview)",
+      "zh": "「劳动安全卫生法等的一部を修订する法律等的实施等(化学物质等に係る表示及び文書交付制度的改善関係)に係る留意事項（概要）」的修订（概要）",
+      "vi": "「An toàn vệ sinh lao động法等 一部をSửa đổiする法律等 施行等(Chất hóa học等に係る表示及び文書交付制度 改善関係)に係る留意事項(Tổng quan)」 Sửa đổi(Tổng quan)",
+      "pt": "「Saúde e Segurança Ocupacional法等 de 一部をEmendaする法律等 de 施行等(Substância Química等に係る表示及び文書交付制度 de 改善関係)に係る留意事項 (visão geral)」 de Emenda (visão geral)",
+      "tl": "「Kaligtasan sa Trabaho法等 ng 一部をPagbabagoする法律等 ng 施行等(Kemikal等に係る表示及び文書交付制度 ng 改善関係)に係る留意事項 (pangkalahatan)」 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0072",
+      "ja": "労働安全衛生規則等の一部を改正する省令の一部を改正する省令の施行について",
+      "en": "Occupational Safety and HealthRegulation等 of 一部をAmendmentする省令 of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "劳动安全卫生规则等的一部を修订する省令的一部を修订する省令的实施（概要）",
+      "vi": "An toàn vệ sinh lao động規則等 一部をSửa đổiする省令 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則等 de 一部をEmendaする省令 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則等 ng 一部をPagbabagoする省令 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0073",
+      "ja": "騒音障害防止のためのガイドラインの改訂について",
+      "en": "騒音障害防止 of ため of Guideline of 改訂 (overview)",
+      "zh": "騒音障害防止的ため的指南的改訂（概要）",
+      "vi": "騒音障害防止 ため ガイドライン 改訂(Tổng quan)",
+      "pt": "騒音障害防止 de ため de ガイドライン de 改訂 (visão geral)",
+      "tl": "騒音障害防止 ng ため ng ガイドライン ng 改訂 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0074",
+      "ja": "作業環境測定基準及び第三管理区分に区分された場所に係る有機溶剤等の濃度の測定の方法等の一部を改正する告示について",
+      "en": "作業環境測定基準及び第三管理区分に区分された場所に係る有機溶剤等 of 濃度 of 測定 of 方法等 of 一部をAmendmentするPublic Notice (overview)",
+      "zh": "作業環境測定基準及び第三管理区分に区分された場所に係る有機溶剤等的濃度的測定的方法等的一部を修订する公告（概要）",
+      "vi": "作業環境測定基準及び第三管理区分に区分された場所に係る有機溶剤等 濃度 測定 方法等 一部をSửa đổiするThông báo(Tổng quan)",
+      "pt": "作業環境測定基準及び第三管理区分に区分された場所に係る有機溶剤等 de 濃度 de 測定 de 方法等 de 一部をEmendaするNotificação (visão geral)",
+      "tl": "作業環境測定基準及び第三管理区分に区分された場所に係る有機溶剤等 ng 濃度 ng 測定 ng 方法等 ng 一部をPagbabagoする告示 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0075",
+      "ja": "個人サンプリング法による作業環境測定及びその結果の評価に関するガイドラインの一部改正について",
+      "en": "個人サンプリング法による作業環境測定及びそ of 結果 of 評価に関するGuideline of 一部Amendment (overview)",
+      "zh": "個人サンプリング法による作業環境測定及びそ的結果的評価に関する指南的一部修订（概要）",
+      "vi": "個人サンプリング法による作業環境測定及びそ 結果 評価に関するガイドライン 一部Sửa đổi(Tổng quan)",
+      "pt": "個人サンプリング法による作業環境測定及びそ de 結果 de 評価に関するガイドライン de 一部Emenda (visão geral)",
+      "tl": "個人サンプリング法による作業環境測定及びそ ng 結果 ng 評価に関するガイドライン ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0076",
+      "ja": "労働安全衛生規則等の一部を改正する省令等の施行等について",
+      "en": "Occupational Safety and HealthRegulation等 of 一部をAmendmentする省令等 of Enforcement等 (overview)",
+      "zh": "劳动安全卫生规则等的一部を修订する省令等的实施等（概要）",
+      "vi": "An toàn vệ sinh lao động規則等 一部をSửa đổiする省令等 施行等(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則等 de 一部をEmendaする省令等 de 施行等 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則等 ng 一部をPagbabagoする省令等 ng 施行等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0077",
+      "ja": "第10次粉じん障害防止総合対策の推進について",
+      "en": "第10次粉じん障害防止総合対策 of 推進 (overview)",
+      "zh": "第10次粉じん障害防止総合対策的推進（概要）",
+      "vi": "第10次粉じん障害防止総合対策 推進(Tổng quan)",
+      "pt": "第10次粉じん障害防止総合対策 de 推進 (visão geral)",
+      "tl": "第10次粉じん障害防止総合対策 ng 推進 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0078",
+      "ja": "労働安全衛生規則第592条の8等で定める有害性等の掲示内容について",
+      "en": "Occupational Safety and HealthRegulation第592条 of 8等で定める有害性等 of 掲示内容 (overview)",
+      "zh": "劳动安全卫生规则第592条的8等で定める有害性等的掲示内容（概要）",
+      "vi": "An toàn vệ sinh lao động規則第592条 8等で定める有害性等 掲示内容(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則第592条 de 8等で定める有害性等 de 掲示内容 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則第592条 ng 8等で定める有害性等 ng 掲示内容 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0079",
+      "ja": "労働基準法施行規則の一部を改正する省令等の公布等について",
+      "en": "労働基準法EnforcementRegulation of 一部をAmendmentする省令等 of 公布等 (overview)",
+      "zh": "労働基準法实施规则的一部を修订する省令等的公布等（概要）",
+      "vi": "労働基準法施行規則 一部をSửa đổiする省令等 公布等(Tổng quan)",
+      "pt": "労働基準法施行規則 de 一部をEmendaする省令等 de 公布等 (visão geral)",
+      "tl": "労働基準法施行規則 ng 一部をPagbabagoする省令等 ng 公布等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0080",
+      "ja": "貨物自動車における荷役作業時の墜落・転落防止対策の充実に係る労働安全衛生規則の一部を改正する省令及び安全衛生特別教育規程の一部を改正する件の施行について",
+      "en": "貨物自動車における荷役作業時 of Fall from height・Fall防止対策 of 充実に係るOccupational Safety and HealthRegulation of 一部をAmendmentする省令及び安全衛生Special Education規程 of 一部をAmendmentする件 of Enforcement (overview)",
+      "zh": "貨物自動車における荷役作業時的坠落・跌落防止対策的充実に係る劳动安全卫生规则的一部を修订する省令及び安全衛生特别教育規程的一部を修订する件的实施（概要）",
+      "vi": "貨物自動車における荷役作業時 墜落・転落防止対策 充実に係るAn toàn vệ sinh lao động規則 一部をSửa đổiする省令及び安全衛生Đào tạo đặc biệt規程 一部をSửa đổiする件 施行(Tổng quan)",
+      "pt": "貨物自動車における荷役作業時 de 墜落・転落防止対策 de 充実に係るSaúde e Segurança Ocupacional規則 de 一部をEmendaする省令及び安全衛生Treinamento Especial規程 de 一部をEmendaする件 de 施行 (visão geral)",
+      "tl": "貨物自動車における荷役作業時 ng 墜落・転落防止対策 ng 充実に係るKaligtasan sa Trabaho規則 ng 一部をPagbabagoする省令及び安全衛生Espesyal na Pagsasanay規程 ng 一部をPagbabagoする件 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0081",
+      "ja": "足場からの墜落・転落災害防止総合対策推進要綱の改正について",
+      "en": "Scaffoldから of Fall from height・FallDisaster防止総合対策推進要綱 of Amendment (overview)",
+      "zh": "脚手架から的坠落・跌落灾害防止総合対策推進要綱的修订（概要）",
+      "vi": "足場から 墜落・転落災害防止総合対策推進要綱 Sửa đổi(Tổng quan)",
+      "pt": "足場から de 墜落・転落災害防止総合対策推進要綱 de Emenda (visão geral)",
+      "tl": "足場から ng 墜落・転落災害防止総合対策推進要綱 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0082",
+      "ja": "足場からの墜落・転落災害防止の充実に係る労働安全衛生規則の一部を改正する省令の施行について",
+      "en": "Scaffoldから of Fall from height・FallDisaster防止 of 充実に係るOccupational Safety and HealthRegulation of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "脚手架から的坠落・跌落灾害防止的充実に係る劳动安全卫生规则的一部を修订する省令的实施（概要）",
+      "vi": "足場から 墜落・転落災害防止 充実に係るAn toàn vệ sinh lao động規則 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "足場から de 墜落・転落災害防止 de 充実に係るSaúde e Segurança Ocupacional規則 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "足場から ng 墜落・転落災害防止 ng 充実に係るKaligtasan sa Trabaho規則 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0083",
+      "ja": "病院におけるアスベスト(石綿)使用実態調査に係るフォローアップ調査の結果の公表及び今後の対応等について",
+      "en": "病院におけるアスベスト(石綿)使用実態調査に係るフォローアップ調査 of 結果 of 公表及び今後 of 対応等 (overview)",
+      "zh": "病院におけるアスベスト(石綿)使用実態調査に係るフォローアップ調査的結果的公表及び今後的対応等（概要）",
+      "vi": "病院におけるアスベスト(石綿)使用実態調査に係るフォローアップ調査 結果 公表及び今後 対応等(Tổng quan)",
+      "pt": "病院におけるアスベスト(石綿)使用実態調査に係るフォローアップ調査 de 結果 de 公表及び今後 de 対応等 (visão geral)",
+      "tl": "病院におけるアスベスト(石綿)使用実態調査に係るフォローアップ調査 ng 結果 ng 公表及び今後 ng 対応等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0084",
+      "ja": "第14次労働災害防止計画の策定について",
+      "en": "第14次Workplace Accident防止計画 of Establishment (overview)",
+      "zh": "第14次工伤事故防止計画的制定（概要）",
+      "vi": "第14次Tai nạn lao động防止計画 策定(Tổng quan)",
+      "pt": "第14次Acidente de Trabalho防止計画 de 策定 (visão geral)",
+      "tl": "第14次Aksidente sa Trabaho防止計画 ng 策定 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0085",
+      "ja": "「石綿による疾病の認定基準について」の一部改正について",
+      "en": "「石綿による疾病 of 認定基準 (overview)」 of 一部Amendment (overview)",
+      "zh": "「石綿による疾病的認定基準（概要）」的一部修订（概要）",
+      "vi": "「石綿による疾病 認定基準(Tổng quan)」 一部Sửa đổi(Tổng quan)",
+      "pt": "「石綿による疾病 de 認定基準 (visão geral)」 de 一部Emenda (visão geral)",
+      "tl": "「石綿による疾病 ng 認定基準 (pangkalahatan)」 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0086",
+      "ja": "一年単位の変形労働時間制に関する協定の本社一括届出に係る取扱いについて",
+      "en": "一 単位 of 変形労働時間制に関する協定 of 本社一括届出に係る取扱い (overview)",
+      "zh": "一年単位的変形労働時間制に関する協定的本社一括届出に係る取扱い（概要）",
+      "vi": "一年単位 変形労働時間制に関する協定 本社一括届出に係る取扱い(Tổng quan)",
+      "pt": "一年単位 de 変形労働時間制に関する協定 de 本社一括届出に係る取扱い (visão geral)",
+      "tl": "一年単位 ng 変形労働時間制に関する協定 ng 本社一括届出に係る取扱い (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0087",
+      "ja": "一年単位の変形労働時間制に関する協定の本社一括届出について",
+      "en": "一 単位 of 変形労働時間制に関する協定 of 本社一括届出 (overview)",
+      "zh": "一年単位的変形労働時間制に関する協定的本社一括届出（概要）",
+      "vi": "一年単位 変形労働時間制に関する協定 本社一括届出(Tổng quan)",
+      "pt": "一年単位 de 変形労働時間制に関する協定 de 本社一括届出 (visão geral)",
+      "tl": "一年単位 ng 変形労働時間制に関する協定 ng 本社一括届出 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0088",
+      "ja": "デジタル原則に照らした規制の一括見直しプラン及びデジタル原則を踏まえたアナログ規制の見直しに係る工程表を踏まえた対応等について",
+      "en": "デジタル原則に照らした規制 of 一括見直しプラン及びデジタル原則を踏まえたアナログ規制 of 見直しに係る工程表を踏まえた対応等 (overview)",
+      "zh": "デジタル原則に照らした規制的一括見直しプラン及びデジタル原則を踏まえたアナログ規制的見直しに係る工程表を踏まえた対応等（概要）",
+      "vi": "デジタル原則に照らした規制 一括見直しプラン及びデジタル原則を踏まえたアナログ規制 見直しに係る工程表を踏まえた対応等(Tổng quan)",
+      "pt": "デジタル原則に照らした規制 de 一括見直しプラン及びデジタル原則を踏まえたアナログ規制 de 見直しに係る工程表を踏まえた対応等 (visão geral)",
+      "tl": "デジタル原則に照らした規制 ng 一括見直しプラン及びデジタル原則を踏まえたアナログ規制 ng 見直しに係る工程表を踏まえた対応等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0089",
+      "ja": "有機溶剤中毒予防規則等に基づく化学物質の管理が一定の水準にある場合の適用除外の認定制度の運用について",
+      "en": "有機溶剤中毒予防Regulation等に基づくChemical Substance of 管理が一定 of 水準にある場合 of 適用除外 of 認定制度 of 運用 (overview)",
+      "zh": "有機溶剤中毒予防规则等に基づく化学物质的管理が一定的水準にある場合的適用除外的認定制度的運用（概要）",
+      "vi": "有機溶剤中毒予防規則等に基づくChất hóa học 管理が一定 水準にある場合 適用除外 認定制度 運用(Tổng quan)",
+      "pt": "有機溶剤中毒予防規則等に基づくSubstância Química de 管理が一定 de 水準にある場合 de 適用除外 de 認定制度 de 運用 (visão geral)",
+      "tl": "有機溶剤中毒予防規則等に基づくKemikal ng 管理が一定 ng 水準にある場合 ng 適用除外 ng 認定制度 ng 運用 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0090",
+      "ja": "労働安全衛生関係法令の規定に基づき選任等が求められる者の選任要件等における高等学校卒業程度認定審査合格者の取扱いについて",
+      "en": "Occupational Safety and Health関係法令 of 規定に基づき選任等が求められる者 of 選任要件等における高等学校卒業程度認定審査合格者 of 取扱い (overview)",
+      "zh": "劳动安全卫生関係法令的規定に基づき選任等が求められる者的選任要件等における高等学校卒業程度認定審査合格者的取扱い（概要）",
+      "vi": "An toàn vệ sinh lao động関係法令 規定に基づき選任等が求められる者 選任要件等における高等学校卒業程度認定審査合格者 取扱い(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional関係法令 de 規定に基づき選任等が求められる者 de 選任要件等における高等学校卒業程度認定審査合格者 de 取扱い (visão geral)",
+      "tl": "Kaligtasan sa Trabaho関係法令 ng 規定に基づき選任等が求められる者 ng 選任要件等における高等学校卒業程度認定審査合格者 ng 取扱い (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0091",
+      "ja": "石綿障害予防規則の一部を改正する省令の施行について",
+      "en": "石綿障害予防Regulation of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "石綿障害予防规则的一部を修订する省令的实施（概要）",
+      "vi": "石綿障害予防規則 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "石綿障害予防規則 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "石綿障害予防規則 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0092",
+      "ja": "化学物質管理専門家の要件に係る作業環境測定士に対する講習について",
+      "en": "Chemical Substance管理専門家 of 要件に係る作業環境測定士に対する講習 (overview)",
+      "zh": "化学物质管理専門家的要件に係る作業環境測定士に対する講習（概要）",
+      "vi": "Chất hóa học管理専門家 要件に係る作業環境測定士に対する講習(Tổng quan)",
+      "pt": "Substância Química管理専門家 de 要件に係る作業環境測定士に対する講習 (visão geral)",
+      "tl": "Kemikal管理専門家 ng 要件に係る作業環境測定士に対する講習 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0093",
+      "ja": "保護具着用管理責任者に対する教育の実施について",
+      "en": "Personal Protective Equipment着用管理責任者に対する教育 of 実施 (overview)",
+      "zh": "防护用品着用管理責任者に対する教育的実施（概要）",
+      "vi": "保護具着用管理責任者に対する教育 実施(Tổng quan)",
+      "pt": "保護具着用管理責任者に対する教育 de 実施 (visão geral)",
+      "tl": "保護具着用管理責任者に対する教育 ng 実施 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0094",
+      "ja": "労働安全衛生規則第577条の2第3項の規定に基づきがん原性がある物として厚生労働大臣が定めるものの適用について",
+      "en": "Occupational Safety and HealthRegulation第577条 of 2第3項 of 規定に基づきがん原性がある物として厚生労働大臣が定めるも of  of 適用 (overview)",
+      "zh": "劳动安全卫生规则第577条的2第3項的規定に基づきがん原性がある物として厚生労働大臣が定めるも的的適用（概要）",
+      "vi": "An toàn vệ sinh lao động規則第577条 2第3項 規定に基づきがん原性がある物として厚生労働大臣が定めるも  適用(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則第577条 de 2第3項 de 規定に基づきがん原性がある物として厚生労働大臣が定めるも de  de 適用 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則第577条 ng 2第3項 ng 規定に基づきがん原性がある物として厚生労働大臣が定めるも ng  ng 適用 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0095",
+      "ja": "変異原性が認められた化学物質の取扱いについて",
+      "en": "変異原性が認められたChemical Substance of 取扱い (overview)",
+      "zh": "変異原性が認められた化学物质的取扱い（概要）",
+      "vi": "変異原性が認められたChất hóa học 取扱い(Tổng quan)",
+      "pt": "変異原性が認められたSubstância Química de 取扱い (visão geral)",
+      "tl": "変異原性が認められたKemikal ng 取扱い (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0096",
+      "ja": "第三管理区分に区分された場所に係る有機溶剤等の濃度の測定の方法等の適用等について",
+      "en": "第三管理区分に区分された場所に係る有機溶剤等 of 濃度 of 測定 of 方法等 of 適用等 (overview)",
+      "zh": "第三管理区分に区分された場所に係る有機溶剤等的濃度的測定的方法等的適用等（概要）",
+      "vi": "第三管理区分に区分された場所に係る有機溶剤等 濃度 測定 方法等 適用等(Tổng quan)",
+      "pt": "第三管理区分に区分された場所に係る有機溶剤等 de 濃度 de 測定 de 方法等 de 適用等 (visão geral)",
+      "tl": "第三管理区分に区分された場所に係る有機溶剤等 ng 濃度 ng 測定 ng 方法等 ng 適用等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0097",
+      "ja": "労働安全衛生規則第12条の5第3項第2号イの規定に基づき厚生労働大臣が定める化学物質の管理に関する講習等の適用等について",
+      "en": "Occupational Safety and HealthRegulation第12条 of 5第3項第2号イ of 規定に基づき厚生労働大臣が定めるChemical Substance of 管理に関する講習等 of 適用等 (overview)",
+      "zh": "劳动安全卫生规则第12条的5第3項第2号イ的規定に基づき厚生労働大臣が定める化学物质的管理に関する講習等的適用等（概要）",
+      "vi": "An toàn vệ sinh lao động規則第12条 5第3項第2号イ 規定に基づき厚生労働大臣が定めるChất hóa học 管理に関する講習等 適用等(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則第12条 de 5第3項第2号イ de 規定に基づき厚生労働大臣が定めるSubstância Química de 管理に関する講習等 de 適用等 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則第12条 ng 5第3項第2号イ ng 規定に基づき厚生労働大臣が定めるKemikal ng 管理に関する講習等 ng 適用等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0098",
+      "ja": "作業環境測定機関の事業報告書に係る事務処理要領の改正について",
+      "en": "作業環境測定機関 of 事業報告書に係る事務処理要領 of Amendment (overview)",
+      "zh": "作業環境測定機関的事業報告書に係る事務処理要領的修订（概要）",
+      "vi": "作業環境測定機関 事業報告書に係る事務処理要領 Sửa đổi(Tổng quan)",
+      "pt": "作業環境測定機関 de 事業報告書に係る事務処理要領 de Emenda (visão geral)",
+      "tl": "作業環境測定機関 ng 事業報告書に係る事務処理要領 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0099",
+      "ja": "「労働安全衛生法等の一部を改正する法律等の施行等(化学物質等に係る表示及び文書交付制度の改善関係)に係る留意事項について」の改正について",
+      "en": "「Occupational Safety and Health法等 of 一部をAmendmentする法律等 of Enforcement等(Chemical Substance等に係る表示及び文書交付制度 of 改善関係)に係る留意事項 (overview)」 of Amendment (overview)",
+      "zh": "「劳动安全卫生法等的一部を修订する法律等的实施等(化学物质等に係る表示及び文書交付制度的改善関係)に係る留意事項（概要）」的修订（概要）",
+      "vi": "「An toàn vệ sinh lao động法等 一部をSửa đổiする法律等 施行等(Chất hóa học等に係る表示及び文書交付制度 改善関係)に係る留意事項(Tổng quan)」 Sửa đổi(Tổng quan)",
+      "pt": "「Saúde e Segurança Ocupacional法等 de 一部をEmendaする法律等 de 施行等(Substância Química等に係る表示及び文書交付制度 de 改善関係)に係る留意事項 (visão geral)」 de Emenda (visão geral)",
+      "tl": "「Kaligtasan sa Trabaho法等 ng 一部をPagbabagoする法律等 ng 施行等(Kemikal等に係る表示及び文書交付制度 ng 改善関係)に係る留意事項 (pangkalahatan)」 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0100",
+      "ja": "労働安全衛生規則等の一部を改正する省令等の施行について",
+      "en": "Occupational Safety and HealthRegulation等 of 一部をAmendmentする省令等 of Enforcement (overview)",
+      "zh": "劳动安全卫生规则等的一部を修订する省令等的实施（概要）",
+      "vi": "An toàn vệ sinh lao động規則等 一部をSửa đổiする省令等 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則等 de 一部をEmendaする省令等 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則等 ng 一部をPagbabagoする省令等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0101",
+      "ja": "熱中症予防の普及啓発・注意喚起について(周知依頼)",
+      "en": "Heat Stroke予防 of 普及啓発・注意喚起 (overview)(周知依頼)",
+      "zh": "中暑予防的普及啓発・注意喚起（概要）(周知依頼)",
+      "vi": "Sốc nhiệt予防 普及啓発・注意喚起(Tổng quan)(周知依頼)",
+      "pt": "Insolação予防 de 普及啓発・注意喚起 (visão geral)(周知依頼)",
+      "tl": "Heat Stroke予防 ng 普及啓発・注意喚起 (pangkalahatan)(周知依頼)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0102",
+      "ja": "労働安全衛生規則の一部を改正する省令の施行について",
+      "en": "Occupational Safety and HealthRegulation of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "劳动安全卫生规则的一部を修订する省令的实施（概要）",
+      "vi": "An toàn vệ sinh lao động規則 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0103",
+      "ja": "ボイラー等の遠隔制御基準等について",
+      "en": "ボイラー等 of 遠隔制御基準等 (overview)",
+      "zh": "ボイラー等的遠隔制御基準等（概要）",
+      "vi": "ボイラー等 遠隔制御基準等(Tổng quan)",
+      "pt": "ボイラー等 de 遠隔制御基準等 (visão geral)",
+      "tl": "ボイラー等 ng 遠隔制御基準等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0104",
+      "ja": "労働安全衛生規則等の一部を改正する省令の施行等について",
+      "en": "Occupational Safety and HealthRegulation等 of 一部をAmendmentする省令 of Enforcement等 (overview)",
+      "zh": "劳动安全卫生规则等的一部を修订する省令的实施等（概要）",
+      "vi": "An toàn vệ sinh lao động規則等 一部をSửa đổiする省令 施行等(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則等 de 一部をEmendaする省令 de 施行等 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則等 ng 一部をPagbabagoする省令 ng 施行等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0105",
+      "ja": "令和4年度における林業の安全対策の推進について",
+      "en": "令和4 度におけるForestry of 安全対策 of 推進 (overview)",
+      "zh": "令和4年度における林业的安全対策的推進（概要）",
+      "vi": "令和4年度における林業 安全対策 推進(Tổng quan)",
+      "pt": "令和4年度における林業 de 安全対策 de 推進 (visão geral)",
+      "tl": "令和4年度における林業 ng 安全対策 ng 推進 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0106",
+      "ja": "「「過労死等ゼロ」緊急対策を踏まえたメンタルヘルス対策の推進について」の一部改正について",
+      "en": "「「過労死等ゼロ」緊急対策を踏まえたメンタルヘルス対策 of 推進 (overview)」 of 一部Amendment (overview)",
+      "zh": "「「過労死等ゼロ」緊急対策を踏まえたメンタルヘルス対策的推進（概要）」的一部修订（概要）",
+      "vi": "「「過労死等ゼロ」緊急対策を踏まえたメンタルヘルス対策 推進(Tổng quan)」 一部Sửa đổi(Tổng quan)",
+      "pt": "「「過労死等ゼロ」緊急対策を踏まえたメンタルヘルス対策 de 推進 (visão geral)」 de 一部Emenda (visão geral)",
+      "tl": "「「過労死等ゼロ」緊急対策を踏まえたメンタルヘルス対策 ng 推進 (pangkalahatan)」 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0107",
+      "ja": "「ストレスチェック制度の施行を踏まえた当面のメンタルヘルス対策の推進について」の一部改正について",
+      "en": "「Stress Check制度 of Enforcementを踏まえた当面 of メンタルヘルス対策 of 推進 (overview)」 of 一部Amendment (overview)",
+      "zh": "「心理压力检查制度的实施を踏まえた当面的メンタルヘルス対策的推進（概要）」的一部修订（概要）",
+      "vi": "「ストレスチェック制度 施行を踏まえた当面 メンタルヘルス対策 推進(Tổng quan)」 一部Sửa đổi(Tổng quan)",
+      "pt": "「ストレスチェック制度 de 施行を踏まえた当面 de メンタルヘルス対策 de 推進 (visão geral)」 de 一部Emenda (visão geral)",
+      "tl": "「ストレスチェック制度 ng 施行を踏まえた当面 ng メンタルヘルス対策 ng 推進 (pangkalahatan)」 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0108",
+      "ja": "令和4年度における建設業の安全衛生対策の推進について",
+      "en": "令和4 度におけるConstruction Industry of 安全衛生対策 of 推進 (overview)",
+      "zh": "令和4年度における建筑业的安全衛生対策的推進（概要）",
+      "vi": "令和4年度におけるNgành xây dựng 安全衛生対策 推進(Tổng quan)",
+      "pt": "令和4年度におけるConstrução de 安全衛生対策 de 推進 (visão geral)",
+      "tl": "令和4年度におけるIndustriya ng Konstruksyon ng 安全衛生対策 ng 推進 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0109",
+      "ja": "事務所衛生基準規則の一部を改正する省令の施行等について",
+      "en": "事務所衛生基準Regulation of 一部をAmendmentする省令 of Enforcement等 (overview)",
+      "zh": "事務所衛生基準规则的一部を修订する省令的实施等（概要）",
+      "vi": "事務所衛生基準規則 一部をSửa đổiする省令 施行等(Tổng quan)",
+      "pt": "事務所衛生基準規則 de 一部をEmendaする省令 de 施行等 (visão geral)",
+      "tl": "事務所衛生基準規則 ng 一部をPagbabagoする省令 ng 施行等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0110",
+      "ja": "労働安全衛生法施行令の一部を改正する政令等の施行について",
+      "en": "Occupational Safety and Health法Enforcement令 of 一部をAmendmentする政令等 of Enforcement (overview)",
+      "zh": "劳动安全卫生法实施令的一部を修订する政令等的实施（概要）",
+      "vi": "An toàn vệ sinh lao động法施行令 一部をSửa đổiする政令等 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional法施行令 de 一部をEmendaする政令等 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho法施行令 ng 一部をPagbabagoする政令等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0111",
+      "ja": "労働安全衛生法施行令の一部を改正する政令及び簡易ボイラー等構造規格の一部を改正する件の施行について",
+      "en": "Occupational Safety and Health法Enforcement令 of 一部をAmendmentする政令及び簡易ボイラー等構造規格 of 一部をAmendmentする件 of Enforcement (overview)",
+      "zh": "劳动安全卫生法实施令的一部を修订する政令及び簡易ボイラー等構造規格的一部を修订する件的实施（概要）",
+      "vi": "An toàn vệ sinh lao động法施行令 一部をSửa đổiする政令及び簡易ボイラー等構造規格 一部をSửa đổiする件 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional法施行令 de 一部をEmendaする政令及び簡易ボイラー等構造規格 de 一部をEmendaする件 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho法施行令 ng 一部をPagbabagoする政令及び簡易ボイラー等構造規格 ng 一部をPagbabagoする件 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0112",
+      "ja": "除染等業務に従事する労働者の放射線障害防止のためのガイドライン等の改正について",
+      "en": "除染等業務に従事する労働者 of 放射線障害防止 of ため of Guideline等 of Amendment (overview)",
+      "zh": "除染等業務に従事する労働者的放射線障害防止的ため的指南等的修订（概要）",
+      "vi": "除染等業務に従事する労働者 放射線障害防止 ため ガイドライン等 Sửa đổi(Tổng quan)",
+      "pt": "除染等業務に従事する労働者 de 放射線障害防止 de ため de ガイドライン等 de Emenda (visão geral)",
+      "tl": "除染等業務に従事する労働者 ng 放射線障害防止 ng ため ng ガイドライン等 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0113",
+      "ja": "労働基準法施行規則の一部を改正する省令等の公布等について",
+      "en": "労働基準法EnforcementRegulation of 一部をAmendmentする省令等 of 公布等 (overview)",
+      "zh": "労働基準法实施规则的一部を修订する省令等的公布等（概要）",
+      "vi": "労働基準法施行規則 一部をSửa đổiする省令等 公布等(Tổng quan)",
+      "pt": "労働基準法施行規則 de 一部をEmendaする省令等 de 公布等 (visão geral)",
+      "tl": "労働基準法施行規則 ng 一部をPagbabagoする省令等 ng 公布等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0114",
+      "ja": "労働安全衛生規則及び厚生労働省の所管する法令の規定に基づく民間事業者等が行う書面の保存等における情報通信の技術の利用に関する省令の一部を改正する省令の施行について",
+      "en": "Occupational Safety and HealthRegulation及び厚生労働省 of 所管する法令 of 規定に基づく民間事業者等が行う書面 of 保存等における情報通信 of 技術 of 利用に関する省令 of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "劳动安全卫生规则及び厚生労働省的所管する法令的規定に基づく民間事業者等が行う書面的保存等における情報通信的技術的利用に関する省令的一部を修订する省令的实施（概要）",
+      "vi": "An toàn vệ sinh lao động規則及び厚生労働省 所管する法令 規定に基づく民間事業者等が行う書面 保存等における情報通信 技術 利用に関する省令 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則及び厚生労働省 de 所管する法令 de 規定に基づく民間事業者等が行う書面 de 保存等における情報通信 de 技術 de 利用に関する省令 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則及び厚生労働省 ng 所管する法令 ng 規定に基づく民間事業者等が行う書面 ng 保存等における情報通信 ng 技術 ng 利用に関する省令 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0115",
+      "ja": "労働安全衛生法に基づく安全データシート(SDS)の記載に係る留意事項について",
+      "en": "Occupational Safety and Health法に基づく安全データシート(SDS) of 記載に係る留意事項 (overview)",
+      "zh": "劳动安全卫生法に基づく安全データシート(SDS)的記載に係る留意事項（概要）",
+      "vi": "An toàn vệ sinh lao động法に基づく安全データシート(SDS) 記載に係る留意事項(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional法に基づく安全データシート(SDS) de 記載に係る留意事項 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho法に基づく安全データシート(SDS) ng 記載に係る留意事項 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0116",
+      "ja": "「事業場における労働者の健康保持増進のための指針の一部を改正する件」の周知について",
+      "en": "「事業場における労働者 of 健康保持増進 of ため of Guideline of 一部をAmendmentする件」 of 周知 (overview)",
+      "zh": "「事業場における労働者的健康保持増進的ため的指南的一部を修订する件」的周知（概要）",
+      "vi": "「事業場における労働者 健康保持増進 ため 指針 一部をSửa đổiする件」 周知(Tổng quan)",
+      "pt": "「事業場における労働者 de 健康保持増進 de ため de 指針 de 一部をEmendaする件」 de 周知 (visão geral)",
+      "tl": "「事業場における労働者 ng 健康保持増進 ng ため ng 指針 ng 一部をPagbabagoする件」 ng 周知 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0117",
+      "ja": "剥離剤を使用した塗料の剥離作業における労働災害防止について(一部改正)",
+      "en": "剥離剤を使用した塗料 of 剥離作業におけるWorkplace Accident防止 (overview)(一部Amendment)",
+      "zh": "剥離剤を使用した塗料的剥離作業における工伤事故防止（概要）(一部修订)",
+      "vi": "剥離剤を使用した塗料 剥離作業におけるTai nạn lao động防止(Tổng quan)(一部Sửa đổi)",
+      "pt": "剥離剤を使用した塗料 de 剥離作業におけるAcidente de Trabalho防止 (visão geral)(一部Emenda)",
+      "tl": "剥離剤を使用した塗料 ng 剥離作業におけるAksidente sa Trabaho防止 (pangkalahatan)(一部Pagbabago)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0118",
+      "ja": "剥離剤を使用した塗料の剥離作業における労働災害防止について",
+      "en": "剥離剤を使用した塗料 of 剥離作業におけるWorkplace Accident防止 (overview)",
+      "zh": "剥離剤を使用した塗料的剥離作業における工伤事故防止（概要）",
+      "vi": "剥離剤を使用した塗料 剥離作業におけるTai nạn lao động防止(Tổng quan)",
+      "pt": "剥離剤を使用した塗料 de 剥離作業におけるAcidente de Trabalho防止 (visão geral)",
+      "tl": "剥離剤を使用した塗料 ng 剥離作業におけるAksidente sa Trabaho防止 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0119",
+      "ja": "少量新規化学物質の確認申請における確認調査票の廃止について",
+      "en": "少量新規Chemical Substance of 確認申請における確認調査票 of 廃止 (overview)",
+      "zh": "少量新規化学物质的確認申請における確認調査票的廃止（概要）",
+      "vi": "少量新規Chất hóa học 確認申請における確認調査票 廃止(Tổng quan)",
+      "pt": "少量新規Substância Química de 確認申請における確認調査票 de 廃止 (visão geral)",
+      "tl": "少量新規Kemikal ng 確認申請における確認調査票 ng 廃止 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0120",
+      "ja": "「情報機器作業における労働衛生管理のためのガイドラインについて」の一部改正について",
+      "en": "「情報機器作業における労働衛生管理 of ため of Guideline (overview)」 of 一部Amendment (overview)",
+      "zh": "「情報機器作業における労働衛生管理的ため的指南（概要）」的一部修订（概要）",
+      "vi": "「情報機器作業における労働衛生管理 ため ガイドライン(Tổng quan)」 一部Sửa đổi(Tổng quan)",
+      "pt": "「情報機器作業における労働衛生管理 de ため de ガイドライン (visão geral)」 de 一部Emenda (visão geral)",
+      "tl": "「情報機器作業における労働衛生管理 ng ため ng ガイドライン (pangkalahatan)」 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0121",
+      "ja": "「事務所衛生基準規則及び労働安全衛生規則の一部を改正する省令の施行等について",
+      "en": "「事務所衛生基準Regulation及びOccupational Safety and HealthRegulation of 一部をAmendmentする省令 of Enforcement等 (overview)",
+      "zh": "「事務所衛生基準规则及び劳动安全卫生规则的一部を修订する省令的实施等（概要）",
+      "vi": "「事務所衛生基準規則及びAn toàn vệ sinh lao động規則 一部をSửa đổiする省令 施行等(Tổng quan)",
+      "pt": "「事務所衛生基準規則及びSaúde e Segurança Ocupacional規則 de 一部をEmendaする省令 de 施行等 (visão geral)",
+      "tl": "「事務所衛生基準規則及びKaligtasan sa Trabaho規則 ng 一部をPagbabagoする省令 ng 施行等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0122",
+      "ja": "変異原性が認められた化学物質の取扱いについて",
+      "en": "変異原性が認められたChemical Substance of 取扱い (overview)",
+      "zh": "変異原性が認められた化学物质的取扱い（概要）",
+      "vi": "変異原性が認められたChất hóa học 取扱い(Tổng quan)",
+      "pt": "変異原性が認められたSubstância Química de 取扱い (visão geral)",
+      "tl": "変異原性が認められたKemikal ng 取扱い (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0123",
+      "ja": "労働基準法第三十六条第一項の協定で定める労働時間の延長及び休日の労働について留意すべき事項等に関する指針の一部改正等について",
+      "en": "労働基準法第三十六条第一項 of 協定で定める労働時間 of 延長及び休 of 労働 (overview)留意すべき事項等に関するGuideline of 一部Amendment等 (overview)",
+      "zh": "労働基準法第三十六条第一項的協定で定める労働時間的延長及び休日的労働（概要）留意すべき事項等に関する指南的一部修订等（概要）",
+      "vi": "労働基準法第三十六条第一項 協定で定める労働時間 延長及び休日 労働(Tổng quan)留意すべき事項等に関する指針 一部Sửa đổi等(Tổng quan)",
+      "pt": "労働基準法第三十六条第一項 de 協定で定める労働時間 de 延長及び休日 de 労働 (visão geral)留意すべき事項等に関する指針 de 一部Emenda等 (visão geral)",
+      "tl": "労働基準法第三十六条第一項 ng 協定で定める労働時間 ng 延長及び休日 ng 労働 (pangkalahatan)留意すべき事項等に関する指針 ng 一部Pagbabago等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0124",
+      "ja": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等の認定基準に係る運用上の留意点について",
+      "en": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 of 認定基準に係る運用上 of 留意点 (overview)",
+      "zh": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等的認定基準に係る運用上的留意点（概要）",
+      "vi": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 認定基準に係る運用上 留意点(Tổng quan)",
+      "pt": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 de 認定基準に係る運用上 de 留意点 (visão geral)",
+      "tl": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 ng 認定基準に係る運用上 ng 留意点 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0125",
+      "ja": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等の認定基準について",
+      "en": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 of 認定基準 (overview)",
+      "zh": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等的認定基準（概要）",
+      "vi": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 認定基準(Tổng quan)",
+      "pt": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 de 認定基準 (visão geral)",
+      "tl": "血管病変等を著しく増悪させる業務による脳血管疾患及び虚血性心疾患等 ng 認定基準 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0126",
+      "ja": "リスク評価結果等に基づく労働者の健康障害防止対策の徹底について",
+      "en": "リスク評価結果等に基づく労働者 of 健康障害防止対策 of 徹底 (overview)",
+      "zh": "リスク評価結果等に基づく労働者的健康障害防止対策的徹底（概要）",
+      "vi": "リスク評価結果等に基づく労働者 健康障害防止対策 徹底(Tổng quan)",
+      "pt": "リスク評価結果等に基づく労働者 de 健康障害防止対策 de 徹底 (visão geral)",
+      "tl": "リスク評価結果等に基づく労働者 ng 健康障害防止対策 ng 徹底 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0127",
+      "ja": "技能講習の講師要件に係る質疑応答について",
+      "en": "技能講習 of 講師要件に係る質疑応答 (overview)",
+      "zh": "技能講習的講師要件に係る質疑応答（概要）",
+      "vi": "技能講習 講師要件に係る質疑応答(Tổng quan)",
+      "pt": "技能講習 de 講師要件に係る質疑応答 (visão geral)",
+      "tl": "技能講習 ng 講師要件に係る質疑応答 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0128",
+      "ja": "「インターネット等を介したeラーニング等により行われる技能講習等の実施ガイドライン」等の周知について",
+      "en": "「インターネット等を介したeラーニング等により行われる技能講習等 of 実施Guideline」等 of 周知 (overview)",
+      "zh": "「インターネット等を介したeラーニング等により行われる技能講習等的実施指南」等的周知（概要）",
+      "vi": "「インターネット等を介したeラーニング等により行われる技能講習等 実施ガイドライン」等 周知(Tổng quan)",
+      "pt": "「インターネット等を介したeラーニング等により行われる技能講習等 de 実施ガイドライン」等 de 周知 (visão geral)",
+      "tl": "「インターネット等を介したeラーニング等により行われる技能講習等 ng 実施ガイドライン」等 ng 周知 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0129",
+      "ja": "電気機械器具防爆構造規格第5条の規定に基づき、防爆構造規格に適合するものと同等以上の防爆性能を有することを確認するための基準等について",
+      "en": "電気機械器具防爆構造規格第5条 of 規定に基づき、防爆構造規格に適合するも of と同等以上 of 防爆性能を有することを確認するため of 基準等 (overview)",
+      "zh": "電気機械器具防爆構造規格第5条的規定に基づき、防爆構造規格に適合するも的と同等以上的防爆性能を有することを確認するため的基準等（概要）",
+      "vi": "電気機械器具防爆構造規格第5条 規定に基づき、防爆構造規格に適合するも と同等以上 防爆性能を有することを確認するため 基準等(Tổng quan)",
+      "pt": "電気機械器具防爆構造規格第5条 de 規定に基づき、防爆構造規格に適合するも de と同等以上 de 防爆性能を有することを確認するため de 基準等 (visão geral)",
+      "tl": "電気機械器具防爆構造規格第5条 ng 規定に基づき、防爆構造規格に適合するも ng と同等以上 ng 防爆性能を有することを確認するため ng 基準等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0130",
+      "ja": "「職場における熱中症予防基本対策要綱の策定について」の一部改正について",
+      "en": "「職場におけるHeat Stroke予防基本対策要綱 of Establishment (overview)」 of 一部Amendment (overview)",
+      "zh": "「職場における中暑予防基本対策要綱的制定（概要）」的一部修订（概要）",
+      "vi": "「職場におけるSốc nhiệt予防基本対策要綱 策定(Tổng quan)」 一部Sửa đổi(Tổng quan)",
+      "pt": "「職場におけるInsolação予防基本対策要綱 de 策定 (visão geral)」 de 一部Emenda (visão geral)",
+      "tl": "「職場におけるHeat Stroke予防基本対策要綱 ng 策定 (pangkalahatan)」 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0131",
+      "ja": "剥離剤を使用した塗料の剥離作業における労働災害防止について(一部改正)",
+      "en": "剥離剤を使用した塗料 of 剥離作業におけるWorkplace Accident防止 (overview)(一部Amendment)",
+      "zh": "剥離剤を使用した塗料的剥離作業における工伤事故防止（概要）(一部修订)",
+      "vi": "剥離剤を使用した塗料 剥離作業におけるTai nạn lao động防止(Tổng quan)(一部Sửa đổi)",
+      "pt": "剥離剤を使用した塗料 de 剥離作業におけるAcidente de Trabalho防止 (visão geral)(一部Emenda)",
+      "tl": "剥離剤を使用した塗料 ng 剥離作業におけるAksidente sa Trabaho防止 (pangkalahatan)(一部Pagbabago)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0132",
+      "ja": "労働安全衛生法に係る有害物等の輸入通関手続について",
+      "en": "Occupational Safety and Health法に係る有害物等 of 輸入通関手続 (overview)",
+      "zh": "劳动安全卫生法に係る有害物等的輸入通関手続（概要）",
+      "vi": "An toàn vệ sinh lao động法に係る有害物等 輸入通関手続(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional法に係る有害物等 de 輸入通関手続 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho法に係る有害物等 ng 輸入通関手続 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0133",
+      "ja": "石綿障害予防規則及び厚生労働省の所管する法令の規定に基づく民間事業者等が行う書面の保存等における情報通信の技術の利用に関する省令の一部を改正する省令等の施行について",
+      "en": "石綿障害予防Regulation及び厚生労働省 of 所管する法令 of 規定に基づく民間事業者等が行う書面 of 保存等における情報通信 of 技術 of 利用に関する省令 of 一部をAmendmentする省令等 of Enforcement (overview)",
+      "zh": "石綿障害予防规则及び厚生労働省的所管する法令的規定に基づく民間事業者等が行う書面的保存等における情報通信的技術的利用に関する省令的一部を修订する省令等的实施（概要）",
+      "vi": "石綿障害予防規則及び厚生労働省 所管する法令 規定に基づく民間事業者等が行う書面 保存等における情報通信 技術 利用に関する省令 一部をSửa đổiする省令等 施行(Tổng quan)",
+      "pt": "石綿障害予防規則及び厚生労働省 de 所管する法令 de 規定に基づく民間事業者等が行う書面 de 保存等における情報通信 de 技術 de 利用に関する省令 de 一部をEmendaする省令等 de 施行 (visão geral)",
+      "tl": "石綿障害予防規則及び厚生労働省 ng 所管する法令 ng 規定に基づく民間事業者等が行う書面 ng 保存等における情報通信 ng 技術 ng 利用に関する省令 ng 一部をPagbabagoする省令等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0134",
+      "ja": "剥離剤を使用した塗料の剥離作業における労働災害防止について(再注意喚起)",
+      "en": "剥離剤を使用した塗料 of 剥離作業におけるWorkplace Accident防止 (overview)(再注意喚起)",
+      "zh": "剥離剤を使用した塗料的剥離作業における工伤事故防止（概要）(再注意喚起)",
+      "vi": "剥離剤を使用した塗料 剥離作業におけるTai nạn lao động防止(Tổng quan)(再注意喚起)",
+      "pt": "剥離剤を使用した塗料 de 剥離作業におけるAcidente de Trabalho防止 (visão geral)(再注意喚起)",
+      "tl": "剥離剤を使用した塗料 ng 剥離作業におけるAksidente sa Trabaho防止 (pangkalahatan)(再注意喚起)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0135",
+      "ja": "日本産業規格T8150呼吸用保護具の選択、使用及び保守管理方法の改正について(公示)",
+      "en": "本産業規格T8150呼吸用Personal Protective Equipment of 選択、使用及び保守管理方法 of Amendment (overview)(公示)",
+      "zh": "日本産業規格T8150呼吸用防护用品的選択、使用及び保守管理方法的修订（概要）(公示)",
+      "vi": "日本産業規格T8150呼吸用保護具 選択、使用及び保守管理方法 Sửa đổi(Tổng quan)(公示)",
+      "pt": "日本産業規格T8150呼吸用保護具 de 選択、使用及び保守管理方法 de Emenda (visão geral)(公示)",
+      "tl": "日本産業規格T8150呼吸用保護具 ng 選択、使用及び保守管理方法 ng Pagbabago (pangkalahatan)(公示)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0136",
+      "ja": "職場における熱中症予防基本対策要綱の策定について",
+      "en": "職場におけるHeat Stroke予防基本対策要綱 of Establishment (overview)",
+      "zh": "職場における中暑予防基本対策要綱的制定（概要）",
+      "vi": "職場におけるSốc nhiệt予防基本対策要綱 策定(Tổng quan)",
+      "pt": "職場におけるInsolação予防基本対策要綱 de 策定 (visão geral)",
+      "tl": "職場におけるHeat Stroke予防基本対策要綱 ng 策定 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0137",
+      "ja": "地下駐車場等に使用される二酸化炭素消火設備の点検作業等における労働災害の防止について",
+      "en": "地下駐車場等に使用される二酸化炭素消火設備 of 点検作業等におけるWorkplace Accident of 防止 (overview)",
+      "zh": "地下駐車場等に使用される二酸化炭素消火設備的点検作業等における工伤事故的防止（概要）",
+      "vi": "地下駐車場等に使用される二酸化炭素消火設備 点検作業等におけるTai nạn lao động 防止(Tổng quan)",
+      "pt": "地下駐車場等に使用される二酸化炭素消火設備 de 点検作業等におけるAcidente de Trabalho de 防止 (visão geral)",
+      "tl": "地下駐車場等に使用される二酸化炭素消火設備 ng 点検作業等におけるAksidente sa Trabaho ng 防止 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0138",
+      "ja": "フィットテスト実施者に対する教育の実施について",
+      "en": "フィットテスト実施者に対する教育 of 実施 (overview)",
+      "zh": "フィットテスト実施者に対する教育的実施（概要）",
+      "vi": "フィットテスト実施者に対する教育 実施(Tổng quan)",
+      "pt": "フィットテスト実施者に対する教育 de 実施 (visão geral)",
+      "tl": "フィットテスト実施者に対する教育 ng 実施 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0139",
+      "ja": "「専属産業医が他の事業場の非専属の産業医を兼務する場合の事業場間の地理的関係について」の廃止について",
+      "en": "「専属産業医が他 of 事業場 of 非専属 of 産業医を兼務する場合 of 事業場間 of 地理的関係 (overview)」 of 廃止 (overview)",
+      "zh": "「専属産業医が他的事業場的非専属的産業医を兼務する場合的事業場間的地理的関係（概要）」的廃止（概要）",
+      "vi": "「専属産業医が他 事業場 非専属 産業医を兼務する場合 事業場間 地理的関係(Tổng quan)」 廃止(Tổng quan)",
+      "pt": "「専属産業医が他 de 事業場 de 非専属 de 産業医を兼務する場合 de 事業場間 de 地理的関係 (visão geral)」 de 廃止 (visão geral)",
+      "tl": "「専属産業医が他 ng 事業場 ng 非専属 ng 産業医を兼務する場合 ng 事業場間 ng 地理的関係 (pangkalahatan)」 ng 廃止 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0140",
+      "ja": "「専属産業医が他の事業場の非専属の産業医を兼務することについて」の一部改正について",
+      "en": "「専属産業医が他 of 事業場 of 非専属 of 産業医を兼務すること (overview)」 of 一部Amendment (overview)",
+      "zh": "「専属産業医が他的事業場的非専属的産業医を兼務すること（概要）」的一部修订（概要）",
+      "vi": "「専属産業医が他 事業場 非専属 産業医を兼務すること(Tổng quan)」 一部Sửa đổi(Tổng quan)",
+      "pt": "「専属産業医が他 de 事業場 de 非専属 de 産業医を兼務すること (visão geral)」 de 一部Emenda (visão geral)",
+      "tl": "「専属産業医が他 ng 事業場 ng 非専属 ng 産業医を兼務すること (pangkalahatan)」 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0141",
+      "ja": "情報通信機器を用いた産業医の職務の一部実施に関する留意事項等について",
+      "en": "情報通信機器を用いた産業医 of 職務 of 一部実施に関する留意事項等 (overview)",
+      "zh": "情報通信機器を用いた産業医的職務的一部実施に関する留意事項等（概要）",
+      "vi": "情報通信機器を用いた産業医 職務 一部実施に関する留意事項等(Tổng quan)",
+      "pt": "情報通信機器を用いた産業医 de 職務 de 一部実施に関する留意事項等 (visão geral)",
+      "tl": "情報通信機器を用いた産業医 ng 職務 ng 一部実施に関する留意事項等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0142",
+      "ja": "令和3年度における建設業の安全衛生対策の推進について",
+      "en": "令和3 度におけるConstruction Industry of 安全衛生対策 of 推進 (overview)",
+      "zh": "令和3年度における建筑业的安全衛生対策的推進（概要）",
+      "vi": "令和3年度におけるNgành xây dựng 安全衛生対策 推進(Tổng quan)",
+      "pt": "令和3年度におけるConstrução de 安全衛生対策 de 推進 (visão geral)",
+      "tl": "令和3年度におけるIndustriya ng Konstruksyon ng 安全衛生対策 ng 推進 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0143",
+      "ja": "令和3年度における林業の安全対策の推進について",
+      "en": "令和3 度におけるForestry of 安全対策 of 推進 (overview)",
+      "zh": "令和3年度における林业的安全対策的推進（概要）",
+      "vi": "令和3年度における林業 安全対策 推進(Tổng quan)",
+      "pt": "令和3年度における林業 de 安全対策 de 推進 (visão geral)",
+      "tl": "令和3年度における林業 ng 安全対策 ng 推進 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0144",
+      "ja": "「登録性能検査機関が行う性能検査の適正な実施に係る留意事項について」の一部改正について",
+      "en": "「登録性能検査機関が行う性能検査 of 適正な実施に係る留意事項 (overview)」 of 一部Amendment (overview)",
+      "zh": "「登録性能検査機関が行う性能検査的適正な実施に係る留意事項（概要）」的一部修订（概要）",
+      "vi": "「登録性能検査機関が行う性能検査 適正な実施に係る留意事項(Tổng quan)」 一部Sửa đổi(Tổng quan)",
+      "pt": "「登録性能検査機関が行う性能検査 de 適正な実施に係る留意事項 (visão geral)」 de 一部Emenda (visão geral)",
+      "tl": "「登録性能検査機関が行う性能検査 ng 適正な実施に係る留意事項 (pangkalahatan)」 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0145",
+      "ja": "ボイラー等の開放検査周期認定要領に係る留意事項について",
+      "en": "ボイラー等 of 開放検査周期認定要領に係る留意事項 (overview)",
+      "zh": "ボイラー等的開放検査周期認定要領に係る留意事項（概要）",
+      "vi": "ボイラー等 開放検査周期認定要領に係る留意事項(Tổng quan)",
+      "pt": "ボイラー等 de 開放検査周期認定要領に係る留意事項 (visão geral)",
+      "tl": "ボイラー等 ng 開放検査周期認定要領に係る留意事項 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0146",
+      "ja": "「登録性能検査機関が行う性能検査の適正な実施について」の改正について",
+      "en": "「登録性能検査機関が行う性能検査 of 適正な実施 (overview)」 of Amendment (overview)",
+      "zh": "「登録性能検査機関が行う性能検査的適正な実施（概要）」的修订（概要）",
+      "vi": "「登録性能検査機関が行う性能検査 適正な実施(Tổng quan)」 Sửa đổi(Tổng quan)",
+      "pt": "「登録性能検査機関が行う性能検査 de 適正な実施 (visão geral)」 de Emenda (visão geral)",
+      "tl": "「登録性能検査機関が行う性能検査 ng 適正な実施 (pangkalahatan)」 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0147",
+      "ja": "ボイラー等の開放検査周期に係る認定制度について",
+      "en": "ボイラー等 of 開放検査周期に係る認定制度 (overview)",
+      "zh": "ボイラー等的開放検査周期に係る認定制度（概要）",
+      "vi": "ボイラー等 開放検査周期に係る認定制度(Tổng quan)",
+      "pt": "ボイラー等 de 開放検査周期に係る認定制度 (visão geral)",
+      "tl": "ボイラー等 ng 開放検査周期に係る認定制度 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0148",
+      "ja": "リーフレット「はしごを使う前に/脚立を使う前に」を活用した墜落・転落災害防止の徹底について",
+      "en": "リーフレット「はしごを使う前に/脚立を使う前に」を活用したFall from height・FallDisaster防止 of 徹底 (overview)",
+      "zh": "リーフレット「はしごを使う前に/脚立を使う前に」を活用した坠落・跌落灾害防止的徹底（概要）",
+      "vi": "リーフレット「はしごを使う前に/脚立を使う前に」を活用した墜落・転落災害防止 徹底(Tổng quan)",
+      "pt": "リーフレット「はしごを使う前に/脚立を使う前に」を活用した墜落・転落災害防止 de 徹底 (visão geral)",
+      "tl": "リーフレット「はしごを使う前に/脚立を使う前に」を活用した墜落・転落災害防止 ng 徹底 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0149",
+      "ja": "チェーンソーを用いて行う伐木等の業務(労働安全衛生規則第36条第8号の業務)従事者安全衛生教育について",
+      "en": "チェーンソーを用いて行う伐木等 of 業務(Occupational Safety and HealthRegulation第36条第8号 of 業務)従事者安全衛生教育 (overview)",
+      "zh": "チェーンソーを用いて行う伐木等的業務(劳动安全卫生规则第36条第8号的業務)従事者安全衛生教育（概要）",
+      "vi": "チェーンソーを用いて行う伐木等 業務(An toàn vệ sinh lao động規則第36条第8号 業務)従事者安全衛生教育(Tổng quan)",
+      "pt": "チェーンソーを用いて行う伐木等 de 業務(Saúde e Segurança Ocupacional規則第36条第8号 de 業務)従事者安全衛生教育 (visão geral)",
+      "tl": "チェーンソーを用いて行う伐木等 ng 業務(Kaligtasan sa Trabaho規則第36条第8号 ng 業務)従事者安全衛生教育 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0150",
+      "ja": "危険又は有害な業務に現に就いている者に対する安全衛生教育に関する指針の一部改正について",
+      "en": "危険又は有害な業務に現に就いている者に対する安全衛生教育に関するGuideline of 一部Amendment (overview)",
+      "zh": "危険又は有害な業務に現に就いている者に対する安全衛生教育に関する指南的一部修订（概要）",
+      "vi": "危険又は有害な業務に現に就いている者に対する安全衛生教育に関する指針 一部Sửa đổi(Tổng quan)",
+      "pt": "危険又は有害な業務に現に就いている者に対する安全衛生教育に関する指針 de 一部Emenda (visão geral)",
+      "tl": "危険又は有害な業務に現に就いている者に対する安全衛生教育に関する指針 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0151",
+      "ja": "粉じん障害防止規則第24条の2(発破終了後の措置)における「粉じんが適当に薄められた」の判断基準について",
+      "en": "粉じん障害防止Regulation第24条 of 2(発破終了後 of 措置)における「粉じんが適当に薄められた」 of 判断基準 (overview)",
+      "zh": "粉じん障害防止规则第24条的2(発破終了後的措置)における「粉じんが適当に薄められた」的判断基準（概要）",
+      "vi": "粉じん障害防止規則第24条 2(発破終了後 措置)における「粉じんが適当に薄められた」 判断基準(Tổng quan)",
+      "pt": "粉じん障害防止規則第24条 de 2(発破終了後 de 措置)における「粉じんが適当に薄められた」 de 判断基準 (visão geral)",
+      "tl": "粉じん障害防止規則第24条 ng 2(発破終了後 ng 措置)における「粉じんが適当に薄められた」 ng 判断基準 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0152",
+      "ja": "粉じん障害防止規則及びずい道等建設工事における粉じん対策に関するガイドラインの解釈等について",
+      "en": "粉じん障害防止Regulation及びずい道等建設工事における粉じん対策に関するGuideline of 解釈等 (overview)",
+      "zh": "粉じん障害防止规则及びずい道等建設工事における粉じん対策に関する指南的解釈等（概要）",
+      "vi": "粉じん障害防止規則及びずい道等建設工事における粉じん対策に関するガイドライン 解釈等(Tổng quan)",
+      "pt": "粉じん障害防止規則及びずい道等建設工事における粉じん対策に関するガイドライン de 解釈等 (visão geral)",
+      "tl": "粉じん障害防止規則及びずい道等建設工事における粉じん対策に関するガイドライン ng 解釈等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0153",
+      "ja": "引火性の物の蒸気又はガスが爆発の危険のある濃度に達するおそれのある箇所の分類の方法及び範囲の判定の方法に関する運用について",
+      "en": "引火性 of 物 of 蒸気又はガスが爆発 of 危険 of ある濃度に達するおそれ of ある箇所 of 分類 of 方法及び範囲 of 判定 of 方法に関する運用 (overview)",
+      "zh": "引火性的物的蒸気又はガスが爆発的危険的ある濃度に達するおそれ的ある箇所的分類的方法及び範囲的判定的方法に関する運用（概要）",
+      "vi": "引火性 物 蒸気又はガスが爆発 危険 ある濃度に達するおそれ ある箇所 分類 方法及び範囲 判定 方法に関する運用(Tổng quan)",
+      "pt": "引火性 de 物 de 蒸気又はガスが爆発 de 危険 de ある濃度に達するおそれ de ある箇所 de 分類 de 方法及び範囲 de 判定 de 方法に関する運用 (visão geral)",
+      "tl": "引火性 ng 物 ng 蒸気又はガスが爆発 ng 危険 ng ある濃度に達するおそれ ng ある箇所 ng 分類 ng 方法及び範囲 ng 判定 ng 方法に関する運用 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0154",
+      "ja": "緊急事態宣言延長に伴う職場における新型コロナウイルス感染症の拡大防止対策の強化について",
+      "en": "緊急事態宣言延長に伴う職場における新型コロナウイルス感染症 of 拡大防止対策 of 強化 (overview)",
+      "zh": "緊急事態宣言延長に伴う職場における新型コロナウイルス感染症的拡大防止対策的強化（概要）",
+      "vi": "緊急事態宣言延長に伴う職場における新型コロナウイルス感染症 拡大防止対策 強化(Tổng quan)",
+      "pt": "緊急事態宣言延長に伴う職場における新型コロナウイルス感染症 de 拡大防止対策 de 強化 (visão geral)",
+      "tl": "緊急事態宣言延長に伴う職場における新型コロナウイルス感染症 ng 拡大防止対策 ng 強化 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0155",
+      "ja": "「有害性の調査の基準及び有害性の調査を行う試験施設等が具備すべき基準の適用について」の一部改正について",
+      "en": "「有害性 of 調査 of 基準及び有害性 of 調査を行う試験施設等が具備すべき基準 of 適用 (overview)」 of 一部Amendment (overview)",
+      "zh": "「有害性的調査的基準及び有害性的調査を行う試験施設等が具備すべき基準的適用（概要）」的一部修订（概要）",
+      "vi": "「有害性 調査 基準及び有害性 調査を行う試験施設等が具備すべき基準 適用(Tổng quan)」 一部Sửa đổi(Tổng quan)",
+      "pt": "「有害性 de 調査 de 基準及び有害性 de 調査を行う試験施設等が具備すべき基準 de 適用 (visão geral)」 de 一部Emenda (visão geral)",
+      "tl": "「有害性 ng 調査 ng 基準及び有害性 ng 調査を行う試験施設等が具備すべき基準 ng 適用 (pangkalahatan)」 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0156",
+      "ja": "「事業場における労働者の健康保持増進のための指針の一部を改正する件」の周知について",
+      "en": "「事業場における労働者 of 健康保持増進 of ため of Guideline of 一部をAmendmentする件」 of 周知 (overview)",
+      "zh": "「事業場における労働者的健康保持増進的ため的指南的一部を修订する件」的周知（概要）",
+      "vi": "「事業場における労働者 健康保持増進 ため 指針 一部をSửa đổiする件」 周知(Tổng quan)",
+      "pt": "「事業場における労働者 de 健康保持増進 de ため de 指針 de 一部をEmendaする件」 de 周知 (visão geral)",
+      "tl": "「事業場における労働者 ng 健康保持増進 ng ため ng 指針 ng 一部をPagbabagoする件」 ng 周知 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0157",
+      "ja": "特定化学物質障害予防規則及び作業環境測定法施行規則の一部を改正する省令及び厚生労働省の所管する法令の規定に基づく民間事業者等が行う書面の保存等における情報通信の技術の利用に関する省令の一部を改正する省令の施行等について",
+      "en": "特定Chemical Substance障害予防Regulation及び作業環境測定法EnforcementRegulation of 一部をAmendmentする省令及び厚生労働省 of 所管する法令 of 規定に基づく民間事業者等が行う書面 of 保存等における情報通信 of 技術 of 利用に関する省令 of 一部をAmendmentする省令 of Enforcement等 (overview)",
+      "zh": "特定化学物质障害予防规则及び作業環境測定法实施规则的一部を修订する省令及び厚生労働省的所管する法令的規定に基づく民間事業者等が行う書面的保存等における情報通信的技術的利用に関する省令的一部を修订する省令的实施等（概要）",
+      "vi": "特定Chất hóa học障害予防規則及び作業環境測定法施行規則 一部をSửa đổiする省令及び厚生労働省 所管する法令 規定に基づく民間事業者等が行う書面 保存等における情報通信 技術 利用に関する省令 一部をSửa đổiする省令 施行等(Tổng quan)",
+      "pt": "特定Substância Química障害予防規則及び作業環境測定法施行規則 de 一部をEmendaする省令及び厚生労働省 de 所管する法令 de 規定に基づく民間事業者等が行う書面 de 保存等における情報通信 de 技術 de 利用に関する省令 de 一部をEmendaする省令 de 施行等 (visão geral)",
+      "tl": "特定Kemikal障害予防規則及び作業環境測定法施行規則 ng 一部をPagbabagoする省令及び厚生労働省 ng 所管する法令 ng 規定に基づく民間事業者等が行う書面 ng 保存等における情報通信 ng 技術 ng 利用に関する省令 ng 一部をPagbabagoする省令 ng 施行等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0158",
+      "ja": "インターネット等を介したeラーニング等により行われる労働安全衛生法に基づく安全衛生教育等の実施について",
+      "en": "インターネット等を介したeラーニング等により行われるOccupational Safety and Health法に基づく安全衛生教育等 of 実施 (overview)",
+      "zh": "インターネット等を介したeラーニング等により行われる劳动安全卫生法に基づく安全衛生教育等的実施（概要）",
+      "vi": "インターネット等を介したeラーニング等により行われるAn toàn vệ sinh lao động法に基づく安全衛生教育等 実施(Tổng quan)",
+      "pt": "インターネット等を介したeラーニング等により行われるSaúde e Segurança Ocupacional法に基づく安全衛生教育等 de 実施 (visão geral)",
+      "tl": "インターネット等を介したeラーニング等により行われるKaligtasan sa Trabaho法に基づく安全衛生教育等 ng 実施 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0159",
+      "ja": "特定化学物質障害予防規則における第2類物質「溶接ヒューム」に係る関係省令等の解釈等について",
+      "en": "特定Chemical Substance障害予防Regulationにおける第2類物質「溶接ヒューム」に係る関係省令等 of 解釈等 (overview)",
+      "zh": "特定化学物质障害予防规则における第2類物質「溶接ヒューム」に係る関係省令等的解釈等（概要）",
+      "vi": "特定Chất hóa học障害予防規則における第2類物質「溶接ヒューム」に係る関係省令等 解釈等(Tổng quan)",
+      "pt": "特定Substância Química障害予防規則における第2類物質「溶接ヒューム」に係る関係省令等 de 解釈等 (visão geral)",
+      "tl": "特定Kemikal障害予防規則における第2類物質「溶接ヒューム」に係る関係省令等 ng 解釈等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0160",
+      "ja": "ボイラー等に係る明細書及び特定機械等に係る検査証等における押印の廃止について",
+      "en": "ボイラー等に係る明細書及び特定機械等に係る検査証等における押印 of 廃止 (overview)",
+      "zh": "ボイラー等に係る明細書及び特定機械等に係る検査証等における押印的廃止（概要）",
+      "vi": "ボイラー等に係る明細書及び特定機械等に係る検査証等における押印 廃止(Tổng quan)",
+      "pt": "ボイラー等に係る明細書及び特定機械等に係る検査証等における押印 de 廃止 (visão geral)",
+      "tl": "ボイラー等に係る明細書及び特定機械等に係る検査証等における押印 ng 廃止 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0161",
+      "ja": "「チェーンソー取扱作業指導員について」の一部改正について",
+      "en": "「チェーンソー取扱作業指導員 (overview)」 of 一部Amendment (overview)",
+      "zh": "「チェーンソー取扱作業指導員（概要）」的一部修订（概要）",
+      "vi": "「チェーンソー取扱作業指導員(Tổng quan)」 一部Sửa đổi(Tổng quan)",
+      "pt": "「チェーンソー取扱作業指導員 (visão geral)」 de 一部Emenda (visão geral)",
+      "tl": "「チェーンソー取扱作業指導員 (pangkalahatan)」 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0162",
+      "ja": "押印を求める手続の見直し等のための厚生労働省関係省令の一部を改正する省令等の施行等について",
+      "en": "押印を求める手続 of 見直し等 of ため of 厚生労働省関係省令 of 一部をAmendmentする省令等 of Enforcement等 (overview)",
+      "zh": "押印を求める手続的見直し等的ため的厚生労働省関係省令的一部を修订する省令等的实施等（概要）",
+      "vi": "押印を求める手続 見直し等 ため 厚生労働省関係省令 一部をSửa đổiする省令等 施行等(Tổng quan)",
+      "pt": "押印を求める手続 de 見直し等 de ため de 厚生労働省関係省令 de 一部をEmendaする省令等 de 施行等 (visão geral)",
+      "tl": "押印を求める手続 ng 見直し等 ng ため ng 厚生労働省関係省令 ng 一部をPagbabagoする省令等 ng 施行等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0163",
+      "ja": "定期健康診断等における血糖検査の取扱いについて",
+      "en": "定期健康診断等における血糖検査 of 取扱い (overview)",
+      "zh": "定期健康診断等における血糖検査的取扱い（概要）",
+      "vi": "定期健康診断等における血糖検査 取扱い(Tổng quan)",
+      "pt": "定期健康診断等における血糖検査 de 取扱い (visão geral)",
+      "tl": "定期健康診断等における血糖検査 ng 取扱い (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0164",
+      "ja": "労働安全衛生法施行令の一部を改正する政令及び労働安全衛生規則の一部を改正する省令の施行について",
+      "en": "Occupational Safety and Health法Enforcement令 of 一部をAmendmentする政令及びOccupational Safety and HealthRegulation of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "劳动安全卫生法实施令的一部を修订する政令及び劳动安全卫生规则的一部を修订する省令的实施（概要）",
+      "vi": "An toàn vệ sinh lao động法施行令 一部をSửa đổiする政令及びAn toàn vệ sinh lao động規則 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional法施行令 de 一部をEmendaする政令及びSaúde e Segurança Ocupacional規則 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho法施行令 ng 一部をPagbabagoする政令及びKaligtasan sa Trabaho規則 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0165",
+      "ja": "変異原性が認められた化学物質に関する情報について",
+      "en": "変異原性が認められたChemical Substanceに関する情報 (overview)",
+      "zh": "変異原性が認められた化学物质に関する情報（概要）",
+      "vi": "変異原性が認められたChất hóa họcに関する情報(Tổng quan)",
+      "pt": "変異原性が認められたSubstância Químicaに関する情報 (visão geral)",
+      "tl": "変異原性が認められたKemikalに関する情報 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0166",
+      "ja": "変異原性が認められた化学物質の取扱いについて",
+      "en": "変異原性が認められたChemical Substance of 取扱い (overview)",
+      "zh": "変異原性が認められた化学物质的取扱い（概要）",
+      "vi": "変異原性が認められたChất hóa học 取扱い(Tổng quan)",
+      "pt": "変異原性が認められたSubstância Química de 取扱い (visão geral)",
+      "tl": "変異原性が認められたKemikal ng 取扱い (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0167",
+      "ja": "木材加工用機械作業主任者技能講習規程及びプレス機械作業主任者技能講習規程の一部を改正する件の施行について",
+      "en": "木材加工用機械作業主任者技能講習規程及びプレス機械作業主任者技能講習規程 of 一部をAmendmentする件 of Enforcement (overview)",
+      "zh": "木材加工用機械作業主任者技能講習規程及びプレス機械作業主任者技能講習規程的一部を修订する件的实施（概要）",
+      "vi": "木材加工用機械作業主任者技能講習規程及びプレス機械作業主任者技能講習規程 一部をSửa đổiする件 施行(Tổng quan)",
+      "pt": "木材加工用機械作業主任者技能講習規程及びプレス機械作業主任者技能講習規程 de 一部をEmendaする件 de 施行 (visão geral)",
+      "tl": "木材加工用機械作業主任者技能講習規程及びプレス機械作業主任者技能講習規程 ng 一部をPagbabagoする件 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0168",
+      "ja": "石綿障害予防規則の解説について",
+      "en": "石綿障害予防Regulation of 解説 (overview)",
+      "zh": "石綿障害予防规则的解説（概要）",
+      "vi": "石綿障害予防規則 解説(Tổng quan)",
+      "pt": "石綿障害予防規則 de 解説 (visão geral)",
+      "tl": "石綿障害予防規則 ng 解説 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0169",
+      "ja": "電離放射線障害防止規則の一部を改正する省令等の施行等について",
+      "en": "電離放射線障害防止Regulation of 一部をAmendmentする省令等 of Enforcement等 (overview)",
+      "zh": "電離放射線障害防止规则的一部を修订する省令等的实施等（概要）",
+      "vi": "電離放射線障害防止規則 一部をSửa đổiする省令等 施行等(Tổng quan)",
+      "pt": "電離放射線障害防止規則 de 一部をEmendaする省令等 de 施行等 (visão geral)",
+      "tl": "電離放射線障害防止規則 ng 一部をPagbabagoする省令等 ng 施行等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0170",
+      "ja": "自転車及び原動機付自転車を用いた飲食物のデリバリーにおける交通事故防止について",
+      "en": "自転車及び原動機付自転車を用いた飲食物 of デリバリーにおける交通事故防止 (overview)",
+      "zh": "自転車及び原動機付自転車を用いた飲食物的デリバリーにおける交通事故防止（概要）",
+      "vi": "自転車及び原動機付自転車を用いた飲食物 デリバリーにおける交通事故防止(Tổng quan)",
+      "pt": "自転車及び原動機付自転車を用いた飲食物 de デリバリーにおける交通事故防止 (visão geral)",
+      "tl": "自転車及び原動機付自転車を用いた飲食物 ng デリバリーにおける交通事故防止 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0171",
+      "ja": "剥離剤を使用した塗料の剥離作業における労働災害防止について(改正)",
+      "en": "剥離剤を使用した塗料 of 剥離作業におけるWorkplace Accident防止 (overview)(Amendment)",
+      "zh": "剥離剤を使用した塗料的剥離作業における工伤事故防止（概要）(修订)",
+      "vi": "剥離剤を使用した塗料 剥離作業におけるTai nạn lao động防止(Tổng quan)(Sửa đổi)",
+      "pt": "剥離剤を使用した塗料 de 剥離作業におけるAcidente de Trabalho防止 (visão geral)(Emenda)",
+      "tl": "剥離剤を使用した塗料 ng 剥離作業におけるAksidente sa Trabaho防止 (pangkalahatan)(Pagbabago)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0172",
+      "ja": "じん肺法施行規則等の一部を改正する省令の施行について",
+      "en": "じん肺法EnforcementRegulation等 of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "じん肺法实施规则等的一部を修订する省令的实施（概要）",
+      "vi": "じん肺法施行規則等 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "じん肺法施行規則等 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "じん肺法施行規則等 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0173",
+      "ja": "情報通信機器を用いた労働安全衛生法第17条、第18条及び第19条の規定に基づく安全委員会等の開催について",
+      "en": "情報通信機器を用いたOccupational Safety and Health法第17条、第18条及び第19条 of 規定に基づく安全委員会等 of 開催 (overview)",
+      "zh": "情報通信機器を用いた劳动安全卫生法第17条、第18条及び第19条的規定に基づく安全委員会等的開催（概要）",
+      "vi": "情報通信機器を用いたAn toàn vệ sinh lao động法第17条、第18条及び第19条 規定に基づく安全委員会等 開催(Tổng quan)",
+      "pt": "情報通信機器を用いたSaúde e Segurança Ocupacional法第17条、第18条及び第19条 de 規定に基づく安全委員会等 de 開催 (visão geral)",
+      "tl": "情報通信機器を用いたKaligtasan sa Trabaho法第17条、第18条及び第19条 ng 規定に基づく安全委員会等 ng 開催 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0174",
+      "ja": "剥離剤を使用した塗料の剥離作業における労働災害防止について",
+      "en": "剥離剤を使用した塗料 of 剥離作業におけるWorkplace Accident防止 (overview)",
+      "zh": "剥離剤を使用した塗料的剥離作業における工伤事故防止（概要）",
+      "vi": "剥離剤を使用した塗料 剥離作業におけるTai nạn lao động防止(Tổng quan)",
+      "pt": "剥離剤を使用した塗料 de 剥離作業におけるAcidente de Trabalho防止 (visão geral)",
+      "tl": "剥離剤を使用した塗料 ng 剥離作業におけるAksidente sa Trabaho防止 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0175",
+      "ja": "作業環境測定の記録のモデル様式の改正について",
+      "en": "作業環境測定 of 記録 of モデル様式 of Amendment (overview)",
+      "zh": "作業環境測定的記録的モデル様式的修订（概要）",
+      "vi": "作業環境測定 記録 モデル様式 Sửa đổi(Tổng quan)",
+      "pt": "作業環境測定 de 記録 de モデル様式 de Emenda (visão geral)",
+      "tl": "作業環境測定 ng 記録 ng モデル様式 ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0176",
+      "ja": "石綿障害予防規則等の一部を改正する省令等の施行について",
+      "en": "石綿障害予防Regulation等 of 一部をAmendmentする省令等 of Enforcement (overview)",
+      "zh": "石綿障害予防规则等的一部を修订する省令等的实施（概要）",
+      "vi": "石綿障害予防規則等 一部をSửa đổiする省令等 施行(Tổng quan)",
+      "pt": "石綿障害予防規則等 de 一部をEmendaする省令等 de 施行 (visão geral)",
+      "tl": "石綿障害予防規則等 ng 一部をPagbabagoする省令等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0177",
+      "ja": "石綿障害予防規則等の一部を改正する省令等の施行について",
+      "en": "石綿障害予防Regulation等 of 一部をAmendmentする省令等 of Enforcement (overview)",
+      "zh": "石綿障害予防规则等的一部を修订する省令等的实施（概要）",
+      "vi": "石綿障害予防規則等 一部をSửa đổiする省令等 施行(Tổng quan)",
+      "pt": "石綿障害予防規則等 de 一部をEmendaする省令等 de 施行 (visão geral)",
+      "tl": "石綿障害予防規則等 ng 一部をPagbabagoする省令等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0178",
+      "ja": "陸上貨物運送事業における労働災害防止に向けた一層の取組について(トラック荷台からの転落防止等荷役災害対策の推進)",
+      "en": "陸上貨物運送事業におけるWorkplace Accident防止に向けた一層 of 取組 (overview)(トラック荷台から of Fall防止等荷役Disaster対策 of 推進)",
+      "zh": "陸上貨物運送事業における工伤事故防止に向けた一層的取組（概要）(トラック荷台から的跌落防止等荷役灾害対策的推進)",
+      "vi": "陸上貨物運送事業におけるTai nạn lao động防止に向けた一層 取組(Tổng quan)(トラック荷台から 転落防止等荷役災害対策 推進)",
+      "pt": "陸上貨物運送事業におけるAcidente de Trabalho防止に向けた一層 de 取組 (visão geral)(トラック荷台から de 転落防止等荷役災害対策 de 推進)",
+      "tl": "陸上貨物運送事業におけるAksidente sa Trabaho防止に向けた一層 ng 取組 (pangkalahatan)(トラック荷台から ng 転落防止等荷役災害対策 ng 推進)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0179",
+      "ja": "金属アーク溶接等作業を継続して行う屋内作業場に係る溶接ヒュームの濃度の測定の方法等の施行について",
+      "en": "金属アーク溶接等作業を継続して行う屋内作業場に係る溶接ヒューム of 濃度 of 測定 of 方法等 of Enforcement (overview)",
+      "zh": "金属アーク溶接等作業を継続して行う屋内作業場に係る溶接ヒューム的濃度的測定的方法等的实施（概要）",
+      "vi": "金属アーク溶接等作業を継続して行う屋内作業場に係る溶接ヒューム 濃度 測定 方法等 施行(Tổng quan)",
+      "pt": "金属アーク溶接等作業を継続して行う屋内作業場に係る溶接ヒューム de 濃度 de 測定 de 方法等 de 施行 (visão geral)",
+      "tl": "金属アーク溶接等作業を継続して行う屋内作業場に係る溶接ヒューム ng 濃度 ng 測定 ng 方法等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0180",
+      "ja": "技能講習の実施における外国語補助教材の使用上の留意事項について",
+      "en": "技能講習 of 実施における外国語補助教材 of 使用上 of 留意事項 (overview)",
+      "zh": "技能講習的実施における外国語補助教材的使用上的留意事項（概要）",
+      "vi": "技能講習 実施における外国語補助教材 使用上 留意事項(Tổng quan)",
+      "pt": "技能講習 de 実施における外国語補助教材 de 使用上 de 留意事項 (visão geral)",
+      "tl": "技能講習 ng 実施における外国語補助教材 ng 使用上 ng 留意事項 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0181",
+      "ja": "社会福祉施設における労働災害防止に向けたより一層の取組について",
+      "en": "社会福祉施設におけるWorkplace Accident防止に向けたより一層 of 取組 (overview)",
+      "zh": "社会福祉施設における工伤事故防止に向けたより一層的取組（概要）",
+      "vi": "社会福祉施設におけるTai nạn lao động防止に向けたより一層 取組(Tổng quan)",
+      "pt": "社会福祉施設におけるAcidente de Trabalho防止に向けたより一層 de 取組 (visão geral)",
+      "tl": "社会福祉施設におけるAksidente sa Trabaho防止に向けたより一層 ng 取組 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0182",
+      "ja": "ずい道等建設工事における粉じん対策に関するガイドラインの改正について",
+      "en": "ずい道等建設工事における粉じん対策に関するGuideline of Amendment (overview)",
+      "zh": "ずい道等建設工事における粉じん対策に関する指南的修订（概要）",
+      "vi": "ずい道等建設工事における粉じん対策に関するガイドライン Sửa đổi(Tổng quan)",
+      "pt": "ずい道等建設工事における粉じん対策に関するガイドライン de Emenda (visão geral)",
+      "tl": "ずい道等建設工事における粉じん対策に関するガイドライン ng Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0183",
+      "ja": "粉じん作業を行う坑内作業場に係る粉じん濃度の測定及び評価の方法等の施行について",
+      "en": "粉じん作業を行う坑内作業場に係る粉じん濃度 of 測定及び評価 of 方法等 of Enforcement (overview)",
+      "zh": "粉じん作業を行う坑内作業場に係る粉じん濃度的測定及び評価的方法等的实施（概要）",
+      "vi": "粉じん作業を行う坑内作業場に係る粉じん濃度 測定及び評価 方法等 施行(Tổng quan)",
+      "pt": "粉じん作業を行う坑内作業場に係る粉じん濃度 de 測定及び評価 de 方法等 de 施行 (visão geral)",
+      "tl": "粉じん作業を行う坑内作業場に係る粉じん濃度 ng 測定及び評価 ng 方法等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0184",
+      "ja": "建築物石綿含有建材調査者講習登録規程の改正等について",
+      "en": "建築物石綿含有建材調査者講習登録規程 of Amendment等 (overview)",
+      "zh": "建築物石綿含有建材調査者講習登録規程的修订等（概要）",
+      "vi": "建築物石綿含有建材調査者講習登録規程 Sửa đổi等(Tổng quan)",
+      "pt": "建築物石綿含有建材調査者講習登録規程 de Emenda等 (visão geral)",
+      "tl": "建築物石綿含有建材調査者講習登録規程 ng Pagbabago等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0185",
+      "ja": "粉じん障害防止規則及び労働安全衛生規則の一部を改正する省令等の施行について",
+      "en": "粉じん障害防止Regulation及びOccupational Safety and HealthRegulation of 一部をAmendmentする省令等 of Enforcement (overview)",
+      "zh": "粉じん障害防止规则及び劳动安全卫生规则的一部を修订する省令等的实施（概要）",
+      "vi": "粉じん障害防止規則及びAn toàn vệ sinh lao động規則 一部をSửa đổiする省令等 施行(Tổng quan)",
+      "pt": "粉じん障害防止規則及びSaúde e Segurança Ocupacional規則 de 一部をEmendaする省令等 de 施行 (visão geral)",
+      "tl": "粉じん障害防止規則及びKaligtasan sa Trabaho規則 ng 一部をPagbabagoする省令等 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0186",
+      "ja": "廃棄物焼却施設内作業におけるダイオキシン類ばく露防止対策に係る特例について",
+      "en": "廃棄物焼却施設内作業におけるダイオキシン類ばく露防止対策に係る特例 (overview)",
+      "zh": "廃棄物焼却施設内作業におけるダイオキシン類ばく露防止対策に係る特例（概要）",
+      "vi": "廃棄物焼却施設内作業におけるダイオキシン類ばく露防止対策に係る特例(Tổng quan)",
+      "pt": "廃棄物焼却施設内作業におけるダイオキシン類ばく露防止対策に係る特例 (visão geral)",
+      "tl": "廃棄物焼却施設内作業におけるダイオキシン類ばく露防止対策に係る特例 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0187",
+      "ja": "労働安全衛生規則等の一部を改正する省令の施行に伴う労働安全衛生法関係通達の整備について",
+      "en": "Occupational Safety and HealthRegulation等 of 一部をAmendmentする省令 of Enforcementに伴うOccupational Safety and Health法関係Circular of 整備 (overview)",
+      "zh": "劳动安全卫生规则等的一部を修订する省令的实施に伴う劳动安全卫生法関係通达的整備（概要）",
+      "vi": "An toàn vệ sinh lao động規則等 一部をSửa đổiする省令 施行に伴うAn toàn vệ sinh lao động法関係Thông tư 整備(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional規則等 de 一部をEmendaする省令 de 施行に伴うSaúde e Segurança Ocupacional法関係Circular de 整備 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho規則等 ng 一部をPagbabagoする省令 ng 施行に伴うKaligtasan sa Trabaho法関係Sirkular ng 整備 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0188",
+      "ja": "試験施設等に関する安衛法GLP適合確認要領の一部改正について",
+      "en": "試験施設等に関するIndustrial Safety and Health ActGLP適合確認要領 of 一部Amendment (overview)",
+      "zh": "試験施設等に関する劳动安全卫生法GLP適合確認要領的一部修订（概要）",
+      "vi": "試験施設等に関する安衛法GLP適合確認要領 一部Sửa đổi(Tổng quan)",
+      "pt": "試験施設等に関する安衛法GLP適合確認要領 de 一部Emenda (visão geral)",
+      "tl": "試験施設等に関する安衛法GLP適合確認要領 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0189",
+      "ja": "労働安全衛生法施行令の一部を改正する政令等の施行等について",
+      "en": "Occupational Safety and Health法Enforcement令 of 一部をAmendmentする政令等 of Enforcement等 (overview)",
+      "zh": "劳动安全卫生法实施令的一部を修订する政令等的实施等（概要）",
+      "vi": "An toàn vệ sinh lao động法施行令 一部をSửa đổiする政令等 施行等(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional法施行令 de 一部をEmendaする政令等 de 施行等 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho法施行令 ng 一部をPagbabagoする政令等 ng 施行等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0190",
+      "ja": "ボイラー及び圧力容器安全規則等の一部を改正する省令の施行について",
+      "en": "ボイラー及び圧力容器安全Regulation等 of 一部をAmendmentする省令 of Enforcement (overview)",
+      "zh": "ボイラー及び圧力容器安全规则等的一部を修订する省令的实施（概要）",
+      "vi": "ボイラー及び圧力容器安全規則等 一部をSửa đổiする省令 施行(Tổng quan)",
+      "pt": "ボイラー及び圧力容器安全規則等 de 一部をEmendaする省令 de 施行 (visão geral)",
+      "tl": "ボイラー及び圧力容器安全規則等 ng 一部をPagbabagoする省令 ng 施行 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0191",
+      "ja": "「新規化学物質の有害性の調査の具体的な方法等に関するＱ＆Ａ」について",
+      "en": "「新規Chemical Substance of 有害性 of 調査 of 具体的な方法等に関するＱ＆Ａ」 (overview)",
+      "zh": "「新規化学物质的有害性的調査的具体的な方法等に関するＱ＆Ａ」（概要）",
+      "vi": "「新規Chất hóa học 有害性 調査 具体的な方法等に関するＱ＆Ａ」(Tổng quan)",
+      "pt": "「新規Substância Química de 有害性 de 調査 de 具体的な方法等に関するＱ＆Ａ」 (visão geral)",
+      "tl": "「新規Kemikal ng 有害性 ng 調査 ng 具体的な方法等に関するＱ＆Ａ」 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0192",
+      "ja": "バイオテクノロジー応用医薬品に係る有害性調査について",
+      "en": "バイオテクノロジー応用医薬品に係る有害性調査 (overview)",
+      "zh": "バイオテクノロジー応用医薬品に係る有害性調査（概要）",
+      "vi": "バイオテクノロジー応用医薬品に係る有害性調査(Tổng quan)",
+      "pt": "バイオテクノロジー応用医薬品に係る有害性調査 (visão geral)",
+      "tl": "バイオテクノロジー応用医薬品に係る有害性調査 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0193",
+      "ja": "微生物を用いる変異原性試験の具体的手法及び試験結果の評価方法について",
+      "en": "微生物を用いる変異原性試験 of 具体的手法及び試験結果 of 評価方法 (overview)",
+      "zh": "微生物を用いる変異原性試験的具体的手法及び試験結果的評価方法（概要）",
+      "vi": "微生物を用いる変異原性試験 具体的手法及び試験結果 評価方法(Tổng quan)",
+      "pt": "微生物を用いる変異原性試験 de 具体的手法及び試験結果 de 評価方法 (visão geral)",
+      "tl": "微生物を用いる変異原性試験 ng 具体的手法及び試験結果 ng 評価方法 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0194",
+      "ja": "新型コロナウイルス感染症の軽症者等の宿泊療養を実施する宿泊施設等における労働者の安全衛生を確保する観点からの留意事項について",
+      "en": "新型コロナウイルス感染症 of 軽症者等 of 宿泊療養を実施する宿泊施設等における労働者 of 安全衛生を確保する観点から of 留意事項 (overview)",
+      "zh": "新型コロナウイルス感染症的軽症者等的宿泊療養を実施する宿泊施設等における労働者的安全衛生を確保する観点から的留意事項（概要）",
+      "vi": "新型コロナウイルス感染症 軽症者等 宿泊療養を実施する宿泊施設等における労働者 安全衛生を確保する観点から 留意事項(Tổng quan)",
+      "pt": "新型コロナウイルス感染症 de 軽症者等 de 宿泊療養を実施する宿泊施設等における労働者 de 安全衛生を確保する観点から de 留意事項 (visão geral)",
+      "tl": "新型コロナウイルス感染症 ng 軽症者等 ng 宿泊療養を実施する宿泊施設等における労働者 ng 安全衛生を確保する観点から ng 留意事項 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0195",
+      "ja": "労働安全衛生法第57条の4第1項の規定に基づき厚生労働大臣の定める基準の一部を改正する件の適用について",
+      "en": "Occupational Safety and Health法第57条 of 4第1項 of 規定に基づき厚生労働大臣 of 定める基準 of 一部をAmendmentする件 of 適用 (overview)",
+      "zh": "劳动安全卫生法第57条的4第1項的規定に基づき厚生労働大臣的定める基準的一部を修订する件的適用（概要）",
+      "vi": "An toàn vệ sinh lao động法第57条 4第1項 規定に基づき厚生労働大臣 定める基準 一部をSửa đổiする件 適用(Tổng quan)",
+      "pt": "Saúde e Segurança Ocupacional法第57条 de 4第1項 de 規定に基づき厚生労働大臣 de 定める基準 de 一部をEmendaする件 de 適用 (visão geral)",
+      "tl": "Kaligtasan sa Trabaho法第57条 ng 4第1項 ng 規定に基づき厚生労働大臣 ng 定める基準 ng 一部をPagbabagoする件 ng 適用 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0196",
+      "ja": "「過重労働による健康障害防止のための総合対策について」の一部改正について",
+      "en": "「過重労働による健康障害防止 of ため of 総合対策 (overview)」 of 一部Amendment (overview)",
+      "zh": "「過重労働による健康障害防止的ため的総合対策（概要）」的一部修订（概要）",
+      "vi": "「過重労働による健康障害防止 ため 総合対策(Tổng quan)」 一部Sửa đổi(Tổng quan)",
+      "pt": "「過重労働による健康障害防止 de ため de 総合対策 (visão geral)」 de 一部Emenda (visão geral)",
+      "tl": "「過重労働による健康障害防止 ng ため ng 総合対策 (pangkalahatan)」 ng 一部Pagbabago (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0197",
+      "ja": "貨物自動車の過積載の防止について",
+      "en": "貨物自動車 of 過積載 of 防止 (overview)",
+      "zh": "貨物自動車的過積載的防止（概要）",
+      "vi": "貨物自動車 過積載 防止(Tổng quan)",
+      "pt": "貨物自動車 de 過積載 de 防止 (visão geral)",
+      "tl": "貨物自動車 ng 過積載 ng 防止 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0198",
+      "ja": "製造業における職長等に対する能力向上教育に準じた教育の周知等について",
+      "en": "Manufacturingにおける職長等に対する能力向上教育に準じた教育 of 周知等 (overview)",
+      "zh": "制造业における職長等に対する能力向上教育に準じた教育的周知等（概要）",
+      "vi": "Ngành chế tạoにおける職長等に対する能力向上教育に準じた教育 周知等(Tổng quan)",
+      "pt": "Indústriaにおける職長等に対する能力向上教育に準じた教育 de 周知等 (visão geral)",
+      "tl": "製造業における職長等に対する能力向上教育に準じた教育 ng 周知等 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0199",
+      "ja": "外国人の日本語の理解力に配慮した技能講習の実施について",
+      "en": "外国人 of 本語 of 理解力に配慮した技能講習 of 実施 (overview)",
+      "zh": "外国人的日本語的理解力に配慮した技能講習的実施（概要）",
+      "vi": "外国人 日本語 理解力に配慮した技能講習 実施(Tổng quan)",
+      "pt": "外国人 de 日本語 de 理解力に配慮した技能講習 de 実施 (visão geral)",
+      "tl": "外国人 ng 日本語 ng 理解力に配慮した技能講習 ng 実施 (pangkalahatan)"
+    },
+    {
+      "resourceType": "notice",
+      "id": "mhlw-notice-0200",
+      "ja": "「労働安全衛生法に基づく製造時等検査の業務を自ら行う都道府県労働局長の変更について」の改正について",
+      "en": "「Occupational Safety and Health法に基づく製造時等検査 of 業務を自ら行う都道府県労働局長 of 変更 (overview)」 of Amendment (overview)",
+      "zh": "「劳动安全卫生法に基づく製造時等検査的業務を自ら行う都道府県労働局長的変更（概要）」的修订（概要）",
+      "vi": "「An toàn vệ sinh lao động法に基づく製造時等検査 業務を自ら行う都道府県労働局長 変更(Tổng quan)」 Sửa đổi(Tổng quan)",
+      "pt": "「Saúde e Segurança Ocupacional法に基づく製造時等検査 de 業務を自ら行う都道府県労働局長 de 変更 (visão geral)」 de Emenda (visão geral)",
+      "tl": "「Kaligtasan sa Trabaho法に基づく製造時等検査 ng 業務を自ら行う都道府県労働局長 ng 変更 (pangkalahatan)」 ng Pagbabago (pangkalahatan)"
+    }
+  ]
+}
