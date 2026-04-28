@@ -1,0 +1,64 @@
+{
+  "generatedAt": "2026-04-28T15:11:06.480Z",
+  "publishedRange": {
+    "start": "2026-05-01",
+    "perDay": 12
+  },
+  "totals": {
+    "circulars": 1158,
+    "accidents": 500,
+    "chemicals": 100,
+    "seasonal": 52,
+    "legal": 60,
+    "subsidies": 30,
+    "international": 60,
+    "total": 1960
+  },
+  "files": [
+    {
+      "category": "circulars",
+      "file": "seo-articles-circulars-001.jsonl",
+      "count": 500
+    },
+    {
+      "category": "circulars",
+      "file": "seo-articles-circulars-002.jsonl",
+      "count": 500
+    },
+    {
+      "category": "circulars",
+      "file": "seo-articles-circulars-003.jsonl",
+      "count": 158
+    },
+    {
+      "category": "accidents",
+      "file": "seo-articles-accidents.jsonl",
+      "count": 500
+    },
+    {
+      "category": "chemicals",
+      "file": "seo-articles-chemicals.jsonl",
+      "count": 100
+    },
+    {
+      "category": "seasonal",
+      "file": "seo-articles-seasonal.jsonl",
+      "count": 52
+    },
+    {
+      "category": "legal",
+      "file": "seo-articles-legal.jsonl",
+      "count": 60
+    },
+    {
+      "category": "subsidies",
+      "file": "seo-articles-subsidies.jsonl",
+      "count": 30
+    },
+    {
+      "category": "international",
+      "file": "seo-articles-international.jsonl",
+      "count": 60
+    }
+  ]
+}
