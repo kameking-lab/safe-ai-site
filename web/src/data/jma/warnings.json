@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-04-29T14:22:58.333Z",
+  "fetchedAt": "2026-04-29T16:15:51.594Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -5408,8 +5408,8 @@
         {
           "sourceCode": "473000",
           "level": "advisory",
-          "headline": "宮古島地方では、竜巻などの激しい突風や急な強い雨、落雷に注意してください。",
-          "reportDatetime": "2026-04-29T15:40:00+09:00",
+          "headline": "宮古島地方では、３０日朝から高波に、３０日夕方まで竜巻などの激しい突風や急な強い雨、落雷に注意してください。",
+          "reportDatetime": "2026-04-30T01:04:00+09:00",
           "publishingOffice": "宮古島地方気象台",
           "warnings": [
             {
@@ -5419,15 +5419,33 @@
               "level": "advisory"
             },
             {
+              "areaCode": "473000",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4721400",
               "code": "14",
               "status": "継続",
               "level": "advisory"
             },
             {
+              "areaCode": "4721400",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4737500",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4737500",
+              "code": "16",
+              "status": "発表",
               "level": "advisory"
             }
           ]
