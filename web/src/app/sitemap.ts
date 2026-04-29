@@ -3,6 +3,7 @@ import { PAID_MODE } from "@/lib/paid-mode";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { getPublishedArticleIndex } from "@/lib/articles";
 import { getAllEquipment } from "@/lib/equipment-recommendation";
+import casesData from "@/data/cases.json";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://safe-ai-site.vercel.app";
@@ -91,7 +92,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
   }));
 
-  return [...filtered, ...circularPages, ...articlePages, ...equipmentPages].map(
+  // ペルソナ事例ページ
+  const casePages: typeof pages = casesData.map((c) => ({
+    url: `/cases/${c.slug}`,
+    lastModified: "2026-04-29",
+    priority: 0.7,
+    changeFrequency: "monthly",
+  }));
+
+  return [...filtered, ...circularPages, ...articlePages, ...equipmentPages, ...casePages].map(
     ({ url, lastModified, priority, changeFrequency }) => ({
       url: `${base}${url}`,
       lastModified,
