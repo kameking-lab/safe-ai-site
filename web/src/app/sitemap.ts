@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { getPublishedArticleIndex } from "@/lib/articles";
+import { getAllEquipment } from "@/lib/equipment-recommendation";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://safe-ai-site.vercel.app";
@@ -82,7 +83,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
   }));
 
-  return [...filtered, ...circularPages, ...articlePages].map(
+  // 保護具DBの個別ページ（月次更新前提）
+  const equipmentPages: typeof pages = getAllEquipment().map((it) => ({
+    url: `/equipment/${it.id}`,
+    lastModified: "2026-04-29",
+    priority: 0.4,
+    changeFrequency: "monthly",
+  }));
+
+  return [...filtered, ...circularPages, ...articlePages, ...equipmentPages].map(
     ({ url, lastModified, priority, changeFrequency }) => ({
       url: `${base}${url}`,
       lastModified,
