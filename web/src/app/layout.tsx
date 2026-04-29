@@ -8,6 +8,8 @@ import { JsonLd, organizationSchema, webSiteSchema, personSchema } from "@/compo
 import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
 import { CommandPaletteProvider } from "@/components/CommandPaletteProvider";
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
+import Analytics from "@/components/Analytics";
+import AdSenseScript from "@/components/AdSenseScript";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -89,6 +91,8 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-full bg-slate-50 font-sans text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+        <Analytics />
+        <AdSenseScript />
         <JsonLd schema={organizationSchema()} />
         <JsonLd schema={webSiteSchema()} />
         <JsonLd schema={personSchema()} />
