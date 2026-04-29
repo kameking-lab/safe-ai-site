@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-04-29T01:26:04.727Z",
+  "fetchedAt": "2026-04-29T04:58:44.182Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -4380,15 +4380,112 @@
       ]
     },
     "JP-22": {
-      "level": "none",
+      "level": "advisory",
       "entries": [
         {
           "sourceCode": "220000",
-          "level": "none",
-          "headline": "注意報を解除します。",
-          "reportDatetime": "2026-04-28T22:13:00+09:00",
+          "level": "advisory",
+          "headline": "中部、西部では、２９日夕方まで強風に注意してください。",
+          "reportDatetime": "2026-04-29T12:02:00+09:00",
           "publishingOffice": "静岡地方気象台",
-          "warnings": []
+          "warnings": [
+            {
+              "areaCode": "220010",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "220040",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2210001",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2213001",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2220900",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2221100",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2221200",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2221300",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2221400",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2221600",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2222100",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2222300",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2222400",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2222600",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2242400",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2246100",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            }
+          ]
         }
       ]
     },
