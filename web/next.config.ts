@@ -26,6 +26,10 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  // /admin/status が同階層の report.md をサーバ読込するため明示的にトレース
+  outputFileTracingIncludes: {
+    "/admin/status": ["./src/app/admin/status/report.md"],
+  },
   // 画像最適化（AVIF/WebP）
   images: {
     formats: ["image/avif", "image/webp"],
