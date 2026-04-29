@@ -1,0 +1,66 @@
+name: Equipment DB monthly update
+
+on:
+  schedule:
+    # 毎月1日 01:00 JST = 16:00 UTC（前日）
+    - cron: "0 16 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Lint equipment data
+        id: lint
+        run: |
+          mkdir -p logs
+          node scripts/lint-equipment-data.mjs | tee logs/equipment-lint-$(date -u +%Y-%m).log
+        env:
+          NODE_OPTIONS: "--no-warnings"
+
+      - name: Upload lint log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: equipment-lint-log
+          path: logs/equipment-lint-*.log
+          retention-days: 90
+
+      - name: Open issue on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const dir = 'logs';
+            let body = '保護具DBのlintが失敗しました。詳細はワークフロー実行ログを確認してください。\n\n';
+            try {
+              const files = fs.readdirSync(dir).filter(f => f.startsWith('equipment-lint-'));
+              if (files.length) {
+                const log = fs.readFileSync(path.join(dir, files[0]), 'utf8');
+                body += '```\n' + log.slice(-3000) + '\n```';
+              }
+            } catch (e) { /* noop */ }
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[equipment-db] 月次lint失敗 ${new Date().toISOString().slice(0,10)}`,
+              body,
+              labels: ['data-quality', 'equipment-db'],
+            });
