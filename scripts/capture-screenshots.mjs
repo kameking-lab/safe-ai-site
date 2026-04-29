@@ -18,11 +18,15 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { createRequire } from "node:module";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, "..");
+
+// npm run capture はweb/から実行されるのでCWDから解決する
+const cwdRequire = createRequire(path.join(process.cwd(), "package.json"));
 const OUT_DIR = path.join(ROOT, "web", "public", "screenshots");
 
 const BASE_URL = process.env.SCREENSHOT_BASE_URL || "https://safe-ai-site.vercel.app";
@@ -102,12 +106,26 @@ function escapeXml(s) {
 }
 
 async function tryPlaywright() {
+  // npm run capture は web/ から実行されるので CWD の node_modules から playwright を解決
+  const candidates = [];
   try {
-    const mod = await import("playwright");
-    return mod.chromium ? mod : null;
+    candidates.push(pathToFileURL(cwdRequire.resolve("playwright")).href);
   } catch {
-    return null;
+    // フォールバック
   }
+  candidates.push("playwright");
+
+  for (const spec of candidates) {
+    try {
+      const mod = await import(spec);
+      // CJSモジュールをESM dynamic importすると mod.default に入る場合がある
+      const resolved = mod.default ?? mod;
+      if (resolved.chromium) return resolved;
+    } catch {
+      // next
+    }
+  }
+  return null;
 }
 
 async function captureWithPlaywright(playwright) {
