@@ -1,26 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import equipmentDb from "@/data/safety-equipment-db.json";
+import { recommendEquipment, type ScoredEquipment } from "@/lib/equipment-recommendation";
 
-type Item = {
-  id: string;
-  categoryId: string;
-  categoryName: string;
-  categoryIcon: string;
-  name: string;
-  spec: string;
-  priceMin: number;
-  priceMax: number;
-  priceLabel: string;
-  industries: string[];
-  hazards: string[];
-  seasons: string[];
-  affiliate: { amazonUrl: string; rakutenUrl: string; moshimoNote: string };
-  jisOrCertification: string;
-};
-
-const items = equipmentDb.items as Item[];
 const hazardLabels = equipmentDb.hazardLabels as Record<string, string>;
 const industryLabels = equipmentDb.industryLabels as Record<string, string>;
 
@@ -31,10 +15,10 @@ const SEASONS = [
 ] as const;
 
 const BUDGETS = [
-  { id: "low", label: "1万円以下", max: 10000 },
-  { id: "mid", label: "1万〜5万円", max: 50000 },
-  { id: "high", label: "5万円以上", max: Infinity },
-  { id: "any", label: "予算問わず", max: Infinity },
+  { id: "low", label: "1万円以下", cap: 10000 },
+  { id: "mid", label: "1万〜5万円", cap: 50000 },
+  { id: "high", label: "5万円以上", cap: 500000 },
+  { id: "any", label: "予算問わず", cap: undefined as number | undefined },
 ] as const;
 
 type Step = 1 | 2 | 3 | 4;
@@ -46,17 +30,15 @@ export function EquipmentFinderClient() {
   const [season, setSeason] = useState<string>("all");
   const [budget, setBudget] = useState<string>("any");
 
-  const results = useMemo<Item[]>(() => {
-    if (step !== 4) return [];
+  const result = useMemo(() => {
+    if (step !== 4) return null;
     const budgetCfg = BUDGETS.find((b) => b.id === budget) ?? BUDGETS[3];
-    return items
-      .filter((it) => (industry ? it.industries.includes(industry) : true))
-      .filter((it) => (hazard ? it.hazards.includes(hazard) : true))
-      .filter((it) =>
-        season === "all" ? true : it.seasons.includes(season) || it.seasons.includes("all")
-      )
-      .filter((it) => (budget === "any" ? true : it.priceMin <= budgetCfg.max))
-      .slice(0, 12);
+    return recommendEquipment({
+      industry: industry || undefined,
+      hazard: hazard || undefined,
+      season,
+      budgetCap: budgetCfg.cap,
+    });
   }, [step, industry, hazard, season, budget]);
 
   function reset() {
@@ -74,9 +56,7 @@ export function EquipmentFinderClient() {
         {[1, 2, 3, 4].map((s) => (
           <div
             key={s}
-            className={`h-1.5 flex-1 rounded-full ${
-              s <= step ? "bg-emerald-500" : "bg-slate-200"
-            }`}
+            className={`h-1.5 flex-1 rounded-full ${s <= step ? "bg-emerald-500" : "bg-slate-200"}`}
           />
         ))}
       </div>
@@ -198,7 +178,7 @@ export function EquipmentFinderClient() {
         </section>
       )}
 
-      {step === 4 && (
+      {step === 4 && result && (
         <section className="space-y-3">
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4">
             <p className="text-xs font-bold text-emerald-800">レコメンド条件</p>
@@ -207,6 +187,9 @@ export function EquipmentFinderClient() {
               <strong>{hazardLabels[hazard] ?? "未指定"}</strong> ／ 季節:{" "}
               <strong>{SEASONS.find((s) => s.id === season)?.label}</strong> ／ 予算:{" "}
               <strong>{BUDGETS.find((b) => b.id === budget)?.label}</strong>
+            </p>
+            <p className="mt-1 text-[11px] text-emerald-900">
+              候補 {result.totalCandidates.toLocaleString()} 点から、4軸スコア（業種30+危険源30+季節15+予算15+評価10）で上位を提示。
             </p>
             <button
               type="button"
@@ -217,47 +200,30 @@ export function EquipmentFinderClient() {
             </button>
           </div>
 
-          {results.length === 0 ? (
+          {result.top.length === 0 ? (
             <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
               該当商品が見つかりませんでした。条件をゆるめて再検索してください。
             </div>
           ) : (
-            <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {results.map((it) => (
-                <li
-                  key={it.id}
-                  className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl" aria-hidden="true">
-                      {it.categoryIcon}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-500">{it.categoryName}</span>
-                  </div>
-                  <p className="mt-2 text-sm font-bold text-slate-900">{it.name}</p>
-                  <p className="mt-1 text-[11px] text-slate-600">{it.spec}</p>
-                  <p className="mt-2 text-xs font-bold text-emerald-700">{it.priceLabel}</p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <a
-                      href={it.affiliate.amazonUrl}
-                      target="_blank"
-                      rel="noopener noreferrer sponsored"
-                      className="rounded-md bg-amber-500 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-amber-600"
-                    >
-                      Amazonで見る
-                    </a>
-                    <a
-                      href={it.affiliate.rakutenUrl}
-                      target="_blank"
-                      rel="noopener noreferrer sponsored"
-                      className="rounded-md bg-rose-500 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-rose-600"
-                    >
-                      楽天で見る
-                    </a>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <>
+              <h3 className="text-sm font-bold text-slate-900">⭐ AIの一推し（上位5点）</h3>
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {result.top.map((it) => (
+                  <RecommendCard key={it.id} item={it} highlight />
+                ))}
+              </ul>
+
+              {result.others.length > 0 && (
+                <>
+                  <h3 className="mt-4 text-sm font-bold text-slate-900">そのほかのおすすめ（10点）</h3>
+                  <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {result.others.map((it) => (
+                      <RecommendCard key={it.id} item={it} />
+                    ))}
+                  </ul>
+                </>
+              )}
+            </>
           )}
 
           <p className="text-[11px] text-slate-500">
@@ -266,5 +232,62 @@ export function EquipmentFinderClient() {
         </section>
       )}
     </div>
+  );
+}
+
+function RecommendCard({ item, highlight }: { item: ScoredEquipment; highlight?: boolean }) {
+  return (
+    <li
+      className={`flex flex-col rounded-2xl border bg-white p-4 shadow-sm ${
+        highlight ? "border-emerald-300 ring-1 ring-emerald-200" : "border-slate-200"
+      }`}
+    >
+      <div className="flex items-center gap-2">
+        <span className="text-xl" aria-hidden="true">
+          {item.categoryIcon}
+        </span>
+        <span className="text-[10px] font-bold text-slate-500">{item.categoryName}</span>
+        <span className="ml-auto rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+          {item.score}/100
+        </span>
+      </div>
+      <Link href={`/equipment/${item.id}`} className="mt-2 text-sm font-bold text-slate-900 hover:underline">
+        {item.name}
+      </Link>
+      <p className="mt-1 text-[11px] text-slate-600">{item.spec}</p>
+      {item.recommendReason ? (
+        <p className="mt-1 text-[11px] leading-5 text-slate-700">{item.recommendReason}</p>
+      ) : null}
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <p className="text-xs font-bold text-emerald-700">{item.priceLabel}</p>
+        {typeof item.rating === "number" ? (
+          <span className="text-[11px] text-amber-700">★ {item.rating.toFixed(1)}</span>
+        ) : null}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <a
+          href={item.affiliate.amazonUrl}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          className="rounded-md bg-amber-500 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-amber-600"
+        >
+          Amazonで見る
+        </a>
+        <a
+          href={item.affiliate.rakutenUrl}
+          target="_blank"
+          rel="noopener noreferrer sponsored"
+          className="rounded-md bg-rose-500 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-rose-600"
+        >
+          楽天で見る
+        </a>
+        <Link
+          href={`/equipment/${item.id}`}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50"
+        >
+          詳細
+        </Link>
+      </div>
+    </li>
   );
 }
