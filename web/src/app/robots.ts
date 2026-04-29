@@ -5,9 +5,8 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      // 画面表示専用（サイネージ）と API ルートは検索エンジンから除外
-      disallow: ["/api/", "/signage"],
+      disallow: ["/admin/", "/api/", "/signage", "/strategy"],
     },
-    sitemap: "https://safe-ai-site.vercel.app/sitemap.xml",
+    sitemap: "https://safe-ai-site.vercel.app/sitemap-index.xml",
   };
 }
