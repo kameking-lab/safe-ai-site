@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-04-30T09:05:26.562Z",
+  "fetchedAt": "2026-04-30T11:08:49.758Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -4264,8 +4264,8 @@
         {
           "sourceCode": "190000",
           "level": "advisory",
-          "headline": "東部・富士五湖では、１日昼前まで濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-04-30T16:20:00+09:00",
+          "headline": "東部・富士五湖では、１日昼前まで濃霧による視程障害に、１日までなだれに注意してください。",
+          "reportDatetime": "2026-04-30T18:12:00+09:00",
           "publishingOffice": "甲府地方気象台",
           "warnings": [
             {
@@ -4275,9 +4275,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "190020",
+              "code": "22",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "1920200",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "1920200",
+              "code": "22",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -4302,6 +4314,12 @@
               "areaCode": "1942900",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "1942900",
+              "code": "22",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -9108,17 +9126,102 @@
       "entries": [
         {
           "sourceCode": "460040",
-          "level": "none",
-          "headline": "注意報を解除します。",
-          "reportDatetime": "2026-04-30T16:02:00+09:00",
+          "level": "advisory",
+          "headline": "奄美地方では、１日未明から高波に注意してください。",
+          "reportDatetime": "2026-04-30T19:53:00+09:00",
           "publishingOffice": "名瀬測候所",
-          "warnings": []
+          "warnings": [
+            {
+              "areaCode": "460040",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4622200",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4630400",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4652300",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4652400",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4652500",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4652700",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4652900",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4653000",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4653100",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4653200",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4653300",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4653400",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4653500",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            }
+          ]
         },
         {
           "sourceCode": "460100",
           "level": "advisory",
-          "headline": "種子島・屋久島地方では１日未明から、薩摩、大隅地方では１日未明から１日夕方まで、強風に注意してください。種子島・屋久島地方では、３０日夜のはじめ頃まで高波に注意してください。",
-          "reportDatetime": "2026-04-30T16:04:00+09:00",
+          "headline": "薩摩、大隅、種子島・屋久島地方では、１日未明から１日夜のはじめ頃まで強風に注意してください。種子島・屋久島地方では、１日明け方から高波に注意してください。",
+          "reportDatetime": "2026-04-30T19:52:00+09:00",
           "publishingOffice": "鹿児島地方気象台",
           "warnings": [
             {
