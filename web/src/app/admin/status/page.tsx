@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 const VALID_KEY = "kaneda2026";
-const REPORT_FILENAME = "comprehensive-status-report-2026-04-30.md";
+const REPORT_FILENAME = "comprehensive-status-report-2026-05-01.md";
 
 interface Props {
   searchParams: Promise<{ key?: string }>;
@@ -34,7 +34,7 @@ export default async function AdminStatusPage({ searchParams }: Props) {
         <div className="max-w-3xl mx-auto">
           <p className="text-xs text-slate-400 mb-1">ANZEN AI 内部文書 / noindex</p>
           <h1 className="text-xl font-bold leading-snug">完全版 現状把握レポート</h1>
-          <p className="text-sm text-slate-300 mt-1">2026-04-30 / 全12セクション</p>
+          <p className="text-sm text-slate-300 mt-1">2026-05-01 / 全12セクション + 付録</p>
         </div>
       </div>
 
