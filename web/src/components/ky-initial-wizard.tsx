@@ -19,6 +19,7 @@ export function KyInitialWizard({ onApply }: Props) {
   useEffect(() => {
     try {
       const dismissed = localStorage.getItem(DISMISSED_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント直後の一度きりのlocalStorage hydration
       if (!dismissed) setOpen(true);
     } catch {
       // localStorage unavailable: default to shown

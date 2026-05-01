@@ -63,6 +63,7 @@ export function CertQuizResult({
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorageからの結果データhydration
     setSession(loadSession(slug));
     setPlan(loadPlan());
     setHydrated(true);

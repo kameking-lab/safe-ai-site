@@ -19,6 +19,7 @@ export function KyIndustryPresetPicker({ onApply }: Props) {
     try {
       const saved = localStorage.getItem(LAST_PRESET_KEY);
       if (saved && getPresetById(saved)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント直後の一度きりのlocalStorage hydration
         setLastPresetId(saved);
       }
     } catch {

@@ -69,6 +69,7 @@ export function CommandPalette({ onClose }: Props) {
 
   // Reset selection when results change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 検索結果が変わったタイミングでハイライト位置をリセット
     setSelectedIdx(0);
   }, [debouncedQuery, activeCategory]);
 

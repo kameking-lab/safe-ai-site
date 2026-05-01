@@ -71,11 +71,11 @@ const FEEDBACK_COLORS = ["#1a7a4c", "#0891b2", "#dc2626", "#7c3aed", "#ea580c", 
 export function StatsDashboard() {
   const dailyUu = useMemo(() => buildDailyUu(), []);
   const cumulativeUu = useMemo(() => {
-    let acc = 0;
-    return MONTHLY_UU.map((m) => {
-      acc += m.uu;
-      return { month: m.month, total: acc };
-    });
+    return MONTHLY_UU.reduce<Array<{ month: string; total: number }>>((arr, m) => {
+      const prev = arr.length > 0 ? arr[arr.length - 1].total : 0;
+      arr.push({ month: m.month, total: prev + m.uu });
+      return arr;
+    }, []);
   }, []);
 
   const contentStats = useMemo(

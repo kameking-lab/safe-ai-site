@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { AlertTriangle, BookOpen, Database, ExternalLink, Gauge } from "lucide-react";
 import {
   regulatoryLabels,
@@ -32,7 +32,7 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
     chemical.flags.carcinogenic || supplemental?.carcinogenic === true;
 
   const [measured, setMeasured] = useState("");
-  const verdict = useMemo(() => evaluateConcentration(measured, limit8h), [measured, limit8h]);
+  const verdict = evaluateConcentration(measured, limit8h);
 
   return (
     <div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-4">

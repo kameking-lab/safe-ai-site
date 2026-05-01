@@ -23,6 +23,7 @@ export function FuriganaProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント直後の一度きりのlocalStorage hydration
       if (localStorage.getItem(STORAGE_KEY) === "true") setFuriganaEnabled(true);
     } catch {
       // localStorage unavailable

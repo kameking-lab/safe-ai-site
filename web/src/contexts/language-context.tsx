@@ -83,6 +83,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     try {
       const stored = localStorage.getItem("language");
       if (isLanguage(stored)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント直後の一度きりのlocalStorage hydration
         setLanguageState(stored);
         applyHtmlLang(stored);
       }

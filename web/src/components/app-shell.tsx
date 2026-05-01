@@ -191,6 +191,7 @@ export function AppShell({ children, user }: AppShellProps) {
   // SSR/hydration対策: マウント後にのみ localStorage 依存のUI(言語セレクタ含む)を描画
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- SSRフラッシュ防止のhydrationゲート
     setMounted(true);
   }, []);
 
@@ -199,6 +200,7 @@ export function AppShell({ children, user }: AppShellProps) {
 
   useEffect(() => {
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント直後の一度きりのlocalStorage hydration
       if (localStorage.getItem(LARGE_FONT_KEY) === "true") setLargeFontEnabled(true);
     } catch {
       // localStorage unavailable
@@ -231,6 +233,7 @@ export function AppShell({ children, user }: AppShellProps) {
 
   useEffect(() => {
     try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント直後の一度きりのlocalStorage hydration
       if (localStorage.getItem(HIGH_CONTRAST_KEY) === "true") setHighContrastEnabled(true);
     } catch {
       // localStorage unavailable

@@ -63,6 +63,7 @@ export function CertQuizPlayer({ slug, certName, questions }: CertQuizPlayerProp
   const [session, setSession] = useState<SessionAnswer[]>([]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント直後の一度きりのlocalStorage hydration
     setPlan(loadPlan());
   }, []);
 

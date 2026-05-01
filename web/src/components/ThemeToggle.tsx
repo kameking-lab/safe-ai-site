@@ -25,6 +25,7 @@ export function ThemeToggle({
 }) {
   const { theme, resolvedTheme, cycleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- SSRフラッシュ防止のhydrationゲート
   useEffect(() => setMounted(true), []);
 
   const dims =
