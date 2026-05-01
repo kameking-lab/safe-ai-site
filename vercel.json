@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "npm ci",
-  "ignoreCommand": "bash -c 'if [[ \"$VERCEL_GIT_COMMIT_MESSAGE\" == *\"[skip ci]\"* ]]; then exit 0; else exit 1; fi'",
+  "ignoreCommand": "bash -c 'subject=$(echo \"$VERCEL_GIT_COMMIT_MESSAGE\" | head -n1); if [[ \"$subject\" == *\"[skip ci]\"* ]]; then exit 0; else exit 1; fi'",
   "crons": [
     {
       "path": "/api/seo/notify-search-console",
