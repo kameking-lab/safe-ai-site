@@ -1,17 +1,17 @@
 import type { Metadata } from "next";
-import { HomeScreen } from "@/components/home-screen";
+import { NewHomeHero } from "@/components/new-home-hero";
+import { FlagshipGrid } from "@/components/flagship-grid";
 import { MorningDigest } from "@/components/morning-digest";
-import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { ogImageUrl } from "@/lib/og-url";
 
 export const metadata: Metadata = {
   title: { absolute: "ANZEN AI｜現場の安全を、AIで変える。" },
   description:
-    "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。建設・製造・林業・運輸・医療福祉の安全担当者を支援します。",
+    "労働安全衛生のAI・DX活用研究プロジェクト。安全衛生日誌・KY簡易作成・化学物質RA・サイネージ・法改正・安衛法AIチャット・重大事故ニュースの7つの主要機能で現場運用を支援します。",
   openGraph: {
     title: "ANZEN AI｜現場の安全を、AIで変える。",
     description:
-      "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。建設・製造・林業・運輸・医療福祉の安全担当者を支援します。",
+      "労働安全衛生のAI・DX活用研究プロジェクト。7つの主要機能で建設・製造・運輸・医療福祉・林業の現場運用を支援します。",
     images: [{ url: ogImageUrl("現場の安全を、AIで変える。"), width: 1200, height: 630 }],
   },
   twitter: {
@@ -22,18 +22,14 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <HomeScreen variant="portal">
-      <TranslatedPageHeader
-        titleJa="現場の安全情報を、すばやく確認"
-        titleEn="Quick access to workplace safety information"
-        descriptionJa="法改正・現場リスク・事故DB・KY用紙をまとめて確認"
-        descriptionEn="Review law updates, field risks, accident DB, and KY forms in one place"
-        iconName="Shield"
-        iconColor="emerald"
-      />
-      <div className="mt-4">
+    <main>
+      <NewHomeHero />
+      <div className="px-4 py-8 sm:py-10">
+        <FlagshipGrid />
+      </div>
+      <div className="mx-auto max-w-7xl px-4 pb-10">
         <MorningDigest />
       </div>
-    </HomeScreen>
+    </main>
   );
 }

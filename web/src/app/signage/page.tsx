@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
 import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture-warning-map";
+import { SignageFloorPlan } from "@/components/signage/signage-floor-plan";
 import { SignageHeader } from "@/components/signage/signage-header";
 import { SignageFeaturedGoods } from "@/components/signage/signage-featured-goods";
 import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
@@ -57,6 +58,8 @@ export default function SignagePage() {
   });
   const [bundle, setBundle] = useState<SignageDataApiResponse | null>(null);
   const [bundleStatus, setBundleStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  // 初期表示は現場図面サンプル。地図モードに切り替えると気象庁の警報マップを表示
+  const [displayMode, setDisplayMode] = useState<"floorplan" | "map">("floorplan");
 
   const selectedLocation = useMemo(
     () => getSignageLocationById(selectedLocationId) ?? getSignageLocationById("tokyo-shinjuku")!,
@@ -270,31 +273,90 @@ export default function SignagePage() {
           <div className="flex flex-col gap-2 overflow-x-hidden rounded-2xl border border-slate-600 bg-slate-950/60 p-2 sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
             <div className="flex shrink-0 flex-wrap items-start justify-between gap-2">
               <div>
-                <p className="text-xs font-bold text-slate-100 sm:text-sm lg:text-base">気象庁 注意報・警報（都道府県）</p>
+                <p className="text-xs font-bold text-slate-100 sm:text-sm lg:text-base">
+                  {displayMode === "floorplan" ? "現場レイアウト" : "気象庁 注意報・警報（都道府県）"}
+                </p>
                 <p className="mt-0.5 text-[9px] text-slate-400 sm:text-[10px]">
-                  地図は{" "}
-                  <a href="https://www.jma.go.jp/bosai/warning/" className="text-emerald-400 underline" target="_blank" rel="noreferrer">
-                    気象庁 警報・注意報
-                  </a>
-                  の公開JSONを約1時間キャッシュして描画しています。
+                  {displayMode === "floorplan" ? (
+                    <>図面サンプルを表示中。気象警報は右サイドパネルで確認できます。</>
+                  ) : (
+                    <>
+                      地図は{" "}
+                      <a href="https://www.jma.go.jp/bosai/warning/" className="text-emerald-400 underline" target="_blank" rel="noreferrer">
+                        気象庁 警報・注意報
+                      </a>
+                      の公開JSONを約1時間キャッシュして描画しています。
+                    </>
+                  )}
                 </p>
               </div>
-              <a
-                href={jmaLink}
-                target="_blank"
-                rel="noreferrer"
-                className="shrink-0 flex items-center rounded-lg border border-sky-600/60 bg-sky-950/50 px-2 py-2.5 text-[9px] font-semibold text-sky-200 hover:bg-sky-900/50 sm:text-[10px] min-h-[44px]"
-              >
-                選択地点の詳細（気象庁）→
-              </a>
+              <div className="flex shrink-0 items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setDisplayMode("floorplan")}
+                  className={`flex items-center rounded-lg border px-2 py-2.5 text-[10px] font-semibold min-h-[44px] ${
+                    displayMode === "floorplan"
+                      ? "border-emerald-500 bg-emerald-700 text-white"
+                      : "border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800"
+                  }`}
+                  aria-pressed={displayMode === "floorplan"}
+                >
+                  図面
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDisplayMode("map")}
+                  className={`flex items-center rounded-lg border px-2 py-2.5 text-[10px] font-semibold min-h-[44px] ${
+                    displayMode === "map"
+                      ? "border-emerald-500 bg-emerald-700 text-white"
+                      : "border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800"
+                  }`}
+                  aria-pressed={displayMode === "map"}
+                >
+                  地図
+                </button>
+                <a
+                  href={jmaLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center rounded-lg border border-sky-600/60 bg-sky-950/50 px-2 py-2.5 text-[9px] font-semibold text-sky-200 hover:bg-sky-900/50 sm:text-[10px] min-h-[44px]"
+                >
+                  気象庁 →
+                </a>
+              </div>
             </div>
-            {bundle?.jmaHeadline ? (
+
+            {/* 警報サイドパネル（図面モード時のみ表示） */}
+            {displayMode === "floorplan" && (
+              <div className="shrink-0 rounded-lg border border-amber-700/50 bg-amber-950/40 p-2 sm:p-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-300 sm:text-xs">本日の気象警報</p>
+                {bundle?.jmaHeadline ? (
+                  <p className="mt-1 text-[11px] leading-snug text-amber-100 sm:text-sm">{bundle.jmaHeadline}</p>
+                ) : (
+                  <p className="mt-1 text-[10px] text-amber-200/80 sm:text-xs">現在、選択地点に発表中の警報はありません。</p>
+                )}
+                {selectedLocation.jmaCityCode && bundle?.selectedWarnings && bundle.selectedWarnings.length > 0 ? (
+                  <ul className="mt-2 space-y-0.5 text-[10px] text-amber-100 sm:text-xs">
+                    {bundle.selectedWarnings.map((w, i) => (
+                      <li key={`${w.code}-${i}`}>
+                        ・{hintForJmaCode(w.code)}（{w.status}）
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                {bundle?.jmaReportTime ? (
+                  <p className="mt-2 text-[9px] text-amber-300/70">気象庁データ時刻: {bundle.jmaReportTime}</p>
+                ) : null}
+              </div>
+            )}
+
+            {displayMode === "map" && bundle?.jmaHeadline ? (
               <p className="shrink-0 text-[11px] leading-snug text-amber-100 sm:text-sm">{bundle.jmaHeadline}</p>
             ) : null}
-            {bundle?.jmaReportTime ? (
+            {displayMode === "map" && bundle?.jmaReportTime ? (
               <p className="text-[9px] text-slate-500">気象庁データ時刻: {bundle.jmaReportTime}</p>
             ) : null}
-            {selectedLocation.jmaCityCode && bundle?.selectedWarnings && bundle.selectedWarnings.length > 0 ? (
+            {displayMode === "map" && selectedLocation.jmaCityCode && bundle?.selectedWarnings && bundle.selectedWarnings.length > 0 ? (
               <ul className="shrink-0 space-y-0.5 text-[10px] text-slate-200">
                 {bundle.selectedWarnings.map((w, i) => (
                   <li key={`${w.code}-${i}`}>
@@ -304,7 +366,11 @@ export default function SignagePage() {
               </ul>
             ) : null}
 
-            <JapanPrefectureWarningMap levelsByIso={prefectureLevels} highlightIso={selectedLocation.prefectureIso} />
+            {displayMode === "floorplan" ? (
+              <SignageFloorPlan />
+            ) : (
+              <JapanPrefectureWarningMap levelsByIso={prefectureLevels} highlightIso={selectedLocation.prefectureIso} />
+            )}
 
             <SignageHourlyStrip
               hourly={bundle?.hourly ?? []}

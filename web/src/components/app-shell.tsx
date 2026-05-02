@@ -32,13 +32,13 @@ import {
   Briefcase,
   Handshake,
   ListChecks,
-  Building2,
   Sun,
   Moon,
   BarChart3,
   Sparkles,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
+import { FlagshipNav } from "@/components/flagship-nav";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { ShareButtons } from "@/components/share-buttons";
 import { UserMenu } from "@/components/user-menu";
@@ -76,7 +76,6 @@ const PAID_SERVICE_ITEMS: NavItem[] = [
   { id: "education", label: "特別教育", href: "/education", icon: GraduationCap },
   { id: "consulting", label: "月額顧問", href: "/consulting", icon: Handshake },
   { id: "wizard", label: "コンプラ診断", href: "/wizard", icon: ListChecks, badge: "NEW" },
-  { id: "cases", label: "導入事例", href: "/cases", icon: Building2 },
 ];
 
 const NAV_CATEGORIES: NavCategory[] = [
@@ -625,6 +624,7 @@ export function AppShell({ children, user }: AppShellProps) {
           </button>
         </div>
         <EnglishBetaBanner />
+        <FlagshipNav />
         <main className="flex flex-1 flex-col">
           <div className="mx-auto w-full max-w-7xl flex-1">{children}</div>
         </main>

@@ -55,7 +55,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/glossary", lastModified: "2026-04-01", priority: 0.7, changeFrequency: "monthly" },
     { url: "/pdf", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
     { url: "/safety-diary", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
-    { url: "/bear-map", lastModified: "2026-04-19", priority: 0.6, changeFrequency: "daily" },
     { url: "/notifications", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
     { url: "/goods", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
     { url: "/about", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "yearly" },
@@ -90,8 +89,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.4,
     changeFrequency: "monthly",
   }));
-
-  // ペルソナ事例ページは sitemap-cases.xml に分離
 
   return [...filtered, ...circularPages, ...articlePages, ...equipmentPages].map(
     ({ url, lastModified, priority, changeFrequency }) => ({

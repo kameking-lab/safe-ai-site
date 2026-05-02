@@ -329,22 +329,12 @@ export const FEATURES: FeatureItem[] = [
     tags: ["運営者"],
   },
   {
-    slug: "about-cases",
-    title: "導入事例",
-    summary: "実際の導入事例とビフォーアフター",
-    description:
-      "建設・製造・運輸・医療福祉など、各業種での導入事例とビフォーアフターを紹介します。",
-    href: "/cases",
-    category: "management",
-    tags: ["事例"],
-  },
-  {
     slug: "community-cases",
     title: "利用者の声",
     summary: "現場担当者からのフィードバック",
     description:
       "実際にANZEN AIを使っている現場担当者・安全管理者の声を集約。改善要望・追加機能の提案窓口も。",
-    href: "/cases",
+    href: "/community-cases",
     category: "management",
     tags: ["利用者"],
   },

@@ -39,11 +39,27 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   // /feedback は /contact に一本化（恒久リダイレクト）
+  // /cases 系はサンプル事例ページとして廃止 → トップへ
   async redirects() {
     return [
       {
         source: "/feedback",
         destination: "/contact?category=demo",
+        permanent: true,
+      },
+      {
+        source: "/cases",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/cases/:slug",
+        destination: "/",
+        permanent: true,
+      },
+      {
+        source: "/bear-map",
+        destination: "/risk",
         permanent: true,
       },
     ];
