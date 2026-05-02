@@ -19,6 +19,7 @@ import {
   type SearchItem,
   type SearchCategory,
 } from '@/lib/search-index';
+import { trackEvent } from '@/components/Analytics';
 
 const CATEGORIES: SearchCategory[] = ['notice', 'chemical', 'quiz', 'education', 'accident'];
 
@@ -83,10 +84,11 @@ export function CommandPalette({ onClose }: Props) {
 
   const navigate = useCallback(
     (item: SearchItem) => {
+      trackEvent("search_query", { query: debouncedQuery, result_count: results.length });
       router.push(item.url);
       onClose();
     },
-    [router, onClose],
+    [router, onClose, debouncedQuery, results.length],
   );
 
   // Keyboard navigation

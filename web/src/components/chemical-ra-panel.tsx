@@ -22,6 +22,7 @@ import type {
   PpeRecommendation,
   SafetyMeasure,
 } from "@/app/api/chemical-ra/route";
+import { trackEvent } from "@/components/Analytics";
 
 // ────────────────────────────────────────────────────────────
 // GHSピクトグラム（絵文字ベース）
@@ -282,6 +283,7 @@ export function ChemicalRaPanel() {
     setErrorHint(null);
     setResult(null);
 
+    const flowStartAt = Date.now();
     const MAX_RETRIES = 3;
     const dur = durationHours.trim() ? parseFloat(durationHours) : undefined;
     const body = JSON.stringify({
@@ -314,6 +316,7 @@ export function ChemicalRaPanel() {
           setErrorHint(hint);
         } else {
           setResult(data);
+          trackEvent("flow_complete", { flow_type: "chemical-ra", duration: Math.round((Date.now() - flowStartAt) / 1000) });
           if (data.aiStatus && data.aiStatus !== "ok") {
             const statusLabel: Record<string, string> = {
               apikey_missing: "GEMINI_API_KEY未設定",

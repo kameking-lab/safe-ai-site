@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Mail } from "lucide-react";
+import { trackEvent } from "@/components/Analytics";
 
 const PREFECTURES = [
   "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県",
@@ -37,6 +38,7 @@ export function SubscribeForm() {
         throw new Error(data.error ?? "登録に失敗しました。");
       }
       setStatus("success");
+      trackEvent("newsletter_signup", { source_page: "notifications" });
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "エラーが発生しました。");
       setStatus("error");

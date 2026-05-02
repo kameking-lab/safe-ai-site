@@ -13,6 +13,7 @@ import {
   saveChatHistory,
   type StoredChatMessage,
 } from "@/lib/chat-history";
+import { trackEvent } from "@/components/Analytics";
 
 type ChatMessage = {
   id: string;
@@ -176,6 +177,8 @@ export function ChatbotPanel() {
   async function handleSend(question?: string) {
     const text = (question ?? input).trim();
     if (!text || isSending) return;
+
+    trackEvent("chatbot_message", { message_length: text.length });
 
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
