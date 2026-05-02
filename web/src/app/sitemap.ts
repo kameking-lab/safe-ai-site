@@ -91,8 +91,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
   }));
 
-  // ペルソナ事例ページは sitemap-cases.xml に分離
-
   return [...filtered, ...circularPages, ...articlePages, ...equipmentPages].map(
     ({ url, lastModified, priority, changeFrequency }) => ({
       url: `${base}${url}`,

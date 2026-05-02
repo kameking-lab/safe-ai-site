@@ -9,17 +9,6 @@ import {
   categoryColorClasses,
   type FeatureCategoryId,
 } from "@/data/features-catalog";
-import casesData from "@/data/cases.json";
-
-type CaseEntry = {
-  slug: string;
-  company: string;
-  industry: string;
-  useCase: string;
-  headline: string;
-  results?: string[];
-  tags?: string[];
-};
 
 const QUICK_LINKS = [
   { href: "/features/quick-tour", label: "5分ツアー", emoji: "⏱" },
@@ -35,10 +24,6 @@ export function FeaturesIndexClient() {
     if (activeCategory === "all") return FEATURES;
     return FEATURES.filter((f) => f.category === activeCategory);
   }, [activeCategory]);
-
-  const latestCases: CaseEntry[] = useMemo(() => {
-    return (casesData as CaseEntry[]).slice(0, 3);
-  }, []);
 
   return (
     <div className="px-4 py-6 sm:py-10">
@@ -169,68 +154,6 @@ export function FeaturesIndexClient() {
           })}
         </div>
       </section>
-
-      {/* 利用者の声（最新3件） */}
-      {latestCases.length > 0 && (
-        <section className="mx-auto mt-12 max-w-6xl">
-          <div className="mb-4 flex items-end justify-between">
-            <div>
-              <p className="text-xs font-bold tracking-widest text-emerald-700">USER VOICES</p>
-              <h2 className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">利用者の声・導入事例</h2>
-            </div>
-            <Link
-              href="/cases"
-              className="text-sm font-semibold text-emerald-700 hover:underline"
-            >
-              すべて見る →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            {latestCases.map((c) => (
-              <Link
-                key={c.slug}
-                href={`/cases/${c.slug}`}
-                className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <p className="text-[11px] font-bold tracking-widest text-emerald-700">
-                  {c.industry}
-                </p>
-                <p className="mt-1 text-sm font-bold text-slate-900">{c.company}</p>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                  「{c.headline}」
-                </p>
-                {c.results && c.results.length > 0 && (
-                  <ul className="mt-3 space-y-1 border-t border-slate-100 pt-2 text-[11px] text-slate-600">
-                    {c.results.slice(0, 2).map((r) => (
-                      <li key={r} className="flex items-start gap-1">
-                        <span aria-hidden className="text-emerald-600">✓</span>
-                        <span className="line-clamp-2">{r}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <div className="mt-auto flex items-center justify-between gap-2 pt-3">
-                  <span className="inline-block rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-700">
-                    {c.useCase}
-                  </span>
-                  <span className="text-[11px] font-bold text-emerald-700">詳しく →</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-            <p className="text-xs text-emerald-900">
-              ご利用中の方へ：改善提案・追加機能の要望は随時受付中です。
-            </p>
-            <Link
-              href="/contact"
-              className="inline-flex items-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
-            >
-              ご意見を送る →
-            </Link>
-          </div>
-        </section>
-      )}
 
       {/* CTA */}
       <section className="mx-auto mt-12 max-w-5xl rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 text-center sm:p-8">
