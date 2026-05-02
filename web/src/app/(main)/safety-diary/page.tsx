@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import { SafetyDiaryPanel } from "@/components/safety-diary-panel";
+import { DiaryListClient } from "@/components/safety-diary/diary-list-client";
 import { ogImageUrl } from "@/lib/og-url";
-
 import { PageJsonLd } from "@/components/page-json-ld";
-const _title = "安全衛生日誌 電子記録ツール";
+
+const _title = "安全衛生日誌 V3 ｜ 必須5項目で3〜5分入力 + 月次まとめ";
 const _desc =
-  "現場の安全活動を記録する安全衛生日誌。行・列・項目を自由に編集でき、ブラウザに保存。建設・製造現場の安全管理記録に。";
+  "業種別プリセット（建設/製造/医療福祉/運輸/IT）に対応した安全衛生日誌。必須5項目を3〜5分で入力し、任意8項目で詳細化。月次まとめで延労働人数・KY実施率・ヒヤリ件数を可視化。";
 
 export const metadata: Metadata = {
   title: _title,
   description: _desc,
+  alternates: { canonical: "/safety-diary" },
   openGraph: {
     title: `${_title}｜ANZEN AI`,
     description: _desc,
@@ -24,8 +25,12 @@ export const metadata: Metadata = {
 export default function SafetyDiaryPage() {
   return (
     <>
-      <PageJsonLd name="安全日報" description="日次の安全活動・KY項目・ヒヤリハットを記録。事業所単位で集計・PDF出力。" path="/safety-diary" />
-      <SafetyDiaryPanel />
+      <PageJsonLd
+        name="安全衛生日誌 V3"
+        description="必須5項目+任意8項目の現場日誌。月次まとめで類似事故・関連法改正をハイライト。"
+        path="/safety-diary"
+      />
+      <DiaryListClient />
     </>
   );
 }
