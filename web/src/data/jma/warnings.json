@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-02T03:53:51.783Z",
+  "fetchedAt": "2026-05-02T06:16:14.643Z",
   "byIso": {
     "JP-01": {
       "level": "warning",
@@ -3968,7 +3968,7 @@
           "sourceCode": "040000",
           "level": "warning",
           "headline": "宮城県では、２日夕方まで暴風に警戒してください。",
-          "reportDatetime": "2026-05-02T09:56:00+09:00",
+          "reportDatetime": "2026-05-02T14:56:00+09:00",
           "publishingOffice": "仙台管区気象台",
           "warnings": [
             {
@@ -3976,12 +3976,6 @@
               "code": "05",
               "status": "継続",
               "level": "warning"
-            },
-            {
-              "areaCode": "040010",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
             },
             {
               "areaCode": "040020",
@@ -3996,12 +3990,6 @@
               "level": "warning"
             },
             {
-              "areaCode": "0410001",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0410002",
               "code": "05",
               "status": "継続",
@@ -4014,34 +4002,16 @@
               "level": "warning"
             },
             {
-              "areaCode": "0420200",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0420300",
               "code": "05",
               "status": "継続",
               "level": "warning"
             },
             {
-              "areaCode": "0420300",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0420500",
               "code": "05",
               "status": "継続",
               "level": "warning"
-            },
-            {
-              "areaCode": "0420500",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
             },
             {
               "areaCode": "0420600",
@@ -4056,12 +4026,6 @@
               "level": "warning"
             },
             {
-              "areaCode": "0420700",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0420800",
               "code": "05",
               "status": "継続",
@@ -4074,22 +4038,10 @@
               "level": "warning"
             },
             {
-              "areaCode": "0420900",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0421100",
               "code": "05",
               "status": "継続",
               "level": "warning"
-            },
-            {
-              "areaCode": "0421100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
             },
             {
               "areaCode": "0421200",
@@ -4114,12 +4066,6 @@
               "code": "05",
               "status": "継続",
               "level": "warning"
-            },
-            {
-              "areaCode": "0421400",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
             },
             {
               "areaCode": "0421501",
@@ -4188,22 +4134,10 @@
               "level": "warning"
             },
             {
-              "areaCode": "0436100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0436200",
               "code": "05",
               "status": "継続",
               "level": "warning"
-            },
-            {
-              "areaCode": "0436200",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
             },
             {
               "areaCode": "0440100",
@@ -4212,34 +4146,16 @@
               "level": "warning"
             },
             {
-              "areaCode": "0440100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0440400",
               "code": "05",
               "status": "継続",
               "level": "warning"
             },
             {
-              "areaCode": "0440400",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0440600",
               "code": "05",
               "status": "継続",
               "level": "warning"
-            },
-            {
-              "areaCode": "0440600",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
             },
             {
               "areaCode": "0442101",
@@ -4296,22 +4212,10 @@
               "level": "warning"
             },
             {
-              "areaCode": "0458100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0460600",
               "code": "05",
               "status": "継続",
               "level": "warning"
-            },
-            {
-              "areaCode": "0460600",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
             }
           ]
         }
