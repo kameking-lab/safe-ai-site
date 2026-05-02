@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-02T12:36:52.505Z",
+  "fetchedAt": "2026-05-02T14:00:31.647Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -3141,15 +3141,118 @@
       ]
     },
     "JP-38": {
-      "level": "none",
+      "level": "advisory",
       "entries": [
         {
           "sourceCode": "380000",
-          "level": "none",
-          "headline": "注意報を解除します。",
-          "reportDatetime": "2026-05-01T20:38:00+09:00",
+          "level": "advisory",
+          "headline": "南予では、３日朝から３日夜遅くまで強風や高波に注意してください。",
+          "reportDatetime": "2026-05-02T22:11:00+09:00",
           "publishingOffice": "松山地方気象台",
-          "warnings": []
+          "warnings": [
+            {
+              "areaCode": "380030",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "380030",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3820300",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3820300",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3820400",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3820400",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3820700",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3820700",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3821400",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3821400",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3842200",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3844200",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3844200",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3848400",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3848800",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3850600",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "3850600",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            }
+          ]
         }
       ]
     },
