@@ -1,4 +1,6 @@
 import { allLawArticles } from "@/data/laws";
+import { mhlwNotices } from "@/data/mhlw-notices";
+import equipmentDb from "@/data/safety-equipment-db.json";
 import { realAccidentCases } from "@/data/mock/real-accident-cases";
 import { realAccidentCasesExtra } from "@/data/mock/real-accident-cases-extra";
 import { realAccidentCasesExtra2 } from "@/data/mock/real-accident-cases-extra2";
@@ -11,6 +13,9 @@ const _siteCuratedCaseCount =
   realAccidentCasesExtra2.length +
   realAccidentCasesExtra3.length +
   realAccidentCasesDiverseIndustries.length;
+
+const _noticeCount = mhlwNotices.length;
+const _equipmentItemCount = (equipmentDb as { items: unknown[] }).items?.length ?? 0;
 
 /**
  * サイト全体で表示する KPI 数字を一元管理。
@@ -37,6 +42,10 @@ export const SITE_STATS = {
   ragArticleCount: allLawArticles.length.toLocaleString(),
   /** 対応教育の種類数（特別教育・法定・労働衛生、要相談含む） */
   specialEdKinds: "12+",
+  /** 厚労省 通達・告示・指針の収録件数（mhlw-notices.ts） */
+  mhlwNoticeCount: _noticeCount.toLocaleString(),
+  /** 保護具AIファインダーが扱う商品点数（safety-equipment-db.json） */
+  equipmentItemCount: _equipmentItemCount.toLocaleString(),
 } as const;
 
 /**
@@ -95,5 +104,14 @@ export const SITE_STATS_META: Record<
   specialEdKinds: {
     source: "安衛則第36条／酸欠則／粉じん則ほか（要相談含む）",
     asOf: "2026-04",
+  },
+  mhlwNoticeCount: {
+    source: "厚労省・中央労働災害防止協会 安全衛生情報センター（mhlw-notices.ts 自動生成）",
+    sourceUrl: "https://www.jaish.gr.jp/user/anzen/hor/tsutatsu.html",
+    asOf: "2026-05",
+  },
+  equipmentItemCount: {
+    source: "保護具AIファインダー DB（safety-equipment-db.json）",
+    asOf: "2026-05",
   },
 };

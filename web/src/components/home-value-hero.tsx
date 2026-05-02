@@ -7,11 +7,11 @@ import { SITE_STATS, SITE_STATS_META, type SiteStatKey } from "@/data/site-stats
 import { PersonaEntry } from "@/components/PersonaEntry";
 import { PAID_MODE } from "@/lib/paid-mode";
 
+// ファーストビュー数値訴求: 「通達・事例・商品」の3軸でサイト規模を即提示
 const STATS: { key: SiteStatKey; value: string; label: string; hint: string }[] = [
-  { key: "accidentDbCount", value: SITE_STATS.accidentDbCount, label: "厚労省 事故DB収録件数", hint: "全件検索対応" },
-  { key: "fatalDisastersR5", value: SITE_STATS.fatalDisastersR5, label: "死亡労災（R5・建設業）", hint: "厚労省統計" },
-  { key: "lawArticleCount", value: SITE_STATS.lawArticleCount, label: "法令条文データ", hint: "RAG検索で即照合" },
-  { key: "specialEdKinds", value: SITE_STATS.specialEdKinds, label: "特別教育 対応種別", hint: "過去問クイズ付" },
+  { key: "mhlwNoticeCount", value: SITE_STATS.mhlwNoticeCount, label: "厚労省 通達・告示", hint: "拘束力レベル付き" },
+  { key: "accidents10yCount", value: SITE_STATS.accidents10yCount, label: "事故事例（10年統合）", hint: "業種・原因別検索" },
+  { key: "equipmentItemCount", value: SITE_STATS.equipmentItemCount, label: "保護具DB点数", hint: "JIS規格・国家検定品" },
 ];
 
 // 主役6機能（KY / AIチャット / 化学物質RA / 事故DB / 保護具AI / ダイジェスト）
@@ -108,7 +108,7 @@ export function HomeValueHero() {
                 </svg>
               </span>
               <p className="text-xs font-semibold uppercase tracking-widest text-green-200">
-                ANZEN AI — 労働安全コンサルタント（登録番号260022）監修
+                労働安全衛生のAI・DX活用研究プロジェクト
               </p>
             </div>
             <h2 className="mt-2 text-2xl font-bold leading-snug sm:text-3xl">
@@ -117,13 +117,35 @@ export function HomeValueHero() {
             </h2>
             <p className="mt-3 text-sm leading-6 text-green-100 sm:text-base">
               建設・製造・介護・林業・運輸の現場向け。
-              朝礼KY・法改正・事故DB・Eラーニングを1つのポータルに集約した
-              <strong className="text-white">労働安全 × AI・DX の研究・実証プロジェクト</strong>
-              として、すべての機能を無料で公開しています。
+              <strong className="text-white">保護具AIファインダー・化学物質RA・KY支援</strong>
+              を中心に、通達・事故・法令を1つのポータルに集約。
+              労働安全コンサルタント（登録番号260022）監修のもと、すべての機能を無料で公開しています。
             </p>
 
-            {/* 統計バッジ — 出典・取得日をtitle属性で開示 */}
-            <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {/* 主要機能ボタン3つ — 保護具AI / 化学物質RA / KY */}
+            <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <Link
+                href="/equipment-finder"
+                className="rounded-lg bg-white/95 px-4 py-3 text-center text-sm font-bold text-[#1a7a4c] shadow hover:bg-white transition-colors"
+              >
+                🛡 保護具AIで探す
+              </Link>
+              <Link
+                href="/chemical-ra"
+                className="rounded-lg bg-white/95 px-4 py-3 text-center text-sm font-bold text-[#1a7a4c] shadow hover:bg-white transition-colors"
+              >
+                ⚗️ 化学物質RA
+              </Link>
+              <Link
+                href="/ky"
+                className="rounded-lg bg-white/95 px-4 py-3 text-center text-sm font-bold text-[#1a7a4c] shadow hover:bg-white transition-colors"
+              >
+                📝 KY支援
+              </Link>
+            </div>
+
+            {/* 統計バッジ — 通達・事例・商品の3軸。出典・取得日をtitle属性で開示 */}
+            <div className="mt-5 grid grid-cols-3 gap-2">
               {STATS.map((s) => {
                 const meta = SITE_STATS_META[s.key];
                 const tooltip = `${meta.source}（取得: ${meta.asOf}）`;
