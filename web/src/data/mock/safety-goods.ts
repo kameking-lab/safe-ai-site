@@ -1,3 +1,5 @@
+import { appendAmazonTag, generateRakutenAffiliateUrl } from "@/lib/affiliate-url";
+
 export type SafetyGoodsCategory = {
   id: string;
   name: string;
@@ -84,7 +86,7 @@ export const safetyGoodsCategories: SafetyGoodsCategory[] = [
   },
 ];
 
-export const safetyGoodsItems: SafetyGoodsItem[] = [
+const rawSafetyGoodsItems: SafetyGoodsItem[] = [
   // 墜落制止用器具
   {
     id: "fg-001",
@@ -553,6 +555,15 @@ export const safetyGoodsItems: SafetyGoodsItem[] = [
     tags: ["酸欠防止", "硫化水素", "CO", "マンホール"],
   },
 ];
+
+// JSON 内の amazonUrl / rakutenUrl は生の検索URL。
+// NEXT_PUBLIC_AMAZON_AFFILIATE_ID / NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID が設定されていれば
+// データ層でアソシエイトタグ／hb.afl リダイレクトに包み、未設定時は原URLが返る。
+export const safetyGoodsItems: SafetyGoodsItem[] = rawSafetyGoodsItems.map((item) => ({
+  ...item,
+  amazonUrl: appendAmazonTag(item.amazonUrl),
+  rakutenUrl: generateRakutenAffiliateUrl(item.rakutenUrl),
+}));
 
 /** サイネージ向け：おすすめフラグ付きをカテゴリ横断で返す */
 export function getSignageFeaturedSafetyGoods(limit = 12): SafetyGoodsItem[] {

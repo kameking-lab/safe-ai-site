@@ -15,7 +15,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { amazonSearchUrl, rakutenSearchUrl } from "@/lib/affiliate";
+import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
 
 // ── PPEデータ ──────────────────────────────────────────────────
 const PPE_ITEMS = [
@@ -252,7 +252,7 @@ export default function WomenPage() {
                 {/* アフィリエイトリンク */}
                 <div className="grid grid-cols-2 gap-2">
                   <a
-                    href={amazonSearchUrl(item.searchQuery)}
+                    href={generateAmazonAffiliateUrl(item.searchQuery)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-1 rounded-lg bg-amber-500 py-2 text-xs font-bold text-white hover:bg-amber-600"
@@ -261,7 +261,7 @@ export default function WomenPage() {
                     Amazonで探す
                   </a>
                   <a
-                    href={rakutenSearchUrl(item.searchQuery)}
+                    href={generateRakutenSearchUrl(item.searchQuery)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-1 rounded-lg bg-rose-500 py-2 text-xs font-bold text-white hover:bg-rose-600"

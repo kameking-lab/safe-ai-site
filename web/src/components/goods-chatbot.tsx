@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Bot, Send, ShoppingBag } from "lucide-react";
 import { TextareaWithVoice } from "@/components/voice-input-field";
-import { amazonSearchUrl, rakutenSearchUrl } from "@/lib/affiliate";
+import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
 import type { GoodsRecommendation, GoodsChatResponse } from "@/app/api/goods-chat/route";
 
 type Message = {
@@ -33,7 +33,7 @@ function RecommendationCard({ item }: { item: GoodsRecommendation }) {
           )}
           <div className="mt-2 flex gap-1.5">
             <a
-              href={amazonSearchUrl(item.searchQuery)}
+              href={generateAmazonAffiliateUrl(item.searchQuery)}
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-md bg-amber-500 px-2 py-1 text-[10px] font-bold text-white hover:bg-amber-600"
@@ -41,7 +41,7 @@ function RecommendationCard({ item }: { item: GoodsRecommendation }) {
               Amazonで探す
             </a>
             <a
-              href={rakutenSearchUrl(item.searchQuery)}
+              href={generateRakutenSearchUrl(item.searchQuery)}
               target="_blank"
               rel="noopener noreferrer"
               className="rounded-md bg-rose-500 px-2 py-1 text-[10px] font-bold text-white hover:bg-rose-600"

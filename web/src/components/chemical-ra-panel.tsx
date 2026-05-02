@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Search, AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag, Gauge, Database } from "lucide-react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
-import { amazonSearchUrl, rakutenSearchUrl } from "@/lib/affiliate";
+import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
 import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
 import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
 import { SimpleMarkdown } from "@/components/simple-markdown";
@@ -73,7 +73,7 @@ function PpeCard({ ppe }: { ppe: PpeRecommendation }) {
           <p className="mt-0.5 text-xs text-slate-600">{ppe.specification}</p>
           <div className="mt-2 flex gap-1.5">
             <a
-              href={amazonSearchUrl(ppe.searchQuery)}
+              href={generateAmazonAffiliateUrl(ppe.searchQuery)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 rounded-md bg-amber-500 px-2 py-1 text-[10px] font-bold text-white hover:bg-amber-600"
@@ -82,7 +82,7 @@ function PpeCard({ ppe }: { ppe: PpeRecommendation }) {
               Amazon
             </a>
             <a
-              href={rakutenSearchUrl(ppe.searchQuery)}
+              href={generateRakutenSearchUrl(ppe.searchQuery)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 rounded-md bg-rose-500 px-2 py-1 text-[10px] font-bold text-white hover:bg-rose-600"

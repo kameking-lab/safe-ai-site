@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { getSignageFeaturedSafetyGoods, safetyGoodsCategories } from "@/data/mock/safety-goods";
-import { withAmazonAssociateTag, withRakutenAffiliateId } from "@/lib/affiliate-links";
 import { GoodsCategoryIcon } from "@/components/goods-icons";
 
 const SVG_CATEGORY_IDS = new Set(["fall-protection", "respiratory", "head-protection", "eye-ear-protection", "hand-foot"]);
@@ -45,7 +44,7 @@ export function SignageFeaturedGoods() {
                 <p className="text-[9px] text-amber-100/90">{item.price}</p>
                 <div className="mt-auto flex flex-wrap gap-1 pt-1">
                   <a
-                    href={withAmazonAssociateTag(item.amazonUrl)}
+                    href={item.amazonUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="rounded bg-amber-600/90 px-1.5 py-0.5 text-[9px] font-bold text-white hover:bg-amber-500"
@@ -53,7 +52,7 @@ export function SignageFeaturedGoods() {
                     Amazon
                   </a>
                   <a
-                    href={withRakutenAffiliateId(item.rakutenUrl)}
+                    href={item.rakutenUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="rounded border border-rose-400/60 px-1.5 py-0.5 text-[9px] font-bold text-rose-100 hover:bg-rose-950/50"
