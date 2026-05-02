@@ -41,7 +41,7 @@ function FlagshipNavDesktop() {
                 </p>
                 <ul>
                   {f.subItems.map((s) => (
-                    <li key={s.href}>
+                    <li key={`${s.label}-${s.href}`}>
                       <Link
                         href={s.href}
                         className="block rounded-md px-2 py-2 text-xs text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-emerald-300"
@@ -97,7 +97,7 @@ function FlagshipNavMobile() {
               {expanded && (
                 <ul className="bg-slate-50 px-4 py-2 dark:bg-slate-950">
                   {f.subItems.map((s) => (
-                    <li key={s.href}>
+                    <li key={`${s.label}-${s.href}`}>
                       <Link
                         href={s.href}
                         className="block rounded px-2 py-2 text-xs text-slate-700 hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800"

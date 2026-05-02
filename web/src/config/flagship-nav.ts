@@ -49,7 +49,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     subItems: [
       { label: "新規KY作成", href: "/ky" },
       { label: "PDFエクスポート", href: "/pdf" },
-      { label: "業種別プリセット", href: "/ky" },
+      { label: "業種別プリセット", href: "/ky#presets" },
     ],
   },
   {
@@ -63,7 +63,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     subItems: [
       { label: "新規アセスメント", href: "/chemical-ra" },
       { label: "化学物質検索", href: "/chemical-database" },
-      { label: "濃度基準値", href: "/chemical-database" },
+      { label: "濃度基準値", href: "/chemical-database#limits" },
     ],
   },
   {
