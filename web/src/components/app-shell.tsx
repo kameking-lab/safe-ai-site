@@ -38,6 +38,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
+import { FlagshipNav } from "@/components/flagship-nav";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { ShareButtons } from "@/components/share-buttons";
 import { UserMenu } from "@/components/user-menu";
@@ -623,6 +624,7 @@ export function AppShell({ children, user }: AppShellProps) {
           </button>
         </div>
         <EnglishBetaBanner />
+        <FlagshipNav />
         <main className="flex flex-1 flex-col">
           <div className="mx-auto w-full max-w-7xl flex-1">{children}</div>
         </main>

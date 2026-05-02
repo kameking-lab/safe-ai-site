@@ -42,8 +42,97 @@ export function Footer() {
           </div>
         )}
 
-        {/* 3カラム構成 */}
-        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+        {/* 4カラム構成 */}
+        <div className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {/* 主要機能（7目玉） */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              主要機能
+            </p>
+            <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+              <li>
+                <Link href="/safety-diary" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  安全衛生日誌
+                </Link>
+              </li>
+              <li>
+                <Link href="/ky" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  KY簡易作成
+                </Link>
+              </li>
+              <li>
+                <Link href="/chemical-ra" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  化学物質RA
+                </Link>
+              </li>
+              <li>
+                <Link href="/signage" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  サイネージ
+                </Link>
+              </li>
+              <li>
+                <Link href="/laws" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  法改正一覧
+                </Link>
+              </li>
+              <li>
+                <Link href="/chatbot" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  安衛法AIチャット
+                </Link>
+              </li>
+              <li>
+                <Link href="/accidents" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  重大事故ニュース
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* 関連データ */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              関連データ
+            </p>
+            <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+              <li>
+                <Link href="/equipment-finder" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  保護具AIファインダー
+                </Link>
+              </li>
+              <li>
+                <Link href="/chemical-database" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  化学物質検索
+                </Link>
+              </li>
+              <li>
+                <Link href="/circulars" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  通達・告示
+                </Link>
+              </li>
+              <li>
+                <Link href="/risk" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  気象リスク
+                </Link>
+              </li>
+              <li>
+                <Link href="/e-learning" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  Eラーニング
+                </Link>
+              </li>
+              <li>
+                <Link href="/glossary" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  用語集
+                </Link>
+              </li>
+              <li>
+                <Link href="/goods" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  安全用品カタログ
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* プロジェクト */}
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
               プロジェクト
@@ -51,7 +140,7 @@ export function Footer() {
             <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li>
                 <Link href="/features" className="font-semibold text-emerald-700 hover:underline dark:text-emerald-300">
-                  機能紹介（全26機能）
+                  機能一覧（全機能）
                 </Link>
               </li>
               <li>
@@ -74,11 +163,32 @@ export function Footer() {
                   ご意見・改善提案
                 </Link>
               </li>
+              {PAID_MODE && (
+                <>
+                  <li>
+                    <Link href="/services" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                      受託業務
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/consulting" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                      月額顧問
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/pricing" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                      料金プラン
+                    </Link>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
+
+          {/* 規約・運営 */}
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-              法務・運営
+              規約・運営
             </p>
             <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li>
@@ -104,62 +214,6 @@ export function Footer() {
               <li>
                 <Link href="/bcp" className="hover:text-slate-900 hover:underline dark:hover:text-white">
                   BCP
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-              {PAID_MODE ? "サービス" : "主なコンテンツ"}
-            </p>
-            <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
-              {PAID_MODE ? (
-                <>
-                  <li>
-                    <Link href="/services" className="hover:text-slate-900 hover:underline dark:hover:text-white">
-                      受託業務
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/consulting" className="hover:text-slate-900 hover:underline dark:hover:text-white">
-                      月額顧問
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/pricing" className="hover:text-slate-900 hover:underline dark:hover:text-white">
-                      料金プラン
-                    </Link>
-                  </li>
-                </>
-              ) : null}
-              <li>
-                <Link href="/laws" className="hover:text-slate-900 hover:underline dark:hover:text-white">
-                  法令・通達
-                </Link>
-              </li>
-              <li>
-                <Link href="/accidents" className="hover:text-slate-900 hover:underline dark:hover:text-white">
-                  事故データベース
-                </Link>
-              </li>
-              <li>
-                <Link href="/chemical-database" className="hover:text-slate-900 hover:underline dark:hover:text-white">
-                  化学物質検索
-                </Link>
-              </li>
-              <li>
-                <Link href="/equipment-finder" className="hover:text-slate-900 hover:underline dark:hover:text-white">
-                  保護具AIファインダー
-                </Link>
-              </li>
-              <li>
-                <Link href="/goods" className="hover:text-slate-900 hover:underline dark:hover:text-white">
-                  安全用品カタログ
-                </Link>
-              </li>
-              <li>
-                <Link href="/wizard" className="hover:text-slate-900 hover:underline dark:hover:text-white">
-                  コンプラ診断
                 </Link>
               </li>
             </ul>
