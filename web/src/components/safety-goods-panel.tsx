@@ -10,8 +10,7 @@ import {
   type SafetyGoodsCategory,
   type SafetyGoodsItem,
 } from "@/data/mock/safety-goods";
-import { withAmazonAssociateTag, withRakutenAffiliateId } from "@/lib/affiliate-links";
-import { amazonSearchUrl, rakutenSearchUrl } from "@/lib/affiliate";
+import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
 import { GoodsCategoryIcon } from "@/components/goods-icons";
 
 const SELECTION_GUIDES = [
@@ -149,8 +148,9 @@ function GoodsIconDisplay({ categoryId }: { categoryId: string }) {
 }
 
 function GoodsCard({ item }: { item: SafetyGoodsItem }) {
-  const amazonHref = withAmazonAssociateTag(item.amazonUrl);
-  const rakutenHref = withRakutenAffiliateId(item.rakutenUrl);
+  // amazonUrl / rakutenUrl は safety-goods.ts でアフィリエイト変換済み
+  const amazonHref = item.amazonUrl;
+  const rakutenHref = item.rakutenUrl;
   return (
     <article className="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md">
       <div className="flex h-36 items-center justify-center rounded-t-xl bg-slate-100 overflow-hidden">
@@ -260,7 +260,7 @@ function SelectionGuideSection() {
             </ul>
             <div className="mt-4 grid grid-cols-2 gap-2">
               <a
-                href={amazonSearchUrl(guide.searchQuery)}
+                href={generateAmazonAffiliateUrl(guide.searchQuery)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-lg bg-amber-500 py-2 text-center text-xs font-bold text-white hover:bg-amber-600"
@@ -268,7 +268,7 @@ function SelectionGuideSection() {
                 Amazonで探す
               </a>
               <a
-                href={rakutenSearchUrl(guide.searchQuery)}
+                href={generateRakutenSearchUrl(guide.searchQuery)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-lg bg-rose-500 py-2 text-center text-xs font-bold text-white hover:bg-rose-600"
