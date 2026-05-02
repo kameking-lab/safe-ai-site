@@ -12,6 +12,10 @@ web/src/data/accidents-mhlw/
 node_modules/
 dist/
 
+# Lock files for non-npm package managers (project uses npm only)
+pnpm-lock.yaml
+yarn.lock
+
 # Python ETL artifacts
 __pycache__/
 *.pyc
