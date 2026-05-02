@@ -9,6 +9,12 @@
 - Vercel デプロイ（GitHub mainブランチ連携）
 - モックデータ中心 → 将来Supabase/AI API接続予定
 
+## パッケージマネージャー（重要）
+- **npm のみ使用。pnpm・yarn は絶対に使わない**
+- `npm install` でパッケージ追加、`npm ci` でクリーンインストール
+- `pnpm-lock.yaml` / `yarn.lock` は .gitignore で除外済み。コミット禁止
+- `web/package.json` に `"packageManager": "npm@11.8.0"` を設定済み
+
 ## コマンド
 - `cd web && npm run dev` → 開発サーバー (localhost:3000)
 - `cd web && npm run build` → ビルド確認
