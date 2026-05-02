@@ -1,59 +1,16 @@
 {
-  "fetchedAt": "2026-05-02T10:35:59.377Z",
+  "fetchedAt": "2026-05-02T11:33:20.399Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
       "entries": [
         {
           "sourceCode": "011000",
-          "level": "advisory",
-          "headline": "宗谷地方では、２日夜のはじめ頃まで強風に注意してください。",
-          "reportDatetime": "2026-05-02T15:39:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-02T20:06:00+09:00",
           "publishingOffice": "稚内地方気象台",
-          "warnings": [
-            {
-              "areaCode": "011000",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0121400",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151400",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151600",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0152000",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         },
         {
           "sourceCode": "012000",
@@ -1533,8 +1490,8 @@
         {
           "sourceCode": "020000",
           "level": "advisory",
-          "headline": "三八上北では、２日夜のはじめ頃まで強風に注意してください。津軽、三八上北では、３日まで空気の乾燥した状態が続くため、火の取り扱いに、ここしばらくなだれに注意してください。",
-          "reportDatetime": "2026-05-02T16:12:00+09:00",
+          "headline": "津軽、三八上北では、３日まで空気の乾燥した状態が続くため、火の取り扱いに、ここしばらくなだれに注意してください。",
+          "reportDatetime": "2026-05-02T20:26:00+09:00",
           "publishingOffice": "青森地方気象台",
           "warnings": [
             {
@@ -2461,8 +2418,8 @@
         {
           "sourceCode": "040000",
           "level": "none",
-          "headline": "宮城県では、２日夜のはじめ頃まで強風に注意してください。",
-          "reportDatetime": "2026-05-02T17:43:00+09:00",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-02T20:24:00+09:00",
           "publishingOffice": "仙台管区気象台",
           "warnings": []
         }
@@ -3091,64 +3048,15 @@
       ]
     },
     "JP-12": {
-      "level": "advisory",
+      "level": "none",
       "entries": [
         {
           "sourceCode": "120000",
-          "level": "advisory",
-          "headline": "南部では、２日夜のはじめ頃まで高波に注意してください。",
-          "reportDatetime": "2026-05-02T16:03:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-02T20:30:00+09:00",
           "publishingOffice": "銚子地方気象台",
-          "warnings": [
-            {
-              "areaCode": "120030",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1220500",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1221800",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1222300",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1223400",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1223800",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1244300",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1246300",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
@@ -3158,8 +3066,8 @@
         {
           "sourceCode": "130000",
           "level": "advisory",
-          "headline": "伊豆諸島北部、伊豆諸島南部では、２日夜のはじめ頃まで高波に注意してください。",
-          "reportDatetime": "2026-05-02T16:02:00+09:00",
+          "headline": "伊豆諸島北部、伊豆諸島南部では、２日夜遅くまで高波に注意してください。",
+          "reportDatetime": "2026-05-02T20:32:00+09:00",
           "publishingOffice": "気象庁",
           "warnings": [
             {
@@ -3170,12 +3078,6 @@
             },
             {
               "areaCode": "130030",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1336100",
               "code": "16",
               "status": "継続",
               "level": "advisory"
@@ -3566,58 +3468,15 @@
       ]
     },
     "JP-22": {
-      "level": "advisory",
+      "level": "none",
       "entries": [
         {
           "sourceCode": "220000",
-          "level": "advisory",
-          "headline": "伊豆では、２日夜のはじめ頃まで強風に注意してください。",
-          "reportDatetime": "2026-05-02T16:35:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-02T20:29:00+09:00",
           "publishingOffice": "静岡地方気象台",
-          "warnings": [
-            {
-              "areaCode": "220020",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2221900",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2230100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2230200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2230400",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2230500",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2230600",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
