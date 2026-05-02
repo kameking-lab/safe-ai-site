@@ -57,6 +57,11 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: true,
       },
+      {
+        source: "/bear-map",
+        destination: "/risk",
+        permanent: true,
+      },
     ];
   },
   // セキュリティ・キャッシュヘッダー

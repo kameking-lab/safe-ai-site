@@ -248,15 +248,6 @@ const INDUSTRIES: Industry[] = [
           { label: "特別教育", href: "/education" },
         ],
       },
-      {
-        title: "クマ目撃情報",
-        problem: "クマ被害が増加、労災認定例も。",
-        solution: "クマ目撃マップで該当地域を確認。気象リスクと組み合わせて朝礼で共有。",
-        relatedFeatures: [
-          { label: "クマ目撃マップ", href: "/bear-map" },
-          { label: "気象リスク", href: "/risk" },
-        ],
-      },
     ],
   },
   {
