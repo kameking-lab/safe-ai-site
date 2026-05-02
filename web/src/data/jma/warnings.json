@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-01T23:09:47.145Z",
+  "fetchedAt": "2026-05-02T00:08:07.925Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -1166,7 +1166,7 @@
           "sourceCode": "015000",
           "level": "advisory",
           "headline": "日高地方では、土砂災害や河川の増水に注意してください。胆振、日高地方では、強風や高波、濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-02T03:11:00+09:00",
+          "reportDatetime": "2026-05-02T08:14:00+09:00",
           "publishingOffice": "室蘭地方気象台",
           "warnings": [
             {
@@ -1207,6 +1207,12 @@
             },
             {
               "areaCode": "015020",
+              "code": "18",
+              "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "015020",
               "code": "20",
               "status": "継続",
               "level": "advisory"
@@ -1268,7 +1274,7 @@
             {
               "areaCode": "0123301",
               "code": "15",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -1280,7 +1286,7 @@
             {
               "areaCode": "0123302",
               "code": "15",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -1292,7 +1298,7 @@
             {
               "areaCode": "0157100",
               "code": "15",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -1304,7 +1310,7 @@
             {
               "areaCode": "0157500",
               "code": "15",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -1352,7 +1358,7 @@
             {
               "areaCode": "0158400",
               "code": "15",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -1394,7 +1400,7 @@
             {
               "areaCode": "0160101",
               "code": "15",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -1417,6 +1423,12 @@
             },
             {
               "areaCode": "0160102",
+              "code": "18",
+              "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0160102",
               "code": "20",
               "status": "継続",
               "level": "advisory"
@@ -1424,12 +1436,6 @@
             {
               "areaCode": "0160200",
               "code": "15",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0160200",
-              "code": "18",
               "status": "継続",
               "level": "advisory"
             },
@@ -1459,12 +1465,6 @@
             },
             {
               "areaCode": "0160400",
-              "code": "18",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0160400",
               "code": "20",
               "status": "継続",
               "level": "advisory"
@@ -1489,12 +1489,6 @@
             },
             {
               "areaCode": "0160700",
-              "code": "18",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0160700",
               "code": "20",
               "status": "継続",
               "level": "advisory"
@@ -1508,12 +1502,6 @@
             {
               "areaCode": "0160800",
               "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0160800",
-              "code": "18",
               "status": "継続",
               "level": "advisory"
             },
@@ -1562,6 +1550,12 @@
             {
               "areaCode": "0161000",
               "code": "16",
+              "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0161000",
+              "code": "18",
               "status": "継続",
               "level": "advisory"
             },
@@ -2473,18 +2467,12 @@
         {
           "sourceCode": "017000",
           "level": "advisory",
-          "headline": "渡島地方では、土砂災害に注意してください。渡島、檜山地方では、強風や高波、濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-02T03:44:00+09:00",
+          "headline": "渡島、檜山地方では、２日夕方まで強風に、２日昼前まで濃霧による視程障害に注意してください。檜山地方では２日昼前まで、渡島地方では２日夕方まで、高波に注意してください。",
+          "reportDatetime": "2026-05-02T08:12:00+09:00",
           "publishingOffice": "函館地方気象台",
           "warnings": [
             {
               "areaCode": "017010",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "017010",
               "code": "15",
               "status": "継続",
               "level": "advisory"
@@ -2516,12 +2504,6 @@
             {
               "areaCode": "017020",
               "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0120200",
-              "code": "10",
               "status": "継続",
               "level": "advisory"
             },
@@ -2618,12 +2600,6 @@
             {
               "areaCode": "0133700",
               "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0134300",
-              "code": "10",
               "status": "継続",
               "level": "advisory"
             },
@@ -2780,7 +2756,7 @@
             {
               "areaCode": "0137000",
               "code": "15",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
