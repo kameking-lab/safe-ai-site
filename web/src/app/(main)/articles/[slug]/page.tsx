@@ -4,13 +4,21 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink } from "lucide-react";
 import { JsonLd, breadcrumbSchema } from "@/components/json-ld";
 import { LanguageButton } from "@/components/language-button";
+import { RelatedContent, type RelatedContentGroup } from "@/components/RelatedContent";
 import {
   getPublishedArticleBySlug,
   getPublishedArticleSlugs,
 } from "@/lib/articles";
+import { mhlwNotices } from "@/data/mhlw-notices";
+import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
+import { getAllEquipment } from "@/lib/equipment-recommendation";
 import type { LanguageCode } from "@/lib/translation-cache";
 import multilingualTitles from "@/data/translations/multilingual-titles.json";
 import { ogImageUrl } from "@/lib/og-url";
+
+function tokenizeJa(text: string): string[] {
+  return (text.match(/[一-龥ぁ-んァ-ヶa-zA-Z0-9]{2,}/g) ?? []).filter((t) => t.length >= 2);
+}
 
 const SITE_BASE = "https://safe-ai-site.vercel.app";
 
@@ -76,6 +84,92 @@ export default async function ArticleDetailPage({
     article.description,
     ...article.sections.map((s) => `${s.heading}\n${s.body}`),
   ].join("\n\n");
+
+  // 関連コンテンツ: 記事本文・タグ・キーワードから内部リンク候補を抽出
+  const articleTokens = new Set<string>([
+    ...tokenizeJa(article.title),
+    ...tokenizeJa(article.description),
+    ...(article.tags ?? []).flatMap(tokenizeJa),
+    ...(article.keywords ?? []).flatMap(tokenizeJa),
+  ]);
+  const matchScore = (haystack: string) => {
+    let s = 0;
+    articleTokens.forEach((t) => {
+      if (haystack.includes(t)) s += 1;
+    });
+    return s;
+  };
+  const relatedNotices = mhlwNotices
+    .map((n) => ({ n, s: matchScore(`${n.title} ${n.category} ${n.lawRef ?? ""}`) }))
+    .filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s)
+    .slice(0, 6);
+  const relatedAccidents = getAccidentCasesDataset()
+    .map((c) => ({
+      c,
+      s: matchScore(`${c.title} ${c.summary} ${c.workCategory} ${c.type}`),
+    }))
+    .filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s)
+    .slice(0, 6);
+  const relatedEquipment = getAllEquipment()
+    .map((it) => ({
+      it,
+      s: matchScore(`${it.name} ${it.spec} ${it.recommendReason ?? ""}`),
+    }))
+    .filter((x) => x.s > 0)
+    .sort((a, b) => b.s - a.s)
+    .slice(0, 6);
+
+  const relatedGroups: RelatedContentGroup[] = [
+    {
+      heading: "📜 関連する厚労省 通達・告示",
+      accent: "sky",
+      moreHref: "/circulars",
+      moreLabel: "通達一覧",
+      items: relatedNotices.map(({ n }) => ({
+        href: `/circulars/${n.id}`,
+        category: `${n.docType}・${n.category}`,
+        title: n.title,
+        description: `${n.noticeNumber ?? ""} ${n.issuer ?? ""} ${n.issuedDateRaw ?? ""}`.trim(),
+        kind: "notice" as const,
+        badge:
+          n.bindingLevel === "binding"
+            ? "拘束力あり"
+            : n.bindingLevel === "indirect"
+              ? "間接的拘束"
+              : "参考",
+      })),
+    },
+    {
+      heading: "⚠️ 関連する事故事例",
+      accent: "amber",
+      moreHref: "/accidents",
+      moreLabel: "事故DB",
+      items: relatedAccidents.map(({ c }) => ({
+        href: `/accidents`,
+        category: c.workCategory,
+        title: c.title,
+        description: c.summary,
+        kind: "accident" as const,
+        badge: c.severity,
+      })),
+    },
+    {
+      heading: "🛡 推奨保護具",
+      accent: "emerald",
+      moreHref: "/equipment-finder",
+      moreLabel: "保護具AI",
+      items: relatedEquipment.map(({ it }) => ({
+        href: `/equipment/${it.id}`,
+        category: `${it.categoryIcon} ${it.categoryName}`,
+        title: it.name,
+        description: it.recommendReason ?? it.spec,
+        kind: "equipment" as const,
+        badge: it.priceLabel,
+      })),
+    },
+  ];
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 sm:py-8">
@@ -185,6 +279,11 @@ export default async function ArticleDetailPage({
           </Link>
         </section>
       </article>
+
+      <RelatedContent
+        title="関連コンテンツ — 通達・事故・保護具で深掘り"
+        groups={relatedGroups}
+      />
     </main>
   );
 }

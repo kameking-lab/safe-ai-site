@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink } from "lucide-react";
 import { JsonLd, breadcrumbSchema } from "@/components/json-ld";
 import { AffiliateLink } from "@/components/affiliate-link";
+import { RelatedContent, type RelatedContentGroup } from "@/components/RelatedContent";
 import { mhlwNotices, type MhlwNotice } from "@/data/mhlw-notices";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import {
@@ -12,6 +13,7 @@ import {
   relatedInCategory,
   type EquipmentItem,
 } from "@/lib/equipment-recommendation";
+import { relatedFromEquipment } from "@/lib/related-content";
 import { ogImageUrl } from "@/lib/og-url";
 import type { AccidentCase } from "@/lib/types/domain";
 
@@ -120,6 +122,32 @@ export default async function EquipmentDetailPage({
   const relatedAccidents = pickRelatedAccidents(item, getAccidentCasesDataset());
   const url = `${SITE_BASE}/equipment/${item.id}`;
   const avgPrice = Math.round((item.priceMin + item.priceMax) / 2);
+
+  // 共通スコアリング: より広く事故・通達・同カテゴリ商品を内部リンクに追加
+  const linked = relatedFromEquipment(item, { limit: 6 });
+  const relatedGroupsExt: RelatedContentGroup[] = [
+    {
+      heading: "⚠️ さらに参考になる事故事例",
+      accent: "amber",
+      moreHref: "/accidents",
+      moreLabel: "事故DB",
+      items: linked.accidents,
+    },
+    {
+      heading: "📜 関連する通達・告示（追加）",
+      accent: "sky",
+      moreHref: "/circulars",
+      moreLabel: "通達一覧",
+      items: linked.notices,
+    },
+    {
+      heading: "🛡 同カテゴリの他保護具",
+      accent: "emerald",
+      moreHref: "/equipment-finder",
+      moreLabel: "保護具AI",
+      items: linked.equipment,
+    },
+  ];
 
   const productSchema = {
     "@context": "https://schema.org",
@@ -343,6 +371,11 @@ export default async function EquipmentDetailPage({
           </ul>
         )}
       </section>
+
+      <RelatedContent
+        title="さらに深掘り — 事故・通達・他保護具"
+        groups={relatedGroupsExt}
+      />
 
       <footer className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-[11px] leading-5 text-slate-600">
         <p>

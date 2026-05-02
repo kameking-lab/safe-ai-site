@@ -3,9 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink, FileText, Share2 } from "lucide-react";
 import { JsonLd, legalDocumentSchema, breadcrumbSchema } from "@/components/json-ld";
+import { RelatedContent, type RelatedContentGroup } from "@/components/RelatedContent";
 import { mhlwNotices, type MhlwNotice } from "@/data/mhlw-notices";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import { safetyGoodsItems, safetyGoodsCategories } from "@/data/mock/safety-goods";
+import { relatedFromNotice } from "@/lib/related-content";
 import { ogImageUrl } from "@/lib/og-url";
 import type { AccidentCase } from "@/lib/types/domain";
 
@@ -92,6 +94,33 @@ export default async function CircularDetailPage({
   const relatedAccidents = pickRelatedAccidents(notice, getAccidentCasesDataset());
   const relatedEquipment = pickRelatedEquipment(notice);
   const url = `${SITE_BASE}/circulars/${notice.id}`;
+
+  // 共通スコアリング: 関連通達・追加事故・追加保護具を内部リンク強化として表示
+  const linked = relatedFromNotice(notice, { limit: 6 });
+  const relatedGroups: RelatedContentGroup[] = [
+    {
+      heading: "📜 関連する他の通達・告示",
+      description: "同カテゴリ・同キーワードで命令的拘束力の参考になる通達群",
+      accent: "sky",
+      moreHref: "/circulars",
+      moreLabel: "通達一覧",
+      items: linked.notices,
+    },
+    {
+      heading: "⚠️ 関連する事故事例（追加）",
+      accent: "amber",
+      moreHref: "/accidents",
+      moreLabel: "事故DB",
+      items: linked.accidents,
+    },
+    {
+      heading: "🛡 推奨保護具（自動マッチ）",
+      accent: "emerald",
+      moreHref: "/equipment-finder",
+      moreLabel: "保護具AI",
+      items: linked.equipment,
+    },
+  ];
 
   const description = `${notice.docType}「${notice.title}」（${notice.noticeNumber ?? ""}）。${
     notice.issuer ?? ""
@@ -319,6 +348,11 @@ export default async function CircularDetailPage({
           保護具AIで条件を絞り込む →
         </Link>
       </section>
+
+      <RelatedContent
+        title="さらに深掘り — 通達・事故・保護具"
+        groups={relatedGroups}
+      />
 
       <footer className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-[11px] leading-5 text-slate-600">
         <p>
