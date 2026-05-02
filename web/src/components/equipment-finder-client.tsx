@@ -229,6 +229,22 @@ export function EquipmentFinderClient() {
           <p className="text-[11px] text-slate-500">
             ※ アフィリエイトリンク（もしも経由）。発生報酬は研究プロジェクト運営費（事故DB拡充・AI推論コスト・法令データ更新）に充てます。
           </p>
+
+          {/* /goods への誘導: 1,050点の全商品カタログを案内 */}
+          <div className="mt-3 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
+            <div>
+              <p className="text-sm font-bold text-emerald-900">📚 もっと商品を比較したい方へ</p>
+              <p className="mt-1 text-xs text-slate-700">
+                1,050点超のカテゴリ別カタログで、墜落制止・防塵マスク・ヘルメットなどを横断検索できます。
+              </p>
+            </div>
+            <Link
+              href="/goods"
+              className="mt-3 inline-flex items-center justify-center rounded-lg bg-emerald-600 px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 sm:mt-0 sm:shrink-0"
+            >
+              安全用品カタログを開く →
+            </Link>
+          </div>
         </section>
       )}
     </div>

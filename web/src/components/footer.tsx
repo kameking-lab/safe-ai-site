@@ -148,6 +148,16 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/equipment-finder" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  保護具AIファインダー
+                </Link>
+              </li>
+              <li>
+                <Link href="/goods" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  安全用品カタログ
+                </Link>
+              </li>
+              <li>
                 <Link href="/wizard" className="hover:text-slate-900 hover:underline dark:hover:text-white">
                   コンプラ診断
                 </Link>

@@ -14,7 +14,7 @@ const STATS: { key: SiteStatKey; value: string; label: string; hint: string }[] 
   { key: "specialEdKinds", value: SITE_STATS.specialEdKinds, label: "特別教育 対応種別", hint: "過去問クイズ付" },
 ];
 
-// 主役5機能（戦略V2準拠: KY / AIチャット / 化学物質RA / 事故DB / ダイジェスト）
+// 主役6機能（KY / AIチャット / 化学物質RA / 事故DB / 保護具AI / ダイジェスト）
 // 二軍機能（法改正・Eラーニング・リスク予測）はフッター・⌘K検索・サブナビから到達。
 const CAPABILITIES = [
   {
@@ -28,6 +28,12 @@ const CAPABILITIES = [
     label: "安衛法AIチャット",
     desc: "「これって違反？」の疑問を即解決。条文根拠付きで回答。",
     href: "/chatbot",
+  },
+  {
+    emoji: "🛡",
+    label: "保護具AIファインダー",
+    desc: "業種・危険源・季節+予算の3問で200点から最適な保護具をAIが提案。",
+    href: "/equipment-finder",
   },
   {
     emoji: "⚗️",
@@ -318,7 +324,7 @@ export function HomeValueHero() {
             { href: "/risk-prediction", label: "🛡 AIリスク予測" },
             { href: "/circulars", label: "📄 通達一覧" },
             { href: "/articles", label: "📰 解説記事" },
-            { href: "/equipment-finder", label: "🛡 保護具AI" },
+            { href: "/goods", label: "🛒 安全用品カタログ" },
             { href: "/law-search", label: "🔍 条文検索" },
             { href: "/exam-quiz", label: "🧠 過去問クイズ" },
           ].map((f) => (
