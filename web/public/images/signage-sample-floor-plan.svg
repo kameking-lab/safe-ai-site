@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="1000" height="600">
+  <title>現場図面サンプル</title>
+  <desc>サイネージ向け現場レイアウト見本（事務所・作業エリア・搬入路・倉庫）</desc>
+
+  <!-- 敷地外背景 -->
+  <rect x="0" y="0" width="1000" height="600" fill="#0f172a"/>
+
+  <!-- 敷地外グリッド -->
+  <g stroke="#1e293b" stroke-width="1">
+    <path d="M0 50 L1000 50 M0 100 L1000 100 M0 150 L1000 150 M0 200 L1000 200 M0 250 L1000 250 M0 300 L1000 300 M0 350 L1000 350 M0 400 L1000 400 M0 450 L1000 450 M0 500 L1000 500 M0 550 L1000 550" />
+    <path d="M50 0 L50 600 M100 0 L100 600 M150 0 L150 600 M200 0 L200 600 M250 0 L250 600 M300 0 L300 600 M350 0 L350 600 M400 0 L400 600 M450 0 L450 600 M500 0 L500 600 M550 0 L550 600 M600 0 L600 600 M650 0 L650 600 M700 0 L700 600 M750 0 L750 600 M800 0 L800 600 M850 0 L850 600 M900 0 L900 600 M950 0 L950 600" />
+  </g>
+
+  <!-- 敷地境界 -->
+  <rect x="40" y="40" width="920" height="520" fill="#0b1220" stroke="#475569" stroke-width="3" stroke-dasharray="6 4"/>
+
+  <!-- 道路 -->
+  <rect x="40" y="500" width="920" height="60" fill="#1f2937" stroke="#334155" stroke-width="1"/>
+  <line x1="40" y1="530" x2="960" y2="530" stroke="#fde047" stroke-width="2" stroke-dasharray="20 14"/>
+  <text x="960" y="555" fill="#94a3b8" font-size="14" text-anchor="end" font-family="sans-serif">公道</text>
+
+  <!-- 搬入口 -->
+  <rect x="420" y="490" width="160" height="14" fill="#0f172a" stroke="#fbbf24" stroke-width="2"/>
+  <text x="500" y="486" fill="#fde68a" font-size="14" text-anchor="middle" font-family="sans-serif">搬入口</text>
+
+  <!-- 事務所棟 -->
+  <rect x="80" y="80" width="260" height="160" fill="#1e293b" stroke="#22d3ee" stroke-width="2" rx="6"/>
+  <text x="210" y="160" fill="#67e8f9" font-size="22" text-anchor="middle" font-family="sans-serif" font-weight="bold">事務所棟</text>
+  <text x="210" y="186" fill="#94a3b8" font-size="13" text-anchor="middle" font-family="sans-serif">朝礼・点呼・打合せ</text>
+
+  <!-- 倉庫 -->
+  <rect x="80" y="280" width="260" height="180" fill="#1e293b" stroke="#a78bfa" stroke-width="2" rx="6"/>
+  <text x="210" y="360" fill="#c4b5fd" font-size="22" text-anchor="middle" font-family="sans-serif" font-weight="bold">資機材倉庫</text>
+  <text x="210" y="386" fill="#94a3b8" font-size="13" text-anchor="middle" font-family="sans-serif">保護具・工具保管</text>
+
+  <!-- 作業エリアA -->
+  <rect x="380" y="80" width="280" height="180" fill="#1e293b" stroke="#34d399" stroke-width="2" rx="6"/>
+  <text x="520" y="160" fill="#6ee7b7" font-size="22" text-anchor="middle" font-family="sans-serif" font-weight="bold">作業エリアA</text>
+  <text x="520" y="186" fill="#94a3b8" font-size="13" text-anchor="middle" font-family="sans-serif">高所作業（フルハーネス必須）</text>
+
+  <!-- 作業エリアB -->
+  <rect x="380" y="290" width="280" height="170" fill="#1e293b" stroke="#fb923c" stroke-width="2" rx="6"/>
+  <text x="520" y="370" fill="#fdba74" font-size="22" text-anchor="middle" font-family="sans-serif" font-weight="bold">作業エリアB</text>
+  <text x="520" y="396" fill="#94a3b8" font-size="13" text-anchor="middle" font-family="sans-serif">重機作業（誘導員配置）</text>
+
+  <!-- 危険エリア -->
+  <rect x="700" y="80" width="220" height="180" fill="#450a0a" stroke="#ef4444" stroke-width="3" rx="6"/>
+  <text x="810" y="150" fill="#fca5a5" font-size="20" text-anchor="middle" font-family="sans-serif" font-weight="bold">立入禁止区画</text>
+  <text x="810" y="178" fill="#fecaca" font-size="13" text-anchor="middle" font-family="sans-serif">電気設備・薬品保管</text>
+  <g transform="translate(810 200)">
+    <polygon points="0,-22 22,18 -22,18" fill="#fbbf24" stroke="#000" stroke-width="2"/>
+    <text x="0" y="14" fill="#000" font-size="22" text-anchor="middle" font-family="sans-serif" font-weight="bold">!</text>
+  </g>
+
+  <!-- 集合場所 -->
+  <rect x="700" y="290" width="220" height="170" fill="#1e293b" stroke="#10b981" stroke-width="2" rx="6"/>
+  <text x="810" y="370" fill="#34d399" font-size="20" text-anchor="middle" font-family="sans-serif" font-weight="bold">避難集合場所</text>
+  <g transform="translate(810 396)">
+    <circle cx="0" cy="0" r="14" fill="#10b981"/>
+    <text x="0" y="6" fill="#fff" font-size="18" text-anchor="middle" font-family="sans-serif" font-weight="bold">→</text>
+  </g>
+
+  <!-- 通路 -->
+  <line x1="340" y1="170" x2="380" y2="170" stroke="#64748b" stroke-width="2" stroke-dasharray="5 3"/>
+  <line x1="340" y1="370" x2="380" y2="370" stroke="#64748b" stroke-width="2" stroke-dasharray="5 3"/>
+  <line x1="660" y1="170" x2="700" y2="170" stroke="#64748b" stroke-width="2" stroke-dasharray="5 3"/>
+  <line x1="660" y1="370" x2="700" y2="370" stroke="#64748b" stroke-width="2" stroke-dasharray="5 3"/>
+  <line x1="500" y1="260" x2="500" y2="290" stroke="#64748b" stroke-width="2" stroke-dasharray="5 3"/>
+  <line x1="500" y1="460" x2="500" y2="490" stroke="#64748b" stroke-width="2" stroke-dasharray="5 3"/>
+
+  <!-- 凡例 -->
+  <g transform="translate(60 20)">
+    <text x="0" y="0" fill="#cbd5e1" font-size="14" font-family="sans-serif" font-weight="bold">現場レイアウト サンプル（差し替え可）</text>
+  </g>
+</svg>
