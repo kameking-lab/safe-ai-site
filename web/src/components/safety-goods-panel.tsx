@@ -11,6 +11,7 @@ import {
   type SafetyGoodsItem,
 } from "@/data/mock/safety-goods";
 import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
+import { trackAffiliateClick } from "@/lib/track-events";
 import { GoodsCategoryIcon } from "@/components/goods-icons";
 
 const SELECTION_GUIDES = [
@@ -184,16 +185,34 @@ function GoodsCard({ item }: { item: SafetyGoodsItem }) {
           <a
             href={amazonHref}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener noreferrer sponsored"
             className="rounded-lg bg-amber-500 py-2 text-center text-xs font-bold text-white hover:bg-amber-600"
+            onClick={() =>
+              trackAffiliateClick({
+                productId: item.id,
+                productName: item.name,
+                network: "amazon",
+                url: amazonHref,
+                page: "/goods",
+              })
+            }
           >
             Amazonで見る
           </a>
           <a
             href={rakutenHref}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noopener noreferrer sponsored"
             className="rounded-lg bg-rose-500 py-2 text-center text-xs font-bold text-white hover:bg-rose-600"
+            onClick={() =>
+              trackAffiliateClick({
+                productId: item.id,
+                productName: item.name,
+                network: "rakuten",
+                url: rakutenHref,
+                page: "/goods",
+              })
+            }
           >
             楽天で見る
           </a>

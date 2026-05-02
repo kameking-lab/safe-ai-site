@@ -6,8 +6,8 @@ import { useEffect, Suspense } from 'react';
 
 declare global {
   interface Window {
-    gtag: (command: string, targetId: string, params?: Record<string, unknown>) => void;
-    dataLayer: unknown[];
+    gtag?: (command: string, targetId: string, params?: Record<string, unknown>) => void;
+    dataLayer?: unknown[];
   }
 }
 

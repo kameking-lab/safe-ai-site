@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import equipmentDb from "@/data/safety-equipment-db.json";
 import { recommendEquipment, type ScoredEquipment } from "@/lib/equipment-recommendation";
+import { trackAffiliateClick } from "@/lib/track-events";
 
 const hazardLabels = equipmentDb.hazardLabels as Record<string, string>;
 const industryLabels = equipmentDb.industryLabels as Record<string, string>;
@@ -286,6 +287,15 @@ function RecommendCard({ item, highlight }: { item: ScoredEquipment; highlight?:
           target="_blank"
           rel="noopener noreferrer sponsored"
           className="rounded-md bg-amber-500 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-amber-600"
+          onClick={() =>
+            trackAffiliateClick({
+              productId: item.id,
+              productName: item.name,
+              network: "amazon",
+              url: item.affiliate.amazonUrl,
+              page: "/equipment-finder",
+            })
+          }
         >
           Amazonで見る
         </a>
@@ -294,6 +304,15 @@ function RecommendCard({ item, highlight }: { item: ScoredEquipment; highlight?:
           target="_blank"
           rel="noopener noreferrer sponsored"
           className="rounded-md bg-rose-500 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-rose-600"
+          onClick={() =>
+            trackAffiliateClick({
+              productId: item.id,
+              productName: item.name,
+              network: "rakuten",
+              url: item.affiliate.rakutenUrl,
+              page: "/equipment-finder",
+            })
+          }
         >
           楽天で見る
         </a>

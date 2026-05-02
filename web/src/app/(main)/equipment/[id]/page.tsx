@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink } from "lucide-react";
 import { JsonLd, breadcrumbSchema } from "@/components/json-ld";
+import { AffiliateLink } from "@/components/affiliate-link";
 import { mhlwNotices, type MhlwNotice } from "@/data/mhlw-notices";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import {
@@ -228,24 +229,28 @@ export default async function EquipmentDetailPage({
           ※ もしもアフィリエイト経由のプレースホルダーリンクです。発生報酬は研究プロジェクト運営費に充てます。
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
-          <a
+          <AffiliateLink
             href={item.affiliate.amazonUrl}
-            target="_blank"
-            rel="noopener noreferrer sponsored"
+            productId={item.id}
+            productName={item.name}
+            network="amazon"
+            page={`/equipment/${item.id}`}
             className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white hover:bg-amber-600"
           >
             Amazonで見る
             <ExternalLink className="h-3 w-3" />
-          </a>
-          <a
+          </AffiliateLink>
+          <AffiliateLink
             href={item.affiliate.rakutenUrl}
-            target="_blank"
-            rel="noopener noreferrer sponsored"
+            productId={item.id}
+            productName={item.name}
+            network="rakuten"
+            page={`/equipment/${item.id}`}
             className="inline-flex items-center gap-1.5 rounded-lg bg-rose-500 px-4 py-2 text-xs font-bold text-white hover:bg-rose-600"
           >
             楽天で見る
             <ExternalLink className="h-3 w-3" />
-          </a>
+          </AffiliateLink>
         </div>
         <p className="mt-2 text-[10px] text-slate-500">
           参考平均価格 ¥{avgPrice.toLocaleString()}（メーカー希望小売・市場実勢の中央値ベース）
