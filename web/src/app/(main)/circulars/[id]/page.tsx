@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink, FileText, Share2 } from "lucide-react";
 import { JsonLd, legalDocumentSchema, breadcrumbSchema } from "@/components/json-ld";
 import { RelatedContent, type RelatedContentGroup } from "@/components/RelatedContent";
+import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { mhlwNotices, type MhlwNotice } from "@/data/mhlw-notices";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import { safetyGoodsItems, safetyGoodsCategories } from "@/data/mock/safety-goods";
@@ -94,6 +95,18 @@ export default async function CircularDetailPage({
   const relatedAccidents = pickRelatedAccidents(notice, getAccidentCasesDataset());
   const relatedEquipment = pickRelatedEquipment(notice);
   const url = `${SITE_BASE}/circulars/${notice.id}`;
+
+  // 通達カテゴリから推奨保護具のフォールバックを決める（高所→fall, 化学→respiratory, 熱→heat-cold）
+  const ppeFallbacks: string[] = [];
+  if (/(墜落|足場|高所|ハーネス)/.test(notice.title)) ppeFallbacks.push("fall-protection");
+  if (notice.category === "heat-stroke") ppeFallbacks.push("heat-cold");
+  if (/(化学|有機|特化|粉じん|粉塵|石綿)/.test(notice.title) || notice.category.includes("chemical")) {
+    ppeFallbacks.push("respiratory");
+  }
+  if (/(感電|電気)/.test(notice.title)) ppeFallbacks.push("hand-foot");
+  if (ppeFallbacks.length === 0) ppeFallbacks.push("head-protection");
+
+  const ppeContext = `${notice.title} ${notice.category} ${notice.lawRef ?? ""} ${notice.docType}`;
 
   // 共通スコアリング: 関連通達・追加事故・追加保護具を内部リンク強化として表示
   const linked = relatedFromNotice(notice, { limit: 6 });
@@ -348,6 +361,11 @@ export default async function CircularDetailPage({
           保護具AIで条件を絞り込む →
         </Link>
       </section>
+
+      <ContextualPpePicks
+        context={ppeContext}
+        fallbackCategoryIds={ppeFallbacks}
+      />
 
       <RelatedContent
         title="さらに深掘り — 通達・事故・保護具"

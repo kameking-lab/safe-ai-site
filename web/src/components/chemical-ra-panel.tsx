@@ -8,6 +8,7 @@ import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affi
 import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
 import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
 import { SimpleMarkdown } from "@/components/simple-markdown";
+import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import {
   findByCas,
   getSupplementalInfo,
@@ -756,6 +757,14 @@ export function ChemicalRaPanel() {
               </a>
             </div>
           </div>
+
+          {/* この場面で必要な保護具: 化学物質名から関連 PPE を絞り込み（フォールバックは呼吸器系） */}
+          <ContextualPpePicks
+            context={`${result.chemicalName} 化学物質 SDS 防塵 防毒 マスク 保護メガネ 耐薬品 手袋 保護衣`}
+            fallbackCategoryIds={["respiratory", "eye-ear-protection", "hand-foot"]}
+            heading={`🛡 ${result.chemicalName} 取扱い時に推奨される保護具`}
+            description="GHS 分類・SDS の指示に沿って選定する候補。最終判断は公式 SDS と専門家の指導に従ってください。"
+          />
 
           {/* 免責事項 */}
           <p className="text-[11px] leading-relaxed text-slate-400">

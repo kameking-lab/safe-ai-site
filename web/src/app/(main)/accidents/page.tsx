@@ -5,6 +5,7 @@ import { LastUpdatedBadge } from "@/components/last-updated-badge";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
+import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
@@ -56,6 +57,16 @@ export default function AccidentsPage() {
           <LadderStatsCard />
         </div>
       </HomeScreen>
+      {/* 事故事例 → 主要な労災原因に対応する予防保護具を提示 */}
+      <div className="mx-auto max-w-7xl px-4 lg:px-8">
+        <ContextualPpePicks
+          context="墜落 転落 足場 ハーネス 保護帽 ヘルメット 安全靴 切創 はさまれ 巻き込まれ 熱中症 化学物質 中毒"
+          fallbackCategoryIds={["fall-protection", "head-protection", "hand-foot", "heat-cold"]}
+          heading="🛡 主要な労災を防ぐための予防保護具"
+          description="本データベースで多発する「墜落・転落・はさまれ・熱中症」など主要原因に直接効く保護具を厳選。"
+        />
+      </div>
+
       <RelatedPageCards
         heading="このデータを活かす"
         pages={[

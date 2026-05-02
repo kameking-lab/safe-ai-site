@@ -19,6 +19,7 @@ import {
   type ChemicalSubstance,
 } from "@/data/mock/chemical-substances-db";
 import { getAllMergedChemicals } from "@/lib/mhlw-chemicals";
+import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 
 
 const CATEGORY_FILTERS: ChemicalCategory[] = [
@@ -281,6 +282,14 @@ export function ChemicalDatabaseClient() {
       </section>
 
       </>)}
+
+      {/* この場面で必要な保護具: 化学物質 → 防塵防毒マスク・保護メガネ・保護手袋・保護衣 */}
+      <ContextualPpePicks
+        context="化学物質 有機溶剤 特化則 防塵 防毒 マスク 保護メガネ 保護手袋"
+        fallbackCategoryIds={["respiratory", "eye-ear-protection", "hand-foot"]}
+        heading="🛡 化学物質作業で必要な保護具"
+        description="呼吸用保護具・保護メガネ・耐薬品手袋など、SDS の指示に沿って選定するための候補。"
+      />
 
       <aside className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
         <p className="flex items-center gap-2 font-semibold">
