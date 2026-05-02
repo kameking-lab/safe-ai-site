@@ -1,0 +1,96 @@
+# 環境変数参照一覧 (2026-05-02)
+# grep -rn "process.env" web/src/ | grep -v "node_modules|.next"
+# ワークツリー: reverent-goldwasser-280c0b
+
+web/src/app/(main)/contact/ContactForm.tsx:9:NEXT_PUBLIC_FORMSPREE_ID
+web/src/app/(main)/pricing/pricing-checkout.tsx:13:NEXT_PUBLIC_STRIPE_PRICE_PREMIUM
+web/src/app/(main)/pricing/pricing-checkout.tsx:14:NEXT_PUBLIC_STRIPE_PRICE_PRO
+web/src/app/(main)/pricing/success/page.tsx:24:NEXT_PUBLIC_STRIPE_PRICE_PRO
+web/src/app/(main)/pricing/success/page.tsx:25:NEXT_PUBLIC_STRIPE_PRICE_PREMIUM
+web/src/app/(main)/pricing/success/page.tsx:31:STRIPE_SECRET_KEY
+web/src/app/api/chat/route.ts:96:GEMINI_API_KEY (fallback: GOOGLE_API_KEY)
+web/src/app/api/chatbot/route.ts:191:GEMINI_API_KEY (fallback: GOOGLE_API_KEY)
+web/src/app/api/chemical-ra/route.ts:370:GEMINI_API_KEY
+web/src/app/api/goods-chat/route.ts:88:GEMINI_API_KEY
+web/src/app/api/law-summary/route.ts:10:GEMINI_API_KEY
+web/src/app/api/mhlw/search/route.ts:175:BLOB_READ_WRITE_TOKEN
+web/src/app/api/notify/subscribe/route.ts:25:RESEND_API_KEY
+web/src/app/api/notify/subscribe/route.ts:26:RESEND_AUDIENCE_ID
+web/src/app/api/notify/subscribe/route.ts:49:NOTIFY_FROM (optional, default: "ANZEN AI <noreply@anzen-ai.com>")
+web/src/app/api/notify/weather-alert/route.ts:22:CRON_SECRET
+web/src/app/api/notify/weather-alert/route.ts:30:RESEND_API_KEY
+web/src/app/api/notify/weather-alert/route.ts:31:RESEND_AUDIENCE_ID
+web/src/app/api/notify/weather-alert/route.ts:45:NOTIFY_FROM (optional)
+web/src/app/api/quiz-explain/route.ts:16:GEMINI_API_KEY
+web/src/app/api/revisions/route.ts:64:REVISIONS_REAL_SOURCE_FORMAT
+web/src/app/api/revisions/route.ts:66:REVISIONS_REAL_SOURCE_URL
+web/src/app/api/revisions/route.ts:69:REVISIONS_REAL_SOURCE_ALLOW_HOSTS
+web/src/app/api/revisions/route.ts:215:NEXT_PUBLIC_REVISIONS_INGEST_SOURCE
+web/src/app/api/stripe/checkout/route.ts:15:STRIPE_SECRET_KEY
+web/src/app/api/stripe/checkout/route.ts:77:NEXT_PUBLIC_SITE_URL (default: http://localhost:3000)
+web/src/app/api/stripe/portal/route.ts:14:STRIPE_SECRET_KEY
+web/src/app/api/stripe/portal/route.ts:45:NEXT_PUBLIC_SITE_URL (default: http://localhost:3000)
+web/src/app/api/summaries/route.ts:89:GEMINI_API_KEY
+web/src/app/api/webhooks/stripe/route.ts:22:STRIPE_SECRET_KEY
+web/src/app/api/webhooks/stripe/route.ts:33:STRIPE_WEBHOOK_SECRET
+web/src/auth.ts:17:AUTH_SECRET
+web/src/auth.ts:23:AUTH_GOOGLE_ID
+web/src/auth.ts:24:AUTH_GOOGLE_SECRET
+web/src/data/mock/law-revisions.ts:25:NEXT_PUBLIC_REVISIONS_INGEST_SOURCE
+web/src/data/mock/law-revisions.ts:28:REVISIONS_REAL_SOURCE_PAYLOAD_JSON
+web/src/lib/affiliate-links.ts:7:NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG
+web/src/lib/affiliate-links.ts:21:NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID
+web/src/lib/affiliate.ts:1:NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG
+web/src/lib/affiliate.ts:2:NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID
+web/src/lib/affiliate.ts:9:NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID
+web/src/lib/prisma.ts:14:DATABASE_URL
+web/src/lib/prisma.ts:17:NODE_ENV
+web/src/lib/prisma.ts:28:NODE_ENV
+web/src/lib/revisions-ingest/load-real.ts:86:REVISIONS_REAL_SOURCE_ALLOW_HOSTS
+web/src/lib/revisions-ingest/load-real.ts:131:REVISIONS_REAL_SOURCE_URL
+web/src/lib/revisions-ingest/load-real.ts:162:REVISIONS_REAL_SOURCE_URL
+web/src/lib/services/service-factory.ts:41:NEXT_PUBLIC_API_MODE
+web/src/lib/services/service-factory.ts:45:NEXT_PUBLIC_WEATHER_API_MODE
+web/src/lib/services/service-factory.ts:72:NEXT_PUBLIC_FORCE_ERROR_TRANSPORT
+web/src/lib/services/service-factory.ts:85:NEXT_PUBLIC_FORCE_ERROR
+web/src/lib/stripe-webhook-handlers.ts:29:NEXT_PUBLIC_STRIPE_PRICE_PRO
+web/src/lib/stripe-webhook-handlers.ts:30:NEXT_PUBLIC_STRIPE_PRICE_PREMIUM
+web/src/lib/stripe-webhook-handlers.ts:65:STRIPE_SECRET_KEY
+web/src/proxy.ts:7:AUTH_SECRET
+
+# ======================================================
+# ユニーク変数リスト (27変数 + NODE_ENV)
+# ======================================================
+#
+# === NEXT_PUBLIC_* (ブラウザ公開) ===
+# NEXT_PUBLIC_AMAZON_ASSOCIATE_TAG
+# NEXT_PUBLIC_API_MODE
+# NEXT_PUBLIC_FORCE_ERROR
+# NEXT_PUBLIC_FORCE_ERROR_TRANSPORT
+# NEXT_PUBLIC_FORMSPREE_ID
+# NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID
+# NEXT_PUBLIC_REVISIONS_INGEST_SOURCE
+# NEXT_PUBLIC_SITE_URL
+# NEXT_PUBLIC_STRIPE_PRICE_PREMIUM
+# NEXT_PUBLIC_STRIPE_PRICE_PRO
+# NEXT_PUBLIC_WEATHER_API_MODE
+#
+# === サーバーサイドシークレット ===
+# AUTH_GOOGLE_ID
+# AUTH_GOOGLE_SECRET
+# AUTH_SECRET
+# BLOB_READ_WRITE_TOKEN
+# CRON_SECRET
+# DATABASE_URL
+# GEMINI_API_KEY
+# GOOGLE_API_KEY  ← GEMINI_API_KEY の旧エイリアス (非推奨)
+# NOTIFY_FROM     ← オプション (デフォルト値あり)
+# RESEND_API_KEY
+# RESEND_AUDIENCE_ID
+# REVISIONS_REAL_SOURCE_ALLOW_HOSTS
+# REVISIONS_REAL_SOURCE_FORMAT
+# REVISIONS_REAL_SOURCE_PAYLOAD_JSON
+# REVISIONS_REAL_SOURCE_URL
+# STRIPE_SECRET_KEY
+# STRIPE_WEBHOOK_SECRET
+# NODE_ENV        ← ランタイム自動設定 (手動設定不要)
