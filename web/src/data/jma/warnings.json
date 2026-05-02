@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-02T17:08:43.694Z",
+  "fetchedAt": "2026-05-02T18:03:55.470Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -3303,15 +3303,112 @@
       ]
     },
     "JP-43": {
-      "level": "none",
+      "level": "advisory",
       "entries": [
         {
           "sourceCode": "430000",
-          "level": "none",
-          "headline": "注意報を解除します。",
-          "reportDatetime": "2026-05-01T21:10:00+09:00",
+          "level": "advisory",
+          "headline": "熊本、天草・芦北地方では、３日朝から強風に注意してください。",
+          "reportDatetime": "2026-05-03T02:54:00+09:00",
           "publishingOffice": "熊本地方気象台",
-          "warnings": []
+          "warnings": [
+            {
+              "areaCode": "430010",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "430030",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4310000",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4320200",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4320400",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4320500",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4320600",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4321100",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4321200",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4321300",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4321500",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4336800",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4346800",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4348200",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4348400",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4353100",
+              "code": "15",
+              "status": "発表",
+              "level": "advisory"
+            }
+          ]
         }
       ]
     },
