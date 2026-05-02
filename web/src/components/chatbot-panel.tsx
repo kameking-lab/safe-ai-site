@@ -6,6 +6,13 @@ import type { ChatbotSource, FollowupSuggestion } from "@/app/api/chatbot/route"
 import type { NoticeHit } from "@/lib/notice-search";
 import { VoiceMicButton } from "@/components/voice-input-field";
 import { BindingBadge } from "@/components/AIResponseCard";
+import {
+  CHAT_HISTORY_MAX_MESSAGES,
+  clearChatHistory,
+  loadChatHistory,
+  saveChatHistory,
+  type StoredChatMessage,
+} from "@/lib/chat-history";
 
 type ChatMessage = {
   id: string;
@@ -127,6 +134,11 @@ export function ChatbotPanel() {
 
   useEffect(() => {
     setSessions(loadSessions());
+    // ページ再読込時に進行中の会話を復元（最大 50 件）
+    const restored = loadChatHistory<ChatMessage>();
+    if (restored && restored.length > 0) {
+      setMessages(restored);
+    }
   }, []);
 
   useEffect(() => {
@@ -137,6 +149,11 @@ export function ChatbotPanel() {
       setInput(q.trim());
     }
   }, [searchParams]);
+
+  // メッセージ更新時に進行中セッションを localStorage に永続化
+  useEffect(() => {
+    saveChatHistory<StoredChatMessage>(messages as unknown as StoredChatMessage[]);
+  }, [messages]);
 
   function saveCurrentSession(msgs: ChatMessage[]) {
     if (msgs.length < 2) return;
@@ -269,6 +286,20 @@ export function ChatbotPanel() {
     setSessions(updated);
   }
 
+  function handleClearCurrent() {
+    if (messages.length === 0) return;
+    const ok =
+      typeof window === "undefined"
+        ? true
+        : window.confirm(
+            "進行中の会話履歴を削除します。よろしいですか？（保存済みセッションは残ります）"
+          );
+    if (!ok) return;
+    setMessages([]);
+    clearChatHistory();
+    setError(null);
+  }
+
   function handleImportJSON(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -307,6 +338,15 @@ export function ChatbotPanel() {
         </div>
         {hasMessages && (
           <div className="flex items-center gap-2 flex-wrap">
+            {/* 履歴クリアボタン: 進行中の会話を削除（保存済みセッションは残る） */}
+            <button
+              type="button"
+              onClick={handleClearCurrent}
+              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+              title={`進行中の会話を削除（最大${CHAT_HISTORY_MAX_MESSAGES}件まで自動保存）`}
+            >
+              🗑 履歴をクリア
+            </button>
             {/* 共有ボタン */}
             <button
               type="button"
