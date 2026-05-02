@@ -82,6 +82,33 @@
 7. 通知機能の実装
 8. サブスク課金の設計
 
+## 環境変数命名規則（重要）
+
+詳細: `docs/env-naming-guide-2026-05-02.md`、クリーンアップ候補: `docs/env-cleanup-candidates.md`
+
+### NEXT_PUBLIC_* (ブラウザ公開)
+| 正式名 | 用途 |
+|--------|------|
+| `NEXT_PUBLIC_AMAZON_AFFILIATE_ID` | Amazon アソシエイトタグ (旧名: AMAZON_ASSOCIATE_TAG も使用可) |
+| `NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID` | 楽天アフィリエイトID (**AFID は誤り**) |
+| `NEXT_PUBLIC_FORMSPREE_ID` | お問い合わせフォーム |
+| `NEXT_PUBLIC_STRIPE_PRICE_PRO` | Stripe プロプラン Price ID |
+| `NEXT_PUBLIC_STRIPE_PRICE_PREMIUM` | Stripe スタンダードプラン Price ID |
+| `NEXT_PUBLIC_SITE_URL` | 本番URL (Stripe リダイレクト用) |
+| `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE` | 法改正データソース切替 |
+| `NEXT_PUBLIC_PAID_MODE` | 課金機能フラグ (false/true) |
+
+### サーバーサイドシークレット
+| 正式名 | 用途 |
+|--------|------|
+| `GEMINI_API_KEY` | Gemini AI 全機能 (`GOOGLE_API_KEY` は旧エイリアス) |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob (MHLW検索) |
+| `STRIPE_SECRET_KEY` | Stripe 決済 |
+| `STRIPE_WEBHOOK_SECRET` | Stripe Webhook 署名検証 |
+| `AUTH_SECRET` | NextAuth セッション |
+| `RESEND_API_KEY` / `RESEND_AUDIENCE_ID` | メール通知 |
+| `CRON_SECRET` | Cron ジョブ認証 |
+
 ## ファイル構成
 ```
 safe-ai-site/
