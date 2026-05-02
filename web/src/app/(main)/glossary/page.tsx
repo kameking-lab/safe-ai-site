@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import { BookMarked, Search, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 // Metadata cannot be exported from client component – define it in a separate layout or use a wrapper.
 // For now, the page itself handles SEO via next/head alternative approach.
 
@@ -165,6 +166,8 @@ export default function GlossaryPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="労働安全用語集" description="労働安全衛生に関する専門用語をわかりやすく解説。条文・通達・現場用語を一覧から検索。" path="/glossary" />
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3">

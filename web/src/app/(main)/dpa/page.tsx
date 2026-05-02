@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "データ処理契約（DPA）",
   description: "ANZEN AIのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
 export default function DpaPage() {
   return (
     <div className="px-4 py-8 lg:px-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="データ処理契約（DPA）" description="ANZEN AIのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。" path="/dpa" />
       <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">データ処理契約（DPA）</h1>

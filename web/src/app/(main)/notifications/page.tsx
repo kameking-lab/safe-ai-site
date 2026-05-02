@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { SubscribeForm } from "./subscribe-form";
 import { ogImageUrl } from "@/lib/og-url";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "安全情報 通知・メール配信設定";
 const _desc =
   "気象警報・労働安全衛生法改正・労働災害情報の通知とメール配信設定。重要な安全情報を見逃さない。";
@@ -55,6 +56,8 @@ const ROADMAP = [
 export default function NotificationsPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name={_title} description={_desc} path="/notifications" />
       <PageHeader
         title="通知・配信設定"
         description="気象警報・法改正・事故情報の通知とメール配信の設定"

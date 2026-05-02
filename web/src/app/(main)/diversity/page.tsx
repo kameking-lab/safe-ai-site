@@ -15,6 +15,7 @@ import {
 import { PageHeader } from "@/components/page-header";
 import { ogImageUrl } from "@/lib/og-url";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "多様な働き方の労働安全｜女性・高齢者・外国人・LGBTQ・非正規";
 const _desc =
   "女性労働者・高齢者・外国人・LGBTQ当事者・非正規・在宅ワーカー・障害者・若年スポットワーカー向けの労働安全情報をまとめました。就業制限・相談窓口・合理的配慮の基本。";
@@ -296,6 +297,8 @@ const COLOR_CLASS: Record<DiversitySection["color"], { bg: string; border: strin
 export default function DiversityPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name={_title} description={_desc} path="/diversity" />
       <PageHeader
         title="多様な働き方の労働安全"
         description="女性・妊産婦・高齢・外国人・非正規・障害者・LGBTQ・在宅ワーカーの安全衛生"

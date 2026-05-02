@@ -3,6 +3,7 @@ import { Mail, Shield, Bell, TrendingUp, Heart } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
 import { NewsletterForm } from "./newsletter-form";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "週間安全情報メルマガ登録";
 const _desc =
   "毎週月曜日に最新の労働安全通達・事故事例・法改正情報をお届け。研究プロジェクトの応援者として登録して、現場の安全づくりに役立てましょう。";
@@ -58,6 +59,8 @@ const colorMap = {
 export default function NewsletterPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:py-12">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name={_title} description={_desc} path="/newsletter" />
       {/* ヘッダー */}
       <div className="mb-8 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-100">

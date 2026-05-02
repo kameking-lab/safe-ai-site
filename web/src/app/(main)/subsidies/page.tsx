@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { ogImageUrl } from "@/lib/og-url";
 import { SubsidiesRecommender, type Subsidy } from "@/components/subsidies-recommender";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "助成金・補助金ガイド｜中小企業の安全投資ROI";
 const _desc =
   "エイジフレンドリー補助金・働き方改革推進支援助成金・建退共など、労働安全投資に使える公的助成金を中小企業向けにまとめました。労災1件あたりの経済損失試算も掲載。";
@@ -146,6 +147,8 @@ const SUBSIDIES: Subsidy[] = [
 export default function SubsidiesPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name={_title} description={_desc} path="/subsidies" />
       <PageHeader
         title="助成金・補助金ガイド"
         description="労働安全投資に使える公的助成金と、労災1件あたりの経済損失試算"

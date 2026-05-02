@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LeafletPrintView } from "./LeafletPrintView";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "リーフレット（A4両面・印刷PDF）",
   description:
@@ -9,5 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function LeafletPage() {
-  return <LeafletPrintView />;
+  return (
+    <>
+      <PageJsonLd name="啓発リーフレット" description="現場での朝礼・安全教育で使える啓発リーフレットを印刷用にレイアウト。" path="/leaflet" />
+      <LeafletPrintView />
+    </>
+  );
 }

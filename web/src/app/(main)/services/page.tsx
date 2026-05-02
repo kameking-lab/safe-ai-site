@@ -5,6 +5,7 @@ import { ServicesContent } from "./ServicesContent";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { SITE_STATS } from "@/data/site-stats";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const TITLE = "受託業務｜KYデジタル化・安全管理自動化・法改正通知・Claude Code 開発";
 const DESCRIPTION =
   "労働安全コンサルタント監修の受託業務。KYデジタル化¥500k〜、安全管理自動化¥300k〜、法改正通知¥200k〜、教育コンテンツ¥500k〜、化学物質管理¥500k〜、特別教育¥150k〜、Claude Code自動化¥200k〜。無料相談30分実施中。";
@@ -69,6 +70,8 @@ export default function ServicesPage() {
   if (!PAID_MODE) {
     return (
       <main className="mx-auto max-w-3xl px-4 py-8 sm:py-10">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name={TITLE} description={DESCRIPTION} path="/services" />
         <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-5 sm:p-6">
           <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">
             研究・実証プロジェクト

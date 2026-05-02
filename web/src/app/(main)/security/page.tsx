@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "セキュリティ",
   description: "ANZEN AIのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。",
@@ -18,6 +19,8 @@ function Badge({ type }: { type: "現状" | "予定" | "未対応" }) {
   };
   return (
     <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${styles[type]}`}>
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="セキュリティ" description="ANZEN AIのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。" path="/security" />
       {type}
     </span>
   );

@@ -7,6 +7,7 @@ import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 import { CERT_QUIZZES, getTotalQuestionCount } from "@/data/mock/quiz/cert-quiz";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "安全衛生 資格試験 過去問クイズ";
 const _desc =
   "労働安全コンサルタント・衛生管理者・ボイラー技士など全資格の過去問クイズ。科目・年度別に本番形式で挑戦できます。";
@@ -78,6 +79,8 @@ export default function ExamQuizPage() {
                 key={item.industry}
                 className={`rounded-xl border p-4 ${item.bg}`}
               >
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name={_title} description={_desc} path="/exam-quiz" />
                 <div className="flex items-center gap-2 mb-3">
                   <span
                     className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ${item.iconBg}`}

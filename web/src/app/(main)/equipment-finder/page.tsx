@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { EquipmentFinderClient } from "@/components/equipment-finder-client";
 import { ogImageUrl } from "@/lib/og-url";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "保護具AIファインダー｜業種・危険源・季節から最適な保護具を提案",
   description:
@@ -17,6 +18,8 @@ export const metadata: Metadata = {
 export default function EquipmentFinderPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="保護具AIファインダー｜業種・危険源・季節から最適な保護具を提案" description="建設・製造・医療福祉・運輸・林業の現場別に、危険源と季節・予算から最適な保護具200点をAIが3問でレコメンド。JIS規格・国家検定品も明示。" path="/equipment-finder" />
       <header className="mb-5">
         <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
           🛡 保護具AIファインダー

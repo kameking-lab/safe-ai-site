@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { FeaturesIndexClient } from "./features-index-client";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "機能紹介 | ANZEN AI",
   description:
@@ -13,5 +14,10 @@ export const metadata: Metadata = {
 };
 
 export default function FeaturesPage() {
-  return <FeaturesIndexClient />;
+  return (
+    <>
+      <PageJsonLd name="機能一覧・ユースケース" description="ANZEN AI が提供する機能の全体像。業種別ユースケース・現場での使い方を一覧表示。" path="/features" />
+      <FeaturesIndexClient />
+    </>
+  );
 }

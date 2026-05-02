@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getPublishedArticleIndex } from "@/lib/articles";
 import { ogImageUrl } from "@/lib/og-url";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "労働安全 解説記事一覧",
   description:
@@ -26,6 +27,8 @@ export default function ArticlesIndexPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="労働安全 解説記事一覧" description="労働安全衛生に関する法改正・運用ガイド・業種別のSEO記事を労働安全コンサルタント監修で公開。" path="/articles" />
       <header className="mb-5">
         <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
           労働安全 解説記事

@@ -4,6 +4,7 @@ import ContactForm from "./ContactForm";
 import InquiryForm from "./InquiryForm";
 import { PAID_MODE } from "@/lib/paid-mode";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: PAID_MODE ? "お問い合わせ" : "ご意見・ご質問・改善提案",
   description: PAID_MODE
@@ -28,6 +29,8 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <Suspense fallback={null}>
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="お問い合わせ" description="ANZEN AI へのお問い合わせフォーム。法人案内・取材依頼・OEM/再販相談などをこちらから。" path="/contact" />
       {PAID_MODE ? <ContactForm /> : <InquiryForm />}
     </Suspense>
   );

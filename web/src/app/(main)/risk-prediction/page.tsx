@@ -6,6 +6,7 @@ import { RelatedPageCards } from "@/components/related-page-cards";
 import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { ogImageUrl } from "@/lib/og-url";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "AI 労働災害リスク予測｜KY活動支援";
 const _desc =
   "作業内容を入力すると類似事故を検索し、AIが潜在リスクを予測。建設・製造・林業の朝礼KY活動・危険予知活動を支援。";
@@ -27,6 +28,8 @@ export const metadata: Metadata = {
 export default function RiskPredictionPage() {
   return (
     <>
+      
+      <PageJsonLd name="リスク予測・KY支援AI" description="作業内容・天候・現場特性からリスクを予測し、KY項目を自動生成するAI支援ツール。" path="/risk-prediction" />
       <PageHeader
         title="AIリスク予測"
         description="作業内容から事故事例を検索し、AIがリスクを予測"

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "利用規約",
   description: "ANZEN AIの利用規約。本サービスの利用条件について説明しています。",
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <div className="px-4 py-8 lg:px-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="利用規約" description="ANZEN AIの利用規約。本サービスの利用条件について説明しています。" path="/terms" />
       <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">利用規約</h1>

@@ -5,6 +5,7 @@ import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { ogImageUrl } from "@/lib/og-url";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "化学物質 リスクアセスメント ツール";
 const _desc =
   "化学物質名を入力するとSDS・GHS分類・必要保護具・安全対策チェックリストを表示。安衛法令和4年改正対応。厚労省データ参考。";
@@ -26,6 +27,8 @@ export const metadata: Metadata = {
 export default function ChemicalRaPage() {
   return (
     <>
+      
+      <PageJsonLd name="化学物質リスクアセスメント" description="安衛法第57条の3に基づく化学物質リスクアセスメントを支援。CREATE-SIMPLE準拠の簡易評価ツール。" path="/chemical-ra" />
       <div className="mx-auto max-w-7xl px-4 pt-6">
         <TranslatedPageHeader
           titleJa="化学物質リスクアセスメント"

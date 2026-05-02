@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { SafetyGoodsPanel } from "@/components/safety-goods-panel";
 import { ogImageUrl } from "@/lib/og-url";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "安全用品・保護具 おすすめ一覧";
 const _desc =
   "安全ヘルメット・墜落制止用器具・保護手袋・安全靴など現場で役立つ保護具を分野別に紹介。Amazon・楽天で購入できます。";
@@ -24,6 +25,8 @@ export const metadata: Metadata = {
 export default function GoodsPage() {
   return (
     <Suspense>
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name={_title} description={_desc} path="/goods" />
       <SafetyGoodsPanel />
     </Suspense>
   );

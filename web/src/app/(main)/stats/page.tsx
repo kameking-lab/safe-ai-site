@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { StatsDashboard } from "./StatsDashboard";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "利用統計｜ANZEN AI 研究プロジェクト",
   description:
@@ -13,5 +14,10 @@ export const metadata: Metadata = {
 };
 
 export default function StatsPage() {
-  return <StatsDashboard />;
+  return (
+    <>
+      <PageJsonLd name="労働災害統計ダッシュボード" description="厚労省公表の労働災害統計を業種別・年次別に可視化。死亡災害・休業4日以上の傷病を集計。" path="/stats" />
+      <StatsDashboard />
+    </>
+  );
 }

@@ -6,6 +6,7 @@ import { COMMUNITY_CASES_SEED } from "@/data/mock/community-cases";
 import { UGC_CATEGORY_LABELS, UGC_INDUSTRY_OPTIONS } from "@/lib/ugc-types";
 import { CommunityCasesClient } from "./CommunityCasesClient";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const TITLE = "現場の声・事例集（UGC）";
 const DESCRIPTION =
   "全国の現場担当者から集まったヒヤリハット・質問・Tipsを匿名で共有。労働安全コンサルタントの監修コメント付き。";
@@ -31,6 +32,8 @@ export default function CommunityCasesPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name={TITLE} description={DESCRIPTION} path="/community-cases" />
       <header className="mb-6">
         <p className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
           <Tag className="h-3.5 w-3.5" />

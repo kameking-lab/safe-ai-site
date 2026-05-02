@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "引き継ぎ書 | ANZEN AI",
   robots: { index: false, follow: false },
@@ -33,6 +34,8 @@ export default async function HandoverPage({ searchParams }: Props) {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="引き継ぎ書" description="引き継ぎ書について。労働安全衛生のポータル。" path="/handover" />
       {/* ヘッダー */}
       <div className="bg-slate-800 text-white px-4 py-6">
         <div className="max-w-3xl mx-auto">

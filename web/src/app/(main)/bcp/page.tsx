@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "運営継続計画（BCP）",
   description: "ANZEN AIの運営継続計画（BCP）。個人事業の特性を踏まえた業務継続不可時の対応とデータ引き渡し方針を公開します。",
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
 export default function BcpPage() {
   return (
     <div className="px-4 py-8 lg:px-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="運営継続計画（BCP）" description="ANZEN AIの運営継続計画（BCP）。個人事業の特性を踏まえた業務継続不可時の対応とデータ引き渡し方針を公開します。" path="/bcp" />
       <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">運営継続計画（BCP）</h1>

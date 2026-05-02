@@ -3,6 +3,7 @@ import { Building2, Users, Shield, FileText, PieChart, Award } from "lucide-reac
 import { PageHeader } from "@/components/page-header";
 import { ogImageUrl } from "@/lib/og-url";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "組織管理ダッシュボード｜デモ版";
 const _desc =
   "ANZEN AI 法人向けの組織管理ダッシュボード（モック）。拠点・部署・受講進捗・安全統括の一元管理。正式リリース前のデモ版です。";
@@ -45,6 +46,8 @@ const KPI = [
 export default function OrganizationPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name={_title} description={_desc} path="/organization" />
       <PageHeader
         title="組織管理ダッシュボード"
         description="拠点・部署・受講進捗・安全統括を一元管理するモック画面です"

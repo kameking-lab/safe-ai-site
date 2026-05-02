@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { JsonLd, personSchema } from "@/components/json-ld";
+import {
+  JsonLd,
+  personSchema,
+  organizationSchema,
+  webPageSchema,
+  breadcrumbSchema,
+} from "@/components/json-ld";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -171,7 +177,22 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
 export default function AboutPage() {
   return (
     <main className="mx-auto max-w-2xl px-4 py-6 sm:py-8">
-      <JsonLd schema={personSchema()} />
+      <JsonLd
+        schema={[
+          personSchema(),
+          organizationSchema(),
+          webPageSchema({
+            name: "研究・実証プロジェクトについて",
+            description:
+              "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。労働安全コンサルタント（登録番号260022・土木区分）が運営。",
+            url: "https://safe-ai-site.vercel.app/about",
+          }),
+          breadcrumbSchema([
+            { name: "ホーム", url: "https://safe-ai-site.vercel.app" },
+            { name: "プロジェクトについて", url: "https://safe-ai-site.vercel.app/about" },
+          ]),
+        ]}
+      />
       <TranslatedPageHeader
         titleJa="研究・実証プロジェクトについて"
         titleEn="About ANZEN AI Research Project"

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "賠償責任保険加入状況",
   description: "ANZEN AIの賠償責任保険・データ漏洩保険の加入状況。現状と加入予定を正直に公開します。",
@@ -13,6 +14,8 @@ export const metadata: Metadata = {
 export default function InsurancePage() {
   return (
     <div className="px-4 py-8 lg:px-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="賠償責任保険加入状況" description="ANZEN AIの賠償責任保険・データ漏洩保険の加入状況。現状と加入予定を正直に公開します。" path="/insurance" />
       <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">賠償責任保険加入状況</h1>

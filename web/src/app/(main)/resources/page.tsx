@@ -6,6 +6,7 @@ import { LegalDocBadgeLegend } from "@/components/LegalDocBadge";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { mhlwLeaflets } from "@/data/mhlw-leaflets";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const TITLE = "厚労省一次資料DB（通達・告示・指針・リーフレット）";
 const DESCRIPTION =
   "厚生労働省・安全衛生情報センターが公開している労働安全衛生関係の通達・告示・指針・リーフレット計1,158件を分類・検索できる一次資料データベース。各エントリは原文ページへ直リンクで一次ソースを担保。";
@@ -30,6 +31,8 @@ export default function ResourcesPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name={TITLE} description={DESCRIPTION} path="/resources" />
       <div className="mb-4">
         <Link
           href="/laws"

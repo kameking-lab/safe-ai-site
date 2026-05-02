@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ManagePlanButton } from "./manage-plan-button";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "マイページ",
   description: "プラン状況と契約管理",
@@ -90,6 +91,8 @@ export default async function AccountPage({ searchParams }: Props) {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="マイページ" description="プラン状況と契約管理" path="/account" />
       <h1 className="text-2xl font-bold text-slate-900">マイページ</h1>
       <p className="mt-2 text-sm text-slate-500">{session.user.email}</p>
 

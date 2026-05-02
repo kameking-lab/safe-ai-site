@@ -4,6 +4,7 @@ import { LmsPanel } from "@/components/lms-panel";
 import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { ogImageUrl } from "@/lib/og-url";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "多拠点 学習管理システム（LMS）β";
 const _desc =
   "複数拠点・部署の安全教育を一元管理。受講進捗・グループ管理・修了証発行・業種別レポートをまとめて確認できます。2026年秋β公開予定、現在ウェイティングリスト先行受付中。";
@@ -21,6 +22,8 @@ export const metadata: Metadata = {
 export default function LmsPage() {
   return (
     <>
+      
+      <PageJsonLd name="学習管理システム (LMS)" description="事業所単位での教育受講管理・修了証発行・進捗トラッキング。" path="/lms" />
       {/* βウェイティングリスト — 2026年秋公開予定 */}
       <div className="mx-auto mt-4 max-w-5xl px-4">
         <div className="rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 via-white to-emerald-50 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">

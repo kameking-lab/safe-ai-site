@@ -5,6 +5,8 @@ import { COMMUNITY_CASES_SEED } from "@/data/mock/community-cases";
 import { UGC_INDUSTRY_OPTIONS } from "@/lib/ugc-types";
 import { ogImageUrl } from "@/lib/og-url";
 
+import { PageJsonLd } from "@/components/page-json-ld";
+import { JsonLd, faqPageSchema } from "@/components/json-ld";
 const TITLE = "Q&Aナレッジベース";
 const DESCRIPTION =
   "現場担当者から寄せられた質問と、労働安全コンサルタントの回答をまとめたナレッジベース。";
@@ -29,8 +31,18 @@ export default function QaKnowledgePage() {
     (c) => c.category === "question" && c.status === "approved"
   );
 
+  const faq = questions
+    .map((q) => ({
+      question: q.title,
+      answer: q.body || "（コミュニティから回答受付中）",
+    }))
+    .slice(0, 20);
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+      {/* SEO: WebPage + BreadcrumbList + FAQPage */}
+      <PageJsonLd name={TITLE} description={DESCRIPTION} path="/qa-knowledge" />
+      {faq.length > 0 ? <JsonLd schema={faqPageSchema(faq)} /> : null}
       <header className="mb-6">
         <p className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700 border border-sky-200">
           <HelpCircle className="h-3.5 w-3.5" />

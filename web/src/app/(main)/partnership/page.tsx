@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "パートナーシップ・OEM/再販案内",
   description:
@@ -95,6 +96,8 @@ const PROGRAMS: {
 export default function PartnershipPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="パートナーシップ・OEM/再販案内" description="ANZEN AI のホワイトラベル提供・OEM・再販案内。社会保険労務士・労働安全コンサルタント・同業ITベンダー向けに、月額顧問への組み込み・共同セミナー開催等のパートナーメニューを提供しています。" path="/partnership" />
       <TranslatedPageHeader
         titleJa="パートナーシップ・OEM/再販案内"
         titleEn="Partnership & OEM/Reseller Program"

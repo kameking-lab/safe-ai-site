@@ -13,6 +13,7 @@ import {
 import { PageHeader } from "@/components/page-header";
 import { ogImageUrl } from "@/lib/og-url";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "メンタルヘルス・ハラスメント・VDT作業｜労働安全の見えない半分";
 const _desc =
   "ストレスチェック制度・カスタマーハラスメント対策法（2025年）・VDT作業ガイドライン・4つのケアをまとめました。労安衛の新しい半分を整理。";
@@ -123,6 +124,8 @@ const VDT: InfoCard[] = [
 export default function MentalHealthPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name={_title} description={_desc} path="/mental-health" />
       <PageHeader
         title="メンタルヘルス・ハラスメント・VDT作業"
         description="ストレスチェック・4つのケア・カスハラ対策・情報機器作業ガイドライン"

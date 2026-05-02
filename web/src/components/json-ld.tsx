@@ -255,6 +255,89 @@ export function legalDocumentSchema(input: {
   };
 }
 
+/**
+ * 汎用 WebPage スキーマ。トップレベルページ（/services, /pricing 等）に使う。
+ * BreadcrumbList と組み合わせて配列で渡す想定。
+ */
+export function webPageSchema(input: {
+  name: string;
+  description: string;
+  url: string;
+  inLanguage?: string;
+  datePublished?: string;
+  dateModified?: string;
+}): Schema {
+  const { name, description, url, inLanguage = "ja", datePublished, dateModified } = input;
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name,
+    description,
+    url,
+    inLanguage,
+    isPartOf: {
+      "@type": "WebSite",
+      name: "ANZEN AI",
+      url: "https://safe-ai-site.vercel.app",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "ANZEN AI",
+      url: "https://safe-ai-site.vercel.app",
+    },
+    ...(datePublished ? { datePublished } : {}),
+    ...(dateModified ? { dateModified } : {}),
+  };
+}
+
+/**
+ * FAQPage スキーマ。/qa-knowledge のような Q&A ページで使う。
+ */
+export function faqPageSchema(
+  qa: { question: string; answer: string }[]
+): Schema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: qa.slice(0, 20).map((it) => ({
+      "@type": "Question",
+      name: it.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: it.answer,
+      },
+    })),
+  };
+}
+
+/**
+ * 商品コレクション ItemList スキーマ。/goods, /equipment-finder で使う。
+ */
+export function productCollectionSchema(input: {
+  name: string;
+  url: string;
+  products: { name: string; url: string; description?: string; brand?: string }[];
+}): Schema {
+  const { name, url, products } = input;
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name,
+    url,
+    itemListElement: products.slice(0, 20).map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Product",
+        name: p.name,
+        url: p.url,
+        ...(p.description ? { description: p.description } : {}),
+        ...(p.brand ? { brand: { "@type": "Brand", name: p.brand } } : {}),
+      },
+    })),
+  };
+}
+
 export function courseListSchema(
   courses: { name: string; description: string }[]
 ): Schema {

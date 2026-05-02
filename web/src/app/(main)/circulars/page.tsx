@@ -3,6 +3,7 @@ import Link from "next/link";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { ogImageUrl } from "@/lib/og-url";
 
+import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "厚労省通達・告示・指針 一覧",
   description:
@@ -30,6 +31,8 @@ export default function CircularsIndexPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      {/* SEO: WebPage + BreadcrumbList */}
+      <PageJsonLd name="厚労省通達・告示・指針 一覧" description="労働安全衛生に関する厚生労働省の通達・告示・指針を全件横断検索。各通達ごとに概要・関連事故事例・推奨保護具をまとめています。" path="/circulars" />
       <header className="mb-5">
         <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
           厚労省通達・告示・指針 一覧
