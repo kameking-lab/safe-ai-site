@@ -13,6 +13,7 @@ import {
 import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
 import { trackAffiliateClick } from "@/lib/track-events";
 import { GoodsCategoryIcon } from "@/components/goods-icons";
+import { trackEvent } from "@/components/Analytics";
 
 const SELECTION_GUIDES = [
   {
@@ -283,6 +284,7 @@ function SelectionGuideSection() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-lg bg-amber-500 py-2 text-center text-xs font-bold text-white hover:bg-amber-600"
+                onClick={() => trackEvent("affiliate_click", { platform: "amazon", product_id: guide.id, product_name: guide.title, page_location: "goods_guide" })}
               >
                 Amazonで探す
               </a>
@@ -291,6 +293,7 @@ function SelectionGuideSection() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-lg bg-rose-500 py-2 text-center text-xs font-bold text-white hover:bg-rose-600"
+                onClick={() => trackEvent("affiliate_click", { platform: "rakuten", product_id: guide.id, product_name: guide.title, page_location: "goods_guide" })}
               >
                 楽天で探す
               </a>

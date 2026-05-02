@@ -14,6 +14,7 @@ import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-fiel
 import { KY_INDUSTRY_PRESETS } from "@/data/mock/ky-industry-presets";
 import { createServices } from "@/lib/services/service-factory";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
+import { trackEvent } from "@/components/Analytics";
 import type {
   KyInstructionFallCheck,
   KyInstructionParticipant,
@@ -245,9 +246,11 @@ export function KyPageContent() {
 
   const handleManualSave = async () => {
     setSaveError(null);
+    const flowStartAt = Date.now();
     try {
       const result = await services.operations.saveKyInstructionRecord(record);
       if (result.ok) {
+        trackEvent("flow_complete", { flow_type: "ky", duration: Math.round((Date.now() - flowStartAt) / 1000) });
         setSavedLabel(`手動保存: ${new Date().toLocaleTimeString("ja-JP")}`);
         const list = await services.operations.getKyRecordList();
         if (list.ok) setRecordList(list.data);
