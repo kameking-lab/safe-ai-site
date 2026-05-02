@@ -4,6 +4,7 @@
 // 上位5商品を「推薦」、次点10商品を「他のおすすめ」として返す。
 
 import equipmentDb from "@/data/safety-equipment-db.json";
+import { appendAmazonTag, generateRakutenAffiliateUrl } from "./affiliate-url";
 
 export type EquipmentItem = {
   id: string;
@@ -56,7 +57,17 @@ export type RecommendResult = {
   totalCandidates: number;
 };
 
-const allItems = equipmentDb.items as EquipmentItem[];
+// JSON のアフィリエイトURLは生のAmazon/楽天検索URL。NEXT_PUBLIC_*_AFFILIATE_ID が
+// 設定されていれば、ここで一度だけアソシエイトタグ／hb.afl リダイレクトに包む。
+// （未設定なら原URLが返るため、開発環境でも動作する）
+const allItems: EquipmentItem[] = (equipmentDb.items as EquipmentItem[]).map((item) => ({
+  ...item,
+  affiliate: {
+    ...item.affiliate,
+    amazonUrl: appendAmazonTag(item.affiliate.amazonUrl),
+    rakutenUrl: generateRakutenAffiliateUrl(item.affiliate.rakutenUrl),
+  },
+}));
 
 /** 単一商品の各軸スコアを返す（0〜各軸満点） */
 export function scoreItem(item: EquipmentItem, input: RecommendInput): ScoredEquipment["scoreBreakdown"] & { total: number } {
