@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-03T21:23:27.464Z",
+  "fetchedAt": "2026-05-03T22:09:15.961Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -11884,18 +11884,12 @@
         {
           "sourceCode": "270000",
           "level": "advisory",
-          "headline": "大阪府では、４日朝まで土砂災害に、４日夜のはじめ頃まで強風や高波に注意してください。",
-          "reportDatetime": "2026-05-04T04:22:00+09:00",
+          "headline": "大阪府では、４日夜のはじめ頃まで強風や高波に注意してください。",
+          "reportDatetime": "2026-05-04T07:04:00+09:00",
           "publishingOffice": "大阪管区気象台",
           "warnings": [
             {
               "areaCode": "270000",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "270000",
               "code": "15",
               "status": "継続",
               "level": "advisory"
@@ -11920,12 +11914,6 @@
             },
             {
               "areaCode": "2714000",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2714000",
               "code": "15",
               "status": "継続",
               "level": "advisory"
@@ -11945,12 +11933,6 @@
             {
               "areaCode": "2720200",
               "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2720300",
-              "code": "10",
               "status": "継続",
               "level": "advisory"
             },
@@ -11986,12 +11968,6 @@
             },
             {
               "areaCode": "2720700",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2720700",
               "code": "15",
               "status": "継続",
               "level": "advisory"
@@ -12016,31 +11992,13 @@
             },
             {
               "areaCode": "2721000",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2721000",
               "code": "15",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "2721100",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2721100",
               "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2721200",
-              "code": "10",
               "status": "継続",
               "level": "advisory"
             },
@@ -12064,31 +12022,13 @@
             },
             {
               "areaCode": "2721400",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2721400",
               "code": "15",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "2721500",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2721500",
               "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2721600",
-              "code": "10",
               "status": "継続",
               "level": "advisory"
             },
@@ -12106,19 +12046,7 @@
             },
             {
               "areaCode": "2721800",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2721800",
               "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2721900",
-              "code": "10",
               "status": "継続",
               "level": "advisory"
             },
@@ -12136,19 +12064,7 @@
             },
             {
               "areaCode": "2722100",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2722100",
               "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2722200",
-              "code": "10",
               "status": "継続",
               "level": "advisory"
             },
@@ -12208,19 +12124,7 @@
             },
             {
               "areaCode": "2722900",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2722900",
               "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2723000",
-              "code": "10",
               "status": "継続",
               "level": "advisory"
             },
@@ -12250,31 +12154,13 @@
             },
             {
               "areaCode": "2730100",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2730100",
               "code": "15",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "2732100",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2732100",
               "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2732200",
-              "code": "10",
               "status": "継続",
               "level": "advisory"
             },
@@ -12328,31 +12214,13 @@
             },
             {
               "areaCode": "2738100",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2738100",
               "code": "15",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "2738200",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2738200",
               "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2738300",
-              "code": "10",
               "status": "継続",
               "level": "advisory"
             },
