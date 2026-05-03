@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { EquipmentFinderClient } from "@/components/equipment-finder-client";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -33,7 +34,9 @@ export default function EquipmentFinderPage() {
         </div>
       </header>
 
-      <EquipmentFinderClient />
+      <Suspense fallback={<div className="text-sm text-slate-500">読み込み中…</div>}>
+        <EquipmentFinderClient />
+      </Suspense>
     </main>
   );
 }

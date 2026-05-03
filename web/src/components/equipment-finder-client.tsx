@@ -1,17 +1,90 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, Star, RefreshCw } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { ArrowLeft, ArrowRight, Star, RefreshCw, FlaskConical } from "lucide-react";
 import { EQUIPMENT_CATEGORIES, getCategoryById, type RefineAnswers } from "@/config/equipment-categories";
 import { recommendItems } from "@/lib/equipment-finder/recommendations";
 import { trackAffiliateClick } from "@/lib/track-events";
+import { findChemicalEquipmentProfile } from "@/lib/chemical-equipment-mapping";
 
 type Phase = "category" | "refine" | "result";
 
+type IncomingContext =
+  | {
+      kind: "chemical";
+      chemicalName: string;
+      hazards: string[];
+      categories: string[];
+      gasMaskAbsorber?: "有機ガス" | "ハロゲン" | "硫化水素" | "アンモニア";
+    }
+  | {
+      kind: "accident";
+      accidentTitle: string;
+      categories: string[];
+    }
+  | null;
+
 export function EquipmentFinderClient() {
+  const searchParams = useSearchParams();
   const [phase, setPhase] = useState<Phase>("category");
   const [categoryId, setCategoryId] = useState<string>("");
   const [answers, setAnswers] = useState<RefineAnswers>({});
+  const appliedContextRef = useRef<string | null>(null);
+
+  // 受信コンテキストの解析（化学物質RAから or 事故DBから）
+  const incoming: IncomingContext = useMemo(() => {
+    if (!searchParams) return null;
+    const chemical = searchParams.get("chemical");
+    if (chemical) {
+      const profile = findChemicalEquipmentProfile(chemical);
+      const hazardsParam = searchParams.get("hazards");
+      const categoriesParam = searchParams.get("categories");
+      const hazards = hazardsParam
+        ? hazardsParam.split(",").filter(Boolean)
+        : profile?.hazards ?? [];
+      const categories = categoriesParam
+        ? categoriesParam.split(",").filter(Boolean)
+        : profile?.recommendedCategories ?? [];
+      return {
+        kind: "chemical",
+        chemicalName: chemical,
+        hazards,
+        categories,
+        gasMaskAbsorber: profile?.gasMaskAbsorber,
+      };
+    }
+    const fromAccident = searchParams.get("fromAccident");
+    if (fromAccident) {
+      const categoriesParam = searchParams.get("categories");
+      const categories = categoriesParam ? categoriesParam.split(",").filter(Boolean) : [];
+      return { kind: "accident", accidentTitle: fromAccident, categories };
+    }
+    return null;
+  }, [searchParams]);
+
+  // クエリで categories が指定されていれば最初のカテゴリを自動選択して refine へ
+  useEffect(() => {
+    if (!incoming) return;
+    if (appliedContextRef.current === JSON.stringify(incoming)) return;
+    if (phase !== "category") return;
+    const first = incoming.categories.find((c) => getCategoryById(c));
+    if (!first) return;
+    appliedContextRef.current = JSON.stringify(incoming);
+    // 化学物質由来で gasMaskAbsorber が指定されていれば防毒マスクの初期回答を入れる
+    const initialAnswers: RefineAnswers =
+      incoming.kind === "chemical" &&
+      incoming.gasMaskAbsorber &&
+      first === "gas-mask"
+        ? { gasType: incoming.gasMaskAbsorber }
+        : {};
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 受信クエリパラメータからの初期化は副作用扱いが妥当
+    setCategoryId(first);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
+    setAnswers(initialAnswers);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
+    setPhase("refine");
+  }, [incoming, phase]);
 
   const category = useMemo(
     () => (categoryId ? getCategoryById(categoryId) : undefined),
@@ -39,29 +112,47 @@ export function EquipmentFinderClient() {
     setAnswers({});
   }
 
+  const contextBanner = incoming ? <IncomingContextBanner ctx={incoming} /> : null;
+
   if (phase === "category") {
+    const recommendedSet = new Set(incoming?.categories ?? []);
     return (
       <section>
+        {contextBanner}
         <div className="mb-3">
           <p className="text-xs font-bold text-emerald-700">STEP 1</p>
           <h2 className="text-lg font-bold text-slate-900 sm:text-xl">保護具の種類を選んでください</h2>
           <p className="mt-1 text-xs text-slate-500 sm:text-sm">12カテゴリから選択 → 種類別に3〜6問で絞り込み → おすすめ商品を表示します。</p>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {EQUIPMENT_CATEGORIES.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => chooseCategory(c.id)}
-              className="group flex flex-col items-start gap-1 rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-md"
-            >
-              <span className="text-2xl" aria-hidden>
-                {c.icon}
-              </span>
-              <span className="text-sm font-bold text-slate-900 group-hover:text-emerald-700">{c.label}</span>
-              <span className="text-[11px] leading-snug text-slate-500">{c.description}</span>
-            </button>
-          ))}
+          {EQUIPMENT_CATEGORIES.map((c) => {
+            const isRecommended = recommendedSet.has(c.id);
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => chooseCategory(c.id)}
+                className={`group relative flex flex-col items-start gap-1 rounded-2xl border p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+                  isRecommended
+                    ? "border-emerald-400 bg-emerald-50/60 ring-2 ring-emerald-200 hover:border-emerald-500"
+                    : "border-slate-200 bg-white hover:border-emerald-400"
+                }`}
+              >
+                {isRecommended && (
+                  <span className="absolute right-2 top-2 rounded-full bg-emerald-600 px-1.5 py-0.5 text-[9px] font-bold text-white">
+                    推奨
+                  </span>
+                )}
+                <span className="text-2xl" aria-hidden>
+                  {c.icon}
+                </span>
+                <span className={`text-sm font-bold group-hover:text-emerald-700 ${isRecommended ? "text-emerald-800" : "text-slate-900"}`}>
+                  {c.label}
+                </span>
+                <span className="text-[11px] leading-snug text-slate-500">{c.description}</span>
+              </button>
+            );
+          })}
         </div>
       </section>
     );
@@ -73,6 +164,7 @@ export function EquipmentFinderClient() {
       .every((q) => answers[q.id]);
     return (
       <section>
+        {contextBanner}
         <div className="mb-3 flex items-center justify-between gap-2">
           <button
             type="button"
@@ -141,6 +233,7 @@ export function EquipmentFinderClient() {
   if (phase === "result" && category) {
     return (
       <section>
+        {contextBanner}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div>
             <p className="text-xs font-bold text-emerald-700">STEP 3 / RESULT</p>
@@ -281,4 +374,46 @@ export function EquipmentFinderClient() {
   }
 
   return null;
+}
+
+function IncomingContextBanner({ ctx }: { ctx: NonNullable<IncomingContext> }) {
+  if (ctx.kind === "chemical") {
+    return (
+      <div className="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-3 sm:p-4">
+        <div className="flex items-start gap-2">
+          <FlaskConical className="mt-0.5 h-4 w-4 shrink-0 text-blue-700" />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-bold text-blue-900">
+              「{ctx.chemicalName}」の取扱いに必要な保護具
+            </p>
+            <p className="mt-0.5 text-[11px] text-blue-900/80">
+              化学物質リスクアセスメントから連携。推奨カテゴリにバッジを付けています。
+            </p>
+            {ctx.hazards.length > 0 && (
+              <ul className="mt-1.5 flex flex-wrap gap-1">
+                {ctx.hazards.map((h) => (
+                  <li
+                    key={h}
+                    className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-blue-800 ring-1 ring-blue-200"
+                  >
+                    ⚠ {h}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="mb-4 rounded-2xl border border-rose-200 bg-rose-50 p-3 sm:p-4">
+      <p className="text-xs font-bold text-rose-900">
+        「{ctx.accidentTitle}」の再発防止に必要な保護具
+      </p>
+      <p className="mt-0.5 text-[11px] text-rose-900/80">
+        事故DBから連携。推奨カテゴリにバッジを付けています。
+      </p>
+    </div>
+  );
 }
