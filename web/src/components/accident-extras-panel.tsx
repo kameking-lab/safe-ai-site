@@ -97,21 +97,49 @@ function CrossTab() {
 
 /**
  * MHLW 死亡災害ケースに「最も近い」サイト収録事例（詳細ページあり）を探す。
- * type が一致するもの → 業種が一致するもの → の優先順位で1件返す。
+ * 段階的フォールバック: 事故型一致 → 業種一致 → 説明テキスト部分一致 → 業種カテゴリ近接 → 任意の1件。
+ * Top5 カードを必ず詳細ページに遷移可能にするため、null を返さず常に1件返す。
  */
 function findRelatedCuratedCase(
   mhlw: ScoredMhlwCase,
   curated: AccidentCase[]
-): AccidentCase | null {
+): { case: AccidentCase; matchLevel: "type" | "industry" | "keyword" | "loose" | "fallback" } | null {
+  if (curated.length === 0) return null;
+
+  // 1. 事故型 厳密一致
   if (mhlw.type) {
     const byType = curated.find((c) => c.type && mhlw.type?.includes(c.type.slice(0, 2)));
-    if (byType) return byType;
+    if (byType) return { case: byType, matchLevel: "type" };
   }
+
+  // 2. 業種 厳密一致
   if (mhlw.industry) {
     const byIndustry = curated.find((c) => c.workCategory && mhlw.industry?.includes(c.workCategory));
-    if (byIndustry) return byIndustry;
+    if (byIndustry) return { case: byIndustry, matchLevel: "industry" };
   }
-  return null;
+
+  // 3. 事故説明テキストとサマリーのキーワード部分一致
+  if (mhlw.description) {
+    const tokens = mhlw.description
+      .replace(/[、。\s]+/g, " ")
+      .split(" ")
+      .filter((t) => t.length >= 2)
+      .slice(0, 6);
+    const byKeyword = curated.find((c) =>
+      tokens.some((t) => c.summary.includes(t) || c.title.includes(t))
+    );
+    if (byKeyword) return { case: byKeyword, matchLevel: "keyword" };
+  }
+
+  // 4. 業種カテゴリの先頭2文字で部分一致（製造業/建設業など）
+  if (mhlw.industry) {
+    const prefix = mhlw.industry.slice(0, 2);
+    const byLoose = curated.find((c) => c.workCategory.includes(prefix));
+    if (byLoose) return { case: byLoose, matchLevel: "loose" };
+  }
+
+  // 5. 最終フォールバック: 任意の1件（ユーザーを少なくとも事故DB内のページへ）
+  return { case: curated[0], matchLevel: "fallback" };
 }
 
 function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
@@ -172,8 +200,21 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
           {cases.map((c, i) => {
             const related = findRelatedCuratedCase(c, curated);
             const detailHref = related
-              ? `/accidents/${related.id}`
+              ? `/accidents/${related.case.id}`
               : `/accidents?q=${encodeURIComponent([c.type, c.industry].filter(Boolean).join(" "))}`;
+            const linkLabel = (() => {
+              if (!related) return "→ 類似事例を事故DBで探す";
+              switch (related.matchLevel) {
+                case "type":
+                case "industry":
+                  return "→ 関連事例の詳細を見る";
+                case "keyword":
+                  return "→ 近い事例の詳細を見る";
+                case "loose":
+                case "fallback":
+                  return "→ 近接業種の事例を見る";
+              }
+            })();
             return (
               <li key={c.id} className="rounded-lg border border-rose-100 bg-white p-3 text-xs shadow-sm">
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -193,6 +234,20 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
                   <span className="text-[10px] text-slate-400">
                     {c.year}{c.month ? `-${String(c.month).padStart(2, "0")}` : ""}
                   </span>
+                  {related && (related.matchLevel === "loose" || related.matchLevel === "fallback" || related.matchLevel === "keyword") && (
+                    <span
+                      className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800"
+                      title={
+                        related.matchLevel === "fallback"
+                          ? "厳密一致なし。サイト収録事例から代表例を表示"
+                          : related.matchLevel === "loose"
+                          ? "近接業種の収録事例を表示"
+                          : "キーワード部分一致の収録事例を表示"
+                      }
+                    >
+                      {related.matchLevel === "keyword" ? "近い" : "近接"}
+                    </span>
+                  )}
                 </div>
                 <p className="mt-1.5 text-slate-700 leading-relaxed">{c.description}</p>
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -200,7 +255,7 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
                     href={detailHref}
                     className="inline-flex items-center gap-1 rounded-full border border-rose-300 bg-white px-2 py-0.5 text-[11px] font-bold text-rose-800 hover:bg-rose-50"
                   >
-                    {related ? "→ 関連事例の詳細を見る" : "→ 類似事例を事故DBで探す"}
+                    {linkLabel}
                   </Link>
                 </div>
               </li>
