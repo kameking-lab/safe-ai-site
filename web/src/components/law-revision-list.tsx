@@ -731,7 +731,46 @@ export function LawRevisionList({
         <p className="mt-2 text-xs text-slate-500">法改正一覧を読み込み中です...</p>
       )}
       {showEmptyState && (
-        <p className="mt-2 text-xs text-slate-500">表示できる法改正データがありません。</p>
+        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-bold text-amber-900">該当する法改正が見つかりませんでした</p>
+          <p className="mt-1 text-xs leading-5 text-amber-800">
+            条件を緩めると関連する改正が表示される場合があります。
+            まずは絞り込み条件を解除してみてください。
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setSearch("");
+                setArticleHighlights([]);
+                setSelectedKind("すべて");
+                setSelectedImpact("すべて");
+                resetIndustries();
+                setSelectedWorkerAttribute("すべて");
+                setSelectedCompanySize("全規模");
+                setOnlyRelevant(false);
+              }}
+              className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-700"
+            >
+              ↺ 条件を全て解除して再検索
+            </button>
+            {articleHighlights.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setArticleHighlights([])}
+                className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-50"
+              >
+                条文絞り込みのみ解除
+              </button>
+            )}
+            <a
+              href="/chatbot"
+              className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-50"
+            >
+              💬 AIに類似条文を質問
+            </a>
+          </div>
+        </div>
       )}
       <ul className="mt-3 max-h-[70vh] space-y-3 overflow-y-auto pr-1 print:max-h-none print:overflow-visible print:pr-0">
         {filtered.map((revision) => {
