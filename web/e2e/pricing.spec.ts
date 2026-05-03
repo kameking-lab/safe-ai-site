@@ -16,7 +16,7 @@ test.describe("料金プラン", () => {
   test("料金が表示される", async ({ page }) => {
     await page.goto("/pricing");
     // PAID_MODE=false の場合、全機能無料の説明が表示される
-    await expect(page.getByText(/研究・実証プロジェクト/)).toBeVisible();
+    await expect(page.getByText(/研究・実証プロジェクト/).first()).toBeVisible();
   });
 
   test("CTAボタンが存在する", async ({ page }) => {
