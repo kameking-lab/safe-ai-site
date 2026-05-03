@@ -124,7 +124,7 @@ function makeInitialKyInstruction(): KyInstructionRecordState {
     coop3Chief: "",
     workRows: [emptyWork(), emptyWork(), emptyWork(), emptyWork()],
     riskRows: [
-      emptyRisk("上記"),
+      emptyRisk("自由記述欄"),
       emptyRisk("①"),
       emptyRisk("②"),
       emptyRisk("③"),
@@ -723,11 +723,11 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
                 }}
               />
             </div>
-            <div className="mt-4 space-y-3">
-              {[
-                { key: "workDateYear", label: "日付", type: "row" },
-              ].map(() => (
-                <div key="date-row" className="grid grid-cols-3 gap-2">
+            <div className="mt-4 space-y-5">
+              {/* ①基本情報 */}
+              <fieldset className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                <legend className="px-1 text-xs font-bold text-emerald-700">① 基本情報</legend>
+                <div className="grid grid-cols-3 gap-2">
                   <label className="text-xs font-semibold text-slate-700">
                     年
                     <input
@@ -760,63 +760,73 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
                     />
                   </label>
                 </div>
-              ))}
-              <label className="block text-xs font-semibold text-slate-700">
-                場所（作業場所）
-                <input
-                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                  placeholder="例: 〇〇ビル3階 外壁工事エリア"
-                  value={kyInstructionRecord.workRows[0]?.workPlace ?? ""}
-                  onChange={(e) =>
-                    setKyInstructionRecord((prev) => {
-                      const rows = prev.workRows.map((r, i) => (i === 0 ? { ...r, workPlace: e.target.value } : r));
-                      return { ...prev, workRows: rows };
-                    })
-                  }
-                />
-              </label>
-              <label className="block text-xs font-semibold text-slate-700">
-                作業内容
-                <textarea
-                  className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                  placeholder="例: 高所足場組み立て・鉄筋配筋作業"
-                  value={kyInstructionRecord.workRows[0]?.workDetail ?? ""}
-                  onChange={(e) =>
-                    setKyInstructionRecord((prev) => {
-                      const rows = prev.workRows.map((r, i) => (i === 0 ? { ...r, workDetail: e.target.value } : r));
-                      return { ...prev, workRows: rows };
-                    })
-                  }
-                />
-              </label>
-              <label className="block text-xs font-semibold text-slate-700">
-                危険要因
-                <textarea
-                  className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                  placeholder="例: 墜落・転落、資材落下"
-                  value={kyInstructionRecord.riskRows[0]?.hazard ?? ""}
-                  onChange={(e) =>
-                    setKyInstructionRecord((prev) => {
-                      const rows = prev.riskRows.map((r, i) => (i === 0 ? { ...r, hazard: e.target.value } : r));
-                      return { ...prev, riskRows: rows };
-                    })
-                  }
-                />
-              </label>
-              <label className="block text-xs font-semibold text-slate-700">
-                対策
-                <textarea
-                  className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                  placeholder="例: 要求性能墜落制止用器具使用、作業区画内立入禁止"
-                  value={kyInstructionRecord.riskRows[0]?.reduction ?? ""}
-                  onChange={(e) =>
-                    setKyInstructionRecord((prev) => {
-                      const rows = prev.riskRows.map((r, i) => (i === 0 ? { ...r, reduction: e.target.value } : r));
-                      return { ...prev, riskRows: rows };
-                    })
-                  }
-                />
-              </label>
+                <label className="mt-3 block text-xs font-semibold text-slate-700">
+                  場所（作業場所）
+                  <input
+                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                    placeholder="例: 〇〇ビル3階 外壁工事エリア"
+                    value={kyInstructionRecord.workRows[0]?.workPlace ?? ""}
+                    onChange={(e) =>
+                      setKyInstructionRecord((prev) => {
+                        const rows = prev.workRows.map((r, i) => (i === 0 ? { ...r, workPlace: e.target.value } : r));
+                        return { ...prev, workRows: rows };
+                      })
+                    }
+                  />
+                </label>
+              </fieldset>
+
+              {/* ②作業内容 */}
+              <fieldset className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                <legend className="px-1 text-xs font-bold text-emerald-700">② 作業内容</legend>
+                <label className="block text-xs font-semibold text-slate-700">
+                  作業内容
+                  <textarea
+                    className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                    placeholder="例: 高所足場組み立て・鉄筋配筋作業"
+                    value={kyInstructionRecord.workRows[0]?.workDetail ?? ""}
+                    onChange={(e) =>
+                      setKyInstructionRecord((prev) => {
+                        const rows = prev.workRows.map((r, i) => (i === 0 ? { ...r, workDetail: e.target.value } : r));
+                        return { ...prev, workRows: rows };
+                      })
+                    }
+                  />
+                </label>
+              </fieldset>
+
+              {/* ③現地KY */}
+              <fieldset className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+                <legend className="px-1 text-xs font-bold text-emerald-700">③ 現地KY</legend>
+                <label className="block text-xs font-semibold text-slate-700">
+                  危険要因
+                  <textarea
+                    className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                    placeholder="例: 墜落・転落、資材落下"
+                    value={kyInstructionRecord.riskRows[0]?.hazard ?? ""}
+                    onChange={(e) =>
+                      setKyInstructionRecord((prev) => {
+                        const rows = prev.riskRows.map((r, i) => (i === 0 ? { ...r, hazard: e.target.value } : r));
+                        return { ...prev, riskRows: rows };
+                      })
+                    }
+                  />
+                </label>
+                <label className="mt-3 block text-xs font-semibold text-slate-700">
+                  対策
+                  <textarea
+                    className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                    placeholder="例: 要求性能墜落制止用器具使用、作業区画内立入禁止"
+                    value={kyInstructionRecord.riskRows[0]?.reduction ?? ""}
+                    onChange={(e) =>
+                      setKyInstructionRecord((prev) => {
+                        const rows = prev.riskRows.map((r, i) => (i === 0 ? { ...r, reduction: e.target.value } : r));
+                        return { ...prev, riskRows: rows };
+                      })
+                    }
+                  />
+                </label>
+              </fieldset>
             </div>
             <div className="mt-4 flex flex-wrap gap-2">
               <button
