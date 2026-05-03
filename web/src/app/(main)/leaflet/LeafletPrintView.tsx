@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Printer } from "lucide-react";
 import { SITE_STATS } from "@/data/site-stats";
@@ -86,7 +86,7 @@ export function LeafletPrintView() {
             <div className="shrink-0 text-right">
               <p className="text-[10px] uppercase tracking-widest text-slate-400">監修</p>
               <p className="text-sm font-bold text-slate-900">労働安全コンサルタント</p>
-              <p className="text-[11px] text-slate-500">登録番号 260022（土木区分）</p>
+              <p className="text-[11px] text-slate-500">ANZEN AI 有資格者</p>
             </div>
           </header>
 
@@ -195,7 +195,7 @@ export function LeafletPrintView() {
 
           <footer className="border-t border-slate-200 pt-3 text-center">
             <p className="text-[10px] text-slate-500">
-              © 2026 ANZEN AI / 監修：労働安全コンサルタント（登録番号260022・土木区分）
+              © 2026 ANZEN AI / 監修：ANZEN AI 専門家チーム
             </p>
           </footer>
         </article>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { getPublishedArticleIndex } from "@/lib/articles";
 import { ogImageUrl } from "@/lib/og-url";
@@ -34,7 +34,7 @@ export default function ArticlesIndexPage() {
           労働安全 解説記事
         </h1>
         <p className="mt-2 text-sm text-slate-600">
-          公開済み <strong>{articles.length}</strong> 本。法改正・運用ガイド・業種別の記事を労働安全コンサルタント（登録番号260022）監修で公開しています。
+          公開済み <strong>{articles.length}</strong> 本。法改正・運用ガイド・業種別の記事をANZEN AI 専門家チームによる設計で公開しています。
         </p>
       </header>
 

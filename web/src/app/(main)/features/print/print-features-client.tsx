@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { FEATURES, FEATURE_CATEGORIES, getFeaturesByCategory, type FeatureCategoryId } from "@/data/features-catalog";
@@ -92,7 +92,7 @@ export function PrintFeaturesClient() {
               現場の安全を、AIで変える。
             </h2>
             <p className="mt-1 text-xs text-slate-600">
-              労働安全コンサルタント（登録番号260022）監修 ／ 全{FEATURES.length}機能
+              ANZEN AI 専門家チームによる設計 ／ 全{FEATURES.length}機能
             </p>
             <p className="mt-1 text-[10px] text-slate-500">
               印刷日: <span className="print-only">{new Date().toLocaleDateString("ja-JP")}</span>
@@ -167,7 +167,7 @@ export function PrintFeaturesClient() {
               <li>5分ツアー: https://safe-ai-site.vercel.app/features/quick-tour</li>
             </ul>
             <p className="mt-2 text-[10px] text-slate-600">
-              監修: 労働安全コンサルタント（登録番号260022） ／ © 2026 ANZEN AI
+              監修: ANZEN AI 専門家チーム ／ © 2026 ANZEN AI
             </p>
           </section>
         </article>

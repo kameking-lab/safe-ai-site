@@ -1,4 +1,4 @@
-{
+﻿{
   "slug": "elearning-tokubetsu-12-types",
   "title": "特別教育12種類を社内で運用する完全ガイド",
   "description": "特別教育の対象作業・カリキュラム・修了証発行・記録保存。Eラーニング化の判断基準。",
@@ -17,7 +17,7 @@
   "publishedAt": "2026-04-28",
   "lastReviewedAt": "2026-04-28",
   "author": {
-    "name": "労働安全コンサルタント（登録番号260022・土木）",
+    "name": "ANZEN AI 専門家チーム",
     "url": "https://safe-ai-site.vercel.app/about"
   },
   "sections": [
@@ -54,7 +54,7 @@
   ],
   "ctaSlot": {
     "title": "現場の運用設計をご相談ください",
-    "description": "労働安全コンサルタント（登録番号260022）が直接ヒアリング。",
+    "description": "ANZEN AI 専門家チームが直接ヒアリング。",
     "href": "/contact",
     "label": "無料相談を申し込む"
   }

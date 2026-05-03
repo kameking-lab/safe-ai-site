@@ -33,7 +33,7 @@ const BENEFITS = [
   {
     icon: ShieldCheck,
     title: "労働安全コンサル監修",
-    desc: "登録番号260022 の有資格者が直接担当",
+    desc: "ANZEN AI 専門家チームが直接担当",
   },
 ] as const;
 

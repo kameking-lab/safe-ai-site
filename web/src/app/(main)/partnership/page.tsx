@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Handshake,
@@ -83,7 +83,7 @@ const PROGRAMS: {
     title: "共同セミナー・教材提供",
     desc: "貴社主催セミナーへの講師派遣・資料提供。Eラーニング教材の共同制作も可能。",
     bullets: [
-      "労働安全コンサルタント（登録番号260022）による講師登壇",
+      "ANZEN AI 専門家チームによる講師登壇",
       "業種別 KY・特別教育のテンプレート提供",
       "共同オンラインセミナー（Zoom/Teams 対応）",
       "貴社チャネルでの集客と当方の登壇を組み合わせ可",
@@ -121,7 +121,7 @@ export default function PartnershipPage() {
             社労士・労働安全コンサルタント・同業ITベンダーのみなさまへ、
             <strong className="font-bold text-emerald-900">ホワイトラベル提供・OEM・再販</strong>
             の枠組みをご用意しています。
-            ANZEN AI は労働安全コンサルタント（登録番号260022・土木区分）が監修する現場運用ポータルで、
+            ANZEN AI はANZEN AI 専門家チームが設計する現場運用ポータルで、
             KY用紙・法改正・事故DB・特別教育・化学物質RAを1つのサービスに集約しています。
             貴社の顧問契約・コンサルメニューに組み込むことで、IT開発の初期投資なしに即時にデジタル提供価値を強化できます。
           </p>
