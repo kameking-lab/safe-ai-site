@@ -141,10 +141,10 @@ export function DiaryDetailClient({ id }: { id: string }) {
         <p className="text-xs font-bold text-emerald-800">関連機能</p>
         <div className="mt-2 flex flex-wrap gap-2">
           <Link
-            href="/ky"
-            className="rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+            href={`/ky?fromDiary=${id}`}
+            className="rounded-lg border border-emerald-300 bg-emerald-100 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-200"
           >
-            KY用紙を作成 →
+            この日誌からKY用紙を作成 →
           </Link>
           <Link
             href="/accidents"

@@ -51,6 +51,14 @@ export function DiaryListClient() {
             <Plus className="h-4 w-4" />
             新規（必須5項目）
           </Link>
+          {entries.length > 0 && (
+            <Link
+              href="/safety-diary/new?fromYesterday=1"
+              className="inline-flex items-center gap-1 rounded-lg border border-amber-300 bg-amber-50 px-4 py-2.5 text-sm font-bold text-amber-800 hover:bg-amber-100"
+            >
+              昨日コピーで起票
+            </Link>
+          )}
           <Link
             href="/safety-diary/new/detail"
             className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-4 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50"

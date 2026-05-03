@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
 import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture-warning-map";
-import { SignageFloorPlan } from "@/components/signage/signage-floor-plan";
+import { SignageFloorPlanEditor } from "@/components/signage/signage-floor-plan-editor";
+import { SignageDangerAlert } from "@/components/signage/signage-danger-alert";
+import { SignageMorningScript } from "@/components/signage/signage-morning-script";
 import { SignageHeader } from "@/components/signage/signage-header";
 import { SignageFeaturedGoods } from "@/components/signage/signage-featured-goods";
 import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
@@ -237,6 +239,21 @@ export default function SignagePage() {
         </p>
       </div>
 
+      {/* 危険イベント全画面アラート（Web Speech API） */}
+      <SignageDangerAlert
+        jmaHeadline={bundle?.jmaHeadline ?? null}
+        warnings={bundle?.selectedWarnings ?? null}
+      />
+
+      {/* 朝礼スクリプトAI（200字要約） */}
+      <SignageMorningScript
+        jmaHeadline={bundle?.jmaHeadline ?? null}
+        warnings={bundle?.selectedWarnings ?? null}
+        topAccidentTitle={(bundle?.laborTrend ?? [])[0]?.title ?? null}
+        topLawTitle={topLaws[0]?.title ?? null}
+        industryLabel={selectedLocation.label}
+      />
+
       {/* 地図モードへの導線 */}
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-700/60 bg-emerald-950/40 px-3 py-2 text-xs">
         <span className="font-semibold text-emerald-200">🗺️ 地図モード（新）</span>
@@ -367,7 +384,7 @@ export default function SignagePage() {
             ) : null}
 
             {displayMode === "floorplan" ? (
-              <SignageFloorPlan />
+              <SignageFloorPlanEditor />
             ) : (
               <JapanPrefectureWarningMap levelsByIso={prefectureLevels} highlightIso={selectedLocation.prefectureIso} />
             )}

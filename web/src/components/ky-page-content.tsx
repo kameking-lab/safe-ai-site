@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { KyIndustryPresetPicker } from "@/components/ky-industry-preset-picker";
 import { KyInitialWizard } from "@/components/ky-initial-wizard";
 import { getPresetById, type KyIndustryPreset } from "@/data/mock/ky-industry-presets";
+import { getEntryById, loadEntries } from "@/lib/safety-diary/store";
+import { loadProfile } from "@/lib/company-profile";
 import { SITE_STATS } from "@/data/site-stats";
 import { KyRecordList } from "@/components/ky-record-list";
 import { KySignatureCanvas } from "@/components/ky-signature-canvas";
@@ -176,7 +179,7 @@ export function KyPageContent() {
   const services = useMemo(() => createServices(), []);
   const [record, setRecord] = useState<KyInstructionRecordState>(makeInitialRecord);
   const [signatures, setSignatures] = useState<Record<number, string>>({});
-  const [mode, setMode] = useState<KyMode>("detail");
+  const [mode, setMode] = useState<KyMode>("simple");
   const [customSections, setCustomSections] = useState<CustomSections>(DEFAULT_CUSTOM);
   const [guideOpen, setGuideOpen] = useState(false);
   const [recordList, setRecordList] = useState<KyRecordSummary[]>([]);
@@ -299,9 +302,81 @@ export function KyPageContent() {
     if (preset) handlePresetApply(preset);
   }, [searchParams, handlePresetApply]);
 
-  // /ky?import=risk-prediction で来た場合に localStorage の payload を取り込む
-  // （/risk-prediction の「このリスクをKY用紙に転記」ボタン経由）
+  // /ky?fromDiary=[id] で来た場合、日誌の workContent / kyResult を取り込む
   const [importNotice, setImportNotice] = useState<string | null>(null);
+  useEffect(() => {
+    const diaryId = searchParams?.get("fromDiary");
+    if (!diaryId) return;
+    const diary = getEntryById(diaryId);
+    if (!diary) {
+      setImportNotice("指定の日誌が見つかりませんでした");
+      return;
+    }
+    const workSummary = diary.required.workContent;
+    const kyText = diary.required.kyResult;
+    setRecord((prev) => {
+      const workRows = prev.workRows.map((r, i) =>
+        i === 0 ? { ...r, workDetail: workSummary } : r
+      );
+      // kyResult のテキストから危険・対策を分解（簡易）
+      const lines = kyText.split(/\n+/g);
+      const riskRows = prev.riskRows.map((r, i) => {
+        if (i === 0) return r;
+        const idx = i - 1;
+        const line = lines[idx] ?? "";
+        const hazardMatch = line.match(/危険[:：]\s*(.+)/);
+        const reduceMatch = line.match(/対策[:：]\s*(.+)/);
+        return {
+          ...r,
+          hazard: hazardMatch?.[1] ?? r.hazard,
+          reduction: reduceMatch?.[1] ?? r.reduction,
+        };
+      });
+      return { ...prev, workRows, riskRows };
+    });
+    setImportNotice(`日誌（${diary.required.date} ${diary.required.siteName}）から作業内容・KY結果を取り込みました`);
+  }, [searchParams]);
+
+  // 「昨日コピー」: 直近のKY localStorageから流用（既に保存ロジックが localStorage を使っている）
+  useEffect(() => {
+    if (searchParams?.get("fromYesterday") !== "1") return;
+    // 直近の日誌から要約を流用（KY自体には履歴一覧がないため日誌から流用）
+    const all = loadEntries();
+    if (all.length === 0) return;
+    const sorted = [...all].sort((a, b) =>
+      b.required.date.localeCompare(a.required.date)
+    );
+    const latest = sorted[0];
+    setRecord((prev) => {
+      const workRows = prev.workRows.map((r, i) =>
+        i === 0 ? { ...r, workDetail: latest.required.workContent } : r
+      );
+      return { ...prev, workRows };
+    });
+    setImportNotice(`${latest.required.date} の日誌から作業内容を流用しました（要編集）`);
+  }, [searchParams]);
+
+  // 自社プロファイルの業種でプリセット初期適用（クエリ指定がない場合のみ）
+  useEffect(() => {
+    if (searchParams?.get("preset")) return;
+    if (searchParams?.get("fromDiary")) return;
+    if (searchParams?.get("fromYesterday")) return;
+    const profile = loadProfile();
+    if (!profile.wizardCompleted) return;
+    const industryToPreset: Record<string, string> = {
+      construction: "construction-scaffolding",
+      manufacturing: "manufacturing-press",
+      transport: "logistics-fork",
+      logistics: "logistics-fork",
+    };
+    const presetId = industryToPreset[profile.industry];
+    if (!presetId) return;
+    const preset = getPresetById(presetId);
+    if (preset) handlePresetApply(preset);
+    // 1度だけ
+  }, [searchParams, handlePresetApply]);
+
+  /** ↓ 既存: /ky?import=risk-prediction の処理 */
   useEffect(() => {
     const importKind = searchParams?.get("import");
     if (importKind !== "risk-prediction") return;
@@ -440,12 +515,30 @@ export function KyPageContent() {
       {/* Sticky mode selector */}
       <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur-sm lg:px-8 print:hidden">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2">
-          <span className="hidden text-xs text-slate-500 sm:block">
-            <a href="/risk" className="font-semibold text-emerald-700 underline">今日のリスク</a>{" "}
-            と組み合わせて使えます
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/ky?fromYesterday=1"
+              className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-100"
+            >
+              昨日コピー
+            </Link>
+            <Link
+              href="/ky/morning"
+              className="rounded-full border border-violet-300 bg-violet-50 px-2.5 py-1 text-[11px] font-bold text-violet-800 hover:bg-violet-100"
+              title="サイネージ・大型画面で朝礼用に表示"
+            >
+              朝礼サイネージ表示 →
+            </Link>
+            <Link
+              href="/risk-prediction?target=ky"
+              className="hidden rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100 sm:inline-block"
+              title="AIリスク予測の結果をワンタップでKYに取り込む"
+            >
+              AIリスク予測から取り込み
+            </Link>
+          </div>
           <div className="flex items-center gap-0.5 rounded-full border border-slate-300 bg-slate-50 p-0.5">
-            {(["detail", "simple", "custom"] as KyMode[]).map((m) => (
+            {(["simple", "detail", "custom"] as KyMode[]).map((m) => (
               <button
                 key={m}
                 type="button"
@@ -457,7 +550,7 @@ export function KyPageContent() {
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                {m === "detail" ? "詳細モード" : m === "simple" ? "シンプル" : "カスタム"}
+                {m === "simple" ? "シンプル（推奨）" : m === "detail" ? "詳細" : "カスタム"}
               </button>
             ))}
           </div>

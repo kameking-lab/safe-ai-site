@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DiaryFormRequired } from "@/components/safety-diary/diary-form-required";
@@ -25,7 +26,9 @@ export default function NewSafetyDiaryPage() {
           ← 一覧へ戻る
         </Link>
       </header>
-      <DiaryFormRequired />
+      <Suspense fallback={<div className="text-sm text-slate-500">読み込み中…</div>}>
+        <DiaryFormRequired />
+      </Suspense>
     </main>
   );
 }
