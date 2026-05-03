@@ -427,6 +427,12 @@ export function AccidentDatabasePanel({
                     {isExpanded ? "閉じる" : "詳細を見る"}
                   </button>
                   <Link
+                    href={`/accidents/${accident.id}`}
+                    className="text-xs font-semibold text-blue-700 underline decoration-blue-300 underline-offset-2 hover:text-blue-900"
+                  >
+                    → 詳細ページへ
+                  </Link>
+                  <Link
                     href="/e-learning"
                     className="text-xs font-semibold text-emerald-700 underline decoration-emerald-300 underline-offset-2"
                   >

@@ -102,7 +102,7 @@ function makeInitialRecord(): KyInstructionRecordState {
     coop3Name: "",
     coop3Chief: "",
     workRows: [emptyWork(), emptyWork(), emptyWork(), emptyWork()],
-    riskRows: [emptyRisk("上記"), emptyRisk("①"), emptyRisk("②"), emptyRisk("③"), emptyRisk("④")],
+    riskRows: [emptyRisk("自由記述欄"), emptyRisk("①"), emptyRisk("②"), emptyRisk("③"), emptyRisk("④")],
     participants: Array.from({ length: 6 }, () => emptyP()),
     participantTotal: "",
     breaks: ["", "", "", "", ""],
@@ -401,7 +401,7 @@ export function KyPageContent() {
       const incoming = parsed.risks ?? [];
       if (incoming.length === 0) return;
       setRecord((prev) => {
-        // 空の行から優先的に詰める（1行目「上記」はスキップ）
+        // 空の行から優先的に詰める（1行目「自由記述欄」はスキップ）
         const next = prev.riskRows.map((r) => ({ ...r }));
         let cursor = 1;
         for (const item of incoming) {

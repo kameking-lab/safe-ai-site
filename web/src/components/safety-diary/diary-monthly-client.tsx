@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { Printer } from "lucide-react";
 import { getEntriesByMonth } from "@/lib/safety-diary/store";
 import type { SafetyDiaryEntry } from "@/lib/safety-diary/schema";
 import { computeMonthlySummary } from "@/lib/safety-diary/monthly-summary";
@@ -40,17 +41,20 @@ export function DiaryMonthlyClient({ ym }: { ym: string }) {
   const next = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, "0")}`;
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
-      <header className="mb-5 flex flex-wrap items-center justify-between gap-3">
+    <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8 print:max-w-none print:px-0 print:py-2">
+      <header className="mb-5 flex flex-wrap items-center justify-between gap-3 print:mb-3">
         <div>
-          <Link href="/safety-diary" className="text-xs font-semibold text-slate-500 hover:underline">
+          <Link
+            href="/safety-diary"
+            className="text-xs font-semibold text-slate-500 hover:underline print:hidden"
+          >
             ← 一覧へ戻る
           </Link>
           <h1 className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">
             📊 {ym} 月次まとめ
           </h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 print:hidden">
           <Link
             href={`/safety-diary/monthly/${prev}`}
             className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
@@ -63,6 +67,15 @@ export function DiaryMonthlyClient({ ym }: { ym: string }) {
           >
             翌月 →
           </Link>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700"
+            aria-label="月次まとめをPDF出力／印刷"
+          >
+            <Printer className="h-3.5 w-3.5" />
+            PDFで出力／印刷
+          </button>
         </div>
       </header>
 

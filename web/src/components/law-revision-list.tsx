@@ -8,7 +8,7 @@ import { fuzzyMatchAll } from "@/lib/fuzzy-search";
 import { revisionMatchesIndustry } from "@/lib/law-revision-industry-tags";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
-import { loadProfile, relevanceScore, type CompanyProfile } from "@/lib/company-profile";
+import { loadProfile, profileIndustryToTag, relevanceScore, type CompanyProfile } from "@/lib/company-profile";
 
 function formatDate(value: string) {
   if (!value) return null;
@@ -305,48 +305,76 @@ export function LawRevisionList({
     [profile]
   );
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    const results = revisions.filter((r) => {
+  // 業種タグ（プロファイル業種→IndustryTag 変換）
+  const profileIndustryTag = useMemo(
+    () => (profile?.industry ? profileIndustryToTag(profile.industry) : null),
+    [profile]
+  );
+
+  // フィルタ: 厳密一致版（業種タグ完全一致）と近接版（キーワードスコア）
+  const filterBase = useCallback(
+    (r: LawRevision): boolean => {
+      const q = search.trim().toLowerCase();
       const y = Number(r.publishedAt.slice(0, 4));
       if (y < yearFrom || y > yearTo) return false;
       if (selectedKind !== "すべて" && resolveKindLabel(r) !== selectedKind) return false;
-      // #40: 影響度フィルタ
       if (selectedImpact !== "すべて" && r.impact !== selectedImpact) return false;
-      // 業種マルチセレクトフィルタ（OR条件）
       if (selectedIndustries.size > 0) {
         const matches = Array.from(selectedIndustries).some((key) => industryMatchesRevision(key, r));
         if (!matches) return false;
       }
-      // 属性フィルタ
       if (selectedWorkerAttribute !== "すべて") {
         const attrs = r.worker_attribute ?? ["一般"];
         if (!attrs.includes(selectedWorkerAttribute) && !attrs.includes("一般")) return false;
       }
-      // 規模フィルタ
       if (selectedCompanySize !== "全規模") {
         const size = r.company_size ?? "全規模";
         if (size !== "全規模" && size !== selectedCompanySize) return false;
       }
-      // 5.2: 自社に効く改正のみ
-      if (onlyRelevant && profile && profile.wizardCompleted) {
-        if (scoreFor(r) < 18) return false;
-      }
       if (!q) return true;
       const target = `${r.title} ${r.summary} ${r.issuer} ${r.revisionNumber}`;
       return fuzzyMatchAll(search.trim(), target);
+    },
+    [search, yearFrom, yearTo, selectedKind, selectedImpact, selectedIndustries, selectedWorkerAttribute, selectedCompanySize]
+  );
+
+  const { filtered, relevanceFallback } = useMemo(() => {
+    // 自社関連フィルタ無効時は通常フィルタのみ
+    if (!onlyRelevant || !profile?.wizardCompleted) {
+      const list = revisions.filter(filterBase);
+      list.sort((a, b) => {
+        const diff = a.publishedAt.localeCompare(b.publishedAt);
+        return sortOrder === "desc" ? -diff : diff;
+      });
+      return { filtered: list, relevanceFallback: false };
+    }
+
+    // 1段目: 業種タグ厳密一致 + 自社プロファイル関連
+    const strict = revisions.filter((r) => {
+      if (!filterBase(r)) return false;
+      if (!profileIndustryTag) return scoreFor(r) >= 18;
+      return industryMatchesRevision(profileIndustryTag, r) && scoreFor(r) >= 18;
     });
-    // #40: 施行日ソート
-    return results.sort((a, b) => {
-      // 自社関連を優先表示する場合はスコア順
-      if (onlyRelevant && profile?.wizardCompleted) {
+    if (strict.length > 0) {
+      strict.sort((a, b) => {
         const ds = scoreFor(b) - scoreFor(a);
         if (ds !== 0) return ds;
-      }
+        const diff = a.publishedAt.localeCompare(b.publishedAt);
+        return sortOrder === "desc" ? -diff : diff;
+      });
+      return { filtered: strict, relevanceFallback: false };
+    }
+
+    // 2段目: 近接フォールバック（キーワードスコアのみ）
+    const loose = revisions.filter((r) => filterBase(r) && scoreFor(r) >= 18);
+    loose.sort((a, b) => {
+      const ds = scoreFor(b) - scoreFor(a);
+      if (ds !== 0) return ds;
       const diff = a.publishedAt.localeCompare(b.publishedAt);
       return sortOrder === "desc" ? -diff : diff;
     });
-  }, [revisions, search, yearFrom, yearTo, selectedKind, selectedImpact, sortOrder, selectedIndustries, selectedWorkerAttribute, selectedCompanySize, onlyRelevant, profile, scoreFor]);
+    return { filtered: loose, relevanceFallback: loose.length > 0 };
+  }, [revisions, filterBase, sortOrder, onlyRelevant, profile, profileIndustryTag, scoreFor]);
 
   const showEmptyState = status === "success" && !error && filtered.length === 0;
 
@@ -378,6 +406,14 @@ export function LawRevisionList({
       <p className="mt-1 text-[11px] leading-5 text-amber-700">
         ⚠ 要約・条番号は<strong>施行当時</strong>のものです。現行条文は各カードの「e-Govで原文を確認」から最新版をご確認ください。
       </p>
+      {relevanceFallback && (
+        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px] leading-5 text-amber-900 print:hidden">
+          <p className="font-bold">業種厳密一致の改正は見つかりませんでした</p>
+          <p className="mt-0.5">
+            近接条件（取扱化学物質・主要機械・作業キーワード）で関連スコア順に表示しています。
+          </p>
+        </div>
+      )}
       {articleHighlights.length > 0 && (
         <div className="mt-3 rounded-xl border border-violet-200 bg-violet-50 p-3 print:hidden">
           <div className="flex items-start justify-between gap-2">

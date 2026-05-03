@@ -112,6 +112,32 @@ export function getIndustryKeywords(industry: ProfileIndustry): string[] {
   return INDUSTRY_KEYWORDS[industry] ?? [];
 }
 
+/**
+ * プロファイル業種を IndustryTag (domain.ts) にマッピングする。
+ * 該当が無い（it / other）場合は null。
+ */
+export function profileIndustryToTag(
+  industry: ProfileIndustry
+): "construction" | "manufacturing" | "healthcare" | "transport" | "forestry" | null {
+  switch (industry) {
+    case "construction":
+      return "construction";
+    case "manufacturing":
+      return "manufacturing";
+    case "healthcare":
+      return "healthcare";
+    case "transport":
+    case "logistics":
+      return "transport";
+    case "forestry":
+      return "forestry";
+    case "it":
+    case "other":
+    default:
+      return null;
+  }
+}
+
 /** プロファイルから「自社に関連する」スコアを算出（テキスト→0..100） */
 export function relevanceScore(text: string, profile: CompanyProfile): number {
   if (!text) return 0;
