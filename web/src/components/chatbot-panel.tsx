@@ -129,9 +129,56 @@ export function ChatbotPanel() {
   const [copyStates, setCopyStates] = useState<Record<string, boolean>>({});
   const [shareToast, setShareToast] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
+  const [voiceMode, setVoiceMode] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
   const prefillAppliedRef = useRef(false);
+
+  // 音声完結モード: 新しいAI回答が来たら読み上げ
+  useEffect(() => {
+    if (!voiceMode) return;
+    if (messages.length === 0) return;
+    const last = messages[messages.length - 1];
+    if (last.role !== "assistant") return;
+    if (typeof window === "undefined" || !window.speechSynthesis) return;
+    const utter = new SpeechSynthesisUtterance(last.content.slice(0, 400));
+    utter.lang = "ja-JP";
+    utter.rate = 1.0;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utter);
+  }, [messages, voiceMode]);
+
+  // 音声完結モード: 起動時に音声入力を促す
+  const startVoiceInput = useCallback(() => {
+    if (typeof window === "undefined") return;
+    type SR = { new (): {
+      lang: string;
+      interimResults: boolean;
+      onresult: (e: { results: { 0: { transcript: string } }[] }) => void;
+      onerror: () => void;
+      start: () => void;
+    } };
+    const w = window as unknown as { webkitSpeechRecognition?: SR; SpeechRecognition?: SR };
+    const Ctor = w.webkitSpeechRecognition ?? w.SpeechRecognition;
+    if (!Ctor) {
+      alert("音声入力に対応していないブラウザです。Chrome系をお試しください。");
+      return;
+    }
+    const recog = new Ctor();
+    recog.lang = "ja-JP";
+    recog.interimResults = false;
+    recog.onresult = (e) => {
+      const text = e.results[0]?.[0]?.transcript ?? "";
+      if (text) {
+        setInput(text);
+        // 自動送信（音声完結モード）
+        setTimeout(() => void handleSend(text), 200);
+      }
+    };
+    recog.onerror = () => {};
+    recog.start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     setSessions(loadSessions());
@@ -338,6 +385,29 @@ export function ChatbotPanel() {
           >
             🕐 履歴{sessions.length > 0 && <span className="text-blue-600">({sessions.length})</span>}
           </button>
+          {/* 6.3: 音声完結モード */}
+          <button
+            type="button"
+            onClick={() => setVoiceMode((v) => !v)}
+            aria-pressed={voiceMode}
+            className={`flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-bold ${
+              voiceMode
+                ? "border-emerald-400 bg-emerald-600 text-white"
+                : "border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50"
+            }`}
+            title="音声入力で質問→AI回答を自動読み上げ（Web Speech API）"
+          >
+            🎙 音声完結モード{voiceMode ? "ON" : "OFF"}
+          </button>
+          {voiceMode && (
+            <button
+              type="button"
+              onClick={startVoiceInput}
+              className="flex items-center gap-1 rounded-lg border border-emerald-400 bg-white px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-50"
+            >
+              🎤 話して質問する
+            </button>
+          )}
         </div>
         {hasMessages && (
           <div className="flex items-center gap-2 flex-wrap">
@@ -641,6 +711,39 @@ export function ChatbotPanel() {
                           {fu.label}
                         </button>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 6.2: 横断アクション — KY/RA/法改正へ遷移 */}
+                {msg.role === "assistant" && !isSending && (
+                  <div className="mt-2 max-w-[88%]">
+                    <p className="mb-1 text-[11px] text-slate-500">この内容を活用：</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <a
+                        href={`/ky?q=${encodeURIComponent(msg.content.slice(0, 80))}`}
+                        className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100"
+                      >
+                        → KYで確認
+                      </a>
+                      <a
+                        href={`/chemical-ra?name=${encodeURIComponent(msg.content.slice(0, 40))}`}
+                        className="rounded-full border border-violet-300 bg-violet-50 px-3 py-1 text-[11px] font-bold text-violet-800 hover:bg-violet-100"
+                      >
+                        → 化学物質RA
+                      </a>
+                      <a
+                        href={`/laws?q=${encodeURIComponent(msg.content.slice(0, 40))}`}
+                        className="rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
+                      >
+                        → 法改正一覧
+                      </a>
+                      <a
+                        href={`/accidents?q=${encodeURIComponent(msg.content.slice(0, 40))}`}
+                        className="rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-[11px] font-bold text-rose-800 hover:bg-rose-100"
+                      >
+                        → 事故事例
+                      </a>
                     </div>
                   </div>
                 )}
