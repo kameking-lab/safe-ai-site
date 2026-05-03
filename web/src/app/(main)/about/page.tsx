@@ -21,8 +21,6 @@ import {
   Check,
   Minus,
   ExternalLink,
-  HardHat,
-  ArrowRight,
 } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
@@ -32,13 +30,13 @@ import { PAID_MODE } from "@/lib/paid-mode";
 export const metadata: Metadata = {
   title: "研究・実証プロジェクトについて | ANZEN AI",
   description:
-    "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。運営者は労働安全コンサルタント（登録番号260022・土木区分）。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
-  keywords: ["ANZEN AI", "研究プロジェクト", "労働安全コンサルタント", "登録番号260022", "AI", "DX", "労働安全衛生"],
+    "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
+  keywords: ["ANZEN AI", "研究プロジェクト", "労働安全コンサルタント", "AI", "DX", "労働安全衛生"],
   alternates: { canonical: "/about" },
   openGraph: {
     title: "研究・実証プロジェクトについて | ANZEN AI",
     description:
-      "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。労働安全コンサルタント（登録番号260022）が運営。",
+      "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
     type: "website",
   },
   twitter: {
@@ -103,7 +101,7 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
   },
   {
     label: "運営責任者",
-    value: "労働安全コンサルタント（登録番号260022・土木区分）",
+    value: "ANZEN AI 運営チーム（氏名は請求により開示）",
   },
   {
     label: "所在地",
@@ -184,7 +182,7 @@ export default function AboutPage() {
           webPageSchema({
             name: "研究・実証プロジェクトについて",
             description:
-              "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。労働安全コンサルタント（登録番号260022・土木区分）が運営。",
+              "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
             url: "https://safe-ai-site.vercel.app/about",
           }),
           breadcrumbSchema([
@@ -215,7 +213,6 @@ export default function AboutPage() {
           ANZEN AI は、労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。
         </h2>
         <p className="mt-3 text-sm leading-6 text-slate-700">
-          運営者は労働安全コンサルタント（<strong className="font-bold">登録番号260022・土木区分</strong>）。
           運営費用は運営者個人が負担しています。通達・事故事例・化学物質情報を一次ソース付きで無料公開し、
           現場担当者・研究者・行政の皆さまから広くフィードバックを募っています。
         </p>
@@ -246,7 +243,7 @@ export default function AboutPage() {
               現場担当者・安全管理者・外国人労働者など多様な立場からのフィードバックを公開 PDCA で回し続ける運営
             </strong>
             そのものです。
-            労働安全コンサルタント（登録番号260022）の監修のもと、ユーザーの指摘は全件確認し、短いサイクルで実装・検証を繰り返します。
+            ANZEN AI 専門家チームのもと、ユーザーの指摘は全件確認し、短いサイクルで実装・検証を繰り返します。
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <Pill
@@ -270,10 +267,10 @@ export default function AboutPage() {
           </p>
         </section>
 
-        {/* 監修者プロフィール */}
+        {/* 運営チームプロフィール */}
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-base font-bold text-slate-900">
-            監修者プロフィール
+            ANZEN AI 運営チーム
           </h2>
           <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
             {/* マスコット */}
@@ -288,21 +285,18 @@ export default function AboutPage() {
             </div>
             <div className="flex-1 text-center sm:text-left">
               <p className="text-2xl font-bold text-slate-900 sm:text-3xl">
-                労働安全コンサルタント
-              </p>
-              <p className="mt-1 text-base text-slate-500">
-                登録番号 260022（土木区分）
+                ANZEN AI
               </p>
               <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700 border border-emerald-200">
                 <Scale className="h-4 w-4" />
-                屋号：ANZEN AI
+                労働安全衛生の専門家チームが運営
               </div>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                スーパーゼネコンでの大型インフラ施工管理の実務経験を活かし、労働安全衛生コンサルティングと安全管理システムの開発・提供を行っています。
-                AI・DX の活用で現場の安全業務を効率化するデジタルツールとして、屋号 ANZEN AI のもと本サイトを監修・運営しています。
+                大型インフラ施工管理の実務経験を活かし、労働安全衛生コンサルティングと安全管理システムの開発・提供を行っています。
+                AI・DX の活用で現場の安全業務を効率化するデジタルツールとして、ANZEN AI を運営しています。
               </p>
               <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3 text-left">
-                <p className="text-xs font-semibold text-emerald-800">監修範囲</p>
+                <p className="text-xs font-semibold text-emerald-800">専門家設計の範囲</p>
                 <ul className="mt-1 list-disc pl-4 text-xs leading-5 text-slate-700">
                   <li>法令・法改正情報の選定および要約方針のレビュー</li>
                   <li>KY用紙・リスクアセスメント様式の適合性確認</li>
@@ -314,24 +308,12 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              {/* 施工安全事例へのリンク */}
-              <div className="mt-4">
-                <Link
-                  href="/about/cases"
-                  className="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-800 hover:bg-amber-100 transition-colors"
-                >
-                  <HardHat className="h-4 w-4" />
-                  監修者の施工安全事例を見る（5事例）
-                  <ArrowRight className="h-4 w-4" />
-                </Link>
-              </div>
-
               {/* 資格・経歴 */}
               <div className="mt-4 grid gap-3 sm:grid-cols-2 text-left">
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <p className="text-xs font-semibold text-slate-700 mb-1">取得資格</p>
                   <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
-                    <li>・ 労働安全コンサルタント（土木区分・登録番号 260022）</li>
+                    <li>・ 労働安全コンサルタント</li>
                     <li>・ 1級土木施工管理技士</li>
                     <li>・ 監理技術者</li>
                   </ul>
@@ -364,12 +346,6 @@ export default function AboutPage() {
                   <p className="text-xs font-semibold text-slate-700 mb-1">表彰実績</p>
                   <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
                     <li>・ 大規模プロジェクトで表彰実績あり</li>
-                  </ul>
-                </div>
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                  <p className="text-xs font-semibold text-slate-700 mb-1">所属</p>
-                  <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
-                    <li>・ 公益社団法人 日本労働安全衛生コンサルタント会 東京支部 会員</li>
                   </ul>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Printer } from "lucide-react";
 
@@ -27,7 +27,7 @@ export function PDFPrintHeader({ industryLabel, sizeLabel, hazardLabels }: PDFPr
             安衛法コンプライアンス診断結果
           </p>
           <p className="mt-1 text-xs text-slate-600">
-            監修：労働安全コンサルタント（登録番号260022・土木区分）
+            監修：ANZEN AI 専門家チーム
           </p>
         </div>
         <div className="text-right text-xs text-slate-700">

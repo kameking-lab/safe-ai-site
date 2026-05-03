@@ -75,13 +75,13 @@ export default async function HandoverPage({ searchParams }: Props) {
               ["サイト名", "ANZEN AI（安全AIサイト）"],
               ["URL", "https://safe-ai-site.vercel.app"],
               ["目的", "労働安全の独立コンサルタント受注サイト（協会向けポートフォリオ兼務）"],
-              ["監修者表記", "労働安全コンサルタント（登録番号260022・土木区分）\nANZEN AI 事務局"],
+              ["運営表記", "ANZEN AI 運営チーム"],
               ["デプロイ", "Vercel（GitHub main ブランチ自動デプロイ）"],
               ["フロント", "Next.js App Router / TypeScript / Tailwind CSS"],
             ]}
           />
           <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-            <strong>⚠️ 重要:</strong> 実名「金田 義太」は絶対に出力しないこと。特商法の請求開示方式を採用済み。
+            <strong>⚠️ 重要:</strong> 運営者の実名は絶対に出力しないこと。特商法の請求開示方式を採用済み。
           </div>
         </section>
 
@@ -242,7 +242,7 @@ export default async function HandoverPage({ searchParams }: Props) {
           />
           <SubHeading>禁止事項</SubHeading>
           <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 space-y-1">
-            <p>❌ 実名「金田 義太」の出力</p>
+            <p>❌ 運営者の実名出力</p>
             <p>❌ 未確認の外部 API/サービス導入</p>
             <p>❌ Stripe・認証・課金の無断実装</p>
             <p>❌ 環境変数の無断追加</p>

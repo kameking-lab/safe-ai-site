@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { readFile } from "fs/promises";
 import path from "path";
@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "環境変数 棚卸し | Admin",
 };
 
-const VALID_KEY = "kaneda2026";
+const VALID_KEY = "anzenai2026";
 
 interface Props {
   searchParams: Promise<{ key?: string }>;

@@ -1,4 +1,4 @@
-{
+﻿{
   "slug": "scaffold-3rd-rail-2024",
   "title": "足場墜落防止 第3次規制（2024〜）のポイント",
   "description": "墜落防止措置の段階的強化、手すり先行工法、特別教育の追加項目、罰則の動向を整理。",
@@ -17,7 +17,7 @@
   "publishedAt": "2026-04-28",
   "lastReviewedAt": "2026-04-28",
   "author": {
-    "name": "労働安全コンサルタント（登録番号260022・土木）",
+    "name": "ANZEN AI 専門家チーム",
     "url": "https://safe-ai-site.vercel.app/about"
   },
   "sections": [
@@ -54,7 +54,7 @@
   ],
   "ctaSlot": {
     "title": "現場の運用設計をご相談ください",
-    "description": "労働安全コンサルタント（登録番号260022）が直接ヒアリング。",
+    "description": "ANZEN AI 専門家チームが直接ヒアリング。",
     "href": "/contact",
     "label": "無料相談を申し込む"
   }

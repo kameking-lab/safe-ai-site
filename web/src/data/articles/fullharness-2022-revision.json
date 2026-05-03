@@ -1,4 +1,4 @@
-{
+﻿{
   "slug": "fullharness-2022-revision",
   "title": "フルハーネス義務化の最新ルール（2022年改正以降）— 6.75m超は必須",
   "description": "フルハーネス型墜落制止用器具の使用義務範囲、特別教育、点検記録、現場で陥りがちな違反例を整理。",
@@ -17,7 +17,7 @@
   "publishedAt": "2026-04-28",
   "lastReviewedAt": "2026-04-28",
   "author": {
-    "name": "労働安全コンサルタント（登録番号260022・土木）",
+    "name": "ANZEN AI 専門家チーム",
     "url": "https://safe-ai-site.vercel.app/about"
   },
   "sections": [
@@ -54,7 +54,7 @@
   ],
   "ctaSlot": {
     "title": "現場の運用設計をご相談ください",
-    "description": "労働安全コンサルタント（登録番号260022）が直接ヒアリング。",
+    "description": "ANZEN AI 専門家チームが直接ヒアリング。",
     "href": "/contact",
     "label": "無料相談を申し込む"
   }

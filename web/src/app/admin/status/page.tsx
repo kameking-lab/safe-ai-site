@@ -1,4 +1,4 @@
-import fs from "node:fs";
+﻿import fs from "node:fs";
 import path from "node:path";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false, nocache: true, noarchive: true },
 };
 
-const VALID_KEY = "kaneda2026";
+const VALID_KEY = "anzenai2026";
 const REPORT_FILENAME = "comprehensive-status-report-2026-05-01.md";
 
 interface Props {

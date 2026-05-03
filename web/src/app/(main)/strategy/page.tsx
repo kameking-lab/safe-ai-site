@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { StrategyGate } from "@/components/strategy-gate";
 import { monetizationStrategyV3 } from "@/data/strategy/monetization-v3-2026-04-26";
 
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const STRATEGY_PASSWORD = "kaneda2026";
+const STRATEGY_PASSWORD = "anzenai2026";
 
 export default function StrategyPage() {
   return (

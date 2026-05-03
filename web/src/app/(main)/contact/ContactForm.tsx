@@ -238,10 +238,10 @@ export default function ContactForm() {
         </div>
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
-            ANZEN AI 監修・受託担当
+            ANZEN AI 運営チーム
           </p>
           <h2 className="mt-1 text-lg font-bold text-slate-900">
-            労働安全コンサルタント（登録番号260022・土木区分）
+            労働安全の専門家チームがご対応します
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-slate-700">
             大手ゼネコンで大型土木インフラの施工管理経験をもつ労働安全コンサルタント。

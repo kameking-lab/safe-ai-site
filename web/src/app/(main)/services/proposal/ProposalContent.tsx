@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -162,7 +162,7 @@ const PLANS: PlanSpec[] = [
 ];
 
 const COMMON_ITEMS = [
-  "労働安全コンサルタント（登録番号260022・土木区分）が監修・直接担当",
+  "ANZEN AI 専門家チームが設計・直接担当",
   "業務委託契約書に「成果物の知的財産権帰属」「ソースコード引渡条項」を明記",
   "助成金（人材開発支援助成金・業務改善助成金・エイジフレンドリー補助金）申請サポート対応",
   "全プラン Cal.com にて無料相談30分を予約可能",
@@ -403,7 +403,7 @@ export function ProposalContent() {
         {/* フッター */}
         <footer className="border-t border-slate-200 pt-6 text-xs leading-6 text-slate-500">
           <p>ANZEN AI（運営：労働安全コンサルタント事務所）</p>
-          <p>監修：労働安全コンサルタント 登録番号260022（土木区分）</p>
+          <p>監修：労働安全コンサルタント ANZEN AI 有資格者</p>
           <p>本提案書は概算見積です。正式見積は無料相談（30分）後に2〜3営業日以内にお送りします。</p>
         </footer>
       </article>

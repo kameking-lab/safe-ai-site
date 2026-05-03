@@ -1,4 +1,4 @@
-{
+﻿{
   "slug": "stress-check-50-employee",
   "title": "ストレスチェック制度の50人未満事業所への拡大",
   "description": "2026年以降の制度動向、50人未満への努力義務拡大、外部委託先の選び方、産業医面談との接続。",
@@ -16,7 +16,7 @@
   "publishedAt": "2026-04-28",
   "lastReviewedAt": "2026-04-28",
   "author": {
-    "name": "労働安全コンサルタント（登録番号260022・土木）",
+    "name": "ANZEN AI 専門家チーム",
     "url": "https://safe-ai-site.vercel.app/about"
   },
   "sections": [
@@ -53,7 +53,7 @@
   ],
   "ctaSlot": {
     "title": "現場の運用設計をご相談ください",
-    "description": "労働安全コンサルタント（登録番号260022）が直接ヒアリング。",
+    "description": "ANZEN AI 専門家チームが直接ヒアリング。",
     "href": "/contact",
     "label": "無料相談を申し込む"
   }

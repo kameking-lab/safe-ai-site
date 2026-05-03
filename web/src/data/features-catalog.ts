@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 機能紹介ページ群で使う機能カタログ
  * - /features （トップ）
  * - /features/[category]
@@ -321,9 +321,9 @@ export const FEATURES: FeatureItem[] = [
   {
     slug: "stats",
     title: "サイト統計・運営者情報",
-    summary: "登録番号260022の労働安全コンサルタント監修",
+    summary: "ANZEN AI 有資格者の労働安全コンサルタント監修",
     description:
-      "本サイトは登録労働安全コンサルタント（登録番号260022）が監修。利用統計・監修方針を公開しています。",
+      "本サイトは登録ANZEN AI 専門家チームが監修。利用統計・監修方針を公開しています。",
     href: "/about",
     category: "management",
     tags: ["運営者"],
