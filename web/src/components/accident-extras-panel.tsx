@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { searchMhlwSimilar, MHLW_DEATHS_TOTAL, type ScoredMhlwCase } from "@/lib/mhlw-similar-cases";
+import { searchMhlwSimilarStrict, MHLW_DEATHS_TOTAL, type ScoredMhlwCase } from "@/lib/mhlw-similar-cases";
 import { loadProfile, INDUSTRY_LABELS, type CompanyProfile } from "@/lib/company-profile";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
+import type { AccidentCase } from "@/lib/types/domain";
 
 const INDUSTRIES_FOR_PROFILE: Record<string, string[]> = {
   construction: ["建設", "足場", "高所", "型枠"],
@@ -94,9 +95,32 @@ function CrossTab() {
   );
 }
 
+/**
+ * MHLW 死亡災害ケースに「最も近い」サイト収録事例（詳細ページあり）を探す。
+ * type が一致するもの → 業種が一致するもの → の優先順位で1件返す。
+ */
+function findRelatedCuratedCase(
+  mhlw: ScoredMhlwCase,
+  curated: AccidentCase[]
+): AccidentCase | null {
+  if (mhlw.type) {
+    const byType = curated.find((c) => c.type && mhlw.type?.includes(c.type.slice(0, 2)));
+    if (byType) return byType;
+  }
+  if (mhlw.industry) {
+    const byIndustry = curated.find((c) => c.workCategory && mhlw.industry?.includes(c.workCategory));
+    if (byIndustry) return byIndustry;
+  }
+  return null;
+}
+
 function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
   const query = profile ? buildProfileQuery(profile) : "";
-  const cases = useMemo(() => (query ? searchMhlwSimilar(query, 5) : []), [query]);
+  const result = useMemo(() => {
+    if (!profile || !query) return { cases: [] as ScoredMhlwCase[], mode: "none" as const };
+    return searchMhlwSimilarStrict(query, profile.industry, 5);
+  }, [profile, query]);
+  const curated = useMemo(() => getAccidentCasesDataset(), []);
 
   if (!profile?.wizardCompleted) {
     return (
@@ -115,6 +139,9 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
     );
   }
 
+  const cases = result.cases;
+  const isLoose = result.mode === "loose";
+
   return (
     <section className="rounded-2xl border border-rose-200 bg-rose-50/40 p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -131,35 +158,54 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
       <p className="mt-1 text-[11px] text-rose-800">
         厚労省 死亡災害DB {MHLW_DEATHS_TOTAL.toLocaleString()}件から、業種・主要機械・化学物質キーワードで重み付け検索した実例。
       </p>
+      {isLoose && (
+        <p className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-900">
+          ⚠ 業種厳密一致では該当なし。業種制限を外して全件から関連度順で表示しています。
+        </p>
+      )}
       {cases.length === 0 ? (
         <p className="mt-3 rounded-lg bg-white px-3 py-2 text-xs text-slate-500">
           該当事例なし。プロファイルにより詳しい主要機械・化学物質を追加してください。
         </p>
       ) : (
         <ol className="mt-3 space-y-2">
-          {cases.map((c, i) => (
-            <li key={c.id} className="rounded-lg border border-rose-100 bg-white p-3 text-xs shadow-sm">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white">
-                  {i + 1}
-                </span>
-                {c.type && (
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
-                    {c.type}
+          {cases.map((c, i) => {
+            const related = findRelatedCuratedCase(c, curated);
+            const detailHref = related
+              ? `/accidents/${related.id}`
+              : `/accidents?q=${encodeURIComponent([c.type, c.industry].filter(Boolean).join(" "))}`;
+            return (
+              <li key={c.id} className="rounded-lg border border-rose-100 bg-white p-3 text-xs shadow-sm">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white">
+                    {i + 1}
                   </span>
-                )}
-                {c.industry && (
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600">
-                    {c.industry}
+                  {c.type && (
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+                      {c.type}
+                    </span>
+                  )}
+                  {c.industry && (
+                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600">
+                      {c.industry}
+                    </span>
+                  )}
+                  <span className="text-[10px] text-slate-400">
+                    {c.year}{c.month ? `-${String(c.month).padStart(2, "0")}` : ""}
                   </span>
-                )}
-                <span className="text-[10px] text-slate-400">
-                  {c.year}{c.month ? `-${String(c.month).padStart(2, "0")}` : ""}
-                </span>
-              </div>
-              <p className="mt-1.5 text-slate-700 leading-relaxed">{c.description}</p>
-            </li>
-          ))}
+                </div>
+                <p className="mt-1.5 text-slate-700 leading-relaxed">{c.description}</p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <Link
+                    href={detailHref}
+                    className="inline-flex items-center gap-1 rounded-full border border-rose-300 bg-white px-2 py-0.5 text-[11px] font-bold text-rose-800 hover:bg-rose-50"
+                  >
+                    {related ? "→ 関連事例の詳細を見る" : "→ 類似事例を事故DBで探す"}
+                  </Link>
+                </div>
+              </li>
+            );
+          })}
         </ol>
       )}
     </section>
