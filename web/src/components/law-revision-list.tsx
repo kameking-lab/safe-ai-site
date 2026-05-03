@@ -178,7 +178,12 @@ export function LawRevisionList({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [search, setSearch] = useState("");
+  const articlesParam = searchParams.get("articles");
+  const initialArticles = articlesParam
+    ? articlesParam.split(",").map((s) => s.trim()).filter(Boolean)
+    : [];
+  const [search, setSearch] = useState(initialArticles[0] ?? "");
+  const [articleHighlights, setArticleHighlights] = useState<string[]>(initialArticles);
   const [yearFrom, setYearFrom] = useState(2016);
   const [yearTo, setYearTo] = useState(2026);
   const [selectedKind, setSelectedKind] = useState<string>("すべて");
@@ -373,6 +378,38 @@ export function LawRevisionList({
       <p className="mt-1 text-[11px] leading-5 text-amber-700">
         ⚠ 要約・条番号は<strong>施行当時</strong>のものです。現行条文は各カードの「e-Govで原文を確認」から最新版をご確認ください。
       </p>
+      {articleHighlights.length > 0 && (
+        <div className="mt-3 rounded-xl border border-violet-200 bg-violet-50 p-3 print:hidden">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <p className="text-xs font-bold text-violet-900">
+                事故事例から関連法令を絞り込み中
+              </p>
+              <ul className="mt-1 flex flex-wrap gap-1">
+                {articleHighlights.map((a) => (
+                  <li
+                    key={a}
+                    className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-violet-800 ring-1 ring-violet-200"
+                  >
+                    {a}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setArticleHighlights([]);
+                setSearch("");
+              }}
+              className="rounded px-1.5 text-violet-700 hover:bg-violet-100"
+              aria-label="絞り込みを解除"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
       <div className="mt-3 grid grid-cols-1 gap-2 print:hidden sm:grid-cols-2 lg:grid-cols-3">
         <div className="sm:col-span-2">
           <label className="text-xs font-semibold text-slate-700" htmlFor="law-search">
