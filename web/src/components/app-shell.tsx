@@ -318,6 +318,13 @@ export function AppShell({ children, user }: AppShellProps) {
 
   return (
     <div className="flex min-h-full w-full bg-white shadow-sm dark:bg-slate-900 dark:shadow-black/40">
+      {/* Skip to main content (a11y / WCAG 2.4.1) */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-emerald-700 focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-300"
+      >
+        メインコンテンツへスキップ
+      </a>
       {/* PC sidebar */}
       <aside className="hidden w-60 shrink-0 flex-col border-r border-slate-200 bg-slate-50/80 px-3 py-5 dark:border-slate-700 dark:bg-slate-900/80 lg:flex">
         <div className="mb-4 flex items-start justify-between gap-2 px-1">
@@ -625,7 +632,7 @@ export function AppShell({ children, user }: AppShellProps) {
         </div>
         <EnglishBetaBanner />
         <FlagshipNav />
-        <main className="flex flex-1 flex-col">
+        <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col scroll-mt-20 focus:outline-none">
           <div className="mx-auto w-full max-w-7xl flex-1">{children}</div>
         </main>
         <Footer />

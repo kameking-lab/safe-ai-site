@@ -9,22 +9,20 @@ test.describe("料金プラン", () => {
 
   test("プラン一覧が表示される", async ({ page }) => {
     await page.goto("/pricing");
-    // 5つのプラン（無料・スタンダード・プロ・ビジネス・受託）が存在する
-    await expect(page.getByText("無料")).toBeVisible();
-    await expect(page.getByText(/スタンダード/)).toBeVisible();
-    await expect(page.getByText(/プロ/)).toBeVisible();
+    // PAID_MODE=false の場合、準備中ページが表示される
+    await expect(page.getByRole("heading", { name: /料金プランは現在準備中/ })).toBeVisible();
   });
 
   test("料金が表示される", async ({ page }) => {
     await page.goto("/pricing");
-    await expect(page.getByText("¥0")).toBeVisible();
-    await expect(page.getByText(/¥980/)).toBeVisible();
+    // PAID_MODE=false の場合、全機能無料の説明が表示される
+    await expect(page.getByText(/研究・実証プロジェクト/).first()).toBeVisible();
   });
 
   test("CTAボタンが存在する", async ({ page }) => {
     await page.goto("/pricing");
-    // プランのCTAボタンが複数あること
-    const ctaButtons = page.getByRole("link", { name: /無料|申し込む|お問い合わせ|始める/ });
+    // 準備中UIのナビゲーションリンクが存在する
+    const ctaButtons = page.getByRole("link", { name: /機能を試す|ご意見/ });
     await expect(ctaButtons.first()).toBeVisible();
   });
 });
