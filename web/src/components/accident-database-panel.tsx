@@ -431,12 +431,37 @@ export function AccidentDatabasePanel({
                   >
                     この事例で学習する
                   </Link>
+                </div>
+
+                {/* 7.3: 事故詳細 → KY/保護具/法改正 アクションバー */}
+                <div className="mt-2 flex flex-wrap gap-1.5 rounded-lg border border-slate-200 bg-slate-50 p-2">
                   <Link
-                    href="/ky"
-                    className="text-xs font-semibold text-sky-700 underline decoration-sky-300 underline-offset-2"
+                    href={`/ky?q=${encodeURIComponent(accident.title)}`}
+                    className="rounded-full border border-emerald-300 bg-white px-2.5 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-50"
                   >
-                    KY用紙へ反映する
+                    → この事例でKY作成
                   </Link>
+                  <Link
+                    href={`/equipment-finder?q=${encodeURIComponent(accident.mainCauses.join(" "))}`}
+                    className="rounded-full border border-sky-300 bg-white px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-50"
+                  >
+                    → 適合保護具を探す
+                  </Link>
+                  <Link
+                    href={`/laws?q=${encodeURIComponent(accident.workCategory)}`}
+                    className="rounded-full border border-violet-300 bg-white px-2.5 py-1 text-[11px] font-bold text-violet-800 hover:bg-violet-50"
+                  >
+                    → 関連法改正
+                  </Link>
+                  <Link
+                    href={`/safety-diary/new?q=${encodeURIComponent(accident.title)}`}
+                    className="rounded-full border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-50"
+                  >
+                    → 日誌に記録
+                  </Link>
+                </div>
+
+                <div className="mt-1 flex flex-wrap items-center gap-2">
                   {source ? (
                     source.url ? (
                       <a
