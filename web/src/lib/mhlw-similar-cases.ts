@@ -104,4 +104,75 @@ export function searchMhlwSimilar(
   return scored.slice(0, limit);
 }
 
+/** ProfileIndustry → 期待される MHLW industry 文字列の一覧 */
+const PROFILE_INDUSTRY_TO_MHLW: Record<string, string[]> = {
+  construction: ["建設業"],
+  manufacturing: ["製造業"],
+  healthcare: ["保健衛生業"],
+  transport: ["陸上貨物運送事業", "運輸交通業"],
+  it: ["通信業", "金融広告業"],
+  forestry: ["林業"],
+  logistics: ["陸上貨物運送事業"],
+  other: [],
+};
+
+/**
+ * 業種を厳密フィルタした上でキーワードスコア検索する。
+ * フォールバック付き：業種厳密一致で 0 件なら全件対象にして "loose" を返す。
+ */
+export function searchMhlwSimilarStrict(
+  query: string,
+  profileIndustry: string,
+  limit = 5
+): { cases: ScoredMhlwCase[]; mode: "strict" | "loose" | "none" } {
+  const expectedIndustries = PROFILE_INDUSTRY_TO_MHLW[profileIndustry] ?? [];
+  const tokens = tokenize(query);
+  if (tokens.length === 0) return { cases: [], mode: "none" };
+
+  const scoreEntry = (rec: MhlwDeathRecord): ScoredMhlwCase | null => {
+    let score = 0;
+    const matched = new Set<string>();
+    const desc = rec.description ?? "";
+    const type = rec.type ?? "";
+    const industry = rec.industry ?? "";
+    const industryMedium = rec.industryMedium ?? "";
+    const cause = rec.cause ?? "";
+    for (const t of tokens) {
+      let hit = false;
+      if (desc.includes(t)) { score += WEIGHTS.description; hit = true; }
+      if (type.includes(t)) { score += WEIGHTS.type; hit = true; }
+      if (industry.includes(t)) { score += WEIGHTS.industry; hit = true; }
+      if (industryMedium.includes(t)) { score += WEIGHTS.industryMedium; hit = true; }
+      if (cause.includes(t)) { score += WEIGHTS.cause; hit = true; }
+      if (hit) matched.add(t);
+    }
+    if (score === 0) return null;
+    return { ...rec, score, matchedTokens: [...matched] };
+  };
+
+  // 厳密モード: profile.industry に一致する MHLW industry のみ対象
+  if (expectedIndustries.length > 0) {
+    const strict: ScoredMhlwCase[] = [];
+    for (const rec of compact.entries) {
+      if (!rec.industry || !expectedIndustries.some((i) => rec.industry?.includes(i))) continue;
+      const s = scoreEntry(rec);
+      if (s) strict.push(s);
+    }
+    if (strict.length > 0) {
+      strict.sort((a, b) => b.score - a.score);
+      return { cases: strict.slice(0, limit), mode: "strict" };
+    }
+  }
+
+  // フォールバック: 業種制限なしで全件対象
+  const loose: ScoredMhlwCase[] = [];
+  for (const rec of compact.entries) {
+    const s = scoreEntry(rec);
+    if (s) loose.push(s);
+  }
+  loose.sort((a, b) => b.score - a.score);
+  if (loose.length === 0) return { cases: [], mode: "none" };
+  return { cases: loose.slice(0, limit), mode: "loose" };
+}
+
 export const MHLW_DEATHS_TOTAL = compact.total;

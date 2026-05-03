@@ -42,7 +42,8 @@ export function DiaryMonthlyClient({ ym }: { ym: string }) {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8 print:max-w-none print:px-0 print:py-2">
-      <header className="mb-5 flex flex-wrap items-center justify-between gap-3 print:mb-3">
+      {/* グローバル CSS で header タグは print 時に非表示になるため div を使う */}
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 print:mb-3">
         <div>
           <Link
             href="/safety-diary"
@@ -53,6 +54,9 @@ export function DiaryMonthlyClient({ ym }: { ym: string }) {
           <h1 className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">
             📊 {ym} 月次まとめ
           </h1>
+          <p className="mt-1 hidden text-[10px] text-slate-600 print:block">
+            出力日: {new Date().toLocaleDateString("ja-JP")}
+          </p>
         </div>
         <div className="flex gap-2 print:hidden">
           <Link
@@ -77,7 +81,7 @@ export function DiaryMonthlyClient({ ym }: { ym: string }) {
             PDFで出力／印刷
           </button>
         </div>
-      </header>
+      </div>
 
       {!loaded && <p className="text-sm text-slate-500">読み込み中…</p>}
 
@@ -90,7 +94,7 @@ export function DiaryMonthlyClient({ ym }: { ym: string }) {
       </section>
 
       {/* 延労働人数推移 */}
-      <section className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="mb-4 break-inside-avoid rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-sm font-bold text-slate-900">延労働人数推移</h2>
         {summary.trendByDate.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">この月の記録はありません。</p>
@@ -119,7 +123,7 @@ export function DiaryMonthlyClient({ ym }: { ym: string }) {
       </section>
 
       {/* 類似事故Top3（予想災害カテゴリより） */}
-      <section className="mb-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <section className="mb-4 break-inside-avoid rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
         <h2 className="text-sm font-bold text-slate-900">類似事故Top3（予想災害カテゴリより集計）</h2>
         {top3Disasters.length === 0 ? (
           <p className="mt-2 text-sm text-slate-500">予想災害が記録されていません。</p>
@@ -167,7 +171,7 @@ export function DiaryMonthlyClient({ ym }: { ym: string }) {
       </section>
 
       {/* AIサマリー */}
-      <section className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
+      <section className="break-inside-avoid rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4">
         <p className="text-xs font-bold text-emerald-800">AIサマリー</p>
         <pre className="mt-2 whitespace-pre-wrap font-sans text-sm leading-relaxed text-emerald-900">
 {summary.aiSummary}
