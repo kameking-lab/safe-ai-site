@@ -676,10 +676,18 @@ export function ChemicalRaPanel() {
           {/* 保護具推奨 */}
           {result.ppeRecommendations.length > 0 && (
             <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900">
-                <Shield className="h-4 w-4 text-emerald-600" />
-                必要保護具 ({result.ppeRecommendations.length}件)
-              </h2>
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                <h2 className="flex items-center gap-2 text-sm font-bold text-slate-900">
+                  <Shield className="h-4 w-4 text-emerald-600" />
+                  必要保護具 ({result.ppeRecommendations.length}件)
+                </h2>
+                <a
+                  href={`/equipment-finder?chemical=${encodeURIComponent(result.chemicalName)}`}
+                  className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
+                >
+                  保護具ファインダーで詳細 →
+                </a>
+              </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {result.ppeRecommendations.map((ppe, i) => (
                   <PpeCard key={i} ppe={ppe} />
