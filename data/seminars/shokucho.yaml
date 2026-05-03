@@ -1,4 +1,4 @@
-meta:
+﻿meta:
   id: shokucho
   title: 職長等教育
   subtitle: 安全衛生責任者対応コース
@@ -6,7 +6,7 @@ meta:
   english_subtitle: Supervisor Training for Designated Industries
   legal_basis: "安衛法第60条 ／ 安衛則第40条 ／ 12時間以上 ／ 製造業・建設業等の指定業種が対象"
   duration: "12時間以上（2日間想定）"
-  supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+  supervisor: ANZEN AI
   contact: "https://safe-ai-site.vercel.app/contact"
   output: shokucho.pptx
 
@@ -20,7 +20,7 @@ slides:
     title: 職長等教育
     subtitle: 安全衛生責任者対応コース
     legal: "安衛法第60条準拠 ／ 12時間以上（2日間想定）"
-    supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    supervisor: ANZEN AI
 
   # =========================================================
   # Slide 2 — 目次
@@ -224,4 +224,4 @@ slides:
         body: 統括安全衛生責任者と連携し、記録3年以上保存で改善を継続
     footer_label: お問い合わせ
     footer_value: safe-ai-site.vercel.app/contact
-    footer_supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    footer_supervisor: ANZEN AI

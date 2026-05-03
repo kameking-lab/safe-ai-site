@@ -225,7 +225,7 @@ export function Footer() {
           <p className="text-xs text-slate-500 dark:text-slate-400">
             © 2026 ANZEN AI ·{" "}
             <Link href="/about" className="hover:text-slate-800 hover:underline dark:hover:text-slate-200">
-              監修：労働安全コンサルタント（登録番号260022）
+              運営者情報
             </Link>
           </p>
           <p className="text-[11px] text-slate-400 dark:text-slate-500">

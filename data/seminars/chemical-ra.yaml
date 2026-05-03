@@ -1,4 +1,4 @@
-meta:
+﻿meta:
   id: chemical-ra
   title: 化学物質RA実務教育
   subtitle: 自律的化学物質管理対応コース
@@ -6,7 +6,7 @@ meta:
   english_subtitle: Autonomous Chemical Management Compliance Course
   legal_basis: "安衛法第57条の3 ／ 安衛則第34条の2の7 ／ 2.5〜4時間 ／ 自律的管理制度（2024年4月施行・2026年4月完全施行）対応"
   duration: "約2.5〜4時間"
-  supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+  supervisor: ANZEN AI
   contact: "https://safe-ai-site.vercel.app/contact"
   output: chemical-ra.pptx
 
@@ -20,7 +20,7 @@ slides:
     title: 化学物質RA実務教育
     subtitle: 自律的化学物質管理対応コース
     legal: "安衛法第57条の3準拠 ／ 約2.5〜4時間"
-    supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    supervisor: ANZEN AI
 
   # =========================================================
   # Slide 2 — 目次
@@ -224,4 +224,4 @@ slides:
         body: RA記録は3年以上、がん原性物質は30年保存（一部物質）
     footer_label: お問い合わせ
     footer_value: safe-ai-site.vercel.app/contact
-    footer_supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    footer_supervisor: ANZEN AI

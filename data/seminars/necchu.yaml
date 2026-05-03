@@ -1,4 +1,4 @@
-meta:
+﻿meta:
   id: necchu
   title: 熱中症予防 労働衛生教育
   subtitle: WBGT・現場運用対応コース
@@ -6,7 +6,7 @@ meta:
   english_subtitle: Workplace Occupational Health Education
   legal_basis: "基発0420第3号「職場における熱中症予防基本対策要綱」（令和3年4月20日付）準拠"
   duration: 約1.5時間
-  supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+  supervisor: ANZEN AI
   contact: "https://safe-ai-site.vercel.app/contact"
   output: necchu.pptx
 
@@ -20,7 +20,7 @@ slides:
     title: 熱中症予防 労働衛生教育
     subtitle: WBGT・現場運用対応コース
     legal: 基発0420第3号準拠 ／ 約1.5時間
-    supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    supervisor: ANZEN AI
 
   # =========================================================
   # Slide 2 — 目次
@@ -224,4 +224,4 @@ slides:
         body: 教育・健診・対応記録を3年保存し毎年見直し
     footer_label: お問い合わせ
     footer_value: safe-ai-site.vercel.app/contact
-    footer_supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    footer_supervisor: ANZEN AI

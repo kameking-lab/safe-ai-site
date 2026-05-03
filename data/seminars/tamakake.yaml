@@ -1,4 +1,4 @@
-meta:
+﻿meta:
   id: tamakake
   title: 玉掛け 特別教育
   subtitle: つり上げ荷重1t未満の業務
@@ -6,7 +6,7 @@ meta:
   english_subtitle: Special Education for Sling Operations
   legal_basis: 安衛則第36条第19号 ／ 学科5時間＋実技4時間 ／ 安衛則別表第5
   duration: 約9時間
-  supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+  supervisor: ANZEN AI
   contact: "https://safe-ai-site.vercel.app/contact"
   output: tamakake.pptx
 
@@ -20,7 +20,7 @@ slides:
     title: 玉掛け 特別教育
     subtitle: つり上げ荷重1t未満の業務
     legal: 安衛則第36条第19号準拠 ／ 約9時間
-    supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    supervisor: ANZEN AI
 
   # =========================================================
   # Slide 2 — 目次
@@ -225,4 +225,4 @@ slides:
         body: 共づり・ねじれ・片荷・衝撃・頭上通過は重大災害の典型
     footer_label: お問い合わせ
     footer_value: safe-ai-site.vercel.app/contact
-    footer_supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    footer_supervisor: ANZEN AI

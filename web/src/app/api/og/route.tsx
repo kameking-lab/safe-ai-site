@@ -51,7 +51,7 @@ export function GET(req: NextRequest) {
             marginBottom: "20px",
           }}
         >
-          ANZEN AI — 労働安全コンサルタント（登録番号260022）監修
+          ANZEN AI — 専門家チームによる設計
         </div>
 
         <div

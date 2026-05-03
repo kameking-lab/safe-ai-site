@@ -38,14 +38,14 @@ const USAGE_GUIDE = {
     "法改正により条文内容が変わる場合があります。最新情報はe-Govで確認ください",
     "本ツールの回答は法的アドバイスではありません。具体的な判断は専門家にご相談ください",
     "現在対応中の法令：労働安全衛生法・安衛則・クレーン則・有機則・特化則・酸欠則・石綿則・じん肺法・粉じん則・電離則・ボイラー則・ゴンドラ則・足場則・高圧則・作業環境測定法・労基法・労災保険法・育児介護休業法・雇用均等法 ほか（全33法令以上）",
-    "監修：労働安全コンサルタント（登録番号260022・土木区分）",
+    "コンテンツは ANZEN AI 専門家チームによる設計です",
   ],
   en: [
     "Answers are generated via RAG using registered occupational safety law articles",
     "Law content may change due to amendments — always confirm the latest on e-Gov",
     "Responses from this tool are not legal advice. For specific decisions, consult a qualified expert",
     "Covered laws: OSH Act, OSH Rules, Crane Rules, Organic Solvent Rules, Specific Chemical Rules, Oxygen Deficiency Rules, Asbestos Rules, Pneumoconiosis Act, Dust Rules, Ionizing Radiation Rules, Boiler Rules, Gondola Rules, Scaffolding Rules, High-Pressure Rules, Work Environment Measurement Act, Labour Standards Act, Workers' Accident Compensation Act, Childcare/Care Leave Act, Equal Employment Act + 14 more (33+ total)",
-    "Supervised by: Occupational Safety Consultant (Reg. No. 260022, Civil Engineering)",
+    "Content designed by ANZEN AI expert team",
   ],
 };
 

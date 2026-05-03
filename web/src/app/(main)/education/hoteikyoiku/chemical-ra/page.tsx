@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, GraduationCap, MessageSquare, Mail, Download } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
@@ -421,7 +421,7 @@ export default function ChemicalRaPage() {
 
       {/* 監修者 */}
       <p className="mt-6 text-center text-xs text-slate-400">
-        労働安全コンサルタント（登録番号260022・土木区分）監修
+        ANZEN AI 専門家チームによる設計
       </p>
     </main>
   );

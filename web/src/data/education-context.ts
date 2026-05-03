@@ -64,7 +64,7 @@ export type EducationContext = {
 };
 
 const SUPERVISOR_LABEL =
-  "監修：労働安全コンサルタント（登録番号260022・土木区分）";
+  "コンテンツは ANZEN AI 専門家チームによる設計です";
 
 export const EDUCATION_CONTEXTS: Record<EducationSlug, EducationContext> = {
   "hoteikyoiku/chemical-ra": {

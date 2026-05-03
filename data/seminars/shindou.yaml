@@ -1,4 +1,4 @@
-meta:
+﻿meta:
   id: shindou
   title: 振動障害予防 労働衛生教育
   subtitle: チェーンソー・工具対応コース
@@ -6,7 +6,7 @@ meta:
   english_subtitle: Workplace Occupational Health Education
   legal_basis: "基発0810第1号「振動工具取扱作業者に対する安全衛生教育の推進について」 ／ 振動障害予防のための作業管理指針準拠"
   duration: 約2時間
-  supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+  supervisor: ANZEN AI
   contact: "https://safe-ai-site.vercel.app/contact"
   output: shindou.pptx
 
@@ -20,7 +20,7 @@ slides:
     title: 振動障害予防 労働衛生教育
     subtitle: チェーンソー・工具対応コース
     legal: 基発0810第1号準拠 ／ 約2時間
-    supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    supervisor: ANZEN AI
 
   # =========================================================
   # Slide 2 — 目次
@@ -224,4 +224,4 @@ slides:
         body: 特殊健診6月以内ごと、記録5年保存で追跡
     footer_label: お問い合わせ
     footer_value: safe-ai-site.vercel.app/contact
-    footer_supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    footer_supervisor: ANZEN AI

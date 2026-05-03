@@ -19,7 +19,7 @@ import { JsonLd, serviceSchema } from "@/components/json-ld";
 import { useTranslation } from "@/contexts/language-context";
 
 const DESCRIPTION =
-  "労働安全コンサルタント監修の受託業務。KYデジタル化¥500k〜、安全管理自動化¥300k〜、法改正通知¥200k〜、教育コンテンツ¥500k〜、化学物質管理¥500k〜、特別教育¥150k〜、Claude Code自動化¥200k〜。無料相談30分実施中。";
+  "専門家による設計の受託業務。KYデジタル化¥500k〜、安全管理自動化¥300k〜、法改正通知¥200k〜、教育コンテンツ¥500k〜、化学物質管理¥500k〜、特別教育¥150k〜、Claude Code自動化¥200k〜。無料相談30分実施中。";
 
 const SERVICES = [
   {
@@ -145,7 +145,7 @@ const ACCENT_STYLES: Record<AccentKey, { icon: string; tag: string; price: strin
 
 const TRACK_RECORD = [
   { label: { ja: "労働安全コンサル実績", en: "Safety consulting track record" }, value: "大手ゼネコン大型土木インフラ / Major general contractor — large-scale civil infrastructure" },
-  { label: { ja: "監修者の資格", en: "Supervisor credentials" }, value: "労働安全コンサルタント 登録番号260022 / Occupational Safety Consultant Reg. No. 260022" },
+  { label: { ja: "専門家設計", en: "Expert-designed" }, value: "ANZEN AI 専門家チーム / ANZEN AI expert team" },
   { label: { ja: "Claude Code 実装サイト", en: "Claude Code showcase" }, value: "本サイト ANZEN AI / This site — ANZEN AI" },
   { label: { ja: "対応業種", en: "Industries served" }, value: "建設・製造・介護・林業・運輸 / Construction, Manufacturing, Care, Forestry, Transport" },
 ];
@@ -158,7 +158,7 @@ const FAQ = {
     { q: "複数メニューの組合せや月額顧問はできますか？", a: "可能です。「安全管理自動化＋特別教育＋月額顧問」のようなパッケージや、1年契約による割引もご用意しています。" },
     { q: "助成金は活用できますか？", a: "人材開発支援助成金・エイジフレンドリー補助金・業務改善助成金などが活用できる場合があります。申請書類の作成サポートも対応可能です。" },
     { q: "契約書・請求書払い・源泉徴収に対応していますか？", a: "すべて対応可能です。個人事業主へのお支払いとなるため、源泉徴収の要否はご相談のうえ決定します。" },
-    { q: "個人事業主との契約に不安があります。事業継続性は？", a: "業務委託契約書に「成果物の知的財産権は発注者に帰属」「ソースコード・データの引渡条項」「保守期間中の体制継続義務」を明記します。万一の事業休止時にも、納品済みコードはお客様が独立運用できる形で引き渡します。日本労働安全衛生コンサルタント会の倫理規程を遵守した運営です。" },
+    { q: "個人事業主との契約に不安があります。事業継続性は？", a: "業務委託契約書に「成果物の知的財産権は発注者に帰属」「ソースコード・データの引渡条項」「保守期間中の体制継続義務」を明記します。万一の事業休止時にも、納品済みコードはお客様が独立運用できる形で引き渡します。" },
     { q: "相談後にしつこい営業はありませんか？", a: "ありません。無料相談後は、相談内容に基づくご提案メール1通のみお送りします。その後の営業連絡はご希望に応じてオプトアウト可能（返信『今回はパスします』で追客停止）です。" },
   ],
   en: [
@@ -201,8 +201,8 @@ export function ServicesContent() {
         </h1>
         <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
           {isEn
-            ? "Services directly handled by a registered Occupational Safety Consultant (Reg. No. 260022, Civil Engineering). We combine large-scale infrastructure project management experience with Claude Code rapid development to deliver systems, materials, and workflows that work on the field — on short deadlines."
-            : "労働安全コンサルタント（登録番号260022・土木区分）が直接担当する受託サービスです。大型土木インフラの施工管理経験と Claude Code による高速開発で、「現場で使える」システム・教材・仕組みを短納期で提供します。"}
+            ? "Services directly handled by the ANZEN AI expert team. We combine large-scale infrastructure project management experience with Claude Code rapid development to deliver systems, materials, and workflows that work on the field — on short deadlines."
+            : "ANZEN AI 専門家チームが直接担当する受託サービスです。大型土木インフラの施工管理経験と Claude Code による高速開発で、「現場で使える」システム・教材・仕組みを短納期で提供します。"}
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link

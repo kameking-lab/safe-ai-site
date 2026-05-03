@@ -1,4 +1,4 @@
-meta:
+﻿meta:
   id: sankesu
   title: 酸素欠乏危険作業 特別教育
   subtitle: 第一種・第二種対応コース
@@ -6,7 +6,7 @@ meta:
   english_subtitle: Special Education for Oxygen Deficiency Risks
   legal_basis: 酸素欠乏症等防止規則第12条 ／ 第一種5.5時間 ／ 第二種5.5時間（硫化水素含む追加内容で計5.5h相当）
   duration: 約5.5時間
-  supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+  supervisor: ANZEN AI
   contact: "https://safe-ai-site.vercel.app/contact"
   output: sankesu.pptx
 
@@ -20,7 +20,7 @@ slides:
     title: 酸素欠乏危険作業 特別教育
     subtitle: 第一種・第二種対応コース
     legal: 酸欠則第12条準拠 ／ 約5.5時間
-    supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    supervisor: ANZEN AI
 
   # =========================================================
   # Slide 2 — 目次
@@ -225,4 +225,4 @@ slides:
         body: 装備なしの進入は絶対禁止。空気呼吸器と命綱を必ず装着
     footer_label: お問い合わせ
     footer_value: safe-ai-site.vercel.app/contact
-    footer_supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    footer_supervisor: ANZEN AI

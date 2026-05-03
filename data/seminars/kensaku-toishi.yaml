@@ -1,4 +1,4 @@
-meta:
+﻿meta:
   id: kensaku-toishi
   title: 研削といし取替え等 特別教育
   subtitle: 学科＋実技対応コース
@@ -6,7 +6,7 @@ meta:
   english_subtitle: Special Education for Grinding Wheel Replacement and Test Run
   legal_basis: 安衛則第36条第1号 ／ 安衛則第38条 ／ 学科2時間以上＋実技2時間以上
   duration: 約4時間（学科2h + 実技2h）
-  supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+  supervisor: ANZEN AI
   contact: https://safe-ai-site.vercel.app/contact
   output: kensaku-toishi.pptx
 
@@ -20,7 +20,7 @@ slides:
     title: 研削といし取替え等 特別教育
     subtitle: 学科＋実技対応コース
     legal: 安衛則第36条第1号・第38条準拠 ／ 約4時間
-    supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    supervisor: ANZEN AI
 
   # =========================================================
   # Slide 2 — 目次
@@ -223,4 +223,4 @@ slides:
         body: 教育記録・点検記録を3年保存し、毎年見直す
     footer_label: お問い合わせ
     footer_value: safe-ai-site.vercel.app/contact
-    footer_supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    footer_supervisor: ANZEN AI

@@ -1,4 +1,4 @@
-meta:
+﻿meta:
   id: souon
   title: 騒音障害防止 労働衛生教育
   subtitle: 令和5年改訂ガイドライン対応コース
@@ -6,7 +6,7 @@ meta:
   english_subtitle: Workplace Occupational Health Education
   legal_basis: "基発0420第2号「騒音障害防止のためのガイドライン」（令和5年4月20日改訂）準拠"
   duration: 約1.5時間
-  supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+  supervisor: ANZEN AI
   contact: "https://safe-ai-site.vercel.app/contact"
   output: souon.pptx
 
@@ -20,7 +20,7 @@ slides:
     title: 騒音障害防止 労働衛生教育
     subtitle: 令和5年改訂ガイドライン対応コース
     legal: 基発0420第2号（令和5年改訂）準拠 ／ 約1.5時間
-    supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    supervisor: ANZEN AI
 
   # =========================================================
   # Slide 2 — 目次
@@ -224,4 +224,4 @@ slides:
         body: 特殊健診6月以内ごと、保健指導で進行抑制
     footer_label: お問い合わせ
     footer_value: safe-ai-site.vercel.app/contact
-    footer_supervisor: ANZEN AI ／ 労働安全コンサルタント（登録番号260022・土木）監修
+    footer_supervisor: ANZEN AI
