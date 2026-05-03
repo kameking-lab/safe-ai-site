@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { IndustryTag, LawRevision, RevisionImpact } from "@/lib/types/domain";
 import type { ServiceError } from "@/lib/types/api";
@@ -8,6 +8,7 @@ import { fuzzyMatchAll } from "@/lib/fuzzy-search";
 import { revisionMatchesIndustry } from "@/lib/law-revision-industry-tags";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
+import { loadProfile, relevanceScore, type CompanyProfile } from "@/lib/company-profile";
 
 function formatDate(value: string) {
   if (!value) return null;
@@ -246,6 +247,59 @@ export function LawRevisionList({
   // 詳細展開中のカードID
   const [expandedDetailId, setExpandedDetailId] = useState<string | null>(null);
 
+  // 自社プロファイル連動（5.2 / 5.3）
+  const [profile, setProfile] = useState<CompanyProfile | null>(null);
+  const [onlyRelevant, setOnlyRelevant] = useState(false);
+  const [rewrites, setRewrites] = useState<Record<string, string>>({});
+  const [rewriteBusyId, setRewriteBusyId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setProfile(loadProfile());
+    const onChange = () => setProfile(loadProfile());
+    if (typeof window !== "undefined") {
+      window.addEventListener("company-profile-changed", onChange);
+      return () => window.removeEventListener("company-profile-changed", onChange);
+    }
+  }, []);
+
+  const handleRewrite = async (revision: LawRevision) => {
+    if (!profile) return;
+    setRewriteBusyId(revision.id);
+    try {
+      // 簡易書き換え: 業種・主要機械・取扱化学物質を冒頭に挿入
+      // 本番ではGemini APIを使うが、ここではテンプレベースで自社向けに整形
+      const ctx: string[] = [];
+      ctx.push(`【${profile.companyName || "自社"}向け要点】`);
+      const industryHits = profile.industry;
+      ctx.push(`業種: ${industryHits}`);
+      if (profile.machines.length > 0)
+        ctx.push(`主要機械: ${profile.machines.slice(0, 3).join("、")}`);
+      if (profile.chemicals.length > 0)
+        ctx.push(`取扱化学物質: ${profile.chemicals.slice(0, 3).join("、")}`);
+
+      const baseSummary = revision.summary;
+      const focused = baseSummary
+        .replace(/事業者は/g, `${profile.companyName || "自社"}は`);
+
+      const rewrite = `${ctx.join(" / ")}\n${focused}\n→ 自社で確認する点: ${
+        profile.machines[0] ?? profile.chemicals[0] ?? "全社員へ周知"
+      }について本改正の影響を確認すること。`;
+
+      setRewrites((prev) => ({ ...prev, [revision.id]: rewrite }));
+    } finally {
+      setRewriteBusyId(null);
+    }
+  };
+
+  const scoreFor = useCallback(
+    (r: LawRevision): number => {
+      if (!profile) return 0;
+      return relevanceScore(`${r.title} ${r.summary} ${r.category ?? ""}`, profile);
+    },
+    [profile]
+  );
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     const results = revisions.filter((r) => {
@@ -269,25 +323,50 @@ export function LawRevisionList({
         const size = r.company_size ?? "全規模";
         if (size !== "全規模" && size !== selectedCompanySize) return false;
       }
+      // 5.2: 自社に効く改正のみ
+      if (onlyRelevant && profile && profile.wizardCompleted) {
+        if (scoreFor(r) < 18) return false;
+      }
       if (!q) return true;
       const target = `${r.title} ${r.summary} ${r.issuer} ${r.revisionNumber}`;
       return fuzzyMatchAll(search.trim(), target);
     });
     // #40: 施行日ソート
     return results.sort((a, b) => {
+      // 自社関連を優先表示する場合はスコア順
+      if (onlyRelevant && profile?.wizardCompleted) {
+        const ds = scoreFor(b) - scoreFor(a);
+        if (ds !== 0) return ds;
+      }
       const diff = a.publishedAt.localeCompare(b.publishedAt);
       return sortOrder === "desc" ? -diff : diff;
     });
-  }, [revisions, search, yearFrom, yearTo, selectedKind, selectedImpact, sortOrder, selectedIndustries, selectedWorkerAttribute, selectedCompanySize]);
+  }, [revisions, search, yearFrom, yearTo, selectedKind, selectedImpact, sortOrder, selectedIndustries, selectedWorkerAttribute, selectedCompanySize, onlyRelevant, profile, scoreFor]);
 
   const showEmptyState = status === "success" && !error && filtered.length === 0;
 
   return (
     <section
-      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:sticky lg:top-24"
+      className="w-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
       aria-label="法改正一覧"
     >
-      <h2 className="text-base font-bold text-slate-900 sm:text-lg">法改正一覧</h2>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-base font-bold text-slate-900 sm:text-lg">法改正一覧</h2>
+        {profile?.wizardCompleted && (
+          <button
+            type="button"
+            onClick={() => setOnlyRelevant((v) => !v)}
+            aria-pressed={onlyRelevant}
+            className={`rounded-full px-3 py-1 text-xs font-bold transition ${
+              onlyRelevant
+                ? "border border-emerald-400 bg-emerald-600 text-white"
+                : "border border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50"
+            }`}
+          >
+            ✨ 自社に効く改正のみ
+          </button>
+        )}
+      </div>
       <p className="mt-1 text-xs text-slate-500 sm:text-sm">
         直近10年の主要な労働安全衛生関連の改正を収録。キーワード・年で絞り込みできます（音声入力対応）。
       </p>
@@ -509,7 +588,22 @@ export function LawRevisionList({
               }`}
             >
               <div className="space-y-2">
-                <h3 className="text-sm font-semibold leading-6 text-slate-900">{revision.title}</h3>
+                <h3 className="text-sm font-semibold leading-6 text-slate-900">
+                  {revision.title}
+                  {profile?.wizardCompleted && scoreFor(revision) >= 36 && (
+                    <span
+                      className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800"
+                      title="自社プロファイルに合致する改正"
+                    >
+                      自社スコア {scoreFor(revision)}
+                    </span>
+                  )}
+                  {profile?.wizardCompleted && scoreFor(revision) >= 18 && scoreFor(revision) < 36 && (
+                    <span className="ml-2 rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-700">
+                      自社スコア {scoreFor(revision)}
+                    </span>
+                  )}
+                </h3>
 
                 {/* 日付行：公布日 / 施行日を別表示 */}
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
@@ -558,6 +652,36 @@ export function LawRevisionList({
                 )}
 
                 <p className="text-sm leading-6 text-slate-700">{revision.summary}</p>
+
+                {/* 5.3 自社版書き換え */}
+                {profile?.wizardCompleted && (
+                  <div className="space-y-1">
+                    {!rewrites[revision.id] ? (
+                      <button
+                        type="button"
+                        disabled={rewriteBusyId === revision.id}
+                        onClick={() => void handleRewrite(revision)}
+                        className="rounded border border-violet-300 bg-violet-50 px-2 py-1 text-[11px] font-bold text-violet-800 hover:bg-violet-100 disabled:opacity-50"
+                      >
+                        {rewriteBusyId === revision.id ? "生成中…" : "✏️ 自社版に書き換え"}
+                      </button>
+                    ) : (
+                      <div className="rounded-lg border border-violet-200 bg-violet-50/60 p-2">
+                        <p className="text-[10px] font-bold text-violet-800">自社版要約</p>
+                        <p className="mt-0.5 whitespace-pre-line text-xs leading-relaxed text-violet-900">
+                          {rewrites[revision.id]}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => void handleRewrite(revision)}
+                          className="mt-1 text-[10px] font-bold text-violet-700 hover:underline"
+                        >
+                          再生成
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* 出典リンク */}
                 {resolveSourceLabel(revision) && (

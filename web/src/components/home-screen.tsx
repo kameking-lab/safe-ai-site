@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { ChatPanel, type ChatMessage } from "@/components/chat-panel";
 import { AccidentDatabasePanel } from "@/components/accident-database-panel";
+import { AccidentExtrasPanel } from "@/components/accident-extras-panel";
 
 const AccidentAnalysisPanel = dynamic(
   () => import("@/components/accident-analysis-panel").then((m) => m.AccidentAnalysisPanel),
@@ -594,6 +595,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
           <section id="section-accidents" className="space-y-4 px-4 pt-4 lg:px-8">
             {accidentActiveTab === "list" && (
               <>
+                <AccidentExtrasPanel />
                 <AccidentDatabasePanel
                   cases={accidentCases}
                   allCases={services.accident.getAllAccidentCases()}
@@ -607,7 +609,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
                 <MhlwDisasterDatabasesPanel />
               </>
             )}
-            {accidentActiveTab === "mhlw-search" && <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">厚労省全件検索（準備中）</div>}
+            {accidentActiveTab === "mhlw-search" && <AccidentExtrasPanel />}
             {accidentActiveTab === "mhlw-deaths" && <MhlwDeathsPanel />}
             {accidentActiveTab === "industry" && <IndustryRiskRanking />}
             {accidentActiveTab === "mhlw" && <MhlwAccidentAnalysisPanel />}
@@ -624,7 +626,11 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
           <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
           <section
             id="section-laws"
-            className="grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start lg:gap-6 lg:px-8"
+            className={
+              activeTab === "laws"
+                ? "grid grid-cols-1 gap-4 px-4 py-4 lg:px-8"
+                : "grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start lg:gap-6 lg:px-8"
+            }
           >
             {activeTab === "laws" && (
               <LawRevisionList
