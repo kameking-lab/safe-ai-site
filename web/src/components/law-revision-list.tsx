@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { IndustryTag, LawRevision, RevisionImpact } from "@/lib/types/domain";
 import type { ServiceError } from "@/lib/types/api";
-import { fuzzyMatchAll } from "@/lib/fuzzy-search";
+import { fuzzyMatchAll, fuzzyMatch } from "@/lib/fuzzy-search";
 import { revisionMatchesIndustry } from "@/lib/law-revision-industry-tags";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
@@ -182,7 +182,7 @@ export function LawRevisionList({
   const initialArticles = articlesParam
     ? articlesParam.split(",").map((s) => s.trim()).filter(Boolean)
     : [];
-  const [search, setSearch] = useState(initialArticles[0] ?? "");
+  const [search, setSearch] = useState("");
   const [articleHighlights, setArticleHighlights] = useState<string[]>(initialArticles);
   const [yearFrom, setYearFrom] = useState(2016);
   const [yearTo, setYearTo] = useState(2026);
@@ -338,10 +338,87 @@ export function LawRevisionList({
     [search, yearFrom, yearTo, selectedKind, selectedImpact, selectedIndustries, selectedWorkerAttribute, selectedCompanySize]
   );
 
+  // 事故由来 articles でのプリフィルタ（OR検索 + 段階フォールバック）
+  // 1段目: いずれかの article キーワードに一致
+  // 2段目: 「第XX条」を除いた簡略形で再試行（条番号が title/summary に出ない場合の救済）
+  // 3段目: 改正の category を OR 検索（「化学物質規制」「足場」など大分類で寄せる）
+  const articleFilterResult = useMemo<{
+    items: LawRevision[];
+    mode: "none" | "strict" | "simplified" | "category" | "all";
+    matchedIds: Set<string>;
+  }>(() => {
+    if (articleHighlights.length === 0) {
+      return { items: revisions, mode: "none", matchedIds: new Set() };
+    }
+    const targetText = (r: LawRevision) =>
+      `${r.title} ${r.summary} ${r.issuer} ${r.category ?? ""} ${r.revisionNumber ?? ""}`;
+
+    // 厳密マッチ
+    const strict = revisions.filter((r) =>
+      articleHighlights.some((a) => fuzzyMatchAll(a, targetText(r)))
+    );
+    if (strict.length > 0) {
+      return {
+        items: strict,
+        mode: "strict",
+        matchedIds: new Set(strict.map((r) => r.id)),
+      };
+    }
+
+    // フォールバック1: 条番号を取り除いた簡略形
+    const simplified = articleHighlights
+      .map((a) =>
+        a
+          .replace(/\s*第\s*[0-9０-９]+\s*条(?:の[0-9０-９]+)?(?:第[0-9０-９]+項)?/g, "")
+          .replace(/\s*第[0-9０-９]+項/g, "")
+          .trim()
+      )
+      .filter((a) => a.length > 1);
+    if (simplified.length > 0) {
+      const sim = revisions.filter((r) =>
+        simplified.some((a) => fuzzyMatchAll(a, targetText(r)))
+      );
+      if (sim.length > 0) {
+        return {
+          items: sim,
+          mode: "simplified",
+          matchedIds: new Set(sim.map((r) => r.id)),
+        };
+      }
+    }
+
+    // フォールバック2: カテゴリ・キーワード単体での寄せ集め（部分一致）
+    const looseTokens = articleHighlights
+      .flatMap((a) => a.split(/\s+/))
+      .map((t) =>
+        t
+          .replace(/第[0-9０-９]+条(?:の[0-9０-９]+)?/g, "")
+          .replace(/第[0-9０-９]+項/g, "")
+          .trim()
+      )
+      .filter((t) => t.length >= 2);
+    if (looseTokens.length > 0) {
+      const cat = revisions.filter((r) =>
+        looseTokens.some((t) => fuzzyMatch(t, targetText(r)))
+      );
+      if (cat.length > 0) {
+        return {
+          items: cat,
+          mode: "category",
+          matchedIds: new Set(cat.map((r) => r.id)),
+        };
+      }
+    }
+
+    // どの段階でも空 → 全件表示（フォールバックバナーで明示）
+    return { items: revisions, mode: "all", matchedIds: new Set() };
+  }, [revisions, articleHighlights]);
+
   const { filtered, relevanceFallback } = useMemo(() => {
+    const sourceList = articleFilterResult.items;
     // 自社関連フィルタ無効時は通常フィルタのみ
     if (!onlyRelevant || !profile?.wizardCompleted) {
-      const list = revisions.filter(filterBase);
+      const list = sourceList.filter(filterBase);
       list.sort((a, b) => {
         const diff = a.publishedAt.localeCompare(b.publishedAt);
         return sortOrder === "desc" ? -diff : diff;
@@ -350,7 +427,7 @@ export function LawRevisionList({
     }
 
     // 1段目: 業種タグ厳密一致 + 自社プロファイル関連
-    const strict = revisions.filter((r) => {
+    const strict = sourceList.filter((r) => {
       if (!filterBase(r)) return false;
       if (!profileIndustryTag) return scoreFor(r) >= 18;
       return industryMatchesRevision(profileIndustryTag, r) && scoreFor(r) >= 18;
@@ -366,7 +443,7 @@ export function LawRevisionList({
     }
 
     // 2段目: 近接フォールバック（キーワードスコアのみ）
-    const loose = revisions.filter((r) => filterBase(r) && scoreFor(r) >= 18);
+    const loose = sourceList.filter((r) => filterBase(r) && scoreFor(r) >= 18);
     loose.sort((a, b) => {
       const ds = scoreFor(b) - scoreFor(a);
       if (ds !== 0) return ds;
@@ -374,7 +451,7 @@ export function LawRevisionList({
       return sortOrder === "desc" ? -diff : diff;
     });
     return { filtered: loose, relevanceFallback: loose.length > 0 };
-  }, [revisions, filterBase, sortOrder, onlyRelevant, profile, profileIndustryTag, scoreFor]);
+  }, [articleFilterResult, filterBase, sortOrder, onlyRelevant, profile, profileIndustryTag, scoreFor]);
 
   const showEmptyState = status === "success" && !error && filtered.length === 0;
 
@@ -431,6 +508,21 @@ export function LawRevisionList({
                   </li>
                 ))}
               </ul>
+              {articleFilterResult.mode === "simplified" && (
+                <p className="mt-1.5 text-[11px] leading-5 text-violet-800">
+                  ※ 条番号を含む厳密一致では見つからなかったため、法令名のみで再検索しました。
+                </p>
+              )}
+              {articleFilterResult.mode === "category" && (
+                <p className="mt-1.5 text-[11px] leading-5 text-violet-800">
+                  ※ 厳密一致なし。キーワード部分一致で関連改正を表示しています。
+                </p>
+              )}
+              {articleFilterResult.mode === "all" && (
+                <p className="mt-1.5 text-[11px] leading-5 text-rose-700">
+                  ※ 関連法令がヒットしませんでした。全件を表示しています。キーワードや業種で絞り込んでください。
+                </p>
+              )}
             </div>
             <button
               type="button"
@@ -651,17 +743,28 @@ export function LawRevisionList({
           const hasNoticeNum = revision.official_notice_number && revision.official_notice_number !== "";
           const eGovUrl = revision.source_url && revision.source_url !== "" ? revision.source_url : null;
 
+          const isArticleMatch = articleFilterResult.matchedIds.has(revision.id);
           return (
             <li
               key={revision.id}
               className={`rounded-xl border bg-white p-4 transition ${
                 isSelected
                   ? "border-emerald-300 bg-emerald-50/30 ring-1 ring-emerald-200"
-                  : "border-slate-200 hover:border-slate-300"
+                  : isArticleMatch
+                    ? "border-violet-300 bg-violet-50/40 ring-1 ring-violet-200"
+                    : "border-slate-200 hover:border-slate-300"
               }`}
             >
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold leading-6 text-slate-900">
+                  {isArticleMatch && (
+                    <span
+                      className="mr-2 inline-flex items-center rounded-full bg-violet-600 px-2 py-0.5 align-middle text-[10px] font-bold text-white"
+                      title="事故由来 articles と一致した改正"
+                    >
+                      ⚡ 該当
+                    </span>
+                  )}
                   {revision.title}
                   {profile?.wizardCompleted && scoreFor(revision) >= 36 && (
                     <span
