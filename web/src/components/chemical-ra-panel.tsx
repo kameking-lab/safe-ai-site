@@ -16,6 +16,7 @@ import {
   MHLW_MERGED_CHEMICAL_COUNT,
   type MergedChemical,
 } from "@/lib/mhlw-chemicals";
+import { findChemicalEquipmentProfile } from "@/lib/chemical-equipment-mapping";
 import type {
   ChemicalRaResponse,
   GhsHazard,
@@ -681,12 +682,22 @@ export function ChemicalRaPanel() {
                   <Shield className="h-4 w-4 text-emerald-600" />
                   必要保護具 ({result.ppeRecommendations.length}件)
                 </h2>
-                <a
-                  href={`/equipment-finder?chemical=${encodeURIComponent(result.chemicalName)}`}
-                  className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
-                >
-                  保護具ファインダーで詳細 →
-                </a>
+                {(() => {
+                  const profile = findChemicalEquipmentProfile(result.chemicalName);
+                  const params = new URLSearchParams({ chemical: result.chemicalName });
+                  if (profile) {
+                    params.set("hazards", profile.hazards.join(","));
+                    params.set("categories", profile.recommendedCategories.join(","));
+                  }
+                  return (
+                    <a
+                      href={`/equipment-finder?${params.toString()}`}
+                      className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
+                    >
+                      → この物質に必要な保護具を見る
+                    </a>
+                  );
+                })()}
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {result.ppeRecommendations.map((ppe, i) => (

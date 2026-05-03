@@ -13,6 +13,7 @@ import {
 import { fuzzyMatchAll } from "@/lib/fuzzy-search";
 import { resolveAccidentSource } from "@/lib/accident-source";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
+import { AccidentActionBar } from "@/components/accidents/action-bar";
 
 const PAGE_SIZE = 40;
 
@@ -433,26 +434,9 @@ export function AccidentDatabasePanel({
                   </Link>
                 </div>
 
-                {/* 7.3: 事故詳細 → KY/保護具/法改正 アクションバー */}
-                <div className="mt-2 flex flex-wrap gap-1.5 rounded-lg border border-slate-200 bg-slate-50 p-2">
-                  <Link
-                    href={`/ky?q=${encodeURIComponent(accident.title)}`}
-                    className="rounded-full border border-emerald-300 bg-white px-2.5 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-50"
-                  >
-                    → この事例でKY作成
-                  </Link>
-                  <Link
-                    href={`/equipment-finder?q=${encodeURIComponent(accident.mainCauses.join(" "))}`}
-                    className="rounded-full border border-sky-300 bg-white px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-50"
-                  >
-                    → 適合保護具を探す
-                  </Link>
-                  <Link
-                    href={`/laws?q=${encodeURIComponent(accident.workCategory)}`}
-                    className="rounded-full border border-violet-300 bg-white px-2.5 py-1 text-[11px] font-bold text-violet-800 hover:bg-violet-50"
-                  >
-                    → 関連法改正
-                  </Link>
+                {/* 9.3: 事故 → KY起票 / 必要保護具 / 関連法令 の固定アクションバー */}
+                <AccidentActionBar accident={accident} variant="inline" />
+                <div className="mt-2 flex flex-wrap gap-1.5">
                   <Link
                     href={`/safety-diary/new?q=${encodeURIComponent(accident.title)}`}
                     className="rounded-full border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-50"

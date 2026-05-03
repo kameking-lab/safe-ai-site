@@ -294,13 +294,24 @@ export function KyPageContent() {
   }, []);
 
   // /ky?preset=<id> で来た場合にプリセットを自動適用する（脚立・業種リンクから）
+  // /ky?fromAccident=<id>&template=<presetId>&q=<title> も同様にテンプレ適用
   const searchParams = useSearchParams();
+  const [fromAccidentNotice, setFromAccidentNotice] = useState<string | null>(null);
   useEffect(() => {
-    const presetId = searchParams?.get("preset");
+    const presetId = searchParams?.get("preset") ?? searchParams?.get("template");
     if (!presetId) return;
     const preset = getPresetById(presetId);
     if (preset) handlePresetApply(preset);
   }, [searchParams, handlePresetApply]);
+
+  useEffect(() => {
+    const fromAccident = searchParams?.get("fromAccident");
+    const q = searchParams?.get("q");
+    if (!fromAccident) return;
+    setFromAccidentNotice(
+      q ? `事故事例「${q}」からKYを起票しています。テンプレを適用済み。` : "事故事例から起票しています。"
+    );
+  }, [searchParams]);
 
   // /ky?fromDiary=[id] で来た場合、日誌の workContent / kyResult を取り込む
   const [importNotice, setImportNotice] = useState<string | null>(null);
@@ -624,6 +635,21 @@ export function KyPageContent() {
             </div>
           )}
         </div>
+
+        {/* 事故事例からの起票通知 */}
+        {fromAccidentNotice && (
+          <div className="mt-3 flex items-start justify-between gap-3 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3">
+            <p className="text-sm font-semibold text-rose-900">⚠ {fromAccidentNotice}</p>
+            <button
+              type="button"
+              onClick={() => setFromAccidentNotice(null)}
+              className="rounded px-1.5 text-rose-700 hover:bg-rose-100"
+              aria-label="通知を閉じる"
+            >
+              ×
+            </button>
+          </div>
+        )}
 
         {/* リスク予測からの転記通知 */}
         {importNotice && (
