@@ -7,7 +7,16 @@ import { getEntriesByMonth } from "@/lib/safety-diary/store";
 import type { SafetyDiaryEntry } from "@/lib/safety-diary/schema";
 import { computeMonthlySummary } from "@/lib/safety-diary/monthly-summary";
 
-export function DiaryMonthlyClient({ ym }: { ym: string }) {
+/** `202604` (6桁) または `2026-04` (7桁) を `YYYY-MM` に正規化 */
+function normalizeYearMonth(raw: string): string {
+  if (/^\d{6}$/.test(raw)) {
+    return `${raw.slice(0, 4)}-${raw.slice(4, 6)}`;
+  }
+  return raw;
+}
+
+export function DiaryMonthlyClient({ ym: rawYm }: { ym: string }) {
+  const ym = normalizeYearMonth(rawYm);
   const [entries, setEntries] = useState<SafetyDiaryEntry[]>([]);
   const [loaded, setLoaded] = useState(false);
 

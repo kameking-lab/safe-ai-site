@@ -28,8 +28,8 @@ export const requiredFieldsSchema = z.object({
   siteName: z.string().min(1, "現場名は必須"),
   /** 作業内容 */
   workContent: z.string().min(1, "作業内容は必須"),
-  /** KY結果（/ky から転記される文字列または手入力） */
-  kyResult: z.string().min(1, "KY結果は必須"),
+  /** KY結果（/ky から転記される文字列または手入力。未実施の場合は空文字） */
+  kyResult: z.string(),
   /** ヒヤリハット有無 */
   nearMissOccurred: z.boolean(),
   /** ヒヤリハット内容（有の場合） */
