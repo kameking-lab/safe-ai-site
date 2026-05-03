@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Search, AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag, Gauge, Database } from "lucide-react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
@@ -207,6 +207,14 @@ export function ChemicalRaPanel() {
   const [errorHint, setErrorHint] = useState<string | null>(null);
   const [result, setResult] = useState<ChemicalRaResponse | null>(null);
   const [mhlwSelected, setMhlwSelected] = useState<MergedChemical | null>(null);
+  const resultAnchorRef = useRef<HTMLDivElement | null>(null);
+
+  // AI調査の結果生成完了時に結果セクションへスクロール
+  useEffect(() => {
+    if (result && !loading && resultAnchorRef.current) {
+      resultAnchorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [result, loading]);
 
   // 物質名から自動MHLW検索（セレクター選択が優先）
   const autoMhlw = useMemo(() => {
@@ -576,7 +584,7 @@ export function ChemicalRaPanel() {
 
       {/* 結果 */}
       {result && !loading && (
-        <div className="space-y-6">
+        <div ref={resultAnchorRef} className="space-y-6 scroll-mt-20">
           {/* 物質概要 */}
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
