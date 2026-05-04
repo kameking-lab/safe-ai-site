@@ -26,7 +26,7 @@ export function CompanyProfileWizard() {
     if (typeof window !== "undefined" && window.localStorage.getItem(SKIP_KEY) === "1") return;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setProfile(p);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setOpen(true);
   }, []);
 

@@ -14,7 +14,7 @@ export function DiaryPrintClient({ id }: { id: string }) {
     // localStorage はクライアント専用のため useEffect で読み込む必要がある
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setEntry(getEntryById(id));
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setLoaded(true);
   }, [id]);
 

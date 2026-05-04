@@ -43,13 +43,13 @@ export function CompanyProfileForm({ onSaved }: { onSaved?: (p: CompanyProfile) 
     // localStorage はクライアント専用のため useEffect で読み込む必要がある
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setProfile(p);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setChemicalsInput(p.chemicals.join("、"));
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setMachinesInput(p.machines.join("、"));
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setSitesInput(p.sites.join("、"));
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setWorkInput(p.workKeywords.join("、"));
   }, []);
 
