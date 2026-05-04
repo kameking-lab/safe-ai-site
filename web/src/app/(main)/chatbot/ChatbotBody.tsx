@@ -120,6 +120,13 @@ export function ChatbotBody() {
             <li key={item}>・ {item}</li>
           ))}
         </ul>
+        <p className="mt-3 text-xs text-amber-800">
+          <a href="/about/chatbot-eval" className="font-semibold underline hover:text-amber-900">
+            {isEn
+              ? "→ See the 100-question accuracy benchmark"
+              : "→ 100問ベンチマーク（精度評価）を見る"}
+          </a>
+        </p>
       </div>
 
       <RelatedPageCards

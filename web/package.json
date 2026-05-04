@@ -13,6 +13,7 @@
     "postinstall": "prisma generate --no-hints || true",
     "lint": "eslint",
     "test": "vitest run",
+    "eval:chatbot": "node scripts/chatbot-eval.ts",
     "test:e2e": "playwright test",
     "test:e2e:smoke": "playwright test --grep @smoke",
     "test:e2e:failure": "playwright test --grep @failure",
