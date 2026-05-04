@@ -7,6 +7,7 @@ import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
+import { JsonLd } from "@/components/json-ld";
 const _title = "化学物質 リスクアセスメント ツール";
 const _desc =
   "化学物質名を入力するとSDS・GHS分類・必要保護具・安全対策チェックリストを表示。安衛法令和4年改正対応。厚労省データ参考。";
@@ -30,6 +31,17 @@ export default function ChemicalRaPage() {
     <>
       
       <PageJsonLd name="化学物質リスクアセスメント" description="安衛法第57条の3に基づく化学物質リスクアセスメントを支援。CREATE-SIMPLE準拠の簡易評価ツール。" path="/chemical-ra" />
+      <JsonLd schema={{
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "化学物質リスクアセスメントツール",
+        description: _desc,
+        url: "https://safe-ai-site.vercel.app/chemical-ra",
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web",
+        offers: { "@type": "Offer", price: 0, priceCurrency: "JPY" },
+        publisher: { "@type": "Organization", name: "ANZEN AI", url: "https://safe-ai-site.vercel.app" },
+      }} />
       <div className="mx-auto max-w-7xl px-4 pt-6">
         <TranslatedPageHeader
           titleJa="化学物質リスクアセスメント"
