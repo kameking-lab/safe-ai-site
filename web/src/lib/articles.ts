@@ -55,7 +55,10 @@ function loadAll(): Article[] {
   }
   const articles: Article[] = entries.map((f) => {
     const raw = readFileSync(join(ARTICLES_DIR, f), "utf-8");
-    return JSON.parse(raw) as Article;
+    // 一部 .json ファイルが UTF-8 BOM 付きで保存されており JSON.parse が失敗する。
+    // 入口で剥がす（BOM が無ければそのまま）。
+    const stripped = raw.charCodeAt(0) === 0xfeff ? raw.slice(1) : raw;
+    return JSON.parse(stripped) as Article;
   });
   cached = articles;
   return articles;
