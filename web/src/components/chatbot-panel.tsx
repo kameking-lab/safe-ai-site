@@ -621,29 +621,7 @@ export function ChatbotPanel() {
                     </summary>
                     <div className="mt-2 space-y-2">
                       {msg.sources.map((src, i) => (
-                        <div key={i} className="rounded-md bg-slate-50 p-2 text-xs">
-                          <div className="flex flex-wrap items-center justify-between gap-1">
-                            <p className="font-semibold text-blue-700">
-                              {src.law} {src.article}
-                            </p>
-                            <a
-                              href={EGOV_LAW_NUMBERS[src.law.replace(/（[^）]+）$/, "")]
-                                ? `https://laws.e-gov.go.jp/law/${EGOV_LAW_NUMBERS[src.law.replace(/（[^）]+）$/, "")]}`
-                                : `https://laws.e-gov.go.jp/search?keyword=${encodeURIComponent(src.law)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="shrink-0 rounded border border-blue-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-blue-600 hover:bg-blue-50"
-                            >
-                              e-Gov で確認
-                            </a>
-                          </div>
-                          {src.snippet && src.snippet !== src.text && (
-                            <p className="mt-1 rounded bg-yellow-50 px-1.5 py-1 text-[11px] text-amber-900 leading-5">
-                              💡 該当箇所: {src.snippet}
-                            </p>
-                          )}
-                          <p className="mt-1 text-slate-600 leading-5">{src.text}</p>
-                        </div>
+                        <ChatbotSourceCard key={i} src={src} />
                       ))}
                     </div>
                   </details>
@@ -824,6 +802,59 @@ export function ChatbotPanel() {
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full bg-slate-800 px-5 py-2.5 text-sm font-semibold text-white shadow-lg z-50">
           {shareToast}
         </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * 参照条文 1 件分のカード。
+ * 200 字でトリミングしたダイジェストと、トグルで表示する条文全文を持つ。
+ * fullText が無い（MLIT 資料等の）場合は従来どおり text のみ表示。
+ */
+function ChatbotSourceCard({ src }: { src: ChatbotSource }) {
+  const [showFull, setShowFull] = useState(false);
+  const lawName = src.law.replace(/（[^）]+）$/, "");
+  const egovHref = EGOV_LAW_NUMBERS[lawName]
+    ? `https://laws.e-gov.go.jp/law/${EGOV_LAW_NUMBERS[lawName]}`
+    : `https://laws.e-gov.go.jp/search?keyword=${encodeURIComponent(src.law)}`;
+  const hasFull =
+    typeof src.fullText === "string" &&
+    src.fullText.length > 0 &&
+    src.fullText !== src.text;
+
+  return (
+    <div className="rounded-md bg-slate-50 p-2 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-1">
+        <p className="font-semibold text-blue-700">
+          {src.law} {src.article}
+        </p>
+        <a
+          href={src.url ?? egovHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 rounded border border-blue-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-blue-600 hover:bg-blue-50"
+        >
+          {src.url ? "原文を確認" : "e-Gov で確認"}
+        </a>
+      </div>
+      {src.snippet && src.snippet !== src.text && (
+        <p className="mt-1 rounded bg-yellow-50 px-1.5 py-1 text-[11px] text-amber-900 leading-5">
+          💡 該当箇所: {src.snippet}
+        </p>
+      )}
+      <p className="mt-1 whitespace-pre-wrap text-slate-600 leading-5">
+        {showFull && src.fullText ? src.fullText : src.text}
+      </p>
+      {hasFull && (
+        <button
+          type="button"
+          onClick={() => setShowFull((v) => !v)}
+          className="mt-1.5 inline-flex items-center gap-1 rounded-full border border-blue-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-blue-700 hover:bg-blue-50"
+          aria-expanded={showFull}
+        >
+          {showFull ? "▲ 全文を閉じる" : "▼ 条文全文を表示"}
+        </button>
       )}
     </div>
   );

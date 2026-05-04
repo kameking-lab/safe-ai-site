@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { CompanyProfileForm } from "@/components/company-profile-form";
+import { LocalDataExportImport } from "@/components/local-data-export-import";
 
 export const metadata: Metadata = {
   title: "自社プロファイル｜ANZEN AI",
   description:
-    "業種・規模・取扱化学物質・主要機械・現場名を登録すると、KY・日誌・法改正・事故DBなど全機能の初期表示が最適化されます。",
+    "業種・規模・取扱化学物質・主要機械・現場名を登録すると、KY・日誌・法改正・事故DBなど全機能の初期表示が最適化されます。端末データのエクスポート/インポートも可能。",
   alternates: { canonical: "/profile" },
 };
 
@@ -36,6 +37,19 @@ export default function ProfilePage() {
           <li>• 化学物質RAの「現場の化学物質リスト」初期値</li>
           <li>• 事故ニュースの「自社類似事故Top5」レコメンド</li>
         </ul>
+      </section>
+
+      <section
+        id="data-management"
+        className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+      >
+        <h2 className="mb-1 text-base font-bold text-slate-900">端末データの管理（バックアップ／復元）</h2>
+        <p className="mb-3 text-xs leading-5 text-slate-600">
+          このサイトはサーバー同期を持ちません。端末を変える・ブラウザデータを消すと
+          データが失われます。エクスポート JSON を保管して、別端末や再インストール時に
+          インポートしてください。
+        </p>
+        <LocalDataExportImport />
       </section>
     </main>
   );

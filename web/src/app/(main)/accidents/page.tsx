@@ -8,7 +8,10 @@ import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
-import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
+import {
+  getAccidentCasesDataset,
+  getAccidentProvenanceCounts,
+} from "@/data/mock/accident-cases";
 import { SITE_STATS } from "@/data/site-stats";
 
 const _title = "労働災害 事故事例データベース";
@@ -50,9 +53,40 @@ export default function AccidentsPage() {
           iconName="Database"
           iconColor="red"
         />
-        <div className="mt-2">
+        <div className="mt-2 flex flex-wrap items-center gap-2">
           <LastUpdatedBadge />
+          {(() => {
+            const counts = getAccidentProvenanceCounts();
+            return (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] text-slate-600">
+                収録 {getAccidentCasesDataset().length} 件（
+                <span className="font-semibold text-emerald-700">厚労省 {counts.mhlw}</span>
+                ／<span className="font-semibold text-sky-700">curated {counts.curated}</span>
+                {counts.synthetic > 0 ? (
+                  <>
+                    ／
+                    <span className="font-semibold text-amber-700">
+                      合成 {counts.synthetic}
+                    </span>
+                  </>
+                ) : null}
+                ）
+              </span>
+            );
+          })()}
         </div>
+        <p className="mt-1 text-[10px] text-slate-500">
+          内訳の定義:{" "}
+          <a
+            href="/about/data-sources"
+            className="underline hover:text-slate-700"
+          >
+            データソース一覧
+          </a>{" "}
+          を参照。<strong>厚労省</strong> = 職場のあんぜんサイト由来の再収録、
+          <strong>curated</strong> = 公開情報・統計を編集部が再構成（固有名詞匿名化）、
+          <strong>合成</strong> = 教材用カバレッジ補完事例。
+        </p>
         <div className="mt-4">
           <LadderStatsCard />
         </div>

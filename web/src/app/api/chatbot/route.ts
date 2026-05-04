@@ -19,6 +19,10 @@ export type ChatbotSource = {
   text: string;
   /** 条文中、質問に該当する箇所の前後を抜粋したスニペット */
   snippet?: string;
+  /** 条文全文（UI で「全文表示」ボタン用。法令条文の場合のみ） */
+  fullText?: string;
+  /** 条文タイトル（「総則」「定義」等） */
+  articleTitle?: string;
   /** 出典の所管省庁（国交省資料の場合のみ） */
   ministry?: string;
   /** 公式ページURL（外部出典の場合） */
@@ -197,7 +201,9 @@ export async function POST(request: Request) {
       ...articles.map((a) => ({
         law: `${a.law}（${a.lawShort}）`,
         article: a.articleNum + (a.articleTitle ? `「${a.articleTitle}」` : ""),
+        articleTitle: a.articleTitle,
         text: a.text.length > 200 ? a.text.slice(0, 200) + "…" : a.text,
+        fullText: a.text,
         snippet: buildSnippet(a.text, message),
       })),
       ...mlitMatches.map(mlitToSource),
@@ -334,7 +340,9 @@ export async function POST(request: Request) {
     ...relevantArticles.map((a: LawArticle) => ({
       law: `${a.law}（${a.lawShort}）`,
       article: a.articleNum + (a.articleTitle ? `「${a.articleTitle}」` : ""),
+      articleTitle: a.articleTitle,
       text: a.text.length > 200 ? a.text.slice(0, 200) + "…" : a.text,
+      fullText: a.text,
       snippet: buildSnippet(a.text, message),
     })),
     ...mlitMatches.map(mlitToSource),

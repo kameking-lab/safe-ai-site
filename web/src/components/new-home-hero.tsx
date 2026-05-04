@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { MessageSquare, ClipboardList } from "lucide-react";
-import { SITE_STATS } from "@/data/site-stats";
+import { SITE_STATS, SITE_STATS_META, type SiteStatKey } from "@/data/site-stats";
 
-const STATS = [
-  { value: SITE_STATS.mhlwNoticeCount, label: "厚労省 通達・告示", hint: "拘束力レベル付き" },
-  { value: SITE_STATS.accidents10yCount, label: "事故事例（10年統合）", hint: "業種・原因別検索" },
-  { value: SITE_STATS.equipmentItemCount, label: "保護具DB点数", hint: "JIS規格・国家検定品" },
+const STATS: { key: SiteStatKey; value: string; label: string; hint: string }[] = [
+  { key: "mhlwNoticeCount", value: SITE_STATS.mhlwNoticeCount, label: "厚労省 通達・告示", hint: "拘束力レベル付き" },
+  { key: "accidents10yCount", value: SITE_STATS.accidents10yCount, label: "事故事例（10年統合）", hint: "業種・原因別検索" },
+  { key: "equipmentItemCount", value: SITE_STATS.equipmentItemCount, label: "保護具DB点数", hint: "JIS規格・国家検定品" },
 ];
 
 /** 新トップページヒーロー: 「現場の安全を、AIで変える。」 */
@@ -51,20 +51,35 @@ export function NewHomeHero() {
 
         {/* 統計バー */}
         <ul className="mx-auto mt-8 grid max-w-3xl grid-cols-3 gap-3 sm:gap-4">
-          {STATS.map((s) => (
-            <li
-              key={s.label}
-              className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:px-4 sm:py-4"
-            >
-              <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300 sm:text-2xl lg:text-3xl">
-                {s.value}
-              </p>
-              <p className="mt-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-200 sm:text-xs">
-                {s.label}
-              </p>
-              <p className="text-[9px] text-slate-500 dark:text-slate-400 sm:text-[10px]">{s.hint}</p>
-            </li>
-          ))}
+          {STATS.map((s) => {
+            const meta = SITE_STATS_META[s.key];
+            return (
+              <li
+                key={s.label}
+                className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:px-4 sm:py-4"
+              >
+                <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300 sm:text-2xl lg:text-3xl">
+                  {s.value}
+                </p>
+                <p className="mt-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-200 sm:text-xs">
+                  {s.label}
+                </p>
+                <p className="text-[9px] text-slate-500 dark:text-slate-400 sm:text-[10px]">{s.hint}</p>
+                {meta?.sourceUrl ? (
+                  <a
+                    href={meta.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 block text-[9px] leading-4 text-emerald-700 underline hover:text-emerald-800 dark:text-emerald-400"
+                  >
+                    出典・{meta.asOf}
+                  </a>
+                ) : (
+                  <p className="mt-1 text-[9px] leading-4 text-slate-400">出典: {meta?.source ?? ""}</p>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     </section>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { FileUp, Plus, X, Trash2, Sparkles } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { loadProfile, saveProfile } from "@/lib/company-profile";
 
 const SITE_LIST_KEY = "chemical-ra:site-list-v1";
@@ -34,8 +34,6 @@ export function ChemicalRaExtras() {
   const [list, setList] = useState<SiteChemical[]>([]);
   const [name, setName] = useState("");
   const [cas, setCas] = useState("");
-  const [sdsBusy, setSdsBusy] = useState(false);
-  const [sdsResult, setSdsResult] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = loadSiteList();
@@ -80,64 +78,8 @@ export function ChemicalRaExtras() {
     saveSiteList(next);
   };
 
-  const handleSdsUpload = async (file: File) => {
-    setSdsBusy(true);
-    setSdsResult(null);
-    // 注: 実際のPDF抽出はサーバー側に持っていない。簡易デモとして
-    // ファイル名から物質名を推測し、一覧に追加するのみとする。
-    await new Promise((r) => setTimeout(r, 600));
-    const guessed = file.name
-      .replace(/\.(pdf|PDF)$/, "")
-      .replace(/[\-_].*$/, "")
-      .replace(/SDS|sds/g, "")
-      .trim();
-    if (guessed) {
-      const next = [
-        { name: guessed, addedAt: new Date().toISOString() },
-        ...list.filter((c) => c.name !== guessed),
-      ];
-      setList(next);
-      saveSiteList(next);
-    }
-    setSdsResult(
-      `SDSファイル「${file.name}」をローカル登録しました。物質名「${guessed || "（推定不可）"}」をリストに追加。詳細RAは下のフォームで実行してください。`
-    );
-    setSdsBusy(false);
-  };
-
   return (
     <div className="mx-auto max-w-7xl space-y-3 px-4 lg:px-8">
-      {/* SDSアップロード */}
-      <section className="rounded-2xl border border-violet-200 bg-violet-50/50 p-4 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-bold text-violet-900">
-            <Sparkles className="mr-1 inline h-3.5 w-3.5" />
-            SDS PDF アップロード（AI 読取・実験的）
-          </h2>
-          <label className="inline-flex cursor-pointer items-center gap-1 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-violet-700">
-            <FileUp className="h-3.5 w-3.5" />
-            {sdsBusy ? "解析中…" : "PDFを選ぶ"}
-            <input
-              type="file"
-              accept="application/pdf"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) void handleSdsUpload(f);
-              }}
-            />
-          </label>
-        </div>
-        <p className="mt-1 text-[11px] text-violet-800">
-          現在は実験的サポート: ファイル名から物質名を推定して一覧に登録します。本番AI読取は管理者向けに整備予定。
-        </p>
-        {sdsResult && (
-          <p className="mt-2 rounded border border-violet-300 bg-white px-2 py-1 text-[11px] text-violet-800">
-            {sdsResult}
-          </p>
-        )}
-      </section>
-
       {/* 現場の化学物質リスト */}
       <section className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2">

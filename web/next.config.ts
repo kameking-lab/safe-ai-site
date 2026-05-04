@@ -38,30 +38,27 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
-  // /feedback は /contact に一本化（恒久リダイレクト）
-  // /cases 系はサンプル事例ページとして廃止 → トップへ
+  // 直感URL（短い・単数形・別表記）から正規ページへの 301 リダイレクト。
+  // 旧URL互換に加え、ユーザーが推測しがちな URL を恒久転送する。
   async redirects() {
     return [
-      {
-        source: "/feedback",
-        destination: "/contact?category=demo",
-        permanent: true,
-      },
-      {
-        source: "/cases",
-        destination: "/",
-        permanent: true,
-      },
-      {
-        source: "/cases/:slug",
-        destination: "/",
-        permanent: true,
-      },
-      {
-        source: "/bear-map",
-        destination: "/risk",
-        permanent: true,
-      },
+      // 既存
+      { source: "/feedback", destination: "/contact?category=demo", permanent: true },
+      { source: "/cases", destination: "/", permanent: true },
+      { source: "/cases/:slug", destination: "/", permanent: true },
+      { source: "/bear-map", destination: "/risk", permanent: true },
+      // 直感URL 10件（推測しがちな短縮形・単数形・英数別表記）
+      { source: "/chat", destination: "/chatbot", permanent: true },
+      { source: "/law", destination: "/laws", permanent: true },
+      { source: "/accident", destination: "/accidents", permanent: true },
+      { source: "/equipment-search", destination: "/equipment-finder", permanent: true },
+      { source: "/quiz", destination: "/exam-quiz", permanent: true },
+      { source: "/e-learn", destination: "/e-learning", permanent: true },
+      { source: "/elearning", destination: "/e-learning", permanent: true },
+      { source: "/support", destination: "/contact", permanent: true },
+      { source: "/help", destination: "/contact", permanent: true },
+      { source: "/price", destination: "/pricing", permanent: true },
+      { source: "/faq", destination: "/qa-knowledge", permanent: true },
     ];
   },
   // セキュリティ・キャッシュヘッダー

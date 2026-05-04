@@ -1,0 +1,161 @@
+{
+  "generated_at": "2026-05-04T00:18:06.959Z",
+  "total": 100,
+  "correct": 100,
+  "accuracy": 1,
+  "target": 0.8,
+  "passed": true,
+  "failures": [],
+  "topic_breakdown": {
+    "総則": {
+      "total": 4,
+      "correct": 4,
+      "accuracy": 1
+    },
+    "組織": {
+      "total": 6,
+      "correct": 6,
+      "accuracy": 1
+    },
+    "教育": {
+      "total": 10,
+      "correct": 10,
+      "accuracy": 1
+    },
+    "健診": {
+      "total": 10,
+      "correct": 10,
+      "accuracy": 1
+    },
+    "墜落": {
+      "total": 6,
+      "correct": 6,
+      "accuracy": 1
+    },
+    "足場": {
+      "total": 4,
+      "correct": 4,
+      "accuracy": 1
+    },
+    "クレーン": {
+      "total": 8,
+      "correct": 8,
+      "accuracy": 1
+    },
+    "有機溶剤": {
+      "total": 2,
+      "correct": 2,
+      "accuracy": 1
+    },
+    "局排": {
+      "total": 2,
+      "correct": 2,
+      "accuracy": 1
+    },
+    "特化物": {
+      "total": 1,
+      "correct": 1,
+      "accuracy": 1
+    },
+    "石綿": {
+      "total": 2,
+      "correct": 2,
+      "accuracy": 1
+    },
+    "粉じん": {
+      "total": 1,
+      "correct": 1,
+      "accuracy": 1
+    },
+    "酸欠": {
+      "total": 4,
+      "correct": 4,
+      "accuracy": 1
+    },
+    "化学物質": {
+      "total": 3,
+      "correct": 3,
+      "accuracy": 1
+    },
+    "電離": {
+      "total": 2,
+      "correct": 2,
+      "accuracy": 1
+    },
+    "熱中症": {
+      "total": 2,
+      "correct": 2,
+      "accuracy": 1
+    },
+    "騒音": {
+      "total": 1,
+      "correct": 1,
+      "accuracy": 1
+    },
+    "ボイラー": {
+      "total": 1,
+      "correct": 1,
+      "accuracy": 1
+    },
+    "VDT": {
+      "total": 1,
+      "correct": 1,
+      "accuracy": 1
+    },
+    "重量物": {
+      "total": 1,
+      "correct": 1,
+      "accuracy": 1
+    },
+    "高圧": {
+      "total": 1,
+      "correct": 1,
+      "accuracy": 1
+    },
+    "測定": {
+      "total": 6,
+      "correct": 6,
+      "accuracy": 1
+    },
+    "報告": {
+      "total": 4,
+      "correct": 4,
+      "accuracy": 1
+    },
+    "罰則": {
+      "total": 1,
+      "correct": 1,
+      "accuracy": 1
+    },
+    "労基": {
+      "total": 7,
+      "correct": 7,
+      "accuracy": 1
+    },
+    "育介": {
+      "total": 2,
+      "correct": 2,
+      "accuracy": 1
+    },
+    "賃金": {
+      "total": 1,
+      "correct": 1,
+      "accuracy": 1
+    },
+    "労災": {
+      "total": 2,
+      "correct": 2,
+      "accuracy": 1
+    },
+    "契約": {
+      "total": 3,
+      "correct": 3,
+      "accuracy": 1
+    },
+    "ハラスメント": {
+      "total": 2,
+      "correct": 2,
+      "accuracy": 1
+    }
+  }
+}
