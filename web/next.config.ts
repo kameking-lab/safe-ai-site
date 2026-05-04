@@ -90,12 +90,8 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
-      {
-        source: "/_next/static/(.*)",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
+      // Note: /_next/static/* は Next.js が自動的に immutable な Cache-Control を設定するため
+      // 明示的なオーバーライドは不要（指定すると build 警告が出る）
     ];
   },
 };
