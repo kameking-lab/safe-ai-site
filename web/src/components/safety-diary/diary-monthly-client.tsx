@@ -24,7 +24,7 @@ export function DiaryMonthlyClient({ ym: rawYm }: { ym: string }) {
     // localStorage はクライアント専用のため useEffect で読み込む必要がある
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setEntries(getEntriesByMonth(ym));
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setLoaded(true);
   }, [ym]);
 

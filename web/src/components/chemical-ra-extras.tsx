@@ -48,7 +48,7 @@ export function ChemicalRaExtras() {
           name: c,
           addedAt: new Date().toISOString(),
         }));
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         setList(initial);
         saveSiteList(initial);
       }

@@ -80,9 +80,9 @@ export function EquipmentFinderClient() {
         : {};
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 受信クエリパラメータからの初期化は副作用扱いが妥当
     setCategoryId(first);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
+     
     setAnswers(initialAnswers);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
+     
     setPhase("refine");
   }, [incoming, phase]);
 

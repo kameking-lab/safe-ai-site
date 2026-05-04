@@ -55,7 +55,7 @@ export function SignageFloorPlanEditor() {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       if (img) setImageDataUrl(img);
     } catch {}
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setPins(loadPins());
   }, []);
 

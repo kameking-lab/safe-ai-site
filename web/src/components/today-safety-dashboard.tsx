@@ -64,7 +64,7 @@ export function TodaySafetyDashboard() {
     const today = new Date().toISOString().slice(0, 10);
     try {
       const entries = loadDiaryEntries();
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       setDiaryToday(entries.some((e) => e.required.date === today));
     } catch {}
     try {
@@ -72,7 +72,7 @@ export function TodaySafetyDashboard() {
       if (ky) {
         const parsed = JSON.parse(ky) as { workDateYear?: string; workDateMonth?: string; workDateDay?: string };
         const ymd = `${parsed.workDateYear ?? ""}-${(parsed.workDateMonth ?? "").padStart(2, "0")}-${(parsed.workDateDay ?? "").padStart(2, "0")}`;
-        // eslint-disable-next-line react-hooks/set-state-in-effect
+         
         setKyToday(ymd === today);
       }
     } catch {}

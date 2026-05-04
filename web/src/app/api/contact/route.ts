@@ -117,7 +117,8 @@ export async function POST(request: Request) {
   };
 
   // 現段階はサーバーログへの記録のみ。将来は Resend / Slack Webhook 連携を追加。
-  console.log("[contact]", JSON.stringify(record));
+  // console.warn を使用して本番ビルドの removeConsole で削除されないようにする
+  console.warn("[contact]", JSON.stringify(record));
 
   return NextResponse.json(
     {

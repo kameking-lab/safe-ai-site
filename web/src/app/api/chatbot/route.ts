@@ -284,7 +284,6 @@ export async function POST(request: Request) {
   }
 
   // Gemini Flash API呼び出し（多ターン会話対応）
-  console.log("[chatbot] API key present:", !!apiKey);
   let answer: string;
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
@@ -295,12 +294,10 @@ export async function POST(request: Request) {
 
     const userPrompt = buildUserPrompt(message, context, buildMlitContext(mlitMatches));
     const historyContents = buildHistoryContents(body?.history);
-    console.log("[chatbot] Calling Gemini API, question length:", message.length, "history turns:", historyContents.length);
     const result = historyContents.length > 0
       ? await model.startChat({ history: historyContents }).sendMessage(userPrompt)
       : await model.generateContent(userPrompt);
     answer = result.response.text();
-    console.log("[chatbot] Gemini API response received, answer length:", answer.length);
   } catch (err) {
     console.error("[chatbot] Gemini API error:", err instanceof Error ? err.message : String(err));
     const isOverload =

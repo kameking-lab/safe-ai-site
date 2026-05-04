@@ -259,7 +259,7 @@ export function LawRevisionList({
   const [rewriteBusyId, setRewriteBusyId] = useState<string | null>(null);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setProfile(loadProfile());
     const onChange = () => setProfile(loadProfile());
     if (typeof window !== "undefined") {

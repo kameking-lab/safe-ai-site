@@ -4,6 +4,17 @@ import { safetyDiaryEntrySchema, type SafetyDiaryEntry } from "./schema";
 
 const STORAGE_KEY = "safety-diary-v3";
 
+// localStorage 肥大化対策: 1 年分（365エントリ）を上限とする。
+// 1 エントリあたり ~2KB の前提で 365 件 ≒ 730KB（localStorage 上限の 1/7 程度）。
+export const MAX_DIARY_ENTRIES = 365;
+
+/** エントリ配列を localStorage 上限ポリシーに従って切り詰める（純粋関数） */
+export function capEntries(entries: SafetyDiaryEntry[]): SafetyDiaryEntry[] {
+  // updatedAt 降順で並び替えて先頭 MAX_DIARY_ENTRIES 件を保持
+  const sorted = [...entries].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return sorted.slice(0, MAX_DIARY_ENTRIES);
+}
+
 /** localStorage から全エントリを読む */
 export function loadEntries(): SafetyDiaryEntry[] {
   if (typeof window === "undefined") return [];
@@ -23,10 +34,10 @@ export function loadEntries(): SafetyDiaryEntry[] {
   }
 }
 
-/** 全エントリを保存 */
+/** 全エントリを保存（保存時に上限ポリシーを適用） */
 function saveAll(entries: SafetyDiaryEntry[]) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(capEntries(entries)));
 }
 
 /** ID で取得 */
