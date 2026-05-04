@@ -18,6 +18,7 @@ import { KY_INDUSTRY_PRESETS } from "@/data/mock/ky-industry-presets";
 import { createServices } from "@/lib/services/service-factory";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
 import { trackEvent } from "@/components/Analytics";
+import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
 import type {
   KyInstructionFallCheck,
   KyInstructionParticipant,
@@ -579,6 +580,11 @@ export function KyPageContent() {
             iconName="ClipboardList"
             iconColor="emerald"
           />
+        </div>
+
+        {/* localStorage データ保存警告 */}
+        <div className="mt-3">
+          <LocalStorageWarningBanner />
         </div>
 
         {/* Usage guide */}
