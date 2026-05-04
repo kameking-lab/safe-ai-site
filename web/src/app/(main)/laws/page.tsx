@@ -44,6 +44,13 @@ export default function LawsPage() {
         heading="合わせて使う"
         pages={[
           {
+            href: "/laws/glossary",
+            label: "法令用語集",
+            description: "公布と施行の違い、告示・通達・指針の拘束力、政省令の関係など、改正情報を読む前提となる用語を一次出典付きで解説。",
+            color: "purple",
+            cta: "用語を確認する",
+          },
+          {
             href: "/laws/notices-precedents",
             label: "通達・判例（第2層出典）",
             description: "条文だけでは読めない行政解釈（通達15件）と最高裁判例（15件）。監督官・士業向けの実務出典集。",
