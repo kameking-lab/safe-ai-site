@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search,
@@ -74,7 +74,10 @@ export function CommandPalette({ onClose }: Props) {
     setSelectedIdx(0);
   }, [debouncedQuery, activeCategory]);
 
-  const results = debouncedQuery ? searchItems(index, debouncedQuery, activeCategory) : [];
+  const results = useMemo(
+    () => (debouncedQuery ? searchItems(index, debouncedQuery, activeCategory) : []),
+    [debouncedQuery, index, activeCategory],
+  );
 
   // Scroll selected item into view
   useEffect(() => {
