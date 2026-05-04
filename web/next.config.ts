@@ -38,16 +38,16 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
-  // 直感URL（短い・単数形・別表記）から正規ページへの 301 リダイレクト。
-  // 旧URL互換に加え、ユーザーが推測しがちな URL を恒久転送する。
+  // 直感URL（短い・単数形・別表記・日英両パターン）から正規ページへの恒久リダイレクト
   async redirects() {
     return [
-      // 既存
+      // フィードバック → コンテクスト付きお問い合わせ
       { source: "/feedback", destination: "/contact?category=demo", permanent: true },
+      // 廃止・移動ページ
       { source: "/cases", destination: "/", permanent: true },
       { source: "/cases/:slug", destination: "/", permanent: true },
       { source: "/bear-map", destination: "/risk", permanent: true },
-      // 直感URL 10件（推測しがちな短縮形・単数形・英数別表記）
+      // 英語短縮形・単数形
       { source: "/chat", destination: "/chatbot", permanent: true },
       { source: "/law", destination: "/laws", permanent: true },
       { source: "/accident", destination: "/accidents", permanent: true },
@@ -59,6 +59,22 @@ const nextConfig: NextConfig = {
       { source: "/help", destination: "/contact", permanent: true },
       { source: "/price", destination: "/pricing", permanent: true },
       { source: "/faq", destination: "/qa-knowledge", permanent: true },
+      // 安全日誌（日本語2パターン）
+      { source: "/anzen-nisshi", destination: "/safety-diary", permanent: true },
+      { source: "/anzen-eisei-nisshi", destination: "/safety-diary", permanent: true },
+      // 法改正（英語・日本語）
+      { source: "/regulations", destination: "/laws", permanent: true },
+      { source: "/houkaisei", destination: "/laws", permanent: true },
+      // 事故DB（英語・日本語）
+      { source: "/news", destination: "/accidents", permanent: true },
+      { source: "/jiko", destination: "/accidents", permanent: true },
+      // 化学物質DB
+      { source: "/chemical-search-db", destination: "/chemical-database", permanent: true },
+      { source: "/kagaku-bushitsu", destination: "/chemical-ra", permanent: true },
+      // サイネージ
+      { source: "/safety-signage", destination: "/signage", permanent: true },
+      // KY（危険予知の日本語フルネーム）
+      { source: "/kiken-yochi", destination: "/ky", permanent: true },
     ];
   },
   // セキュリティ・キャッシュヘッダー
