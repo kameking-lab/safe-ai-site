@@ -80,7 +80,16 @@ function SiteDataDisclaimer() {
   return (
     <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
       ⚠ このタブは当サイト独自収集の参考事例です。統計的代表性はありません。
-      厚労省公式統計（N={SITE_STATS.accidentDbCount}件）は「<strong>MHLW実データ分析</strong>」タブをご覧ください。
+      厚労省公式統計（N={SITE_STATS.accidentDbCount}件・
+      <a
+        href="https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline hover:text-amber-900"
+      >
+        出典: 職場のあんぜんサイト
+      </a>
+      ）は「<strong>MHLW実データ分析</strong>」タブをご覧ください。
     </div>
   );
 }
