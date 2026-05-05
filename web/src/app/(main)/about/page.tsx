@@ -48,8 +48,8 @@ export const metadata: Metadata = {
 };
 
 const STATS = [
-  { icon: AlertCircle, label: "事故データベース", value: `${SITE_STATS.accidentDbCount}件`, color: "red" },
-  { icon: AlertCircle, label: "死亡災害", value: `${SITE_STATS.mhlwDeathsCount}件`, color: "red" },
+  { icon: AlertCircle, label: "死亡事故（10年統合）", value: `${SITE_STATS.accidents10yCount}件`, color: "red" },
+  { icon: AlertCircle, label: "死亡災害DB（5年分）", value: `${SITE_STATS.mhlwDeathsCount}件`, color: "red" },
   { icon: FileText, label: "法令条文", value: `${SITE_STATS.lawArticleCount}条文`, color: "emerald" },
   { icon: Scale, label: "化学物質", value: `${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()}物質`, color: "sky" },
   { icon: GraduationCap, label: "過去問", value: "1,000問+", color: "amber" },

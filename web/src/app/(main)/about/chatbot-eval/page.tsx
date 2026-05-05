@@ -3,14 +3,14 @@ import Link from "next/link";
 import results from "@/data/chatbot-eval-results.json";
 
 export const metadata: Metadata = {
-  title: "AIチャットボット精度評価（100問ベンチマーク） | ANZEN AI",
+  title: "AIチャットボット精度評価（Recall@5 100問ベンチマーク） | ANZEN AI",
   description:
-    "労働安全衛生 AI チャットボットの根拠条文検索精度を 100 問ベンチマークで定量公開。RAG 検索結果に正答条文が top-5 内に含まれるかを判定し、トピック別の正答率と全失敗問の期待/取得値を開示します。",
+    "労働安全衛生 AI チャットボットの根拠条文検索精度を 100 問ベンチマークで定量公開。RAG 検索結果に正答条文が top-5 内に含まれるか（Recall@5）を判定し、トピック別の Recall@5 と全失敗問の期待/取得値を開示します。",
   alternates: { canonical: "/about/chatbot-eval" },
   openGraph: {
-    title: "AIチャットボット精度評価 | ANZEN AI",
+    title: "AIチャットボット精度評価（Recall@5） | ANZEN AI",
     description:
-      "100 問ベンチマークによる根拠条文ヒット率を全件公開。トピック別正答率と失敗問の詳細を含む。",
+      "100 問ベンチマークによる根拠条文 Recall@5 を全件公開。トピック別スコアと失敗問の詳細を含む。",
     type: "article",
   },
 };
@@ -72,8 +72,8 @@ export default function ChatbotEvalPage() {
 
       {/* サマリ */}
       <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="正答数" value={`${r.correct} / ${r.total}`} accent />
-        <Stat label="正答率" value={formatPct(r.accuracy)} accent />
+        <Stat label="正答数（Recall@5）" value={`${r.correct} / ${r.total}`} accent />
+        <Stat label="Recall@5" value={formatPct(r.accuracy)} accent />
         <Stat label="目標値" value={formatPct(r.target)} />
         <Stat
           label="判定"
@@ -90,9 +90,9 @@ export default function ChatbotEvalPage() {
 
       {/* トピック別 */}
       <section className="mt-8">
-        <h2 className="text-lg font-bold text-slate-900">トピック別正答率</h2>
+        <h2 className="text-lg font-bold text-slate-900">トピック別 Recall@5</h2>
         <p className="mt-1 text-xs text-slate-500">
-          法令カテゴリ別に分けた集計。問数の多いトピックから降順表示。
+          法令カテゴリ別に分けた集計。問数の多いトピックから降順表示。Recall@5 = top-5 に gold 条文が 1 件以上含まれた割合。
         </p>
         <div className="mt-3 overflow-hidden rounded-lg border border-slate-200">
           <table className="w-full text-sm">
@@ -101,7 +101,7 @@ export default function ChatbotEvalPage() {
                 <th className="px-3 py-2 text-left font-semibold">トピック</th>
                 <th className="px-3 py-2 text-right font-semibold">問数</th>
                 <th className="px-3 py-2 text-right font-semibold">正答</th>
-                <th className="px-3 py-2 text-right font-semibold">正答率</th>
+                <th className="px-3 py-2 text-right font-semibold">Recall@5</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">

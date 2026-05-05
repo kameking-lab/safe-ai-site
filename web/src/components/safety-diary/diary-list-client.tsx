@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { Plus, ListChecks, Calendar, AlertTriangle } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Plus, ListChecks, Calendar, AlertTriangle, Download, Upload } from "lucide-react";
+import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
 import { loadEntries } from "@/lib/safety-diary/store";
-import type { SafetyDiaryEntry } from "@/lib/safety-diary/schema";
+import { safetyDiaryEntrySchema, type SafetyDiaryEntry } from "@/lib/safety-diary/schema";
 import { computeMonthlySummary } from "@/lib/safety-diary/monthly-summary";
 
 function currentYearMonth(): string {
@@ -15,14 +16,52 @@ function currentYearMonth(): string {
 export function DiaryListClient() {
   const [entries, setEntries] = useState<SafetyDiaryEntry[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [importMsg, setImportMsg] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // localStorage はクライアント専用のため useEffect で読み込む必要がある
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEntries(loadEntries());
-     
     setLoaded(true);
   }, []);
+
+  function handleExport() {
+    const data = JSON.stringify(entries, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `safety-diary-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed: unknown = JSON.parse(ev.target?.result as string);
+        if (!Array.isArray(parsed)) throw new Error("配列形式ではありません");
+        const valid = parsed
+          .map((item) => safetyDiaryEntrySchema.safeParse(item))
+          .filter((r) => r.success)
+          .map((r) => (r as { success: true; data: SafetyDiaryEntry }).data);
+        const existing = loadEntries();
+        const existingIds = new Set(existing.map((e) => e.id));
+        const added = valid.filter((e) => !existingIds.has(e.id));
+        const merged = [...existing, ...added];
+        localStorage.setItem("safety-diary-v3", JSON.stringify(merged));
+        setEntries(loadEntries());
+        setImportMsg(`✓ ${added.length} 件インポートしました（重複スキップ: ${valid.length - added.length} 件）`);
+      } catch (err) {
+        setImportMsg(`⚠ インポート失敗: ${err instanceof Error ? err.message : "不明なエラー"}`);
+      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+    reader.readAsText(file);
+  }
 
   const ym = currentYearMonth();
   const thisMonthEntries = useMemo(
@@ -36,6 +75,7 @@ export function DiaryListClient() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      <LocalStorageWarningBanner />
       <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">📓 安全衛生日誌</h1>
@@ -72,8 +112,50 @@ export function DiaryListClient() {
             <Calendar className="h-4 w-4" />
             今月のまとめ
           </Link>
+          {entries.length > 0 && (
+            <button
+              type="button"
+              onClick={handleExport}
+              className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              title="全記録を JSON でダウンロード"
+            >
+              <Download className="h-4 w-4" />
+              エクスポート
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+            title="JSON ファイルから記録を読み込む"
+          >
+            <Upload className="h-4 w-4" />
+            インポート
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            onChange={handleImport}
+            className="hidden"
+            aria-label="インポートするJSONファイルを選択"
+          />
         </div>
       </header>
+
+      {importMsg && (
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm">
+          <span>{importMsg}</span>
+          <button
+            type="button"
+            onClick={() => setImportMsg(null)}
+            className="rounded px-1 text-slate-500 hover:bg-slate-100"
+            aria-label="通知を閉じる"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {/* 月次トレンド（簡易） */}
       <section className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
