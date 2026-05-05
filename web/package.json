@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.2",
+    "@google-analytics/data": "^5.2.2",
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.19.3",
     "@stripe/stripe-js": "^9.1.0",
