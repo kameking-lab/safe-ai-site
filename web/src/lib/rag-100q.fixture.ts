@@ -136,4 +136,16 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 98, topic: "契約", question: "有期労働契約の無期転換は？", gold: [{ lawShort: "労契法", articleNum: "第18条" }] },
   { id: 99, topic: "ハラスメント", question: "セクシュアルハラスメント防止義務は？", gold: [{ lawShort: "均等法", articleNum: "第11条" }] },
   { id: 100, topic: "ハラスメント", question: "妊娠・出産等を理由とする不利益取扱いの禁止は？", gold: [{ lawShort: "均等法", articleNum: "第11条の3" }, { lawShort: "均等法", articleNum: "第12条" }] },
+
+  // L. 足場手すり補強問題 (101-104) – 安衛則563条特化
+  { id: 101, topic: "足場", question: "足場の作業床に設けなければならない手すりの高さは何cm以上ですか？", gold: [{ lawShort: "安衛則", articleNum: "第563条" }] },
+  { id: 102, topic: "足場", question: "足場の手すりに加えて設置が必要な中さん等の高さ基準は？", gold: [{ lawShort: "安衛則", articleNum: "第563条" }] },
+  { id: 103, topic: "足場", question: "足場に手すり等を設けることが困難な場合の代替措置は何条に定められていますか？", gold: [{ lawShort: "安衛則", articleNum: "第563条" }, { lawShort: "安衛則", articleNum: "第518条" }] },
+  { id: 104, topic: "足場", question: "足場の手すりの設置義務（安衛則563条）の2015年改正で追加された中さん等の規定内容は？", gold: [{ lawShort: "安衛則", articleNum: "第563条" }] },
+
+  // M. フォークリフト就業制限・使用基準 (105-108) – 安衛令20条11号
+  { id: 105, topic: "フォークリフト", question: "フォークリフトの運転に就業制限が設けられる最大荷重は何トン以上ですか？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }] },
+  { id: 106, topic: "フォークリフト", question: "フォークリフト運転業務の就業制限の根拠条文（政令）は？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }, { lawShort: "安衛法", articleNum: "第61条" }] },
+  { id: 107, topic: "フォークリフト", question: "フォークリフトの制限速度の設定義務は何条ですか？", gold: [{ lawShort: "安衛則", articleNum: "第151条の73" }] },
+  { id: 108, topic: "フォークリフト", question: "フォークリフトを主たる用途以外（人の運搬等）に使用することを禁止している条文は？", gold: [{ lawShort: "安衛則", articleNum: "第151条の74" }] },
 ];
