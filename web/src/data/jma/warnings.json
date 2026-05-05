@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-05T19:46:04.307Z",
+  "fetchedAt": "2026-05-05T21:09:46.244Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -8,7 +8,7 @@
           "sourceCode": "011000",
           "level": "advisory",
           "headline": "宗谷地方では、強風や高波に注意してください。",
-          "reportDatetime": "2026-05-06T03:58:00+09:00",
+          "reportDatetime": "2026-05-06T05:45:00+09:00",
           "publishingOffice": "稚内地方気象台",
           "warnings": [
             {
@@ -42,20 +42,8 @@
               "level": "advisory"
             },
             {
-              "areaCode": "0151100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0151200",
               "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151200",
-              "code": "16",
               "status": "継続",
               "level": "advisory"
             },
@@ -68,12 +56,6 @@
             {
               "areaCode": "0151400",
               "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151400",
-              "code": "16",
               "status": "継続",
               "level": "advisory"
             },
@@ -2267,8 +2249,8 @@
         {
           "sourceCode": "030000",
           "level": "advisory",
-          "headline": "岩手県では、空気の乾燥した状態が続くため、火の取り扱いに注意してください。内陸では、なだれに注意してください。内陸、沿岸北部では、霜に対する農作物の管理に注意してください。",
-          "reportDatetime": "2026-05-05T13:11:00+09:00",
+          "headline": "岩手県では、７日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。内陸では、ここしばらくなだれに注意してください。",
+          "reportDatetime": "2026-05-06T06:06:00+09:00",
           "publishingOffice": "盛岡地方気象台",
           "warnings": [
             {
@@ -2284,21 +2266,9 @@
               "level": "advisory"
             },
             {
-              "areaCode": "030010",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
               "areaCode": "030020",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "030020",
-              "code": "24",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -2314,21 +2284,9 @@
               "level": "advisory"
             },
             {
-              "areaCode": "0320100",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0320200",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0320200",
-              "code": "24",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -2344,21 +2302,9 @@
               "level": "advisory"
             },
             {
-              "areaCode": "0320500",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0320600",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0320600",
-              "code": "24",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -2416,12 +2362,6 @@
               "level": "advisory"
             },
             {
-              "areaCode": "0321400",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0321500",
               "code": "21",
               "status": "継続",
@@ -2440,12 +2380,6 @@
               "level": "advisory"
             },
             {
-              "areaCode": "0321600",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0330100",
               "code": "21",
               "status": "継続",
@@ -2458,21 +2392,9 @@
               "level": "advisory"
             },
             {
-              "areaCode": "0330100",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0330200",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0330200",
-              "code": "24",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -2482,33 +2404,15 @@
               "level": "advisory"
             },
             {
-              "areaCode": "0330300",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0332100",
               "code": "21",
               "status": "継続",
               "level": "advisory"
             },
             {
-              "areaCode": "0332100",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0332200",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0332200",
-              "code": "24",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -2521,12 +2425,6 @@
               "areaCode": "0336600",
               "code": "22",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0336600",
-              "code": "24",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -2560,33 +2458,15 @@
               "level": "advisory"
             },
             {
-              "areaCode": "0348200",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0348300",
               "code": "21",
               "status": "継続",
               "level": "advisory"
             },
             {
-              "areaCode": "0348300",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0348400",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0348400",
-              "code": "24",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -2636,7 +2516,7 @@
           "sourceCode": "040000",
           "level": "advisory",
           "headline": "宮城県では、７日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-05T15:30:00+09:00",
+          "reportDatetime": "2026-05-06T04:51:00+09:00",
           "publishingOffice": "仙台管区気象台",
           "warnings": [
             {
@@ -3427,8 +3307,8 @@
         {
           "sourceCode": "070000",
           "level": "advisory",
-          "headline": "中通りでは、ここしばらく空気の乾燥した状態が続くため、火の取り扱いに注意してください。会津では、６日朝は霜に対する農作物の管理に注意してください。",
-          "reportDatetime": "2026-05-05T09:38:00+09:00",
+          "headline": "中通りでは、７日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-05-06T06:03:00+09:00",
           "publishingOffice": "福島地方気象台",
           "warnings": [
             {
@@ -3438,33 +3318,15 @@
               "level": "advisory"
             },
             {
-              "areaCode": "070030",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0720100",
               "code": "21",
               "status": "継続",
               "level": "advisory"
             },
             {
-              "areaCode": "0720200",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0720301",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0720302",
-              "code": "24",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3477,12 +3339,6 @@
               "areaCode": "0720700",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0720800",
-              "code": "24",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3543,102 +3399,6 @@
               "areaCode": "0734401",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0734402",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0736200",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0736400",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0736700",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0736800",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0740200",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0740500",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0740700",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0740800",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0742100",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0742200",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0742300",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0744400",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0744500",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0744600",
-              "code": "24",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0744700",
-              "code": "24",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -7516,7 +7276,7 @@
           "sourceCode": "474000",
           "level": "warning",
           "headline": "石垣島地方では、６日朝まで低い土地の浸水や河川の増水に警戒してください。",
-          "reportDatetime": "2026-05-06T04:13:00+09:00",
+          "reportDatetime": "2026-05-06T05:21:00+09:00",
           "publishingOffice": "石垣島地方気象台",
           "warnings": [
             {
@@ -7570,7 +7330,7 @@
             {
               "areaCode": "4720700",
               "code": "04",
-              "status": "発表",
+              "status": "継続",
               "level": "warning"
             },
             {
@@ -7590,18 +7350,6 @@
               "code": "16",
               "status": "継続",
               "level": "advisory"
-            },
-            {
-              "areaCode": "4738100",
-              "code": "03",
-              "status": "継続",
-              "level": "warning"
-            },
-            {
-              "areaCode": "4738100",
-              "code": "04",
-              "status": "継続",
-              "level": "warning"
             },
             {
               "areaCode": "4738100",
