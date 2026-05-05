@@ -16,14 +16,29 @@ import { buildMockStatsResponse } from "@/data/mock/stats-mock";
  */
 
 function isGa4Configured(): boolean {
-  if (!process.env.GA4_PROPERTY_ID) return false;
-  if (
-    !process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON &&
-    !process.env.GOOGLE_APPLICATION_CREDENTIALS
-  ) {
-    return false;
-  }
-  return true;
+    // デバッグログ: 環境変数の状態を確認（一時的、原因特定後に削除）
+    console.log("[stats:debug] GA4_PROPERTY_ID:",
+                    process.env.GA4_PROPERTY_ID
+                      ? `set (length=${process.env.GA4_PROPERTY_ID.length})`
+                      : "undefined");
+    console.log("[stats:debug] GOOGLE_APPLICATION_CREDENTIALS_JSON:",
+                    process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON
+                      ? `set (length=${process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON.length})`
+                      : "undefined");
+    console.log("[stats:debug] GOOGLE_APPLICATION_CREDENTIALS:",
+                    process.env.GOOGLE_APPLICATION_CREDENTIALS
+                      ? `set (length=${process.env.GOOGLE_APPLICATION_CREDENTIALS.length})`
+                      : "undefined");
+    console.log("[stats:debug] env keys (GA4/GOOGLE):",
+                    Object.keys(process.env).filter(k => k.startsWith("GA4") || k.startsWith("GOOGLE")));
+    if (!process.env.GA4_PROPERTY_ID) return false;
+    if (
+          !process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON &&
+          !process.env.GOOGLE_APPLICATION_CREDENTIALS
+        ) {
+          return false;
+    }
+    return true;
 }
 
 function periodToDates(period: StatsPeriod): { startDate: string; endDate: string } {
