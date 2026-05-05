@@ -10,7 +10,7 @@ export function LocalStorageWarningBanner() {
 
   useEffect(() => {
     try {
-      if (!localStorage.getItem(DISMISSED_KEY)) setVisible(true);
+      setVisible(!localStorage.getItem(DISMISSED_KEY));
     } catch {
       // localStorage 利用不可の環境では表示しない
     }
