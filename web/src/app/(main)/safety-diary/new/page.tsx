@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DiaryFormRequired } from "@/components/safety-diary/diary-form-required";
+import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
 
 export const metadata: Metadata = {
   title: "新規日誌作成（必須5項目・3〜5分）｜安全衛生日誌 V3",
@@ -26,6 +27,7 @@ export default function NewSafetyDiaryPage() {
           ← 一覧へ戻る
         </Link>
       </header>
+      <LocalStorageWarningBanner />
       <Suspense fallback={<div className="text-sm text-slate-500">読み込み中…</div>}>
         <DiaryFormRequired />
       </Suspense>

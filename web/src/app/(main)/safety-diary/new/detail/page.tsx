@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DiaryFormDetail } from "@/components/safety-diary/diary-form-detail";
+import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
 
 export const metadata: Metadata = {
   title: "新規日誌（詳細モード・任意8項目を含む）｜安全衛生日誌 V3",
@@ -27,6 +28,7 @@ export default function NewSafetyDiaryDetailPage() {
           ← 一覧へ戻る
         </Link>
       </header>
+      <LocalStorageWarningBanner />
       <DiaryFormDetail />
     </main>
   );

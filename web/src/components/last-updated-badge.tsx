@@ -7,19 +7,30 @@ interface Props {
 }
 
 /**
- * realLawRevisions の publishedAt 最大日（=収録された改正のうち最新の公布／施行日）から
- * "YYYY年M月" 形式のラベルを動的生成する。改正データを足したら自動で追従する。
+ * realLawRevisions のうち「現時点で既に公布／施行された」最新日から
+ * "YYYY年M月" 形式のラベルを動的生成する。
+ *
+ * 未来日（施行予定の改正）は「最終更新」には含めない。
+ * これがないと、たとえば 2027-04-01 施行予定の改正が登録されると
+ * 「最終更新: 2027年4月」のように現実より先の日付が表示されてしまう。
  */
 function deriveLatestLabel(): string {
+  const todayIso = new Date().toISOString().slice(0, 10);
   let latest = "";
   for (const r of realLawRevisions) {
     const candidate =
       typeof r.enforcement_date === "string" && r.enforcement_date
         ? r.enforcement_date
         : r.publishedAt;
-    if (candidate && candidate > latest) latest = candidate;
+    if (!candidate) continue;
+    if (candidate > todayIso) continue;
+    if (candidate > latest) latest = candidate;
   }
-  if (!latest) return "2026年4月";
+  if (!latest) {
+    const m = todayIso.match(/^(\d{4})-(\d{2})/);
+    if (m) return `${m[1]}年${Number(m[2])}月`;
+    return "2026年4月";
+  }
   const m = latest.match(/^(\d{4})-(\d{2})/);
   if (!m) return latest;
   return `${m[1]}年${Number(m[2])}月`;
