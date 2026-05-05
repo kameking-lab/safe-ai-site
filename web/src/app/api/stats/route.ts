@@ -6,17 +6,21 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function parsePeriod(raw: string | null): StatsPeriod {
-    if (raw === "7d" || raw === "30d" || raw === "90d") return raw;
-    return "30d";
+      if (raw === "7d" || raw === "30d" || raw === "90d") return raw;
+      return "30d";
 }
 
 export async function GET(request: Request) {
-    const url = new URL(request.url);
-    const period = parsePeriod(url.searchParams.get("period"));
-    const data = await fetchStats(period);
-    return NextResponse.json(data, {
-          headers: {
-                  "Cache-Control": "no-cache, must-revalidate",
-          },
-    });
+      console.log("[route:debug] GET /api/stats called");
+      const url = new URL(request.url);
+      const period = parsePeriod(url.searchParams.get("period"));
+      console.log("[route:debug] period=", period);
+      console.log("[route:debug] about to call fetchStats");
+      const data = await fetchStats(period);
+      console.log("[route:debug] fetchStats returned source=", data.source);
+      return NextResponse.json(data, {
+              headers: {
+                        "Cache-Control": "no-cache, must-revalidate",
+              },
+      });
 }
