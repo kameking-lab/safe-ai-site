@@ -1,45 +1,27 @@
 {
-  "fetchedAt": "2026-05-05T14:29:30.654Z",
+  "fetchedAt": "2026-05-05T16:13:38.616Z",
   "byIso": {
     "JP-01": {
       "level": "warning",
       "entries": [
         {
           "sourceCode": "011000",
-          "level": "warning",
-          "headline": "宗谷地方では、５日夕方から５日夜遅くまで暴風に警戒してください。",
-          "reportDatetime": "2026-05-05T13:08:00+09:00",
+          "level": "advisory",
+          "headline": "宗谷地方では、強風や高波に注意してください。",
+          "reportDatetime": "2026-05-06T00:15:00+09:00",
           "publishingOffice": "稚内地方気象台",
           "warnings": [
             {
               "areaCode": "011000",
-              "code": "05",
-              "status": "発表",
-              "level": "warning"
-            },
-            {
-              "areaCode": "011000",
               "code": "16",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0121400",
-              "code": "05",
-              "status": "発表",
-              "level": "warning"
-            },
-            {
-              "areaCode": "0121400",
               "code": "16",
               "status": "継続",
               "level": "advisory"
-            },
-            {
-              "areaCode": "0151100",
-              "code": "05",
-              "status": "発表",
-              "level": "warning"
             },
             {
               "areaCode": "0151100",
@@ -79,21 +61,9 @@
             },
             {
               "areaCode": "0151600",
-              "code": "05",
-              "status": "発表",
-              "level": "warning"
-            },
-            {
-              "areaCode": "0151600",
               "code": "16",
               "status": "継続",
               "level": "advisory"
-            },
-            {
-              "areaCode": "0151700",
-              "code": "05",
-              "status": "発表",
-              "level": "warning"
             },
             {
               "areaCode": "0151700",
@@ -103,33 +73,15 @@
             },
             {
               "areaCode": "0151800",
-              "code": "05",
-              "status": "発表",
-              "level": "warning"
-            },
-            {
-              "areaCode": "0151800",
               "code": "16",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0151900",
-              "code": "05",
-              "status": "発表",
-              "level": "warning"
-            },
-            {
-              "areaCode": "0151900",
               "code": "16",
               "status": "継続",
               "level": "advisory"
-            },
-            {
-              "areaCode": "0152000",
-              "code": "05",
-              "status": "発表",
-              "level": "warning"
             },
             {
               "areaCode": "0152000",
@@ -1498,7 +1450,7 @@
           "sourceCode": "020000",
           "level": "advisory",
           "headline": "津軽、三八上北では、強風やなだれに注意してください。青森県では、高波と、空気の乾燥した状態が続くため火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-05T15:47:00+09:00",
+          "reportDatetime": "2026-05-05T23:59:00+09:00",
           "publishingOffice": "青森地方気象台",
           "warnings": [
             {
@@ -1756,7 +1708,7 @@
             {
               "areaCode": "0230300",
               "code": "16",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
