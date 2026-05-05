@@ -1,22 +1,31 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore, useState } from "react";
 import { HardDrive, X } from "lucide-react";
 
 const DISMISSED_KEY = "safe-ai:local-storage-warning-dismissed:v1";
 
+function subscribe(_callback: () => void) {
+  return () => {};
+}
+
+function getVisibleSnapshot(): boolean {
+  try {
+    return !localStorage.getItem(DISMISSED_KEY);
+  } catch {
+    return false;
+  }
+}
+
+function getServerSnapshot(): boolean {
+  return false;
+}
+
 export function LocalStorageWarningBanner() {
-  const [visible, setVisible] = useState(false);
+  const storedVisible = useSyncExternalStore(subscribe, getVisibleSnapshot, getServerSnapshot);
+  const [dismissed, setDismissed] = useState(false);
 
-  useEffect(() => {
-    try {
-      setVisible(!localStorage.getItem(DISMISSED_KEY));
-    } catch {
-      // localStorage 利用不可の環境では表示しない
-    }
-  }, []);
-
-  if (!visible) return null;
+  if (!storedVisible || dismissed) return null;
 
   function dismiss() {
     try {
@@ -24,7 +33,7 @@ export function LocalStorageWarningBanner() {
     } catch {
       // ignore
     }
-    setVisible(false);
+    setDismissed(true);
   }
 
   return (
