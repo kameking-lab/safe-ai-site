@@ -57,6 +57,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/safety-diary", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
     { url: "/notifications", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
     { url: "/goods", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/signage", lastModified: "2026-05-06", priority: 0.5, changeFrequency: "weekly" },
     { url: "/about", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "yearly" },
     { url: "/contact", lastModified: "2026-04-22", priority: 0.5, changeFrequency: "yearly" },
     { url: "/privacy", lastModified: "2025-10-01", priority: 0.3, changeFrequency: "yearly" },
