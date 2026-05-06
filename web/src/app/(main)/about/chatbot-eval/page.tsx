@@ -4,14 +4,14 @@ import results from "@/data/chatbot-eval-results.json";
 import freshResults from "@/data/chatbot-eval-fresh-results.json";
 
 export const metadata: Metadata = {
-  title: "AIチャットボット精度評価（Recall@5 100問ベンチマーク）",
+  title: "AIチャットボット Recall@5 評価（100問ベンチマーク） | ANZEN AI",
   description:
-    "労働安全衛生 AI チャットボットの根拠条文検索精度を 100 問ベンチマークで定量公開。RAG 検索結果に正答条文が top-5 内に含まれるか（Recall@5）を判定し、トピック別の Recall@5 と全失敗問の期待/取得値を開示します。",
+    "労働安全衛生 AI チャットボットの根拠条文 検索ヒット率（Recall@5）を 100 問ベンチマークで定量公開。RAG 検索結果の上位 5 件に gold 条文が含まれるかを判定し、トピック別の Recall@5 と全失敗問の期待/取得値を開示します。",
   alternates: { canonical: "/about/chatbot-eval" },
   openGraph: {
-    title: "AIチャットボット精度評価（Recall@5）",
+    title: "AIチャットボット Recall@5 評価 | ANZEN AI",
     description:
-      "100 問ベンチマークによる根拠条文 Recall@5 を全件公開。トピック別スコアと失敗問の詳細を含む。",
+      "100 問ベンチマークによる根拠条文の Recall@5（検索ヒット率）を全件公開。トピック別スコアと失敗問の詳細を含む。",
     type: "article",
   },
 };
@@ -59,22 +59,22 @@ export default function ChatbotEvalPage() {
           研究・実証プロジェクトについて
         </Link>
         <span className="mx-2">/</span>
-        <span>AIチャットボット精度評価</span>
+        <span>AIチャットボット Recall@5 評価</span>
       </nav>
 
       <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-        AIチャットボット精度評価（100問ベンチマーク）
+        AIチャットボット Recall@5 評価（100問ベンチマーク）
       </h1>
       <p className="mt-2 text-sm leading-6 text-slate-600">
         労働安全衛生 AI チャットボットが「正しい根拠条文を検索できているか」を 100 問のクローズドセットで評価し、
         結果を全件公開しています。各問は <code className="rounded bg-slate-100 px-1">{`{question, gold[]}`}</code>{" "}
-        の組で、RAG 検索の上位 5 件に gold（期待される条文）のいずれか 1 件以上が含まれていれば正答とみなします。
+        の組で、RAG 検索の上位 5 件に gold（期待される条文）のいずれか 1 件以上が含まれた割合を Recall@5（検索ヒット率）として算出します。
       </p>
 
       {/* サマリ */}
       <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="正答数（Recall@5）" value={`${r.correct} / ${r.total}`} accent />
-        <Stat label="Recall@5" value={formatPct(r.accuracy)} accent />
+        <Stat label="Recall@5（件数）" value={`${r.correct} / ${r.total}`} accent />
+        <Stat label="Recall@5（検索ヒット率）" value={formatPct(r.accuracy)} accent />
         <Stat label="目標値" value={formatPct(r.target)} />
         <Stat
           label="判定"
@@ -83,6 +83,7 @@ export default function ChatbotEvalPage() {
         />
       </section>
       <p className="mt-3 text-xs text-slate-500">
+        ※ 本ページの「Recall@5」は RAG 検索の根拠条文 検索ヒット率であり、Gemini が生成する回答文の正答率ではありません。<br />
         最終評価: {formatDate(r.generated_at)} ／ ソース:{" "}
         <code className="rounded bg-slate-100 px-1">test/chatbot-basic-100.json</code>
         ／ 実行コマンド:{" "}
@@ -174,7 +175,7 @@ export default function ChatbotEvalPage() {
             ・評価対象は <strong>RAG 検索の根拠条文ヒット率</strong>。Gemini の生成回答の文章品質は別途評価。
           </li>
           <li>
-            ・上位 5 件のうち gold 1 件でも含まれれば正答（Recall@5 ベース）。
+            ・上位 5 件のうち gold 1 件でも含まれれば検索ヒットとみなす（Recall@5 ベース）。
           </li>
           <li>
             ・本ベンチマークは検索段階の代理指標であり、実際の回答精度はモデル生成・プロンプト設計にも依存します。

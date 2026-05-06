@@ -148,4 +148,10 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 106, topic: "フォークリフト", question: "フォークリフト運転業務の就業制限の根拠条文（政令）は？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }, { lawShort: "安衛法", articleNum: "第61条" }] },
   { id: 107, topic: "フォークリフト", question: "フォークリフトの制限速度の設定義務は何条ですか？", gold: [{ lawShort: "安衛則", articleNum: "第151条の73" }] },
   { id: 108, topic: "フォークリフト", question: "フォークリフトを主たる用途以外（人の運搬等）に使用することを禁止している条文は？", gold: [{ lawShort: "安衛則", articleNum: "第151条の74" }] },
+
+  // N. 就業制限業務（安衛令第20条 各号）(109-112) – Recall@5強化
+  { id: 109, topic: "就業制限", question: "玉掛けの資格（技能講習）は何条に規定されていますか？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }] },
+  { id: 110, topic: "就業制限", question: "つり上げ荷重1トン以上の移動式クレーンを運転するために必要な資格の根拠条文は？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }] },
+  { id: 111, topic: "就業制限", question: "機体重量3トン以上の車両系建設機械の運転に必要な技能講習の根拠となる政令の条文は？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }] },
+  { id: 112, topic: "就業制限", question: "可燃性ガスと酸素を使って金属を溶接・溶断するガス溶接の資格（技能講習）の根拠条文は？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }] },
 ];

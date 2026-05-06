@@ -13,8 +13,9 @@ const _desc =
 export const metadata: Metadata = {
   title: _title,
   description: _desc,
+  alternates: { canonical: "/laws" },
   openGraph: {
-    title: `${_title}`,
+    title: `${_title}｜ANZEN AI`,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
   },
