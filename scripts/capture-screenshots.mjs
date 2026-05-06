@@ -12,7 +12,7 @@
  *
  * 注意:
  *   - Playwrightが入っていない/起動できない環境では SVG プレースホルダーで代替する
- *   - 本番URLは https://safe-ai-site.vercel.app
+ *   - 本番URLは https://anzen-ai-portal.jp
  */
 
 import { mkdir, writeFile } from "node:fs/promises";
@@ -29,7 +29,7 @@ const ROOT = path.resolve(__dirname, "..");
 const cwdRequire = createRequire(path.join(process.cwd(), "package.json"));
 const OUT_DIR = path.join(ROOT, "web", "public", "screenshots");
 
-const BASE_URL = process.env.SCREENSHOT_BASE_URL || "https://safe-ai-site.vercel.app";
+const BASE_URL = process.env.SCREENSHOT_BASE_URL || "https://anzen-ai-portal.jp";
 
 /** @typedef {{ slug: string, path: string, label: string, color: string }} Target */
 

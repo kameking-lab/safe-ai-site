@@ -7,7 +7,7 @@
   legal_basis: 酸素欠乏症等防止規則第12条 ／ 第一種5.5時間 ／ 第二種5.5時間（硫化水素含む追加内容で計5.5h相当）
   duration: 約5.5時間
   supervisor: 安全AIポータル
-  contact: "https://safe-ai-site.vercel.app/contact"
+  contact: "https://anzen-ai-portal.jp/contact"
   output: sankesu.pptx
 
 slides:
@@ -224,5 +224,5 @@ slides:
         head: 二次災害防止が救助の鉄則
         body: 装備なしの進入は絶対禁止。空気呼吸器と命綱を必ず装着
     footer_label: お問い合わせ
-    footer_value: safe-ai-site.vercel.app/contact
+    footer_value: anzen-ai-portal.jp/contact
     footer_supervisor: 安全AIポータル

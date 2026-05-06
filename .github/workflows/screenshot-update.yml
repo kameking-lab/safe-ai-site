@@ -13,7 +13,7 @@ on:
       base_url:
         description: "撮影対象のベースURL"
         required: false
-        default: "https://safe-ai-site.vercel.app"
+        default: "https://anzen-ai-portal.jp"
 
 permissions:
   contents: write
@@ -43,7 +43,7 @@ jobs:
 
       - name: Capture screenshots
         env:
-          SCREENSHOT_BASE_URL: ${{ inputs.base_url || 'https://safe-ai-site.vercel.app' }}
+          SCREENSHOT_BASE_URL: ${{ inputs.base_url || 'https://anzen-ai-portal.jp' }}
         run: node scripts/capture-screenshots.mjs
 
       - name: Detect changes
@@ -69,7 +69,7 @@ jobs:
 
             毎週月曜の自動実行により、`web/public/screenshots/` を本番サイトの最新表示で更新しました。
 
-            - ベースURL: `${{ inputs.base_url || 'https://safe-ai-site.vercel.app' }}`
+            - ベースURL: `${{ inputs.base_url || 'https://anzen-ai-portal.jp' }}`
             - 実行: `node scripts/capture-screenshots.mjs`
             - デスクトップ (1280x800) + モバイル (375x667)
 

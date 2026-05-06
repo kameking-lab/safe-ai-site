@@ -36,11 +36,11 @@ export default function ChemicalRaPage() {
         "@type": "SoftwareApplication",
         name: "化学物質リスクアセスメントツール",
         description: _desc,
-        url: "https://safe-ai-site.vercel.app/chemical-ra",
+        url: "https://anzen-ai-portal.jp/chemical-ra",
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         offers: { "@type": "Offer", price: 0, priceCurrency: "JPY" },
-        publisher: { "@type": "Organization", name: "安全AIポータル", url: "https://safe-ai-site.vercel.app" },
+        publisher: { "@type": "Organization", name: "安全AIポータル", url: "https://anzen-ai-portal.jp" },
       }} />
       <div className="mx-auto max-w-7xl px-4 pt-6">
         <TranslatedPageHeader

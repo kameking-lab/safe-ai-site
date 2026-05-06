@@ -108,7 +108,7 @@ export default function ConsultingPage() {
         schema={serviceSchema({
           name: "安全AIポータル 月額顧問サービス",
           description: DESCRIPTION,
-          url: "https://safe-ai-site.vercel.app/consulting",
+          url: "https://anzen-ai-portal.jp/consulting",
           serviceType: "ProfessionalService",
           priceFrom: 150000,
         })}

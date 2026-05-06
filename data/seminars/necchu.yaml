@@ -7,7 +7,7 @@
   legal_basis: "基発0420第3号「職場における熱中症予防基本対策要綱」（令和3年4月20日付）準拠"
   duration: 約1.5時間
   supervisor: 安全AIポータル
-  contact: "https://safe-ai-site.vercel.app/contact"
+  contact: "https://anzen-ai-portal.jp/contact"
   output: necchu.pptx
 
 slides:
@@ -223,5 +223,5 @@ slides:
         head: 記録と再評価で継続改善
         body: 教育・健診・対応記録を3年保存し毎年見直し
     footer_label: お問い合わせ
-    footer_value: safe-ai-site.vercel.app/contact
+    footer_value: anzen-ai-portal.jp/contact
     footer_supervisor: 安全AIポータル

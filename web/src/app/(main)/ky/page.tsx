@@ -28,7 +28,7 @@ const KY_HOWTO = howToSchema({
   name: "KY（危険予知）活動の進め方",
   description:
     "建設・製造現場で行うKY（危険予知）活動を4ラウンド法でデジタル記録する手順。",
-  url: "https://safe-ai-site.vercel.app/ky",
+  url: "https://anzen-ai-portal.jp/ky",
   totalTime: "PT15M",
   steps: [
     { name: "1R: 現状の把握", text: "作業内容・場所・人員・使用機械を整理し『どんな危険があるか』を全員で出し合う。" },

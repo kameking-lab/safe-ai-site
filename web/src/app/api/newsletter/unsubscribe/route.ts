@@ -40,7 +40,7 @@ function successHtml(email: string): string {
   <p style="font-size:40px;margin:0 0 16px;">✅</p>
   <h1 style="font-size:20px;margin:0 0 8px;">配信停止が完了しました</h1>
   <p style="font-size:14px;color:#64748b;margin:0 0 24px;">${email} への週間安全情報の配信を停止しました。</p>
-  <a href="https://safe-ai-site.vercel.app/newsletter" style="font-size:13px;color:#2563eb;">再度登録する</a>
+  <a href="https://anzen-ai-portal.jp/newsletter" style="font-size:13px;color:#2563eb;">再度登録する</a>
   <p style="font-size:12px;color:#94a3b8;margin-top:32px;">安全AIポータル ─ 現場の安全を、AIで変える。</p>
 </body>
 </html>`;
@@ -57,7 +57,7 @@ function errorHtml(msg: string): string {
   <p style="font-size:40px;margin:0 0 16px;">⚠️</p>
   <h1 style="font-size:20px;margin:0 0 8px;">配信停止に失敗しました</h1>
   <p style="font-size:14px;color:#64748b;margin:0 0 24px;">${msg}</p>
-  <a href="https://safe-ai-site.vercel.app" style="font-size:13px;color:#2563eb;">トップへ戻る</a>
+  <a href="https://anzen-ai-portal.jp" style="font-size:13px;color:#2563eb;">トップへ戻る</a>
 </body>
 </html>`;
 }

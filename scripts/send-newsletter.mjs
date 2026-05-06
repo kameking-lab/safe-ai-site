@@ -7,7 +7,7 @@
  *   NEWSLETTER_AUDIENCE_ID    - Resendオーディエンスid (なければ RESEND_AUDIENCE_ID)
  *   AUTH_SECRET               - 配信停止トークン生成用シークレット
  *   NOTIFY_FROM               - 送信元アドレス (例: 安全AIポータル <noreply@anzen-ai.com>)
- *   NEXT_PUBLIC_SITE_URL      - サイトURL (例: https://safe-ai-site.vercel.app)
+ *   NEXT_PUBLIC_SITE_URL      - サイトURL (例: https://anzen-ai-portal.jp)
  *
  * 実行:
  *   node scripts/send-newsletter.mjs [--dry-run]
@@ -22,7 +22,7 @@ const AUDIENCE_ID =
 const AUTH_SECRET = process.env.AUTH_SECRET ?? "dev-newsletter-secret";
 const FROM_ADDRESS = process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.com>";
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://safe-ai-site.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://anzen-ai-portal.jp";
 
 if (!RESEND_API_KEY) {
   console.error("[send-newsletter] RESEND_API_KEY が設定されていません。");

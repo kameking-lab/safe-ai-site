@@ -183,11 +183,11 @@ export default function AboutPage() {
             name: "研究・実証プロジェクトについて",
             description:
               "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
-            url: "https://safe-ai-site.vercel.app/about",
+            url: "https://anzen-ai-portal.jp/about",
           }),
           breadcrumbSchema([
-            { name: "ホーム", url: "https://safe-ai-site.vercel.app" },
-            { name: "プロジェクトについて", url: "https://safe-ai-site.vercel.app/about" },
+            { name: "ホーム", url: "https://anzen-ai-portal.jp" },
+            { name: "プロジェクトについて", url: "https://anzen-ai-portal.jp/about" },
           ]),
         ]}
       />

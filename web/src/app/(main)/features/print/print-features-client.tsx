@@ -161,10 +161,10 @@ export function PrintFeaturesClient() {
             </p>
             <ul className="mt-2 text-xs">
               <li>
-                Webフォーム: https://safe-ai-site.vercel.app/contact
+                Webフォーム: https://anzen-ai-portal.jp/contact
               </li>
-              <li>料金プラン: https://safe-ai-site.vercel.app/pricing</li>
-              <li>5分ツアー: https://safe-ai-site.vercel.app/features/quick-tour</li>
+              <li>料金プラン: https://anzen-ai-portal.jp/pricing</li>
+              <li>5分ツアー: https://anzen-ai-portal.jp/features/quick-tour</li>
             </ul>
             <p className="mt-2 text-[10px] text-slate-600">
               監修: 安全AIポータル 専門家チーム ／ © 2026 安全AIポータル

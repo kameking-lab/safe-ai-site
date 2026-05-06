@@ -139,7 +139,7 @@ mock配下の総行数は約13,530行。実データ比率87%以上。
 
 ### Robots
 
-`web/src/app/robots.ts` で Allow `/`、Disallow `/api/` と `/signage`。sitemap参照は `https://safe-ai-site.vercel.app/sitemap.xml` を指定。本セッションで `sitemap-index.xml` への切替えがオプションとして可能になったが、現時点では `robots.ts` 側は `sitemap.xml` を指したまま。Search Console 側で `sitemap-index.xml` を直接登録する運用を想定。
+`web/src/app/robots.ts` で Allow `/`、Disallow `/api/` と `/signage`。sitemap参照は `https://anzen-ai-portal.jp/sitemap.xml` を指定。本セッションで `sitemap-index.xml` への切替えがオプションとして可能になったが、現時点では `robots.ts` 側は `sitemap.xml` を指したまま。Search Console 側で `sitemap-index.xml` を直接登録する運用を想定。
 
 ### Manifest
 

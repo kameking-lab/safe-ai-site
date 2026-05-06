@@ -14,7 +14,7 @@ export function personSchema(): Schema {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "安全AIポータル",
-    url: "https://safe-ai-site.vercel.app/about",
+    url: "https://anzen-ai-portal.jp/about",
     knowsAbout: [
       "労働安全衛生",
       "建設業安全管理",
@@ -31,11 +31,11 @@ export function organizationSchema(): Schema {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "安全AIポータル",
-    url: "https://safe-ai-site.vercel.app",
-    logo: "https://safe-ai-site.vercel.app/apple-touch-icon.png",
+    url: "https://anzen-ai-portal.jp",
+    logo: "https://anzen-ai-portal.jp/apple-touch-icon.png",
     description:
       "労働安全衛生の現場運用を支援するポータルサービス。法改正情報・事故データベース・KY用紙・Eラーニング・AIチャットボットを提供。",
-    sameAs: ["https://safe-ai-site.vercel.app"],
+    sameAs: ["https://anzen-ai-portal.jp"],
   };
 }
 
@@ -44,20 +44,20 @@ export function webSiteSchema(): Schema {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "安全AIポータル",
-    url: "https://safe-ai-site.vercel.app",
+    url: "https://anzen-ai-portal.jp",
     description:
       "労働安全衛生の現場運用ポータル。法改正・リスク管理・KY用紙・Eラーニングをまとめて確認。",
     author: {
       "@type": "Organization",
       name: "安全AIポータル",
-      url: "https://safe-ai-site.vercel.app/about",
+      url: "https://anzen-ai-portal.jp/about",
     },
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
         urlTemplate:
-          "https://safe-ai-site.vercel.app/law-search?q={search_term_string}",
+          "https://anzen-ai-portal.jp/law-search?q={search_term_string}",
       },
       "query-input": "required name=search_term_string",
     },
@@ -82,7 +82,7 @@ export function articleListSchema(
         publisher: {
           "@type": "Organization",
           name: "安全AIポータル",
-          url: "https://safe-ai-site.vercel.app",
+          url: "https://anzen-ai-portal.jp",
         },
       },
     })),
@@ -107,7 +107,7 @@ export function newsArticleListSchema(
         publisher: {
           "@type": "Organization",
           name: "安全AIポータル",
-          url: "https://safe-ai-site.vercel.app",
+          url: "https://anzen-ai-portal.jp",
         },
       },
     })),
@@ -126,7 +126,7 @@ export function serviceSchema(input: {
   const provider = {
     "@type": "Organization",
     name: "安全AIポータル",
-    url: "https://safe-ai-site.vercel.app",
+    url: "https://anzen-ai-portal.jp",
   };
   const offers = priceFrom
     ? {
@@ -255,12 +255,12 @@ export function webPageSchema(input: {
     isPartOf: {
       "@type": "WebSite",
       name: "安全AIポータル",
-      url: "https://safe-ai-site.vercel.app",
+      url: "https://anzen-ai-portal.jp",
     },
     publisher: {
       "@type": "Organization",
       name: "安全AIポータル",
-      url: "https://safe-ai-site.vercel.app",
+      url: "https://anzen-ai-portal.jp",
     },
     ...(datePublished ? { datePublished } : {}),
     ...(dateModified ? { dateModified } : {}),
@@ -331,7 +331,7 @@ export function courseListSchema(
         provider: {
           "@type": "Organization",
           name: "安全AIポータル",
-          url: "https://safe-ai-site.vercel.app",
+          url: "https://anzen-ai-portal.jp",
         },
       },
     })),

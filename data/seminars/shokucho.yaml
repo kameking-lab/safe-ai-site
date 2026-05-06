@@ -7,7 +7,7 @@
   legal_basis: "安衛法第60条 ／ 安衛則第40条 ／ 12時間以上 ／ 製造業・建設業等の指定業種が対象"
   duration: "12時間以上（2日間想定）"
   supervisor: 安全AIポータル
-  contact: "https://safe-ai-site.vercel.app/contact"
+  contact: "https://anzen-ai-portal.jp/contact"
   output: shokucho.pptx
 
 slides:
@@ -223,5 +223,5 @@ slides:
         head: 統括との連携と記録
         body: 統括安全衛生責任者と連携し、記録3年以上保存で改善を継続
     footer_label: お問い合わせ
-    footer_value: safe-ai-site.vercel.app/contact
+    footer_value: anzen-ai-portal.jp/contact
     footer_supervisor: 安全AIポータル

@@ -73,7 +73,7 @@ export default async function HandoverPage({ searchParams }: Props) {
           <Table
             rows={[
               ["サイト名", "安全AIポータル（安全AIサイト）"],
-              ["URL", "https://safe-ai-site.vercel.app"],
+              ["URL", "https://anzen-ai-portal.jp"],
               ["目的", "労働安全の独立コンサルタント受注サイト（協会向けポートフォリオ兼務）"],
               ["運営表記", "安全AIポータル 運営チーム"],
               ["デプロイ", "Vercel（GitHub main ブランチ自動デプロイ）"],

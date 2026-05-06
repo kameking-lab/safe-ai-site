@@ -1,6 +1,6 @@
 # 10ペルソナ最終激辛レビュー（2026-04-22）
 
-**評価対象**: https://safe-ai-site.vercel.app
+**評価対象**: https://anzen-ai-portal.jp
 **評価ブランチ**: claude/musing-kare-d7aa29 ／ main HEAD: 1cdadfa
 **評価方法**: 10ペルソナがそれぞれ独立に本番サイトを実機巡回し、自分の業務観点で激辛レビュー。妥協・忖度・緩和表現禁止。
 **直前の整備**:

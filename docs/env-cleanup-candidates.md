@@ -93,7 +93,7 @@
 優先度 高:
   1. web/.env.example の NEXT_PUBLIC_RAKUTEN_AFID を NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID に修正 ← 完了
   2. Vercel で NEXT_PUBLIC_RAKUTEN_AFID → NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID に変更
-  3. NEXT_PUBLIC_SITE_URL を Vercel Production に設定（値: https://safe-ai-site.vercel.app）
+  3. NEXT_PUBLIC_SITE_URL を Vercel Production に設定（値: https://anzen-ai-portal.jp）
 
 優先度 中:
   4. NEXT_PUBLIC_PAID_MODE=false を全環境に追加

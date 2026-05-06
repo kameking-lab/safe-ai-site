@@ -91,7 +91,7 @@ export function GET(req: NextRequest) {
             letterSpacing: "0.05em",
           }}
         >
-          safe-ai-site.vercel.app
+          anzen-ai-portal.jp
         </div>
       </div>
     ),

@@ -1,6 +1,6 @@
 # セッション引き継ぎ書 — 2026-04-21
 
-> **閲覧方法:** [https://safe-ai-site.vercel.app/handover?key=handover2026](https://safe-ai-site.vercel.app/handover?key=handover2026)
+> **閲覧方法:** [https://anzen-ai-portal.jp/handover?key=handover2026](https://anzen-ai-portal.jp/handover?key=handover2026)
 
 ---
 
@@ -9,7 +9,7 @@
 | 項目 | 内容 |
 |------|------|
 | サイト名 | 安全AIポータル（安全AIサイト） |
-| URL | https://safe-ai-site.vercel.app |
+| URL | https://anzen-ai-portal.jp |
 | 目的 | 労働安全の独立コンサルタント受注サイト（協会向けポートフォリオ兼務） |
 | 監修者表記 | **労働安全コンサルタント（登録番号260022・土木区分）** または **安全AIポータル 事務局** |
 | 実名 | **絶対に「金田 義太」を出力しないこと**（特商法の請求開示方式を採用済み） |
@@ -200,4 +200,4 @@ scripts/generate-seminar-pptx.mjs      ← 生成スクリプト
 ---
 
 *このドキュメントは 2026-04-21 時点の状態を記録しています。*  
-*閲覧URL: https://safe-ai-site.vercel.app/handover?key=handover2026*
+*閲覧URL: https://anzen-ai-portal.jp/handover?key=handover2026*

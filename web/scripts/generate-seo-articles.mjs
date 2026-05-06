@@ -173,7 +173,7 @@ function buildArticle(seed) {
     ...seed,
     author: {
       name: "労働安全コンサルタント（登録番号260022・土木）",
-      url: "https://safe-ai-site.vercel.app/about",
+      url: "https://anzen-ai-portal.jp/about",
     },
     sections: [
       {

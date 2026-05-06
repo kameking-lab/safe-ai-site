@@ -182,7 +182,7 @@ export function ServicesContent() {
         schema={serviceSchema({
           name: "安全AIポータル 受託業務サービス",
           description: DESCRIPTION,
-          url: "https://safe-ai-site.vercel.app/services",
+          url: "https://anzen-ai-portal.jp/services",
           serviceType: "ProfessionalService",
           priceFrom: 150000,
         })}

@@ -417,7 +417,7 @@ const FAQ_JA = [
   },
   {
     q: "授業や講演で本サイトの図表・統計データを引用してもよいですか？",
-    a: "教育・研究・非営利目的の引用は CC BY-NC 4.0（出典明記・非営利）で許諾します。スライド・教科書・論文に「出典：安全AIポータル（safe-ai-site.vercel.app）／取得日」を明記してください。商用利用・転載は別途ご相談ください。",
+    a: "教育・研究・非営利目的の引用は CC BY-NC 4.0（出典明記・非営利）で許諾します。スライド・教科書・論文に「出典：安全AIポータル（anzen-ai-portal.jp）／取得日」を明記してください。商用利用・転載は別途ご相談ください。",
   },
 ];
 
@@ -448,7 +448,7 @@ const FAQ_EN = [
   },
   {
     q: "May I cite charts or statistics from this site in lectures or papers?",
-    a: "Yes, for educational/research/non-commercial use under CC BY-NC 4.0. Cite as 'Source: 安全AIポータル (safe-ai-site.vercel.app) / accessed [date]'. Contact us for commercial use.",
+    a: "Yes, for educational/research/non-commercial use under CC BY-NC 4.0. Cite as 'Source: 安全AIポータル (anzen-ai-portal.jp) / accessed [date]'. Contact us for commercial use.",
   },
 ];
 

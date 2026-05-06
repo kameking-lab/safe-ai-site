@@ -20,7 +20,7 @@ function tokenizeJa(text: string): string[] {
   return (text.match(/[一-龥ぁ-んァ-ヶa-zA-Z0-9]{2,}/g) ?? []).filter((t) => t.length >= 2);
 }
 
-const SITE_BASE = "https://safe-ai-site.vercel.app";
+const SITE_BASE = "https://anzen-ai-portal.jp";
 
 export function generateStaticParams() {
   return getPublishedArticleSlugs().map((slug) => ({ slug }));

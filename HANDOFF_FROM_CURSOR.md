@@ -6,8 +6,8 @@
 会社の安全担当者が業務時間内に日常的に使う想定。
 
 ## 本番URL
-- メイン: https://safe-ai-site.vercel.app/
-- サイネージ: https://safe-ai-site.vercel.app/signage
+- メイン: https://anzen-ai-portal.jp/
+- サイネージ: https://anzen-ai-portal.jp/signage
 - GitHub: https://github.com/kameking-lab/safe-ai-site
 - デプロイ: Vercel（GitHub連携で自動デプロイ）
 

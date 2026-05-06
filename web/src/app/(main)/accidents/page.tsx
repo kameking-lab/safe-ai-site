@@ -36,7 +36,7 @@ export default function AccidentsPage() {
     getAccidentCasesDataset().map((c) => ({
       headline: c.title,
       datePublished: c.occurredOn,
-      url: "https://safe-ai-site.vercel.app/accidents",
+      url: "https://anzen-ai-portal.jp/accidents",
       description: c.summary,
     }))
   );

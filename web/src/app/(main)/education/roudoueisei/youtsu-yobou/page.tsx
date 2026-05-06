@@ -30,7 +30,7 @@ const courseSchema = {
   "@type": "Course",
   name: "腰痛予防労働衛生教育",
   description: DESCRIPTION,
-  url: "https://safe-ai-site.vercel.app/education/roudoueisei/youtsu-yobou",
+  url: "https://anzen-ai-portal.jp/education/roudoueisei/youtsu-yobou",
   timeRequired: "PT2H",
   educationalLevel: "職場従事者",
   teaches: [
@@ -42,7 +42,7 @@ const courseSchema = {
   provider: {
     "@type": "Organization",
     name: "安全AIポータル",
-    url: "https://safe-ai-site.vercel.app",
+    url: "https://anzen-ai-portal.jp",
   },
   offers: [
     {
@@ -80,9 +80,9 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "安全AIポータル", item: "https://safe-ai-site.vercel.app/" },
-    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
-    { "@type": "ListItem", position: 3, name: "腰痛予防労働衛生教育", item: "https://safe-ai-site.vercel.app/education/roudoueisei/youtsu-yobou" },
+    { "@type": "ListItem", position: 1, name: "安全AIポータル", item: "https://anzen-ai-portal.jp/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://anzen-ai-portal.jp/education" },
+    { "@type": "ListItem", position: 3, name: "腰痛予防労働衛生教育", item: "https://anzen-ai-portal.jp/education/roudoueisei/youtsu-yobou" },
   ],
 };
 
