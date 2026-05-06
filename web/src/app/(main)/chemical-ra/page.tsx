@@ -4,6 +4,7 @@ import { ChemicalRaPanel } from "@/components/chemical-ra-panel";
 import { ChemicalRaExtras } from "@/components/chemical-ra-extras";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
+import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -51,6 +52,7 @@ export default function ChemicalRaPage() {
           iconName="Search"
           iconColor="blue"
         />
+        <LocalStorageWarningBanner />
       </div>
       <ChemicalRaExtras />
       <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-500">読み込み中…</div>}>
