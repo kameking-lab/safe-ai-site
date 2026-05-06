@@ -329,7 +329,7 @@ export function AppShell({ children, user }: AppShellProps) {
       <aside className="hidden w-60 shrink-0 flex-col border-r border-slate-200 bg-slate-50/80 px-3 py-5 dark:border-slate-700 dark:bg-slate-900/80 lg:flex">
         <div className="mb-4 flex items-start justify-between gap-2 px-1">
           <div>
-            <p className="text-xs font-bold tracking-wide text-emerald-700 dark:text-emerald-300">ANZEN AI</p>
+            <p className="text-xs font-bold tracking-wide text-emerald-700 dark:text-emerald-300">安全AIポータル</p>
             <p className="mt-0.5 text-[10px] text-slate-500 dark:text-slate-400">
               現場の安全を、AIで変える。
             </p>
@@ -444,7 +444,7 @@ export function AppShell({ children, user }: AppShellProps) {
         {/* Mobile header — 375px で縦積みしないように要素を絞る（a11yトグルはドロップダウン内へ移設） */}
         <div className="flex flex-nowrap items-center justify-between gap-2 border-b border-slate-200 bg-gradient-to-b from-emerald-50 to-white px-3 py-3 dark:border-slate-700 dark:from-emerald-500/10 dark:to-slate-900 lg:hidden">
           <div className="min-w-0 shrink">
-            <p className="truncate text-[11px] font-bold tracking-wide text-emerald-700 dark:text-emerald-300">ANZEN AI</p>
+            <p className="truncate text-[11px] font-bold tracking-wide text-emerald-700 dark:text-emerald-300">安全AIポータル</p>
             <p className="truncate text-[11px] text-slate-700 dark:text-slate-300 sm:text-xs">現場の安全を、AIで変える。</p>
           </div>
           <div className="flex shrink-0 items-center gap-1">

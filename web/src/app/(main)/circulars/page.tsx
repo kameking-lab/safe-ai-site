@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     "労働安全衛生に関する厚生労働省の通達・告示・指針を全件横断検索。各通達ごとに概要・関連事故事例・推奨保護具をまとめています。",
   alternates: { canonical: "/circulars" },
   openGraph: {
-    title: "厚労省通達・告示・指針 一覧｜ANZEN AI",
+    title: "厚労省通達・告示・指針 一覧｜安全AIポータル",
     description:
       "労働安全衛生に関する通達を網羅。法的拘束力バッジ・最終確認日付き。",
     images: [{ url: ogImageUrl("厚労省通達 一覧"), width: 1200, height: 630 }],
@@ -67,7 +67,7 @@ export default function CircularsIndexPage() {
       </ul>
 
       <p className="mt-6 text-xs text-slate-500">
-        ※ 出典: 中央労働災害防止協会 安全衛生情報センター（jaish.gr.jp）。本一覧は ANZEN AI が公開情報を整理し、最終確認日を付与したものです。
+        ※ 出典: 中央労働災害防止協会 安全衛生情報センター（jaish.gr.jp）。本一覧は 安全AIポータル が公開情報を整理し、最終確認日を付与したものです。
       </p>
     </main>
   );

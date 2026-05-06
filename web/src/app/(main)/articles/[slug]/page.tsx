@@ -40,7 +40,7 @@ export async function generateMetadata({
     alternates: { canonical: `/articles/${slug}` },
     keywords: article.keywords,
     openGraph: {
-      title: `${article.title}｜ANZEN AI`,
+      title: `${article.title}｜安全AIポータル`,
       description: article.description,
       images: [{ url: ogImageUrl(article.title), width: 1200, height: 630 }],
       type: "article",
@@ -190,7 +190,7 @@ export default async function ArticleDetailPage({
             },
             publisher: {
               "@type": "Organization",
-              name: "ANZEN AI",
+              name: "安全AIポータル",
               url: SITE_BASE,
             },
             mainEntityOfPage: url,

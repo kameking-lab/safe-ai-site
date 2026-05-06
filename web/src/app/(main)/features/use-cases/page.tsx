@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "業種別の使い方 | 機能紹介 | ANZEN AI",
+  title: "業種別の使い方 | 機能紹介 | 安全AIポータル",
   description:
-    "建設・製造・医療福祉・運輸・IT・化学・林業・食品・サービス業向けに、ANZEN AIの活用シナリオを紹介します。",
+    "建設・製造・医療福祉・運輸・IT・化学・林業・食品・サービス業向けに、安全AIポータルの活用シナリオを紹介します。",
 };
 
 type UseCase = { title: string; problem: string; solution: string; relatedFeatures: { label: string; href: string }[] };
@@ -344,7 +344,7 @@ export default function UseCasesPage() {
           業種別の使い方
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-          建設・製造・医療福祉・運輸・IT・化学・林業・食品・サービス業の{INDUSTRIES.length}業種について、ANZEN AIをどう使うかを具体的なシナリオで紹介します。
+          建設・製造・医療福祉・運輸・IT・化学・林業・食品・サービス業の{INDUSTRIES.length}業種について、安全AIポータルをどう使うかを具体的なシナリオで紹介します。
         </p>
       </header>
 
@@ -389,7 +389,7 @@ export default function UseCasesPage() {
                   <h3 className="mt-1 text-base font-bold text-slate-900">{useCase.title}</h3>
                   <p className="mt-2 text-xs font-semibold text-slate-500">課題</p>
                   <p className="text-sm text-slate-700">{useCase.problem}</p>
-                  <p className="mt-2 text-xs font-semibold text-emerald-700">ANZEN AIで</p>
+                  <p className="mt-2 text-xs font-semibold text-emerald-700">安全AIポータルで</p>
                   <p className="text-sm text-slate-700">{useCase.solution}</p>
                   <div className="mt-auto pt-3">
                     <p className="mb-1 text-[11px] font-semibold text-slate-500">関連機能</p>

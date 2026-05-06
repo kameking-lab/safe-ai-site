@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: "/education" },
   openGraph: {
-    title: `${TITLE}｜ANZEN AI`,
+    title: `${TITLE}｜安全AIポータル`,
     description: DESCRIPTION,
     images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
   },

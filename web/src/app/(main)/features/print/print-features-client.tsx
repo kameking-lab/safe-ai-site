@@ -86,13 +86,13 @@ export function PrintFeaturesClient() {
           {/* タイトル */}
           <header className="print-avoid-break mb-4 border-b-2 border-emerald-700 pb-3">
             <p className="text-[10px] font-bold tracking-widest text-emerald-700">
-              ANZEN AI — 機能一覧（社内検討資料）
+              安全AIポータル — 機能一覧（社内検討資料）
             </p>
             <h2 className="mt-1 text-2xl font-bold text-slate-900">
               現場の安全を、AIで変える。
             </h2>
             <p className="mt-1 text-xs text-slate-600">
-              ANZEN AI 専門家チームによる設計 ／ 全{FEATURES.length}機能
+              安全AIポータル 専門家チームによる設計 ／ 全{FEATURES.length}機能
             </p>
             <p className="mt-1 text-[10px] text-slate-500">
               印刷日: <span className="print-only">{new Date().toLocaleDateString("ja-JP")}</span>
@@ -104,7 +104,7 @@ export function PrintFeaturesClient() {
           <section className="print-avoid-break mb-4 rounded border border-slate-300 bg-slate-50 p-3">
             <h3 className="text-sm font-bold text-slate-900">サービス概要</h3>
             <p className="mt-1 text-xs leading-relaxed">
-              ANZEN AIは、労働安全衛生法対応のクラウドポータルです。
+              安全AIポータルは、労働安全衛生法対応のクラウドポータルです。
               安衛法チャットボット・KY用紙・化学物質RA・事故DB・特別教育などを1つのアカウントで利用できます。
               スマートフォン・PC・現場サイネージに対応。
             </p>
@@ -167,7 +167,7 @@ export function PrintFeaturesClient() {
               <li>5分ツアー: https://safe-ai-site.vercel.app/features/quick-tour</li>
             </ul>
             <p className="mt-2 text-[10px] text-slate-600">
-              監修: ANZEN AI 専門家チーム ／ © 2026 ANZEN AI
+              監修: 安全AIポータル 専門家チーム ／ © 2026 安全AIポータル
             </p>
           </section>
         </article>

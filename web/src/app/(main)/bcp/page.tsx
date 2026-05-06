@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "運営継続計画（BCP）",
-  description: "ANZEN AIの運営継続計画（BCP）。個人事業の特性を踏まえた業務継続不可時の対応とデータ引き渡し方針を公開します。",
+  description: "安全AIポータルの運営継続計画（BCP）。個人事業の特性を踏まえた業務継続不可時の対応とデータ引き渡し方針を公開します。",
   alternates: { canonical: "/bcp" },
   openGraph: {
-    title: "運営継続計画（BCP）｜ANZEN AI",
-    description: "ANZEN AIの運営継続計画（BCP）。個人事業の特性を踏まえた業務継続不可時の対応とデータ引き渡し方針を公開します。",
+    title: "運営継続計画（BCP）｜安全AIポータル",
+    description: "安全AIポータルの運営継続計画（BCP）。個人事業の特性を踏まえた業務継続不可時の対応とデータ引き渡し方針を公開します。",
   },
 };
 
@@ -15,13 +15,13 @@ export default function BcpPage() {
   return (
     <div className="px-4 py-8 lg:px-8">
       {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="運営継続計画（BCP）" description="ANZEN AIの運営継続計画（BCP）。個人事業の特性を踏まえた業務継続不可時の対応とデータ引き渡し方針を公開します。" path="/bcp" />
+      <PageJsonLd name="運営継続計画（BCP）" description="安全AIポータルの運営継続計画（BCP）。個人事業の特性を踏まえた業務継続不可時の対応とデータ引き渡し方針を公開します。" path="/bcp" />
       <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">運営継続計画（BCP）</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            ANZEN AIは個人事業主が運営するサービスです。
+            安全AIポータルは個人事業主が運営するサービスです。
             大企業と異なり、代替運営者や組織的なBCPチームはありません。
             その現実を正直に開示し、利用者が適切に判断できるよう情報を提供します。
           </p>

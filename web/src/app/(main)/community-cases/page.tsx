@@ -12,11 +12,11 @@ const DESCRIPTION =
   "全国の現場担当者から集まったヒヤリハット・質問・Tipsを匿名で共有。労働安全コンサルタントの監修コメント付き。";
 
 export const metadata: Metadata = {
-  title: `${TITLE}｜ANZEN AI`,
+  title: `${TITLE}｜安全AIポータル`,
   description: DESCRIPTION,
   alternates: { canonical: "/community-cases" },
   openGraph: {
-    title: `${TITLE}｜ANZEN AI`,
+    title: `${TITLE}｜安全AIポータル`,
     description: DESCRIPTION,
     images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
   },

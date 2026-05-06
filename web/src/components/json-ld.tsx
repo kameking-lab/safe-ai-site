@@ -13,7 +13,7 @@ export function personSchema(): Schema {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "ANZEN AI",
+    name: "安全AIポータル",
     url: "https://safe-ai-site.vercel.app/about",
     knowsAbout: [
       "労働安全衛生",
@@ -30,7 +30,7 @@ export function organizationSchema(): Schema {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "ANZEN AI",
+    name: "安全AIポータル",
     url: "https://safe-ai-site.vercel.app",
     logo: "https://safe-ai-site.vercel.app/apple-touch-icon.png",
     description:
@@ -43,13 +43,13 @@ export function webSiteSchema(): Schema {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "ANZEN AI",
+    name: "安全AIポータル",
     url: "https://safe-ai-site.vercel.app",
     description:
       "労働安全衛生の現場運用ポータル。法改正・リスク管理・KY用紙・Eラーニングをまとめて確認。",
     author: {
       "@type": "Organization",
-      name: "ANZEN AI",
+      name: "安全AIポータル",
       url: "https://safe-ai-site.vercel.app/about",
     },
     potentialAction: {
@@ -81,7 +81,7 @@ export function articleListSchema(
         ...(item.description ? { description: item.description } : {}),
         publisher: {
           "@type": "Organization",
-          name: "ANZEN AI",
+          name: "安全AIポータル",
           url: "https://safe-ai-site.vercel.app",
         },
       },
@@ -106,7 +106,7 @@ export function newsArticleListSchema(
         ...(item.description ? { description: item.description } : {}),
         publisher: {
           "@type": "Organization",
-          name: "ANZEN AI",
+          name: "安全AIポータル",
           url: "https://safe-ai-site.vercel.app",
         },
       },
@@ -125,7 +125,7 @@ export function serviceSchema(input: {
   const { name, description, url, serviceType, priceFrom, priceCurrency = "JPY" } = input;
   const provider = {
     "@type": "Organization",
-    name: "ANZEN AI",
+    name: "安全AIポータル",
     url: "https://safe-ai-site.vercel.app",
   };
   const offers = priceFrom
@@ -254,12 +254,12 @@ export function webPageSchema(input: {
     inLanguage,
     isPartOf: {
       "@type": "WebSite",
-      name: "ANZEN AI",
+      name: "安全AIポータル",
       url: "https://safe-ai-site.vercel.app",
     },
     publisher: {
       "@type": "Organization",
-      name: "ANZEN AI",
+      name: "安全AIポータル",
       url: "https://safe-ai-site.vercel.app",
     },
     ...(datePublished ? { datePublished } : {}),
@@ -330,7 +330,7 @@ export function courseListSchema(
         description: course.description,
         provider: {
           "@type": "Organization",
-          name: "ANZEN AI",
+          name: "安全AIポータル",
           url: "https://safe-ai-site.vercel.app",
         },
       },

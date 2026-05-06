@@ -227,7 +227,7 @@ const ADVISOR_PLANS: NewPlanCard[] = [
       { ja: "メール相談無制限", en: "Unlimited email consultation" },
       { ja: "安全管理規程・書類レビュー（月1件）", en: "Safety regulation / document review (1/mo)" },
       { ja: "現場課題ヒアリング＆改善提案", en: "On-site issue review & improvement proposal" },
-      { ja: "ANZEN AI SaaS Proプラン同梱", en: "ANZEN AI SaaS Pro plan included" },
+      { ja: "安全AIポータル SaaS Proプラン同梱", en: "安全AIポータル SaaS Pro plan included" },
     ],
     cta: { ja: "3ヶ月お試しを申し込む", en: "Start 3-month trial" },
     ctaHref: "#payment-link-placeholder",
@@ -269,7 +269,7 @@ const ADVISOR_PLANS: NewPlanCard[] = [
       { ja: "安全管理者コミュニティ（Slack）参加権", en: "Safety manager community (Slack) access" },
       { ja: "月次オンライン勉強会（録画視聴可）", en: "Monthly online study session (recording avail.)" },
       { ja: "会員限定コンテンツ・事例集", en: "Member-only content & case studies" },
-      { ja: "ANZEN AI フリープラン同梱", en: "ANZEN AI Free plan included" },
+      { ja: "安全AIポータル フリープラン同梱", en: "安全AIポータル Free plan included" },
     ],
     cta: { ja: "早期会員に申し込む", en: "Join as early member" },
     ctaHref: "#payment-link-placeholder",
@@ -417,7 +417,7 @@ const FAQ_JA = [
   },
   {
     q: "授業や講演で本サイトの図表・統計データを引用してもよいですか？",
-    a: "教育・研究・非営利目的の引用は CC BY-NC 4.0（出典明記・非営利）で許諾します。スライド・教科書・論文に「出典：ANZEN AI（safe-ai-site.vercel.app）／取得日」を明記してください。商用利用・転載は別途ご相談ください。",
+    a: "教育・研究・非営利目的の引用は CC BY-NC 4.0（出典明記・非営利）で許諾します。スライド・教科書・論文に「出典：安全AIポータル（safe-ai-site.vercel.app）／取得日」を明記してください。商用利用・転載は別途ご相談ください。",
   },
 ];
 
@@ -448,7 +448,7 @@ const FAQ_EN = [
   },
   {
     q: "May I cite charts or statistics from this site in lectures or papers?",
-    a: "Yes, for educational/research/non-commercial use under CC BY-NC 4.0. Cite as 'Source: ANZEN AI (safe-ai-site.vercel.app) / accessed [date]'. Contact us for commercial use.",
+    a: "Yes, for educational/research/non-commercial use under CC BY-NC 4.0. Cite as 'Source: 安全AIポータル (safe-ai-site.vercel.app) / accessed [date]'. Contact us for commercial use.",
   },
 ];
 

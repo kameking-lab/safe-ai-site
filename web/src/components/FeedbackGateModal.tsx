@@ -44,7 +44,7 @@ export function FeedbackGateModal() {
 
   const handleShareTwitter = () => {
     const url = "https://safe-ai-site.vercel.app";
-    const text = "現場の労働安全をAIで支援する『ANZEN AI』を使っています。法改正・KY・化学物質RA・事故DB がまとまっていて便利です。";
+    const text = "現場の労働安全をAIで支援する『安全AIポータル』を使っています。法改正・KY・化学物質RA・事故DB がまとまっていて便利です。";
     const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
       text
     )}&url=${encodeURIComponent(url)}`;

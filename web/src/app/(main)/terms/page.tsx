@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "利用規約",
-  description: "ANZEN AIの利用規約。本サービスの利用条件について説明しています。",
+  description: "安全AIポータルの利用規約。本サービスの利用条件について説明しています。",
   alternates: { canonical: "/terms" },
   openGraph: {
-    title: "利用規約｜ANZEN AI",
-    description: "ANZEN AIの利用規約。本サービスの利用条件について説明しています。",
+    title: "利用規約｜安全AIポータル",
+    description: "安全AIポータルの利用規約。本サービスの利用条件について説明しています。",
   },
 };
 
@@ -15,7 +15,7 @@ export default function TermsPage() {
   return (
     <div className="px-4 py-8 lg:px-8">
       {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="利用規約" description="ANZEN AIの利用規約。本サービスの利用条件について説明しています。" path="/terms" />
+      <PageJsonLd name="利用規約" description="安全AIポータルの利用規約。本サービスの利用条件について説明しています。" path="/terms" />
       <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">利用規約</h1>
@@ -25,7 +25,7 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">第1条（適用）</h2>
           <p className="text-sm leading-7 text-slate-600">
-            本規約は、ANZEN AI（以下「本サービス」）の利用条件を定めます。
+            本規約は、安全AIポータル（以下「本サービス」）の利用条件を定めます。
             本サービスを利用するすべての方（以下「利用者」）は、本規約に同意したものとみなします。
           </p>
         </section>

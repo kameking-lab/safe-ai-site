@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "現状把握レポート | ANZEN AI 内部",
+  title: "現状把握レポート | 安全AIポータル 内部",
   robots: { index: false, follow: false, nocache: true, noarchive: true },
 };
 
@@ -32,7 +32,7 @@ export default async function AdminStatusPage({ searchParams }: Props) {
     <div className="min-h-screen bg-slate-50">
       <div className="bg-slate-800 text-white px-4 py-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-xs text-slate-400 mb-1">ANZEN AI 内部文書 / noindex</p>
+          <p className="text-xs text-slate-400 mb-1">安全AIポータル 内部文書 / noindex</p>
           <h1 className="text-xl font-bold leading-snug">完全版 現状把握レポート</h1>
           <p className="text-sm text-slate-300 mt-1">2026-05-01 / 全12セクション + 付録</p>
         </div>
@@ -75,7 +75,7 @@ export default async function AdminStatusPage({ searchParams }: Props) {
         </div>
 
         <footer className="border-t border-slate-200 pt-6 pb-10 text-center text-xs text-slate-400">
-          <p>ANZEN AI 内部文書 / 検索エンジン非公開</p>
+          <p>安全AIポータル 内部文書 / 検索エンジン非公開</p>
           <p className="mt-1">出典: docs/{REPORT_FILENAME}</p>
         </footer>
       </div>

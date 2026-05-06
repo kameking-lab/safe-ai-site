@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "セキュリティ",
-  description: "ANZEN AIのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。",
+  description: "安全AIポータルのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。",
   alternates: { canonical: "/security" },
   openGraph: {
-    title: "セキュリティ｜ANZEN AI",
-    description: "ANZEN AIのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。",
+    title: "セキュリティ｜安全AIポータル",
+    description: "安全AIポータルのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。",
   },
 };
 
@@ -20,7 +20,7 @@ function Badge({ type }: { type: "現状" | "予定" | "未対応" }) {
   return (
     <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${styles[type]}`}>
       {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="セキュリティ" description="ANZEN AIのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。" path="/security" />
+      <PageJsonLd name="セキュリティ" description="安全AIポータルのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。" path="/security" />
       {type}
     </span>
   );
@@ -34,7 +34,7 @@ export default function SecurityPage() {
           <h1 className="text-xl font-bold text-slate-900">セキュリティ</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            ANZEN AIは個人事業として運営されています。大企業と同じ認証は持っていませんが、
+            安全AIポータルは個人事業として運営されています。大企業と同じ認証は持っていませんが、
             利用可能な技術的措置を誠実に実施し、現状と計画を公開します。
           </p>
         </div>
@@ -223,7 +223,7 @@ export default function SecurityPage() {
         <section className="space-y-4">
           <h2 className="text-base font-bold text-slate-900">7. AI基盤（Gemini API）</h2>
           <p className="text-sm leading-7 text-slate-600">
-            ANZEN AI の生成AI機能（法令チャットボット、化学物質RA、KY支援、Eラーニング解説等）は
+            安全AIポータル の生成AI機能（法令チャットボット、化学物質RA、KY支援、Eラーニング解説等）は
             Google LLC が提供する <strong>Gemini API（Google AI Studio）</strong>
             を経由して処理しています。
           </p>

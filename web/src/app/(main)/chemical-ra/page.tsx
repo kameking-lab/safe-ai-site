@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: _title,
   description: _desc,
   openGraph: {
-    title: `${_title}｜ANZEN AI`,
+    title: `${_title}｜安全AIポータル`,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
   },
@@ -40,7 +40,7 @@ export default function ChemicalRaPage() {
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         offers: { "@type": "Offer", price: 0, priceCurrency: "JPY" },
-        publisher: { "@type": "Organization", name: "ANZEN AI", url: "https://safe-ai-site.vercel.app" },
+        publisher: { "@type": "Organization", name: "安全AIポータル", url: "https://safe-ai-site.vercel.app" },
       }} />
       <div className="mx-auto max-w-7xl px-4 pt-6">
         <TranslatedPageHeader

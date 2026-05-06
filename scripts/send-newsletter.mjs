@@ -6,7 +6,7 @@
  *   RESEND_API_KEY            - Resend APIキー
  *   NEWSLETTER_AUDIENCE_ID    - Resendオーディエンスid (なければ RESEND_AUDIENCE_ID)
  *   AUTH_SECRET               - 配信停止トークン生成用シークレット
- *   NOTIFY_FROM               - 送信元アドレス (例: ANZEN AI <noreply@anzen-ai.com>)
+ *   NOTIFY_FROM               - 送信元アドレス (例: 安全AIポータル <noreply@anzen-ai.com>)
  *   NEXT_PUBLIC_SITE_URL      - サイトURL (例: https://safe-ai-site.vercel.app)
  *
  * 実行:
@@ -20,7 +20,7 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const AUDIENCE_ID =
   process.env.NEWSLETTER_AUDIENCE_ID ?? process.env.RESEND_AUDIENCE_ID;
 const AUTH_SECRET = process.env.AUTH_SECRET ?? "dev-newsletter-secret";
-const FROM_ADDRESS = process.env.NOTIFY_FROM ?? "ANZEN AI <noreply@anzen-ai.com>";
+const FROM_ADDRESS = process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.com>";
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://safe-ai-site.vercel.app";
 
@@ -56,7 +56,7 @@ function buildHtml(email) {
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px 16px;color:#1e293b;background:#f8fafc;">
 <div style="background:#fff;border-radius:12px;padding:24px;border:1px solid #e2e8f0;">
-  <h1 style="font-size:18px;color:#059669;margin:0 0 4px;">ANZEN AI 週間安全情報</h1>
+  <h1 style="font-size:18px;color:#059669;margin:0 0 4px;">安全AIポータル 週間安全情報</h1>
   <p style="font-size:12px;color:#64748b;margin:0 0 20px;">${label}</p>
 
   <div style="background:#fff7ed;border-radius:8px;padding:12px 16px;margin:0 0 20px;">
@@ -86,12 +86,12 @@ function buildHtml(email) {
   </ul>
 
   <div style="border-top:1px solid #e2e8f0;margin-top:16px;padding-top:16px;text-align:center;">
-    <a href="${SITE_URL}" style="display:inline-block;background:#059669;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;text-decoration:none;font-weight:600;">ANZEN AI を開く</a>
+    <a href="${SITE_URL}" style="display:inline-block;background:#059669;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;text-decoration:none;font-weight:600;">安全AIポータル を開く</a>
   </div>
 </div>
 <p style="font-size:11px;color:#94a3b8;margin:16px 0 0;text-align:center;">
   <a href="${unsubUrl}" style="color:#6b7280;">配信停止</a>
-  ｜ ANZEN AI ─ 現場の安全を、AIで変える。
+  ｜ 安全AIポータル ─ 現場の安全を、AIで変える。
 </p>
 </body>
 </html>`;
@@ -143,7 +143,7 @@ async function main() {
     return;
   }
 
-  const subject = `【ANZEN AI】週間安全情報 ${weekLabel()}`;
+  const subject = `【安全AIポータル】週間安全情報 ${weekLabel()}`;
   const BATCH_SIZE = 50;
   let sent = 0;
   let failed = 0;

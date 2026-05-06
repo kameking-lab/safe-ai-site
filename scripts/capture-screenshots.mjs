@@ -86,7 +86,7 @@ async function writePlaceholder(target, viewport) {
   <rect width="100%" height="100%" fill="#f8fafc"/>
   <rect width="100%" height="100%" fill="url(#g${target.slug})"/>
   <rect x="20" y="20" width="${viewport.width - 40}" height="64" rx="12" fill="${target.color}" opacity="0.85"/>
-  <text x="${viewport.width / 2}" y="62" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif" font-size="22" font-weight="700" fill="white" text-anchor="middle">ANZEN AI</text>
+  <text x="${viewport.width / 2}" y="62" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif" font-size="22" font-weight="700" fill="white" text-anchor="middle">安全AIポータル</text>
   <text x="${viewport.width / 2}" y="${viewport.height / 2 - 30}" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif" font-size="${viewport.name === "mobile" ? 22 : 36}" font-weight="700" fill="${target.color}" text-anchor="middle">${escapeXml(target.label)}</text>
   <text x="${viewport.width / 2}" y="${viewport.height / 2 + 10}" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif" font-size="${viewport.name === "mobile" ? 13 : 18}" fill="#475569" text-anchor="middle">${target.path}</text>
   <text x="${viewport.width / 2}" y="${viewport.height - 40}" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Hiragino Sans',sans-serif" font-size="12" fill="#94a3b8" text-anchor="middle">プレビュー画像（${viewport.name === "mobile" ? "375×667" : "1280×800"}）</text>

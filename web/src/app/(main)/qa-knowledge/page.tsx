@@ -12,11 +12,11 @@ const DESCRIPTION =
   "現場担当者から寄せられた質問と、労働安全コンサルタントの回答をまとめたナレッジベース。";
 
 export const metadata: Metadata = {
-  title: `${TITLE}｜ANZEN AI`,
+  title: `${TITLE}｜安全AIポータル`,
   description: DESCRIPTION,
   alternates: { canonical: "/qa-knowledge" },
   openGraph: {
-    title: `${TITLE}｜ANZEN AI`,
+    title: `${TITLE}｜安全AIポータル`,
     description: DESCRIPTION,
     images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
   },

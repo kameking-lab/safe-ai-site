@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "データ処理契約（DPA）",
-  description: "ANZEN AIのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
+  description: "安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
   alternates: { canonical: "/dpa" },
   openGraph: {
-    title: "データ処理契約（DPA）｜ANZEN AI",
-    description: "ANZEN AIのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
+    title: "データ処理契約（DPA）｜安全AIポータル",
+    description: "安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
   },
 };
 
@@ -15,13 +15,13 @@ export default function DpaPage() {
   return (
     <div className="px-4 py-8 lg:px-8">
       {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="データ処理契約（DPA）" description="ANZEN AIのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。" path="/dpa" />
+      <PageJsonLd name="データ処理契約（DPA）" description="安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。" path="/dpa" />
       <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">データ処理契約（DPA）</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            ANZEN AIでは、個人情報保護法・GDPRなどの要件に基づき、
+            安全AIポータルでは、個人情報保護法・GDPRなどの要件に基づき、
             業務委託先として当方のサービスを利用する法人・団体からのDPA締結要請に個別対応しています。
           </p>
         </div>

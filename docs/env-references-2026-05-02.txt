@@ -16,7 +16,7 @@ web/src/app/api/law-summary/route.ts:10:GEMINI_API_KEY
 web/src/app/api/mhlw/search/route.ts:175:BLOB_READ_WRITE_TOKEN
 web/src/app/api/notify/subscribe/route.ts:25:RESEND_API_KEY
 web/src/app/api/notify/subscribe/route.ts:26:RESEND_AUDIENCE_ID
-web/src/app/api/notify/subscribe/route.ts:49:NOTIFY_FROM (optional, default: "ANZEN AI <noreply@anzen-ai.com>")
+web/src/app/api/notify/subscribe/route.ts:49:NOTIFY_FROM (optional, default: "安全AIポータル <noreply@anzen-ai.com>")
 web/src/app/api/notify/weather-alert/route.ts:22:CRON_SECRET
 web/src/app/api/notify/weather-alert/route.ts:30:RESEND_API_KEY
 web/src/app/api/notify/weather-alert/route.ts:31:RESEND_AUDIENCE_ID

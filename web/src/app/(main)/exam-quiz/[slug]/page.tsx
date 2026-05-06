@@ -22,7 +22,7 @@ export async function generateMetadata(
     title,
     description: desc,
     openGraph: {
-      title: `${title}｜ANZEN AI`,
+      title: `${title}｜安全AIポータル`,
       description: desc,
       images: [{ url: ogImageUrl(title, desc), width: 1200, height: 630 }],
     },

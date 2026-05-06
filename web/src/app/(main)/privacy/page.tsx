@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
-  description: "ANZEN AIのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
+  description: "安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
   alternates: { canonical: "/privacy" },
   openGraph: {
-    title: "プライバシーポリシー｜ANZEN AI",
-    description: "ANZEN AIのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
+    title: "プライバシーポリシー｜安全AIポータル",
+    description: "安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
   },
 };
 
@@ -15,7 +15,7 @@ export default function PrivacyPage() {
   return (
     <div className="px-4 py-8 lg:px-8">
       {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="プライバシーポリシー" description="ANZEN AIのプライバシーポリシー。個人情報の取り扱いについて説明しています。" path="/privacy" />
+      <PageJsonLd name="プライバシーポリシー" description="安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。" path="/privacy" />
       <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">プライバシーポリシー</h1>
@@ -25,7 +25,7 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">1. 事業者の名称・連絡先</h2>
           <p className="text-sm leading-7 text-slate-600">
-            本サービス「ANZEN AI」（以下「本サービス」）の個人情報取扱事業者は、ANZEN AI 事務局（以下「当方」）です。
+            本サービス「安全AIポータル」（以下「本サービス」）の個人情報取扱事業者は、安全AIポータル 事務局（以下「当方」）です。
             個人情報保護に関するお問い合わせは
             <a className="underline hover:text-emerald-700" href="/contact">お問い合わせフォーム</a>
             よりご連絡ください。

@@ -5,7 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 
-const TITLE = "熱中症予防 労働衛生教育｜ANZEN AI";
+const TITLE = "熱中症予防 労働衛生教育｜安全AIポータル";
 const DESCRIPTION =
   "厚生労働省「職場における熱中症予防基本対策要綱」（基発0420第3号）と2025年6月施行の安衛則改正に基づく約1.5時間の労働衛生教育。屋外・高温環境作業向けにオンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 
@@ -40,7 +40,7 @@ const courseSchema = {
   ],
   provider: {
     "@type": "Organization",
-    name: "ANZEN AI",
+    name: "安全AIポータル",
     url: "https://safe-ai-site.vercel.app",
   },
   offers: [
@@ -79,7 +79,7 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
+    { "@type": "ListItem", position: 1, name: "安全AIポータル", item: "https://safe-ai-site.vercel.app/" },
     { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
     { "@type": "ListItem", position: 3, name: "熱中症予防 労働衛生教育", item: "https://safe-ai-site.vercel.app/education/roudoueisei/necchu" },
   ],
@@ -409,7 +409,7 @@ export default function NecchuPage() {
 
       {/* 監修者 */}
       <p className="mt-6 text-center text-xs text-slate-400">
-        ANZEN AI 専門家チームによる設計
+        安全AIポータル 専門家チームによる設計
       </p>
     </main>
   );

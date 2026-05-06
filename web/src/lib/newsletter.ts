@@ -46,7 +46,7 @@ function siteUrl(): string {
 }
 
 function fromAddress(): string {
-  return process.env.NOTIFY_FROM ?? "ANZEN AI <noreply@anzen-ai.com>";
+  return process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.com>";
 }
 
 // ── subscribe ────────────────────────────────────────────────
@@ -83,7 +83,7 @@ export async function addSubscriber(
     await r.resend.emails.send({
       from: fromAddress(),
       to: sub.email,
-      subject: "【ANZEN AI】週間安全情報メルマガの登録が完了しました",
+      subject: "【安全AIポータル】週間安全情報メルマガの登録が完了しました",
       html: buildWelcomeEmail(sub, unsubUrl),
     });
 
@@ -171,7 +171,7 @@ function buildWelcomeEmail(sub: NewsletterSubscriber, unsubUrl: string): string 
 <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /></head>
 <body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px 16px;color:#1e293b;background:#f8fafc;">
   <div style="background:#fff;border-radius:12px;padding:24px;border:1px solid #e2e8f0;">
-    <h1 style="font-size:18px;color:#059669;margin:0 0 16px;">ANZEN AI 週間安全情報</h1>
+    <h1 style="font-size:18px;color:#059669;margin:0 0 16px;">安全AIポータル 週間安全情報</h1>
     <p style="margin:0 0 12px;font-size:14px;">研究プロジェクトの応援者として登録が完了しました。ありがとうございます！</p>
     <p style="margin:0 0 8px;font-size:14px;">毎週月曜日の朝9時に、以下の情報をお届けします：</p>
     <ul style="font-size:13px;padding-left:20px;margin:8px 0 16px;line-height:1.8;">
@@ -184,7 +184,7 @@ function buildWelcomeEmail(sub: NewsletterSubscriber, unsubUrl: string): string 
   </div>
   <p style="font-size:11px;color:#94a3b8;margin:16px 0 0;text-align:center;">
     <a href="${unsubUrl}" style="color:#6b7280;">配信停止</a>
-    ｜ ANZEN AI ─ 現場の安全を、AIで変える。
+    ｜ 安全AIポータル ─ 現場の安全を、AIで変える。
   </p>
 </body>
 </html>`;
@@ -232,7 +232,7 @@ export function buildDigestEmail(opts: {
 <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /></head>
 <body style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px 16px;color:#1e293b;background:#f8fafc;">
   <div style="background:#fff;border-radius:12px;padding:24px;border:1px solid #e2e8f0;">
-    <h1 style="font-size:18px;color:#059669;margin:0 0 4px;">ANZEN AI 週間安全情報</h1>
+    <h1 style="font-size:18px;color:#059669;margin:0 0 4px;">安全AIポータル 週間安全情報</h1>
     <p style="font-size:12px;color:#64748b;margin:0 0 20px;">${opts.weekLabel}</p>
 
     ${accidentSection}
@@ -245,12 +245,12 @@ export function buildDigestEmail(opts: {
     ${ugcHtml ? `<h2 style="font-size:14px;color:#1e293b;margin:0 0 8px;">安全活動 事例共有</h2><ul style="padding-left:16px;margin:0 0 20px;">${ugcHtml}</ul>` : ""}
 
     <div style="border-top:1px solid #e2e8f0;margin-top:16px;padding-top:16px;text-align:center;">
-      <a href="https://safe-ai-site.vercel.app" style="display:inline-block;background:#059669;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;text-decoration:none;font-weight:600;">ANZEN AI を開く</a>
+      <a href="https://safe-ai-site.vercel.app" style="display:inline-block;background:#059669;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;text-decoration:none;font-weight:600;">安全AIポータル を開く</a>
     </div>
   </div>
   <p style="font-size:11px;color:#94a3b8;margin:16px 0 0;text-align:center;">
     <a href="${opts.unsubUrl}" style="color:#6b7280;">配信停止</a>
-    ｜ ANZEN AI ─ 現場の安全を、AIで変える。
+    ｜ 安全AIポータル ─ 現場の安全を、AIで変える。
   </p>
 </body>
 </html>`;

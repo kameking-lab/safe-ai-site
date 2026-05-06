@@ -17,12 +17,12 @@ import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "パートナーシップ・OEM/再販案内",
   description:
-    "ANZEN AI のホワイトラベル提供・OEM・再販案内。社会保険労務士・労働安全コンサルタント・同業ITベンダー向けに、月額顧問への組み込み・共同セミナー開催等のパートナーメニューを提供しています。",
+    "安全AIポータル のホワイトラベル提供・OEM・再販案内。社会保険労務士・労働安全コンサルタント・同業ITベンダー向けに、月額顧問への組み込み・共同セミナー開催等のパートナーメニューを提供しています。",
   alternates: { canonical: "/partnership" },
   openGraph: {
-    title: "パートナーシップ・OEM/再販案内｜ANZEN AI",
+    title: "パートナーシップ・OEM/再販案内｜安全AIポータル",
     description:
-      "ANZEN AI のホワイトラベル提供・OEM・再販・共同セミナー等のパートナーメニュー。",
+      "安全AIポータル のホワイトラベル提供・OEM・再販・共同セミナー等のパートナーメニュー。",
   },
 };
 
@@ -35,7 +35,7 @@ const PARTNER_PROFILES = [
   {
     icon: Users2,
     title: "労働安全コンサルタント",
-    desc: "巡回診断・OSHMS構築の現場ツールとして、ANZEN AI を活用してください。",
+    desc: "巡回診断・OSHMS構築の現場ツールとして、安全AIポータル を活用してください。",
   },
   {
     icon: Building2,
@@ -55,7 +55,7 @@ const PROGRAMS: {
   {
     icon: Tag,
     title: "ホワイトラベル提供",
-    desc: "貴社ブランドで ANZEN AI を提供。ロゴ・カラー・独自ドメイン対応。",
+    desc: "貴社ブランドで 安全AIポータル を提供。ロゴ・カラー・独自ドメイン対応。",
     bullets: [
       "貴社ロゴ・カラーへのリブランディング",
       "独自サブドメイン（例：safety.example.co.jp）",
@@ -68,7 +68,7 @@ const PROGRAMS: {
   {
     icon: Briefcase,
     title: "月額顧問への組み込み",
-    desc: "顧問契約のオプション機能として、ANZEN AI を割引価格で再販可能。",
+    desc: "顧問契約のオプション機能として、安全AIポータル を割引価格で再販可能。",
     bullets: [
       "Standard/Pro プランを 30〜50% 割引で卸価格提供",
       "顧問先ごとのアカウント発行・利用ログ確認",
@@ -83,7 +83,7 @@ const PROGRAMS: {
     title: "共同セミナー・教材提供",
     desc: "貴社主催セミナーへの講師派遣・資料提供。Eラーニング教材の共同制作も可能。",
     bullets: [
-      "ANZEN AI 専門家チームによる講師登壇",
+      "安全AIポータル 専門家チームによる講師登壇",
       "業種別 KY・特別教育のテンプレート提供",
       "共同オンラインセミナー（Zoom/Teams 対応）",
       "貴社チャネルでの集客と当方の登壇を組み合わせ可",
@@ -97,7 +97,7 @@ export default function PartnershipPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
       {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="パートナーシップ・OEM/再販案内" description="ANZEN AI のホワイトラベル提供・OEM・再販案内。社会保険労務士・労働安全コンサルタント・同業ITベンダー向けに、月額顧問への組み込み・共同セミナー開催等のパートナーメニューを提供しています。" path="/partnership" />
+      <PageJsonLd name="パートナーシップ・OEM/再販案内" description="安全AIポータル のホワイトラベル提供・OEM・再販案内。社会保険労務士・労働安全コンサルタント・同業ITベンダー向けに、月額顧問への組み込み・共同セミナー開催等のパートナーメニューを提供しています。" path="/partnership" />
       <TranslatedPageHeader
         titleJa="パートナーシップ・OEM/再販案内"
         titleEn="Partnership & OEM/Reseller Program"
@@ -115,13 +115,13 @@ export default function PartnershipPage() {
             同業のみなさまへ
           </div>
           <h2 className="mt-2 text-xl font-bold leading-snug text-slate-900 sm:text-2xl">
-            「労働安全のITは作れない」を、ANZEN AI で解決します。
+            「労働安全のITは作れない」を、安全AIポータル で解決します。
           </h2>
           <p className="mt-3 text-sm leading-7 text-slate-700">
             社労士・労働安全コンサルタント・同業ITベンダーのみなさまへ、
             <strong className="font-bold text-emerald-900">ホワイトラベル提供・OEM・再販</strong>
             の枠組みをご用意しています。
-            ANZEN AI はANZEN AI 専門家チームが設計する現場運用ポータルで、
+            安全AIポータル は安全AIポータル 専門家チームが設計する現場運用ポータルで、
             KY用紙・法改正・事故DB・特別教育・化学物質RAを1つのサービスに集約しています。
             貴社の顧問契約・コンサルメニューに組み込むことで、IT開発の初期投資なしに即時にデジタル提供価値を強化できます。
           </p>

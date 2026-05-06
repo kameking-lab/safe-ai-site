@@ -11,7 +11,7 @@ export default function MainError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[ANZEN AI] main route error:", error);
+    console.error("[安全AIポータル] main route error:", error);
   }, [error]);
 
   return (

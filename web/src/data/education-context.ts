@@ -64,7 +64,7 @@ export type EducationContext = {
 };
 
 const SUPERVISOR_LABEL =
-  "コンテンツは ANZEN AI 専門家チームによる設計です";
+  "コンテンツは 安全AIポータル 専門家チームによる設計です";
 
 export const EDUCATION_CONTEXTS: Record<EducationSlug, EducationContext> = {
   "hoteikyoiku/chemical-ra": {

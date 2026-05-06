@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: "プランへのお申し込みありがとうございました。",
   robots: { index: false, follow: false },
   openGraph: {
-    title: "決済完了｜ANZEN AI",
+    title: "決済完了｜安全AIポータル",
     description: "プランへのお申し込みありがとうございました。",
   },
 };

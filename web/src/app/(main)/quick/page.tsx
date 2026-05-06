@@ -3,7 +3,7 @@ import { QuickLauncher } from "@/components/QuickLauncher";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
-  title: "クイックアクセス｜ANZEN AI",
+  title: "クイックアクセス｜安全AIポータル",
   description:
     "現場職長の朝礼3分に特化。KY用紙・事故事例検索・AIチャット・気象警報をワンタップで起動。",
 };

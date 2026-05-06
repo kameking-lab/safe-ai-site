@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SubmitForm } from "./SubmitForm";
 
 export const metadata: Metadata = {
-  title: "現場の声を投稿する｜ANZEN AI",
+  title: "現場の声を投稿する｜安全AIポータル",
   description:
     "ヒヤリハット・現場の質問・Tipsを匿名で投稿できます。AI監査と労働安全コンサルタントの確認を経て公開されます。",
   alternates: { canonical: "/community-cases/submit" },

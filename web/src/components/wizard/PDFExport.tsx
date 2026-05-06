@@ -21,13 +21,13 @@ export function PDFPrintHeader({ industryLabel, sizeLabel, hazardLabels }: PDFPr
       <div className="flex items-start justify-between border-b-2 border-emerald-700 pb-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">
-            ANZEN AI
+            安全AIポータル
           </p>
           <p className="text-lg font-bold text-slate-900">
             安衛法コンプライアンス診断結果
           </p>
           <p className="mt-1 text-xs text-slate-600">
-            監修：ANZEN AI 専門家チーム
+            監修：安全AIポータル 専門家チーム
           </p>
         </div>
         <div className="text-right text-xs text-slate-700">

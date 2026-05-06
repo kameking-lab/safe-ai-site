@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
-    title: `${TITLE}｜ANZEN AI`,
+    title: `${TITLE}｜安全AIポータル`,
     description: DESCRIPTION,
   },
 };

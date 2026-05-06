@@ -83,7 +83,7 @@
 | 変数名 | 推奨値 | 理由 |
 |--------|--------|------|
 | `NEXT_PUBLIC_PAID_MODE` | `false` | 課金機能の有効/無効フラグ。将来の課金実装時に切替 |
-| `NOTIFY_FROM` | `ANZEN AI <noreply@anzen-ai.com>` | デフォルト値があるが明示設定を推奨 |
+| `NOTIFY_FROM` | `安全AIポータル <noreply@anzen-ai.com>` | デフォルト値があるが明示設定を推奨 |
 
 ---
 

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Share2, Link2, Check, MessageSquare } from "lucide-react";
 import { SITE_STATS } from "@/data/site-stats";
 
-const SUPPORT_TEMPLATE = `ANZEN AI を応援しています。労働安全衛生分野の AI・DX 研究プロジェクトで、通達 ${SITE_STATS.lawArticleCount} 条文・事故DB ${SITE_STATS.accidentDbCount} 件・化学物質情報を一次ソース付きで無料公開しています。`;
+const SUPPORT_TEMPLATE = `安全AIポータル を応援しています。労働安全衛生分野の AI・DX 研究プロジェクトで、通達 ${SITE_STATS.lawArticleCount} 条文・事故DB ${SITE_STATS.accidentDbCount} 件・化学物質情報を一次ソース付きで無料公開しています。`;
 
 type ShareButtonsProps = {
   /** シェア対象のテキスト（記事タイトル・AI応答要約・KY結果サマリー等） */
@@ -34,7 +34,7 @@ export function ShareButtons({ title, hashtags, fixed = true }: ShareButtonsProp
     setMounted(true);
   }, []);
 
-  const text = title ? `${title} | ANZEN AI` : SUPPORT_TEMPLATE;
+  const text = title ? `${title} | 安全AIポータル` : SUPPORT_TEMPLATE;
   const tags = (hashtags ?? ["ANZENAI", "労働安全", "DX"]).map((t) => t.replace(/^#/, ""));
   const url = buildAbsoluteUrl(pathname);
   const tagStr = tags.map((t) => `#${t}`).join(" ");

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "労働安全衛生 法令用語集（条文・通達・行政用語）｜ANZEN AI",
+  title: "労働安全衛生 法令用語集（条文・通達・行政用語）｜安全AIポータル",
   description:
     "「公布日と施行日の違い」「告示・通達・指針の拘束力」「省令・規則・規程」など、労働安全衛生法令を読むときに必要な用語を一次出典付きで整理。",
   alternates: { canonical: "/laws/glossary" },

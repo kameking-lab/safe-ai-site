@@ -172,11 +172,11 @@
 
 | 競合 | 比較感想 |
 |---|---|
-| 中災防（中央労働災害防止協会） | 公的色強く保守的、ANZEN AI は UI が現代的だが信頼の蓄積では及ばない |
-| ProSafety / SafetyCulture | 海外UIで日本の法令対応が弱い、ANZEN AI は日本法令で勝てる |
-| KYアプリ各社（無名多数） | 機能重複、ANZEN AI は AI による事故事例検索や法令RAGで差別化可 |
-| LMS各社（teachme biz / Cloud Campus） | LMS は専門特化、ANZEN AI の LMS は「準備中」で勝負にならない |
-| 化学物質管理SaaS（CHEMSHERPA等） | 専門度高い、ANZEN AI はSDS収集よりRAアシストに寄せる方が良い |
+| 中災防（中央労働災害防止協会） | 公的色強く保守的、安全AIポータル は UI が現代的だが信頼の蓄積では及ばない |
+| ProSafety / SafetyCulture | 海外UIで日本の法令対応が弱い、安全AIポータル は日本法令で勝てる |
+| KYアプリ各社（無名多数） | 機能重複、安全AIポータル は AI による事故事例検索や法令RAGで差別化可 |
+| LMS各社（teachme biz / Cloud Campus） | LMS は専門特化、安全AIポータル の LMS は「準備中」で勝負にならない |
+| 化学物質管理SaaS（CHEMSHERPA等） | 専門度高い、安全AIポータル はSDS収集よりRAアシストに寄せる方が良い |
 
 **所感**: 「労働安全 × AI／Claude Code」での独自性は明確。**信頼の蓄積（事例・出典・更新頻度）と、エンタープライズ向け要件（中規模プラン・SSO）を補えば、競合上位3社に並ぶ可能性が高い**との評価。
 

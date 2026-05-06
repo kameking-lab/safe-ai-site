@@ -1,4 +1,4 @@
-// ANZEN AI Service Worker
+// 安全AIポータル Service Worker
 // Cache-first: static assets / Network-first: API calls
 // v2: モバイル LCP 改善のため主要ページをプリキャッシュ
 
@@ -130,7 +130,7 @@ async function networkFirst(request, fallbackToOffline) {
 // ----- Push Notification (将来用のプレースホルダー) -----
 self.addEventListener("push", (event) => {
   const data = event.data ? event.data.json() : {};
-  const title = data.title ?? "ANZEN AI";
+  const title = data.title ?? "安全AIポータル";
   const options = {
     body: data.body ?? "新しい通知があります",
     icon: "/icon-192x192.png",

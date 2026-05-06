@@ -6,14 +6,14 @@ import { JsonLd, serviceSchema } from "@/components/json-ld";
 
 const TITLE = "月額顧問サービス｜労働安全顧問・AI/DX 顧問";
 const DESCRIPTION =
-  "ANZEN AI の月額顧問プラン。労働安全の専門家チームが貴社の安全衛生体制を継続支援。AI・DX 顧問プランでは Claude / ChatGPT を活用した業務改善を伴走サポート。¥150,000〜/月。";
+  "安全AIポータル の月額顧問プラン。労働安全の専門家チームが貴社の安全衛生体制を継続支援。AI・DX 顧問プランでは Claude / ChatGPT を活用した業務改善を伴走サポート。¥150,000〜/月。";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/consulting" },
   openGraph: {
-    title: `${TITLE}｜ANZEN AI`,
+    title: `${TITLE}｜安全AIポータル`,
     description: DESCRIPTION,
     images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
   },
@@ -106,7 +106,7 @@ export default function ConsultingPage() {
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd
         schema={serviceSchema({
-          name: "ANZEN AI 月額顧問サービス",
+          name: "安全AIポータル 月額顧問サービス",
           description: DESCRIPTION,
           url: "https://safe-ai-site.vercel.app/consulting",
           serviceType: "ProfessionalService",
@@ -123,7 +123,7 @@ export default function ConsultingPage() {
         </h1>
         <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
           スポット相談ではなく、現場と並走しながら継続的に改善する月額顧問サービスです。
-          ANZEN AI 専門家チームが、安全衛生体制の運用と AI・DX 活用の双方で、貴社の伴走パートナーとなります。
+          安全AIポータル 専門家チームが、安全衛生体制の運用と AI・DX 活用の双方で、貴社の伴走パートナーとなります。
         </p>
       </header>
 

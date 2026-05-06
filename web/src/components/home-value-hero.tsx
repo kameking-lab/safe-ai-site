@@ -57,7 +57,7 @@ const CAPABILITIES = [
 
 const STRENGTH_ITEMS = [
   {
-    title: "ANZEN AI 専門家チームが直接担当",
+    title: "安全AIポータル 専門家チームが直接担当",
     desc: "大手ゼネコンで大型土木インフラ施工管理を担当した実務経験。机上論ではなく、現場で回る仕組みを設計します。",
   },
   {
@@ -256,7 +256,7 @@ export function HomeValueHero() {
           <div className="hidden sm:flex flex-shrink-0 items-end self-end pb-1">
             <Image
               src="/mascot/mascot-chihuahua-4.png"
-              alt="ANZEN AI マスコット"
+              alt="安全AIポータル マスコット"
               width={88}
               height={88}
               className="drop-shadow-md"
@@ -396,7 +396,7 @@ export function HomeValueHero() {
         className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-amber-50 p-5 shadow-sm dark:border-emerald-500/30 dark:from-emerald-500/10 dark:via-slate-800 dark:to-amber-500/10 sm:p-6"
       >
         <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
-          {PAID_MODE ? "ANZEN AI サービス" : "ANZEN AI 研究プロジェクト"}
+          {PAID_MODE ? "安全AIポータル サービス" : "安全AIポータル 研究プロジェクト"}
         </p>
         <h3 id="services-section-heading" className="mt-1 text-base font-bold text-slate-900 dark:text-slate-100 sm:text-lg">
           {PAID_MODE

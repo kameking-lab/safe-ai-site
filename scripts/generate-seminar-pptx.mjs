@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ANZEN AI セミナー PPTX 生成 CLI (Node エントリ)
+ * 安全AIポータル セミナー PPTX 生成 CLI (Node エントリ)
  *
  * 実体は python-pptx を使用した Python レンダラ (scripts/seminar_pptx.py)。
  * 本スクリプトは「Node プロジェクトから生成を一発で叩く」ためのラッパー。

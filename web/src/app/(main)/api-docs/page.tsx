@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "API ドキュメント・ロードマップ",
-  description: "ANZEN AIのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
+  description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
   alternates: { canonical: "/api-docs" },
   openGraph: {
-    title: "API ドキュメント・ロードマップ｜ANZEN AI",
-    description: "ANZEN AIのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
+    title: "API ドキュメント・ロードマップ｜安全AIポータル",
+    description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
   },
 };
 
@@ -15,13 +15,13 @@ export default function ApiDocsPage() {
   return (
     <div className="px-4 py-8 lg:px-8">
       {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="API ドキュメント・ロードマップ" description="ANZEN AIのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。" path="/api-docs" />
+      <PageJsonLd name="API ドキュメント・ロードマップ" description="安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。" path="/api-docs" />
       <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">API ドキュメント・ロードマップ</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
           <p className="mt-3 text-sm leading-7 text-slate-600">
-            現在のANZEN AIは内部APIのみ使用しています。
+            現在の安全AIポータルは内部APIのみ使用しています。
             外部向けAPIは段階的に公開予定です。現状と計画を正直に公開します。
           </p>
         </div>

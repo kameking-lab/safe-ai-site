@@ -1,5 +1,5 @@
 """
-ANZEN AI セミナーテンプレート (templates/seminar-template.pptx) を生成する。
+安全AIポータル セミナーテンプレート (templates/seminar-template.pptx) を生成する。
 
 このテンプレートは python-pptx 生成時の「ベース」として使い、
 - 16:9 のスライドサイズ
@@ -24,15 +24,15 @@ def main() -> None:
     prs.slide_height = Inches(SLIDE_H_IN)
 
     core = prs.core_properties
-    core.title = "ANZEN AI Seminar Template"
-    core.author = "ANZEN AI"
-    core.company = "ANZEN AI"
+    core.title = "安全AIポータル Seminar Template"
+    core.author = "安全AIポータル"
+    core.company = "安全AIポータル"
     core.comments = (
         "労働安全コンサルタント（登録番号260022・土木）監修による"
         "労働衛生教育セミナー資料の共通テンプレート。"
     )
     core.subject = "労働衛生教育 16:9 テンプレート"
-    core.keywords = "ANZEN AI; 労働安全; 労働衛生教育; PowerPoint"
+    core.keywords = "安全AIポータル; 労働安全; 労働衛生教育; PowerPoint"
 
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     prs.save(str(OUTPUT))

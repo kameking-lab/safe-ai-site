@@ -104,7 +104,7 @@ async function runBatched(urls, concurrency) {
 
 // ── Main ──────────────────────────────────────────────────────────
 async function main() {
-  console.log("=== ANZEN AI — Source URL Liveness Check ===\n");
+  console.log("=== 安全AIポータル — Source URL Liveness Check ===\n");
   console.log(`Settings: concurrency=${CONCURRENCY}  timeout=${TIMEOUT_MS}ms\n`);
 
   // Collect URLs

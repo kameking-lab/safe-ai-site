@@ -28,22 +28,22 @@ import { SITE_STATS } from "@/data/site-stats";
 import { PAID_MODE } from "@/lib/paid-mode";
 
 export const metadata: Metadata = {
-  title: "研究・実証プロジェクトについて | ANZEN AI",
+  title: "研究・実証プロジェクトについて | 安全AIポータル",
   description:
-    "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
-  keywords: ["ANZEN AI", "研究プロジェクト", "労働安全コンサルタント", "AI", "DX", "労働安全衛生"],
+    "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
+  keywords: ["安全AIポータル", "研究プロジェクト", "労働安全コンサルタント", "AI", "DX", "労働安全衛生"],
   alternates: { canonical: "/about" },
   openGraph: {
-    title: "研究・実証プロジェクトについて | ANZEN AI",
+    title: "研究・実証プロジェクトについて | 安全AIポータル",
     description:
-      "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
+      "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "研究・実証プロジェクトについて | ANZEN AI",
+    title: "研究・実証プロジェクトについて | 安全AIポータル",
     description:
-      "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
+      "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
   },
 };
 
@@ -101,7 +101,7 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
   },
   {
     label: "運営責任者",
-    value: "ANZEN AI 運営チーム（氏名は請求により開示）",
+    value: "安全AIポータル 運営チーム（氏名は請求により開示）",
   },
   {
     label: "所在地",
@@ -182,7 +182,7 @@ export default function AboutPage() {
           webPageSchema({
             name: "研究・実証プロジェクトについて",
             description:
-              "ANZEN AI は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
+              "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
             url: "https://safe-ai-site.vercel.app/about",
           }),
           breadcrumbSchema([
@@ -193,7 +193,7 @@ export default function AboutPage() {
       />
       <TranslatedPageHeader
         titleJa="研究・実証プロジェクトについて"
-        titleEn="About ANZEN AI Research Project"
+        titleEn="About 安全AIポータル Research Project"
         descriptionJa="個人運営の労働安全 × AI・DX 研究プロジェクト"
         descriptionEn="An independent research project on AI/DX in occupational safety"
         iconName="Info"
@@ -210,7 +210,7 @@ export default function AboutPage() {
           研究・実証プロジェクト
         </div>
         <h2 id="research-project-heading" className="mt-2 text-base font-bold leading-snug text-slate-900 sm:text-lg">
-          ANZEN AI は、労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。
+          安全AIポータル は、労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。
         </h2>
         <p className="mt-3 text-sm leading-6 text-slate-700">
           運営費用は運営者個人が負担しています。通達・事故事例・化学物質情報を一次ソース付きで無料公開し、
@@ -229,7 +229,7 @@ export default function AboutPage() {
         >
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-800">
             <Sparkles className="h-4 w-4 text-amber-500" aria-hidden="true" />
-            ANZEN AI の One Big Thing
+            安全AIポータル の One Big Thing
           </div>
           <h2
             id="one-big-thing-heading"
@@ -243,7 +243,7 @@ export default function AboutPage() {
               現場担当者・安全管理者・外国人労働者など多様な立場からのフィードバックを公開 PDCA で回し続ける運営
             </strong>
             そのものです。
-            ANZEN AI 専門家チームのもと、ユーザーの指摘は全件確認し、短いサイクルで実装・検証を繰り返します。
+            安全AIポータル 専門家チームのもと、ユーザーの指摘は全件確認し、短いサイクルで実装・検証を繰り返します。
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <Pill
@@ -270,14 +270,14 @@ export default function AboutPage() {
         {/* 運営チームプロフィール */}
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-base font-bold text-slate-900">
-            ANZEN AI 運営チーム
+            安全AIポータル 運営チーム
           </h2>
           <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
             {/* マスコット */}
             <div className="flex-shrink-0">
               <Image
                 src="/mascot/mascot-chihuahua-4.png"
-                alt="ANZEN AI マスコット"
+                alt="安全AIポータル マスコット"
                 width={100}
                 height={100}
                 className="drop-shadow-md"
@@ -285,7 +285,7 @@ export default function AboutPage() {
             </div>
             <div className="flex-1 text-center sm:text-left">
               <p className="text-2xl font-bold text-slate-900 sm:text-3xl">
-                ANZEN AI
+                安全AIポータル
               </p>
               <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700 border border-emerald-200">
                 <Scale className="h-4 w-4" />
@@ -293,7 +293,7 @@ export default function AboutPage() {
               </div>
               <p className="mt-3 text-sm leading-6 text-slate-600">
                 大型インフラ施工管理の実務経験を活かし、労働安全衛生コンサルティングと安全管理システムの開発・提供を行っています。
-                AI・DX の活用で現場の安全業務を効率化するデジタルツールとして、ANZEN AI を運営しています。
+                AI・DX の活用で現場の安全業務を効率化するデジタルツールとして、安全AIポータル を運営しています。
               </p>
               <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3 text-left">
                 <p className="text-xs font-semibold text-emerald-800">専門家設計の範囲</p>
@@ -440,7 +440,7 @@ export default function AboutPage() {
               <thead className="bg-slate-50 text-slate-600">
                 <tr>
                   <th className="px-3 py-2 text-left font-semibold">機能・特徴</th>
-                  <th className="px-3 py-2 text-center font-semibold">ANZEN AI</th>
+                  <th className="px-3 py-2 text-center font-semibold">安全AIポータル</th>
                   <th className="px-3 py-2 text-center font-semibold">厚労省<br />e-Gov</th>
                   <th className="px-3 py-2 text-center font-semibold">中災防</th>
                   <th className="px-3 py-2 text-center font-semibold">大手有料LMS</th>

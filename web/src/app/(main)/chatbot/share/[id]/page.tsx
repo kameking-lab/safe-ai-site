@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "共有チャット | ANZEN AI 安衛法チャットボット",
-  description: "ANZEN AI の安衛法チャットボットで行われた会話の共有ビューです。",
+  title: "共有チャット | 安全AIポータル 安衛法チャットボット",
+  description: "安全AIポータル の安衛法チャットボットで行われた会話の共有ビューです。",
   robots: { index: false, follow: false },
 };
 
@@ -69,7 +69,7 @@ export default async function ChatSharePage({
       <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h1 className="text-lg font-bold text-slate-900">共有された会話</h1>
-          <p className="text-xs text-slate-500 mt-0.5">ANZEN AI 安衛法チャットボット</p>
+          <p className="text-xs text-slate-500 mt-0.5">安全AIポータル 安衛法チャットボット</p>
         </div>
         <Link
           href="/chatbot"

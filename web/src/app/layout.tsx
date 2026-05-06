@@ -40,8 +40,8 @@ export const metadata: Metadata = {
     apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
   },
   title: {
-    default: "ANZEN AI｜現場の安全を、AIで変える。",
-    template: "%s｜ANZEN AI",
+    default: "安全AIポータル｜現場の安全を、AIで変える。",
+    template: "%s｜安全AIポータル",
   },
   verification: {
     google: 'y_-VOPrIGDyyHEdjP0PtPk96E7V5KTh4zdTzhKy9ZBE',
@@ -55,21 +55,21 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ja_JP",
-    siteName: "ANZEN AI",
-    title: "ANZEN AI｜現場の安全を、AIで変える。",
+    siteName: "安全AIポータル",
+    title: "安全AIポータル｜現場の安全を、AIで変える。",
     description: "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。",
     images: [
       {
         url: "/api/og",
         width: 1200,
         height: 630,
-        alt: "ANZEN AI — 現場の安全を、AIで変える。",
+        alt: "安全AIポータル — 現場の安全を、AIで変える。",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ANZEN AI｜現場の安全を、AIで変える。",
+    title: "安全AIポータル｜現場の安全を、AIで変える。",
     description: "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。",
     images: ["/api/og"],
   },
