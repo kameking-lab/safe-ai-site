@@ -43,9 +43,9 @@ export const metadata: Metadata = {
     default: "安全AIポータル｜現場の安全を、AIで変える。",
     template: "%s｜安全AIポータル",
   },
-  verification: {
-    google: 'y_-VOPrIGDyyHEdjP0PtPk96E7V5KTh4zdTzhKy9ZBE',
-  },
+  ...(process.env.GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+    : {}),
   description:
     "労働安全衛生分野のAI・DX活用研究プロジェクト。通達・事故事例・化学物質情報を一次ソース付きで無料公開。",
   metadataBase: new URL("https://anzen-ai-portal.jp"),
