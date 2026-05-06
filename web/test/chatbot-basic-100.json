@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-04T10:55:53.836Z",
+  "generated_at": "2026-05-06T05:17:43.078Z",
   "source": "src/lib/rag-100q.fixture.ts",
-  "total": 108,
+  "total": 112,
   "description": "RAG 検索精度ベンチマーク 100 問。各問は (question, gold[]) で構成。RAG top-5 に gold いずれか 1 件でも含まれれば正答とみなす。",
   "questions": [
     {
@@ -1545,6 +1545,50 @@
         {
           "lawShort": "安衛則",
           "articleNum": "第151条の74"
+        }
+      ]
+    },
+    {
+      "id": 109,
+      "topic": "就業制限",
+      "question": "玉掛けの資格（技能講習）は何条に規定されていますか？",
+      "gold": [
+        {
+          "lawShort": "安衛令",
+          "articleNum": "第20条"
+        }
+      ]
+    },
+    {
+      "id": 110,
+      "topic": "就業制限",
+      "question": "つり上げ荷重1トン以上の移動式クレーンを運転するために必要な資格の根拠条文は？",
+      "gold": [
+        {
+          "lawShort": "安衛令",
+          "articleNum": "第20条"
+        }
+      ]
+    },
+    {
+      "id": 111,
+      "topic": "就業制限",
+      "question": "機体重量3トン以上の車両系建設機械の運転に必要な技能講習の根拠となる政令の条文は？",
+      "gold": [
+        {
+          "lawShort": "安衛令",
+          "articleNum": "第20条"
+        }
+      ]
+    },
+    {
+      "id": 112,
+      "topic": "就業制限",
+      "question": "可燃性ガスと酸素を使って金属を溶接・溶断するガス溶接の資格（技能講習）の根拠条文は？",
+      "gold": [
+        {
+          "lawShort": "安衛令",
+          "articleNum": "第20条"
         }
       ]
     }
