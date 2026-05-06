@@ -15,6 +15,7 @@ const _desc =
 export const metadata: Metadata = {
   title: _title,
   description: _desc,
+  alternates: { canonical: "/chemical-ra" },
   openGraph: {
     title: `${_title}｜ANZEN AI`,
     description: _desc,
