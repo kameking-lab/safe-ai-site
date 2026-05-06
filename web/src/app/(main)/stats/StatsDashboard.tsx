@@ -516,7 +516,12 @@ function Section({
 }) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="text-base font-bold text-slate-900">{heading}</h2>
+      <h2 className="flex flex-wrap items-center gap-2 text-base font-bold text-slate-900">
+        <span>{heading}</span>
+        <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+          ※サンプル
+        </span>
+      </h2>
       {subheading ? <p className="mt-1 text-xs text-slate-500">{subheading}</p> : null}
       <div className="mt-4">{children}</div>
     </section>
