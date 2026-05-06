@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-06T11:30:55.478Z",
+  "fetchedAt": "2026-05-06T13:20:56.368Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -5364,24 +5364,11 @@
       "entries": [
         {
           "sourceCode": "471000",
-          "level": "advisory",
-          "headline": "本島北部では、６日夜遅くまで土砂災害に注意してください。",
-          "reportDatetime": "2026-05-06T16:12:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-06T22:03:00+09:00",
           "publishingOffice": "沖縄気象台",
-          "warnings": [
-            {
-              "areaCode": "471020",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4730100",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         },
         {
           "sourceCode": "472000",
