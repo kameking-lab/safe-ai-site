@@ -94,6 +94,7 @@ const nextConfig: NextConfig = {
       // 明示的なオーバーライドは不要（指定すると build 警告が出る）
     ];
   },
+    serverExternalPackages: ["@google-analytics/data", "@grpc/grpc-js", "google-gax"],
 };
 
 export default nextConfig;
