@@ -530,9 +530,15 @@ export function buildContextFromArticles(articles: LawArticle[]): string {
   }
 
   return articles
-    .map(
-      (a) =>
-        `【${a.law}（${a.lawShort}）${a.articleNum}「${a.articleTitle}」】\n${a.text}`
-    )
+    .map((a) => {
+      const itemMapNote = a.itemNumberMap
+        ? `\n[号番号と対象業務の対応（条文表記をそのまま使用すること）]\n${Object.entries(
+            a.itemNumberMap
+          )
+            .map(([key, value]) => `  ・第${key}号 = ${value}`)
+            .join("\n")}`
+        : "";
+      return `【${a.law}（${a.lawShort}）${a.articleNum}「${a.articleTitle}」】\n${a.text}${itemMapNote}`;
+    })
     .join("\n\n---\n\n");
 }
