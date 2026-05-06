@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "他の方法との比較 | 機能紹介 | 安全AIポータル",
+  title: "他の方法との比較 | 機能紹介",
   description:
     "安全AIポータルと従来の安全管理ソフト・紙ベース運用を、機能・コスト・運用負荷で比較します。事実ベースで公平に整理しています。",
 };

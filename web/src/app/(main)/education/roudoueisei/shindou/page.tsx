@@ -5,7 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 
-const TITLE = "振動障害予防 労働衛生教育｜安全AIポータル";
+const TITLE = "振動障害予防 労働衛生教育";
 const DESCRIPTION =
   "厚生労働省「振動工具取扱作業者に対する安全衛生教育の推進について」（基発0810第1号）と振動障害予防のための作業管理指針に基づく約2時間の労働衛生教育。チェーンソー・削岩機・サンダー等の振動工具作業向けにオンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 

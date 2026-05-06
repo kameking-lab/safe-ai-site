@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "業種別の使い方 | 機能紹介 | 安全AIポータル",
+  title: "業種別の使い方 | 機能紹介",
   description:
     "建設・製造・医療福祉・運輸・IT・化学・林業・食品・サービス業向けに、安全AIポータルの活用シナリオを紹介します。",
 };

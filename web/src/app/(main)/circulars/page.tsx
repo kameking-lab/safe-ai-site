@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     "労働安全衛生に関する厚生労働省の通達・告示・指針を全件横断検索。各通達ごとに概要・関連事故事例・推奨保護具をまとめています。",
   alternates: { canonical: "/circulars" },
   openGraph: {
-    title: "厚労省通達・告示・指針 一覧｜安全AIポータル",
+    title: "厚労省通達・告示・指針 一覧",
     description:
       "労働安全衛生に関する通達を網羅。法的拘束力バッジ・最終確認日付き。",
     images: [{ url: ogImageUrl("厚労省通達 一覧"), width: 1200, height: 630 }],

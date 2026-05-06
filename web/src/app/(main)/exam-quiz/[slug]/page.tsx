@@ -22,7 +22,7 @@ export async function generateMetadata(
     title,
     description: desc,
     openGraph: {
-      title: `${title}｜安全AIポータル`,
+      title: `${title}`,
       description: desc,
       images: [{ url: ogImageUrl(title, desc), width: 1200, height: 630 }],
     },

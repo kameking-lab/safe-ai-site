@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
-  title: "引き継ぎ書 | 安全AIポータル",
+  title: "引き継ぎ書",
   robots: { index: false, follow: false },
 };
 

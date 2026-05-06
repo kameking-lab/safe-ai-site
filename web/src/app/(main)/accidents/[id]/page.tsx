@@ -40,7 +40,7 @@ export async function generateMetadata({
     description,
     alternates: { canonical: `/accidents/${id}` },
     openGraph: {
-      title: `${title}｜安全AIポータル`,
+      title: `${title}`,
       description,
       images: [{ url: ogImageUrl(accident.title, accident.type), width: 1200, height: 630 }],
     },

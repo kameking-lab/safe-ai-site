@@ -5,7 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 
-const TITLE = "職長等教育｜安全AIポータル";
+const TITLE = "職長等教育";
 const DESCRIPTION =
   "労働安全衛生法第60条に基づく職長等教育（12時間以上・2日間想定）。建設業・製造業等の指定業種の職長・班長を対象に、オンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "安全AIポータルのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。",
   alternates: { canonical: "/security" },
   openGraph: {
-    title: "セキュリティ｜安全AIポータル",
+    title: "セキュリティ",
     description: "安全AIポータルのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。",
   },
 };

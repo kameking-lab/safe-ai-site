@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "共有チャット | 安全AIポータル 安衛法チャットボット",
+  title: "共有チャット 安衛法チャットボット",
   description: "安全AIポータル の安衛法チャットボットで行われた会話の共有ビューです。",
   robots: { index: false, follow: false },
 };

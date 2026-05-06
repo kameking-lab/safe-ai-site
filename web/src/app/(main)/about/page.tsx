@@ -28,20 +28,20 @@ import { SITE_STATS } from "@/data/site-stats";
 import { PAID_MODE } from "@/lib/paid-mode";
 
 export const metadata: Metadata = {
-  title: "研究・実証プロジェクトについて | 安全AIポータル",
+  title: "研究・実証プロジェクトについて",
   description:
     "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
   keywords: ["安全AIポータル", "研究プロジェクト", "労働安全コンサルタント", "AI", "DX", "労働安全衛生"],
   alternates: { canonical: "/about" },
   openGraph: {
-    title: "研究・実証プロジェクトについて | 安全AIポータル",
+    title: "研究・実証プロジェクトについて",
     description:
       "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "研究・実証プロジェクトについて | 安全AIポータル",
+    title: "研究・実証プロジェクトについて",
     description:
       "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
   },

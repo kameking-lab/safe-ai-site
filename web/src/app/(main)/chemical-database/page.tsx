@@ -12,13 +12,13 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
   alternates: { canonical: "/chemical-database" },
   openGraph: {
-    title: `${TITLE}｜安全AIポータル`,
+    title: `${TITLE}`,
     description: DESCRIPTION,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: `${TITLE}｜安全AIポータル`,
+    title: `${TITLE}`,
     description: DESCRIPTION,
   },
 };

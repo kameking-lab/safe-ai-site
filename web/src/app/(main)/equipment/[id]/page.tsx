@@ -39,7 +39,7 @@ export async function generateMetadata({
     description,
     alternates: { canonical: `/equipment/${id}` },
     openGraph: {
-      title: `${item.name}｜安全AIポータル`,
+      title: `${item.name}`,
       description,
       images: [
         {

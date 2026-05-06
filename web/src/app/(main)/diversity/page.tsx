@@ -25,14 +25,14 @@ export const metadata: Metadata = {
   description: _desc,
   alternates: { canonical: "/diversity" },
   openGraph: {
-    title: `${_title}｜安全AIポータル`,
+    title: `${_title}`,
     description: _desc,
     type: "website",
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${_title}｜安全AIポータル`,
+    title: `${_title}`,
     description: _desc,
     images: [ogImageUrl(_title, _desc)],
   },

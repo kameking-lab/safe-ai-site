@@ -5,7 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 
-const TITLE = "騒音障害防止 労働衛生教育｜安全AIポータル";
+const TITLE = "騒音障害防止 労働衛生教育";
 const DESCRIPTION =
   "厚生労働省「騒音障害防止のためのガイドライン」（基発0420第2号、令和5年4月20日改訂）に基づく約1.5時間の労働衛生教育。等価騒音レベル LAeq,8h、管理区分判定、聴覚保護具（NRR/SNR）選定までをカバー。1社10名¥50,000〜（税込）。";
 

@@ -5,7 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 
-const TITLE = "酸素欠乏危険作業 特別教育｜安全AIポータル";
+const TITLE = "酸素欠乏危険作業 特別教育";
 const DESCRIPTION =
   "酸素欠乏症等防止規則第12条に基づく第一種・第二種の酸素欠乏危険作業特別教育（約5.5時間）。地下ピット・タンク・下水道作業者向けにオンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "安全AIポータルの運営継続計画（BCP）。個人事業の特性を踏まえた業務継続不可時の対応とデータ引き渡し方針を公開します。",
   alternates: { canonical: "/bcp" },
   openGraph: {
-    title: "運営継続計画（BCP）｜安全AIポータル",
+    title: "運営継続計画（BCP）",
     description: "安全AIポータルの運営継続計画（BCP）。個人事業の特性を踏まえた業務継続不可時の対応とデータ引き渡し方針を公開します。",
   },
 };

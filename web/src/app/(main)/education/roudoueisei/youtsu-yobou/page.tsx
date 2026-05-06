@@ -6,7 +6,7 @@ import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 
-const TITLE = "腰痛予防労働衛生教育｜安全AIポータル";
+const TITLE = "腰痛予防労働衛生教育";
 const DESCRIPTION =
   "厚生労働省「職場における腰痛予防対策指針」に基づく2時間の労働衛生教育。重量物取扱い・介護・VDT作業向けにオンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 

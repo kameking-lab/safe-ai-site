@@ -56,7 +56,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ja_JP",
     siteName: "安全AIポータル",
-    title: "安全AIポータル｜現場の安全を、AIで変える。",
+    title: {
+      default: "安全AIポータル｜現場の安全を、AIで変える。",
+      template: "%s｜安全AIポータル",
+    },
     description: "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。",
     images: [
       {
@@ -69,7 +72,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "安全AIポータル｜現場の安全を、AIで変える。",
+    title: {
+      default: "安全AIポータル｜現場の安全を、AIで変える。",
+      template: "%s｜安全AIポータル",
+    },
     description: "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。",
     images: ["/api/og"],
   },

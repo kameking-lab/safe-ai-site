@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "ログイン",
   description: "安全AIポータルにログインしてKY用紙・チャット履歴・法人プラン機能をご利用ください。",
   openGraph: {
-    title: "ログイン｜安全AIポータル",
+    title: "ログイン",
     description: "安全AIポータルにログインしてKY用紙・チャット履歴・法人プラン機能をご利用ください。",
   },
 };

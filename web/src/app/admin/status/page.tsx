@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
 export const metadata: Metadata = {
-  title: "現状把握レポート | 安全AIポータル 内部",
+  title: "現状把握レポート 内部",
   robots: { index: false, follow: false, nocache: true, noarchive: true },
 };
 

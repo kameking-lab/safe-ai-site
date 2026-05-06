@@ -5,7 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 
-const TITLE = "フルハーネス型墜落制止用器具 特別教育｜安全AIポータル";
+const TITLE = "フルハーネス型墜落制止用器具 特別教育";
 const DESCRIPTION =
   "労働安全衛生規則第36条第41号に基づくフルハーネス型墜落制止用器具の特別教育（学科4.5h+実技1.5h、計約6時間）。高所作業従事者向けにオンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 

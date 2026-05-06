@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
   alternates: { canonical: "/api-docs" },
   openGraph: {
-    title: "API ドキュメント・ロードマップ｜安全AIポータル",
+    title: "API ドキュメント・ロードマップ",
     description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
   },
 };

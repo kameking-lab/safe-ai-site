@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     "安全AIポータル のホワイトラベル提供・OEM・再販案内。社会保険労務士・労働安全コンサルタント・同業ITベンダー向けに、月額顧問への組み込み・共同セミナー開催等のパートナーメニューを提供しています。",
   alternates: { canonical: "/partnership" },
   openGraph: {
-    title: "パートナーシップ・OEM/再販案内｜安全AIポータル",
+    title: "パートナーシップ・OEM/再販案内",
     description:
       "安全AIポータル のホワイトラベル提供・OEM・再販・共同セミナー等のパートナーメニュー。",
   },

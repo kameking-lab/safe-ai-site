@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   title: _title,
   description: _desc,
   openGraph: {
-    title: `${_title}｜安全AIポータル`,
+    title: `${_title}`,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
   },

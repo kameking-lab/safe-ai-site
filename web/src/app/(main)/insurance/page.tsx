@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "安全AIポータルの賠償責任保険・データ漏洩保険の加入状況。現状と加入予定を正直に公開します。",
   alternates: { canonical: "/insurance" },
   openGraph: {
-    title: "賠償責任保険加入状況｜安全AIポータル",
+    title: "賠償責任保険加入状況",
     description: "安全AIポータルの賠償責任保険・データ漏洩保険の加入状況。現状と加入予定を正直に公開します。",
   },
 };

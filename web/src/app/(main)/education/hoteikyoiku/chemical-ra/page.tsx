@@ -5,7 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 
-const TITLE = "化学物質RA実務教育｜安全AIポータル";
+const TITLE = "化学物質RA実務教育";
 const DESCRIPTION =
   "労働安全衛生法第57条の3に基づく自律的化学物質管理対応の実務教育（約2.5〜4時間）。化学物質管理者選任候補・SDS管理担当・RA実務担当向けに、オンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 

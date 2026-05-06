@@ -5,7 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 
-const TITLE = "足場の組立て等 特別教育｜安全AIポータル";
+const TITLE = "足場の組立て等 特別教育";
 const DESCRIPTION =
   "労働安全衛生規則第36条第39号に基づく足場の組立て等特別教育（学科6時間以上）。建設・解体・塗装・屋根工事業者向けにオンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 

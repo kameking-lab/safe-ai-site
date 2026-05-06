@@ -3,12 +3,12 @@ import Link from "next/link";
 import results from "@/data/chatbot-eval-results.json";
 
 export const metadata: Metadata = {
-  title: "AIチャットボット精度評価（Recall@5 100問ベンチマーク） | 安全AIポータル",
+  title: "AIチャットボット精度評価（Recall@5 100問ベンチマーク）",
   description:
     "労働安全衛生 AI チャットボットの根拠条文検索精度を 100 問ベンチマークで定量公開。RAG 検索結果に正答条文が top-5 内に含まれるか（Recall@5）を判定し、トピック別の Recall@5 と全失敗問の期待/取得値を開示します。",
   alternates: { canonical: "/about/chatbot-eval" },
   openGraph: {
-    title: "AIチャットボット精度評価（Recall@5） | 安全AIポータル",
+    title: "AIチャットボット精度評価（Recall@5）",
     description:
       "100 問ベンチマークによる根拠条文 Recall@5 を全件公開。トピック別スコアと失敗問の詳細を含む。",
     type: "article",

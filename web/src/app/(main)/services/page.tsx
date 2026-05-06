@@ -20,7 +20,7 @@ export const metadata: Metadata = PAID_MODE
       description: DESCRIPTION,
       alternates: { canonical: "/services" },
       openGraph: {
-        title: `${TITLE}｜安全AIポータル`,
+        title: `${TITLE}`,
         description: DESCRIPTION,
         images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
       },
@@ -34,7 +34,7 @@ export const metadata: Metadata = PAID_MODE
       description: RESEARCH_DESC,
       alternates: { canonical: "/services" },
       openGraph: {
-        title: `${RESEARCH_TITLE}｜安全AIポータル`,
+        title: `${RESEARCH_TITLE}`,
         description: RESEARCH_DESC,
       },
     };

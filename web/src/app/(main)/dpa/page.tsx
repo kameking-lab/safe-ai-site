@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
   alternates: { canonical: "/dpa" },
   openGraph: {
-    title: "データ処理契約（DPA）｜安全AIポータル",
+    title: "データ処理契約（DPA）",
     description: "安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
   },
 };

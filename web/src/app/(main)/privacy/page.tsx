@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
   alternates: { canonical: "/privacy" },
   openGraph: {
-    title: "プライバシーポリシー｜安全AIポータル",
+    title: "プライバシーポリシー",
     description: "安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
   },
 };

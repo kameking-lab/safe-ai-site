@@ -5,7 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 
-const TITLE = "低圧電気取扱い 特別教育｜安全AIポータル";
+const TITLE = "低圧電気取扱い 特別教育";
 const DESCRIPTION =
   "労働安全衛生規則第36条第4号に基づく低圧電気取扱い特別教育（学科7時間。活線・活線近接作業の場合は実技7時間追加で計14時間）。配電盤点検・電気工事補助者向けにオンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 

@@ -23,12 +23,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { category } = await params;
   const cat = getCategoryById(category);
-  if (!cat) return { title: "機能カテゴリ | 安全AIポータル" };
+  if (!cat) return { title: "機能カテゴリ" };
   return {
-    title: `${cat.title} | 機能紹介 | 安全AIポータル`,
+    title: `${cat.title} | 機能紹介`,
     description: cat.description,
     openGraph: {
-      title: `${cat.title} | 機能紹介 | 安全AIポータル`,
+      title: `${cat.title} | 機能紹介`,
       description: cat.description,
     },
   };

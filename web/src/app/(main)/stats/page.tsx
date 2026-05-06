@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { StatsDashboard } from "./StatsDashboard";
 import { PageJsonLd } from "@/components/page-json-ld";
 
-const _title = "利用統計（公開ダッシュボード）｜安全AIポータル";
+const _title = "利用統計（公開ダッシュボード）";
 const _desc =
   "安全AIポータル（労働安全 × AI 研究プロジェクト）の利用状況を 8 セクションで透明公開。DAU/MAU・機能別 PV・流入元・導線・コンバージョン・AIチャット・改善インサイト。";
 
