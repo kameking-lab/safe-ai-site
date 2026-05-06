@@ -85,8 +85,8 @@ function extractStringField(src, fieldName) {
 function extractMeta(src, fallbackPath) {
   let title = extractStringField(src, "title");
   if (title) {
-    // "X｜ANZEN AI" のサフィックスを取り除く
-    title = title.replace(/[｜|]\s*ANZEN AI.*$/u, "").trim();
+    // "X｜安全AIポータル" のサフィックスを取り除く
+    title = title.replace(/[｜|]\s*安全AIポータル.*$/u, "").trim();
   }
   if (!title) title = fallbackPath;
   let description = extractStringField(src, "description");

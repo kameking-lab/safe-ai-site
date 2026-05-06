@@ -111,9 +111,9 @@ export async function POST(request: Request) {
       const { Resend } = await import("resend");
       const resend = new Resend(resendKey);
       await resend.emails.send({
-        from: "ANZEN AI <noreply@anzen-ai.example.com>",
+        from: "安全AIポータル <noreply@anzen-ai.example.com>",
         to: inboxAddress,
-        subject: `[ANZEN AI 相談] ${body.category} / ${body.subject.slice(0, 60)}`,
+        subject: `[安全AIポータル 相談] ${body.category} / ${body.subject.slice(0, 60)}`,
         text:
           `カテゴリ: ${body.category}\n` +
           `名前: ${record.name || "（未記入）"}\n` +

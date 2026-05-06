@@ -118,7 +118,7 @@ const SERVICES = [
     icon: Sparkles,
     title: { ja: "Claude Code 活用自動化", en: "Claude Code Rapid Development" },
     tag: { ja: "2〜5倍の開発速度", en: "2–5× development speed" },
-    desc: { ja: "Claude Code を使った高速開発で、社内ツール・業務Webアプリ・Chatbotを短納期で構築。本サイト ANZEN AI 自体が実例。", en: "Rapid development with Claude Code to build internal tools, business web apps, and chatbots on short deadlines. This site (ANZEN AI) is a live example." },
+    desc: { ja: "Claude Code を使った高速開発で、社内ツール・業務Webアプリ・Chatbotを短納期で構築。本サイト 安全AIポータル 自体が実例。", en: "Rapid development with Claude Code to build internal tools, business web apps, and chatbots on short deadlines. This site (安全AIポータル) is a live example." },
     bullets: {
       ja: ["要件ヒアリング → 実装まで最短2週間", "Next.js + Vercel + Supabase 構成", "社内LLM・RAG・Chatbot構築", "運用引き継ぎ・社内人材育成込み"],
       en: ["Requirements to delivery in as little as 2 weeks", "Next.js + Vercel + Supabase stack", "Internal LLM, RAG, and chatbot development", "Operational handover and in-house team training included"],
@@ -145,8 +145,8 @@ const ACCENT_STYLES: Record<AccentKey, { icon: string; tag: string; price: strin
 
 const TRACK_RECORD = [
   { label: { ja: "労働安全コンサル実績", en: "Safety consulting track record" }, value: "大手ゼネコン大型土木インフラ / Major general contractor — large-scale civil infrastructure" },
-  { label: { ja: "専門家設計", en: "Expert-designed" }, value: "ANZEN AI 専門家チーム / ANZEN AI expert team" },
-  { label: { ja: "Claude Code 実装サイト", en: "Claude Code showcase" }, value: "本サイト ANZEN AI / This site — ANZEN AI" },
+  { label: { ja: "専門家設計", en: "Expert-designed" }, value: "安全AIポータル 専門家チーム / 安全AIポータル expert team" },
+  { label: { ja: "Claude Code 実装サイト", en: "Claude Code showcase" }, value: "本サイト 安全AIポータル / This site — 安全AIポータル" },
   { label: { ja: "対応業種", en: "Industries served" }, value: "建設・製造・介護・林業・運輸 / Construction, Manufacturing, Care, Forestry, Transport" },
 ];
 
@@ -180,9 +180,9 @@ export function ServicesContent() {
     <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
       <JsonLd
         schema={serviceSchema({
-          name: "ANZEN AI 受託業務サービス",
+          name: "安全AIポータル 受託業務サービス",
           description: DESCRIPTION,
-          url: "https://safe-ai-site.vercel.app/services",
+          url: "https://anzen-ai-portal.jp/services",
           serviceType: "ProfessionalService",
           priceFrom: 150000,
         })}
@@ -201,8 +201,8 @@ export function ServicesContent() {
         </h1>
         <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
           {isEn
-            ? "Services directly handled by the ANZEN AI expert team. We combine large-scale infrastructure project management experience with Claude Code rapid development to deliver systems, materials, and workflows that work on the field — on short deadlines."
-            : "ANZEN AI 専門家チームが直接担当する受託サービスです。大型土木インフラの施工管理経験と Claude Code による高速開発で、「現場で使える」システム・教材・仕組みを短納期で提供します。"}
+            ? "Services directly handled by the 安全AIポータル expert team. We combine large-scale infrastructure project management experience with Claude Code rapid development to deliver systems, materials, and workflows that work on the field — on short deadlines."
+            : "安全AIポータル 専門家チームが直接担当する受託サービスです。大型土木インフラの施工管理経験と Claude Code による高速開発で、「現場で使える」システム・教材・仕組みを短納期で提供します。"}
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link

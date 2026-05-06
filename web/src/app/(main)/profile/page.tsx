@@ -3,7 +3,7 @@ import { CompanyProfileForm } from "@/components/company-profile-form";
 import { LocalDataExportImport } from "@/components/local-data-export-import";
 
 export const metadata: Metadata = {
-  title: "自社プロファイル｜ANZEN AI",
+  title: "自社プロファイル",
   description:
     "業種・規模・取扱化学物質・主要機械・現場名を登録すると、KY・日誌・法改正・事故DBなど全機能の初期表示が最適化されます。端末データのエクスポート/インポートも可能。",
   alternates: { canonical: "/profile" },

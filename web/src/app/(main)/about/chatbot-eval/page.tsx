@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import results from "@/data/chatbot-eval-results.json";
+import freshResults from "@/data/chatbot-eval-fresh-results.json";
 
 export const metadata: Metadata = {
   title: "AIチャットボット Recall@5 評価（100問ベンチマーク） | ANZEN AI",
@@ -158,6 +159,9 @@ export default function ChatbotEvalPage() {
         )}
       </section>
 
+      {/* fresh セット結果 */}
+      <FreshResultsSection r={freshResults as EvalResult} />
+
       {/* 評価方法 */}
       <section className="mt-10 rounded-xl border border-slate-200 bg-slate-50 p-5">
         <h2 className="text-base font-bold text-slate-900">評価方法・限界</h2>
@@ -235,5 +239,100 @@ function Stat({
         {value}
       </p>
     </div>
+  );
+}
+
+function FreshResultsSection({ r }: { r: EvalResult }) {
+  const sortedTopics = Object.entries(r.topic_breakdown).sort(
+    ([, a], [, b]) => b.total - a.total
+  );
+  return (
+    <section className="mt-12 rounded-xl border border-slate-200 bg-white p-5">
+      <div className="flex flex-wrap items-baseline gap-2">
+        <h2 className="text-lg font-bold text-slate-900">
+          fresh セット（第2ベンチマーク）
+        </h2>
+        <span className="rounded-full border border-violet-300 bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-800">
+          言い換えロバストネス
+        </span>
+      </div>
+      <p className="mt-2 text-xs leading-6 text-slate-600">
+        既存の 100 問とは別の言い回し・観点で同じ法令論点をカバーする 100 問の追加セット。
+        質問の表現が変わっても同じ条文を取れるかを観測する。
+      </p>
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat label="正答数（Recall@5）" value={`${r.correct} / ${r.total}`} accent />
+        <Stat label="Recall@5" value={formatPct(r.accuracy)} accent />
+        <Stat label="目標値" value={formatPct(r.target)} />
+        <Stat
+          label="判定"
+          value={r.passed ? "✅ 達成" : "❌ 未達"}
+          accent={r.passed}
+        />
+      </div>
+      <p className="mt-3 text-xs text-slate-500">
+        最終評価: {formatDate(r.generated_at)} ／ ソース:{" "}
+        <code className="rounded bg-slate-100 px-1">test/chatbot-fresh-100.json</code>
+        ／ 実行コマンド:{" "}
+        <code className="rounded bg-slate-100 px-1">npm test -- rag-100q-fresh</code>
+      </p>
+      <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50 text-xs text-slate-600">
+            <tr>
+              <th className="px-3 py-2 text-left font-semibold">トピック</th>
+              <th className="px-3 py-2 text-right font-semibold">問数</th>
+              <th className="px-3 py-2 text-right font-semibold">正答</th>
+              <th className="px-3 py-2 text-right font-semibold">Recall@5</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 bg-white">
+            {sortedTopics.map(([topic, t]) => (
+              <tr key={topic}>
+                <td className="px-3 py-2 font-medium text-slate-800">{topic}</td>
+                <td className="px-3 py-2 text-right text-slate-700">{t.total}</td>
+                <td className="px-3 py-2 text-right text-slate-700">{t.correct}</td>
+                <td
+                  className={`px-3 py-2 text-right font-semibold ${
+                    t.accuracy >= r.target ? "text-emerald-700" : "text-amber-700"
+                  }`}
+                >
+                  {formatPct(t.accuracy)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {r.failures.length > 0 ? (
+        <details className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs">
+          <summary className="cursor-pointer font-semibold text-slate-700">
+            不正答ケースを表示（{r.failures.length} 件）
+          </summary>
+          <ul className="mt-3 space-y-2">
+            {r.failures.map((f) => (
+              <li
+                key={f.id}
+                className="rounded-md border border-amber-200 bg-amber-50 p-2 text-slate-800"
+              >
+                <p className="font-semibold">
+                  Q{f.id}{" "}
+                  <span className="rounded bg-amber-200 px-1.5 py-0.5 text-[10px] text-amber-900">
+                    {f.topic}
+                  </span>{" "}
+                  {f.question}
+                </p>
+                <p className="mt-1">
+                  <span className="font-semibold">期待:</span> {f.expected}
+                </p>
+                <p className="mt-0.5">
+                  <span className="font-semibold">取得:</span> {f.actual}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </section>
   );
 }

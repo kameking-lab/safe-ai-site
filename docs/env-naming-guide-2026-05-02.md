@@ -1,6 +1,6 @@
 # 環境変数 命名ガイド (2026-05-02)
 
-プロジェクト: ANZEN AI (safe-ai-site)  
+プロジェクト: 安全AIポータル (safe-ai-site)  
 作成日: 2026-05-02
 
 ---
@@ -86,7 +86,7 @@ echo "false" | vercel env add NEXT_PUBLIC_PAID_MODE preview
 echo "false" | vercel env add NEXT_PUBLIC_PAID_MODE development
 
 # NEXT_PUBLIC_SITE_URL を Production に設定
-echo "https://safe-ai-site.vercel.app" | vercel env add NEXT_PUBLIC_SITE_URL production
+echo "https://anzen-ai-portal.jp" | vercel env add NEXT_PUBLIC_SITE_URL production
 
 # 楽天アフィリエイトID の命名修正（旧名削除 → 新名追加）
 vercel env rm NEXT_PUBLIC_RAKUTEN_AFID production  # 既存があれば

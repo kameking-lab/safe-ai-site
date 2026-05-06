@@ -85,7 +85,7 @@ GEMINI_API_KEY=<新しいキー>
 vercel --prod
 
 # チャット API の動作確認
-curl -s -X POST "https://safe-ai-site.vercel.app/api/chatbot" \
+curl -s -X POST "https://anzen-ai-portal.jp/api/chatbot" \
   -H "Content-Type: application/json" \
   -d '{"message":"テスト"}' | head -50
 ```

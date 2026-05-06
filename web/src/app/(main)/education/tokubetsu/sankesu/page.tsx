@@ -5,7 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 
-const TITLE = "酸素欠乏危険作業 特別教育｜ANZEN AI";
+const TITLE = "酸素欠乏危険作業 特別教育";
 const DESCRIPTION =
   "酸素欠乏症等防止規則第12条に基づく第一種・第二種の酸素欠乏危険作業特別教育（約5.5時間）。地下ピット・タンク・下水道作業者向けにオンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 
@@ -29,7 +29,7 @@ const courseSchema = {
   "@type": "Course",
   name: "酸素欠乏危険作業 特別教育",
   description: DESCRIPTION,
-  url: "https://safe-ai-site.vercel.app/education/tokubetsu/sankesu",
+  url: "https://anzen-ai-portal.jp/education/tokubetsu/sankesu",
   timeRequired: "PT5H30M",
   educationalLevel: "酸素欠乏危険場所作業従事者",
   teaches: [
@@ -41,8 +41,8 @@ const courseSchema = {
   ],
   provider: {
     "@type": "Organization",
-    name: "ANZEN AI",
-    url: "https://safe-ai-site.vercel.app",
+    name: "安全AIポータル",
+    url: "https://anzen-ai-portal.jp",
   },
   offers: [
     {
@@ -80,9 +80,9 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
-    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
-    { "@type": "ListItem", position: 3, name: "酸素欠乏危険作業 特別教育", item: "https://safe-ai-site.vercel.app/education/tokubetsu/sankesu" },
+    { "@type": "ListItem", position: 1, name: "安全AIポータル", item: "https://anzen-ai-portal.jp/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://anzen-ai-portal.jp/education" },
+    { "@type": "ListItem", position: 3, name: "酸素欠乏危険作業 特別教育", item: "https://anzen-ai-portal.jp/education/tokubetsu/sankesu" },
   ],
 };
 
@@ -390,7 +390,7 @@ export default function SankesuPage() {
 
       {/* 監修者 */}
       <p className="mt-6 text-center text-xs text-slate-400">
-        ANZEN AI 専門家チームによる設計
+        安全AIポータル 専門家チームによる設計
       </p>
     </main>
   );

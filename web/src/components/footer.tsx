@@ -223,7 +223,7 @@ export function Footer() {
         {/* コピーライト */}
         <div className="mt-6 flex flex-col items-center gap-1 border-t border-slate-200 pt-4 dark:border-slate-700 sm:flex-row sm:justify-between">
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            © 2026 ANZEN AI ·{" "}
+            © 2026 安全AIポータル ·{" "}
             <Link href="/about" className="hover:text-slate-800 hover:underline dark:hover:text-slate-200">
               運営者情報
             </Link>

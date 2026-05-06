@@ -184,9 +184,9 @@
   },
   "about": {
     "title": "关于我们",
-    "description": "关于ANZEN AI",
+    "description": "关于安全AIポータル",
     "mission": "使命",
-    "missionText": "ANZEN AI 是一个职场安全门户，旨在帮助建筑和制造业的安全官快速高效地访问关键的安全信息。",
+    "missionText": "安全AIポータル 是一个职场安全门户，旨在帮助建筑和制造业的安全官快速高效地访问关键的安全信息。",
     "operator": "运营方",
     "contact": "联系",
     "version": "版本"

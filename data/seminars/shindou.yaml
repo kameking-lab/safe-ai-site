@@ -6,8 +6,8 @@
   english_subtitle: Workplace Occupational Health Education
   legal_basis: "基発0810第1号「振動工具取扱作業者に対する安全衛生教育の推進について」 ／ 振動障害予防のための作業管理指針準拠"
   duration: 約2時間
-  supervisor: ANZEN AI
-  contact: "https://safe-ai-site.vercel.app/contact"
+  supervisor: 安全AIポータル
+  contact: "https://anzen-ai-portal.jp/contact"
   output: shindou.pptx
 
 slides:
@@ -20,7 +20,7 @@ slides:
     title: 振動障害予防 労働衛生教育
     subtitle: チェーンソー・工具対応コース
     legal: 基発0810第1号準拠 ／ 約2時間
-    supervisor: ANZEN AI
+    supervisor: 安全AIポータル
 
   # =========================================================
   # Slide 2 — 目次
@@ -223,5 +223,5 @@ slides:
         head: 健診と記録で早期発見
         body: 特殊健診6月以内ごと、記録5年保存で追跡
     footer_label: お問い合わせ
-    footer_value: safe-ai-site.vercel.app/contact
-    footer_supervisor: ANZEN AI
+    footer_value: anzen-ai-portal.jp/contact
+    footer_supervisor: 安全AIポータル

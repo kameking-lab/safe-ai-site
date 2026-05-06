@@ -18,12 +18,12 @@ export async function generateMetadata({
   const found = COMMUNITY_CASES_SEED.find((c) => c.id === id);
   if (!found) {
     return {
-      title: "現場の声｜ANZEN AI",
+      title: "現場の声",
       robots: { index: false, follow: false },
     };
   }
   return {
-    title: `${found.title}｜現場の声｜ANZEN AI`,
+    title: `${found.title}｜現場の声`,
     description: found.body.slice(0, 120),
     alternates: { canonical: `/community-cases/${found.id}` },
   };

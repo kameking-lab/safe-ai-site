@@ -16,7 +16,7 @@ grep -rn "月商目標" web/src/app/ web/src/components/
 
 | ファイル | 内容 | 対処 |
 |---|---|---|
-| `web/src/app/(main)/strategy/page.tsx:6` | `title: "月商100万円戦略 V3 \| ANZEN AI 内部文書"` | **除外** — /strategy は社内文書ページ |
+| `web/src/app/(main)/strategy/page.tsx:6` | `title: "月商100万円戦略 V3 \| 安全AIポータル 内部文書"` | **除外** — /strategy は社内文書ページ |
 | `web/src/components/strategy-gate.tsx:47` | `<h1>月商100万円戦略 — パスワード保護</h1>` | **除外** — /strategy へのゲートコンポーネント |
 | `web/src/data/strategy/monetization-v3-2026-04-26.ts` | 戦略文書データ全体 | **除外** — 内部データ、/strategy のみで使用 |
 

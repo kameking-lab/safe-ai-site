@@ -5,7 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 
-const TITLE = "低圧電気取扱い 特別教育｜ANZEN AI";
+const TITLE = "低圧電気取扱い 特別教育";
 const DESCRIPTION =
   "労働安全衛生規則第36条第4号に基づく低圧電気取扱い特別教育（学科7時間。活線・活線近接作業の場合は実技7時間追加で計14時間）。配電盤点検・電気工事補助者向けにオンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 
@@ -29,7 +29,7 @@ const courseSchema = {
   "@type": "Course",
   name: "低圧電気取扱い 特別教育",
   description: DESCRIPTION,
-  url: "https://safe-ai-site.vercel.app/education/tokubetsu/teiatsu-denki",
+  url: "https://anzen-ai-portal.jp/education/tokubetsu/teiatsu-denki",
   timeRequired: "PT7H",
   educationalLevel: "職場従事者",
   teaches: [
@@ -41,8 +41,8 @@ const courseSchema = {
   ],
   provider: {
     "@type": "Organization",
-    name: "ANZEN AI",
-    url: "https://safe-ai-site.vercel.app",
+    name: "安全AIポータル",
+    url: "https://anzen-ai-portal.jp",
   },
   offers: [
     {
@@ -80,9 +80,9 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
-    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
-    { "@type": "ListItem", position: 3, name: "低圧電気取扱い 特別教育", item: "https://safe-ai-site.vercel.app/education/tokubetsu/teiatsu-denki" },
+    { "@type": "ListItem", position: 1, name: "安全AIポータル", item: "https://anzen-ai-portal.jp/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://anzen-ai-portal.jp/education" },
+    { "@type": "ListItem", position: 3, name: "低圧電気取扱い 特別教育", item: "https://anzen-ai-portal.jp/education/tokubetsu/teiatsu-denki" },
   ],
 };
 
@@ -391,7 +391,7 @@ export default function TeiatsuDenkiPage() {
 
       {/* 監修者 */}
       <p className="mt-6 text-center text-xs text-slate-400">
-        ANZEN AI 専門家チームによる設計
+        安全AIポータル 専門家チームによる設計
       </p>
     </main>
   );

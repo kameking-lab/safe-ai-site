@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
-    title: `${TITLE}｜ANZEN AI`,
+    title: `${TITLE}`,
     description: DESCRIPTION,
     images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
   },

@@ -61,7 +61,7 @@ export function ScaffoldPage({
         "@context": "https://schema.org",
         "@type": "BreadcrumbList",
         itemListElement: [
-          { "@type": "ListItem", position: 1, name: "ANZEN AI", item: `${SITE_ORIGIN}/` },
+          { "@type": "ListItem", position: 1, name: "安全AIポータル", item: `${SITE_ORIGIN}/` },
           { "@type": "ListItem", position: 2, name: sectionName, item: `${SITE_ORIGIN}${backHref}` },
           { "@type": "ListItem", position: 3, name: title, item: `${SITE_ORIGIN}${canonicalPath}` },
         ],

@@ -100,7 +100,7 @@ export function DiaryPrintClient({ id }: { id: string }) {
         </footer>
 
         <p className="mt-4 text-[10px] text-slate-500">
-          ANZEN AI / 出力日時 {new Date().toLocaleString("ja-JP")}
+          安全AIポータル / 出力日時 {new Date().toLocaleString("ja-JP")}
         </p>
       </div>
     </div>

@@ -14,7 +14,7 @@ const INQUIRY_CATEGORIES = [
   { value: "education", label: "特別教育・安全衛生教育・教材制作" },
   { value: "chemical", label: "化学物質管理（SDS・RA）" },
   { value: "monthly-retainer", label: "月額顧問契約（安全 / AI・DX）" },
-  { value: "demo", label: "ANZEN AI 本体のデモ・導入相談" },
+  { value: "demo", label: "安全AIポータル 本体のデモ・導入相談" },
 ] as const;
 
 type InquiryCategory = typeof INQUIRY_CATEGORIES[number]["value"];
@@ -238,7 +238,7 @@ export default function ContactForm() {
         </div>
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
-            ANZEN AI 運営チーム
+            安全AIポータル 運営チーム
           </p>
           <h2 className="mt-1 text-lg font-bold text-slate-900">
             労働安全の専門家チームがご対応します

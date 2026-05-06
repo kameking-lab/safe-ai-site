@@ -30,7 +30,7 @@ export default function LawsPage() {
     realLawRevisions.map((r) => ({
       headline: r.title,
       datePublished: r.publishedAt,
-      url: r.source_url ?? `https://safe-ai-site.vercel.app/laws`,
+      url: r.source_url ?? `https://anzen-ai-portal.jp/laws`,
       description: r.summary,
     }))
   );

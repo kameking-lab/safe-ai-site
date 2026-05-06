@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin/", "/api/", "/strategy"],
     },
-    sitemap: "https://safe-ai-site.vercel.app/sitemap-index.xml",
+    sitemap: "https://anzen-ai-portal.jp/sitemap-index.xml",
   };
 }

@@ -29,7 +29,7 @@ grep -rn "gtag|analytics|GA_|NEXT_PUBLIC_GA|googletagmanager" web/src/
 ### 2. サイト疎通確認
 
 ```
-curl -sv https://safe-ai-site.vercel.app/
+curl -sv https://anzen-ai-portal.jp/
 ```
 
 **結果: Windows 環境での SSL 証明書失効確認エラー (CRYPT_E_NO_REVOCATION_CHECK)**  

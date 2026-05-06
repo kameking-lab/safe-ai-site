@@ -16,7 +16,7 @@ function isAuthorized(req: Request): boolean {
 }
 
 function siteUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://safe-ai-site.vercel.app";
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://anzen-ai-portal.jp";
 }
 
 function weekLabel(): string {
@@ -102,8 +102,8 @@ export async function POST(req: Request) {
   }
 
   const resend = new Resend(apiKey);
-  const fromAddress = process.env.NOTIFY_FROM ?? "ANZEN AI <noreply@anzen-ai.com>";
-  const subject = `【ANZEN AI】週間安全情報 ${weekLabel()}`;
+  const fromAddress = process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.com>";
+  const subject = `【安全AIポータル】週間安全情報 ${weekLabel()}`;
   const content = buildContent();
 
   const BATCH_SIZE = 50;

@@ -5,7 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 
-const TITLE = "騒音障害防止 労働衛生教育｜ANZEN AI";
+const TITLE = "騒音障害防止 労働衛生教育";
 const DESCRIPTION =
   "厚生労働省「騒音障害防止のためのガイドライン」（基発0420第2号、令和5年4月20日改訂）に基づく約1.5時間の労働衛生教育。等価騒音レベル LAeq,8h、管理区分判定、聴覚保護具（NRR/SNR）選定までをカバー。1社10名¥50,000〜（税込）。";
 
@@ -29,7 +29,7 @@ const courseSchema = {
   "@type": "Course",
   name: "騒音障害防止 労働衛生教育",
   description: DESCRIPTION,
-  url: "https://safe-ai-site.vercel.app/education/roudoueisei/souon",
+  url: "https://anzen-ai-portal.jp/education/roudoueisei/souon",
   timeRequired: "PT1H30M",
   educationalLevel: "職場従事者",
   teaches: [
@@ -40,8 +40,8 @@ const courseSchema = {
   ],
   provider: {
     "@type": "Organization",
-    name: "ANZEN AI",
-    url: "https://safe-ai-site.vercel.app",
+    name: "安全AIポータル",
+    url: "https://anzen-ai-portal.jp",
   },
   offers: [
     {
@@ -79,9 +79,9 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
-    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
-    { "@type": "ListItem", position: 3, name: "騒音障害防止 労働衛生教育", item: "https://safe-ai-site.vercel.app/education/roudoueisei/souon" },
+    { "@type": "ListItem", position: 1, name: "安全AIポータル", item: "https://anzen-ai-portal.jp/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://anzen-ai-portal.jp/education" },
+    { "@type": "ListItem", position: 3, name: "騒音障害防止 労働衛生教育", item: "https://anzen-ai-portal.jp/education/roudoueisei/souon" },
   ],
 };
 
@@ -399,7 +399,7 @@ export default function SouonPage() {
 
       {/* 監修者 */}
       <p className="mt-6 text-center text-xs text-slate-400">
-        ANZEN AI 専門家チームによる設計
+        安全AIポータル 専門家チームによる設計
       </p>
     </main>
   );
