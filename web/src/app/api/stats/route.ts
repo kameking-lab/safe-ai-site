@@ -3,24 +3,20 @@ import { fetchStats } from "@/lib/stats/ga4-client";
 import type { StatsPeriod } from "@/lib/stats/types";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"; // ルートを完全動的化（毎回Function実行）
 
 function parsePeriod(raw: string | null): StatsPeriod {
-      if (raw === "7d" || raw === "30d" || raw === "90d") return raw;
-      return "30d";
+        if (raw === "7d" || raw === "30d" || raw === "90d") return raw;
+        return "30d";
 }
 
 export async function GET(request: Request) {
-      console.log("[route:debug] GET /api/stats called");
-      const url = new URL(request.url);
-      const period = parsePeriod(url.searchParams.get("period"));
-      console.log("[route:debug] period=", period);
-      console.log("[route:debug] about to call fetchStats");
-      const data = await fetchStats(period);
-      console.log("[route:debug] fetchStats returned source=", data.source);
-      return NextResponse.json(data, {
-              headers: {
-                        "Cache-Control": "no-cache, must-revalidate",
-              },
-      });
+        const url = new URL(request.url);
+        const period = parsePeriod(url.searchParams.get("period"));
+        const data = await fetchStats(period);
+        return NextResponse.json(data, {
+                  headers: {
+                              "Cache-Control": "no-cache, must-revalidate",
+                  },
+        });
 }
