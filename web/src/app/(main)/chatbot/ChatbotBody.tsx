@@ -123,8 +123,8 @@ export function ChatbotBody() {
         <p className="mt-3 text-xs text-amber-800">
           <a href="/about/chatbot-eval" className="font-semibold underline hover:text-amber-900">
             {isEn
-              ? "→ See the 100-question accuracy benchmark"
-              : "→ 100問ベンチマーク（精度評価）を見る"}
+              ? "→ See the 100-question Recall@5 benchmark"
+              : "→ 100問ベンチマーク（Recall@5 検索ヒット率）を見る"}
           </a>
         </p>
       </div>
