@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { NewHomeHero } from "@/components/new-home-hero";
 import { FlagshipGrid } from "@/components/flagship-grid";
 import { HomeThreePillars } from "@/components/home-three-pillars";
-import { CompanyProfileWizard } from "@/components/company-profile-wizard";
 import { ogImageUrl } from "@/lib/og-url";
 
 export const metadata: Metadata = {
@@ -31,7 +30,6 @@ export default function HomePage() {
       <div className="px-4 py-8 sm:py-10">
         <FlagshipGrid />
       </div>
-      <CompanyProfileWizard />
     </main>
   );
 }

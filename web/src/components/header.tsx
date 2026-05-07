@@ -1,9 +1,13 @@
 "use client";
 
+import { Mascot } from "@/components/mascot";
+
 export function Header() {
   return (
     <header className="border-b border-slate-200 bg-white px-4 py-4 dark:border-slate-700 dark:bg-slate-900 sm:py-5">
       <div className="flex items-center gap-3">
+        {/* マスコット */}
+        <Mascot size="xs" className="shrink-0" alt="安全AIポータル マスコット" />
         {/* ヘルメットアイコン */}
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600 shadow-sm">
           <svg

@@ -1,6 +1,5 @@
 import { AppShell } from "@/components/app-shell";
 import { auth } from "@/auth";
-import { FirstVisitOnboarding } from "@/components/first-visit-onboarding";
 import { FeedbackGateModal } from "@/components/FeedbackGateModal";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 
@@ -14,7 +13,6 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   }
   return (
     <AppShell user={user}>
-      <FirstVisitOnboarding />
       <FeedbackGateModal />
       {children}
       <MobileBottomNav />

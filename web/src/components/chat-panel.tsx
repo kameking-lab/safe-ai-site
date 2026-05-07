@@ -4,6 +4,7 @@ import type { RefObject } from "react";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
+import { Mascot } from "@/components/mascot";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
 
 export type ChatMessage = {
@@ -52,18 +53,19 @@ export function ChatPanel({
       >
         {chatMessages.map((message) => {
           const isUser = message.role === "user";
+          if (!isUser) {
+            return (
+              <div key={message.id} className="flex items-start gap-1.5">
+                <Mascot size="sm" className="mt-0.5 shrink-0" alt="AI回答" />
+                <div className="max-w-[90%] rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6 text-slate-700">
+                  <EasyJapaneseText>{message.content}</EasyJapaneseText>
+                </div>
+              </div>
+            );
+          }
           return (
-            <div
-              key={message.id}
-              className={`max-w-[90%] rounded-lg px-3 py-2 text-sm leading-6 ${
-                isUser
-                  ? "ml-auto bg-blue-600 text-white"
-                  : "border border-slate-200 bg-white text-slate-700"
-              }`}
-            >
-              {message.role === "assistant" ? (
-                <EasyJapaneseText>{message.content}</EasyJapaneseText>
-              ) : message.content}
+            <div key={message.id} className="ml-auto max-w-[90%] rounded-lg bg-blue-600 px-3 py-2 text-sm leading-6 text-white">
+              {message.content}
             </div>
           );
         })}
