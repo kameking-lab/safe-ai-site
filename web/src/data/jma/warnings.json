@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-07T15:15:26.978Z",
+  "fetchedAt": "2026-05-07T17:18:16.906Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -5351,11 +5351,30 @@
         },
         {
           "sourceCode": "472000",
-          "level": "none",
-          "headline": "注意報を解除します。",
-          "reportDatetime": "2026-05-07T07:15:00+09:00",
+          "level": "advisory",
+          "headline": "大東島地方では、８日朝まで濃霧による視程障害に注意してください。",
+          "reportDatetime": "2026-05-08T01:30:00+09:00",
           "publishingOffice": "南大東島地方気象台",
-          "warnings": []
+          "warnings": [
+            {
+              "areaCode": "472000",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4735700",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4735800",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            }
+          ]
         },
         {
           "sourceCode": "473000",
