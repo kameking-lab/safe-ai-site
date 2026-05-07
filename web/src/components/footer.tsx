@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { PAID_MODE } from "@/lib/paid-mode";
+import { Mascot } from "@/components/mascot";
 
 export function Footer() {
   return (
@@ -222,12 +223,15 @@ export function Footer() {
 
         {/* コピーライト */}
         <div className="mt-6 flex flex-col items-center gap-1 border-t border-slate-200 pt-4 dark:border-slate-700 sm:flex-row sm:justify-between">
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            © 2026 ANZEN AI ·{" "}
-            <Link href="/about" className="hover:text-slate-800 hover:underline dark:hover:text-slate-200">
-              運営者情報
-            </Link>
-          </p>
+          <div className="flex items-center gap-2">
+            <Mascot size="sm" alt="ANZEN AI マスコット" />
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              © 2026 ANZEN AI ·{" "}
+              <Link href="/about" className="hover:text-slate-800 hover:underline dark:hover:text-slate-200">
+                運営者情報
+              </Link>
+            </p>
+          </div>
           <p className="text-[11px] text-slate-400 dark:text-slate-500">
             個人運営の研究プロジェクト
           </p>
