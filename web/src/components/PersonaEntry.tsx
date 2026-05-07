@@ -142,7 +142,7 @@ const PERSONAS: Persona[] = [
   {
     id: "consultant-sr",
     title: "安全コンサル・社労士",
-    desc: "ホワイトラベル提供・OEM・再販。月額顧問への組み込みも歓迎。",
+    desc: "ホワイトラベル提供・OEM・再販。共同セミナー開催も歓迎。",
     icon: Handshake,
     href: "/partnership",
     ctaLabel: "パートナー案内",

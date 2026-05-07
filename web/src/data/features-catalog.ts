@@ -299,26 +299,6 @@ export const FEATURES: FeatureItem[] = [
     tags: ["LMS", "多拠点"],
   },
   {
-    slug: "consulting",
-    title: "月額顧問",
-    summary: "労働安全コンサルタントの月額契約",
-    description:
-      "登録労働安全コンサルタントが月額で安全管理を支援。リスクアセスメント・安全パト・教育設計まで対応します。",
-    href: "/consulting",
-    category: "management",
-    tags: ["顧問", "サービス"],
-  },
-  {
-    slug: "services",
-    title: "受託業務",
-    summary: "安全書類・教育設計・職場巡視の代行",
-    description:
-      "安全書類作成、特別教育設計、職場巡視同行、是正指導書作成などをスポット契約で受託します。",
-    href: "/services",
-    category: "management",
-    tags: ["受託"],
-  },
-  {
     slug: "stats",
     title: "サイト統計・運営者情報",
     summary: "安全AIポータル 有資格者の労働安全コンサルタント監修",

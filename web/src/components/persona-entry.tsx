@@ -67,10 +67,10 @@ const PERSONAS: Persona[] = [
     id: "executive",
     icon: Briefcase,
     title: "中小企業の経営者",
-    desc: "属人化・Excel地獄から脱出したい方。月額顧問やコンプラ診断で全体最適化。",
+    desc: "属人化・Excel地獄から脱出したい方。コンプラ診断で全体最適化。",
     links: [
-      { label: "月額顧問", href: "/consulting" },
       { label: "コンプラ診断", href: "/wizard" },
+      { label: "ご意見・改善提案", href: "/contact" },
     ],
     accent: {
       iconBg: "bg-emerald-100 dark:bg-emerald-500/15",
@@ -115,10 +115,10 @@ const PERSONAS: Persona[] = [
     id: "dx",
     icon: Sparkles,
     title: "DX推進・情シス担当",
-    desc: "AI×安全分野を業務に組み込みたい方。受託業務／LMS連携で短納期に。",
+    desc: "AI×安全分野を業務に組み込みたい方。LMS連携で多拠点運用に。",
     links: [
-      { label: "受託業務", href: "/services" },
       { label: "LMS（多拠点）", href: "/lms" },
+      { label: "ご意見・改善提案", href: "/contact" },
     ],
     accent: {
       iconBg: "bg-indigo-100 dark:bg-indigo-500/15",

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { LawSearchPanel } from "@/components/law-search-panel";
-import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -28,11 +27,6 @@ export default function LawSearchPage() {
       
       <PageJsonLd name="法令条文検索" description="労働安全衛生法・関連政令・省令の条文を全文検索。条文間の参照リンクも追跡。" path="/law-search" />
       <LawSearchPanel />
-      <EnterpriseFunnel
-        service="law-notify"
-        headline="法改正の見落としをゼロに"
-        subline="貴社の業種・取扱物質・機械に絞った監視ルールを設定。改正があれば即時メール／Slack通知＋影響評価レポートをお届けします。"
-      />
     </>
   );
 }
