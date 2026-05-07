@@ -5,7 +5,7 @@ import { getPublishedArticleIndex } from "@/lib/articles";
 import { getAllEquipment } from "@/lib/equipment-recommendation";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://anzen-ai-portal.jp";
+  const base = "https://www.anzen-ai-portal.jp";
 
   type Freq = "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   const pages: { url: string; lastModified: string; priority: number; changeFrequency: Freq }[] = [

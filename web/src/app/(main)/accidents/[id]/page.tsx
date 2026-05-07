@@ -11,7 +11,7 @@ import { getAccidentRelated } from "@/lib/accident-related";
 import { ogImageUrl } from "@/lib/og-url";
 import type { AccidentCase } from "@/lib/types/domain";
 
-const SITE_BASE = "https://anzen-ai-portal.jp";
+const SITE_BASE = "https://www.anzen-ai-portal.jp";
 
 function findAccident(id: string): AccidentCase | undefined {
   return getAccidentCasesDataset().find((c) => c.id === id);

@@ -16,7 +16,7 @@ function isAuthorized(req: Request): boolean {
 }
 
 function siteUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://anzen-ai-portal.jp";
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.anzen-ai-portal.jp";
 }
 
 function weekLabel(): string {

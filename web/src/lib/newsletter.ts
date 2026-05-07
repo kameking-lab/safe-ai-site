@@ -42,7 +42,7 @@ function getResend(): { resend: Resend; audienceId: string } | null {
 }
 
 function siteUrl(): string {
-  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://anzen-ai-portal.jp";
+  return process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.anzen-ai-portal.jp";
 }
 
 function fromAddress(): string {
@@ -245,7 +245,7 @@ export function buildDigestEmail(opts: {
     ${ugcHtml ? `<h2 style="font-size:14px;color:#1e293b;margin:0 0 8px;">安全活動 事例共有</h2><ul style="padding-left:16px;margin:0 0 20px;">${ugcHtml}</ul>` : ""}
 
     <div style="border-top:1px solid #e2e8f0;margin-top:16px;padding-top:16px;text-align:center;">
-      <a href="https://anzen-ai-portal.jp" style="display:inline-block;background:#059669;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;text-decoration:none;font-weight:600;">安全AIポータル を開く</a>
+      <a href="https://www.anzen-ai-portal.jp" style="display:inline-block;background:#059669;color:#fff;padding:8px 20px;border-radius:8px;font-size:13px;text-decoration:none;font-weight:600;">安全AIポータル を開く</a>
     </div>
   </div>
   <p style="font-size:11px;color:#94a3b8;margin:16px 0 0;text-align:center;">

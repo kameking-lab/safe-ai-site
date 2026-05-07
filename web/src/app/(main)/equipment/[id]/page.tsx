@@ -17,7 +17,7 @@ import { relatedFromEquipment } from "@/lib/related-content";
 import { ogImageUrl } from "@/lib/og-url";
 import type { AccidentCase } from "@/lib/types/domain";
 
-const SITE_BASE = "https://anzen-ai-portal.jp";
+const SITE_BASE = "https://www.anzen-ai-portal.jp";
 const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
 export function generateStaticParams() {

@@ -48,9 +48,9 @@ export const metadata: Metadata = {
     : {}),
   description:
     "労働安全衛生分野のAI・DX活用研究プロジェクト。通達・事故事例・化学物質情報を一次ソース付きで無料公開。",
-  metadataBase: new URL("https://anzen-ai-portal.jp"),
+  metadataBase: new URL("https://www.anzen-ai-portal.jp"),
   alternates: {
-    canonical: "https://anzen-ai-portal.jp",
+    canonical: "https://www.anzen-ai-portal.jp",
   },
   openGraph: {
     type: "website",
