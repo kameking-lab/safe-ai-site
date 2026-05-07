@@ -24,7 +24,7 @@ export function Mascot({
   size = "md",
   variant: _variant = "default",
   className = "",
-  alt = "ANZEN AIマスコット",
+  alt = "安全AIポータル マスコット",
 }: MascotProps) {
   const px = SIZE_MAP[size];
   return (
