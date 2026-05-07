@@ -3,7 +3,6 @@ import { NewHomeHero } from "@/components/new-home-hero";
 import { FlagshipGrid } from "@/components/flagship-grid";
 import { MorningDigest } from "@/components/morning-digest";
 import { TodaySafetyDashboard } from "@/components/today-safety-dashboard";
-import { CompanyProfileWizard } from "@/components/company-profile-wizard";
 import { ogImageUrl } from "@/lib/og-url";
 
 export const metadata: Metadata = {
@@ -35,7 +34,6 @@ export default function HomePage() {
       <div className="mx-auto max-w-7xl px-4 pb-10">
         <MorningDigest />
       </div>
-      <CompanyProfileWizard />
     </main>
   );
 }

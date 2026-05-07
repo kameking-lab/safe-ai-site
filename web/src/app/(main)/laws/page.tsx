@@ -13,9 +13,8 @@ const _desc =
 export const metadata: Metadata = {
   title: _title,
   description: _desc,
-  alternates: { canonical: "/laws" },
   openGraph: {
-    title: `${_title}｜ANZEN AI`,
+    title: `${_title}｜安全AIポータル`,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
   },
@@ -30,7 +29,7 @@ export default function LawsPage() {
     realLawRevisions.map((r) => ({
       headline: r.title,
       datePublished: r.publishedAt,
-      url: r.source_url ?? `https://anzen-ai-portal.jp/laws`,
+      url: r.source_url ?? `https://safe-ai-site.vercel.app/laws`,
       description: r.summary,
     }))
   );
