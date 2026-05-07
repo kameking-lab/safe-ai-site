@@ -127,9 +127,9 @@ function extractAccidentSourceUrl(c: AccidentCase): string | null {
 }
 
 export function HomeThreePillars() {
-  const fatal = useMemo(pickLatestFatalAccident, []);
-  const lawRevisions = useMemo(pickRecentLawRevisions, []);
-  const warnings = useMemo(pickWarningWeather, []);
+  const fatal = useMemo(() => pickLatestFatalAccident(), []);
+  const lawRevisions = useMemo(() => pickRecentLawRevisions(), []);
+  const warnings = useMemo(() => pickWarningWeather(), []);
 
   return (
     <section className="space-y-4">
