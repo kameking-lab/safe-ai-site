@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { searchRelevantArticlesWithScore, buildContextFromArticles, formatSourceCitations } from "@/lib/rag-search";
+import { searchRelevantArticlesWithScore, buildContextFromArticles, formatSourceCitations, type LawCategoryFilter } from "@/lib/rag-search";
 import { searchRelevantNotices, NOTICE_BINDING_LABELS, type NoticeHit } from "@/lib/notice-search";
 import type { LawArticle } from "@/data/laws";
 import { searchMlitResources, type MlitResource } from "@/data/mlit-resources";
@@ -11,6 +11,8 @@ export type ChatTurn = { role: "user" | "assistant"; content: string };
 export type ChatbotRequest = {
   message: string;
   history?: ChatTurn[];
+  /** 法令カテゴリで RAG 検索の対象を絞る（"all" または lawShort 指定） */
+  lawCategory?: LawCategoryFilter;
 };
 
 export type ChatbotSource = {
@@ -200,12 +202,13 @@ export async function POST(request: Request) {
     return jsonError(400, "質問文を入力してください。");
   }
 
+  const lawCategory: LawCategoryFilter = body?.lawCategory ?? "all";
   const relatedNotices = searchRelevantNotices(message, 3);
 
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey || apiKey === "dummy") {
     // APIキー未設定時もRAG検索による条文引用は提供する
-    const { articles } = searchRelevantArticlesWithScore(message, 5);
+    const { articles } = searchRelevantArticlesWithScore(message, 5, lawCategory);
     const mlitMatches = searchMlitResources(message, 3);
     const sources: ChatbotSource[] = [
       ...articles.map((a) => ({
@@ -235,7 +238,7 @@ export async function POST(request: Request) {
   }
 
   // RAG: 関連条文の検索（スコア付き）
-  const { articles: allRelevant, normalizedScore } = searchRelevantArticlesWithScore(message, 10);
+  const { articles: allRelevant, normalizedScore } = searchRelevantArticlesWithScore(message, 10, lawCategory);
   // MLIT資料の関連検索（所管省庁資料の追加コンテキスト）
   const mlitMatches = searchMlitResources(message, 3);
 

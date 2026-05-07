@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ChatbotSource, FollowupSuggestion } from "@/app/api/chatbot/route";
 import type { NoticeHit } from "@/lib/notice-search";
+import { LAW_CATEGORY_OPTIONS, type LawCategoryFilter } from "@/lib/rag-search";
 import { VoiceMicButton } from "@/components/voice-input-field";
 import { BindingBadge } from "@/components/AIResponseCard";
 import {
@@ -130,6 +131,7 @@ export function ChatbotPanel() {
   const [shareToast, setShareToast] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [voiceMode, setVoiceMode] = useState(false);
+  const [lawCategory, setLawCategory] = useState<LawCategoryFilter>("all");
   const listRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
   const prefillAppliedRef = useRef(false);
@@ -249,7 +251,7 @@ export function ChatbotPanel() {
       const res = await fetch("/api/chatbot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, history }),
+        body: JSON.stringify({ message: text, history, lawCategory }),
       });
 
       if (!res.ok) {
@@ -749,6 +751,28 @@ export function ChatbotPanel() {
           {error}
         </div>
       )}
+
+      {/* 法令カテゴリセレクタ */}
+      <div className="flex flex-wrap items-center gap-2">
+        <label className="text-xs font-semibold text-slate-700" htmlFor="law-category-select">
+          検索対象
+        </label>
+        <select
+          id="law-category-select"
+          value={lawCategory}
+          onChange={(e) => setLawCategory(e.target.value as LawCategoryFilter)}
+          className="rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+        >
+          {LAW_CATEGORY_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+        <span className="text-[11px] text-slate-500">
+          {lawCategory === "all" ? "全法令から検索" : `${lawCategory}に絞って検索`}
+        </span>
+      </div>
 
       {/* 入力エリア */}
       <div className="flex gap-2">
