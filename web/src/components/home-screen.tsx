@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { ChatPanel, type ChatMessage } from "@/components/chat-panel";
+import { Mascot } from "@/components/mascot";
 import { AccidentDatabasePanel } from "@/components/accident-database-panel";
 import { AccidentExtrasPanel } from "@/components/accident-extras-panel";
 
@@ -845,7 +846,12 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
                 保存
               </button>
             </div>
-            {opsSavedLabel && <p className="mt-2 text-[11px] text-slate-500">{opsSavedLabel}</p>}
+            {opsSavedLabel && (
+              <div className="mt-2 flex items-center gap-1.5">
+                <Mascot size="xs" alt="保存完了" />
+                <p className="text-[11px] font-medium text-emerald-600">{opsSavedLabel}</p>
+              </div>
+            )}
           </div>
         </section>
       ) : null}
