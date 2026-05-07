@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-07T01:20:25.613Z",
+  "fetchedAt": "2026-05-07T05:01:18.609Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -2524,70 +2524,15 @@
       ]
     },
     "JP-05": {
-      "level": "advisory",
+      "level": "none",
       "entries": [
         {
           "sourceCode": "050000",
-          "level": "advisory",
-          "headline": "内陸では、ここしばらくなだれに注意してください。",
-          "reportDatetime": "2026-05-07T09:53:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-07T10:48:00+09:00",
           "publishingOffice": "秋田地方気象台",
-          "warnings": [
-            {
-              "areaCode": "050020",
-              "code": "22",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0520300",
-              "code": "22",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0520700",
-              "code": "22",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0520900",
-              "code": "22",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0521200",
-              "code": "22",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0521500",
-              "code": "22",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0530300",
-              "code": "22",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0543400",
-              "code": "22",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0546400",
-              "code": "22",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
