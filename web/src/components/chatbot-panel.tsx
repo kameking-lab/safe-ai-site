@@ -81,7 +81,7 @@ function saveSessions(sessions: SavedSession[]) {
 function messagesToMarkdown(messages: ChatMessage[]): string {
   return messages
     .map((m) => {
-      const role = m.role === "user" ? "**あなた**" : "**ANZEN AI**";
+      const role = m.role === "user" ? "**あなた**" : "**安全AIポータル**";
       const body = m.content;
       const sources =
         m.sources && m.sources.length > 0
@@ -95,7 +95,7 @@ function messagesToMarkdown(messages: ChatMessage[]): string {
 function messagesToText(messages: ChatMessage[]): string {
   return messages
     .map((m) => {
-      const role = m.role === "user" ? "あなた" : "ANZEN AI";
+      const role = m.role === "user" ? "あなた" : "安全AIポータル";
       return `[${role}]\n${m.content}`;
     })
     .join("\n\n");

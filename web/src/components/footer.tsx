@@ -226,7 +226,7 @@ export function Footer() {
           <div className="flex items-center gap-2">
             <Mascot size="sm" alt="ANZEN AI マスコット" />
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              © 2026 ANZEN AI ·{" "}
+              © 2026 安全AIポータル ·{" "}
               <Link href="/about" className="hover:text-slate-800 hover:underline dark:hover:text-slate-200">
                 運営者情報
               </Link>

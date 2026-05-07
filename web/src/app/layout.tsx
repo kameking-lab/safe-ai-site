@@ -40,36 +40,42 @@ export const metadata: Metadata = {
     apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
   },
   title: {
-    default: "ANZEN AI｜現場の安全を、AIで変える。",
-    template: "%s｜ANZEN AI",
+    default: "安全AIポータル｜現場の安全を、AIで変える。",
+    template: "%s｜安全AIポータル",
   },
-  verification: {
-    google: 'y_-VOPrIGDyyHEdjP0PtPk96E7V5KTh4zdTzhKy9ZBE',
-  },
+  ...(process.env.GOOGLE_SITE_VERIFICATION
+    ? { verification: { google: process.env.GOOGLE_SITE_VERIFICATION } }
+    : {}),
   description:
     "労働安全衛生分野のAI・DX活用研究プロジェクト。通達・事故事例・化学物質情報を一次ソース付きで無料公開。",
-  metadataBase: new URL("https://safe-ai-site.vercel.app"),
+  metadataBase: new URL("https://anzen-ai-portal.jp"),
   alternates: {
-    canonical: "https://safe-ai-site.vercel.app",
+    canonical: "https://anzen-ai-portal.jp",
   },
   openGraph: {
     type: "website",
     locale: "ja_JP",
-    siteName: "ANZEN AI",
-    title: "ANZEN AI｜現場の安全を、AIで変える。",
+    siteName: "安全AIポータル",
+    title: {
+      default: "安全AIポータル｜現場の安全を、AIで変える。",
+      template: "%s｜安全AIポータル",
+    },
     description: "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。",
     images: [
       {
         url: "/api/og",
         width: 1200,
         height: 630,
-        alt: "ANZEN AI — 現場の安全を、AIで変える。",
+        alt: "安全AIポータル — 現場の安全を、AIで変える。",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "ANZEN AI｜現場の安全を、AIで変える。",
+    title: {
+      default: "安全AIポータル｜現場の安全を、AIで変える。",
+      template: "%s｜安全AIポータル",
+    },
     description: "法改正・現場リスク・事故データベース・KY用紙・化学物質RA・Eラーニングをまとめた労働安全ポータル。",
     images: ["/api/og"],
   },

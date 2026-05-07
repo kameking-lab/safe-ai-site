@@ -4,6 +4,7 @@ import { ChemicalRaPanel } from "@/components/chemical-ra-panel";
 import { ChemicalRaExtras } from "@/components/chemical-ra-extras";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
+import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -15,8 +16,9 @@ const _desc =
 export const metadata: Metadata = {
   title: _title,
   description: _desc,
+  alternates: { canonical: "/chemical-ra" },
   openGraph: {
-    title: `${_title}｜ANZEN AI`,
+    title: `${_title}`,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
   },
@@ -36,11 +38,11 @@ export default function ChemicalRaPage() {
         "@type": "SoftwareApplication",
         name: "化学物質リスクアセスメントツール",
         description: _desc,
-        url: "https://safe-ai-site.vercel.app/chemical-ra",
+        url: "https://anzen-ai-portal.jp/chemical-ra",
         applicationCategory: "BusinessApplication",
         operatingSystem: "Web",
         offers: { "@type": "Offer", price: 0, priceCurrency: "JPY" },
-        publisher: { "@type": "Organization", name: "ANZEN AI", url: "https://safe-ai-site.vercel.app" },
+        publisher: { "@type": "Organization", name: "安全AIポータル", url: "https://anzen-ai-portal.jp" },
       }} />
       <div className="mx-auto max-w-7xl px-4 pt-6">
         <TranslatedPageHeader
@@ -51,6 +53,7 @@ export default function ChemicalRaPage() {
           iconName="Search"
           iconColor="blue"
         />
+        <LocalStorageWarningBanner />
       </div>
       <ChemicalRaExtras />
       <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-500">読み込み中…</div>}>

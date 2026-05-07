@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { realLawRevisions } from '@/data/mock/real-law-revisions';
 
-const BASE = 'https://safe-ai-site.vercel.app';
+const BASE = 'https://anzen-ai-portal.jp';
 const TODAY = new Date().toISOString().split('T')[0];
 
 function escapeXml(str: string): string {

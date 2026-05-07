@@ -1,6 +1,6 @@
 import { JsonLd, webPageSchema, breadcrumbSchema } from "./json-ld";
 
-const SITE_BASE = "https://safe-ai-site.vercel.app";
+const SITE_BASE = "https://anzen-ai-portal.jp";
 
 type Crumb = { name: string; url: string };
 

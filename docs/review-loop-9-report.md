@@ -21,7 +21,7 @@
 | `app/(main)/contact/page.tsx` | `alternates.canonical: "/contact"` と `twitter` メタを追加 |
 | `app/(main)/ky/page.tsx` | KY 4ラウンド法を `HowTo` JSON-LD として出力、canonical 追加 |
 
-注: `metadataBase` が root layout で `https://safe-ai-site.vercel.app` に設定済みのため、子ページの `canonical: "/path"` は Next.js が自動的に絶対URLに解決する（設計通り）。
+注: `metadataBase` が root layout で `https://anzen-ai-portal.jp` に設定済みのため、子ページの `canonical: "/path"` は Next.js が自動的に絶対URLに解決する（設計通り）。
 
 ## 残課題
 

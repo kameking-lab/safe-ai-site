@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { safetyGoodsItems } from '@/data/mock/safety-goods';
 
-const BASE = 'https://safe-ai-site.vercel.app';
+const BASE = 'https://anzen-ai-portal.jp';
 
 function escapeXml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

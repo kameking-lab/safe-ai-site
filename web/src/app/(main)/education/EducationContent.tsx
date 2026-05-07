@@ -103,9 +103,9 @@ export function EducationContent() {
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd
         schema={serviceSchema({
-          name: "ANZEN AI 特別教育・安全衛生教育",
+          name: "安全AIポータル 特別教育・安全衛生教育",
           description: DESCRIPTION,
-          url: "https://safe-ai-site.vercel.app/education",
+          url: "https://anzen-ai-portal.jp/education",
           serviceType: "EducationalService",
           priceFrom: 50000,
         })}
@@ -122,8 +122,8 @@ export function EducationContent() {
         </h1>
         <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
           {isEn
-            ? "ANZEN AI provides special education, statutory training, and occupational health education under Japan's Occupational Safety and Health Act (安全衛生法). Designed by ANZEN AI expert team. Choose from on-demand video, customized training, or instructor dispatch — matched to your company size and industry."
-            : "労働安全衛生法に基づく特別教育・法定教育・労働衛生教育を ANZEN AI が提供します。専門家チームによる設計。オンデマンド配信から講師派遣まで、企業規模・業種に合わせた最適な形で受講いただけます。掲載以外の教育もお気軽にご相談ください。"}
+            ? "安全AIポータル provides special education, statutory training, and occupational health education under Japan's Occupational Safety and Health Act (安全衛生法). Designed by 安全AIポータル expert team. Choose from on-demand video, customized training, or instructor dispatch — matched to your company size and industry."
+            : "労働安全衛生法に基づく特別教育・法定教育・労働衛生教育を 安全AIポータル が提供します。専門家チームによる設計。オンデマンド配信から講師派遣まで、企業規模・業種に合わせた最適な形で受講いただけます。掲載以外の教育もお気軽にご相談ください。"}
         </p>
       </header>
 

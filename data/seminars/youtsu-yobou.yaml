@@ -6,8 +6,8 @@
   english_subtitle: Workplace Occupational Health Education
   legal_basis: 基発0618第1号（職場における腰痛予防対策指針）準拠
   duration: 約2時間
-  supervisor: ANZEN AI
-  contact: https://safe-ai-site.vercel.app/contact
+  supervisor: 安全AIポータル
+  contact: https://anzen-ai-portal.jp/contact
   output: youtsu-yobou.pptx
 
 slides:
@@ -20,7 +20,7 @@ slides:
     title: 腰痛予防 労働衛生教育
     subtitle: 実務対応コース
     legal: 基発0618第1号準拠 ／ 約2時間
-    supervisor: ANZEN AI
+    supervisor: 安全AIポータル
 
   # =========================================================
   # Slide 2 — 目次
@@ -223,5 +223,5 @@ slides:
         head: 記録と再評価が継続改善の核
         body: 教育・健診・RAは3年保存、毎年見直し
     footer_label: お問い合わせ
-    footer_value: safe-ai-site.vercel.app/contact
-    footer_supervisor: ANZEN AI
+    footer_value: anzen-ai-portal.jp/contact
+    footer_supervisor: 安全AIポータル

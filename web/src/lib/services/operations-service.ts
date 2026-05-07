@@ -42,15 +42,19 @@ function todayISODate() {
   return new Date().toISOString().slice(0, 10);
 }
 
-const defaultKySheetDraft: KySheetDraft = {
-  date: todayISODate(),
-  siteName: "",
-  workSummary: "",
-  expectedRisks: "",
-  countermeasures: "",
-  callAndResponse: "",
-  notes: "",
-};
+// 重要: date は毎回呼び出し時に評価する（モジュール初期化時に固定すると
+// Next.js の build/SSR キャッシュで日付が固定化されるため）
+function buildDefaultKySheetDraft(): KySheetDraft {
+  return {
+    date: todayISODate(),
+    siteName: "",
+    workSummary: "",
+    expectedRisks: "",
+    countermeasures: "",
+    callAndResponse: "",
+    notes: "",
+  };
+}
 
 function emptyKyPaperRow() {
   return {
@@ -68,18 +72,20 @@ function emptyKyPaperRow() {
   };
 }
 
-const defaultKyPaperForm: KyPaperFormState = {
-  date: todayISODate(),
-  companyName: "",
-  personInCharge: "",
-  workContent: "",
-  supervisorInstructions: "",
-  rows: [emptyKyPaperRow(), emptyKyPaperRow()],
-  participantNames: "",
-  pointingCall: "",
-  siteAgentSign: "",
-  supervisorSign: "",
-};
+function buildDefaultKyPaperForm(): KyPaperFormState {
+  return {
+    date: todayISODate(),
+    companyName: "",
+    personInCharge: "",
+    workContent: "",
+    supervisorInstructions: "",
+    rows: [emptyKyPaperRow(), emptyKyPaperRow()],
+    participantNames: "",
+    pointingCall: "",
+    siteAgentSign: "",
+    supervisorSign: "",
+  };
+}
 
 function emptyWorkRow(): KyInstructionRecordState["workRows"][number] {
   return {
@@ -114,42 +120,45 @@ function emptyParticipant(): KyInstructionRecordState["participants"][number] {
   return { name: "", qualNo: "", preWork: "", onExit: "" };
 }
 
-const defaultKyInstructionRecord: KyInstructionRecordState = {
-  reportStamps: ["", "", "", "", ""],
-  workDateYear: new Date().getFullYear().toString(),
-  workDateMonth: String(new Date().getMonth() + 1),
-  workDateDay: String(new Date().getDate()),
-  workDateNote: "",
-  weather: "",
-  coop1Name: "",
-  coop1Chief: "",
-  coop2Name: "",
-  coop2Chief: "",
-  coop3Name: "",
-  coop3Chief: "",
-  workRows: [emptyWorkRow(), emptyWorkRow(), emptyWorkRow(), emptyWorkRow()],
-  riskRows: [
-    emptyRiskRow("上記"),
-    emptyRiskRow("①"),
-    emptyRiskRow("②"),
-    emptyRiskRow("③"),
-    emptyRiskRow("④"),
-  ],
-  participants: Array.from({ length: 6 }, () => emptyParticipant()),
-  participantTotal: "",
-  breaks: ["", "", "", "", ""],
-  safetyVest: "",
-  exitLarge: "",
-  exitMedium: "",
-  exitSmall: "",
-  closingNote: "",
-  fallChecks: [
-    { good: "", bad: "", done: "" },
-    { good: "", bad: "", done: "" },
-    { good: "", bad: "", done: "" },
-  ],
-  correctionNote: "",
-};
+function buildDefaultKyInstructionRecord(): KyInstructionRecordState {
+  const d = new Date();
+  return {
+    reportStamps: ["", "", "", "", ""],
+    workDateYear: d.getFullYear().toString(),
+    workDateMonth: String(d.getMonth() + 1),
+    workDateDay: String(d.getDate()),
+    workDateNote: "",
+    weather: "",
+    coop1Name: "",
+    coop1Chief: "",
+    coop2Name: "",
+    coop2Chief: "",
+    coop3Name: "",
+    coop3Chief: "",
+    workRows: [emptyWorkRow(), emptyWorkRow(), emptyWorkRow(), emptyWorkRow()],
+    riskRows: [
+      emptyRiskRow("上記"),
+      emptyRiskRow("①"),
+      emptyRiskRow("②"),
+      emptyRiskRow("③"),
+      emptyRiskRow("④"),
+    ],
+    participants: Array.from({ length: 6 }, () => emptyParticipant()),
+    participantTotal: "",
+    breaks: ["", "", "", "", ""],
+    safetyVest: "",
+    exitLarge: "",
+    exitMedium: "",
+    exitSmall: "",
+    closingNote: "",
+    fallChecks: [
+      { good: "", bad: "", done: "" },
+      { good: "", bad: "", done: "" },
+      { good: "", bad: "", done: "" },
+    ],
+    correctionNote: "",
+  };
+}
 
 function ensureArray<T>(value: unknown, fallback: T[]): T[] {
   if (Array.isArray(value)) return value as T[];
@@ -167,7 +176,7 @@ function ensureArray<T>(value: unknown, fallback: T[]): T[] {
 
 export function normalizeKyInstructionRecord(raw: unknown): KyInstructionRecordState {
   const base = (raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {}) as Partial<KyInstructionRecordState>;
-  const merged: KyInstructionRecordState = { ...defaultKyInstructionRecord, ...base };
+  const merged: KyInstructionRecordState = { ...buildDefaultKyInstructionRecord(), ...base };
   const workRows = ensureArray<KyInstructionRecordState["workRows"][number]>(merged.workRows, []);
   if (workRows.length < 4) {
     while (workRows.length < 4) workRows.push(emptyWorkRow());
@@ -264,21 +273,21 @@ export function createOperationsService(): OperationsService {
       return { ok: true, data: value };
     },
     async getKyDraft() {
-      return { ok: true, data: readFromStorage(STORAGE_KEYS.ky, defaultKySheetDraft) };
+      return { ok: true, data: readFromStorage(STORAGE_KEYS.ky, buildDefaultKySheetDraft()) };
     },
     async saveKyDraft(value) {
       writeToStorage(STORAGE_KEYS.ky, value);
       return { ok: true, data: value };
     },
     async getKyPaperForm() {
-      return { ok: true, data: readFromStorage(STORAGE_KEYS.kyPaper, defaultKyPaperForm) };
+      return { ok: true, data: readFromStorage(STORAGE_KEYS.kyPaper, buildDefaultKyPaperForm()) };
     },
     async saveKyPaperForm(value) {
       writeToStorage(STORAGE_KEYS.kyPaper, value);
       return { ok: true, data: value };
     },
     async getKyInstructionRecord() {
-      const raw = readFromStorage(STORAGE_KEYS.kyInstruction, defaultKyInstructionRecord);
+      const raw = readFromStorage(STORAGE_KEYS.kyInstruction, buildDefaultKyInstructionRecord());
       return { ok: true, data: normalizeKyInstructionRecord(raw) };
     },
     async saveKyInstructionRecord(value) {
@@ -324,7 +333,7 @@ export function createOperationsService(): OperationsService {
     },
     async buildMailPreview({ notification, mail }) {
       const lines = [
-        "【ANZEN AI】配信プレビュー",
+        "【安全AIポータル】配信プレビュー",
         `配信先: ${mail.email || "未設定"}`,
         `頻度: ${mail.frequency}`,
         "",

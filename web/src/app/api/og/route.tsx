@@ -51,7 +51,7 @@ export function GET(req: NextRequest) {
             marginBottom: "20px",
           }}
         >
-          ANZEN AI — 専門家チームによる設計
+          安全AIポータル — 専門家チームによる設計
         </div>
 
         <div
@@ -91,7 +91,7 @@ export function GET(req: NextRequest) {
             letterSpacing: "0.05em",
           }}
         >
-          safe-ai-site.vercel.app
+          anzen-ai-portal.jp
         </div>
       </div>
     ),

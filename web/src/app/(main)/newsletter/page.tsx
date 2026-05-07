@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   title: _title,
   description: _desc,
   openGraph: {
-    title: `${_title}｜ANZEN AI`,
+    title: `${_title}`,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
   },
@@ -109,7 +109,7 @@ export default function NewsletterPage() {
         個人情報は配信目的のみに使用し、第三者には提供しません。
         配信停止はメール内のリンク1クリック。
         <br />
-        ANZEN AI ─ 現場の安全を、AIで変える。
+        安全AIポータル ─ 現場の安全を、AIで変える。
       </p>
     </div>
   );

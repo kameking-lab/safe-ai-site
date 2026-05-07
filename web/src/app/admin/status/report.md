@@ -1,4 +1,4 @@
-﻿# ANZEN AI 完全版現状把握レポート
+﻿# 安全AIポータル 完全版現状把握レポート
 
 調査日: 2026-05-01
 対象: safe-ai-site リポジトリ全体
@@ -139,7 +139,7 @@ mock配下の総行数は約13,530行。実データ比率87%以上。
 
 ### Robots
 
-`web/src/app/robots.ts` で Allow `/`、Disallow `/api/` と `/signage`。sitemap参照は `https://safe-ai-site.vercel.app/sitemap.xml` を指定。本セッションで `sitemap-index.xml` への切替えがオプションとして可能になったが、現時点では `robots.ts` 側は `sitemap.xml` を指したまま。Search Console 側で `sitemap-index.xml` を直接登録する運用を想定。
+`web/src/app/robots.ts` で Allow `/`、Disallow `/api/` と `/signage`。sitemap参照は `https://anzen-ai-portal.jp/sitemap.xml` を指定。本セッションで `sitemap-index.xml` への切替えがオプションとして可能になったが、現時点では `robots.ts` 側は `sitemap.xml` を指したまま。Search Console 側で `sitemap-index.xml` を直接登録する運用を想定。
 
 ### Manifest
 
@@ -448,7 +448,7 @@ LMS（`/lms`）：△ 部分動作。前回と同じ。
 
 ### 特商法表記
 
-専用URLは未設置。`/about` ページに「特定商取引法に基づく表記」として運営者氏名・労働安全コンサルタントANZEN AI 専門家チームを記載している模様。本セッションで pricing にエントリープラン4種が追加されたため、決済画面から1〜2クリック以内に特商法表記へ到達する経路の確認・整備の必要性が高まっている。`/commerce` 等の独立URL化が望ましい。
+専用URLは未設置。`/about` ページに「特定商取引法に基づく表記」として運営者氏名・労働安全コンサルタント安全AIポータル 専門家チームを記載している模様。本セッションで pricing にエントリープラン4種が追加されたため、決済画面から1〜2クリック以内に特商法表記へ到達する経路の確認・整備の必要性が高まっている。`/commerce` 等の独立URL化が望ましい。
 
 ### ハルシネーション対策
 

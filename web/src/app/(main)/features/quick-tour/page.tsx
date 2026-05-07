@@ -3,9 +3,9 @@ import Link from "next/link";
 import Image from "next/image";
 
 export const metadata: Metadata = {
-  title: "5分ツアー | 機能紹介 | ANZEN AI",
+  title: "5分ツアー | 機能紹介",
   description:
-    "ANZEN AIの主要機能を7ステップ・5分で巡る入門ツアー。実機画面のスクショつきで、すぐに試せます。",
+    "安全AIポータルの主要機能を7ステップ・5分で巡る入門ツアー。実機画面のスクショつきで、すぐに試せます。",
 };
 
 type Step = {
@@ -96,7 +96,7 @@ export default function QuickTourPage() {
       <header className="mx-auto mt-4 max-w-4xl text-center">
         <p className="text-xs font-bold tracking-widest text-emerald-700">QUICK TOUR</p>
         <h1 className="mt-1 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl md:text-4xl">
-          5分でわかる ANZEN AI
+          5分でわかる 安全AIポータル
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
           7ステップで主要機能を巡るツアー。各ステップから直接試せます。

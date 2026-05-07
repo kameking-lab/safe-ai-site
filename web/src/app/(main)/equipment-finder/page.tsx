@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     "フルハーネス・防毒/防塵マスク・ヘルメット・安全靴・保護メガネ・防音・手袋・保護衣・救命胴衣・視認性ベストなど12カテゴリから、種類別の絞り込み質問で最適な保護具をレコメンド。JIS規格・国家検定品も明示。",
   alternates: { canonical: "/equipment-finder" },
   openGraph: {
-    title: "保護具AIファインダー｜ANZEN AI",
+    title: "保護具AIファインダー",
     description: "保護具の種類を選んで、種類別の絞り込み質問でおすすめ商品を表示。",
     images: [{ url: ogImageUrl("保護具AIファインダー", "12カテゴリから種類別に絞り込み"), width: 1200, height: 630 }],
   },

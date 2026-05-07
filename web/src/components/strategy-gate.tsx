@@ -43,7 +43,7 @@ export function StrategyGate({ password, content }: { password: string; content:
         className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <div className="mb-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">ANZEN AI 内部文書</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">安全AIポータル 内部文書</p>
           <h1 className="mt-1 text-lg font-bold text-slate-900">月商100万円戦略 — パスワード保護</h1>
           <p className="mt-2 text-sm text-slate-600">
             この資料は閲覧制限されています。閲覧パスワードを入力してください。

@@ -309,7 +309,7 @@ function generateLoaderScript(data) {
   // 月次まとめURLは YYYY-MM 形式
   const fromYm = meta.dateRange.from.slice(0, 7);
   return `// ============================================================
-// ANZEN AI テストデータ投入スクリプト
+// 安全AIポータル テストデータ投入スクリプト
 // ブラウザ DevTools > Console に貼り付けて実行してください
 //
 // 生成日時  : ${meta.generatedAt}
@@ -356,7 +356,7 @@ const sizes = requestedDays > 0 ? [requestedDays] : [22, 100, 365];
 const outputDir = join(REPO_ROOT, "scripts", "test-data");
 mkdirSync(outputDir, { recursive: true });
 
-console.log("\n=== ANZEN AI テストデータ生成 (safety-diary-v3スキーマ) ===");
+console.log("\n=== 安全AIポータル テストデータ生成 (safety-diary-v3スキーマ) ===");
 
 for (const days of sizes) {
   const data = generateData(days);

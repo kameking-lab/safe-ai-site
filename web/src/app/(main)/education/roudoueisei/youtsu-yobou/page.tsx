@@ -6,7 +6,7 @@ import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 
-const TITLE = "腰痛予防労働衛生教育｜ANZEN AI";
+const TITLE = "腰痛予防労働衛生教育";
 const DESCRIPTION =
   "厚生労働省「職場における腰痛予防対策指針」に基づく2時間の労働衛生教育。重量物取扱い・介護・VDT作業向けにオンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 
@@ -30,7 +30,7 @@ const courseSchema = {
   "@type": "Course",
   name: "腰痛予防労働衛生教育",
   description: DESCRIPTION,
-  url: "https://safe-ai-site.vercel.app/education/roudoueisei/youtsu-yobou",
+  url: "https://anzen-ai-portal.jp/education/roudoueisei/youtsu-yobou",
   timeRequired: "PT2H",
   educationalLevel: "職場従事者",
   teaches: [
@@ -41,8 +41,8 @@ const courseSchema = {
   ],
   provider: {
     "@type": "Organization",
-    name: "ANZEN AI",
-    url: "https://safe-ai-site.vercel.app",
+    name: "安全AIポータル",
+    url: "https://anzen-ai-portal.jp",
   },
   offers: [
     {
@@ -80,9 +80,9 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "ANZEN AI", item: "https://safe-ai-site.vercel.app/" },
-    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://safe-ai-site.vercel.app/education" },
-    { "@type": "ListItem", position: 3, name: "腰痛予防労働衛生教育", item: "https://safe-ai-site.vercel.app/education/roudoueisei/youtsu-yobou" },
+    { "@type": "ListItem", position: 1, name: "安全AIポータル", item: "https://anzen-ai-portal.jp/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://anzen-ai-portal.jp/education" },
+    { "@type": "ListItem", position: 3, name: "腰痛予防労働衛生教育", item: "https://anzen-ai-portal.jp/education/roudoueisei/youtsu-yobou" },
   ],
 };
 
@@ -413,7 +413,7 @@ export default function YoutsuyobouPage() {
 
       {/* 監修者 */}
       <p className="mt-6 text-center text-xs text-slate-400">
-        ANZEN AI 専門家チームによる設計
+        安全AIポータル 専門家チームによる設計
       </p>
     </main>
   );

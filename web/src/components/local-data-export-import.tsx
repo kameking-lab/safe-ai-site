@@ -89,7 +89,7 @@ export function LocalDataExportImport() {
       const txt = await file.text();
       const parsed = JSON.parse(txt) as Partial<Snapshot>;
       if (parsed.source !== "anzen-ai-localstorage" || !parsed.data) {
-        setError("ANZEN AI のバックアップファイルではありません。source 不一致。");
+        setError("安全AIポータル のバックアップファイルではありません。source 不一致。");
         return;
       }
       const entries = Object.entries(parsed.data).filter(
@@ -116,7 +116,7 @@ export function LocalDataExportImport() {
     setError(null);
     setInfo(null);
     const ok = window.confirm(
-      "この端末に保存されている ANZEN AI のデータをすべて削除します。元に戻せません。よろしいですか？"
+      "この端末に保存されている 安全AIポータル のデータをすべて削除します。元に戻せません。よろしいですか？"
     );
     if (!ok) return;
     const keys = collectKeys();

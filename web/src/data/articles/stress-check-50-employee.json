@@ -16,8 +16,8 @@
   "publishedAt": "2026-04-28",
   "lastReviewedAt": "2026-04-28",
   "author": {
-    "name": "ANZEN AI 専門家チーム",
-    "url": "https://safe-ai-site.vercel.app/about"
+    "name": "安全AIポータル 専門家チーム",
+    "url": "https://anzen-ai-portal.jp/about"
   },
   "sections": [
     {
@@ -53,7 +53,7 @@
   ],
   "ctaSlot": {
     "title": "現場の運用設計をご相談ください",
-    "description": "ANZEN AI 専門家チームが直接ヒアリング。",
+    "description": "安全AIポータル 専門家チームが直接ヒアリング。",
     "href": "/contact",
     "label": "無料相談を申し込む"
   }

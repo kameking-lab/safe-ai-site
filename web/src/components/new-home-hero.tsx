@@ -18,7 +18,7 @@ export function NewHomeHero() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14 lg:py-16">
         <div className="text-center">
           <p className="text-xs font-bold tracking-widest text-emerald-700 dark:text-emerald-300">
-            ANZEN AI
+            安全AIポータル
           </p>
           <h1
             id="home-hero-title"

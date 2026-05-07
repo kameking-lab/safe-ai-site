@@ -33,7 +33,7 @@ const BENEFITS = [
   {
     icon: ShieldCheck,
     title: "労働安全コンサル監修",
-    desc: "ANZEN AI 専門家チームが直接担当",
+    desc: "安全AIポータル 専門家チームが直接担当",
   },
 ] as const;
 

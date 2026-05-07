@@ -41,6 +41,13 @@ const nextConfig: NextConfig = {
   // 直感URL（短い・単数形・別表記・日英両パターン）から正規ページへの恒久リダイレクト
   async redirects() {
     return [
+      // 旧Vercelドメイン → 本番カスタムドメインへの恒久転送
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "safe-ai-site.vercel.app" }],
+        destination: "https://anzen-ai-portal.jp/:path*",
+        permanent: true,
+      },
       // フィードバック → コンテクスト付きお問い合わせ
       { source: "/feedback", destination: "/contact?category=demo", permanent: true },
       // 廃止・移動ページ

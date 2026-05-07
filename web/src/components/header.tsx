@@ -28,7 +28,7 @@ export function Header() {
         </div>
         <div className="flex-1">
           <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
-            ANZEN AI
+            安全AIポータル
           </p>
           <h1 className="text-lg font-bold leading-tight text-slate-900 dark:text-slate-100 sm:text-xl">
             現場の安全情報を、すばやく確認

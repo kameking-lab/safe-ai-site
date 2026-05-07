@@ -158,7 +158,7 @@ const CATEGORIES = [
       { name: "氷のうベスト", price: [4500, 8500], spec: "保冷剤交換式", season: "summer" },
       { name: "塩飴・経口補水ゼリー（業務用）", price: [1800, 3800], spec: "10袋セット", season: "summer" },
       { name: "WBGT 黒球式温度計（電池式）", price: [12000, 28000], spec: "JIS Z 8504" , season: "summer" },
-      { name: "熱中症警戒スマホアラート（義務化対応）", price: [0, 0], spec: "ANZEN AI 内 /risk で無料提供", season: "summer" },
+      { name: "熱中症警戒スマホアラート（義務化対応）", price: [0, 0], spec: "安全AIポータル 内 /risk で無料提供", season: "summer" },
       { name: "クールタオル（速乾・冷感素材）", price: [600, 1500], spec: "首巻きタイプ", season: "summer" },
     ],
   },

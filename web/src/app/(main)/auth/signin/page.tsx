@@ -4,10 +4,10 @@ import { signIn } from "@/auth";
 
 export const metadata: Metadata = {
   title: "ログイン",
-  description: "ANZEN AIにログインしてKY用紙・チャット履歴・法人プラン機能をご利用ください。",
+  description: "安全AIポータルにログインしてKY用紙・チャット履歴・法人プラン機能をご利用ください。",
   openGraph: {
-    title: "ログイン｜ANZEN AI",
-    description: "ANZEN AIにログインしてKY用紙・チャット履歴・法人プラン機能をご利用ください。",
+    title: "ログイン",
+    description: "安全AIポータルにログインしてKY用紙・チャット履歴・法人プラン機能をご利用ください。",
   },
 };
 

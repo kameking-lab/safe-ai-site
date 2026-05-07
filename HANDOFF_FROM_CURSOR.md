@@ -6,8 +6,8 @@
 会社の安全担当者が業務時間内に日常的に使う想定。
 
 ## 本番URL
-- メイン: https://safe-ai-site.vercel.app/
-- サイネージ: https://safe-ai-site.vercel.app/signage
+- メイン: https://anzen-ai-portal.jp/
+- サイネージ: https://anzen-ai-portal.jp/signage
 - GitHub: https://github.com/kameking-lab/safe-ai-site
 - デプロイ: Vercel（GitHub連携で自動デプロイ）
 
@@ -75,3 +75,11 @@ npm run lint
 PRD.md / TASKS.md はShift-JIS系の文字化けが起きている。
 内容はこの HANDOFF ファイルに集約したので、PRD.md / TASKS.md は
 UTF-8で書き直してよい。
+
+## Search Console セットアップ（オーナー作業）
+1. https://search.google.com/search-console にアクセス
+2. プロパティ追加 → URL接頭辞「https://anzen-ai-portal.jp」
+3. 確認方法「HTMLタグ」を選択し、`<meta name="google-site-verification" content="xxxxx">` の content 値をコピー
+4. Vercel ダッシュボード → Project Settings → Environment Variables で `GOOGLE_SITE_VERIFICATION=xxxxx` を本番環境に追加
+5. 再デプロイ後、Search Console で「確認」ボタンを押す
+6. sitemap.xml（https://anzen-ai-portal.jp/sitemap.xml）を Search Console に登録
