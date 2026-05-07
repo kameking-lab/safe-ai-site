@@ -10,7 +10,6 @@ const pages = [
   { path: "/pricing", label: "料金プラン" },
   { path: "/about", label: "概要" },
   { path: "/contact", label: "お問い合わせ" },
-  { path: "/services", label: "サービス一覧" },
 ];
 
 for (const { path, label } of pages) {

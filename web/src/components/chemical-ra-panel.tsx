@@ -207,6 +207,9 @@ export function ChemicalRaPanel() {
   const [errorHint, setErrorHint] = useState<string | null>(null);
   const [result, setResult] = useState<ChemicalRaResponse | null>(null);
   const [mhlwSelected, setMhlwSelected] = useState<MergedChemical | null>(null);
+  // 既定は2ステップウィザード（物質検索→作業方法）。詳細モードを ON にすると
+  // CREATE-SIMPLE 用の換気・取扱量・作業時間・測定濃度の入力欄が表示される。
+  const [detailedMode, setDetailedMode] = useState(false);
   const resultAnchorRef = useRef<HTMLDivElement | null>(null);
 
   // AI調査の結果生成完了時に結果セクションへスクロール
@@ -373,6 +376,23 @@ export function ChemicalRaPanel() {
 
       {/* 検索フォーム */}
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div>
+            <p className="text-xs font-bold text-emerald-700">2ステップウィザード</p>
+            <p className="text-[11px] text-slate-500">
+              STEP 1 物質を選ぶ → STEP 2 作業方法を答える → A4結果表
+            </p>
+          </div>
+          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700">
+            <input
+              type="checkbox"
+              checked={detailedMode}
+              onChange={(e) => setDetailedMode(e.target.checked)}
+              className="h-4 w-4"
+            />
+            詳細モード（数値入力を表示）
+          </label>
+        </div>
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -422,7 +442,46 @@ export function ChemicalRaPanel() {
             />
           </div>
 
-          {/* ③ CREATE-SIMPLE 入力（取扱量・換気・作業時間） */}
+          {/* STEP 2 作業方法の逆質問（簡易モード） */}
+          {!detailedMode && (
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-3">
+              <p className="text-xs font-bold text-emerald-900">STEP 2 作業の状況を選んでください</p>
+              <p className="mt-0.5 text-[11px] text-slate-600">
+                換気状況・取扱量を選ぶだけで、A4結果表に反映されます。詳細な数値入力が必要な場合は上の「詳細モード」をONにしてください。
+              </p>
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <label className="text-[11px] text-slate-700">
+                  換気の状況
+                  <select
+                    value={ventilation}
+                    onChange={(e) => setVentilation(e.target.value as "none" | "general" | "local" | "")}
+                    className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
+                  >
+                    <option value="">選んでください</option>
+                    <option value="none">屋内・換気なし</option>
+                    <option value="general">全体換気あり（窓・扇風機）</option>
+                    <option value="local">局所排気装置あり</option>
+                  </select>
+                </label>
+                <label className="text-[11px] text-slate-700">
+                  1日の取扱量の目安
+                  <select
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value as "small" | "medium" | "large" | "")}
+                    className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs"
+                  >
+                    <option value="">選んでください</option>
+                    <option value="small">少量（コップ1杯以下）</option>
+                    <option value="medium">中量（バケツ1杯まで）</option>
+                    <option value="large">大量（ドラム缶以上）</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* ③ CREATE-SIMPLE 入力（詳細モードのみ） */}
+          {detailedMode && (
           <div className="rounded-lg border border-blue-200 bg-blue-50/40 p-3">
             <p className="text-xs font-semibold text-blue-900">
               ③ CREATE-SIMPLE 簡易判定（任意）— 4段階リスクレベル（I〜IV）を算出
@@ -472,8 +531,10 @@ export function ChemicalRaPanel() {
               ※ CREATE-SIMPLE は厚労省「化学物質リスクアセスメント支援ツール」を参考にした簡略判定です。最終判断は公式版または専門家（労働衛生コンサルタント等）の判断によること。
             </p>
           </div>
+          )}
 
-          {/* ④ 測定濃度入力と判定 */}
+          {/* ④ 測定濃度入力と判定（詳細モードのみ） */}
+          {detailedMode && (
           <div className="rounded-lg border border-amber-200 bg-amber-50/50 p-3">
             <label className="flex items-center gap-1.5 text-xs font-semibold text-amber-900">
               <Gauge className="h-3.5 w-3.5" />
@@ -516,6 +577,7 @@ export function ChemicalRaPanel() {
               </div>
             )}
           </div>
+          )}
         </div>
 
         {/* クイック検索 */}
@@ -584,7 +646,17 @@ export function ChemicalRaPanel() {
 
       {/* 結果 */}
       {result && !loading && (
-        <div ref={resultAnchorRef} className="space-y-6 scroll-mt-20">
+        <div ref={resultAnchorRef} className="space-y-6 scroll-mt-20 print:space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
+            <p className="text-xs font-bold text-emerald-700">A4 結果表（ブラウザ印刷で A4 1〜2ページに収まります）</p>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50"
+            >
+              🖨 印刷 / PDF保存
+            </button>
+          </div>
           {/* 物質概要 */}
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">

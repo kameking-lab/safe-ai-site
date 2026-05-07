@@ -291,12 +291,6 @@ export default function PartnershipPage() {
             >
               API ドキュメント
             </Link>
-            <Link
-              href="/services"
-              className="rounded-full border border-slate-300 bg-white px-3 py-1 font-semibold text-slate-700 hover:bg-slate-100"
-            >
-              受託業務メニュー
-            </Link>
           </div>
         </section>
       </div>

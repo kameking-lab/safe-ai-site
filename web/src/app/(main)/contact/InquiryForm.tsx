@@ -251,6 +251,13 @@ export default function InquiryForm() {
             </a>{" "}
             をご確認ください。
           </p>
+          <p className="text-[11px] text-slate-500">
+            フォームが使えない場合は{" "}
+            <a href="mailto:kenshi.ycc@gmail.com" className="underline hover:text-slate-700">
+              kenshi.ycc@gmail.com
+            </a>{" "}
+            まで直接ご連絡ください。
+          </p>
         </form>
       )}
     </div>

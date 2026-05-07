@@ -4,7 +4,6 @@ import { LadderStatsCard } from "@/components/ladder-stats-card";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
-import { EnterpriseFunnel } from "@/components/EnterpriseFunnel";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
@@ -119,11 +118,6 @@ export default function AccidentsPage() {
             cta: "KY用紙を作成する",
           },
         ]}
-      />
-      <EnterpriseFunnel
-        service="safety-automation"
-        headline="貴社の業界・職種に絞った事故事例DBを構築"
-        subline="厚労省データに加え、貴社の業界・取扱機械・職種に特化した事例検索・統計レポートを月次で配信します。"
       />
     </>
   );

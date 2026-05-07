@@ -29,8 +29,6 @@ import {
   BookMarked,
   Users2,
   Heart,
-  Briefcase,
-  Handshake,
   ListChecks,
   Sun,
   Moon,
@@ -72,9 +70,7 @@ type NavCategory = {
 };
 
 const PAID_SERVICE_ITEMS: NavItem[] = [
-  { id: "services", label: "受託業務", href: "/services", icon: Briefcase },
   { id: "education", label: "特別教育", href: "/education", icon: GraduationCap },
-  { id: "consulting", label: "月額顧問", href: "/consulting", icon: Handshake },
   { id: "wizard", label: "コンプラ診断", href: "/wizard", icon: ListChecks, badge: "NEW" },
 ];
 

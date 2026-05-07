@@ -1,6 +1,27 @@
 import { allLawArticles } from "@/data/laws";
 import type { LawArticle } from "@/data/laws";
 import { normalizeSearchText } from "@/lib/fuzzy-search";
+import { expandQuery } from "@/lib/query-expansion";
+
+/** チャットボットの法令カテゴリフィルタ（lawShort と完全一致） */
+export type LawCategoryFilter =
+  | "all"
+  | "安衛法"
+  | "安衛則"
+  | "クレーン則"
+  | "有機則"
+  | "特化則"
+  | "酸欠則";
+
+export const LAW_CATEGORY_OPTIONS: { value: LawCategoryFilter; label: string }[] = [
+  { value: "all", label: "すべて" },
+  { value: "安衛法", label: "安衛法" },
+  { value: "安衛則", label: "安衛則" },
+  { value: "クレーン則", label: "クレーン則" },
+  { value: "有機則", label: "有機則" },
+  { value: "特化則", label: "特化則" },
+  { value: "酸欠則", label: "酸欠則" },
+];
 
 /**
  * トピック別の必須条文プライン（キーワードに該当する場合、RAG 検索結果の先頭に
@@ -407,25 +428,39 @@ function applyPinnedTopics(
 }
 
 /** キーワードマッチングによる関連条文のRAG検索 */
-export function searchRelevantArticles(query: string, topK = 10): LawArticle[] {
-  return searchRelevantArticlesWithScore(query, topK).articles;
+export function searchRelevantArticles(
+  query: string,
+  topK = 10,
+  category: LawCategoryFilter = "all"
+): LawArticle[] {
+  return searchRelevantArticlesWithScore(query, topK, category).articles;
 }
 
 /**
  * RAG検索結果と最高スコアを返す（信頼度計算用）
  * normalizedScore: topScore / 30 を [0,1] にクランプした値
+ *
+ * - クエリは expandQuery で同義語展開してからトークン化する。
+ * - category が "all" 以外の場合、当該 lawShort の条文のみを対象にする。
  */
 export function searchRelevantArticlesWithScore(
   query: string,
-  topK = 10
+  topK = 10,
+  category: LawCategoryFilter = "all"
 ): { articles: LawArticle[]; topScore: number; normalizedScore: number } {
-  const queryTokens = tokenize(query);
+  const expandedQuery = expandQuery(query);
+  const queryTokens = tokenize(expandedQuery);
 
   if (queryTokens.length === 0) {
     return { articles: [], topScore: 0, normalizedScore: 0 };
   }
 
-  const scored = allLawArticles.map((article) => ({
+  const corpus =
+    category === "all"
+      ? allLawArticles
+      : allLawArticles.filter((a) => a.lawShort === category);
+
+  const scored = corpus.map((article) => ({
     article,
     score: calcScore(article, queryTokens),
   }));

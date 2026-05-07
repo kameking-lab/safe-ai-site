@@ -199,7 +199,7 @@ export function HomeValueHero() {
                     href="/contact"
                     className="rounded-lg border-2 border-white/60 bg-white/10 px-5 py-3 text-center text-sm font-bold text-white hover:bg-white/20 transition-colors"
                   >
-                    受託業務のご相談 →
+                    お問い合わせ →
                   </Link>
                   <Link
                     href="/pricing"
@@ -415,18 +415,10 @@ export function HomeValueHero() {
                   accent: "text-emerald-700 dark:text-emerald-300",
                 },
                 {
-                  href: "/services",
-                  title: "受託業務（¥150k〜）",
-                  desc: "KY・安全管理・教育・法改正通知・Claude Code 開発まで。",
-                  cta: "受託メニューを見る",
-                  color: "bg-white border-amber-200 hover:border-amber-400 dark:bg-slate-800 dark:border-amber-500/30 dark:hover:border-amber-400/70",
-                  accent: "text-amber-700 dark:text-amber-300",
-                },
-                {
                   href: "/contact",
-                  title: "無料相談30分",
-                  desc: "課題整理から最適プラン提案まで。強引な営業は一切なし。",
-                  cta: "相談を申し込む",
+                  title: "お問い合わせ",
+                  desc: "ご意見・改善提案・機能リクエスト・データ誤り指摘を歓迎します。",
+                  cta: "問い合わせる",
                   color: "bg-white border-violet-200 hover:border-violet-400 dark:bg-slate-800 dark:border-violet-500/30 dark:hover:border-violet-400/70",
                   accent: "text-violet-700 dark:text-violet-300",
                 },

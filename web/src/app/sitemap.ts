@@ -28,7 +28,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/chemical-database", lastModified: "2026-04-01", priority: 0.7, changeFrequency: "monthly" },
     { url: "/risk-prediction", lastModified: "2026-04-01", priority: 0.7, changeFrequency: "monthly" },
     { url: "/pricing", lastModified: "2026-03-01", priority: 0.7, changeFrequency: "monthly" },
-    { url: "/services", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "monthly" },
     { url: "/education", lastModified: "2026-04-25", priority: 0.9, changeFrequency: "monthly" },
     { url: "/education/tokubetsu/kensaku-toishi", lastModified: "2026-04-25", priority: 0.8, changeFrequency: "monthly" },
     { url: "/education/tokubetsu/teiatsu-denki", lastModified: "2026-04-25", priority: 0.8, changeFrequency: "monthly" },
@@ -42,7 +41,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/education/roudoueisei/necchu", lastModified: "2026-04-25", priority: 0.8, changeFrequency: "monthly" },
     { url: "/education/roudoueisei/shindou", lastModified: "2026-04-25", priority: 0.8, changeFrequency: "monthly" },
     { url: "/education/roudoueisei/souon", lastModified: "2026-04-25", priority: 0.8, changeFrequency: "monthly" },
-    { url: "/consulting", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "monthly" },
     { url: "/subsidies", lastModified: "2026-04-01", priority: 0.7, changeFrequency: "monthly" },
     { url: "/diversity", lastModified: "2026-04-01", priority: 0.7, changeFrequency: "monthly" },
     { url: "/diversity/disability", lastModified: "2026-04-01", priority: 0.6, changeFrequency: "monthly" },
@@ -65,7 +63,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   // PAID_MODE が無効な研究プロジェクト期間は、課金関連ページをサイトマップから除外
-  const PAID_ONLY = new Set(["/pricing", "/services", "/consulting"]);
+  const PAID_ONLY = new Set(["/pricing"]);
   const filtered = PAID_MODE ? pages : pages.filter((p) => !PAID_ONLY.has(p.url));
 
   const circularPages: typeof pages = mhlwNotices.map((n) => ({

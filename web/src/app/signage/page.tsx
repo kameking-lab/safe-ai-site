@@ -5,12 +5,8 @@ import Link from "next/link";
 import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
 import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture-warning-map";
 import { SignageFloorPlanEditor } from "@/components/signage/signage-floor-plan-editor";
-import { SignageDangerAlert } from "@/components/signage/signage-danger-alert";
-import { SignageMorningScript } from "@/components/signage/signage-morning-script";
 import { SignageHeader } from "@/components/signage/signage-header";
-import { SignageFeaturedGoods } from "@/components/signage/signage-featured-goods";
 import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
-import { SignageRiskPrediction } from "@/components/signage/signage-risk-prediction";
 import { SignageShell } from "@/components/signage/signage-shell";
 import { SignageTodayDocuments } from "@/components/signage/signage-today-documents";
 import { getSignageLocationById, signageLocations } from "@/data/signage-locations";
@@ -35,6 +31,10 @@ function hintForJmaCode(code: string) {
 
 const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
 const LOCATION_STORAGE_KEY = "signage-location-id";
+const ORIENTATION_STORAGE_KEY = "signage-orientation";
+
+type Orientation = "landscape" | "portrait";
+type DisplayMode = "floorplan" | "map" | "workdocs";
 
 type DashboardState = {
   mode: ApiMode;
@@ -60,8 +60,18 @@ export default function SignagePage() {
   });
   const [bundle, setBundle] = useState<SignageDataApiResponse | null>(null);
   const [bundleStatus, setBundleStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  // 初期表示は現場図面サンプル。地図モードに切り替えると気象庁の警報マップを表示
-  const [displayMode, setDisplayMode] = useState<"floorplan" | "map">("floorplan");
+  // 中央メインエリア: 図面 / 地図 / 作業資料 の3モード切替
+  const [displayMode, setDisplayMode] = useState<DisplayMode>("floorplan");
+  // 縦長/横長の切替: 縦置きTV対応
+  const [orientation, setOrientation] = useState<Orientation>(() => {
+    if (typeof window !== "undefined") {
+      const stored = window.localStorage.getItem(ORIENTATION_STORAGE_KEY);
+      if (stored === "portrait" || stored === "landscape") return stored;
+    }
+    return "landscape";
+  });
+  // トレンドニュースの拡大表示
+  const [zoomedTrendIndex, setZoomedTrendIndex] = useState<number | null>(null);
 
   const selectedLocation = useMemo(
     () => getSignageLocationById(selectedLocationId) ?? getSignageLocationById("tokyo-shinjuku")!,
@@ -219,8 +229,23 @@ export default function SignagePage() {
     }
   };
 
+  const toggleOrientation = () => {
+    setOrientation((prev) => {
+      const next: Orientation = prev === "landscape" ? "portrait" : "landscape";
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(ORIENTATION_STORAGE_KEY, next);
+      }
+      return next;
+    });
+  };
+
+  const trendItems = bundle?.laborTrend ?? [];
+  const zoomedTrend = zoomedTrendIndex !== null ? trendItems[zoomedTrendIndex] ?? null : null;
+
   const prefectureLevels = bundle?.prefectureLevels ?? {};
   const jmaLink = `https://www.jma.go.jp/bosai/warning/#area_type=class20s&area_code=${selectedLocation.jmaCityCode ?? "130000"}`;
+
+  const isPortrait = orientation === "portrait";
 
   return (
     <SignageShell>
@@ -239,37 +264,27 @@ export default function SignagePage() {
         </p>
       </div>
 
-      {/* 危険イベント全画面アラート（Web Speech API） */}
-      <SignageDangerAlert
-        jmaHeadline={bundle?.jmaHeadline ?? null}
-        warnings={bundle?.selectedWarnings ?? null}
-      />
-
-      {/* 朝礼スクリプトAI（200字要約） */}
-      <SignageMorningScript
-        jmaHeadline={bundle?.jmaHeadline ?? null}
-        warnings={bundle?.selectedWarnings ?? null}
-        topAccidentTitle={(bundle?.laborTrend ?? [])[0]?.title ?? null}
-        topLawTitle={topLaws[0]?.title ?? null}
-        industryLabel={selectedLocation.label}
-      />
-
-      {/* 地図モードへの導線 */}
+      {/* 縦長/横長切替 + 地図モード導線 */}
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-700/60 bg-emerald-950/40 px-3 py-2 text-xs">
-        <span className="font-semibold text-emerald-200">🗺️ 地図モード（新）</span>
-        <span className="text-emerald-100/80">
-          全国の警報・天気・地震を地図上に表示。ピン登録・通知・フルスクリーン対応。
-        </span>
+        <button
+          type="button"
+          onClick={toggleOrientation}
+          className="rounded border border-emerald-400 bg-emerald-700 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
+          aria-pressed={isPortrait}
+        >
+          {isPortrait ? "📱 縦長表示中（横長へ切替）" : "🖥 横長表示中（縦長へ切替）"}
+        </button>
+        <span className="text-emerald-100/80">縦置きTVと横置きTVを切替できます。</span>
         <Link
           href="/signage/map"
           className="ml-auto rounded border border-emerald-400 bg-emerald-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
         >
-          地図モードを開く →
+          🗺️ 地図モードを開く →
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 xl:min-h-0 xl:flex-1 xl:grid-cols-12 xl:gap-3 xl:overflow-hidden">
-        <div className="flex flex-col gap-2 overflow-x-hidden xl:col-span-7 xl:min-h-0 xl:overflow-y-auto">
+      <div className={`grid grid-cols-1 gap-2 xl:min-h-0 xl:flex-1 xl:gap-3 xl:overflow-hidden ${isPortrait ? "" : "xl:grid-cols-12"}`}>
+        <div className={`flex flex-col gap-2 overflow-x-hidden xl:min-h-0 xl:overflow-y-auto ${isPortrait ? "" : "xl:col-span-7"}`}>
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             <label className="ml-auto flex max-w-full items-center gap-2 text-[10px] text-slate-300 sm:text-xs">
               <span className="shrink-0 whitespace-nowrap">地点</span>
@@ -291,12 +306,17 @@ export default function SignagePage() {
             <div className="flex shrink-0 flex-wrap items-start justify-between gap-2">
               <div>
                 <p className="text-xs font-bold text-slate-100 sm:text-sm lg:text-base">
-                  {displayMode === "floorplan" ? "現場レイアウト" : "気象庁 注意報・警報（都道府県）"}
+                  {displayMode === "floorplan"
+                    ? "現場レイアウト"
+                    : displayMode === "map"
+                      ? "気象庁 注意報・警報（都道府県）"
+                      : "本日の作業資料"}
                 </p>
                 <p className="mt-0.5 text-[9px] text-slate-400 sm:text-[10px]">
-                  {displayMode === "floorplan" ? (
+                  {displayMode === "floorplan" && (
                     <>図面サンプルを表示中。気象警報は右サイドパネルで確認できます。</>
-                  ) : (
+                  )}
+                  {displayMode === "map" && (
                     <>
                       地図は{" "}
                       <a href="https://www.jma.go.jp/bosai/warning/" className="text-emerald-400 underline" target="_blank" rel="noreferrer">
@@ -304,6 +324,9 @@ export default function SignagePage() {
                       </a>
                       の公開JSONを約1時間キャッシュして描画しています。
                     </>
+                  )}
+                  {displayMode === "workdocs" && (
+                    <>本日使用する図面・指示書をアップロード表示します。</>
                   )}
                 </p>
               </div>
@@ -331,6 +354,18 @@ export default function SignagePage() {
                   aria-pressed={displayMode === "map"}
                 >
                   地図
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDisplayMode("workdocs")}
+                  className={`flex items-center rounded-lg border px-2 py-2.5 text-[10px] font-semibold min-h-[44px] ${
+                    displayMode === "workdocs"
+                      ? "border-emerald-500 bg-emerald-700 text-white"
+                      : "border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800"
+                  }`}
+                  aria-pressed={displayMode === "workdocs"}
+                >
+                  作業資料
                 </button>
                 <a
                   href={jmaLink}
@@ -383,11 +418,11 @@ export default function SignagePage() {
               </ul>
             ) : null}
 
-            {displayMode === "floorplan" ? (
-              <SignageFloorPlanEditor />
-            ) : (
+            {displayMode === "floorplan" && <SignageFloorPlanEditor />}
+            {displayMode === "map" && (
               <JapanPrefectureWarningMap levelsByIso={prefectureLevels} highlightIso={selectedLocation.prefectureIso} />
             )}
+            {displayMode === "workdocs" && <SignageTodayDocuments />}
 
             <SignageHourlyStrip
               hourly={bundle?.hourly ?? []}
@@ -415,11 +450,9 @@ export default function SignagePage() {
           {state.riskStatus === "error" && (
             <p className="shrink-0 text-[10px] text-amber-200 sm:text-xs">地点リスク（日次）の取得に失敗しました。</p>
           )}
-
-          <SignageTodayDocuments />
         </div>
 
-        <div className="flex flex-col gap-2 xl:col-span-5 xl:min-h-0 xl:overflow-hidden">
+        <div className={`flex flex-col gap-2 xl:min-h-0 xl:overflow-hidden ${isPortrait ? "" : "xl:col-span-5"}`}>
           <section className="flex flex-col rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden">
             <h2 className="shrink-0 text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">
               トレンド（労働災害・建設事故）
@@ -431,18 +464,17 @@ export default function SignagePage() {
               {bundleStatus === "success" && bundle && bundle.laborTrend.length === 0 ? (
                 <li className="text-xs text-slate-400">現在取得できるニュースがありません。</li>
               ) : null}
-              {(bundle?.laborTrend ?? []).map((item, idx) => (
+              {trendItems.map((item, idx) => (
                 <li key={`${item.link}-${idx}`}>
-                  <a
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block rounded-lg border border-slate-700 bg-slate-950/60 p-2 text-left transition hover:border-emerald-600/80 hover:bg-slate-900 sm:rounded-xl sm:p-3"
+                  <button
+                    type="button"
+                    onClick={() => setZoomedTrendIndex(idx)}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-950/60 p-2 text-left transition hover:border-emerald-600/80 hover:bg-slate-900 sm:rounded-xl sm:p-3"
                   >
                     <p className="text-[9px] text-slate-300 sm:text-[10px]">{item.pubDate || "日時不明"}</p>
                     <p className="mt-0.5 text-sm font-semibold leading-snug text-slate-50 sm:text-base lg:text-lg">{item.title}</p>
-                    <p className="mt-1 text-[10px] font-semibold text-emerald-400 sm:text-xs">記事を開く →</p>
-                  </a>
+                    <p className="mt-1 text-[10px] font-semibold text-emerald-400 sm:text-xs">タップで拡大表示 / 記事を開く →</p>
+                  </button>
                 </li>
               ))}
               {bundleStatus === "loading" || bundleStatus === "idle" ? (
@@ -498,13 +530,46 @@ export default function SignagePage() {
             </ul>
           </section>
 
-          <SignageRiskPrediction weatherData={state.riskData} />
-
-          <SignageFeaturedGoods />
         </div>
       </div>
 
       <AutoRefreshStatus intervalMinutes={REFRESH_INTERVAL_MS / 60000} lastUpdatedText={state.lastUpdatedText} />
+
+      {/* トレンドニュース拡大モーダル */}
+      {zoomedTrend && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 sm:p-8"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => setZoomedTrendIndex(null)}
+        >
+          <div
+            className="relative w-full max-w-4xl rounded-2xl border border-slate-700 bg-slate-950 p-6 shadow-2xl sm:p-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setZoomedTrendIndex(null)}
+              className="absolute right-3 top-3 rounded-full border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-slate-700"
+              aria-label="閉じる"
+            >
+              ✕ 閉じる
+            </button>
+            <p className="text-xs text-slate-400 sm:text-sm">{zoomedTrend.pubDate || "日時不明"}</p>
+            <h3 className="mt-2 text-2xl font-bold leading-snug text-slate-50 sm:text-3xl lg:text-4xl">
+              {zoomedTrend.title}
+            </h3>
+            <a
+              href={zoomedTrend.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-6 inline-block rounded-lg border border-emerald-500 bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-600 sm:text-base"
+            >
+              記事を開く →
+            </a>
+          </div>
+        </div>
+      )}
     </SignageShell>
   );
 }
