@@ -20,7 +20,7 @@ function tokenizeJa(text: string): string[] {
   return (text.match(/[一-龥ぁ-んァ-ヶa-zA-Z0-9]{2,}/g) ?? []).filter((t) => t.length >= 2);
 }
 
-const SITE_BASE = "https://safe-ai-site.vercel.app";
+const SITE_BASE = "https://anzen-ai-portal.jp";
 
 export function generateStaticParams() {
   return getPublishedArticleSlugs().map((slug) => ({ slug }));
@@ -40,7 +40,7 @@ export async function generateMetadata({
     alternates: { canonical: `/articles/${slug}` },
     keywords: article.keywords,
     openGraph: {
-      title: `${article.title}｜ANZEN AI`,
+      title: `${article.title}`,
       description: article.description,
       images: [{ url: ogImageUrl(article.title), width: 1200, height: 630 }],
       type: "article",
@@ -190,7 +190,7 @@ export default async function ArticleDetailPage({
             },
             publisher: {
               "@type": "Organization",
-              name: "ANZEN AI",
+              name: "安全AIポータル",
               url: SITE_BASE,
             },
             mainEntityOfPage: url,

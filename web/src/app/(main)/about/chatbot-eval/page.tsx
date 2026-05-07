@@ -1,16 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import results from "@/data/chatbot-eval-results.json";
+import freshResults from "@/data/chatbot-eval-fresh-results.json";
 
 export const metadata: Metadata = {
   title: "AIチャットボット精度評価（Recall@5 100問ベンチマーク）｜安全AIポータル",
   description:
-    "労働安全衛生 AI チャットボットの根拠条文検索精度を 100 問ベンチマークで定量公開。RAG 検索結果に正答条文が top-5 内に含まれるか（Recall@5）を判定し、トピック別の Recall@5 と全失敗問の期待/取得値を開示します。",
+    "労働安全衛生 AI チャットボットの根拠条文 検索ヒット率（Recall@5）を 100 問ベンチマークで定量公開。RAG 検索結果の上位 5 件に gold 条文が含まれるかを判定し、トピック別の Recall@5 と全失敗問の期待/取得値を開示します。",
   alternates: { canonical: "/about/chatbot-eval" },
   openGraph: {
     title: "AIチャットボット精度評価（Recall@5）｜安全AIポータル",
     description:
-      "100 問ベンチマークによる根拠条文 Recall@5 を全件公開。トピック別スコアと失敗問の詳細を含む。",
+      "100 問ベンチマークによる根拠条文の Recall@5（検索ヒット率）を全件公開。トピック別スコアと失敗問の詳細を含む。",
     type: "article",
   },
 };
@@ -58,22 +59,22 @@ export default function ChatbotEvalPage() {
           研究・実証プロジェクトについて
         </Link>
         <span className="mx-2">/</span>
-        <span>AIチャットボット精度評価</span>
+        <span>AIチャットボット Recall@5 評価</span>
       </nav>
 
       <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-        AIチャットボット精度評価（100問ベンチマーク）
+        AIチャットボット Recall@5 評価（100問ベンチマーク）
       </h1>
       <p className="mt-2 text-sm leading-6 text-slate-600">
         労働安全衛生 AI チャットボットが「正しい根拠条文を検索できているか」を 100 問のクローズドセットで評価し、
         結果を全件公開しています。各問は <code className="rounded bg-slate-100 px-1">{`{question, gold[]}`}</code>{" "}
-        の組で、RAG 検索の上位 5 件に gold（期待される条文）のいずれか 1 件以上が含まれていれば正答とみなします。
+        の組で、RAG 検索の上位 5 件に gold（期待される条文）のいずれか 1 件以上が含まれた割合を Recall@5（検索ヒット率）として算出します。
       </p>
 
       {/* サマリ */}
       <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Stat label="正答数（Recall@5）" value={`${r.correct} / ${r.total}`} accent />
-        <Stat label="Recall@5" value={formatPct(r.accuracy)} accent />
+        <Stat label="Recall@5（件数）" value={`${r.correct} / ${r.total}`} accent />
+        <Stat label="Recall@5（検索ヒット率）" value={formatPct(r.accuracy)} accent />
         <Stat label="目標値" value={formatPct(r.target)} />
         <Stat
           label="判定"
@@ -82,6 +83,7 @@ export default function ChatbotEvalPage() {
         />
       </section>
       <p className="mt-3 text-xs text-slate-500">
+        ※ 本ページの「Recall@5」は RAG 検索の根拠条文 検索ヒット率であり、Gemini が生成する回答文の正答率ではありません。<br />
         最終評価: {formatDate(r.generated_at)} ／ ソース:{" "}
         <code className="rounded bg-slate-100 px-1">test/chatbot-basic-100.json</code>
         ／ 実行コマンド:{" "}
@@ -157,6 +159,9 @@ export default function ChatbotEvalPage() {
         )}
       </section>
 
+      {/* fresh セット結果 */}
+      <FreshResultsSection r={freshResults as EvalResult} />
+
       {/* 評価方法 */}
       <section className="mt-10 rounded-xl border border-slate-200 bg-slate-50 p-5">
         <h2 className="text-base font-bold text-slate-900">評価方法・限界</h2>
@@ -170,7 +175,7 @@ export default function ChatbotEvalPage() {
             ・評価対象は <strong>RAG 検索の根拠条文ヒット率</strong>。Gemini の生成回答の文章品質は別途評価。
           </li>
           <li>
-            ・上位 5 件のうち gold 1 件でも含まれれば正答（Recall@5 ベース）。
+            ・上位 5 件のうち gold 1 件でも含まれれば検索ヒットとみなす（Recall@5 ベース）。
           </li>
           <li>
             ・本ベンチマークは検索段階の代理指標であり、実際の回答精度はモデル生成・プロンプト設計にも依存します。
@@ -234,5 +239,100 @@ function Stat({
         {value}
       </p>
     </div>
+  );
+}
+
+function FreshResultsSection({ r }: { r: EvalResult }) {
+  const sortedTopics = Object.entries(r.topic_breakdown).sort(
+    ([, a], [, b]) => b.total - a.total
+  );
+  return (
+    <section className="mt-12 rounded-xl border border-slate-200 bg-white p-5">
+      <div className="flex flex-wrap items-baseline gap-2">
+        <h2 className="text-lg font-bold text-slate-900">
+          fresh セット（第2ベンチマーク）
+        </h2>
+        <span className="rounded-full border border-violet-300 bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-800">
+          言い換えロバストネス
+        </span>
+      </div>
+      <p className="mt-2 text-xs leading-6 text-slate-600">
+        既存の 100 問とは別の言い回し・観点で同じ法令論点をカバーする 100 問の追加セット。
+        質問の表現が変わっても同じ条文を取れるかを観測する。
+      </p>
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat label="正答数（Recall@5）" value={`${r.correct} / ${r.total}`} accent />
+        <Stat label="Recall@5" value={formatPct(r.accuracy)} accent />
+        <Stat label="目標値" value={formatPct(r.target)} />
+        <Stat
+          label="判定"
+          value={r.passed ? "✅ 達成" : "❌ 未達"}
+          accent={r.passed}
+        />
+      </div>
+      <p className="mt-3 text-xs text-slate-500">
+        最終評価: {formatDate(r.generated_at)} ／ ソース:{" "}
+        <code className="rounded bg-slate-100 px-1">test/chatbot-fresh-100.json</code>
+        ／ 実行コマンド:{" "}
+        <code className="rounded bg-slate-100 px-1">npm test -- rag-100q-fresh</code>
+      </p>
+      <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50 text-xs text-slate-600">
+            <tr>
+              <th className="px-3 py-2 text-left font-semibold">トピック</th>
+              <th className="px-3 py-2 text-right font-semibold">問数</th>
+              <th className="px-3 py-2 text-right font-semibold">正答</th>
+              <th className="px-3 py-2 text-right font-semibold">Recall@5</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 bg-white">
+            {sortedTopics.map(([topic, t]) => (
+              <tr key={topic}>
+                <td className="px-3 py-2 font-medium text-slate-800">{topic}</td>
+                <td className="px-3 py-2 text-right text-slate-700">{t.total}</td>
+                <td className="px-3 py-2 text-right text-slate-700">{t.correct}</td>
+                <td
+                  className={`px-3 py-2 text-right font-semibold ${
+                    t.accuracy >= r.target ? "text-emerald-700" : "text-amber-700"
+                  }`}
+                >
+                  {formatPct(t.accuracy)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {r.failures.length > 0 ? (
+        <details className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs">
+          <summary className="cursor-pointer font-semibold text-slate-700">
+            不正答ケースを表示（{r.failures.length} 件）
+          </summary>
+          <ul className="mt-3 space-y-2">
+            {r.failures.map((f) => (
+              <li
+                key={f.id}
+                className="rounded-md border border-amber-200 bg-amber-50 p-2 text-slate-800"
+              >
+                <p className="font-semibold">
+                  Q{f.id}{" "}
+                  <span className="rounded bg-amber-200 px-1.5 py-0.5 text-[10px] text-amber-900">
+                    {f.topic}
+                  </span>{" "}
+                  {f.question}
+                </p>
+                <p className="mt-1">
+                  <span className="font-semibold">期待:</span> {f.expected}
+                </p>
+                <p className="mt-0.5">
+                  <span className="font-semibold">取得:</span> {f.actual}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ) : null}
+    </section>
   );
 }

@@ -12,7 +12,7 @@ import { relatedFromNotice } from "@/lib/related-content";
 import { ogImageUrl } from "@/lib/og-url";
 import type { AccidentCase } from "@/lib/types/domain";
 
-const SITE_BASE = "https://safe-ai-site.vercel.app";
+const SITE_BASE = "https://anzen-ai-portal.jp";
 const TODAY_ISO = new Date().toISOString().slice(0, 10);
 
 function findNotice(id: string): MhlwNotice | undefined {
@@ -40,7 +40,7 @@ export async function generateMetadata({
     description,
     alternates: { canonical: `/circulars/${id}` },
     openGraph: {
-      title: `${title}｜ANZEN AI`,
+      title: `${title}`,
       description,
       images: [{ url: ogImageUrl(notice.title, notice.noticeNumber ?? "厚労省通達"), width: 1200, height: 630 }],
     },
@@ -374,7 +374,7 @@ export default async function CircularDetailPage({
 
       <footer className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-[11px] leading-5 text-slate-600">
         <p>
-          ※ 本ページは厚生労働省・労働基準局通達等の公開情報をもとに、ANZEN AI
+          ※ 本ページは厚生労働省・労働基準局通達等の公開情報をもとに、安全AIポータル
           が一覧化したものです。法的判断・実務適用は必ず本文（出典元）と所管省庁の最新公表内容をご確認ください。
         </p>
         <p className="mt-1">

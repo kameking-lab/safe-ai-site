@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const BASE = 'https://safe-ai-site.vercel.app';
+const BASE = 'https://anzen-ai-portal.jp';
 
 export async function GET() {
   const today = new Date().toISOString().split('T')[0];

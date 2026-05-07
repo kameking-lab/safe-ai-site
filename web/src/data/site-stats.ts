@@ -69,12 +69,12 @@ export const SITE_STATS_META: Record<
     asOf: "2026-01",
   },
   accidents10yCount: {
-    source: "ANZEN AI ETL: data/accidents-10years.jsonl（厚労省死亡災害DB＋curated事例の10年統合）",
+    source: "安全AIポータル ETL: data/accidents-10years.jsonl（厚労省死亡災害DB＋curated事例の10年統合）",
     sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen_pg/SHISHO_FND.aspx",
     asOf: "2026-04",
   },
   lawUpdates10yCount: {
-    source: "ANZEN AI ETL: data/law-updates-10years.jsonl（e-Gov・厚労省通達の10年統合）",
+    source: "安全AIポータル ETL: data/law-updates-10years.jsonl（e-Gov・厚労省通達の10年統合）",
     sourceUrl: "https://laws.e-gov.go.jp/",
     asOf: "2026-04",
   },
@@ -84,7 +84,7 @@ export const SITE_STATS_META: Record<
     asOf: "2024-05",
   },
   siteCuratedCaseCount: {
-    source: "ANZEN AI 編集部による厚労省事例DBから curated した詳細事例集",
+    source: "安全AIポータル 編集部による厚労省事例DBから curated した詳細事例集",
     asOf: "2026-04",
   },
   chemicalsMhlwCount: {
@@ -98,7 +98,7 @@ export const SITE_STATS_META: Record<
     asOf: "2026-04",
   },
   ragArticleCount: {
-    source: "ANZEN AI RAG（curated 33法令 + 厚労省PDF抽出フィルタ後インデックス）",
+    source: "安全AIポータル RAG（curated 33法令 + 厚労省PDF抽出フィルタ後インデックス）",
     asOf: "2026-04",
   },
   specialEdKinds: {

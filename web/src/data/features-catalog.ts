@@ -321,9 +321,9 @@ export const FEATURES: FeatureItem[] = [
   {
     slug: "stats",
     title: "サイト統計・運営者情報",
-    summary: "ANZEN AI 有資格者の労働安全コンサルタント監修",
+    summary: "安全AIポータル 有資格者の労働安全コンサルタント監修",
     description:
-      "本サイトは登録ANZEN AI 専門家チームが監修。利用統計・監修方針を公開しています。",
+      "本サイトは登録安全AIポータル 専門家チームが監修。利用統計・監修方針を公開しています。",
     href: "/about",
     category: "management",
     tags: ["運営者"],
@@ -333,7 +333,7 @@ export const FEATURES: FeatureItem[] = [
     title: "利用者の声",
     summary: "現場担当者からのフィードバック",
     description:
-      "実際にANZEN AIを使っている現場担当者・安全管理者の声を集約。改善要望・追加機能の提案窓口も。",
+      "実際に安全AIポータルを使っている現場担当者・安全管理者の声を集約。改善要望・追加機能の提案窓口も。",
     href: "/community-cases",
     category: "management",
     tags: ["利用者"],

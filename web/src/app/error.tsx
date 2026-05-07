@@ -11,7 +11,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[ANZEN AI] global error boundary:", error);
+    console.error("[安全AIポータル] global error boundary:", error);
   }, [error]);
 
   return (

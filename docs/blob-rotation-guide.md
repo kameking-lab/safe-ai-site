@@ -75,7 +75,7 @@ vercel --prod
 
 ```bash
 # Vercel 環境で API が正常動作するか確認
-curl -s "https://safe-ai-site.vercel.app/api/mhlw/search?q=test" | head -100
+curl -s "https://anzen-ai-portal.jp/api/mhlw/search?q=test" | head -100
 # → エラーなく JSON が返れば成功
 ```
 

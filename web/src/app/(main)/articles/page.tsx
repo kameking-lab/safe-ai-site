@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     "労働安全衛生に関する法改正・運用ガイド・業種別のSEO記事を労働安全コンサルタント監修で公開。",
   alternates: { canonical: "/articles" },
   openGraph: {
-    title: "労働安全 解説記事一覧｜ANZEN AI",
+    title: "労働安全 解説記事一覧",
     description: "法改正・運用ガイド・業種別の解説記事をコンサルタント監修で公開。",
     images: [{ url: ogImageUrl("解説記事一覧"), width: 1200, height: 630 }],
   },
@@ -34,7 +34,7 @@ export default function ArticlesIndexPage() {
           労働安全 解説記事
         </h1>
         <p className="mt-2 text-sm text-slate-600">
-          公開済み <strong>{articles.length}</strong> 本。法改正・運用ガイド・業種別の記事をANZEN AI 専門家チームによる設計で公開しています。
+          公開済み <strong>{articles.length}</strong> 本。法改正・運用ガイド・業種別の記事を安全AIポータル 専門家チームによる設計で公開しています。
         </p>
       </header>
 

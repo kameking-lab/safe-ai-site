@@ -49,7 +49,14 @@ function formatPct(v: number, digits = 1): string {
   return `${(v * 100).toFixed(digits)}%`;
 }
 
-function deltaPill(delta: number, invertColor = false) {
+function deltaPill(delta: number, invertColor = false, hide = false) {
+  if (hide) {
+    return (
+      <span className="ml-2 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">
+        −
+      </span>
+    );
+  }
   const positive = delta >= 0;
   const good = invertColor ? !positive : positive;
   const tone = good
@@ -138,6 +145,20 @@ export function StatsDashboard() {
         </div>
       ) : null}
 
+      {!loading && data && (data.source !== "ga4" || data.summary.pv === 0) ? (
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+          <p className="font-bold">📊 実データ収集中</p>
+          <p className="mt-1 text-xs leading-relaxed">
+            このダッシュボードは現在
+            {data.source === "ga4"
+              ? "GA4 に接続済みですが、計測データがまだ少ないため一部指標が 0 になっています。"
+              : "GA4 Data API が未接続のため、サンプル（モック）データを表示しています。"}
+            機能別利用・ページ別アクセス・コンバージョンは{" "}
+            <strong>※ サンプルデータ</strong> を含みます。実数値は GA4 接続および利用蓄積後に反映されます。
+          </p>
+        </div>
+      ) : null}
+
       {loading || !data ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
           読み込み中…
@@ -185,17 +206,34 @@ function DataSourceBadge({ data, loading }: { data: StatsResponse | null; loadin
  * ────────────────────────────────────────────────────────── */
 function SectionSummary({ data }: { data: StatsResponse }) {
   const s = data.summary;
-  const cards: Array<{ label: string; value: string; delta: number; invertColor?: boolean }> = [
-    { label: "DAU（直近 1 日）", value: formatNum(s.dau), delta: s.deltas.dau },
-    { label: "MAU（直近 30 日）", value: formatNum(s.mau), delta: s.deltas.mau },
-    { label: "PV（期間内合計）", value: formatNum(s.pv), delta: s.deltas.pv },
-    { label: "平均セッション時間", value: formatDuration(s.avgSessionSec), delta: s.deltas.avgSessionSec },
-    { label: "直帰率", value: formatPct(s.bounceRate), delta: s.deltas.bounceRate, invertColor: true },
+  const cards: Array<{
+    label: string;
+    value: string;
+    rawValue: number;
+    delta: number;
+    invertColor?: boolean;
+  }> = [
+    { label: "DAU（直近 1 日）", value: formatNum(s.dau), rawValue: s.dau, delta: s.deltas.dau },
+    { label: "MAU（直近 30 日）", value: formatNum(s.mau), rawValue: s.mau, delta: s.deltas.mau },
+    { label: "PV（期間内合計）", value: formatNum(s.pv), rawValue: s.pv, delta: s.deltas.pv },
+    {
+      label: "平均セッション時間",
+      value: formatDuration(s.avgSessionSec),
+      rawValue: s.avgSessionSec,
+      delta: s.deltas.avgSessionSec,
+    },
+    {
+      label: "直帰率",
+      value: formatPct(s.bounceRate),
+      rawValue: s.bounceRate,
+      delta: s.deltas.bounceRate,
+      invertColor: true,
+    },
   ];
   return (
     <Section
       heading="サマリ"
-      subheading="主要指標と前期間比"
+      subheading="主要指標と前期間比（値が 0 の指標は前期間比を非表示）"
     >
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {cards.map((c) => (
@@ -203,7 +241,7 @@ function SectionSummary({ data }: { data: StatsResponse }) {
             <p className="text-[11px] font-medium text-slate-600">{c.label}</p>
             <p className="mt-1 text-xl font-bold text-slate-900">
               {c.value}
-              {deltaPill(c.delta, c.invertColor)}
+              {deltaPill(c.delta, c.invertColor, c.rawValue === 0)}
             </p>
           </div>
         ))}
@@ -217,8 +255,12 @@ function SectionSummary({ data }: { data: StatsResponse }) {
  * ────────────────────────────────────────────────────────── */
 function SectionFeatures({ data }: { data: StatsResponse }) {
   const sorted = useMemo(() => [...data.features].sort((a, b) => b.pv - a.pv), [data.features]);
+  const isSample = data.source !== "ga4" || sorted.every((f) => f.pv === 0);
   return (
-    <Section heading="機能別利用" subheading="7 目玉機能の PV / 滞在 / 利用率">
+    <Section
+      heading={`機能別利用${isSample ? "（※ サンプルデータ）" : ""}`}
+      subheading="7 目玉機能の PV / 滞在 / 利用率"
+    >
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead className="text-left text-slate-500">
@@ -516,7 +558,12 @@ function Section({
 }) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h2 className="text-base font-bold text-slate-900">{heading}</h2>
+      <h2 className="flex flex-wrap items-center gap-2 text-base font-bold text-slate-900">
+        <span>{heading}</span>
+        <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+          ※サンプル
+        </span>
+      </h2>
       {subheading ? <p className="mt-1 text-xs text-slate-500">{subheading}</p> : null}
       <div className="mt-4">{children}</div>
     </section>

@@ -4,7 +4,7 @@ import { Printer } from "lucide-react";
 import { SITE_STATS } from "@/data/site-stats";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 
-const SITE_URL = "https://safe-ai-site.vercel.app";
+const SITE_URL = "https://anzen-ai-portal.jp";
 // QR コードは Google Chart API は廃止のため、qrserver を利用（CDN フェールセーフ用に画像でフォールバック）。
 const QR_URL = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(SITE_URL)}`;
 
@@ -73,7 +73,7 @@ export function LeafletPrintView() {
           <header className="flex items-start justify-between gap-4 border-b-2 border-emerald-600 pb-4">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700">
-                ANZEN AI — 研究・実証プロジェクト
+                安全AIポータル — 研究・実証プロジェクト
               </p>
               <h2 className="mt-2 text-3xl font-extrabold leading-tight text-slate-900">
                 現場の安全を、AI で変える。
@@ -86,7 +86,7 @@ export function LeafletPrintView() {
             <div className="shrink-0 text-right">
               <p className="text-[10px] uppercase tracking-widest text-slate-400">監修</p>
               <p className="text-sm font-bold text-slate-900">労働安全コンサルタント</p>
-              <p className="text-[11px] text-slate-500">ANZEN AI 有資格者</p>
+              <p className="text-[11px] text-slate-500">安全AIポータル 有資格者</p>
             </div>
           </header>
 
@@ -131,7 +131,7 @@ export function LeafletPrintView() {
             <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700">
               プロジェクトの規模（{SITE_URL.replace(/^https?:\/\//, "")}）
             </p>
-            <h2 className="mt-1 text-2xl font-bold text-slate-900">数字で見る ANZEN AI</h2>
+            <h2 className="mt-1 text-2xl font-bold text-slate-900">数字で見る 安全AIポータル</h2>
           </header>
 
           {/* 統計ブロック */}
@@ -160,7 +160,7 @@ export function LeafletPrintView() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={QR_URL}
-                alt={`ANZEN AI のQRコード（${SITE_URL}）`}
+                alt={`安全AIポータル のQRコード（${SITE_URL}）`}
                 width={160}
                 height={160}
                 className="h-40 w-40 border border-slate-300 bg-white p-1"
@@ -195,7 +195,7 @@ export function LeafletPrintView() {
 
           <footer className="border-t border-slate-200 pt-3 text-center">
             <p className="text-[10px] text-slate-500">
-              © 2026 ANZEN AI / 監修：ANZEN AI 専門家チーム
+              © 2026 安全AIポータル / 監修：安全AIポータル 専門家チーム
             </p>
           </footer>
         </article>

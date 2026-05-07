@@ -12,7 +12,7 @@ const DESCRIPTION =
 
 const RESEARCH_TITLE = "研究プロジェクトの取り組み";
 const RESEARCH_DESC =
-  "ANZEN AI が現在取り組んでいる労働安全衛生 × AI・DX の研究テーマ・実証実験の紹介。個人運営の無料公開プロジェクト。";
+  "安全AIポータル が現在取り組んでいる労働安全衛生 × AI・DX の研究テーマ・実証実験の紹介。個人運営の無料公開プロジェクト。";
 
 export const metadata: Metadata = PAID_MODE
   ? {
@@ -20,7 +20,7 @@ export const metadata: Metadata = PAID_MODE
       description: DESCRIPTION,
       alternates: { canonical: "/services" },
       openGraph: {
-        title: `${TITLE}｜ANZEN AI`,
+        title: `${TITLE}`,
         description: DESCRIPTION,
         images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
       },
@@ -34,7 +34,7 @@ export const metadata: Metadata = PAID_MODE
       description: RESEARCH_DESC,
       alternates: { canonical: "/services" },
       openGraph: {
-        title: `${RESEARCH_TITLE}｜ANZEN AI`,
+        title: `${RESEARCH_TITLE}`,
         description: RESEARCH_DESC,
       },
     };
@@ -80,7 +80,7 @@ export default function ServicesPage() {
             研究プロジェクトの取り組み
           </h1>
           <p className="mt-3 text-sm leading-6 text-slate-700">
-            ANZEN AI は労働安全衛生分野の AI・DX 活用を、個人運営で研究・実証しています。
+            安全AIポータル は労働安全衛生分野の AI・DX 活用を、個人運営で研究・実証しています。
             以下のテーマで通達・事故事例・化学物質情報・教育教材を一次ソース付きで無料公開し、
             現場・行政・研究者からのフィードバックを取り込みながら反復改善を続けています。
           </p>

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
-  title: "引き継ぎ書 | ANZEN AI",
+  title: "引き継ぎ書",
   robots: { index: false, follow: false },
 };
 
@@ -39,7 +39,7 @@ export default async function HandoverPage({ searchParams }: Props) {
       {/* ヘッダー */}
       <div className="bg-slate-800 text-white px-4 py-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-xs text-slate-400 mb-1">ANZEN AI 内部文書</p>
+          <p className="text-xs text-slate-400 mb-1">安全AIポータル 内部文書</p>
           <h1 className="text-xl font-bold leading-snug">
             セッション引き継ぎ書
           </h1>
@@ -72,10 +72,10 @@ export default async function HandoverPage({ searchParams }: Props) {
           <SectionTitle num={1} title="プロジェクト概要" />
           <Table
             rows={[
-              ["サイト名", "ANZEN AI（安全AIサイト）"],
-              ["URL", "https://safe-ai-site.vercel.app"],
+              ["サイト名", "安全AIポータル（安全AIサイト）"],
+              ["URL", "https://anzen-ai-portal.jp"],
               ["目的", "労働安全の独立コンサルタント受注サイト（協会向けポートフォリオ兼務）"],
-              ["運営表記", "ANZEN AI 運営チーム"],
+              ["運営表記", "安全AIポータル 運営チーム"],
               ["デプロイ", "Vercel（GitHub main ブランチ自動デプロイ）"],
               ["フロント", "Next.js App Router / TypeScript / Tailwind CSS"],
             ]}
@@ -303,7 +303,7 @@ export default async function HandoverPage({ searchParams }: Props) {
 
         {/* フッター */}
         <footer className="border-t border-slate-200 pt-6 pb-10 text-center text-xs text-slate-400">
-          <p>ANZEN AI 内部文書 — 2026-04-21 時点</p>
+          <p>安全AIポータル 内部文書 — 2026-04-21 時点</p>
           <p className="mt-1">このページは noindex 設定されており、検索エンジンには表示されません。</p>
         </footer>
       </div>

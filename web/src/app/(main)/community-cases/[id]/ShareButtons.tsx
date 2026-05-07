@@ -7,10 +7,10 @@ export function ShareButtons({ title, id }: { title: string; id: string }) {
   const [copied, setCopied] = useState(false);
 
   // SSRとクライアントで同じURLを生成してhydration mismatchを避ける
-  const url = `https://safe-ai-site.vercel.app/community-cases/${id}`;
+  const url = `https://anzen-ai-portal.jp/community-cases/${id}`;
 
   const tweetUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-    `${title} ｜現場の声｜ANZEN AI`
+    `${title} ｜現場の声｜安全AIポータル`
   )}&url=${encodeURIComponent(url)}`;
 
   async function handleCopy() {

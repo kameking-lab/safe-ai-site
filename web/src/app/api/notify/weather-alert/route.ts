@@ -42,7 +42,7 @@ export async function POST(req: Request) {
   }
 
   const resend = new Resend(apiKey);
-  const fromAddress = process.env.NOTIFY_FROM ?? "ANZEN AI <noreply@anzen-ai.com>";
+  const fromAddress = process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.com>";
   const issuedDate = new Date(issuedAt).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
 
   try {
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     await resend.emails.send({
       from: fromAddress,
       to: `audience:${audienceId}`, // Resend オーディエンス全体に送信
-      subject: `【ANZEN AI 警報】${prefecture}に${alertType}が発表されました`,
+      subject: `【安全AIポータル 警報】${prefecture}に${alertType}が発表されました`,
       html: `
 <!DOCTYPE html>
 <html lang="ja">
@@ -66,7 +66,7 @@ export async function POST(req: Request) {
   ${url ? `<p><a href="${url}" style="color:#059669;">詳細情報を確認する →</a></p>` : ""}
   <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;" />
   <p style="font-size:12px;color:#94a3b8;">
-    ANZEN AI ─ 現場の安全を、AIで変える。<br/>
+    安全AIポータル ─ 現場の安全を、AIで変える。<br/>
     <a href="{{unsubscribe_url}}" style="color:#94a3b8;">配信停止はこちら</a>
   </p>
 </body>

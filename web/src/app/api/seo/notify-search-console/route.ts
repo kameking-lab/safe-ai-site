@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const SITE_BASE = "https://safe-ai-site.vercel.app";
+const SITE_BASE = "https://anzen-ai-portal.jp";
 const SITEMAP_URL = `${SITE_BASE}/sitemap-index.xml`;
 
 // Vercel Cron は Authorization: Bearer ${CRON_SECRET} を付与する。

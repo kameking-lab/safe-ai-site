@@ -28,7 +28,7 @@ const PINS_FILE = join(REPO_ROOT, "data", "signage-pins.json");
 const STATE_FILE = join(REPO_ROOT, "data", "signage-notify-state.json");
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY ?? null;
-const FROM_EMAIL = process.env.NOTIFY_FROM ?? "ANZEN AI <noreply@anzen-ai.example.jp>";
+const FROM_EMAIL = process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.example.jp>";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.jp";
 
 /** 緯度経度から都道府県を簡易判定（最寄り重心） */

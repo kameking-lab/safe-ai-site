@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "他の方法との比較 | 機能紹介 | ANZEN AI",
+  title: "他の方法との比較 | 機能紹介",
   description:
-    "ANZEN AIと従来の安全管理ソフト・紙ベース運用を、機能・コスト・運用負荷で比較します。事実ベースで公平に整理しています。",
+    "安全AIポータルと従来の安全管理ソフト・紙ベース運用を、機能・コスト・運用負荷で比較します。事実ベースで公平に整理しています。",
 };
 
 type Method = "anzen" | "legacy" | "paper";
@@ -156,7 +156,7 @@ const COMPARISON_ROWS: Row[] = [
 
 const METHOD_META: Record<Method, { label: string; sub: string; accent: string }> = {
   anzen: {
-    label: "ANZEN AI",
+    label: "安全AIポータル",
     sub: "クラウド型・AI搭載",
     accent: "from-emerald-500 to-emerald-700",
   },
@@ -195,7 +195,7 @@ export default function ComparisonPage() {
           他の方法との比較
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-          ANZEN AIと従来の安全管理ソフト・紙ベース運用を、機能とコストの観点で並べました。
+          安全AIポータルと従来の安全管理ソフト・紙ベース運用を、機能とコストの観点で並べました。
           特定製品名は出さず、事実ベースで整理しています。検討材料としてお使いください。
         </p>
         <p className="mx-auto mt-2 max-w-2xl text-xs text-slate-500">
@@ -285,7 +285,7 @@ export default function ComparisonPage() {
         <h2 className="text-lg font-bold text-slate-900 sm:text-xl">どれを選べばよいか</h2>
         <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-            <p className="text-sm font-bold text-emerald-800">ANZEN AIが向く場合</p>
+            <p className="text-sm font-bold text-emerald-800">安全AIポータルが向く場合</p>
             <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-emerald-900">
               <li>多拠点・多店舗で安全管理を一元化したい</li>
               <li>改正安衛法対応の化学物質RAが必要</li>

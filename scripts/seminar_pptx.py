@@ -1,5 +1,5 @@
 """
-ANZEN AI セミナー PPTX 自動生成エンジン
+安全AIポータル セミナー PPTX 自動生成エンジン
 ====================================
 
 YAML データを読み込んで、Midnight Executive 系デザインの 16:9 PPTX を生成する。
@@ -312,12 +312,12 @@ def render_cover(slide, data: dict, meta: dict) -> None:
         font_size=10, font_color=SLATE_400, tight=True,
     )
 
-    # 右下の装飾：ANZEN AI ロゴ風テキスト
+    # 右下の装飾：安全AIポータル ロゴ風テキスト
     add_text(
         slide,
         Inches(SLIDE_W_IN - 2.4), Inches(0.7),
         Inches(1.8), Inches(0.35),
-        "ANZEN AI",
+        "安全AIポータル",
         font_size=12, font_color=GOLD, bold=True,
         align=PP_ALIGN.RIGHT, tight=True,
     )

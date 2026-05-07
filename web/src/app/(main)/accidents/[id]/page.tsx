@@ -11,7 +11,7 @@ import { getAccidentRelated } from "@/lib/accident-related";
 import { ogImageUrl } from "@/lib/og-url";
 import type { AccidentCase } from "@/lib/types/domain";
 
-const SITE_BASE = "https://safe-ai-site.vercel.app";
+const SITE_BASE = "https://anzen-ai-portal.jp";
 
 function findAccident(id: string): AccidentCase | undefined {
   return getAccidentCasesDataset().find((c) => c.id === id);
@@ -40,7 +40,7 @@ export async function generateMetadata({
     description,
     alternates: { canonical: `/accidents/${id}` },
     openGraph: {
-      title: `${title}｜ANZEN AI`,
+      title: `${title}`,
       description,
       images: [{ url: ogImageUrl(accident.title, accident.type), width: 1200, height: 630 }],
     },
@@ -243,7 +243,7 @@ export default async function AccidentDetailPage({
 
       <footer className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-[11px] leading-5 text-slate-600">
         <p>
-          ※ 本ページは厚生労働省・労働基準局の公開情報をもとに、ANZEN AI が一覧化した労働災害事例です。
+          ※ 本ページは厚生労働省・労働基準局の公開情報をもとに、安全AIポータル が一覧化した労働災害事例です。
           実務適用は本文（出典元）と所管省庁の最新公表内容を必ずご確認ください。
         </p>
       </footer>

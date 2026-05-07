@@ -6,7 +6,7 @@
  *   1. web/src/data/deaths-mhlw/records-{YYYY}.jsonl
  *      → 厚労省 死亡災害DB（2019〜2023の構造化データ）
  *   2. web/src/data/mock/real-accident-cases*.ts
- *      → ANZEN AI 編集部が curated した詳細事例（公開情報ベース）
+ *      → 安全AIポータル 編集部が curated した詳細事例（公開情報ベース）
  *   3. (任意) Vercel Blob mhlw-accidents/{YYYY}.jsonl
  *      → BLOB_READ_WRITE_TOKEN が設定されていれば 2015〜2021 をマージ
  *
@@ -228,7 +228,7 @@ function toUnifiedFromCurated(c) {
           url: `https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=${c.id.replace("mhlw-", "")}`,
           caseId: c.id.replace("mhlw-", ""),
         }
-      : { name: "ANZEN AI 編集部 curated 事例" },
+      : { name: "安全AIポータル 編集部 curated 事例" },
   };
 }
 

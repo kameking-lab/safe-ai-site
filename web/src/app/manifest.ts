@@ -8,8 +8,8 @@ import type { MetadataRoute } from "next";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "ANZEN AI — 現場の安全情報ポータル",
-    short_name: "ANZEN AI",
+    name: "安全AIポータル — 現場の安全情報ポータル",
+    short_name: "安全AIポータル",
     description:
       "法改正・事故DB・KY用紙・化学物質RA・Eラーニングを1つに。現場担当者の声を反映して継続的に改善される安全ポータル。",
     start_url: "/",

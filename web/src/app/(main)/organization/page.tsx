@@ -6,13 +6,13 @@ import { ogImageUrl } from "@/lib/og-url";
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "組織管理ダッシュボード｜デモ版";
 const _desc =
-  "ANZEN AI 法人向けの組織管理ダッシュボード（モック）。拠点・部署・受講進捗・安全統括の一元管理。正式リリース前のデモ版です。";
+  "安全AIポータル 法人向けの組織管理ダッシュボード（モック）。拠点・部署・受講進捗・安全統括の一元管理。正式リリース前のデモ版です。";
 
 export const metadata: Metadata = {
   title: _title,
   description: _desc,
   openGraph: {
-    title: `${_title}｜ANZEN AI`,
+    title: `${_title}`,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
   },
