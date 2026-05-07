@@ -6,6 +6,7 @@ import type { ChatbotSource, FollowupSuggestion } from "@/app/api/chatbot/route"
 import type { NoticeHit } from "@/lib/notice-search";
 import { VoiceMicButton } from "@/components/voice-input-field";
 import { BindingBadge } from "@/components/AIResponseCard";
+import { Mascot } from "@/components/mascot";
 import {
   CHAT_HISTORY_MAX_MESSAGES,
   clearChatHistory,
@@ -550,29 +551,34 @@ export function ChatbotPanel() {
           <div className="space-y-4">
             {messages.map((msg) => (
               <div key={msg.id}>
-                <div
-                  className={`max-w-[88%] rounded-xl px-4 py-3 text-sm leading-6 ${
-                    msg.role === "user"
-                      ? "ml-auto bg-blue-600 text-white"
-                      : "border border-slate-200 bg-white text-slate-800"
-                  }`}
-                >
-                  {msg.role === "assistant" ? (
-                    <div className="whitespace-pre-wrap">
-                      {msg.content.split(/(\*\*[^*]+\*\*)/).map((part, idx) => {
-                        if (part.startsWith("**") && part.endsWith("**")) {
-                          return <strong key={idx}>{part.slice(2, -2)}</strong>;
-                        }
-                        return part;
-                      })}
-                    </div>
-                  ) : (
-                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                <div className={msg.role === "assistant" ? "flex items-start gap-2" : ""}>
+                  {msg.role === "assistant" && (
+                    <Mascot size="sm" className="mt-1 shrink-0" alt="AI回答" />
                   )}
+                  <div
+                    className={`max-w-[88%] rounded-xl px-4 py-3 text-sm leading-6 ${
+                      msg.role === "user"
+                        ? "ml-auto bg-blue-600 text-white"
+                        : "border border-slate-200 bg-white text-slate-800"
+                    }`}
+                  >
+                    {msg.role === "assistant" ? (
+                      <div className="whitespace-pre-wrap">
+                        {msg.content.split(/(\*\*[^*]+\*\*)/).map((part, idx) => {
+                          if (part.startsWith("**") && part.endsWith("**")) {
+                            return <strong key={idx}>{part.slice(2, -2)}</strong>;
+                          }
+                          return part;
+                        })}
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* コピーボタン */}
-                <div className="mt-1 flex items-center gap-2">
+                <div className={`mt-1 flex items-center gap-2 ${msg.role === "assistant" ? "ml-10" : ""}`}>
                   <button
                     type="button"
                     onClick={() => handleCopyMessage(msg.id, msg.content)}
@@ -585,7 +591,7 @@ export function ChatbotPanel() {
 
                 {/* RAGソース・信頼度バッジ */}
                 {msg.role === "assistant" && msg.source_type && (
-                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                  <div className="mt-1.5 ml-10 flex flex-wrap items-center gap-1.5">
                     {msg.source_type === "rag" ? (
                       <span className="inline-flex items-center rounded border border-green-200 bg-green-50 px-2 py-0.5 text-[11px] font-semibold text-green-700">
                         📚 法令データベースから検索
@@ -615,7 +621,7 @@ export function ChatbotPanel() {
 
                 {/* 根拠条文の表示 */}
                 {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
-                  <details className="mt-2 max-w-[88%] rounded-lg border border-slate-200 bg-white p-3" open={msg.sources.length <= 2}>
+                  <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-slate-200 bg-white p-3" open={msg.sources.length <= 2}>
                     <summary className="cursor-pointer text-xs font-semibold text-slate-500 hover:text-slate-700">
                       参照条文 ({msg.sources.length}件)
                     </summary>
@@ -629,7 +635,7 @@ export function ChatbotPanel() {
 
                 {/* 関連通達・告示・指針（厚労省一次資料DB由来） */}
                 {msg.role === "assistant" && msg.notices && msg.notices.length > 0 && (
-                  <details className="mt-2 max-w-[88%] rounded-lg border border-amber-200 bg-amber-50 p-3" open>
+                  <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-amber-200 bg-amber-50 p-3" open>
                     <summary className="cursor-pointer text-xs font-semibold text-amber-900 hover:text-amber-700">
                       関連通達・告示 ({msg.notices.length}件・拘束力レベル付き)
                     </summary>
@@ -676,7 +682,7 @@ export function ChatbotPanel() {
 
                 {/* フォローアップ質問サジェスト */}
                 {msg.role === "assistant" && msg.followups && msg.followups.length > 0 && !isSending && (
-                  <div className="mt-2 max-w-[88%]">
+                  <div className="mt-2 ml-10 max-w-[88%]">
                     <p className="mb-1 text-[11px] text-slate-500">続けて質問する：</p>
                     <div className="flex flex-wrap gap-1.5">
                       {msg.followups.map((fu, i) => (
@@ -695,7 +701,7 @@ export function ChatbotPanel() {
 
                 {/* 6.2: 横断アクション — KY/RA/法改正へ遷移 */}
                 {msg.role === "assistant" && !isSending && (
-                  <div className="mt-2 max-w-[88%]">
+                  <div className="mt-2 ml-10 max-w-[88%]">
                     <p className="mb-1 text-[11px] text-slate-500">この内容を活用：</p>
                     <div className="flex flex-wrap gap-1.5">
                       <a
