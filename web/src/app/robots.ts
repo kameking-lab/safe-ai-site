@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin/", "/api/", "/strategy"],
     },
-    sitemap: "https://anzen-ai-portal.jp/sitemap-index.xml",
+    sitemap: "https://www.anzen-ai-portal.jp/sitemap-index.xml",
   };
 }

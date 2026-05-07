@@ -104,7 +104,7 @@ export function EducationContent() {
         schema={serviceSchema({
           name: "安全AIポータル 特別教育・安全衛生教育",
           description: DESCRIPTION,
-          url: "https://anzen-ai-portal.jp/education",
+          url: "https://www.anzen-ai-portal.jp/education",
           serviceType: "EducationalService",
           priceFrom: 50000,
         })}

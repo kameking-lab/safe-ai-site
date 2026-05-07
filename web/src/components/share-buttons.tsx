@@ -18,7 +18,7 @@ type ShareButtonsProps = {
 
 function buildAbsoluteUrl(pathname: string): string {
   if (typeof window === "undefined") {
-    return `https://anzen-ai-portal.jp${pathname}`;
+    return `https://www.anzen-ai-portal.jp${pathname}`;
   }
   return `${window.location.origin}${pathname}${window.location.search}`;
 }

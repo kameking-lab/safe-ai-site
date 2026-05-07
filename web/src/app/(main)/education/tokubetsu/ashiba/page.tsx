@@ -29,7 +29,7 @@ const courseSchema = {
   "@type": "Course",
   name: "足場の組立て等 特別教育",
   description: DESCRIPTION,
-  url: "https://anzen-ai-portal.jp/education/tokubetsu/ashiba",
+  url: "https://www.anzen-ai-portal.jp/education/tokubetsu/ashiba",
   timeRequired: "PT6H",
   educationalLevel: "職場従事者",
   teaches: [
@@ -41,7 +41,7 @@ const courseSchema = {
   provider: {
     "@type": "Organization",
     name: "安全AIポータル",
-    url: "https://anzen-ai-portal.jp",
+    url: "https://www.anzen-ai-portal.jp",
   },
   offers: [
     {
@@ -79,9 +79,9 @@ const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "安全AIポータル", item: "https://anzen-ai-portal.jp/" },
-    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://anzen-ai-portal.jp/education" },
-    { "@type": "ListItem", position: 3, name: "足場の組立て等 特別教育", item: "https://anzen-ai-portal.jp/education/tokubetsu/ashiba" },
+    { "@type": "ListItem", position: 1, name: "安全AIポータル", item: "https://www.anzen-ai-portal.jp/" },
+    { "@type": "ListItem", position: 2, name: "教育・研修", item: "https://www.anzen-ai-portal.jp/education" },
+    { "@type": "ListItem", position: 3, name: "足場の組立て等 特別教育", item: "https://www.anzen-ai-portal.jp/education/tokubetsu/ashiba" },
   ],
 };
 
