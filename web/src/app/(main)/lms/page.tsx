@@ -9,6 +9,7 @@ const _desc =
   "複数拠点・部署の安全教育を一元管理。受講進捗・グループ管理・修了証発行・業種別レポートをまとめて確認できます。2026年秋β公開予定、現在ウェイティングリスト先行受付中。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/lms" },
   title: _title,
   description: _desc,
   openGraph: {

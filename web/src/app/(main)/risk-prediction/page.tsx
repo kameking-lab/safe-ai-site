@@ -11,6 +11,7 @@ const _desc =
   "作業内容を入力すると類似事故を検索し、AIが潜在リスクを予測。建設・製造・林業の朝礼KY活動・危険予知活動を支援。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/risk-prediction" },
   title: _title,
   description: _desc,
   openGraph: {

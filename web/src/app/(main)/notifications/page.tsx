@@ -10,6 +10,7 @@ const _desc =
   "気象警報・労働安全衛生法改正・労働災害情報の通知とメール配信設定。重要な安全情報を見逃さない。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/notifications" },
   title: _title,
   description: _desc,
   openGraph: {

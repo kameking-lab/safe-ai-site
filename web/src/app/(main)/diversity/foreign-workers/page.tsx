@@ -7,6 +7,7 @@ const DESCRIPTION =
   "技能実習・特定技能・留学生アルバイトに共通する安全衛生課題。母語（中・越・ポ・タガログ）での相談窓口、多言語KY様式、失踪・メンタル不調時の対応フローを公的資源と接続して整理します。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/diversity/foreign-workers" },
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {

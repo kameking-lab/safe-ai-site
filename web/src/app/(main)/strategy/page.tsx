@@ -4,6 +4,7 @@ import { monetizationStrategyV3 } from "@/data/strategy/monetization-v3-2026-04-
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
+  alternates: { canonical: "/strategy" },
   title: "月商100万円戦略 V3 内部文書",
   description: "安全AIポータル の収益化戦略 V3（兼業NG・全自動化前提の作戦変更議論ログ・社内限定）",
   robots: { index: false, follow: false },

@@ -7,6 +7,7 @@ const DESCRIPTION =
   "派遣労働者・パートタイム・有期雇用者の安全衛生管理。同一労働同一賃金（保護具支給等）、雇入れ時の安全衛生教育義務、派遣元・派遣先の責任分担を実務目線で解説します。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/diversity/non-regular" },
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {

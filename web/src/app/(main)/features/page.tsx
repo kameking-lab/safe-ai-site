@@ -3,6 +3,7 @@ import { FeaturesIndexClient } from "./features-index-client";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
+  alternates: { canonical: "/features" },
   title: "機能紹介",
   description:
     "安全AIポータルの全26機能を1ページで一覧。安衛法チャットボット・KY用紙・化学物質RA・事故DB・Eラーニングなど、業種・用途から探せます。",

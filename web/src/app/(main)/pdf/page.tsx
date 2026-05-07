@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/page-header";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
+  alternates: { canonical: "/pdf" },
   title: "PDF出力",
   description: "KY用紙・朝礼要点のPDFプレビューと出力。",
   openGraph: {

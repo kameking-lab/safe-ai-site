@@ -11,6 +11,7 @@ const _desc =
   "エイジフレンドリー補助金・働き方改革推進支援助成金・建退共など、労働安全投資に使える公的助成金を中小企業向けにまとめました。労災1件あたりの経済損失試算も掲載。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/subsidies" },
   title: _title,
   description: _desc,
   openGraph: {

@@ -7,6 +7,7 @@ const DESCRIPTION =
   "業務災害・通勤災害に対する労災保険の特別加入制度。加入団体の選び方・業種別の保険料・給付範囲を整理し、全国300万のフリーランスへの情報格差を解消します。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/laws/freelance-rosai" },
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {

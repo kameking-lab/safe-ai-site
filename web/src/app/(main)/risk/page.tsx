@@ -8,6 +8,7 @@ const _desc =
   "都道府県別の気象警報・注意報と向こう1週間の天気予報。屋外作業・建設現場の安全管理に。市区町村別詳細も確認できます。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/risk" },
   title: _title,
   description: _desc,
   openGraph: {

@@ -11,6 +11,7 @@ const _desc =
   "2016年〜2026年の労働安全衛生法・化学物質管理など100件以上の法改正をAI要約付きで確認。e-Gov・厚労省通達へのリンク付き。安全担当者に。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/laws" },
   title: _title,
   description: _desc,
   openGraph: {
