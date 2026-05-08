@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-08T20:41:43.829Z",
+  "fetchedAt": "2026-05-08T21:43:33.012Z",
   "byIso": {
     "JP-01": {
       "level": "warning",
@@ -8409,7 +8409,7 @@
           "sourceCode": "170000",
           "level": "advisory",
           "headline": "石川県では、９日朝まで強風や急な強い雨、落雷に、９日昼前まで高波に注意してください。",
-          "reportDatetime": "2026-05-09T05:32:00+09:00",
+          "reportDatetime": "2026-05-09T05:56:00+09:00",
           "publishingOffice": "金沢地方気象台",
           "warnings": [
             {
@@ -8758,25 +8758,13 @@
         {
           "sourceCode": "180000",
           "level": "advisory",
-          "headline": "福井県では、９日明け方まで強風に、９日未明から９日昼前まで高波に注意してください。",
-          "reportDatetime": "2026-05-08T20:21:00+09:00",
+          "headline": "福井県では、９日昼前まで高波に注意してください。",
+          "reportDatetime": "2026-05-09T05:41:00+09:00",
           "publishingOffice": "福井地方気象台",
           "warnings": [
             {
               "areaCode": "180010",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "180010",
               "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "180020",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             },
@@ -8788,19 +8776,7 @@
             },
             {
               "areaCode": "1820100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1820100",
               "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1820200",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             },
@@ -8812,25 +8788,7 @@
             },
             {
               "areaCode": "1820400",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1820400",
               "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1820700",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1820800",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             },
@@ -8841,38 +8799,8 @@
               "level": "advisory"
             },
             {
-              "areaCode": "1820900",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1821000",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "1821000",
               "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1832200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1838200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1840400",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             },
@@ -8884,19 +8812,7 @@
             },
             {
               "areaCode": "1842300",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1842300",
               "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1844200",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             },
@@ -8908,31 +8824,13 @@
             },
             {
               "areaCode": "1848100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1848100",
               "code": "16",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "1848300",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1848300",
               "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1850100",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             },
