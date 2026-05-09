@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-09T11:14:14.903Z",
+  "fetchedAt": "2026-05-09T12:05:16.685Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -2377,8 +2377,8 @@
         {
           "sourceCode": "040000",
           "level": "advisory",
-          "headline": "東部では、９日夜のはじめ頃まで強風に注意してください。宮城県では、１１日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-09T15:46:00+09:00",
+          "headline": "宮城県では、１１日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-05-09T20:40:00+09:00",
           "publishingOffice": "仙台管区気象台",
           "warnings": [
             {
@@ -2632,70 +2632,15 @@
       ]
     },
     "JP-05": {
-      "level": "advisory",
+      "level": "none",
       "entries": [
         {
           "sourceCode": "050000",
-          "level": "advisory",
-          "headline": "沿岸では、９日夜のはじめ頃まで高波に注意してください。",
-          "reportDatetime": "2026-05-09T16:03:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-09T20:16:00+09:00",
           "publishingOffice": "秋田地方気象台",
-          "warnings": [
-            {
-              "areaCode": "050010",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0520100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0520200",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0520600",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0521000",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0521100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0521400",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0534800",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0534900",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
@@ -2705,8 +2650,8 @@
         {
           "sourceCode": "060000",
           "level": "advisory",
-          "headline": "山形県では、９日夜のはじめ頃まで高波に、１１日までなだれに注意してください。",
-          "reportDatetime": "2026-05-09T16:03:00+09:00",
+          "headline": "山形県では、１１日までなだれに注意してください。",
+          "reportDatetime": "2026-05-09T20:16:00+09:00",
           "publishingOffice": "山形地方気象台",
           "warnings": [
             {
@@ -2718,12 +2663,6 @@
             {
               "areaCode": "060020",
               "code": "22",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "060030",
-              "code": "16",
               "status": "継続",
               "level": "advisory"
             },
@@ -2741,19 +2680,7 @@
             },
             {
               "areaCode": "0620300",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0620300",
               "code": "22",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0620400",
-              "code": "16",
               "status": "継続",
               "level": "advisory"
             },
@@ -2808,12 +2735,6 @@
             {
               "areaCode": "0642800",
               "code": "22",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0646100",
-              "code": "16",
               "status": "継続",
               "level": "advisory"
             },
@@ -10503,8 +10424,8 @@
         {
           "sourceCode": "473000",
           "level": "advisory",
-          "headline": "宮古島地方では、強風や高波、急な強い雨、落雷に注意してください。",
-          "reportDatetime": "2026-05-09T16:05:00+09:00",
+          "headline": "宮古島地方では、１０日夜のはじめ頃まで高波に、１０日明け方から１０日夕方まで急な強い雨や落雷に注意してください。",
+          "reportDatetime": "2026-05-09T20:49:00+09:00",
           "publishingOffice": "宮古島地方気象台",
           "warnings": [
             {
@@ -10515,12 +10436,6 @@
             },
             {
               "areaCode": "473000",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "473000",
               "code": "16",
               "status": "継続",
               "level": "advisory"
@@ -10533,12 +10448,6 @@
             },
             {
               "areaCode": "4721400",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4721400",
               "code": "16",
               "status": "継続",
               "level": "advisory"
@@ -10546,12 +10455,6 @@
             {
               "areaCode": "4737500",
               "code": "14",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4737500",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             },
@@ -10566,37 +10469,19 @@
         {
           "sourceCode": "474000",
           "level": "advisory",
-          "headline": "八重山地方では、９日夜のはじめ頃まで強風に注意してください。与那国島地方では１０日朝まで、石垣島地方では１０日昼前まで、高波に注意してください。",
-          "reportDatetime": "2026-05-09T15:27:00+09:00",
+          "headline": "与那国島地方では１０日朝まで、石垣島地方では１０日昼前まで、高波に注意してください。",
+          "reportDatetime": "2026-05-09T20:51:00+09:00",
           "publishingOffice": "石垣島地方気象台",
           "warnings": [
             {
               "areaCode": "474010",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "474010",
               "code": "16",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "474020",
-              "code": "15",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "474020",
               "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4720700",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             },
@@ -10608,20 +10493,8 @@
             },
             {
               "areaCode": "4738100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4738100",
               "code": "16",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4738200",
-              "code": "15",
-              "status": "発表",
               "level": "advisory"
             },
             {
