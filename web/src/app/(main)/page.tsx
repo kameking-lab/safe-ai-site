@@ -5,6 +5,7 @@ import { HomeThreePillars } from "@/components/home-three-pillars";
 import { ogImageUrl } from "@/lib/og-url";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/" },
   title: { absolute: "安全AIポータル｜現場の安全を、AIで変える。" },
   description:
     "労働安全衛生のAI・DX活用研究プロジェクト。安全衛生日誌・KY簡易作成・化学物質RA・サイネージ・法改正・安衛法AIチャット・重大事故ニュースの7つの主要機能で現場運用を支援します。",

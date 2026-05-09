@@ -17,6 +17,7 @@ const _title = "労働災害 事故事例データベース";
 const _desc = `10年統合${SITE_STATS.accidents10yCount}件の死亡労働災害事例を業種・事故種別で検索し再発防止に活用。厚労省死亡災害DB（${SITE_STATS.mhlwDeathsCount}件）＋厚労省全件DB（${SITE_STATS.accidentDbCount}件）＋curated詳細事例（${SITE_STATS.siteCuratedCaseCount}件）を統合。`;
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/accidents" },
   title: _title,
   description: _desc,
   openGraph: {

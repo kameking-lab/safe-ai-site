@@ -13,6 +13,7 @@ const _desc =
   "労働安全コンサルタント・衛生管理者・ボイラー技士など全資格の過去問クイズ。科目・年度別に本番形式で挑戦できます。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/exam-quiz" },
   title: _title,
   description: _desc,
   openGraph: {

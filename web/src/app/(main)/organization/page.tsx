@@ -9,6 +9,7 @@ const _desc =
   "安全AIポータル 法人向けの組織管理ダッシュボード（モック）。拠点・部署・受講進捗・安全統括の一元管理。正式リリース前のデモ版です。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/organization" },
   title: _title,
   description: _desc,
   openGraph: {
