@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-09T12:05:16.685Z",
+  "fetchedAt": "2026-05-09T13:54:57.623Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -337,8 +337,8 @@
         {
           "sourceCode": "013000",
           "level": "advisory",
-          "headline": "網走、紋別地方では、強風に注意してください。網走、北見、紋別地方では、濃霧による視程障害や霜に対する農作物の管理に注意してください。",
-          "reportDatetime": "2026-05-09T15:51:00+09:00",
+          "headline": "網走地方では１０日夕方まで、紋別地方では１０日明け方から１０日夕方まで、強風に注意してください。網走、北見、紋別地方では、１０日朝は霜に対する農作物の管理に注意してください。",
+          "reportDatetime": "2026-05-09T21:50:00+09:00",
           "publishingOffice": "網走地方気象台",
           "warnings": [
             {
@@ -349,19 +349,7 @@
             },
             {
               "areaCode": "013010",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "013010",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "013020",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -379,19 +367,7 @@
             },
             {
               "areaCode": "013030",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "013030",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0120801",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -409,12 +385,6 @@
             },
             {
               "areaCode": "0120802",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0120802",
               "code": "24",
               "status": "継続",
               "level": "advisory"
@@ -427,12 +397,6 @@
             },
             {
               "areaCode": "0121100",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0121100",
               "code": "24",
               "status": "継続",
               "level": "advisory"
@@ -440,12 +404,6 @@
             {
               "areaCode": "0121900",
               "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0121900",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -457,19 +415,7 @@
             },
             {
               "areaCode": "0154300",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154300",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154400",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -487,19 +433,7 @@
             },
             {
               "areaCode": "0154500",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154500",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154600",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -517,31 +451,13 @@
             },
             {
               "areaCode": "0154700",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154700",
               "code": "24",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0154900",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154900",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0155000",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -559,19 +475,7 @@
             },
             {
               "areaCode": "0155200",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0155200",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0155500",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -589,19 +493,7 @@
             },
             {
               "areaCode": "0155900",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0155900",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0156000",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -619,19 +511,7 @@
             },
             {
               "areaCode": "0156100",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0156100",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0156200",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -649,19 +529,7 @@
             },
             {
               "areaCode": "0156300",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0156300",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0156400",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -675,137 +543,22 @@
         },
         {
           "sourceCode": "014100",
-          "level": "advisory",
-          "headline": "根室、釧路地方では、９日夜遅くまで強風に注意してください。",
-          "reportDatetime": "2026-05-09T18:44:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-09T21:52:00+09:00",
           "publishingOffice": "釧路地方気象台",
-          "warnings": [
-            {
-              "areaCode": "014010",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "014020",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0120601",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0120602",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0120603",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0122300",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0166100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0166200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0166300",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0166400",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0166500",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0166700",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0166800",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0169100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0169200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0169300",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0169400",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         },
         {
           "sourceCode": "015000",
           "level": "advisory",
-          "headline": "日高地方では、９日夜遅くまで強風や高波に注意してください。胆振、日高地方では、１０日朝は霜に対する農作物の管理に注意してください。",
-          "reportDatetime": "2026-05-09T19:45:00+09:00",
+          "headline": "胆振、日高地方では、１０日朝は霜に対する農作物の管理に注意してください。",
+          "reportDatetime": "2026-05-09T21:20:00+09:00",
           "publishingOffice": "室蘭地方気象台",
           "warnings": [
             {
               "areaCode": "015010",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "015020",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "015020",
-              "code": "16",
               "status": "継続",
               "level": "advisory"
             },
@@ -913,49 +666,13 @@
             },
             {
               "areaCode": "0160700",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0160700",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0160700",
               "code": "24",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0160800",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0160800",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0160800",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0160900",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0160900",
-              "code": "16",
               "status": "継続",
               "level": "advisory"
             },
@@ -3369,17 +3086,11 @@
         {
           "sourceCode": "130000",
           "level": "advisory",
-          "headline": "伊豆諸島南部、小笠原諸島では、高波に注意してください。小笠原諸島では、急な強い雨や落雷に注意してください。",
-          "reportDatetime": "2026-05-09T16:10:00+09:00",
+          "headline": "小笠原諸島では、１０日明け方から１０日夜遅くまで高波に、１０日夜遅くまで急な強い雨や落雷に注意してください。",
+          "reportDatetime": "2026-05-09T21:05:00+09:00",
           "publishingOffice": "気象庁",
           "warnings": [
             {
-              "areaCode": "130030",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "130040",
               "code": "14",
               "status": "継続",
@@ -3387,30 +3098,6 @@
             },
             {
               "areaCode": "130040",
-              "code": "16",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1338100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1338200",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1340100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1340200",
               "code": "16",
               "status": "継続",
               "level": "advisory"
@@ -3424,7 +3111,7 @@
             {
               "areaCode": "1342100",
               "code": "16",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             }
           ]
