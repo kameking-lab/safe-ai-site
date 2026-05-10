@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-10T15:16:18.368Z",
+  "fetchedAt": "2026-05-10T16:30:30.427Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -2689,14 +2689,14 @@
         {
           "sourceCode": "130000",
           "level": "advisory",
-          "headline": "小笠原諸島では、１１日昼前まで土砂災害に、１１日夜遅くまで落雷に注意してください。",
-          "reportDatetime": "2026-05-10T23:12:00+09:00",
+          "headline": "小笠原諸島では、土砂災害や高波、落雷に注意してください。",
+          "reportDatetime": "2026-05-11T01:04:00+09:00",
           "publishingOffice": "気象庁",
           "warnings": [
             {
               "areaCode": "130040",
               "code": "10",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -2706,15 +2706,27 @@
               "level": "advisory"
             },
             {
+              "areaCode": "130040",
+              "code": "16",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "1342100",
               "code": "10",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "1342100",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "1342100",
+              "code": "16",
+              "status": "発表",
               "level": "advisory"
             }
           ]
