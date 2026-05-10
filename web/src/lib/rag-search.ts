@@ -498,21 +498,40 @@ export function searchRelevantArticlesWithScore(
  * 日本語の助詞（は・が・を・に・で・の・も・と・へ・や・か）でも分割し、
  * スペース無しで続けて入力された質問でも意味単位に分解できるようにする。
  */
+/** 条番号パターン（「第」なし揺らぎ含む） */
+const ARTICLE_NUM_RE =
+  /第\d+条(?:の\d+)?(?:第\d+項)?(?:第\d+号)?/g;
+
 function tokenize(text: string): string[] {
   const fuzzyNormalized = normalizeSearchText(text);
 
-  const normalized = fuzzyNormalized
+  // Fix 2a: 「第」なし数字+条 を正規化（例: "565条" → "第565条"）
+  // 負の後読みで「第」が既に付いている場合はスキップ
+  const withNormNums = fuzzyNormalized.replace(
+    /(?<!第)(\d+条(?:の\d+)?)/g,
+    "第$1"
+  );
+
+  // Fix 2b: 条番号トークンを先抽出して汎用分割から保護する
+  const articleNumTokens: string[] = [];
+  const withoutArticleNums = withNormNums.replace(ARTICLE_NUM_RE, (match) => {
+    articleNumTokens.push(match);
+    return " ";
+  });
+
+  // 汎用トークナイズ（残テキスト）
+  const normalized = withoutArticleNums
     .replace(/[？?！!。、.,\s　]/g, " ")
     .replace(/[（）()「」『』【】\[\]]/g, " ")
     // 主要な日本語助詞・助動詞で分割（長い候補を先に評価して残骸を防ぐ）
     .replace(/(について|に関する|から|まで|より|など|は|が|を|に|で|の|も|と|へ|や|か)/g, " ");
 
-  const tokens = normalized
+  const generalTokens = normalized
     .split(" ")
     .map((t) => t.trim())
     .filter((t) => t.length >= 2);
 
-  return [...new Set(tokens)];
+  return [...new Set([...articleNumTokens, ...generalTokens])];
 }
 
 /**
