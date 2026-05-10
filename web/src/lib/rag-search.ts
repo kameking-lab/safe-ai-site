@@ -504,8 +504,8 @@ function tokenize(text: string): string[] {
   const normalized = fuzzyNormalized
     .replace(/[？?！!。、.,\s　]/g, " ")
     .replace(/[（）()「」『』【】\[\]]/g, " ")
-    // 主要な日本語助詞・助動詞で分割（これらの前後は別トークン扱い）
-    .replace(/(は|が|を|に|で|の|も|と|へ|や|か|から|まで|より|など|について|に関する)/g, " ");
+    // 主要な日本語助詞・助動詞で分割（長い候補を先に評価して残骸を防ぐ）
+    .replace(/(について|に関する|から|まで|より|など|は|が|を|に|で|の|も|と|へ|や|か)/g, " ");
 
   const tokens = normalized
     .split(" ")
