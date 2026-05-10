@@ -546,7 +546,11 @@ function calcScore(article: LawArticle, queryTokens: string[]): number {
   const textNorm = normalizeSearchText(article.text);
   const titleNorm = normalizeSearchText(article.articleTitle);
   const articleNumLower = article.articleNum.toLowerCase();
-  const lawNorm = normalizeSearchText(article.law + article.lawShort);
+  // Fix 4: 括弧とその中身を除去してから法令名を正規化する。
+  // "労働安全衛生規則（足場等）" → "労働安全衛生規則" として比較するため、
+  // law フィールドの表記ゆれ（括弧あり/なし混在）を統一する。元データは変更しない。
+  const lawWithoutParens = article.law.replace(/[（(][^）)]*[）)]/g, "");
+  const lawNorm = normalizeSearchText(lawWithoutParens + article.lawShort);
 
   let matchedTokenCount = 0;
 
