@@ -66,10 +66,18 @@ describe("RAG Q3 article-number direct lookup precision", () => {
     expect(top3.some((a) => a.articleNum === "第74条" && a.lawShort === "クレーン則")).toBe(true);
   });
 
-  // T6 ─ combined token with の-suffix "労働安全衛生規則第151条の67" does not match
-  //       (original task spec used 第151条の3 which does not exist in data;
-  //        adjusted to 第151条の67 which is the フォークリフト article that exists)
-  it("T6: 安衛則第151条の67 top1 for 労働安全衛生規則第151条の67", () => {
+  // T6 ─ combined token with の-suffix "労働安全衛生規則第151条の3" resolves to
+  //       車両系建設機械の用途以外の使用の制限 (data added in PR #83)
+  it("T6: 安衛則第151条の3 top1 for 労働安全衛生規則第151条の3", () => {
+    const { articles } = searchRelevantArticlesWithScore(
+      "労働安全衛生規則第151条の3",
+      5
+    );
+    expect(articles[0]?.articleNum).toBe("第151条の3");
+  });
+
+  // T6b ─ の-suffix variant: 第151条の67 (フォークリフト定期自主検査) also resolves correctly
+  it("T6b: 安衛則第151条の67 top1 for 労働安全衛生規則第151条の67", () => {
     const { articles } = searchRelevantArticlesWithScore(
       "労働安全衛生規則第151条の67",
       5
