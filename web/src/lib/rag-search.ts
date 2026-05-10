@@ -506,9 +506,10 @@ function tokenize(text: string): string[] {
   const fuzzyNormalized = normalizeSearchText(text);
 
   // Fix 2a: 「第」なし数字+条 を正規化（例: "565条" → "第565条"）
-  // 負の後読みで「第」が既に付いている場合はスキップ
+  // (?<![第\d]) で「直前が 第 または数字」の場合はスキップする。
+  // これにより "第565条" の途中の "65条" が誤マッチするのを防ぐ。
   const withNormNums = fuzzyNormalized.replace(
-    /(?<!第)(\d+条(?:の\d+)?)/g,
+    /(?<![第\d])(\d+条(?:の\d+)?)/g,
     "第$1"
   );
 
