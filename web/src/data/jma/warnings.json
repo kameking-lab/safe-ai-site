@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-10T09:09:37.622Z",
+  "fetchedAt": "2026-05-10T10:39:36.979Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -193,16 +193,10 @@
         {
           "sourceCode": "013000",
           "level": "advisory",
-          "headline": "網走、北見、紋別地方では、１０日夜のはじめ頃まで強風に、１１日朝は霜に対する農作物の管理に注意してください。網走地方では、１２日までなだれに注意してください。",
-          "reportDatetime": "2026-05-10T16:21:00+09:00",
+          "headline": "紋別地方では、強風に注意してください。網走地方では、なだれに注意してください。網走、北見、紋別地方では、霜に対する農作物の管理に注意してください。",
+          "reportDatetime": "2026-05-10T19:04:00+09:00",
           "publishingOffice": "網走地方気象台",
           "warnings": [
-            {
-              "areaCode": "013010",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
             {
               "areaCode": "013010",
               "code": "22",
@@ -217,12 +211,6 @@
             },
             {
               "areaCode": "013020",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "013020",
               "code": "24",
               "status": "継続",
               "level": "advisory"
@@ -241,31 +229,13 @@
             },
             {
               "areaCode": "0120801",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0120801",
               "code": "24",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0120802",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0120802",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0121100",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             },
@@ -301,12 +271,6 @@
             },
             {
               "areaCode": "0154500",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154500",
               "code": "22",
               "status": "継続",
               "level": "advisory"
@@ -325,19 +289,7 @@
             },
             {
               "areaCode": "0154700",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154700",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154900",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             },
@@ -349,19 +301,7 @@
             },
             {
               "areaCode": "0155000",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0155000",
               "code": "24",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0155200",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             },
