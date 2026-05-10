@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-10T17:37:37.952Z",
+  "fetchedAt": "2026-05-10T18:39:42.242Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -8412,8 +8412,8 @@
         {
           "sourceCode": "473000",
           "level": "advisory",
-          "headline": "宮古島地方では、高波や竜巻などの激しい突風、急な強い雨、落雷に注意してください。",
-          "reportDatetime": "2026-05-10T15:39:00+09:00",
+          "headline": "宮古島地方では、竜巻などの激しい突風や急な強い雨、落雷に注意してください。",
+          "reportDatetime": "2026-05-11T03:35:00+09:00",
           "publishingOffice": "宮古島地方気象台",
           "warnings": [
             {
@@ -8423,32 +8423,14 @@
               "level": "advisory"
             },
             {
-              "areaCode": "473000",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "4721400",
               "code": "14",
               "status": "継続",
               "level": "advisory"
             },
             {
-              "areaCode": "4721400",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "4737500",
               "code": "14",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4737500",
-              "code": "16",
               "status": "継続",
               "level": "advisory"
             }
@@ -8458,7 +8440,7 @@
           "sourceCode": "474000",
           "level": "advisory",
           "headline": "八重山地方では、竜巻などの激しい突風や急な強い雨、落雷に注意してください。",
-          "reportDatetime": "2026-05-10T15:39:00+09:00",
+          "reportDatetime": "2026-05-11T03:35:00+09:00",
           "publishingOffice": "石垣島地方気象台",
           "warnings": [
             {
