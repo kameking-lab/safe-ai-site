@@ -568,7 +568,19 @@ function calcScore(article: LawArticle, queryTokens: string[]): number {
     }
 
     // 条文番号のマッチ（高スコア）
-    if (articleNumLower.includes(tokenLower)) {
+    // 条番号形状トークン（/^第\d+条/）は双方向 startsWith で厳密比較する。
+    // これにより "第5条" が "第51条" に誤ってマッチするのを防ぎ、かつ
+    // "第61条第1項第3号" のような詳細参照が "第61条" 記事に正しくマッチする。
+    if (/^第\d+条/.test(tokenLower)) {
+      if (
+        articleNumLower === tokenLower ||
+        articleNumLower.startsWith(tokenLower) ||
+        tokenLower.startsWith(articleNumLower)
+      ) {
+        score += 10;
+        tokenMatched = true;
+      }
+    } else if (articleNumLower.includes(tokenLower)) {
       score += 10;
       tokenMatched = true;
     }
