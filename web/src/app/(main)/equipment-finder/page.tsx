@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { EquipmentFinderClient } from "@/components/equipment-finder-client";
+import { PageContainer } from "@/components/layout";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function EquipmentFinderPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+    <PageContainer as="main" width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="保護具AIファインダー｜種類選択→絞り込みで最適保護具を提案" description="12カテゴリから保護具の種類を選び、種類別の絞り込み質問で最適な装備をレコメンド。JIS規格・国家検定品も明示。" path="/equipment-finder" />
       <header className="mb-5">
@@ -37,6 +38,6 @@ export default function EquipmentFinderPage() {
       <Suspense fallback={<div className="text-sm text-slate-500">読み込み中…</div>}>
         <EquipmentFinderClient />
       </Suspense>
-    </main>
+    </PageContainer>
   );
 }
