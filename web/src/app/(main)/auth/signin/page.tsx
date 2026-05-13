@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { LogIn } from "lucide-react";
 import { signIn } from "@/auth";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
 
 export const metadata: Metadata = {
   title: "ログイン",
   description: "安全AIポータルにログインしてKY用紙・チャット履歴・法人プラン機能をご利用ください。",
-  openGraph: {
+  alternates: { canonical: "/auth/signin" },
+  openGraph: withSiteOpenGraph("/auth/signin", {
     title: "ログイン",
     description: "安全AIポータルにログインしてKY用紙・チャット履歴・法人プラン機能をご利用ください。",
-  },
+  }),
 };
 
 export default function SignInPage() {

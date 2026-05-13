@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
   description: "安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
   alternates: { canonical: "/privacy" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/privacy", {
     title: "プライバシーポリシー",
     description: "安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
-  },
+  }),
 };
 
 export default function PrivacyPage() {

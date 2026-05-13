@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "運営継続計画（BCP）",
   description: "安全AIポータルの運営継続計画（BCP）。個人事業の特性を踏まえた業務継続不可時の対応とデータ引き渡し方針を公開します。",
   alternates: { canonical: "/bcp" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/bcp", {
     title: "運営継続計画（BCP）",
     description: "安全AIポータルの運営継続計画（BCP）。個人事業の特性を踏まえた業務継続不可時の対応とデータ引き渡し方針を公開します。",
-  },
+  }),
 };
 
 export default function BcpPage() {

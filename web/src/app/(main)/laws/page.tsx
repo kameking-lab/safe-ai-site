@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { LawsPageClient } from "@/components/laws-page-client";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { JsonLd, articleListSchema } from "@/components/json-ld";
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
 
@@ -14,15 +15,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/laws" },
   title: _title,
   description: _desc,
-  openGraph: {
+  openGraph: withSiteOpenGraph("/laws", {
     title: _title,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
+  }),
+  twitter: withSiteTwitter({
     images: [ogImageUrl(_title, _desc)],
-  },
+  }),
 };
 
 export default function LawsPage() {

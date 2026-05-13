@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "データ処理契約（DPA）",
   description: "安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
   alternates: { canonical: "/dpa" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/dpa", {
     title: "データ処理契約（DPA）",
     description: "安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
-  },
+  }),
 };
 
 export default function DpaPage() {

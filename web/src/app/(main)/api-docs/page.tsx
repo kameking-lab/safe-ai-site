@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "API ドキュメント・ロードマップ",
   description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
   alternates: { canonical: "/api-docs" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/api-docs", {
     title: "API ドキュメント・ロードマップ",
     description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
-  },
+  }),
 };
 
 export default function ApiDocsPage() {

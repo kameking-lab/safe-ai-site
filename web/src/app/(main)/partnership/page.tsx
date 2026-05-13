@@ -12,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
@@ -19,11 +20,11 @@ export const metadata: Metadata = {
   description:
     "安全AIポータル のホワイトラベル提供・OEM・再販案内。社会保険労務士・労働安全コンサルタント・同業ITベンダー向けに、月額顧問への組み込み・共同セミナー開催等のパートナーメニューを提供しています。",
   alternates: { canonical: "/partnership" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/partnership", {
     title: "パートナーシップ・OEM/再販案内",
     description:
       "安全AIポータル のホワイトラベル提供・OEM・再販・共同セミナー等のパートナーメニュー。",
-  },
+  }),
 };
 
 const PARTNER_PROFILES = [

@@ -6,6 +6,7 @@ import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { ogImageUrl } from "@/lib/og-url";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
 import {
   getAccidentCasesDataset,
@@ -20,15 +21,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/accidents" },
   title: _title,
   description: _desc,
-  openGraph: {
+  openGraph: withSiteOpenGraph("/accidents", {
     title: _title,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
+  }),
+  twitter: withSiteTwitter({
     images: [ogImageUrl(_title, _desc)],
-  },
+  }),
 };
 
 export default function AccidentsPage() {
