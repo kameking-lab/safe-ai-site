@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Clock, MailCheck, ShieldCheck } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
+import { PageContainer } from "@/components/layout";
 import { useLanguage } from "@/contexts/language-context";
 
 const FORMSPREE_ID = process.env.NEXT_PUBLIC_FORMSPREE_ID;
@@ -189,7 +190,7 @@ export default function ContactForm() {
     "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-[#1a7a4c] focus:ring-2 focus:ring-[#1a7a4c]/40 focus-visible:ring-offset-2 sm:text-sm";
 
   return (
-    <div className="mx-auto max-w-3xl space-y-10 px-4 py-8 lg:px-8">
+    <PageContainer width="prose" className="space-y-10">
       {/* ヘッダー */}
       <div>
         <TranslatedPageHeader
@@ -495,6 +496,6 @@ export default function ContactForm() {
           </button>
         </form>
       )}
-    </div>
+    </PageContainer>
   );
 }
