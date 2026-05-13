@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Building2, Users, Shield, FileText, PieChart, Award } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { ogImageUrl } from "@/lib/og-url";
@@ -61,7 +62,7 @@ export default function OrganizationPage() {
         <p className="font-semibold">デモ版 / モックデータ表示中</p>
         <p className="mt-1">
           本画面は多拠点向け管理ダッシュボードのUIプレビューです。実データ連携・SSO・権限管理は正式リリース（2026年秋予定）で提供します。
-          リリース情報は <a href="/features" className="underline hover:text-amber-900">/features</a> を参照してください。
+          リリース情報は <Link href="/features" className="underline hover:text-amber-900">/features</Link> を参照してください。
         </p>
       </div>
 
