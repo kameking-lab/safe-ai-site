@@ -225,10 +225,13 @@ export type AccidentSource = {
 /**
  * 事故事例のデータ来源。UI 上の信頼性表示と統計集計の母集団切り分けに使う。
  *  - mhlw      : 厚労省「職場のあんぜんサイト」公開事例の再収録（id が mhlw-*）
- *  - curated   : 公開情報（労働局統計・報道・判例）に基づき編集部が再構成（固有名詞匿名化）
- *  - synthetic : 教材用に編集部が合成した架空事例（カバレッジ補完目的）
+ *  - curated     : 公開情報（労働局統計・報道・判例）に基づき編集部が再構成（固有名詞匿名化）
+ *  - synthetic   : 教材用に編集部が合成した架空事例（カバレッジ補完目的）
+ *  - preliminary : 厚労省速報集計値（業種別・事故型別合計）から導出した代表的パターン事例。
+ *                  個票（個別報告書）ではなく集計統計に基づくため「速報」表示を必ずUIで明示。
+ *                  確定値公開後は mhlw / curated に置き換える予定。
  */
-export type AccidentProvenance = "mhlw" | "curated" | "synthetic";
+export type AccidentProvenance = "mhlw" | "curated" | "synthetic" | "preliminary";
 
 export type AccidentCase = {
   id: string;
