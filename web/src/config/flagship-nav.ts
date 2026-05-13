@@ -119,6 +119,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     href: "/accidents",
     subItems: [
       { label: "事故データベース", href: "/accidents" },
+      { label: "事故統計ダッシュボード", href: "/accidents-analytics" },
       { label: "労災死傷統計", href: "/stats" },
       { label: "リスク予測", href: "/risk-prediction" },
     ],
