@@ -19,6 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/e-learning", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
     { url: "/exam-quiz", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
     { url: "/laws", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
+    { url: "/law-hierarchy", lastModified: "2026-05-14", priority: 0.8, changeFrequency: "monthly" },
     { url: "/laws/notices-precedents", lastModified: "2026-04-19", priority: 0.8, changeFrequency: "monthly" },
     { url: "/ky", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
     { url: "/risk", lastModified: "2026-04-19", priority: 0.8, changeFrequency: "daily" },
