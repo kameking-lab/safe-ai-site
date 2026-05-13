@@ -230,3 +230,62 @@
 - Production fetched: 32 of 42 listed pages (others are static legal/policy pages confirmed via source).
 - Source-level grep: branding (ANZEN AI / 安全AIサイト / Claude Code), Enterprise/法人/お見積, console.* leaks, Stop Claude leak, broken hrefs, JSON-LD URLs, PII logging — all completed.
 - Sub-agent (a2300235563aaf4c0) integrated into findings above.
+
+---
+
+## Phase Y — Fixes shipped (2026-05-13)
+
+| # | Category | Branch | PR | Merge SHA | Items fixed |
+|---|---|---|---|---|---|
+| α | BROKEN/SEO | fix/seo-jsonld-canonical-2026-05-13 | [#90](https://github.com/kameking-lab/safe-ai-site/pull/90) | be28b47 | P0-01 |
+| θ | UI consistency (copy) | fix/copy-cleanup-2026-05-13 | [#91](https://github.com/kameking-lab/safe-ai-site/pull/91) | 5282a9d | P1-01, P1-02, P1-03, P1-04, P1-06 |
+| β | Interaction robustness | improve/loading-states-2026-05-13 | [#92](https://github.com/kameking-lab/safe-ai-site/pull/92) | 0c38714 | P1-05, P1-07 |
+| α (lint follow-up) | Lint | fix/organization-link-lint | [#93](https://github.com/kameking-lab/safe-ai-site/pull/93) | 2d14a25 | (lint regression in #91) |
+
+**Main HEAD after Phase Y:** `2d14a25`
+**CI on main:** green (run 25802741559 — lint, build, unit, smoke-E2E all passed).
+
+### What changed
+- **P0-01** — both `/accidents` and `/laws` JSON-LD now emit `https://www.anzen-ai-portal.jp/...` URLs (canonical host) instead of the retired `safe-ai-site.vercel.app` literal. SEO canonical mismatch resolved across every NewsArticle/Article schema entry.
+- **P1-01** — `/auth/signin` description/body no longer markets the removed 法人プラン; new copy mentions KY/chat history/お気に入り条文. Page also gained `robots: { index: false, follow: false }` to keep the login page out of search indices.
+- **P1-02** — Page-title brand alignment: `/signage/map` and `/about/data-sources` now say "安全AIポータル" (was "安全AIサイト").
+- **P1-03** — Enterprise references removed/softened: `/organization` banner, `/api-docs` Phase 3 row, and `/pricing` Custom plan CTA all updated.
+- **P1-04** — 13 education pages bulk-rewritten: 「XX教育のご相談・お見積り」 → 「XX教育のお問い合わせ・改善提案」. English variant also updated.
+- **P1-05** — Signage SSR placeholders ("—") replaced with "起動中…" / "--:--" / "取得中…" so first-paint reads as "loading" not "broken".
+- **P1-06** — `/notifications` dropped the "Standard プラン以上" qualifier; copy now reads "今後追加予定".
+- **P1-07** — `MhlwDeathsPanel` got a 15s safety timeout + finally-clause that prevents the spinner from hanging forever if dynamic JSON import never resolves.
+
+### What was NOT shipped (and why)
+- **P2-01 — "Claude Code" leak** on /about, /contact, /pricing: requires **owner decision** before mass edit (could be intentional portfolio signaling).
+- **P2-02 — Dead-code PersonaEntry.tsx**: not user-visible (no `variant="portal"` consumer); demoted to backlog.
+- **P2-03 — `/accidents` 276 vs 504,415 reconciliation**: small UX improvement, defer if owner OK with current copy.
+- **P2-04 — /pricing 準備中 vs CTA mismatch**: partially addressed by P1-01/P1-03/P1-06; remaining items are documentation, not code.
+- **P2-05 — PII in API console logs**: real concern but requires a separate logging-policy decision (use `redact()` helper or remove logs?). Backlog.
+- **P2-06 — /handover noindex robots flag**: already noindexed per agent's secondary scan; no action.
+- **P2-07 — /partnership 営業日 wording**: standard biz copy; defer.
+- All **P3** items: stylistic; not Y-budget.
+
+### Verification (Phase Z)
+- Main HEAD: `2d14a25`. All 4 PRs (#90/#91/#92/#93) merged.
+- CI: `gh run view 25802741559` — `success` (web-ci, all jobs green).
+- Production fetch (cache-busted):
+  - `/auth/signin` — copy reads "お気に入り条文" ✅
+  - `/notifications` — copy reads "今後追加予定" ✅
+  - `/organization` — banner says "多拠点向け管理ダッシュボード", link to /features ✅
+  - `/education/tokubetsu/ashiba` — header reads "足場特別教育のお問い合わせ・改善提案" ✅
+  - `/signage` — timestamp area shows "--:--" / "起動中…" ✅
+- P0-01 (JSON-LD) is a source-only SEO fix; manual production verification is not informative for it (would need view-source on a freshly-deployed page).
+- Lighthouse / mobile responsiveness / chatbot 10-query re-run: deferred (not modified by Phase Y; out of audit budget).
+
+### Residual items / backlog
+- P2-01 (Claude Code wording) — needs owner go/no-go.
+- P2-05 (PII in server console logs) — logging policy decision required.
+- P3-02 (loading.tsx visual heaviness) — polish, optional.
+- P3-03 (header overflow on <360px) — verify in browser first.
+- All P3-04..P3-07.
+- Stripe paid-plan implementation when monetization restarts.
+
+### Risk / rollback
+- Each PR is independent; revert SHA list: 2d14a25 → 0c38714 → 5282a9d → be28b47 (newest first).
+- No data-model changes, no migrations, no env-var changes — pure code/copy diffs.
+- E2E live-mode tests on main still in progress at sign-off time; smoke E2E + lint + build + unit confirmed green.
