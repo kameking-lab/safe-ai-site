@@ -5,6 +5,7 @@ import { ChemicalRaExtras } from "@/components/chemical-ra-extras";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
 import { ogImageUrl } from "@/lib/og-url";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
@@ -16,15 +17,14 @@ export const metadata: Metadata = {
   title: _title,
   description: _desc,
   alternates: { canonical: "/chemical-ra" },
-  openGraph: {
-    title: `${_title}`,
+  openGraph: withSiteOpenGraph("/chemical-ra", {
+    title: _title,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
+  }),
+  twitter: withSiteTwitter({
     images: [ogImageUrl(_title, _desc)],
-  },
+  }),
 };
 
 export default function ChemicalRaPage() {

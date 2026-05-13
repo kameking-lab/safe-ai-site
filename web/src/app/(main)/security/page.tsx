@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "セキュリティ",
   description: "安全AIポータルのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。",
   alternates: { canonical: "/security" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/security", {
     title: "セキュリティ",
     description: "安全AIポータルのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。",
-  },
+  }),
 };
 
 function Badge({ type }: { type: "現状" | "予定" | "未対応" }) {

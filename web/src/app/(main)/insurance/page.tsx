@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "賠償責任保険加入状況",
   description: "安全AIポータルの賠償責任保険・データ漏洩保険の加入状況。現状と加入予定を正直に公開します。",
   alternates: { canonical: "/insurance" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/insurance", {
     title: "賠償責任保険加入状況",
     description: "安全AIポータルの賠償責任保険・データ漏洩保険の加入状況。現状と加入予定を正直に公開します。",
-  },
+  }),
 };
 
 export default function InsurancePage() {
