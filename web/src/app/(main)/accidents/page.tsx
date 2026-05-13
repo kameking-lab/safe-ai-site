@@ -62,6 +62,14 @@ export default function AccidentsPage() {
                 収録 {getAccidentCasesDataset().length} 件（
                 <span className="font-semibold text-emerald-700">厚労省 {counts.mhlw}</span>
                 ／<span className="font-semibold text-sky-700">curated {counts.curated}</span>
+                {counts.preliminary > 0 ? (
+                  <>
+                    ／
+                    <span className="font-semibold text-orange-700">
+                      速報 {counts.preliminary}
+                    </span>
+                  </>
+                ) : null}
                 {counts.synthetic > 0 ? (
                   <>
                     ／
@@ -85,7 +93,24 @@ export default function AccidentsPage() {
           </a>{" "}
           を参照。<strong>厚労省</strong> = 職場のあんぜんサイト由来の再収録、
           <strong>curated</strong> = 公開情報・統計を編集部が再構成（固有名詞匿名化）、
+          <span className="font-semibold text-orange-700">速報</span>{" "}
+          = 厚労省月次速報集計値から導出したパターン事例（個票非公開のため・確定値公開後に更新）、
           <strong>合成</strong> = 教材用カバレッジ補完事例。
+        </p>
+        {/* 2025-2026 速報注記 */}
+        <p className="mt-1 rounded-md border border-orange-200 bg-orange-50 px-2.5 py-1.5 text-[11px] text-orange-800">
+          ⚠ <strong>2025〜2026年の事例は速報値を含みます。</strong>
+          令和7年速報（全産業死亡684人・2026年3月集計）および令和8年速報（2026年4月集計）に基づく
+          代表パターン事例です。確定個票（労働者死傷病報告 R07オープンデータ）は未公開のため、
+          <a
+            href="https://anzeninfo.mhlw.go.jp/information/sokuhou.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            厚労省速報ページ
+          </a>
+          で最新集計値をご確認ください。
         </p>
         <div className="mt-4">
           <LadderStatsCard />

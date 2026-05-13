@@ -7,6 +7,7 @@ import { realAccidentCasesExtra2 } from "@/data/mock/real-accident-cases-extra2"
 import { realAccidentCasesExtra3 } from "@/data/mock/real-accident-cases-extra3";
 import { realAccidentCasesDiverseIndustries } from "@/data/mock/real-accident-cases-diverse-industries";
 import { realAccidentCases20242026 } from "@/data/mock/real-accident-cases-2024-2026";
+import { realAccidentCases2025Preliminary } from "@/data/mock/real-accident-cases-2025-preliminary";
 
 const _siteCuratedCaseCount =
   realAccidentCases.length +
@@ -14,7 +15,8 @@ const _siteCuratedCaseCount =
   realAccidentCasesExtra2.length +
   realAccidentCasesExtra3.length +
   realAccidentCasesDiverseIndustries.length +
-  realAccidentCases20242026.length;
+  realAccidentCases20242026.length +
+  realAccidentCases2025Preliminary.length;
 
 const _noticeCount = mhlwNotices.length;
 const _equipmentItemCount = (equipmentDb as { items: unknown[] }).items?.length ?? 0;
@@ -35,10 +37,11 @@ export const SITE_STATS = {
    */
   mhlwDeathsCount: "4,782",
   /**
-   * data/accidents-10years.jsonl 統合件数（2015〜2026・死亡災害DB＋curated事例）。
+   * data/accidents-10years.jsonl 統合件数（2015〜2026・死亡災害DB＋curated事例＋速報事例）。
    * /accidents ページで実際に検索対象となる件数。accidentDbCount の絞り込み後。
+   * 2025〜2026分は厚労省速報集計値ベースのパターン事例を含む（個票未公開のため）。
    */
-  accidents10yCount: "5,010",
+  accidents10yCount: "5,026",
   /** data/law-updates-10years.jsonl 統合件数（2015〜2024・労働安全衛生関連法令改正） */
   lawUpdates10yCount: "31",
   /** 死亡労災件数（令和5年・建設業）厚労省統計 */
@@ -83,8 +86,8 @@ export const SITE_STATS_META: Record<
     asOf: "2026-05",
   },
   accidents10yCount: {
-    source: "安全AIポータル ETL: data/accidents-10years.jsonl（厚労省死亡災害DB 2019-2024＋curated事例 2015-2026統合）",
-    sourceUrl: "https://anzeninfo.mhlw.go.jp/user/anzen/tok/anst00.html",
+    source: "安全AIポータル ETL: 厚労省死亡災害DB 2019-2024（確定値）＋curated事例 2015-2026＋速報パターン事例 2025-2026（厚労省月次速報集計値ベース）統合",
+    sourceUrl: "https://anzeninfo.mhlw.go.jp/information/sokuhou.html",
     asOf: "2026-05",
   },
   lawUpdates10yCount: {
