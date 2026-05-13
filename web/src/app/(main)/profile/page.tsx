@@ -52,6 +52,6 @@ export default function ProfilePage() {
         </p>
         <LocalDataExportImport />
       </section>
-    </main>
+    </PageContainer>
   );
 }

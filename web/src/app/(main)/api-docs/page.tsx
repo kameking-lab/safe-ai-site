@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { withSiteOpenGraph } from "@/lib/seo-metadata";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
@@ -14,10 +15,9 @@ export const metadata: Metadata = {
 
 export default function ApiDocsPage() {
   return (
-    <div className="px-4 py-8 lg:px-8">
+    <PageContainer width="narrow" className="space-y-8">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="API ドキュメント・ロードマップ" description="安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。" path="/api-docs" />
-      <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">API ドキュメント・ロードマップ</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
@@ -148,7 +148,6 @@ export default function ApiDocsPage() {
             利用ユースケースをお聞かせいただいた方を優先的にご案内します。
           </p>
         </section>
-      </div>
-    </div>
+    </PageContainer>
   );
 }

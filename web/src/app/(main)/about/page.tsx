@@ -27,6 +27,7 @@ import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import { SITE_STATS } from "@/data/site-stats";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
+import { PageContainer } from "@/components/layout";
 
 export const metadata: Metadata = {
   title: "研究・実証プロジェクトについて",
@@ -173,7 +174,7 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-6 sm:py-8">
+    <PageContainer as="main" width="narrow">
       <JsonLd
         schema={[
           personSchema(),
@@ -573,7 +574,7 @@ export default function AboutPage() {
           </p>
         </div>
       </div>
-    </main>
+    </PageContainer>
   );
 }
 

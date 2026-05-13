@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Building2, Users, Shield, FileText, PieChart, Award } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { ogImageUrl } from "@/lib/og-url";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "組織管理ダッシュボード｜デモ版";
@@ -47,7 +48,7 @@ const KPI = [
 
 export default function OrganizationPage() {
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+    <PageContainer as="main" width="wide">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={_title} description={_desc} path="/organization" />
       <PageHeader
@@ -204,6 +205,6 @@ export default function OrganizationPage() {
       <p className="mt-6 text-center text-[11px] text-slate-400">
         ※ 本画面は構成例を示すモック表示です。実データは正式リリース後（2026年秋予定）に連携されます。
       </p>
-    </main>
+    </PageContainer>
   );
 }

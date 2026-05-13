@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
@@ -47,7 +48,7 @@ export default async function HandoverPage({ searchParams }: Props) {
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-6 space-y-8">
+      <PageContainer width="narrow" paddingY="none" className="py-6 space-y-8">
         {/* 目次 */}
         <nav className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
           <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">
@@ -306,7 +307,7 @@ export default async function HandoverPage({ searchParams }: Props) {
           <p>安全AIポータル 内部文書 — 2026-04-21 時点</p>
           <p className="mt-1">このページは noindex 設定されており、検索エンジンには表示されません。</p>
         </footer>
-      </div>
+      </PageContainer>
     </div>
   );
 }
