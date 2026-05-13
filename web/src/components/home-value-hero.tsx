@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { SITE_STATS, SITE_STATS_META, type SiteStatKey } from "@/data/site-stats";
-import { PersonaEntry } from "@/components/PersonaEntry";
 import { PAID_MODE } from "@/lib/paid-mode";
 
 // ファーストビュー数値訴求: 「通達・事例・商品」の3軸でサイト規模を即提示
@@ -265,8 +264,6 @@ export function HomeValueHero() {
         </div>
       </div>
 
-      {/* 「こんな方に」セクション — 8カテゴリのペルソナ別入口 */}
-      <PersonaEntry />
 
       {/* 「できること」セクション */}
       <section
