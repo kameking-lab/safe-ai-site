@@ -576,11 +576,13 @@ function calcScore(article: LawArticle, queryTokens: string[]): number {
     // 条番号形状トークン（/^第\d+条/）は双方向 startsWith で厳密比較する。
     // これにより "第5条" が "第51条" に誤ってマッチするのを防ぎ、かつ
     // "第61条第1項第3号" のような詳細参照が "第61条" 記事に正しくマッチする。
+    // tokenLower.startsWith(articleNumLower) は「トークンが 第 で始まる項/号付き参照」
+    // の場合のみ許可。数字で続く場合（例: "第151条の67" が "第151条の6" にマッチ）は誤検知のため除外。
     if (/^第\d+条/.test(tokenLower)) {
       if (
         articleNumLower === tokenLower ||
         articleNumLower.startsWith(tokenLower) ||
-        tokenLower.startsWith(articleNumLower)
+        (tokenLower.startsWith(articleNumLower) && tokenLower[articleNumLower.length] === "第")
       ) {
         score += 10;
         tokenMatched = true;
