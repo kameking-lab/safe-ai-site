@@ -6,13 +6,15 @@ import { realAccidentCasesExtra } from "@/data/mock/real-accident-cases-extra";
 import { realAccidentCasesExtra2 } from "@/data/mock/real-accident-cases-extra2";
 import { realAccidentCasesExtra3 } from "@/data/mock/real-accident-cases-extra3";
 import { realAccidentCasesDiverseIndustries } from "@/data/mock/real-accident-cases-diverse-industries";
+import { realAccidentCases20242026 } from "@/data/mock/real-accident-cases-2024-2026";
 
 const _siteCuratedCaseCount =
   realAccidentCases.length +
   realAccidentCasesExtra.length +
   realAccidentCasesExtra2.length +
   realAccidentCasesExtra3.length +
-  realAccidentCasesDiverseIndustries.length;
+  realAccidentCasesDiverseIndustries.length +
+  realAccidentCases20242026.length;
 
 const _noticeCount = mhlwNotices.length;
 const _equipmentItemCount = (equipmentDb as { items: unknown[] }).items?.length ?? 0;
@@ -28,15 +30,15 @@ export const SITE_STATS = {
    */
   accidentDbCount: "504,415",
   /**
-   * 厚労省 死亡災害データベース収録件数（2019〜2023・5年分）。
+   * 厚労省 死亡災害データベース収録件数（2019〜2024・6年分）。
    * /accidents ページの「死亡のみ集計」参照用。
    */
-  mhlwDeathsCount: "4,043",
+  mhlwDeathsCount: "4,782",
   /**
-   * data/accidents-10years.jsonl 統合件数（2015〜2024・死亡災害DB＋curated事例）。
+   * data/accidents-10years.jsonl 統合件数（2015〜2026・死亡災害DB＋curated事例）。
    * /accidents ページで実際に検索対象となる件数。accidentDbCount の絞り込み後。
    */
-  accidents10yCount: "4,257",
+  accidents10yCount: "5,010",
   /** data/law-updates-10years.jsonl 統合件数（2015〜2024・労働安全衛生関連法令改正） */
   lawUpdates10yCount: "31",
   /** 死亡労災件数（令和5年・建設業）厚労省統計 */
@@ -76,14 +78,14 @@ export const SITE_STATS_META: Record<
     asOf: "2026-01",
   },
   mhlwDeathsCount: {
-    source: "厚労省 死亡災害データベース（2019〜2023・5年分）",
-    sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen_pg/SHISHO_FND.aspx",
-    asOf: "2026-01",
+    source: "厚労省 死亡災害DB（2019〜2023）＋死傷病報告オープンデータR06（2024確定値・739件）",
+    sourceUrl: "https://anzeninfo.mhlw.go.jp/user/anzen/tok/anst00.html",
+    asOf: "2026-05",
   },
   accidents10yCount: {
-    source: "安全AIポータル ETL: data/accidents-10years.jsonl（厚労省死亡災害DB＋curated事例の10年統合）",
-    sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen_pg/SHISHO_FND.aspx",
-    asOf: "2026-04",
+    source: "安全AIポータル ETL: data/accidents-10years.jsonl（厚労省死亡災害DB 2019-2024＋curated事例 2015-2026統合）",
+    sourceUrl: "https://anzeninfo.mhlw.go.jp/user/anzen/tok/anst00.html",
+    asOf: "2026-05",
   },
   lawUpdates10yCount: {
     source: "安全AIポータル ETL: data/law-updates-10years.jsonl（e-Gov・厚労省通達の10年統合）",
