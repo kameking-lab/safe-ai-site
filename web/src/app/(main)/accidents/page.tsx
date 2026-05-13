@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { HomeScreen } from "@/components/home-screen";
 import { LadderStatsCard } from "@/components/ladder-stats-card";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
+import { NewsFeedSection } from "@/components/news-feed-section";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
@@ -134,6 +135,7 @@ export default function AccidentsPage() {
         <div className="mt-4">
           <LadderStatsCard />
         </div>
+        <NewsFeedSection />
       </HomeScreen>
       {/* 事故事例 → 主要な労災原因に対応する予防保護具を提示 */}
       <PageContainer paddingY="none">

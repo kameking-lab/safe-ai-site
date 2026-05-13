@@ -17,6 +17,9 @@ __pycache__/
 *.pyc
 .mypy_cache/
 
+# News-feed inter-stage handoff (regenerated each run by fetch-news-feed.mjs)
+scripts/etl/data/news-feed-candidates.json
+
 # OS / editor
 .DS_Store
 Thumbs.db
