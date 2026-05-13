@@ -399,7 +399,7 @@ export default function ChemicalRaPage() {
 
       {/* CTA */}
       <section className="rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white p-6">
-        <p className="text-base font-bold text-sky-900">化学物質RA実務教育のご相談・お見積り</p>
+        <p className="text-base font-bold text-sky-900">化学物質RA実務教育のお問い合わせ・改善提案</p>
         <p className="mt-1 text-sm text-slate-600">受講人数・取扱物質・希望時期をお知らせください。原則3営業日以内にご返信します。</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link

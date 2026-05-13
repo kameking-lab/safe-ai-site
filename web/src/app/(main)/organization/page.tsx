@@ -60,8 +60,8 @@ export default function OrganizationPage() {
       <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
         <p className="font-semibold">デモ版 / モックデータ表示中</p>
         <p className="mt-1">
-          本画面はEnterpriseプラン向け管理ダッシュボードのUIプレビューです。実データ連携・SSO・権限管理は正式リリース（2026年秋予定）で提供します。
-          Enterpriseの詳細は <a href="/pricing" className="underline hover:text-amber-900">/pricing</a> を参照してください。
+          本画面は多拠点向け管理ダッシュボードのUIプレビューです。実データ連携・SSO・権限管理は正式リリース（2026年秋予定）で提供します。
+          リリース情報は <a href="/features" className="underline hover:text-amber-900">/features</a> を参照してください。
         </p>
       </div>
 
@@ -201,7 +201,7 @@ export default function OrganizationPage() {
       </section>
 
       <p className="mt-6 text-center text-[11px] text-slate-400">
-        ※ 本画面は構成例を示すモック表示です。実データは Enterpriseプラン契約後に連携されます。
+        ※ 本画面は構成例を示すモック表示です。実データは正式リリース後（2026年秋予定）に連携されます。
       </p>
     </main>
   );

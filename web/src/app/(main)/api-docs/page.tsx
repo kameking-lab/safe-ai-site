@@ -106,7 +106,7 @@ export default function ApiDocsPage() {
                 Phase 3
               </span>
               <span className="text-sm font-semibold text-slate-700">
-                エンタープライズ連携（独立後12ヶ月）
+                組織連携機能（独立後12ヶ月）
               </span>
             </div>
             <ul className="mt-3 space-y-1.5 text-sm text-slate-600">

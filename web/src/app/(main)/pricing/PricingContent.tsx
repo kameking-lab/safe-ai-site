@@ -598,7 +598,7 @@ export function PricingContent() {
                       </Link>
                     ) : isCustom ? (
                       <Link
-                        href="/contact?category=enterprise"
+                        href="/contact?category=custom"
                         className="block w-full rounded-xl bg-blue-600 py-2.5 text-center text-sm font-bold text-white transition hover:bg-blue-700 active:scale-[0.98]"
                       >
                         {t("pricing.plan.custom.cta")}
