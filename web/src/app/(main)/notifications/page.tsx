@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bell, CheckCircle } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { PageContainer } from "@/components/layout";
 import { SubscribeForm } from "./subscribe-form";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -56,7 +57,7 @@ const ROADMAP = [
 
 export default function NotificationsPage() {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+    <PageContainer width="wide" paddingY="tight">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={_title} description={_desc} path="/notifications" />
       <PageHeader
@@ -114,6 +115,6 @@ export default function NotificationsPage() {
           ))}
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }
