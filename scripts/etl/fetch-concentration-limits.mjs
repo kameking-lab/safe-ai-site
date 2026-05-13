@@ -36,6 +36,7 @@ import { fileURLToPath } from "node:url";
 import { EXPANDED_CHEMICALS } from "./data/expanded-chemicals.mjs";
 import { EXPANDED_CHEMICALS_2 } from "./data/expanded-chemicals-2.mjs";
 import { EXPANDED_CHEMICALS_3 } from "./data/expanded-chemicals-3.mjs";
+import { EXPANDED_CHEMICALS_4 } from "./data/expanded-chemicals-4.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "..", "..");
@@ -57,14 +58,24 @@ const SOURCES = {
   GHS_MHLW: "厚生労働省 国によるGHS分類",
 };
 
-/** "20 ppm" / "５ ㎎/㎥" / "0.1 ppm" などを {value, unit} に正規化 */
+/**
+ * "20 ppm" / "５ ㎎/㎥" / "1,000 ppm" / "すずとして0.1 ㎎/㎥" などを {value, unit} に正規化。
+ * - 全角数字・記号を半角変換
+ * - "XXXとして" などの前置詞を除去
+ * - 千区切りカンマを除去
+ */
 function parseLimit(text) {
   if (!text || typeof text !== "string") return null;
   let s = text.trim();
   if (!s) return null;
   s = s.replace(/[０-９．]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
   s = s.replace(/㎎/g, "mg").replace(/㎥/g, "m³").replace(/㎍/g, "μg");
-  s = s.replace(/[\s\u3000]+/g, " ");
+  // eslint-disable-next-line no-irregular-whitespace
+  s = s.replace(/[\s　]+/g, " ");
+  // "XとしてY unit" / "X粒子としてY unit" などの前置詞を除去
+  s = s.replace(/^[^\d]*として\s*/, "");
+  // 千区切りカンマを除去（例: "1,000 ppm" → "1000 ppm"）
+  s = s.replace(/(\d),(\d)/g, "$1$2");
   const m = s.match(/^([\d.]+)\s*(ppm|mg\/m³|μg\/m³|mg\/m3)/i);
   if (!m) return null;
   return { value: m[1], unit: m[2].replace("mg/m3", "mg/m³") };
@@ -113,7 +124,12 @@ function buildSubstances(compact) {
   }
 
   // ② 拡張データセットをマージ（既存の値は壊さない、なければ追加）
-  const expanded = [...EXPANDED_CHEMICALS, ...EXPANDED_CHEMICALS_2, ...EXPANDED_CHEMICALS_3];
+  const expanded = [
+    ...EXPANDED_CHEMICALS,
+    ...EXPANDED_CHEMICALS_2,
+    ...EXPANDED_CHEMICALS_3,
+    ...EXPANDED_CHEMICALS_4,
+  ];
   for (const c of expanded) {
     if (!c.cas || !/^\d{2,7}-\d{2,3}-\d{1,2}$/.test(c.cas)) continue;
     const cur = byCas[c.cas] ?? {};
@@ -124,6 +140,7 @@ function buildSubstances(compact) {
       if (!notes.includes(c.note)) notes.push(c.note);
       cur.notes = notes;
     }
+    if (c.mhlwSdsUrl && !cur.mhlwSdsUrl) cur.mhlwSdsUrl = c.mhlwSdsUrl;
 
     // MHLW 告示第177号
     if (c.mhlw177) {
