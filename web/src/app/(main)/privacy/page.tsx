@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { withSiteOpenGraph } from "@/lib/seo-metadata";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
@@ -14,10 +15,9 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <div className="px-4 py-8 lg:px-8">
+    <PageContainer width="narrow" className="space-y-8">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="プライバシーポリシー" description="安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。" path="/privacy" />
-      <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">プライバシーポリシー</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月22日</p>
@@ -221,7 +221,6 @@ export default function PrivacyPage() {
             よりご連絡ください。
           </p>
         </section>
-      </div>
-    </div>
+    </PageContainer>
   );
 }

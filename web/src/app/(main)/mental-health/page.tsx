@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageContainer } from "@/components/layout";
 import {
   Brain,
   Heart,
@@ -123,7 +124,7 @@ const VDT: InfoCard[] = [
 
 export default function MentalHealthPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+    <PageContainer as="main" width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={_title} description={_desc} path="/mental-health" />
       <PageHeader
@@ -312,6 +313,6 @@ export default function MentalHealthPage() {
         <strong className="text-slate-500">メンタルヘルスの個別診断・治療判断は医師法上、医師の専管事項です。</strong>
         本サイトは個別診断・治療助言を行いません。具体的事案は産業医・臨床心理士・医師・社労士等の専門家にご相談ください。
       </p>
-    </main>
+    </PageContainer>
   );
 }

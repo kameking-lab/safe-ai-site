@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Library } from "lucide-react";
 import { ResourcesClient } from "@/components/resources-client";
+import { PageContainer } from "@/components/layout";
 import { LegalDocBadgeLegend } from "@/components/LegalDocBadge";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { mhlwLeaflets } from "@/data/mhlw-leaflets";
@@ -31,7 +32,7 @@ export default function ResourcesPage() {
   const total = counts.notice + counts.kokuji + counts.shishin + counts.leaflet;
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+    <PageContainer width="wide">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={TITLE} description={DESCRIPTION} path="/resources" />
       <div className="mb-4">
@@ -71,7 +72,7 @@ export default function ResourcesPage() {
       </header>
 
       <ResourcesClient notices={mhlwNotices} leaflets={mhlwLeaflets} />
-    </div>
+    </PageContainer>
   );
 }
 
