@@ -49,6 +49,9 @@ export function MhlwDeathsPanel() {
 
   useEffect(() => {
     let active = true;
+    const timeout = setTimeout(() => {
+      if (active) setError("データの読み込みがタイムアウトしました。再読み込みしてください。");
+    }, 15000);
     (async () => {
       try {
         const mod = await import("@/data/deaths-mhlw/compact.json");
@@ -57,10 +60,13 @@ export function MhlwDeathsPanel() {
       } catch (err) {
         if (!active) return;
         setError(err instanceof Error ? err.message : "読み込みに失敗しました");
+      } finally {
+        clearTimeout(timeout);
       }
     })();
     return () => {
       active = false;
+      clearTimeout(timeout);
     };
   }, []);
 
