@@ -13,6 +13,7 @@ import {
   getAccidentProvenanceCounts,
 } from "@/data/mock/accident-cases";
 import { SITE_STATS } from "@/data/site-stats";
+import { PageContainer } from "@/components/layout/page-container";
 
 const _title = "労働災害 事故事例データベース";
 const _desc = `10年統合${SITE_STATS.accidents10yCount}件の死亡労働災害事例を業種・事故種別で検索し再発防止に活用。厚労省死亡災害DB（${SITE_STATS.mhlwDeathsCount}件）＋厚労省全件DB（${SITE_STATS.accidentDbCount}件）＋curated詳細事例（${SITE_STATS.siteCuratedCaseCount}件）を統合。`;
@@ -117,14 +118,14 @@ export default function AccidentsPage() {
         </div>
       </HomeScreen>
       {/* 事故事例 → 主要な労災原因に対応する予防保護具を提示 */}
-      <div className="mx-auto max-w-7xl px-4 lg:px-8">
+      <PageContainer paddingY="none">
         <ContextualPpePicks
           context="墜落 転落 足場 ハーネス 保護帽 ヘルメット 安全靴 切創 はさまれ 巻き込まれ 熱中症 化学物質 中毒"
           fallbackCategoryIds={["fall-protection", "head-protection", "hand-foot", "heat-cold"]}
           heading="🛡 主要な労災を防ぐための予防保護具"
           description="本データベースで多発する「墜落・転落・はさまれ・熱中症」など主要原因に直接効く保護具を厳選。"
         />
-      </div>
+      </PageContainer>
 
       <RelatedPageCards
         heading="このデータを活かす"

@@ -16,6 +16,8 @@ import {
 } from "recharts";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import type { StatsPeriod, StatsResponse } from "@/lib/stats/types";
+import { PageContainer } from "@/components/layout/page-container";
+import { Stack } from "@/components/layout/stack";
 
 const PERIODS: Array<{ id: StatsPeriod; label: string }> = [
   { id: "7d", label: "直近 7 日" },
@@ -105,7 +107,8 @@ export function StatsDashboard() {
   }, [period]);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
+    <PageContainer>
+      <Stack gap="lg">
       <TranslatedPageHeader
         titleJa="利用統計（公開ダッシュボード）"
         titleEn="Public Usage Dashboard"
@@ -182,7 +185,8 @@ export function StatsDashboard() {
           </p>
         </>
       )}
-    </div>
+      </Stack>
+    </PageContainer>
   );
 }
 
