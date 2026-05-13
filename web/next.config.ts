@@ -82,6 +82,8 @@ const nextConfig: NextConfig = {
       { source: "/safety-signage", destination: "/signage", permanent: true },
       // KY（危険予知の日本語フルネーム）
       { source: "/kiken-yochi", destination: "/ky", permanent: true },
+      // 廃止ページ → 近接ページへ転送
+      { source: "/partnership", destination: "/contact", permanent: true },
     ];
   },
   // セキュリティ・キャッシュヘッダー
