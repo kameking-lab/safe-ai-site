@@ -6,6 +6,7 @@ import { ExamQuizClient } from "./exam-quiz-client";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 import { CERT_QUIZZES, getTotalQuestionCount } from "@/data/mock/quiz/cert-quiz";
+import { PageContainer } from "@/components/layout/page-container";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "安全衛生 資格試験 過去問クイズ";
@@ -68,106 +69,110 @@ export default function ExamQuizPage() {
       />
 
       {/* あなたにおすすめの資格 */}
-      <section className="mx-auto max-w-7xl px-4 py-4 lg:px-8">
-        <h2 className="mb-3 text-sm font-bold text-slate-700">
-          あなたにおすすめの資格
-        </h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          {QUALIFICATION_GUIDES.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.industry}
-                className={`rounded-xl border p-4 ${item.bg}`}
-              >
-      {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name={_title} description={_desc} path="/exam-quiz" />
-                <div className="flex items-center gap-2 mb-3">
-                  <span
-                    className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ${item.iconBg}`}
-                  >
-                    <Icon className="h-4 w-4" />
-                  </span>
-                  <span className="text-sm font-bold text-slate-800">
-                    {item.industry}
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {item.qualifications.map((q) => (
+      <PageContainer paddingY="tight">
+        {/* SEO: WebPage + BreadcrumbList */}
+        <PageJsonLd name={_title} description={_desc} path="/exam-quiz" />
+        <section>
+          <h2 className="mb-3 text-sm font-bold text-slate-700">
+            あなたにおすすめの資格
+          </h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {QUALIFICATION_GUIDES.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.industry}
+                  className={`rounded-xl border p-4 ${item.bg}`}
+                >
+                  <div className="flex items-center gap-2 mb-3">
                     <span
-                      key={q}
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${item.badge}`}
+                      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg ${item.iconBg}`}
                     >
-                      {q}
+                      <Icon className="h-4 w-4" />
                     </span>
-                  ))}
+                    <span className="text-sm font-bold text-slate-800">
+                      {item.industry}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {item.qualifications.map((q) => (
+                      <span
+                        key={q}
+                        className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${item.badge}`}
+                      >
+                        {q}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
+              );
+            })}
+          </div>
+        </section>
+      </PageContainer>
 
       {/* 資格別100問クイズ（カリキュラム網羅型） */}
-      <section className="mx-auto max-w-7xl px-4 py-4 lg:px-8">
-        <div className="mb-3 flex items-center justify-between">
-          <div>
-            <h2 className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
-              <Sparkles className="h-4 w-4 text-amber-500" />
-              資格別100問クイズ（解説・法令根拠つき）
-            </h2>
-            <p className="mt-0.5 text-xs text-slate-500">
-              10資格 × 100問 = {getTotalQuestionCount()}問のカリキュラム網羅型クイズ。Free=各資格30問、Standard以上で全問。
-            </p>
+      <PageContainer paddingY="tight">
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
+                <Sparkles className="h-4 w-4 text-amber-500" />
+                資格別100問クイズ（解説・法令根拠つき）
+              </h2>
+              <p className="mt-0.5 text-xs text-slate-500">
+                10資格 × 100問 = {getTotalQuestionCount()}問のカリキュラム網羅型クイズ。Free=各資格30問、Standard以上で全問。
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {CERT_QUIZZES.map((c) => (
-            <Link
-              key={c.id}
-              href={`/exam-quiz/${c.id}`}
-              className="group rounded-xl border border-slate-200 bg-white p-3 transition hover:border-amber-300 hover:shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-bold text-slate-900 group-hover:text-amber-700">
-                    {c.name}
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {CERT_QUIZZES.map((c) => (
+              <Link
+                key={c.id}
+                href={`/exam-quiz/${c.id}`}
+                className="group rounded-xl border border-slate-200 bg-white p-3 transition hover:border-amber-300 hover:shadow-sm"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-bold text-slate-900 group-hover:text-amber-700">
+                      {c.name}
+                    </div>
+                    <div className="mt-1 line-clamp-2 text-[11px] text-slate-500">
+                      {c.description}
+                    </div>
                   </div>
-                  <div className="mt-1 line-clamp-2 text-[11px] text-slate-500">
-                    {c.description}
-                  </div>
-                </div>
-                <span
-                  className={`shrink-0 rounded-full bg-gradient-to-r ${c.color} px-1.5 py-0.5 text-[10px] font-bold text-white`}
-                >
-                  {c.difficulty}
-                </span>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-1">
-                {c.topics.slice(0, 3).map((t) => (
                   <span
-                    key={t}
-                    className="rounded-full bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-600"
+                    className={`shrink-0 rounded-full bg-gradient-to-r ${c.color} px-1.5 py-0.5 text-[10px] font-bold text-white`}
                   >
-                    {t}
+                    {c.difficulty}
                   </span>
-                ))}
-                {c.topics.length > 3 && (
-                  <span className="text-[10px] text-slate-400">
-                    +{c.topics.length - 3}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {c.topics.slice(0, 3).map((t) => (
+                    <span
+                      key={t}
+                      className="rounded-full bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-600"
+                    >
+                      {t}
+                    </span>
+                  ))}
+                  {c.topics.length > 3 && (
+                    <span className="text-[10px] text-slate-400">
+                      +{c.topics.length - 3}
+                    </span>
+                  )}
+                </div>
+                <div className="mt-2 flex items-center justify-between text-[11px]">
+                  <span className="text-slate-500">{c.questions.length}問</span>
+                  <span className="inline-flex items-center gap-0.5 font-bold text-amber-600 group-hover:text-amber-700">
+                    挑戦する <ChevronRight className="h-3 w-3" />
                   </span>
-                )}
-              </div>
-              <div className="mt-2 flex items-center justify-between text-[11px]">
-                <span className="text-slate-500">{c.questions.length}問</span>
-                <span className="inline-flex items-center gap-0.5 font-bold text-amber-600 group-hover:text-amber-700">
-                  挑戦する <ChevronRight className="h-3 w-3" />
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </PageContainer>
 
       <ExamQuizClient />
       <RelatedPageCards

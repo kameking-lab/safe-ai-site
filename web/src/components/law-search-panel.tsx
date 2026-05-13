@@ -7,6 +7,8 @@ import { SITE_STATS } from "@/data/site-stats";
 import { InputWithVoice } from "@/components/voice-input-field";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
 import { SimpleMarkdown } from "@/components/simple-markdown";
+import { PageContainer } from "@/components/layout/page-container";
+import { Stack } from "@/components/layout/stack";
 
 const MhlwLawArticlesPanel = dynamic(
   () =>
@@ -262,7 +264,8 @@ export function LawSearchPanel() {
   }, [query, selectedLaw, articleNumQuery]);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
+    <PageContainer>
+      <Stack gap="lg">
       <div>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-xl font-bold text-slate-900 lg:text-2xl">法令全文検索</h1>
@@ -382,6 +385,7 @@ export function LawSearchPanel() {
       )}
 
       </>)}
-    </div>
+      </Stack>
+    </PageContainer>
   );
 }
