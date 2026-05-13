@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Banknote, TrendingUp, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { PageContainer } from "@/components/layout";
 import { ogImageUrl } from "@/lib/og-url";
 import { SubsidiesRecommender, type Subsidy } from "@/components/subsidies-recommender";
 
@@ -147,7 +148,7 @@ const SUBSIDIES: Subsidy[] = [
 
 export default function SubsidiesPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+    <PageContainer as="main" width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={_title} description={_desc} path="/subsidies" />
       <PageHeader
@@ -276,6 +277,6 @@ export default function SubsidiesPage() {
         ※ 本ページの情報は2026年4月時点の公開情報をもとにしています。
         制度は頻繁に改正されます。申請前に必ず各所管庁の最新公募要領をご確認ください。
       </p>
-    </main>
+    </PageContainer>
   );
 }
