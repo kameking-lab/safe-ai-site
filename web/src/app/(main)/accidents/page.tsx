@@ -112,6 +112,24 @@ export default function AccidentsPage() {
           </a>
           で最新集計値をご確認ください。
         </p>
+        <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 sm:p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-emerald-900 sm:text-base">
+                📊 事故統計ダッシュボード
+              </p>
+              <p className="mt-0.5 text-[11px] text-emerald-800 sm:text-xs">
+                収録 {SITE_STATS.accidents10yCount} 件を、年・月・業種・事故種類・地域・規模など 25 種類の分析軸で可視化。
+              </p>
+            </div>
+            <a
+              href="/accidents-analytics"
+              className="inline-flex items-center gap-1 rounded-md bg-emerald-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-800 sm:text-sm"
+            >
+              ダッシュボードを開く →
+            </a>
+          </div>
+        </div>
         <div className="mt-4">
           <LadderStatsCard />
         </div>
