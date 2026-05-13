@@ -13,16 +13,18 @@ interface SplitViewProps {
   className?: string;
 }
 
+// Tailwind v4 cannot parse arbitrary values with nested commas; use 1fr.
+// Children use min-w-0 to prevent grid blowout from long content.
 const GRID_CLASS: Record<Breakpoint, Record<ListWidth, string>> = {
   md: {
-    narrow: "md:grid md:grid-cols-[16rem_minmax(0,1fr)] md:gap-4",
-    default: "md:grid md:grid-cols-[20rem_minmax(0,1fr)] md:gap-5",
-    wide: "md:grid md:grid-cols-[24rem_minmax(0,1fr)] md:gap-5",
+    narrow: "md:grid md:grid-cols-[16rem_1fr] md:gap-4",
+    default: "md:grid md:grid-cols-[20rem_1fr] md:gap-5",
+    wide: "md:grid md:grid-cols-[24rem_1fr] md:gap-5",
   },
   lg: {
-    narrow: "lg:grid lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-5",
-    default: "lg:grid lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-6",
-    wide: "lg:grid lg:grid-cols-[26rem_minmax(0,1fr)] lg:gap-6",
+    narrow: "lg:grid lg:grid-cols-[18rem_1fr] lg:gap-5",
+    default: "lg:grid lg:grid-cols-[22rem_1fr] lg:gap-6",
+    wide: "lg:grid lg:grid-cols-[26rem_1fr] lg:gap-6",
   },
 };
 
