@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/about/data-sources" },
-  title: "データソース一覧 | 安全AIサイト",
+  title: "データソース一覧 | 安全AIポータル",
   description:
     "本サイトで利用している外部データの出典・更新頻度・利用条件を一覧で公開しています（気象庁、厚生労働省、国土地理院ほか）。",
 };
