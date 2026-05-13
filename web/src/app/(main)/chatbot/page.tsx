@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ogImageUrl } from "@/lib/og-url";
 import { ChatbotBody } from "./ChatbotBody";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "安衛法 AI チャットボット｜法令質問";
@@ -11,15 +12,14 @@ export const metadata: Metadata = {
   title: _title,
   description: _desc,
   alternates: { canonical: "/chatbot" },
-  openGraph: {
-    title: `${_title}`,
+  openGraph: withSiteOpenGraph("/chatbot", {
+    title: _title,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
+  }),
+  twitter: withSiteTwitter({
     images: [ogImageUrl(_title, _desc)],
-  },
+  }),
 };
 
 export default function ChatbotPage() {

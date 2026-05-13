@@ -9,6 +9,7 @@ const _desc =
   "毎週月曜日に最新の労働安全通達・事故事例・法改正情報をお届け。研究プロジェクトの応援者として登録して、現場の安全づくりに役立てましょう。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/newsletter" },
   title: _title,
   description: _desc,
   openGraph: {

@@ -79,8 +79,7 @@ async function sendFeedbackEmail(payload: FeedbackPayload, receivedAt: string): 
 `;
 
   if (!apiKey) {
-    console.log("[feedback] RESEND_API_KEY 未設定 - メール送信スキップ");
-    console.log("[feedback] 報告内容:", JSON.stringify({ subject, to, payload, receivedAt }));
+    console.log("[feedback] RESEND_API_KEY 未設定 - メール送信スキップ. articleSlug:", payload.articleSlug, "errorType:", payload.errorType, "at:", receivedAt);
     return;
   }
 

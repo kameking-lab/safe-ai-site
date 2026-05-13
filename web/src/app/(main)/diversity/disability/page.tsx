@@ -7,6 +7,7 @@ const DESCRIPTION =
   "改正障害者雇用促進法（2024年4月）の合理的配慮義務と労安衛法の接続。発達特性・視覚過敏・聴覚過敏など個別ニーズに応じた配慮事例、ジョブコーチ制度、特例子会社の運用論点を整理します。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/diversity/disability" },
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {

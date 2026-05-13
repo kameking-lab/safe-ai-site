@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const VALID_KEY = "handover2026";
+const VALID_KEY = process.env.HANDOVER_GATE_KEY ?? "handover2026";
 
 const SECTIONS = [
   { id: "overview", label: "1. プロジェクト概要" },

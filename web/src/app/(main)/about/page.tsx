@@ -26,6 +26,7 @@ import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import { SITE_STATS } from "@/data/site-stats";
 import { PAID_MODE } from "@/lib/paid-mode";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
 export const metadata: Metadata = {
   title: "研究・実証プロジェクトについて",
@@ -33,18 +34,16 @@ export const metadata: Metadata = {
     "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
   keywords: ["安全AIポータル", "研究プロジェクト", "労働安全コンサルタント", "AI", "DX", "労働安全衛生"],
   alternates: { canonical: "/about" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/about", {
     title: "研究・実証プロジェクトについて",
     description:
       "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
+  }),
+  twitter: withSiteTwitter({
     title: "研究・実証プロジェクトについて",
     description:
       "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
-  },
+  }),
 };
 
 const STATS = [
@@ -141,11 +140,11 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
   },
   {
     label: "販売価格",
-    value: "各サービスページに記載（税抜表示／受託業務・顧問契約は別途見積）",
+    value: "各サービスページに記載（税抜表示／受託業務は別途お問い合わせ）",
   },
   {
     label: "支払方法",
-    value: "クレジットカード（Visa／Mastercard／American Express／JCB、Stripeにて処理）／銀行振込（受託業務・顧問契約）",
+    value: "クレジットカード（Visa／Mastercard／American Express／JCB、Stripeにて処理）／銀行振込（受託業務）",
   },
   {
     label: "支払時期",
@@ -163,7 +162,7 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
   {
     label: "適格請求書発行事業者番号",
     value:
-      "受託業務・顧問契約等で適格請求書（インボイス）が必要な場合は、契約時にご請求ください。本サイトは個人事業主が運営しており、登録状況および登録番号は別途開示いたします（未登録の場合はその旨を明示）。",
+      "受託業務で適格請求書（インボイス）が必要な場合は、契約時にご請求ください。本サイトは個人事業主が運営しており、登録状況および登録番号は別途開示いたします（未登録の場合はその旨を明示）。",
   },
   {
     label: "動作環境",
@@ -331,7 +330,7 @@ export default function AboutPage() {
                   <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
                     <li>・ Python / OpenAI API による安全業務自動化</li>
                     <li>・ Excel VBA で帳票・KY・安全書類をデジタル化</li>
-                    <li>・ Claude Code を用いた高速 Web 開発</li>
+                    <li>・ Next.js / TypeScript による Web 開発</li>
                   </ul>
                 </div>
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">

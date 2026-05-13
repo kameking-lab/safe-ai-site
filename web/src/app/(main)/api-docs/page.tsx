@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "API ドキュメント・ロードマップ",
   description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
   alternates: { canonical: "/api-docs" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/api-docs", {
     title: "API ドキュメント・ロードマップ",
     description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
-  },
+  }),
 };
 
 export default function ApiDocsPage() {
@@ -105,7 +106,7 @@ export default function ApiDocsPage() {
                 Phase 3
               </span>
               <span className="text-sm font-semibold text-slate-700">
-                エンタープライズ連携（独立後12ヶ月）
+                組織連携機能（独立後12ヶ月）
               </span>
             </div>
             <ul className="mt-3 space-y-1.5 text-sm text-slate-600">

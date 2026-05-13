@@ -22,11 +22,20 @@ const _equipmentItemCount = (equipmentDb as { items: unknown[] }).items?.length 
  * ページごとに別々にハードコードすると不整合が生じるため、ここから参照すること。
  */
 export const SITE_STATS = {
-  /** 厚労省 職場のあんぜんサイト 事故データベース収録件数（2006〜2021・月別 jsonl 集計） */
+  /**
+   * 厚労省 職場のあんぜんサイト 死傷災害データベース収録件数（2006〜2021・月別jsonl集計）。
+   * /accidents ページの「元DB総件数」参照用。表示件数とは異なる。
+   */
   accidentDbCount: "504,415",
-  /** 厚労省 死亡災害データベース収録件数（2019〜2023・5年分） */
+  /**
+   * 厚労省 死亡災害データベース収録件数（2019〜2023・5年分）。
+   * /accidents ページの「死亡のみ集計」参照用。
+   */
   mhlwDeathsCount: "4,043",
-  /** data/accidents-10years.jsonl 統合件数（2015〜2024・死亡災害DB＋curated事例） */
+  /**
+   * data/accidents-10years.jsonl 統合件数（2015〜2024・死亡災害DB＋curated事例）。
+   * /accidents ページで実際に検索対象となる件数。accidentDbCount の絞り込み後。
+   */
   accidents10yCount: "4,257",
   /** data/law-updates-10years.jsonl 統合件数（2015〜2024・労働安全衛生関連法令改正） */
   lawUpdates10yCount: "31",
@@ -38,7 +47,10 @@ export const SITE_STATS = {
   chemicalsMhlwCount: "3,984",
   /** /law-search に収録された全条文件数（curated 33法令+） */
   lawArticleCount: allLawArticles.length.toLocaleString(),
-  /** RAG 検索（chatbot/法令要約）対応の全条文数（curated + 厚労省PDF抽出フィルタ後） */
+  /**
+   * RAG 検索（chatbot/法令要約）対応の全条文数。
+   * 現時点では allLawArticles と同一ソース。将来、厚労省PDF抽出分を追加すると diverge する。
+   */
   ragArticleCount: allLawArticles.length.toLocaleString(),
   /** 対応教育の種類数（特別教育・法定・労働衛生、要相談含む） */
   specialEdKinds: "12+",

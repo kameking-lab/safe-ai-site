@@ -276,7 +276,7 @@ export function EducationContent() {
       {/* CTA */}
       <section className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 text-center">
         <p className="text-sm font-semibold text-emerald-800">
-          {isEn ? "Training consultation & quote" : "教育プログラムのご相談・お見積り"}
+          {isEn ? "Training inquiry & feedback" : "教育プログラムのお問い合わせ・改善提案"}
         </p>
         <p className="mt-2 text-xs text-slate-600">
           {isEn

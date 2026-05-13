@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { SafetyGoodsPanel } from "@/components/safety-goods-panel";
 import { ogImageUrl } from "@/lib/og-url";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "安全用品・保護具 おすすめ一覧";
@@ -12,15 +13,14 @@ export const metadata: Metadata = {
   title: _title,
   description: _desc,
   alternates: { canonical: "/goods" },
-  openGraph: {
-    title: `${_title}｜安全AIポータル`,
+  openGraph: withSiteOpenGraph("/goods", {
+    title: _title,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
+  }),
+  twitter: withSiteTwitter({
     images: [ogImageUrl(_title, _desc)],
-  },
+  }),
 };
 
 export default function GoodsPage() {

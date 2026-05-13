@@ -3,7 +3,9 @@ import { Suspense } from "react";
 import { LawsPageClient } from "@/components/laws-page-client";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { JsonLd, articleListSchema } from "@/components/json-ld";
+import { SITE_URL } from "@/lib/seo-metadata";
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
 
 const _title = "安全衛生法 改正情報一覧 最新";
@@ -11,17 +13,17 @@ const _desc =
   "2016年〜2026年の労働安全衛生法・化学物質管理など100件以上の法改正をAI要約付きで確認。e-Gov・厚労省通達へのリンク付き。安全担当者に。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/laws" },
   title: _title,
   description: _desc,
-  openGraph: {
-    title: `${_title}｜安全AIポータル`,
+  openGraph: withSiteOpenGraph("/laws", {
+    title: _title,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
+  }),
+  twitter: withSiteTwitter({
     images: [ogImageUrl(_title, _desc)],
-  },
+  }),
 };
 
 export default function LawsPage() {
@@ -29,7 +31,7 @@ export default function LawsPage() {
     realLawRevisions.map((r) => ({
       headline: r.title,
       datePublished: r.publishedAt,
-      url: r.source_url ?? `https://safe-ai-site.vercel.app/laws`,
+      url: r.source_url ?? `${SITE_URL}/laws`,
       description: r.summary,
     }))
   );

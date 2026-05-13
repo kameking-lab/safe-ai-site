@@ -6,6 +6,7 @@ import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { ogImageUrl } from "@/lib/og-url";
+import { SITE_URL, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
 import {
   getAccidentCasesDataset,
@@ -17,17 +18,17 @@ const _title = "労働災害 事故事例データベース";
 const _desc = `10年統合${SITE_STATS.accidents10yCount}件の死亡労働災害事例を業種・事故種別で検索し再発防止に活用。厚労省死亡災害DB（${SITE_STATS.mhlwDeathsCount}件）＋厚労省全件DB（${SITE_STATS.accidentDbCount}件）＋curated詳細事例（${SITE_STATS.siteCuratedCaseCount}件）を統合。`;
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/accidents" },
   title: _title,
   description: _desc,
-  openGraph: {
-    title: `${_title}｜安全AIポータル`,
+  openGraph: withSiteOpenGraph("/accidents", {
+    title: _title,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
+  }),
+  twitter: withSiteTwitter({
     images: [ogImageUrl(_title, _desc)],
-  },
+  }),
 };
 
 export default function AccidentsPage() {
@@ -35,7 +36,7 @@ export default function AccidentsPage() {
     getAccidentCasesDataset().map((c) => ({
       headline: c.title,
       datePublished: c.occurredOn,
-      url: "https://safe-ai-site.vercel.app/accidents",
+      url: `${SITE_URL}/accidents`,
       description: c.summary,
     }))
   );
