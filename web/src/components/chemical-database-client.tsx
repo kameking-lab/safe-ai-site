@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { PageContainer } from "@/components/layout";
 import {
   Search,
   FlaskConical,
@@ -71,7 +72,7 @@ export function ChemicalDatabaseClient() {
   }, [query, category, skinOnly]);
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+    <PageContainer width="wide">
       <header className="mb-5">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-700">
           <FlaskConical className="h-4 w-4" aria-hidden="true" />
@@ -323,6 +324,6 @@ export function ChemicalDatabaseClient() {
           </li>
         </ul>
       </aside>
-    </div>
+    </PageContainer>
   );
 }
