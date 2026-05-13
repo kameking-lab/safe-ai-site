@@ -217,3 +217,72 @@ a real browser.
 
 Build state at audit time matches main HEAD `513a8c9`. No 5xx or 503 was
 returned by any audited path.
+
+## Phase 3 — verification (2026-05-13)
+
+After PR #85 deployed to production, `/accidents`, `/laws`, `/goods` and
+`/about/chatbot-eval` og:title rendered with a single brand suffix:
+
+  /accidents → "労働災害 事故事例データベース｜安全AIポータル" (was: ...｜安全AIポータル｜安全AIポータル)
+
+PR #86 (CI in flight at audit close) is expected to add og:type,
+og:site_name, og:locale, og:url to the 20 helper-adopting pages on
+the next Vercel deploy.
+
+The 10-query chatbot smoke and HTTP status sweep on production are
+preserved unchanged in `logs/audit-1A-http.txt` and `logs/audit-1G-chatbot.txt`
+as the pre-fix baseline. No regression was expected because the
+fixes are metadata-only and `web/src/lib/rag-search.ts` was not
+touched.
+
+## Phase 2 — fixes landed (2026-05-13)
+
+- **PR #85** `fix/og-title-duplicate-brand` (squash merge 2c75a12) — dropped
+  the manual `｜安全AIポータル` suffix from openGraph.title on `/goods`,
+  `/accidents`, `/laws`. Restores correct og:title rendering. Addresses
+  P0 issue #1.
+- **PR #86** `fix/og-completion-helper` (squash merge d197bb0) — added
+  `web/src/lib/seo-metadata.ts` with `withSiteOpenGraph(path, extra)` and
+  `withSiteTwitter(extra)`. Applied to 20 high-impact pages: home,
+  chatbot, chemical-ra, accidents, laws, features, goods, contact, stats,
+  about, about/chatbot-eval (also fixed double-brand here), privacy,
+  terms, security, bcp, dpa, api-docs, insurance, partnership,
+  auth/signin. Restores `og:type`, `og:site_name`, `og:locale`, `og:url`
+  on overriding pages. Addresses P0 issue #2.
+
+## Residual / out-of-scope after Phase 2
+
+### Left for follow-up
+
+- **`/about` operator-identity disclosure (P1, owner decision)** —
+  current `/about` still exposes qualifications + super-general-contractor
+  experience line. Per task constraints the only permitted operator
+  marker is registration number 260022, which is not currently rendered.
+  This is a judgment call for the owner; not auto-fixed.
+- **Q6 chatbot RAG miss (フルハーネス型墜落制止用器具) (P1)** — 0 sources,
+  low confidence. Lives in `rag-search.ts` which is out of scope per
+  task instructions (parallel investigation Dispatch in flight).
+- **Legacy Twitter hashtag `ANZENAI` (P2)** — default in
+  `web/src/components/share-buttons.tsx:38`. Cosmetic; can be rotated
+  later.
+- **Pages that still override `openGraph`/`twitter` without the helper
+  (P2)** — `/wizard`, `/lms`, `/risk`, `/risk-prediction`, `/e-learning`,
+  `/diversity`, `/mental-health`, `/notifications`, `/leaflet`, `/pdf`,
+  `/account`, signage routes, `/chemical-database`, `/circulars`,
+  `/laws/notices-precedents`, `/qa-knowledge`, `/glossary`, `/subsidies`,
+  `/safety-diary`, `/ky`, `/equipment-finder`, `/exam-quiz`. They serve
+  fewer impressions than the 20 fixed in PR #86; helper adoption can
+  follow in a Phase 4 sweep.
+- **`/chatbot-eval` 404 (P2)** — no in-app link points to bare
+  `/chatbot-eval`; the canonical URL is `/about/chatbot-eval`. Optional
+  308 redirect for external inbound links.
+- **PARTIAL pages (P3)** — `/risk-prediction`, `/e-learning`, `/diversity`,
+  `/mental-health`, `/notifications`, `/leaflet`, `/pdf`, `/wizard` are
+  landing pages without deep interactive flows. Not fixed in this audit.
+
+### Explicitly out of scope for this audit
+
+- `web/src/lib/rag-search.ts` body
+- PR #82 conflict resolution / `test/rag-article-number-failing` branch
+- Article 151-3 data additions
+- Q3-shape Recall@5 residual (3/10)
