@@ -8,9 +8,9 @@ on Opus 4.7 inside the `xenodochial-knuth-923713` worktree.
 
 ## Phases
 - [x] Phase 0 — worktree cleanup + alive marker commit/push
-- [ ] Phase 1 — read-only audit (1-A through 1-K)
-- [ ] Phase 2 — P0/P1 fixes (categories alpha through theta)
-- [ ] Phase 3 — final verification + residual issue log
+- [x] Phase 1 — read-only audit (1-A through 1-K) — commit 2969096
+- [x] Phase 2 — P0 SEO fixes (PR #85 merge 2c75a12, PR #86 merge d197bb0)
+- [ ] Phase 3 — final verification + residual issue log (in progress)
 
 ## Phase 0 summary
 - Worktree dirs before cleanup: 35 (1 orphan present: `amazing-cori-60f36c`)
