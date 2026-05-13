@@ -6,7 +6,7 @@ import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { ogImageUrl } from "@/lib/og-url";
-import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
+import { SITE_URL, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
 import {
   getAccidentCasesDataset,
@@ -36,7 +36,7 @@ export default function AccidentsPage() {
     getAccidentCasesDataset().map((c) => ({
       headline: c.title,
       datePublished: c.occurredOn,
-      url: "https://safe-ai-site.vercel.app/accidents",
+      url: `${SITE_URL}/accidents`,
       description: c.summary,
     }))
   );

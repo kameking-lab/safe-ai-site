@@ -5,6 +5,7 @@ import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { JsonLd, articleListSchema } from "@/components/json-ld";
+import { SITE_URL } from "@/lib/seo-metadata";
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
 
 const _title = "安全衛生法 改正情報一覧 最新";
@@ -30,7 +31,7 @@ export default function LawsPage() {
     realLawRevisions.map((r) => ({
       headline: r.title,
       datePublished: r.publishedAt,
-      url: r.source_url ?? `https://safe-ai-site.vercel.app/laws`,
+      url: r.source_url ?? `${SITE_URL}/laws`,
       description: r.summary,
     }))
   );
