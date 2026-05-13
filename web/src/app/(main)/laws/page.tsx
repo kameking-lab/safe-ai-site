@@ -46,6 +46,13 @@ export default function LawsPage() {
         heading="合わせて使う"
         pages={[
           {
+            href: "/law-hierarchy",
+            label: "法令階層マップ",
+            description: "労働安全衛生法を頂点とした政令・省令・告示・通達の階層を一枚で俯瞰。各法令から e-Gov 公式条文・条文検索・関連通達一覧へ直接遷移。",
+            color: "rose",
+            cta: "階層マップを開く",
+          },
+          {
             href: "/laws/glossary",
             label: "法令用語集",
             description: "公布と施行の違い、告示・通達・指針の拘束力、政省令の関係など、改正情報を読む前提となる用語を一次出典付きで解説。",
