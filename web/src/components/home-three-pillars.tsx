@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, CloudRain, Scale, Sparkles, Loader2, ExternalLink } from "lucide-react";
-import { realAccidentCases } from "@/data/mock/real-accident-cases";
+import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
 import { realLawRevisionsExtra } from "@/data/mock/real-law-revisions-extra";
 import warningsData from "@/data/jma/warnings.json";
@@ -72,7 +72,10 @@ const PREFECTURE_LABELS: Record<string, string> = {
 };
 
 function pickLatestFatalAccident(): AccidentCase | null {
-  const fatal = realAccidentCases.filter((c) => c.severity === "死亡");
+  const today = new Date().toISOString().slice(0, 10);
+  const fatal = getAccidentCasesDataset().filter(
+    (c) => c.severity === "死亡" && c.occurredOn <= today,
+  );
   if (fatal.length === 0) return null;
   return [...fatal].sort((a, b) => b.occurredOn.localeCompare(a.occurredOn))[0] ?? null;
 }
