@@ -15,7 +15,12 @@ import {
   YAxis,
 } from "recharts";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
-import type { StatsPeriod, StatsResponse } from "@/lib/stats/types";
+import type {
+  PageAnalyticsResponse,
+  SearchConsoleResponse,
+  StatsPeriod,
+  StatsResponse,
+} from "@/lib/stats/types";
 import { PageContainer } from "@/components/layout/page-container";
 import { Stack } from "@/components/layout/stack";
 
@@ -76,6 +81,8 @@ function deltaPill(delta: number, invertColor = false, hide = false) {
 export function StatsDashboard() {
   const [period, setPeriod] = useState<StatsPeriod>("30d");
   const [data, setData] = useState<StatsResponse | null>(null);
+  const [gsc, setGsc] = useState<SearchConsoleResponse | null>(null);
+  const [pageAnalytics, setPageAnalytics] = useState<PageAnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -85,14 +92,27 @@ export function StatsDashboard() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
-    fetch(`/api/stats?period=${period}`, { cache: "no-store" })
+
+    const statsPromise = fetch(`/api/stats?period=${period}`, { cache: "no-store" })
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json() as Promise<StatsResponse>;
-      })
-      .then((json) => {
+      });
+    const gscPromise = fetch(`/api/search-console?period=${period}`, { cache: "no-store" })
+      .then((r) => (r.ok ? (r.json() as Promise<SearchConsoleResponse>) : null))
+      .catch(() => null);
+    const pageAnalyticsPromise = fetch(`/api/stats/page-analytics?period=${period}`, {
+      cache: "no-store",
+    })
+      .then((r) => (r.ok ? (r.json() as Promise<PageAnalyticsResponse>) : null))
+      .catch(() => null);
+
+    Promise.all([statsPromise, gscPromise, pageAnalyticsPromise])
+      .then(([statsJson, gscJson, pageJson]) => {
         if (cancelled) return;
-        setData(json);
+        setData(statsJson);
+        setGsc(gscJson);
+        setPageAnalytics(pageJson);
       })
       .catch((e: unknown) => {
         if (cancelled) return;
@@ -139,7 +159,10 @@ export function StatsDashboard() {
             );
           })}
         </div>
-        <DataSourceBadge data={data} loading={loading} />
+        <div className="flex flex-wrap items-center gap-2">
+          <DataSourceBadge data={data} loading={loading} />
+          <SearchConsoleBadge gsc={gsc} loading={loading} />
+        </div>
       </div>
 
       {error ? (
@@ -169,8 +192,13 @@ export function StatsDashboard() {
       ) : (
         <>
           <SectionSummary data={data} />
+          {gsc ? <SectionSeoSummary gsc={gsc} /> : null}
+          {gsc ? <SectionSeoQueries gsc={gsc} /> : null}
+          {gsc ? <SectionSeoPages gsc={gsc} /> : null}
           <SectionFeatures data={data} />
+          {pageAnalytics ? <SectionPageAnalytics pa={pageAnalytics} /> : null}
           <SectionPages data={data} />
+          {pageAnalytics ? <SectionDeviceReferral pa={pageAnalytics} /> : null}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <SectionSources data={data} />
             <SectionFlow data={data} />
@@ -181,7 +209,7 @@ export function StatsDashboard() {
           </div>
           <SectionInsights data={data} />
           <p className="text-[11px] text-slate-400">
-            ※ GA4 Data API 未接続時は <strong>モックデータ</strong>を表示します。接続手順は <code className="rounded bg-slate-100 px-1">web/src/lib/stats/ga4-client.ts</code> 冒頭コメント参照。
+            ※ GA4 Data API / Search Console API 未接続時は <strong>モックデータ</strong>を表示します。接続手順は <code className="rounded bg-slate-100 px-1">web/src/lib/stats/ga4-client.ts</code> および <code className="rounded bg-slate-100 px-1">web/src/lib/stats/search-console-client.ts</code> 冒頭コメント参照。
           </p>
         </>
       )}
@@ -196,12 +224,262 @@ function DataSourceBadge({ data, loading }: { data: StatsResponse | null; loadin
   const tone = isLive
     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
     : "border-amber-200 bg-amber-50 text-amber-700";
-  const label = isLive ? "GA4 ライブ" : "モックデータ";
+  const label = isLive ? "GA4 ライブ" : "GA4 モック";
   return (
     <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${tone}`}>
       <span className={`h-1.5 w-1.5 rounded-full ${isLive ? "bg-emerald-500" : "bg-amber-500"}`} />
       {label}
     </span>
+  );
+}
+
+function SearchConsoleBadge({ gsc, loading }: { gsc: SearchConsoleResponse | null; loading: boolean }) {
+  if (loading || !gsc) return null;
+  const isLive = gsc.source === "gsc";
+  const tone = isLive
+    ? "border-sky-200 bg-sky-50 text-sky-700"
+    : "border-amber-200 bg-amber-50 text-amber-700";
+  const label = isLive ? "GSC ライブ" : "GSC モック";
+  return (
+    <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${tone}`}>
+      <span className={`h-1.5 w-1.5 rounded-full ${isLive ? "bg-sky-500" : "bg-amber-500"}`} />
+      {label}
+    </span>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+ * SEO Section (GSC): summary cards, query ranking, page ranking
+ * ────────────────────────────────────────────────────────── */
+function SectionSeoSummary({ gsc }: { gsc: SearchConsoleResponse }) {
+  const s = gsc.summary;
+  const cards = [
+    { label: "インプレッション", value: formatNum(s.impressions) },
+    { label: "クリック", value: formatNum(s.clicks) },
+    { label: "平均CTR", value: formatPct(s.ctr, 2) },
+    { label: "平均掲載順位", value: s.position > 0 ? s.position.toFixed(1) : "—" },
+  ];
+  return (
+    <Section
+      heading="SEO効果（Search Console）"
+      subheading={
+        gsc.source === "gsc"
+          ? "Google 検索結果上のサイト全体パフォーマンス"
+          : "GSC API 未接続のため、構造確認用のサンプル値を表示しています"
+      }
+      hideSampleBadge={gsc.source === "gsc"}
+    >
+      {gsc.error && gsc.source !== "gsc" ? (
+        <div className="mb-3 rounded-lg border border-amber-300 bg-amber-50 p-2 text-[11px] text-amber-900">
+          ⚠ GSC接続失敗: {gsc.error}
+        </div>
+      ) : null}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {cards.map((c) => (
+          <div key={c.label} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p className="text-[11px] font-medium text-slate-600">{c.label}</p>
+            <p className="mt-1 text-xl font-bold text-slate-900">{c.value}</p>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function SectionSeoQueries({ gsc }: { gsc: SearchConsoleResponse }) {
+  const rows = gsc.queries.slice(0, 30);
+  return (
+    <Section
+      heading="検索クエリ TOP30"
+      subheading="どんな検索語でサイトが表示・クリックされたか"
+      hideSampleBadge={gsc.source === "gsc"}
+    >
+      {rows.length === 0 ? (
+        <p className="text-xs text-slate-500">
+          まだ十分な検索データが蓄積されていません（ドメイン取得直後はデータが薄くなります）。
+        </p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="text-left text-slate-500">
+              <tr>
+                <th className="pb-2">#</th>
+                <th className="pb-2">クエリ</th>
+                <th className="pb-2 text-right">表示</th>
+                <th className="pb-2 text-right">クリック</th>
+                <th className="pb-2 text-right">CTR</th>
+                <th className="pb-2 text-right">平均順位</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((q, idx) => (
+                <tr key={`${q.query}-${idx}`} className="border-t border-slate-100">
+                  <td className="py-2 text-slate-400">{idx + 1}</td>
+                  <td className="py-2 font-semibold text-slate-800">{q.query || "(unknown)"}</td>
+                  <td className="py-2 text-right tabular-nums">{formatNum(q.impressions)}</td>
+                  <td className="py-2 text-right tabular-nums">{formatNum(q.clicks)}</td>
+                  <td className="py-2 text-right tabular-nums">{formatPct(q.ctr, 2)}</td>
+                  <td className="py-2 text-right tabular-nums">{q.position.toFixed(1)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Section>
+  );
+}
+
+function SectionSeoPages({ gsc }: { gsc: SearchConsoleResponse }) {
+  const rows = gsc.pages.slice(0, 10);
+  return (
+    <Section
+      heading="検索流入ページ TOP10"
+      subheading="検索結果からクリックされたページ"
+      hideSampleBadge={gsc.source === "gsc"}
+    >
+      {rows.length === 0 ? (
+        <p className="text-xs text-slate-500">まだ計測データが蓄積されていません。</p>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead className="text-left text-slate-500">
+              <tr>
+                <th className="pb-2">#</th>
+                <th className="pb-2">ページ</th>
+                <th className="pb-2 text-right">表示</th>
+                <th className="pb-2 text-right">クリック</th>
+                <th className="pb-2 text-right">CTR</th>
+                <th className="pb-2 text-right">平均順位</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((p, idx) => (
+                <tr key={`${p.page}-${idx}`} className="border-t border-slate-100">
+                  <td className="py-2 text-slate-400">{idx + 1}</td>
+                  <td className="py-2">
+                    <span className="font-mono text-[11px] text-emerald-700">{p.page || "(unknown)"}</span>
+                  </td>
+                  <td className="py-2 text-right tabular-nums">{formatNum(p.impressions)}</td>
+                  <td className="py-2 text-right tabular-nums">{formatNum(p.clicks)}</td>
+                  <td className="py-2 text-right tabular-nums">{formatPct(p.ctr, 2)}</td>
+                  <td className="py-2 text-right tabular-nums">{p.position.toFixed(1)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </Section>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────
+ * GA4 Page Analytics expansion (engagement, devices, referrals)
+ * ────────────────────────────────────────────────────────── */
+function SectionPageAnalytics({ pa }: { pa: PageAnalyticsResponse }) {
+  const rows = pa.pages.slice(0, 10);
+  return (
+    <Section
+      heading="機能別アクセス詳細（GA4）"
+      subheading="ページ別 PV・滞在時間・エンゲージメント・直帰率"
+      hideSampleBadge={pa.source === "ga4"}
+    >
+      <div className="mb-3 grid grid-cols-3 gap-3">
+        <Stat
+          label="エンゲージメント率"
+          value={formatPct(pa.engagement.engagementRate)}
+          accent="emerald"
+        />
+        <Stat
+          label="平均セッション時間"
+          value={formatDuration(pa.engagement.avgSessionSec)}
+          accent="sky"
+        />
+        <Stat
+          label="セッション当たりPV"
+          value={pa.engagement.pagesPerSession.toFixed(2)}
+          accent="amber"
+        />
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead className="text-left text-slate-500">
+            <tr>
+              <th className="pb-2">#</th>
+              <th className="pb-2">ページ</th>
+              <th className="pb-2 text-right">PV</th>
+              <th className="pb-2 text-right">平均滞在</th>
+              <th className="pb-2 text-right">エンゲージ率</th>
+              <th className="pb-2 text-right">直帰率</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((p, idx) => (
+              <tr key={`${p.url}-${idx}`} className="border-t border-slate-100">
+                <td className="py-2 text-slate-400">{idx + 1}</td>
+                <td className="py-2">
+                  <a href={p.url} className="font-semibold text-emerald-700 hover:underline">
+                    {p.title || p.url}
+                  </a>
+                  <p className="text-[10px] text-slate-400">{p.url}</p>
+                </td>
+                <td className="py-2 text-right tabular-nums">{formatNum(p.pv)}</td>
+                <td className="py-2 text-right tabular-nums">{formatDuration(p.avgSec)}</td>
+                <td className="py-2 text-right tabular-nums">{formatPct(p.engagementRate)}</td>
+                <td className="py-2 text-right tabular-nums">{formatPct(p.bounceRate)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Section>
+  );
+}
+
+function SectionDeviceReferral({ pa }: { pa: PageAnalyticsResponse }) {
+  return (
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <Section heading="デバイス別" subheading="モバイル / デスクトップ / タブレット の構成比" hideSampleBadge={pa.source === "ga4"}>
+        <ul className="space-y-2 text-xs">
+          {pa.devices.map((d) => (
+            <li key={d.device} className="flex items-center justify-between">
+              <span className="font-semibold text-slate-700">{d.device}</span>
+              <span className="flex items-center gap-2">
+                <span className="block h-1.5 w-32 overflow-hidden rounded-full bg-slate-100">
+                  <span
+                    className="block h-full rounded-full bg-emerald-500"
+                    style={{ width: `${Math.min(d.pct, 1) * 100}%` }}
+                  />
+                </span>
+                <span className="tabular-nums text-slate-600">{formatPct(d.pct)}</span>
+                <span className="text-[10px] tabular-nums text-slate-400">
+                  / {formatNum(d.sessions)}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Section>
+      <Section heading="流入元（Source / Medium）" subheading="セッション元の上位" hideSampleBadge={pa.source === "ga4"}>
+        <ul className="space-y-2 text-xs">
+          {pa.referrals.slice(0, 8).map((r, idx) => (
+            <li
+              key={`${r.source}-${r.medium}-${idx}`}
+              className="flex items-center justify-between border-b border-slate-100 pb-1 last:border-b-0"
+            >
+              <span className="flex items-center gap-2">
+                <span className="font-semibold text-slate-800">{r.source || "(direct)"}</span>
+                <span className="rounded bg-slate-100 px-1 text-[10px] text-slate-600">
+                  {r.medium || "(none)"}
+                </span>
+              </span>
+              <span className="tabular-nums text-slate-600">{formatNum(r.sessions)}</span>
+            </li>
+          ))}
+        </ul>
+      </Section>
+    </div>
   );
 }
 
@@ -555,18 +833,22 @@ function Section({
   heading,
   subheading,
   children,
+  hideSampleBadge,
 }: {
   heading: string;
   subheading?: string;
   children: React.ReactNode;
+  hideSampleBadge?: boolean;
 }) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <h2 className="flex flex-wrap items-center gap-2 text-base font-bold text-slate-900">
         <span>{heading}</span>
-        <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
-          ※サンプル
-        </span>
+        {hideSampleBadge ? null : (
+          <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
+            ※サンプル
+          </span>
+        )}
       </h2>
       {subheading ? <p className="mt-1 text-xs text-slate-500">{subheading}</p> : null}
       <div className="mt-4">{children}</div>
