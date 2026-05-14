@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageContainer } from "@/components/layout";
 import {
   Users2,
   Baby,
@@ -296,7 +297,7 @@ const COLOR_CLASS: Record<DiversitySection["color"], { bg: string; border: strin
 
 export default function DiversityPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+    <PageContainer as="main" width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={_title} description={_desc} path="/diversity" />
       <PageHeader
@@ -509,6 +510,6 @@ export default function DiversityPage() {
       <p className="mt-10 text-center text-xs text-slate-400">
         最終更新：2026年4月。多言語ページ（ja/en/vi/zh/pt/tl）は現在6言語骨組み公開中。
       </p>
-    </main>
+    </PageContainer>
   );
 }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Clock, MailCheck, ShieldCheck } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
+import { PageContainer } from "@/components/layout";
 import { useLanguage } from "@/contexts/language-context";
 
 const FORMSPREE_ID = process.env.NEXT_PUBLIC_FORMSPREE_ID;
@@ -13,7 +14,6 @@ const INQUIRY_CATEGORIES = [
   { value: "automation", label: "KY・安全業務の自動化／受託開発" },
   { value: "education", label: "特別教育・安全衛生教育・教材制作" },
   { value: "chemical", label: "化学物質管理（SDS・RA）" },
-  { value: "monthly-retainer", label: "月額顧問契約（安全 / AI・DX）" },
   { value: "demo", label: "安全AIポータル 本体のデモ・導入相談" },
 ] as const;
 
@@ -78,7 +78,7 @@ const SERVICE_LABEL: Record<string, string> = {
   "edu-content": "教育コンテンツ制作",
   chemical: "化学物質管理体制の構築",
   "special-edu": "特別教育・安全衛生教育",
-  "claude-code": "Claude Code 活用自動化",
+  "ai-automation": "AI・DX活用自動化",
 };
 
 export default function ContactForm() {
@@ -190,14 +190,14 @@ export default function ContactForm() {
     "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-[#1a7a4c] focus:ring-2 focus:ring-[#1a7a4c]/40 focus-visible:ring-offset-2 sm:text-sm";
 
   return (
-    <div className="mx-auto max-w-3xl space-y-10 px-4 py-8 lg:px-8">
+    <PageContainer width="prose" className="space-y-10">
       {/* ヘッダー */}
       <div>
         <TranslatedPageHeader
           titleJa="お問い合わせ・無料相談"
           titleEn="Contact Us / Free Consultation"
-          descriptionJa="導入相談・受託業務のご依頼・顧問契約・機能要望など、お気軽にご連絡ください。現状の課題に合わせて、最適なプラン・受託メニューをご提案します。"
-          descriptionEn="Implementation inquiries, custom projects, retainer contracts, or feature requests — feel free to reach out. We'll suggest the best plan or service for your current challenges."
+          descriptionJa="導入相談・受託業務のご依頼・機能要望など、お気軽にご連絡ください。現状の課題に合わせて、最適なプランをご案内します。"
+          descriptionEn="Implementation inquiries, custom projects, or feature requests — feel free to reach out. We'll suggest the best plan for your current challenges."
           iconName="MessageSquare"
           iconColor="emerald"
         />
@@ -245,8 +245,7 @@ export default function ContactForm() {
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-slate-700">
             大手ゼネコンで大型土木インフラの施工管理経験をもつ労働安全コンサルタント。
-            Claude Code による高速開発と現場理解を組み合わせ、「机上の安全管理」ではなく
-            「現場で回る仕組み」を設計します。
+            現場理解と技術実装力を組み合わせ、「机上の安全管理」ではなく「現場で回る仕組み」を設計します。
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {["労働安全コンサルタント（土木）", "1級土木施工管理技士", "監理技術者"].map((badge) => (
@@ -497,6 +496,6 @@ export default function ContactForm() {
           </button>
         </form>
       )}
-    </div>
+    </PageContainer>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
+import { PageContainer } from "@/components/layout";
 import { PAID_MODE } from "@/lib/paid-mode";
 
 type Category =
@@ -70,7 +71,7 @@ export default function InquiryForm() {
     "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/30 sm:text-sm";
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 px-4 py-8 lg:px-8">
+    <PageContainer width="narrow" className="space-y-6">
       <TranslatedPageHeader
         titleJa="ご意見・ご質問・改善提案"
         titleEn="Feedback / Questions / Improvement Suggestions"
@@ -260,6 +261,6 @@ export default function InquiryForm() {
           </p>
         </form>
       )}
-    </div>
+    </PageContainer>
   );
 }

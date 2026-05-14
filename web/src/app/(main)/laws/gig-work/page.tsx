@@ -7,6 +7,7 @@ const DESCRIPTION =
   "タイミー・シェアフル・メルカリ ハロ等のスポットワークにおける雇用関係の判別、労災適用、危険作業の拒否権。若年労働者の保護を労安法・労基法・プラットフォーマー法の3軸で整理します。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/laws/gig-work" },
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {

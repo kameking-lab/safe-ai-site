@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { StatsDashboard } from "./StatsDashboard";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
 const _title = "利用統計（公開ダッシュボード）";
 const _desc =
@@ -11,16 +12,15 @@ export const metadata: Metadata = {
   description: _desc,
   alternates: { canonical: "/stats" },
   robots: { index: true, follow: true },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/stats", {
     title: _title,
     description: _desc,
-    type: "website",
-  },
-  twitter: {
+  }),
+  twitter: withSiteTwitter({
     card: "summary",
     title: _title,
     description: _desc,
-  },
+  }),
 };
 
 export default function StatsPage() {

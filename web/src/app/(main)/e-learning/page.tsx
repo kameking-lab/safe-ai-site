@@ -11,6 +11,7 @@ const _desc =
   "高所作業・化学物質・電気安全など労働安全衛生のテーマ別学習コンテンツ。安全衛生管理者・安全担当者の知識定着に活用できます。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/e-learning" },
   title: _title,
   description: _desc,
   openGraph: {
