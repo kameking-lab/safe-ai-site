@@ -101,6 +101,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "laws", label: "法改正", href: "/laws", icon: Scale },
       { id: "law-search", label: "法令検索", href: "/law-search", icon: Search },
+      { id: "law-hierarchy", label: "法令体系マップ", href: "/law-hierarchy", icon: LibraryBig },
       { id: "chatbot", label: "法令チャット", href: "/chatbot", icon: MessageSquare, badge: "AI" },
     ],
   },
