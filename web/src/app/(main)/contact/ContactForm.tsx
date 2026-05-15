@@ -329,7 +329,7 @@ export default function ContactForm() {
             </div>
             <div>
               <label htmlFor="contact-phone" className="block text-sm font-semibold text-slate-700">
-                電話番号 <span className="text-xs text-slate-400">（任意）</span>
+                電話番号 <span className="text-xs text-slate-500">（任意）</span>
               </label>
               <input
                 id="contact-phone"
