@@ -407,3 +407,100 @@ audit doc once Vercel has rolled out PRs #137/138/141/142/144/145 to
 production. The owner should regenerate the 32-run matrix with the same
 tooling (`lighthouse@13.3.0`, `lighthouse:default`, Chrome stable, Windows) and
 diff the per-page scores against the table in §A-2.
+
+---
+
+## Phase E — Post-implementation re-measurement attempt (2026-05-15)
+
+### E-1. Why this section is incomplete
+
+A re-measurement run was attempted against the post-PR-#137..#145 production
+build to fill in the §A-2 deltas. Two paths were tried:
+
+1. **`lighthouse@13.x` + `chrome-launcher`** locally — blocked because Chrome
+   is not installed in the working environment.
+2. **PageSpeed Insights API** as a Chrome-less fallback —
+   `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=...&strategy=mobile`
+   without an API key returned `HTTP 429 RESOURCE_EXHAUSTED` on the very first
+   request:
+
+   ```
+   "quota_metric": "pagespeedonline.googleapis.com/default",
+   "quota_limit": "defaultPerDayPerProject",
+   "quota_limit_value": "0"
+   ```
+
+   The "anonymous quota" path documented for PSI is now `0` per project per
+   day; an API key (`key=...` query parameter) is required for any meaningful
+   number of requests. The auditor was instructed not to read environment
+   variables, so a key could not be sourced without owner action.
+
+### E-2. What was verified without Lighthouse
+
+Production response inspection (live site, `curl -I`) confirmed:
+
+- `/quiz` returns `HTTP 200` directly (no 308 hop) — **B-10 shipped**.
+- `Cache-Control` on flagship pages is `public, max-age=0, must-revalidate`
+  (no `no-store`); bf-cache is not blocked by a server header.
+- `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+  — preload-eligible per PR #129.
+
+Source-tree verification of the PR #137..#145 changes (the diffs cited in §D
+above) confirmed each fix is present on `main` at HEAD `acbb1f6`.
+
+### E-3. Additional fixes shipped this pass (PR #146)
+
+Two deferred items moved from §D's "items deferred to a future audit pass"
+into the implementation set, picked because both ship without
+runtime-measurement risk:
+
+- **B-14 — `productionBrowserSourceMaps: true`** in `next.config.ts`. After
+  next build, `.next/static/chunks/*.js.map` are emitted alongside chunks.
+  Per-page-perf impact is marginal (slightly larger deploy artifact, no
+  runtime change), but the audit explicitly noted B-2 was hard to
+  attribute because of the missing maps; future React-error reports will
+  group correctly. Closes the 32x `valid-source-maps` audit failure.
+- **B-13 (partial) — `requestAnimationFrame` instead of `setTimeout`** for
+  the two scroll-to-bottom calls in
+  `web/src/components/chatbot-panel.tsx`. The forced-reflow-insight audit
+  fired on 11 pages; rAF defers the `scrollHeight` read until after the
+  browser has flushed the message-list re-render, eliminating one
+  synchronous-layout hazard on the chatbot page. Visible scroll behavior
+  is identical. Other forced-reflow sites
+  (`signage-floor-plan-editor`, `home-screen`, `goods-chatbot`,
+  `ky-signature-canvas`) remain.
+
+### E-4. Items that still need real Lighthouse / Chrome to verify
+
+None of these can be confirmed by `curl` or static reading; all require
+either Lighthouse against a real browser or a workstation-side browser
+DevTools session:
+
+- **Per-page deltas vs. §A-2** for PRs #137/138/141/142/144/145. The
+  expected directions are documented per-PR in §D; the actual numbers are
+  what a re-run is supposed to produce.
+- **B-11 bf-cache on `/chatbot`** — needs the Application tab "Back/forward
+  cache" panel in Chrome DevTools to enumerate the blocking reason. Code
+  review found no `unload`/`beforeunload` listener and no streaming
+  response, so the most likely remaining cause is a `<Script>` lifecycle
+  side effect or a third-party SDK; cannot be confirmed without a probe.
+- **B-12 LCP investigation on `/accidents` mobile** — needs Lighthouse to
+  re-identify the LCP element after PR #137's CLS fix. The B-12 fix path
+  (move heavy data work into `useMemo`, seed precomputed summary) was
+  not attempted in this pass because verification requires a real run.
+- **B-15 legacy-javascript-insight** — `web/package.json` has no
+  `browserslist` field, so Next 16 already targets the modern baseline
+  (Chrome 111+, Edge 111+, Firefox 111+, Safari 16.4+, sourced from
+  `next/dist/shared/lib/modern-browserslist-target.js`). Adding an
+  explicit `browserslist` would be a no-op against the same target. The
+  remaining `legacy-javascript-insight` firings are likely third-party
+  bundles (recharts, leaflet) shipping their own polyfills; addressing
+  that means library replacement, not a config tweak.
+
+### E-5. Recommended next action for the owner
+
+Either provision a PSI API key (free Google Cloud project, enable PageSpeed
+Insights API, generate restricted API key for `*.anzen-ai-portal.jp`) and
+re-run the 32-cell matrix via a small `node` script, or run
+`npx lighthouse@13` from a workstation with Chrome installed against the
+same 16 URLs and form factors. The §A-2 table is the diff target.
