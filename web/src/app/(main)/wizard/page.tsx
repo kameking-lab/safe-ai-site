@@ -57,7 +57,7 @@ export default function WizardPage() {
   };
 
   return (
-    <PageContainer as="main" width="prose">
+    <PageContainer width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="セットアップウィザード" description="事業所の業種・人数・想定リスクから、必要な保護具・教育・KY項目を初期セットアップします。" path="/wizard" />
       {/* ヘッダー */}

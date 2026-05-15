@@ -77,7 +77,7 @@ export default async function AccidentDetailPage({
   const similar = pickSimilarAccidents(accident, getAccidentCasesDataset());
 
   return (
-    <PageContainer as="main" width="prose">
+    <PageContainer width="prose">
       <JsonLd
         schema={[
           breadcrumbSchema([

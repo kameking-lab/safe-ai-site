@@ -117,7 +117,7 @@ function ResultView() {
 
   if (!isInputValid) {
     return (
-      <PageContainer as="main" width="prose" className="text-center">
+      <PageContainer width="prose" className="text-center">
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
           <p className="text-sm font-bold">入力情報が不足しています</p>
           <p className="mt-2 text-xs">
@@ -143,7 +143,7 @@ function ResultView() {
   const calculatorHref = `/subsidies/calculator?industry=${calculatorIndustry}&employees=${calculatorEmployees}`;
 
   return (
-    <PageContainer as="main" width="prose" className="print:max-w-none print:px-0">
+    <PageContainer width="prose" className="print:max-w-none print:px-0">
       {/* PDF用ヘッダー（印刷時のみ表示） */}
       <PDFPrintHeader
         industryLabel={industryData.label}
@@ -497,7 +497,7 @@ export default function WizardResultPage() {
   return (
     <Suspense
       fallback={
-        <PageContainer as="main" width="prose" className="text-center text-sm text-slate-500">
+        <PageContainer width="prose" className="text-center text-sm text-slate-500">
           診断結果を読み込み中...
         </PageContainer>
       }

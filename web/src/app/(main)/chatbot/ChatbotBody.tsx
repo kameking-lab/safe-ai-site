@@ -55,7 +55,7 @@ export function ChatbotBody() {
   const guide = isEn ? USAGE_GUIDE.en : USAGE_GUIDE.ja;
 
   return (
-    <PageContainer as="main" width="wide">
+    <PageContainer width="wide">
       <TranslatedPageHeader
         titleJa="安衛法AIチャットボット"
         titleEn="Occupational Safety Law AI Chat"

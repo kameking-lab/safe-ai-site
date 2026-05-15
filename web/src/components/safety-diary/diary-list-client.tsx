@@ -75,7 +75,7 @@ export function DiaryListClient() {
   );
 
   return (
-    <PageContainer as="main" width="prose">
+    <PageContainer width="prose">
       <LocalStorageWarningBanner />
       <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>

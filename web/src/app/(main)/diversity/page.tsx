@@ -297,7 +297,7 @@ const COLOR_CLASS: Record<DiversitySection["color"], { bg: string; border: strin
 
 export default function DiversityPage() {
   return (
-    <PageContainer as="main" width="prose">
+    <PageContainer width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={_title} description={_desc} path="/diversity" />
       <PageHeader

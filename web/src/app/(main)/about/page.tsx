@@ -174,7 +174,7 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
 
 export default function AboutPage() {
   return (
-    <PageContainer as="main" width="narrow">
+    <PageContainer width="narrow">
       <JsonLd
         schema={[
           personSchema(),

@@ -48,7 +48,7 @@ const KPI = [
 
 export default function OrganizationPage() {
   return (
-    <PageContainer as="main" width="wide">
+    <PageContainer width="wide">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={_title} description={_desc} path="/organization" />
       <PageHeader

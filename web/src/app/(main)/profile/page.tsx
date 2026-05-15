@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function ProfilePage() {
   return (
-    <PageContainer as="main" width="narrow" paddingY="none" className="py-8">
+    <PageContainer width="narrow" paddingY="none" className="py-8">
       <header className="mb-6">
         <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">自社プロファイル</h1>
         <p className="mt-1 text-sm text-slate-600">
