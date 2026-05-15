@@ -5,6 +5,7 @@ import { ChatbotPanel } from "@/components/chatbot-panel";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { useTranslation } from "@/contexts/language-context";
+import { PageContainer } from "@/components/layout";
 
 const CORE_LAWS = [
   { ja: "安衛法", en: "OSH Act (安衛法)" },
@@ -54,7 +55,7 @@ export function ChatbotBody() {
   const guide = isEn ? USAGE_GUIDE.en : USAGE_GUIDE.ja;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+    <PageContainer as="main" width="wide">
       <TranslatedPageHeader
         titleJa="安衛法AIチャットボット"
         titleEn="Occupational Safety Law AI Chat"
@@ -165,6 +166,6 @@ export function ChatbotBody() {
           },
         ]}
       />
-    </main>
+    </PageContainer>
   );
 }
