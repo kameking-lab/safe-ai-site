@@ -105,6 +105,14 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: [
           { key: "Content-Security-Policy", value: CSP },
+          // 2 years + includeSubDomains + preload is the canonical config
+          // required by hstspreload.org for the Chrome HSTS Preload List.
+          // Site owner must submit the domain at https://hstspreload.org/
+          // separately; this header only makes the site eligible.
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
