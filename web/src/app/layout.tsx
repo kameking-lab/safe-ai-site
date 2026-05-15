@@ -102,6 +102,12 @@ export default function RootLayout({
       <head>
         {/* FOUC 抑止: hydration 前に html.dark を確定させる */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {/* Warm up TCP/TLS for third-party origins before they're requested (B-15) */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
+        <link rel="dns-prefetch" href="https://formspree.io" />
       </head>
       <body className="min-h-full bg-slate-50 font-sans text-slate-900 dark:bg-slate-900 dark:text-slate-100">
         <Analytics />
