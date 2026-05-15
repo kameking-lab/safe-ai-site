@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bell, CheckCircle } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { PageContainer } from "@/components/layout";
 import { SubscribeForm } from "./subscribe-form";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -10,6 +11,7 @@ const _desc =
   "気象警報・労働安全衛生法改正・労働災害情報の通知とメール配信設定。重要な安全情報を見逃さない。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/notifications" },
   title: _title,
   description: _desc,
   openGraph: {
@@ -55,7 +57,7 @@ const ROADMAP = [
 
 export default function NotificationsPage() {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+    <PageContainer width="wide" paddingY="tight">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={_title} description={_desc} path="/notifications" />
       <PageHeader
@@ -73,7 +75,7 @@ export default function NotificationsPage() {
         </div>
         <p className="mb-4 text-xs text-slate-600 leading-5">
           大雨・暴風・高温注意情報などの気象警報が発令された際に、現場担当者へメールでお知らせします。
-          登録は無料です（地域指定・拠点別通知は Standard プラン以上で利用可能）。
+          登録は無料です（地域指定・拠点別通知は今後追加予定）。
         </p>
         <SubscribeForm />
       </div>
@@ -113,6 +115,6 @@ export default function NotificationsPage() {
           ))}
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

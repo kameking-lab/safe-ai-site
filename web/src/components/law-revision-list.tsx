@@ -8,6 +8,7 @@ import { fuzzyMatchAll, fuzzyMatch } from "@/lib/fuzzy-search";
 import { revisionMatchesIndustry } from "@/lib/law-revision-industry-tags";
 import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
+import { Cluster } from "@/components/layout";
 import { loadProfile, profileIndustryToTag, relevanceScore, type CompanyProfile } from "@/lib/company-profile";
 
 function formatDate(value: string) {
@@ -656,7 +657,7 @@ export function LawRevisionList({
       </div>
       <div className="mt-3 print:hidden">
         <p className="text-xs font-semibold text-slate-700">種別フィルタ</p>
-        <div className="mt-1 flex flex-wrap gap-2">
+        <Cluster gap="sm" className="mt-1">
           {["すべて", "法律", "省令", "通達", "告示", "ガイドライン"].map((k) => (
             <button
               key={k}
@@ -671,7 +672,7 @@ export function LawRevisionList({
               {k}
             </button>
           ))}
-        </div>
+        </Cluster>
       </div>
 
       {/* 影響度フィルタ + 施行日ソート */}

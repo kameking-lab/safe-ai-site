@@ -6,6 +6,7 @@ import { EasyJapaneseProvider } from "@/contexts/easy-japanese-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { JsonLd, organizationSchema, webSiteSchema, personSchema } from "@/components/json-ld";
 import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
+import { InstallPwaPrompt } from "@/components/install-pwa-prompt";
 import { CommandPaletteProvider } from "@/components/CommandPaletteProvider";
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
 import Analytics from "@/components/Analytics";
@@ -51,10 +52,16 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.anzen-ai-portal.jp"),
   alternates: {
     canonical: "https://www.anzen-ai-portal.jp",
+    languages: {
+      ja: "https://www.anzen-ai-portal.jp",
+      "en": "https://www.anzen-ai-portal.jp",
+      "x-default": "https://www.anzen-ai-portal.jp",
+    },
   },
   openGraph: {
     type: "website",
     locale: "ja_JP",
+    alternateLocale: ["en_US"],
     siteName: "安全AIポータル",
     title: {
       default: "安全AIポータル｜現場の安全を、AIで変える。",
@@ -103,6 +110,7 @@ export default function RootLayout({
         <JsonLd schema={webSiteSchema()} />
         <JsonLd schema={personSchema()} />
         <ServiceWorkerRegistrar />
+        <InstallPwaPrompt />
         <ThemeProvider>
           <LanguageProvider>
             <FuriganaProvider>

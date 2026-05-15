@@ -29,7 +29,7 @@ export function Mascot({
   const px = SIZE_MAP[size];
   return (
     <Image
-      src="/mascot/mascot-chihuahua-4.png"
+      src="/mascot/mascot-chihuahua-4.webp"
       alt={alt}
       width={px}
       height={px}

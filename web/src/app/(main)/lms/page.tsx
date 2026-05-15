@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LmsPanel } from "@/components/lms-panel";
+import { PageContainer } from "@/components/layout";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -9,6 +10,7 @@ const _desc =
   "複数拠点・部署の安全教育を一元管理。受講進捗・グループ管理・修了証発行・業種別レポートをまとめて確認できます。2026年秋β公開予定、現在ウェイティングリスト先行受付中。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/lms" },
   title: _title,
   description: _desc,
   openGraph: {
@@ -24,7 +26,7 @@ export default function LmsPage() {
       
       <PageJsonLd name="学習管理システム (LMS)" description="事業所単位での教育受講管理・修了証発行・進捗トラッキング。" path="/lms" />
       {/* βウェイティングリスト — 2026年秋公開予定 */}
-      <div className="mx-auto mt-4 max-w-5xl px-4">
+      <PageContainer width="wide" paddingY="none" className="mt-4">
         <div className="rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 via-white to-emerald-50 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-violet-700">
@@ -50,7 +52,7 @@ export default function LmsPage() {
             β先行登録 →
           </Link>
         </div>
-      </div>
+      </PageContainer>
       <LmsPanel />
     </>
   );

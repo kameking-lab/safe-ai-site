@@ -223,7 +223,7 @@ export function AccidentDatabasePanel({
               <button
                 type="button"
                 onClick={resetIndustries}
-                className="text-[11px] font-semibold text-slate-400 hover:text-red-500 transition"
+                className="text-[11px] font-semibold text-slate-500 hover:text-red-500 transition"
               >
                 フィルタをリセット
               </button>
@@ -371,6 +371,14 @@ export function AccidentDatabasePanel({
                   <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
                     {accident.severity}
                   </span>
+                  {accident.provenance === "preliminary" && (
+                    <span
+                      className="rounded-full border border-orange-300 bg-orange-50 px-2 py-0.5 text-[11px] font-semibold text-orange-700"
+                      title="厚労省速報集計値から導出したパターン事例。確定個票ではありません。"
+                    >
+                      速報
+                    </span>
+                  )}
                   <span className="text-xs text-slate-500">{accident.occurredOn}</span>
                 </div>
 

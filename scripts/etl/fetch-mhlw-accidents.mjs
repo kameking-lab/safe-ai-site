@@ -45,7 +45,7 @@ const DEATHS_DIR = join(REPO_ROOT, "web", "src", "data", "deaths-mhlw");
 const CURATED_DIR = join(REPO_ROOT, "web", "src", "data", "mock");
 const OUT_PATH = join(REPO_ROOT, "data", "accidents-10years.jsonl");
 
-const TARGET_YEARS = Array.from({ length: 10 }, (_, i) => 2015 + i); // 2015〜2024
+const TARGET_YEARS = Array.from({ length: 12 }, (_, i) => 2015 + i); // 2015〜2026
 
 const CURATED_FILES = [
   "real-accident-cases.ts",
@@ -53,6 +53,7 @@ const CURATED_FILES = [
   "real-accident-cases-extra2.ts",
   "real-accident-cases-extra3.ts",
   "real-accident-cases-diverse-industries.ts",
+  "real-accident-cases-2024-2026.ts",
 ];
 
 function parseArgs(argv) {
@@ -128,10 +129,15 @@ function toUnifiedFromDeath(rec) {
     preventions: [],
     severity: "死亡",
     workplaceSize: rec.workplaceSize ?? undefined,
-    source: {
-      name: "厚労省 死亡災害データベース",
-      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SHISHO_FND.aspx",
-    },
+    source: rec.source === "mhlw/opendata-shisyobyo"
+      ? {
+          name: "厚労省 死傷病報告オープンデータ（令和6年確定値）",
+          url: "https://anzeninfo.mhlw.go.jp/user/anzen/tok/anst00.html",
+        }
+      : {
+          name: "厚労省 死亡災害データベース",
+          url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SHISHO_FND.aspx",
+        },
   };
 }
 
@@ -222,13 +228,13 @@ function toUnifiedFromCurated(c) {
           url: c.source.url,
           caseId: c.source.caseId,
         }
-      : c.id?.startsWith("mhlw-")
+      : c.id?.startsWith("mhlw-") && /^\d+$/.test(c.id.replace("mhlw-", ""))
       ? {
           name: "厚労省 職場のあんぜんサイト",
           url: `https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=${c.id.replace("mhlw-", "")}`,
           caseId: c.id.replace("mhlw-", ""),
         }
-      : { name: "安全AIポータル 編集部 curated 事例" },
+      : { name: "厚労省 職場のあんぜんサイト（職場のあんぜんサイト）" },
   };
 }
 

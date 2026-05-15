@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
+import { PageContainer } from "@/components/layout";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { useLanguage } from "@/contexts/language-context";
 
@@ -94,7 +95,7 @@ export default function InquiryForm() {
     "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-base outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/30 sm:text-sm";
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 px-4 py-8 lg:px-8">
+    <PageContainer width="narrow" className="space-y-6">
       <TranslatedPageHeader
         titleJa="ご意見・ご質問・改善提案"
         titleEn="Feedback / Questions / Improvement Suggestions"
@@ -207,7 +208,7 @@ export default function InquiryForm() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="inquiry-name" className="block text-sm font-semibold text-slate-700">
-                {isEn ? "Name" : "お名前"} <span className="text-xs text-slate-400">{isEn ? "(optional)" : "（任意）"}</span>
+                {isEn ? "Name" : "お名前"} <span className="text-xs text-slate-500">{isEn ? "(optional)" : "（任意）"}</span>
               </label>
               <input
                 id="inquiry-name"
@@ -219,7 +220,7 @@ export default function InquiryForm() {
             </div>
             <div>
               <label htmlFor="inquiry-email" className="block text-sm font-semibold text-slate-700">
-                {isEn ? "Email" : "メールアドレス"} <span className="text-xs text-slate-400">{isEn ? "(optional, for reply)" : "（任意・返信希望時）"}</span>
+                {isEn ? "Email" : "メールアドレス"} <span className="text-xs text-slate-500">{isEn ? "(optional, for reply)" : "（任意・返信希望時）"}</span>
               </label>
               <input
                 id="inquiry-email"
@@ -234,7 +235,7 @@ export default function InquiryForm() {
 
           <div>
             <label htmlFor="inquiry-industry" className="block text-sm font-semibold text-slate-700">
-              {isEn ? "Industry" : "業種"} <span className="text-xs text-slate-400">{isEn ? "(optional)" : "（任意）"}</span>
+              {isEn ? "Industry" : "業種"} <span className="text-xs text-slate-500">{isEn ? "(optional)" : "（任意）"}</span>
             </label>
             <select
               id="inquiry-industry"
@@ -307,6 +308,6 @@ export default function InquiryForm() {
           </p>
         </form>
       )}
-    </div>
+    </PageContainer>
   );
 }
