@@ -223,7 +223,7 @@ export function AccidentDatabasePanel({
               <button
                 type="button"
                 onClick={resetIndustries}
-                className="text-[11px] font-semibold text-slate-400 hover:text-red-500 transition"
+                className="text-[11px] font-semibold text-slate-500 hover:text-red-500 transition"
               >
                 フィルタをリセット
               </button>
