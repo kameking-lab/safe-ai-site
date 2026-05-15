@@ -19,6 +19,7 @@ import {
   YAxis,
 } from "recharts";
 import { CardGrid, PageContainer, Section, Stack } from "@/components/layout";
+import { LazyChart } from "@/components/charts/lazy-chart";
 import type { AnalyticsAggregates, NameCount } from "@/lib/accidents-analytics/types";
 
 const PALETTE = [
@@ -88,11 +89,11 @@ function ChartCard({
       {description ? (
         <p className="mt-0.5 text-[11px] text-slate-500 sm:text-xs">{description}</p>
       ) : null}
-      <div className="mt-3" style={{ width: "100%", height }}>
+      <LazyChart className="mt-3" style={{ width: "100%", height }}>
         <ResponsiveContainer width="100%" height="100%">
           {children as React.ReactElement}
         </ResponsiveContainer>
-      </div>
+      </LazyChart>
     </div>
   );
 }

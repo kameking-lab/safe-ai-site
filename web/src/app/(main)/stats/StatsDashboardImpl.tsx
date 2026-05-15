@@ -23,6 +23,7 @@ import type {
 } from "@/lib/stats/types";
 import { PageContainer } from "@/components/layout/page-container";
 import { Stack } from "@/components/layout/stack";
+import { LazyChart } from "@/components/charts/lazy-chart";
 
 const PERIODS: Array<{ id: StatsPeriod; label: string }> = [
   { id: "7d", label: "直近 7 日" },
@@ -633,7 +634,7 @@ function SectionPages({ data }: { data: StatsResponse }) {
 function SectionSources({ data }: { data: StatsResponse }) {
   return (
     <Section heading="流入元分析" subheading="セッション元（Source）と構成比">
-      <div className="h-64 w-full">
+      <LazyChart className="h-64 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -652,7 +653,7 @@ function SectionSources({ data }: { data: StatsResponse }) {
             <Tooltip formatter={(v) => formatNum(Number(v))} />
           </PieChart>
         </ResponsiveContainer>
-      </div>
+      </LazyChart>
       <ul className="mt-3 space-y-1 text-xs">
         {data.sources.map((s) => (
           <li key={s.source} className="flex items-center justify-between">
@@ -755,7 +756,7 @@ function SectionChatbot({ data }: { data: StatsResponse }) {
         <Stat label="質問数（合計）" value={formatNum(c.totalQuestions)} accent="emerald" />
         <Stat label="平均応答時間" value={`${(c.avgResponseMs / 1000).toFixed(2)}秒`} accent="sky" />
       </div>
-      <div className="mt-4 h-56 w-full">
+      <LazyChart className="mt-4 h-56 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={c.byCategory}
@@ -773,7 +774,7 @@ function SectionChatbot({ data }: { data: StatsResponse }) {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </div>
+      </LazyChart>
     </Section>
   );
 }
