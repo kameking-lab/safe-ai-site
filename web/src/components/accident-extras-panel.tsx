@@ -269,9 +269,12 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
 
 export function AccidentExtrasPanel() {
   const [profile, setProfile] = useState<CompanyProfile | null>(null);
+  const [mounted, setMounted] = useState(false);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setProfile(loadProfile());
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
     const onChange = () => setProfile(loadProfile());
     window.addEventListener("company-profile-changed", onChange);
     return () => window.removeEventListener("company-profile-changed", onChange);
@@ -279,7 +282,16 @@ export function AccidentExtrasPanel() {
 
   return (
     <div className="space-y-4">
-      <ProfileRecommend profile={profile} />
+      <div className="min-h-[280px] sm:min-h-[320px]">
+        {mounted ? (
+          <ProfileRecommend profile={profile} />
+        ) : (
+          <div
+            className="h-[280px] animate-pulse rounded-2xl border border-slate-200 bg-slate-50/60 sm:h-[320px]"
+            aria-hidden="true"
+          />
+        )}
+      </div>
       <CrossTab />
     </div>
   );
