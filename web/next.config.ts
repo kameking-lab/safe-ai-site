@@ -1,13 +1,17 @@
 import type { NextConfig } from "next";
 
+// GA4 (gtag.js) loads from www.googletagmanager.com and beacons to
+// www.google-analytics.com / *.analytics.google.com. AdSense loads from
+// pagead2.googlesyndication.com and renders ad iframes from
+// googleads.g.doubleclick.net and tpc.googlesyndication.com.
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://formspree.io https://generativelanguage.googleapis.com",
-  "frame-src 'none'",
+  "connect-src 'self' https://formspree.io https://generativelanguage.googleapis.com https://www.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://pagead2.googlesyndication.com",
+  "frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
