@@ -288,6 +288,7 @@ export default function ContactForm() {
                 value={form.company}
                 onChange={handleChange}
                 placeholder="株式会社〇〇建設（個人の場合は屋号／お名前）"
+                autoComplete="organization"
                 className={inputClass}
               />
             </div>
@@ -302,6 +303,7 @@ export default function ContactForm() {
                 value={form.name}
                 onChange={handleChange}
                 placeholder="山田 太郎"
+                autoComplete="name"
                 className={inputClass}
               />
             </div>
@@ -320,6 +322,8 @@ export default function ContactForm() {
                 value={form.email}
                 onChange={handleChange}
                 placeholder="yamada@example.co.jp"
+                autoComplete="email"
+                inputMode="email"
                 className={inputClass}
               />
             </div>
@@ -334,6 +338,8 @@ export default function ContactForm() {
                 value={form.phone}
                 onChange={handleChange}
                 placeholder="03-0000-0000"
+                autoComplete="tel"
+                inputMode="tel"
                 className={inputClass}
               />
             </div>
