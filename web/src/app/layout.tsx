@@ -52,10 +52,16 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.anzen-ai-portal.jp"),
   alternates: {
     canonical: "https://www.anzen-ai-portal.jp",
+    languages: {
+      ja: "https://www.anzen-ai-portal.jp",
+      "en": "https://www.anzen-ai-portal.jp",
+      "x-default": "https://www.anzen-ai-portal.jp",
+    },
   },
   openGraph: {
     type: "website",
     locale: "ja_JP",
+    alternateLocale: ["en_US"],
     siteName: "安全AIポータル",
     title: {
       default: "安全AIポータル｜現場の安全を、AIで変える。",

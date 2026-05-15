@@ -89,6 +89,74 @@ export function articleListSchema(
   };
 }
 
+/**
+ * Single NewsArticle schema for individual article pages.
+ * Google Discover prefers NewsArticle over Article when content is
+ * timely/news-style; safety-law commentary and accident analysis fit
+ * that mold. Wider 16:9 image (>=1200px) and inLanguage tagging are
+ * required for Top Stories eligibility.
+ */
+export function newsArticleSchema(input: {
+  headline: string;
+  description: string;
+  url: string;
+  datePublished: string;
+  dateModified: string;
+  authorName: string;
+  authorUrl?: string;
+  image?: string;
+  inLanguage?: string;
+  keywords?: string[];
+  articleSection?: string;
+}): Schema {
+  const {
+    headline,
+    description,
+    url,
+    datePublished,
+    dateModified,
+    authorName,
+    authorUrl,
+    image,
+    inLanguage = "ja",
+    keywords,
+    articleSection,
+  } = input;
+  return {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline,
+    description,
+    url,
+    datePublished,
+    dateModified,
+    inLanguage,
+    ...(image ? { image: [image] } : {}),
+    ...(keywords && keywords.length ? { keywords: keywords.join(", ") } : {}),
+    ...(articleSection ? { articleSection } : {}),
+    author: {
+      "@type": "Person",
+      name: authorName,
+      ...(authorUrl ? { url: authorUrl } : {}),
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "安全AIポータル",
+      url: "https://www.anzen-ai-portal.jp",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://www.anzen-ai-portal.jp/apple-touch-icon.png",
+        width: 180,
+        height: 180,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+    },
+  };
+}
+
 export function newsArticleListSchema(
   items: { headline: string; datePublished: string; url: string; description?: string }[]
 ): Schema {

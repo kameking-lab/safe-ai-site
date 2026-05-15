@@ -5,10 +5,20 @@ export const runtime = "edge";
 
 export function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const title = searchParams.get("title") ?? "現場の安全を、AIで変える。";
-  const desc =
-    searchParams.get("desc") ??
-    "法改正・現場リスク・事故DB・KY用紙・Eラーニングを一つのポータルに集約";
+  const lang = searchParams.get("lang") === "en" ? "en" : "ja";
+  const defaults = lang === "en"
+    ? {
+        title: "Reshape workplace safety with AI.",
+        desc: "Law updates, accident DB, KY forms, chemical RA, and e-learning — one portal for site safety.",
+        tagline: "ANZEN AI Portal — Designed by safety experts",
+      }
+    : {
+        title: "現場の安全を、AIで変える。",
+        desc: "法改正・現場リスク・事故DB・KY用紙・Eラーニングを一つのポータルに集約",
+        tagline: "安全AIポータル — 専門家チームによる設計",
+      };
+  const title = searchParams.get("title") ?? defaults.title;
+  const desc = searchParams.get("desc") ?? defaults.desc;
 
   return new ImageResponse(
     (
@@ -51,7 +61,7 @@ export function GET(req: NextRequest) {
             marginBottom: "20px",
           }}
         >
-          安全AIポータル — 専門家チームによる設計
+          {defaults.tagline}
         </div>
 
         <div
