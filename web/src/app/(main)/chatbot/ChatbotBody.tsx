@@ -104,7 +104,21 @@ export function ChatbotBody() {
 
       {/* Chat panel */}
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <Suspense fallback={<div className="text-sm text-slate-400">{isEn ? "Loading…" : "読み込み中…"}</div>}>
+        <Suspense
+          fallback={
+            <div
+              role="status"
+              aria-live="polite"
+              aria-busy="true"
+              className="space-y-3"
+            >
+              <span className="sr-only">{isEn ? "Loading" : "読み込み中"}</span>
+              <div className="h-12 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+              <div className="h-32 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+              <div className="h-10 w-2/3 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+            </div>
+          }
+        >
           <ChatbotPanel />
         </Suspense>
       </div>

@@ -5,6 +5,7 @@ import { ChemicalRaExtras } from "@/components/chemical-ra-extras";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
 import { PageContainer } from "@/components/layout";
+import { PageSkeleton } from "@/components/skeleton";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
@@ -56,7 +57,7 @@ export default function ChemicalRaPage() {
         <LocalStorageWarningBanner />
       </PageContainer>
       <ChemicalRaExtras />
-      <Suspense fallback={<PageContainer><span className="text-sm text-slate-500">読み込み中…</span></PageContainer>}>
+      <Suspense fallback={<PageSkeleton label="化学物質リスクアセスメントを読み込み中" />}>
         <ChemicalRaPanel />
       </Suspense>
     </>

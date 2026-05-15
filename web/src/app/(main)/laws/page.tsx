@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LawsPageClient } from "@/components/laws-page-client";
+import { PageSkeleton } from "@/components/skeleton";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
@@ -39,7 +40,7 @@ export default function LawsPage() {
   return (
     <>
       <JsonLd schema={lawSchema} />
-      <Suspense fallback={<p className="px-4 py-6 text-sm text-slate-600">読み込み中…</p>}>
+      <Suspense fallback={<PageSkeleton label="法改正一覧を読み込み中" />}>
         <LawsPageClient />
       </Suspense>
       <RelatedPageCards

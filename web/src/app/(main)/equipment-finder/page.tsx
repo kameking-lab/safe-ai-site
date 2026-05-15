@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { EquipmentFinderClient } from "@/components/equipment-finder-client";
 import { PageContainer } from "@/components/layout";
+import { PanelSkeleton } from "@/components/skeleton";
 import { ogImageUrl } from "@/lib/og-url";
 import { SITE_URL } from "@/lib/seo-metadata";
 import { getAllEquipment } from "@/lib/equipment-recommendation";
@@ -56,7 +57,7 @@ export default function EquipmentFinderPage() {
         </div>
       </header>
 
-      <Suspense fallback={<div className="text-sm text-slate-500">読み込み中…</div>}>
+      <Suspense fallback={<PanelSkeleton rows={4} label="保護具レコメンドを読み込み中" />}>
         <EquipmentFinderClient />
       </Suspense>
     </PageContainer>
