@@ -45,11 +45,19 @@ const nextConfig: NextConfig = {
   // 直感URL（短い・単数形・別表記・日英両パターン）から正規ページへの恒久リダイレクト
   async redirects() {
     return [
+      // Apex → www canonical (301 for unambiguous SEO consolidation; Vercel's
+      // default apex alias responds with 307 Temporary which weakens the signal).
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "anzen-ai-portal.jp" }],
+        destination: "https://www.anzen-ai-portal.jp/:path*",
+        statusCode: 301,
+      },
       // 旧Vercelドメイン → 本番カスタムドメインへの恒久転送
       {
         source: "/:path*",
         has: [{ type: "host", value: "safe-ai-site.vercel.app" }],
-        destination: "https://anzen-ai-portal.jp/:path*",
+        destination: "https://www.anzen-ai-portal.jp/:path*",
         permanent: true,
       },
       // フィードバック → コンテクスト付きお問い合わせ
