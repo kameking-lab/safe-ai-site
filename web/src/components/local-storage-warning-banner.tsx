@@ -1,21 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HardDrive, X } from "lucide-react";
 
 const DISMISSED_KEY = "safe-ai:local-storage-warning-dismissed:v1";
 
-function getInitialDismissed(): boolean {
-  if (typeof window === "undefined") return true;
-  try {
-    return Boolean(localStorage.getItem(DISMISSED_KEY));
-  } catch {
-    return false;
-  }
-}
-
 export function LocalStorageWarningBanner() {
-  const [dismissed, setDismissed] = useState<boolean>(getInitialDismissed);
+  // Start hidden on both server and client first paint to avoid hydration mismatch.
+  // Reveal in useEffect only when localStorage flag is unset.
+  const [dismissed, setDismissed] = useState<boolean>(true);
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem(DISMISSED_KEY)) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setDismissed(false);
+      }
+    } catch {
+      setDismissed(false);
+    }
+  }, []);
 
   if (dismissed) return null;
 
