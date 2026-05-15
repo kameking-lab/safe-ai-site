@@ -427,8 +427,8 @@ export default function DiversityPage() {
             <thead className="bg-slate-50 text-left text-[11px] font-bold text-slate-600">
               <tr>
                 <th className="px-3 py-2">日本語</th>
-                <th className="px-3 py-2">English</th>
-                <th className="px-3 py-2">Tiếng Việt</th>
+                <th className="px-3 py-2" lang="en">English</th>
+                <th className="px-3 py-2" lang="vi">Tiếng Việt</th>
                 <th className="px-3 py-2">中文</th>
                 <th className="px-3 py-2">Português</th>
                 <th className="px-3 py-2">Tagalog</th>

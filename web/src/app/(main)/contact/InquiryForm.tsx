@@ -172,7 +172,7 @@ export default function InquiryForm() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="inquiry-name" className="block text-sm font-semibold text-slate-700">
-                お名前 <span className="text-xs text-slate-400">（任意）</span>
+                お名前 <span className="text-xs text-slate-500">（任意）</span>
               </label>
               <input
                 id="inquiry-name"
@@ -184,7 +184,7 @@ export default function InquiryForm() {
             </div>
             <div>
               <label htmlFor="inquiry-email" className="block text-sm font-semibold text-slate-700">
-                メールアドレス <span className="text-xs text-slate-400">（任意・返信希望時）</span>
+                メールアドレス <span className="text-xs text-slate-500">（任意・返信希望時）</span>
               </label>
               <input
                 id="inquiry-email"
@@ -199,7 +199,7 @@ export default function InquiryForm() {
 
           <div>
             <label htmlFor="inquiry-industry" className="block text-sm font-semibold text-slate-700">
-              業種 <span className="text-xs text-slate-400">（任意）</span>
+              業種 <span className="text-xs text-slate-500">（任意）</span>
             </label>
             <select
               id="inquiry-industry"
