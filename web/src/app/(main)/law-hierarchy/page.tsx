@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageContainer, Section, Stack, Cluster } from "@/components/layout";
-import { JsonLd, webPageSchema, breadcrumbSchema } from "@/components/json-ld";
+import { JsonLd, webPageSchema, breadcrumbSchema, dataCatalogSchema } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import {
   SITE_URL,
@@ -200,6 +200,16 @@ export default function LawHierarchyPage() {
             { name: "法改正情報", url: `${SITE_URL}/laws` },
             { name: "法令階層マップ", url: PAGE_URL },
           ]),
+          dataCatalogSchema({
+            name: "労働安全衛生法令 階層カタログ",
+            description: PAGE_DESC,
+            url: PAGE_URL,
+            datasets: LAW_HIERARCHY_NODES.map((n) => ({
+              name: n.title,
+              url: getEGovUrl(n.eGovLawId) ?? `${SITE_URL}/law-search?law=${encodeURIComponent(n.title)}`,
+              description: n.description,
+            })),
+          }),
         ]}
       />
 

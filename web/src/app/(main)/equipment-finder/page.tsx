@@ -3,8 +3,9 @@ import { Suspense } from "react";
 import { EquipmentFinderClient } from "@/components/equipment-finder-client";
 import { PageContainer } from "@/components/layout";
 import { ogImageUrl } from "@/lib/og-url";
-
-import { PageJsonLd } from "@/components/page-json-ld";
+import { SITE_URL } from "@/lib/seo-metadata";
+import { getAllEquipment } from "@/lib/equipment-recommendation";
+import { JsonLd, webPageSchema, breadcrumbSchema, productCollectionSchema } from "@/components/json-ld";
 export const metadata: Metadata = {
   title: "保護具AIファインダー｜種類選択→絞り込みで最適保護具を提案",
   description:
@@ -18,10 +19,30 @@ export const metadata: Metadata = {
 };
 
 export default function EquipmentFinderPage() {
+  const url = `${SITE_URL}/equipment-finder`;
+  const title = "保護具AIファインダー｜種類選択→絞り込みで最適保護具を提案";
+  const description = "12カテゴリから保護具の種類を選び、種類別の絞り込み質問で最適な装備をレコメンド。JIS規格・国家検定品も明示。";
   return (
     <PageContainer as="main" width="prose">
-      {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="保護具AIファインダー｜種類選択→絞り込みで最適保護具を提案" description="12カテゴリから保護具の種類を選び、種類別の絞り込み質問で最適な装備をレコメンド。JIS規格・国家検定品も明示。" path="/equipment-finder" />
+      <JsonLd
+        schema={[
+          webPageSchema({ name: title, description, url }),
+          breadcrumbSchema([
+            { name: "ホーム", url: SITE_URL },
+            { name: "保護具AIファインダー", url },
+          ]),
+          productCollectionSchema({
+            name: title,
+            url,
+            products: getAllEquipment().slice(0, 20).map((item) => ({
+              name: item.name,
+              url: `${SITE_URL}/equipment/${item.id}`,
+              description: item.spec,
+              brand: item.maker,
+            })),
+          }),
+        ]}
+      />
       <header className="mb-5">
         <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
           🛡 保護具AIファインダー

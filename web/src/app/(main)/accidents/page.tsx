@@ -8,7 +8,7 @@ import { RelatedPageCards } from "@/components/related-page-cards";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { ogImageUrl } from "@/lib/og-url";
 import { SITE_URL, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
-import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
+import { JsonLd, datasetSchema, webPageSchema, breadcrumbSchema } from "@/components/json-ld";
 import {
   getAccidentCasesDataset,
   getAccidentProvenanceCounts,
@@ -34,18 +34,32 @@ export const metadata: Metadata = {
 };
 
 export default function AccidentsPage() {
-  const accidentSchema = newsArticleListSchema(
-    getAccidentCasesDataset().map((c) => ({
-      headline: c.title,
-      datePublished: c.occurredOn,
-      url: `${SITE_URL}/accidents`,
-      description: c.summary,
-    }))
-  );
+  const totalCount = getAccidentCasesDataset().length;
 
   return (
     <>
-      <JsonLd schema={accidentSchema} />
+      <JsonLd
+        schema={[
+          webPageSchema({ name: _title, description: _desc, url: `${SITE_URL}/accidents` }),
+          breadcrumbSchema([
+            { name: "ホーム", url: SITE_URL },
+            { name: "事故データベース", url: `${SITE_URL}/accidents` },
+          ]),
+          datasetSchema({
+            name: "労働災害 統合事故事例データベース",
+            description: _desc,
+            url: `${SITE_URL}/accidents`,
+            keywords: ["労働災害", "事故事例", "死亡災害", "業種別", "厚生労働省", "再発防止"],
+            temporalCoverage: "2014/2026",
+            license: "https://creativecommons.org/licenses/by/4.0/",
+            variableMeasured: [`総収録件数: ${totalCount}件`, "業種", "事故種類", "発生年月", "重傷度"],
+            isBasedOn: [
+              { name: "厚生労働省 職場のあんぜんサイト 死亡災害DB", url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.aspx" },
+              { name: "厚生労働省 労働者死傷病報告オープンデータ", url: "https://anzeninfo.mhlw.go.jp/information/sokuhou.html" },
+            ],
+          }),
+        ]}
+      />
       <HomeScreen variant="accidents">
         <TranslatedPageHeader
           titleJa="事故データベース"
