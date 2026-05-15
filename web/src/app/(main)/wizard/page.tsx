@@ -17,6 +17,7 @@ import {
 import matrix from "@/data/compliance-matrix.json";
 
 import { PageJsonLd } from "@/components/page-json-ld";
+import { PageContainer } from "@/components/layout";
 const STEPS = [
   { id: 1, label: "業種", icon: Building2 },
   { id: 2, label: "規模", icon: Users },
@@ -56,7 +57,7 @@ export default function WizardPage() {
   };
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+    <PageContainer as="main" width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="セットアップウィザード" description="事業所の業種・人数・想定リスクから、必要な保護具・教育・KY項目を初期セットアップします。" path="/wizard" />
       {/* ヘッダー */}
@@ -370,6 +371,6 @@ export default function WizardPage() {
           </Link>
         </div>
       </section>
-    </main>
+    </PageContainer>
   );
 }
