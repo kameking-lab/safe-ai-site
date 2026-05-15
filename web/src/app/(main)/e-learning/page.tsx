@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { HomeScreen } from "@/components/home-screen";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
@@ -36,7 +37,14 @@ export default function ELearningPage() {
   return (
     <>
       <JsonLd schema={courseSchema} />
-      <HomeScreen variant="elearning">
+      <Suspense
+        fallback={
+          <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">
+            <div className="h-40 animate-pulse rounded-lg bg-slate-100" />
+          </div>
+        }
+      >
+        <HomeScreen variant="elearning">
         <TranslatedPageHeader
           titleJa="Eラーニング"
           titleEn="E-Learning"
@@ -46,6 +54,7 @@ export default function ELearningPage() {
           iconColor="emerald"
         />
       </HomeScreen>
+      </Suspense>
       <RelatedPageCards
         heading="合わせて使う"
         pages={[

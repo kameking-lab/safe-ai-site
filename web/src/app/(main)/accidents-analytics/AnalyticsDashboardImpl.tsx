@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Bar,
   BarChart,
@@ -118,8 +119,30 @@ function applyFilter(
 }
 
 export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) {
-  const [industryFilter, setIndustryFilter] = useState<string>("");
-  const [typeFilter, setTypeFilter] = useState<string>("");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [industryFilter, setIndustryFilter] = useState<string>(
+    () => searchParams?.get("industry") ?? "",
+  );
+  const [typeFilter, setTypeFilter] = useState<string>(
+    () => searchParams?.get("type") ?? "",
+  );
+
+  // Sync filter state -> URL (replace so back goes to a previous page, not a previous filter)
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (industryFilter) params.set("industry", industryFilter);
+    if (typeFilter) params.set("type", typeFilter);
+    const qs = params.toString();
+    const next = qs ? `${pathname}?${qs}` : pathname;
+    const current =
+      window.location.pathname + (window.location.search || "");
+    if (next !== current) {
+      router.replace(next, { scroll: false });
+    }
+  }, [industryFilter, typeFilter, pathname, router]);
 
   const industryOptions = useMemo(
     () => aggregates.industryRanking.map((x) => x.name),

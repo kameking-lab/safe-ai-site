@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { allLawArticles, type LawArticle } from "@/data/laws";
 import { SITE_STATS } from "@/data/site-stats";
 import { InputWithVoice } from "@/components/voice-input-field";
@@ -242,11 +243,37 @@ function AiSummaryModal({
 }
 
 export function LawSearchPanel() {
-  const [query, setQuery] = useState("");
-  const [selectedLaw, setSelectedLaw] = useState<string>("all");
-  const [articleNumQuery, setArticleNumQuery] = useState("");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [query, setQuery] = useState(() => searchParams?.get("q") ?? "");
+  const [selectedLaw, setSelectedLaw] = useState<string>(
+    () => searchParams?.get("law") ?? "all",
+  );
+  const [articleNumQuery, setArticleNumQuery] = useState(
+    () => searchParams?.get("art") ?? "",
+  );
   const [summaryTarget, setSummaryTarget] = useState<LawArticle | null>(null);
-  const [mode, setMode] = useState<"curated" | "mhlw">("curated");
+  const [mode, setMode] = useState<"curated" | "mhlw">(
+    () => (searchParams?.get("mode") === "mhlw" ? "mhlw" : "curated"),
+  );
+
+  // Sync state -> URL (replace so we don't pollute history)
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (selectedLaw && selectedLaw !== "all") params.set("law", selectedLaw);
+    if (articleNumQuery) params.set("art", articleNumQuery);
+    if (mode !== "curated") params.set("mode", mode);
+    const qs = params.toString();
+    const next = qs ? `${pathname}?${qs}` : pathname;
+    const current =
+      window.location.pathname + (window.location.search || "");
+    if (next !== current) {
+      router.replace(next, { scroll: false });
+    }
+  }, [query, selectedLaw, articleNumQuery, mode, pathname, router]);
 
   const filtered = useMemo(() => {
     const nq = normalizeQuery(query);
