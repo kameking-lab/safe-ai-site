@@ -71,7 +71,10 @@ const nextConfig: NextConfig = {
       { source: "/law", destination: "/laws", permanent: true },
       { source: "/accident", destination: "/accidents", permanent: true },
       { source: "/equipment-search", destination: "/equipment-finder", permanent: true },
-      { source: "/quiz", destination: "/exam-quiz", permanent: true },
+      // /quiz is now served by a real page that re-renders the /exam-quiz
+      // component with a canonical pointing at /exam-quiz. Lighthouse B-10
+      // (PR #135) measured ~316 ms wasted on the 308 redirect; the re-export
+      // collapses that hop while keeping SEO consolidated via canonical.
       { source: "/e-learn", destination: "/e-learning", permanent: true },
       { source: "/elearning", destination: "/e-learning", permanent: true },
       { source: "/support", destination: "/contact", permanent: true },
