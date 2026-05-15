@@ -111,3 +111,110 @@ export type StatsResponse = {
   chatbot: ChatbotStats;
   insights: Insight;
 };
+
+/**
+ * Google Search Console — SEO performance signals exposed at /api/search-console.
+ *
+ *  - summary: aggregate impressions / clicks / CTR / position over the period.
+ *  - queries: top search queries that brought visitors to the site.
+ *  - pages: top landing pages ranked by clicks.
+ *  - countries: country breakdown (top 10).
+ *  - devices: device-category breakdown (mobile / desktop / tablet).
+ */
+export type SearchConsoleSummary = {
+  impressions: number;
+  clicks: number;
+  /** click-through rate, 0.0–1.0 */
+  ctr: number;
+  /** average ranking position; smaller is better */
+  position: number;
+};
+
+export type SearchConsoleQueryRow = {
+  query: string;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  position: number;
+};
+
+export type SearchConsolePageRow = {
+  page: string;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  position: number;
+};
+
+export type SearchConsoleCountryRow = {
+  country: string;
+  impressions: number;
+  clicks: number;
+};
+
+export type SearchConsoleDeviceRow = {
+  device: "MOBILE" | "DESKTOP" | "TABLET" | string;
+  impressions: number;
+  clicks: number;
+};
+
+export type SearchConsoleResponse = {
+  period: StatsPeriod;
+  /** "gsc" when the live API answered, otherwise "mock". */
+  source: "gsc" | "mock";
+  generatedAt: string;
+  /** Site property used (https URL or sc-domain: form). Empty when unknown. */
+  siteUrl: string;
+  summary: SearchConsoleSummary;
+  queries: SearchConsoleQueryRow[];
+  pages: SearchConsolePageRow[];
+  countries: SearchConsoleCountryRow[];
+  devices: SearchConsoleDeviceRow[];
+  /** Set when the live API was attempted and rejected, surfaced to the UI. */
+  error?: string;
+};
+
+/**
+ * GA4 page-analytics expansion — exposed at /api/stats/page-analytics.
+ * The original /api/stats already returns a top-10 page list; this endpoint
+ * adds engagement / device / referral breakdowns used by the SEO dashboard.
+ */
+export type PageAnalyticsPage = {
+  url: string;
+  title: string;
+  pv: number;
+  avgSec: number;
+  /** engagement rate 0.0–1.0 */
+  engagementRate: number;
+  /** bounce rate 0.0–1.0 */
+  bounceRate: number;
+};
+
+export type EngagementMetrics = {
+  engagementRate: number;
+  avgSessionSec: number;
+  pagesPerSession: number;
+};
+
+export type DeviceShare = {
+  device: string;
+  sessions: number;
+  pct: number;
+};
+
+export type ReferralRow = {
+  source: string;
+  medium: string;
+  sessions: number;
+};
+
+export type PageAnalyticsResponse = {
+  period: StatsPeriod;
+  source: "ga4" | "mock";
+  generatedAt: string;
+  pages: PageAnalyticsPage[];
+  engagement: EngagementMetrics;
+  devices: DeviceShare[];
+  referrals: ReferralRow[];
+  error?: string;
+};

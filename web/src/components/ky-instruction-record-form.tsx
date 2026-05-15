@@ -729,6 +729,8 @@ export function KyInstructionRecordForm({ value, onChange, onSave, savedLabel }:
                         className="w-full border-0 bg-transparent px-1 py-0.5"
                         value={p.name}
                         onChange={(e) => setParticipant(i, { ...p, name: e.target.value })}
+                        autoComplete="off"
+                        aria-label={`参加者${i + 1}の氏名`}
                       />
                     </td>
                     <td className="border border-slate-300 p-0">
@@ -736,6 +738,8 @@ export function KyInstructionRecordForm({ value, onChange, onSave, savedLabel }:
                         className="w-full border-0 bg-transparent px-1 py-0.5"
                         value={p.qualNo}
                         onChange={(e) => setParticipant(i, { ...p, qualNo: e.target.value })}
+                        autoComplete="off"
+                        aria-label={`参加者${i + 1}の資格番号`}
                       />
                     </td>
                     <td className="border border-slate-300 p-0">
@@ -743,6 +747,8 @@ export function KyInstructionRecordForm({ value, onChange, onSave, savedLabel }:
                         className="w-full border-0 bg-transparent px-1 py-0.5"
                         value={p.preWork}
                         onChange={(e) => setParticipant(i, { ...p, preWork: e.target.value })}
+                        autoComplete="off"
+                        aria-label={`参加者${i + 1}の作業前チェック`}
                       />
                     </td>
                     <td className="border border-slate-300 p-0">
@@ -750,6 +756,8 @@ export function KyInstructionRecordForm({ value, onChange, onSave, savedLabel }:
                         className="w-full border-0 bg-transparent px-1 py-0.5"
                         value={p.onExit}
                         onChange={(e) => setParticipant(i, { ...p, onExit: e.target.value })}
+                        autoComplete="off"
+                        aria-label={`参加者${i + 1}の退場時チェック`}
                       />
                     </td>
                   </tr>

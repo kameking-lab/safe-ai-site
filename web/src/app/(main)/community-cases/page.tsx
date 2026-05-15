@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MessageSquarePlus, Tag } from "lucide-react";
+import { PageContainer } from "@/components/layout";
 import { ogImageUrl } from "@/lib/og-url";
 import { COMMUNITY_CASES_SEED } from "@/data/mock/community-cases";
 import { UGC_CATEGORY_LABELS, UGC_INDUSTRY_OPTIONS } from "@/lib/ugc-types";
@@ -31,7 +32,7 @@ export default function CommunityCasesPage() {
   const initial = COMMUNITY_CASES_SEED.filter((c) => c.status === "approved");
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+    <PageContainer as="main" width="wide">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={TITLE} description={DESCRIPTION} path="/community-cases" />
       <header className="mb-6">
@@ -65,6 +66,6 @@ export default function CommunityCasesPage() {
       </header>
 
       <CommunityCasesClient initial={initial} industries={UGC_INDUSTRY_OPTIONS} />
-    </main>
+    </PageContainer>
   );
 }

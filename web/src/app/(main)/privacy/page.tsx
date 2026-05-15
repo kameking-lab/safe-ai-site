@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
   description: "安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
   alternates: { canonical: "/privacy" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/privacy", {
     title: "プライバシーポリシー",
     description: "安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
-  },
+  }),
 };
 
 export default function PrivacyPage() {
   return (
-    <div className="px-4 py-8 lg:px-8">
+    <PageContainer width="narrow" className="space-y-8">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="プライバシーポリシー" description="安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。" path="/privacy" />
-      <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">プライバシーポリシー</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月22日</p>
@@ -59,6 +60,9 @@ export default function PrivacyPage() {
               （/api/notify/subscribe を利用する場合）：メールアドレス、通知条件、選択地点
             </li>
           </ul>
+          <p className="text-sm leading-7 text-slate-600">
+            なお、サーバーサイドのアプリケーションログ（問い合わせ受信・フィードバック・メルマガ登録）には、氏名・メールアドレス・相談内容等の個人情報は記録しません。ログに含まれるのはカテゴリ、文字数、受信日時などの非個人情報のみです。
+          </p>
         </section>
 
         <section className="space-y-3">
@@ -217,7 +221,6 @@ export default function PrivacyPage() {
             よりご連絡ください。
           </p>
         </section>
-      </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -2,11 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { allLawArticles, type LawArticle } from "@/data/laws";
 import { SITE_STATS } from "@/data/site-stats";
 import { InputWithVoice } from "@/components/voice-input-field";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
 import { SimpleMarkdown } from "@/components/simple-markdown";
+import { PageContainer } from "@/components/layout/page-container";
+import { Stack } from "@/components/layout/stack";
 
 const MhlwLawArticlesPanel = dynamic(
   () =>
@@ -240,11 +243,37 @@ function AiSummaryModal({
 }
 
 export function LawSearchPanel() {
-  const [query, setQuery] = useState("");
-  const [selectedLaw, setSelectedLaw] = useState<string>("all");
-  const [articleNumQuery, setArticleNumQuery] = useState("");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const [query, setQuery] = useState(() => searchParams?.get("q") ?? "");
+  const [selectedLaw, setSelectedLaw] = useState<string>(
+    () => searchParams?.get("law") ?? "all",
+  );
+  const [articleNumQuery, setArticleNumQuery] = useState(
+    () => searchParams?.get("art") ?? "",
+  );
   const [summaryTarget, setSummaryTarget] = useState<LawArticle | null>(null);
-  const [mode, setMode] = useState<"curated" | "mhlw">("curated");
+  const [mode, setMode] = useState<"curated" | "mhlw">(
+    () => (searchParams?.get("mode") === "mhlw" ? "mhlw" : "curated"),
+  );
+
+  // Sync state -> URL (replace so we don't pollute history)
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (selectedLaw && selectedLaw !== "all") params.set("law", selectedLaw);
+    if (articleNumQuery) params.set("art", articleNumQuery);
+    if (mode !== "curated") params.set("mode", mode);
+    const qs = params.toString();
+    const next = qs ? `${pathname}?${qs}` : pathname;
+    const current =
+      window.location.pathname + (window.location.search || "");
+    if (next !== current) {
+      router.replace(next, { scroll: false });
+    }
+  }, [query, selectedLaw, articleNumQuery, mode, pathname, router]);
 
   const filtered = useMemo(() => {
     const nq = normalizeQuery(query);
@@ -262,7 +291,8 @@ export function LawSearchPanel() {
   }, [query, selectedLaw, articleNumQuery]);
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
+    <PageContainer>
+      <Stack gap="lg">
       <div>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-xl font-bold text-slate-900 lg:text-2xl">法令全文検索</h1>
@@ -382,6 +412,7 @@ export function LawSearchPanel() {
       )}
 
       </>)}
-    </div>
+      </Stack>
+    </PageContainer>
   );
 }

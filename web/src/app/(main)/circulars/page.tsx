@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { mhlwNotices } from "@/data/mhlw-notices";
+import { PageContainer } from "@/components/layout";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -30,7 +31,7 @@ export default function CircularsIndexPage() {
   const recent = sorted.slice(0, 100);
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+    <PageContainer as="main" width="wide">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="厚労省通達・告示・指針 一覧" description="労働安全衛生に関する厚生労働省の通達・告示・指針を全件横断検索。各通達ごとに概要・関連事故事例・推奨保護具をまとめています。" path="/circulars" />
       <header className="mb-5">
@@ -69,6 +70,6 @@ export default function CircularsIndexPage() {
       <p className="mt-6 text-xs text-slate-500">
         ※ 出典: 中央労働災害防止協会 安全衛生情報センター（jaish.gr.jp）。本一覧は 安全AIポータル が公開情報を整理し、最終確認日を付与したものです。
       </p>
-    </main>
+    </PageContainer>
   );
 }
