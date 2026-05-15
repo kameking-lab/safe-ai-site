@@ -4,6 +4,7 @@ import { useState } from "react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { PageContainer } from "@/components/layout";
 import { PAID_MODE } from "@/lib/paid-mode";
+import { useLanguage } from "@/contexts/language-context";
 
 type Category =
   | "question"
@@ -13,7 +14,7 @@ type Category =
   | "business"
   | "other";
 
-const CATEGORIES: { value: Category; label: string; hint: string }[] = [
+const CATEGORIES_JA: { value: Category; label: string; hint: string }[] = [
   { value: "question", label: "質問", hint: "使い方・法令・データの読み方など" },
   { value: "improvement", label: "改善提案", hint: "もっとこうしたら使いやすい等" },
   { value: "data-error", label: "データの誤り", hint: "条文・事故事例・統計の誤りを発見した" },
@@ -22,7 +23,16 @@ const CATEGORIES: { value: Category; label: string; hint: string }[] = [
   { value: "other", label: "その他", hint: "何でもお書きください" },
 ];
 
-const INDUSTRY_OPTIONS = [
+const CATEGORIES_EN: { value: Category; label: string; hint: string }[] = [
+  { value: "question", label: "Question", hint: "Usage, laws, how to read data, etc." },
+  { value: "improvement", label: "Improvement suggestion", hint: "How to make it easier to use" },
+  { value: "data-error", label: "Data error", hint: "Found an error in articles, cases, or stats" },
+  { value: "feature-request", label: "Feature request", hint: "Features you'd like to see" },
+  { value: "business", label: "Business inquiry", hint: "Consulting / contract discussion (optional)" },
+  { value: "other", label: "Other", hint: "Anything you'd like to share" },
+];
+
+const INDUSTRY_OPTIONS_JA = [
   "建設・土木",
   "製造・化学",
   "物流・運輸",
@@ -32,7 +42,21 @@ const INDUSTRY_OPTIONS = [
   "その他",
 ];
 
+const INDUSTRY_OPTIONS_EN = [
+  "Construction / Civil",
+  "Manufacturing / Chemicals",
+  "Logistics / Transport",
+  "Healthcare / Welfare / Care",
+  "Forestry / Agriculture / Fisheries",
+  "Education / Government",
+  "Other",
+];
+
 export default function InquiryForm() {
+  const { language } = useLanguage();
+  const isEn = language === "en";
+  const CATEGORIES = isEn ? CATEGORIES_EN : CATEGORIES_JA;
+  const INDUSTRY_OPTIONS = isEn ? INDUSTRY_OPTIONS_EN : INDUSTRY_OPTIONS_JA;
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -60,7 +84,7 @@ export default function InquiryForm() {
         setStatus("error");
         return;
       }
-      setResultMsg(data.message ?? "送信が完了しました。");
+      setResultMsg(data.message ?? (isEn ? "Submission complete." : "送信が完了しました。"));
       setStatus("success");
     } catch {
       setStatus("error");
@@ -82,12 +106,20 @@ export default function InquiryForm() {
       />
 
       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm leading-6 text-emerald-900">
-        <p className="font-semibold">どんな声でも歓迎します</p>
+        <p className="font-semibold">
+          {isEn ? "All feedback is welcome" : "どんな声でも歓迎します"}
+        </p>
         <p className="mt-1 text-xs leading-5 text-emerald-800">
-          匿名でも投稿できます（名前・メールは任意）。データの誤り・追加してほしい機能・現場で使いにくい点など、お気軽にお書きください。
+          {isEn
+            ? "Anonymous submissions are fine (name/email optional). Share data errors, feature requests, friction in the field — anything goes."
+            : "匿名でも投稿できます（名前・メールは任意）。データの誤り・追加してほしい機能・現場で使いにくい点など、お気軽にお書きください。"}
           {PAID_MODE
-            ? "業務委託・顧問契約のご相談もこちらから受け付けています。"
-            : "業務に関するご相談もお気軽にお書きください。"}
+            ? isEn
+              ? " Consulting and retainer inquiries also welcome here."
+              : "業務委託・顧問契約のご相談もこちらから受け付けています。"
+            : isEn
+              ? " Business inquiries are also welcome."
+              : "業務に関するご相談もお気軽にお書きください。"}
         </p>
       </div>
 
@@ -97,10 +129,14 @@ export default function InquiryForm() {
           aria-live="polite"
           className="rounded-xl border border-emerald-200 bg-emerald-50 px-6 py-10 text-center"
         >
-          <p className="text-xl font-bold text-emerald-800">送信が完了しました</p>
+          <p className="text-xl font-bold text-emerald-800">
+            {isEn ? "Submission complete" : "送信が完了しました"}
+          </p>
           <p className="mt-2 text-sm text-emerald-700">
             {resultMsg ??
-              "ご意見ありがとうございます。メールアドレスをご記入いただいた場合は3営業日以内に返信します。"}
+              (isEn
+                ? "Thanks for your feedback. If you included an email, we'll reply within 3 business days."
+                : "ご意見ありがとうございます。メールアドレスをご記入いただいた場合は3営業日以内に返信します。")}
           </p>
         </div>
       ) : (
@@ -108,7 +144,7 @@ export default function InquiryForm() {
           {/* カテゴリ */}
           <fieldset>
             <legend className="block text-sm font-semibold text-slate-700">
-              カテゴリ <span className="text-red-500">*</span>
+              {isEn ? "Category" : "カテゴリ"} <span className="text-red-500">*</span>
             </legend>
             <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
               {CATEGORIES.map((c) => (
@@ -140,14 +176,14 @@ export default function InquiryForm() {
           {/* 件名 */}
           <div>
             <label htmlFor="inquiry-subject" className="block text-sm font-semibold text-slate-700">
-              件名 <span className="text-red-500">*</span>
+              {isEn ? "Subject" : "件名"} <span className="text-red-500">*</span>
             </label>
             <input
               id="inquiry-subject"
               required
               value={form.subject}
               onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
-              placeholder="例: 法令検索でこの条文が見つからない"
+              placeholder={isEn ? "e.g. Can't find this article in law search" : "例: 法令検索でこの条文が見つからない"}
               className={inputClass}
             />
           </div>
@@ -155,7 +191,7 @@ export default function InquiryForm() {
           {/* 本文 */}
           <div>
             <label htmlFor="inquiry-message" className="block text-sm font-semibold text-slate-700">
-              内容 <span className="text-red-500">*</span>
+              {isEn ? "Message" : "内容"} <span className="text-red-500">*</span>
             </label>
             <textarea
               id="inquiry-message"
@@ -163,7 +199,7 @@ export default function InquiryForm() {
               rows={7}
               value={form.message}
               onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-              placeholder="どのページのどの箇所か・期待する動作・現状の動作などをお書きください。"
+              placeholder={isEn ? "Which page/section, expected behavior, actual behavior, etc." : "どのページのどの箇所か・期待する動作・現状の動作などをお書きください。"}
               className={inputClass}
             />
           </div>
@@ -172,19 +208,19 @@ export default function InquiryForm() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="inquiry-name" className="block text-sm font-semibold text-slate-700">
-                お名前 <span className="text-xs text-slate-500">（任意）</span>
+                {isEn ? "Name" : "お名前"} <span className="text-xs text-slate-500">{isEn ? "(optional)" : "（任意）"}</span>
               </label>
               <input
                 id="inquiry-name"
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="匿名でも構いません"
+                placeholder={isEn ? "Anonymous is fine" : "匿名でも構いません"}
                 className={inputClass}
               />
             </div>
             <div>
               <label htmlFor="inquiry-email" className="block text-sm font-semibold text-slate-700">
-                メールアドレス <span className="text-xs text-slate-500">（任意・返信希望時）</span>
+                {isEn ? "Email" : "メールアドレス"} <span className="text-xs text-slate-500">{isEn ? "(optional, for reply)" : "（任意・返信希望時）"}</span>
               </label>
               <input
                 id="inquiry-email"
@@ -199,7 +235,7 @@ export default function InquiryForm() {
 
           <div>
             <label htmlFor="inquiry-industry" className="block text-sm font-semibold text-slate-700">
-              業種 <span className="text-xs text-slate-500">（任意）</span>
+              {isEn ? "Industry" : "業種"} <span className="text-xs text-slate-500">{isEn ? "(optional)" : "（任意）"}</span>
             </label>
             <select
               id="inquiry-industry"
@@ -207,7 +243,7 @@ export default function InquiryForm() {
               onChange={(e) => setForm((f) => ({ ...f, industry: e.target.value }))}
               className={`${inputClass} bg-white`}
             >
-              <option value="">選択しない</option>
+              <option value="">{isEn ? "Not selected" : "選択しない"}</option>
               {INDUSTRY_OPTIONS.map((o) => (
                 <option key={o} value={o}>
                   {o}
@@ -225,16 +261,27 @@ export default function InquiryForm() {
               className="mt-1 h-4 w-4"
             />
             <span className="text-slate-700">
-              この内容を <strong>公開Q&amp;A</strong> として匿名で掲載しても構いません。
-              <span className="block text-[11px] text-slate-500">
-                チェックを入れた場合のみ、回答とともに公開する場合があります。氏名・メールは公開しません。
-              </span>
+              {isEn ? (
+                <>
+                  This content may be posted anonymously to the <strong>public Q&amp;A</strong>.
+                  <span className="block text-[11px] text-slate-500">
+                    Only when checked may we publish your message alongside a reply. Name and email are never shared.
+                  </span>
+                </>
+              ) : (
+                <>
+                  この内容を <strong>公開Q&amp;A</strong> として匿名で掲載しても構いません。
+                  <span className="block text-[11px] text-slate-500">
+                    チェックを入れた場合のみ、回答とともに公開する場合があります。氏名・メールは公開しません。
+                  </span>
+                </>
+              )}
             </span>
           </label>
 
           {status === "error" && (
             <p className="text-sm text-red-600" role="alert">
-              送信に失敗しました。時間をおいて再度お試しください。
+              {isEn ? "Submission failed. Please try again later." : "送信に失敗しました。時間をおいて再度お試しください。"}
             </p>
           )}
 
@@ -243,21 +290,21 @@ export default function InquiryForm() {
             disabled={status === "sending"}
             className="w-full rounded-xl bg-emerald-600 py-3.5 text-sm font-bold text-white transition hover:bg-emerald-700 disabled:opacity-60"
           >
-            {status === "sending" ? "送信中..." : "送信する"}
+            {status === "sending" ? (isEn ? "Sending..." : "送信中...") : (isEn ? "Submit" : "送信する")}
           </button>
           <p className="text-[11px] text-slate-500">
-            ※ 個人情報の取扱いは{" "}
+            {isEn ? "* Personal-data handling per the " : "※ 個人情報の取扱いは"}{" "}
             <a href="/privacy" className="underline hover:text-slate-700">
-              プライバシーポリシー
+              {isEn ? "Privacy Policy" : "プライバシーポリシー"}
             </a>{" "}
-            をご確認ください。
+            {isEn ? "." : "をご確認ください。"}
           </p>
           <p className="text-[11px] text-slate-500">
-            フォームが使えない場合は{" "}
+            {isEn ? "If the form is unavailable, contact us directly at " : "フォームが使えない場合は "}
             <a href="mailto:kenshi.ycc@gmail.com" className="underline hover:text-slate-700">
               kenshi.ycc@gmail.com
-            </a>{" "}
-            まで直接ご連絡ください。
+            </a>
+            {isEn ? "." : " まで直接ご連絡ください。"}
           </p>
         </form>
       )}

@@ -8,6 +8,7 @@ import { realLawRevisions } from "@/data/mock/real-law-revisions";
 import { realLawRevisionsExtra } from "@/data/mock/real-law-revisions-extra";
 import warningsData from "@/data/jma/warnings.json";
 import type { AccidentCase, LawRevisionCore } from "@/lib/types/domain";
+import { useLanguage } from "@/contexts/language-context";
 
 type WarningLevel = "warning" | "advisory" | "none";
 
@@ -133,13 +134,19 @@ export function HomeThreePillars() {
   const fatal = useMemo(() => pickLatestFatalAccident(), []);
   const lawRevisions = useMemo(() => pickRecentLawRevisions(), []);
   const warnings = useMemo(() => pickWarningWeather(), []);
+  const { language } = useLanguage();
+  const isEn = language === "en";
 
   return (
     <section className="space-y-4">
       <header className="px-1">
-        <h2 className="text-base font-bold text-slate-900 sm:text-lg">本日の安全トピック</h2>
+        <h2 className="text-base font-bold text-slate-900 sm:text-lg">
+          {isEn ? "Today's safety topics" : "本日の安全トピック"}
+        </h2>
         <p className="mt-0.5 text-xs text-slate-500">
-          直近の死亡事故・気象警報・法改正の3項目をまとめて把握。各項目から朝礼用の注意喚起文をAIで生成できます。
+          {isEn
+            ? "Latest fatal accident, weather warnings, and law amendments at a glance. Generate a morning-briefing alert from each item using AI."
+            : "直近の死亡事故・気象警報・法改正の3項目をまとめて把握。各項目から朝礼用の注意喚起文をAIで生成できます。"}
         </p>
       </header>
 
@@ -154,6 +161,8 @@ export function HomeThreePillars() {
 
 function PillarFatalAccident({ fatal }: { fatal: AccidentCase | null }) {
   const sourceUrl = fatal ? extractAccidentSourceUrl(fatal) : null;
+  const { language } = useLanguage();
+  const isEn = language === "en";
   return (
     <article className="flex flex-col rounded-2xl border border-rose-200 bg-rose-50/40 p-4 shadow-sm">
       <div className="flex items-start gap-2">
@@ -161,9 +170,11 @@ function PillarFatalAccident({ fatal }: { fatal: AccidentCase | null }) {
           <AlertTriangle className="h-4 w-4" />
         </div>
         <div className="flex-1">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-rose-700">A. 直近の死亡事故</p>
+          <p className="text-[11px] font-bold uppercase tracking-widest text-rose-700">
+            {isEn ? "A. Latest fatal accident" : "A. 直近の死亡事故"}
+          </p>
           <h3 className="mt-1 text-sm font-bold leading-snug text-slate-900">
-            {fatal ? fatal.title : "現在公開中の死亡事例はありません"}
+            {fatal ? fatal.title : isEn ? "No fatal cases currently published" : "現在公開中の死亡事例はありません"}
           </h3>
         </div>
       </div>
@@ -191,7 +202,7 @@ function PillarFatalAccident({ fatal }: { fatal: AccidentCase | null }) {
               className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 hover:underline"
             >
               <ExternalLink className="h-3 w-3" />
-              出典・報道URLを開く
+              {isEn ? "Open press source" : "出典・報道URLを開く"}
             </a>
           )}
 
@@ -208,7 +219,7 @@ function PillarFatalAccident({ fatal }: { fatal: AccidentCase | null }) {
         href="/accidents"
         className="mt-3 inline-flex items-center justify-center rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50"
       >
-        事故DBを見る →
+        {isEn ? "Open accident DB →" : "事故DBを見る →"}
       </Link>
     </article>
   );
@@ -216,6 +227,8 @@ function PillarFatalAccident({ fatal }: { fatal: AccidentCase | null }) {
 
 function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
   const hasWarning = warnings.some((w) => w.level === "warning");
+  const { language } = useLanguage();
+  const isEn = language === "en";
   return (
     <article className="flex flex-col rounded-2xl border border-amber-200 bg-amber-50/40 p-4 shadow-sm">
       <div className="flex items-start gap-2">
@@ -224,10 +237,20 @@ function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
         </div>
         <div className="flex-1">
           <p className="text-[11px] font-bold uppercase tracking-widest text-amber-700">
-            B. 1週間の警報級悪天候
+            {isEn ? "B. Severe weather this week" : "B. 1週間の警報級悪天候"}
           </p>
           <h3 className="mt-1 text-sm font-bold leading-snug text-slate-900">
-            {hasWarning ? "警報級の悪天候が発表中" : warnings.length > 0 ? "注意報のみ（警報はなし）" : "現在、特別な警報・注意報はありません"}
+            {hasWarning
+              ? isEn
+                ? "Warning-level severe weather in effect"
+                : "警報級の悪天候が発表中"
+              : warnings.length > 0
+                ? isEn
+                  ? "Advisories only (no warnings)"
+                  : "注意報のみ（警報はなし）"
+                : isEn
+                  ? "No special warnings or advisories at this time"
+                  : "現在、特別な警報・注意報はありません"}
           </h3>
         </div>
       </div>
@@ -243,7 +266,13 @@ function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
                     : "bg-slate-200 text-slate-700"
                 }`}
               >
-                {w.level === "warning" ? "警報" : "注意報"}
+                {w.level === "warning"
+                  ? isEn
+                    ? "Warning"
+                    : "警報"
+                  : isEn
+                    ? "Advisory"
+                    : "注意報"}
               </span>
               <span className="font-semibold">{w.prefecture}</span>
               <span className="ml-1 text-slate-600">{w.headline.slice(0, 60)}</span>
@@ -269,13 +298,15 @@ function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
         href="/risk"
         className="mt-3 inline-flex items-center justify-center rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50"
       >
-        気象リスク詳細を見る →
+        {isEn ? "Weather risk detail →" : "気象リスク詳細を見る →"}
       </Link>
     </article>
   );
 }
 
 function PillarLawRevisions({ revisions }: { revisions: LawRevisionCore[] }) {
+  const { language } = useLanguage();
+  const isEn = language === "en";
   return (
     <article className="flex flex-col rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 shadow-sm">
       <div className="flex items-start gap-2">
@@ -284,10 +315,16 @@ function PillarLawRevisions({ revisions }: { revisions: LawRevisionCore[] }) {
         </div>
         <div className="flex-1">
           <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-700">
-            C. 直近の法改正3件
+            {isEn ? "C. Recent 3 law amendments" : "C. 直近の法改正3件"}
           </p>
           <h3 className="mt-1 text-sm font-bold leading-snug text-slate-900">
-            {revisions.length > 0 ? `${revisions.length}件の改正情報を表示中` : "現在表示できる改正情報はありません"}
+            {revisions.length > 0
+              ? isEn
+                ? `Showing ${revisions.length} amendment${revisions.length === 1 ? "" : "s"}`
+                : `${revisions.length}件の改正情報を表示中`
+              : isEn
+                ? "No amendment data available"
+                : "現在表示できる改正情報はありません"}
           </h3>
         </div>
       </div>
@@ -298,7 +335,7 @@ function PillarLawRevisions({ revisions }: { revisions: LawRevisionCore[] }) {
             <li key={r.id} className="rounded-lg border border-emerald-100 bg-white p-2.5">
               <p className="text-xs font-bold text-slate-900">{r.title}</p>
               <p className="mt-0.5 text-[11px] text-slate-500">
-                施行日: {r.enforcement_date || r.publishedAt} / {r.issuer}
+                {isEn ? "Effective" : "施行日"}: {r.enforcement_date || r.publishedAt} / {r.issuer}
               </p>
               <AlertGenerator
                 kind="law-revision"
@@ -316,7 +353,7 @@ function PillarLawRevisions({ revisions }: { revisions: LawRevisionCore[] }) {
         href="/laws"
         className="mt-3 inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50"
       >
-        法改正一覧を見る →
+        {isEn ? "Law amendments list →" : "法改正一覧を見る →"}
       </Link>
     </article>
   );
@@ -338,6 +375,8 @@ function AlertGenerator({
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { language } = useLanguage();
+  const isEn = language === "en";
 
   const accentClasses: Record<typeof accent, string> = {
     rose: "border-rose-300 bg-white text-rose-800 hover:bg-rose-50",
@@ -359,12 +398,12 @@ function AlertGenerator({
         error?: string;
       };
       if (!res.ok || !data.alert) {
-        setError(data.error ?? "生成に失敗しました。");
+        setError(data.error ?? (isEn ? "Generation failed." : "生成に失敗しました。"));
       } else {
         setAlert(data.alert);
       }
     } catch {
-      setError("ネットワークエラーが発生しました。");
+      setError(isEn ? "Network error occurred." : "ネットワークエラーが発生しました。");
     } finally {
       setLoading(false);
     }
@@ -383,7 +422,7 @@ function AlertGenerator({
         ) : (
           <Sparkles className="h-3 w-3" />
         )}
-        {loading ? "生成中…" : "注意喚起文を作成"}
+        {loading ? (isEn ? "Generating…" : "生成中…") : (isEn ? "Generate alert text" : "注意喚起文を作成")}
       </button>
 
       {alert && (

@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BookOpen, HardHat, Factory, Briefcase, ChevronRight, Sparkles } from "lucide-react";
+import { BookOpen, HardHat, Factory, Briefcase, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { ExamQuizClient } from "./exam-quiz-client";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 import { CERT_QUIZZES, getTotalQuestionCount } from "@/data/mock/quiz/cert-quiz";
+import {
+  ExamQuizCardLabels,
+  ExamQuizIndustryLabel,
+  ExamQuizRecommendHeading,
+  ExamQuizSectionLabels,
+} from "./ExamQuizI18n";
 import { PageContainer } from "@/components/layout/page-container";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -32,6 +38,7 @@ const QUALIFICATION_GUIDES = [
   {
     icon: HardHat,
     industry: "建設業",
+    industryEn: "Construction",
     color: "orange",
     qualifications: ["労働安全コンサルタント", "クレーン運転士"],
     bg: "bg-orange-50 border-orange-200",
@@ -41,6 +48,7 @@ const QUALIFICATION_GUIDES = [
   {
     icon: Factory,
     industry: "製造業",
+    industryEn: "Manufacturing",
     color: "blue",
     qualifications: ["衛生管理者", "ボイラー技士"],
     bg: "bg-blue-50 border-blue-200",
@@ -50,6 +58,7 @@ const QUALIFICATION_GUIDES = [
   {
     icon: Briefcase,
     industry: "管理職",
+    industryEn: "Managerial",
     color: "emerald",
     qualifications: ["第一種衛生管理者"],
     bg: "bg-emerald-50 border-emerald-200",
@@ -73,9 +82,7 @@ export default function ExamQuizPage() {
         {/* SEO: WebPage + BreadcrumbList */}
         <PageJsonLd name={_title} description={_desc} path="/exam-quiz" />
         <section>
-          <h2 className="mb-3 text-sm font-bold text-slate-700">
-            あなたにおすすめの資格
-          </h2>
+          <ExamQuizRecommendHeading />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {QUALIFICATION_GUIDES.map((item) => {
               const Icon = item.icon;
@@ -91,7 +98,7 @@ export default function ExamQuizPage() {
                       <Icon className="h-4 w-4" />
                     </span>
                     <span className="text-sm font-bold text-slate-800">
-                      {item.industry}
+                      <ExamQuizIndustryLabel ja={item.industry} en={item.industryEn} />
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -114,17 +121,7 @@ export default function ExamQuizPage() {
       {/* 資格別100問クイズ（カリキュラム網羅型） */}
       <PageContainer paddingY="tight">
         <section>
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <h2 className="flex items-center gap-1.5 text-sm font-bold text-slate-700">
-                <Sparkles className="h-4 w-4 text-amber-500" />
-                資格別100問クイズ（解説・法令根拠つき）
-              </h2>
-              <p className="mt-0.5 text-xs text-slate-500">
-                10資格 × 100問 = {getTotalQuestionCount()}問のカリキュラム網羅型クイズ。Free=各資格30問、Standard以上で全問。
-              </p>
-            </div>
-          </div>
+          <ExamQuizSectionLabels total={getTotalQuestionCount()} />
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {CERT_QUIZZES.map((c) => (
               <Link
@@ -162,12 +159,7 @@ export default function ExamQuizPage() {
                     </span>
                   )}
                 </div>
-                <div className="mt-2 flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500">{c.questions.length}問</span>
-                  <span className="inline-flex items-center gap-0.5 font-bold text-amber-600 group-hover:text-amber-700">
-                    挑戦する <ChevronRight className="h-3 w-3" />
-                  </span>
-                </div>
+                <ExamQuizCardLabels count={c.questions.length} />
               </Link>
             ))}
           </div>
@@ -176,21 +168,27 @@ export default function ExamQuizPage() {
 
       <ExamQuizClient />
       <RelatedPageCards
-        heading="合わせて使う"
+        heading={{ ja: "合わせて使う", en: "Use alongside" }}
         pages={[
           {
             href: "/e-learning",
-            label: "Eラーニング",
-            description: "テーマ別の解説付きクイズで知識を体系的に整理。過去問の前に基礎固めするのにも最適です。",
+            label: { ja: "Eラーニング", en: "E-learning" },
+            description: {
+              ja: "テーマ別の解説付きクイズで知識を体系的に整理。過去問の前に基礎固めするのにも最適です。",
+              en: "Themed quizzes with explanations organize your knowledge — perfect for shoring up basics before past exams.",
+            },
             color: "emerald",
-            cta: "Eラーニングで学ぶ",
+            cta: { ja: "Eラーニングで学ぶ", en: "Start e-learning" },
           },
           {
             href: "/law-search",
-            label: "法令検索",
-            description: "問題で出てきた条文を原文で確認。労安法・安衛則などをキーワード検索できます。",
+            label: { ja: "法令検索", en: "Law search" },
+            description: {
+              ja: "問題で出てきた条文を原文で確認。労安法・安衛則などをキーワード検索できます。",
+              en: "Look up the original text of articles mentioned in questions. Keyword search across OSH Act and OSH Rules.",
+            },
             color: "sky",
-            cta: "法令を検索する",
+            cta: { ja: "法令を検索する", en: "Search laws" },
           },
         ]}
       />

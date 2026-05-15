@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { EquipmentFinderClient } from "@/components/equipment-finder-client";
+import { EquipmentFinderHeader } from "@/components/equipment-finder-header";
 import { PageContainer } from "@/components/layout";
 import { PanelSkeleton } from "@/components/skeleton";
 import { ogImageUrl } from "@/lib/og-url";
@@ -44,18 +45,7 @@ export default function EquipmentFinderPage() {
           }),
         ]}
       />
-      <header className="mb-5">
-        <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
-          🛡 保護具AIファインダー
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          まず保護具の種類を選び、種類別の絞り込み質問に答えると、1,000点超の保護具DBからおすすめ商品を表示します。JIS規格・国家検定品も明示。
-        </p>
-        <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs leading-5 text-emerald-900">
-          <strong>研究プロジェクト運営費について:</strong>{" "}
-          本ページの「Amazon / 楽天で見る」リンクは、もしもアフィリエイト経由で生成しています。発生した報酬は、本サイトの運営費（事故DB拡充・AI推論コスト・法令データ更新）に充てます。
-        </div>
-      </header>
+      <EquipmentFinderHeader />
 
       <Suspense fallback={<PanelSkeleton rows={4} label="保護具レコメンドを読み込み中" />}>
         <EquipmentFinderClient />
