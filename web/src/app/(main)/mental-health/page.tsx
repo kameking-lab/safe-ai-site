@@ -124,7 +124,7 @@ const VDT: InfoCard[] = [
 
 export default function MentalHealthPage() {
   return (
-    <PageContainer as="main" width="prose">
+    <PageContainer width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={_title} description={_desc} path="/mental-health" />
       <PageHeader

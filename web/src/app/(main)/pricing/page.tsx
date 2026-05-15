@@ -35,7 +35,7 @@ export const metadata: Metadata = PAID_MODE
 export default function PricingPage() {
   if (!PAID_MODE) {
     return (
-      <PageContainer as="main" width="narrow" className="py-12 sm:py-16">
+      <PageContainer width="narrow" className="py-12 sm:py-16">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={_title} description="安全AIポータル は現在、研究・実証プロジェクトとして全機能を無料公開しています。料金プランは準備中です。" path="/pricing" />
         <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-6 text-center sm:p-8">

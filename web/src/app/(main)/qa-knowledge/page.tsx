@@ -40,7 +40,7 @@ export default function QaKnowledgePage() {
     .slice(0, 20);
 
   return (
-    <PageContainer as="main" width="prose">
+    <PageContainer width="prose">
       {/* SEO: WebPage + BreadcrumbList + FAQPage */}
       <PageJsonLd name={TITLE} description={DESCRIPTION} path="/qa-knowledge" />
       {faq.length > 0 ? <JsonLd schema={faqPageSchema(faq)} /> : null}

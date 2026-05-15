@@ -25,7 +25,7 @@ export default function EquipmentFinderPage() {
   const title = "保護具AIファインダー｜種類選択→絞り込みで最適保護具を提案";
   const description = "12カテゴリから保護具の種類を選び、種類別の絞り込み質問で最適な装備をレコメンド。JIS規格・国家検定品も明示。";
   return (
-    <PageContainer as="main" width="prose">
+    <PageContainer width="prose">
       <JsonLd
         schema={[
           webPageSchema({ name: title, description, url }),

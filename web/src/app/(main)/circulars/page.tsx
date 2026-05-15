@@ -32,7 +32,7 @@ export default function CircularsIndexPage() {
   const recent = sorted.slice(0, 100);
 
   return (
-    <PageContainer as="main" width="wide">
+    <PageContainer width="wide">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="厚労省通達・告示・指針 一覧" description="労働安全衛生に関する厚生労働省の通達・告示・指針を全件横断検索。各通達ごとに概要・関連事故事例・推奨保護具をまとめています。" path="/circulars" />
       <CircularsHeader total={mhlwNotices.length} shown={recent.length} />

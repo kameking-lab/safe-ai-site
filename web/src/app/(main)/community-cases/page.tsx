@@ -32,7 +32,7 @@ export default function CommunityCasesPage() {
   const initial = COMMUNITY_CASES_SEED.filter((c) => c.status === "approved");
 
   return (
-    <PageContainer as="main" width="wide">
+    <PageContainer width="wide">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={TITLE} description={DESCRIPTION} path="/community-cases" />
       <header className="mb-6">

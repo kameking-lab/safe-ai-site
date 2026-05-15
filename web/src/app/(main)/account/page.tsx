@@ -91,7 +91,7 @@ export default async function AccountPage({ searchParams }: Props) {
     : null;
 
   return (
-    <PageContainer as="main" width="narrow" paddingY="none" className="py-8">
+    <PageContainer width="narrow" paddingY="none" className="py-8">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="マイページ" description="プラン状況と契約管理" path="/account" />
       <h1 className="text-2xl font-bold text-slate-900">マイページ</h1>

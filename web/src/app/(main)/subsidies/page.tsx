@@ -148,7 +148,7 @@ const SUBSIDIES: Subsidy[] = [
 
 export default function SubsidiesPage() {
   return (
-    <PageContainer as="main" width="prose">
+    <PageContainer width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={_title} description={_desc} path="/subsidies" />
       <PageHeader
