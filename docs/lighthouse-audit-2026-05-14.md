@@ -341,3 +341,69 @@ If a single sprint must pick five items, ship B-4, B-5, B-6, B-7, B-8 — all sm
 - **Status:** Draft PR for owner review. No code changes proposed in this PR — only the audit narrative and ROI list.
 - **Raw data:** the 32 Lighthouse JSON reports (one per page × form-factor) are not committed to the repo (~3 MB each); they live in the auditor's local temp directory and can be regenerated with `npx lighthouse <url>` against the same HEAD.
 - **Reproduction:** Lighthouse 13.3.0, `lighthouse:default` config, Chrome stable on Windows. Default mobile/desktop emulation. Single run per cell — variance band on a single run is approximately ±5 Performance points, so per-page numbers should be read with that uncertainty in mind. The averages, ranks, and audit-failure counts are robust to that variance.
+
+---
+
+## Phase D — Post-fix implementation status (2026-05-15)
+
+ROI-top-10 items B-1 through B-10 shipped in six follow-up PRs:
+
+- **PR #137** `fix(perf): eliminate CLS on /accidents` — addresses **B-1**.
+  Reserves `min-h-[280px]` for the `ProfileRecommend` skeleton in
+  `AccidentExtrasPanel` so server-render (`null` profile, ~120 px banner) and
+  post-mount render (Top5 list, ~600 px) no longer disagree on height.
+  Expected: desktop CLS 0.383 → ~0.000, Performance 72 → 95+.
+- **PR #138** `fix(perf): resolve React #418 hydration on /chemical-ra & /safety-diary` —
+  addresses **B-2**. `LocalStorageWarningBanner` previously read `localStorage`
+  in its `useState` initializer, producing different SSR vs CSR output.
+  Now starts dismissed on both sides and promotes via `useEffect`.
+  Expected: BP 96 → 100 on both pages; secondary TBT/LCP win from avoiding
+  the cascading re-hydration.
+- **PR #141** `perf(charts): defer recharts mount via IntersectionObserver` —
+  addresses **B-3b**. New `LazyChart` wrapper postpones each
+  `ResponsiveContainer` mount until the placeholder is within 200 px of the
+  viewport. Applied to all charts on `/stats` and `/accidents-analytics`.
+  Expected: `/accidents-analytics` mobile 65 → 85+; `/stats` mobile 73 → 88+.
+- **PR #142** `fix(a11y): batch polish — contrast, target size, semantics, select labels` —
+  addresses **B-4 through B-8** in a single batch.
+  - B-4: `text-slate-400` → `text-slate-500` in footer copyright, app-shell
+    sidebar headers and item descriptions, stat-source-cite, weather-forecast-panel
+    update/disclaimer lines, accident-database-panel filter-reset button.
+  - B-5: app-shell desktop search button `aria-label` swapped from
+    `"検索を開く（Ctrl+K）"` to `"検索 Ctrl+K"` (matches visible text).
+  - B-6: every footer `<Link>` gets `inline-flex min-h-[44px] items-center` so
+    adjacent footer rows clear the WCAG 2.2 24×24 floor (and 44×44 AAA).
+  - B-7: ladder-stats-card stops using malformed `<dl>` (whose `<div>` wrappers
+    contained `<p>` siblings) — now plain `<h3>` + `<p>` blocks.
+  - B-8: exam-quiz certification `<select>` gets a real `<label htmlFor>`
+    association plus `aria-label="資格を選択"`.
+  Combined expected: Accessibility 93–94 → 96–97 sitewide.
+- **PR #144** `perf(analytics): switch GTM/AdSense to lazyOnload` — addresses
+  **B-9a**. `Analytics.tsx` and `AdSenseScript.tsx` move from
+  `strategy="afterInteractive"` to `strategy="lazyOnload"`. Expected: mobile
+  Performance +2–4 across pages, TBT reduction during FCP→LCP window.
+- **PR #145** `perf(quiz): collapse /quiz redirect into real route with canonical` —
+  addresses **B-10**. The 308 redirect rule is removed from `next.config.ts`
+  and `/quiz/page.tsx` now re-exports the `/exam-quiz` default export with
+  `alternates.canonical = "/exam-quiz"` and `robots.index = false`. Expected:
+  saves ~316 ms on cold external loads of `/quiz` without sacrificing SEO
+  consolidation.
+
+### Items deferred to a future audit pass
+
+- **B-11** bf-cache investigation on `/chatbot` — not in top-10 ROI; left for a
+  separate session.
+- **B-12** the second `redirects` audit-firing page — diagnosed alongside B-10
+  but not yet confirmed which other route triggers it; needs targeted
+  measurement.
+- **B-13 through B-15** — Medium/Low items per the Phase B roadmap; not in the
+  ROI-top-10 scope for this sprint.
+
+### Post-fix measurement plan
+
+Actual post-deploy Lighthouse numbers are intentionally **not** filled in here
+because this PR ships the audit baseline; the rerun belongs in a follow-up
+audit doc once Vercel has rolled out PRs #137/138/141/142/144/145 to
+production. The owner should regenerate the 32-run matrix with the same
+tooling (`lighthouse@13.3.0`, `lighthouse:default`, Chrome stable, Windows) and
+diff the per-page scores against the table in §A-2.
