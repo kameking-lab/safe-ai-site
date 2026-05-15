@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-15T01:31:56.120Z",
+  "fetchedAt": "2026-05-15T05:40:45.362Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -1469,8 +1469,8 @@
         {
           "sourceCode": "030000",
           "level": "advisory",
-          "headline": "沿岸北部では、１５日夕方まで濃霧による視程障害に注意してください。内陸では、１７日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-15T10:11:00+09:00",
+          "headline": "内陸では、１７日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-05-15T12:57:00+09:00",
           "publishingOffice": "盛岡地方気象台",
           "warnings": [
             {
@@ -1480,20 +1480,8 @@
               "level": "advisory"
             },
             {
-              "areaCode": "030020",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0320100",
               "code": "21",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0320200",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -1506,12 +1494,6 @@
             {
               "areaCode": "0320600",
               "code": "21",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0320700",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -1600,50 +1582,14 @@
               "level": "advisory"
             },
             {
-              "areaCode": "0348200",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0348300",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0348400",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0348500",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0350100",
               "code": "21",
               "status": "継続",
               "level": "advisory"
             },
             {
-              "areaCode": "0350300",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0350600",
               "code": "21",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0350700",
-              "code": "20",
               "status": "継続",
               "level": "advisory"
             },
@@ -5643,24 +5589,11 @@
       "entries": [
         {
           "sourceCode": "460040",
-          "level": "advisory",
-          "headline": "奄美地方では、１５日朝から１５日昼前まで急な強い雨や落雷に注意してください。",
-          "reportDatetime": "2026-05-15T04:10:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-15T10:35:00+09:00",
           "publishingOffice": "名瀬測候所",
-          "warnings": [
-            {
-              "areaCode": "460040",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4630400",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         },
         {
           "sourceCode": "460100",
