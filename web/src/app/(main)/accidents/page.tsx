@@ -5,6 +5,7 @@ import { LastUpdatedBadge } from "@/components/last-updated-badge";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
+import { AccidentsMetaInfo, AccidentsMetaCaption } from "@/components/accidents-meta-info";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
 import {
@@ -57,35 +58,16 @@ export default function AccidentsPage() {
           {(() => {
             const counts = getAccidentProvenanceCounts();
             return (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] text-slate-600">
-                収録 {getAccidentCasesDataset().length} 件（
-                <span className="font-semibold text-emerald-700">厚労省 {counts.mhlw}</span>
-                ／<span className="font-semibold text-sky-700">curated {counts.curated}</span>
-                {counts.synthetic > 0 ? (
-                  <>
-                    ／
-                    <span className="font-semibold text-amber-700">
-                      合成 {counts.synthetic}
-                    </span>
-                  </>
-                ) : null}
-                ）
-              </span>
+              <AccidentsMetaInfo
+                total={getAccidentCasesDataset().length}
+                mhlw={counts.mhlw}
+                curated={counts.curated}
+                synthetic={counts.synthetic}
+              />
             );
           })()}
         </div>
-        <p className="mt-1 text-[10px] text-slate-500">
-          内訳の定義:{" "}
-          <a
-            href="/about/data-sources"
-            className="underline hover:text-slate-700"
-          >
-            データソース一覧
-          </a>{" "}
-          を参照。<strong>厚労省</strong> = 職場のあんぜんサイト由来の再収録、
-          <strong>curated</strong> = 公開情報・統計を編集部が再構成（固有名詞匿名化）、
-          <strong>合成</strong> = 教材用カバレッジ補完事例。
-        </p>
+        <AccidentsMetaCaption />
         <div className="mt-4">
           <LadderStatsCard />
         </div>
@@ -95,27 +77,39 @@ export default function AccidentsPage() {
         <ContextualPpePicks
           context="墜落 転落 足場 ハーネス 保護帽 ヘルメット 安全靴 切創 はさまれ 巻き込まれ 熱中症 化学物質 中毒"
           fallbackCategoryIds={["fall-protection", "head-protection", "hand-foot", "heat-cold"]}
-          heading="🛡 主要な労災を防ぐための予防保護具"
-          description="本データベースで多発する「墜落・転落・はさまれ・熱中症」など主要原因に直接効く保護具を厳選。"
+          heading={{
+            ja: "🛡 主要な労災を防ぐための予防保護具",
+            en: "🛡 PPE for preventing the most common workplace accidents",
+          }}
+          description={{
+            ja: "本データベースで多発する「墜落・転落・はさまれ・熱中症」など主要原因に直接効く保護具を厳選。",
+            en: "Curated PPE that directly addresses the most frequent accident causes in this database — falls, being caught/struck, heat stress, and more.",
+          }}
         />
       </div>
 
       <RelatedPageCards
-        heading="このデータを活かす"
+        heading={{ ja: "このデータを活かす", en: "Put this data to use" }}
         pages={[
           {
             href: "/risk-prediction",
-            label: "AIリスク予測",
-            description: "事故事例と照合しながらAIが潜在リスクを予測。朝礼・KY活動に役立てられます。",
+            label: { ja: "AIリスク予測", en: "AI Risk Prediction" },
+            description: {
+              ja: "事故事例と照合しながらAIが潜在リスクを予測。朝礼・KY活動に役立てられます。",
+              en: "AI cross-references accident cases to predict latent risks — useful for morning briefings and KY activities.",
+            },
             color: "blue",
-            cta: "AIリスク予測を使う",
+            cta: { ja: "AIリスク予測を使う", en: "Open AI Risk Prediction" },
           },
           {
             href: "/ky",
-            label: "KY用紙",
-            description: "事故事例を参考に危険予知活動表を作成。音声入力対応で現場から記録できます。",
+            label: { ja: "KY用紙", en: "KY Form" },
+            description: {
+              ja: "事故事例を参考に危険予知活動表を作成。音声入力対応で現場から記録できます。",
+              en: "Build a hazard-prediction sheet inspired by real cases. Voice input lets you record from the field.",
+            },
             color: "emerald",
-            cta: "KY用紙を作成する",
+            cta: { ja: "KY用紙を作成する", en: "Create a KY form" },
           },
         ]}
       />

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { ogImageUrl } from "@/lib/og-url";
+import { CircularsHeader, CircularsFooter } from "./CircularsI18n";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
@@ -33,15 +34,7 @@ export default function CircularsIndexPage() {
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="厚労省通達・告示・指針 一覧" description="労働安全衛生に関する厚生労働省の通達・告示・指針を全件横断検索。各通達ごとに概要・関連事故事例・推奨保護具をまとめています。" path="/circulars" />
-      <header className="mb-5">
-        <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
-          厚労省通達・告示・指針 一覧
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          収録件数: <strong>{mhlwNotices.length.toLocaleString("ja-JP")}件</strong>
-          （直近{recent.length}件を表示）
-        </p>
-      </header>
+      <CircularsHeader total={mhlwNotices.length} shown={recent.length} />
 
       <ul className="space-y-2">
         {recent.map((n) => (
@@ -66,9 +59,7 @@ export default function CircularsIndexPage() {
         ))}
       </ul>
 
-      <p className="mt-6 text-xs text-slate-500">
-        ※ 出典: 中央労働災害防止協会 安全衛生情報センター（jaish.gr.jp）。本一覧は 安全AIポータル が公開情報を整理し、最終確認日を付与したものです。
-      </p>
+      <CircularsFooter />
     </main>
   );
 }

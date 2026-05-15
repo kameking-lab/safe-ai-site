@@ -9,16 +9,27 @@ import {
   categoryColorClasses,
   type FeatureCategoryId,
 } from "@/data/features-catalog";
+import { useLanguage } from "@/contexts/language-context";
 
-const QUICK_LINKS = [
+const QUICK_LINKS_JA = [
   { href: "/features/quick-tour", label: "5分ツアー", emoji: "⏱" },
   { href: "/features/use-cases", label: "業種別の使い方", emoji: "🏗" },
   { href: "/features/comparison", label: "従来比較", emoji: "⚖" },
   { href: "/features/print", label: "印刷用一覧", emoji: "🖨" },
 ];
 
+const QUICK_LINKS_EN = [
+  { href: "/features/quick-tour", label: "5-min tour", emoji: "⏱" },
+  { href: "/features/use-cases", label: "Use cases by industry", emoji: "🏗" },
+  { href: "/features/comparison", label: "Comparison", emoji: "⚖" },
+  { href: "/features/print", label: "Printable list", emoji: "🖨" },
+];
+
 export function FeaturesIndexClient() {
   const [activeCategory, setActiveCategory] = useState<FeatureCategoryId | "all">("all");
+  const { language } = useLanguage();
+  const isEn = language === "en";
+  const QUICK_LINKS = isEn ? QUICK_LINKS_EN : QUICK_LINKS_JA;
 
   const filteredFeatures = useMemo(() => {
     if (activeCategory === "all") return FEATURES;
@@ -31,11 +42,12 @@ export function FeaturesIndexClient() {
       <section className="mx-auto max-w-5xl text-center">
         <p className="text-xs font-bold tracking-widest text-emerald-700">FEATURES</p>
         <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl md:text-4xl">
-          安全AIポータルの全機能を、1ページで。
+          {isEn ? "All ANZEN AI Portal features, on one page." : "安全AIポータルの全機能を、1ページで。"}
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
-          労働安全衛生法対応・現場運用ツール・AIアシスタント・教育コンテンツを{FEATURES.length}機能で提供しています。
-          スクリーンショットと一緒に、用途やカテゴリから探せます。
+          {isEn
+            ? `${FEATURES.length} features spanning OSH-Act compliance, field tools, AI assistants, and training content. Browse by category or use case alongside screenshots.`
+            : `労働安全衛生法対応・現場運用ツール・AIアシスタント・教育コンテンツを${FEATURES.length}機能で提供しています。スクリーンショットと一緒に、用途やカテゴリから探せます。`}
         </p>
         <div className="mt-5 flex flex-wrap justify-center gap-2">
           {QUICK_LINKS.map((link) => (
@@ -64,7 +76,7 @@ export function FeaturesIndexClient() {
                   : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
               }`}
             >
-              すべて（{FEATURES.length}）
+              {isEn ? `All (${FEATURES.length})` : `すべて（${FEATURES.length}）`}
             </button>
             {FEATURE_CATEGORIES.map((cat) => {
               const count = FEATURES.filter((f) => f.category === cat.id).length;
@@ -139,13 +151,13 @@ export function FeaturesIndexClient() {
                       href={feature.href}
                       className={`inline-flex flex-1 items-center justify-center rounded-lg bg-gradient-to-r ${colors.gradient} px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90`}
                     >
-                      機能を試す →
+                      {isEn ? "Try it →" : "機能を試す →"}
                     </Link>
                     <Link
                       href={`/features/${feature.category}`}
                       className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                     >
-                      詳しく見る
+                      {isEn ? "Learn more" : "詳しく見る"}
                     </Link>
                   </div>
                 </div>
@@ -158,23 +170,25 @@ export function FeaturesIndexClient() {
       {/* CTA */}
       <section className="mx-auto mt-12 max-w-5xl rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 text-center sm:p-8">
         <h2 className="text-xl font-bold text-emerald-900 sm:text-2xl">
-          試したい機能はありますか？
+          {isEn ? "Something you'd like to try?" : "試したい機能はありますか？"}
         </h2>
         <p className="mt-2 text-sm text-emerald-800">
-          ご意見・改善提案・追加機能の要望は、安全コンサルタントが直接対応します。
+          {isEn
+            ? "Feedback, improvement ideas, and feature requests go directly to a safety consultant."
+            : "ご意見・改善提案・追加機能の要望は、安全コンサルタントが直接対応します。"}
         </p>
         <div className="mt-4 flex flex-col items-center justify-center gap-2 sm:flex-row">
           <Link
             href="/contact"
             className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
           >
-            ご意見・改善提案を送る →
+            {isEn ? "Send feedback →" : "ご意見・改善提案を送る →"}
           </Link>
           <Link
             href="/features/quick-tour"
             className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-5 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50"
           >
-            5分ツアーを見る
+            {isEn ? "Take the 5-min tour" : "5分ツアーを見る"}
           </Link>
         </div>
       </section>

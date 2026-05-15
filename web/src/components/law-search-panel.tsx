@@ -7,6 +7,7 @@ import { SITE_STATS } from "@/data/site-stats";
 import { InputWithVoice } from "@/components/voice-input-field";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
 import { SimpleMarkdown } from "@/components/simple-markdown";
+import { useLanguage } from "@/contexts/language-context";
 
 const MhlwLawArticlesPanel = dynamic(
   () =>
@@ -92,6 +93,8 @@ function getEGovUrl(lawName: string): string | null {
 
 function ArticleCard({ article, onSummarize }: { article: LawArticle; onSummarize: (a: LawArticle) => void }) {
   const eGovUrl = getEGovUrl(article.law);
+  const { language } = useLanguage();
+  const isEn = language === "en";
   return (
     <article className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -103,9 +106,9 @@ function ArticleCard({ article, onSummarize }: { article: LawArticle; onSummariz
           {/* 出典区別バッジ：キュレーション条文は現行版（e-Gov準拠）として表示 */}
           <span
             className="inline-flex items-center gap-0.5 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800"
-            title="本サイトのキュレーション条文。現行版（e-Gov準拠）の条番号・条文を採録しています。"
+            title={isEn ? "Curated articles. Article numbers and text match the current e-Gov version." : "本サイトのキュレーション条文。現行版（e-Gov準拠）の条番号・条文を採録しています。"}
           >
-            <span aria-hidden>●</span> 現行（e-Gov準拠）
+            <span aria-hidden>●</span> {isEn ? "Current (e-Gov-aligned)" : "現行（e-Gov準拠）"}
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -124,7 +127,7 @@ function ArticleCard({ article, onSummarize }: { article: LawArticle; onSummariz
             onClick={() => onSummarize(article)}
             className="rounded-lg border border-violet-300 bg-violet-50 px-3 py-1 text-[11px] font-semibold text-violet-700 hover:bg-violet-100 transition"
           >
-            AI要約
+            {isEn ? "AI summary" : "AI要約"}
           </button>
         </div>
       </div>
@@ -154,6 +157,8 @@ function AiSummaryModal({
 }) {
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
   const [summary, setSummary] = useState("");
+  const { language } = useLanguage();
+  const isEn = language === "en";
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -198,12 +203,12 @@ function AiSummaryModal({
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <div>
             <p className="text-xs text-slate-500">{article.lawShort} {article.articleNum}</p>
-            <p id="ai-summary-title" className="text-sm font-bold text-slate-900">{article.articleTitle || "AI要約"}</p>
+            <p id="ai-summary-title" className="text-sm font-bold text-slate-900">{article.articleTitle || (isEn ? "AI summary" : "AI要約")}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="このダイアログを閉じる"
+            aria-label={isEn ? "Close this dialog" : "このダイアログを閉じる"}
             className="text-slate-600 hover:text-slate-900 text-xl leading-none min-h-[44px] min-w-[44px] flex items-center justify-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
           >
             ×
@@ -216,22 +221,26 @@ function AiSummaryModal({
               onClick={fetchSummary}
               className="w-full rounded-xl bg-violet-600 py-3 text-sm font-bold text-white hover:bg-violet-700"
             >
-              AI要約を生成する
+              {isEn ? "Generate AI summary" : "AI要約を生成する"}
             </button>
           )}
           {status === "loading" && (
-            <p className="text-center text-sm text-slate-500 py-4">要約生成中...</p>
+            <p className="text-center text-sm text-slate-500 py-4">
+              {isEn ? "Generating summary..." : "要約生成中..."}
+            </p>
           )}
           {status === "done" && (
             <>
               <SimpleMarkdown content={summary} className="text-sm leading-relaxed text-slate-700" />
               <p className="mt-3 rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-800">
-                ※ この要約はAIが生成したものです。正確な内容はe-Gov法令検索で原文をご確認ください。
+                {isEn
+                  ? "* This summary is AI-generated. For the authoritative text, confirm on e-Gov."
+                  : "※ この要約はAIが生成したものです。正確な内容はe-Gov法令検索で原文をご確認ください。"}
               </p>
             </>
           )}
           {status === "error" && (
-            <p className="text-sm text-red-600">エラーが発生しました。</p>
+            <p className="text-sm text-red-600">{isEn ? "An error occurred." : "エラーが発生しました。"}</p>
           )}
         </div>
       </div>
@@ -245,6 +254,8 @@ export function LawSearchPanel() {
   const [articleNumQuery, setArticleNumQuery] = useState("");
   const [summaryTarget, setSummaryTarget] = useState<LawArticle | null>(null);
   const [mode, setMode] = useState<"curated" | "mhlw">("curated");
+  const { language } = useLanguage();
+  const isEn = language === "en";
 
   const filtered = useMemo(() => {
     const nq = normalizeQuery(query);
@@ -265,28 +276,40 @@ export function LawSearchPanel() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
       <div>
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-xl font-bold text-slate-900 lg:text-2xl">法令全文検索</h1>
+          <h1 className="text-xl font-bold text-slate-900 lg:text-2xl">
+            {isEn ? "Law full-text search" : "法令全文検索"}
+          </h1>
           <LastUpdatedBadge />
         </div>
         <p className="mt-1 text-sm text-slate-600">
-          キーワード・条番号・法令名で条文を検索できます。漢数字（第二十一条）と算用数字（第21条）は同等に検索されます。
+          {isEn
+            ? "Search articles by keyword, article number, or law name. Kanji numbers (第二十一条) and Arabic numbers (第21条) match equivalently."
+            : "キーワード・条番号・法令名で条文を検索できます。漢数字（第二十一条）と算用数字（第21条）は同等に検索されます。"}
         </p>
       </div>
 
-      {/* 出典区別の凡例（A-5 監督官・A-2 安全部長系列の宿題） */}
+      {/* 出典区別の凡例 */}
       <div className="rounded-xl border border-amber-200 bg-amber-50/60 px-3 py-2 text-[11px] text-amber-900">
-        <span className="font-bold">出典の見分け方:</span>{" "}
-        <span className="inline-flex items-center gap-0.5 rounded-full border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 font-semibold text-emerald-800">● 現行（e-Gov準拠）</span>{" "}
-        は本サイトのキュレーション条文（最新の条番号・条文）。{" "}
-        <span className="inline-flex items-center gap-0.5 rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 font-semibold text-amber-800">● 施行当時（MHLW PDF）</span>{" "}
-        は厚労省PDF発行時点の条番号・条文です。引用時は識別の上、最新版が必要な場合は e-Gov で再確認してください。
+        <span className="font-bold">{isEn ? "Source legend:" : "出典の見分け方:"}</span>{" "}
+        <span className="inline-flex items-center gap-0.5 rounded-full border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 font-semibold text-emerald-800">
+          ● {isEn ? "Current (e-Gov-aligned)" : "現行（e-Gov準拠）"}
+        </span>{" "}
+        {isEn
+          ? "are this site's curated articles (current article numbers and text)."
+          : "は本サイトのキュレーション条文（最新の条番号・条文）。"}{" "}
+        <span className="inline-flex items-center gap-0.5 rounded-full border border-amber-300 bg-amber-50 px-1.5 py-0.5 font-semibold text-amber-800">
+          ● {isEn ? "As enforced (MHLW PDF)" : "施行当時（MHLW PDF）"}
+        </span>{" "}
+        {isEn
+          ? "are article numbers and text as published in the MHLW PDF. Verify on e-Gov when current text is required."
+          : "は厚労省PDF発行時点の条番号・条文です。引用時は識別の上、最新版が必要な場合は e-Gov で再確認してください。"}
       </div>
 
       <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 w-fit">
         {(
           [
-            { id: "curated", label: `キュレーション（${SITE_STATS.lawArticleCount}条文）` },
-            { id: "mhlw", label: "MHLW公式法令PDF" },
+            { id: "curated", label: isEn ? `Curated (${SITE_STATS.lawArticleCount} articles)` : `キュレーション（${SITE_STATS.lawArticleCount}条文）` },
+            { id: "mhlw", label: isEn ? "MHLW official law PDFs" : "MHLW公式法令PDF" },
           ] as const
         ).map((tab) => (
           <button
@@ -314,8 +337,8 @@ export function LawSearchPanel() {
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="フリーワード検索（例: 墜落制止用器具、有機溶剤）"
-            aria-label="法令フリーワード検索"
+            placeholder={isEn ? "Free-text search (e.g. fall-arrest equipment, organic solvent)" : "フリーワード検索（例: 墜落制止用器具、有機溶剤）"}
+            aria-label={isEn ? "Free-text law search" : "法令フリーワード検索"}
             className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200 w-full"
           />
         </div>
@@ -323,8 +346,8 @@ export function LawSearchPanel() {
           type="search"
           value={articleNumQuery}
           onChange={(e) => setArticleNumQuery(e.target.value)}
-          placeholder="条番号（例: 第21条）"
-          aria-label="条番号で検索"
+          placeholder={isEn ? "Article number (e.g. Article 21)" : "条番号（例: 第21条）"}
+          aria-label={isEn ? "Search by article number" : "条番号で検索"}
           className="rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
         />
       </div>
@@ -339,7 +362,7 @@ export function LawSearchPanel() {
               : "bg-slate-100 text-slate-700 hover:bg-slate-200"
           }`}
         >
-          すべての法令
+          {isEn ? "All laws" : "すべての法令"}
         </button>
         {LAW_NAMES.map((name) => (
           <button
@@ -358,7 +381,9 @@ export function LawSearchPanel() {
       </div>
 
       <p className="text-xs text-slate-500">
-        {filtered.length}件の条文が見つかりました（全{SITE_STATS.lawArticleCount}件）
+        {isEn
+          ? `${filtered.length} articles found (of ${SITE_STATS.lawArticleCount} total)`
+          : `${filtered.length}件の条文が見つかりました（全${SITE_STATS.lawArticleCount}件）`}
       </p>
 
       <div className="space-y-4">
@@ -367,12 +392,14 @@ export function LawSearchPanel() {
         ))}
         {filtered.length > 50 && (
           <p className="text-center text-xs text-slate-500">
-            上位50件を表示。検索を絞り込んでください（残り{filtered.length - 50}件）
+            {isEn
+              ? `Showing top 50. Narrow your search to see the remaining ${filtered.length - 50}.`
+              : `上位50件を表示。検索を絞り込んでください（残り${filtered.length - 50}件）`}
           </p>
         )}
         {filtered.length === 0 && (
           <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-600">
-            条文が見つかりませんでした。
+            {isEn ? "No articles found." : "条文が見つかりませんでした。"}
           </p>
         )}
       </div>
