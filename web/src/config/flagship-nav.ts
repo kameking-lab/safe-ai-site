@@ -93,6 +93,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       { label: "通達・判例", href: "/laws/notices-precedents" },
       { label: "条文検索", href: "/law-search" },
       { label: "通達原文", href: "/circulars" },
+      { label: "法令体系マップ", href: "/law-hierarchy", description: "法→政令→省令→告示の階層構造を俯瞰" },
     ],
   },
   {
