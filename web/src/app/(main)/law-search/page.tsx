@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { LawSearchPanel } from "@/components/law-search-panel";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -27,7 +28,17 @@ export default function LawSearchPage() {
     <>
       
       <PageJsonLd name="法令条文検索" description="労働安全衛生法・関連政令・省令の条文を全文検索。条文間の参照リンクも追跡。" path="/law-search" />
-      <LawSearchPanel />
+      <Suspense
+        fallback={
+          <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">
+            <div className="h-8 w-2/3 animate-pulse rounded bg-slate-200" />
+            <div className="h-10 animate-pulse rounded-lg bg-slate-100" />
+            <div className="h-40 animate-pulse rounded-lg bg-slate-100" />
+          </div>
+        }
+      >
+        <LawSearchPanel />
+      </Suspense>
     </>
   );
 }
