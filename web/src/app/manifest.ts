@@ -67,5 +67,49 @@ export default function manifest(): MetadataRoute.Manifest {
         url: "/accidents",
       },
     ],
+    screenshots: [
+      {
+        src: "/screenshots/home-desktop.png",
+        sizes: "2560x1600",
+        type: "image/png",
+        form_factor: "wide",
+        label: "ホーム — 法改正・事故DB・KYへのクイックアクセス",
+      },
+      {
+        src: "/screenshots/ky-desktop.png",
+        sizes: "2560x1600",
+        type: "image/png",
+        form_factor: "wide",
+        label: "KY用紙 — 朝礼で使える危険予知シート",
+      },
+      {
+        src: "/screenshots/chatbot-desktop.png",
+        sizes: "2560x1600",
+        type: "image/png",
+        form_factor: "wide",
+        label: "AIチャットボット — 安衛法をその場で質問",
+      },
+      {
+        src: "/screenshots/home-mobile.png",
+        sizes: "750x1334",
+        type: "image/png",
+        form_factor: "narrow",
+        label: "ホーム (モバイル)",
+      },
+      {
+        src: "/screenshots/ky-mobile.png",
+        sizes: "750x1334",
+        type: "image/png",
+        form_factor: "narrow",
+        label: "KY用紙 (モバイル)",
+      },
+      {
+        src: "/screenshots/chatbot-mobile.png",
+        sizes: "750x1334",
+        type: "image/png",
+        form_factor: "narrow",
+        label: "AIチャットボット (モバイル)",
+      },
+    ],
   };
 }
