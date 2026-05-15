@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-15T20:35:25.629Z",
+  "fetchedAt": "2026-05-15T21:42:06.994Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -4394,10 +4394,16 @@
         {
           "sourceCode": "200000",
           "level": "advisory",
-          "headline": "中部では、１８日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-16T04:17:00+09:00",
+          "headline": "北部では、１６日昼前まで濃霧による視程障害に注意してください。中部では、１８日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-05-16T06:05:00+09:00",
           "publishingOffice": "長野地方気象台",
           "warnings": [
+            {
+              "areaCode": "200010",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
             {
               "areaCode": "200020",
               "code": "21",
@@ -4438,6 +4444,18 @@
               "areaCode": "2020800",
               "code": "21",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2021100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2021300",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -4582,6 +4600,30 @@
               "areaCode": "2045200",
               "code": "21",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2056100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2056200",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2056300",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2060200",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             }
           ]
