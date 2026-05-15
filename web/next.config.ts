@@ -42,6 +42,11 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
+  // Ship browser source maps in production so error reports group by original
+  // file/line. Lighthouse audit 2026-05-14 (B-14) flagged 32x missing source
+  // maps; this also makes future React #418-style hydration errors traceable
+  // (B-2 took manual repro work because of the missing maps).
+  productionBrowserSourceMaps: true,
   // 直感URL（短い・単数形・別表記・日英両パターン）から正規ページへの恒久リダイレクト
   async redirects() {
     return [
