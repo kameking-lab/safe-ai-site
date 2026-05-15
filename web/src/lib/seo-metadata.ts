@@ -3,11 +3,34 @@ import type { Metadata } from "next";
 export const SITE_NAME = "安全AIポータル";
 export const SITE_URL = "https://www.anzen-ai-portal.jp";
 export const SITE_LOCALE = "ja_JP";
+export const SITE_ALTERNATE_LOCALES = ["en_US"] as const;
 
 type Override<T> = T extends object ? Partial<T> : T;
 
 type OpenGraphOverride = Override<NonNullable<Metadata["openGraph"]>>;
 type TwitterOverride = Override<NonNullable<Metadata["twitter"]>>;
+
+/**
+ * Build the `alternates` block with canonical + hreflang language map.
+ * Pass the relative path (`/foo`) — both languages and x-default point
+ * at the same canonical URL because the site uses client-side language
+ * switching with no URL prefix; this is the form Google accepts for
+ * single-URL multilingual content.
+ */
+export function withSiteAlternates(
+  path: string,
+): NonNullable<Metadata["alternates"]> {
+  const normalisedPath = path.startsWith("/") ? path : `/${path}`;
+  const canonical = `${SITE_URL}${normalisedPath === "/" ? "" : normalisedPath}`;
+  return {
+    canonical,
+    languages: {
+      ja: canonical,
+      en: canonical,
+      "x-default": canonical,
+    },
+  };
+}
 
 /**
  * Build an openGraph metadata block that preserves the site-wide
@@ -26,6 +49,7 @@ export function withSiteOpenGraph(
   return {
     type: "website",
     locale: SITE_LOCALE,
+    alternateLocale: [...SITE_ALTERNATE_LOCALES],
     siteName: SITE_NAME,
     url: `${SITE_URL}${normalisedPath === "/" ? "" : normalisedPath}`,
     ...extra,
