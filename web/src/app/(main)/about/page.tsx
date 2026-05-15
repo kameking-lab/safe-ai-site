@@ -276,7 +276,7 @@ export default function AboutPage() {
             {/* マスコット */}
             <div className="flex-shrink-0">
               <Image
-                src="/mascot/mascot-chihuahua-4.png"
+                src="/mascot/mascot-chihuahua-4.webp"
                 alt="安全AIポータル マスコット"
                 width={100}
                 height={100}
