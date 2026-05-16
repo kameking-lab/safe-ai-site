@@ -180,7 +180,7 @@
 - Need: ensure NEXT_PUBLIC_AMAZON_AFFILIATE_ID and NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID are set in Vercel — cannot verify from audit.
 
 ## Recurring-pattern check (X-J)
-- "Stop Claude" / STOP_CLAUDE leak: **none found** in web/src.
+- Prompt-injection marker leak: **none found** in web/src.
 - "ANZEN AI" leak in user-visible Japanese copy: **none found** (only allowed SEO redirect/alt usage).
 - "安全AIサイト" old-brand leak: **2 active page titles** (P1-02).
 - "お見積り" / "営業" sales-y wording: **12 education sub-pages** (P1-04).
@@ -228,7 +228,7 @@
 
 ## Audit completion stamps
 - Production fetched: 32 of 42 listed pages (others are static legal/policy pages confirmed via source).
-- Source-level grep: branding (ANZEN AI / 安全AIサイト / Claude Code), Enterprise/法人/お見積, console.* leaks, Stop Claude leak, broken hrefs, JSON-LD URLs, PII logging — all completed.
+- Source-level grep: branding (ANZEN AI / 安全AIサイト / Claude Code), Enterprise/法人/お見積, console.* leaks, prompt-injection markers, broken hrefs, JSON-LD URLs, PII logging — all completed.
 - Sub-agent (a2300235563aaf4c0) integrated into findings above.
 
 ---
