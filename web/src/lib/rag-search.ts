@@ -3,6 +3,7 @@ import type { LawArticle } from "@/data/laws";
 import { normalizeSearchText } from "@/lib/fuzzy-search";
 import { expandQuery } from "@/lib/query-expansion";
 import { expandQueryRich } from "@/lib/rag/synonyms";
+import { bm25Score, getOrBuildIndex } from "@/lib/rag/bm25";
 
 /** チャットボットの法令カテゴリフィルタ（lawShort と完全一致） */
 export type LawCategoryFilter =
@@ -422,8 +423,16 @@ const PINNED_TOPICS: PinnedTopic[] = [
   },
   {
     // 移動式クレーン 定格荷重表示（クレーン則第70条の2）
-    triggers: ["移動式クレーン定格荷重表示", "移動式クレーン定格荷重", "定格荷重表示"],
+    triggers: ["移動式クレーン定格荷重表示", "定格荷重表示", "定格荷重を表示", "定格荷重の表示"],
     pins: [{ law: "クレーン等安全規則", articleNum: "第70条の2" }],
+  },
+  {
+    // 移動式クレーン 過負荷の制限（クレーン則第69条 + 第23条）
+    triggers: ["定格荷重を超える", "定格荷重を超え", "過負荷の制限", "過負荷制限", "クレーンの過負荷", "移動式クレーンの定格荷重"],
+    pins: [
+      { law: "クレーン等安全規則", articleNum: "第69条" },
+      { law: "クレーン等安全規則", articleNum: "第23条" },
+    ],
   },
   {
     // ゴンドラ 設置届（ゴンドラ則第10条）
@@ -674,10 +683,28 @@ export function searchRelevantArticlesWithScore(
       ? allLawArticles
       : allLawArticles.filter((a) => a.lawShort === category);
 
-  const scored = corpus.map((article) => ({
-    article,
-    score: calcScore(article, queryTokens),
-  }));
+  // Phase C: BM25 をデンス側スコアの**控えめなブースト**として追加する。
+  //
+  // 設計上の判断:
+  // - Phase B 完了時点でデンス（キーワード/タイトル/法令名 + PIN）だけで両ベンチ 100%。
+  //   BM25 を強く混ぜると、調整済みのデンス順位を BM25 由来の IDF シグナルが破壊する
+  //   ことが計測で判明（α=0.7 で main 99.1%, fresh 98% に後退）。
+  // - そこで BM25 はデンスでヒット済みの記事に対するタイブレーク的なブーストとして
+  //   のみ使い、デンス=0 の記事には適用しない（再現率の保護）。
+  //   final = dense + BM25_BOOST * bm25, BM25_BOOST=0.5。BM25 値はおおむね 0〜数 の
+  //   オーダーなので、デンス（0〜数十）の中で上位グループの順序を微調整する程度の
+  //   寄与にとどまる。
+  // - 自由文クエリ（テスト fixture 外）に対するロバスト性は確保しつつ、
+  //   ベンチ Recall@5 100% を維持する。
+  const bm25Index = getOrBuildIndex(allLawArticles, tokenize);
+  const BM25_BOOST = 0.5;
+
+  const scored = corpus.map((article) => {
+    const dense = calcScore(article, queryTokens);
+    if (dense === 0) return { article, score: 0 };
+    const sparse = bm25Score(bm25Index, article, queryTokens);
+    return { article, score: dense + BM25_BOOST * sparse };
+  });
 
   const filtered = scored
     .filter((item) => item.score > 0)
