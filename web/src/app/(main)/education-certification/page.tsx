@@ -3,6 +3,7 @@ import Link from "next/link";
 import { GraduationCap, Search, BookOpen, AlertCircle, ChevronRight, Scale } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { CrossToolLinks } from "@/components/cross-tool-links";
 import { ogImageUrl } from "@/lib/og-url";
 import { getCertsByType, CERT_TYPE_LABELS, CERT_TYPE_COLORS } from "@/lib/education-cert-engine";
 import type { EducationCert } from "@/types/education-cert";
@@ -191,6 +192,7 @@ export default function EducationCertificationPage() {
           </section>
         </main>
       </div>
+      <CrossToolLinks exclude="education-certification" />
     </>
   );
 }

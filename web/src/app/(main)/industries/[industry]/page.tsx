@@ -7,6 +7,7 @@ import { Section } from "@/components/layout/section";
 import { CardGrid } from "@/components/layout/card-grid";
 import { Cluster, Stack } from "@/components/layout/stack";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { CrossToolLinks } from "@/components/cross-tool-links";
 import {
   JsonLd,
   breadcrumbSchema,
@@ -515,6 +516,11 @@ export default async function IndustryLandingPage({ params }: { params: Params }
           法令の最新情報や個別の判断は、所轄労働基準監督署や顧問の労働安全コンサルタントにご確認ください。
         </p>
       </PageContainer>
+      <CrossToolLinks
+        industry={content.slug as IndustrySlug}
+        exclude="industries"
+        heading="この業種で使える実務ツール"
+      />
     </>
   );
 }

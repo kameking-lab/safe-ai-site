@@ -160,6 +160,42 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       },
     ],
   },
+  {
+    id: "industries",
+    label: "業種から探す",
+    icon: "🏭",
+    cardTitle: "業種別ポータル",
+    cardDescription:
+      "建設・製造・運輸・医療福祉・サービスの5業種から、事故レポート・KY事例・健診・資格・年次計画を横断的に活用。",
+    href: "/industries",
+    subItems: [
+      {
+        label: "建設業",
+        href: "/industries/construction",
+        description: "足場・重機・高所作業の安全管理。事故レポート・KY事例・必要資格を確認。",
+      },
+      {
+        label: "製造業",
+        href: "/industries/manufacturing",
+        description: "機械・化学物質・騒音のリスク管理。業種別分析レポートと必要資格を確認。",
+      },
+      {
+        label: "運輸交通業",
+        href: "/industries/transport",
+        description: "交通労災・荷役・長時間労働対策。事故事例と年次計画テンプレートを活用。",
+      },
+      {
+        label: "医療・福祉",
+        href: "/industries/healthcare",
+        description: "腰痛・感染症・メンタルヘルス対応。業種特有の健診スケジュールを確認。",
+      },
+      {
+        label: "サービス業",
+        href: "/industries/service",
+        description: "転倒・労務管理・顧客対応ストレス。業種別ポータルからツールを横断利用。",
+      },
+    ],
+  },
 ];
 
 export function getFlagshipById(id: string): FlagshipFeature | undefined {

@@ -5,6 +5,7 @@ import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { PlanDocument } from "@/components/safety-plan/plan-document";
 import { PrintButton } from "@/components/safety-plan/print-button";
+import { CrossToolLinks, SAFETY_PLAN_TO_SLUG } from "@/components/cross-tool-links";
 import { findTemplateById } from "@/data/safety-plan-templates";
 import { regenerateFromTemplateId } from "@/lib/safety-plan-generator";
 import type { MeasureCategory } from "@/types/safety-plan";
@@ -145,6 +146,13 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
           </Link>
         </div>
       </PageContainer>
+      <div className="print:hidden">
+        <CrossToolLinks
+          industry={SAFETY_PLAN_TO_SLUG[plan.template.industry]}
+          exclude="plan-generator"
+          heading="計画書と合わせて使う"
+        />
+      </div>
     </div>
   );
 }

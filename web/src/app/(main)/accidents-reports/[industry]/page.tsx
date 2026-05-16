@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { IndustryReportView } from "@/components/accidents-reports/industry-report-view";
+import { CrossToolLinks } from "@/components/cross-tool-links";
 import {
   getIndustryConfig,
   getIndustryReport,
@@ -124,6 +125,11 @@ export default async function IndustryReportPage({ params }: { params: Params })
         ]}
       />
       <IndustryReportView report={report} />
+      <CrossToolLinks
+        industry={config.slug as IndustrySlug}
+        exclude="accidents-reports"
+        heading="同業種の関連ツール"
+      />
     </>
   );
 }

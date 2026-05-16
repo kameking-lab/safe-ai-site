@@ -4,6 +4,7 @@ import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { SchedulerDocument } from "@/components/health-checkup/scheduler-document";
 import { PrintButton } from "@/components/health-checkup/print-button";
+import { CrossToolLinks, HEALTH_CHECKUP_TO_SLUG } from "@/components/cross-tool-links";
 import { buildDecision } from "@/lib/health-checkup-engine";
 import {
   INDUSTRY_LABELS,
@@ -148,6 +149,13 @@ export default async function HealthCheckupSchedulerResultPage({
           </Link>
         </div>
       </PageContainer>
+      <div className="print:hidden">
+        <CrossToolLinks
+          industry={HEALTH_CHECKUP_TO_SLUG[industry]}
+          exclude="health-checkup"
+          heading="同業種の関連ツール"
+        />
+      </div>
     </div>
   );
 }
