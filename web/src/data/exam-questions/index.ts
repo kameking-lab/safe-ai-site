@@ -35,6 +35,8 @@ import { questions as qHealthConsultant } from "./health-consultant";
 import { questions as qBoiler1stClass } from "./boiler-1st-class";
 // Batch 7: 10 work-supervisor skill-training certifications (100 questions)
 import { questions as qSkillTraining } from "./skill-training";
+// Batch 8: health-1st expansion (+60 questions, h1-health-general subject)
+import { questions as qHealth1stExtra } from "./health-1st-extra";
 
 export type { ExamQuestion, ExamSubject, ExamCertification };
 export type { ExamCertSubject } from "./types";
@@ -74,6 +76,7 @@ export const ALL_QUESTIONS: ExamQuestion[] = [
   ...qHealthConsultant,
   ...qBoiler1stClass,
   ...qSkillTraining,
+  ...qHealth1stExtra,
 ];
 
 export const AVAILABLE_YEARS = [2023, 2024, 2025] as const;
