@@ -121,6 +121,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     href: "/accidents",
     subItems: [
       { label: "事故データベース", href: "/accidents" },
+      { label: "業種別 安全管理ポータル", href: "/industries", description: "5業種の重点課題・関連法令・推奨機能への動線をワンページに集約" },
       { label: "業種別 事故分析レポート", href: "/accidents-reports", description: "5業種の事故型・原因・対策・関連法令を自動集計" },
       { label: "事故統計ダッシュボード", href: "/accidents-analytics" },
       { label: "労災死傷統計", href: "/stats" },
