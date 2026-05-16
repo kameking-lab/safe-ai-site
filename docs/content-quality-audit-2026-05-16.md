@@ -186,7 +186,16 @@ also be dropped (`lib/search-index.ts`).
   parity with mhlw-* records.
 - **Impact**: 18 cards get a visible badge; no URL changes.
 
-### B-2 — `community-cases` operator-authored UGC seed (P1)
+### B-2 — `community-cases` operator-authored UGC seed (P1) — **resolved-pr-198**
+
+> **Status (2026-05-16):** highest-priority sub-fixes shipped in PR #198 —
+> `faqPageSchema` removed from `/qa-knowledge`; all four fake aliases in
+> `community-cases.ts` replaced with `（運営チーム作成事例）`; header copy on
+> `/community-cases` + `community-voice-section.tsx` rewritten to "労働安全
+> コンサルタント監修のもと運営チームが作成した参考事例". PR #194 had
+> already corrected the most overt metadata wording; this completes the
+> brand-risk fix. Route preserved (audit option (a) — relabel, not archive).
+
 
 - File: `web/src/data/mock/community-cases.ts:1-7`
 - Comment: "公開デモ用に、運営側が用意した「実体験ベース」の事例。"
@@ -210,7 +219,16 @@ also be dropped (`lib/search-index.ts`).
 
 ## Category C — Redundant / low-use features (P1)
 
-### C-1 — `/stats` public dashboard fed by mock numbers (P1)
+### C-1 — `/stats` public dashboard fed by mock numbers (P1) — **resolved-pr-195**
+
+> **Status (2026-05-16):** shipped in PR #195. Audit option (b) was taken
+> (banner + demoted framing) and option (a) was partially applied
+> (`robots: { index: false, follow: true }`) so sample numbers cannot
+> rank in search. The misleading `schema.org/Dataset` JSON-LD was also
+> removed; only `WebPage` + `BreadcrumbList` remain. Page title is now
+> "利用統計ダッシュボード（サンプル表示）"; existing in-page amber banner
+> (rendered on `source !== "ga4"` or `pv === 0`) explains the mock state.
+
 
 - File: `web/src/app/(main)/stats/page.tsx`
 - Title: "利用統計（公開ダッシュボード）" — "8 セクションで透明公開".
@@ -227,7 +245,14 @@ also be dropped (`lib/search-index.ts`).
 - **Impact**: `/stats` becomes private. No other route imports
   `stats-mock.ts`; sitemap entry should be removed.
 
-### C-2 — `/partnership` (P1)
+### C-2 — `/partnership` (P1) — **resolved-already-in-main**
+
+> **Status (2026-05-16):** verified during category-C cleanup — the page is
+> already deleted and `next.config.ts:106` carries
+> `{ source: "/partnership", destination: "/contact", permanent: true }`.
+> No route on disk under `web/src/app/(main)/partnership/`. PR #96's removal
+> had landed; the audit doc was based on a stale tree read.
+
 
 - File: `web/src/app/(main)/partnership/page.tsx`
 - Offers "ホワイトラベル提供 / OEM / 再販案内" for a single-operator
@@ -239,7 +264,17 @@ also be dropped (`lib/search-index.ts`).
   exactly what PR #96 set out to fix.
 - **Impact**: same as PR #96.
 
-### C-3 — `/wizard` (P1)
+### C-3 — `/wizard` (P1) — **resolved-pr-198**
+
+> **Status (2026-05-16):** shipped in PR #198. `/wizard` and `/wizard/result`
+> route files plus the `web/src/components/wizard/PDFExport.tsx` component
+> deleted. 301 redirects added in `next.config.ts` to
+> `/strategy/plan-generator` (which has shipped). Internal links repointed
+> in `app-shell.tsx` (2 nav entries), `persona-entry.tsx`,
+> `features/use-cases/page.tsx` (3 places), `features/quick-tour/page.tsx`
+> (step 7), `features-catalog.ts`. `data/compliance-matrix.json` preserved
+> per audit note.
+
 
 - File: `web/src/app/(main)/wizard/page.tsx`
 - 4-step industry/size/hazard wizard whose output overlaps with the much
@@ -266,7 +301,12 @@ also be dropped (`lib/search-index.ts`).
 - **Recommendation**: P3 — keep; revisit after PR #173 lands and the new
   homepage hierarchy stabilizes.
 
-### C-6 — `/community-cases`, `/qa-knowledge` (see B-2) — P1 archival candidate
+### C-6 — `/community-cases`, `/qa-knowledge` (see B-2) — P1 archival candidate — **resolved-pr-198 (via B-2)**
+
+> **Status (2026-05-16):** brand-risk fixes shipped in PR #198 (see B-2).
+> Routes kept (audit option (a) — relabel, not archive); FAQPage schema
+> dropped; fake aliases removed; honest "運営チーム作成事例" framing applied.
+
 
 Tracked under B-2 since the core issue is sourcing, not redundancy.
 
