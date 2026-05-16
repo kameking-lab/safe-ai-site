@@ -20,8 +20,15 @@ import {
   getScaleAdditions,
 } from "./base/common-measures";
 import { commonMonthlySchedule } from "./base/common-schedule";
-import { commonLawReferences, commonCircularReferences } from "./base/common-laws";
+import {
+  commonLawReferences,
+  commonCircularReferences,
+  getScaleLawReferences,
+  getScaleCircularReferences,
+} from "./base/common-laws";
 import { getBaseGoals } from "./base/common-goals";
+import { getIndustryScaleOverlay } from "./base/industry-scale-overlays";
+import { optimizeMonthlySchedule } from "./base/schedule-optimizer";
 
 import {
   constructionBasicPolicy,
@@ -210,10 +217,12 @@ const INDUSTRY_BUNDLES: IndustryBundle[] = [
 const SCALES: ScaleId[] = ["small", "medium", "large"];
 
 function mergeMonthlySchedule(
-  extras: Partial<Record<MonthIndex, MonthlyEvent[]>>,
+  ...overlays: Array<Partial<Record<MonthIndex, MonthlyEvent[]>>>
 ): MonthlySchedule[] {
   return commonMonthlySchedule.map((entry) => {
-    const extra = extras[entry.month] ?? [];
+    const extra: MonthlyEvent[] = overlays.flatMap(
+      (overlay) => overlay[entry.month] ?? [],
+    );
     return { month: entry.month, events: [...entry.events, ...extra] };
   });
 }
@@ -222,6 +231,11 @@ function buildTemplate(
   bundle: IndustryBundle,
   scale: ScaleId,
 ): SafetyPlanTemplate {
+  const scaleOverlay = getIndustryScaleOverlay(bundle.industry, scale);
+  const merged = mergeMonthlySchedule(
+    bundle.monthlyExtras,
+    scaleOverlay.extraMonthlyEvents,
+  );
   return {
     id: `${bundle.industry}-${scale}`,
     industry: bundle.industry,
@@ -229,15 +243,28 @@ function buildTemplate(
     industryLabel: INDUSTRY_LABELS[bundle.industry],
     scaleLabel: SCALE_LABELS[scale],
     basicPolicy: bundle.basicPolicy,
-    goals: [...getBaseGoals(scale), ...bundle.goals],
+    goals: [
+      ...getBaseGoals(scale),
+      ...bundle.goals,
+      ...scaleOverlay.extraGoals,
+    ],
     measures: [
       ...baseSafetyMeasures,
       ...getScaleAdditions(scale),
       ...bundle.measures,
+      ...scaleOverlay.extraMeasures,
     ],
-    monthlySchedule: mergeMonthlySchedule(bundle.monthlyExtras),
-    relatedLaws: [...commonLawReferences, ...bundle.laws],
-    relatedCirculars: [...commonCircularReferences, ...bundle.circulars],
+    monthlySchedule: optimizeMonthlySchedule(merged, bundle.industry),
+    relatedLaws: [
+      ...commonLawReferences,
+      ...getScaleLawReferences(scale),
+      ...bundle.laws,
+    ],
+    relatedCirculars: [
+      ...commonCircularReferences,
+      ...getScaleCircularReferences(scale),
+      ...bundle.circulars,
+    ],
   };
 }
 

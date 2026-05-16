@@ -5,7 +5,7 @@
  * (CLAUDE.md: 法令本文の逐語転載禁止).
  */
 
-import type { CircularReference, LawReference } from "@/types/safety-plan";
+import type { CircularReference, LawReference, ScaleId } from "@/types/safety-plan";
 
 export const commonLawReferences: LawReference[] = [
   {
@@ -82,3 +82,101 @@ export const commonCircularReferences: CircularReference[] = [
     title: "心理的負担の程度を把握するための検査（ストレスチェック）の実施について",
   },
 ];
+
+/**
+ * Scale-applicability law overlay.
+ *
+ * Adds articles and summaries that hinge on headcount thresholds: small uses
+ * 推進者 framework, medium adds 衛生管理者・産業医・委員会, large adds
+ * 総括安全衛生管理者・専属産業医・複数衛生管理者.
+ */
+const SMALL_SCALE_LAWS: LawReference[] = [
+  {
+    name: "労働安全衛生法（小規模事業場の体制）",
+    articles: [
+      "第12条の2（安全衛生推進者・衛生推進者）",
+    ],
+    summary:
+      "常時10〜49人規模では衛生推進者（業種により安全衛生推進者）の選任が必要。氏名を労働者に周知し、安全衛生業務を担当させる。",
+  },
+  {
+    name: "労働安全衛生規則（小規模事業場運用）",
+    articles: [
+      "第12条の2〜第12条の4（推進者の選任要件・職務）",
+      "第23条の2（労働者の意見聴取の機会）",
+    ],
+    summary:
+      "推進者の選任要件・資格・業務範囲、および委員会設置義務がない事業場での意見聴取の機会確保を定める。",
+  },
+];
+
+const MEDIUM_SCALE_LAWS: LawReference[] = [
+  {
+    name: "労働安全衛生法（中規模事業場の体制）",
+    articles: [
+      "第12条（衛生管理者の選任）",
+      "第13条（産業医の選任）",
+      "第18条（衛生委員会）",
+      "第66条の10（ストレスチェック）",
+    ],
+    summary:
+      "常時50人以上で衛生管理者・産業医・衛生委員会・ストレスチェック実施が義務化。選任・実施結果は所轄労基署へ報告。",
+  },
+];
+
+const LARGE_SCALE_LAWS: LawReference[] = [
+  {
+    name: "労働安全衛生法（大規模事業場の体制）",
+    articles: [
+      "第10条（総括安全衛生管理者）",
+      "第13条第1項第2号（専属産業医）",
+    ],
+    summary:
+      "業種により常時100/300/1000人以上で総括安全衛生管理者選任。1,000人以上または有害業務500人以上で専属産業医、3,001人以上で2人以上の産業医が必要。",
+  },
+  {
+    name: "労働安全衛生規則（大規模事業場運用）",
+    articles: [
+      "第7条第1項第4号（衛生管理者の複数選任）",
+      "第13条第1項（産業医の専属・複数選任）",
+    ],
+    summary:
+      "労働者数に応じた衛生管理者の複数選任・専任化、産業医の専属・複数選任の要件を定める。",
+  },
+];
+
+export function getScaleLawReferences(scale: ScaleId): LawReference[] {
+  if (scale === "small") return SMALL_SCALE_LAWS;
+  if (scale === "medium") return MEDIUM_SCALE_LAWS;
+  return LARGE_SCALE_LAWS;
+}
+
+const SMALL_SCALE_CIRCULARS: CircularReference[] = [
+  {
+    number: "基発1018第1号",
+    date: "2023-10-18",
+    title: "小規模事業場における産業保健活動の推進について（地域産業保健センターの活用）",
+  },
+];
+
+const MEDIUM_SCALE_CIRCULARS: CircularReference[] = [
+  {
+    number: "基発0405第2号",
+    date: "2024-04-05",
+    title: "事業場における労働者の健康保持増進のための指針の運用について（中規模事業場対象）",
+  },
+];
+
+const LARGE_SCALE_CIRCULARS: CircularReference[] = [
+  {
+    number: "基発0331第8号",
+    date: "2024-03-31",
+    title: "労働安全衛生マネジメントシステム（JIS Q 45100）の普及推進について",
+  },
+];
+
+export function getScaleCircularReferences(scale: ScaleId): CircularReference[] {
+  if (scale === "small") return SMALL_SCALE_CIRCULARS;
+  if (scale === "medium") return MEDIUM_SCALE_CIRCULARS;
+  return LARGE_SCALE_CIRCULARS;
+}

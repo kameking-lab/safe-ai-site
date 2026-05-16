@@ -151,6 +151,43 @@ export interface GeneratedPlan {
   notes: string;
 }
 
+export type SpecialWorkId =
+  | "high-place"
+  | "organic-solvent"
+  | "specified-chemical"
+  | "dust"
+  | "noise"
+  | "vibration"
+  | "ionizing-radiation"
+  | "lead"
+  | "asbestos"
+  | "lone-work"
+  | "shift-work"
+  | "heavy-load";
+
+export const SPECIAL_WORK_LABELS: Record<SpecialWorkId, string> = {
+  "high-place": "高所作業（2m以上）",
+  "organic-solvent": "有機溶剤取扱い",
+  "specified-chemical": "特定化学物質取扱い",
+  dust: "粉じん作業",
+  noise: "騒音作業（85dB以上）",
+  vibration: "振動工具使用",
+  "ionizing-radiation": "電離放射線業務",
+  lead: "鉛業務",
+  asbestos: "石綿取扱い・解体",
+  "lone-work": "ひとり作業・夜間ひとり勤務",
+  "shift-work": "交代制・深夜業",
+  "heavy-load": "重量物取扱い（介護・荷役）",
+};
+
+export type OverworkPriority = "high" | "normal" | "low";
+
+export const OVERWORK_PRIORITY_LABELS: Record<OverworkPriority, string> = {
+  high: "重点（長時間労働常態化または過労死等の発生実績あり）",
+  normal: "通常（法定上限内で運用）",
+  low: "影響小（勤務時間管理が確立済み）",
+};
+
 export interface PlanGeneratorInput {
   industry: IndustryId;
   scale: ScaleId;
@@ -159,6 +196,14 @@ export interface PlanGeneratorInput {
   focusAreas: MeasureCategory[];
   customGoals: SafetyGoal[];
   notes: string;
+  /** 重点項目（任意・複数選択可） */
+  priorityAreas?: MeasureCategory[];
+  /** 自社に存在する特殊作業（任意・複数選択可） */
+  specialWork?: SpecialWorkId[];
+  /** 海外派遣労働者の有無 */
+  hasOverseasAssignment?: boolean;
+  /** 過重労働対策の優先度 */
+  overworkPriority?: OverworkPriority;
 }
 
 export const MONTH_LABELS_JA: Record<MonthIndex, string> = {
