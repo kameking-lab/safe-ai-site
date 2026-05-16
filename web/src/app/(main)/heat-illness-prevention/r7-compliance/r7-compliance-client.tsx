@@ -75,7 +75,7 @@ export function R7ComplianceClient() {
           />
         </div>
         <p className="mt-3 text-xs text-rose-800">
-          安衛則第612条の2 改正（令和7年4月1日適用）に対応した社内点検用チェックリストです。
+          安衛則第612条の2 改正（令和7年6月1日施行）に対応した社内点検用チェックリストです。
           チェックは端末内のみで保持され、サーバには送信されません。
         </p>
       </section>
@@ -191,7 +191,7 @@ export function R7ComplianceClient() {
 
       <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-600">
         <p>
-          出典：労働安全衛生規則第612条の2 改正（令和7年4月1日適用、MHLW通達 基発0301第1号）、
+          出典：労働安全衛生規則第612条の2 改正（令和7年6月1日施行、厚生労働省令第86号）、
           厚生労働省「職場における熱中症予防対策マニュアル」。
         </p>
         <p className="mt-1">

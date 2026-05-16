@@ -9,7 +9,7 @@ import type { MhlwNotice } from "@/data/mhlw-notices";
 export const batch2HeatMental: MhlwNotice[] = [
   {
     id: "mhlw-notice-0920",
-    title: "労働安全衛生規則等の一部改正（職場における熱中症防止強化措置）の施行について（令和7年4月1日施行）",
+    title: "労働安全衛生規則等の一部改正（職場における熱中症防止強化措置）の施行について（令和7年6月1日施行）",
     issuedDate: "2025-03-31",
     issuedDateRaw: "令和7年3月31日",
     noticeNumber: "基発0331第2号",
@@ -24,7 +24,7 @@ export const batch2HeatMental: MhlwNotice[] = [
   },
   {
     id: "mhlw-notice-0921",
-    title: "WBGT（暑さ指数）の活用による熱中症予防対策の強化について（R7.4.1義務化）",
+    title: "WBGT（暑さ指数）の活用による熱中症予防対策の強化について（R7.6.1義務化）",
     issuedDate: "2025-02-28",
     issuedDateRaw: "令和7年2月28日",
     noticeNumber: "基安労発0228第1号",
@@ -459,7 +459,7 @@ export const batch2HeatMental: MhlwNotice[] = [
   },
   {
     id: "mhlw-notice-0950",
-    title: "職場における熱中症等の健康障害を防止するための改正安衛則（R7.4.1施行）Q&A集について",
+    title: "職場における熱中症等の健康障害を防止するための改正安衛則（R7.6.1施行）Q&A集について",
     issuedDate: "2025-02-14",
     issuedDateRaw: "令和7年2月14日",
     noticeNumber: "基安労発0214第1号",
