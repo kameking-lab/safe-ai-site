@@ -34,11 +34,16 @@ jobs:
         env:
           NODE_OPTIONS: "--no-warnings"
 
-      - name: Stage 2 — AI judge gate (Gemini 2.5 Flash, 4 scores)
+      - name: Stage 2 — AI judge gate (Gemini 2.5 Flash, per-type thresholds)
         run: node scripts/etl/news-ai-judge.mjs
         env:
           NODE_OPTIONS: "--no-warnings"
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: Stage 3 — recompute audit dashboard stats
+        run: node scripts/etl/news-feed-stats.mjs
+        env:
+          NODE_OPTIONS: "--no-warnings"
 
       - name: Commit if changed
         run: |
