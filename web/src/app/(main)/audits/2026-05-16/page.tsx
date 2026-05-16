@@ -146,6 +146,9 @@ const FINDINGS_B: Finding[] = [
       "web/src/data/mock/real-accident-cases-2025-preliminary.ts ヘッダコメント:「個票ではなく、業種別・事故型別集計値(速報)から統計的に導出した『代表パターン』」。UI上は他の実事例と並ぶ。「速報」バッジでは「創作事例である」ことが伝わらない。",
     recommendation:
       "代表パターン事例には専用バッジ「想定例(統計に基づく合成)」を新設。実報告事例と明確に視覚分離。確定値(R07個票)公開後に置換するロードマップを当該ページに常時表示。",
+    status: "resolved-pr-audit-p1-priority-batch",
+    statusNote:
+      "事例カードのバッジを「速報」→「想定例(速報基準)」に改称し、aria-label/title で「実報告ではなく統計に基づく合成」を明示。/accidents-reports ハブに AccidentsPreliminaryBanner を常時表示し、R07確定個票公開後に置換予定のロードマップを可視化。メタ内訳キャプションも『想定例 N件』+ 確定値置換予定の説明に更新。",
   },
   {
     id: "B-002",
@@ -431,6 +434,9 @@ const FINDINGS_F: Finding[] = [
       "WebFetch評価:「未稼働。2026年秋公開予定。プレビューはモック画面のみ」。法人向けプロダクトの体裁を装う未完成ページが信頼を毀損。",
     recommendation:
       "本リリースまで /lms はナビから除外、noindex化。「準備中: LMS機能は法人化後にβ提供予定」とトップに小さく案内のみ。",
+    status: "resolved-pr-audit-p1-priority-batch",
+    statusNote:
+      "ページ metadata に robots:{index:false,follow:false,nocache:true} を追加、canonical を解除。app-shell サイドナビと features-catalog から LMS エントリを除外。sitemap.ts および robots.ts Disallow に追加。ページ本体は残し、ウェイティングリスト先行受付のみ継続。",
   },
   {
     id: "F-002",
@@ -443,6 +449,9 @@ const FINDINGS_F: Finding[] = [
       "WebFetch評価:「実際のAPIなし。フェーズ1は『独立後3ヶ月』という未定の時間軸」「実装前の計画書をユーザー向けに掲載する意味は限定的」。",
     recommendation:
       "ページ削除(または /admin 配下に移動)。法人化・API提供開始時に再公開。",
+    status: "resolved-pr-audit-p1-priority-batch",
+    statusNote:
+      "ページ metadata に robots:{index:false,follow:false,nocache:true} を追加、canonical/openGraph を解除。sitemap.ts および robots.ts Disallow に追加。直接 URL を知っている関係者向けにロードマップは閲覧可能なまま残す（削除は外部リンク破壊リスクのため見送り）。",
   },
   {
     id: "F-003",
@@ -455,6 +464,9 @@ const FINDINGS_F: Finding[] = [
       "A-006 と同根。外部利用者向け価値ゼロ。",
     recommendation:
       "削除または /admin 配下に移動。",
+    status: "resolved-pr-audit-p1-priority-batch",
+    statusNote:
+      "棚卸完了: ページ metadata は既に noindex 設定済 (web/src/app/(main)/handover/page.tsx:8) かつ HANDOVER_GATE_KEY によるキー認証で、未認証アクセスは notFound() を返す。ナビ・サイトマップ未掲載も確認済。本バッチでは robots.ts Disallow に /handover を追加し、クローラ側でも明示拒否。",
   },
   {
     id: "F-004",
@@ -467,6 +479,9 @@ const FINDINGS_F: Finding[] = [
       "WebFetch評価:「料金プランは現在準備中。決済方法の情報もない」。",
     recommendation:
       "実課金開始までナビから除外+noindex。短い「料金は法人化後に提示」の1ページに縮小。",
+    status: "resolved-pr-audit-p1-priority-batch",
+    statusNote:
+      "棚卸完了: PAID_MODE が無効な研究プロジェクト期間中、/pricing は (1) metadata で robots:{index:false,follow:false}、(2) sitemap.ts の PAID_ONLY フィルタで除外、(3) app-shell および footer から非掲載、(4) 本体表示は『料金プランは現在準備中です』の縮小版に切替済。M6 課金事業再開時に NEXT_PUBLIC_PAID_MODE=true で全UIが復活する設計。",
   },
   {
     id: "F-005",
