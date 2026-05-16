@@ -2,6 +2,11 @@ name: GSC Add Property Ownership
 
 on:
   workflow_dispatch:
+    inputs:
+      site_url:
+        description: "GSC property identifier (sc-domain:<domain> or https://www.<domain>/)"
+        required: false
+        default: "sc-domain:anzen-ai-portal.jp"
 
 permissions:
   contents: read
@@ -25,3 +30,4 @@ jobs:
         run: node scripts/etl/gsc-add-property.mjs
         env:
           GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+          GSC_TARGET_SITE: ${{ github.event.inputs.site_url || 'sc-domain:anzen-ai-portal.jp' }}
