@@ -131,10 +131,10 @@ export function StatsDashboardImpl() {
     <PageContainer>
       <Stack gap="lg">
       <TranslatedPageHeader
-        titleJa="利用統計（公開ダッシュボード）"
-        titleEn="Public Usage Dashboard"
-        descriptionJa="個人運営の研究プロジェクトの透明性のため、UU・PV・AI 利用・流入元・コンバージョンを公開しています。"
-        descriptionEn="Public transparency dashboard for this independent research project."
+        titleJa="利用統計ダッシュボード（サンプル表示）"
+        titleEn="Usage Dashboard (Sample)"
+        descriptionJa="GA4 / Search Console が接続されている期間は実数値、未接続時は構造確認用のサンプル数値を表示します。検索インデックスからは除外しています。"
+        descriptionEn="Live numbers when GA4 / Search Console are connected; sample mock numbers otherwise. This page is noindexed until live data stabilizes."
         iconName="BarChart3"
         iconColor="emerald"
       />
