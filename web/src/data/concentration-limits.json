@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-13T16:23:40.895Z",
+  "generatedAt": "2026-05-16T03:24:09.519Z",
   "version": "2.0.0",
   "sources": {
     "MHLW_177": "厚生労働省告示第177号（令和5年4月公示・以降改正分含む）",
@@ -9,7 +9,7 @@
     "GHS_MHLW": "厚生労働省 国によるGHS分類"
   },
   "summary": {
-    "total": 1046,
+    "total": 1546,
     "withMhlw": 251,
     "withJsoh": 91,
     "withAcgih": 502,
@@ -18,7 +18,7 @@
       "mhlw": 251,
       "jsoh": 15,
       "acgih": 303,
-      "reference": 477
+      "reference": 977
     },
     "byIarc": {
       "group1": 111,
@@ -19732,6 +19732,5506 @@
       "nameEn": "Copper dimethyldithiocarbamate",
       "notes": [
         "農薬・顔料用途"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "51-55-8": {
+      "name": "アトロピン",
+      "nameEn": "Atropine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "52-90-4": {
+      "name": "Ｌ－システイン",
+      "nameEn": "L-Cysteine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "54-11-5": {
+      "name": "ニコチン",
+      "nameEn": "Nicotine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "55-56-1": {
+      "name": "クロロヘキシジン",
+      "nameEn": "Chlorhexidine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "56-18-8": {
+      "name": "イミノビスプロピルアミン",
+      "nameEn": "Imino-bis(propylamine)",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "56-72-4": {
+      "name": "Ｏ－３－クロロ－４－メチル－２－オキソ－２Ｈ－クロメン－７－イル＝Ｏ’，Ｏ’’－ジエチル＝ホスホロチオアート",
+      "nameEn": "O-3-Chloro-4-methyl-2-oxo-2H-chromen-7-yl O',O''-diethyl phosphorothioate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "56-93-9": {
+      "name": "ベンジル（トリメチル）アンモニウム＝クロリド",
+      "nameEn": "Benzyl(trimethyl)ammonium chloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "57-06-7": {
+      "name": "イソチオシアン酸アリル",
+      "nameEn": "Allyl isothiocyanate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "57-09-0": {
+      "name": "ヘキサデシルトリメチルアンモニウム＝ブロミド",
+      "nameEn": "Hexadecyltrimethylammonium bromide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "57-24-9": {
+      "name": "ストリキニーネ",
+      "nameEn": "Strychnine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "59-66-5": {
+      "name": "アセタゾラミド（別名アセタゾールアミド）",
+      "nameEn": "Acetazolamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "59-88-1": {
+      "name": "フェニルヒドラジン一塩酸塩",
+      "nameEn": "Phenylhydrazine monohydrochloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "60-35-5": {
+      "name": "アセトアミド",
+      "nameEn": "Acetamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "61-68-7": {
+      "name": "メフェナム酸",
+      "nameEn": "Mefenamic acid",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "61-73-4": {
+      "name": "メチレンブルー",
+      "nameEn": "Methylene blue",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "62-55-5": {
+      "name": "チオアセトアミド",
+      "nameEn": "Thioacetamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "62-74-8": {
+      "name": "フルオロ酢酸ナトリウム",
+      "nameEn": "Sodium fluoroacetate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "64-02-8": {
+      "name": "エチレンジアミン四酢酸四ナトリウム",
+      "nameEn": "Tetrasodium ethylenediaminetetraacetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "65-86-1": {
+      "name": "オロト酸",
+      "nameEn": "Orotic acid",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "66-32-0": {
+      "name": "硝酸ストリキニーネ",
+      "nameEn": "Strychnine nitrate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "66-81-9": {
+      "name": "シクロヘキシミド",
+      "nameEn": "Cicloheximide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "68-11-1": {
+      "name": "メルカプト酢酸",
+      "nameEn": "Mercaptoacetic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "69-72-7": {
+      "name": "サリチル酸",
+      "nameEn": "Salicylic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "74-31-7": {
+      "name": "Ｎ，Ｎ’－ジフェニル－パラ－フェニレンジアミン",
+      "nameEn": "N,N'-Diphenyl-p-phenylenediamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "74-93-1": {
+      "name": "メチルメルカプタン",
+      "nameEn": "Methyl mercaptan",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "74-95-3": {
+      "name": "ジブロモメタン",
+      "nameEn": "Dibromomethane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "74-97-5": {
+      "name": "ブロモクロロメタン",
+      "nameEn": "Bromochloromethane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-08-1": {
+      "name": "エタンチオール",
+      "nameEn": "Ethanethiol",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-18-3": {
+      "name": "硫化ジメチル",
+      "nameEn": "Dimethyl sulfide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-20-7": {
+      "name": "炭化カルシウム",
+      "nameEn": "Calcium carbide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-36-5": {
+      "name": "アセチル＝クロリド",
+      "nameEn": "Acetyl chloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-47-8": {
+      "name": "ヨードホルム",
+      "nameEn": "Iodoform",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-54-7": {
+      "name": "ジクロロ（メチル）シラン",
+      "nameEn": "Dichloro(methyl)silane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-57-0": {
+      "name": "テトラメチルアンモニウム＝クロリド",
+      "nameEn": "Tetramethylammonium chloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-59-2": {
+      "name": "テトラメチルアンモニウム＝ヒドロキシド",
+      "nameEn": "Tetramethylammonium hydroxide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-61-6": {
+      "name": "ジブロモジフルオロメタン",
+      "nameEn": "Dibromodifluoromethane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-73-0": {
+      "name": "テトラフルオロメタン",
+      "nameEn": "Tetrafluoromethane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-75-2": {
+      "name": "メタンスルホン酸",
+      "nameEn": "Methanesulphonic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-76-3": {
+      "name": "テトラメチルシラン",
+      "nameEn": "Tetramethylsilane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "75-79-6": {
+      "name": "トリクロロ（メチル）シラン",
+      "nameEn": "Trichloro(methyl)silane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "76-05-1": {
+      "name": "トリフルオロ酢酸",
+      "nameEn": "Trifluoroacetic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "76-16-4": {
+      "name": "ヘキサフルオロエタン（高圧のガスの状態のものに限る。）",
+      "nameEn": "Hexafluoroethane (as a gas under pressure)",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "78-40-0": {
+      "name": "りん酸トリエチル",
+      "nameEn": "Triethyl phosphate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "78-42-2": {
+      "name": "りん酸トリス（２－エチルヘキシル）",
+      "nameEn": "Tris(2-ethylhexyl) phosphate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "78-57-9": {
+      "name": "ジチオりん酸Ｓ－（４，６－ジアミノ－１，３，５－トリアジン－２－イルメチル）Ｏ，Ｏ－ジメチル",
+      "nameEn": "Dithiophosphoric acid S-(4,6-diamino-1,3,5-triazin-2-ylmethyl)O,O-dimethyl ester",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "78-62-6": {
+      "name": "ジエトキシジメチルシラン",
+      "nameEn": "Diethoxydimethylsilane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "78-82-0": {
+      "name": "イソブチロニトリル",
+      "nameEn": "Isobutyronitrile",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "78-94-4": {
+      "name": "メチルビニルケトン",
+      "nameEn": "Methyl vinyl ketone",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "78-95-5": {
+      "name": "クロロアセトン",
+      "nameEn": "Chloroacetone",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-03-8": {
+      "name": "塩化プロパノイル",
+      "nameEn": "Propanoyl chloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-04-9": {
+      "name": "クロロアセチル＝クロリド",
+      "nameEn": "Chloroacetyl chloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-07-2": {
+      "name": "クロロアセトアミド",
+      "nameEn": "Chloroacetamide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-08-3": {
+      "name": "ブロモ酢酸",
+      "nameEn": "Bromoacetic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-14-1": {
+      "name": "グリコール酸",
+      "nameEn": "Glycollic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-16-3": {
+      "name": "Ｎ－メチルアセトアミド",
+      "nameEn": "N-Methylacetamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-19-6": {
+      "name": "チオセミカルバジド",
+      "nameEn": "Thiosemicarbazide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-21-0": {
+      "name": "過酢酸",
+      "nameEn": "Peroxyacetic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-22-1": {
+      "name": "メチル＝カルボノクロリダート",
+      "nameEn": "Methyl carbonochloridate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-36-7": {
+      "name": "ジクロロ酢酸＝クロリド",
+      "nameEn": "Dichloroacetyl chloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-38-9": {
+      "name": "クロロトリフルオロエチレン",
+      "nameEn": "Chlorotrifluoroethylene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-39-0": {
+      "name": "メタクリルアミド",
+      "nameEn": "Methacrylamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "79-43-6": {
+      "name": "ジクロロ酢酸",
+      "nameEn": "Dichloroacetic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "80-10-4": {
+      "name": "ジクロロジフェニルシラン",
+      "nameEn": "Dichlorodiphenylsilane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "80-43-3": {
+      "name": "ビス（１－メチル－１－フェニルエチル）＝ペルオキシド",
+      "nameEn": "Bis(1-methyl-1-phenylethyl) peroxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "80-48-8": {
+      "name": "パラ－トルエンスルホン酸メチル",
+      "nameEn": "Methyl p-toluenesulfonate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "82-68-8": {
+      "name": "ペンタクロロニトロベンゼン",
+      "nameEn": "Pentachloronitrobenzene",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "83-32-9": {
+      "name": "アセナフテン",
+      "nameEn": "Acenaphthene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "83-79-4": {
+      "name": "ロテノン",
+      "nameEn": "Rotenone",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "84-61-7": {
+      "name": "フタル酸ジシクロヘキシル",
+      "nameEn": "Dicyclohexyl phthalate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "85-01-8": {
+      "name": "フェナントレン",
+      "nameEn": "Phenanthrene",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "85-42-7": {
+      "name": "シクロヘキサン－１，２－ジカルボン酸無水物",
+      "nameEn": "Cyclohexane-1,2-dicarboxylic anhydride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "85-43-8": {
+      "name": "シクロヘキサ－４－エン－１，２－ジカルボン酸無水物",
+      "nameEn": "Cyclohex-4-ene-1,2-dicarboxylic anhydride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "86-74-8": {
+      "name": "カルバゾール",
+      "nameEn": "Carbazole",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "88-89-1": {
+      "name": "ピクリン酸",
+      "nameEn": "Picric acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "90-02-8": {
+      "name": "サリチルアルデヒド",
+      "nameEn": "Salicylaldehyde",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "91-17-8": {
+      "name": "デカヒドロナフタレン",
+      "nameEn": "Decahydronaphthalene",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "91-64-5": {
+      "name": "クマリン",
+      "nameEn": "Coumarin",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "91-66-7": {
+      "name": "Ｎ，Ｎ－ジエチルアニリン",
+      "nameEn": "N,N-Diethylaniline",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "93-58-3": {
+      "name": "安息香酸メチル",
+      "nameEn": "Methyl benzoate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "94-09-7": {
+      "name": "パラ－アミノ安息香酸エチル",
+      "nameEn": "Ethyl p-aminobenzoate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "94-68-8": {
+      "name": "Ｎ－エチル－２－メチルアニリン",
+      "nameEn": "N-Ethyl-2-methylaniline",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "95-13-6": {
+      "name": "インデン",
+      "nameEn": "Indene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "95-16-9": {
+      "name": "ベンゾチアゾール",
+      "nameEn": "Benzothiazole",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "95-31-8": {
+      "name": "Ｎ－（ターシャリ－ブチル）－２－ベンゾチアゾールスルフェンアミド",
+      "nameEn": "N-(tert-Butyl)-2-benzothiazolesulfenamide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "95-33-0": {
+      "name": "Ｎ－シクロヘキシル－２－ベンゾチアゾールスルフェンアミド",
+      "nameEn": "N-Cyclohexyl-2-benzothiazolesulfenamide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "95-92-1": {
+      "name": "しゆう酸ジエチル",
+      "nameEn": "Diethyl oxalate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "96-05-9": {
+      "name": "アリル＝メタクリレート",
+      "nameEn": "Allyl methacrylate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "96-29-7": {
+      "name": "ブタン－２－オン＝オキシム",
+      "nameEn": "Butan-2-one oxime",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "96-34-4": {
+      "name": "クロロ酢酸メチル",
+      "nameEn": "Methyl chloroacetate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "96-41-3": {
+      "name": "シクロペンタノール",
+      "nameEn": "Cyclopentanol",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "97-17-6": {
+      "name": "チオりん酸Ｏ－２，４－ジクロロフェニル－Ｏ，Ｏ－ジエチル",
+      "nameEn": "O-2,4-Dichlorophenyl O,O-diethyl phosphorothioate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "97-39-2": {
+      "name": "ジ－オルト－トリルグアニジン",
+      "nameEn": "Di-o-tolylguanidine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "97-62-1": {
+      "name": "２－メチルプロパン酸エチル",
+      "nameEn": "Ethyl 2-methylpropionate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "97-64-3": {
+      "name": "乳酸エチル",
+      "nameEn": "Ethyl lactate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "97-72-3": {
+      "name": "無水イソ酪酸",
+      "nameEn": "Isobutyric anhydride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "97-74-5": {
+      "name": "テトラメチルチウラムモノスルフィド",
+      "nameEn": "Tetramethylthiuram monosulphide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "97-90-5": {
+      "name": "エチレンジメタクリラート",
+      "nameEn": "Ethylene dimethacrylate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "97-94-9": {
+      "name": "トリエチルボラン",
+      "nameEn": "Triethylborane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "98-02-2": {
+      "name": "フラン－２－イルメタンチオール",
+      "nameEn": "Furan-2-ylmethanethiol",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "98-09-9": {
+      "name": "塩化ベンゼンスルホニル",
+      "nameEn": "Benzenesulfonyl chloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "98-10-2": {
+      "name": "ベンゼンスルホンアミド",
+      "nameEn": "Benzenesulphonamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "98-11-3": {
+      "name": "ベンゼンスルホン酸",
+      "nameEn": "Benzenesulfonic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "98-13-5": {
+      "name": "トリクロロ（フェニル）シラン",
+      "nameEn": "Trichloro(phenyl)silane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "98-94-2": {
+      "name": "Ｎ，Ｎ－ジメチルシクロヘキシルアミン",
+      "nameEn": "N,N-Dimethyl-cyclohexylamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "99-35-4": {
+      "name": "トリニトロベンゼン",
+      "nameEn": "Trinitrobenzene",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "99-63-8": {
+      "name": "イソフタロイル＝ジクロリド",
+      "nameEn": "Isophthaloyl dichloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "99-97-8": {
+      "name": "Ｎ，Ｎ－ジメチル－パラ－トルイジン",
+      "nameEn": "N,N-Dimethyl-p-toluidine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "100-20-9": {
+      "name": "ベンゼン－１，４－ジカルボニル＝ジクロリド",
+      "nameEn": "Benzene-1,4-dicarbonyl dichloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "100-21-0": {
+      "name": "テレフタル酸",
+      "nameEn": "Terephthalic acid",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "100-36-7": {
+      "name": "Ｎ，Ｎ－ジエチルエチレンジアミン",
+      "nameEn": "N,N-Diethylethylenediamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "100-47-0": {
+      "name": "ベンゾニトリル",
+      "nameEn": "Benzonitrile",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "100-68-5": {
+      "name": "チオアニソール",
+      "nameEn": "Thioanisole",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "100-74-3": {
+      "name": "Ｎ－エチルモルホリン",
+      "nameEn": "N-Ethylmorpholine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "101-02-0": {
+      "name": "亜りん酸トリフェニル",
+      "nameEn": "Triphenylphosphite",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "101-43-9": {
+      "name": "メタクリル酸シクロヘキシル",
+      "nameEn": "Cyclohexyl methacrylate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "101-72-4": {
+      "name": "Ｎ－イソプロピル－Ｎ’－フェニル－パラ－フェニレンジアミン",
+      "nameEn": "N-Isopropyl-N'-phenyl-p-phenylenediamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "102-08-9": {
+      "name": "Ｎ，Ｎ’－ジフェニルチオ尿素",
+      "nameEn": "N,N'-Diphenylthiourea",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "102-09-0": {
+      "name": "炭酸ジフェニル",
+      "nameEn": "Diphenyl carbonate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "102-27-2": {
+      "name": "Ｎ－エチル－メタ－トルイジン",
+      "nameEn": "N-Ethyl-m-toluidine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "102-69-2": {
+      "name": "トリプロピルアミン",
+      "nameEn": "Tripropylamine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "102-70-5": {
+      "name": "トリアリルアミン",
+      "nameEn": "Triarylamine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "103-50-4": {
+      "name": "ジベンジルエーテル",
+      "nameEn": "Dibenzyl ether",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "103-65-1": {
+      "name": "プロピルベンゼン",
+      "nameEn": "Propylbenzene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "103-69-5": {
+      "name": "Ｎ－エチルアニリン",
+      "nameEn": "N-Ethylaniline",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "103-71-9": {
+      "name": "フェニルイソシアネート",
+      "nameEn": "Phenyl isocyanate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "103-73-1": {
+      "name": "エトキシベンゼン",
+      "nameEn": "Ethoxybenzene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "103-83-3": {
+      "name": "Ｎ，Ｎ－ジメチルベンジルアミン",
+      "nameEn": "N,N-Dimethylbenzylamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "103-84-4": {
+      "name": "アセトアニリド",
+      "nameEn": "Acetanilide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "103-90-2": {
+      "name": "Ｎ－（４－ヒドロキシフェニル）アセトアミド",
+      "nameEn": "N-(4-Hydroxyphenyl)acetamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "104-51-8": {
+      "name": "ブチルベンゼン",
+      "nameEn": "Butylbenzene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-36-2": {
+      "name": "ブロモ酢酸エチル",
+      "nameEn": "Ethyl bromoacetate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-37-3": {
+      "name": "プロピオン酸エチル",
+      "nameEn": "Ethyl propionate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-38-4": {
+      "name": "プロピオン酸ビニル",
+      "nameEn": "Vinyl propionate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-39-5": {
+      "name": "クロロ酢酸エチル",
+      "nameEn": "Ethyl chloroacetate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-45-3": {
+      "name": "アセト酢酸メチル",
+      "nameEn": "Methyl acetoacetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-48-6": {
+      "name": "２－クロロ酢酸イソプロピル",
+      "nameEn": "Isopropyl 2-chloroacetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-53-3": {
+      "name": "マロン酸ジエチル",
+      "nameEn": "Diethyl malonate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-54-4": {
+      "name": "ブタン酸エチル",
+      "nameEn": "Ethyl butanoate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-55-5": {
+      "name": "Ｎ，Ｎ’－ジエチルチオ尿素",
+      "nameEn": "N,N'-Diethylthiourea",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-58-8": {
+      "name": "炭酸ジエチル",
+      "nameEn": "Diethyl carbonate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-59-9": {
+      "name": "メチルジエタノールアミン",
+      "nameEn": "Methyldiethanolamine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-64-6": {
+      "name": "ジイソプロピルペルオキシジカルボナート",
+      "nameEn": "Diisopropyl peroxydicarbonate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-74-8": {
+      "name": "ジラウロイルペルオキシド",
+      "nameEn": "Dilauroyl Peroxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "105-99-7": {
+      "name": "アジピン酸ジブチル",
+      "nameEn": "Dibutyl adipate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "106-27-4": {
+      "name": "酪酸イソペンチル",
+      "nameEn": "Isopentyl butyrate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "106-31-0": {
+      "name": "無水酪酸",
+      "nameEn": "Butyric anhydride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "106-63-8": {
+      "name": "アクリル酸イソブチル",
+      "nameEn": "Isobutyl acrylate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "106-68-3": {
+      "name": "オクタン－３－オン",
+      "nameEn": "Octan-3-one",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "106-90-1": {
+      "name": "アクリル酸グリシジル",
+      "nameEn": "Glycidyl acrylate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "107-03-9": {
+      "name": "プロパン－１－チオール",
+      "nameEn": "Propane-1-thiol",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "107-10-8": {
+      "name": "プロピルアミン",
+      "nameEn": "Propylamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "107-14-2": {
+      "name": "クロロアセトニトリル",
+      "nameEn": "Chloroacetonitrile",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "107-20-0": {
+      "name": "クロロアセトアルデヒド",
+      "nameEn": "Chloroacetaldehyde",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "107-22-2": {
+      "name": "グリオキサール",
+      "nameEn": "Glyoxal",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "107-25-5": {
+      "name": "メトキシエテン",
+      "nameEn": "Methoxyethene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "107-46-0": {
+      "name": "ヘキサメチルジシロキサン",
+      "nameEn": "Hexamethyldisiloxane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "107-64-2": {
+      "name": "Ｎ，Ｎ－ジメチル－Ｎ，Ｎ－ジオクタデシルアンモニウム＝クロリド",
+      "nameEn": "N,N-Dimethyl-N,N-dioctadecylammonium chloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "107-66-4": {
+      "name": "りん酸ジ－ノルマル－ブチル",
+      "nameEn": "Di-n-butyl phosphate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "108-30-5": {
+      "name": "無水コハク酸",
+      "nameEn": "Succinic anhydride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "108-32-7": {
+      "name": "炭酸プロピレン",
+      "nameEn": "Propylene carbonate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "108-60-1": {
+      "name": "ビス（２－クロロイソプロピル）エーテル",
+      "nameEn": "Bis(2-chloroisopropyl)ether",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "108-86-1": {
+      "name": "ブロモベンゼン",
+      "nameEn": "Bromobenzene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "108-98-5": {
+      "name": "チオフェノール",
+      "nameEn": "Thiophenol",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "109-21-7": {
+      "name": "酪酸ブチル",
+      "nameEn": "Butyl butyrate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "109-52-4": {
+      "name": "ペンタン酸",
+      "nameEn": "Pentanoic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "109-55-7": {
+      "name": "Ｎ，Ｎ－ジメチルプロパン－１，３－ジアミン",
+      "nameEn": "N,N-Dimethylpropane-1,3-diamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "109-59-1": {
+      "name": "エチレングリコールモノイソプロピルエーテル",
+      "nameEn": "Ethylene glycol monoisopropyl ether",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "109-63-7": {
+      "name": "三弗化ほう素ジエチルエーテル",
+      "nameEn": "Diethyl ether-boron trifluoride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "109-84-2": {
+      "name": "ヒドロキシエチルヒドラジン",
+      "nameEn": "Hydroxyethyl hydrazine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "109-92-2": {
+      "name": "エトキシエテン",
+      "nameEn": "Ethoxyethene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "109-94-4": {
+      "name": "ぎ酸エチル",
+      "nameEn": "Ethyl formate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-00-9": {
+      "name": "フラン",
+      "nameEn": "Furan",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-01-0": {
+      "name": "テトラヒドロチオフェン",
+      "nameEn": "Tetrahydrothiophene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-02-1": {
+      "name": "チオフェン",
+      "nameEn": "Thiophene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-05-4": {
+      "name": "ジ－ターシャリ－ブチルペルオキシド",
+      "nameEn": "Di-tert-butyl peroxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-16-7": {
+      "name": "マレイン酸",
+      "nameEn": "Maleic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-17-8": {
+      "name": "フマル酸",
+      "nameEn": "Fumaric acid",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-18-9": {
+      "name": "Ｎ，Ｎ，Ｎ’，Ｎ’－テトラメチルエチレンジアミン",
+      "nameEn": "N,N,N',N'-Tetramethylethylenediamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-42-9": {
+      "name": "デカン酸メチル",
+      "nameEn": "Methyl decanoate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-45-2": {
+      "name": "ぎ酸イソペンチル",
+      "nameEn": "Isopentyl formate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-46-3": {
+      "name": "亜硝酸イソペンチル",
+      "nameEn": "Isopentyl nitrite",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-64-5": {
+      "name": "ブタ－２－エン－１，４－ジオール",
+      "nameEn": "But-2-ene-1,4-diol",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-65-6": {
+      "name": "ブタ－２－イン－１，４－ジオール",
+      "nameEn": "But-2-yne-1,4-diol",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-81-6": {
+      "name": "ジエチルジスルファン",
+      "nameEn": "Diethyldisulfane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-83-8": {
+      "name": "シクロヘキセン",
+      "nameEn": "Cyclohexene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-85-0": {
+      "name": "ピペラジン",
+      "nameEn": "Piperazine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-89-4": {
+      "name": "ピペリジン",
+      "nameEn": "Piperidine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-96-3": {
+      "name": "ジイソブチルアミン",
+      "nameEn": "Diisobutylamine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "110-97-4": {
+      "name": "ジイソプロパノールアミン",
+      "nameEn": "Diisopropanolamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "111-11-5": {
+      "name": "オクタン酸メチル",
+      "nameEn": "Methyl octanoate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "111-14-8": {
+      "name": "ヘプタン酸",
+      "nameEn": "Heptanoic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "111-18-2": {
+      "name": "Ｎ，Ｎ，Ｎ’，Ｎ’－テトラメチル－１，６－ヘキサメチレンジアミン",
+      "nameEn": "N,N,N',N'-Tetramethyl-1,6-hexamethylenediamine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "111-41-1": {
+      "name": "Ｎ－（２－アミノエチル）－２－アミノエタノール",
+      "nameEn": "N-(2-Aminoethyl)-2-aminoethanol",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "111-43-3": {
+      "name": "ジプロピルエーテル",
+      "nameEn": "Dipropyl ether",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "111-49-9": {
+      "name": "ヘキサメチレンイミン",
+      "nameEn": "Hexamethyleneimine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "111-69-3": {
+      "name": "アジポニトリル",
+      "nameEn": "Adiponitrile",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "111-82-0": {
+      "name": "メチル＝ドデカノアート",
+      "nameEn": "Methyl dodecanoate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "111-88-6": {
+      "name": "オクタン－１－チオール",
+      "nameEn": "Octane-1-thiol",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "111-91-1": {
+      "name": "ジクロロエチルホルマール",
+      "nameEn": "Dichloroethyl formal",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "111-92-2": {
+      "name": "ジブチルアミン",
+      "nameEn": "Dibutylamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "112-02-7": {
+      "name": "ヘキサデシルトリメチルアンモニウム＝クロリド",
+      "nameEn": "Hexadecyltrimethylammonium chloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "112-03-8": {
+      "name": "トリメチル（オクタデシル）アンモニウム＝クロリド",
+      "nameEn": "Trimethyl(octadecyl)ammonium chloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "112-05-0": {
+      "name": "ノナン酸",
+      "nameEn": "Nonanoic acid",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "112-18-5": {
+      "name": "Ｎ，Ｎ－ジメチルドデシルアミン",
+      "nameEn": "N,N-Dimethyldodecylamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "112-36-7": {
+      "name": "ジエチレングリコールジエチルエーテル",
+      "nameEn": "Diethylene glycol diethyl ether",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "112-55-0": {
+      "name": "ドデカン－１－チオール",
+      "nameEn": "Dodecane-1-thiol",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "112-76-5": {
+      "name": "ステアロイル＝クロリド",
+      "nameEn": "Stearoyl chloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "113-00-8": {
+      "name": "グアニジン",
+      "nameEn": "Guanidine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "113-92-8": {
+      "name": "マレイン酸クロルフェニラミン",
+      "nameEn": "Chlorpheniramine maleate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "115-02-6": {
+      "name": "Ｏ－（２－ジアゾアセチル）－Ｌ－セリン",
+      "nameEn": "O-(2-Diazoacetyl)-L-serine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "115-10-6": {
+      "name": "ジメチルエーテル",
+      "nameEn": "Dimethyl ether",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "115-21-9": {
+      "name": "トリクロロエチルシラン",
+      "nameEn": "Trichloroethylsilane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "116-15-4": {
+      "name": "ヘキサフルオロプロペン",
+      "nameEn": "Hexafluoropropene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "116-54-1": {
+      "name": "２，２－ジクロロ酢酸メチル",
+      "nameEn": "Methyl 2,2-dichloroacetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "117-08-8": {
+      "name": "テトラクロロ無水フタル酸",
+      "nameEn": "Tetrachlorophthalic anhydride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "118-71-8": {
+      "name": "マルトール",
+      "nameEn": "Maltol",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "119-61-9": {
+      "name": "ベンゾフェノン",
+      "nameEn": "Benzophenone",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "119-65-3": {
+      "name": "イソキノリン",
+      "nameEn": "Isoquinoline",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "120-61-6": {
+      "name": "テレフタル酸ジメチル",
+      "nameEn": "Dimethyl terephthalate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "121-45-9": {
+      "name": "亜りん酸トリメチル",
+      "nameEn": "Trimethyl phosphite",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "121-79-9": {
+      "name": "プロパ－１－イル＝３，４，５－トリヒドロキシベンゾアート",
+      "nameEn": "Prop-1-yl 3,4,5-trihydroxybenzoate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "122-03-2": {
+      "name": "クミンアルデヒド",
+      "nameEn": "Cuminaldehyde",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "122-20-3": {
+      "name": "トリイソプロパノールアミン",
+      "nameEn": "Triisopropanolamine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "122-51-0": {
+      "name": "トリエトキシメタン",
+      "nameEn": "Triethoxymethane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "122-52-1": {
+      "name": "亜りん酸トリエチル",
+      "nameEn": "Triethyl phosphite",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "123-23-9": {
+      "name": "ジコハク酸ペルオキシド",
+      "nameEn": "Disuccinate peroxide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "123-39-7": {
+      "name": "Ｎ－メチルホルムアミド",
+      "nameEn": "N-Methylformamide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "123-54-6": {
+      "name": "アセチルアセトン",
+      "nameEn": "Acetylacetone",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "123-62-6": {
+      "name": "無水プロピオン酸",
+      "nameEn": "Propionic anhydride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "123-63-7": {
+      "name": "パラアルデヒド",
+      "nameEn": "Paraldehyde",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "123-68-2": {
+      "name": "アリル＝ヘキサノアート",
+      "nameEn": "Allyl hexanoate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "123-75-1": {
+      "name": "ピロリジン",
+      "nameEn": "Pyrrolidine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "123-77-3": {
+      "name": "アゾジカルボンアミド",
+      "nameEn": "Azodicarbonamide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "124-02-7": {
+      "name": "ジアリルアミン",
+      "nameEn": "Diallylamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "124-04-9": {
+      "name": "アジピン酸",
+      "nameEn": "Adipic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "124-09-4": {
+      "name": "ヘキサメチレンジアミン",
+      "nameEn": "Hexamethylenediamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "124-11-8": {
+      "name": "ノナ－１－エン",
+      "nameEn": "Non-1-ene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "124-28-7": {
+      "name": "Ｎ，Ｎ－ジメチルオクタデシルアミン",
+      "nameEn": "N,N-Dimethyloctadecylamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "124-30-1": {
+      "name": "オクタデカン－１－アミン",
+      "nameEn": "Octadecan-1-amine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "124-41-4": {
+      "name": "ナトリウムメトキシド",
+      "nameEn": "Sodium methoxide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "124-43-6": {
+      "name": "過酸化尿素",
+      "nameEn": "Hydrogen peroxide-urea",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "124-47-0": {
+      "name": "硝酸尿素",
+      "nameEn": "Urea nitrate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "124-63-0": {
+      "name": "メタンスルホニル＝クロリド",
+      "nameEn": "Methanesulfonyl chloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "126-85-2": {
+      "name": "Ｎ，Ｎ－ビス（２－クロロエチル）メチルアミン－Ｎ－オキシド",
+      "nameEn": "N,N-Bis(2-chloroethyl)methylamine N-oxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "127-68-4": {
+      "name": "３－ニトロベンゼンスルホン酸ナトリウム",
+      "nameEn": "Sodium 3-nitrobenzenesulfonate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "128-04-1": {
+      "name": "ジメチルジチオカルバミン酸ナトリウム",
+      "nameEn": "Sodium dimethyldithiocarbamate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "128-62-1": {
+      "name": "ノスカピン",
+      "nameEn": "Noscapine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "129-66-8": {
+      "name": "２，４，６－トリニトロ安息香酸",
+      "nameEn": "Trinitrobenzoic acid",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "130-15-4": {
+      "name": "ナフタレン－１，４－ジオン",
+      "nameEn": "Naphthalene-1,4-dione",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "131-17-9": {
+      "name": "フタル酸ジアリル",
+      "nameEn": "Diallyl phthalate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "131-73-7": {
+      "name": "ビス（２，４，６－トリニトロフェニル）アミン",
+      "nameEn": "Bis(2,4,6-trinitrophenyl)amine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "131-74-8": {
+      "name": "ピクリン酸アンモニウム",
+      "nameEn": "Ammonium picrate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "132-27-4": {
+      "name": "ナトリウム＝１，１’－ビフェニル－２－オラート",
+      "nameEn": "Sodium 1,1'-biphenyl-2-olate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "134-62-3": {
+      "name": "Ｎ，Ｎ－ジエチル－３－メチルベンズアミド",
+      "nameEn": "N,N-Diethyl-3-methylbenzamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "135-88-6": {
+      "name": "Ｎ－フェニル－２－ナフチルアミン",
+      "nameEn": "N-Phenyl-2-naphthylamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "136-78-7": {
+      "name": "２，４－ジクロロフェノキシエチル硫酸ナトリウム",
+      "nameEn": "Sodium 2,4-dichlorophenoxyethyl sulfate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "137-58-6": {
+      "name": "リドカイン",
+      "nameEn": "Lidocaine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "138-89-6": {
+      "name": "Ｎ，Ｎ－ジメチル－４－ニトロソアニリン",
+      "nameEn": "N,N-Dimethyl-4-nitrosoaniline",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "140-11-4": {
+      "name": "酢酸ベンジル",
+      "nameEn": "Benzyl acetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "140-31-8": {
+      "name": "Ｎ－アミノエチルピペラジン",
+      "nameEn": "N-Aminoethylpiperazine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "141-10-6": {
+      "name": "プソイドヨノン",
+      "nameEn": "Pseudoionone",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "141-75-3": {
+      "name": "ブチリル＝クロリド",
+      "nameEn": "Butyryl chloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "141-82-2": {
+      "name": "マロン酸",
+      "nameEn": "Malonic acid",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "141-97-9": {
+      "name": "アセト酢酸エチル",
+      "nameEn": "Ethyl acetoacetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "142-04-1": {
+      "name": "アニリン塩酸塩",
+      "nameEn": "Aniline hydrochloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "142-19-8": {
+      "name": "アリル＝ヘプタノアート",
+      "nameEn": "Allyl heptanoate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "142-29-0": {
+      "name": "シクロペンテン",
+      "nameEn": "Cyclopentene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "142-59-6": {
+      "name": "二ナトリウム＝エタン－１，２－ジイルジカルバモジチオアート",
+      "nameEn": "Disodium ethane-1,2-diyldicarbamodithioate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "142-62-1": {
+      "name": "ヘキサン酸",
+      "nameEn": "Hexanoic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "142-64-3": {
+      "name": "ピペラジン二塩酸塩",
+      "nameEn": "Piperazine dihydrochloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "142-68-7": {
+      "name": "テトラヒドロピラン",
+      "nameEn": "Tetrahydropyran",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "142-84-7": {
+      "name": "ジプロピルアミン",
+      "nameEn": "Dipropylamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "142-92-7": {
+      "name": "酢酸ヘキシル",
+      "nameEn": "Hexyl acetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "142-96-1": {
+      "name": "ブチルエーテル",
+      "nameEn": "Butyl ether",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "143-18-0": {
+      "name": "カリウム＝（Ｚ）－オレアート",
+      "nameEn": "Potassium (Z)-oleate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "144-49-0": {
+      "name": "モノフルオール酢酸",
+      "nameEn": "Monofluoroacetic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "144-62-7": {
+      "name": "しゆう酸",
+      "nameEn": "Oxalic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "147-24-0": {
+      "name": "ジフェンヒドラミン塩酸塩",
+      "nameEn": "Diphenhydramine hydrochloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "148-18-5": {
+      "name": "ジエチルジチオカルバミン酸ナトリウム",
+      "nameEn": "Sodium diethyldithiocarbamate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "149-73-5": {
+      "name": "オルトぎ酸トリメチル",
+      "nameEn": "Trimethyl orthoformate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "150-46-9": {
+      "name": "ほう酸トリエチル",
+      "nameEn": "Triethyl borate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "156-62-7": {
+      "name": "カルシウムシアナミド",
+      "nameEn": "Calcium cyanamide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "208-96-8": {
+      "name": "アセナフチレン",
+      "nameEn": "Acenaphthylene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "271-89-6": {
+      "name": "ベンゾフラン",
+      "nameEn": "Benzofuran",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "286-20-4": {
+      "name": "シクロヘキセンオキシド",
+      "nameEn": "Cyclohexene oxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "288-94-8": {
+      "name": "テトラゾール",
+      "nameEn": "Tetrazole",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "291-64-5": {
+      "name": "シクロヘプタン",
+      "nameEn": "Cycloheptane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "297-78-9": {
+      "name": "オクタクロルテトラヒドロメタノフタラン",
+      "nameEn": "Octachlorotetrahydromethanofutarane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "298-06-6": {
+      "name": "ジチオりん酸Ｏ，Ｏ－ジエチル",
+      "nameEn": "Dithiophosphoric acid O,O-diethyl ester",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "298-07-7": {
+      "name": "ビス（２－エチルヘキシル）＝水素＝ホスファート",
+      "nameEn": "Bis(2-ethylhexyl)hydrogen phosphate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "298-12-4": {
+      "name": "グリオキシル酸",
+      "nameEn": "Glyoxylic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "299-42-3": {
+      "name": "エフェドリン",
+      "nameEn": "Ephedrine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "301-02-0": {
+      "name": "オレイン酸アミド",
+      "nameEn": "Oleic acid amide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "306-98-9": {
+      "name": "ペルフルオロ（１，２－ジメチルシクロヘキサン）",
+      "nameEn": "Perfluoro(1,2-dimethylcyclohexane)",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "317-34-0": {
+      "name": "アミノフィリン",
+      "nameEn": "Aminophylline",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "333-20-0": {
+      "name": "チオシアン酸カリウム",
+      "nameEn": "Potassium thiocyanate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "334-48-5": {
+      "name": "デカン酸",
+      "nameEn": "Decanoic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "351-05-3": {
+      "name": "モノフルオール酢酸パラブロムアニリド",
+      "nameEn": "Monofluoroaceto-p-bromoanilide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "353-50-4": {
+      "name": "弗化カルボニル",
+      "nameEn": "Carbonyl fluoride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "357-57-3": {
+      "name": "ブルシン",
+      "nameEn": "Brucine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "372-09-8": {
+      "name": "シアノ酢酸",
+      "nameEn": "Cyanoacetic acid",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "381-73-7": {
+      "name": "ジフルオロ酢酸",
+      "nameEn": "Difluoroacetic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "420-04-2": {
+      "name": "シアナミド",
+      "nameEn": "Cyanamide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "429-06-1": {
+      "name": "ほう弗化テトラエチルアンモニウム",
+      "nameEn": "Tetraethylammonium tetrafluoroboranuide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "459-72-3": {
+      "name": "２－フルオロ酢酸エチル",
+      "nameEn": "Ethyl 2-fluoroacetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "460-19-5": {
+      "name": "ジシアン",
+      "nameEn": "Dicyan",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "463-51-4": {
+      "name": "ケテン",
+      "nameEn": "Ketene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "470-90-6": {
+      "name": "ジエチル－１－（２’，４’－ジクロルフェニル）－２－クロルビニルホスフェイト",
+      "nameEn": "Diethyl-1-(2',4'-dichlorophenyl)-2-chlorovinylphosphate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "479-45-8": {
+      "name": "テトリル",
+      "nameEn": "Tetryl",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "492-80-8": {
+      "name": "オーラミン",
+      "nameEn": "Auramine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "501-53-1": {
+      "name": "クロロぎ酸ベンジル",
+      "nameEn": "Benzyl chloroformate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "504-60-9": {
+      "name": "ペンタ－１，３－ジエン",
+      "nameEn": "Penta-1,3-diene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "506-77-4": {
+      "name": "塩化シアン",
+      "nameEn": "Cyanogen chloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "506-96-7": {
+      "name": "アセチル＝ブロミド",
+      "nameEn": "Acetyl bromide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "509-14-8": {
+      "name": "テトラニトロメタン",
+      "nameEn": "Tetranitromethane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "510-15-6": {
+      "name": "４，４’－ジクロロベンジル酸エチル",
+      "nameEn": "Ethyl 4,4'-dichlorobenzilate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "512-56-1": {
+      "name": "りん酸トリメチル",
+      "nameEn": "Trimethyl phosphate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "533-96-0": {
+      "name": "セスキ炭酸ナトリウム",
+      "nameEn": "Sodium sesquicarbonate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "538-75-0": {
+      "name": "ジシクロヘキシルカルボジイミド",
+      "nameEn": "Dicyclohexylcarbodiimide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "538-93-2": {
+      "name": "イソブチルベンゼン",
+      "nameEn": "Isobutylbenzene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "539-74-2": {
+      "name": "３－ブロモプロピオン酸エチル",
+      "nameEn": "Ethyl 3-bromopropionate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "541-42-4": {
+      "name": "亜硝酸イソプロピル",
+      "nameEn": "Isopropyl nitrite",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "542-18-7": {
+      "name": "クロロシクロヘキサン",
+      "nameEn": "Chlorocyclohexane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "542-55-2": {
+      "name": "ぎ酸イソブチル",
+      "nameEn": "Isobutyl formate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "543-27-1": {
+      "name": "クロロぎ酸イソブチル",
+      "nameEn": "Isobutyl chloroformate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "544-01-4": {
+      "name": "ジイソペンチルエーテル",
+      "nameEn": "Diisopentyl ether",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "544-16-1": {
+      "name": "亜硝酸ブチル",
+      "nameEn": "Butyl nitrite",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "544-97-8": {
+      "name": "ジメチル亜鉛",
+      "nameEn": "Dimethylzinc",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "545-06-2": {
+      "name": "トリクロロアセトニトリル",
+      "nameEn": "Trichloroacetonitrile",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "547-64-8": {
+      "name": "乳酸メチル",
+      "nameEn": "Methyl lactate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "554-13-2": {
+      "name": "炭酸リチウム",
+      "nameEn": "Lithium carbonate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "555-34-0": {
+      "name": "しゆう酸鉄（Ⅲ）三ナトリウム",
+      "nameEn": "Trisodium trioxalatoferrate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "556-61-6": {
+      "name": "メチル＝イソチオシアネート",
+      "nameEn": "Methyl isothiocyanate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "556-67-2": {
+      "name": "オクタメチルシクロテトラシロキサン",
+      "nameEn": "Octamethylcyclotetrasiloxane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "557-04-0": {
+      "name": "ステアリン酸マグネシウム",
+      "nameEn": "Magnesium stearate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "558-13-4": {
+      "name": "テトラブロモメタン",
+      "nameEn": "Tetrabromomethane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "558-25-8": {
+      "name": "メタンスルホニル＝フルオリド",
+      "nameEn": "Methanesulfonyl fluoride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "562-81-2": {
+      "name": "シアン化白金バリウム",
+      "nameEn": "Barium tetracyanoplatinate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "563-41-7": {
+      "name": "セミカルバジド塩酸塩",
+      "nameEn": "Semicarbazide hydrochloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "586-62-9": {
+      "name": "テルピノレン",
+      "nameEn": "Terpinolene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "590-01-2": {
+      "name": "プロピオン酸ブチル",
+      "nameEn": "Butyl propionate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "590-28-3": {
+      "name": "シアン酸カリウム",
+      "nameEn": "Potassium cyanate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "591-60-6": {
+      "name": "アセト酢酸ブチル",
+      "nameEn": "Butyl acetoacetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "591-87-7": {
+      "name": "酢酸アリル",
+      "nameEn": "Allyl acetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "592-01-8": {
+      "name": "シアン化カルシウム",
+      "nameEn": "Calcium cyanide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "593-53-3": {
+      "name": "フルオロメタン",
+      "nameEn": "Fluoromethane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "594-42-3": {
+      "name": "トリクロロメチルスルフェニル＝クロリド",
+      "nameEn": "Trichloromethylsulfenyl chloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "598-31-2": {
+      "name": "ブロムアセトン",
+      "nameEn": "Bromoacetone",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "598-56-1": {
+      "name": "Ｎ，Ｎ－ジメチルエチルアミン",
+      "nameEn": "N,N-Dimethylethylamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "603-35-0": {
+      "name": "トリフェニルホスフィン",
+      "nameEn": "Triphenylphosphine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "608-71-9": {
+      "name": "ペンタブロモフェノール",
+      "nameEn": "Pentabromophenol",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "613-35-4": {
+      "name": "Ｎ，Ｎ’－ジアセチルベンジジン",
+      "nameEn": "N,N'-Diacetylbenzidine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "616-38-6": {
+      "name": "炭酸ジメチル",
+      "nameEn": "Dimethyl carbonate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "621-64-7": {
+      "name": "Ｎ－ニトロソジプロピルアミン",
+      "nameEn": "N-Nitrosodipropylamine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "622-45-7": {
+      "name": "酢酸シクロヘキシル",
+      "nameEn": "Cyclohexyl acetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "623-42-7": {
+      "name": "ブタン酸メチル",
+      "nameEn": "Methyl butanoate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "623-91-6": {
+      "name": "フマル酸ジエチル",
+      "nameEn": "Diethyl fumarate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "624-48-6": {
+      "name": "マレイン酸ジメチル",
+      "nameEn": "Dimethyl maleate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "624-54-4": {
+      "name": "プロピオン酸ペンチル",
+      "nameEn": "Pentyl propionate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "624-91-9": {
+      "name": "亜硝酸メチル",
+      "nameEn": "Methyl nitrite",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "624-92-0": {
+      "name": "ジメチルジスルフィド",
+      "nameEn": "Dimethyl disulfide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "625-45-6": {
+      "name": "メトキシ酢酸",
+      "nameEn": "Methoxyacetic acid",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "626-67-5": {
+      "name": "Ｎ－メチルピペリジン",
+      "nameEn": "N-Methylpiperidine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "628-96-6": {
+      "name": "ニトログリコール",
+      "nameEn": "Nitroglycol",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "632-22-4": {
+      "name": "テトラメチル尿素",
+      "nameEn": "Tetramethylurea",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "638-11-9": {
+      "name": "酪酸イソプロピル",
+      "nameEn": "Isopropyl butyrate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "638-21-1": {
+      "name": "フェニルホスフィン",
+      "nameEn": "Phenylphosphine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "638-49-3": {
+      "name": "ぎ酸ペンチル",
+      "nameEn": "Pentyl formate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "640-19-7": {
+      "name": "モノフルオール酢酸アミド",
+      "nameEn": "Monofluoroacetamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "640-67-5": {
+      "name": "しゆう酸マンガン",
+      "nameEn": "Manganese oxalate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "644-97-3": {
+      "name": "ジクロロ（フェニル）ホスフィン",
+      "nameEn": "Dichloro(phenyl)phosphine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "650-51-1": {
+      "name": "トリクロロ酢酸ナトリウム",
+      "nameEn": "Sodium trichloroacetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "676-97-1": {
+      "name": "メチルホスホン酸ジクロリド",
+      "nameEn": "Methylphosphonoyl dichloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "680-31-9": {
+      "name": "ヘキサメチルホスホリックトリアミド",
+      "nameEn": "Hexamethylphosphoric triamide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "731-27-1": {
+      "name": "Ｎ－ジクロロフルオロメチルチオ－Ｎ’，Ｎ’－ジメチル－Ｎ－パラ－トリルスルファミド",
+      "nameEn": "N-Dichlorofluoromethylthio-N',N'-dimethyl-N-p-tolylsulfamide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "732-11-6": {
+      "name": "ジメチルフタリルイミドメチルジチオホスフェイト",
+      "nameEn": "O,O-Dimethyl phthalimidomethyl S-phosphorodithioate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "756-79-6": {
+      "name": "メチルホスホン酸ジメチル",
+      "nameEn": "Dimethyl methylphosphonate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "756-80-9": {
+      "name": "ジチオりん酸Ｏ，Ｏ－ジメチル",
+      "nameEn": "Dithiophosphoric acid O,O-dimethyl ester",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "763-69-9": {
+      "name": "エチル＝３－エトキシプロパノアート",
+      "nameEn": "Ethyl 3-ethoxypropanoate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "767-10-2": {
+      "name": "Ｎ－ブチルピロリジン",
+      "nameEn": "N-Butylpyrrolidine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "768-52-5": {
+      "name": "Ｎ－イソプロピルアニリン",
+      "nameEn": "N-Isopropylaniline",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "786-19-6": {
+      "name": "ジエチル－４－クロルフェニルメルカプトメチルジチオホスフェイト",
+      "nameEn": "Diethyl-4-chlorophenylmercaptomethyldithiophosphate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "791-28-6": {
+      "name": "トリフェニルホスフィンオキシド",
+      "nameEn": "Triphenylphosphine oxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "793-24-8": {
+      "name": "Ｎ－（１，３－ジメチルブチル）－Ｎ’－フェニル－パラ－フェニレンジアミン",
+      "nameEn": "N-(1,3-Dimethylbutyl)-N'-phenyl-p-phenylenediamine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "814-68-6": {
+      "name": "塩化アクリロイル",
+      "nameEn": "Acryloyl chloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "814-78-8": {
+      "name": "メチルイソプロペニルケトン",
+      "nameEn": "Methyl isopropenyl ketone",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "822-16-2": {
+      "name": "ステアリン酸ナトリウム",
+      "nameEn": "Sodium stearate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "824-78-2": {
+      "name": "ナトリウム＝４－ニトロフェノラート",
+      "nameEn": "Sodium 4-nitrophenolate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "831-52-7": {
+      "name": "ナトリウム＝２－アミノ－４，６－ジニトロフェノラート",
+      "nameEn": "Sodium 2-amino-4,6-dinitrophenolate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "868-85-9": {
+      "name": "亜りん酸ジメチル",
+      "nameEn": "Dimethyl phosphonate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "869-29-4": {
+      "name": "ジアセトキシプロペン",
+      "nameEn": "Diacetoxypropene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "882-33-7": {
+      "name": "ジフェニルジスルファン",
+      "nameEn": "Diphenyldisulfane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "917-61-3": {
+      "name": "シアン酸ナトリウム",
+      "nameEn": "Sodium cyanate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "920-46-7": {
+      "name": "メタクリル酸クロリド",
+      "nameEn": "Methacryloyl chloride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "924-42-5": {
+      "name": "Ｎ－（ヒドロキシメチル）アクリルアミド",
+      "nameEn": "N-(Hydroxymethyl)acrylamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "927-49-1": {
+      "name": "ジペンチルケトン",
+      "nameEn": "Dipentyl ketone",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "941-69-5": {
+      "name": "Ｎ－フェニルマレイミド",
+      "nameEn": "N-Phenylmaleimide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "947-04-6": {
+      "name": "アザシクロトリデカン－２－オン",
+      "nameEn": "Azacyclotridecan-2-one",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "998-40-3": {
+      "name": "トリブチルホスフィン",
+      "nameEn": "Tributylphosphine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "999-97-3": {
+      "name": "ヘキサメチルジシラザン",
+      "nameEn": "Hexamethyldisilazane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1011-73-0": {
+      "name": "ナトリウム＝２，４－ジニトロフェノラート",
+      "nameEn": "Sodium 2,4-dinitrophenolate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1066-40-6": {
+      "name": "トリメチルシラノール",
+      "nameEn": "Trimethylsilanol",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1069-66-5": {
+      "name": "ナトリウム＝２－プロピルペンタノアート",
+      "nameEn": "Sodium 2-propylpentanoate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1185-55-3": {
+      "name": "トリメトキシ（メチル）シラン",
+      "nameEn": "Trimethoxy(methyl)silane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1302-74-5": {
+      "name": "エメリー",
+      "nameEn": "Emery",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1304-29-6": {
+      "name": "過酸化バリウム",
+      "nameEn": "Barium peroxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1305-99-3": {
+      "name": "りん化石灰",
+      "nameEn": "Tricalcium diphosphide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1309-48-4": {
+      "name": "酸化マグネシウム",
+      "nameEn": "Magnesium oxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1310-65-2": {
+      "name": "水酸化リチウム",
+      "nameEn": "Lithium hydroxide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1312-73-8": {
+      "name": "硫化カリウム",
+      "nameEn": "Dipotassium sulphide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1313-60-6": {
+      "name": "過酸化ナトリウム",
+      "nameEn": "Sodium peroxide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1313-82-2": {
+      "name": "硫化ナトリウム",
+      "nameEn": "Sodium sulfide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1314-18-7": {
+      "name": "過酸化ストロンチウム",
+      "nameEn": "Strontium peroxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1314-34-7": {
+      "name": "三酸化バナジウム",
+      "nameEn": "Vanadium trioxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1314-35-8": {
+      "name": "酸化タングステン（Ⅵ）",
+      "nameEn": "Tungsten(VI) oxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1314-84-7": {
+      "name": "りん化亜鉛",
+      "nameEn": "Zinc phosphide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1318-02-1": {
+      "name": "ゼオライト",
+      "nameEn": "Zeolites",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1321-64-8": {
+      "name": "ペンタクロロナフタレン",
+      "nameEn": "Pentachloronaphthalene",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1321-65-9": {
+      "name": "トリクロロナフタレン",
+      "nameEn": "Trichloronaphthalene",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1321-74-0": {
+      "name": "ジビニルベンゼン",
+      "nameEn": "Divinylbenzene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1332-07-6": {
+      "name": "ほう酸亜鉛",
+      "nameEn": "Zinc borate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1335-87-1": {
+      "name": "ヘキサクロロナフタレン",
+      "nameEn": "Hexachloronaphthalene",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1335-88-2": {
+      "name": "テトラクロロナフタレン",
+      "nameEn": "Tetrachloronaphthalene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1338-23-4": {
+      "name": "エチルメチルケトンペルオキシド",
+      "nameEn": "Ethyl methyl ketone peroxide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1344-08-7": {
+      "name": "多硫化ナトリウム",
+      "nameEn": "Sodium sulfide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1467-79-4": {
+      "name": "ジメチルシアナミド",
+      "nameEn": "Dimethylcyanamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1493-13-6": {
+      "name": "トリフルオロメタンスルホン酸",
+      "nameEn": "Trifluoromethanesulfonic acid",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1587-41-3": {
+      "name": "ジクロルジニトロメタン",
+      "nameEn": "Dichlorodinitromethane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1590-87-0": {
+      "name": "ジシラン",
+      "nameEn": "Disilane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1643-20-5": {
+      "name": "Ｎ，Ｎ－ジメチルドデシルアミン＝Ｎ－オキシド",
+      "nameEn": "N,N-Dimethyldodecylamine N-oxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1678-91-7": {
+      "name": "エチルシクロヘキサン",
+      "nameEn": "Ethylcyclohexane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1752-30-3": {
+      "name": "アセトンチオセミカルバゾン",
+      "nameEn": "Acetone thiosemicarbazone",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1758-73-2": {
+      "name": "二酸化チオ尿素",
+      "nameEn": "Thiourea dioxide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1761-71-3": {
+      "name": "ビス（４－アミノシクロヘキシル）メタン",
+      "nameEn": "Bis(4-aminocyclohexyl)methane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1762-95-4": {
+      "name": "チオシアン酸アンモニウム",
+      "nameEn": "Ammonium thiocyanate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1789-58-8": {
+      "name": "ジクロロ（エチル）シラン",
+      "nameEn": "Dichloro(ethyl)silane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1809-19-4": {
+      "name": "ジブタン－１－イル＝ホスホナート",
+      "nameEn": "Dibutan-1-yl phosphonate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1852-16-0": {
+      "name": "Ｎ－ブトキシメチルアクリルアミド",
+      "nameEn": "N-Butoxymethylacrylamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1885-14-9": {
+      "name": "クロロ炭酸フェニルエステル",
+      "nameEn": "Phenyl chloroformate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1918-18-9": {
+      "name": "３，４－ジクロロフェニルカルバミン酸メチル",
+      "nameEn": "Methyl 3,4-dichlorophenylcarbamate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1929-77-7": {
+      "name": "Ｎ，Ｎ－ジプロピルチオカルバミン酸Ｓ－プロピル",
+      "nameEn": "S-Propyl dipropylthiocarbamate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1931-62-0": {
+      "name": "ＯＯ－ターシャリ－ブチル＝モノペルオキシマレアート",
+      "nameEn": "OO-tert-Butyl monoperoxymaleate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "1939-36-2": {
+      "name": "トリメチレンジアミン四酢酸",
+      "nameEn": "Trimethylenediamine tetraacetic acid",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2082-79-3": {
+      "name": "３－（４’－ヒドロキシ－３’，５’－ジ－ターシャリ－ブチルフェニル）プロピオン酸＝オクタデシル",
+      "nameEn": "Octadecyl 3-(4'-hydroxy-3',5'-di-tert-butylphenyl) propionate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2210-25-5": {
+      "name": "Ｎ－イソプロピルアクリルアミド",
+      "nameEn": "N-Isopropylacrylamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2217-06-3": {
+      "name": "ビス（２，４，６－トリニトロフェニル）スルファン",
+      "nameEn": "Bis(2,4,6-trinitrophenyl)sulfane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2227-17-0": {
+      "name": "ペルクロロ－１，１’－ビ（シクロペンタ－２，４－ジエン）",
+      "nameEn": "Perchloro-1,1'-bi(cyclopenta-2,4-diene)",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2231-57-4": {
+      "name": "ヒドラジンチオカルボヒドラジド",
+      "nameEn": "Hydrazine thiocarbohydrazide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2234-13-1": {
+      "name": "オクタクロロナフタレン",
+      "nameEn": "Octachloronaphthalene",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2238-07-5": {
+      "name": "ビス（２，３－エポキシプロピル）エーテル",
+      "nameEn": "Bis(2,3-epoxypropyl) ether",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2269-22-9": {
+      "name": "アルミニウム＝トリス（ブタン－２－オラート）",
+      "nameEn": "Aluminum tris(butan-2-olate)",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2275-14-1": {
+      "name": "ジエチル－２，５－ジクロルフェニルメルカプトメチルジチオホスフェイト",
+      "nameEn": "Diethyl-2,5-dichlorphenylmercaptomethyldithiophosphate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2303-16-4": {
+      "name": "ジイソプロピルチオカルバミン酸Ｓ－（２，３－ジクロロアリル）",
+      "nameEn": "S-(2,3-Dichloroallyl) diisopropylthiocarbamate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2312-76-7": {
+      "name": "４，６－ジニトロ－オルト－クレゾールナトリウム",
+      "nameEn": "Sodium 4,6-dinitro-o-cresolate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2314-97-8": {
+      "name": "トリフルオロヨードメタン",
+      "nameEn": "Trifluoroiodomethane",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2346-99-8": {
+      "name": "メチルシクロヘキシル－４－クロルフェニルチオホスフェイト",
+      "nameEn": "Methylcyclohexyl-4-chlorphenylthiophosphate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2414-98-4": {
+      "name": "マグネシウムジエタノラート",
+      "nameEn": "Magnesium diethanolate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2489-77-2": {
+      "name": "トリメチルチオ尿素",
+      "nameEn": "Trimethylthiourea",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2524-03-0": {
+      "name": "Ｏ，Ｏ－ジメチル－チオホスホリル＝クロリド",
+      "nameEn": "O,O-Dimethyl thiophosphoryl chloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2524-04-1": {
+      "name": "ジエチルホスホロクロリドチオネート",
+      "nameEn": "Diethyl phosphochloridothionate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2528-36-1": {
+      "name": "りん酸ジ－ノルマル－ブチル＝フェニル",
+      "nameEn": "Di-n-butyl phenyl phosphate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2595-54-2": {
+      "name": "エチル－Ｎ－（ジエチルジチオホスホリルアセチル）－Ｎ－メチルカルバメート",
+      "nameEn": "Ethyl N-(diethyldithiophosphorylacetyl)-N-methylcarbamate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2674-91-1": {
+      "name": "ジメチルエチルスルフィニルイソプロピルチオホスフェイト",
+      "nameEn": "Dimethylethylsulfinyl isopropylthiophosphate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2680-03-7": {
+      "name": "Ｎ，Ｎ－ジメチルアクリルアミド",
+      "nameEn": "N,N-Dimethylacrylamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2699-79-8": {
+      "name": "弗化スルフリル",
+      "nameEn": "Sulphuryl difluoride",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2768-02-7": {
+      "name": "トリメトキシ（ビニル）シラン",
+      "nameEn": "Trimethoxy(vinyl)silane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2795-39-3": {
+      "name": "ペルフルオロオクタン－１－スルホン酸カリウム",
+      "nameEn": "Potassium perfluorooctane-1-sulfonate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2873-97-4": {
+      "name": "Ｎ－（１，１－ジメチル－３－オキソブチル）アクリルアミド",
+      "nameEn": "N-(1,1-dimethyl-3-oxobutyl)acrylamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2937-50-0": {
+      "name": "クロロぎ酸アリル",
+      "nameEn": "Allyl chloroformate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "2973-10-6": {
+      "name": "硫酸ジイソプロピル",
+      "nameEn": "Diisopropyl sulfate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "3033-62-3": {
+      "name": "ビス（２－ジメチルアミノエチル）エーテル",
+      "nameEn": "Bis(2-dimethylaminoethyl) ether",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "3078-97-5": {
+      "name": "ジエチルパラジメチルアミノスルホニルフェニルチオホスフェイト",
+      "nameEn": "Diethyl-p-dimethylaminosulfonylphenylthiophosphate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "3115-68-2": {
+      "name": "テトラブチルホスホニウム＝ブロミド",
+      "nameEn": "Tetrabutylphosphonium bromide",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "3333-52-6": {
+      "name": "テトラメチルこはく酸ニトリル",
+      "nameEn": "Tetramethylsuccinic acid dinitrile",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "3391-86-4": {
+      "name": "１－オクテン－３－オール",
+      "nameEn": "Octen-3-ol",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "3648-21-3": {
+      "name": "フタル酸ジヘプチル",
+      "nameEn": "Diheptyl phthalate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "3710-30-3": {
+      "name": "オクタ－１，７－ジエン",
+      "nameEn": "Octa-1,7-diene",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "3710-84-7": {
+      "name": "Ｎ，Ｎ－ジエチルヒドロキシルアミン",
+      "nameEn": "N,N-Diethylhydroxylamine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "3724-65-0": {
+      "name": "クロトン酸",
+      "nameEn": "Crotonic acid",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "3792-59-4": {
+      "name": "エチル－２，４－ジクロルフェニルチオノベンゼンホスホネイト",
+      "nameEn": "Ethyl-2,4-dichlorophenylthionobenzenephosphonate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "3926-62-3": {
+      "name": "クロロ酢酸ナトリウム",
+      "nameEn": "Sodium chloroacetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "3942-54-9": {
+      "name": "Ｎ－メチルカルバミル－２－クロルフェノール",
+      "nameEn": "N-Methylcarbamyl-2-chlorophenol",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "4067-16-7": {
+      "name": "ペンタエチレンヘキサミン",
+      "nameEn": "Pentaethylenehexamine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "4074-88-8": {
+      "name": "オキシジエチレン＝ジアクリラート",
+      "nameEn": "Oxydiethylene diacrylate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "4109-96-0": {
+      "name": "ジクロロシラン",
+      "nameEn": "Dichlorosilane",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "4253-34-3": {
+      "name": "メチルシラントリイル＝トリアセタート",
+      "nameEn": "Methylsilanetriyl triacetate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "4418-26-2": {
+      "name": "ナトリウム＝３－アセチル－６－メチル－２，４－ジオキソ－３，４－ジヒドロ－２Ｈ－ピラン－３－イド",
+      "nameEn": "Sodium 3-acetyl-6-methyl-2,4-dioxo-3,4-dihydro-2H-pyran-3-ide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "4461-52-3": {
+      "name": "メトキシメタノール",
+      "nameEn": "Methoxymethanol",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "4549-40-0": {
+      "name": "Ｎ－メチル－Ｎ－ニトロソエテンアミン",
+      "nameEn": "N-Methyl-N-nitrosoethenamine",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "4719-04-4": {
+      "name": "ヘキサヒドロ－１，３，５－トリス（２－ヒドロキシエチル）－１，３，５－トリアジン",
+      "nameEn": "Hexahydro-1,3,5-tris(2-hydroxyethyl)-1,3,5-triazine",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "4979-32-2": {
+      "name": "Ｎ，Ｎ－ジシクロヘキシル－２－ベンゾチアゾールスルフェンアミド",
+      "nameEn": "N,N-Dicyclohexyl-2-benzothiazolesulfenamide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "5064-31-3": {
+      "name": "ニトリロ三酢酸三ナトリウム",
+      "nameEn": "Trisodium 2,2',2''-nitrilotriacetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "5329-14-6": {
+      "name": "スルファミン酸",
+      "nameEn": "Sulfamic acid",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "5349-28-0": {
+      "name": "ロダン酢酸エチル",
+      "nameEn": "Ethyl rhodanacetate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "5405-41-4": {
+      "name": "３－ヒドロキシブタン酸エチル",
+      "nameEn": "Ethyl 3-hydroxybutyrate",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "5470-11-1": {
+      "name": "塩酸ヒドロキシルアミン",
+      "nameEn": "Hydroxylammonium chloride",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "5810-88-8": {
+      "name": "ジチオりん酸Ｏ，Ｏ－ビス（２－エチルヘキシル）",
+      "nameEn": "O,O-Bis(2-ethylhexyl)  phosphorodithioate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "5827-05-4": {
+      "name": "ジイソプロピル－Ｓ－（エチルスルフィニルメチル）－ジチオホスフェイト",
+      "nameEn": "Diisopropyl-S-(ethylsulfinylmethyl)-dithiophosphate",
+      "notes": [
+        "皮膚等障害化学物質 / R5化学物質規制 SDS交付義務（R7.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "5903-13-9": {
+      "name": "Ｎ－メチル－Ｎ－（１－ナフチル）－モノフルオール酢酸アミド",
+      "nameEn": "N-Methyl-N-(1-naphthyl)-monofluoracetic acid amide",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R8.4.1適用）"
+      ],
+      "source": "reference",
+      "iarcGroup": null,
+      "jsohOel": null,
+      "acgihTlv": null
+    },
+    "6164-98-3": {
+      "name": "Ｎ’－（２－メチル－４－クロルフェニル）－Ｎ，Ｎ－ジメチルホルムアミジン",
+      "nameEn": "N'-(2-Methyl-4-chlorophenyl)-N,N-dimethylformamidine)",
+      "notes": [
+        "R5化学物質規制 SDS交付義務（R7.4.1適用）"
       ],
       "source": "reference",
       "iarcGroup": null,
