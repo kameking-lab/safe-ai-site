@@ -34,6 +34,7 @@ import {
   Moon,
   BarChart3,
   Sparkles,
+  HelpCircle,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { FlagshipNav } from "@/components/flagship-nav";
@@ -155,6 +156,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "lms", label: "LMS（多拠点管理）", href: "/lms", icon: LibraryBig, badge: "beta", description: "先行登録" },
       { id: "glossary", label: "安全用語辞書", href: "/glossary", icon: BookMarked },
+      { id: "faq", label: "FAQ 200問", href: "/faq", icon: HelpCircle },
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
       ...(PAID_MODE
         ? [{ id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard } as NavItem]
