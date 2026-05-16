@@ -1,4 +1,5 @@
 export type { LawArticle } from "./law-types";
+export { LAW_METADATA, getLawMetadata, type LawMetadata } from "./law-metadata";
 export { rodoAnzenEiseiHo } from "./rodo-anzen-eisei-ho";
 export { rodoAnzenEiseiHoSikokiregu } from "./rodo-anzen-eisei-ho-sikokiregu";
 export { anzenEiseiKisoku } from "./anzen-eisei-kisoku";
