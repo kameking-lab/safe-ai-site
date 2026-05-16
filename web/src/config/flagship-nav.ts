@@ -197,6 +197,27 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       },
     ],
   },
+  {
+    id: "work-environment",
+    label: "作業環境測定",
+    icon: "🔬",
+    cardTitle: "作業環境測定 管理区分判定",
+    cardDescription:
+      "安衛令第21条の10種類の測定対象を自動判定。A測定・B測定から管理区分（第1〜第3）を算出し、区分別改善措置を提案。作業環境測定法準拠。",
+    href: "/work-environment-measurement",
+    subItems: [
+      {
+        label: "測定対象作業場チェッカー",
+        href: "/work-environment-measurement/target-finder",
+        description: "業種・工程・物質から測定義務対象を判定",
+      },
+      {
+        label: "管理区分 判定ツール",
+        href: "/work-environment-measurement/management-class-judge",
+        description: "A測定・B測定値から第1〜第3区分を算出",
+      },
+    ],
+  },
 ];
 
 export function getFlagshipById(id: string): FlagshipFeature | undefined {
