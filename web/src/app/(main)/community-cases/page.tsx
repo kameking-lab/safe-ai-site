@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MessageSquarePlus, Tag } from "lucide-react";
+import { PageContainer } from "@/components/layout";
 import { ogImageUrl } from "@/lib/og-url";
 import { COMMUNITY_CASES_SEED } from "@/data/mock/community-cases";
 import { UGC_CATEGORY_LABELS, UGC_INDUSTRY_OPTIONS } from "@/lib/ugc-types";
 import { CommunityCasesClient } from "./CommunityCasesClient";
 
 import { PageJsonLd } from "@/components/page-json-ld";
-const TITLE = "現場の声・事例集（UGC）";
+const TITLE = "ヒヤリ・質問・Tips 事例集（運営チーム作成）";
 const DESCRIPTION =
-  "全国の現場担当者から集まったヒヤリハット・質問・Tipsを匿名で共有。労働安全コンサルタントの監修コメント付き。";
+  "労働安全コンサルタント監修のもと運営チームが作成した、ヒヤリハット・質問・Tipsの参考事例集。実際の投稿が集まり次第、順次差し替えていきます。";
 
 export const metadata: Metadata = {
   title: `${TITLE}`,
@@ -31,13 +32,13 @@ export default function CommunityCasesPage() {
   const initial = COMMUNITY_CASES_SEED.filter((c) => c.status === "approved");
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+    <PageContainer width="wide">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={TITLE} description={DESCRIPTION} path="/community-cases" />
       <header className="mb-6">
         <p className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
           <Tag className="h-3.5 w-3.5" />
-          現場の声（UGC）
+          運営チーム作成事例
         </p>
         <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">{TITLE}</h1>
         <p className="mt-2 text-sm leading-6 text-slate-600 sm:text-base">{DESCRIPTION}</p>
@@ -65,6 +66,6 @@ export default function CommunityCasesPage() {
       </header>
 
       <CommunityCasesClient initial={initial} industries={UGC_INDUSTRY_OPTIONS} />
-    </main>
+    </PageContainer>
   );
 }

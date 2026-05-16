@@ -89,6 +89,74 @@ export function articleListSchema(
   };
 }
 
+/**
+ * Single NewsArticle schema for individual article pages.
+ * Google Discover prefers NewsArticle over Article when content is
+ * timely/news-style; safety-law commentary and accident analysis fit
+ * that mold. Wider 16:9 image (>=1200px) and inLanguage tagging are
+ * required for Top Stories eligibility.
+ */
+export function newsArticleSchema(input: {
+  headline: string;
+  description: string;
+  url: string;
+  datePublished: string;
+  dateModified: string;
+  authorName: string;
+  authorUrl?: string;
+  image?: string;
+  inLanguage?: string;
+  keywords?: string[];
+  articleSection?: string;
+}): Schema {
+  const {
+    headline,
+    description,
+    url,
+    datePublished,
+    dateModified,
+    authorName,
+    authorUrl,
+    image,
+    inLanguage = "ja",
+    keywords,
+    articleSection,
+  } = input;
+  return {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline,
+    description,
+    url,
+    datePublished,
+    dateModified,
+    inLanguage,
+    ...(image ? { image: [image] } : {}),
+    ...(keywords && keywords.length ? { keywords: keywords.join(", ") } : {}),
+    ...(articleSection ? { articleSection } : {}),
+    author: {
+      "@type": "Person",
+      name: authorName,
+      ...(authorUrl ? { url: authorUrl } : {}),
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "安全AIポータル",
+      url: "https://www.anzen-ai-portal.jp",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://www.anzen-ai-portal.jp/apple-touch-icon.png",
+        width: 180,
+        height: 180,
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": url,
+    },
+  };
+}
+
 export function newsArticleListSchema(
   items: { headline: string; datePublished: string; url: string; description?: string }[]
 ): Schema {
@@ -334,6 +402,156 @@ export function courseListSchema(
           url: "https://www.anzen-ai-portal.jp",
         },
       },
+    })),
+  };
+}
+
+export function datasetSchema(input: {
+  name: string;
+  description: string;
+  url: string;
+  keywords?: string[];
+  temporalCoverage?: string;
+  license?: string;
+  variableMeasured?: string[];
+  isBasedOn?: { name: string; url: string }[];
+}): Schema {
+  const { name, description, url, keywords, temporalCoverage, license, variableMeasured, isBasedOn } = input;
+  return {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    name,
+    description,
+    url,
+    creator: {
+      "@type": "Organization",
+      name: "安全AIポータル",
+      url: "https://www.anzen-ai-portal.jp",
+    },
+    inLanguage: "ja",
+    ...(license ? { license } : {}),
+    ...(keywords ? { keywords } : {}),
+    ...(temporalCoverage ? { temporalCoverage } : {}),
+    ...(variableMeasured ? { variableMeasured } : {}),
+    ...(isBasedOn
+      ? {
+          isBasedOn: isBasedOn.map((d) => ({
+            "@type": "Dataset",
+            name: d.name,
+            url: d.url,
+          })),
+        }
+      : {}),
+  };
+}
+
+export function qaPageSchema(input: {
+  name: string;
+  description: string;
+  url: string;
+}): Schema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "QAPage",
+    name: input.name,
+    description: input.description,
+    url: input.url,
+    inLanguage: "ja",
+    isPartOf: {
+      "@type": "WebSite",
+      name: "安全AIポータル",
+      url: "https://www.anzen-ai-portal.jp",
+    },
+  };
+}
+
+export function definedTermSetSchema(input: {
+  name: string;
+  url: string;
+  description?: string;
+  terms: { name: string; description: string }[];
+}): Schema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "DefinedTermSet",
+    name: input.name,
+    url: input.url,
+    inLanguage: "ja",
+    ...(input.description ? { description: input.description } : {}),
+    hasDefinedTerm: input.terms.slice(0, 50).map((t) => ({
+      "@type": "DefinedTerm",
+      name: t.name,
+      description: t.description,
+      inDefinedTermSet: input.url,
+    })),
+  };
+}
+
+export function quizSchema(input: {
+  name: string;
+  description: string;
+  url: string;
+  about?: string;
+  questions: {
+    text: string;
+    choices: string[];
+    correct: number;
+    explanation?: string;
+  }[];
+}): Schema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Quiz",
+    name: input.name,
+    description: input.description,
+    url: input.url,
+    inLanguage: "ja",
+    ...(input.about ? { about: { "@type": "Thing", name: input.about } } : {}),
+    educationalUse: "practice",
+    provider: {
+      "@type": "Organization",
+      name: "安全AIポータル",
+      url: "https://www.anzen-ai-portal.jp",
+    },
+    hasPart: input.questions.slice(0, 10).map((q) => ({
+      "@type": "Question",
+      name: q.text,
+      suggestedAnswer: q.choices.map((c) => ({
+        "@type": "Answer",
+        text: c,
+      })),
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: q.choices[q.correct],
+        ...(q.explanation ? { comment: { "@type": "Comment", text: q.explanation } } : {}),
+      },
+    })),
+  };
+}
+
+export function dataCatalogSchema(input: {
+  name: string;
+  description: string;
+  url: string;
+  datasets: { name: string; url: string; description?: string }[];
+}): Schema {
+  return {
+    "@context": "https://schema.org",
+    "@type": "DataCatalog",
+    name: input.name,
+    description: input.description,
+    url: input.url,
+    inLanguage: "ja",
+    creator: {
+      "@type": "Organization",
+      name: "安全AIポータル",
+      url: "https://www.anzen-ai-portal.jp",
+    },
+    dataset: input.datasets.map((d) => ({
+      "@type": "Dataset",
+      name: d.name,
+      url: d.url,
+      ...(d.description ? { description: d.description } : {}),
     })),
   };
 }

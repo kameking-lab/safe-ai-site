@@ -3,8 +3,11 @@
 import { useState, useRef, useCallback } from "react";
 import { BookMarked, Search, ExternalLink } from "lucide-react";
 import Link from "next/link";
-
+import { PageContainer } from "@/components/layout";
+import { JsonLd, definedTermSetSchema } from "@/components/json-ld";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { LawHubNav } from "@/components/law-hub-nav";
+import { EXTRA_TERMS } from "@/data/glossary";
 // Metadata cannot be exported from client component – define it in a separate layout or use a wrapper.
 // For now, the page itself handles SEO via next/head alternative approach.
 
@@ -15,7 +18,7 @@ type Term = {
   relatedPages?: Array<{ href: string; label: string }>;
 };
 
-const TERMS: Term[] = [
+const BASE_TERMS: Term[] = [
   { term: "KY活動", reading: "けーわいかつどう", definition: "危険予知活動の略。作業前に作業者全員でその作業に潜む危険を話し合い、対策を講じる安全活動。TBM（ツールボックスミーティング）と組み合わせて実施することが多い。", relatedPages: [{ href: "/ky", label: "KY用紙" }, { href: "/e-learning", label: "Eラーニング" }] },
   { term: "KYT", reading: "けーわいてぃー", definition: "危険予知トレーニングの略。イラストや写真を使って、潜む危険を発見・指摘する訓練。4ラウンド法（現状把握→本質追究→対策樹立→目標設定）が代表的手法。", relatedPages: [{ href: "/ky", label: "KY用紙" }] },
   { term: "安全衛生委員会", reading: "あんぜんえいせいいいんかい", definition: "常時50人以上の労働者を使用する事業場で設置義務がある委員会。安全委員会と衛生委員会を統合したもので、月1回以上開催が義務。議事録は3年間保存。", relatedPages: [{ href: "/laws", label: "法改正" }, { href: "/chatbot", label: "法令チャット" }] },
@@ -75,7 +78,7 @@ const TERMS: Term[] = [
   { term: "マトリクス評価", reading: "まとりくすひょうか", definition: "リスクアセスメントにおけるリスク評価手法。発生の可能性（頻度）と重篤性（被害の大きさ）の組み合わせでリスクレベルを決定するマトリクス表を用いる。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }, { href: "/risk", label: "気象リスク" }] },
   { term: "メンタルヘルス", reading: "めんたるへるす", definition: "精神的健康のこと。職場のメンタルヘルス対策では、4つのケア（セルフケア・ラインケア・事業場内資源ケア・事業場外資源ケア）の推進が求められる。", relatedPages: [{ href: "/laws", label: "法改正" }] },
   { term: "元方事業者", reading: "もとかたじぎょうしゃ", definition: "同一の場所で複数の事業者が混在して作業を行う場合の元請事業者。下請け事業者に対する安全衛生管理の統括義務がある。", relatedPages: [{ href: "/chatbot", label: "法令チャット" }] },
-  { term: "有機溶剤", reading: "ゆうきようざい", definition: "他の物質を溶かす性質を持つ有機化合物の総称。トルエン・キシレン・アセトン等。蒸気を吸入することで健康障害を引き起こす。有機溶剤中毒予防規則（有機則）の規制を受ける。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }, { href: "/chatbot", label: "法令チャット" }] },
+  { term: "有機溶剤", reading: "ゆうきようざい", definition: "他の物質を溶かす性質を持つ有機化合物の総称。有機則別表第1にトルエン・キシレン・アセトン等が指定され、毒性により第1種（クロロホルム等の高毒性7物質）・第2種（多くの有機溶剤）・第3種（低毒性のガソリン・石油エーテル等）に区分される。物質単体の説明は本項、暴露時の疾患は『有機溶剤中毒』、規制省令は『有機則』を参照。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }, { href: "/chatbot", label: "法令チャット" }] },
   { term: "溶接・溶断", reading: "ようせつようだん", definition: "金属を溶かして接合・切断する作業。アーク溶接・ガス溶接・プラズマ切断等がある。溶接ヒュームによる健康障害防止、火花による火災防止が重要課題。", relatedPages: [{ href: "/laws", label: "法改正" }] },
   { term: "労働安全衛生法", reading: "ろうどうあんぜんえいせいほう", definition: "昭和47年制定の基本法。事業者の安全衛生措置義務・安全管理体制・健康保持増進等を定める。通称「安衛法」。労働安全衛生規則（安衛則）等の省令とセットで運用される。", relatedPages: [{ href: "/laws", label: "法改正" }, { href: "/chatbot", label: "法令チャット" }, { href: "/law-search", label: "法令検索" }] },
   { term: "労働安全コンサルタント", reading: "ろうどうあんぜんこんさるたんと", definition: "安衛法に基づく国家資格。事業場の安全診断・安全教育等を行う専門家。試験科目は産業安全一般と産業安全関係法令。", relatedPages: [{ href: "/exam-quiz", label: "過去問" }] },
@@ -115,6 +118,8 @@ const TERMS: Term[] = [
   { term: "通路・避難路", reading: "つうろひなんろ", definition: "作業場の通路は幅80cm以上の確保・標識設置が必要（安衛則第542条等）。避難路・非常口の確保と表示、定期的な避難訓練の実施が求められる。", relatedPages: [] },
   { term: "ロックアウト・タグアウト", reading: "ろっくあうとたぐあうと", definition: "LOTO（Lockout/Tagout）。機械整備・清掃時の予期しない起動・エネルギー放出を防ぐための手順。動力源を遮断・施錠し、警告タグを取り付ける安全確保手順。", relatedPages: [] },
 ];
+
+const TERMS: Term[] = [...BASE_TERMS, ...EXTRA_TERMS];
 
 const KANA_ROWS = ["あ", "か", "さ", "た", "な", "は", "ま", "や", "ら", "わ"];
 
@@ -165,9 +170,19 @@ export default function GlossaryPage() {
   }, []);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
-      {/* SEO: WebPage + BreadcrumbList */}
+    <>
+    <LawHubNav current="glossary" />
+    <PageContainer>
       <PageJsonLd name="労働安全用語集" description="労働安全衛生に関する専門用語をわかりやすく解説。条文・通達・現場用語を一覧から検索。" path="/glossary" />
+      {/* SEO: DefinedTermSet */}
+      <JsonLd
+        schema={definedTermSetSchema({
+          name: "労働安全用語集",
+          url: "https://www.anzen-ai-portal.jp/glossary",
+          description: "労働安全衛生に関する専門用語をわかりやすく解説。条文・通達・現場用語を一覧から検索。",
+          terms: TERMS.map((t) => ({ name: t.term, description: t.definition })),
+        })}
+      />
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3">
@@ -273,6 +288,7 @@ export default function GlossaryPage() {
           </div>
         )}
       </div>
-    </div>
+    </PageContainer>
+    </>
   );
 }

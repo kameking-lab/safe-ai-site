@@ -1,7 +1,13 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
-import { CommandPalette } from './CommandPalette';
+import dynamic from 'next/dynamic';
+
+// Loaded on-demand (Ctrl+K) — keeps it out of the initial shared bundle (B-11)
+const CommandPalette = dynamic(
+  () => import('./CommandPalette').then((m) => ({ default: m.CommandPalette })),
+  { ssr: false },
+);
 
 interface CommandPaletteContextValue {
   isOpen: boolean;

@@ -36,8 +36,18 @@ export { ashibaSagyoKisoku } from "./ashiba-sagyo-kisoku";
 export { kajuRodoTaisaku } from "./jiritsushinkei-setsumeisho";
 export { koyoKintoHo } from "./koyo-kinto-ho";
 export { mhlwLawArticles } from "./mhlw-extras";
+export { enKisoku } from "./en-kisoku";
+export { shiAlkylEnKisoku } from "./shi-alkyl-en-kisoku";
+export { jimushoEiseiKijunKisoku } from "./jimusho-eisei-kijun-kisoku";
+export { kikaiKenteiKisoku } from "./kikai-kentei-kisoku";
+export { hakenAnzenEisei } from "./haken-anzen-eisei";
 
 import { mhlwLawArticles } from "./mhlw-extras";
+import { enKisoku } from "./en-kisoku";
+import { shiAlkylEnKisoku } from "./shi-alkyl-en-kisoku";
+import { jimushoEiseiKijunKisoku } from "./jimusho-eisei-kijun-kisoku";
+import { kikaiKenteiKisoku } from "./kikai-kentei-kisoku";
+import { hakenAnzenEisei } from "./haken-anzen-eisei";
 import { rodoAnzenEiseiHo } from "./rodo-anzen-eisei-ho";
 import { rodoAnzenEiseiHoSikokiregu } from "./rodo-anzen-eisei-ho-sikokiregu";
 import { anzenEiseiKisoku } from "./anzen-eisei-kisoku";
@@ -110,4 +120,9 @@ export const allLawArticles = [
   ...kajuRodoTaisaku,
   ...koyoKintoHo,
   ...mhlwLawArticles,
+  ...enKisoku,
+  ...shiAlkylEnKisoku,
+  ...jimushoEiseiKijunKisoku,
+  ...kikaiKenteiKisoku,
+  ...hakenAnzenEisei,
 ];

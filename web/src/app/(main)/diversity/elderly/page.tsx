@@ -7,6 +7,7 @@ const DESCRIPTION =
   "高齢労働者（60歳以上）の転倒・腰痛・熱中症リスクへの対応。厚労省「エイジフレンドリーガイドライン」に基づく安全配慮義務・健康管理・職場環境改善の実務ポイントを解説します。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/diversity/elderly" },
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {

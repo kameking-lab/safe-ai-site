@@ -3,6 +3,7 @@ import { Brain } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { RiskPredictionPanel } from "@/components/risk-prediction-panel";
 import { RelatedPageCards } from "@/components/related-page-cards";
+import { PageContainer } from "@/components/layout";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -11,6 +12,7 @@ const _desc =
   "作業内容を入力すると類似事故を検索し、AIが潜在リスクを予測。建設・製造・林業の朝礼KY活動・危険予知活動を支援。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/risk-prediction" },
   title: _title,
   description: _desc,
   openGraph: {
@@ -39,7 +41,7 @@ export default function RiskPredictionPage() {
       <RiskPredictionPanel />
 
       {/* 予測の仕組みについて */}
-      <section className="mx-auto max-w-7xl px-4 pb-4">
+      <PageContainer paddingY="none" className="pb-4" as="section">
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
           <h2 className="mb-3 text-sm font-bold text-slate-800">予測の仕組みについて</h2>
           <dl className="space-y-3 text-xs leading-6 text-slate-700">
@@ -67,7 +69,7 @@ export default function RiskPredictionPage() {
             </div>
           </dl>
         </div>
-      </section>
+      </PageContainer>
 
       <RelatedPageCards
         heading="合わせて使う"

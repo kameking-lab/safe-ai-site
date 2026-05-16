@@ -43,7 +43,7 @@ const byMonthData = byMonth as MonthMap;
 const deathsByYearData = deathsByYear as YearMap;
 const deathsByIndustryData = deathsByIndustry as YearMap;
 
-const DEATHS_RANGE_LABEL = "令和元年〜令和5年（2019〜2023）";
+const DEATHS_RANGE_LABEL = "令和元年〜令和6年（2019〜2024）";
 const DEATHS_SOURCE_URL = "https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.aspx";
 const DEATHS_SOURCE_LABEL = "厚生労働省 職場のあんぜんサイト 死亡災害DB";
 
@@ -443,7 +443,7 @@ export function MhlwAccidentAnalysisPanel() {
               死亡災害 N={deathsTotal.toLocaleString()}件（{DEATHS_RANGE_LABEL}）
             </h3>
             <p className="mt-1 text-xs text-slate-600">
-              死亡災害（死亡 1 名以上）と休業 4 日以上の労働災害を並べて比較。休業 4 日以上データは 2006〜2021、死亡災害データは 2019〜2023 のため重複期間（2019〜2021）で両者が描画されます。
+              死亡災害（死亡 1 名以上）と休業 4 日以上の労働災害を並べて比較。休業 4 日以上データは 2006〜2021、死亡災害データは 2019〜2024 のため重複期間（2019〜2021）で両者が描画されます。
             </p>
             <p className="mt-0.5 text-[11px] text-slate-500">
               出典:&nbsp;

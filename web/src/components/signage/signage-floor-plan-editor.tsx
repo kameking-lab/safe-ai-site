@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { Upload, MapPin, Trash2, Save, X } from "lucide-react";
+import { Upload, MapPin, Trash2, X } from "lucide-react";
 
 const IMAGE_KEY = "signage-floor-plan-image-v1";
 const PINS_KEY = "signage-floor-plan-pins-v1";

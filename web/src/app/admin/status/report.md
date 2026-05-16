@@ -67,7 +67,7 @@
 - `/sitemap-index.xml`、`/sitemap-articles.xml`、`/sitemap-circulars.xml`、`/sitemap-equipment.xml` … サイトマップ多分割。
 - `/api/seo/notify-search-console` … Search Console Ping 自動化。
 - `/api/feedback` … 読者通報受付。
-- `/admin/status` … 内部ステータスビュー（`?key=anzenai2026` 必須、それ以外は `notFound()`）。
+- `/admin/status` … 内部ステータスビュー（`?key=***` 必須、それ以外は `notFound()`）。
 
 ### メタデータ設定状況
 
@@ -432,7 +432,7 @@ LMS（`/lms`）：△ 部分動作。前回と同じ。
 
 マイページ（`/account`）：✓ 動作。
 
-社内ステータス（`/admin/status?key=anzenai2026`）：✓ 動作（新設）。
+社内ステータス（`/admin/status?key=***`）：✓ 動作（新設）。
 
 ### 制限の主な理由
 

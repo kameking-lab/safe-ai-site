@@ -1,9 +1,10 @@
 import type { UgcSubmission } from "@/lib/ugc-types";
 
 /**
- * 現場の声（UGC）シードデータ。
- * 公開デモ用に、運営側が用意した「実体験ベース」の事例。
- * 将来 DB に移行する際はこのファイルを廃止する。
+ * Community cases seed data — operator-authored example entries for demonstration purposes.
+ * These are NOT real user submissions. They are illustrative cases written by the site operator
+ * to show the UGC feature before genuine contributions are available.
+ * Retire this file when migrating to a real DB with verified user contributions.
  */
 export const COMMUNITY_CASES_SEED: UgcSubmission[] = [
   {
@@ -15,7 +16,7 @@ export const COMMUNITY_CASES_SEED: UgcSubmission[] = [
     body: "鉄骨建方の作業中、安全帯のフックを掛け替えるタイミングで一瞬両手フリーになり、足場が揺れた瞬間バランスを崩しそうになりました。ダブルランヤード（2丁掛け）に切り替えてからは「無胴綱状態」がゼロになり、現場全体の不安感も減りました。古い安全帯が残っていないか定期点検することをおすすめします。",
     bodyOriginal:
       "鉄骨建方の作業中、安全帯のフックを掛け替えるタイミングで一瞬両手フリーになり、足場が揺れた瞬間バランスを崩しそうになりました。ダブルランヤード（2丁掛け）に切り替えてからは「無胴綱状態」がゼロになり、現場全体の不安感も減りました。古い安全帯が残っていないか定期点検することをおすすめします。",
-    authorAlias: "匿名のコアラ#3421",
+    authorAlias: "（運営チーム作成事例）",
     status: "approved",
     audit: {
       ngWords: [],
@@ -38,7 +39,7 @@ export const COMMUNITY_CASES_SEED: UgcSubmission[] = [
     body: "従来は『臭いがキツい』『目がしみる』といった感覚的な訴えで終わっていた化学物質関連のヒヤリですが、CREATE-SIMPLE での定量評価を入れたら、ばく露推定量がリスクI～IVのどこに入るかが見えるようになり、局排の能力アップ稟議が一発で通りました。リスクの『言語化』が動くお金を変えると実感。",
     bodyOriginal:
       "従来は『臭いがキツい』『目がしみる』といった感覚的な訴えで終わっていた化学物質関連のヒヤリですが、CREATE-SIMPLE での定量評価を入れたら、ばく露推定量がリスクI～IVのどこに入るかが見えるようになり、局排の能力アップ稟議が一発で通りました。リスクの『言語化』が動くお金を変えると実感。",
-    authorAlias: "匿名のフクロウ#7882",
+    authorAlias: "（運営チーム作成事例）",
     status: "approved",
     audit: {
       ngWords: [],
@@ -61,7 +62,7 @@ export const COMMUNITY_CASES_SEED: UgcSubmission[] = [
     body: "特養で勤務しています。移乗介助での腰痛が職員の最大の離職要因になっています。スライディングボード／リフトの導入を検討しているのですが、現場が「使い方を覚える方が大変」と言って広がりません。導入が成功した施設の運用ルールを聞きたいです。",
     bodyOriginal:
       "特養で勤務しています。移乗介助での腰痛が職員の最大の離職要因になっています。スライディングボード／リフトの導入を検討しているのですが、現場が「使い方を覚える方が大変」と言って広がりません。導入が成功した施設の運用ルールを聞きたいです。",
-    authorAlias: "匿名のシマエナガ#5530",
+    authorAlias: "（運営チーム作成事例）",
     status: "approved",
     audit: {
       ngWords: [],
@@ -84,7 +85,7 @@ export const COMMUNITY_CASES_SEED: UgcSubmission[] = [
     body: "倉庫内でピッキング作業者がリフト走路を横断したところ、ちょうど死角から出てきたリフトと接触しかけました。床のラインだけでは気付かない人がいると分かったので、交差ポイントに音と光のセンサ式注意灯を設置。今のところ再発はありません。",
     bodyOriginal:
       "倉庫内でピッキング作業者がリフト走路を横断したところ、ちょうど死角から出てきたリフトと接触しかけました。床のラインだけでは気付かない人がいると分かったので、交差ポイントに音と光のセンサ式注意灯を設置。今のところ再発はありません。",
-    authorAlias: "匿名のペンギン#1180",
+    authorAlias: "（運営チーム作成事例）",
     status: "approved",
     audit: {
       ngWords: [],

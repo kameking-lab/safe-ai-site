@@ -1,0 +1,34 @@
+{
+  "year": 2026,
+  "source": {
+    "site": "厚生労働省 労働災害発生状況速報値",
+    "url": "https://anzeninfo.mhlw.go.jp/information/sokuhou.html",
+    "license": "政府標準利用規約（第2.0版）CC BY 4.0互換",
+    "filename": "26-04.xlsx",
+    "as_of": "令和8年4月6日現在（令和8年5月14日ダウンロード）"
+  },
+  "extracted_at": "2026-05-14",
+  "data_type": "aggregate_preliminary",
+  "note": "Individual case records (個票) are NOT available. This is aggregate statistics only.",
+  "calendar_year": "令和8年（2026年）",
+  "coverage_months": "令和8年1〜3月（速報値。令和8年4月6日現在）",
+  "comparison_period": "令和7年1〜3月",
+  "deaths": {
+    "jan_mar_2026": 114,
+    "jan_mar_2025": 142,
+    "change": -28,
+    "change_pct": -19.7
+  },
+  "deaths_by_industry_jan_mar": {
+    "全産業": 114,
+    "製造業": 20,
+    "鉱業": 2,
+    "建設業": 39,
+    "交通運輸事業": 1,
+    "陸上貨物運送事業": 13,
+    "港湾運送業": 0,
+    "林業": 5,
+    "農業、畜産・水産業": 9,
+    "第三次産業": 22
+  }
+}

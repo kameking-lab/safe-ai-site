@@ -32,7 +32,7 @@ export function MhlwSimilarCasesPanel({ query }: { query: string }) {
         類似事例（MHLW 実データ {MHLW_DEATHS_TOTAL.toLocaleString()} 件）TOP {results.length}
       </div>
       <p className="mt-1 text-[11px] text-rose-700/80">
-        厚生労働省 死亡災害データベース（2019-2023）から、入力作業内容と一致するキーワードを重み付けして検索した実例です。
+        厚生労働省 死亡災害データベース（2019-2024）から、入力作業内容と一致するキーワードを重み付けして検索した実例です。
       </p>
 
       {results.length === 0 ? (
