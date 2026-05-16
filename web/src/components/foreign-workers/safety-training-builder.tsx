@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   MATERIAL_INDUSTRY_LABELS_JA,
   MATERIAL_INDUSTRY_LABELS_EN,
@@ -16,9 +17,12 @@ import {
 } from "@/types/foreign-worker";
 
 interface BuilderProps {
+  /** Pre-filtered materials for the current industry only (~25 KB vs 148 KB for all). */
   materials: SafetyMaterial[];
   industries: MaterialIndustry[];
   topics: MaterialTopic[];
+  /** The industry whose materials were pre-fetched server-side (drives URL navigation on change). */
+  currentIndustry: MaterialIndustry;
 }
 
 const TEXT_DIR: Record<MaterialLanguage, "ltr"> = {
@@ -51,8 +55,9 @@ export function SafetyTrainingBuilder({
   materials,
   industries,
   topics,
+  currentIndustry,
 }: BuilderProps) {
-  const [industry, setIndustry] = useState<MaterialIndustry>(industries[0]);
+  const router = useRouter();
   const [topic, setTopic] = useState<MaterialTopic>(topics[0]);
   const [selectedLangs, setSelectedLangs] = useState<MaterialLanguage[]>([
     "ja-easy",
@@ -61,9 +66,13 @@ export function SafetyTrainingBuilder({
   ]);
 
   const material = useMemo(
-    () => materials.find((m) => m.industry === industry && m.topic === topic),
-    [materials, industry, topic],
+    () => materials.find((m) => m.topic === topic),
+    [materials, topic],
   );
+
+  function handleIndustryChange(next: MaterialIndustry) {
+    router.push(`?industry=${next}`);
+  }
 
   function toggleLang(l: MaterialLanguage) {
     setSelectedLangs((prev) =>
@@ -78,8 +87,8 @@ export function SafetyTrainingBuilder({
           <label className="block">
             <span className="text-xs font-semibold text-slate-600">業種</span>
             <select
-              value={industry}
-              onChange={(e) => setIndustry(e.target.value as MaterialIndustry)}
+              value={currentIndustry}
+              onChange={(e) => handleIndustryChange(e.target.value as MaterialIndustry)}
               className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
             >
               {industries.map((i) => (

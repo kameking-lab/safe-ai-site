@@ -8,6 +8,7 @@ import {
   ASBESTOS_QUALIFICATIONS,
   WORK_PLANS,
 } from "@/data/asbestos-rules";
+import { ogImageUrl } from "@/lib/og-url";
 
 const _title =
   "石綿（アスベスト）対応支援｜事前調査・労基署報告・作業計画テンプレート";
@@ -23,6 +24,13 @@ export const metadata: Metadata = {
     description: _desc,
     type: "website",
     locale: "ja_JP",
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: _title,
+    description: _desc,
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 

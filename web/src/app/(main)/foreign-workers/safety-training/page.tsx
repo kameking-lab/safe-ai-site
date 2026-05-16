@@ -11,6 +11,8 @@ import {
 } from "@/types/foreign-worker";
 import { SafetyTrainingBuilder } from "@/components/foreign-workers/safety-training-builder";
 
+const DEFAULT_INDUSTRY: MaterialIndustry = "construction";
+
 const _title =
   "外国人労働者向け多言語安全教育教材ビルダー｜やさしい日本語・英語・ベトナム語・中国語・インドネシア語";
 const _desc =
@@ -29,9 +31,21 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SafetyTrainingPage() {
+interface PageProps {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export default async function SafetyTrainingPage({ searchParams }: PageProps) {
+  const { industry: rawIndustry } = await searchParams;
   const industries = Object.keys(MATERIAL_INDUSTRY_LABELS_JA) as MaterialIndustry[];
   const topics = Object.keys(MATERIAL_TOPIC_LABELS_JA) as MaterialTopic[];
+  const industry: MaterialIndustry =
+    typeof rawIndustry === "string" && industries.includes(rawIndustry as MaterialIndustry)
+      ? (rawIndustry as MaterialIndustry)
+      : DEFAULT_INDUSTRY;
+
+  // Pre-filter server-side: pass only 1 industry (~25 KB) instead of all 6 (~148 KB).
+  const filteredMaterials = SAFETY_MATERIAL_INDEX.byIndustry[industry] ?? [];
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -69,9 +83,10 @@ export default function SafetyTrainingPage() {
         </header>
 
         <SafetyTrainingBuilder
-          materials={SAFETY_MATERIAL_INDEX.all}
+          materials={filteredMaterials}
           industries={industries}
           topics={topics}
+          currentIndustry={industry}
         />
 
         <section className="mt-10 rounded-lg border border-emerald-200 bg-white p-5 text-sm text-slate-700 print:hidden">

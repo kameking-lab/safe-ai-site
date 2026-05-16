@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { BookOpen, HardHat, Factory, Briefcase, Sparkles } from "lucide-react";
+import { BookOpen, HardHat, Factory, Briefcase } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { ExamQuizClient } from "./exam-quiz-client";
 import { RelatedPageCards } from "@/components/related-page-cards";

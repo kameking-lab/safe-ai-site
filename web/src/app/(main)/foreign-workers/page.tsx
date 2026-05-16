@@ -5,6 +5,7 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { RESIDENCE_STATUS_INDEX } from "@/data/foreign-worker-rules";
 import { SAFETY_MATERIAL_INDEX } from "@/data/foreign-worker-materials";
+import { ogImageUrl } from "@/lib/og-url";
 import {
   MATERIAL_INDUSTRY_LABELS_JA,
   MATERIAL_LANGUAGE_LABELS,
@@ -31,6 +32,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ja_JP",
     alternateLocale: ["en_US", "vi_VN", "zh_CN", "id_ID"],
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: _title,
+    description: _desc,
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 
