@@ -4,6 +4,7 @@ import { normalizeSearchText } from "@/lib/fuzzy-search";
 import { expandQuery } from "@/lib/query-expansion";
 import { expandQueryRich } from "@/lib/rag/synonyms";
 import { bm25Score, getOrBuildIndex } from "@/lib/rag/bm25";
+import { rerank } from "@/lib/rag/reranker";
 
 /** チャットボットの法令カテゴリフィルタ（lawShort と完全一致） */
 export type LawCategoryFilter =
@@ -710,13 +711,17 @@ export function searchRelevantArticlesWithScore(
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score);
 
-  const topScore = filtered[0]?.score ?? 0;
+  // Phase D: 上位 20 に対してメタデータ・ベースの軽量リランクを適用。
+  // 明示された法令略称・連番クラスタ・改正版ペナルティで順位を微調整する。
+  const reranked = rerank(filtered, query, 20);
+
+  const topScore = reranked[0]?.score ?? 0;
   // 正規化の分母: 25 (タイトル一致6 + キーワード完全一致5 + テキスト一致数回 + 共起ボーナスで
   // 現実的な上限がおよそ25点になるため)。以前は30だったが、日本語助詞で分割した後の
   // 3トークン質問でも上位条文が 0.7 を十分に超えるよう緩和。
   const normalizedScore = Math.min(topScore / 25, 1.0);
 
-  const scoredArticles = filtered.slice(0, topK).map((item) => item.article);
+  const scoredArticles = reranked.slice(0, topK).map((item) => item.article);
   const { articles: pinnedArticles, hadPins } = applyPinnedTopics(query, scoredArticles);
   const finalArticles = pinnedArticles.slice(0, topK);
 
