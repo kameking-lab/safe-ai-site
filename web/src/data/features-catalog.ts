@@ -288,16 +288,7 @@ export const FEATURES: FeatureItem[] = [
     category: "management",
     tags: ["助成金"],
   },
-  {
-    slug: "lms",
-    title: "LMS（多拠点管理）",
-    summary: "事業所横断の教育・点検管理",
-    description:
-      "支店・現場ごとの受講状況・点検実績を一元管理。経営層向けの集計レポートも自動生成します。",
-    href: "/lms",
-    category: "management",
-    tags: ["LMS", "多拠点"],
-  },
+  // LMS entry removed: pre-launch β waitlist only. Audit reference F-001.
   {
     slug: "stats",
     title: "サイト統計・運営者情報",

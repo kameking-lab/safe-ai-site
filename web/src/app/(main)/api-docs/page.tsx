@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
-import { withSiteOpenGraph } from "@/lib/seo-metadata";
 import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
+
+// Pre-launch roadmap page — no external API exists yet. Keep noindex until Phase 1 ships.
+// Audit reference: harsh-third-party-2026-05-16 F-002.
 export const metadata: Metadata = {
   title: "API ドキュメント・ロードマップ",
   description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
-  alternates: { canonical: "/api-docs" },
-  openGraph: withSiteOpenGraph("/api-docs", {
-    title: "API ドキュメント・ロードマップ",
-    description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
-  }),
+  robots: { index: false, follow: false, nocache: true },
+  alternates: { canonical: null as unknown as string },
 };
 
 export default function ApiDocsPage() {
