@@ -1,4 +1,141 @@
 {
-  "updatedAt": "1970-01-01T00:00:00.000Z",
-  "entries": []
+  "updatedAt": "2026-05-16T00:09:40.199Z",
+  "entries": [
+    {
+      "id": "b843c0a41c745361",
+      "headline": "エアコン使用でも熱中症で死亡 周囲が高齢者などに声かけを",
+      "aiSummary": "エアコン使用環境下でも熱中症で死亡する事例が発生。高齢者などへの注意喚起を促す。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260513/k10015120461000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 13 May 2026 20:26:02 +0900",
+        "fetchedAt": "2026-05-16T00:08:47.992Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 70,
+        "judgedAt": "2026-05-16T00:09:08.280Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related)",
+          "duplication 70 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "083e2b51d1b171a1",
+      "headline": "全国的に気温上昇 真夏日になるところも 熱中症対策を",
+      "aiSummary": "全国的に気温が上昇し、熱中症予防が呼びかけられている。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260516/k10015123171000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 16 May 2026 08:33:03 +0900",
+        "fetchedAt": "2026-05-16T00:08:47.992Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 5,
+        "misinformationRisk": 5,
+        "duplication": 85,
+        "judgedAt": "2026-05-16T00:08:54.645Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related)",
+          "duplication 85 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "e46d6bfde4760534",
+      "headline": "16日からさらに気温上昇 真夏日も  小中学校でも熱中症対策",
+      "aiSummary": "全国的に気温上昇し真夏日予想。小中学校で熱中症対策を強化するよう呼びかけ。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260515/k10015122591000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 15 May 2026 19:20:03 +0900",
+        "fetchedAt": "2026-05-16T00:08:47.992Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "estimatedWorkCategory": "その他の事業",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 75,
+        "judgedAt": "2026-05-16T00:09:01.226Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related)",
+          "duplication 75 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "8a1785900c9170b5",
+      "headline": "第５２回特定石綿被害建設業務労働者等認定審査会　開催案内",
+      "aiSummary": "厚生労働省が特定石綿被害建設業務労働者等の認定審査会開催を案内。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_72843.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-05-13T14:00:00+09:00",
+        "fetchedAt": "2026-05-16T00:08:47.992Z"
+      },
+      "estimatedAccidentType": "有害物質",
+      "estimatedWorkCategory": "建設業",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 5,
+        "misinformationRisk": 5,
+        "duplication": 65,
+        "judgedAt": "2026-05-16T00:09:13.740Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "duplication 65 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "061e1ea8be3730ae",
+      "headline": "第34回特定石綿被害建設業務労働者等認定審査会専門委員会　開催案内",
+      "aiSummary": "建設業の石綿被害労働者に関する認定審査会が開催される。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_72893.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-05-01T14:00:00+09:00",
+        "fetchedAt": "2026-05-16T00:08:47.992Z"
+      },
+      "estimatedAccidentType": "有害物質",
+      "estimatedWorkCategory": "建設業",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 65,
+        "judgedAt": "2026-05-16T00:09:32.749Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "duplication 65 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    }
+  ]
 }
