@@ -241,6 +241,24 @@ export function PlanBuilderClient() {
             </button>
           </header>
 
+          {/* Prominent medical disclaimer (top): per audit G-006 — must be reviewed before reading the plan. */}
+          <aside
+            role="note"
+            aria-label="医学的判断ではないことに関する重要なお知らせ"
+            className="rounded-lg border-2 border-amber-400 bg-amber-50 p-3"
+          >
+            <p className="text-sm font-bold text-amber-900">
+              ※ 本プランは医学的判断ではありません
+            </p>
+            <p className="mt-1 text-xs leading-5 text-amber-800">
+              本ツールが生成する内容は、産業医・主治医および衛生管理者・人事労務担当者が
+              個別ケースを協議する際の<span className="font-semibold">雛形（たたき台）</span>
+              に過ぎません。実際の就業可否判断・配慮事項の決定は、必ず主治医の意見書、
+              産業医面談、本人の同意を踏まえてご判断ください。本ツールの出力は医療助言・診断・
+              治療方針の提示ではなく、これらの代替とすることはできません。
+            </p>
+          </aside>
+
           {form.employeeNote && (
             <section className="rounded-lg bg-slate-50 p-3 text-xs leading-6 text-slate-700">
               <span className="font-semibold">本人の希望・職場の事情：</span>
@@ -356,9 +374,22 @@ export function PlanBuilderClient() {
             </p>
           </section>
 
-          <p className="border-t border-slate-200 pt-3 text-[11px] leading-5 text-slate-500">
-            {plan.disclaimer}
-          </p>
+          {/* Footer disclaimer (PDF/print): per audit G-006 — visible on printed output. */}
+          <footer className="border-t-2 border-amber-300 pt-3">
+            <p className="text-xs font-bold text-amber-900">
+              ※ 本書は医学的判断ではありません — 産業医・主治医による確認が必須です
+            </p>
+            <p className="mt-1 text-[11px] leading-5 text-slate-600">
+              本書は、産業医・主治医の判断を補助する雛形であり、医学的診断・治療方針・就業可否判断の
+              代替とはなりません。実際の運用にあたっては、必ず主治医意見書および産業医面談の結果に基づき、
+              本人・人事労務担当者・産業医・主治医の合意形成のうえで最終決定してください。
+              出典法令・指針は厚生労働省「事業場における治療と仕事の両立支援のためのガイドライン」
+              （2016年策定、令和3年改訂版を参照）に基づきます。
+            </p>
+            <p className="mt-1 text-[11px] leading-5 text-slate-500">
+              {plan.disclaimer}
+            </p>
+          </footer>
         </article>
       )}
 

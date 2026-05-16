@@ -621,6 +621,7 @@ const FINDINGS_G: Finding[] = [
       "WebFetch評価:「テンプレート未整備(『独立後3ヶ月以内に整備予定』)、個別対応のみ、標準化なし」「個人運営による業務委託契約の締結は法的責任が曖昧」。",
     recommendation:
       "/dpa はナビ除外+noindex、法人化後に再公開。現状は「DPA等の企業契約は法人化後に提供」と1行明記。",
+    status: "resolved-pr-200",
   },
   {
     id: "G-003",
@@ -633,6 +634,7 @@ const FINDINGS_G: Finding[] = [
       "WebFetch評価:「未加入です。Phase 1 after incorporation」「保険未加入の状態でサービスを利用されることに同意のうえご利用ください」。透明性は高いが、企業利用者にはハードル。",
     recommendation:
       "短期: 個人事業者向けPL保険(年間数万円)の加入検討。中期: 法人化後にIT賠償責任保険を必ず取得。/insurance ページは継続的に状況を更新。",
+    status: "resolved-pr-200",
   },
   {
     id: "G-004",
@@ -644,6 +646,7 @@ const FINDINGS_G: Finding[] = [
       "WebFetch評価:「反社条項は明記されていない。禁止事項(第4条)では『法令違反・公序良俗違反』と一般的規定にとどまり、反社排除条項(契約解除権)の明示的な記載がない」。",
     recommendation:
       "反社排除条項を追加(契約解除権、損害賠償責任、表明保証)。",
+    status: "resolved-pr-200",
   },
   {
     id: "G-005",
@@ -655,6 +658,7 @@ const FINDINGS_G: Finding[] = [
       "WebFetch評価:「同意管理UI(バナー)への言及なし。GA等分析ツール導入の有無が不明。GDPR/CCPA準拠の詳細説明不足」。",
     recommendation:
       "(a) GA4/GTM の使用状況を明記、(b) 個人情報保護法2022年改正に対応した同意管理バナー設置、(c) Cookie種別(必須/分析/広告)を区別。",
+    status: "resolved-pr-200",
   },
   {
     id: "G-006",
@@ -666,6 +670,7 @@ const FINDINGS_G: Finding[] = [
       "WebFetch評価:「『段階的復職プラン自動生成』は医学専門的判断を要する領域であり、自動化への違和感が残る」。免責はあるが、ガイドが詳細すぎると誤認余地。",
     recommendation:
       "生成結果の冒頭に「※産業医・主治医の判断を補助するための雛形であり、医学的判断ではありません」を強調表示。プランビルダー出力PDFのフッタにも明記。",
+    status: "resolved-pr-200",
   },
 ];
 
