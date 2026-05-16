@@ -602,6 +602,345 @@ export function getAllIndustriesSummary(): AllIndustriesSummary {
 /* Report DTO (composed for the page)                                  */
 /* ------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------ */
+/* Deeper analytics — time/size/severity mix                           */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Time-of-day distribution.
+ *
+ * MHLW deaths data carries `occurrenceTime` as a 2-hour bucket label
+ * ("0～2", "2～4", ... "22～24"). We group those into 4 operationally
+ * meaningful bands so the page shows "始業直後" / "午前" / "午後" /
+ * "夜間・残業帯" rather than a flat 12-bucket histogram.
+ */
+export type TimeBand = "early-morning" | "morning" | "afternoon" | "night";
+export type TimeBandCount = {
+  band: TimeBand;
+  label: string;
+  range: string;
+  count: number;
+  share: number;
+};
+
+const TIME_BAND_LABEL: Record<TimeBand, { label: string; range: string }> = {
+  "early-morning": { label: "始業帯 (6:00-10:00)", range: "6～10" },
+  morning: { label: "午前 (10:00-12:00)", range: "10～12" },
+  afternoon: { label: "午後 (12:00-18:00)", range: "12～18" },
+  night: { label: "夜間・残業 (18:00-6:00)", range: "18～6" },
+};
+
+function bandOf(raw: string | null): TimeBand | null {
+  if (!raw) return null;
+  // raw looks like "8～10" or "18～20" or "10～12"
+  const m = raw.match(/(\d{1,2})/);
+  if (!m) return null;
+  const start = Number(m[1]);
+  if (Number.isNaN(start)) return null;
+  if (start >= 6 && start < 10) return "early-morning";
+  if (start >= 10 && start < 12) return "morning";
+  if (start >= 12 && start < 18) return "afternoon";
+  return "night";
+}
+
+export function getTimeBandDistribution(slug: IndustrySlug): TimeBandCount[] {
+  const buckets: Record<TimeBand, number> = {
+    "early-morning": 0,
+    morning: 0,
+    afternoon: 0,
+    night: 0,
+  };
+  let total = 0;
+  for (const c of getSlice(slug).combined) {
+    const band = bandOf(c.occurrenceTime);
+    if (!band) continue;
+    buckets[band] += 1;
+    total += 1;
+  }
+  const order: TimeBand[] = ["early-morning", "morning", "afternoon", "night"];
+  return order.map((band) => ({
+    band,
+    label: TIME_BAND_LABEL[band].label,
+    range: TIME_BAND_LABEL[band].range,
+    count: buckets[band],
+    share: total > 0 ? buckets[band] / total : 0,
+  }));
+}
+
+/**
+ * Workplace size distribution. MHLW labels use the format "10～29",
+ * "1～9", "100～299" etc. We collapse them into 4 SME-relevant tiers
+ * so the report tells a small/medium/large operations story.
+ */
+export type SizeTier = "micro" | "small" | "medium" | "large";
+export type SizeTierCount = {
+  tier: SizeTier;
+  label: string;
+  count: number;
+  share: number;
+};
+
+const SIZE_TIER_LABEL: Record<SizeTier, string> = {
+  micro: "1〜9人 (零細)",
+  small: "10〜49人 (小規模)",
+  medium: "50〜299人 (中規模)",
+  large: "300人以上 (大規模)",
+};
+
+function tierOfSize(raw: string | null): SizeTier | null {
+  if (!raw) return null;
+  // raw can be "10～29", "1～9", "100～299", "300以上", or curated free text
+  const m = raw.match(/(\d+)/);
+  if (!m) return null;
+  const start = Number(m[1]);
+  if (Number.isNaN(start)) return null;
+  if (start < 10) return "micro";
+  if (start < 50) return "small";
+  if (start < 300) return "medium";
+  return "large";
+}
+
+export function getWorkplaceSizeDistribution(slug: IndustrySlug): SizeTierCount[] {
+  const buckets: Record<SizeTier, number> = { micro: 0, small: 0, medium: 0, large: 0 };
+  let total = 0;
+  for (const c of getSlice(slug).combined) {
+    const tier = tierOfSize(c.workplaceSize);
+    if (!tier) continue;
+    buckets[tier] += 1;
+    total += 1;
+  }
+  const order: SizeTier[] = ["micro", "small", "medium", "large"];
+  return order.map((tier) => ({
+    tier,
+    label: SIZE_TIER_LABEL[tier],
+    count: buckets[tier],
+    share: total > 0 ? buckets[tier] / total : 0,
+  }));
+}
+
+/**
+ * Severity ratio expressed in 労働安全衛生法 reporting terms:
+ *  - 死亡 → 死亡災害
+ *  - 重傷・中等傷 → 休業4日以上（事業者報告義務）
+ *  - 軽傷 → 休業3日以下
+ *
+ * MHLW deaths feed entries are implicitly fatal, so the ratio is
+ * essentially curated-driven; that is what we want — the curated subset
+ * is the only source where non-fatal severities exist.
+ */
+export type SeverityRatio = {
+  fatal: number;
+  lostWorkday: number; // 休業4日以上 (重傷 + 中等傷)
+  minor: number;
+  total: number;
+  fatalShare: number;
+  lostWorkdayShare: number;
+  minorShare: number;
+};
+
+export function getSeverityRatio(slug: IndustrySlug): SeverityRatio {
+  const slice = getSlice(slug);
+  let fatal = 0;
+  let lostWorkday = 0;
+  let minor = 0;
+  for (const c of slice.combined) {
+    if (c.severity === "死亡") fatal += 1;
+    else if (c.severity === "重傷" || c.severity === "中等傷") lostWorkday += 1;
+    else if (c.severity === "軽傷") minor += 1;
+  }
+  const total = fatal + lostWorkday + minor;
+  return {
+    fatal,
+    lostWorkday,
+    minor,
+    total,
+    fatalShare: total > 0 ? fatal / total : 0,
+    lostWorkdayShare: total > 0 ? lostWorkday / total : 0,
+    minorShare: total > 0 ? minor / total : 0,
+  };
+}
+
+/**
+ * Highlight the 3 worst months (by absolute count) and provide a
+ * narrative tag classifying the season. Used for the seasonality
+ * callout above the monthly chart.
+ */
+export type WorstMonth = {
+  month: number;
+  count: number;
+  share: number;
+  seasonTag: "夏季暑熱期" | "冬季寒冷期" | "梅雨期" | "年度切替期" | "繁忙期";
+  hazardHint: string;
+};
+
+const SEASON_HINTS: Record<number, { tag: WorstMonth["seasonTag"]; hint: string }> = {
+  1: { tag: "冬季寒冷期", hint: "凍結・転倒、暖房関連火災に注意" },
+  2: { tag: "冬季寒冷期", hint: "凍結・転倒、低体温症リスク" },
+  3: { tag: "年度切替期", hint: "工期繁忙・新人作業者の不慣れ" },
+  4: { tag: "年度切替期", hint: "新人作業者・体制変更に伴う作業手順逸脱" },
+  5: { tag: "繁忙期", hint: "屋外作業の本格化・連休明けの集中力低下" },
+  6: { tag: "梅雨期", hint: "足元の濡れによる転倒、墜落作業の作業姿勢悪化" },
+  7: { tag: "夏季暑熱期", hint: "熱中症・判断力低下による事故、夕立時の濡れ" },
+  8: { tag: "夏季暑熱期", hint: "熱中症ピーク、夏季休業前後の引き継ぎ漏れ" },
+  9: { tag: "夏季暑熱期", hint: "残暑による熱中症、台風前後の高所作業" },
+  10: { tag: "繁忙期", hint: "年度後半の納期集中・残業多発" },
+  11: { tag: "繁忙期", hint: "工期追い込み、年末工事の前倒し" },
+  12: { tag: "繁忙期", hint: "年末工事の集中、寒冷化と疲労蓄積" },
+};
+
+export function getWorstMonths(slug: IndustrySlug, limit = 3): WorstMonth[] {
+  const monthly = getMonthlySeasonality(slug);
+  const total = monthly.reduce((s, m) => s + m.count, 0);
+  return [...monthly]
+    .filter((m) => m.count > 0)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, limit)
+    .map((m) => ({
+      month: m.month,
+      count: m.count,
+      share: total > 0 ? m.count / total : 0,
+      seasonTag: SEASON_HINTS[m.month].tag,
+      hazardHint: SEASON_HINTS[m.month].hint,
+    }));
+}
+
+/**
+ * Multi-year monthly series for the recharts line chart. We keep the
+ * latest N years where N defaults to 3 — enough for visual YoY pattern
+ * comparison without overcrowding the chart on mobile.
+ */
+export type MonthlyByYear = {
+  /** ISO month 1..12 */
+  month: number;
+  /** "1月", "2月", ... — for x-axis ticks */
+  monthLabel: string;
+  /** key = year (e.g. "2023"), value = count for that month */
+  [year: string]: string | number;
+};
+
+export function getMonthlySeriesByYear(slug: IndustrySlug, years = 3): {
+  rows: MonthlyByYear[];
+  years: number[];
+} {
+  const trend = getYearTrend(slug);
+  if (trend.length === 0) return { rows: [], years: [] };
+  const selectedYears = trend.slice(-years).map((t) => t.year);
+
+  // Initialise count grid: month 1..12 × selectedYears
+  const grid: Record<number, Record<number, number>> = {};
+  for (let m = 1; m <= 12; m += 1) {
+    grid[m] = {};
+    for (const y of selectedYears) grid[m][y] = 0;
+  }
+  for (const c of getSlice(slug).combined) {
+    if (!c.month || c.year <= 0) continue;
+    if (!selectedYears.includes(c.year)) continue;
+    grid[c.month][c.year] += 1;
+  }
+  const rows: MonthlyByYear[] = [];
+  for (let m = 1; m <= 12; m += 1) {
+    const row: MonthlyByYear = { month: m, monthLabel: `${m}月` };
+    for (const y of selectedYears) row[String(y)] = grid[m][y];
+    rows.push(row);
+  }
+  return { rows, years: selectedYears };
+}
+
+/**
+ * Industry's top 5 "danger factors" derived from causes + matched
+ * archetypes. The output mixes data-driven cause names with
+ * editorialised explanations from the config so the section reads as
+ * actionable rather than as a raw frequency dump.
+ */
+export type DangerFactor = {
+  rank: number;
+  factor: string;
+  cause: string | null;
+  count: number;
+  share: number;
+  hint: string;
+};
+
+const FACTOR_HINTS: Record<string, string> = {
+  足場等: "足場の組立・解体・点検時の墜落リスク。組立等作業主任者の指揮下で実施。",
+  仮設物: "仮設足場・親綱の不備による墜落。安衛則 第518条〜第533条 をチェック。",
+  動力機械: "プレス・ローラー・回転体への巻き込まれ。光線式安全装置の作動確認。",
+  運搬機械: "フォークリフト・クレーン関連。誘導者の配置と接触防止標識を徹底。",
+  物上げ装置: "クレーン・揚重作業。玉掛者・運転者の資格と合図の取り決めを確認。",
+  乗物: "業務車両運行中の交通事故。点呼・運行管理・改善基準告示遵守を確認。",
+  環境等: "通路・床面・照度などの作業環境。整理整頓と滑り止め対策が基本。",
+  材料: "資材落下や荷崩れ。荷の積み付け・固縛の徹底。",
+  動作: "腰痛・反動動作。介助・荷役時の動作手順とアシスト機器の活用。",
+};
+
+function hintFor(cause: string, archetypes: readonly string[]): string {
+  for (const key of Object.keys(FACTOR_HINTS)) {
+    if (cause.includes(key)) return FACTOR_HINTS[key];
+  }
+  // Fall back to first archetype mention containing a keyword from the cause
+  const head = cause.slice(0, 3);
+  const matched = archetypes.find((a) => a.includes(head));
+  return matched ?? `${cause}に関わる作業手順・教育・点検記録を再確認。`;
+}
+
+export function getDangerFactors(slug: IndustrySlug, limit = 5): DangerFactor[] {
+  const config = getIndustryConfig(slug);
+  if (!config) return [];
+  const causes = getTopCauses(slug, limit);
+  return causes.map((c, idx) => ({
+    rank: idx + 1,
+    factor: c.name,
+    cause: c.name,
+    count: c.count,
+    share: c.share,
+    hint: hintFor(c.name, config.archetypes),
+  }));
+}
+
+/**
+ * Cross-industry comparison: how this industry's fatal share compares
+ * to the average across the 5 supported buckets. This is the "same
+ * industry vs others" data we can compute from the existing dataset
+ * without external benchmarks.
+ */
+export type IndustryComparison = {
+  thisFatalCount: number;
+  thisTotalCount: number;
+  thisFatalRate: number; // fatal / total within industry
+  avgFatalRate: number; // avg across other 4 industries
+  rankByFatal: number; // 1 = highest fatal count
+  totalIndustries: number;
+};
+
+export function getIndustryComparison(slug: IndustrySlug): IndustryComparison {
+  const all = INDUSTRY_CONFIGS.map((cfg) => ({
+    slug: cfg.slug,
+    stats: getIndustryStats(cfg.slug),
+  }));
+  const self = all.find((a) => a.slug === slug)!;
+  const others = all.filter((a) => a.slug !== slug);
+  const otherRates = others
+    .map((o) => (o.stats.total > 0 ? o.stats.severity.fatal / o.stats.total : 0))
+    .filter((r) => r > 0);
+  const avgFatalRate =
+    otherRates.length > 0 ? otherRates.reduce((s, x) => s + x, 0) / otherRates.length : 0;
+  const sortedByFatal = [...all].sort((a, b) => b.stats.severity.fatal - a.stats.severity.fatal);
+  const rankByFatal = sortedByFatal.findIndex((s) => s.slug === slug) + 1;
+
+  return {
+    thisFatalCount: self.stats.severity.fatal,
+    thisTotalCount: self.stats.total,
+    thisFatalRate: self.stats.total > 0 ? self.stats.severity.fatal / self.stats.total : 0,
+    avgFatalRate,
+    rankByFatal,
+    totalIndustries: all.length,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Report DTO (composed for the page)                                  */
+/* ------------------------------------------------------------------ */
+
 export type IndustryReport = {
   config: IndustryConfig;
   stats: IndustryStats;
@@ -613,6 +952,15 @@ export type IndustryReport = {
   yoy: YoYDelta | null;
   patterns: CommonPattern[];
   topCases: AccidentCase[];
+  /** Phase A additions */
+  timeBands: TimeBandCount[];
+  workplaceSizes: SizeTierCount[];
+  severityRatio: SeverityRatio;
+  worstMonths: WorstMonth[];
+  dangerFactors: DangerFactor[];
+  comparison: IndustryComparison;
+  /** Phase B addition — multi-year monthly series for the recharts panel */
+  monthlyByYear: { rows: MonthlyByYear[]; years: number[] };
 };
 
 export function getIndustryReport(slug: IndustrySlug): IndustryReport | null {
@@ -629,5 +977,12 @@ export function getIndustryReport(slug: IndustrySlug): IndustryReport | null {
     yoy: getYoYDelta(slug),
     patterns: getCommonPatterns(slug, 8),
     topCases: getTopCases(slug, 5),
+    timeBands: getTimeBandDistribution(slug),
+    workplaceSizes: getWorkplaceSizeDistribution(slug),
+    severityRatio: getSeverityRatio(slug),
+    worstMonths: getWorstMonths(slug, 3),
+    dangerFactors: getDangerFactors(slug, 5),
+    comparison: getIndustryComparison(slug),
+    monthlyByYear: getMonthlySeriesByYear(slug, 3),
   };
 }

@@ -407,4 +407,75 @@ table {
   .plan-print-root a[href^="http"]::after {
     content: "" !important;
   }
+
+  /**
+   * 業種別事故分析レポート（/accidents-reports/[industry]）の印刷スタイル。
+   * - A4 縦・15mm/12mm マージン
+   * - 固定ヘッダー（社名・発行日）と固定フッター（出典・ページ番号）
+   * - 30 項目チェックリストはカテゴリ単位でページ分割
+   * - URL の脚注付与は無効化（PDF 配布時のノイズを排除）
+   */
+  .accident-report-print-root {
+    color: black !important;
+  }
+  .accident-report-print-root header,
+  .accident-report-print-root section {
+    display: block !important;
+  }
+  .accident-report-print-root h1 {
+    font-size: 16pt;
+    page-break-after: avoid;
+  }
+  .accident-report-print-root h2 {
+    font-size: 12pt;
+    page-break-after: avoid;
+    margin-top: 6mm;
+  }
+  .accident-report-print-root h3 {
+    font-size: 10pt;
+    page-break-after: avoid;
+  }
+  .accident-report-print-root ol,
+  .accident-report-print-root ul,
+  .accident-report-print-root li,
+  .accident-report-print-root .recharts-wrapper,
+  .accident-report-print-root section > div {
+    page-break-inside: avoid;
+  }
+  /* リーフレット用の URL 脚注はレポートでは不要 */
+  .accident-report-print-root a[href^="http"]::after {
+    content: "" !important;
+  }
+
+  /* ヘッダー帯（最初のページ上部に表示。固定にすると重なるため流し込み） */
+  .accident-report-print-root .report-print-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #475569;
+    padding-bottom: 3mm;
+    margin-bottom: 4mm;
+  }
+  .accident-report-print-root .report-print-header img {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* フッター（全ページに固定表示、ページ番号入り） */
+  .accident-report-print-root .report-print-footer {
+    position: fixed;
+    bottom: 4mm;
+    left: 12mm;
+    right: 12mm;
+    border-top: 1px solid #94a3b8;
+    padding-top: 1.5mm;
+    font-size: 7.5pt;
+    color: #334155;
+    display: flex;
+    justify-content: space-between;
+  }
+  /* CSS counter ベースのページ番号。@page で auto-increment される */
+  .accident-report-print-root .report-print-pagenum::after {
+    content: "ページ " counter(page);
+  }
 }
