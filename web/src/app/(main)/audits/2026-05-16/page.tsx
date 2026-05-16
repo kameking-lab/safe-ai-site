@@ -160,7 +160,7 @@ const FINDINGS_B: Finding[] = [
       "web/src/data/mock/chemical-substances-db.ts コメント:「主要50物質を抜粋したβ版」。一方ホーム/サイト全体では3,000物質や1,046+物質といった訴求が混在。表示根拠と実装の整合性が不透明。",
     recommendation:
       "現時点で詳細解説のある50物質、リスト掲載のみのN物質、未収録のN物質を分けて明示。「収録: 50物質詳細 + 約3,000物質リスト」と段階表示。",
-    status: "resolved-pr-audit-b-category",
+    status: "resolved-pr-202",
     statusNote:
       "chemical-substances-db.ts の JSDoc を書き換え、本ファイルが『MHLW 3,000物質規制データセットへの専門解説 50物質サブセット』であることと、MHLW 全データは src/data/chemicals-mhlw/compact.json と src/lib/mhlw-chemicals.ts に存在することを明示。/chemical-database ページのタイトル『MHLW {count}物質 ＋ 専門解説50物質』は既に二層構造を提示しており、データ整備の最新状況(3,000物質マージ済)と合致。",
   },
@@ -188,7 +188,7 @@ const FINDINGS_B: Finding[] = [
       "WebFetch評価:「安衛則612条の2改正への言及あり。ただし施行日は『2025年4月1日』記載、評価文では『令和7年6月施行義務化』と別表記。統一性確認が必要」。",
     recommendation:
       "施行日を一本化(令和7年=2025年で日付確認)。本サイト全体で和暦/西暦の併記ルールを統一。",
-    status: "resolved-pr-audit-b-category",
+    status: "resolved-pr-202",
     statusNote:
       "安衛則第612条の2 改正の正式な施行日は厚生労働省令第86号により令和7年6月1日(2025-06-01)。R7_EFFECTIVE_FROM を `2025-06-01` に修正し、R7_EFFECTIVE_FROM_JP=`令和7年6月1日` を併設。/heat-illness-prevention のハブ・/r7-compliance ページ・通達3件のタイトル(expanded-circulars-batch-2-heat-mental.ts mhlw-notice-0920/0921/1370)を令和7年6月1日施行に統一。法令メタデータ(law-metadata.ts, anzen-eisei-kisoku.ts)と必修教材(/education/roudoueisei/necchu)は既に R7.6.1 で記載済。",
   },
@@ -230,7 +230,7 @@ const FINDINGS_B: Finding[] = [
       "WebFetch評価:「『リスクは通常の2〜4倍』といった統計値に出典なし」「SOGIハラの定義で『該当しうる』の曖昧性が法的主張には弱い」。",
     recommendation:
       "統計値はすべて厚労省・内閣府・各種白書からの引用とし出典URL併記。曖昧な「該当しうる」表現は「個別判断には専門家相談が必要」と書き直す。",
-    status: "resolved-pr-audit-b-category",
+    status: "resolved-pr-202",
     statusNote:
       "/diversity の『加齢に伴うリスク』に厚労省『令和5年労働災害発生状況』と『エイジフレンドリーガイドライン』(令和2年3月16日 基安発0316第1号)を出典として明記し、60歳以上の千人率は20歳代の約2倍・転倒事故は若年層の3〜4倍という根拠を併記。『SOGIハラの定義』は令和2年厚生労働省告示第5号(パワハラ防止指針)を直接引用し、性的指向・性自認に関する侮辱的言動およびアウティングが『精神的な攻撃』『個の侵害』に該当することを明示。曖昧な『該当しうる』表現を撤廃。",
   },
@@ -244,7 +244,7 @@ const FINDINGS_B: Finding[] = [
       "WebFetch評価:「4言語フレーズ表の 『Dừng lại! Nguy hiểm!』や『小心夹手』は文語的で実用性に欠ける」「翻訳監修:母語話者(在日10年以上)と明記しながら、自動翻訳の痕跡(敬語の過剰、直訳的構文)が残存」。",
     recommendation:
       "母語話者(またはネイティブ翻訳サービス)による再翻訳。翻訳監修者の実名公開(本人同意が取れる場合)。",
-    status: "resolved-pr-audit-b-category",
+    status: "resolved-pr-202",
     statusNote:
       "/diversity の多言語フレーズ表ヘッダを『参考訳』に改題し、辞書・公式安全衛生掲示の対訳と機械翻訳を参考に編集部が作成した参考訳である旨を amber バナーで明示。検証根拠が薄い『翻訳監修：母語話者（在日10年以上）』表記を撤廃し、母語話者監修・専門翻訳サービスへの差し替えを2026年下期予定としてロードマップ化。現場常用前の母語話者確認(同僚・技能実習生支援団体・各国大使館労働相談窓口)を促す注意書きを追加。",
   },
