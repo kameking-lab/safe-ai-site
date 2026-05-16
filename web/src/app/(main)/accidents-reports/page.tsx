@@ -6,6 +6,7 @@ import { Section } from "@/components/layout/section";
 import { CardGrid } from "@/components/layout/card-grid";
 import { Cluster } from "@/components/layout/stack";
 import { Breadcrumb } from "@/components/breadcrumb";
+import { AccidentsPreliminaryBanner } from "@/components/accidents-meta-info";
 import { getAllIndustriesSummary } from "@/lib/accident-analysis";
 import { ogImageUrl } from "@/lib/og-url";
 import { SITE_URL, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
@@ -95,6 +96,9 @@ export default function AccidentsReportsHubPage() {
             データ収録期間: {summary.yearRange.min}年〜{summary.yearRange.max}年 ・ うち curated 詳細{" "}
             {num(summary.totalCurated)}件
           </p>
+          {/* B-001 (audit harsh-third-party-2026-05-16): make the representative-pattern
+              roadmap visible on the hub so users see the disclaimer before they drill in. */}
+          <AccidentsPreliminaryBanner />
         </header>
 
         <Section
@@ -186,7 +190,7 @@ export default function AccidentsReportsHubPage() {
 
         <p className="mt-8 text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
           自動分析の母集団: 厚生労働省 職場のあんぜんサイト 死亡災害DB、労働者死傷病報告オープンデータ、編集部 curated 事例（公開情報を匿名化して再構成）。
-          速報集計から導出したパターン事例を含むため、確定統計と一致しない場合があります。
+          2025〜2026年分は「想定例（速報集計から統計的に導出した代表パターン事例）」を含みます。実報告の確定個票（R07労働者死傷病報告オープンデータ）が公開され次第、当該事例は順次置換予定です。
         </p>
       </PageContainer>
     </>

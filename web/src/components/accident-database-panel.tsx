@@ -374,9 +374,10 @@ export function AccidentDatabasePanel({
                   {accident.provenance === "preliminary" && (
                     <span
                       className="rounded-full border border-orange-300 bg-orange-50 px-2 py-0.5 text-[11px] font-semibold text-orange-700"
-                      title="厚労省速報集計値から導出したパターン事例。確定個票ではありません。"
+                      title="厚労省速報集計値から統計的に導出した代表パターン事例です。実際の労働者死傷病報告（個票）ではありません。R07確定値の公開後に置換予定。"
+                      aria-label="想定例: 速報統計から導出した代表パターン事例。実報告ではありません。"
                     >
-                      速報
+                      想定例(速報基準)
                     </span>
                   )}
                   <span className="text-xs text-slate-500">{accident.occurredOn}</span>

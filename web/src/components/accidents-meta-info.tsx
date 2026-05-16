@@ -24,8 +24,15 @@ export function AccidentsMetaInfo({ total, mhlw, curated, synthetic, preliminary
         {preliminary > 0 ? (
           <>
             ／
-            <span className="font-semibold text-orange-700">
-              {isEn ? `preliminary ${preliminary}` : `速報 ${preliminary}`}
+            <span
+              className="font-semibold text-orange-700"
+              title={
+                isEn
+                  ? "Representative pattern cases derived from MHLW monthly preliminary tallies — not individual records."
+                  : "厚労省月次速報集計値から導出した代表パターン事例。実報告（個票）ではありません。"
+              }
+            >
+              {isEn ? `representative ${preliminary}` : `想定例 ${preliminary}`}
             </span>
           </>
         ) : null}
@@ -55,8 +62,8 @@ export function AccidentsMetaCaption() {
         </a>
         . <strong>MHLW</strong> = re-curated from the workplace-safety site,{" "}
         <strong>curated</strong> = open data restructured by the editorial team (proper nouns anonymized),{" "}
-        <span className="font-semibold text-orange-700">preliminary</span>{" "}
-        = pattern cases derived from MHLW monthly preliminary tallies (individual records non-public; will update on final release),{" "}
+        <span className="font-semibold text-orange-700">representative (preliminary-based)</span>{" "}
+        = synthetic example cases derived from MHLW monthly preliminary tallies — NOT real individual reports. Will be replaced with mhlw/curated once the R07 worker injury/illness open dataset is released,{" "}
         <strong>synthetic</strong> = training-coverage supplements.
       </p>
     );
@@ -69,8 +76,8 @@ export function AccidentsMetaCaption() {
       </a>{" "}
       を参照。<strong>厚労省</strong> = 職場のあんぜんサイト由来の再収録、
       <strong>curated</strong> = 公開情報・統計を編集部が再構成（固有名詞匿名化）、
-      <span className="font-semibold text-orange-700">速報</span>{" "}
-      = 厚労省月次速報集計値から導出したパターン事例（個票非公開のため・確定値公開後に更新）、
+      <span className="font-semibold text-orange-700">想定例(速報基準)</span>{" "}
+      = 厚労省月次速報集計値から統計的に導出した代表パターン事例（実報告ではない合成事例）。確定個票（R07労働者死傷病報告オープンデータ）公開後に mhlw/curated へ置換予定、
       <strong>合成</strong> = 教材用カバレッジ補完事例。
     </p>
   );
