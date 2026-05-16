@@ -84,7 +84,7 @@ const INDUSTRIES: Industry[] = [
         solution: "助成金シミュレーターで、エイジフレンドリー補助金等の申請可否と試算額を即提示。",
         relatedFeatures: [
           { label: "助成金シミュレーター", href: "/subsidies/calculator" },
-          { label: "コンプラ診断", href: "/wizard" },
+          { label: "年次安全衛生計画", href: "/strategy/plan-generator" },
         ],
       },
     ],
@@ -107,10 +107,10 @@ const INDUSTRIES: Industry[] = [
       {
         title: "メンタル・カスハラ対応",
         problem: "ハラスメント対策法対応・メンタル不調の早期発見が課題。",
-        solution: "メンタル・カスハラ専用コンテンツで管理職教育。安衛法上の必須項目はコンプラ診断で確認。",
+        solution: "メンタル・カスハラ専用コンテンツで管理職教育。安衛法上の必須項目は年次安全衛生計画で確認。",
         relatedFeatures: [
           { label: "メンタル・カスハラ", href: "/mental-health" },
-          { label: "コンプラ診断", href: "/wizard" },
+          { label: "年次安全衛生計画", href: "/strategy/plan-generator" },
         ],
       },
       {
@@ -150,7 +150,7 @@ const INDUSTRIES: Industry[] = [
       {
         title: "助成金活用",
         problem: "デジタコ・追加機材の投資判断。",
-        solution: "助成金シミュレーターで対象助成金を試算、コンプラ診断で必須対応を可視化。",
+        solution: "助成金シミュレーターで対象助成金を試算、年次安全衛生計画で必須対応を可視化。",
         relatedFeatures: [
           { label: "助成金シミュレーター", href: "/subsidies/calculator" },
         ],
@@ -166,9 +166,9 @@ const INDUSTRIES: Industry[] = [
       {
         title: "VDT・テレワーク環境整備",
         problem: "在宅環境の労務リスクとコンプラ確認。",
-        solution: "コンプラ診断で在宅・VDT関連の必須対応を提示。資料ライブラリでガイドラインを参照。",
+        solution: "年次安全衛生計画で在宅・VDT関連の必須対応を提示。資料ライブラリでガイドラインを参照。",
         relatedFeatures: [
-          { label: "コンプラ診断", href: "/wizard" },
+          { label: "年次安全衛生計画", href: "/strategy/plan-generator" },
           { label: "資料ライブラリ", href: "/resources" },
         ],
       },

@@ -73,7 +73,7 @@ type NavCategory = {
 
 const PAID_SERVICE_ITEMS: NavItem[] = [
   { id: "education", label: "特別教育", href: "/education", icon: GraduationCap },
-  { id: "wizard", label: "コンプラ診断", href: "/wizard", icon: ListChecks, badge: "NEW" },
+  { id: "plan-generator", label: "年次安全衛生計画", href: "/strategy/plan-generator", icon: ListChecks, badge: "NEW" },
 ];
 
 const NAV_CATEGORIES: NavCategory[] = [
@@ -143,7 +143,7 @@ const NAV_CATEGORIES: NavCategory[] = [
         {
           label: "ツール",
           items: [
-            { id: "wizard", label: "コンプラ診断", href: "/wizard", icon: ListChecks, badge: "NEW" },
+            { id: "plan-generator", label: "年次安全衛生計画", href: "/strategy/plan-generator", icon: ListChecks, badge: "NEW" },
           ] as NavItem[],
         },
       ]),

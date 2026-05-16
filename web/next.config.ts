@@ -104,6 +104,12 @@ const nextConfig: NextConfig = {
       { source: "/kiken-yochi", destination: "/ky", permanent: true },
       // 廃止ページ → 近接ページへ転送
       { source: "/partnership", destination: "/contact", permanent: true },
+      // /wizard archived per content-quality audit C-3 (PR #182,
+      // docs/content-quality-audit-2026-05-16.md). The 4-step compliance
+      // wizard overlapped with /strategy/plan-generator. compliance-matrix.json
+      // is preserved in data/ for future reuse by the plan generator.
+      { source: "/wizard", destination: "/strategy/plan-generator", permanent: true },
+      { source: "/wizard/result", destination: "/strategy/plan-generator", permanent: true },
     ];
   },
   // セキュリティ・キャッシュヘッダー
