@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-16T12:46:30.975Z",
+  "fetchedAt": "2026-05-16T14:24:36.140Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -448,16 +448,10 @@
         {
           "sourceCode": "014100",
           "level": "advisory",
-          "headline": "根室地方では、１６日夜遅くまで融雪による土砂災害に、１８日までなだれに注意してください。根室、釧路地方では、１７日昼前まで濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-16T15:20:00+09:00",
+          "headline": "根室、釧路地方では、１７日昼前まで濃霧による視程障害に注意してください。根室地方では、１８日までなだれに注意してください。",
+          "reportDatetime": "2026-05-16T21:55:00+09:00",
           "publishingOffice": "釧路地方気象台",
           "warnings": [
-            {
-              "areaCode": "014010",
-              "code": "17",
-              "status": "継続",
-              "level": "advisory"
-            },
             {
               "areaCode": "014010",
               "code": "20",
@@ -485,7 +479,7 @@
             {
               "areaCode": "0120602",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -521,19 +515,19 @@
             {
               "areaCode": "0166400",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0166500",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0166700",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -551,18 +545,12 @@
             {
               "areaCode": "0169200",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0169300",
               "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0169400",
-              "code": "17",
               "status": "継続",
               "level": "advisory"
             },
