@@ -11,29 +11,37 @@ import type {
 /**
  * Google Search Console wrapper used by /api/search-console.
  *
- * Auth strategy mirrors the GA4 client (web/src/lib/stats/ga4-client.ts):
- *  - The service-account JSON sits in GOOGLE_APPLICATION_CREDENTIALS_JSON.
- *  - private_key has its \n escapes restored before JWT signing.
- *  - When credentials are missing or unauthorized we fall back to mock data
- *    so the dashboard keeps rendering instead of erroring out.
+ * Auth strategy: user OAuth with a long-lived refresh token.
  *
- * Operator setup checklist:
- *  1. In Search Console, add the service-account e-mail
- *     (parsedCredentials.client_email) as a "Restricted user" on the property.
- *  2. Optionally set GSC_SITE_URL to the exact property identifier
- *     (https://www.anzen-ai-portal.jp/ or sc-domain:anzen-ai-portal.jp).
- *     Defaults to NEXT_PUBLIC_SITE_URL otherwise.
+ * Why not the service account that GA4 uses: Google rejects service-account
+ * email addresses in the GSC "Add user" flow for personal Gmail-owned
+ * properties, and Workspace-only workarounds (Group, Domain-wide Delegation)
+ * are unavailable. The owner therefore authorises a user-OAuth client once
+ * via scripts/etl/gsc-oauth-init.mjs and the refresh token is stored as a
+ * Vercel env var.
+ *
+ * Required env vars (all three must be set):
+ *   GSC_OAUTH_CLIENT_ID
+ *   GSC_OAUTH_CLIENT_SECRET
+ *   GSC_OAUTH_REFRESH_TOKEN
+ *
+ * Optional:
+ *   GSC_SITE_URL  — property identifier; defaults to NEXT_PUBLIC_SITE_URL or
+ *                   https://www.anzen-ai-portal.jp/. The OAuth user must own
+ *                   this property in Search Console.
+ *
+ * When any required var is missing or the live call fails we fall back to
+ * mock data so the dashboard keeps rendering. See docs/gsc-oauth-setup.md.
  */
 
-type Credentials = {
-  client_email?: string;
-  private_key?: string;
-  project_id?: string;
-};
+const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
 
 function isConfigured(): boolean {
-  if (!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) return false;
-  return true;
+  return Boolean(
+    process.env.GSC_OAUTH_CLIENT_ID &&
+      process.env.GSC_OAUTH_CLIENT_SECRET &&
+      process.env.GSC_OAUTH_REFRESH_TOKEN,
+  );
 }
 
 function resolveSiteUrl(): string {
@@ -56,34 +64,32 @@ function periodDates(period: StatsPeriod): { startDate: string; endDate: string 
   return { startDate: fmt(start), endDate: fmt(end) };
 }
 
-function parseCredentials(): Credentials {
-  try {
-    const raw = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON || "{}";
-    const parsed = JSON.parse(raw) as Credentials;
-    if (parsed.private_key) {
-      parsed.private_key = parsed.private_key.replace(/\\n/g, "\n");
-    }
-    return parsed;
-  } catch (e) {
-    console.error("[search-console] credentials JSON parse failed", e);
-    return {};
-  }
-}
-
 async function getAccessToken(): Promise<string> {
-  const credentials = parseCredentials();
-  if (!credentials.client_email || !credentials.private_key) {
-    throw new Error("service account credentials are missing");
+  const clientId = process.env.GSC_OAUTH_CLIENT_ID;
+  const clientSecret = process.env.GSC_OAUTH_CLIENT_SECRET;
+  const refreshToken = process.env.GSC_OAUTH_REFRESH_TOKEN;
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error("OAuth credentials are missing");
   }
-  const { JWT } = await import("google-auth-library");
-  const jwt = new JWT({
-    email: credentials.client_email,
-    key: credentials.private_key,
-    scopes: ["https://www.googleapis.com/auth/webmasters.readonly"],
+  const body = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    refresh_token: refreshToken,
+    grant_type: "refresh_token",
   });
-  const { access_token } = await jwt.authorize();
-  if (!access_token) throw new Error("failed to obtain access token");
-  return access_token;
+  const res = await fetch(TOKEN_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`GSC token refresh ${res.status}: ${text.slice(0, 240)}`);
+  }
+  const json = (await res.json()) as { access_token?: string };
+  if (!json.access_token) throw new Error("token response missing access_token");
+  return json.access_token;
 }
 
 type QueryDimension = "query" | "page" | "country" | "device";
