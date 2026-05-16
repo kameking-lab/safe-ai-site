@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LawSearchPanel } from "@/components/law-search-panel";
+import { LawHubNav } from "@/components/law-hub-nav";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -26,8 +27,8 @@ export const metadata: Metadata = {
 export default function LawSearchPage() {
   return (
     <>
-      
       <PageJsonLd name="法令条文検索" description="労働安全衛生法・関連政令・省令の条文を全文検索。条文間の参照リンクも追跡。" path="/law-search" />
+      <LawHubNav current="law-search" />
       <Suspense
         fallback={
           <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">

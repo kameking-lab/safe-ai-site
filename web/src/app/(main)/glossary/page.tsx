@@ -6,6 +6,7 @@ import Link from "next/link";
 import { PageContainer } from "@/components/layout";
 import { JsonLd, definedTermSetSchema } from "@/components/json-ld";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { LawHubNav } from "@/components/law-hub-nav";
 import { EXTRA_TERMS } from "@/data/glossary";
 // Metadata cannot be exported from client component – define it in a separate layout or use a wrapper.
 // For now, the page itself handles SEO via next/head alternative approach.
@@ -169,8 +170,9 @@ export default function GlossaryPage() {
   }, []);
 
   return (
+    <>
+    <LawHubNav current="glossary" />
     <PageContainer>
-      {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="労働安全用語集" description="労働安全衛生に関する専門用語をわかりやすく解説。条文・通達・現場用語を一覧から検索。" path="/glossary" />
       {/* SEO: DefinedTermSet */}
       <JsonLd
@@ -287,5 +289,6 @@ export default function GlossaryPage() {
         )}
       </div>
     </PageContainer>
+    </>
   );
 }

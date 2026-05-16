@@ -910,6 +910,21 @@ export function ChatbotPanel() {
         </span>
       </div>
 
+      {/* C-001: quick-question chips above textarea — always visible for beginners */}
+      <div className="flex flex-wrap gap-1.5" role="group" aria-label="クイック質問例">
+        {EXAMPLE_QUESTIONS.slice(0, 3).map((q) => (
+          <button
+            key={q}
+            type="button"
+            disabled={isSending}
+            onClick={() => handleSend(q)}
+            className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-medium text-blue-700 transition hover:bg-blue-100 active:scale-[0.98] disabled:opacity-40"
+          >
+            {q}
+          </button>
+        ))}
+      </div>
+
       {/* 入力エリア */}
       <div className="flex gap-2">
         <textarea
@@ -943,18 +958,20 @@ export function ChatbotPanel() {
         </div>
       </div>
 
-      {/* 免責注記 */}
-      <p className="text-xs text-slate-400 leading-5">
-        ※ 回答は提供済み法令条文に基づくものです。最新の法令は
+      {/* C-005: disclaimer directly below send button, always visible on all viewports */}
+      <p className="text-xs text-amber-800 leading-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+        <span className="font-bold">⚠ 本回答は法的助言ではありません。</span>
+        　具体的な判断は必ず専門家（労働安全コンサルタント等）にご相談ください。
+        最新の法令は{" "}
         <a
           href="https://laws.e-gov.go.jp/"
           target="_blank"
           rel="noopener noreferrer"
-          className="underline hover:text-slate-600"
+          className="underline hover:text-amber-900"
         >
           e-Gov法令検索
         </a>
-        で確認してください。法的判断は専門家にご相談ください。
+        {" "}でご確認ください。
       </p>
 
       {/* 共有URLコピー完了トースト */}
