@@ -97,6 +97,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       { label: "年次安全衛生計画ジェネレーター", href: "/strategy/plan-generator", description: "業種・規模別の30テンプレートから年次計画書を自動生成" },
       { label: "健康診断スケジューラ", href: "/health-checkup-scheduler", description: "業種・職種・物質・作業条件から必要健診と年間スケジュールを自動判定" },
       { label: "治療と仕事の両立支援", href: "/treatment-work-balance", description: "6疾患カテゴリの病態別労務配慮と両立支援プラン・主治医意見書テンプレ" },
+      { label: "熱中症対策ハブ", href: "/heat-illness-prevention", description: "WBGT計算機・業種別リスク判定・R7安衛則改正チェックリストと社内文書テンプレ" },
     ],
   },
   {
