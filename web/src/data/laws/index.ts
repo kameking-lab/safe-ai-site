@@ -41,8 +41,10 @@ export { shiAlkylEnKisoku } from "./shi-alkyl-en-kisoku";
 export { jimushoEiseiKijunKisoku } from "./jimusho-eisei-kijun-kisoku";
 export { kikaiKenteiKisoku } from "./kikai-kentei-kisoku";
 export { hakenAnzenEisei } from "./haken-anzen-eisei";
+export { corpusGapFillArticles } from "./corpus-gaps-fill";
 
 import { mhlwLawArticles } from "./mhlw-extras";
+import { corpusGapFillArticles } from "./corpus-gaps-fill";
 import { enKisoku } from "./en-kisoku";
 import { shiAlkylEnKisoku } from "./shi-alkyl-en-kisoku";
 import { jimushoEiseiKijunKisoku } from "./jimusho-eisei-kijun-kisoku";
@@ -125,4 +127,5 @@ export const allLawArticles = [
   ...jimushoEiseiKijunKisoku,
   ...kikaiKenteiKisoku,
   ...hakenAnzenEisei,
+  ...corpusGapFillArticles,
 ];

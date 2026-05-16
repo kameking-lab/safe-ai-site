@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { searchRelevantArticlesWithScore } from "@/lib/rag-search";
 import { RAG_100_QUESTIONS } from "@/lib/rag-100q.fixture";
+import { isLawShortEquivalent } from "@/lib/rag/synonyms";
 
 /**
  * RAG 検索 100 問ベンチマーク。
@@ -22,8 +23,10 @@ function isMatch(
   return gold.some((g) =>
     results.some(
       (r) =>
-        (r.lawShort === g.lawShort || r.law === g.lawShort) &&
-        r.articleNum === g.articleNum
+        r.articleNum === g.articleNum &&
+        (r.lawShort === g.lawShort ||
+          r.law === g.lawShort ||
+          isLawShortEquivalent(r.lawShort, g.lawShort))
     )
   );
 }

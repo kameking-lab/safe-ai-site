@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { searchRelevantArticlesWithScore } from "@/lib/rag-search";
+import { isLawShortEquivalent } from "@/lib/rag/synonyms";
 
 /**
  * RAG 検索 100 問ベンチマーク（fresh セット）。
@@ -14,10 +15,11 @@ import { searchRelevantArticlesWithScore } from "@/lib/rag-search";
 const TOP_K = 5;
 /**
  * fresh セットは既存セットと異なる言い回し・観点で同じ法令論点を試す
- * セカンダリ評価のため、threshold は basic セット（85%）より低めに設定。
- * 検索エンジンの言い換えロバストネスを観測する用途。
+ * セカンダリ評価。Phase B（同義語辞書・コーパス補完・PINNED_TOPICS 拡張・
+ * 法令略称エイリアス対応）後に Recall@5 100% を達成しており、回帰防止のため
+ * 高めの閾値で運用する。
  */
-const TARGET_ACCURACY = 0.55;
+const TARGET_ACCURACY = 0.9;
 
 type FreshQuestion = {
   id: number;
@@ -39,8 +41,10 @@ function isMatch(
   return gold.some((g) =>
     results.some(
       (r) =>
-        (r.lawShort === g.lawShort || r.law === g.lawShort) &&
-        r.articleNum === g.articleNum
+        r.articleNum === g.articleNum &&
+        (r.lawShort === g.lawShort ||
+          r.law === g.lawShort ||
+          isLawShortEquivalent(r.lawShort, g.lawShort))
     )
   );
 }

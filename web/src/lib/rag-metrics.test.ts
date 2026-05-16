@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { allLawArticles } from "@/data/laws";
 import { searchRelevantArticlesWithScore } from "@/lib/rag-search";
 import { RAG_100_QUESTIONS } from "@/lib/rag-100q.fixture";
+import { isLawShortEquivalent } from "@/lib/rag/synonyms";
 
 /**
  * RAG metrics benchmark — computes Recall@5 / Precision@5 / MRR
@@ -17,7 +18,9 @@ type Result = { law: string; lawShort: string; articleNum: string };
 type Gold = { lawShort: string; articleNum: string };
 
 function isMatch(r: Result, g: Gold): boolean {
-  return (r.lawShort === g.lawShort || r.law === g.lawShort) && r.articleNum === g.articleNum;
+  if (r.articleNum !== g.articleNum) return false;
+  if (r.lawShort === g.lawShort || r.law === g.lawShort) return true;
+  return isLawShortEquivalent(r.lawShort, g.lawShort);
 }
 
 type FreshFixture = {
