@@ -21,6 +21,10 @@ import {
   type WorkerProfile,
 } from "@/types/health-checkup";
 import type { CheckupDecision } from "@/lib/health-checkup-engine";
+import {
+  optimiseDecision,
+  type OptimisedDecision,
+} from "@/lib/annual-schedule-optimizer";
 import { getJobById } from "@/data/health-checkup-rules";
 
 interface Props {
@@ -39,6 +43,7 @@ const MONTHS: MonthIndex[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export function SchedulerDocument({ profile, decision, generatedAt }: Props) {
   const { required, schedule, missing } = decision;
+  const optimised: OptimisedDecision = optimiseDecision(required, schedule);
   const grouped: Record<MonthIndex, typeof schedule.entries> = {
     1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [], 11: [], 12: [],
   };
@@ -237,7 +242,119 @@ export function SchedulerDocument({ profile, decision, generatedAt }: Props) {
 
       <section>
         <h2 className="border-l-4 border-emerald-600 pl-3 text-xl font-bold">
-          3. 漏れ・期限超過の警告
+          3. 随時実施対象（イベント駆動の健診・面接指導）
+        </h2>
+        <p className="mt-2 text-sm text-slate-500">
+          月別カレンダーに固定配置できない、トリガー事象が発生したときに実施する健診・面接指導です。長時間労働者の医師面接（労安法第66条の8）と海外派遣前後の健診（安衛則第45条の2）が代表例です。
+        </p>
+        {optimised.onDemand.length === 0 ? (
+          <p className="mt-3 rounded border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+            随時実施対象は該当ありません。
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-2 text-sm">
+            {optimised.onDemand.map((e) => (
+              <li
+                key={e.rule.id}
+                className="rounded border border-purple-200 bg-purple-50 p-3"
+              >
+                <p className="font-semibold text-purple-900">{e.rule.title}</p>
+                <p className="text-purple-800">
+                  <span className="font-semibold">トリガー:</span> {e.trigger}
+                </p>
+                <p className="text-purple-800">
+                  <span className="font-semibold">根拠:</span>{" "}
+                  {e.rule.relatedLaw.name}（{e.rule.relatedLaw.articles.join("・")}）
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h2 className="border-l-4 border-emerald-600 pl-3 text-xl font-bold">
+          4. 年間スケジュール最適化（推奨配置）
+        </h2>
+        <p className="mt-2 text-sm text-slate-500">
+          法定の起点（雇入時）は固定し、繁忙月に偏った定期健診の繰返しを操業閑散期（5月・6月・9月・11月）へ自動再配置した推奨スケジュールです。再配置の最大件数は4件まで。
+        </p>
+        {optimised.moves.length === 0 ? (
+          <p className="mt-3 rounded border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+            集中月が検出されなかったため、再配置は不要でした。法定の月別配置で運用可能です。
+          </p>
+        ) : (
+          <ul className="mt-3 space-y-2 text-sm">
+            {optimised.moves.map((m, i) => (
+              <li
+                key={`${m.ruleId}-${i}`}
+                className="rounded border border-amber-200 bg-amber-50 p-3"
+              >
+                <p className="font-semibold text-amber-900">{m.ruleTitle}</p>
+                <p className="text-amber-800">
+                  {MONTH_LABELS_JA[m.from]} → {MONTH_LABELS_JA[m.to]} に再配置
+                </p>
+                <p className="text-xs text-amber-700">{m.reason}</p>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-4 space-y-3">
+          {optimised.monthlyView.map((v) => (
+            <div
+              key={`opt-${v.month}`}
+              className={`rounded border p-3 ${
+                v.entries.length === 0
+                  ? "border-slate-200 bg-slate-50"
+                  : "border-blue-200 bg-blue-50"
+              }`}
+            >
+              <h3 className="text-base font-bold text-blue-900">
+                {MONTH_LABELS_JA[v.month]}
+                {v.entries.length > 0 ? `（${v.entries.length}件）` : ""}
+              </h3>
+              {v.entries.length === 0 ? (
+                <p className="mt-1 text-sm text-slate-500">該当なし</p>
+              ) : (
+                <>
+                  <ul className="mt-2 space-y-1 text-sm">
+                    {v.entries.map((e, i) => (
+                      <li key={`opt-${e.ruleId}-${i}`}>
+                        <span
+                          className={`mr-2 inline-block rounded px-1.5 py-0.5 text-xs font-semibold ${
+                            e.isAtHire
+                              ? "bg-amber-100 text-amber-800"
+                              : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
+                          {e.isAtHire ? "雇入時" : "定期"}
+                        </span>
+                        <span className="font-semibold">{e.ruleTitle}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {v.consolidatedItems.length > 0 ? (
+                    <details className="mt-2 text-xs">
+                      <summary className="cursor-pointer text-blue-700">
+                        統合済み検査項目（{v.consolidatedItems.length}項目）
+                      </summary>
+                      <ul className="mt-1 list-disc pl-5 text-blue-900">
+                        {v.consolidatedItems.map((it, i) => (
+                          <li key={i}>{it}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : null}
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="border-l-4 border-emerald-600 pl-3 text-xl font-bold">
+          5. 漏れ・期限超過の警告
         </h2>
         {missing.length === 0 ? (
           <p className="mt-3 rounded border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">

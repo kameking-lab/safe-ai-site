@@ -202,10 +202,24 @@ export function identifyMissing(
   for (const { rule } of required) {
     const record = performedMap.get(rule.id);
     if (!record || !record.lastPerformed) {
+      // Event-driven exams (overtime interview / overseas dispatch) are
+      // surfaced as "随時実施" reminders, not as periodic-overdue warnings.
+      if (rule.frequency.eventDriven) {
+        out.push({
+          rule,
+          reason:
+            "随時実施対象。トリガー事象（時間外労働申出・海外派遣決定／帰任等）の発生時に速やかに実施が必要。",
+        });
+        continue;
+      }
       out.push({
         rule,
         reason: "実施記録なし。雇入時または定期健診として速やかに実施が必要。",
       });
+      continue;
+    }
+    if (rule.frequency.eventDriven) {
+      // Recorded but event-driven — nothing periodic to flag.
       continue;
     }
     const last = parseHireDate(record.lastPerformed);

@@ -17,7 +17,9 @@ export type CheckupType =
   | "special"
   | "silicosis"
   | "dental-special"
-  | "electron-radiation";
+  | "electron-radiation"
+  | "overtime"
+  | "overseas";
 
 export const CHECKUP_TYPE_LABELS: Record<CheckupType, string> = {
   general: "一般健康診断",
@@ -26,6 +28,8 @@ export const CHECKUP_TYPE_LABELS: Record<CheckupType, string> = {
   silicosis: "じん肺健康診断",
   "dental-special": "歯科特殊健康診断",
   "electron-radiation": "電離放射線健康診断",
+  overtime: "長時間労働者の医師面接指導",
+  overseas: "海外派遣労働者の健康診断",
 };
 
 export type IndustryId =
@@ -65,7 +69,11 @@ export type SubstanceId =
   | "formaldehyde" // ホルムアルデヒド
   | "dichloromethane" // ジクロロメタン
   | "mercury" // 水銀・水銀化合物
-  | "dental-acid"; // 塩酸・硝酸・硫酸・亜硫酸・フッ化水素・黄リン等（歯科特殊）
+  | "dental-acid" // 塩酸・硝酸・硫酸・亜硫酸・フッ化水素・黄リン等（歯科特殊）
+  | "beryllium" // ベリリウム及びその化合物（特化則・特別管理物質）
+  | "arsenic" // 砒素及びその化合物（特化則・特別管理物質）
+  | "hydrofluoric-acid" // フッ化水素（特化則第2類・歯科特殊重複）
+  | "phosphorus-yellow"; // 黄りん（特化則・顎骨壊死）
 
 export const SUBSTANCE_LABELS: Record<SubstanceId, string> = {
   "organic-solvent": "有機溶剤（有機則対象）",
@@ -86,6 +94,10 @@ export const SUBSTANCE_LABELS: Record<SubstanceId, string> = {
   dichloromethane: "ジクロロメタン",
   mercury: "水銀・水銀化合物",
   "dental-acid": "塩酸・硝酸・硫酸等の酸蒸気（歯科特殊対象）",
+  beryllium: "ベリリウム・ベリリウム化合物",
+  arsenic: "砒素・砒素化合物",
+  "hydrofluoric-acid": "フッ化水素・フッ化水素酸",
+  "phosphorus-yellow": "黄りん（白リン）",
 };
 
 /**
@@ -105,7 +117,9 @@ export type WorkConditionId =
   | "vdt-work" // 情報機器作業（旧VDT）
   | "deep-night-driver" // 深夜時間帯の自動車運転を反復する業務
   | "underground-work" // 坑内における業務
-  | "asbestos-handling-past"; // 過去に石綿業務に従事（離職後も対象）
+  | "asbestos-handling-past" // 過去に石綿業務に従事（離職後も対象）
+  | "overtime-80h" // 時間外・休日労働80時間超かつ疲労蓄積あり（労安法第66条の8）
+  | "overseas-dispatch-6m"; // 6か月以上の海外派遣予定/終了（安衛則第45条の2）
 
 export const WORK_CONDITION_LABELS: Record<WorkConditionId, string> = {
   "night-work": "深夜業を含む業務",
@@ -121,6 +135,8 @@ export const WORK_CONDITION_LABELS: Record<WorkConditionId, string> = {
   "deep-night-driver": "深夜時間帯に自動車運転を反復する業務",
   "underground-work": "坑内における業務",
   "asbestos-handling-past": "過去に石綿業務へ従事した労働者",
+  "overtime-80h": "時間外労働80時間超／疲労蓄積（労安法66条の8）",
+  "overseas-dispatch-6m": "6か月以上の海外派遣予定または帰国直後（安衛則45条の2）",
 };
 
 /**
@@ -131,10 +147,22 @@ export const WORK_CONDITION_LABELS: Record<WorkConditionId, string> = {
 export interface CheckupFrequency {
   /** Required at hire / job-change / period-change-of-task. */
   atHire: boolean;
-  /** Periodic interval expressed in months. 12 = annual, 6 = semiannual, 1 = monthly. */
-  intervalMonths: 1 | 3 | 6 | 12;
+  /**
+   * Periodic interval expressed in months. 12 = annual, 6 = semiannual,
+   * 1 = monthly. Use 0 for event-driven exams (e.g. long-overtime interview,
+   * overseas-dispatch pre/post checkup) that are not periodically placed on
+   * the annual calendar by the scheduler.
+   */
+  intervalMonths: 0 | 1 | 3 | 6 | 12;
   /** Free-text qualifier shown to humans, e.g. "雇入時・配置替時・6月以内ごとに1回". */
   humanReadable: string;
+  /**
+   * True when the exam is triggered by a discrete event (overtime hours,
+   * dispatch start/end, accident exposure) rather than the calendar. Drives
+   * the scheduler/optimizer to surface it under the "随時実施" bucket
+   * instead of placing it on a specific month.
+   */
+  eventDriven?: boolean;
 }
 
 export interface CheckupTestItems {
