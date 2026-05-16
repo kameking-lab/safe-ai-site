@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-16T20:59:11.726Z",
+  "fetchedAt": "2026-05-16T21:59:47.615Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -2987,14 +2987,20 @@
         {
           "sourceCode": "200000",
           "level": "advisory",
-          "headline": "北部では、１７日昼前まで濃霧による視程障害に注意してください。中部では、１９日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-17T04:21:00+09:00",
+          "headline": "北部、中部では、１７日昼前まで濃霧による視程障害に注意してください。中部では、１９日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-05-17T06:51:00+09:00",
           "publishingOffice": "長野地方気象台",
           "warnings": [
             {
               "areaCode": "200010",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "200020",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3007,6 +3013,12 @@
               "areaCode": "2020100",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2020201",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3077,6 +3089,12 @@
             },
             {
               "areaCode": "2021501",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2021501",
               "code": "21",
               "status": "継続",
               "level": "advisory"
@@ -3097,6 +3115,12 @@
               "areaCode": "2021900",
               "code": "21",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2022000",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3191,8 +3215,20 @@
             },
             {
               "areaCode": "2044600",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2044600",
               "code": "21",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2044800",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3203,14 +3239,32 @@
             },
             {
               "areaCode": "2045000",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2045000",
               "code": "21",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "2045100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2045100",
               "code": "21",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "2045200",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
