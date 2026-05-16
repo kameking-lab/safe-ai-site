@@ -233,6 +233,20 @@ const FINDINGS_B: Finding[] = [
     recommendation:
       "母語話者(またはネイティブ翻訳サービス)による再翻訳。翻訳監修者の実名公開(本人同意が取れる場合)。",
   },
+  {
+    id: "B-009",
+    title: "community-cases.ts — 「現場の声(UGC)」と称する運営者作成シードデータ(虚偽UGC表示)",
+    priority: "P2",
+    effortHours: 1,
+    url: "/community-cases, /qa-knowledge",
+    evidence:
+      "web/src/data/mock/community-cases.ts JSDoc:「現場の声（UGC）シードデータ。公開デモ用に、運営側が用意した『実体験ベース』の事例。」。'UGC' はユーザー生成コンテンツを意味するが、実態は運営者が作成した4件の事例。authorAlias(「匿名のコアラ#3421」等)も架空。/qa-knowledge の DESCRIPTION がさらに「現場担当者から寄せられた」と虚偽記載することで二重の誤認を生じさせていた。",
+    recommendation:
+      "JSDoc から UGC・シードデータ表現を削除し「operator-authored example entries, NOT real user submissions」と明記。",
+    status: "resolved-pr-194",
+    statusNote:
+      "refactor/remove-brand-damaging-content PR#194 でJSDocを英語コメントに書き換え、operator-authored example entries であることを明示。E-003(/qa-knowledge DESCRIPTION)と連動して解消。",
+  },
 ];
 
 const FINDINGS_C: Finding[] = [
@@ -374,6 +388,34 @@ const FINDINGS_E: Finding[] = [
       "PR#135 (docs/regression-audit/lighthouse) で実施。本タスクは別軸のため再計測せず。直近PR連投でTBT/LCP の回帰可能性。",
     recommendation:
       "本audit外スコープ。次回Lighthouse監査で再評価。",
+  },
+  {
+    id: "E-002",
+    title: "/education — 未リリースサービスに「¥50,000〜の明朗会計」表記(景表法・優良誤認リスク)",
+    priority: "P2",
+    effortHours: 1,
+    url: "/education",
+    evidence:
+      "web/src/app/(main)/education/EducationContent.tsx の FORMATS に price フィールド(¥50,000〜/¥150,000〜/¥80,000〜)、DESCRIPTION に「¥50,000〜の明朗会計」。2026年秋リリース予定の未稼働サービスに具体的料金を掲示することは景品表示法(優良誤認)の解釈余地あり。個人運営ポートフォリオとの矛盾も大きい。",
+    recommendation:
+      "価格表記を全削除。「詳細はお問い合わせください」に置換。serviceSchema の priceFrom も除去。",
+    status: "resolved-pr-194",
+    statusNote:
+      "refactor/remove-brand-damaging-content PR#194 で価格表記・priceFrom・セクション見出し「〜と料金」を完全削除。料金欄をお問い合わせ誘導に変更。",
+  },
+  {
+    id: "E-003",
+    title: "/qa-knowledge — 「現場担当者から寄せられた」虚偽ヘッダー(FAQPage構造化データ誤帰属)",
+    priority: "P2",
+    effortHours: 1,
+    url: "/qa-knowledge",
+    evidence:
+      "web/src/app/(main)/qa-knowledge/page.tsx DESCRIPTION:「現場担当者から寄せられた質問と」。実際のデータソースは COMMUNITY_CASES_SEED(運営者が用意した4件のシードデータ、authorAlias は仮名)。FAQPage 構造化データも同シードから生成されており、実質的に虚偽の質問者帰属を含む。",
+    recommendation:
+      "DESCRIPTION から「現場担当者から寄せられた」を削除し、実態に即した表現に変更。",
+    status: "resolved-pr-194",
+    statusNote:
+      "refactor/remove-brand-damaging-content PR#194 で DESCRIPTION を「労働安全に関するQ&Aをまとめたナレッジベース。コンサルタントへの質問も受け付けています。」に変更。",
   },
 ];
 
