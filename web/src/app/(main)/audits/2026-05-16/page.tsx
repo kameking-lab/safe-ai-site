@@ -117,7 +117,7 @@ const FINDINGS_A: Finding[] = [
       "web/src/data/articles-index.json: 10本すべて publishedAt: 2026-04-28, lastReviewedAt: 2026-04-28。実際の執筆/公開日が反映されていない。コンサルブランドとしての連載感が出ない。",
     recommendation:
       "実際の執筆日を反映し、各記事の publishedAt を分散。最新記事の更新を継続(月1ペース)。",
-    status: "resolved-2026-05-16-pending-vercel",
+    status: "resolved-pr-191-merged",
     statusNote:
       "Content quality cleanup PR で publishedAt を 2026-04-28 → 2026-05-12 に分散済。詳細: /audits/content-quality-cleanup",
   },
@@ -168,7 +168,7 @@ const FINDINGS_B: Finding[] = [
       "WebFetch評価:「定義が流暢すぎる(典型的な行政文体)」「教科書的」。政策解釈の項目に標準化感が強い。",
     recommendation:
       "政策解釈系の用語は厚労省・JISHA等の公式定義から引用し、出典リンクを併記。AI生成感のある独自要約を再構成。",
-    status: "resolved-2026-05-16-pending-vercel",
+    status: "resolved-pr-191-merged",
     statusNote:
       "Content quality cleanup PR でリスクコミュニケーション・女性活躍と安全衛生に法令根拠(労基法第65/67/68条, 女性労働基準規則第2/3条, 安衛法第57条, PRTR法)+環境省出典を追加済。",
   },
@@ -193,7 +193,7 @@ const FINDINGS_B: Finding[] = [
       "WebFetch評価:「義務化された熱中症対策の具体的内容など、行政文体の典型的表現」「著者・監修者明示なし。『安全AIポータル 専門家チームによる設計』と組織名のみで個人名や資格情報がない」。",
     recommendation:
       "(a) オーナー名(労働安全衛生コンサルタント登録番号260022)を監修者として明示、(b) 各記事末尾に出典リンク(厚労省通達番号・告示番号)、(c) AI生成感のある段落を実体験/事例ベースに書き換え。",
-    status: "resolved-2026-05-16-pending-vercel",
+    status: "resolved-pr-191-merged",
     statusNote:
       "Content quality cleanup PR で全 10 記事の本文を条文出典付きで全面書き換え。著者を「安全AIポータル 編集部(労働安全衛生コンサルタント監修)」に変更。氏名公開はオーナー方針(/about: 氏名は請求により開示)を尊重し折衷案を採用。",
   },
@@ -207,7 +207,7 @@ const FINDINGS_B: Finding[] = [
       "WebFetch評価:「重複事例: 『有機溶剤』と『有機溶剤中毒』が並立。『作業管理』『作業環境管理』が分割」。",
     recommendation:
       "概念重複を統合または相互参照リンクで関係性を明示。",
-    status: "resolved-2026-05-16-pending-vercel",
+    status: "resolved-pr-191-merged",
     statusNote:
       "Content quality cleanup PR で 有機溶剤(物質クラス) ↔ 有機溶剤中毒(疾患)、作業環境管理 ↔ 作業管理 を相互参照化。各エントリに具体的対策と関連用語のリンクを追加。",
   },
@@ -648,14 +648,13 @@ const CATEGORY_TITLES: Record<string, string> = {
 
 function renderFindingBlock(f: Finding) {
   const isResolved = f.status?.startsWith("resolved");
-  const isPendingVercel = f.status === "resolved-2026-05-16-pending-vercel";
   const isDeferred = f.status === "deferred-next-pass";
   const isOutOfScope = f.status === "out-of-scope";
   const isInventoryFixed = f.status?.includes("notation-fixed");
+  const prMatch = f.status?.match(/pr-(\d+)/);
+  const prNumber = prMatch ? prMatch[1] : null;
   const statusBadgeStyle = isResolved
-    ? isPendingVercel
-      ? "bg-sky-100 text-sky-900"
-      : "bg-emerald-100 text-emerald-900"
+    ? "bg-emerald-100 text-emerald-900"
     : isInventoryFixed
       ? "bg-emerald-100 text-emerald-900"
       : isDeferred
@@ -663,17 +662,17 @@ function renderFindingBlock(f: Finding) {
         : isOutOfScope
           ? "bg-slate-200 text-slate-700"
           : "bg-slate-100 text-slate-700";
-  const statusLabel = isPendingVercel
-    ? "解決済 (Vercel 本番反映待ち)"
-    : isResolved
-      ? "解決済 (main マージ済)"
-      : isInventoryFixed
-        ? "改修済+棚卸完了"
-        : isDeferred
-          ? "次回パスへ保留"
-          : isOutOfScope
-            ? "対象外"
-            : f.status ?? "";
+  const statusLabel = isResolved
+    ? prNumber
+      ? `解決済 (PR #${prNumber} merged)`
+      : "解決済 (main マージ済)"
+    : isInventoryFixed
+      ? "改修済+棚卸完了"
+      : isDeferred
+        ? "次回パスへ保留"
+        : isOutOfScope
+          ? "対象外"
+          : f.status ?? "";
   return (
     <article
       key={f.id}
