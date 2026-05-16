@@ -127,6 +127,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2 },
       { id: "mental-health", label: "メンタル・カスハラ", href: "/mental-health", icon: Heart },
+      { id: "mental-health-management", label: "メンタル対策実務", href: "/mental-health-management", icon: Brain, badge: "NEW" },
       { id: "treatment-work-balance", label: "治療と仕事の両立支援", href: "/treatment-work-balance", icon: HeartHandshake, badge: "NEW" },
     ],
   },
