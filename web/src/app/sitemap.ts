@@ -4,6 +4,8 @@ import { mhlwNotices } from "@/data/mhlw-notices";
 import { getPublishedArticleIndex } from "@/lib/articles";
 import { getAllEquipment } from "@/lib/equipment-recommendation";
 import { FEATURE_CATEGORIES } from "@/data/features-catalog";
+import { SAFETY_SIGNS, SIGN_CATEGORIES } from "@/data/safety-signs";
+import { INDUSTRIES } from "@/data/safety-signs/industry-usage";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://www.anzen-ai-portal.jp";
@@ -120,6 +122,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/ky/morning", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "monthly" },
     { url: "/security", lastModified: "2026-05-15", priority: 0.3, changeFrequency: "yearly" },
     { url: "/dpa", lastModified: "2026-05-15", priority: 0.3, changeFrequency: "yearly" },
+    { url: "/safety-signs", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
     { url: "/about", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "yearly" },
     { url: "/contact", lastModified: "2026-04-22", priority: 0.5, changeFrequency: "yearly" },
     { url: "/privacy", lastModified: "2025-10-01", priority: 0.3, changeFrequency: "yearly" },
@@ -160,7 +163,37 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
   }));
 
-  return [...filtered, ...circularPages, ...articlePages, ...equipmentPages, ...featureCategoryPages].map(
+  const safetySignCategoryPages: typeof pages = SIGN_CATEGORIES.map((c) => ({
+    url: `/safety-signs/category/${c.id}`,
+    lastModified: "2026-05-16",
+    priority: 0.7,
+    changeFrequency: "monthly",
+  }));
+
+  const safetySignIndustryPages: typeof pages = INDUSTRIES.map((i) => ({
+    url: `/safety-signs/industry/${i.id}`,
+    lastModified: "2026-05-16",
+    priority: 0.7,
+    changeFrequency: "monthly",
+  }));
+
+  const safetySignDetailPages: typeof pages = SAFETY_SIGNS.map((s) => ({
+    url: `/safety-signs/sign/${s.id}`,
+    lastModified: "2026-05-16",
+    priority: 0.5,
+    changeFrequency: "monthly",
+  }));
+
+  return [
+    ...filtered,
+    ...circularPages,
+    ...articlePages,
+    ...equipmentPages,
+    ...featureCategoryPages,
+    ...safetySignCategoryPages,
+    ...safetySignIndustryPages,
+    ...safetySignDetailPages,
+  ].map(
     ({ url, lastModified, priority, changeFrequency }) => {
       const absolute = `${base}${url}`;
       return {
