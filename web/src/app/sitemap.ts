@@ -31,6 +31,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/chemical-database", lastModified: "2026-04-01", priority: 0.7, changeFrequency: "monthly" },
     { url: "/risk-prediction", lastModified: "2026-04-01", priority: 0.7, changeFrequency: "monthly" },
     { url: "/pricing", lastModified: "2026-03-01", priority: 0.7, changeFrequency: "monthly" },
+    { url: "/strategy/plan-generator", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/education", lastModified: "2026-04-25", priority: 0.9, changeFrequency: "monthly" },
     { url: "/education/tokubetsu/kensaku-toishi", lastModified: "2026-04-25", priority: 0.8, changeFrequency: "monthly" },
     { url: "/education/tokubetsu/teiatsu-denki", lastModified: "2026-04-25", priority: 0.8, changeFrequency: "monthly" },

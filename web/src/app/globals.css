@@ -359,4 +359,52 @@ table {
     display: flex !important;
     justify-content: space-between;
   }
+
+  /**
+   * 安全衛生計画書プレビュー（/strategy/plan-generator/preview/*）の印刷スタイル。
+   * グローバルでは <header>/<footer>/<nav> を非表示にしているが、計画書本体は
+   * <article class="plan-print-root"> 内なので、その配下では再表示する。
+   */
+  .plan-print-root,
+  .plan-print-root header,
+  .plan-print-root footer,
+  .plan-print-root section {
+    display: block !important;
+  }
+  .plan-print-root {
+    color: black !important;
+  }
+  .plan-print-root h1 {
+    font-size: 16pt;
+  }
+  .plan-print-root h2 {
+    font-size: 13pt;
+    page-break-after: avoid;
+    margin-top: 10mm;
+  }
+  .plan-print-root h3 {
+    font-size: 11pt;
+    page-break-after: avoid;
+  }
+  .plan-print-root section {
+    page-break-inside: auto;
+  }
+  .plan-print-root table {
+    page-break-inside: auto;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .plan-print-root table th,
+  .plan-print-root table td {
+    border: 1px solid #999 !important;
+    padding: 4pt 6pt !important;
+  }
+  .plan-print-root tr,
+  .plan-print-root li {
+    page-break-inside: avoid;
+  }
+  /* URL 脚注は計画書プレビューでは不要（参照は本文に明記済み） */
+  .plan-print-root a[href^="http"]::after {
+    content: "" !important;
+  }
 }
