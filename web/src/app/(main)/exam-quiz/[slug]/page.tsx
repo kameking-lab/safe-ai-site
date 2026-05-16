@@ -5,6 +5,8 @@ import { ChevronLeft } from "lucide-react";
 import { CERT_QUIZZES, getCertQuiz } from "@/data/mock/quiz/cert-quiz";
 import { ogImageUrl } from "@/lib/og-url";
 import { CertQuizPlayer } from "./cert-quiz-player";
+import { JsonLd, breadcrumbSchema, quizSchema } from "@/components/json-ld";
+import { SITE_URL } from "@/lib/seo-metadata";
 
 export function generateStaticParams() {
   return CERT_QUIZZES.map((c) => ({ slug: c.id }));
@@ -42,8 +44,33 @@ export default async function CertQuizPage({
   const cert = getCertQuiz(slug);
   if (!cert) notFound();
 
+  const certUrl = `${SITE_URL}/exam-quiz/${cert.id}`;
+  const certTitle = `${cert.name} 100問クイズ`;
+  const certDesc = `${cert.name}の対策に。4択100問・解説付き・法令根拠つきカリキュラム網羅型クイズ。${cert.topics.join("・")}を分野別に学習。`;
+
   return (
     <>
+      <JsonLd
+        schema={[
+          breadcrumbSchema([
+            { name: "ホーム", url: SITE_URL },
+            { name: "試験対策クイズ", url: `${SITE_URL}/exam-quiz` },
+            { name: cert.name, url: certUrl },
+          ]),
+          quizSchema({
+            name: certTitle,
+            description: certDesc,
+            url: certUrl,
+            about: cert.name,
+            questions: cert.questions.map((q) => ({
+              text: q.q,
+              choices: [...q.choices],
+              correct: q.correct,
+              explanation: q.explain,
+            })),
+          }),
+        ]}
+      />
       <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6 sm:py-5">
         <div className="mx-auto max-w-4xl">
           <Link

@@ -1,12 +1,17 @@
+"use client";
+
 import Link from "next/link";
+import { useLanguage } from "@/contexts/language-context";
+
+type Translatable = string | { ja: string; en: string };
 
 export type RelatedPage = {
   href: string;
-  label: string;
-  description: string;
+  label: Translatable;
+  description: Translatable;
   /** Tailwind color theme key */
   color: "blue" | "emerald" | "orange" | "sky" | "amber" | "purple" | "rose";
-  cta: string;
+  cta: Translatable;
 };
 
 const COLOR_MAP: Record<
@@ -50,19 +55,28 @@ const COLOR_MAP: Record<
   },
 };
 
-interface RelatedPageCardsProps {
-  pages: RelatedPage[];
-  heading?: string;
+function resolveText(value: Translatable, isEn: boolean): string {
+  if (typeof value === "string") return value;
+  return isEn ? value.en : value.ja;
 }
 
-export function RelatedPageCards({
-  pages,
-  heading = "関連機能",
-}: RelatedPageCardsProps) {
+interface RelatedPageCardsProps {
+  pages: RelatedPage[];
+  heading?: Translatable;
+}
+
+export function RelatedPageCards({ pages, heading }: RelatedPageCardsProps) {
+  const { language } = useLanguage();
+  const isEn = language === "en";
+  const resolvedHeading = heading
+    ? resolveText(heading, isEn)
+    : isEn
+      ? "Related features"
+      : "関連機能";
   return (
-    <section className="mx-auto max-w-7xl px-4 pb-8 pt-2" aria-label={heading}>
+    <section className="mx-auto max-w-7xl px-4 pb-8 pt-2" aria-label={resolvedHeading}>
       <p className="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">
-        {heading}
+        {resolvedHeading}
       </p>
       <div className={`grid grid-cols-1 gap-3 sm:grid-cols-${Math.min(pages.length, 3)}`}>
         {pages.map((page) => {
@@ -76,17 +90,17 @@ export function RelatedPageCards({
                 <span
                   className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold ${c.badge}`}
                 >
-                  {page.label}
+                  {resolveText(page.label, isEn)}
                 </span>
                 <p className="mt-2 text-xs leading-5 text-slate-700">
-                  {page.description}
+                  {resolveText(page.description, isEn)}
                 </p>
               </div>
               <Link
                 href={page.href}
                 className={`mt-3 inline-block rounded-md px-3 py-2 text-center text-xs font-semibold transition-colors ${c.btn}`}
               >
-                {page.cta} →
+                {resolveText(page.cta, isEn)} →
               </Link>
             </div>
           );

@@ -127,7 +127,7 @@ function persistSeenQuakes(set: Set<string>) {
 export function SignageMapClient({ initialFullscreen = false }: { initialFullscreen?: boolean }) {
   const [bundle, setBundle] = useState<ApiBundle | null>(null);
   const [bundleStatus, setBundleStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [lastRefreshedAt, setLastRefreshedAt] = useState<string>("—");
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<string>("起動中…");
 
   const view = useSyncExternalStore(subscribeView, ensureInitialView, getServerView);
   const setView = useCallback((next: ViewState) => setViewExternal(next), []);
@@ -325,7 +325,7 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
             </div>
 
             <div className="mt-3 space-y-1 text-[11px] text-slate-400">
-              <p>取得時刻: {bundle?.fetchedAt ?? "—"}</p>
+              <p>取得時刻: {bundle?.fetchedAt ?? "取得中…"}</p>
               <p>
                 データ提供:{" "}
                 <a href={bundle?.sourceUrl ?? "https://www.jma.go.jp/bosai/"} target="_blank" rel="noreferrer" className="text-emerald-400 underline">

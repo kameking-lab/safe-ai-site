@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { StatsDashboard } from "./StatsDashboard";
-import { PageJsonLd } from "@/components/page-json-ld";
+import { withSiteOpenGraph, withSiteTwitter, SITE_URL } from "@/lib/seo-metadata";
+import { JsonLd, webPageSchema, breadcrumbSchema, datasetSchema } from "@/components/json-ld";
 
 const _title = "利用統計（公開ダッシュボード）";
 const _desc =
@@ -11,25 +12,36 @@ export const metadata: Metadata = {
   description: _desc,
   alternates: { canonical: "/stats" },
   robots: { index: true, follow: true },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/stats", {
     title: _title,
     description: _desc,
-    type: "website",
-  },
-  twitter: {
+  }),
+  twitter: withSiteTwitter({
     card: "summary",
     title: _title,
     description: _desc,
-  },
+  }),
 };
 
 export default function StatsPage() {
+  const url = `${SITE_URL}/stats`;
   return (
     <>
-      <PageJsonLd
-        name="安全AIポータル 利用統計ダッシュボード"
-        description="個人運営の労働安全研究プロジェクトの利用状況を透明公開（DAU/MAU・機能別利用・流入元・コンバージョン・AIチャット利用・改善インサイト）。"
-        path="/stats"
+      <JsonLd
+        schema={[
+          webPageSchema({ name: _title, description: _desc, url }),
+          breadcrumbSchema([
+            { name: "ホーム", url: SITE_URL },
+            { name: "利用統計", url },
+          ]),
+          datasetSchema({
+            name: "安全AIポータル サイト利用統計データセット",
+            description: _desc,
+            url,
+            keywords: ["DAU", "MAU", "PV", "利用統計", "AIチャット", "労働安全"],
+            variableMeasured: ["DAU/MAU", "機能別ページビュー", "流入元", "コンバージョン率", "AIチャット利用数"],
+          }),
+        ]}
       />
       <StatsDashboard />
     </>

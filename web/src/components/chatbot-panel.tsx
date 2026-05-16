@@ -242,9 +242,13 @@ export function ChatbotPanel() {
     setIsSending(true);
     setError(null);
 
-    setTimeout(() => {
-      listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-    }, 50);
+    // rAF defers the scroll-height read until after the browser has flushed
+    // the message-list re-render, avoiding a forced synchronous layout.
+    // Lighthouse audit 2026-05-14 (B-13) flagged forced-reflow on 11 pages.
+    requestAnimationFrame(() => {
+      const el = listRef.current;
+      if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    });
 
     try {
       // 直近の会話履歴を最大8ターン送信（多ターン会話の文脈保持）
@@ -290,9 +294,10 @@ export function ChatbotPanel() {
       setError(message);
     } finally {
       setIsSending(false);
-      setTimeout(() => {
-        listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
-      }, 100);
+      requestAnimationFrame(() => {
+        const el = listRef.current;
+        if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+      });
     }
   }
 

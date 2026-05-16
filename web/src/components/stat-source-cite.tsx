@@ -17,7 +17,7 @@ export function StatSourceCite({
   const meta = SITE_STATS_META[statKey];
   if (!meta) return null;
   return (
-    <p className={`text-[9px] leading-4 text-slate-400 ${className}`}>
+    <p className={`text-[9px] leading-4 text-slate-500 ${className}`}>
       出典:{" "}
       {meta.sourceUrl ? (
         <a

@@ -8,6 +8,14 @@
       "cwd": "web",
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "safe-ai-site-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start"],
+      "cwd": "web",
+      "port": 3001,
+      "autoPort": true
     }
   ]
 }

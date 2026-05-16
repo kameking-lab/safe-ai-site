@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HelpCircle, MessageSquarePlus } from "lucide-react";
+import { PageContainer } from "@/components/layout";
 import { COMMUNITY_CASES_SEED } from "@/data/mock/community-cases";
 import { UGC_INDUSTRY_OPTIONS } from "@/lib/ugc-types";
 import { ogImageUrl } from "@/lib/og-url";
@@ -39,7 +40,7 @@ export default function QaKnowledgePage() {
     .slice(0, 20);
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+    <PageContainer width="prose">
       {/* SEO: WebPage + BreadcrumbList + FAQPage */}
       <PageJsonLd name={TITLE} description={DESCRIPTION} path="/qa-knowledge" />
       {faq.length > 0 ? <JsonLd schema={faqPageSchema(faq)} /> : null}
@@ -115,6 +116,6 @@ export default function QaKnowledgePage() {
           })}
         </ul>
       )}
-    </main>
+    </PageContainer>
   );
 }

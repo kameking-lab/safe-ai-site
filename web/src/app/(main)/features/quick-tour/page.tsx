@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/features/quick-tour" },
   title: "5分ツアー | 機能紹介",
   description:
     "安全AIポータルの主要機能を7ステップ・5分で巡る入門ツアー。実機画面のスクショつきで、すぐに試せます。",

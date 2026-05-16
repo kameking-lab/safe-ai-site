@@ -15,6 +15,11 @@ const AMAZON_TAG = (
 
 const RAKUTEN_AFFID = (process.env.NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID || "").trim();
 
+if (process.env.NODE_ENV === "development") {
+  if (!AMAZON_TAG) console.warn("[affiliate-url] NEXT_PUBLIC_AMAZON_AFFILIATE_ID is not set — Amazon affiliate links disabled");
+  if (!RAKUTEN_AFFID) console.warn("[affiliate-url] NEXT_PUBLIC_RAKUTEN_AFFILIATE_ID is not set — Rakuten affiliate links disabled");
+}
+
 const AMAZON_HOSTS = ["amazon.co.jp", "amazon.com"];
 const RAKUTEN_HOST = "rakuten.co.jp";
 const RAKUTEN_AFFILIATE_HOST = "hb.afl.rakuten.co.jp";

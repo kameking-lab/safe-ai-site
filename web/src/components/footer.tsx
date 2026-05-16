@@ -33,37 +33,37 @@ export function Footer() {
             </p>
             <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li>
-                <Link href="/safety-diary" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/safety-diary" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   安全衛生日誌
                 </Link>
               </li>
               <li>
-                <Link href="/ky" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/ky" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   KY簡易作成
                 </Link>
               </li>
               <li>
-                <Link href="/chemical-ra" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/chemical-ra" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   化学物質RA
                 </Link>
               </li>
               <li>
-                <Link href="/signage" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/signage" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   サイネージ
                 </Link>
               </li>
               <li>
-                <Link href="/laws" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/laws" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   法改正一覧
                 </Link>
               </li>
               <li>
-                <Link href="/chatbot" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/chatbot" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   安衛法AIチャット
                 </Link>
               </li>
               <li>
-                <Link href="/accidents" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/accidents" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   重大事故ニュース
                 </Link>
               </li>
@@ -77,37 +77,37 @@ export function Footer() {
             </p>
             <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li>
-                <Link href="/equipment-finder" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/equipment-finder" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   保護具AIファインダー
                 </Link>
               </li>
               <li>
-                <Link href="/chemical-database" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/chemical-database" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   化学物質検索
                 </Link>
               </li>
               <li>
-                <Link href="/circulars" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/circulars" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   通達・告示
                 </Link>
               </li>
               <li>
-                <Link href="/risk" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/risk" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   気象リスク
                 </Link>
               </li>
               <li>
-                <Link href="/e-learning" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/e-learning" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   Eラーニング
                 </Link>
               </li>
               <li>
-                <Link href="/glossary" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/glossary" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   用語集
                 </Link>
               </li>
               <li>
-                <Link href="/goods" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/goods" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   安全用品カタログ
                 </Link>
               </li>
@@ -121,33 +121,33 @@ export function Footer() {
             </p>
             <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li>
-                <Link href="/features" className="font-semibold text-emerald-700 hover:underline dark:text-emerald-300">
+                <Link href="/features" className="inline-flex min-h-[44px] items-center font-semibold text-emerald-700 hover:underline dark:text-emerald-300">
                   機能一覧（全機能）
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/about" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   研究プロジェクトについて
                 </Link>
               </li>
               <li>
-                <Link href="/stats" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/stats" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   利用統計
                 </Link>
               </li>
               <li>
-                <Link href="/leaflet" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/leaflet" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   リーフレット（PDF）
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/contact" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   ご意見・改善提案
                 </Link>
               </li>
               {PAID_MODE && (
                 <li>
-                  <Link href="/pricing" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                  <Link href="/pricing" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                     料金プラン
                   </Link>
                 </li>
@@ -162,27 +162,27 @@ export function Footer() {
             </p>
             <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li>
-                <Link href="/privacy" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/privacy" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   プライバシーポリシー
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/terms" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   利用規約
                 </Link>
               </li>
               <li>
-                <Link href="/security" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/security" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   セキュリティ
                 </Link>
               </li>
               <li>
-                <Link href="/dpa" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/dpa" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   DPA
                 </Link>
               </li>
               <li>
-                <Link href="/bcp" className="hover:text-slate-900 hover:underline dark:hover:text-white">
+                <Link href="/bcp" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   BCP
                 </Link>
               </li>
@@ -201,7 +201,7 @@ export function Footer() {
               </Link>
             </p>
           </div>
-          <p className="text-[11px] text-slate-400 dark:text-slate-500">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400">
             個人運営の研究プロジェクト
           </p>
         </div>

@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { EquipmentFinderClient } from "@/components/equipment-finder-client";
+import { EquipmentFinderHeader } from "@/components/equipment-finder-header";
+import { PageContainer } from "@/components/layout";
+import { PanelSkeleton } from "@/components/skeleton";
 import { ogImageUrl } from "@/lib/og-url";
-
-import { PageJsonLd } from "@/components/page-json-ld";
+import { SITE_URL } from "@/lib/seo-metadata";
+import { getAllEquipment } from "@/lib/equipment-recommendation";
+import { JsonLd, webPageSchema, breadcrumbSchema, productCollectionSchema } from "@/components/json-ld";
 export const metadata: Metadata = {
   title: "保護具AIファインダー｜種類選択→絞り込みで最適保護具を提案",
   description:
@@ -17,26 +21,35 @@ export const metadata: Metadata = {
 };
 
 export default function EquipmentFinderPage() {
+  const url = `${SITE_URL}/equipment-finder`;
+  const title = "保護具AIファインダー｜種類選択→絞り込みで最適保護具を提案";
+  const description = "12カテゴリから保護具の種類を選び、種類別の絞り込み質問で最適な装備をレコメンド。JIS規格・国家検定品も明示。";
   return (
-    <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
-      {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name="保護具AIファインダー｜種類選択→絞り込みで最適保護具を提案" description="12カテゴリから保護具の種類を選び、種類別の絞り込み質問で最適な装備をレコメンド。JIS規格・国家検定品も明示。" path="/equipment-finder" />
-      <header className="mb-5">
-        <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
-          🛡 保護具AIファインダー
-        </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          まず保護具の種類を選び、種類別の絞り込み質問に答えると、1,000点超の保護具DBからおすすめ商品を表示します。JIS規格・国家検定品も明示。
-        </p>
-        <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs leading-5 text-emerald-900">
-          <strong>研究プロジェクト運営費について:</strong>{" "}
-          本ページの「Amazon / 楽天で見る」リンクは、もしもアフィリエイト経由で生成しています。発生した報酬は、本サイトの運営費（事故DB拡充・AI推論コスト・法令データ更新）に充てます。
-        </div>
-      </header>
+    <PageContainer width="prose">
+      <JsonLd
+        schema={[
+          webPageSchema({ name: title, description, url }),
+          breadcrumbSchema([
+            { name: "ホーム", url: SITE_URL },
+            { name: "保護具AIファインダー", url },
+          ]),
+          productCollectionSchema({
+            name: title,
+            url,
+            products: getAllEquipment().slice(0, 20).map((item) => ({
+              name: item.name,
+              url: `${SITE_URL}/equipment/${item.id}`,
+              description: item.spec,
+              brand: item.maker,
+            })),
+          }),
+        ]}
+      />
+      <EquipmentFinderHeader />
 
-      <Suspense fallback={<div className="text-sm text-slate-500">読み込み中…</div>}>
+      <Suspense fallback={<PanelSkeleton rows={4} label="保護具レコメンドを読み込み中" />}>
         <EquipmentFinderClient />
       </Suspense>
-    </main>
+    </PageContainer>
   );
 }

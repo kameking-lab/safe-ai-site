@@ -9,7 +9,7 @@ export default function AdSenseScript() {
     <Script
       id="adsense-init"
       src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${PUB_ID}`}
-      strategy="afterInteractive"
+      strategy="lazyOnload"
       crossOrigin="anonymous"
     />
   );

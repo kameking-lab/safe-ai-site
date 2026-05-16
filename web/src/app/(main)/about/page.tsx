@@ -14,7 +14,6 @@ import {
   BookOpen,
   GraduationCap,
   Scale,
-  Mail,
   Handshake,
   Users2,
   Sparkles,
@@ -26,6 +25,9 @@ import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import { SITE_STATS } from "@/data/site-stats";
 import { PAID_MODE } from "@/lib/paid-mode";
+import { AboutContactBlock, AboutResearchDeclaration, AboutDisclaimer } from "./AboutBody";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
+import { PageContainer } from "@/components/layout";
 
 export const metadata: Metadata = {
   title: "研究・実証プロジェクトについて",
@@ -33,23 +35,21 @@ export const metadata: Metadata = {
     "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。一次ソース付きで通達・事故事例・化学物質情報を無料公開。",
   keywords: ["安全AIポータル", "研究プロジェクト", "労働安全コンサルタント", "AI", "DX", "労働安全衛生"],
   alternates: { canonical: "/about" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/about", {
     title: "研究・実証プロジェクトについて",
     description:
       "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
+  }),
+  twitter: withSiteTwitter({
     title: "研究・実証プロジェクトについて",
     description:
       "安全AIポータル は労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクト。",
-  },
+  }),
 };
 
 const STATS = [
   { icon: AlertCircle, label: "死亡事故（10年統合）", value: `${SITE_STATS.accidents10yCount}件`, color: "red" },
-  { icon: AlertCircle, label: "死亡災害DB（5年分）", value: `${SITE_STATS.mhlwDeathsCount}件`, color: "red" },
+  { icon: AlertCircle, label: "死亡災害DB（6年分）", value: `${SITE_STATS.mhlwDeathsCount}件`, color: "red" },
   { icon: FileText, label: "法令条文", value: `${SITE_STATS.lawArticleCount}条文`, color: "emerald" },
   { icon: Scale, label: "化学物質", value: `${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()}物質`, color: "sky" },
   { icon: GraduationCap, label: "過去問", value: "1,000問+", color: "amber" },
@@ -141,11 +141,11 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
   },
   {
     label: "販売価格",
-    value: "各サービスページに記載（税抜表示／受託業務・顧問契約は別途見積）",
+    value: "各サービスページに記載（税抜表示／受託業務は別途お問い合わせ）",
   },
   {
     label: "支払方法",
-    value: "クレジットカード（Visa／Mastercard／American Express／JCB、Stripeにて処理）／銀行振込（受託業務・顧問契約）",
+    value: "クレジットカード（Visa／Mastercard／American Express／JCB、Stripeにて処理）／銀行振込（受託業務）",
   },
   {
     label: "支払時期",
@@ -163,7 +163,7 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
   {
     label: "適格請求書発行事業者番号",
     value:
-      "受託業務・顧問契約等で適格請求書（インボイス）が必要な場合は、契約時にご請求ください。本サイトは個人事業主が運営しており、登録状況および登録番号は別途開示いたします（未登録の場合はその旨を明示）。",
+      "受託業務で適格請求書（インボイス）が必要な場合は、契約時にご請求ください。本サイトは個人事業主が運営しており、登録状況および登録番号は別途開示いたします（未登録の場合はその旨を明示）。",
   },
   {
     label: "動作環境",
@@ -174,7 +174,7 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-6 sm:py-8">
+    <PageContainer width="narrow">
       <JsonLd
         schema={[
           personSchema(),
@@ -201,25 +201,7 @@ export default function AboutPage() {
       />
 
       {/* 研究プロジェクト宣言（最上部） */}
-      <section
-        aria-labelledby="research-project-heading"
-        className="mt-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-5 shadow-sm"
-      >
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-emerald-800">
-          <Sparkles className="h-4 w-4 text-emerald-600" aria-hidden="true" />
-          研究・実証プロジェクト
-        </div>
-        <h2 id="research-project-heading" className="mt-2 text-base font-bold leading-snug text-slate-900 sm:text-lg">
-          安全AIポータル は、労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。
-        </h2>
-        <p className="mt-3 text-sm leading-6 text-slate-700">
-          運営費用は運営者個人が負担しています。通達・事故事例・化学物質情報を一次ソース付きで無料公開し、
-          現場担当者・研究者・行政の皆さまから広くフィードバックを募っています。
-        </p>
-        <p className="mt-2 text-[11px] leading-5 text-slate-500">
-          ※ 本サイトは現時点で課金機能を提供していません。M6 期に検討される料金設計はあくまで構想段階です。
-        </p>
-      </section>
+      <AboutResearchDeclaration />
 
       <div className="mt-6 space-y-6">
         {/* One Big Thing — サイトの独自価値宣言（ID_060・ID_002・ID_048） */}
@@ -276,7 +258,7 @@ export default function AboutPage() {
             {/* マスコット */}
             <div className="flex-shrink-0">
               <Image
-                src="/mascot/mascot-chihuahua-4.png"
+                src="/mascot/mascot-chihuahua-4.webp"
                 alt="安全AIポータル マスコット"
                 width={100}
                 height={100}
@@ -331,7 +313,7 @@ export default function AboutPage() {
                   <ul className="text-xs leading-5 text-slate-600 space-y-0.5">
                     <li>・ Python / OpenAI API による安全業務自動化</li>
                     <li>・ Excel VBA で帳票・KY・安全書類をデジタル化</li>
-                    <li>・ Claude Code を用いた高速 Web 開発</li>
+                    <li>・ Next.js / TypeScript による Web 開発</li>
                   </ul>
                 </div>
                 <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
@@ -517,21 +499,7 @@ export default function AboutPage() {
         </section>
 
         {/* お問い合わせ */}
-        <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-5 text-center">
-          <p className="text-sm font-semibold text-emerald-800 mb-1">
-            ご質問・ご要望はお気軽に
-          </p>
-          <p className="text-xs text-slate-600 mb-4">
-            システムの導入相談・機能リクエスト・不具合報告など何でもお問い合わせください。
-          </p>
-          <Link
-            href="/contact"
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"
-          >
-            <Mail className="h-4 w-4" />
-            お問い合わせはこちら
-          </Link>
-        </div>
+        <AboutContactBlock />
 
         {/* 特定商取引法（PAID_MODE時のみ表示） */}
         {PAID_MODE ? (
@@ -565,16 +533,9 @@ export default function AboutPage() {
         ) : null}
 
         {/* 免責事項 */}
-        <div className="rounded-xl border border-amber-100 bg-amber-50 p-4 text-xs text-amber-800 leading-6">
-          <p className="font-semibold mb-1">免責事項</p>
-          <p>
-            本サービスが提供する情報は、労働安全衛生に関する一般的な情報提供を目的としています。
-            個別の法的判断・安全管理措置については、必ず専門家にご相談ください。
-            本サービスの利用によって生じた損害について、運営者は責任を負いかねます。
-          </p>
-        </div>
+        <AboutDisclaimer />
       </div>
-    </main>
+    </PageContainer>
   );
 }
 

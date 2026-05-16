@@ -29,6 +29,7 @@ import {
   BookMarked,
   Users2,
   Heart,
+  HeartHandshake,
   ListChecks,
   Sun,
   Moon,
@@ -101,6 +102,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "laws", label: "法改正", href: "/laws", icon: Scale },
       { id: "law-search", label: "法令検索", href: "/law-search", icon: Search },
+      { id: "law-hierarchy", label: "法令体系マップ", href: "/law-hierarchy", icon: LibraryBig },
       { id: "chatbot", label: "法令チャット", href: "/chatbot", icon: MessageSquare, badge: "AI" },
     ],
   },
@@ -125,6 +127,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2 },
       { id: "mental-health", label: "メンタル・カスハラ", href: "/mental-health", icon: Heart },
+      { id: "treatment-work-balance", label: "治療と仕事の両立支援", href: "/treatment-work-balance", icon: HeartHandshake, badge: "NEW" },
     ],
   },
   ...(PAID_MODE
@@ -288,7 +291,7 @@ export function AppShell({ children, user }: AppShellProps) {
           <span className="flex-1 truncate">
             {item.label}
             {item.description && (
-              <span className="ml-1 text-[10px] font-normal text-slate-400 dark:text-slate-500">{item.description}</span>
+              <span className="ml-1 text-[10px] font-normal text-slate-500 dark:text-slate-400">{item.description}</span>
             )}
           </span>
           {item.badge && !active && (
@@ -347,7 +350,7 @@ export function AppShell({ children, user }: AppShellProps) {
           {NAV_CATEGORIES.map((cat) => (
             <div key={cat.label || "__top__"}>
               {cat.label && (
-                <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   {cat.label}
                 </p>
               )}
@@ -510,7 +513,7 @@ export function AppShell({ children, user }: AppShellProps) {
           <div className="z-20 border-b border-slate-200 bg-slate-50/95 px-3 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/95 lg:hidden">
             {/* モバイル: アクセシビリティトグル（ヘッダから移設） */}
             <div className="mb-3 flex flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-800">
-              <p className="w-full px-1 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+              <p className="w-full px-1 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                 表示・入力支援
               </p>
               <button
@@ -574,7 +577,7 @@ export function AppShell({ children, user }: AppShellProps) {
               {NAV_CATEGORIES.map((cat) => (
                 <div key={cat.label || "__top__"}>
                   {cat.label && (
-                    <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                    <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                       {cat.label}
                     </p>
                   )}
@@ -594,7 +597,7 @@ export function AppShell({ children, user }: AppShellProps) {
             onClick={openCommandPalette}
             className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50"
             title="検索を開く"
-            aria-label="検索を開く（Ctrl+K）"
+            aria-label="検索 Ctrl+K"
           >
             <Search className="h-3.5 w-3.5" aria-hidden="true" />
             <span>検索</span>

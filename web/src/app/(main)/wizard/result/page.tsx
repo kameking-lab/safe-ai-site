@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import matrix from "@/data/compliance-matrix.json";
 import { PDFPrintHeader, PDFExportButton } from "@/components/wizard/PDFExport";
+import { PageContainer } from "@/components/layout";
 
 // compliance-matrix.json の業種ID → 助成金計算機の IndustryType への対応
 // 助成金計算機にない業種は最も近いカテゴリにフォールバック。
@@ -116,7 +117,7 @@ function ResultView() {
 
   if (!isInputValid) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-10 text-center">
+      <PageContainer width="prose" className="text-center">
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-amber-900">
           <p className="text-sm font-bold">入力情報が不足しています</p>
           <p className="mt-2 text-xs">
@@ -130,7 +131,7 @@ function ResultView() {
             ウィザードに戻る
           </Link>
         </div>
-      </main>
+      </PageContainer>
     );
   }
 
@@ -142,7 +143,7 @@ function ResultView() {
   const calculatorHref = `/subsidies/calculator?industry=${calculatorIndustry}&employees=${calculatorEmployees}`;
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8 print:max-w-none print:px-0">
+    <PageContainer width="prose" className="print:max-w-none print:px-0">
       {/* PDF用ヘッダー（印刷時のみ表示） */}
       <PDFPrintHeader
         industryLabel={industryData.label}
@@ -410,7 +411,7 @@ function ResultView() {
         個別の事案（出向・派遣・複数事業場・特殊作業条件等）については、
         所轄労働基準監督署または労働安全コンサルタントへご相談ください。
       </p>
-    </main>
+    </PageContainer>
   );
 }
 
@@ -496,9 +497,9 @@ export default function WizardResultPage() {
   return (
     <Suspense
       fallback={
-        <main className="mx-auto max-w-4xl px-4 py-10 text-center text-sm text-slate-500">
+        <PageContainer width="prose" className="text-center text-sm text-slate-500">
           診断結果を読み込み中...
-        </main>
+        </PageContainer>
       }
     >
       <ResultView />
