@@ -30,6 +30,7 @@ type Finding = {
   evidence: string;
   recommendation: string;
   decision?: "TBD";
+  status?: string;
 };
 
 const FINDINGS_A: Finding[] = [
@@ -43,6 +44,7 @@ const FINDINGS_A: Finding[] = [
       "web/src/data/exam-questions/skill-training.ts に明示コメント: 「No verbatim copy of past-exam text. Each item is an original write-up with reference law citations.」一方UIは「過去問クイズ」と表示。オーナー方針「創作過去問・予想問題系コンテンツはNG」と矛盾。23,501行のコードに同様構造。",
     recommendation:
       "(a) UI見出しを「練習問題」「学習用問題」に改称、(b) 各カテゴリトップに「公式試験問題の逐語コピーではなく、出題範囲を踏まえた学習用問題」と明示、(c) 実際の公表過去問は厚労省・JISHA・各試験運営機関の公式ページへの外部リンクに限定。",
+    status: "resolved-pr-188",
   },
   {
     id: "A-002",
@@ -54,6 +56,7 @@ const FINDINGS_A: Finding[] = [
       "ページ本体に「出題は当サイト独自の学習用問題」「実試験の過去問とは異なる」旨の注記が存在しない。利用者は「過去問」を実際の試験問題と誤認する。",
     recommendation:
       "ページ上部に薄い情報バーで「※当サイトの問題は学習用に作成したものであり、実際の試験で出題されたものではありません」を常時表示。",
+    status: "resolved-pr-188",
   },
   {
     id: "A-003",
@@ -305,6 +308,7 @@ const FINDINGS_D: Finding[] = [
       "web/src/app/robots.ts:disallow に「/strategy」(末尾スラなし)が含まれ、sitemap.ts には /strategy/plan-generator が priority 0.8 で掲載。メイン3機能の1つが robots でクロール拒否される深刻な矛盾。本日18 PR連投の中で見落とされた可能性。",
     recommendation:
       "robots.ts の Disallow から「/strategy」を削除、または「/strategy/dev」など特定パスのみに絞る。robots.txt と sitemap の整合性を CI で検証(URL の重複検査スクリプト)。",
+    status: "resolved-pr-188",
   },
   {
     id: "D-002",
@@ -490,6 +494,7 @@ const FINDINGS_G: Finding[] = [
       "A-001 と同根。表示「過去問」と実装「No verbatim copy of past-exam text」の不一致は景表法(優良誤認)の解釈余地あり。",
     recommendation:
       "即時にUI表記を「学習用問題」に変更。最優先課題として扱う。",
+    status: "resolved-pr-188",
   },
   {
     id: "G-002",
@@ -626,6 +631,7 @@ function renderFindingBlock(f: Finding) {
       data-finding-id={f.id}
       data-priority={f.priority}
       data-effort-hours={f.effortHours}
+      data-status={f.status}
     >
       <header className="flex flex-wrap items-baseline gap-2">
         <span className="font-mono text-sm font-bold text-slate-900">{f.id}</span>
