@@ -30,6 +30,7 @@ type Finding = {
   evidence: string;
   recommendation: string;
   decision?: "TBD";
+  batch?: number;
   status?: string;
 };
 
@@ -39,6 +40,7 @@ const FINDINGS_A: Finding[] = [
     title: "「過去問クイズ」表示と実装(創作問題)の不一致 — 誤認誘導のおそれ",
     priority: "P1",
     effortHours: 6,
+    batch: 1,
     url: "/exam-quiz, /quiz",
     evidence:
       "web/src/data/exam-questions/skill-training.ts に明示コメント: 「No verbatim copy of past-exam text. Each item is an original write-up with reference law citations.」一方UIは「過去問クイズ」と表示。オーナー方針「創作過去問・予想問題系コンテンツはNG」と矛盾。23,501行のコードに同様構造。",
@@ -51,6 +53,7 @@ const FINDINGS_A: Finding[] = [
     title: "exam-quiz ページに出題ソース注記なし",
     priority: "P1",
     effortHours: 3,
+    batch: 1,
     url: "/exam-quiz",
     evidence:
       "ページ本体に「出題は当サイト独自の学習用問題」「実試験の過去問とは異なる」旨の注記が存在しない。利用者は「過去問」を実際の試験問題と誤認する。",
@@ -85,6 +88,7 @@ const FINDINGS_A: Finding[] = [
     title: "「個人運営の研究プロジェクト」表記と機能(LMS β/Stripe/DPA/API-docs)の体裁不整合",
     priority: "P1",
     effortHours: 6,
+    batch: 3,
     url: "/lms, /dpa, /api-docs, /pricing",
     evidence:
       "footer等で「個人運営の研究プロジェクト」と明記しながら、LMS事前登録β、Stripe料金プレースホルダ、DPAページ「独立後3ヶ月以内」、API-docs「Phase 1独立後」など、企業向けプロダクトの体裁を装う未完成ページが多数。",
@@ -132,6 +136,7 @@ const FINDINGS_B: Finding[] = [
     title: "2025年事故事例が「速報統計から導出した代表パターン」=実質創作 — preliminary バッジでは伝わりにくい",
     priority: "P1",
     effortHours: 8,
+    batch: 4,
     url: "/accidents-reports, /accidents",
     evidence:
       "web/src/data/mock/real-accident-cases-2025-preliminary.ts ヘッダコメント:「個票ではなく、業種別・事故型別集計値(速報)から統計的に導出した『代表パターン』」。UI上は他の実事例と並ぶ。「速報」バッジでは「創作事例である」ことが伝わらない。",
@@ -365,6 +370,7 @@ const FINDINGS_F: Finding[] = [
     title: "/lms — 2026年秋公開予定のウェイトリスト、現状機能なし",
     priority: "P1",
     effortHours: 2,
+    batch: 2,
     url: "/lms",
     evidence:
       "WebFetch評価:「未稼働。2026年秋公開予定。プレビューはモック画面のみ」。法人向けプロダクトの体裁を装う未完成ページが信頼を毀損。",
@@ -376,6 +382,7 @@ const FINDINGS_F: Finding[] = [
     title: "/api-docs — 実APIなし、ロードマップのみ(個人運営に不要)",
     priority: "P1",
     effortHours: 2,
+    batch: 2,
     url: "/api-docs",
     evidence:
       "WebFetch評価:「実際のAPIなし。フェーズ1は『独立後3ヶ月』という未定の時間軸」「実装前の計画書をユーザー向けに掲載する意味は限定的」。",
@@ -387,6 +394,7 @@ const FINDINGS_F: Finding[] = [
     title: "/handover — 内部用ページが外部公開",
     priority: "P1",
     effortHours: 1,
+    batch: 2,
     url: "/handover",
     evidence:
       "A-006 と同根。外部利用者向け価値ゼロ。",
@@ -398,6 +406,7 @@ const FINDINGS_F: Finding[] = [
     title: "/pricing — 「準備中」5プラン構想記載のみ、実装ゼロ",
     priority: "P1",
     effortHours: 2,
+    batch: 2,
     url: "/pricing",
     evidence:
       "WebFetch評価:「料金プランは現在準備中。決済方法の情報もない」。",
@@ -501,6 +510,7 @@ const FINDINGS_G: Finding[] = [
     title: "/dpa — テンプレート未整備状態での公開、個人運営での企業向けDPA提供は法的責任曖昧",
     priority: "P1",
     effortHours: 3,
+    batch: 3,
     url: "/dpa",
     evidence:
       "WebFetch評価:「テンプレート未整備(『独立後3ヶ月以内に整備予定』)、個別対応のみ、標準化なし」「個人運営による業務委託契約の締結は法的責任が曖昧」。",
@@ -512,6 +522,7 @@ const FINDINGS_G: Finding[] = [
     title: "賠償責任保険「未加入」を /insurance で明記 — 個人運営の限界",
     priority: "P1",
     effortHours: 4,
+    batch: 4,
     url: "/insurance",
     evidence:
       "WebFetch評価:「未加入です。Phase 1 after incorporation」「保険未加入の状態でサービスを利用されることに同意のうえご利用ください」。透明性は高いが、企業利用者にはハードル。",
@@ -631,6 +642,7 @@ function renderFindingBlock(f: Finding) {
       data-finding-id={f.id}
       data-priority={f.priority}
       data-effort-hours={f.effortHours}
+      data-batch={f.batch !== undefined ? String(f.batch) : undefined}
       data-status={f.status}
     >
       <header className="flex flex-wrap items-baseline gap-2">
@@ -649,6 +661,11 @@ function renderFindingBlock(f: Finding) {
         >
           {f.priority}
         </span>
+        {f.batch !== undefined && (
+          <span className="rounded px-2 py-0.5 text-xs font-bold bg-blue-100 text-blue-900">
+            Batch {f.batch}
+          </span>
+        )}
         <span className="text-xs text-slate-500">推定工数 {f.effortHours}h</span>
         <span className="text-xs text-slate-500">採否: TBD</span>
       </header>
