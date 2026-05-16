@@ -1,9 +1,10 @@
 import type { UgcSubmission } from "@/lib/ugc-types";
 
 /**
- * 現場の声（UGC）シードデータ。
- * 公開デモ用に、運営側が用意した「実体験ベース」の事例。
- * 将来 DB に移行する際はこのファイルを廃止する。
+ * Community cases seed data — operator-authored example entries for demonstration purposes.
+ * These are NOT real user submissions. They are illustrative cases written by the site operator
+ * to show the UGC feature before genuine contributions are available.
+ * Retire this file when migrating to a real DB with verified user contributions.
  */
 export const COMMUNITY_CASES_SEED: UgcSubmission[] = [
   {

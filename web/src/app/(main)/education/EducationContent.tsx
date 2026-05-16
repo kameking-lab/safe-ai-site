@@ -6,7 +6,7 @@ import { JsonLd, serviceSchema } from "@/components/json-ld";
 import { useTranslation } from "@/contexts/language-context";
 
 const DESCRIPTION =
-  "労働安全衛生法に基づく特別教育・法定教育・労働衛生教育12種に対応。フルハーネス・足場・低圧電気・職長教育など。オンデマンド配信・カスタマイズ研修・講師派遣。¥50,000〜の明朗会計、修了証発行まで一括対応。";
+  "労働安全衛生法に基づく特別教育・法定教育・労働衛生教育12種に対応。フルハーネス・足場・低圧電気・職長教育など。オンデマンド配信・カスタマイズ研修・講師派遣。修了証発行まで一括対応。";
 
 type CategoryKey = "tokubetsu" | "hoteikyoiku" | "roudoueisei";
 
@@ -56,14 +56,14 @@ const CATEGORY_ORDER: CategoryKey[] = ["tokubetsu", "hoteikyoiku", "roudoueisei"
 
 const FORMATS = {
   ja: [
-    { icon: BookOpen, title: "オンデマンド配信", desc: "対応12種を動画で受講。受講進捗の管理画面に対応。スマホ・PC両対応。", price: "¥50,000〜 / 1社（10名まで）", badge: "2026年秋リリース予定", preorder: "事前予約受付中" },
-    { icon: Users, title: "カスタマイズ研修", desc: "貴社の現場・機械・KY事例に合わせた専用テキスト・動画を制作。法定時間を満たす独自カリキュラムを設計。", price: "¥150,000〜 / 1コース" },
-    { icon: Building2, title: "講師派遣（対面・オンライン）", desc: "労働安全コンサルタントが講師として登壇。実技指導や質疑応答、修了証発行までワンストップ対応。", price: "¥80,000〜 / 半日（交通費別）" },
+    { icon: BookOpen, title: "オンデマンド配信", desc: "対応12種を動画で受講。受講進捗の管理画面に対応。スマホ・PC両対応。", badge: "2026年秋リリース予定", preorder: "事前予約受付中" },
+    { icon: Users, title: "カスタマイズ研修", desc: "貴社の現場・機械・KY事例に合わせた専用テキスト・動画を制作。法定時間を満たす独自カリキュラムを設計。" },
+    { icon: Building2, title: "講師派遣（対面・オンライン）", desc: "労働安全コンサルタントが講師として登壇。実技指導や質疑応答、修了証発行までワンストップ対応。" },
   ],
   en: [
-    { icon: BookOpen, title: "On-demand Video", desc: "Watch all 12 program types as video. Progress dashboard included. Works on smartphone and PC.", price: "¥50,000~ / company (up to 10 people)", badge: "Planned for fall 2026", preorder: "Pre-registration open" },
-    { icon: Users, title: "Customized Training", desc: "We create bespoke text and video matched to your site, equipment, and KY examples — designed to meet statutory hours.", price: "¥150,000~ / 1 course" },
-    { icon: Building2, title: "Instructor Dispatch (in-person / online)", desc: "A registered Occupational Safety Consultant serves as instructor. Practical guidance, Q&A, and certificate issuance — all in one.", price: "¥80,000~ / half-day (travel costs extra)" },
+    { icon: BookOpen, title: "On-demand Video", desc: "Watch all 12 program types as video. Progress dashboard included. Works on smartphone and PC.", badge: "Planned for fall 2026", preorder: "Pre-registration open" },
+    { icon: Users, title: "Customized Training", desc: "We create bespoke text and video matched to your site, equipment, and KY examples — designed to meet statutory hours." },
+    { icon: Building2, title: "Instructor Dispatch (in-person / online)", desc: "A registered Occupational Safety Consultant serves as instructor. Practical guidance, Q&A, and certificate issuance — all in one." },
   ],
 };
 
@@ -106,7 +106,6 @@ export function EducationContent() {
           description: DESCRIPTION,
           url: "https://www.anzen-ai-portal.jp/education",
           serviceType: "EducationalService",
-          priceFrom: 50000,
         })}
       />
       <header className="mb-8">
@@ -129,7 +128,7 @@ export function EducationContent() {
       {/* Delivery formats */}
       <section className="mb-10">
         <h2 className="mb-4 text-lg font-bold text-slate-900">
-          {isEn ? "Delivery Formats & Pricing" : "受講形式と料金"}
+          {isEn ? "Delivery Formats" : "受講形式"}
         </h2>
         <div className="grid gap-4 md:grid-cols-3">
           {formats.map((f) => {
@@ -153,15 +152,14 @@ export function EducationContent() {
                   )}
                 </div>
                 <p className="mt-2 text-xs leading-5 text-slate-600">{f.desc}</p>
-                <p className="mt-3 text-sm font-bold text-emerald-700">{f.price}</p>
               </div>
             );
           })}
         </div>
         <p className="mt-3 text-xs text-slate-500">
           {isEn
-            ? "* Prices are tax-exclusive estimates. Vary with number of participants, customization scope, and travel destination."
-            : "※ 価格は税抜目安。受講人数・カスタマイズ範囲・出張地域により変動します。詳細はお問い合わせください。"}
+            ? "* Contact us for pricing details tailored to your participant count, customization scope, and location."
+            : "※ 受講人数・カスタマイズ範囲・出張地域に応じてご案内します。詳細はお問い合わせください。"}
         </p>
       </section>
 

@@ -10,7 +10,7 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd, faqPageSchema } from "@/components/json-ld";
 const TITLE = "Q&Aナレッジベース";
 const DESCRIPTION =
-  "現場担当者から寄せられた質問と、労働安全コンサルタントの回答をまとめたナレッジベース。";
+  "労働安全に関するQ&Aをまとめたナレッジベース。コンサルタントへの質問も受け付けています。";
 
 export const metadata: Metadata = {
   title: `${TITLE}`,
