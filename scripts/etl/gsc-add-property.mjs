@@ -4,12 +4,16 @@
  * GSC UI silently rejects service accounts (Google account validation).
  * This script uses a direct API call instead.
  *
- * Env: GOOGLE_APPLICATION_CREDENTIALS_JSON (service account JSON, single line)
+ * Env:
+ *   GOOGLE_APPLICATION_CREDENTIALS_JSON - service account JSON (single line)
+ *   GSC_TARGET_SITE - GSC property identifier (default: sc-domain:anzen-ai-portal.jp)
+ *     Use sc-domain:<domain> for Domain properties (DNS TXT verified).
+ *     Use https://www.<domain>/ for URL-prefix properties.
  */
 
 import { createSign } from 'node:crypto';
 
-const SITE_URL = 'https://www.anzen-ai-portal.jp/';
+const SITE_URL = process.env.GSC_TARGET_SITE || 'sc-domain:anzen-ai-portal.jp';
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 const SCOPE = 'https://www.googleapis.com/auth/webmasters';
 const WEBMASTERS_BASE = 'https://www.googleapis.com/webmasters/v3';
@@ -82,12 +86,12 @@ async function sitesList(token) {
 
   const found = sites.find((s) => s.siteUrl === SITE_URL);
   if (found) {
-    console.log(`sites.list: ${SITE_URL} FOUND permissionLevel=${found.permissionLevel}`);
+    console.log(`sites.list: FOUND siteUrl=${found.siteUrl} permissionLevel=${found.permissionLevel}`);
     return true;
   }
 
   console.warn(`sites.list: ${SITE_URL} NOT FOUND`);
-  console.log('Registered sites:', sites.map((s) => s.siteUrl).join(', '));
+  console.log('Registered sites:', sites.map((s) => `${s.siteUrl}(${s.permissionLevel})`).join(', '));
   return false;
 }
 
