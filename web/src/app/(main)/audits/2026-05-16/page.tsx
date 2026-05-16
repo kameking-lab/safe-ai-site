@@ -375,6 +375,20 @@ const FINDINGS_D: Finding[] = [
     recommendation:
       "/qa-knowledge を /faq の1セクションに統合(投稿は1件と少ない)。/articles はテーマ記事として独立維持。",
   },
+  {
+    id: "D-005",
+    title: "seo-articles JSONL — 4テンプレートサブセット202本がAI量産・出典なし(Helpful Content違反リスク)",
+    priority: "P1",
+    effortHours: 2,
+    url: "web/src/data/seo-articles/ (seasonal/legal/subsidies/international)",
+    evidence:
+      "web/src/data/seo-articles/seo-articles-{seasonal,legal,subsidies,international}.jsonl の202本は、業種・季節を入れ替えるだけの定型テンプレート本文。記事ごとのMHLW通達番号・事例IDなし、テンプレ免責「本記事はテンプレートベースで自動生成された情報整理です」を明記。コンサルタント監修ポータルとしてはHelpful Content違反およびプログラマブルSEOスパムのリスク。Draft PR #182 audit doc D-1 に該当。",
+    recommendation:
+      "circulars/accidents/chemicals(MHLW実データ紐付け済、1,758本)は維持し、テンプレート4サブセットは削除。これらは公開ルート・サイトマップに未接続のため301は不要。",
+    status: "resolved-pr-196",
+    statusNote:
+      "refactor/archive-ai-generated-articles PR#196 で4 JSONLファイル(202本)を削除、index.jsonに archived ブロックを追加、generator/audit scripts を残3カテゴリ(circulars/accidents/chemicals)のみに更新。",
+  },
 ];
 
 const FINDINGS_E: Finding[] = [
