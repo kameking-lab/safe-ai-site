@@ -95,6 +95,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       { label: "通達原文", href: "/circulars" },
       { label: "法令体系マップ", href: "/law-hierarchy", description: "法→政令→省令→告示の階層構造を俯瞰" },
       { label: "年次安全衛生計画ジェネレーター", href: "/strategy/plan-generator", description: "業種・規模別の30テンプレートから年次計画書を自動生成" },
+      { label: "健康診断スケジューラ", href: "/health-checkup-scheduler", description: "業種・職種・物質・作業条件から必要健診と年間スケジュールを自動判定" },
     ],
   },
   {
