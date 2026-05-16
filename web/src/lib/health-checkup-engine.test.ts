@@ -20,7 +20,7 @@ const baseProfile = (overrides: Partial<WorkerProfile> = {}): WorkerProfile => (
 });
 
 describe("health-checkup-engine", () => {
-  it("ships rules covering all 6 checkup types", () => {
+  it("ships rules covering all 8 checkup types", () => {
     const types = new Set(ALL_CHECKUP_RULES.map((r) => r.type));
     expect(types.has("general")).toBe(true);
     expect(types.has("specific-job")).toBe(true);
@@ -28,6 +28,14 @@ describe("health-checkup-engine", () => {
     expect(types.has("silicosis")).toBe(true);
     expect(types.has("dental-special")).toBe(true);
     expect(types.has("electron-radiation")).toBe(true);
+    expect(types.has("overtime")).toBe(true);
+    expect(types.has("overseas")).toBe(true);
+  });
+
+  it("ships at least 30 distinct checkup rules across 8 categories", () => {
+    expect(ALL_CHECKUP_RULES.length).toBeGreaterThanOrEqual(30);
+    const ids = new Set(ALL_CHECKUP_RULES.map((r) => r.id));
+    expect(ids.size).toBe(ALL_CHECKUP_RULES.length); // no duplicate ids
   });
 
   it("ships at least 100 job profiles across 5 industries", () => {
