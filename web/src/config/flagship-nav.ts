@@ -123,6 +123,37 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       { label: "リスク予測", href: "/risk-prediction" },
     ],
   },
+  {
+    id: "education-certification",
+    label: "特別教育・技能講習",
+    icon: "🎓",
+    cardTitle: "特別教育・技能講習DB",
+    cardDescription:
+      "安衛則第36条の特別教育（約60種）・技能講習（約40種）を完全収録。業種・作業から必要資格を即時判定。根拠条文付き。",
+    href: "/education-certification",
+    subItems: [
+      {
+        label: "資格判定ツール",
+        href: "/education-certification/finder",
+        description: "業種・作業を選んで必要資格を自動判定",
+      },
+      {
+        label: "特別教育一覧（安衛則第36条）",
+        href: "/education-certification#special",
+        description: "約60種の特別教育を根拠条文付きで確認",
+      },
+      {
+        label: "技能講習一覧（就業制限）",
+        href: "/education-certification#skill",
+        description: "約40種の技能講習・就業制限業務",
+      },
+      {
+        label: "Eラーニング・受講申込",
+        href: "/education",
+        description: "特別教育コースのオンライン受講",
+      },
+    ],
+  },
 ];
 
 export function getFlagshipById(id: string): FlagshipFeature | undefined {
