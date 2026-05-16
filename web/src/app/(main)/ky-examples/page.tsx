@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { KyExamplesBrowser } from "@/components/ky-examples-browser";
+import { CrossToolLinks } from "@/components/cross-tool-links";
 import { PageSkeleton } from "@/components/skeleton";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -25,8 +26,11 @@ export const metadata: Metadata = {
 
 export default function KyExamplesPage() {
   return (
-    <Suspense fallback={<PageSkeleton label="KY事例データベースを読み込み中" />}>
-      <KyExamplesBrowser />
-    </Suspense>
+    <>
+      <Suspense fallback={<PageSkeleton label="KY事例データベースを読み込み中" />}>
+        <KyExamplesBrowser />
+      </Suspense>
+      <CrossToolLinks exclude="ky-examples" />
+    </>
   );
 }

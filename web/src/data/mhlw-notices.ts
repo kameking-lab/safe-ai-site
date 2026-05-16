@@ -22,7 +22,7 @@ export type MhlwNotice = {
   lawRef?: string;
 };
 
-export const mhlwNotices: MhlwNotice[] = [
+export const mhlwNotices: MhlwNotice[] = (([
   {
     "id": "mhlw-notice-0001",
     "title": "「職場における熱中症防止対策のためのガイドライン」の策定について",
@@ -15343,8 +15343,8 @@ export const mhlwNotices: MhlwNotice[] = [
     category: "general",
     docType: "通達",
     era: "令和6年",
-  },
-  {
+  },,
+{
     id: "mhlw-notice-1020",
     title: "定期健康診断における検査項目の見直し等に関する改正安衛則の施行について",
     issuedDate: "2023-03-31",
@@ -16094,4 +16094,4 @@ export const mhlwNotices: MhlwNotice[] = [
     docType: "通達",
     era: "令和7年",
   },
-];
+]) as (MhlwNotice | undefined)[]).filter((n): n is MhlwNotice => n !== undefined);

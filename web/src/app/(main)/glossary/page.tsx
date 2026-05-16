@@ -6,6 +6,7 @@ import Link from "next/link";
 import { PageContainer } from "@/components/layout";
 import { JsonLd, definedTermSetSchema } from "@/components/json-ld";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { EXTRA_TERMS } from "@/data/glossary";
 // Metadata cannot be exported from client component – define it in a separate layout or use a wrapper.
 // For now, the page itself handles SEO via next/head alternative approach.
 
@@ -16,7 +17,7 @@ type Term = {
   relatedPages?: Array<{ href: string; label: string }>;
 };
 
-const TERMS: Term[] = [
+const BASE_TERMS: Term[] = [
   { term: "KY活動", reading: "けーわいかつどう", definition: "危険予知活動の略。作業前に作業者全員でその作業に潜む危険を話し合い、対策を講じる安全活動。TBM（ツールボックスミーティング）と組み合わせて実施することが多い。", relatedPages: [{ href: "/ky", label: "KY用紙" }, { href: "/e-learning", label: "Eラーニング" }] },
   { term: "KYT", reading: "けーわいてぃー", definition: "危険予知トレーニングの略。イラストや写真を使って、潜む危険を発見・指摘する訓練。4ラウンド法（現状把握→本質追究→対策樹立→目標設定）が代表的手法。", relatedPages: [{ href: "/ky", label: "KY用紙" }] },
   { term: "安全衛生委員会", reading: "あんぜんえいせいいいんかい", definition: "常時50人以上の労働者を使用する事業場で設置義務がある委員会。安全委員会と衛生委員会を統合したもので、月1回以上開催が義務。議事録は3年間保存。", relatedPages: [{ href: "/laws", label: "法改正" }, { href: "/chatbot", label: "法令チャット" }] },
@@ -116,6 +117,8 @@ const TERMS: Term[] = [
   { term: "通路・避難路", reading: "つうろひなんろ", definition: "作業場の通路は幅80cm以上の確保・標識設置が必要（安衛則第542条等）。避難路・非常口の確保と表示、定期的な避難訓練の実施が求められる。", relatedPages: [] },
   { term: "ロックアウト・タグアウト", reading: "ろっくあうとたぐあうと", definition: "LOTO（Lockout/Tagout）。機械整備・清掃時の予期しない起動・エネルギー放出を防ぐための手順。動力源を遮断・施錠し、警告タグを取り付ける安全確保手順。", relatedPages: [] },
 ];
+
+const TERMS: Term[] = [...BASE_TERMS, ...EXTRA_TERMS];
 
 const KANA_ROWS = ["あ", "か", "さ", "た", "な", "は", "ま", "や", "ら", "わ"];
 
