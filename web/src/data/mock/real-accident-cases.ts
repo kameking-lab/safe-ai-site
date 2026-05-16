@@ -27,6 +27,12 @@ export const realAccidentCases: AccidentCase[] = [
       "安全装備の適切な使用と確認手順を確立する",
       "屋根作業中の包括的な安全プロトコルと監督体制を構築する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100003",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100003",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100005",
@@ -47,6 +53,12 @@ export const realAccidentCases: AccidentCase[] = [
       "安全基準に沿った装備配置を確保する",
       "書面による作業手順を策定し、全員に周知する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100005",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100005",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100010",
@@ -67,6 +79,12 @@ export const realAccidentCases: AccidentCase[] = [
       "JIS認定の適切な防護具の使用",
       "定期的な安全点検と作業環境測定の実施",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100010",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100010",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100015",
@@ -87,6 +105,12 @@ export const realAccidentCases: AccidentCase[] = [
       "安全柵・手すりを設置する",
       "作業員間の連携体制を確立し安全確認手順を周知する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100015",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100015",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100020",
@@ -107,6 +131,12 @@ export const realAccidentCases: AccidentCase[] = [
       "足場の確保と墜落防止措置の徹底",
       "新規入場者教育の実施を徹底する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100020",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100020",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100025",
@@ -127,6 +157,12 @@ export const realAccidentCases: AccidentCase[] = [
       "監督者主導の安全指示手順を実施する",
       "落下物防止ネットの適切な設置を確保する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100025",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100025",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100030",
@@ -147,6 +183,12 @@ export const realAccidentCases: AccidentCase[] = [
       "作業手順の遵守を徹底する",
       "挟まれ・巻き込まれ防止のカバー・ガードを設置する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100030",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100030",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100035",
@@ -167,6 +209,12 @@ export const realAccidentCases: AccidentCase[] = [
       "作業前にリスクアセスメントを実施する",
       "監督者の安全訓練を徹底する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100035",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100035",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100040",
@@ -187,6 +235,12 @@ export const realAccidentCases: AccidentCase[] = [
       "吊荷作業時に立入禁止区域を設定する",
       "玉掛け作業は有資格者が行う",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100040",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100040",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100050",
@@ -207,6 +261,12 @@ export const realAccidentCases: AccidentCase[] = [
       "保護具の装着について明確な指示を全員に出す",
       "作業内容に応じた作業計画を作成し現場で厳守する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100050",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100050",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100055",
@@ -227,6 +287,12 @@ export const realAccidentCases: AccidentCase[] = [
       "支柱・筋交いの設置を確実に行う",
       "手すり・中桟の設置を省略しない",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100055",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100055",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100060",
@@ -247,6 +313,12 @@ export const realAccidentCases: AccidentCase[] = [
       "定期的な床面の保守点検を実施する",
       "つまずき・滑り防止の安全標識を設置する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100060",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100060",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100080",
@@ -267,6 +339,12 @@ export const realAccidentCases: AccidentCase[] = [
       "施工計画に挟まれ防止措置を盛り込む",
       "作業員に対する安全教育を実施する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100080",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100080",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100090",
@@ -287,6 +365,12 @@ export const realAccidentCases: AccidentCase[] = [
       "施設・設備に関する安全情報の提供",
       "保護具管理と安全教育の強化",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100090",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100090",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100100",
@@ -307,6 +391,12 @@ export const realAccidentCases: AccidentCase[] = [
       "荷重制限を厳守する",
       "定期的な保守管理と安全教育を徹底する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100100",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100100",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100150",
@@ -326,6 +416,12 @@ export const realAccidentCases: AccidentCase[] = [
       "クレーン操作時の安全確保と監視体制の整備",
       "溶融金属取扱い作業の安全手順を策定する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100150",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100150",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100170",
@@ -346,6 +442,12 @@ export const realAccidentCases: AccidentCase[] = [
       "作業開始前に圧力残留の有無を確認する",
       "必要に応じて保護装置を使用する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100170",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100170",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100200",
@@ -366,6 +468,12 @@ export const realAccidentCases: AccidentCase[] = [
       "作業前に安全設備の状態を確認する",
       "安全装備は規格品を使用し、定期的に交換する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100200",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100200",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100250",
@@ -386,6 +494,12 @@ export const realAccidentCases: AccidentCase[] = [
       "貯蔵庫の定期的な保守管理を行う",
       "単独作業時の安全確認ルールを設ける",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100250",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100250",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100300",
@@ -405,6 +519,12 @@ export const realAccidentCases: AccidentCase[] = [
       "保護具（耐薬品手袋・ゴーグル等）の適切使用",
       "作業指揮者の配置と定期的な安全点検",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100300",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100300",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100320",
@@ -425,6 +545,12 @@ export const realAccidentCases: AccidentCase[] = [
       "ハロゲンガス対応の適切な保護装置の導入",
       "関係者への安全教育・訓練の実施",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100320",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100320",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100370",
@@ -444,6 +570,12 @@ export const realAccidentCases: AccidentCase[] = [
       "吊荷の下には立入禁止区域を設ける",
       "玉掛け作業は有資格者が実施する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100370",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100370",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100400",
@@ -464,6 +596,12 @@ export const realAccidentCases: AccidentCase[] = [
       "漏電遮断装置の設置",
       "高湿度環境での絶縁保護具の使用を義務付ける",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100400",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100400",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100450",
@@ -484,6 +622,12 @@ export const realAccidentCases: AccidentCase[] = [
       "高所作業では必ず墜落制止用器具を使用する",
       "救助用具の配備と緊急時の連絡体制を確保する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100450",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100450",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100500",
@@ -504,6 +648,12 @@ export const realAccidentCases: AccidentCase[] = [
       "メンテナンス作業前に全関係者に周知する",
       "安全確認後に初めて機械を再起動する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100500",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100500",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100520",
@@ -524,6 +674,12 @@ export const realAccidentCases: AccidentCase[] = [
       "危険な地盤条件が検出された場合は作業を停止する",
       "足場の組立て等作業主任者を選任する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100520",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100520",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100550",
@@ -544,6 +700,12 @@ export const realAccidentCases: AccidentCase[] = [
       "定期的な機械点検と安全装置の動作確認",
       "保守管理体制の強化",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100550",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100550",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100570",
@@ -564,6 +726,12 @@ export const realAccidentCases: AccidentCase[] = [
       "作業開始前に手順と危険箇所を明確に指示する",
       "高齢作業者には適切な作業配分を行う",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100570",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100570",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100600",
@@ -584,6 +752,12 @@ export const realAccidentCases: AccidentCase[] = [
       "充電部には絶縁カバーを設置する",
       "感電防止教育と漏電遮断装置の設置を行う",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100600",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100600",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100620",
@@ -604,6 +778,12 @@ export const realAccidentCases: AccidentCase[] = [
       "消火設備の定期点検と維持管理を徹底する",
       "可燃性物質付近の作業手順を策定し遵守する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100620",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100620",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100670",
@@ -624,6 +804,12 @@ export const realAccidentCases: AccidentCase[] = [
       "落下防止の機械的拘束システムを使用する",
       "複数名で吊り上げ作業を行い合図者を配置する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100670",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100670",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100720",
@@ -644,6 +830,12 @@ export const realAccidentCases: AccidentCase[] = [
       "容器開放前に徹底的な検査を行う",
       "装備操作中の安全プロトコルを確立する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100720",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100720",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100750",
@@ -664,6 +856,12 @@ export const realAccidentCases: AccidentCase[] = [
       "MSDSに基づく保護具の使用を徹底する",
       "有害物質の取り扱いと緊急時対応の訓練を実施する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100750",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100750",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-100770",
@@ -684,6 +882,12 @@ export const realAccidentCases: AccidentCase[] = [
       "適切な保護具（防毒マスク等）の使用を徹底する",
       "化学的危険と安全な取り扱い方法の教育訓練を実施する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "100770",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=100770",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-101200",
@@ -704,6 +908,12 @@ export const realAccidentCases: AccidentCase[] = [
       "プレス機械は定期自主検査を確実に実施する",
       "作業員への安全教育と訓練を徹底する",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "101200",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=101200",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-101500",
@@ -724,6 +934,12 @@ export const realAccidentCases: AccidentCase[] = [
       "リスクアセスメントを実施し結果に基づく対策を講じる",
       "漏電遮断装置の設置と接地を確実に行う",
     ],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "101500",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=101500",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102001",
@@ -735,6 +951,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "建設現場でクレーンにより鉄骨を吊り上げ中、玉掛けワイヤーが外れ鉄骨が落下。下で誘導していた作業者に直撃し死亡。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102001",
     mainCauses: ["玉掛けワイヤーの点検不足による破断", "立入禁止区域の未設定", "誘導者の配置位置不適切"],
     preventionPoints: ["玉掛け用具の始業前点検を徹底する", "吊り荷直下への立入禁止区域を設定する", "誘導者は吊り荷の落下影響圏外に位置する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102001",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102001",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102002",
@@ -746,6 +968,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "高所作業車のバスケット内で電気工事中、安全帯を使用せず作業姿勢を崩してバスケット外に転落し地面に激突。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102002",
     mainCauses: ["安全帯の未使用", "作業手順書に安全帯使用が明記されていなかった", "監督者による確認不足"],
     preventionPoints: ["高所作業車作業では必ず安全帯を使用し作業車に接続する", "作業手順書に保護具着用を明記する", "KY活動で転落リスクを毎日確認する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102002",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102002",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102003",
@@ -757,6 +985,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "トンネル掘削工事において、地山の支保工設置前に切羽が崩落し、作業者2名が土砂に生き埋めとなり死亡。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102003",
     mainCauses: ["地山調査の不十分", "支保工設置作業の遅れ", "切羽近接作業者の退避遅延"],
     preventionPoints: ["掘削前に地山の性状を十分調査する", "支保工は規定どおりの間隔・タイミングで設置する", "崩落の前兆確認時は即座に作業員を退避させる"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102003",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102003",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102004",
@@ -768,6 +1002,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "鉄骨製造工場で溶接作業中、適切な遮光めがねを着用せずアーク光を直視し、紫外線眼炎（電気性眼炎）を発症。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102004",
     mainCauses: ["適切な遮光保護具の未着用", "溶接作業区画の不備", "保護具着用教育の不徹底"],
     preventionPoints: ["溶接作業には溶接電流に対応した遮光度の溶接面を使用する", "作業区画を遮光カーテンで囲い光の拡散を防ぐ", "新入社員への保護具教育を入職時に実施する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102004",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102004",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102005",
@@ -779,6 +1019,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "倉庫内でフォークリフトが後退中、死角に入っていた作業者と衝突。骨盤骨折の重傷を負った。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102005",
     mainCauses: ["歩行者通路とフォークリフト通路の分離なし", "バックブザーの故障放置", "後方確認の不徹底"],
     preventionPoints: ["人とフォークリフトの通路を物理的に分離する", "バックブザー・後方カメラの始業前点検を義務化する", "死角に後方確認ミラーを設置する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102005",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102005",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102006",
@@ -790,6 +1036,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "化学工場の貯蔵タンク内清掃作業で、窒素パージ後の酸素濃度確認を怠り作業者が酸素欠乏症で倒れ死亡。救助に入った作業者も被災。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102006",
     mainCauses: ["作業前の酸素濃度測定の省略", "酸素欠乏危険作業の特別教育未受講", "救助時の呼吸用保護具不使用"],
     preventionPoints: ["密閉空間入場前に酸素濃度・有害ガス濃度を必ず測定する", "酸素欠乏危険作業従事者特別教育を全員受講させる", "救助者は必ず呼吸用保護具を着用してから入場する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102006",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102006",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102007",
@@ -801,6 +1053,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "木材加工工場で丸のこ盤を使用中、ガイドを使わず手で材料を押さえながら切断作業をしていた作業者が、材料が跳ね上がり指3本を切断。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102007",
     mainCauses: ["押えガイドを使用せず手で材料を保持", "丸のこ盤の刃カバーが外されたまま使用", "作業手順書の不遵守"],
     preventionPoints: ["丸のこ盤は必ず刃カバーと押えガイドを使用する", "材料は適切な治具・クランプで固定してから切断する", "安全装置を外した機械の使用を禁止する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102007",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102007",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102008",
@@ -812,6 +1070,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "内装工事で脚立の最上段に乗り天井作業中、バランスを崩して転落し腰椎圧迫骨折。脚立が適切に固定されていなかった。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102008",
     mainCauses: ["脚立の最上段使用", "脚立の設置面が不安定", "補助者なしの単独作業"],
     preventionPoints: ["脚立の最上段・天板への乗り禁止を徹底する", "脚立は水平な堅固な地面に設置し開き止め金具を確認する", "高所作業は可能な限り二人作業で行う"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102008",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102008",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102009",
@@ -823,6 +1087,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "猛暑日の屋外建設現場で型枠解体作業中、WBGT値が危険域に達していたが作業継続し熱中症で倒れ心肺停止。AEDが近くになく救命できなかった。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102009",
     mainCauses: ["WBGT値の計測・管理なし", "作業中断・休憩ルールの未整備", "AED・緊急冷却用品の未設置"],
     preventionPoints: ["WBGTが28度以上で作業計画を見直し・中断する", "高温作業時は定期的な休憩と水分・塩分補給を義務付ける", "現場内にAEDと緊急冷却用品を常備する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102009",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102009",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102010",
@@ -834,6 +1104,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "機械加工工場でグラインダー作業中、砥石が回転中に破裂し破片が顔面に直撃。フェイスシールドを使用していなかった。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102010",
     mainCauses: ["フェイスシールド未使用", "砥石の最高回転速度超過", "砥石の使用前点検省略"],
     preventionPoints: ["研削作業では保護めがね・フェイスシールドを必ず着用する", "砥石の最高回転速度を確認し機械の回転数と一致させる", "砥石は使用前に打音検査と外観検査を実施する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102010",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102010",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102011",
@@ -845,6 +1121,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "スレート屋根の補修作業で、踏み抜き防止板を使用せず歩行し採光窓付近のスレートを踏み抜いて屋根から転落死亡。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102011",
     mainCauses: ["踏み抜き防止板の未使用", "安全ロープ・墜落防止ネットの未設置", "脆弱箇所の事前調査不足"],
     preventionPoints: ["スレート等の脆弱屋根は踏み抜き防止板を敷いて歩行する", "屋根周囲に防護ネットまたは安全ロープを設置する", "作業前に屋根材の状態を確認し脆弱箇所をマーキングする"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102011",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102011",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102012",
@@ -856,6 +1138,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "塗装ブース内でトルエン含有塗料を使用中、換気が不十分で有機溶剤中毒を発症し意識障害に。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102012",
     mainCauses: ["局所排気装置の起動忘れ", "有機ガス用防毒マスクの未着用", "有機溶剤作業主任者の不在"],
     preventionPoints: ["有機溶剤使用前に局所排気装置の稼働を確認する", "有機溶剤作業には有機ガス用吸収缶付き防毒マスクを使用する", "作業場所の有機溶剤濃度を定期的に測定する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102012",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102012",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102013",
@@ -867,6 +1155,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "高層建築のコンクリート打設中、型枠支保工が突然倒壊し作業者3名が巻き込まれ2名死亡1名重傷。計算書通りの施工がされていなかった。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102013",
     mainCauses: ["型枠支保工の設計・施工基準不遵守", "コンクリート打設速度が過大", "組立図・作業計画書の未作成"],
     preventionPoints: ["型枠支保工は設計計算書に基づき施工し組立後に確認する", "コンクリート打設速度と打設順序を計画書に定め遵守する", "型枠支保工の組立・解体には作業指揮者を選任する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102013",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102013",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102014",
@@ -878,6 +1172,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "食品工場でベルトコンベアの清掃中、停止措置をせず運転中のコンベアに手を入れ巻き込まれ前腕部骨折。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102014",
     mainCauses: ["機械停止確認なしの清掃作業", "ロックアウト・タグアウト手順の未整備", "運転中の危険部分への手の接近"],
     preventionPoints: ["清掃・点検作業前にロックアウト・タグアウトで完全停止させる", "清掃手順書に機械停止確認を明記し作業前に確認する", "巻き込まれ危険部位にカバーまたは安全センサーを設置する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102014",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102014",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102015",
@@ -889,6 +1189,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "雨天後の濡れた足場でコンクリートドリルを使用中、漏電して感電しびっくりして足場から転落し骨折。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102015",
     mainCauses: ["雨天後の漏電対策不備", "接地（アース）未接続", "漏電遮断器の設置なし"],
     preventionPoints: ["屋外電動工具は漏電遮断器付きの延長コードを使用する", "電動工具のアース接続を確認する", "雨天後は地面・足場が乾くまで電動工具の使用を控える"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102015",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102015",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102016",
@@ -900,6 +1206,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "自動車部品塗装工場で、可燃性溶剤の蒸気が滞留した中で電気スイッチを操作し爆発・火災が発生し作業者2名が火傷。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102016",
     mainCauses: ["可燃性溶剤蒸気の換気不足による滞留", "防爆型でない電気機器の使用", "可燃性ガス検知器の未設置"],
     preventionPoints: ["可燃性溶剤使用場所には局所排気と全体換気を組み合わせて使用する", "爆発危険区域には防爆型電気機器を設置する", "可燃性ガス検知警報器を設置し作業開始前に確認する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102016",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102016",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102017",
@@ -911,6 +1223,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "ボイラー点検整備中、バルブが完全に閉まっていることを確認せず配管フランジを開放したところ高温蒸気が噴出し顔・腕に重度熱傷。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102017",
     mainCauses: ["バルブ閉止確認の省略", "残圧・残熱の確認手順の欠如", "耐熱保護具の未着用"],
     preventionPoints: ["配管・機器の開放前に必ず残圧ゼロ・冷却確認を行う", "バルブ操作にはロックアウトを施し誤開放を防ぐ", "熱系作業では耐熱手袋・フェイスシールドを着用する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102017",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102017",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102018",
@@ -922,6 +1240,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "物流倉庫で25kgの荷物を一人で中腰姿勢のまま持ち上げた際に腰を痛め、腰椎捻挫で休業4日。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102018",
     mainCauses: ["一人での重量物取り扱い", "中腰姿勢での持ち上げ動作", "腰部保護ベルトの未使用"],
     preventionPoints: ["20kg超の荷物は二人以上または機械援助で運搬する", "持ち上げはひざを曲げ背筋を伸ばした姿勢で行う", "重量物作業者には腰部保護ベルトを支給し着用を徹底する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102018",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102018",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102019",
@@ -933,6 +1257,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "山林での立木伐採中、受け口・追い口の切り込みが不十分で木が予定外の方向に倒れ、近くで作業していた別の作業者を直撃し死亡。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102019",
     mainCauses: ["退避場所・退避方向の未確認", "受け口・追い口の不適切な切り込み", "伐倒方向の事前調査不足"],
     preventionPoints: ["伐木前に退避場所と退避経路を全員で確認する", "受け口は幹径の1/4以上の深さと正確な角度で切る", "木の重心・風向き・枝張りを確認し安全な伐倒方向を決定する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102019",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102019",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102020",
@@ -944,6 +1274,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "解体工事で吹き付けアスベストの除去作業中、隔離養生が不十分で周辺に石綿が飛散。適切な呼吸用保護具を使用していない作業者が被曝。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102020",
     mainCauses: ["作業前の石綿含有調査不徹底", "隔離・養生措置の不備", "防じんマスクRS3/DS3未着用"],
     preventionPoints: ["解体前に石綿含有建材の事前調査を資格者が実施する", "石綿除去は負圧隔離・湿潤化して飛散を防止する", "作業者は電動ファン付き呼吸用保護具を着用する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102020",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102020",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102021",
@@ -955,6 +1291,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "鉄骨建方工事の外部足場で作業中、踏板の固定が不十分でずれ、高さ4.5mから転落し多発骨折。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102021",
     mainCauses: ["踏板の緊結金具による固定省略", "足場の始業前点検での確認漏れ", "安全帯使用の不徹底"],
     preventionPoints: ["足場の踏板は緊結金具で確実に固定する", "毎朝の始業前に足場の状態を確認し異常があれば即修正する", "足場上での移動時もランヤードをフックポイントに接続する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102021",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102021",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102022",
@@ -966,6 +1308,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "石油タンクローリーの上蓋から積み込みホースを接続しようとした際に足を滑らせ地面に転落し脊椎骨折。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102022",
     mainCauses: ["タンク上部作業時の安全帯未使用", "滑り止めのない天板", "昇降設備の不備"],
     preventionPoints: ["ローリー上部作業は安全帯と親綱を使用する", "天板に滑り止め加工を施す", "固定式の昇降タラップと転落防止柵を設置する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102022",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102022",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102023",
@@ -977,6 +1325,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "下水管敷設工事の掘削溝で配管作業中、側壁の土砂が崩落し作業者1名が生き埋めになり窒息死。土留め工が施工されていなかった。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102023",
     mainCauses: ["深さ1.5m超の掘削への土留め未施工", "地山の地質・含水状態の事前調査不足", "掘削作業主任者の不選任"],
     preventionPoints: ["深さ1.5m超の掘削は土留め・矢板等を施工する", "掘削前に地質調査を行い軟弱地盤は強化土留めとする", "掘削工事には地山の掘削作業主任者を選任する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102023",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102023",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102024",
@@ -988,6 +1342,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "高圧受電設備の盤内工事中、停電確認を怠り充電中のブスバーに工具が接触し6600Vの感電で死亡。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102024",
     mainCauses: ["活線確認・停電確認の省略", "充電部のテープ養生なし", "絶縁保護具の未着用"],
     preventionPoints: ["高圧電気工事は必ず停電・検電・短絡接地を行い無電圧を確認してから実施する", "充電部には絶縁テープ・絶縁シートで養生する", "高圧電気作業では絶縁保護具一式を着用する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102024",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102024",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102025",
@@ -999,6 +1359,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "造林作業でチェーンソーを使い下草刈り中、チェーンソーが跳ね返り作業者自身の太ももを切傷。防護ズボンを着用していなかった。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102025",
     mainCauses: ["防護ズボンの未着用", "キックバックの危険性教育不足", "作業姿勢・チェーンソー操作方法の問題"],
     preventionPoints: ["チェーンソー作業には必ず防護ズボン・防護長靴を着用する", "チェーンソー特別教育でキックバック防止技術を習得させる", "チェーンソーは肩の高さ以下で操作し体から離した姿勢を保つ"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102025",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102025",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102026",
@@ -1010,6 +1376,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "船舶修理のドライドック内の浮き桟橋作業中、作業者が水面に転落し救命胴衣を着用していなかったため溺水死亡。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102026",
     mainCauses: ["水辺作業時の救命胴衣未着用", "転落防止用手すりの未設置", "水中救助体制の未整備"],
     preventionPoints: ["水辺での作業には必ず救命胴衣を着用させる", "水辺作業床には手すりと中桟を設置する", "水中救助用具と救助手順を事前に整備し訓練する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102026",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102026",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102027",
@@ -1021,6 +1393,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "鉄板のガス溶断中にノズルが詰まり逆火が発生。アセチレンボンベのバルブを閉め忘れていたため爆発し作業者が爆風で負傷。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102027",
     mainCauses: ["逆火防止器の未取付け", "ノズル詰まり時の緊急手順の未習得", "作業終了時のボンベバルブ閉止の確認不足"],
     preventionPoints: ["ガス溶断では酸素・可燃ガスホースに逆火防止器を取り付ける", "逆火発生時は即座にガスバルブを閉鎖する訓練を実施する", "作業終了・中断時は必ずボンベバルブを閉止する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102027",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102027",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102028",
@@ -1032,6 +1410,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "エレベーターの保守点検中、昇降路内でエレベーターかごと壁の間に挟まれて死亡。作業者がかごを固定せず昇降させてしまった。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102028",
     mainCauses: ["エレベーターかごの固定省略", "点検モードへの切り替え確認不足", "単独での保守作業"],
     preventionPoints: ["昇降路内作業前に必ずかごを固定し動力を遮断する", "点検モードスイッチの確認を複数人で相互確認する", "昇降機保守は2名以上で実施し互いに確認し合う"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102028",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102028",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102029",
@@ -1043,6 +1427,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "製粉工場で小麦粉の粉塵が集積した中でモーターが発火し粉塵爆発が発生。作業者3名が火傷を負い工場設備が全焼。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102029",
     mainCauses: ["粉塵集積の掃除不足", "電気設備の防爆対応不備", "粉塵爆発リスクの認識不足"],
     preventionPoints: ["粉塵が発生する工場は定期的に粉塵を除去・清掃する", "粉塵爆発危険箇所の電気設備は防爆型にする", "粉塵爆発のリスク教育を全作業者に実施する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102029",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102029",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102030",
@@ -1054,6 +1444,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "鉄骨建方工事でクレーンが鉄骨柱を吊り上げ中、建入れ調整のため近接していた鍛冶工が誤って落下した鉄骨に激突し死亡。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102030",
     mainCauses: ["吊り荷周囲への不必要な近接", "吊り荷の落下影響圏の誰にも未周知", "作業指揮者の不在"],
     preventionPoints: ["鉄骨建方中は吊り荷落下影響圏への立入を禁止する", "建入れ調整はクレーンが吊り荷を安定させてから行う", "鉄骨建方には作業主任者を選任し全体を統括させる"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102030",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102030",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102031",
@@ -1065,6 +1461,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "金属プレス加工工場で、生産速度向上のため作業者が安全両手操作装置を無効化して片手操作を行い、プレス型に指4本を挟まれ切断。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102031",
     mainCauses: ["安全装置（両手操作機構）の意図的な無効化", "生産優先意識による安全軽視", "管理者による作業実態の把握不足"],
     preventionPoints: ["安全装置の改造・無効化を規則で厳禁にし定期確認する", "生産目標と安全の両立に向けた作業改善を推進する", "管理者は定期的に作業実態を観察し危険行為を是正する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102031",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102031",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102032",
@@ -1076,6 +1478,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "厳冬期の橋梁工事で風速15m/s・気温-5度の環境下で長時間作業し、防寒対策不十分な作業者が低体温症で意識混濁となり搬送。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102032",
     mainCauses: ["気象条件に対応した防寒装備の未整備", "作業中断・暖房休憩の未設定", "低体温症の初期症状の認知不足"],
     preventionPoints: ["厳冬期作業には防風防水の防寒具・電熱防寒具を支給する", "風速・体感温度に基づく作業中断基準を設け実施する", "低体温症の症状・応急処置を全作業者に教育する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102032",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102032",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102033",
@@ -1087,6 +1495,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "市街地での足場解体作業中、防護ネットを外した後に鋼管が落下し、通行人に当たり骨折。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102033",
     mainCauses: ["解体順序の誤り（防護ネット先行除去）", "落下物防護シートの未設置", "第三者立入禁止区域設定の不備"],
     preventionPoints: ["足場解体は上から順に行い防護設備は最後に撤去する", "市街地の足場解体では防護シートと飛散防護を維持する", "作業区域外への立入禁止ロープ・看板を設置する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102033",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102033",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102034",
@@ -1098,6 +1512,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "セラミック製品焼成工場で高温窯（900度）の棚板交換中に棚板が滑落し、耐熱手袋なしの素手に落下して重度熱傷。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102034",
     mainCauses: ["耐熱手袋の未着用", "棚板の適切な把持方法の未習得", "作業前の冷却確認省略"],
     preventionPoints: ["高温窯作業には耐熱手袋・耐熱エプロンを着用する", "高温材料の取り扱い手順を作業標準書に明記し教育する", "作業前に材料の温度を確認し適切な冷却を待つ"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102034",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102034",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102035",
@@ -1109,6 +1529,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "道路工事で削岩機・チッパーを長年使用してきた作業者が振動障害（白蝋病）を発症。健康診断での早期発見が遅れた。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102035",
     mainCauses: ["1日の振動工具使用時間の管理不足", "振動障害特殊健康診断の未実施", "防振手袋の未使用"],
     preventionPoints: ["振動工具の1日使用時間を管理し休憩を適切に挟む", "振動業務従事者は年2回の振動特殊健康診断を受診させる", "防振手袋を使用し振動の吸収を図る"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102035",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102035",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102036",
@@ -1120,6 +1546,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "屋外タンク修理現場でアーク溶接中、雨で濡れた状態の作業者が溶接棒ホルダの充電部に触れ感電死亡。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102036",
     mainCauses: ["雨天・濡れた状態での溶接作業継続", "自動電撃防止装置の未設置", "絶縁保護具の未着用"],
     preventionPoints: ["雨天・濡れた状態での屋外溶接作業は中断する", "溶接機には自動電撃防止装置を設置する", "溶接作業者は絶縁手袋・乾燥した作業服を着用する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102036",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102036",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102037",
@@ -1131,6 +1563,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "トラックの荷台（高さ1.2m）から荷物を降ろす際に足を踏み外し転落。コンクリート床面に頭部を打ち硬膜外血腫。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102037",
     mainCauses: ["積み降ろし用ステップの未設置", "荷台端部での後ろ向き降車", "作業靴の滑り止め摩耗"],
     preventionPoints: ["荷台への昇降には専用ステップまたはタラップを使用する", "荷台から降りる際は必ずステップを使い前向きで降りる", "作業靴の滑り止めを定期点検し摩耗したら交換する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102037",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102037",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102038",
@@ -1142,6 +1580,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "コンクリート打設中に圧送ホースの継手部が圧力超過で破裂し、コンクリートが飛散して近くの作業者の顔面に直撃し複数骨折。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102038",
     mainCauses: ["圧送ホースの定期点検・耐圧試験の未実施", "継手部の締め付け不足", "飛散防護措置の未実施"],
     preventionPoints: ["圧送ホースは使用前に耐圧試験と外観点検を実施する", "ホース継手部は規定トルクで締め付け確認する", "コンクリートポンプ作業では周囲への立入禁止区域を設ける"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102038",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102038",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102039",
@@ -1153,6 +1597,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "下水道管渠の清掃工事でマンホール内に降下した作業者が高濃度硫化水素で即死。救助に入った作業者も被災し計2名死亡。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102039",
     mainCauses: ["入場前のガス濃度測定省略", "空気呼吸器の不携行", "2次被災防止のための救助手順の未整備"],
     preventionPoints: ["下水管内作業前に硫化水素濃度を測定し安全を確認する", "マンホール内作業者は空気呼吸器を着用する", "2次被災防止のため救助者は必ず呼吸用保護具を着用してから入場する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102039",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102039",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102040",
@@ -1164,6 +1614,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "製紙工場の大型ロールプレス機の清掃中に稼働中のロールに布が巻き込まれ、手でつかんでいた作業者が手首まで巻き込まれ骨折・脱臼。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102040",
     mainCauses: ["稼働中機械の清掃作業", "ロール接触部への接近禁止措置なし", "非常停止ボタンの位置が遠い"],
     preventionPoints: ["ロール機械の清掃は必ず停止・ロックアウト後に実施する", "ロール接触部には固定式ガードを設置し接触を防止する", "非常停止ボタンを作業位置近くに設置する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102040",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102040",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102041",
@@ -1175,6 +1631,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "フォークリフト用鉛蓄電池の定期交換作業で、長期間にわたり防じんマスクなしで作業を続けた作業者が血中鉛濃度上昇（鉛中毒）と診断。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102041",
     mainCauses: ["鉛作業における防じんマスクの未使用", "鉛特殊健康診断の未受診", "作業環境測定の未実施"],
     preventionPoints: ["鉛作業には防じんマスクを着用し換気を十分に行う", "鉛業務従事者は6ヶ月ごとに鉛特殊健康診断を受診させる", "作業環境測定を定期的に実施し管理濃度を超えないようにする"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102041",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102041",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102042",
@@ -1186,6 +1648,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "道路拡張工事でバックホウのアームが架空電線（6600V）に接触し、機械が感電。オペレーターと誘導員が感電し重傷。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102042",
     mainCauses: ["電力会社への事前連絡・防護措置の未実施", "架空電線の位置・電圧確認の省略", "安全距離の確保なし"],
     preventionPoints: ["電線近接工事は事前に電力会社に連絡し絶縁カバーを依頼する", "架空電線から安全離隔距離を確保する", "バックホウの旋回半径内に電線が入る場合は電線防護措置を実施する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102042",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102042",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102043",
@@ -1197,6 +1665,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "家具工場で昇降盤（テーブルソー）使用中、節のある木材が突然キックバックして顔面に直撃し鼻骨骨折・裂傷。フェイスシールド未着用。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102043",
     mainCauses: ["フェイスシールドの未着用", "反キックバック装置の未設置", "節・木目方向の事前確認省略"],
     preventionPoints: ["昇降盤使用時はフェイスシールドを着用する", "反キックバック装置（割刃・反発防止爪）を設置する", "加工前に木目・節の状態を確認しキックバックしやすい材は慎重に扱う"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102043",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102043",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102044",
@@ -1208,6 +1682,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "工場の電気室で変圧器の定期点検中、誤って充電中の配電盤に触れ感電死亡。同室内で別作業員が孤立作業していた。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102044",
     mainCauses: ["充電部分の養生なし", "絶縁保護具未着用での充電部近接", "単独作業で監視者不在"],
     preventionPoints: ["電気室での作業は充電部を絶縁シートで養生する", "低圧電気取扱業務特別教育を受けた者のみが電気作業を行う", "電気設備の点検は単独作業を避け複数名で実施する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102044",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102044",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102045",
@@ -1219,6 +1699,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "製鉄所の転炉作業で溶融鉄に水分が混入し爆発的な飛散が発生し、周囲の作業者複数名が熱傷を負った。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102045",
     mainCauses: ["スクラップ水分確認の不徹底", "転炉周囲の防護設備の不備", "作業者への危険区域の周知不足"],
     preventionPoints: ["溶融金属と水分の接触を防ぐためスクラップの水分除去を徹底する", "転炉作業区域には溶融金属飛散防護シールドを設置する", "溶融金属取扱い時の危険区域を明確にし立入制限する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102045",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102045",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102046",
@@ -1230,6 +1716,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "工事現場のガス保管場所で、倒れ止めなしで立てかけられていた酸素ボンベが転倒し、近くを通りかかった作業者の頭部に直撃。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102046",
     mainCauses: ["ガスボンベの転倒防止措置なし", "ガスボンベの保管場所の不適切", "転倒危険性の認識不足"],
     preventionPoints: ["ガスボンベは必ずチェーンまたはベルトで固定する", "ガスボンベ保管場所を定め表示する", "ボンベの取扱い方法・転倒危険性を全作業者に教育する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102046",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102046",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102047",
@@ -1241,6 +1733,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "夜間の道路工事で交通誘導中の作業者が、誘導灯が電池切れで消灯した状態で後続車両に気づかれず接触し死亡。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102047",
     mainCauses: ["誘導灯の電池切れ確認不足", "高視認性安全服の未着用", "夜間作業の照明計画の不備"],
     preventionPoints: ["夜間作業前に誘導灯・保安具の電池残量を確認する", "夜間の道路工事には高視認性安全服（JIS T 8127）を着用する", "夜間作業区域の照明計画を事前に作成し必要な照度を確保する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102047",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102047",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102048",
@@ -1252,6 +1750,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "造船工場で亜鉛メッキ鋼板の溶接作業中、溶接ヒュームを多量に吸引し作業後に発熱・悪寒・倦怠感（金属熱）を発症し緊急搬送。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102048",
     mainCauses: ["局所排気装置の換気量不足", "溶接ヒューム用防じん機能付き防毒マスクの未着用", "亜鉛メッキ材溶接の危険性周知不足"],
     preventionPoints: ["亜鉛メッキ材溶接では換気を強化し溶接ヒューム用マスクを着用する", "溶接作業場所にプッシュプル型換気装置を設置する", "金属熱の症状・対処法を作業者に周知する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102048",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102048",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102049",
@@ -1263,6 +1767,12 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "化学プラントの配管水圧試験中、継手の溶接不良箇所が水圧（10MPa）で破裂し破片が飛散し近くの作業者に直撃。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102049",
     mainCauses: ["溶接後の非破壊検査省略", "水圧試験中の立入制限区域の未設定", "段階的な昇圧手順の未遵守"],
     preventionPoints: ["配管溶接後は放射線透過試験等の非破壊検査を実施する", "水圧試験中は試験体周囲を立入禁止区域にする", "昇圧は段階的に行い各圧力で保持・漏れ確認をする"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102049",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102049",
+    },
+    provenance: "mhlw",
   },
   {
     id: "mhlw-102050",
@@ -1274,5 +1784,11 @@ export const realAccidentCases: AccidentCase[] = [
     summary: "建設現場の仮設電気設備（200V）の配線が損傷し、金属仮設ハウスが帯電。作業員がハウスのドアノブを掴んで感電し意識喪失。出典: anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102050",
     mainCauses: ["仮設電気設備の絶縁状態の点検不足", "金属仮設物の接地なし", "漏電遮断器の動作確認省略"],
     preventionPoints: ["仮設電気設備は毎月絶縁抵抗測定を実施する", "仮設ハウス等の金属設備は接地（アース）を確実に施工する", "漏電遮断器は毎月テストボタンで動作確認する"],
+    source: {
+      site: "職場のあんぜんサイト",
+      caseId: "102050",
+      url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx?joho_no=102050",
+    },
+    provenance: "mhlw",
   },
 ];

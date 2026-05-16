@@ -31,6 +31,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     industry_detail: "警備（施設警備・深夜帯）",
     worker_attribute: ["高齢者", "夜勤"],
     company_size: "中小（30名）",
+    provenance: "curated",
   },
   {
     id: "industry-keibi-002",
@@ -52,6 +53,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
       "車両側への事前注意喚起（看板・回転灯）強化",
     ],
     industry_detail: "警備（交通誘導・2号）",
+    provenance: "curated",
   },
 
   // 造園・外構 —— ID_29, ID_30 対応
@@ -75,6 +77,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
       "蜂毒アレルギー自覚症状への即時通報ルール化",
     ],
     industry_detail: "造園（高木剪定・夏季）",
+    provenance: "curated",
   },
   {
     id: "industry-zouen-002",
@@ -96,6 +99,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
       "資材は立て掛けず横置きを原則",
     ],
     industry_detail: "外構工事（第三者災害）",
+    provenance: "curated",
   },
 
   // 整備業 —— ID_40 対応
@@ -119,6 +123,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
       "油圧シリンダーの摩耗検査を年1回実施",
     ],
     industry_detail: "自動車整備（2柱リフト作業）",
+    provenance: "curated",
   },
   {
     id: "industry-seibi-002",
@@ -140,6 +145,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
       "絶縁手袋・絶縁マットは作業前に耐圧試験実施",
     ],
     industry_detail: "自動車整備（HV/EV高電圧）",
+    provenance: "curated",
   },
 
   // 縫製業 —— ID_80 対応
@@ -164,6 +170,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     ],
     industry_detail: "縫製（工業用ミシン）",
     worker_attribute: ["外国人技能実習生", "女性"],
+    provenance: "curated",
   },
 
   // 小売業 —— ID_33 対応
@@ -188,6 +195,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     ],
     industry_detail: "小売（総合スーパー）",
     worker_attribute: ["女性", "非正規"],
+    provenance: "curated",
   },
   {
     id: "industry-kouri-002",
@@ -209,6 +217,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
       "新人には先輩が1ヶ月間同伴指導",
     ],
     industry_detail: "小売（精肉加工）",
+    provenance: "curated",
   },
 
   // 医療・介護 —— ID_36, ID_38, ID_84 対応
@@ -233,6 +242,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     ],
     industry_detail: "医療（急性期病院・看護）",
     worker_attribute: ["女性"],
+    provenance: "curated",
   },
   {
     id: "industry-kaigo-001",
@@ -255,6 +265,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     ],
     industry_detail: "介護（特養・入浴介助）",
     worker_attribute: ["女性"],
+    provenance: "curated",
   },
   {
     id: "industry-kaigo-002",
@@ -276,6 +287,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
       "夜勤の複数体制 or コール通報体制",
     ],
     industry_detail: "介護（認知症グループホーム）",
+    provenance: "curated",
   },
 
   // 食品工場 —— ID_14 対応
@@ -300,6 +312,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     ],
     industry_detail: "食品（冷凍倉庫作業）",
     worker_attribute: ["女性"],
+    provenance: "curated",
   },
   {
     id: "industry-shokuhin-002",
@@ -321,6 +334,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
       "熱傷時の冷却15分・即通報を掲示",
     ],
     industry_detail: "食品（惣菜製造）",
+    provenance: "curated",
   },
 
   // 運輸・物流 —— ID_50, ID_94 対応
@@ -345,6 +359,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     ],
     industry_detail: "運輸（長距離トラック）",
     worker_attribute: ["高齢者"],
+    provenance: "curated",
   },
   {
     id: "industry-butsuryu-001",
@@ -366,6 +381,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
       "ヒヤリマップ運用で死角の『見える化』",
     ],
     industry_detail: "物流（倉庫・フォーク）",
+    provenance: "curated",
   },
 
   // 清掃業 —— ID_42, ID_93 対応
@@ -390,6 +406,7 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
     ],
     industry_detail: "ビルメンテナンス（窓清掃）",
     worker_attribute: ["女性", "高齢者"],
+    provenance: "curated",
   },
   {
     id: "industry-seisou-002",
@@ -411,5 +428,6 @@ export const realAccidentCasesDiverseIndustries: AccidentCase[] = [
       "清掃用洗剤は混合リスクの低い単一成分を優先選定",
     ],
     industry_detail: "清掃（ビル・洗剤取扱）",
+    provenance: "curated",
   },
 ];
