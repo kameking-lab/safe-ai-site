@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Plus, ListChecks, Calendar, AlertTriangle, Download, Upload } from "lucide-react";
 import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
+import { PageContainer } from "@/components/layout";
 import { loadEntries } from "@/lib/safety-diary/store";
 import { safetyDiaryEntrySchema, type SafetyDiaryEntry } from "@/lib/safety-diary/schema";
 import { computeMonthlySummary } from "@/lib/safety-diary/monthly-summary";
@@ -74,7 +75,7 @@ export function DiaryListClient() {
   );
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+    <PageContainer width="prose">
       <LocalStorageWarningBanner />
       <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -219,7 +220,7 @@ export function DiaryListClient() {
           </ul>
         )}
       </section>
-    </main>
+    </PageContainer>
   );
 }
 

@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "データ処理契約（DPA）",
   description: "安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
   alternates: { canonical: "/dpa" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/dpa", {
     title: "データ処理契約（DPA）",
     description: "安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
-  },
+  }),
 };
 
 export default function DpaPage() {
   return (
-    <div className="px-4 py-8 lg:px-8">
+    <PageContainer width="narrow" className="space-y-8">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="データ処理契約（DPA）" description="安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。" path="/dpa" />
-      <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">データ処理契約（DPA）</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
@@ -142,7 +143,6 @@ export default function DpaPage() {
             ：お問い合わせから5営業日以内に初回回答。
           </p>
         </section>
-      </div>
-    </div>
+    </PageContainer>
   );
 }

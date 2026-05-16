@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "セキュリティ",
   description: "安全AIポータルのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。",
   alternates: { canonical: "/security" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/security", {
     title: "セキュリティ",
     description: "安全AIポータルのセキュリティ体制。インフラ・暗号化・認証・脆弱性対応の現状とロードマップを公開します。",
-  },
+  }),
 };
 
 function Badge({ type }: { type: "現状" | "予定" | "未対応" }) {
@@ -28,8 +30,7 @@ function Badge({ type }: { type: "現状" | "予定" | "未対応" }) {
 
 export default function SecurityPage() {
   return (
-    <div className="px-4 py-8 lg:px-8">
-      <div className="mx-auto max-w-2xl space-y-8">
+    <PageContainer width="narrow" className="space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">セキュリティ</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
@@ -319,7 +320,6 @@ export default function SecurityPage() {
             にてご報告ください。善意の報告は公開前に当方へご連絡いただくことを歓迎します。
           </p>
         </section>
-      </div>
-    </div>
+    </PageContainer>
   );
 }

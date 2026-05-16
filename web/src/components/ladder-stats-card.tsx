@@ -42,27 +42,27 @@ export function LadderStatsCard() {
         </span>
       </div>
 
-      <dl className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
+      <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
         <div className="rounded-xl bg-white/70 p-3">
-          <dt className="text-[11px] font-semibold text-slate-500">平均墜落高さ</dt>
-          <dd className="mt-0.5 text-lg font-black text-amber-900">1.5〜2.5m</dd>
+          <h3 className="text-[11px] font-semibold text-slate-500">平均墜落高さ</h3>
+          <p className="mt-0.5 text-lg font-black text-amber-900">1.5〜2.5m</p>
           <p className="text-[11px] leading-5 text-slate-600">
             「低いから大丈夫」が招く重症事故。1mでも打ちどころで死亡例あり。
           </p>
         </div>
         <div className="rounded-xl bg-white/70 p-3">
-          <dt className="text-[11px] font-semibold text-slate-500">主な原因</dt>
-          <dd className="mt-0.5 text-sm font-bold text-amber-900">
+          <h3 className="text-[11px] font-semibold text-slate-500">主な原因</h3>
+          <p className="mt-0.5 text-sm font-bold text-amber-900">
             3点支持不遵守・開脚金具未ロック・脚元不安定
-          </dd>
+          </p>
         </div>
         <div className="rounded-xl bg-white/70 p-3">
-          <dt className="text-[11px] font-semibold text-slate-500">多発時期</dt>
-          <dd className="mt-0.5 text-sm font-bold text-amber-900">
+          <h3 className="text-[11px] font-semibold text-slate-500">多発時期</h3>
+          <p className="mt-0.5 text-sm font-bold text-amber-900">
             夏（保守点検期）と年度末の工期集中期
-          </dd>
+          </p>
         </div>
-      </dl>
+      </div>
 
       <details className="mt-3 rounded-xl border border-amber-200 bg-white/70 p-3">
         <summary className="flex cursor-pointer items-center gap-2 text-xs font-bold text-amber-900">

@@ -49,6 +49,9 @@ export function MhlwDeathsPanel() {
 
   useEffect(() => {
     let active = true;
+    const timeout = setTimeout(() => {
+      if (active) setError("データの読み込みがタイムアウトしました。再読み込みしてください。");
+    }, 15000);
     (async () => {
       try {
         const mod = await import("@/data/deaths-mhlw/compact.json");
@@ -57,10 +60,13 @@ export function MhlwDeathsPanel() {
       } catch (err) {
         if (!active) return;
         setError(err instanceof Error ? err.message : "読み込みに失敗しました");
+      } finally {
+        clearTimeout(timeout);
       }
     })();
     return () => {
       active = false;
+      clearTimeout(timeout);
     };
   }, []);
 
@@ -122,7 +128,7 @@ export function MhlwDeathsPanel() {
               MHLW 死亡災害データベース N={data.total.toLocaleString()}件
             </h3>
             <p className="mt-1 text-xs text-slate-600">
-              2019〜2023年（5年分）の全件を収録。業種・事故種別・キーワードで絞り込みできます。
+              2019〜2024年（6年分）の全件を収録。業種・事故種別・キーワードで絞り込みできます。
             </p>
             <p className="mt-0.5 text-[11px] text-slate-500">
               出典:&nbsp;

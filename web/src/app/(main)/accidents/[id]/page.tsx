@@ -10,6 +10,7 @@ import { resolveAccidentSource } from "@/lib/accident-source";
 import { getAccidentRelated } from "@/lib/accident-related";
 import { ogImageUrl } from "@/lib/og-url";
 import type { AccidentCase } from "@/lib/types/domain";
+import { PageContainer } from "@/components/layout/page-container";
 
 const SITE_BASE = "https://www.anzen-ai-portal.jp";
 
@@ -76,7 +77,7 @@ export default async function AccidentDetailPage({
   const similar = pickSimilarAccidents(accident, getAccidentCasesDataset());
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-6 sm:py-8">
+    <PageContainer width="prose">
       <JsonLd
         schema={[
           breadcrumbSchema([
@@ -247,6 +248,6 @@ export default async function AccidentDetailPage({
           実務適用は本文（出典元）と所管省庁の最新公表内容を必ずご確認ください。
         </p>
       </footer>
-    </main>
+    </PageContainer>
   );
 }

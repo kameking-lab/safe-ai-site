@@ -1,22 +1,23 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "賠償責任保険加入状況",
   description: "安全AIポータルの賠償責任保険・データ漏洩保険の加入状況。現状と加入予定を正直に公開します。",
   alternates: { canonical: "/insurance" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/insurance", {
     title: "賠償責任保険加入状況",
     description: "安全AIポータルの賠償責任保険・データ漏洩保険の加入状況。現状と加入予定を正直に公開します。",
-  },
+  }),
 };
 
 export default function InsurancePage() {
   return (
-    <div className="px-4 py-8 lg:px-8">
+    <PageContainer width="narrow" className="space-y-8">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="賠償責任保険加入状況" description="安全AIポータルの賠償責任保険・データ漏洩保険の加入状況。現状と加入予定を正直に公開します。" path="/insurance" />
-      <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">賠償責任保険加入状況</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
@@ -124,7 +125,6 @@ export default function InsurancePage() {
             よりご連絡ください。
           </p>
         </section>
-      </div>
-    </div>
+    </PageContainer>
   );
 }

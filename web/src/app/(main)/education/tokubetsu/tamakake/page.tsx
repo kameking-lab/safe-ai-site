@@ -369,7 +369,7 @@ export default function TamakakePage() {
 
       {/* CTA */}
       <section className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-6">
-        <p className="text-base font-bold text-amber-900">玉掛け特別教育のご相談・お見積り</p>
+        <p className="text-base font-bold text-amber-900">玉掛け特別教育のお問い合わせ・改善提案</p>
         <p className="mt-1 text-sm text-slate-600">受講人数・業種・希望時期をお知らせください。原則3営業日以内にご返信します。</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link

@@ -82,8 +82,8 @@ export default function SignagePage() {
     mode: services.mode,
     regionLabel: selectedLocation.label,
     // SSR/client hydration mismatch 対策: 時刻はクライアント側 useEffect でセット
-    nowText: "—",
-    lastUpdatedText: "—",
+    nowText: "--:--",
+    lastUpdatedText: "起動中…",
     riskStatus: "idle",
     riskData: null,
     lawStatus: "idle",

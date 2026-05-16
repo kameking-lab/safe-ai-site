@@ -63,7 +63,7 @@ export async function addSubscriber(
 
   const r = getResend();
   if (!r) {
-    console.log("[newsletter:subscribe]", JSON.stringify(sub));
+    console.log("[newsletter:subscribe] no Resend — stored in memory. industry:", sub.industry);
     return { ok: true };
   }
 
@@ -107,7 +107,7 @@ export async function removeSubscriber(email: string): Promise<boolean> {
 
   const r = getResend();
   if (!r) {
-    console.log("[newsletter:unsubscribe]", email);
+    console.log("[newsletter:unsubscribe] no Resend — updated in memory");
     return true;
   }
 

@@ -93,6 +93,8 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       { label: "通達・判例", href: "/laws/notices-precedents" },
       { label: "条文検索", href: "/law-search" },
       { label: "通達原文", href: "/circulars" },
+      { label: "法令体系マップ", href: "/law-hierarchy", description: "法→政令→省令→告示の階層構造を俯瞰" },
+      { label: "年次安全衛生計画ジェネレーター", href: "/strategy/plan-generator", description: "業種・規模別の30テンプレートから年次計画書を自動生成" },
     ],
   },
   {
@@ -119,8 +121,42 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     href: "/accidents",
     subItems: [
       { label: "事故データベース", href: "/accidents" },
+      { label: "業種別 安全管理ポータル", href: "/industries", description: "5業種の重点課題・関連法令・推奨機能への動線をワンページに集約" },
+      { label: "業種別 事故分析レポート", href: "/accidents-reports", description: "5業種の事故型・原因・対策・関連法令を自動集計" },
+      { label: "事故統計ダッシュボード", href: "/accidents-analytics" },
       { label: "労災死傷統計", href: "/stats" },
       { label: "リスク予測", href: "/risk-prediction" },
+    ],
+  },
+  {
+    id: "education-certification",
+    label: "特別教育・技能講習",
+    icon: "🎓",
+    cardTitle: "特別教育・技能講習DB",
+    cardDescription:
+      "安衛則第36条の特別教育（約60種）・技能講習（約40種）を完全収録。業種・作業から必要資格を即時判定。根拠条文付き。",
+    href: "/education-certification",
+    subItems: [
+      {
+        label: "資格判定ツール",
+        href: "/education-certification/finder",
+        description: "業種・作業を選んで必要資格を自動判定",
+      },
+      {
+        label: "特別教育一覧（安衛則第36条）",
+        href: "/education-certification#special",
+        description: "約60種の特別教育を根拠条文付きで確認",
+      },
+      {
+        label: "技能講習一覧（就業制限）",
+        href: "/education-certification#skill",
+        description: "約40種の技能講習・就業制限業務",
+      },
+      {
+        label: "Eラーニング・受講申込",
+        href: "/education",
+        description: "特別教育コースのオンライン受講",
+      },
     ],
   },
 ];

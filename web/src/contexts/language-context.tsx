@@ -106,7 +106,7 @@ function LanguageToast({ message, onDismiss }: { message: string; onDismiss: () 
       aria-live="polite"
       className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full bg-slate-900/95 px-4 py-2 text-sm font-medium text-white shadow-lg"
     >
-      <span>{message}</span>
+      <span lang="en">{message}</span>
       <button
         type="button"
         onClick={onDismiss}

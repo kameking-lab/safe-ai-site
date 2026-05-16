@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Banknote, TrendingUp, AlertCircle } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { PageContainer } from "@/components/layout";
 import { ogImageUrl } from "@/lib/og-url";
 import { SubsidiesRecommender, type Subsidy } from "@/components/subsidies-recommender";
 
@@ -11,6 +12,7 @@ const _desc =
   "エイジフレンドリー補助金・働き方改革推進支援助成金・建退共など、労働安全投資に使える公的助成金を中小企業向けにまとめました。労災1件あたりの経済損失試算も掲載。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/subsidies" },
   title: _title,
   description: _desc,
   openGraph: {
@@ -146,7 +148,7 @@ const SUBSIDIES: Subsidy[] = [
 
 export default function SubsidiesPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
+    <PageContainer width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name={_title} description={_desc} path="/subsidies" />
       <PageHeader
@@ -275,6 +277,6 @@ export default function SubsidiesPage() {
         ※ 本ページの情報は2026年4月時点の公開情報をもとにしています。
         制度は頻繁に改正されます。申請前に必ず各所管庁の最新公募要領をご確認ください。
       </p>
-    </main>
+    </PageContainer>
   );
 }

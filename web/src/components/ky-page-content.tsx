@@ -5,7 +5,9 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { KyIndustryPresetPicker } from "@/components/ky-industry-preset-picker";
 import { KyInitialWizard } from "@/components/ky-initial-wizard";
+import { KyExamplesPanel } from "@/components/ky-examples-panel";
 import { getPresetById, type KyIndustryPreset } from "@/data/mock/ky-industry-presets";
+import type { KyExample, KyIndustryId } from "@/types/ky-example";
 import { getEntryById, loadEntries } from "@/lib/safety-diary/store";
 import { loadProfile } from "@/lib/company-profile";
 import { SITE_STATS } from "@/data/site-stats";
@@ -292,6 +294,54 @@ export function KyPageContent() {
       });
       return { ...prev, workRows, riskRows };
     });
+  }, []);
+
+  const [exampleNotice, setExampleNotice] = useState<string | null>(null);
+  const [profileIndustry, setProfileIndustry] = useState<KyIndustryId | undefined>(undefined);
+  useEffect(() => {
+    const profile = loadProfile();
+    if (!profile.wizardCompleted) return;
+    const map: Record<string, KyIndustryId> = {
+      construction: "construction",
+      manufacturing: "manufacturing",
+      transport: "transport",
+      logistics: "transport",
+      medical: "medical-welfare",
+      welfare: "medical-welfare",
+      care: "medical-welfare",
+      service: "service",
+      retail: "service",
+    };
+    const mapped = map[profile.industry];
+    if (mapped) setProfileIndustry(mapped);
+  }, []);
+  const handleExampleApply = useCallback((example: KyExample) => {
+    setRecord((prev) => {
+      const workRows = prev.workRows.map((r, i) =>
+        i === 0
+          ? {
+              ...r,
+              workDetail: example.title,
+              safetyInstruction:
+                example.countermeasures.slice(0, 2).join("／") || r.safetyInstruction,
+            }
+          : r
+      );
+      const riskRows = prev.riskRows.map((r, i) => {
+        if (i === 0) return r;
+        const hazardIdx = i - 1;
+        const hazard = example.hazards[hazardIdx];
+        const reduction = example.countermeasures[hazardIdx];
+        if (!hazard && !reduction) return r;
+        return {
+          ...r,
+          hazard: hazard ?? r.hazard,
+          reduction: reduction ?? r.reduction,
+        };
+      });
+      return { ...prev, workRows, riskRows };
+    });
+    setExampleNotice(`過去事例「${example.title}」を反映しました（出典: ${example.source.label}）`);
   }, []);
 
   // /ky?preset=<id> で来た場合にプリセットを自動適用する（脚立・業種リンクから）
@@ -673,6 +723,28 @@ export function KyPageContent() {
             </button>
           </div>
         )}
+
+        {/* 過去事例から提案 */}
+        {exampleNotice && (
+          <div className="mt-3 flex items-start justify-between gap-3 rounded-xl border border-indigo-300 bg-indigo-50 px-4 py-3">
+            <p className="text-sm font-semibold text-indigo-900">✓ {exampleNotice}</p>
+            <button
+              type="button"
+              onClick={() => setExampleNotice(null)}
+              className="rounded px-1.5 text-indigo-700 hover:bg-indigo-100"
+              aria-label="通知を閉じる"
+            >
+              ×
+            </button>
+          </div>
+        )}
+        <div className="mt-3">
+          <KyExamplesPanel
+            defaultIndustry={profileIndustry}
+            workContextText={workContextStr}
+            onApply={handleExampleApply}
+          />
+        </div>
 
         {/* Industry preset */}
         <div className="mt-3">
