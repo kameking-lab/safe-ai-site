@@ -4,15 +4,19 @@
  * tightened to mandate WBGT-driven controls, recognition training, and
  * documented early-response procedures.
  *
- * Effective date: 2025-04-01 (R7/4/1).
+ * Effective date: 2025-06-01 (令和7年6月1日) — per 厚生労働省令第86号
+ * (令和6年改正). The effective date is unified across the site; see
+ * `web/src/data/laws/anzen-eisei-kisoku.ts` (第612条の2) for the
+ * authoritative article text.
  *
  * The text below paraphrases the obligations; do not copy the regulation
- * verbatim. Cross-reference: MHLW notice 基発0301第1号 (R7).
+ * verbatim.
  */
 
 import type { R7ComplianceItem } from "@/types/heat-illness";
 
-export const R7_EFFECTIVE_FROM = "2025-04-01";
+export const R7_EFFECTIVE_FROM = "2025-06-01";
+export const R7_EFFECTIVE_FROM_JP = "令和7年6月1日";
 
 export const R7_COMPLIANCE_ITEMS: R7ComplianceItem[] = [
   {

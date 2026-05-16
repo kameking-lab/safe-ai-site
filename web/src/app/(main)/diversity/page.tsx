@@ -122,7 +122,7 @@ const SECTIONS: DiversitySection[] = [
     topics: [
       {
         title: "加齢に伴うリスク",
-        body: "転倒（バランス低下）・墜落（反射低下）・腰痛（筋力低下）・熱中症（体温調節低下）・視認性低下（老眼・白内障）。事故類型別の高齢者リスクは通常の2〜4倍。",
+        body: "転倒（バランス低下）・墜落（反射低下）・腰痛（筋力低下）・熱中症（体温調節低下）・視認性低下（老眼・白内障）が代表的。厚生労働省『令和5年労働災害発生状況』では、60歳以上の労働者千人率は20歳代の約2倍、転倒事故では特に女性高齢者で若年層の3〜4倍とされる。出典: 厚生労働省『エイジフレンドリーガイドライン』（令和2年3月16日 基安発0316第1号）、同『高年齢労働者の安全と健康確保のためのガイドライン』別添資料。",
       },
       {
         title: "設備・環境の改善例",
@@ -248,7 +248,7 @@ const SECTIONS: DiversitySection[] = [
     topics: [
       {
         title: "SOGIハラの定義",
-        body: "性的指向や性自認に関する差別的言動・暴露（アウティング）・否定的な決めつけ・不利益取扱い。パワハラ防止法6類型のうち『精神的な攻撃』『個の侵害』に該当しうる。",
+        body: "性的指向や性自認に関する差別的言動・暴露（アウティング）・否定的な決めつけ・不利益取扱いを指す。厚生労働省『事業主が職場における優越的な関係を背景とした言動に起因する問題に関して雇用管理上講ずべき措置等についての指針』（令和2年厚生労働省告示第5号）は、性的指向・性自認に関する侮辱的な言動およびアウティングが、パワハラ6類型のうち『精神的な攻撃』『個の侵害』に該当することを明示している。個別事案の判定は事案ごとの事実関係によるため、社内で疑いが生じた場合は産業保健・労務・弁護士に相談すること。",
       },
       {
         title: "更衣室・トイレ運用",
@@ -414,14 +414,23 @@ export default function DiversityPage() {
         })}
       </div>
 
-      {/* 多言語フレーズ集（4言語先行公開） */}
+      {/* 多言語フレーズ集（4言語先行公開・参考訳） */}
       <section className="mt-10">
         <h2 className="mb-3 text-lg font-bold text-slate-900">
-          現場で使える基本フレーズ（4言語先行公開）
+          現場で使える基本フレーズ（5言語・参考訳）
         </h2>
         <p className="mb-4 text-xs leading-5 text-slate-600">
-          UI全体の翻訳は2026年夏に着手予定です。先に <strong>命に関わる基本フレーズ</strong> を、ベトナム語・中国語・ポルトガル語・タガログ語で公開します。印刷して現場掲示にもどうぞ。
+          UI全体の翻訳は2026年夏に着手予定です。先に <strong>命に関わる基本フレーズ</strong> を、英語・ベトナム語・中国語・ポルトガル語・タガログ語で公開します。印刷して現場掲示にもどうぞ。
         </p>
+        <div className="mb-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-[11px] leading-5 text-amber-900">
+          <strong className="font-semibold">参考訳の位置付け：</strong>
+          本フレーズは辞書・公式安全衛生掲示の対訳と機械翻訳を参考に編集部で作成した <strong>参考訳</strong> です。
+          地域方言・業種固有の表現には対応していません。現場で常用する前に、必ず母語話者
+          （職場の同僚・技能実習生支援団体・各国在京大使館の労働相談窓口など）に確認してください。
+          誤訳・改善案は
+          <Link href="/contact?category=feedback" className="font-semibold underline">お問い合わせ</Link>
+          へお寄せいただければ随時反映します。
+        </div>
         <div className="overflow-x-auto rounded-xl border border-slate-200">
           <table className="min-w-full divide-y divide-slate-200 text-xs">
             <thead className="bg-slate-50 text-left text-[11px] font-bold text-slate-600">
@@ -459,9 +468,7 @@ export default function DiversityPage() {
           </table>
         </div>
         <p className="mt-3 text-[11px] text-slate-500">
-          翻訳監修：母語話者（在日10年以上）。誤訳のご指摘は{" "}
-          <Link href="/contact?category=feedback" className="font-semibold text-emerald-700 underline">お問い合わせ</Link>
-          {" "}まで。
+          作成方法：辞書・公式安全衛生掲示の対訳をベースに編集部が監修。母語話者監修・専門翻訳サービスへの差し替えはロードマップに掲載中（2026年下期予定）。
         </p>
       </section>
 

@@ -15,12 +15,12 @@ import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
-import { INDUSTRY_HEAT_RULES, R7_EFFECTIVE_FROM, R7_SOURCES } from "@/data/heat-illness-rules";
+import { INDUSTRY_HEAT_RULES, R7_EFFECTIVE_FROM, R7_EFFECTIVE_FROM_JP, R7_SOURCES } from "@/data/heat-illness-rules";
 
 const _title =
   "熱中症対策ハブ｜WBGT計算機・業種別リスク判定・R7安衛則改正チェックリスト";
 const _desc =
-  "労働安全衛生規則第612条の2（令和7年4月1日改正）に対応した職場の熱中症対策ポータル。JIS Z 8504準拠のWBGT計算機、10業種別の暑熱リスク判定、R7改正コンプライアンスチェックリストと社内文書テンプレートをまとめて提供します。";
+  "労働安全衛生規則第612条の2（令和7年6月1日施行）に対応した職場の熱中症対策ポータル。JIS Z 8504準拠のWBGT計算機、10業種別の暑熱リスク判定、R7改正コンプライアンスチェックリストと社内文書テンプレートをまとめて提供します。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -130,14 +130,14 @@ export default function HeatIllnessPreventionHubPage() {
             <p className="mt-1">
               本ページは
               <strong className="font-semibold">
-                労働安全衛生規則第612条の2（令和7年4月1日改正）
+                労働安全衛生規則第612条の2（令和7年6月1日施行）
               </strong>
               に対応した職場の熱中症対策ガイドです。
               JIS Z 8504準拠のWBGT計算式と厚労省「職場における熱中症予防対策マニュアル」を参照しています。
               個別作業の安全判断は事業者・産業医・職長が現場状況を踏まえて行ってください。
             </p>
             <p className="mt-2 text-xs text-amber-800">
-              改正適用日：{R7_EFFECTIVE_FROM}（令和7年4月1日）
+              改正施行日：{R7_EFFECTIVE_FROM}（{R7_EFFECTIVE_FROM_JP}）— 厚生労働省令第86号
             </p>
           </div>
         </div>
@@ -223,7 +223,7 @@ export default function HeatIllnessPreventionHubPage() {
           R7改正の要点
         </h2>
         <p className="mt-1 text-xs text-slate-500">
-          安衛則第612条の2が令和7年4月1日に強化されました。事業者に求められる主要4項目を要約します。
+          安衛則第612条の2が令和7年6月1日に施行されました。事業者に求められる主要4項目を要約します。
         </p>
         <ul className="mt-4 space-y-2 text-sm leading-6 text-slate-800">
           <li className="rounded-lg border border-slate-200 bg-white p-3">

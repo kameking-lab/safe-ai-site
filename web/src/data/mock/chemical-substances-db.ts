@@ -1,13 +1,24 @@
 /**
- * 労働安全衛生法 リスクアセスメント対象物質 検索DB（抜粋50物質）
+ * Curated expert explanations for 50 high-priority chemical substances (専門解説50物質).
  *
- * 2024年4月から段階的に施行されている「化学物質の自律的管理」における
- * リスクアセスメント対象物質は2025年4月時点で約900物質に拡大。
- * 本データは厚労省告示に基づく物質群から主要50物質を抜粋したβ版。
- * 今後フェーズ2で674→900物質まで拡大予定。
+ * Scope: This file is NOT a complete chemical database. It contains
+ * hand-written, consultant-curated detail records for the 50 substances
+ * most commonly encountered in Japanese workplace safety practice
+ * (特化則・有機則・粉じん則・皮膚等障害化学物質 etc.).
  *
- * 出典: 厚生労働省 職場のあんぜんサイト（安全データシート）、
- *       労働安全衛生法施行令別表第9、特化則別表第1、有機則別表。
+ * Relationship to the MHLW dataset:
+ * - The full regulatory dataset (CAS-merged from 4 MHLW lists, ~3,000
+ *   substances) lives in `src/data/chemicals-mhlw/compact.json` and is
+ *   exposed via `src/lib/mhlw-chemicals.ts`.
+ * - The `/chemical-database` page renders both: the MHLW dataset for
+ *   coverage and CAS lookup, and these 50 entries for narrative detail
+ *   (uses, health effects, related regulations, GHS, OEL).
+ *
+ * Sources for each detail record:
+ * - 厚生労働省 職場のあんぜんサイト（安全データシート）
+ * - 労働安全衛生法施行令別表第9
+ * - 特定化学物質障害予防規則 別表第1
+ * - 有機溶剤中毒予防規則 別表
  */
 
 export type ChemicalCategory =
