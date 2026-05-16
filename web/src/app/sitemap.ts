@@ -6,6 +6,7 @@ import { getAllEquipment } from "@/lib/equipment-recommendation";
 import { FEATURE_CATEGORIES } from "@/data/features-catalog";
 import { SAFETY_SIGNS, SIGN_CATEGORIES } from "@/data/safety-signs";
 import { INDUSTRIES } from "@/data/safety-signs/industry-usage";
+import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://www.anzen-ai-portal.jp";
@@ -38,6 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/law-hierarchy", lastModified: "2026-05-14", priority: 0.8, changeFrequency: "monthly" },
     { url: "/laws/notices-precedents", lastModified: "2026-04-19", priority: 0.8, changeFrequency: "monthly" },
     { url: "/ky", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
+    { url: "/ky-examples", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
     { url: "/risk", lastModified: "2026-04-19", priority: 0.8, changeFrequency: "daily" },
     { url: "/chatbot", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
     { url: "/law-search", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
@@ -69,6 +71,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/foreign-workers/status/long-term-resident", lastModified: "2026-05-16", priority: 0.65, changeFrequency: "monthly" },
     { url: "/foreign-workers/status/spouse-of-japanese", lastModified: "2026-05-16", priority: 0.65, changeFrequency: "monthly" },
     { url: "/foreign-workers/status/designated-activities-employment", lastModified: "2026-05-16", priority: 0.65, changeFrequency: "monthly" },
+    { url: "/education-certification", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
+    { url: "/education-certification/finder", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/education", lastModified: "2026-04-25", priority: 0.9, changeFrequency: "monthly" },
     { url: "/education/tokubetsu/kensaku-toishi", lastModified: "2026-04-25", priority: 0.8, changeFrequency: "monthly" },
     { url: "/education/tokubetsu/teiatsu-denki", lastModified: "2026-04-25", priority: 0.8, changeFrequency: "monthly" },
@@ -95,6 +99,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/laws/bcp", lastModified: "2026-04-01", priority: 0.7, changeFrequency: "monthly" },
     { url: "/laws/freelance-rosai", lastModified: "2026-04-01", priority: 0.7, changeFrequency: "monthly" },
     { url: "/laws/gig-work", lastModified: "2026-04-01", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/treatment-work-balance", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
+    { url: "/treatment-work-balance/plan-builder", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/mental-health", lastModified: "2026-04-01", priority: 0.7, changeFrequency: "monthly" },
     { url: "/mental-health-management", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
     { url: "/mental-health-management/stress-check", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
@@ -190,6 +196,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
   }));
 
+  const illnessGuidePages: typeof pages = ILLNESS_CATEGORIES.map((c) => ({
+    url: `/treatment-work-balance/illness-guide/${c.id}`,
+    lastModified: "2026-05-16",
+    priority: 0.75,
+    changeFrequency: "monthly",
+  }));
+
   return [
     ...filtered,
     ...circularPages,
@@ -199,6 +212,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...safetySignCategoryPages,
     ...safetySignIndustryPages,
     ...safetySignDetailPages,
+    ...illnessGuidePages,
   ].map(
     ({ url, lastModified, priority, changeFrequency }) => {
       const absolute = `${base}${url}`;
