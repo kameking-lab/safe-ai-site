@@ -129,8 +129,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/qa-knowledge", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "weekly" },
     { url: "/resources", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "monthly" },
     { url: "/insurance", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "monthly" },
-    { url: "/api-docs", lastModified: "2026-05-15", priority: 0.6, changeFrequency: "monthly" },
-    { url: "/lms", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "monthly" },
+    // /api-docs and /lms removed: pre-launch features (no real API yet, LMS β waitlist only).
+    // Audit reference: harsh-third-party-2026-05-16 F-001/F-002.
     { url: "/ky/morning", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "monthly" },
     { url: "/security", lastModified: "2026-05-15", priority: 0.3, changeFrequency: "yearly" },
     { url: "/dpa", lastModified: "2026-05-15", priority: 0.3, changeFrequency: "yearly" },

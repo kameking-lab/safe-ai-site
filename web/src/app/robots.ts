@@ -5,7 +5,9 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/api/", "/dev/", "/audits/"],
+      // Pre-launch features and internal pages: also covered by per-page noindex.
+      // Audit reference: harsh-third-party-2026-05-16 F-001/F-002/F-003.
+      disallow: ["/admin/", "/api/", "/dev/", "/audits/", "/handover", "/lms", "/api-docs"],
     },
     sitemap: "https://www.anzen-ai-portal.jp/sitemap-index.xml",
   };
