@@ -301,6 +301,17 @@ export type NewsFeedAiScore = {
   rejectionReasons?: string[];
 };
 
+/**
+ * AI が分類するニュース種別。2026-05-17 の精度監査で追加。
+ * 行政発表・統計発表に対して duplication 軸を適用しないために用いる。
+ */
+export type NewsFeedNewsType =
+  | "accident_report"
+  | "administrative_notice"
+  | "statistics_release"
+  | "general_news"
+  | "unknown";
+
 export type NewsFeedEntry = {
   /** URL の SHA-256 ハッシュ（先頭16文字）。重複排除キー */
   id: string;
@@ -314,6 +325,8 @@ export type NewsFeedEntry = {
   estimatedAccidentType?: AccidentType;
   /** AI が推定した業種（推定不能なら undefined） */
   estimatedWorkCategory?: AccidentWorkCategory;
+  /** AI が分類したニュース種別（2026-05-17 監査で追加、既存エントリは undefined） */
+  newsType?: NewsFeedNewsType;
   /** 自動判定スコア */
   score: NewsFeedAiScore;
   /** 自動判定結果（true=承認/approved/, false=却下/rejected/） */
