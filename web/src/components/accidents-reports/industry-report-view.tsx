@@ -1,5 +1,16 @@
 import Link from "next/link";
-import { ArrowUpRight, AlertTriangle, ShieldCheck, BookOpen, TrendingUp, Calendar } from "lucide-react";
+import {
+  ArrowUpRight,
+  AlertTriangle,
+  ShieldCheck,
+  BookOpen,
+  TrendingUp,
+  Calendar,
+  Clock,
+  Building2,
+  Gauge,
+  ListChecks,
+} from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { Section } from "@/components/layout/section";
 import { Stack, Cluster } from "@/components/layout/stack";
@@ -12,6 +23,11 @@ import type {
   YearCount,
 } from "@/lib/accident-analysis";
 import type { AccidentCase } from "@/lib/types/domain";
+import type { IndustrySlug } from "@/lib/industry-slugs";
+import { MonthlyTrendChart } from "./monthly-trend-chart";
+import { PreventionChecklist } from "./prevention-checklist";
+import { ReportPrintButton } from "./report-print-button";
+import { ReportPrintMeta, ReportPrintFooter } from "./report-print-meta";
 
 const COLOR_SWATCH: Record<string, { bar: string; chip: string; ring: string; text: string }> = {
   amber: { bar: "bg-amber-500", chip: "bg-amber-50 text-amber-900 border-amber-200", ring: "ring-amber-200", text: "text-amber-900" },
@@ -31,6 +47,11 @@ function pct(n: number, digits = 1): string {
 
 function num(n: number): string {
   return n.toLocaleString("ja-JP");
+}
+
+function todayJp(): string {
+  const d = new Date();
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
 /* ---------- Sub components ---------------------------------------- */
@@ -228,297 +249,493 @@ function TopCaseCard({ accident }: { accident: AccidentCase }) {
 /* ---------- Main view --------------------------------------------- */
 
 export function IndustryReportView({ report }: { report: IndustryReport }) {
-  const { config, stats, topTypes, topCauses, topPrevention, seasonality, yearTrend, yoy, patterns, topCases } = report;
+  const {
+    config,
+    stats,
+    topTypes,
+    topCauses,
+    topPrevention,
+    seasonality,
+    yearTrend,
+    yoy,
+    patterns,
+    topCases,
+    timeBands,
+    workplaceSizes,
+    severityRatio,
+    worstMonths,
+    dangerFactors,
+    comparison,
+    monthlyByYear,
+  } = report;
   const sw = swatch(config.colorClass);
+  const yearLabel = `${stats.yearRange.min}年〜${stats.yearRange.max}年`;
+  const generatedAt = todayJp();
 
   return (
-    <PageContainer width="full">
-      <Breadcrumb
-        items={[
-          { name: "事故データベース", href: "/accidents" },
-          { name: "業種別レポート", href: "/accidents-reports" },
-          { name: config.label },
-        ]}
+    <article className="accident-report-print-root">
+      <ReportPrintMeta
+        industryLabel={config.label}
+        populationLabel={`${num(stats.total)}件`}
+        yearRange={yearLabel}
+        generatedAt={generatedAt}
       />
 
-      {/* ---------- Header ------------------------------------------- */}
-      <header className={`rounded-xl border p-5 ${sw.chip}`}>
-        <Cluster gap="sm">
-          <span className="text-3xl" aria-hidden="true">
-            {config.icon}
-          </span>
-          <div>
-            <p className="text-xs font-medium opacity-80">業種別 事故分析レポート</p>
-            <h1 className="text-2xl font-bold sm:text-3xl">{config.label}</h1>
+      <PageContainer width="full">
+        <Breadcrumb
+          items={[
+            { name: "事故データベース", href: "/accidents" },
+            { name: "業種別レポート", href: "/accidents-reports" },
+            { name: config.label },
+          ]}
+        />
+
+        {/* ---------- Header ------------------------------------------- */}
+        <header className={`rounded-xl border p-5 print:rounded-none print:border-0 print:p-0 ${sw.chip}`}>
+          <Cluster gap="sm">
+            <span className="text-3xl" aria-hidden="true">
+              {config.icon}
+            </span>
+            <div className="flex-1">
+              <p className="text-xs font-medium opacity-80">業種別 事故分析レポート</p>
+              <h1 className="text-2xl font-bold sm:text-3xl">{config.label}</h1>
+            </div>
+            <ReportPrintButton />
+          </Cluster>
+          <p className="mt-3 text-sm leading-relaxed">{config.tagline}</p>
+          <p className="mt-1 text-xs opacity-70">
+            {config.labelEn} ・ 集計期間 {yearLabel} ・ 母集団{num(stats.total)}件 ・ 発行日 {generatedAt}
+          </p>
+        </header>
+
+        {/* ---------- KPI cards ---------------------------------------- */}
+        <Section title="サマリ" spacing="tight" className="mt-6 print:break-inside-avoid">
+          <CardGrid cols={4} gap="md">
+            <KpiCard
+              label="事故事例 合計"
+              value={`${num(stats.total)}件`}
+              caption={`厚労省データ＋curated事例の合算（${yearLabel}）`}
+            />
+            <KpiCard
+              label="死亡事例"
+              value={`${num(stats.severity.fatal)}件`}
+              caption={
+                stats.fatalityShareOfAll > 0
+                  ? `全業種死亡災害の${pct(stats.fatalityShareOfAll)}を占める`
+                  : "全業種比 算出不可"
+              }
+              tone="danger"
+            />
+            <KpiCard
+              label="休業4日以上 (重傷+中等傷)"
+              value={`${num(severityRatio.lostWorkday)}件`}
+              caption={
+                severityRatio.total > 0
+                  ? `業種事例の${pct(severityRatio.lostWorkdayShare)}（事業者報告義務該当）`
+                  : "—"
+              }
+              tone="warn"
+            />
+            <KpiCard
+              label="前年同期比"
+              value={
+                yoy
+                  ? `${yoy.deltaPct >= 0 ? "+" : ""}${(yoy.deltaPct * 100).toFixed(1)}%`
+                  : "—"
+              }
+              caption={
+                yoy
+                  ? `${yoy.previousYear}年 ${num(yoy.previousCount)}件 → ${yoy.latestYear}年 ${num(yoy.latestCount)}件`
+                  : "比較可能なデータが不足"
+              }
+              tone={yoy ? (yoy.deltaPct > 0.05 ? "danger" : yoy.deltaPct < -0.05 ? "good" : "default") : "default"}
+            />
+          </CardGrid>
+
+          {/* Industry comparison strip */}
+          <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-300 print:bg-white">
+            <Cluster gap="md">
+              <span className="inline-flex items-center gap-1">
+                <Gauge className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>
+                  業種内 死亡比率 <strong className="tabular-nums">{pct(comparison.thisFatalRate)}</strong>
+                </span>
+              </span>
+              <span>
+                他4業種平均 <span className="tabular-nums">{pct(comparison.avgFatalRate)}</span>
+              </span>
+              <span>
+                死亡件数ランキング <strong className="tabular-nums">{comparison.rankByFatal}</strong>/{comparison.totalIndustries}位
+              </span>
+            </Cluster>
           </div>
-        </Cluster>
-        <p className="mt-3 text-sm leading-relaxed">{config.tagline}</p>
-        <p className="mt-1 text-xs opacity-70">
-          {config.labelEn} ・ 集計期間 {stats.yearRange.min}年〜{stats.yearRange.max}年 ・ 母集団{num(stats.total)}件
-        </p>
-      </header>
+        </Section>
 
-      {/* ---------- KPI cards ---------------------------------------- */}
-      <Section title="サマリ" spacing="tight" className="mt-6">
-        <CardGrid cols={4} gap="md">
-          <KpiCard
-            label="事故事例 合計"
-            value={`${num(stats.total)}件`}
-            caption={`厚労省データ＋curated事例の合算（${stats.yearRange.min}-${stats.yearRange.max}）`}
-          />
-          <KpiCard
-            label="死亡事例"
-            value={`${num(stats.severity.fatal)}件`}
-            caption={
-              stats.fatalityShareOfAll > 0
-                ? `全業種死亡災害の${pct(stats.fatalityShareOfAll)}を占める`
-                : "全業種比 算出不可"
+        {/* ---------- Danger factors (Top 5) ---------------------------- */}
+        {dangerFactors.length > 0 && (
+          <Section
+            title={
+              <Cluster gap="xs">
+                <AlertTriangle className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
+                <span>業種特有の危険要因 Top 5</span>
+              </Cluster>
             }
-            tone="danger"
-          />
-          <KpiCard
-            label="curated詳細事例"
-            value={`${num(stats.totalCurated)}件`}
-            caption="原因・予防策の解説付き"
-          />
-          <KpiCard
-            label="前年同期比"
-            value={
-              yoy
-                ? `${yoy.deltaPct >= 0 ? "+" : ""}${(yoy.deltaPct * 100).toFixed(1)}%`
-                : "—"
-            }
-            caption={
-              yoy
-                ? `${yoy.previousYear}年 ${num(yoy.previousCount)}件 → ${yoy.latestYear}年 ${num(yoy.latestCount)}件`
-                : "比較可能なデータが不足"
-            }
-            tone={yoy ? (yoy.deltaPct > 0.05 ? "danger" : yoy.deltaPct < -0.05 ? "good" : "default") : "default"}
-          />
-        </CardGrid>
-      </Section>
+            description="原因 Top 集計と業種ハザード辞書を突き合わせて、業種としてのリスクポイントを抽出。"
+            spacing="default"
+            className="mt-8 print:break-inside-avoid"
+          >
+            <ol className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {dangerFactors.map((d) => (
+                <li
+                  key={d.rank}
+                  className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <Cluster gap="xs">
+                    <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${sw.chip}`}>
+                      {d.rank}
+                    </span>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {d.factor}
+                    </p>
+                  </Cluster>
+                  <p className="mt-1 text-[11px] tabular-nums text-slate-500 dark:text-slate-400">
+                    {num(d.count)}件 ・ 業種内 {pct(d.share)}
+                  </p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-slate-700 dark:text-slate-300">{d.hint}</p>
+                </li>
+              ))}
+            </ol>
+          </Section>
+        )}
 
-      {/* ---------- Top cases --------------------------------------- */}
-      {topCases.length > 0 && (
+        {/* ---------- Top cases --------------------------------------- */}
+        {topCases.length > 0 && (
+          <Section
+            title={
+              <Cluster gap="xs">
+                <AlertTriangle className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
+                <span>重大事故 Top {topCases.length}</span>
+              </Cluster>
+            }
+            description="重傷・死亡を中心に curated 事例から代表的なケースを抽出。詳細ページで再発防止策・関連法令を確認できます。"
+            spacing="default"
+            className="mt-8"
+          >
+            <CardGrid cols={2} gap="md">
+              {topCases.map((c) => (
+                <TopCaseCard key={c.id} accident={c} />
+              ))}
+            </CardGrid>
+          </Section>
+        )}
+
+        {/* ---------- Top accident types ------------------------------ */}
+        <Section
+          title="事故の型 Top 10"
+          description="厚労省データを含む業種内全事例から事故型を集計。"
+          spacing="default"
+          className="mt-8 print:break-inside-avoid"
+        >
+          <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+            <RankList items={topTypes} color={config.colorClass} />
+          </div>
+        </Section>
+
+        {/* ---------- Top causes -------------------------------------- */}
+        <Section
+          title="原因 Top 10"
+          description="厚労省データ＋curated事例の mainCauses を統合集計。"
+          spacing="default"
+          className="mt-8 print:break-inside-avoid"
+        >
+          <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+            <RankList items={topCauses} color={config.colorClass} />
+          </div>
+        </Section>
+
+        {/* ---------- Industry-specific patterns ---------------------- */}
         <Section
           title={
             <Cluster gap="xs">
-              <AlertTriangle className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
-              <span>重大事故 Top {topCases.length}</span>
+              <TrendingUp className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
+              <span>業種特有パターン</span>
             </Cluster>
           }
-          description="重傷・死亡を中心に curated 事例から代表的なケースを抽出。詳細ページで再発防止策・関連法令を確認できます。"
+          description="事故型 × 原因の組み合わせ頻度。業種で繰り返されているシナリオを示します。"
           spacing="default"
-          className="mt-8"
+          className="mt-8 print:break-inside-avoid"
         >
-          <CardGrid cols={2} gap="md">
-            {topCases.map((c) => (
-              <TopCaseCard key={c.id} accident={c} />
-            ))}
-          </CardGrid>
-        </Section>
-      )}
-
-      {/* ---------- Top accident types ------------------------------ */}
-      <Section
-        title="事故の型 Top 10"
-        description="厚労省データを含む業種内全事例から事故型を集計。"
-        spacing="default"
-        className="mt-8"
-      >
-        <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <RankList items={topTypes} color={config.colorClass} />
-        </div>
-      </Section>
-
-      {/* ---------- Top causes -------------------------------------- */}
-      <Section
-        title="原因 Top 10"
-        description="厚労省データ＋curated事例の mainCauses を統合集計。"
-        spacing="default"
-        className="mt-8"
-      >
-        <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <RankList items={topCauses} color={config.colorClass} />
-        </div>
-      </Section>
-
-      {/* ---------- Industry-specific patterns ---------------------- */}
-      <Section
-        title={
-          <Cluster gap="xs">
-            <TrendingUp className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
-            <span>業種特有パターン</span>
-          </Cluster>
-        }
-        description="事故型 × 原因の組み合わせ頻度。業種で繰り返されているシナリオを示します。"
-        spacing="default"
-        className="mt-8"
-      >
-        {patterns.length === 0 ? (
-          <p className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">
-            十分なパターンが抽出できませんでした。母集団が小さい業種です。
-          </p>
-        ) : (
-          <CardGrid cols={2} gap="md">
-            {patterns.map((p, i) => (
-              <div
-                key={`${p.type}-${p.cause}-${i}`}
-                className={`rounded-lg border p-3 ${sw.chip}`}
-              >
-                <p className="text-xs font-medium opacity-80">{p.type}</p>
-                <p className="mt-1 text-sm font-semibold">{p.cause}</p>
-                <p className="mt-1 text-xs opacity-80">
-                  {num(p.count)}件 ・ 業種内 {pct(p.share)}
-                </p>
-              </div>
-            ))}
-          </CardGrid>
-        )}
-        <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400">
-          <p className="font-semibold text-slate-700 dark:text-slate-300">業種が抱える典型的なハザード</p>
-          <ul className="mt-1 ml-4 list-disc">
-            {config.archetypes.map((a) => (
-              <li key={a}>{a}</li>
-            ))}
-          </ul>
-        </div>
-      </Section>
-
-      {/* ---------- Seasonality ------------------------------------ */}
-      <Section
-        title="月別 発生傾向"
-        description="季節要因（暑熱・降雪・年度切替）を読み取るための業種内の月別集計。"
-        spacing="default"
-        className="mt-8"
-      >
-        <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <SeasonalityChart data={seasonality} color={config.colorClass} />
-        </div>
-      </Section>
-
-      {/* ---------- Year trend & YoY -------------------------------- */}
-      <Section
-        title="年次推移と前年同期比較"
-        description="業種内の事故件数を年単位で集計。データ収録は年により濃淡があるため、絶対値ではなく構成比の変化を中心に読みます。"
-        spacing="default"
-        className="mt-8"
-      >
-        <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-          <YearTrendChart data={yearTrend} color={config.colorClass} />
-        </div>
-      </Section>
-
-      {/* ---------- Recommended countermeasures --------------------- */}
-      <Section
-        title={
-          <Cluster gap="xs">
-            <ShieldCheck className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
-            <span>推奨対策チェックリスト</span>
-          </Cluster>
-        }
-        description="curated 事例の preventionPoints から頻出度上位を抽出。朝礼・KY・年次計画に転記して使えます。"
-        spacing="default"
-        className="mt-8"
-      >
-        {topPrevention.length === 0 ? (
-          <p className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">
-            curated 事例が不足しており推奨対策を生成できませんでした。
-          </p>
-        ) : (
-          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {topPrevention.map((p) => (
-              <li
-                key={p.name}
-                className="flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 text-sm dark:border-slate-800 dark:bg-slate-900"
-              >
-                <input
-                  type="checkbox"
-                  className="mt-1 h-4 w-4 cursor-pointer accent-emerald-600"
-                  aria-label={`${p.name} をチェック`}
-                />
-                <div className="min-w-0 flex-1">
-                  <p className="text-slate-800 dark:text-slate-200">{p.name}</p>
-                  <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-500">
-                    出現{num(p.count)}回
+          {patterns.length === 0 ? (
+            <p className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">
+              十分なパターンが抽出できませんでした。母集団が小さい業種です。
+            </p>
+          ) : (
+            <CardGrid cols={2} gap="md">
+              {patterns.map((p, i) => (
+                <div
+                  key={`${p.type}-${p.cause}-${i}`}
+                  className={`rounded-lg border p-3 ${sw.chip}`}
+                >
+                  <p className="text-xs font-medium opacity-80">{p.type}</p>
+                  <p className="mt-1 text-sm font-semibold">{p.cause}</p>
+                  <p className="mt-1 text-xs opacity-80">
+                    {num(p.count)}件 ・ 業種内 {pct(p.share)}
                   </p>
                 </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Section>
+              ))}
+            </CardGrid>
+          )}
+          <div className="mt-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-400 print:bg-white">
+            <p className="font-semibold text-slate-700 dark:text-slate-300">業種が抱える典型的なハザード</p>
+            <ul className="mt-1 ml-4 list-disc">
+              {config.archetypes.map((a) => (
+                <li key={a}>{a}</li>
+              ))}
+            </ul>
+          </div>
+        </Section>
 
-      {/* ---------- Related laws ------------------------------------ */}
-      <Section
-        title={
-          <Cluster gap="xs">
-            <BookOpen className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
-            <span>関連法令マッピング</span>
-          </Cluster>
-        }
-        description="本業種の死亡・重傷事例に対して条文遵守状況を確認すべき主要な労働安全衛生関連法令。"
-        spacing="default"
-        className="mt-8"
-      >
-        <Stack gap="sm">
-          {config.laws.map((law) => (
-            <div
-              key={law.name}
-              className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
-            >
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{law.name}</p>
-              <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">{law.scope}</p>
+        {/* ---------- Time band + workplace size ---------------------- */}
+        <Section
+          title="時間帯・事業所規模"
+          description="始業帯・残業帯など事故が集中する時間と、事業所規模ごとの分布を集計。"
+          spacing="default"
+          className="mt-8 print:break-inside-avoid"
+        >
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+              <Cluster gap="xs">
+                <Clock className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">時間帯別 発生比率</h3>
+              </Cluster>
+              <ul className="mt-2 space-y-2.5">
+                {timeBands.map((b) => (
+                  <BarRow
+                    key={b.band}
+                    label={b.label}
+                    count={b.count}
+                    share={b.share}
+                    total={Math.max(1, ...timeBands.map((t) => t.count))}
+                    color={config.colorClass}
+                  />
+                ))}
+              </ul>
+              <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-500">
+                厚労省 occurrenceTime（2時間幅）を 4 区分にまとめた業種内の分布。
+              </p>
             </div>
-          ))}
-        </Stack>
-        <Cluster gap="xs" className="mt-3 text-xs">
-          <Link
-            href="/laws"
-            className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-          >
-            法改正一覧 <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
-          </Link>
-          <Link
-            href="/law-search"
-            className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-          >
-            条文検索 <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
-          </Link>
-        </Cluster>
-      </Section>
+            <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+              <Cluster gap="xs">
+                <Building2 className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">事業所規模別</h3>
+              </Cluster>
+              <ul className="mt-2 space-y-2.5">
+                {workplaceSizes.map((s) => (
+                  <BarRow
+                    key={s.tier}
+                    label={s.label}
+                    count={s.count}
+                    share={s.share}
+                    total={Math.max(1, ...workplaceSizes.map((t) => t.count))}
+                    color={config.colorClass}
+                  />
+                ))}
+              </ul>
+              <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-500">
+                安衛法上の「規模別管理者選任義務」のラインで4区分。
+              </p>
+            </div>
+          </div>
+        </Section>
 
-      {/* ---------- Cross-links ------------------------------------- */}
-      <Section title="次のアクション" spacing="tight" className="mt-8">
-        <CardGrid cols={3} gap="md">
-          <Link
-            href="/accidents-analytics"
-            className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
-          >
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">📊 事故統計ダッシュボード</p>
-            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">25軸の多角分析で本業種以外も横断比較。</p>
-          </Link>
-          <Link
-            href="/ky"
-            className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
-          >
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">📝 KY用紙を起票</p>
-            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">本レポートのパターンを朝礼の危険予知活動に展開。</p>
-          </Link>
-          <Link
-            href="/risk-prediction"
-            className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
-          >
-            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">🤖 AIリスク予測</p>
-            <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">業種・作業内容を入力して潜在リスクを推定。</p>
-          </Link>
-        </CardGrid>
-      </Section>
+        {/* ---------- Worst months + multi-year line chart ------------- */}
+        <Section
+          title="月別 発生傾向と季節性"
+          description="業種内で事故が集中する月と、過去3年の月次推移を比較表示。"
+          spacing="default"
+          className="mt-8 print:break-inside-avoid"
+        >
+          {worstMonths.length > 0 && (
+            <CardGrid cols={3} gap="md">
+              {worstMonths.map((m) => (
+                <div
+                  key={m.month}
+                  className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <Cluster gap="xs">
+                    <span className={`inline-flex h-7 min-w-[36px] items-center justify-center rounded-md px-2 text-sm font-bold ${sw.chip}`}>
+                      {m.month}月
+                    </span>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{m.seasonTag}</span>
+                  </Cluster>
+                  <p className="mt-1 text-xs tabular-nums text-slate-500 dark:text-slate-400">
+                    {num(m.count)}件 ・ {pct(m.share)}
+                  </p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-slate-700 dark:text-slate-300">{m.hazardHint}</p>
+                </div>
+              ))}
+            </CardGrid>
+          )}
+          <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">月次推移（過去3年）</h3>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              年単位の事故件数推移を月ベースで比較。季節要因と前年同月比を1画面で読み取れます。
+            </p>
+            <div className="mt-3">
+              <MonthlyTrendChart rows={monthlyByYear.rows} years={monthlyByYear.years} />
+            </div>
+          </div>
+          <div className="mt-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 print:break-inside-avoid">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">月別 全期間累計</h3>
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              業種累計の月別件数。季節要因（暑熱・降雪・年度切替）の影響を読み取るための分布です。
+            </p>
+            <div className="mt-3">
+              <SeasonalityChart data={seasonality} color={config.colorClass} />
+            </div>
+          </div>
+        </Section>
 
-      <p className="mt-8 text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
-        出典: 厚生労働省 職場のあんぜんサイト 死亡災害DB、労働者死傷病報告オープンデータ、編集部 curated 事例（公開情報を匿名化して再構成）。
-        本レポートは自動集計に基づく参考情報であり、個別案件の判断は所轄労働基準監督署および関係法令を確認してください。
-      </p>
-    </PageContainer>
+        {/* ---------- Year trend & YoY -------------------------------- */}
+        <Section
+          title="年次推移と前年同期比較"
+          description="業種内の事故件数を年単位で集計。データ収録は年により濃淡があるため、絶対値ではなく構成比の変化を中心に読みます。"
+          spacing="default"
+          className="mt-8 print:break-inside-avoid"
+        >
+          <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+            <YearTrendChart data={yearTrend} color={config.colorClass} />
+          </div>
+        </Section>
+
+        {/* ---------- Recommended countermeasures (frequency-based) --- */}
+        <Section
+          title={
+            <Cluster gap="xs">
+              <ShieldCheck className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
+              <span>頻出 推奨対策（curated 事例ベース）</span>
+            </Cluster>
+          }
+          description="curated 事例の preventionPoints から頻出度上位を抽出。朝礼・KY・年次計画に転記して使えます。"
+          spacing="default"
+          className="mt-8 print:break-inside-avoid"
+        >
+          {topPrevention.length === 0 ? (
+            <p className="rounded-lg border border-slate-200 bg-white p-4 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900">
+              curated 事例が不足しており推奨対策を生成できませんでした。
+            </p>
+          ) : (
+            <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {topPrevention.map((p) => (
+                <li
+                  key={p.name}
+                  className="flex items-start gap-2 rounded-lg border border-slate-200 bg-white p-3 text-sm dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 cursor-pointer accent-emerald-600"
+                    aria-label={`${p.name} をチェック`}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-slate-800 dark:text-slate-200">{p.name}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-500">
+                      出現{num(p.count)}回
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Section>
+
+        {/* ---------- 30-item prevention checklist -------------------- */}
+        <Section
+          title={
+            <Cluster gap="xs">
+              <ListChecks className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
+              <span>重大事故予防チェックリスト 30項目</span>
+            </Cluster>
+          }
+          description="本業種で死亡災害を防ぐためのチェックリスト。6カテゴリ×5項目で構成され、PDF出力でそのまま現場会議資料に使えます。"
+          spacing="default"
+          className="mt-8 print:break-before-page"
+        >
+          <PreventionChecklist industry={config.slug as IndustrySlug} />
+        </Section>
+
+        {/* ---------- Related laws ------------------------------------ */}
+        <Section
+          title={
+            <Cluster gap="xs">
+              <BookOpen className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
+              <span>関連法令マッピング</span>
+            </Cluster>
+          }
+          description="本業種の死亡・重傷事例に対して条文遵守状況を確認すべき主要な労働安全衛生関連法令。"
+          spacing="default"
+          className="mt-8 print:break-inside-avoid"
+        >
+          <Stack gap="sm">
+            {config.laws.map((law) => (
+              <div
+                key={law.name}
+                className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900"
+              >
+                <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{law.name}</p>
+                <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">{law.scope}</p>
+              </div>
+            ))}
+          </Stack>
+          <Cluster gap="xs" className="mt-3 text-xs print:hidden">
+            <Link
+              href="/laws"
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            >
+              法改正一覧 <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+            </Link>
+            <Link
+              href="/law-search"
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            >
+              条文検索 <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+            </Link>
+          </Cluster>
+        </Section>
+
+        {/* ---------- Cross-links ------------------------------------- */}
+        <Section title="次のアクション" spacing="tight" className="mt-8 print:hidden">
+          <CardGrid cols={3} gap="md">
+            <Link
+              href="/accidents-analytics"
+              className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            >
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">📊 事故統計ダッシュボード</p>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">25軸の多角分析で本業種以外も横断比較。</p>
+            </Link>
+            <Link
+              href="/ky"
+              className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            >
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">📝 KY用紙を起票</p>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">本レポートのパターンを朝礼の危険予知活動に展開。</p>
+            </Link>
+            <Link
+              href="/risk-prediction"
+              className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            >
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">🤖 AIリスク予測</p>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">業種・作業内容を入力して潜在リスクを推定。</p>
+            </Link>
+          </CardGrid>
+        </Section>
+
+        <p className="mt-8 text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
+          出典: 厚生労働省 職場のあんぜんサイト 死亡災害DB、労働者死傷病報告オープンデータ、編集部 curated 事例（公開情報を匿名化して再構成）。
+          本レポートは自動集計に基づく参考情報であり、個別案件の判断は所轄労働基準監督署および関係法令を確認してください。
+        </p>
+      </PageContainer>
+
+      <ReportPrintFooter />
+    </article>
   );
 }
