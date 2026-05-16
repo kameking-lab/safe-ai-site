@@ -56,7 +56,7 @@ const FINDINGS_A: Finding[] = [
       "ページ本体に「出題は当サイト独自の学習用問題」「実試験の過去問とは異なる」旨の注記が存在しない。利用者は「過去問」を実際の試験問題と誤認する。",
     recommendation:
       "ページ上部に薄い情報バーで「※当サイトの問題は学習用に作成したものであり、実際の試験で出題されたものではありません」を常時表示。",
-    status: "resolved-pr-188",
+    status: "notation-fixed-and-inventory-completed-pr-189",
   },
   {
     id: "A-003",
