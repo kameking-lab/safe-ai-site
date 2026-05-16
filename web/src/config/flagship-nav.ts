@@ -201,6 +201,11 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
         href: "/industries/service",
         description: "転倒・労務管理・顧客対応ストレス。業種別ポータルからツールを横断利用。",
       },
+      {
+        label: "安全衛生標識データベース",
+        href: "/safety-signs",
+        description: "JIS Z 9101準拠の110標識・業種別の必須／推奨セット・設置位置ガイド。",
+      },
     ],
   },
   {
