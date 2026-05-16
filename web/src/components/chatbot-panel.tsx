@@ -4,6 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ChatbotSource, FollowupSuggestion } from "@/app/api/chatbot/route";
 import type { NoticeHit } from "@/lib/notice-search";
+import type {
+  StructuredCitation,
+  RelatedLawLink,
+  DigDeeperLink,
+} from "@/lib/chatbot-enrichment";
 import { LAW_CATEGORY_OPTIONS, type LawCategoryFilter } from "@/lib/rag-search";
 import { VoiceMicButton } from "@/components/voice-input-field";
 import { BindingBadge } from "@/components/AIResponseCard";
@@ -27,6 +32,10 @@ type ChatMessage = {
   confidenceScore?: number;
   followups?: FollowupSuggestion[];
   notices?: NoticeHit[];
+  citations?: StructuredCitation[];
+  relatedLaws?: RelatedLawLink[];
+  digDeeperLinks?: DigDeeperLink[];
+  scopeWarnings?: string[];
 };
 
 
@@ -272,6 +281,10 @@ export function ChatbotPanel() {
         confidenceScore?: number;
         followups?: FollowupSuggestion[];
         notices?: NoticeHit[];
+        citations?: StructuredCitation[];
+        relatedLaws?: RelatedLawLink[];
+        digDeeperLinks?: DigDeeperLink[];
+        scopeWarnings?: string[];
       };
 
       const assistantMsg: ChatMessage = {
@@ -284,6 +297,10 @@ export function ChatbotPanel() {
         confidenceScore: data.confidenceScore,
         followups: data.followups,
         notices: data.notices,
+        citations: data.citations,
+        relatedLaws: data.relatedLaws,
+        digDeeperLinks: data.digDeeperLinks,
+        scopeWarnings: data.scopeWarnings,
       };
 
       const finalMessages = [...nextMessages, assistantMsg];
@@ -596,6 +613,18 @@ export function ChatbotPanel() {
                   </button>
                 </div>
 
+                {/* 範囲外参照の警告（ハルシネーション抑制） */}
+                {msg.role === "assistant" && msg.scopeWarnings && msg.scopeWarnings.length > 0 && (
+                  <div className="mt-2 ml-10 max-w-[88%] rounded-lg border border-rose-200 bg-rose-50 p-3">
+                    <p className="text-[11px] font-bold text-rose-800">⚠ 提供データ範囲外の参照を検出</p>
+                    <ul className="mt-1 space-y-0.5 text-[11px] text-rose-700 leading-5">
+                      {msg.scopeWarnings.map((w, i) => (
+                        <li key={i}>・{w}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 {/* RAGソース・信頼度バッジ */}
                 {msg.role === "assistant" && msg.source_type && (
                   <div className="mt-1.5 ml-10 flex flex-wrap items-center gap-1.5">
@@ -638,6 +667,102 @@ export function ChatbotPanel() {
                       ))}
                     </div>
                   </details>
+                )}
+
+                {/* 構造化出典: 条文番号 + 施行日 + 発出機関 */}
+                {msg.role === "assistant" && msg.citations && msg.citations.length > 0 && (
+                  <details
+                    className="mt-2 ml-10 max-w-[88%] rounded-lg border border-emerald-200 bg-emerald-50/60 p-3"
+                    open
+                  >
+                    <summary className="cursor-pointer text-xs font-semibold text-emerald-900 hover:text-emerald-700">
+                      📎 出典（条文番号＋施行日＋発出機関）{msg.citations.length}件
+                    </summary>
+                    <ul className="mt-2 space-y-1.5">
+                      {msg.citations.map((c, i) => (
+                        <li key={i} className="rounded-md bg-white p-2 text-[11px] leading-5">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="font-bold text-emerald-800">
+                              {c.lawShort}
+                              {c.articleNum}
+                            </span>
+                            {c.articleTitle && (
+                              <span className="text-slate-600">「{c.articleTitle}」</span>
+                            )}
+                          </div>
+                          <div className="mt-0.5 text-slate-700">
+                            <span className="font-semibold">所管：</span>
+                            {c.issuer}
+                            {c.effectiveDate && (
+                              <>
+                                <span className="mx-1 text-slate-400">／</span>
+                                <span className="font-semibold">施行：</span>
+                                {c.effectiveDate}
+                              </>
+                            )}
+                          </div>
+                          <div className="mt-1 flex flex-wrap gap-1.5">
+                            <a
+                              href={c.searchHref}
+                              className="rounded border border-emerald-300 bg-white px-2 py-0.5 text-[10px] font-semibold text-emerald-700 hover:bg-emerald-100"
+                            >
+                              法令検索で条文を見る
+                            </a>
+                            {c.egovHref && (
+                              <a
+                                href={c.egovHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600 hover:bg-slate-50"
+                              >
+                                e-Govで原文を見る
+                              </a>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+
+                {/* 合わせて確認すべき法令（関連法令サジェスト） */}
+                {msg.role === "assistant" && msg.relatedLaws && msg.relatedLaws.length > 0 && (
+                  <div className="mt-2 ml-10 max-w-[88%] rounded-lg border border-sky-200 bg-sky-50/70 p-3">
+                    <p className="text-xs font-semibold text-sky-900">📚 合わせて確認すべき法令</p>
+                    <ul className="mt-1.5 space-y-1">
+                      {msg.relatedLaws.map((r, i) => (
+                        <li key={i} className="text-[11px] leading-5">
+                          <a
+                            href={r.searchHref}
+                            className="font-bold text-sky-800 underline-offset-2 hover:underline"
+                          >
+                            {r.lawShort}（{r.fullName}）
+                          </a>
+                          <span className="ml-1 text-slate-600">— {r.reason}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* もっと深く知る: 事故事例・通達・業種別レポート */}
+                {msg.role === "assistant" && msg.digDeeperLinks && msg.digDeeperLinks.length > 0 && (
+                  <div className="mt-2 ml-10 max-w-[88%] rounded-lg border border-violet-200 bg-violet-50/70 p-3">
+                    <p className="text-xs font-semibold text-violet-900">🔍 もっと深く知る</p>
+                    <ul className="mt-1.5 space-y-1.5">
+                      {msg.digDeeperLinks.map((d, i) => (
+                        <li key={i} className="text-[11px] leading-5">
+                          <a
+                            href={d.href}
+                            className="font-bold text-violet-800 underline-offset-2 hover:underline"
+                          >
+                            {d.label}
+                          </a>
+                          <span className="ml-1 text-slate-600">— {d.description}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
 
                 {/* 関連通達・告示・指針（厚労省一次資料DB由来） */}
