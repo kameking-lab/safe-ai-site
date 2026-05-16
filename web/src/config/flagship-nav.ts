@@ -48,6 +48,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     href: "/ky",
     subItems: [
       { label: "新規KY作成", href: "/ky" },
+      { label: "KY事例データベース", href: "/ky-examples", description: "5業種×10作業150件の危険予知実例。作業別に検索してKY用紙作成に活用" },
       { label: "PDFエクスポート", href: "/pdf" },
       { label: "業種別プリセット", href: "/ky#presets" },
     ],
@@ -98,6 +99,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       { label: "健康診断スケジューラ", href: "/health-checkup-scheduler", description: "業種・職種・物質・作業条件から必要健診と年間スケジュールを自動判定" },
       { label: "治療と仕事の両立支援", href: "/treatment-work-balance", description: "6疾患カテゴリの病態別労務配慮と両立支援プラン・主治医意見書テンプレ" },
       { label: "熱中症対策ハブ", href: "/heat-illness-prevention", description: "WBGT計算機・業種別リスク判定・R7安衛則改正チェックリストと社内文書テンプレ" },
+      { label: "メンタルヘルス対策", href: "/mental-health-management", description: "ストレスチェック義務・産業医面接指導・小規模事業場向けの実務ガイドと書式" },
     ],
   },
   {
@@ -111,6 +113,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     subItems: [
       { label: "AIに質問する", href: "/chatbot" },
       { label: "用語集", href: "/glossary" },
+      { label: "FAQ 200問", href: "/faq", description: "法令・管理体制・化学物質・健康管理の200問を法令根拠付きで解説" },
       { label: "Q&Aナレッジ", href: "/qa-knowledge" },
     ],
   },
@@ -205,6 +208,11 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
         label: "安全衛生標識データベース",
         href: "/safety-signs",
         description: "JIS Z 9101準拠の110標識・業種別の必須／推奨セット・設置位置ガイド。",
+      },
+      {
+        label: "外国人労働者支援",
+        href: "/foreign-workers",
+        description: "在留資格別の安全衛生義務・多言語教材・技能実習生対応ガイド。",
       },
     ],
   },

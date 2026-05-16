@@ -107,6 +107,26 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/faq" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  FAQ 200問
+                </Link>
+              </li>
+              <li>
+                <Link href="/ky-examples" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  KY事例データベース
+                </Link>
+              </li>
+              <li>
+                <Link href="/mental-health-management" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  メンタルヘルス対策
+                </Link>
+              </li>
+              <li>
+                <Link href="/foreign-workers" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  外国人労働者支援
+                </Link>
+              </li>
+              <li>
                 <Link href="/goods" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   安全用品カタログ
                 </Link>

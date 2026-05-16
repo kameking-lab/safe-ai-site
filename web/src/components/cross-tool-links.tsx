@@ -34,9 +34,17 @@ export type CrossToolId =
   | "education-certification"
   | "health-checkup"
   | "plan-generator"
-  | "industries";
+  | "industries"
+  | "foreign-workers"
+  | "treatment-work-balance"
+  | "work-environment-measurement"
+  | "heat-illness-prevention"
+  | "asbestos-management"
+  | "mental-health-management"
+  | "faq"
+  | "safety-signs";
 
-function buildPages(industry?: IndustrySlug, exclude?: CrossToolId): RelatedPage[] {
+function buildPracticeTools(industry?: IndustrySlug, exclude?: CrossToolId): RelatedPage[] {
   const lbl = industry ? INDUSTRY_LABELS[industry] : undefined;
 
   const all: Array<{ id: CrossToolId; page: RelatedPage }> = [
@@ -112,6 +120,107 @@ function buildPages(industry?: IndustrySlug, exclude?: CrossToolId): RelatedPage
         cta: lbl ? `${lbl}ポータルへ` : "業種別に探す",
       },
     },
+    {
+      id: "work-environment-measurement",
+      page: {
+        href: "/work-environment-measurement",
+        label: "作業環境測定",
+        description: lbl
+          ? `${lbl}の測定対象作業場を自動判定。A・B測定値から管理区分と改善措置を算出。`
+          : "安衛令第21条の10種測定対象を判定。A・B測定から管理区分（第1〜第3）と改善措置を算出。",
+        color: "blue",
+        cta: "管理区分を判定する",
+      },
+    },
+    {
+      id: "heat-illness-prevention",
+      page: {
+        href: "/heat-illness-prevention",
+        label: "熱中症対策ハブ",
+        description: lbl
+          ? `${lbl}の WBGT 基準・業種別リスク・R7 安衛則改正チェックリストと社内文書テンプレ。`
+          : "WBGT 計算機・業種別リスク判定・R7 安衛則改正チェックリストと社内文書テンプレ一式。",
+        color: "orange",
+        cta: "熱中症対策を確認",
+      },
+    },
+    {
+      id: "asbestos-management",
+      page: {
+        href: "/asbestos-management",
+        label: "石綿（アスベスト）対応",
+        description:
+          "R4.4施行の事前調査結果報告義務対応。判定ツール・届出書類自動生成・作業計画テンプレ。",
+        color: "purple",
+        cta: "石綿対応を確認する",
+      },
+    },
+    {
+      id: "safety-signs",
+      page: {
+        href: "/safety-signs",
+        label: "安全衛生標識DB",
+        description: lbl
+          ? `${lbl}の必須・推奨標識セットと設置位置ガイド。JIS Z 9101準拠の110標識。`
+          : "JIS Z 9101準拠の110標識・業種別の必須／推奨セット・設置位置ガイド。",
+        color: "rose",
+        cta: "標識を確認する",
+      },
+    },
+    {
+      id: "faq",
+      page: {
+        href: "/faq",
+        label: "FAQ 200問",
+        description:
+          "法令・管理体制・化学物質・健康管理の200問を法令根拠付きで解説。カテゴリ別・横断検索対応。",
+        color: "sky",
+        cta: "FAQを見る",
+      },
+    },
+  ];
+
+  return all.filter(({ id }) => id !== exclude).map(({ page }) => page);
+}
+
+function buildGuideTools(industry?: IndustrySlug, exclude?: CrossToolId): RelatedPage[] {
+  const lbl = industry ? INDUSTRY_LABELS[industry] : undefined;
+
+  const all: Array<{ id: CrossToolId; page: RelatedPage }> = [
+    {
+      id: "foreign-workers",
+      page: {
+        href: "/foreign-workers",
+        label: "外国人労働者支援",
+        description: lbl
+          ? `${lbl}で雇用する外国人労働者の在留資格別義務・多言語教材・技能実習生対応ガイド。`
+          : "在留資格別の安全衛生義務・多言語安全教材・技能実習生対応ガイドをワンストップ提供。",
+        color: "orange",
+        cta: "外国人労働者支援を見る",
+      },
+    },
+    {
+      id: "treatment-work-balance",
+      page: {
+        href: "/treatment-work-balance",
+        label: "治療と仕事の両立支援",
+        description:
+          "がん・脳卒中・心疾患・糖尿病・精神疾患・難病の6カテゴリ別の労務配慮と両立支援プラン。",
+        color: "emerald",
+        cta: "両立支援を確認する",
+      },
+    },
+    {
+      id: "mental-health-management",
+      page: {
+        href: "/mental-health-management",
+        label: "メンタルヘルス対策",
+        description:
+          "ストレスチェック義務・産業医面接指導・小規模事業場向けトラック別の実務ガイドと書式。",
+        color: "rose",
+        cta: "メンタルヘルス対策へ",
+      },
+    },
   ];
 
   return all.filter(({ id }) => id !== exclude).map(({ page }) => page);
@@ -127,10 +236,20 @@ interface CrossToolLinksProps {
 }
 
 export function CrossToolLinks({ industry, exclude, heading }: CrossToolLinksProps) {
+  const practicePages = buildPracticeTools(industry, exclude);
+  const guidePages = buildGuideTools(industry, exclude);
   return (
-    <RelatedPageCards
-      heading={heading ?? "合わせて使う"}
-      pages={buildPages(industry, exclude)}
-    />
+    <>
+      <RelatedPageCards
+        heading={heading ?? "合わせて使う"}
+        pages={practicePages}
+      />
+      {guidePages.length > 0 && (
+        <RelatedPageCards
+          heading="対象者別ガイド"
+          pages={guidePages}
+        />
+      )}
+    </>
   );
 }
