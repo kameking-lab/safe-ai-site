@@ -8133,7 +8133,7 @@
       "acgihTlv": null
     },
     "10097-32-2": {
-      "name": "臭素",
+      "name": "臭素（CAS: 10097-32-2）",
       "nameEn": "Bromine",
       "source": "reference",
       "iarcGroup": null,
@@ -11536,7 +11536,7 @@
       }
     },
     "12172-67-7": {
-      "name": "クリソタイル",
+      "name": "クリソタイル（変種: CAS 12172-67-7）",
       "nameEn": "Chrysotile (variation)",
       "carcinogenicity": {
         "iarc": "1",
@@ -11994,7 +11994,7 @@
       }
     },
     "10024-89-2": {
-      "name": "モルホリン",
+      "name": "モルホリン（CAS: 10024-89-2）",
       "nameEn": "Morpholine",
       "notes": [
         "皮"
@@ -13822,7 +13822,7 @@
       "acgihTlv": null
     },
     "471-34-1": {
-      "name": "炭酸カルシウム",
+      "name": "炭酸カルシウム（アラゴナイト）",
       "nameEn": "Calcium carbonate",
       "acgih": {
         "twa": {
@@ -16314,7 +16314,7 @@
       "acgihTlv": null
     },
     "101-94-0": {
-      "name": "2-アミノピリジン",
+      "name": "2-アミノピリジン（CAS: 101-94-0）",
       "nameEn": "2-Aminopyridine",
       "acgih": {
         "twa": {
@@ -16589,7 +16589,7 @@
       "acgihTlv": null
     },
     "1314-22-3": {
-      "name": "酸化亜鉛",
+      "name": "過酸化亜鉛（CAS: 1314-22-3）",
       "nameEn": "Zinc peroxide",
       "source": "reference",
       "iarcGroup": null,
@@ -16979,7 +16979,7 @@
       "acgihTlv": null
     },
     "7783-58-6": {
-      "name": "ゲルマン",
+      "name": "ゲルマン（CAS: 7783-58-6）",
       "nameEn": "Germane",
       "acgih": {
         "twa": {
@@ -17897,7 +17897,7 @@
       "acgihTlv": null
     },
     "5283-67-0": {
-      "name": "アジ化ナトリウム",
+      "name": "アジ化ナトリウム（CAS: 5283-67-0）",
       "nameEn": "Sodium azide",
       "notes": [
         "皮"
@@ -18253,7 +18253,7 @@
       "acgihTlv": null
     },
     "1317-95-9": {
-      "name": "結晶質シリカ（石英）",
+      "name": "結晶質シリカ（石英・CAS: 1317-95-9）",
       "nameEn": "Crystalline silica - Quartz",
       "notes": [
         "職業的ばく露による吸入時"
@@ -18298,7 +18298,7 @@
       "acgihTlv": null
     },
     "542-83-6": {
-      "name": "カドミウム及びその化合物（酢酸カドミウム）",
+      "name": "酢酸カドミウム（一水和物: CAS 542-83-6）",
       "nameEn": "Cadmium acetate",
       "carcinogenicity": {
         "iarc": "1",
@@ -18311,7 +18311,7 @@
       "acgihTlv": null
     },
     "543-90-8": {
-      "name": "カドミウム及びその化合物（酢酸カドミウム）",
+      "name": "酢酸カドミウム（無水物: CAS 543-90-8）",
       "nameEn": "Cadmium acetate",
       "carcinogenicity": {
         "iarc": "1",
@@ -18771,7 +18771,7 @@
       "acgihTlv": null
     },
     "12202-17-4": {
-      "name": "鉛及びその無機化合物",
+      "name": "鉛及びその無機化合物（CAS: 12202-17-4）",
       "nameEn": "Inorganic lead compound",
       "carcinogenicity": {
         "iarc": "2A",
@@ -18823,7 +18823,7 @@
       "acgihTlv": null
     },
     "19783-14-3": {
-      "name": "鉛及びその無機化合物",
+      "name": "鉛及びその無機化合物（CAS: 19783-14-3）",
       "nameEn": "Inorganic lead compound",
       "carcinogenicity": {
         "iarc": "2A",
@@ -18849,7 +18849,7 @@
       "acgihTlv": null
     },
     "90583-37-2": {
-      "name": "鉛及びその無機化合物",
+      "name": "鉛及びその無機化合物（CAS: 90583-37-2）",
       "nameEn": "Inorganic lead compound",
       "carcinogenicity": {
         "iarc": "2A",
@@ -18875,7 +18875,7 @@
       "acgihTlv": null
     },
     "56189-09-4": {
-      "name": "ステアリン酸鉛",
+      "name": "ステアリン酸鉛（CAS: 56189-09-4）",
       "nameEn": "Lead stearate",
       "carcinogenicity": {
         "iarc": "2A",
@@ -19102,7 +19102,7 @@
       "acgihTlv": null
     },
     "25321-14-6": {
-      "name": "2,4-ジニトロトルエン",
+      "name": "ジニトロトルエン（混合異性体）",
       "nameEn": "Dinitrotoluenes (2,4-isomer dominant)",
       "carcinogenicity": {
         "iarc": "2B",
@@ -19145,7 +19145,7 @@
       }
     },
     "540-73-8": {
-      "name": "1,1-ジメチルヒドラジン",
+      "name": "1,1-ジメチルヒドラジン（CAS: 540-73-8）",
       "nameEn": "1,1-Dimethylhydrazine",
       "notes": [
         "皮膚吸収; ACGIH 値は参考"

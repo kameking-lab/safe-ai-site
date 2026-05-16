@@ -1,32 +1,14 @@
 import { RelatedPageCards, type RelatedPage } from "@/components/related-page-cards";
-import type { IndustrySlug } from "@/lib/accident-analysis";
+import type { IndustrySlug } from "@/lib/industry-slugs";
+import {
+  HEALTH_CHECKUP_TO_SLUG,
+  SAFETY_PLAN_TO_SLUG,
+  INDUSTRY_LABELS_JA,
+} from "@/lib/industry-slugs";
 
-// Health-checkup IndustryId → IndustrySlug (for result page)
-export const HEALTH_CHECKUP_TO_SLUG: Partial<Record<string, IndustrySlug>> = {
-  construction: "construction",
-  manufacturing: "manufacturing",
-  transportation: "transport",
-  medical: "healthcare",
-  service: "service",
-};
+export { HEALTH_CHECKUP_TO_SLUG, SAFETY_PLAN_TO_SLUG };
 
-// Safety-plan IndustryId → IndustrySlug (for plan-generator preview)
-export const SAFETY_PLAN_TO_SLUG: Partial<Record<string, IndustrySlug>> = {
-  construction: "construction",
-  manufacturing: "manufacturing",
-  transportation: "transport",
-  medical: "healthcare",
-  service: "service",
-  // retail / food / wholesale / warehouse / office → no matching accident-analysis slug
-};
-
-const INDUSTRY_LABELS: Record<IndustrySlug, string> = {
-  construction: "建設業",
-  manufacturing: "製造業",
-  transport: "運輸交通業",
-  healthcare: "医療福祉",
-  service: "サービス業",
-};
+const INDUSTRY_LABELS: Record<IndustrySlug, string> = INDUSTRY_LABELS_JA;
 
 export type CrossToolId =
   | "accidents-reports"

@@ -14,12 +14,14 @@
 import { loadCombinedCases, type CombinedCase } from "@/lib/accidents-analytics/loader";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import type { AccidentCase, AccidentWorkCategory } from "@/lib/types/domain";
+import type { IndustrySlug as _IndustrySlug } from "@/lib/industry-slugs";
 
 /* ------------------------------------------------------------------ */
 /* Industry registry                                                   */
 /* ------------------------------------------------------------------ */
 
-export type IndustrySlug = "construction" | "manufacturing" | "transport" | "healthcare" | "service";
+// Re-exported from the canonical source so consumers can import from either path.
+export type IndustrySlug = _IndustrySlug;
 
 /**
  * Industry config used by the report routes.
