@@ -37,6 +37,10 @@ import { EXPANDED_CHEMICALS } from "./data/expanded-chemicals.mjs";
 import { EXPANDED_CHEMICALS_2 } from "./data/expanded-chemicals-2.mjs";
 import { EXPANDED_CHEMICALS_3 } from "./data/expanded-chemicals-3.mjs";
 import { EXPANDED_CHEMICALS_4 } from "./data/expanded-chemicals-4.mjs";
+import { EXPANDED_CHEMICALS_5 } from "./data/expanded-chemicals-5.mjs";
+import { EXPANDED_CHEMICALS_6 } from "./data/expanded-chemicals-6.mjs";
+import { EXPANDED_CHEMICALS_7 } from "./data/expanded-chemicals-7.mjs";
+import { EXPANDED_CHEMICALS_8 } from "./data/expanded-chemicals-8.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "..", "..");
@@ -129,6 +133,10 @@ function buildSubstances(compact) {
     ...EXPANDED_CHEMICALS_2,
     ...EXPANDED_CHEMICALS_3,
     ...EXPANDED_CHEMICALS_4,
+    ...EXPANDED_CHEMICALS_5,
+    ...EXPANDED_CHEMICALS_6,
+    ...EXPANDED_CHEMICALS_7,
+    ...EXPANDED_CHEMICALS_8,
   ];
   for (const c of expanded) {
     if (!c.cas || !/^\d{2,7}-\d{2,3}-\d{1,2}$/.test(c.cas)) continue;
