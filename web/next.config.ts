@@ -85,7 +85,7 @@ const nextConfig: NextConfig = {
       { source: "/support", destination: "/contact", permanent: true },
       { source: "/help", destination: "/contact", permanent: true },
       { source: "/price", destination: "/pricing", permanent: true },
-      { source: "/faq", destination: "/qa-knowledge", permanent: true },
+      // /faq now has its own page — redirect removed
       // 安全日誌（日本語2パターン）
       { source: "/anzen-nisshi", destination: "/safety-diary", permanent: true },
       { source: "/anzen-eisei-nisshi", destination: "/safety-diary", permanent: true },
