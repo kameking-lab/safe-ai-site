@@ -159,6 +159,11 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
         href: "/education",
         description: "特別教育コースのオンライン受講",
       },
+      {
+        label: "石綿（アスベスト）対応支援",
+        href: "/asbestos-management",
+        description: "R4.4施行の事前調査結果報告義務に対応した判定ツール・届出書類自動生成・作業計画テンプレ",
+      },
     ],
   },
   {
