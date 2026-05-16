@@ -30,12 +30,14 @@ export const metadata: Metadata = {
   },
 };
 
+const SITE_BASE = "https://www.anzen-ai-portal.jp";
+
 export default function AccidentsPage() {
   const accidentSchema = newsArticleListSchema(
     getAccidentCasesDataset().map((c) => ({
       headline: c.title,
       datePublished: c.occurredOn,
-      url: "https://safe-ai-site.vercel.app/accidents",
+      url: `${SITE_BASE}/accidents/${c.id}`,
       description: c.summary,
     }))
   );

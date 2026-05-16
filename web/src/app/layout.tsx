@@ -4,7 +4,7 @@ import "./globals.css";
 import { FuriganaProvider } from "@/contexts/furigana-context";
 import { EasyJapaneseProvider } from "@/contexts/easy-japanese-context";
 import { LanguageProvider } from "@/contexts/language-context";
-import { JsonLd, organizationSchema, webSiteSchema, personSchema } from "@/components/json-ld";
+import { JsonLd, organizationSchema, webSiteSchema } from "@/components/json-ld";
 import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
 import { CommandPaletteProvider } from "@/components/CommandPaletteProvider";
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
@@ -101,7 +101,6 @@ export default function RootLayout({
         <AdSenseScript />
         <JsonLd schema={organizationSchema()} />
         <JsonLd schema={webSiteSchema()} />
-        <JsonLd schema={personSchema()} />
         <ServiceWorkerRegistrar />
         <ThemeProvider>
           <LanguageProvider>

@@ -5,6 +5,7 @@ import { BookMarked, Search, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 import { PageJsonLd } from "@/components/page-json-ld";
+import { JsonLd, definedTermSetSchema } from "@/components/json-ld";
 // Metadata cannot be exported from client component – define it in a separate layout or use a wrapper.
 // For now, the page itself handles SEO via next/head alternative approach.
 
@@ -166,8 +167,19 @@ export default function GlossaryPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
-      {/* SEO: WebPage + BreadcrumbList */}
+      {/* SEO: WebPage + BreadcrumbList + DefinedTermSet */}
       <PageJsonLd name="労働安全用語集" description="労働安全衛生に関する専門用語をわかりやすく解説。条文・通達・現場用語を一覧から検索。" path="/glossary" />
+      <JsonLd
+        schema={definedTermSetSchema({
+          name: "労働安全用語集",
+          url: "https://www.anzen-ai-portal.jp/glossary",
+          description: "労働安全衛生に関する専門用語をわかりやすく解説。",
+          terms: TERMS.map((t) => ({
+            term: t.term,
+            definition: t.definition,
+          })),
+        })}
+      />
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3">

@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import {
   JsonLd,
-  personSchema,
-  organizationSchema,
   webPageSchema,
   breadcrumbSchema,
 } from "@/components/json-ld";
@@ -177,8 +175,6 @@ export default function AboutPage() {
     <main className="mx-auto max-w-2xl px-4 py-6 sm:py-8">
       <JsonLd
         schema={[
-          personSchema(),
-          organizationSchema(),
           webPageSchema({
             name: "研究・実証プロジェクトについて",
             description:

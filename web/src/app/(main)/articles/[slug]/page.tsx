@@ -181,6 +181,7 @@ export default async function ArticleDetailPage({
             headline: article.title,
             description: article.description,
             url,
+            image: [`${SITE_BASE}${ogImageUrl(article.title)}`],
             datePublished: article.publishedAt,
             dateModified: article.lastReviewedAt,
             author: {
@@ -192,6 +193,12 @@ export default async function ArticleDetailPage({
               "@type": "Organization",
               name: "安全AIポータル",
               url: SITE_BASE,
+              logo: {
+                "@type": "ImageObject",
+                url: `${SITE_BASE}/apple-touch-icon.png`,
+                width: 180,
+                height: 180,
+              },
             },
             mainEntityOfPage: url,
             inLanguage: "ja",
