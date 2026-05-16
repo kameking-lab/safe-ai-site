@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "データ処理契約（DPA）",
   description: "安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
   alternates: { canonical: "/dpa" },
+  // Per-page noindex: individual operator scope — standard DPA template will be issued after incorporation.
+  // Audit reference: harsh-third-party-2026-05-16 G-002.
+  robots: { index: false, follow: true },
   openGraph: withSiteOpenGraph("/dpa", {
     title: "データ処理契約（DPA）",
     description: "安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。",
@@ -20,7 +23,18 @@ export default function DpaPage() {
       <PageJsonLd name="データ処理契約（DPA）" description="安全AIポータルのデータ処理契約（DPA）。サブプロセッサー一覧、DPA締結の流れをご案内します。" path="/dpa" />
         <div>
           <h1 className="text-xl font-bold text-slate-900">データ処理契約（DPA）</h1>
-          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
+          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年5月17日</p>
+          <div className="mt-3 rounded-xl border border-amber-300 bg-amber-50 p-4">
+            <p className="text-sm font-semibold text-amber-900">
+              【ご案内】本ページは個人事業者運営フェーズの参考情報です
+            </p>
+            <p className="mt-2 text-sm leading-7 text-amber-800">
+              標準化されたDPAテンプレートの提供および法人向け業務委託契約の正式締結は、
+              法人化（予定: 2026年中）完了後に対応する方針です。それまでは個別案件に応じた個別契約での対応となり、
+              企業のコンプライアンス要件（標準DPA・サブプロセッサー監査権など）を完全に満たせない場合があります。
+              重要案件においては、必要に応じて社内法務・外部弁護士のレビューをご検討ください。
+            </p>
+          </div>
           <p className="mt-3 text-sm leading-7 text-slate-600">
             安全AIポータルでは、個人情報保護法・GDPRなどの要件に基づき、
             業務委託先として当方のサービスを利用する法人・団体からのDPA締結要請に個別対応しています。

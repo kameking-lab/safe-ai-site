@@ -196,11 +196,9 @@ export function Footer() {
                   セキュリティ
                 </Link>
               </li>
-              <li>
-                <Link href="/dpa" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
-                  DPA
-                </Link>
-              </li>
+              {/* DPA link removed from nav: individual-operator phase, standard template after incorporation.
+                  Page remains reachable via /dpa direct URL but is excluded from indexing.
+                  Audit reference: harsh-third-party-2026-05-16 G-002. */}
               <li>
                 <Link href="/bcp" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   BCP

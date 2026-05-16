@@ -133,7 +133,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Audit reference: harsh-third-party-2026-05-16 F-001/F-002.
     { url: "/ky/morning", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "monthly" },
     { url: "/security", lastModified: "2026-05-15", priority: 0.3, changeFrequency: "yearly" },
-    { url: "/dpa", lastModified: "2026-05-15", priority: 0.3, changeFrequency: "yearly" },
+    // /dpa removed: individual-operator phase, standard template after incorporation.
+    // Audit reference: harsh-third-party-2026-05-16 G-002.
     { url: "/safety-signs", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
     { url: "/about", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "yearly" },
     { url: "/contact", lastModified: "2026-04-22", priority: 0.5, changeFrequency: "yearly" },

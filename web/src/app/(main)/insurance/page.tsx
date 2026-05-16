@@ -20,18 +20,25 @@ export default function InsurancePage() {
       <PageJsonLd name="賠償責任保険加入状況" description="安全AIポータルの賠償責任保険・データ漏洩保険の加入状況。現状と加入予定を正直に公開します。" path="/insurance" />
         <div>
           <h1 className="text-xl font-bold text-slate-900">賠償責任保険加入状況</h1>
-          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
+          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年5月17日</p>
           <p className="mt-3 text-sm leading-7 text-slate-600">
             安全AIポータルでは、利用者・取引先への万が一の被害に備えるため、賠償責任保険への加入を計画しています。
             現状と予定を正直に開示します。
           </p>
         </div>
 
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">
           <p className="text-sm font-semibold text-amber-900">【現状】未加入</p>
           <p className="mt-2 text-sm leading-7 text-amber-800">
-            2026年4月現在、業務賠償責任保険・データ漏洩保険には未加入です。
+            2026年5月現在、業務賠償責任保険・データ漏洩保険には未加入です。
             独立準備フェーズのため、加入手続きは法人化・独立後のフェーズ1で実施予定です。
+          </p>
+          <p className="mt-3 text-sm leading-7 text-amber-900">
+            <span className="font-semibold">企業のご利用について：</span>
+            企業の調達基準において賠償責任保険の付保が必須となる場合、現時点では本サービスは要件を満たさない可能性があります。
+            重要度の高い業務での利用を検討される場合は、貴社の調達基準・リスク管理基準をご確認のうえ、必要に応じて
+            <a className="underline hover:text-amber-700" href="/contact">お問い合わせフォーム</a>
+            より個別にご相談ください。
           </p>
         </div>
 
@@ -41,7 +48,32 @@ export default function InsurancePage() {
           <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
             <div className="flex items-center gap-2">
               <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-                予定
+                短期検討
+              </span>
+              <span className="text-sm font-semibold text-blue-900">
+                個人事業者向けPL保険・賠償責任保険
+              </span>
+            </div>
+            <ul className="mt-3 space-y-1.5 text-sm text-blue-800">
+              <li className="flex items-start gap-2">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                対象：個人事業者として加入可能なPL保険・業務賠償責任保険
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                目的：法人化までの空白期間における基本的なリスクカバー
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                状況：2026年内に複数社の見積取得・補償範囲比較を実施予定
+              </li>
+            </ul>
+          </div>
+
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+            <div className="flex items-center gap-2">
+              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+                中期予定
               </span>
               <span className="text-sm font-semibold text-blue-900">
                 業務上の賠償責任保険（ITコンサルタント向け）
@@ -58,7 +90,7 @@ export default function InsurancePage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                加入目標：独立後3ヶ月以内
+                加入目標：法人化完了後3ヶ月以内
               </li>
             </ul>
           </div>
