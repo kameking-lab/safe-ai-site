@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/api/", "/strategy", "/dev/", "/audits/"],
+      disallow: ["/admin/", "/api/", "/dev/", "/audits/"],
     },
     sitemap: "https://www.anzen-ai-portal.jp/sitemap-index.xml",
   };
