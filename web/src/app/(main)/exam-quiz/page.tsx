@@ -15,9 +15,9 @@ import {
 import { PageContainer } from "@/components/layout/page-container";
 
 import { PageJsonLd } from "@/components/page-json-ld";
-const _title = "安全衛生 資格試験 過去問クイズ";
+const _title = "安全衛生 資格試験 学習用クイズ";
 const _desc =
-  "労働安全コンサルタント・衛生管理者・ボイラー技士など全資格の過去問クイズ。科目・年度別に本番形式で挑戦できます。";
+  "労働安全コンサルタント・衛生管理者・ボイラー技士など全資格の学習用クイズ。出題形式・法令根拠つき。当サイト独自の演習問題であり、実試験の過去問とは異なります。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/exam-quiz" },
@@ -71,8 +71,8 @@ export default function ExamQuizPage() {
   return (
     <>
       <PageHeader
-        title="過去問クイズ（全資格対応）"
-        description="安全・衛生コンサルタント、衛生管理者、ボイラー技士など全資格の過去問で実力を確認"
+        title="学習用クイズ（全資格対応）"
+        description="安全・衛生コンサルタント、衛生管理者、ボイラー技士など全資格の学習用問題で実力を確認"
         icon={BookOpen}
         iconColor="amber"
       />
@@ -81,6 +81,14 @@ export default function ExamQuizPage() {
       <PageContainer paddingY="tight">
         {/* SEO: WebPage + BreadcrumbList */}
         <PageJsonLd name={_title} description={_desc} path="/exam-quiz" />
+
+        {/* Disclaimer: original practice questions, not verbatim past-exam papers */}
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+          <span className="font-bold">【ご注意】</span>
+          本クイズは当サイトが独自に作成した学習用問題です。実試験の過去問（公式試験問題）の逐語転載ではありません。
+          実際の過去問は各試験機関の公式ページをご参照ください。
+        </div>
+
         <section>
           <ExamQuizRecommendHeading />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -174,8 +182,8 @@ export default function ExamQuizPage() {
             href: "/e-learning",
             label: { ja: "Eラーニング", en: "E-learning" },
             description: {
-              ja: "テーマ別の解説付きクイズで知識を体系的に整理。過去問の前に基礎固めするのにも最適です。",
-              en: "Themed quizzes with explanations organize your knowledge — perfect for shoring up basics before past exams.",
+              ja: "テーマ別の解説付きクイズで知識を体系的に整理。学習用クイズの前に基礎固めするのにも最適です。",
+              en: "Themed quizzes with explanations organize your knowledge — perfect for shoring up basics before these practice quizzes.",
             },
             color: "emerald",
             cta: { ja: "Eラーニングで学ぶ", en: "Start e-learning" },
