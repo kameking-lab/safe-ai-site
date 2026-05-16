@@ -8,7 +8,11 @@ import { PrintButton } from "@/components/safety-plan/print-button";
 import { CrossToolLinks, SAFETY_PLAN_TO_SLUG } from "@/components/cross-tool-links";
 import { findTemplateById } from "@/data/safety-plan-templates";
 import { regenerateFromTemplateId } from "@/lib/safety-plan-generator";
-import type { MeasureCategory } from "@/types/safety-plan";
+import type {
+  MeasureCategory,
+  OverworkPriority,
+  SpecialWorkId,
+} from "@/types/safety-plan";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -29,6 +33,29 @@ const MEASURE_KEYS: MeasureCategory[] = [
 
 const isMeasureCategory = (v: string): v is MeasureCategory =>
   (MEASURE_KEYS as string[]).includes(v);
+
+const SPECIAL_WORK_KEYS: SpecialWorkId[] = [
+  "high-place",
+  "organic-solvent",
+  "specified-chemical",
+  "dust",
+  "noise",
+  "vibration",
+  "ionizing-radiation",
+  "lead",
+  "asbestos",
+  "lone-work",
+  "shift-work",
+  "heavy-load",
+];
+
+const isSpecialWorkId = (v: string): v is SpecialWorkId =>
+  (SPECIAL_WORK_KEYS as string[]).includes(v);
+
+const OVERWORK_KEYS: OverworkPriority[] = ["high", "normal", "low"];
+
+const isOverworkPriority = (v: string): v is OverworkPriority =>
+  (OVERWORK_KEYS as string[]).includes(v);
 
 function readString(
   sp: Record<string, string | string[] | undefined>,
@@ -59,6 +86,32 @@ function readFocus(
     .split(",")
     .map((s) => s.trim())
     .filter((s): s is MeasureCategory => s !== "" && isMeasureCategory(s));
+}
+
+function readSpecialWork(
+  sp: Record<string, string | string[] | undefined>,
+): SpecialWorkId[] {
+  const raw = readString(sp, "special");
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s): s is SpecialWorkId => s !== "" && isSpecialWorkId(s));
+}
+
+function readOverwork(
+  sp: Record<string, string | string[] | undefined>,
+): OverworkPriority | undefined {
+  const raw = readString(sp, "overwork");
+  if (!raw) return undefined;
+  return isOverworkPriority(raw) ? raw : undefined;
+}
+
+function readOverseas(
+  sp: Record<string, string | string[] | undefined>,
+): boolean {
+  const raw = readString(sp, "overseas");
+  return raw === "1" || raw === "true";
 }
 
 export async function generateMetadata({
@@ -94,6 +147,9 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
     focusAreas: readFocus(sp),
     customGoals: [],
     notes: readString(sp, "notes"),
+    specialWork: readSpecialWork(sp),
+    hasOverseasAssignment: readOverseas(sp),
+    overworkPriority: readOverwork(sp),
   });
 
   if (!result.ok) {

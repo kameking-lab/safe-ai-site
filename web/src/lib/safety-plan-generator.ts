@@ -16,13 +16,21 @@
  */
 
 import { findTemplate, findTemplateById } from "@/data/safety-plan-templates";
+import {
+  getOverseasAdditions,
+  getOverworkAdditions,
+  getSpecialWorkAdditions,
+} from "@/data/safety-plan-templates/base/custom-parameter-overlays";
 import type {
   GeneratedPlan,
   MeasureCategory,
   MonthlySchedule,
+  OverworkPriority,
   PlanGeneratorInput,
+  SafetyGoal,
   SafetyMeasure,
   SafetyPlanTemplate,
+  SpecialWorkId,
 } from "@/types/safety-plan";
 
 export interface GeneratorError {
@@ -77,6 +85,69 @@ function buildId(input: PlanGeneratorInput, timestamp: number): string {
   ].join("-");
 }
 
+function dedupeGoals(goals: SafetyGoal[]): SafetyGoal[] {
+  const seen = new Set<string>();
+  const out: SafetyGoal[] = [];
+  for (const g of goals) {
+    const k = `${g.category}::${g.title}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(g);
+  }
+  return out;
+}
+
+function dedupeMeasures(measures: SafetyMeasure[]): SafetyMeasure[] {
+  const seen = new Set<string>();
+  const out: SafetyMeasure[] = [];
+  for (const m of measures) {
+    const k = `${m.category}::${m.title}`;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(m);
+  }
+  return out;
+}
+
+interface CustomParamApplication {
+  extraGoals: SafetyGoal[];
+  extraMeasures: SafetyMeasure[];
+  effectiveFocusAreas: MeasureCategory[];
+}
+
+function applyCustomParameters(
+  input: PlanGeneratorInput,
+): CustomParamApplication {
+  const special = getSpecialWorkAdditions(input.specialWork);
+  const overseas = input.hasOverseasAssignment
+    ? getOverseasAdditions()
+    : { goals: [], measures: [] };
+  const overwork = getOverworkAdditions(input.overworkPriority);
+
+  const extraGoals = dedupeGoals([
+    ...special.goals,
+    ...overseas.goals,
+    ...overwork.goals,
+  ]);
+  const extraMeasures = dedupeMeasures([
+    ...special.measures,
+    ...overseas.measures,
+    ...overwork.measures,
+  ]);
+
+  // Combine explicit focusAreas with priorityAreas — both are used to surface
+  // related measures at the top of the implementation table.
+  const merged = new Set<MeasureCategory>([
+    ...input.focusAreas,
+    ...(input.priorityAreas ?? []),
+  ]);
+  return {
+    extraGoals,
+    extraMeasures,
+    effectiveFocusAreas: [...merged],
+  };
+}
+
 export function generatePlan(input: PlanGeneratorInput): GeneratorResult {
   const template = findTemplate(input.industry, input.scale);
   if (!template) {
@@ -89,9 +160,16 @@ export function generatePlan(input: PlanGeneratorInput): GeneratorResult {
     };
   }
 
+  const { extraGoals, extraMeasures, effectiveFocusAreas } =
+    applyCustomParameters(input);
+
+  const mergedMeasures = dedupeMeasures([
+    ...template.measures,
+    ...extraMeasures,
+  ]);
   const orderedMeasures = prioritizeMeasures(
-    template.measures,
-    input.focusAreas,
+    mergedMeasures,
+    effectiveFocusAreas,
   );
   const orderedSchedule = annotateScheduleWithFiscalYear(
     template.monthlySchedule,
@@ -100,6 +178,7 @@ export function generatePlan(input: PlanGeneratorInput): GeneratorResult {
 
   const composedTemplate: SafetyPlanTemplate = {
     ...template,
+    goals: dedupeGoals([...template.goals, ...extraGoals]),
     measures: orderedMeasures,
     monthlySchedule: orderedSchedule,
   };
@@ -132,6 +211,10 @@ export function regenerateFromTemplateId(args: {
   focusAreas: MeasureCategory[];
   customGoals: GeneratedPlan["customGoals"];
   notes: string;
+  priorityAreas?: MeasureCategory[];
+  specialWork?: SpecialWorkId[];
+  hasOverseasAssignment?: boolean;
+  overworkPriority?: OverworkPriority;
 }): GeneratorResult {
   const tpl = findTemplateById(args.templateId);
   if (!tpl) {
@@ -151,5 +234,9 @@ export function regenerateFromTemplateId(args: {
     focusAreas: args.focusAreas,
     customGoals: args.customGoals,
     notes: args.notes,
+    priorityAreas: args.priorityAreas,
+    specialWork: args.specialWork,
+    hasOverseasAssignment: args.hasOverseasAssignment,
+    overworkPriority: args.overworkPriority,
   });
 }

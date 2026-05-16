@@ -364,12 +364,36 @@ table {
    * 安全衛生計画書プレビュー（/strategy/plan-generator/preview/*）の印刷スタイル。
    * グローバルでは <header>/<footer>/<nav> を非表示にしているが、計画書本体は
    * <article class="plan-print-root"> 内なので、その配下では再表示する。
+   *
+   * A4 縦・上下15mm / 左右12mm のマージンで A4 印刷向けに最適化。表紙と目次の
+   * 直後でページ分割し、各セクション見出しはページ先頭に来るよう page-break を
+   * 制御する。
    */
   .plan-print-root,
   .plan-print-root header,
   .plan-print-root footer,
+  .plan-print-root nav,
   .plan-print-root section {
     display: block !important;
+  }
+  .plan-print-root .plan-cover {
+    page-break-after: always;
+  }
+  .plan-print-root .plan-toc {
+    page-break-after: always;
+  }
+  .plan-print-root section {
+    page-break-inside: auto;
+  }
+  .plan-print-root section + section {
+    page-break-before: auto;
+  }
+  .plan-print-root section > h2 {
+    page-break-after: avoid;
+  }
+  /* TOC のリンクは PDF 出力時に URL を表示しない */
+  .plan-print-root .plan-toc a[href^="#"]::after {
+    content: "" !important;
   }
   .plan-print-root {
     color: black !important;
