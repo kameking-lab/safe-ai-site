@@ -45,7 +45,7 @@ export function determineRequiredCerts(
 
     const matchReason = buildMatchReason(cert, works, businessTypes, score);
     const priority =
-      cert.certType === "special_education" || cert.certType === "skill_training"
+      cert.certType === "special_education" || cert.certType === "skill_training" || cert.certType === "license"
         ? "required"
         : "recommended";
 
@@ -116,6 +116,7 @@ export const CERT_TYPE_LABELS: Record<EducationCert["certType"], string> = {
   special_education: "特別教育",
   skill_training: "技能講習",
   job_chief: "職長教育・管理者研修",
+  license: "免許（国家試験）",
 };
 
 /** Color classes for cert types (Tailwind) */
@@ -134,6 +135,11 @@ export const CERT_TYPE_COLORS: Record<EducationCert["certType"], { badge: string
     badge: "bg-emerald-100 text-emerald-800 border-emerald-200",
     border: "border-l-emerald-400",
     header: "text-emerald-900",
+  },
+  license: {
+    badge: "bg-purple-100 text-purple-800 border-purple-200",
+    border: "border-l-purple-400",
+    header: "text-purple-900",
   },
 };
 

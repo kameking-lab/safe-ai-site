@@ -3,7 +3,8 @@
 export type CertType =
   | "special_education" // 特別教育 (安衛法第59条第3項, 安衛則第36条)
   | "skill_training"    // 技能講習修了 (安衛法第61条, 安衛則第41条)
-  | "job_chief";        // 職長教育 (安衛法第60条, 安衛則第40条)
+  | "job_chief"         // 職長教育 (安衛法第60条, 安衛則第40条)
+  | "license";          // 免許 (安衛法第61条・安衛令第20条の就業制限業務。国家試験合格が必要)
 
 /** Work category for filtering */
 export type WorkCategory =

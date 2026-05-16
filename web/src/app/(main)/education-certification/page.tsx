@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { GraduationCap, Search, BookOpen, AlertCircle, ChevronRight, Scale } from "lucide-react";
+import { GraduationCap, Search, BookOpen, AlertCircle, ChevronRight, Scale, Award } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { CrossToolLinks } from "@/components/cross-tool-links";
@@ -61,6 +61,7 @@ export default function EducationCertificationPage() {
   const specialEd = getCertsByType("special_education");
   const skillTr = getCertsByType("skill_training");
   const jobChief = getCertsByType("job_chief");
+  const licenses = getCertsByType("license");
 
   return (
     <>
@@ -80,10 +81,11 @@ export default function EducationCertificationPage() {
 
         <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
           {/* Stats row */}
-          <section aria-label="資格種別カウント" className="mb-6 grid grid-cols-3 gap-3 sm:gap-4">
+          <section aria-label="資格種別カウント" className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
             <CertCountBadge certs={specialEd} type="special_education" />
             <CertCountBadge certs={skillTr} type="skill_training" />
             <CertCountBadge certs={jobChief} type="job_chief" />
+            <CertCountBadge certs={licenses} type="license" />
           </section>
 
           {/* CTA: Finder */}
@@ -119,6 +121,7 @@ export default function EducationCertificationPage() {
                   <li><strong>特別教育</strong>（安衛法第59条第3項・安衛則第36条）: 危険有害業務に従事させる前に事業者が実施義務。修了証発行。</li>
                   <li><strong>技能講習（就業制限）</strong>（安衛法第61条・安衛令第20条）: 修了者または免許取得者のみが従事できる業務（就業制限）。</li>
                   <li><strong>職長教育</strong>（安衛法第60条・安衛則第40条）: 製造業等で新たに職長等となる者への義務教育。</li>
+                  <li><strong>免許（国家試験）</strong>（安衛法第61条・安衛令第20条）: 国家試験合格が必要な最上位資格。技能講習修了では代替不可の業務（5t以上クレーン・潜水士等）。</li>
                   <li className="mt-2 font-semibold">本データは参考情報です。最新情報は各都道府県労働局・厚生労働省で必ずご確認ください。</li>
                 </ul>
               </div>
@@ -165,6 +168,24 @@ export default function EducationCertificationPage() {
             </div>
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {jobChief.map((cert) => (
+                <CertCard key={cert.id} cert={cert} />
+              ))}
+            </div>
+          </section>
+
+          {/* License list */}
+          <section className="mb-8">
+            <div className="mb-3 flex items-center gap-2">
+              <Award className="h-5 w-5 text-purple-600" aria-hidden />
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                免許（国家試験）— {licenses.length}種
+              </h2>
+            </div>
+            <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
+              国家試験合格または都道府県労働局長による交付が必要。技能講習修了では代替できない就業制限業務の最上位資格。
+            </p>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {licenses.map((cert) => (
                 <CertCard key={cert.id} cert={cert} />
               ))}
             </div>

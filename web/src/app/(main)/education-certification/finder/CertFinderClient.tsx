@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   Clock,
   Scale,
+  Zap,
 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -20,6 +21,8 @@ import {
   WORK_CATEGORY_LABELS,
   WORK_TAG_PRESETS,
 } from "@/lib/education-cert-engine";
+import { WORK_SCENARIOS, getCertIdsForScenarios } from "@/lib/work-certification-mapper";
+import { ALL_CERTS } from "@/data/education-rules";
 import type { WorkCategory, RequiredCertResult } from "@/types/education-cert";
 
 const CATEGORIES: WorkCategory[] = [
@@ -151,6 +154,7 @@ export function CertFinderClient() {
   const [selectedCategories, setSelectedCategories] = useState<WorkCategory[]>([]);
   const [selectedWorks, setSelectedWorks] = useState<string[]>([]);
   const [freeText, setFreeText] = useState("");
+  const [selectedScenarios, setSelectedScenarios] = useState<string[]>([]);
 
   const toggleCategory = (cat: WorkCategory) => {
     setSelectedCategories((prev) =>
@@ -161,6 +165,12 @@ export function CertFinderClient() {
   const toggleWork = (tag: string) => {
     setSelectedWorks((prev) =>
       prev.includes(tag) ? prev.filter((w) => w !== tag) : [...prev, tag]
+    );
+  };
+
+  const toggleScenario = (sid: string) => {
+    setSelectedScenarios((prev) =>
+      prev.includes(sid) ? prev.filter((s) => s !== sid) : [...prev, sid]
     );
   };
 
@@ -179,13 +189,29 @@ export function CertFinderClient() {
     return terms;
   }, [selectedWorks, freeText]);
 
+  // 業務シナリオから直接資格を引くモード
+  const scenarioResults = useMemo((): RequiredCertResult[] | null => {
+    if (selectedScenarios.length === 0) return null;
+    const certIds = getCertIdsForScenarios(selectedScenarios);
+    const certs = certIds.map((id) => ALL_CERTS.find((c) => c.id === id)).filter(Boolean) as typeof ALL_CERTS;
+    return certs.map((cert) => {
+      const scenario = WORK_SCENARIOS.find((s) => s.requiredCertIds.includes(cert.id));
+      return {
+        cert,
+        matchReason: scenario?.legalNote ?? "業務シナリオに該当",
+        priority: (cert.certType === "job_chief" ? "recommended" : "required") as "required" | "recommended",
+      };
+    });
+  }, [selectedScenarios]);
+
   const results = useMemo(() => {
+    if (scenarioResults !== null) return scenarioResults;
     if (selectedCategories.length === 0 && allWorkTerms.length === 0) return null;
     return determineRequiredCerts({
       businessTypes: selectedCategories.length > 0 ? selectedCategories : ["general"],
       works: allWorkTerms,
     });
-  }, [selectedCategories, allWorkTerms]);
+  }, [selectedCategories, allWorkTerms, scenarioResults]);
 
   const requiredResults = results?.filter((r) => r.priority === "required") ?? [];
   const recommendedResults = results?.filter((r) => r.priority === "recommended") ?? [];
@@ -194,7 +220,10 @@ export function CertFinderClient() {
     setSelectedCategories([]);
     setSelectedWorks([]);
     setFreeText("");
+    setSelectedScenarios([]);
   };
+
+  const isUsingScenarioMode = selectedScenarios.length > 0;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -221,13 +250,43 @@ export function CertFinderClient() {
 
         <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
           {/* Left: Filter panel */}
-          <aside>
+          <aside className="space-y-4">
+            {/* Scenario quick-select */}
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/20">
+              <div className="mb-3 flex items-center gap-2">
+                <Zap className="h-4 w-4 text-amber-600" aria-hidden />
+                <h2 className="text-sm font-bold text-amber-900 dark:text-amber-200">
+                  クイック選択（業務シナリオ）
+                </h2>
+              </div>
+              <p className="mb-3 text-[11px] text-amber-700 dark:text-amber-300">
+                よくある業務を選択すると、必要な資格が即時表示されます
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {WORK_SCENARIOS.map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => toggleScenario(s.id)}
+                    aria-pressed={selectedScenarios.includes(s.id)}
+                    className={`rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${
+                      selectedScenarios.includes(s.id)
+                        ? "border-amber-500 bg-amber-500 text-white"
+                        : "border-amber-300 bg-white text-amber-800 hover:border-amber-500 hover:bg-amber-100 dark:border-amber-700 dark:bg-slate-800 dark:text-amber-300"
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  Step 1: 業種を選択
+                  {isUsingScenarioMode ? "詳細検索（任意）" : "Step 1: 業種を選択"}
                 </h2>
-                {(selectedCategories.length > 0 || selectedWorks.length > 0 || freeText) && (
+                {(selectedCategories.length > 0 || selectedWorks.length > 0 || freeText || selectedScenarios.length > 0) && (
                   <button
                     type="button"
                     onClick={reset}
