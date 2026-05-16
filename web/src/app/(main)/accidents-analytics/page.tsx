@@ -110,6 +110,14 @@ export default function AccidentsAnalyticsPage() {
             </li>
             <li>
               <Link
+                href="/accidents-reports"
+                className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
+              >
+                🏷 業種別レポート
+              </Link>
+            </li>
+            <li>
+              <Link
                 href="/stats"
                 className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
               >
