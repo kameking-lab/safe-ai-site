@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { LawsPageClient } from "@/components/laws-page-client";
 import { PageSkeleton } from "@/components/skeleton";
 import { RelatedPageCards } from "@/components/related-page-cards";
+import { LawHubNav } from "@/components/law-hub-nav";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { JsonLd, articleListSchema } from "@/components/json-ld";
@@ -40,6 +41,8 @@ export default function LawsPage() {
   return (
     <>
       <JsonLd schema={lawSchema} />
+      {/* C-004: law-hub quick-nav — surface scattered law tools at the top to reduce navigation depth */}
+      <LawHubNav current="laws" />
       <Suspense fallback={<PageSkeleton label="法改正一覧を読み込み中" />}>
         <LawsPageClient />
       </Suspense>

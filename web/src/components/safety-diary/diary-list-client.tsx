@@ -173,6 +173,19 @@ export function DiaryListClient() {
         </div>
       </section>
 
+      {/* C-006: USP clarification — storage scope and KY link */}
+      <section className="mb-4 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3">
+        <p className="text-xs font-bold text-sky-900">このツールについて</p>
+        <ul className="mt-1.5 space-y-1 text-xs text-sky-800 leading-5">
+          <li>・ 入力データはこのブラウザ（localStorage）にのみ保存されます。多拠点共有にはエクスポート→インポートをご利用ください。</li>
+          <li>・ 日誌の記録内容は{" "}
+            <Link href="/ky" className="font-semibold underline hover:text-sky-900">KY用紙</Link>
+            {" "}や{" "}
+            <Link href="/chemical-ra" className="font-semibold underline hover:text-sky-900">化学物質RA</Link>
+            {" "}と連携して活用できます。</li>
+        </ul>
+      </section>
+
       {/* 一覧 */}
       <section>
         <h2 className="mb-2 text-sm font-bold text-slate-900">記録一覧（新しい順）</h2>

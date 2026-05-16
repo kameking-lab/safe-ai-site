@@ -612,7 +612,7 @@ export function KyPageContent() {
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                {m === "simple" ? "シンプル（推奨）" : m === "detail" ? "詳細" : "カスタム"}
+                {m === "simple" ? "シンプル（推奨）" : m === "detail" ? "詳細（4ラウンド法）" : "カスタム"}
               </button>
             ))}
           </div>
@@ -679,6 +679,18 @@ export function KyPageContent() {
                     <p className="mt-1 leading-relaxed text-blue-700">{item.desc}</p>
                   </div>
                 ))}
+              </div>
+              {/* C-002: clarify 4-round KYT correspondence */}
+              <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+                <p className="font-semibold text-emerald-900">4ラウンド法（KYT）との対応</p>
+                <p className="mt-1 text-emerald-800">「詳細（4ラウンド法）」モードは KYT 4ラウンド法に対応しています：</p>
+                <ul className="mt-1 space-y-0.5 text-emerald-800">
+                  <li>1R 現状把握 → 作業内容・使用機械・危険箇所の入力</li>
+                  <li>2R 本質追究 → リスク欄①「危険のポイント」の選定</li>
+                  <li>3R 対策の樹立 → リスク欄「低減措置」の記入</li>
+                  <li>4R 目標設定 → 終了確認欄の行動目標・唱和</li>
+                </ul>
+                <p className="mt-1.5 text-emerald-700">音声入力は各テキスト欄右端の 🎙 ボタンで使えます（Chrome 系ブラウザ推奨）。</p>
               </div>
               <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
                 <p className="font-semibold text-amber-800">参加者署名の方法</p>

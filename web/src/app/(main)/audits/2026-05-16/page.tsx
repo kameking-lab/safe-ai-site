@@ -263,6 +263,9 @@ const FINDINGS_C: Finding[] = [
       "WebFetch評価:「ページ上にチャット機能があるが、入力例やプロンプト案は見当たらない。初心者向けガイダンス不足」。",
     recommendation:
       "チャット入力欄上に「例: 安全管理者の選任要件は?」など3-5件のサンプル質問チップを配置。",
+    status: "resolved-pr-200",
+    statusNote:
+      "chatbot-panel.tsx の入力エリア直上に EXAMPLE_QUESTIONS から3件の常時表示チップを追加。空チャット時の6件チップと合わせて二重保護。",
   },
   {
     id: "C-002",
@@ -274,6 +277,9 @@ const FINDINGS_C: Finding[] = [
       "CLAUDE.md優先課題5:「KY用紙の完成(音声入力・PDF出力)」のうち音声入力が未実装。4ラウンドKYTとの対応不明。WebFetch評価:「4ラウンド法など本格的KYTとの整合性: 言及なし」。",
     recommendation:
       "(a) Web Speech API で音声入力をMVP実装、(b) 4ラウンド法テンプレ(発見→絞り込み→対策→決定)モードを追加、(c) どの方式かをUI上で選択。",
+    status: "resolved-pr-200",
+    statusNote:
+      "音声入力は InputWithVoice/TextareaWithVoice として実装済みであることを確認。モードボタンのラベルを「詳細」→「詳細（4ラウンド法）」に変更し、使い方ガイドに4ラウンド/署名/音声ヒントを追加。",
   },
   {
     id: "C-003",
@@ -285,6 +291,9 @@ const FINDINGS_C: Finding[] = [
       "WebFetch評価:「ピン配置0件は未実装同然」「気象警報とニュースRSSはあるが、『現場リスクと安全要点』の実質内容が見当たらない」「装飾が目立つわりにメイン情報が薄い」。",
     recommendation:
       "想定運用シナリオ(朝礼前/休憩時間/退場時)を3パターンに整理し、それぞれデフォルトコンテンツを用意。または機能を縮小し「気象警報+本日のKY」のみに絞る。",
+    status: "resolved-pr-200",
+    statusNote:
+      "シナリオプリセットボタン(朝礼前→図面モード/休憩時間→地図/退場時→作業資料)を操作バーに追加。各ボタンに title で使用目的を説明。",
   },
   {
     id: "C-004",
@@ -296,6 +305,9 @@ const FINDINGS_C: Finding[] = [
       "WebFetch評価:「法改正・通達・用語集など関連機能の散在」。検索/法令体系/通達/用語集/FAQ など似た機能が分散。",
     recommendation:
       "「法令まわり」を1ハブページに集約(現状の/lawsを統合ハブ化)。サブ機能はタブ切替か、ハブからの導線でアクセス。",
+    status: "resolved-pr-200",
+    statusNote:
+      "LawHubNav コンポーネントを新設し、/laws /law-search /circulars /glossary の4ページ上部に「法改正一覧|条文検索|法令体系|通達DB|用語集|AIチャット」ナビバーを追加。",
   },
   {
     id: "C-005",
@@ -307,6 +319,9 @@ const FINDINGS_C: Finding[] = [
       "WebFetch評価:「やや不十分。法令説明ページ下部に4項目記載。チャット画面そのものでの警告表示の有無は不確認」。",
     recommendation:
       "チャット送信ボタン直下に「本回答は法的助言ではありません。具体判断は専門家へ」を常時表示(モバイル含む)。",
+    status: "resolved-pr-200",
+    statusNote:
+      "送信ボタン直下の免責注記をtext-slate-400の薄いテキストからamber背景のパネル(⚠ 本回答は法的助言ではありません)に変更。モバイル含む全幅表示。",
   },
   {
     id: "C-006",
@@ -318,6 +333,9 @@ const FINDINGS_C: Finding[] = [
       "WebFetch評価:「KY/化学物質RA/事故DBなど外部ツールが豊富で、日誌との機能分担が曖昧。日誌単体での価値が埋没」「データ永続化: ページ内に言及なし。クラウドDB保存か端末ローカルか不明」。",
     recommendation:
       "(a) 日誌は localStorage 限定であることを明示、(b) KY/化学物質RA への自動転記をUSP化、(c) 多拠点運用を求める利用者へはLMSへの導線(または機能削除)。",
+    status: "resolved-pr-200",
+    statusNote:
+      "diary-list-client.tsx に localStorage限定説明 + /ky /chemical-raリンクを含むUSP案内バナーを追加(LocalStorageWarningBannerはnew/ページに既存で確認済み)。",
   },
   {
     id: "C-007",
@@ -329,6 +347,9 @@ const FINDINGS_C: Finding[] = [
       "WebFetch評価:「気象警報マップセクション」がメインコンテンツ。利用者は「リスクアセスメント」を期待して訪問する可能性が高く、見出しと内容のミスマッチ。",
     recommendation:
       "/risk を「リスクアセスメント・予測ハブ」に再構成し、気象警報は /risk/weather や /weather に切出し。または /risk → /risk-prediction を301化。",
+    status: "resolved-pr-200",
+    statusNote:
+      "/risk ページを「リスク管理ハブ」にリフレーム。ページ上部にリスク予測/KY/化学物質RAの3カードを配置し、WeatherForecastPanelを「気象警報・作業中止判断」セクションとして下部に移動。",
   },
 ];
 

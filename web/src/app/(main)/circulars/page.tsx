@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { PageContainer } from "@/components/layout";
+import { LawHubNav } from "@/components/law-hub-nav";
 import { ogImageUrl } from "@/lib/og-url";
 import { CircularsHeader, CircularsFooter } from "./CircularsI18n";
 
@@ -32,8 +33,9 @@ export default function CircularsIndexPage() {
   const recent = sorted.slice(0, 100);
 
   return (
+    <>
+    <LawHubNav current="circulars" />
     <PageContainer width="wide">
-      {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="厚労省通達・告示・指針 一覧" description="労働安全衛生に関する厚生労働省の通達・告示・指針を全件横断検索。各通達ごとに概要・関連事故事例・推奨保護具をまとめています。" path="/circulars" />
       <CircularsHeader total={mhlwNotices.length} shown={recent.length} />
 
@@ -62,5 +64,6 @@ export default function CircularsIndexPage() {
 
       <CircularsFooter />
     </PageContainer>
+    </>
   );
 }

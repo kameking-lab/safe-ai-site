@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { WeatherForecastPanel } from "@/components/weather-forecast-panel";
 import { ogImageUrl } from "@/lib/og-url";
-
 import { PageJsonLd } from "@/components/page-json-ld";
-const _title = "気象警報マップ｜現場 作業リスク管理";
+import { RelatedPageCards } from "@/components/related-page-cards";
+
+const _title = "リスク管理ハブ｜現場リスクアセスメント・気象警報";
 const _desc =
-  "都道府県別の気象警報・注意報と向こう1週間の天気予報。屋外作業・建設現場の安全管理に。市区町村別詳細も確認できます。";
+  "現場リスクアセスメント、化学物質RA、KY活動、気象警報を一か所に集約。屋外作業・建設現場の安全管理をまとめて支援。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/risk" },
@@ -25,8 +26,56 @@ export const metadata: Metadata = {
 export default function RiskPage() {
   return (
     <>
-      <PageJsonLd name="気象リスク予測" description="気象庁データに基づく作業中止判断の参考情報。WBGT・降雨・雷リスクを地点別に表示。" path="/risk" />
-      <WeatherForecastPanel />
+      <PageJsonLd
+        name="リスク管理ハブ"
+        description="現場リスクアセスメント・化学物質RA・KY活動・気象警報を集約したハブページ。"
+        path="/risk"
+      />
+
+      {/* C-007: reframe as RA hub so visitors expecting risk assessment find what they need */}
+      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <header className="mb-6">
+          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">リスク管理ハブ</h1>
+          <p className="mt-2 text-sm text-slate-600">
+            現場のリスクアセスメント・危険予知・化学物質RA・気象判断を一か所で。
+          </p>
+        </header>
+
+        <RelatedPageCards
+          heading="リスクアセスメント"
+          pages={[
+            {
+              href: "/risk-prediction",
+              label: "リスク予測・判断支援",
+              description: "作業計画をもとにリスクを予測し、管理措置の優先順位を整理。",
+              color: "rose",
+              cta: "リスク予測を開く",
+            },
+            {
+              href: "/ky",
+              label: "KY用紙作成",
+              description: "4ラウンド法に対応した危険予知活動シート。音声入力・PDF出力対応。",
+              color: "emerald",
+              cta: "KY用紙を開く",
+            },
+            {
+              href: "/chemical-ra",
+              label: "化学物質リスクアセスメント",
+              description: "GHS分類に基づく化学物質の健康・爆発リスクを評価。",
+              color: "purple",
+              cta: "化学物質RAを開く",
+            },
+          ]}
+        />
+
+        <div className="mt-8">
+          <h2 className="mb-4 text-lg font-bold text-slate-800">気象警報・作業中止判断</h2>
+          <p className="mb-4 text-sm text-slate-600">
+            屋外作業・建設現場向けに、都道府県・市区町村別の気象警報と週間天気を確認できます。
+          </p>
+          <WeatherForecastPanel />
+        </div>
+      </div>
     </>
   );
 }
