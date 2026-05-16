@@ -33,12 +33,6 @@ import { questions as qHealth2nd } from "./health-2nd";
 // Batch 6: New certifications
 import { questions as qHealthConsultant } from "./health-consultant";
 import { questions as qBoiler1stClass } from "./boiler-1st-class";
-// Batch 7: 10 work-supervisor skill-training certifications (100 questions)
-import { questions as qSkillTraining } from "./skill-training";
-// Batch 8: health-1st expansion (+60 questions, h1-health-general subject)
-import { questions as qHealth1stExtra } from "./health-1st-extra";
-// Batch 9: health-2nd expansion (+50 questions across 2 subjects)
-import { questions as qHealth2ndExtra } from "./health-2nd-extra";
 
 export type { ExamQuestion, ExamSubject, ExamCertification };
 export type { ExamCertSubject } from "./types";
@@ -77,9 +71,6 @@ export const ALL_QUESTIONS: ExamQuestion[] = [
   ...qHealth2nd,
   ...qHealthConsultant,
   ...qBoiler1stClass,
-  ...qSkillTraining,
-  ...qHealth1stExtra,
-  ...qHealth2ndExtra,
 ];
 
 export const AVAILABLE_YEARS = [2023, 2024, 2025] as const;
@@ -351,77 +342,6 @@ export const EXAM_CATEGORIES: ExamCertification[] = [
       { id: "hc-general", label: "健康管理" },
       { id: "hc-law", label: "関係法令" },
     ],
-  },
-  // Batch 7: 10 work-supervisor skill-training certifications (建設・有害業務系)
-  {
-    id: "skill-jiyama",
-    name: "地山の掘削及び土止め支保工作業主任者技能講習",
-    shortName: "地山掘削・土止め支保工",
-    category: "skill-training",
-    subjects: [{ id: "sj-general", label: "地山の掘削・土止め支保工" }],
-  },
-  {
-    id: "skill-katawaku",
-    name: "型枠支保工の組立て等作業主任者技能講習",
-    shortName: "型枠支保工",
-    category: "skill-training",
-    subjects: [{ id: "sk-general", label: "型枠支保工" }],
-  },
-  {
-    id: "skill-ashiba",
-    name: "足場の組立て等作業主任者技能講習",
-    shortName: "足場の組立て等",
-    category: "skill-training",
-    subjects: [{ id: "sa-general", label: "足場の組立て等" }],
-  },
-  {
-    id: "skill-sankesu",
-    name: "酸素欠乏・硫化水素危険作業主任者技能講習",
-    shortName: "酸欠・硫化水素",
-    category: "skill-training",
-    subjects: [{ id: "ss-general", label: "酸素欠乏・硫化水素危険作業" }],
-  },
-  {
-    id: "skill-yuki",
-    name: "有機溶剤作業主任者技能講習",
-    shortName: "有機溶剤",
-    category: "skill-training",
-    subjects: [{ id: "sy-general", label: "有機溶剤作業" }],
-  },
-  {
-    id: "skill-tokka",
-    name: "特定化学物質及び四アルキル鉛等作業主任者技能講習",
-    shortName: "特定化学物質",
-    category: "skill-training",
-    subjects: [{ id: "st-general", label: "特定化学物質作業" }],
-  },
-  {
-    id: "skill-namari",
-    name: "鉛作業主任者技能講習",
-    shortName: "鉛作業",
-    category: "skill-training",
-    subjects: [{ id: "sn-general", label: "鉛作業" }],
-  },
-  {
-    id: "skill-sekimen",
-    name: "石綿作業主任者技能講習",
-    shortName: "石綿作業",
-    category: "skill-training",
-    subjects: [{ id: "ssm-general", label: "石綿作業" }],
-  },
-  {
-    id: "skill-konkrit",
-    name: "コンクリート造の工作物の解体等作業主任者技能講習",
-    shortName: "コンクリート造解体",
-    category: "skill-training",
-    subjects: [{ id: "sko-general", label: "コンクリート造工作物解体等" }],
-  },
-  {
-    id: "skill-mokuzo",
-    name: "木造建築物の組立て等作業主任者技能講習",
-    shortName: "木造建築物組立て",
-    category: "skill-training",
-    subjects: [{ id: "smo-general", label: "木造建築物組立て等" }],
   },
 ];
 
