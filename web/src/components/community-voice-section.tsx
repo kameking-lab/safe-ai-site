@@ -12,8 +12,9 @@ const CATEGORY_BADGE: Record<UgcCategory, string> = {
 };
 
 /**
- * トップページに表示する「現場の声」セクション。
+ * トップページに表示する「事例集」セクション。
  * 直近3件を表示し、投稿CTAを併設。
+ * 表示中の事例は運営チームが作成した参考事例（実投稿が集まり次第差し替え予定）。
  */
 export function CommunityVoiceSection() {
   const latest = COMMUNITY_CASES_SEED.filter((c) => c.status === "approved")
@@ -37,7 +38,7 @@ export function CommunityVoiceSection() {
               id="community-voice-title"
               className="text-base font-bold text-slate-900 sm:text-lg"
             >
-              現場の声（UGC）
+              ヒヤリ・Tips 事例集
             </h2>
           </div>
           <Link
@@ -48,7 +49,7 @@ export function CommunityVoiceSection() {
           </Link>
         </div>
         <p className="mt-1 text-xs text-slate-600">
-          全国の現場担当者から集まったヒヤリハット・質問・Tips。労働安全コンサルタント監修コメント付き。
+          労働安全コンサルタント監修のもと運営チームが作成した参考事例（ヒヤリ・質問・Tips）。実投稿が集まり次第、順次差し替えていきます。
         </p>
 
         <ul className="mt-4 grid gap-3 sm:grid-cols-3">

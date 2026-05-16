@@ -269,14 +269,14 @@ export const FEATURES: FeatureItem[] = [
   },
   // 管理ツール
   {
-    slug: "wizard",
-    title: "コンプラ診断ウィザード",
-    summary: "10問でコンプライアンス状況を診断",
+    slug: "plan-generator",
+    title: "年次安全衛生計画ジェネレーター",
+    summary: "業種・規模別の30テンプレートから年次計画を生成",
     description:
-      "10問程度の質問に答えると、労働安全衛生法上の必須対応項目と未着手項目を自動判定します。",
-    href: "/wizard",
+      "業種10種×規模3段階の30テンプレートから、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む年次安全衛生計画書の雛形を生成。PDF出力可。",
+    href: "/strategy/plan-generator",
     category: "management",
-    tags: ["診断", "コンプラ"],
+    tags: ["年次計画", "コンプラ"],
   },
   {
     slug: "subsidies-calculator",
