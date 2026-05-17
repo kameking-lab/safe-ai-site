@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-17T10:52:45.790Z",
+  "fetchedAt": "2026-05-17T12:02:31.224Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -8028,14 +8028,20 @@
         {
           "sourceCode": "472000",
           "level": "advisory",
-          "headline": "大東島地方では、強風や高波に注意してください。",
-          "reportDatetime": "2026-05-17T14:25:00+09:00",
+          "headline": "大東島地方では、強風や高波、急な強い雨、落雷に注意してください。",
+          "reportDatetime": "2026-05-17T20:19:00+09:00",
           "publishingOffice": "南大東島地方気象台",
           "warnings": [
             {
               "areaCode": "472000",
-              "code": "15",
+              "code": "14",
               "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "472000",
+              "code": "15",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -8046,8 +8052,14 @@
             },
             {
               "areaCode": "4735700",
-              "code": "15",
+              "code": "14",
               "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4735700",
+              "code": "15",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -8058,8 +8070,14 @@
             },
             {
               "areaCode": "4735800",
-              "code": "15",
+              "code": "14",
               "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4735800",
+              "code": "15",
+              "status": "継続",
               "level": "advisory"
             },
             {
