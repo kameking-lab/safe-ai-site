@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { NotificationBuilder } from "./NotificationBuilder";
+import { ogImageUrl } from "@/lib/og-url";
 
 const _title =
   "届出書類リスト 自動生成｜石綿（アスベスト）対応支援";
@@ -12,7 +13,21 @@ export const metadata: Metadata = {
   title: _title,
   description: _desc,
   alternates: { canonical: "/asbestos-management/notification-builder" },
-  openGraph: { title: _title, description: _desc, type: "website", locale: "ja_JP" },
+  openGraph: {
+    title: _title,
+    description: _desc,
+    type: "website",
+    locale: "ja_JP",
+    siteName: "安全AIポータル",
+    url: "https://www.anzen-ai-portal.jp/asbestos-management/notification-builder",
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: _title,
+    description: _desc,
+    images: [ogImageUrl(_title, _desc)],
+  },
 };
 
 export default function Page() {

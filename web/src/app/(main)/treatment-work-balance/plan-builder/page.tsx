@@ -5,6 +5,7 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { ClipboardList } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { PlanBuilderClient } from "./plan-builder-client";
+import { ogImageUrl } from "@/lib/og-url";
 
 const _title =
   "両立支援プランビルダー｜病態・職種別に労務配慮と主治医意見書テンプレを自動生成";
@@ -19,6 +20,16 @@ export const metadata: Metadata = {
     title: _title,
     description: _desc,
     type: "website",
+    locale: "ja_JP",
+    siteName: "安全AIポータル",
+    url: "https://www.anzen-ai-portal.jp/treatment-work-balance/plan-builder",
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: _title,
+    description: _desc,
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 

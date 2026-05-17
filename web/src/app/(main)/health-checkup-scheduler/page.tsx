@@ -4,6 +4,7 @@ import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { SchedulerForm } from "@/components/health-checkup/scheduler-form";
+import { ogImageUrl } from "@/lib/og-url";
 
 const _title = "健康診断スケジューラ｜業種・職種別に必要な健診30種を自動判定";
 const _desc =
@@ -17,6 +18,16 @@ export const metadata: Metadata = {
     title: _title,
     description: _desc,
     type: "website",
+    locale: "ja_JP",
+    siteName: "安全AIポータル",
+    url: "https://www.anzen-ai-portal.jp/health-checkup-scheduler",
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: _title,
+    description: _desc,
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 

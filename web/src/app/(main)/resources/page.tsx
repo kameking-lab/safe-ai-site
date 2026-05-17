@@ -8,6 +8,7 @@ import { mhlwNotices } from "@/data/mhlw-notices";
 import { mhlwLeaflets } from "@/data/mhlw-leaflets";
 
 import { PageJsonLd } from "@/components/page-json-ld";
+import { ogImageUrl } from "@/lib/og-url";
 const TITLE = "厚労省一次資料DB（通達・告示・指針・リーフレット）";
 const DESCRIPTION =
   "厚生労働省・安全衛生情報センターが公開している労働安全衛生関係の通達・告示・指針・リーフレット計1,158件を分類・検索できる一次資料データベース。各エントリは原文ページへ直リンクで一次ソースを担保。";
@@ -17,8 +18,19 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
-    title: `${TITLE}`,
+    title: TITLE,
     description: DESCRIPTION,
+    type: "website",
+    locale: "ja_JP",
+    siteName: "安全AIポータル",
+    url: "https://www.anzen-ai-portal.jp/resources",
+    images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [ogImageUrl(TITLE, DESCRIPTION)],
   },
 };
 

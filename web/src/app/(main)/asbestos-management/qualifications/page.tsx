@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ASBESTOS_QUALIFICATIONS } from "@/data/asbestos-rules";
+import { ogImageUrl } from "@/lib/og-url";
 
 const _title = "必要資格一覧｜石綿（アスベスト）対応支援";
 const _desc =
@@ -26,7 +27,21 @@ export const metadata: Metadata = {
   title: _title,
   description: _desc,
   alternates: { canonical: "/asbestos-management/qualifications" },
-  openGraph: { title: _title, description: _desc, type: "website", locale: "ja_JP" },
+  openGraph: {
+    title: _title,
+    description: _desc,
+    type: "website",
+    locale: "ja_JP",
+    siteName: "安全AIポータル",
+    url: "https://www.anzen-ai-portal.jp/asbestos-management/qualifications",
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: _title,
+    description: _desc,
+    images: [ogImageUrl(_title, _desc)],
+  },
 };
 
 export default function Page() {

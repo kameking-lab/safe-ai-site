@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { WorkPlanViewer } from "./WorkPlanViewer";
+import { ogImageUrl } from "@/lib/og-url";
 
 const _title = "作業計画書テンプレート｜石綿レベル1〜3別｜石綿対応支援";
 const _desc =
@@ -11,7 +12,21 @@ export const metadata: Metadata = {
   title: _title,
   description: _desc,
   alternates: { canonical: "/asbestos-management/work-plan-template" },
-  openGraph: { title: _title, description: _desc, type: "website", locale: "ja_JP" },
+  openGraph: {
+    title: _title,
+    description: _desc,
+    type: "website",
+    locale: "ja_JP",
+    siteName: "安全AIポータル",
+    url: "https://www.anzen-ai-portal.jp/asbestos-management/work-plan-template",
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: _title,
+    description: _desc,
+    images: [ogImageUrl(_title, _desc)],
+  },
 };
 
 export default function Page() {

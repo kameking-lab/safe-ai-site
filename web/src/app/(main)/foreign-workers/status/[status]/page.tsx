@@ -12,6 +12,7 @@ import {
   SSF_FIELD_LABELS_JA,
   type ResidenceStatusId,
 } from "@/types/foreign-worker";
+import { ogImageUrl } from "@/lib/og-url";
 
 type StatusPageProps = {
   params: Promise<{ status: string }>;
@@ -28,14 +29,24 @@ export async function generateMetadata(
   const rule = getResidenceStatusRule(status as ResidenceStatusId);
   if (!rule) return { title: "在留資格ガイド" };
   const title = `${rule.labelJa}の安全衛生ガイド｜事業主義務と労働者の権利`;
+  const description = rule.summary;
   return {
     title,
-    description: rule.summary,
+    description,
     alternates: { canonical: `/foreign-workers/status/${rule.id}` },
     openGraph: {
       title,
-      description: rule.summary,
+      description,
       type: "article",
+      siteName: "安全AIポータル",
+      url: `https://www.anzen-ai-portal.jp/foreign-workers/status/${rule.id}`,
+      images: [{ url: ogImageUrl(title, description), width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImageUrl(title, description)],
     },
   };
 }
