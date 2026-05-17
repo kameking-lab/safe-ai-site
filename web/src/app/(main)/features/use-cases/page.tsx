@@ -199,7 +199,7 @@ const INDUSTRIES: Industry[] = [
     hookline: "改正安衛法（2024年4月施行）の化学物質管理が業種を問わず必須。化学業界はその先端。",
     cases: [
       {
-        title: "改正安衛法 完全対応",
+        title: "改正安衛法に対応",
         problem: "リスクアセスメント対象物質の拡大、ばく露濃度測定の必須化。",
         solution: "化学物質RA＋検索DBで法令対応。記録は監査・労基対応にそのまま提出可能。",
         relatedFeatures: [

@@ -99,7 +99,7 @@ const TOKUSHO_ROWS: { label: string; value: React.ReactNode }[] = [
   },
   {
     label: "運営責任者",
-    value: "安全AIポータル 運営チーム（氏名は請求により開示）",
+    value: "個人事業主・労働安全衛生コンサルタント（登録番号260022）（氏名は請求により開示）",
   },
   {
     label: "所在地",
@@ -221,7 +221,7 @@ export default function AboutPage() {
               現場担当者・安全管理者・外国人労働者など多様な立場からのフィードバックを公開 PDCA で回し続ける運営
             </strong>
             そのものです。
-            安全AIポータル 専門家チームのもと、ユーザーの指摘は全件確認し、短いサイクルで実装・検証を繰り返します。
+            運営者（労働安全衛生コンサルタント・登録番号260022）が、ユーザーの指摘を全件確認し、短いサイクルで実装・検証を繰り返します。
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <Pill
@@ -248,7 +248,7 @@ export default function AboutPage() {
         {/* 運営チームプロフィール */}
         <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <h2 className="mb-4 text-base font-bold text-slate-900">
-            安全AIポータル 運営チーム
+            運営者プロフィール
           </h2>
           <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
             {/* マスコット */}
@@ -267,14 +267,14 @@ export default function AboutPage() {
               </p>
               <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-semibold text-emerald-700 border border-emerald-200">
                 <Scale className="h-4 w-4" />
-                労働安全衛生の専門家チームが運営
+                労働安全衛生コンサルタント（登録番号260022）が個人で運営
               </div>
               <p className="mt-3 text-sm leading-6 text-slate-600">
-                大型インフラ施工管理の実務経験を活かし、労働安全衛生コンサルティングと安全管理システムの開発・提供を行っています。
-                AI・DX の活用で現場の安全業務を効率化するデジタルツールとして、安全AIポータル を運営しています。
+                大型インフラ施工管理の実務経験を持つ労働安全衛生コンサルタント（登録番号260022）が、個人プロジェクトとして本サイトを運営しています。
+                AI・DX を活用した現場安全業務の効率化を研究・実証する場として、安全AIポータル を公開しています。
               </p>
               <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50/60 p-3 text-left">
-                <p className="text-xs font-semibold text-emerald-800">専門家設計の範囲</p>
+                <p className="text-xs font-semibold text-emerald-800">監修者によるレビュー範囲</p>
                 <ul className="mt-1 list-disc pl-4 text-xs leading-5 text-slate-700">
                   <li>法令・法改正情報の選定および要約方針のレビュー</li>
                   <li>KY用紙・リスクアセスメント様式の適合性確認</li>

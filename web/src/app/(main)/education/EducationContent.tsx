@@ -6,7 +6,7 @@ import { JsonLd, serviceSchema } from "@/components/json-ld";
 import { useTranslation } from "@/contexts/language-context";
 
 const DESCRIPTION =
-  "労働安全衛生法に基づく特別教育・法定教育・労働衛生教育12種に対応。フルハーネス・足場・低圧電気・職長教育など。オンデマンド配信・カスタマイズ研修・講師派遣。修了証発行まで一括対応。";
+  "労働安全衛生法に基づく特別教育・法定教育・労働衛生教育12種のカリキュラム設計を公開している研究プロジェクト。フルハーネス・足場・低圧電気・職長教育など。労働安全衛生コンサルタント（登録番号260022）監修。";
 
 type CategoryKey = "tokubetsu" | "hoteikyoiku" | "roudoueisei";
 
@@ -111,17 +111,17 @@ export function EducationContent() {
       <header className="mb-8">
         <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
           <GraduationCap className="h-3.5 w-3.5" />
-          {isEn ? "Special Education & OHS Training" : "特別教育・安全衛生教育サービス"}
+          {isEn ? "Special Education & OHS Training (research project)" : "特別教育・安全衛生教育（教材公開）"}
         </div>
         <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
           {isEn
-            ? "12 program types + custom options. Certificate issuance included."
-            : "12種の対応教育＋要相談多数。修了証発行までワンストップ。"}
+            ? "12 program designs. Curricula, slides, and reference notes published openly."
+            : "12種の教育プログラム設計を公開。カリキュラム・スライド・参考資料を無料で閲覧できます。"}
         </h1>
         <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
           {isEn
-            ? "安全AIポータル provides special education, statutory training, and occupational health education under Japan's Occupational Safety and Health Act (安全衛生法). Designed by 安全AIポータル expert team. Choose from on-demand video, customized training, or instructor dispatch — matched to your company size and industry."
-            : "労働安全衛生法に基づく特別教育・法定教育・労働衛生教育を 安全AIポータル が提供します。専門家チームによる設計。オンデマンド配信から講師派遣まで、企業規模・業種に合わせた最適な形で受講いただけます。掲載以外の教育もお気軽にご相談ください。"}
+            ? "An open archive of special education, statutory training, and occupational health curricula under Japan's Occupational Safety and Health Act (安全衛生法). Supervised by an Occupational Safety & Health Consultant (registration no. 260022) and published as part of this independent research project. Field practitioners are encouraged to share gaps, errors, or improvement suggestions."
+            : "労働安全衛生法に基づく特別教育・法定教育・労働衛生教育のカリキュラムを、労働安全衛生コンサルタント（登録番号260022）監修のもと公開している研究プロジェクトです。教材設計の参考としてご活用ください。現場での気づき・誤りの指摘・追加してほしいテーマがあれば、フィードバックフォームよりお寄せください。"}
         </p>
       </header>
 
@@ -158,8 +158,8 @@ export function EducationContent() {
         </div>
         <p className="mt-3 text-xs text-slate-500">
           {isEn
-            ? "* Contact us for pricing details tailored to your participant count, customization scope, and location."
-            : "※ 受講人数・カスタマイズ範囲・出張地域に応じてご案内します。詳細はお問い合わせください。"}
+            ? "* Pricing fields are part of a future paid mode design (M6 phase) — they are not currently active offers from this research project."
+            : "※ 各形式に表示している料金は、将来の課金モード（M6期）の設計上の数値です。本研究プロジェクトとして現時点で提供しているサービスではありません。"}
         </p>
       </section>
 
@@ -249,8 +249,8 @@ export function EducationContent() {
         </div>
         <p className="text-sm text-slate-600 mb-4">
           {isEn
-            ? "We design custom curricula for needs beyond the listed programs. Whether or not a legal requirement exists, feel free to inquire."
-            : "下記以外にも、現場のニーズに応じてカリキュラムを設計します。法定要件の有無に関わらず、まずはご相談ください。"}
+            ? "Beyond the listed programs, we are continually expanding curricula based on field feedback. Suggestions for additional themes are welcome."
+            : "下記以外のテーマについても、現場からのフィードバックに応じて教材を順次拡充しています。追加してほしい教育テーマがあればお知らせください。"}
         </p>
         <ul className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
           {others.map((item) => (
@@ -278,8 +278,8 @@ export function EducationContent() {
         </p>
         <p className="mt-2 text-xs text-slate-600">
           {isEn
-            ? "Tell us your number of participants, target tasks, and preferred timing. We reply within 3 business days."
-            : "受講人数・対象業務・希望時期をお知らせください。原則3営業日以内にご返信いたします。"}
+            ? "Share questions, errors found, or themes you'd like added. We reply within 3 business days."
+            : "教材内容のご質問・誤りの指摘・追加してほしいテーマをお寄せください。原則3営業日以内にご返信いたします。"}
         </p>
         <Link
           href="/contact"

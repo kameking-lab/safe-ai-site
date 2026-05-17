@@ -367,28 +367,28 @@ export default function AshibaPage() {
       {/* CTA */}
       <section className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6">
         <p className="text-base font-bold text-emerald-900">足場特別教育のお問い合わせ・改善提案</p>
-        <p className="mt-1 text-sm text-slate-600">受講人数・業種・希望時期をお知らせください。原則3営業日以内にご返信します。</p>
+        <p className="mt-1 text-sm text-slate-600">教材内容のご質問・誤りの指摘・追加してほしいテーマなどをお寄せください。原則3営業日以内にご返信します。</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
             href="/contact?category=education&course=ashiba"
             className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"
           >
             <Mail className="h-4 w-4" />
-            無料相談
+            ご質問・改善提案を送る
           </Link>
           <Link
             href="/contact?category=education&course=ashiba&type=document"
             className="inline-flex items-center gap-2 rounded-lg border border-emerald-600 bg-white px-5 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50 transition-colors"
           >
             <FileText className="h-4 w-4" />
-            資料請求
+            教材についての質問
           </Link>
         </div>
       </section>
 
       {/* 監修者 */}
       <p className="mt-6 text-center text-xs text-slate-400">
-        安全AIポータル 専門家チームによる設計
+        労働安全衛生コンサルタント（登録番号260022）監修
       </p>
     </main>
   );

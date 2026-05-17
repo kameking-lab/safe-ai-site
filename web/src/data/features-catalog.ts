@@ -292,9 +292,9 @@ export const FEATURES: FeatureItem[] = [
   {
     slug: "stats",
     title: "サイト統計・運営者情報",
-    summary: "安全AIポータル 有資格者の労働安全コンサルタント監修",
+    summary: "労働安全衛生コンサルタント（登録番号260022）監修",
     description:
-      "本サイトは登録安全AIポータル 専門家チームが監修。利用統計・監修方針を公開しています。",
+      "本サイトは労働安全衛生コンサルタント（登録番号260022）が個人で監修。利用統計・監修方針を公開しています。",
     href: "/about",
     category: "management",
     tags: ["運営者"],

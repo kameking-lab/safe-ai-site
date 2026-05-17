@@ -76,7 +76,7 @@ export default function EducationCertificationPage() {
           description="安衛則第36条・安衛法第76条に基づく全種目。業種・作業から必要資格を判定。"
           icon={GraduationCap}
           iconColor="blue"
-          badge="法令完全対応"
+          badge="主要法令に対応"
         />
 
         <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
