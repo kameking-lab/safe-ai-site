@@ -152,4 +152,5 @@ const nextConfig: NextConfig = {
     serverExternalPackages: ["@google-analytics/data", "@grpc/grpc-js", "google-gax", "google-auth-library"],
 };
 
+// build-trigger: include audit page from PR #235 (2026-05-17)
 export default nextConfig;
