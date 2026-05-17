@@ -358,7 +358,7 @@ export function ExamQuizClient() {
                 <div className="rounded-xl border border-amber-100 bg-amber-50 p-4 text-sm text-slate-700">
                   <p className="mb-1 font-semibold text-amber-800">解説</p>
                   <p className="whitespace-pre-line leading-relaxed">
-                    {q.explanation ?? "解説は準備中です。"}
+                    {q.explanation ?? "AI解説は現在ご利用いただけません。"}
                   </p>
                   {q.relatedLaw && (
                     <p className="mt-2 text-xs text-amber-700">
@@ -444,8 +444,10 @@ export function ExamQuizClient() {
 
             {/* Certification selector */}
             <div>
-              <p className="mb-2 text-xs font-semibold text-slate-500">資格（詳細選択）</p>
+              <label htmlFor="exam-cert-select" className="mb-2 block text-xs font-semibold text-slate-500">資格（詳細選択）</label>
               <select
+                id="exam-cert-select"
+                aria-label="資格を選択"
                 value={certId}
                 onChange={(e) => { setCertId(e.target.value); setSubject("all"); }}
                 className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-amber-400 focus:outline-none"

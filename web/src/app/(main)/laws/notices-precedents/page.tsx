@@ -5,17 +5,30 @@ import {
   officialNotices,
   courtPrecedents,
 } from "@/data/mock/notices-and-precedents";
+import { ogImageUrl } from "@/lib/og-url";
 
 const TITLE = "通達・判例 — 労働安全衛生の第2層出典";
 const DESCRIPTION =
   "監督官・士業・弁護士が実務で参照する通達（基発・安衛発）と、安全配慮義務関連の最高裁・高裁判例30件。条文の向こう側にある行政解釈・司法解釈をまとめて確認できます。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/laws/notices-precedents" },
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
-    title: `${TITLE}`,
+    title: TITLE,
     description: DESCRIPTION,
+    type: "website",
+    locale: "ja_JP",
+    siteName: "安全AIポータル",
+    url: "https://www.anzen-ai-portal.jp/laws/notices-precedents",
+    images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [ogImageUrl(TITLE, DESCRIPTION)],
   },
 };
 

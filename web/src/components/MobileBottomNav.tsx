@@ -32,6 +32,7 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="モバイル ボトムナビゲーション"
+      data-mobile-nav="bottom"
       className="mobile-bottom-nav fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-slate-700 dark:bg-slate-900/95 dark:supports-[backdrop-filter]:bg-slate-900/80"
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-between px-1">

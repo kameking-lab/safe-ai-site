@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { PageContainer } from "@/components/layout";
 import {
   Search,
   FlaskConical,
@@ -18,7 +19,7 @@ import {
   type ChemicalCategory,
   type ChemicalSubstance,
 } from "@/data/mock/chemical-substances-db";
-import { getAllMergedChemicals } from "@/lib/mhlw-chemicals";
+import { getAllMergedChemicals, type MergedChemical } from "@/lib/mhlw-chemicals";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 
 
@@ -54,8 +55,23 @@ function matches(sub: ChemicalSubstance, q: string): boolean {
   return haystack.includes(n);
 }
 
+function normalizeMhlw(v: string): string {
+  return v.toLowerCase().replace(/\s+/g, "");
+}
+
+function matchesMhlw(c: MergedChemical, q: string): boolean {
+  if (!q) return true;
+  const n = normalizeMhlw(q);
+  return (
+    normalizeMhlw(c.primaryName).includes(n) ||
+    (c.cas !== null && normalizeMhlw(c.cas).includes(n)) ||
+    c.aliases.some((a) => normalizeMhlw(a).includes(n))
+  );
+}
+
 export function ChemicalDatabaseClient() {
-  const mhlwCount = useMemo(() => getAllMergedChemicals().length, []);
+  const mhlwChemicals = useMemo(() => getAllMergedChemicals(), []);
+  const mhlwCount = mhlwChemicals.length;
   const [mode, setMode] = useState<"curated" | "mhlw">("mhlw");
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<ChemicalCategory | "">("");
@@ -70,12 +86,17 @@ export function ChemicalDatabaseClient() {
     });
   }, [query, category, skinOnly]);
 
+  const filteredMhlw = useMemo(
+    () => mhlwChemicals.filter((c) => matchesMhlw(c, query)),
+    [mhlwChemicals, query],
+  );
+
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+    <PageContainer width="wide">
       <header className="mb-5">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-700">
           <FlaskConical className="h-4 w-4" aria-hidden="true" />
-          化学物質検索DB β版
+          化学物質検索DB
         </div>
         <h1 className="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
           化学物質データベース（MHLW {mhlwCount.toLocaleString()}物質 ＋ 専門解説50物質）
@@ -112,7 +133,72 @@ export function ChemicalDatabaseClient() {
         ))}
       </div>
 
-      {mode === "mhlw" && <div className="rounded-xl border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-500">厚労省化学物質データベース（準備中）</div>}
+      {mode === "mhlw" && (
+        <section className="space-y-4">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-800">
+              <Search className="h-4 w-4 text-slate-400" aria-hidden="true" />
+              物質名・CAS番号で検索
+            </div>
+            <label className="block">
+              <span className="sr-only">物質名・CAS番号で検索</span>
+              <input
+                type="search"
+                inputMode="search"
+                placeholder="例: ベンゼン / 71-43-2"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+              />
+            </label>
+            <p className="mt-2 text-xs text-slate-500">
+              {query
+                ? `${filteredMhlw.length.toLocaleString()} 件 / 全 ${mhlwCount.toLocaleString()} 件`
+                : `全 ${mhlwCount.toLocaleString()} 件`}（CAS 統合）
+            </p>
+          </div>
+          {filteredMhlw.length === 0 ? (
+            <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+              該当する物質が見つかりませんでした。別の語句でお試しください。
+            </p>
+          ) : (
+            <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+              <table className="w-full text-xs">
+                <thead className="border-b border-slate-200 bg-slate-50">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-semibold text-slate-700">CAS番号</th>
+                    <th className="px-3 py-2 text-left font-semibold text-slate-700">物質名</th>
+                    <th className="px-3 py-2 text-center font-semibold text-slate-700">がん原性</th>
+                    <th className="px-3 py-2 text-center font-semibold text-slate-700">皮膚障害</th>
+                    <th className="px-3 py-2 text-center font-semibold text-slate-700">濃度基準</th>
+                    <th className="px-3 py-2 text-center font-semibold text-slate-700">SDS義務</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredMhlw.slice(0, 100).map((c, i) => (
+                    <tr
+                      key={c.cas ?? `${c.primaryName}-${i}`}
+                      className="hover:bg-slate-50"
+                    >
+                      <td className="px-3 py-2 font-mono text-slate-400">{c.cas ?? "—"}</td>
+                      <td className="px-3 py-2 font-medium text-slate-800">{c.primaryName}</td>
+                      <td className="px-3 py-2 text-center text-red-600">{c.flags.carcinogenic ? "●" : ""}</td>
+                      <td className="px-3 py-2 text-center text-amber-600">{c.flags.skin ? "●" : ""}</td>
+                      <td className="px-3 py-2 text-center text-blue-600">{c.flags.concentration ? "●" : ""}</td>
+                      <td className="px-3 py-2 text-center text-emerald-600">{c.flags.label_sds ? "●" : ""}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {filteredMhlw.length > 100 && (
+                <p className="px-4 py-3 text-center text-xs text-slate-400">
+                  さらに {(filteredMhlw.length - 100).toLocaleString()} 件 — キーワードを入力して絞り込んでください
+                </p>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       {mode === "curated" && (<>
 
@@ -323,6 +409,6 @@ export function ChemicalDatabaseClient() {
           </li>
         </ul>
       </aside>
-    </div>
+    </PageContainer>
   );
 }

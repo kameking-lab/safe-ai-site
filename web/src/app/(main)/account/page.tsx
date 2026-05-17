@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ManagePlanButton } from "./manage-plan-button";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
@@ -90,7 +91,7 @@ export default async function AccountPage({ searchParams }: Props) {
     : null;
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
+    <PageContainer width="narrow" paddingY="none" className="py-8">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="マイページ" description="プラン状況と契約管理" path="/account" />
       <h1 className="text-2xl font-bold text-slate-900">マイページ</h1>
@@ -222,6 +223,6 @@ export default async function AccountPage({ searchParams }: Props) {
           <li>再加入時は以前の顧客情報が引き継がれます。</li>
         </ul>
       </section>
-    </main>
+    </PageContainer>
   );
 }

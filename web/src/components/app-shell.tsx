@@ -29,11 +29,13 @@ import {
   BookMarked,
   Users2,
   Heart,
+  HeartHandshake,
   ListChecks,
   Sun,
   Moon,
   BarChart3,
   Sparkles,
+  HelpCircle,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { FlagshipNav } from "@/components/flagship-nav";
@@ -71,7 +73,7 @@ type NavCategory = {
 
 const PAID_SERVICE_ITEMS: NavItem[] = [
   { id: "education", label: "特別教育", href: "/education", icon: GraduationCap },
-  { id: "wizard", label: "コンプラ診断", href: "/wizard", icon: ListChecks, badge: "NEW" },
+  { id: "plan-generator", label: "年次安全衛生計画", href: "/strategy/plan-generator", icon: ListChecks, badge: "NEW" },
 ];
 
 const NAV_CATEGORIES: NavCategory[] = [
@@ -101,6 +103,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "laws", label: "法改正", href: "/laws", icon: Scale },
       { id: "law-search", label: "法令検索", href: "/law-search", icon: Search },
+      { id: "law-hierarchy", label: "法令体系マップ", href: "/law-hierarchy", icon: LibraryBig },
       { id: "chatbot", label: "法令チャット", href: "/chatbot", icon: MessageSquare, badge: "AI" },
     ],
   },
@@ -117,7 +120,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database },
       { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2, badge: "AI" },
-      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "50物質β" },
+      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "専門解説50物質" },
     ],
   },
   {
@@ -125,6 +128,8 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2 },
       { id: "mental-health", label: "メンタル・カスハラ", href: "/mental-health", icon: Heart },
+      { id: "mental-health-management", label: "メンタル対策実務", href: "/mental-health-management", icon: Brain, badge: "NEW" },
+      { id: "treatment-work-balance", label: "治療と仕事の両立支援", href: "/treatment-work-balance", icon: HeartHandshake, badge: "NEW" },
     ],
   },
   ...(PAID_MODE
@@ -138,7 +143,7 @@ const NAV_CATEGORIES: NavCategory[] = [
         {
           label: "ツール",
           items: [
-            { id: "wizard", label: "コンプラ診断", href: "/wizard", icon: ListChecks, badge: "NEW" },
+            { id: "plan-generator", label: "年次安全衛生計画", href: "/strategy/plan-generator", icon: ListChecks, badge: "NEW" },
           ] as NavItem[],
         },
       ]),
@@ -153,8 +158,9 @@ const NAV_CATEGORIES: NavCategory[] = [
   {
     label: "その他",
     items: [
-      { id: "lms", label: "LMS（多拠点管理）", href: "/lms", icon: LibraryBig, badge: "beta", description: "先行登録" },
+      // LMS hidden from nav: pre-launch β waitlist only. Audit reference F-001.
       { id: "glossary", label: "安全用語辞書", href: "/glossary", icon: BookMarked },
+      { id: "faq", label: "FAQ 200問", href: "/faq", icon: HelpCircle },
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
       ...(PAID_MODE
         ? [{ id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard } as NavItem]
@@ -288,24 +294,18 @@ export function AppShell({ children, user }: AppShellProps) {
           <span className="flex-1 truncate">
             {item.label}
             {item.description && (
-              <span className="ml-1 text-[10px] font-normal text-slate-400 dark:text-slate-500">{item.description}</span>
+              <span className="ml-1 text-[10px] font-normal text-slate-500 dark:text-slate-400">{item.description}</span>
             )}
           </span>
           {item.badge && !active && (
             <span
               className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                item.badge === "soon"
-                  ? "bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-300"
-                  : item.badge === "beta"
-                    ? "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300"
-                    : "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+                item.badge === "beta"
+                  ? "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300"
+                  : "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
               }`}
             >
-              {item.badge === "soon"
-                ? "準備中"
-                : item.badge === "beta"
-                  ? "β"
-                  : item.badge}
+              {item.badge === "beta" ? "β" : item.badge}
             </span>
           )}
         </Link>
@@ -347,7 +347,7 @@ export function AppShell({ children, user }: AppShellProps) {
           {NAV_CATEGORIES.map((cat) => (
             <div key={cat.label || "__top__"}>
               {cat.label && (
-                <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   {cat.label}
                 </p>
               )}
@@ -510,7 +510,7 @@ export function AppShell({ children, user }: AppShellProps) {
           <div className="z-20 border-b border-slate-200 bg-slate-50/95 px-3 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/95 lg:hidden">
             {/* モバイル: アクセシビリティトグル（ヘッダから移設） */}
             <div className="mb-3 flex flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-800">
-              <p className="w-full px-1 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+              <p className="w-full px-1 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                 表示・入力支援
               </p>
               <button
@@ -574,7 +574,7 @@ export function AppShell({ children, user }: AppShellProps) {
               {NAV_CATEGORIES.map((cat) => (
                 <div key={cat.label || "__top__"}>
                   {cat.label && (
-                    <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                    <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
                       {cat.label}
                     </p>
                   )}
@@ -594,7 +594,7 @@ export function AppShell({ children, user }: AppShellProps) {
             onClick={openCommandPalette}
             className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm hover:bg-slate-50"
             title="検索を開く"
-            aria-label="検索を開く（Ctrl+K）"
+            aria-label="検索 Ctrl+K"
           >
             <Search className="h-3.5 w-3.5" aria-hidden="true" />
             <span>検索</span>

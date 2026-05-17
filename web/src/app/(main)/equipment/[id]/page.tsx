@@ -154,6 +154,7 @@ export default async function EquipmentDetailPage({
     "@type": "Product",
     name: item.name,
     description: `${item.categoryName} / ${item.spec}. ${item.recommendReason ?? ""}`,
+    image: [`${SITE_BASE}${ogImageUrl(item.name, item.categoryName)}`],
     category: item.categoryName,
     ...(item.maker ? { brand: { "@type": "Brand", name: item.maker } } : {}),
     offers: {

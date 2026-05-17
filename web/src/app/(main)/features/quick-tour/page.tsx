@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/features/quick-tour" },
   title: "5分ツアー | 機能紹介",
   description:
     "安全AIポータルの主要機能を7ステップ・5分で巡る入門ツアー。実機画面のスクショつきで、すぐに試せます。",
@@ -68,11 +69,11 @@ const STEPS: Step[] = [
   },
   {
     step: 7,
-    slug: "wizard",
-    title: "コンプラ診断で必須対応を可視化",
-    body: "10問程度の質問に答えるだけで、安衛法上の必須対応・未着手項目を自動判定。助成金シミュレーターと組み合わせて投資計画も立てられます。",
-    href: "/wizard",
-    hrefLabel: "診断を始める",
+    slug: "plan-generator",
+    title: "年次安全衛生計画で全体最適化",
+    body: "業種・規模を選ぶだけで、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む年次計画書の雛形を生成。助成金シミュレーターと組み合わせて投資計画も立てられます。",
+    href: "/strategy/plan-generator",
+    hrefLabel: "計画ジェネレーターを開く",
   },
 ];
 

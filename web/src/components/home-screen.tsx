@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChatPanel, type ChatMessage } from "@/components/chat-panel";
 import { Mascot } from "@/components/mascot";
 import { AccidentDatabasePanel } from "@/components/accident-database-panel";
@@ -148,8 +149,29 @@ function makeInitialKyInstruction(): KyInstructionRecordState {
   };
 }
 
+const ACCIDENT_TABS = [
+  "list",
+  "mhlw-search",
+  "mhlw-deaths",
+  "mhlw",
+  "industry",
+  "analysis",
+] as const;
+type AccidentTab = (typeof ACCIDENT_TABS)[number];
+
+function readAccidentTabFromUrl(
+  value: string | null | undefined,
+): AccidentTab | null {
+  return ACCIDENT_TABS.includes(value as AccidentTab)
+    ? (value as AccidentTab)
+    : null;
+}
+
 export function HomeScreen({ children, variant: variantProp, initialLawTab }: HomeScreenProps) {
   const variant = variantProp ?? "portal";
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const services = useMemo(() => createServices(), []);
   const [revisions, setRevisions] = useState(() => services.revision.getCachedRevisions());
   const [activeTab, setActiveTab] = useState<TabId>(() => initialLawTab ?? "laws");
@@ -174,9 +196,30 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
   const [accidentError, setAccidentError] = useState<ServiceError | null>(null);
   const [selectedAccidentType, setSelectedAccidentType] = useState<AccidentType | "すべて">("すべて");
   const [selectedAccidentCategory, setSelectedAccidentCategory] = useState<AccidentWorkCategory | "すべて">("すべて");
-  const [accidentActiveTab, setAccidentActiveTab] = useState<
-    "list" | "mhlw-search" | "mhlw-deaths" | "mhlw" | "industry" | "analysis"
-  >("mhlw-search");
+  const [accidentActiveTab, setAccidentActiveTab] = useState<AccidentTab>(
+    () =>
+      (variantProp === "accidents" &&
+        readAccidentTabFromUrl(searchParams?.get("tab"))) ||
+      "mhlw-search",
+  );
+
+  // Sync /accidents tab state -> URL (replace, scroll preserved)
+  useEffect(() => {
+    if (variant !== "accidents") return;
+    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    if (accidentActiveTab === "mhlw-search") {
+      params.delete("tab");
+    } else {
+      params.set("tab", accidentActiveTab);
+    }
+    const qs = params.toString();
+    const next = qs ? `${pathname}?${qs}` : pathname;
+    const current =
+      window.location.pathname + (window.location.search || "");
+    if (next !== current) {
+      router.replace(next, { scroll: false });
+    }
+  }, [accidentActiveTab, variant, pathname, router, searchParams]);
   const [selectedRegionName, setSelectedRegionName] = useState(
     () => services.weatherRisk.getAvailableRegions()[0]?.regionName ?? ""
   );

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, ExternalLink } from "lucide-react";
-import { JsonLd, breadcrumbSchema } from "@/components/json-ld";
+import { JsonLd, breadcrumbSchema, newsArticleSchema } from "@/components/json-ld";
 import { LanguageButton } from "@/components/language-button";
 import { RelatedContent, type RelatedContentGroup } from "@/components/RelatedContent";
 import {
@@ -37,13 +37,25 @@ export async function generateMetadata({
   return {
     title: article.title,
     description: article.description,
-    alternates: { canonical: `/articles/${slug}` },
+    alternates: {
+      canonical: `/articles/${slug}`,
+      languages: {
+        ja: `${SITE_BASE}/articles/${slug}`,
+        en: `${SITE_BASE}/articles/${slug}`,
+        "x-default": `${SITE_BASE}/articles/${slug}`,
+      },
+    },
     keywords: article.keywords,
     openGraph: {
       title: `${article.title}`,
       description: article.description,
       images: [{ url: ogImageUrl(article.title), width: 1200, height: 630 }],
       type: "article",
+      locale: "ja_JP",
+      alternateLocale: ["en_US"],
+      publishedTime: article.publishedAt,
+      modifiedTime: article.lastReviewedAt,
+      authors: [article.author.url],
     },
     twitter: { card: "summary_large_image", images: [ogImageUrl(article.title)] },
   };
@@ -175,27 +187,19 @@ export default async function ArticleDetailPage({
     <main className="mx-auto max-w-3xl px-4 py-6 sm:py-8">
       <JsonLd
         schema={[
-          {
-            "@context": "https://schema.org",
-            "@type": "Article",
+          newsArticleSchema({
             headline: article.title,
             description: article.description,
             url,
             datePublished: article.publishedAt,
             dateModified: article.lastReviewedAt,
-            author: {
-              "@type": "Person",
-              name: article.author.name,
-              url: article.author.url,
-            },
-            publisher: {
-              "@type": "Organization",
-              name: "安全AIポータル",
-              url: SITE_BASE,
-            },
-            mainEntityOfPage: url,
+            authorName: article.author.name,
+            authorUrl: article.author.url,
+            image: `${SITE_BASE}${ogImageUrl(article.title)}`,
             inLanguage: "ja",
-          },
+            keywords: article.keywords,
+            articleSection: article.tags?.[0],
+          }),
           breadcrumbSchema([
             { name: "ホーム", url: SITE_BASE },
             { name: "解説記事", url: `${SITE_BASE}/articles` },
