@@ -285,8 +285,131 @@ export const LAW_HIERARCHY_NODES: LawHierarchyNode[] = [
     shortTitle: "じん肺則",
     description: "昭和35年労働省令第6号",
     eGovLawId: "335M50002000006",
+    lawNameInData: "じん肺法施行規則",
     circularLawRef: "じん肺法施行規則",
     scopeNote: "じん肺健康診断の実施方法・じん肺管理区分決定手続・記録保存。",
+  },
+  // 50法令体制への拡張（+11法令、じん肺則は既存ノードを活用）
+  {
+    id: "karoshi-boshi-ho",
+    level: "law",
+    title: "過労死等防止対策推進法",
+    shortTitle: "過労死防止法",
+    description: "平成26年法律第100号",
+    eGovLawId: "426AC1000000100",
+    lawNameInData: "過労死等防止対策推進法",
+    scopeNote:
+      "脳・心臓疾患／精神障害による過労死の防止を国の責務として位置づけ、調査研究・啓発・大綱策定・協議会の枠組みを定める。",
+  },
+  {
+    id: "rosai-boshi-dantai-ho",
+    level: "law",
+    title: "労働災害防止団体法",
+    shortTitle: "労災防止団体法",
+    description: "昭和39年法律第118号",
+    eGovLawId: "339AC0000000118",
+    lawNameInData: "労働災害防止団体法",
+    scopeNote:
+      "中央労働災害防止協会(中災防)と業種別労働災害防止協会(建災防／陸災防／港災防／林災防／鉱業労災防止)の根拠法。労働災害防止規程の認可制度を含む。",
+  },
+  {
+    id: "kensetsu-rosai-boshi-kitei",
+    parentId: "rosai-boshi-dantai-ho",
+    level: "ministerialOrdinance",
+    title: "建設業労働災害防止規程",
+    shortTitle: "建災防規程",
+    description: "建設業労働災害防止協会作成（労働災害防止団体法第36条 厚生労働大臣認可）",
+    lawNameInData: "建設業労働災害防止規程",
+    scopeNote:
+      "建設業労働災害防止協会の会員事業者に拘束力をもつ規程。安全衛生管理体制・墜落防止・解体工事・下請混在作業の措置を具体化。",
+  },
+  {
+    id: "kenko-zoshin-ho",
+    level: "law",
+    title: "健康増進法",
+    shortTitle: "健康増進法",
+    description: "平成14年法律第103号",
+    eGovLawId: "414AC0000000103",
+    lawNameInData: "健康増進法",
+    scopeNote:
+      "国民の健康増進と受動喫煙防止のための施策を定める。第二種施設（事務所・工場・飲食店）の屋内禁煙・喫煙専用室基準は事業場禁煙対策の根拠。",
+  },
+  {
+    id: "koatsu-gas-hoanho",
+    level: "law",
+    title: "高圧ガス保安法",
+    shortTitle: "高圧ガス保安法",
+    description: "昭和26年法律第204号",
+    eGovLawId: "326AC0000000204",
+    lawNameInData: "高圧ガス保安法",
+    scopeNote:
+      "高圧ガスの製造・貯蔵・販売・移動・消費の規制。1MPa以上の圧縮ガス・液化ガスを対象とし、保安統括者・冷凍保安責任者の選任を義務付ける。",
+  },
+  {
+    id: "soon-kisei-ho",
+    level: "law",
+    title: "騒音規制法",
+    shortTitle: "騒音規制法",
+    description: "昭和43年法律第98号",
+    eGovLawId: "343AC0000000098",
+    lawNameInData: "騒音規制法",
+    scopeNote:
+      "工場・事業場の特定施設および建設工事の特定建設作業から発生する騒音を規制。労働衛生(85dB)・敷地境界線騒音規制を補完する環境法。",
+  },
+  {
+    id: "kashin-ho",
+    level: "law",
+    title: "化学物質の審査及び製造等の規制に関する法律（化審法）",
+    shortTitle: "化審法",
+    description: "昭和48年法律第117号",
+    eGovLawId: "348AC0000000117",
+    lawNameInData: "化学物質の審査及び製造等の規制に関する法律",
+    scopeNote:
+      "新規化学物質の事前審査・第一種特定化学物質(PCB等)の原則禁止・優先評価化学物質のリスク評価を定める。特化則・有機則と上流側で接続。",
+  },
+  {
+    id: "dokugeki-ho",
+    level: "law",
+    title: "毒物及び劇物取締法",
+    shortTitle: "毒劇法",
+    description: "昭和25年法律第303号",
+    eGovLawId: "325AC0000000303",
+    lawNameInData: "毒物及び劇物取締法",
+    scopeNote:
+      "毒物・劇物・特定毒物の製造・輸入・販売・取扱を規制。営業登録・毒物劇物取扱責任者・「医薬用外毒物/劇物」表示・譲渡記録5年保存を義務付ける。",
+  },
+  {
+    id: "shokuhin-eisei-ho",
+    level: "law",
+    title: "食品衛生法",
+    shortTitle: "食品衛生法",
+    description: "昭和22年法律第233号",
+    eGovLawId: "322AC0000000233",
+    lawNameInData: "食品衛生法",
+    scopeNote:
+      "食品の安全性確保のための営業許可・HACCP・規格基準・食品衛生管理者を定める。飲食店・食品製造業の事業場運営における基幹法。",
+  },
+  {
+    id: "kowan-rodo-ho",
+    level: "law",
+    title: "港湾労働法",
+    shortTitle: "港湾労働法",
+    description: "昭和63年法律第40号",
+    eGovLawId: "363AC0000000040",
+    lawNameInData: "港湾労働法",
+    scopeNote:
+      "六大港湾(東京/横浜/名古屋/大阪/神戸/関門)の港湾運送業に適用。港湾労働者派遣の特例・雇用管理者選任・港湾労働者証制度を定める。",
+  },
+  {
+    id: "senin-anzen-eisei-kisoku",
+    level: "ministerialOrdinance",
+    title: "船員労働安全衛生規則",
+    shortTitle: "船員安衛則",
+    description: "昭和39年運輸省令第53号",
+    eGovLawId: "339M50000800053",
+    lawNameInData: "船員労働安全衛生規則",
+    scopeNote:
+      "国土交通省所管。船員法に基づき船員の労働安全衛生（船倉閉鎖区画・高所作業・化学物質取扱・健康診断）を定める。陸上の安衛法体系は船員に適用されない。",
   },
 ];
 

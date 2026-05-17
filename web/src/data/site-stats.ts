@@ -50,7 +50,7 @@ export const SITE_STATS = {
   siteCuratedCaseCount: _siteCuratedCaseCount.toLocaleString(),
   /** 厚労省 化学物質情報データベース 取込件数 */
   chemicalsMhlwCount: "3,984",
-  /** /law-search に収録された全条文件数（curated 33法令+） */
+  /** /law-search に収録された全条文件数（curated 50法令体制） */
   lawArticleCount: allLawArticles.length.toLocaleString(),
   /**
    * RAG 検索（chatbot/法令要約）対応の全条文数。
@@ -115,7 +115,7 @@ export const SITE_STATS_META: Record<
     asOf: "2026-04",
   },
   ragArticleCount: {
-    source: "安全AIポータル RAG（curated 33法令 + 厚労省PDF抽出フィルタ後インデックス）",
+    source: "安全AIポータル RAG（curated 50法令 + 厚労省PDF抽出フィルタ後インデックス）",
     asOf: "2026-04",
   },
   specialEdKinds: {
