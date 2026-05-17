@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CompanyProfileForm } from "@/components/company-profile-form";
 import { LocalDataExportImport } from "@/components/local-data-export-import";
+import { PageContainer } from "@/components/layout";
 
 export const metadata: Metadata = {
   title: "自社プロファイル",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function ProfilePage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
+    <PageContainer width="narrow" paddingY="none" className="py-8">
       <header className="mb-6">
         <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">自社プロファイル</h1>
         <p className="mt-1 text-sm text-slate-600">
@@ -51,6 +52,6 @@ export default function ProfilePage() {
         </p>
         <LocalDataExportImport />
       </section>
-    </main>
+    </PageContainer>
   );
 }

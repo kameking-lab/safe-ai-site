@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { KyPageContent } from "@/components/ky-page-content";
+import { PageSkeleton } from "@/components/skeleton";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, howToSchema } from "@/components/json-ld";
 
@@ -41,7 +42,7 @@ export default function KyPage() {
   return (
     <>
       <JsonLd schema={KY_HOWTO} />
-      <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-8 text-sm text-slate-500">読み込み中...</div>}>
+      <Suspense fallback={<PageSkeleton label="KY用紙ツールを読み込み中" />}>
         <KyPageContent />
       </Suspense>
     </>

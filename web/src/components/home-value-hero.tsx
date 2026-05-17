@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { SITE_STATS, SITE_STATS_META, type SiteStatKey } from "@/data/site-stats";
-import { PersonaEntry } from "@/components/PersonaEntry";
 import { PAID_MODE } from "@/lib/paid-mode";
 
 // ファーストビュー数値訴求: 「通達・事例・商品」の3軸でサイト規模を即提示
@@ -55,20 +54,6 @@ const CAPABILITIES = [
   },
 ] as const;
 
-const STRENGTH_ITEMS = [
-  {
-    title: "安全AIポータル 専門家チームが直接担当",
-    desc: "大手ゼネコンで大型土木インフラ施工管理を担当した実務経験。机上論ではなく、現場で回る仕組みを設計します。",
-  },
-  {
-    title: "Claude Code を活用した短納期開発",
-    desc: "本サイト自体が Claude Code 製（要件定義から初版2週間目安）。社内ツール・教材・Chatbotを短納期で構築。",
-  },
-  {
-    title: "コンサル × 実装力をワンストップで提供",
-    desc: "労働安全の現場知識と Next.js 実装力を1人で両立。Excel代行・システム会社では難しい『現場で実際に使える仕組み』を一気通貫で提供。",
-  },
-];
 
 export function HomeValueHero() {
   return (
@@ -265,8 +250,6 @@ export function HomeValueHero() {
         </div>
       </div>
 
-      {/* 「こんな方に」セクション — 8カテゴリのペルソナ別入口 */}
-      <PersonaEntry />
 
       {/* 「できること」セクション */}
       <section
@@ -361,34 +344,6 @@ export function HomeValueHero() {
         </div>
       </section>
 
-      {/* Claude Code × 安全 の強み */}
-      <section
-        aria-labelledby="strength-heading"
-        className="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 via-white to-emerald-50 p-5 shadow-sm dark:border-amber-500/30 dark:from-amber-500/10 dark:via-slate-800 dark:to-emerald-500/10 sm:p-6"
-      >
-        <p className="text-[11px] font-bold uppercase tracking-widest text-amber-700 dark:text-amber-300">
-          Claude Code × 安全 の強み
-        </p>
-        <h3 id="strength-heading" className="mt-1 text-base font-bold text-slate-900 dark:text-slate-100 sm:text-lg">
-          「現場を知る人間」が「最新AIで実装する」からこそ、速くて正しい。
-        </h3>
-        <div className="mt-4 space-y-3">
-          {STRENGTH_ITEMS.map((s, i) => (
-            <div
-              key={s.title}
-              className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
-            >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-700 dark:bg-amber-500/20 dark:text-amber-200">
-                {i + 1}
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{s.title}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-600 dark:text-slate-300">{s.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* 関連動線 — PAID_MODE で内容が切り替わる */}
       <section

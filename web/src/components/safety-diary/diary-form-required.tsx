@@ -265,6 +265,7 @@ export function DiaryFormRequired() {
           value={siteName}
           onChange={(e) => setSiteName(e.target.value)}
           placeholder="例: 〇〇ビル新築工事 1F"
+          autoComplete="off"
           className="mt-3 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           required
         />
@@ -291,6 +292,7 @@ export function DiaryFormRequired() {
           onChange={(e) => setWorkContent(e.target.value)}
           placeholder="例: 2階スラブ配筋・型枠組立"
           rows={3}
+          autoComplete="off"
           className="mt-3 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           required
         />
@@ -341,6 +343,7 @@ export function DiaryFormRequired() {
           onChange={(e) => setKyResult(e.target.value)}
           placeholder="例: 高所作業時はフルハーネス着用徹底、墜落防止親綱を点検"
           rows={4}
+          autoComplete="off"
           className="mt-3 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           required
         />

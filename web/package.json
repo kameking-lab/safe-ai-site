@@ -67,6 +67,13 @@
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.2"
   },
+  "browserslist": [
+    "> 0.3%",
+    "not dead",
+    "not op_mini all",
+    "not ie 11",
+    "not safari < 14"
+  ],
   "overrides": {
     "tar": "^7.5.10",
     "vite": "^8.0.5",

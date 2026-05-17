@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
+
+// Pre-launch roadmap page — no external API exists yet. Keep noindex until Phase 1 ships.
+// Audit reference: harsh-third-party-2026-05-16 F-002.
 export const metadata: Metadata = {
   title: "API ドキュメント・ロードマップ",
   description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
-  alternates: { canonical: "/api-docs" },
-  openGraph: {
-    title: "API ドキュメント・ロードマップ",
-    description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
-  },
+  robots: { index: false, follow: false, nocache: true },
+  alternates: { canonical: null as unknown as string },
 };
 
 export default function ApiDocsPage() {
   return (
-    <div className="px-4 py-8 lg:px-8">
+    <PageContainer width="narrow" className="space-y-8">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="API ドキュメント・ロードマップ" description="安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。" path="/api-docs" />
-      <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">API ドキュメント・ロードマップ</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
@@ -105,7 +105,7 @@ export default function ApiDocsPage() {
                 Phase 3
               </span>
               <span className="text-sm font-semibold text-slate-700">
-                エンタープライズ連携（独立後12ヶ月）
+                組織連携機能（独立後12ヶ月）
               </span>
             </div>
             <ul className="mt-3 space-y-1.5 text-sm text-slate-600">
@@ -147,7 +147,6 @@ export default function ApiDocsPage() {
             利用ユースケースをお聞かせいただいた方を優先的にご案内します。
           </p>
         </section>
-      </div>
-    </div>
+    </PageContainer>
   );
 }

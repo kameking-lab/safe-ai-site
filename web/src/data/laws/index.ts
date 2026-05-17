@@ -1,4 +1,5 @@
 export type { LawArticle } from "./law-types";
+export { LAW_METADATA, getLawMetadata, type LawMetadata } from "./law-metadata";
 export { rodoAnzenEiseiHo } from "./rodo-anzen-eisei-ho";
 export { rodoAnzenEiseiHoSikokiregu } from "./rodo-anzen-eisei-ho-sikokiregu";
 export { anzenEiseiKisoku } from "./anzen-eisei-kisoku";
@@ -35,8 +36,20 @@ export { ashibaSagyoKisoku } from "./ashiba-sagyo-kisoku";
 export { kajuRodoTaisaku } from "./jiritsushinkei-setsumeisho";
 export { koyoKintoHo } from "./koyo-kinto-ho";
 export { mhlwLawArticles } from "./mhlw-extras";
+export { enKisoku } from "./en-kisoku";
+export { shiAlkylEnKisoku } from "./shi-alkyl-en-kisoku";
+export { jimushoEiseiKijunKisoku } from "./jimusho-eisei-kijun-kisoku";
+export { kikaiKenteiKisoku } from "./kikai-kentei-kisoku";
+export { hakenAnzenEisei } from "./haken-anzen-eisei";
+export { corpusGapFillArticles } from "./corpus-gaps-fill";
 
 import { mhlwLawArticles } from "./mhlw-extras";
+import { corpusGapFillArticles } from "./corpus-gaps-fill";
+import { enKisoku } from "./en-kisoku";
+import { shiAlkylEnKisoku } from "./shi-alkyl-en-kisoku";
+import { jimushoEiseiKijunKisoku } from "./jimusho-eisei-kijun-kisoku";
+import { kikaiKenteiKisoku } from "./kikai-kentei-kisoku";
+import { hakenAnzenEisei } from "./haken-anzen-eisei";
 import { rodoAnzenEiseiHo } from "./rodo-anzen-eisei-ho";
 import { rodoAnzenEiseiHoSikokiregu } from "./rodo-anzen-eisei-ho-sikokiregu";
 import { anzenEiseiKisoku } from "./anzen-eisei-kisoku";
@@ -109,4 +122,10 @@ export const allLawArticles = [
   ...kajuRodoTaisaku,
   ...koyoKintoHo,
   ...mhlwLawArticles,
+  ...enKisoku,
+  ...shiAlkylEnKisoku,
+  ...jimushoEiseiKijunKisoku,
+  ...kikaiKenteiKisoku,
+  ...hakenAnzenEisei,
+  ...corpusGapFillArticles,
 ];

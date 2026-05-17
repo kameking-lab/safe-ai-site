@@ -196,7 +196,6 @@
     "description": "Choose the plan that fits your organization",
     "free": "Free",
     "standard": "Standard",
-    "enterprise": "Enterprise",
     "perMonth": "/ month",
     "perUser": "/ user",
     "getStarted": "Get Started",

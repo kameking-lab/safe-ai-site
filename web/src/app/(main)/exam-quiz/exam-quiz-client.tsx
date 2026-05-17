@@ -444,8 +444,10 @@ export function ExamQuizClient() {
 
             {/* Certification selector */}
             <div>
-              <p className="mb-2 text-xs font-semibold text-slate-500">資格（詳細選択）</p>
+              <label htmlFor="exam-cert-select" className="mb-2 block text-xs font-semibold text-slate-500">資格（詳細選択）</label>
               <select
+                id="exam-cert-select"
+                aria-label="資格を選択"
                 value={certId}
                 onChange={(e) => { setCertId(e.target.value); setSubject("all"); }}
                 className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:border-amber-400 focus:outline-none"

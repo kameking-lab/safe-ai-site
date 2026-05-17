@@ -11,6 +11,7 @@ const DESCRIPTION =
   "監督官・士業・弁護士が実務で参照する通達（基発・安衛発）と、安全配慮義務関連の最高裁・高裁判例30件。条文の向こう側にある行政解釈・司法解釈をまとめて確認できます。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/laws/notices-precedents" },
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {

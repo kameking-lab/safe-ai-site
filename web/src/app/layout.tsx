@@ -4,8 +4,9 @@ import "./globals.css";
 import { FuriganaProvider } from "@/contexts/furigana-context";
 import { EasyJapaneseProvider } from "@/contexts/easy-japanese-context";
 import { LanguageProvider } from "@/contexts/language-context";
-import { JsonLd, organizationSchema, webSiteSchema, personSchema } from "@/components/json-ld";
+import { JsonLd, organizationSchema, webSiteSchema } from "@/components/json-ld";
 import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
+import { InstallPwaPrompt } from "@/components/install-pwa-prompt";
 import { CommandPaletteProvider } from "@/components/CommandPaletteProvider";
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
 import Analytics from "@/components/Analytics";
@@ -51,10 +52,16 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.anzen-ai-portal.jp"),
   alternates: {
     canonical: "https://www.anzen-ai-portal.jp",
+    languages: {
+      ja: "https://www.anzen-ai-portal.jp",
+      "en": "https://www.anzen-ai-portal.jp",
+      "x-default": "https://www.anzen-ai-portal.jp",
+    },
   },
   openGraph: {
     type: "website",
     locale: "ja_JP",
+    alternateLocale: ["en_US"],
     siteName: "安全AIポータル",
     title: {
       default: "安全AIポータル｜現場の安全を、AIで変える。",
@@ -95,14 +102,20 @@ export default function RootLayout({
       <head>
         {/* FOUC 抑止: hydration 前に html.dark を確定させる */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {/* Warm up TCP/TLS for third-party origins before they're requested (B-15) */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="dns-prefetch" href="https://generativelanguage.googleapis.com" />
+        <link rel="dns-prefetch" href="https://formspree.io" />
       </head>
       <body className="min-h-full bg-slate-50 font-sans text-slate-900 dark:bg-slate-900 dark:text-slate-100">
         <Analytics />
         <AdSenseScript />
         <JsonLd schema={organizationSchema()} />
         <JsonLd schema={webSiteSchema()} />
-        <JsonLd schema={personSchema()} />
         <ServiceWorkerRegistrar />
+        <InstallPwaPrompt />
         <ThemeProvider>
           <LanguageProvider>
             <FuriganaProvider>

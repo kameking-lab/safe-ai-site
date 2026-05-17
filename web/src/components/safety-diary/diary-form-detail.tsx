@@ -14,6 +14,7 @@ import {
 } from "@/lib/safety-diary/schema";
 import { addEntry, newId } from "@/lib/safety-diary/store";
 import { INDUSTRY_PRESET_DATA, estimateQualifications } from "@/lib/safety-diary/presets";
+import { CardGrid } from "@/components/layout";
 
 const INDUSTRY_LABELS: Record<IndustryPreset, string> = {
   construction: "建設",
@@ -225,7 +226,7 @@ export function DiaryFormDetail() {
           <p className="text-xs font-semibold text-slate-700">業者別作業</p>
           <div className="mt-2 space-y-2">
             {contractorWorks.map((c, idx) => (
-              <div key={idx} className="grid grid-cols-2 gap-2">
+              <CardGrid key={idx} cols={2} gap="sm">
                 <input
                   list={`contractor-${idx}`}
                   value={c.name}
@@ -252,7 +253,7 @@ export function DiaryFormDetail() {
                   placeholder="作業内容"
                   className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
                 />
-              </div>
+              </CardGrid>
             ))}
             <button
               type="button"
