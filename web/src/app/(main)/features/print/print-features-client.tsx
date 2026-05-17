@@ -92,7 +92,7 @@ export function PrintFeaturesClient() {
               現場の安全を、AIで変える。
             </h2>
             <p className="mt-1 text-xs text-slate-600">
-              安全AIポータル 専門家チームによる設計 ／ 全{FEATURES.length}機能
+              労働安全衛生コンサルタント（登録番号260022）監修 ／ 全{FEATURES.length}機能
             </p>
             <p className="mt-1 text-[10px] text-slate-500">
               印刷日: <span className="print-only">{new Date().toLocaleDateString("ja-JP")}</span>
@@ -156,8 +156,8 @@ export function PrintFeaturesClient() {
           <section className="print-avoid-break mt-6 rounded border-2 border-emerald-700 bg-emerald-50 p-3">
             <h3 className="text-base font-bold text-emerald-900">お問い合わせ</h3>
             <p className="mt-1 text-xs">
-              導入相談・受託業務・月額顧問のご相談は、お気軽にどうぞ。
-              安全コンサルタントが直接対応します。
+              ご質問・改善提案・データの誤り指摘はお気軽にお寄せください。
+              研究プロジェクト運営者（労働安全衛生コンサルタント）が直接対応します。
             </p>
             <ul className="mt-2 text-xs">
               <li>
@@ -167,7 +167,7 @@ export function PrintFeaturesClient() {
               <li>5分ツアー: https://www.anzen-ai-portal.jp/features/quick-tour</li>
             </ul>
             <p className="mt-2 text-[10px] text-slate-600">
-              監修: 安全AIポータル 専門家チーム ／ © 2026 安全AIポータル
+              監修: 労働安全衛生コンサルタント（登録番号260022） ／ © 2026 安全AIポータル
             </p>
           </section>
         </article>

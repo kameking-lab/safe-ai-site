@@ -10,12 +10,12 @@ export function GET(req: NextRequest) {
     ? {
         title: "Reshape workplace safety with AI.",
         desc: "Law updates, accident DB, KY forms, chemical RA, and e-learning — one portal for site safety.",
-        tagline: "ANZEN AI Portal — Designed by safety experts",
+        tagline: "ANZEN AI Portal — Supervised by an OSH Consultant",
       }
     : {
         title: "現場の安全を、AIで変える。",
         desc: "法改正・現場リスク・事故DB・KY用紙・Eラーニングを一つのポータルに集約",
-        tagline: "安全AIポータル — 専門家チームによる設計",
+        tagline: "安全AIポータル — 労働安全衛生コンサルタント監修",
       };
   const title = searchParams.get("title") ?? defaults.title;
   const desc = searchParams.get("desc") ?? defaults.desc;

@@ -318,22 +318,22 @@ export default function ComparisonPage() {
 
       {/* CTA */}
       <section className="mx-auto mt-10 max-w-5xl rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white p-6 text-center sm:p-8">
-        <h2 className="text-xl font-bold text-emerald-900 sm:text-2xl">迷われている方へ</h2>
+        <h2 className="text-xl font-bold text-emerald-900 sm:text-2xl">機能比較に関するご意見</h2>
         <p className="mt-2 text-sm text-emerald-800">
-          現状の運用と既存システムを伺った上で、コストと効果の試算をお出しします。
+          機能比較項目の追加・修正・現場運用での気づきをお寄せください。本サイトは個人運営の研究プロジェクトです。
         </p>
         <div className="mt-4 flex flex-col items-center justify-center gap-2 sm:flex-row">
           <Link
             href="/contact"
             className="inline-flex items-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
           >
-            無料相談を申し込む →
+            ご意見・改善提案を送る →
           </Link>
           <Link
-            href="/pricing"
+            href="/features"
             className="inline-flex items-center rounded-lg border border-emerald-300 bg-white px-5 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50"
           >
-            料金プランを見る
+            機能一覧を見る
           </Link>
         </div>
       </section>

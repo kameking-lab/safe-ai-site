@@ -398,7 +398,7 @@ export default function SubsidyCalculatorPage() {
                     href="/contact"
                     className="flex items-center justify-center gap-1 rounded-lg bg-emerald-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-emerald-700"
                   >
-                    無料相談を申し込む
+                    ご意見・改善提案を送る
                     <ArrowRight className="h-3 w-3" aria-hidden="true" />
                   </Link>
                   <Link

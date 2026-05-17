@@ -195,7 +195,7 @@ export function LeafletPrintView() {
 
           <footer className="border-t border-slate-200 pt-3 text-center">
             <p className="text-[10px] text-slate-500">
-              © 2026 安全AIポータル / 監修：安全AIポータル 専門家チーム
+              © 2026 安全AIポータル / 監修：労働安全衛生コンサルタント（登録番号260022）
             </p>
           </footer>
         </article>

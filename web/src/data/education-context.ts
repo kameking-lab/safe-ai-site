@@ -64,7 +64,7 @@ export type EducationContext = {
 };
 
 const SUPERVISOR_LABEL =
-  "コンテンツは 安全AIポータル 専門家チームによる設計です";
+  "労働安全衛生コンサルタント（登録番号260022）監修";
 
 export const EDUCATION_CONTEXTS: Record<EducationSlug, EducationContext> = {
   "hoteikyoiku/chemical-ra": {

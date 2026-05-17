@@ -407,21 +407,21 @@ export default function ChemicalRaPage() {
             className="inline-flex items-center gap-2 rounded-lg bg-sky-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-sky-800 transition-colors"
           >
             <Mail className="h-4 w-4" />
-            無料相談
+            ご質問・改善提案を送る
           </Link>
           <Link
             href="/contact?category=education&course=chemical-ra&type=document"
             className="inline-flex items-center gap-2 rounded-lg border border-sky-700 bg-white px-5 py-2.5 text-sm font-bold text-sky-800 hover:bg-sky-50 transition-colors"
           >
             <FileText className="h-4 w-4" />
-            資料請求
+            教材についての質問
           </Link>
         </div>
       </section>
 
       {/* 監修者 */}
       <p className="mt-6 text-center text-xs text-slate-400">
-        安全AIポータル 専門家チームによる設計
+        労働安全衛生コンサルタント（登録番号260022）監修
       </p>
     </main>
   );

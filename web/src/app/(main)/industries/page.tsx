@@ -126,7 +126,7 @@ export default function IndustriesHubPage() {
 
         <header className="rounded-xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-white p-5 dark:border-slate-800 dark:from-emerald-950/40 dark:to-slate-950">
           <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-            業種別エントリポイント ・ 10業種完全網羅
+            業種別エントリポイント ・ 主要10業種
           </p>
           <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl dark:text-slate-100">
             業種別の安全管理ポータル
