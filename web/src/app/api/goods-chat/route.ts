@@ -4,6 +4,7 @@
  */
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 
 export type GoodsChatRequest = {
   question: string;
@@ -19,7 +20,43 @@ export type GoodsRecommendation = {
 export type GoodsChatResponse = {
   reply: string;
   recommendations: GoodsRecommendation[];
+  /** AI 生成が失敗してフォールバック応答を返したことを示すフラグ */
+  degraded?: boolean;
+  degradedReason?: string;
 };
+
+const FALLBACK_RECOMMENDATIONS: GoodsRecommendation[] = [
+  {
+    item: "保護帽（産業用ヘルメット）",
+    reason: "現場立入時の頭部保護として全業種で標準",
+    lawBasis: "安衛則第539条",
+    searchQuery: "保護帽 産業用ヘルメット JIS T8131",
+  },
+  {
+    item: "安全靴（JIS T8101適合）",
+    reason: "足への飛来落下物・釘の踏み抜き防止",
+    lawBasis: "安衛則第558条",
+    searchQuery: "安全靴 JIS T8101",
+  },
+  {
+    item: "保護手袋",
+    reason: "切創・摩擦・薬品からの手指保護（作業に応じて選定）",
+    lawBasis: "安衛則第594条",
+    searchQuery: "作業用 保護手袋",
+  },
+];
+
+function buildDegradedResponse(question: string, reason: string): GoodsChatResponse {
+  return {
+    reply:
+      `（AI生成は現在ご利用いただけません: ${reason}。汎用の保護具候補を表示します。）\n\n` +
+      `ご質問: ${question}\n\n` +
+      `作業内容や環境（高所・化学物質・粉塵など）が具体的に分かれば、後ほどAIで再選定できます。`,
+    recommendations: FALLBACK_RECOMMENDATIONS,
+    degraded: true,
+    degradedReason: reason,
+  };
+}
 
 const SYSTEM_PROMPT = `あなたは労働安全衛生法の専門家で、現場の保護具選定を支援するアドバイザーです。
 
@@ -118,12 +155,6 @@ export async function POST(request: Request) {
     return NextResponse.json(demoResponse, { status: 200 });
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash",
-    systemInstruction: SYSTEM_PROMPT,
-  });
-
   const userPrompt = `以下の作業内容・環境に対して、必要な保護具を推薦してください。
 
 【作業内容・環境】
@@ -132,16 +163,30 @@ ${question}
 保護具の選定根拠となる法令条文を引用し、JSONブロックに含めて回答してください。`;
 
   try {
-    const result = await model.generateContent(userPrompt);
-    const rawReply = result.response.text();
+    const rawReply = await withCircuitBreaker(
+      "gemini",
+      async () => {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: "gemini-2.5-flash",
+          systemInstruction: SYSTEM_PROMPT,
+        });
+        const result = await model.generateContent(userPrompt);
+        return result.response.text();
+      },
+      { failureThreshold: 4, cooldownMs: 60_000 }
+    );
     const recommendations = extractRecommendations(rawReply);
     const cleanReply = removeJsonBlock(rawReply);
     const response: GoodsChatResponse = { reply: cleanReply, recommendations };
     return NextResponse.json(response, { status: 200 });
-  } catch {
-    return NextResponse.json(
-      { error: { code: "UNAVAILABLE", message: "AIチャットボットが一時的に利用できません。しばらく経ってから再試行してください。" } },
-      { status: 503 }
-    );
+  } catch (err) {
+    const lower = err instanceof Error ? err.message.toLowerCase() : "";
+    let reason = "AIサービス接続エラー";
+    if (err instanceof CircuitOpenError) reason = "AIサービスが連続失敗中（自動復旧待ち）";
+    else if (lower.includes("quota") || lower.includes("429")) reason = "APIクォータ超過";
+    else if (lower.includes("timeout")) reason = "AI応答タイムアウト";
+    console.error("[goods-chat] Gemini call failed:", err instanceof Error ? err.message : err);
+    return NextResponse.json(buildDegradedResponse(question, reason), { status: 200 });
   }
 }

@@ -62,6 +62,7 @@ function isRateLimited(ip: string, now: number): boolean {
 
 // ────────────────────────────────────────────────────────────
 // メール送信 (Resend / fallback: console.log)
+// Resend が落ちていてもユーザーへの受付応答は止めない。本文は常にログにも残る。
 // ────────────────────────────────────────────────────────────
 async function sendFeedbackEmail(payload: FeedbackPayload, receivedAt: string): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
@@ -78,19 +79,24 @@ async function sendFeedbackEmail(payload: FeedbackPayload, receivedAt: string): 
 </table>
 `;
 
+  // ログには常に残す（Resend 不通時の手動レスキューに必須）
+  console.warn("[feedback]", JSON.stringify({ subject, to, payload, receivedAt }));
+
   if (!apiKey) {
     console.log("[feedback] RESEND_API_KEY 未設定 - メール送信スキップ");
-    console.log("[feedback] 報告内容:", JSON.stringify({ subject, to, payload, receivedAt }));
     return;
   }
 
-  const { Resend } = await import("resend");
-  const resend = new Resend(apiKey);
-  const from = process.env.RESEND_FROM_EMAIL ?? "noreply@safe-ai.jp";
-
-  const { error } = await resend.emails.send({ from, to, subject, html });
-  if (error) {
-    console.error("[feedback] Resend送信エラー:", error);
+  try {
+    const { Resend } = await import("resend");
+    const resend = new Resend(apiKey);
+    const from = process.env.RESEND_FROM_EMAIL ?? "noreply@safe-ai.jp";
+    const { error } = await resend.emails.send({ from, to, subject, html });
+    if (error) {
+      console.error("[feedback] Resend送信エラー:", error);
+    }
+  } catch (err) {
+    console.error("[feedback] Resend呼び出し失敗:", err instanceof Error ? err.message : err);
   }
 }
 
