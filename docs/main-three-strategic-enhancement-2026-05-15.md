@@ -485,3 +485,34 @@ These four pieces of infrastructure are the *real* engineering investment behind
 ---
 
 **End of draft. Awaiting owner decision on §6.1 and §8 before any implementation work begins.**
+
+---
+
+## 9. Post-draft updates (2026-05-17)
+
+### 9.1 Relevant PRs merged since this document was written
+
+The following PRs shipped after this strategy document was authored and are relevant to the main-3 roadmap:
+
+| PR | What shipped | Roadmap relevance |
+|----|-------------|-------------------|
+| #223 feat(resilience) | Circuit breakers + fallbacks for `/api/chatbot`; degraded-mode RAG reply when Gemini quota exhausted | Reduces P0-1 / P0-2 blast radius (chatbot stays responsive during quota incidents) |
+| #226 feat(accidents-reports) | `/accidents-reports/compare` — 2-5 industry side-by-side comparison with differential highlights, 10 panels, recharts overlay | Aligns with P1-5 spirit (cross-industry analytical surface); not a full P1-5 (industries still 5, not expanded to 12) |
+| #228 feat(resilience) | Phase-2 fallbacks across 9 more routes | Further resilience for chatbot + plan-generator adjacent routes |
+
+### 9.2 §8 open questions — status
+
+| Q# | Question | Status |
+|----|----------|--------|
+| Q1 | Approve P0 list (§6.1)? | Open — no explicit owner approval recorded. Main-3 confirmed per #173/PR #176 commission, but P0 implementation details still pending owner action. |
+| Q2 | Owner willing to write 50 consultant commentaries within 3 months? | Open |
+| Q3 | Acceptable price band for consultant review (¥30k–¥80k)? | Open |
+| Q4 | Begin email subscribers without paid-mode (P0-5)? | Open — paid-mode infrastructure not yet activated (`NEXT_PUBLIC_PAID_MODE=false`) |
+| Q5 | Confirm JISHA chatbot scope within 2 weeks? | Open — 2-week window from 2026-05-15 = 2026-05-29. No confirmation recorded. |
+| Q6 | Greenlight 4 cross-cutting infra pieces (§6.4)? | Open |
+
+### 9.3 P0 implementation status (as of 2026-05-17)
+
+None of the P0 items (P0-1 through P0-7) have shipped. The `docs/rag-deferred-improvements-2026-05-13.md` still lists 通達 retrieval wiring as deferred (P0-1 precondition).
+
+Next recommended dispatch: P0-1 (通達/告示 hybrid retrieval wiring into chatbot) — all corpus data already in-repo, only the retrieval path needs wiring.
