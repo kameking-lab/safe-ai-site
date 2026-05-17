@@ -1,7 +1,7 @@
 import type { GlossaryTerm } from "./types";
 
 export const BATCH2_TERMS: GlossaryTerm[] = [
-  { term: "許容濃度", reading: "きょようのうど", definition: "産業衛生学会が定める、ほぼ全ての労働者が毎日8時間繰り返し暴露されても健康上の悪影響が見られないと判断される化学物質の空気中濃度の上限値。TLV（Threshold Limit Value）に相当。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }] },
+  { term: "許容濃度", reading: "きょようのうど", definition: "産業衛生学会が定める、ほぼ全ての労働者が毎日8時間繰り返し暴露されても健康上の悪影響が見られないと判断される化学物質の空気中濃度の上限値。TLV（Threshold Limit Value）に相当。厚労省の「管理濃度」と異なり行政的な規制値ではなく、日本産業衛生学会が毎年改訂する勧告値。化学物質リスクアセスメントの暴露基準として活用される。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }], source: { label: "日本産業衛生学会 許容濃度等の勧告", url: "https://www.sanei.or.jp/pages/46/" } },
   { term: "管理濃度", reading: "かんりのうど", definition: "作業環境測定の結果をA・B・C管理区分に評価する際の基準値。厚生労働省が物質ごとに定める。第1管理区分（管理濃度以下）・第2管理区分・第3管理区分の区分に応じた改善措置が求められる。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }, { href: "/chatbot", label: "法令チャット" }] },
   { term: "暴露限界値", reading: "ばくろげんかいち", definition: "化学物質の自律管理において事業者が参照するリスク評価の基準値。GHS分類に基づくSDSに記載されたOEL（Occupational Exposure Limit）や許容濃度等を用いてリスクを評価する。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }] },
   { term: "皮膚吸収", reading: "ひふきゅうしゅう", definition: "化学物質が皮膚を通じて体内に取り込まれる経路。呼吸器経路とは別に管理が必要。皮膚吸収性が高い物質（有機リン系農薬・フェノール等）では防護手袋・防護服の着用が必須。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }] },
