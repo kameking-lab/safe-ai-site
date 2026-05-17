@@ -4,7 +4,7 @@ import { ogImageUrl } from "@/lib/og-url";
 
 const TITLE = "SOGI と職場の安全衛生";
 const DESCRIPTION =
-  "性的指向・性自認（SOGI）に関するハラスメント・アウティングの防止と、トランスジェンダー従業員の更衣室・トイレ運用。パワハラ防止法（2020年施行）の指針と労安衛法の安全配慮義務が交差する論点を整理します。";
+  "性的指向・性自認（SOGI）に関するハラスメント・アウティングの防止と、トランスジェンダー従業員の更衣室・トイレ運用。パワハラ防止法（2020年施行）の指針と安衛法の安全配慮義務が交差する論点を整理します。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/diversity/sogi" },

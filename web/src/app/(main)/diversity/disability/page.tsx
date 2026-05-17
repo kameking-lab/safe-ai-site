@@ -4,7 +4,7 @@ import { ogImageUrl } from "@/lib/og-url";
 
 const TITLE = "障害者雇用 × 労働安全衛生";
 const DESCRIPTION =
-  "改正障害者雇用促進法（2024年4月）の合理的配慮義務と労安衛法の接続。発達特性・視覚過敏・聴覚過敏など個別ニーズに応じた配慮事例、ジョブコーチ制度、特例子会社の運用論点を整理します。";
+  "改正障害者雇用促進法（2024年4月）の合理的配慮義務と安衛法の接続。発達特性・視覚過敏・聴覚過敏など個別ニーズに応じた配慮事例、ジョブコーチ制度、特例子会社の運用論点を整理します。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/diversity/disability" },
@@ -31,7 +31,7 @@ export default function DiversityDisabilityPage() {
       title={TITLE}
       lead={DESCRIPTION}
       keyPoints={[
-        "合理的配慮の法的枠組み（改正障害者雇用促進法 第36条の2〜4）と労安衛法の接続",
+        "合理的配慮の法的枠組み（改正障害者雇用促進法 第36条の2〜4）と安衛法の接続",
         "障害特性別の配慮事例（発達障害・視覚障害・聴覚障害・精神障害・身体障害）10件",
         "ジョブコーチ制度（職場適応援助者）— 訪問型・企業在籍型・訪問型の3区分",
         "特例子会社の設立要件と本社との安全衛生委員会の関係",
@@ -44,7 +44,7 @@ export default function DiversityDisabilityPage() {
           description: "事業主の合理的配慮提供義務と過重負担の限界",
         },
         {
-          label: "労安衛法 第22条（作業方法の配慮）",
+          label: "安衛法 第22条（作業方法の配慮）",
           href: "/laws",
           description: "身体能力・心身の状況に応じた作業方法の配慮義務",
         },

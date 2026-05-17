@@ -167,10 +167,10 @@ export default function MentalHealthManagementHubPage() {
               </h3>
             </div>
             <p className="mt-2 text-sm leading-6 text-slate-700">
-              年1回以上のストレスチェック実施・労働基準監督署への報告を含む全{MANDATORY_BASELINE.length}項目の対応が必要。実施しない場合は労安衛法違反となります。
+              年1回以上のストレスチェック実施・労働基準監督署への報告を含む全{MANDATORY_BASELINE.length}項目の対応が必要。実施しない場合は安衛法違反となります。
             </p>
             <ul className="mt-3 space-y-1 text-xs leading-5 text-slate-600">
-              <li>・労安衛則 第52条の9〜21 を全面適用</li>
+              <li>・安衛則 第52条の9〜21 を全面適用</li>
               <li>・労働基準監督署への実施報告（様式第6号の2）</li>
               <li>・集団分析と職場環境改善（推奨事項）</li>
             </ul>

@@ -452,10 +452,10 @@ export const courtPrecedents: LawRevisionCore[] = [
     issuer: "東京高等裁判所",
     impact: "中",
     summary:
-      "労働者が業務上のドライクリーニング機操作中に有機溶剤中毒で死亡。会社と代表者の両方を労安衛法の両罰規定により起訴、有罪確定。",
+      "労働者が業務上のドライクリーニング機操作中に有機溶剤中毒で死亡。会社と代表者の両方を安衛法の両罰規定により起訴、有罪確定。",
     source: { url: "https://www.courts.go.jp/", label: "裁判所判例検索" },
     court_case: "東京高判平成30年7月24日 労判1192号42頁",
-    court_case_summary: "労安衛法の両罰規定による法人と経営者の同時刑事責任を確定した事例。",
+    court_case_summary: "安衛法の両罰規定による法人と経営者の同時刑事責任を確定した事例。",
     court_case_url: "https://www.courts.go.jp/",
     source_url: "https://laws.e-gov.go.jp/law/347AC0000000057",
     publication_date: "2018-07-24",
@@ -470,7 +470,7 @@ export const courtPrecedents: LawRevisionCore[] = [
     issuer: "最高裁判所第一小法廷",
     impact: "高",
     summary:
-      "建設労働者のアスベスト被害について、国の規制権限不行使の違法性と建材メーカーの共同不法行為責任を認定。一人親方への労安衛法適用の射程を拡大。",
+      "建設労働者のアスベスト被害について、国の規制権限不行使の違法性と建材メーカーの共同不法行為責任を認定。一人親方への安衛法適用の射程を拡大。",
     source: { url: "https://www.courts.go.jp/app/hanrei_jp/detail2?id=90316", label: "裁判所判例検索" },
     court_case: "最一小判令和3年5月17日 民集75巻5号1359頁",
     court_case_summary: "建設アスベストの国家賠償責任と建材メーカーの共同責任を認定した大規模労災判例。",

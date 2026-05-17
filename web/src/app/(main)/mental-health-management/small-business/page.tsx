@@ -81,7 +81,7 @@ export default function SmallBusinessPage() {
           <div className="text-sm leading-6 text-amber-900">
             <p className="font-semibold">努力義務の位置付け</p>
             <p className="mt-1">
-              労働者50人未満の事業場では、ストレスチェック実施は労安衛法上の<strong>努力義務</strong>です。
+              労働者50人未満の事業場では、ストレスチェック実施は安衛法上の<strong>努力義務</strong>です。
               義務化されていませんが、メンタル不調による休職・離職コストや使用者の安全配慮義務（労働契約法第5条）の観点から、
               地域産業保健センター（さんぽセンター）の<strong>無料支援を活用した実施</strong>が推奨されます。
             </p>

@@ -285,14 +285,14 @@ const rawSafetyGoodsItems: SafetyGoodsItem[] = [
   {
     id: "fa-001",
     categoryId: "first-aid",
-    name: "現場用救急箱（50人用・労安則対応）",
+    name: "現場用救急箱（50人用・安衛則対応）",
     description: "労働安全衛生規則に基づく備品を網羅したセット。包帯・消毒液・三角巾・ピンセット・はさみ等。",
     price: "¥5,000〜¥12,000",
     imageAlt: "現場用救急箱の製品イメージ",
     signageFeatured: true,
     amazonUrl: "https://www.amazon.co.jp/s?k=%E7%8F%BE%E5%A0%B4%E7%94%A8+%E6%95%91%E6%80%A5%E7%AE%B1+%E5%8A%B4%E5%AE%89%E5%89%87",
     rakutenUrl: "https://search.rakuten.co.jp/search/mall/%E7%8F%BE%E5%A0%B4%E7%94%A8+%E6%95%91%E6%80%A5%E7%AE%B1+%E5%8A%B4%E5%AE%89%E5%89%87/",
-    tags: ["50人用", "労安則対応"],
+    tags: ["50人用", "安衛則対応"],
   },
   // 標識・バリケード
   {

@@ -192,7 +192,7 @@ export default function ExamQuizPage() {
             href: "/law-search",
             label: { ja: "法令検索", en: "Law search" },
             description: {
-              ja: "問題で出てきた条文を原文で確認。労安法・安衛則などをキーワード検索できます。",
+              ja: "問題で出てきた条文を原文で確認。安衛法・安衛則などをキーワード検索できます。",
               en: "Look up the original text of articles mentioned in questions. Keyword search across OSH Act and OSH Rules.",
             },
             color: "sky",

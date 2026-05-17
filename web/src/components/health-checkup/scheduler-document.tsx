@@ -245,7 +245,7 @@ export function SchedulerDocument({ profile, decision, generatedAt }: Props) {
           3. 随時実施対象（イベント駆動の健診・面接指導）
         </h2>
         <p className="mt-2 text-sm text-slate-500">
-          月別カレンダーに固定配置できない、トリガー事象が発生したときに実施する健診・面接指導です。長時間労働者の医師面接（労安法第66条の8）と海外派遣前後の健診（安衛則第45条の2）が代表例です。
+          月別カレンダーに固定配置できない、トリガー事象が発生したときに実施する健診・面接指導です。長時間労働者の医師面接（安衛法第66条の8）と海外派遣前後の健診（安衛則第45条の2）が代表例です。
         </p>
         {optimised.onDemand.length === 0 ? (
           <p className="mt-3 rounded border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">

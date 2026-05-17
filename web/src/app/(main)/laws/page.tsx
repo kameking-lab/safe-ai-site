@@ -101,7 +101,7 @@ export default function LawsPage() {
           {
             href: "/laws/bcp",
             label: "BCP 策定義務化",
-            description: "介護施設等で2024年4月義務化。労安衛法との接続と中小向けテンプレート。",
+            description: "介護施設等で2024年4月義務化。安衛法との接続と中小向けテンプレート。",
             color: "amber",
             cta: "BCP を整理する",
           },

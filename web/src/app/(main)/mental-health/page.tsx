@@ -17,7 +17,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "メンタルヘルス・ハラスメント・VDT作業｜労働安全の見えない半分";
 const _desc =
-  "ストレスチェック制度・カスタマーハラスメント対策法（2025年）・VDT作業ガイドライン・4つのケアをまとめました。労安衛の新しい半分を整理。";
+  "ストレスチェック制度・カスタマーハラスメント対策法（2025年）・VDT作業ガイドライン・4つのケアをまとめました。労働安全衛生の新しい半分を整理。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -47,7 +47,7 @@ const STRESS_CHECK: InfoCard[] = [
   {
     title: "対象事業場",
     body: "常時使用する労働者が50人以上の事業場は年1回以上の実施が義務（2015年施行）。50人未満は当分の間努力義務。派遣労働者は派遣元・派遣先で重複実施しない整理。",
-    law: "労安衛法第66条の10、同施行規則第52条の9〜21",
+    law: "安衛法第66条の10、同施行規則第52条の9〜21",
   },
   {
     title: "高ストレス者への医師面接",
@@ -153,7 +153,7 @@ export default function MentalHealthPage() {
           <Brain className="h-5 w-5 text-violet-600" aria-hidden="true" />
           ストレスチェック制度
         </h2>
-        <p className="mt-1 text-xs text-slate-500">労安衛法第66条の10に基づく法定制度の要点。</p>
+        <p className="mt-1 text-xs text-slate-500">安衛法第66条の10に基づく法定制度の要点。</p>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
           {STRESS_CHECK.map((s) => (
             <article
