@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import results from "@/data/chatbot-eval-results.json";
 import freshResults from "@/data/chatbot-eval-fresh-results.json";
+import { PageJsonLd } from "@/components/page-json-ld";
+
+const SITE = "https://www.anzen-ai-portal.jp";
 
 export const metadata: Metadata = {
   title: "AIチャットボット精度評価（Recall@5 100問ベンチマーク）｜安全AIポータル",
@@ -54,6 +57,16 @@ export default function ChatbotEvalPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
+      <PageJsonLd
+        name="AIチャットボット精度評価（Recall@5 100問ベンチマーク）"
+        description="労働安全衛生 AI チャットボットの根拠条文 検索ヒット率（Recall@5）を 100 問ベンチマークで定量公開。"
+        path="/about/chatbot-eval"
+        breadcrumbs={[
+          { name: "ホーム", url: SITE },
+          { name: "プロジェクトについて", url: `${SITE}/about` },
+          { name: "AIチャット精度評価", url: `${SITE}/about/chatbot-eval` },
+        ]}
+      />
       <nav aria-label="パンくず" className="mb-4 text-xs text-slate-500">
         <Link href="/about" className="hover:underline">
           研究・実証プロジェクトについて

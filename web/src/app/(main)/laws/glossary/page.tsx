@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageJsonLd } from "@/components/page-json-ld";
+
+const SITE = "https://www.anzen-ai-portal.jp";
+const _title = "労働安全衛生 法令用語集（条文・通達・行政用語）";
+const _desc =
+  "「公布日と施行日の違い」「告示・通達・指針の拘束力」「省令・規則・規程」など、労働安全衛生法令を読むときに必要な用語を一次出典付きで整理。";
 
 export const metadata: Metadata = {
-  title: "労働安全衛生 法令用語集（条文・通達・行政用語）",
-  description:
-    "「公布日と施行日の違い」「告示・通達・指針の拘束力」「省令・規則・規程」など、労働安全衛生法令を読むときに必要な用語を一次出典付きで整理。",
+  title: _title,
+  description: _desc,
   alternates: { canonical: "/laws/glossary" },
 };
 
@@ -177,6 +182,16 @@ const TERMS: Term[] = [
 export default function LawsGlossaryPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
+      <PageJsonLd
+        name={_title}
+        description={_desc}
+        path="/laws/glossary"
+        breadcrumbs={[
+          { name: "ホーム", url: SITE },
+          { name: "法改正情報", url: `${SITE}/laws` },
+          { name: "法令用語集", url: `${SITE}/laws/glossary` },
+        ]}
+      />
       <nav aria-label="パンくず" className="mb-4 text-xs text-slate-500">
         <Link href="/laws" className="hover:underline">
           法改正情報

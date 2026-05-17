@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { EquipmentFinderClient } from "@/components/equipment-finder-client";
+import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -37,6 +38,33 @@ export default function EquipmentFinderPage() {
       <Suspense fallback={<div className="text-sm text-slate-500">読み込み中…</div>}>
         <EquipmentFinderClient />
       </Suspense>
+
+      <RelatedPageCards
+        heading="合わせて使う"
+        pages={[
+          {
+            href: "/chemical-database",
+            label: "化学物質検索DB",
+            description: "化学物質名・CAS番号から必要な保護具の種類を逆引き。濃度基準値も同時確認。",
+            color: "blue",
+            cta: "物質から選ぶ",
+          },
+          {
+            href: "/chemical-ra",
+            label: "化学物質RA",
+            description: "リスクアセスメント結果をもとに保護具・換気設備の優先度を判定。",
+            color: "emerald",
+            cta: "RAから判定",
+          },
+          {
+            href: "/accidents",
+            label: "事故データベース",
+            description: "保護具未着用・選定誤りが要因となった事故事例を業種別に検索。",
+            color: "orange",
+            cta: "事故から学ぶ",
+          },
+        ]}
+      />
     </main>
   );
 }

@@ -7,6 +7,7 @@ import { RelatedPageCards } from "@/components/related-page-cards";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
+import { PageJsonLd } from "@/components/page-json-ld";
 import {
   getAccidentCasesDataset,
   getAccidentProvenanceCounts,
@@ -42,6 +43,7 @@ export default function AccidentsPage() {
 
   return (
     <>
+      <PageJsonLd name={_title} description={_desc} path="/accidents" />
       <JsonLd schema={accidentSchema} />
       <HomeScreen variant="accidents">
         <TranslatedPageHeader

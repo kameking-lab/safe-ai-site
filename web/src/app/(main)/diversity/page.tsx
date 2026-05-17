@@ -469,40 +469,29 @@ export default function DiversityPage() {
         <h2 className="mb-3 text-lg font-bold text-slate-900">
           個別深掘りページ（β骨組み公開中）
         </h2>
-        <ul className="grid gap-3 sm:grid-cols-3">
-          <li>
-            <Link
-              href="/diversity/disability"
-              className="block min-h-[56px] rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 hover:bg-emerald-100"
-            >
-              障害者雇用 × 労働安全衛生
-              <span className="mt-0.5 block text-[11px] font-normal text-emerald-700">
-                合理的配慮・ジョブコーチ制度・特例子会社
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/diversity/sogi"
-              className="block min-h-[56px] rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 hover:bg-emerald-100"
-            >
-              SOGI と職場の安全衛生
-              <span className="mt-0.5 block text-[11px] font-normal text-emerald-700">
-                パワハラ防止法 × 経産省トイレ事件判例
-              </span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/diversity/foreign-workers"
-              className="block min-h-[56px] rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 hover:bg-emerald-100"
-            >
-              外国人労働者 × 労働安全衛生
-              <span className="mt-0.5 block text-[11px] font-normal text-emerald-700">
-                OTIT・JITCO 相談窓口 / 多言語KY
-              </span>
-            </Link>
-          </li>
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {[
+            { href: "/diversity/women", title: "女性労働者・妊産婦", desc: "労基法64条の3・女性則・母性健康管理措置の整理" },
+            { href: "/diversity/elderly", title: "高齢労働者（エイジフレンドリー）", desc: "厚労省ガイドライン・補助金・体力チェック" },
+            { href: "/diversity/foreign-workers", title: "外国人労働者 × 労働安全衛生", desc: "OTIT・JITCO 相談窓口 / 多言語KY" },
+            { href: "/diversity/non-regular", title: "非正規・パート・スポットワーク", desc: "派遣法第45条・タイミー型単発労働" },
+            { href: "/diversity/disability", title: "障害者雇用 × 労働安全衛生", desc: "合理的配慮・ジョブコーチ制度・特例子会社" },
+            { href: "/diversity/sogi", title: "SOGI と職場の安全衛生", desc: "パワハラ防止法 × 経産省トイレ事件判例" },
+            { href: "/diversity/lgbtq", title: "LGBTQ 配慮の実務", desc: "アウティング禁止・更衣室・研修プログラム" },
+            { href: "/diversity/remote", title: "在宅・フリーランス", desc: "VDT作業ガイドライン・労災特別加入制度" },
+          ].map((p) => (
+            <li key={p.href}>
+              <Link
+                href={p.href}
+                className="block min-h-[56px] rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 hover:bg-emerald-100"
+              >
+                {p.title}
+                <span className="mt-0.5 block text-[11px] font-normal text-emerald-700">
+                  {p.desc}
+                </span>
+              </Link>
+            </li>
+          ))}
         </ul>
       </section>
 

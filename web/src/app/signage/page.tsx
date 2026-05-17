@@ -281,6 +281,12 @@ export default function SignagePage() {
         >
           🗺️ 地図モードを開く →
         </Link>
+        <Link
+          href="/signage/display"
+          className="rounded border border-sky-400 bg-sky-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-sky-600"
+        >
+          📺 ディスプレイモード →
+        </Link>
       </div>
 
       <div className={`grid grid-cols-1 gap-2 xl:min-h-0 xl:flex-1 xl:gap-3 xl:overflow-hidden ${isPortrait ? "" : "xl:grid-cols-12"}`}>

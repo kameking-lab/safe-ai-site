@@ -69,6 +69,28 @@ export default function CircularsIndexPage() {
       <p className="mt-6 text-xs text-slate-500">
         ※ 出典: 中央労働災害防止協会 安全衛生情報センター（jaish.gr.jp）。本一覧は 安全AIポータル が公開情報を整理し、最終確認日を付与したものです。
       </p>
+
+      <section aria-label="関連ハブ" className="mt-8 border-t border-slate-200 pt-6">
+        <h2 className="mb-3 text-base font-bold text-slate-900">関連ハブを開く</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Link href="/laws" className="block min-h-[64px] rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 hover:bg-emerald-100">
+            法改正一覧（年表）
+            <span className="mt-0.5 block text-[11px] font-normal text-emerald-700">100件超の改正を時系列で。施行日カウントダウン付き</span>
+          </Link>
+          <Link href="/law-search" className="block min-h-[64px] rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-900 hover:bg-sky-100">
+            条文全文検索（33法令）
+            <span className="mt-0.5 block text-[11px] font-normal text-sky-700">通達で言及される条文へキーワード検索でジャンプ</span>
+          </Link>
+          <Link href="/laws/notices-precedents" className="block min-h-[64px] rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 hover:bg-amber-100">
+            通達・判例 解説
+            <span className="mt-0.5 block text-[11px] font-normal text-amber-700">行政解釈と最高裁判例の整理（実務出典）</span>
+          </Link>
+          <Link href="/resources" className="block min-h-[64px] rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-900 hover:bg-violet-100">
+            厚労省一次資料DB
+            <span className="mt-0.5 block text-[11px] font-normal text-violet-700">告示・指針・リーフレットを含む 1,158件</span>
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

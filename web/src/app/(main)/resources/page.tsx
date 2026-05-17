@@ -70,6 +70,56 @@ export default function ResourcesPage() {
       </header>
 
       <ResourcesClient notices={mhlwNotices} leaflets={mhlwLeaflets} />
+
+      <section aria-label="関連リソース" className="mt-10 border-t border-slate-200 pt-6">
+        <h2 className="mb-3 text-base font-bold text-slate-900">関連の一次資料ハブ</h2>
+        <ul className="grid gap-3 sm:grid-cols-2">
+          <li>
+            <Link
+              href="/resources/mlit"
+              className="block min-h-[64px] rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-900 hover:bg-emerald-100"
+            >
+              国交省（MLIT）安全衛生資料
+              <span className="mt-0.5 block text-[11px] font-normal text-emerald-700">
+                建設業労働災害防止対策・通達・要綱の建設専門コーナー
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/circulars"
+              className="block min-h-[64px] rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-semibold text-sky-900 hover:bg-sky-100"
+            >
+              通達・告示の本文閲覧
+              <span className="mt-0.5 block text-[11px] font-normal text-sky-700">
+                重要通達の本文を縦長スクロールで読める閲覧モード
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/laws"
+              className="block min-h-[64px] rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 hover:bg-amber-100"
+            >
+              法改正一覧（年表＋AI要約）
+              <span className="mt-0.5 block text-[11px] font-normal text-amber-700">
+                100件超の改正を時系列で。施行日カウントダウン付き
+              </span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/law-search"
+              className="block min-h-[64px] rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-900 hover:bg-violet-100"
+            >
+              条文検索（安衛法・関係省令）
+              <span className="mt-0.5 block text-[11px] font-normal text-violet-700">
+                キーワード・条番号から原文へ。e-Gov 直リンク
+              </span>
+            </Link>
+          </li>
+        </ul>
+      </section>
     </div>
   );
 }

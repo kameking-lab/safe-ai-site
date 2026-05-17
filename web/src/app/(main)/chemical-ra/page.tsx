@@ -4,6 +4,7 @@ import { ChemicalRaPanel } from "@/components/chemical-ra-panel";
 import { ChemicalRaExtras } from "@/components/chemical-ra-extras";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
+import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -58,6 +59,39 @@ export default function ChemicalRaPage() {
       <Suspense fallback={<div className="mx-auto max-w-7xl px-4 py-6 text-sm text-slate-500">読み込み中…</div>}>
         <ChemicalRaPanel />
       </Suspense>
+      <RelatedPageCards
+        heading="合わせて使う"
+        pages={[
+          {
+            href: "/chemical-database",
+            label: "化学物質検索",
+            description: "厚労省統合DB 8,400物質超。CAS番号・物質名から濃度基準値・GHS分類を確認できます。",
+            color: "blue",
+            cta: "物質を検索する",
+          },
+          {
+            href: "/chemical-ra/product-search",
+            label: "製品名 → 成分検索",
+            description: "市販の塗料・洗剤・接着剤などの製品名から含有化学物質を遡って確認。",
+            color: "sky",
+            cta: "製品名で調べる",
+          },
+          {
+            href: "/equipment-finder",
+            label: "保護具AIファインダー",
+            description: "化学物質と作業内容から、必要な手袋・保護メガネ・マスクをAIが提案。",
+            color: "emerald",
+            cta: "保護具を探す",
+          },
+          {
+            href: "/education/hoteikyoiku/chemical-ra",
+            label: "化学物質RA 実務教育",
+            description: "安衛法第57条の3に基づく実務教育。2026年4月の自律管理制度に対応。",
+            color: "amber",
+            cta: "教育プログラム",
+          },
+        ]}
+      />
     </>
   );
 }

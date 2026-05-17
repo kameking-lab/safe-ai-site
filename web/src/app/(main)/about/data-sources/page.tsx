@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageJsonLd } from "@/components/page-json-ld";
+
+const SITE = "https://www.anzen-ai-portal.jp";
+const _title = "データソース一覧 | 安全AIサイト";
+const _desc =
+  "本サイトで利用している外部データの出典・更新頻度・利用条件を一覧で公開しています（気象庁、厚生労働省、国土地理院ほか）。";
 
 export const metadata: Metadata = {
-  title: "データソース一覧 | 安全AIサイト",
-  description:
-    "本サイトで利用している外部データの出典・更新頻度・利用条件を一覧で公開しています（気象庁、厚生労働省、国土地理院ほか）。",
+  title: _title,
+  description: _desc,
+  alternates: { canonical: "/about/data-sources" },
 };
 
 type Source = {
@@ -94,6 +100,16 @@ const SOURCES: Source[] = [
 export default function DataSourcesPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-10 text-slate-900">
+      <PageJsonLd
+        name={_title}
+        description={_desc}
+        path="/about/data-sources"
+        breadcrumbs={[
+          { name: "ホーム", url: SITE },
+          { name: "プロジェクトについて", url: `${SITE}/about` },
+          { name: "データソース一覧", url: `${SITE}/about/data-sources` },
+        ]}
+      />
       <header className="mb-6">
         <p className="text-sm text-slate-500">
           <Link href="/" className="underline hover:text-slate-800">

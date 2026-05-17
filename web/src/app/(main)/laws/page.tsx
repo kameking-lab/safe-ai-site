@@ -4,6 +4,7 @@ import { LawsPageClient } from "@/components/laws-page-client";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, articleListSchema } from "@/components/json-ld";
+import { PageJsonLd } from "@/components/page-json-ld";
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
 
 const _title = "安全衛生法 改正情報一覧 最新";
@@ -36,6 +37,7 @@ export default function LawsPage() {
 
   return (
     <>
+      <PageJsonLd name={_title} description={_desc} path="/laws" />
       <JsonLd schema={lawSchema} />
       <Suspense fallback={<p className="px-4 py-6 text-sm text-slate-600">読み込み中…</p>}>
         <LawsPageClient />

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ogImageUrl } from "@/lib/og-url";
+import { PageJsonLd } from "@/components/page-json-ld";
 
 const _title = "女性労働者の安全衛生｜就業制限・母性保護・ハラスメント対策";
 const _desc =
@@ -20,6 +21,22 @@ export const metadata: Metadata = {
   },
 };
 
+const SITE = "https://www.anzen-ai-portal.jp";
+
 export default function DiversityWomenLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <>
+      <PageJsonLd
+        name={_title}
+        description={_desc}
+        path="/diversity/women"
+        breadcrumbs={[
+          { name: "ホーム", url: SITE },
+          { name: "多様な働き方の労働安全", url: `${SITE}/diversity` },
+          { name: "女性労働者の安全衛生", url: `${SITE}/diversity/women` },
+        ]}
+      />
+      {children}
+    </>
+  );
 }
