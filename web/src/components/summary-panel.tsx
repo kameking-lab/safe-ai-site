@@ -1,3 +1,5 @@
+"use client";
+
 import { ErrorNotice } from "@/components/error-notice";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
