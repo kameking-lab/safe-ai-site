@@ -400,7 +400,7 @@ export function DiaryFormRequired() {
             {nearMissPhotoDataUrl && (
               <div className="flex items-center gap-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={nearMissPhotoDataUrl} alt="ヒヤリハット写真" className="h-16 w-16 rounded border object-cover" />
+                <img src={nearMissPhotoDataUrl} alt="ヒヤリハット写真" width={64} height={64} className="h-16 w-16 rounded border object-cover" />
                 <button
                   type="button"
                   onClick={() => setNearMissPhotoDataUrl(null)}
@@ -508,6 +508,8 @@ export function DiaryFormRequired() {
                 <img
                   src={nearMissPhotoDataUrl}
                   alt="ヒヤリハット写真"
+                  width={80}
+                  height={80}
                   className="h-20 w-20 rounded-lg border object-cover"
                 />
                 <button
