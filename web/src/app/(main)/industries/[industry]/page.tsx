@@ -1,7 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowUpRight, BookOpen, ShieldCheck, AlertTriangle } from "lucide-react";
+import {
+  ArrowUpRight,
+  BookOpen,
+  ShieldCheck,
+  AlertTriangle,
+  FileText,
+  GraduationCap,
+  FlaskConical,
+  HelpCircle,
+  ScrollText,
+  Hash,
+} from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { Section } from "@/components/layout/section";
 import { CardGrid } from "@/components/layout/card-grid";
@@ -21,7 +32,6 @@ import {
   INDUSTRY_CONTENT_SLUGS,
 } from "@/data/industries-content";
 import {
-  getIndustryConfig,
   getIndustryReport,
   type IndustrySlug,
 } from "@/lib/accident-analysis";
@@ -79,6 +89,13 @@ const COLOR_SWATCH: Record<string, {
   },
 };
 
+const FAQ_CATEGORY_LABEL: Record<string, string> = {
+  "law-system": "法令・制度",
+  management: "安全衛生管理体制",
+  chemical: "化学物質・有害物",
+  "health-education": "健康管理・教育",
+};
+
 function num(n: number): string {
   return n.toLocaleString("ja-JP");
 }
@@ -87,18 +104,18 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { industry } = await params;
   const content = getIndustryContent(industry);
   if (!content) return {};
-  const cfg = getIndustryConfig(industry);
   const path = `/industries/${content.slug}`;
   return {
     title: content.seoTitle,
     description: content.seoDescription,
+    keywords: content.longTailKeywords.slice(0, 25).join(", "),
     alternates: { canonical: path },
     openGraph: withSiteOpenGraph(path, {
       title: content.seoTitle,
       description: content.seoDescription,
       images: [
         {
-          url: ogImageUrl(content.seoTitle, cfg?.tagline ?? content.heroHeadline),
+          url: ogImageUrl(content.seoTitle, content.tagline),
           width: 1200,
           height: 630,
         },
@@ -107,7 +124,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     twitter: withSiteTwitter({
       title: content.seoTitle,
       description: content.seoDescription,
-      images: [ogImageUrl(content.seoTitle, cfg?.tagline ?? content.heroHeadline)],
+      images: [ogImageUrl(content.seoTitle, content.tagline)],
     }),
   };
 }
@@ -116,12 +133,12 @@ export default async function IndustryLandingPage({ params }: { params: Params }
   const { industry } = await params;
   const content = getIndustryContent(industry);
   if (!content) notFound();
-  const cfg = getIndustryConfig(industry);
-  if (!cfg) notFound();
-  const report = getIndustryReport(content.slug as IndustrySlug);
+  const report = content.accidentAnalysisSlug
+    ? getIndustryReport(content.accidentAnalysisSlug as IndustrySlug)
+    : null;
 
   const url = `${SITE_URL}/industries/${content.slug}`;
-  const swatch = COLOR_SWATCH[cfg.colorClass] ?? COLOR_SWATCH.blue;
+  const swatch = COLOR_SWATCH[content.colorClass] ?? COLOR_SWATCH.blue;
 
   return (
     <>
@@ -131,13 +148,13 @@ export default async function IndustryLandingPage({ params }: { params: Params }
             name: content.seoTitle,
             description: content.seoDescription,
             url,
-            datePublished: "2026-05-16",
-            dateModified: "2026-05-16",
+            datePublished: "2026-05-17",
+            dateModified: "2026-05-17",
           }),
           breadcrumbSchema([
             { name: "ホーム", url: SITE_URL },
             { name: "業種別案内", url: `${SITE_URL}/industries` },
-            { name: cfg.label, url },
+            { name: content.label, url },
           ]),
           {
             "@context": "https://schema.org",
@@ -148,7 +165,7 @@ export default async function IndustryLandingPage({ params }: { params: Params }
             inLanguage: "ja",
             mainEntity: {
               "@type": "Thing",
-              name: `${cfg.label}の労働安全衛生`,
+              name: `${content.label}の労働安全衛生`,
               description: content.heroLead,
             },
             isPartOf: {
@@ -156,6 +173,21 @@ export default async function IndustryLandingPage({ params }: { params: Params }
               name: "安全AIポータル",
               url: SITE_URL,
             },
+            keywords: content.longTailKeywords.join(", "),
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: `${content.label}の安全管理ツール一覧`,
+            itemListOrder: "https://schema.org/ItemListOrderDescending",
+            numberOfItems: content.recommendations.length,
+            itemListElement: content.recommendations.map((rec, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: rec.title,
+              description: rec.reason,
+              url: `${SITE_URL}${rec.href}`,
+            })),
           },
           faqPageSchema(content.faq),
         ]}
@@ -164,7 +196,7 @@ export default async function IndustryLandingPage({ params }: { params: Params }
         <Breadcrumb
           items={[
             { name: "業種別案内", href: "/industries" },
-            { name: cfg.label },
+            { name: content.label },
           ]}
         />
 
@@ -174,11 +206,11 @@ export default async function IndustryLandingPage({ params }: { params: Params }
         >
           <Cluster gap="sm">
             <span className="text-4xl" aria-hidden="true">
-              {cfg.icon}
+              {content.icon}
             </span>
             <div className="min-w-0 flex-1">
               <p className={`text-xs font-medium ${swatch.badge}`}>
-                業種別ポータル ・ {cfg.labelEn}
+                業種別ポータル ・ {content.labelEn}
               </p>
               <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl dark:text-slate-100">
                 {content.heroHeadline}
@@ -212,7 +244,7 @@ export default async function IndustryLandingPage({ params }: { params: Params }
           )}
         </header>
 
-        {/* Stats from analytics layer */}
+        {/* Stats from analytics layer (only for industries with accident-analysis bucket) */}
         {report && report.stats.total > 0 && (
           <Section
             title="業種別 統計（自動集計）"
@@ -254,20 +286,20 @@ export default async function IndustryLandingPage({ params }: { params: Params }
             </CardGrid>
             <div className="mt-3">
               <Link
-                href={`/accidents-reports/${content.slug}`}
+                href={`/accidents-reports/${content.accidentAnalysisSlug}`}
                 className="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
               >
-                {cfg.label}の事故分析レポートを開く
+                {content.label}の事故分析レポートを開く
                 <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
           </Section>
         )}
 
-        {/* Challenges */}
+        {/* 1. Challenges */}
         <Section
-          title="重点課題"
-          description={`${cfg.label}で繰り返し発生する代表的なリスクと組織的対応の要点`}
+          title="1. 重点課題"
+          description={`${content.label}で繰り返し発生する代表的なリスクと組織的対応の要点`}
           spacing="default"
           className="mt-8"
         >
@@ -293,50 +325,9 @@ export default async function IndustryLandingPage({ params }: { params: Params }
           </CardGrid>
         </Section>
 
-        {/* Recommended features */}
+        {/* 2. Law highlights */}
         <Section
-          title="この業種におすすめの機能"
-          description="課題に対応する機能へワンクリックで遷移します"
-          spacing="default"
-          className="mt-8"
-        >
-          <CardGrid cols={3} gap="md">
-            {content.recommendations.map((rec) => (
-              <Link
-                key={rec.href}
-                href={rec.href}
-                className={`group block rounded-xl border bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:bg-slate-900 ${swatch.card}`}
-              >
-                <Cluster gap="sm">
-                  <span className="text-2xl" aria-hidden="true">
-                    {rec.icon}
-                  </span>
-                  <h3 className="flex-1 text-sm font-bold text-slate-900 dark:text-slate-100">
-                    {rec.title}
-                  </h3>
-                  <ArrowUpRight
-                    className="h-4 w-4 shrink-0 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-emerald-600"
-                    aria-hidden="true"
-                  />
-                </Cluster>
-                <p className="mt-2 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
-                  {rec.reason}
-                </p>
-                {rec.cta && (
-                  <span
-                    className={`mt-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${swatch.accent}`}
-                  >
-                    {rec.cta} →
-                  </span>
-                )}
-              </Link>
-            ))}
-          </CardGrid>
-        </Section>
-
-        {/* Law highlights */}
-        <Section
-          title="関連法令ハイライト"
+          title="2. 業種特有法令ハイライト"
           description="頻出する条文・規則・指針。条文検索や法改正一覧と連動しています"
           spacing="default"
           className="mt-8"
@@ -382,20 +373,375 @@ export default async function IndustryLandingPage({ params }: { params: Params }
               法改正一覧
               <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
             </Link>
+          </Cluster>
+        </Section>
+
+        {/* 3. Accident examples */}
+        <Section
+          title="3. 業種特有 典型事故事例"
+          description="現場で実際に起きやすい労働災害パターン。事故分析レポートで詳細・予防策を確認できます"
+          spacing="default"
+          className="mt-8"
+        >
+          <Stack gap="sm">
+            {content.accidentExamples.map((ex) => (
+              <Link
+                key={ex.title}
+                href={ex.href}
+                className={`group flex items-start gap-3 rounded-lg border bg-white p-3 transition hover:border-rose-300 hover:bg-rose-50/30 dark:bg-slate-900 dark:hover:bg-rose-950/30 ${swatch.card}`}
+              >
+                <AlertTriangle
+                  className="mt-0.5 h-5 w-5 shrink-0 text-rose-500"
+                  aria-hidden="true"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    {ex.title}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                    {ex.summary}
+                  </p>
+                </div>
+                <ArrowUpRight
+                  className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 group-hover:text-rose-600"
+                  aria-hidden="true"
+                />
+              </Link>
+            ))}
+          </Stack>
+        </Section>
+
+        {/* 4. Circulars */}
+        <Section
+          title="4. 業種特有 重要通達"
+          description="厚労省通達から業種影響度の高いものを抜粋。原文は通達一覧から確認できます"
+          spacing="default"
+          className="mt-8"
+        >
+          <Stack gap="sm">
+            {content.circulars.map((c) => (
+              <Link
+                key={c.id}
+                href={`/circulars/${c.id}`}
+                className={`group flex items-start gap-3 rounded-lg border bg-white p-3 transition hover:border-emerald-300 dark:bg-slate-900 ${swatch.card}`}
+              >
+                <ScrollText
+                  className="mt-0.5 h-5 w-5 shrink-0 text-slate-500 group-hover:text-emerald-700"
+                  aria-hidden="true"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    {c.title}
+                  </p>
+                  <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                    {c.issuer} ・ {c.date}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                    {c.relevance}
+                  </p>
+                </div>
+                <ArrowUpRight
+                  className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 group-hover:text-emerald-600"
+                  aria-hidden="true"
+                />
+              </Link>
+            ))}
+          </Stack>
+          <div className="mt-3">
             <Link
               href="/circulars"
               className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
             >
-              通達原文
+              通達一覧をすべて見る
               <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
             </Link>
-          </Cluster>
+          </div>
+        </Section>
+
+        {/* 5. KY topics */}
+        <Section
+          title="5. 推奨 KY項目"
+          description={`${content.label}の典型作業ごとに、KY用紙作成の出発点として使えるテンプレ`}
+          spacing="default"
+          className="mt-8"
+        >
+          <CardGrid cols={2} gap="md">
+            {content.kyTopics.map((ky) => (
+              <Link
+                key={ky.title}
+                href={ky.href}
+                className={`group block rounded-xl border bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-900 ${swatch.card}`}
+              >
+                <Cluster gap="sm">
+                  <FileText className={`h-5 w-5 shrink-0 ${swatch.badge}`} aria-hidden="true" />
+                  <h3 className="flex-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {ky.title}
+                  </h3>
+                  <ArrowUpRight
+                    className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-emerald-600"
+                    aria-hidden="true"
+                  />
+                </Cluster>
+                <p className="mt-2 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                  {ky.scenario}
+                </p>
+              </Link>
+            ))}
+          </CardGrid>
+          <div className="mt-3">
+            <Link
+              href="/ky"
+              className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+            >
+              KY用紙作成ツールを開く
+              <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+            </Link>
+          </div>
+        </Section>
+
+        {/* 6. Chemical substances */}
+        {content.chemicalSubstances.length > 0 && (
+          <Section
+            title="6. 化学物質取扱い・重要物質"
+            description="リスクアセスメント対象物の代表例。化学物質RA・データベースと連動"
+            spacing="default"
+            className="mt-8"
+          >
+            <Stack gap="sm">
+              {content.chemicalSubstances.map((chem) => (
+                <Link
+                  key={chem.name}
+                  href={chem.href}
+                  className={`group flex items-start gap-3 rounded-lg border bg-white p-3 transition hover:border-emerald-300 dark:bg-slate-900 ${swatch.card}`}
+                >
+                  <FlaskConical
+                    className="mt-0.5 h-5 w-5 shrink-0 text-slate-500 group-hover:text-emerald-700"
+                    aria-hidden="true"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {chem.name}
+                      {chem.casNo && (
+                        <span className="ml-2 text-[11px] font-normal text-slate-500">
+                          CAS: {chem.casNo}
+                        </span>
+                      )}
+                    </p>
+                    <p className="mt-0.5 text-xs text-slate-700 dark:text-slate-300">
+                      {chem.hazard}
+                    </p>
+                  </div>
+                  <ArrowUpRight
+                    className="mt-0.5 h-4 w-4 shrink-0 text-slate-400 group-hover:text-emerald-600"
+                    aria-hidden="true"
+                  />
+                </Link>
+              ))}
+            </Stack>
+            <Cluster gap="sm" className="mt-3">
+              <Link
+                href="/chemical-ra"
+                className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+              >
+                化学物質リスクアセスメント
+                <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+              </Link>
+              <Link
+                href="/chemical-database"
+                className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+              >
+                化学物質データベース
+                <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+              </Link>
+            </Cluster>
+          </Section>
+        )}
+
+        {/* 7. Education certs */}
+        <Section
+          title="7. 関連特別教育・技能講習"
+          description={`${content.label}で必要となる法定教育・免許・職長教育の一覧`}
+          spacing="default"
+          className="mt-8"
+        >
+          <CardGrid cols={2} gap="md">
+            {content.educationCerts.map((cert) => (
+              <Link
+                key={cert.name}
+                href={cert.href}
+                className={`group block rounded-xl border bg-white p-3 transition hover:border-emerald-300 dark:bg-slate-900 ${swatch.card}`}
+              >
+                <Cluster gap="sm">
+                  <GraduationCap className={`h-5 w-5 shrink-0 ${swatch.badge}`} aria-hidden="true" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {cert.name}
+                    </p>
+                    <span
+                      className={`mt-0.5 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${swatch.accent}`}
+                    >
+                      {cert.type}
+                    </span>
+                  </div>
+                  <ArrowUpRight
+                    className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-emerald-600"
+                    aria-hidden="true"
+                  />
+                </Cluster>
+                <p className="mt-2 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                  対象: {cert.target}
+                </p>
+              </Link>
+            ))}
+          </CardGrid>
+          <div className="mt-3">
+            <Link
+              href="/education-certification"
+              className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+            >
+              特別教育・技能講習ファインダー
+              <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
+            </Link>
+          </div>
+        </Section>
+
+        {/* 8. Accident report deep-link (only for industries with reports) */}
+        {content.accidentAnalysisSlug && (
+          <Section
+            title="8. 業種別 事故レポート"
+            description="厚労省データ＋curated事例ベースの自動集計レポート"
+            spacing="default"
+            className="mt-8"
+          >
+            <Link
+              href={`/accidents-reports/${content.accidentAnalysisSlug}`}
+              className={`group block rounded-xl border bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-900 ${swatch.card}`}
+            >
+              <Cluster gap="sm">
+                <AlertTriangle className={`h-6 w-6 shrink-0 ${swatch.badge}`} aria-hidden="true" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-base font-bold text-slate-900 dark:text-slate-100">
+                    {content.label} 事故分析レポート
+                  </p>
+                  <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                    事故型ランキング、月別季節性、原因分析、推奨対策、30項目チェックリスト、印刷PDFを収録
+                  </p>
+                </div>
+                <ArrowUpRight
+                  className="h-5 w-5 shrink-0 text-slate-400 group-hover:text-emerald-600"
+                  aria-hidden="true"
+                />
+              </Cluster>
+            </Link>
+          </Section>
+        )}
+
+        {/* 9. Safety plan template */}
+        <Section
+          title="9. 業種別 安全衛生計画テンプレ"
+          description="規模別（小・中・大）の年次安全衛生計画ジェネレーター"
+          spacing="default"
+          className="mt-8"
+        >
+          <Link
+            href={`/strategy/plan-generator?industry=${content.safetyPlanIndustry}`}
+            className={`group block rounded-xl border bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:bg-slate-900 ${swatch.card}`}
+          >
+            <Cluster gap="sm">
+              <FileText className={`h-6 w-6 shrink-0 ${swatch.badge}`} aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <p className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  {content.label}向け 年次安全衛生計画
+                </p>
+                <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
+                  業種×規模別の30テンプレートから、基本方針・目標・月別取組・関連法令・通達を自動生成
+                </p>
+              </div>
+              <ArrowUpRight
+                className="h-5 w-5 shrink-0 text-slate-400 group-hover:text-emerald-600"
+                aria-hidden="true"
+              />
+            </Cluster>
+          </Link>
+        </Section>
+
+        {/* 10. Related FAQ categories */}
+        <Section
+          title="10. 業種関連 FAQ"
+          description={`${content.label}に関連する質問が集まるFAQカテゴリ`}
+          spacing="default"
+          className="mt-8"
+        >
+          <CardGrid cols={2} gap="md">
+            {content.faqCategories.map((fc) => (
+              <Link
+                key={fc.category}
+                href={`/faq/${fc.category}`}
+                className={`group block rounded-xl border bg-white p-3 transition hover:border-emerald-300 dark:bg-slate-900 ${swatch.card}`}
+              >
+                <Cluster gap="sm">
+                  <HelpCircle className={`h-5 w-5 shrink-0 ${swatch.badge}`} aria-hidden="true" />
+                  <p className="flex-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {fc.label} ({FAQ_CATEGORY_LABEL[fc.category] ?? fc.category})
+                  </p>
+                  <ArrowUpRight
+                    className="h-4 w-4 shrink-0 text-slate-400 group-hover:text-emerald-600"
+                    aria-hidden="true"
+                  />
+                </Cluster>
+                <p className="mt-2 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                  {fc.rationale}
+                </p>
+              </Link>
+            ))}
+          </CardGrid>
+        </Section>
+
+        {/* Recommended features */}
+        <Section
+          title="この業種におすすめの機能"
+          description="課題に対応する機能へワンクリックで遷移します"
+          spacing="default"
+          className="mt-8"
+        >
+          <CardGrid cols={3} gap="md">
+            {content.recommendations.map((rec) => (
+              <Link
+                key={rec.href + rec.title}
+                href={rec.href}
+                className={`group block rounded-xl border bg-white p-4 transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:bg-slate-900 ${swatch.card}`}
+              >
+                <Cluster gap="sm">
+                  <span className="text-2xl" aria-hidden="true">
+                    {rec.icon}
+                  </span>
+                  <h3 className="flex-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {rec.title}
+                  </h3>
+                  <ArrowUpRight
+                    className="h-4 w-4 shrink-0 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-emerald-600"
+                    aria-hidden="true"
+                  />
+                </Cluster>
+                <p className="mt-2 text-xs leading-relaxed text-slate-700 dark:text-slate-300">
+                  {rec.reason}
+                </p>
+                {rec.cta && (
+                  <span
+                    className={`mt-3 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${swatch.accent}`}
+                  >
+                    {rec.cta} →
+                  </span>
+                )}
+              </Link>
+            ))}
+          </CardGrid>
         </Section>
 
         {/* Typical work types */}
         <Section
           title="典型的な業務と主なハザード"
-          description={`${cfg.label}の中で発生する代表的な作業区分とリスクの組合せ`}
+          description={`${content.label}の中で発生する代表的な作業区分とリスクの組合せ`}
           spacing="default"
           className="mt-8"
         >
@@ -422,7 +768,7 @@ export default async function IndustryLandingPage({ params }: { params: Params }
         {/* FAQ */}
         <Section
           title="よくある質問"
-          description={`${cfg.label}の安全管理でよく聞かれる質問`}
+          description={`${content.label}の安全管理でよく聞かれる質問`}
           spacing="default"
           className="mt-8"
         >
@@ -448,6 +794,26 @@ export default async function IndustryLandingPage({ params }: { params: Params }
           </Stack>
         </Section>
 
+        {/* Long-tail keywords (SEO chip cloud) */}
+        <Section
+          title="関連キーワード"
+          description={`${content.label}に関する検索クエリ・関連トピック（${content.longTailKeywords.length}件）`}
+          spacing="default"
+          className="mt-8"
+        >
+          <Cluster gap="xs">
+            {content.longTailKeywords.map((kw) => (
+              <span
+                key={kw}
+                className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              >
+                <Hash className="h-3 w-3" aria-hidden="true" />
+                {kw}
+              </span>
+            ))}
+          </Cluster>
+        </Section>
+
         {/* CTA */}
         <Section spacing="tight" className="mt-10">
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
@@ -465,7 +831,7 @@ export default async function IndustryLandingPage({ params }: { params: Params }
                 📝 KYを作成
               </Link>
               <Link
-                href={`/strategy/plan-generator?industry=${content.slug}`}
+                href={`/strategy/plan-generator?industry=${content.safetyPlanIndustry}`}
                 className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-sm font-medium text-emerald-800 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300"
               >
                 📋 年次計画を生成
@@ -476,12 +842,14 @@ export default async function IndustryLandingPage({ params }: { params: Params }
               >
                 ✅ 過去問演習
               </Link>
-              <Link
-                href={`/accidents-reports/${content.slug}`}
-                className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-sm font-medium text-emerald-800 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300"
-              >
-                🚨 事故分析を見る
-              </Link>
+              {content.accidentAnalysisSlug && (
+                <Link
+                  href={`/accidents-reports/${content.accidentAnalysisSlug}`}
+                  className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-sm font-medium text-emerald-800 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300"
+                >
+                  🚨 事故分析を見る
+                </Link>
+              )}
             </Cluster>
           </div>
         </Section>
@@ -495,7 +863,7 @@ export default async function IndustryLandingPage({ params }: { params: Params }
         >
           <Cluster gap="sm">
             {INDUSTRY_CONTENT_SLUGS.filter((s) => s !== content.slug).map((s) => {
-              const other = getIndustryConfig(s);
+              const other = getIndustryContent(s);
               if (!other) return null;
               return (
                 <Link
@@ -516,11 +884,13 @@ export default async function IndustryLandingPage({ params }: { params: Params }
           法令の最新情報や個別の判断は、所轄労働基準監督署や顧問の労働安全コンサルタントにご確認ください。
         </p>
       </PageContainer>
-      <CrossToolLinks
-        industry={content.slug as IndustrySlug}
-        exclude="industries"
-        heading="この業種で使える実務ツール"
-      />
+      {content.accidentAnalysisSlug && (
+        <CrossToolLinks
+          industry={content.accidentAnalysisSlug as IndustrySlug}
+          exclude="industries"
+          heading="この業種で使える実務ツール"
+        />
+      )}
     </>
   );
 }

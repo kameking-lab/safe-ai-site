@@ -127,7 +127,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     href: "/accidents",
     subItems: [
       { label: "事故データベース", href: "/accidents" },
-      { label: "業種別 安全管理ポータル", href: "/industries", description: "5業種の重点課題・関連法令・推奨機能への動線をワンページに集約" },
+      { label: "業種別 安全管理ポータル", href: "/industries", description: "10業種の重点課題・関連法令・通達・推奨機能への動線をワンページに集約" },
       { label: "業種別 事故分析レポート", href: "/accidents-reports", description: "5業種の事故型・原因・対策・関連法令を自動集計" },
       { label: "事故統計ダッシュボード", href: "/accidents-analytics" },
       { label: "労災死傷統計", href: "/stats" },
@@ -174,35 +174,60 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     id: "industries",
     label: "業種から探す",
     icon: "🏭",
-    cardTitle: "業種別ポータル",
+    cardTitle: "業種別ポータル 10業種",
     cardDescription:
-      "建設・製造・運輸・医療福祉・サービスの5業種から、事故レポート・KY事例・健診・資格・年次計画を横断的に活用。",
+      "建設・製造・運輸・医療福祉・サービス・小売・飲食・卸売・倉庫・事務系の10業種から、事故レポート・KY・通達・化学物質・特別教育・年次計画を横断的に活用。",
     href: "/industries",
     subItems: [
       {
         label: "建設業",
         href: "/industries/construction",
-        description: "足場・重機・高所作業の安全管理。事故レポート・KY事例・必要資格を確認。",
+        description: "足場・重機・高所作業・石綿の安全管理。事故レポート・KY例・必要資格を10セクションで網羅。",
       },
       {
         label: "製造業",
         href: "/industries/manufacturing",
-        description: "機械・化学物質・騒音のリスク管理。業種別分析レポートと必要資格を確認。",
+        description: "機械・化学物質・粉じん・ロボットのリスク管理。化学物質RAと特別教育を業種別に整理。",
       },
       {
         label: "運輸交通業",
         href: "/industries/transport",
-        description: "交通労災・荷役・長時間労働対策。事故事例と年次計画テンプレートを活用。",
+        description: "改善基準告示・荷役・腰痛・健康起因事故対策。陸災防5大災害ベースの事故事例と年次計画。",
       },
       {
         label: "医療・福祉",
         href: "/industries/healthcare",
-        description: "腰痛・感染症・メンタルヘルス対応。業種特有の健診スケジュールを確認。",
+        description: "腰痛・感染症・暴力・メンタル対応。ノーリフトケア・ストレスチェック・健診スケジュール。",
       },
       {
-        label: "サービス業",
+        label: "サービス業（宿泊・清掃・教育）",
         href: "/industries/service",
-        description: "転倒・労務管理・顧客対応ストレス。業種別ポータルからツールを横断利用。",
+        description: "転倒・ロープ高所・カスハラ・防火管理。雇入れ時教育と業種別KYテンプレートを活用。",
+      },
+      {
+        label: "小売業（スーパー・コンビニ）",
+        href: "/industries/retail",
+        description: "品出し腰痛・転倒・カスハラ・深夜業健診。学生アルバイト教育と防火管理を集約。",
+      },
+      {
+        label: "飲食業（レストラン・居酒屋）",
+        href: "/industries/food",
+        description: "厨房切創・やけど・熱中症・HACCP対応。年少者就業制限と若年労働者教育を業種別に整理。",
+      },
+      {
+        label: "卸売業",
+        href: "/industries/wholesale",
+        description: "フォークリフト・荷役腰痛・配送中事故。改善基準告示と腰痛予防教育を集約。",
+      },
+      {
+        label: "倉庫業（物流・3PL）",
+        href: "/industries/warehouse",
+        description: "自動倉庫・AGV・ピッキング・冷凍庫凍傷。物流DX対応の特別教育とリスクアセスメント。",
+      },
+      {
+        label: "事務系（情報通信・金融・士業）",
+        href: "/industries/office",
+        description: "メンタルヘルス・VDT・長時間労働・テレワーク・ハラスメント。ストレスチェック実務を集約。",
       },
       {
         label: "安全衛生標識データベース",

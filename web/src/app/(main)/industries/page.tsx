@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, AlertTriangle } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { Section } from "@/components/layout/section";
 import { CardGrid } from "@/components/layout/card-grid";
@@ -15,11 +15,11 @@ import {
 import { ogImageUrl } from "@/lib/og-url";
 import { SITE_URL, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { listIndustryContents } from "@/data/industries-content";
-import { listIndustries } from "@/lib/accident-analysis";
+import { getIndustryReport, type IndustrySlug } from "@/lib/accident-analysis";
 
-const title = "業種別 安全管理ポータル | 建設・製造・運輸・医療福祉・サービス";
+const title = "業種別 安全管理ポータル | 建設・製造・運輸・医療福祉・サービス・小売・飲食・卸売・倉庫・事務系の10業種";
 const description =
-  "業種ごとの労働安全衛生課題を、関連法令・事故事例・推奨機能（KY・化学物質RA・年次計画・AIチャット）への動線で整理。建設業・製造業・運輸業・医療福祉・サービス業の5業種別エントリポイントを提供します。";
+  "10業種ごとの労働安全衛生課題を、関連法令・通達・典型事故・KY・化学物質・特別教育・事故レポート・年次計画・FAQへの動線で整理。建設業から事務系業種まで、業種別エントリポイントを提供します。";
 
 export const metadata: Metadata = {
   title,
@@ -28,12 +28,12 @@ export const metadata: Metadata = {
   openGraph: withSiteOpenGraph("/industries", {
     title,
     description,
-    images: [{ url: ogImageUrl(title, "5業種別の安全管理ポータル"), width: 1200, height: 630 }],
+    images: [{ url: ogImageUrl(title, "10業種別の安全管理ポータル"), width: 1200, height: 630 }],
   }),
   twitter: withSiteTwitter({
     title,
     description,
-    images: [ogImageUrl(title, "5業種別の安全管理ポータル")],
+    images: [ogImageUrl(title, "10業種別の安全管理ポータル")],
   }),
 };
 
@@ -67,11 +67,28 @@ const CARD_COLOR_CLASS: Record<string, { border: string; hover: string; bg: stri
   },
 };
 
+function num(n: number): string {
+  return n.toLocaleString("ja-JP");
+}
+
 export default function IndustriesHubPage() {
   const contents = listIndustryContents();
-  const configs = listIndustries();
-  const configMap = new Map(configs.map((c) => [c.slug, c]));
   const url = `${SITE_URL}/industries`;
+
+  // Sector-wide accident summary (only for 5 industries with analysis data)
+  const summary = contents
+    .filter((c) => c.accidentAnalysisSlug)
+    .map((c) => {
+      const report = getIndustryReport(c.accidentAnalysisSlug as IndustrySlug);
+      return {
+        slug: c.slug,
+        label: c.label,
+        icon: c.icon,
+        total: report?.stats.total ?? 0,
+        fatal: report?.stats.severity.fatal ?? 0,
+        topType: report?.topTypes[0]?.name ?? "—",
+      };
+    });
 
   return (
     <>
@@ -85,11 +102,23 @@ export default function IndustriesHubPage() {
           articleListSchema(
             contents.map((it) => ({
               headline: it.seoTitle,
-              datePublished: "2026-05-16",
+              datePublished: "2026-05-17",
               url: `${SITE_URL}/industries/${it.slug}`,
               description: it.seoDescription,
             })),
           ),
+          {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            name: "業種別 安全管理ポータル 10業種",
+            numberOfItems: contents.length,
+            itemListElement: contents.map((c, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: c.label,
+              url: `${SITE_URL}/industries/${c.slug}`,
+            })),
+          },
         ]}
       />
       <PageContainer width="full">
@@ -97,32 +126,31 @@ export default function IndustriesHubPage() {
 
         <header className="rounded-xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-white p-5 dark:border-slate-800 dark:from-emerald-950/40 dark:to-slate-950">
           <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">
-            業種別エントリポイント
+            業種別エントリポイント ・ 10業種完全網羅
           </p>
           <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl dark:text-slate-100">
             業種別の安全管理ポータル
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
-            建設業・製造業・運輸業・医療福祉・サービス業の
-            <span className="font-semibold">5業種</span>
-            について、現場の重点課題と関連法令、推奨機能（KY用紙・化学物質RA・年次安全衛生計画・事故分析・AIチャットボット）への最短動線を整理しています。
+            建設業・製造業・運輸業・医療福祉・サービス業・小売業・飲食業・卸売業・倉庫業・事務系の
+            <span className="font-semibold">10業種</span>
+            について、現場の重点課題と関連法令・通達・典型事故・KY・化学物質・特別教育・事故レポート・年次計画・FAQへの動線を10セクション構成で整理しています。
           </p>
           <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            検索からの来訪向けに、業種固有のキーワード・課題・条文ハイライトを集約。事故分析（自動集計）と
+            検索からの来訪向けに、業種固有のキーワード（30〜50/業種のロングテール）・課題・条文ハイライトを集約。事故分析（自動集計）と
             年次計画ジェネレーター、KY業種別プリセットへワンクリックで遷移できます。
           </p>
         </header>
 
         <Section
-          title="5業種から選ぶ"
-          description="各カードをクリックすると業種別の専用ページに遷移します。"
+          title="10業種から選ぶ"
+          description="各カードをクリックすると業種別の専用ページに遷移します（全10セクション構成）"
           spacing="default"
           className="mt-6"
         >
           <CardGrid cols={3} gap="md">
             {contents.map((it) => {
-              const cfg = configMap.get(it.slug);
-              const color = cfg ? CARD_COLOR_CLASS[cfg.colorClass] ?? CARD_COLOR_CLASS.blue : CARD_COLOR_CLASS.blue;
+              const color = CARD_COLOR_CLASS[it.colorClass] ?? CARD_COLOR_CLASS.blue;
               return (
                 <Link
                   key={it.slug}
@@ -131,14 +159,14 @@ export default function IndustriesHubPage() {
                 >
                   <Cluster gap="sm">
                     <span className="text-3xl" aria-hidden="true">
-                      {cfg?.icon ?? "🏢"}
+                      {it.icon}
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-base font-bold text-slate-900 dark:text-slate-100">
-                        {cfg?.label ?? it.slug}
+                        {it.label}
                       </p>
                       <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
-                        {cfg?.tagline ?? ""}
+                        {it.tagline}
                       </p>
                     </div>
                     <ArrowRight
@@ -159,11 +187,81 @@ export default function IndustriesHubPage() {
                       </span>
                     ))}
                   </Cluster>
+                  {it.accidentAnalysisSlug && (
+                    <p className="mt-3 text-[11px] text-slate-500 dark:text-slate-400">
+                      事故分析レポート連動
+                    </p>
+                  )}
                 </Link>
               );
             })}
           </CardGrid>
         </Section>
+
+        {/* Sector-wide summary across the 5 industries with accident-statistics data */}
+        {summary.length > 0 && (
+          <Section
+            title="業界全体動向 — 主要5業種の事故分析サマリ"
+            description="事故統計データを保有する5業種の比較。詳細は各業種ページの統計ブロックへ"
+            spacing="default"
+            className="mt-8"
+          >
+            <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+              <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-slate-700">
+                <thead className="bg-slate-50 dark:bg-slate-800">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      業種
+                    </th>
+                    <th className="px-3 py-2 text-right text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      事例件数
+                    </th>
+                    <th className="px-3 py-2 text-right text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      うち死亡
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      最多事故型
+                    </th>
+                    <th className="px-3 py-2 text-right text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      レポート
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white dark:divide-slate-800 dark:bg-slate-900">
+                  {summary.map((s) => (
+                    <tr key={s.slug} className="hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                      <td className="whitespace-nowrap px-3 py-2 font-medium text-slate-900 dark:text-slate-100">
+                        <span className="mr-1.5" aria-hidden="true">{s.icon}</span>
+                        {s.label}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-slate-700 dark:text-slate-300">
+                        {num(s.total)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2 text-right tabular-nums text-rose-700 dark:text-rose-300">
+                        {num(s.fatal)}
+                      </td>
+                      <td className="px-3 py-2 text-xs text-slate-700 dark:text-slate-300">
+                        {s.topType}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-2 text-right">
+                        <Link
+                          href={`/industries/${s.slug}`}
+                          className="text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+                        >
+                          開く →
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+              <AlertTriangle className="mr-1 inline h-3 w-3" aria-hidden="true" />
+              小売・飲食・卸売・倉庫・事務系は事故統計データとの個別連動なし。各ページの事故事例セクションで業種特有パターンを掲載しています。
+            </p>
+          </Section>
+        )}
 
         <Section title="関連ページ" spacing="tight" className="mt-8">
           <Cluster gap="sm">
@@ -190,6 +288,18 @@ export default function IndustriesHubPage() {
               className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
               💬 安衛法AIチャット
+            </Link>
+            <Link
+              href="/education-certification"
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            >
+              🎓 特別教育・技能講習
+            </Link>
+            <Link
+              href="/circulars"
+              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            >
+              📜 通達原文
             </Link>
           </Cluster>
         </Section>
