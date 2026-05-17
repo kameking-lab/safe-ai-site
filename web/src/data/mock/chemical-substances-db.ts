@@ -76,7 +76,7 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     skin_hazard: true,
     uses: "溶剤、合成原料、ゴム、塗料、石油精製（古い用途多数）",
     health_effects: "白血病、再生不良性貧血、中枢神経抑制、皮膚刺激",
-    related_laws: ["特化則 第2類", "労安衛法 第57条の3", "化学物質の表示義務"],
+    related_laws: ["特化則 第2類", "安衛法 第57条の3", "化学物質の表示義務"],
     ghs: ["発がん性1A", "生殖細胞変異原性1B", "引火性液体2"],
     sds_url: "https://anzeninfo.mhlw.go.jp/anzen_pg/GHS_MSD_FND.aspx",
   },
@@ -107,7 +107,7 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     skin_hazard: false,
     uses: "塗料・合成樹脂・接着剤の溶剤、農薬",
     health_effects: "中枢神経系抑制、皮膚刺激、肝障害",
-    related_laws: ["有機則 第2種", "労安衛法 第57条の3"],
+    related_laws: ["有機則 第2種", "安衛法 第57条の3"],
     ghs: ["引火性液体3", "急性毒性4"],
   },
   {
@@ -205,7 +205,7 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     skin_hazard: false,
     uses: "断熱材、耐火被覆、建材（現在は全面禁止）",
     health_effects: "肺がん、中皮腫、石綿肺（じん肺）",
-    related_laws: ["石綿則", "特化則 第1類", "労安衛法 第55条（禁止）"],
+    related_laws: ["石綿則", "特化則 第1類", "安衛法 第55条（禁止）"],
     ghs: ["発がん性1A"],
   },
   {
@@ -373,7 +373,7 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     skin_hazard: false,
     uses: "消毒、溶剤、燃料、食品添加物",
     health_effects: "中枢神経抑制（高濃度）、皮膚脱脂",
-    related_laws: ["労安衛法 第57条の3"],
+    related_laws: ["安衛法 第57条の3"],
     ghs: ["引火性液体2"],
   },
   {
@@ -751,7 +751,7 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     skin_hazard: false,
     uses: "ガラス、防腐剤、陶磁器、殺虫剤",
     health_effects: "生殖毒性、発達毒性（2017年EUでREACH SVHC）",
-    related_laws: ["労安衛法 第57条の3"],
+    related_laws: ["安衛法 第57条の3"],
     ghs: ["生殖毒性1B"],
   },
   {
@@ -780,6 +780,6 @@ export const chemicalCategoryInfo: Record<ChemicalCategory, string> = {
   "鉛則": "鉛中毒予防規則",
   "四アルキル鉛則": "四アルキル鉛中毒予防規則",
   "粉じん則": "粉じん障害防止規則",
-  "リスクアセスメント対象物": "労安衛法第57条の3 リスクアセスメント義務物質",
+  "リスクアセスメント対象物": "安衛法第57条の3 リスクアセスメント義務物質",
   "皮膚等障害化学物質等": "2024年4月施行 皮膚等障害化学物質等（不浸透性保護具義務）",
 };

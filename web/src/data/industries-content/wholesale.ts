@@ -279,7 +279,7 @@ export const wholesaleContent: IndustryContent = {
     {
       label: "法令・制度",
       category: "law-system",
-      rationale: "改善基準告示・労安衛則・道路交通法の制度面",
+      rationale: "改善基準告示・安衛則・道路交通法の制度面",
     },
     {
       label: "安全衛生管理体制",

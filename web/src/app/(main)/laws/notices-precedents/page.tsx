@@ -66,7 +66,7 @@ export default function NoticesPrecedentsPage() {
           通達・判例でたどる労働安全衛生
         </h1>
         <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700 sm:text-base">
-          労安衛法は条文だけでは読めません。行政解釈を示す <strong>通達（基発・安衛発）</strong> と、
+          安衛法は条文だけでは読めません。行政解釈を示す <strong>通達（基発・安衛発）</strong> と、
           安全配慮義務の司法解釈を示す <strong>最高裁判例</strong> が揃って初めて実務に届きます。
           監督官・社労士・弁護士が一次情報として参照する第2層出典を合計 30 件整理しました。
         </p>

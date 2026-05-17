@@ -126,7 +126,7 @@ export const questions: ExamQuestion[] = [
       {label:"ウ",text:"温水ボイラーで最高使用圧力0.5MPa・伝熱面積12㎡のもの"},
     ],
     correctAnswer:"ウ",
-    explanation:"労安法・ボイラー則：最高使用圧力0.1MPaを超えるか伝熱面積3㎡超（貫流ボイラーは10㎡超）のボイラーは設置届が必要。",
+    explanation:"安衛法・ボイラー則：最高使用圧力0.1MPaを超えるか伝熱面積3㎡超（貫流ボイラーは10㎡超）のボイラーは設置届が必要。",
   },
   { id:"b1c-str-004", year:2024, certificationId:"boiler-1st-class", subject:"b1-structure", subjectLabel:"ボイラーの構造", questionNumber:104,
     questionText:"水管ボイラーの特徴として最も適切なものはどれか。",

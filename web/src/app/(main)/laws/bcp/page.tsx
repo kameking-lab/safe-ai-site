@@ -4,7 +4,7 @@ import { ogImageUrl } from "@/lib/og-url";
 
 const TITLE = "BCP 策定義務化 × 労働安全衛生";
 const DESCRIPTION =
-  "2024年4月から介護施設等で義務化された BCP（事業継続計画）の策定。労安衛法の安全配慮義務・避難訓練・危険物管理と BCP の接続、中小事業者向けのテンプレート運用論点を整理します。";
+  "2024年4月から介護施設等で義務化された BCP（事業継続計画）の策定。安衛法の安全配慮義務・避難訓練・危険物管理と BCP の接続、中小事業者向けのテンプレート運用論点を整理します。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/laws/bcp" },
@@ -33,7 +33,7 @@ export default function LawsBcpPage() {
       keyPoints={[
         "介護報酬改定2024（3年経過措置終了）による BCP 策定義務化の範囲",
         "自然災害 BCP と感染症 BCP の二本立て（厚労省ガイドライン）",
-        "労安衛法との接続：避難訓練（消防法）・危険物管理・停電時の酸欠防止",
+        "安衛法との接続：避難訓練（消防法）・危険物管理・停電時の酸欠防止",
         "中小施設向け A4 1 枚スタータースキーム（業務影響分析・重要業務の特定）",
         "協力医療機関連携・地域 BCP ネットワーク（社協・災害派遣チーム）",
       ]}
@@ -44,7 +44,7 @@ export default function LawsBcpPage() {
           description: "BCP策定・訓練の義務化経過措置",
         },
         {
-          label: "労安衛法 第23条（事業者の責務）",
+          label: "安衛法 第23条（事業者の責務）",
           href: "/laws",
           description: "通常時・非常時ともに安全配慮義務",
         },

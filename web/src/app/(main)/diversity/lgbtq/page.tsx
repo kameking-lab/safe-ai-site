@@ -40,7 +40,7 @@ export default function DiversityLgbtqPage() {
       ]}
       relatedLaws={[
         {
-          label: "労安衛法 第19条の2（ハラスメント防止義務）",
+          label: "安衛法 第19条の2（ハラスメント防止義務）",
           href: "/laws",
           description: "事業者のハラスメント防止措置義務とパワハラ指針のSOGI条項",
         },

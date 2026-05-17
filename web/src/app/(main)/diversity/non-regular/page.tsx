@@ -31,7 +31,7 @@ export default function DiversityNonRegularPage() {
       title={TITLE}
       lead={DESCRIPTION}
       keyPoints={[
-        "雇入れ時の安全衛生教育（労安衛法第59条）：パート・有期・派遣を問わず義務。未実施は法令違反",
+        "雇入れ時の安全衛生教育（安衛法第59条）：パート・有期・派遣を問わず義務。未実施は法令違反",
         "派遣元・派遣先の責任分担：作業手順・保護具は派遣先、健診・特別教育は原則として派遣元",
         "同一労働同一賃金と安全配慮：保護具支給・特殊健診・健康管理費用でも均等待遇原則が適用",
         "有期雇用労働者の特性：短期雇用による危険作業への不慣れリスク→OJT・安全観察の強化",
@@ -40,7 +40,7 @@ export default function DiversityNonRegularPage() {
       ]}
       relatedLaws={[
         {
-          label: "労安衛法 第59条（雇入れ時教育・作業変更時教育）",
+          label: "安衛法 第59条（雇入れ時教育・作業変更時教育）",
           href: "/laws",
           description: "雇用形態を問わず全労働者への安全衛生教育義務",
         },
