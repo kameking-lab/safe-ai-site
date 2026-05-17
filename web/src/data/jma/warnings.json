@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-17T09:21:18.889Z",
+  "fetchedAt": "2026-05-17T10:52:45.790Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -72,10 +72,16 @@
         {
           "sourceCode": "013000",
           "level": "advisory",
-          "headline": "網走地方では、１８日までなだれに注意してください。",
-          "reportDatetime": "2026-05-17T16:09:00+09:00",
+          "headline": "網走、紋別地方では、１８日明け方まで濃霧による視程障害に注意してください。網走地方では、１８日までなだれに注意してください。",
+          "reportDatetime": "2026-05-17T18:30:00+09:00",
           "publishingOffice": "網走地方気象台",
           "warnings": [
+            {
+              "areaCode": "013010",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
             {
               "areaCode": "013010",
               "code": "22",
@@ -83,9 +89,69 @@
               "level": "advisory"
             },
             {
+              "areaCode": "013030",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0120802",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0121100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0121900",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0154500",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "0154500",
               "code": "22",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0154700",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0155200",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0155900",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0156100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0156300",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             }
           ]
