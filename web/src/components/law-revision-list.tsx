@@ -557,6 +557,8 @@ export function LawRevisionList({
             年（自）
             <input
               className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"
+              inputMode="numeric"
+              pattern="[0-9]*"
               max={2026}
               min={1990}
               onChange={(e) => setYearFrom(Number(e.target.value))}
@@ -568,6 +570,8 @@ export function LawRevisionList({
             年（至）
             <input
               className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"
+              inputMode="numeric"
+              pattern="[0-9]*"
               max={2030}
               min={1990}
               onChange={(e) => setYearTo(Number(e.target.value))}

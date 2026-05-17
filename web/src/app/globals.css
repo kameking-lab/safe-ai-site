@@ -256,10 +256,52 @@ table {
     min-width: 48px;
     touch-action: manipulation;
   }
+  /**
+   * 2026-05-17 モバイルUX監査(40ページ×4ビューポート=160サンプル)で、
+   * `<button>` と `[role=button]` のうち w/h<44px のものが 6,380 件検出された。
+   * 主要因はヘッダーのアイコンボタン(36px)/ハンバーガー(33px)等のクローム要素。
+   * WCAG 2.5.5(AAA) と iOS HIG の最小タップサイズ 44x44 を満たすため、
+   * data-compact 以外のすべてに 44x44 を保証する。インラインの小さなテキストリンク
+   * (`a[href]` 単体) は対象外とし、`role=button` を付けたボタン化リンクのみ広げる。
+   */
+  button:not([data-compact]):not(.sr-only),
+  [role="button"]:not([data-compact]):not(.sr-only),
+  a[role="button"]:not([data-compact]):not(.sr-only),
+  [role="tab"]:not([data-compact]),
+  [role="menuitem"]:not([data-compact]),
+  input[type="submit"]:not([data-compact]),
+  input[type="button"]:not([data-compact]) {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
   button[data-compact],
   a[data-compact] {
     min-height: 0;
     min-width: 0;
+  }
+}
+
+/**
+ * 2026-05-17 モバイルUX監査: 25,930 件の <14px テキストが検出された。
+ * 主要因は `text-xs` (12px) と arbitrary `text-[10-13px]` の多用。
+ * iPhone SE/Android 縦持ち(<=480px)では Tailwind の text-xs / 小さい arbitrary を
+ * 14px に底上げし、屋外/手袋/老眼でも読める最低ラインを担保する。
+ * `data-compact-text` を付けた要素はオプトアウト可能(legend/サイネージなど)。
+ */
+@media (max-width: 480px) {
+  .text-xs:not([data-compact-text]),
+  .text-2xs:not([data-compact-text]),
+  .text-\[10px\]:not([data-compact-text]),
+  .text-\[11px\]:not([data-compact-text]),
+  .text-\[12px\]:not([data-compact-text]),
+  .text-\[13px\]:not([data-compact-text]) {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.45;
+  }
+  small:not([data-compact-text]),
+  figcaption:not([data-compact-text]) {
+    font-size: 0.875rem; /* 14px */
   }
 }
 
