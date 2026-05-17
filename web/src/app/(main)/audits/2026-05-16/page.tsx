@@ -584,6 +584,9 @@ const FINDINGS_F: Finding[] = [
       "WebFetch評価:「単なるディレクトリ機能に過ぎない」「政府資料のリンク集に過ぎず、付加価値ほぼなし」。",
     recommendation:
       "削除、または分類タグ・解説コメントを付与して付加価値化。",
+    status: "kept-after-investigation",
+    statusNote:
+      "アーカイブ実装の事前調査でWebFetch評価より広い実装footprintが判明したため保持。/resources は厚労省一次資料DB(通達527+告示244+指針98+リーフレット289=1,158件)を分類検索可能なナビゲーション、各エントリは原文ページへ直リンクで一次ソースを担保。lib/search-index.ts:157 がサイト内検索で1,158件の通達/告示クリック先として /resources?q= を発行、chatbot-panel.tsx:810 がAI回答の出典提示で一次資料DBへ案内、laws/page.tsx:74 と laws/glossary/page.tsx:281 が法令ハブからの主要関連カードとして参照。サブページ /resources/mlit も国交省・建災防の安全資料DBを保持。監査の「ディレクトリのみ」評価はこれら接続を反映していなかった。",
   },
   {
     id: "F-010",
@@ -606,6 +609,9 @@ const FINDINGS_F: Finding[] = [
       "WebFetch評価:「物販は付属的。コア機能に比べ詳細情報が限定的」。アフィリエイト導線は /equipment-finder で十分。",
     recommendation:
       "/equipment-finder に統合、/goods は301。",
+    status: "kept-after-investigation",
+    statusNote:
+      "アーカイブ実装の事前調査で /equipment-finder には移植困難な独自機能が確認されたため保持。/goods は (1) SafetyGoodsPanel によるカテゴリ別カタログUI、(2) GoodsChatbot + /api/goods-chat による作業内容ベース保護具レコメンドAI、(3) Amazon・楽天 アフィリエイト導線(収益機能、track-events で計測)、を提供。app-shell.tsx:164 のサイドナビ、footer.tsx:130、home-value-hero.tsx:332、features-catalog.ts:184、diversity/women/page.tsx:379、signage/signage-featured-goods.tsx:17 など複数のサーフェスからリンク。/equipment-finder は規格ベースの装備検索が中心で、AIチャットとアフィリエイト導線は持たないため、単純301では収益機能が消失する。",
   },
 ];
 
@@ -986,9 +992,9 @@ F-005 ?  ?  ?  ?
 F-006 ?  ?  ?  ?
 F-007 ?  ?  ?  ?
 F-008 ?  ?  ?  ?
-F-009 ?  ?  ?  ?
+F-009 defer owner 2026-05-17 archive見送り(調査でDB実体と複数接続を確認)
 F-010 ?  ?  ?  ?
-F-011 ?  ?  ?  ?
+F-011 defer owner 2026-05-17 archive見送り(調査でChatbot+収益動線を確認)
 G-001 ?  ?  ?  ?
 G-002 ?  ?  ?  ?
 G-003 ?  ?  ?  ?
