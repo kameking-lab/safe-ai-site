@@ -127,7 +127,12 @@ export async function POST(request: Request) {
       console.error("[inquiry] resend error", err);
     }
   } else {
-    console.log("[inquiry]", JSON.stringify(record));
+    console.log("[inquiry] no Resend — stored in memory.", JSON.stringify({
+      receivedAt: record.receivedAt,
+      category: record.category,
+      messageLength: record.messageLength,
+      publishOk: record.publishOk,
+    }));
   }
 
   return NextResponse.json(

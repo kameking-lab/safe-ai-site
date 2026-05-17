@@ -1,25 +1,26 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
   title: "利用規約",
   description: "安全AIポータルの利用規約。本サービスの利用条件について説明しています。",
   alternates: { canonical: "/terms" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/terms", {
     title: "利用規約",
     description: "安全AIポータルの利用規約。本サービスの利用条件について説明しています。",
-  },
+  }),
 };
 
 export default function TermsPage() {
   return (
-    <div className="px-4 py-8 lg:px-8">
+    <PageContainer width="narrow" className="space-y-8">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="利用規約" description="安全AIポータルの利用規約。本サービスの利用条件について説明しています。" path="/terms" />
-      <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">利用規約</h1>
-          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月25日</p>
+          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年5月17日</p>
         </div>
 
         <section className="space-y-3">
@@ -144,14 +145,41 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-base font-bold text-slate-900">第9条（準拠法・管轄）</h2>
+          <h2 className="text-base font-bold text-slate-900">第9条（反社会的勢力の排除）</h2>
+          <p className="text-sm leading-7 text-slate-600">
+            利用者は、現在および将来にわたり、暴力団、暴力団員、暴力団員でなくなった時から5年を経過しない者、
+            暴力団準構成員、暴力団関係企業、総会屋、社会運動等標榜ゴロ、特殊知能暴力集団、その他これらに準ずる者
+            （以下、総称して「反社会的勢力」）に該当しないこと、および反社会的勢力と次の各号に該当する関係を
+            有しないことを表明し、かつ将来にわたっても該当しないことを確約します。
+          </p>
+          <ul className="ml-4 space-y-1 text-sm text-slate-600">
+            <li className="list-disc">反社会的勢力が経営を支配していると認められる関係を有すること</li>
+            <li className="list-disc">反社会的勢力が経営に実質的に関与していると認められる関係を有すること</li>
+            <li className="list-disc">自己、自社もしくは第三者の不正の利益を図る目的または第三者に損害を加える目的をもって反社会的勢力を利用するなどの関係を有すること</li>
+            <li className="list-disc">反社会的勢力に対して資金等を提供し、または便宜を供与するなどの関与をしていると認められる関係を有すること</li>
+            <li className="list-disc">役員または経営に実質的に関与している者が、反社会的勢力と社会的に非難されるべき関係を有すること</li>
+          </ul>
+          <p className="text-sm leading-7 text-slate-600">
+            利用者は、自らまたは第三者を利用して、本サービスおよび運営者に対し、暴力的な要求行為、
+            法的責任を超えた不当な要求行為、取引に関して脅迫的な言動または暴力を用いる行為、
+            風説の流布・偽計または威力を用いて運営者の信用を毀損もしくは業務を妨害する行為、
+            その他これらに準ずる行為を行わないことを確約します。
+          </p>
+          <p className="text-sm leading-7 text-slate-600">
+            運営者は、利用者が前各項に違反した場合、何らの催告を要せず直ちに利用者による本サービスの利用を停止し、
+            または本規約に基づく契約関係を解除することができます。この場合において、利用者は運営者に生じた損害を
+            賠償する責を負い、運営者は利用者に対し一切の損害を賠償しないものとします。
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-base font-bold text-slate-900">第10条（準拠法・管轄）</h2>
           <p className="text-sm leading-7 text-slate-600">
             本規約の解釈・適用は日本法に準拠します。
             本サービスに関して紛争が生じた場合は、運営者の所在地を管轄する裁判所を
             第一審の専属的合意管轄裁判所とします。
           </p>
         </section>
-      </div>
-    </div>
+    </PageContainer>
   );
 }

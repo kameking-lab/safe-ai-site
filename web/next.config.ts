@@ -1,13 +1,17 @@
 import type { NextConfig } from "next";
 
+// GA4 (gtag.js) loads from www.googletagmanager.com and beacons to
+// www.google-analytics.com / *.analytics.google.com. AdSense loads from
+// pagead2.googlesyndication.com and renders ad iframes from
+// googleads.g.doubleclick.net and tpc.googlesyndication.com.
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://formspree.io https://generativelanguage.googleapis.com",
-  "frame-src 'none'",
+  "connect-src 'self' https://formspree.io https://generativelanguage.googleapis.com https://www.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com https://pagead2.googlesyndication.com",
+  "frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
@@ -38,14 +42,27 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
+  // Ship browser source maps in production so error reports group by original
+  // file/line. Lighthouse audit 2026-05-14 (B-14) flagged 32x missing source
+  // maps; this also makes future React #418-style hydration errors traceable
+  // (B-2 took manual repro work because of the missing maps).
+  productionBrowserSourceMaps: true,
   // 直感URL（短い・単数形・別表記・日英両パターン）から正規ページへの恒久リダイレクト
   async redirects() {
     return [
+      // Apex → www canonical (301 for unambiguous SEO consolidation; Vercel's
+      // default apex alias responds with 307 Temporary which weakens the signal).
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "anzen-ai-portal.jp" }],
+        destination: "https://www.anzen-ai-portal.jp/:path*",
+        statusCode: 301,
+      },
       // 旧Vercelドメイン → 本番カスタムドメインへの恒久転送
       {
         source: "/:path*",
         has: [{ type: "host", value: "safe-ai-site.vercel.app" }],
-        destination: "https://anzen-ai-portal.jp/:path*",
+        destination: "https://www.anzen-ai-portal.jp/:path*",
         permanent: true,
       },
       // フィードバック → コンテクスト付きお問い合わせ
@@ -59,13 +76,16 @@ const nextConfig: NextConfig = {
       { source: "/law", destination: "/laws", permanent: true },
       { source: "/accident", destination: "/accidents", permanent: true },
       { source: "/equipment-search", destination: "/equipment-finder", permanent: true },
-      { source: "/quiz", destination: "/exam-quiz", permanent: true },
+      // /quiz is now served by a real page that re-renders the /exam-quiz
+      // component with a canonical pointing at /exam-quiz. Lighthouse B-10
+      // (PR #135) measured ~316 ms wasted on the 308 redirect; the re-export
+      // collapses that hop while keeping SEO consolidated via canonical.
       { source: "/e-learn", destination: "/e-learning", permanent: true },
       { source: "/elearning", destination: "/e-learning", permanent: true },
       { source: "/support", destination: "/contact", permanent: true },
       { source: "/help", destination: "/contact", permanent: true },
       { source: "/price", destination: "/pricing", permanent: true },
-      { source: "/faq", destination: "/qa-knowledge", permanent: true },
+      // /faq now has its own page — redirect removed
       // 安全日誌（日本語2パターン）
       { source: "/anzen-nisshi", destination: "/safety-diary", permanent: true },
       { source: "/anzen-eisei-nisshi", destination: "/safety-diary", permanent: true },
@@ -82,6 +102,14 @@ const nextConfig: NextConfig = {
       { source: "/safety-signage", destination: "/signage", permanent: true },
       // KY（危険予知の日本語フルネーム）
       { source: "/kiken-yochi", destination: "/ky", permanent: true },
+      // 廃止ページ → 近接ページへ転送
+      { source: "/partnership", destination: "/contact", permanent: true },
+      // /wizard archived per content-quality audit C-3 (PR #182,
+      // docs/content-quality-audit-2026-05-16.md). The 4-step compliance
+      // wizard overlapped with /strategy/plan-generator. compliance-matrix.json
+      // is preserved in data/ for future reuse by the plan generator.
+      { source: "/wizard", destination: "/strategy/plan-generator", permanent: true },
+      { source: "/wizard/result", destination: "/strategy/plan-generator", permanent: true },
     ];
   },
   // セキュリティ・キャッシュヘッダー
@@ -91,6 +119,14 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: [
           { key: "Content-Security-Policy", value: CSP },
+          // 2 years + includeSubDomains + preload is the canonical config
+          // required by hstspreload.org for the Chrome HSTS Preload List.
+          // Site owner must submit the domain at https://hstspreload.org/
+          // separately; this header only makes the site eligible.
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
@@ -101,7 +137,7 @@ const nextConfig: NextConfig = {
       // 明示的なオーバーライドは不要（指定すると build 警告が出る）
     ];
   },
-    serverExternalPackages: ["@google-analytics/data", "@grpc/grpc-js", "google-gax"],
+    serverExternalPackages: ["@google-analytics/data", "@grpc/grpc-js", "google-gax", "google-auth-library"],
 };
 
 export default nextConfig;

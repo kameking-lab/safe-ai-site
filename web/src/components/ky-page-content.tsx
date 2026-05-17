@@ -5,7 +5,9 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { KyIndustryPresetPicker } from "@/components/ky-industry-preset-picker";
 import { KyInitialWizard } from "@/components/ky-initial-wizard";
+import { KyExamplesPanel } from "@/components/ky-examples-panel";
 import { getPresetById, type KyIndustryPreset } from "@/data/mock/ky-industry-presets";
+import type { KyExample, KyIndustryId } from "@/types/ky-example";
 import { getEntryById, loadEntries } from "@/lib/safety-diary/store";
 import { loadProfile } from "@/lib/company-profile";
 import { SITE_STATS } from "@/data/site-stats";
@@ -294,6 +296,54 @@ export function KyPageContent() {
     });
   }, []);
 
+  const [exampleNotice, setExampleNotice] = useState<string | null>(null);
+  const [profileIndustry, setProfileIndustry] = useState<KyIndustryId | undefined>(undefined);
+  useEffect(() => {
+    const profile = loadProfile();
+    if (!profile.wizardCompleted) return;
+    const map: Record<string, KyIndustryId> = {
+      construction: "construction",
+      manufacturing: "manufacturing",
+      transport: "transport",
+      logistics: "transport",
+      medical: "medical-welfare",
+      welfare: "medical-welfare",
+      care: "medical-welfare",
+      service: "service",
+      retail: "service",
+    };
+    const mapped = map[profile.industry];
+    if (mapped) setProfileIndustry(mapped);
+  }, []);
+  const handleExampleApply = useCallback((example: KyExample) => {
+    setRecord((prev) => {
+      const workRows = prev.workRows.map((r, i) =>
+        i === 0
+          ? {
+              ...r,
+              workDetail: example.title,
+              safetyInstruction:
+                example.countermeasures.slice(0, 2).join("／") || r.safetyInstruction,
+            }
+          : r
+      );
+      const riskRows = prev.riskRows.map((r, i) => {
+        if (i === 0) return r;
+        const hazardIdx = i - 1;
+        const hazard = example.hazards[hazardIdx];
+        const reduction = example.countermeasures[hazardIdx];
+        if (!hazard && !reduction) return r;
+        return {
+          ...r,
+          hazard: hazard ?? r.hazard,
+          reduction: reduction ?? r.reduction,
+        };
+      });
+      return { ...prev, workRows, riskRows };
+    });
+    setExampleNotice(`過去事例「${example.title}」を反映しました（出典: ${example.source.label}）`);
+  }, []);
+
   // /ky?preset=<id> で来た場合にプリセットを自動適用する（脚立・業種リンクから）
   // /ky?fromAccident=<id>&template=<presetId>&q=<title> も同様にテンプレ適用
   const searchParams = useSearchParams();
@@ -562,7 +612,7 @@ export function KyPageContent() {
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                {m === "simple" ? "シンプル（推奨）" : m === "detail" ? "詳細" : "カスタム"}
+                {m === "simple" ? "シンプル（推奨）" : m === "detail" ? "詳細（4ラウンド法）" : "カスタム"}
               </button>
             ))}
           </div>
@@ -630,6 +680,18 @@ export function KyPageContent() {
                   </div>
                 ))}
               </div>
+              {/* C-002: clarify 4-round KYT correspondence */}
+              <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2">
+                <p className="font-semibold text-emerald-900">4ラウンド法（KYT）との対応</p>
+                <p className="mt-1 text-emerald-800">「詳細（4ラウンド法）」モードは KYT 4ラウンド法に対応しています：</p>
+                <ul className="mt-1 space-y-0.5 text-emerald-800">
+                  <li>1R 現状把握 → 作業内容・使用機械・危険箇所の入力</li>
+                  <li>2R 本質追究 → リスク欄①「危険のポイント」の選定</li>
+                  <li>3R 対策の樹立 → リスク欄「低減措置」の記入</li>
+                  <li>4R 目標設定 → 終了確認欄の行動目標・唱和</li>
+                </ul>
+                <p className="mt-1.5 text-emerald-700">音声入力は各テキスト欄右端の 🎙 ボタンで使えます（Chrome 系ブラウザ推奨）。</p>
+              </div>
               <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
                 <p className="font-semibold text-amber-800">参加者署名の方法</p>
                 <ul className="mt-1 space-y-0.5 text-amber-700">
@@ -673,6 +735,28 @@ export function KyPageContent() {
             </button>
           </div>
         )}
+
+        {/* 過去事例から提案 */}
+        {exampleNotice && (
+          <div className="mt-3 flex items-start justify-between gap-3 rounded-xl border border-indigo-300 bg-indigo-50 px-4 py-3">
+            <p className="text-sm font-semibold text-indigo-900">✓ {exampleNotice}</p>
+            <button
+              type="button"
+              onClick={() => setExampleNotice(null)}
+              className="rounded px-1.5 text-indigo-700 hover:bg-indigo-100"
+              aria-label="通知を閉じる"
+            >
+              ×
+            </button>
+          </div>
+        )}
+        <div className="mt-3">
+          <KyExamplesPanel
+            defaultIndustry={profileIndustry}
+            workContextText={workContextStr}
+            onApply={handleExampleApply}
+          />
+        </div>
 
         {/* Industry preset */}
         <div className="mt-3">

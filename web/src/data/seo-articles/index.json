@@ -4,15 +4,17 @@
     "start": "2026-05-01",
     "perDay": 12
   },
+  "archived": {
+    "removedCategories": ["seasonal", "legal", "subsidies", "international"],
+    "removedCount": 202,
+    "removedAt": "2026-05-16",
+    "reason": "Audit PR #182 D-1: templated bodies (no per-article MHLW anchor) removed to reduce brand-risk for a consultant-branded portal."
+  },
   "totals": {
     "circulars": 1158,
     "accidents": 500,
     "chemicals": 100,
-    "seasonal": 52,
-    "legal": 60,
-    "subsidies": 30,
-    "international": 60,
-    "total": 1960
+    "total": 1758
   },
   "files": [
     {
@@ -39,26 +41,6 @@
       "category": "chemicals",
       "file": "seo-articles-chemicals.jsonl",
       "count": 100
-    },
-    {
-      "category": "seasonal",
-      "file": "seo-articles-seasonal.jsonl",
-      "count": 52
-    },
-    {
-      "category": "legal",
-      "file": "seo-articles-legal.jsonl",
-      "count": 60
-    },
-    {
-      "category": "subsidies",
-      "file": "seo-articles-subsidies.jsonl",
-      "count": 30
-    },
-    {
-      "category": "international",
-      "file": "seo-articles-international.jsonl",
-      "count": 60
     }
   ]
 }

@@ -62,7 +62,7 @@ const PINNED_TOPICS: PinnedTopic[] = [
     triggers: ["有機溶剤健康診断", "有機溶剤健診", "有機溶剤の健康診断"],
     pins: [
       { law: "有機溶剤中毒予防規則", articleNum: "第29条" },
-      { law: "有機溶剤中毒予防規則", articleNum: "第29条の2" },
+      { law: "有機溶剤中毒予防規則", articleNum: "第30条" },
     ],
   },
   {
@@ -281,7 +281,7 @@ const PINNED_TOPICS: PinnedTopic[] = [
       "安衛令20条",
       "施行令第20条",
       "施行令20条",
-      // ガス溶接（第15号）
+      // ガス溶接（第10号）
       "ガス溶接技能講習",
       "ガス溶接",
       "ガス溶断",
@@ -290,21 +290,22 @@ const PINNED_TOPICS: PinnedTopic[] = [
       "ガス溶接の資格",
       "ガス溶接資格",
       "可燃性ガス",
-      "施行令20条11号",
-      // 玉掛け（第14号）
+      "施行令20条10号",
+      "20条第10号",
+      // 玉掛け（第16号）
       "玉掛け資格",
       "玉掛けの資格",
       "玉掛け技能講習",
       "玉掛けの業務",
-      "施行令20条14号",
-      "20条第14号",
-      // 移動式クレーン（第6号）
+      "施行令20条16号",
+      "20条第16号",
+      // 移動式クレーン（第7号）
       "移動式クレーン資格",
       "移動式クレーンの資格",
       "移動式クレーン運転資格",
       "移動式クレーン運転士",
-      "施行令20条6号",
-      "20条第6号",
+      "施行令20条7号",
+      "20条第7号",
       // 車両系建設機械（第12号）
       "車両系建設機械",
       "車両系建設機械の資格",
@@ -312,14 +313,15 @@ const PINNED_TOPICS: PinnedTopic[] = [
       "機体重量3トン",
       "施行令20条12号",
       "20条第12号",
-      // 電気取扱業務（第16号）
-      "電気取扱業務",
-      "高圧充電電路",
-      "特別高圧",
       // 発破（第1号）
       "発破技士",
-      // 揚貨装置（第8号）
+      // 揚貨装置（第2号）
       "揚貨装置運転士",
+      // 潜水業務（第9号）
+      "潜水士",
+      "潜水業務",
+      // 高所作業車（第15号）
+      "高所作業車運転",
     ],
     pins: [
       { law: "労働安全衛生法", articleNum: "第61条" },
@@ -498,21 +500,41 @@ export function searchRelevantArticlesWithScore(
  * 日本語の助詞（は・が・を・に・で・の・も・と・へ・や・か）でも分割し、
  * スペース無しで続けて入力された質問でも意味単位に分解できるようにする。
  */
+/** 条番号パターン（「第」なし揺らぎ含む） */
+const ARTICLE_NUM_RE =
+  /第\d+条(?:の\d+)?(?:第\d+項)?(?:第\d+号)?/g;
+
 function tokenize(text: string): string[] {
   const fuzzyNormalized = normalizeSearchText(text);
 
-  const normalized = fuzzyNormalized
+  // Fix 2a: 「第」なし数字+条 を正規化（例: "565条" → "第565条"）
+  // (?<![第\d]) で「直前が 第 または数字」の場合はスキップする。
+  // これにより "第565条" の途中の "65条" が誤マッチするのを防ぐ。
+  const withNormNums = fuzzyNormalized.replace(
+    /(?<![第\d])(\d+条(?:の\d+)?)/g,
+    "第$1"
+  );
+
+  // Fix 2b: 条番号トークンを先抽出して汎用分割から保護する
+  const articleNumTokens: string[] = [];
+  const withoutArticleNums = withNormNums.replace(ARTICLE_NUM_RE, (match) => {
+    articleNumTokens.push(match);
+    return " ";
+  });
+
+  // 汎用トークナイズ（残テキスト）
+  const normalized = withoutArticleNums
     .replace(/[？?！!。、.,\s　]/g, " ")
     .replace(/[（）()「」『』【】\[\]]/g, " ")
-    // 主要な日本語助詞・助動詞で分割（これらの前後は別トークン扱い）
-    .replace(/(は|が|を|に|で|の|も|と|へ|や|か|から|まで|より|など|について|に関する)/g, " ");
+    // 主要な日本語助詞・助動詞で分割（長い候補を先に評価して残骸を防ぐ）
+    .replace(/(について|に関する|から|まで|より|など|は|が|を|に|で|の|も|と|へ|や|か)/g, " ");
 
-  const tokens = normalized
+  const generalTokens = normalized
     .split(" ")
     .map((t) => t.trim())
     .filter((t) => t.length >= 2);
 
-  return [...new Set(tokens)];
+  return [...new Set([...articleNumTokens, ...generalTokens])];
 }
 
 /**
@@ -527,7 +549,11 @@ function calcScore(article: LawArticle, queryTokens: string[]): number {
   const textNorm = normalizeSearchText(article.text);
   const titleNorm = normalizeSearchText(article.articleTitle);
   const articleNumLower = article.articleNum.toLowerCase();
-  const lawNorm = normalizeSearchText(article.law + article.lawShort);
+  // Fix 4: 括弧とその中身を除去してから法令名を正規化する。
+  // "労働安全衛生規則（足場等）" → "労働安全衛生規則" として比較するため、
+  // law フィールドの表記ゆれ（括弧あり/なし混在）を統一する。元データは変更しない。
+  const lawWithoutParens = article.law.replace(/[（(][^）)]*[）)]/g, "");
+  const lawNorm = normalizeSearchText(lawWithoutParens + article.lawShort);
 
   let matchedTokenCount = 0;
 
@@ -549,7 +575,21 @@ function calcScore(article: LawArticle, queryTokens: string[]): number {
     }
 
     // 条文番号のマッチ（高スコア）
-    if (articleNumLower.includes(tokenLower)) {
+    // 条番号形状トークン（/^第\d+条/）は双方向 startsWith で厳密比較する。
+    // これにより "第5条" が "第51条" に誤ってマッチするのを防ぎ、かつ
+    // "第61条第1項第3号" のような詳細参照が "第61条" 記事に正しくマッチする。
+    // tokenLower.startsWith(articleNumLower) は「トークンが 第 で始まる項/号付き参照」
+    // の場合のみ許可。数字で続く場合（例: "第151条の67" が "第151条の6" にマッチ）は誤検知のため除外。
+    if (/^第\d+条/.test(tokenLower)) {
+      if (
+        articleNumLower === tokenLower ||
+        articleNumLower.startsWith(tokenLower) ||
+        (tokenLower.startsWith(articleNumLower) && tokenLower[articleNumLower.length] === "第")
+      ) {
+        score += 10;
+        tokenMatched = true;
+      }
+    } else if (articleNumLower.includes(tokenLower)) {
       score += 10;
       tokenMatched = true;
     }

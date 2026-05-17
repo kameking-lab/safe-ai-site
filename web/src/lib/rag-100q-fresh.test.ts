@@ -49,7 +49,11 @@ const fixturePath = resolve(process.cwd(), "test/chatbot-fresh-100.json");
 const fixture = JSON.parse(readFileSync(fixturePath, "utf8")) as FreshFixture;
 
 describe("RAG 100問ベンチマーク (fresh)", () => {
-  it(`fresh セットの正答率が ${TARGET_ACCURACY * 100}% 以上であること`, () => {
+  // 100問を逐次評価する CPU バウンドな処理で、コーパス拡張により CI 上で
+  // 5秒のデフォルトを超えることがあるため timeout を 30秒に拡張する。
+  // 精度判定（>= TARGET_ACCURACY）は assertion 側で担保しているので、
+  // 実時間オーバーで失敗扱いになるのを防ぐのが目的。
+  it(`fresh セットの正答率が ${TARGET_ACCURACY * 100}% 以上であること`, { timeout: 30000 }, () => {
     let correct = 0;
     const failures: Array<{
       id: number;

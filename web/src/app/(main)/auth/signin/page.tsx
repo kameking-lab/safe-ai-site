@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
 import { LogIn } from "lucide-react";
 import { signIn } from "@/auth";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
 
 export const metadata: Metadata = {
   title: "ログイン",
-  description: "安全AIポータルにログインしてKY用紙・チャット履歴・法人プラン機能をご利用ください。",
-  openGraph: {
+  description: "安全AIポータルにログインして、KY用紙・チャット履歴・お気に入り条文などのログイン限定機能をご利用ください。",
+  alternates: { canonical: "/auth/signin" },
+  robots: { index: false, follow: false },
+  openGraph: withSiteOpenGraph("/auth/signin", {
     title: "ログイン",
-    description: "安全AIポータルにログインしてKY用紙・チャット履歴・法人プラン機能をご利用ください。",
-  },
+    description: "安全AIポータルにログインして、KY用紙・チャット履歴・お気に入り条文などのログイン限定機能をご利用ください。",
+  }),
 };
 
 export default function SignInPage() {
@@ -20,7 +23,7 @@ export default function SignInPage() {
         </div>
         <h1 className="text-xl font-bold text-slate-900 mb-2">ログイン</h1>
         <p className="text-sm text-slate-500 mb-8 leading-6">
-          アカウントにログインして、KY用紙・チャット履歴・法人プラン機能をご利用ください。
+          アカウントにログインして、KY用紙・チャット履歴・お気に入り条文などのログイン限定機能をご利用ください。
         </p>
 
         <form

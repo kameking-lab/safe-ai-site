@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpen, ExternalLink, Sparkles } from "lucide-react";
+import { BookOpen, ExternalLink, Sparkles } from "lucide-react";
+import { Breadcrumb } from "@/components/breadcrumb";
 
 export type ScaffoldLink = {
   label: string;
@@ -68,6 +69,10 @@ export function ScaffoldPage({
       }
     : null;
 
+  const breadcrumbItems = canonicalPath
+    ? [{ name: sectionName, href: backHref }, { name: title }]
+    : [{ name: sectionName, href: backHref }];
+
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
       {breadcrumbLd && (
@@ -77,13 +82,7 @@ export function ScaffoldPage({
         />
       )}
       <div className="mb-4">
-        <Link
-          href={backHref}
-          className="inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 py-1 text-sm text-slate-600 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-          {backLabel}
-        </Link>
+        <Breadcrumb items={breadcrumbItems} />
       </div>
 
       <header className="mb-5">

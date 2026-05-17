@@ -1,0 +1,70 @@
+{
+  "year": 2025,
+  "source": {
+    "site": "厚生労働省 労働災害発生状況速報値",
+    "url": "https://anzeninfo.mhlw.go.jp/information/sokuhou.html",
+    "license": "政府標準利用規約（第2.0版）CC BY 4.0互換",
+    "filename": "25-15.xlsx",
+    "as_of": "令和8年3月6日現在（令和8年3月6日ダウンロード）"
+  },
+  "extracted_at": "2026-05-14",
+  "data_type": "aggregate_preliminary",
+  "note": "Individual case records (個票) are NOT available. This is aggregate statistics only. R07 opendata not yet published as of extraction date.",
+  "calendar_year": "令和7年（2025年）",
+  "coverage_months": "令和7年1月〜12月（速報値。令和8年3月6日現在）",
+  "comparison_year": "令和6年（2024年・確定値）",
+  "deaths": {
+    "total": 684,
+    "prev_year": 724,
+    "change": -40,
+    "change_pct": -5.5
+  },
+  "deaths_by_industry": {
+    "全産業": 684,
+    "製造業": 115,
+    "鉱業": 6,
+    "建設業": 209,
+    "交通運輸事業": 12,
+    "陸上貨物運送事業": 77,
+    "港湾運送業": 9,
+    "林業": 25,
+    "農業、畜産・水産業": 41,
+    "第三次産業": 190,
+    "商業": 77,
+    "保健衛生業": 60
+  },
+  "deaths_by_accident_type": {
+    "墜落・転落": 182,
+    "転倒": 21,
+    "飛来・落下": 27,
+    "激突され": 36,
+    "はさまれ・巻き込まれ": 58,
+    "交通事故（道路）": 114
+  },
+  "deaths_by_industry_and_type": {
+    "建設業": {
+      "墜落・転落": 88,
+      "飛来・落下": 8,
+      "激突され": 22,
+      "はさまれ・巻き込まれ": 5,
+      "交通事故（道路）": 14
+    },
+    "製造業": {
+      "墜落・転落": 28,
+      "はさまれ・巻き込まれ": 47,
+      "有害物等との接触": 6
+    },
+    "陸上貨物運送事業": {
+      "交通事故（道路）": 43,
+      "はさまれ・巻き込まれ": 4
+    },
+    "林業": {
+      "墜落・転落": 13,
+      "激突され": 9
+    },
+    "第三次産業": {
+      "商業交通事故（道路）": 43,
+      "保健衛生業": 60
+    }
+  }
+}

@@ -5,6 +5,7 @@ import { ChatbotPanel } from "@/components/chatbot-panel";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { useTranslation } from "@/contexts/language-context";
+import { PageContainer } from "@/components/layout";
 
 const CORE_LAWS = [
   { ja: "安衛法", en: "OSH Act (安衛法)" },
@@ -54,7 +55,7 @@ export function ChatbotBody() {
   const guide = isEn ? USAGE_GUIDE.en : USAGE_GUIDE.ja;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
+    <PageContainer width="wide">
       <TranslatedPageHeader
         titleJa="安衛法AIチャットボット"
         titleEn="Occupational Safety Law AI Chat"
@@ -104,7 +105,21 @@ export function ChatbotBody() {
 
       {/* Chat panel */}
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
-        <Suspense fallback={<div className="text-sm text-slate-400">{isEn ? "Loading…" : "読み込み中…"}</div>}>
+        <Suspense
+          fallback={
+            <div
+              role="status"
+              aria-live="polite"
+              aria-busy="true"
+              className="space-y-3"
+            >
+              <span className="sr-only">{isEn ? "Loading" : "読み込み中"}</span>
+              <div className="h-12 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+              <div className="h-32 animate-pulse rounded-lg bg-slate-100 dark:bg-slate-800" />
+              <div className="h-10 w-2/3 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+            </div>
+          }
+        >
           <ChatbotPanel />
         </Suspense>
       </div>
@@ -151,6 +166,6 @@ export function ChatbotBody() {
           },
         ]}
       />
-    </main>
+    </PageContainer>
   );
 }

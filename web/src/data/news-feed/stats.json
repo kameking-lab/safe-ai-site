@@ -1,0 +1,358 @@
+{
+  "generatedAt": "2026-05-16T23:24:31.038Z",
+  "counts": {
+    "approved": 3,
+    "rejected": 5,
+    "total": 8,
+    "approvalRate": 0.375
+  },
+  "byDay": [
+    {
+      "date": "2026-05-16",
+      "approved": 3,
+      "rejected": 5,
+      "total": 8,
+      "approvalRate": 0.375
+    }
+  ],
+  "byPublisher": [
+    {
+      "publisher": "厚生労働省",
+      "approved": 3,
+      "rejected": 2,
+      "total": 5,
+      "approvalRate": 0.6
+    },
+    {
+      "publisher": "日本放送協会",
+      "approved": 0,
+      "rejected": 3,
+      "total": 3,
+      "approvalRate": 0
+    }
+  ],
+  "byEstimatedWorkCategory": [
+    {
+      "category": "建設業",
+      "approved": 0,
+      "rejected": 2,
+      "total": 2,
+      "approvalRate": 0
+    },
+    {
+      "category": "その他の事業",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
+    }
+  ],
+  "byEstimatedAccidentType": [
+    {
+      "type": "熱中症",
+      "approved": 0,
+      "rejected": 3,
+      "total": 3,
+      "approvalRate": 0
+    },
+    {
+      "type": "有害物質",
+      "approved": 0,
+      "rejected": 2,
+      "total": 2,
+      "approvalRate": 0
+    }
+  ],
+  "scoreHistograms": {
+    "relevance": {
+      "buckets": [
+        "0-9",
+        "10-19",
+        "20-29",
+        "30-39",
+        "40-49",
+        "50-59",
+        "60-69",
+        "70-79",
+        "80-89",
+        "90-100"
+      ],
+      "approved": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        2
+      ],
+      "rejected": [
+        0,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2
+      ]
+    },
+    "copyrightRisk": {
+      "buckets": [
+        "0-9",
+        "10-19",
+        "20-29",
+        "30-39",
+        "40-49",
+        "50-59",
+        "60-69",
+        "70-79",
+        "80-89",
+        "90-100"
+      ],
+      "approved": [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rejected": [
+        2,
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "misinformationRisk": {
+      "buckets": [
+        "0-9",
+        "10-19",
+        "20-29",
+        "30-39",
+        "40-49",
+        "50-59",
+        "60-69",
+        "70-79",
+        "80-89",
+        "90-100"
+      ],
+      "approved": [
+        3,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rejected": [
+        5,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "duplication": {
+      "buckets": [
+        "0-9",
+        "10-19",
+        "20-29",
+        "30-39",
+        "40-49",
+        "50-59",
+        "60-69",
+        "70-79",
+        "80-89",
+        "90-100"
+      ],
+      "approved": [
+        0,
+        2,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "rejected": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        2,
+        1,
+        0
+      ]
+    }
+  },
+  "rejectionReasonRanks": [
+    {
+      "reason": "duplication",
+      "count": 5
+    },
+    {
+      "reason": "relevance",
+      "count": 3
+    }
+  ],
+  "samples": {
+    "approved": [
+      {
+        "headline": "第185回労働政策審議会安全衛生分科会（開催案内）",
+        "aiSummary": "厚生労働省が労働安全衛生政策を議論する分科会の開催を案内。",
+        "score": {
+          "relevance": 95,
+          "copyrightRisk": 5,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-05-16T00:09:20.104Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
+        "headline": "「第１回 個人事業者等安全衛生推進協議会」を５月13日に開催します",
+        "aiSummary": "厚生労働省が個人事業主の安全衛生推進に向け、初の協議会を5月13日に開催する。",
+        "score": {
+          "relevance": 88,
+          "copyrightRisk": 5,
+          "misinformationRisk": 2,
+          "duplication": 10,
+          "judgedAt": "2026-05-16T00:09:25.863Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
+        "headline": "令和８年度第２回「石綿に係る疾病の業務上外に関する検討会」を開催します",
+        "aiSummary": "厚生労働省がアスベスト関連疾病の業務起因性に関する検討会を開催。",
+        "score": {
+          "relevance": 95,
+          "copyrightRisk": 5,
+          "misinformationRisk": 0,
+          "duplication": 20,
+          "judgedAt": "2026-05-16T00:09:40.186Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      }
+    ],
+    "rejected": [
+      {
+        "headline": "エアコン使用でも熱中症で死亡 周囲が高齢者などに声かけを",
+        "aiSummary": "エアコン使用環境下でも熱中症で死亡する事例が発生。高齢者などへの注意喚起を促す。",
+        "score": {
+          "relevance": 20,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 70,
+          "judgedAt": "2026-05-16T00:09:08.280Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 20 < 70 (not labor-safety related)",
+            "duplication 70 > 50 (already covered in accident DB)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "全国的に気温上昇 真夏日になるところも 熱中症対策を",
+        "aiSummary": "全国的に気温が上昇し、熱中症予防が呼びかけられている。",
+        "score": {
+          "relevance": 15,
+          "copyrightRisk": 5,
+          "misinformationRisk": 5,
+          "duplication": 85,
+          "judgedAt": "2026-05-16T00:08:54.645Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 15 < 70 (not labor-safety related)",
+            "duplication 85 > 50 (already covered in accident DB)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "16日からさらに気温上昇 真夏日も  小中学校でも熱中症対策",
+        "aiSummary": "全国的に気温上昇し真夏日予想。小中学校で熱中症対策を強化するよう呼びかけ。",
+        "score": {
+          "relevance": 15,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 75,
+          "judgedAt": "2026-05-16T00:09:01.226Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 15 < 70 (not labor-safety related)",
+            "duplication 75 > 50 (already covered in accident DB)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "第５２回特定石綿被害建設業務労働者等認定審査会　開催案内",
+        "aiSummary": "厚生労働省が特定石綿被害建設業務労働者等の認定審査会開催を案内。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 5,
+          "misinformationRisk": 5,
+          "duplication": 65,
+          "judgedAt": "2026-05-16T00:09:13.740Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "duplication 65 > 50 (already covered in accident DB)"
+          ]
+        },
+        "publisher": "厚生労働省"
+      },
+      {
+        "headline": "第34回特定石綿被害建設業務労働者等認定審査会専門委員会　開催案内",
+        "aiSummary": "建設業の石綿被害労働者に関する認定審査会が開催される。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 65,
+          "judgedAt": "2026-05-16T00:09:32.749Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "duplication 65 > 50 (already covered in accident DB)"
+          ]
+        },
+        "publisher": "厚生労働省"
+      }
+    ]
+  }
+}

@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LawsPageClient } from "@/components/laws-page-client";
+import { PageSkeleton } from "@/components/skeleton";
 import { RelatedPageCards } from "@/components/related-page-cards";
+import { LawHubNav } from "@/components/law-hub-nav";
 import { ogImageUrl } from "@/lib/og-url";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { JsonLd, articleListSchema } from "@/components/json-ld";
+import { SITE_URL } from "@/lib/seo-metadata";
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
 
 const _title = "安全衛生法 改正情報一覧 最新";
@@ -11,17 +15,17 @@ const _desc =
   "2016年〜2026年の労働安全衛生法・化学物質管理など100件以上の法改正をAI要約付きで確認。e-Gov・厚労省通達へのリンク付き。安全担当者に。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/laws" },
   title: _title,
   description: _desc,
-  openGraph: {
-    title: `${_title}｜安全AIポータル`,
+  openGraph: withSiteOpenGraph("/laws", {
+    title: _title,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
+  }),
+  twitter: withSiteTwitter({
     images: [ogImageUrl(_title, _desc)],
-  },
+  }),
 };
 
 export default function LawsPage() {
@@ -29,7 +33,7 @@ export default function LawsPage() {
     realLawRevisions.map((r) => ({
       headline: r.title,
       datePublished: r.publishedAt,
-      url: r.source_url ?? `https://www.anzen-ai-portal.jp/laws`,
+      url: r.source_url ?? `${SITE_URL}/laws`,
       description: r.summary,
     }))
   );
@@ -37,12 +41,21 @@ export default function LawsPage() {
   return (
     <>
       <JsonLd schema={lawSchema} />
-      <Suspense fallback={<p className="px-4 py-6 text-sm text-slate-600">読み込み中…</p>}>
+      {/* C-004: law-hub quick-nav — surface scattered law tools at the top to reduce navigation depth */}
+      <LawHubNav current="laws" />
+      <Suspense fallback={<PageSkeleton label="法改正一覧を読み込み中" />}>
         <LawsPageClient />
       </Suspense>
       <RelatedPageCards
         heading="合わせて使う"
         pages={[
+          {
+            href: "/law-hierarchy",
+            label: "法令階層マップ",
+            description: "労働安全衛生法を頂点とした政令・省令・告示・通達の階層を一枚で俯瞰。各法令から e-Gov 公式条文・条文検索・関連通達一覧へ直接遷移。",
+            color: "rose",
+            cta: "階層マップを開く",
+          },
           {
             href: "/laws/glossary",
             label: "法令用語集",
