@@ -278,11 +278,11 @@ export function WeatherForecastPanel() {
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-bold text-slate-900">都道府県別 気象警報・注意報</h2>
               {jmaLoading && (
-                <span className="text-xs text-slate-400 animate-pulse">更新中…</span>
+                <span className="text-xs text-slate-500 animate-pulse">更新中…</span>
               )}
             </div>
             <JapanPrefectureWarningMap levelsByIso={jmaLevels} />
-            <p className="mt-2 text-[11px] text-slate-400">
+            <p className="mt-2 text-[11px] text-slate-500">
               ※ 8地域ブロック代表地点の予報から強風・降水の目安を色分けしています。
               気象庁の実際の警報・注意報は
               <a
@@ -454,7 +454,7 @@ export function WeatherForecastPanel() {
         </div>
       )}
 
-      <p className="text-[11px] text-slate-400">
+      <p className="text-[11px] text-slate-500">
         天気予報データ: Open-Meteo（無料・オープンデータ）。気象警報は気象庁データを参照。
         予報は参考値です。現場では必ず最新の気象情報を確認してください。
       </p>

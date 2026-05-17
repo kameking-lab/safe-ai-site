@@ -7,6 +7,7 @@ const DESCRIPTION =
   "LGBTQ当事者（トランスジェンダー・ノンバイナリー含む）が安全に働くための職場配慮。トイレ・更衣室のアクセス、SOGIハラスメント防止、社内制度（パートナーシップ等）と労働安全衛生の接続を整理します。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/diversity/lgbtq" },
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {

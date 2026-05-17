@@ -256,10 +256,52 @@ table {
     min-width: 48px;
     touch-action: manipulation;
   }
+  /**
+   * 2026-05-17 モバイルUX監査(40ページ×4ビューポート=160サンプル)で、
+   * `<button>` と `[role=button]` のうち w/h<44px のものが 6,380 件検出された。
+   * 主要因はヘッダーのアイコンボタン(36px)/ハンバーガー(33px)等のクローム要素。
+   * WCAG 2.5.5(AAA) と iOS HIG の最小タップサイズ 44x44 を満たすため、
+   * data-compact 以外のすべてに 44x44 を保証する。インラインの小さなテキストリンク
+   * (`a[href]` 単体) は対象外とし、`role=button` を付けたボタン化リンクのみ広げる。
+   */
+  button:not([data-compact]):not(.sr-only),
+  [role="button"]:not([data-compact]):not(.sr-only),
+  a[role="button"]:not([data-compact]):not(.sr-only),
+  [role="tab"]:not([data-compact]),
+  [role="menuitem"]:not([data-compact]),
+  input[type="submit"]:not([data-compact]),
+  input[type="button"]:not([data-compact]) {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
   button[data-compact],
   a[data-compact] {
     min-height: 0;
     min-width: 0;
+  }
+}
+
+/**
+ * 2026-05-17 モバイルUX監査: 25,930 件の <14px テキストが検出された。
+ * 主要因は `text-xs` (12px) と arbitrary `text-[10-13px]` の多用。
+ * iPhone SE/Android 縦持ち(<=480px)では Tailwind の text-xs / 小さい arbitrary を
+ * 14px に底上げし、屋外/手袋/老眼でも読める最低ラインを担保する。
+ * `data-compact-text` を付けた要素はオプトアウト可能(legend/サイネージなど)。
+ */
+@media (max-width: 480px) {
+  .text-xs:not([data-compact-text]),
+  .text-2xs:not([data-compact-text]),
+  .text-\[10px\]:not([data-compact-text]),
+  .text-\[11px\]:not([data-compact-text]),
+  .text-\[12px\]:not([data-compact-text]),
+  .text-\[13px\]:not([data-compact-text]) {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.45;
+  }
+  small:not([data-compact-text]),
+  figcaption:not([data-compact-text]) {
+    font-size: 0.875rem; /* 14px */
   }
 }
 
@@ -358,5 +400,148 @@ table {
     padding-top: 2mm;
     display: flex !important;
     justify-content: space-between;
+  }
+
+  /**
+   * 安全衛生計画書プレビュー（/strategy/plan-generator/preview/*）の印刷スタイル。
+   * グローバルでは <header>/<footer>/<nav> を非表示にしているが、計画書本体は
+   * <article class="plan-print-root"> 内なので、その配下では再表示する。
+   *
+   * A4 縦・上下15mm / 左右12mm のマージンで A4 印刷向けに最適化。表紙と目次の
+   * 直後でページ分割し、各セクション見出しはページ先頭に来るよう page-break を
+   * 制御する。
+   */
+  .plan-print-root,
+  .plan-print-root header,
+  .plan-print-root footer,
+  .plan-print-root nav,
+  .plan-print-root section {
+    display: block !important;
+  }
+  .plan-print-root .plan-cover {
+    page-break-after: always;
+  }
+  .plan-print-root .plan-toc {
+    page-break-after: always;
+  }
+  .plan-print-root section {
+    page-break-inside: auto;
+  }
+  .plan-print-root section + section {
+    page-break-before: auto;
+  }
+  .plan-print-root section > h2 {
+    page-break-after: avoid;
+  }
+  /* TOC のリンクは PDF 出力時に URL を表示しない */
+  .plan-print-root .plan-toc a[href^="#"]::after {
+    content: "" !important;
+  }
+  .plan-print-root {
+    color: black !important;
+  }
+  .plan-print-root h1 {
+    font-size: 16pt;
+  }
+  .plan-print-root h2 {
+    font-size: 13pt;
+    page-break-after: avoid;
+    margin-top: 10mm;
+  }
+  .plan-print-root h3 {
+    font-size: 11pt;
+    page-break-after: avoid;
+  }
+  .plan-print-root section {
+    page-break-inside: auto;
+  }
+  .plan-print-root table {
+    page-break-inside: auto;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .plan-print-root table th,
+  .plan-print-root table td {
+    border: 1px solid #999 !important;
+    padding: 4pt 6pt !important;
+  }
+  .plan-print-root tr,
+  .plan-print-root li {
+    page-break-inside: avoid;
+  }
+  /* URL 脚注は計画書プレビューでは不要（参照は本文に明記済み） */
+  .plan-print-root a[href^="http"]::after {
+    content: "" !important;
+  }
+
+  /**
+   * 業種別事故分析レポート（/accidents-reports/[industry]）の印刷スタイル。
+   * - A4 縦・15mm/12mm マージン
+   * - 固定ヘッダー（社名・発行日）と固定フッター（出典・ページ番号）
+   * - 30 項目チェックリストはカテゴリ単位でページ分割
+   * - URL の脚注付与は無効化（PDF 配布時のノイズを排除）
+   */
+  .accident-report-print-root {
+    color: black !important;
+  }
+  .accident-report-print-root header,
+  .accident-report-print-root section {
+    display: block !important;
+  }
+  .accident-report-print-root h1 {
+    font-size: 16pt;
+    page-break-after: avoid;
+  }
+  .accident-report-print-root h2 {
+    font-size: 12pt;
+    page-break-after: avoid;
+    margin-top: 6mm;
+  }
+  .accident-report-print-root h3 {
+    font-size: 10pt;
+    page-break-after: avoid;
+  }
+  .accident-report-print-root ol,
+  .accident-report-print-root ul,
+  .accident-report-print-root li,
+  .accident-report-print-root .recharts-wrapper,
+  .accident-report-print-root section > div {
+    page-break-inside: avoid;
+  }
+  /* リーフレット用の URL 脚注はレポートでは不要 */
+  .accident-report-print-root a[href^="http"]::after {
+    content: "" !important;
+  }
+
+  /* ヘッダー帯（最初のページ上部に表示。固定にすると重なるため流し込み） */
+  .accident-report-print-root .report-print-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #475569;
+    padding-bottom: 3mm;
+    margin-bottom: 4mm;
+  }
+  .accident-report-print-root .report-print-header img {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* フッター（全ページに固定表示、ページ番号入り） */
+  .accident-report-print-root .report-print-footer {
+    position: fixed;
+    bottom: 4mm;
+    left: 12mm;
+    right: 12mm;
+    border-top: 1px solid #94a3b8;
+    padding-top: 1.5mm;
+    font-size: 7.5pt;
+    color: #334155;
+    display: flex;
+    justify-content: space-between;
+  }
+  /* CSS counter ベースのページ番号。@page で auto-increment される */
+  .accident-report-print-root .report-print-pagenum::after {
+    content: "ページ " counter(page);
   }
 }

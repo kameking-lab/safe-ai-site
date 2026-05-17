@@ -19,14 +19,14 @@ const ROOT = process.cwd();
 const SEO_DIR = path.join(ROOT, "web/src/data/seo-articles");
 const MAX_PER_FILE = 500;
 
+// Audit PR #182 D-1: seasonal/legal/subsidies/international were templated
+// bodies with no per-article MHLW anchor and were archived in
+// refactor/archive-ai-generated-articles. Keep only categories tied to real
+// MHLW notices, accident IDs, or chemical entries.
 const TARGETS = {
   circulars: 1158,
   accidents: 500,
   chemicals: 100,
-  seasonal: 52,
-  legal: 60,
-  subsidies: 30,
-  international: 60,
 };
 
 const M1_START = "2026-05-01"; // 公開開始日
@@ -966,14 +966,10 @@ async function main() {
     ].slice(0, TARGETS.circulars),
     accidents: generateAccidentArticles(sources.deaths, TARGETS.accidents),
     chemicals: generateChemicalArticles(sources.chemCompact, TARGETS.chemicals),
-    seasonal: generateSeasonalArticles().slice(0, TARGETS.seasonal),
-    legal: generateLegalArticles(sources.lawCompact, TARGETS.legal),
-    subsidies: generateSubsidyArticles(sources.subsidies, TARGETS.subsidies),
-    international: generateInternationalArticles(TARGETS.international),
   };
 
   // カテゴリ単位で id/slug/publishedAt/翻訳付与
-  const order = ["circulars", "accidents", "chemicals", "seasonal", "legal", "subsidies", "international"];
+  const order = ["circulars", "accidents", "chemicals"];
   const articlesByCat = {};
   let globalIdx = 0;
   for (const cat of order) {

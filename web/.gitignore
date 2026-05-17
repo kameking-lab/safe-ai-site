@@ -18,6 +18,7 @@ yarn.lock
 /coverage
 /test-results/
 /playwright-report/
+/audit-out/
 
 # next.js
 /.next/

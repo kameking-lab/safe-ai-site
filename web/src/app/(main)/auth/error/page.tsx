@@ -4,6 +4,7 @@ import { AlertTriangle } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "ログインエラー",
+  robots: { index: false },
   openGraph: {
     title: "ログインエラー",
   },

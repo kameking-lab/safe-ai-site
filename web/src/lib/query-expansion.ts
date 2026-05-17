@@ -20,6 +20,7 @@ const EXPANSION_RULES: ExpansionRule[] = [
   { pattern: /命綱|安全帯/, expansions: ["墜落制止用器具", "フルハーネス", "ランヤード"] },
 
   // 作業・教育系
+  { pattern: /特別教育/, expansions: ["安衛則第36条", "特別の教育"] },
   { pattern: /足場/, expansions: ["特別教育", "技能講習", "作業主任者"] },
   { pattern: /高所/, expansions: ["墜落制止用器具", "墜落防止"] },
   { pattern: /玉掛け/, expansions: ["技能講習", "特別教育"] },

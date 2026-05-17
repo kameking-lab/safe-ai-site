@@ -340,8 +340,9 @@ function buildReport(seoData, sourceData, generatedAt) {
   p('');
   p('| カテゴリ | 記事数 | 期待数 | 過不足 | ファイル数 |');
   p('|---------|--------|--------|--------|-----------|');
-  const catOrder = ['circulars', 'accidents', 'chemicals', 'seasonal', 'legal', 'subsidies', 'international'];
-  const expectedMap = { circulars: 1158, accidents: 500, chemicals: 100, seasonal: 52, legal: 60, subsidies: 30, international: 60 };
+  // Audit PR #182 D-1: seasonal/legal/subsidies/international archived.
+  const catOrder = ['circulars', 'accidents', 'chemicals'];
+  const expectedMap = { circulars: 1158, accidents: 500, chemicals: 100 };
   for (const cat of catOrder) {
     const stat = seoData.categoryStats[cat];
     if (!stat) {

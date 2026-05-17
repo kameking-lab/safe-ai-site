@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   title: "環境変数 棚卸し | Admin",
 };
 
-const VALID_KEY = "anzenai2026";
+const VALID_KEY = process.env.STRATEGY_AUTH_PASSWORD ?? "";
 
 interface Props {
   searchParams: Promise<{ key?: string }>;

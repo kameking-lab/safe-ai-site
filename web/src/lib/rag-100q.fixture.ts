@@ -154,4 +154,9 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 110, topic: "就業制限", question: "つり上げ荷重1トン以上の移動式クレーンを運転するために必要な資格の根拠条文は？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }] },
   { id: 111, topic: "就業制限", question: "機体重量3トン以上の車両系建設機械の運転に必要な技能講習の根拠となる政令の条文は？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }] },
   { id: 112, topic: "就業制限", question: "可燃性ガスと酸素を使って金属を溶接・溶断するガス溶接の資格（技能講習）の根拠条文は？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }] },
+
+  // O. 特別教育・移動式クレーン資格 (113-115) – query-expansion 検証
+  { id: 113, topic: "教育", question: "特別教育とは？", gold: [{ lawShort: "安衛法", articleNum: "第59条" }, { lawShort: "安衛則", articleNum: "第36条" }] },
+  { id: 114, topic: "就業制限", question: "玉掛けに必要な資格は何号ですか？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }] },
+  { id: 115, topic: "就業制限", question: "移動式クレーンの運転資格の根拠は何ですか？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }, { lawShort: "安衛法", articleNum: "第61条" }] },
 ];
