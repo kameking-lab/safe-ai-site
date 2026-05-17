@@ -1,3 +1,5 @@
+"use client";
+
 import type { SiteRiskWeather, WeatherAlert } from "@/lib/types/domain";
 
 type WorkType = "高所作業" | "電気作業" | "足場作業" | "一般作業";

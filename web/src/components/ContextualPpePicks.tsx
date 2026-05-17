@@ -1,27 +1,23 @@
+"use client";
+
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { safetyGoodsCategories, safetyGoodsItems, type SafetyGoodsItem } from "@/data/mock/safety-goods";
 import { relatedSafetyGoodsByText } from "@/lib/related-content";
+import { useLanguage } from "@/contexts/language-context";
+
+type Translatable = string | { ja: string; en: string };
 
 /**
  * 「この場面で必要な保護具」セクション。通達／事故／化学物質ページなど
  * 文脈ページの下部に置き、本文に沿った保護具を 3〜4 点提示する。
- *
- * - アフィリエイトリンク（Amazon / 楽天）は safety-goods.ts で
- *   appendAmazonTag / generateRakutenAffiliateUrl 済み
- * - context（タイトル/タグ/本文）からトークン一致でレコメンド
- * - フォールバック用に fallbackCategoryIds を渡せる
  */
 interface ContextualPpePicksProps {
-  /** 文脈テキスト（タイトル + 本文 + タグなど） */
   context: string;
-  /** 該当が無いときに掘る既定カテゴリ（fall-protection / respiratory など） */
   fallbackCategoryIds?: string[];
-  /** 表示件数 */
   limit?: number;
-  /** カードのヘッダ文言を上書き */
-  heading?: string;
-  description?: string;
+  heading?: Translatable;
+  description?: Translatable;
 }
 
 function pickFallback(categoryIds: string[], limit: number): SafetyGoodsItem[] {
@@ -30,32 +26,54 @@ function pickFallback(categoryIds: string[], limit: number): SafetyGoodsItem[] {
   return matched.slice(0, limit);
 }
 
+function resolveText(value: Translatable | undefined, fallback: { ja: string; en: string }, isEn: boolean): string {
+  if (value === undefined) return isEn ? fallback.en : fallback.ja;
+  if (typeof value === "string") return value;
+  return isEn ? value.en : value.ja;
+}
+
 export function ContextualPpePicks({
   context,
   fallbackCategoryIds = [],
   limit = 4,
-  heading = "🛡 この場面で必要な保護具",
-  description = "本ページの内容に関連する保護具をピックアップ。Amazon / 楽天のアフィリエイトリンク（発生報酬は研究プロジェクト運営費に充当）。",
+  heading,
+  description,
 }: ContextualPpePicksProps) {
+  const { language } = useLanguage();
+  const isEn = language === "en";
   const matched = relatedSafetyGoodsByText(context, { limit });
   const items = matched.length > 0 ? matched : pickFallback(fallbackCategoryIds, limit);
   if (items.length === 0) return null;
 
+  const resolvedHeading = resolveText(
+    heading,
+    { ja: "🛡 この場面で必要な保護具", en: "🛡 PPE for this situation" },
+    isEn,
+  );
+  const resolvedDescription = resolveText(
+    description,
+    {
+      ja: "本ページの内容に関連する保護具をピックアップ。Amazon / 楽天のアフィリエイトリンク（発生報酬は研究プロジェクト運営費に充当）。",
+      en: "Curated PPE related to this page's content. Amazon / Rakuten affiliate links — any commissions go toward research-project operating costs.",
+    },
+    isEn,
+  );
+
   return (
     <section
       className="mt-6 rounded-2xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-white p-5 shadow-sm"
-      aria-label={heading}
+      aria-label={resolvedHeading}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-bold text-amber-900 sm:text-base">{heading}</h3>
-          <p className="mt-1 text-[11px] leading-5 text-slate-600">{description}</p>
+          <h3 className="text-sm font-bold text-amber-900 sm:text-base">{resolvedHeading}</h3>
+          <p className="mt-1 text-[11px] leading-5 text-slate-600">{resolvedDescription}</p>
         </div>
         <Link
           href="/equipment-finder"
           className="shrink-0 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50"
         >
-          AI診断 →
+          {isEn ? "AI finder →" : "AI診断 →"}
         </Link>
       </div>
 
@@ -72,7 +90,7 @@ export function ContextualPpePicks({
                   {cat?.icon ?? "🛡"}
                 </span>
                 <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
-                  {cat?.name ?? "保護具"}
+                  {cat?.name ?? (isEn ? "PPE" : "保護具")}
                 </span>
               </div>
               <p className="mt-1.5 line-clamp-2 text-xs font-bold text-slate-900">{item.name}</p>
@@ -96,7 +114,7 @@ export function ContextualPpePicks({
                   rel="noopener noreferrer sponsored"
                   className="inline-flex items-center gap-1 rounded-md bg-rose-500 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-600"
                 >
-                  楽天
+                  {isEn ? "Rakuten" : "楽天"}
                   <ExternalLink className="h-2.5 w-2.5" />
                 </a>
               </div>
@@ -106,7 +124,9 @@ export function ContextualPpePicks({
       </ul>
 
       <p className="mt-3 text-[10px] leading-5 text-slate-500">
-        ※ 商品リンクは Amazon アソシエイト / もしもアフィリエイト経由で生成。発生報酬は事故DB拡充・AI推論コスト・法令データ更新に充てます。
+        {isEn
+          ? "* Product links use the Amazon Associates / moshimo affiliate program. Commissions go toward accident-DB expansion, AI inference costs, and law-data updates."
+          : "※ 商品リンクは Amazon アソシエイト / もしもアフィリエイト経由で生成。発生報酬は事故DB拡充・AI推論コスト・法令データ更新に充てます。"}
       </p>
     </section>
   );

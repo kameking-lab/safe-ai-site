@@ -67,9 +67,9 @@ const PERSONAS: Persona[] = [
     id: "executive",
     icon: Briefcase,
     title: "中小企業の経営者",
-    desc: "属人化・Excel地獄から脱出したい方。コンプラ診断で全体最適化。",
+    desc: "属人化・Excel地獄から脱出したい方。年次安全衛生計画で全体最適化。",
     links: [
-      { label: "コンプラ診断", href: "/wizard" },
+      { label: "年次安全衛生計画", href: "/strategy/plan-generator" },
       { label: "ご意見・改善提案", href: "/contact" },
     ],
     accent: {

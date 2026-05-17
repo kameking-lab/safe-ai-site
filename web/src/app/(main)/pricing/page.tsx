@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ogImageUrl } from "@/lib/og-url";
 import { PricingContent } from "./PricingContent";
+import { PageContainer } from "@/components/layout";
 import { PAID_MODE } from "@/lib/paid-mode";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -24,9 +25,9 @@ export const metadata: Metadata = PAID_MODE
       },
     }
   : {
-      title: "料金プラン（準備中）",
+      title: "料金プラン｜現在、全機能を無料公開中",
       description:
-        "安全AIポータル は現在、研究・実証プロジェクトとして全機能を無料公開しています。料金プランは準備中です。",
+        "安全AIポータル は現在、研究・実証プロジェクトとして全機能を無料公開しています。",
       robots: { index: false, follow: false },
       alternates: { canonical: "/pricing" },
     };
@@ -34,15 +35,15 @@ export const metadata: Metadata = PAID_MODE
 export default function PricingPage() {
   if (!PAID_MODE) {
     return (
-      <main className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+      <PageContainer width="narrow" className="py-12 sm:py-16">
       {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name={_title} description="安全AIポータル は現在、研究・実証プロジェクトとして全機能を無料公開しています。料金プランは準備中です。" path="/pricing" />
+      <PageJsonLd name={_title} description="安全AIポータル は現在、研究・実証プロジェクトとして全機能を無料公開しています。" path="/pricing" />
         <div className="rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-6 text-center sm:p-8">
           <p className="text-xs font-bold uppercase tracking-widest text-emerald-700">
             研究・実証プロジェクト
           </p>
           <h1 className="mt-3 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl">
-            料金プランは現在準備中です
+            現在、全機能を無料公開中です
           </h1>
           <p className="mt-4 text-sm leading-6 text-slate-700">
             安全AIポータル は現時点で個人運営の研究・実証プロジェクトです。
@@ -66,7 +67,7 @@ export default function PricingPage() {
             </Link>
           </div>
         </div>
-      </main>
+      </PageContainer>
     );
   }
   return <PricingContent />;

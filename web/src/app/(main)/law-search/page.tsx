@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { LawSearchPanel } from "@/components/law-search-panel";
 import { RelatedPageCards } from "@/components/related-page-cards";
+import { LawHubNav } from "@/components/law-hub-nav";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -9,6 +11,7 @@ const _desc =
   "労働安全衛生法・安衛則・クレーン則・有機則・特化則・石綿則・じん肺法など全33法令の条文を全文検索。厚労省の令和4年・5年の省令改正・施行通達 PDF から抽出した条文も含む。条番号・キーワード・法令名で絞り込み可能。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/law-search" },
   title: _title,
   description: _desc,
   openGraph: {
@@ -25,32 +28,28 @@ export const metadata: Metadata = {
 export default function LawSearchPage() {
   return (
     <>
-      
       <PageJsonLd name="法令条文検索" description="労働安全衛生法・関連政令・省令の条文を全文検索。条文間の参照リンクも追跡。" path="/law-search" />
-      <LawSearchPanel />
+      <LawHubNav current="law-search" />
+      <Suspense
+        fallback={
+          <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">
+            <div className="h-8 w-2/3 animate-pulse rounded bg-slate-200" />
+            <div className="h-10 animate-pulse rounded-lg bg-slate-100" />
+            <div className="h-40 animate-pulse rounded-lg bg-slate-100" />
+          </div>
+        }
+      >
+        <LawSearchPanel />
+      </Suspense>
       <RelatedPageCards
         heading="合わせて使う"
         pages={[
           {
-            href: "/laws",
-            label: "法改正一覧（年表）",
-            description: "見つけた条文の改正履歴・施行日・AI要約を時系列で確認。",
-            color: "emerald",
-            cta: "改正履歴を見る",
-          },
-          {
-            href: "/circulars",
-            label: "通達原文",
-            description: "条文を補足する厚労省通達の原文を縦長スクロールで閲覧。",
+            href: "/laws/notices-precedents",
+            label: "通達・判例 解説",
+            description: "条文を補完する行政解釈と最高裁判例 30 件の整理。",
             color: "amber",
-            cta: "通達を読む",
-          },
-          {
-            href: "/chatbot",
-            label: "安衛法AIチャット",
-            description: "条文の解釈や適用判断を AI に質問。条文番号と通達を出典に提示。",
-            color: "blue",
-            cta: "AIに聞く",
+            cta: "通達と判例",
           },
           {
             href: "/laws/glossary",
@@ -58,6 +57,13 @@ export default function LawSearchPage() {
             description: "公布／施行／告示／通達／指針の違いと拘束力を一次出典付きで解説。",
             color: "purple",
             cta: "用語を確認",
+          },
+          {
+            href: "/resources",
+            label: "厚労省一次資料DB",
+            description: "条文を補強する告示・指針・リーフレットを 1,158件横断検索。",
+            color: "emerald",
+            cta: "一次資料を開く",
           },
         ]}
       />

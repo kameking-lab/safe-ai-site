@@ -1,51 +1,81 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { HomeScreen } from "@/components/home-screen";
 import { LadderStatsCard } from "@/components/ladder-stats-card";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
+import { NewsFeedSection } from "@/components/news-feed-section";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
+import {
+  AccidentsMetaInfo,
+  AccidentsMetaCaption,
+  AccidentsPreliminaryBanner,
+  AccidentsAnalyticsBanner,
+} from "@/components/accidents-meta-info";
 import { ogImageUrl } from "@/lib/og-url";
-import { JsonLd, newsArticleListSchema } from "@/components/json-ld";
-import { PageJsonLd } from "@/components/page-json-ld";
+import { SITE_URL, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
+import { JsonLd, datasetSchema, webPageSchema, breadcrumbSchema } from "@/components/json-ld";
 import {
   getAccidentCasesDataset,
   getAccidentProvenanceCounts,
 } from "@/data/mock/accident-cases";
 import { SITE_STATS } from "@/data/site-stats";
+import { PageContainer } from "@/components/layout/page-container";
 
 const _title = "労働災害 事故事例データベース";
 const _desc = `10年統合${SITE_STATS.accidents10yCount}件の死亡労働災害事例を業種・事故種別で検索し再発防止に活用。厚労省死亡災害DB（${SITE_STATS.mhlwDeathsCount}件）＋厚労省全件DB（${SITE_STATS.accidentDbCount}件）＋curated詳細事例（${SITE_STATS.siteCuratedCaseCount}件）を統合。`;
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/accidents" },
   title: _title,
   description: _desc,
-  openGraph: {
-    title: `${_title}｜安全AIポータル`,
+  openGraph: withSiteOpenGraph("/accidents", {
+    title: _title,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
+  }),
+  twitter: withSiteTwitter({
     images: [ogImageUrl(_title, _desc)],
-  },
+  }),
 };
 
 export default function AccidentsPage() {
-  const accidentSchema = newsArticleListSchema(
-    getAccidentCasesDataset().map((c) => ({
-      headline: c.title,
-      datePublished: c.occurredOn,
-      url: "https://safe-ai-site.vercel.app/accidents",
-      description: c.summary,
-    }))
-  );
+  const totalCount = getAccidentCasesDataset().length;
 
   return (
     <>
-      <PageJsonLd name={_title} description={_desc} path="/accidents" />
-      <JsonLd schema={accidentSchema} />
-      <HomeScreen variant="accidents">
+      <JsonLd
+        schema={[
+          webPageSchema({ name: _title, description: _desc, url: `${SITE_URL}/accidents` }),
+          breadcrumbSchema([
+            { name: "ホーム", url: SITE_URL },
+            { name: "事故データベース", url: `${SITE_URL}/accidents` },
+          ]),
+          datasetSchema({
+            name: "労働災害 統合事故事例データベース",
+            description: _desc,
+            url: `${SITE_URL}/accidents`,
+            keywords: ["労働災害", "事故事例", "死亡災害", "業種別", "厚生労働省", "再発防止"],
+            temporalCoverage: "2014/2026",
+            license: "https://creativecommons.org/licenses/by/4.0/",
+            variableMeasured: [`総収録件数: ${totalCount}件`, "業種", "事故種類", "発生年月", "重傷度"],
+            isBasedOn: [
+              { name: "厚生労働省 職場のあんぜんサイト 死亡災害DB", url: "https://anzeninfo.mhlw.go.jp/anzen_pg/SIB_FND.aspx" },
+              { name: "厚生労働省 労働者死傷病報告オープンデータ", url: "https://anzeninfo.mhlw.go.jp/information/sokuhou.html" },
+            ],
+          }),
+        ]}
+      />
+      <Suspense
+        fallback={
+          <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">
+            <div className="h-8 w-2/3 animate-pulse rounded bg-slate-200" />
+            <div className="h-40 animate-pulse rounded-lg bg-slate-100" />
+          </div>
+        }
+      >
+        <HomeScreen variant="accidents">
         <TranslatedPageHeader
           titleJa="事故データベース"
           titleEn="Accident Database"
@@ -59,65 +89,63 @@ export default function AccidentsPage() {
           {(() => {
             const counts = getAccidentProvenanceCounts();
             return (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-0.5 text-[11px] text-slate-600">
-                収録 {getAccidentCasesDataset().length} 件（
-                <span className="font-semibold text-emerald-700">厚労省 {counts.mhlw}</span>
-                ／<span className="font-semibold text-sky-700">curated {counts.curated}</span>
-                {counts.synthetic > 0 ? (
-                  <>
-                    ／
-                    <span className="font-semibold text-amber-700">
-                      合成 {counts.synthetic}
-                    </span>
-                  </>
-                ) : null}
-                ）
-              </span>
+              <AccidentsMetaInfo
+                total={getAccidentCasesDataset().length}
+                mhlw={counts.mhlw}
+                curated={counts.curated}
+                preliminary={counts.preliminary ?? 0}
+                synthetic={counts.synthetic}
+              />
             );
           })()}
         </div>
-        <p className="mt-1 text-[10px] text-slate-500">
-          内訳の定義:{" "}
-          <a
-            href="/about/data-sources"
-            className="underline hover:text-slate-700"
-          >
-            データソース一覧
-          </a>{" "}
-          を参照。<strong>厚労省</strong> = 職場のあんぜんサイト由来の再収録、
-          <strong>curated</strong> = 公開情報・統計を編集部が再構成（固有名詞匿名化）、
-          <strong>合成</strong> = 教材用カバレッジ補完事例。
-        </p>
+        <AccidentsMetaCaption />
+        <AccidentsPreliminaryBanner />
+        <AccidentsAnalyticsBanner totalLabel={SITE_STATS.accidents10yCount} />
         <div className="mt-4">
           <LadderStatsCard />
         </div>
+        <NewsFeedSection />
       </HomeScreen>
+      </Suspense>
       {/* 事故事例 → 主要な労災原因に対応する予防保護具を提示 */}
-      <div className="mx-auto max-w-7xl px-4 lg:px-8">
+      <PageContainer paddingY="none">
         <ContextualPpePicks
           context="墜落 転落 足場 ハーネス 保護帽 ヘルメット 安全靴 切創 はさまれ 巻き込まれ 熱中症 化学物質 中毒"
           fallbackCategoryIds={["fall-protection", "head-protection", "hand-foot", "heat-cold"]}
-          heading="🛡 主要な労災を防ぐための予防保護具"
-          description="本データベースで多発する「墜落・転落・はさまれ・熱中症」など主要原因に直接効く保護具を厳選。"
+          heading={{
+            ja: "🛡 主要な労災を防ぐための予防保護具",
+            en: "🛡 PPE for preventing the most common workplace accidents",
+          }}
+          description={{
+            ja: "本データベースで多発する「墜落・転落・はさまれ・熱中症」など主要原因に直接効く保護具を厳選。",
+            en: "Curated PPE that directly addresses the most frequent accident causes in this database — falls, being caught/struck, heat stress, and more.",
+          }}
         />
-      </div>
+      </PageContainer>
 
       <RelatedPageCards
-        heading="このデータを活かす"
+        heading={{ ja: "このデータを活かす", en: "Put this data to use" }}
         pages={[
           {
             href: "/risk-prediction",
-            label: "AIリスク予測",
-            description: "事故事例と照合しながらAIが潜在リスクを予測。朝礼・KY活動に役立てられます。",
+            label: { ja: "AIリスク予測", en: "AI Risk Prediction" },
+            description: {
+              ja: "事故事例と照合しながらAIが潜在リスクを予測。朝礼・KY活動に役立てられます。",
+              en: "AI cross-references accident cases to predict latent risks — useful for morning briefings and KY activities.",
+            },
             color: "blue",
-            cta: "AIリスク予測を使う",
+            cta: { ja: "AIリスク予測を使う", en: "Open AI Risk Prediction" },
           },
           {
             href: "/ky",
-            label: "KY用紙",
-            description: "事故事例を参考に危険予知活動表を作成。音声入力対応で現場から記録できます。",
+            label: { ja: "KY用紙", en: "KY Form" },
+            description: {
+              ja: "事故事例を参考に危険予知活動表を作成。音声入力対応で現場から記録できます。",
+              en: "Build a hazard-prediction sheet inspired by real cases. Voice input lets you record from the field.",
+            },
             color: "emerald",
-            cta: "KY用紙を作成する",
+            cta: { ja: "KY用紙を作成する", en: "Create a KY form" },
           },
         ]}
       />

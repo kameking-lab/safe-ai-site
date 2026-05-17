@@ -117,7 +117,7 @@ export async function POST(request: Request) {
         error: {
           code: "NOT_FOUND",
           message:
-            "該当する製品が SDS 内蔵 DB に見つかりませんでした。製品名・メーカー名をご確認の上、再度お試しください（β機能：主要10製品のみ収録）。",
+            "該当する製品が SDS 内蔵 DB に見つかりませんでした。製品名・メーカー名をご確認の上、再度お試しください（主要10製品収録）。",
         },
       },
       { status: 404 }
@@ -165,7 +165,7 @@ export async function POST(request: Request) {
       used: limit.used + 1,
       historySaved: saved,
       disclaimer:
-        "本評価はCREATE-SIMPLEの簡略実装によるβ機能です。最終判断は事業者責任のもと公式CREATE-SIMPLEまたは労働衛生コンサルタントの判断をご確認ください。",
+        "本評価はCREATE-SIMPLEの簡略実装です。最終判断は事業者責任のもと公式CREATE-SIMPLEまたは労働衛生コンサルタントの判断をご確認ください。",
     },
     { status: 200 }
   );

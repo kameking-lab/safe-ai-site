@@ -7,7 +7,7 @@ import type { LawRevisionCore } from "@/lib/types/domain";
 const fallbackLawRevisions: LawRevisionCore[] = [
   {
     id: "lr-fallback-001",
-    title: "法改正データを準備中です",
+    title: "データ読み込みエラー",
     publishedAt: "1970-01-01",
     revisionNumber: "未設定",
     kind: "notice",

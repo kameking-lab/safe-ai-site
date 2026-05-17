@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageJsonLd } from "@/components/page-json-ld";
+import { JsonLd, webPageSchema, breadcrumbSchema, definedTermSetSchema } from "@/components/json-ld";
+import { SITE_URL } from "@/lib/seo-metadata";
 
-const SITE = "https://www.anzen-ai-portal.jp";
 const _title = "労働安全衛生 法令用語集（条文・通達・行政用語）";
 const _desc =
   "「公布日と施行日の違い」「告示・通達・指針の拘束力」「省令・規則・規程」など、労働安全衛生法令を読むときに必要な用語を一次出典付きで整理。";
@@ -85,7 +85,7 @@ const TERMS: Term[] = [
     term: "通達",
     reading: "つうたつ",
     definition:
-      "上級行政機関が下級行政機関に対し、法令解釈や運用方針を示すために発する文書。事業者を直接拘束する法的強制力はないが、監督指導の根拠として実務上極めて重要。",
+      "上級行政機関（厚生労働省等）が下級行政機関（都道府県労働局・労働基準監督署）に対し、法令解釈や運用方針を示すために発する文書。事業者を直接拘束する法的強制力はないが、監督指導の根拠として実務上極めて重要。現場安全管理における具体的な運用上の意義は /glossary（現場用語集）の「通達」項目を参照。",
     example:
       "「基発0115第1号」のように 発出官庁＋年月日＋連番 で識別。",
     source: {
@@ -165,31 +165,39 @@ const TERMS: Term[] = [
     term: "拘束力レベル",
     reading: "こうそくりょくれべる",
     definition:
-      "本サイトの通達一覧で表示するラベル。「法令」「告示」「通達」「指針」「事務連絡」の順で強い順から表示し、罰則の有無を示す目安として用いる。",
+      "労働安全衛生分野の行政文書が持つ法的拘束力の強弱を示す概念。強い順: 法律（国会制定・刑事罰あり）→政令（内閣制定）→省令（各省大臣制定・刑事罰あり）→告示（基準値・指定対象の確定）→通達（行政解釈・監督指導の根拠、事業者を直接拘束せず）→指針・ガイドライン（望ましい取組の提示）→事務連絡（情報共有）。罰則（懲役・罰金）は法律・省令違反に対してのみ科され、通達以下には刑事罰はない。ただし通達・指針への対応は安全配慮義務の判断材料として民事裁判で参照されることがある。",
+    example: "本サイトの通達一覧ページでは、このレベルをラベルとして表示し罰則有無の目安としている。",
   },
   {
     term: "e-Gov 法令検索",
     reading: "いーがぶ ほうれいけんさく",
     definition:
-      "総務省が運営する公式の法令検索ポータル。条文・改正履歴・告示の最新版が無償公開されている。",
+      "デジタル庁が運営する政府の公式法令検索ポータル（https://laws.e-gov.go.jp/）。法律・政令・省令・告示の現行条文・改正履歴が無償公開されている。安衛法・安衛則・特化則等の最新版および改正前条文の参照に利用できる。「法令API」も提供されており、プログラムによる条文参照も可能。本サイトの法令検索・法令チャット機能でも参照元として活用。",
     source: {
-      label: "e-Gov 法令検索",
+      label: "e-Gov 法令検索（デジタル庁）",
       url: "https://laws.e-gov.go.jp/",
     },
   },
 ];
 
 export default function LawsGlossaryPage() {
+  const url = `${SITE_URL}/laws/glossary`;
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
-      <PageJsonLd
-        name={_title}
-        description={_desc}
-        path="/laws/glossary"
-        breadcrumbs={[
-          { name: "ホーム", url: SITE },
-          { name: "法改正情報", url: `${SITE}/laws` },
-          { name: "法令用語集", url: `${SITE}/laws/glossary` },
+      <JsonLd
+        schema={[
+          webPageSchema({ name: _title, description: _desc, url }),
+          breadcrumbSchema([
+            { name: "ホーム", url: SITE_URL },
+            { name: "法改正情報", url: `${SITE_URL}/laws` },
+            { name: "法令用語集", url },
+          ]),
+          definedTermSetSchema({
+            name: "労働安全衛生 法令用語集",
+            url,
+            description: "労働安全衛生法令の読解に必要な行政・法令用語を一次出典付きで解説。",
+            terms: TERMS.map((t) => ({ name: t.term, description: t.definition })),
+          }),
         ]}
       />
       <nav aria-label="パンくず" className="mb-4 text-xs text-slate-500">

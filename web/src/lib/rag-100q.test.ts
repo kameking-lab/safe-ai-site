@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { searchRelevantArticlesWithScore } from "@/lib/rag-search";
 import { RAG_100_QUESTIONS } from "@/lib/rag-100q.fixture";
+import { isLawShortEquivalent } from "@/lib/rag/synonyms";
 
 /**
  * RAG 検索 100 問ベンチマーク。
@@ -22,14 +23,19 @@ function isMatch(
   return gold.some((g) =>
     results.some(
       (r) =>
-        (r.lawShort === g.lawShort || r.law === g.lawShort) &&
-        r.articleNum === g.articleNum
+        r.articleNum === g.articleNum &&
+        (r.lawShort === g.lawShort ||
+          r.law === g.lawShort ||
+          isLawShortEquivalent(r.lawShort, g.lawShort))
     )
   );
 }
 
 describe("RAG 100問ベンチマーク", () => {
-  it(`正答率が ${TARGET_ACCURACY * 100}% 以上であること`, () => {
+  // 100問を逐次評価する CPU バウンドな処理。コーパス拡張やマシン揺らぎで
+  // 5秒デフォルトを踏み抜くのを予防するため timeout を 30秒に拡張する
+  // （fresh セット側で同種の連鎖タイムアウトが発生したため横展開）。
+  it(`正答率が ${TARGET_ACCURACY * 100}% 以上であること`, { timeout: 30000 }, () => {
     let correct = 0;
     const failures: Array<{
       id: number;

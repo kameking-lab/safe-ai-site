@@ -3,14 +3,14 @@ import Link from "next/link";
 import { PageJsonLd } from "@/components/page-json-ld";
 
 const SITE = "https://www.anzen-ai-portal.jp";
-const _title = "データソース一覧 | 安全AIサイト";
+const _title = "データソース一覧 | 安全AIポータル";
 const _desc =
   "本サイトで利用している外部データの出典・更新頻度・利用条件を一覧で公開しています（気象庁、厚生労働省、国土地理院ほか）。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/about/data-sources" },
   title: _title,
   description: _desc,
-  alternates: { canonical: "/about/data-sources" },
 };
 
 type Source = {
@@ -94,6 +94,30 @@ const SOURCES: Source[] = [
     url: "https://news.google.com/",
     description: "労働災害・建設事故関連ニュースの一覧表示。",
     usedFor: ["サイネージダッシュボード"],
+  },
+  {
+    id: "news-auto-nhk",
+    name: "NHK NEWS WEB RSS（社会・経済）",
+    provider: "日本放送協会",
+    updateFreq: "日次（GitHub Actions cron 06:00 JST）",
+    license:
+      "見出しと出典URLのみ取得。本文は転載せず、AIが独自要約（50字以内）を生成。著作権法32条の引用要件（主従関係・必要最小限・出典明示）を遵守。",
+    url: "https://www3.nhk.or.jp/rss/",
+    description:
+      "労働災害関連の見出しをキーワードフィルタで抽出し、Gemini 2.5 Flash の AI 判定ゲートを通過したもののみを /accidents に自動公開（完全自動運用）。",
+    usedFor: ["事故データベース（報道・自動収集セクション）"],
+  },
+  {
+    id: "news-auto-mhlw",
+    name: "厚生労働省 報道発表資料 RSS",
+    provider: "厚生労働省",
+    updateFreq: "日次（GitHub Actions cron 06:00 JST）",
+    license:
+      "政府著作物（著作権法 13 条準拠、政府標準利用規約 2.0 / CC BY 4.0 互換）。",
+    url: "https://www.mhlw.go.jp/stf/news.rdf",
+    description:
+      "労働安全衛生に関連する記者発表（協議会・審議会の開催案内、災害発生注意喚起等）の見出しを自動収集。",
+    usedFor: ["事故データベース（報道・自動収集セクション）"],
   },
 ];
 

@@ -7,6 +7,7 @@ const DESCRIPTION =
   "テレワーク・在宅勤務者への安全配慮義務。VDT（ディスプレイ）作業、メンタルヘルスケア、労働時間管理、自宅作業環境の整備基準を厚労省テレワークガイドラインに基づき解説します。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/diversity/remote" },
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {

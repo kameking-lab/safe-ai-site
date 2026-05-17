@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { loadProfile, saveProfile } from "@/lib/company-profile";
+import { useLanguage } from "@/contexts/language-context";
 
 const SITE_LIST_KEY = "chemical-ra:site-list-v1";
 
@@ -34,6 +35,8 @@ export function ChemicalRaExtras() {
   const [list, setList] = useState<SiteChemical[]>([]);
   const [name, setName] = useState("");
   const [cas, setCas] = useState("");
+  const { language } = useLanguage();
+  const isEn = language === "en";
 
   useEffect(() => {
     const stored = loadSiteList();
@@ -83,8 +86,14 @@ export function ChemicalRaExtras() {
       {/* 現場の化学物質リスト */}
       <section className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-sm font-bold text-emerald-900">📋 現場の化学物質リスト（端末内に保存）</h2>
-          <span className="text-[11px] text-slate-500">{list.length}件</span>
+          <h2 className="text-sm font-bold text-emerald-900">
+            {isEn
+              ? "📋 Site chemicals list (saved on this device)"
+              : "📋 現場の化学物質リスト（端末内に保存）"}
+          </h2>
+          <span className="text-[11px] text-slate-500">
+            {isEn ? `${list.length} items` : `${list.length}件`}
+          </span>
         </div>
 
         <div className="mt-3 flex flex-wrap gap-2">
@@ -92,14 +101,14 @@ export function ChemicalRaExtras() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="物質名"
+            placeholder={isEn ? "Substance name" : "物質名"}
             className="flex-1 min-w-[160px] rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
           <input
             type="text"
             value={cas}
             onChange={(e) => setCas(e.target.value)}
-            placeholder="CAS No.（任意）"
+            placeholder={isEn ? "CAS No. (optional)" : "CAS No.（任意）"}
             className="w-36 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
           <button
@@ -109,7 +118,7 @@ export function ChemicalRaExtras() {
             className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
           >
             <Plus className="h-3.5 w-3.5" />
-            追加
+            {isEn ? "Add" : "追加"}
           </button>
         </div>
 
@@ -132,18 +141,18 @@ export function ChemicalRaExtras() {
                       href={raLink}
                       className="rounded border border-emerald-300 bg-white px-2 py-1 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-50"
                     >
-                      RA再評価
+                      {isEn ? "Re-assess" : "RA再評価"}
                     </Link>
                     <Link
                       href={ppeLink}
                       className="rounded border border-sky-300 bg-white px-2 py-1 text-[11px] font-semibold text-sky-800 hover:bg-sky-50"
                     >
-                      保護具を探す →
+                      {isEn ? "Find PPE →" : "保護具を探す →"}
                     </Link>
                     <button
                       type="button"
                       onClick={() => removeItem(c.name)}
-                      aria-label={`${c.name}を削除`}
+                      aria-label={isEn ? `Remove ${c.name}` : `${c.name}を削除`}
                       className="rounded p-1 text-rose-500 hover:bg-rose-50"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -155,7 +164,9 @@ export function ChemicalRaExtras() {
           </ul>
         ) : (
           <p className="mt-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-4 text-center text-xs text-slate-500">
-            まだ登録された化学物質はありません。物質名と任意でCAS No.を入力して追加してください。
+            {isEn
+              ? "No chemicals registered yet. Enter a substance name and optionally a CAS No. to add."
+              : "まだ登録された化学物質はありません。物質名と任意でCAS No.を入力して追加してください。"}
           </p>
         )}
       </section>

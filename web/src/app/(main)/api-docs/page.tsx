@@ -1,22 +1,22 @@
 import type { Metadata } from "next";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
+
+// Pre-launch roadmap page — no external API exists yet. Keep noindex until Phase 1 ships.
+// Audit reference: harsh-third-party-2026-05-16 F-002.
 export const metadata: Metadata = {
   title: "API ドキュメント・ロードマップ",
   description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
-  alternates: { canonical: "/api-docs" },
-  openGraph: {
-    title: "API ドキュメント・ロードマップ",
-    description: "安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。",
-  },
+  robots: { index: false, follow: false, nocache: true },
+  alternates: { canonical: null as unknown as string },
 };
 
 export default function ApiDocsPage() {
   return (
-    <div className="px-4 py-8 lg:px-8">
+    <PageContainer width="narrow" className="space-y-8">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="API ドキュメント・ロードマップ" description="安全AIポータルのAPI公開ロードマップ。現状の内部API構成と、REST API・Webhook・SSO/SCIMの段階的な外部公開計画を案内します。" path="/api-docs" />
-      <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">API ドキュメント・ロードマップ</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
@@ -46,7 +46,7 @@ export default function ApiDocsPage() {
               <span className="rounded-full bg-blue-600 px-2.5 py-0.5 text-xs font-bold text-white">
                 Phase 1
               </span>
-              <span className="text-sm font-semibold text-blue-900">REST API β（独立後3ヶ月）</span>
+              <span className="text-sm font-semibold text-blue-900">REST API（開発中）</span>
             </div>
             <ul className="mt-3 space-y-1.5 text-sm text-blue-800">
               <li className="flex items-start gap-2">
@@ -67,7 +67,7 @@ export default function ApiDocsPage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                レートリミット: 100 req/分（β版）
+                レートリミット: 100 req/分（初期設定）
               </li>
             </ul>
           </div>
@@ -77,7 +77,7 @@ export default function ApiDocsPage() {
               <span className="rounded-full bg-slate-400 px-2.5 py-0.5 text-xs font-bold text-white">
                 Phase 2
               </span>
-              <span className="text-sm font-semibold text-slate-700">Webhook（独立後6ヶ月）</span>
+              <span className="text-sm font-semibold text-slate-700">Webhook（Phase 2）</span>
             </div>
             <ul className="mt-3 space-y-1.5 text-sm text-slate-600">
               <li className="flex items-start gap-2">
@@ -105,7 +105,7 @@ export default function ApiDocsPage() {
                 Phase 3
               </span>
               <span className="text-sm font-semibold text-slate-700">
-                エンタープライズ連携（独立後12ヶ月）
+                エンタープライズ連携（Phase 3）
               </span>
             </div>
             <ul className="mt-3 space-y-1.5 text-sm text-slate-600">
@@ -139,7 +139,7 @@ export default function ApiDocsPage() {
         <section className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <h2 className="text-base font-bold text-slate-900">早期アクセス</h2>
           <p className="text-sm leading-7 text-slate-600">
-            API β版の早期アクセスをご希望の方は、
+            APIの早期アクセスをご希望の方は、
             <a className="underline hover:text-emerald-700" href="/contact">
               お問い合わせフォーム
             </a>
@@ -147,7 +147,6 @@ export default function ApiDocsPage() {
             利用ユースケースをお聞かせいただいた方を優先的にご案内します。
           </p>
         </section>
-      </div>
-    </div>
+    </PageContainer>
   );
 }

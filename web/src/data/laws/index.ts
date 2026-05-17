@@ -1,4 +1,5 @@
 export type { LawArticle } from "./law-types";
+export { LAW_METADATA, getLawMetadata, type LawMetadata } from "./law-metadata";
 export { rodoAnzenEiseiHo } from "./rodo-anzen-eisei-ho";
 export { rodoAnzenEiseiHoSikokiregu } from "./rodo-anzen-eisei-ho-sikokiregu";
 export { anzenEiseiKisoku } from "./anzen-eisei-kisoku";
@@ -35,8 +36,33 @@ export { ashibaSagyoKisoku } from "./ashiba-sagyo-kisoku";
 export { kajuRodoTaisaku } from "./jiritsushinkei-setsumeisho";
 export { koyoKintoHo } from "./koyo-kinto-ho";
 export { mhlwLawArticles } from "./mhlw-extras";
+export { enKisoku } from "./en-kisoku";
+export { shiAlkylEnKisoku } from "./shi-alkyl-en-kisoku";
+export { jimushoEiseiKijunKisoku } from "./jimusho-eisei-kijun-kisoku";
+export { kikaiKenteiKisoku } from "./kikai-kentei-kisoku";
+export { hakenAnzenEisei } from "./haken-anzen-eisei";
+export { corpusGapFillArticles } from "./corpus-gaps-fill";
+// 50法令体制への拡張（+12法令）
+export { karoshiBoshiHo } from "./karoshi-boshi-ho";
+export { rosaiBoshiDantaiHo } from "./rosai-boshi-dantai-ho";
+export { kenkoZoshinHo } from "./kenko-zoshin-ho";
+export { jinpaiHoSikokiregu } from "./jinpai-ho-sikokiregu";
+export { koatsuGasHoanHo } from "./koatsu-gas-hoanho";
+export { soonKiseiHo } from "./soon-kisei-ho";
+export { kashinHo } from "./kashin-ho";
+export { dokugekiHo } from "./dokugeki-ho";
+export { shokuhinEiseiHo } from "./shokuhin-eisei-ho";
+export { kensetsuRosaiBoshiKitei } from "./kensetsu-rosai-boshi-kitei";
+export { kowanRodoHo } from "./kowan-rodo-ho";
+export { seninAnzenEiseiKisoku } from "./senin-anzen-eisei-kisoku";
 
 import { mhlwLawArticles } from "./mhlw-extras";
+import { corpusGapFillArticles } from "./corpus-gaps-fill";
+import { enKisoku } from "./en-kisoku";
+import { shiAlkylEnKisoku } from "./shi-alkyl-en-kisoku";
+import { jimushoEiseiKijunKisoku } from "./jimusho-eisei-kijun-kisoku";
+import { kikaiKenteiKisoku } from "./kikai-kentei-kisoku";
+import { hakenAnzenEisei } from "./haken-anzen-eisei";
 import { rodoAnzenEiseiHo } from "./rodo-anzen-eisei-ho";
 import { rodoAnzenEiseiHoSikokiregu } from "./rodo-anzen-eisei-ho-sikokiregu";
 import { anzenEiseiKisoku } from "./anzen-eisei-kisoku";
@@ -71,8 +97,20 @@ import { mentalHealthShishin } from "./mental-health-shishin";
 import { ashibaSagyoKisoku } from "./ashiba-sagyo-kisoku";
 import { kajuRodoTaisaku } from "./jiritsushinkei-setsumeisho";
 import { koyoKintoHo } from "./koyo-kinto-ho";
+import { karoshiBoshiHo } from "./karoshi-boshi-ho";
+import { rosaiBoshiDantaiHo } from "./rosai-boshi-dantai-ho";
+import { kenkoZoshinHo } from "./kenko-zoshin-ho";
+import { jinpaiHoSikokiregu } from "./jinpai-ho-sikokiregu";
+import { koatsuGasHoanHo } from "./koatsu-gas-hoanho";
+import { soonKiseiHo } from "./soon-kisei-ho";
+import { kashinHo } from "./kashin-ho";
+import { dokugekiHo } from "./dokugeki-ho";
+import { shokuhinEiseiHo } from "./shokuhin-eisei-ho";
+import { kensetsuRosaiBoshiKitei } from "./kensetsu-rosai-boshi-kitei";
+import { kowanRodoHo } from "./kowan-rodo-ho";
+import { seninAnzenEiseiKisoku } from "./senin-anzen-eisei-kisoku";
 
-/** 全法令条文をまとめた配列（33法令以上） */
+/** 全法令条文をまとめた配列（50法令体制） */
 export const allLawArticles = [
   ...rodoAnzenEiseiHo,
   ...rodoAnzenEiseiHoSikokiregu,
@@ -109,4 +147,22 @@ export const allLawArticles = [
   ...kajuRodoTaisaku,
   ...koyoKintoHo,
   ...mhlwLawArticles,
+  ...enKisoku,
+  ...shiAlkylEnKisoku,
+  ...jimushoEiseiKijunKisoku,
+  ...kikaiKenteiKisoku,
+  ...hakenAnzenEisei,
+  ...corpusGapFillArticles,
+  ...karoshiBoshiHo,
+  ...rosaiBoshiDantaiHo,
+  ...kenkoZoshinHo,
+  ...jinpaiHoSikokiregu,
+  ...koatsuGasHoanHo,
+  ...soonKiseiHo,
+  ...kashinHo,
+  ...dokugekiHo,
+  ...shokuhinEiseiHo,
+  ...kensetsuRosaiBoshiKitei,
+  ...kowanRodoHo,
+  ...seninAnzenEiseiKisoku,
 ];

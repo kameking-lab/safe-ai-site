@@ -77,7 +77,7 @@ function FlagshipNavMobile() {
               <div className="flex items-stretch">
                 <Link
                   href={f.href}
-                  className="flex flex-1 items-center gap-2 px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-emerald-50 dark:text-slate-100 dark:hover:bg-slate-800"
+                  className="flex min-h-[44px] flex-1 items-center gap-2 px-4 py-3 text-sm font-semibold text-slate-800 hover:bg-emerald-50 dark:text-slate-100 dark:hover:bg-slate-800"
                 >
                   <span aria-hidden>{f.icon}</span>
                   {f.label}
@@ -88,7 +88,7 @@ function FlagshipNavMobile() {
                     onClick={() => setOpenId(expanded ? null : f.id)}
                     aria-expanded={expanded}
                     aria-label={`${f.label}の配下機能を${expanded ? "閉じる" : "開く"}`}
-                    className="flex w-12 items-center justify-center border-l border-slate-100 text-slate-500 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800"
+                    className="flex min-h-[44px] w-12 items-center justify-center border-l border-slate-100 text-slate-500 hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800"
                   >
                     <ChevronDown className={`h-4 w-4 transition ${expanded ? "rotate-180" : ""}`} aria-hidden />
                   </button>
@@ -100,7 +100,7 @@ function FlagshipNavMobile() {
                     <li key={`${s.label}-${s.href}`}>
                       <Link
                         href={s.href}
-                        className="block rounded px-2 py-2 text-xs text-slate-700 hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800"
+                        className="flex min-h-[44px] items-center rounded px-2 py-2 text-xs text-slate-700 hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800"
                       >
                         {s.label}
                       </Link>

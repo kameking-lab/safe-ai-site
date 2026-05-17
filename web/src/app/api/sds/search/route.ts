@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       hits: result.hits,
       source: result.source,
       disclaimer:
-        "本検索はSDS情報の参考表示です。最終判断は事業者責任のもと公式SDSをご確認ください（β機能）。",
+        "本検索はSDS情報の参考表示です。最終判断は事業者責任のもと公式SDSをご確認ください。",
     },
     { status: 200 }
   );

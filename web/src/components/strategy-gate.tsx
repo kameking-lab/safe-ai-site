@@ -1,45 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { SimpleMarkdown } from "@/components/simple-markdown";
-
-export function StrategyGate({ password, content }: { password: string; content: string }) {
-  const [unlocked, setUnlocked] = useState(false);
-  const [input, setInput] = useState("");
-  const [error, setError] = useState<string | null>(null);
-
-  if (unlocked) {
-    return (
-      <article className="prose prose-slate max-w-none">
-        <SimpleMarkdown content={content} className="text-slate-800" />
-        <div className="mt-12 border-t border-slate-200 pt-6">
-          <button
-            type="button"
-            onClick={() => {
-              setUnlocked(false);
-              setInput("");
-            }}
-            className="text-xs text-slate-500 underline hover:text-slate-700"
-          >
-            ロックする
-          </button>
-        </div>
-      </article>
-    );
-  }
-
+export function StrategyGate({ hasKeyAttempt }: { hasKeyAttempt: boolean }) {
   return (
     <div className="min-h-[60vh] flex items-center justify-center px-4">
       <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (input === password) {
-            setUnlocked(true);
-            setError(null);
-          } else {
-            setError("パスワードが違います");
-          }
-        }}
+        method="GET"
         className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <div className="mb-4">
@@ -52,13 +17,14 @@ export function StrategyGate({ password, content }: { password: string; content:
         <label className="block text-sm font-medium text-slate-700">パスワード</label>
         <input
           type="password"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
+          name="key"
           autoFocus
           autoComplete="off"
           className="mt-1 block w-full rounded-md border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
-        {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
+        {hasKeyAttempt && (
+          <p className="mt-2 text-xs text-red-600">パスワードが違います</p>
+        )}
         <button
           type="submit"
           className="mt-4 w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700"

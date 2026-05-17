@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { HomeScreen } from "@/components/home-screen";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
@@ -12,6 +13,7 @@ const _desc =
   "高所作業・化学物質・電気安全など労働安全衛生のテーマ別学習コンテンツ。安全衛生管理者・安全担当者の知識定着に活用できます。";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/e-learning" },
   title: _title,
   description: _desc,
   openGraph: {
@@ -37,7 +39,14 @@ export default function ELearningPage() {
     <>
       <PageJsonLd name={_title} description={_desc} path="/e-learning" />
       <JsonLd schema={courseSchema} />
-      <HomeScreen variant="elearning">
+      <Suspense
+        fallback={
+          <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">
+            <div className="h-40 animate-pulse rounded-lg bg-slate-100" />
+          </div>
+        }
+      >
+        <HomeScreen variant="elearning">
         <TranslatedPageHeader
           titleJa="Eラーニング"
           titleEn="E-Learning"
@@ -47,6 +56,7 @@ export default function ELearningPage() {
           iconColor="emerald"
         />
       </HomeScreen>
+      </Suspense>
       <RelatedPageCards
         heading="合わせて使う"
         pages={[

@@ -265,6 +265,7 @@ export function DiaryFormRequired() {
           value={siteName}
           onChange={(e) => setSiteName(e.target.value)}
           placeholder="例: 〇〇ビル新築工事 1F"
+          autoComplete="off"
           className="mt-3 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           required
         />
@@ -291,6 +292,7 @@ export function DiaryFormRequired() {
           onChange={(e) => setWorkContent(e.target.value)}
           placeholder="例: 2階スラブ配筋・型枠組立"
           rows={3}
+          autoComplete="off"
           className="mt-3 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           required
         />
@@ -341,6 +343,7 @@ export function DiaryFormRequired() {
           onChange={(e) => setKyResult(e.target.value)}
           placeholder="例: 高所作業時はフルハーネス着用徹底、墜落防止親綱を点検"
           rows={4}
+          autoComplete="off"
           className="mt-3 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
           required
         />
@@ -397,7 +400,7 @@ export function DiaryFormRequired() {
             {nearMissPhotoDataUrl && (
               <div className="flex items-center gap-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={nearMissPhotoDataUrl} alt="ヒヤリハット写真" className="h-16 w-16 rounded border object-cover" />
+                <img src={nearMissPhotoDataUrl} alt="ヒヤリハット写真" width={64} height={64} className="h-16 w-16 rounded border object-cover" />
                 <button
                   type="button"
                   onClick={() => setNearMissPhotoDataUrl(null)}
@@ -505,6 +508,8 @@ export function DiaryFormRequired() {
                 <img
                   src={nearMissPhotoDataUrl}
                   alt="ヒヤリハット写真"
+                  width={80}
+                  height={80}
                   className="h-20 w-20 rounded-lg border object-cover"
                 />
                 <button

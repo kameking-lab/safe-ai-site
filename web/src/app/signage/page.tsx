@@ -82,8 +82,8 @@ export default function SignagePage() {
     mode: services.mode,
     regionLabel: selectedLocation.label,
     // SSR/client hydration mismatch 対策: 時刻はクライアント側 useEffect でセット
-    nowText: "—",
-    lastUpdatedText: "—",
+    nowText: "--:--",
+    lastUpdatedText: "起動中…",
     riskStatus: "idle",
     riskData: null,
     lawStatus: "idle",
@@ -264,29 +264,50 @@ export default function SignagePage() {
         </p>
       </div>
 
-      {/* 縦長/横長切替 + 地図モード導線 */}
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-emerald-700/60 bg-emerald-950/40 px-3 py-2 text-xs">
-        <button
-          type="button"
-          onClick={toggleOrientation}
-          className="rounded border border-emerald-400 bg-emerald-700 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
-          aria-pressed={isPortrait}
-        >
-          {isPortrait ? "📱 縦長表示中（横長へ切替）" : "🖥 横長表示中（縦長へ切替）"}
-        </button>
-        <span className="text-emerald-100/80">縦置きTVと横置きTVを切替できます。</span>
-        <Link
-          href="/signage/map"
-          className="ml-auto rounded border border-emerald-400 bg-emerald-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
-        >
-          🗺️ 地図モードを開く →
-        </Link>
-        <Link
-          href="/signage/display"
-          className="rounded border border-sky-400 bg-sky-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-sky-600"
-        >
-          📺 ディスプレイモード →
-        </Link>
+      {/* C-003: scenario presets — set display mode for common use cases */}
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-sky-700/50 bg-sky-950/40 px-3 py-2 text-xs">
+        <span className="text-sky-200/80 font-semibold shrink-0">シナリオ：</span>
+        {([
+          { label: "朝礼前", icon: "🌅", mode: "floorplan" as DisplayMode, title: "朝礼前 — 現場レイアウトと気象警報を確認" },
+          { label: "休憩時間", icon: "☕", mode: "map" as DisplayMode, title: "休憩時間 — 気象マップと最新ニュース確認" },
+          { label: "退場時", icon: "🌆", mode: "workdocs" as DisplayMode, title: "退場時 — 本日の作業資料と法改正確認" },
+        ] as const).map((s) => (
+          <button
+            key={s.label}
+            type="button"
+            onClick={() => setDisplayMode(s.mode)}
+            title={s.title}
+            className={`rounded border px-2.5 py-1 text-[11px] font-bold transition min-h-[36px] ${
+              displayMode === s.mode
+                ? "border-sky-400 bg-sky-600 text-white"
+                : "border-sky-700 bg-sky-900/60 text-sky-200 hover:bg-sky-800/60"
+            }`}
+          >
+            {s.icon} {s.label}
+          </button>
+        ))}
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={toggleOrientation}
+            className="rounded border border-emerald-400 bg-emerald-700 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
+            aria-pressed={isPortrait}
+          >
+            {isPortrait ? "📱 縦長" : "🖥 横長"}
+          </button>
+          <Link
+            href="/signage/map"
+            className="rounded border border-emerald-400 bg-emerald-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
+          >
+            🗺️ 地図
+          </Link>
+          <Link
+            href="/signage/display"
+            className="rounded border border-sky-400 bg-sky-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-sky-600"
+          >
+            📺 全画面
+          </Link>
+        </div>
       </div>
 
       <div className={`grid grid-cols-1 gap-2 xl:min-h-0 xl:flex-1 xl:gap-3 xl:overflow-hidden ${isPortrait ? "" : "xl:grid-cols-12"}`}>

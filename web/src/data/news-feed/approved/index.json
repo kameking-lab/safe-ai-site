@@ -1,0 +1,71 @@
+{
+  "updatedAt": "2026-05-16T00:09:40.199Z",
+  "entries": [
+    {
+      "id": "6bd4258af8401d55",
+      "headline": "第185回労働政策審議会安全衛生分科会（開催案内）",
+      "aiSummary": "厚生労働省が労働安全衛生政策を議論する分科会の開催を案内。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_72982.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-05-11T14:00:00+09:00",
+        "fetchedAt": "2026-05-16T00:08:47.992Z"
+      },
+      "score": {
+        "relevance": 95,
+        "copyrightRisk": 5,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-05-16T00:09:20.104Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "19649f6cf00b5d8d",
+      "headline": "「第１回 個人事業者等安全衛生推進協議会」を５月13日に開催します",
+      "aiSummary": "厚生労働省が個人事業主の安全衛生推進に向け、初の協議会を5月13日に開催する。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_73047.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-05-08T14:00:00+09:00",
+        "fetchedAt": "2026-05-16T00:08:47.992Z"
+      },
+      "score": {
+        "relevance": 88,
+        "copyrightRisk": 5,
+        "misinformationRisk": 2,
+        "duplication": 10,
+        "judgedAt": "2026-05-16T00:09:25.863Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "69f285f5eb82bb78",
+      "headline": "令和８年度第２回「石綿に係る疾病の業務上外に関する検討会」を開催します",
+      "aiSummary": "厚生労働省がアスベスト関連疾病の業務起因性に関する検討会を開催。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_72704.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-05-01T14:00:00+09:00",
+        "fetchedAt": "2026-05-16T00:08:47.992Z"
+      },
+      "score": {
+        "relevance": 95,
+        "copyrightRisk": 5,
+        "misinformationRisk": 0,
+        "duplication": 20,
+        "judgedAt": "2026-05-16T00:09:40.186Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    }
+  ]
+}

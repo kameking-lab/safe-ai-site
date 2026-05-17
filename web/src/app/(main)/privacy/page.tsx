@@ -1,25 +1,27 @@
 import type { Metadata } from "next";
+import { withSiteOpenGraph } from "@/lib/seo-metadata";
+import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
+import { PrivacyCookieStatus } from "@/components/privacy/cookie-status";
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
   description: "安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
   alternates: { canonical: "/privacy" },
-  openGraph: {
+  openGraph: withSiteOpenGraph("/privacy", {
     title: "プライバシーポリシー",
     description: "安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。",
-  },
+  }),
 };
 
 export default function PrivacyPage() {
   return (
-    <div className="px-4 py-8 lg:px-8">
+    <PageContainer width="narrow" className="space-y-8">
       {/* SEO: WebPage + BreadcrumbList */}
       <PageJsonLd name="プライバシーポリシー" description="安全AIポータルのプライバシーポリシー。個人情報の取り扱いについて説明しています。" path="/privacy" />
-      <div className="mx-auto max-w-2xl space-y-8">
         <div>
           <h1 className="text-xl font-bold text-slate-900">プライバシーポリシー</h1>
-          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月22日</p>
+          <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年5月17日</p>
         </div>
 
         <section className="space-y-3">
@@ -59,6 +61,9 @@ export default function PrivacyPage() {
               （/api/notify/subscribe を利用する場合）：メールアドレス、通知条件、選択地点
             </li>
           </ul>
+          <p className="text-sm leading-7 text-slate-600">
+            なお、サーバーサイドのアプリケーションログ（問い合わせ受信・フィードバック・メルマガ登録）には、氏名・メールアドレス・相談内容等の個人情報は記録しません。ログに含まれるのはカテゴリ、文字数、受信日時などの非個人情報のみです。
+          </p>
         </section>
 
         <section className="space-y-3">
@@ -172,9 +177,55 @@ export default function PrivacyPage() {
           <h2 className="text-base font-bold text-slate-900">6. Cookie・ローカルストレージ</h2>
           <p className="text-sm leading-7 text-slate-600">
             本サービスは、表示設定・KYドラフト・地点選択などの利用者体験を維持するため、ブラウザのローカルストレージと Cookie を利用します。
-            認証用 Cookie を利用する場合があります（NextAuth セッション等）。ブラウザ設定から無効化・削除が可能ですが、ログイン状態の維持や KY 用紙の一時保存など一部機能が利用できなくなる場合があります。
-            第三者による広告トラッキング目的の Cookie は設定していません（アフィリエイトリンク先を除く）。
+            ブラウザ設定から無効化・削除が可能ですが、ログイン状態の維持や KY 用紙の一時保存など一部機能が利用できなくなる場合があります。
           </p>
+          <p className="text-sm leading-7 text-slate-600">
+            <span className="font-semibold text-slate-700">Cookie・ストレージの種類別の取扱い：</span>
+          </p>
+          <ul className="ml-4 space-y-1.5 text-sm text-slate-600">
+            <li className="list-disc">
+              <span className="font-semibold text-slate-700">必須（Essential）</span>
+              ：認証セッション（NextAuth）、表示設定、KYドラフトの一時保存など、本サービスの基本機能維持に不可欠なもの。無効化するとサービスの利用に支障が生じます。
+            </li>
+            <li className="list-disc">
+              <span className="font-semibold text-slate-700">分析（Analytics）</span>
+              ：本サービスでは、利用傾向の把握および機能改善のため、環境変数
+              <code className="mx-1 rounded bg-slate-100 px-1 text-xs text-slate-700">NEXT_PUBLIC_GA_MEASUREMENT_ID</code>
+              が設定されている場合に Google Analytics 4（GA4）を導入することがあります。GA4 が有効な場合、`_ga` 等の Cookie によりページ閲覧の統計情報（匿名化された利用者識別子、ページパス、滞在時間など）が Google LLC（米国）へ送信されます。IP匿名化を有効化し、個人を直接特定する情報は送信しません。導入の有無は本ページ末尾の「現在の Cookie 利用状況」で確認できます。GA4 のデータ取扱いは
+              <a className="ml-0.5 underline hover:text-emerald-700" href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google プライバシーポリシー</a>
+              に従います。
+            </li>
+            <li className="list-disc">
+              <span className="font-semibold text-slate-700">広告（Advertising）</span>
+              ：本サービス自体は広告トラッキング目的の Cookie を設定していません。ただし、ページ内のアフィリエイトリンク（Amazon・楽天等）をクリックして遷移した先では、各事業者のポリシーに基づき Cookie が設定される場合があります。これらは本サービスの管理外です。
+            </li>
+          </ul>
+          <p className="text-sm leading-7 text-slate-600">
+            <span className="font-semibold text-slate-700">分析 Cookie のオプトアウト：</span>
+            分析 Cookie の送信を停止したい場合、(a) ブラウザの設定から Cookie をブロック、または (b)
+            <a className="ml-0.5 underline hover:text-emerald-700" href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google アナリティクス オプトアウト アドオン</a>
+            の導入により、本サービスでの GA4 計測を無効化できます。
+          </p>
+          <p className="text-sm leading-7 text-slate-600">
+            <span className="font-semibold text-slate-700">2022年改正個人情報保護法・GDPR/CCPA対応について：</span>
+            個人関連情報（Cookie等）の第三者提供にかかる本人同意取得義務（個人情報保護法第31条）への対応として、
+            分析 Cookie の利用範囲・送信先・オプトアウト手段を本ポリシーで明示し、利用者が事前に判断できる体制としています。
+            EU/EEA・英国・カリフォルニア州在住の利用者は、GDPR第15条〜第22条・CCPA に基づくデータ主体の権利
+            （開示・訂正・削除・処理停止・データポータビリティ等）の請求を
+            <a className="underline hover:text-emerald-700" href="/contact">お問い合わせフォーム</a>
+            よりお寄せいただけます。
+          </p>
+          <p className="text-sm leading-7 text-slate-600">
+            <span className="font-semibold text-slate-700">同意管理バナーについて：</span>
+            個別 Cookie 種類ごとに事前同意を取得する同意管理バナー（CMP）の導入は、
+            2026年下期の対応予定項目として整備中です。当面の対応として、本ページで Cookie 種別ごとの利用目的・送信先・オプトアウト手段を明示し、
+            利用者が自己決定できる情報を提供する方針としています。
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-base font-bold text-slate-900">6-2. 現在の Cookie 利用状況（動的表示）</h2>
+          <PrivacyCookieStatus />
         </section>
 
         <section className="space-y-3">
@@ -217,7 +268,6 @@ export default function PrivacyPage() {
             よりご連絡ください。
           </p>
         </section>
-      </div>
-    </div>
+    </PageContainer>
   );
 }

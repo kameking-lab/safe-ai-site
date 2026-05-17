@@ -119,7 +119,7 @@ const PLAN_FEATURES = {
       { ja: "プロの全機能", en: "All Pro features" },
       { ja: "利用アカウント：最大100名", en: "Up to 100 user accounts" },
       { ja: "多拠点サイネージ表示（無制限）", en: "Multi-site signage (unlimited)" },
-      { ja: "LMS βアクセス（先行招待）", en: "LMS β early access" },
+      { ja: "LMS 先行招待", en: "LMS early access" },
       { ja: "法令通知の業種別カスタムルール", en: "Industry-specific law alert rules" },
       { ja: "請求書払い・年契払い割引（−10%）", en: "Invoice payment + annual discount (−10%)" },
       { ja: "初期サポート（ハンズオン1回／導入時）", en: "Onboarding hands-on session (×1)" },
@@ -140,8 +140,7 @@ const PLAN_FEATURES = {
       { ja: "KY・安全書類のデジタル化", en: "KY & safety document digitization" },
       { ja: "Excel VBA・ルーティン業務の自動化", en: "Excel VBA / routine task automation" },
       { ja: "特別教育・安全衛生教育の講師派遣", en: "Special education instructor dispatch" },
-      { ja: "労働安全コンサル・月額顧問", en: "Occupational safety consulting / monthly retainer" },
-      { ja: "Claude Code による受託開発", en: "Custom development via Claude Code" },
+      { ja: "労働安全コンサル・診断", en: "Occupational safety consulting / diagnosis" },
       { ja: "要件ヒアリング → 個別見積", en: "Requirements → custom quote" },
       { ja: "無料相談30分（オンライン）", en: "Free 30-min consultation (online)" },
     ],
@@ -598,7 +597,7 @@ export function PricingContent() {
                       </Link>
                     ) : isCustom ? (
                       <Link
-                        href="/contact?category=enterprise"
+                        href="/contact?category=custom"
                         className="block w-full rounded-xl bg-blue-600 py-2.5 text-center text-sm font-bold text-white transition hover:bg-blue-700 active:scale-[0.98]"
                       >
                         {t("pricing.plan.custom.cta")}

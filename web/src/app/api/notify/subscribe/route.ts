@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
   if (!apiKey) {
     return NextResponse.json(
-      { error: "メール通知機能は現在準備中です。（RESEND_API_KEY未設定）" },
+      { error: "通知機能は現在ご利用いただけません。" },
       { status: 503 }
     );
   }
