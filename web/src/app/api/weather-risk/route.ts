@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { signageMeteoRegions } from "@/data/signage-locations";
 import type { ApiErrorResponse, WeatherRiskApiResponse } from "@/lib/types/api";
 import type { WeatherAlert, WeatherSnapshot } from "@/lib/types/domain";
+import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
+import { fetchWithTimeout, TimeoutError } from "@/lib/external/fetch-with-timeout";
 
 type OpenMeteoDailyResponse = {
   daily?: {
@@ -122,6 +124,18 @@ function toSnapshot(regionName: string, payload: OpenMeteoDailyResponse): Weathe
   };
 }
 
+function buildFallbackSnapshot(regionName: string): WeatherSnapshot {
+  return {
+    regionName,
+    date: new Date().toISOString().slice(0, 10),
+    overview: "情報なし",
+    temperatureCelsius: 0,
+    windSpeedMs: 0,
+    precipitationMm: 0,
+    alerts: [],
+  };
+}
+
 export async function GET(request: NextRequest) {
   const region = resolveRegion(request);
   if (!region) {
@@ -138,44 +152,52 @@ export async function GET(request: NextRequest) {
     "weather_code,temperature_2m_max,wind_speed_10m_max,precipitation_sum"
   );
 
-  let response: Response;
+  let snapshot: WeatherSnapshot | null = null;
+  let provider: WeatherRiskApiResponse["provider"] = "open-meteo";
+
   try {
-    response = await fetch(endpoint.toString(), {
-      headers: {
-        Accept: "application/json",
+    const payload = await withCircuitBreaker(
+      "open-meteo",
+      async () => {
+        const response = await fetchWithTimeout(endpoint.toString(), {
+          headers: { Accept: "application/json" },
+          cache: "no-store",
+          timeoutMs: 6000,
+        });
+        if (!response.ok) {
+          throw new Error(`open-meteo HTTP ${response.status}`);
+        }
+        return (await response.json()) as OpenMeteoDailyResponse;
       },
-      cache: "no-store",
-    });
-  } catch {
-    return errorResponse(503, "NETWORK", "天気情報の取得に失敗しました。通信状況を確認してください。");
+      { failureThreshold: 5, cooldownMs: 120_000 }
+    );
+    snapshot = toSnapshot(region.regionName, payload);
+  } catch (err) {
+    const reason = err instanceof CircuitOpenError
+      ? "open-meteo circuit open"
+      : err instanceof TimeoutError
+        ? "open-meteo timeout"
+        : err instanceof Error
+          ? err.message
+          : "open-meteo unknown error";
+    console.error("[weather-risk] degraded:", reason);
+    snapshot = buildFallbackSnapshot(region.regionName);
+    provider = "mock-fallback";
   }
 
-  if (!response.ok) {
-    return errorResponse(503, "UNAVAILABLE", "天気APIが一時的に利用できません。");
-  }
-
-  let payload: OpenMeteoDailyResponse;
-  try {
-    payload = (await response.json()) as OpenMeteoDailyResponse;
-  } catch {
-    return errorResponse(502, "UNKNOWN", "天気APIのレスポンス形式が不正です。");
-  }
-
-  const snapshot = toSnapshot(region.regionName, payload);
   if (!snapshot) {
-    return errorResponse(502, "UNKNOWN", "天気APIのデータが不足しています。");
+    snapshot = buildFallbackSnapshot(region.regionName);
+    provider = "mock-fallback";
   }
 
   const body: WeatherRiskApiResponse = {
     snapshot,
-    provider: "open-meteo",
+    provider,
     fetchedAt: new Date().toISOString(),
   };
 
   return NextResponse.json(body, {
     status: 200,
-    headers: {
-      "x-weather-source": "open-meteo",
-    },
+    headers: { "x-weather-source": provider },
   });
 }

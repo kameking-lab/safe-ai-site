@@ -3,6 +3,8 @@ import { summaryMockByRevisionId } from "@/data/mock/summaries";
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
 import type { SummaryApiRouteResponse } from "@/lib/types/api";
 import type { LawRevisionSummary } from "@/lib/types/domain";
+import { withCircuitBreaker } from "@/lib/external/circuit-breaker";
+import { fetchWithTimeout } from "@/lib/external/fetch-with-timeout";
 
 function parseDelay(value: string | null, fallbackMs: number): number {
   const parsed = Number(value);
@@ -87,7 +89,7 @@ async function generateSummaryForRevision(
   revision: (typeof realLawRevisions)[number]
 ): Promise<LawRevisionSummary> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
-  // AI生成を試みる
+  // AI生成を試みる（失敗時はヒューリスティックにフォールバック）
   if (apiKey && apiKey !== "dummy") {
     try {
       const prompt = `以下の労働安全衛生に関する法改正を、現場担当者向けに分析し、JSONで回答してください。
@@ -109,37 +111,46 @@ async function generateSummaryForRevision(
 - 施行日: ${revision.enforcement_date ?? "不明"}
 - 発出元: ${revision.issuer}`;
 
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-          signal: AbortSignal.timeout(15000),
-        }
-      );
-      if (res.ok) {
-        const data = (await res.json()) as {
-          candidates?: { content?: { parts?: { text?: string }[] } }[];
-        };
-        const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-        const match = raw.match(/```json\s*([\s\S]*?)```/);
-        if (match?.[1]) {
-          try {
-            const parsed = JSON.parse(match[1]) as Partial<LawRevisionSummary>;
-            const three = Array.isArray(parsed.threeLineSummary) ? parsed.threeLineSummary.slice(0, 3) : [];
-            while (three.length < 3) three.push(revision.summary ?? "情報なし");
-            return {
-              threeLineSummary: [three[0], three[1], three[2]] as [string, string, string],
-              workplaceActions: Array.isArray(parsed.workplaceActions) ? parsed.workplaceActions : [],
-              targetIndustries: Array.isArray(parsed.targetIndustries) ? parsed.targetIndustries : [],
-            };
-          } catch {
-            // fall through to heuristic
+      const data = await withCircuitBreaker(
+        "gemini",
+        async () => {
+          const res = await fetchWithTimeout(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+              timeoutMs: 15_000,
+            }
+          );
+          if (!res.ok) {
+            throw new Error(`gemini HTTP ${res.status}`);
           }
+          return (await res.json()) as {
+            candidates?: { content?: { parts?: { text?: string }[] } }[];
+          };
+        },
+        { failureThreshold: 4, cooldownMs: 60_000 }
+      );
+
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+      const match = raw.match(/```json\s*([\s\S]*?)```/);
+      if (match?.[1]) {
+        try {
+          const parsed = JSON.parse(match[1]) as Partial<LawRevisionSummary>;
+          const three = Array.isArray(parsed.threeLineSummary) ? parsed.threeLineSummary.slice(0, 3) : [];
+          while (three.length < 3) three.push(revision.summary ?? "情報なし");
+          return {
+            threeLineSummary: [three[0], three[1], three[2]] as [string, string, string],
+            workplaceActions: Array.isArray(parsed.workplaceActions) ? parsed.workplaceActions : [],
+            targetIndustries: Array.isArray(parsed.targetIndustries) ? parsed.targetIndustries : [],
+          };
+        } catch {
+          // fall through to heuristic
         }
       }
-    } catch {
+    } catch (err) {
+      console.warn("[summaries] Gemini call failed — using heuristic:", err instanceof Error ? err.message : err);
       // fall through to heuristic
     }
   }

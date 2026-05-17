@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 
 export type TranslateRequest = {
   /** 翻訳対象のテキスト（タイトル+本文を改行で連結したもの） */
@@ -58,29 +59,39 @@ export async function POST(request: Request) {
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const translated = await withCircuitBreaker(
+      "gemini",
+      async () => {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    const prompt = [
-      `You are a professional translator specialized in Japanese occupational safety and health terminology.`,
-      `Translate the following Japanese text into ${LANG_NAMES[body.targetLang]}.`,
-      `Preserve technical terms (JIS standards, regulation names, hazard categories) accurately.`,
-      `Do not add commentary; output only the translated text.`,
-      ``,
-      `=== Source ===`,
-      body.text,
-      `=== End ===`,
-    ].join("\n");
+        const prompt = [
+          `You are a professional translator specialized in Japanese occupational safety and health terminology.`,
+          `Translate the following Japanese text into ${LANG_NAMES[body.targetLang]}.`,
+          `Preserve technical terms (JIS standards, regulation names, hazard categories) accurately.`,
+          `Do not add commentary; output only the translated text.`,
+          ``,
+          `=== Source ===`,
+          body.text,
+          `=== End ===`,
+        ].join("\n");
 
-    const result = await model.generateContent(prompt);
-    const translated = result.response.text();
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+      },
+      { failureThreshold: 4, cooldownMs: 60_000 }
+    );
 
     return NextResponse.json({
       text: translated.trim(),
       source: "gemini",
     } satisfies TranslateResponse);
   } catch (err) {
-    const reason = err instanceof Error ? err.message : "unknown_error";
+    const reason = err instanceof CircuitOpenError
+      ? "Gemini circuit open (連続失敗中)"
+      : err instanceof Error
+        ? err.message
+        : "unknown_error";
     return NextResponse.json(
       {
         ...buildPlaceholder(body.text, body.targetLang),

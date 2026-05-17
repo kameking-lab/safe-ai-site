@@ -103,36 +103,27 @@ export async function POST(request: Request) {
     publishOk: Boolean(body.publishOk),
   };
 
-  // Resend が設定されている場合のみメール通知。それ以外はサーバーログに残す。
-  const resendKey = process.env.RESEND_API_KEY;
+  // 受領は必ずログに残す（Resend 不通時の手動レスキューに必須）
+  console.warn("[inquiry]", JSON.stringify(record));
+
+  // Resend が設定されている場合のみメール通知。失敗してもユーザー応答は止めない。
   const inboxAddress = process.env.INQUIRY_INBOX;
-  if (resendKey && inboxAddress) {
-    try {
-      const { Resend } = await import("resend");
-      const resend = new Resend(resendKey);
-      await resend.emails.send({
-        from: "安全AIポータル <noreply@anzen-ai.example.com>",
-        to: inboxAddress,
-        subject: `[安全AIポータル 相談] ${body.category} / ${body.subject.slice(0, 60)}`,
-        text:
-          `カテゴリ: ${body.category}\n` +
-          `名前: ${record.name || "（未記入）"}\n` +
-          `メール: ${record.email || "（未記入）"}\n` +
-          `業種: ${record.industry || "（未記入）"}\n` +
-          `公開Q&A掲載: ${record.publishOk ? "可" : "不可"}\n` +
-          `件名: ${record.subject}\n\n` +
-          `--- 内容 ---\n${body.message}\n`,
-      });
-    } catch (err) {
-      console.error("[inquiry] resend error", err);
-    }
-  } else {
-    console.log("[inquiry] no Resend — stored in memory.", JSON.stringify({
-      receivedAt: record.receivedAt,
-      category: record.category,
-      messageLength: record.messageLength,
-      publishOk: record.publishOk,
-    }));
+  if (inboxAddress) {
+    const { sendEmailSafe } = await import("@/lib/external/resend-safe");
+    await sendEmailSafe({
+      tag: "inquiry",
+      from: "安全AIポータル <noreply@anzen-ai.example.com>",
+      to: inboxAddress,
+      subject: `[安全AIポータル 相談] ${body.category} / ${body.subject.slice(0, 60)}`,
+      text:
+        `カテゴリ: ${body.category}\n` +
+        `名前: ${record.name || "（未記入）"}\n` +
+        `メール: ${record.email || "（未記入）"}\n` +
+        `業種: ${record.industry || "（未記入）"}\n` +
+        `公開Q&A掲載: ${record.publishOk ? "可" : "不可"}\n` +
+        `件名: ${record.subject}\n\n` +
+        `--- 内容 ---\n${body.message}\n`,
+    });
   }
 
   return NextResponse.json(

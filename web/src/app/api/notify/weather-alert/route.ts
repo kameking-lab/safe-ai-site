@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
+import { sendEmailSafe } from "@/lib/external/resend-safe";
 
 // 気象警報メール一斉送信エンドポイント
 // Vercel Cron または外部スクリプトから呼び出す想定
@@ -30,10 +30,6 @@ export async function POST(req: Request) {
   const apiKey = process.env.RESEND_API_KEY;
   const audienceId = process.env.RESEND_AUDIENCE_ID;
 
-  if (!apiKey || !audienceId) {
-    return NextResponse.json({ error: "Resend未設定" }, { status: 503 });
-  }
-
   const body = (await req.json()) as AlertPayload;
   const { prefecture, alertType, issuedAt, url } = body;
 
@@ -41,18 +37,35 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "prefecture, alertType は必須です。" }, { status: 400 });
   }
 
-  const resend = new Resend(apiKey);
+  // クロン側がリトライできるよう必ずログに残す
+  console.warn(
+    "[notify/weather-alert]",
+    JSON.stringify({ prefecture, alertType, issuedAt, url, at: new Date().toISOString() })
+  );
+
+  if (!apiKey || !audienceId) {
+    return NextResponse.json(
+      {
+        success: false,
+        delivered: false,
+        skipped: true,
+        reason: "Resend未設定 (RESEND_API_KEY または RESEND_AUDIENCE_ID 未設定)",
+        prefecture,
+        alertType,
+      },
+      { status: 200 } // cron は 2xx を成功とみなしてリトライしない。スキップは構造で示す。
+    );
+  }
+
   const fromAddress = process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.com>";
   const issuedDate = new Date(issuedAt).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
 
-  try {
-    // Resend Broadcasts API（または個別送信）で一斉送信
-    // NOTE: Resend v3 では broadcasts.create で一斉送信が可能
-    await resend.emails.send({
-      from: fromAddress,
-      to: `audience:${audienceId}`, // Resend オーディエンス全体に送信
-      subject: `【安全AIポータル 警報】${prefecture}に${alertType}が発表されました`,
-      html: `
+  const result = await sendEmailSafe({
+    tag: "weather-alert",
+    from: fromAddress,
+    to: `audience:${audienceId}`,
+    subject: `【安全AIポータル 警報】${prefecture}に${alertType}が発表されました`,
+    html: `
 <!DOCTYPE html>
 <html lang="ja">
 <head><meta charset="utf-8" /></head>
@@ -71,11 +84,16 @@ export async function POST(req: Request) {
   </p>
 </body>
 </html>`,
-    });
+  });
 
-    return NextResponse.json({ success: true, prefecture, alertType });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "送信失敗";
-    return NextResponse.json({ error: msg }, { status: 500 });
+  if (result.delivered) {
+    return NextResponse.json({ success: true, delivered: true, prefecture, alertType, id: result.id });
   }
+
+  // Cron リトライを誘発するためサーキット解放中は 503、ハード失敗は 500、未設定は 200(skip) を返す。
+  const status = result.reason === "circuit_open" ? 503 : 500;
+  return NextResponse.json(
+    { success: false, delivered: false, reason: result.reason, detail: result.detail, prefecture, alertType },
+    { status, headers: result.reason === "circuit_open" ? { "Retry-After": "120" } : undefined }
+  );
 }

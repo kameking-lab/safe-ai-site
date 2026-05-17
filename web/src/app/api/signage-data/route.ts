@@ -64,27 +64,39 @@ export async function GET(request: NextRequest) {
   const locationId = request.nextUrl.searchParams.get("locationId") ?? "tokyo-shinjuku";
   const loc = getSignageLocationById(locationId) ?? getSignageLocationById("tokyo-shinjuku")!;
 
-  try {
-    const [prefectureLevels, laborTrend, hourly] = await Promise.all([
-      getPrefectureLevelsCached(),
-      fetchLaborTrendItems(10),
-      fetchSignageHourlySeries(loc.latitude, loc.longitude, 48),
-    ]);
+  // 各依存を独立に await し、片方が失敗してももう片方を表示できるようにする。
+  // サイネージは現場の常時表示前提のため 5xx を絶対に返さない。
+  const [prefectureLevelsResult, laborTrendResult, hourlyResult] = await Promise.allSettled([
+    getPrefectureLevelsCached(),
+    fetchLaborTrendItems(10),
+    fetchSignageHourlySeries(loc.latitude, loc.longitude, 48),
+  ]);
 
+  const prefectureLevels = prefectureLevelsResult.status === "fulfilled" ? prefectureLevelsResult.value : {};
+  const laborTrend = laborTrendResult.status === "fulfilled" ? laborTrendResult.value : [];
+  const hourly = hourlyResult.status === "fulfilled" ? hourlyResult.value : [];
+
+  const failures: string[] = [];
+  if (prefectureLevelsResult.status === "rejected") failures.push("jma");
+  if (laborTrendResult.status === "rejected") failures.push("labor-rss");
+  if (hourlyResult.status === "rejected") failures.push("open-meteo");
+
+  let jmaHeadline: string | null = null;
+  let jmaReportTime: string | null = null;
+  const selectedWarnings: { code: string; status: string }[] = [];
+
+  try {
     const prefCodes = jmaWarningJsonCodesForIso2(loc.prefectureIso);
     const prefPayloads = (
       await Promise.all(prefCodes.map((c) => fetchJson(jmaWarningJsonUrl(c))))
     ).filter((p): p is JmaWarningPayload => p !== null);
 
-    let jmaHeadline: string | null = null;
-    let jmaReportTime: string | null = null;
     for (const p of prefPayloads) {
       const h = headlineFromPayload(p);
       if (h) jmaHeadline = h;
       if (p.reportDatetime) jmaReportTime = p.reportDatetime;
     }
 
-    const selectedWarnings: { code: string; status: string }[] = [];
     if (loc.jmaCityCode) {
       for (const p of prefPayloads) {
         for (const w of warningsForCityCode(p, loc.jmaCityCode)) {
@@ -92,29 +104,31 @@ export async function GET(request: NextRequest) {
         }
       }
     }
-
-    const body: SignageDataApiResponse = {
-      fetchedAt: new Date().toISOString(),
-      prefectureLevels,
-      laborTrend,
-      hourly,
-      jmaHeadline,
-      jmaReportTime,
-      selectedWarnings,
-      locationLabel: loc.label,
-    };
-
-    return NextResponse.json(body, {
-      status: 200,
-      headers: {
-        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
-        "x-signage-data": "jma-openmeteo-rss",
-      },
-    });
-  } catch {
-    return NextResponse.json(
-      { error: { code: "UNAVAILABLE", message: "サイネージデータの取得に失敗しました。" } },
-      { status: 503 }
-    );
+  } catch (err) {
+    failures.push("jma-city");
+    console.warn("[signage-data] city-level JMA fetch failed:", err instanceof Error ? err.message : err);
   }
+
+  if (failures.length > 0) {
+    console.warn("[signage-data] degraded — failed deps:", failures.join(","));
+  }
+
+  const body: SignageDataApiResponse = {
+    fetchedAt: new Date().toISOString(),
+    prefectureLevels,
+    laborTrend,
+    hourly,
+    jmaHeadline,
+    jmaReportTime,
+    selectedWarnings,
+    locationLabel: loc.label,
+  };
+
+  return NextResponse.json(body, {
+    status: 200,
+    headers: {
+      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      "x-signage-data": failures.length > 0 ? `degraded:${failures.join(",")}` : "jma-openmeteo-rss",
+    },
+  });
 }
