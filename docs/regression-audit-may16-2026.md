@@ -205,3 +205,34 @@ Internal-link orphan check:
 grep -rE "href=\"/(foreign-workers|mental-health-management|ky-examples|faq)\"" src/ \
   | grep -vE "/(foreign-workers|mental-health-management|ky-examples|faq)/"
 ```
+
+## Phase E — Findings resolution status (updated 2026-05-17)
+
+All P1 findings were resolved the same day as this audit.
+
+| Finding | Resolved by | Merged | Notes |
+|---------|-------------|--------|-------|
+| P1-01 faq/[category] canonical | PR #180 | 2026-05-16 | Per-category `generateMetadata` added via `faq/[category]/layout.tsx` |
+| P1-02 Sitemap missing 3 features | PR #180 | 2026-05-16 | 11 URLs added (`/ky-examples`, `/education-certification`, `/treatment-work-balance` + sub-pages) |
+| P1-03 4 features orphaned from nav | PR #180 | 2026-05-16 | All 4 registered in `flagship-nav.ts` subItems and footer |
+| P1-04 CrossToolLinks 6→14 tools | PR #180 | 2026-05-16 | 8 new tools added; `CrossToolId` union expanded |
+| P2-01 og:image missing on 3 pages | PR #220 | 2026-05-16 | 16-page OG/Twitter metadata audit fixed all gaps |
+| P2-05 2 lint warnings | PR #220 | 2026-05-16 | Unused `Sparkles` and `Save` imports removed |
+
+Open items (still outstanding as of 2026-05-17):
+
+| Finding | Status |
+|---------|--------|
+| P2-02 `/ky-examples` no JSON-LD | Open — tracked for next SEO pass |
+| P2-03 Industry-slug fragmentation | Open — owner direction needed before consolidation |
+| P2-04 `/foreign-workers/safety-training` 148 KB payload | Open — Lighthouse confirmation needed |
+| P3-01 Chemical-DB 14 duplicate JP names | Open — UI disambiguation TBD |
+
+F-category decisions confirmed by PR #234 (2026-05-17):
+
+| Feature | Decision |
+|---------|----------|
+| F-005 `/signage` | `kept-by-owner` — ky-morning-signage連携+主要シーン |
+| F-007 `/qa-knowledge` | `reduced-by-owner` — FAQ 200問リンク+投稿募集CTAランディングに縮小 |
+| F-008 accidents trio (`/accidents`, `/accidents-reports`, `/accidents-analytics`) | `kept-by-owner` — SEOリスク>整理メリット |
+| F-010 `/safety-diary` | `reduced-by-owner` — 一覧+新規2ページ、LMS時再設計 |
