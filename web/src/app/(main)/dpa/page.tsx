@@ -40,8 +40,8 @@ export default function DpaPage() {
           <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
             <p className="text-sm font-semibold text-blue-900">【現状】個別対応中</p>
             <p className="mt-2 text-sm leading-7 text-blue-800">
-              標準DPAテンプレートは現在準備中です（独立後3ヶ月以内に整備予定）。
-              現時点でDPAが必要な場合は、
+              標準DPAテンプレートについては個別にご案内しています。
+              DPAが必要な場合は、
               <a className="underline hover:text-blue-900" href="/contact">
                 お問い合わせフォーム
               </a>

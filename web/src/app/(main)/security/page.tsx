@@ -102,7 +102,7 @@ export default function SecurityPage() {
               <Badge type="予定" />
               <span>
                 <span className="font-semibold text-slate-700">アプリレベル暗号化</span>
-                ：メールアドレス等の準個人情報の列単位暗号化（独立後3〜6ヶ月で実装予定）。
+                ：メールアドレス等の準個人情報の列単位暗号化（計画中）。
               </span>
             </li>
           </ul>
@@ -276,7 +276,7 @@ export default function SecurityPage() {
               <Badge type="予定" />
               <span>
                 <span className="font-semibold text-slate-700">入力前自動マスキング</span>
-                ：氏名・電話番号・メールアドレス等のパターンを検知して送信前に自動で伏字化する機能を実装予定（独立後3〜6ヶ月）。
+                ：氏名・電話番号・メールアドレス等のパターンを検知して送信前に自動で伏字化する機能（計画中）。
               </span>
             </li>
           </ul>

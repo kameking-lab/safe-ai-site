@@ -46,7 +46,7 @@ export default function ApiDocsPage() {
               <span className="rounded-full bg-blue-600 px-2.5 py-0.5 text-xs font-bold text-white">
                 Phase 1
               </span>
-              <span className="text-sm font-semibold text-blue-900">REST API β（独立後3ヶ月）</span>
+              <span className="text-sm font-semibold text-blue-900">REST API（開発中）</span>
             </div>
             <ul className="mt-3 space-y-1.5 text-sm text-blue-800">
               <li className="flex items-start gap-2">
@@ -67,7 +67,7 @@ export default function ApiDocsPage() {
               </li>
               <li className="flex items-start gap-2">
                 <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
-                レートリミット: 100 req/分（β版）
+                レートリミット: 100 req/分（初期設定）
               </li>
             </ul>
           </div>
@@ -77,7 +77,7 @@ export default function ApiDocsPage() {
               <span className="rounded-full bg-slate-400 px-2.5 py-0.5 text-xs font-bold text-white">
                 Phase 2
               </span>
-              <span className="text-sm font-semibold text-slate-700">Webhook（独立後6ヶ月）</span>
+              <span className="text-sm font-semibold text-slate-700">Webhook（Phase 2）</span>
             </div>
             <ul className="mt-3 space-y-1.5 text-sm text-slate-600">
               <li className="flex items-start gap-2">
@@ -105,7 +105,7 @@ export default function ApiDocsPage() {
                 Phase 3
               </span>
               <span className="text-sm font-semibold text-slate-700">
-                エンタープライズ連携（独立後12ヶ月）
+                エンタープライズ連携（Phase 3）
               </span>
             </div>
             <ul className="mt-3 space-y-1.5 text-sm text-slate-600">
@@ -139,7 +139,7 @@ export default function ApiDocsPage() {
         <section className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <h2 className="text-base font-bold text-slate-900">早期アクセス</h2>
           <p className="text-sm leading-7 text-slate-600">
-            API β版の早期アクセスをご希望の方は、
+            APIの早期アクセスをご希望の方は、
             <a className="underline hover:text-emerald-700" href="/contact">
               お問い合わせフォーム
             </a>

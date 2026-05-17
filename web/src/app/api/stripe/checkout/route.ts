@@ -21,7 +21,7 @@ export async function POST(req: Request) {
   const stripe = getStripe();
   if (!stripe) {
     return NextResponse.json(
-      { error: "決済機能は現在準備中です。（STRIPE_SECRET_KEY未設定）" },
+      { error: "決済機能は現在ご利用いただけません。" },
       { status: 503 },
     );
   }
