@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-17T16:14:19.630Z",
+  "fetchedAt": "2026-05-17T17:30:26.203Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -5731,16 +5731,10 @@
         {
           "sourceCode": "340000",
           "level": "advisory",
-          "headline": "広島県では、１７日夜遅くから１８日未明まで高潮に、１９日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-17T14:23:00+09:00",
+          "headline": "広島県では、１９日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-05-18T01:14:00+09:00",
           "publishingOffice": "広島地方気象台",
           "warnings": [
-            {
-              "areaCode": "340010",
-              "code": "19",
-              "status": "発表",
-              "level": "advisory"
-            },
             {
               "areaCode": "340010",
               "code": "21",
@@ -5751,12 +5745,6 @@
               "areaCode": "340020",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3410100",
-              "code": "19",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -5773,20 +5761,8 @@
             },
             {
               "areaCode": "3410300",
-              "code": "19",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3410300",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3410400",
-              "code": "19",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -5809,20 +5785,8 @@
             },
             {
               "areaCode": "3410700",
-              "code": "19",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3410700",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3410800",
-              "code": "19",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -5845,32 +5809,14 @@
             },
             {
               "areaCode": "3420400",
-              "code": "19",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3420400",
               "code": "21",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3420500",
-              "code": "19",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3420500",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3420700",
-              "code": "19",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -5899,12 +5845,6 @@
             },
             {
               "areaCode": "3421100",
-              "code": "19",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3421100",
               "code": "21",
               "status": "継続",
               "level": "advisory"
@@ -5913,12 +5853,6 @@
               "areaCode": "3421200",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3421300",
-              "code": "19",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -5935,12 +5869,6 @@
             },
             {
               "areaCode": "3421500",
-              "code": "19",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3421500",
               "code": "21",
               "status": "継続",
               "level": "advisory"
@@ -5953,12 +5881,6 @@
             },
             {
               "areaCode": "3430400",
-              "code": "19",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3430400",
               "code": "21",
               "status": "継続",
               "level": "advisory"
@@ -5967,12 +5889,6 @@
               "areaCode": "3430700",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3430900",
-              "code": "19",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -5991,12 +5907,6 @@
               "areaCode": "3436900",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3443100",
-              "code": "19",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -6397,16 +6307,10 @@
         {
           "sourceCode": "370000",
           "level": "advisory",
-          "headline": "香川県では、１８日未明は高潮に、１９日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-17T16:08:00+09:00",
+          "headline": "香川県では、１９日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-05-18T01:19:00+09:00",
           "publishingOffice": "高松地方気象台",
           "warnings": [
-            {
-              "areaCode": "370000",
-              "code": "19",
-              "status": "発表",
-              "level": "advisory"
-            },
             {
               "areaCode": "370000",
               "code": "21",
@@ -6417,12 +6321,6 @@
               "areaCode": "3720100",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3720200",
-              "code": "19",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -6459,12 +6357,6 @@
               "areaCode": "3720700",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3720800",
-              "code": "19",
-              "status": "発表",
               "level": "advisory"
             },
             {
