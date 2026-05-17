@@ -5,6 +5,7 @@ import { searchRelevantNotices, NOTICE_BINDING_LABELS, type NoticeHit } from "@/
 import type { LawArticle } from "@/data/laws";
 import { searchMlitResources, type MlitResource } from "@/data/mlit-resources";
 import { AI_DISCLAIMER_SYSTEM_INSTRUCTION, AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
+import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 import {
   buildStructuredCitations,
   formatCitationTriples,
@@ -328,31 +329,68 @@ export async function POST(request: Request) {
     );
   }
 
-  // Gemini Flash API呼び出し（多ターン会話対応）
+  // Gemini Flash API呼び出し（多ターン会話対応） — 失敗時は RAG ヒットを degraded 回答として返す
   let answer: string;
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      systemInstruction: SYSTEM_PROMPT,
-    });
-
-    const userPrompt = buildUserPrompt(message, context, buildMlitContext(mlitMatches));
-    const historyContents = buildHistoryContents(body?.history);
-    const result = historyContents.length > 0
-      ? await model.startChat({ history: historyContents }).sendMessage(userPrompt)
-      : await model.generateContent(userPrompt);
-    answer = result.response.text();
+    answer = await withCircuitBreaker(
+      "gemini",
+      async () => {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: "gemini-2.5-flash",
+          systemInstruction: SYSTEM_PROMPT,
+        });
+        const userPrompt = buildUserPrompt(message, context, buildMlitContext(mlitMatches));
+        const historyContents = buildHistoryContents(body?.history);
+        const result = historyContents.length > 0
+          ? await model.startChat({ history: historyContents }).sendMessage(userPrompt)
+          : await model.generateContent(userPrompt);
+        return result.response.text();
+      },
+      { failureThreshold: 4, cooldownMs: 60_000 }
+    );
   } catch (err) {
     console.error("[chatbot] Gemini API error:", err instanceof Error ? err.message : String(err));
-    const isOverload =
-      err instanceof Error && err.message.toLowerCase().includes("quota");
-    return jsonError(
-      503,
-      isOverload
-        ? "AIサービスの利用制限に達しました。しばらくしてから再試行してください。"
-        : "AIサービスへの接続に失敗しました。しばらくしてから再試行してください。",
-      true
+    const lower = err instanceof Error ? err.message.toLowerCase() : "";
+    let reasonLabel = "AIサービスへの接続に失敗しました";
+    if (err instanceof CircuitOpenError) reasonLabel = "AIサービスが連続失敗中（自動復旧待ち）";
+    else if (lower.includes("quota") || lower.includes("429")) reasonLabel = "AIサービスの利用制限に達しました";
+    else if (lower.includes("timeout")) reasonLabel = "AIサービスの応答がタイムアウトしました";
+
+    const degradedAnswer =
+      `【AI生成は現在ご利用いただけません（${reasonLabel}）。関連条文のみご案内します。】\n\n` +
+      `ご質問：${message}\n\n` +
+      `信頼度の高い関連条文：\n` +
+      relevantArticles
+        .slice(0, 5)
+        .map((a) => `・${a.law}（${a.lawShort}） ${a.articleNum}${a.articleTitle ? `「${a.articleTitle}」` : ""}`)
+        .join("\n") +
+      `\n\n条文本文は下記の【参照】セクションまたは e-Gov 法令検索 (https://laws.e-gov.go.jp/) でご確認ください。` +
+      `\n${AI_LEGAL_DISCLAIMER}`;
+
+    const degradedSources: ChatbotSource[] = [
+      ...relevantArticles.map((a: LawArticle) => ({
+        law: `${a.law}（${a.lawShort}）`,
+        article: a.articleNum + (a.articleTitle ? `「${a.articleTitle}」` : ""),
+        articleTitle: a.articleTitle,
+        text: a.text.length > 200 ? a.text.slice(0, 200) + "…" : a.text,
+        fullText: a.text,
+        snippet: buildSnippet(a.text, message),
+      })),
+      ...mlitMatches.map(mlitToSource),
+    ];
+
+    return NextResponse.json<ChatbotResponse>(
+      {
+        answer: degradedAnswer,
+        sources: degradedSources,
+        source_type: "rag",
+        confidence: "medium",
+        confidenceScore,
+        followups: buildFollowups(message, relevantArticles),
+        notices: relatedNotices,
+      },
+      { status: 200 }
     );
   }
 

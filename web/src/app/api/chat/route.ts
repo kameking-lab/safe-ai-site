@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { searchRelevantArticles, buildContextFromArticles } from "@/lib/rag-search";
+import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 import type {
   ChatApiRequest,
   ChatApiResponse,
@@ -110,25 +111,49 @@ export async function POST(request: Request) {
   const context = buildContextFromArticles(relevantArticles);
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      systemInstruction: SYSTEM_PROMPT,
-    });
-
-    const userPrompt = buildUserPrompt(revisionTitle, question, context);
-    const result = await model.generateContent(userPrompt);
-    const answer = result.response.text();
+    const answer = await withCircuitBreaker(
+      "gemini",
+      async () => {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: "gemini-2.5-flash",
+          systemInstruction: SYSTEM_PROMPT,
+        });
+        const userPrompt = buildUserPrompt(revisionTitle, question, context);
+        const result = await model.generateContent(userPrompt);
+        return result.response.text();
+      },
+      { failureThreshold: 4, cooldownMs: 60_000 }
+    );
 
     return NextResponse.json<ChatApiResponse>({ reply: answer }, { status: 200 });
   } catch (err) {
-    const isOverload = err instanceof Error && err.message.toLowerCase().includes("quota");
-    return jsonError(
-      503,
-      "UNAVAILABLE",
-      isOverload
-        ? "AIサービスの利用制限に達しました。しばらくしてから再試行してください。"
-        : "AIサービスへの接続に失敗しました。しばらくしてから再試行してください。"
-    );
+    const lower = err instanceof Error ? err.message.toLowerCase() : "";
+    let reason = "AIサービスへの接続に失敗しました";
+    if (err instanceof CircuitOpenError) reason = "AIサービスが連続失敗中（自動復旧待ち）";
+    else if (lower.includes("quota") || lower.includes("429")) reason = "AIサービスの利用制限に達しました";
+    else if (lower.includes("timeout")) reason = "AIサービスの応答がタイムアウトしました";
+    console.error("[chat] Gemini call failed:", err instanceof Error ? err.message : err);
+
+    if (relevantArticles.length > 0) {
+      const citations = relevantArticles
+        .slice(0, 5)
+        .map((a) => `・${a.law}（${a.lawShort}） ${a.articleNum}${a.articleTitle ? `「${a.articleTitle}」` : ""}`)
+        .join("\n");
+      const reply = [
+        `【AI生成は現在ご利用いただけません（${reason}）。関連条文のみご案内します】`,
+        "",
+        `ご質問：${question}`,
+        "",
+        "関連が高い条文：",
+        citations,
+        "",
+        "条文本文は左側パネルまたは e-Gov 法令検索 (https://laws.e-gov.go.jp/) でご確認ください。",
+        "AI要約が必要な場合は数分後に再度お試しいただくか、運営者へお問い合わせください。",
+      ].join("\n");
+      return NextResponse.json<ChatApiResponse>({ reply }, { status: 200 });
+    }
+
+    return jsonError(503, "UNAVAILABLE", `${reason}。しばらくしてから再試行してください。`);
   }
 }

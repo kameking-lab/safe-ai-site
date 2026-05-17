@@ -229,16 +229,19 @@ export async function GET(request: Request) {
     return NextResponse.json(payload);
   } catch (err) {
     const message = err instanceof Error ? err.message : "unknown error";
+    console.error("[mhlw/search] degraded fallback:", message);
     const payload: SearchResponse = {
-      ok: false,
+      ok: true,
       fallback: true,
       source: "error",
       year: params.year,
       availableYears,
       total: 0,
       records: [],
-      message,
+      message:
+        `MHLW検索が一時的に利用できません（${message}）。同梱データ・トップ集計値はサイドバーから引き続き閲覧いただけます。`,
+      warning: "degraded_mode",
     };
-    return NextResponse.json(payload, { status: 500 });
+    return NextResponse.json(payload, { status: 200 });
   }
 }

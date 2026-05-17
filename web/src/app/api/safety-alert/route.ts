@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AI_DISCLAIMER_SYSTEM_INSTRUCTION, AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
+import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 
 export const runtime = "nodejs";
 
@@ -16,6 +17,8 @@ type ResponseBody = {
   alert?: string;
   disclaimer?: string;
   error?: string;
+  degraded?: boolean;
+  degradedReason?: string;
 };
 
 const SYSTEM_PROMPT = `あなたは労働安全衛生の現場監督者です。朝礼や安全朝会で読み上げる短い注意喚起文を作成します。
@@ -67,24 +70,40 @@ export async function POST(request: Request): Promise<NextResponse<ResponseBody>
   }
 
   try {
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
-      systemInstruction: SYSTEM_PROMPT,
-    });
-    const prompt = buildPrompt(body.kind, body.title.trim(), body.context?.trim());
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const text = await withCircuitBreaker(
+      "gemini",
+      async () => {
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: "gemini-2.5-flash",
+          systemInstruction: SYSTEM_PROMPT,
+        });
+        const prompt = buildPrompt(body.kind, body.title.trim(), body.context?.trim());
+        const result = await model.generateContent(prompt);
+        return result.response.text();
+      },
+      { failureThreshold: 4, cooldownMs: 60_000 }
+    );
     return NextResponse.json({ alert: text, disclaimer: AI_LEGAL_DISCLAIMER }, { status: 200 });
   } catch (err) {
-    const isOverload = err instanceof Error && err.message.toLowerCase().includes("quota");
+    const lower = err instanceof Error ? err.message.toLowerCase() : "";
+    let reason = "AIサービスへの接続に失敗しました";
+    if (err instanceof CircuitOpenError) reason = "AIサービスが連続失敗中（自動復旧待ち）";
+    else if (lower.includes("quota") || lower.includes("429")) reason = "AIサービスの利用制限に達しました";
+    console.error("[safety-alert] Gemini call failed:", err instanceof Error ? err.message : err);
     return NextResponse.json(
       {
-        error: isOverload
-          ? "AIサービスの利用制限に達しました。しばらくしてから再試行してください。"
-          : "AIサービスへの接続に失敗しました。しばらくしてから再試行してください。",
+        alert:
+          `（AI生成は現在ご利用いただけません: ${reason}。汎用テンプレートを表示します）\n` +
+          `本日の注意喚起: ${body.title}\n` +
+          `・基本装備（ヘルメット・墜落制止用器具・保護具）の着用を必ず確認してください\n` +
+          `・始業前KYで本日のリスクを再確認し、危険箇所では指差呼称を徹底しましょう\n` +
+          `・体調不良や違和感を感じたら無理せず作業中止・声かけをしてください`,
+        disclaimer: AI_LEGAL_DISCLAIMER,
+        degraded: true,
+        degradedReason: reason,
       },
-      { status: 503 },
+      { status: 200 },
     );
   }
 }
