@@ -40,7 +40,7 @@ export default function TermsPage() {
           <ul className="ml-4 space-y-1 text-sm text-slate-600">
             <li className="list-disc">事故データベース（労働災害事例の検索・閲覧）</li>
             <li className="list-disc">Eラーニング（安全衛生テーマ別学習コンテンツ）</li>
-            <li className="list-disc">過去問クイズ（各種資格試験の過去問）</li>
+            <li className="list-disc">演習問題クイズ（各種資格試験の学習用演習問題）</li>
             <li className="list-disc">法改正情報（労働安全衛生法等の改正情報）</li>
             <li className="list-disc">現場リスク情報（気象・作業リスク判定）</li>
             <li className="list-disc">KY用紙（危険予知活動支援）</li>

@@ -1,10 +1,7 @@
-import { DiaryDetailClient } from "@/components/safety-diary/diary-detail-client";
+// F-010 B縮小: 詳細ページはアーカイブ。LMS拡張時に再設計予定。
+// localStorage データはクライアント側で保持されているため破壊なし。
+import { permanentRedirect } from "next/navigation";
 
-export default async function SafetyDiaryEntryPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  return <DiaryDetailClient id={id} />;
+export default async function SafetyDiaryEntryPage() {
+  permanentRedirect("/safety-diary");
 }

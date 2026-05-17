@@ -108,7 +108,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/qa-knowledge" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
-                  Q&Aナレッジ
+                  Q&A投稿募集
                 </Link>
               </li>
               <li>

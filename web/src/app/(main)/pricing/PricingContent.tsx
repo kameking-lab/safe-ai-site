@@ -61,7 +61,7 @@ const PLAN_FEATURES = {
       { ja: "事故データベース検索（全件）", en: "Accident DB search (all records)" },
       { ja: "法改正一覧・AI要約（月30回まで）", en: "Law update list + AI summary (30/mo)" },
       { ja: "KY用紙シンプルモード", en: "KY form (simple mode)" },
-      { ja: "特別教育 過去問クイズ（一部）", en: "Special education quizzes (partial)" },
+      { ja: "特別教育 演習問題クイズ（一部）", en: "Special education quizzes (partial)" },
       { ja: "気象リスク（1地域）", en: "Weather risk (1 region)" },
     ],
     limitations: [
@@ -81,7 +81,7 @@ const PLAN_FEATURES = {
       { ja: "AIチャット・リスク予測（無制限）", en: "AI chat & risk prediction (unlimited)" },
       { ja: "法改正AI要約（無制限）", en: "Law update AI summaries (unlimited)" },
       { ja: "KY用紙 詳細モード・PDF出力", en: "KY form detailed mode + PDF export" },
-      { ja: "特別教育 過去問クイズ（全種）", en: "Special education quizzes (all types)" },
+      { ja: "特別教育 演習問題クイズ（全種）", en: "Special education quizzes (all types)" },
       { ja: "気象リスク警報メール通知", en: "Weather alert email notifications" },
       { ja: "メールサポート", en: "Email support" },
     ],

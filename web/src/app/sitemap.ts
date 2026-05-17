@@ -135,7 +135,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/features/quick-tour", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "monthly" },
     { url: "/features/use-cases", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "monthly" },
     { url: "/bcp", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "monthly" },
-    { url: "/qa-knowledge", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "weekly" },
+    // /qa-knowledge: reduced to thin landing (募集中), excluded from sitemap (F-007 B縮小)
     { url: "/resources", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "monthly" },
     { url: "/insurance", lastModified: "2026-05-15", priority: 0.7, changeFrequency: "monthly" },
     // /api-docs and /lms removed: pre-launch features (no real API yet, LMS β waitlist only).

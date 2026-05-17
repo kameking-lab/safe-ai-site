@@ -540,6 +540,9 @@ const FINDINGS_F: Finding[] = [
       "C-003 と同根。",
     recommendation:
       "機能を「気象警報+本日のKY」MVPまで縮小、または非公開化。",
+    status: "kept-by-owner",
+    statusNote:
+      "オーナー判断: A-維持。ky-morning-signage連携・朝礼前/休憩/退場3シーン・気象警報表示が主要利用シーン。CLAUDE.mdにサイネージは主要シーンとして明記。",
   },
   {
     id: "F-006",
@@ -562,6 +565,9 @@ const FINDINGS_F: Finding[] = [
       "WebFetch評価:「確認可能な公開事例は1件のみ。母集団が不足しており、実質的な参考資料ライブラリとしての機能はまだ発展途上段階」。",
     recommendation:
       "/faq に統合、または最低10事例集まるまで非公開。",
+    status: "reduced-by-owner",
+    statusNote:
+      "オーナー判断: B-縮小。/qa-knowledgeトップを投稿募集ランディング(50行)に縮小・/faq 200問へのリンク強調・/community-casesへ送客。既存4件Q&A表示削除。/faq へ301リダイレクト追加。",
   },
   {
     id: "F-008",
@@ -573,6 +579,9 @@ const FINDINGS_F: Finding[] = [
       "WebFetch評価:「業種別 事故分析レポートと機能的に重複する可能性が高い。両者の差別化が明示されていない」。",
     recommendation:
       "/accidents をハブ化、サブセクション(/accidents/reports, /accidents/analytics) に整理。",
+    status: "kept-by-owner",
+    statusNote:
+      "オーナー判断: A-維持。メイン3機能の1つ。URL変更によるSEO損失リスクが整理メリットを上回る。PR#225でhub-spoke内部リンク整理・PR#226でcomparison view追加済。中期課題として継続検討。",
   },
   {
     id: "F-009",
@@ -598,6 +607,9 @@ const FINDINGS_F: Finding[] = [
       "C-006 と同根。",
     recommendation:
       "KY/RA への自動転記をUSP化、または削除。",
+    status: "reduced-by-owner",
+    statusNote:
+      "オーナー判断: B-縮小。一覧(/safety-diary)と新規(/safety-diary/new)の2ページに絞る。詳細/月次/印刷/new/detailは/safety-diaryへ301リダイレクト。LMS提供開始(2026年秋)時に詳細機能を再設計予定。localStorageデータは保持。",
   },
   {
     id: "F-011",

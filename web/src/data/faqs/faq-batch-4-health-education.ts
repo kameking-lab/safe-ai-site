@@ -178,7 +178,7 @@ export const FAQ_BATCH_4_HEALTH_EDUCATION: FAQ[] = [
     relatedLaws: ["安衛法第61条", "クレーン等安全規則第22条"],
     relatedPages: [
       { href: "/education", label: "特別教育・技能講習" },
-      { href: "/exam-quiz", label: "過去問" },
+      { href: "/exam-quiz", label: "演習問題" },
     ],
     tags: ["クレーン", "特別教育", "技能講習", "免許"],
     source: "厚生労働省",
@@ -234,7 +234,7 @@ export const FAQ_BATCH_4_HEALTH_EDUCATION: FAQ[] = [
     relatedLaws: ["安衛法第61条", "安衛令第20条第10号"],
     relatedPages: [
       { href: "/education", label: "特別教育・技能講習" },
-      { href: "/exam-quiz", label: "過去問" },
+      { href: "/exam-quiz", label: "演習問題" },
     ],
     tags: ["ガス溶接技能講習", "15時間", "アセチレン"],
     source: "厚生労働省",
@@ -262,7 +262,7 @@ export const FAQ_BATCH_4_HEALTH_EDUCATION: FAQ[] = [
     relatedLaws: ["安衛法第61条", "安衛則第36条第5号"],
     relatedPages: [
       { href: "/education", label: "特別教育・技能講習" },
-      { href: "/exam-quiz", label: "過去問" },
+      { href: "/exam-quiz", label: "演習問題" },
     ],
     tags: ["フォークリフト", "技能講習", "1トン以上"],
     source: "厚生労働省",
@@ -290,7 +290,7 @@ export const FAQ_BATCH_4_HEALTH_EDUCATION: FAQ[] = [
     relatedLaws: ["安衛法第61条", "安衛則第36条第20号"],
     relatedPages: [
       { href: "/education", label: "特別教育・技能講習" },
-      { href: "/exam-quiz", label: "過去問" },
+      { href: "/exam-quiz", label: "演習問題" },
     ],
     tags: ["玉掛け", "技能講習", "クレーン"],
     source: "厚生労働省",
@@ -327,11 +327,11 @@ export const FAQ_BATCH_4_HEALTH_EDUCATION: FAQ[] = [
     id: "hlth-024",
     question: "「過去問（衛生管理者試験）」の難易度と合格率の傾向は？",
     answer:
-      "第一種衛生管理者試験の合格率は例年40〜50%程度で推移しています（2020〜2024年度）。第二種は50〜60%程度とやや高めです。試験は全国の安全衛生技術センターで月1〜2回実施（CBT化も検討中）。出題傾向は、①労働衛生（職業性疾病・有害業務・作業環境）が最も出題が多く難度が高い、②関係法令（安衛法・労基法等）は暗記で対応、③労働生理（人体の生理機能）は基礎知識が重要です。過去問演習が最も効果的な学習方法で、本サービスの「過去問チャレンジ」を活用できます。近年は法改正（フルハーネス・化学物質自律管理等）に関連した新問題も増えています。",
+      "第一種衛生管理者試験の合格率は例年40〜50%程度で推移しています（2020〜2024年度）。第二種は50〜60%程度とやや高めです。試験は全国の安全衛生技術センターで月1〜2回実施（CBT化も検討中）。出題傾向は、①労働衛生（職業性疾病・有害業務・作業環境）が最も出題が多く難度が高い、②関係法令（安衛法・労基法等）は暗記で対応、③労働生理（人体の生理機能）は基礎知識が重要です。過去問演習が最も効果的な学習方法で、本サービスの「演習問題チャレンジ」を活用できます。近年は法改正（フルハーネス・化学物質自律管理等）に関連した新問題も増えています。",
     category: "health-education",
     relatedLaws: ["安衛法第12条", "安衛則第10条"],
     relatedPages: [
-      { href: "/exam-quiz", label: "過去問チャレンジ" },
+      { href: "/exam-quiz", label: "演習問題チャレンジ" },
       { href: "/e-learning", label: "Eラーニング" },
     ],
     tags: ["衛生管理者試験", "合格率", "過去問"],

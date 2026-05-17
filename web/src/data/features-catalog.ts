@@ -259,13 +259,13 @@ export const FEATURES: FeatureItem[] = [
   },
   {
     slug: "exam-quiz",
-    title: "資格試験過去問",
-    summary: "労働安全衛生コンサルタント等の過去問",
+    title: "資格試験演習問題",
+    summary: "労働安全衛生コンサルタント等の演習問題",
     description:
-      "労働安全衛生コンサルタント・衛生管理者・安全管理者選任時研修などの過去問・模擬試験を収録。",
+      "労働安全衛生コンサルタント・衛生管理者・安全管理者選任時研修などの演習問題・模擬試験を収録。",
     href: "/exam-quiz",
     category: "education",
-    tags: ["資格", "過去問"],
+    tags: ["資格", "演習問題"],
   },
   // 管理ツール
   {

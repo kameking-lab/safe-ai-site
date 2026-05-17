@@ -85,7 +85,7 @@ export const FEATURE_MATRIX: FeatureCategory[] = [
         values: { free: true, standard: true, pro: true, business: true, custom: true },
       },
       {
-        labelJa: "特別教育 過去問クイズ",
+        labelJa: "特別教育 演習問題クイズ",
         labelEn: "Special education quizzes",
         values: { free: "一部", standard: "全種", pro: "全種", business: "全種", custom: "全種" },
       },

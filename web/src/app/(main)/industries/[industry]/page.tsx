@@ -840,7 +840,7 @@ export default async function IndustryLandingPage({ params }: { params: Params }
                 href="/exam-quiz"
                 className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-sm font-medium text-emerald-800 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300"
               >
-                ✅ 過去問演習
+                ✅ 演習問題
               </Link>
               {content.accidentAnalysisSlug && (
                 <Link
