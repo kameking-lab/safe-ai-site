@@ -40,7 +40,7 @@ export default function DiversityElderlyPage() {
       ]}
       relatedLaws={[
         {
-          label: "労安衛法 第22条・第66条（健康診断・健康管理）",
+          label: "安衛法 第22条・第66条（健康診断・健康管理）",
           href: "/laws",
           description: "事業者の健康管理義務と特定業務従事者への健診強化",
         },

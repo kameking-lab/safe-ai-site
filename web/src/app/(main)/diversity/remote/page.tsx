@@ -40,7 +40,7 @@ export default function DiversityRemotePage() {
       ]}
       relatedLaws={[
         {
-          label: "労安衛法 第65条（作業環境管理）・第66条（健康管理）",
+          label: "安衛法 第65条（作業環境管理）・第66条（健康管理）",
           href: "/laws",
           description: "テレワーク中も事業者の安全配慮義務は継続して適用",
         },

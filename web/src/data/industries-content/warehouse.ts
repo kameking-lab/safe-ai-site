@@ -295,7 +295,7 @@ export const warehouseContent: IndustryContent = {
     {
       label: "法令・制度",
       category: "law-system",
-      rationale: "労安衛則・消防法（危険物倉庫）・機械包括安全指針",
+      rationale: "安衛則・消防法（危険物倉庫）・機械包括安全指針",
     },
     {
       label: "安全衛生管理体制",

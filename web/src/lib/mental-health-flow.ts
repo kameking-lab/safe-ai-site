@@ -12,7 +12,7 @@
  *
  * No clinical judgement is made; outputs are operational HR guidance derived
  * from MHLW's stress-check implementation manual and rule articles
- * 労安衛則 第52条の9〜21.
+ * 安衛則 第52条の9〜21.
  */
 
 import {

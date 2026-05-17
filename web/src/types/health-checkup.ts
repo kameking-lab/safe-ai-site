@@ -118,7 +118,7 @@ export type WorkConditionId =
   | "deep-night-driver" // 深夜時間帯の自動車運転を反復する業務
   | "underground-work" // 坑内における業務
   | "asbestos-handling-past" // 過去に石綿業務に従事（離職後も対象）
-  | "overtime-80h" // 時間外・休日労働80時間超かつ疲労蓄積あり（労安法第66条の8）
+  | "overtime-80h" // 時間外・休日労働80時間超かつ疲労蓄積あり（安衛法第66条の8）
   | "overseas-dispatch-6m"; // 6か月以上の海外派遣予定/終了（安衛則第45条の2）
 
 export const WORK_CONDITION_LABELS: Record<WorkConditionId, string> = {
@@ -135,7 +135,7 @@ export const WORK_CONDITION_LABELS: Record<WorkConditionId, string> = {
   "deep-night-driver": "深夜時間帯に自動車運転を反復する業務",
   "underground-work": "坑内における業務",
   "asbestos-handling-past": "過去に石綿業務へ従事した労働者",
-  "overtime-80h": "時間外労働80時間超／疲労蓄積（労安法66条の8）",
+  "overtime-80h": "時間外労働80時間超／疲労蓄積（安衛法66条の8）",
   "overseas-dispatch-6m": "6か月以上の海外派遣予定または帰国直後（安衛則45条の2）",
 };
 
