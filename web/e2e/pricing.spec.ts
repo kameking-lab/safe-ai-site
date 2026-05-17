@@ -9,8 +9,8 @@ test.describe("料金プラン", () => {
 
   test("プラン一覧が表示される", async ({ page }) => {
     await page.goto("/pricing");
-    // PAID_MODE=false の場合、準備中ページが表示される
-    await expect(page.getByRole("heading", { name: /料金プランは現在準備中/ })).toBeVisible();
+    // PAID_MODE=false の場合、研究・実証プロジェクトとしての全機能無料公開の案内が表示される
+    await expect(page.getByRole("heading", { name: /現在、全機能を無料公開中/ })).toBeVisible();
   });
 
   test("料金が表示される", async ({ page }) => {
