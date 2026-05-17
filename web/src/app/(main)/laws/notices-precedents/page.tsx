@@ -5,6 +5,7 @@ import {
   officialNotices,
   courtPrecedents,
 } from "@/data/mock/notices-and-precedents";
+import { ogImageUrl } from "@/lib/og-url";
 
 const TITLE = "通達・判例 — 労働安全衛生の第2層出典";
 const DESCRIPTION =
@@ -15,8 +16,19 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
-    title: `${TITLE}`,
+    title: TITLE,
     description: DESCRIPTION,
+    type: "website",
+    locale: "ja_JP",
+    siteName: "安全AIポータル",
+    url: "https://www.anzen-ai-portal.jp/laws/notices-precedents",
+    images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [ogImageUrl(TITLE, DESCRIPTION)],
   },
 };
 

@@ -5,15 +5,27 @@ import { ogImageUrl } from "@/lib/og-url";
 import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
+const _title = "労働安全 解説記事一覧";
+const _desc = "労働安全衛生に関する法改正・運用ガイド・業種別のSEO記事を労働安全コンサルタント監修で公開。";
+
 export const metadata: Metadata = {
-  title: "労働安全 解説記事一覧",
-  description:
-    "労働安全衛生に関する法改正・運用ガイド・業種別のSEO記事を労働安全コンサルタント監修で公開。",
+  title: _title,
+  description: _desc,
   alternates: { canonical: "/articles" },
   openGraph: {
-    title: "労働安全 解説記事一覧",
-    description: "法改正・運用ガイド・業種別の解説記事をコンサルタント監修で公開。",
-    images: [{ url: ogImageUrl("解説記事一覧"), width: 1200, height: 630 }],
+    title: _title,
+    description: _desc,
+    type: "website",
+    locale: "ja_JP",
+    siteName: "安全AIポータル",
+    url: "https://www.anzen-ai-portal.jp/articles",
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: _title,
+    description: _desc,
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 

@@ -9,6 +9,7 @@ import {
   categoryColorClasses,
   type FeatureCategoryId,
 } from "@/data/features-catalog";
+import { ogImageUrl } from "@/lib/og-url";
 
 export function generateStaticParams() {
   return FEATURE_CATEGORIES.map((c) => ({ category: c.id }));
@@ -24,12 +25,25 @@ export async function generateMetadata({
   const { category } = await params;
   const cat = getCategoryById(category);
   if (!cat) return { title: "機能カテゴリ" };
+  const title = `${cat.title} | 機能紹介`;
   return {
-    title: `${cat.title} | 機能紹介`,
+    title,
     description: cat.description,
+    alternates: { canonical: `/features/${cat.id}` },
     openGraph: {
-      title: `${cat.title} | 機能紹介`,
+      title,
       description: cat.description,
+      type: "website",
+      locale: "ja_JP",
+      siteName: "安全AIポータル",
+      url: `https://www.anzen-ai-portal.jp/features/${cat.id}`,
+      images: [{ url: ogImageUrl(title, cat.description), width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: cat.description,
+      images: [ogImageUrl(title, cat.description)],
     },
   };
 }

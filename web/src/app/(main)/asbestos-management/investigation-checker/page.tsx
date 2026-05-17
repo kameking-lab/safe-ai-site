@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { InvestigationCheckerForm } from "./InvestigationCheckerForm";
+import { ogImageUrl } from "@/lib/og-url";
 
 const _title =
   "事前調査・報告義務 判定ツール｜石綿（アスベスト）対応支援";
@@ -12,7 +13,21 @@ export const metadata: Metadata = {
   title: _title,
   description: _desc,
   alternates: { canonical: "/asbestos-management/investigation-checker" },
-  openGraph: { title: _title, description: _desc, type: "website", locale: "ja_JP" },
+  openGraph: {
+    title: _title,
+    description: _desc,
+    type: "website",
+    locale: "ja_JP",
+    siteName: "安全AIポータル",
+    url: "https://www.anzen-ai-portal.jp/asbestos-management/investigation-checker",
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: _title,
+    description: _desc,
+    images: [ogImageUrl(_title, _desc)],
+  },
 };
 
 export default function Page() {

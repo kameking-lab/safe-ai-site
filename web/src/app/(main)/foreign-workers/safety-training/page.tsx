@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { SAFETY_MATERIAL_INDEX } from "@/data/foreign-worker-materials";
+import { ogImageUrl } from "@/lib/og-url";
 import {
   MATERIAL_INDUSTRY_LABELS_JA,
   MATERIAL_TOPIC_LABELS_JA,
@@ -27,7 +28,16 @@ export const metadata: Metadata = {
     description: _desc,
     type: "website",
     locale: "ja_JP",
+    siteName: "安全AIポータル",
+    url: "https://www.anzen-ai-portal.jp/foreign-workers/safety-training",
     alternateLocale: ["en_US", "vi_VN", "zh_CN", "id_ID"],
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: _title,
+    description: _desc,
+    images: [ogImageUrl(_title, _desc)],
   },
 };
 

@@ -2,18 +2,27 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import results from "@/data/chatbot-eval-results.json";
 import freshResults from "@/data/chatbot-eval-fresh-results.json";
-import { withSiteOpenGraph } from "@/lib/seo-metadata";
+import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
+import { ogImageUrl } from "@/lib/og-url";
+
+const _title = "AIチャットボット精度評価（Recall@5 100問ベンチマーク）";
+const _desc =
+  "労働安全衛生 AI チャットボットの根拠条文 検索ヒット率（Recall@5）を 100 問ベンチマークで定量公開。RAG 検索結果の上位 5 件に gold 条文が含まれるかを判定し、トピック別の Recall@5 と全失敗問の期待/取得値を開示します。";
 
 export const metadata: Metadata = {
-  title: "AIチャットボット精度評価（Recall@5 100問ベンチマーク）",
-  description:
-    "労働安全衛生 AI チャットボットの根拠条文 検索ヒット率（Recall@5）を 100 問ベンチマークで定量公開。RAG 検索結果の上位 5 件に gold 条文が含まれるかを判定し、トピック別の Recall@5 と全失敗問の期待/取得値を開示します。",
+  title: _title,
+  description: _desc,
   alternates: { canonical: "/about/chatbot-eval" },
   openGraph: withSiteOpenGraph("/about/chatbot-eval", {
-    title: "AIチャットボット精度評価（Recall@5）",
-    description:
-      "100 問ベンチマークによる根拠条文の Recall@5（検索ヒット率）を全件公開。トピック別スコアと失敗問の詳細を含む。",
+    title: _title,
+    description: _desc,
     type: "article",
+    images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
+  }),
+  twitter: withSiteTwitter({
+    title: _title,
+    description: _desc,
+    images: [ogImageUrl(_title, _desc)],
   }),
 };
 

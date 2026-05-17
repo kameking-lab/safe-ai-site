@@ -11,6 +11,7 @@ import {
   getConditionsByCategory,
 } from "@/data/illness-considerations";
 import type { IllnessCategory } from "@/types/illness-consideration";
+import { ogImageUrl } from "@/lib/og-url";
 
 export function generateStaticParams() {
   return ILLNESS_CATEGORIES.map((c) => ({ illness: c.id }));
@@ -40,6 +41,15 @@ export async function generateMetadata(
       title,
       description,
       type: "article",
+      siteName: "安全AIポータル",
+      url: `https://www.anzen-ai-portal.jp/treatment-work-balance/illness-guide/${meta.id}`,
+      images: [{ url: ogImageUrl(title, description), width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImageUrl(title, description)],
     },
   };
 }
