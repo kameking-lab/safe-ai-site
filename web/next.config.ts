@@ -133,6 +133,14 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
+      // robots.txt: s-maxage=0 forces Vercel Edge Cache to always revalidate so
+      // Disallow rule changes (e.g. #232 removing /audits/) take effect immediately.
+      {
+        source: "/robots.txt",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=0, s-maxage=0, must-revalidate" },
+        ],
+      },
       // Note: /_next/static/* は Next.js が自動的に immutable な Cache-Control を設定するため
       // 明示的なオーバーライドは不要（指定すると build 警告が出る）
     ];
