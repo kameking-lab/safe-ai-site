@@ -16,6 +16,7 @@ type Term = {
   reading: string;
   definition: string;
   relatedPages?: Array<{ href: string; label: string }>;
+  source?: { label: string; url: string };
 };
 
 const BASE_TERMS: Term[] = [
@@ -25,13 +26,13 @@ const BASE_TERMS: Term[] = [
   { term: "安全管理者", reading: "あんぜんかんりしゃ", definition: "安衛法第11条に基づき、製造業・建設業等の常時50人以上の事業場で選任義務がある者。作業場の安全に関する技術的事項を管理する。", relatedPages: [{ href: "/chatbot", label: "法令チャット" }] },
   { term: "安全施工サイクル", reading: "あんぜんせこうさいくる", definition: "建設工事の着工から竣工まで、工事の各段階で繰り返す安全衛生活動のサイクル。朝礼・TBM・KY・終了時確認などの日常サイクルと、月例・工期ごとのサイクルがある。", relatedPages: [{ href: "/ky", label: "KY用紙" }] },
   { term: "安全データシート", reading: "あんぜんでーたしーと", definition: "SDS（Safety Data Sheet）。化学物質の危険有害性情報、取扱方法、緊急時対処等を記載した文書。GHS対応のSDS提供がメーカーに義務付けられている。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }, { href: "/laws", label: "法改正" }] },
-  { term: "安全パトロール", reading: "あんぜんぱとろーる", definition: "管理者・安全管理者等が現場を巡視し、不安全状態・不安全行動を発見・是正する活動。定期実施と記録が求められる。", relatedPages: [] },
+  { term: "安全パトロール", reading: "あんぜんぱとろーる", definition: "管理者・安全管理者等が作業現場を定期的に巡視し、不安全状態・不安全行動を発見・是正する活動。安全管理者は安衛則第6条に基づく職務の一環として作業場の巡視を行う。衛生管理者は安衛則第11条により毎週1回以上の巡視が義務付けられる。発見した問題点は記録・報告し、速やかに改善措置を講じることが求められる。", relatedPages: [] },
   { term: "石綿", reading: "いしわた（アスベスト）", definition: "アスベストとも呼ぶ天然の繊維状鉱物。吸入により中皮腫・肺がんを引き起こす。2006年以降、製造・使用等が原則禁止。解体作業時の事前調査義務がある。", relatedPages: [{ href: "/chatbot", label: "法令チャット" }, { href: "/laws", label: "法改正" }] },
-  { term: "異常時措置", reading: "いじょうじそち", definition: "機械・設備・作業環境に異常が生じた場合に講ずべき対応手順。あらかじめ手順を定め、労働者に周知することが事業者に求められる。", relatedPages: [] },
+  { term: "異常時措置", reading: "いじょうじそち", definition: "機械・設備・作業環境に異常が発生した際に講じるべき対応手順。安衛則第26条に基づき、事業者はあらかじめ異常時の措置手順を定め、作業開始前に労働者へ周知する義務がある。基本手順: ①機械停止（ロックアウト）→②異常の通報→③立入禁止の設定→④原因究明→⑤安全確認後の再稼働。異常を発見した労働者が申し出やすい環境づくりも重要な要素。", relatedPages: [] },
   { term: "インターロック", reading: "いんたーろっく", definition: "機械の安全装置の一種。扉や安全柵を開けると機械が自動停止する仕組み。労働安全衛生規則で設置が義務付けられている場合がある。", relatedPages: [] },
   { term: "衛生管理者", reading: "えいせいかんりしゃ", definition: "安衛法第12条に基づき、常時50人以上の全業種の事業場で選任義務がある者。衛生に関する技術的事項を管理し、週1回以上の作業場巡視が義務。", relatedPages: [{ href: "/chatbot", label: "法令チャット" }, { href: "/exam-quiz", label: "過去問" }] },
   { term: "エックス線作業主任者", reading: "えっくすせんさぎょうしゅにんしゃ", definition: "エックス線装置を用いた作業の際に選任義務がある作業主任者。都道府県労働局長登録の講習修了者から選任する。", relatedPages: [{ href: "/exam-quiz", label: "過去問" }] },
-  { term: "大型特殊自動車", reading: "おおがたとくしゅじどうしゃ", definition: "ブルドーザー・ショベルカー等の特殊な構造を持つ大型車両の総称。公道走行には大型特殊自動車免許が必要。作業には別途資格が必要な場合がある。", relatedPages: [] },
+  { term: "大型特殊自動車", reading: "おおがたとくしゅじどうしゃ", definition: "ブルドーザー・クレーン車・ホイールローダー等、特殊な構造を持つ大型作業用車両の総称。公道走行には道路交通法に基づく大型特殊自動車免許が必要。建設現場での作業には車両系建設機械（整地等）運転技能講習・クレーン運転士免許等の別途資格が必要（安衛法別表第18）。", relatedPages: [{ href: "/e-learning", label: "Eラーニング" }, { href: "/chatbot", label: "法令チャット" }] },
   { term: "架設通路", reading: "かせつつうろ", definition: "建設工事現場に設置する仮設の通路。安衛則第552条に基づき、幅・勾配・手すり等の基準が定められている。", relatedPages: [{ href: "/laws", label: "法改正" }] },
   { term: "火気管理", reading: "かきかんり", definition: "溶接・溶断・喫煙等、火を扱う作業や使用箇所の管理。引火性物質の近辺での火気禁止、消火器の配備等が求められる。", relatedPages: [] },
   { term: "型枠支保工", reading: "かたわくしほこう", definition: "コンクリートを流し込む型枠を支える仮設構造物。型枠支保工の設計・組み立て・解体には作業主任者の選任が義務付けられている。", relatedPages: [{ href: "/chatbot", label: "法令チャット" }] },
@@ -42,10 +43,10 @@ const BASE_TERMS: Term[] = [
   { term: "技能講習", reading: "ぎのうこうしゅう", definition: "労働安全衛生法に基づき都道府県労働局長が登録した機関が実施する講習。玉掛け・フォークリフト等の危険業務に就くために修了が必要。", relatedPages: [{ href: "/e-learning", label: "Eラーニング" }, { href: "/chatbot", label: "法令チャット" }] },
   { term: "局所排気装置", reading: "きょくしょはいきそうち", definition: "有害物質の発散源に近い場所に設けたフード・ダクト・排風機からなる換気装置。有機溶剤・特定化学物質等の作業場への設置が義務付けられている。", relatedPages: [{ href: "/chatbot", label: "法令チャット" }] },
   { term: "クレーン", reading: "くれーん", definition: "荷物を動力を用いてつり上げ、水平に運搬する機械。つり上げ荷重0.5t以上は労働安全衛生法の規制対象。運転には資格が必要。", relatedPages: [{ href: "/exam-quiz", label: "過去問" }, { href: "/chatbot", label: "法令チャット" }] },
-  { term: "ゲートウェイ確認", reading: "げーとうぇいかくにん", definition: "工事や作業の節目（フェーズ移行時）に安全確認を行うマネジメント手法。各ゲートの通過条件として安全評価項目を設定する。", relatedPages: [] },
-  { term: "GHS", reading: "じーえいちえす", definition: "化学品の分類および表示に関する世界調和システム（Globally Harmonized System）。絵表示（ピクトグラム）・シグナルワード・危険有害性情報の統一的表示を規定。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }] },
+  { term: "ゲートウェイ確認", reading: "げーとうぇいかくにん", definition: "建設工事・製造プロセスの各工程移行点（ゲート）で実施する安全確認手法。着工前・基礎工事完了・躯体完了等の節目で、前工程のリスク低減措置の完了と次工程への安全な移行条件を元請・下請が合同で確認する。特定元方事業者の作業間連絡調整義務（安衛法第30条第1項第2号）の具体的実施手法として機能し、混在作業に起因する災害防止に有効。", relatedPages: [{ href: "/chatbot", label: "法令チャット" }] },
+  { term: "GHS", reading: "じーえいちえす", definition: "化学品の分類および表示に関する世界調和システム（Globally Harmonized System）。絵表示（ピクトグラム）・シグナルワード・危険有害性情報の統一的表示を規定。国連が勧告し日本では安衛法第57条に基づくラベル表示・SDS交付義務に反映されている。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }], source: { label: "厚労省 GHS対応（化学物質の表示・SDS制度）", url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000099121.html" } },
   { term: "健康診断", reading: "けんこうしんだん", definition: "安衛法第66条に基づく事業者の実施義務。一般健康診断（年1回）と特殊健康診断（有害業務従事者対象）がある。結果に基づく事後措置が求められる。", relatedPages: [{ href: "/laws", label: "法改正" }, { href: "/chatbot", label: "法令チャット" }] },
-  { term: "工事安全計画", reading: "こうじあんぜんけいかく", definition: "建設工事着手前に作成する安全衛生管理計画書。工種ごとのリスクアセスメント結果・安全対策・安全施工サイクル等をまとめる。", relatedPages: [] },
+  { term: "工事安全計画", reading: "こうじあんぜんけいかく", definition: "建設工事着手前に元方事業者が作成する安全衛生管理計画書。工種別リスクアセスメント結果・使用機械・作業主任者・安全施工サイクル・緊急連絡体制等を記載する。安衛法第30条の特定元方事業者の統括管理義務の具体化文書であり、建設業労働安全衛生マネジメントシステム（COHSMS）でも中核文書と位置づけられる。", relatedPages: [{ href: "/chatbot", label: "法令チャット" }] },
   { term: "酸素欠乏", reading: "さんそけつぼう", definition: "空気中の酸素濃度が18%未満の状態。マンホール・タンク内等で発生しやすく、急性の場合は即死の危険がある。作業前の測定と換気が義務。", relatedPages: [{ href: "/chatbot", label: "法令チャット" }] },
   { term: "産業医", reading: "さんぎょうい", definition: "常時50人以上の事業場で選任義務がある医師。月1回以上の作業場巡視（書類提供により2か月に1回可）、健康診断結果への意見提出、ストレスチェック等を担う。", relatedPages: [{ href: "/laws", label: "法改正" }, { href: "/chatbot", label: "法令チャット" }] },
   { term: "作業環境測定", reading: "さぎょうかんきょうそくてい", definition: "安衛法第65条に基づき、有害物質を取り扱う作業場で定期的に実施する濃度測定。結果をA・B・C管理区分に評価し、改善措置を講じる。", relatedPages: [{ href: "/chatbot", label: "法令チャット" }, { href: "/exam-quiz", label: "過去問" }] },
@@ -63,7 +64,7 @@ const BASE_TERMS: Term[] = [
   { term: "転倒防止", reading: "てんとうぼうし", definition: "転倒は労働災害の発生件数で最多の類型。床の整理整頓・滑り止め・段差解消・適切な照明・適切な靴の着用等の対策が求められる。", relatedPages: [] },
   { term: "墜落制止用器具", reading: "ついらくせいしようき", definition: "高所作業時の墜落を制止する保護具。ハーネス型（フルハーネス）と胴ベルト型があり、6.75m以上（建設業等）の高所ではフルハーネス型の使用が義務。", relatedPages: [{ href: "/laws", label: "法改正" }, { href: "/chatbot", label: "法令チャット" }] },
   { term: "熱中症", reading: "ねっちゅうしょう", definition: "高温環境での労働により発症する健康障害。熱中症予防のためのWBGT（暑さ指数）管理・休憩・水分補給・健康観察が求められる。夏季の重点管理事項。", relatedPages: [{ href: "/laws", label: "法改正" }] },
-  { term: "農薬管理", reading: "のうやくかんり", definition: "農作業における農薬の保管・取扱い・廃棄の管理。農薬取締法・農林水産省ガイドラインに加え、農業用労働安全の観点からも重要。", relatedPages: [] },
+  { term: "農薬管理", reading: "のうやくかんり", definition: "農薬を使用する作業における安全衛生管理。有機リン系・カーバメート系農薬等は急性毒性・皮膚吸収性が高く、化学物質リスクアセスメント（安衛法第57条の3）の対象物質を含む。厚労省「農業における農薬等の安全使用のための指針」に基づき、防毒マスク・防護手袋・防護服等の保護具着用、作業後の洗身、農薬取扱い従事者の定期健康診断実施が求められる。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }] },
   { term: "爆発・火災防止", reading: "ばくはつかさいぼうし", definition: "可燃性ガス・引火性液体・可燃性粉じん等に起因する爆発・火災を防ぐ措置。危険物の適切な管理・換気・着火源の除去等が基本対策。", relatedPages: [] },
   { term: "ハインリッヒの法則", reading: "はいんりっひのほうそく", definition: "1件の重大災害の背景には29件の軽微な事故があり、さらに300件のヒヤリハットがあるという経験則。安全管理の基本理念として広く用いられる。", relatedPages: [] },
   { term: "ヒヤリハット", reading: "ひやりはっと", definition: "事故には至らなかったが、ヒヤッとしたりハッとしたりした出来事。報告・分析することで重大事故防止につなげる。KYTの素材にもなる。", relatedPages: [{ href: "/ky", label: "KY用紙" }] },
@@ -80,14 +81,14 @@ const BASE_TERMS: Term[] = [
   { term: "元方事業者", reading: "もとかたじぎょうしゃ", definition: "同一の場所で複数の事業者が混在して作業を行う場合の元請事業者。下請け事業者に対する安全衛生管理の統括義務がある。", relatedPages: [{ href: "/chatbot", label: "法令チャット" }] },
   { term: "有機溶剤", reading: "ゆうきようざい", definition: "他の物質を溶かす性質を持つ有機化合物の総称。有機則別表第1にトルエン・キシレン・アセトン等が指定され、毒性により第1種（クロロホルム等の高毒性7物質）・第2種（多くの有機溶剤）・第3種（低毒性のガソリン・石油エーテル等）に区分される。物質単体の説明は本項、暴露時の疾患は『有機溶剤中毒』、規制省令は『有機則』を参照。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }, { href: "/chatbot", label: "法令チャット" }] },
   { term: "溶接・溶断", reading: "ようせつようだん", definition: "金属を溶かして接合・切断する作業。アーク溶接・ガス溶接・プラズマ切断等がある。溶接ヒュームによる健康障害防止、火花による火災防止が重要課題。", relatedPages: [{ href: "/laws", label: "法改正" }] },
-  { term: "労働安全衛生法", reading: "ろうどうあんぜんえいせいほう", definition: "昭和47年制定の基本法。事業者の安全衛生措置義務・安全管理体制・健康保持増進等を定める。通称「安衛法」。労働安全衛生規則（安衛則）等の省令とセットで運用される。", relatedPages: [{ href: "/laws", label: "法改正" }, { href: "/chatbot", label: "法令チャット" }, { href: "/law-search", label: "法令検索" }] },
+  { term: "労働安全衛生法", reading: "ろうどうあんぜんえいせいほう", definition: "昭和47年制定の基本法。事業者の安全衛生措置義務・安全管理体制・健康保持増進等を定める。通称「安衛法」。労働安全衛生規則（安衛則）等の省令とセットで運用される。", relatedPages: [{ href: "/laws", label: "法改正" }, { href: "/chatbot", label: "法令チャット" }, { href: "/law-search", label: "法令検索" }], source: { label: "e-Gov 労働安全衛生法（昭47法57）", url: "https://laws.e-gov.go.jp/law/347AC0000000057" } },
   { term: "労働安全コンサルタント", reading: "ろうどうあんぜんこんさるたんと", definition: "安衛法に基づく国家資格。事業場の安全診断・安全教育等を行う専門家。試験科目は産業安全一般と産業安全関係法令。", relatedPages: [{ href: "/exam-quiz", label: "過去問" }] },
   { term: "労働衛生コンサルタント", reading: "ろうどうえいせいこんさるたんと", definition: "安衛法に基づく国家資格。事業場の衛生診断・衛生教育等を行う専門家。試験科目は労働衛生一般と労働衛生関係法令。", relatedPages: [{ href: "/exam-quiz", label: "過去問" }] },
   { term: "リスクアセスメント", reading: "りすくあせすめんと", definition: "危険性・有害性の特定→リスクの見積もり→リスクの評価→リスク低減措置の決定・実施というプロセス。2006年から努力義務、化学物質等は義務化されている。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }, { href: "/risk-prediction", label: "リスク予測" }] },
   { term: "玉掛け", reading: "たまがけ", definition: "クレーン等で荷物をつり上げる際に、ワイヤーロープ等を用いて荷物を掛ける作業。最大荷重1t以上のクレーン使用時は技能講習修了が必要。", relatedPages: [{ href: "/e-learning", label: "Eラーニング" }, { href: "/chatbot", label: "法令チャット" }] },
   { term: "TBM", reading: "てぃーびーえむ", definition: "ツールボックスミーティングの略。作業開始前に作業グループのメンバーが短時間（5〜10分）で行うミーティング。その日の作業内容・危険ポイント・対策を確認する。", relatedPages: [{ href: "/ky", label: "KY用紙" }] },
   { term: "MSDS/SDS", reading: "えむえすでぃーえす/えすでぃーえす", definition: "Material Safety Data Sheet → Safety Data Sheet。化学物質の安全情報を記載した文書。GHS対応で「SDS」に統一。16項目の記載が義務付けられている。", relatedPages: [{ href: "/chemical-ra", label: "化学物質RA" }] },
-  { term: "WBGT", reading: "だぶりゅーびーじーてぃー", definition: "湿球黒球温度（Wet Bulb Globe Temperature）。熱中症リスクを評価するための暑さ指数。気温・湿度・輻射熱を考慮して算出し、28℃以上で厳重警戒、31℃以上で危険とされる。", relatedPages: [{ href: "/laws", label: "法改正" }] },
+  { term: "WBGT", reading: "だぶりゅーびーじーてぃー", definition: "湿球黒球温度（Wet Bulb Globe Temperature）。熱中症リスクを評価するための暑さ指数。気温・湿度・輻射熱を考慮して算出し、28℃以上で厳重警戒、31℃以上で危険とされる。厚労省の熱中症予防指針（「職場における熱中症の予防について」基発0618第1号等）でWBGT値に応じた対策の実施が求められる。", relatedPages: [{ href: "/laws", label: "法改正" }], source: { label: "厚労省 熱中症予防対策（WBGT管理）", url: "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/anzen/necchusyo/" } },
   { term: "PDCA", reading: "ぴーでぃーしーえー", definition: "Plan（計画）→Do（実施）→Check（評価）→Act（改善）のサイクル。安全衛生管理においてOSHMS（労働安全衛生マネジメントシステム）の基本的枠組みとして活用される。", relatedPages: [] },
   { term: "OSHMS", reading: "おーえすえいちえむえす", definition: "労働安全衛生マネジメントシステム（Occupational Safety and Health Management System）。PDCAサイクルにより継続的に安全衛生水準を向上させる体系的管理手法。ISO 45001が国際規格。", relatedPages: [] },
   { term: "ISO 45001", reading: "あいえすおー45001", definition: "労働安全衛生マネジメントシステムの国際規格（2018年制定）。OHSAS 18001を後継し、働き方改革・サプライチェーン管理等の要求事項を盛り込んでいる。", relatedPages: [] },
@@ -111,11 +112,11 @@ const BASE_TERMS: Term[] = [
   { term: "過重労働", reading: "かじゅうろうどう", definition: "長時間労働や身体的・精神的負荷の高い業務。過労死・過労自殺の原因として社会問題化。残業時間の管理・産業医面談・労働時間の適正化が求められる。", relatedPages: [{ href: "/laws", label: "法改正" }] },
   { term: "化学物質自律管理", reading: "かがくぶっしつじりつかんり", definition: "2023年以降の化学物質管理の新体制。国が個別に規制する方式から、事業者が自らリスクアセスメントを実施して管理する方式への転換。危険性・有害性情報の伝達が前提。", relatedPages: [{ href: "/laws", label: "法改正" }, { href: "/chemical-ra", label: "化学物質RA" }] },
   { term: "墜落防止", reading: "ついらくぼうし", definition: "高所からの墜落による労働災害を防ぐ措置。手すり・親綱・墜落防止ネットの設置、フルハーネス型等の要求性能墜落制止用器具の使用が主な対策。", relatedPages: [{ href: "/laws", label: "法改正" }] },
-  { term: "感染症対策", reading: "かんせんしょうたいさく", definition: "職場における感染症（インフルエンザ・新型コロナウイルス等）の拡大防止措置。手洗い・マスク・換気・就業制限・ワクチン接種推進等が含まれる。", relatedPages: [] },
+  { term: "感染症対策", reading: "かんせんしょうたいさく", definition: "職場における感染症の拡大防止措置。事業者は安衛法第3条の事業者責務として労働者の健康を保護する義務を負い、換気・飛沫対策・罹患者の就業制限等を講じる必要がある。特定の職種（医療・介護・食品製造等）では感染症法・食品衛生法上の就業制限規定も適用される。業務に起因した感染（業務起因性が認められる場合）は労災保険の対象となる。", relatedPages: [{ href: "/laws", label: "法改正" }] },
   { term: "建設業法", reading: "けんせつぎょうほう", definition: "建設工事の適正な施工を確保する法律。主任技術者・監理技術者の配置義務、一括下請け禁止、施工体制台帳の整備等を定める。安全管理とも密接に関連。", relatedPages: [{ href: "/laws", label: "法改正" }] },
   { term: "消防法", reading: "しょうぼうほう", definition: "火災の予防・警戒・鎮圧に関する法律。職場では危険物の貯蔵・取扱い、消防設備の設置・維持、防火管理者の選任等が義務付けられている。", relatedPages: [{ href: "/laws", label: "法改正" }] },
-  { term: "産業廃棄物管理", reading: "さんぎょうはいきぶつかんり", definition: "事業活動で生じた廃棄物の適正処理。廃棄物処理法に基づく分別・保管・マニフェスト管理・許可業者への委託が義務。石綿・水銀等の特別管理産業廃棄物に注意。", relatedPages: [] },
-  { term: "通路・避難路", reading: "つうろひなんろ", definition: "作業場の通路は幅80cm以上の確保・標識設置が必要（安衛則第542条等）。避難路・非常口の確保と表示、定期的な避難訓練の実施が求められる。", relatedPages: [] },
+  { term: "産業廃棄物管理", reading: "さんぎょうはいきぶつかんり", definition: "廃棄物の処理及び清掃に関する法律（廃棄物処理法）に基づく、事業活動から生じる廃棄物の適正管理。産業廃棄物管理票（マニフェスト）による委託処理の追跡・保管基準の遵守・許可業者への委託が義務。石綿含有廃棄物・水銀使用製品廃棄物等は「特別管理産業廃棄物」として厳格な管理が必要で、不適正処理は3年以下の懲役または300万円以下の罰金（廃棄物処理法第25条）。", relatedPages: [] },
+  { term: "通路・避難路", reading: "つうろひなんろ", definition: "作業場内の通路・避難経路の確保に関する規定。安衛則第540条・第542条により、作業場の通路は幅80cm以上を常時確保し、定期的な掃除と適切な照明の設置が義務付けられる。非常口・避難経路は消防法第8条の消防計画に定め、誘導灯の設置（消防法施行令第26条）が必要。防火対象物での避難訓練は消防法第8条第2項により年1〜2回の実施が義務付けられる。", relatedPages: [] },
   { term: "ロックアウト・タグアウト", reading: "ろっくあうとたぐあうと", definition: "LOTO（Lockout/Tagout）。機械整備・清掃時の予期しない起動・エネルギー放出を防ぐための手順。動力源を遮断・施錠し、警告タグを取り付ける安全確保手順。", relatedPages: [] },
 ];
 
@@ -275,6 +276,19 @@ export default function GlossaryPage() {
                         </Link>
                       ))}
                     </div>
+                  )}
+                  {t.source && (
+                    <p className="mt-1.5 text-xs text-slate-500">
+                      出典:{" "}
+                      <a
+                        href={t.source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-700 underline hover:text-blue-900"
+                      >
+                        {t.source.label} ↗
+                      </a>
+                    </p>
                   )}
                 </div>
               ))}

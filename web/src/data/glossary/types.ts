@@ -3,4 +3,5 @@ export type GlossaryTerm = {
   reading: string;
   definition: string;
   relatedPages?: Array<{ href: string; label: string }>;
+  source?: { label: string; url: string };
 };
