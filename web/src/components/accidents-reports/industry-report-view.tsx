@@ -702,6 +702,30 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
           </Cluster>
         </Section>
 
+        {/* ---------- Compare CTA -------------------------------------- */}
+        <Section title="他業種と比較" spacing="tight" className="mt-8 print:hidden">
+          <Link
+            href={`/accidents-reports/compare?industries=${config.slug},${
+              config.slug === "construction" ? "manufacturing" : "construction"
+            }`}
+            className="group flex items-center gap-3 rounded-xl border-2 border-emerald-300 bg-gradient-to-r from-emerald-50 to-white p-4 transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-emerald-800 dark:from-emerald-950/30 dark:to-slate-950"
+          >
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-emerald-600 text-white">
+              <span className="text-2xl" aria-hidden="true">⚖️</span>
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-base font-bold text-slate-900 dark:text-slate-100">
+                {config.label}を他業種と並べて比較
+              </p>
+              <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                死亡率・主要事故型・原因・危険要因・季節性を業種横断で対比。
+                2〜5業種まで自由に組み合わせて表示できます。
+              </p>
+            </div>
+            <ArrowUpRight className="h-4 w-4 shrink-0 text-emerald-600 transition group-hover:translate-x-0.5" aria-hidden="true" />
+          </Link>
+        </Section>
+
         {/* ---------- Cross-links ------------------------------------- */}
         <Section title="次のアクション" spacing="tight" className="mt-8 print:hidden">
           <CardGrid cols={3} gap="md">

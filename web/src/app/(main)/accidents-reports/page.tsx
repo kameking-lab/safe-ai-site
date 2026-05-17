@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, GitCompare } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { Section } from "@/components/layout/section";
 import { CardGrid } from "@/components/layout/card-grid";
@@ -100,6 +100,37 @@ export default function AccidentsReportsHubPage() {
               roadmap visible on the hub so users see the disclaimer before they drill in. */}
           <AccidentsPreliminaryBanner />
         </header>
+
+        <Section
+          title="業種を横断比較"
+          description="複数業種を並べて事故傾向・死亡率・原因・対策を一望できます。"
+          spacing="tight"
+          className="mt-6"
+        >
+          <Link
+            href="/accidents-reports/compare"
+            className="group flex items-center gap-3 rounded-xl border-2 border-emerald-300 bg-gradient-to-r from-emerald-50 to-white p-4 transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-emerald-800 dark:from-emerald-950/30 dark:to-slate-950"
+          >
+            <span
+              className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-emerald-600 text-white"
+              aria-hidden="true"
+            >
+              <GitCompare className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-base font-bold text-slate-900 dark:text-slate-100">
+                業種比較ビュー（2〜5業種）
+              </p>
+              <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
+                建設×製造×医療… 業種をまたいで死亡率・主要事故型・原因・危険要因・推奨対策を並列表示。コンサルのベンチマーク用途に最適。
+              </p>
+            </div>
+            <ArrowRight
+              className="h-4 w-4 shrink-0 text-emerald-600 transition group-hover:translate-x-0.5"
+              aria-hidden="true"
+            />
+          </Link>
+        </Section>
 
         <Section
           title="5 業種のレポート一覧"

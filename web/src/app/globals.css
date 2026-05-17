@@ -544,4 +544,32 @@ table {
   .accident-report-print-root .report-print-pagenum::after {
     content: "ページ " counter(page);
   }
+
+  /**
+   * 業種比較ビュー（/accidents-reports/compare）固有の印刷補強。
+   * Matrix テーブルは横スクロール前提で組まれているが、印刷時は
+   * 折り返しを許容して A4 幅に収まるようにする。
+   */
+  .accident-report-print-root table {
+    page-break-inside: auto;
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 8.5pt;
+  }
+  .accident-report-print-root table th,
+  .accident-report-print-root table td {
+    border: 1px solid #94a3b8 !important;
+    padding: 2pt 4pt !important;
+    word-break: break-word;
+  }
+  .accident-report-print-root table tr {
+    page-break-inside: avoid;
+  }
+  .accident-report-print-root .overflow-x-auto {
+    overflow: visible !important;
+  }
+  .accident-report-print-root table.min-w-\[640px\],
+  .accident-report-print-root table.min-w-\[520px\] {
+    min-width: 0 !important;
+  }
 }
