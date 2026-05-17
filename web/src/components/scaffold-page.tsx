@@ -10,7 +10,7 @@ export type ScaffoldLink = {
   description?: string;
 };
 
-const SITE_ORIGIN = "https://anzen-ai.com";
+const SITE_ORIGIN = "https://www.anzen-ai-portal.jp";
 
 export type ScaffoldPageProps = {
   /** Breadcrumb back-link label */

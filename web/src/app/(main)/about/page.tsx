@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import {
   JsonLd,
-  personSchema,
-  organizationSchema,
   webPageSchema,
   breadcrumbSchema,
 } from "@/components/json-ld";
@@ -177,8 +175,6 @@ export default function AboutPage() {
     <PageContainer width="narrow">
       <JsonLd
         schema={[
-          personSchema(),
-          organizationSchema(),
           webPageSchema({
             name: "研究・実証プロジェクトについて",
             description:

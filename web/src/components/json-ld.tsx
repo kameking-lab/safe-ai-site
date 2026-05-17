@@ -9,32 +9,28 @@ export function JsonLd({ schema }: { schema: Schema | Schema[] }) {
   );
 }
 
-export function personSchema(): Schema {
-  return {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "安全AIポータル",
-    url: "https://www.anzen-ai-portal.jp/about",
-    knowsAbout: [
-      "労働安全衛生",
-      "建設業安全管理",
-      "製造業安全管理",
-      "リスクアセスメント",
-      "AIシステム開発",
-      "業務自動化",
-    ],
-  };
-}
-
 export function organizationSchema(): Schema {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "安全AIポータル",
     url: "https://www.anzen-ai-portal.jp",
-    logo: "https://www.anzen-ai-portal.jp/apple-touch-icon.png",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://www.anzen-ai-portal.jp/apple-touch-icon.png",
+      width: 180,
+      height: 180,
+    },
     description:
       "労働安全衛生の現場運用を支援するポータルサービス。法改正情報・事故データベース・KY用紙・Eラーニング・AIチャットボットを提供。",
+    knowsAbout: [
+      "労働安全衛生",
+      "建設業安全管理",
+      "製造業安全管理",
+      "リスクアセスメント",
+      "化学物質管理",
+      "AIシステム開発",
+    ],
     sameAs: ["https://www.anzen-ai-portal.jp"],
   };
 }
@@ -64,8 +60,20 @@ export function webSiteSchema(): Schema {
   };
 }
 
+const PUBLISHER_REF = {
+  "@type": "Organization",
+  name: "安全AIポータル",
+  url: "https://www.anzen-ai-portal.jp",
+  logo: {
+    "@type": "ImageObject",
+    url: "https://www.anzen-ai-portal.jp/apple-touch-icon.png",
+  },
+} as const;
+
+const DEFAULT_OG_IMAGE = "https://www.anzen-ai-portal.jp/api/og";
+
 export function articleListSchema(
-  items: { headline: string; datePublished: string; url: string; description?: string }[]
+  items: { headline: string; datePublished: string; url: string; description?: string; image?: string }[]
 ): Schema {
   return {
     "@context": "https://schema.org",
@@ -78,12 +86,10 @@ export function articleListSchema(
         headline: item.headline,
         datePublished: item.datePublished,
         url: item.url,
+        image: item.image ?? DEFAULT_OG_IMAGE,
         ...(item.description ? { description: item.description } : {}),
-        publisher: {
-          "@type": "Organization",
-          name: "安全AIポータル",
-          url: "https://www.anzen-ai-portal.jp",
-        },
+        author: PUBLISHER_REF,
+        publisher: PUBLISHER_REF,
       },
     })),
   };
@@ -158,7 +164,7 @@ export function newsArticleSchema(input: {
 }
 
 export function newsArticleListSchema(
-  items: { headline: string; datePublished: string; url: string; description?: string }[]
+  items: { headline: string; datePublished: string; url: string; description?: string; image?: string }[]
 ): Schema {
   return {
     "@context": "https://schema.org",
@@ -171,12 +177,10 @@ export function newsArticleListSchema(
         headline: item.headline,
         datePublished: item.datePublished,
         url: item.url,
+        image: item.image ?? DEFAULT_OG_IMAGE,
         ...(item.description ? { description: item.description } : {}),
-        publisher: {
-          "@type": "Organization",
-          name: "安全AIポータル",
-          url: "https://www.anzen-ai-portal.jp",
-        },
+        author: PUBLISHER_REF,
+        publisher: PUBLISHER_REF,
       },
     })),
   };
@@ -361,7 +365,7 @@ export function faqPageSchema(
 export function productCollectionSchema(input: {
   name: string;
   url: string;
-  products: { name: string; url: string; description?: string; brand?: string }[];
+  products: { name: string; url: string; description?: string; brand?: string; image?: string }[];
 }): Schema {
   const { name, url, products } = input;
   return {
@@ -376,6 +380,7 @@ export function productCollectionSchema(input: {
         "@type": "Product",
         name: p.name,
         url: p.url,
+        ...(p.image ? { image: p.image } : {}),
         ...(p.description ? { description: p.description } : {}),
         ...(p.brand ? { brand: { "@type": "Brand", name: p.brand } } : {}),
       },
