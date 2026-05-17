@@ -48,7 +48,7 @@ export function UserMenu({ user }: Props) {
       >
         {user.image ? (
           /* eslint-disable-next-line @next/next/no-img-element -- 外部OAuth画像のためimg使用 */
-          <img src={user.image} alt="ユーザーアイコン" className="h-5 w-5 rounded-full" />
+          <img src={user.image} alt="ユーザーアイコン" width={20} height={20} className="h-5 w-5 rounded-full" />
         ) : (
           <User className="h-4 w-4 text-slate-400" />
         )}

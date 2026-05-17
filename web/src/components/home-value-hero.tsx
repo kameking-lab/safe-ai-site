@@ -255,7 +255,7 @@ export function HomeValueHero() {
           {/* マスコット */}
           <div className="hidden sm:flex flex-shrink-0 items-end self-end pb-1">
             <Image
-              src="/mascot/mascot-chihuahua-4.png"
+              src="/mascot/mascot-chihuahua-4.webp"
               alt="安全AIポータル マスコット"
               width={88}
               height={88}
