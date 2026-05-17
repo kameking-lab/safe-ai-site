@@ -301,6 +301,12 @@ export default function SignagePage() {
           >
             🗺️ 地図
           </Link>
+          <Link
+            href="/signage/display"
+            className="rounded border border-sky-400 bg-sky-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-sky-600"
+          >
+            📺 全画面
+          </Link>
         </div>
       </div>
 

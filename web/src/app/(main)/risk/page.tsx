@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { WeatherForecastPanel } from "@/components/weather-forecast-panel";
+import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 import { PageJsonLd } from "@/components/page-json-ld";
-import { RelatedPageCards } from "@/components/related-page-cards";
 
 const _title = "リスク管理ハブ｜現場リスクアセスメント・気象警報";
 const _desc =
@@ -75,6 +75,26 @@ export default function RiskPage() {
           </p>
           <WeatherForecastPanel />
         </div>
+
+        <RelatedPageCards
+          heading="あわせて見る"
+          pages={[
+            {
+              href: "/accidents",
+              label: "気象起因の事故事例",
+              description: "豪雨・落雷・突風・熱中症が要因となった労災を業種別に検索。",
+              color: "orange",
+              cta: "事故から学ぶ",
+            },
+            {
+              href: "/signage",
+              label: "現場サイネージ",
+              description: "気象警報を朝礼掲示や事務所モニターに30分自動更新で表示。",
+              color: "blue",
+              cta: "サイネージを開く",
+            },
+          ]}
+        />
       </div>
     </>
   );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DiaryListClient } from "@/components/safety-diary/diary-list-client";
+import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 import { PageJsonLd } from "@/components/page-json-ld";
 
@@ -31,6 +32,32 @@ export default function SafetyDiaryPage() {
         path="/safety-diary"
       />
       <DiaryListClient />
+      <RelatedPageCards
+        heading="合わせて使う"
+        pages={[
+          {
+            href: "/ky",
+            label: "KY簡易作成",
+            description: "朝礼3分で危険予知活動表を作成し、その日の日誌へそのまま転記できます。",
+            color: "emerald",
+            cta: "KYを書く",
+          },
+          {
+            href: "/pdf",
+            label: "PDF エクスポート",
+            description: "日誌・KY・RA をワンクリックでPDF出力。協力会社・元請への提出に。",
+            color: "sky",
+            cta: "PDFを出力",
+          },
+          {
+            href: "/accidents",
+            label: "事故事例で振り返り",
+            description: "日誌の月次まとめから類似事故を逆引きし、翌月のKYに反映できます。",
+            color: "orange",
+            cta: "類似事故を見る",
+          },
+        ]}
+      />
     </>
   );
 }

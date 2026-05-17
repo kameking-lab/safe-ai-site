@@ -7,6 +7,7 @@ import { LawHubNav } from "@/components/law-hub-nav";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { JsonLd, articleListSchema } from "@/components/json-ld";
+import { PageJsonLd } from "@/components/page-json-ld";
 import { SITE_URL } from "@/lib/seo-metadata";
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
 
@@ -40,6 +41,7 @@ export default function LawsPage() {
 
   return (
     <>
+      <PageJsonLd name={_title} description={_desc} path="/laws" />
       <JsonLd schema={lawSchema} />
       {/* C-004: law-hub quick-nav — surface scattered law tools at the top to reduce navigation depth */}
       <LawHubNav current="laws" />

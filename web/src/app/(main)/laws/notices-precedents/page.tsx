@@ -5,8 +5,10 @@ import {
   officialNotices,
   courtPrecedents,
 } from "@/data/mock/notices-and-precedents";
+import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 
+const SITE = "https://www.anzen-ai-portal.jp";
 const TITLE = "通達・判例 — 労働安全衛生の第2層出典";
 const DESCRIPTION =
   "監督官・士業・弁護士が実務で参照する通達（基発・安衛発）と、安全配慮義務関連の最高裁・高裁判例30件。条文の向こう側にある行政解釈・司法解釈をまとめて確認できます。";
@@ -35,6 +37,16 @@ export const metadata: Metadata = {
 export default function NoticesPrecedentsPage() {
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
+      <PageJsonLd
+        name={TITLE}
+        description={DESCRIPTION}
+        path="/laws/notices-precedents"
+        breadcrumbs={[
+          { name: "ホーム", url: SITE },
+          { name: "法改正情報", url: `${SITE}/laws` },
+          { name: "通達・判例", url: `${SITE}/laws/notices-precedents` },
+        ]}
+      />
       <div className="mb-4">
         <Link
           href="/laws"

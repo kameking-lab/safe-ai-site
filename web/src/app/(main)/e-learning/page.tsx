@@ -5,6 +5,7 @@ import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, courseListSchema } from "@/components/json-ld";
+import { PageJsonLd } from "@/components/page-json-ld";
 import { elearningThemesCatalog } from "@/data/mock/elearning-themes-data";
 
 const _title = "安全衛生 Eラーニング 教育コンテンツ";
@@ -36,6 +37,7 @@ export default function ELearningPage() {
 
   return (
     <>
+      <PageJsonLd name={_title} description={_desc} path="/e-learning" />
       <JsonLd schema={courseSchema} />
       <Suspense
         fallback={

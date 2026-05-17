@@ -63,6 +63,20 @@ export default function CircularsIndexPage() {
       </ul>
 
       <CircularsFooter />
+
+      <section aria-label="補助ハブ" className="mt-8 border-t border-slate-200 pt-6">
+        <h2 className="mb-3 text-base font-bold text-slate-900">補助ハブ</h2>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Link href="/laws/notices-precedents" className="block min-h-[64px] rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900 hover:bg-amber-100">
+            通達・判例 解説
+            <span className="mt-0.5 block text-[11px] font-normal text-amber-700">行政解釈と最高裁判例の整理（実務出典）</span>
+          </Link>
+          <Link href="/resources" className="block min-h-[64px] rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-900 hover:bg-violet-100">
+            厚労省一次資料DB
+            <span className="mt-0.5 block text-[11px] font-normal text-violet-700">告示・指針・リーフレットを含む 1,158件</span>
+          </Link>
+        </div>
+      </section>
     </PageContainer>
     </>
   );

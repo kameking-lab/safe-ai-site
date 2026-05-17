@@ -107,6 +107,16 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/qa-knowledge" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  Q&Aナレッジ
+                </Link>
+              </li>
+              <li>
+                <Link href="/resources" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  厚労省一次資料DB
+                </Link>
+              </li>
+              <li>
                 <Link href="/faq" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   FAQ 200問
                 </Link>
@@ -151,6 +161,16 @@ export function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/about/cases" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  導入事例・利用シーン
+                </Link>
+              </li>
+              <li>
+                <Link href="/api-docs" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  API ドキュメント
+                </Link>
+              </li>
+              <li>
                 <Link href="/stats" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   利用統計
                 </Link>
@@ -158,6 +178,11 @@ export function Footer() {
               <li>
                 <Link href="/leaflet" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   リーフレット（PDF）
+                </Link>
+              </li>
+              <li>
+                <Link href="/newsletter" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  メールニュース購読
                 </Link>
               </li>
               <li>

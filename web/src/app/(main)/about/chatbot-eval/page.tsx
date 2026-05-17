@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import results from "@/data/chatbot-eval-results.json";
 import freshResults from "@/data/chatbot-eval-fresh-results.json";
+import { PageJsonLd } from "@/components/page-json-ld";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { ogImageUrl } from "@/lib/og-url";
 
+const SITE = "https://www.anzen-ai-portal.jp";
 const _title = "AIチャットボット精度評価（Recall@5 100問ベンチマーク）";
 const _desc =
   "労働安全衛生 AI チャットボットの根拠条文 検索ヒット率（Recall@5）を 100 問ベンチマークで定量公開。RAG 検索結果の上位 5 件に gold 条文が含まれるかを判定し、トピック別の Recall@5 と全失敗問の期待/取得値を開示します。";
@@ -64,6 +66,16 @@ export default function ChatbotEvalPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 sm:py-10">
+      <PageJsonLd
+        name="AIチャットボット精度評価（Recall@5 100問ベンチマーク）"
+        description="労働安全衛生 AI チャットボットの根拠条文 検索ヒット率（Recall@5）を 100 問ベンチマークで定量公開。"
+        path="/about/chatbot-eval"
+        breadcrumbs={[
+          { name: "ホーム", url: SITE },
+          { name: "プロジェクトについて", url: `${SITE}/about` },
+          { name: "AIチャット精度評価", url: `${SITE}/about/chatbot-eval` },
+        ]}
+      />
       <nav aria-label="パンくず" className="mb-4 text-xs text-slate-500">
         <Link href="/about" className="hover:underline">
           研究・実証プロジェクトについて

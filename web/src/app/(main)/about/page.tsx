@@ -494,6 +494,40 @@ export default function AboutPage() {
           </ul>
         </section>
 
+        {/* プロジェクト関連ページ */}
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-3 flex items-center gap-2 text-base font-bold text-slate-900">
+            <BookOpen className="h-4 w-4 text-sky-600" aria-hidden="true" />
+            運営・研究の補足資料
+          </h2>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {[
+              { href: "/about/cases", title: "導入事例・利用シーン", desc: "建設・製造・医療福祉の現場での具体的な使われ方", color: "emerald" as const },
+              { href: "/about/chatbot-eval", title: "AIチャット 精度評価レポート", desc: "Recall@5・回答正確性のベンチマーク結果と方法論", color: "violet" as const },
+              { href: "/about/data-sources", title: "データソース一覧", desc: "厚労省・e-Gov・気象庁ほか参照している一次ソースを網羅" , color: "amber" as const },
+              { href: "/api-docs", title: "API ドキュメント", desc: "外部連携を検討する開発者・情シス向けのインターフェース", color: "sky" as const },
+              { href: "/organization", title: "組織・チーム管理", desc: "管理者向けのメンバー・部署・権限の運用画面", color: "rose" as const },
+            ].map((p) => {
+              const c = {
+                emerald: "border-emerald-200 bg-emerald-50 text-emerald-900 hover:bg-emerald-100",
+                violet: "border-violet-200 bg-violet-50 text-violet-900 hover:bg-violet-100",
+                amber: "border-amber-200 bg-amber-50 text-amber-900 hover:bg-amber-100",
+                sky: "border-sky-200 bg-sky-50 text-sky-900 hover:bg-sky-100",
+                blue: "border-blue-200 bg-blue-50 text-blue-900 hover:bg-blue-100",
+                rose: "border-rose-200 bg-rose-50 text-rose-900 hover:bg-rose-100",
+              }[p.color];
+              return (
+                <li key={p.href}>
+                  <Link href={p.href} className={`block min-h-[68px] rounded-xl border px-4 py-3 text-sm font-semibold ${c}`}>
+                    {p.title}
+                    <span className="mt-0.5 block text-[11px] font-normal opacity-80">{p.desc}</span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+
         {/* お問い合わせ */}
         <AboutContactBlock />
 

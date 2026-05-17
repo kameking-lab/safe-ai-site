@@ -1504,6 +1504,22 @@ export function KyPageContent() {
           heading="合わせて使う"
           pages={[
             {
+              href: "/safety-diary",
+              label: "安全衛生日誌",
+              description:
+                "完成したKYを当日の安全衛生日誌へ転記。月次まとめでKY実施率・ヒヤリ件数を可視化できます。",
+              color: "emerald",
+              cta: "日誌に転記",
+            },
+            {
+              href: "/ky/morning",
+              label: "朝礼KYサイネージ",
+              description:
+                "本日のKYを大画面で全員に共有。朝礼用に最適化された読み上げ・タイマー付きビュー。",
+              color: "purple",
+              cta: "朝礼モードを開く",
+            },
+            {
               href: "/risk-prediction",
               label: "AIリスク予測",
               description:

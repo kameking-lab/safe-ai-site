@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { LawSearchPanel } from "@/components/law-search-panel";
+import { RelatedPageCards } from "@/components/related-page-cards";
 import { LawHubNav } from "@/components/law-hub-nav";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -40,6 +41,32 @@ export default function LawSearchPage() {
       >
         <LawSearchPanel />
       </Suspense>
+      <RelatedPageCards
+        heading="合わせて使う"
+        pages={[
+          {
+            href: "/laws/notices-precedents",
+            label: "通達・判例 解説",
+            description: "条文を補完する行政解釈と最高裁判例 30 件の整理。",
+            color: "amber",
+            cta: "通達と判例",
+          },
+          {
+            href: "/laws/glossary",
+            label: "法令用語集",
+            description: "公布／施行／告示／通達／指針の違いと拘束力を一次出典付きで解説。",
+            color: "purple",
+            cta: "用語を確認",
+          },
+          {
+            href: "/resources",
+            label: "厚労省一次資料DB",
+            description: "条文を補強する告示・指針・リーフレットを 1,158件横断検索。",
+            color: "emerald",
+            cta: "一次資料を開く",
+          },
+        ]}
+      />
     </>
   );
 }

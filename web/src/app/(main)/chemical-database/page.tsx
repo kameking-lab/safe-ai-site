@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ChemicalDatabaseClient } from "@/components/chemical-database-client";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
+import { RelatedPageCards } from "@/components/related-page-cards";
 import { SITE_URL } from "@/lib/seo-metadata";
 import { JsonLd, webPageSchema, breadcrumbSchema, datasetSchema } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
@@ -54,6 +55,32 @@ export default function ChemicalDatabasePage() {
         ]}
       />
       <ChemicalDatabaseClient />
+      <RelatedPageCards
+        heading="合わせて使う"
+        pages={[
+          {
+            href: "/chemical-ra",
+            label: "化学物質RA ツール",
+            description: "検索した物質をそのままリスクアセスメントへ。CREATE-SIMPLE準拠の評価フォーム。",
+            color: "emerald",
+            cta: "リスクアセスを開始",
+          },
+          {
+            href: "/equipment-finder",
+            label: "保護具AIファインダー",
+            description: "化学物質に必要な保護手袋・保護メガネ・呼吸器の型式選定をAIが補助。",
+            color: "amber",
+            cta: "保護具を選ぶ",
+          },
+          {
+            href: "/laws",
+            label: "化学物質規制 法改正",
+            description: "安衛則・化学物質規則・指針の最新改正を時系列で確認。",
+            color: "purple",
+            cta: "法改正を確認",
+          },
+        ]}
+      />
     </>
   );
 }

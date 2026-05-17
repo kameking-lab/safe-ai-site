@@ -4,6 +4,7 @@ import { KyPageContent } from "@/components/ky-page-content";
 import { PageSkeleton } from "@/components/skeleton";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, howToSchema } from "@/components/json-ld";
+import { PageJsonLd } from "@/components/page-json-ld";
 
 const _title = "KY用紙 作成ツール｜危険予知活動";
 const _desc =
@@ -41,6 +42,7 @@ const KY_HOWTO = howToSchema({
 export default function KyPage() {
   return (
     <>
+      <PageJsonLd name={_title} description={_desc} path="/ky" />
       <JsonLd schema={KY_HOWTO} />
       <Suspense fallback={<PageSkeleton label="KY用紙ツールを読み込み中" />}>
         <KyPageContent />

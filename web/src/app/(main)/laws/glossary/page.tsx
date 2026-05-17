@@ -3,10 +3,13 @@ import Link from "next/link";
 import { JsonLd, webPageSchema, breadcrumbSchema, definedTermSetSchema } from "@/components/json-ld";
 import { SITE_URL } from "@/lib/seo-metadata";
 
+const _title = "労働安全衛生 法令用語集（条文・通達・行政用語）";
+const _desc =
+  "「公布日と施行日の違い」「告示・通達・指針の拘束力」「省令・規則・規程」など、労働安全衛生法令を読むときに必要な用語を一次出典付きで整理。";
+
 export const metadata: Metadata = {
-  title: "労働安全衛生 法令用語集（条文・通達・行政用語）",
-  description:
-    "「公布日と施行日の違い」「告示・通達・指針の拘束力」「省令・規則・規程」など、労働安全衛生法令を読むときに必要な用語を一次出典付きで整理。",
+  title: _title,
+  description: _desc,
   alternates: { canonical: "/laws/glossary" },
 };
 
@@ -183,11 +186,7 @@ export default function LawsGlossaryPage() {
     <main className="mx-auto max-w-4xl px-4 py-8">
       <JsonLd
         schema={[
-          webPageSchema({
-            name: "労働安全衛生 法令用語集（条文・通達・行政用語）",
-            description: "「公布日と施行日の違い」「告示・通達・指針の拘束力」「省令・規則・規程」など、労働安全衛生法令を読むときに必要な用語を一次出典付きで整理。",
-            url,
-          }),
+          webPageSchema({ name: _title, description: _desc, url }),
           breadcrumbSchema([
             { name: "ホーム", url: SITE_URL },
             { name: "法改正情報", url: `${SITE_URL}/laws` },
