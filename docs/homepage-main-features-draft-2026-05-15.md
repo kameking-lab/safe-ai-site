@@ -483,3 +483,36 @@ Reconciliation table for the 7 demoted-or-relocated current features:
 ---
 
 **End of draft. Awaiting owner decision on §4.5 before any implementation work begins.**
+
+---
+
+## 6. Post-draft updates (2026-05-17)
+
+### 6.1 Main-3 selection confirmed
+
+Owner reviewed this document and confirmed the main-3 selection (`/chatbot`, `/accidents-reports`, `/strategy/plan-generator`). The follow-up strategic enhancement design was documented in [docs/main-three-strategic-enhancement-2026-05-15.md](docs/main-three-strategic-enhancement-2026-05-15.md) (PR #176).
+
+### 6.2 F-category decisions (§4.5 Q5 — partial answer)
+
+PR #234 (merged 2026-05-17) confirmed the F-category feature dispositions that affect §4.5 Q5:
+
+| Feature | Decision | Homepage implication |
+|---------|----------|----------------------|
+| F-005 `/signage` | `kept-by-owner` | Stays in global nav; homepage grid demotion from main-3 still valid |
+| F-007 `/qa-knowledge` | `reduced-by-owner` | Demoted to FAQ 200問 redirect landing; not a main-3 candidate |
+| F-008 accidents trio | `kept-by-owner` | `/accidents-reports` in main-3 confirmed; `/accidents` and `/accidents-analytics` remain live |
+| F-010 `/safety-diary` | `reduced-by-owner` | Reduced to 2 pages; homepage grid demotion confirmed |
+
+### 6.3 §4.5 open questions — status
+
+| Q# | Question | Status |
+|----|----------|--------|
+| Q1 | Third slot `/strategy/plan-generator` vs `/chemical-ra` vs `/ky`? | **Confirmed: `/strategy/plan-generator`** (owner decision per PR #176 commission) |
+| Q2 | 6 cards in 2軍 grid? | Open — pending implementation dispatch |
+| Q3 | "全機能一覧" as card vs text link? | Open — pending implementation dispatch |
+| Q4 | 2軍 grid title? | Open — pending implementation dispatch |
+| Q5 | Remove `/signage` and `/safety-diary` from global header nav? | `/signage` stays (kept-by-owner). `/safety-diary` stays in nav (2 pages retained); homepage grid demotion confirmed |
+
+### 6.4 Implementation status
+
+Homepage still renders `FlagshipGrid` (7-card) as of 2026-05-17. The main-3 implementation (`MainThreeGrid` + `SecondaryGrid`) is pending a future implementation dispatch. Routes are unchanged.
