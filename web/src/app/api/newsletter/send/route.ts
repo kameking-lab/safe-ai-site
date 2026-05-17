@@ -7,6 +7,7 @@ import {
   memSendHistory,
 } from "@/lib/newsletter";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
+import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 
 function isAuthorized(req: Request): boolean {
   const adminToken = process.env.NEWSLETTER_ADMIN_TOKEN;
@@ -124,9 +125,18 @@ export async function POST(req: Request) {
     });
 
     try {
-      await resend.batch.send(emails);
+      await withCircuitBreaker(
+        "resend",
+        () => resend.batch.send(emails),
+        { failureThreshold: 4, cooldownMs: 120_000 }
+      );
       sent += batch.length;
     } catch (err) {
+      if (err instanceof CircuitOpenError) {
+        console.error("[newsletter:send:circuit_open]", err.message, "skipping remaining batches");
+        failed += activeSubscribers.length - i;
+        break; // 残りバッチは諦めて当該実行を終わらせる（次回 cron で再試行）
+      }
       console.error("[newsletter:send:batch_error]", err);
       failed += batch.length;
     }

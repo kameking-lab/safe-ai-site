@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { JapanRegionId, MapAlertLevel } from "@/data/mock/japan-weather-map-mock";
 import type { SignageHourlyPoint, SignageWeatherApiResponse } from "@/lib/types/signage-weather";
+import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
+import { fetchWithTimeout } from "@/lib/external/fetch-with-timeout";
 
 type HourlyPayload = {
   hourly?: {
@@ -182,8 +184,12 @@ async function fetchHourly(lat: number, lon: number) {
   u.searchParams.set("timezone", "Asia/Tokyo");
   u.searchParams.set("forecast_days", "3");
   u.searchParams.set("hourly", "temperature_2m,precipitation,weather_code,wind_speed_10m");
-  const res = await fetch(u.toString(), { headers: { Accept: "application/json" }, cache: "no-store" });
-  if (!res.ok) throw new Error("hourly");
+  const res = await fetchWithTimeout(u.toString(), {
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+    timeoutMs: 6000,
+  });
+  if (!res.ok) throw new Error(`open-meteo hourly HTTP ${res.status}`);
   return (await res.json()) as HourlyPayload;
 }
 
@@ -194,9 +200,33 @@ async function fetchDailyWeek(lat: number, lon: number) {
   u.searchParams.set("timezone", "Asia/Tokyo");
   u.searchParams.set("forecast_days", "7");
   u.searchParams.set("daily", "weather_code,wind_speed_10m_max,precipitation_sum");
-  const res = await fetch(u.toString(), { headers: { Accept: "application/json" }, cache: "no-store" });
-  if (!res.ok) throw new Error("daily");
+  const res = await fetchWithTimeout(u.toString(), {
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+    timeoutMs: 6000,
+  });
+  if (!res.ok) throw new Error(`open-meteo daily HTTP ${res.status}`);
   return (await res.json()) as DailyPayload;
+}
+
+function buildDegradedSignageWeather(
+  selectedId: JapanRegionId,
+  mapMode: "today" | "week"
+): SignageWeatherApiResponse {
+  const mapLevels = REGION_ORDER.reduce(
+    (acc, id) => {
+      acc[id] = "none";
+      return acc;
+    },
+    {} as Record<JapanRegionId, MapAlertLevel>
+  );
+  return {
+    mapLevels,
+    hourly: [],
+    mapMode,
+    sourceRegionName: REGION_POINTS[selectedId].representativeName,
+    fetchedAt: new Date().toISOString(),
+  };
 }
 
 export async function GET(request: NextRequest) {
@@ -206,47 +236,58 @@ export async function GET(request: NextRequest) {
   const now = new Date();
 
   try {
-    const mapLevels = {} as Record<JapanRegionId, MapAlertLevel>;
-    let selectedHourlyPayload: HourlyPayload;
+    const body = await withCircuitBreaker(
+      "open-meteo",
+      async () => {
+        const mapLevels = {} as Record<JapanRegionId, MapAlertLevel>;
+        let selectedHourlyPayload: HourlyPayload;
 
-    if (mapMode === "today") {
-      const hourlyPayloads = await Promise.all(
-        REGION_ORDER.map((id) => fetchHourly(REGION_POINTS[id].lat, REGION_POINTS[id].lon))
-      );
-      REGION_ORDER.forEach((id, idx) => {
-        mapLevels[id] = levelFromHourlyToday(hourlyPayloads[idx]!, now);
-      });
-      const selectedIdx = REGION_ORDER.indexOf(selectedId);
-      selectedHourlyPayload = hourlyPayloads[selectedIdx] ?? hourlyPayloads[2]!;
-    } else {
-      const dailyPayloads = await Promise.all(
-        REGION_ORDER.map((id) => fetchDailyWeek(REGION_POINTS[id].lat, REGION_POINTS[id].lon))
-      );
-      REGION_ORDER.forEach((id, idx) => {
-        mapLevels[id] = levelFromDailyPayload(dailyPayloads[idx]!);
-      });
-      const { lat, lon } = REGION_POINTS[selectedId];
-      selectedHourlyPayload = await fetchHourly(lat, lon);
-    }
+        if (mapMode === "today") {
+          const hourlyPayloads = await Promise.all(
+            REGION_ORDER.map((id) => fetchHourly(REGION_POINTS[id].lat, REGION_POINTS[id].lon))
+          );
+          REGION_ORDER.forEach((id, idx) => {
+            mapLevels[id] = levelFromHourlyToday(hourlyPayloads[idx]!, now);
+          });
+          const selectedIdx = REGION_ORDER.indexOf(selectedId);
+          selectedHourlyPayload = hourlyPayloads[selectedIdx] ?? hourlyPayloads[2]!;
+        } else {
+          const dailyPayloads = await Promise.all(
+            REGION_ORDER.map((id) => fetchDailyWeek(REGION_POINTS[id].lat, REGION_POINTS[id].lon))
+          );
+          REGION_ORDER.forEach((id, idx) => {
+            mapLevels[id] = levelFromDailyPayload(dailyPayloads[idx]!);
+          });
+          const { lat, lon } = REGION_POINTS[selectedId];
+          selectedHourlyPayload = await fetchHourly(lat, lon);
+        }
 
-    const hourly = buildHourlySeries(selectedHourlyPayload, now, 48);
-
-    const body: SignageWeatherApiResponse = {
-      mapLevels,
-      hourly,
-      mapMode,
-      sourceRegionName: REGION_POINTS[selectedId].representativeName,
-      fetchedAt: new Date().toISOString(),
-    };
+        const hourly = buildHourlySeries(selectedHourlyPayload, now, 48);
+        return {
+          mapLevels,
+          hourly,
+          mapMode,
+          sourceRegionName: REGION_POINTS[selectedId].representativeName,
+          fetchedAt: new Date().toISOString(),
+        } satisfies SignageWeatherApiResponse;
+      },
+      { failureThreshold: 5, cooldownMs: 120_000 }
+    );
 
     return NextResponse.json(body, {
       status: 200,
       headers: { "x-signage-weather": "open-meteo" },
     });
-  } catch {
-    return NextResponse.json(
-      { error: { code: "UNAVAILABLE", message: "サイネージ用天気の取得に失敗しました。" } },
-      { status: 503 }
-    );
+  } catch (err) {
+    const reason = err instanceof CircuitOpenError
+      ? "open-meteo circuit open"
+      : err instanceof Error
+        ? err.message
+        : "unknown";
+    console.warn("[signage-weather] degraded:", reason);
+    return NextResponse.json(buildDegradedSignageWeather(selectedId, mapMode), {
+      status: 200,
+      headers: { "x-signage-weather": "degraded" },
+    });
   }
 }

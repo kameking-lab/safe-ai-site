@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { sendEmailSafe } from "@/lib/external/resend-safe";
+import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 
 // 気象警報メール通知 購読登録エンドポイント
 //
@@ -25,33 +27,54 @@ export async function POST(req: Request) {
   const apiKey = process.env.RESEND_API_KEY;
   const audienceId = process.env.RESEND_AUDIENCE_ID;
 
+  // 登録要求は必ずログに残す。Resend 不通時の手動レスキューに必須。
+  console.warn(
+    "[notify/subscribe]",
+    JSON.stringify({ email, prefecture: body.prefecture ?? "", name: body.name ?? "", at: new Date().toISOString() })
+  );
+
   if (!apiKey) {
     return NextResponse.json(
-      { error: "通知機能は現在ご利用いただけません。" },
-      { status: 503 }
+      {
+        success: true,
+        email,
+        delivered: false,
+        message:
+          "登録を受け付けました。通知システムは現在準備中のため、運用開始時にあらためてご案内します。",
+      },
+      { status: 200 }
     );
   }
 
-  const resend = new Resend(apiKey);
-
-  try {
-    // Resend Contacts API でオーディエンスに追加
-    if (audienceId) {
-      await resend.contacts.create({
-        email,
-        firstName: body.name ?? "",
-        unsubscribed: false,
-        audienceId,
-      });
+  // Resend Contacts API（audienceId 設定時のみ）。失敗はメール送信を止めない。
+  if (audienceId) {
+    try {
+      await withCircuitBreaker(
+        "resend",
+        async () => {
+          const resend = new Resend(apiKey);
+          await resend.contacts.create({
+            email,
+            firstName: body.name ?? "",
+            unsubscribed: false,
+            audienceId,
+          });
+        },
+        { failureThreshold: 4, cooldownMs: 120_000 }
+      );
+    } catch (err) {
+      const detail = err instanceof CircuitOpenError ? "circuit_open" : err instanceof Error ? err.message : String(err);
+      console.warn("[notify/subscribe] contacts.create failed (continuing):", detail);
     }
+  }
 
-    // 登録確認メール送信
-    const fromAddress = process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.com>";
-    await resend.emails.send({
-      from: fromAddress,
-      to: email,
-      subject: "【安全AIポータル】気象警報メール通知の登録が完了しました",
-      html: `
+  const fromAddress = process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.com>";
+  const result = await sendEmailSafe({
+    tag: "notify-subscribe",
+    from: fromAddress,
+    to: email,
+    subject: "【安全AIポータル】気象警報メール通知の登録が完了しました",
+    html: `
 <!DOCTYPE html>
 <html lang="ja">
 <head><meta charset="utf-8" /></head>
@@ -64,11 +87,14 @@ export async function POST(req: Request) {
   <p style="font-size:12px;color:#94a3b8;">安全AIポータル ─ 現場の安全を、AIで変える。</p>
 </body>
 </html>`,
-    });
+  });
 
-    return NextResponse.json({ success: true, email });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : "登録に失敗しました。";
-    return NextResponse.json({ error: msg }, { status: 500 });
-  }
+  return NextResponse.json({
+    success: true,
+    email,
+    delivered: result.delivered,
+    message: result.delivered
+      ? "登録が完了しました。確認メールをお送りしましたのでご確認ください。"
+      : "登録を受け付けました。確認メール送信に失敗したため、運営側で手動対応します。",
+  });
 }
