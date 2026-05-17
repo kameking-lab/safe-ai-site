@@ -2,9 +2,16 @@ import type { IndustryContent } from "@/types/industry-content";
 
 export const healthcareContent: IndustryContent = {
   slug: "healthcare",
-  seoTitle: "医療・福祉の安全管理ポータル | 腰痛・針刺し・転倒・暴力対策",
+  label: "医療・福祉",
+  labelEn: "Healthcare & Welfare",
+  icon: "🏥",
+  colorClass: "rose",
+  tagline: "腰痛・転倒・暴力に加え感染症リスクが大きい",
+  safetyPlanIndustry: "medical",
+  accidentAnalysisSlug: "healthcare",
+  seoTitle: "医療・福祉の安全管理ポータル | 腰痛・針刺し・転倒・暴力対策10セクション",
   seoDescription:
-    "医療・福祉業の労働安全衛生に特化したポータル。介護移乗による腰痛、針刺し・感染暴露、施設内転倒、利用者からの暴力など重点課題と関連法令、KY・教育・AIチャットボットへの動線を提供。",
+    "医療・福祉業の労働安全衛生に特化したポータル。介護移乗による腰痛、針刺し感染、施設内転倒、利用者からの暴力など重点課題と関連法令・通達・KY・教育・年次計画への動線を集約。",
   heroHeadline: "医療・福祉の「腰痛・転倒・感染・暴力」を組織で守る",
   heroLead:
     "医療・福祉業の労災発生件数は近年急増し、製造業を上回る規模に。介護移乗による腰痛、施設内転倒、針刺し感染、利用者からの暴力・ハラスメントが重点課題です。当ポータルは腰痛予防教育・KY・事故事例・年次計画を1ページに集約します。",
@@ -86,6 +93,86 @@ export const healthcareContent: IndustryContent = {
       note: "夜勤・交代制勤務における快適環境の整備",
       href: "/law-search?q=快適な職場環境",
     },
+    {
+      name: "労働基準法 第36条 / 第37条",
+      articles: "時間外労働・深夜割増",
+      note: "夜勤・宿日直の労働時間管理と36協定特別条項",
+      href: "/law-search?q=36協定%20宿日直",
+    },
+  ],
+  accidentExamples: [
+    {
+      title: "ベッドから車椅子への移乗中の腰部受傷",
+      summary: "1人で80kgの利用者を抱え上げ移乗中、急なバランス崩しで腰椎を捻挫。ノーリフトケア機器未導入。",
+      href: "/accidents-reports/healthcare",
+    },
+    {
+      title: "針刺し事故（採血後のリキャップ）",
+      summary: "採血後にキャップを再装着しようとして針が手指に刺さり、B型肝炎抗体陽性患者血液に暴露。",
+      href: "/accidents-reports/healthcare",
+    },
+    {
+      title: "夜勤帯の急ぎ動作による転倒",
+      summary: "コール対応のため小走りで移動中、床の水滴で滑り転倒、手首骨折。動線と床面対策の不備。",
+      href: "/accidents-reports/healthcare",
+    },
+    {
+      title: "認知症患者からの突発的な暴力",
+      summary: "夜間徘徊対応中に殴打を受け頭部打撲。事前のリスク評価とペアでの対応体制不備。",
+      href: "/accidents-reports/healthcare",
+    },
+    {
+      title: "結核患者対応中の職業感染",
+      summary: "外来結核患者へのN95マスク未着用での処置で曝露、後日IGRA陽性で発症。標準予防策の徹底不足。",
+      href: "/accidents-reports/healthcare",
+    },
+    {
+      title: "化学物質暴露（消毒薬・抗がん剤）",
+      summary: "グルタラール内視鏡洗浄中の換気不足で気管支炎発症。抗がん剤調製時のCSTD（閉鎖式システム）未使用例も多い。",
+      href: "/accidents-reports/healthcare",
+    },
+    {
+      title: "夜勤過重労働によるメンタル不調",
+      summary: "月8回以上の夜勤に加え人員不足で月100時間超の時間外、適応障害で長期休職。",
+      href: "/accidents-reports/healthcare",
+    },
+  ],
+  circulars: [
+    {
+      id: "mhlw-notice-0992",
+      title: "医療機関における腰痛予防対策の推進について（介護・看護作業の人力移乗）",
+      issuer: "厚生労働省労働基準局安全衛生部安全課長",
+      date: "2024年",
+      relevance: "ノーリフトケアの法的根拠と機器補助率の徹底を要請。",
+    },
+    {
+      id: "mhlw-notice-0993",
+      title: "介護施設等における職場の安全衛生管理の徹底について（腰痛・感染症・暴力対策）",
+      issuer: "厚生労働省労働基準局安全衛生部安全課長",
+      date: "2024年",
+      relevance: "介護施設の労災急増を受け、3大課題（腰痛・感染・暴力）の総合対策を要請。",
+    },
+    {
+      id: "mhlw-notice-0929",
+      title: "職場における腰痛予防対策指針の適切な実施について（重量物取扱い・介護作業）",
+      issuer: "厚生労働省労働基準局長",
+      date: "2024年",
+      relevance: "介護現場での人力抱上げを原則禁止し福祉用具活用を要請。",
+    },
+    {
+      id: "mhlw-notice-0932",
+      title: "労働安全衛生法に基づくストレスチェック制度の適切な実施について（令和6年留意事項）",
+      issuer: "厚生労働省労働基準局長",
+      date: "2024年",
+      relevance: "高ストレス者・集団分析・面接指導の運用ポイント。",
+    },
+    {
+      id: "mhlw-notice-0933",
+      title: "ストレスチェック制度の見直しに係る改正安衛則（従業員50人未満適用拡大等）の施行について",
+      issuer: "厚生労働省労働基準局長",
+      date: "2024年",
+      relevance: "50人未満事業場へのストレスチェック適用拡大方針。",
+    },
   ],
   workTypes: [
     { name: "病院・クリニック", hazard: "針刺し・感染暴露・夜勤" },
@@ -94,6 +181,129 @@ export const healthcareContent: IndustryContent = {
     { name: "障害者支援", hazard: "暴力・転倒・コミュニケーション困難" },
     { name: "保育所", hazard: "腰痛・感染症・心理的負荷" },
     { name: "リハビリ・デイサービス", hazard: "移乗腰痛・転倒・送迎運転" },
+  ],
+  kyTopics: [
+    {
+      title: "ベッド⇔車椅子の移乗介助",
+      scenario: "スライディングボード・リフト機器の使用、ペア介助、利用者の身体状況確認、声掛け確認。",
+      href: "/ky?industry=healthcare&topic=transfer",
+    },
+    {
+      title: "採血・注射・点滴",
+      scenario: "リキャップ禁止、安全装置付き針、針捨て容器設置位置、患者と作業者の動線。",
+      href: "/ky?industry=healthcare&topic=needle",
+    },
+    {
+      title: "夜勤・宿直業務",
+      scenario: "コール対応の動線、床面の段差・水滴、ペアでの巡視、緊急時連絡体制、休憩時間確保。",
+      href: "/ky?industry=healthcare&topic=night-shift",
+    },
+    {
+      title: "感染症患者対応",
+      scenario: "標準予防策、PPE装着・脱衣手順、N95マスクのフィットテスト、ゾーニング、廃棄物処理。",
+      href: "/ky?industry=healthcare&topic=infection",
+    },
+    {
+      title: "認知症・精神疾患患者対応",
+      scenario: "事前のリスク評価、ペアでの対応、家族からの情報共有、危険物の除去、緊急時通報。",
+      href: "/ky?industry=healthcare&topic=violence",
+    },
+    {
+      title: "訪問介護・訪問看護",
+      scenario: "単独訪問の事前確認、車両運転時の注意、利用者宅の環境リスク、緊急時連絡体制。",
+      href: "/ky?industry=healthcare&topic=home-visit",
+    },
+  ],
+  chemicalSubstances: [
+    {
+      name: "グルタラール（2%水溶液）",
+      casNo: "111-30-8",
+      hazard: "内視鏡消毒で多用。気管支炎・接触性皮膚炎。換気装置と保護具、特化則類似管理。",
+      href: "/chemical-database",
+    },
+    {
+      name: "抗がん剤（HD：シクロホスファミド等）",
+      hazard: "発がん性・変異原性。CSTD（閉鎖式システム）・安全キャビネット・PPEの三重防護。",
+      href: "/chemical-database",
+    },
+    {
+      name: "ホルムアルデヒド",
+      casNo: "50-00-0",
+      hazard: "病理検体の固定液。発がん性区分1B。特化則第2類、屋内発散源の囲い式フード必須。",
+      href: "/chemical-database",
+    },
+    {
+      name: "次亜塩素酸ナトリウム",
+      casNo: "7681-52-9",
+      hazard: "感染対策で多用。酸性薬剤との混合で塩素ガス発生事故が散見。混合禁止の表示徹底。",
+      href: "/chemical-database",
+    },
+    {
+      name: "エチレンオキシド（EO）",
+      casNo: "75-21-8",
+      hazard: "医療機器ガス滅菌。発がん性区分1A、特化則第2類。残留EO測定と特殊健診。",
+      href: "/chemical-database",
+    },
+  ],
+  educationCerts: [
+    {
+      name: "腰痛予防の労働衛生教育",
+      type: "労働衛生教育",
+      target: "介護・看護・移乗作業従事者",
+      href: "/education-certification/finder?q=腰痛",
+    },
+    {
+      name: "感染症対策教育（職業感染防止）",
+      type: "労働衛生教育",
+      target: "医療・福祉従事者全般",
+      href: "/education-certification/finder?q=感染対策",
+    },
+    {
+      name: "メンタルヘルス・ラインケア教育",
+      type: "労働衛生教育",
+      target: "管理監督者（職場のメンタルヘルス4つのケア）",
+      href: "/education-certification/finder?q=メンタルヘルス",
+    },
+    {
+      name: "衛生管理者免許（第一種）",
+      type: "免許",
+      target: "常時50人以上の事業場の衛生管理者選任要件",
+      href: "/education-certification/finder?q=衛生管理者",
+    },
+    {
+      name: "ストレスチェック実施者研修",
+      type: "労働衛生教育",
+      target: "医師・保健師等のストレスチェック実施者",
+      href: "/education-certification/finder?q=ストレスチェック",
+    },
+    {
+      name: "認知症介護基礎研修",
+      type: "労働衛生教育",
+      target: "介護施設の介護職員（暴力・徘徊対応含む）",
+      href: "/education-certification/finder?q=認知症",
+    },
+  ],
+  faqCategories: [
+    {
+      label: "健康管理・教育",
+      category: "health-education",
+      rationale: "ストレスチェック・夜勤健診・腰痛予防教育の要件",
+    },
+    {
+      label: "安全衛生管理体制",
+      category: "management",
+      rationale: "衛生管理者・産業医・安全衛生委員会の選任と運営",
+    },
+    {
+      label: "化学物質・有害物",
+      category: "chemical",
+      rationale: "グルタラール・抗がん剤・ホルムアルデヒド等の管理",
+    },
+    {
+      label: "法令・制度",
+      category: "law-system",
+      rationale: "感染症法・36協定・腰痛予防対策指針の制度面",
+    },
   ],
   recommendations: [
     {
@@ -112,10 +322,10 @@ export const healthcareContent: IndustryContent = {
     },
     {
       icon: "🎓",
-      title: "腰痛予防の労働衛生教育",
-      reason: "ノーリフトケアの実技と腰部負担評価チェックリスト",
-      href: "/education/roudoueisei/youtsu-yobou",
-      cta: "受講する",
+      title: "医療・福祉の特別教育・衛生教育",
+      reason: "腰痛予防・感染対策・メンタルヘルス教育の要件を一覧化",
+      href: "/education-certification/finder?industry=healthcare",
+      cta: "教育要件を確認",
     },
     {
       icon: "🧠",
@@ -153,12 +363,61 @@ export const healthcareContent: IndustryContent = {
     {
       question: "ストレスチェック制度は誰が実施義務を負いますか？",
       answer:
-        "常時50人以上の労働者を使用する事業場で年1回の実施が義務（安衛法第66条の10）。50人未満は努力義務です。実施者は医師・保健師・厚労省指定の研修を修了した看護師・精神保健福祉士等です。",
+        "常時50人以上の労働者を使用する事業場で年1回の実施が義務（安衛法第66条の10）。50人未満は努力義務ですが、改正安衛則により今後適用拡大の方針です。実施者は医師・保健師・厚労省指定の研修を修了した看護師・精神保健福祉士等です。",
     },
     {
       question: "カスタマーハラスメントへの会社の責任は？",
       answer:
         "2022年4月施行のパワハラ防止法（労働施策総合推進法）で、事業主は顧客等からの著しい迷惑行為に対し相談体制整備等の必要な配慮が求められます。厚労省「カスハラ対策企業マニュアル」を参考に組織として対応します。",
     },
+    {
+      question: "夜勤者の健診頻度と項目は？",
+      answer:
+        "深夜業従事者は6か月以内ごとに1回の特定業務従事者健診が義務（安衛則第45条）。定期健診と同等の11項目に加え、自覚症状・他覚症状の検査、必要に応じ脳・心臓血管系の検査を追加します。",
+    },
+  ],
+  longTailKeywords: [
+    "医療 安全管理",
+    "福祉 安全管理",
+    "介護 KY 例文",
+    "看護 KY 例文",
+    "医療福祉 安全衛生計画",
+    "介護 腰痛 労災",
+    "介護 腰痛予防 ノーリフトケア",
+    "介護 移乗 リフト機器",
+    "介護 スライディングボード",
+    "看護師 針刺し 対応",
+    "針刺し B型肝炎 ワクチン",
+    "感染対策 標準予防策",
+    "N95 フィットテスト",
+    "病院 結核 職業感染",
+    "病院 抗がん剤 CSTD",
+    "病院 グルタラール 換気",
+    "病院 ホルムアルデヒド 特化則",
+    "病院 エチレンオキシド 健診",
+    "介護 認知症 暴力 対策",
+    "介護 カスハラ 対応",
+    "介護 メンタルヘルス 離職",
+    "ストレスチェック 50人未満",
+    "ストレスチェック 高ストレス者",
+    "ストレスチェック 集団分析",
+    "夜勤 健康診断 6か月",
+    "夜勤 36協定 宿日直",
+    "保育所 腰痛 抱っこ",
+    "保育所 感染症",
+    "訪問介護 単独訪問 リスク",
+    "訪問看護 交通事故",
+    "デイサービス 送迎 安全",
+    "リハビリ 移乗 腰痛",
+    "病院 衛生委員会 議事録",
+    "病院 産業医 選任",
+    "病院 ヒヤリハット",
+    "病院 インシデント アクシデント",
+    "病院 4つのケア",
+    "病院 メンタル ラインケア",
+    "介護 安全衛生委員会",
+    "介護 第14次労働災害防止計画",
+    "医療 BCP 感染症",
+    "医療 災害ゼロ",
   ],
 };
