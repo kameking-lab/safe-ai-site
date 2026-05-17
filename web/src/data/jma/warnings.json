@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-17T17:30:26.203Z",
+  "fetchedAt": "2026-05-17T18:44:51.389Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -1721,8 +1721,8 @@
         {
           "sourceCode": "070000",
           "level": "advisory",
-          "headline": "浜通りでは、１８日昼前まで濃霧による視程障害に注意してください。中通り、会津では、ここしばらく空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-17T22:15:00+09:00",
+          "headline": "浜通りでは、１８日昼前まで濃霧による視程障害に注意してください。中通り、会津では、２０日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-05-18T03:30:00+09:00",
           "publishingOffice": "福島地方気象台",
           "warnings": [
             {
@@ -1734,7 +1734,7 @@
             {
               "areaCode": "070020",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -1770,7 +1770,7 @@
             {
               "areaCode": "0720400",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -1794,7 +1794,7 @@
             {
               "areaCode": "0720900",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -1812,7 +1812,7 @@
             {
               "areaCode": "0721200",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -2052,43 +2052,43 @@
             {
               "areaCode": "0754100",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0754200",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0754300",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0754500",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0754600",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0754700",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0756100",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             }
           ]
@@ -6881,18 +6881,12 @@
         {
           "sourceCode": "420000",
           "level": "advisory",
-          "headline": "南部、壱岐・対馬では高潮に、北部、壱岐・対馬、五島では濃霧による視程障害に、南部、北部では空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-17T15:35:00+09:00",
+          "headline": "壱岐・対馬では高潮に、北部、壱岐・対馬、五島では濃霧による視程障害に、南部、北部では空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-05-18T03:14:00+09:00",
           "publishingOffice": "長崎地方気象台",
           "warnings": [
             {
               "areaCode": "420010",
-              "code": "19",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "420010",
               "code": "21",
               "status": "継続",
               "level": "advisory"
@@ -6900,7 +6894,7 @@
             {
               "areaCode": "420020",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -6918,13 +6912,13 @@
             {
               "areaCode": "420030",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "420040",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -6942,13 +6936,7 @@
             {
               "areaCode": "4220202",
               "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4220300",
-              "code": "19",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -6972,7 +6960,7 @@
             {
               "areaCode": "4220700",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -6984,7 +6972,7 @@
             {
               "areaCode": "4220800",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -7002,25 +6990,25 @@
             {
               "areaCode": "4220901",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "4220902",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "4221000",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "4221100",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -7032,7 +7020,7 @@
             {
               "areaCode": "4221202",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -7080,7 +7068,7 @@
             {
               "areaCode": "4238300",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -7092,7 +7080,7 @@
             {
               "areaCode": "4241100",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             }
           ]
