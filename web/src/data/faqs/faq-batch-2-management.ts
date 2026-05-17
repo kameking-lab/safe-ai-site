@@ -10,7 +10,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     relatedLaws: ["安衛法第12条", "安衛則第7条"],
     relatedPages: [
       { href: "/organization", label: "組織管理" },
-      { href: "/exam-quiz", label: "過去問" },
+      { href: "/exam-quiz", label: "演習問題" },
     ],
     tags: ["衛生管理者", "選任人数", "資格"],
     source: "厚生労働省",
@@ -52,7 +52,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     relatedLaws: ["安衛法第11条", "安衛則第5条"],
     relatedPages: [
       { href: "/organization", label: "組織管理" },
-      { href: "/exam-quiz", label: "過去問" },
+      { href: "/exam-quiz", label: "演習問題" },
     ],
     tags: ["安全管理者", "資格要件", "学歴・実務経験"],
     source: "厚生労働省",
@@ -331,7 +331,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     category: "management",
     relatedLaws: ["安衛法第12条", "安衛則第10条"],
     relatedPages: [
-      { href: "/exam-quiz", label: "過去問" },
+      { href: "/exam-quiz", label: "演習問題" },
       { href: "/organization", label: "組織管理" },
     ],
     tags: ["衛生管理者", "第一種", "第二種"],
@@ -359,7 +359,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     category: "management",
     relatedLaws: ["安衛法第82条〜第84条"],
     relatedPages: [
-      { href: "/exam-quiz", label: "過去問" },
+      { href: "/exam-quiz", label: "演習問題" },
       { href: "/organization", label: "組織管理" },
     ],
     tags: ["労働安全コンサルタント", "労働衛生コンサルタント", "国家資格"],
@@ -611,7 +611,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     category: "management",
     relatedLaws: ["安衛法第12条", "安衛則第10条〜第12条"],
     relatedPages: [
-      { href: "/exam-quiz", label: "過去問" },
+      { href: "/exam-quiz", label: "演習問題" },
       { href: "/education", label: "教育・資格" },
     ],
     tags: ["衛生管理者", "試験", "受験資格"],

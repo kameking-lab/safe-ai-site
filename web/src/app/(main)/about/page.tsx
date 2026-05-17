@@ -50,7 +50,7 @@ const STATS = [
   { icon: AlertCircle, label: "死亡災害DB（6年分）", value: `${SITE_STATS.mhlwDeathsCount}件`, color: "red" },
   { icon: FileText, label: "法令条文", value: `${SITE_STATS.lawArticleCount}条文`, color: "emerald" },
   { icon: Scale, label: "化学物質", value: `${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()}物質`, color: "sky" },
-  { icon: GraduationCap, label: "過去問", value: "1,000問+", color: "amber" },
+  { icon: GraduationCap, label: "演習問題", value: "1,000問+", color: "amber" },
   { icon: BookOpen, label: "Eラーニング", value: "200問+", color: "violet" },
 ] as const;
 
@@ -279,7 +279,7 @@ export default function AboutPage() {
                   <li>法令・法改正情報の選定および要約方針のレビュー</li>
                   <li>KY用紙・リスクアセスメント様式の適合性確認</li>
                   <li>事故データベース掲載基準および出典の取扱い</li>
-                  <li>Eラーニング・過去問の内容整合性のスポットチェック</li>
+                  <li>Eラーニング・演習問題の内容整合性のスポットチェック</li>
                 </ul>
                 <p className="mt-2 text-[11px] leading-5 text-slate-500">
                   ※ AI生成の要約・回答は最新法令や個別事案の判断を保証するものではありません。具体的な判断は必ず一次資料・専門家をご確認ください。
@@ -430,7 +430,7 @@ export default function AboutPage() {
                   { label: "事故DBのグラフ可視化", self: true, egov: false, jisha: false, lms: true },
                   { label: "KY用紙（シンプル/詳細切替）", self: true, egov: false, jisha: false, lms: true },
                   { label: "化学物質RA入力ツール", self: true, egov: false, jisha: false, lms: false },
-                  { label: "過去問1,000問超", self: true, egov: false, jisha: true, lms: true },
+                  { label: "演習問題1,000問超", self: true, egov: false, jisha: true, lms: true },
                   { label: "Eラーニング（業種別250問+）", self: true, egov: false, jisha: true, lms: true },
                   { label: "助成金早見（中小向け）", self: true, egov: false, jisha: false, lms: false },
                   { label: "現場向けスマホ導線", self: true, egov: false, jisha: false, lms: false },

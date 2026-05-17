@@ -1,117 +1,90 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HelpCircle, MessageSquarePlus } from "lucide-react";
+import { HelpCircle, MessageSquarePlus, BookOpen, Users } from "lucide-react";
 import { PageContainer } from "@/components/layout";
-import { COMMUNITY_CASES_SEED } from "@/data/mock/community-cases";
-import { UGC_INDUSTRY_OPTIONS } from "@/lib/ugc-types";
 import { ogImageUrl } from "@/lib/og-url";
-
 import { PageJsonLd } from "@/components/page-json-ld";
-const TITLE = "Q&Aナレッジベース（運営チーム作成事例）";
+
+const TITLE = "Q&Aナレッジ — 質問募集中";
 const DESCRIPTION =
-  "労働安全に関するQ&Aを運営チームが作成したナレッジベース。実際の質問投稿が集まり次第、順次差し替えていきます。コンサルタントへの質問も受け付けています。";
+  "労働安全に関するQ&Aを募集中。現在は /faq の200問FAQを活用ください。実際の質問投稿が集まり次第、ナレッジベースとして順次公開します。";
 
 export const metadata: Metadata = {
-  title: `${TITLE}`,
+  title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: "/qa-knowledge" },
   openGraph: {
-    title: `${TITLE}`,
+    title: TITLE,
     description: DESCRIPTION,
     images: [{ url: ogImageUrl(TITLE, DESCRIPTION), width: 1200, height: 630 }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    images: [ogImageUrl(TITLE, DESCRIPTION)],
   },
 };
 
 export default function QaKnowledgePage() {
-  const questions = COMMUNITY_CASES_SEED.filter(
-    (c) => c.category === "question" && c.status === "approved"
-  );
-
   return (
     <PageContainer width="prose">
-      {/* SEO: WebPage + BreadcrumbList only. FAQPage schema intentionally
-          omitted: the seed entries are operator-authored examples, not real
-          user submissions, so emitting FAQPage JSON-LD would mislead search
-          engines (Google manual-action risk per content-quality audit B-2,
-          docs/content-quality-audit-2026-05-16.md). Restore once real
-          submissions exist. */}
       <PageJsonLd name={TITLE} description={DESCRIPTION} path="/qa-knowledge" />
-      <header className="mb-6">
+      <header className="mb-8">
         <p className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700 border border-sky-200">
           <HelpCircle className="h-3.5 w-3.5" />
-          Q&Aナレッジベース
+          Q&Aナレッジ
         </p>
-        <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">{TITLE}</h1>
-        <p className="mt-2 text-sm leading-6 text-slate-600 sm:text-base">{DESCRIPTION}</p>
-
-        <div className="mt-5">
-          <Link
-            href="/community-cases/submit"
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-emerald-700"
-          >
-            <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
-            質問を投稿する
-          </Link>
-        </div>
+        <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">
+          Q&Aナレッジ — 質問募集中
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          現場の疑問・ヒヤリハット・法令解釈など、労働安全に関する質問を募集しています。
+          投稿された質問はコンサルタントが回答し、順次ナレッジベースとして公開します。
+        </p>
       </header>
 
-      {questions.length === 0 ? (
-        <p className="rounded-xl border border-slate-200 bg-white px-4 py-10 text-center text-sm text-slate-500">
-          まだ質問はありません。最初の質問を投稿してみませんか？
-        </p>
-      ) : (
-        <ul className="space-y-4">
-          {questions.map((q) => {
-            const industryLabel =
-              UGC_INDUSTRY_OPTIONS.find((i) => i.value === q.industry)?.label ?? q.industry;
-            return (
-              <li
-                key={q.id}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+          <div className="flex items-start gap-3">
+            <BookOpen className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-700" />
+            <div>
+              <p className="font-bold text-emerald-900">まずは FAQ 200問をご活用ください</p>
+              <p className="mt-1 text-sm text-emerald-800">
+                法令・管理体制・化学物質・健康管理の200問を法令根拠付きで解説しています。
+              </p>
+              <Link
+                href="/faq"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700"
               >
-                <div className="flex flex-wrap items-center gap-2 text-[11px]">
-                  <span className="rounded-full border border-sky-200 bg-sky-50 px-2 py-0.5 font-bold text-sky-700">
-                    Q. 質問
-                  </span>
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-600">
-                    {industryLabel}
-                  </span>
-                  <span className="text-slate-400">{q.authorAlias}</span>
-                </div>
+                FAQ 200問を見る →
+              </Link>
+            </div>
+          </div>
+        </div>
 
-                <Link
-                  href={`/community-cases/${q.id}`}
-                  className="mt-3 block text-base font-bold leading-snug text-slate-900 hover:text-emerald-700"
-                >
-                  {q.title}
-                </Link>
+        <div className="rounded-2xl border border-sky-200 bg-sky-50 p-5">
+          <div className="flex items-start gap-3">
+            <Users className="mt-0.5 h-5 w-5 flex-shrink-0 text-sky-700" />
+            <div>
+              <p className="font-bold text-sky-900">事例・Q&Aを投稿する</p>
+              <p className="mt-1 text-sm text-sky-800">
+                現場での気づき・ヒヤリハット・法令解釈の疑問などを共有してください。
+              </p>
+              <Link
+                href="/community-cases/submit"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-sky-600 px-4 py-2 text-sm font-bold text-white hover:bg-sky-700"
+              >
+                <MessageSquarePlus className="h-4 w-4" />
+                質問・事例を投稿する
+              </Link>
+            </div>
+          </div>
+        </div>
 
-                <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-600">{q.body}</p>
-
-                {q.supervisorComment && (
-                  <div className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
-                    <p className="text-[11px] font-bold text-emerald-700">A. コンサルタント回答</p>
-                    <p className="mt-1 text-xs leading-5 text-emerald-900 line-clamp-3">
-                      {q.supervisorComment}
-                    </p>
-                  </div>
-                )}
-
-                <Link
-                  href={`/community-cases/${q.id}`}
-                  className="mt-3 inline-block text-xs font-semibold text-emerald-700 hover:underline"
-                >
-                  詳細を読む →
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+        <div className="rounded-xl border border-slate-200 bg-white p-4 text-center text-sm text-slate-500">
+          Q&Aナレッジベースは投稿が集まり次第、随時公開します。
+          現在はコンサルタントが厳選した
+          <Link href="/faq" className="mx-1 font-semibold text-emerald-700 hover:underline">
+            FAQ 200問
+          </Link>
+          をご利用ください。
+        </div>
+      </div>
     </PageContainer>
   );
 }

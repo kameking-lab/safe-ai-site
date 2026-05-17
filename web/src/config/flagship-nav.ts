@@ -33,9 +33,8 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       "現場の朝礼・作業内容・KY結果・ヒヤリハットを3〜5分で記録。月次まとめでトレンドが見える化。",
     href: "/safety-diary",
     subItems: [
+      { label: "日誌一覧", href: "/safety-diary" },
       { label: "新規作成（必須5項目）", href: "/safety-diary/new" },
-      { label: "詳細モード（任意8項目）", href: "/safety-diary/new/detail" },
-      { label: "月次まとめ", href: "/safety-diary" },
     ],
   },
   {
@@ -114,7 +113,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       { label: "AIに質問する", href: "/chatbot" },
       { label: "用語集", href: "/glossary" },
       { label: "FAQ 200問", href: "/faq", description: "法令・管理体制・化学物質・健康管理の200問を法令根拠付きで解説" },
-      { label: "Q&Aナレッジ", href: "/qa-knowledge" },
+      { label: "Q&A投稿募集", href: "/qa-knowledge", description: "現場の疑問・ヒヤリハットを投稿。集まり次第ナレッジベースとして公開" },
     ],
   },
   {

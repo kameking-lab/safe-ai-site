@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Plus, ListChecks, Calendar, AlertTriangle, Download, Upload } from "lucide-react";
+import { Plus, ListChecks, AlertTriangle, Download, Upload } from "lucide-react";
 import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
 import { PageContainer } from "@/components/layout";
 import { loadEntries } from "@/lib/safety-diary/store";
@@ -100,19 +100,7 @@ export function DiaryListClient() {
               昨日コピーで起票
             </Link>
           )}
-          <Link
-            href="/safety-diary/new/detail"
-            className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-4 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50"
-          >
-            詳細モード
-          </Link>
-          <Link
-            href={`/safety-diary/monthly/${ym}`}
-            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            <Calendar className="h-4 w-4" />
-            今月のまとめ
-          </Link>
+          {/* 詳細モード・月次まとめはF-010 B縮小によりLMS拡張時に再設計 */}
           {entries.length > 0 && (
             <button
               type="button"

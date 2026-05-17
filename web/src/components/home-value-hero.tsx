@@ -325,13 +325,13 @@ export function HomeValueHero() {
         <div className="mt-2 flex flex-wrap gap-2 text-xs">
           {[
             { href: "/laws", label: "📋 法改正チェック" },
-            { href: "/e-learning", label: "🎓 Eラーニング・過去問" },
+            { href: "/e-learning", label: "🎓 Eラーニング・演習問題" },
             { href: "/risk-prediction", label: "🛡 AIリスク予測" },
             { href: "/circulars", label: "📄 通達一覧" },
             { href: "/articles", label: "📰 解説記事" },
             { href: "/goods", label: "🛒 安全用品カタログ" },
             { href: "/law-search", label: "🔍 条文検索" },
-            { href: "/exam-quiz", label: "🧠 過去問クイズ" },
+            { href: "/exam-quiz", label: "🧠 演習問題クイズ" },
           ].map((f) => (
             <Link
               key={f.href}

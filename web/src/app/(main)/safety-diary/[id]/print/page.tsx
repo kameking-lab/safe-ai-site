@@ -1,10 +1,7 @@
-import { DiaryPrintClient } from "@/components/safety-diary/diary-print-client";
+// F-010 B縮小: 印刷ページはアーカイブ。LMS拡張時に再設計予定。
+// localStorage データはクライアント側で保持されているため破壊なし。
+import { permanentRedirect } from "next/navigation";
 
-export default async function SafetyDiaryPrintPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  return <DiaryPrintClient id={id} />;
+export default async function SafetyDiaryPrintPage() {
+  permanentRedirect("/safety-diary");
 }

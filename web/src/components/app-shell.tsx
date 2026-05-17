@@ -95,7 +95,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "学習",
     items: [
       { id: "elearning", label: "Eラーニング", href: "/e-learning", icon: GraduationCap },
-      { id: "exam-quiz", label: "過去問", href: "/exam-quiz", icon: BookOpen },
+      { id: "exam-quiz", label: "演習問題", href: "/exam-quiz", icon: BookOpen },
     ],
   },
   {

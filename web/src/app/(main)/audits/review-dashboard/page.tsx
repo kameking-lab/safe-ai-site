@@ -216,7 +216,7 @@ const OPEN_PRS: OpenPR[] = [
     title: "audit: low-quality content and unnecessary features inventory",
     createdAt: "2026-05-16T09:50Z",
     isDraft: true,
-    estimatedCompletion: "Draft — F-009/F-011 の kept-by-owner 反映済(PR #224)。F-005/F-007/F-008/F-010 のオーナー判断待ち",
+    estimatedCompletion: "Draft — F-009/F-011 の kept-by-owner 反映済(PR #224)。F-005/F-008 は kept-by-owner 確定・F-007/F-010 は reduced-by-owner 確定(本PR)。全4件判断確定済",
   },
   {
     number: 177,
@@ -257,7 +257,7 @@ const AUDIT_PAGES: AuditPage[] = [
     label: "第三者目線 激辛監査レポート (49件 8カテゴリ)",
     httpStatus: 200,
     findingsOpen: 6,
-    note: "F-005/F-007/F-008/F-010 + その他P2/P3未着手。P0/P1 は #188 #199 #200 で解消済",
+    note: "F-005/F-008 kept-by-owner, F-007/F-010 reduced-by-owner 確定(本PR)。P0/P1 は #188 #199 #200 で解消済",
   },
   {
     id: "brand-consistency-2026-05-17",

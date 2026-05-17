@@ -26,6 +26,13 @@ export const metadata: Metadata = {
 export default function SafetyDiaryPage() {
   return (
     <>
+      {/* F-010 B縮小版: 現在は一覧+新規記録の2ページ構成。詳細/月次/印刷機能は
+          今後のLMS拡張時に再設計予定。localStorageデータは保持されています。 */}
+      <div className="mx-auto max-w-2xl px-4 pt-4">
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
+          現在は一覧と新規記録の2ページに絞った縮小版です。詳細・月次まとめ・印刷機能は今後のLMS拡張時に再設計予定です。
+        </p>
+      </div>
       <PageJsonLd
         name="安全衛生日誌"
         description="必須5項目+任意8項目の現場日誌。月次まとめで類似事故・関連法改正をハイライト。"

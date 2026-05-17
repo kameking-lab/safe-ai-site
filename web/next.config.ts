@@ -110,6 +110,10 @@ const nextConfig: NextConfig = {
       // is preserved in data/ for future reuse by the plan generator.
       { source: "/wizard", destination: "/strategy/plan-generator", permanent: true },
       { source: "/wizard/result", destination: "/strategy/plan-generator", permanent: true },
+      // F-010 B縮小: 詳細/月次/印刷ページ → 一覧へ301 (LMS拡張時に再設計)
+      // /safety-diary/[id] と /safety-diary/[id]/print は component-level permanentRedirect で対応
+      { source: "/safety-diary/new/detail", destination: "/safety-diary", permanent: true },
+      { source: "/safety-diary/monthly/:ym", destination: "/safety-diary", permanent: true },
     ];
   },
   // セキュリティ・キャッシュヘッダー

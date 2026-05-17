@@ -143,7 +143,7 @@ export default function FAQHubPage() {
             { href: "/education", label: "特別教育・資格" },
             { href: "/organization", label: "管理体制チェック" },
             { href: "/mental-health", label: "メンタルヘルス" },
-            { href: "/exam-quiz", label: "衛生管理者過去問" },
+            { href: "/exam-quiz", label: "衛生管理者演習問題" },
           ].map((tool) => (
             <Link
               key={tool.href}
