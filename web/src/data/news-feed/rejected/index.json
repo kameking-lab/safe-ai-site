@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-16T00:09:40.199Z",
+  "updatedAt": "2026-05-17T21:52:04.515Z",
   "entries": [
     {
       "id": "b843c0a41c745361",
@@ -29,6 +29,33 @@
       "provenance": "news_auto"
     },
     {
+      "id": "25a6fe3f1b76a406",
+      "headline": "東京都心でことし初の真夏日 あすも気温高く熱中症に注意",
+      "aiSummary": "東京都心で今年初の真夏日を記録。明日も高温が予想され、熱中症への警戒を呼びかけ。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260517/k10015123801000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sun, 17 May 2026 19:00:08 +0900",
+        "fetchedAt": "2026-05-17T21:51:51.520Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-05-17T21:52:04.401Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
       "id": "083e2b51d1b171a1",
       "headline": "全国的に気温上昇 真夏日になるところも 熱中症対策を",
       "aiSummary": "全国的に気温が上昇し、熱中症予防が呼びかけられている。",
@@ -50,6 +77,33 @@
         "rejectionReasons": [
           "relevance 15 < 70 (not labor-safety related)",
           "duplication 85 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "544758d2986790e9",
+      "headline": "気温上昇 猛暑日予想も 熱中症への対策を",
+      "aiSummary": "気温上昇と猛暑日予想を受け、熱中症予防策の徹底が呼びかけられている。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260518/k10015124181000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 18 May 2026 06:09:09 +0900",
+        "fetchedAt": "2026-05-17T21:51:51.520Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-05-17T21:51:58.298Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
