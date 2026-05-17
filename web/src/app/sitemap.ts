@@ -14,7 +14,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   type Freq = "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   const pages: { url: string; lastModified: string; priority: number; changeFrequency: Freq }[] = [
     { url: "/", lastModified: "2026-04-19", priority: 1.0, changeFrequency: "daily" },
-    { url: "/stats", lastModified: "2026-04-28", priority: 0.6, changeFrequency: "weekly" },
     { url: "/leaflet", lastModified: "2026-04-28", priority: 0.5, changeFrequency: "monthly" },
     { url: "/circulars", lastModified: "2026-04-28", priority: 0.8, changeFrequency: "weekly" },
     { url: "/equipment-finder", lastModified: "2026-04-28", priority: 0.7, changeFrequency: "monthly" },
@@ -142,6 +141,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Audit reference: harsh-third-party-2026-05-16 G-002.
     { url: "/safety-signs", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
     { url: "/about", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "yearly" },
+    { url: "/about/cases", lastModified: "2026-04-19", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/about/chatbot-eval", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
+    { url: "/about/data-sources", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
+    { url: "/about/news-feed", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
+    { url: "/chemical-ra/product-search", lastModified: "2026-04-01", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/laws/glossary", lastModified: "2026-04-19", priority: 0.7, changeFrequency: "monthly" },
+    { url: "/newsletter", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
+    { url: "/resources/mlit", lastModified: "2026-05-15", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/subsidies/calculator", lastModified: "2026-04-01", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/quick", lastModified: "2026-04-19", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/signage/map", lastModified: "2026-05-06", priority: 0.4, changeFrequency: "weekly" },
     { url: "/contact", lastModified: "2026-04-22", priority: 0.5, changeFrequency: "yearly" },
     { url: "/privacy", lastModified: "2025-10-01", priority: 0.3, changeFrequency: "yearly" },
     { url: "/terms", lastModified: "2025-10-01", priority: 0.3, changeFrequency: "yearly" },
