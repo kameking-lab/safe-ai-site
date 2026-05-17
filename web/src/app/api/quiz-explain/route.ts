@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json({
-      explanation: fallbackExplanation ?? "解説は準備中です。",
+      explanation: fallbackExplanation ?? "AI解説は現在ご利用いただけません。",
       source: "fallback",
     });
   }
@@ -56,7 +56,7 @@ ${relatedLaw ? `【関連法令】${relatedLaw}` : ""}
 
     if (!res.ok) {
       return NextResponse.json({
-        explanation: fallbackExplanation ?? "解説は準備中です。",
+        explanation: fallbackExplanation ?? "AI解説は現在ご利用いただけません。",
         source: "fallback",
       });
     }
@@ -67,12 +67,12 @@ ${relatedLaw ? `【関連法令】${relatedLaw}` : ""}
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
     return NextResponse.json({
-      explanation: text || fallbackExplanation || "解説は準備中です。",
+      explanation: text || fallbackExplanation || "AI解説は現在ご利用いただけません。",
       source: text ? "ai" : "fallback",
     });
   } catch {
     return NextResponse.json({
-      explanation: fallbackExplanation ?? "解説は準備中です。",
+      explanation: fallbackExplanation ?? "AI解説は現在ご利用いただけません。",
       source: "fallback",
     });
   }

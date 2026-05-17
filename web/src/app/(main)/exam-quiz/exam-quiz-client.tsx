@@ -358,7 +358,7 @@ export function ExamQuizClient() {
                 <div className="rounded-xl border border-amber-100 bg-amber-50 p-4 text-sm text-slate-700">
                   <p className="mb-1 font-semibold text-amber-800">解説</p>
                   <p className="whitespace-pre-line leading-relaxed">
-                    {q.explanation ?? "解説は準備中です。"}
+                    {q.explanation ?? "AI解説は現在ご利用いただけません。"}
                   </p>
                   {q.relatedLaw && (
                     <p className="mt-2 text-xs text-amber-700">

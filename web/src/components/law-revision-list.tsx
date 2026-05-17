@@ -958,7 +958,7 @@ export function LawRevisionList({
                       : "bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99]"
                   }`}
                 >
-                  {isLoadingSummary ? "要約を準備中..." : "AIで要約"}
+                  {isLoadingSummary ? "AIが要約中..." : "AIで要約"}
                 </button>
                 <button
                   type="button"

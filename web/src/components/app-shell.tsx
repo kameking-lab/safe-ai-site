@@ -120,7 +120,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database },
       { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2, badge: "AI" },
-      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "50物質β" },
+      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "専門解説50物質" },
     ],
   },
   {
@@ -300,18 +300,12 @@ export function AppShell({ children, user }: AppShellProps) {
           {item.badge && !active && (
             <span
               className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                item.badge === "soon"
-                  ? "bg-slate-200 text-slate-500 dark:bg-slate-700 dark:text-slate-300"
-                  : item.badge === "beta"
-                    ? "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300"
-                    : "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
+                item.badge === "beta"
+                  ? "bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300"
+                  : "bg-blue-100 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300"
               }`}
             >
-              {item.badge === "soon"
-                ? "準備中"
-                : item.badge === "beta"
-                  ? "β"
-                  : item.badge}
+              {item.badge === "beta" ? "β" : item.badge}
             </span>
           )}
         </Link>

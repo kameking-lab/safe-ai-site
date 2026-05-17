@@ -119,7 +119,7 @@ const PLAN_FEATURES = {
       { ja: "プロの全機能", en: "All Pro features" },
       { ja: "利用アカウント：最大100名", en: "Up to 100 user accounts" },
       { ja: "多拠点サイネージ表示（無制限）", en: "Multi-site signage (unlimited)" },
-      { ja: "LMS βアクセス（先行招待）", en: "LMS β early access" },
+      { ja: "LMS 先行招待", en: "LMS early access" },
       { ja: "法令通知の業種別カスタムルール", en: "Industry-specific law alert rules" },
       { ja: "請求書払い・年契払い割引（−10%）", en: "Invoice payment + annual discount (−10%)" },
       { ja: "初期サポート（ハンズオン1回／導入時）", en: "Onboarding hands-on session (×1)" },

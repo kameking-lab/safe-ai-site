@@ -94,7 +94,7 @@ export default function LawsPage() {
         ]}
       />
       <RelatedPageCards
-        heading="新設 特集ページ（β骨組み）"
+        heading="特集ページ"
         pages={[
           {
             href: "/laws/bcp",

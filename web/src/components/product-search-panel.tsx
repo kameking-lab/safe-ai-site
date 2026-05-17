@@ -85,7 +85,7 @@ export function ProductSearchPanel() {
       setSearchHits(json.hits ?? []);
       setSearchSource(json.source ?? "");
       if ((json.hits ?? []).length === 0) {
-        setError("該当する製品が見つかりませんでした（β：主要10製品のみ収録）。");
+        setError("該当する製品が見つかりませんでした（主要10製品収録）。");
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "検索に失敗しました。");
@@ -132,7 +132,7 @@ export function ProductSearchPanel() {
             SDS製品検索＋自動リスクアセスメント
           </h1>
           <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
-            β機能
+            主要10製品対応
           </span>
         </div>
         <p className="text-sm text-slate-600">
