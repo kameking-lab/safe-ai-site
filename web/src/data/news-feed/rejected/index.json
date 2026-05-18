@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-17T21:52:04.515Z",
+  "updatedAt": "2026-05-18T22:00:23.717Z",
   "entries": [
     {
       "id": "b843c0a41c745361",
@@ -23,6 +23,32 @@
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related)",
           "duplication 70 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "479c747637d3a304",
+      "headline": "きょうも季節外れの暑さ続く 猛暑日予想も 熱中症対策を",
+      "aiSummary": "季節外れの高温が続き、猛暑日も予想されるため、熱中症対策を呼びかけ。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260519/k10015124911000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 19 May 2026 06:10:56 +0900",
+        "fetchedAt": "2026-05-18T22:00:16.198Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-05-18T22:00:23.529Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,

@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-05-17T21:52:04.572Z",
+  "generatedAt": "2026-05-18T22:00:23.775Z",
   "counts": {
     "approved": 3,
-    "rejected": 7,
-    "total": 10,
-    "approvalRate": 0.3
+    "rejected": 8,
+    "total": 11,
+    "approvalRate": 0.273
   },
   "byDay": [
     {
@@ -20,6 +20,13 @@
       "rejected": 2,
       "total": 2,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-05-19",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -33,8 +40,8 @@
     {
       "publisher": "日本放送協会",
       "approved": 0,
-      "rejected": 5,
-      "total": 5,
+      "rejected": 6,
+      "total": 6,
       "approvalRate": 0
     }
   ],
@@ -99,7 +106,7 @@
       "rejected": [
         0,
         2,
-        3,
+        4,
         0,
         0,
         0,
@@ -136,7 +143,7 @@
       ],
       "rejected": [
         2,
-        5,
+        6,
         0,
         0,
         0,
@@ -174,7 +181,7 @@
       ],
       "rejected": [
         7,
-        0,
+        1,
         0,
         0,
         0,
@@ -212,7 +219,7 @@
       ],
       "rejected": [
         0,
-        2,
+        3,
         0,
         0,
         0,
@@ -227,7 +234,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 5
+      "count": 6
     },
     {
       "reason": "duplication",
@@ -290,6 +297,22 @@
           "rejectionReasons": [
             "relevance 20 < 70 (not labor-safety related)",
             "duplication 70 > 50 (already covered in accident DB)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "きょうも季節外れの暑さ続く 猛暑日予想も 熱中症対策を",
+        "aiSummary": "季節外れの高温が続き、猛暑日も予想されるため、熱中症対策を呼びかけ。",
+        "score": {
+          "relevance": 20,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-05-18T22:00:23.529Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 20 < 70 (not labor-safety related for type=general_news)"
           ]
         },
         "publisher": "日本放送協会"
