@@ -20,6 +20,8 @@ type BatchFinding = {
   dependency: string;
 };
 
+type BatchStatus = "planned" | "in-progress" | "completed";
+
 type Batch = {
   number: number;
   label: string;
@@ -30,6 +32,9 @@ type Batch = {
   dependency: string;
   effect: string;
   findings: BatchFinding[];
+  status: BatchStatus;
+  /** PR number that delivered the batch; surfaces in data-status as "completed-pr-<n>" */
+  completedPr?: number;
 };
 
 const BATCHES: Batch[] = [
@@ -40,10 +45,12 @@ const BATCHES: Batch[] = [
     endDate: "2026-05-22",
     totalHours: 8,
     prName:
-      "fix(ux-main3): align Hero CTA + MobileBottomNav + Footer with chatbot/accidents-reports/strategy main 3 features",
+      "feat(ux): P1 Batch 1 — align main-3-features in hero CTA / mobile bottom nav / footer (UX-001/002/005)",
     dependency: "なし (即時着手可)",
     effect:
       "サイト全体のナビ・CTA・Footerがオーナー戦略「メイン3機能(chatbot/accidents-reports/strategy/plan-generator)」と一致。監査総評の「戦略⇄実装の乖離」を解消。",
+    status: "completed",
+    completedPr: 241,
     findings: [
       {
         id: "UX-001",
@@ -85,6 +92,7 @@ const BATCHES: Batch[] = [
     dependency: "Batch 1 完了 (メイン3機能のIA固定後でないと二度手間)",
     effect:
       "メイン3機能のGoogle検索インプレッション向上の土台(KPI目標: GSC 1ヶ月後にimpressions +50%)。PageRank流通効率改善。",
+    status: "planned",
     findings: [
       {
         id: "SEO-001",
@@ -117,6 +125,7 @@ const BATCHES: Batch[] = [
     dependency: "なし (Batch 1/2 と並行可、ただしオーナー戦略判断必要)",
     effect:
       "GoogleSearchConsoleの不適切判定リスク解消。SSR HTMLがlang=jaのみで一貫し、Googlebotの混乱を排除。法人化後に/en/プレフィックスで本格再開を別計画化。",
+    status: "planned",
     findings: [
       {
         id: "SEO-015",
@@ -345,7 +354,11 @@ export default function P1BatchPlanPage() {
           id={`batch-${batch.number}`}
           className={`rounded-xl border p-4 space-y-3 ${BATCH_COLORS[batch.number]}`}
           data-batch-id={batch.number}
-          data-status="planned"
+          data-status={
+            batch.status === "completed" && batch.completedPr
+              ? `completed-pr-${batch.completedPr}`
+              : batch.status
+          }
         >
           <header>
             <div className="flex flex-wrap items-baseline gap-2">
@@ -357,6 +370,16 @@ export default function P1BatchPlanPage() {
               <h2 className="text-base font-bold text-slate-900">
                 {batch.label}
               </h2>
+              {batch.status === "completed" && batch.completedPr ? (
+                <a
+                  href={`https://github.com/kameking-lab/safe-ai-site/pull/${batch.completedPr}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800 hover:bg-emerald-200"
+                >
+                  完了 · PR #{batch.completedPr}
+                </a>
+              ) : null}
             </div>
             <div className="mt-1 flex flex-wrap gap-4 text-xs text-slate-600">
               <span>
@@ -386,7 +409,11 @@ export default function P1BatchPlanPage() {
                 className="rounded-lg border border-slate-200 bg-white p-3"
                 data-finding-id={f.id}
                 data-batch-id={batch.number}
-                data-status="planned"
+                data-status={
+                  batch.status === "completed" && batch.completedPr
+                    ? `resolved-pr-${batch.completedPr}`
+                    : batch.status
+                }
                 data-category={f.category}
               >
                 <header className="flex flex-wrap items-baseline gap-2">

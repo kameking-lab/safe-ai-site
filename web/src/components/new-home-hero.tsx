@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MessageSquare, ClipboardList } from "lucide-react";
+import { MessageSquare, ClipboardList, BarChart3, CalendarCheck, Search } from "lucide-react";
 import { SITE_STATS, SITE_STATS_META, type SiteStatKey } from "@/data/site-stats";
 import { useLanguage } from "@/contexts/language-context";
 
@@ -68,20 +68,46 @@ export function NewHomeHero() {
               : "労働安全衛生のAI・DX活用研究プロジェクト。建設・製造・運輸・医療福祉・林業の現場運用をワンストップで支援します。"}
           </p>
 
-          <div className="mt-6 flex flex-col items-center justify-center gap-2 sm:flex-row">
+          {/* メイン3機能 CTA: chatbot / accidents-reports / strategy/plan-generator */}
+          <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
             <Link
               href="/chatbot"
-              className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-6 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700 sm:text-base"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700"
             >
               <MessageSquare className="h-4 w-4" />
-              {isEn ? "Ask the OSH-Law AI" : "安衛法AIに質問する"}
+              {isEn ? "Ask the OSH-Law AI" : "安衛法AIに質問"}
             </Link>
             <Link
-              href="/ky"
-              className="inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-white px-6 py-3 text-sm font-bold text-emerald-700 shadow-sm transition hover:bg-emerald-50 dark:border-emerald-500/40 dark:bg-slate-900 dark:text-emerald-200 dark:hover:bg-slate-800 sm:text-base"
+              href="/accidents-reports"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700"
             >
-              <ClipboardList className="h-4 w-4" />
+              <BarChart3 className="h-4 w-4" />
+              {isEn ? "Industry accident reports" : "業種別 事故分析レポート"}
+            </Link>
+            <Link
+              href="/strategy/plan-generator"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700"
+            >
+              <CalendarCheck className="h-4 w-4" />
+              {isEn ? "Annual OSH plan generator" : "年次安全衛生計画を作成"}
+            </Link>
+          </div>
+
+          {/* KY/検索 ショートカット: モバイルボトムナビから外れた2機能を最上部で2タップ以内に確保 */}
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+            <Link
+              href="/ky"
+              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 dark:border-emerald-500/40 dark:bg-slate-900 dark:text-emerald-200 dark:hover:bg-slate-800"
+            >
+              <ClipboardList className="h-3.5 w-3.5" />
               {isEn ? "Build a KY in 3 min" : "KYを3分で作る"}
+            </Link>
+            <Link
+              href="/law-search"
+              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50 dark:border-emerald-500/40 dark:bg-slate-900 dark:text-emerald-200 dark:hover:bg-slate-800"
+            >
+              <Search className="h-3.5 w-3.5" />
+              {isEn ? "Search law / articles" : "法令・条文を検索"}
             </Link>
           </div>
         </div>

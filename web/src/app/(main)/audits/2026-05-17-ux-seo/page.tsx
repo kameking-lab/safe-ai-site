@@ -39,6 +39,8 @@ type Finding = {
   evidence: string;
   recommendation: string;
   status: Status;
+  /** PR number that resolved this finding; surfaces in data-status as "resolved-pr-<n>" for downstream tooling */
+  resolvedPr?: number;
 };
 
 // =====================================================================
@@ -58,7 +60,8 @@ const FINDINGS_UX_A: Finding[] = [
       "web/src/components/new-home-hero.tsx のCTAは /chatbot と /ky の2件のみ。 /accidents-reports と /strategy/plan-generator はヒーロー直下動線に出てこず、HomeThreePillars 内の事故DBカードも /accidents (10年統合DB) に遷移、業種別レポート /accidents-reports へは到達しない。docs/homepage の『メイン3項目化』方針 (commit d81ac80) と実装の乖離。",
     recommendation:
       "(a) ヒーローCTAを3項目に拡張 (安衛法AIチャット / 業種別 事故分析レポート / 年次安全衛生計画)。 (b) HomeThreePillars 事故カードの遷移先を /accidents-reports にして実利用主導の動線にする。 (c) 既存の /accidents へは『10年事故DB一覧へ』というセカンダリリンクに格下げ。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 241,
   },
   {
     id: "UX-002",
@@ -71,7 +74,8 @@ const FINDINGS_UX_A: Finding[] = [
       "web/src/components/MobileBottomNav.tsx の ITEMS は home/ky/law-search/chatbot/account。メイン3機能のうち 2/3 (accidents-reports, strategy/plan-generator) が固定ナビから抜けている。モバイルユーザーは縦スクロール後にこれら主要機能へ辿り着く動線がない。",
     recommendation:
       "ITEMS を [home, chatbot, accidents-reports, strategy/plan-generator, account] の5項目構成にリプレイス。検索とKYは2タップ以内 (ホーム+1) で到達できるよう、ホーム最上部に専用ショートカットを配置。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 241,
   },
   {
     id: "UX-003",
@@ -110,7 +114,8 @@ const FINDINGS_UX_A: Finding[] = [
       "web/src/components/footer.tsx:34-70 の『主要機能』カラムは 7項目固定で、メイン3機能のうち /accidents-reports が含まれず /accidents (10年DB) になっている。 /strategy/plan-generator は『プロジェクト』カラムにも『関連データ』カラムにも無い。サイト全体動線で『主要』の定義が分裂。",
     recommendation:
       "『主要機能』カラムを上位3項目 (chatbot / accidents-reports / strategy/plan-generator) に整理し、残り4項目は『ツール』『データ』別カラムに移動。フッターの順序を docs/homepage の戦略3項目化と一致させる。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 241,
   },
 ];
 
@@ -909,7 +914,7 @@ function renderFindingBlock(f: Finding) {
       data-priority={f.priority}
       data-category={f.category}
       data-effort-hours={f.effortHours}
-      data-status={f.status}
+      data-status={f.resolvedPr ? `resolved-pr-${f.resolvedPr}` : f.status}
     >
       <header className="flex flex-wrap items-baseline gap-2">
         <span className="font-mono text-sm font-bold text-slate-900">{f.id}</span>
@@ -932,6 +937,16 @@ function renderFindingBlock(f: Finding) {
         </span>
         <span className="text-xs text-slate-500">推定工数 {f.effortHours}h</span>
         <span className="text-xs text-slate-500">採否: {f.status}</span>
+        {f.resolvedPr ? (
+          <a
+            href={`https://github.com/kameking-lab/safe-ai-site/pull/${f.resolvedPr}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-800 hover:bg-emerald-200"
+          >
+            完了 · PR #{f.resolvedPr}
+          </a>
+        ) : null}
       </header>
       <h3 className="mt-2 text-sm font-bold text-slate-900">{f.title}</h3>
       {f.url ? (
