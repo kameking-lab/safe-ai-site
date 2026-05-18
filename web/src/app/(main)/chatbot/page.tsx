@@ -4,9 +4,9 @@ import { ChatbotBody } from "./ChatbotBody";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { SITE_URL } from "@/lib/seo-metadata";
 import { JsonLd, webPageSchema, breadcrumbSchema, qaPageSchema } from "@/components/json-ld";
-const _title = "安衛法 AI チャットボット｜法令質問";
+const _title = "安衛法AIチャットボット｜33法令以上を根拠条文付きで即答（無料）";
 const _desc =
-  "労働安全衛生法・安衛則・石綿則・じん肺法・粉じん則・有機則・特化則・酸欠則・ボイラー則など全33法令以上の条文をAIが即答。現場の法令の疑問をその場で解決。";
+  "安衛法AIチャットボットが労働安全衛生法・安衛則・特化則・有機則・酸欠則・粉じん則・石綿則・じん肺法など33法令以上を根拠条文付きで回答。RAG方式・無料・出典必須。安衛法AIの使い方ガイドは /guides/anzeneho-ai-chatbot を参照。";
 
 export const metadata: Metadata = {
   title: _title,

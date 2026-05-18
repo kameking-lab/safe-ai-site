@@ -502,6 +502,7 @@ export default function AboutPage() {
           </h2>
           <ul className="grid gap-3 sm:grid-cols-2">
             {[
+              { href: "/guides", title: "検索意図ガイド（4キーワード）", desc: "安衛法AIチャット・業種別事故レポート・年次計画・化学物質RAの検索意図別解説", color: "sky" as const },
               { href: "/about/cases", title: "導入事例・利用シーン", desc: "建設・製造・医療福祉の現場での具体的な使われ方", color: "emerald" as const },
               { href: "/about/chatbot-eval", title: "AIチャット 精度評価レポート", desc: "Recall@5・回答正確性のベンチマーク結果と方法論", color: "violet" as const },
               { href: "/about/data-sources", title: "データソース一覧", desc: "厚労省・e-Gov・気象庁ほか参照している一次ソースを網羅" , color: "amber" as const },

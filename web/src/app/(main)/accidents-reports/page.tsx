@@ -17,9 +17,9 @@ import {
   articleListSchema,
 } from "@/components/json-ld";
 
-const title = "業種別 労働災害分析レポート | 自動集計";
+const title = "労働災害 業種別 分析レポート｜5業種5,000件超の自動集計（無料）";
 const description =
-  "建設業・製造業・運輸業・医療福祉・サービス業の5業種について、5,000件超の労働災害事例を自動分析。業種ごとの事故型・原因・推奨対策・関連法令をワンクリックで確認できます。";
+  "労働災害 業種別 分析レポート — 建設業・製造業・運輸業・医療福祉・サービス業の5業種について、厚労省データと curated 事例を統合した5,000件超の労働災害を自動分析。事故型・原因・推奨対策・関連法令を業種別に無料で確認。解説は /guides/industry-accident-reports を参照。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/accidents-reports" },
@@ -192,6 +192,12 @@ export default function AccidentsReportsHubPage() {
           className="mt-8"
         >
           <Cluster gap="sm">
+            <Link
+              href="/guides/industry-accident-reports"
+              className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
+            >
+              📘 ガイド：労働災害 業種別 分析レポートの読み方
+            </Link>
             <Link
               href="/accidents"
               className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"

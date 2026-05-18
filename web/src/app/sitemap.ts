@@ -150,6 +150,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/about/chatbot-eval", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
     { url: "/about/data-sources", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
     { url: "/about/news-feed", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
+    // SEO-001 keyword landings — information-intent guides funnelling to main 4 tool pages.
+    { url: "/guides", lastModified: "2026-05-19", priority: 0.85, changeFrequency: "monthly" },
+    { url: "/guides/anzeneho-ai-chatbot", lastModified: "2026-05-19", priority: 0.8, changeFrequency: "monthly" },
+    { url: "/guides/industry-accident-reports", lastModified: "2026-05-19", priority: 0.8, changeFrequency: "monthly" },
+    { url: "/guides/annual-safety-plan-generator", lastModified: "2026-05-19", priority: 0.8, changeFrequency: "monthly" },
+    { url: "/guides/chemical-ra-create-simple", lastModified: "2026-05-19", priority: 0.8, changeFrequency: "monthly" },
     { url: "/chemical-ra/product-search", lastModified: "2026-04-01", priority: 0.6, changeFrequency: "monthly" },
     { url: "/laws/glossary", lastModified: "2026-04-19", priority: 0.7, changeFrequency: "monthly" },
     { url: "/newsletter", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },

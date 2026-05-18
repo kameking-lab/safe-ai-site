@@ -147,6 +147,17 @@ export function ChatbotBody() {
         heading={isEn ? "Use alongside" : "合わせて使う"}
         pages={[
           {
+            href: "/guides/anzeneho-ai-chatbot",
+            label: isEn
+              ? "Guide: How the OSH Law AI Chatbot works"
+              : "ガイド：安衛法AIチャットボットとは",
+            description: isEn
+              ? "Intent guide explaining 33+ supported laws, Recall@5 evaluation, common queries, and how the chatbot differs from generic ChatGPT."
+              : "対応33法令・Recall@5評価・代表的な質問例・汎用ChatGPTとの違いを解説した検索意図ガイド。",
+            color: "amber",
+            cta: isEn ? "Read the guide" : "ガイドを読む",
+          },
+          {
             href: "/law-search",
             label: isEn ? "Law Search" : "法令検索",
             description: isEn

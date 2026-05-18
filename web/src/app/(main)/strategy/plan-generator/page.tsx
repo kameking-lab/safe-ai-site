@@ -6,9 +6,9 @@ import { PlanGeneratorForm } from "@/components/safety-plan/plan-generator-form"
 import { INDUSTRY_LABELS, SCALE_LABELS } from "@/types/safety-plan";
 import { ogImageUrl } from "@/lib/og-url";
 
-const _title = "年次安全衛生計画ジェネレーター｜業種・規模別テンプレート";
+const _title = "年次安全衛生計画 業種別 ジェネレーター｜10業種×3規模・無料・PDF";
 const _desc =
-  "業種10種×規模3段階の30テンプレートから、年次安全衛生計画（基本方針・重点目標・実施事項・月別スケジュール）を自動生成。安衛法・安衛則・通達・告示に対応。PDF出力可。";
+  "年次安全衛生計画 業種別 ジェネレーター — 建設業・製造業・運輸業・医療福祉ほか10業種×規模3段階の30テンプレートから、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む安全衛生計画書を無料で自動生成。PDF出力可。使い方ガイドは /guides/annual-safety-plan-generator を参照。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -71,6 +71,14 @@ export default function PlanGeneratorPage() {
               通達・告示一覧
             </Link>{" "}
             も併せてご確認ください。
+          </p>
+          <p className="mt-3">
+            <Link
+              href="/guides/annual-safety-plan-generator"
+              className="font-semibold underline hover:text-amber-700"
+            >
+              → ガイド：年次安全衛生計画ジェネレーター（業種別）の使い方
+            </Link>
           </p>
         </section>
       </PageContainer>

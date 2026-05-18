@@ -12,9 +12,9 @@ import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
-const _title = "化学物質 リスクアセスメント ツール";
+const _title = "化学物質 リスクアセスメント CREATE-SIMPLE 無料｜安衛法57条の3対応";
 const _desc =
-  "化学物質名を入力するとSDS・GHS分類・必要保護具・安全対策チェックリストを表示。安衛法令和4年改正対応。厚労省データ参考。";
+  "化学物質 リスクアセスメント CREATE-SIMPLE 無料ツール — 物質名・GHS分類・取扱量・換気状況からばく露と健康障害のリスク区分（I〜IV）を簡易評価し、推奨保護具・改善対策を提示。安衛法第57条の3・2024年改正（自律的管理）対応。解説は /guides/chemical-ra-create-simple を参照。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -64,6 +64,13 @@ export default function ChemicalRaPage() {
       <RelatedPageCards
         heading="合わせて使う"
         pages={[
+          {
+            href: "/guides/chemical-ra-create-simple",
+            label: "ガイド：化学物質RA（CREATE-SIMPLE 無料）",
+            description: "安衛法第57条の3・2024年改正・リスク区分I〜IV・必要な保護具・記録保存まで、化学物質RAの検索意図を網羅した解説。",
+            color: "amber",
+            cta: "ガイドを読む",
+          },
           {
             href: "/chemical-database",
             label: "化学物質検索",
