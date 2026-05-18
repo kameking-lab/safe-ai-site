@@ -145,6 +145,32 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "public, max-age=0, s-maxage=0, must-revalidate" },
         ],
       },
+      // /audits/* は静的レポートページ。CDNに24時間キャッシュさせてFunction呼び出しを抑制
+      {
+        source: "/audits/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, s-maxage=86400, stale-while-revalidate=3600" },
+        ],
+      },
+      // サイネージAPIは /signage 画面から頻繁ポーリングされるため短時間CDNキャッシュで重複呼び出しを削減
+      {
+        source: "/api/signage-data",
+        headers: [
+          { key: "Cache-Control", value: "public, s-maxage=60, stale-while-revalidate=30" },
+        ],
+      },
+      {
+        source: "/api/signage-weather",
+        headers: [
+          { key: "Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=60" },
+        ],
+      },
+      {
+        source: "/api/signage/jma",
+        headers: [
+          { key: "Cache-Control", value: "public, s-maxage=300, stale-while-revalidate=60" },
+        ],
+      },
       // Note: /_next/static/* は Next.js が自動的に immutable な Cache-Control を設定するため
       // 明示的なオーバーライドは不要（指定すると build 警告が出る）
     ];
