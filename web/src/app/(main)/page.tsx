@@ -8,7 +8,7 @@ import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
 const _title = "安全AIポータル｜現場の安全を、AIで変える。";
 const _desc =
-  "労働安全衛生のAI・DX活用研究プロジェクト。安全衛生日誌・KY簡易作成・化学物質RA・サイネージ・法改正・安衛法AIチャット・重大事故ニュースの7つの主要機能で現場運用を支援します。";
+  "労働安全衛生のAI・DX活用研究プロジェクト。安衛法AIチャット・法令検索・KY活動・労働災害防止・事故事例DB・年次安全衛生計画など、建設・製造・医療福祉向け現場安全管理機能を集約。無料。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: withSiteOpenGraph("/", {
     title: { absolute: _title },
     description:
-      "労働安全衛生のAI・DX活用研究プロジェクト。7つの主要機能で建設・製造・運輸・医療福祉・林業の現場運用を支援します。",
+      "労働安全衛生のAI・DX活用研究プロジェクト。安衛法AIチャット・法令検索・KY活動・事故事例DBなど建設・製造・医療福祉向け現場安全管理機能を集約。無料。",
     images: [{ url: ogImageUrl("現場の安全を、AIで変える。"), width: 1200, height: 630 }],
   }),
   twitter: withSiteTwitter({
