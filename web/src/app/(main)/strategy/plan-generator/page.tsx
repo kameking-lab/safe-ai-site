@@ -37,7 +37,7 @@ export default function PlanGeneratorPage() {
         path="/strategy/plan-generator"
         breadcrumbs={[
           { name: "ホーム", url: "https://www.anzen-ai-portal.jp" },
-          { name: "戦略・計画", url: "https://www.anzen-ai-portal.jp/strategy/plan-generator" },
+          { name: "戦略・計画", url: "https://www.anzen-ai-portal.jp/strategy" },
           { name: "年次安全衛生計画ジェネレーター", url: "https://www.anzen-ai-portal.jp/strategy/plan-generator" },
         ]}
       />

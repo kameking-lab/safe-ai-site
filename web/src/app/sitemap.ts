@@ -242,16 +242,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
         lastModified,
         changeFrequency,
         priority,
-        // Client-side i18n switches the language on the same URL, so the ja
-        // and en alternates both point at the canonical URL. Emitting them
-        // makes the language coverage explicit to Google.
-        alternates: {
-          languages: {
-            ja: absolute,
-            en: absolute,
-            "x-default": absolute,
-          },
-        },
       };
     }
   );

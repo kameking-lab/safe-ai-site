@@ -26,7 +26,7 @@ export function Footer() {
 
         {/* 4カラム構成 */}
         <div className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {/* 主要機能（7目玉） */}
+          {/* 主要機能 */}
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
               主要機能
@@ -163,11 +163,6 @@ export function Footer() {
               <li>
                 <Link href="/about/cases" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   導入事例・利用シーン
-                </Link>
-              </li>
-              <li>
-                <Link href="/api-docs" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
-                  API ドキュメント
                 </Link>
               </li>
               <li>

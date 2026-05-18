@@ -1,4 +1,4 @@
-/** 7目玉の主要機能ナビゲーション定義 */
+/** 主要機能ナビゲーション定義 */
 
 export type FlagshipSubItem = {
   label: string;

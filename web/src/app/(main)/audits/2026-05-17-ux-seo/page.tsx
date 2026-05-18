@@ -27,7 +27,7 @@ const META = {
 };
 
 type Priority = "P0" | "P1" | "P2" | "P3";
-type Status = "TBD" | "out-of-scope";
+type Status = "TBD" | "out-of-scope" | "resolved";
 
 type Finding = {
   id: string;
@@ -97,7 +97,7 @@ const FINDINGS_UX_A: Finding[] = [
       "web/src/config/flagship-nav.ts コメント `/** 7目玉の主要機能ナビゲーション定義 */`、 web/src/components/flagship-grid.tsx の h2 表示 `『7つの主要機能』(isEn ? '7 flagship tools' : '7つの主要機能')`、 web/src/components/flagship-nav.tsx の aria-label `7目玉ナビゲーション` のいずれも『7』を主張。一方 FLAGSHIP_FEATURES 配列は safety-diary, ky, chemical-ra, signage, laws, chatbot, accidents, education-certification, industries, work-environment の10件。コードと表示の不一致は第三者には誤情報。",
     recommendation:
       "FLAGSHIP_FEATURES を厳密に7件に絞る (memory: education-certification, industries, work-environment を別カテゴリへ移動)、または表示文言を『10の主要機能』『主要機能セット』に統一。中途半端な『7』ラベルは即時撤去。",
-    status: "TBD",
+    status: "resolved",
   },
   {
     id: "UX-005",
@@ -168,7 +168,7 @@ const FINDINGS_UX_C: Finding[] = [
       "web/src/components/flagship-grid.tsx の h2: `『7つの主要機能』`。 直下のグリッドには10枚カードが並ぶ。コンサル/労務担当者からは『数を盛っているのか、減らしたのか分からない』と映る。",
     recommendation:
       "見出しを『主要10機能』『現場をワンストップで支える機能群』等に修正、または10→7の絞り込みを実施。",
-    status: "TBD",
+    status: "resolved",
   },
   {
     id: "UX-010",
@@ -442,7 +442,7 @@ const FINDINGS_UX_H: Finding[] = [
       "web/src/components/footer.tsx:168-172 で /api-docs に静的リンク。 web/src/app/(main)/api-docs/ ページ本体は noindex (curl で確認、`<meta name='robots' content='noindex,'>` 出力)、robots.txt でも Disallow 指定済 (PR #187 F-002)。しかしフッターからのリンクは未削除。ユーザーは『API ドキュメント』を期待してクリックし未完成ページに到達、信頼性毀損。",
     recommendation:
       "footer.tsx から /api-docs リンクを削除。法人化後のAPI提供開始時に再追加。",
-    status: "TBD",
+    status: "resolved",
   },
   {
     id: "UX-029",
@@ -536,7 +536,7 @@ const FINDINGS_SEO_B: Finding[] = [
       "本番 curl 結果: 各 <url> ブロックに `<xhtml:link rel='alternate' hreflang='ja' href='...'/>`, `hreflang='en'`, `hreflang='x-default'` が全部同一URLを指す。Google: 『代替URL を持つときは、各代替URLは異なる必要があります』。 web/src/app/sitemap.ts:247-254 の `alternates.languages` が全URLに同一を埋め込む実装。",
     recommendation:
       "(a) sitemap.ts の alternates.languages ブロックを削除 (英語版 URL が無いなら hreflang は emit しない)。 (b) 本格英語対応 (SEO-004) 完了後に /en/ プレフィックスURLを埋め込む。",
-    status: "TBD",
+    status: "resolved",
   },
   {
     id: "SEO-006",
@@ -564,7 +564,7 @@ const FINDINGS_SEO_B: Finding[] = [
       "web/src/app/(main)/page.tsx:10-11 `_desc = '労働安全衛生のAI・DX活用研究プロジェクト。安全衛生日誌・KY簡易作成・化学物質RA・サイネージ・法改正・安衛法AIチャット・重大事故ニュースの7つの主要機能で現場運用を支援します。'`。 文字数 = 145文字。Google検索結果の description は120字前後で切られるため、後半『重大事故ニュースの7つの主要機能で現場運用を支援します。』が切り落とされる。",
     recommendation:
       "description を100-120字に短縮し、主要キーワード3つ (労働安全衛生 / AI / DX) を前半に置く。例:『労働安全衛生のAI・DX活用研究プロジェクト。安衛法AIチャット、KY、業種別事故分析、年次安全衛生計画など現場運用機能を集約。無料。』(96字)",
-    status: "TBD",
+    status: "resolved",
   },
   {
     id: "SEO-008",
@@ -595,7 +595,7 @@ const FINDINGS_SEO_C: Finding[] = [
       "web/src/app/(main)/strategy/plan-generator/page.tsx:38-42 breadcrumbs 2階層目と3階層目の url が同じ /strategy/plan-generator。 Google Rich Results Test で『同一URLを複数のpositionで参照する不正な BreadcrumbList』と判定される可能性。",
     recommendation:
       "(a) /strategy ハブを実装し中間 URL を /strategy に。(b) または2階層に減らす ([ホーム, 年次安全衛生計画ジェネレーター])。",
-    status: "TBD",
+    status: "resolved",
   },
   {
     id: "SEO-010",
@@ -775,7 +775,7 @@ const FINDINGS_SEO_G: Finding[] = [
       "/robots.txt は Disallow: /api-docs。 web/src/components/footer.tsx には /api-docs リンクが残存。 Googlebot は『リンクは追えるが crawl 禁止』状態でクロール予算を浪費。soft 404 シグナル。",
     recommendation:
       "(a) footer.tsx から /api-docs リンク削除 (UX-028 と同根)、(b) /lms / /dpa など同様のリンクも全カラム横断棚卸し。",
-    status: "TBD",
+    status: "resolved",
   },
   {
     id: "SEO-022",

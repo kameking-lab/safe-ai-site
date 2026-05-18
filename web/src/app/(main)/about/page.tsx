@@ -505,7 +505,6 @@ export default function AboutPage() {
               { href: "/about/cases", title: "導入事例・利用シーン", desc: "建設・製造・医療福祉の現場での具体的な使われ方", color: "emerald" as const },
               { href: "/about/chatbot-eval", title: "AIチャット 精度評価レポート", desc: "Recall@5・回答正確性のベンチマーク結果と方法論", color: "violet" as const },
               { href: "/about/data-sources", title: "データソース一覧", desc: "厚労省・e-Gov・気象庁ほか参照している一次ソースを網羅" , color: "amber" as const },
-              { href: "/api-docs", title: "API ドキュメント", desc: "外部連携を検討する開発者・情シス向けのインターフェース", color: "sky" as const },
               { href: "/organization", title: "組織・チーム管理", desc: "管理者向けのメンバー・部署・権限の運用画面", color: "rose" as const },
             ].map((p) => {
               const c = {

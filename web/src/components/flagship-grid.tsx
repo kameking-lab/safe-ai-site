@@ -43,7 +43,7 @@ const EN_FEATURE_COPY: Record<string, { title: string; description: string }> = 
   },
 };
 
-/** トップページの7目玉機能カードグリッド */
+/** トップページの主要機能カードグリッド */
 export function FlagshipGrid() {
   const { language } = useLanguage();
   const isEn = language === "en";
@@ -55,7 +55,7 @@ export function FlagshipGrid() {
           <div>
             <p className="text-xs font-bold tracking-widest text-emerald-700">FEATURES</p>
             <h2 id="flagship-grid-title" className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">
-              {isEn ? "7 flagship tools" : "7つの主要機能"}
+              {isEn ? "Flagship features" : "主要機能"}
             </h2>
             <p className="mt-1 text-xs leading-snug text-slate-500 sm:text-sm">
               {isEn

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { FLAGSHIP_FEATURES } from "@/config/flagship-nav";
 
-/** 7目玉ナビ（デスクトップ：横並び＋ホバーPopover、モバイル：アコーディオン） */
+/** 主要機能ナビ（デスクトップ：横並び＋ホバーPopover、モバイル：アコーディオン） */
 export function FlagshipNav() {
   return (
     <>
@@ -17,7 +17,7 @@ export function FlagshipNav() {
 
 function FlagshipNavDesktop() {
   return (
-    <nav aria-label="7目玉ナビゲーション" className="hidden border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 lg:block">
+    <nav aria-label="主要機能ナビゲーション" className="hidden border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 lg:block">
       <ul className="mx-auto flex max-w-7xl items-stretch gap-1 px-4 py-1.5">
         {FLAGSHIP_FEATURES.map((f) => (
           <li key={f.id} className="group relative">
@@ -68,7 +68,7 @@ function FlagshipNavDesktop() {
 function FlagshipNavMobile() {
   const [openId, setOpenId] = useState<string | null>(null);
   return (
-    <nav aria-label="7目玉ナビゲーション（モバイル）" className="border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 lg:hidden">
+    <nav aria-label="主要機能ナビゲーション（モバイル）" className="border-b border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900 lg:hidden">
       <ul className="divide-y divide-slate-100 dark:divide-slate-800">
         {FLAGSHIP_FEATURES.map((f) => {
           const expanded = openId === f.id;
