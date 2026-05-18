@@ -24,12 +24,36 @@ export function Footer() {
           </Link>
         </div>
 
-        {/* 4カラム構成 */}
-        <div className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {/* 主要機能 */}
+        {/* 5カラム構成: 主要機能(3) / 現場ツール / 関連データ / プロジェクト / 規約・運営。オーナー戦略「メイン3機能」と整合 */}
+        <div className="mt-6 grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5">
+          {/* 主要機能 (オーナー戦略のメイン3機能) */}
           <div>
             <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
               主要機能
+            </p>
+            <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+              <li>
+                <Link href="/chatbot" className="inline-flex min-h-[44px] items-center font-semibold text-emerald-700 hover:underline dark:text-emerald-300">
+                  安衛法AIチャット
+                </Link>
+              </li>
+              <li>
+                <Link href="/accidents-reports" className="inline-flex min-h-[44px] items-center font-semibold text-emerald-700 hover:underline dark:text-emerald-300">
+                  業種別 事故分析レポート
+                </Link>
+              </li>
+              <li>
+                <Link href="/strategy/plan-generator" className="inline-flex min-h-[44px] items-center font-semibold text-emerald-700 hover:underline dark:text-emerald-300">
+                  年次安全衛生計画
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* 現場ツール (旧『主要機能』から4項目を移設) */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              現場ツール
             </p>
             <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li>
@@ -52,30 +76,25 @@ export function Footer() {
                   サイネージ
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          {/* 関連データ (laws/accidents もここに集約) */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              関連データ
+            </p>
+            <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li>
                 <Link href="/laws" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   法改正一覧
                 </Link>
               </li>
               <li>
-                <Link href="/chatbot" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
-                  安衛法AIチャット
-                </Link>
-              </li>
-              <li>
                 <Link href="/accidents" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
-                  重大事故ニュース
+                  10年事故DB
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          {/* 関連データ */}
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
-              関連データ
-            </p>
-            <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li>
                 <Link href="/equipment-finder" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   保護具AIファインダー

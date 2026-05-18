@@ -2,22 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, ClipboardList, Search, MessageSquare, UserRound } from "lucide-react";
+import { Home, MessageSquare, BarChart3, CalendarCheck, UserRound } from "lucide-react";
 
 /**
  * 山田職長級モバイル（iPhone SE 375px）専用ボトムナビ。
  * - 480px 以下のみ表示（CSS側で .mobile-bottom-nav を可視化）
  * - safe-area-inset-bottom 対応（iOS ホームバー回避）
- * - 5 アイコン（ホーム / KY / 検索 / AIチャット / マイ）
+ * - 5 アイコン: ホーム / AIチャット / 業種別事故 / 年次計画 / マイ (オーナー戦略「メイン3機能」と整合)
+ * - 検索/KY はホーム最上部のショートカットから 2タップ以内で到達
  * - 各アイコン領域は 48px 以上のタップ領域を保証（globals.css の .tap-target）
  *
  * 既存ページ側は body {padding-bottom} で固定ナビ分の余白を確保（globals.css）。
  */
 const ITEMS = [
   { id: "home", label: "ホーム", href: "/", icon: Home },
-  { id: "ky", label: "KY", href: "/ky", icon: ClipboardList },
-  { id: "search", label: "検索", href: "/law-search", icon: Search },
   { id: "chat", label: "AIチャット", href: "/chatbot", icon: MessageSquare },
+  { id: "accidents-reports", label: "事故分析", href: "/accidents-reports", icon: BarChart3 },
+  { id: "plan-generator", label: "年次計画", href: "/strategy/plan-generator", icon: CalendarCheck },
   { id: "account", label: "マイ", href: "/account", icon: UserRound },
 ] as const;
 

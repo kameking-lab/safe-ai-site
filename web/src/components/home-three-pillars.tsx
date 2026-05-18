@@ -215,11 +215,18 @@ function PillarFatalAccident({ fatal }: { fatal: AccidentCase | null }) {
         </>
       )}
 
+      {/* メイン3機能: 業種別事故分析レポートを主動線とし、10年DB一覧はセカンダリに格下げ */}
       <Link
-        href="/accidents"
+        href="/accidents-reports"
         className="mt-3 inline-flex items-center justify-center rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50"
       >
-        {isEn ? "Open accident DB →" : "事故DBを見る →"}
+        {isEn ? "Industry accident reports →" : "業種別 事故分析レポートへ →"}
+      </Link>
+      <Link
+        href="/accidents"
+        className="mt-1.5 inline-flex items-center justify-center text-[11px] font-semibold text-rose-700/80 hover:text-rose-800 hover:underline"
+      >
+        {isEn ? "10-year accident DB list →" : "10年事故DB一覧へ →"}
       </Link>
     </article>
   );
