@@ -83,6 +83,10 @@ describe("copilot/keyword-routing", () => {
     expect(focus).toContain("ra");
   });
 
+  it("maps 熱中症 to industry-specific focus", () => {
+    expect(detectFocusAreas("熱中症")).toContain("industry-specific");
+  });
+
   it("detects concerns from text", () => {
     const cs = detectConcerns("夏場の熱中症と墜落事故");
     expect(cs).toContain("熱中症");

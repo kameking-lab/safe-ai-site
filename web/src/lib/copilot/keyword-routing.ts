@@ -94,7 +94,19 @@ const FOCUS_KEYWORDS: Array<{ focus: MeasureCategory; keywords: string[]; concer
   {
     focus: "industry-specific",
     concern: "業種特有事項",
-    keywords: ["足場", "墜落", "酸欠", "石綿", "粉じん", "有機溶剤", "騒音", "振動"],
+    keywords: [
+      "足場",
+      "墜落",
+      "酸欠",
+      "石綿",
+      "粉じん",
+      "有機溶剤",
+      "騒音",
+      "振動",
+      "熱中症",
+      "WBGT",
+      "暑熱",
+    ],
   },
 ];
 

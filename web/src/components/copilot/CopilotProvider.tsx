@@ -67,13 +67,11 @@ export function CopilotProvider({ children }: { children: React.ReactNode }) {
       if (raw) {
         const parsed = JSON.parse(raw);
         const normalized = normalizeSafetyContext(parsed);
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot hydration
         setState(normalized);
       }
     } catch {
       // ignore malformed storage; keep empty state
     } finally {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot hydration
       setHydrated(true);
       skipPersistRef.current = false;
     }
