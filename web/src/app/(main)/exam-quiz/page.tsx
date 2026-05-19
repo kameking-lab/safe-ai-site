@@ -15,9 +15,9 @@ import {
 import { PageContainer } from "@/components/layout/page-container";
 
 import { PageJsonLd } from "@/components/page-json-ld";
-const _title = "安全衛生 資格試験 学習用クイズ";
+const _title = "演習問題（全資格対応）";
 const _desc =
-  "労働安全コンサルタント・衛生管理者・ボイラー技士など全資格の学習用クイズ。出題形式・法令根拠つき。当サイト独自の演習問題であり、実試験の過去問とは異なります。";
+  "労働安全コンサルタント・衛生管理者・ボイラー技士など全資格の演習問題。出題形式・法令根拠つき。当サイト独自の演習問題であり、実試験の過去問とは異なります。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/exam-quiz" },
@@ -71,8 +71,8 @@ export default function ExamQuizPage() {
   return (
     <>
       <PageHeader
-        title="学習用クイズ（全資格対応）"
-        description="安全・衛生コンサルタント、衛生管理者、ボイラー技士など全資格の学習用問題で実力を確認"
+        title="演習問題（全資格対応）"
+        description="安全・衛生コンサルタント、衛生管理者、ボイラー技士など全資格の演習問題で実力を確認"
         icon={BookOpen}
         iconColor="amber"
       />

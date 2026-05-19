@@ -126,11 +126,6 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/qa-knowledge" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
-                  Q&A投稿募集
-                </Link>
-              </li>
-              <li>
                 <Link href="/resources" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   厚労省一次資料DB
                 </Link>
@@ -202,6 +197,11 @@ export function Footer() {
               <li>
                 <Link href="/contact" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   ご意見・改善提案
+                </Link>
+              </li>
+              <li>
+                <Link href="/qa-knowledge" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  Q&A 投稿募集 (準備中)
                 </Link>
               </li>
               {PAID_MODE && (

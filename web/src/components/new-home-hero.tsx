@@ -54,7 +54,7 @@ export function NewHomeHero() {
       <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14 lg:py-16">
         <div className="text-center">
           <p className="text-xs font-bold tracking-widest text-emerald-700 dark:text-emerald-300">
-            {isEn ? "ANZEN AI Portal" : "安全AIポータル"}
+            {isEn ? "Anzen AI Portal (Japan OSH research)" : "安全AIポータル"}
           </p>
           <h1
             id="home-hero-title"
@@ -112,22 +112,25 @@ export function NewHomeHero() {
           </div>
         </div>
 
-        {/* 統計バー */}
-        <ul className="mx-auto mt-8 grid max-w-3xl grid-cols-3 gap-3 sm:gap-4">
-          {STATS.map((s) => {
+        {/* 統計バー: 375px (grid-cols-2) では3枚目が2列分にまたがる 2+1 レイアウト */}
+        <ul className="mx-auto mt-8 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+          {STATS.map((s, idx) => {
             const meta = SITE_STATS_META[s.key];
+            const isThird = idx === 2;
             return (
               <li
                 key={s.key}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:px-4 sm:py-4"
+                className={`rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:px-4 sm:py-4 ${
+                  isThird ? "col-span-2 sm:col-span-1" : ""
+                }`}
               >
                 <p className="text-xl font-bold text-emerald-700 dark:text-emerald-300 sm:text-2xl lg:text-3xl">
                   {s.value}
                 </p>
-                <p className="mt-0.5 text-[10px] font-semibold text-slate-700 dark:text-slate-200 sm:text-xs">
+                <p className="mt-0.5 text-[11px] font-semibold text-slate-700 dark:text-slate-200 sm:text-xs">
                   {isEn ? s.labelEn : s.labelJa}
                 </p>
-                <p className="text-[9px] text-slate-500 dark:text-slate-400 sm:text-[10px]">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   {isEn ? s.hintEn : s.hintJa}
                 </p>
                 {meta?.sourceUrl ? (
@@ -135,12 +138,12 @@ export function NewHomeHero() {
                     href={meta.sourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-1 block text-[9px] leading-4 text-emerald-700 underline hover:text-emerald-800 dark:text-emerald-400"
+                    className="mt-1 block text-[11px] leading-4 text-emerald-700 underline hover:text-emerald-800 dark:text-emerald-400"
                   >
                     {isEn ? `Source · ${meta.asOf}` : `出典・${meta.asOf}`}
                   </a>
                 ) : (
-                  <p className="mt-1 text-[9px] leading-4 text-slate-400">
+                  <p className="mt-1 text-[11px] leading-4 text-slate-400">
                     {isEn ? `Source: ${meta?.source ?? ""}` : `出典: ${meta?.source ?? ""}`}
                   </p>
                 )}
