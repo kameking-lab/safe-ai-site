@@ -33,7 +33,7 @@ export function CircularsFooter() {
   return (
     <p className="mt-6 text-xs text-slate-500">
       {isEn
-        ? "* Source: Japan Industrial Safety & Health Association (jaish.gr.jp). This list is organized by ANZEN AI Portal from public information with a last-verified date attached."
+        ? "* Source: Japan Industrial Safety & Health Association (jaish.gr.jp). This list is organized by Anzen AI Portal from public information with a last-verified date attached."
         : "※ 出典: 中央労働災害防止協会 安全衛生情報センター（jaish.gr.jp）。本一覧は 安全AIポータル が公開情報を整理し、最終確認日を付与したものです。"}
     </p>
   );

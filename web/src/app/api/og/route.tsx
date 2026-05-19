@@ -10,7 +10,7 @@ export function GET(req: NextRequest) {
     ? {
         title: "Reshape workplace safety with AI.",
         desc: "Law updates, accident DB, KY forms, chemical RA, and e-learning — one portal for site safety.",
-        tagline: "ANZEN AI Portal — Supervised by an OSH Consultant",
+        tagline: "Anzen AI Portal — Supervised by an OSH Consultant",
       }
     : {
         title: "現場の安全を、AIで変える。",

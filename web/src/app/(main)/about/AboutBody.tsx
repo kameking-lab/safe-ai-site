@@ -18,7 +18,7 @@ export function AboutResearchDeclaration() {
       </div>
       <h2 id="research-project-heading" className="mt-2 text-base font-bold leading-snug text-slate-900 sm:text-lg">
         {isEn
-          ? "ANZEN AI Portal is an independent project researching and demonstrating AI/DX in occupational safety and health."
+          ? "Anzen AI Portal is an independent project researching and demonstrating AI/DX in occupational safety and health."
           : "安全AIポータル は、労働安全衛生分野における AI・DX 活用の研究・実証を目的とした個人プロジェクトです。"}
       </h2>
       <p className="mt-3 text-sm leading-6 text-slate-700">
