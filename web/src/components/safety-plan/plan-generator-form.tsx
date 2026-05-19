@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   INDUSTRY_LABELS,
   MEASURE_LABELS,
@@ -14,6 +14,10 @@ import {
   type ScaleId,
   type SpecialWorkId,
 } from "@/types/safety-plan";
+
+const INDUSTRY_IDS = Object.keys(INDUSTRY_LABELS) as IndustryId[];
+const isIndustryId = (v: string | null): v is IndustryId =>
+  v !== null && (INDUSTRY_IDS as string[]).includes(v);
 
 const DEFAULT_FY = 2026;
 
@@ -47,7 +51,12 @@ const OVERWORK_CHOICES: OverworkPriority[] = ["high", "normal", "low"];
 
 export function PlanGeneratorForm() {
   const router = useRouter();
-  const [industry, setIndustry] = useState<IndustryId>("construction");
+  const searchParams = useSearchParams();
+  const initialIndustryParam = searchParams.get("industry");
+  const initialIndustry: IndustryId = isIndustryId(initialIndustryParam)
+    ? initialIndustryParam
+    : "construction";
+  const [industry, setIndustry] = useState<IndustryId>(initialIndustry);
   const [scale, setScale] = useState<ScaleId>("medium");
   const [fiscalYear, setFiscalYear] = useState<number>(DEFAULT_FY);
   const [organizationName, setOrganizationName] = useState<string>("");

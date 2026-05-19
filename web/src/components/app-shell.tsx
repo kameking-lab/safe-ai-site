@@ -42,17 +42,10 @@ import { FlagshipNav } from "@/components/flagship-nav";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { ShareButtons } from "@/components/share-buttons";
 import { UserMenu } from "@/components/user-menu";
-import { EnglishBetaBanner } from "@/components/english-beta-banner";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useCommandPalette } from "@/components/CommandPaletteProvider";
 import { useFurigana } from "@/contexts/furigana-context";
 import { useEasyJapanese } from "@/contexts/easy-japanese-context";
-import {
-  useLanguage,
-  SUPPORTED_LANGUAGES,
-  LANGUAGE_LABELS,
-  type Language,
-} from "@/contexts/language-context";
 
 const LARGE_FONT_KEY = "large-font-enabled";
 const HIGH_CONTRAST_KEY = "high-contrast-enabled";
@@ -186,15 +179,7 @@ export function AppShell({ children, user }: AppShellProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { furiganaEnabled, toggleFurigana } = useFurigana();
   const { easyJapaneseEnabled, toggleEasyJapanese } = useEasyJapanese();
-  const { language, setLanguage } = useLanguage();
   const { open: openCommandPalette } = useCommandPalette();
-
-  // SSR/hydration対策: マウント後にのみ localStorage 依存のUI(言語セレクタ含む)を描画
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- SSRフラッシュ防止のhydrationゲート
-    setMounted(true);
-  }, []);
 
   // SSR/hydration対策: 初期値はfalseで統一し、マウント後にlocalStorageから読む
   const [largeFontEnabled, setLargeFontEnabled] = useState<boolean>(false);
@@ -410,27 +395,6 @@ export function AppShell({ children, user }: AppShellProps) {
             >
               屋外
             </button>
-            <label className="sr-only" htmlFor="app-lang-select-pc">
-              言語 / Language
-            </label>
-            <select
-              id="app-lang-select-pc"
-              value={mounted ? language : "ja"}
-              onChange={(e) => setLanguage(e.target.value as Language)}
-              className={`rounded-lg px-2 py-1.5 text-xs font-semibold transition-colors ${
-                !mounted || language === "ja"
-                  ? "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-                  : "bg-indigo-600 text-white"
-              }`}
-              title="言語を切り替え / Switch language"
-              suppressHydrationWarning
-            >
-              {SUPPORTED_LANGUAGES.map((l) => (
-                <option key={l} value={l}>
-                  {LANGUAGE_LABELS[l]}
-                </option>
-              ))}
-            </select>
           </div>
           <UserMenu user={user} />
         </div>
@@ -468,29 +432,6 @@ export function AppShell({ children, user }: AppShellProps) {
             >
               {highContrastEnabled ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
-            {/* 言語切替 — mounted が揃うまでは静的プレースホルダで hydration 安定化 */}
-            <label className="sr-only" htmlFor="app-lang-select-mobile">
-              言語 / Language
-            </label>
-            <select
-              id="app-lang-select-mobile"
-              value={mounted ? language : "ja"}
-              onChange={(e) => setLanguage(e.target.value as Language)}
-              className={`min-h-[44px] max-w-[140px] truncate rounded-full px-2 py-1 text-[11px] font-semibold transition-colors ${
-                !mounted || language === "ja"
-                  ? "border border-slate-200 bg-white text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-                  : "bg-indigo-600 text-white"
-              }`}
-              title="言語を切り替え / Switch language"
-              aria-label={`現在の言語: ${LANGUAGE_LABELS[mounted ? language : "ja"]}`}
-              suppressHydrationWarning
-            >
-              {SUPPORTED_LANGUAGES.map((l) => (
-                <option key={l} value={l}>
-                  {LANGUAGE_LABELS[l]}
-                </option>
-              ))}
-            </select>
             <ThemeToggle size="sm" />
             <UserMenu user={user} />
             <button
@@ -626,7 +567,6 @@ export function AppShell({ children, user }: AppShellProps) {
             )}
           </button>
         </div>
-        <EnglishBetaBanner />
         <FlagshipNav />
         <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col scroll-mt-20 focus:outline-none">
           <div className="mx-auto w-full max-w-7xl flex-1">{children}</div>

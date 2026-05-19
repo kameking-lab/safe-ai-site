@@ -144,6 +144,34 @@ export function ChatbotBody() {
       </div>
 
       <RelatedPageCards
+        heading={isEn ? "Main 3 features" : "メイン3機能の他のページ"}
+        pages={[
+          {
+            href: "/accidents-reports",
+            label: isEn
+              ? "Industry-specific accident analysis reports"
+              : "業種別 労働災害分析レポート",
+            description: isEn
+              ? "5 industries (construction / manufacturing / transport / healthcare / services) × 5,000+ MHLW cases auto-analyzed by accident type, cause, industry pattern, and recommended measures."
+              : "建設・製造・運輸・医療福祉・サービスの5業種5,000件超の労働災害を事故型・原因・業種特有パターン・推奨対策で自動分析。",
+            color: "rose",
+            cta: isEn ? "Open the reports" : "業種別レポートを見る",
+          },
+          {
+            href: "/strategy/plan-generator",
+            label: isEn
+              ? "Annual safety & health plan generator"
+              : "年次安全衛生計画 業種別ジェネレーター",
+            description: isEn
+              ? "10 industries × 3 scales × 30 templates. Generates basic policy, focus goals, monthly schedule and law references — PDF output."
+              : "10業種×3規模・30テンプレートから基本方針・重点目標・月別スケジュール・関連法令付きの年次安全衛生計画書を自動生成・PDF出力可。",
+            color: "purple",
+            cta: isEn ? "Generate a plan" : "計画書を作る",
+          },
+        ]}
+      />
+
+      <RelatedPageCards
         heading={isEn ? "Use alongside" : "合わせて使う"}
         pages={[
           {
