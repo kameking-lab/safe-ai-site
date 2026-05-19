@@ -62,13 +62,13 @@ export function ShareButtons({ title, hashtags, fixed = true }: ShareButtonsProp
     if (!mounted) return null;
     return (
       <>
-        {/* トグルボタン */}
+        {/* トグルボタン — モバイル時は MobileBottomNav (高さ ~56px) の上に重ねないため bottom-20 */}
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-label={open ? "シェアメニューを閉じる" : "シェアメニューを開く"}
-          className="fixed bottom-4 right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition hover:bg-emerald-700 sm:bottom-6 sm:right-6"
+          className="fixed bottom-20 right-4 z-30 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition hover:bg-emerald-700 sm:bottom-6 sm:right-6"
         >
           <Share2 className="h-5 w-5" />
         </button>
@@ -77,7 +77,7 @@ export function ShareButtons({ title, hashtags, fixed = true }: ShareButtonsProp
           <div
             role="dialog"
             aria-label="シェアメニュー"
-            className="fixed inset-x-0 bottom-0 z-40 rounded-t-2xl border-t border-slate-200 bg-white p-4 shadow-2xl sm:inset-x-auto sm:bottom-20 sm:right-6 sm:w-72 sm:rounded-2xl sm:border"
+            className="fixed inset-x-0 bottom-14 z-40 rounded-t-2xl border-t border-slate-200 bg-white p-4 shadow-2xl sm:inset-x-auto sm:bottom-20 sm:right-6 sm:w-72 sm:rounded-2xl sm:border"
           >
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-bold text-slate-800">シェアして応援する</p>

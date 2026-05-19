@@ -11,6 +11,10 @@ import {
   BookOpen,
   AlertTriangle,
   ArrowRight,
+  Scale,
+  MessageSquare,
+  ListChecks,
+  BarChart3,
 } from 'lucide-react';
 import {
   buildSearchIndex,
@@ -22,6 +26,22 @@ import {
 import { trackEvent } from '@/components/Analytics';
 
 const CATEGORIES: SearchCategory[] = ['notice', 'chemical', 'quiz', 'education', 'accident'];
+
+// 空クエリ時に表示する主要ショートカット（UX-007: モバイル検索とPC Ctrl+K の機能を統一）
+type Shortcut = {
+  id: string;
+  label: string;
+  description: string;
+  url: string;
+  icon: typeof Search;
+};
+
+const QUICK_SHORTCUTS: Shortcut[] = [
+  { id: 'law-search', label: '法令条文検索', description: '安衛法・関連政令・省令の条文を全文検索', url: '/law-search', icon: Scale },
+  { id: 'chatbot', label: '法令チャット (AI)', description: 'AI が条文・通達を引用しながら回答', url: '/chatbot', icon: MessageSquare },
+  { id: 'accidents-reports', label: '業種別 事故分析レポート', description: '業種別の死亡事故統計・原因分析', url: '/accidents-reports', icon: BarChart3 },
+  { id: 'plan-generator', label: '年次安全衛生計画', description: '10業種テンプレートから年次計画 PDF を生成', url: '/strategy/plan-generator', icon: ListChecks },
+];
 
 function CategoryIcon({ category }: { category: SearchCategory }) {
   const cls = 'w-3.5 h-3.5';
@@ -205,7 +225,40 @@ export function CommandPalette({ onClose }: Props) {
           {loading ? (
             <div className="py-10 text-center text-slate-400 text-sm">インデックスを読み込み中…</div>
           ) : !debouncedQuery ? (
-            <div className="py-10 text-center text-slate-400 text-sm">キーワードを入力してください</div>
+            <div className="px-2 py-3">
+              <p className="px-2 pb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                よく使うショートカット
+              </p>
+              <ul className="space-y-0.5">
+                {QUICK_SHORTCUTS.map((sc) => {
+                  const Icon = sc.icon;
+                  return (
+                    <li key={sc.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          router.push(sc.url);
+                          onClose();
+                        }}
+                        className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left hover:bg-slate-100"
+                      >
+                        <span className="shrink-0 inline-flex h-6 w-6 items-center justify-center rounded-md bg-emerald-100 text-emerald-700">
+                          <Icon className="h-3.5 w-3.5" />
+                        </span>
+                        <span className="flex-1 min-w-0">
+                          <span className="block text-sm font-medium text-slate-900 truncate">{sc.label}</span>
+                          <span className="block text-xs text-slate-500 truncate">{sc.description}</span>
+                        </span>
+                        <ArrowRight className="shrink-0 w-3.5 h-3.5 text-slate-300" />
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="px-2 pt-3 text-[11px] text-slate-400">
+                またはキーワードを入力して、通達・化学物質・問題・教育・事故から横断検索
+              </p>
+            </div>
           ) : results.length === 0 ? (
             <div className="py-10 text-center text-slate-400 text-sm">
               「{debouncedQuery}」の結果が見つかりませんでした

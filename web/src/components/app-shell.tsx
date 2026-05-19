@@ -49,6 +49,7 @@ import { useEasyJapanese } from "@/contexts/easy-japanese-context";
 
 const LARGE_FONT_KEY = "large-font-enabled";
 const HIGH_CONTRAST_KEY = "high-contrast-enabled";
+const A11Y_HINT_DISMISSED_KEY = "a11y-hint-dismissed";
 
 type NavItem = {
   id: string;
@@ -255,6 +256,27 @@ export function AppShell({ children, user }: AppShellProps) {
     });
   };
 
+  // モバイル初回訪問時のアクセシビリティ機能案内バナー
+  const [a11yHintVisible, setA11yHintVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント直後の一度きりのlocalStorage hydration
+      if (localStorage.getItem(A11Y_HINT_DISMISSED_KEY) !== "true") setA11yHintVisible(true);
+    } catch {
+      // localStorage unavailable
+    }
+  }, []);
+
+  const dismissA11yHint = () => {
+    setA11yHintVisible(false);
+    try {
+      localStorage.setItem(A11Y_HINT_DISMISSED_KEY, "true");
+    } catch {
+      // localStorage利用不可の場合は無視
+    }
+  };
+
   const linkClass = (item: NavItem) => {
     const active = navActive(pathname, item.href);
     const base = "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm";
@@ -411,50 +433,106 @@ export function AppShell({ children, user }: AppShellProps) {
       </aside>
 
       <div className="flex min-h-full flex-1 flex-col overflow-x-hidden">
-        {/* Mobile header — 375px で縦積みしないように要素を絞る（a11yトグルはドロップダウン内へ移設） */}
-        <div className="flex flex-nowrap items-center justify-between gap-2 border-b border-slate-200 bg-gradient-to-b from-emerald-50 to-white px-3 py-3 dark:border-slate-700 dark:from-emerald-500/10 dark:to-slate-900 lg:hidden">
-          <div className="min-w-0 shrink">
-            <p className="truncate text-[11px] font-bold tracking-wide text-emerald-700 dark:text-emerald-300">安全AIポータル</p>
-            <p className="truncate text-[11px] text-slate-700 dark:text-slate-300 sm:text-xs">現場の安全を、AIで変える。</p>
+        {/* Mobile header — 375px で縦積みしないように要素を絞る */}
+        <div className="border-b border-slate-200 bg-gradient-to-b from-emerald-50 to-white dark:border-slate-700 dark:from-emerald-500/10 dark:to-slate-900 lg:hidden">
+          <div className="flex flex-nowrap items-center justify-between gap-2 px-3 py-3">
+            <div className="min-w-0 shrink">
+              <p className="truncate text-[11px] font-bold tracking-wide text-emerald-700 dark:text-emerald-300">安全AIポータル</p>
+              <p className="truncate text-[11px] text-slate-700 dark:text-slate-300 sm:text-xs">現場の安全を、AIで変える。</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-1">
+              {/* 検索（⌘K）— モバイルはアイコンのみ */}
+              <button
+                type="button"
+                onClick={openCommandPalette}
+                aria-label="検索を開く（Ctrl+K）"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"
+              >
+                <Search className="h-4 w-4" aria-hidden="true" />
+              </button>
+              {/* 屋外（ハイコントラスト）モードトグル */}
+              <button
+                type="button"
+                onClick={toggleHighContrast}
+                aria-label={highContrastEnabled ? "屋外モードをオフ" : "屋外モードをオン"}
+                aria-pressed={highContrastEnabled}
+                className={`inline-flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition-colors ${
+                  highContrastEnabled
+                    ? "bg-slate-900 text-white"
+                    : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                }`}
+                title="屋外（ハイコントラスト）モード切替"
+              >
+                {highContrastEnabled ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
+              <ThemeToggle size="sm" />
+              <UserMenu user={user} />
+              <button
+                type="button"
+                onClick={() => setIsSidebarOpen((prev) => !prev)}
+                className="inline-flex shrink-0 items-center rounded-full border border-emerald-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-emerald-700 shadow-sm dark:border-emerald-500/40 dark:bg-slate-800 dark:text-emerald-300 sm:px-3 sm:text-xs"
+                aria-expanded={isSidebarOpen}
+                aria-label="メニューを開閉"
+              >
+                {isSidebarOpen ? "閉じる" : "メニュー"}
+              </button>
+            </div>
           </div>
-          <div className="flex shrink-0 items-center gap-1">
-            {/* 検索（⌘K）— モバイルはアイコンのみ */}
+          {/* モバイル必須a11yトグル: ふりがな + 文字大 を常時露出（UX-021） */}
+          <div className="flex items-center gap-1.5 px-3 pb-2">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">表示</span>
             <button
               type="button"
-              onClick={openCommandPalette}
-              aria-label="検索を開く（Ctrl+K）"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"
-            >
-              <Search className="h-4 w-4" aria-hidden="true" />
-            </button>
-            {/* 屋外（ハイコントラスト）モードトグル */}
-            <button
-              type="button"
-              onClick={toggleHighContrast}
-              aria-label={highContrastEnabled ? "屋外モードをオフ" : "屋外モードをオン"}
-              aria-pressed={highContrastEnabled}
-              className={`inline-flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition-colors ${
-                highContrastEnabled
-                  ? "bg-slate-900 text-white"
-                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              onClick={toggleFurigana}
+              aria-pressed={furiganaEnabled}
+              className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+                furiganaEnabled
+                  ? "bg-emerald-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
               }`}
-              title="屋外（ハイコントラスト）モード切替"
+              title="ふりがな表示を切替"
             >
-              {highContrastEnabled ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              ふりがな
             </button>
-            <ThemeToggle size="sm" />
-            <UserMenu user={user} />
             <button
               type="button"
-              onClick={() => setIsSidebarOpen((prev) => !prev)}
-              className="inline-flex shrink-0 items-center rounded-full border border-emerald-200 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-emerald-700 shadow-sm dark:border-emerald-500/40 dark:bg-slate-800 dark:text-emerald-300 sm:px-3 sm:text-xs"
-              aria-expanded={isSidebarOpen}
-              aria-label="メニューを開閉"
+              onClick={toggleLargeFont}
+              aria-pressed={largeFontEnabled}
+              className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+                largeFontEnabled
+                  ? "bg-emerald-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              }`}
+              title="文字を大きくする"
             >
-              {isSidebarOpen ? "閉じる" : "メニュー"}
+              文字大
             </button>
+            <span className="ml-auto text-[10px] text-slate-400 dark:text-slate-500">他はメニュー内</span>
           </div>
         </div>
+
+        {/* モバイル初回訪問者向けアクセシビリティ案内バナー（UX-021） */}
+        {a11yHintVisible && (
+          <div
+            role="region"
+            aria-label="アクセシビリティ機能の案内"
+            className="flex items-start gap-2 border-b border-emerald-200 bg-emerald-50/80 px-3 py-2 text-[11px] leading-5 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200 lg:hidden"
+          >
+            <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <p className="flex-1">
+              「ふりがな」「やさしい日本語」「文字大」「屋外（ハイコントラスト）」の表示モードがあります。
+              ヘッダー上部または右上メニュー内で切替できます。
+            </p>
+            <button
+              type="button"
+              onClick={dismissA11yHint}
+              className="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+              aria-label="案内バナーを閉じる"
+            >
+              閉じる
+            </button>
+          </div>
+        )}
 
         {/* Mobile nav dropdown */}
         {isSidebarOpen && (
