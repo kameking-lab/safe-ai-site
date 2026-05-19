@@ -3,7 +3,14 @@ import { ogImageUrl } from "@/lib/og-url";
 import { ChatbotBody } from "./ChatbotBody";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { SITE_URL } from "@/lib/seo-metadata";
-import { JsonLd, webPageSchema, breadcrumbSchema, qaPageSchema } from "@/components/json-ld";
+import {
+  JsonLd,
+  webPageSchema,
+  breadcrumbSchema,
+  qaPageSchema,
+  webApplicationSchema,
+  COPILOT_FEATURE_PEERS,
+} from "@/components/json-ld";
 const _title = "安衛法AIチャットボット｜33法令以上を根拠条文付きで即答（無料）";
 const _desc =
   "安衛法AIチャットボットが労働安全衛生法・安衛則・特化則・有機則・酸欠則・粉じん則・石綿則・じん肺法など33法令以上を根拠条文付きで回答。RAG方式・無料・出典必須。安衛法AIの使い方ガイドは /guides/anzeneho-ai-chatbot を参照。";
@@ -34,6 +41,21 @@ export default function ChatbotPage() {
             { name: "AIチャットボット", url },
           ]),
           qaPageSchema({ name: _title, description: _desc, url }),
+          webApplicationSchema({
+            name: "安衛法AIチャットボット",
+            description:
+              "労働安全衛生法・関連規則 33法令以上に対応した RAG 方式の安衛法AIチャットボット。根拠条文付きで回答します。",
+            url,
+            applicationCategory: "BusinessApplication",
+            mentions: [COPILOT_FEATURE_PEERS.accidentsReports, COPILOT_FEATURE_PEERS.planGenerator],
+            searchUrlTemplate: `${SITE_URL}/chatbot?q={search_term_string}`,
+            featureList: [
+              "労働安全衛生法・関連規則 33法令以上に対応",
+              "根拠条文付き回答（RAG 方式）",
+              "業種別 事故レポートへの自動誘導",
+              "年次安全衛生計画ジェネレーターへの連携",
+            ],
+          }),
         ]}
       />
       <ChatbotBody />

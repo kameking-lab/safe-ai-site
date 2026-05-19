@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { IndustryReportView } from "@/components/accidents-reports/industry-report-view";
 import { CrossToolLinks } from "@/components/cross-tool-links";
+import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
+import { CopilotMemo } from "@/components/copilot/CopilotMemo";
+import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
+import { CopilotIndustrySync } from "@/components/copilot/CopilotIndustrySync";
 import {
   getIndustryConfig,
   getIndustryReport,
@@ -124,7 +128,31 @@ export default async function IndustryReportPage({ params }: { params: Params })
           }),
         ]}
       />
+      <CopilotIndustrySync
+        industry={config.slug as IndustrySlug}
+        source="accidents-reports"
+        concerns={
+          report.topTypes[0]?.name ? [report.topTypes[0].name] : undefined
+        }
+      />
+      <div className="mx-auto w-full max-w-7xl px-4 pt-4 space-y-3 sm:px-6">
+        <CopilotStepNav current="accidents-reports" industry={config.slug} />
+        <CopilotMemo />
+      </div>
       <IndustryReportView report={report} />
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
+        <CopilotNextSteps
+          current="accidents-reports"
+          industry={config.slug as IndustrySlug}
+          intro={`${config.label}の事故傾向と推奨対策を踏まえ、安衛法AIで関連法令を深掘りするか、業種別テンプレートで年次安全衛生計画を作成できます。業種「${config.label}」は引き継がれます。`}
+          extraCta={{
+            label: `${config.label}向け年次計画を作成`,
+            description:
+              "本レポートで判明した重点事故型・原因を反映した年次安全衛生計画書を、業種テンプレートから自動生成します。",
+            href: `/strategy/plan-generator?industry=${config.slug}`,
+          }}
+        />
+      </div>
       <CrossToolLinks
         industry={config.slug as IndustrySlug}
         exclude="accidents-reports"

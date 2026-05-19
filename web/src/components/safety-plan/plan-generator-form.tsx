@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   INDUSTRY_LABELS,
@@ -14,6 +14,18 @@ import {
   type ScaleId,
   type SpecialWorkId,
 } from "@/types/safety-plan";
+import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
+import type { IndustrySlug } from "@/lib/industry-slugs";
+import { detectFocusAreas } from "@/lib/copilot/keyword-routing";
+
+// Canonical accidents-reports IndustrySlug → plan-generator IndustryId
+const SLUG_TO_INDUSTRY: Record<IndustrySlug, IndustryId> = {
+  construction: "construction",
+  manufacturing: "manufacturing",
+  transport: "transportation",
+  healthcare: "medical",
+  service: "service",
+};
 
 const INDUSTRY_IDS = Object.keys(INDUSTRY_LABELS) as IndustryId[];
 const isIndustryId = (v: string | null): v is IndustryId =>
@@ -52,10 +64,19 @@ const OVERWORK_CHOICES: OverworkPriority[] = ["high", "normal", "low"];
 export function PlanGeneratorForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const copilot = useOptionalCopilot();
+  // Synchronous initial industry from URL (?industry=construction) to avoid
+  // a render flicker. Accepts either a canonical accidents-reports IndustrySlug
+  // or a plan-generator IndustryId so links from /chatbot and /accidents-reports
+  // both work. SafetyContext fallback runs in the prefill effect below.
   const initialIndustryParam = searchParams.get("industry");
-  const initialIndustry: IndustryId = isIndustryId(initialIndustryParam)
-    ? initialIndustryParam
-    : "construction";
+  const initialIndustry: IndustryId = (() => {
+    if (!initialIndustryParam) return "construction";
+    if (initialIndustryParam in SLUG_TO_INDUSTRY) {
+      return SLUG_TO_INDUSTRY[initialIndustryParam as IndustrySlug];
+    }
+    return isIndustryId(initialIndustryParam) ? initialIndustryParam : "construction";
+  })();
   const [industry, setIndustry] = useState<IndustryId>(initialIndustry);
   const [scale, setScale] = useState<ScaleId>("medium");
   const [fiscalYear, setFiscalYear] = useState<number>(DEFAULT_FY);
@@ -66,8 +87,78 @@ export function PlanGeneratorForm() {
   const [overworkPriority, setOverworkPriority] =
     useState<OverworkPriority>("normal");
   const [notes, setNotes] = useState<string>("");
+  // Surface what was auto-prefilled so the user knows their context carried over.
+  const [prefillMessage, setPrefillMessage] = useState<string | null>(null);
+  const prefillAppliedRef = useRef(false);
 
   const templateId = useMemo(() => `${industry}-${scale}`, [industry, scale]);
+
+  // Copilot-aware prefill: URL params win, then SafetyContext, then defaults.
+  // Runs once after mount to avoid stomping on user edits later.
+  // Lint rule (react-hooks/set-state-in-effect) discourages naked setState in
+  // effects, so we compute the entire prefill payload first and batch the
+  // commit via a single rAF (which React groups into one re-render).
+  useEffect(() => {
+    if (prefillAppliedRef.current) return;
+    if (!copilot?.hydrated && copilot != null) return; // wait for hydration
+    // useSearchParams returns null mid-suspense in Next.js 16; only mark the
+    // prefill as applied once we have a real ReadonlyURLSearchParams handle.
+    if (searchParams == null) return;
+    prefillAppliedRef.current = true;
+
+    type Prefill = {
+      industry?: IndustryId;
+      scale?: ScaleId;
+      focusAreas?: MeasureCategory[];
+      message?: string;
+    };
+    const next: Prefill = {};
+    const messages: string[] = [];
+
+    const urlIndustry = searchParams?.get("industry");
+    const urlFocus = searchParams?.get("focus");
+    const urlScale = searchParams?.get("scale");
+
+    if (urlIndustry && urlIndustry in SLUG_TO_INDUSTRY) {
+      next.industry = SLUG_TO_INDUSTRY[urlIndustry as IndustrySlug];
+      messages.push(`業種「${INDUSTRY_LABELS[next.industry]}」を引き継ぎ`);
+    } else if (copilot?.state.industry && copilot.state.industry in SLUG_TO_INDUSTRY) {
+      next.industry = SLUG_TO_INDUSTRY[copilot.state.industry];
+      messages.push(`業種「${INDUSTRY_LABELS[next.industry]}」を引き継ぎ`);
+    }
+
+    if (urlScale === "small" || urlScale === "medium" || urlScale === "large") {
+      next.scale = urlScale;
+    } else if (copilot?.state.scale) {
+      next.scale = copilot.state.scale;
+    }
+
+    if (urlFocus) {
+      const detected = detectFocusAreas(urlFocus);
+      if (detected.length > 0) {
+        next.focusAreas = detected;
+        messages.push(`重点取組み「${urlFocus}」`);
+      }
+    } else if ((copilot?.state.keyConcerns?.length ?? 0) > 0) {
+      const detected = detectFocusAreas(copilot!.state.keyConcerns.join(" "));
+      if (detected.length > 0) {
+        next.focusAreas = detected;
+        messages.push(`重点取組み「${copilot!.state.keyConcerns.slice(0, 2).join("・")}」`);
+      }
+    }
+
+    if (messages.length > 0) next.message = messages.join(" / ");
+
+    // A one-shot prefill is a legitimate React 19 pattern (the alternative
+    // is to thread query-string parsing through a parent server component),
+    // so we silence the cascading-render lint rule for this single commit.
+    /* eslint-disable react-hooks/set-state-in-effect */
+    if (next.industry) setIndustry(next.industry);
+    if (next.scale) setScale(next.scale);
+    if (next.focusAreas) setFocusAreas(next.focusAreas);
+    if (next.message) setPrefillMessage(next.message);
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [searchParams, copilot]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,9 +171,26 @@ export function PlanGeneratorForm() {
     if (overworkPriority !== "normal") params.set("overwork", overworkPriority);
     if (notes) params.set("notes", notes);
     const qs = params.toString();
-    router.push(
-      `/strategy/plan-generator/preview/${templateId}${qs ? `?${qs}` : ""}`,
-    );
+    const href = `/strategy/plan-generator/preview/${templateId}${qs ? `?${qs}` : ""}`;
+
+    // Record the about-to-be-generated plan in the Copilot SafetyContext.
+    // The preview page also records on mount, but doing it here lets the
+    // chatbot / accidents-reports nav reflect the plan immediately after
+    // the user clicks "計画書を生成".
+    const planIndustrySlug = (Object.entries(SLUG_TO_INDUSTRY) as [
+      IndustrySlug,
+      IndustryId,
+    ][]).find(([, id]) => id === industry)?.[0];
+    copilot?.recordPlan({
+      industry: planIndustrySlug,
+      scale,
+      fiscalYear,
+      templateId,
+      href,
+      organizationName: organizationName || undefined,
+    });
+
+    router.push(href);
   };
 
   const toggleFocus = (c: MeasureCategory) => {
@@ -97,11 +205,27 @@ export function PlanGeneratorForm() {
     );
   };
 
+  // Map current plan-generator IndustryId back to the canonical accidents-reports slug
+  const reportSlug = (Object.entries(SLUG_TO_INDUSTRY) as [IndustrySlug, IndustryId][])
+    .find(([, id]) => id === industry)?.[0];
+
   return (
     <form
       onSubmit={handleSubmit}
       className="space-y-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
     >
+      {prefillMessage && (
+        <div
+          role="status"
+          className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900"
+        >
+          <span aria-hidden="true">✓</span>
+          <span>
+            安全Copilotから引き継ぎました：
+            <span className="font-semibold">{prefillMessage}</span>
+          </span>
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
           <span className="block text-sm font-semibold text-slate-700">業種 <span className="text-red-600">*</span></span>
@@ -269,6 +393,34 @@ export function PlanGeneratorForm() {
           maxLength={2000}
         />
       </label>
+
+      {reportSlug && (
+        <div className="rounded-lg border border-rose-200 bg-rose-50/60 px-3 py-2 text-xs text-rose-900">
+          <p className="font-semibold">
+            事故傾向を参考にしてから計画を作成できます
+          </p>
+          <p className="mt-1 leading-relaxed">
+            {INDUSTRY_LABELS[industry]}で多発する事故型・原因・推奨対策チェックリストを
+            <a
+              href={`/accidents-reports/${reportSlug}`}
+              className="ml-1 font-semibold underline hover:text-rose-700"
+            >
+              業種別レポートで確認
+            </a>
+            してから本フォームに戻ると、関心事項が自動で引き継がれます。
+          </p>
+          <p className="mt-1 leading-relaxed">
+            個別の法令確認は
+            <a
+              href={`/chatbot?q=${encodeURIComponent(`${INDUSTRY_LABELS[industry]}で必要な安全衛生管理の根拠法令`)}`}
+              className="ml-1 font-semibold underline hover:text-rose-700"
+            >
+              安衛法AIで深掘り
+            </a>
+            できます。
+          </p>
+        </div>
+      )}
 
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
         <button

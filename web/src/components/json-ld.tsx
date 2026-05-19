@@ -560,3 +560,78 @@ export function dataCatalogSchema(input: {
     })),
   };
 }
+
+/**
+ * WebApplication schema for a tool/feature page. Used by the 3 Copilot
+ * flagship features to:
+ *  - declare they are a free, web-based application
+ *  - link to each other via `mentions` so search engines see the journey
+ *  - expose a SearchAction (chatbot prefill) where applicable
+ */
+export function webApplicationSchema(input: {
+  name: string;
+  description: string;
+  url: string;
+  applicationCategory?: string;
+  /** Cross-feature mentions — peer Copilot features */
+  mentions?: { name: string; url: string }[];
+  /** Optional SearchAction url template (e.g. /chatbot?q={search_term_string}) */
+  searchUrlTemplate?: string;
+  featureList?: string[];
+}): Schema {
+  const schema: Schema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: input.name,
+    description: input.description,
+    url: input.url,
+    inLanguage: "ja",
+    applicationCategory: input.applicationCategory ?? "BusinessApplication",
+    operatingSystem: "Any (Web Browser)",
+    isAccessibleForFree: true,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "JPY",
+    },
+    provider: PUBLISHER_REF,
+  };
+  if (input.mentions && input.mentions.length > 0) {
+    schema.mentions = input.mentions.map((m) => ({
+      "@type": "WebApplication",
+      name: m.name,
+      url: m.url,
+    }));
+  }
+  if (input.searchUrlTemplate) {
+    schema.potentialAction = {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: input.searchUrlTemplate,
+      },
+      "query-input": "required name=search_term_string",
+    };
+  }
+  if (input.featureList && input.featureList.length > 0) {
+    schema.featureList = input.featureList;
+  }
+  return schema;
+}
+
+/**
+ * Single canonical reference object that links the 3 flagship features.
+ * Used by webApplicationSchema callers to populate `mentions`.
+ */
+export const COPILOT_FEATURE_PEERS = {
+  chatbot: { name: "安衛法AIチャットボット", url: "https://www.anzen-ai-portal.jp/chatbot" },
+  accidentsReports: {
+    name: "業種別 労働災害分析レポート",
+    url: "https://www.anzen-ai-portal.jp/accidents-reports",
+  },
+  planGenerator: {
+    name: "年次安全衛生計画ジェネレーター",
+    url: "https://www.anzen-ai-portal.jp/strategy/plan-generator",
+  },
+} as const;
+

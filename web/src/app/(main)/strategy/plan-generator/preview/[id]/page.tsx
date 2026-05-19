@@ -6,6 +6,11 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { PlanDocument } from "@/components/safety-plan/plan-document";
 import { PrintButton } from "@/components/safety-plan/print-button";
 import { CrossToolLinks, SAFETY_PLAN_TO_SLUG } from "@/components/cross-tool-links";
+import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
+import { CopilotMemo } from "@/components/copilot/CopilotMemo";
+import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
+import { CopilotPlanSync } from "@/components/copilot/CopilotPlanSync";
+import type { CopilotScale } from "@/lib/copilot/types";
 import { findTemplateById } from "@/data/safety-plan-templates";
 import { regenerateFromTemplateId } from "@/lib/safety-plan-generator";
 import type {
@@ -158,9 +163,43 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
 
   const plan = result.plan;
   const previewPath = `/strategy/plan-generator/preview/${id}`;
+  const reportSlug = SAFETY_PLAN_TO_SLUG[plan.template.industry];
+  const planScale: CopilotScale | undefined =
+    plan.template.scale === "small" ||
+    plan.template.scale === "medium" ||
+    plan.template.scale === "large"
+      ? plan.template.scale
+      : undefined;
+  // Compose a query string that preserves the user's selections so the link
+  // round-trips back to a regenerated preview if they want to tweak inputs.
+  const previewSearch = (() => {
+    const params = new URLSearchParams();
+    const focus = readFocus(sp);
+    const special = readSpecialWork(sp);
+    const overwork = readOverwork(sp);
+    const org = readString(sp, "org");
+    const notes = readString(sp, "notes");
+    if (org) params.set("org", org);
+    params.set("year", String(plan.fiscalYear));
+    if (focus.length > 0) params.set("focus", focus.join(","));
+    if (special.length > 0) params.set("special", special.join(","));
+    if (readOverseas(sp)) params.set("overseas", "1");
+    if (overwork && overwork !== "normal") params.set("overwork", overwork);
+    if (notes) params.set("notes", notes);
+    return params.toString();
+  })();
+  const fullPreviewHref = `${previewPath}${previewSearch ? `?${previewSearch}` : ""}`;
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <CopilotPlanSync
+        industry={reportSlug}
+        scale={planScale}
+        fiscalYear={plan.fiscalYear}
+        templateId={id}
+        href={fullPreviewHref}
+        organizationName={plan.organizationName || undefined}
+      />
       <div className="print:hidden">
         <PageJsonLd
           name={`${plan.fiscalYear}年度 安全衛生計画書 プレビュー`}
@@ -181,6 +220,11 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
       </div>
 
       <PageContainer width="prose" className="py-6 md:py-10">
+        <div className="mb-4 space-y-3 print:hidden">
+          <CopilotStepNav current="plan-generator" industry={reportSlug} />
+          <CopilotMemo />
+        </div>
+
         <div className="mb-6 flex flex-col items-stretch gap-3 print:hidden sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/strategy/plan-generator"
@@ -200,6 +244,24 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
           >
             ← 入力に戻る
           </Link>
+        </div>
+
+        <div className="print:hidden">
+          <CopilotNextSteps
+            current="plan-generator"
+            industry={reportSlug}
+            intro={`${plan.template.industryLabel}向けの${plan.fiscalYear}年度計画書を生成しました。重点目標・実施事項に対応する事故事例や根拠法令を、安全Copilotで横断確認できます。`}
+            extraCta={
+              reportSlug
+                ? {
+                    label: `${plan.template.industryLabel}の事故傾向と本計画を突き合わせる`,
+                    description:
+                      "業種別事故レポートと本計画書を並べて、目標値と実態に乖離がないか点検します。",
+                    href: `/accidents-reports/${reportSlug}`,
+                  }
+                : undefined
+            }
+          />
         </div>
       </PageContainer>
       <div className="print:hidden">

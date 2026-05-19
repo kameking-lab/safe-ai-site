@@ -3,7 +3,15 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
+import {
+  JsonLd,
+  webApplicationSchema,
+  COPILOT_FEATURE_PEERS,
+} from "@/components/json-ld";
 import { PlanGeneratorForm } from "@/components/safety-plan/plan-generator-form";
+import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
+import { CopilotMemo } from "@/components/copilot/CopilotMemo";
+import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { INDUSTRY_LABELS, SCALE_LABELS } from "@/types/safety-plan";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -42,7 +50,28 @@ export default function PlanGeneratorPage() {
           { name: "年次安全衛生計画ジェネレーター", url: "https://www.anzen-ai-portal.jp/strategy/plan-generator" },
         ]}
       />
+      <JsonLd
+        schema={webApplicationSchema({
+          name: "年次安全衛生計画ジェネレーター",
+          description:
+            "10業種×3規模の30テンプレートから、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む年次安全衛生計画書を自動生成します。",
+          url: "https://www.anzen-ai-portal.jp/strategy/plan-generator",
+          applicationCategory: "BusinessApplication",
+          mentions: [COPILOT_FEATURE_PEERS.chatbot, COPILOT_FEATURE_PEERS.accidentsReports],
+          featureList: [
+            "業種10種×規模3段階の30テンプレート",
+            "安衛法・安衛則・関連省令の条文番号付き実施事項",
+            "全国安全週間・全国労働衛生週間を含む月別スケジュール",
+            "業種別事故レポートとの自動連携",
+            "安衛法AIチャットボットでの根拠法令確認導線",
+          ],
+        })}
+      />
       <PageContainer width="prose" className="py-8 md:py-12">
+        <div className="mb-4 space-y-3">
+          <CopilotStepNav current="plan-generator" />
+          <CopilotMemo />
+        </div>
         <header className="mb-6">
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
             年次安全衛生計画ジェネレーター
@@ -96,36 +125,10 @@ export default function PlanGeneratorPage() {
           </p>
         </section>
 
-        <section className="mt-6 grid gap-3 sm:grid-cols-2">
-          <Link
-            href="/chatbot"
-            className="flex items-start gap-3 rounded-xl border border-blue-200 bg-white p-4 transition hover:border-blue-400 hover:shadow-sm dark:border-blue-900 dark:bg-slate-900"
-          >
-            <span className="text-2xl" aria-hidden="true">💬</span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold text-blue-800 dark:text-blue-300">
-                生成計画書を AI に質問する
-              </span>
-              <span className="mt-0.5 block text-xs text-slate-600 dark:text-slate-400">
-                計画書の根拠条文・関連法令を安衛法AIチャットボットに質問。33法令以上を根拠条文付きで即答。
-              </span>
-            </span>
-          </Link>
-          <Link
-            href="/accidents-reports"
-            className="flex items-start gap-3 rounded-xl border border-rose-200 bg-white p-4 transition hover:border-rose-400 hover:shadow-sm dark:border-rose-900 dark:bg-slate-900"
-          >
-            <span className="text-2xl" aria-hidden="true">📊</span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-sm font-semibold text-rose-800 dark:text-rose-300">
-                業種別 労働災害分析レポートで重点目標を裏付ける
-              </span>
-              <span className="mt-0.5 block text-xs text-slate-600 dark:text-slate-400">
-                5業種5,000件超の事故事例から業種特有パターンを確認し、計画書の重点目標に反映。
-              </span>
-            </span>
-          </Link>
-        </section>
+        <CopilotNextSteps
+          current="plan-generator"
+          intro="生成前でも、業種別レポートで事故傾向を先に確認すると、本フォームの「重点取組み」が自動で引き継がれます。"
+        />
       </PageContainer>
     </div>
   );
