@@ -144,7 +144,8 @@ const FINDINGS_UX_B: Finding[] = [
       "web/src/components/MobileBottomNav.tsx の `search` item は href=/law-search で直接遷移。 web/src/components/app-shell.tsx の PC `検索 Ctrl+K` ボタンは openCommandPalette を呼び出す。同じ『検索』ラベルだがモバイルは1機能遷移、PCはサイト横断検索。学習コストと混乱を生む。",
     recommendation:
       "MobileBottomNav の『検索』も CommandPalette を開くボタンに変更 (openCommandPalette via useCommandPalette hook)。 /law-search は副次動線として CommandPalette 内『法令検索』ショートカット行に出す。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 250,
   },
   {
     id: "UX-008",
@@ -274,7 +275,8 @@ const FINDINGS_UX_E: Finding[] = [
       "web/src/components/home-three-pillars.tsx:402 のフォールバック `setError(isEn ? 'Network error occurred.' : 'ネットワークエラーが発生しました。')`。ユーザーには『再試行』ボタンも『なぜ失敗したか』のヒントもない。失敗時の出口が無い。",
     recommendation:
       "エラー時に (a) 再試行ボタン、 (b) 'API使用上限/ネットワーク等を確認' の具体的ヒント、 (c) 失敗が3回続いた場合の管理者連絡先誘導 (/contact) を表示。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 250,
   },
   {
     id: "UX-017",
@@ -345,7 +347,8 @@ const FINDINGS_UX_F: Finding[] = [
       "web/src/components/app-shell.tsx の モバイルヘッダーは 検索 + 屋外 + 言語 + テーマ + ユーザー + メニューの6要素のみ。ふりがな/やさしい/文字大はメニュー展開後の 4ボタングループ内。日本語が苦手な利用者・高齢の現場作業員はメニューを開かないと機能発見できない。",
     recommendation:
       "(a) 初回訪問時にバナーで『ふりがな/やさしい日本語/文字大の表示モードあります』を案内、 (b) mobile ヘッダーに最低限『ふりがな』『文字大』を移動表示。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 250,
   },
 ];
 
@@ -391,7 +394,8 @@ const FINDINGS_UX_G: Finding[] = [
       "web/src/components/app-shell.tsx:636 `<ShareButtons fixed />`。 ShareButtons は fixed bottom right。MobileBottomNav も fixed bottom inset-x-0 z-40。 z-index/position の重ね合わせで、ShareButtons パネル展開時にボトムナビの右側 (chat / マイ) が見えない/タップできない可能性。",
     recommendation:
       "(a) モバイルでは ShareButtons を画面右上か中央上に移動、 (b) または ShareButtons は MobileBottomNav 表示時 (≤480px) に bottom-16 (ナビ分のオフセット) を付与。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 250,
   },
 ];
 

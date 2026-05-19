@@ -114,11 +114,12 @@ const BATCHES: Batch[] = [
     endDate: "2026-05-26",
     totalHours: 9,
     prName:
-      "fix(ux-p2): mobile UX + feedback — search/a11y/share/alert-error (UX-007/016/021/024)",
+      "fix(ux-p2): Batch 2 mobile UX + feedback — UX-007/016/021/024",
     dependency: "Batch 1 完了推奨 (バッジ整理後の方が AppShell 編集衝突を回避)",
     effect:
       "モバイル利用者のタップ可達性 (検索/A11y/ナビ) を改善。失敗時の出口UIで離脱率を抑える。",
-    status: "planned",
+    status: "completed",
+    completedPr: 250,
     findings: [
       {
         id: "UX-007",
