@@ -7,6 +7,9 @@ import { CardGrid } from "@/components/layout/card-grid";
 import { Cluster } from "@/components/layout/stack";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { AccidentsPreliminaryBanner } from "@/components/accidents-meta-info";
+import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
+import { CopilotMemo } from "@/components/copilot/CopilotMemo";
+import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { getAllIndustriesSummary } from "@/lib/accident-analysis";
 import { ogImageUrl } from "@/lib/og-url";
 import { SITE_URL, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
@@ -15,6 +18,8 @@ import {
   breadcrumbSchema,
   webPageSchema,
   articleListSchema,
+  webApplicationSchema,
+  COPILOT_FEATURE_PEERS,
 } from "@/components/json-ld";
 
 const title = "労働災害 業種別 分析レポート｜5業種5,000件超の自動集計（無料）";
@@ -71,6 +76,20 @@ export default function AccidentsReportsHubPage() {
               description: it.tagline,
             })),
           ),
+          webApplicationSchema({
+            name: "業種別 労働災害分析レポート",
+            description:
+              "建設業・製造業・運輸業・医療福祉・サービス業の労働災害を自動分析し、業種特有の事故型・原因・推奨対策を一覧化します。",
+            url,
+            applicationCategory: "BusinessApplication",
+            mentions: [COPILOT_FEATURE_PEERS.chatbot, COPILOT_FEATURE_PEERS.planGenerator],
+            featureList: [
+              "5業種5,000件超の労働災害事例を自動集計",
+              "事故型ランキング・原因 Top10・推奨対策チェックリスト",
+              "業種比較ビュー",
+              "年次安全衛生計画ジェネレーターへの自動連携",
+            ],
+          }),
         ]}
       />
       <PageContainer width="full">
@@ -80,6 +99,11 @@ export default function AccidentsReportsHubPage() {
             { name: "業種別レポート" },
           ]}
         />
+
+        <div className="my-4 space-y-3">
+          <CopilotStepNav current="accidents-reports" />
+          <CopilotMemo />
+        </div>
 
         <header className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
           <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">業種別 自動分析</p>
@@ -229,6 +253,11 @@ export default function AccidentsReportsHubPage() {
           自動分析の母集団: 厚生労働省 職場のあんぜんサイト 死亡災害DB、労働者死傷病報告オープンデータ、編集部 curated 事例（公開情報を匿名化して再構成）。
           2025〜2026年分は「想定例（速報集計から統計的に導出した代表パターン事例）」を含みます。実報告の確定個票（R07労働者死傷病報告オープンデータ）が公開され次第、当該事例は順次置換予定です。
         </p>
+
+        <CopilotNextSteps
+          current="accidents-reports"
+          intro="業種を選んで詳細レポートを開くと、その業種が安全Copilotに引き継がれ、年次計画と法令チャットでも自動的に反映されます。"
+        />
       </PageContainer>
     </>
   );

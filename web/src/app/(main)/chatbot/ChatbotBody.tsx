@@ -1,11 +1,15 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { ChatbotPanel } from "@/components/chatbot-panel";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { useTranslation } from "@/contexts/language-context";
 import { PageContainer } from "@/components/layout";
+import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
+import { CopilotMemo } from "@/components/copilot/CopilotMemo";
+import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
+import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
 
 const CORE_LAWS = [
   { ja: "安衛法", en: "OSH Act (安衛法)" },
@@ -53,6 +57,14 @@ export function ChatbotBody() {
   const { t, language } = useTranslation();
   const isEn = language === "en";
   const guide = isEn ? USAGE_GUIDE.en : USAGE_GUIDE.ja;
+  const copilot = useOptionalCopilot();
+
+  // Record entry to the chatbot step in the cross-feature SafetyContext so
+  // the step indicator on /accidents-reports and /strategy/plan-generator
+  // can light up the "1. 質問する" node.
+  useEffect(() => {
+    copilot?.recordVisit("chatbot");
+  }, [copilot]);
 
   return (
     <PageContainer width="wide">
@@ -64,6 +76,13 @@ export function ChatbotBody() {
         iconName="Scale"
         iconColor="blue"
       />
+
+      {!isEn && (
+        <div className="mt-4 space-y-3">
+          <CopilotStepNav current="chatbot" />
+          <CopilotMemo />
+        </div>
+      )}
 
       {/* Law badges */}
       <div className="mt-4 mb-2 space-y-2">
@@ -142,6 +161,13 @@ export function ChatbotBody() {
           </a>
         </p>
       </div>
+
+      {!isEn && (
+        <CopilotNextSteps
+          current="chatbot"
+          intro="回答内容を踏まえて、業種別の事故傾向確認や年次計画作成に進めます。質問で言及された業種・関心事項は自動で引き継がれます。"
+        />
+      )}
 
       <RelatedPageCards
         heading={isEn ? "Use alongside" : "合わせて使う"}

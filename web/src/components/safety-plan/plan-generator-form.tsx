@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   INDUSTRY_LABELS,
   MEASURE_LABELS,
@@ -14,6 +14,18 @@ import {
   type ScaleId,
   type SpecialWorkId,
 } from "@/types/safety-plan";
+import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
+import type { IndustrySlug } from "@/lib/industry-slugs";
+import { detectFocusAreas } from "@/lib/copilot/keyword-routing";
+
+// Canonical accidents-reports IndustrySlug → plan-generator IndustryId
+const SLUG_TO_INDUSTRY: Record<IndustrySlug, IndustryId> = {
+  construction: "construction",
+  manufacturing: "manufacturing",
+  transport: "transportation",
+  healthcare: "medical",
+  service: "service",
+};
 
 const DEFAULT_FY = 2026;
 
@@ -47,6 +59,8 @@ const OVERWORK_CHOICES: OverworkPriority[] = ["high", "normal", "low"];
 
 export function PlanGeneratorForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const copilot = useOptionalCopilot();
   const [industry, setIndustry] = useState<IndustryId>("construction");
   const [scale, setScale] = useState<ScaleId>("medium");
   const [fiscalYear, setFiscalYear] = useState<number>(DEFAULT_FY);
@@ -57,8 +71,62 @@ export function PlanGeneratorForm() {
   const [overworkPriority, setOverworkPriority] =
     useState<OverworkPriority>("normal");
   const [notes, setNotes] = useState<string>("");
+  // Surface what was auto-prefilled so the user knows their context carried over.
+  const [prefillMessage, setPrefillMessage] = useState<string | null>(null);
+  const prefillAppliedRef = useRef(false);
 
   const templateId = useMemo(() => `${industry}-${scale}`, [industry, scale]);
+
+  // Copilot-aware prefill: URL params win, then SafetyContext, then defaults.
+  // Runs once after mount to avoid stomping on user edits later.
+  useEffect(() => {
+    if (prefillAppliedRef.current) return;
+    prefillAppliedRef.current = true;
+
+    const messages: string[] = [];
+    const urlIndustry = searchParams?.get("industry");
+    const urlFocus = searchParams?.get("focus");
+    const urlScale = searchParams?.get("scale");
+
+    // 1. URL ?industry= takes priority — supports deep links from
+    //    /accidents-reports/[industry] and /chatbot CTA chips.
+    if (urlIndustry && urlIndustry in SLUG_TO_INDUSTRY) {
+      const mapped = SLUG_TO_INDUSTRY[urlIndustry as IndustrySlug];
+      setIndustry(mapped);
+      messages.push(`業種「${INDUSTRY_LABELS[mapped]}」を引き継ぎ`);
+    } else if (copilot?.state.industry && copilot.state.industry in SLUG_TO_INDUSTRY) {
+      // 2. Copilot SafetyContext fallback
+      const mapped = SLUG_TO_INDUSTRY[copilot.state.industry];
+      setIndustry(mapped);
+      messages.push(`業種「${INDUSTRY_LABELS[mapped]}」を引き継ぎ`);
+    }
+
+    if (urlScale === "small" || urlScale === "medium" || urlScale === "large") {
+      setScale(urlScale);
+    } else if (copilot?.state.scale) {
+      setScale(copilot.state.scale);
+    }
+
+    // 3. Convert free-text focus hint into focus chip selections via the
+    //    Copilot keyword detector (e.g. ?focus=熱中症 → ["industry-specific"]).
+    if (urlFocus) {
+      const detected = detectFocusAreas(urlFocus);
+      if (detected.length > 0) {
+        setFocusAreas(detected);
+        messages.push(`重点取組み「${urlFocus}」`);
+      }
+    } else if ((copilot?.state.keyConcerns?.length ?? 0) > 0) {
+      const detected = detectFocusAreas(copilot!.state.keyConcerns.join(" "));
+      if (detected.length > 0) {
+        setFocusAreas(detected);
+        messages.push(`重点取組み「${copilot!.state.keyConcerns.slice(0, 2).join("・")}」`);
+      }
+    }
+
+    if (messages.length > 0) {
+      setPrefillMessage(messages.join(" / "));
+    }
+  }, [searchParams, copilot]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -71,9 +139,26 @@ export function PlanGeneratorForm() {
     if (overworkPriority !== "normal") params.set("overwork", overworkPriority);
     if (notes) params.set("notes", notes);
     const qs = params.toString();
-    router.push(
-      `/strategy/plan-generator/preview/${templateId}${qs ? `?${qs}` : ""}`,
-    );
+    const href = `/strategy/plan-generator/preview/${templateId}${qs ? `?${qs}` : ""}`;
+
+    // Record the about-to-be-generated plan in the Copilot SafetyContext.
+    // The preview page also records on mount, but doing it here lets the
+    // chatbot / accidents-reports nav reflect the plan immediately after
+    // the user clicks "計画書を生成".
+    const planIndustrySlug = (Object.entries(SLUG_TO_INDUSTRY) as [
+      IndustrySlug,
+      IndustryId,
+    ][]).find(([, id]) => id === industry)?.[0];
+    copilot?.recordPlan({
+      industry: planIndustrySlug,
+      scale,
+      fiscalYear,
+      templateId,
+      href,
+      organizationName: organizationName || undefined,
+    });
+
+    router.push(href);
   };
 
   const toggleFocus = (c: MeasureCategory) => {
@@ -88,11 +173,27 @@ export function PlanGeneratorForm() {
     );
   };
 
+  // Map current plan-generator IndustryId back to the canonical accidents-reports slug
+  const reportSlug = (Object.entries(SLUG_TO_INDUSTRY) as [IndustrySlug, IndustryId][])
+    .find(([, id]) => id === industry)?.[0];
+
   return (
     <form
       onSubmit={handleSubmit}
       className="space-y-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
     >
+      {prefillMessage && (
+        <div
+          role="status"
+          className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900"
+        >
+          <span aria-hidden="true">✓</span>
+          <span>
+            安全Copilotから引き継ぎました：
+            <span className="font-semibold">{prefillMessage}</span>
+          </span>
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
           <span className="block text-sm font-semibold text-slate-700">業種 <span className="text-red-600">*</span></span>
@@ -260,6 +361,34 @@ export function PlanGeneratorForm() {
           maxLength={2000}
         />
       </label>
+
+      {reportSlug && (
+        <div className="rounded-lg border border-rose-200 bg-rose-50/60 px-3 py-2 text-xs text-rose-900">
+          <p className="font-semibold">
+            事故傾向を参考にしてから計画を作成できます
+          </p>
+          <p className="mt-1 leading-relaxed">
+            {INDUSTRY_LABELS[industry]}で多発する事故型・原因・推奨対策チェックリストを
+            <a
+              href={`/accidents-reports/${reportSlug}`}
+              className="ml-1 font-semibold underline hover:text-rose-700"
+            >
+              業種別レポートで確認
+            </a>
+            してから本フォームに戻ると、関心事項が自動で引き継がれます。
+          </p>
+          <p className="mt-1 leading-relaxed">
+            個別の法令確認は
+            <a
+              href={`/chatbot?q=${encodeURIComponent(`${INDUSTRY_LABELS[industry]}で必要な安全衛生管理の根拠法令`)}`}
+              className="ml-1 font-semibold underline hover:text-rose-700"
+            >
+              安衛法AIで深掘り
+            </a>
+            できます。
+          </p>
+        </div>
+      )}
 
       <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
         <button

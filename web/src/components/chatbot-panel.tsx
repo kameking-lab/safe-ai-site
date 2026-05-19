@@ -21,6 +21,7 @@ import {
   type StoredChatMessage,
 } from "@/lib/chat-history";
 import { trackEvent } from "@/components/Analytics";
+import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
 
 type ChatMessage = {
   id: string;
@@ -145,6 +146,7 @@ export function ChatbotPanel() {
   const listRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
   const prefillAppliedRef = useRef(false);
+  const copilot = useOptionalCopilot();
 
   // 音声完結モード: 新しいAI回答が来たら読み上げ
   useEffect(() => {
@@ -238,6 +240,9 @@ export function ChatbotPanel() {
     if (!text || isSending) return;
 
     trackEvent("chatbot_message", { message_length: text.length });
+    // Feed the Copilot SafetyContext so /accidents-reports and
+    // /strategy/plan-generator can pre-fill industry & concerns.
+    copilot?.ingestText(text, "chatbot");
 
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
@@ -831,11 +836,38 @@ export function ChatbotPanel() {
                   </div>
                 )}
 
-                {/* 6.2: 横断アクション — KY/RA/法改正へ遷移 */}
+                {/* 6.2: 横断アクション — KY/RA/法改正へ遷移
+                    + Copilot深化：業種別レポート・年次計画への直接遷移 */}
                 {msg.role === "assistant" && !isSending && (
                   <div className="mt-2 ml-10 max-w-[88%]">
                     <p className="mb-1 text-[11px] text-slate-500">この内容を活用：</p>
                     <div className="flex flex-wrap gap-1.5">
+                      {/* Copilot連携: 業種が検出済みなら業種別レポートへ、
+                          そうでなければハブへフォールバック */}
+                      <a
+                        href={
+                          copilot?.state.industry
+                            ? `/accidents-reports/${copilot.state.industry}`
+                            : `/accidents-reports`
+                        }
+                        className="rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-[11px] font-bold text-rose-800 hover:bg-rose-100"
+                      >
+                        → 業種別 事故レポート
+                      </a>
+                      <a
+                        href={(() => {
+                          const params = new URLSearchParams();
+                          if (copilot?.state.industry)
+                            params.set("industry", copilot.state.industry);
+                          if (copilot?.state.keyConcerns?.[0])
+                            params.set("focus", copilot.state.keyConcerns[0]);
+                          const qs = params.toString();
+                          return `/strategy/plan-generator${qs ? `?${qs}` : ""}`;
+                        })()}
+                        className="rounded-full border border-violet-300 bg-violet-50 px-3 py-1 text-[11px] font-bold text-violet-800 hover:bg-violet-100"
+                      >
+                        → 年次計画に反映
+                      </a>
                       <a
                         href={`/ky?q=${encodeURIComponent(msg.content.slice(0, 80))}`}
                         className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100"
@@ -853,12 +885,6 @@ export function ChatbotPanel() {
                         className="rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
                       >
                         → 法改正一覧
-                      </a>
-                      <a
-                        href={`/accidents?q=${encodeURIComponent(msg.content.slice(0, 40))}`}
-                        className="rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-[11px] font-bold text-rose-800 hover:bg-rose-100"
-                      >
-                        → 事故事例
                       </a>
                     </div>
                   </div>

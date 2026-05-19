@@ -2,7 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
+import {
+  JsonLd,
+  webApplicationSchema,
+  COPILOT_FEATURE_PEERS,
+} from "@/components/json-ld";
 import { PlanGeneratorForm } from "@/components/safety-plan/plan-generator-form";
+import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
+import { CopilotMemo } from "@/components/copilot/CopilotMemo";
+import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { INDUSTRY_LABELS, SCALE_LABELS } from "@/types/safety-plan";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -41,7 +49,28 @@ export default function PlanGeneratorPage() {
           { name: "年次安全衛生計画ジェネレーター", url: "https://www.anzen-ai-portal.jp/strategy/plan-generator" },
         ]}
       />
+      <JsonLd
+        schema={webApplicationSchema({
+          name: "年次安全衛生計画ジェネレーター",
+          description:
+            "10業種×3規模の30テンプレートから、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む年次安全衛生計画書を自動生成します。",
+          url: "https://www.anzen-ai-portal.jp/strategy/plan-generator",
+          applicationCategory: "BusinessApplication",
+          mentions: [COPILOT_FEATURE_PEERS.chatbot, COPILOT_FEATURE_PEERS.accidentsReports],
+          featureList: [
+            "業種10種×規模3段階の30テンプレート",
+            "安衛法・安衛則・関連省令の条文番号付き実施事項",
+            "全国安全週間・全国労働衛生週間を含む月別スケジュール",
+            "業種別事故レポートとの自動連携",
+            "安衛法AIチャットボットでの根拠法令確認導線",
+          ],
+        })}
+      />
       <PageContainer width="prose" className="py-8 md:py-12">
+        <div className="mb-4 space-y-3">
+          <CopilotStepNav current="plan-generator" />
+          <CopilotMemo />
+        </div>
         <header className="mb-6">
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
             年次安全衛生計画ジェネレーター
@@ -81,6 +110,11 @@ export default function PlanGeneratorPage() {
             </Link>
           </p>
         </section>
+
+        <CopilotNextSteps
+          current="plan-generator"
+          intro="生成前でも、業種別レポートで事故傾向を先に確認すると、本フォームの「重点取組み」が自動で引き継がれます。"
+        />
       </PageContainer>
     </div>
   );
