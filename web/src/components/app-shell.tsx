@@ -56,8 +56,17 @@ type NavItem = {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
+  // ISO yyyy-mm-dd. Suppresses badge once `today > badgeUntil`, so NEW does not linger past ~30 days.
+  badgeUntil?: string;
   description?: string;
 };
+
+function isBadgeActive(item: NavItem): boolean {
+  if (!item.badge) return false;
+  if (!item.badgeUntil) return true;
+  const today = new Date().toISOString().slice(0, 10);
+  return today <= item.badgeUntil;
+}
 
 type NavCategory = {
   label: string;
@@ -66,7 +75,7 @@ type NavCategory = {
 
 const PAID_SERVICE_ITEMS: NavItem[] = [
   { id: "education", label: "特別教育", href: "/education", icon: GraduationCap },
-  { id: "plan-generator", label: "年次安全衛生計画", href: "/strategy/plan-generator", icon: ListChecks, badge: "NEW" },
+  { id: "plan-generator", label: "年次安全衛生計画", href: "/strategy/plan-generator", icon: ListChecks, badge: "NEW", badgeUntil: "2026-04-15" },
 ];
 
 const NAV_CATEGORIES: NavCategory[] = [
@@ -74,7 +83,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "",
     items: [
       { id: "home", label: "ホーム", href: "/", icon: Home },
-      { id: "features", label: "機能紹介", href: "/features", icon: Sparkles, badge: "NEW" },
+      { id: "features", label: "機能紹介", href: "/features", icon: Sparkles, badge: "NEW", badgeUntil: "2026-04-30" },
     ],
   },
   {
@@ -104,7 +113,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "現場ツール",
     items: [
       { id: "ky-sheet", label: "KY用紙", href: "/ky", icon: ClipboardList },
-      { id: "risk-prediction", label: "リスク予測", href: "/risk-prediction", icon: Brain, badge: "AI" },
+      { id: "risk-prediction", label: "リスク予測", href: "/risk-prediction", icon: Brain },
       { id: "safety-diary", label: "安全衛生日誌", href: "/safety-diary", icon: FileText },
     ],
   },
@@ -112,7 +121,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "事例・データ",
     items: [
       { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database },
-      { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2, badge: "AI" },
+      { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2 },
       { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "専門解説50物質" },
     ],
   },
@@ -121,8 +130,8 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2 },
       { id: "mental-health", label: "メンタル・カスハラ", href: "/mental-health", icon: Heart },
-      { id: "mental-health-management", label: "メンタル対策実務", href: "/mental-health-management", icon: Brain, badge: "NEW" },
-      { id: "treatment-work-balance", label: "治療と仕事の両立支援", href: "/treatment-work-balance", icon: HeartHandshake, badge: "NEW" },
+      { id: "mental-health-management", label: "メンタル対策実務", href: "/mental-health-management", icon: Brain, badge: "NEW", badgeUntil: "2026-06-15" },
+      { id: "treatment-work-balance", label: "治療と仕事の両立支援", href: "/treatment-work-balance", icon: HeartHandshake, badge: "NEW", badgeUntil: "2026-06-15" },
     ],
   },
   ...(PAID_MODE
@@ -136,7 +145,7 @@ const NAV_CATEGORIES: NavCategory[] = [
         {
           label: "ツール",
           items: [
-            { id: "plan-generator", label: "年次安全衛生計画", href: "/strategy/plan-generator", icon: ListChecks, badge: "NEW" },
+            { id: "plan-generator", label: "年次安全衛生計画", href: "/strategy/plan-generator", icon: ListChecks, badge: "NEW", badgeUntil: "2026-04-15" },
           ] as NavItem[],
         },
       ]),
@@ -251,7 +260,7 @@ export function AppShell({ children, user }: AppShellProps) {
     const base = "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm";
     if (active)
       return `${base} bg-emerald-100/80 font-semibold text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-200`;
-    if (item.badge)
+    if (isBadgeActive(item))
       return `${base} font-semibold text-blue-700 hover:bg-blue-50 dark:text-blue-300 dark:hover:bg-blue-500/10`;
     return `${base} text-slate-700 hover:bg-emerald-50 dark:text-slate-200 dark:hover:bg-emerald-500/10`;
   };
@@ -259,6 +268,7 @@ export function AppShell({ children, user }: AppShellProps) {
   const renderNavItems = (items: NavItem[], onClickLink?: () => void) =>
     items.map((item) => {
       const active = navActive(pathname, item.href);
+      const showBadge = isBadgeActive(item);
       const Icon = item.icon;
       return (
         <Link
@@ -271,7 +281,7 @@ export function AppShell({ children, user }: AppShellProps) {
             className={`h-4 w-4 shrink-0 ${
               active
                 ? "text-emerald-700 dark:text-emerald-300"
-                : item.badge
+                : showBadge
                   ? "text-blue-500 dark:text-blue-300"
                   : "text-slate-400 dark:text-slate-500"
             }`}
@@ -282,7 +292,7 @@ export function AppShell({ children, user }: AppShellProps) {
               <span className="ml-1 text-[10px] font-normal text-slate-500 dark:text-slate-400">{item.description}</span>
             )}
           </span>
-          {item.badge && !active && (
+          {showBadge && !active && (
             <span
               className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
                 item.badge === "beta"

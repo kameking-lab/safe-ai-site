@@ -41,6 +41,21 @@ const EN_FEATURE_COPY: Record<string, { title: string; description: string }> = 
     description:
       "MHLW, prefecture, and press reports of severe/fatal incidents — filter by industry or work type.",
   },
+  "education-certification": {
+    title: "Special Education & Skill Training DB",
+    description:
+      "Full catalog of ~60 special-education courses (OSH Rule Art. 36) and ~40 skill-training courses. Instantly identifies required qualifications by industry and task, with cited articles.",
+  },
+  industries: {
+    title: "Industry Portals (10 sectors)",
+    description:
+      "Construction, manufacturing, transport, healthcare, service, retail, food, wholesale, warehouse, and office — accident reports, KY, notices, chemicals, special education, and annual plans cross-linked per sector.",
+  },
+  "work-environment": {
+    title: "Work Environment Measurement",
+    description:
+      "Auto-classifies the 10 measurement targets under OSH Order Art. 21. Computes Management Class 1–3 from A/B measurements and recommends class-specific improvements (Work Environment Measurement Act compliant).",
+  },
 };
 
 /** トップページの主要機能カードグリッド */

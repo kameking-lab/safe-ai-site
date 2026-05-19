@@ -48,7 +48,8 @@ const BATCHES: Batch[] = [
     dependency: "なし (即時着手可)",
     effect:
       "サイト内文言の小さなブランド不整合・視認性低下・分類不適切を一括解消。後続バッチで触る前に表面ノイズを除去する。",
-    status: "planned",
+    status: "completed",
+    completedPr: 246,
     findings: [
       {
         id: "UX-010",
