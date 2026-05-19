@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, CloudRain, Scale, Sparkles, Loader2, ExternalLink } from "lucide-react";
+import { AlertTriangle, CloudRain, Scale, Sparkles, Loader2, ExternalLink, RefreshCw, LifeBuoy } from "lucide-react";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
 import { realLawRevisionsExtra } from "@/data/mock/real-law-revisions-extra";
@@ -382,6 +382,7 @@ function AlertGenerator({
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [failureCount, setFailureCount] = useState(0);
   const { language } = useLanguage();
   const isEn = language === "en";
 
@@ -406,15 +407,20 @@ function AlertGenerator({
       };
       if (!res.ok || !data.alert) {
         setError(data.error ?? (isEn ? "Generation failed." : "生成に失敗しました。"));
+        setFailureCount((c) => c + 1);
       } else {
         setAlert(data.alert);
+        setFailureCount(0);
       }
     } catch {
       setError(isEn ? "Network error occurred." : "ネットワークエラーが発生しました。");
+      setFailureCount((c) => c + 1);
     } finally {
       setLoading(false);
     }
   }
+
+  const showContactCta = failureCount >= 3;
 
   return (
     <div className={compact ? "mt-2" : "mt-3"}>
@@ -438,9 +444,34 @@ function AlertGenerator({
         </div>
       )}
       {error && (
-        <p className="mt-1.5 text-[11px] text-rose-700" role="alert">
-          {error}
-        </p>
+        <div className="mt-1.5 rounded-md border border-rose-200 bg-rose-50/60 p-2 text-[11px] leading-5 text-rose-800" role="alert">
+          <p className="font-semibold">{error}</p>
+          <p className="mt-1 text-rose-700/90">
+            {isEn
+              ? "Possible causes: API rate limit, temporary network issue, or upstream service unavailable."
+              : "考えられる原因: AI APIの利用上限、一時的なネットワーク不調、サービス側の停止。"}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={handleGenerate}
+              disabled={loading}
+              className="inline-flex items-center gap-1 rounded-full border border-rose-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-rose-800 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <RefreshCw className="h-3 w-3" />
+              {isEn ? "Retry" : "再試行"}
+            </button>
+            {showContactCta && (
+              <Link
+                href="/contact"
+                className="inline-flex items-center gap-1 rounded-full border border-rose-300 bg-rose-100 px-2.5 py-1 text-[11px] font-semibold text-rose-900 hover:bg-rose-200"
+              >
+                <LifeBuoy className="h-3 w-3" />
+                {isEn ? "Contact administrator" : "管理者に連絡（3回連続失敗）"}
+              </Link>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
