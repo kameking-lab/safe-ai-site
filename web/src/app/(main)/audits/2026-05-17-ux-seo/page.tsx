@@ -186,7 +186,8 @@ const FINDINGS_UX_C: Finding[] = [
       "web/src/components/new-home-hero.tsx:57 `{isEn ? 'ANZEN AI Portal' : '安全AIポータル'}`。 直近 c6a22bc コミット (fix(branding): remove ANZEN AI from remaining alt attributes) で alt 属性のみ修正しているが、ヒーロー英語表記は ANZEN AI Portal のまま。英語版で『安全AIポータルって何?』と困惑を生む。",
     recommendation:
       "英語表記を 'ANZEN AI Portal' から 'Anzen AI Portal (Japan OSH research)' などに刷新するか、ja の『安全AIポータル』をそのまま英語版でも使い (固有名詞扱い)、サブタイトルだけ英訳。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 246,
   },
   {
     id: "UX-011",
@@ -361,7 +362,8 @@ const FINDINGS_UX_G: Finding[] = [
       "web/src/components/new-home-hero.tsx:90-124 の統計バー: `grid-cols-3 gap-3 sm:gap-4` で 375px では1カラム75px幅。 `text-[9px]` (9px) と `text-[10px]` (10px) が混在。Tailwind 標準の text-xs (12px) を下回るサイズは現場ユーザー(高齢/老眼) には読みづらい。",
     recommendation:
       "(a) viewport <400px では2カラム+1カラムレイアウトに変更、 (b) 最小フォントサイズを text-[11px] (11px) に統一、 (c) 出典リンクは ハンドル化 して 'i' アイコンタップで開く。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 246,
   },
   {
     id: "UX-023",
@@ -406,7 +408,8 @@ const FINDINGS_UX_H: Finding[] = [
       "(a) web/src/components/app-shell.tsx:98 nav label = '演習問題'、(b) web/src/app/(main)/exam-quiz/page.tsx:74 PageHeader title = '学習用クイズ（全資格対応）'、(c) 同 metadata.title = '安全衛生 資格試験 学習用クイズ'。PR #234 で nav は『演習問題』に統一されたが、ページ本体は未対応。",
     recommendation:
       "3箇所すべて『演習問題（全資格対応）』に統一。メタ description も連動更新。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 246,
   },
   {
     id: "UX-026",
@@ -420,7 +423,8 @@ const FINDINGS_UX_H: Finding[] = [
       "web/src/components/app-shell.tsx NAV_CATEGORIES で `badge: 'NEW'` が features/risk-prediction/chatbot/chemical-ra/mental-health-management/treatment-work-balance/plan-generator の7+件。 `badge: 'AI'` も chatbot/risk-prediction/chemical-ra で3件。 NEW が常時表示の利用者には『何が新しい?』が分からなくなり情報価値ゼロ。",
     recommendation:
       "(a) NEW バッジは公開後30日のみ表示する有効期限機構を導入 (badgeUntil: 'YYYY-MM-DD')。 (b) AI バッジは chatbot のみに絞る (RAコア機能は AI でなくテンプレ計算なので AI バッジ撤去)。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 246,
   },
   {
     id: "UX-027",
@@ -461,7 +465,8 @@ const FINDINGS_UX_H: Finding[] = [
       "web/src/components/footer.tsx:109-113。F-007 の縮小判断 (kept-by-owner B-縮小) は /qa-knowledge を投稿募集ランディングに絞り /faq へ301する設計。フッターの『Q&A投稿募集』ラベルは縮小方針と整合するが、関連データカラムの分類は『データ』として不適切。",
     recommendation:
       "(a) ラベルを『Q&A 投稿募集 (準備中)』にしてプロジェクト/コミュニティ系カラムに移動、 (b) もしくは投稿数が10件未満のうちは footer 表示から除外し /contact 経由のみに。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 246,
   },
 ];
 
@@ -707,7 +712,8 @@ const FINDINGS_SEO_E: Finding[] = [
       "web/src/components/flagship-grid.tsx:8-44 EN_FEATURE_COPY のキーは safety-diary, ky, chemical-ra, signage, laws, chatbot, accidents の7件。 FLAGSHIP_FEATURES 10件のうち education-certification, industries, work-environment の英語版は f.cardTitle/f.cardDescription (日本語) を流す。English (Beta) を主張するなら最低限の翻訳カバレッジが必要。",
     recommendation:
       "EN_FEATURE_COPY に残り3機能を追加。 (1) education-certification: 'Special Education & Skill Training DB'、 (2) industries: 'Industry-Specific Safety Portal (10 industries)'、 (3) work-environment: 'Working Environment Measurement & Classification'。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 246,
   },
   {
     id: "SEO-017",
