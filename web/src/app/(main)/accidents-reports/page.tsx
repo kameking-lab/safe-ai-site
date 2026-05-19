@@ -11,6 +11,7 @@ import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
 import { CopilotMemo } from "@/components/copilot/CopilotMemo";
 import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { getAllIndustriesSummary } from "@/lib/accident-analysis";
+import { SLUG_TO_SAFETY_PLAN, type IndustrySlug } from "@/lib/industry-slugs";
 import { ogImageUrl } from "@/lib/og-url";
 import { SITE_URL, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import {
@@ -166,45 +167,66 @@ export default function AccidentsReportsHubPage() {
             {summary.industries.map((it) => {
               const cls = COLOR_CLASS[it.colorClass] ?? COLOR_CLASS.blue;
               return (
-                <Link
+                <div
                   key={it.slug}
-                  href={`/accidents-reports/${it.slug}`}
-                  className={`group block rounded-xl border-2 p-4 transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${cls.card}`}
+                  className={`flex flex-col rounded-xl border-2 p-4 transition hover:shadow-md ${cls.card}`}
                 >
-                  <Cluster gap="sm">
-                    <span className="text-3xl" aria-hidden="true">
-                      {it.icon}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-base font-bold text-slate-900 dark:text-slate-100">{it.label}</p>
-                      <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">{it.tagline}</p>
-                    </div>
-                    <ArrowRight
-                      className="h-4 w-4 shrink-0 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-emerald-600"
-                      aria-hidden="true"
-                    />
-                  </Cluster>
-                  <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
-                    <div className="rounded-md bg-white px-2 py-1.5 dark:bg-slate-900">
-                      <dt className="text-[10px] text-slate-500 dark:text-slate-400">事例</dt>
-                      <dd className="text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-100">
-                        {num(it.total)}
-                      </dd>
-                    </div>
-                    <div className="rounded-md bg-white px-2 py-1.5 dark:bg-slate-900">
-                      <dt className="text-[10px] text-slate-500 dark:text-slate-400">死亡</dt>
-                      <dd className="text-sm font-semibold tabular-nums text-rose-700 dark:text-rose-400">
-                        {num(it.fatal)}
-                      </dd>
-                    </div>
-                    <div className="rounded-md bg-white px-2 py-1.5 dark:bg-slate-900">
-                      <dt className="text-[10px] text-slate-500 dark:text-slate-400">最多型</dt>
-                      <dd className="truncate text-[11px] font-medium text-slate-800 dark:text-slate-200" title={it.topType ?? ""}>
-                        {it.topType ?? "—"}
-                      </dd>
-                    </div>
-                  </dl>
-                </Link>
+                  <Link
+                    href={`/accidents-reports/${it.slug}`}
+                    className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                    aria-label={`${it.label}の労働災害分析レポートを開く`}
+                  >
+                    <Cluster gap="sm">
+                      <span className="text-3xl" aria-hidden="true">
+                        {it.icon}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-base font-bold text-slate-900 dark:text-slate-100">{it.label}</p>
+                        <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">{it.tagline}</p>
+                      </div>
+                      <ArrowRight
+                        className="h-4 w-4 shrink-0 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-emerald-600"
+                        aria-hidden="true"
+                      />
+                    </Cluster>
+                    <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
+                      <div className="rounded-md bg-white px-2 py-1.5 dark:bg-slate-900">
+                        <dt className="text-[10px] text-slate-500 dark:text-slate-400">事例</dt>
+                        <dd className="text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-100">
+                          {num(it.total)}
+                        </dd>
+                      </div>
+                      <div className="rounded-md bg-white px-2 py-1.5 dark:bg-slate-900">
+                        <dt className="text-[10px] text-slate-500 dark:text-slate-400">死亡</dt>
+                        <dd className="text-sm font-semibold tabular-nums text-rose-700 dark:text-rose-400">
+                          {num(it.fatal)}
+                        </dd>
+                      </div>
+                      <div className="rounded-md bg-white px-2 py-1.5 dark:bg-slate-900">
+                        <dt className="text-[10px] text-slate-500 dark:text-slate-400">最多型</dt>
+                        <dd className="truncate text-[11px] font-medium text-slate-800 dark:text-slate-200" title={it.topType ?? ""}>
+                          {it.topType ?? "—"}
+                        </dd>
+                      </div>
+                    </dl>
+                  </Link>
+                  <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-200/60 pt-3 dark:border-slate-700/60">
+                    <Link
+                      href={`/strategy/plan-generator?industry=${SLUG_TO_SAFETY_PLAN[it.slug as IndustrySlug] ?? ""}`}
+                      className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-purple-700 ring-1 ring-purple-200 hover:bg-purple-50 dark:bg-slate-900 dark:text-purple-300 dark:ring-purple-800 dark:hover:bg-purple-950/40"
+                      aria-label={`${it.label}の年次安全衛生計画を作成する`}
+                    >
+                      📝 {it.label}の年次計画を作る
+                    </Link>
+                    <Link
+                      href="/chatbot"
+                      className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-blue-700 ring-1 ring-blue-200 hover:bg-blue-50 dark:bg-slate-900 dark:text-blue-300 dark:ring-blue-800 dark:hover:bg-blue-950/40"
+                      aria-label={`${it.label}の労働災害について安衛法AIチャットボットに質問する`}
+                    >
+                      💬 AIに条文を質問
+                    </Link>
+                  </div>
+                </div>
               );
             })}
           </CardGrid>
@@ -221,6 +243,18 @@ export default function AccidentsReportsHubPage() {
               className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
             >
               📘 ガイド：労働災害 業種別 分析レポートの読み方
+            </Link>
+            <Link
+              href="/strategy/plan-generator"
+              className="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-sm font-semibold text-purple-800 hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-200"
+            >
+              📝 年次安全衛生計画ジェネレーター
+            </Link>
+            <Link
+              href="/chatbot"
+              className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-800 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200"
+            >
+              💬 安衛法AIチャットボット
             </Link>
             <Link
               href="/accidents"

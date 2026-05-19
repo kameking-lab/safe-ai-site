@@ -27,6 +27,10 @@ const SLUG_TO_INDUSTRY: Record<IndustrySlug, IndustryId> = {
   service: "service",
 };
 
+const INDUSTRY_IDS = Object.keys(INDUSTRY_LABELS) as IndustryId[];
+const isIndustryId = (v: string | null): v is IndustryId =>
+  v !== null && (INDUSTRY_IDS as string[]).includes(v);
+
 const DEFAULT_FY = 2026;
 
 const FOCUS_CHOICES: MeasureCategory[] = [
@@ -61,7 +65,19 @@ export function PlanGeneratorForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const copilot = useOptionalCopilot();
-  const [industry, setIndustry] = useState<IndustryId>("construction");
+  // Synchronous initial industry from URL (?industry=construction) to avoid
+  // a render flicker. Accepts either a canonical accidents-reports IndustrySlug
+  // or a plan-generator IndustryId so links from /chatbot and /accidents-reports
+  // both work. SafetyContext fallback runs in the prefill effect below.
+  const initialIndustryParam = searchParams.get("industry");
+  const initialIndustry: IndustryId = (() => {
+    if (!initialIndustryParam) return "construction";
+    if (initialIndustryParam in SLUG_TO_INDUSTRY) {
+      return SLUG_TO_INDUSTRY[initialIndustryParam as IndustrySlug];
+    }
+    return isIndustryId(initialIndustryParam) ? initialIndustryParam : "construction";
+  })();
+  const [industry, setIndustry] = useState<IndustryId>(initialIndustry);
   const [scale, setScale] = useState<ScaleId>("medium");
   const [fiscalYear, setFiscalYear] = useState<number>(DEFAULT_FY);
   const [organizationName, setOrganizationName] = useState<string>("");

@@ -16,6 +16,7 @@ export type CrossToolId =
   | "education-certification"
   | "health-checkup"
   | "plan-generator"
+  | "chatbot"
   | "industries"
   | "foreign-workers"
   | "treatment-work-balance"
@@ -81,13 +82,25 @@ function buildPracticeTools(industry?: IndustrySlug, exclude?: CrossToolId): Rel
     {
       id: "plan-generator",
       page: {
-        href: "/strategy/plan-generator",
+        href: industry ? `/strategy/plan-generator?industry=${industry}` : "/strategy/plan-generator",
         label: "年次安全衛生計画",
         description: lbl
           ? `${lbl}向けテンプレートから基本方針・重点目標・月別スケジュールを含む計画書を自動生成。`
           : "業種・規模別30テンプレートから年次安全衛生計画書を自動生成。PDF出力対応。",
         color: "purple",
-        cta: "計画書を生成する",
+        cta: lbl ? `${lbl}の年次計画を作る` : "計画書を生成する",
+      },
+    },
+    {
+      id: "chatbot",
+      page: {
+        href: "/chatbot",
+        label: "安衛法AIチャットボット",
+        description: lbl
+          ? `${lbl}の計画書・事故事例に関する条文確認をAIに質問。33法令以上を根拠条文付きで即答。`
+          : "労働安全衛生法・安衛則・特化則など33法令以上を根拠条文付きでAIが回答。出典必須・無料。",
+        color: "blue",
+        cta: "AIに質問する",
       },
     },
     {

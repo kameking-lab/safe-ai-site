@@ -88,11 +88,12 @@ const BATCHES: Batch[] = [
     endDate: "2026-05-29",
     totalHours: 10,
     prName:
-      "fix(seo-main3): rewrite title/description + add reciprocal internal links across main 3 features",
+      "feat(seo): /guides hub-and-spoke for SEO-001 four-keyword recovery + main-3-feature internal-link density",
     dependency: "Batch 1 完了 (メイン3機能のIA固定後でないと二度手間)",
     effect:
-      "メイン3機能のGoogle検索インプレッション向上の土台(KPI目標: GSC 1ヶ月後にimpressions +50%)。PageRank流通効率改善。",
-    status: "planned",
+      "メイン3機能のGoogle検索インプレッション向上の土台(KPI目標: GSC 1ヶ月後にimpressions +50%)。PageRank流通効率改善。SEO-001はPR #242の/guidesハブ&スポーク(Article/HowTo/FAQPage/BreadcrumbList JSON-LD + 30+ロングテール変奏)で根本対応。SEO-012はPR #244で/accidents-reports業種カード→/strategy/plan-generator?industry=、/chatbot→/accidents-reports + /strategy/plan-generatorの相互リンク密度を確立。",
+    status: "completed",
+    completedPr: 244,
     findings: [
       {
         id: "SEO-001",
@@ -121,11 +122,12 @@ const BATCHES: Batch[] = [
     endDate: "2026-06-02",
     totalHours: 4,
     prName:
-      "fix(seo-i18n): retire half-baked client-side English UI to stop GSC mixed-signal",
+      "feat(seo): retire broken English UI to stop GSC mixed-signal (SEO-015/023)",
     dependency: "なし (Batch 1/2 と並行可、ただしオーナー戦略判断必要)",
     effect:
-      "GoogleSearchConsoleの不適切判定リスク解消。SSR HTMLがlang=jaのみで一貫し、Googlebotの混乱を排除。法人化後に/en/プレフィックスで本格再開を別計画化。",
-    status: "planned",
+      "GoogleSearchConsoleの不適切判定リスク解消。SSR HTMLがlang=jaのみで一貫し、Googlebotの混乱を排除。法人化後に/en/プレフィックスで本格再開を別計画化。PR #244 で撤去案を採用 — LanguageProvider/EnglishBetaBanner/言語切替UIを撤去し、useLanguage/useTranslationフックは互換維持(ja固定返却)。",
+    status: "completed",
+    completedPr: 244,
     findings: [
       {
         id: "SEO-015",

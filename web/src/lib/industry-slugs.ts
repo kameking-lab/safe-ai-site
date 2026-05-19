@@ -34,6 +34,17 @@ export const SAFETY_PLAN_TO_SLUG: Partial<Record<string, IndustrySlug>> = {
   // retail / food / wholesale / warehouse / office → no matching accident-analysis slug
 };
 
+// Inverse of SAFETY_PLAN_TO_SLUG — canonical IndustrySlug → safety-plan IndustryId.
+// Used by cross-tool deep-links from /accidents-reports → /strategy/plan-generator?industry=...
+// so the plan-generator form can pre-select the matching industry (SEO-012).
+export const SLUG_TO_SAFETY_PLAN: Record<IndustrySlug, string> = {
+  construction: "construction",
+  manufacturing: "manufacturing",
+  transport: "transportation",
+  healthcare: "medical",
+  service: "service",
+};
+
 // health-checkup IndustryId → canonical IndustrySlug
 export const HEALTH_CHECKUP_TO_SLUG: Partial<Record<string, IndustrySlug>> = {
   construction: "construction",

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import {
@@ -86,7 +87,20 @@ export default function PlanGeneratorPage() {
           </ul>
         </header>
 
-        <PlanGeneratorForm />
+        <Suspense
+          fallback={
+            <div
+              aria-busy="true"
+              className="space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+            >
+              <div className="h-10 w-full animate-pulse rounded bg-slate-100" />
+              <div className="h-10 w-full animate-pulse rounded bg-slate-100" />
+              <div className="h-32 w-full animate-pulse rounded bg-slate-100" />
+            </div>
+          }
+        >
+          <PlanGeneratorForm />
+        </Suspense>
 
         <section className="mt-10 rounded border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           <h2 className="font-semibold">生成された計画書の使い方</h2>
