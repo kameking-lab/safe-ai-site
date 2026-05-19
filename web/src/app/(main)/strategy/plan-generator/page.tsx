@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { PlanGeneratorForm } from "@/components/safety-plan/plan-generator-form";
@@ -57,7 +58,20 @@ export default function PlanGeneratorPage() {
           </ul>
         </header>
 
-        <PlanGeneratorForm />
+        <Suspense
+          fallback={
+            <div
+              aria-busy="true"
+              className="space-y-4 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
+            >
+              <div className="h-10 w-full animate-pulse rounded bg-slate-100" />
+              <div className="h-10 w-full animate-pulse rounded bg-slate-100" />
+              <div className="h-32 w-full animate-pulse rounded bg-slate-100" />
+            </div>
+          }
+        >
+          <PlanGeneratorForm />
+        </Suspense>
 
         <section className="mt-10 rounded border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           <h2 className="font-semibold">生成された計画書の使い方</h2>
@@ -80,6 +94,37 @@ export default function PlanGeneratorPage() {
               → ガイド：年次安全衛生計画ジェネレーター（業種別）の使い方
             </Link>
           </p>
+        </section>
+
+        <section className="mt-6 grid gap-3 sm:grid-cols-2">
+          <Link
+            href="/chatbot"
+            className="flex items-start gap-3 rounded-xl border border-blue-200 bg-white p-4 transition hover:border-blue-400 hover:shadow-sm dark:border-blue-900 dark:bg-slate-900"
+          >
+            <span className="text-2xl" aria-hidden="true">💬</span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-blue-800 dark:text-blue-300">
+                生成計画書を AI に質問する
+              </span>
+              <span className="mt-0.5 block text-xs text-slate-600 dark:text-slate-400">
+                計画書の根拠条文・関連法令を安衛法AIチャットボットに質問。33法令以上を根拠条文付きで即答。
+              </span>
+            </span>
+          </Link>
+          <Link
+            href="/accidents-reports"
+            className="flex items-start gap-3 rounded-xl border border-rose-200 bg-white p-4 transition hover:border-rose-400 hover:shadow-sm dark:border-rose-900 dark:bg-slate-900"
+          >
+            <span className="text-2xl" aria-hidden="true">📊</span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-semibold text-rose-800 dark:text-rose-300">
+                業種別 労働災害分析レポートで重点目標を裏付ける
+              </span>
+              <span className="mt-0.5 block text-xs text-slate-600 dark:text-slate-400">
+                5業種5,000件超の事故事例から業種特有パターンを確認し、計画書の重点目標に反映。
+              </span>
+            </span>
+          </Link>
         </section>
       </PageContainer>
     </div>
