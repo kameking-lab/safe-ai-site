@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-18T22:00:23.717Z",
+  "updatedAt": "2026-05-19T22:12:53.910Z",
   "entries": [
     {
       "id": "b843c0a41c745361",
@@ -23,6 +23,33 @@
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related)",
           "duplication 70 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "1f639911efac9799",
+      "headline": "熱中症 搬送者数 5月11～17日に全国で1000人以上 1人死亡",
+      "aiSummary": "全国で5月11日から17日までに熱中症で1000人以上が搬送され、1人が死亡した。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260519/k10015126121000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 19 May 2026 22:44:35 +0900",
+        "fetchedAt": "2026-05-19T22:12:40.563Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 10,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-05-19T22:12:48.966Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,

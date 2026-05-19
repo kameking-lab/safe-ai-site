@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-05-18T22:00:23.775Z",
+  "generatedAt": "2026-05-19T22:12:53.966Z",
   "counts": {
     "approved": 3,
-    "rejected": 8,
-    "total": 11,
-    "approvalRate": 0.273
+    "rejected": 9,
+    "total": 12,
+    "approvalRate": 0.25
   },
   "byDay": [
     {
@@ -27,6 +27,13 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-05-20",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -40,8 +47,8 @@
     {
       "publisher": "日本放送協会",
       "approved": 0,
-      "rejected": 6,
-      "total": 6,
+      "rejected": 7,
+      "total": 7,
       "approvalRate": 0
     }
   ],
@@ -65,8 +72,8 @@
     {
       "type": "熱中症",
       "approved": 0,
-      "rejected": 5,
-      "total": 5,
+      "rejected": 6,
+      "total": 6,
       "approvalRate": 0
     },
     {
@@ -106,7 +113,7 @@
       "rejected": [
         0,
         2,
-        4,
+        5,
         0,
         0,
         0,
@@ -143,7 +150,7 @@
       ],
       "rejected": [
         2,
-        6,
+        7,
         0,
         0,
         0,
@@ -181,7 +188,7 @@
       ],
       "rejected": [
         7,
-        1,
+        2,
         0,
         0,
         0,
@@ -219,7 +226,7 @@
       ],
       "rejected": [
         0,
-        3,
+        4,
         0,
         0,
         0,
@@ -234,7 +241,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 6
+      "count": 7
     },
     {
       "reason": "duplication",
@@ -297,6 +304,22 @@
           "rejectionReasons": [
             "relevance 20 < 70 (not labor-safety related)",
             "duplication 70 > 50 (already covered in accident DB)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "熱中症 搬送者数 5月11～17日に全国で1000人以上 1人死亡",
+        "aiSummary": "全国で5月11日から17日までに熱中症で1000人以上が搬送され、1人が死亡した。",
+        "score": {
+          "relevance": 25,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-05-19T22:12:48.966Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 25 < 70 (not labor-safety related for type=general_news)"
           ]
         },
         "publisher": "日本放送協会"

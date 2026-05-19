@@ -1,4 +1,33 @@
 {
-  "updatedAt": "2026-05-18T22:00:23.717Z",
-  "entries": []
+  "updatedAt": "2026-05-19T22:12:53.910Z",
+  "entries": [
+    {
+      "id": "aa4e79ccc98b9c4f",
+      "headline": "福島 マンホールに作業員2人が転落か 意識なし 消防",
+      "aiSummary": "福島県でマンホール作業中に2名が転落、意識不明。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260519/k10015125771000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 19 May 2026 18:43:08 +0900",
+        "fetchedAt": "2026-05-19T22:12:40.563Z"
+      },
+      "estimatedAccidentType": "墜落",
+      "estimatedWorkCategory": "建設業",
+      "newsType": "accident_report",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 20,
+        "misinformationRisk": 10,
+        "duplication": 70,
+        "judgedAt": "2026-05-19T22:12:53.903Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "duplication 70 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    }
+  ]
 }
