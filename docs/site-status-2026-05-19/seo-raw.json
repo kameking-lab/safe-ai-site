@@ -1,0 +1,140 @@
+{
+  "_meta": {
+    "generatedAt": "2026-05-20T00:00:00Z",
+    "reportDate": "2026-05-19",
+    "collectionMethod": "static-code-analysis",
+    "note": "GSC/GA4実データは環境変数未確認のためコード解析ベース。本番curl結果はStep 2で収集"
+  },
+  "sitemap": {
+    "indexFile": "web/src/app/sitemap-index.xml/",
+    "mainSitemapFile": "web/src/app/sitemap.ts",
+    "childSitemaps": [
+      "sitemap.ts (main, dynamic)",
+      "sitemap-articles.xml/",
+      "sitemap-circulars.xml/",
+      "sitemap-equipment.xml/"
+    ],
+    "staticUrls": 169,
+    "dynamicUrlSources": {
+      "mhlwNotices": "通達告示指針 ~1069件",
+      "articles": "公開記事 ~50件",
+      "equipment": "保護具DB ~500-1000件",
+      "featureCategories": "機能カテゴリ ~10件",
+      "signCategories": "安全標識カテゴリ ~30件",
+      "signIndustries": "標識業種別 ~10件",
+      "safetySignDetails": "標識個別 ~1500件",
+      "illnessGuides": "疾病ガイド ~20件"
+    },
+    "estimatedTotalUrls": "2800-3500件",
+    "queryParamUrlsInSitemap": [
+      "/accidents-reports/compare?industries=construction,manufacturing",
+      "/accidents-reports/compare?industries=construction,manufacturing,transport",
+      "/accidents-reports/compare?industries=healthcare,service",
+      "/accidents-reports/compare?industries=construction,healthcare,manufacturing,service,transport"
+    ],
+    "knownIssue": "SEO-008: クエリパラメータ付きURLがsitemapに4件残存 (P2 Batch5で修正予定)"
+  },
+  "robots": {
+    "generalDisallow": ["/admin/", "/api/", "/auth/", "/dev/", "/handover", "/lms", "/api-docs", "/dpa"],
+    "aiCrawlerBlocked": 17,
+    "aiCrawlerList": ["GPTBot", "ChatGPT-User", "OAI-SearchBot", "Claude-Web", "ClaudeBot", "anthropic-ai", "Bytespider", "Amazonbot", "PerplexityBot", "YouBot", "CCBot", "FacebookBot", "ImgProxy", "Diffbot", "omgili", "omgilibot", "facebookexternalhit"],
+    "sitemapRef": "https://www.anzen-ai-portal.jp/sitemap-index.xml",
+    "note": "PR #239でAIクローラーブロック実装 (Vercel bandwidth/function quota保護目的)"
+  },
+  "gsc": {
+    "status": "実装済み・要環境変数確認",
+    "authMethod": "ユーザーOAuth (refresh token)",
+    "requiredEnvVars": ["GSC_OAUTH_CLIENT_ID", "GSC_OAUTH_CLIENT_SECRET", "GSC_OAUTH_REFRESH_TOKEN"],
+    "optionalEnvVars": ["GSC_SITE_URL"],
+    "implementationFile": "web/src/lib/stats/search-console-client.ts",
+    "apiRoute": "web/src/app/api/search-console/route.ts",
+    "fallback": "credentials未設定時はsrc/data/mock/search-console-mock.tsのモックデータを返却",
+    "dataFetched": ["summary (impressions/clicks/CTR/position)", "queries TOP30", "pages TOP30", "countries TOP10", "devices TOP5"],
+    "setupDoc": "docs/gsc-oauth-setup.md",
+    "liveDataAvailable": "環境変数設定状況次第 (ローカルでは確認不可)"
+  },
+  "ga4": {
+    "status": "実装済み・要環境変数確認",
+    "frontendFile": "web/src/components/Analytics.tsx",
+    "frontendMeasurementIdEnv": "NEXT_PUBLIC_GA_MEASUREMENT_ID",
+    "apiClientFile": "web/src/lib/stats/ga4-client.ts",
+    "authMethod": "サービスアカウントJSON",
+    "requiredEnvVars": ["GA4_PROPERTY_ID", "GOOGLE_APPLICATION_CREDENTIALS_JSON または GOOGLE_APPLICATION_CREDENTIALS"],
+    "fallback": "未設定時はsrc/data/mock/stats-mock.tsのモックデータを返却",
+    "dataFetched": ["DAU", "MAU", "PV", "avg session duration", "bounce rate", "pages TOP10", "sources TOP10"],
+    "liveDataAvailable": "環境変数設定状況次第 (ローカルでは確認不可)"
+  },
+  "vercelAnalytics": {
+    "status": "admin/health-check経由での取得は未確認",
+    "note": "PR #247でVercel usage monitoring dashboardを実装済み。Web Analytics APIは課金プラン次第"
+  },
+  "keyPages": {
+    "/chatbot": {
+      "title": "安衛法AIチャットボット｜33法令以上を根拠条文付きで即答（無料）",
+      "canonical": "https://www.anzen-ai-portal.jp/chatbot",
+      "jsonLdTypes": ["WebPage", "BreadcrumbList", "QAPage", "WebApplication"],
+      "sitemapLastModified": "2026-04-01",
+      "sitemapPriority": 0.8,
+      "changeFrequency": "monthly",
+      "note": "sitemapのlastModified 2026-04-01は古い。実際はPR #245 (2026-05-18)で大幅改修済み"
+    },
+    "/accidents-reports": {
+      "title": "労働災害 業種別 分析レポート｜5業種5,000件超の自動集計（無料）",
+      "canonical": "https://www.anzen-ai-portal.jp/accidents-reports",
+      "jsonLdTypes": ["WebPage", "BreadcrumbList", "ArticleList", "WebApplication"],
+      "revalidate": 86400,
+      "sitemapLastModified": "2026-05-16",
+      "sitemapPriority": 0.8
+    },
+    "/strategy/plan-generator": {
+      "title": "年次安全衛生計画 業種別 ジェネレーター｜10業種×3規模・無料・PDF",
+      "canonical": "https://www.anzen-ai-portal.jp/strategy/plan-generator",
+      "jsonLdTypes": ["WebPage", "WebApplication", "BreadcrumbList"],
+      "sitemapLastModified": "2026-05-16",
+      "sitemapPriority": 0.8
+    },
+    "/laws": {
+      "title": "安全衛生法 改正情報一覧 最新",
+      "sitemapLastModified": "2026-04-19",
+      "sitemapPriority": 0.9
+    },
+    "/accidents": {
+      "sitemapLastModified": "2026-04-19",
+      "sitemapPriority": 0.9
+    }
+  },
+  "structuredData": {
+    "implementationFile": "web/src/components/json-ld.tsx",
+    "schemaTypes": ["Organization", "WebSite", "WebPage", "BreadcrumbList", "QAPage", "WebApplication", "NewsArticle", "Dataset", "ItemList", "FAQPage"],
+    "coverageFiles": "125ファイルでJSON-LDを使用",
+    "knownIssues": [
+      "SEO-010: FlagshipGrid ItemList Schema未実装 (P2 Batch4で修正予定)",
+      "SEO-011: /exam-quiz CourseList/Quiz Schema未実装 (P2 Batch4で修正予定)"
+    ]
+  },
+  "accidentDataCounts": {
+    "detailedCases": {
+      "real-accident-cases.ts": 86,
+      "real-accident-cases-extra.ts": 81,
+      "real-accident-cases-extra2.ts": 40,
+      "real-accident-cases-extra3.ts": 43,
+      "real-accident-cases-2024-2026.ts": 8,
+      "real-accident-cases-2025-preliminary.ts": 16,
+      "real-accident-cases-diverse-industries.ts": 18,
+      "total": 292
+    },
+    "aggregateStatistics": {
+      "source": "src/data/aggregates-mhlw/industry-profiles.json",
+      "note": "厚労省職場のあんぜんサイト 死亡災害DB 2006-2021スナップショット",
+      "constructionTotal": 66713,
+      "manufacturingTotal": 115601,
+      "transportTotal": 66650,
+      "healthcareTotal": 22707,
+      "serviceTotal": 34436,
+      "otherTotal": 198306,
+      "grandTotal": 504413,
+      "dataAge": "2026-04-18生成 (2026-05-20現在32日古い)"
+    },
+    "marketingClaim": "5,000件超 (実データとの対応付け要確認)"
+  }
+}
