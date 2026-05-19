@@ -5,7 +5,7 @@ import Image from "next/image";
  * accident-report PDF. Hidden on screen, visible only when @media print.
  *
  * Includes report title, industry label, today's date, and the issuer
- * (ANZEN AI Portal). The actual page-number markers are drawn via
+ * (Anzen AI Portal). The actual page-number markers are drawn via
  * the @page CSS counter in globals.css.
  */
 export function ReportPrintMeta({
@@ -37,7 +37,7 @@ export function ReportPrintMeta({
         </div>
         <div className="text-right text-[8pt] text-slate-700">
           <p>発行日: {generatedAt}</p>
-          <p>発行: ANZEN AI Portal</p>
+          <p>発行: 安全AIポータル</p>
         </div>
       </div>
     </div>

@@ -50,7 +50,7 @@ export default function KyExamplesPage() {
           license: "https://www.anzen-ai-portal.jp/terms",
           creator: {
             "@type": "Organization",
-            name: "ANZEN AI Portal",
+            name: "Anzen AI Portal",
             url: "https://www.anzen-ai-portal.jp",
           },
           keywords: ["危険予知", "KY活動", "リスクアセスメント", "労働安全"],

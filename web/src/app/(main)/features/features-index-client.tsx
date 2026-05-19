@@ -42,7 +42,7 @@ export function FeaturesIndexClient() {
       <section className="mx-auto max-w-5xl text-center">
         <p className="text-xs font-bold tracking-widest text-emerald-700">FEATURES</p>
         <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl md:text-4xl">
-          {isEn ? "All ANZEN AI Portal features, on one page." : "安全AIポータルの全機能を、1ページで。"}
+          {isEn ? "All Anzen AI Portal features, on one page." : "安全AIポータルの全機能を、1ページで。"}
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
           {isEn
