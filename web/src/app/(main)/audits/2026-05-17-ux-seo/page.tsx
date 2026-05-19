@@ -482,7 +482,8 @@ const FINDINGS_SEO_A: Finding[] = [
       "WebSearch 2026-05-17 時点: (a)『安衛法 AI チャットボット』top10 はBotpress/Malwarebytes/JBS等の汎用記事、安衛法特化チャットボットの言及無し。(b)『労働災害 業種別 分析 レポート』top10 は JISHA / 厚労省 / osh-management.com / keiyaku-watch.jp。安全AIポータル不在。(c)『年次安全衛生計画 業種 ジェネレーター』top10 は厚労省/m3career/aemk.or.jp/sangyoui/sbrain.co.jp等の士業/コンサルブログ。当サイトの『業種10種×規模3段階の30テンプレート』は強力な差別化だが、検索可視性ゼロ。",
     recommendation:
       "(a) /chatbot, /accidents-reports, /strategy/plan-generator の title/description を主要キーワード前半に再構成。(b) これら3機能を起点とする internal-link hub を作り、業種別 LP に E-E-A-T 要素 (オーナー資格・登録番号) を埋め込む。(c) Google Search Console で当該クエリのインプレッション/CTR/ポジションを定常監視する仕組みをドキュメント化。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 242,
   },
   {
     id: "SEO-002",
@@ -645,7 +646,8 @@ const FINDINGS_SEO_D: Finding[] = [
       "PR #225 のハブ&スポーク整理で /chatbot は法令系ハブから link in されたが、 /accidents-reports → /strategy/plan-generator の相互リンクや、 /strategy/plan-generator → /chatbot(『計画書条文確認はAIで』)の動線が薄い。Googlebot のPageRank流通効率が低下。",
     recommendation:
       "(a) /accidents-reports の各業種カードに『この業種の年次計画を作る (/strategy/plan-generator?industry=...)』リンクを追加。 (b) /strategy/plan-generator フォーム結果末尾に『生成計画書を AI に質問 (/chatbot)』リンク。 (c) /chatbot サイドバーに『関連機能: 業種別事故レポート / 年次計画ジェネレーター』を常時表示。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 244,
   },
   {
     id: "SEO-013",
@@ -690,7 +692,8 @@ const FINDINGS_SEO_E: Finding[] = [
       "web/src/contexts/language-context.tsx の LanguageProvider は useState('ja') 初期化、 localStorage から hydrate。 Googlebot は static SSR の日本語 HTML をクロール。 英語版コンテンツは JS 実行後のみ。 Google が JS レンダリングする場合でも、localStorage に何も無い状態で初期表示は ja のままで、英語 indexing は事実上不可能。",
     recommendation:
       "(a) 本格対応する場合は /en/ プレフィックスルート (Next.js i18n routing) を導入し SSR で英語HTMLをemit。(b) 簡易対応なら『Beta』ラベルを撤去し、英語切替機能は Footer 内 explanatory bar に格下げ。中途半端な多言語化を停止。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 244,
   },
   {
     id: "SEO-016",
@@ -811,7 +814,8 @@ const FINDINGS_SEO_H: Finding[] = [
       "web/src/app/layout.tsx:98 `<html lang='ja'>`。 web/src/contexts/language-context.tsx の applyHtmlLang は `document.documentElement.lang = ...` で client mount 後のみ更新。Googlebot は SSR 時点の lang=ja のみ参照。 hreflang/英語切替 UI を併設しても英語版は索引化不可。",
     recommendation:
       "(a) /en/ プレフィックス導入時に layout.tsx を [locale] 動的ルートに変更し SSR で lang を切替、(b) または英語版を諦め、lang=ja のみで運用し全ての英語 UI を撤去。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 244,
   },
   {
     id: "SEO-024",
@@ -825,7 +829,8 @@ const FINDINGS_SEO_H: Finding[] = [
       "(SEO-015/SEO-023 と連動) language-context.tsx LANGUAGE_LABELS.en = 'English (Beta)'。 EnglishBetaBanner コンポーネントもサイト上部に表示。しかし英語版URLは存在せず、Search Console で『英語からの流入』を計測しても 0 のまま。リブランド時に Beta 取り下げの判断が必要。",
     recommendation:
       "(a) /en/ ルート実装で本格対応、 (b) または英語切替 UI 撤去 + 主要ページのみ簡易英語ハブ (/about/en) のみ実装。中途半端な Beta 表記は撤去。",
-    status: "TBD",
+    status: "resolved",
+    resolvedPr: 244,
   },
   {
     id: "SEO-025",
