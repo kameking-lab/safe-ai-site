@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-19T14:17:51.190Z",
+  "fetchedAt": "2026-05-19T17:26:43.865Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -4272,26 +4272,14 @@
         {
           "sourceCode": "280000",
           "level": "advisory",
-          "headline": "南部では、１９日夜遅くまで強風や高波に、２０日未明は高潮に注意してください。兵庫県では、２０日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-19T15:32:00+09:00",
+          "headline": "南部では、２０日未明は高潮に注意してください。兵庫県では、２０日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-05-19T23:40:00+09:00",
           "publishingOffice": "神戸地方気象台",
           "warnings": [
             {
               "areaCode": "280010",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "280010",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "280010",
               "code": "19",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -4363,7 +4351,7 @@
             {
               "areaCode": "2820100",
               "code": "19",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -4380,18 +4368,6 @@
             },
             {
               "areaCode": "2820300",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2820300",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2820300",
               "code": "21",
               "status": "継続",
               "level": "advisory"
@@ -4399,18 +4375,6 @@
             {
               "areaCode": "2820400",
               "code": "21",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2820500",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2820500",
-              "code": "16",
               "status": "継続",
               "level": "advisory"
             },
@@ -4435,7 +4399,7 @@
             {
               "areaCode": "2820800",
               "code": "19",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -4452,18 +4416,6 @@
             },
             {
               "areaCode": "2821000",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2821000",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2821000",
               "code": "21",
               "status": "継続",
               "level": "advisory"
@@ -4471,7 +4423,7 @@
             {
               "areaCode": "2821200",
               "code": "19",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -4495,18 +4447,6 @@
             {
               "areaCode": "2821500",
               "code": "21",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2821600",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2821600",
-              "code": "16",
               "status": "継続",
               "level": "advisory"
             },
@@ -4560,18 +4500,6 @@
             },
             {
               "areaCode": "2822400",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2822400",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2822400",
               "code": "21",
               "status": "継続",
               "level": "advisory"
@@ -4579,18 +4507,6 @@
             {
               "areaCode": "2822500",
               "code": "21",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2822600",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2822600",
-              "code": "16",
               "status": "継続",
               "level": "advisory"
             },
@@ -4615,7 +4531,7 @@
             {
               "areaCode": "2822900",
               "code": "19",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -4639,18 +4555,6 @@
             {
               "areaCode": "2838100",
               "code": "21",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2838200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "2838200",
-              "code": "16",
               "status": "継続",
               "level": "advisory"
             },
@@ -5729,8 +5633,8 @@
         {
           "sourceCode": "430000",
           "level": "advisory",
-          "headline": "天草・芦北地方では、２０日まで高潮に注意してください。熊本県では、２０日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-19T16:08:00+09:00",
+          "headline": "熊本県では、２０日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-05-20T02:12:00+09:00",
           "publishingOffice": "熊本地方気象台",
           "warnings": [
             {
@@ -5742,12 +5646,6 @@
             {
               "areaCode": "430020",
               "code": "21",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "430030",
-              "code": "19",
               "status": "継続",
               "level": "advisory"
             },
@@ -5963,20 +5861,8 @@
             },
             {
               "areaCode": "4348200",
-              "code": "19",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4348200",
               "code": "21",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4348400",
-              "code": "19",
-              "status": "発表",
               "level": "advisory"
             },
             {
