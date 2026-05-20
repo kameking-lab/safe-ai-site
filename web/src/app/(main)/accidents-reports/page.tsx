@@ -63,7 +63,7 @@ export default function AccidentsReportsHubPage() {
     <>
       <JsonLd
         schema={[
-          webPageSchema({ name: title, description, url }),
+          webPageSchema({ name: title, description, url, keywords: ["労働災害 建設業 業種別 分析", "事故事例 建設業 厚生労働省 統計", "業種別 労働災害 分析レポート", "墜落 転落 はさまれ 業種別", "再発防止 対策 事故事例"] }),
           breadcrumbSchema([
             { name: "ホーム", url: SITE_URL },
             { name: "事故データベース", url: `${SITE_URL}/accidents` },

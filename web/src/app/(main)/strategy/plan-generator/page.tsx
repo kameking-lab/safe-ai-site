@@ -17,7 +17,7 @@ import { ogImageUrl } from "@/lib/og-url";
 
 const _title = "年次安全衛生計画 業種別 ジェネレーター｜10業種×3規模・無料・PDF";
 const _desc =
-  "年次安全衛生計画 業種別 ジェネレーター — 建設業・製造業・運輸業・医療福祉ほか10業種×規模3段階の30テンプレートから、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む安全衛生計画書を無料で自動生成。PDF出力可。使い方ガイドは /guides/annual-safety-plan-generator を参照。";
+  "年次安全衛生計画 業種別 テンプレートを無料で自動生成 — 建設業・製造業・運輸業・医療福祉ほか10業種×規模3段階の30テンプレートから、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む安全衛生計画書を作成。PDF出力可。使い方ガイドは /guides/annual-safety-plan-generator を参照。";
 
 export const metadata: Metadata = {
   title: _title,
