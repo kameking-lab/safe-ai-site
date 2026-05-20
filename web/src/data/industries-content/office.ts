@@ -404,5 +404,7 @@ export const officeContent: IndustryContent = {
     "オフィス ヒヤリハット",
     "通勤災害 駅階段 転落",
     "オフィス 第14次労働災害防止計画",
+    "事務系 安全衛生計画書 テンプレート",
+    "事務系 KY 例 PDF",
   ],
 };

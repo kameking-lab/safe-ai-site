@@ -13,7 +13,7 @@ import {
 } from "@/components/json-ld";
 const _title = "安衛法AIチャットボット｜33法令以上を根拠条文付きで即答（無料）";
 const _desc =
-  "安衛法AIチャットボットが労働安全衛生法・安衛則・特化則・有機則・酸欠則・粉じん則・石綿則・じん肺法など33法令以上を根拠条文付きで回答。RAG方式・無料・出典必須。安衛法AIの使い方ガイドは /guides/anzeneho-ai-chatbot を参照。";
+  "安衛法 AI チャットボット（無料）— 労働安全衛生法・安衛則・特化則・有機則・酸欠則・粉じん則・石綿則・じん肺法など33法令以上を根拠条文付きで即答。RAG方式・出典必須。元方事業者の統括責任から化学物質 自律的管理まで幅広く対応。使い方ガイドは /guides/anzeneho-ai-chatbot を参照。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -35,7 +35,7 @@ export default function ChatbotPage() {
     <>
       <JsonLd
         schema={[
-          webPageSchema({ name: _title, description: _desc, url }),
+          webPageSchema({ name: _title, description: _desc, url, keywords: ["安衛法 AI チャットボット 無料", "労働安全衛生法 条文 即答", "33法令 根拠条文付き", "元方事業者 統括責任 Q&A", "化学物質 自律的管理 法令"] }),
           breadcrumbSchema([
             { name: "ホーム", url: SITE_URL },
             { name: "AIチャットボット", url },

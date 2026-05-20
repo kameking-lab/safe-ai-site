@@ -400,5 +400,7 @@ export const foodContent: IndustryContent = {
     "飲食店 災害ゼロ",
     "飲食店 ストレスチェック",
     "飲食店 メンタルヘルス",
+    "飲食業 KY 例 PDF",
+    "飲食業 安全衛生計画書 テンプレート",
   ],
 };

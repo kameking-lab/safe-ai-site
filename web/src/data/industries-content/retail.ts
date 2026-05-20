@@ -387,5 +387,7 @@ export const retailContent: IndustryContent = {
     "小売業 衛生委員会 議事録",
     "小売業 防犯 強盗",
     "小売業 SDS 整備",
+    "小売業 KY 例 PDF",
+    "小売業 安全衛生計画書 テンプレート",
   ],
 };

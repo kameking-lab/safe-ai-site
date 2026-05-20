@@ -315,8 +315,9 @@ export function webPageSchema(input: {
   inLanguage?: string;
   datePublished?: string;
   dateModified?: string;
+  keywords?: string[];
 }): Schema {
-  const { name, description, url, inLanguage = "ja", datePublished, dateModified } = input;
+  const { name, description, url, inLanguage = "ja", datePublished, dateModified, keywords } = input;
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -336,6 +337,7 @@ export function webPageSchema(input: {
     },
     ...(datePublished ? { datePublished } : {}),
     ...(dateModified ? { dateModified } : {}),
+    ...(keywords && keywords.length ? { keywords: keywords.join(", ") } : {}),
   };
 }
 

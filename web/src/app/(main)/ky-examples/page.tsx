@@ -9,7 +9,7 @@ import { JsonLd } from "@/components/json-ld";
 
 const TITLE = "KY事例データベース｜業種・作業別の危険予知例150件";
 const DESC =
-  "建設・製造・運輸・医療福祉・サービスの5業種×10作業別に整理した、危険要因・リスク・対策の参考例。KY用紙作成の出発点として活用できます。";
+  "建設業 KY 例・製造業 KY 例など5業種×10作業別に整理した危険予知例 150件。危険要因・リスク・対策・KY 例文を PDF 形式で確認でき、KY用紙作成の出発点として活用できます。";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -53,7 +53,7 @@ export default function KyExamplesPage() {
             name: "Anzen AI Portal",
             url: "https://www.anzen-ai-portal.jp",
           },
-          keywords: ["危険予知", "KY活動", "リスクアセスメント", "労働安全"],
+          keywords: ["危険予知", "KY活動", "リスクアセスメント", "労働安全", "建設業 KY 例文", "製造業 KY 例 PDF", "KYT 4ラウンド法", "足場 危険予知", "墜落防止 KY"],
         }}
       />
       <Suspense fallback={<PageSkeleton label="KY事例データベースを読み込み中" />}>

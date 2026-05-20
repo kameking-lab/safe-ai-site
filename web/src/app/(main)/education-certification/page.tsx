@@ -10,7 +10,7 @@ import type { EducationCert } from "@/types/education-cert";
 
 const TITLE = "特別教育・技能講習データベース｜業務別必要資格を自動判定";
 const DESCRIPTION =
-  "安衛則第36条の特別教育（約60種）と労働安全衛生法第76条の技能講習（約40種）の完全データベース。業種・作業内容から必要な資格・講習を即時判定。根拠条文・講習時間付き。";
+  "特別教育 60種類 一覧＆技能講習 40種データベース — フルハーネス・足場・低圧電気など安衛則第36条の特別教育と安衛法第76条の技能講習を業種・作業から即時判定。作業主任者 選任 種類・根拠条文・講習時間付き。";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -69,6 +69,7 @@ export default function EducationCertificationPage() {
         name="特別教育・技能講習データベース"
         description={DESCRIPTION}
         path="/education-certification"
+        keywords={["特別教育 60種類 一覧", "技能講習 40種 データベース", "フルハーネス 義務化 特別教育", "作業主任者 選任 種類", "安衛則第36条 特別教育"]}
       />
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
         <PageHeader

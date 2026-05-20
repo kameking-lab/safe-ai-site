@@ -6,7 +6,7 @@ import { SITE_URL } from "@/lib/seo-metadata";
 import { JsonLd, webPageSchema, breadcrumbSchema, datasetSchema } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 const TITLE = "化学物質検索DB（MHLW規制物質 + 専門解説50物質）";
-const DESCRIPTION = `厚生労働省の皮膚等障害化学物質リスト・SDS交付義務物質一覧・がん原性物質一覧・濃度基準値設定物質を CAS 番号でマージした ${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()} 物質と、労働安全コンサルタントによる専門解説 50 物質を横断検索。規制区分・関連法令・濃度基準値を 1 画面で確認。`;
+const DESCRIPTION = `化学物質 GHS分類・SDS 2024年義務物質を CAS番号で検索 — 厚生労働省の皮膚等障害化学物質リスト・SDS交付義務物質一覧・がん原性物質一覧・濃度基準値設定物質を ${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()} 物質統合。専門解説 50 物質付き。規制区分・関連法令・濃度基準値を 1 画面で確認。`;
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -44,7 +44,7 @@ export default function ChemicalDatabasePage() {
             name: "労働安全衛生 化学物質規制データベース",
             description: DESCRIPTION,
             url,
-            keywords: ["化学物質", "SDS", "CAS番号", "OEL", "皮膚等障害化学物質", "がん原性物質", "労働安全衛生法"],
+            keywords: ["化学物質", "SDS", "CAS番号", "OEL", "皮膚等障害化学物質", "がん原性物質", "労働安全衛生法", "化学物質 GHS分類", "SDS 2024年 義務物質", "化学物質 自律的管理"],
             license: "https://creativecommons.org/licenses/by/4.0/",
             variableMeasured: [`収録物質数: ${MHLW_MERGED_CHEMICAL_COUNT}物質`, "規制区分", "濃度基準値", "CAS番号"],
             isBasedOn: [

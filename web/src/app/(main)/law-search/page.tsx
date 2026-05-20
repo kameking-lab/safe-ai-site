@@ -8,7 +8,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "安全衛生法令 条文全文検索（厚労省公式PDF対応）";
 const _desc =
-  "労働安全衛生法・安衛則・クレーン則・有機則・特化則・石綿則・じん肺法など全33法令の条文を全文検索。厚労省の令和4年・5年の省令改正・施行通達 PDF から抽出した条文も含む。条番号・キーワード・法令名で絞り込み可能。";
+  "安衛則・特化則・有機則など全33法令の条文を全文検索 — 熱中症対策（安衛則612条の2）・フルハーネス義務化・化学物質 自律的管理の改正条文も含む。条番号・キーワード・法令名で絞り込み可能。厚労省公式PDF対応。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/law-search" },

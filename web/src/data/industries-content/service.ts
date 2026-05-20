@@ -397,5 +397,7 @@ export const serviceContent: IndustryContent = {
     "サービス業 第14次労働災害防止計画",
     "サービス業 災害ゼロ",
     "サービス業 安全パトロール",
+    "サービス業 安全衛生計画書 テンプレート",
+    "サービス業 KY 例 PDF",
   ],
 };

@@ -419,5 +419,8 @@ export const healthcareContent: IndustryContent = {
     "介護 第14次労働災害防止計画",
     "医療 BCP 感染症",
     "医療 災害ゼロ",
+    "医療福祉 安全衛生計画書 テンプレート 無料",
+    "医療福祉 KY 例 PDF",
+    "医療福祉 年次安全衛生計画 サンプル",
   ],
 };
