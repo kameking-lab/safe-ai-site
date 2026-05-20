@@ -159,21 +159,22 @@ PR #238 で P0級即時対応として **P2のうち4件が解消済**:
   - SEO-010 (4h) `flagship-grid.tsx` に ItemList JSON-LD を埋め込み (各ListItem に name/url/description)
   - SEO-011 (6h) `/exam-quiz` トップに ItemList of Course Schema、`/exam-quiz/[slug]` に Quiz Schema (questions/answers 一部抜粋)
 
-### Batch 5 — Sitemap/Tech SEO + Long-tail Content (27h, 4件)
+### Batch 5 — Sitemap/Tech SEO (11h, 3件) ← SEO-002は前倒し完了済
 
 - **着手日:** 2026-06-07
 - **完了目標:** 2026-06-11 (5日)
-- **PR名:** `feat(seo-p2): sitemap automation + long-tail content (SEO-002/006/008/022)`
-- **依存:** Batch 4 と並行可だが、SEO-002 はメイン3機能の構造確定後 (Batch 3) が前提
-- **マージ後の期待効果:** sitemap鮮度をビルド時自動化、重複コンテンツリスク低減、ロングテール検索意図を3機能の description / 本文に注入
-- **findings:**
+- **PR名:** `feat(seo-p2): sitemap automation (SEO-006/008/022)`
+- **依存:** Batch 4 と並行可
+- **マージ後の期待効果:** sitemap鮮度をビルド時自動化、重複コンテンツリスク低減
+- **SEO-002: 完了済 (2026-05-21前倒し実装, main HEAD fc3389d)**
+  - 60KW以上を18ページのdescription/JSON-LDに自然挿入
+  - webPageSchema/PageJsonLd に keywords プロパティ追加
+  - 業種別 longTailKeywords 10業種に業種×実務文書KW追加
+  - ビルド: 2510/2510成功、テスト: 339/339 passed
+- **findings (残3件):**
   - SEO-006 (4h) `scripts/refresh-sitemap-lastmod.mjs` 新設 (git log ベース)、`web/src/app/sitemap.ts` の静的 lastmod ハードコーディング撤廃
   - SEO-008 (3h) `sitemap.ts` から `compare?industries=...` のクエリ付き5URLを除外、`/accidents-reports/compare` のみ掲載
   - SEO-022 (4h) `scripts/audit-sitemap-routes.mjs` 新設 — (a) sitemap.xml URL vs routes (b) robots Disallow vs sitemap loc (c) lastmod が1年以内 を CI で検証
-  - SEO-002 (16h)
-    - `/strategy/plan-generator` description に「無料・PDF出力可・10業種 (建設業/製造業/運輸業/医療福祉/サービス業/小売業/飲食業/卸売業/倉庫業/事務系)」を明示
-    - `/ky-examples` に「無料 KYT 例 建設業 鉄筋 高所作業 ヒヤリハット」等ロングテール H2 追加
-    - `/heat-illness-prevention` に「安衛則第612条の2 令和7年6月1日施行」正規語句を最初の段落に追加
 
 ### Batch 6 — CWV + Search Expansion + Chatbot SSR + i18n判断 (28h, 6件)
 
