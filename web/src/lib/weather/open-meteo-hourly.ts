@@ -136,7 +136,8 @@ export async function fetchOpenMeteoHourlyPayload(lat: number, lon: number): Pro
   u.searchParams.set("hourly", "temperature_2m,precipitation,weather_code,wind_speed_10m");
   const res = await fetch(u.toString(), {
     headers: { Accept: "application/json" },
-    next: { revalidate: 1800 },
+    // 1h: 上流データ更新が 1h サイクル (docs/perf/isr-followup.md)
+    next: { revalidate: 3600 },
   });
   if (!res.ok) throw new Error("open-meteo-hourly");
   return (await res.json()) as HourlyPayload;

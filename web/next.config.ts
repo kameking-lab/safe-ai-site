@@ -137,12 +137,13 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
-      // robots.txt: s-maxage=0 forces Vercel Edge Cache to always revalidate so
-      // Disallow rule changes (e.g. #232 removing /audits/) take effect immediately.
+      // robots.txt: PR #233 で s-maxage=0 (即時反映目的) を強制していたが、
+      // Disallow ルールは安定したため通常の 24h CDN キャッシュへ復元。
+      // クローラ毎回の Function Invocation を抑制（docs/perf/edge-isr-followup-2026-05-19.md）。
       {
         source: "/robots.txt",
         headers: [
-          { key: "Cache-Control", value: "public, max-age=0, s-maxage=0, must-revalidate" },
+          { key: "Cache-Control", value: "public, max-age=3600, s-maxage=86400, stale-while-revalidate=3600" },
         ],
       },
       // /audits/* は静的レポートページ。CDNに24時間キャッシュさせてFunction呼び出しを抑制

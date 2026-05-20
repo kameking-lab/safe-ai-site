@@ -28,7 +28,8 @@ async function fetchJson(url: string): Promise<JmaWarningPayload | null> {
   try {
     const res = await fetch(url, {
       headers: { Accept: "application/json" },
-      next: { revalidate: 3600 },
+      // 2h: 外側 CDN s-maxage=300 で 5分の鮮度確保。内側を 2h 延長 (docs/perf/isr-followup.md)
+      next: { revalidate: 7200 },
     });
     if (!res.ok) return null;
     return (await res.json()) as JmaWarningPayload;
@@ -57,7 +58,8 @@ const getPrefectureLevelsCached = unstable_cache(
     return levels;
   },
   ["signage-jma-prefecture-levels-v3"],
-  { revalidate: 3600 }
+  // 2h: 外側 CDN s-maxage=300 で 5分の鮮度確保 (docs/perf/isr-followup.md)
+  { revalidate: 7200 }
 );
 
 export async function GET(request: NextRequest) {

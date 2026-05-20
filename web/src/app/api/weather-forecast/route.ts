@@ -86,7 +86,7 @@ async function fetchRegionForecast(region: (typeof REGIONS)[number]): Promise<Re
 
   const res = await fetchWithTimeout(u.toString(), {
     headers: { Accept: "application/json" },
-    next: { revalidate: 3600 }, // 1時間キャッシュ
+    next: { revalidate: 21600 }, // 6h: 日次予報は次日精度に影響なし (docs/perf/isr-followup.md)
     timeoutMs: 6000,
   });
   if (!res.ok) throw new Error(`open-meteo HTTP ${res.status} for ${region.id}`);

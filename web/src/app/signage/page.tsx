@@ -29,7 +29,9 @@ function hintForJmaCode(code: string) {
   return JMA_CODE_HINT[code] ?? `コード ${code}`;
 }
 
-const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
+// 60分: Vercel Edge Requests 削減 (docs/perf/edge-isr-followup-2026-05-19.md)。
+// 上流 /api/signage-data の CDN s-maxage=300 / 内側 revalidate=7200 と整合。
+const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
 const LOCATION_STORAGE_KEY = "signage-location-id";
 const ORIENTATION_STORAGE_KEY = "signage-orientation";
 
