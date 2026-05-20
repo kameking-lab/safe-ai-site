@@ -14,7 +14,7 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 const _title = "化学物質 リスクアセスメント CREATE-SIMPLE 無料｜安衛法57条の3対応";
 const _desc =
-  "化学物質 リスクアセスメント CREATE-SIMPLE 無料ツール — 物質名・GHS分類・取扱量・換気状況からばく露と健康障害のリスク区分（I〜IV）を簡易評価し、推奨保護具・改善対策を提示。安衛法第57条の3・2024年改正（自律的管理）対応。解説は /guides/chemical-ra-create-simple を参照。";
+  "化学物質 リスクアセスメント CREATE-SIMPLE 使い方ガイド＆無料ツール — 物質名・GHS分類・取扱量・換気状況からばく露リスク区分（I〜IV）を簡易評価し、皮膚障害防止の保護具選定・改善対策を提示。安衛法第57条の3・2024年 自律的管理対応。解説は /guides/chemical-ra-create-simple を参照。";
 
 export const metadata: Metadata = {
   title: _title,
