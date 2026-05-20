@@ -8,7 +8,7 @@ import { PageJsonLd } from "@/components/page-json-ld";
 
 const _title = "KY用紙 作成ツール｜危険予知活動";
 const _desc =
-  "危険予知活動表（KY用紙）をオンラインで作成・記録。音声入力対応で現場から入力。建設・製造・土木の安全朝礼KY活動に。";
+  "危険予知活動表（KY用紙）をオンラインで作成・記録。KYT 4ラウンド法の手順で、建設・製造・土木の現場から音声入力でKY例を記録。安全朝礼や職長教育にも活用できます。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -42,7 +42,7 @@ const KY_HOWTO = howToSchema({
 export default function KyPage() {
   return (
     <>
-      <PageJsonLd name={_title} description={_desc} path="/ky" />
+      <PageJsonLd name={_title} description={_desc} path="/ky" keywords={["KYT 4ラウンド法 やり方", "建設業 KY 例 作業前確認", "KY用紙 作成 テンプレート", "危険予知活動 手順"]} />
       <JsonLd schema={KY_HOWTO} />
       <Suspense fallback={<PageSkeleton label="KY用紙ツールを読み込み中" />}>
         <KyPageContent />
