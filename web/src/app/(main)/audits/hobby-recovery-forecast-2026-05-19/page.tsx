@@ -784,6 +784,19 @@ export default function HobbyRecoveryForecast20260519() {
         </div>
       </Section>
 
+      {/* 方針変更ノート */}
+      <Section id="plan-policy-update" title="【更新 2026-05-19】方針変更">
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <p className="font-semibold">Pro継続固定方針に変更。本予測ページは履歴として保持。</p>
+          <p className="mt-1 text-xs text-amber-800">
+            Dispatch A（CDNキャッシュ）・B（ISR削減）を実施後も isrWrites・edgeRequests ともにHobby上限の常時超過が構造的に解消不能と確定。
+            2026-05-19付でHobby復帰を断念しPro継続を無期限方針とした（復帰可能性&lt;5%）。
+            /admin/health-check の「Hobby復帰判定」セクションは参考履歴として残存。
+            再評価条件: 月額コスト変動 or Vercelプラン体系の大規模改定時のみ。
+          </p>
+        </div>
+      </Section>
+
       {/* Footer */}
       <footer className="border-t border-slate-200 pt-6">
         <dl className="space-y-1 text-xs">
