@@ -17,7 +17,10 @@ export type IndustryId =
   | "food"
   | "wholesale"
   | "warehouse"
-  | "office";
+  | "office"
+  | "agriculture"
+  | "forestry"
+  | "fishery";
 
 export type ScaleId = "small" | "medium" | "large";
 
@@ -32,6 +35,9 @@ export const INDUSTRY_LABELS: Record<IndustryId, string> = {
   wholesale: "卸売業",
   warehouse: "倉庫・運送取扱業",
   office: "事務系（情報通信・金融・士業ほか）",
+  agriculture: "農業",
+  forestry: "林業",
+  fishery: "漁業",
 };
 
 export const SCALE_LABELS: Record<ScaleId, string> = {
