@@ -5,6 +5,11 @@
  */
 import { NextResponse } from "next/server";
 import { searchProducts } from "@/lib/sds-fetcher";
+import { cdnCacheHeaders, noStoreHeaders } from "@/lib/api-cache";
+
+// F-005: SDS検索は同一(productName, manufacturer)で同一結果に収束。
+// ただし内蔵DB追加が頻繁にあり得るので5分のみ。
+const SUCCESS_CACHE = cdnCacheHeaders("REALTIME");
 
 export type SdsSearchRequest = {
   productName: string;
@@ -18,7 +23,7 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json(
       { error: { code: "VALIDATION", message: "リクエスト形式が不正です。" } },
-      { status: 400 }
+      { status: 400, headers: noStoreHeaders() }
     );
   }
 
@@ -26,7 +31,7 @@ export async function POST(request: Request) {
   if (!productName) {
     return NextResponse.json(
       { error: { code: "VALIDATION", message: "製品名を入力してください。" } },
-      { status: 400 }
+      { status: 400, headers: noStoreHeaders() }
     );
   }
 
@@ -38,6 +43,6 @@ export async function POST(request: Request) {
       disclaimer:
         "本検索はSDS情報の参考表示です。最終判断は事業者責任のもと公式SDSをご確認ください。",
     },
-    { status: 200 }
+    { status: 200, headers: SUCCESS_CACHE }
   );
 }
