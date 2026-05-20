@@ -47,11 +47,11 @@ const FINDINGS: Finding[] = [
     filePath: "web/src/app/api/admin/health/route.ts:6",
     prSource: [247],
     detail:
-      "const VALID_KEY = 'anzenai2026' をコード内ハードコード。比較対照: /admin/env-audit, /admin/health-check, /strategy/page.tsx, auth.ts, proxy.ts はすべて process.env.STRATEGY_AUTH_PASSWORD 経由でゲート。PR #193 (remove hardcoded credential from /strategy client bundle) で同種の修正を実施済みなのに再発。",
+      "const VALID_KEY = '<REDACTED>' をコード内ハードコード。比較対照: /admin/env-audit, /admin/health-check, /strategy/page.tsx, auth.ts, proxy.ts はすべて process.env.STRATEGY_AUTH_PASSWORD 経由でゲート。PR #193 (remove hardcoded credential from /strategy client bundle) で同種の修正を実施済みなのに再発。",
     risk:
-      "client bundle には含まれないが GitHub public source に残るため攻撃者が ?key=anzenai2026 で叩ける。返却内容は service status のみだが内部 URL/環境を公開する情報源となる。",
+      "client bundle には含まれないが GitHub public source に残るため攻撃者が旧固定鍵で /api/admin/health を叩ける。返却内容は service status のみだが内部 URL/環境を公開する情報源となる。",
     recommendation:
-      "const VALID_KEY = process.env.STRATEGY_AUTH_PASSWORD ?? '' に変更し、空文字なら 503。ヒストリから値を消去 (BFG / filter-branch) または STRATEGY_AUTH_PASSWORD をローテーション。",
+      "const VALID_KEY = process.env.ADMIN_HEALTH_KEY に変更し、未設定時 401。Vercel 本番に強い乱数値を設定し旧鍵を廃止 (security/f002-admin-health-auth で対応)。",
   },
   {
     id: "F-003",

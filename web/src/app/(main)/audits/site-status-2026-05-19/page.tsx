@@ -443,9 +443,9 @@ export default function SiteStatusReport20260519() {
             <p>
               <strong>F-002（P1、Security）:</strong>
               <code>src/app/api/admin/health/route.ts:6</code> に
-              <code>const VALID_KEY = &apos;anzenai2026&apos;</code> がハードコードされており、GitHubパブリックソースに露出中。
+              <code>const VALID_KEY = &apos;&lt;REDACTED&gt;&apos;</code>（旧固定鍵）がハードコードされており、GitHubパブリックソースに露出していた。
               返却内容はservice statusのみだが内部URL/環境情報の公開リスクあり。
-              推奨対応は <code>process.env.STRATEGY_AUTH_PASSWORD ?? &apos;&apos;</code> への置換＋GitHistoryからの消去（BFG）またはSTRATEGY_AUTH_PASSWORDのローテーション。本ページでは処理しない。
+              対応: <code>process.env.ADMIN_HEALTH_KEY</code> ベースに変更済み（security/f002-admin-health-auth）。旧鍵は履歴に残るため Vercel 環境変数を新しい強い乱数値に設定する必要あり。
             </p>
           </Prose>
         </SubSection>

@@ -388,9 +388,9 @@ export default function SiteRealityCheck20260519() {
               次の判断者は「レポートの認識を本番に合わせて修正する」か「本番を強化して内部数値を可視化する」かの方針決定が必要。
             </li>
             <li>
-              F-002(ハードコード認証鍵)は本番で実際に動作しており、curl で /api/admin/health?key=anzenai2026 を叩くと
-              Gemini / Stripe / Supabase / GA4 / GSC 等10サービスの configured 状態・fallback 動作・circuit breaker 状態を含む詳細 JSON を返却する。
-              GitHub public リポジトリにキーが露出し続けていることと合わせ、 P1 セキュリティ事案として優先処置が必要。
+              F-002(ハードコード認証鍵)は 2026-05-19 時点で本番で実際に動作しており、curl で /api/admin/health?key=&lt;旧固定鍵&gt; を叩くと
+              Gemini / Stripe / Supabase / GA4 / GSC 等10サービスの configured 状態・fallback 動作・circuit breaker 状態を含む詳細 JSON を返却していた。
+              security/f002-admin-health-auth で ADMIN_HEALTH_KEY 環境変数化済み。Vercel 本番に新値を設定し旧鍵は廃止する手順が残っている。
             </li>
             <li>
               レポート §6.3 が指摘していた「33法令以上 vs 50法令体制」のズレは本番で完全に未解消で、
