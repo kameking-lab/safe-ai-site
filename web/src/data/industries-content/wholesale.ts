@@ -404,5 +404,7 @@ export const wholesaleContent: IndustryContent = {
     "卸売業 ストレスチェック",
     "卸売業 メンタルヘルス",
     "卸売業 BCP 物流",
+    "卸売業 安全衛生計画書 テンプレート",
+    "卸売業 KY 例 PDF",
   ],
 };
