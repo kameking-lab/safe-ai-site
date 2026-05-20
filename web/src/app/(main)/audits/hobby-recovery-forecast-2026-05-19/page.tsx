@@ -429,6 +429,15 @@ export default function HobbyRecoveryForecast20260519() {
           実測値は{" "}
           <code className="font-mono">/admin/health-check?key=...</code> で取得可能。
         </div>
+        <div className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-xs text-sky-900">
+          <strong className="font-semibold">2026-05-19 followup 反映:</strong>{" "}
+          本ベースライン公開後、Edge発生源削減 (signage polling / proxy.ts matcher / robots.txt cache) と
+          ISR追加削減 (fetch revalidate 5件) を実装。Edge Requests は 159% → 約 135-150% (依然 blocked)、
+          ISR Writes は 540% → 約 478% (依然 blocked) と試算。詳細は{" "}
+          <code className="font-mono">docs/perf/edge-isr-followup-2026-05-19.md</code> を参照。
+          <strong className="font-semibold"> Hobby復帰可能性は約30% → 5%未満に下方修正</strong>
+          （構造的トラフィック構成のためコード変更だけでは到達不可。Pro継続が現実的）。
+        </div>
       </header>
 
       {/* Section 1: Current Status */}

@@ -40,7 +40,9 @@ type ApiBundle = {
 type ViewState = { lat: number; lng: number; zoom: number };
 const VIEW_STORAGE_KEY = "signage-map-view";
 const SEEN_QUAKE_STORAGE_KEY = "signage-map-seen-quakes";
-const REFRESH_INTERVAL_MS = 15 * 60 * 1000;
+// 30分: Vercel Edge Requests 削減 (docs/perf/edge-isr-followup-2026-05-19.md)。
+// 上流 /api/signage/jma の revalidate=3600 / CDN s-maxage=300 と整合。
+const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
 const DEFAULT_VIEW: ViewState = { lat: 36.5, lng: 138.0, zoom: 5 };
 
 function isValidView(v: unknown): v is ViewState {

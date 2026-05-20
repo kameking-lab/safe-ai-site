@@ -124,7 +124,8 @@ async function fetchAndFilter(
 ): Promise<{ total: number; records: Accident[] }> {
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
-    next: { revalidate: 60 * 60 },
+    // 6h: Blob 内容は手動更新のみ (docs/perf/isr-followup.md)
+    next: { revalidate: 6 * 60 * 60 },
   });
   if (!res.ok || !res.body) {
     throw new Error(`Blob fetch failed: ${res.status}`);

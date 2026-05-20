@@ -80,7 +80,8 @@ export async function fetchLaborTrendItems(maxTotal: number): Promise<LaborRssIt
   const seen = new Set<string>();
   for (const url of urls) {
     try {
-      const res = await fetch(url, { headers, next: { revalidate: 3600 } });
+      // 6h: トレンド表示用 news (docs/perf/isr-followup.md)
+      const res = await fetch(url, { headers, next: { revalidate: 21600 } });
       if (!res.ok) continue;
       const xml = await res.text();
       for (const item of parseLaborRssItems(xml, 14)) {
