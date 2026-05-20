@@ -5,6 +5,11 @@ import type { SummaryApiRouteResponse } from "@/lib/types/api";
 import type { LawRevisionSummary } from "@/lib/types/domain";
 import { withCircuitBreaker } from "@/lib/external/circuit-breaker";
 import { fetchWithTimeout } from "@/lib/external/fetch-with-timeout";
+import { cdnCacheHeaders, noStoreHeaders } from "@/lib/api-cache";
+
+// F-005: 唯一のGETルート。revisionIdごとに固定応答 → Vercel Edge Cache実効。
+// 法改正の追加は日次以下のペースなので1h保持+24h SWR。最大の削減効果が期待される。
+const SUCCESS_CACHE = cdnCacheHeaders("DAILY");
 
 function parseDelay(value: string | null, fallbackMs: number): number {
   const parsed = Number(value);
@@ -37,7 +42,7 @@ function errorResponse(
         retryable,
       },
     },
-    { status }
+    { status, headers: noStoreHeaders() }
   );
 }
 
@@ -67,10 +72,13 @@ export async function GET(request: NextRequest) {
 
   const mockSummary = summaryMockByRevisionId[revisionId];
   if (mockSummary) {
-    return NextResponse.json<SummaryApiRouteResponse>({
-      ok: true,
-      data: { revisionId, summary: mockSummary },
-    });
+    return NextResponse.json<SummaryApiRouteResponse>(
+      {
+        ok: true,
+        data: { revisionId, summary: mockSummary },
+      },
+      { headers: SUCCESS_CACHE }
+    );
   }
 
   // Fallback: 事前要約が未作成の場合は、AI or ヒューリスティックで生成
@@ -79,10 +87,13 @@ export async function GET(request: NextRequest) {
     return errorResponse(404, "要約データが見つかりませんでした。", "NOT_FOUND", false);
   }
   const generated = await generateSummaryForRevision(revision);
-  return NextResponse.json<SummaryApiRouteResponse>({
-    ok: true,
-    data: { revisionId, summary: generated },
-  });
+  return NextResponse.json<SummaryApiRouteResponse>(
+    {
+      ok: true,
+      data: { revisionId, summary: generated },
+    },
+    { headers: SUCCESS_CACHE }
+  );
 }
 
 async function generateSummaryForRevision(

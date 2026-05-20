@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
+import { cdnCacheHeaders, noStoreHeaders } from "@/lib/api-cache";
+
+// F-005: 翻訳は同一(text, targetLang)で同一結果。4hキャッシュ+24h SWRで再アクセス削減。
+const SUCCESS_CACHE = cdnCacheHeaders("INDUSTRY");
 
 export type TranslateRequest = {
   /** 翻訳対象のテキスト（タイトル+本文を改行で連結したもの） */
@@ -43,19 +47,21 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as TranslateRequest;
   } catch {
-    return NextResponse.json({ error: "invalid_json" }, { status: 400 });
+    return NextResponse.json({ error: "invalid_json" }, { status: 400, headers: noStoreHeaders() });
   }
 
   if (!body?.text || !body?.targetLang) {
     return NextResponse.json(
       { error: "missing_required_fields" },
-      { status: 400 }
+      { status: 400, headers: noStoreHeaders() }
     );
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return NextResponse.json(buildPlaceholder(body.text, body.targetLang));
+    return NextResponse.json(buildPlaceholder(body.text, body.targetLang), {
+      headers: SUCCESS_CACHE,
+    });
   }
 
   try {
@@ -82,22 +88,26 @@ export async function POST(request: Request) {
       { failureThreshold: 4, cooldownMs: 60_000 }
     );
 
-    return NextResponse.json({
-      text: translated.trim(),
-      source: "gemini",
-    } satisfies TranslateResponse);
+    return NextResponse.json(
+      {
+        text: translated.trim(),
+        source: "gemini",
+      } satisfies TranslateResponse,
+      { headers: SUCCESS_CACHE }
+    );
   } catch (err) {
     const reason = err instanceof CircuitOpenError
       ? "Gemini circuit open (連続失敗中)"
       : err instanceof Error
         ? err.message
         : "unknown_error";
+    // 縮退応答(原文+notice)はGemini復帰時に再生成すべきなのでキャッシュしない
     return NextResponse.json(
       {
         ...buildPlaceholder(body.text, body.targetLang),
         notice: `Gemini呼び出しエラー: ${reason}`,
       },
-      { status: 200 }
+      { status: 200, headers: noStoreHeaders() }
     );
   }
 }

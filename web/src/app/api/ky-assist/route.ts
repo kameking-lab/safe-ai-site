@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { buildKyAssistText, buildRiskAssessmentTable, type KyAssistField } from "@/data/mock/ky-assist-responses";
 import { AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
+import { cdnCacheHeaders, noStoreHeaders } from "@/lib/api-cache";
+
+// F-005: seedベースの確率的応答だが、同一(workContext, industryId)で繰り返される
+// 連続呼び出しを5分間吸収。
+const SUCCESS_CACHE = cdnCacheHeaders("REALTIME");
 
 type Body = {
   /** "table" を指定するとリスクアセスメント表を一括生成。未指定時は単項目補完。 */
@@ -24,7 +29,7 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as Body;
   } catch {
-    return NextResponse.json({ error: "JSONが不正です" }, { status: 400 });
+    return NextResponse.json({ error: "JSONが不正です" }, { status: 400, headers: noStoreHeaders() });
   }
 
   // モード: リスクアセスメント表の一括生成
@@ -33,13 +38,16 @@ export async function POST(request: Request) {
       workContext: body.workContext?.trim() || "",
       industryId: body.industryId,
     });
-    return NextResponse.json({ ...result, disclaimer: AI_LEGAL_DISCLAIMER }, { status: 200 });
+    return NextResponse.json(
+      { ...result, disclaimer: AI_LEGAL_DISCLAIMER },
+      { status: 200, headers: SUCCESS_CACHE }
+    );
   }
 
   // モード: 単一項目（hazard/reduction/rereduction）の補完
   const field = body.field;
   if (field !== "hazard" && field !== "reduction" && field !== "rereduction") {
-    return NextResponse.json({ error: "field が不正です" }, { status: 400 });
+    return NextResponse.json({ error: "field が不正です" }, { status: 400, headers: noStoreHeaders() });
   }
 
   const text = buildKyAssistText({
@@ -56,5 +64,8 @@ export async function POST(request: Request) {
     industryId: body.industryId,
   });
 
-  return NextResponse.json({ text, disclaimer: AI_LEGAL_DISCLAIMER }, { status: 200 });
+  return NextResponse.json(
+    { text, disclaimer: AI_LEGAL_DISCLAIMER },
+    { status: 200, headers: SUCCESS_CACHE }
+  );
 }
