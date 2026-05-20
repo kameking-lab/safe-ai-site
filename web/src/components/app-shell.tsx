@@ -450,21 +450,6 @@ export function AppShell({ children, user }: AppShellProps) {
               >
                 <Search className="h-4 w-4" aria-hidden="true" />
               </button>
-              {/* 屋外（ハイコントラスト）モードトグル */}
-              <button
-                type="button"
-                onClick={toggleHighContrast}
-                aria-label={highContrastEnabled ? "屋外モードをオフ" : "屋外モードをオン"}
-                aria-pressed={highContrastEnabled}
-                className={`inline-flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition-colors ${
-                  highContrastEnabled
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                }`}
-                title="屋外（ハイコントラスト）モード切替"
-              >
-                {highContrastEnabled ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </button>
               <ThemeToggle size="sm" />
               <UserMenu user={user} />
               <button
