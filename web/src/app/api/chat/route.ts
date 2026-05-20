@@ -2,11 +2,15 @@ import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { searchRelevantArticles, buildContextFromArticles } from "@/lib/rag-search";
 import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
+import { cdnCacheHeaders, noStoreHeaders } from "@/lib/api-cache";
 import type {
   ChatApiRequest,
   ChatApiResponse,
   ApiErrorResponse,
 } from "@/lib/types/api";
+
+// F-005: RAG応答は質問+revisionTitleで変動。短時間CDNキャッシュで連続同一質問のみ吸収。
+const SUCCESS_CACHE = cdnCacheHeaders("REALTIME");
 
 function jsonError(status: number, code: ApiErrorResponse["error"]["code"], message: string) {
   return NextResponse.json<ApiErrorResponse>(
@@ -17,7 +21,7 @@ function jsonError(status: number, code: ApiErrorResponse["error"]["code"], mess
         retryable: status >= 500,
       },
     },
-    { status }
+    { status, headers: noStoreHeaders() }
   );
 }
 
@@ -102,7 +106,7 @@ export async function POST(request: Request) {
           "AIチャットボット（Gemini）のAPIキーが設定されていません。\n" +
           "Vercelの環境変数 GEMINI_API_KEY を設定すると、労働安全衛生法に基づく回答を取得できます。",
       },
-      { status: 200 }
+      { status: 200, headers: SUCCESS_CACHE }
     );
   }
 
@@ -126,7 +130,7 @@ export async function POST(request: Request) {
       { failureThreshold: 4, cooldownMs: 60_000 }
     );
 
-    return NextResponse.json<ChatApiResponse>({ reply: answer }, { status: 200 });
+    return NextResponse.json<ChatApiResponse>({ reply: answer }, { status: 200, headers: SUCCESS_CACHE });
   } catch (err) {
     const lower = err instanceof Error ? err.message.toLowerCase() : "";
     let reason = "AIサービスへの接続に失敗しました";
@@ -151,7 +155,8 @@ export async function POST(request: Request) {
         "条文本文は左側パネルまたは e-Gov 法令検索 (https://laws.e-gov.go.jp/) でご確認ください。",
         "AI要約が必要な場合は数分後に再度お試しいただくか、運営者へお問い合わせください。",
       ].join("\n");
-      return NextResponse.json<ChatApiResponse>({ reply }, { status: 200 });
+      // 縮退応答(関連条文のみ)もキャッシュ可: 同一質問なら同一条文セット
+      return NextResponse.json<ChatApiResponse>({ reply }, { status: 200, headers: SUCCESS_CACHE });
     }
 
     return jsonError(503, "UNAVAILABLE", `${reason}。しばらくしてから再試行してください。`);

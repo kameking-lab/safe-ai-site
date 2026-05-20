@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cdnCacheHeaders } from "@/lib/api-cache";
+
+// F-005: 同一問題(questionText+choices+correctAnswer)は同一AI解説に収束。
+const SUCCESS_CACHE = cdnCacheHeaders("INDUSTRY");
 
 interface QuizExplainRequest {
   questionText: string;
@@ -15,10 +19,13 @@ export async function POST(req: NextRequest) {
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    return NextResponse.json({
-      explanation: fallbackExplanation ?? "AI解説は現在ご利用いただけません。",
-      source: "fallback",
-    });
+    return NextResponse.json(
+      {
+        explanation: fallbackExplanation ?? "AI解説は現在ご利用いただけません。",
+        source: "fallback",
+      },
+      { headers: SUCCESS_CACHE }
+    );
   }
 
   const choicesText = choices
@@ -55,10 +62,13 @@ ${relatedLaw ? `【関連法令】${relatedLaw}` : ""}
     );
 
     if (!res.ok) {
-      return NextResponse.json({
-        explanation: fallbackExplanation ?? "AI解説は現在ご利用いただけません。",
-        source: "fallback",
-      });
+      return NextResponse.json(
+        {
+          explanation: fallbackExplanation ?? "AI解説は現在ご利用いただけません。",
+          source: "fallback",
+        },
+        { headers: SUCCESS_CACHE }
+      );
     }
 
     const data = (await res.json()) as {
@@ -66,14 +76,20 @@ ${relatedLaw ? `【関連法令】${relatedLaw}` : ""}
     };
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 
-    return NextResponse.json({
-      explanation: text || fallbackExplanation || "AI解説は現在ご利用いただけません。",
-      source: text ? "ai" : "fallback",
-    });
+    return NextResponse.json(
+      {
+        explanation: text || fallbackExplanation || "AI解説は現在ご利用いただけません。",
+        source: text ? "ai" : "fallback",
+      },
+      { headers: SUCCESS_CACHE }
+    );
   } catch {
-    return NextResponse.json({
-      explanation: fallbackExplanation ?? "AI解説は現在ご利用いただけません。",
-      source: "fallback",
-    });
+    return NextResponse.json(
+      {
+        explanation: fallbackExplanation ?? "AI解説は現在ご利用いただけません。",
+        source: "fallback",
+      },
+      { headers: SUCCESS_CACHE }
+    );
   }
 }

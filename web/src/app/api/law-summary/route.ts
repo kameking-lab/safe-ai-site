@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { fetchWithTimeout } from "@/lib/external/fetch-with-timeout";
 import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
+import { cdnCacheHeaders } from "@/lib/api-cache";
 
 const LAW_SUMMARY_TIMEOUT_MS = 12_000;
+// F-005: 同一条文(law+articleNum+text)は同一要約に収束するため4hキャッシュ。
+const SUCCESS_CACHE = cdnCacheHeaders("INDUSTRY");
 
 function excerpt(text: string, maxChars = 200): string {
   return text.length > maxChars ? `${text.slice(0, maxChars)}…` : text;
@@ -31,7 +34,9 @@ export async function POST(req: Request) {
 
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey || apiKey === "dummy") {
-    return NextResponse.json(buildFallback(law, articleNum, text, "GEMINI_API_KEY未設定"));
+    return NextResponse.json(buildFallback(law, articleNum, text, "GEMINI_API_KEY未設定"), {
+      headers: SUCCESS_CACHE,
+    });
   }
 
   const prompt = `以下の労働安全衛生法令の条文を、現場担当者向けに3〜5行で分かりやすく要約してください。法令名・条番号を冒頭に示し、重要なポイントを箇条書きで補足してください。回答の末尾には必ず「【出典】告示番号（わかる場合）とe-GovのURL（例: https://laws.e-gov.go.jp/law/347AC0000000057）」を記載してください。\n\n法令: ${law} ${articleNum}\n\n条文:\n${text}`;
@@ -61,9 +66,11 @@ export async function POST(req: Request) {
 
     const summary = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
     if (!summary) {
-      return NextResponse.json(buildFallback(law, articleNum, text, "AI応答が空"));
+      return NextResponse.json(buildFallback(law, articleNum, text, "AI応答が空"), {
+        headers: SUCCESS_CACHE,
+      });
     }
-    return NextResponse.json({ summary, source: "ai" });
+    return NextResponse.json({ summary, source: "ai" }, { headers: SUCCESS_CACHE });
   } catch (err) {
     const message = err instanceof Error ? err.message.toLowerCase() : "";
     let reason = "AI応答エラー";
@@ -72,6 +79,9 @@ export async function POST(req: Request) {
     else if (message.includes("timeout") || message.includes("timed out")) reason = "AIサービス応答タイムアウト";
     else if (message.includes("network") || message.includes("fetch")) reason = "ネットワークエラー";
     console.error("[law-summary] Gemini call failed:", err instanceof Error ? err.message : err);
-    return NextResponse.json(buildFallback(law, articleNum, text, reason));
+    // フォールバック文も同一条文なら同一出力なのでキャッシュ可
+    return NextResponse.json(buildFallback(law, articleNum, text, reason), {
+      headers: SUCCESS_CACHE,
+    });
   }
 }
