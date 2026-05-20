@@ -15,11 +15,13 @@ export function PageJsonLd({
   description,
   path,
   breadcrumbs,
+  keywords,
 }: {
   name: string;
   description: string;
   path: string;
   breadcrumbs?: Crumb[];
+  keywords?: string[];
 }) {
   const url = `${SITE_BASE}${path}`;
   const crumbs: Crumb[] = breadcrumbs ?? [
@@ -37,7 +39,7 @@ export function PageJsonLd({
     <>
       <JsonLd
         schema={[
-          webPageSchema({ name, description, url }),
+          webPageSchema({ name, description, url, keywords }),
           breadcrumbSchema(crumbs),
         ]}
       />
