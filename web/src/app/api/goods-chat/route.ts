@@ -5,6 +5,10 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
+import { cdnCacheHeaders, noStoreHeaders } from "@/lib/api-cache";
+
+// F-005: 同一質問に対するAI生成は概ね収束する一方、商品リンクの鮮度を考慮して5分のみ。
+const SUCCESS_CACHE = cdnCacheHeaders("REALTIME");
 
 export type GoodsChatRequest = {
   question: string;
@@ -114,12 +118,18 @@ export async function POST(request: Request) {
   try {
     body = (await request.json()) as GoodsChatRequest;
   } catch {
-    return NextResponse.json({ error: { code: "VALIDATION", message: "リクエスト形式が不正です。" } }, { status: 400 });
+    return NextResponse.json(
+      { error: { code: "VALIDATION", message: "リクエスト形式が不正です。" } },
+      { status: 400, headers: noStoreHeaders() }
+    );
   }
 
   const question = body?.question?.trim();
   if (!question || question.length === 0) {
-    return NextResponse.json({ error: { code: "VALIDATION", message: "作業内容を入力してください。" } }, { status: 400 });
+    return NextResponse.json(
+      { error: { code: "VALIDATION", message: "作業内容を入力してください。" } },
+      { status: 400, headers: noStoreHeaders() }
+    );
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -152,7 +162,7 @@ export async function POST(request: Request) {
         },
       ],
     };
-    return NextResponse.json(demoResponse, { status: 200 });
+    return NextResponse.json(demoResponse, { status: 200, headers: SUCCESS_CACHE });
   }
 
   const userPrompt = `以下の作業内容・環境に対して、必要な保護具を推薦してください。
@@ -179,7 +189,7 @@ ${question}
     const recommendations = extractRecommendations(rawReply);
     const cleanReply = removeJsonBlock(rawReply);
     const response: GoodsChatResponse = { reply: cleanReply, recommendations };
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(response, { status: 200, headers: SUCCESS_CACHE });
   } catch (err) {
     const lower = err instanceof Error ? err.message.toLowerCase() : "";
     let reason = "AIサービス接続エラー";
@@ -187,6 +197,10 @@ ${question}
     else if (lower.includes("quota") || lower.includes("429")) reason = "APIクォータ超過";
     else if (lower.includes("timeout")) reason = "AI応答タイムアウト";
     console.error("[goods-chat] Gemini call failed:", err instanceof Error ? err.message : err);
-    return NextResponse.json(buildDegradedResponse(question, reason), { status: 200 });
+    // 縮退応答はGemini復帰時に再生成すべきなのでキャッシュしない
+    return NextResponse.json(buildDegradedResponse(question, reason), {
+      status: 200,
+      headers: noStoreHeaders(),
+    });
   }
 }

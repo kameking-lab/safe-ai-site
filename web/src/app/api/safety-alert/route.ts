@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { AI_DISCLAIMER_SYSTEM_INSTRUCTION, AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
 import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
+import { cdnCacheHeaders, noStoreHeaders } from "@/lib/api-cache";
 
 export const runtime = "nodejs";
+
+// F-005: 朝礼アラートはニュース・天候・法改正の日次変動に追従。1h保持+24h SWR。
+const SUCCESS_CACHE = cdnCacheHeaders("DAILY");
 
 type AlertKind = "fatal-accident" | "weather" | "law-revision";
 
@@ -48,11 +52,17 @@ export async function POST(request: Request): Promise<NextResponse<ResponseBody>
   try {
     body = (await request.json()) as RequestBody;
   } catch {
-    return NextResponse.json({ error: "リクエストの形式が不正です。" }, { status: 400 });
+    return NextResponse.json(
+      { error: "リクエストの形式が不正です。" },
+      { status: 400, headers: noStoreHeaders() }
+    );
   }
 
   if (!body?.kind || !body?.title?.trim()) {
-    return NextResponse.json({ error: "kind と title は必須です。" }, { status: 400 });
+    return NextResponse.json(
+      { error: "kind と title は必須です。" },
+      { status: 400, headers: noStoreHeaders() }
+    );
   }
 
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
@@ -65,7 +75,7 @@ export async function POST(request: Request): Promise<NextResponse<ResponseBody>
           "\n・基本装備（ヘルメット・保護具）の着用を徹底してください\n・始業前のKYで本日のリスクを再確認しましょう\n・無理な作業は避け、声かけ・指差呼称を励行してください",
         disclaimer: AI_LEGAL_DISCLAIMER,
       },
-      { status: 200 },
+      { status: 200, headers: SUCCESS_CACHE },
     );
   }
 
@@ -84,13 +94,17 @@ export async function POST(request: Request): Promise<NextResponse<ResponseBody>
       },
       { failureThreshold: 4, cooldownMs: 60_000 }
     );
-    return NextResponse.json({ alert: text, disclaimer: AI_LEGAL_DISCLAIMER }, { status: 200 });
+    return NextResponse.json(
+      { alert: text, disclaimer: AI_LEGAL_DISCLAIMER },
+      { status: 200, headers: SUCCESS_CACHE }
+    );
   } catch (err) {
     const lower = err instanceof Error ? err.message.toLowerCase() : "";
     let reason = "AIサービスへの接続に失敗しました";
     if (err instanceof CircuitOpenError) reason = "AIサービスが連続失敗中（自動復旧待ち）";
     else if (lower.includes("quota") || lower.includes("429")) reason = "AIサービスの利用制限に達しました";
     console.error("[safety-alert] Gemini call failed:", err instanceof Error ? err.message : err);
+    // 縮退応答はGemini復帰時に再生成すべきなのでキャッシュしない
     return NextResponse.json(
       {
         alert:
@@ -103,7 +117,7 @@ export async function POST(request: Request): Promise<NextResponse<ResponseBody>
         degraded: true,
         degradedReason: reason,
       },
-      { status: 200 },
+      { status: 200, headers: noStoreHeaders() },
     );
   }
 }
