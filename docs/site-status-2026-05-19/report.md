@@ -272,7 +272,7 @@ P1 2件、P2 3件、P3 6件。
 
 F-001（P1, Data integrity）: 未来日付の事故レコード mhlw-2026-001（occurredOn: 2026-07-08、本日より49日先の未来）。`web/src/data/mock/real-accident-cases-2024-2026.ts:143-162`。
 
-F-002（P1, Security）: ハードコード認証鍵 `const VALID_KEY = 'anzenai2026'` を `/api/admin/health/route.ts:6` に記述。GitHubパブリックソースに露出。
+F-002（P1, Security）: ハードコード認証鍵 `const VALID_KEY = '<REDACTED>'`（旧固定鍵）を `/api/admin/health/route.ts:6` に記述していた。GitHubパブリックソースに露出。security/f002-admin-health-auth で `process.env.ADMIN_HEALTH_KEY` 化済み。
 
 F-003（P2, Brand consistency）: ANZEN AI Portal 残存6箇所（OG画像英語tagline・印刷PDF発行元・About英語見出し・Features英語hero・Circulars英語footer・Dataset JSON-LD creator）。PR #246では部分対応のみ。
 
@@ -286,7 +286,7 @@ F-006〜F-011（P3）: データファイル年度命名不整合・管理画面
 
 **F-001**: `real-accident-cases-2024-2026.ts:143-162` の mhlw-2026-001レコードは occurredOn=2026-07-08（未来日付）かつ provenance='mhlw'（厚労省公式扱い）。本Dispatch内では処理しない。推奨対応は（1）occurredOn を2025-07-08に修正しタイトル整合、（2）レコード削除、（3）provenance='scenario'変更＋disclaimerフィールド追加の3択。複数の監査ページ（post-2week-regression/2026-05-16/brand-consistency）で言及済み。
 
-**F-002**: `/api/admin/health/route.ts:6` の `const VALID_KEY = 'anzenai2026'` はGitHub公開リポジトリに露出。返却内容はservice statusのみだが内部URL/環境情報の公開リスクあり。PR #193で同種の修正実施済みにもかかわらず再発したケース。推奨対応は `process.env.STRATEGY_AUTH_PASSWORD ?? ''` への置換＋Gitヒストリからの消去（BFG）またはSTRATEGY_AUTH_PASSWORDのローテーション。本Dispatch内では処理しない。
+**F-002**: `/api/admin/health/route.ts:6` の旧固定鍵 `const VALID_KEY = '<REDACTED>'` はGitHub公開リポジトリに露出。返却内容はservice statusのみだが内部URL/環境情報の公開リスクあり。PR #193で同種の修正実施済みにもかかわらず再発したケース。security/f002-admin-health-auth で `process.env.ADMIN_HEALTH_KEY` に変更済み。残る作業は Vercel 本番環境変数の設定と旧鍵のローテーション（Gitヒストリからの消去は任意）。
 
 ### 5.5 コード内TODO/FIXME全件
 

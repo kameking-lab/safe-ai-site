@@ -71,7 +71,7 @@ Steps (example with BFG):
 git clone --mirror https://github.com/kameking-lab/safe-ai-site.git
 
 # 2. Create a file with the credential to replace (one value per line)
-echo "anzenai2026" > credentials.txt
+echo "<REDACTED-旧鍵値>" > credentials.txt
 
 # 3. Run BFG
 java -jar bfg.jar --replace-text credentials.txt safe-ai-site.git

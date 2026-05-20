@@ -3,13 +3,27 @@ import { checkAllServices } from "@/lib/external/health";
 
 export const dynamic = "force-dynamic";
 
-const VALID_KEY = "anzenai2026";
+function unauthorized() {
+  return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+}
+
+function extractProvidedKey(request: Request): string | null {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.slice("Bearer ".length).trim() || null;
+  }
+  const url = new URL(request.url);
+  return url.searchParams.get("key");
+}
 
 export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const key = url.searchParams.get("key");
-  if (key !== VALID_KEY) {
-    return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  const expected = process.env.ADMIN_HEALTH_KEY;
+  if (!expected) {
+    return unauthorized();
+  }
+  const provided = extractProvidedKey(request);
+  if (!provided || provided !== expected) {
+    return unauthorized();
   }
 
   const services = await checkAllServices();

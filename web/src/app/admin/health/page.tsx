@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-const VALID_KEY = "anzenai2026";
+const VALID_KEY = process.env.ADMIN_HEALTH_KEY ?? "";
 
 const STATUS_BADGE: Record<ServiceHealth["status"], { label: string; bg: string; fg: string }> = {
   ok: { label: "OK", bg: "bg-emerald-100", fg: "text-emerald-800" },
@@ -31,7 +31,7 @@ interface Props {
 
 export default async function AdminHealthPage({ searchParams }: Props) {
   const params = await searchParams;
-  if (params.key !== VALID_KEY) {
+  if (!VALID_KEY || params.key !== VALID_KEY) {
     notFound();
   }
 

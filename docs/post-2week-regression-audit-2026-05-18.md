@@ -74,14 +74,11 @@
 - **file**: `web/src/app/api/admin/health/route.ts:6`
 - **pr-source**: #247 (Vercel usage monitoring dashboard) または旧PR
 - **detail**:
-  - `const VALID_KEY = "anzenai2026"` をコード内ハードコード。
+  - `const VALID_KEY = "<REDACTED>"`（旧固定鍵）をコード内ハードコード。
   - 比較対照: `/admin/env-audit`, `/admin/health-check`, `/strategy/page.tsx`, `auth.ts`, `proxy.ts` はすべて `process.env.STRATEGY_AUTH_PASSWORD` 経由でゲート。
   - PR #193 (security: remove hardcoded credential from /strategy client bundle) で同種の修正を実施済みなのに、新規API route で再発。
-- **risk**: client bundleには含まれないが、ソースコード履歴(GitHub public)に残るため、攻撃者が `?key=anzenai2026` で `/api/admin/health` を叩ける。返却内容は service status のみだが、内部URL/環境を公開する情報源となる。
-- **推奨対応**:
-  1. `const VALID_KEY = process.env.STRATEGY_AUTH_PASSWORD ?? "";` に変更し、空文字なら 503 を返す。
-  2. ヒストリーから値そのものを消去 (BFG / filter-branch) または `STRATEGY_AUTH_PASSWORD` を新値にローテーション。
-- **本タスク非修正理由**: クレデンシャルローテーションを伴うため、オーナー作業を待つ。
+- **risk**: client bundleには含まれないが、ソースコード履歴(GitHub public)に残るため、攻撃者が旧固定鍵で `/api/admin/health` を叩ける。返却内容は service status のみだが、内部URL/環境を公開する情報源となる。
+- **対応**: security/f002-admin-health-auth で `process.env.ADMIN_HEALTH_KEY` に変更済み。未設定時 401。残る作業は Vercel 本番環境変数の設定と旧鍵のローテーション。
 
 ### P2-003: ブランド表記漏れ (PR #246 UX-010 部分対応)
 
