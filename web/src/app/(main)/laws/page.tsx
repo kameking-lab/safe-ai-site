@@ -13,7 +13,7 @@ import { realLawRevisions } from "@/data/mock/real-law-revisions";
 
 const _title = "安全衛生法 改正情報一覧 最新";
 const _desc =
-  "2016年〜2026年の労働安全衛生法・化学物質管理など100件以上の法改正をAI要約付きで確認。e-Gov・厚労省通達へのリンク付き。安全担当者に。";
+  "法改正 労働安全 2024〜2026まとめ — 熱中症対策（安衛則612条の2 R7.6.1施行）・化学物質 自律的管理・ストレスチェック改正など100件以上をAI要約付きで確認。e-Gov・厚労省通達リンク付き。安全担当者必携。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/laws" },
