@@ -24,7 +24,7 @@ import { SITE_STATS } from "@/data/site-stats";
 import { PageContainer } from "@/components/layout/page-container";
 
 const _title = "労働災害 事故事例データベース";
-const _desc = `10年統合${SITE_STATS.accidents10yCount}件の死亡労働災害事例を業種・事故種別で検索し再発防止に活用。厚労省死亡災害DB（${SITE_STATS.mhlwDeathsCount}件）＋厚労省全件DB（${SITE_STATS.accidentDbCount}件）＋curated詳細事例（${SITE_STATS.siteCuratedCaseCount}件）を統合。`;
+const _desc = `墜落・転倒・はさまれなど10年統合${SITE_STATS.accidents10yCount}件の労働災害 事故事例を業種・事故型で検索。厚生労働省データ（${SITE_STATS.mhlwDeathsCount}件死亡＋${SITE_STATS.accidentDbCount}件全件）＋curated詳細事例（${SITE_STATS.siteCuratedCaseCount}件）を統合し再発防止に活用。`;
 
 export const metadata: Metadata = {
   alternates: { canonical: "/accidents" },
@@ -47,7 +47,7 @@ export default function AccidentsPage() {
     <>
       <JsonLd
         schema={[
-          webPageSchema({ name: _title, description: _desc, url: `${SITE_URL}/accidents` }),
+          webPageSchema({ name: _title, description: _desc, url: `${SITE_URL}/accidents`, keywords: ["労働災害 事故事例 10年統計 厚生労働省", "墜落防止 対策", "転倒 はさまれ 業種別", "死亡災害 再発防止"] }),
           breadcrumbSchema([
             { name: "ホーム", url: SITE_URL },
             { name: "事故データベース", url: `${SITE_URL}/accidents` },
@@ -56,7 +56,7 @@ export default function AccidentsPage() {
             name: "労働災害 統合事故事例データベース",
             description: _desc,
             url: `${SITE_URL}/accidents`,
-            keywords: ["労働災害", "事故事例", "死亡災害", "業種別", "厚生労働省", "再発防止"],
+            keywords: ["労働災害", "事故事例", "死亡災害", "業種別", "厚生労働省", "再発防止", "墜落防止", "転倒対策", "はさまれ巻き込まれ", "労働災害 事故事例 10年統計"],
             temporalCoverage: "2014/2026",
             license: "https://creativecommons.org/licenses/by/4.0/",
             variableMeasured: [`総収録件数: ${totalCount}件`, "業種", "事故種類", "発生年月", "重傷度"],

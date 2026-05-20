@@ -20,7 +20,7 @@ import { INDUSTRY_HEAT_RULES, R7_EFFECTIVE_FROM, R7_EFFECTIVE_FROM_JP, R7_SOURCE
 const _title =
   "熱中症対策ハブ｜WBGT計算機・業種別リスク判定・R7安衛則改正チェックリスト";
 const _desc =
-  "労働安全衛生規則第612条の2（令和7年6月1日施行）に対応した職場の熱中症対策ポータル。JIS Z 8504準拠のWBGT計算機、10業種別の暑熱リスク判定、R7改正コンプライアンスチェックリストと社内文書テンプレートをまとめて提供します。";
+  "熱中症 安衛則612条の2（R7.6.1施行）完全対応 — 職場・建設現場の熱中症対策に必要なWBGT計算機・10業種別暑熱リスク判定・R7改正コンプライアンスチェックリスト・社内文書テンプレートをまとめて提供します。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -98,6 +98,7 @@ export default function HeatIllnessPreventionHubPage() {
         name={_title}
         description={_desc}
         path="/heat-illness-prevention"
+        keywords={["熱中症 安衛則612条の2 R7.6.1", "熱中症 建設現場 対策 チェックリスト", "WBGT計算機 職場", "熱中症予防 業種別リスク判定"]}
       />
       <JsonLd
         schema={{

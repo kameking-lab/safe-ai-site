@@ -17,7 +17,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "メンタルヘルス・ハラスメント・VDT作業｜労働安全の見えない半分";
 const _desc =
-  "ストレスチェック制度・カスタマーハラスメント対策法（2025年）・VDT作業ガイドライン・4つのケアをまとめました。労働安全衛生の新しい半分を整理。";
+  "ストレスチェック制度（R9改正・50人未満義務化予定）・4つのケア実践法・カスタマーハラスメント対策法（2025年）・VDT作業ガイドラインをまとめた職場メンタルヘルス管理ハブ。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -126,7 +126,7 @@ export default function MentalHealthPage() {
   return (
     <PageContainer width="prose">
       {/* SEO: WebPage + BreadcrumbList */}
-      <PageJsonLd name={_title} description={_desc} path="/mental-health" />
+      <PageJsonLd name={_title} description={_desc} path="/mental-health" keywords={["ストレスチェック R9 50人未満 義務化", "ストレスチェック 実施 手順 中小企業", "4つのケア 職場メンタルヘルス", "カスタマーハラスメント 対策"]} />
       <PageHeader
         title="メンタルヘルス・ハラスメント・VDT作業"
         description="ストレスチェック・4つのケア・カスハラ対策・情報機器作業ガイドライン"
