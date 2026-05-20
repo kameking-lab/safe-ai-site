@@ -76,7 +76,7 @@ const BATCHES: Batch[] = [
     dependency: "なし (即時着手可)",
     effect:
       "ファーストビューの初見ユーザー認知コスト削減・CLS 改善・略語解消。new-home-hero.tsx と app-shell.tsx の局所変更のみ。",
-    status: "planned",
+    status: "completed",
     findings: [
       {
         id: "UX-011",
@@ -86,7 +86,7 @@ const BATCHES: Batch[] = [
         url: "/",
         fix: "new-home-hero.tsx:78 を「労働安全衛生法をAIに質問」に変更",
         dependency: "なし",
-        status: "open",
+        status: "resolved",
       },
       {
         id: "UX-019",
@@ -94,9 +94,9 @@ const BATCHES: Batch[] = [
         title: "屋外モードトグルが PC topbar + sidebar の2箇所重複",
         effortHours: 1,
         url: "全ページ (PC)",
-        fix: "app-shell.tsx サイドバー底部の屋外ボタン (line:403-406) を削除、topbar 集約",
+        fix: "app-shell.tsx モバイルヘッダーの屋外ボタンを削除、PC topbar に集約",
         dependency: "なし",
-        status: "open",
+        status: "resolved",
       },
       {
         id: "SEO-003",
@@ -106,7 +106,7 @@ const BATCHES: Batch[] = [
         url: "/",
         fix: "h1 → 「労働安全衛生のAI・DX活用ポータル」、情緒コピーはサブヘッドに格下げ",
         dependency: "なし",
-        status: "open",
+        status: "resolved",
       },
       {
         id: "UX-018",
@@ -114,9 +114,9 @@ const BATCHES: Batch[] = [
         title: "統計バー CLS リスク (フォントロード前後でレイアウトシフト)",
         effortHours: 2,
         url: "/",
-        fix: "コンテナに min-h を付与しスケルトン確保、font-display 対策",
+        fix: "コンテナに min-h を付与しスケルトン確保、line-clamp-1 でソーステキスト均一化",
         dependency: "UX-011 と同ファイル → 同時対応",
-        status: "open",
+        status: "resolved",
       },
     ],
   },

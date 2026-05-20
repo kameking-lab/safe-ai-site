@@ -60,8 +60,13 @@ export function NewHomeHero() {
             id="home-hero-title"
             className="mt-3 text-3xl font-bold leading-tight text-slate-900 dark:text-slate-50 sm:text-4xl lg:text-5xl"
           >
-            {isEn ? "Transform workplace safety with AI." : "現場の安全を、AIで変える。"}
+            {isEn ? "Transform workplace safety with AI." : "労働安全衛生のAI・DX活用ポータル"}
           </h1>
+          {!isEn && (
+            <h2 className="mt-1 text-lg font-semibold leading-tight text-slate-600 dark:text-slate-400 sm:text-xl lg:text-2xl">
+              現場の安全を、AIで変える。
+            </h2>
+          )}
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:text-base">
             {isEn
               ? "A research project on AI and DX for occupational safety and health. One-stop support for field operations in construction, manufacturing, transportation, healthcare, and forestry."
@@ -75,7 +80,7 @@ export function NewHomeHero() {
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700"
             >
               <MessageSquare className="h-4 w-4" />
-              {isEn ? "Ask the OSH-Law AI" : "安衛法AIに質問"}
+              {isEn ? "Ask the OSH-Law AI" : "労働安全衛生法をAIに質問"}
             </Link>
             <Link
               href="/accidents-reports"
@@ -120,7 +125,7 @@ export function NewHomeHero() {
             return (
               <li
                 key={s.key}
-                className={`rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:px-4 sm:py-4 ${
+                className={`flex min-h-[96px] flex-col rounded-xl border border-slate-200 bg-white px-3 py-3 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900 sm:min-h-[108px] sm:px-4 sm:py-4 ${
                   isThird ? "col-span-2 sm:col-span-1" : ""
                 }`}
               >
@@ -143,7 +148,7 @@ export function NewHomeHero() {
                     {isEn ? `Source · ${meta.asOf}` : `出典・${meta.asOf}`}
                   </a>
                 ) : (
-                  <p className="mt-1 text-[11px] leading-4 text-slate-400">
+                  <p className="mt-1 line-clamp-1 text-[11px] leading-4 text-slate-400" title={meta?.source ?? ""}>
                     {isEn ? `Source: ${meta?.source ?? ""}` : `出典: ${meta?.source ?? ""}`}
                   </p>
                 )}
