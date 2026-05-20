@@ -40,7 +40,7 @@ export function generateStaticParams() {
   return INDUSTRY_CONTENT_SLUGS.map((slug) => ({ industry: slug }));
 }
 
-export const revalidate = 86400;
+export const revalidate = 2592000;
 export const dynamicParams = false;
 
 type Params = Promise<{ industry: string }>;

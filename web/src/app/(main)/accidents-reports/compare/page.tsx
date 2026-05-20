@@ -17,7 +17,7 @@ import {
   articleListSchema,
 } from "@/components/json-ld";
 
-export const revalidate = 86400;
+export const revalidate = 2592000;
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

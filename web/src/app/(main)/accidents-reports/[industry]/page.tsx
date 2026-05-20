@@ -22,16 +22,16 @@ import {
 } from "@/components/json-ld";
 
 /**
- * Static pre-generation for the 5 supported industries. Each page is
- * built at build time and re-validated daily — the underlying dataset
- * changes infrequently (monthly MHLW refresh at most), so 1 day is
- * a good freshness vs. CDN-hit tradeoff.
+ * Static pre-generation for the 5 supported industries. The underlying
+ * dataset (静的 TS + repo 同梱 jsonl) はデプロイ時にしか変わらないため、
+ * revalidate=2592000 (30d) で十分。data 更新時は code commit → 再 deploy
+ * で全キャッシュが無効化される。
  */
 export function generateStaticParams() {
   return listIndustries().map((c) => ({ industry: c.slug }));
 }
 
-export const revalidate = 86400;
+export const revalidate = 2592000;
 export const dynamicParams = false;
 
 type Params = Promise<{ industry: string }>;
