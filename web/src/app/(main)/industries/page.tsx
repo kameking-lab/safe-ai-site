@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   }),
 };
 
-export const revalidate = 86400;
+export const revalidate = 2592000;
 
 const CARD_COLOR_CLASS: Record<string, { border: string; hover: string; bg: string }> = {
   amber: {

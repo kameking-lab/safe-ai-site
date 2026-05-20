@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   }),
 };
 
-export const revalidate = 86400;
+export const revalidate = 2592000;
 
 const COLOR_CLASS: Record<string, { card: string; pill: string }> = {
   amber: { card: "border-amber-200 hover:border-amber-400 bg-amber-50/40", pill: "bg-amber-100 text-amber-900" },
