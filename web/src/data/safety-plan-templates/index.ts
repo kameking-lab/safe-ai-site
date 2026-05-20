@@ -110,6 +110,30 @@ import {
   officeLawReferences,
   officeMonthlyExtras,
 } from "./industries/office";
+import {
+  agricultureBasicPolicy,
+  agricultureCircularReferences,
+  agricultureIndustryGoals,
+  agricultureIndustryMeasures,
+  agricultureLawReferences,
+  agricultureMonthlyExtras,
+} from "./industries/agriculture";
+import {
+  forestryBasicPolicy,
+  forestryCircularReferences,
+  forestryIndustryGoals,
+  forestryIndustryMeasures,
+  forestryLawReferences,
+  forestryMonthlyExtras,
+} from "./industries/forestry";
+import {
+  fisheryBasicPolicy,
+  fisheryCircularReferences,
+  fisheryIndustryGoals,
+  fisheryIndustryMeasures,
+  fisheryLawReferences,
+  fisheryMonthlyExtras,
+} from "./industries/fishery";
 
 interface IndustryBundle {
   industry: IndustryId;
@@ -211,6 +235,33 @@ const INDUSTRY_BUNDLES: IndustryBundle[] = [
     monthlyExtras: officeMonthlyExtras,
     laws: officeLawReferences,
     circulars: officeCircularReferences,
+  },
+  {
+    industry: "agriculture",
+    basicPolicy: agricultureBasicPolicy,
+    goals: agricultureIndustryGoals,
+    measures: agricultureIndustryMeasures,
+    monthlyExtras: agricultureMonthlyExtras,
+    laws: agricultureLawReferences,
+    circulars: agricultureCircularReferences,
+  },
+  {
+    industry: "forestry",
+    basicPolicy: forestryBasicPolicy,
+    goals: forestryIndustryGoals,
+    measures: forestryIndustryMeasures,
+    monthlyExtras: forestryMonthlyExtras,
+    laws: forestryLawReferences,
+    circulars: forestryCircularReferences,
+  },
+  {
+    industry: "fishery",
+    basicPolicy: fisheryBasicPolicy,
+    goals: fisheryIndustryGoals,
+    measures: fisheryIndustryMeasures,
+    monthlyExtras: fisheryMonthlyExtras,
+    laws: fisheryLawReferences,
+    circulars: fisheryCircularReferences,
   },
 ];
 

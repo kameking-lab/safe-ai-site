@@ -567,6 +567,10 @@ export type AllIndustriesSummary = {
     total: number;
     fatal: number;
     topType: string | null;
+    /** Top 3 accident types — feeds the hub filter (`?type=`). */
+    topTypes: string[];
+    /** Top 3 months by case count (1-12) — feeds the hub filter (`?month=`). */
+    peakMonths: number[];
   }[];
   yearRange: { min: number; max: number };
 };
@@ -577,7 +581,14 @@ export function getAllIndustriesSummary(): AllIndustriesSummary {
 
   const industries = INDUSTRY_CONFIGS.map((cfg) => {
     const stats = getIndustryStats(cfg.slug);
-    const topType = getTopAccidentTypes(cfg.slug, 1)[0]?.name ?? null;
+    const topTypeRows = getTopAccidentTypes(cfg.slug, 3);
+    const topType = topTypeRows[0]?.name ?? null;
+    const topTypes = topTypeRows.map((t) => t.name);
+    const peakMonths = getMonthlySeasonality(cfg.slug)
+      .filter((m) => m.count > 0)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 3)
+      .map((m) => m.month);
     return {
       slug: cfg.slug,
       label: cfg.label,
@@ -587,6 +598,8 @@ export function getAllIndustriesSummary(): AllIndustriesSummary {
       total: stats.total,
       fatal: stats.severity.fatal,
       topType,
+      topTypes,
+      peakMonths,
     };
   });
 

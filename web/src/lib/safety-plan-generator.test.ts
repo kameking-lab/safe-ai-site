@@ -3,8 +3,8 @@ import { SAFETY_PLAN_TEMPLATES } from "@/data/safety-plan-templates";
 import { generatePlan, regenerateFromTemplateId } from "./safety-plan-generator";
 
 describe("safety-plan-generator", () => {
-  it("ships 30 templates (10 industries × 3 scales)", () => {
-    expect(SAFETY_PLAN_TEMPLATES).toHaveLength(30);
+  it("ships 39 templates (13 industries × 3 scales)", () => {
+    expect(SAFETY_PLAN_TEMPLATES).toHaveLength(39);
   });
 
   it("each template has 12 monthly schedule entries", () => {
@@ -41,6 +41,9 @@ describe("safety-plan-generator", () => {
       "wholesale",
       "warehouse",
       "office",
+      "agriculture",
+      "forestry",
+      "fishery",
     ] as const) {
       const small = SAFETY_PLAN_TEMPLATES.find(
         (t) => t.industry === industry && t.scale === "small",
@@ -235,5 +238,57 @@ describe("safety-plan-generator", () => {
       );
       expect(drills.length).toBeGreaterThanOrEqual(1);
     }
+  });
+
+  it("agriculture template surfaces tractor / heat-stroke / pesticide measures", () => {
+    const r = generatePlan({
+      industry: "agriculture",
+      scale: "medium",
+      organizationName: "サンプル農場",
+      fiscalYear: 2026,
+      focusAreas: [],
+      customGoals: [],
+      notes: "",
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const titles = r.plan.template.measures.map((m) => m.title).join("\n");
+    expect(titles).toMatch(/トラクター|農業機械/);
+    expect(titles).toMatch(/熱中症|WBGT/);
+    expect(titles).toMatch(/農薬/);
+  });
+
+  it("forestry template requires chainsaw special education and hangup procedure", () => {
+    const r = generatePlan({
+      industry: "forestry",
+      scale: "small",
+      organizationName: "サンプル林業",
+      fiscalYear: 2026,
+      focusAreas: [],
+      customGoals: [],
+      notes: "",
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const titles = r.plan.template.measures.map((m) => m.title).join("\n");
+    expect(titles).toMatch(/チェーンソー/);
+    expect(titles).toMatch(/かかり木|防護衣/);
+  });
+
+  it("fishery template surfaces life-jacket and weather-judgement measures", () => {
+    const r = generatePlan({
+      industry: "fishery",
+      scale: "medium",
+      organizationName: "サンプル水産",
+      fiscalYear: 2026,
+      focusAreas: [],
+      customGoals: [],
+      notes: "",
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const titles = r.plan.template.measures.map((m) => m.title).join("\n");
+    expect(titles).toMatch(/救命胴衣|ライフジャケット/);
+    expect(titles).toMatch(/気象|海象/);
   });
 });

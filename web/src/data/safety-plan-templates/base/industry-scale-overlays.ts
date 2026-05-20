@@ -1161,6 +1161,226 @@ export const INDUSTRY_SCALE_OVERLAYS: OverlayMatrix = {
       },
     },
   },
+  agriculture: {
+    small: {
+      extraGoals: [
+        {
+          category: "education-coverage",
+          title: "家族労働者・季節雇用者を含む安全教育の実施",
+          description:
+            "雇用契約の有無に関わらず、ほ場で農機を扱う全員に農業機械の基本操作と熱中症予防の教育を実施する。",
+          target: "対象者の教育受講率 100%",
+          kpi: "教育実施回数 / 対象者数",
+        },
+      ],
+      extraMeasures: [
+        {
+          category: "industry-specific",
+          title: "農林水産省「農作業安全のための指針」チェックリストの活用",
+          description:
+            "農水省公開の自己点検チェックリスト（農機・農薬・熱中症・ハウス）を年 1 回実施し、結果を記録する。",
+          frequency: "年1回",
+          responsible: "事業者（農場主）",
+          reference: "23消安第6051号",
+        },
+      ],
+      extraMonthlyEvents: EMPTY_MONTHLY,
+    },
+    medium: {
+      extraGoals: [
+        {
+          category: "ra-coverage",
+          title: "農薬・燃料・肥料のリスクアセスメントの定着",
+          description:
+            "SDS 整備対象の化学物質に対して年 1 回 RA を実施し、保護具と保管方法を見直す。",
+          target: "対象物質の RA 実施率 100%",
+          kpi: "RA 実施件数 / 対象物質数",
+        },
+      ],
+      extraMeasures: [
+        {
+          category: "committee",
+          title: "安全衛生委員会（または労使協議会）の運営",
+          description:
+            "労働者 50 名以上の場合は安全衛生委員会を設置。それ未満でも労使協議の場で月次の安全議題を扱う。",
+          frequency: "月1回",
+          responsible: "事業者 / 衛生推進者",
+          reference: "安衛法第18条",
+        },
+      ],
+      extraMonthlyEvents: EMPTY_MONTHLY,
+    },
+    large: {
+      extraGoals: [
+        {
+          category: "compliance",
+          title: "技能実習生・特定技能外国人材の安全衛生管理",
+          description:
+            "技能実習生・特定技能外国人材を受け入れる場合、母国語または平易な日本語による安全衛生教育、相談窓口、宗教・文化への配慮を整備する。",
+          target: "外国人材向け教育受講率 100%",
+          kpi: "対象者数 / 教育実施件数",
+        },
+      ],
+      extraMeasures: [
+        {
+          category: "industry-specific",
+          title: "外国人技能実習・特定技能労働者の安全衛生教育（母国語対応）",
+          description:
+            "やさしい日本語・母国語教材を用意し、農業機械・農薬・熱中症の教育を雇入れ時に実施。技能実習機構の指導にも対応する。",
+          frequency: "雇入れ時 / 年1回フォローアップ",
+          responsible: "事業者 / 監理団体",
+          reference: "技能実習法 / 出入国管理及び難民認定法",
+        },
+      ],
+      extraMonthlyEvents: EMPTY_MONTHLY,
+    },
+  },
+  forestry: {
+    small: {
+      extraGoals: [
+        {
+          category: "education-coverage",
+          title: "チェーンソー特別教育・刈払機特別教育の全員修了",
+          description:
+            "従事者全員が安衛則第36条第8号の特別教育（または社内同等教育）を受講するまで単独伐木作業を行わせない。",
+          target: "特別教育修了率 100%",
+          kpi: "対象者数 / 修了者数",
+        },
+      ],
+      extraMeasures: [
+        {
+          category: "industry-specific",
+          title: "林災防 小規模事業者向け安全衛生計画書様式の活用",
+          description:
+            "林災防（林業・木材製造業労働災害防止協会）が公開する小規模事業者向け様式を活用し、班ごとの計画書を作成する。",
+          frequency: "事業年度ごと",
+          responsible: "事業者 / 班長",
+        },
+      ],
+      extraMonthlyEvents: EMPTY_MONTHLY,
+    },
+    medium: {
+      extraGoals: [
+        {
+          category: "ra-coverage",
+          title: "伐木・造材・搬出の工程別リスクアセスメント",
+          description:
+            "立木調査・伐倒・かかり木処理・集材・運搬の各工程についてリスクアセスメントを実施し、退避路・退避場所を作業計画書に反映する。",
+          target: "主要工程 RA 実施率 100%",
+          kpi: "RA 実施件数 / 工程数",
+        },
+      ],
+      extraMeasures: [
+        {
+          category: "committee",
+          title: "安全衛生協議組織（請負事業者合同）の運営",
+          description:
+            "請負・受託の複数事業者が同一林班で作業する場合は協議組織を設置し、合図・退避区画・救護体制を統一する。",
+          frequency: "月1回以上",
+          responsible: "発注事業者 / 受託事業者",
+          reference: "安衛則第635条",
+        },
+      ],
+      extraMonthlyEvents: EMPTY_MONTHLY,
+    },
+    large: {
+      extraGoals: [
+        {
+          category: "accident-reduction",
+          title: "本社・林業事業体合同の災害情報水平展開",
+          description:
+            "重大災害・かかり木処理事案を 48 時間以内に本社安全衛生部門へ報告し、全林業事業体・全班に対策展開する。",
+          target: "重大災害の水平展開所要時間 48h 以内 100%",
+          kpi: "水平展開件数 / 発生件数",
+        },
+      ],
+      extraMeasures: [
+        {
+          category: "industry-specific",
+          title: "高性能林業機械オペレーター教育の体系化",
+          description:
+            "プロセッサ・ハーベスタ・フォワーダ・スイングヤーダ等のオペレーターに対し、機種別教育と年次再教育を体系化する。",
+          frequency: "新規配置時 / 年1回",
+          responsible: "本社安全衛生部門",
+          reference: "安衛則第151条の29",
+        },
+      ],
+      extraMonthlyEvents: EMPTY_MONTHLY,
+    },
+  },
+  fishery: {
+    small: {
+      extraGoals: [
+        {
+          category: "compliance",
+          title: "小型船舶用救命胴衣の常時着用 100%",
+          description:
+            "全乗組員に膨張式救命胴衣を支給し、甲板上作業時の常時着用と年 1 回の点検を徹底する。",
+          target: "救命胴衣着用率 100% / 年次点検実施率 100%",
+          kpi: "着用確認回数 / 点検記録数",
+        },
+      ],
+      extraMeasures: [
+        {
+          category: "industry-specific",
+          title: "個人事業主・乗組員向けの簡易安全衛生計画書",
+          description:
+            "水産庁・厚労省共管の漁業労働災害防止ガイドラインに準拠した簡易計画書を年度ごとに作成・更新する。",
+          frequency: "事業年度ごと",
+          responsible: "船長 / 事業者",
+          reference: "水管第3450号",
+        },
+      ],
+      extraMonthlyEvents: EMPTY_MONTHLY,
+    },
+    medium: {
+      extraGoals: [
+        {
+          category: "ra-coverage",
+          title: "船種別・漁法別のリスクアセスメント",
+          description:
+            "底引網・延縄・定置網・刺し網など漁法別に RA を実施し、揚網機・ローラー等の操作と退避区画を作業手順に反映する。",
+          target: "主要漁法 RA 実施率 100%",
+          kpi: "RA 実施件数 / 漁法数",
+        },
+      ],
+      extraMeasures: [
+        {
+          category: "committee",
+          title: "船主・漁協合同 安全衛生連絡会の運営",
+          description:
+            "同一港・同一漁業協同組合の船主合同で安全衛生連絡会を四半期 1 回開催し、出漁判断基準・荒天対応・救助体制を共有する。",
+          frequency: "四半期 1 回",
+          responsible: "事業者 / 漁協担当",
+        },
+      ],
+      extraMonthlyEvents: EMPTY_MONTHLY,
+    },
+    large: {
+      extraGoals: [
+        {
+          category: "compliance",
+          title: "船員法・船舶安全法・労働安全衛生法の一体運用",
+          description:
+            "船員法に基づく健康診断、船舶安全法に基づく救命設備、安衛法に基づく陸上水産加工場の措置を一体運用し、本社安全衛生委員会で年次レビューする。",
+          target: "三法の年次レビュー実施 100%",
+          kpi: "レビュー実施件数 / 対象事業所数",
+        },
+      ],
+      extraMeasures: [
+        {
+          category: "industry-specific",
+          title: "遠洋漁業の船内 ISM（安全管理システム）運用",
+          description:
+            "遠洋・沖合漁船は ISM コードに準拠した安全管理マニュアルを整備し、本社で年 1 回内部監査を実施する。",
+          frequency: "年1回",
+          responsible: "本社安全衛生部門 / 船長",
+          reference: "ISM コード / 船舶安全法",
+        },
+      ],
+      extraMonthlyEvents: EMPTY_MONTHLY,
+    },
+  },
 };
 
 export function getIndustryScaleOverlay(
