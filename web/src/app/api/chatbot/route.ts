@@ -17,6 +17,7 @@ import {
   type RelatedLawLink,
   type DigDeeperLink,
 } from "@/lib/chatbot-enrichment";
+import { cacheKey, getCachedResponse, setCachedResponse } from "@/lib/chatbot-cache";
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
 
@@ -228,6 +229,20 @@ export async function POST(request: Request) {
   const lawCategory: LawCategoryFilter = body?.lawCategory ?? "all";
   const relatedNotices = searchRelevantNotices(message, 3);
 
+  // Cache lookup. Only safe for stateless (no-history) requests: with a
+  // history array, the prior turn context affects the answer.
+  const cacheableRequest = !body?.history || body.history.length === 0;
+  const key = cacheableRequest ? cacheKey(message, lawCategory) : null;
+  if (key) {
+    const cached = getCachedResponse<ChatbotResponse>(key);
+    if (cached) {
+      return NextResponse.json<ChatbotResponse>(cached, {
+        status: 200,
+        headers: { "X-Cache-Hit": "true" },
+      });
+    }
+  }
+
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey || apiKey === "dummy") {
     // APIキー未設定時もRAG検索による条文引用は提供する
@@ -247,20 +262,24 @@ export async function POST(request: Request) {
     const fallbackAnswer = articles.length > 0 || mlitMatches.length > 0
       ? `AIによる回答生成は現在利用できませんが、関連する法令条文・所管省庁資料が見つかりました。下記の参照をご確認ください。\n\nGEMINI_API_KEYを環境変数に設定すると、AIによる詳細な回答が利用できます。\n\n⚠️ ${AI_LEGAL_DISCLAIMER}`
       : `現在、AIチャットボット機能はAPIキーが設定されていないため利用できません。\n\nGEMINI_API_KEYを環境変数に設定することで、労働安全衛生法に関するご質問にお答えできます。\n\n⚠️ ${AI_LEGAL_DISCLAIMER}`;
-    return NextResponse.json<ChatbotResponse>(
-      {
-        answer: fallbackAnswer,
-        sources,
-        source_type: articles.length > 0 || mlitMatches.length > 0 ? "rag" : "ai_inference",
-        confidence: articles.length > 0 || mlitMatches.length > 0 ? "medium" : "low",
-        followups: buildFollowups(message, articles),
-        notices: relatedNotices,
-        citations: buildStructuredCitations(articles),
-        relatedLaws: suggestRelatedLaws(message, articles),
-        digDeeperLinks: suggestDigDeeperLinks(message, articles),
-      },
-      { status: 200 }
-    );
+    const fallbackPayload: ChatbotResponse = {
+      answer: fallbackAnswer,
+      sources,
+      source_type: articles.length > 0 || mlitMatches.length > 0 ? "rag" : "ai_inference",
+      confidence: articles.length > 0 || mlitMatches.length > 0 ? "medium" : "low",
+      followups: buildFollowups(message, articles),
+      notices: relatedNotices,
+      citations: buildStructuredCitations(articles),
+      relatedLaws: suggestRelatedLaws(message, articles),
+      digDeeperLinks: suggestDigDeeperLinks(message, articles),
+    };
+    if (key) {
+      setCachedResponse(key, fallbackPayload);
+    }
+    return NextResponse.json<ChatbotResponse>(fallbackPayload, {
+      status: 200,
+      headers: { "X-Cache-Hit": "false" },
+    });
   }
 
   // RAG: 関連条文の検索（スコア付き）
@@ -478,20 +497,24 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json<ChatbotResponse>(
-    {
-      answer,
-      sources,
-      source_type,
-      confidence,
-      confidenceScore,
-      followups: buildFollowups(message, relevantArticles),
-      notices: relatedNotices,
-      citations: structuredCitations,
-      relatedLaws,
-      digDeeperLinks,
-      scopeWarnings: scopeWarnings.length > 0 ? scopeWarnings : undefined,
-    },
-    { status: 200 }
-  );
+  const responsePayload: ChatbotResponse = {
+    answer,
+    sources,
+    source_type,
+    confidence,
+    confidenceScore,
+    followups: buildFollowups(message, relevantArticles),
+    notices: relatedNotices,
+    citations: structuredCitations,
+    relatedLaws,
+    digDeeperLinks,
+    scopeWarnings: scopeWarnings.length > 0 ? scopeWarnings : undefined,
+  };
+  if (key) {
+    setCachedResponse(key, responsePayload);
+  }
+  return NextResponse.json<ChatbotResponse>(responsePayload, {
+    status: 200,
+    headers: { "X-Cache-Hit": "false" },
+  });
 }
