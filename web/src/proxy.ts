@@ -15,6 +15,8 @@ export function proxy() {
 }
 
 export const config = {
-  // 静的ファイルとNext.js内部ルートは除外
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)"],
+  // Phase 4-3 まで保護ルート未実装のため、実在しないパスのみマッチさせて
+  // Edge Function 起動を防ぐ (docs/perf/edge-isr-followup-2026-05-19.md)。
+  // Phase 4-3 で /account/* や /dashboard/* を保護するときに matcher を戻す。
+  matcher: ["/_proxy-disabled-until-phase-4-3/:path*"],
 };

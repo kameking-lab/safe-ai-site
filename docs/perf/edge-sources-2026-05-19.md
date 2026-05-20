@@ -7,7 +7,7 @@
 
 ## 1. 確認した前提
 
-- **`middleware.ts` は本リポジトリに存在しない**（`web/src/` 配下に `middleware*` ファイルなし）。matcher 設定の最適化余地はゼロ。
+- **`middleware.ts` ではなく Next.js 16 の `proxy.ts`** が `web/src/proxy.ts` に存在。Phase 4-3 まで保護ルート未実装のため、関数本体は no-op (AUTH_SECRET 未設定なら早期 return)。だが matcher が広範 (`"/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)"`) で、AUTH_SECRET 設定下では事実上ほぼ全ルートで Edge Function が起動する。
 - Vercel における Edge Requests は「Vercel Edge Network が受けた全 HTTP リクエスト」を含む（静的アセット・関数呼び出し・リダイレクト・CDN cache HIT すべて）。
 - Function Invocations は別メトリクス。Edge cache HIT は Edge Request としてカウントされ続けるが、Function Invocation は発生しない。
 
@@ -34,6 +34,11 @@
   - `signage-map-client.tsx` 15min → 30min（直接 50% 削減）
   - `signage/page.tsx` 30min → 60min（直接 50% 削減）
   - 効果範囲: アクティブな signage 表示クライアント数に比例。低トラフィックでは Edge 全体への影響は限定的。
+
+- **`proxy.ts` (Next.js 16 旧 middleware) matcher の最適化**
+  - 旧 matcher: `"/((?!_next/static|_next/image|favicon.ico|.*\\.png$).*)"` → 実質ほぼ全ルートで Edge Function 起動。
+  - 新 matcher: `"/_proxy-disabled-until-phase-4-3/:path*"` → 実在しないパスのみマッチ。Phase 4-3 で保護ルートが入るときに戻す。
+  - 効果: Function Invocations 大幅削減（Edge cache HIT 自体は引き続き Edge Request として計上される点に注意）。AUTH_SECRET 設定時に毎回起動していた no-op 関数を撤廃。
 
 ### 中効果（Function Invocations を減らす：副次効果あり）
 
