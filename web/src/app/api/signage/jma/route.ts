@@ -32,7 +32,7 @@ export async function GET() {
   return NextResponse.json(body, {
     status: 200,
     headers: {
-      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=900",
+      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=900",
       "x-data-source": "jma-batch",
     },
   });
