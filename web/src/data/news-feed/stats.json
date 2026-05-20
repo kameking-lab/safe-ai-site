@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-05-19T22:12:53.966Z",
+  "generatedAt": "2026-05-20T22:23:05.554Z",
   "counts": {
-    "approved": 3,
+    "approved": 4,
     "rejected": 9,
-    "total": 12,
-    "approvalRate": 0.25
+    "total": 13,
+    "approvalRate": 0.308
   },
   "byDay": [
     {
@@ -34,6 +34,13 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-05-21",
+      "approved": 1,
+      "rejected": 0,
+      "total": 1,
+      "approvalRate": 1
     }
   ],
   "byPublisher": [
@@ -46,19 +53,19 @@
     },
     {
       "publisher": "日本放送協会",
-      "approved": 0,
+      "approved": 1,
       "rejected": 7,
-      "total": 7,
-      "approvalRate": 0
+      "total": 8,
+      "approvalRate": 0.125
     }
   ],
   "byEstimatedWorkCategory": [
     {
       "category": "建設業",
-      "approved": 0,
+      "approved": 1,
       "rejected": 2,
-      "total": 2,
-      "approvalRate": 0
+      "total": 3,
+      "approvalRate": 0.333
     },
     {
       "category": "その他の事業",
@@ -71,10 +78,10 @@
   "byEstimatedAccidentType": [
     {
       "type": "熱中症",
-      "approved": 0,
+      "approved": 1,
       "rejected": 6,
-      "total": 6,
-      "approvalRate": 0
+      "total": 7,
+      "approvalRate": 0.143
     },
     {
       "type": "有害物質",
@@ -108,7 +115,7 @@
         0,
         0,
         1,
-        2
+        3
       ],
       "rejected": [
         0,
@@ -138,7 +145,7 @@
       ],
       "approved": [
         3,
-        0,
+        1,
         0,
         0,
         0,
@@ -176,7 +183,7 @@
       ],
       "approved": [
         3,
-        0,
+        1,
         0,
         0,
         0,
@@ -214,7 +221,7 @@
       ],
       "approved": [
         0,
-        2,
+        3,
         1,
         0,
         0,
@@ -250,6 +257,19 @@
   ],
   "samples": {
     "approved": [
+      {
+        "headline": "労働局が建設現場での熱中症対策を呼びかけ【企業の対策QAも】",
+        "aiSummary": "労働局が建設現場での熱中症対策を強化するよう呼びかけ、企業向けQ&Aも公開。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 15,
+          "misinformationRisk": 10,
+          "duplication": 15,
+          "judgedAt": "2026-05-20T22:22:59.495Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "日本放送協会"
+      },
       {
         "headline": "第185回労働政策審議会安全衛生分科会（開催案内）",
         "aiSummary": "厚生労働省が労働安全衛生政策を議論する分科会の開催を案内。",

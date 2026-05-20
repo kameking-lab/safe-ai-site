@@ -1,6 +1,31 @@
 {
-  "updatedAt": "2026-05-19T22:12:53.910Z",
+  "updatedAt": "2026-05-20T22:23:05.488Z",
   "entries": [
+    {
+      "id": "dd8cb1f886540ea8",
+      "headline": "労働局が建設現場での熱中症対策を呼びかけ【企業の対策QAも】",
+      "aiSummary": "労働局が建設現場での熱中症対策を強化するよう呼びかけ、企業向けQ&Aも公開。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260520/k10015126851000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 20 May 2026 18:47:56 +0900",
+        "fetchedAt": "2026-05-20T22:22:51.116Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "estimatedWorkCategory": "建設業",
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 15,
+        "judgedAt": "2026-05-20T22:22:59.495Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
     {
       "id": "6bd4258af8401d55",
       "headline": "第185回労働政策審議会安全衛生分科会（開催案内）",
