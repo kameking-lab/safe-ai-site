@@ -304,7 +304,7 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
           </Cluster>
           <p className="mt-3 text-sm leading-relaxed">{config.tagline}</p>
           <p className="mt-1 text-xs opacity-70">
-            {config.labelEn} ・ 集計期間 {yearLabel} ・ 母集団{num(stats.total)}件 ・ 発行日 {generatedAt}
+            {config.labelEn} ・ 集計期間 {yearLabel} ・ 死亡災害DB中心 {num(stats.total)}件 ・ 発行日 {generatedAt}
           </p>
         </header>
 
@@ -314,7 +314,7 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
             <KpiCard
               label="事故事例 合計"
               value={`${num(stats.total)}件`}
-              caption={`厚労省データ＋curated事例の合算（${yearLabel}）`}
+              caption={`死亡災害DB＋curated事例（${yearLabel}）※休業4日以上全件は別集計`}
             />
             <KpiCard
               label="死亡事例"
@@ -754,7 +754,8 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
         </Section>
 
         <p className="mt-8 text-[11px] leading-relaxed text-slate-500 dark:text-slate-500">
-          出典: 厚生労働省 職場のあんぜんサイト 死亡災害DB、労働者死傷病報告オープンデータ、編集部 curated 事例（公開情報を匿名化して再構成）。
+          出典: 厚生労働省 職場のあんぜんサイト 死亡災害DB（2019〜2024年）、労働者死傷病報告オープンデータ、編集部 curated 事例（公開情報を匿名化して再構成）。
+          ※本レポートの件数集計は<strong className="font-semibold text-slate-600 dark:text-slate-400">死亡・重篤事例を中心とした記録</strong>が対象です。休業4日以上の全死傷件数（建設業は年間約14,000件規模）は含まず、別集計となります。
           本レポートは自動集計に基づく参考情報であり、個別案件の判断は所轄労働基準監督署および関係法令を確認してください。
         </p>
       </PageContainer>

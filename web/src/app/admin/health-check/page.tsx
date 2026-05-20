@@ -56,6 +56,12 @@ export default async function HealthCheckPage({ searchParams }: Props) {
       <Header snapshot={snapshot} overall={overallStatus} resetDate={resetDate} />
 
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+        {/* Pro継続固定方針バナー */}
+        <div className="rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+          <strong className="font-semibold">Vercel Pro 継続中（無期限）</strong>
+          {" — "}2026-05-19 方針確定: Hobby復帰は構造的に不可能（<span className="font-mono">isrWrites</span>・<span className="font-mono">edgeRequests</span> ともに Hobby 上限を常時超過）。Pro プランを無期限継続。Hobby 復帰判定セクションは参考履歴として保持。
+        </div>
+
         {snapshot.warningMessage && (
           <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
             <strong className="font-semibold">注意:</strong> {snapshot.warningMessage}
@@ -98,9 +104,12 @@ export default async function HealthCheckPage({ searchParams }: Props) {
 
         <section className="rounded-xl border border-slate-200 bg-white shadow-sm">
           <SectionHeading
-            title="Hobby復帰判定"
-            subtitle="直近14日平均 × 30日 でHobby月間予測 / 80%以下が復帰条件"
+            title="Hobby復帰判定（参考履歴 / 現状維持）"
+            subtitle="2026-05-19 Pro継続固定方針に変更。復帰非対象。以下は参考データ"
           />
+          <div className="px-4 py-2 text-xs font-semibold text-slate-500 border-b border-slate-100">
+            現状維持（復帰非対象）— Pro 継続固定方針により Hobby 復帰判定は無効
+          </div>
           <ReadinessPanel readiness={readiness} />
         </section>
 
