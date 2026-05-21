@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-21T16:29:55.260Z",
+  "fetchedAt": "2026-05-21T18:24:17.575Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -3783,8 +3783,8 @@
         {
           "sourceCode": "080000",
           "level": "advisory",
-          "headline": "茨城県では、強風や高波、急な強い雨、落雷に注意してください。",
-          "reportDatetime": "2026-05-21T16:17:00+09:00",
+          "headline": "南部では、低い土地の浸水に注意してください。茨城県では、強風や高波、落雷に注意してください。",
+          "reportDatetime": "2026-05-22T01:58:00+09:00",
           "publishingOffice": "水戸地方気象台",
           "warnings": [
             {
@@ -3803,6 +3803,12 @@
               "areaCode": "080010",
               "code": "16",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "080020",
+              "code": "10",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3875,6 +3881,12 @@
               "areaCode": "0820700",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0820800",
+              "code": "10",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3953,6 +3965,12 @@
               "areaCode": "0821600",
               "code": "15",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0821700",
+              "code": "10",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -9603,46 +9621,15 @@
       ]
     },
     "JP-36": {
-      "level": "advisory",
+      "level": "none",
       "entries": [
         {
           "sourceCode": "360000",
-          "level": "advisory",
-          "headline": "南部では、２２日明け方まで高波に注意してください。",
-          "reportDatetime": "2026-05-21T23:34:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-22T02:17:00+09:00",
           "publishingOffice": "徳島地方気象台",
-          "warnings": [
-            {
-              "areaCode": "360020",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3620400",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3638300",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3638700",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3638800",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
@@ -9673,34 +9660,15 @@
       ]
     },
     "JP-39": {
-      "level": "advisory",
+      "level": "none",
       "entries": [
         {
           "sourceCode": "390000",
-          "level": "advisory",
-          "headline": "東部では、２２日明け方まで高波に注意してください。",
-          "reportDatetime": "2026-05-21T23:34:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-22T02:17:00+09:00",
           "publishingOffice": "高知地方気象台",
-          "warnings": [
-            {
-              "areaCode": "390020",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3920200",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3930100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
