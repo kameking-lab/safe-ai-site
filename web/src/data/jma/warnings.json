@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-22T15:25:24.301Z",
+  "fetchedAt": "2026-05-22T17:25:29.870Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -6963,22 +6963,10 @@
         {
           "sourceCode": "430000",
           "level": "advisory",
-          "headline": "熊本、天草・芦北地方では、２３日未明まで強風に注意してください。球磨地方では、２３日明け方から２３日朝まで濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-22T20:17:00+09:00",
+          "headline": "球磨地方では、２３日明け方から２３日朝まで濃霧による視程障害に注意してください。",
+          "reportDatetime": "2026-05-23T02:01:00+09:00",
           "publishingOffice": "熊本地方気象台",
           "warnings": [
-            {
-              "areaCode": "430010",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "430030",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
             {
               "areaCode": "430040",
               "code": "20",
@@ -6986,86 +6974,8 @@
               "level": "advisory"
             },
             {
-              "areaCode": "4310000",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4320200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "4320300",
               "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4320400",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4320500",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4320600",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4321100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4321200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4321300",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4321500",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4336800",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4346800",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4348200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4348400",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             },
@@ -7120,12 +7030,6 @@
             {
               "areaCode": "4351400",
               "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4353100",
-              "code": "15",
               "status": "継続",
               "level": "advisory"
             }
