@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# A分類ブランチ削除スクリプト (2026-05-23 棚卸し)
+# 73 件の claude/* + merged PR 紐付きブランチを一括削除
+# ローカルから実行: bash scripts/delete-A-branches-2026-05-23.sh
+# 環境内 git proxy は HTTP 403 でブランチ削除を拒否するためローカル実行が必要
+
+set -e
+
+git fetch --all --prune
+
+BRANCHES=(
+  "claude/competent-feynman-3d6f18"
+  "claude/sad-lalande-abf395"
+  "claude/thirsty-wiles-117fe9"
+  "claude/relaxed-hertz-8ba83c"
+  "claude/reverent-goldwasser-280c0b"
+  "claude/fervent-mccarthy-8ccecb"
+  "claude/adoring-stonebraker-0c9f55"
+  "claude/quizzical-pascal-7791a9"
+  "claude/festive-proskuriakova-30e751"
+  "claude/dreamy-thompson-820044"
+  "claude/crazy-wiles-dab0d9"
+  "claude/vigilant-khayyam-e5802c"
+  "claude/competent-euler-969219"
+  "claude/spicy-review-top10"
+  "claude/nice-brahmagupta-25b5e0"
+  "claude/clever-carson-674d01"
+  "claude/nifty-noyce-5ce5b6"
+  "claude/relaxed-jones-958106"
+  "claude/competent-swirles-5b6161"
+  "claude/gifted-heisenberg-3f4804"
+  "claude/vibrant-dirac-d386d5"
+  "claude/pwa-enhancements-3f86c0"
+  "claude/i18n-seo-3f86c0"
+  "claude/tender-sanderson-9b5be0"
+  "claude/fix-duplicate-main"
+  "claude/flamboyant-wright-807c47"
+  "claude/sleepy-payne-78cac6"
+  "claude/nifty-swartz-3e5309"
+  "claude/eager-fermi-1cbd4a"
+  "claude/zen-hodgkin-482d27"
+  "claude/great-rosalind-892047"
+  "claude/jovial-panini-4485de"
+  "claude/dazzling-lamport-944f08"
+  "claude/sharp-shockley-8e079f"
+  "claude/goofy-archimedes-0ab343"
+  "claude/tender-banzai-044fc8"
+  "claude/nervous-wing-9dab29"
+  "claude/news-feed-judge-audit-2026-05-17"
+  "claude/busy-wing-0f28e0"
+  "claude/nervous-buck-1ed6e6"
+  "claude/naughty-zhukovsky-59e307"
+  "claude/fervent-murdock-12049c"
+  "claude/mobile-ux-audit-2026-05-17"
+  "claude/laughing-haibt-f5b643"
+  "claude/pensive-burnell-b59283"
+  "claude/flamboyant-lewin-53ef62"
+  "claude/determined-babbage-e39b68"
+  "claude/admiring-davinci-b319e0"
+  "claude/blissful-murdock-35c0f3"
+  "claude/cool-raman-bcf9e0"
+  "claude/stoic-keller-938a8a"
+  "claude/elated-shtern-72267e"
+  "claude/nice-bardeen-59d829"
+  "claude/resilience-phase-2"
+  "claude/elated-chatterjee-74787f"
+  "claude/ecstatic-meninsky-919572"
+  "claude/festive-ardinghelli-aae1b5"
+  "claude/fervent-dubinsky-aa7274"
+  "claude/happy-franklin-f3e0b0"
+  "claude/focused-galileo-f0aaef"
+  "claude/festive-cray-b54551"
+  "claude/thirsty-gates-2fe990"
+  "claude/funny-kowalevski-6fb8fe"
+  "claude/p2-batch-plan-2026-05-18"
+  "claude/practical-bouman-2b6d43"
+  "claude/goofy-meninsky-127577"
+  "claude/sharp-hertz-12c435"
+  "claude/strange-easley-4c0481"
+  "claude/frosty-mendeleev-f03dd9"
+  "claude/stoic-mirzakhani-1a7a83"
+  "claude/zealous-shirley-c16cdb"
+  "claude/admiring-rhodes-bd2186"
+  "claude/safe-ai-site-audit-u48Pz"
+)
+
+echo "Deleting ${#BRANCHES[@]} A category branches..."
+for b in "${BRANCHES[@]}"; do
+  echo "→ $b"
+  git push origin --delete "$b" || echo "  (already deleted or error)"
+done
+
+echo "Done. Remaining remote branches:"
+git fetch --prune origin
+git for-each-ref --format="%(refname:short)" refs/remotes/origin | wc -l
