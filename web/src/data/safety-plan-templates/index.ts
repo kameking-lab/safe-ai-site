@@ -1,6 +1,9 @@
 /**
- * Registry composing 10 industries × 3 scales = 30 annual safety & health plan
+ * Registry composing 13 industries × 3 scales = 39 annual safety & health plan
  * templates from the building blocks under base/ and industries/.
+ * Industries are listed in priority order (construction first, primary industries
+ * before agricultural sectors) — this order is preserved through
+ * INDUSTRY_BUNDLES, SAFETY_PLAN_TEMPLATES, listIndustries(), and INDUSTRY_LABELS.
  */
 
 import {
@@ -319,7 +322,7 @@ function buildTemplate(
   };
 }
 
-/** All 30 templates: 10 industries × 3 scales. */
+/** All 39 templates: 13 industries × 3 scales. */
 export const SAFETY_PLAN_TEMPLATES: readonly SafetyPlanTemplate[] =
   Object.freeze(
     INDUSTRY_BUNDLES.flatMap((bundle) =>

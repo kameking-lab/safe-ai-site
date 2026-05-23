@@ -1,8 +1,8 @@
 /**
  * Industry × scale overlays.
  *
- * Each of the 10 industries pairs with each of the 3 scales (small/medium/large)
- * to produce 30 truly distinct templates. The overlay supplies scale-tuned
+ * Each of the 13 industries pairs with each of the 3 scales (small/medium/large)
+ * to produce 39 truly distinct templates. The overlay supplies scale-tuned
  * extra goals, measures, and (optionally) monthly events on top of the
  * industry's base material in `industries/*.ts`.
  *

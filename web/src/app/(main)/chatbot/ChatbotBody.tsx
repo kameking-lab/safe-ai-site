@@ -189,8 +189,8 @@ export function ChatbotBody() {
               ? "Annual safety & health plan generator"
               : "年次安全衛生計画 業種別ジェネレーター",
             description: isEn
-              ? "10 industries × 3 scales × 30 templates. Generates basic policy, focus goals, monthly schedule and law references — PDF output."
-              : "10業種×3規模・30テンプレートから基本方針・重点目標・月別スケジュール・関連法令付きの年次安全衛生計画書を自動生成・PDF出力可。",
+              ? "13 industries × 3 scales × 39 templates (construction-first). Generates basic policy, focus goals, monthly schedule and law references — PDF output."
+              : "建設業を筆頭に13業種×3規模・39テンプレートから基本方針・重点目標・月別スケジュール・関連法令付きの年次安全衛生計画書を自動生成・PDF出力可。",
             color: "purple",
             cta: isEn ? "Generate a plan" : "計画書を作る",
           },

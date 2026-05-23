@@ -15,9 +15,9 @@ import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { INDUSTRY_LABELS, SCALE_LABELS } from "@/types/safety-plan";
 import { ogImageUrl } from "@/lib/og-url";
 
-const _title = "年次安全衛生計画 業種別 ジェネレーター｜10業種×3規模・無料・PDF";
+const _title = "年次安全衛生計画 業種別 ジェネレーター｜建設業ほか13業種×3規模・無料・PDF";
 const _desc =
-  "年次安全衛生計画 業種別 テンプレートを無料で自動生成 — 建設業・製造業・運輸業・医療福祉ほか10業種×規模3段階の30テンプレートから、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む安全衛生計画書を作成。PDF出力可。使い方ガイドは /guides/annual-safety-plan-generator を参照。";
+  "年次安全衛生計画 業種別 テンプレートを無料で自動生成 — 建設業・製造業・運輸業・医療福祉ほか13業種×規模3段階の39テンプレートから、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む安全衛生計画書を作成。PDF出力可。使い方ガイドは /guides/annual-safety-plan-generator を参照。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -54,12 +54,12 @@ export default function PlanGeneratorPage() {
         schema={webApplicationSchema({
           name: "年次安全衛生計画ジェネレーター",
           description:
-            "10業種×3規模の30テンプレートから、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む年次安全衛生計画書を自動生成します。",
+            "13業種×3規模の39テンプレートから、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む年次安全衛生計画書を自動生成します。",
           url: "https://www.anzen-ai-portal.jp/strategy/plan-generator",
           applicationCategory: "BusinessApplication",
           mentions: [COPILOT_FEATURE_PEERS.chatbot, COPILOT_FEATURE_PEERS.accidentsReports],
           featureList: [
-            "業種10種×規模3段階の30テンプレート",
+            "業種13種×規模3段階の39テンプレート",
             "安衛法・安衛則・関連省令の条文番号付き実施事項",
             "全国安全週間・全国労働衛生週間を含む月別スケジュール",
             "業種別事故レポートとの自動連携",
@@ -80,7 +80,7 @@ export default function PlanGeneratorPage() {
             業種と規模を選ぶだけで、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む年次安全衛生計画書の雛形を作成します。生成後はそのままブラウザでPDFに出力できます。
           </p>
           <ul className="mt-4 list-disc space-y-1 pl-6 text-sm text-slate-600">
-            <li>業種10種（{Object.values(INDUSTRY_LABELS).slice(0, 5).join("・")} ほか）×規模3段階（{Object.values(SCALE_LABELS).join("・")}）の30テンプレート。</li>
+            <li>業種13種（{Object.values(INDUSTRY_LABELS).slice(0, 5).join("・")} ほか）×規模3段階（{Object.values(SCALE_LABELS).join("・")}）の39テンプレート。</li>
             <li>安衛法・安衛則・関連省令の条文番号を実施事項に紐付け。</li>
             <li>厚労省通達・告示の出典を計画書末尾に自動掲載。</li>
             <li>月別スケジュールは全国安全週間（7月）・全国労働衛生週間（10月）・防災の日（9月）等の年間イベントを織り込み済み。</li>

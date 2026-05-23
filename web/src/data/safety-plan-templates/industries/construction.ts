@@ -100,6 +100,16 @@ export const constructionMonthlyExtras: Partial<Record<MonthIndex, MonthlyEvent[
       required: false,
     },
   ],
+  5: [
+    {
+      title: "梅雨入り前 雨天作業ルール再周知",
+      category: "industry-specific",
+      description:
+        "梅雨入り前に、強風・大雨・大雪等の悪天候時における作業中止・再開の判断基準を全職長に再周知。足場・開口部・電気作業の浸水/感電リスク、土砂崩壊兆候の点検手順を併せて確認する。",
+      reference: "安衛則第522条",
+      required: false,
+    },
+  ],
   6: [
     {
       title: "全国安全週間 建設業特別取組",
@@ -182,4 +192,4 @@ export const constructionCircularReferences: CircularReference[] = [
   },
 ];
 
-export const constructionBasicPolicy = `当社は「全ての労働者が無事に帰宅できる現場づくり」を最重要課題とし、墜落・転落および建設機械災害ゼロを目指す。元請・協力会社が一体となり、リスクアセスメントに基づく工事計画、フルハーネスの正しい使用、足場・開口部の確実な保護、KY活動の定着、そして職長を中心とした自主的安全衛生管理を推進する。`;
+export const constructionBasicPolicy = `当社は「全ての労働者が無事に帰宅できる現場づくり」を最重要課題とし、墜落・転落および建設機械災害ゼロを目指す。元請・協力会社が一体となり、リスクアセスメントに基づく工事計画、フルハーネスの正しい使用、足場・開口部の確実な保護、KY活動の定着、そして職長を中心とした自主的安全衛生管理を推進する。なお本方針は土木工事・建築工事・電気工事・設備工事の各作業種別に共通する基本方針であり、現場ごとに作業種別の重点リスク（土木=土砂崩壊・重機接触、建築=墜落・足場、電気=感電・アーク、設備=狭所・酸欠）を加味して運用する。`;
