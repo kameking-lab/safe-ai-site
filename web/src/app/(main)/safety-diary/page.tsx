@@ -1,12 +1,13 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
-import { DiaryListClient } from "@/components/safety-diary/diary-list-client";
-import { RelatedPageCards } from "@/components/related-page-cards";
+import { DiaryPaperPageContent } from "@/components/safety-diary/diary-paper-page-content";
+import { PageSkeleton } from "@/components/skeleton";
 import { ogImageUrl } from "@/lib/og-url";
 import { PageJsonLd } from "@/components/page-json-ld";
 
-const _title = "安全衛生日誌 ｜ 必須5項目で3〜5分入力 + 月次まとめ";
+const _title = "安全衛生日誌 ｜ 完成形の用紙に直接書き込む (用紙ファースト型UI)";
 const _desc =
-  "業種別プリセット（建設/製造/医療福祉/運輸/IT）に対応した安全衛生日誌。必須5項目を3〜5分で入力し、任意8項目で詳細化。月次まとめで延労働人数・KY実施率・ヒヤリ件数を可視化。";
+  "安全衛生日誌をA4用紙そのままの画面で作成。必須5項目 (日付・天候・現場名・作業内容・KY結果・ヒヤリハット) を3〜5分で入力し、印刷/PDF出力に対応。昨日の日誌から流用も可能。";
 
 export const metadata: Metadata = {
   title: _title,
@@ -26,45 +27,14 @@ export const metadata: Metadata = {
 export default function SafetyDiaryPage() {
   return (
     <>
-      {/* F-010 B縮小版: 現在は一覧+新規記録の2ページ構成。詳細/月次/印刷機能は
-          今後のLMS拡張時に再設計予定。localStorageデータは保持されています。 */}
-      <div className="mx-auto max-w-2xl px-4 pt-4">
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
-          現在は一覧と新規記録の2ページに絞った縮小版です。詳細・月次まとめ・印刷機能は今後のLMS拡張時に再設計予定です。
-        </p>
-      </div>
       <PageJsonLd
-        name="安全衛生日誌"
-        description="必須5項目+任意8項目の現場日誌。月次まとめで類似事故・関連法改正をハイライト。"
+        name="安全衛生日誌 (用紙ファースト)"
+        description="完成形のA4用紙に直接書き込んで保存できる安全衛生日誌。"
         path="/safety-diary"
       />
-      <DiaryListClient />
-      <RelatedPageCards
-        heading="合わせて使う"
-        pages={[
-          {
-            href: "/ky",
-            label: "KY簡易作成",
-            description: "朝礼3分で危険予知活動表を作成し、その日の日誌へそのまま転記できます。",
-            color: "emerald",
-            cta: "KYを書く",
-          },
-          {
-            href: "/pdf",
-            label: "PDF エクスポート",
-            description: "日誌・KY・RA をワンクリックでPDF出力。協力会社・元請への提出に。",
-            color: "sky",
-            cta: "PDFを出力",
-          },
-          {
-            href: "/accidents",
-            label: "事故事例で振り返り",
-            description: "日誌の月次まとめから類似事故を逆引きし、翌月のKYに反映できます。",
-            color: "orange",
-            cta: "類似事故を見る",
-          },
-        ]}
-      />
+      <Suspense fallback={<PageSkeleton label="日誌用紙を読み込み中" />}>
+        <DiaryPaperPageContent />
+      </Suspense>
     </>
   );
 }
