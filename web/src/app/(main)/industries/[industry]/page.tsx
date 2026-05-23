@@ -654,7 +654,7 @@ export default async function IndustryLandingPage({ params }: { params: Params }
                   {content.label}向け 年次安全衛生計画
                 </p>
                 <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">
-                  業種×規模別の30テンプレートから、基本方針・目標・月別取組・関連法令・通達を自動生成
+                  業種13種×規模3段階・39テンプレートから、基本方針・目標・月別取組・関連法令・通達を自動生成
                 </p>
               </div>
               <ArrowUpRight
