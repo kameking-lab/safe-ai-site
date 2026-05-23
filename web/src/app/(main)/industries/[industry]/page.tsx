@@ -244,6 +244,32 @@ export default async function IndustryLandingPage({ params }: { params: Params }
           )}
         </header>
 
+        {content.slug === "construction" && (
+          <Link
+            href="/for/construction"
+            className="group mt-4 flex items-start gap-3 rounded-xl border-2 border-amber-300 bg-amber-50/70 p-3 transition hover:border-amber-400 hover:bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30 dark:hover:bg-amber-950/50"
+          >
+            <span aria-hidden="true" className="text-xl">
+              🏗
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-xs font-bold uppercase tracking-widest text-amber-800 dark:text-amber-300">
+                併せて読みたい
+              </span>
+              <span className="mt-0.5 block text-sm font-semibold text-slate-900 dark:text-slate-100">
+                建設業の役職別ランディング /for/construction
+              </span>
+              <span className="mt-0.5 block text-[11px] leading-relaxed text-slate-600 dark:text-slate-400">
+                職長・元請安全担当・現場代理人向けに、当日／月次／年次の運用ツールを役職別エントリで整理しています
+              </span>
+            </span>
+            <ArrowUpRight
+              className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 transition group-hover:translate-x-0.5 dark:text-amber-300"
+              aria-hidden="true"
+            />
+          </Link>
+        )}
+
         {/* Stats from analytics layer (only for industries with accident-analysis bucket) */}
         {report && report.stats.total > 0 && (
           <Section
