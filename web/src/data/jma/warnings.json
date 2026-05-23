@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-23T21:29:11.402Z",
+  "fetchedAt": "2026-05-23T22:31:37.386Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -2310,28 +2310,15 @@
       ]
     },
     "JP-15": {
-      "level": "advisory",
+      "level": "none",
       "entries": [
         {
           "sourceCode": "150000",
-          "level": "advisory",
-          "headline": "佐渡では、２４日朝まで急な強い雨や落雷に注意してください。",
-          "reportDatetime": "2026-05-24T04:16:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-24T07:06:00+09:00",
           "publishingOffice": "新潟地方気象台",
-          "warnings": [
-            {
-              "areaCode": "150040",
-              "code": "14",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1522400",
-              "code": "14",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
@@ -2349,76 +2336,15 @@
       ]
     },
     "JP-17": {
-      "level": "advisory",
+      "level": "none",
       "entries": [
         {
           "sourceCode": "170000",
-          "level": "advisory",
-          "headline": "能登では、２４日朝まで急な強い雨や落雷に注意してください。",
-          "reportDatetime": "2026-05-24T01:32:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-24T07:03:00+09:00",
           "publishingOffice": "金沢地方気象台",
-          "warnings": [
-            {
-              "areaCode": "170020",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1720200",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1720400",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1720500",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1720700",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1738400",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1738600",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1740700",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1746100",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1746300",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
