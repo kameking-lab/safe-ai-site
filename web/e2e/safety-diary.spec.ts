@@ -14,13 +14,19 @@ test.describe("安全衛生日誌", () => {
 
   test("日誌作成→保存フロー: localStorage に永続化される", async ({ page }) => {
     await page.goto("/safety-diary");
-    // ハイドレーション完了を待つ（タブUIが現れるまで）
+    // ハイドレーション完了を待つ（保存ボタンが現れるまで）
     await page.waitForLoadState("networkidle");
 
     // 現場名入力（type=text の最初の入力欄を狙う）
     const textInputs = page.locator('input[type="text"]');
     if (await textInputs.count() > 0) {
       await textInputs.first().fill("E2E現場テスト");
+    }
+
+    // 作業内容入力 (用紙ファースト UI では textarea。schema 上 min(1) 必須)
+    const textareas = page.locator("textarea");
+    if (await textareas.count() > 0) {
+      await textareas.first().fill("E2E 作業内容: 配筋・型枠");
     }
 
     // 保存ボタン（テキストに「保存」を含む）
@@ -30,7 +36,7 @@ test.describe("安全衛生日誌", () => {
       // 保存後 localStorage を確認
       await page.waitForTimeout(500);
       const stored = await page.evaluate(() =>
-        localStorage.getItem("anzen-safety-diary-v1"),
+        localStorage.getItem("safety-diary-v3"),
       );
       // 保存成功時に何らかのエントリが書き込まれている
       expect(stored).toBeTruthy();
