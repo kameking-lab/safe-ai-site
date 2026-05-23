@@ -216,6 +216,12 @@ export default function AccidentsReportsHubPage() {
             >
               📝 KY用紙を起票
             </Link>
+            <Link
+              href="/for/construction"
+              className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
+            >
+              🏗 建設業の方はこちら（役職別ランディング）
+            </Link>
           </Cluster>
         </Section>
 

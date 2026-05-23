@@ -123,6 +123,14 @@ export default function PlanGeneratorPage() {
               → ガイド：年次安全衛生計画ジェネレーター（業種別）の使い方
             </Link>
           </p>
+          <p className="mt-3">
+            <Link
+              href="/for/construction"
+              className="font-semibold underline hover:text-amber-700"
+            >
+              → 建設業の方はこちら：職長・元請・現場代理人向けランディング /for/construction
+            </Link>
+          </p>
         </section>
 
         <CopilotNextSteps

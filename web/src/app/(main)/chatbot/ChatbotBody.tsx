@@ -229,6 +229,17 @@ export function ChatbotBody() {
             color: "emerald",
             cta: isEn ? "Start e-learning" : "Eラーニングで学ぶ",
           },
+          {
+            href: "/for/construction",
+            label: isEn
+              ? "Construction industry landing"
+              : "建設業の方はこちら（役職別ランディング）",
+            description: isEn
+              ? "Role-based entry for site foremen, prime-contractor safety leads, and field representatives. Daily / monthly / yearly tools in one page."
+              : "職長・元請安全担当・現場代理人の3役職向けに、当日／月次／年次の運用ツールと法令早見を1ページに集約。",
+            color: "amber",
+            cta: isEn ? "Open the landing" : "建設業ランディングへ",
+          },
         ]}
       />
     </PageContainer>
