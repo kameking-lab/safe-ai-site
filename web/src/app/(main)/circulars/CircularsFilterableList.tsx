@@ -4,6 +4,9 @@ import { useDeferredValue, useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, X } from "lucide-react";
 import type { MhlwNotice, MhlwNoticeDocType } from "@/data/mhlw-notices";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
+import { CopyCitationButton } from "@/components/favorites/copy-citation-button";
+import { formatNoticeCitation } from "@/lib/favorites";
 
 // P1-I: /circulars にキーワード+期間+種別フィルタを追加。
 // 1069件全件をクライアントに渡し、フィルタ後の上位 200 件を表示する。
@@ -182,6 +185,25 @@ export function CircularsFilterableList({ all }: { all: MhlwNotice[] }) {
                 {n.noticeNumber ? <span>{n.noticeNumber}</span> : null}
                 <span>{n.issuedDateRaw ?? n.issuedDate}</span>
                 {n.issuer ? <span>{n.issuer}</span> : null}
+                {/* P0-016 (usability-audit-day3): 通達の引用コピー + お気に入り */}
+                <span className="ml-auto flex items-center gap-1.5">
+                  <CopyCitationButton
+                    text={formatNoticeCitation({
+                      title: n.title,
+                      issuer: n.issuer ?? undefined,
+                      noticeNumber: n.noticeNumber ?? undefined,
+                      issuedDate: n.issuedDateRaw ?? n.issuedDate ?? undefined,
+                      url: `https://www.anzen-ai-portal.jp/circulars/${n.id}`,
+                    })}
+                  />
+                  <FavoriteButton
+                    kind="notice"
+                    id={n.id}
+                    title={n.title}
+                    subtitle={`${n.docType}${n.noticeNumber ? ` ・ ${n.noticeNumber}` : ""}${n.issuer ? ` ・ ${n.issuer}` : ""}`}
+                    href={`/circulars/${n.id}`}
+                  />
+                </span>
               </div>
               <Link
                 href={`/circulars/${n.id}`}
