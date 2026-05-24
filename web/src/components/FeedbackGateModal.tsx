@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { MessageSquare, Share2, FileText, X } from "lucide-react";
+import { MessageSquare, Share2, X } from "lucide-react";
 import {
   shouldShowFeedbackGate,
   trackUsage,
@@ -93,20 +93,6 @@ export function FeedbackGateModal() {
               <p className="text-sm font-bold text-slate-900">ご意見・改善提案</p>
               <p className="mt-0.5 text-xs text-slate-700">
                 使いにくい点・追加してほしい機能などを教えてください。
-              </p>
-            </div>
-          </Link>
-
-          <Link
-            href="/community-cases/submit"
-            onClick={handleAction}
-            className="flex items-start gap-3 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 transition hover:bg-sky-100"
-          >
-            <FileText className="mt-0.5 h-6 w-6 shrink-0 text-sky-600" aria-hidden="true" />
-            <div>
-              <p className="text-sm font-bold text-slate-900">現場事例を共有</p>
-              <p className="mt-0.5 text-xs text-slate-700">
-                ヒヤリハット・質問・現場のTipsを匿名で投稿できます。
               </p>
             </div>
           </Link>

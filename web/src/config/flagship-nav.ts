@@ -90,9 +90,8 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     href: "/laws",
     subItems: [
       { label: "法改正一覧", href: "/laws" },
-      { label: "通達・判例", href: "/laws/notices-precedents" },
+      { label: "通達・判例", href: "/circulars" },
       { label: "条文検索", href: "/law-search" },
-      { label: "通達原文", href: "/circulars" },
       { label: "法令体系マップ", href: "/law-hierarchy", description: "法→政令→省令→告示の階層構造を俯瞰" },
       { label: "年次安全衛生計画ジェネレーター", href: "/strategy/plan-generator", description: "業種・規模別の39テンプレートから年次計画書を自動生成" },
       { label: "健康診断スケジューラ", href: "/health-checkup-scheduler", description: "業種・職種・物質・作業条件から必要健診と年間スケジュールを自動判定" },
@@ -113,7 +112,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       { label: "AIに質問する", href: "/chatbot" },
       { label: "用語集", href: "/glossary" },
       { label: "FAQ 200問", href: "/faq", description: "法令・管理体制・化学物質・健康管理の200問を法令根拠付きで解説" },
-      { label: "現場の声を投稿", href: "/community-cases/submit", description: "現場の疑問・ヒヤリハット・気づきを共有。コンサルタント監修コメント付きで /community-cases に公開" },
+      { label: "ご意見・改善提案", href: "/contact", description: "サイトへの要望・追加してほしい機能はこちらからお寄せください" },
     ],
   },
   {

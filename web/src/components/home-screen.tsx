@@ -29,7 +29,6 @@ const MhlwDeathsPanel = dynamic(
   () => import("@/components/mhlw-deaths-panel").then((m) => m.MhlwDeathsPanel),
   { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
 );
-import { CommunityVoiceSection } from "@/components/community-voice-section";
 import { ELearningPanel } from "@/components/elearning-panel";
 import { HomeValueHero } from "@/components/home-value-hero";
 import { PersonaEntry } from "@/components/persona-entry";
@@ -540,7 +539,6 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
           <section id="section-persona-entry" className="px-4 pt-4 pb-6 lg:px-8">
             <PersonaEntry />
           </section>
-          <CommunityVoiceSection />
         </>
       ) : null}
 

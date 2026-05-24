@@ -118,6 +118,16 @@ const nextConfig: NextConfig = {
       // 投稿募集ランディング(119行・実投稿0件・コンサル監修コメント無し)を削除し、
       // 同一意図(=Q&Aで疑問解決)を満たす /faq 200問 (法令タグ付き) へ恒久転送。
       { source: "/qa-knowledge", destination: "/faq", permanent: true },
+      // P0-002改 (usability-audit-day2-2026-05-24): /community-cases を削除。
+      // サーバメモリのみで投稿が永続化されない実装不全 + サイト中核コンセプト
+      // 「現場のめんどくさいを解決する(現場に投稿させるのは禁止)」と矛盾するため
+      // 機能ごと廃止。シード4件は事故事例DB(/accidents)に相当するため恒久転送。
+      { source: "/community-cases", destination: "/accidents", permanent: true },
+      { source: "/community-cases/:path*", destination: "/accidents", permanent: true },
+      // P0-011 (usability-audit-day2): /laws/notices-precedents (通達+判例30件)を
+      // /circulars (1069通達 DB) に統合。判例30件は court-precedents-list で
+      // /circulars 下部に表示するように移植済み。
+      { source: "/laws/notices-precedents", destination: "/circulars", permanent: true },
     ];
   },
   // セキュリティ・キャッシュヘッダー
