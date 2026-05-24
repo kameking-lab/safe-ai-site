@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { HomeScreen } from "@/components/home-screen";
+import { ELearningPanel } from "@/components/elearning-panel";
+import { ElearningProgressBoard } from "@/components/elearning-progress-board";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
+import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
 import { RelatedPageCards } from "@/components/related-page-cards";
+import { PageContainer } from "@/components/layout";
+import { PageSkeleton } from "@/components/skeleton";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd, courseListSchema } from "@/components/json-ld";
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -39,14 +43,11 @@ export default function ELearningPage() {
     <>
       <PageJsonLd name={_title} description={_desc} path="/e-learning" />
       <JsonLd schema={courseSchema} />
-      <Suspense
-        fallback={
-          <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">
-            <div className="h-40 animate-pulse rounded-lg bg-slate-100" />
-          </div>
-        }
-      >
-        <HomeScreen variant="elearning">
+      {/* P0-012 (usability-audit-day3): HomeScreen 経由を廃止し、ファースト
+          ビューを直接「コース一覧」に。ペルソナA (建設業職長) が「クイズを
+          すぐ始めたい」用途で 5-6 スクロール → 1 スクロール以内に短縮。
+          P0-014 (受講者進捗保存) と組み合わせて学習継続性を担保する。 */}
+      <PageContainer width="wide" paddingY="default">
         <TranslatedPageHeader
           titleJa="Eラーニング"
           titleEn="E-Learning"
@@ -55,8 +56,13 @@ export default function ELearningPage() {
           iconName="GraduationCap"
           iconColor="emerald"
         />
-      </HomeScreen>
-      </Suspense>
+        <LocalStorageWarningBanner />
+        {/* P0-014: 受講者進捗ボード (履歴ゼロ時は非表示) */}
+        <ElearningProgressBoard />
+        <Suspense fallback={<PageSkeleton label="コース一覧を読み込み中" />}>
+          <ELearningPanel />
+        </Suspense>
+      </PageContainer>
       <RelatedPageCards
         heading="合わせて使う"
         pages={[
