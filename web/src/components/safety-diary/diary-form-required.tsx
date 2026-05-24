@@ -14,6 +14,10 @@ import {
 import { addEntry, loadEntries, newId } from "@/lib/safety-diary/store";
 import { INDUSTRY_PRESET_DATA } from "@/lib/safety-diary/presets";
 import { loadProfile } from "@/lib/company-profile";
+import {
+  loadLatestKyForDiary,
+  type KyToDiaryPayload,
+} from "@/lib/safety-diary/from-ky";
 
 const INDUSTRY_LABELS: Record<IndustryPreset, string> = {
   construction: "建設",
@@ -53,6 +57,9 @@ export function DiaryFormRequired() {
   const [error, setError] = useState<string | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
   const [importNotice, setImportNotice] = useState<string | null>(null);
+  const [fromKyMeta, setFromKyMeta] = useState<KyToDiaryPayload["meta"] | null>(
+    null,
+  );
 
   const preset = INDUSTRY_PRESET_DATA[industry];
 
@@ -83,6 +90,28 @@ export function DiaryFormRequired() {
     setWorkContent(latest.required.workContent);
     setKyResult(latest.required.kyResult);
     setImportNotice(`${latest.required.date} の日誌から流用しました（日付・天候・ヒヤリは要更新）`);
+  }, [searchParams]);
+
+  // P0-010 (usability-audit-day2): fromKy=latest → 直近のKY記録から流用。
+  // KY 作業内容・危険要因・対策・参加者・現場名を日誌に自動転記して
+  // 「現場のめんどくさい (KY→日誌の手コピペ)」を解決する。
+  useEffect(() => {
+    const fromKy = searchParams?.get("fromKy");
+    if (!fromKy) return;
+    const payload = loadLatestKyForDiary();
+    if (!payload) {
+      setImportNotice(
+        "保存済のKY記録が見つかりませんでした。/ky でKYを保存してから「この内容で日誌を書く」を押してください。",
+      );
+      return;
+    }
+    if (payload.siteName) setSiteName(payload.siteName);
+    if (payload.workContent) setWorkContent(payload.workContent);
+    if (payload.kyResult) setKyResult(payload.kyResult);
+    setFromKyMeta(payload.meta);
+    setImportNotice(
+      `${payload.meta.workDate ?? "(日付不明)"} のKY「${payload.meta.workDetail ?? "未入力"}」から自動転記しました`,
+    );
   }, [searchParams]);
 
   function handleVoiceInput(setter: (v: string) => void) {
@@ -199,6 +228,22 @@ export function DiaryFormRequired() {
       {importNotice && (
         <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
           ✓ {importNotice}
+        </div>
+      )}
+
+      {/* P0-010 元KYバッジ: どのKYから転記されたかを明示し、修正時に
+          ユーザーが追跡できるようにする。 */}
+      {fromKyMeta && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900">
+          <span className="font-bold">このKYから作成:</span>{" "}
+          {fromKyMeta.workDate ?? "(日付不明)"} ・{" "}
+          {fromKyMeta.companyName ?? "会社名未入力"}
+          <Link
+            href="/ky"
+            className="ml-2 underline hover:text-blue-700"
+          >
+            KY を再編集 →
+          </Link>
         </div>
       )}
 

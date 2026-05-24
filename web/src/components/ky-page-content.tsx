@@ -1582,7 +1582,7 @@ export function KyPageContent() {
         )}
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2">
           <span className="text-[11px] text-slate-500">{savedLabel}</span>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={() => void handleManualSave()}
@@ -1590,6 +1590,17 @@ export function KyPageContent() {
             >
               保存
             </button>
+            {/* P0-010 (usability-audit-day2): KY → 日誌 ワンクリック転記。
+                作業内容・危険要因・対策・参加者をプリフィルした状態で
+                /safety-diary/new を開く。サイト中核コンセプト
+                「現場のめんどくさいを解決する」の代表施策。 */}
+            <Link
+              href="/safety-diary/new?fromKy=latest"
+              className="rounded-lg border border-blue-300 bg-white px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-50"
+              title="現在のKY内容を引き継いで安全衛生日誌を作成"
+            >
+              この内容で日誌を書く →
+            </Link>
             <button
               type="button"
               onClick={() => window.print()}
