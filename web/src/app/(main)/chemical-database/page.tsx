@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ChemicalDatabaseClient } from "@/components/chemical-database-client";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import { RelatedPageCards } from "@/components/related-page-cards";
@@ -54,6 +55,16 @@ export default function ChemicalDatabasePage() {
           }),
         ]}
       />
+      {/* P1-E: 化学物質RA との使い分けをファーストビューで明示 */}
+      <div className="mx-auto mt-3 max-w-7xl px-4 lg:px-8">
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50/60 px-4 py-2.5 text-xs text-emerald-900 dark:border-emerald-700/60 dark:bg-emerald-900/20 dark:text-emerald-200">
+          <strong className="font-semibold">このページの使い分け：</strong>
+          このページは物質の<strong className="font-semibold">詳細情報（CAS番号・GHS分類・濃度基準値）を閲覧</strong>するDBです。
+          物質と作業内容から<em className="font-medium">リスク区分を判定</em>したい場合は
+          <Link href="/chemical-ra" className="ml-1 underline decoration-emerald-400 underline-offset-2 hover:text-emerald-700 dark:hover:text-emerald-100">化学物質RA</Link>
+          をご利用ください。
+        </div>
+      </div>
       <ChemicalDatabaseClient />
       <RelatedPageCards
         heading="合わせて使う"

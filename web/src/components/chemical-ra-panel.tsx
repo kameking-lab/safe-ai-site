@@ -388,9 +388,11 @@ export function ChemicalRaPanel() {
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div>
-            <p className="text-xs font-bold text-emerald-700">2ステップウィザード</p>
+            {/* P1-F: 「2ステップウィザード」では入口が3つ並ぶ実態と乖離するため、
+                「物質を選ぶ → 作業方法 → A4結果表」の3ステップで実態を表現する。 */}
+            <p className="text-xs font-bold text-emerald-700">3ステップで判定</p>
             <p className="text-[11px] text-slate-500">
-              STEP 1 物質を選ぶ → STEP 2 作業方法を答える → A4結果表
+              STEP 1 化学物質を選ぶ（3つの入口）→ STEP 2 作業方法を選ぶ → STEP 3 A4結果表
             </p>
           </div>
           <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700">

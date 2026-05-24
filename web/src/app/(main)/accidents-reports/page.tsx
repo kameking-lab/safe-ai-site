@@ -164,8 +164,15 @@ export default function AccidentsReportsHubPage() {
               </div>
             }
           >
-            <HubFilter industries={summary.industries} />
+            <HubFilter industries={summary.industries} yearRange={summary.yearRange} />
           </Suspense>
+          {/* P1-C: 業種カードの数値（事例数・死亡数）の意味と、データ源差による
+              業種間の桁差をハブ全体の注釈として明示。誤認防止のため。 */}
+          <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 text-[11px] leading-relaxed text-amber-900 dark:border-amber-700/60 dark:bg-amber-900/20 dark:text-amber-200">
+            ※ 各業種の「事例（件）」「うち死亡（人）」は <strong>{summary.yearRange.min}〜{summary.yearRange.max}年の累計</strong> です（速報値ではありません）。
+            医療・福祉など一部業種は厚労省「職場のあんぜんサイト」での収録件数が他業種に比べて少なく、
+            実際の労働災害件数の業種間比較に直接使うのは適切ではありません。各業種ページで事故型・原因の構造を確認してください。
+          </p>
         </Section>
 
         <Section
