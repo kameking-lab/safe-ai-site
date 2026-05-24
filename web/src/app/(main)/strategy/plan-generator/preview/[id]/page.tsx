@@ -8,6 +8,7 @@ import { PrintButton } from "@/components/safety-plan/print-button";
 import { CrossToolLinks, SAFETY_PLAN_TO_SLUG } from "@/components/cross-tool-links";
 import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
 import { CopilotMemo } from "@/components/copilot/CopilotMemo";
+import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { CopilotPlanSync } from "@/components/copilot/CopilotPlanSync";
 import type { CopilotScale } from "@/lib/copilot/types";
@@ -228,9 +229,10 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
         <div className="mb-6 flex flex-col items-stretch gap-3 print:hidden sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/strategy/plan-generator"
-            className="text-sm text-emerald-700 hover:underline"
+            className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
+            title="事業者名・業種・規模・計画年度を再編集して新しい計画書を生成します"
           >
-            ← 入力に戻る
+            ← 事業者名・業種等を再編集
           </Link>
           <PrintButton />
         </div>
@@ -271,6 +273,15 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
           heading="計画書と合わせて使う"
         />
       </div>
+      {/* P2項目9: 統一CTA — 結果画面下部の次アクション */}
+      <PageContainer width="full">
+        <div className="print:hidden mt-4">
+          <MainFeatureNextActions
+            exclude="plan-generator"
+            contextLabel={`${plan.template.industry} の年次計画`}
+          />
+        </div>
+      </PageContainer>
     </div>
   );
 }

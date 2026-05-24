@@ -56,12 +56,12 @@ const CATEGORY_ORDER: CategoryKey[] = ["tokubetsu", "hoteikyoiku", "roudoueisei"
 
 const FORMATS = {
   ja: [
-    { icon: BookOpen, title: "オンデマンド配信", desc: "対応12種を動画で受講。受講進捗の管理画面に対応。スマホ・PC両対応。", badge: "2026年秋リリース予定", preorder: "事前予約受付中" },
+    { icon: BookOpen, title: "オンデマンド配信", desc: "対応12種を動画で受講。受講進捗の管理画面に対応。スマホ・PC両対応。", badge: "準備中", preorder: "公開のお知らせを希望される方は事前登録ください" },
     { icon: Users, title: "カスタマイズ研修", desc: "貴社の現場・機械・KY事例に合わせた専用テキスト・動画を制作。法定時間を満たす独自カリキュラムを設計。" },
     { icon: Building2, title: "講師派遣（対面・オンライン）", desc: "労働安全コンサルタントが講師として登壇。実技指導や質疑応答、修了証発行までワンストップ対応。" },
   ],
   en: [
-    { icon: BookOpen, title: "On-demand Video", desc: "Watch all 12 program types as video. Progress dashboard included. Works on smartphone and PC.", badge: "Planned for fall 2026", preorder: "Pre-registration open" },
+    { icon: BookOpen, title: "On-demand Video", desc: "Watch all 12 program types as video. Progress dashboard included. Works on smartphone and PC.", badge: "In preparation", preorder: "Sign up to be notified when available" },
     { icon: Users, title: "Customized Training", desc: "We create bespoke text and video matched to your site, equipment, and KY examples — designed to meet statutory hours." },
     { icon: Building2, title: "Instructor Dispatch (in-person / online)", desc: "A registered Occupational Safety Consultant serves as instructor. Practical guidance, Q&A, and certificate issuance — all in one." },
   ],
