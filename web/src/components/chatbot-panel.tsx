@@ -278,25 +278,40 @@ export function ChatbotPanel() {
       if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     });
 
+    // P0-001 (usability-audit-day2): SSE ストリーミング応答に対応。
+    // 「送信→10秒沈黙→ドット3つ」状態を解消し、最初の文字を1秒以内に表示。
+    // 失敗時は従来 JSON 応答に自動 fallback して互換性を確保する。
+    const assistantId = crypto.randomUUID();
+    const placeholderAssistant: ChatMessage = {
+      id: assistantId,
+      role: "assistant",
+      content: "",
+    };
+    setMessages([...nextMessages, placeholderAssistant]);
+
+    const history = messages.slice(-8).map((m) => ({ role: m.role, content: m.content }));
+    const requestBody = JSON.stringify({ message: text, history, lawCategory });
+
     try {
-      // 直近の会話履歴を最大8ターン送信（多ターン会話の文脈保持）
-      const history = messages.slice(-8).map((m) => ({ role: m.role, content: m.content }));
-      const res = await fetch("/api/chatbot", {
+      const res = await fetch("/api/chatbot/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, history, lawCategory }),
+        body: requestBody,
       });
 
-      if (!res.ok) {
-        const errBody = (await res.json()) as { error: string };
-        throw new Error(errBody.error ?? "エラーが発生しました");
+      if (!res.ok || !res.body) {
+        // Fallback to non-stream endpoint
+        throw new Error("stream-fallback");
       }
 
-      const data = (await res.json()) as {
-        answer: string;
-        sources: ChatbotSource[];
-        source_type: "rag" | "ai_inference";
-        confidence: "high" | "medium" | "low";
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let streamedContent = "";
+      let finalMeta: {
+        sources?: ChatbotSource[];
+        source_type?: "rag" | "ai_inference";
+        confidence?: "high" | "medium" | "low";
         confidenceScore?: number;
         followups?: FollowupSuggestion[];
         notices?: NoticeHit[];
@@ -306,32 +321,137 @@ export function ChatbotPanel() {
         scopeWarnings?: string[];
         attachedNotices?: AttachedNotice[];
         attachedLeaflets?: AttachedLeaflet[];
-      };
+        answer?: string;
+      } = {};
 
-      const assistantMsg: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content: data.answer,
-        sources: data.sources,
-        source_type: data.source_type,
-        confidence: data.confidence,
-        confidenceScore: data.confidenceScore,
-        followups: data.followups,
-        notices: data.notices,
-        citations: data.citations,
-        relatedLaws: data.relatedLaws,
-        digDeeperLinks: data.digDeeperLinks,
-        scopeWarnings: data.scopeWarnings,
-        attachedNotices: data.attachedNotices,
-        attachedLeaflets: data.attachedLeaflets,
-      };
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        // SSE は \n\n でフレーム区切り
+        let sep: number;
+        while ((sep = buffer.indexOf("\n\n")) >= 0) {
+          const frame = buffer.slice(0, sep);
+          buffer = buffer.slice(sep + 2);
+          if (!frame.trim()) continue;
+          const lines = frame.split("\n");
+          let event = "message";
+          let data = "";
+          for (const line of lines) {
+            if (line.startsWith("event:")) event = line.slice(6).trim();
+            else if (line.startsWith("data:")) data += line.slice(5).trim();
+          }
+          if (!data) continue;
+          try {
+            const parsed = JSON.parse(data) as Record<string, unknown>;
+            if (event === "text" && typeof parsed.chunk === "string") {
+              streamedContent += parsed.chunk;
+              setMessages((prev) =>
+                prev.map((m) => (m.id === assistantId ? { ...m, content: streamedContent } : m)),
+              );
+              requestAnimationFrame(() => {
+                const el = listRef.current;
+                if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+              });
+            } else if (event === "meta") {
+              finalMeta = parsed as typeof finalMeta;
+            } else if (event === "error") {
+              throw new Error(typeof parsed.message === "string" ? parsed.message : "ストリーミングエラー");
+            }
+          } catch (parseErr) {
+            if ((parseErr as Error).message.startsWith("ストリーミング")) throw parseErr;
+            // 不正フレームは黙って skip
+          }
+        }
+      }
 
-      const finalMessages = [...nextMessages, assistantMsg];
-      setMessages(finalMessages);
-      saveCurrentSession(finalMessages);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "通信エラーが発生しました";
-      setError(message);
+      // ストリーミング完了 — meta を反映してセッション保存
+      setMessages((prev) => {
+        const next = prev.map((m) =>
+          m.id === assistantId
+            ? {
+                ...m,
+                content: finalMeta.answer ?? streamedContent,
+                sources: finalMeta.sources,
+                source_type: finalMeta.source_type,
+                confidence: finalMeta.confidence,
+                confidenceScore: finalMeta.confidenceScore,
+                followups: finalMeta.followups,
+                notices: finalMeta.notices,
+                citations: finalMeta.citations,
+                relatedLaws: finalMeta.relatedLaws,
+                digDeeperLinks: finalMeta.digDeeperLinks,
+                scopeWarnings: finalMeta.scopeWarnings,
+                attachedNotices: finalMeta.attachedNotices,
+                attachedLeaflets: finalMeta.attachedLeaflets,
+              }
+            : m,
+        );
+        saveCurrentSession(next);
+        return next;
+      });
+    } catch (streamErr) {
+      // P0-001: ストリーミング失敗時は従来 /api/chatbot で同期 JSON 応答に fallback
+      try {
+        const res = await fetch("/api/chatbot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: requestBody,
+        });
+        if (!res.ok) {
+          const errBody = (await res.json()) as { error: string };
+          throw new Error(errBody.error ?? "エラーが発生しました");
+        }
+        const data = (await res.json()) as {
+          answer: string;
+          sources: ChatbotSource[];
+          source_type: "rag" | "ai_inference";
+          confidence: "high" | "medium" | "low";
+          confidenceScore?: number;
+          followups?: FollowupSuggestion[];
+          notices?: NoticeHit[];
+          citations?: StructuredCitation[];
+          relatedLaws?: RelatedLawLink[];
+          digDeeperLinks?: DigDeeperLink[];
+          scopeWarnings?: string[];
+          attachedNotices?: AttachedNotice[];
+          attachedLeaflets?: AttachedLeaflet[];
+        };
+        setMessages((prev) => {
+          const next = prev.map((m) =>
+            m.id === assistantId
+              ? {
+                  ...m,
+                  content: data.answer,
+                  sources: data.sources,
+                  source_type: data.source_type,
+                  confidence: data.confidence,
+                  confidenceScore: data.confidenceScore,
+                  followups: data.followups,
+                  notices: data.notices,
+                  citations: data.citations,
+                  relatedLaws: data.relatedLaws,
+                  digDeeperLinks: data.digDeeperLinks,
+                  scopeWarnings: data.scopeWarnings,
+                  attachedNotices: data.attachedNotices,
+                  attachedLeaflets: data.attachedLeaflets,
+                }
+              : m,
+          );
+          saveCurrentSession(next);
+          return next;
+        });
+      } catch (fallbackErr) {
+        const message =
+          fallbackErr instanceof Error ? fallbackErr.message : "通信エラーが発生しました";
+        setError(message);
+        // 失敗時は placeholder を残さず除去
+        setMessages((prev) => prev.filter((m) => m.id !== assistantId));
+      }
+      // streamErr の original cause はログのみ
+      if (streamErr instanceof Error && streamErr.message !== "stream-fallback") {
+        console.warn("[chatbot] stream error, fell back to JSON:", streamErr.message);
+      }
     } finally {
       setIsSending(false);
       requestAnimationFrame(() => {

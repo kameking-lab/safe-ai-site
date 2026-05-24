@@ -46,7 +46,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/e-learning", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
     { url: "/laws", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
     { url: "/law-hierarchy", lastModified: "2026-05-14", priority: 0.8, changeFrequency: "monthly" },
-    { url: "/laws/notices-precedents", lastModified: "2026-04-19", priority: 0.8, changeFrequency: "monthly" },
+    // P0-011 (usability-audit-day2): /laws/notices-precedents は /circulars に統合済。301 redirect は next.config.ts。
     { url: "/ky", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
     { url: "/ky-examples", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
     { url: "/risk", lastModified: "2026-04-19", priority: 0.8, changeFrequency: "daily" },

@@ -11,6 +11,8 @@ import { CopilotMemo } from "@/components/copilot/CopilotMemo";
 import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { CopilotPlanSync } from "@/components/copilot/CopilotPlanSync";
+import { PlanHistorySaver } from "@/components/safety-plan/plan-history-saver";
+import { PlanHistoryPicker } from "@/components/safety-plan/plan-history-picker";
 import type { CopilotScale } from "@/lib/copilot/types";
 import { findTemplateById } from "@/data/safety-plan-templates";
 import { regenerateFromTemplateId } from "@/lib/safety-plan-generator";
@@ -201,6 +203,18 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
         href={fullPreviewHref}
         organizationName={plan.organizationName || undefined}
       />
+      {/* P0-006 (usability-audit-day2): プレビュー表示時に過去計画 履歴 に追加。
+          最大3件を端末内に保持し、PDCA運用 (昨年比較・前年流用) に対応。 */}
+      <PlanHistorySaver
+        id={id}
+        previewHref={fullPreviewHref}
+        industry={plan.template.industry}
+        industryLabel={plan.template.industryLabel}
+        scale={plan.template.scale}
+        scaleLabel={plan.template.scaleLabel}
+        fiscalYear={plan.fiscalYear}
+        organizationName={plan.organizationName || null}
+      />
       <div className="print:hidden">
         <PageJsonLd
           name={`${plan.fiscalYear}年度 安全衛生計画書 プレビュー`}
@@ -238,6 +252,9 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
         </div>
 
         <PlanDocument plan={plan} />
+
+        {/* P0-006: 過去計画ピッカー (最大3件、表示中はバッジ付き) */}
+        <PlanHistoryPicker currentId={id} variant="full" />
 
         <div className="mt-8 print:hidden">
           <Link

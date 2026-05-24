@@ -14,7 +14,12 @@ import {
 } from "@/lib/mhlw-chemicals";
 import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
 import { RegulationTagsSection } from "@/components/regulation-tags-section";
-import { normalizeTags } from "@/lib/regulation-tag-labels";
+import {
+  normalizeTags,
+  oshaTagsForCas,
+  isSpecialControlSubstance,
+  REGULATION_TAGS,
+} from "@/lib/regulation-tag-labels";
 
 /**
  * 厚労省由来の物質詳細カード。
@@ -170,6 +175,11 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
         </div>
       )}
 
+      {/* P0-009 (usability-audit-day2): 労働安全衛生 特別則 (特化則/有機則/
+          酸欠則/粉じん則/石綿則) を CAS から自動引き当てして表示。
+          製造業/建設業安全担当者の最頻ユースケース対応。 */}
+      <OshaRegulationsSection cas={chemical.cas} />
+
       {/* Phase 1e: 規制タグから自動生成する関連法令 (PRTR/化審法/毒劇法/CWC/廃掃法) */}
       {chemical.details?.limits && (
         <div className="mt-3">
@@ -284,6 +294,62 @@ function ExternalRefsLinks({
           </a>
         ))}
       </div>
+    </div>
+  );
+}
+
+/**
+ * P0-009: 労働安全衛生 特別則セクション。
+ * CAS マッピングから特化則/有機則/酸欠則/粉じん則/石綿則のタグを引き当て、
+ * 該当があれば short label + 概要 + e-Gov 直リンクを表示。
+ * 該当なしの物質ではセクション自体を非表示。
+ */
+function OshaRegulationsSection({ cas }: { cas: string | null }) {
+  const oshaTags = oshaTagsForCas(cas);
+  if (oshaTags.length === 0) return null;
+  const special = isSpecialControlSubstance(cas);
+  return (
+    <div className="mt-3 rounded-lg border border-red-200 bg-white p-3">
+      <p className="flex items-center gap-1 text-xs font-semibold text-red-700">
+        <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+        労働安全衛生 特別則
+        {special && (
+          <span className="ml-1 rounded-full bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-900">
+            特別管理物質
+          </span>
+        )}
+      </p>
+      <ul className="mt-2 space-y-2 text-xs text-slate-700">
+        {oshaTags.map((tag) => {
+          const info = REGULATION_TAGS[tag];
+          return (
+            <li key={tag} className="flex flex-col gap-0.5">
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-bold ${info.badgeClass}`}>
+                  {info.shortLabel}
+                </span>
+                <a
+                  href={info.officialUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-0.5 text-[11px] text-slate-500 hover:text-slate-800 underline"
+                >
+                  e-Gov 法令
+                  <ExternalLink className="h-2.5 w-2.5" aria-hidden="true" />
+                </a>
+              </div>
+              <p className="ml-1 text-[11px] leading-relaxed text-slate-600">
+                {info.summary}
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+      {special && (
+        <p className="mt-2 rounded bg-red-50 px-2 py-1.5 text-[11px] text-red-900">
+          特別管理物質: 作業環境測定結果・特殊健診結果・作業記録を 30 年間保存する義務があります (特化則 第38条の4)。
+        </p>
+      )}
     </div>
   );
 }

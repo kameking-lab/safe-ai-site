@@ -101,7 +101,8 @@ function jsonError(status: number, message: string, retryable = false) {
   return NextResponse.json<ApiErrorBody>({ error: message, retryable }, { status });
 }
 
-const SYSTEM_PROMPT = `あなたは労働安全衛生法の専門家AIアシスタントです。
+// P0-001 (usability-audit-day2): /api/chatbot/stream で再利用するため export 化。
+export const SYSTEM_PROMPT = `あなたは労働安全衛生法の専門家AIアシスタントです。
 以下のルールを厳守してください。
 
 1. 必ず提供された法令条文のみに基づいて回答すること
@@ -132,8 +133,8 @@ ${AI_DISCLAIMER_SYSTEM_INSTRUCTION}`;
 // Phase 2 Layer 1 で buildPromptWithWhitelist に置換済み（旧 buildUserPrompt を削除）。
 // 設計参照: docs/chatbot-quality-research-2026-05-23/04-hallucination-prevention-design.md §2
 
-/** MLIT資料をプロンプト用テキストに整形 */
-function buildMlitContext(resources: MlitResource[]): string {
+/** MLIT資料をプロンプト用テキストに整形 (P0-001: stream route で再利用) */
+export function buildMlitContext(resources: MlitResource[]): string {
   if (resources.length === 0) return "";
   return resources
     .map(
@@ -143,8 +144,8 @@ function buildMlitContext(resources: MlitResource[]): string {
     .join("\n");
 }
 
-/** MLIT資料をChatbotSource形式に変換 */
-function mlitToSource(r: MlitResource): ChatbotSource {
+/** MLIT資料をChatbotSource形式に変換 (P0-001: stream route で再利用) */
+export function mlitToSource(r: MlitResource): ChatbotSource {
   const desc = `${r.subcategory}・対象:${r.targetAudience.join("・")}${r.relatedLaws.length > 0 ? `・関連:${r.relatedLaws.join("、")}` : ""}`;
   return {
     law: `${r.publisher}（${r.bureau}）`,
@@ -156,8 +157,8 @@ function mlitToSource(r: MlitResource): ChatbotSource {
   };
 }
 
-/** 条文テキストから質問キーワード周辺を抜粋したスニペットを生成 */
-function buildSnippet(text: string, query: string, maxLen = 140): string {
+/** 条文テキストから質問キーワード周辺を抜粋したスニペットを生成 (P0-001: stream route で再利用) */
+export function buildSnippet(text: string, query: string, maxLen = 140): string {
   if (!text) return "";
   const tokens = query
     .replace(/[？?！!。、.,（）()「」『』【】\s　]/g, " ")
@@ -182,8 +183,8 @@ function buildSnippet(text: string, query: string, maxLen = 140): string {
   return prefix + text.slice(start, end) + suffix;
 }
 
-/** 直近の会話履歴を最大10ターンに制限してGeminiの contents 形式に変換 */
-function buildHistoryContents(history: ChatTurn[] | undefined) {
+/** 直近の会話履歴を最大10ターンに制限してGeminiの contents 形式に変換 (P0-001: stream route で再利用) */
+export function buildHistoryContents(history: ChatTurn[] | undefined) {
   if (!history || history.length === 0) return [];
   const recent = history.slice(-10);
   return recent.map((turn) => ({
@@ -192,8 +193,8 @@ function buildHistoryContents(history: ChatTurn[] | undefined) {
   }));
 }
 
-/** 質問と関連条文から、フォローアップ候補を生成 */
-function buildFollowups(question: string, articles: LawArticle[]): FollowupSuggestion[] {
+/** 質問と関連条文から、フォローアップ候補を生成 (P0-001: stream route で再利用) */
+export function buildFollowups(question: string, articles: LawArticle[]): FollowupSuggestion[] {
   const out: FollowupSuggestion[] = [];
   out.push({
     label: "💡 もっと詳しく",

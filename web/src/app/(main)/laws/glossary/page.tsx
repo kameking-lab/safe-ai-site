@@ -270,7 +270,7 @@ export default function LawsGlossaryPage() {
           </li>
           <li>
             ・{" "}
-            <Link href="/laws/notices-precedents" className="text-blue-700 underline">
+            <Link href="/circulars" className="text-blue-700 underline">
               通達・判例（第2層出典）
             </Link>{" "}
             — 行政解釈と最高裁判例

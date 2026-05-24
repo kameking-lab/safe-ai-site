@@ -562,7 +562,7 @@ export function ChemicalDatabaseClient() {
           </li>
           <li>
             <Link
-              href="/laws/notices-precedents"
+              href="/circulars"
               className="inline-flex min-h-[36px] items-center rounded-md border border-emerald-300 bg-white px-3 py-1.5 font-semibold text-emerald-700 hover:bg-emerald-50"
             >
               通達・判例

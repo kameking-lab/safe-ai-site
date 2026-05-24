@@ -40,12 +40,12 @@ export default function DiversitySogiPage() {
       relatedLaws={[
         {
           label: "パワハラ防止法 指針（令和2年厚労告示第5号）",
-          href: "/laws/notices-precedents",
+          href: "/circulars",
           description: "SOGI ハラ・アウティングも対象と明示",
         },
         {
           label: "最三小判令5.7.11 トイレ使用制限事件",
-          href: "/laws/notices-precedents",
+          href: "/circulars",
           description: "職場SOGIに関する合理的配慮義務の最高裁判例",
         },
       ]}

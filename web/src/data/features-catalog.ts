@@ -289,16 +289,6 @@ export const FEATURES: FeatureItem[] = [
     category: "management",
     tags: ["運営者"],
   },
-  {
-    slug: "community-cases",
-    title: "利用者の声",
-    summary: "現場担当者からのフィードバック",
-    description:
-      "実際に安全AIポータルを使っている現場担当者・安全管理者の声を集約。改善要望・追加機能の提案窓口も。",
-    href: "/community-cases",
-    category: "management",
-    tags: ["利用者"],
-  },
   // サイネージ
   {
     slug: "signage",

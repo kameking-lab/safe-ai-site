@@ -51,7 +51,7 @@ export default function DiversityLgbtqPage() {
         },
         {
           label: "通達・判例（SOGI含む）",
-          href: "/laws/notices-precedents",
+          href: "/circulars",
           description: "SOGIハラスメントに関する行政通達・裁判例",
         },
       ]}

@@ -14,14 +14,26 @@ export type RegulationTag =
   | "cscl-other"
   | "poison-control"
   | "cwc"
-  | "waste";
+  | "waste"
+  // P0-009 (usability-audit-day2): 労働安全衛生関連の特別則タグ。
+  // 製造業安全担当者の最頻ユースケース(特化則第二類物質マーキング等)を
+  // 既存「規制法令」セクションと同じUIで一望できるように追加。
+  | "tokutei-1"
+  | "tokutei-2"
+  | "tokutei-3"
+  | "yuki-1"
+  | "yuki-2"
+  | "sankketsu"
+  | "funjin"
+  | "sekimen";
 
 export type RegulationTagCategory =
   | "nite"
   | "prtr"
   | "chashin"
   | "poison-waste"
-  | "cwc";
+  | "cwc"
+  | "osha";
 
 export type RegulationTagInfo = {
   tag: RegulationTag;
@@ -134,6 +146,87 @@ export const REGULATION_TAGS: Record<RegulationTag, RegulationTagInfo> = {
     category: "poison-waste",
     badgeClass: "bg-fuchsia-100 text-fuchsia-900 border-fuchsia-300",
   },
+  // ---- 労働安全衛生関連 特別則 (P0-009) -------------------------
+  "tokutei-1": {
+    tag: "tokutei-1",
+    shortLabel: "特化則 第一類",
+    fullLabel: "特定化学物質障害予防規則 第一類物質",
+    summary:
+      "労働安全衛生法施行令別表第三 第一号。製造許可物質 (ジクロロベンジジン、ベリリウム、アルファナフチルアミン等)。製造時は厚生労働大臣の許可が必要。",
+    officialUrl: "https://laws.e-gov.go.jp/law/347M50002000039",
+    category: "osha",
+    badgeClass: "bg-red-200 text-red-950 border-red-400",
+  },
+  "tokutei-2": {
+    tag: "tokutei-2",
+    shortLabel: "特化則 第二類",
+    fullLabel: "特定化学物質障害予防規則 第二類物質",
+    summary:
+      "労働安全衛生法施行令別表第三 第二号。発散抑制装置の設置・作業環境測定 (6か月以内ごと)・特殊健康診断 (6か月以内ごと)・作業主任者選任義務。特別管理物質はさらに30年間記録保存。",
+    officialUrl: "https://laws.e-gov.go.jp/law/347M50002000039",
+    category: "osha",
+    badgeClass: "bg-red-100 text-red-900 border-red-300",
+  },
+  "tokutei-3": {
+    tag: "tokutei-3",
+    shortLabel: "特化則 第三類",
+    fullLabel: "特定化学物質障害予防規則 第三類物質",
+    summary:
+      "労働安全衛生法施行令別表第三 第三号。大量漏えい時の急性中毒予防を主目的とした規制 (塩素、塩化水素、硝酸、フッ化水素等)。漏えい防止措置・修理時の作業基準等を要求。",
+    officialUrl: "https://laws.e-gov.go.jp/law/347M50002000039",
+    category: "osha",
+    badgeClass: "bg-rose-100 text-rose-900 border-rose-300",
+  },
+  "yuki-1": {
+    tag: "yuki-1",
+    shortLabel: "有機則 第一種",
+    fullLabel: "有機溶剤中毒予防規則 第一種有機溶剤",
+    summary:
+      "有機溶剤中毒予防規則 別表第一 第一種 (クロロホルム、四塩化炭素、トリクロロエチレン等 7物質)。発散抑制装置として密閉式・局所排気装置(プッシュプル型)の設置義務。作業環境測定 6か月以内ごと。",
+    officialUrl: "https://laws.e-gov.go.jp/law/347M50002000036",
+    category: "osha",
+    badgeClass: "bg-amber-200 text-amber-950 border-amber-400",
+  },
+  "yuki-2": {
+    tag: "yuki-2",
+    shortLabel: "有機則 第二種",
+    fullLabel: "有機溶剤中毒予防規則 第二種有機溶剤",
+    summary:
+      "有機溶剤中毒予防規則 別表第一 第二種 (トルエン、キシレン、酢酸エチル、MEK等の主要溶剤)。局所排気装置(囲い式・外付け式)以上の発散抑制義務。作業環境測定 6か月以内ごと、特殊健診も同頻度。",
+    officialUrl: "https://laws.e-gov.go.jp/law/347M50002000036",
+    category: "osha",
+    badgeClass: "bg-amber-100 text-amber-900 border-amber-300",
+  },
+  sankketsu: {
+    tag: "sankketsu",
+    shortLabel: "酸欠則",
+    fullLabel: "酸素欠乏症等防止規則",
+    summary:
+      "酸素濃度18%未満となる恐れのある場所 (タンク内部・地下ピット・マンホール・サイロ・船倉等) の作業を規制。酸素欠乏危険作業主任者選任・作業前測定・換気・空気呼吸器等を義務付け。第二種は硫化水素中毒予防も対象。",
+    officialUrl: "https://laws.e-gov.go.jp/law/347M50002000042",
+    category: "osha",
+    badgeClass: "bg-cyan-100 text-cyan-900 border-cyan-300",
+  },
+  funjin: {
+    tag: "funjin",
+    shortLabel: "粉じん則",
+    fullLabel: "粉じん障害防止規則",
+    summary:
+      "粉じん作業 (鉱物・岩石・金属の研磨・破砕・選別、アーク溶接、ずい道掘削等) を規制。発散抑制設備・呼吸用保護具・特別教育・じん肺健診を義務付け。じん肺法 (粉じん作業従事者の健康管理) と一体運用。",
+    officialUrl: "https://laws.e-gov.go.jp/law/354M50002000018",
+    category: "osha",
+    badgeClass: "bg-stone-100 text-stone-900 border-stone-300",
+  },
+  sekimen: {
+    tag: "sekimen",
+    shortLabel: "石綿則",
+    fullLabel: "石綿障害予防規則",
+    summary:
+      "石綿 (アスベスト) およびこれを含有する建材等の取扱作業を規制。事前調査・除去/封じ込め/囲い込み工事の作業計画届出・作業主任者選任・特殊健診 (40年間記録保存) を義務付け。建築物解体時の石綿事前調査結果報告 (R4.4.1〜) も含む。",
+    officialUrl: "https://laws.e-gov.go.jp/law/417M60000100021",
+    category: "osha",
+    badgeClass: "bg-zinc-200 text-zinc-950 border-zinc-400",
+  },
 };
 
 export const ALL_REGULATION_TAGS: RegulationTag[] = [
@@ -146,10 +239,21 @@ export const ALL_REGULATION_TAGS: RegulationTag[] = [
   "poison-control",
   "cwc",
   "waste",
+  // P0-009 OSHA 系
+  "tokutei-1",
+  "tokutei-2",
+  "tokutei-3",
+  "yuki-1",
+  "yuki-2",
+  "sankketsu",
+  "funjin",
+  "sekimen",
 ];
 
 /** カテゴリの順序定義 (フィルタ UI のグルーピング用) */
 export const TAG_CATEGORY_ORDER: RegulationTagCategory[] = [
+  // P0-009: 製造業/建設業の最頻ユースケースである安衛法系を冒頭に配置。
+  "osha",
   "nite",
   "prtr",
   "chashin",
@@ -158,6 +262,7 @@ export const TAG_CATEGORY_ORDER: RegulationTagCategory[] = [
 ];
 
 export const TAG_CATEGORY_LABELS: Record<RegulationTagCategory, string> = {
+  osha: "労働安全衛生 特別則",
   nite: "政府版GHS分類",
   prtr: "化管法 PRTR",
   chashin: "化審法",
@@ -219,3 +324,92 @@ export const CONSTRUCTION_PRIORITY_CAS: ReadonlyArray<{
 export const CONSTRUCTION_PRIORITY_CAS_SET = new Set(
   CONSTRUCTION_PRIORITY_CAS.map((x) => x.cas)
 );
+
+/**
+ * P0-009 (usability-audit-day2-2026-05-24):
+ * 主要物質の 安衛法 特別則 タグの CAS マッピング。
+ *
+ * 出典:
+ * - 特定化学物質障害予防規則 (347M50002000039) 別表第1
+ * - 有機溶剤中毒予防規則 (347M50002000036) 別表第1
+ * - 石綿障害予防規則 (417M60000100021)
+ * - 厚生労働省 化学物質情報 (https://anzeninfo.mhlw.go.jp/anzen_pg/SAB_FND.aspx)
+ *
+ * 全 200 物質超の特化則対象を網羅すると ETL 整備が必要なため、
+ * まずは建設業/製造業の最頻 22 物質に絞ってハードコード。残りの物質は
+ * 後続フェーズで MHLW 別表データ取込により自動付与する設計を残す。
+ *
+ * 「特別管理物質」(発がん性)に該当するものはコメントで明示。
+ */
+export const OSHA_REGULATION_TAGS_BY_CAS: Readonly<Record<string, RegulationTag[]>> = {
+  // ---- 特化則 第二類 (特別管理物質含む) -----------------------
+  "75-09-2": ["tokutei-2"], // ジクロロメタン (特別管理物質)
+  "71-43-2": ["tokutei-2"], // ベンゼン (特別管理物質)
+  "79-06-1": ["tokutei-2"], // アクリルアミド (特別管理物質)
+  "50-00-0": ["tokutei-2"], // ホルムアルデヒド (特別管理物質)
+  "75-21-8": ["tokutei-2"], // エチレンオキシド (特別管理物質)
+  "127-18-4": ["tokutei-2"], // テトラクロロエチレン (特別管理物質)
+  "79-01-6": ["tokutei-2"], // トリクロロエチレン (特別管理物質)
+  "1336-36-3": ["tokutei-1"], // PCB
+  "7439-97-6": ["tokutei-2"], // 水銀
+  "7440-43-9": ["tokutei-2"], // カドミウム
+  // ---- 特化則 第三類 (大量漏えい・急性中毒予防) ----------------
+  "7782-50-5": ["tokutei-3"], // 塩素
+  "7664-39-3": ["tokutei-3"], // フッ化水素
+  "7647-01-0": ["tokutei-3"], // 塩化水素
+  "7697-37-2": ["tokutei-3"], // 硝酸
+  // ---- 有機則 第二種 (主要溶剤) -------------------------------
+  "108-88-3": ["yuki-2"], // トルエン
+  "1330-20-7": ["yuki-2"], // キシレン
+  "67-64-1": ["yuki-2"], // アセトン
+  "78-93-3": ["yuki-2"], // メチルエチルケトン (MEK)
+  "141-78-6": ["yuki-2"], // 酢酸エチル
+  // ---- 有機則 第一種 (7物質のうち主要) ------------------------
+  "67-66-3": ["yuki-1"], // クロロホルム
+  "56-23-5": ["yuki-1"], // 四塩化炭素
+  // ---- 石綿則 ----------------------------------------------
+  "1332-21-4": ["sekimen"], // 石綿 (アスベスト)
+  "12172-73-5": ["sekimen"], // アモサイト
+  "12001-29-5": ["sekimen"], // クリソタイル
+  "12001-28-4": ["sekimen"], // クロシドライト
+  // ---- 酸欠則 (CAS 直接指定はないが代表ガス) -------------------
+  // 酸欠則は作業環境(酸素濃度18%未満)の規制であり物質単位ではないため、
+  // タグは作業環境関連物質(窒素・二酸化炭素・硫化水素)のみに付与。
+  "7727-37-9": ["sankketsu"], // 窒素 (酸素欠乏発生ガス)
+  "124-38-9": ["sankketsu"], // 二酸化炭素 (高濃度で酸素欠乏発生)
+  "7783-06-4": ["tokutei-2", "sankketsu"], // 硫化水素 (酸欠則 第二種・特化則 第二類)
+  // ---- 粉じん則 (代表物質) --------------------------------
+  "14808-60-7": ["funjin"], // 結晶質シリカ (石英)
+  "14464-46-1": ["funjin"], // 結晶質シリカ (クリストバライト)
+};
+
+/**
+ * P0-009: CAS 番号から 安衛法 特別則 タグを取得。
+ * 未登録の物質は空配列を返す (false-positive を避けるためマッピング外は表示しない)。
+ */
+export function oshaTagsForCas(cas: string | null | undefined): RegulationTag[] {
+  if (!cas) return [];
+  const tags = OSHA_REGULATION_TAGS_BY_CAS[cas];
+  return tags ? [...tags] : [];
+}
+
+/**
+ * P0-009: 特別管理物質 (特化則 第二類のうちがん原性等で30年記録保存対象) かどうか。
+ * UI表示で「特別管理物質」バッジを併記するために使用。
+ *
+ * 注: 完全な特別管理物質リストは ETL 整備が必要。ここでは確実なものに限定。
+ */
+export const SPECIAL_CONTROL_CAS_SET = new Set<string>([
+  "75-09-2", // ジクロロメタン
+  "71-43-2", // ベンゼン
+  "79-06-1", // アクリルアミド
+  "50-00-0", // ホルムアルデヒド
+  "75-21-8", // エチレンオキシド
+  "127-18-4", // テトラクロロエチレン
+  "79-01-6", // トリクロロエチレン
+]);
+
+export function isSpecialControlSubstance(cas: string | null | undefined): boolean {
+  if (!cas) return false;
+  return SPECIAL_CONTROL_CAS_SET.has(cas);
+}

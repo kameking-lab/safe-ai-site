@@ -45,9 +45,9 @@ export default function LawSearchPage() {
         heading="合わせて使う"
         pages={[
           {
-            href: "/laws/notices-precedents",
+            href: "/circulars",
             label: "通達・判例 解説",
-            description: "条文を補完する行政解釈と最高裁判例 30 件の整理。",
+            description: "条文を補完する行政解釈 1069件 と最高裁判例 30件の統合一覧。",
             color: "amber",
             cta: "通達と判例",
           },
