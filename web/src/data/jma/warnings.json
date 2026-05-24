@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-24T20:32:02.924Z",
+  "fetchedAt": "2026-05-24T21:40:24.265Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -3820,15 +3820,82 @@
       ]
     },
     "JP-15": {
-      "level": "none",
+      "level": "advisory",
       "entries": [
         {
           "sourceCode": "150000",
-          "level": "none",
-          "headline": "注意報を解除します。",
-          "reportDatetime": "2026-05-24T07:06:00+09:00",
+          "level": "advisory",
+          "headline": "下越、佐渡では、２５日昼前まで濃霧による視程障害に注意してください。",
+          "reportDatetime": "2026-05-25T06:19:00+09:00",
           "publishingOffice": "新潟地方気象台",
-          "warnings": []
+          "warnings": [
+            {
+              "areaCode": "150010",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "150040",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "1510000",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "1520600",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "1521200",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "1521300",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "1522400",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "1522700",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "1530700",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "1534200",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "1558600",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            }
+          ]
         }
       ]
     },
