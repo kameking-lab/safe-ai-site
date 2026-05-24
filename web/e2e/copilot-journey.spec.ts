@@ -10,9 +10,18 @@ import { test, expect } from "@playwright/test";
  * (covered separately) — we only check the cross-feature wiring stays alive.
  */
 test.describe("Copilot 3-feature journey @smoke", () => {
-  test("chatbot page renders Copilot step nav and memo", async ({ page }) => {
+  test("chatbot page renders Copilot step nav and memo (in collapsible <details>)", async ({ page }) => {
     const res = await page.goto("/chatbot");
     expect(res?.status()).toBeLessThan(400);
+    // P0-020 (usability-audit-day4): CopilotStepNav/CopilotMemo は chatbot
+    // ファーストビューから退避し <details> 内に折りたたみ移動した。継続利用者は
+    // <summary> クリックで展開できる。初見の現場職長を「Copilot/引き継ぎ」
+    // 語彙で戸惑わせない設計。
+    const summary = page.locator(
+      'details summary:has-text("安全Copilot: メイン3機能")',
+    );
+    await expect(summary).toBeVisible();
+    await summary.click();
     await expect(page.getByRole("navigation", { name: /Copilot/ })).toBeVisible();
     // Step labels
     await expect(page.getByText("1. 質問する")).toBeVisible();
