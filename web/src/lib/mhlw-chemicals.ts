@@ -34,7 +34,21 @@ export type ExternalReference = {
   lookupHint: string;
 };
 
-/** 物質単位の濃度・発がん性データ（concentration-limits.json v3.0.0） */
+/** NITE 由来の主要 GHS 区分まとめ (Phase 1b 追加、政府版GHS分類) */
+export type NiteGhsClassifications = {
+  carcinogen?: string;
+  mutagen?: string;
+  reproTox?: string;
+  skinSens?: string;
+  respSens?: string;
+  skinCorrIrr?: string;
+  eyeDamageIrr?: string;
+  stotSingle?: string;
+  stotRepeat?: string;
+  aspiration?: string;
+};
+
+/** 物質単位の濃度・発がん性データ（concentration-limits.json v3.0.0 / v3.1.0で NITE 拡張） */
 export type ConcentrationLimitEntry = {
   name?: string;
   nameEn?: string;
@@ -45,6 +59,8 @@ export type ConcentrationLimitEntry = {
     iarc?: string;
     monograph?: string;
     ghs?: string;
+    /** Phase 1b 追加: NITE 由来 GHS 発がん性区分 (例 "区分1A") */
+    ghsClass?: string;
     source?: string;
   };
   mhlwSdsUrl?: string;
@@ -62,6 +78,12 @@ export type ConcentrationLimitEntry = {
     acgih?: ExternalReference;
     jsoh?: ExternalReference;
   };
+  /** Phase 1b 追加: 法規制タグ ("nite" / "prtr" / "chashin" / "mhlw" 等) */
+  regulationTags?: string[];
+  /** Phase 1b 追加: NITE 統合版 GHS 分類詳細ページ URL */
+  niteChripUrl?: string;
+  /** Phase 1b 追加: NITE 由来の主要 GHS 区分まとめ */
+  niteGhsClassifications?: NiteGhsClassifications;
 };
 
 type ConcentrationLimitsFile = {
@@ -80,6 +102,18 @@ type ConcentrationLimitsFile = {
     withIarc: number;
     withExternalAcgihRef?: number;
     withExternalJsohRef?: number;
+    /** Phase 1b 追加 */
+    withRegulationNite?: number;
+    /** Phase 1b 追加 */
+    withNiteGhs?: number;
+  };
+  niteImport?: {
+    importedAt: string;
+    sourceCount: number;
+    merged: number;
+    added: number;
+    sourceSha256?: string | null;
+    sourceUrl?: string;
   };
   substances: Record<string, ConcentrationLimitEntry>;
 };
