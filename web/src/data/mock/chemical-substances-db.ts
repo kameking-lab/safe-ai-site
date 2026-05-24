@@ -12,7 +12,7 @@
  *   - 労働安全衛生法施行令別表第9、特化則別表第1、有機則別表第1
  *   - 厚生労働省「皮膚等障害化学物質等一覧」（令和6年4月1日施行）
  *   - 日本産業衛生学会「許容濃度等の勧告」
- *   - IARC Monographs / ACGIH TLVs（参考値）
+ *   - IARC Monographs（参考: 分類のみ）
  *   - JIS Z 7253:2019（GHS H/Pステートメント）
  *
  * 監査: 2026-05-17 — Opus 4.7 によるCAS整合性/OEL/GHS精度監査
@@ -20,6 +20,12 @@
  *   - skin_hazard ↔ 皮膚等障害化学物質等カテゴリ: 整合済み
  *   - OEL: 厚労告示第177号 (`concentration-limits.json` MHLW_177 タグ) を優先採用
  *   - 監査スクリプト: `node scripts/audit-chemicals.mjs`
+ *
+ * 著作権ポリシー (Phase 1a, 2026-05-24):
+ *   - 国の数値(管理濃度・濃度基準値)のみ収録
+ *   - ACGIH TLV / JSOH 許容濃度の数値は非収録(公式サイト参照)
+ *     ACGIH: https://www.acgih.org/tlv-bei-guidelines/
+ *     JSOH:  https://www.sanei.or.jp/topics/recommendation.html
  */
 
 export type ChemicalCategory =
@@ -279,8 +285,8 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "1332-21-4",
     synonyms: ["クリソタイル", "アモサイト", "クロシドライト"],
     categories: ["石綿則", "特化則1類", "特別管理物質"],
-    oel: "管理濃度 0.15 f/cm³（参考: ACGIH TLV 0.1 f/cc）",
-    oel_source: ["管理濃度告示", "ACGIH"],
+    oel: "管理濃度 0.15 f/cm³（ACGIH TLV は公式サイト参照）",
+    oel_source: ["管理濃度告示"],
     skin_hazard: false,
     uses: "断熱材、耐火被覆、建材（1995年以降使用禁止）",
     health_effects: "肺がん、中皮腫、石綿肺（じん肺）、咽頭がん、卵巣がん",
@@ -299,8 +305,8 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "7439-92-1",
     synonyms: ["Pb", "鉛粉じん", "鉛化合物"],
     categories: ["鉛則", "リスクアセスメント対象物"],
-    oel: "TWA 0.05 mg/m³（管理濃度、参考: ACGIH TLV 0.05 mg/m³）",
-    oel_source: ["管理濃度告示", "ACGIH"],
+    oel: "管理濃度 0.05 mg/m³（ACGIH TLV は公式サイト参照）",
+    oel_source: ["管理濃度告示"],
     skin_hazard: false,
     uses: "はんだ、蓄電池、放射線遮蔽、顔料",
     health_effects: "神経障害、貧血、腎障害、生殖毒性、発達神経毒性",
@@ -319,8 +325,8 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "78-00-2",
     synonyms: ["TEL"],
     categories: ["四アルキル鉛則", "皮膚等障害化学物質等"],
-    oel: "管理濃度 0.075 mg/m³（Pb換算、参考: ACGIH TLV 0.1 mg/m³）",
-    oel_source: ["管理濃度告示", "ACGIH"],
+    oel: "管理濃度 0.075 mg/m³（Pb換算）／ACGIH TLV は公式サイト参照",
+    oel_source: ["管理濃度告示"],
     skin_hazard: true,
     uses: "アンチノック剤（現在はほぼ使用禁止、レーシング燃料一部残存）",
     health_effects: "急性脳症、記憶障害、けいれん、生殖毒性",
@@ -338,8 +344,8 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "630-08-0",
     synonyms: ["CO"],
     categories: ["リスクアセスメント対象物", "皮膚等障害化学物質等"],
-    oel: "TWA 25 ppm（参考: ACGIH TLV 25 ppm）",
-    oel_source: ["ACGIH"],
+    oel: "ACGIH TLV は公式サイト参照（数値非収録）",
+    oel_source: ["参考値"],
     skin_hazard: true,
     uses: "不完全燃焼で発生（炉・エンジン・火災・練炭）",
     health_effects: "組織低酸素症、中枢神経障害、意識喪失、死亡、胎児毒性",
@@ -414,8 +420,8 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "74-90-8",
     synonyms: ["HCN", "青酸ガス"],
     categories: ["特化則2類", "皮膚等障害化学物質等"],
-    oel: "TWA 4.7 ppm（参考: ACGIH TLV 4.7 ppm Skin / JSOH 5 ppm）",
-    oel_source: ["ACGIH", "JSOH"],
+    oel: "ACGIH TLV・JSOH 許容濃度は公式サイト参照（数値非収録、Skin 表示あり）",
+    oel_source: ["参考値"],
     skin_hazard: true,
     uses: "めっき廃液、化学合成、燻蒸剤",
     health_effects: "細胞呼吸阻害（瞬間致死）、皮膚吸収による中毒",
@@ -511,8 +517,8 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "64-17-5",
     synonyms: ["エチルアルコール"],
     categories: ["リスクアセスメント対象物"],
-    oel: "TWA 1000 ppm（参考: 日本産業衛生学会許容濃度）",
-    oel_source: ["JSOH"],
+    oel: "JSOH 許容濃度は公式サイト参照（数値非収録）",
+    oel_source: ["参考値"],
     skin_hazard: false,
     uses: "消毒、溶剤、燃料、食品添加物",
     health_effects: "中枢神経抑制（高濃度）、皮膚脱脂、発がん性（経口摂取）",
@@ -589,8 +595,8 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "67-63-0",
     synonyms: ["IPA", "2-プロパノール"],
     categories: ["有機溶剤2種", "リスクアセスメント対象物"],
-    oel: "TWA 200 ppm（参考: ACGIH TLV 200 ppm）",
-    oel_source: ["ACGIH"],
+    oel: "ACGIH TLV は公式サイト参照（数値非収録）",
+    oel_source: ["参考値"],
     skin_hazard: false,
     uses: "消毒、溶剤、電子部品洗浄",
     health_effects: "中枢神経抑制、眼刺激、皮膚脱脂",
@@ -808,8 +814,8 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "7440-74-6",
     synonyms: ["酸化インジウム", "ITO（酸化インジウムスズ）"],
     categories: ["特化則2類", "リスクアセスメント対象物"],
-    oel: "管理濃度 0.0003 mg/m³（In換算）/ 参考: ACGIH TLV 0.1 mg/m³",
-    oel_source: ["管理濃度告示", "ACGIH"],
+    oel: "管理濃度 0.0003 mg/m³（In換算）／ACGIH TLV は公式サイト参照",
+    oel_source: ["管理濃度告示"],
     skin_hazard: false,
     uses: "液晶パネル透明電極(ITO)、はんだ合金",
     health_effects: "間質性肺炎（インジウム肺）、肺気腫",
@@ -827,8 +833,8 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "91-20-3",
     synonyms: ["衣料用防虫剤"],
     categories: ["特化則2類", "リスクアセスメント対象物", "皮膚等障害化学物質等"],
-    oel: "TWA 10 ppm（参考: ACGIH TLV 10 ppm Skin）",
-    oel_source: ["ACGIH"],
+    oel: "ACGIH TLV は公式サイト参照（数値非収録、Skin 表示あり）",
+    oel_source: ["参考値"],
     skin_hazard: true,
     uses: "防虫剤、染料中間体、溶剤",
     health_effects: "溶血性貧血、白内障、発がん性（鼻腔がん）",
@@ -986,8 +992,8 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "101-68-8",
     synonyms: ["MDI", "ジフェニルメタンジイソシアネート"],
     categories: ["特化則2類", "リスクアセスメント対象物", "皮膚等障害化学物質等"],
-    oel: "TWA 0.005 ppm（参考: ACGIH TLV）",
-    oel_source: ["ACGIH"],
+    oel: "ACGIH TLV は公式サイト参照（数値非収録）",
+    oel_source: ["参考値"],
     skin_hazard: true,
     uses: "ウレタン発泡原料、接着剤、塗料",
     health_effects: "職業性喘息、皮膚・気道感作、過敏性肺炎",
@@ -1046,8 +1052,8 @@ export const chemicalSubstances: ChemicalSubstance[] = [
     cas: "10043-35-3",
     synonyms: ["B(OH)3", "ホウ砂", "四ホウ酸ナトリウム"],
     categories: ["リスクアセスメント対象物"],
-    oel: "TWA 2 mg/m³（吸入性、参考: ACGIH TLV）/ 1 mg/m³（JSOH）",
-    oel_source: ["ACGIH", "JSOH"],
+    oel: "ACGIH TLV・JSOH 許容濃度は公式サイト参照（数値非収録、吸入性）",
+    oel_source: ["参考値"],
     skin_hazard: false,
     uses: "ガラス、防腐剤、陶磁器、殺虫剤",
     health_effects: "生殖毒性、発達毒性（2017年EU REACH SVHC）",
