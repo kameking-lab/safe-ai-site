@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-24T03:27:25.643Z",
+  "generated_at": "2026-05-24T07:01:23.197Z",
   "total": 115,
   "correct": 115,
   "accuracy": 1,
@@ -167,5 +167,11 @@
       "correct": 4,
       "accuracy": 1
     }
+  },
+  "phase2": {
+    "citation_at1": 0.6779999999999999,
+    "layer1_avg_whitelist": 4.8,
+    "layer2_fp_rate": 0.0174,
+    "hallucination_detection_rate": 1
   }
 }

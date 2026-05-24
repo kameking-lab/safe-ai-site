@@ -19,6 +19,16 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 type Failure = { id: number; topic: string; question: string; expected: string; actual: string };
+type Phase2Metrics = {
+  /** top-1 が gold セットに含まれる率（Citation Accuracy@1） */
+  citation_at1?: number;
+  /** Layer 1 が同梱したホワイトリスト平均サイズ */
+  layer1_avg_whitelist?: number;
+  /** Layer 2 False Positive Rate（自分の引用を弾く率） */
+  layer2_fp_rate?: number;
+  /** Hallucination Detection Rate（架空条文を検出する率） */
+  hallucination_detection_rate?: number;
+};
 type EvalResult = {
   generated_at: string;
   total: number;
@@ -28,6 +38,7 @@ type EvalResult = {
   passed: boolean;
   failures: Failure[];
   topic_breakdown: Record<string, { total: number; correct: number; accuracy: number }>;
+  phase2?: Phase2Metrics;
 };
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -39,10 +50,10 @@ const vitestBin = resolve(
   isWindows ? "node_modules/.bin/vitest.cmd" : "node_modules/.bin/vitest"
 );
 
-console.log("[chatbot-eval] vitest run rag-100q.test 実行中…");
+console.log("[chatbot-eval] vitest run rag-100q.test + chatbot-phase2-metrics.test 実行中…");
 const proc = spawnSync(
   vitestBin,
-  ["run", "rag-100q.test", "--reporter=verbose"],
+  ["run", "rag-100q.test", "chatbot-phase2-metrics.test", "--reporter=verbose"],
   { cwd: root, encoding: "utf8", shell: isWindows }
 );
 
@@ -90,6 +101,22 @@ for (const t of Object.values(topicBreakdown)) {
   t.accuracy = t.total === 0 ? 0 : t.correct / t.total;
 }
 
+// Phase 2 メトリクス抽出（vitest stdout から）
+function extractFloat(text: string, regex: RegExp): number | undefined {
+  const m = text.match(regex);
+  return m ? Number(m[1]) : undefined;
+}
+const citationAt1Pct = extractFloat(out, /Citation Accuracy@1: \d+\/\d+ = ([\d.]+)%/);
+const layer1Avg = extractFloat(out, /Layer 1 平均ホワイトリスト密度: ([\d.]+) 条文\/問/);
+const fpRatePct = extractFloat(out, /Layer 2 False Positive Rate: \d+\/\d+ = ([\d.]+)%/);
+const halDetectPct = extractFloat(out, /Hallucination Detection Rate: \d+\/\d+ = ([\d.]+)%/);
+const phase2: Phase2Metrics = {
+  citation_at1: citationAt1Pct !== undefined ? citationAt1Pct / 100 : undefined,
+  layer1_avg_whitelist: layer1Avg,
+  layer2_fp_rate: fpRatePct !== undefined ? fpRatePct / 100 : undefined,
+  hallucination_detection_rate: halDetectPct !== undefined ? halDetectPct / 100 : undefined,
+};
+
 const TARGET = 0.8;
 const result: EvalResult = {
   generated_at: new Date().toISOString(),
@@ -100,6 +127,7 @@ const result: EvalResult = {
   passed: accuracy >= TARGET,
   failures,
   topic_breakdown: topicBreakdown,
+  phase2,
 };
 
 const outPath = resolve(root, "src/data/chatbot-eval-results.json");
@@ -107,6 +135,14 @@ writeFileSync(outPath, JSON.stringify(result, null, 2) + "\n", "utf8");
 console.log(
   `[chatbot-eval] ${correct}/${total} = ${(accuracy * 100).toFixed(1)}% (target ${TARGET * 100}%) -> ${outPath}`
 );
+if (phase2.citation_at1 !== undefined) {
+  console.log(
+    `[chatbot-eval] Phase 2 - Citation@1: ${(phase2.citation_at1 * 100).toFixed(1)}%, ` +
+      `Layer1 avg whitelist: ${phase2.layer1_avg_whitelist?.toFixed(1) ?? "?"}, ` +
+      `Layer2 FP: ${(phase2.layer2_fp_rate ?? 0) * 100}%, ` +
+      `Hallucination Detection: ${(phase2.hallucination_detection_rate ?? 0) * 100}%`
+  );
+}
 
 if (!result.passed) {
   console.error("[chatbot-eval] 目標未達");
