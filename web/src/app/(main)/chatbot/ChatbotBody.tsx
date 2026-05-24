@@ -169,9 +169,29 @@ export function ChatbotBody() {
         />
       )}
 
+      {/* P1 関連動線強化: チャット回答後、実務（KY起票・日誌記録）に
+          直接進めるよう KY・日誌のCTAを最上部に追加。 */}
       <RelatedPageCards
-        heading={isEn ? "Main 3 features" : "メイン3機能の他のページ"}
+        heading={isEn ? "Next: turn the answer into action" : "回答を実務に落とす"}
         pages={[
+          {
+            href: "/ky",
+            label: isEn ? "Build a KY sheet" : "KY用紙を起票",
+            description: isEn
+              ? "Turn this chat answer into today's hazard-prediction sheet. Industry presets + voice input."
+              : "この回答を今日のKY用紙に。業種別プリセット・音声入力で3分。",
+            color: "emerald",
+            cta: isEn ? "Start KY" : "KYを作る",
+          },
+          {
+            href: "/safety-diary/new",
+            label: isEn ? "Record in safety diary" : "安全衛生日誌に記録",
+            description: isEn
+              ? "Save today's briefing, KY result, and near-misses. Required 5 fields in 3–5 min."
+              : "今日の朝礼・KY結果・ヒヤリハットを日誌に記録（必須5項目・3〜5分）。",
+            color: "sky",
+            cta: isEn ? "Open diary" : "日誌に書く",
+          },
           {
             href: "/accidents-reports",
             label: isEn

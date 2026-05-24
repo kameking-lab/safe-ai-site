@@ -179,11 +179,7 @@ export function Footer() {
                   導入事例・利用シーン
                 </Link>
               </li>
-              <li>
-                <Link href="/stats" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
-                  利用統計
-                </Link>
-              </li>
+              {/* P1-J: /stats はサンプル表示が露出するため一般ナビから除外 */}
               <li>
                 <Link href="/leaflet" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   リーフレット（PDF）

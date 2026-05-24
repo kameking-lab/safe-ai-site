@@ -76,15 +76,22 @@ export default function PlanGeneratorPage() {
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
             年次安全衛生計画ジェネレーター
           </h1>
-          <p className="mt-3 text-base text-slate-700">
-            業種と規模を選ぶだけで、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む年次安全衛生計画書の雛形を作成します。生成後はそのままブラウザでPDFに出力できます。
+          {/* P1-D: 説明文を 1 行に圧縮。詳細は <details> 内に移動して
+              ファーストビューで業種・規模選択が見えるようにする。 */}
+          <p className="mt-2 text-sm text-slate-700">
+            業種と規模を選ぶだけで、基本方針・重点目標・月別スケジュール・関連法令付きの年次計画書を自動生成。PDF出力可。
           </p>
-          <ul className="mt-4 list-disc space-y-1 pl-6 text-sm text-slate-600">
-            <li>業種10種（{Object.values(INDUSTRY_LABELS).slice(0, 5).join("・")} ほか）×規模3段階（{Object.values(SCALE_LABELS).join("・")}）の30テンプレート。</li>
-            <li>安衛法・安衛則・関連省令の条文番号を実施事項に紐付け。</li>
-            <li>厚労省通達・告示の出典を計画書末尾に自動掲載。</li>
-            <li>月別スケジュールは全国安全週間（7月）・全国労働衛生週間（10月）・防災の日（9月）等の年間イベントを織り込み済み。</li>
-          </ul>
+          <details className="mt-2 text-xs text-slate-600">
+            <summary className="cursor-pointer font-semibold text-emerald-700 hover:text-emerald-800">
+              テンプレートと含まれる項目を見る
+            </summary>
+            <ul className="mt-2 list-disc space-y-1 pl-6">
+              <li>業種10種（{Object.values(INDUSTRY_LABELS).slice(0, 5).join("・")} ほか）×規模3段階（{Object.values(SCALE_LABELS).join("・")}）の30テンプレート。</li>
+              <li>安衛法・安衛則・関連省令の条文番号を実施事項に紐付け。</li>
+              <li>厚労省通達・告示の出典を計画書末尾に自動掲載。</li>
+              <li>月別スケジュールは全国安全週間（7月）・全国労働衛生週間（10月）・防災の日（9月）等の年間イベントを織り込み済み。</li>
+            </ul>
+          </details>
         </header>
 
         <Suspense

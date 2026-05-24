@@ -26,11 +26,12 @@ export const metadata: Metadata = {
 export default function SafetyDiaryPage() {
   return (
     <>
-      {/* F-010 B縮小版: 現在は一覧+新規記録の2ページ構成。詳細/月次/印刷機能は
-          今後のLMS拡張時に再設計予定。localStorageデータは保持されています。 */}
+      {/* P1-A: 「縮小版」ネガティブ告知を撤去。下部の RelatedPageCards に
+          PDFエクスポート動線がある旨だけポジティブに案内する。 */}
       <div className="mx-auto max-w-2xl px-4 pt-4">
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
-          現在は一覧と新規記録の2ページに絞った縮小版です。詳細・月次まとめ・印刷機能は今後のLMS拡張時に再設計予定です。
+        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs text-emerald-900">
+          一覧と新規記録の2画面で運用できます。PDF出力・印刷はこのページ下部の
+          「PDF エクスポート」から行えます。
         </p>
       </div>
       <PageJsonLd

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ChemicalRaPanel } from "@/components/chemical-ra-panel";
 import { ChemicalRaExtras } from "@/components/chemical-ra-extras";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
@@ -56,11 +57,21 @@ export default function ChemicalRaPage() {
           iconColor="blue"
         />
         <LocalStorageWarningBanner />
+        {/* P1-E: 化学物質RA と 化学物質検索DB の使い分けをファーストビューで明示 */}
+        <div className="mt-3 rounded-lg border border-sky-200 bg-sky-50/60 px-4 py-2.5 text-xs text-sky-900 dark:border-sky-700/60 dark:bg-sky-900/20 dark:text-sky-200">
+          <strong className="font-semibold">このページの使い分け：</strong>
+          このページは物質と作業内容から<strong className="font-semibold">リスクを判定</strong>するツールです。
+          物質の濃度基準値・GHS分類など<em className="font-medium">詳細情報の閲覧</em>だけが目的なら
+          <Link href="/chemical-database" className="ml-1 underline decoration-sky-400 underline-offset-2 hover:text-sky-700 dark:hover:text-sky-100">化学物質検索DB</Link>
+          をご覧ください。
+        </div>
       </PageContainer>
-      <ChemicalRaExtras />
+      {/* P1-G: メイン入力（RAパネル）をファーストビューに、現場リストは下部へ。
+          初見ユーザーが「何のページか」を即理解できるよう順序を入れ替えた。 */}
       <Suspense fallback={<PageSkeleton label="化学物質リスクアセスメントを読み込み中" />}>
         <ChemicalRaPanel />
       </Suspense>
+      <ChemicalRaExtras />
       <RelatedPageCards
         heading="合わせて使う"
         pages={[

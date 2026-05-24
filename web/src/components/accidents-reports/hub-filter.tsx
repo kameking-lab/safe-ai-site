@@ -42,8 +42,10 @@ function num(n: number) {
 
 export function HubFilter({
   industries,
+  yearRange,
 }: {
   industries: AllIndustriesSummary["industries"];
+  yearRange?: AllIndustriesSummary["yearRange"];
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -256,26 +258,33 @@ export function HubFilter({
                       aria-hidden="true"
                     />
                   </div>
+                  {/* P1-C: 単位を明示。「2007〜2026累計」を太字で示し、死亡が
+                      他業種と桁違いに少ない理由（データ源の偏り）も補足する。 */}
                   <dl className="mt-3 grid grid-cols-3 gap-2 text-xs">
                     <div className="rounded-md bg-white px-2 py-1.5 dark:bg-slate-900">
-                      <dt className="text-[10px] text-slate-500 dark:text-slate-400">事例</dt>
+                      <dt className="text-[10px] text-slate-500 dark:text-slate-400">事例（件）</dt>
                       <dd className="text-sm font-semibold tabular-nums text-slate-900 dark:text-slate-100">
                         {num(it.total)}
                       </dd>
                     </div>
                     <div className="rounded-md bg-white px-2 py-1.5 dark:bg-slate-900">
-                      <dt className="text-[10px] text-slate-500 dark:text-slate-400">死亡</dt>
+                      <dt className="text-[10px] text-slate-500 dark:text-slate-400">うち死亡（人）</dt>
                       <dd className="text-sm font-semibold tabular-nums text-rose-700 dark:text-rose-400">
                         {num(it.fatal)}
                       </dd>
                     </div>
                     <div className="rounded-md bg-white px-2 py-1.5 dark:bg-slate-900">
-                      <dt className="text-[10px] text-slate-500 dark:text-slate-400">最多型</dt>
+                      <dt className="text-[10px] text-slate-500 dark:text-slate-400">最多事故型</dt>
                       <dd className="truncate text-[11px] font-medium text-slate-800 dark:text-slate-200" title={it.topType ?? ""}>
                         {it.topType ?? "—"}
                       </dd>
                     </div>
                   </dl>
+                  {yearRange && (
+                    <p className="mt-1.5 text-[10px] text-slate-500 dark:text-slate-400">
+                      <strong className="font-semibold">{yearRange.min}〜{yearRange.max}年 累計</strong> ／ 出典: 厚労省「職場のあんぜんサイト」+ 編集部 curated 事例
+                    </p>
+                  )}
                 </Link>
                 <div className="mt-3 flex flex-wrap gap-2 border-t border-slate-200/60 pt-3 dark:border-slate-700/60">
                   <Link

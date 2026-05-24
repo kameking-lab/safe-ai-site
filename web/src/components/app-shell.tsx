@@ -32,7 +32,6 @@ import {
   ListChecks,
   Sun,
   Moon,
-  BarChart3,
   Sparkles,
   HelpCircle,
 } from "lucide-react";
@@ -78,50 +77,53 @@ const PAID_SERVICE_ITEMS: NavItem[] = [
   { id: "plan-generator", label: "年次安全衛生計画", href: "/strategy/plan-generator", icon: ListChecks, badge: "NEW", badgeUntil: "2026-04-15" },
 ];
 
+// P1-B: 各ナビ項目に短い説明文（description）を追加。
+// サイドバーとモバイルドロワーで、機能名だけでは初見ユーザーが
+// 何ができるか分からなかった問題を解消する。
 const NAV_CATEGORIES: NavCategory[] = [
   {
     label: "",
     items: [
       { id: "home", label: "ホーム", href: "/", icon: Home },
-      { id: "features", label: "機能紹介", href: "/features", icon: Sparkles, badge: "NEW", badgeUntil: "2026-04-30" },
+      { id: "features", label: "機能紹介", href: "/features", icon: Sparkles, badge: "NEW", badgeUntil: "2026-04-30", description: "全機能の一覧" },
     ],
   },
   {
     label: "マップ",
     items: [
-      { id: "signage", label: "サイネージ", href: "/signage", icon: Monitor },
-      { id: "weather-risk", label: "気象リスク", href: "/risk", icon: CloudRain },
+      { id: "signage", label: "サイネージ", href: "/signage", icon: Monitor, description: "現場掲示用ダッシュボード" },
+      { id: "weather-risk", label: "気象リスク", href: "/risk", icon: CloudRain, description: "警報・WBGT" },
     ],
   },
   {
     label: "学習",
     items: [
-      { id: "elearning", label: "Eラーニング", href: "/e-learning", icon: GraduationCap },
+      { id: "elearning", label: "Eラーニング", href: "/e-learning", icon: GraduationCap, description: "特別教育受講" },
     ],
   },
   {
     label: "法律",
     items: [
-      { id: "laws", label: "法改正", href: "/laws", icon: Scale },
-      { id: "law-search", label: "法令検索", href: "/law-search", icon: Search },
-      { id: "law-hierarchy", label: "法令体系マップ", href: "/law-hierarchy", icon: LibraryBig },
-      { id: "chatbot", label: "法令チャット", href: "/chatbot", icon: MessageSquare, badge: "AI" },
+      { id: "laws", label: "法改正", href: "/laws", icon: Scale, description: "改正カレンダー・施行日" },
+      { id: "law-search", label: "法令検索", href: "/law-search", icon: Search, description: "条文を検索" },
+      { id: "law-hierarchy", label: "法令体系マップ", href: "/law-hierarchy", icon: LibraryBig, description: "法→政令→省令の階層" },
+      { id: "chatbot", label: "法令チャット", href: "/chatbot", icon: MessageSquare, badge: "AI", description: "条文番号付きで回答" },
     ],
   },
   {
     label: "現場ツール",
     items: [
-      { id: "ky-sheet", label: "KY用紙", href: "/ky", icon: ClipboardList },
-      { id: "risk-prediction", label: "リスク予測", href: "/risk-prediction", icon: Brain },
-      { id: "safety-diary", label: "安全衛生日誌", href: "/safety-diary", icon: FileText },
+      { id: "ky-sheet", label: "KY用紙", href: "/ky", icon: ClipboardList, description: "業種別プリセット・音声入力" },
+      { id: "risk-prediction", label: "リスク予測", href: "/risk-prediction", icon: Brain, description: "AIで潜在リスクを予測" },
+      { id: "safety-diary", label: "安全衛生日誌", href: "/safety-diary", icon: FileText, description: "必須5項目を3〜5分" },
     ],
   },
   {
     label: "事例・データ",
     items: [
-      { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database },
-      { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2 },
-      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "専門解説50物質" },
+      { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database, description: "厚労省事例の全件検索" },
+      { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2, description: "CREATE-SIMPLE簡易判定" },
+      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "物質の詳細・基準値を閲覧" },
     ],
   },
   {
@@ -152,7 +154,8 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "プロジェクト",
     items: [
       { id: "about", label: "研究プロジェクトについて", href: "/about", icon: Info },
-      { id: "stats", label: "利用統計", href: "/stats", icon: BarChart3 },
+      // P1-J: /stats はサンプル表示が露出するため一般ナビから除外。
+      // 必要な人は /accidents-analytics などから到達できる。
       { id: "contact", label: "ご意見・改善提案", href: "/contact", icon: Mail },
     ],
   },
@@ -303,6 +306,8 @@ export function AppShell({ children, user }: AppShellProps) {
           href={item.href}
           className={linkClass(item)}
           onClick={onClickLink}
+          // P1-B: ホバーで機能の1行説明を表示。truncate で隠れたときの保険にもなる。
+          title={item.description ? `${item.label} — ${item.description}` : item.label}
         >
           <Icon
             className={`h-4 w-4 shrink-0 ${
