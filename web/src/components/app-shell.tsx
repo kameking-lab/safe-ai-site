@@ -34,6 +34,11 @@ import {
   Moon,
   Sparkles,
   HelpCircle,
+  HardHat,
+  Building2,
+  Thermometer,
+  BarChart3,
+  Star,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { FlagshipNav } from "@/components/flagship-nav";
@@ -69,6 +74,8 @@ function isBadgeActive(item: NavItem): boolean {
 
 type NavCategory = {
   label: string;
+  /** P0-021 (usability-audit-day3): カテゴリ自体の1行説明 */
+  description?: string;
   items: NavItem[];
 };
 
@@ -77,100 +84,105 @@ const PAID_SERVICE_ITEMS: NavItem[] = [
   { id: "plan-generator", label: "年次安全衛生計画", href: "/strategy/plan-generator", icon: ListChecks, badge: "NEW", badgeUntil: "2026-04-15" },
 ];
 
-// P1-B: 各ナビ項目に短い説明文（description）を追加。
-// サイドバーとモバイルドロワーで、機能名だけでは初見ユーザーが
-// 何ができるか分からなかった問題を解消する。
+// P0-021 (usability-audit-day3-2026-05-24): NAV_CATEGORIES を 10 → 6 カテゴリに
+// 再編。監査で「10カテゴリ40+項目で機能重複しまくり、選択肢過多」と指摘された
+// 問題を解消。動詞ベース (現場で使う / 質問する / 学ぶ / 分析する / 計画する /
+// 業種から) で職長語彙に合わせ、各カテゴリに 1 行説明を併記する。
+// モバイル底部ナビ (MobileBottomNav.tsx) との整合 = ホーム/KY/AIチャット/日誌は
+// PC でも引き続きアクセス可能 (各々「現場で使う」「質問する」配下に維持)。
 const NAV_CATEGORIES: NavCategory[] = [
   {
     label: "",
     items: [
       { id: "home", label: "ホーム", href: "/", icon: Home },
-      { id: "features", label: "機能紹介", href: "/features", icon: Sparkles, badge: "NEW", badgeUntil: "2026-04-30", description: "全機能の一覧" },
+      { id: "favorites", label: "お気に入り", href: "/favorites", icon: Star, description: "保存した条文・通達" },
     ],
   },
   {
-    label: "マップ",
+    label: "現場で使う",
+    description: "当日の現場業務で使う実務ツール",
     items: [
-      { id: "signage", label: "サイネージ", href: "/signage", icon: Monitor, description: "現場掲示用ダッシュボード" },
-      { id: "weather-risk", label: "気象リスク", href: "/risk", icon: CloudRain, description: "警報・WBGT" },
-    ],
-  },
-  {
-    label: "学習",
-    items: [
-      { id: "elearning", label: "Eラーニング", href: "/e-learning", icon: GraduationCap, description: "特別教育受講" },
-    ],
-  },
-  {
-    label: "法律",
-    items: [
-      { id: "laws", label: "法改正", href: "/laws", icon: Scale, description: "改正カレンダー・施行日" },
-      { id: "law-search", label: "法令検索", href: "/law-search", icon: Search, description: "条文を検索" },
-      { id: "law-hierarchy", label: "法令体系マップ", href: "/law-hierarchy", icon: LibraryBig, description: "法→政令→省令の階層" },
-      { id: "chatbot", label: "法令チャット", href: "/chatbot", icon: MessageSquare, badge: "AI", description: "条文番号付きで回答" },
-    ],
-  },
-  {
-    label: "現場ツール",
-    items: [
-      { id: "ky-sheet", label: "KY用紙", href: "/ky", icon: ClipboardList, description: "業種別プリセット・音声入力" },
-      { id: "risk-prediction", label: "リスク予測", href: "/risk-prediction", icon: Brain, description: "AIで潜在リスクを予測" },
-      { id: "safety-diary", label: "安全衛生日誌", href: "/safety-diary", icon: FileText, description: "必須5項目を3〜5分" },
-    ],
-  },
-  {
-    label: "事例・データ",
-    items: [
-      { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database, description: "厚労省事例の全件検索" },
+      { id: "ky-sheet", label: "KY用紙", href: "/ky", icon: ClipboardList, description: "業種別プリセット・音声入力で3分起票" },
+      { id: "safety-diary", label: "安全衛生日誌", href: "/safety-diary", icon: FileText, description: "必須5項目を3〜5分で入力・月次まとめ" },
+      { id: "signage", label: "サイネージ", href: "/signage", icon: Monitor, description: "現場掲示用フルスクリーン・自動更新" },
+      { id: "heat-illness", label: "熱中症対策", href: "/heat-illness-prevention", icon: Thermometer, description: "WBGT計算機・R7改正対応" },
       { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2, description: "CREATE-SIMPLE簡易判定" },
-      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "物質の詳細・基準値を閲覧" },
     ],
   },
   {
-    label: "多様な働き方",
+    label: "質問する",
+    description: "AIが安衛法を条文番号・出典付きで回答",
     items: [
-      { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2 },
-      { id: "mental-health", label: "メンタル・カスハラ", href: "/mental-health", icon: Heart },
-      { id: "mental-health-management", label: "メンタル対策実務", href: "/mental-health-management", icon: Brain, badge: "NEW", badgeUntil: "2026-05-31" },
-      { id: "treatment-work-balance", label: "治療と仕事の両立支援", href: "/treatment-work-balance", icon: HeartHandshake },
+      { id: "chatbot", label: "安衛法AIチャット", href: "/chatbot", icon: MessageSquare, badge: "AI", description: "33法令を根拠条文付きで回答 (ストリーミング)" },
+    ],
+  },
+  {
+    label: "学ぶ",
+    description: "法令・通達・用語・コースで体系的に学習",
+    items: [
+      { id: "law-search", label: "法令検索", href: "/law-search", icon: Search, description: "条文を全文検索・お気に入り保存" },
+      { id: "circulars", label: "通達・判例", href: "/circulars", icon: Scale, description: "厚労省通達1069件+安全配慮義務判例30件" },
+      { id: "laws", label: "法改正カレンダー", href: "/laws", icon: RefreshCw, description: "改正カレンダー・施行日カウントダウン" },
+      { id: "law-hierarchy", label: "法令体系マップ", href: "/law-hierarchy", icon: LibraryBig, description: "法→政令→省令→告示の階層俯瞰" },
+      { id: "glossary", label: "安全用語辞書", href: "/glossary", icon: BookMarked, description: "272語を五十音で引ける用語集" },
+      { id: "faq", label: "FAQ 200問", href: "/faq", icon: HelpCircle, description: "法令タグ付きFAQ・コンサル監修" },
+      { id: "elearning", label: "Eラーニング", href: "/e-learning", icon: GraduationCap, description: "クイズ式コース・進捗保存" },
+    ],
+  },
+  {
+    label: "分析する",
+    description: "事故・物質・メンタル・業種データから判断材料を得る",
+    items: [
+      { id: "accidents-reports", label: "業種別 事故分析レポート", href: "/accidents-reports", icon: BarChart3, description: "5業種5,000件超を業種別レポートで自動分析" },
+      { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database, description: "厚労省事例の全件検索" },
+      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "約3,700物質の詳細・基準値・安衛法規制タグ" },
+      { id: "mental-health-management", label: "メンタル対策実務", href: "/mental-health-management", icon: Brain, badge: "NEW", badgeUntil: "2026-05-31", description: "事業場規模別の義務・面接指導・50人未満対応" },
+      { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2, description: "LGBTQ・障害・外国人労働者の安全配慮" },
+      { id: "risk-prediction", label: "AIリスク予測", href: "/risk-prediction", icon: Brain, description: "作業内容から潜在リスクをAIが予測" },
+    ],
+  },
+  {
+    label: "計画する",
+    description: "年次安全衛生計画を作成・保管・前年比較",
+    items: [
+      { id: "plan-generator", label: "年次安全衛生計画", href: "/strategy/plan-generator", icon: ListChecks, badge: "NEW", badgeUntil: "2026-04-15", description: "13業種×3規模・39テンプレート・過去3件保存" },
+      { id: "weather-risk", label: "気象リスク", href: "/risk", icon: CloudRain, description: "警報・WBGT・拠点別表示" },
+      { id: "treatment-work-balance", label: "治療と仕事の両立支援", href: "/treatment-work-balance", icon: HeartHandshake, description: "事業場の両立支援プラン策定" },
+      { id: "subsidies", label: "助成金ガイド", href: "/subsidies", icon: Banknote, description: "エイジフレンドリー・人材開発支援等の試算" },
+    ],
+  },
+  {
+    label: "業種から",
+    description: "業種別の課題・対策・KY例を1ページに集約",
+    items: [
+      { id: "for-construction", label: "建設業向け実務", href: "/for/construction", icon: HardHat, description: "職長・元請担当・現場代理人 向け即実行エントリ" },
+      { id: "industries", label: "10業種ハブ", href: "/industries", icon: Building2, description: "建設/製造/運輸/医療福祉/サービス/小売/飲食/卸売/倉庫/事務" },
+      { id: "mental-health", label: "メンタル・カスハラ", href: "/mental-health", icon: Heart, description: "業種別のカスハラ・ハラスメント対策" },
     ],
   },
   ...(PAID_MODE
     ? [
         {
-          label: "サービス",
+          label: "有料サービス",
           items: PAID_SERVICE_ITEMS,
         },
-      ]
-    : [
         {
-          label: "ツール",
+          label: "アカウント",
           items: [
-            { id: "plan-generator", label: "年次安全衛生計画", href: "/strategy/plan-generator", icon: ListChecks, badge: "NEW", badgeUntil: "2026-04-15" },
-          ] as NavItem[],
+            { id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard } as NavItem,
+          ],
         },
-      ]),
+      ]
+    : []),
   {
     label: "プロジェクト",
+    description: "運営者・お問い合わせ",
     items: [
       { id: "about", label: "研究プロジェクトについて", href: "/about", icon: Info },
-      // P1-J: /stats はサンプル表示が露出するため一般ナビから除外。
-      // 必要な人は /accidents-analytics などから到達できる。
       { id: "contact", label: "ご意見・改善提案", href: "/contact", icon: Mail },
-    ],
-  },
-  {
-    label: "その他",
-    items: [
-      // LMS hidden from nav: pre-launch β waitlist only. Audit reference F-001.
-      { id: "glossary", label: "安全用語辞書", href: "/glossary", icon: BookMarked },
-      { id: "faq", label: "FAQ 200問", href: "/faq", icon: HelpCircle },
       { id: "goods", label: "安全グッズ", href: "/goods", icon: ShoppingBag },
-      ...(PAID_MODE
-        ? [{ id: "pricing", label: "料金プラン", href: "/pricing", icon: CreditCard } as NavItem]
-        : []),
-      { id: "subsidies", label: "助成金ガイド", href: "/subsidies", icon: Banknote },
       { id: "notifications", label: "通知/配信", href: "/notifications", icon: Bell },
+      { id: "features", label: "機能紹介一覧", href: "/features", icon: Sparkles, badge: "NEW", badgeUntil: "2026-04-30" },
     ],
   },
 ];

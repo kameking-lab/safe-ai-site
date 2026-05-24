@@ -32,31 +32,61 @@ export default function HomePage() {
     <main>
       <PageJsonLd name={_title} description={_desc} path="/" />
       <NewHomeHero />
+
+      {/* P0-017 (usability-audit-day3): 建設業向けランディングをヒーロー直下に
+          昇格。Day1 までは FlagshipGrid 下の最下段にあったが、ペルソナA本命
+          施策として 3 大 CTA 直下の「最も視線が集まる位置」に移した。
+          他業種ユーザーは下の HomeThreePillars / FlagshipGrid から
+          一般機能にアクセスできる。 */}
+      <section
+        aria-label="建設業向けランディングへの誘導"
+        className="mx-auto max-w-7xl px-4 pt-6"
+      >
+        <Link
+          href="/for/construction"
+          className="group flex flex-col items-stretch gap-4 rounded-2xl border-2 border-emerald-300 bg-gradient-to-r from-emerald-50 via-amber-50 to-emerald-50 p-5 transition-colors hover:from-emerald-100 hover:via-amber-100 hover:to-emerald-100 sm:flex-row sm:items-center"
+        >
+          <div className="flex items-start gap-3 sm:flex-1">
+            <div className="rounded-full bg-emerald-600 p-2.5 group-hover:bg-emerald-700">
+              <HardHat className="h-6 w-6 text-white" aria-hidden="true" />
+            </div>
+            <div className="flex-1">
+              <p className="text-base font-bold text-emerald-900 sm:text-lg">
+                建設業の方はこちら
+              </p>
+              <p className="mt-1 text-sm leading-relaxed text-emerald-800">
+                職長・元請担当・現場代理人 向けの実務エントリ。
+                <strong className="font-semibold">足場・墜落・KY・統括管理</strong>
+                を当日から使える機能に集約。
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] text-emerald-700">
+                <span className="rounded-full border border-emerald-300 bg-white/70 px-2 py-0.5">
+                  KY 用紙
+                </span>
+                <span className="rounded-full border border-emerald-300 bg-white/70 px-2 py-0.5">
+                  朝礼サイネージ
+                </span>
+                <span className="rounded-full border border-emerald-300 bg-white/70 px-2 py-0.5">
+                  建設業頻出 20 物質
+                </span>
+                <span className="rounded-full border border-emerald-300 bg-white/70 px-2 py-0.5">
+                  墜落事故 Top10
+                </span>
+                <span className="rounded-full border border-emerald-300 bg-white/70 px-2 py-0.5">
+                  年次計画
+                </span>
+              </div>
+            </div>
+          </div>
+          <ArrowRight className="hidden h-6 w-6 flex-shrink-0 text-emerald-700 group-hover:translate-x-1 sm:block" aria-hidden="true" />
+        </Link>
+      </section>
+
       <div className="mx-auto max-w-7xl px-4 pt-6">
         <HomeThreePillars />
       </div>
       <div className="px-4 py-8 sm:py-10">
         <FlagshipGrid />
-      </div>
-      {/* 業種別ランディング誘導: 建設業 (Phase 5 — ペルソナA本命施策) */}
-      <div className="mx-auto max-w-7xl px-4 pb-10">
-        <Link
-          href="/for/construction"
-          className="flex items-center justify-between gap-4 rounded-2xl border-2 border-emerald-300 bg-gradient-to-r from-emerald-50 to-amber-50 p-5 hover:from-emerald-100 hover:to-amber-100 transition-colors"
-        >
-          <div className="flex items-start gap-3">
-            <div className="rounded-full bg-emerald-600 p-2">
-              <HardHat className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <p className="font-bold text-emerald-900">建設業の方はこちら</p>
-              <p className="mt-0.5 text-sm text-emerald-800">
-                職長・元請担当・現場代理人 向けの実務エントリ。当日の KY・朝礼から年次計画まで一画面に集約。
-              </p>
-            </div>
-          </div>
-          <ArrowRight className="h-6 w-6 flex-shrink-0 text-emerald-700" />
-        </Link>
       </div>
     </main>
   );

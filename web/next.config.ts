@@ -160,11 +160,20 @@ const nextConfig: NextConfig = {
           { key: "Cache-Control", value: "public, max-age=3600, s-maxage=86400, stale-while-revalidate=3600" },
         ],
       },
-      // /audits/* は静的レポートページ。CDNに24時間キャッシュさせてFunction呼び出しを抑制
+      // /audits/* (公開維持の読み物 6フォルダ) は静的レポートページ。CDNに24時間キャッシュ。
+      // 内部監査資料 8フォルダは P0-013 (usability-audit-day3) で /admin/audits/ に移管済。
       {
         source: "/audits/:path*",
         headers: [
           { key: "Cache-Control", value: "public, s-maxage=86400, stale-while-revalidate=3600" },
+        ],
+      },
+      // /admin/audits/* — 内部監査資料 (noindex 必須)。CDN キャッシュは短時間 (頻繁更新)
+      {
+        source: "/admin/audits/:path*",
+        headers: [
+          { key: "Cache-Control", value: "private, max-age=0, must-revalidate" },
+          { key: "X-Robots-Tag", value: "noindex, nofollow, noarchive" },
         ],
       },
       // サイネージAPIは /signage 画面から頻繁ポーリングされるため短時間CDNキャッシュで重複呼び出しを削減

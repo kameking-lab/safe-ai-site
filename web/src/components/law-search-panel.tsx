@@ -11,6 +11,9 @@ import { SimpleMarkdown } from "@/components/simple-markdown";
 import { useLanguage } from "@/contexts/language-context";
 import { PageContainer } from "@/components/layout/page-container";
 import { Stack } from "@/components/layout/stack";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
+import { CopyCitationButton } from "@/components/favorites/copy-citation-button";
+import { formatArticleCitation } from "@/lib/favorites";
 
 const MhlwLawArticlesPanel = dynamic(
   () =>
@@ -114,7 +117,7 @@ function ArticleCard({ article, onSummarize }: { article: LawArticle; onSummariz
             <span aria-hidden>●</span> {isEn ? "Current (e-Gov-aligned)" : "現行（e-Gov準拠）"}
           </span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {eGovUrl && (
             <a
               href={eGovUrl}
@@ -132,6 +135,23 @@ function ArticleCard({ article, onSummarize }: { article: LawArticle; onSummariz
           >
             {isEn ? "AI summary" : "AI要約"}
           </button>
+          {/* P0-016 (usability-audit-day3): 条文の引用コピー + お気に入り */}
+          <CopyCitationButton
+            text={formatArticleCitation({
+              text: article.text,
+              lawShort: article.lawShort,
+              lawFull: article.law,
+              articleNum: article.articleNum,
+              egovUrl: eGovUrl ?? undefined,
+            })}
+          />
+          <FavoriteButton
+            kind="article"
+            id={`${article.law}|${article.articleNum}`}
+            title={article.articleTitle ?? article.articleNum}
+            subtitle={`${article.lawShort} ${article.articleNum}`}
+            href={`/law-search?law=${encodeURIComponent(article.lawShort)}&art=${encodeURIComponent(article.articleNum)}`}
+          />
         </div>
       </div>
       {article.articleTitle && (

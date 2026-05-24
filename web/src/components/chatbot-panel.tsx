@@ -869,11 +869,16 @@ export function ChatbotPanel() {
                   </details>
                 )}
 
-                {/* 合わせて確認すべき法令（関連法令サジェスト） */}
+                {/* P0-019 (usability-audit-day3): 関連系 (合わせて法令 + もっと深く知る)
+                    を「関連=スカイ」で統一し、初期は折りたたみ。1 回答に 17 色が
+                    並んでいた問題を「出典=エメラルド / 関連=スカイ / 警告=ロゼ」の
+                    3 色体系に絞り込んで視線誘導を整理する。 */}
                 {msg.role === "assistant" && msg.relatedLaws && msg.relatedLaws.length > 0 && (
-                  <div className="mt-2 ml-10 max-w-[88%] rounded-lg border border-sky-200 bg-sky-50/70 p-3">
-                    <p className="text-xs font-semibold text-sky-900">📚 合わせて確認すべき法令</p>
-                    <ul className="mt-1.5 space-y-1">
+                  <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-sky-200 bg-sky-50/70 p-3">
+                    <summary className="cursor-pointer text-xs font-semibold text-sky-900 hover:text-sky-700">
+                      📚 合わせて確認すべき法令 ({msg.relatedLaws.length}件)
+                    </summary>
+                    <ul className="mt-2 space-y-1">
                       {msg.relatedLaws.map((r, i) => (
                         <li key={i} className="text-[11px] leading-5">
                           <a
@@ -886,19 +891,21 @@ export function ChatbotPanel() {
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </details>
                 )}
 
-                {/* もっと深く知る: 事故事例・通達・業種別レポート */}
+                {/* もっと深く知る: 事故事例・通達・業種別レポート — 関連系=スカイに統一 */}
                 {msg.role === "assistant" && msg.digDeeperLinks && msg.digDeeperLinks.length > 0 && (
-                  <div className="mt-2 ml-10 max-w-[88%] rounded-lg border border-violet-200 bg-violet-50/70 p-3">
-                    <p className="text-xs font-semibold text-violet-900">🔍 もっと深く知る</p>
-                    <ul className="mt-1.5 space-y-1.5">
+                  <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-sky-200 bg-sky-50/50 p-3">
+                    <summary className="cursor-pointer text-xs font-semibold text-sky-900 hover:text-sky-700">
+                      🔍 もっと深く知る ({msg.digDeeperLinks.length}件)
+                    </summary>
+                    <ul className="mt-2 space-y-1.5">
                       {msg.digDeeperLinks.map((d, i) => (
                         <li key={i} className="text-[11px] leading-5">
                           <a
                             href={d.href}
-                            className="font-bold text-violet-800 underline-offset-2 hover:underline"
+                            className="font-bold text-sky-800 underline-offset-2 hover:underline"
                           >
                             {d.label}
                           </a>
@@ -906,7 +913,7 @@ export function ChatbotPanel() {
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </details>
                 )}
 
                 {/* Phase 4: 通達・告示・リーフレットカード（条文紐付け+応答引用+クエリの3層統合） */}

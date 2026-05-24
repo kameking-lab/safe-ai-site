@@ -19,6 +19,7 @@ import { CardGrid } from "@/components/layout/card-grid";
 import { Cluster, Stack } from "@/components/layout/stack";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { CrossToolLinks } from "@/components/cross-tool-links";
+import { TodayThreeCtaBand } from "@/components/industries/today-three-cta-band";
 import {
   JsonLd,
   breadcrumbSchema,
@@ -261,6 +262,11 @@ export default async function IndustryLandingPage({ params }: { params: Params }
             </Cluster>
           )}
         </header>
+
+        {/* P0-018 (usability-audit-day3): hero 直下に「今日の3CTA」帯を配置。
+            事故レポート・KY 用紙・年次計画への業種コンテキスト付き起動を
+            1 タップで提供し、KY セクションまでスクロール 5 回問題を解消。 */}
+        <TodayThreeCtaBand content={content} />
 
         {/* Stats from analytics layer (only for industries with accident-analysis bucket) */}
         {report && report.stats.total > 0 && (
