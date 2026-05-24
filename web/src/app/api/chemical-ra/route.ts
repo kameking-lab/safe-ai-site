@@ -95,7 +95,7 @@ const SYSTEM_PROMPT = `あなたは化学物質の安全性と職場の化学物
     }
   ],
   "flashPoint": "引火点（例：-11℃）、不燃の場合は null",
-  "exposureLimit": "許容濃度（例：OEL 50ppm / ACGIH TLV-TWA 50ppm）",
+  "exposureLimit": "濃度基準値（例：8時間 50ppm／厚労告示第177号）。本サイトは国の数値のみ収録します。",
   "ppeRecommendations": [
     {
       "item": "保護具名",
@@ -139,7 +139,9 @@ const SYSTEM_PROMPT = `あなたは化学物質の安全性と職場の化学物
 - 回答の冒頭に物質の基本的な性状説明を2〜3行で加える
 - safetyMeasures は厚労省指針の優先順位（① 代替化／工学的対策 → ② 管理的対策 → ③ 個人保護具）を必ず守ること
 - safetyMeasures.priority は 1=工学的対策・代替化、2=管理的対策、3=保護具 とし、配列は priority 順に並べること
-- 濃度基準値・許容濃度は「参考値」として提示し、実際の作業環境測定結果によって判断すること
+- exposureLimit は **国の数値**(厚労告示第177号の濃度基準値、特化則・有機則の管理濃度)のみ記載すること
+- ACGIH TLV や JSOH 許容濃度の **数値は本回答に含めない**。必要な場合は「ACGIH/JSOH の公式サイトを参照」と案内に留めること
+- 濃度基準値は「参考値」として提示し、実際の作業環境測定結果によって判断すること
 - 断定的な断言（「〜に該当します」）より「〜と考えられます」「〜とされています」を使うこと
 ${AI_DISCLAIMER_SYSTEM_INSTRUCTION}`;
 
@@ -313,7 +315,7 @@ const DEMO_RESPONSE: ChemicalRaResponse = {
     { category: "生殖毒性", classification: "区分2", signal: "警告", hazardStatement: "生殖能又は胎児への悪影響のおそれの疑い" },
   ],
   flashPoint: "4℃",
-  exposureLimit: "OEL 20ppm（日本産業衛生学会）/ ACGIH TLV-TWA 20ppm",
+  exposureLimit: "8時間濃度基準値 20ppm（厚労告示第177号）",
   ppeRecommendations: [
     { item: "有機ガス用防毒マスク（吸収缶：有機ガス用）", specification: "JIST8151 有機ガス用吸収缶付き", searchQuery: "防毒マスク 有機ガス用 吸収缶" },
     { item: "保護手袋（耐溶剤性）", specification: "ニトリル製 EN374適合", searchQuery: "耐溶剤 保護手袋 ニトリル" },

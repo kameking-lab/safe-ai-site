@@ -7,7 +7,9 @@ import {
   relatedLawTexts,
   getSupplementalInfo,
   MHLW_MERGED_CHEMICAL_COUNT,
+  EXTERNAL_REF_LABEL,
   type MergedChemical,
+  type ConcentrationLimitEntry,
 } from "@/lib/mhlw-chemicals";
 
 /**
@@ -151,6 +153,8 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
         </p>
       )}
 
+      <ExternalRefsLinks externalRefs={chemical.details?.limits?.externalRefs} />
+
       {limit8h && (
         <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
           <p className="text-xs font-semibold text-amber-900">
@@ -197,6 +201,59 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
           厚労省 公式 SDS PDF
         </a>
       )}
+    </div>
+  );
+}
+
+/**
+ * 学会値(ACGIH/JSOH)の公式参照リンク。
+ * 著作権リスク回避のため数値は本サイトに非収録。
+ */
+function ExternalRefsLinks({
+  externalRefs,
+}: {
+  externalRefs?: ConcentrationLimitEntry["externalRefs"];
+}) {
+  if (!externalRefs) return null;
+  const items: { key: "acgih" | "jsoh"; url: string; hint: string }[] = [];
+  if (externalRefs.acgih) {
+    items.push({
+      key: "acgih",
+      url: externalRefs.acgih.url,
+      hint: externalRefs.acgih.lookupHint,
+    });
+  }
+  if (externalRefs.jsoh) {
+    items.push({
+      key: "jsoh",
+      url: externalRefs.jsoh.url,
+      hint: externalRefs.jsoh.lookupHint,
+    });
+  }
+  if (items.length === 0) return null;
+  return (
+    <div className="mt-4 rounded-lg border border-sky-200 bg-sky-50/60 p-3">
+      <p className="text-xs font-semibold text-sky-900">
+        学会値の公式参照（数値は本サイトに非収録）
+      </p>
+      <p className="mt-1 text-[11px] text-sky-800">
+        ACGIH TLV・JSOH 許容濃度は著作物のため、各学会公式サイトでご確認ください。
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {items.map((it) => (
+          <a
+            key={it.key}
+            href={it.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 rounded-md border border-sky-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-sky-900 hover:bg-sky-50"
+            title={it.hint}
+          >
+            <ExternalLink className="h-3 w-3" aria-hidden="true" />
+            {EXTERNAL_REF_LABEL[it.key]}
+          </a>
+        ))}
+      </div>
     </div>
   );
 }

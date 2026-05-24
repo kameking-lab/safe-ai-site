@@ -26,8 +26,12 @@
  *
  * ── ライセンス・出典の注意 ────────────────────────────────
  *  - 厚労省告示・IARC は公的機関の公表値で、出典明記のうえ自由利用可。
- *  - JSOH 値は学会勧告。出典「日本産業衛生学会 許容濃度等の勧告（年度）」を必ず併記。
- *  - ACGIH TLV は原文のフルコピーは不可。要点抜粋に留め出典を併記する。
+ *  - JSOH / ACGIH の数値は著作権あり。本プロジェクトでは数値を **本番DBに収録しない**。
+ *
+ * ── Phase 1a (2026-05-24) クリーンアップ ─────────────────
+ *  本スクリプトの実行後は必ず `node scripts/etl/strip-society-values.mjs` を実行し、
+ *  JSOH/ACGIH 数値を除去し externalRefs(公式参照リンク) に置換すること。
+ *  build-time に source 側から学会値が再注入される設計なので、stripping は必須。
  */
 
 import { readFile, writeFile } from "node:fs/promises";

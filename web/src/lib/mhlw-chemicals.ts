@@ -17,13 +17,24 @@ export type LimitValue = {
   source?: string;
 };
 
-/** 主要出典の判定ラベル */
-export type LimitSource = "mhlw" | "jsoh" | "acgih" | "reference";
+/**
+ * 主要出典の判定ラベル
+ *
+ * v3.0.0 (2026-05-24): 学会値(JSOH/ACGIH)は著作権リスク回避のため数値非収録。
+ * 公式参照リンクは externalRefs フィールドで提供。
+ */
+export type LimitSource = "mhlw" | "reference";
 
 /** IARC 発がん性分類 */
 export type IarcGroup = "1" | "2A" | "2B" | "3";
 
-/** 物質単位の濃度・発がん性データ（concentration-limits.json） */
+/** 学会値の公式参照リンク(数値は非収録) */
+export type ExternalReference = {
+  url: string;
+  lookupHint: string;
+};
+
+/** 物質単位の濃度・発がん性データ（concentration-limits.json v3.0.0） */
 export type ConcentrationLimitEntry = {
   name?: string;
   nameEn?: string;
@@ -36,38 +47,39 @@ export type ConcentrationLimitEntry = {
     ghs?: string;
     source?: string;
   };
-  jsoh?: {
-    twa?: { value: string; unit: string };
-    stel?: { value: string; unit: string };
-    ceiling?: { value: string; unit: string };
-  };
-  acgih?: {
-    twa?: { value: string; unit: string };
-    stel?: { value: string; unit: string };
-    ceiling?: { value: string; unit: string };
-  };
   mhlwSdsUrl?: string;
   notes?: string[];
-  /** v2: 主要出典の判定（mhlw > jsoh > acgih > reference） */
+  /** 主要出典の判定（mhlw=国の数値 / reference=参考値・国の数値なし） */
   source?: LimitSource;
-  /** v2: IARC 分類のフラット参照 */
+  /** IARC 分類のフラット参照 */
   iarcGroup?: IarcGroup | null;
-  /** v2: JSOH TWA 数値（フィルタ・ソート用） */
-  jsohOel?: { value: number; unit: string } | null;
-  /** v2: ACGIH TLV-TWA 数値（フィルタ・ソート用） */
-  acgihTlv?: { value: number; unit: string } | null;
+  /**
+   * 学会値の公式参照リンク (数値は著作権ありのため非収録)
+   * - acgih: ACGIH TLVs and BEIs 公式サイト
+   * - jsoh:  日本産業衛生学会 許容濃度等の勧告 公式サイト
+   */
+  externalRefs?: {
+    acgih?: ExternalReference;
+    jsoh?: ExternalReference;
+  };
 };
 
 type ConcentrationLimitsFile = {
   generatedAt: string;
   version: string;
+  policy?: {
+    description: string;
+    removedSources: string[];
+    removedAt: string;
+    authority?: string;
+  };
   sources: Record<string, string>;
   summary: {
     total: number;
     withMhlw: number;
     withIarc: number;
-    withJsoh: number;
-    withAcgih: number;
+    withExternalAcgihRef?: number;
+    withExternalJsohRef?: number;
   };
   substances: Record<string, ConcentrationLimitEntry>;
 };
@@ -85,8 +97,8 @@ export type MhlwChemicalDetails = {
   link?: string;
   /** 濃度・発がん性の構造化データ（concentration-limits.json）*/
   limits?: ConcentrationLimitEntry;
-  /** データの優先度: 厚労省告示 > 産業衛生学会 > ACGIH > 参考値 */
-  tier?: "mhlw_177" | "jsoh" | "acgih" | "reference" | "none";
+  /** データの優先度: 濃度基準値 > 学会公式参照のみ > 参考値 > なし */
+  tier?: DataTier;
 };
 
 export type MhlwChemicalEntry = {
@@ -161,14 +173,16 @@ export const MHLW_CHEMICALS_SOURCE =
   "厚生労働省 皮膚等障害化学物質リスト・SDS交付義務物質一覧・がん原性物質一覧・濃度基準値設定物質";
 
 /**
- * 濃度基準値・許容濃度・発がん性分類は scripts/etl/fetch-concentration-limits.mjs で
+ * 濃度基準値・発がん性分類は scripts/etl/fetch-concentration-limits.mjs で
  * 生成された web/src/data/concentration-limits.json を出典とする。
  *
- *   優先度: 厚労省告示第177号 > 産業衛生学会許容濃度 > ACGIH > 参考値
+ *   v3.0.0 (2026-05-24): 学会値(ACGIH/JSOH)は著作権リスク回避のため数値非収録。
+ *     - 国の数値(MHLW_177)を最優先
+ *     - 学会値は externalRefs.acgih.url / externalRefs.jsoh.url で公式参照のみ案内
  *
- * 拡張する場合は ETL スクリプトの CARCINOGENS_IARC / JSOH_LIMITS / ACGIH_LIMITS /
- * MHLW_177_OVERRIDES マップに追記し、`node scripts/etl/fetch-concentration-limits.mjs`
- * を再実行する。
+ * MHLW_177 拡張する場合は ETL スクリプトに追記し、
+ * `node scripts/etl/fetch-concentration-limits.mjs` を再実行する。
+ * その後 `node scripts/etl/strip-society-values.mjs` で学会数値を再除去すること。
  */
 function formatLimitValue(v?: LimitValue | { value: string; unit: string }): string | undefined {
   if (!v) return undefined;
@@ -178,8 +192,6 @@ function formatLimitValue(v?: LimitValue | { value: string; unit: string }): str
 /** UI 表示用ラベル: 出典タグ → 短縮ラベル */
 export const SOURCE_LABEL: Record<string, string> = {
   MHLW_177: "厚労告示第177号",
-  JSOH: "産業衛生学会",
-  ACGIH: "ACGIH",
   IARC: "IARC",
   GHS_MHLW: "国GHS分類",
 };
@@ -187,27 +199,27 @@ export const SOURCE_LABEL: Record<string, string> = {
 /** UI 表示用バッジ色 */
 export const SOURCE_BADGE: Record<string, string> = {
   MHLW_177: "bg-amber-100 text-amber-900 border-amber-200",
-  JSOH: "bg-violet-100 text-violet-900 border-violet-200",
-  ACGIH: "bg-sky-100 text-sky-900 border-sky-200",
   IARC: "bg-rose-100 text-rose-900 border-rose-200",
   GHS_MHLW: "bg-emerald-100 text-emerald-900 border-emerald-200",
 };
 
-/** v2: フラット source フィールド用ラベル */
+/** フラット source フィールド用ラベル */
 export const PRIMARY_SOURCE_LABEL: Record<LimitSource, string> = {
   mhlw: "公式（厚労告示）",
-  jsoh: "学会（産衛）",
-  acgih: "参考（ACGIH）",
-  reference: "参考値",
+  reference: "参考値（数値非収録）",
 };
 
-/** v2: フラット source フィールド用バッジ色 */
+/** フラット source フィールド用バッジ色 */
 export const PRIMARY_SOURCE_BADGE: Record<LimitSource, string> = {
   mhlw: "bg-amber-100 text-amber-900 border-amber-300",
-  jsoh: "bg-violet-100 text-violet-900 border-violet-300",
-  acgih: "bg-sky-100 text-sky-900 border-sky-300",
   reference: "bg-slate-100 text-slate-700 border-slate-200",
 };
+
+/** 公式参照リンクのラベル(数値は非収録) */
+export const EXTERNAL_REF_LABEL = {
+  acgih: "ACGIH公式参照",
+  jsoh: "JSOH公式参照",
+} as const;
 
 /** v2: IARC 分類の表示色 */
 export const IARC_BADGE: Record<IarcGroup, string> = {
@@ -225,21 +237,25 @@ export const IARC_LABEL: Record<IarcGroup, string> = {
   "3": "Group 3（分類できない）",
 };
 
-/** データ階層バッジ: 「濃度基準値あり」「許容濃度のみ」「参考値のみ」 */
-export type DataTier = "mhlw_177" | "jsoh" | "acgih" | "reference" | "none";
+/**
+ * データ階層バッジ:
+ *   - mhlw_177: 国の数値あり(濃度基準値)
+ *   - external_only: 国の数値なし、学会公式参照リンクのみ
+ *   - reference: 国の数値も学会参照もない、参考値のみ
+ *   - none: 数値データなし
+ */
+export type DataTier = "mhlw_177" | "external_only" | "reference" | "none";
 
 export const TIER_LABEL: Record<DataTier, string> = {
   mhlw_177: "濃度基準値あり",
-  jsoh: "許容濃度のみ",
-  acgih: "参考値のみ",
+  external_only: "学会公式参照のみ",
   reference: "参考値",
   none: "数値データなし",
 };
 
 export const TIER_BADGE: Record<DataTier, string> = {
   mhlw_177: "bg-amber-100 text-amber-900 border-amber-300",
-  jsoh: "bg-violet-100 text-violet-900 border-violet-300",
-  acgih: "bg-sky-100 text-sky-900 border-sky-300",
+  external_only: "bg-sky-100 text-sky-900 border-sky-300",
   reference: "bg-slate-100 text-slate-700 border-slate-200",
   none: "bg-slate-50 text-slate-400 border-slate-100",
 };
@@ -251,8 +267,7 @@ function determineTier(entry: ConcentrationLimitEntry | undefined): DataTier {
     entry.stel?.source === "MHLW_177" ||
     entry.ceiling?.source === "MHLW_177";
   if (isMhlw) return "mhlw_177";
-  if (entry.jsoh) return "jsoh";
-  if (entry.acgih) return "acgih";
+  if (entry.externalRefs?.acgih || entry.externalRefs?.jsoh) return "external_only";
   return "reference";
 }
 
