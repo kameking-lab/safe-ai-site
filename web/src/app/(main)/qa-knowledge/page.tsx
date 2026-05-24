@@ -76,13 +76,42 @@ export default function QaKnowledgePage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-4 text-center text-sm text-slate-500">
-          Q&Aナレッジベースは投稿が集まり次第、随時公開します。
-          現在はコンサルタントが厳選した
-          <Link href="/faq" className="mx-1 font-semibold text-emerald-700 hover:underline">
-            FAQ 200問
-          </Link>
-          をご利用ください。
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-5 space-y-3">
+          <p className="text-sm font-semibold text-emerald-900">
+            ご質問への回答は、現在 3 つの入口で対応しています
+          </p>
+          <ul className="space-y-2 text-sm text-slate-700">
+            <li className="flex items-start gap-2">
+              <span className="font-bold text-emerald-700">①</span>
+              <span>
+                <Link href="/faq" className="font-semibold text-emerald-700 hover:underline">
+                  FAQ 200問
+                </Link>
+                — コンサルタントが厳選した代表的な質問
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="font-bold text-emerald-700">②</span>
+              <span>
+                <Link href="/chatbot" className="font-semibold text-emerald-700 hover:underline">
+                  法令チャット (AI)
+                </Link>
+                — 自然言語で質問、条文番号付きで回答 (33法令対応)
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="font-bold text-emerald-700">③</span>
+              <span>
+                <Link href="/contact" className="font-semibold text-emerald-700 hover:underline">
+                  ご意見・改善提案
+                </Link>
+                — Q&Aナレッジベースへの掲載希望もこちらから
+              </span>
+            </li>
+          </ul>
+          <p className="text-xs text-slate-500">
+            Q&Aナレッジベースは投稿が集まり次第、随時公開します。当面は上記 3 つの入口をご活用ください。
+          </p>
         </div>
       </div>
     </PageContainer>

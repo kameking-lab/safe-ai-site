@@ -31,6 +31,7 @@ import {
 } from "@/lib/chat-history";
 import { trackEvent } from "@/components/Analytics";
 import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
+import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 
 type ChatMessage = {
   id: string;
@@ -596,7 +597,7 @@ export function ChatbotPanel() {
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map((msg) => (
+            {messages.map((msg, idx) => (
               <div key={msg.id}>
                 <div className={msg.role === "assistant" ? "flex items-start gap-2" : ""}>
                   {msg.role === "assistant" && (
@@ -926,6 +927,12 @@ export function ChatbotPanel() {
                         → サイネージで掲示
                       </a>
                     </div>
+                    {/* P2項目9: 統一CTA — 結果画面下部の次アクション (最後のメッセージのみ表示) */}
+                    {idx === messages.length - 1 && (
+                      <div className="mt-3">
+                        <MainFeatureNextActions exclude="chatbot" />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

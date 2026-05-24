@@ -9,6 +9,7 @@ import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
 import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
 import { SimpleMarkdown } from "@/components/simple-markdown";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
+import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 import {
   findByCas,
   getSupplementalInfo,
@@ -904,6 +905,9 @@ export function ChemicalRaPanel() {
             実際の作業においては、製品の公式SDS・最新の法令・専門家の指導に従ってください。
             保護具購入リンクはアフィリエイトプログラムを利用しています。
           </p>
+
+          {/* P2項目9: 統一CTA — メイン3機能 + 現場ツールへの次アクション */}
+          <MainFeatureNextActions exclude="chemical-ra" contextLabel={result.chemicalName} />
         </div>
       )}
     </div>
