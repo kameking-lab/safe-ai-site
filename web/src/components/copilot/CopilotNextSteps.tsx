@@ -79,7 +79,7 @@ export function CopilotNextSteps({ current, industry, intro, extraCta }: Copilot
         : "年次安全衛生計画を作成する",
       description: lbl
         ? `${lbl}向けテンプレートに、ここでの内容を反映した年次計画を自動生成します。`
-        : "10業種×3規模の30テンプレートから基本方針・重点目標・月別スケジュールを生成。",
+        : "13業種×3規模の39テンプレートから基本方針・重点目標・月別スケジュールを生成。",
       href,
       icon: ListChecks,
       tone: "violet",

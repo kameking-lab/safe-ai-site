@@ -36,7 +36,7 @@ const STEPS: StepDef[] = [
   {
     id: "plan-generator",
     label: "3. 年次計画を作成",
-    caption: "業種×規模で30テンプレ",
+    caption: "業種×規模で39テンプレ",
     href: "/strategy/plan-generator",
     icon: ListChecks,
   },
