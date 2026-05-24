@@ -18,12 +18,6 @@ import {
   type DigDeeperLink,
 } from "@/lib/chatbot-enrichment";
 import { cacheKey, getCachedResponse, setCachedResponse } from "@/lib/chatbot-cache";
-import { lookupArticleNoticeMap } from "@/data/article-notice-map";
-import { detectNoticesFromAnswer } from "@/lib/chatbot-notice-detector";
-import { searchRelevantLeaflets } from "@/lib/chatbot-leaflets-search";
-import { normalizeArticleNumToKey } from "@/lib/article-number-normalize";
-import type { MhlwNotice } from "@/data/mhlw-notices";
-import type { MhlwLeaflet } from "@/data/mhlw-leaflets";
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
 
@@ -76,10 +70,6 @@ export type ChatbotResponse = {
   digDeeperLinks?: DigDeeperLink[];
   /** RAG コーパス範囲外の参照を検出した場合の警告（先頭に表示） */
   scopeWarnings?: string[];
-  /** Phase 4: 引用条文 + AI応答内通達検出から統合した関連通達 (NoticeCard 表示用) */
-  noticeAttachments?: MhlwNotice[];
-  /** Phase 4: 引用条文 + 質問キーワード検索から統合した関連リーフレット */
-  leafletAttachments?: MhlwLeaflet[];
 };
 
 type ApiErrorBody = {
@@ -507,42 +497,6 @@ export async function POST(request: Request) {
     );
   }
 
-  // ===== Phase 4: 通達/リーフレット URL 自動添付 =====
-  // 1) RAG ヒット条文 → article-notice-map から関連通達/リーフレット/MLIT を取得
-  const attachedNotices = new Map<string, MhlwNotice>();
-  const attachedLeaflets = new Map<string, MhlwLeaflet>();
-  for (const a of relevantArticles) {
-    const key = `${a.lawShort}|${normalizeArticleNumToKey(a.articleNum) ?? ""}`;
-    if (!key.endsWith("|")) {
-      const lookup = lookupArticleNoticeMap(key, 5, 3);
-      for (const n of lookup.notices) attachedNotices.set(n.id, n);
-      for (const l of lookup.leaflets) attachedLeaflets.set(l.id, l);
-    }
-  }
-  // 2) AI 応答内の通達番号引用を検出 (架空通達番号は除外)
-  const aiDetected = detectNoticesFromAnswer(answer);
-  for (const n of aiDetected.matched) attachedNotices.set(n.id, n);
-  // 3) 既存の searchRelevantNotices ヒット (relatedNotices) も統合
-  for (const n of relatedNotices) {
-    if (!attachedNotices.has(n.id)) {
-      // NoticeHit は MhlwNotice 形なので互換
-      attachedNotices.set(n.id, n as unknown as MhlwNotice);
-    }
-  }
-  // 4) 質問キーワードからリーフレット検索 (最大3件)
-  for (const l of searchRelevantLeaflets(message, 3)) {
-    attachedLeaflets.set(l.id, l);
-  }
-  // 5) ソート (拘束力 binding > indirect > reference の順) し、最大 5 件
-  const noticeAttachments: MhlwNotice[] = Array.from(attachedNotices.values())
-    .sort((a, b) => {
-      const order = (lvl: string | undefined) =>
-        lvl === "binding" ? 0 : lvl === "indirect" ? 1 : 2;
-      return order(a.bindingLevel) - order(b.bindingLevel);
-    })
-    .slice(0, 5);
-  const leafletAttachments: MhlwLeaflet[] = Array.from(attachedLeaflets.values()).slice(0, 5);
-
   const responsePayload: ChatbotResponse = {
     answer,
     sources,
@@ -554,8 +508,6 @@ export async function POST(request: Request) {
     citations: structuredCitations,
     relatedLaws,
     digDeeperLinks,
-    noticeAttachments,
-    leafletAttachments,
     scopeWarnings: scopeWarnings.length > 0 ? scopeWarnings : undefined,
   };
   if (key) {

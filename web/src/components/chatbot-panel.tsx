@@ -4,10 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { ChatbotSource, FollowupSuggestion } from "@/app/api/chatbot/route";
 import type { NoticeHit } from "@/lib/notice-search";
-import type { MhlwNotice } from "@/data/mhlw-notices";
-import type { MhlwLeaflet } from "@/data/mhlw-leaflets";
-import { ChatbotNoticeCard } from "@/components/chatbot/notice-card";
-import { ChatbotLeafletCard } from "@/components/chatbot/leaflet-card";
 import type {
   StructuredCitation,
   RelatedLawLink,
@@ -41,10 +37,6 @@ type ChatMessage = {
   relatedLaws?: RelatedLawLink[];
   digDeeperLinks?: DigDeeperLink[];
   scopeWarnings?: string[];
-  /** Phase 4 */
-  noticeAttachments?: MhlwNotice[];
-  /** Phase 4 */
-  leafletAttachments?: MhlwLeaflet[];
 };
 
 
@@ -298,8 +290,6 @@ export function ChatbotPanel() {
         relatedLaws?: RelatedLawLink[];
         digDeeperLinks?: DigDeeperLink[];
         scopeWarnings?: string[];
-        noticeAttachments?: MhlwNotice[];
-        leafletAttachments?: MhlwLeaflet[];
       };
 
       const assistantMsg: ChatMessage = {
@@ -316,8 +306,6 @@ export function ChatbotPanel() {
         relatedLaws: data.relatedLaws,
         digDeeperLinks: data.digDeeperLinks,
         scopeWarnings: data.scopeWarnings,
-        noticeAttachments: data.noticeAttachments,
-        leafletAttachments: data.leafletAttachments,
       };
 
       const finalMessages = [...nextMessages, assistantMsg];
@@ -782,24 +770,8 @@ export function ChatbotPanel() {
                   </div>
                 )}
 
-                {/* Phase 4: 関連通達・リーフレット原文URL (article-notice-map + 通達番号検出経由) */}
-                {msg.role === "assistant" &&
-                  msg.noticeAttachments &&
-                  msg.noticeAttachments.length > 0 && (
-                    <div className="mt-2 ml-10 max-w-[88%]">
-                      <ChatbotNoticeCard notices={msg.noticeAttachments} />
-                    </div>
-                  )}
-                {msg.role === "assistant" &&
-                  msg.leafletAttachments &&
-                  msg.leafletAttachments.length > 0 && (
-                    <div className="mt-2 ml-10 max-w-[88%]">
-                      <ChatbotLeafletCard leaflets={msg.leafletAttachments} />
-                    </div>
-                  )}
-
-                {/* 関連通達・告示・指針（厚労省一次資料DB由来、旧UI/Phase 1〜2由来。Phase 4のnoticeAttachmentsがあれば重複しないが、無い場合のフォールバック表示） */}
-                {msg.role === "assistant" && msg.notices && msg.notices.length > 0 && !(msg.noticeAttachments && msg.noticeAttachments.length > 0) && (
+                {/* 関連通達・告示・指針（厚労省一次資料DB由来） */}
+                {msg.role === "assistant" && msg.notices && msg.notices.length > 0 && (
                   <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-amber-200 bg-amber-50 p-3" open>
                     <summary className="cursor-pointer text-xs font-semibold text-amber-900 hover:text-amber-700">
                       関連通達・告示 ({msg.notices.length}件・拘束力レベル付き)
