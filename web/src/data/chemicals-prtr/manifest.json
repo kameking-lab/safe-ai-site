@@ -1,0 +1,31 @@
+{
+  "generatedAt": "2026-05-24T05:58:20.946813+00:00",
+  "sources": [
+    {
+      "kind": "github_mirror",
+      "repository": "Ameyanagi/ra-law-db",
+      "file": "law_entries.jsonl",
+      "sha256": "8c8205c5fd268a899412cfd34edbb60d47de732ba5baccd7ed87c304774206d5",
+      "fileSize": 656161
+    },
+    {
+      "kind": "github_mirror",
+      "repository": "Ameyanagi/ra-law-db",
+      "file": "cas_mappings.jsonl",
+      "sha256": "abc4285d38bb857c356f7fedef468da75951f9ca75ba2b5323a00e8887564238",
+      "fileSize": 189829
+    }
+  ],
+  "upstreamReference": "e-Gov 法令API 経由で取得された政府公開法令データ",
+  "license": "政府公開法令データ (e-Gov api.elaws.e-gov.go.jp)、出典明記で自由利用可",
+  "regulationTypes": [
+    "prtr1",
+    "prtr2"
+  ],
+  "totalRows": 408,
+  "uniqueCas": 398,
+  "regulationTypeLabels": {
+    "prtr1": "化管法 第一種指定化学物質 (PRTR 第一種)",
+    "prtr2": "化管法 第二種指定化学物質 (PRTR 第二種)"
+  }
+}

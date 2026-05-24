@@ -12,6 +12,8 @@ import {
   ExternalLink,
   Info,
   ClipboardCheck,
+  Filter,
+  X,
 } from "lucide-react";
 import {
   chemicalSubstances,
@@ -21,6 +23,16 @@ import {
 } from "@/data/mock/chemical-substances-db";
 import { getAllMergedChemicals, type MergedChemical } from "@/lib/mhlw-chemicals";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
+import {
+  ALL_REGULATION_TAGS,
+  REGULATION_TAGS,
+  TAG_CATEGORY_ORDER,
+  TAG_CATEGORY_LABELS,
+  CONSTRUCTION_PRIORITY_CAS_SET,
+  normalizeTags,
+  type RegulationTag,
+} from "@/lib/regulation-tag-labels";
+import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
 
 
 const CATEGORY_FILTERS: ChemicalCategory[] = [
@@ -76,6 +88,23 @@ export function ChemicalDatabaseClient() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<ChemicalCategory | "">("");
   const [skinOnly, setSkinOnly] = useState(false);
+  // Phase 1e: 規制タグフィルタ
+  const [selectedTags, setSelectedTags] = useState<Set<RegulationTag>>(new Set());
+  const [tagMatchMode, setTagMatchMode] = useState<"and" | "or">("and");
+  const [constructionOnly, setConstructionOnly] = useState(false);
+
+  const toggleTag = (t: RegulationTag) => {
+    setSelectedTags((prev) => {
+      const next = new Set(prev);
+      if (next.has(t)) next.delete(t);
+      else next.add(t);
+      return next;
+    });
+  };
+  const clearTagFilter = () => {
+    setSelectedTags(new Set());
+    setConstructionOnly(false);
+  };
 
   const filtered = useMemo(() => {
     return chemicalSubstances.filter((s) => {
@@ -86,10 +115,27 @@ export function ChemicalDatabaseClient() {
     });
   }, [query, category, skinOnly]);
 
-  const filteredMhlw = useMemo(
-    () => mhlwChemicals.filter((c) => matchesMhlw(c, query)),
-    [mhlwChemicals, query],
-  );
+  const filteredMhlw = useMemo(() => {
+    return mhlwChemicals.filter((c) => {
+      if (!matchesMhlw(c, query)) return false;
+      // 建設業頻出物質プリセット
+      if (constructionOnly) {
+        if (!c.cas || !CONSTRUCTION_PRIORITY_CAS_SET.has(c.cas)) return false;
+      }
+      // 規制タグフィルタ
+      if (selectedTags.size > 0) {
+        const tags = new Set(normalizeTags(c.details?.limits?.regulationTags));
+        if (tagMatchMode === "and") {
+          for (const t of selectedTags) if (!tags.has(t)) return false;
+        } else {
+          let any = false;
+          for (const t of selectedTags) if (tags.has(t)) { any = true; break; }
+          if (!any) return false;
+        }
+      }
+      return true;
+    });
+  }, [mhlwChemicals, query, selectedTags, tagMatchMode, constructionOnly]);
 
   return (
     <PageContainer width="wide">
@@ -152,10 +198,97 @@ export function ChemicalDatabaseClient() {
               />
             </label>
             <p className="mt-2 text-xs text-slate-500">
-              {query
+              {query || selectedTags.size > 0 || constructionOnly
                 ? `${filteredMhlw.length.toLocaleString()} 件 / 全 ${mhlwCount.toLocaleString()} 件`
                 : `全 ${mhlwCount.toLocaleString()} 件`}（CAS 統合）
             </p>
+          </div>
+
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-sm font-bold text-slate-800">
+                <Filter className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                規制法令で絞り込み
+                {selectedTags.size > 0 && (
+                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-800">
+                    {selectedTags.size} 件選択中
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="inline-flex items-center gap-1.5 text-xs text-slate-700">
+                  <input
+                    type="checkbox"
+                    checked={constructionOnly}
+                    onChange={(e) => setConstructionOnly(e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-400 text-amber-600 focus:ring-amber-500"
+                  />
+                  建設業頻出物質のみ
+                </label>
+                <div
+                  className="inline-flex rounded-md border border-slate-300 text-xs overflow-hidden"
+                  role="radiogroup"
+                  aria-label="複数タグの結合方法"
+                >
+                  {(["and", "or"] as const).map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => setTagMatchMode(m)}
+                      className={`px-2.5 py-1 ${
+                        tagMatchMode === m
+                          ? "bg-slate-800 text-white"
+                          : "bg-white text-slate-600 hover:bg-slate-50"
+                      }`}
+                    >
+                      {m === "and" ? "全て満たす (AND)" : "いずれか (OR)"}
+                    </button>
+                  ))}
+                </div>
+                {(selectedTags.size > 0 || constructionOnly) && (
+                  <button
+                    type="button"
+                    onClick={clearTagFilter}
+                    className="inline-flex items-center gap-1 rounded border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                  >
+                    <X className="h-3 w-3" aria-hidden="true" />
+                    クリア
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="space-y-2">
+              {TAG_CATEGORY_ORDER.map((cat) => {
+                const tagsInCat = ALL_REGULATION_TAGS.filter(
+                  (t) => REGULATION_TAGS[t].category === cat,
+                );
+                if (tagsInCat.length === 0) return null;
+                return (
+                  <div key={cat} className="flex flex-wrap items-baseline gap-2">
+                    <span className="text-[11px] font-semibold uppercase text-slate-500 min-w-[8rem]">
+                      {TAG_CATEGORY_LABELS[cat]}
+                    </span>
+                    {tagsInCat.map((t) => {
+                      const info = REGULATION_TAGS[t];
+                      const selected = selectedTags.has(t);
+                      return (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => toggleTag(t)}
+                          className={`inline-flex items-center rounded border text-xs px-2 py-0.5 font-medium whitespace-nowrap ${info.badgeClass} ${
+                            selected ? "ring-2 ring-offset-1 ring-slate-700" : "opacity-70 hover:opacity-100"
+                          }`}
+                          title={info.fullLabel}
+                        >
+                          {info.shortLabel}
+                        </button>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
           {filteredMhlw.length === 0 ? (
             <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
@@ -167,27 +300,63 @@ export function ChemicalDatabaseClient() {
                 <thead className="border-b border-slate-200 bg-slate-50">
                   <tr>
                     <th className="px-3 py-2 text-left font-semibold text-slate-700">CAS番号</th>
-                    <th className="px-3 py-2 text-left font-semibold text-slate-700">物質名</th>
+                    <th className="px-3 py-2 text-left font-semibold text-slate-700">物質名 / 規制タグ</th>
                     <th className="px-3 py-2 text-center font-semibold text-slate-700">がん原性</th>
                     <th className="px-3 py-2 text-center font-semibold text-slate-700">皮膚障害</th>
                     <th className="px-3 py-2 text-center font-semibold text-slate-700">濃度基準</th>
                     <th className="px-3 py-2 text-center font-semibold text-slate-700">SDS義務</th>
+                    <th className="px-3 py-2 text-center font-semibold text-slate-700">詳細</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filteredMhlw.slice(0, 100).map((c, i) => (
-                    <tr
-                      key={c.cas ?? `${c.primaryName}-${i}`}
-                      className="hover:bg-slate-50"
-                    >
-                      <td className="px-3 py-2 font-mono text-slate-400">{c.cas ?? "—"}</td>
-                      <td className="px-3 py-2 font-medium text-slate-800">{c.primaryName}</td>
-                      <td className="px-3 py-2 text-center text-red-600">{c.flags.carcinogenic ? "●" : ""}</td>
-                      <td className="px-3 py-2 text-center text-amber-600">{c.flags.skin ? "●" : ""}</td>
-                      <td className="px-3 py-2 text-center text-blue-600">{c.flags.concentration ? "●" : ""}</td>
-                      <td className="px-3 py-2 text-center text-emerald-600">{c.flags.label_sds ? "●" : ""}</td>
-                    </tr>
-                  ))}
+                  {filteredMhlw.slice(0, 100).map((c, i) => {
+                    const tags = c.details?.limits?.regulationTags;
+                    const isPriority = c.cas && CONSTRUCTION_PRIORITY_CAS_SET.has(c.cas);
+                    return (
+                      <tr
+                        key={c.cas ?? `${c.primaryName}-${i}`}
+                        className="hover:bg-slate-50"
+                      >
+                        <td className="px-3 py-2 font-mono text-slate-400 align-top">{c.cas ?? "—"}</td>
+                        <td className="px-3 py-2 align-top">
+                          <div className="flex flex-col gap-1">
+                            <span className="font-medium text-slate-800 flex items-center gap-1.5 flex-wrap">
+                              {c.primaryName}
+                              {isPriority && (
+                                <span className="rounded-full bg-amber-100 text-amber-900 border border-amber-300 px-1.5 py-0 text-[10px]">
+                                  建設業頻出
+                                </span>
+                              )}
+                            </span>
+                            {tags && tags.length > 0 && (
+                              <RegulationTagBadgeList
+                                tags={tags}
+                                maxVisible={4}
+                                size="xs"
+                                onTagClick={(t) => toggleTag(t)}
+                              />
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 text-center text-red-600 align-top">{c.flags.carcinogenic ? "●" : ""}</td>
+                        <td className="px-3 py-2 text-center text-amber-600 align-top">{c.flags.skin ? "●" : ""}</td>
+                        <td className="px-3 py-2 text-center text-blue-600 align-top">{c.flags.concentration ? "●" : ""}</td>
+                        <td className="px-3 py-2 text-center text-emerald-600 align-top">{c.flags.label_sds ? "●" : ""}</td>
+                        <td className="px-3 py-2 text-center align-top">
+                          {c.cas ? (
+                            <Link
+                              href={`/chemical-database/${encodeURIComponent(c.cas)}`}
+                              className="inline-flex items-center gap-0.5 text-emerald-700 hover:text-emerald-900 underline text-[11px]"
+                            >
+                              開く
+                            </Link>
+                          ) : (
+                            <span className="text-slate-300">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
               {filteredMhlw.length > 100 && (

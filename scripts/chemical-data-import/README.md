@@ -1,21 +1,73 @@
-# 化学物質データ統合スクリプト (Phase 1b/1c スケルトン)
+# 化学物質データ統合スクリプト
 
 化学物質RA万能化 Phase 1 において、本番DBを 1,546 物質 → 12,000-15,000 物質まで
-拡張するための取得スクリプト群。本ディレクトリは **スケルトンのみ**(実装は別セッション)。
+拡張するための取得スクリプト群。
 
 ## 進捗
 
-- Phase 1a (完了): ACGIH/JSOH 数値除去 + 公式参照リンク化
-- Phase 1b (このPRはスケルトンのみ): NITE-CHRIP / PRTR / 化審法の政府データ統合
-- Phase 1c (未着手): 物質マスタ統合検証 + UI 横断調整
+- Phase 1a (完了 PR #271): ACGIH/JSOH 数値除去 + 公式参照リンク化
+- **Phase 1b (完了 2026-05-24): NITE-CHRIP 3,388 物質統合 (1,546 → 3,513 物質)**
+- **Phase 1c (完了 2026-05-24): PRTR 398 ユニーク CAS タグ付与**
+- **Phase 1d (完了 2026-05-24): 化審法 (特定) + 毒劇法 + 化学兵器禁止法 + 廃掃法 255 ユニーク CAS タグ付与**
+- Phase 1e (未着手): 化審法 優先評価化学物質 (約1,100) + GHS-Japan オリジナル分類 + Model SDS 取り込み
+
+詳細運用ルール: `docs/chemical-ra-phase1b/etl-operations-guide.md`
 
 ## スクリプト
 
-| ファイル | データソース | 推定追加物質数 | 状態 |
+| ファイル | データソース | 取り込み | 状態 |
 |---|---|---|---|
-| `nite-chrip-importer.mjs` | NITE-CHRIP (政府版 GHS 分類) | ~3,300 | スケルトン |
-| `prtr-importer.mjs` | PRTR 第一種(462)・第二種(100) | ~562 | スケルトン |
-| `chashin-importer.mjs` | 化審法 (特定/優先評価/監視) | ~1,100 | スケルトン |
+| `parse-nite-chrip.py` + `nite-chrip-importer.mjs` | NITE 統合版GHS分類 | 3,388 (uniq 3,378) | **実装完了** |
+| `parse-regulatory-laws.py` + `prtr-importer.mjs` | 化管法 PRTR 第一種/第二種 | 398 ユニーク CAS | **実装完了** |
+| `parse-regulatory-laws.py` + `chashin-importer.mjs` | 化審法 特定 + 毒劇法 + CWC + 廃掃法 | 255 ユニーク CAS | **実装完了** |
+
+## PRTR + 化審法系 実行手順 (Phase 1c/1d 完了形)
+
+```bash
+# 1. 元 JSONL 取得 (GitHub ミラー Ameyanagi/ra-law-db 経由)
+mkdir -p scripts/chemical-data-import/tmp
+curl -sL -o scripts/chemical-data-import/tmp/law_entries.jsonl \
+  https://raw.githubusercontent.com/Ameyanagi/ra-law-db/main/parsed/law_entries.jsonl
+curl -sL -o scripts/chemical-data-import/tmp/cas_mappings.jsonl \
+  https://raw.githubusercontent.com/Ameyanagi/ra-law-db/main/mappings/cas_mappings.jsonl
+
+# 2. PRTR / 化審法系 JSONL を生成 (Python 標準ライブラリのみ)
+python3 scripts/chemical-data-import/parse-regulatory-laws.py
+
+# 3. マスタへマージ (順序: NITE → PRTR → 化審法系)
+node scripts/chemical-data-import/prtr-importer.mjs
+node scripts/chemical-data-import/chashin-importer.mjs
+
+# 4. 学会数値除去 (冪等、必須)
+node scripts/etl/strip-society-values.mjs
+
+# 5. 検証
+cd web && npm run lint && npx tsc --noEmit && npm run test && npm run build
+```
+
+## NITE-CHRIP 実行手順 (Phase 1b 完了形)
+
+```bash
+# 1. 元 xlsx 取得 (NITE 公式 or ミラー)
+curl -sL -o scripts/chemical-data-import/tmp/list_nite_all.xlsx \
+  "https://www.chem-info.nite.go.jp/chem/ghs/files/list_nite_all.xlsx"
+#   または (本セッション環境のように nite.go.jp 到達不可の場合):
+# curl -sL -o scripts/chemical-data-import/tmp/list_nite_all.xlsx \
+#   "https://github.com/Ameyanagi/risk_assessment_list/raw/main/reference/list_nite_all.xlsx"
+
+# 2. xlsx → JSONL パース (Python, openpyxl 必要)
+pip install openpyxl
+python3 scripts/chemical-data-import/parse-nite-chrip.py
+
+# 3. concentration-limits.json へマージ
+node scripts/chemical-data-import/nite-chrip-importer.mjs
+
+# 4. 学会数値再除去 (冪等、必須)
+node scripts/etl/strip-society-values.mjs
+
+# 5. 検証
+cd web && npm run lint && npx tsc --noEmit && npm run test && npm run build
+```
 
 ## 共通フロー
 

@@ -104,12 +104,31 @@ function stripEntry(cas, entry) {
 
 function summarize(byCas) {
   const entries = Object.values(byCas);
+  const withNite = entries.filter((v) => (v.regulationTags ?? []).includes("nite")).length;
+  const withNiteGhs = entries.filter((v) => v.niteGhsClassifications).length;
+  const withPrtr = entries.filter((v) => {
+    const t = v.regulationTags ?? [];
+    return t.includes("prtr1") || t.includes("prtr2");
+  }).length;
+  const withChashin = entries.filter((v) => {
+    const t = v.regulationTags ?? [];
+    return (
+      t.some((x) => x.startsWith("cscl")) ||
+      t.includes("poison-control") ||
+      t.includes("cwc") ||
+      t.includes("waste")
+    );
+  }).length;
   return {
     total: entries.length,
     withMhlw: entries.filter((v) => v.source === "mhlw").length,
     withIarc: entries.filter((v) => v.iarcGroup).length,
     withExternalAcgihRef: entries.filter((v) => v.externalRefs?.acgih).length,
     withExternalJsohRef: entries.filter((v) => v.externalRefs?.jsoh).length,
+    withRegulationNite: withNite,
+    withNiteGhs,
+    withPrtr,
+    withChashin,
     bySource: {
       mhlw: entries.filter((v) => v.source === "mhlw").length,
       reference: entries.filter((v) => v.source === "reference").length,
@@ -202,12 +221,24 @@ async function main() {
     ACGIH_EXTERNAL: `ACGIH TLVs and BEIs (公式参照のみ・数値非収録): ${ACGIH_PUBLIC_URL}`,
     JSOH_EXTERNAL: `JSOH 許容濃度等の勧告 (公式参照のみ・数値非収録): ${JSOH_PUBLIC_URL}`,
   };
+  // Phase 1b/1c/1d 以降のソースは既存登録を保持
+  if (doc.sources?.GHS_NITE) newSources.GHS_NITE = doc.sources.GHS_NITE;
+  if (doc.sources?.PRTR_KAKAN) newSources.PRTR_KAKAN = doc.sources.PRTR_KAKAN;
+  if (doc.sources?.CHASHIN_DOKUGEKI_CWC_WASTE)
+    newSources.CHASHIN_DOKUGEKI_CWC_WASTE = doc.sources.CHASHIN_DOKUGEKI_CWC_WASTE;
 
   const newSummary = summarize(doc.substances);
+  const hasChashin = newSummary.withChashin > 0;
+  const hasPrtr = newSummary.withPrtr > 0;
+  const hasNite = newSummary.withRegulationNite > 0;
+  let version = "3.0.0-government-only";
+  if (hasNite) version = "3.1.0-government-only-nite";
+  if (hasNite && hasPrtr) version = "3.2.0-government-only-nite-prtr";
+  if (hasNite && hasPrtr && hasChashin) version = "3.3.0-government-only-nite-prtr-chashin";
 
   const newDoc = {
     generatedAt: new Date().toISOString(),
-    version: "3.0.0-government-only",
+    version,
     policy: {
       description:
         "学会数値(ACGIH/JSOH)は著作権ありのため数値非収録。公式参照URLのみ提供。",
@@ -218,6 +249,10 @@ async function main() {
     },
     sources: newSources,
     summary: newSummary,
+    // Phase 1b/1c/1d 追加: インポートメタを保持
+    ...(doc.niteImport ? { niteImport: doc.niteImport } : {}),
+    ...(doc.prtrImport ? { prtrImport: doc.prtrImport } : {}),
+    ...(doc.chashinImport ? { chashinImport: doc.chashinImport } : {}),
     substances: doc.substances,
   };
 
