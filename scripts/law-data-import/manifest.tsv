@@ -1,0 +1,14 @@
+lawShort	fullName	eGovUrl	priority	estimatedArticles	purpose	status
+建リ法	建設工事に係る資材の再資源化等に関する法律	https://laws.e-gov.go.jp/law/412AC0000000104	A	35	分別解体・特定建設資材	pending
+廃掃法	廃棄物の処理及び清掃に関する法律	https://laws.e-gov.go.jp/law/345AC0000000137	A	45	産廃・特管廃棄物・マニフェスト	pending
+大防法	大気汚染防止法	https://laws.e-gov.go.jp/law/343AC0000000097	A	25	粉じん発生施設・特定粉じん	pending
+水濁法	水質汚濁防止法	https://laws.e-gov.go.jp/law/345AC0000000138	B	20	特定施設・排水基準	pending
+振動規制法	振動規制法	https://laws.e-gov.go.jp/law/351AC0000000064	B	15	特定建設作業・振動規制値	pending
+ダイ特法	ダイオキシン類対策特別措置法	https://laws.e-gov.go.jp/law/411AC0000000105	B	15	特定施設・排出基準	pending
+PCB特法	ポリ塩化ビフェニル廃棄物の適正な処理の推進に関する特別措置法	https://laws.e-gov.go.jp/law/413AC0000000065	C	10	高濃度/低濃度PCB処理期限	pending
+改善基準告示	自動車運転者の労働時間等の改善のための基準	https://laws.e-gov.go.jp/law/364M50000040013	A	12	令和6年4月改正含む	pending
+貨運法	貨物自動車運送事業法	https://laws.e-gov.go.jp/law/401AC0000000083	B	20	安全管理規程・運行管理	pending
+道交法	道路交通法	https://laws.e-gov.go.jp/law/335AC0000000105	C	30	業務上関連条項のみ	pending
+推進者選任基準	安全衛生推進者等の選任に関する基準	https://laws.e-gov.go.jp/law/363M50000040080	B	5	推進者の選任	pending
+化管法R3告示	化学物質管理に関する令和3年改正関連告示	(複数告示の束ね)	C	10	自律的管理関連	pending
+自律管理通達	自律的化学物質管理関連通達	(基発番号ベース、複数)	C	15	リスクアセスメント運用	pending

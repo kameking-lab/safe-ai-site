@@ -31,14 +31,14 @@ export const LAW_CATEGORY_OPTIONS: { value: LawCategoryFilter; label: string }[]
  * 強制的に差し込む）。安衛法第60条のように「政令で定めるもの」で参照切れに
  * なる条文はスコアだけでは十分に引けないため、施行令・規則とセットで返す。
  */
-type PinnedTopic = {
+export type PinnedTopic = {
   /** このトピックに該当させるキーワード（いずれか1つが query に含まれれば適用） */
   triggers: string[];
   /** 先頭に差し込む条文の { law, articleNum } ペア */
   pins: { law: string; articleNum: string }[];
 };
 
-const PINNED_TOPICS: PinnedTopic[] = [
+export const PINNED_TOPICS: PinnedTopic[] = [
   {
     // 職長教育：安衛法第60条＋施行令第19条（対象業種）をセットで返す
     triggers: ["職長教育", "職長", "第60条", "60条", "第六十条"],
@@ -104,9 +104,10 @@ const PINNED_TOPICS: PinnedTopic[] = [
   },
   {
     // 局所排気装置 / プッシュプル
+    // NOTE(Phase 1a): 旧 第16条 は corpus に未収録のため除外（PIN integrity test）。
+    // 第16条の2 (清掃) と 第28条 (測定) で代替し、本トピックの根拠条文は維持する。
     triggers: ["局所排気装置", "局排", "プッシュプル"],
     pins: [
-      { law: "有機溶剤中毒予防規則", articleNum: "第16条" },
       { law: "有機溶剤中毒予防規則", articleNum: "第16条の2" },
       { law: "有機溶剤中毒予防規則", articleNum: "第28条" },
     ],
@@ -226,9 +227,9 @@ const PINNED_TOPICS: PinnedTopic[] = [
   },
   {
     // 気積・採光・換気
+    // NOTE(Phase 1a): 第600条 は corpus に未収録のため除外（PIN integrity test）。
     triggers: ["気積", "採光", "換気", "事務所衛生基準"],
     pins: [
-      { law: "労働安全衛生規則", articleNum: "第600条" },
       { law: "労働安全衛生規則", articleNum: "第604条" },
       { law: "労働安全衛生規則", articleNum: "第607条" },
       { law: "労働安全衛生規則", articleNum: "第627条" },
@@ -250,17 +251,17 @@ const PINNED_TOPICS: PinnedTopic[] = [
   },
   {
     // 投下設備
+    // NOTE(Phase 1a): 第536条 は corpus に未収録のため除外（PIN integrity test）。
     triggers: ["投下設備", "投下", "監視人配置", "上下作業"],
     pins: [
-      { law: "労働安全衛生規則", articleNum: "第536条" },
       { law: "労働安全衛生規則", articleNum: "第519条" },
     ],
   },
   {
     // デリック設置届
+    // NOTE(Phase 1a): 第96条 は corpus に未収録のため除外（PIN integrity test）。
     triggers: ["デリック設置", "デリック設置届", "デリック"],
     pins: [
-      { law: "クレーン等安全規則", articleNum: "第96条" },
       { law: "クレーン等安全規則", articleNum: "第111条" },
     ],
   },
@@ -428,11 +429,11 @@ const PINNED_TOPICS: PinnedTopic[] = [
     pins: [{ law: "クレーン等安全規則", articleNum: "第70条の2" }],
   },
   {
-    // 移動式クレーン 過負荷の制限（クレーン則第69条 + 第23条）
+    // 移動式クレーン 過負荷の制限
+    // NOTE(Phase 1a): 第23条 は corpus に未収録のため除外（PIN integrity test）。
     triggers: ["定格荷重を超える", "定格荷重を超え", "過負荷の制限", "過負荷制限", "クレーンの過負荷", "移動式クレーンの定格荷重"],
     pins: [
       { law: "クレーン等安全規則", articleNum: "第69条" },
-      { law: "クレーン等安全規則", articleNum: "第23条" },
     ],
   },
   {
@@ -463,10 +464,10 @@ const PINNED_TOPICS: PinnedTopic[] = [
   },
   {
     // 局所排気装置 設置義務（有機則第5条が中核）
+    // NOTE(Phase 1a): 第16条 は corpus に未収録のため除外（PIN integrity test）。
     triggers: ["局所排気装置の設置", "局排の設置", "局所排気装置設置義務", "有機溶剤局所排気"],
     pins: [
       { law: "有機溶剤中毒予防規則", articleNum: "第5条" },
-      { law: "有機溶剤中毒予防規則", articleNum: "第16条" },
     ],
   },
   {
