@@ -18,6 +18,7 @@ import {
 import { RegulationTagsSection } from "@/components/regulation-tags-section";
 import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
 import { CONSTRUCTION_PRIORITY_CAS_SET } from "@/lib/regulation-tag-labels";
+import { OshaRegulationsSection } from "@/components/chemical/osha-regulations-section";
 
 type Params = Promise<{ cas: string }>;
 
@@ -94,6 +95,11 @@ export default async function ChemicalDetailPage({
         {entry.niteGhsClassifications && (
           <NiteGhsBlock classifications={entry.niteGhsClassifications} />
         )}
+
+        {/* P0-009 (usability-audit-day2): 安衛法 特別則 (特化則/有機則/酸欠則/
+            粉じん則/石綿則) を CAS から自動引き当てて表示。製造業/建設業の
+            最頻 22 物質に該当する場合のみセクション表示。 */}
+        <OshaRegulationsSection cas={cas} />
 
         <RegulationTagsSection entry={entry} variant="page" />
 
