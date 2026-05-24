@@ -273,7 +273,9 @@ export function DiaryFormRequired() {
 
       {/* 作業内容（音声入力対応） */}
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="flex items-start justify-between gap-2">
+        {/* P1-N: 音声入力ボタンを十分なタップ面積に拡大。flex-wrap で
+            375px でも縦に折り返してから縦書き圧縮を避ける。 */}
+        <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <p className="text-xs font-bold text-emerald-700">必須 3/5</p>
             <h3 className="mt-1 text-sm font-bold text-slate-900">作業内容（音声入力対応）</h3>
@@ -281,9 +283,10 @@ export function DiaryFormRequired() {
           <button
             type="button"
             onClick={() => handleVoiceInput(setWorkContent)}
-            className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            aria-label="作業内容を音声で入力"
+            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
           >
-            <Mic className="h-3.5 w-3.5" />
+            <Mic className="h-4 w-4" aria-hidden="true" />
             音声入力
           </button>
         </div>
@@ -314,25 +317,26 @@ export function DiaryFormRequired() {
 
       {/* KY結果 */}
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-        <div className="flex items-start justify-between gap-2">
+        {/* P1-N: ボタン群を flex-wrap でモバイル幅でも縦に折り返せるように */}
+        <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <p className="text-xs font-bold text-emerald-700">必須 4/5</p>
             <h3 className="mt-1 text-sm font-bold text-slate-900">KY結果</h3>
           </div>
-          <div className="flex gap-1">
+          <div className="flex flex-wrap gap-1.5">
             <button
               type="button"
               onClick={handleAiDraftKy}
               disabled={aiBusy}
-              className="inline-flex items-center gap-1 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-semibold text-violet-800 hover:bg-violet-100 disabled:opacity-50"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-violet-300 bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-800 hover:bg-violet-100 disabled:opacity-50"
               title="作業内容から危険・対策のたたき台を生成"
             >
-              <Sparkles className="h-3.5 w-3.5" />
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
               {aiBusy ? "生成中…" : "AIたたき台"}
             </button>
             <Link
               href="/ky"
-              className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
             >
               /ky で作成 →
             </Link>
@@ -341,7 +345,7 @@ export function DiaryFormRequired() {
         <textarea
           value={kyResult}
           onChange={(e) => setKyResult(e.target.value)}
-          placeholder="例: 高所作業時はフルハーネス着用徹底、墜落防止親綱を点検"
+          placeholder="例: ハーネス着用徹底・親綱点検"
           rows={4}
           autoComplete="off"
           className="mt-3 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"

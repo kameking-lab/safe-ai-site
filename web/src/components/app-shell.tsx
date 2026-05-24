@@ -32,7 +32,6 @@ import {
   ListChecks,
   Sun,
   Moon,
-  BarChart3,
   Sparkles,
   HelpCircle,
 } from "lucide-react";

@@ -727,8 +727,26 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
         </Section>
 
         {/* ---------- Cross-links ------------------------------------- */}
+        {/* P1 関連動線強化: 業種別レポートの結末から、すぐに KY起票 / 日誌記録 へ
+            進めるよう CTA を強化。AIリスク予測・統計ダッシュボードと並列に配置。 */}
         <Section title="次のアクション" spacing="tight" className="mt-8 print:hidden">
-          <CardGrid cols={3} gap="md">
+          <CardGrid cols={2} gap="md">
+            <Link
+              href="/ky"
+              className="group rounded-lg border-2 border-emerald-300 bg-emerald-50 p-4 transition hover:border-emerald-500 hover:shadow-sm dark:border-emerald-700 dark:bg-emerald-950/40"
+            >
+              <p className="text-sm font-bold text-emerald-900 dark:text-emerald-100">📝 KY用紙を起票</p>
+              <p className="mt-1 text-xs text-emerald-800 dark:text-emerald-300">本レポートの事故パターンを朝礼の危険予知活動に展開。業種別プリセット入り。</p>
+            </Link>
+            <Link
+              href="/safety-diary/new"
+              className="group rounded-lg border-2 border-sky-300 bg-sky-50 p-4 transition hover:border-sky-500 hover:shadow-sm dark:border-sky-700 dark:bg-sky-950/40"
+            >
+              <p className="text-sm font-bold text-sky-900 dark:text-sky-100">📓 安全衛生日誌を記録</p>
+              <p className="mt-1 text-xs text-sky-800 dark:text-sky-300">本日の朝礼・KY結果・ヒヤリハットを記録。月次まとめで類似事故と連動。</p>
+            </Link>
+          </CardGrid>
+          <CardGrid cols={3} gap="md" className="mt-3">
             <Link
               href="/accidents-analytics"
               className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
@@ -737,18 +755,18 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
               <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">25軸の多角分析で本業種以外も横断比較。</p>
             </Link>
             <Link
-              href="/ky"
-              className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
-            >
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">📝 KY用紙を起票</p>
-              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">本レポートのパターンを朝礼の危険予知活動に展開。</p>
-            </Link>
-            <Link
               href="/risk-prediction"
               className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
             >
               <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">🤖 AIリスク予測</p>
               <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">業種・作業内容を入力して潜在リスクを推定。</p>
+            </Link>
+            <Link
+              href="/strategy/plan-generator"
+              className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            >
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">📋 年次計画ジェネレーター</p>
+              <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">本レポートの結果を年次安全衛生計画書に反映。</p>
             </Link>
           </CardGrid>
         </Section>
