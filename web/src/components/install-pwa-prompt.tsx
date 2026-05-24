@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { getUsageScore } from "@/lib/usage-tracker";
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -13,6 +14,11 @@ interface BeforeInstallPromptEvent extends Event {
 
 const STORAGE_KEY = "pwa-install-dismissed-at";
 const DISMISS_COOLDOWN_DAYS = 14;
+// P0-5: 初回訪問時に PWA インストール促しを出さない。
+// KY 1回 = 5pt, ai_chat 1回 = 3pt, page_view = 1pt。
+// 「KY/Chatbot/日誌を3回以上使った」をだいたい満たす閾値として 9 を採用
+// （例：KY 2回 + chat 0回 / chat 3回 / KY 1回 + chat 2回 ）。
+const MIN_ENGAGEMENT_SCORE = 9;
 
 function isDismissedRecently(): boolean {
   if (typeof window === "undefined") return false;
@@ -37,8 +43,13 @@ export function InstallPwaPrompt() {
 
     const handler = (event: Event) => {
       event.preventDefault();
-      setDeferred(event as BeforeInstallPromptEvent);
-      setVisible(true);
+      const installEvent = event as BeforeInstallPromptEvent;
+      setDeferred(installEvent);
+      // KY/Chat/日誌の利用が一定以上ある時だけバナー表示。
+      // それ未満では `deferred` だけ保持して、後で利用が進んだら表示できるようにする。
+      if (getUsageScore() >= MIN_ENGAGEMENT_SCORE) {
+        setVisible(true);
+      }
     };
 
     const installedHandler = () => {
@@ -46,13 +57,22 @@ export function InstallPwaPrompt() {
       setDeferred(null);
     };
 
+    // 既に beforeinstallprompt が発火済みでも、利用が進めば後から表示できるよう
+    // 1分ごとに再判定する。
+    const interval = window.setInterval(() => {
+      if (deferred && !visible && !isDismissedRecently() && getUsageScore() >= MIN_ENGAGEMENT_SCORE) {
+        setVisible(true);
+      }
+    }, 60_000);
+
     window.addEventListener("beforeinstallprompt", handler);
     window.addEventListener("appinstalled", installedHandler);
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
       window.removeEventListener("appinstalled", installedHandler);
+      window.clearInterval(interval);
     };
-  }, []);
+  }, [deferred, visible]);
 
   const dismiss = useCallback(() => {
     setVisible(false);
@@ -83,10 +103,12 @@ export function InstallPwaPrompt() {
   if (!visible || !deferred) return null;
 
   return (
+    // P0-5: モバイル底部ナビ (`MobileBottomNav`) と重ならないよう、
+    // CSS変数 --mobile-bottom-nav-h を使った安全余白を確保する（globals.css 側で定義）。
     <div
       role="dialog"
       aria-label="ホーム画面に追加"
-      className="fixed inset-x-3 bottom-3 z-40 mx-auto max-w-md rounded-2xl border border-emerald-200 bg-white p-4 shadow-xl dark:border-emerald-900 dark:bg-slate-900"
+      className="fixed inset-x-3 bottom-[calc(var(--mobile-bottom-nav-h,0px)+12px)] z-30 mx-auto max-w-md rounded-2xl border border-emerald-200 bg-white p-4 shadow-xl dark:border-emerald-900 dark:bg-slate-900"
     >
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xl text-white">

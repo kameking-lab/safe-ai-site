@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { KY_INDUSTRY_PRESETS, type KyIndustryPreset } from "@/data/mock/ky-industry-presets";
 
 const DISMISSED_KEY = "ky-wizard-dismissed";
@@ -11,12 +12,27 @@ type Props = {
   onApply: (preset: KyIndustryPreset, selectedWork: string) => void;
 };
 
+// 業種ページや事故事例から ?industry=/?preset=/?template=/?fromAccident= 付きで
+// 遷移してきた場合は、すでにテンプレが当たっているのでウィザードを出さない。
+const DEEP_LINK_PARAM_KEYS = [
+  "industry",
+  "preset",
+  "template",
+  "fromAccident",
+  "fromDiary",
+  "fromYesterday",
+  "import",
+] as const;
+
 export function KyInitialWizard({ onApply }: Props) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<WizardStep>("industry");
   const [selectedIndustry, setSelectedIndustry] = useState<KyIndustryPreset | null>(null);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
+    const hasDeepLink = DEEP_LINK_PARAM_KEYS.some((k) => searchParams?.get(k));
+    if (hasDeepLink) return;
     try {
       const dismissed = localStorage.getItem(DISMISSED_KEY);
       // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント直後の一度きりのlocalStorage hydration
@@ -25,7 +41,7 @@ export function KyInitialWizard({ onApply }: Props) {
       // localStorage unavailable: default to shown
       setOpen(true);
     }
-  }, []);
+  }, [searchParams]);
 
   const markDismissed = () => {
     try {

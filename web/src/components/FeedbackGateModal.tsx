@@ -66,10 +66,10 @@ export function FeedbackGateModal() {
               id="feedback-gate-title"
               className="text-lg font-bold text-slate-900 sm:text-xl"
             >
-              いつもご利用ありがとうございます
+              ご覧いただきありがとうございます
             </h2>
             <p className="mt-1 text-xs text-slate-600">
-              現場で役立つサービスにするため、ご協力をお願いします。
+              現場で役立つサービスにするため、ご協力をお願いします。後でも構いません。
             </p>
           </div>
           <button

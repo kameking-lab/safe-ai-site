@@ -7,6 +7,7 @@ import { KyIndustryPresetPicker } from "@/components/ky-industry-preset-picker";
 import { KyInitialWizard } from "@/components/ky-initial-wizard";
 import { KyExamplesPanel } from "@/components/ky-examples-panel";
 import { getPresetById, type KyIndustryPreset } from "@/data/mock/ky-industry-presets";
+import { mapIndustryParamToPresetId, describeTopic } from "@/lib/ky-deep-link";
 import type { KyExample, KyIndustryId } from "@/types/ky-example";
 import { getEntryById, loadEntries } from "@/lib/safety-diary/store";
 import { loadProfile } from "@/lib/company-profile";
@@ -346,10 +347,14 @@ export function KyPageContent() {
 
   // /ky?preset=<id> で来た場合にプリセットを自動適用する（脚立・業種リンクから）
   // /ky?fromAccident=<id>&template=<presetId>&q=<title> も同様にテンプレ適用
+  // /ky?industry=<id>&topic=<key> も同様（/industries/* からの遷移）
   const searchParams = useSearchParams();
   const [fromAccidentNotice, setFromAccidentNotice] = useState<string | null>(null);
   useEffect(() => {
-    const presetId = searchParams?.get("preset") ?? searchParams?.get("template");
+    const presetId =
+      searchParams?.get("preset") ??
+      searchParams?.get("template") ??
+      mapIndustryParamToPresetId(searchParams?.get("industry"));
     if (!presetId) return;
     const preset = getPresetById(presetId);
     if (preset) handlePresetApply(preset);
@@ -362,6 +367,22 @@ export function KyPageContent() {
     setFromAccidentNotice(
       q ? `事故事例「${q}」からKYを起票しています。テンプレを適用済み。` : "事故事例から起票しています。"
     );
+  }, [searchParams]);
+
+  // /ky?industry=<id>&topic=<key> でテンプレ適用済みの通知を出す
+  useEffect(() => {
+    const industry = searchParams?.get("industry");
+    if (!industry) return;
+    const presetId = mapIndustryParamToPresetId(industry);
+    const preset = presetId ? getPresetById(presetId) : undefined;
+    const topicLabel = describeTopic(searchParams?.get("topic"));
+    if (preset && topicLabel) {
+      setFromAccidentNotice(
+        `${preset.label}向けプリセットを適用しました（テーマ: ${topicLabel}）。作業内容欄を編集してください。`
+      );
+    } else if (preset) {
+      setFromAccidentNotice(`${preset.label}向けプリセットを適用しました。作業内容欄を編集してください。`);
+    }
   }, [searchParams]);
 
   // /ky?fromDiary=[id] で来た場合、日誌の workContent / kyResult を取り込む
@@ -421,17 +442,14 @@ export function KyPageContent() {
   // 自社プロファイルの業種でプリセット初期適用（クエリ指定がない場合のみ）
   useEffect(() => {
     if (searchParams?.get("preset")) return;
+    if (searchParams?.get("template")) return;
+    if (searchParams?.get("industry")) return;
     if (searchParams?.get("fromDiary")) return;
     if (searchParams?.get("fromYesterday")) return;
+    if (searchParams?.get("fromAccident")) return;
     const profile = loadProfile();
     if (!profile.wizardCompleted) return;
-    const industryToPreset: Record<string, string> = {
-      construction: "construction-scaffolding",
-      manufacturing: "manufacturing-press",
-      transport: "logistics-fork",
-      logistics: "logistics-fork",
-    };
-    const presetId = industryToPreset[profile.industry];
+    const presetId = mapIndustryParamToPresetId(profile.industry);
     if (!presetId) return;
     const preset = getPresetById(presetId);
     if (preset) handlePresetApply(preset);

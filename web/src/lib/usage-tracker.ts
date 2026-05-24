@@ -25,8 +25,12 @@ const SCORE_KEY = "anzen-usage-score-v1";
 const GATE_DISMISSED_KEY = "anzen-feedback-gate-dismissed-v1";
 const GATE_SNOOZED_UNTIL_KEY = "anzen-feedback-gate-snoozed-until-v1";
 const SUBMITTED_FLAG_KEY = "anzen-feedback-gate-submitted-v1";
+const PAGE_VIEW_COUNT_KEY = "anzen-page-view-count-v1";
 
 export const FEEDBACK_GATE_THRESHOLD = 20;
+// P0-4: 最低 3 回の閲覧があるまではモーダルを出さない。
+// score がスコア値で 20 を超えていても、PV 回数が 3 未満なら表示しない。
+export const FEEDBACK_GATE_MIN_PAGE_VIEWS = 3;
 const SNOOZE_DAYS_DEFAULT = 7;
 
 function safeGet(key: string): string | null {
@@ -60,7 +64,19 @@ export function trackUsage(event: UsageEvent): number {
   const current = getUsageScore();
   const next = current + EVENT_SCORES[event];
   safeSet(SCORE_KEY, String(next));
+  if (event === "page_view") {
+    const prev = getPageViewCount();
+    safeSet(PAGE_VIEW_COUNT_KEY, String(prev + 1));
+  }
   return next;
+}
+
+/** 累積ページビュー回数（PVスコアではなく純粋な訪問回数）を取得。 */
+export function getPageViewCount(): number {
+  const raw = safeGet(PAGE_VIEW_COUNT_KEY);
+  if (!raw) return 0;
+  const n = Number.parseInt(raw, 10);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
 }
 
 /** すでに投稿済みか（永続フラグ） */
@@ -98,6 +114,8 @@ export function shouldShowFeedbackGate(): boolean {
   if (hasSubmittedFeedback()) return false;
   if (safeGet(GATE_DISMISSED_KEY) === "1") return false;
   if (isSnoozed()) return false;
+  // 初回・2回目アクセスでは絶対に表示しない（P0-4）
+  if (getPageViewCount() < FEEDBACK_GATE_MIN_PAGE_VIEWS) return false;
   return getUsageScore() >= FEEDBACK_GATE_THRESHOLD;
 }
 
@@ -109,6 +127,7 @@ export function resetUsageTracker(): void {
     window.localStorage.removeItem(GATE_DISMISSED_KEY);
     window.localStorage.removeItem(GATE_SNOOZED_UNTIL_KEY);
     window.localStorage.removeItem(SUBMITTED_FLAG_KEY);
+    window.localStorage.removeItem(PAGE_VIEW_COUNT_KEY);
   } catch {
     /* noop */
   }

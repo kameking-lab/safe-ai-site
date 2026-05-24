@@ -120,7 +120,12 @@ body {
  * MobileBottomNav: 480px 以下で表示。
  * デフォルトは hidden、対象ビューポートでのみ flex 表示にする。
  * 印刷時は確実に非表示。
+ * P0-5: PWA インストール促しなどの fixed バナーが重ならないよう、
+ *       表示時のみ --mobile-bottom-nav-h を 56px に設定（safe-area分は別途加算）。
  */
+:root {
+  --mobile-bottom-nav-h: 0px;
+}
 .mobile-bottom-nav {
   display: none;
   padding-bottom: env(safe-area-inset-bottom, 0px);
@@ -128,6 +133,9 @@ body {
 @media (max-width: 480px) {
   .mobile-bottom-nav {
     display: block;
+  }
+  :root {
+    --mobile-bottom-nav-h: 56px;
   }
 }
 @media print {
