@@ -61,13 +61,6 @@ export default function ELearningPage() {
         heading="合わせて使う"
         pages={[
           {
-            href: "/exam-quiz",
-            label: "演習問題クイズ",
-            description: "学んだ知識を実際の試験問題で確認。安全コンサルタント・衛生管理者等の演習問題に挑戦できます。",
-            color: "amber",
-            cta: "演習問題に挑戦する",
-          },
-          {
             href: "/accidents",
             label: "事故データベース",
             description: "学習内容と関連する実際の事故事例を検索。リアルな現場のリスクを確認できます。",

@@ -7,7 +7,6 @@ import {
   X,
   FileText,
   TestTube2,
-  HelpCircle,
   BookOpen,
   AlertTriangle,
   ArrowRight,
@@ -25,7 +24,7 @@ import {
 } from '@/lib/search-index';
 import { trackEvent } from '@/components/Analytics';
 
-const CATEGORIES: SearchCategory[] = ['notice', 'chemical', 'quiz', 'education', 'accident'];
+const CATEGORIES: SearchCategory[] = ['notice', 'chemical', 'education', 'accident'];
 
 // 空クエリ時に表示する主要ショートカット（UX-007: モバイル検索とPC Ctrl+K の機能を統一）
 type Shortcut = {
@@ -48,7 +47,6 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
   switch (category) {
     case 'notice':    return <FileText className={cls} />;
     case 'chemical':  return <TestTube2 className={cls} />;
-    case 'quiz':      return <HelpCircle className={cls} />;
     case 'education': return <BookOpen className={cls} />;
     case 'accident':  return <AlertTriangle className={cls} />;
   }

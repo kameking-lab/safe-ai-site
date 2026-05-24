@@ -1,6 +1,6 @@
 import { normalizeSearchText } from './fuzzy-search';
 
-export type SearchCategory = 'notice' | 'chemical' | 'quiz' | 'education' | 'accident';
+export type SearchCategory = 'notice' | 'chemical' | 'education' | 'accident';
 
 export interface SearchItem {
   id: string;
@@ -16,7 +16,6 @@ export const CATEGORY_META: Record<
 > = {
   notice:    { label: '通達',    bgColor: 'bg-blue-100',   textColor: 'text-blue-700' },
   chemical:  { label: '化学物質', bgColor: 'bg-orange-100', textColor: 'text-orange-700' },
-  quiz:      { label: '問題',    bgColor: 'bg-purple-100', textColor: 'text-purple-700' },
   education: { label: '教育',    bgColor: 'bg-green-100',  textColor: 'text-green-700' },
   accident:  { label: '事故',    bgColor: 'bg-red-100',    textColor: 'text-red-700' },
 };
@@ -65,21 +64,6 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
   const items: SearchItem[] = [];
 
   await Promise.allSettled([
-    // 1,000 quiz questions across 10 certifications
-    import('@/data/mock/quiz/cert-quiz').then(({ CERT_QUIZZES }) => {
-      for (const quiz of CERT_QUIZZES) {
-        for (const q of quiz.questions) {
-          items.push({
-            id: `quiz-${q.id}`,
-            title: q.q.length > 80 ? q.q.slice(0, 80) + '…' : q.q,
-            subtitle: `${quiz.shortName} / ${q.topic}`,
-            category: 'quiz',
-            url: `/exam-quiz?cert=${quiz.id}`,
-          });
-        }
-      }
-    }),
-
     // Accident cases (multiple files)
     Promise.all([
       import('@/data/mock/real-accident-cases'),

@@ -29,7 +29,6 @@ export function buildMockPageAnalyticsResponse(
     { url: "/elearning", title: "Eラーニング", pv: 240 * k, avgSec: 412, engagementRate: 0.71, bounceRate: 0.29 },
     { url: "/safety-diary", title: "安全衛生日誌", pv: 180 * k, avgSec: 156, engagementRate: 0.52, bounceRate: 0.48 },
     { url: "/chemical-database", title: "化学物質DB", pv: 140 * k, avgSec: 142, engagementRate: 0.49, bounceRate: 0.51 },
-    { url: "/exam-quiz", title: "国家試験問題", pv: 120 * k, avgSec: 318, engagementRate: 0.66, bounceRate: 0.34 },
   ];
 
   const engagement: EngagementMetrics = {
