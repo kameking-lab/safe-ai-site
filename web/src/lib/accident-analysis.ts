@@ -551,6 +551,46 @@ export function getTopCases(slug: IndustrySlug, limit = 5): AccidentCase[] {
     .slice(0, limit);
 }
 
+/**
+ * Recency-filtered curated cases — supports the
+ * "直近7日 / 直近30日 / 全期間" tab UI on the industry detail page.
+ *
+ * referenceDate を渡せばテストで決定性を保てる (default: today). 比較は
+ * occurredOn の年月日のみ・タイムゾーン中立 (occurredKey と同じ計算式)。
+ */
+export function getRecentCases(
+  slug: IndustrySlug,
+  withinDays: number,
+  limit = 5,
+  referenceDate: Date = new Date(),
+): AccidentCase[] {
+  const refKey =
+    referenceDate.getFullYear() * 10000 +
+    (referenceDate.getMonth() + 1) * 100 +
+    referenceDate.getDate();
+  // withinDays を YYYYMMDD 整数空間で扱うのは月またぎで誤差が出るため、
+  // millisecond で計算してから YYYYMMDD に戻す。
+  const cutoffMs =
+    Date.UTC(
+      referenceDate.getFullYear(),
+      referenceDate.getMonth(),
+      referenceDate.getDate(),
+    ) -
+    withinDays * 24 * 60 * 60 * 1000;
+  const cutoff = new Date(cutoffMs);
+  const cutoffKey =
+    cutoff.getUTCFullYear() * 10000 +
+    (cutoff.getUTCMonth() + 1) * 100 +
+    cutoff.getUTCDate();
+  return [...getSlice(slug).curated]
+    .filter((c) => {
+      const k = occurredKey(c.occurredOn);
+      return k > 0 && k >= cutoffKey && k <= refKey;
+    })
+    .sort((a, b) => occurredKey(b.occurredOn) - occurredKey(a.occurredOn))
+    .slice(0, limit);
+}
+
 /* ------------------------------------------------------------------ */
 /* All-industries summary (used by hub page)                           */
 /* ------------------------------------------------------------------ */
@@ -965,6 +1005,12 @@ export type IndustryReport = {
   yoy: YoYDelta | null;
   patterns: CommonPattern[];
   topCases: AccidentCase[];
+  /**
+   * P0-005 (usability-audit-2026-05-24): 直近7日 / 直近30日 タブ用。
+   * curated 事例の occurredOn を referenceDate (default: today) と
+   * 比較してフィルタ。データが該当期間に無ければ空配列。
+   */
+  recentCases: { d7: AccidentCase[]; d30: AccidentCase[] };
   /** Phase A additions */
   timeBands: TimeBandCount[];
   workplaceSizes: SizeTierCount[];
@@ -990,6 +1036,10 @@ export function getIndustryReport(slug: IndustrySlug): IndustryReport | null {
     yoy: getYoYDelta(slug),
     patterns: getCommonPatterns(slug, 8),
     topCases: getTopCases(slug, 5),
+    recentCases: {
+      d7: getRecentCases(slug, 7, 5),
+      d30: getRecentCases(slug, 30, 5),
+    },
     timeBands: getTimeBandDistribution(slug),
     workplaceSizes: getWorkplaceSizeDistribution(slug),
     severityRatio: getSeverityRatio(slug),
