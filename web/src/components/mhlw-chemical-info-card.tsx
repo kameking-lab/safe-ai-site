@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, BookOpen, Database, ExternalLink, Gauge } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, BookOpen, Database, ExternalLink, Gauge, ArrowRight } from "lucide-react";
 import {
   regulatoryLabels,
   relatedLawTexts,
@@ -11,6 +12,9 @@ import {
   type MergedChemical,
   type ConcentrationLimitEntry,
 } from "@/lib/mhlw-chemicals";
+import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
+import { RegulationTagsSection } from "@/components/regulation-tags-section";
+import { normalizeTags } from "@/lib/regulation-tag-labels";
 
 /**
  * 厚労省由来の物質詳細カード。
@@ -50,7 +54,26 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
         {chemical.aliases.slice(0, 3).map((a) => (
           <span key={a} className="text-slate-500">別名: {a}</span>
         ))}
+        {chemical.cas && (
+          <Link
+            href={`/chemical-database/${encodeURIComponent(chemical.cas)}`}
+            className="ml-auto inline-flex items-center gap-0.5 text-emerald-700 hover:text-emerald-900 underline"
+          >
+            DB詳細
+            <ArrowRight className="h-3 w-3" aria-hidden="true" />
+          </Link>
+        )}
       </div>
+      {/* Phase 1e: 規制タグバッジ (一覧での視認性) */}
+      {(() => {
+        const tags = normalizeTags(chemical.details?.limits?.regulationTags);
+        if (tags.length === 0) return null;
+        return (
+          <div className="mt-2">
+            <RegulationTagBadgeList tags={tags} maxVisible={6} size="xs" />
+          </div>
+        );
+      })()}
 
       <dl className="mt-4 grid gap-3 text-xs sm:grid-cols-2">
         <div className="rounded-lg bg-white p-3">
@@ -135,7 +158,7 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
 
       {laws.length > 0 && (
         <div className="mt-3 rounded-lg bg-white p-3">
-          <p className="text-xs font-semibold text-slate-600">関連法令</p>
+          <p className="text-xs font-semibold text-slate-600">関連法令 (安衛法系)</p>
           <ul className="mt-1 space-y-0.5 text-xs text-slate-700">
             {laws.map((l) => (
               <li key={l} className="flex items-start gap-1">
@@ -144,6 +167,13 @@ export function MhlwChemicalInfoCard({ chemical }: { chemical: MergedChemical })
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {/* Phase 1e: 規制タグから自動生成する関連法令 (PRTR/化審法/毒劇法/CWC/廃掃法) */}
+      {chemical.details?.limits && (
+        <div className="mt-3">
+          <RegulationTagsSection entry={chemical.details.limits} variant="card" />
         </div>
       )}
 
