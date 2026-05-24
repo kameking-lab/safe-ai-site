@@ -39,7 +39,7 @@ const QUICK_SHORTCUTS: Shortcut[] = [
   { id: 'law-search', label: '法令条文検索', description: '安衛法・関連政令・省令の条文を全文検索', url: '/law-search', icon: Scale },
   { id: 'chatbot', label: '法令チャット (AI)', description: 'AI が条文・通達を引用しながら回答', url: '/chatbot', icon: MessageSquare },
   { id: 'accidents-reports', label: '業種別 事故分析レポート', description: '業種別の死亡事故統計・原因分析', url: '/accidents-reports', icon: BarChart3 },
-  { id: 'plan-generator', label: '年次安全衛生計画', description: '10業種テンプレートから年次計画 PDF を生成', url: '/strategy/plan-generator', icon: ListChecks },
+  { id: 'plan-generator', label: '年次安全衛生計画', description: '13業種テンプレートから年次計画 PDF を生成', url: '/strategy/plan-generator', icon: ListChecks },
 ];
 
 function CategoryIcon({ category }: { category: SearchCategory }) {

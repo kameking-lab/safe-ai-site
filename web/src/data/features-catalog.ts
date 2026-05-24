@@ -261,9 +261,9 @@ export const FEATURES: FeatureItem[] = [
   {
     slug: "plan-generator",
     title: "年次安全衛生計画ジェネレーター",
-    summary: "業種・規模別の30テンプレートから年次計画を生成",
+    summary: "業種・規模別の39テンプレートから年次計画を生成",
     description:
-      "業種10種×規模3段階の30テンプレートから、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む年次安全衛生計画書の雛形を生成。PDF出力可。",
+      "業種13種×規模3段階の39テンプレートから、基本方針・重点目標・実施事項・月別スケジュール・関連法令を含む年次安全衛生計画書の雛形を生成。PDF出力可。",
     href: "/strategy/plan-generator",
     category: "management",
     tags: ["年次計画", "コンプラ"],

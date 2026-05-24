@@ -86,7 +86,7 @@ function buildPracticeTools(industry?: IndustrySlug, exclude?: CrossToolId): Rel
         label: "年次安全衛生計画",
         description: lbl
           ? `${lbl}向けテンプレートから基本方針・重点目標・月別スケジュールを含む計画書を自動生成。`
-          : "業種・規模別30テンプレートから年次安全衛生計画書を自動生成。PDF出力対応。",
+          : "業種・規模別39テンプレートから年次安全衛生計画書を自動生成。PDF出力対応。",
         color: "purple",
         cta: lbl ? `${lbl}の年次計画を作る` : "計画書を生成する",
       },

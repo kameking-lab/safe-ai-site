@@ -5,7 +5,6 @@ import {
   ShieldCheck,
   BookOpen,
   TrendingUp,
-  Calendar,
   Clock,
   Building2,
   Gauge,
@@ -22,12 +21,12 @@ import type {
   NameCount,
   YearCount,
 } from "@/lib/accident-analysis";
-import type { AccidentCase } from "@/lib/types/domain";
 import type { IndustrySlug } from "@/lib/industry-slugs";
 import { MonthlyTrendChart } from "./monthly-trend-chart";
 import { PreventionChecklist } from "./prevention-checklist";
 import { ReportPrintButton } from "./report-print-button";
 import { ReportPrintMeta, ReportPrintFooter } from "./report-print-meta";
+import { TopCasesTabs } from "./top-cases-tabs";
 
 const COLOR_SWATCH: Record<string, { bar: string; chip: string; ring: string; text: string }> = {
   amber: { bar: "bg-amber-500", chip: "bg-amber-50 text-amber-900 border-amber-200", ring: "ring-amber-200", text: "text-amber-900" },
@@ -203,48 +202,10 @@ function YearTrendChart({ data, color }: { data: YearCount[]; color: string }) {
   );
 }
 
-const SEVERITY_TONE: Record<AccidentCase["severity"], string> = {
-  軽傷: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  中等傷: "bg-amber-100 text-amber-800 border-amber-200",
-  重傷: "bg-orange-100 text-orange-900 border-orange-300",
-  死亡: "bg-rose-100 text-rose-900 border-rose-300",
-};
-
-function TopCaseCard({ accident }: { accident: AccidentCase }) {
-  return (
-    <article className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
-      <Cluster gap="xs" className="text-xs">
-        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 ${SEVERITY_TONE[accident.severity]}`}>
-          {accident.severity}
-        </span>
-        <span className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400">
-          <Calendar className="h-3 w-3" aria-hidden="true" />
-          {accident.occurredOn || "日付不明"}
-        </span>
-        <span className="text-slate-500 dark:text-slate-400">・{accident.type}</span>
-      </Cluster>
-      <h3 className="mt-2 text-base font-bold text-slate-900 dark:text-slate-100">
-        <Link
-          href={`/accidents/${accident.id}`}
-          className="hover:text-emerald-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
-        >
-          {accident.title}
-        </Link>
-      </h3>
-      <p className="mt-1.5 text-sm leading-relaxed text-slate-700 dark:text-slate-300">{accident.summary}</p>
-      {accident.mainCauses.length > 0 && (
-        <div className="mt-3">
-          <p className="text-xs font-semibold text-slate-600 dark:text-slate-400">主な原因</p>
-          <ul className="mt-1 ml-4 list-disc text-xs leading-relaxed text-slate-700 dark:text-slate-300">
-            {accident.mainCauses.slice(0, 3).map((c, i) => (
-              <li key={i}>{c}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </article>
-  );
-}
+/* TopCaseCard / SEVERITY_TONE は P0-005 で
+   web/src/components/accidents-reports/top-cases-tabs.tsx に移管。
+   重大事故 Top セクションは TopCasesTabs (Client Component) を経由して
+   「直近7日 / 直近30日 / 全期間」タブを切替できる。 */
 
 /* ---------- Main view --------------------------------------------- */
 
@@ -260,6 +221,7 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
     yoy,
     patterns,
     topCases,
+    recentCases,
     timeBands,
     workplaceSizes,
     severityRatio,
@@ -408,25 +370,17 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
           </Section>
         )}
 
-        {/* ---------- Top cases --------------------------------------- */}
+        {/* ---------- Top cases (with 7d / 30d / all tabs) ------------ */}
+        {/* P0-005 (usability-audit-2026-05-24): 監査シナリオ7「直近1週間の
+            建設業労災」は元実装で不可能だった。TopCasesTabs に置き換え、
+            curated データを 7日/30日/全期間 で切り替えられるようにした。 */}
         {topCases.length > 0 && (
-          <Section
-            title={
-              <Cluster gap="xs">
-                <AlertTriangle className={`h-4 w-4 ${sw.text}`} aria-hidden="true" />
-                <span>重大事故 Top {topCases.length}</span>
-              </Cluster>
-            }
-            description="重傷・死亡を中心に curated 事例から代表的なケースを抽出。詳細ページで再発防止策・関連法令を確認できます。"
-            spacing="default"
-            className="mt-8"
-          >
-            <CardGrid cols={2} gap="md">
-              {topCases.map((c) => (
-                <TopCaseCard key={c.id} accident={c} />
-              ))}
-            </CardGrid>
-          </Section>
+          <TopCasesTabs
+            textColorClass={sw.text}
+            allTimeCases={topCases}
+            recent30Cases={recentCases.d30}
+            recent7Cases={recentCases.d7}
+          />
         )}
 
         {/* ---------- Top accident types ------------------------------ */}

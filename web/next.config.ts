@@ -114,6 +114,10 @@ const nextConfig: NextConfig = {
       // /safety-diary/[id] と /safety-diary/[id]/print は component-level permanentRedirect で対応
       { source: "/safety-diary/new/detail", destination: "/safety-diary", permanent: true },
       { source: "/safety-diary/monthly/:ym", destination: "/safety-diary", permanent: true },
+      // P0-008 (usability-audit-2026-05-24): /qa-knowledge を /faq に統合。
+      // 投稿募集ランディング(119行・実投稿0件・コンサル監修コメント無し)を削除し、
+      // 同一意図(=Q&Aで疑問解決)を満たす /faq 200問 (法令タグ付き) へ恒久転送。
+      { source: "/qa-knowledge", destination: "/faq", permanent: true },
     ];
   },
   // セキュリティ・キャッシュヘッダー
