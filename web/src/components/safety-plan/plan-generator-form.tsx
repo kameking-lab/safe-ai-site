@@ -17,6 +17,8 @@ import {
 import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
 import type { IndustrySlug } from "@/lib/industry-slugs";
 import { detectFocusAreas } from "@/lib/copilot/keyword-routing";
+import { PlanHistoryPicker } from "@/components/safety-plan/plan-history-picker";
+import { loadLatestPlan } from "@/lib/safety-plan/history";
 
 // Canonical accidents-reports IndustrySlug → plan-generator IndustryId
 const SLUG_TO_INDUSTRY: Record<IndustrySlug, IndustryId> = {
@@ -214,6 +216,13 @@ export function PlanGeneratorForm() {
       onSubmit={handleSubmit}
       className="space-y-6 rounded-lg border border-slate-200 bg-white p-6 shadow-sm"
     >
+      {/* P0-006 (usability-audit-day2): 過去計画ピッカー (最大3件)。
+          履歴ゼロ時は何も表示しないので初回ユーザーは邪魔されない。 */}
+      <PlanHistoryPicker variant="compact" />
+
+      {/* P0-006: 「昨年の計画から作成」ショートカット。最新履歴の preview に飛ぶ。 */}
+      <RebuildFromLastButton />
+
       {prefillMessage && (
         <div
           role="status"
@@ -440,5 +449,42 @@ export function PlanGeneratorForm() {
         </button>
       </div>
     </form>
+  );
+}
+
+/**
+ * P0-006 (usability-audit-day2): 「昨年の計画から作成」ボタン。
+ * 直近1件が localStorage にあれば、その preview URL に1クリックで遷移する。
+ * 履歴ゼロ時は非表示。
+ */
+function RebuildFromLastButton() {
+  const [latestHref, setLatestHref] = useState<string | null>(null);
+  const [latestLabel, setLatestLabel] = useState<string>("");
+
+  useEffect(() => {
+    const latest = loadLatestPlan();
+    if (!latest) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage は外部システム、初回マウントでの hydration として setState は正当
+    setLatestHref(latest.previewHref);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLatestLabel(
+      `${latest.fiscalYear}年度 ${latest.industryLabel} / ${latest.scaleLabel}${latest.organizationName ? ` ・ ${latest.organizationName}` : ""}`,
+    );
+  }, []);
+
+  if (!latestHref) return null;
+
+  return (
+    <a
+      href={latestHref}
+      className="flex items-center justify-between gap-3 rounded-lg border border-violet-300 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-900 hover:bg-violet-100"
+    >
+      <span>
+        🕒 直近の計画を開く: <span className="font-bold">{latestLabel}</span>
+      </span>
+      <span className="rounded-full bg-violet-200 px-2 py-0.5 text-[10px] font-bold text-violet-900">
+        昨年から作成
+      </span>
+    </a>
   );
 }
