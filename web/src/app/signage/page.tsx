@@ -522,7 +522,9 @@ export default function SignagePage() {
                 一覧ページへ
               </Link>
             </div>
-            {state.lawStatus === "loading" && (
+            {/* P1-K: lawStatus が "idle" のままだとセクションが空のままだったので、
+                loading と同じスケルトンを出して空状態の露出を防ぐ。 */}
+            {(state.lawStatus === "loading" || state.lawStatus === "idle") && (
               <div className="mt-2 space-y-2">
                 <div className="h-5 w-full animate-pulse rounded bg-slate-700/80" />
                 <div className="h-16 w-full animate-pulse rounded bg-slate-700/60" />

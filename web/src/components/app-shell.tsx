@@ -152,7 +152,8 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "プロジェクト",
     items: [
       { id: "about", label: "研究プロジェクトについて", href: "/about", icon: Info },
-      { id: "stats", label: "利用統計", href: "/stats", icon: BarChart3 },
+      // P1-J: /stats はサンプル表示が露出するため一般ナビから除外。
+      // 必要な人は /accidents-analytics などから到達できる。
       { id: "contact", label: "ご意見・改善提案", href: "/contact", icon: Mail },
     ],
   },

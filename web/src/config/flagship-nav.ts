@@ -129,7 +129,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
       { label: "業種別 安全管理ポータル", href: "/industries", description: "10業種の重点課題・関連法令・通達・推奨機能への動線をワンページに集約" },
       { label: "業種別 事故分析レポート", href: "/accidents-reports", description: "5業種の事故型・原因・対策・関連法令を自動集計" },
       { label: "事故統計ダッシュボード", href: "/accidents-analytics" },
-      { label: "労災死傷統計", href: "/stats" },
+      // P1-J: /stats はサンプル表示が露出するため主要機能ナビから除外
       { label: "リスク予測", href: "/risk-prediction" },
     ],
   },

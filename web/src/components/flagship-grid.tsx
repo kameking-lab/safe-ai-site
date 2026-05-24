@@ -5,6 +5,34 @@ import { ArrowRight } from "lucide-react";
 import { FLAGSHIP_FEATURES } from "@/config/flagship-nav";
 import { useLanguage } from "@/contexts/language-context";
 
+// P1-L: 「開く →」「配下機能 N件」の抽象ラベルを具体動詞へ。
+// 機能ごとに「何ができるか」が一瞬で分かる動詞ラベルを定義する。
+const FEATURE_CTA_JA: Record<string, string> = {
+  "safety-diary": "日誌を記録する",
+  ky: "KY用紙を作る",
+  "chemical-ra": "化学物質RAを開始",
+  signage: "サイネージを開く",
+  laws: "法改正を確認",
+  chatbot: "AIに質問する",
+  accidents: "事故事例を検索",
+  "education-certification": "必要資格を判定",
+  industries: "業種から探す",
+  "work-environment": "管理区分を判定",
+};
+
+const FEATURE_CTA_EN: Record<string, string> = {
+  "safety-diary": "Log diary",
+  ky: "Create KY sheet",
+  "chemical-ra": "Start RA",
+  signage: "Open signage",
+  laws: "View updates",
+  chatbot: "Ask the AI",
+  accidents: "Search incidents",
+  "education-certification": "Find required licenses",
+  industries: "Browse by sector",
+  "work-environment": "Classify environment",
+};
+
 const EN_FEATURE_COPY: Record<string, { title: string; description: string }> = {
   "safety-diary": {
     title: "Safety & Health Diary",
@@ -107,14 +135,17 @@ export function FlagshipGrid() {
                   <p className="mt-2 flex-1 text-xs leading-relaxed text-slate-600 sm:text-sm">
                     {description}
                   </p>
+                  {/* P1-L: 抽象的な「開く →」「配下機能 N件」を具体動詞へ。
+                      機能ごとに動詞ラベルを定義（FEATURE_CTA_*）。 */}
                   <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500">
                     <span>
                       {isEn
-                        ? `${f.subItems.length} sub-features`
-                        : `配下機能 ${f.subItems.length} 件`}
+                        ? `+${f.subItems.length} related`
+                        : `関連機能 ${f.subItems.length} つ`}
                     </span>
                     <span className="inline-flex items-center gap-0.5 font-semibold text-emerald-700 group-hover:gap-1.5">
-                      {isEn ? "Open" : "開く"} <ArrowRight className="h-3 w-3" />
+                      {isEn ? FEATURE_CTA_EN[f.id] ?? "Open" : FEATURE_CTA_JA[f.id] ?? "開く"}
+                      <ArrowRight className="h-3 w-3" />
                     </span>
                   </div>
                 </Link>
