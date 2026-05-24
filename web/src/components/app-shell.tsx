@@ -255,7 +255,10 @@ export function AppShell({ children, user }: AppShellProps) {
   };
 
   // モバイル初回訪問時のアクセシビリティ機能案内バナー
+  // P0-2: 初期は畳んだチップだけを表示し、ファーストビュー占有を縮小する。
+  // タップで詳細を展開、再タップで畳む。「閉じる」を押すと localStorage で永久非表示。
   const [a11yHintVisible, setA11yHintVisible] = useState<boolean>(false);
+  const [a11yHintExpanded, setA11yHintExpanded] = useState<boolean>(false);
 
   useEffect(() => {
     try {
@@ -273,6 +276,10 @@ export function AppShell({ children, user }: AppShellProps) {
     } catch {
       // localStorage利用不可の場合は無視
     }
+  };
+
+  const toggleA11yHintExpanded = () => {
+    setA11yHintExpanded((prev) => !prev);
   };
 
   const linkClass = (item: NavItem) => {
@@ -494,26 +501,51 @@ export function AppShell({ children, user }: AppShellProps) {
           </div>
         </div>
 
-        {/* モバイル初回訪問者向けアクセシビリティ案内バナー（UX-021） */}
+        {/* モバイル初回訪問者向けアクセシビリティ案内バナー（UX-021 / P0-2） */}
+        {/* 既定は畳んだチップ表示。タップで本文を展開。「閉じる」で localStorage に既読フラグを保存し以降非表示。 */}
         {a11yHintVisible && (
           <div
             role="region"
             aria-label="アクセシビリティ機能の案内"
-            className="flex items-start gap-2 border-b border-emerald-200 bg-emerald-50/80 px-3 py-2 text-[11px] leading-5 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200 lg:hidden"
+            className="border-b border-emerald-200 bg-emerald-50/80 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200 lg:hidden"
           >
-            <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-            <p className="flex-1">
-              「ふりがな」「やさしい日本語」「文字大」「屋外（ハイコントラスト）」の表示モードがあります。
-              ヘッダー上部または右上メニュー内で切替できます。
-            </p>
-            <button
-              type="button"
-              onClick={dismissA11yHint}
-              className="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
-              aria-label="案内バナーを閉じる"
-            >
-              閉じる
-            </button>
+            <div className="flex items-center gap-2 px-3 py-1.5">
+              <button
+                type="button"
+                onClick={toggleA11yHintExpanded}
+                aria-expanded={a11yHintExpanded}
+                aria-controls="a11y-hint-body"
+                className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-emerald-800 shadow-sm hover:bg-emerald-100 dark:bg-slate-800 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+              >
+                <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>表示モード</span>
+                <span aria-hidden="true" className="text-emerald-600 dark:text-emerald-300">
+                  {a11yHintExpanded ? "▲" : "▼"}
+                </span>
+              </button>
+              <span className="text-[11px] text-emerald-700 dark:text-emerald-300">
+                ふりがな・やさしい日本語・文字大・屋外
+              </span>
+              <button
+                type="button"
+                onClick={dismissA11yHint}
+                className="ml-auto shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-100 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
+                aria-label="案内バナーを閉じる"
+              >
+                ×
+              </button>
+            </div>
+            {a11yHintExpanded && (
+              <div
+                id="a11y-hint-body"
+                className="flex items-start gap-2 px-3 pb-2 text-[11px] leading-5"
+              >
+                <p className="flex-1">
+                  「ふりがな」「やさしい日本語」「文字大」「屋外（ハイコントラスト）」の表示モードがあります。
+                  ヘッダー上部または右上メニュー内で切替できます。
+                </p>
+              </div>
+            )}
           </div>
         )}
 
