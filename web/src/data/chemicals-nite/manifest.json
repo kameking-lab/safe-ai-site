@@ -1,0 +1,24 @@
+{
+  "generatedAt": "2026-05-24T05:00:13.669914+00:00",
+  "source": {
+    "officialUrl": "https://www.chem-info.nite.go.jp/chem/ghs/files/list_nite_all.xlsx",
+    "mirrorUrl": "https://github.com/Ameyanagi/risk_assessment_list/raw/main/reference/list_nite_all.xlsx",
+    "sha256": "d4927fd01a269bb4f69a6d0275a059b45dbcd5f9c7c9ceafa83ce71dba677da8",
+    "fileSize": 860647,
+    "sheetName": "NITE統合版GHS分類結果"
+  },
+  "license": "政府データ(独立行政法人 製品評価技術基盤機構 NITE)、出典明記のうえ自由利用可",
+  "totalSubstances": 3388,
+  "skippedRows": 29,
+  "withAnyClassifiedHazard": 3345,
+  "shorthandCodes": {
+    "1A/1B/1C/1/2/2A/2B/3/4/5": "GHS 区分N (実害指摘あり)",
+    "L": "液化ガス",
+    "P": "圧縮ガス",
+    "D": "深冷液化ガス",
+    "S": "溶解ガス",
+    "N": "区分に該当しない（分類対象外）",
+    "X": "区分外",
+    "U": "分類できない"
+  }
+}
