@@ -200,6 +200,24 @@ export default async function IndustryLandingPage({ params }: { params: Params }
           ]}
         />
 
+        {/* 建設業ランディングへの誘導 (Phase 5) */}
+        {industry === "construction" && (
+          <Link
+            href="/for/construction"
+            className="mt-3 flex items-center justify-between gap-3 rounded-lg border-2 border-emerald-300 bg-emerald-50 px-4 py-3 hover:bg-emerald-100"
+          >
+            <div>
+              <p className="text-sm font-bold text-emerald-900">
+                実務でこの内容を使う方は → 建設業 実務ポータル
+              </p>
+              <p className="mt-0.5 text-xs text-emerald-800">
+                職長・元請担当・現場代理人 向けの即実行エントリ。KY・朝礼・年次計画を 1〜2 タップで起動。
+              </p>
+            </div>
+            <span className="text-emerald-700 font-bold">→</span>
+          </Link>
+        )}
+
         {/* Hero */}
         <header
           className={`rounded-xl border border-slate-200 bg-gradient-to-br p-5 sm:p-6 dark:border-slate-800 ${swatch.hero}`}

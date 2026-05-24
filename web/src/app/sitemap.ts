@@ -32,6 +32,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/accidents-reports/compare?industries=healthcare,service", lastModified: "2026-05-17", priority: 0.65, changeFrequency: "weekly" },
     { url: "/accidents-reports/compare?industries=construction,healthcare,manufacturing,service,transport", lastModified: "2026-05-17", priority: 0.65, changeFrequency: "weekly" },
     { url: "/industries", lastModified: "2026-05-17", priority: 0.85, changeFrequency: "monthly" },
+    { url: "/for/construction", lastModified: "2026-05-24", priority: 0.9, changeFrequency: "weekly" },
     { url: "/industries/construction", lastModified: "2026-05-17", priority: 0.8, changeFrequency: "monthly" },
     { url: "/industries/manufacturing", lastModified: "2026-05-17", priority: 0.8, changeFrequency: "monthly" },
     { url: "/industries/transport", lastModified: "2026-05-17", priority: 0.8, changeFrequency: "monthly" },

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { IndustryReportView } from "@/components/accidents-reports/industry-report-view";
 import { CrossToolLinks } from "@/components/cross-tool-links";
@@ -158,6 +159,25 @@ export default async function IndustryReportPage({ params }: { params: Params })
         exclude="accidents-reports"
         heading="同業種の関連ツール"
       />
+      {/* 建設業のみ: 実務ポータルへの導線 (Phase 5) */}
+      {config.slug === "construction" && (
+        <div className="mt-6">
+          <Link
+            href="/for/construction"
+            className="flex items-center justify-between gap-3 rounded-lg border-2 border-emerald-300 bg-emerald-50 px-4 py-3 hover:bg-emerald-100"
+          >
+            <div>
+              <p className="text-sm font-bold text-emerald-900">
+                建設業 実務ポータルで「次の一手」を一画面に集約
+              </p>
+              <p className="mt-0.5 text-xs text-emerald-800">
+                統計を見たあとの行動 (KY/朝礼/年次計画/化学物質RA/法令チャット) を 1〜2 タップで起動。
+              </p>
+            </div>
+            <span className="text-emerald-700 font-bold">→</span>
+          </Link>
+        </div>
+      )}
     </>
   );
 }

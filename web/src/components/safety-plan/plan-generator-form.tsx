@@ -226,6 +226,15 @@ export function PlanGeneratorForm() {
           </span>
         </div>
       )}
+      {/* 建設業選択時の補助バナー (Phase 5) */}
+      {industry === "construction" && (
+        <a
+          href="/for/construction"
+          className="block rounded-lg border border-emerald-300 bg-emerald-50/70 px-3 py-2 text-xs text-emerald-900 hover:bg-emerald-100"
+        >
+          🏗 建設業の関連資料 (KY・朝礼・法令早見・建設業頻出20物質) は <span className="font-bold underline">/for/construction</span> に集約されています
+        </a>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
           <span className="block text-sm font-semibold text-slate-700">業種 <span className="text-red-600">*</span></span>
