@@ -19,10 +19,7 @@
 
 import type { LawArticle } from "@/data/laws";
 import { LAW_METADATA } from "@/data/laws";
-import {
-  normalizeArticleNumToKey,
-  parseArticleNum,
-} from "@/lib/article-number-normalize";
+import { normalizeArticleNumToKey } from "@/lib/article-number-normalize";
 
 /**
  * Layer 1 がプロンプトに同梱する許可条文の構造。
