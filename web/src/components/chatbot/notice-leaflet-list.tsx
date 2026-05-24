@@ -33,11 +33,11 @@ export function ChatbotNoticeList({ notices }: NoticeListProps) {
   return (
     <section
       aria-labelledby="chatbot-notices-heading"
-      className="mt-3 rounded-lg border border-amber-200 bg-amber-50/50 p-3 dark:border-amber-700/60 dark:bg-amber-900/15"
+      className="mt-3 rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-700/60 dark:bg-emerald-900/15"
     >
       <h3
         id="chatbot-notices-heading"
-        className="mb-2 text-xs font-bold uppercase tracking-widest text-amber-900 dark:text-amber-200"
+        className="mb-2 text-xs font-bold uppercase tracking-widest text-emerald-900 dark:text-emerald-200"
       >
         関連通達・告示（{notices.length}件）
       </h3>
@@ -52,7 +52,7 @@ export function ChatbotNoticeList({ notices }: NoticeListProps) {
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="mt-2 inline-flex min-h-[36px] items-center gap-1 rounded-full border border-amber-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-amber-800 hover:bg-amber-50 dark:border-amber-700 dark:bg-slate-800 dark:text-amber-300"
+          className="mt-2 inline-flex min-h-[36px] items-center gap-1 rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-emerald-800 hover:bg-emerald-50 dark:border-emerald-700 dark:bg-slate-800 dark:text-emerald-300"
           aria-expanded={expanded}
         >
           <ChevronDown
