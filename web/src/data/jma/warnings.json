@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-24T22:42:12.372Z",
+  "fetchedAt": "2026-05-24T23:44:36.966Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -2650,94 +2650,15 @@
       ]
     },
     "JP-09": {
-      "level": "advisory",
+      "level": "none",
       "entries": [
         {
           "sourceCode": "090000",
-          "level": "advisory",
-          "headline": "栃木県では、２５日昼前まで濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-24T16:01:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-25T08:01:00+09:00",
           "publishingOffice": "宇都宮地方気象台",
-          "warnings": [
-            {
-              "areaCode": "090010",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "090020",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0920400",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0920500",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0920601",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0920602",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0920603",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0920604",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0920605",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0921100",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0921300",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0938400",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0940700",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
