@@ -28,6 +28,12 @@ import {
   buildFallbackDecision,
   formatFallbackSuggestionsText,
 } from "@/lib/chatbot-fallback-logic";
+// Phase 4 通達・リーフレット添付
+import {
+  attachNoticesAndLeaflets,
+  type AttachedLeaflet,
+  type AttachedNotice,
+} from "@/lib/chatbot-notice-attachment";
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
 
@@ -70,7 +76,7 @@ export type ChatbotResponse = {
   confidenceScore?: number;
   /** フォローアップ質問サジェスト（最大3件） */
   followups?: FollowupSuggestion[];
-  /** 関連する厚労省通達・告示・指針（一次資料DB由来） */
+  /** 関連する厚労省通達・告示・指針（一次資料DB由来）— Phase 4 で attachedNotices に統合 */
   notices?: NoticeHit[];
   /** 構造化された出典（条文番号＋施行日＋発出機関） */
   citations?: StructuredCitation[];
@@ -80,6 +86,10 @@ export type ChatbotResponse = {
   digDeeperLinks?: DigDeeperLink[];
   /** RAG コーパス範囲外の参照を検出した場合の警告（先頭に表示） */
   scopeWarnings?: string[];
+  /** Phase 4: 条文紐付け/応答引用/クエリ で取得した通達・告示（最大5件、source 付き） */
+  attachedNotices?: AttachedNotice[];
+  /** Phase 4: 条文紐付けで取得した厚労省リーフレット（最大5件） */
+  attachedLeaflets?: AttachedLeaflet[];
 };
 
 type ApiErrorBody = {
@@ -257,6 +267,11 @@ export async function POST(request: Request) {
     const fallbackAnswer = articles.length > 0 || mlitMatches.length > 0
       ? `AIによる回答生成は現在利用できませんが、関連する法令条文・所管省庁資料が見つかりました。下記の参照をご確認ください。\n\nGEMINI_API_KEYを環境変数に設定すると、AIによる詳細な回答が利用できます。\n\n⚠️ ${AI_LEGAL_DISCLAIMER}`
       : `現在、AIチャットボット機能はAPIキーが設定されていないため利用できません。\n\nGEMINI_API_KEYを環境変数に設定することで、労働安全衛生法に関するご質問にお答えできます。\n\n⚠️ ${AI_LEGAL_DISCLAIMER}`;
+    // Phase 4: API キー無しの degraded path でも条文ベースで通達・リーフレットを添付
+    const attachedDegraded = attachNoticesAndLeaflets({
+      articles,
+      query: message,
+    });
     const fallbackPayload: ChatbotResponse = {
       answer: fallbackAnswer,
       sources,
@@ -267,6 +282,8 @@ export async function POST(request: Request) {
       citations: buildStructuredCitations(articles),
       relatedLaws: suggestRelatedLaws(message, articles),
       digDeeperLinks: suggestDigDeeperLinks(message, articles),
+      attachedNotices: attachedDegraded.notices.length > 0 ? attachedDegraded.notices : undefined,
+      attachedLeaflets: attachedDegraded.leaflets.length > 0 ? attachedDegraded.leaflets : undefined,
     };
     if (key) {
       setCachedResponse(key, fallbackPayload);
@@ -483,6 +500,13 @@ export async function POST(request: Request) {
   const relatedLaws = suggestRelatedLaws(message, relevantArticles);
   const digDeeperLinks = suggestDigDeeperLinks(message, relevantArticles);
 
+  // Phase 4: 通達・リーフレットの自動添付（Layer A 条文紐付け + Layer B 応答引用 + Layer C クエリ）
+  const attached = attachNoticesAndLeaflets({
+    articles: relevantArticles,
+    answer,
+    query: message,
+  });
+
   // Phase 2 Layer 3: adjacent tier では「直接答える条文は限定的」の見出しを冒頭に挿入
   if (fallbackDecision.tier === "adjacent" && fallbackDecision.headline) {
     answer = `${fallbackDecision.headline}\n\n${answer}`;
@@ -504,13 +528,33 @@ export async function POST(request: Request) {
     answer += `\n\n🏛 所管省庁資料: ${ministryRefs.join("、")}`;
   }
 
-  // 関連通達を回答末尾に追記（拘束力レベル付き）
-  if (relatedNotices.length > 0) {
+  // 関連通達を回答末尾に追記（Phase 4: 3層統合済 attached.notices を使用）
+  if (attached.notices.length > 0) {
     answer += "\n\n【関連通達・告示】\n";
-    for (const n of relatedNotices) {
+    for (const n of attached.notices) {
       const num = n.noticeNumber ? `${n.noticeNumber}・` : "";
       const date = n.issuedDateRaw ? `${n.issuedDateRaw}・` : "";
       answer += `- ${num}${date}${n.title}（${NOTICE_BINDING_LABELS[n.bindingLevel]}）\n`;
+      // 原文URL を1行下に併記（detailUrl を厚労省/JAISH 公式直リンクとして）
+      answer += `  原文: ${n.detailUrl}\n`;
+    }
+  }
+
+  // Phase 4: 関連リーフレットを回答末尾に追記
+  if (attached.leaflets.length > 0) {
+    answer += "\n\n【関連リーフレット・教材】\n";
+    const targetLabel: Record<string, string> = {
+      general: "一般",
+      worker: "現場用",
+      employer: "管理者用",
+      "foreign-worker": "外国人労働者向け",
+    };
+    for (const l of attached.leaflets) {
+      const targetTxt = targetLabel[l.target] ?? l.target;
+      const date = l.publishedDateRaw ? `（${l.publishedDateRaw}）` : "";
+      answer += `- ${l.title}${date}・${l.publisher}・${targetTxt}\n`;
+      const url = l.pdfUrl ?? l.sourceUrl;
+      answer += `  原文: ${url}\n`;
     }
   }
 
@@ -597,6 +641,8 @@ export async function POST(request: Request) {
     relatedLaws,
     digDeeperLinks,
     scopeWarnings: scopeWarnings.length > 0 ? scopeWarnings : undefined,
+    attachedNotices: attached.notices.length > 0 ? attached.notices : undefined,
+    attachedLeaflets: attached.leaflets.length > 0 ? attached.leaflets : undefined,
   };
   if (key) {
     setCachedResponse(key, responsePayload);
@@ -608,6 +654,8 @@ export async function POST(request: Request) {
       "X-Citation-Layer1-Status": allowedCitations.length > 0 ? "applied" : "empty",
       "X-Citation-Layer2-Status": citationLayer2Status,
       "X-Citation-Layer3-Tier": fallbackDecision.tier,
+      "X-Notice-Layer4-Count": String(attached.notices.length),
+      "X-Leaflet-Layer4-Count": String(attached.leaflets.length),
     },
   });
 }

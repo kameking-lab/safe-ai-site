@@ -9,6 +9,15 @@ import type {
   RelatedLawLink,
   DigDeeperLink,
 } from "@/lib/chatbot-enrichment";
+// Phase 4: 通達/リーフレット添付カード
+import type {
+  AttachedLeaflet,
+  AttachedNotice,
+} from "@/lib/chatbot-notice-attachment";
+import {
+  ChatbotLeafletList,
+  ChatbotNoticeList,
+} from "@/components/chatbot/notice-leaflet-list";
 import { LAW_CATEGORY_OPTIONS, type LawCategoryFilter } from "@/lib/rag-search";
 import { VoiceMicButton } from "@/components/voice-input-field";
 import { BindingBadge } from "@/components/AIResponseCard";
@@ -37,6 +46,10 @@ type ChatMessage = {
   relatedLaws?: RelatedLawLink[];
   digDeeperLinks?: DigDeeperLink[];
   scopeWarnings?: string[];
+  /** Phase 4: 3層統合された通達リスト（条文紐付け+応答引用+クエリ） */
+  attachedNotices?: AttachedNotice[];
+  /** Phase 4: 条文紐付けで取得した厚労省リーフレット */
+  attachedLeaflets?: AttachedLeaflet[];
 };
 
 
@@ -290,6 +303,8 @@ export function ChatbotPanel() {
         relatedLaws?: RelatedLawLink[];
         digDeeperLinks?: DigDeeperLink[];
         scopeWarnings?: string[];
+        attachedNotices?: AttachedNotice[];
+        attachedLeaflets?: AttachedLeaflet[];
       };
 
       const assistantMsg: ChatMessage = {
@@ -306,6 +321,8 @@ export function ChatbotPanel() {
         relatedLaws: data.relatedLaws,
         digDeeperLinks: data.digDeeperLinks,
         scopeWarnings: data.scopeWarnings,
+        attachedNotices: data.attachedNotices,
+        attachedLeaflets: data.attachedLeaflets,
       };
 
       const finalMessages = [...nextMessages, assistantMsg];
@@ -770,8 +787,26 @@ export function ChatbotPanel() {
                   </div>
                 )}
 
-                {/* 関連通達・告示・指針（厚労省一次資料DB由来） */}
-                {msg.role === "assistant" && msg.notices && msg.notices.length > 0 && (
+                {/* Phase 4: 通達・告示・リーフレットカード（条文紐付け+応答引用+クエリの3層統合） */}
+                {msg.role === "assistant" && msg.attachedNotices && msg.attachedNotices.length > 0 && (
+                  <div className="ml-10 max-w-[88%]">
+                    <ChatbotNoticeList notices={msg.attachedNotices} />
+                    <p className="mt-1 text-[10px] text-amber-800 dark:text-amber-300">
+                      ※ 出典: 厚労省・中央労働災害防止協会 安全衛生情報センター。
+                      <a href="/resources" className="ml-1 underline">一次資料DB</a> も参照ください。
+                    </p>
+                  </div>
+                )}
+                {msg.role === "assistant" && msg.attachedLeaflets && msg.attachedLeaflets.length > 0 && (
+                  <div className="ml-10 max-w-[88%]">
+                    <ChatbotLeafletList leaflets={msg.attachedLeaflets} />
+                  </div>
+                )}
+                {/* 旧 notices フィールド（attachedNotices が無い古いキャッシュ応答用、後方互換） */}
+                {msg.role === "assistant" &&
+                  (!msg.attachedNotices || msg.attachedNotices.length === 0) &&
+                  msg.notices &&
+                  msg.notices.length > 0 && (
                   <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-amber-200 bg-amber-50 p-3" open>
                     <summary className="cursor-pointer text-xs font-semibold text-amber-900 hover:text-amber-700">
                       関連通達・告示 ({msg.notices.length}件・拘束力レベル付き)
@@ -810,10 +845,6 @@ export function ChatbotPanel() {
                         );
                       })}
                     </div>
-                    <p className="mt-2 text-[10px] text-amber-800">
-                      ※ 出典: 厚労省・中央労働災害防止協会 安全衛生情報センター。
-                      <a href="/resources" className="ml-1 underline">一次資料DB</a> も参照ください。
-                    </p>
                   </details>
                 )}
 
