@@ -85,7 +85,7 @@ export default function ChemicalRaPage() {
           {
             href: "/chemical-database",
             label: "化学物質検索",
-            description: "厚労省統合DB 8,400物質超。CAS番号・物質名から濃度基準値・GHS分類を確認できます。",
+            description: "厚労省統合DB 約3,700物質（MHLW告示251 + NITE GHS 2,729 + PRTR 398 + 化審/毒劇/CWC/廃掃 255）。CAS番号・物質名から濃度基準値・GHS分類を確認できます。",
             color: "blue",
             cta: "物質を検索する",
           },

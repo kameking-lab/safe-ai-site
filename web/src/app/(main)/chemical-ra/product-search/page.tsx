@@ -50,7 +50,7 @@ export default function ProductSearchPage() {
           {
             href: "/chemical-database",
             label: "化学物質検索DB",
-            description: "厚労省 8,400物質超の規制区分・濃度基準値を横断検索。",
+            description: "厚労省 約3,700物質（MHLW告示251 + NITE GHS 2,729 + PRTR 398 + 化審/毒劇/CWC/廃掃 255）の規制区分・濃度基準値を横断検索。",
             color: "blue",
             cta: "物質を調べる",
           },
