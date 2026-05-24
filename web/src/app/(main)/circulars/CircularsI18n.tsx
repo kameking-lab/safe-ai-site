@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/contexts/language-context";
 
-export function CircularsHeader({ total, shown }: { total: number; shown: number }) {
+export function CircularsHeader({ total }: { total: number; shown?: number }) {
   const { language } = useLanguage();
   const isEn = language === "en";
   return (
@@ -15,11 +15,11 @@ export function CircularsHeader({ total, shown }: { total: number; shown: number
       <p className="mt-2 text-sm text-slate-600">
         {isEn ? (
           <>
-            Total entries: <strong>{total.toLocaleString("en-US")}</strong> (showing latest {shown})
+            Total entries: <strong>{total.toLocaleString("en-US")}</strong>. Search by keyword, year, and type below.
           </>
         ) : (
           <>
-            収録件数: <strong>{total.toLocaleString("ja-JP")}件</strong>（直近{shown}件を表示）
+            収録件数: <strong>{total.toLocaleString("ja-JP")}件</strong>。下のキーワード・期間・種別で絞り込めます。
           </>
         )}
       </p>
