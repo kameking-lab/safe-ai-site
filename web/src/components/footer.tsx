@@ -196,8 +196,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/qa-knowledge" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
-                  Q&A 投稿募集 (準備中)
+                <Link href="/faq" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  FAQ 200問
                 </Link>
               </li>
               {PAID_MODE && (
