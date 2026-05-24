@@ -43,7 +43,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/industries/warehouse", lastModified: "2026-05-17", priority: 0.8, changeFrequency: "monthly" },
     { url: "/industries/office", lastModified: "2026-05-17", priority: 0.8, changeFrequency: "monthly" },
     { url: "/e-learning", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
-    { url: "/exam-quiz", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
     { url: "/laws", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
     { url: "/law-hierarchy", lastModified: "2026-05-14", priority: 0.8, changeFrequency: "monthly" },
     { url: "/laws/notices-precedents", lastModified: "2026-04-19", priority: 0.8, changeFrequency: "monthly" },

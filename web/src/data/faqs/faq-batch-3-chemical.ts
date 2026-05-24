@@ -261,7 +261,6 @@ export const FAQ_BATCH_3_CHEMICAL: FAQ[] = [
     category: "chemical",
     relatedLaws: ["安衛法第95条の4", "安衛法第65条"],
     relatedPages: [
-      { href: "/exam-quiz", label: "演習問題" },
       { href: "/education", label: "教育・資格" },
     ],
     tags: ["作業環境測定士", "国家資格", "有害業務"],
@@ -471,7 +470,6 @@ export const FAQ_BATCH_3_CHEMICAL: FAQ[] = [
     category: "chemical",
     relatedLaws: ["消防法第13条", "危険物の規制に関する政令"],
     relatedPages: [
-      { href: "/exam-quiz", label: "演習問題" },
       { href: "/education", label: "教育・資格" },
     ],
     tags: ["危険物取扱者", "甲種乙種丙種", "消防法"],

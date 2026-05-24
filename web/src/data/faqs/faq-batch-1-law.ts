@@ -231,7 +231,6 @@ export const FAQ_BATCH_1_LAW: FAQ[] = [
     relatedLaws: ["安衛法第61条", "安衛令第20条", "安衛法第120条"],
     relatedPages: [
       { href: "/education", label: "教育・資格" },
-      { href: "/exam-quiz", label: "演習問題" },
     ],
     tags: ["就業制限", "資格", "フォークリフト"],
     source: "厚生労働省",
