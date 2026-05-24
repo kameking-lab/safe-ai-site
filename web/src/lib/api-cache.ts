@@ -1,7 +1,7 @@
 /**
  * CDN cache headers for dynamic AI/data routes.
  *
- * F-005 (post-2week regression audit, /audits/post-2week-regression):
+ * F-005 (post-2week regression audit, /admin/audits/post-2week-regression):
  * 動的AIルートはCDNキャッシュなしで毎回Function invocationを焼いていた。
  * 3ヘッダ構成でブラウザ・汎用CDN・Vercel Edge それぞれに指示する。
  *
