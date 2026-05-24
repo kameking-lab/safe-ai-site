@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-05-04T00:18:06.959Z",
-  "total": 100,
-  "correct": 100,
+  "generated_at": "2026-05-24T03:27:25.643Z",
+  "total": 115,
+  "correct": 115,
   "accuracy": 1,
   "target": 0.8,
   "passed": true,
@@ -33,8 +33,8 @@
       "accuracy": 1
     },
     "足場": {
-      "total": 4,
-      "correct": 4,
+      "total": 8,
+      "correct": 8,
       "accuracy": 1
     },
     "クレーン": {
@@ -155,6 +155,16 @@
     "ハラスメント": {
       "total": 2,
       "correct": 2,
+      "accuracy": 1
+    },
+    "フォークリフト": {
+      "total": 4,
+      "correct": 4,
+      "accuracy": 1
+    },
+    "就業制限": {
+      "total": 4,
+      "correct": 4,
       "accuracy": 1
     }
   }
