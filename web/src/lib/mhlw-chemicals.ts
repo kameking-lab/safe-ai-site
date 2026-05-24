@@ -78,12 +78,26 @@ export type ConcentrationLimitEntry = {
     acgih?: ExternalReference;
     jsoh?: ExternalReference;
   };
-  /** Phase 1b 追加: 法規制タグ ("nite" / "prtr" / "chashin" / "mhlw" 等) */
+  /**
+   * Phase 1b/1c/1d 追加: 法規制タグ
+   * - "nite": NITE 統合版 GHS 分類
+   * - "prtr1" / "prtr2": 化管法 PRTR 第一種/第二種指定化学物質
+   * - "cscl1" / "cscl2" / "cscl-other": 化審法 第一種特定/第二種特定/その他特定
+   * - "poison-control": 毒物及び劇物取締法
+   * - "cwc": 化学兵器禁止法
+   * - "waste": 廃棄物処理法 特定有害産業廃棄物
+   */
   regulationTags?: string[];
   /** Phase 1b 追加: NITE 統合版 GHS 分類詳細ページ URL */
   niteChripUrl?: string;
   /** Phase 1b 追加: NITE 由来の主要 GHS 区分まとめ */
   niteGhsClassifications?: NiteGhsClassifications;
+  /** Phase 1c 追加: PRTR 制度公式参照 URL */
+  prtrUrl?: string;
+  /** Phase 1c 追加: PRTR 関連の法令別表参照 (例: "化管法施行令 412CO0000000138 別表第一") */
+  prtrLawReferences?: string[];
+  /** Phase 1d 追加: 化審法/毒劇法/化学兵器禁止法/廃掃法 の法令別表参照 */
+  chashinLawReferences?: string[];
 };
 
 type ConcentrationLimitsFile = {
@@ -106,6 +120,10 @@ type ConcentrationLimitsFile = {
     withRegulationNite?: number;
     /** Phase 1b 追加 */
     withNiteGhs?: number;
+    /** Phase 1c 追加 */
+    withPrtr?: number;
+    /** Phase 1d 追加 */
+    withChashin?: number;
   };
   niteImport?: {
     importedAt: string;
@@ -114,6 +132,30 @@ type ConcentrationLimitsFile = {
     added: number;
     sourceSha256?: string | null;
     sourceUrl?: string;
+  };
+  /** Phase 1c 追加 */
+  prtrImport?: {
+    importedAt: string;
+    sourceCount: number;
+    merged: number;
+    added: number;
+    class1Tagged?: number;
+    class2Tagged?: number;
+    sourceSha256?: string | null;
+    upstreamReference?: string;
+    mirror?: string;
+  };
+  /** Phase 1d 追加 */
+  chashinImport?: {
+    importedAt: string;
+    sourceCount: number;
+    merged: number;
+    added: number;
+    tagCounts?: Record<string, number>;
+    sourceSha256?: string | null;
+    upstreamReference?: string;
+    mirror?: string;
+    knownLimitation?: string;
   };
   substances: Record<string, ConcentrationLimitEntry>;
 };
