@@ -1,16 +1,19 @@
-# 化学物質マスタ ETL 運用ルール (Phase 1b 以降)
+# 化学物質マスタ ETL 運用ルール (Phase 1b/1c/1d 完了)
 
-最終更新: 2026-05-24 / Phase 1b NITE-CHRIP 統合時
+最終更新: 2026-05-24 / Phase 1c+1d (PRTR・化審法系) 統合時
 
 ## 1. 対象データソース
 
-| ソース | 物質数 (目安) | 取得経路 | ライセンス |
+| ソース | 物質数 (実取込) | 取得経路 | ライセンス |
 |---|---|---|---|
 | MHLW 厚労告示第177号 (濃度基準値) | 251 | `scripts/etl/fetch-concentration-limits.mjs` | 政府データ (自由) |
 | MHLW 皮膚等障害/SDS/がん原性 | 1,546 | `web/src/data/chemicals-mhlw/` (既取込) | 政府データ (自由) |
-| **NITE 統合版GHS分類結果** | **3,388 (uniq 3,378)** | `scripts/chemical-data-import/parse-nite-chrip.py` + `nite-chrip-importer.mjs` | 独立行政法人 NITE データ (出典明記で自由) |
-| PRTR (Phase 1c 予定) | 562 | `scripts/chemical-data-import/prtr-importer.mjs` (スケルトン) | 政府データ |
-| 化審法 (Phase 1d 予定) | 1,100 | `scripts/chemical-data-import/chashin-importer.mjs` (スケルトン) | 政府データ |
+| **NITE 統合版GHS分類結果** | **3,388 (uniq 3,378)** | `parse-nite-chrip.py` + `nite-chrip-importer.mjs` | NITE データ (出典明記で自由) |
+| **PRTR 化管法 第一種/第二種** | **398 ユニーク CAS** (法令562の72%) | `parse-regulatory-laws.py` + `prtr-importer.mjs` | 政府公開法令 (e-Gov 由来) |
+| **化審法 (第一種特定/第二種特定)** | **34 ユニーク CAS** (優先評価1,100は未取込) | `parse-regulatory-laws.py` + `chashin-importer.mjs` | 政府公開法令 |
+| 毒物及び劇物取締法 | 200 ユニーク CAS | 同上 (chashin-importer 経由) | 政府公開法令 |
+| 化学兵器禁止法 (CWC) | 24 ユニーク CAS | 同上 (chashin-importer 経由) | 政府公開法令 |
+| 廃棄物処理法 (特定有害産業廃棄物) | 12 ユニーク CAS | 同上 (chashin-importer 経由) | 政府公開法令 |
 | IARC Monographs | 415 | `scripts/etl/fetch-concentration-limits.mjs` | 出典明記必要 |
 
 ## 2. データ統合優先順位 (重複 CAS の解決ルール)
@@ -19,29 +22,32 @@
 
 1. **MHLW (国の数値)** — 法令上の濃度基準値・告示。最優先で保持。
 2. **NITE (政府版GHS分類)** — MHLW で未設定の項目を補完。
-3. **既存参考値** — 1, 2 で空欄の場合のみ採用。
-4. **学会値 (ACGIH/JSOH)** — **数値非収録 (著作権)。公式参照URLのみ**。
+3. **PRTR / 化審法 / 毒劇法 / CWC / 廃掃法 (法令タグ)** — 数値は持たず `regulationTags` で並列追加。
+4. **既存参考値** — 1, 2, 3 で空欄の場合のみ採用。
+5. **学会値 (ACGIH/JSOH)** — **数値非収録 (著作権)。公式参照URLのみ**。
 
 importer の実装では:
 - 数値フィールド (`twa` / `stel` / `ceiling`) は MHLW を上書きしない
 - `carcinogenicity.iarc` / `carcinogenicity.ghs` は MHLW/IARC が優先
 - `carcinogenicity.ghsClass` (NITE 由来) は既存に値が無い場合のみ書き込み
-- `regulationTags` には全ソースのタグを `Set` 結合
+- `regulationTags` には全ソースのタグを `Set` 結合 (nite / prtr1 / prtr2 / cscl1 / cscl2 / cscl-other / poison-control / cwc / waste)
+- `prtrLawReferences` / `chashinLawReferences` は法令別表参照を配列で蓄積
 
 ## 3. 標準実行順序
 
-新規ソース取り込み (Phase 1c 以降を含む) 時は **必ずこの順序** で:
+新規ソース取り込み時は **必ずこの順序** で:
 
 ```bash
-# 1. 取得・パース (Python or Node)
-python3 scripts/chemical-data-import/parse-nite-chrip.py    # xlsx → JSONL
-# (今後の Phase 1c: python3 scripts/chemical-data-import/parse-prtr.py)
+# 1. 取得・パース (Python)
+python3 scripts/chemical-data-import/parse-nite-chrip.py            # NITE xlsx → JSONL
+python3 scripts/chemical-data-import/parse-regulatory-laws.py       # 法令JSONL → PRTR/化審法系 JSONL
 
-# 2. マスタへマージ
+# 2. マスタへマージ (順序: NITE → PRTR → 化審法系)
 node scripts/chemical-data-import/nite-chrip-importer.mjs
-# (今後の Phase 1c: node scripts/chemical-data-import/prtr-importer.mjs)
+node scripts/chemical-data-import/prtr-importer.mjs
+node scripts/chemical-data-import/chashin-importer.mjs
 
-# 3. 学会数値の混入再担保 (冪等)
+# 3. 学会数値の混入再担保 (冪等。各 import メタを保持しつつ summary 再計算)
 node scripts/etl/strip-society-values.mjs
 
 # 4. 検証
@@ -49,6 +55,7 @@ cd web && npm run lint && npx tsc --noEmit && npm run test && npm run build
 ```
 
 **重要**: Step 3 (`strip-society-values.mjs`) を省略すると、ETL 過程で再混入した学会値が本番に出てしまう可能性がある。**必ず最後に実行する**。
+新規 import スクリプトを追加する場合は `strip-society-values.mjs` 側の `summarize()` と `newSources` 保持ロジックに同様の保存処理を追記すること。
 
 ## 4. 著作権遵守チェックリスト
 
@@ -95,22 +102,41 @@ cd web && npm run lint && npx tsc --noEmit && npm run test && npm run build
 ```
 scripts/
 ├── chemical-data-import/
-│   ├── README.md                       # スケルトン概要 (Phase 1a)
+│   ├── README.md                       # 概要・実行手順
 │   ├── parse-nite-chrip.py             # NITE xlsx → JSONL パーサ (Phase 1b)
-│   ├── nite-chrip-importer.mjs         # JSONL → マスタマージ (Phase 1b)
-│   ├── prtr-importer.mjs               # PRTR スケルトン (Phase 1c で実装)
-│   └── chashin-importer.mjs            # 化審法スケルトン (Phase 1d で実装)
+│   ├── parse-regulatory-laws.py        # 法令JSONL → PRTR/化審法系 JSONL (Phase 1c/1d)
+│   ├── nite-chrip-importer.mjs         # NITE → マスタマージ (Phase 1b)
+│   ├── prtr-importer.mjs               # PRTR → マスタマージ (Phase 1c)
+│   └── chashin-importer.mjs            # 化審法+毒劇法+CWC+廃掃法 → マスタマージ (Phase 1d)
 └── etl/
-    └── strip-society-values.mjs        # 学会値除去 (毎 ETL 後に必須)
+    └── strip-society-values.mjs        # 学会値除去 (毎 ETL 後に必須、各 import メタを保持)
 
 web/src/data/
-├── concentration-limits.json           # 統合マスタ (v3.1.0-government-only-nite)
+├── concentration-limits.json           # 統合マスタ (v3.3.0-government-only-nite-prtr-chashin)
 ├── chemicals-mhlw/                     # MHLW 既存データ
-└── chemicals-nite/
-    ├── classifications.jsonl           # NITE 全 GHS 詳細 (Phase 1b 追加)
-    └── manifest.json                   # 取得元・sha256・件数
+├── chemicals-nite/                     # NITE 詳細
+│   ├── classifications.jsonl           # NITE 全 GHS 詳細 (Phase 1b)
+│   └── manifest.json
+├── chemicals-prtr/                     # PRTR 詳細 (Phase 1c)
+│   ├── regulatory.jsonl
+│   └── manifest.json
+└── chemicals-chashin/                  # 化審法系 詳細 (Phase 1d)
+    ├── regulatory.jsonl
+    └── manifest.json
 
 web/src/lib/
-├── mhlw-chemicals.ts                   # マスタ統合ロジック
+├── mhlw-chemicals.ts                   # マスタ統合ロジック (regulationTags 体制)
 └── nite-chrip.ts                       # NITE 詳細 lazy load アクセサ (Phase 1b)
 ```
+
+## 8. 残データソース候補 (Phase 1e 以降)
+
+3,515 物質マスタを 12,000-15,000 物質規模に拡張するための追加データソース:
+
+- **化審法 優先評価化学物質** (約1,100物質) — METI 公表 PDF/Excel。本ミラーには未収録
+- **化審法 一般化学物質中の特定** (約700物質)
+- **GHS-Japan オリジナル分類リスト** (環境省/経産省 Web公開分、約2,000物質)
+- **職場あんぜんサイト Model SDS 全件** (厚労省、約3,000物質)
+- **国際的な GHS データセット (EU CLP, 米OSHA)** — 出典・利用条件確認必要
+
+これらは Phase 1e 以降で同じ `regulationTags` 体制に並列追加可能。
