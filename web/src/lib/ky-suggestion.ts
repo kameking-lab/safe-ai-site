@@ -147,14 +147,41 @@ function extractKeywords(text: string): string[] {
 }
 
 // ── localStorage history helpers ─────────────────────────────────────
+// stable empty reference used both as the SSR/no-window result and as the
+// cached "nothing in storage" snapshot. useSyncExternalStore compares the
+// returned reference with Object.is; returning a fresh [] on every call
+// would trigger React error #185 (Maximum update depth exceeded).
+const EMPTY_HISTORY_SNAPSHOT: readonly KySuggestionHistoryEntry[] = Object.freeze([]);
+let cachedRaw: string | null = null;
+let cachedSnapshot: KySuggestionHistoryEntry[] | readonly KySuggestionHistoryEntry[] =
+  EMPTY_HISTORY_SNAPSHOT;
+
 export function loadKySuggestionHistory(): KySuggestionHistoryEntry[] {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") {
+    return EMPTY_HISTORY_SNAPSHOT as KySuggestionHistoryEntry[];
+  }
+  let raw: string | null = null;
   try {
-    const raw = window.localStorage.getItem(HISTORY_KEY);
-    if (!raw) return [];
+    raw = window.localStorage.getItem(HISTORY_KEY);
+  } catch {
+    // localStorage unavailable (private mode, disabled, quota). Treat as empty.
+    return EMPTY_HISTORY_SNAPSHOT as KySuggestionHistoryEntry[];
+  }
+  if (raw === cachedRaw) {
+    return cachedSnapshot as KySuggestionHistoryEntry[];
+  }
+  cachedRaw = raw;
+  if (!raw) {
+    cachedSnapshot = EMPTY_HISTORY_SNAPSHOT;
+    return cachedSnapshot as KySuggestionHistoryEntry[];
+  }
+  try {
     const parsed: unknown = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed
+    if (!Array.isArray(parsed)) {
+      cachedSnapshot = EMPTY_HISTORY_SNAPSHOT;
+      return cachedSnapshot as KySuggestionHistoryEntry[];
+    }
+    cachedSnapshot = parsed
       .filter(
         (entry): entry is KySuggestionHistoryEntry =>
           typeof entry === "object" &&
@@ -163,8 +190,10 @@ export function loadKySuggestionHistory(): KySuggestionHistoryEntry[] {
           typeof (entry as Record<string, unknown>).at === "number"
       )
       .slice(0, HISTORY_MAX);
+    return cachedSnapshot as KySuggestionHistoryEntry[];
   } catch {
-    return [];
+    cachedSnapshot = EMPTY_HISTORY_SNAPSHOT;
+    return cachedSnapshot as KySuggestionHistoryEntry[];
   }
 }
 
@@ -178,7 +207,10 @@ export function recordKySuggestionUsage(exampleId: string): void {
     ...existing,
   ].slice(0, HISTORY_MAX);
   try {
-    window.localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+    const serialized = JSON.stringify(next);
+    window.localStorage.setItem(HISTORY_KEY, serialized);
+    cachedRaw = serialized;
+    cachedSnapshot = next;
     window.dispatchEvent(new Event("ky-suggestion-history-updated"));
   } catch {
     // localStorage may be unavailable (private mode, quota) — silently skip.

@@ -123,6 +123,69 @@ function makeInitialRecord(): KyInstructionRecordState {
   };
 }
 
+// /industries/<id> から来る ?industry=<id> を KY プリセットID へマップする。
+// 業種ページは industries-content の ID（construction/food/healthcare/...）を
+// 渡してくるが、KY プリセットは別の体系（construction/manufacturing/medical/
+// care-facility/homecare/transport/forestry/food/retail/ladder/cleaning）。
+// マッピングできないキーは undefined を返し、プリセット適用をスキップする。
+const INDUSTRY_PARAM_TO_PRESET: Record<string, string> = {
+  construction: "construction",
+  manufacturing: "manufacturing",
+  healthcare: "medical",
+  medical: "medical",
+  "medical-welfare": "medical",
+  welfare: "care-facility",
+  care: "care-facility",
+  "care-facility": "care-facility",
+  homecare: "homecare",
+  transport: "transport",
+  logistics: "transport",
+  warehouse: "transport",
+  wholesale: "transport",
+  forestry: "forestry",
+  food: "food",
+  retail: "retail",
+  service: "retail",
+  cleaning: "cleaning",
+  ladder: "ladder",
+};
+
+function mapIndustryParamToPresetId(industry: string | null | undefined): string | undefined {
+  if (!industry) return undefined;
+  return INDUSTRY_PARAM_TO_PRESET[industry];
+}
+
+function describeTopic(topic: string | null | undefined): string | undefined {
+  if (!topic) return undefined;
+  const map: Record<string, string> = {
+    scaffold: "足場の組立て・解体作業",
+    fall: "高所作業（屋根・梁上）",
+    crane: "クレーン・玉掛け作業",
+    demolition: "解体・はつり作業",
+    heat: "夏季屋外作業",
+    "heat-illness": "熱中症対策作業",
+    press: "プレス機作業",
+    forklift: "フォークリフト作業",
+    robot: "産業用ロボット作業",
+    chemical: "化学物質取扱い作業",
+    dust: "粉じん作業",
+    knife: "刃物・スライサー作業",
+    delivery: "配送・搬送作業",
+    "night-shift": "夜勤・深夜作業",
+    newcomer: "新人作業者の作業",
+    transfer: "移乗・介助",
+    needle: "注射・採血",
+    infection: "感染症対策",
+    violence: "暴力・カスハラ対応",
+    "home-visit": "訪問先での作業",
+    cashier: "レジ業務",
+    stocking: "品出し作業",
+    "fresh-food": "生鮮食品取扱い",
+    ladder: "脚立・はしご作業",
+  };
+  return map[topic];
+}
+
 function getSimilarCases(workText: string): KyIndustryPreset | null {
   if (!workText.trim()) return null;
   const lower = workText.toLowerCase();
@@ -346,10 +409,14 @@ export function KyPageContent() {
 
   // /ky?preset=<id> で来た場合にプリセットを自動適用する（脚立・業種リンクから）
   // /ky?fromAccident=<id>&template=<presetId>&q=<title> も同様にテンプレ適用
+  // /ky?industry=<id>&topic=<key> も同様（/industries/* からの遷移）
   const searchParams = useSearchParams();
   const [fromAccidentNotice, setFromAccidentNotice] = useState<string | null>(null);
   useEffect(() => {
-    const presetId = searchParams?.get("preset") ?? searchParams?.get("template");
+    const presetId =
+      searchParams?.get("preset") ??
+      searchParams?.get("template") ??
+      mapIndustryParamToPresetId(searchParams?.get("industry"));
     if (!presetId) return;
     const preset = getPresetById(presetId);
     if (preset) handlePresetApply(preset);
@@ -362,6 +429,22 @@ export function KyPageContent() {
     setFromAccidentNotice(
       q ? `事故事例「${q}」からKYを起票しています。テンプレを適用済み。` : "事故事例から起票しています。"
     );
+  }, [searchParams]);
+
+  // /ky?industry=<id>&topic=<key> でテンプレ適用済みの通知を出す
+  useEffect(() => {
+    const industry = searchParams?.get("industry");
+    if (!industry) return;
+    const presetId = mapIndustryParamToPresetId(industry);
+    const preset = presetId ? getPresetById(presetId) : undefined;
+    const topicLabel = describeTopic(searchParams?.get("topic"));
+    if (preset && topicLabel) {
+      setFromAccidentNotice(
+        `${preset.label}向けプリセットを適用しました（テーマ: ${topicLabel}）。作業内容欄を編集してください。`
+      );
+    } else if (preset) {
+      setFromAccidentNotice(`${preset.label}向けプリセットを適用しました。作業内容欄を編集してください。`);
+    }
   }, [searchParams]);
 
   // /ky?fromDiary=[id] で来た場合、日誌の workContent / kyResult を取り込む
@@ -421,17 +504,14 @@ export function KyPageContent() {
   // 自社プロファイルの業種でプリセット初期適用（クエリ指定がない場合のみ）
   useEffect(() => {
     if (searchParams?.get("preset")) return;
+    if (searchParams?.get("template")) return;
+    if (searchParams?.get("industry")) return;
     if (searchParams?.get("fromDiary")) return;
     if (searchParams?.get("fromYesterday")) return;
+    if (searchParams?.get("fromAccident")) return;
     const profile = loadProfile();
     if (!profile.wizardCompleted) return;
-    const industryToPreset: Record<string, string> = {
-      construction: "construction-scaffolding",
-      manufacturing: "manufacturing-press",
-      transport: "logistics-fork",
-      logistics: "logistics-fork",
-    };
-    const presetId = industryToPreset[profile.industry];
+    const presetId = mapIndustryParamToPresetId(profile.industry);
     if (!presetId) return;
     const preset = getPresetById(presetId);
     if (preset) handlePresetApply(preset);

@@ -1,5 +1,9 @@
-import { describe, it, expect } from "vitest";
-import { suggestKyByIndustryAndWork } from "./ky-suggestion";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import {
+  loadKySuggestionHistory,
+  recordKySuggestionUsage,
+  suggestKyByIndustryAndWork,
+} from "./ky-suggestion";
 import { KY_EXAMPLES } from "@/data/ky-examples";
 import type { KyExample } from "@/types/ky-example";
 
@@ -87,6 +91,91 @@ describe("suggestKyByIndustryAndWork", () => {
     }
     const recall = hits / samples.length;
     expect(recall).toBeGreaterThanOrEqual(0.6);
+  });
+});
+
+// Regression: /ky used to crash with React error #185 (Maximum update depth
+// exceeded) for new users because loadKySuggestionHistory returned a fresh
+// array reference on every call. useSyncExternalStore's getSnapshot must
+// return a stable reference when the underlying data has not changed.
+describe("loadKySuggestionHistory snapshot stability", () => {
+  let storage: Record<string, string>;
+
+  beforeEach(() => {
+    storage = {};
+    const stub: Storage = {
+      get length() {
+        return Object.keys(storage).length;
+      },
+      clear() {
+        storage = {};
+      },
+      getItem(key: string) {
+        return key in storage ? storage[key] : null;
+      },
+      key(i: number) {
+        return Object.keys(storage)[i] ?? null;
+      },
+      removeItem(key: string) {
+        delete storage[key];
+      },
+      setItem(key: string, value: string) {
+        storage[key] = value;
+      },
+    };
+    vi.stubGlobal("window", {
+      localStorage: stub,
+      dispatchEvent: vi.fn(() => true),
+    });
+    // First call after stub reset must read the fresh state, not a leftover
+    // cached snapshot from a previous test.
+    loadKySuggestionHistory();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("returns the same reference across calls when localStorage is empty", () => {
+    const a = loadKySuggestionHistory();
+    const b = loadKySuggestionHistory();
+    const c = loadKySuggestionHistory();
+    expect(a).toBe(b);
+    expect(b).toBe(c);
+    expect(a).toEqual([]);
+  });
+
+  it("returns the same reference across calls when localStorage has data", () => {
+    recordKySuggestionUsage("ct-fall-001");
+    const a = loadKySuggestionHistory();
+    const b = loadKySuggestionHistory();
+    expect(a).toBe(b);
+    expect(a.length).toBe(1);
+    expect(a[0].exampleId).toBe("ct-fall-001");
+  });
+
+  it("returns a new reference after recordKySuggestionUsage updates storage", () => {
+    const before = loadKySuggestionHistory();
+    recordKySuggestionUsage("ct-fall-001");
+    const after = loadKySuggestionHistory();
+    expect(after).not.toBe(before);
+    expect(after.length).toBe(1);
+  });
+
+  it("returns a stable empty reference when localStorage contains malformed JSON", () => {
+    storage["ky-suggestion-history-v1"] = "{not valid json";
+    const a = loadKySuggestionHistory();
+    const b = loadKySuggestionHistory();
+    expect(a).toBe(b);
+    expect(a).toEqual([]);
+  });
+
+  it("returns a stable empty reference when localStorage contains non-array JSON", () => {
+    storage["ky-suggestion-history-v1"] = JSON.stringify({ unexpected: true });
+    const a = loadKySuggestionHistory();
+    const b = loadKySuggestionHistory();
+    expect(a).toBe(b);
+    expect(a).toEqual([]);
   });
 });
 
