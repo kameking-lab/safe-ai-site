@@ -212,10 +212,20 @@ export function ChemicalRaPanel() {
   const [detailedMode, setDetailedMode] = useState(false);
   const resultAnchorRef = useRef<HTMLDivElement | null>(null);
 
-  // AI調査の結果生成完了時に結果セクションへスクロール
+  // P0-6: AI調査の結果生成完了時に結果セクションへスムーズスクロール＋フォーカス移動。
+  // 読み上げ・キーボード操作ユーザーが結果に到達できるよう、tabIndex=-1 のアンカーに focus する。
   useEffect(() => {
     if (result && !loading && resultAnchorRef.current) {
-      resultAnchorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      const node = resultAnchorRef.current;
+      node.scrollIntoView({ behavior: "smooth", block: "start" });
+      // スクロール後にフォーカス。preventScroll でスクロール挙動を二重発火させない。
+      window.setTimeout(() => {
+        try {
+          node.focus({ preventScroll: true });
+        } catch {
+          // 古いブラウザでは preventScroll が未対応 — 無視。
+        }
+      }, 200);
     }
   }, [result, loading]);
 
@@ -423,10 +433,23 @@ export function ChemicalRaPanel() {
                 type="button"
                 onClick={() => void handleSearch()}
                 disabled={!chemicalName.trim() || loading}
-                className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow hover:bg-emerald-700 disabled:opacity-50"
+                aria-busy={loading}
+                className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-progress"
               >
-                <Search className="h-4 w-4" />
-                AI 詳細調査
+                {loading ? (
+                  <>
+                    <span
+                      aria-hidden="true"
+                      className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"
+                    />
+                    調査中…
+                  </>
+                ) : (
+                  <>
+                    <Search className="h-4 w-4" />
+                    AI 詳細調査
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -646,7 +669,12 @@ export function ChemicalRaPanel() {
 
       {/* 結果 */}
       {result && !loading && (
-        <div ref={resultAnchorRef} className="space-y-6 scroll-mt-20 print:space-y-3">
+        <div
+          ref={resultAnchorRef}
+          tabIndex={-1}
+          aria-label="AI調査結果"
+          className="space-y-6 scroll-mt-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 print:space-y-3"
+        >
           <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
             <p className="text-xs font-bold text-emerald-700">A4 結果表（ブラウザ印刷で A4 1〜2ページに収まります）</p>
             <button
