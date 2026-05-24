@@ -50,7 +50,7 @@ export default function DiversityDisabilityPage() {
         },
         {
           label: "通達・判例（SOGI含む）",
-          href: "/laws/notices-precedents",
+          href: "/circulars",
         },
       ]}
       resources={[

@@ -66,9 +66,9 @@ export default function LawsPage() {
             cta: "用語を確認する",
           },
           {
-            href: "/laws/notices-precedents",
-            label: "通達・判例（第2層出典）",
-            description: "条文だけでは読めない行政解釈（通達15件）と最高裁判例（15件）。監督官・士業向けの実務出典集。",
+            href: "/circulars",
+            label: "通達・告示・判例（第2層出典）",
+            description: "厚労省通達 1069件 + 安全配慮義務に関する最高裁判例 30件を統合。監督官・士業向けの実務出典集。",
             color: "emerald",
             cta: "通達と判例を見る",
           },

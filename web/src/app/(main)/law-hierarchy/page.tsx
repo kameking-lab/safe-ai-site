@@ -395,7 +395,7 @@ export default function LawHierarchyPage() {
                 </p>
               </Link>
               <Link
-                href="/laws/notices-precedents"
+                href="/circulars"
                 className="rounded-xl border border-slate-200 bg-white p-4 transition hover:shadow-md"
               >
                 <p className="text-xs font-bold text-slate-700">通達・判例（第2層）</p>

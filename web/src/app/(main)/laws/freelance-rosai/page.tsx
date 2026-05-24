@@ -49,7 +49,7 @@ export default function LawsFreelanceRosaiPage() {
         },
         {
           label: "通達・判例",
-          href: "/laws/notices-precedents",
+          href: "/circulars",
         },
       ]}
       resources={[
