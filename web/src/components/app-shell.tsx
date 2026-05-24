@@ -131,8 +131,8 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2 },
       { id: "mental-health", label: "メンタル・カスハラ", href: "/mental-health", icon: Heart },
-      { id: "mental-health-management", label: "メンタル対策実務", href: "/mental-health-management", icon: Brain, badge: "NEW", badgeUntil: "2026-06-15" },
-      { id: "treatment-work-balance", label: "治療と仕事の両立支援", href: "/treatment-work-balance", icon: HeartHandshake, badge: "NEW", badgeUntil: "2026-06-15" },
+      { id: "mental-health-management", label: "メンタル対策実務", href: "/mental-health-management", icon: Brain, badge: "NEW", badgeUntil: "2026-05-31" },
+      { id: "treatment-work-balance", label: "治療と仕事の両立支援", href: "/treatment-work-balance", icon: HeartHandshake },
     ],
   },
   ...(PAID_MODE
@@ -480,7 +480,7 @@ export function AppShell({ children, user }: AppShellProps) {
               type="button"
               onClick={toggleFurigana}
               aria-pressed={furiganaEnabled}
-              className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+              className={`inline-flex min-h-[36px] items-center rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
                 furiganaEnabled
                   ? "bg-emerald-600 text-white"
                   : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
@@ -493,7 +493,7 @@ export function AppShell({ children, user }: AppShellProps) {
               type="button"
               onClick={toggleLargeFont}
               aria-pressed={largeFontEnabled}
-              className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold transition-colors ${
+              className={`inline-flex min-h-[36px] items-center rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
                 largeFontEnabled
                   ? "bg-emerald-600 text-white"
                   : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"

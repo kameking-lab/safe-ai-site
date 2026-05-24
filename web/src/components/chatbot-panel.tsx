@@ -428,9 +428,10 @@ export function ChatbotPanel() {
             type="button"
             onClick={() => setShowHistory((v) => !v)}
             className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
-            aria-label="履歴を表示"
+            aria-label="保存済み会話を開く"
+            title="保存済みの会話セッションを一覧表示します"
           >
-            🕐 履歴{sessions.length > 0 && <span className="text-blue-600">({sessions.length})</span>}
+            🕐 保存した会話{sessions.length > 0 && <span className="text-blue-600">({sessions.length})</span>}
           </button>
           {/* 6.3: 音声完結モード */}
           <button
@@ -442,9 +443,9 @@ export function ChatbotPanel() {
                 ? "border-emerald-400 bg-emerald-600 text-white"
                 : "border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50"
             }`}
-            title="音声入力で質問→AI回答を自動読み上げ（Web Speech API）"
+            title="音声で質問→AI回答を自動読み上げ (Web Speech API)。タップで切替"
           >
-            🎙 音声完結モード{voiceMode ? "ON" : "OFF"}
+            🎙 {voiceMode ? "音声で会話中 (タップで終了)" : "音声で会話する"}
           </button>
           {voiceMode && (
             <button
@@ -916,6 +917,13 @@ export function ChatbotPanel() {
                         className="rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
                       >
                         → 法改正一覧
+                      </a>
+                      <a
+                        href="/signage"
+                        className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-100"
+                        title="朝礼・現場の常時表示画面で活用"
+                      >
+                        → サイネージで掲示
                       </a>
                     </div>
                   </div>
