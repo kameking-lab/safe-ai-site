@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-25T21:36:49.471Z",
+  "fetchedAt": "2026-05-25T22:44:06.677Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -3958,58 +3958,15 @@
       ]
     },
     "JP-19": {
-      "level": "advisory",
+      "level": "none",
       "entries": [
         {
           "sourceCode": "190000",
-          "level": "advisory",
-          "headline": "東部・富士五湖では、２６日昼前まで濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-26T05:21:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-26T07:30:00+09:00",
           "publishingOffice": "甲府地方気象台",
-          "warnings": [
-            {
-              "areaCode": "190020",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1920200",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1942300",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1942400",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1942500",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1942900",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1943000",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
@@ -5500,8 +5457,8 @@
         {
           "sourceCode": "460040",
           "level": "warning",
-          "headline": "奄美地方では、２６日昼前まで土砂災害に警戒してください。",
-          "reportDatetime": "2026-05-26T06:22:00+09:00",
+          "headline": "奄美地方では、２６日昼前まで土砂災害や低い土地の浸水に警戒してください。",
+          "reportDatetime": "2026-05-26T07:25:00+09:00",
           "publishingOffice": "名瀬測候所",
           "warnings": [
             {
@@ -5543,7 +5500,7 @@
             {
               "areaCode": "4652300",
               "code": "10",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -5579,7 +5536,7 @@
             {
               "areaCode": "4652700",
               "code": "10",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -5590,9 +5547,9 @@
             },
             {
               "areaCode": "4652900",
-              "code": "10",
+              "code": "03",
               "status": "発表",
-              "level": "advisory"
+              "level": "warning"
             },
             {
               "areaCode": "4652900",
