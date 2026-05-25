@@ -33,6 +33,10 @@ export interface KyCloudTransport {
   createSignageSession(record: KyInstructionRecordState): Promise<string | null>;
   /** Phase 6: 6桁コードから共有KYを取得（期限切れ・不存在は null）。 */
   getSignageSession(code: string): Promise<KyInstructionRecordState | null>;
+  /** P0-A: クラウドの単一KYを id で取得（一覧から再編集で開く）。 */
+  getKyRecordById(deviceId: string, id: string): Promise<KyInstructionRecordState | null>;
+  /** P0-A: クラウドのKYを id で削除。 */
+  deleteKyRecord(deviceId: string, id: string): Promise<boolean>;
 }
 
 // ── クラウド有効判定・端末ID ─────────────────────────────────────
@@ -113,6 +117,22 @@ const fetchTransport: KyCloudTransport = {
     const data: unknown = await res.json();
     const rec = (data as { record?: unknown })?.record;
     return rec ? normalizeKyInstructionRecord(rec) : null;
+  },
+  async getKyRecordById(deviceId, id) {
+    const res = await fetch(
+      `/api/ky/records?deviceId=${encodeURIComponent(deviceId)}&id=${encodeURIComponent(id)}`
+    );
+    if (!res.ok) return null;
+    const data: unknown = await res.json();
+    const rec = (data as { record?: unknown })?.record;
+    return rec ? normalizeKyInstructionRecord(rec) : null;
+  },
+  async deleteKyRecord(deviceId, id) {
+    const res = await fetch(
+      `/api/ky/records?deviceId=${encodeURIComponent(deviceId)}&id=${encodeURIComponent(id)}`,
+      { method: "DELETE" }
+    );
+    return res.ok;
   },
 };
 
@@ -226,6 +246,26 @@ export async function cloudGetSignageSession(code: string): Promise<KyInstructio
     return await transport.getSignageSession(code);
   } catch {
     return null;
+  }
+}
+
+/** P0-A: クラウドの単一KYを id で取得（未設定・失敗は null）。 */
+export async function cloudGetKyRecordById(id: string): Promise<KyInstructionRecordState | null> {
+  if (!isKyCloudEnabled()) return null;
+  try {
+    return await transport.getKyRecordById(getDeviceId(), id);
+  } catch {
+    return null;
+  }
+}
+
+/** P0-A: クラウドのKYを id で削除（未設定・失敗は false）。 */
+export async function cloudDeleteKyRecord(id: string): Promise<boolean> {
+  if (!isKyCloudEnabled()) return false;
+  try {
+    return await transport.deleteKyRecord(getDeviceId(), id);
+  } catch {
+    return false;
   }
 }
 

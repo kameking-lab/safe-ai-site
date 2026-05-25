@@ -41,14 +41,28 @@ import {
   cloudPushKyRecord,
   cloudCreateSignageSession,
   flushKyCloudQueue,
+  hasPendingKyCloudSync,
 } from "@/lib/ky/storage-adapter";
 import type { KyHazardSuggestion, HazardSuggestionResponse } from "@/lib/ky/gemini-suggest";
 import { migrateLegacyKyRecord } from "@/lib/ky/storage-migration";
+import { computeKySyncStatus, KY_SYNC_LABEL, type KySyncStatus } from "@/lib/ky/sync-status";
+import { applyKyDeepLink } from "@/lib/ky/deep-link-prefill";
+import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
+import {
+  submitKy,
+  approveKy,
+  rejectKy,
+  isKyLocked,
+  DEFAULT_APPROVAL,
+  KY_APPROVAL_LABEL,
+  type KyApproval,
+} from "@/lib/ky/approval";
 
 const AUTOSAVE_KEY = "ky-record";
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
 const ZOOM_STEP = 0.1;
+const DEEP_LINK_KEYS = ["preset", "template", "industry", "fromAccident", "fromDiary", "import"] as const;
 
 function makeToday(): KyInstructionRecordState {
   const base = normalizeKyInstructionRecord({});
@@ -73,21 +87,60 @@ export function KyPaperView() {
   const [suggestSource, setSuggestSource] = useState<"gemini" | "fallback" | null>(null);
   const [shareBusy, setShareBusy] = useState(false);
   const [shareCode, setShareCode] = useState<string | null>(null);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [approvalActor, setApprovalActor] = useState("");
+  const [approvalComment, setApprovalComment] = useState("");
+  const [syncStatus, setSyncStatus] = useState<KySyncStatus>(() =>
+    computeKySyncStatus({ cloudEnabled: isKyCloudEnabled(), online: true, pending: false })
+  );
 
-  // 初回読み込み: 旧 /ky の手動保存データを引き継いでから、自動保存KYを読み込む。
+  const refreshSync = useCallback(() => {
+    setSyncStatus(
+      computeKySyncStatus({
+        cloudEnabled: isKyCloudEnabled(),
+        online: typeof navigator === "undefined" ? true : navigator.onLine,
+        pending: hasPendingKyCloudSync(),
+      })
+    );
+  }, []);
+
+  // P1-D: 同期状態の追従（マウント＋オンライン/オフライン切替）。
+  useEffect(() => {
+    refreshSync();
+    if (typeof window === "undefined") return;
+    window.addEventListener("online", refreshSync);
+    window.addEventListener("offline", refreshSync);
+    return () => {
+      window.removeEventListener("online", refreshSync);
+      window.removeEventListener("offline", refreshSync);
+    };
+  }, [refreshSync]);
+
+  // 初回読み込み: 旧 /ky の手動保存データを引き継ぎ→自動保存KY→クロスツール連携クエリの順で反映。
   useEffect(() => {
     // Phase 7: 旧 /ky（手動保存キー）→ ky-record の移行（空のときだけ・冪等）。
     migrateLegacyKyRecord();
+    let baseRec: KyInstructionRecordState | null = null;
     try {
       const saved = localStorage.getItem(AUTOSAVE_KEY);
-      if (saved) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント時の一度きり
-        setRecord(normalizeKyInstructionRecord(JSON.parse(saved) as unknown));
-      }
+      if (saved) baseRec = normalizeKyInstructionRecord(JSON.parse(saved) as unknown);
     } catch {
       /* 壊れていれば初期値のまま */
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // P1-C: 事故DB/プリセット/日誌/AIリスク予測からのクエリ取り込み。
+    let params: URLSearchParams | null = null;
+    try {
+      params = new URLSearchParams(window.location.search);
+    } catch {
+      params = null;
+    }
+    if (params && DEEP_LINK_KEYS.some((k) => params!.has(k))) {
+      const res = applyKyDeepLink(params, baseRec ?? makeToday());
+      setRecord(res.record);
+      if (res.notice) setNotice(res.notice);
+    } else if (baseRec) {
+      setRecord(baseRec);
+    }
     setWorkers(visibleWorkers(loadWorkers()));
   }, []);
 
@@ -178,7 +231,8 @@ export function KyPaperView() {
       setSavedLabel(`保存しました: ${new Date().toLocaleTimeString("ja-JP")}`);
       setNotice("保存しました。朝礼サイネージ・日誌から参照できます。");
       // Phase 4: 背景でクラウドにも保管（失敗時はキューに退避し次回再送）。
-      void cloudPushKyRecord(record);
+      await cloudPushKyRecord(record);
+      refreshSync();
     } else {
       setNotice(res.error?.message ?? "保存に失敗しました");
     }
@@ -273,6 +327,44 @@ export function KyPaperView() {
     }
   };
 
+  // P1-D: クラウドの最新KYを取得して現在の内容を置き換える（競合は確認のうえユーザー判断）。
+  const handleFetchLatest = async () => {
+    const pulled = await cloudPullKyRecords();
+    refreshSync();
+    if (!pulled?.latest) {
+      setNotice("クラウドに保存済みのKYが見つかりませんでした。");
+      return;
+    }
+    if (window.confirm("クラウドの最新KYで現在の内容を置き換えますか？（この端末の未保存の変更は失われます）")) {
+      setRecord(pulled.latest);
+      setNotice("クラウドの最新KYを読み込みました。");
+    }
+  };
+
+  // P1-B: 元請確認・承認フロー。提出/承認中は編集ロック（差し戻しで編集可）。
+  const approval = record.approval ?? DEFAULT_APPROVAL;
+  const locked = isKyLocked(approval);
+  const applyApproval = (next: KyApproval) => {
+    const updated = { ...record, approval: next };
+    setRecord(updated);
+    void cloudPushKyRecord(updated);
+    refreshSync();
+  };
+  const handleSubmitApproval = () => {
+    applyApproval(submitKy(approval, approvalActor || record.foremanName || "職長"));
+    setNotice("元請に提出しました。確認待ちです（提出中は編集ロック）。");
+  };
+  const handleApprove = () => {
+    applyApproval(approveKy(approval, approvalActor || "元請担当者", new Date(), approvalComment || undefined));
+    setApprovalComment("");
+    setNotice("承認しました。");
+  };
+  const handleReject = () => {
+    applyApproval(rejectKy(approval, approvalActor || "元請担当者", new Date(), approvalComment || undefined));
+    setApprovalComment("");
+    setNotice("差し戻しました。編集できるようになりました。");
+  };
+
   const toggleWorker = (w: Worker, checked: boolean) => {
     setRecord((prev) => {
       const exists = prev.participants.some((p) => p.name === w.name && w.name !== "");
@@ -314,6 +406,9 @@ export function KyPaperView() {
             <Link href="/ky/workers" className="rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100">
               作業員マスター
             </Link>
+            <Link href="/ky/list" className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100">
+              保存一覧
+            </Link>
           </div>
           {/* ズーム */}
           <div className="flex items-center gap-1 rounded-full border border-slate-300 bg-white p-0.5">
@@ -333,8 +428,64 @@ export function KyPaperView() {
         </div>
       )}
 
-      {/* 用紙本体（ズーム対象） */}
-      <div className="overflow-x-auto px-2 py-4 print:overflow-visible print:p-0">
+      {/* P1-B: 元請確認・承認パネル */}
+      <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
+        <div className="rounded-xl border border-slate-200 bg-white p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-slate-800">元請確認・承認</span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                  approval.status === "approved"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : approval.status === "submitted"
+                      ? "bg-amber-100 text-amber-800"
+                      : approval.status === "rejected"
+                        ? "bg-rose-100 text-rose-700"
+                        : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {KY_APPROVAL_LABEL[approval.status]}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {(approval.status === "draft" || approval.status === "rejected") && (
+                <button type="button" onClick={handleSubmitApproval} className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-700">
+                  元請に提出
+                </button>
+              )}
+              {(approval.status === "submitted" || approval.status === "approved") && (
+                <>
+                  <input value={approvalActor} onChange={(e) => setApprovalActor(e.target.value)} placeholder="確認者名" aria-label="確認者名" className="w-28 rounded border border-slate-300 px-2 py-1 text-xs" />
+                  <input value={approvalComment} onChange={(e) => setApprovalComment(e.target.value)} placeholder="コメント(任意)" aria-label="コメント" className="w-40 rounded border border-slate-300 px-2 py-1 text-xs" />
+                  {approval.status === "submitted" && (
+                    <button type="button" onClick={handleApprove} className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">承認</button>
+                  )}
+                  <button type="button" onClick={handleReject} className="rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50">差し戻し（編集可に）</button>
+                </>
+              )}
+            </div>
+          </div>
+          {locked && (
+            <p className="mt-2 rounded bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-800">
+              提出/承認中のため編集はロックされています。修正するには「差し戻し」してください。
+            </p>
+          )}
+          {approval.history.length > 0 && (
+            <ul className="mt-2 space-y-0.5 text-[11px] text-slate-500">
+              {approval.history.slice(-5).map((h, i) => (
+                <li key={i}>
+                  {h.action === "submit" ? "提出" : h.action === "approve" ? "承認" : "差し戻し"}: {h.by}（
+                  {new Date(h.at).toLocaleString("ja-JP")}）{h.comment ? `― ${h.comment}` : ""}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {/* 用紙本体（ズーム対象）。印刷時は専用A4シート（下部）を使うため隠す。提出/承認中は inert で編集ロック。 */}
+      <div className="overflow-x-auto px-2 py-4 print:hidden" inert={locked || undefined}>
         <div
           className="mx-auto origin-top"
           style={{ transform: `scale(${zoom})`, width: 820, maxWidth: "100%" }}
@@ -527,11 +678,35 @@ export function KyPaperView() {
         </div>
       </div>
 
+      {/* P1-A: A4印刷用シート（画面では非表示・印刷時のみ描画＝元請提出体裁） */}
+      <div className="hidden print:block">
+        <KyPrintSheet record={record} />
+      </div>
+
+      {/* 印刷プレビュー（画面オーバーレイ。印刷物には出さない） */}
+      {showPrintPreview && (
+        <div className="fixed inset-0 z-40 overflow-auto bg-slate-700/70 p-4 print:hidden">
+          <div className="mx-auto max-w-[210mm] rounded bg-white p-4 shadow-2xl">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-bold text-slate-800">印刷プレビュー（A4・確認印枠つき）</p>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-700">印刷 / PDF</button>
+                <button type="button" onClick={() => setShowPrintPreview(false)} className="rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">閉じる</button>
+              </div>
+            </div>
+            <div className="overflow-x-auto rounded border border-slate-200 p-2">
+              <KyPrintSheet record={record} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 下部アクションバー */}
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-2.5 shadow-lg backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
           <span className="text-[11px] text-slate-500">
             {savedLabel}
+            <span className="ml-2 rounded bg-slate-100 px-2 py-0.5 font-semibold text-slate-600">{KY_SYNC_LABEL[syncStatus]}</span>
             {shareCode && (
               <span className="ml-2 rounded bg-violet-100 px-2 py-0.5 font-bold text-violet-800">共有コード {shareCode}</span>
             )}
@@ -539,8 +714,12 @@ export function KyPaperView() {
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={handleCopyLatest} className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50">前回を複製</button>
             <button type="button" onClick={() => void handleSave()} className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
+            {isKyCloudEnabled() && (
+              <button type="button" onClick={() => void handleFetchLatest()} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">クラウド最新取得</button>
+            )}
             <button type="button" onClick={() => void handleShare()} disabled={shareBusy} className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50 disabled:opacity-50">{shareBusy ? "発行中…" : "別端末で共有"}</button>
             <Link href="/ky/morning" className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50">サイネージへ →</Link>
+            <button type="button" onClick={() => setShowPrintPreview(true)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">印刷プレビュー</button>
             <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-5 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
           </div>
         </div>

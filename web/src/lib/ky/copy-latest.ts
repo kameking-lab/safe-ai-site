@@ -8,6 +8,7 @@
  */
 import type { KyInstructionRecordState } from "@/lib/types/operations";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
+import { DEFAULT_APPROVAL } from "@/lib/ky/approval";
 
 const KY_STORAGE_KEY = "safe-ai:ky-instruction-record:v1";
 const KY_AUTOSAVE_KEY = "ky-record";
@@ -42,6 +43,8 @@ export function copyKyForToday(
     closingNote: "",
     correctionNote: "",
     fallChecks: base.fallChecks.map(() => ({ good: "", bad: "", done: "" })),
+    // 複製は新しい下書き＝承認状態はリセット（前回の承認を引き継がない）。
+    approval: { ...DEFAULT_APPROVAL },
   };
 }
 

@@ -30,6 +30,8 @@ function makeTransport(overrides: Partial<KyCloudTransport> = {}): KyCloudTransp
     getWorkers: vi.fn(async () => [] as Worker[]),
     createSignageSession: vi.fn(async () => "123456"),
     getSignageSession: vi.fn(async () => null),
+    getKyRecordById: vi.fn(async () => null),
+    deleteKyRecord: vi.fn(async () => true),
     ...overrides,
   };
 }
