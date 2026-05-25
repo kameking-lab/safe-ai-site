@@ -41,6 +41,7 @@ import {
   cloudPushKyRecord,
   flushKyCloudQueue,
 } from "@/lib/ky/storage-adapter";
+import type { KyHazardSuggestion, HazardSuggestionResponse } from "@/lib/ky/gemini-suggest";
 
 const AUTOSAVE_KEY = "ky-record";
 const ZOOM_MIN = 0.6;
@@ -65,6 +66,9 @@ export function KyPaperView() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [savedLabel, setSavedLabel] = useState("記入すると自動保存されます");
   const [notice, setNotice] = useState<string | null>(null);
+  const [suggestBusy, setSuggestBusy] = useState(false);
+  const [suggestions, setSuggestions] = useState<KyHazardSuggestion[]>([]);
+  const [suggestSource, setSuggestSource] = useState<"gemini" | "fallback" | null>(null);
 
   // 初回読み込み: 既存の自動保存KYを引き継ぐ（/ky と共有）
   useEffect(() => {
@@ -172,6 +176,72 @@ export function KyPaperView() {
     } else {
       setNotice(res.error?.message ?? "保存に失敗しました");
     }
+  };
+
+  // Phase 5: 本物のAI（Gemini）に危険箇所を提案させる。未設定/失敗時はAPI側で擬似AIにフォールバック。
+  const handleSuggest = async () => {
+    const workContent = record.workRows[0]?.workDetail?.trim() ?? "";
+    if (!workContent) {
+      setNotice("先に「本日の作業内容」を入力してください（AI提案の手がかりになります）。");
+      return;
+    }
+    setSuggestBusy(true);
+    try {
+      const res = await fetch("/api/ky/suggest", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ workContent }),
+      });
+      if (!res.ok) {
+        setNotice("AI提案の取得に失敗しました。時間をおいて再度お試しください。");
+        return;
+      }
+      const data = (await res.json()) as HazardSuggestionResponse;
+      setSuggestions(Array.isArray(data.suggestions) ? data.suggestions : []);
+      setSuggestSource(data.source ?? null);
+      if (!data.suggestions || data.suggestions.length === 0) {
+        setNotice("提案が得られませんでした。作業内容を具体的にすると精度が上がります。");
+      } else if (data.note) {
+        setNotice(data.note);
+      }
+    } catch {
+      setNotice("AI提案の通信に失敗しました。");
+    } finally {
+      setSuggestBusy(false);
+    }
+  };
+
+  // 提案を最初の空き危険欄に取り込む（埋まっていれば新しい行を追加）。
+  const applySuggestion = (s: KyHazardSuggestion) => {
+    setRecord((prev) => {
+      const rows = [...prev.riskRows];
+      const emptyIdx = rows.findIndex((r) => !r.hazard.trim());
+      const base = emptyIdx >= 0 ? rows[emptyIdx] : undefined;
+      if (base) {
+        rows[emptyIdx] = {
+          ...base,
+          hazard: s.hazard,
+          reduction: s.reduction,
+          likelihood: s.likelihood,
+          severity: s.severity,
+        };
+      } else {
+        rows.push({
+          targetLabel: "+",
+          hazard: s.hazard,
+          qualNo: "",
+          likelihood: s.likelihood,
+          severity: s.severity,
+          reduction: s.reduction,
+          reLikelihood: 1,
+          reSeverity: 1,
+          reducedBelow2: "",
+          primeSign: "",
+        });
+      }
+      return { ...prev, riskRows: rows };
+    });
+    setNotice("提案を危険のポイント欄に反映しました。現場に合わせて加筆・修正してください。");
   };
 
   const toggleWorker = (w: Worker, checked: boolean) => {
@@ -298,6 +368,51 @@ export function KyPaperView() {
 
             {/* 4R: 危険のポイントと対策（リスクアセスメント） */}
             <SheetSection title="危険のポイントと対策（1R〜3R）">
+              {/* Phase 5: 本物のAI（Gemini）による危険箇所提案。印刷時は隠す。 */}
+              <div className="mb-2 print:hidden">
+                <button
+                  type="button"
+                  onClick={() => void handleSuggest()}
+                  disabled={suggestBusy}
+                  className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-800 hover:bg-indigo-100 disabled:opacity-50"
+                >
+                  {suggestBusy ? "AIが分析中…" : "🤖 AIに危険箇所を提案させる"}
+                </button>
+                {suggestSource && suggestions.length > 0 && (
+                  <div className="mt-2 space-y-1.5 rounded-lg border border-indigo-200 bg-indigo-50/40 p-2">
+                    <p className="text-[11px] font-semibold text-indigo-900">
+                      {suggestSource === "gemini"
+                        ? "本物のAI（Gemini）の提案"
+                        : "定型提案（AI未設定/応答不可のフォールバック）"}
+                      ：気になる項目を「反映」で危険欄へ取り込めます
+                    </p>
+                    {suggestions.map((s, i) => (
+                      <div key={i} className="flex items-start justify-between gap-2 rounded border border-indigo-200 bg-white p-1.5">
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-slate-800">
+                            {s.hazard}
+                            <span className="ml-1 rounded bg-slate-100 px-1 text-[10px] text-slate-600">
+                              評価値{s.evaluation}（{s.riskLabel}）
+                            </span>
+                            {!s.grounded && (
+                              <span className="ml-1 rounded bg-amber-100 px-1 text-[10px] text-amber-700">要確認</span>
+                            )}
+                          </p>
+                          <p className="text-[11px] text-slate-600">対策: {s.reduction || "—"}</p>
+                          {s.basis && <p className="text-[10px] text-slate-400">根拠: {s.basis}</p>}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => applySuggestion(s)}
+                          className="shrink-0 rounded border border-indigo-300 bg-white px-2 py-1 text-[11px] font-bold text-indigo-700 hover:bg-indigo-50"
+                        >
+                          反映
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="space-y-2">
                 {visibleRisks.map((row, i) => {
                   const score = evalScore(row.likelihood, row.severity);
