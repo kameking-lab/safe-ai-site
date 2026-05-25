@@ -112,11 +112,15 @@ function makeInitialKyInstruction(): KyInstructionRecordState {
   });
   return {
     reportStamps: ["", "", "", "", ""],
+    siteName: "",
+    projectName: "",
+    foremanName: "",
     workDateYear: "",
     workDateMonth: "",
     workDateDay: "",
     workDateNote: "",
     weather: "",
+    temperature: "",
     coop1Name: "",
     coop1Chief: "",
     coop2Name: "",
@@ -145,6 +149,9 @@ function makeInitialKyInstruction(): KyInstructionRecordState {
       { good: "", bad: "", done: "" },
     ],
     correctionNote: "",
+    teamGoal: "",
+    priorityItems: "",
+    pointingCall: "",
   };
 }
 

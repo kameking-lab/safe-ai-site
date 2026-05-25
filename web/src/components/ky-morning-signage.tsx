@@ -122,6 +122,24 @@ export function KyMorningSignage() {
               )}
             </section>
 
+            {/* 本日の行動目標・指差呼称（4Rの締め。全面再設計で追加） */}
+            {(record.teamGoal || record.pointingCall) && (
+              <section className="mt-6 rounded-3xl bg-white/95 p-6 text-slate-900 shadow-2xl sm:p-8">
+                {record.teamGoal && (
+                  <div>
+                    <p className="text-lg font-bold text-emerald-700 sm:text-xl">本日の行動目標</p>
+                    <p className="mt-2 text-3xl font-bold leading-snug sm:text-5xl">{record.teamGoal}</p>
+                  </div>
+                )}
+                {record.pointingCall && (
+                  <div className={record.teamGoal ? "mt-4 border-t border-slate-200 pt-4" : ""}>
+                    <p className="text-lg font-bold text-amber-700 sm:text-xl">指差呼称</p>
+                    <p className="mt-2 text-3xl font-bold leading-snug text-amber-900 sm:text-5xl">{record.pointingCall}</p>
+                  </div>
+                )}
+              </section>
+            )}
+
             {/* 唱和カウントダウン */}
             <section className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-emerald-700/30 p-6">
               <div>

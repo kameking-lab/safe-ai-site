@@ -128,11 +128,19 @@ export type KyInstructionFallCheck = {
 
 export type KyInstructionRecordState = {
   reportStamps: [string, string, string, string, string];
+  /** 現場名（紙KY用紙の標準項目。全面再設計で追加） */
+  siteName: string;
+  /** 工事名・工区 */
+  projectName: string;
+  /** 職長名（リーダー） */
+  foremanName: string;
   workDateYear: string;
   workDateMonth: string;
   workDateDay: string;
   workDateNote: string;
   weather: string;
+  /** 気温（℃）。天気自動取得で埋まる場合あり */
+  temperature: string;
   coop1Name: string;
   coop1Chief: string;
   coop2Name: string;
@@ -151,6 +159,12 @@ export type KyInstructionRecordState = {
   closingNote: string;
   fallChecks: KyInstructionFallCheck[];
   correctionNote: string;
+  /** 4R目標設定: チーム行動目標（「〜しよう」）。朝礼で唱和する核心項目 */
+  teamGoal: string;
+  /** 4R目標設定: 重点実施項目（必ずやること） */
+  priorityItems: string;
+  /** 指差呼称項目（「〜ヨシ！」）。朝礼サイネージで大表示する */
+  pointingCall: string;
 };
 
 /** KY記録一覧用のサマリー */
@@ -158,6 +172,10 @@ export type KyRecordSummary = {
   id: string;
   workDate: string;
   companyName: string;
+  /** 現場名（一覧で記録を識別するために使用） */
+  siteName: string;
+  /** 職長名 */
+  foremanName: string;
   workDetail: string;
   weather: string;
   savedAt: string;
