@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-25T01:55:19.441Z",
+  "fetchedAt": "2026-05-25T06:43:44.435Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -7,74 +7,98 @@
         {
           "sourceCode": "011000",
           "level": "advisory",
-          "headline": "宗谷地方では、２５日未明から濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-24T15:41:00+09:00",
+          "headline": "宗谷地方では、強風や濃霧による視程障害に注意してください。",
+          "reportDatetime": "2026-05-25T15:25:00+09:00",
           "publishingOffice": "稚内地方気象台",
           "warnings": [
             {
               "areaCode": "011000",
-              "code": "20",
+              "code": "15",
               "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "011000",
+              "code": "20",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0121400",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0151100",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0151200",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0151300",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0151400",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0151600",
               "code": "20",
+              "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0151700",
+              "code": "15",
               "status": "発表",
               "level": "advisory"
             },
             {
               "areaCode": "0151700",
               "code": "20",
+              "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0151800",
+              "code": "15",
               "status": "発表",
               "level": "advisory"
             },
             {
               "areaCode": "0151800",
               "code": "20",
+              "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0151900",
+              "code": "15",
               "status": "発表",
               "level": "advisory"
             },
             {
               "areaCode": "0151900",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0152000",
               "code": "20",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             }
           ]
@@ -82,10 +106,16 @@
         {
           "sourceCode": "012000",
           "level": "advisory",
-          "headline": "留萌地方では、２６日昼前まで濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-25T09:39:00+09:00",
+          "headline": "留萌地方では２６日昼前まで、上川地方では２６日未明から２６日昼前まで、濃霧による視程障害に注意してください。",
+          "reportDatetime": "2026-05-25T15:27:00+09:00",
           "publishingOffice": "旭川地方気象台",
           "warnings": [
+            {
+              "areaCode": "012010",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
             {
               "areaCode": "012020",
               "code": "20",
@@ -93,9 +123,147 @@
               "level": "advisory"
             },
             {
+              "areaCode": "0120400",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "0121200",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0122000",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0122100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0122900",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0145200",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0145300",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0145400",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0145500",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0145600",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0145700",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0145800",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0145900",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0146000",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0146100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0146200",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0146300",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0146400",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0146500",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0146800",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0146900",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0147000",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0147100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0147200",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -405,8 +573,8 @@
         {
           "sourceCode": "016000",
           "level": "advisory",
-          "headline": "石狩、後志地方では、２６日昼前まで濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-25T10:02:00+09:00",
+          "headline": "石狩、後志地方では２６日昼前まで、空知地方では２５日夜のはじめ頃から２６日昼前まで、濃霧による視程障害に注意してください。",
+          "reportDatetime": "2026-05-25T15:07:00+09:00",
           "publishingOffice": "札幌管区気象台",
           "warnings": [
             {
@@ -416,9 +584,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "016020",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "016030",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0110000",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -428,9 +608,105 @@
               "level": "advisory"
             },
             {
+              "areaCode": "0120900",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0121000",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0121500",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0121600",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0121700",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0121800",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0122200",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0122400",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0122500",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0122600",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0122700",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0122800",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0123100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0123400",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "0123500",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0130300",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0130400",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -446,9 +722,51 @@
               "level": "advisory"
             },
             {
+              "areaCode": "0139300",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "0139400",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0139500",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0139600",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0139700",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0139800",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0139900",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0140000",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -488,9 +806,105 @@
               "level": "advisory"
             },
             {
+              "areaCode": "0140700",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "0140800",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0140900",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0142300",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0142400",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0142500",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0142700",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0142800",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0142900",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0143000",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0143100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0143200",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0143300",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0143400",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0143600",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0143700",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0143800",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             }
           ]
@@ -798,8 +1212,8 @@
         {
           "sourceCode": "040000",
           "level": "advisory",
-          "headline": "東部では、２６日昼前まで濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-25T09:54:00+09:00",
+          "headline": "宮城県では、２６日昼前まで濃霧による視程障害に注意してください。",
+          "reportDatetime": "2026-05-25T15:29:00+09:00",
           "publishingOffice": "仙台管区気象台",
           "warnings": [
             {
@@ -809,9 +1223,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "040020",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "0410001",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0410002",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -833,9 +1259,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "0420600",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "0420700",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0420800",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -851,9 +1289,87 @@
               "level": "advisory"
             },
             {
+              "areaCode": "0421200",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0421301",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0421302",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "0421400",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0421501",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0421502",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0421600",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0430100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0430200",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0432100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0432200",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0432300",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0432400",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0434100",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -884,6 +1400,54 @@
               "areaCode": "0440600",
               "code": "20",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0442101",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0442102",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0442200",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0442400",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0444400",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0444500",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0450100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "0450500",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -935,7 +1499,7 @@
           "sourceCode": "070000",
           "level": "advisory",
           "headline": "浜通りでは、２６日昼前まで濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-25T09:58:00+09:00",
+          "reportDatetime": "2026-05-25T11:48:00+09:00",
           "publishingOffice": "福島地方気象台",
           "warnings": [
             {
@@ -981,12 +1545,6 @@
               "level": "advisory"
             },
             {
-              "areaCode": "0754400",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0754500",
               "code": "20",
               "status": "継続",
@@ -1005,19 +1563,7 @@
               "level": "advisory"
             },
             {
-              "areaCode": "0754800",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "0756100",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0756400",
               "code": "20",
               "status": "継続",
               "level": "advisory"
@@ -1311,22 +1857,10 @@
         {
           "sourceCode": "150000",
           "level": "advisory",
-          "headline": "下越、中越、佐渡では、２５日昼過ぎまで濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-25T09:14:00+09:00",
+          "headline": "佐渡では、２５日夕方まで濃霧による視程障害に注意してください。",
+          "reportDatetime": "2026-05-25T13:08:00+09:00",
           "publishingOffice": "新潟地方気象台",
           "warnings": [
-            {
-              "areaCode": "150010",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "150020",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
             {
               "areaCode": "150040",
               "code": "20",
@@ -1334,73 +1868,7 @@
               "level": "advisory"
             },
             {
-              "areaCode": "1510000",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1520200",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1520500",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1520600",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1521200",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1521300",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "1522400",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1522700",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1530700",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1534200",
-              "code": "20",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1540500",
-              "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "1558600",
               "code": "20",
               "status": "継続",
               "level": "advisory"
@@ -2074,8 +2542,8 @@
         {
           "sourceCode": "300000",
           "level": "advisory",
-          "headline": "南部では、２５日夕方まで高波に注意してください。",
-          "reportDatetime": "2026-05-25T09:36:00+09:00",
+          "headline": "南部では、２６日明け方まで高波に注意してください。",
+          "reportDatetime": "2026-05-25T15:33:00+09:00",
           "publishingOffice": "和歌山地方気象台",
           "warnings": [
             {
@@ -2175,164 +2643,164 @@
         {
           "sourceCode": "340000",
           "level": "advisory",
-          "headline": "南部では、２５日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
-          "reportDatetime": "2026-05-25T04:11:00+09:00",
+          "headline": "南部では、２６日まで空気の乾燥した状態が続くため、火の取り扱いに注意してください。",
+          "reportDatetime": "2026-05-25T15:07:00+09:00",
           "publishingOffice": "広島地方気象台",
           "warnings": [
             {
               "areaCode": "340010",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3410100",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3410200",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3410300",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3410400",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3410500",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3410600",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3410700",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3410800",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3420200",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3420300",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3420400",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3420500",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3420700",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3420800",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3421100",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3421200",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3421300",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3421500",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3430200",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3430400",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3430700",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3430900",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3443100",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3446200",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "3454500",
               "code": "21",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             }
           ]
@@ -3285,8 +3753,8 @@
         {
           "sourceCode": "471000",
           "level": "advisory",
-          "headline": "久米島では２６日明け方まで、本島中南部、本島北部では２６日昼前まで、竜巻などの激しい突風や急な強い雨、落雷に注意してください。",
-          "reportDatetime": "2026-05-25T10:17:00+09:00",
+          "headline": "沖縄本島地方では、竜巻などの激しい突風や急な強い雨、落雷、濃霧による視程障害に注意してください。",
+          "reportDatetime": "2026-05-25T15:40:00+09:00",
           "publishingOffice": "沖縄気象台",
           "warnings": [
             {
@@ -3296,9 +3764,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "471010",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "471020",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "471020",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3308,9 +3788,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "471030",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4720100",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4720100",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3320,9 +3812,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4720500",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4720800",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4720800",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3332,9 +3836,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4720900",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4721000",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4721000",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3344,9 +3860,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4721100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4721200",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4721200",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3356,9 +3884,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4721300",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4721500",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4721500",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3368,9 +3908,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4730100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4730200",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4730200",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3380,9 +3932,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4730300",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4730600",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4730600",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3392,9 +3956,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4730800",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4731100",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4731100",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3404,9 +3980,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4731300",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4731400",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4731400",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3416,9 +4004,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4731500",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4732400",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4732400",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3428,9 +4028,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4732500",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4732600",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4732600",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3440,9 +4052,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4732700",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4732800",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4732800",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3452,9 +4076,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4732900",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4734800",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4734800",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3464,9 +4100,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4735000",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4735300",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4735300",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3476,9 +4124,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4735400",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4735500",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4735500",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3488,9 +4148,21 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4735600",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4735900",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4735900",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             },
             {
@@ -3500,15 +4172,33 @@
               "level": "advisory"
             },
             {
+              "areaCode": "4736000",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4736100",
               "code": "14",
               "status": "継続",
               "level": "advisory"
             },
             {
+              "areaCode": "4736100",
+              "code": "20",
+              "status": "発表",
+              "level": "advisory"
+            },
+            {
               "areaCode": "4736200",
               "code": "14",
               "status": "継続",
+              "level": "advisory"
+            },
+            {
+              "areaCode": "4736200",
+              "code": "20",
+              "status": "発表",
               "level": "advisory"
             }
           ]
