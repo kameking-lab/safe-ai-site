@@ -77,12 +77,12 @@ export function ChatbotBody() {
         iconColor="blue"
       />
 
-      {!isEn && (
-        <div className="mt-4 space-y-3">
-          <CopilotStepNav current="chatbot" />
-          <CopilotMemo />
-        </div>
-      )}
+      {/* P0-020 (usability-audit-day4-final): CopilotStepNav/CopilotMemo を
+          ファーストビューから退避。「Copilot」「引き継ぎ」「記憶」という語彙は
+          初見の現場職長に伝わらず、入力欄FVを食う問題を解消する。
+          完全削除ではなく、ChatbotPanel の下 (継続利用者がアクセス可能な位置)
+          に移動。Phase 2/4 の「メイン3機能を連続して使うと業種・関心事項が
+          自動引き継がれる」体験は維持される (非表示=オフではなく位置変更)。 */}
 
       {/* Law badges */}
       <div className="mt-4 mb-2 space-y-2">
@@ -167,6 +167,22 @@ export function ChatbotBody() {
           current="chatbot"
           intro="回答内容を踏まえて、業種別の事故傾向確認や年次計画作成に進めます。質問で言及された業種・関心事項は自動で引き継がれます。"
         />
+      )}
+
+      {/* P0-020 (usability-audit-day4-final): CopilotStepNav/CopilotMemo を
+          ファーストビューから退避し、ここ (回答エリア・次のステップの下) に
+          移動。継続利用者は引き続き「メイン3機能間で文脈を引き継ぐ」状態を
+          確認できる。初見ユーザーには入力欄が見やすくなる。 */}
+      {!isEn && (
+        <details className="mt-6 rounded-xl border border-slate-200 bg-slate-50/60 p-3 text-xs">
+          <summary className="cursor-pointer font-semibold text-slate-700 hover:text-slate-900">
+            安全Copilot: メイン3機能 (チャット / 事故レポート / 年次計画) を連続利用すると業種・関心が自動引き継ぎされます
+          </summary>
+          <div className="mt-3 space-y-3">
+            <CopilotStepNav current="chatbot" />
+            <CopilotMemo />
+          </div>
+        </details>
       )}
 
       {/* P1 関連動線強化: チャット回答後、実務（KY起票・日誌記録）に
