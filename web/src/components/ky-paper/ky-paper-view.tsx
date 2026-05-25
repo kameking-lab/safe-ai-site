@@ -43,6 +43,7 @@ import {
   flushKyCloudQueue,
 } from "@/lib/ky/storage-adapter";
 import type { KyHazardSuggestion, HazardSuggestionResponse } from "@/lib/ky/gemini-suggest";
+import { migrateLegacyKyRecord } from "@/lib/ky/storage-migration";
 
 const AUTOSAVE_KEY = "ky-record";
 const ZOOM_MIN = 0.6;
@@ -73,8 +74,10 @@ export function KyPaperView() {
   const [shareBusy, setShareBusy] = useState(false);
   const [shareCode, setShareCode] = useState<string | null>(null);
 
-  // 初回読み込み: 既存の自動保存KYを引き継ぐ（/ky と共有）
+  // 初回読み込み: 旧 /ky の手動保存データを引き継いでから、自動保存KYを読み込む。
   useEffect(() => {
+    // Phase 7: 旧 /ky（手動保存キー）→ ky-record の移行（空のときだけ・冪等）。
+    migrateLegacyKyRecord();
     try {
       const saved = localStorage.getItem(AUTOSAVE_KEY);
       if (saved) {
@@ -307,10 +310,7 @@ export function KyPaperView() {
       <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-bold text-slate-900">KY用紙（用紙ビュー・ベータ）</span>
-            <Link href="/ky" className="rounded-full border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">
-              通常の入力に戻る
-            </Link>
+            <span className="text-sm font-bold text-slate-900">KY用紙</span>
             <Link href="/ky/workers" className="rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100">
               作業員マスター
             </Link>

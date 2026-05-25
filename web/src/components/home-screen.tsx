@@ -34,7 +34,6 @@ import { HomeValueHero } from "@/components/home-value-hero";
 import { PersonaEntry } from "@/components/persona-entry";
 import { KyRecordList } from "@/components/ky-record-list";
 import { KySheetPanel } from "@/components/ky-sheet-panel";
-import { KyInstructionRecordForm } from "@/components/ky-instruction-record-form";
 import { KyIndustryPresetPicker } from "@/components/ky-industry-preset-picker";
 import { LawRevisionList } from "@/components/law-revision-list";
 import { MailDeliveryPanel } from "@/components/mail-delivery-panel";
@@ -924,20 +923,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
               });
             }}
           />
-          <KyInstructionRecordForm
-            onChange={setKyInstructionRecord}
-            onSave={(current) => {
-              void services.operations.saveKyInstructionRecord(current).then(async (result) => {
-                if (result.ok) {
-                  setOpsSavedLabel(`作業指示・現地KY記録を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
-                  const list = await services.operations.getKyRecordList();
-                  if (list.ok) setKyRecordList(list.data);
-                }
-              });
-            }}
-            savedLabel={opsSavedLabel}
-            value={kyInstructionRecord}
-          />
+          {/* Phase 7: 915行の旧KYフォームは /ky/paper に一本化したため削除（この variant="ky" 分岐は現在どのルートからも描画されない）。 */}
         </section>
       ) : null}
 

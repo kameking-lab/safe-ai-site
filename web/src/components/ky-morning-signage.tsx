@@ -108,7 +108,7 @@ export function KyMorningSignage() {
             KY 朝礼サイネージ表示
           </p>
           <Link
-            href="/ky"
+            href="/ky/paper"
             className="rounded-lg border border-white/30 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
           >
             ← KY編集に戻る

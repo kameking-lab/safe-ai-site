@@ -92,7 +92,7 @@ export function WorkersMasterClient() {
           </p>
         </div>
         <Link
-          href="/ky"
+          href="/ky/paper"
           className="rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
         >
           ← KY用紙に戻る

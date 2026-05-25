@@ -44,9 +44,9 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     cardTitle: "KY簡易作成",
     cardDescription:
       "業種別プリセット・音声入力対応。3分で危険予知活動表を作成し、サイネージや日誌に転記できます。",
-    href: "/ky",
+    href: "/ky/paper",
     subItems: [
-      { label: "新規KY作成", href: "/ky" },
+      { label: "新規KY作成", href: "/ky/paper" },
       { label: "KY事例データベース", href: "/ky-examples", description: "5業種×10作業150件の危険予知実例。作業別に検索してKY用紙作成に活用" },
       { label: "PDFエクスポート", href: "/pdf" },
       { label: "業種別プリセット", href: "/ky#presets" },

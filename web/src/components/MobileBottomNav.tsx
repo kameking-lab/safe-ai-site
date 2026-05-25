@@ -30,7 +30,7 @@ import {
  */
 const PRIMARY_ITEMS = [
   { id: "home", label: "ホーム", href: "/", icon: Home },
-  { id: "ky", label: "KY", href: "/ky", icon: ClipboardList },
+  { id: "ky", label: "KY", href: "/ky/paper", icon: ClipboardList },
   { id: "chat", label: "AIチャット", href: "/chatbot", icon: MessageSquare },
   { id: "safety-diary", label: "日誌", href: "/safety-diary", icon: FileText },
 ] as const;
