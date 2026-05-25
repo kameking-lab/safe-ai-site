@@ -94,11 +94,15 @@ function makeInitialRecord(): KyInstructionRecordState {
   const emptyP = (): KyInstructionParticipant => ({ name: "", qualNo: "", preWork: "", onExit: "" });
   return {
     reportStamps: ["", "", "", "", ""],
+    siteName: "",
+    projectName: "",
+    foremanName: "",
     workDateYear: "",
     workDateMonth: "",
     workDateDay: "",
     workDateNote: "",
     weather: "",
+    temperature: "",
     coop1Name: "",
     coop1Chief: "",
     coop2Name: "",
@@ -121,6 +125,9 @@ function makeInitialRecord(): KyInstructionRecordState {
       { good: "", bad: "", done: "" },
     ],
     correctionNote: "",
+    teamGoal: "",
+    priorityItems: "",
+    pointingCall: "",
   };
 }
 
