@@ -6,6 +6,8 @@ import {
   cloudPullKyRecords,
   cloudPushWorkers,
   cloudPullWorkers,
+  cloudCreateSignageSession,
+  cloudGetSignageSession,
   flushKyCloudQueue,
   hasPendingKyCloudSync,
   __setKyCloudTransport,
@@ -26,6 +28,8 @@ function makeTransport(overrides: Partial<KyCloudTransport> = {}): KyCloudTransp
     getKyRecords: vi.fn(async () => ({ latest: null, list: [] })),
     putWorkers: vi.fn(async () => true),
     getWorkers: vi.fn(async () => [] as Worker[]),
+    createSignageSession: vi.fn(async () => "123456"),
+    getSignageSession: vi.fn(async () => null),
     ...overrides,
   };
 }
@@ -159,5 +163,38 @@ describe("storage-adapter: 再送キュー（オフライン耐性・最新優�
     expect(putKyRecord).toHaveBeenCalledTimes(1);
     const sent = (putKyRecord.mock.calls[0] as unknown[])[1] as { siteName: string };
     expect(sent.siteName).toBe("B");
+  });
+});
+
+describe("storage-adapter: サイネージ共有（Phase 6）", () => {
+  it("作成でコードを返す", async () => {
+    __setKyCloudTransport(makeTransport({ createSignageSession: vi.fn(async () => "654321") }));
+    expect(await cloudCreateSignageSession(normalizeKyInstructionRecord({}))).toBe("654321");
+  });
+
+  it("クラウド未設定なら作成は null（共有不可）", async () => {
+    delete process.env[ENV_URL];
+    const t = makeTransport();
+    __setKyCloudTransport(t);
+    expect(await cloudCreateSignageSession(normalizeKyInstructionRecord({}))).toBeNull();
+    expect(t.createSignageSession).not.toHaveBeenCalled();
+  });
+
+  it("コードからKYを取得する", async () => {
+    const rec = normalizeKyInstructionRecord({ siteName: "共有現場" });
+    __setKyCloudTransport(makeTransport({ getSignageSession: vi.fn(async () => rec) }));
+    const got = await cloudGetSignageSession("123456");
+    expect(got?.siteName).toBe("共有現場");
+  });
+
+  it("取得失敗(例外)でも throw せず null", async () => {
+    __setKyCloudTransport(
+      makeTransport({
+        getSignageSession: vi.fn(async () => {
+          throw new Error("network");
+        }),
+      })
+    );
+    await expect(cloudGetSignageSession("123456")).resolves.toBeNull();
   });
 });

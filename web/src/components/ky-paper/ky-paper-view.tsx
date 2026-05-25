@@ -39,6 +39,7 @@ import {
   isKyCloudEnabled,
   cloudPullKyRecords,
   cloudPushKyRecord,
+  cloudCreateSignageSession,
   flushKyCloudQueue,
 } from "@/lib/ky/storage-adapter";
 import type { KyHazardSuggestion, HazardSuggestionResponse } from "@/lib/ky/gemini-suggest";
@@ -69,6 +70,8 @@ export function KyPaperView() {
   const [suggestBusy, setSuggestBusy] = useState(false);
   const [suggestions, setSuggestions] = useState<KyHazardSuggestion[]>([]);
   const [suggestSource, setSuggestSource] = useState<"gemini" | "fallback" | null>(null);
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareCode, setShareCode] = useState<string | null>(null);
 
   // 初回読み込み: 既存の自動保存KYを引き継ぐ（/ky と共有）
   useEffect(() => {
@@ -242,6 +245,29 @@ export function KyPaperView() {
       return { ...prev, riskRows: rows };
     });
     setNotice("提案を危険のポイント欄に反映しました。現場に合わせて加筆・修正してください。");
+  };
+
+  // Phase 6: 現在のKYを別端末サイネージ用に共有（6桁コード発行）。
+  const handleShare = async () => {
+    if (!isKyCloudEnabled()) {
+      setNotice("クラウド未設定のため別端末共有は使えません。同じ端末なら「サイネージへ」で表示できます。");
+      return;
+    }
+    setShareBusy(true);
+    try {
+      // 共有前に保存して内容を確定（保存KYと共有内容を一致させる）。
+      await services.operations.saveKyInstructionRecord(record);
+      void cloudPushKyRecord(record);
+      const code = await cloudCreateSignageSession(record);
+      if (code) {
+        setShareCode(code);
+        setNotice(`別端末サイネージ共有コード: ${code}（別端末で /ky/morning に入力、または ?code=${code}）`);
+      } else {
+        setNotice("共有コードの発行に失敗しました。通信状況をご確認ください。");
+      }
+    } finally {
+      setShareBusy(false);
+    }
   };
 
   const toggleWorker = (w: Worker, checked: boolean) => {
@@ -504,10 +530,16 @@ export function KyPaperView() {
       {/* 下部アクションバー */}
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-2.5 shadow-lg backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
-          <span className="text-[11px] text-slate-500">{savedLabel}</span>
+          <span className="text-[11px] text-slate-500">
+            {savedLabel}
+            {shareCode && (
+              <span className="ml-2 rounded bg-violet-100 px-2 py-0.5 font-bold text-violet-800">共有コード {shareCode}</span>
+            )}
+          </span>
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={handleCopyLatest} className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50">前回を複製</button>
             <button type="button" onClick={() => void handleSave()} className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
+            <button type="button" onClick={() => void handleShare()} disabled={shareBusy} className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50 disabled:opacity-50">{shareBusy ? "発行中…" : "別端末で共有"}</button>
             <Link href="/ky/morning" className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50">サイネージへ →</Link>
             <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-5 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
           </div>

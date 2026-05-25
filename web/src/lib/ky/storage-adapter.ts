@@ -29,6 +29,10 @@ export interface KyCloudTransport {
   getKyRecords(deviceId: string): Promise<KyCloudPull | null>;
   putWorkers(deviceId: string, workers: Worker[]): Promise<boolean>;
   getWorkers(deviceId: string): Promise<Worker[] | null>;
+  /** Phase 6: 朝礼サイネージ共有セッションを作成し6桁コードを返す。 */
+  createSignageSession(record: KyInstructionRecordState): Promise<string | null>;
+  /** Phase 6: 6桁コードから共有KYを取得（期限切れ・不存在は null）。 */
+  getSignageSession(code: string): Promise<KyInstructionRecordState | null>;
 }
 
 // ── クラウド有効判定・端末ID ─────────────────────────────────────
@@ -91,6 +95,24 @@ const fetchTransport: KyCloudTransport = {
     if (!data || typeof data !== "object") return null;
     const d = data as { workers?: unknown };
     return Array.isArray(d.workers) ? normalizeWorkers(d.workers) : null;
+  },
+  async createSignageSession(record) {
+    const res = await fetch("/api/ky/signage", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ record }),
+    });
+    if (!res.ok) return null;
+    const data: unknown = await res.json();
+    const code = (data as { code?: unknown })?.code;
+    return typeof code === "string" ? code : null;
+  },
+  async getSignageSession(code) {
+    const res = await fetch(`/api/ky/signage?code=${encodeURIComponent(code)}`);
+    if (!res.ok) return null;
+    const data: unknown = await res.json();
+    const rec = (data as { record?: unknown })?.record;
+    return rec ? normalizeKyInstructionRecord(rec) : null;
   },
 };
 
@@ -182,6 +204,26 @@ export async function cloudPullWorkers(): Promise<Worker[] | null> {
   if (!isKyCloudEnabled()) return null;
   try {
     return await transport.getWorkers(getDeviceId());
+  } catch {
+    return null;
+  }
+}
+
+/** Phase 6: サイネージ共有セッションを作成し6桁コードを返す（クラウド未設定なら null）。 */
+export async function cloudCreateSignageSession(record: KyInstructionRecordState): Promise<string | null> {
+  if (!isKyCloudEnabled()) return null;
+  try {
+    return await transport.createSignageSession(record);
+  } catch {
+    return null;
+  }
+}
+
+/** Phase 6: 6桁コードから共有KYを取得（クラウド未設定・期限切れ・失敗は null）。 */
+export async function cloudGetSignageSession(code: string): Promise<KyInstructionRecordState | null> {
+  if (!isKyCloudEnabled()) return null;
+  try {
+    return await transport.getSignageSession(code);
   } catch {
     return null;
   }
