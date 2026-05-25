@@ -174,6 +174,8 @@ export type KyRecordSummary = {
   companyName: string;
   /** 現場名（一覧で記録を識別するために使用） */
   siteName: string;
+  /** 工事名・工区 */
+  projectName: string;
   /** 職長名 */
   foremanName: string;
   workDetail: string;

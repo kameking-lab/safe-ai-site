@@ -16,6 +16,7 @@ const STORAGE_KEYS = {
   kyPaper: "safe-ai:ky-paper:v1",
   kyInstruction: "safe-ai:ky-instruction-record:v1",
   kyList: "safe-ai:ky-record-list:v1",
+  kyById: "safe-ai:ky-records-by-id:v1",
 } as const;
 
 const MAX_KY_LIST = 30;
@@ -232,6 +233,7 @@ export function buildKyRecordSummary(
     workDate: `${normalized.workDateYear}-${pad(normalized.workDateMonth)}-${pad(normalized.workDateDay)}`,
     companyName: normalized.coop1Name || normalized.coop2Name || normalized.coop3Name || "未入力",
     siteName: normalized.siteName || "",
+    projectName: normalized.projectName || "",
     foremanName: normalized.foremanName || "",
     workDetail: normalized.workRows[0]?.workDetail || "未入力",
     weather: normalized.weather || "未入力",
@@ -274,6 +276,7 @@ export type OperationsService = {
   getKyInstructionRecord: () => Promise<ServiceResult<KyInstructionRecordState>>;
   saveKyInstructionRecord: (value: KyInstructionRecordState) => Promise<ServiceResult<KyInstructionRecordState>>;
   getKyRecordList: () => Promise<ServiceResult<KyRecordSummary[]>>;
+  getKyRecordById: (id: string) => Promise<ServiceResult<KyInstructionRecordState | null>>;
   deleteKyRecord: (id: string) => Promise<ServiceResult<KyRecordSummary[]>>;
   buildMailPreview: (input: {
     notification: NotificationSettings;
@@ -330,6 +333,16 @@ export function createOperationsService(): OperationsService {
         const summary = buildKyRecordSummary(normalized);
         const updated = [summary, ...safeList].slice(0, MAX_KY_LIST);
         writeToStorage(STORAGE_KEYS.kyList, updated);
+        // P0-A: 個別の再編集・複製用に full record を id 別マップへ保存（一覧の id に合わせて剪定）。
+        const byId = readFromStorage<Record<string, KyInstructionRecordState>>(STORAGE_KEYS.kyById, {});
+        const safeById = byId && typeof byId === "object" && !Array.isArray(byId) ? { ...byId } : {};
+        safeById[summary.id] = normalized;
+        const keepIds = new Set(updated.map((s) => s.id));
+        const prunedById: Record<string, KyInstructionRecordState> = {};
+        for (const k of Object.keys(safeById)) {
+          if (keepIds.has(k)) prunedById[k] = safeById[k]!;
+        }
+        writeToStorage(STORAGE_KEYS.kyById, prunedById);
         return { ok: true, data: normalized };
       } catch (err) {
         return {
@@ -346,11 +359,22 @@ export function createOperationsService(): OperationsService {
       const data = readFromStorage<KyRecordSummary[]>(STORAGE_KEYS.kyList, []);
       return { ok: true, data: Array.isArray(data) ? data : [] };
     },
+    async getKyRecordById(id) {
+      const byId = readFromStorage<Record<string, KyInstructionRecordState>>(STORAGE_KEYS.kyById, {});
+      const rec = byId && typeof byId === "object" && !Array.isArray(byId) ? byId[id] : undefined;
+      return { ok: true, data: rec ? normalizeKyInstructionRecord(rec) : null };
+    },
     async deleteKyRecord(id) {
       const list = readFromStorage<KyRecordSummary[]>(STORAGE_KEYS.kyList, []);
       const safeList = Array.isArray(list) ? list : [];
       const updated = safeList.filter((r) => r.id !== id);
       writeToStorage(STORAGE_KEYS.kyList, updated);
+      const byId = readFromStorage<Record<string, KyInstructionRecordState>>(STORAGE_KEYS.kyById, {});
+      if (byId && typeof byId === "object" && !Array.isArray(byId) && id in byId) {
+        const next = { ...byId };
+        delete next[id];
+        writeToStorage(STORAGE_KEYS.kyById, next);
+      }
       return { ok: true, data: updated };
     },
     async buildMailPreview({ notification, mail }) {

@@ -57,9 +57,26 @@ export async function GET(request: Request) {
   const supabase = getServiceSupabase();
   if (!supabase) return cloudNotConfigured();
 
-  const deviceId = new URL(request.url).searchParams.get("deviceId")?.trim() ?? "";
+  const params = new URL(request.url).searchParams;
+  const deviceId = params.get("deviceId")?.trim() ?? "";
+  const id = params.get("id")?.trim() ?? "";
   if (!deviceId) {
     return NextResponse.json({ ok: false, reason: "missing_field" }, { status: 400 });
+  }
+
+  // P0-A: id 指定時は単一KYの full payload を返す（一覧から再編集で開くため）。
+  if (id) {
+    const { data, error } = await supabase
+      .from("ky_records")
+      .select("payload")
+      .eq("device_id", deviceId)
+      .eq("id", id)
+      .maybeSingle();
+    if (error) {
+      return NextResponse.json({ ok: false, reason: "db_error", detail: error.message }, { status: 502 });
+    }
+    const record = data ? normalizeKyInstructionRecord((data as { payload: unknown }).payload) : null;
+    return NextResponse.json({ ok: true, record });
   }
 
   const { data, error } = await supabase
@@ -82,4 +99,21 @@ export async function GET(request: Request) {
     });
   });
   return NextResponse.json({ ok: true, latest, list });
+}
+
+export async function DELETE(request: Request) {
+  const supabase = getServiceSupabase();
+  if (!supabase) return cloudNotConfigured();
+
+  const params = new URL(request.url).searchParams;
+  const deviceId = params.get("deviceId")?.trim() ?? "";
+  const id = params.get("id")?.trim() ?? "";
+  if (!deviceId || !id) {
+    return NextResponse.json({ ok: false, reason: "missing_field" }, { status: 400 });
+  }
+  const { error } = await supabase.from("ky_records").delete().eq("device_id", deviceId).eq("id", id);
+  if (error) {
+    return NextResponse.json({ ok: false, reason: "db_error", detail: error.message }, { status: 502 });
+  }
+  return NextResponse.json({ ok: true });
 }
