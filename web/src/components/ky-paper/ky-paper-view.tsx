@@ -48,6 +48,15 @@ import { migrateLegacyKyRecord } from "@/lib/ky/storage-migration";
 import { computeKySyncStatus, KY_SYNC_LABEL, type KySyncStatus } from "@/lib/ky/sync-status";
 import { applyKyDeepLink } from "@/lib/ky/deep-link-prefill";
 import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
+import {
+  submitKy,
+  approveKy,
+  rejectKy,
+  isKyLocked,
+  DEFAULT_APPROVAL,
+  KY_APPROVAL_LABEL,
+  type KyApproval,
+} from "@/lib/ky/approval";
 
 const AUTOSAVE_KEY = "ky-record";
 const ZOOM_MIN = 0.6;
@@ -79,6 +88,8 @@ export function KyPaperView() {
   const [shareBusy, setShareBusy] = useState(false);
   const [shareCode, setShareCode] = useState<string | null>(null);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [approvalActor, setApprovalActor] = useState("");
+  const [approvalComment, setApprovalComment] = useState("");
   const [syncStatus, setSyncStatus] = useState<KySyncStatus>(() =>
     computeKySyncStatus({ cloudEnabled: isKyCloudEnabled(), online: true, pending: false })
   );
@@ -330,6 +341,30 @@ export function KyPaperView() {
     }
   };
 
+  // P1-B: 元請確認・承認フロー。提出/承認中は編集ロック（差し戻しで編集可）。
+  const approval = record.approval ?? DEFAULT_APPROVAL;
+  const locked = isKyLocked(approval);
+  const applyApproval = (next: KyApproval) => {
+    const updated = { ...record, approval: next };
+    setRecord(updated);
+    void cloudPushKyRecord(updated);
+    refreshSync();
+  };
+  const handleSubmitApproval = () => {
+    applyApproval(submitKy(approval, approvalActor || record.foremanName || "職長"));
+    setNotice("元請に提出しました。確認待ちです（提出中は編集ロック）。");
+  };
+  const handleApprove = () => {
+    applyApproval(approveKy(approval, approvalActor || "元請担当者", new Date(), approvalComment || undefined));
+    setApprovalComment("");
+    setNotice("承認しました。");
+  };
+  const handleReject = () => {
+    applyApproval(rejectKy(approval, approvalActor || "元請担当者", new Date(), approvalComment || undefined));
+    setApprovalComment("");
+    setNotice("差し戻しました。編集できるようになりました。");
+  };
+
   const toggleWorker = (w: Worker, checked: boolean) => {
     setRecord((prev) => {
       const exists = prev.participants.some((p) => p.name === w.name && w.name !== "");
@@ -393,8 +428,64 @@ export function KyPaperView() {
         </div>
       )}
 
-      {/* 用紙本体（ズーム対象）。印刷時は専用A4シート（下部）を使うため隠す。 */}
-      <div className="overflow-x-auto px-2 py-4 print:hidden">
+      {/* P1-B: 元請確認・承認パネル */}
+      <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
+        <div className="rounded-xl border border-slate-200 bg-white p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-slate-800">元請確認・承認</span>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                  approval.status === "approved"
+                    ? "bg-emerald-100 text-emerald-800"
+                    : approval.status === "submitted"
+                      ? "bg-amber-100 text-amber-800"
+                      : approval.status === "rejected"
+                        ? "bg-rose-100 text-rose-700"
+                        : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {KY_APPROVAL_LABEL[approval.status]}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {(approval.status === "draft" || approval.status === "rejected") && (
+                <button type="button" onClick={handleSubmitApproval} className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-700">
+                  元請に提出
+                </button>
+              )}
+              {(approval.status === "submitted" || approval.status === "approved") && (
+                <>
+                  <input value={approvalActor} onChange={(e) => setApprovalActor(e.target.value)} placeholder="確認者名" aria-label="確認者名" className="w-28 rounded border border-slate-300 px-2 py-1 text-xs" />
+                  <input value={approvalComment} onChange={(e) => setApprovalComment(e.target.value)} placeholder="コメント(任意)" aria-label="コメント" className="w-40 rounded border border-slate-300 px-2 py-1 text-xs" />
+                  {approval.status === "submitted" && (
+                    <button type="button" onClick={handleApprove} className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">承認</button>
+                  )}
+                  <button type="button" onClick={handleReject} className="rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50">差し戻し（編集可に）</button>
+                </>
+              )}
+            </div>
+          </div>
+          {locked && (
+            <p className="mt-2 rounded bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-800">
+              提出/承認中のため編集はロックされています。修正するには「差し戻し」してください。
+            </p>
+          )}
+          {approval.history.length > 0 && (
+            <ul className="mt-2 space-y-0.5 text-[11px] text-slate-500">
+              {approval.history.slice(-5).map((h, i) => (
+                <li key={i}>
+                  {h.action === "submit" ? "提出" : h.action === "approve" ? "承認" : "差し戻し"}: {h.by}（
+                  {new Date(h.at).toLocaleString("ja-JP")}）{h.comment ? `― ${h.comment}` : ""}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      {/* 用紙本体（ズーム対象）。印刷時は専用A4シート（下部）を使うため隠す。提出/承認中は inert で編集ロック。 */}
+      <div className="overflow-x-auto px-2 py-4 print:hidden" inert={locked || undefined}>
         <div
           className="mx-auto origin-top"
           style={{ transform: `scale(${zoom})`, width: 820, maxWidth: "100%" }}

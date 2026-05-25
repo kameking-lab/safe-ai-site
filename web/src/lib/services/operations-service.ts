@@ -8,6 +8,7 @@ import type {
   NotificationSettings,
   PdfExportTarget,
 } from "@/lib/types/operations";
+import { normalizeApproval } from "@/lib/ky/approval";
 
 const STORAGE_KEYS = {
   notification: "safe-ai:notification-settings:v1",
@@ -214,6 +215,7 @@ export function normalizeKyInstructionRecord(raw: unknown): KyInstructionRecordS
     fallChecks,
     breaks,
     reportStamps: reportStamps.slice(0, 5) as [string, string, string, string, string],
+    approval: normalizeApproval(merged.approval),
   };
 }
 

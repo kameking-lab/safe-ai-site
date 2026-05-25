@@ -4,6 +4,7 @@
  */
 import type { KyInstructionRecordState } from "@/lib/types/operations";
 import { evalScore, riskGrade } from "@/lib/ky/pulldown-options";
+import { KY_APPROVAL_LABEL } from "@/lib/ky/approval";
 
 const th = "border border-black bg-slate-100 px-1.5 py-1 text-left align-top font-bold whitespace-nowrap";
 const td = "border border-black px-1.5 py-1 align-top";
@@ -14,6 +15,8 @@ export function KyPrintSheet({ record }: { record: KyInstructionRecordState }) {
   const workDetail = record.workRows.find((r) => r.workDetail.trim())?.workDetail ?? "";
   const dateStr = `${record.workDateYear || ""}年${record.workDateMonth || ""}月${record.workDateDay || ""}日`;
   const temp = record.temperature ? `${record.temperature}℃` : "";
+  const approval = record.approval;
+  const lastApprove = (approval?.history ?? []).slice().reverse().find((h) => h.action === "approve");
 
   return (
     <div className="mx-auto bg-white text-[9pt] text-black print:text-black" style={{ width: "186mm", maxWidth: "100%" }}>
@@ -123,6 +126,14 @@ export function KyPrintSheet({ record }: { record: KyInstructionRecordState }) {
           </tr>
         </tbody>
       </table>
+
+      {/* 承認状況（提出済み以降のみ表示） */}
+      {approval && approval.status !== "draft" && (
+        <p className="mt-1 text-[9pt] font-bold">
+          承認状況: {KY_APPROVAL_LABEL[approval.status]}
+          {lastApprove ? `（承認者: ${lastApprove.by} / ${new Date(lastApprove.at).toLocaleDateString("ja-JP")}）` : ""}
+        </p>
+      )}
 
       {/* 確認印枠 */}
       <table className="mt-1 w-full table-fixed border-collapse">

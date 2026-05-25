@@ -1,3 +1,5 @@
+import type { KyApproval } from "@/lib/ky/approval";
+
 export type NotificationSettingKey =
   | "weatherAlerts"
   | "lawRevisions"
@@ -165,6 +167,8 @@ export type KyInstructionRecordState = {
   priorityItems: string;
   /** 指差呼称項目（「〜ヨシ！」）。朝礼サイネージで大表示する */
   pointingCall: string;
+  /** 元請確認・承認の状態と履歴（P1-B）。未設定は draft 扱い */
+  approval?: KyApproval;
 };
 
 /** KY記録一覧用のサマリー */
