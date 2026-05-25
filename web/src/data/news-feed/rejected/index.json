@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-24T21:53:05.549Z",
+  "updatedAt": "2026-05-25T22:04:46.215Z",
   "entries": [
     {
       "id": "b843c0a41c745361",
@@ -130,6 +130,33 @@
         "rejectionReasons": [
           "relevance 15 < 70 (not labor-safety related)",
           "duplication 85 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "b983955bbf1cec54",
+      "headline": "各地で真夏日 あすも気温高い状態続く 熱中症対策を",
+      "aiSummary": "日本各地で真夏日となり、明日も高温が続く見込み。熱中症対策を呼びかけ。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260525/k10015130771000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 25 May 2026 20:23:31 +0900",
+        "fetchedAt": "2026-05-25T22:04:30.287Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-05-25T22:04:36.844Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,

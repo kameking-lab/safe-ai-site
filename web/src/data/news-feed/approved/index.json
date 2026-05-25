@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-24T21:53:05.549Z",
+  "updatedAt": "2026-05-25T22:04:46.215Z",
   "entries": [
     {
       "id": "dd8cb1f886540ea8",
@@ -21,6 +21,52 @@
         "misinformationRisk": 10,
         "duplication": 15,
         "judgedAt": "2026-05-20T22:22:59.495Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "70bb2530fc67ec29",
+      "headline": "労災疾病臨床研究補助金事業",
+      "aiSummary": "厚生労働省が労働災害による疾病の臨床研究を支援する補助金事業の実施を発表。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/koyou_roudou/roudoukijun/rousai/hojokin.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-05-25T14:00:00+09:00",
+        "fetchedAt": "2026-05-25T22:04:30.287Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-05-25T22:04:41.506Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "f56d30924519b722",
+      "headline": "「第２回　労働安全衛生法に基づく一般健康診断の検査項目等に関する検討会」を開催します",
+      "aiSummary": "厚生労働省が労働安全衛生法に基づく一般健康診断の検査項目に関する検討会を開催。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_73420.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-05-25T09:58:00+09:00",
+        "fetchedAt": "2026-05-25T22:04:30.287Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 20,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-05-25T22:04:46.208Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
