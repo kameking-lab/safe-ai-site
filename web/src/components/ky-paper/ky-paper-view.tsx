@@ -35,6 +35,12 @@ import {
 } from "@/lib/ky/weather-autofill";
 import { loadWorkers, visibleWorkers, type Worker } from "@/lib/ky/workers-master";
 import { loadLatestKyRecord, copyKyForToday } from "@/lib/ky/copy-latest";
+import {
+  isKyCloudEnabled,
+  cloudPullKyRecords,
+  cloudPushKyRecord,
+  flushKyCloudQueue,
+} from "@/lib/ky/storage-adapter";
 
 const AUTOSAVE_KEY = "ky-record";
 const ZOOM_MIN = 0.6;
@@ -73,6 +79,31 @@ export function KyPaperView() {
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setWorkers(visibleWorkers(loadWorkers()));
+  }, []);
+
+  // Phase 4: クラウド同期（背景・任意）。env 未設定なら何もしない＝従来どおり端末内のみ。
+  // ローカルに編集中ドラフトがあれば必ずそれを優先し、空のときだけ別端末の最新を引き継ぐ。
+  useEffect(() => {
+    if (!isKyCloudEnabled()) return;
+    let cancelled = false;
+    void (async () => {
+      await flushKyCloudQueue();
+      let hasLocal = false;
+      try {
+        hasLocal = Boolean(localStorage.getItem(AUTOSAVE_KEY));
+      } catch {
+        hasLocal = false;
+      }
+      if (hasLocal) return;
+      const pulled = await cloudPullKyRecords();
+      if (!cancelled && pulled?.latest) {
+        setRecord(pulled.latest);
+        setNotice("別端末のクラウド保存から最新KYを引き継ぎました。");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // 自動保存（1秒デバウンス）— /ky と同じキーへ
@@ -136,6 +167,8 @@ export function KyPaperView() {
     if (res.ok) {
       setSavedLabel(`保存しました: ${new Date().toLocaleTimeString("ja-JP")}`);
       setNotice("保存しました。朝礼サイネージ・日誌から参照できます。");
+      // Phase 4: 背景でクラウドにも保管（失敗時はキューに退避し次回再送）。
+      void cloudPushKyRecord(record);
     } else {
       setNotice(res.error?.message ?? "保存に失敗しました");
     }

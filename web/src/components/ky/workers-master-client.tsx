@@ -14,6 +14,12 @@ import {
   type Worker,
   type WorkerAffiliation,
 } from "@/lib/ky/workers-master";
+import {
+  isKyCloudEnabled,
+  cloudPullWorkers,
+  cloudPushWorkers,
+  flushKyCloudQueue,
+} from "@/lib/ky/storage-adapter";
 
 const AFFILIATIONS: WorkerAffiliation[] = ["self", "coop1", "coop2", "coop3"];
 
@@ -27,13 +33,31 @@ export function WorkersMasterClient() {
   const [draftRegular, setDraftRegular] = useState(true);
 
   useEffect(() => {
+    const local = loadWorkers();
     // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント時の一度きりのlocalStorage読み込み
-    setWorkers(loadWorkers());
+    setWorkers(local);
+    // Phase 4: クラウド同期（背景・任意）。ローカルが空のときだけ別端末の登録を引き継ぐ。
+    if (!isKyCloudEnabled()) return;
+    let cancelled = false;
+    void (async () => {
+      await flushKyCloudQueue();
+      if (local.length > 0) return;
+      const cloud = await cloudPullWorkers();
+      if (!cancelled && cloud && cloud.length > 0) {
+        saveWorkers(cloud);
+        setWorkers(cloud);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const commit = (next: Worker[]) => {
     setWorkers(next);
     saveWorkers(next);
+    // Phase 4: 背景でクラウド同期（失敗時はキューに退避し次回再送）。
+    void cloudPushWorkers(next);
   };
 
   const handleAdd = () => {
@@ -76,7 +100,7 @@ export function WorkersMasterClient() {
       </div>
 
       <p className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
-        ※ データはこの端末内に保存されます（クラウド同期は今後対応予定）。
+        ※ データはこの端末に保存され、クラウド設定時は自動でバックアップ・別端末同期されます（未設定でも端末内で完結して動作）。
       </p>
 
       {/* 新規追加 */}
