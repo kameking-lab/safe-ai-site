@@ -4,23 +4,61 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
 import type { KyInstructionRecordState } from "@/lib/types/operations";
+import { cloudGetSignageSession } from "@/lib/ky/storage-adapter";
 
 const COUNTDOWN_SEC = 10;
 
 export function KyMorningSignage() {
   const [record, setRecord] = useState<KyInstructionRecordState | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const [remoteCode, setRemoteCode] = useState<string | null>(null);
+  const [remoteError, setRemoteError] = useState<string | null>(null);
+  const [codeInput, setCodeInput] = useState("");
 
+  // 初回: URLの ?code= があれば別端末共有モード（クラウド取得）。無ければ端末内 ky-record。
   useEffect(() => {
+    let code: string | null = null;
+    try {
+      code = new URLSearchParams(window.location.search).get("code");
+    } catch {
+      code = null;
+    }
+    if (code && /^\d{6}$/.test(code)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRemoteCode(code);
+      return;
+    }
     try {
       const saved = localStorage.getItem("ky-record");
       if (saved) {
-        const parsed: unknown = JSON.parse(saved);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setRecord(normalizeKyInstructionRecord(parsed));
+        setRecord(normalizeKyInstructionRecord(JSON.parse(saved) as unknown));
       }
-    } catch {}
+    } catch {
+      /* 端末内データ無し */
+    }
   }, []);
+
+  // 別端末共有モード: コードでクラウドから取得し、約8秒ごとに自動更新（ポーリング）。
+  useEffect(() => {
+    if (!remoteCode) return;
+    let cancelled = false;
+    const load = async () => {
+      const r = await cloudGetSignageSession(remoteCode);
+      if (cancelled) return;
+      if (r) {
+        setRecord(r);
+        setRemoteError(null);
+      } else {
+        setRemoteError("共有コードのKYが見つからないか、有効期限が切れています。");
+      }
+    };
+    void load();
+    const timer = setInterval(() => void load(), 8000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [remoteCode]);
 
   useEffect(() => {
     if (countdown === null) return;
@@ -70,7 +108,7 @@ export function KyMorningSignage() {
             KY 朝礼サイネージ表示
           </p>
           <Link
-            href="/ky"
+            href="/ky/paper"
             className="rounded-lg border border-white/30 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
           >
             ← KY編集に戻る
@@ -79,10 +117,47 @@ export function KyMorningSignage() {
 
         {!record ? (
           <div className="mt-20 rounded-2xl bg-white/10 p-8 text-center">
-            <p className="text-2xl font-bold">KYデータが見つかりません</p>
-            <p className="mt-2 text-base text-white/70">
-              先に <Link href="/ky" className="underline">/ky</Link> でKY用紙を作成・保存してください。
+            <p className="text-2xl font-bold">
+              {remoteCode ? (remoteError ?? "共有KYを読み込み中…") : "KYデータが見つかりません"}
             </p>
+            <p className="mt-2 text-base text-white/70">
+              {remoteCode ? (
+                "発行された6桁コードをご確認ください。作成端末で「別端末で共有」した直後に有効になります。"
+              ) : (
+                <>
+                  先に <Link href="/ky/paper" className="underline">/ky/paper</Link> でKY用紙を作成・保存するか、
+                  別端末で発行した6桁コードを入力してください。
+                </>
+              )}
+            </p>
+            {/* 別端末から6桁コードで開く入力フォーム */}
+            <form
+              className="mx-auto mt-6 flex max-w-xs items-center gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (/^\d{6}$/.test(codeInput)) {
+                  window.location.href = `/ky/morning?code=${codeInput}`;
+                }
+              }}
+            >
+              <input
+                inputMode="numeric"
+                pattern="\d{6}"
+                maxLength={6}
+                value={codeInput}
+                onChange={(e) => setCodeInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="6桁の共有コード"
+                aria-label="共有コード"
+                className="w-44 rounded-lg border border-white/30 bg-white/10 px-3 py-2 text-center text-lg tracking-widest text-white placeholder:text-white/40"
+              />
+              <button
+                type="submit"
+                disabled={!/^\d{6}$/.test(codeInput)}
+                className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400 disabled:opacity-40"
+              >
+                表示
+              </button>
+            </form>
           </div>
         ) : (
           <>
@@ -183,7 +258,9 @@ export function KyMorningSignage() {
         )}
 
         <p className="mt-auto pt-6 text-center text-xs text-white/50">
-          ※ /ky で保存したKY記録（端末内）を表示しています。投影前に最新化してください。
+          {remoteCode
+            ? `※ 共有コード ${remoteCode} のKYを表示中（約8秒ごとに自動更新）。`
+            : "※ この端末で保存したKY記録を表示しています。別端末で映すには、KY用紙の「別端末で共有」から6桁コードを発行してください。"}
         </p>
       </div>
     </main>

@@ -102,7 +102,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "現場で使う",
     description: "当日の現場業務で使う実務ツール",
     items: [
-      { id: "ky-sheet", label: "KY用紙", href: "/ky", icon: ClipboardList, description: "業種別プリセット・音声入力で3分起票" },
+      { id: "ky-sheet", label: "KY用紙", href: "/ky/paper", icon: ClipboardList, description: "用紙ファースト・音声入力・AI危険提案で3分起票" },
       { id: "safety-diary", label: "安全衛生日誌", href: "/safety-diary", icon: FileText, description: "必須5項目を3〜5分で入力・月次まとめ" },
       { id: "signage", label: "サイネージ", href: "/signage", icon: Monitor, description: "現場掲示用フルスクリーン・自動更新" },
       { id: "heat-illness", label: "熱中症対策", href: "/heat-illness-prevention", icon: Thermometer, description: "WBGT計算機・R7改正対応" },

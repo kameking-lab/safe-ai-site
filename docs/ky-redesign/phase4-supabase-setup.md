@@ -95,3 +95,35 @@ alter table worker_master enable row level security;
 - 無料枠で開始（月額¥0）。データ量増加時のみ有料（Pro 約¥4千/月）で**¥10,000上限内**。
 - オフライン必須要件は維持: 環境変数未設定・通信失敗時は端末内保存で従来どおり動作。
 - メール認証・課金は本Phase対象外（社長確認事項として別途）。
+
+---
+
+## E. 実装確定（本セッションで確定したアクセス経路・RLS方針）
+
+「B」で次セッションに先送りしていたRLS/アクセス経路を、以下に確定した。
+
+### 採用アーキテクチャ: サーバー経由 service_role（ブラウザ直 anon は不採用）
+- KY記録・作業員マスターのクラウド読み書きは**すべて Next.js の API Route 経由**:
+  - `POST/GET /api/ky/records`（KY記録の保存・最新/一覧取得）
+  - `POST/GET /api/ky/workers`（作業員マスターの upsert・取得）
+- これらは `web/src/lib/supabase/server.ts` の **service_role クライアント（サーバー専用）** を使う。
+  `service_role` キーはブラウザに一切渡らない。`device_id` 単位の絞り込みは API Route 側のクエリで行う。
+- **理由**: 社長設定では `ky_records` / `worker_master` に RLS が有効。anon キー直アクセス用の
+  ポリシーが無い状態では anon は全拒否になり「クラウドが動かない」状態になる。service_role は
+  RLS を貫通するため、ポリシー詳細に依存せず Preview/本番で確実に動作する（最も壊れにくい）。
+
+### ローカルファースト（オフライン耐性）
+- 端末内 localStorage が常に真実の保存先。UI は従来どおり即時動作。
+- クラウドは「保存ボタン押下時に背景でバックアップ」＋「別端末で最新を引き継ぎ」用。
+- 送信失敗時は `safe-ai:ky-sync-queue:v1` に最新状態を退避し、次回マウント時に再送（最新優先）。
+- env 未設定（service_role 無し）の環境では API Route が 503 を返し、ブラウザは自動で localStorage 継続。
+
+### 社長がプレビューで確認すること
+1. `/ky/paper` でKYを入力し「保存」→ Supabase の `ky_records` に行が増えること。
+2. `/ky/workers` で作業員を追加 → `worker_master` に当該 `device_id` の行ができること。
+3. （任意）別ブラウザ/シークレットウィンドウで `/ky/paper` を開くと、保存済みKYが引き継がれること。
+
+### 推奨RLS（任意・多層防御）
+service_role 経由のため必須ではないが、将来の anon 直アクセスや誤設定に備え、
+`ky_records` / `worker_master` は RLS 有効のまま anon ポリシーを作らない（=既定拒否）を維持する。
+`signage_sessions`（Phase 6）も同様にサーバー経由読み書きとし、anon 公開はしない。

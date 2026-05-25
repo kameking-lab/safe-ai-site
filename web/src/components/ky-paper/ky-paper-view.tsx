@@ -35,6 +35,15 @@ import {
 } from "@/lib/ky/weather-autofill";
 import { loadWorkers, visibleWorkers, type Worker } from "@/lib/ky/workers-master";
 import { loadLatestKyRecord, copyKyForToday } from "@/lib/ky/copy-latest";
+import {
+  isKyCloudEnabled,
+  cloudPullKyRecords,
+  cloudPushKyRecord,
+  cloudCreateSignageSession,
+  flushKyCloudQueue,
+} from "@/lib/ky/storage-adapter";
+import type { KyHazardSuggestion, HazardSuggestionResponse } from "@/lib/ky/gemini-suggest";
+import { migrateLegacyKyRecord } from "@/lib/ky/storage-migration";
 
 const AUTOSAVE_KEY = "ky-record";
 const ZOOM_MIN = 0.6;
@@ -59,9 +68,16 @@ export function KyPaperView() {
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [savedLabel, setSavedLabel] = useState("記入すると自動保存されます");
   const [notice, setNotice] = useState<string | null>(null);
+  const [suggestBusy, setSuggestBusy] = useState(false);
+  const [suggestions, setSuggestions] = useState<KyHazardSuggestion[]>([]);
+  const [suggestSource, setSuggestSource] = useState<"gemini" | "fallback" | null>(null);
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareCode, setShareCode] = useState<string | null>(null);
 
-  // 初回読み込み: 既存の自動保存KYを引き継ぐ（/ky と共有）
+  // 初回読み込み: 旧 /ky の手動保存データを引き継いでから、自動保存KYを読み込む。
   useEffect(() => {
+    // Phase 7: 旧 /ky（手動保存キー）→ ky-record の移行（空のときだけ・冪等）。
+    migrateLegacyKyRecord();
     try {
       const saved = localStorage.getItem(AUTOSAVE_KEY);
       if (saved) {
@@ -73,6 +89,31 @@ export function KyPaperView() {
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setWorkers(visibleWorkers(loadWorkers()));
+  }, []);
+
+  // Phase 4: クラウド同期（背景・任意）。env 未設定なら何もしない＝従来どおり端末内のみ。
+  // ローカルに編集中ドラフトがあれば必ずそれを優先し、空のときだけ別端末の最新を引き継ぐ。
+  useEffect(() => {
+    if (!isKyCloudEnabled()) return;
+    let cancelled = false;
+    void (async () => {
+      await flushKyCloudQueue();
+      let hasLocal = false;
+      try {
+        hasLocal = Boolean(localStorage.getItem(AUTOSAVE_KEY));
+      } catch {
+        hasLocal = false;
+      }
+      if (hasLocal) return;
+      const pulled = await cloudPullKyRecords();
+      if (!cancelled && pulled?.latest) {
+        setRecord(pulled.latest);
+        setNotice("別端末のクラウド保存から最新KYを引き継ぎました。");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // 自動保存（1秒デバウンス）— /ky と同じキーへ
@@ -136,8 +177,99 @@ export function KyPaperView() {
     if (res.ok) {
       setSavedLabel(`保存しました: ${new Date().toLocaleTimeString("ja-JP")}`);
       setNotice("保存しました。朝礼サイネージ・日誌から参照できます。");
+      // Phase 4: 背景でクラウドにも保管（失敗時はキューに退避し次回再送）。
+      void cloudPushKyRecord(record);
     } else {
       setNotice(res.error?.message ?? "保存に失敗しました");
+    }
+  };
+
+  // Phase 5: 本物のAI（Gemini）に危険箇所を提案させる。未設定/失敗時はAPI側で擬似AIにフォールバック。
+  const handleSuggest = async () => {
+    const workContent = record.workRows[0]?.workDetail?.trim() ?? "";
+    if (!workContent) {
+      setNotice("先に「本日の作業内容」を入力してください（AI提案の手がかりになります）。");
+      return;
+    }
+    setSuggestBusy(true);
+    try {
+      const res = await fetch("/api/ky/suggest", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ workContent }),
+      });
+      if (!res.ok) {
+        setNotice("AI提案の取得に失敗しました。時間をおいて再度お試しください。");
+        return;
+      }
+      const data = (await res.json()) as HazardSuggestionResponse;
+      setSuggestions(Array.isArray(data.suggestions) ? data.suggestions : []);
+      setSuggestSource(data.source ?? null);
+      if (!data.suggestions || data.suggestions.length === 0) {
+        setNotice("提案が得られませんでした。作業内容を具体的にすると精度が上がります。");
+      } else if (data.note) {
+        setNotice(data.note);
+      }
+    } catch {
+      setNotice("AI提案の通信に失敗しました。");
+    } finally {
+      setSuggestBusy(false);
+    }
+  };
+
+  // 提案を最初の空き危険欄に取り込む（埋まっていれば新しい行を追加）。
+  const applySuggestion = (s: KyHazardSuggestion) => {
+    setRecord((prev) => {
+      const rows = [...prev.riskRows];
+      const emptyIdx = rows.findIndex((r) => !r.hazard.trim());
+      const base = emptyIdx >= 0 ? rows[emptyIdx] : undefined;
+      if (base) {
+        rows[emptyIdx] = {
+          ...base,
+          hazard: s.hazard,
+          reduction: s.reduction,
+          likelihood: s.likelihood,
+          severity: s.severity,
+        };
+      } else {
+        rows.push({
+          targetLabel: "+",
+          hazard: s.hazard,
+          qualNo: "",
+          likelihood: s.likelihood,
+          severity: s.severity,
+          reduction: s.reduction,
+          reLikelihood: 1,
+          reSeverity: 1,
+          reducedBelow2: "",
+          primeSign: "",
+        });
+      }
+      return { ...prev, riskRows: rows };
+    });
+    setNotice("提案を危険のポイント欄に反映しました。現場に合わせて加筆・修正してください。");
+  };
+
+  // Phase 6: 現在のKYを別端末サイネージ用に共有（6桁コード発行）。
+  const handleShare = async () => {
+    if (!isKyCloudEnabled()) {
+      setNotice("クラウド未設定のため別端末共有は使えません。同じ端末なら「サイネージへ」で表示できます。");
+      return;
+    }
+    setShareBusy(true);
+    try {
+      // 共有前に保存して内容を確定（保存KYと共有内容を一致させる）。
+      await services.operations.saveKyInstructionRecord(record);
+      void cloudPushKyRecord(record);
+      const code = await cloudCreateSignageSession(record);
+      if (code) {
+        setShareCode(code);
+        setNotice(`別端末サイネージ共有コード: ${code}（別端末で /ky/morning に入力、または ?code=${code}）`);
+      } else {
+        setNotice("共有コードの発行に失敗しました。通信状況をご確認ください。");
+      }
+    } finally {
+      setShareBusy(false);
     }
   };
 
@@ -178,10 +310,7 @@ export function KyPaperView() {
       <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-bold text-slate-900">KY用紙（用紙ビュー・ベータ）</span>
-            <Link href="/ky" className="rounded-full border border-slate-300 px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">
-              通常の入力に戻る
-            </Link>
+            <span className="text-sm font-bold text-slate-900">KY用紙</span>
             <Link href="/ky/workers" className="rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100">
               作業員マスター
             </Link>
@@ -265,6 +394,51 @@ export function KyPaperView() {
 
             {/* 4R: 危険のポイントと対策（リスクアセスメント） */}
             <SheetSection title="危険のポイントと対策（1R〜3R）">
+              {/* Phase 5: 本物のAI（Gemini）による危険箇所提案。印刷時は隠す。 */}
+              <div className="mb-2 print:hidden">
+                <button
+                  type="button"
+                  onClick={() => void handleSuggest()}
+                  disabled={suggestBusy}
+                  className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-800 hover:bg-indigo-100 disabled:opacity-50"
+                >
+                  {suggestBusy ? "AIが分析中…" : "🤖 AIに危険箇所を提案させる"}
+                </button>
+                {suggestSource && suggestions.length > 0 && (
+                  <div className="mt-2 space-y-1.5 rounded-lg border border-indigo-200 bg-indigo-50/40 p-2">
+                    <p className="text-[11px] font-semibold text-indigo-900">
+                      {suggestSource === "gemini"
+                        ? "本物のAI（Gemini）の提案"
+                        : "定型提案（AI未設定/応答不可のフォールバック）"}
+                      ：気になる項目を「反映」で危険欄へ取り込めます
+                    </p>
+                    {suggestions.map((s, i) => (
+                      <div key={i} className="flex items-start justify-between gap-2 rounded border border-indigo-200 bg-white p-1.5">
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-slate-800">
+                            {s.hazard}
+                            <span className="ml-1 rounded bg-slate-100 px-1 text-[10px] text-slate-600">
+                              評価値{s.evaluation}（{s.riskLabel}）
+                            </span>
+                            {!s.grounded && (
+                              <span className="ml-1 rounded bg-amber-100 px-1 text-[10px] text-amber-700">要確認</span>
+                            )}
+                          </p>
+                          <p className="text-[11px] text-slate-600">対策: {s.reduction || "—"}</p>
+                          {s.basis && <p className="text-[10px] text-slate-400">根拠: {s.basis}</p>}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => applySuggestion(s)}
+                          className="shrink-0 rounded border border-indigo-300 bg-white px-2 py-1 text-[11px] font-bold text-indigo-700 hover:bg-indigo-50"
+                        >
+                          反映
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="space-y-2">
                 {visibleRisks.map((row, i) => {
                   const score = evalScore(row.likelihood, row.severity);
@@ -356,10 +530,16 @@ export function KyPaperView() {
       {/* 下部アクションバー */}
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-2.5 shadow-lg backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
-          <span className="text-[11px] text-slate-500">{savedLabel}</span>
+          <span className="text-[11px] text-slate-500">
+            {savedLabel}
+            {shareCode && (
+              <span className="ml-2 rounded bg-violet-100 px-2 py-0.5 font-bold text-violet-800">共有コード {shareCode}</span>
+            )}
+          </span>
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={handleCopyLatest} className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50">前回を複製</button>
             <button type="button" onClick={() => void handleSave()} className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
+            <button type="button" onClick={() => void handleShare()} disabled={shareBusy} className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50 disabled:opacity-50">{shareBusy ? "発行中…" : "別端末で共有"}</button>
             <Link href="/ky/morning" className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50">サイネージへ →</Link>
             <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-5 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
           </div>

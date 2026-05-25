@@ -216,6 +216,29 @@ export function normalizeKyInstructionRecord(raw: unknown): KyInstructionRecordS
   };
 }
 
+/**
+ * KY記録から一覧用サマリーを生成する純粋関数。
+ * localStorage 保存（下記 saveKyInstructionRecord）と、クラウド API（/api/ky/records）の
+ * 両方で同じ導出ロジックを共有するために切り出した（Phase 4）。
+ */
+export function buildKyRecordSummary(
+  record: KyInstructionRecordState,
+  opts: { id?: string; savedAt?: string } = {}
+): KyRecordSummary {
+  const normalized = normalizeKyInstructionRecord(record);
+  const pad = (s: string) => String(s ?? "").padStart(2, "0");
+  return {
+    id: opts.id ?? Date.now().toString(),
+    workDate: `${normalized.workDateYear}-${pad(normalized.workDateMonth)}-${pad(normalized.workDateDay)}`,
+    companyName: normalized.coop1Name || normalized.coop2Name || normalized.coop3Name || "未入力",
+    siteName: normalized.siteName || "",
+    foremanName: normalized.foremanName || "",
+    workDetail: normalized.workRows[0]?.workDetail || "未入力",
+    weather: normalized.weather || "未入力",
+    savedAt: opts.savedAt ?? new Date().toISOString(),
+  };
+}
+
 function readFromStorage<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
   const raw = window.localStorage.getItem(key);
@@ -304,17 +327,7 @@ export function createOperationsService(): OperationsService {
         // 一覧に追加
         const list = readFromStorage<KyRecordSummary[]>(STORAGE_KEYS.kyList, []);
         const safeList = Array.isArray(list) ? list : [];
-        const pad = (s: string) => String(s ?? "").padStart(2, "0");
-        const summary: KyRecordSummary = {
-          id: Date.now().toString(),
-          workDate: `${normalized.workDateYear}-${pad(normalized.workDateMonth)}-${pad(normalized.workDateDay)}`,
-          companyName: normalized.coop1Name || normalized.coop2Name || normalized.coop3Name || "未入力",
-          siteName: normalized.siteName || "",
-          foremanName: normalized.foremanName || "",
-          workDetail: normalized.workRows[0]?.workDetail || "未入力",
-          weather: normalized.weather || "未入力",
-          savedAt: new Date().toISOString(),
-        };
+        const summary = buildKyRecordSummary(normalized);
         const updated = [summary, ...safeList].slice(0, MAX_KY_LIST);
         writeToStorage(STORAGE_KEYS.kyList, updated);
         return { ok: true, data: normalized };
