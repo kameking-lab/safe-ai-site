@@ -124,11 +124,15 @@ function buildDefaultKyInstructionRecord(): KyInstructionRecordState {
   const d = new Date();
   return {
     reportStamps: ["", "", "", "", ""],
+    siteName: "",
+    projectName: "",
+    foremanName: "",
     workDateYear: d.getFullYear().toString(),
     workDateMonth: String(d.getMonth() + 1),
     workDateDay: String(d.getDate()),
     workDateNote: "",
     weather: "",
+    temperature: "",
     coop1Name: "",
     coop1Chief: "",
     coop2Name: "",
@@ -157,6 +161,9 @@ function buildDefaultKyInstructionRecord(): KyInstructionRecordState {
       { good: "", bad: "", done: "" },
     ],
     correctionNote: "",
+    teamGoal: "",
+    priorityItems: "",
+    pointingCall: "",
   };
 }
 
@@ -302,6 +309,8 @@ export function createOperationsService(): OperationsService {
           id: Date.now().toString(),
           workDate: `${normalized.workDateYear}-${pad(normalized.workDateMonth)}-${pad(normalized.workDateDay)}`,
           companyName: normalized.coop1Name || normalized.coop2Name || normalized.coop3Name || "未入力",
+          siteName: normalized.siteName || "",
+          foremanName: normalized.foremanName || "",
           workDetail: normalized.workRows[0]?.workDetail || "未入力",
           weather: normalized.weather || "未入力",
           savedAt: new Date().toISOString(),

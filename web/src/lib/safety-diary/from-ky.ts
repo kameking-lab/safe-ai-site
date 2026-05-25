@@ -24,6 +24,7 @@ import type {
 } from "@/lib/types/operations";
 
 const KY_STORAGE_KEY = "safe-ai:ky-instruction-record:v1";
+const KY_AUTOSAVE_KEY = "ky-record";
 
 export type KyToDiaryPayload = {
   workContent: string;
@@ -38,17 +39,21 @@ export type KyToDiaryPayload = {
 
 function safeReadKy(): KyInstructionRecordState | null {
   if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(KY_STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as unknown;
-    if (!parsed || typeof parsed !== "object") return null;
-    // 必須フィールドが揃っているかは normalizeKyInstructionRecord で吸収済の前提。
-    // ここでは型を緩く扱う。
-    return parsed as KyInstructionRecordState;
-  } catch {
-    return null;
+  // 監査 P0-4: 手動保存キーを優先し、未保存（自動保存のみ）の場合も拾えるよう
+  // 自動保存キー(ky-record)へフォールバックする。これで「保存し忘れで空転記」を防ぐ。
+  for (const key of [KY_STORAGE_KEY, KY_AUTOSAVE_KEY]) {
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw) as unknown;
+      if (!parsed || typeof parsed !== "object") continue;
+      // 必須フィールドは normalizeKyInstructionRecord 側で吸収する前提。
+      return parsed as KyInstructionRecordState;
+    } catch {
+      // 壊れていれば次のキーへ
+    }
   }
+  return null;
 }
 
 function formatWorkContent(rows: KyInstructionWorkRow[] | undefined): string {
@@ -95,6 +100,7 @@ export function loadLatestKyForDiary(): KyToDiaryPayload | null {
   // KY は工事会社名 (coop1Name 等) を持つが現場名は持たないことが多い。
   // workPlace は workRows[0] にあるためそちらをフォールバックに使う。
   const siteName =
+    ky.siteName?.trim() ||
     ky.coop1Name?.trim() ||
     ky.workRows?.[0]?.workPlace?.trim() ||
     null;
