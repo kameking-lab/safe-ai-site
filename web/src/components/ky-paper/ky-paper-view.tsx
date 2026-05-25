@@ -47,6 +47,7 @@ import type { KyHazardSuggestion, HazardSuggestionResponse } from "@/lib/ky/gemi
 import { migrateLegacyKyRecord } from "@/lib/ky/storage-migration";
 import { computeKySyncStatus, KY_SYNC_LABEL, type KySyncStatus } from "@/lib/ky/sync-status";
 import { applyKyDeepLink } from "@/lib/ky/deep-link-prefill";
+import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
 
 const AUTOSAVE_KEY = "ky-record";
 const ZOOM_MIN = 0.6;
@@ -77,6 +78,7 @@ export function KyPaperView() {
   const [suggestSource, setSuggestSource] = useState<"gemini" | "fallback" | null>(null);
   const [shareBusy, setShareBusy] = useState(false);
   const [shareCode, setShareCode] = useState<string | null>(null);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [syncStatus, setSyncStatus] = useState<KySyncStatus>(() =>
     computeKySyncStatus({ cloudEnabled: isKyCloudEnabled(), online: true, pending: false })
   );
@@ -391,8 +393,8 @@ export function KyPaperView() {
         </div>
       )}
 
-      {/* 用紙本体（ズーム対象） */}
-      <div className="overflow-x-auto px-2 py-4 print:overflow-visible print:p-0">
+      {/* 用紙本体（ズーム対象）。印刷時は専用A4シート（下部）を使うため隠す。 */}
+      <div className="overflow-x-auto px-2 py-4 print:hidden">
         <div
           className="mx-auto origin-top"
           style={{ transform: `scale(${zoom})`, width: 820, maxWidth: "100%" }}
@@ -585,6 +587,29 @@ export function KyPaperView() {
         </div>
       </div>
 
+      {/* P1-A: A4印刷用シート（画面では非表示・印刷時のみ描画＝元請提出体裁） */}
+      <div className="hidden print:block">
+        <KyPrintSheet record={record} />
+      </div>
+
+      {/* 印刷プレビュー（画面オーバーレイ。印刷物には出さない） */}
+      {showPrintPreview && (
+        <div className="fixed inset-0 z-40 overflow-auto bg-slate-700/70 p-4 print:hidden">
+          <div className="mx-auto max-w-[210mm] rounded bg-white p-4 shadow-2xl">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-bold text-slate-800">印刷プレビュー（A4・確認印枠つき）</p>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-700">印刷 / PDF</button>
+                <button type="button" onClick={() => setShowPrintPreview(false)} className="rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">閉じる</button>
+              </div>
+            </div>
+            <div className="overflow-x-auto rounded border border-slate-200 p-2">
+              <KyPrintSheet record={record} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 下部アクションバー */}
       <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-2.5 shadow-lg backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
@@ -603,6 +628,7 @@ export function KyPaperView() {
             )}
             <button type="button" onClick={() => void handleShare()} disabled={shareBusy} className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50 disabled:opacity-50">{shareBusy ? "発行中…" : "別端末で共有"}</button>
             <Link href="/ky/morning" className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50">サイネージへ →</Link>
+            <button type="button" onClick={() => setShowPrintPreview(true)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">印刷プレビュー</button>
             <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-5 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
           </div>
         </div>
