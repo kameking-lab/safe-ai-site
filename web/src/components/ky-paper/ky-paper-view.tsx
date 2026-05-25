@@ -41,14 +41,18 @@ import {
   cloudPushKyRecord,
   cloudCreateSignageSession,
   flushKyCloudQueue,
+  hasPendingKyCloudSync,
 } from "@/lib/ky/storage-adapter";
 import type { KyHazardSuggestion, HazardSuggestionResponse } from "@/lib/ky/gemini-suggest";
 import { migrateLegacyKyRecord } from "@/lib/ky/storage-migration";
+import { computeKySyncStatus, KY_SYNC_LABEL, type KySyncStatus } from "@/lib/ky/sync-status";
+import { applyKyDeepLink } from "@/lib/ky/deep-link-prefill";
 
 const AUTOSAVE_KEY = "ky-record";
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
 const ZOOM_STEP = 0.1;
+const DEEP_LINK_KEYS = ["preset", "template", "industry", "fromAccident", "fromDiary", "import"] as const;
 
 function makeToday(): KyInstructionRecordState {
   const base = normalizeKyInstructionRecord({});
@@ -73,21 +77,57 @@ export function KyPaperView() {
   const [suggestSource, setSuggestSource] = useState<"gemini" | "fallback" | null>(null);
   const [shareBusy, setShareBusy] = useState(false);
   const [shareCode, setShareCode] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<KySyncStatus>(() =>
+    computeKySyncStatus({ cloudEnabled: isKyCloudEnabled(), online: true, pending: false })
+  );
 
-  // 初回読み込み: 旧 /ky の手動保存データを引き継いでから、自動保存KYを読み込む。
+  const refreshSync = useCallback(() => {
+    setSyncStatus(
+      computeKySyncStatus({
+        cloudEnabled: isKyCloudEnabled(),
+        online: typeof navigator === "undefined" ? true : navigator.onLine,
+        pending: hasPendingKyCloudSync(),
+      })
+    );
+  }, []);
+
+  // P1-D: 同期状態の追従（マウント＋オンライン/オフライン切替）。
+  useEffect(() => {
+    refreshSync();
+    if (typeof window === "undefined") return;
+    window.addEventListener("online", refreshSync);
+    window.addEventListener("offline", refreshSync);
+    return () => {
+      window.removeEventListener("online", refreshSync);
+      window.removeEventListener("offline", refreshSync);
+    };
+  }, [refreshSync]);
+
+  // 初回読み込み: 旧 /ky の手動保存データを引き継ぎ→自動保存KY→クロスツール連携クエリの順で反映。
   useEffect(() => {
     // Phase 7: 旧 /ky（手動保存キー）→ ky-record の移行（空のときだけ・冪等）。
     migrateLegacyKyRecord();
+    let baseRec: KyInstructionRecordState | null = null;
     try {
       const saved = localStorage.getItem(AUTOSAVE_KEY);
-      if (saved) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント時の一度きり
-        setRecord(normalizeKyInstructionRecord(JSON.parse(saved) as unknown));
-      }
+      if (saved) baseRec = normalizeKyInstructionRecord(JSON.parse(saved) as unknown);
     } catch {
       /* 壊れていれば初期値のまま */
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    // P1-C: 事故DB/プリセット/日誌/AIリスク予測からのクエリ取り込み。
+    let params: URLSearchParams | null = null;
+    try {
+      params = new URLSearchParams(window.location.search);
+    } catch {
+      params = null;
+    }
+    if (params && DEEP_LINK_KEYS.some((k) => params!.has(k))) {
+      const res = applyKyDeepLink(params, baseRec ?? makeToday());
+      setRecord(res.record);
+      if (res.notice) setNotice(res.notice);
+    } else if (baseRec) {
+      setRecord(baseRec);
+    }
     setWorkers(visibleWorkers(loadWorkers()));
   }, []);
 
@@ -178,7 +218,8 @@ export function KyPaperView() {
       setSavedLabel(`保存しました: ${new Date().toLocaleTimeString("ja-JP")}`);
       setNotice("保存しました。朝礼サイネージ・日誌から参照できます。");
       // Phase 4: 背景でクラウドにも保管（失敗時はキューに退避し次回再送）。
-      void cloudPushKyRecord(record);
+      await cloudPushKyRecord(record);
+      refreshSync();
     } else {
       setNotice(res.error?.message ?? "保存に失敗しました");
     }
@@ -270,6 +311,20 @@ export function KyPaperView() {
       }
     } finally {
       setShareBusy(false);
+    }
+  };
+
+  // P1-D: クラウドの最新KYを取得して現在の内容を置き換える（競合は確認のうえユーザー判断）。
+  const handleFetchLatest = async () => {
+    const pulled = await cloudPullKyRecords();
+    refreshSync();
+    if (!pulled?.latest) {
+      setNotice("クラウドに保存済みのKYが見つかりませんでした。");
+      return;
+    }
+    if (window.confirm("クラウドの最新KYで現在の内容を置き換えますか？（この端末の未保存の変更は失われます）")) {
+      setRecord(pulled.latest);
+      setNotice("クラウドの最新KYを読み込みました。");
     }
   };
 
@@ -535,6 +590,7 @@ export function KyPaperView() {
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
           <span className="text-[11px] text-slate-500">
             {savedLabel}
+            <span className="ml-2 rounded bg-slate-100 px-2 py-0.5 font-semibold text-slate-600">{KY_SYNC_LABEL[syncStatus]}</span>
             {shareCode && (
               <span className="ml-2 rounded bg-violet-100 px-2 py-0.5 font-bold text-violet-800">共有コード {shareCode}</span>
             )}
@@ -542,6 +598,9 @@ export function KyPaperView() {
           <div className="flex flex-wrap gap-2">
             <button type="button" onClick={handleCopyLatest} className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50">前回を複製</button>
             <button type="button" onClick={() => void handleSave()} className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
+            {isKyCloudEnabled() && (
+              <button type="button" onClick={() => void handleFetchLatest()} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">クラウド最新取得</button>
+            )}
             <button type="button" onClick={() => void handleShare()} disabled={shareBusy} className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50 disabled:opacity-50">{shareBusy ? "発行中…" : "別端末で共有"}</button>
             <Link href="/ky/morning" className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50">サイネージへ →</Link>
             <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-5 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
