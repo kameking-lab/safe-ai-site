@@ -1,71 +1,33 @@
 import type { Metadata } from "next";
-import { DiaryListClient } from "@/components/safety-diary/diary-list-client";
-import { RelatedPageCards } from "@/components/related-page-cards";
-import { ogImageUrl } from "@/lib/og-url";
+import { MeetingPaperView } from "@/components/meeting/meeting-paper-view";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { ogImageUrl } from "@/lib/og-url";
 
-const _title = "安全衛生日誌 ｜ 必須5項目で3〜5分入力 + 月次まとめ";
+const _title = "安全工程打合せ書・安全衛生指示書 ｜ 元請が前日5分で作成";
 const _desc =
-  "業種別プリセット（建設/製造/医療福祉/運輸/IT）に対応した安全衛生日誌。必須5項目を3〜5分で入力し、任意8項目で詳細化。月次まとめで延労働人数・KY実施率・ヒヤリ件数を可視化。";
+  "北海道労働局公式版ベースの「安全工程打合せ書及び安全衛生指示書」を用紙ファーストで作成。各社の作業・使用機械・必要資格・予想災害・リスク評価・指示事項を1枚に。点検項目8カテゴリ・使用機械自動集計・印刷対応。無料・登録不要。";
 
 export const metadata: Metadata = {
   title: _title,
   description: _desc,
   alternates: { canonical: "/safety-diary" },
   openGraph: {
-    title: `${_title}`,
+    title: _title,
     description: _desc,
     images: [{ url: ogImageUrl(_title, _desc), width: 1200, height: 630 }],
   },
-  twitter: {
-    card: "summary_large_image",
-    images: [ogImageUrl(_title, _desc)],
-  },
+  twitter: { card: "summary_large_image", images: [ogImageUrl(_title, _desc)] },
 };
 
 export default function SafetyDiaryPage() {
   return (
     <>
-      {/* P1-A: 「縮小版」ネガティブ告知を撤去。下部の RelatedPageCards に
-          PDFエクスポート動線がある旨だけポジティブに案内する。 */}
-      <div className="mx-auto max-w-2xl px-4 pt-4">
-        <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-xs text-emerald-900">
-          一覧と新規記録の2画面で運用できます。PDF出力・印刷はこのページ下部の
-          「PDF エクスポート」から行えます。
-        </p>
-      </div>
       <PageJsonLd
-        name="安全衛生日誌"
-        description="必須5項目+任意8項目の現場日誌。月次まとめで類似事故・関連法改正をハイライト。"
+        name="安全工程打合せ書・安全衛生指示書"
+        description="北海道労働局公式版ベースの打合せ書。各社マトリクス・点検項目8カテゴリ・使用機械自動集計・印刷対応。"
         path="/safety-diary"
       />
-      <DiaryListClient />
-      <RelatedPageCards
-        heading="合わせて使う"
-        pages={[
-          {
-            href: "/ky",
-            label: "KY簡易作成",
-            description: "朝礼3分で危険予知活動表を作成し、その日の日誌へそのまま転記できます。",
-            color: "emerald",
-            cta: "KYを書く",
-          },
-          {
-            href: "/pdf",
-            label: "PDF エクスポート",
-            description: "日誌・KY・RA をワンクリックでPDF出力。協力会社・元請への提出に。",
-            color: "sky",
-            cta: "PDFを出力",
-          },
-          {
-            href: "/accidents",
-            label: "事故事例で振り返り",
-            description: "日誌の月次まとめから類似事故を逆引きし、翌月のKYに反映できます。",
-            color: "orange",
-            cta: "類似事故を見る",
-          },
-        ]}
-      />
+      <MeetingPaperView />
     </>
   );
 }
