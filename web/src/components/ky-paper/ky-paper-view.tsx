@@ -48,6 +48,7 @@ import { migrateLegacyKyRecord } from "@/lib/ky/storage-migration";
 import { computeKySyncStatus, KY_SYNC_LABEL, type KySyncStatus } from "@/lib/ky/sync-status";
 import { applyKyDeepLink } from "@/lib/ky/deep-link-prefill";
 import { detectChemicalWork, chemicalRaHref } from "@/lib/chemical/work-chemical-hints";
+import { detectAccidentWork, accidentsHref } from "@/lib/accidents/work-accident-hints";
 import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
 import {
   submitKy,
@@ -405,6 +406,12 @@ export function KyPaperView() {
     [record.workRows]
   );
 
+  // P1-1（事故DB統合）: 作業内容があれば、類似の労災事例・AI注意喚起（/accidents）へ誘導。
+  const accHint = useMemo(
+    () => detectAccidentWork(record.workRows.map((w) => w.workDetail).filter(Boolean).join(" ")),
+    [record.workRows]
+  );
+
   return (
     <div className="min-h-screen bg-slate-100 pb-24 print:bg-white print:pb-0">
       {/* 操作バー（印刷時は隠す） */}
@@ -735,6 +742,15 @@ export function KyPaperView() {
                 title={`この作業（${chemHint.keywords.join("・")}）で扱う化学物質の規制・ばく露注意を確認`}
               >
                 ⚗ 化学物質リスクを見る →
+              </Link>
+            )}
+            {accHint.matched && (
+              <Link
+                href={accidentsHref(accHint)}
+                className="rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+                title="この作業の類似労災事例・AI注意喚起を見る"
+              >
+                ⚠ 類似の労災事例を見る →
               </Link>
             )}
             <button type="button" onClick={() => setShowPrintPreview(true)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">印刷プレビュー</button>

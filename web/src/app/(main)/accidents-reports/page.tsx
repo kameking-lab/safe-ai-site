@@ -11,6 +11,7 @@ import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
 import { CopilotMemo } from "@/components/copilot/CopilotMemo";
 import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { HubFilter } from "@/components/accidents-reports/hub-filter";
+import { EstatOfficialTables } from "@/components/accidents/estat-official-tables";
 import { getAllIndustriesSummary } from "@/lib/accident-analysis";
 import { ogImageUrl } from "@/lib/og-url";
 import { SITE_URL, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
@@ -230,6 +231,9 @@ export default function AccidentsReportsHubPage() {
           自動分析の母集団: 厚生労働省 職場のあんぜんサイト 死亡災害DB、労働者死傷病報告オープンデータ、編集部 curated 事例（公開情報を匿名化して再構成）。
           2025〜2026年分は「想定例（速報集計から統計的に導出した代表パターン事例）」を含みます。実報告の確定個票（R07労働者死傷病報告オープンデータ）が公開され次第、当該事例は順次置換予定です。
         </p>
+
+        {/* P3-1: e-Stat 公式統計表カタログ（労働災害・政府統計） */}
+        <EstatOfficialTables />
 
         <CopilotNextSteps
           current="accidents-reports"

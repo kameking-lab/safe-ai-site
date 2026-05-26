@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Sparkles, Loader2, AlertTriangle, ArrowRight } from "lucide-react";
 import { ALL_ACCIDENT_CATEGORIES, type AccidentWorkCategory } from "@/lib/types/domain";
 
@@ -26,6 +27,18 @@ export function AccidentAiAnalyzer() {
   const [advice, setAdvice] = useState<string | null>(null);
   const [cases, setCases] = useState<RelatedCase[] | null>(null);
   const [aiUnavailable, setAiUnavailable] = useState(false);
+  const searchParams = useSearchParams();
+
+  // P1-1: KY等からの ?work= / ?industry= プリフィル（初回のみ）。
+  useEffect(() => {
+    const w = searchParams?.get("work");
+    const ind = searchParams?.get("industry");
+    if (w) setWorkContent(w);
+    if (ind && (ALL_ACCIDENT_CATEGORIES as readonly string[]).includes(ind)) {
+      setCategory(ind as AccidentWorkCategory);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onAnalyze = useCallback(async () => {
     if (!workContent.trim() && !category) {
