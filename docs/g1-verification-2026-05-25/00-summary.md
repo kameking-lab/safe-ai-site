@@ -1,12 +1,19 @@
 # G-1検証 総合サマリー（2026-05-26）
 
-本番URL https://www.anzen-ai-portal.jp/ に対する実接続検証。main HEAD = 581058e2（PR #289 merge 反映済）。
+本番URL https://www.anzen-ai-portal.jp/ に対する実接続検証。
 
-## 結論（一行）
+> **【2026-05-26 更新・解決済】** 下記のSupabaseクラウド層障害は**全て解消**しました。
+> 根本原因は当初仮説の「鍵誤設定」ではなく**テーブルへの service_role GRANT不足**と確定（正しい
+> service_role鍵でも permission denied だったため）。Supabase Management API で fix.sql を実行し、
+> meeting_records 作成＋3テーブルへの GRANT を適用。Vercel鍵変更・再デプロイは不要だった。
+> G-1再検証で KY/打合せ書/サイネージのクラウド同期・6桁共有すべて **YES**。詳細: `docs/g1-fix-2026-05-25.md`。
+> （以下は障害発生時点の記録として保持）
+
+## 結論（一行・障害時点）
 
 ページ表示・リダイレクト・**Gemini AI（KY/打合せ書とも）は本番で正常**。
 一方 **Supabase クラウド層（KY同期・6桁サイネージ共有・打合せ書同期）が全滅**しており、
-これは service_role 権限障害（鍵誤設定の可能性大）+ meeting_records テーブル未作成が原因。
+これは service_role 権限障害（後に GRANT不足と確定）+ meeting_records テーブル未作成が原因。
 サイトは localStorage フォールバックで落ちないが、クラウド付加機能はオーナー対応待ち。
 
 ## 機能別 YES/NO
