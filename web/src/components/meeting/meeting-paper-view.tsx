@@ -21,6 +21,7 @@ import {
 } from "@/lib/meeting/schema";
 import { loadCurrentMeeting, saveCurrentMeeting, snapshotMeeting } from "@/lib/meeting/store";
 import { MeetingPrintSheet } from "@/components/meeting/meeting-print-sheet";
+import { estimateQualifications, inferChecklist } from "@/lib/meeting/inference";
 
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
@@ -58,11 +59,11 @@ export function MeetingPaperView() {
   const [notice, setNotice] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [busyRow, setBusyRow] = useState<string | null>(null);
 
   // 初回: 作業中の打合せ書を復元
   useEffect(() => {
     const cur = loadCurrentMeeting();
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント時に保存済みを復元（一度きり）
     if (cur) setRecord(cur);
   }, []);
 
@@ -109,6 +110,59 @@ export function MeetingPaperView() {
     snapshotMeeting(rec);
     setRecord(rec);
     setNotice("保存しました。一覧から再編集・複製できます。");
+  };
+
+  // Phase6: 行の作業内容からAIで予想災害・指示・リスク・資格を提案。
+  const suggestRow = async (id: string) => {
+    const row = record.contractors.find((c) => c.id === id);
+    if (!row || !row.workContent.trim()) {
+      setNotice("作業内容を入力してからAI提案を実行してください。");
+      return;
+    }
+    setBusyRow(id);
+    try {
+      const res = await fetch("/api/meeting/suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workContent: row.workContent }),
+      });
+      if (!res.ok) {
+        setNotice("AI提案に失敗しました。時間をおいて再度お試しください。");
+        return;
+      }
+      const data = (await res.json()) as {
+        source?: string;
+        disasters?: string[];
+        instructions?: string;
+        severity?: number;
+        likelihood?: number;
+      };
+      const sev = Math.min(3, Math.max(1, Number(data.severity) || 1));
+      const lik = Math.min(3, Math.max(1, Number(data.likelihood) || 1));
+      const quals = estimateQualifications(row.workContent);
+      patchContractor(id, {
+        predictedDisasters: Array.isArray(data.disasters) && data.disasters.length > 0 ? data.disasters : row.predictedDisasters,
+        safetyInstructions: data.instructions || row.safetyInstructions,
+        qualifications: [...new Set([...row.qualifications, ...quals])],
+        risk: { severity: sev, likelihood: lik, priority: computePriority(sev, lik) },
+      });
+      setNotice(
+        data.source === "gemini"
+          ? "AI（Gemini）が提案しました。内容を必ず確認・修正してください。"
+          : "定型の提案を表示しました（AI未設定または応答不可）。"
+      );
+    } catch {
+      setNotice("AI提案でエラーが発生しました。");
+    } finally {
+      setBusyRow(null);
+    }
+  };
+
+  // Phase6: 全作業内容から点検カテゴリをAI推論（該当候補を○に）。
+  const inferChecklistAll = () => {
+    const workText = record.contractors.map((c) => `${c.workContent} ${c.machines}`).join(" ");
+    patch({ checklist: inferChecklist(record.checklist, workText) });
+    setNotice("作業内容から点検項目を推論しました（○=該当候補。実施状況を確認してください）。");
   };
 
   return (
@@ -189,6 +243,7 @@ export function MeetingPaperView() {
                       </select>
                       <input value={c.companyName} onChange={(e) => patchContractor(c.id, { companyName: e.target.value })} placeholder="業者名" className={inp + " flex-1 min-w-[8rem]"} aria-label="業者名" />
                       <button type="button" onClick={() => addContractor(nextType(c.type), c.id)} className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-600 hover:bg-slate-100">＋下位</button>
+                      <button type="button" disabled={busyRow === c.id} onClick={() => void suggestRow(c.id)} className="rounded border border-indigo-300 bg-indigo-50 px-1.5 py-0.5 text-[10px] font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50">{busyRow === c.id ? "提案中…" : "AI提案"}</button>
                       <button type="button" onClick={() => removeContractor(c.id)} className="rounded border border-rose-200 bg-white px-1.5 py-0.5 text-[10px] text-rose-600 hover:bg-rose-50">削除</button>
                     </div>
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -259,7 +314,10 @@ export function MeetingPaperView() {
 
           {/* 点検項目8カテゴリ */}
           <section className="rounded-xl border border-slate-300 bg-white p-3">
-            <h2 className="mb-2 text-sm font-bold text-slate-800">点検項目（○=該当・実施 / ×=要是正 / －=該当無）</h2>
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-sm font-bold text-slate-800">点検項目（○=該当・実施 / ×=要是正 / －=該当無）</h2>
+              <button type="button" onClick={inferChecklistAll} className="rounded-lg border border-indigo-300 bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700 hover:bg-indigo-100">AIで該当項目を推論</button>
+            </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {record.checklist.map((cat) => (
                 <div key={cat.key} className="rounded-lg border border-slate-200 p-2">
