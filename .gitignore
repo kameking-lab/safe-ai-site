@@ -37,3 +37,5 @@ yarn.lock
 .env.local
 .env.*.local
 .claude/scheduled_tasks.lock
+.vercel
+.env*
