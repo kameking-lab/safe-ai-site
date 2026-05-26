@@ -109,6 +109,59 @@ export function deleteMeeting(id: string): MeetingSummary[] {
   return updated;
 }
 
+export type MeetingHistory = {
+  sites: string[];
+  companies: string[];
+  works: string[];
+  machines: string[];
+  responsibles: string[];
+  authors: string[];
+  managers: string[];
+  supervisors: string[];
+};
+
+/** Phase3: 過去の打合せ書から入力候補（履歴サジェスト）を収集（再入力の手間を削減）。 */
+export function collectMeetingHistory(): MeetingHistory {
+  const byId = readRaw<Record<string, MeetingRecord>>(BYID_KEY, {});
+  const recs = byId && typeof byId === "object" && !Array.isArray(byId) ? Object.values(byId) : [];
+  const sets = {
+    sites: new Set<string>(),
+    companies: new Set<string>(),
+    works: new Set<string>(),
+    machines: new Set<string>(),
+    responsibles: new Set<string>(),
+    authors: new Set<string>(),
+    managers: new Set<string>(),
+    supervisors: new Set<string>(),
+  };
+  for (const r of recs) {
+    if (r.siteName) sets.sites.add(r.siteName);
+    if (r.author) sets.authors.add(r.author);
+    if (r.siteManager) sets.managers.add(r.siteManager);
+    if (r.supervisor) sets.supervisors.add(r.supervisor);
+    for (const c of r.contractors ?? []) {
+      if (c.companyName) sets.companies.add(c.companyName);
+      if (c.workContent) sets.works.add(c.workContent);
+      if (c.responsibleName) sets.responsibles.add(c.responsibleName);
+      for (const m of (c.machines || "").split(/[,、\n]/)) {
+        const t = m.trim();
+        if (t) sets.machines.add(t);
+      }
+    }
+  }
+  const cap = (s: Set<string>) => [...s].slice(0, 50);
+  return {
+    sites: cap(sets.sites),
+    companies: cap(sets.companies),
+    works: cap(sets.works),
+    machines: cap(sets.machines),
+    responsibles: cap(sets.responsibles),
+    authors: cap(sets.authors),
+    managers: cap(sets.managers),
+    supervisors: cap(sets.supervisors),
+  };
+}
+
 /** 翌日用に複製（新id・savedAt更新・実績/当日記入はクリア） */
 export function duplicateForNextDay(rec: MeetingRecord): MeetingRecord {
   const d = new Date();

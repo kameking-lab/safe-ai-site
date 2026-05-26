@@ -12,6 +12,7 @@ import {
   emptyDeliveryRow,
   aggregateMachines,
   computePriority,
+  buildDefaultChecklist,
   PRIORITY_LABEL,
   CONTRACTOR_TYPES,
   type MeetingRecord,
@@ -19,7 +20,7 @@ import {
   type ContractorType,
   type ChecklistStatus,
 } from "@/lib/meeting/schema";
-import { loadCurrentMeeting, saveCurrentMeeting, snapshotMeeting } from "@/lib/meeting/store";
+import { loadCurrentMeeting, saveCurrentMeeting, snapshotMeeting, collectMeetingHistory, type MeetingHistory } from "@/lib/meeting/store";
 import { MeetingPrintSheet } from "@/components/meeting/meeting-print-sheet";
 import { estimateQualifications, inferChecklist } from "@/lib/meeting/inference";
 import { cloudPushMeeting, isMeetingCloudEnabled } from "@/lib/meeting/cloud";
@@ -61,11 +62,13 @@ export function MeetingPaperView() {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [busyRow, setBusyRow] = useState<string | null>(null);
+  const [history, setHistory] = useState<MeetingHistory | null>(null);
 
   // 初回: 作業中の打合せ書を復元
   useEffect(() => {
     const cur = loadCurrentMeeting();
     if (cur) setRecord(cur);
+    setHistory(collectMeetingHistory());
   }, []);
 
   // 自動保存（変更のたび）
@@ -171,6 +174,31 @@ export function MeetingPaperView() {
     setNotice("作業内容から点検項目を推論しました（○=該当候補。実施状況を確認してください）。");
   };
 
+  // Phase11: 点検項目カスタマイズ（自社固有項目の追加・編集・削除、公式版リセット）。
+  const isCustomItem = (key: string) => /-c\d/.test(key);
+  const addChecklistItem = (catKey: string) =>
+    patch({
+      checklist: record.checklist.map((c) =>
+        c.key === catKey ? { ...c, items: [...c.items, { key: `${catKey}-c${Date.now()}`, label: "", status: "na" as ChecklistStatus }] } : c
+      ),
+    });
+  const setChecklistItemLabel = (catKey: string, itemKey: string, label: string) =>
+    patch({
+      checklist: record.checklist.map((c) =>
+        c.key === catKey ? { ...c, items: c.items.map((i) => (i.key === itemKey ? { ...i, label } : i)) } : c
+      ),
+    });
+  const removeChecklistItem = (catKey: string, itemKey: string) =>
+    patch({
+      checklist: record.checklist.map((c) => (c.key === catKey ? { ...c, items: c.items.filter((i) => i.key !== itemKey) } : c)),
+    });
+  const resetChecklist = () => {
+    if (window.confirm("点検項目を公式版（8カテゴリ標準項目）に戻します。追加・編集した項目は失われます。よろしいですか？")) {
+      patch({ checklist: buildDefaultChecklist() });
+      setNotice("点検項目を公式版に戻しました。");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-100">
       {/* 上部バー */}
@@ -196,6 +224,20 @@ export function MeetingPaperView() {
       {/* A4横向き印刷指定（この画面でのみ有効） */}
       <style media="print">{"@page{size:A4 landscape;margin:8mm}"}</style>
 
+      {/* Phase3: 履歴サジェスト（過去の打合せ書から候補） */}
+      {history && (
+        <>
+          <datalist id="mtg-sites">{history.sites.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="mtg-companies">{history.companies.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="mtg-works">{history.works.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="mtg-machines">{history.machines.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="mtg-responsibles">{history.responsibles.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="mtg-authors">{history.authors.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="mtg-managers">{history.managers.map((v) => <option key={v} value={v} />)}</datalist>
+          <datalist id="mtg-supervisors">{history.supervisors.map((v) => <option key={v} value={v} />)}</datalist>
+        </>
+      )}
+
       {/* 用紙本体（編集UI。印刷時は専用A4シートを使うため隠す） */}
       <div className="overflow-x-auto px-2 py-4 print:hidden">
         <div className="mx-auto origin-top space-y-3" style={{ transform: `scale(${zoom})`, width: 980, maxWidth: "100%" }}>
@@ -217,10 +259,10 @@ export function MeetingPaperView() {
               </L>
               <L label="気温(℃)"><input value={record.temperature} onChange={(e) => patch({ temperature: e.target.value })} className={inp} /></L>
               <L label="打合せ日(前日)"><input type="date" value={record.meetingDate} onChange={(e) => patch({ meetingDate: e.target.value })} className={inp} /></L>
-              <L label="作業所名"><input value={record.siteName} onChange={(e) => patch({ siteName: e.target.value })} className={inp} /></L>
-              <L label="作業所長"><input value={record.siteManager} onChange={(e) => patch({ siteManager: e.target.value })} className={inp} /></L>
-              <L label="主任等"><input value={record.supervisor} onChange={(e) => patch({ supervisor: e.target.value })} className={inp} /></L>
-              <L label="作成担当者"><input value={record.author} onChange={(e) => patch({ author: e.target.value })} className={inp} /></L>
+              <L label="作業所名"><input value={record.siteName} onChange={(e) => patch({ siteName: e.target.value })} list="mtg-sites" className={inp} /></L>
+              <L label="作業所長"><input value={record.siteManager} onChange={(e) => patch({ siteManager: e.target.value })} list="mtg-managers" className={inp} /></L>
+              <L label="主任等"><input value={record.supervisor} onChange={(e) => patch({ supervisor: e.target.value })} list="mtg-supervisors" className={inp} /></L>
+              <L label="作成担当者"><input value={record.author} onChange={(e) => patch({ author: e.target.value })} list="mtg-authors" className={inp} /></L>
             </div>
           </section>
 
@@ -247,15 +289,15 @@ export function MeetingPaperView() {
                       <select value={c.type} onChange={(e) => patchContractor(c.id, { type: e.target.value as ContractorType })} className={`rounded px-1.5 py-0.5 text-[11px] font-bold ${TYPE_TAG[c.type]}`} aria-label="階層">
                         {CONTRACTOR_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                       </select>
-                      <input value={c.companyName} onChange={(e) => patchContractor(c.id, { companyName: e.target.value })} placeholder="業者名" className={inp + " flex-1 min-w-[8rem]"} aria-label="業者名" />
+                      <input value={c.companyName} onChange={(e) => patchContractor(c.id, { companyName: e.target.value })} placeholder="業者名" list="mtg-companies" className={inp + " flex-1 min-w-[8rem]"} aria-label="業者名" />
                       <button type="button" onClick={() => addContractor(nextType(c.type), c.id)} className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-600 hover:bg-slate-100">＋下位</button>
                       <button type="button" disabled={busyRow === c.id} onClick={() => void suggestRow(c.id)} className="rounded border border-indigo-300 bg-indigo-50 px-1.5 py-0.5 text-[10px] font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50">{busyRow === c.id ? "提案中…" : "AI提案"}</button>
                       <Link href={kyHrefFromRow(c)} className="rounded border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 hover:bg-emerald-100">KYを作成</Link>
                       <button type="button" onClick={() => removeContractor(c.id)} className="rounded border border-rose-200 bg-white px-1.5 py-0.5 text-[10px] text-rose-600 hover:bg-rose-50">削除</button>
                     </div>
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                      <L label="作業内容"><input value={c.workContent} onChange={(e) => patchContractor(c.id, { workContent: e.target.value })} className={inp} /></L>
-                      <L label="使用機械"><input value={c.machines} onChange={(e) => patchContractor(c.id, { machines: e.target.value })} placeholder="例: バックホウ、ダンプ" className={inp} /></L>
+                      <L label="作業内容"><input value={c.workContent} onChange={(e) => patchContractor(c.id, { workContent: e.target.value })} list="mtg-works" className={inp} /></L>
+                      <L label="使用機械"><input value={c.machines} onChange={(e) => patchContractor(c.id, { machines: e.target.value })} placeholder="例: バックホウ、ダンプ" list="mtg-machines" className={inp} /></L>
                       <L label="必要資格"><TagField values={c.qualifications} onChange={(v) => patchContractor(c.id, { qualifications: v })} /></L>
                       <L label="予定人員">
                         <select value={c.plannedCount} onChange={(e) => patchContractor(c.id, { plannedCount: e.target.value })} className={inp}>
@@ -273,7 +315,7 @@ export function MeetingPaperView() {
                         </div>
                       </L>
                       <L label="安全衛生指示事項" wide><textarea value={c.safetyInstructions} onChange={(e) => patchContractor(c.id, { safetyInstructions: e.target.value })} rows={2} className={inp + " resize-y"} /></L>
-                      <L label="協力会社責任者"><input value={c.responsibleName} onChange={(e) => patchContractor(c.id, { responsibleName: e.target.value })} className={inp} /></L>
+                      <L label="協力会社責任者"><input value={c.responsibleName} onChange={(e) => patchContractor(c.id, { responsibleName: e.target.value })} list="mtg-responsibles" className={inp} /></L>
                       <L label="実績人員(当日)"><input value={c.actualCount} onChange={(e) => patchContractor(c.id, { actualCount: e.target.value })} className={inp} /></L>
                       <L label="追記欄(元請)" wide><textarea value={c.appendNote} onChange={(e) => patchContractor(c.id, { appendNote: e.target.value })} rows={2} className={inp + " resize-y"} /></L>
                     </div>
@@ -323,7 +365,10 @@ export function MeetingPaperView() {
           <section className="rounded-xl border border-slate-300 bg-white p-3">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-sm font-bold text-slate-800">点検項目（○=該当・実施 / ×=要是正 / －=該当無）</h2>
-              <button type="button" onClick={inferChecklistAll} className="rounded-lg border border-indigo-300 bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700 hover:bg-indigo-100">AIで該当項目を推論</button>
+              <div className="flex gap-1.5">
+                <button type="button" onClick={inferChecklistAll} className="rounded-lg border border-indigo-300 bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700 hover:bg-indigo-100">AIで該当項目を推論</button>
+                <button type="button" onClick={resetChecklist} className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">公式版に戻す</button>
+              </div>
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
               {record.checklist.map((cat) => (
@@ -332,11 +377,19 @@ export function MeetingPaperView() {
                   <ul className="space-y-1">
                     {cat.items.map((it) => (
                       <li key={it.key} className="flex items-center justify-between gap-1">
-                        <span className="text-[11px] text-slate-600">{it.label}</span>
-                        <Tri value={it.status} onChange={(s) => patch({ checklist: record.checklist.map((cc) => cc.key === cat.key ? { ...cc, items: cc.items.map((ii) => ii.key === it.key ? { ...ii, status: s } : ii) } : cc) })} />
+                        {isCustomItem(it.key) ? (
+                          <input value={it.label} onChange={(e) => setChecklistItemLabel(cat.key, it.key, e.target.value)} placeholder="項目名" aria-label="点検項目名" className="min-w-0 flex-1 rounded border border-slate-200 px-1 text-[11px]" />
+                        ) : (
+                          <span className="text-[11px] text-slate-600">{it.label}</span>
+                        )}
+                        <span className="flex shrink-0 items-center gap-0.5">
+                          <Tri value={it.status} onChange={(s) => patch({ checklist: record.checklist.map((cc) => cc.key === cat.key ? { ...cc, items: cc.items.map((ii) => ii.key === it.key ? { ...ii, status: s } : ii) } : cc) })} />
+                          {isCustomItem(it.key) && <button type="button" onClick={() => removeChecklistItem(cat.key, it.key)} className="px-0.5 text-rose-400 hover:text-rose-600" aria-label="項目削除">×</button>}
+                        </span>
                       </li>
                     ))}
                   </ul>
+                  <button type="button" onClick={() => addChecklistItem(cat.key)} className="mt-1 w-full rounded border border-dashed border-slate-300 py-0.5 text-[10px] text-slate-500 hover:bg-slate-50">＋ 項目を追加</button>
                 </div>
               ))}
             </div>
