@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChemicalRaPanel } from "@/components/chemical-ra-panel";
+import { SdsUploadPanel } from "@/components/chemical/sds-upload-panel";
 import { ChemicalRaExtras } from "@/components/chemical-ra-extras";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
@@ -68,6 +69,10 @@ export default function ChemicalRaPage() {
       </PageContainer>
       {/* P1-G: メイン入力（RAパネル）をファーストビューに、現場リストは下部へ。
           初見ユーザーが「何のページか」を即理解できるよう順序を入れ替えた。 */}
+      <PageContainer paddingY="none" className="pt-3">
+        {/* P2-1: SDS PDF/画像をAIが読み取り、RA・全法律規制へ誘導 */}
+        <SdsUploadPanel />
+      </PageContainer>
       <Suspense fallback={<PageSkeleton label="化学物質リスクアセスメントを読み込み中" />}>
         <ChemicalRaPanel />
       </Suspense>

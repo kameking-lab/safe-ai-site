@@ -6,8 +6,12 @@ import {
 } from "@/lib/regulation-tag-labels";
 import {
   soilContaminationForCas,
+  airPollutionForCas,
+  waterPollutionForCas,
   PHYSICAL_PROPERTY_LAWS,
   SOIL_LAW_OFFICIAL_URL,
+  AIR_LAW_OFFICIAL_URL,
+  WATER_LAW_OFFICIAL_URL,
 } from "@/lib/chemical/extra-regulations";
 import { healthCheckupsFromTags } from "@/lib/chemical/health-checkup-from-tags";
 
@@ -49,6 +53,8 @@ export function RegulationSummarySection({
 }) {
   const tags = normalizeTags(regulationTags);
   const soil = soilContaminationForCas(cas);
+  const air = airPollutionForCas(cas);
+  const water = waterPollutionForCas(cas);
   const checkups = healthCheckupsFromTags(regulationTags);
 
   // 該当が確認できる法律ファミリー（重複排除・出現順）。
@@ -58,6 +64,32 @@ export function RegulationSummarySection({
     if (!families.includes(f)) families.push(f);
   }
   if (soil && !families.includes("土壌汚染対策法")) families.push("土壌汚染対策法");
+  if (air && !families.includes("大気汚染防止法")) families.push("大気汚染防止法");
+  if (water && !families.includes("水質汚濁防止法")) families.push("水質汚濁防止法");
+
+  // 追加オーバーレイ（土壌/大気/水質）のミニ表示用。
+  const overlays: { name: string; detail: string; url: string }[] = [];
+  if (soil) {
+    overlays.push({
+      name: `土壌汚染対策法 特定有害物質（${soil.kind}）`,
+      detail: `${soil.name} は特定有害物質に該当します。${soil.note ? `（${soil.note}）` : ""}`,
+      url: SOIL_LAW_OFFICIAL_URL,
+    });
+  }
+  if (air) {
+    overlays.push({
+      name: `大気汚染防止法（${air.category}）`,
+      detail: `${air.name} は大気汚染防止法の${air.category}に該当します。`,
+      url: AIR_LAW_OFFICIAL_URL,
+    });
+  }
+  if (water) {
+    overlays.push({
+      name: "水質汚濁防止法 有害物質",
+      detail: `${water.name} は水質汚濁防止法の有害物質に該当します（排水基準）。`,
+      url: WATER_LAW_OFFICIAL_URL,
+    });
+  }
 
   return (
     <section className="rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/60 dark:bg-emerald-950/30 p-5 sm:p-6 space-y-5">
@@ -92,15 +124,16 @@ export function RegulationSummarySection({
         </p>
       </div>
 
-      {/* P1-6 土壌汚染対策法 */}
-      {soil && (
-        <div className="rounded-xl border border-amber-300 dark:border-amber-700 bg-white/70 dark:bg-slate-900/50 p-3 space-y-1">
+      {/* P1-6 土壌 / P2-2 大気・水質（環境系・単一CAS確認分） */}
+      {overlays.map((o) => (
+        <div
+          key={o.name}
+          className="rounded-xl border border-amber-300 dark:border-amber-700 bg-white/70 dark:bg-slate-900/50 p-3 space-y-1"
+        >
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              土壌汚染対策法 特定有害物質（{soil.kind}）
-            </span>
+            <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{o.name}</span>
             <a
-              href={SOIL_LAW_OFFICIAL_URL}
+              href={o.url}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1 text-xs text-amber-800 dark:text-amber-300 underline hover:no-underline"
@@ -109,11 +142,9 @@ export function RegulationSummarySection({
               <ExternalLink className="w-3 h-3" aria-hidden="true" />
             </a>
           </div>
-          <p className="text-xs text-slate-600 dark:text-slate-300">
-            {soil.name} は特定有害物質に該当します。{soil.note ? `（${soil.note}）` : null}
-          </p>
+          <p className="text-xs text-slate-600 dark:text-slate-300">{o.detail}</p>
         </div>
-      )}
+      ))}
 
       {/* P2-3 物性/カテゴリ定義型の法律（該当可能性—要確認） */}
       <div className="space-y-2">

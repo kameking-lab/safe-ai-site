@@ -9,6 +9,7 @@ import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
 import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
 import { SimpleMarkdown } from "@/components/simple-markdown";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
+import { ChemicalRaReportHeader, ChemicalRaSignoffBoxes } from "@/components/chemical/chemical-ra-report-print";
 import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 import {
   findByCas,
@@ -679,15 +680,17 @@ export function ChemicalRaPanel() {
           className="space-y-6 scroll-mt-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 print:space-y-3"
         >
           <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
-            <p className="text-xs font-bold text-emerald-700">A4 結果表（ブラウザ印刷で A4 1〜2ページに収まります）</p>
+            <p className="text-xs font-bold text-emerald-700">A4 実施記録（ブラウザ印刷で厚労省様式相当の記録に。会社名・実施者・確認印は印刷時に出ます）</p>
             <button
               type="button"
               onClick={() => window.print()}
               className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50"
             >
-              🖨 印刷 / PDF保存
+              🖨 A4実施レポート印刷 / PDF保存
             </button>
           </div>
+          {/* P1-1: 印刷時のみA4記録様式ヘッダ（自社情報・実施日・実施者）。 */}
+          <ChemicalRaReportHeader />
           {/* 物質概要 */}
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
@@ -905,6 +908,9 @@ export function ChemicalRaPanel() {
             実際の作業においては、製品の公式SDS・最新の法令・専門家の指導に従ってください。
             保護具購入リンクはアフィリエイトプログラムを利用しています。
           </p>
+
+          {/* P1-1: 印刷時のみ確認印枠（実施者・化学物質管理者・統括安全衛生責任者）。 */}
+          <ChemicalRaSignoffBoxes />
 
           {/* P2項目9: 統一CTA — メイン3機能 + 現場ツールへの次アクション */}
           <MainFeatureNextActions exclude="chemical-ra" contextLabel={result.chemicalName} />

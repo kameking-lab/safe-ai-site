@@ -4,6 +4,10 @@ import {
   SOIL_GROUP_DESIGNATED_COUNT,
   soilContaminationForCas,
   PHYSICAL_PROPERTY_LAWS,
+  AIR_POLLUTION_SUBSTANCES,
+  WATER_POLLUTION_SUBSTANCES,
+  airPollutionForCas,
+  waterPollutionForCas,
 } from "@/lib/chemical/extra-regulations";
 
 describe("土壌汚染対策法オーバーレイ", () => {
@@ -39,6 +43,39 @@ describe("土壌汚染対策法オーバーレイ", () => {
       expect(s.name).toBeTruthy();
       expect(s.kind).toBeTruthy();
     }
+  });
+});
+
+describe("大気汚染防止法オーバーレイ", () => {
+  it("優先取組13 + 特定物質5 = 18物質（単一CAS確認分）", () => {
+    expect(AIR_POLLUTION_SUBSTANCES).toHaveLength(18);
+  });
+  it("CASで引ける（トリクロロエチレン=優先取組、塩素=特定物質）", () => {
+    expect(airPollutionForCas("79-01-6")?.category).toBe("優先取組物質");
+    expect(airPollutionForCas("7782-50-5")?.category).toBe("特定物質(事故時)");
+  });
+  it("非該当はnull", () => {
+    expect(airPollutionForCas("137-26-8")).toBeNull(); // チウラムは大気非該当
+  });
+  it("全エントリにCAS・名称・区分", () => {
+    for (const s of AIR_POLLUTION_SUBSTANCES) {
+      expect(s.cas).toMatch(/^\d/);
+      expect(s.name).toBeTruthy();
+      expect(["優先取組物質", "特定物質(事故時)"]).toContain(s.category);
+    }
+  });
+});
+
+describe("水質汚濁防止法オーバーレイ", () => {
+  it("単一CAS確認分 14物質", () => {
+    expect(WATER_POLLUTION_SUBSTANCES).toHaveLength(14);
+  });
+  it("CASで引ける（1,4-ジオキサン・トリクロロエチレン）", () => {
+    expect(waterPollutionForCas("123-91-1")?.name).toContain("ジオキサン");
+    expect(waterPollutionForCas("79-01-6")?.name).toContain("トリクロロエチレン");
+  });
+  it("非該当はnull", () => {
+    expect(waterPollutionForCas("75-21-8")).toBeNull(); // 酸化エチレンは水質非該当
   });
 });
 
