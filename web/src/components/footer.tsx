@@ -58,7 +58,7 @@ export function Footer() {
             <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li>
                 <Link href="/safety-diary" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
-                  安全衛生日誌
+                  安全工程打合せ書
                 </Link>
               </li>
               <li>

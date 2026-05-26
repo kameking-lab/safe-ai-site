@@ -26,15 +26,15 @@ export type FlagshipFeature = {
 export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
   {
     id: "safety-diary",
-    label: "安全衛生日誌",
-    icon: "📓",
-    cardTitle: "安全衛生日誌",
+    label: "安全工程打合せ書",
+    icon: "📋",
+    cardTitle: "安全工程打合せ書・安全衛生指示書",
     cardDescription:
-      "現場の朝礼・作業内容・KY結果・ヒヤリハットを3〜5分で記録。月次まとめでトレンドが見える化。",
+      "元請が前日5分で各社の作業・使用機械・予想災害・リスク・指示を1枚に。AI提案・点検項目・印刷・KY転記。",
     href: "/safety-diary",
     subItems: [
-      { label: "日誌一覧", href: "/safety-diary" },
-      { label: "新規作成（必須5項目）", href: "/safety-diary/new" },
+      { label: "打合せ書を作成", href: "/safety-diary" },
+      { label: "保存一覧", href: "/safety-diary/list" },
     ],
   },
   {
