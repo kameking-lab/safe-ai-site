@@ -118,3 +118,87 @@ export const PHYSICAL_PROPERTY_LAWS: readonly PhysicalPropertyLaw[] = [
     officialUrl: "https://laws.e-gov.go.jp/law/326AC0000000204/", // 高圧ガス保安法（e-Gov）
   },
 ];
+
+// ── P2-2 大気汚染防止法 / 水質汚濁防止法（単一CAS対応・公式確認済みのみ） ──────────
+// 出典: 環境省 有害大気汚染物質対策(優先取組23物質)・大気汚染防止法施行令(特定物質)・
+//       水質汚濁防止法 有害物質28項目。CAS は厚労省「職場のあんぜんサイト」(URLスラッグ=CAS)で確認。
+// 群指定(「○○及びその化合物」等)・標準CASだが個別未確認の物質は収録せず(創作回避)。調査 2026-05-26。
+
+export type AirCategory = "優先取組物質" | "特定物質(事故時)";
+
+export interface AirPollutionSubstance {
+  cas: string;
+  name: string;
+  category: AirCategory;
+}
+
+/** 大気汚染防止法 単一CAS対応（公式anzeninfo確認済み）。優先取組13 + 特定物質の追加分。 */
+export const AIR_POLLUTION_SUBSTANCES: readonly AirPollutionSubstance[] = [
+  // 優先取組物質（単一CAS確認済み）
+  { cas: "107-13-1", name: "アクリロニトリル", category: "優先取組物質" },
+  { cas: "75-07-0", name: "アセトアルデヒド", category: "優先取組物質" },
+  { cas: "75-01-4", name: "塩化ビニルモノマー（クロロエチレン）", category: "優先取組物質" },
+  { cas: "74-87-3", name: "塩化メチル（クロロメタン）", category: "優先取組物質" },
+  { cas: "67-66-3", name: "クロロホルム", category: "優先取組物質" },
+  { cas: "75-21-8", name: "酸化エチレン（エチレンオキシド）", category: "優先取組物質" },
+  { cas: "107-06-2", name: "1,2-ジクロロエタン", category: "優先取組物質" },
+  { cas: "75-09-2", name: "ジクロロメタン", category: "優先取組物質" },
+  { cas: "127-18-4", name: "テトラクロロエチレン", category: "優先取組物質" },
+  { cas: "79-01-6", name: "トリクロロエチレン", category: "優先取組物質" },
+  { cas: "106-99-0", name: "1,3-ブタジエン", category: "優先取組物質" },
+  { cas: "71-43-2", name: "ベンゼン", category: "優先取組物質" },
+  { cas: "50-00-0", name: "ホルムアルデヒド", category: "優先取組物質" },
+  // 特定物質（事故時規制・単一CAS確認済みの追加分）
+  { cas: "7664-41-7", name: "アンモニア", category: "特定物質(事故時)" },
+  { cas: "7664-39-3", name: "ふっ化水素", category: "特定物質(事故時)" },
+  { cas: "7647-01-0", name: "塩化水素", category: "特定物質(事故時)" },
+  { cas: "7782-50-5", name: "塩素", category: "特定物質(事故時)" },
+  { cas: "75-44-5", name: "ホスゲン", category: "特定物質(事故時)" },
+];
+
+export interface WaterPollutionSubstance {
+  cas: string;
+  name: string;
+}
+
+/** 水質汚濁防止法 有害物質 単一CAS対応（公式anzeninfo確認済み 14物質）。群指定12〜13項目は別途。 */
+export const WATER_POLLUTION_SUBSTANCES: readonly WaterPollutionSubstance[] = [
+  { cas: "79-01-6", name: "トリクロロエチレン" },
+  { cas: "127-18-4", name: "テトラクロロエチレン" },
+  { cas: "75-09-2", name: "ジクロロメタン" },
+  { cas: "56-23-5", name: "四塩化炭素" },
+  { cas: "107-06-2", name: "1,2-ジクロロエタン" },
+  { cas: "156-59-2", name: "シス-1,2-ジクロロエチレン" },
+  { cas: "71-55-6", name: "1,1,1-トリクロロエタン" },
+  { cas: "79-00-5", name: "1,1,2-トリクロロエタン" },
+  { cas: "542-75-6", name: "1,3-ジクロロプロペン" },
+  { cas: "137-26-8", name: "チウラム" },
+  { cas: "122-34-9", name: "シマジン" },
+  { cas: "28249-77-6", name: "チオベンカルブ" },
+  { cas: "71-43-2", name: "ベンゼン" },
+  { cas: "123-91-1", name: "1,4-ジオキサン" },
+];
+
+/** 群指定（CAS一意紐付け不可）で未収録の項目件数（参考表示用）。 */
+export const AIR_GROUP_DESIGNATED_COUNT = 8; // 優先取組のうち クロム/六価クロム/水銀/ダイオキシン/ニッケル/ヒ素/ベリリウム/マンガン
+export const WATER_GROUP_DESIGNATED_COUNT = 12; // カドミウム及びその化合物 等
+
+export const AIR_LAW_OFFICIAL_URL = "https://www.env.go.jp/air/osen/law/yugai.html";
+export const WATER_LAW_OFFICIAL_URL = "https://laws.e-gov.go.jp/law/345AC0000000138/";
+
+const AIR_MAP: Map<string, AirPollutionSubstance> = new Map(
+  AIR_POLLUTION_SUBSTANCES.map((s) => [normalizeCas(s.cas), s])
+);
+const WATER_MAP: Map<string, WaterPollutionSubstance> = new Map(
+  WATER_POLLUTION_SUBSTANCES.map((s) => [normalizeCas(s.cas), s])
+);
+
+/** CAS が大気汚染防止法の単一CAS対応物質なら返す。 */
+export function airPollutionForCas(cas: string): AirPollutionSubstance | null {
+  return AIR_MAP.get(normalizeCas(cas)) ?? null;
+}
+
+/** CAS が水質汚濁防止法の単一CAS対応有害物質なら返す。 */
+export function waterPollutionForCas(cas: string): WaterPollutionSubstance | null {
+  return WATER_MAP.get(normalizeCas(cas)) ?? null;
+}
