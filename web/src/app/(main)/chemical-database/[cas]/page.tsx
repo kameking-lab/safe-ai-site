@@ -17,6 +17,7 @@ import {
 } from "@/lib/mhlw-chemicals";
 import { RegulationTagsSection } from "@/components/regulation-tags-section";
 import { RegulationSummarySection } from "@/components/chemical/regulation-summary-section";
+import { AccidentCrossSection } from "@/components/chemical/accident-cross-section";
 import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
 import { CONSTRUCTION_PRIORITY_CAS_SET } from "@/lib/regulation-tag-labels";
 import { OshaRegulationsSection } from "@/components/chemical/osha-regulations-section";
@@ -106,6 +107,9 @@ export default async function ChemicalDetailPage({
         <OshaRegulationsSection cas={cas} />
 
         <RegulationTagsSection entry={entry} variant="page" />
+
+        {/* P1-3: この物質に関連する過去の労働災害事例（事故DBクロス検索）。 */}
+        <AccidentCrossSection substanceName={name} aliases={entry.nameEn ? [entry.nameEn] : undefined} />
 
         <CrossLinksBlock cas={cas} name={name} />
       </div>
