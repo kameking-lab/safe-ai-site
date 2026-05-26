@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChemicalRaPanel } from "@/components/chemical-ra-panel";
 import { SdsUploadPanel } from "@/components/chemical/sds-upload-panel";
+import { SavedRaList } from "@/components/chemical/chemical-ra-save";
 import { ChemicalRaExtras } from "@/components/chemical-ra-extras";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
@@ -76,6 +77,10 @@ export default function ChemicalRaPage() {
       <Suspense fallback={<PageSkeleton label="化学物質リスクアセスメントを読み込み中" />}>
         <ChemicalRaPanel />
       </Suspense>
+      {/* P1-5: 保存したRA一覧（クラウド＋ローカル） */}
+      <PageContainer paddingY="none" className="pt-2">
+        <SavedRaList />
+      </PageContainer>
       <ChemicalRaExtras />
       <RelatedPageCards
         heading="合わせて使う"

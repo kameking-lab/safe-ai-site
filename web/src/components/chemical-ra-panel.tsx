@@ -10,6 +10,7 @@ import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
 import { SimpleMarkdown } from "@/components/simple-markdown";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { ChemicalRaReportHeader, ChemicalRaSignoffBoxes } from "@/components/chemical/chemical-ra-report-print";
+import { ChemicalRaSaveButton } from "@/components/chemical/chemical-ra-save";
 import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 import {
   findByCas,
@@ -681,13 +682,23 @@ export function ChemicalRaPanel() {
         >
           <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
             <p className="text-xs font-bold text-emerald-700">A4 実施記録（ブラウザ印刷で厚労省様式相当の記録に。会社名・実施者・確認印は印刷時に出ます）</p>
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50"
-            >
-              🖨 A4実施レポート印刷 / PDF保存
-            </button>
+            <div className="flex items-center gap-2">
+              {/* P1-5: RA結果のクラウド保管（localStorage即時＋クラウド背景同期） */}
+              <ChemicalRaSaveButton
+                chemicalName={result.chemicalName}
+                cas={result.casNumber ?? ""}
+                workContent={workContent}
+                exposureBand={result.createSimple?.label ?? ""}
+                payload={result}
+              />
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50"
+              >
+                🖨 A4実施レポート印刷 / PDF保存
+              </button>
+            </div>
           </div>
           {/* P1-1: 印刷時のみA4記録様式ヘッダ（自社情報・実施日・実施者）。 */}
           <ChemicalRaReportHeader />
