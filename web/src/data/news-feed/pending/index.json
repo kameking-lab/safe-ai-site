@@ -1,6 +1,34 @@
 {
-  "updatedAt": "2026-05-25T22:04:46.215Z",
+  "updatedAt": "2026-05-26T22:17:52.807Z",
   "entries": [
+    {
+      "id": "a4f4c4e69405037d",
+      "headline": "工事現場でセメントに巻き込まれ2人死亡 滋賀 草津",
+      "aiSummary": "滋賀県草津市の建設現場で、作業員2名がセメントに巻き込まれ死亡した。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260526/k10015131871000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 26 May 2026 15:31:01 +0900",
+        "fetchedAt": "2026-05-26T22:17:34.391Z"
+      },
+      "estimatedAccidentType": "はさまれ・巻き込まれ",
+      "estimatedWorkCategory": "建設業",
+      "newsType": "accident_report",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 70,
+        "judgedAt": "2026-05-26T22:17:52.800Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "duplication 70 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
     {
       "id": "aa4e79ccc98b9c4f",
       "headline": "福島 マンホールに作業員2人が転落か 意識なし 消防",
