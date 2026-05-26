@@ -20,6 +20,7 @@ import {
   type ChecklistStatus,
 } from "@/lib/meeting/schema";
 import { loadCurrentMeeting, saveCurrentMeeting, snapshotMeeting } from "@/lib/meeting/store";
+import { MeetingPrintSheet } from "@/components/meeting/meeting-print-sheet";
 
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
@@ -56,6 +57,7 @@ export function MeetingPaperView() {
   const [savedLabel, setSavedLabel] = useState("");
   const [notice, setNotice] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
 
   // 初回: 作業中の打合せ書を復元
   useEffect(() => {
@@ -131,8 +133,11 @@ export function MeetingPaperView() {
         </div>
       )}
 
-      {/* 用紙本体 */}
-      <div className="overflow-x-auto px-2 py-4">
+      {/* A4横向き印刷指定（この画面でのみ有効） */}
+      <style media="print">{"@page{size:A4 landscape;margin:8mm}"}</style>
+
+      {/* 用紙本体（編集UI。印刷時は専用A4シートを使うため隠す） */}
+      <div className="overflow-x-auto px-2 py-4 print:hidden">
         <div className="mx-auto origin-top space-y-3" style={{ transform: `scale(${zoom})`, width: 980, maxWidth: "100%" }}>
           {/* ヘッダー */}
           <section className="rounded-xl border border-slate-300 bg-white p-3">
@@ -288,10 +293,35 @@ export function MeetingPaperView() {
         </div>
       </div>
 
+      {/* Phase10: A4印刷用シート（画面非表示・印刷時のみ） */}
+      <div className="hidden print:block">
+        <MeetingPrintSheet record={record} />
+      </div>
+
+      {/* 印刷プレビュー（画面オーバーレイ。印刷物には出さない） */}
+      {showPrintPreview && (
+        <div className="fixed inset-0 z-40 overflow-auto bg-slate-700/70 p-4 print:hidden">
+          <div className="mx-auto max-w-[300mm] rounded bg-white p-4 shadow-2xl">
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-bold text-slate-800">印刷プレビュー（A4横・打合せ書）</p>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-700">印刷 / PDF</button>
+                <button type="button" onClick={() => setShowPrintPreview(false)} className="rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">閉じる</button>
+              </div>
+            </div>
+            <div className="overflow-x-auto rounded border border-slate-200 p-2">
+              <MeetingPrintSheet record={record} />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 下部アクションバー */}
       <div className="sticky bottom-0 z-20 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-white/95 px-3 py-2 backdrop-blur print:hidden">
         <span className="text-[11px] text-slate-500">{savedLabel || "未保存"}</span>
         <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => setShowPrintPreview(true)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">印刷プレビュー</button>
+          <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
           <button type="button" onClick={handleSave} className="rounded-lg border border-emerald-300 bg-white px-4 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
         </div>
       </div>
