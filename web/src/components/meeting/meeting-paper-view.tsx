@@ -22,6 +22,7 @@ import {
 import { loadCurrentMeeting, saveCurrentMeeting, snapshotMeeting } from "@/lib/meeting/store";
 import { MeetingPrintSheet } from "@/components/meeting/meeting-print-sheet";
 import { estimateQualifications, inferChecklist } from "@/lib/meeting/inference";
+import { cloudPushMeeting, isMeetingCloudEnabled } from "@/lib/meeting/cloud";
 
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
@@ -109,7 +110,12 @@ export function MeetingPaperView() {
     saveCurrentMeeting(rec);
     snapshotMeeting(rec);
     setRecord(rec);
-    setNotice("保存しました。一覧から再編集・複製できます。");
+    void cloudPushMeeting(rec);
+    setNotice(
+      isMeetingCloudEnabled()
+        ? "保存しました（クラウド同期）。一覧から再編集・複製できます。"
+        : "保存しました。一覧から再編集・複製できます。"
+    );
   };
 
   // Phase6: 行の作業内容からAIで予想災害・指示・リスク・資格を提案。
@@ -244,6 +250,7 @@ export function MeetingPaperView() {
                       <input value={c.companyName} onChange={(e) => patchContractor(c.id, { companyName: e.target.value })} placeholder="業者名" className={inp + " flex-1 min-w-[8rem]"} aria-label="業者名" />
                       <button type="button" onClick={() => addContractor(nextType(c.type), c.id)} className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-600 hover:bg-slate-100">＋下位</button>
                       <button type="button" disabled={busyRow === c.id} onClick={() => void suggestRow(c.id)} className="rounded border border-indigo-300 bg-indigo-50 px-1.5 py-0.5 text-[10px] font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50">{busyRow === c.id ? "提案中…" : "AI提案"}</button>
+                      <Link href={kyHrefFromRow(c)} className="rounded border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 hover:bg-emerald-100">KYを作成</Link>
                       <button type="button" onClick={() => removeContractor(c.id)} className="rounded border border-rose-200 bg-white px-1.5 py-0.5 text-[10px] text-rose-600 hover:bg-rose-50">削除</button>
                     </div>
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -393,6 +400,20 @@ function nextType(t: ContractorType): ContractorType {
   const order: ContractorType[] = ["元請", "1次", "2次", "3次"];
   const i = order.indexOf(t);
   return order[Math.min(i + 1, order.length - 1)]!;
+}
+
+/**
+ * Phase9: 各社行 → KY起票。KY側の既存 deep-link（import=risk-prediction&payload）を
+ * そのまま再利用するため、KYのコードは一切変更しない（破壊リスクゼロ）。
+ */
+function kyHrefFromRow(row: MeetingContractorRow): string {
+  const instrLines = row.safetyInstructions.split(/\n+/).map((s) => s.trim()).filter(Boolean);
+  const risks =
+    row.predictedDisasters.length > 0
+      ? row.predictedDisasters.map((d, i) => ({ hazard: d, reduction: instrLines[i] ?? row.safetyInstructions }))
+      : [{ hazard: "", reduction: row.safetyInstructions }];
+  const payload = encodeURIComponent(JSON.stringify({ workContent: row.workContent, risks }));
+  return `/ky/paper?import=risk-prediction&payload=${payload}`;
 }
 
 function L({ label, children, wide }: { label: string; children: ReactNode; wide?: boolean }) {

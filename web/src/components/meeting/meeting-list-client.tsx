@@ -1,6 +1,6 @@
 "use client";
 
-/** Phase 8: 過去の打合せ書 一覧（開く/翌日複製/削除・絞り込み・並べ替え）。ローカル保管。 */
+/** Phase 8+7: 過去の打合せ書 一覧（開く/翌日複製/削除・検索・並べ替え）。ローカル主・クラウド空時フォールバック。 */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,17 +12,42 @@ import {
   saveCurrentMeeting,
   type MeetingSummary,
 } from "@/lib/meeting/store";
+import {
+  isMeetingCloudEnabled,
+  cloudPullMeetings,
+  cloudGetMeetingById,
+  cloudDeleteMeeting,
+} from "@/lib/meeting/cloud";
+
+type Row = MeetingSummary & { source: "local" | "cloud" };
 
 export function MeetingListClient() {
   const router = useRouter();
-  const [list, setList] = useState<MeetingSummary[]>([]);
+  const [list, setList] = useState<Row[]>([]);
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState<"newest" | "oldest" | "site">("newest");
   const [busy, setBusy] = useState(false);
+  const [usingCloud, setUsingCloud] = useState(false);
 
-  const reload = useCallback(() => setList(getMeetingList()), []);
+  const reload = useCallback(async () => {
+    const local = getMeetingList();
+    if (local.length > 0 || !isMeetingCloudEnabled()) {
+      setList(local.map((s) => ({ ...s, source: "local" as const })));
+      setUsingCloud(false);
+      return;
+    }
+    const cloud = await cloudPullMeetings();
+    if (cloud && cloud.length > 0) {
+      setList(cloud.map((s) => ({ ...s, source: "cloud" as const })));
+      setUsingCloud(true);
+    } else {
+      setList([]);
+      setUsingCloud(false);
+    }
+  }, []);
+
   useEffect(() => {
-    reload();
+    void reload();
   }, [reload]);
 
   const filtered = useMemo(() => {
@@ -38,10 +63,12 @@ export function MeetingListClient() {
     return out;
   }, [list, keyword, sort]);
 
-  const open = (id: string) => {
+  const loadFull = async (row: Row) => (row.source === "cloud" ? cloudGetMeetingById(row.id) : getMeetingById(row.id));
+
+  const open = async (row: Row) => {
     setBusy(true);
     try {
-      const rec = getMeetingById(id);
+      const rec = await loadFull(row);
       if (!rec) return;
       saveCurrentMeeting(rec);
       router.push("/safety-diary");
@@ -50,10 +77,10 @@ export function MeetingListClient() {
     }
   };
 
-  const copyNext = (id: string) => {
+  const copyNext = async (row: Row) => {
     setBusy(true);
     try {
-      const rec = getMeetingById(id);
+      const rec = await loadFull(row);
       if (!rec) return;
       saveCurrentMeeting(duplicateForNextDay(rec));
       router.push("/safety-diary");
@@ -62,10 +89,16 @@ export function MeetingListClient() {
     }
   };
 
-  const remove = (s: MeetingSummary) => {
-    if (!window.confirm(`${s.siteName || s.workDate} の打合せ書を削除します。よろしいですか？`)) return;
-    deleteMeeting(s.id);
-    reload();
+  const remove = async (row: Row) => {
+    if (!window.confirm(`${row.siteName || row.workDate} の打合せ書を削除します。よろしいですか？`)) return;
+    setBusy(true);
+    try {
+      if (row.source === "cloud") await cloudDeleteMeeting(row.id);
+      else deleteMeeting(row.id);
+      await reload();
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -73,7 +106,7 @@ export function MeetingListClient() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h1 className="text-xl font-bold text-slate-900">保存した打合せ書</h1>
-          <p className="mt-1 text-sm text-slate-600">過去の打合せ書を開いて再編集・翌日用に複製できます（この端末の履歴）。</p>
+          <p className="mt-1 text-sm text-slate-600">過去の打合せ書を開いて再編集・翌日用に複製できます。{usingCloud ? "（クラウドの履歴を表示中）" : "（この端末の履歴）"}</p>
         </div>
         <Link href="/safety-diary" className="rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50">＋ 新規作成</Link>
       </div>
@@ -95,16 +128,16 @@ export function MeetingListClient() {
         ) : (
           <ul className="space-y-2">
             {filtered.map((s) => (
-              <li key={s.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <li key={`${s.source}:${s.id}`} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-base font-bold text-slate-900">{s.siteName || "（現場名未入力）"}</p>
                     <p className="mt-0.5 text-xs text-slate-500">作業日 {s.workDate}／作成 {s.author || "—"}／{s.contractorCount}社</p>
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">
-                    <button type="button" disabled={busy} onClick={() => open(s.id)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50 disabled:opacity-50">開く（再編集）</button>
-                    <button type="button" disabled={busy} onClick={() => copyNext(s.id)} className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:opacity-50">翌日用に複製</button>
-                    <button type="button" disabled={busy} onClick={() => remove(s)} className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50">削除</button>
+                    <button type="button" disabled={busy} onClick={() => void open(s)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50 disabled:opacity-50">開く（再編集）</button>
+                    <button type="button" disabled={busy} onClick={() => void copyNext(s)} className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:opacity-50">翌日用に複製</button>
+                    <button type="button" disabled={busy} onClick={() => void remove(s)} className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50">削除</button>
                   </div>
                 </div>
               </li>
