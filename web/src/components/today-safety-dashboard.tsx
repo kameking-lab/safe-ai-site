@@ -172,10 +172,10 @@ export function TodaySafetyDashboard() {
               KY作成
             </Link>
             <Link
-              href={`/safety-diary/new?fromYesterday=1`}
+              href="/safety-diary"
               className="rounded-md border border-emerald-300 bg-white px-2 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-50"
             >
-              昨日コピーで起票
+              打合せ書を作成
             </Link>
           </div>
         </div>

@@ -32,7 +32,7 @@ const PRIMARY_ITEMS = [
   { id: "home", label: "ホーム", href: "/", icon: Home },
   { id: "ky", label: "KY", href: "/ky/paper", icon: ClipboardList },
   { id: "chat", label: "AIチャット", href: "/chatbot", icon: MessageSquare },
-  { id: "safety-diary", label: "日誌", href: "/safety-diary", icon: FileText },
+  { id: "safety-diary", label: "打合せ書", href: "/safety-diary", icon: FileText },
 ] as const;
 
 // 「もっと」シートで開く2次ナビ。職長が日常で必要になりがちな機能を網羅。

@@ -1,10 +1,6 @@
-import { DiaryMonthlyClient } from "@/components/safety-diary/diary-monthly-client";
+import { permanentRedirect } from "next/navigation";
 
-export default async function SafetyDiaryMonthlyPage({
-  params,
-}: {
-  params: Promise<{ ym: string }>;
-}) {
-  const { ym } = await params;
-  return <DiaryMonthlyClient ym={ym} />;
+// Phase 12: 旧「職長日誌」月次は廃止。打合せ書へ一本化。
+export default function Page() {
+  permanentRedirect("/safety-diary");
 }
