@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-26T14:19:48.271Z",
+  "fetchedAt": "2026-05-26T17:45:17.205Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -7,26 +7,14 @@
         {
           "sourceCode": "011000",
           "level": "advisory",
-          "headline": "宗谷地方では、急な強い雨や落雷、濃霧による視程障害に注意してください。",
-          "reportDatetime": "2026-05-26T15:58:00+09:00",
+          "headline": "宗谷地方では、２７日夜遅くまで濃霧による視程障害に注意してください。",
+          "reportDatetime": "2026-05-27T00:09:00+09:00",
           "publishingOffice": "稚内地方気象台",
           "warnings": [
             {
               "areaCode": "011000",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "011000",
               "code": "20",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0121400",
-              "code": "14",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -37,56 +25,26 @@
             },
             {
               "areaCode": "0151100",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151100",
               "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151200",
-              "code": "14",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0151200",
               "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151300",
-              "code": "14",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0151300",
               "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151400",
-              "code": "14",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "0151400",
               "code": "20",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151600",
-              "code": "14",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -97,20 +55,8 @@
             },
             {
               "areaCode": "0151700",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151700",
               "code": "20",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151800",
-              "code": "14",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -121,20 +67,8 @@
             },
             {
               "areaCode": "0151900",
-              "code": "14",
-              "status": "発表",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0151900",
               "code": "20",
               "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0152000",
-              "code": "14",
-              "status": "発表",
               "level": "advisory"
             },
             {
@@ -360,84 +294,11 @@
         },
         {
           "sourceCode": "013000",
-          "level": "advisory",
-          "headline": "網走、北見地方では、２６日夜遅くまで強風に注意してください。",
-          "reportDatetime": "2026-05-26T15:50:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-27T00:11:00+09:00",
           "publishingOffice": "網走地方気象台",
-          "warnings": [
-            {
-              "areaCode": "013010",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "013020",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0120801",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0120802",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0121100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154500",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154600",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154700",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0154900",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0155000",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0155200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "0156400",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         },
         {
           "sourceCode": "014100",
