@@ -16,6 +16,7 @@ import {
   normalizeCas,
 } from "@/lib/mhlw-chemicals";
 import { RegulationTagsSection } from "@/components/regulation-tags-section";
+import { RegulationSummarySection } from "@/components/chemical/regulation-summary-section";
 import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
 import { CONSTRUCTION_PRIORITY_CAS_SET } from "@/lib/regulation-tag-labels";
 import { OshaRegulationsSection } from "@/components/chemical/osha-regulations-section";
@@ -89,6 +90,9 @@ export default async function ChemicalDetailPage({
             </div>
           )}
         </header>
+
+        {/* P0-2/P1-2/P1-6/P2-3: 全法律ワンストップ・サマリー（該当法律＋土壌＋物性型要確認＋特殊健診）を最上部に。 */}
+        <RegulationSummarySection cas={cas} regulationTags={entry.regulationTags} />
 
         <ConcentrationLimitsBlock entry={entry} />
 
