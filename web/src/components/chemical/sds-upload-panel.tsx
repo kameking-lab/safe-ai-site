@@ -1,9 +1,17 @@
 "use client";
 
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { Upload, FileText, Loader2, ArrowRight } from "lucide-react";
 import type { SdsExtraction } from "@/lib/chemical/sds-extraction";
+import {
+  CHEM_LANGS,
+  CHEM_LANG_LABELS,
+  chemSdsLabels,
+  readStoredChemLang,
+  storeChemLang,
+  type ChemLang,
+} from "@/lib/chemical/chemical-ra-labels";
 
 /**
  * P2-1 SDS取込み（Gemini Vision）UI。
@@ -30,6 +38,12 @@ export function SdsUploadPanel() {
   const [result, setResult] = useState<SdsExtraction | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [lang, setLang] = useState<ChemLang>("ja");
+  const L = chemSdsLabels(lang);
+
+  useEffect(() => {
+    setLang(readStoredChemLang());
+  }, []);
 
   const handleFile = useCallback(async (file: File) => {
     setError(null);
@@ -70,13 +84,32 @@ export function SdsUploadPanel() {
 
   return (
     <section className="rounded-2xl border border-sky-200 bg-sky-50/60 p-4 sm:p-5 space-y-3">
-      <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
-        <FileText className="h-5 w-5 text-sky-600" aria-hidden="true" />
-        SDS取込み（PDF/画像をAIが自動読み取り）
-      </h2>
-      <p className="text-xs text-slate-600">
-        手元のSDSをドロップすると、物質名・CAS・GHS分類・取扱注意・適用法令・対策をAIが抽出します（参考）。
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
+          <FileText className="h-5 w-5 text-sky-600" aria-hidden="true" />
+          {L.sdsTitle}
+        </h2>
+        <label className="flex items-center gap-1 text-xs text-slate-500">
+          <span aria-hidden>🌐</span>
+          <select
+            value={lang}
+            onChange={(e) => {
+              const next = e.target.value as ChemLang;
+              setLang(next);
+              storeChemLang(next);
+            }}
+            aria-label="表示言語 / Display language"
+            className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700"
+          >
+            {CHEM_LANGS.map((l) => (
+              <option key={l} value={l}>
+                {CHEM_LANG_LABELS[l]}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <p className="text-xs text-slate-600">{L.sdsDesc}</p>
 
       <label
         htmlFor={inputId}
@@ -97,9 +130,9 @@ export function SdsUploadPanel() {
       >
         <Upload className="h-6 w-6 text-sky-500" aria-hidden="true" />
         <span className="text-sm font-semibold text-slate-700">
-          SDSファイルをここにドロップ / クリックで選択
+          {L.dropHint}
         </span>
-        <span className="text-[11px] text-slate-500">PDF・PNG・JPEG・WebP（約6MBまで）</span>
+        <span className="text-[11px] text-slate-500">{L.fileHint}</span>
         {fileName && <span className="text-[11px] text-sky-700">選択: {fileName}</span>}
         <input
           id={inputId}
@@ -117,7 +150,7 @@ export function SdsUploadPanel() {
       {loading && (
         <p className="flex items-center gap-2 text-sm text-sky-700">
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          AIがSDSを読み取っています…
+          {L.reading}
         </p>
       )}
       {error && <p className="text-sm font-semibold text-rose-700">{error}</p>}
@@ -130,27 +163,27 @@ export function SdsUploadPanel() {
           </p>
           {result.ghs.length > 0 && (
             <p className="text-xs text-slate-700">
-              <span className="font-semibold">GHS分類:</span> {result.ghs.join(" / ")}
+              <span className="font-semibold">{L.ghs}:</span> {result.ghs.join(" / ")}
             </p>
           )}
           {result.physicalChemical && (
             <p className="text-xs text-slate-700">
-              <span className="font-semibold">物理化学的性質:</span> {result.physicalChemical}
+              <span className="font-semibold">{L.physical}:</span> {result.physicalChemical}
             </p>
           )}
           {result.applicableLaws.length > 0 && (
             <p className="text-xs text-slate-700">
-              <span className="font-semibold">適用法令(参考):</span> {result.applicableLaws.join(" / ")}
+              <span className="font-semibold">{L.laws}:</span> {result.applicableLaws.join(" / ")}
             </p>
           )}
           {result.handling && (
             <p className="text-xs text-slate-700">
-              <span className="font-semibold">取扱注意:</span> {result.handling}
+              <span className="font-semibold">{L.handling}:</span> {result.handling}
             </p>
           )}
           {result.measures && (
             <p className="text-xs text-slate-700">
-              <span className="font-semibold">対策:</span> {result.measures}
+              <span className="font-semibold">{L.measures}:</span> {result.measures}
             </p>
           )}
           <div className="flex flex-wrap gap-2 pt-1">
@@ -159,7 +192,7 @@ export function SdsUploadPanel() {
                 href={`/chemical-ra?name=${encodeURIComponent(result.productName || result.cas)}`}
                 className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700"
               >
-                この物質でRAを実施
+                {L.runRa}
                 <ArrowRight className="h-3 w-3" aria-hidden="true" />
               </Link>
             )}
@@ -168,12 +201,12 @@ export function SdsUploadPanel() {
                 href={`/chemical-database/${encodeURIComponent(result.cas)}`}
                 className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
               >
-                全法律の規制を見る
+                {L.seeRegs}
               </Link>
             )}
           </div>
           <p className="text-[11px] leading-relaxed text-slate-400">
-            ※ 抽出結果はAIによる参考情報です。正確な内容は公式SDS・最新法令・専門家の指導に従ってください。
+            {L.aiDisclaimer}
           </p>
         </div>
       )}
