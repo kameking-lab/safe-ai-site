@@ -13,6 +13,7 @@ import {
   type SignageLang,
 } from "@/lib/signage/signage-labels";
 import { readStoredSignageLang, storeSignageLang } from "@/lib/signage/signage-prefs";
+import { SignageAccidentEducation } from "@/components/accidents/signage-accident-education";
 
 const COUNTDOWN_SEC = 10;
 
@@ -298,6 +299,9 @@ export function KyMorningSignage() {
                 )}
               </section>
             )}
+
+            {/* P2-2: 本日の安全啓発（過去の労災事例・日替わり・6言語見出し） */}
+            <SignageAccidentEducation lang={lang} />
 
             {/* 唱和カウントダウン */}
             <section className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-emerald-700/30 p-6 print:hidden">

@@ -18,7 +18,7 @@
 const STORAGE_KEY = "safe-ai:favorites:v1";
 const MAX_FAVORITES = 50;
 
-export type FavoriteKind = "article" | "notice";
+export type FavoriteKind = "article" | "notice" | "accident";
 
 export type FavoriteEntry = {
   kind: FavoriteKind;
@@ -45,7 +45,7 @@ function safeRead(): FavoriteEntry[] {
       (e): e is FavoriteEntry =>
         e !== null &&
         typeof e === "object" &&
-        (e.kind === "article" || e.kind === "notice") &&
+        (e.kind === "article" || e.kind === "notice" || e.kind === "accident") &&
         typeof e.id === "string" &&
         typeof e.title === "string" &&
         typeof e.href === "string",

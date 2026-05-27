@@ -24,6 +24,7 @@ const TAB_LABEL: Record<Tab, string> = {
   all: "すべて",
   article: "条文",
   notice: "通達",
+  accident: "事故事例",
 };
 
 function formatDate(iso: string): string {
@@ -52,6 +53,7 @@ export function FavoritesList() {
     all: list.length,
     article: list.filter((e) => e.kind === "article").length,
     notice: list.filter((e) => e.kind === "notice").length,
+    accident: list.filter((e) => e.kind === "accident").length,
   };
 
   const handleRemove = (entry: FavoriteEntry) => {
