@@ -1,0 +1,59 @@
+name: MHLW monthly sokuhou ETL
+
+on:
+  schedule:
+    # 毎月15日 09:00 JST = 00:00 UTC（月次速報の公開タイミングに余裕を持たせる）
+    - cron: "0 0 15 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: true
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install deps (xlsx/tsx)
+        run: npm ci
+
+      - name: Fetch MHLW monthly sokuhou (analysis Excel)
+        run: npx tsx scripts/etl/mhlw-monthly-fetch.ts
+        env:
+          NODE_OPTIONS: "--no-warnings"
+
+      - name: Commit if changed
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- web/src/data/accidents/monthly-sokuhou.json; then
+            echo "No sokuhou changes"
+            exit 0
+          fi
+          git add web/src/data/accidents/monthly-sokuhou.json
+          git commit -m "chore(accidents): MHLW monthly sokuhou update [skip ci]"
+          for i in 1 2 3; do
+            git pull --rebase origin "${{ github.ref_name }}" || true
+            if git push origin HEAD:"${{ github.ref_name }}"; then
+              echo "Pushed on attempt $i"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Failed to push after retries"
+          exit 1

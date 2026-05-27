@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ALL_ACCIDENT_CATEGORIES,
@@ -117,12 +117,38 @@ export function AccidentDatabasePanel({
   const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
 
   // クライアントマウント後にURLパラメータを読み込む（SSR互換）
+  // P1-3: 業種に加えキーワード・労働者属性・事業所規模もURLから復元（共有可能な絞り込み）。
   useEffect(() => {
     const sp = new URLSearchParams(window.location.search);
     const initial = parseIndustriesParam(sp.get("acc_industries"));
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (initial.size > 0) setSelectedIndustriesState(initial);
+    const kw = sp.get("acc_kw");
+    if (kw) setKeyword(kw);
+    const attr = sp.get("acc_attr");
+    if (attr && (WORKER_ATTRIBUTE_OPTIONS as readonly string[]).includes(attr)) {
+      setSelectedWorkerAttribute(attr as WorkerAttributeFilter);
+    }
+    const size = sp.get("acc_size");
+    if (size && (COMPANY_SIZE_OPTIONS as readonly string[]).includes(size)) {
+      setSelectedCompanySize(size as CompanySizeFilter);
+    }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
+
+  // P1-3: キーワード・属性・規模の変更をURLに同期（replace、初回はスキップ）。
+  const filterHydrated = useRef(false);
+  useEffect(() => {
+    if (!filterHydrated.current) {
+      filterHydrated.current = true;
+      return;
+    }
+    const sp = new URLSearchParams(window.location.search);
+    if (keyword.trim()) sp.set("acc_kw", keyword.trim()); else sp.delete("acc_kw");
+    if (selectedWorkerAttribute !== "すべて") sp.set("acc_attr", selectedWorkerAttribute); else sp.delete("acc_attr");
+    if (selectedCompanySize !== "全規模") sp.set("acc_size", selectedCompanySize); else sp.delete("acc_size");
+    router.replace(`?${sp.toString()}`, { scroll: false });
+  }, [keyword, selectedWorkerAttribute, selectedCompanySize, router]);
 
   const updateIndustriesUrl = useCallback(
     (industries: Set<IndustryKey>) => {

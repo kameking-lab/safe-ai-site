@@ -13,6 +13,7 @@ import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { HubFilter } from "@/components/accidents-reports/hub-filter";
 import { EstatOfficialTables } from "@/components/accidents/estat-official-tables";
 import { AxisAnalysisSection } from "@/components/accidents/axis-analysis-section";
+import { MonthlySokuhouSection } from "@/components/accidents/monthly-sokuhou-section";
 import { getAllIndustriesSummary } from "@/lib/accident-analysis";
 import { ogImageUrl } from "@/lib/og-url";
 import { SITE_URL, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
@@ -233,6 +234,8 @@ export default function AccidentsReportsHubPage() {
           2025〜2026年分は「想定例（速報集計から統計的に導出した代表パターン事例）」を含みます。実報告の確定個票（R07労働者死傷病報告オープンデータ）が公開され次第、当該事例は順次置換予定です。
         </p>
 
+        {/* P2-1: 最新の月次速報（厚労省・速報値、ETL取込） */}
+        <MonthlySokuhouSection />
         {/* P3-2: 多軸分析（曜日別＋集計可否の明示） */}
         <AxisAnalysisSection />
         {/* P3-1: e-Stat 公式統計表カタログ（労働災害・政府統計） */}
