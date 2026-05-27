@@ -11,6 +11,7 @@ import { getAccidentRelated } from "@/lib/accident-related";
 import { ogImageUrl } from "@/lib/og-url";
 import type { AccidentCase } from "@/lib/types/domain";
 import { PageContainer } from "@/components/layout/page-container";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 
 const SITE_BASE = "https://www.anzen-ai-portal.jp";
 
@@ -111,9 +112,20 @@ export default async function AccidentDetailPage({
             {accident.severity}
           </span>
         </div>
-        <h1 className="mt-3 text-xl font-bold leading-snug text-slate-900 sm:text-2xl">
-          {accident.title}
-        </h1>
+        <div className="mt-3 flex items-start justify-between gap-3">
+          <h1 className="text-xl font-bold leading-snug text-slate-900 sm:text-2xl">
+            {accident.title}
+          </h1>
+          {/* P2-4: 事故事例のお気に入り（ブックマーク） */}
+          <FavoriteButton
+            kind="accident"
+            id={accident.id}
+            title={accident.title}
+            subtitle={`${accident.workCategory}／${accident.type}／${accident.severity}`}
+            href={`/accidents/${accident.id}`}
+            variant="normal"
+          />
+        </div>
         <dl className="mt-3 grid grid-cols-1 gap-1 text-xs text-slate-600 sm:grid-cols-2">
           <div className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 text-slate-400" />
