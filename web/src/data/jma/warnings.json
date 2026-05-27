@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-27T10:42:29.924Z",
+  "fetchedAt": "2026-05-27T14:13:55.613Z",
   "byIso": {
     "JP-01": {
       "level": "advisory",
@@ -3965,24 +3965,12 @@
         {
           "sourceCode": "350000",
           "level": "advisory",
-          "headline": "山口県では、２７日夜のはじめ頃まで強風に注意してください。",
-          "reportDatetime": "2026-05-27T15:56:00+09:00",
+          "headline": "西部、北部では、２８日明け方まで強風に注意してください。",
+          "reportDatetime": "2026-05-27T20:34:00+09:00",
           "publishingOffice": "下関地方気象台",
           "warnings": [
             {
               "areaCode": "350010",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "350020",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "350030",
               "code": "15",
               "status": "継続",
               "level": "advisory"
@@ -4000,97 +3988,13 @@
               "level": "advisory"
             },
             {
-              "areaCode": "3520200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3520300",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "3520400",
               "code": "15",
               "status": "継続",
               "level": "advisory"
             },
             {
-              "areaCode": "3520600",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3520700",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3520800",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3521000",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "3521100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3521200",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3521500",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3521600",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3530500",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3532100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3534100",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3534300",
-              "code": "15",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "3534400",
               "code": "15",
               "status": "継続",
               "level": "advisory"
@@ -4972,14 +4876,14 @@
         {
           "sourceCode": "420000",
           "level": "advisory",
-          "headline": "壱岐・対馬では２７日夜遅くまで、北部では２７日夜のはじめ頃から２７日夜遅くまで、強風に注意してください。",
-          "reportDatetime": "2026-05-27T13:36:00+09:00",
+          "headline": "北部、壱岐・対馬では、２８日明け方まで強風に注意してください。",
+          "reportDatetime": "2026-05-27T20:29:00+09:00",
           "publishingOffice": "長崎地方気象台",
           "warnings": [
             {
               "areaCode": "420020",
               "code": "15",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -4991,13 +4895,13 @@
             {
               "areaCode": "4220700",
               "code": "15",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "4220800",
               "code": "15",
-              "status": "発表",
+              "status": "継続",
               "level": "advisory"
             },
             {
@@ -5041,30 +4945,12 @@
         {
           "sourceCode": "440000",
           "level": "advisory",
-          "headline": "中部では２７日夜のはじめ頃まで、南部では２８日明け方まで、高波に注意してください。",
-          "reportDatetime": "2026-05-27T15:40:00+09:00",
+          "headline": "南部では、２８日明け方まで高波に注意してください。",
+          "reportDatetime": "2026-05-27T20:02:00+09:00",
           "publishingOffice": "大分地方気象台",
           "warnings": [
             {
-              "areaCode": "440010",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
               "areaCode": "440040",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4420100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4420200",
               "code": "16",
               "status": "継続",
               "level": "advisory"
@@ -5074,98 +4960,43 @@
               "code": "16",
               "status": "継続",
               "level": "advisory"
-            },
-            {
-              "areaCode": "4420600",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4420700",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4421000",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4434100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
             }
           ]
         }
       ]
     },
     "JP-45": {
-      "level": "advisory",
+      "level": "none",
       "entries": [
         {
           "sourceCode": "450000",
-          "level": "advisory",
-          "headline": "南部平野部、北部平野部では、２７日夜遅くまで土砂災害に注意してください。",
-          "reportDatetime": "2026-05-27T16:01:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-27T21:42:00+09:00",
           "publishingOffice": "宮崎地方気象台",
-          "warnings": [
-            {
-              "areaCode": "450010",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "450020",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4520300",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4520400",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
     "JP-46": {
-      "level": "warning",
+      "level": "advisory",
       "entries": [
         {
           "sourceCode": "460040",
-          "level": "warning",
-          "headline": "奄美地方では、２７日夜のはじめ頃まで土砂災害に警戒してください。",
-          "reportDatetime": "2026-05-27T16:12:00+09:00",
+          "level": "advisory",
+          "headline": "奄美地方では、２８日明け方まで土砂災害に、２８日夕方まで落雷に注意してください。",
+          "reportDatetime": "2026-05-27T21:38:00+09:00",
           "publishingOffice": "名瀬測候所",
           "warnings": [
             {
               "areaCode": "460040",
-              "code": "03",
-              "status": "継続",
-              "level": "warning"
-            },
-            {
-              "areaCode": "460040",
-              "code": "14",
+              "code": "10",
               "status": "継続",
               "level": "advisory"
             },
             {
               "areaCode": "460040",
-              "code": "16",
+              "code": "14",
               "status": "継続",
               "level": "advisory"
             },
@@ -5177,19 +5008,7 @@
             },
             {
               "areaCode": "4630400",
-              "code": "03",
-              "status": "継続",
-              "level": "warning"
-            },
-            {
-              "areaCode": "4630400",
-              "code": "14",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4630400",
-              "code": "16",
+              "code": "10",
               "status": "継続",
               "level": "advisory"
             },
@@ -5263,78 +5082,11 @@
         },
         {
           "sourceCode": "460100",
-          "level": "advisory",
-          "headline": "大隅、種子島・屋久島地方では、２７日夜遅くまで土砂災害に注意してください。種子島・屋久島地方では、２７日夜遅くまで高波に注意してください。",
-          "reportDatetime": "2026-05-27T15:38:00+09:00",
+          "level": "none",
+          "headline": "注意報を解除します。",
+          "reportDatetime": "2026-05-27T21:37:00+09:00",
           "publishingOffice": "鹿児島地方気象台",
-          "warnings": [
-            {
-              "areaCode": "460020",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "460030",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "460030",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4621300",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4630300",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4649100",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4649200",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4650100",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4650200",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4650500",
-              "code": "10",
-              "status": "継続",
-              "level": "advisory"
-            },
-            {
-              "areaCode": "4650500",
-              "code": "16",
-              "status": "継続",
-              "level": "advisory"
-            }
-          ]
+          "warnings": []
         }
       ]
     },
