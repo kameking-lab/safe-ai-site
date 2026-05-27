@@ -1,6 +1,30 @@
 {
-  "updatedAt": "2026-05-26T22:17:52.807Z",
+  "updatedAt": "2026-05-27T22:29:16.735Z",
   "entries": [
+    {
+      "id": "c731005124d77b89",
+      "headline": "熱中症を防ぐ「ショネツジュンカ」って？",
+      "aiSummary": "熱中症予防に有効な暑熱順化の概念と方法を解説。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260527/k10015130171000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 27 May 2026 18:46:00 +0900",
+        "fetchedAt": "2026-05-27T22:28:39.052Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 75,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-05-27T22:28:56.737Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
     {
       "id": "dd8cb1f886540ea8",
       "headline": "労働局が建設現場での熱中症対策を呼びかけ【企業の対策QAも】",
@@ -21,6 +45,76 @@
         "misinformationRisk": 10,
         "duplication": 15,
         "judgedAt": "2026-05-20T22:22:59.495Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "d13e4f2663fd18d6",
+      "headline": "令和７年「職場における熱中症による死傷災害の発生状況」(確定値)を公表します",
+      "aiSummary": "厚生労働省が令和7年の職場熱中症による死傷災害の確定値を公表。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_73330.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-05-27T14:00:00+09:00",
+        "fetchedAt": "2026-05-27T22:28:39.052Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "statistics_release",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-05-27T22:29:16.728Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "dacf4a42c3fa9b43",
+      "headline": "令和７年の労働災害発生状況を公表",
+      "aiSummary": "厚生労働省が最新の労働災害発生状況の統計を公表。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_73382.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-05-27T14:00:00+09:00",
+        "fetchedAt": "2026-05-27T22:28:39.052Z"
+      },
+      "newsType": "statistics_release",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-05-27T22:29:10.674Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "3d89c523ff343a74",
+      "headline": "労働災害発生状況",
+      "aiSummary": "厚生労働省が労働災害の発生状況に関する統計を公表。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/bunya/roudoukijun/anzeneisei11/rousai-hassei/index.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-05-27T14:00:00+09:00",
+        "fetchedAt": "2026-05-27T22:28:39.052Z"
+      },
+      "newsType": "statistics_release",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-05-27T22:29:06.635Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
