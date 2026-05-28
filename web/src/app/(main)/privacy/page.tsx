@@ -72,6 +72,7 @@ export default function PrivacyPage() {
             <li className="list-disc">お問い合わせ・導入相談への返信、見積り、打合せ調整</li>
             <li className="list-disc">AI機能（法令チャットボット、化学物質リスクアセスメント、KY支援、業種別Eラーニング要約、事故事例分析）の提供</li>
             <li className="list-disc">気象警報・安全情報のメール通知配信（購読者のみ）</li>
+            <li className="list-disc">月次メールダイジェスト（法改正・労災速報のまとめ）の配信（購読者のみ・メールアドレスのみ取得）。各メールのワンクリック解除リンクからいつでも配信停止でき、解除時はコンタクト情報を削除します</li>
             <li className="list-disc">サービスの安定運用・障害調査・不正アクセス防止・セキュリティ確保</li>
             <li className="list-disc">利用傾向の統計分析、機能改善、品質向上</li>
             <li className="list-disc">法令・行政機関・裁判所の要請に応じた対応</li>

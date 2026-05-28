@@ -32,15 +32,23 @@ export function WhatsNewClient({ items }: { items: NewsHubItem[] }) {
   const [lastVisit, setLastVisit] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const prev = window.localStorage.getItem(LAST_VISIT_KEY);
-      setLastVisit(prev);
-      const today = new Date().toISOString().slice(0, 10);
-      window.localStorage.setItem(LAST_VISIT_KEY, today);
-    } catch {
-      // localStorage 不可環境では新着判定を 30日以内にフォールバック
-      setLastVisit(null);
-    }
+    let cancelled = false;
+    // マイクロタスクへ遅延し、effect内の同期setStateによるカスケード再描画を避ける
+    queueMicrotask(() => {
+      if (cancelled) return;
+      try {
+        const prev = window.localStorage.getItem(LAST_VISIT_KEY);
+        setLastVisit(prev);
+        const today = new Date().toISOString().slice(0, 10);
+        window.localStorage.setItem(LAST_VISIT_KEY, today);
+      } catch {
+        // localStorage 不可環境では新着判定を 30日以内にフォールバック
+        setLastVisit(null);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filtered = useMemo(

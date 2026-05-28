@@ -16,7 +16,7 @@ import { buildEnforcementBadge } from "@/lib/law-revision-status";
 import { egovRevisionsMeta } from "@/data/law-revisions/egov-revisions-loaded";
 import monthlySokuhou from "@/data/accidents/monthly-sokuhou.json";
 import newsFeed from "@/data/news-feed/approved/index.json";
-import type { NewsHubCategory, NewsHubItem } from "@/lib/news-hub-types";
+import type { NewsHubItem } from "@/lib/news-hub-types";
 
 export type { NewsHubCategory, NewsHubItem } from "@/lib/news-hub-types";
 export { NEWS_HUB_CATEGORY_LABEL, isRecent } from "@/lib/news-hub-types";
