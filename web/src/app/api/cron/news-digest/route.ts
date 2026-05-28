@@ -22,9 +22,14 @@ function currentMonthLabel(now = new Date()): string {
 export async function GET(request: Request) {
   const cronSecret = process.env.CRON_SECRET;
   const auth = request.headers.get("authorization");
+  // CRON_SECRET 設定時は Bearer 一致を要求
   if (cronSecret && auth !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
+  // 送信を許可するのは「CRON_SECRET が設定され、かつ Bearer 一致」の正規Cronのみ。
+  // CRON_SECRET 未設定や未認証の公開アクセスでは、メール送信せず内容プレビューのみ返す
+  // （公開エンドポイントからの一斉配信トリガを防止）。
+  const authed = Boolean(cronSecret) && auth === `Bearer ${cronSecret}`;
 
   const preview = new URL(request.url).searchParams.get("preview") === "1";
   const items = buildNewsHubItems();
@@ -34,12 +39,12 @@ export async function GET(request: Request) {
   const audienceId = process.env.RESEND_AUDIENCE_ID;
   const from = process.env.NOTIFY_FROM;
 
-  // 送信できない/プレビュー時は内容のみ返す（個人情報を扱わない安全経路）
-  if (preview || !apiKey || !audienceId || !from) {
+  // 送信できない/未認証/プレビュー時は内容のみ返す（個人情報を扱わない安全経路）
+  if (preview || !authed || !apiKey || !audienceId || !from) {
     return NextResponse.json({
       ok: true,
       sent: false,
-      reason: preview ? "preview" : "resend_not_configured",
+      reason: preview ? "preview" : !authed ? "unauthenticated_preview" : "resend_not_configured",
       subject: digest.subject,
       itemCount: items.length,
       textPreview: digest.text.slice(0, 600),
