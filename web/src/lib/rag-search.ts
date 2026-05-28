@@ -5,6 +5,7 @@ import { expandQuery } from "@/lib/query-expansion";
 import { expandQueryRich } from "@/lib/rag/synonyms";
 import { bm25Score, getOrBuildIndex } from "@/lib/rag/bm25";
 import { rerank } from "@/lib/rag/reranker";
+import { kanjiToArabic } from "@/lib/article-number-normalize";
 
 /** チャットボットの法令カテゴリフィルタ（lawShort と完全一致） */
 export type LawCategoryFilter =
@@ -754,8 +755,27 @@ export function searchRelevantArticlesWithScore(
 const ARTICLE_NUM_RE =
   /第\d+条(?:の\d+)?(?:第\d+項)?(?:第\d+号)?/g;
 
+/**
+ * P2-6: 漢数字の条番号を算用数字へ正規化する。
+ * 「第」で始まる条番号文脈に限定し、化学物質名等（一酸化炭素・二硫化炭素 等）の
+ * 漢数字を誤って変換しないようにする。例:「第十二条の五」→「第12条の5」。
+ */
+const KANJI_ARTICLE_RE =
+  /第([〇一二三四五六七八九十百千]+)条(?:の([〇一二三四五六七八九十百千]+))?(?:第([〇一二三四五六七八九十百千]+)項)?(?:第([〇一二三四五六七八九十百千]+)号)?/g;
+
+function normalizeKanjiArticleNumbers(text: string): string {
+  return text.replace(KANJI_ARTICLE_RE, (_m, article, branch, paragraph, item) => {
+    let s = `第${kanjiToArabic(article)}条`;
+    if (branch) s += `の${kanjiToArabic(branch)}`;
+    if (paragraph) s += `第${kanjiToArabic(paragraph)}項`;
+    if (item) s += `第${kanjiToArabic(item)}号`;
+    return s;
+  });
+}
+
 function tokenize(text: string): string[] {
-  const fuzzyNormalized = normalizeSearchText(text);
+  // P2-6: 漢数字の条番号（第十二条の五 等）を先に算用数字化してから正規化する
+  const fuzzyNormalized = normalizeKanjiArticleNumbers(normalizeSearchText(text));
 
   // Fix 2a: 「第」なし数字+条 を正規化（例: "565条" → "第565条"）
   // (?<![第\d]) で「直前が 第 または数字」の場合はスキップする。
