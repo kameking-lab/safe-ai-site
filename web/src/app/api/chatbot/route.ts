@@ -26,8 +26,10 @@ import {
 import { validateCitations } from "@/lib/chatbot-citation-validator";
 import {
   buildFallbackDecision,
-  formatFallbackSuggestionsText,
+  searchPartialMatches,
 } from "@/lib/chatbot-fallback-logic";
+import { buildNoHitTemplate } from "@/lib/chatbot-no-hit-response";
+import { getClientIp, checkRateLimit, rateLimitMessage } from "@/lib/chatbot-rate-limit";
 // Phase 4 通達・リーフレット添付
 import {
   attachNoticesAndLeaflets,
@@ -232,6 +234,15 @@ export async function POST(request: Request) {
     return jsonError(400, "質問文を入力してください。");
   }
 
+  // P2-5: 簡易IPレート制限（stream route と同条件・同 in-memory バケットを共有）
+  const rate = checkRateLimit(getClientIp(request));
+  if (!rate.allowed) {
+    return NextResponse.json<ApiErrorBody>(
+      { error: rateLimitMessage(rate.retryAfterSec), retryable: false },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } },
+    );
+  }
+
   const lawCategory: LawCategoryFilter = body?.lawCategory ?? "all";
   const relatedNotices = searchRelevantNotices(message, 3);
 
@@ -319,49 +330,38 @@ export async function POST(request: Request) {
     : "low";
   const confidenceScore = Math.round(normalizedScore * 100) / 100;
 
-  // 低信頼時はe-Gov誘導のテンプレートを返す（AI呼び出しをスキップ）
-  // Phase 2 Layer 3: Out-of-Scope の場合は TOPIC_TO_LAW_CATEGORY で関連分野を提案
+  // P1-5: 直接ヒット無しでも「該当無し」で突き放さず、低スコアの関連条文＋一般原則＋
+  // 公式誘導を返す。stream route と同じ buildNoHitTemplate を使い挙動を揃える。
   if (!hasRagHits) {
-    const fallbackDecisionOutOfScope = buildFallbackDecision({
+    const relatedForNoHit = allRelevant.slice(0, 8);
+    const partialMatches = searchPartialMatches(message);
+    const noHitAnswer = buildNoHitTemplate({
       query: message,
-      normalizedScore,
-      articles: [],
+      relatedArticles: relatedForNoHit,
+      partialMatches,
+      disclaimer: AI_LEGAL_DISCLAIMER,
     });
-    const mlitSources = mlitMatches.map(mlitToSource);
-    const mlitNote = mlitMatches.length > 0
-      ? `\n\n📘 参考までに、関連する所管省庁の公式資料が見つかりました：\n` +
-        mlitMatches
-          .map((r) => `・${r.publisher}（${r.bureau}）「${r.title}」`)
-          .join("\n")
-      : "";
-    const headline = fallbackDecisionOutOfScope.headline
-      ? `⚠️ ${fallbackDecisionOutOfScope.headline}`
-      : "⚠️ この質問は本ツールの提供データ範囲外の可能性があります。確証ある回答ができません。";
-    const suggestionsText = formatFallbackSuggestionsText(
-      fallbackDecisionOutOfScope.suggestions
-    );
-    const egovFooter = fallbackDecisionOutOfScope.egovFooter
-      ? `\n\n${fallbackDecisionOutOfScope.egovFooter}`
-      : "\n\n最新・正確な条文は e-Gov 法令検索（https://laws.e-gov.go.jp/）でご確認ください。\n※ 本回答はあくまで参考情報です。法的判断は労働安全コンサルタント等の専門家にご相談ください。";
-
+    const noHitSources: ChatbotSource[] = [
+      ...relatedForNoHit.map((a) => ({
+        law: `${a.law}（${a.lawShort}）`,
+        article: a.articleNum + (a.articleTitle ? `「${a.articleTitle}」` : ""),
+        articleTitle: a.articleTitle,
+        text: a.text.length > 200 ? a.text.slice(0, 200) + "…" : a.text,
+        fullText: a.text,
+        snippet: buildSnippet(a.text, message),
+      })),
+      ...mlitMatches.map(mlitToSource),
+    ];
     const scopeWarningMsg =
-      fallbackDecisionOutOfScope.suggestions.length > 0
-        ? `本ツールの提供データ範囲（33法令＋関連通達）外の質問ですが、関連する他法令カテゴリを${fallbackDecisionOutOfScope.suggestions.length}件提示しました。`
-        : "本ツールの提供データ範囲（33法令＋関連通達・告示）では確証ある回答が得られない質問です。e-Gov・厚生労働省公式情報をご確認ください。";
+      partialMatches.length > 0
+        ? `直接規定する条文は特定できませんでしたが、関連条文・関連分野（${partialMatches.length}件）と一般原則をご案内しました。確定情報は公式でご確認ください。`
+        : "直接規定する条文は特定できませんでした。関連条文と一般原則をご案内しています。確定情報は e-Gov・厚生労働省・所轄労働基準監督署でご確認ください。";
 
     return NextResponse.json<ChatbotResponse>(
       {
-        answer:
-          headline +
-          "\n\nご質問に合致する法令条文を十分な確信度で特定できませんでした。" +
-          (relatedNotices.length > 0
-            ? "\n\n以下の通達・告示が関連する可能性があります（下部の「関連通達」セクションをご参照ください）。"
-            : "") +
-          suggestionsText +
-          egovFooter +
-          mlitNote,
-        sources: mlitSources,
-        source_type: mlitMatches.length > 0 ? "rag" : "ai_inference",
+        answer: noHitAnswer,
+        sources: noHitSources,
+        source_type: relatedForNoHit.length > 0 ? "rag" : "ai_inference",
         confidence: "low",
         confidenceScore,
         followups: [
@@ -369,9 +369,9 @@ export async function POST(request: Request) {
           { label: "📚 関連する法令を調べる", prompt: `${message} に関連する労働安全衛生法令にはどのようなものがありますか？` },
         ],
         notices: relatedNotices,
-        citations: [],
-        relatedLaws: [],
-        digDeeperLinks: suggestDigDeeperLinks(message, []),
+        citations: relatedForNoHit.length > 0 ? buildStructuredCitations(relatedForNoHit) : [],
+        relatedLaws: suggestRelatedLaws(message, relatedForNoHit),
+        digDeeperLinks: suggestDigDeeperLinks(message, relatedForNoHit),
         scopeWarnings: [scopeWarningMsg],
       },
       { status: 200 }
@@ -587,7 +587,7 @@ export async function POST(request: Request) {
   if (outOfScopeRefs.length > 0) {
     const sample = outOfScopeRefs.slice(0, 3).join("、");
     answer +=
-      `\n\n⚠️ 注記：回答中の「${sample}」は本ツールの提供データ（33法令＋通達DB）の範囲外の参照のため、` +
+      `\n\n⚠️ 注記：回答中の「${sample}」は本ツールの提供データ（50法令＋通達DB）の範囲外の参照のため、` +
       `e-Gov法令検索および厚生労働省公式情報で必ずご確認ください。`;
     scopeWarnings.push(
       `回答中の参照「${sample}」は提供データ範囲外のため、内容の確からしさは保証できません。`

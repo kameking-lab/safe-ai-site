@@ -94,7 +94,7 @@ export function CopilotNextSteps({ current, industry, intro, extraCta }: Copilot
       label: lbl
         ? `${lbl}の関連法令を安衛法AIで深掘りする`
         : "関連法令を安衛法AIで深掘りする",
-      description: "33法令以上を根拠条文付きでAIが回答。具体的な選任要件・特別教育・健診を確認できます。",
+      description: "50法令以上を根拠条文付きでAIが回答。具体的な選任要件・特別教育・健診を確認できます。",
       href: `/chatbot${q}`,
       icon: MessageSquare,
       tone: "blue",

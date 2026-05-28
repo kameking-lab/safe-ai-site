@@ -110,7 +110,7 @@ export const SITE_STATS_META: Record<
     asOf: "2026-04",
   },
   lawArticleCount: {
-    source: "e-Gov 法令検索（curated 主要33法令）",
+    source: "e-Gov 法令検索（curated 主要50法令）",
     sourceUrl: "https://laws.e-gov.go.jp/",
     asOf: "2026-04",
   },
