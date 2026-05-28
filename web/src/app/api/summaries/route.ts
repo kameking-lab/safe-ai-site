@@ -6,6 +6,7 @@ import type { LawRevisionSummary } from "@/lib/types/domain";
 import { withCircuitBreaker } from "@/lib/external/circuit-breaker";
 import { fetchWithTimeout } from "@/lib/external/fetch-with-timeout";
 import { cdnCacheHeaders, noStoreHeaders } from "@/lib/api-cache";
+import { AI_DISCLAIMER_SYSTEM_INSTRUCTION } from "@/lib/gemini";
 
 // F-005: 唯一のGETルート。revisionIdごとに固定応答 → Vercel Edge Cache実効。
 // 法改正の追加は日次以下のペースなので1h保持+24h SWR。最大の削減効果が期待される。
@@ -103,7 +104,10 @@ async function generateSummaryForRevision(
   // AI生成を試みる（失敗時はヒューリスティックにフォールバック）
   if (apiKey && apiKey !== "dummy") {
     try {
-      const prompt = `以下の労働安全衛生に関する法改正を、現場担当者向けに分析し、JSONで回答してください。
+      const prompt = `${AI_DISCLAIMER_SYSTEM_INSTRUCTION}
+
+以下の労働安全衛生に関する法改正を、現場担当者向けに分析し、JSONで回答してください。
+【厳守】提供された情報の範囲のみで記述し、施行日・罰則・数値・条番号を推測で創作しないこと。不明な点は「要確認」とし、断定を避けること（P2-4 AI要約安全統一）。
 回答は必ず \`\`\`json ... \`\`\` ブロックで、以下の形式で出力してください。
 
 \`\`\`json

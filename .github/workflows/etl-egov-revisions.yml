@@ -2,8 +2,8 @@ name: e-Gov law revisions ETL
 
 on:
   schedule:
-    # 毎月5日 09:00 JST = 00:00 UTC（月次。e-Govの改正反映に余裕を持たせ、他ETLと日をずらす）
-    - cron: "0 0 5 * *"
+    # 毎週月曜 09:00 JST = 00:00 UTC（週次。反映ラグ短縮 P2-3。diff-onlyのため無料枠内）
+    - cron: "0 0 * * 1"
   workflow_dispatch:
 
 permissions:

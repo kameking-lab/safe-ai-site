@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-05-28T10:15:05.212Z",
+  "fetchedAt": "2026-05-28T22:29:37.284Z",
   "source": "e-Gov 法令API v2（政府標準利用規約2.0・出典明示）",
   "total": 20,
   "skipped": 0,
@@ -41,7 +41,11 @@
       "publication_date": "2026-01-20",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/347M50002000034"
+      "source_url": "https://laws.e-gov.go.jp/law/347M50002000034",
+      "industry_tags": [
+        "construction",
+        "manufacturing"
+      ]
     },
     {
       "id": "lr-egov-347M50002000036-20260401",
@@ -60,7 +64,11 @@
       "publication_date": "2026-01-20",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/347M50002000036"
+      "source_url": "https://laws.e-gov.go.jp/law/347M50002000036",
+      "industry_tags": [
+        "chemical",
+        "manufacturing"
+      ]
     },
     {
       "id": "lr-egov-347M50002000039-20260401",
@@ -79,7 +87,11 @@
       "publication_date": "2026-01-20",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/347M50002000039"
+      "source_url": "https://laws.e-gov.go.jp/law/347M50002000039",
+      "industry_tags": [
+        "chemical",
+        "manufacturing"
+      ]
     },
     {
       "id": "lr-egov-354M50002000018-20260401",
@@ -98,7 +110,11 @@
       "publication_date": "2026-01-20",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/354M50002000018"
+      "source_url": "https://laws.e-gov.go.jp/law/354M50002000018",
+      "industry_tags": [
+        "construction",
+        "manufacturing"
+      ]
     },
     {
       "id": "lr-egov-417M60000100021-20260401",
@@ -117,7 +133,10 @@
       "publication_date": "2026-01-20",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/417M60000100021"
+      "source_url": "https://laws.e-gov.go.jp/law/417M60000100021",
+      "industry_tags": [
+        "construction"
+      ]
     },
     {
       "id": "lr-egov-347M50002000042-20260401",
@@ -136,7 +155,11 @@
       "publication_date": "2026-01-20",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/347M50002000042"
+      "source_url": "https://laws.e-gov.go.jp/law/347M50002000042",
+      "industry_tags": [
+        "construction",
+        "manufacturing"
+      ]
     },
     {
       "id": "lr-egov-347M50002000041-20260401",
@@ -155,7 +178,11 @@
       "publication_date": "2026-01-20",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/347M50002000041"
+      "source_url": "https://laws.e-gov.go.jp/law/347M50002000041",
+      "industry_tags": [
+        "healthcare",
+        "manufacturing"
+      ]
     },
     {
       "id": "lr-egov-347M50002000033-20260401",
@@ -174,7 +201,10 @@
       "publication_date": "2026-01-20",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/347M50002000033"
+      "source_url": "https://laws.e-gov.go.jp/law/347M50002000033",
+      "industry_tags": [
+        "manufacturing"
+      ]
     },
     {
       "id": "lr-egov-347M50002000037-20260401",
@@ -193,7 +223,11 @@
       "publication_date": "2026-01-20",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/347M50002000037"
+      "source_url": "https://laws.e-gov.go.jp/law/347M50002000037",
+      "industry_tags": [
+        "chemical",
+        "manufacturing"
+      ]
     },
     {
       "id": "lr-egov-347M50002000040-20260401",
@@ -212,7 +246,10 @@
       "publication_date": "2026-01-20",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/347M50002000040"
+      "source_url": "https://laws.e-gov.go.jp/law/347M50002000040",
+      "industry_tags": [
+        "construction"
+      ]
     },
     {
       "id": "lr-egov-347M50002000035-20260401",
@@ -231,7 +268,10 @@
       "publication_date": "2026-01-20",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/347M50002000035"
+      "source_url": "https://laws.e-gov.go.jp/law/347M50002000035",
+      "industry_tags": [
+        "construction"
+      ]
     },
     {
       "id": "lr-egov-347M50002000038-20260401",
@@ -250,7 +290,10 @@
       "publication_date": "2026-01-20",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/347M50002000038"
+      "source_url": "https://laws.e-gov.go.jp/law/347M50002000038",
+      "industry_tags": [
+        "chemical"
+      ]
     },
     {
       "id": "lr-egov-347CO0000000318-20260401",
@@ -325,7 +368,11 @@
       "publication_date": "2025-05-14",
       "enforcement_date": "2026-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/350AC0000000028"
+      "source_url": "https://laws.e-gov.go.jp/law/350AC0000000028",
+      "industry_tags": [
+        "chemical",
+        "manufacturing"
+      ]
     },
     {
       "id": "lr-egov-322AC0000000049-20250601",
@@ -382,7 +429,11 @@
       "publication_date": "2017-06-02",
       "enforcement_date": "2020-04-01",
       "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/335AC0000000030"
+      "source_url": "https://laws.e-gov.go.jp/law/335AC0000000030",
+      "industry_tags": [
+        "construction",
+        "manufacturing"
+      ]
     }
   ]
 }

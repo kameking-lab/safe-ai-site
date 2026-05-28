@@ -46,6 +46,26 @@ const TARGET_LAWS: { lawId: string; lawShort: string }[] = [
   { lawId: "347M50002000038", lawShort: "四アルキル鉛則" },
 ];
 
+// P2-1: 法令→影響業種タグ（保守的。一般法令＝全業種のためタグ無し＝UIで「全業種」表示）。
+// 業種の関連付けのみで、条文内容の解釈はしない。
+const INDUSTRY_TAGS_BY_LAW: Record<string, string[]> = {
+  特化則: ["chemical", "manufacturing"],
+  有機則: ["chemical", "manufacturing"],
+  粉じん則: ["construction", "manufacturing"],
+  石綿則: ["construction"],
+  鉛則: ["chemical", "manufacturing"],
+  四アルキル鉛則: ["chemical"],
+  電離則: ["healthcare", "manufacturing"],
+  酸欠則: ["construction", "manufacturing"],
+  作環測法: ["chemical", "manufacturing"],
+  じん肺法: ["construction", "manufacturing"],
+  クレーン則: ["construction", "manufacturing"],
+  ボイラー則: ["manufacturing"],
+  ゴンドラ則: ["construction"],
+  高圧則: ["construction"],
+  // 安衛法/安衛令/安衛則/労基法/労基則/事務所則 は全業種に関わるためタグ無し（UIで「全業種」）。
+};
+
 type LawRevisionRecord = {
   id: string;
   title: string;
@@ -61,6 +81,7 @@ type LawRevisionRecord = {
   enforcement_date: string;
   enforcement_status?: "enforced" | "upcoming" | "undetermined";
   source_url: string;
+  industry_tags?: string[];
 };
 
 const YMD = /^\d{4}-\d{2}-\d{2}$/;
@@ -146,6 +167,7 @@ function buildRecord(
     enforcement_date: enforcement,
     ...(status ? { enforcement_status: status } : {}),
     source_url: egovUrl,
+    ...(INDUSTRY_TAGS_BY_LAW[lawShort] ? { industry_tags: INDUSTRY_TAGS_BY_LAW[lawShort] } : {}),
   };
 }
 

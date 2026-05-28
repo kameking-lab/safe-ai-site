@@ -15,6 +15,7 @@ import {
   MessageSquare,
   ShoppingBag,
   Bell,
+  Newspaper,
   Search,
   Mail,
   CreditCard,
@@ -95,6 +96,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "",
     items: [
       { id: "home", label: "ホーム", href: "/", icon: Home },
+      { id: "whats-new", label: "新着情報", href: "/whats-new", icon: Newspaper, badge: "NEW", badgeUntil: "2026-07-31", description: "法改正・事故速報・通達を新着順に一元表示" },
       { id: "favorites", label: "お気に入り", href: "/favorites", icon: Star, description: "保存した条文・通達" },
     ],
   },
