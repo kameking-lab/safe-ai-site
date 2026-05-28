@@ -45,9 +45,14 @@ import {
   buildPromptWithWhitelist,
 } from "@/lib/chatbot-prompt-builder";
 import { validateCitations } from "@/lib/chatbot-citation-validator";
-import { buildFallbackDecision } from "@/lib/chatbot-fallback-logic";
+import { buildFallbackDecision, searchPartialMatches } from "@/lib/chatbot-fallback-logic";
 import { attachNoticesAndLeaflets } from "@/lib/chatbot-notice-attachment";
 import { cacheKey, getCachedResponse, setCachedResponse } from "@/lib/chatbot-cache";
+import {
+  buildNoHitTemplate,
+  buildNoHitGeminiPrompt,
+  formatOfficialLinks,
+} from "@/lib/chatbot-no-hit-response";
 import type { LawArticle } from "@/data/laws";
 import {
   SYSTEM_PROMPT,
@@ -124,38 +129,53 @@ export async function POST(request: Request) {
         const mlitMatches = searchMlitResources(message, 3);
         const relatedNotices = searchRelevantNotices(message, 3);
         const CONFIDENCE_THRESHOLD = 0.5;
-        const relevantArticles =
-          normalizedScore >= CONFIDENCE_THRESHOLD ? allRelevant : [];
+        const hasDirectHit =
+          normalizedScore >= CONFIDENCE_THRESHOLD && allRelevant.length > 0;
+        // P1-5: 直接ヒットが無くても低スコアの関連条文を「参考」として根拠提示に使う。
+        // 「該当条文無し」で突き放さず、関連条文＋一般原則＋公式誘導を返す。
+        const noHitMode = !hasDirectHit;
+        const relevantArticles = hasDirectHit ? allRelevant : allRelevant.slice(0, 8);
+        const partialMatches = searchPartialMatches(message);
         const context = buildContextFromArticles(relevantArticles);
-        const hasRagHits = relevantArticles.length > 0;
         const confidenceScore = Math.round(normalizedScore * 100) / 100;
+        const noApi = !apiKey || apiKey === "dummy";
 
-        // APIキーなし or 低信頼なら最小限の degraded response を1発で送る
-        if (!apiKey || apiKey === "dummy" || !hasRagHits) {
-          const fallbackText = !apiKey || apiKey === "dummy"
-            ? `AIによる回答生成は現在ご利用いただけません（APIキー未設定）。関連条文のみご案内します。\n\n${AI_LEGAL_DISCLAIMER}`
-            : `ご質問に合致する法令条文を十分な確信度で特定できませんでした。\n\n最新・正確な条文は e-Gov 法令検索（https://laws.e-gov.go.jp/）でご確認ください。\n${AI_LEGAL_DISCLAIMER}`;
-          send("text", { chunk: fallbackText });
+        const buildSourceList = (): ChatbotSource[] => [
+          ...relevantArticles.map((a: LawArticle) => ({
+            law: `${a.law}（${a.lawShort}）`,
+            article: a.articleNum + (a.articleTitle ? `「${a.articleTitle}」` : ""),
+            articleTitle: a.articleTitle,
+            text: a.text.length > 200 ? a.text.slice(0, 200) + "…" : a.text,
+            fullText: a.text,
+            snippet: buildSnippet(a.text, message),
+          })),
+          ...mlitMatches.map(mlitToSource),
+        ];
+
+        // P1-5: API無し、または根拠となる関連条文が皆無 → 決定的テンプレ
+        // （関連条文＋関連分野＋一般原則＋公式誘導。推測の断定は一切含めない）
+        if (noApi || relevantArticles.length === 0) {
+          const template = buildNoHitTemplate({
+            query: message,
+            relatedArticles: relevantArticles,
+            partialMatches,
+            disclaimer: AI_LEGAL_DISCLAIMER,
+          });
+          const answer = noApi
+            ? `AIによる回答生成は現在ご利用いただけません（APIキー未設定）。関連条文と一般原則をご案内します。\n\n${template}`
+            : template;
+          send("text", { chunk: answer });
           const fallbackPayload: ChatbotResponse = {
-            answer: fallbackText,
-            sources: [
-              ...relevantArticles.map((a: LawArticle) => ({
-                law: `${a.law}（${a.lawShort}）`,
-                article: a.articleNum + (a.articleTitle ? `「${a.articleTitle}」` : ""),
-                articleTitle: a.articleTitle,
-                text: a.text.length > 200 ? a.text.slice(0, 200) + "…" : a.text,
-                fullText: a.text,
-                snippet: buildSnippet(a.text, message),
-              })),
-              ...mlitMatches.map(mlitToSource),
-            ] satisfies ChatbotSource[],
-            source_type: hasRagHits ? "rag" : "ai_inference",
+            answer,
+            sources: buildSourceList(),
+            source_type: relevantArticles.length > 0 ? "rag" : "ai_inference",
             confidence: "low",
             confidenceScore,
             followups: buildFollowups(message, relevantArticles),
             notices: relatedNotices,
-            citations: hasRagHits ? buildStructuredCitations(relevantArticles) : [],
-            relatedLaws: hasRagHits ? suggestRelatedLaws(message, relevantArticles) : [],
+            citations:
+              relevantArticles.length > 0 ? buildStructuredCitations(relevantArticles) : [],
+            relatedLaws: suggestRelatedLaws(message, relevantArticles),
             digDeeperLinks: suggestDigDeeperLinks(message, relevantArticles),
           };
           send("meta", fallbackPayload);
@@ -185,12 +205,19 @@ export async function POST(request: Request) {
                 model: "gemini-2.5-flash",
                 systemInstruction: SYSTEM_PROMPT,
               });
-              const userPrompt = buildPromptWithWhitelist({
-                question: message,
-                context,
-                mlitContext: buildMlitContext(mlitMatches),
-                allowed: allowedCitations,
-              });
+              // P1-5: 直接ヒット無しモードでは「関連＋最低限措置＋公式誘導」を根拠付きで生成
+              const userPrompt = noHitMode
+                ? buildNoHitGeminiPrompt({
+                    question: message,
+                    context,
+                    allowed: allowedCitations,
+                  })
+                : buildPromptWithWhitelist({
+                    question: message,
+                    context,
+                    mlitContext: buildMlitContext(mlitMatches),
+                    allowed: allowedCitations,
+                  });
               const historyContents = buildHistoryContents(body?.history);
               const streamResult = historyContents.length > 0
                 ? await model.startChat({ history: historyContents }).sendMessageStream(userPrompt)
@@ -311,6 +338,10 @@ export async function POST(request: Request) {
             trailing += `- ${r.lawShort}（${r.fullName}）: ${r.reason}\n`;
           }
         }
+        // P1-5: 直接ヒット無しモードでは公式情報への誘導を必ず末尾に付与
+        if (noHitMode) {
+          trailing += `\n${formatOfficialLinks()}`;
+        }
         if (trailing) {
           answer += trailing;
           send("text", { chunk: trailing });
@@ -322,7 +353,7 @@ export async function POST(request: Request) {
         const outOfScopeRefs = detectOutOfScopeLawReferences(answer, hitLawShorts);
         if (outOfScopeRefs.length > 0) {
           const sample = outOfScopeRefs.slice(0, 3).join("、");
-          const note = `\n\n⚠️ 注記：回答中の「${sample}」は本ツールの提供データ（33法令＋通達DB）の範囲外の参照のため、e-Gov法令検索および厚生労働省公式情報で必ずご確認ください。`;
+          const note = `\n\n⚠️ 注記：回答中の「${sample}」は本ツールの収録データ（条文・通達DB）の範囲外の参照のため、e-Gov法令検索および厚生労働省公式情報で必ずご確認ください。`;
           answer += note;
           send("text", { chunk: note });
           scopeWarnings.push(
@@ -335,9 +366,12 @@ export async function POST(request: Request) {
           );
         }
 
-        // 信頼度判定
-        let finalConfidence: "high" | "medium" | "low" =
-          normalizedScore >= 0.75 && relevantArticles.length >= 2 ? "high" : "medium";
+        // 信頼度判定（no-hitモードは「参考」提示のため常に low）
+        let finalConfidence: "high" | "medium" | "low" = noHitMode
+          ? "low"
+          : normalizedScore >= 0.75 && relevantArticles.length >= 2
+            ? "high"
+            : "medium";
         if (citationLayer2Status === "warned") {
           if (finalConfidence === "high") finalConfidence = "medium";
           else if (finalConfidence === "medium") finalConfidence = "low";
