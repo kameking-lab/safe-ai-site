@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-05-27T22:29:16.786Z",
+  "generatedAt": "2026-05-28T22:40:13.030Z",
   "counts": {
     "approved": 10,
-    "rejected": 11,
-    "total": 21,
-    "approvalRate": 0.476
+    "rejected": 13,
+    "total": 23,
+    "approvalRate": 0.435
   },
   "byDay": [
     {
@@ -62,6 +62,13 @@
       "rejected": 0,
       "total": 4,
       "approvalRate": 1
+    },
+    {
+      "date": "2026-05-29",
+      "approved": 0,
+      "rejected": 2,
+      "total": 2,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -75,9 +82,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 2,
-      "rejected": 9,
-      "total": 11,
-      "approvalRate": 0.182
+      "rejected": 11,
+      "total": 13,
+      "approvalRate": 0.154
     }
   ],
   "byEstimatedWorkCategory": [
@@ -141,7 +148,7 @@
       "rejected": [
         0,
         2,
-        7,
+        9,
         0,
         0,
         0,
@@ -178,7 +185,7 @@
       ],
       "rejected": [
         2,
-        9,
+        11,
         0,
         0,
         0,
@@ -215,8 +222,8 @@
         0
       ],
       "rejected": [
-        8,
-        3,
+        9,
+        4,
         0,
         0,
         0,
@@ -254,7 +261,7 @@
       ],
       "rejected": [
         0,
-        6,
+        8,
         0,
         0,
         0,
@@ -269,7 +276,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 9
+      "count": 11
     },
     {
       "reason": "duplication",
@@ -411,6 +418,22 @@
     ],
     "rejected": [
       {
+        "headline": "山形県 クマ「特別警報」新設を検討 死亡事故など受け",
+        "aiSummary": "山形県はクマによる死亡事故を受け、新たな特別警報制度の導入を検討している。",
+        "score": {
+          "relevance": 25,
+          "copyrightRisk": 15,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-05-28T22:40:07.064Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 25 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "エアコン使用でも熱中症で死亡 周囲が高齢者などに声かけを",
         "aiSummary": "エアコン使用環境下でも熱中症で死亡する事例が発生。高齢者などへの注意喚起を促す。",
         "score": {
@@ -541,37 +564,20 @@
         "publisher": "日本放送協会"
       },
       {
-        "headline": "16日からさらに気温上昇 真夏日も  小中学校でも熱中症対策",
-        "aiSummary": "全国的に気温上昇し真夏日予想。小中学校で熱中症対策を強化するよう呼びかけ。",
+        "headline": "広い範囲で真夏日予想 熱中症対策を 台風6号の最新情報に注意",
+        "aiSummary": "真夏日と台風6号の接近が予想されるため、熱中症対策と最新情報に注意。",
         "score": {
-          "relevance": 15,
-          "copyrightRisk": 10,
+          "relevance": 20,
+          "copyrightRisk": 15,
           "misinformationRisk": 5,
-          "duplication": 75,
-          "judgedAt": "2026-05-16T00:09:01.226Z",
+          "duplication": 10,
+          "judgedAt": "2026-05-28T22:39:58.661Z",
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
-            "relevance 15 < 70 (not labor-safety related)",
-            "duplication 75 > 50 (already covered in accident DB)"
+            "relevance 20 < 70 (not labor-safety related for type=general_news)"
           ]
         },
         "publisher": "日本放送協会"
-      },
-      {
-        "headline": "第５２回特定石綿被害建設業務労働者等認定審査会　開催案内",
-        "aiSummary": "厚生労働省が特定石綿被害建設業務労働者等の認定審査会開催を案内。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 5,
-          "misinformationRisk": 5,
-          "duplication": 65,
-          "judgedAt": "2026-05-16T00:09:13.740Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "duplication 65 > 50 (already covered in accident DB)"
-          ]
-        },
-        "publisher": "厚生労働省"
       }
     ]
   }

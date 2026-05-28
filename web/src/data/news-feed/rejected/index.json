@@ -1,6 +1,32 @@
 {
-  "updatedAt": "2026-05-27T22:29:16.735Z",
+  "updatedAt": "2026-05-28T22:40:12.981Z",
   "entries": [
+    {
+      "id": "b02353d74cdda5c4",
+      "headline": "山形県 クマ「特別警報」新設を検討 死亡事故など受け",
+      "aiSummary": "山形県はクマによる死亡事故を受け、新たな特別警報制度の導入を検討している。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260527/k10015133331000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 27 May 2026 20:58:29 +0900",
+        "fetchedAt": "2026-05-28T22:39:51.277Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-05-28T22:40:07.064Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
     {
       "id": "b843c0a41c745361",
       "headline": "エアコン使用でも熱中症で死亡 周囲が高齢者などに声かけを",
@@ -211,6 +237,32 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "189dfe48bca84a95",
+      "headline": "広い範囲で真夏日予想 熱中症対策を 台風6号の最新情報に注意",
+      "aiSummary": "真夏日と台風6号の接近が予想されるため、熱中症対策と最新情報に注意。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260529/k10015134411000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 29 May 2026 06:08:53 +0900",
+        "fetchedAt": "2026-05-28T22:39:51.277Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-05-28T22:39:58.661Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,

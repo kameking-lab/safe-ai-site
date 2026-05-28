@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-27T22:29:16.735Z",
+  "updatedAt": "2026-05-28T22:40:12.981Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -30,23 +30,23 @@
     {
       "id": "a4f4c4e69405037d",
       "headline": "工事現場でセメントに巻き込まれ2人死亡 滋賀 草津",
-      "aiSummary": "滋賀県の工事現場で作業員2名がセメントに巻き込まれ死亡した。",
+      "aiSummary": "滋賀県草津市の建設現場で、作業員2名がセメントに巻き込まれ死亡する労働災害が発生。",
       "source": {
         "name": "NHK NEWS WEB（社会）",
         "url": "http://www3.nhk.or.jp/news/html/20260526/k10015131871000.html",
         "publisher": "日本放送協会",
         "publishedAt": "Tue, 26 May 2026 15:31:01 +0900",
-        "fetchedAt": "2026-05-27T22:28:39.052Z"
+        "fetchedAt": "2026-05-28T22:39:51.277Z"
       },
       "estimatedAccidentType": "はさまれ・巻き込まれ",
       "estimatedWorkCategory": "建設業",
       "newsType": "accident_report",
       "score": {
         "relevance": 90,
-        "copyrightRisk": 15,
+        "copyrightRisk": 20,
         "misinformationRisk": 10,
         "duplication": 70,
-        "judgedAt": "2026-05-27T22:29:02.294Z",
+        "judgedAt": "2026-05-28T22:40:12.973Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)"
