@@ -10,6 +10,7 @@ import { ErrorNotice } from "@/components/error-notice";
 import { InputWithVoice } from "@/components/voice-input-field";
 import { Cluster } from "@/components/layout";
 import { loadProfile, profileIndustryToTag, relevanceScore, type CompanyProfile } from "@/lib/company-profile";
+import { buildEnforcementBadge, getEnforcementStatus, type EnforcementStatus } from "@/lib/law-revision-status";
 
 function formatDate(value: string) {
   if (!value) return null;
@@ -165,6 +166,22 @@ const PARAM_TO_IMPACT: Record<string, RevisionImpact | "すべて"> = {
   low: "低",
 };
 
+// P0-1: 施行ステータスのバッジ配色 + フィルタ
+const ENFORCEMENT_BADGE_CLASS: Record<"enforced" | "upcoming" | "undetermined", string> = {
+  enforced: "bg-emerald-100 text-emerald-800",
+  upcoming: "bg-amber-100 text-amber-900",
+  undetermined: "bg-slate-100 text-slate-600",
+};
+const STATUS_FILTERS: { value: EnforcementStatus | "すべて"; label: string; param: string }[] = [
+  { value: "すべて", label: "すべて", param: "" },
+  { value: "upcoming", label: "施行前のみ", param: "upcoming" },
+  { value: "enforced", label: "施行済のみ", param: "enforced" },
+];
+const PARAM_TO_STATUS: Record<string, EnforcementStatus> = {
+  upcoming: "upcoming",
+  enforced: "enforced",
+};
+
 export function LawRevisionList({
   revisions,
   selectedRevisionId,
@@ -227,6 +244,21 @@ export function LawRevisionList({
       updateUrl(selectedIndustries, selectedImpact, val);
     },
     [updateUrl, selectedIndustries, selectedImpact]
+  );
+
+  // P0-1: 施行ステータスフィルタ（URL ?status=upcoming|enforced 連動。独立更新で他フィルタに非干渉）
+  const [selectedStatus, setSelectedStatusState] = useState<EnforcementStatus | "すべて">(
+    () => PARAM_TO_STATUS[searchParams.get("status") ?? ""] ?? "すべて"
+  );
+  const setSelectedStatus = useCallback(
+    (val: EnforcementStatus | "すべて") => {
+      setSelectedStatusState(val);
+      const params = new URLSearchParams(searchParams.toString());
+      if (val === "すべて") params.delete("status");
+      else params.set("status", val);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [router, searchParams]
   );
 
   const toggleIndustry = useCallback(
@@ -320,6 +352,7 @@ export function LawRevisionList({
       if (y < yearFrom || y > yearTo) return false;
       if (selectedKind !== "すべて" && resolveKindLabel(r) !== selectedKind) return false;
       if (selectedImpact !== "すべて" && r.impact !== selectedImpact) return false;
+      if (selectedStatus !== "すべて" && getEnforcementStatus(r) !== selectedStatus) return false;
       if (selectedIndustries.size > 0) {
         const matches = Array.from(selectedIndustries).some((key) => industryMatchesRevision(key, r));
         if (!matches) return false;
@@ -336,7 +369,7 @@ export function LawRevisionList({
       const target = `${r.title} ${r.summary} ${r.issuer} ${r.revisionNumber}`;
       return fuzzyMatchAll(search.trim(), target);
     },
-    [search, yearFrom, yearTo, selectedKind, selectedImpact, selectedIndustries, selectedWorkerAttribute, selectedCompanySize]
+    [search, yearFrom, yearTo, selectedKind, selectedImpact, selectedStatus, selectedIndustries, selectedWorkerAttribute, selectedCompanySize]
   );
 
   // 事故由来 articles でのプリフィルタ（OR検索 + 段階フォールバック）
@@ -701,6 +734,25 @@ export function LawRevisionList({
           </div>
         </div>
         <div>
+          <p className="text-xs font-semibold text-slate-700">施行状況</p>
+          <div className="mt-1 flex flex-wrap gap-2">
+            {STATUS_FILTERS.map((s) => (
+              <button
+                key={s.label}
+                type="button"
+                onClick={() => setSelectedStatus(s.value)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  selectedStatus === s.value
+                    ? "bg-amber-600 text-white"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
           <p className="text-xs font-semibold text-slate-700">施行日順</p>
           <div className="mt-1 flex gap-2">
             <button
@@ -825,7 +877,7 @@ export function LawRevisionList({
                   )}
                 </h3>
 
-                {/* 日付行：公布日 / 施行日を別表示 */}
+                {/* 日付行：公布日 / 施行日 / 施行ステータスバッジ（P0-1） */}
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
                   {hasPubDate ? (
                     <span>公布日: {formatDate(revision.publication_date!)}</span>
@@ -837,6 +889,17 @@ export function LawRevisionList({
                       施行日: {formatDate(revision.enforcement_date!)}
                     </span>
                   )}
+                  {(() => {
+                    const badge = buildEnforcementBadge(revision);
+                    return (
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${ENFORCEMENT_BADGE_CLASS[badge.tone]}`}
+                        title="施行状況（施行日と本日の比較。最終確認はe-Gov公式で）"
+                      >
+                        {badge.label}
+                      </span>
+                    );
+                  })()}
                 </div>
 
                 {/* 種別・影響度・法令番号バッジ行 */}
