@@ -20,7 +20,7 @@
     { "id": 14, "topic": "教育", "question": "特別教育を必要とする業務の一覧は安衛則の何条にありますか？", "gold": [{ "lawShort": "安衛則", "articleNum": "第36条" }, { "lawShort": "安衛法", "articleNum": "第59条" }] },
     { "id": 15, "topic": "教育", "question": "安全衛生教育を実施した記録の保存はどこに定められていますか？", "gold": [{ "lawShort": "安衛則", "articleNum": "第38条" }, { "lawShort": "安衛法", "articleNum": "第59条" }] },
     { "id": 16, "topic": "教育", "question": "危険または有害な業務に就かせる際の教育義務の条文は？", "gold": [{ "lawShort": "安衛法", "articleNum": "第59条" }] },
-    { "id": 17, "topic": "教育", "question": "化学物質管理者を選任する根拠の規則は？", "gold": [{ "lawShort": "安衛則", "articleNum": "第12条" }, { "lawShort": "安衛法", "articleNum": "第57条の3" }] },
+    { "id": 17, "topic": "教育", "question": "化学物質管理者を選任する根拠の規則は？", "gold": [{ "lawShort": "安衛則", "articleNum": "第12条の5" }, { "lawShort": "安衛法", "articleNum": "第57条の3" }] },
     { "id": 18, "topic": "教育", "question": "玉掛け作業に必要な技能講習はクレーン則の何条？", "gold": [{ "lawShort": "クレーン則", "articleNum": "第221条" }] },
     { "id": 19, "topic": "教育", "question": "ボイラー取扱作業主任者となる資格の根拠条文を教えて。", "gold": [{ "lawShort": "ボイラー則", "articleNum": "第25条" }] },
     { "id": 20, "topic": "教育", "question": "ゴンドラの操作を行わせる労働者への特別教育はどこで定められていますか？", "gold": [{ "lawShort": "ゴンドラ則", "articleNum": "第12条" }] },

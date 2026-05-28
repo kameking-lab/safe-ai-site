@@ -47,6 +47,7 @@ import {
 import { validateCitations } from "@/lib/chatbot-citation-validator";
 import { buildFallbackDecision } from "@/lib/chatbot-fallback-logic";
 import { attachNoticesAndLeaflets } from "@/lib/chatbot-notice-attachment";
+import { cacheKey, getCachedResponse, setCachedResponse } from "@/lib/chatbot-cache";
 import type { LawArticle } from "@/data/laws";
 import {
   SYSTEM_PROMPT,
@@ -92,6 +93,11 @@ export async function POST(request: Request) {
   const lawCategory: LawCategoryFilter = body?.lawCategory ?? "all";
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
 
+  // P1-1 (chatbot-deep-audit 2026-05-26): stream 経路でもレスポンスキャッシュを使う。
+  // 履歴付きリクエストは直前ターンの文脈が回答に影響するため bypass（非stream route と同条件）。
+  const cacheableRequest = !body?.history || body.history.length === 0;
+  const cKey = cacheableRequest ? cacheKey(message, lawCategory) : null;
+
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const send = (event: string, data: unknown) => {
@@ -99,6 +105,17 @@ export async function POST(request: Request) {
       };
 
       try {
+        // キャッシュヒット時は Gemini を呼ばず、確定済み応答を擬似ストリームで再生する
+        if (cKey) {
+          const cached = getCachedResponse<ChatbotResponse>(cKey);
+          if (cached) {
+            send("text", { chunk: cached.answer });
+            send("meta", cached);
+            controller.close();
+            return;
+          }
+        }
+
         send("progress", { step: "rag", message: "関連条文を検索しています…" });
 
         // RAG 検索 (関数引数の型ガード上 message は trim 済の string)
@@ -359,6 +376,11 @@ export async function POST(request: Request) {
           attachedNotices: attached.notices.length > 0 ? attached.notices : undefined,
           attachedLeaflets: attached.leaflets.length > 0 ? attached.leaflets : undefined,
         };
+        // P1-1: 正常完了した応答のみキャッシュ（degraded/error path はキャッシュしない）。
+        // citationLayer2 で警告降格された応答も、確定した本文＋出典なので再利用して問題ない。
+        if (cKey) {
+          setCachedResponse(cKey, payload);
+        }
         send("meta", payload);
         controller.close();
       } catch (err) {
