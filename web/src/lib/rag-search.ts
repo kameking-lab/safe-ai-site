@@ -123,12 +123,17 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     pins: [{ law: "労働安全衛生法", articleNum: "第88条" }],
   },
   {
-    // 化学物質管理者
+    // 化学物質管理者（安衛則第12条の5・2024年4月施行。本則57条の3＝RA根拠も併せて提示）
     triggers: ["化学物質管理者"],
     pins: [
-      { law: "労働安全衛生規則", articleNum: "第12条" },
+      { law: "労働安全衛生規則", articleNum: "第12条の5" },
       { law: "労働安全衛生法", articleNum: "第57条の3" },
     ],
+  },
+  {
+    // 保護具着用管理責任者（安衛則第12条の6・2024年4月施行）
+    triggers: ["保護具着用管理責任者"],
+    pins: [{ law: "労働安全衛生規則", articleNum: "第12条の6" }],
   },
   {
     // SDS / リスクアセスメント
