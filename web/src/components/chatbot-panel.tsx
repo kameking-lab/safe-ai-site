@@ -157,6 +157,9 @@ export function ChatbotPanel() {
   const [exportOpen, setExportOpen] = useState(false);
   const [voiceMode, setVoiceMode] = useState(false);
   const [lawCategory, setLawCategory] = useState<LawCategoryFilter>("all");
+  // P1-2: 生成停止（AbortController）と失敗時の再試行
+  const [retryableQuestion, setRetryableQuestion] = useState<string | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
   const prefillAppliedRef = useRef(false);
@@ -269,6 +272,10 @@ export function ChatbotPanel() {
     setInput("");
     setIsSending(true);
     setError(null);
+    setRetryableQuestion(null);
+    // P1-2: このターン用の AbortController（停止ボタンから abort する）
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     // rAF defers the scroll-height read until after the browser has flushed
     // the message-list re-render, avoiding a forced synchronous layout.
@@ -292,11 +299,15 @@ export function ChatbotPanel() {
     const history = messages.slice(-8).map((m) => ({ role: m.role, content: m.content }));
     const requestBody = JSON.stringify({ message: text, history, lawCategory });
 
+    // catch 節からも参照できるよう try の外で宣言（停止時に途中までの本文を残す）
+    let streamedContent = "";
+
     try {
       const res = await fetch("/api/chatbot/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: requestBody,
+        signal: controller.signal,
       });
 
       if (!res.ok || !res.body) {
@@ -307,7 +318,6 @@ export function ChatbotPanel() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
-      let streamedContent = "";
       let finalMeta: {
         sources?: ChatbotSource[];
         source_type?: "rag" | "ai_inference";
@@ -391,12 +401,26 @@ export function ChatbotPanel() {
         return next;
       });
     } catch (streamErr) {
+      // P1-2: ユーザーが停止した場合は fallback せず、途中までの本文を残して終了
+      if (streamErr instanceof Error && (streamErr.name === "AbortError" || controller.signal.aborted)) {
+        setMessages((prev) => {
+          const next = streamedContent.trim()
+            ? prev.map((m) =>
+                m.id === assistantId ? { ...m, content: streamedContent + "\n\n⏹ 生成を停止しました。" } : m,
+              )
+            : prev.filter((m) => m.id !== assistantId);
+          if (streamedContent.trim()) saveCurrentSession(next);
+          return next;
+        });
+        return;
+      }
       // P0-001: ストリーミング失敗時は従来 /api/chatbot で同期 JSON 応答に fallback
       try {
         const res = await fetch("/api/chatbot", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: requestBody,
+          signal: controller.signal,
         });
         if (!res.ok) {
           const errBody = (await res.json()) as { error: string };
@@ -442,9 +466,16 @@ export function ChatbotPanel() {
           return next;
         });
       } catch (fallbackErr) {
+        // P1-2: fallback 中の停止は静かに終了
+        if (fallbackErr instanceof Error && (fallbackErr.name === "AbortError" || controller.signal.aborted)) {
+          setMessages((prev) => prev.filter((m) => m.id !== assistantId));
+          return;
+        }
         const message =
           fallbackErr instanceof Error ? fallbackErr.message : "通信エラーが発生しました";
         setError(message);
+        // P1-2: 失敗した質問を保持し「再試行」を可能にする
+        setRetryableQuestion(text);
         // 失敗時は placeholder を残さず除去
         setMessages((prev) => prev.filter((m) => m.id !== assistantId));
       }
@@ -454,11 +485,17 @@ export function ChatbotPanel() {
       }
     } finally {
       setIsSending(false);
+      abortRef.current = null;
       requestAnimationFrame(() => {
         const el = listRef.current;
         if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
       });
     }
+  }
+
+  // P1-2: 生成停止
+  function handleStop() {
+    abortRef.current?.abort();
   }
 
   const handleCopyMessage = useCallback(async (id: string, text: string) => {
@@ -1065,7 +1102,7 @@ export function ChatbotPanel() {
               </div>
             ))}
 
-            {/* 送信中インジケータ */}
+            {/* 送信中インジケータ＋停止ボタン (P1-2) */}
             {isSending && (
               <div className="flex items-center gap-2 border border-slate-200 bg-white rounded-xl px-4 py-3 max-w-[88%]">
                 <span className="inline-flex gap-1">
@@ -1074,16 +1111,38 @@ export function ChatbotPanel() {
                   <span className="h-2 w-2 rounded-full bg-slate-400 animate-bounce [animation-delay:300ms]" />
                 </span>
                 <span className="text-xs text-slate-500">回答を生成中...</span>
+                <button
+                  type="button"
+                  onClick={handleStop}
+                  className="ml-2 rounded-full border border-slate-300 bg-white px-3 py-1 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-100 active:scale-[0.98]"
+                  aria-label="生成を停止"
+                >
+                  ⏹ 停止
+                </button>
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* エラー表示 */}
+      {/* エラー表示＋再試行 (P1-2) */}
       {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
-          {error}
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+          <span>{error}</span>
+          {retryableQuestion && !isSending && (
+            <button
+              type="button"
+              onClick={() => {
+                const q = retryableQuestion;
+                setRetryableQuestion(null);
+                setError(null);
+                if (q) handleSend(q);
+              }}
+              className="rounded-full border border-red-300 bg-white px-3 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-100 active:scale-[0.98]"
+            >
+              🔁 再試行
+            </button>
+          )}
         </div>
       )}
 
