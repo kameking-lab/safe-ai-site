@@ -18,11 +18,24 @@ interface Trend {
   byType: Bucket[];
   byIndustry: Bucket[];
 }
+interface SokuhouTop {
+  name: string;
+  total: number;
+}
+interface Sokuhou {
+  fetchedAt: string | null;
+  sibouPeriod: string | null;
+  sisyouPeriod: string | null;
+  topSibou: SokuhouTop[];
+  topSisyou: SokuhouTop[];
+  sourceUrl: string;
+}
 
 export function AccidentTrendSummary() {
   const [months, setMonths] = useState<"1" | "3" | "12">("12");
   const [busy, setBusy] = useState(false);
   const [trend, setTrend] = useState<Trend | null>(null);
+  const [sokuhou, setSokuhou] = useState<Sokuhou | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +44,7 @@ export function AccidentTrendSummary() {
     setError(null);
     setSummary(null);
     setTrend(null);
+    setSokuhou(null);
     try {
       const res = await fetch(`/api/accidents/trend-summary?months=${months}`);
       const data: unknown = await res.json();
@@ -38,8 +52,9 @@ export function AccidentTrendSummary() {
         setError("トレンド取得に失敗しました。");
         return;
       }
-      const d = data as { trend: Trend; summary: string | null };
+      const d = data as { trend: Trend; sokuhou?: Sokuhou; summary: string | null };
       setTrend(d.trend);
+      setSokuhou(d.sokuhou ?? null);
       setSummary(d.summary);
     } catch {
       setError("通信エラーが発生しました。");
@@ -111,6 +126,49 @@ export function AccidentTrendSummary() {
                   ))}
                 </ul>
               </div>
+            </div>
+          )}
+          {sokuhou && (sokuhou.topSibou.length > 0 || sokuhou.topSisyou.length > 0) && (
+            <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-3">
+              <p className="text-xs font-bold text-amber-900">
+                厚労省 月次速報（公式・速報値）{sokuhou.sibouPeriod ? `：${sokuhou.sibouPeriod.split("/")[0].trim()}` : ""}
+              </p>
+              <div className="mt-1.5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {sokuhou.topSibou.length > 0 && (
+                  <div>
+                    <p className="text-[11px] font-semibold text-slate-600">死亡災害が多い業種</p>
+                    <ul className="mt-1 space-y-0.5 text-xs text-slate-700">
+                      {sokuhou.topSibou.map((r) => (
+                        <li key={r.name} className="flex justify-between border-b border-amber-100 pb-0.5">
+                          <span>{r.name}</span>
+                          <span className="font-mono">{r.total}件</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {sokuhou.topSisyou.length > 0 && (
+                  <div>
+                    <p className="text-[11px] font-semibold text-slate-600">死傷災害が多い業種</p>
+                    <ul className="mt-1 space-y-0.5 text-xs text-slate-700">
+                      {sokuhou.topSisyou.map((r) => (
+                        <li key={r.name} className="flex justify-between border-b border-amber-100 pb-0.5">
+                          <span>{r.name}</span>
+                          <span className="font-mono">{r.total}件</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              <a
+                href={sokuhou.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1.5 inline-block text-[11px] font-semibold text-blue-700 hover:underline"
+              >
+                厚労省 速報 原典を見る →
+              </a>
             </div>
           )}
           {summary && (
