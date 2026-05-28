@@ -99,7 +99,7 @@ describe("searchPartialMatches - ペルソナ失敗11件カバレッジ", () => 
   });
 });
 
-describe("searchPartialMatches - その他典型 33法令外", () => {
+describe("searchPartialMatches - その他典型 50法令外", () => {
   it("ドローン → 航空法第132条", () => {
     const out = searchPartialMatches("ドローン使用の事前手続は?");
     expect(out.some((s) => s.lawName.includes("航空法"))).toBe(true);

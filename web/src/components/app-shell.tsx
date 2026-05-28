@@ -113,7 +113,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "質問する",
     description: "AIが安衛法を条文番号・出典付きで回答",
     items: [
-      { id: "chatbot", label: "安衛法AIチャット", href: "/chatbot", icon: MessageSquare, badge: "AI", description: "33法令を根拠条文付きで回答 (ストリーミング)" },
+      { id: "chatbot", label: "安衛法AIチャット", href: "/chatbot", icon: MessageSquare, badge: "AI", description: "50法令を根拠条文付きで回答 (ストリーミング)" },
     ],
   },
   {

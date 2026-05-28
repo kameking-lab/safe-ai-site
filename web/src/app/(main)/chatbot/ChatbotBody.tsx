@@ -41,7 +41,7 @@ const USAGE_GUIDE = {
     "回答は登録済み法令条文に基づくRAG方式で生成されます",
     "法改正により条文内容が変わる場合があります。最新情報はe-Govで確認ください",
     "本ツールの回答は法的アドバイスではありません。具体的な判断は専門家にご相談ください",
-    "現在対応中の法令：労働安全衛生法・安衛則・クレーン則・有機則・特化則・酸欠則・石綿則・じん肺法・粉じん則・電離則・ボイラー則・ゴンドラ則・足場則・高圧則・作業環境測定法・労基法・労災保険法・育児介護休業法・雇用均等法 ほか（全33法令以上）",
+    "現在対応中の法令：労働安全衛生法・安衛則・クレーン則・有機則・特化則・酸欠則・石綿則・じん肺法・粉じん則・電離則・ボイラー則・ゴンドラ則・足場則・高圧則・作業環境測定法・労基法・労災保険法・育児介護休業法・雇用均等法 ほか（全50法令以上）",
     "労働安全衛生コンサルタント（登録番号260022）監修",
   ],
   en: [
@@ -112,14 +112,14 @@ export function ChatbotBody() {
             </span>
           ))}
           <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-medium text-slate-500">
-            {isEn ? "and 14 more" : "ほか全33法令以上"}
+            {isEn ? "and 14 more" : "ほか全50法令以上"}
           </span>
         </div>
       </div>
       <p className="mb-6 text-[11px] leading-5 text-slate-500">
         {isEn
           ? "The above is a partial list. 33+ laws in total are used for RAG search, including the Labour Standards Act, Occupational Safety and Health Act, and MHLW mental health guidelines."
-          : "※ 上記は対応法令の一部です。労働基準法・職業安定法・職業能力開発促進法・メンタルヘルス指針など、全33法令以上の条文をRAG検索に使用しています。"}
+          : "※ 上記は対応法令の一部です。労働基準法・職業安定法・職業能力開発促進法・メンタルヘルス指針など、全50法令以上の条文をRAG検索に使用しています。"}
       </p>
 
       {/* Chat panel */}
@@ -243,7 +243,7 @@ export function ChatbotBody() {
               : "ガイド：安衛法AIチャットボットとは",
             description: isEn
               ? "Intent guide explaining 33+ supported laws, Recall@5 evaluation, common queries, and how the chatbot differs from generic ChatGPT."
-              : "対応33法令・Recall@5評価・代表的な質問例・汎用ChatGPTとの違いを解説した検索意図ガイド。",
+              : "対応50法令・Recall@5評価・代表的な質問例・汎用ChatGPTとの違いを解説した検索意図ガイド。",
             color: "amber",
             cta: isEn ? "Read the guide" : "ガイドを読む",
           },

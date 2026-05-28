@@ -577,7 +577,7 @@ export async function POST(request: Request) {
   if (outOfScopeRefs.length > 0) {
     const sample = outOfScopeRefs.slice(0, 3).join("、");
     answer +=
-      `\n\n⚠️ 注記：回答中の「${sample}」は本ツールの提供データ（33法令＋通達DB）の範囲外の参照のため、` +
+      `\n\n⚠️ 注記：回答中の「${sample}」は本ツールの提供データ（50法令＋通達DB）の範囲外の参照のため、` +
       `e-Gov法令検索および厚生労働省公式情報で必ずご確認ください。`;
     scopeWarnings.push(
       `回答中の参照「${sample}」は提供データ範囲外のため、内容の確からしさは保証できません。`
