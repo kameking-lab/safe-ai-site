@@ -29,6 +29,7 @@ import {
   searchPartialMatches,
 } from "@/lib/chatbot-fallback-logic";
 import { buildNoHitTemplate } from "@/lib/chatbot-no-hit-response";
+import { getClientIp, checkRateLimit, rateLimitMessage } from "@/lib/chatbot-rate-limit";
 // Phase 4 通達・リーフレット添付
 import {
   attachNoticesAndLeaflets,
@@ -231,6 +232,15 @@ export async function POST(request: Request) {
   const message = body?.message?.trim();
   if (!message) {
     return jsonError(400, "質問文を入力してください。");
+  }
+
+  // P2-5: 簡易IPレート制限（stream route と同条件・同 in-memory バケットを共有）
+  const rate = checkRateLimit(getClientIp(request));
+  if (!rate.allowed) {
+    return NextResponse.json<ApiErrorBody>(
+      { error: rateLimitMessage(rate.retryAfterSec), retryable: false },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } },
+    );
   }
 
   const lawCategory: LawCategoryFilter = body?.lawCategory ?? "all";

@@ -53,6 +53,7 @@ import {
   buildNoHitGeminiPrompt,
   formatOfficialLinks,
 } from "@/lib/chatbot-no-hit-response";
+import { getClientIp, checkRateLimit, rateLimitMessage } from "@/lib/chatbot-rate-limit";
 import type { LawArticle } from "@/data/laws";
 import {
   SYSTEM_PROMPT,
@@ -92,6 +93,18 @@ export async function POST(request: Request) {
     return new Response(
       JSON.stringify({ error: "質問文を入力してください。", retryable: false }),
       { status: 400, headers: { "Content-Type": "application/json" } },
+    );
+  }
+
+  // P2-5: 簡易IPレート制限（濫用防止）。到達時は公式DB誘導を返す。
+  const rate = checkRateLimit(getClientIp(request));
+  if (!rate.allowed) {
+    return new Response(
+      JSON.stringify({ error: rateLimitMessage(rate.retryAfterSec), retryable: false }),
+      {
+        status: 429,
+        headers: { "Content-Type": "application/json", "Retry-After": String(rate.retryAfterSec) },
+      },
     );
   }
 
