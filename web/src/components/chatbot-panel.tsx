@@ -19,6 +19,7 @@ import {
   ChatbotNoticeList,
 } from "@/components/chatbot/notice-leaflet-list";
 import { LAW_CATEGORY_OPTIONS, type LawCategoryFilter } from "@/lib/rag-search";
+import { buildContextPrefill } from "@/lib/chatbot-context-prefill";
 import { VoiceMicButton } from "@/components/voice-input-field";
 import { BindingBadge } from "@/components/AIResponseCard";
 import { Mascot } from "@/components/mascot";
@@ -226,6 +227,18 @@ export function ChatbotPanel() {
     if (q && q.trim()) {
       prefillAppliedRef.current = true;
       setInput(q.trim());
+      return;
+    }
+    // P1-3完: 他機能からの文脈プリフィル（?context=ky&work=... / ?substance=...）
+    const contextQuery = buildContextPrefill({
+      context: searchParams?.get("context"),
+      work: searchParams?.get("work"),
+      substance: searchParams?.get("substance"),
+      industry: searchParams?.get("industry"),
+    });
+    if (contextQuery) {
+      prefillAppliedRef.current = true;
+      setInput(contextQuery);
     }
   }, [searchParams]);
 
@@ -1065,20 +1078,27 @@ export function ChatbotPanel() {
                       >
                         → 年次計画に反映
                       </a>
+                      {/* P1-4: プレフィルは回答本文の途中切れではなく直前のユーザ質問を使う */}
                       <a
-                        href={`/ky?q=${encodeURIComponent(msg.content.slice(0, 80))}`}
+                        href={`/ky?q=${encodeURIComponent(
+                          (messages[idx - 1]?.role === "user" ? messages[idx - 1].content : msg.content).slice(0, 80),
+                        )}`}
                         className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100"
                       >
                         → KYで確認
                       </a>
                       <a
-                        href={`/chemical-ra?name=${encodeURIComponent(msg.content.slice(0, 40))}`}
+                        href={`/chemical-ra?name=${encodeURIComponent(
+                          (messages[idx - 1]?.role === "user" ? messages[idx - 1].content : msg.content).slice(0, 40),
+                        )}`}
                         className="rounded-full border border-violet-300 bg-violet-50 px-3 py-1 text-[11px] font-bold text-violet-800 hover:bg-violet-100"
                       >
                         → 化学物質RA
                       </a>
                       <a
-                        href={`/laws?q=${encodeURIComponent(msg.content.slice(0, 40))}`}
+                        href={`/laws?q=${encodeURIComponent(
+                          (messages[idx - 1]?.role === "user" ? messages[idx - 1].content : msg.content).slice(0, 40),
+                        )}`}
                         className="rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
                       >
                         → 法改正一覧

@@ -753,6 +753,18 @@ export function KyPaperView() {
                 ⚠ 類似の労災事例を見る →
               </Link>
             )}
+            {/* P1-3完: KY→チャットボット双方向動線。作業内容を文脈として渡す */}
+            {(record.workRows[0]?.workDetail?.trim() ?? "") !== "" && (
+              <Link
+                href={`/chatbot?context=ky&work=${encodeURIComponent(
+                  (record.workRows[0]?.workDetail ?? "").trim().slice(0, 60),
+                )}`}
+                className="rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                title="この作業の法的根拠・必要な措置をAIチャットに質問"
+              >
+                💬 法的根拠をAIに聞く →
+              </Link>
+            )}
             <button type="button" onClick={() => setShowPrintPreview(true)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">印刷プレビュー</button>
             <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-5 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
           </div>
