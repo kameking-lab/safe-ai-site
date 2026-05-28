@@ -6,7 +6,7 @@
 
 | データ | 引き継ぎ記載 | **実測** | ソース |
 |--------|------------|---------|--------|
-| 法令（条文の母数） | 47条文 | **730条文** | `data/laws/*` → `allLawArticles` |
+| 法令（条文の母数） | 47条文 | **1,048条文** | `data/laws/*` → `allLawArticles.length`（本番ビルドで実測） |
 | 法令（短縮名グループ） | 33法令 | **54の法令＋通達/告示/指針バケット計66キー** | `rag-metrics-latest.json: law_inventory` |
 | e-Gov 実在性メタ付き法令 | — | **33キー** | `data/law-metadata.ts` |
 | 通達 | 94通達 | **1,069件** | `data/mhlw-notices.ts` |
