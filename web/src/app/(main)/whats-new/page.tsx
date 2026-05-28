@@ -3,8 +3,15 @@ import Link from "next/link";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
-import { buildNewsHubItems } from "@/lib/news-hub";
+import { buildNewsHubItems, getNewsHubMeta } from "@/lib/news-hub";
 import { WhatsNewClient } from "./whats-new-client";
+
+function fmtJst(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(d.getDate()).padStart(2, "0")}`;
+}
 
 export const metadata: Metadata = {
   title: "新着情報ハブ｜法改正・事故速報・通達を一元表示（無料・登録不要）",
@@ -23,6 +30,9 @@ export const revalidate = 86400;
 
 export default function WhatsNewPage() {
   const items = buildNewsHubItems();
+  const meta = getNewsHubMeta();
+  const lawFetched = fmtJst(meta.lawRevisionsFetchedAt);
+  const accidentFetched = fmtJst(meta.accidentSokuhouFetchedAt);
 
   return (
     <PageContainer width="wide">
@@ -53,7 +63,20 @@ export default function WhatsNewPage() {
           <Link href="/accidents-reports" className="font-semibold text-emerald-700 hover:underline">
             事故レポートへ →
           </Link>
+          <Link href="/notifications" className="font-semibold text-emerald-700 hover:underline">
+            ✉ メールで受け取る（無料・登録はメアドのみ）
+          </Link>
         </div>
+        {/* P2-3: 反映ラグの可視化（最終取得日時） */}
+        {(lawFetched || accidentFetched) && (
+          <p className="mt-2 text-[11px] text-slate-500">
+            最終取得：
+            {lawFetched && `法改正 ${lawFetched}`}
+            {lawFetched && accidentFetched && " ／ "}
+            {accidentFetched && `事故速報 ${accidentFetched}`}
+            （自動更新）
+          </p>
+        )}
       </header>
 
       <WhatsNewClient items={items} />

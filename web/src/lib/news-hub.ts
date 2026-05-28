@@ -13,6 +13,7 @@
 import { lawRevisionCores } from "@/data/mock/law-revisions";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { buildEnforcementBadge } from "@/lib/law-revision-status";
+import { egovRevisionsMeta } from "@/data/law-revisions/egov-revisions-loaded";
 import monthlySokuhou from "@/data/accidents/monthly-sokuhou.json";
 import newsFeed from "@/data/news-feed/approved/index.json";
 import type { NewsHubCategory, NewsHubItem } from "@/lib/news-hub-types";
@@ -133,4 +134,19 @@ export function buildNewsHubItems(
   return items
     .filter((i) => i.date)
     .sort((a, b) => b.date.localeCompare(a.date));
+}
+
+/** P2-3: 各データ源の最終取得日時（反映ラグの可視化用）。 */
+export function getNewsHubMeta(): {
+  lawRevisionsFetchedAt: string | null;
+  accidentSokuhouFetchedAt: string | null;
+  newsFeedUpdatedAt: string | null;
+} {
+  const sokuhou = monthlySokuhou as { fetchedAt?: string };
+  const feed = newsFeed as { updatedAt?: string };
+  return {
+    lawRevisionsFetchedAt: egovRevisionsMeta.fetchedAt ?? null,
+    accidentSokuhouFetchedAt: sokuhou.fetchedAt ?? null,
+    newsFeedUpdatedAt: feed.updatedAt ?? null,
+  };
 }
