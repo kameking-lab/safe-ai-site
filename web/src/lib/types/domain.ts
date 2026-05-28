@@ -59,6 +59,8 @@ export type LawRevisionCore = {
   official_notice_number?: string;
   /** 施行日（YYYY-MM-DD形式。不明なら空文字""） */
   enforcement_date?: string;
+  /** 施行ステータス（e-Gov current_revision_status 由来。未設定なら enforcement_date から判定） */
+  enforcement_status?: "enforced" | "upcoming" | "undetermined";
   /** e-Gov直リンク（条文レベル。不明なら空文字""） */
   source_url?: string;
   /** 公布日（YYYY-MM-DD形式。不明なら空文字""） */

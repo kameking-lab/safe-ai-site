@@ -1,5 +1,6 @@
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
 import { realLawRevisionsExtra } from "@/data/mock/real-law-revisions-extra";
+import { egovLawRevisions } from "@/data/law-revisions/egov-revisions-loaded";
 import { loadRealRevisionsFromPayload, loadSampleRevisions, type RevisionsIngestSource } from "@/lib/revisions-ingest";
 import type { LawRevisionCore } from "@/lib/types/domain";
 
@@ -40,9 +41,11 @@ export const lawRevisionCores = (() => {
   }
 
   // 実データ（厚労省・官報・e-Gov等の公開情報に基づく）を基本とし、
-  // sample revisions（ingest経由）があれば統合する。
+  // sample revisions（ingest経由）＋ e-Gov法令API自動取込（構造データ）を統合する。
   const loaded = loadSampleRevisions();
-  const merged = [...loaded, ...realLawRevisions, ...realLawRevisionsExtra].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
+  const merged = [...loaded, ...egovLawRevisions, ...realLawRevisions, ...realLawRevisionsExtra].sort(
+    (a, b) => b.publishedAt.localeCompare(a.publishedAt),
+  );
   return merged.length > 0 ? merged : fallbackLawRevisions;
 })();
 
