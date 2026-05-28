@@ -24,7 +24,7 @@
 - Copilot: `lib/copilot/{keyword-routing.ts,types.ts}`
 
 ### データ
-- 法令条文: `data/laws/*.ts`（54ファイル＋index/types）→ `allLawArticles` **730条文**
+- 法令条文: `data/laws/*.ts`（54ファイル＋index/types）→ `allLawArticles` **1,048条文**
 - 通達: `data/mhlw-notices.ts` **1,069件**（RAGが実際に引くのはこの配列のみ）
 - リーフレット: `data/mhlw-leaflets.ts` **289件**
 - FAQ: `data/faqs/faq-batch-1〜4` **200件**
