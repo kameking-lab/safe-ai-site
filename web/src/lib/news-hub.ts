@@ -78,14 +78,18 @@ function mediaItems(limit: number): NewsHubItem[] {
     .map((e) => {
       const src = (e.source ?? {}) as Record<string, unknown>;
       const date = toYmd((src.fetchedAt as string) || (src.publishedAt as string));
+      // P2-1: 構造化補助。判明している推定事故型のみ「AI推定」と明示して付す（推測の断定はしない）。
+      const estType = typeof e.estimatedAccidentType === "string" ? e.estimatedAccidentType : "";
+      const summary = String(e.aiSummary ?? "");
       return {
         id: `news-media-${String(e.id)}`,
         category: "media" as const,
         title: String(e.headline ?? ""),
-        summary: String(e.aiSummary ?? ""),
+        summary: estType ? `${summary}（AI推定事故型: ${estType}）` : summary,
         date,
         url: String(src.url ?? ""),
         internalHref: "/accidents",
+        badge: estType || undefined,
       };
     })
     .filter((i) => i.title && i.url)

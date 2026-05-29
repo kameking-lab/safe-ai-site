@@ -6,6 +6,9 @@ import { ogImageUrl } from "@/lib/og-url";
 import {
   filterSeriousCases,
   getSeriousCaseFilters,
+  getSeriousCaseById,
+  findSimilarSeriousCases,
+  type SeriousCase,
   SERIOUS_CASES_META,
 } from "@/lib/accident-news/serious-cases";
 import { AccidentNewsFilter } from "./accident-news-filter";
@@ -45,6 +48,10 @@ export default async function AccidentNewsPage({
     q: selected.q || undefined,
     limit: 120,
   });
+  // P2-2: ?focus=<id> で選択事例＋似た事例（業種・事故型・原因の類似）を提示
+  const focusId = pick("focus");
+  const focusCase: SeriousCase | null = focusId ? getSeriousCaseById(focusId) : null;
+  const similarCases = focusCase ? findSimilarSeriousCases(focusCase, 6) : [];
 
   return (
     <PageContainer width="wide">
@@ -74,6 +81,39 @@ export default async function AccidentNewsPage({
       </header>
 
       <AccidentNewsFilter options={options} selected={selected} />
+
+      {/* P2-2: 選択事例＋似た事例（業種・事故型・原因の類似度） */}
+      {focusCase && (
+        <section className="mt-3 rounded-xl border-2 border-orange-300 bg-orange-50/60 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-bold text-orange-900">選択した事例と似た事例</p>
+            <Link href="/accident-news" className="text-xs font-semibold text-slate-600 hover:underline">
+              × 解除
+            </Link>
+          </div>
+          <p className="mt-1 text-sm text-slate-800">
+            <span className="font-bold text-rose-700">{focusCase.type ?? "重大災害"}</span>
+            <span className="ml-2 font-semibold text-sky-800">{focusCase.industry ?? ""}</span>
+            <span className="ml-2 text-slate-500">{focusCase.year}年</span>
+            <br />
+            {focusCase.description}
+          </p>
+          {similarCases.length > 0 ? (
+            <ul className="mt-2 space-y-1">
+              {similarCases.map((s) => (
+                <li key={s.id} className="rounded-lg bg-white/80 p-2 text-[13px]">
+                  <span className="font-bold text-rose-700">{s.type ?? "—"}</span>
+                  <span className="ml-2 font-semibold text-sky-800">{s.industry ?? ""}</span>
+                  <span className="ml-2 text-slate-500">{s.year}年</span>
+                  <span className="ml-2 text-slate-700">{s.description}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-xs text-slate-500">類似事例が見つかりませんでした。</p>
+          )}
+        </section>
+      )}
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-slate-600" aria-live="polite">
@@ -124,6 +164,12 @@ export default async function AccidentNewsPage({
                 className="font-semibold text-blue-700 hover:underline"
               >
                 AIに対策を質問 →
+              </Link>
+              <Link
+                href={`/accident-news?focus=${encodeURIComponent(c.id)}`}
+                className="font-semibold text-orange-700 hover:underline"
+              >
+                似た事例 →
               </Link>
               <Link
                 href={`/ky/paper?context=accidents&work=${encodeURIComponent(`${c.industry ?? ""} ${c.type ?? ""}`.trim())}`}
