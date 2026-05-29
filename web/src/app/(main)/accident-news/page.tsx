@@ -75,9 +75,26 @@ export default async function AccidentNewsPage({
 
       <AccidentNewsFilter options={options} selected={selected} />
 
-      <p className="mt-3 text-sm text-slate-600" aria-live="polite">
-        該当 <span className="font-bold text-emerald-700">{cases.length}</span> 件（最大120件表示）
-      </p>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-sm text-slate-600" aria-live="polite">
+          該当 <span className="font-bold text-emerald-700">{cases.length}</span> 件（最大120件表示）
+        </p>
+        {/* P1-3: 現在の絞り込みで説明資料（A4印刷）を作成 */}
+        <Link
+          href={`/accident-news/print${(() => {
+            const p = new URLSearchParams();
+            if (selected.industry) p.set("industry", selected.industry);
+            if (selected.type) p.set("type", selected.type);
+            if (selected.year) p.set("year", selected.year);
+            if (selected.q) p.set("q", selected.q);
+            const qs = p.toString();
+            return qs ? `?${qs}` : "";
+          })()}`}
+          className="rounded-lg border border-sky-300 bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-800 hover:bg-sky-100"
+        >
+          🖨 説明資料を印刷（この絞り込みで）
+        </Link>
+      </div>
 
       <ul className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
         {cases.map((c) => (
