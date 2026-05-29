@@ -65,9 +65,9 @@ const EN_FEATURE_COPY: Record<string, { title: string; description: string }> = 
       "Chatbot specialized in the Occupational Safety & Health Act, related ordinances, and notices. Answers cite article numbers and sources.",
   },
   accidents: {
-    title: "Major Accidents & Rosai News",
+    title: "Accident Cases & Analysis",
     description:
-      "MHLW, prefecture, and press reports of severe/fatal incidents — filter by industry or work type.",
+      "Search ~5,000 integrated MHLW accident records, plus industry analysis reports, a statistics dashboard, and a fatal-accident case browser.",
   },
   "education-certification": {
     title: "Special Education & Skill Training DB",
