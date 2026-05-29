@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-28T22:40:12.981Z",
+  "updatedAt": "2026-05-29T22:26:52.599Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -45,6 +45,29 @@
         "misinformationRisk": 10,
         "duplication": 15,
         "judgedAt": "2026-05-20T22:22:59.495Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "da9da036fae62985",
+      "headline": "労働基準関係法令違反に係る公表事案",
+      "aiSummary": "厚生労働省が労働基準関係法令に違反した企業の事案を公表。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/kinkyu/151106.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-05-29T15:00:00+09:00",
+        "fetchedAt": "2026-05-29T22:26:41.267Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-05-29T22:26:52.592Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
