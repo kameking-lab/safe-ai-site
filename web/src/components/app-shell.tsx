@@ -40,6 +40,7 @@ import {
   Thermometer,
   BarChart3,
   Star,
+  UserRound,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { FlagshipNav } from "@/components/flagship-nav";
@@ -100,6 +101,18 @@ const NAV_CATEGORIES: NavCategory[] = [
       { id: "favorites", label: "お気に入り", href: "/favorites", icon: Star, description: "保存した条文・通達" },
     ],
   },
+  // exp-04 (autonomous-loop 2026-05-30): ペルソナ入口(/for/*)はトップのバンドだけでなく
+  // 全ページのサイドバーからも到達できるよう、立場別の第一級ナビ群として常設する。
+  {
+    label: "立場から探す",
+    description: "あなたの立場に合わせた実務エントリ",
+    items: [
+      { id: "for-construction", label: "建設業の現場", href: "/for/construction", icon: HardHat, description: "職長・元請担当・現場代理人の即実行エントリ" },
+      { id: "for-solo", label: "一人親方", href: "/for/solo", icon: UserRound, description: "特別加入・一人KY・資格・熱中症を自分で回す" },
+      { id: "for-manager", label: "企業の安全衛生担当者", href: "/for/manager", icon: Building2, description: "体制づくり・委員会・年次計画・規模別義務" },
+      { id: "for-consultant", label: "専門家・コンサル", href: "/for/consultant", icon: Scale, description: "法令リサーチ・事故分析・顧問先支援を1画面に" },
+    ],
+  },
   {
     label: "現場で使う",
     description: "当日の現場業務で使う実務ツール",
@@ -158,7 +171,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     label: "業種から",
     description: "業種別の課題・対策・KY例を1ページに集約",
     items: [
-      { id: "for-construction", label: "建設業向け実務", href: "/for/construction", icon: HardHat, description: "職長・元請担当・現場代理人 向け即実行エントリ" },
+      // 建設業向け実務(/for/construction)は「立場から探す」へ集約（重複解消）
       { id: "industries", label: "10業種ハブ", href: "/industries", icon: Building2, description: "建設/製造/運輸/医療福祉/サービス/小売/飲食/卸売/倉庫/事務" },
       { id: "mental-health", label: "メンタル・カスハラ", href: "/mental-health", icon: Heart, description: "業種別のカスハラ・ハラスメント対策" },
     ],

@@ -54,5 +54,14 @@
 - **変更範囲**: flagship-nav.ts の accidents feature を「事故事例・分析」へ正名化＋4事故ツール全てを subItems に整理(+/accident-news追加) / flagship-grid.tsx の EN コピー整合 / faq/page.tsx に metadata export 追加(既存定数流用) / flagship-nav.test.ts 新規(命名・到達性ガード)。
 - **成功基準**: ナビ表示名とクリック先の不一致解消、4事故ツールへ到達可、/faq に title/desc/canonical 出力、既存テスト維持+新規pass、lint/tsc/build 0。
 - **検証結果**: lint 0 / tsc 0 / test **961 pass / 121 files**(+3) / build 成功。既存 feature-naming.test 維持。
+- 採否: **採用（squash merge PR #314 → main `ff9dee79`）**。CI e2e/smoke 両 pass・Vercel pass。命名とクリック先の矛盾を解消し、欠落していた重大災害事例導線を追加、/faqのSEO取りこぼしも補完。
+
+---
+
+## 実験04: ペルソナ入口をグローバルサイドバーに常設（exp-01のIA完成）
+- **狙い**: exp-01のペルソナ入口はトップのバンドのみ＝深いページからサイドバーで巡回するPC利用者には不可視。全ページのサイドバーに「立場から探す」第一級ナビ群(4立場)を常設し、どこからでも自己同定できるようにする。
+- **変更範囲**: app-shell.tsx の NAV_CATEGORIES に「立場から探す」カテゴリ追加(建設業/一人親方/企業担当者/専門家)。既存「業種から」内の重複 for-construction を削除(命名は「建設業向け実務」→「建設業の現場」に統一)。UserRoundアイコン追加。
+- **成功基準**: PC/モバイル両サイドバーから4ペルソナへ到達、重複排除、lint/tsc/build 0、既存テスト維持、非破壊。
+- **検証結果**: lint 0 / tsc 0 /（full test/build 追記）。
 - 採否: （CI green確認後に判断）
 
