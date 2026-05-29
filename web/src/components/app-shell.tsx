@@ -41,6 +41,8 @@ import {
   BarChart3,
   Star,
   UserRound,
+  Award,
+  Gauge,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { FlagshipNav } from "@/components/flagship-nav";
@@ -122,6 +124,8 @@ const NAV_CATEGORIES: NavCategory[] = [
       { id: "signage", label: "サイネージ", href: "/signage", icon: Monitor, description: "現場掲示用フルスクリーン・自動更新" },
       { id: "heat-illness", label: "熱中症対策", href: "/heat-illness-prevention", icon: Thermometer, description: "WBGT計算機・R7改正対応" },
       { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2, description: "CREATE-SIMPLE簡易判定" },
+      // exp-05: フラグシップ機能なのにサイドバー未収録だった作業環境測定を補完
+      { id: "work-environment", label: "作業環境測定", href: "/work-environment-measurement", icon: Gauge, description: "A測定・B測定値から管理区分(第1〜第3)を判定・改善措置を提案" },
     ],
   },
   {
@@ -142,6 +146,8 @@ const NAV_CATEGORIES: NavCategory[] = [
       { id: "glossary", label: "安全用語辞書", href: "/glossary", icon: BookMarked, description: "272語を五十音で引ける用語集" },
       { id: "faq", label: "FAQ 200問", href: "/faq", icon: HelpCircle, description: "法令タグ付きFAQ・コンサル監修" },
       { id: "elearning", label: "Eラーニング", href: "/e-learning", icon: GraduationCap, description: "クイズ式コース・進捗保存" },
+      // exp-05: フラグシップ機能なのにサイドバー未収録だった2機能を補完
+      { id: "education-certification", label: "特別教育・技能講習", href: "/education-certification", icon: Award, description: "安衛則36条の特別教育・技能講習を業種・作業から逆引き判定（根拠条文付き）" },
     ],
   },
   {
@@ -151,6 +157,8 @@ const NAV_CATEGORIES: NavCategory[] = [
       { id: "accidents-reports", label: "業種別 事故分析レポート", href: "/accidents-reports", icon: BarChart3, description: "5業種5,000件超を業種別レポートで自動分析" },
       { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database, description: "厚労省事例の全件検索" },
       { id: "accident-news", label: "重大災害事例", href: "/accident-news", icon: HardHat, badge: "NEW", badgeUntil: "2026-08-31", description: "死亡災害を業種・事故型・原因で類型検索（公表事実・匿名・出典付き）" },
+      // exp-05: AccidentHubNav・flagshipに揃え、統計ダッシュボードもサイドバーから到達可に
+      { id: "accidents-analytics", label: "事故統計ダッシュボード", href: "/accidents-analytics", icon: BarChart3, description: "事故型・業種・経年の傾向をグラフで把握" },
       { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "約3,700物質の詳細・基準値・安衛法規制タグ" },
       { id: "mental-health-management", label: "メンタル対策実務", href: "/mental-health-management", icon: Brain, badge: "NEW", badgeUntil: "2026-05-31", description: "事業場規模別の義務・面接指導・50人未満対応" },
       { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2, description: "LGBTQ・障害・外国人労働者の安全配慮" },
