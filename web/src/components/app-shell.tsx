@@ -94,7 +94,9 @@ const PAID_SERVICE_ITEMS: NavItem[] = [
 // 業種から) で職長語彙に合わせ、各カテゴリに 1 行説明を併記する。
 // モバイル底部ナビ (MobileBottomNav.tsx) との整合 = ホーム/KY/AIチャット/日誌は
 // PC でも引き続きアクセス可能 (各々「現場で使う」「質問する」配下に維持)。
-const NAV_CATEGORIES: NavCategory[] = [
+// exp-06: 回帰テスト(app-shell-nav.test.ts)から被覆検証するため export。
+// 「全 flagship 機能はサイドバーから到達可」の不変条件を守る。
+export const NAV_CATEGORIES: NavCategory[] = [
   {
     label: "",
     items: [
