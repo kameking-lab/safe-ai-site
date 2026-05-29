@@ -77,6 +77,15 @@
 - **狙い**: 「サイト全体ナビゲーション」を謳うサイドバーから2つのフラグシップ機能が辿れない欠落を解消し、2ナビ系統の被覆を一致させる。
 - **変更範囲**: app-shell.tsx に追加 — 特別教育・技能講習(/education-certification)→「学ぶ」、作業環境測定(/work-environment-measurement)→「現場で使う」、事故統計ダッシュボード(/accidents-analytics)→「分析する」。
 - **成功基準**: 3機能がサイドバーから到達可、全flagship機能がサイドバー被覆、lint/tsc/build 0、既存テスト維持、非破壊。
+- **検証結果**: lint 0 / tsc 0 / test 961 pass / build 成功 / ローカル本番で3項目描画確認。flagshipトップレベル機能の全サイドバー被覆を diff で確認。
+- 採否: **採用（squash merge PR #316 → main `b5cd35da`）**。CI e2e/smoke 両 pass。撤去でなく被覆一致でナビ整合を底上げ（実害ある欠落の解消）。
+
+---
+
+## 実験06: IA不変条件の回帰テスト追加（exp-04/05のロック）
+- **狙い**: 「全flagship機能はサイドバーから到達可」「トップにペルソナバンド4立場」という今回確立した不変条件を、将来のリグレッションから守る回帰テストを追加。
+- **変更範囲**: app-shell.tsx の NAV_CATEGORIES を export / 新規 app-shell-nav.test.ts(flagship⊆sidebar 被覆 + 立場から探す4立場) / home-persona-entry.test.tsx(4ペルソナ・href・見出し)。
+- **成功基準**: 不変条件をテスト化し全pass、lint/tsc/build 0、既存維持。万一 app-shell の import が jsdom で不安定なら config 抽出 or 当該テスト取り下げ。
 - **検証結果**: （実装後）
 - 採否: （判断後）
 
