@@ -137,6 +137,7 @@ const NAV_CATEGORIES: NavCategory[] = [
     items: [
       { id: "accidents-reports", label: "業種別 事故分析レポート", href: "/accidents-reports", icon: BarChart3, description: "5業種5,000件超を業種別レポートで自動分析" },
       { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database, description: "厚労省事例の全件検索" },
+      { id: "accident-news", label: "重大災害事例", href: "/accident-news", icon: HardHat, badge: "NEW", badgeUntil: "2026-08-31", description: "死亡災害を業種・事故型・原因で類型検索（公表事実・匿名・出典付き）" },
       { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "約3,700物質の詳細・基準値・安衛法規制タグ" },
       { id: "mental-health-management", label: "メンタル対策実務", href: "/mental-health-management", icon: Brain, badge: "NEW", badgeUntil: "2026-05-31", description: "事業場規模別の義務・面接指導・50人未満対応" },
       { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2, description: "LGBTQ・障害・外国人労働者の安全配慮" },
