@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ArrowRight, GitCompare } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
+import { AccidentHubNav } from "@/components/accident-hub-nav";
 import { Section } from "@/components/layout/section";
 import { Cluster } from "@/components/layout/stack";
 import { Breadcrumb } from "@/components/breadcrumb";
@@ -88,6 +89,7 @@ export default function AccidentsReportsHubPage() {
           }),
         ]}
       />
+      <AccidentHubNav current="accidents-reports" />
       <PageContainer width="full">
         <Breadcrumb
           items={[

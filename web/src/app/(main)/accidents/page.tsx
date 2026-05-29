@@ -26,6 +26,7 @@ import { AccidentAiAnalyzer } from "@/components/accidents/accident-ai-analyzer"
 import { OfficialRecentLinks } from "@/components/accidents/official-recent-links";
 import { AccidentTrendSummary } from "@/components/accidents/accident-trend-summary";
 import { SavedAccidents } from "@/components/accidents/saved-accidents";
+import { AccidentHubNav } from "@/components/accident-hub-nav";
 
 const _title = "労働災害 事故事例データベース";
 const _desc = `墜落・転倒・はさまれなど10年統合${SITE_STATS.accidents10yCount}件の労働災害 事故事例を業種・事故型で検索。厚生労働省データ（${SITE_STATS.mhlwDeathsCount}件死亡＋${SITE_STATS.accidentDbCount}件全件）＋curated詳細事例（${SITE_STATS.siteCuratedCaseCount}件）を統合し再発防止に活用。`;
@@ -71,6 +72,7 @@ export default function AccidentsPage() {
           }),
         ]}
       />
+      <AccidentHubNav current="accidents" />
       <Suspense
         fallback={
           <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">
