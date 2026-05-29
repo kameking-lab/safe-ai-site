@@ -19,8 +19,10 @@
 | 2 | 05:55 | 事故系4ルートに section ハブナビ統合 | feat/exp-02-accident-hub-nav | **採用** | #313 | 89→90 |
 | 3 | 06:05 | flagship事故命名整合＋/faqメタデータ | feat/exp-03-accident-naming-faq-meta | **採用** | #314 | 90→90.5 |
 | 4 | 06:18 | ペルソナ入口をサイドバー常設 | feat/exp-04-persona-sidebar | **採用** | #315 | 90.5→91 |
-| 5 | 06:30 | サイドバーのflagship被覆欠落補完 | feat/exp-05-sidebar-coverage | 進行中 | #316 | 91→? |
+| 5 | 06:30 | サイドバーのflagship被覆欠落補完 | feat/exp-05-sidebar-coverage | **採用** | #316 | 91→91.5 |
+| 6 | 06:38 | IA不変条件の回帰テスト追加 | feat/exp-06-ia-regression-tests | **採用** | #317 | 91.5→92 |
 
-開始時テスト: 941 pass / 116 files。サイクル4後: 961 pass / 121 files。
-デプロイ(本番main)回数: 4（PR#312/#313/#314/#315）。
-網羅巡回: D(全ルート死活)=144静的ルート0問題、E/F/G/H/I=巡回済(coverage-map.md)。
+開始時テスト: 941 pass / 116 files。最終: 966 pass / 123 files（新規 +25）。
+デプロイ(本番main)回数: **6**（PR#312/#313/#314/#315/#316/#317）。最終 main HEAD: `f0f7c1f3`。
+網羅巡回: A/B/C/D(144静的ルート0問題)/E/F/G/H/I 全区画1周済(coverage-map.md)。
+却下: ナビ全面統合(撤去案)=flagship孤立リスクで破棄 / 区画B初見UX変更=既に実務レベルで「やった気」回避のため見送り。
