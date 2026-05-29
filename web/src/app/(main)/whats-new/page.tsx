@@ -57,11 +57,17 @@ export default function WhatsNewPage() {
           <a href="/feed/accident-reports.xml" className="font-semibold text-orange-700 hover:underline">
             📡 事故速報だけ（RSS）
           </a>
+          <a href="/feed/serious-cases.xml" className="font-semibold text-orange-700 hover:underline">
+            📡 重大災害事例だけ（RSS）
+          </a>
           <Link href="/laws" className="font-semibold text-emerald-700 hover:underline">
             法改正一覧へ →
           </Link>
           <Link href="/accidents-reports" className="font-semibold text-emerald-700 hover:underline">
             事故レポートへ →
+          </Link>
+          <Link href="/accident-news" className="font-semibold text-emerald-700 hover:underline">
+            重大災害事例ブラウザへ →
           </Link>
           <Link href="/notifications" className="font-semibold text-emerald-700 hover:underline">
             ✉ メールで受け取る（無料・登録はメアドのみ）

@@ -4,7 +4,7 @@
  * news-hub.ts から分離する。
  */
 
-export type NewsHubCategory = "law-revision" | "accident" | "notice" | "media";
+export type NewsHubCategory = "law-revision" | "accident" | "notice" | "media" | "serious-case";
 
 export type NewsHubItem = {
   id: string;
@@ -26,6 +26,7 @@ export const NEWS_HUB_CATEGORY_LABEL: Record<NewsHubCategory, string> = {
   accident: "事故速報",
   notice: "通達・告示",
   media: "報道",
+  "serious-case": "重大災害事例",
 };
 
 /** 過去 days 日以内かを判定（新着バッジ用）。未来日は新着扱いしない。 */

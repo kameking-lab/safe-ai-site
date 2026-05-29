@@ -16,12 +16,14 @@ const CATEGORY_STYLE: Record<NewsHubCategory, string> = {
   accident: "bg-rose-100 text-rose-800",
   notice: "bg-sky-100 text-sky-800",
   media: "bg-slate-100 text-slate-700",
+  "serious-case": "bg-orange-100 text-orange-800",
 };
 
 const FILTERS: { value: NewsHubCategory | "all"; label: string }[] = [
   { value: "all", label: "すべて" },
   { value: "law-revision", label: "法改正" },
   { value: "accident", label: "事故速報" },
+  { value: "serious-case", label: "重大災害事例" },
   { value: "notice", label: "通達・告示" },
   { value: "media", label: "報道" },
 ];

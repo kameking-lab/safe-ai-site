@@ -33,6 +33,7 @@ export function buildMonthlyDigest(input: DigestInput): DigestOutput {
   const laws = items.filter((i) => i.category === "law-revision").slice(0, 6);
   const upcoming = laws.filter((i) => (i.badge ?? "").includes("施行前"));
   const accidents = items.filter((i) => i.category === "accident" || i.category === "media").slice(0, 4);
+  const seriousCases = items.filter((i) => i.category === "serious-case").slice(0, 4);
   const notices = items.filter((i) => i.category === "notice").slice(0, 4);
 
   const subject = `【安全AIポータル】${monthLabel}の労働安全ダイジェスト（法改正${upcoming.length ? `・施行前${upcoming.length}件` : ""}／労災速報）`;
@@ -50,6 +51,9 @@ export function buildMonthlyDigest(input: DigestInput): DigestOutput {
     "",
     "■ 労災の速報・関連ニュース",
     ...accidents.map((i) => `・${i.title}（${i.date}） ${i.url}`),
+    "",
+    "■ 重大災害事例（業種・事故型の類型／匿名・公表事実）",
+    ...seriousCases.map((i) => `・${i.title} ${SITE}/accident-news`),
     "",
     "■ 通達・告示の新着",
     ...notices.map((i) => `・${i.title}（${i.date}） ${i.url}`),
@@ -75,6 +79,7 @@ export function buildMonthlyDigest(input: DigestInput): DigestOutput {
     `<p>全文（登録不要）: <a href="${SITE}/whats-new">${SITE}/whats-new</a></p>`,
     `<h3>今月の主要法改正（施行前/施行済）</h3><ul>${htmlItems(laws)}</ul>`,
     `<h3>労災の速報・関連ニュース</h3><ul>${htmlItems(accidents)}</ul>`,
+    `<h3>重大災害事例（類型・匿名・公表事実）</h3><ul>${htmlItems(seriousCases)}</ul>`,
     `<h3>通達・告示の新着</h3><ul>${htmlItems(notices)}</ul>`,
     `<p style="font-size:12px;color:#888">※ 本メールは参考情報です。最新・正確な内容は各公式情報でご確認ください。</p>`,
     `<p style="font-size:12px"><a href="${esc(unsub)}">配信停止（ワンクリック）</a></p>`,

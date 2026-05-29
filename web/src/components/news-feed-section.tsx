@@ -122,7 +122,7 @@ export function NewsFeedSection() {
               {entry.estimatedAccidentType ? (
                 <>
                   {" / "}
-                  推定事故型: {entry.estimatedAccidentType}
+                  推定事故型（AI推定・判明範囲）: {entry.estimatedAccidentType}
                 </>
               ) : null}
               {entry.estimatedWorkCategory ? (
