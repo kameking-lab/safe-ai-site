@@ -34,5 +34,25 @@
 - **変更範囲**: 新規 `AccidentHubNav`(+test) / 4ページに挿入 / accident-news の重複手動リンク3本→1本(別系統の whats-new のみ残置)に整理。
 - **成功基準**: (1)4ページで現在地強調＋他3ツールの役割が1行で分かる (2)既存テスト維持+新規pass (3)lint/tsc/build 0 (4)既存非破壊。
 - **検証結果**: lint 0 / tsc 0 / test **958 pass / 120 files**(+3) / build 成功。ローカル本番で4ページ全て HTTP 200・「事故情報ナビ」＋兄弟3リンク描画を確認。
+- 採否: **採用（squash merge PR #313 → main `e549827b`）**。CI e2e/smoke 両 SUCCESS・Vercel SUCCESS。新ルート増設なしで4ルートの相互理解を底上げ、重複リンク削減も実施。実務レベルの初見オリエンテーションを改善。
+
+---
+
+## 中間: 網羅巡回（subagent静的解析）と検証
+- Explore subagent で D(死活)/E(meta)/G(a11y)/H(数値整合) を静的走査 → 21件報告。**ただし要検証**:
+  - 「broken /api-docs」→ (main)/api-docs は実在＝**誤検知**。
+  - 「16ページ metadata 欠落」→ 大半が誤検知/対象外:
+    - /ky /feedback /pdf /about/cases は **redirectのみ**(描画なし=metadata不要)。
+    - /glossary /faq/search /faq/[category] /diversity/women /subsidies/calculator は **layout.tsx で metadata 提供済**(agentはpage.tsxのみ確認)。
+    - **真の欠落は /faq のみ**(TITLE/DESC定数はあるが metadata export 無し)＝SEO/タブ名取りこぼし。
+  - 「print-button アイコンのみ a11y」→ ボタンに可視テキスト「印刷 / PDF保存」あり＝**誤検知**(アクセシブル名あり)。
+  - 「約3,700物質ハードコード3箇所」→ SITE_STATSは3,984(取込件数)で意味が異なり、3,700同士は相互に整合。誤って3,984へ統一すると逆に不正確化リスク→**保留**。
+- 教訓: subagent所見は鵜呑みにせず全件検証。実害は /faq metadata 1件に収束。
+
+## 実験03: 事故導線の命名整合（flagship）＋ /faq メタデータ補完
+- **狙い**: (A) トップ主要機能グリッド/上部ナビが /accidents を「重大事故ニュース」と表示 → 実体は「事故データベース」で、クリック先と表示名が矛盾（初見の誤誘導）。さらに subItems に重大災害事例(/accident-news)が欠落。(B) /faq の metadata export 欠落を補完。
+- **変更範囲**: flagship-nav.ts の accidents feature を「事故事例・分析」へ正名化＋4事故ツール全てを subItems に整理(+/accident-news追加) / flagship-grid.tsx の EN コピー整合 / faq/page.tsx に metadata export 追加(既存定数流用) / flagship-nav.test.ts 新規(命名・到達性ガード)。
+- **成功基準**: ナビ表示名とクリック先の不一致解消、4事故ツールへ到達可、/faq に title/desc/canonical 出力、既存テスト維持+新規pass、lint/tsc/build 0。
+- **検証結果**: lint 0 / tsc 0 / test **961 pass / 121 files**(+3) / build 成功。既存 feature-naming.test 維持。
 - 採否: （CI green確認後に判断）
 

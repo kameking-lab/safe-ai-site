@@ -117,17 +117,18 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
   },
   {
     id: "accidents",
-    label: "重大事故ニュース",
+    label: "事故事例・分析",
     icon: "🚨",
-    cardTitle: "重大事故・労災ニュース",
+    cardTitle: "事故事例データベース・分析",
     cardDescription:
-      "厚労省・自治体・報道から重大災害・死傷事故を集約。業種・作業区分でフィルタ可能。",
+      "厚労省データ統合 約5,000件を全件検索。業種別の自動分析レポート・統計ダッシュボード・重大災害事例まで横断できます。",
     href: "/accidents",
     subItems: [
-      { label: "事故データベース", href: "/accidents" },
-      { label: "業種別 安全管理ポータル", href: "/industries", description: "10業種の重点課題・関連法令・通達・推奨機能への動線をワンページに集約" },
+      { label: "事故DB検索（10年・全件）", href: "/accidents", description: "厚労省統合データを業種・原因・作業区分で全件検索" },
       { label: "業種別 事故分析レポート", href: "/accidents-reports", description: "5業種の事故型・原因・対策・関連法令を自動集計" },
-      { label: "事故統計ダッシュボード", href: "/accidents-analytics" },
+      { label: "事故統計ダッシュボード", href: "/accidents-analytics", description: "事故型・業種・経年の傾向をグラフで把握" },
+      { label: "重大災害事例（死亡災害）", href: "/accident-news", description: "公表事実・匿名・出典付きで業種・事故型・原因から類型検索" },
+      { label: "業種別 安全管理ポータル", href: "/industries", description: "10業種の重点課題・関連法令・通達・推奨機能への動線をワンページに集約" },
       // P1-J: /stats はサンプル表示が露出するため主要機能ナビから除外
       { label: "リスク予測", href: "/risk-prediction" },
     ],

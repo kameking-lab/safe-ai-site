@@ -1,13 +1,33 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { HelpCircle, Scale, Users, FlaskConical, Heart, Search } from "lucide-react";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd, faqPageSchema, breadcrumbSchema } from "@/components/json-ld";
 import { ALL_FAQS, getFAQsByCategory } from "@/data/faqs";
 import { FAQ_CATEGORY_LABELS, FAQ_CATEGORY_DESCRIPTIONS, type FAQCategory } from "@/types/faq";
+import { ogImageUrl } from "@/lib/og-url";
 
 const TITLE = "労働安全衛生FAQ 200問";
 const DESCRIPTION =
   "労働安全衛生法・化学物質管理・健康診断・特別教育などよくある質問200問を法令根拠付きで解説。現場担当者・安全管理者・衛生管理者必携のQ&A集。";
+
+// exp-03 (autonomous-loop 2026-05-30): TITLE/DESCRIPTION 定数は JSON-LD でのみ使われ、
+// ページの <title>/meta description を出力する metadata export が欠落していた（SEO/タブ名の取りこぼし）。
+// 既存定数をそのまま使って補完する。
+export const metadata: Metadata = {
+  title: TITLE,
+  description: DESCRIPTION,
+  alternates: { canonical: "/faq" },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [{ url: ogImageUrl(TITLE, "法令根拠付き Q&A 200問"), width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImageUrl(TITLE, "法令根拠付き Q&A 200問")],
+  },
+};
 
 const CATEGORY_ICONS: Record<FAQCategory, React.ComponentType<{ className?: string }>> = {
   "law-system": Scale,
