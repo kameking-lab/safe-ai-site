@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useFitToScreen } from "@/lib/signage/use-fit-to-screen";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
 import type { KyInstructionRecordState } from "@/lib/types/operations";
 import { cloudGetSignageSession } from "@/lib/ky/storage-adapter";
@@ -26,8 +27,52 @@ export function KyMorningSignage() {
   // Phase C: 表示言語（既定 ja、localStorage 保持）と全画面状態。
   const [lang, setLang] = useState<SignageLang>("ja");
   const [isFullscreen, setIsFullscreen] = useState(false);
+  // 1画面フィット（signage-responsive-audit P0）: 表示系デバイス（横向き or 幅≥768）で
+  // コンテンツを viewport に縮尺フィットさせる。スマホ縦は可読性優先で自然スクロール。
+  const [fitEnabled, setFitEnabled] = useState(false);
+  const [twoCol, setTwoCol] = useState(false);
+  const [printing, setPrinting] = useState(false);
 
   const L = signageLabels(lang);
+
+  // 画面サイズ/向きから fit と 2カラム を判定。
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const update = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const landscape = w > h;
+      setFitEnabled(landscape || w >= 768);
+      // 横長で幅が十分あれば2カラム化（縦の総高を圧縮しフィット倍率を上げる）。縦長は単一カラム。
+      setTwoCol(landscape && w >= 768);
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+    };
+  }, []);
+
+  // 印刷中はフィット縮尺を無効化（A4へ通常フロー出力）。
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const before = () => setPrinting(true);
+    const after = () => setPrinting(false);
+    window.addEventListener("beforeprint", before);
+    window.addEventListener("afterprint", after);
+    return () => {
+      window.removeEventListener("beforeprint", before);
+      window.removeEventListener("afterprint", after);
+    };
+  }, []);
+
+  const fitActive = fitEnabled && !printing;
+  const { outerRef, contentRef, scale } = useFitToScreen({
+    enabled: fitActive,
+    deps: [record, lang, twoCol],
+  });
 
   // Phase C P0-2: サイネージ表示中（record あり）は画面スリープを抑止。
   useWakeLock(record !== null);
@@ -152,9 +197,9 @@ export function KyMorningSignage() {
     : "";
 
   return (
-    <main className="min-h-screen bg-slate-900 text-white print:bg-white print:text-slate-900">
-      <div className="mx-auto flex min-h-screen w-full max-w-[2200px] flex-col px-[clamp(1rem,3vw,4rem)] py-[clamp(0.75rem,2vw,2rem)]">
-        <header className="flex flex-wrap items-center justify-between gap-3 print:hidden">
+    <main className={`${fitActive && record ? "h-[100dvh] overflow-hidden" : "min-h-[100dvh]"} bg-slate-900 text-white print:h-auto print:overflow-visible print:bg-white print:text-slate-900`}>
+      <div className={`mx-auto flex w-full max-w-[2200px] flex-col px-[clamp(1rem,3vw,4rem)] py-[clamp(0.75rem,2vw,2rem)] ${fitActive && record ? "h-full max-h-full" : "min-h-[100dvh]"}`}>
+        <header className="flex shrink-0 flex-wrap items-center justify-between gap-3 print:hidden">
           <p className="text-sm font-bold tracking-widest text-emerald-300">{L.signageTitle}</p>
           <div className="flex flex-wrap items-center gap-2">
             {/* Phase C P1-4: 表示言語トグル */}
@@ -164,7 +209,7 @@ export function KyMorningSignage() {
                 value={lang}
                 onChange={(e) => onLangChange(e.target.value as SignageLang)}
                 aria-label="表示言語 / Display language"
-                className="rounded-lg border border-white/30 bg-white/10 px-2 py-1 text-xs font-semibold text-white"
+                className="min-h-[44px] rounded-lg border border-white/30 bg-white/10 px-2 py-1 text-xs font-semibold text-white"
               >
                 {SIGNAGE_LANGS.map((l) => (
                   <option key={l} value={l} className="text-slate-900">
@@ -177,7 +222,7 @@ export function KyMorningSignage() {
             <button
               type="button"
               onClick={toggleFullscreen}
-              className="rounded-lg border border-white/30 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+              className="inline-flex min-h-[44px] items-center rounded-lg border border-white/30 px-3 py-2 text-xs font-semibold text-white hover:bg-white/10"
             >
               {isFullscreen ? `🗕 ${L.exitFullscreen}` : `⛶ ${L.fullscreen}`}
             </button>
@@ -185,13 +230,13 @@ export function KyMorningSignage() {
             <button
               type="button"
               onClick={() => window.print()}
-              className="rounded-lg border border-white/30 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+              className="inline-flex min-h-[44px] items-center rounded-lg border border-white/30 px-3 py-2 text-xs font-semibold text-white hover:bg-white/10"
             >
               🖨 {L.print}
             </button>
             <Link
               href="/ky/paper"
-              className="rounded-lg border border-white/30 px-3 py-1 text-xs font-semibold text-white hover:bg-white/10"
+              className="inline-flex min-h-[44px] items-center rounded-lg border border-white/30 px-3 py-2 text-xs font-semibold text-white hover:bg-white/10"
             >
               {L.backToEdit}
             </Link>
@@ -243,111 +288,131 @@ export function KyMorningSignage() {
             </form>
           </div>
         ) : (
-          <>
-            <div className="mt-4 font-bold leading-tight text-[clamp(1.5rem,3.2vw,3.5rem)]">
-              {dateStr}
-            </div>
+          <div
+            ref={outerRef}
+            className={`${fitActive ? "relative min-h-0 flex-1 overflow-hidden" : "mt-2"} print:overflow-visible`}
+          >
+            <div
+              ref={contentRef}
+              style={
+                fitActive
+                  ? { transform: `scale(${scale})`, transformOrigin: "top center", width: "100%" }
+                  : undefined
+              }
+              className="w-full print:!transform-none"
+            >
+              <div className="font-bold leading-tight text-[clamp(1.5rem,3.2vw,3.5rem)]">
+                {dateStr}
+              </div>
 
-            <section className="mt-6 rounded-3xl bg-white/95 p-6 text-slate-900 shadow-2xl sm:p-8 print:shadow-none print:border print:border-slate-300">
-              <p className="font-bold text-emerald-700 text-[clamp(1.1rem,1.8vw,2rem)]">{L.mainWork}</p>
-              <p className="mt-2 font-bold leading-tight text-[clamp(1.8rem,5vw,6rem)]">
-                {mainWork?.workDetail || L.notEntered}
-              </p>
-              {mainWork?.workPlace && (
-                <p className="mt-2 text-slate-600 text-[clamp(1.1rem,2.2vw,2.5rem)]">
-                  {L.workPlace}: {mainWork.workPlace}
-                </p>
-              )}
-            </section>
-
-            <section className="mt-6 rounded-3xl bg-white/95 p-6 text-slate-900 shadow-2xl sm:p-8 print:shadow-none print:border print:border-slate-300">
-              <p className="font-bold text-rose-700 text-[clamp(1.1rem,1.8vw,2rem)]">{L.riskTop3}</p>
-              {topRisks.length === 0 ? (
-                <p className="mt-3 text-slate-500 text-[clamp(1.2rem,2.5vw,2.5rem)]">{L.notEntered}</p>
-              ) : (
-                <ul className="mt-4 space-y-4">
-                  {topRisks.map((r, i) => (
-                    <li key={i} className="rounded-2xl border-l-8 border-rose-500 bg-rose-50 p-4">
-                      <p className="font-bold leading-snug text-[clamp(1.4rem,3.6vw,4.5rem)]">
-                        {i + 1}. {r.hazard}
+              <div className={`mt-3 ${twoCol ? "grid grid-cols-2 items-start gap-4" : "flex flex-col gap-4"}`}>
+                {/* 左カラム: 本日の主な作業 + リスクTop3 */}
+                <div className="flex min-w-0 flex-col gap-4">
+                  <section className="rounded-3xl bg-white/95 p-4 text-slate-900 shadow-2xl sm:p-6 print:shadow-none print:border print:border-slate-300">
+                    <p className="font-bold text-emerald-700 text-[clamp(1.1rem,1.8vw,2rem)]">{L.mainWork}</p>
+                    <p className="mt-2 font-bold leading-tight text-[clamp(1.8rem,5vw,6rem)]">
+                      {mainWork?.workDetail || L.notEntered}
+                    </p>
+                    {mainWork?.workPlace && (
+                      <p className="mt-2 text-slate-600 text-[clamp(1.1rem,2.2vw,2.5rem)]">
+                        {L.workPlace}: {mainWork.workPlace}
                       </p>
-                      {r.reduction && (
-                        <p className="mt-2 text-emerald-800 text-[clamp(1.1rem,2.6vw,3rem)]">
-                          → {L.countermeasure}: {r.reduction}
+                    )}
+                  </section>
+
+                  <section className="rounded-3xl bg-white/95 p-4 text-slate-900 shadow-2xl sm:p-6 print:shadow-none print:border print:border-slate-300">
+                    <p className="font-bold text-rose-700 text-[clamp(1.1rem,1.8vw,2rem)]">{L.riskTop3}</p>
+                    {topRisks.length === 0 ? (
+                      <p className="mt-3 text-slate-500 text-[clamp(1.2rem,2.5vw,2.5rem)]">{L.notEntered}</p>
+                    ) : (
+                      <ul className="mt-3 space-y-3">
+                        {topRisks.map((r, i) => (
+                          <li key={i} className="rounded-2xl border-l-8 border-rose-500 bg-rose-50 p-3">
+                            <p className="font-bold leading-snug text-[clamp(1.4rem,3.6vw,4.5rem)]">
+                              {i + 1}. {r.hazard}
+                            </p>
+                            {r.reduction && (
+                              <p className="mt-1 text-emerald-800 text-[clamp(1.1rem,2.6vw,3rem)]">
+                                → {L.countermeasure}: {r.reduction}
+                              </p>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                </div>
+
+                {/* 右カラム: 行動目標・指差呼称 + 本日の安全啓発 + 唱和 */}
+                <div className="flex min-w-0 flex-col gap-4">
+                  {(record.teamGoal || record.pointingCall) && (
+                    <section className="rounded-3xl bg-white/95 p-4 text-slate-900 shadow-2xl sm:p-6 print:shadow-none print:border print:border-slate-300">
+                      {record.teamGoal && (
+                        <div>
+                          <p className="font-bold text-emerald-700 text-[clamp(1.1rem,1.8vw,2rem)]">{L.teamGoal}</p>
+                          <p className="mt-2 font-bold leading-snug text-[clamp(1.8rem,4.5vw,5.5rem)]">{record.teamGoal}</p>
+                        </div>
+                      )}
+                      {record.pointingCall && (
+                        <div className={record.teamGoal ? "mt-4 border-t border-slate-200 pt-4" : ""}>
+                          <p className="font-bold text-amber-700 text-[clamp(1.1rem,1.8vw,2rem)]">{L.pointingCall}</p>
+                          <p className="mt-2 font-bold leading-snug text-amber-900 text-[clamp(1.8rem,4.5vw,5.5rem)]">{record.pointingCall}</p>
+                        </div>
+                      )}
+                    </section>
+                  )}
+
+                  {/* P2-2: 本日の安全啓発（過去の労災事例・日替わり・6言語見出し） */}
+                  <SignageAccidentEducation lang={lang} />
+
+                  {/* 唱和カウントダウン */}
+                  <section className="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-emerald-700/30 p-4 sm:p-6 print:hidden">
+                    <div>
+                      <p className="text-base font-bold uppercase tracking-widest text-emerald-200">
+                        {L.chantCountdown}
+                      </p>
+                      {countdown === null ? (
+                        <p className="mt-1 text-base text-emerald-100">{L.chantReady}</p>
+                      ) : countdown > 0 ? (
+                        <p className="mt-1 font-extrabold tabular-nums text-white text-[clamp(4rem,10vw,12rem)]">
+                          {countdown}
+                        </p>
+                      ) : (
+                        <p className="mt-1 font-extrabold text-emerald-200 text-[clamp(2.5rem,6vw,7rem)]">
+                          🚨 {L.chantGo}
                         </p>
                       )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-
-            {/* 本日の行動目標・指差呼称（4Rの締め。全面再設計で追加） */}
-            {(record.teamGoal || record.pointingCall) && (
-              <section className="mt-6 rounded-3xl bg-white/95 p-6 text-slate-900 shadow-2xl sm:p-8 print:shadow-none print:border print:border-slate-300">
-                {record.teamGoal && (
-                  <div>
-                    <p className="font-bold text-emerald-700 text-[clamp(1.1rem,1.8vw,2rem)]">{L.teamGoal}</p>
-                    <p className="mt-2 font-bold leading-snug text-[clamp(1.8rem,4.5vw,5.5rem)]">{record.teamGoal}</p>
-                  </div>
-                )}
-                {record.pointingCall && (
-                  <div className={record.teamGoal ? "mt-4 border-t border-slate-200 pt-4" : ""}>
-                    <p className="font-bold text-amber-700 text-[clamp(1.1rem,1.8vw,2rem)]">{L.pointingCall}</p>
-                    <p className="mt-2 font-bold leading-snug text-amber-900 text-[clamp(1.8rem,4.5vw,5.5rem)]">{record.pointingCall}</p>
-                  </div>
-                )}
-              </section>
-            )}
-
-            {/* P2-2: 本日の安全啓発（過去の労災事例・日替わり・6言語見出し） */}
-            <SignageAccidentEducation lang={lang} />
-
-            {/* 唱和カウントダウン */}
-            <section className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-emerald-700/30 p-6 print:hidden">
-              <div>
-                <p className="text-base font-bold uppercase tracking-widest text-emerald-200">
-                  {L.chantCountdown}
-                </p>
-                {countdown === null ? (
-                  <p className="mt-1 text-base text-emerald-100">{L.chantReady}</p>
-                ) : countdown > 0 ? (
-                  <p className="mt-1 font-extrabold tabular-nums text-white text-[clamp(4rem,10vw,12rem)]">
-                    {countdown}
-                  </p>
-                ) : (
-                  <p className="mt-1 font-extrabold text-emerald-200 text-[clamp(2.5rem,6vw,7rem)]">
-                    🚨 {L.chantGo}
-                  </p>
-                )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setCountdown(COUNTDOWN_SEC)}
+                        className="rounded-2xl bg-emerald-500 px-6 py-4 text-2xl font-bold text-white shadow-lg hover:bg-emerald-400"
+                      >
+                        ▶ {L.chantStart}（{COUNTDOWN_SEC}秒）
+                      </button>
+                      {countdown !== null && (
+                        <button
+                          type="button"
+                          onClick={() => setCountdown(null)}
+                          className="rounded-2xl border-2 border-white/40 px-6 py-4 text-2xl font-bold text-white hover:bg-white/10"
+                        >
+                          {L.chantStop}
+                        </button>
+                      )}
+                    </div>
+                  </section>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setCountdown(COUNTDOWN_SEC)}
-                  className="rounded-2xl bg-emerald-500 px-6 py-4 text-2xl font-bold text-white shadow-lg hover:bg-emerald-400"
-                >
-                  ▶ {L.chantStart}（{COUNTDOWN_SEC}秒）
-                </button>
-                {countdown !== null && (
-                  <button
-                    type="button"
-                    onClick={() => setCountdown(null)}
-                    className="rounded-2xl border-2 border-white/40 px-6 py-4 text-2xl font-bold text-white hover:bg-white/10"
-                  >
-                    {L.chantStop}
-                  </button>
-                )}
-              </div>
-            </section>
-          </>
+
+              <p className="pt-4 text-center text-xs text-white/50 print:hidden">
+                {remoteCode
+                  ? `※ 共有コード ${remoteCode} のKYを表示中（約8秒ごとに自動更新）。`
+                  : "※ この端末で保存したKY記録を表示しています。別端末で映すには、KY用紙の「別端末で共有」から6桁コードを発行してください。"}
+              </p>
+            </div>
+          </div>
         )}
-
-        <p className="mt-auto pt-6 text-center text-xs text-white/50 print:hidden">
-          {remoteCode
-            ? `※ 共有コード ${remoteCode} のKYを表示中（約8秒ごとに自動更新）。`
-            : "※ この端末で保存したKY記録を表示しています。別端末で映すには、KY用紙の「別端末で共有」から6桁コードを発行してください。"}
-        </p>
       </div>
     </main>
   );
