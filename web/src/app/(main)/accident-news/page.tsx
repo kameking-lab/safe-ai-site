@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageContainer } from "@/components/layout";
+import { AccidentHubNav } from "@/components/accident-hub-nav";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import {
@@ -54,6 +55,8 @@ export default async function AccidentNewsPage({
   const similarCases = focusCase ? findSimilarSeriousCases(focusCase, 6) : [];
 
   return (
+    <>
+    <AccidentHubNav current="accident-news" />
     <PageContainer width="wide">
       <PageJsonLd
         name="重大災害事例ブラウザ"
@@ -67,15 +70,10 @@ export default async function AccidentNewsPage({
           同業種・同種事故の傾向把握や、安全教育・説明資料の作成にご活用ください。
           <span className="font-semibold">会社名・発注者名は扱いません</span>（公表事実の引用に留めています）。
         </p>
+        {/* 事故系の相互導線は上部の AccidentHubNav に集約。ここでは別系統の新着ハブのみ補助リンク。 */}
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-          <Link href="/accidents-analytics" className="font-semibold text-emerald-700 hover:underline">
-            事故統計ダッシュボードへ →
-          </Link>
-          <Link href="/accidents" className="font-semibold text-emerald-700 hover:underline">
-            事故事例DBへ →
-          </Link>
           <Link href="/whats-new" className="font-semibold text-emerald-700 hover:underline">
-            新着情報ハブへ →
+            新着情報ハブ（法改正・速報）へ →
           </Link>
         </div>
       </header>
@@ -197,5 +195,6 @@ export default async function AccidentNewsPage({
         個別の対策判断は労働安全コンサルタント等の専門家にご相談ください。
       </p>
     </PageContainer>
+    </>
   );
 }

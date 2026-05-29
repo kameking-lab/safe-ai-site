@@ -7,6 +7,7 @@ import { JsonLd } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { SITE_STATS } from "@/data/site-stats";
+import { AccidentHubNav } from "@/components/accident-hub-nav";
 
 const title = "事故統計ダッシュボード";
 const description = `労働災害 ${SITE_STATS.accidents10yCount} 件を年・月・業種・事故種類・地域・規模・原因など多軸で集計したダッシュボード。厚労省死亡災害DB（${SITE_STATS.mhlwDeathsCount} 件）と curated 事例を統合し、25 種類の分析軸で可視化。`;
@@ -79,6 +80,7 @@ export default function AccidentsAnalyticsPage() {
   return (
     <>
       <JsonLd schema={datasetSchema} />
+      <AccidentHubNav current="accidents-analytics" />
       <Suspense
         fallback={
           <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">
