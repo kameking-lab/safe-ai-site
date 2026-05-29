@@ -291,7 +291,7 @@ export default function ForConstructionPage() {
             <span className="font-bold text-sky-700">▸</span>
             <span>
               <strong>協議組織の運営・作業間の連絡調整</strong> (安衛則 第635〜636条)。
-              <Link href="/safety-diary" className="ml-1 font-semibold text-sky-700 hover:underline">安全衛生日誌で月次報告まとめ</Link>
+              <Link href="/safety-diary" className="ml-1 font-semibold text-sky-700 hover:underline">安全工程打合せ書で月次報告まとめ</Link>
             </span>
           </li>
           <li className="flex items-start gap-2">
@@ -333,8 +333,8 @@ export default function ForConstructionPage() {
             <p className="mt-1 text-xs text-violet-800">建設業テンプレ: 目標2件 + 対策5項 + 月別イベント12件 + 関連法令12件。</p>
           </Link>
           <Link href="/safety-diary" className="rounded-lg border-2 border-violet-300 bg-violet-50 p-4 hover:bg-violet-100 block">
-            <p className="font-bold text-violet-900">安全衛生日誌で月次まとめ</p>
-            <p className="mt-1 text-xs text-violet-800">必須5項目を3〜5分。パトロール・是正記録・委員会議事録を一元化。</p>
+            <p className="font-bold text-violet-900">安全工程打合せ書で月次まとめ</p>
+            <p className="mt-1 text-xs text-violet-800">元請が前日5分で各社の作業・予想災害・指示を1枚に。印刷・KY転記に対応。</p>
           </Link>
         </div>
         <p className="mt-4 text-xs text-slate-500">

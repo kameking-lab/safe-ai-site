@@ -26,11 +26,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/accidents-reports/transport", lastModified: "2026-05-16", priority: 0.7, changeFrequency: "weekly" },
     { url: "/accidents-reports/healthcare", lastModified: "2026-05-16", priority: 0.7, changeFrequency: "weekly" },
     { url: "/accidents-reports/service", lastModified: "2026-05-16", priority: 0.7, changeFrequency: "weekly" },
+    // site-wide-audit SW-P2-01: クエリ文字列付きURL（?industries=...）は重複/canonical希釈リスクのため
+    // sitemap から除外。比較ページは下記の正規URL（パラメータ無し）に集約する。
     { url: "/accidents-reports/compare", lastModified: "2026-05-17", priority: 0.75, changeFrequency: "weekly" },
-    { url: "/accidents-reports/compare?industries=construction,manufacturing", lastModified: "2026-05-17", priority: 0.7, changeFrequency: "weekly" },
-    { url: "/accidents-reports/compare?industries=construction,manufacturing,transport", lastModified: "2026-05-17", priority: 0.65, changeFrequency: "weekly" },
-    { url: "/accidents-reports/compare?industries=healthcare,service", lastModified: "2026-05-17", priority: 0.65, changeFrequency: "weekly" },
-    { url: "/accidents-reports/compare?industries=construction,healthcare,manufacturing,service,transport", lastModified: "2026-05-17", priority: 0.65, changeFrequency: "weekly" },
     { url: "/industries", lastModified: "2026-05-17", priority: 0.85, changeFrequency: "monthly" },
     { url: "/for/construction", lastModified: "2026-05-24", priority: 0.9, changeFrequency: "weekly" },
     { url: "/industries/construction", lastModified: "2026-05-17", priority: 0.8, changeFrequency: "monthly" },

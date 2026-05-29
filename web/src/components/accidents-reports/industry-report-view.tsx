@@ -693,11 +693,11 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
               <p className="mt-1 text-xs text-emerald-800 dark:text-emerald-300">本レポートの事故パターンを朝礼の危険予知活動に展開。業種別プリセット入り。</p>
             </Link>
             <Link
-              href="/safety-diary/new"
+              href="/safety-diary"
               className="group rounded-lg border-2 border-sky-300 bg-sky-50 p-4 transition hover:border-sky-500 hover:shadow-sm dark:border-sky-700 dark:bg-sky-950/40"
             >
-              <p className="text-sm font-bold text-sky-900 dark:text-sky-100">📓 安全衛生日誌を記録</p>
-              <p className="mt-1 text-xs text-sky-800 dark:text-sky-300">本日の朝礼・KY結果・ヒヤリハットを記録。月次まとめで類似事故と連動。</p>
+              <p className="text-sm font-bold text-sky-900 dark:text-sky-100">📋 安全工程打合せ書を作成</p>
+              <p className="mt-1 text-xs text-sky-800 dark:text-sky-300">各社の作業・予想災害・指示を1枚に。月次まとめで類似事故と連動。</p>
             </Link>
           </CardGrid>
           <CardGrid cols={3} gap="md" className="mt-3">

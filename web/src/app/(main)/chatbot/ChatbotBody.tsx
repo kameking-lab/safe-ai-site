@@ -200,13 +200,13 @@ export function ChatbotBody() {
             cta: isEn ? "Start KY" : "KYを作る",
           },
           {
-            href: "/safety-diary/new",
-            label: isEn ? "Record in safety diary" : "安全衛生日誌に記録",
+            href: "/safety-diary",
+            label: isEn ? "Record in safety diary" : "安全工程打合せ書に記録",
             description: isEn
               ? "Save today's briefing, KY result, and near-misses. Required 5 fields in 3–5 min."
-              : "今日の朝礼・KY結果・ヒヤリハットを日誌に記録（必須5項目・3〜5分）。",
+              : "各社の作業・予想災害・指示を1枚に。KY結果の転記にも対応。",
             color: "sky",
-            cta: isEn ? "Open diary" : "日誌に書く",
+            cta: isEn ? "Open diary" : "打合せ書を作る",
           },
           {
             href: "/accidents-reports",

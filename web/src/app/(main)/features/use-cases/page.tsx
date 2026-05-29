@@ -312,9 +312,9 @@ const INDUSTRIES: Industry[] = [
       {
         title: "安全衛生委員会の運営",
         problem: "議題と前年フォローの引継ぎ漏れ。",
-        solution: "安全衛生日誌と通達・法改正情報で議題を構築。法令検索で根拠を即提示。",
+        solution: "安全工程打合せ書と通達・法改正情報で議題を構築。法令検索で根拠を即提示。",
         relatedFeatures: [
-          { label: "安全衛生日誌", href: "/safety-diary" },
+          { label: "安全工程打合せ書", href: "/safety-diary" },
           { label: "通達・法改正", href: "/laws" },
         ],
       },

@@ -92,7 +92,7 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/accidents" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
-                  10年事故DB
+                  事故データベース（10年）
                 </Link>
               </li>
               <li>
@@ -231,6 +231,11 @@ export function Footer() {
                   セキュリティ
                 </Link>
               </li>
+              <li>
+                <Link href="/about/data-sources" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  データの出典
+                </Link>
+              </li>
               {/* DPA link removed from nav: individual-operator phase, standard template after incorporation.
                   Page remains reachable via /dpa direct URL but is excluded from indexing.
                   Audit reference: harsh-third-party-2026-05-16 G-002. */}
@@ -254,9 +259,14 @@ export function Footer() {
               </Link>
             </p>
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">
-            個人運営の研究プロジェクト
-          </p>
+          <div className="text-center sm:text-right">
+            <p className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+              労働安全コンサルタント監修（登録番号 260022）
+            </p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              個人運営の研究プロジェクト
+            </p>
+          </div>
         </div>
       </div>
     </footer>

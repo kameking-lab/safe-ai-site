@@ -103,15 +103,23 @@ export function FlagshipGrid() {
             <p className="mt-1 text-xs leading-snug text-slate-500 sm:text-sm">
               {isEn
                 ? "Safety diary, KY, chemical RA, signage, law updates, AI chat, and accident news — one-stop support for field operations."
-                : "安全衛生日誌・KY・化学物質RA・サイネージ・法改正・AIチャット・事故ニュースで、現場運用をワンストップで支援。"}
+                : "安全工程打合せ書・KY・化学物質RA・サイネージ・法改正・AIチャット・事故ニュースで、現場運用をワンストップで支援。"}
             </p>
           </div>
-          <Link
-            href="/features"
-            className="hidden shrink-0 text-xs font-semibold text-emerald-700 hover:underline sm:block"
-          >
-            {isEn ? "All features →" : "機能一覧（全機能）→"}
-          </Link>
+          <div className="flex shrink-0 flex-col items-end gap-1 text-xs font-semibold">
+            <Link
+              href="/features/quick-tour"
+              className="text-emerald-700 hover:underline"
+            >
+              {isEn ? "New here? 3-min tour →" : "初めての方へ・3分ツアー →"}
+            </Link>
+            <Link
+              href="/features"
+              className="text-slate-500 hover:text-emerald-700 hover:underline dark:text-slate-400"
+            >
+              {isEn ? "All features →" : "機能一覧（全機能）→"}
+            </Link>
+          </div>
         </div>
         <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {FLAGSHIP_FEATURES.map((f) => {
