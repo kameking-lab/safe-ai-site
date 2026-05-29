@@ -16,6 +16,7 @@ import { buildEnforcementBadge } from "@/lib/law-revision-status";
 import { egovRevisionsMeta } from "@/data/law-revisions/egov-revisions-loaded";
 import monthlySokuhou from "@/data/accidents/monthly-sokuhou.json";
 import newsFeed from "@/data/news-feed/approved/index.json";
+import { filterSeriousCases, SERIOUS_CASES_META } from "@/lib/accident-news/serious-cases";
 import type { NewsHubItem } from "@/lib/news-hub-types";
 
 export type { NewsHubCategory, NewsHubItem } from "@/lib/news-hub-types";
@@ -118,16 +119,35 @@ function accidentSokuhouItem(): NewsHubItem | null {
   };
 }
 
+/** 重大災害事例（匿名・公表事実）の直近を新着ハブ/RSS用に整形。会社名等は扱わない。 */
+function seriousCaseItems(limit: number): NewsHubItem[] {
+  return filterSeriousCases({ limit }).map((c) => ({
+    id: `news-serious-${c.id}`,
+    category: "serious-case" as const,
+    title: `${c.type ?? "重大災害"}（${c.industry ?? "業種不明"}）${c.year}年`,
+    summary: `${c.description}${c.type && c.sameTypeTotal > 0 ? `（同種事故 収録${c.sameTypeTotal}件）` : ""}`,
+    date: `${c.year}-${String(c.month ?? 1).padStart(2, "0")}-01`,
+    url: SERIOUS_CASES_META.sourceUrl,
+    internalHref: "/accident-news",
+  }));
+}
+
 /**
  * 全カテゴリを集約し日付降順で返す。
  */
 export function buildNewsHubItems(
-  opts: { lawLimit?: number; noticeLimit?: number; mediaLimit?: number } = {},
+  opts: {
+    lawLimit?: number;
+    noticeLimit?: number;
+    mediaLimit?: number;
+    seriousCaseLimit?: number;
+  } = {},
 ): NewsHubItem[] {
   const items: NewsHubItem[] = [
     ...lawRevisionItems(opts.lawLimit ?? 40),
     ...noticeItems(opts.noticeLimit ?? 20),
     ...mediaItems(opts.mediaLimit ?? 12),
+    ...seriousCaseItems(opts.seriousCaseLimit ?? 8),
   ];
   const sokuhou = accidentSokuhouItem();
   if (sokuhou) items.push(sokuhou);
