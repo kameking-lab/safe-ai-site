@@ -105,7 +105,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     category: "management",
     relatedLaws: ["安衛法第13条", "安衛則第6条", "安衛則第15条"],
     relatedPages: [
-      { href: "/safety-diary", label: "安全衛生日誌" },
+      { href: "/safety-diary", label: "安全工程打合せ書" },
       { href: "/organization", label: "組織管理" },
     ],
     tags: ["安全パトロール", "巡視", "頻度"],
@@ -133,7 +133,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     category: "management",
     relatedLaws: ["安衛法第102条（書類保存）"],
     relatedPages: [
-      { href: "/safety-diary", label: "安全衛生日誌" },
+      { href: "/safety-diary", label: "安全工程打合せ書" },
       { href: "/ky", label: "KY用紙" },
     ],
     tags: ["安全衛生日誌", "安全施工サイクル", "記録"],
@@ -162,7 +162,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     relatedLaws: ["安衛法第59条（安全衛生教育）"],
     relatedPages: [
       { href: "/ky", label: "KY用紙" },
-      { href: "/safety-diary", label: "安全衛生日誌" },
+      { href: "/safety-diary", label: "安全工程打合せ書" },
     ],
     tags: ["TBM", "ツールボックスミーティング", "朝礼"],
     source: "JISHA",
@@ -245,7 +245,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     category: "management",
     relatedLaws: ["安衛法第11条", "安衛則第6条"],
     relatedPages: [
-      { href: "/safety-diary", label: "安全衛生日誌" },
+      { href: "/safety-diary", label: "安全工程打合せ書" },
       { href: "/organization", label: "組織管理" },
     ],
     tags: ["安全管理者", "巡視", "週1回"],
@@ -315,7 +315,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     category: "management",
     relatedLaws: ["安衛則第38条", "安衛則第51条", "安衛則第52条の13"],
     relatedPages: [
-      { href: "/safety-diary", label: "安全衛生日誌" },
+      { href: "/safety-diary", label: "安全工程打合せ書" },
       { href: "/chatbot", label: "法令チャット" },
     ],
     tags: ["記録保存", "保存期間", "書類管理"],
@@ -411,7 +411,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     category: "management",
     relatedLaws: ["安衛則第23条"],
     relatedPages: [
-      { href: "/safety-diary", label: "安全衛生日誌" },
+      { href: "/safety-diary", label: "安全工程打合せ書" },
       { href: "/chatbot", label: "法令チャット" },
     ],
     tags: ["議事録", "電子化", "電磁的記録"],
@@ -468,7 +468,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     relatedLaws: ["安衛法第59条", "安衛則第38条"],
     relatedPages: [
       { href: "/e-learning", label: "Eラーニング" },
-      { href: "/safety-diary", label: "安全衛生日誌" },
+      { href: "/safety-diary", label: "安全工程打合せ書" },
     ],
     tags: ["教育記録", "保存義務", "特別教育"],
     source: "厚生労働省",

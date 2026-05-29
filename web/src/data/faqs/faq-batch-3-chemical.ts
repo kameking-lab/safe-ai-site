@@ -540,7 +540,7 @@ export const FAQ_BATCH_3_CHEMICAL: FAQ[] = [
     relatedLaws: ["安衛則第34条の2の8"],
     relatedPages: [
       { href: "/chemical-ra", label: "化学物質RA" },
-      { href: "/safety-diary", label: "安全衛生日誌" },
+      { href: "/safety-diary", label: "安全工程打合せ書" },
     ],
     tags: ["リスクアセスメント記録", "保存義務", "記録内容"],
     source: "厚生労働省",

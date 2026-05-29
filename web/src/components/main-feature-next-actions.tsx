@@ -34,8 +34,8 @@ export function MainFeatureNextActions({
     {
       key: "diary",
       href: "/safety-diary",
-      label: "安全衛生日誌に記録",
-      desc: "必須5項目を3〜5分で記録",
+      label: "安全工程打合せ書を作成",
+      desc: "各社の作業・予想災害・指示を1枚に",
       icon: FileText,
       color: "border-sky-300 bg-sky-50 text-sky-900",
     },

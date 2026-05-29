@@ -397,7 +397,7 @@ export const FAQ_BATCH_4_HEALTH_EDUCATION: FAQ[] = [
     relatedLaws: ["安衛則第38条"],
     relatedPages: [
       { href: "/education", label: "特別教育・技能講習" },
-      { href: "/safety-diary", label: "安全衛生日誌" },
+      { href: "/safety-diary", label: "安全工程打合せ書" },
     ],
     tags: ["特別教育記録", "修了証", "3年保存"],
     source: "厚生労働省",
@@ -466,7 +466,7 @@ export const FAQ_BATCH_4_HEALTH_EDUCATION: FAQ[] = [
     category: "health-education",
     relatedLaws: ["安衛則第51条", "石綿則第35条", "電離則第57条"],
     relatedPages: [
-      { href: "/safety-diary", label: "安全衛生日誌" },
+      { href: "/safety-diary", label: "安全工程打合せ書" },
       { href: "/chatbot", label: "法令チャット" },
     ],
     tags: ["健診個人票", "5年保存", "40年保存", "石綿"],

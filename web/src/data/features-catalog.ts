@@ -96,9 +96,9 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
   {
     id: "management",
     title: "管理ツール",
-    summary: "多拠点・点検・日誌・診断を一元管理",
+    summary: "多拠点・点検・打合せ書・診断を一元管理",
     description:
-      "LMS（多拠点管理）、安全衛生日誌、コンプライアンス診断、助成金シミュレーターなど、安全担当者の管理業務を一元化します。",
+      "LMS（多拠点管理）、安全工程打合せ書、コンプライアンス診断、助成金シミュレーターなど、安全担当者の管理業務を一元化します。",
     accent: "indigo",
   },
   {
@@ -166,13 +166,13 @@ export const FEATURES: FeatureItem[] = [
   },
   {
     slug: "safety-diary",
-    title: "安全衛生日誌",
-    summary: "毎日の安全活動をスマホで記録",
+    title: "安全工程打合せ書",
+    summary: "元請が前日5分で各社の作業・指示を1枚に",
     description:
-      "朝礼・KY・点検・指導内容を日誌形式で記録。月次集計や監査対応の証跡として活用できます。",
+      "各社の作業・使用機械・予想災害・リスク評価・指示を1枚に集約。点検項目8カテゴリ・使用機械自動集計・月次まとめ・印刷・KY転記に対応します。",
     href: "/safety-diary",
     category: "ky",
-    tags: ["日誌", "記録"],
+    tags: ["打合せ書", "記録"],
   },
   // 安全装備
   {

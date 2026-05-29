@@ -161,7 +161,7 @@ export function TodaySafetyDashboard() {
             </li>
             <li className="flex items-center gap-1.5">
               <span aria-hidden="true">{diaryToday ? "✅" : "⚠️"}</span>
-              <span>安全衛生日誌: {diaryToday ? "起票済み" : "未作成"}</span>
+              <span>安全工程打合せ書: {diaryToday ? "起票済み" : "未作成"}</span>
             </li>
           </ul>
           <div className="mt-2 flex flex-wrap gap-1.5">
