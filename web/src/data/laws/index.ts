@@ -166,3 +166,19 @@ export const allLawArticles = [
   ...kowanRodoHo,
   ...seninAnzenEiseiKisoku,
 ];
+
+/**
+ * RAG コーパスの「curated 中核」法令・規則・指針の数（distinct `law` 値）。
+ * 実データから算出するためドリフトしない。
+ *
+ * 算出方針（捏造防止・水増し防止）:
+ *   - 専用の curated 法令データファイルの distinct `law` を数える。
+ *   - mhlw-extras（compact.json = 厚労省PDF抽出の補完ソース）は除外。RAG検索の補完用で
+ *     `law` 値が「化学物質管理関連通達」等の文書バンドル名のため、個別法令としては数えない。
+ * 内訳(2026-05 実測): 法令・規則(命令) 47 ＋ 指針/ガイドライン/通達 8 = 計 55。
+ * 表記は「法令・規則・指針等」と総称する（全てが狭義の「法令」ではないため）。
+ */
+const _mhlwExtraSet = new Set<unknown>(mhlwLawArticles);
+export const LAW_SOURCE_COUNT: number = new Set(
+  allLawArticles.filter((a) => !_mhlwExtraSet.has(a)).map((a) => a.law)
+).size;

@@ -22,6 +22,7 @@ import {
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import { SITE_STATS } from "@/data/site-stats";
+import { LAW_SOURCE_COUNT } from "@/data/laws";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { AboutContactBlock, AboutResearchDeclaration, AboutDisclaimer } from "./AboutBody";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
@@ -236,8 +237,8 @@ export default function AboutPage() {
             />
             <Pill
               k="出典必須"
-              v="RAG 33 法令"
-              note="e-Gov直リンク・通達・判例併記"
+              v={`RAG ${LAW_SOURCE_COUNT}法令等`}
+              note="法令・規則・指針・通達。e-Gov直リンク・判例併記"
             />
           </div>
           <p className="mt-3 text-[11px] leading-5 text-slate-500">

@@ -19,6 +19,7 @@ import { JsonLd, breadcrumbSchema, webPageSchema } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 import { SITE_STATS } from "@/data/site-stats";
+import { LAW_SOURCE_COUNT } from "@/data/laws";
 
 const TITLE = "専門家向けポータル — 労働安全コンサルタント・社労士・診断士のためのリサーチ&顧問先支援";
 const DESCRIPTION =
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
 };
 
 const RESEARCH_TOOLS = [
-  { icon: Search, title: "法令検索", desc: `主要50法令 約${SITE_STATS.lawArticleCount}条文を全文検索。お気に入り保存に対応。`, href: "/law-search" },
+  { icon: Search, title: "法令検索", desc: `主要${LAW_SOURCE_COUNT}法令等 約${SITE_STATS.lawArticleCount}条文を全文検索。お気に入り保存に対応。`, href: "/law-search" },
   { icon: Scale, title: "通達・判例", desc: `厚労省通達・告示 ${SITE_STATS.mhlwNoticeCount}件と安全配慮義務の主要判例を拘束力レベル付きで参照。`, href: "/circulars" },
   { icon: LibraryBig, title: "法令体系マップ", desc: "法→政令→省令→告示の階層構造を俯瞰。条文間の関係を一望。", href: "/law-hierarchy" },
   { icon: MessageSquare, title: "安衛法AIチャット (RAG)", desc: "回答に条文番号・通達URLを自動添付。根拠確認しながら下調べを高速化。", href: "/chatbot" },

@@ -146,3 +146,13 @@
 - **stats-mock.ts / API は温存**（データ削除はせず、表示でモックを使わないだけ）。
 - 検証: lint 0(警告0) / tsc 0 / test 968 pass / build OK / ローカル本番で /stats 空状態・モック非表示を実機確認。
 - 採否: **採用（squash merge PR #321 → main `f72b2eb8`）**。CI e2e/smoke 両 pass。約227行のデッドモックコードも削除。CI不具合は検知されず別PR不要。
+
+---
+## エスカレ回答処理 — 項目1: 法令数の統一（33 vs 50 → 実測 55）
+- **数えた根拠（実データ）**: 
+  - `allLawArticles`（RAGコーパス全条文）の distinct `law` = **65**（実行時Set）。ただし内11件は `mhlw-extras`（`@/data/laws-mhlw/compact.json`＝厚労省PDF抽出の補完ソース）由来で、`law`値が「化学物質管理関連通達」「労働安全衛生法令関係」等の**文書バンドル名**＝個別法令として数えると水増し。
+  - **curated 中核（専用法令データファイル）の distinct `law` = 55**（mhlw-extras除外）。内訳: 法令・規則(命令) 47 ＋ 指針/ガイドライン/通達 8。
+- **確定値: 55**（curated 中核の法令・規則・指針等）。「33」は評価トピック/狭義curated核、「50以上」は概算で、いずれも不正確 → **実測55で統一**。
+- **実装**: `src/data/laws/index.ts` に computed定数 `LAW_SOURCE_COUNT`（mhlw-extras除外でドリフト無し）。表記は狭義法令でない8件を含むため「**法令・規則・指針等**」と総称。
+- **統一箇所(9ファイル)**: about(RAGピル) / chatbot(title/desc/JSON-LD/body×4) / law-search / for-consultant / app-shell(nav説明) / CopilotNextSteps / cross-tool-links / chatbot API注記。全て定数参照に。
+- 検証: lint0/tsc0/build OK・ローカル本番で全ページ「55法令等」描画を実機確認。捏造ゼロ（実データのSet計数）。
