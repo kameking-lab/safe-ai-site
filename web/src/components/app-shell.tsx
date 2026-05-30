@@ -147,7 +147,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       { id: "circulars", label: "通達・判例", href: "/circulars", icon: Scale, description: "厚労省通達1069件+安全配慮義務判例30件" },
       { id: "laws", label: "法改正カレンダー", href: "/laws", icon: RefreshCw, description: "改正カレンダー・施行日カウントダウン" },
       { id: "law-hierarchy", label: "法令体系マップ", href: "/law-hierarchy", icon: LibraryBig, description: "法→政令→省令→告示の階層俯瞰" },
-      { id: "glossary", label: "安全用語辞書", href: "/glossary", icon: BookMarked, description: "272語を五十音で引ける用語集" },
+      { id: "glossary", label: "安全用語辞書", href: "/glossary", icon: BookMarked, description: "労働安全衛生の主要用語を五十音で引ける用語集" },
       { id: "faq", label: "FAQ 200問", href: "/faq", icon: HelpCircle, description: "法令タグ付きFAQ・コンサル監修" },
       { id: "elearning", label: "Eラーニング", href: "/e-learning", icon: GraduationCap, description: "クイズ式コース・進捗保存" },
       // exp-05: フラグシップ機能なのにサイドバー未収録だった2機能を補完
