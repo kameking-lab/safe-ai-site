@@ -209,3 +209,21 @@
 - **対応**: KYと同じ dismissable パターンで3ステップ案内を追加（①作業日・現場 ②＋元請/＋1次で協力会社追加・各社の作業/予想災害/指示記入・AI提案で下書き ③保存→印刷で1枚に集約・共有）。localStorageで一度×すれば恒久非表示。
 - **検証**: lint0/tsc0/test981/build OK。ローカル本番モバイルで初見描画を実機確認。
 - **採否**: **採用（squash merge PR #333）**。CI pass。複雑な重層下請ツールの初見救済。
+
+---
+## R4 タスクA（出力品質）第1巡 — 2026-05-30 夜
+
+@media print を Playwright(emulateMedia)で実レンダして全出力を監査。
+
+| # | 出力 | 結果 | 是正 |
+|---|------|------|------|
+| R4-1 | 全印刷出力 | **崩れ2件** | サイトchrome(ログインボタン/表示モード行/ナビ)が全A4印刷に混入＋globalの header/footer 一括非表示で成果物の出典・免責まで巻添え消去 → app-shell chromeに print:hidden＋#main-content配下のheader/footer再表示。PR#335 merged |
+| R4-2 | 化学物質RA A4記録 | **崩れ1件** | window.print()がページ全体印刷→検索フォーム/Geminiバッジ/SDS/混合物/保存一覧/関連カードが記録に混入 → 周辺セクションに print:hidden。記録ヘッダ＋結果＋確認欄＋免責のみ残す。PR#336 |
+| - | accident-news/print | 是正後OK | タイトル/作成日/出典/免責 印刷復活を確認 |
+| - | KY /ky/paper A4 | **検証済OK** | chrome無・はみ出し無・画面フォーム非表示・確認印枠ありの整ったA4様式 |
+| - | 打合せ書 /safety-diary A4(横) | **検証済OK** | chrome無・はみ出し無・画面フォーム非表示 |
+| - | features/print | **検証済OK** | chrome無・登録番号260022監修明記 |
+| - | RSS /feed/{news,law-revisions,accident-reports,serious-cases}.xml | **検証済OK** | XML宣言/rss2.0/channel/item有・生アンパサンド無・本文転載過多無(最大273字要約)・content-type application/rss+xml |
+
+第1巡 計: 実崩れ3件発見・全是正(うち2件はサイト全体に波及する高インパクト)、5系統 検証済OK。
+**次ラウンド R4-3**: タスクB(労災裁判例コーナー)のレビュー＋レベルA実装に着手。出力品質の残り(年次計画preview/健診result/業種別レポートの実データ印刷、6桁/URL共有の相手画面再現)は時間が許せば R4-4 で。
