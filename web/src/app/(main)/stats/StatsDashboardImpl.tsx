@@ -1,18 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
   Cell,
   Legend,
   Pie,
   PieChart,
   ResponsiveContainer,
   Tooltip,
-  XAxis,
-  YAxis,
 } from "recharts";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import type {
@@ -55,28 +50,6 @@ function formatDuration(sec: number): string {
 
 function formatPct(v: number, digits = 1): string {
   return `${(v * 100).toFixed(digits)}%`;
-}
-
-function deltaPill(delta: number, invertColor = false, hide = false) {
-  if (hide) {
-    return (
-      <span className="ml-2 inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">
-        −
-      </span>
-    );
-  }
-  const positive = delta >= 0;
-  const good = invertColor ? !positive : positive;
-  const tone = good
-    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-    : "border-rose-200 bg-rose-50 text-rose-700";
-  const sign = positive ? "+" : "";
-  return (
-    <span className={`ml-2 inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-semibold ${tone}`}>
-      {sign}
-      {delta.toFixed(1)}%
-    </span>
-  );
 }
 
 export function StatsDashboardImpl() {
@@ -127,44 +100,52 @@ export function StatsDashboardImpl() {
     };
   }, [period]);
 
+  // 実データ源が接続済みかどうか。未接続のサンプル(モック)数値は一切表示しない（捏造防止）。
+  const ga4Live = data?.source === "ga4";
+  const gscLive = gsc?.source === "gsc";
+  const paLive = pageAnalytics?.source === "ga4";
+  const anyLive = Boolean(ga4Live || gscLive || paLive);
+
   return (
     <PageContainer>
       <Stack gap="lg">
       <TranslatedPageHeader
-        titleJa="利用統計ダッシュボード（サンプル表示）"
-        titleEn="Usage Dashboard (Sample)"
-        descriptionJa="GA4 / Search Console が接続されている期間は実数値、未接続時は構造確認用のサンプル数値を表示します。検索インデックスからは除外しています。"
-        descriptionEn="Live numbers when GA4 / Search Console are connected; sample mock numbers otherwise. This page is noindexed until live data stabilizes."
+        titleJa="利用統計ダッシュボード"
+        titleEn="Usage Dashboard"
+        descriptionJa="Google Analytics 4 / Search Console を接続した期間の実数値のみを表示します。未接続時はサンプル数値を表示せず、準備中の案内を表示します。検索インデックスからは除外しています。"
+        descriptionEn="Shows live numbers only for periods where GA4 / Search Console are connected. No sample numbers are shown when unconnected. This page is noindexed."
         iconName="BarChart3"
         iconColor="emerald"
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div role="tablist" aria-label="期間切替" className="inline-flex rounded-full border border-slate-200 bg-slate-50 p-0.5 text-xs">
-          {PERIODS.map((p) => {
-            const active = period === p.id;
-            return (
-              <button
-                key={p.id}
-                role="tab"
-                aria-selected={active}
-                onClick={() => setPeriod(p.id)}
-                className={`rounded-full px-3 py-1 font-semibold transition-colors ${
-                  active
-                    ? "bg-white text-emerald-700 shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
-                }`}
-              >
-                {p.label}
-              </button>
-            );
-          })}
+      {anyLive ? (
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div role="tablist" aria-label="期間切替" className="inline-flex rounded-full border border-slate-200 bg-slate-50 p-0.5 text-xs">
+            {PERIODS.map((p) => {
+              const active = period === p.id;
+              return (
+                <button
+                  key={p.id}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setPeriod(p.id)}
+                  className={`rounded-full px-3 py-1 font-semibold transition-colors ${
+                    active
+                      ? "bg-white text-emerald-700 shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <DataSourceBadge data={data} loading={loading} />
+            <SearchConsoleBadge gsc={gsc} loading={loading} />
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <DataSourceBadge data={data} loading={loading} />
-          <SearchConsoleBadge gsc={gsc} loading={loading} />
-        </div>
-      </div>
+      ) : null}
 
       {error ? (
         <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
@@ -172,46 +153,56 @@ export function StatsDashboardImpl() {
         </div>
       ) : null}
 
-      {!loading && data && (data.source !== "ga4" || data.summary.pv === 0) ? (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-          <p className="font-bold">📊 実データ収集中</p>
-          <p className="mt-1 text-xs leading-relaxed">
-            このダッシュボードは現在
-            {data.source === "ga4"
-              ? "GA4 に接続済みですが、計測データがまだ少ないため一部指標が 0 になっています。"
-              : "GA4 Data API が未接続のため、サンプル（モック）データを表示しています。"}
-            機能別利用・ページ別アクセス・コンバージョンは{" "}
-            <strong>※ サンプルデータ</strong> を含みます。実数値は GA4 接続および利用蓄積後に反映されます。
-          </p>
-        </div>
-      ) : null}
-
       {loading || !data ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
           読み込み中…
         </div>
-      ) : (
-        <>
-          <SectionSummary data={data} />
-          {gsc ? <SectionSeoSummary gsc={gsc} /> : null}
-          {gsc ? <SectionSeoQueries gsc={gsc} /> : null}
-          {gsc ? <SectionSeoPages gsc={gsc} /> : null}
-          <SectionFeatures data={data} />
-          {pageAnalytics ? <SectionPageAnalytics pa={pageAnalytics} /> : null}
-          <SectionPages data={data} />
-          {pageAnalytics ? <SectionDeviceReferral pa={pageAnalytics} /> : null}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <SectionSources data={data} />
-            <SectionFlow data={data} />
-          </div>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <SectionConversions data={data} />
-            <SectionChatbot data={data} />
-          </div>
-          <SectionInsights data={data} />
-          <p className="text-[11px] text-slate-400">
-            ※ GA4 Data API / Search Console API 未接続時は <strong>モックデータ</strong>を表示します。接続手順は <code className="rounded bg-slate-100 px-1">web/src/lib/stats/ga4-client.ts</code> および <code className="rounded bg-slate-100 px-1">web/src/lib/stats/search-console-client.ts</code> 冒頭コメント参照。
+      ) : !anyLive ? (
+        // 実データ未接続: サンプル(モック)数値は表示せず、正直な準備中の案内のみ。
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
+          <p className="text-3xl" aria-hidden>📊</p>
+          <h2 className="mt-3 text-lg font-bold text-slate-900">利用統計は準備中です</h2>
+          <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-slate-600">
+            本ダッシュボードは Google Analytics 4 / Search Console を接続した期間の
+            <strong>実数値のみ</strong>を表示します。現在は接続前のため、表示できる実利用データはまだありません。
+            <br className="hidden sm:block" />
+            サンプルや仮の数値は表示していません（正確性のため）。
           </p>
+          <p className="mx-auto mt-4 max-w-xl rounded-lg bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500">
+            運営者向け: <code className="rounded bg-white px-1">GA4_PROPERTY_ID</code> とサービスアカウント認証情報、
+            および Search Console API を設定すると、ここに実数値が表示されます。接続手順は{" "}
+            <code className="rounded bg-white px-1">web/src/lib/stats/ga4-client.ts</code> /{" "}
+            <code className="rounded bg-white px-1">web/src/lib/stats/search-console-client.ts</code> の冒頭コメント参照。
+          </p>
+          <p className="mt-4 text-xs text-slate-500">
+            サイトの収録データ件数（事故事例・条文・通達など）は{" "}
+            <a href="/about/data-sources" className="font-semibold text-emerald-700 underline hover:text-emerald-800">データの出典</a>{" "}
+            ページでご確認いただけます。
+          </p>
+        </div>
+      ) : (
+        // 各データ源が live のときのみ、その源から実測した指標だけを表示する。
+        // GA4 単体で取得できない指標（前期間比・機能別利用・離脱フロー・コンバージョン・
+        // チャット指標・インサイト）はモック値のため一切表示しない（捏造防止）。
+        <>
+          {ga4Live ? <SectionSummary data={data} /> : null}
+          {ga4Live ? <SectionPages data={data} /> : null}
+          {ga4Live ? <SectionSources data={data} /> : null}
+          {gscLive && gsc ? <SectionSeoSummary gsc={gsc} /> : null}
+          {gscLive && gsc ? <SectionSeoQueries gsc={gsc} /> : null}
+          {gscLive && gsc ? <SectionSeoPages gsc={gsc} /> : null}
+          {paLive && pageAnalytics ? <SectionPageAnalytics pa={pageAnalytics} /> : null}
+          {paLive && pageAnalytics ? <SectionDeviceReferral pa={pageAnalytics} /> : null}
+          {ga4Live && data.summary.pv === 0 ? (
+            <p className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-[11px] text-slate-500">
+              GA4 に接続済みですが計測データがまだ少ないため、一部の指標が 0 と表示されることがあります（サンプル値ではなく実測 0 です）。
+            </p>
+          ) : null}
+          {ga4Live ? (
+            <p className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500">
+              ※ 機能別利用・離脱フロー・コンバージョン・チャット指標・前期間比は、GA4 カスタムイベント連携後に対応予定のため表示していません（実測前の推定値・サンプルは表示しない方針）。
+            </p>
+          ) : null}
         </>
       )}
       </Stack>
@@ -263,12 +254,7 @@ function SectionSeoSummary({ gsc }: { gsc: SearchConsoleResponse }) {
   return (
     <Section
       heading="SEO効果（Search Console）"
-      subheading={
-        gsc.source === "gsc"
-          ? "Google 検索結果上のサイト全体パフォーマンス"
-          : "GSC API 未接続のため、構造確認用のサンプル値を表示しています"
-      }
-      hideSampleBadge={gsc.source === "gsc"}
+      subheading="Google 検索結果上のサイト全体パフォーマンス"
     >
       {gsc.error && gsc.source !== "gsc" ? (
         <div className="mb-3 rounded-lg border border-amber-300 bg-amber-50 p-2 text-[11px] text-amber-900">
@@ -293,7 +279,6 @@ function SectionSeoQueries({ gsc }: { gsc: SearchConsoleResponse }) {
     <Section
       heading="検索クエリ TOP30"
       subheading="どんな検索語でサイトが表示・クリックされたか"
-      hideSampleBadge={gsc.source === "gsc"}
     >
       {rows.length === 0 ? (
         <p className="text-xs text-slate-500">
@@ -337,7 +322,6 @@ function SectionSeoPages({ gsc }: { gsc: SearchConsoleResponse }) {
     <Section
       heading="検索流入ページ TOP10"
       subheading="検索結果からクリックされたページ"
-      hideSampleBadge={gsc.source === "gsc"}
     >
       {rows.length === 0 ? (
         <p className="text-xs text-slate-500">まだ計測データが蓄積されていません。</p>
@@ -384,7 +368,6 @@ function SectionPageAnalytics({ pa }: { pa: PageAnalyticsResponse }) {
     <Section
       heading="機能別アクセス詳細（GA4）"
       subheading="ページ別 PV・滞在時間・エンゲージメント・直帰率"
-      hideSampleBadge={pa.source === "ga4"}
     >
       <div className="mb-3 grid grid-cols-3 gap-3">
         <Stat
@@ -441,7 +424,7 @@ function SectionPageAnalytics({ pa }: { pa: PageAnalyticsResponse }) {
 function SectionDeviceReferral({ pa }: { pa: PageAnalyticsResponse }) {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      <Section heading="デバイス別" subheading="モバイル / デスクトップ / タブレット の構成比" hideSampleBadge={pa.source === "ga4"}>
+      <Section heading="デバイス別" subheading="モバイル / デスクトップ / タブレット の構成比">
         <ul className="space-y-2 text-xs">
           {pa.devices.map((d) => (
             <li key={d.device} className="flex items-center justify-between">
@@ -462,7 +445,7 @@ function SectionDeviceReferral({ pa }: { pa: PageAnalyticsResponse }) {
           ))}
         </ul>
       </Section>
-      <Section heading="流入元（Source / Medium）" subheading="セッション元の上位" hideSampleBadge={pa.source === "ga4"}>
+      <Section heading="流入元（Source / Medium）" subheading="セッション元の上位">
         <ul className="space-y-2 text-xs">
           {pa.referrals.slice(0, 8).map((r, idx) => (
             <li
@@ -489,43 +472,24 @@ function SectionDeviceReferral({ pa }: { pa: PageAnalyticsResponse }) {
  * ────────────────────────────────────────────────────────── */
 function SectionSummary({ data }: { data: StatsResponse }) {
   const s = data.summary;
-  const cards: Array<{
-    label: string;
-    value: string;
-    rawValue: number;
-    delta: number;
-    invertColor?: boolean;
-  }> = [
-    { label: "DAU（直近 1 日）", value: formatNum(s.dau), rawValue: s.dau, delta: s.deltas.dau },
-    { label: "MAU（直近 30 日）", value: formatNum(s.mau), rawValue: s.mau, delta: s.deltas.mau },
-    { label: "PV（期間内合計）", value: formatNum(s.pv), rawValue: s.pv, delta: s.deltas.pv },
-    {
-      label: "平均セッション時間",
-      value: formatDuration(s.avgSessionSec),
-      rawValue: s.avgSessionSec,
-      delta: s.deltas.avgSessionSec,
-    },
-    {
-      label: "直帰率",
-      value: formatPct(s.bounceRate),
-      rawValue: s.bounceRate,
-      delta: s.deltas.bounceRate,
-      invertColor: true,
-    },
+  // GA4 実測の主要指標のみ表示。前期間比(deltas)は GA4 単体で取得できずモック値のため非表示（捏造防止）。
+  const cards: Array<{ label: string; value: string }> = [
+    { label: "DAU（直近 1 日）", value: formatNum(s.dau) },
+    { label: "MAU（直近 30 日）", value: formatNum(s.mau) },
+    { label: "PV（期間内合計）", value: formatNum(s.pv) },
+    { label: "平均セッション時間", value: formatDuration(s.avgSessionSec) },
+    { label: "直帰率", value: formatPct(s.bounceRate) },
   ];
   return (
     <Section
       heading="サマリ"
-      subheading="主要指標と前期間比（値が 0 の指標は前期間比を非表示）"
+      subheading="GA4 実測の主要指標（DAU / MAU / PV / 平均セッション時間 / 直帰率）"
     >
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {cards.map((c) => (
           <div key={c.label} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
             <p className="text-[11px] font-medium text-slate-600">{c.label}</p>
-            <p className="mt-1 text-xl font-bold text-slate-900">
-              {c.value}
-              {deltaPill(c.delta, c.invertColor, c.rawValue === 0)}
-            </p>
+            <p className="mt-1 text-xl font-bold text-slate-900">{c.value}</p>
           </div>
         ))}
       </div>
@@ -536,61 +500,6 @@ function SectionSummary({ data }: { data: StatsResponse }) {
 /* ──────────────────────────────────────────────────────────
  * Section 2: 機能別利用
  * ────────────────────────────────────────────────────────── */
-function SectionFeatures({ data }: { data: StatsResponse }) {
-  const sorted = useMemo(() => [...data.features].sort((a, b) => b.pv - a.pv), [data.features]);
-  const isSample = data.source !== "ga4" || sorted.every((f) => f.pv === 0);
-  return (
-    <Section
-      heading={`機能別利用${isSample ? "（※ サンプルデータ）" : ""}`}
-      subheading="7 目玉機能の PV / 滞在 / 利用率"
-    >
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs">
-          <thead className="text-left text-slate-500">
-            <tr>
-              <th className="pb-2">機能</th>
-              <th className="pb-2 text-right">PV</th>
-              <th className="pb-2 text-right">平均滞在</th>
-              <th className="pb-2 text-right">利用率（DAU比）</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sorted.map((f) => (
-              <tr key={f.id} className="border-t border-slate-100">
-                <td className="py-2">
-                  <a href={f.href} className="font-semibold text-emerald-700 hover:underline">
-                    {f.name}
-                  </a>
-                </td>
-                <td className="py-2 text-right tabular-nums">{formatNum(f.pv)}</td>
-                <td className="py-2 text-right tabular-nums">{formatDuration(f.avgSec)}</td>
-                <td className="py-2 text-right tabular-nums">
-                  <UsageBar rate={f.usageRate} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Section>
-  );
-}
-
-function UsageBar({ rate }: { rate: number }) {
-  const pct = Math.min(rate, 1);
-  return (
-    <div className="inline-flex items-center gap-2">
-      <span className="block h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
-        <span
-          className="block h-full rounded-full bg-emerald-500"
-          style={{ width: `${pct * 100}%` }}
-        />
-      </span>
-      <span className="text-slate-600">{formatPct(pct)}</span>
-    </div>
-  );
-}
-
 /* ──────────────────────────────────────────────────────────
  * Section 3: ページ別アクセス
  * ────────────────────────────────────────────────────────── */
@@ -671,162 +580,15 @@ function SectionSources({ data }: { data: StatsResponse }) {
 /* ──────────────────────────────────────────────────────────
  * Section 5: ユーザー導線
  * ────────────────────────────────────────────────────────── */
-function SectionFlow({ data }: { data: StatsResponse }) {
-  return (
-    <Section heading="ユーザー導線" subheading="from → to の通過率（pass rate）">
-      <ul className="divide-y divide-slate-100 text-xs">
-        {data.flow.map((f) => (
-          <li key={`${f.from}-${f.to}`} className="flex items-center justify-between py-2">
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-              <span className="truncate rounded bg-slate-50 px-1.5 py-0.5 font-mono text-[10px] text-slate-700">
-                {f.from}
-              </span>
-              <span className="text-slate-400">→</span>
-              <span className="truncate rounded bg-emerald-50 px-1.5 py-0.5 font-mono text-[10px] text-emerald-700">
-                {f.to}
-              </span>
-            </div>
-            <span className="ml-2 inline-flex items-center gap-1 tabular-nums">
-              <span className="block h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
-                <span
-                  className="block h-full bg-emerald-500"
-                  style={{ width: `${f.passRate * 100}%` }}
-                />
-              </span>
-              <span className="text-slate-600">{formatPct(f.passRate)}</span>
-              <span className="text-[10px] text-slate-400">/ {formatNum(f.users)}人</span>
-            </span>
-          </li>
-        ))}
-      </ul>
-    </Section>
-  );
-}
-
 /* ──────────────────────────────────────────────────────────
  * Section 6: コンバージョン
  * ────────────────────────────────────────────────────────── */
-function SectionConversions({ data }: { data: StatsResponse }) {
-  const c = data.conversions;
-  return (
-    <Section heading="コンバージョン" subheading="アフィリエイトクリックと CTR">
-      <div className="grid grid-cols-3 gap-3 text-xs">
-        <Stat label="Amazon クリック" value={formatNum(c.amazonClicks)} accent="amber" />
-        <Stat label="楽天 クリック" value={formatNum(c.rakutenClicks)} accent="red" />
-        <Stat label="平均 CTR" value={formatPct(c.ctr, 2)} accent="emerald" />
-      </div>
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full text-xs">
-          <thead className="text-left text-slate-500">
-            <tr>
-              <th className="pb-2">ページ</th>
-              <th className="pb-2 text-right">表示</th>
-              <th className="pb-2 text-right">クリック</th>
-              <th className="pb-2 text-right">CTR</th>
-            </tr>
-          </thead>
-          <tbody>
-            {c.byPage.map((p) => (
-              <tr key={p.url} className="border-t border-slate-100">
-                <td className="py-2">
-                  <a href={p.url} className="font-semibold text-emerald-700 hover:underline">
-                    {p.title}
-                  </a>
-                </td>
-                <td className="py-2 text-right tabular-nums">{formatNum(p.impressions)}</td>
-                <td className="py-2 text-right tabular-nums">{formatNum(p.clicks)}</td>
-                <td className="py-2 text-right tabular-nums">{formatPct(p.ctr, 2)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </Section>
-  );
-}
-
 /* ──────────────────────────────────────────────────────────
  * Section 7: AIチャット
  * ────────────────────────────────────────────────────────── */
-function SectionChatbot({ data }: { data: StatsResponse }) {
-  const c = data.chatbot;
-  return (
-    <Section heading="AIチャット利用" subheading="安衛法ボットの質問数とカテゴリ分布">
-      <div className="grid grid-cols-2 gap-3 text-xs">
-        <Stat label="質問数（合計）" value={formatNum(c.totalQuestions)} accent="emerald" />
-        <Stat label="平均応答時間" value={`${(c.avgResponseMs / 1000).toFixed(2)}秒`} accent="sky" />
-      </div>
-      <LazyChart className="mt-4 h-56 w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={c.byCategory}
-            layout="vertical"
-            margin={{ top: 4, right: 8, bottom: 0, left: 30 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis type="number" tick={{ fontSize: 11 }} />
-            <YAxis dataKey="category" type="category" tick={{ fontSize: 11 }} width={100} />
-            <Tooltip formatter={(v) => formatNum(Number(v))} />
-            <Bar dataKey="count" radius={[0, 4, 4, 0]}>
-              {c.byCategory.map((_, idx) => (
-                <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      </LazyChart>
-    </Section>
-  );
-}
-
 /* ──────────────────────────────────────────────────────────
  * Section 8: インサイト
  * ────────────────────────────────────────────────────────── */
-function SectionInsights({ data }: { data: StatsResponse }) {
-  const i = data.insights;
-  return (
-    <Section heading="改善判断インサイト" subheading="伸びている機能 / 使われていない機能 と提案">
-      <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900">
-        {i.summary}
-      </p>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div>
-          <h3 className="mb-2 text-xs font-semibold text-slate-700">📉 利用が低い機能 TOP3</h3>
-          <ul className="space-y-2 text-xs">
-            {i.unusedFeatures.map((u) => (
-              <li
-                key={u.id}
-                className="rounded-lg border border-rose-200 bg-rose-50 p-2"
-              >
-                <p className="font-semibold text-rose-900">
-                  {u.name} <span className="text-rose-600">PV {formatNum(u.pv)}</span>
-                </p>
-                <p className="mt-1 text-rose-800">{u.suggestion}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h3 className="mb-2 text-xs font-semibold text-slate-700">📈 急成長機能 TOP3</h3>
-          <ul className="space-y-2 text-xs">
-            {i.growingFeatures.map((g) => (
-              <li
-                key={g.id}
-                className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 p-2"
-              >
-                <span className="font-semibold text-emerald-900">{g.name}</span>
-                <span className="font-bold tabular-nums text-emerald-700">
-                  +{g.growthPct.toFixed(1)}%
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </Section>
-  );
-}
-
 /* ──────────────────────────────────────────────────────────
  * Shared
  * ────────────────────────────────────────────────────────── */
@@ -834,22 +596,16 @@ function Section({
   heading,
   subheading,
   children,
-  hideSampleBadge,
 }: {
   heading: string;
   subheading?: string;
   children: React.ReactNode;
-  hideSampleBadge?: boolean;
 }) {
+  // 実データ源が live のときだけ各セクションを描画する設計のため、サンプルバッジは廃止。
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <h2 className="flex flex-wrap items-center gap-2 text-base font-bold text-slate-900">
         <span>{heading}</span>
-        {hideSampleBadge ? null : (
-          <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800">
-            ※サンプル
-          </span>
-        )}
       </h2>
       {subheading ? <p className="mt-1 text-xs text-slate-500">{subheading}</p> : null}
       <div className="mt-4">{children}</div>
