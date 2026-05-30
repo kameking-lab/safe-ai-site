@@ -73,7 +73,7 @@ export type CourtCase = {
 };
 
 /**
- * 採用判例（全10件・全件実在確認済み）。
+ * 採用判例（全件実在確認済み。件数は COURT_CASE_COUNT を参照）。
  * 詳細な裏取り出典は docs/court-cases-audit-2026-05-30/README.md の一覧表を参照。
  */
 export const COURT_CASES: CourtCase[] = [
