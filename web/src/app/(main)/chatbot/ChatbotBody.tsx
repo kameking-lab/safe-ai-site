@@ -8,6 +8,7 @@ import { useTranslation } from "@/contexts/language-context";
 import { PageContainer } from "@/components/layout";
 import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
 import { CopilotMemo } from "@/components/copilot/CopilotMemo";
+import { LAW_SOURCE_COUNT } from "@/data/laws";
 import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
 
@@ -41,14 +42,14 @@ const USAGE_GUIDE = {
     "回答は登録済み法令条文に基づくRAG方式で生成されます",
     "法改正により条文内容が変わる場合があります。最新情報はe-Govで確認ください",
     "本ツールの回答は法的アドバイスではありません。具体的な判断は専門家にご相談ください",
-    "現在対応中の法令：労働安全衛生法・安衛則・クレーン則・有機則・特化則・酸欠則・石綿則・じん肺法・粉じん則・電離則・ボイラー則・ゴンドラ則・足場則・高圧則・作業環境測定法・労基法・労災保険法・育児介護休業法・雇用均等法 ほか（全50法令以上）",
+    `現在対応中の法令：労働安全衛生法・安衛則・クレーン則・有機則・特化則・酸欠則・石綿則・じん肺法・粉じん則・電離則・ボイラー則・ゴンドラ則・足場則・高圧則・作業環境測定法・労基法・労災保険法・育児介護休業法・雇用均等法 ほか（計${LAW_SOURCE_COUNT}の法令・規則・指針等）`,
     "労働安全衛生コンサルタント（登録番号260022）監修",
   ],
   en: [
     "Answers are generated via RAG using registered occupational safety law articles",
     "Law content may change due to amendments — always confirm the latest on e-Gov",
     "Responses from this tool are not legal advice. For specific decisions, consult a qualified expert",
-    "Covered laws: OSH Act, OSH Rules, Crane Rules, Organic Solvent Rules, Specific Chemical Rules, Oxygen Deficiency Rules, Asbestos Rules, Pneumoconiosis Act, Dust Rules, Ionizing Radiation Rules, Boiler Rules, Gondola Rules, Scaffolding Rules, High-Pressure Rules, Work Environment Measurement Act, Labour Standards Act, Workers' Accident Compensation Act, Childcare/Care Leave Act, Equal Employment Act + 14 more (33+ total)",
+    `Covered laws: OSH Act, OSH Rules, Crane Rules, Organic Solvent Rules, Specific Chemical Rules, Oxygen Deficiency Rules, Asbestos Rules, Pneumoconiosis Act, Dust Rules, Ionizing Radiation Rules, Boiler Rules, Gondola Rules, Scaffolding Rules, High-Pressure Rules, Work Environment Measurement Act, Labour Standards Act, Workers' Accident Compensation Act, Childcare/Care Leave Act, Equal Employment Act and more (${LAW_SOURCE_COUNT} laws/rules/guidelines total)`,
     "Supervised by an Occupational Safety & Health Consultant (registration no. 260022)",
   ],
 };
@@ -112,14 +113,14 @@ export function ChatbotBody() {
             </span>
           ))}
           <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-medium text-slate-500">
-            {isEn ? "and 14 more" : "ほか全50法令以上"}
+            {isEn ? `${LAW_SOURCE_COUNT} total` : `ほか計${LAW_SOURCE_COUNT}法令等`}
           </span>
         </div>
       </div>
       <p className="mb-6 text-[11px] leading-5 text-slate-500">
         {isEn
-          ? "The above is a partial list. 33+ laws in total are used for RAG search, including the Labour Standards Act, Occupational Safety and Health Act, and MHLW mental health guidelines."
-          : "※ 上記は対応法令の一部です。労働基準法・職業安定法・職業能力開発促進法・メンタルヘルス指針など、全50法令以上の条文をRAG検索に使用しています。"}
+          ? `The above is a partial list. ${LAW_SOURCE_COUNT} laws, rules and guidelines in total are used for RAG search, including the Labour Standards Act, Occupational Safety and Health Act, and MHLW mental health guidelines.`
+          : `※ 上記は対応法令の一部です。労働基準法・職業安定法・職業能力開発促進法・メンタルヘルス指針など、計${LAW_SOURCE_COUNT}の法令・規則・指針等の条文をRAG検索に使用しています。`}
       </p>
 
       {/* Chat panel */}
@@ -242,8 +243,8 @@ export function ChatbotBody() {
               ? "Guide: How the OSH Law AI Chatbot works"
               : "ガイド：安衛法AIチャットボットとは",
             description: isEn
-              ? "Intent guide explaining 33+ supported laws, Recall@5 evaluation, common queries, and how the chatbot differs from generic ChatGPT."
-              : "対応50法令・Recall@5評価・代表的な質問例・汎用ChatGPTとの違いを解説した検索意図ガイド。",
+              ? `Intent guide explaining ${LAW_SOURCE_COUNT} supported laws/rules/guidelines, Recall@5 evaluation, common queries, and how the chatbot differs from generic ChatGPT.`
+              : `対応${LAW_SOURCE_COUNT}法令等・Recall@5評価・代表的な質問例・汎用ChatGPTとの違いを解説した検索意図ガイド。`,
             color: "amber",
             cta: isEn ? "Read the guide" : "ガイドを読む",
           },

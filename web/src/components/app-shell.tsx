@@ -47,6 +47,7 @@ import {
 import { Footer } from "@/components/footer";
 import { FlagshipNav } from "@/components/flagship-nav";
 import { PAID_MODE } from "@/lib/paid-mode";
+import { LAW_SOURCE_COUNT } from "@/data/laws";
 import { ShareButtons } from "@/components/share-buttons";
 import { UserMenu } from "@/components/user-menu";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -134,7 +135,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
     label: "質問する",
     description: "AIが安衛法を条文番号・出典付きで回答",
     items: [
-      { id: "chatbot", label: "安衛法AIチャット", href: "/chatbot", icon: MessageSquare, badge: "AI", description: "50法令を根拠条文付きで回答 (ストリーミング)" },
+      { id: "chatbot", label: "安衛法AIチャット", href: "/chatbot", icon: MessageSquare, badge: "AI", description: `${LAW_SOURCE_COUNT}法令等を根拠条文付きで回答 (ストリーミング)` },
     ],
   },
   {

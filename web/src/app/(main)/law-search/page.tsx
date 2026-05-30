@@ -6,9 +6,10 @@ import { LawHubNav } from "@/components/law-hub-nav";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
+import { LAW_SOURCE_COUNT } from "@/data/laws";
 const _title = "安全衛生法令 条文全文検索（厚労省公式PDF対応）";
 const _desc =
-  "安衛則・特化則・有機則など全50法令の条文を全文検索 — 熱中症対策（安衛則612条の2）・フルハーネス義務化・化学物質 自律的管理の改正条文も含む。条番号・キーワード・法令名で絞り込み可能。厚労省公式PDF対応。";
+  `安衛則・特化則・有機則など全${LAW_SOURCE_COUNT}の法令・規則・指針等の条文を全文検索 — 熱中症対策（安衛則612条の2）・フルハーネス義務化・化学物質 自律的管理の改正条文も含む。条番号・キーワード・法令名で絞り込み可能。厚労省公式PDF対応。`;
 
 export const metadata: Metadata = {
   alternates: { canonical: "/law-search" },
