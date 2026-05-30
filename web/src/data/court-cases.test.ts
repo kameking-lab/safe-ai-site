@@ -91,4 +91,18 @@ describe("court-cases データ整合性（捏造防止の構造ガード）", (
       expect(c!.holding).toMatch(/(判断した|認めた|是認した|とした)/);
     }
   });
+
+  it("R6拡充: 16件以上・新カテゴリ(役員個人責任)・追加2判例(筑豊じん肺/大庄)が存在", () => {
+    expect(COURT_CASES.length).toBeGreaterThanOrEqual(16);
+    expect(COURT_CASE_ISSUES).toContain("役員・個人責任");
+    const chikuho = getCourtCaseById("chikuho-jinpai");
+    expect(chikuho?.issues).toContain("国・行政責任");
+    const daisho = getCourtCaseById("daisho-nihonkai-shoya");
+    expect(daisho?.issues).toContain("役員・個人責任");
+    for (const c of [chikuho, daisho]) {
+      expect(c).toBeDefined();
+      expect(c!.sources.length).toBeGreaterThan(0);
+      expect(c!.holding).toMatch(/(判断した|認めた|是認した|とした)/);
+    }
+  });
 });
