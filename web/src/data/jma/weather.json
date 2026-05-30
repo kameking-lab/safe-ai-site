@@ -1,51 +1,51 @@
 {
-  "fetchedAt": "2026-05-29T23:57:41.487Z",
+  "fetchedAt": "2026-05-30T04:11:50.504Z",
   "byIso": {
     "JP-01": {
       "label": "北海道（石狩・空知・後志）",
-      "reportDatetime": "2026-05-30T05:00:00+09:00",
+      "reportDatetime": "2026-05-30T11:00:00+09:00",
       "publishingOffice": "札幌管区気象台",
       "todayWeatherCode": "211",
-      "todayWeatherText": "くもり　夕方　から　晴れ　所により　昼過ぎ　まで　雨　で　雷を伴う"
+      "todayWeatherText": "くもり　夜　晴れ　所により　昼過ぎ　まで　雨　で　雷を伴う"
     },
     "JP-04": {
       "label": "宮城県",
-      "reportDatetime": "2026-05-30T05:00:00+09:00",
+      "reportDatetime": "2026-05-30T11:00:00+09:00",
       "publishingOffice": "仙台管区気象台",
       "todayWeatherCode": "100",
       "todayWeatherText": "晴れ"
     },
     "JP-13": {
       "label": "東京都",
-      "reportDatetime": "2026-05-30T05:00:00+09:00",
+      "reportDatetime": "2026-05-30T11:00:00+09:00",
       "publishingOffice": "気象庁",
-      "todayWeatherCode": "101",
-      "todayWeatherText": "晴れ　朝晩　くもり"
+      "todayWeatherCode": "100",
+      "todayWeatherText": "晴れ"
     },
     "JP-23": {
       "label": "愛知県",
-      "reportDatetime": "2026-05-30T05:00:00+09:00",
+      "reportDatetime": "2026-05-30T11:00:00+09:00",
       "publishingOffice": "名古屋地方気象台",
       "todayWeatherCode": "111",
       "todayWeatherText": "晴れ　夜　くもり"
     },
     "JP-27": {
       "label": "大阪府",
-      "reportDatetime": "2026-05-30T05:00:00+09:00",
+      "reportDatetime": "2026-05-30T11:00:00+09:00",
       "publishingOffice": "大阪管区気象台",
       "todayWeatherCode": "100",
       "todayWeatherText": "晴れ"
     },
     "JP-34": {
       "label": "広島県",
-      "reportDatetime": "2026-05-30T05:00:00+09:00",
+      "reportDatetime": "2026-05-30T11:00:00+09:00",
       "publishingOffice": "広島地方気象台",
       "todayWeatherCode": "100",
       "todayWeatherText": "晴れ"
     },
     "JP-40": {
       "label": "福岡県",
-      "reportDatetime": "2026-05-30T05:00:00+09:00",
+      "reportDatetime": "2026-05-30T11:00:00+09:00",
       "publishingOffice": "福岡管区気象台",
       "todayWeatherCode": "100",
       "todayWeatherText": "晴れ"
