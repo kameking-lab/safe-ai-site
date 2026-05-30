@@ -19,6 +19,7 @@ import type {
 import { PageContainer } from "@/components/layout/page-container";
 import { Stack } from "@/components/layout/stack";
 import { LazyChart } from "@/components/charts/lazy-chart";
+import { computeStatsLiveness } from "@/lib/stats/liveness";
 
 const PERIODS: Array<{ id: StatsPeriod; label: string }> = [
   { id: "7d", label: "直近 7 日" },
@@ -101,10 +102,7 @@ export function StatsDashboardImpl() {
   }, [period]);
 
   // 実データ源が接続済みかどうか。未接続のサンプル(モック)数値は一切表示しない（捏造防止）。
-  const ga4Live = data?.source === "ga4";
-  const gscLive = gsc?.source === "gsc";
-  const paLive = pageAnalytics?.source === "ga4";
-  const anyLive = Boolean(ga4Live || gscLive || paLive);
+  const { ga4Live, gscLive, paLive, anyLive } = computeStatsLiveness(data, gsc, pageAnalytics);
 
   return (
     <PageContainer>
