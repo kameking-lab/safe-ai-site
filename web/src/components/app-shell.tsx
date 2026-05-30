@@ -161,6 +161,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       { id: "accidents-reports", label: "業種別 事故分析レポート", href: "/accidents-reports", icon: BarChart3, description: "5業種5,000件超を業種別レポートで自動分析" },
       { id: "accidents", label: "事故データベース", href: "/accidents", icon: Database, description: "厚労省事例の全件検索" },
       { id: "accident-news", label: "重大災害事例", href: "/accident-news", icon: HardHat, badge: "NEW", badgeUntil: "2026-08-31", description: "死亡災害を業種・事故型・原因で類型検索（公表事実・匿名・出典付き）" },
+      { id: "court-cases", label: "労災裁判例", href: "/court-cases", icon: Scale, badge: "NEW", badgeUntil: "2026-08-31", description: "安全配慮義務・過失相殺・元請責任の重要確定判例を要旨＋出典で解説" },
       // exp-05: AccidentHubNav・flagshipに揃え、統計ダッシュボードもサイドバーから到達可に
       { id: "accidents-analytics", label: "事故統計ダッシュボード", href: "/accidents-analytics", icon: BarChart3, description: "事故型・業種・経年の傾向をグラフで把握" },
       { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: `${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()}物質の詳細・基準値・安衛法規制タグ` },
