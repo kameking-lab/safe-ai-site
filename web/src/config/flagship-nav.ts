@@ -121,10 +121,10 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     icon: "🚨",
     cardTitle: "事故事例データベース・分析",
     cardDescription:
-      "厚労省データ統合 約5,000件を全件検索。業種別の自動分析レポート・統計ダッシュボード・重大災害事例まで横断できます。",
+      "厚労省の事例検索・業種別の自動分析レポート・統計ダッシュボード（約5,000件）・重大災害事例を横断できます。",
     href: "/accidents",
     subItems: [
-      { label: "事故DB検索（10年・全件）", href: "/accidents", description: "厚労省統合データを業種・原因・作業区分で全件検索" },
+      { label: "事故DB検索（事例・出典付き）", href: "/accidents", description: "厚労省の死傷・死亡災害事例を業種・原因・作業区分で検索" },
       { label: "業種別 事故分析レポート", href: "/accidents-reports", description: "5業種の事故型・原因・対策・関連法令を自動集計" },
       { label: "事故統計ダッシュボード", href: "/accidents-analytics", description: "事故型・業種・経年の傾向をグラフで把握" },
       { label: "重大災害事例（死亡災害）", href: "/accident-news", description: "公表事実・匿名・出典付きで業種・事故型・原因から類型検索" },

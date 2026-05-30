@@ -10,7 +10,7 @@ const NAV_ITEMS = [
     id: "accidents" as const,
     href: "/accidents",
     label: "事故DB検索",
-    description: "厚労省データ統合 約5,000件を業種・原因・作業区分で全件検索",
+    description: "厚労省の死傷・死亡災害事例を業種・原因・作業区分で検索（出典付き）",
   },
   {
     id: "accidents-reports" as const,
@@ -22,7 +22,7 @@ const NAV_ITEMS = [
     id: "accidents-analytics" as const,
     href: "/accidents-analytics",
     label: "統計ダッシュボード",
-    description: "事故型・業種・経年の傾向をグラフで把握（提案資料の根拠に）",
+    description: "約5,000件を事故型・業種・経年など多軸で可視化（傾向把握・提案資料に）",
   },
   {
     id: "accident-news" as const,

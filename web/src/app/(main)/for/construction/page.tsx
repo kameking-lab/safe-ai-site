@@ -19,6 +19,7 @@ import { PageContainer } from "@/components/layout";
 import { JsonLd, breadcrumbSchema, webPageSchema } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import { CONSTRUCTION_PRIORITY_CAS } from "@/lib/regulation-tag-labels";
+import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 import { RoleAnchorScroller } from "@/components/for-construction/role-anchor-scroller";
 
@@ -431,7 +432,7 @@ export default function ForConstructionPage() {
             <TestTube2 className="h-4 w-4" /> 化学物質 RA を開始 →
           </Link>
           <Link href="/chemical-database" className="inline-flex items-center gap-1 rounded-md border border-amber-300 bg-white px-3 py-1.5 text-sm font-semibold text-amber-800 hover:bg-amber-50">
-            3,515 物質を検索 →
+            {MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()} 物質を検索 →
           </Link>
         </div>
       </section>
