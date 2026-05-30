@@ -54,6 +54,8 @@ function hiddenIds(rows: MeetingContractorRow[], collapsed: Set<string>): Set<st
   return hidden;
 }
 
+const FIRSTUSE_HINT_KEY = "safe-ai:meeting-firstuse-hint-dismissed:v1";
+
 export function MeetingPaperView() {
   const [record, setRecord] = useState<MeetingRecord>(buildDefaultMeetingRecord);
   const [zoom, setZoom] = useState(1);
@@ -63,12 +65,32 @@ export function MeetingPaperView() {
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [busyRow, setBusyRow] = useState<string | null>(null);
   const [history, setHistory] = useState<MeetingHistory | null>(null);
+  // R3: 初見の元請担当向け 3ステップ案内（一度×で恒久非表示。localStorage）。
+  const [firstUseHintOpen, setFirstUseHintOpen] = useState(false);
 
   // 初回: 作業中の打合せ書を復元
   useEffect(() => {
     const cur = loadCurrentMeeting();
     if (cur) setRecord(cur);
     setHistory(collectMeetingHistory());
+  }, []);
+
+  // R3: 初見案内の表示判定（未読のときだけ表示）。
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(FIRSTUSE_HINT_KEY) !== "1") setFirstUseHintOpen(true);
+    } catch {
+      /* localStorage 不可時は何もしない */
+    }
+  }, []);
+
+  const dismissFirstUseHint = useCallback(() => {
+    setFirstUseHintOpen(false);
+    try {
+      localStorage.setItem(FIRSTUSE_HINT_KEY, "1");
+    } catch {
+      /* 無視 */
+    }
   }, []);
 
   // 自動保存（変更のたび）
@@ -218,6 +240,33 @@ export function MeetingPaperView() {
         <div className="mx-auto mt-2 flex max-w-5xl items-start justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 print:hidden">
           <p className="text-sm font-semibold text-emerald-900">{notice}</p>
           <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="rounded px-1.5 text-emerald-700 hover:bg-emerald-100">×</button>
+        </div>
+      )}
+
+      {/* R3: 初見の元請担当向け 3ステップ案内。前日5分で各社の危険対策を1枚に＝紙との差。×で恒久非表示。 */}
+      {firstUseHintOpen && (
+        <div className="mx-auto mt-2 max-w-5xl px-3 print:hidden">
+          <div className="rounded-xl border border-sky-300 bg-sky-50 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-bold text-sky-900">はじめての方へ — 前日5分で1枚に</p>
+              <button
+                type="button"
+                onClick={dismissFirstUseHint}
+                aria-label="この案内を閉じる"
+                className="rounded px-1.5 text-sky-700 hover:bg-sky-100"
+              >
+                ×
+              </button>
+            </div>
+            <ol className="mt-1.5 space-y-1 text-xs leading-relaxed text-sky-900 sm:text-sm">
+              <li><span className="font-bold">① 作業日・現場を入力</span></li>
+              <li><span className="font-bold">②「＋元請 / ＋1次 …」で協力会社を追加</span>し、各社の作業・使用機械・予想災害・指示を記入（<span className="font-bold">「AI提案」</span>で下書き可）</li>
+              <li><span className="font-bold">③「保存」→「印刷」</span>で重層下請の危険対策を1枚にまとめ、朝礼・各社へ共有</li>
+            </ol>
+            <p className="mt-1.5 text-[11px] leading-snug text-sky-800">
+              元請が前日5分で各社の予想災害・指示を1枚に集約。AIが指示事項を下書きします。KYへの転記も可能です。
+            </p>
+          </div>
         </div>
       )}
 
