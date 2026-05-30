@@ -31,6 +31,7 @@ const issueColor: Record<string, string> = {
   過失相殺: "bg-amber-100 text-amber-800 border-amber-200",
   "元請・下請責任": "bg-sky-100 text-sky-800 border-sky-200",
   "国・行政責任": "bg-violet-100 text-violet-800 border-violet-200",
+  業務起因性: "bg-teal-100 text-teal-800 border-teal-200",
   労働者性: "bg-rose-100 text-rose-800 border-rose-200",
 };
 
