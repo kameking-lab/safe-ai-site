@@ -120,5 +120,12 @@
 - **変更範囲**: accident-hub-nav.tsx(accidents/analytics desc) / flagship-nav.ts(accidentsカード+subItem) の文言修正＋テストガード2件。
 - **バンドル**: /for/construction の「3,515 物質を検索」(stale) を canonical 定数 MHLW_MERGED_CHEMICAL_COUNT(=3,695) 参照に変更し将来ドリフトを排除（化学物質件数の表記ゆれ是正）。
 - **成功基準**: /accidentsを過大表現しない・5,000は統計に帰属・lint/tsc/build 0・既存966維持・非破壊。
-- 検証結果: （実装後）
-- 採否: （判断後）
+- 検証結果: lint 0 / tsc 0 / test 968 pass / build OK / ローカル本番で /accidents 文言・/for/construction「3,695物質」描画を実機確認。
+- 採否: **採用（squash merge PR #319 → main `29fcf639`）**。CI e2e/smoke 両 pass。出典厳守サイトの信頼に関わる自己作り込みの過大表現を是正。
+
+## R2 追加検証（実機・エッジ/エラー/印刷/多言語）と判断
+- **エラー/フォールバックUX**: chatbot(APIキー無→関連条文＋一般原則の寄り添い応答)、KY AI提案(キー無→定型提案＋「AI未設定」明示)、KY空欄AI(「先に作業内容を入力」)、KY別端末共有(クラウド未設定→「同じ端末ならサイネージへ」と代替提示) — **全て graceful**。実務レベル。
+- **印刷**: /ky/paper・/accident-news/print は print メディアでナビchrome無し＝クリーンなA4配布物。
+- **多言語サイネージ(/ky/morning)**: 日/英/越/中/Tagalog/尼の6言語で見出し・chromeが翻訳切替。可。Tagalogは一部見出しが英語フォールバック(軽微・翻訳作文は捏造リスクのため不介入)。
+- **件数の33 vs 50法令**: about「RAG 33法令」(=評価トピック数) と chatbot「50法令以上」(=コーパス)が不一致。どちらが正かは内部仕様依存で確証できず、誤った数値置換は捏造リスク → **オーナー判断事項として申し送り(不介入)**。
+- 結論: 9機能を実機シナリオで通し詰まりを探索したが、コア機能は graceful degradation 含め成熟。**安易な「やった気」マージは行わず**、確証ある是正(r2-01)のみ採用。
