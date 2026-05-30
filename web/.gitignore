@@ -47,3 +47,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+# R4 print-audit investigation artifacts (not committed)
+.r4-screens/
+scripts/r4-print.mjs

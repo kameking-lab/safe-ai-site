@@ -346,6 +346,15 @@ table {
   .print\:hidden {
     display: none !important;
   }
+  /* 印刷ドキュメント本体(#main-content 配下)の <header>/<footer> は、サイト共通
+     chrome ではなく成果物そのもの（資料タイトル・作成日・出典・免責）。上の一括
+     非表示から除外して再表示する。サイトの共通ヘッダ/フッタは #main-content の外側
+     に配置されているため影響しない。明示的に print:hidden を付けた操作バー等は
+     :not(.print\:hidden) により引き続き非表示のまま。 */
+  #main-content header:not(.print\:hidden),
+  #main-content footer:not(.print\:hidden) {
+    display: revert !important;
+  }
   html,
   body {
     background: white !important;
