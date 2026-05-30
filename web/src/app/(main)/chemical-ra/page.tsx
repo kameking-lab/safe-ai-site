@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChemicalRaPanel } from "@/components/chemical-ra-panel";
@@ -100,7 +101,7 @@ export default function ChemicalRaPage() {
           {
             href: "/chemical-database",
             label: "化学物質検索",
-            description: "厚労省統合DB 約3,700物質（MHLW告示251 + NITE GHS 2,729 + PRTR 398 + 化審/毒劇/CWC/廃掃 255）。CAS番号・物質名から濃度基準値・GHS分類を確認できます。",
+            description: `厚労省統合DB ${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()}物質（MHLW告示・NITE GHS・PRTR・化審/毒劇/化学兵器禁止/廃掃法をCAS統合）。CAS番号・物質名から濃度基準値・GHS分類を確認できます。`,
             color: "blue",
             cta: "物質を検索する",
           },

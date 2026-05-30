@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import Link from "next/link";
 import {
   Building2,
@@ -223,7 +224,7 @@ export default function ForManagerPage() {
           {[
             { icon: Brain, color: "violet", title: "メンタル・ストレスチェック", desc: "義務・面接指導・50人未満事業場の対応まで実務ガイドと書式。", href: "/mental-health-management" },
             { icon: Stethoscope, color: "emerald", title: "健康診断スケジューラ", desc: "業種・職種・物質・作業条件から必要健診と年間スケジュールを判定。", href: "/health-checkup-scheduler" },
-            { icon: FlaskConical, color: "amber", title: "化学物質の自律管理", desc: "CREATE-SIMPLE準拠の簡易RA。約3,700物質の規制タグ・基準値も検索。", href: "/chemical-ra" },
+            { icon: FlaskConical, color: "amber", title: "化学物質の自律管理", desc: `CREATE-SIMPLE準拠の簡易RA。${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()}物質の規制タグ・基準値も検索。`, href: "/chemical-ra" },
             { icon: ListChecks, color: "sky", title: "年次安全衛生計画", desc: "13業種×3規模・39テンプレートから計画書を自動生成・保存。", href: "/strategy/plan-generator" },
             { icon: RefreshCw, color: "rose", title: "法改正ウォッチ", desc: "施行日カウントダウン付きの法改正カレンダーと新着情報。", href: "/whats-new" },
             { icon: CalendarDays, color: "slate", title: "安全工程打合せ書", desc: "各社の作業・予想災害・指示を1枚に。月次報告のまとめにも。", href: "/safety-diary" },
