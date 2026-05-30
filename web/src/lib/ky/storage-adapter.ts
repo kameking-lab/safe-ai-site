@@ -14,6 +14,7 @@
 import type { KyInstructionRecordState, KyRecordSummary } from "@/lib/types/operations";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
 import { normalizeWorkers, type Worker } from "@/lib/ky/workers-master";
+import { fetchWithTimeout } from "@/lib/external/fetch-with-timeout";
 
 const DEVICE_ID_KEY = "safe-ai:ky-device-id:v1";
 const SYNC_QUEUE_KEY = "safe-ai:ky-sync-queue:v1";
@@ -236,6 +237,47 @@ export async function cloudCreateSignageSession(record: KyInstructionRecordState
     return await transport.createSignageSession(record);
   } catch {
     return null;
+  }
+}
+
+/**
+ * R2: 6桁共有の失敗理由まで返す版（UI で正直なエラー表示をするため）。
+ * 既存 cloudCreateSignageSession（string|null）は互換のため温存。
+ * - cloud_not_configured: env未設定（同一端末ならサイネージ表示は可）
+ * - server_error       : サーバー/DBエラー（例: Supabase権限不足 42501・管理者対応待ち）
+ * - busy               : 6桁コード衝突などで一時的に発行不可
+ * - network            : 通信失敗・タイムアウト
+ */
+export type SignageShareResult =
+  | { ok: true; code: string }
+  | { ok: false; reason: "cloud_not_configured" | "server_error" | "busy" | "network" };
+
+export async function cloudCreateSignageSessionDetailed(
+  record: KyInstructionRecordState
+): Promise<SignageShareResult> {
+  if (!isKyCloudEnabled()) return { ok: false, reason: "cloud_not_configured" };
+  try {
+    const res = await fetchWithTimeout("/api/ky/signage", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ record }),
+      timeoutMs: 12000,
+    });
+    const data: unknown = await res.json().catch(() => ({}));
+    const code = (data as { code?: unknown })?.code;
+    if (res.ok && typeof code === "string") return { ok: true, code };
+    const reason = (data as { reason?: unknown })?.reason;
+    if (res.status === 503 && reason === "cloud_not_configured") {
+      return { ok: false, reason: "cloud_not_configured" };
+    }
+    if (reason === "code_collision" || res.status === 503) {
+      return { ok: false, reason: "busy" };
+    }
+    // db_error(502, Supabase権限不足等) や 5xx はサーバー側の問題。
+    return { ok: false, reason: "server_error" };
+  } catch {
+    // TimeoutError / ネットワーク例外。
+    return { ok: false, reason: "network" };
   }
 }
 

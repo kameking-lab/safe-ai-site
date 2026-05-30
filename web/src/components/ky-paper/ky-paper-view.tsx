@@ -39,7 +39,7 @@ import {
   isKyCloudEnabled,
   cloudPullKyRecords,
   cloudPushKyRecord,
-  cloudCreateSignageSession,
+  cloudCreateSignageSessionDetailed,
   flushKyCloudQueue,
   hasPendingKyCloudSync,
 } from "@/lib/ky/storage-adapter";
@@ -309,7 +309,7 @@ export function KyPaperView() {
   // Phase 6: 現在のKYを別端末サイネージ用に共有（6桁コード発行）。
   const handleShare = async () => {
     if (!isKyCloudEnabled()) {
-      setNotice("クラウド未設定のため別端末共有は使えません。同じ端末なら「サイネージへ」で表示できます。");
+      setNotice("クラウド未設定のため別端末共有は使えません。同じ端末なら「サイネージへ」ボタンですぐ表示できます。");
       return;
     }
     setShareBusy(true);
@@ -317,12 +317,20 @@ export function KyPaperView() {
       // 共有前に保存して内容を確定（保存KYと共有内容を一致させる）。
       await services.operations.saveKyInstructionRecord(record);
       void cloudPushKyRecord(record);
-      const code = await cloudCreateSignageSession(record);
-      if (code) {
-        setShareCode(code);
-        setNotice(`別端末サイネージ共有コード: ${code}（別端末で /ky/morning に入力、または ?code=${code}）`);
+      // R2: 失敗理由まで取得し、原因に応じた正直な案内＋同一端末フォールバックを提示。
+      // （クラウド権限障害でも「通信状況を確認」と誤誘導せず、確実に動く代替へ導く）
+      const result = await cloudCreateSignageSessionDetailed(record);
+      if (result.ok) {
+        setShareCode(result.code);
+        setNotice(`別端末サイネージ共有コード: ${result.code}（別端末で /ky/morning に入力、または ?code=${result.code}）`);
+      } else if (result.reason === "cloud_not_configured") {
+        setNotice("クラウド未設定のため別端末共有は使えません。同じ端末なら「サイネージへ」ボタンですぐ表示できます。");
+      } else if (result.reason === "server_error") {
+        setNotice("別端末共有サーバーが一時的に利用できません（管理者が対応中の可能性）。お急ぎの場合は、同じ端末で「サイネージへ」ボタンを押せばこのKYをすぐ表示できます。");
+      } else if (result.reason === "busy") {
+        setNotice("共有コードが混み合っています。少し待って再度「別端末で共有」をお試しください。すぐ表示したい場合は同じ端末の「サイネージへ」をご利用ください。");
       } else {
-        setNotice("共有コードの発行に失敗しました。通信状況をご確認ください。");
+        setNotice("共有コードの発行に失敗しました。通信状況をご確認のうえ、もう一度お試しください。同じ端末なら「サイネージへ」ボタンで表示できます。");
       }
     } finally {
       setShareBusy(false);
