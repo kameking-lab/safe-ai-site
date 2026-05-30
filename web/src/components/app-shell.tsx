@@ -48,6 +48,7 @@ import { Footer } from "@/components/footer";
 import { FlagshipNav } from "@/components/flagship-nav";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { LAW_SOURCE_COUNT } from "@/data/laws";
+import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import { ShareButtons } from "@/components/share-buttons";
 import { UserMenu } from "@/components/user-menu";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -162,7 +163,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       { id: "accident-news", label: "重大災害事例", href: "/accident-news", icon: HardHat, badge: "NEW", badgeUntil: "2026-08-31", description: "死亡災害を業種・事故型・原因で類型検索（公表事実・匿名・出典付き）" },
       // exp-05: AccidentHubNav・flagshipに揃え、統計ダッシュボードもサイドバーから到達可に
       { id: "accidents-analytics", label: "事故統計ダッシュボード", href: "/accidents-analytics", icon: BarChart3, description: "事故型・業種・経年の傾向をグラフで把握" },
-      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: "約3,700物質の詳細・基準値・安衛法規制タグ" },
+      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: `${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()}物質の詳細・基準値・安衛法規制タグ` },
       { id: "mental-health-management", label: "メンタル対策実務", href: "/mental-health-management", icon: Brain, badge: "NEW", badgeUntil: "2026-05-31", description: "事業場規模別の義務・面接指導・50人未満対応" },
       { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2, description: "LGBTQ・障害・外国人労働者の安全配慮" },
       { id: "risk-prediction", label: "AIリスク予測", href: "/risk-prediction", icon: Brain, description: "作業内容から潜在リスクをAIが予測" },

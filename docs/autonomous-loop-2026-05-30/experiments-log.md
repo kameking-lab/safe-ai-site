@@ -156,3 +156,14 @@
 - **実装**: `src/data/laws/index.ts` に computed定数 `LAW_SOURCE_COUNT`（mhlw-extras除外でドリフト無し）。表記は狭義法令でない8件を含むため「**法令・規則・指針等**」と総称。
 - **統一箇所(9ファイル)**: about(RAGピル) / chatbot(title/desc/JSON-LD/body×4) / law-search / for-consultant / app-shell(nav説明) / CopilotNextSteps / cross-tool-links / chatbot API注記。全て定数参照に。
 - 検証: lint0/tsc0/build OK・ローカル本番で全ページ「55法令等」描画を実機確認。捏造ゼロ（実データのSet計数）。
+
+---
+## エスカレ回答処理 — 項目2: 化学物質件数の定義整理・統一
+- **各数字の出自（実コード追跡）**:
+  - **3,695** = `MHLW_MERGED_CHEMICAL_COUNT`（`getAllMergedChemicals().length`）= MHLW告示・NITE GHS・PRTR・化審/毒劇/化兵器/廃掃の各ソースを **CAS で統合後の規制対象物質数**。化学物質DB/RAの実検索対象＝**ユーザー向け正準値**。約7ファイルで既に定数参照。
+  - **約3,700** = 上記3,695の概数（丸め）。**別物ではなく同一指標**。4ファイルでハードコードされていた。
+  - **3,984** = `SITE_STATS.chemicalsMhlwCount`（厚労省「職場のあんぜんサイト」化学物質情報の取込件数）。**UIに非表示**（grep 0件）＝ユーザー混同なし。別メトリクスとして温存・本ログに定義記録。
+  - 注: 報告で「292」を化学に併記したのは私の誤記。292は /accidents の詳細事例数(#319で対応済)であり化学物質とは無関係。
+- **対応**: ハードコード「約3,700物質」4箇所（chemical-ra/page・product-search・for/manager・app-shell）を `MHLW_MERGED_CHEMICAL_COUNT` 参照に統一（ドリフト無し）。
+  - メタ記述の内訳「MHLW告示251 + NITE GHS 2,729 + PRTR 398 + 化審/毒劇/CWC/廃掃 255」は合計3,633で総数3,695と不一致＝stale/未検証のため、**個別件数を削除しソース名のみ**（MHLW告示・NITE GHS・PRTR・化審/毒劇/化兵器/廃掃をCAS統合）に変更。捏造ゼロ。
+- 検証: lint0/tsc0/test974/build OK・ローカル本番で全箇所「3,695物質」描画を実機確認。
