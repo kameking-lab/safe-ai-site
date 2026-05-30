@@ -389,7 +389,7 @@ export function AppShell({ children, user }: AppShellProps) {
         メインコンテンツへスキップ
       </a>
       {/* PC sidebar */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-slate-200 bg-slate-50/80 px-3 py-5 dark:border-slate-700 dark:bg-slate-900/80 lg:flex">
+      <aside className="hidden w-60 shrink-0 flex-col border-r border-slate-200 bg-slate-50/80 px-3 py-5 dark:border-slate-700 dark:bg-slate-900/80 lg:flex print:!hidden">
         <div className="mb-4 flex items-start justify-between gap-2 px-1">
           <div>
             <p className="text-xs font-bold tracking-wide text-emerald-700 dark:text-emerald-300">安全AIポータル</p>
@@ -484,7 +484,7 @@ export function AppShell({ children, user }: AppShellProps) {
 
       <div className="flex min-h-full flex-1 flex-col overflow-x-hidden">
         {/* Mobile header — 375px で縦積みしないように要素を絞る */}
-        <div className="border-b border-slate-200 bg-gradient-to-b from-emerald-50 to-white dark:border-slate-700 dark:from-emerald-500/10 dark:to-slate-900 lg:hidden">
+        <div className="border-b border-slate-200 bg-gradient-to-b from-emerald-50 to-white dark:border-slate-700 dark:from-emerald-500/10 dark:to-slate-900 lg:hidden print:!hidden">
           <div className="flex flex-nowrap items-center justify-between gap-2 px-3 py-3">
             <div className="min-w-0 shrink">
               <p className="truncate text-[11px] font-bold tracking-wide text-emerald-700 dark:text-emerald-300">安全AIポータル</p>
@@ -552,7 +552,7 @@ export function AppShell({ children, user }: AppShellProps) {
           <div
             role="region"
             aria-label="アクセシビリティ機能の案内"
-            className="border-b border-emerald-200 bg-emerald-50/80 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200 lg:hidden"
+            className="border-b border-emerald-200 bg-emerald-50/80 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200 lg:hidden print:!hidden"
           >
             <div className="flex items-center gap-2 px-3 py-1.5">
               <button
@@ -596,7 +596,7 @@ export function AppShell({ children, user }: AppShellProps) {
 
         {/* Mobile nav dropdown */}
         {isSidebarOpen && (
-          <div className="z-20 border-b border-slate-200 bg-slate-50/95 px-3 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/95 lg:hidden">
+          <div className="z-20 border-b border-slate-200 bg-slate-50/95 px-3 py-3 shadow-sm dark:border-slate-700 dark:bg-slate-900/95 lg:hidden print:!hidden">
             {/* モバイル: アクセシビリティトグル（ヘッダから移設） */}
             <div className="mb-3 flex flex-wrap gap-1.5 rounded-xl border border-slate-200 bg-white p-2 dark:border-slate-700 dark:bg-slate-800">
               <p className="w-full px-1 text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
@@ -677,7 +677,7 @@ export function AppShell({ children, user }: AppShellProps) {
         )}
 
         {/* Desktop top bar — ⌘K検索ヒント + 屋外モードトグルを右上に常設 */}
-        <div className="hidden items-center justify-end gap-2 border-b border-slate-200 bg-white/70 px-6 py-2 backdrop-blur lg:flex">
+        <div className="hidden items-center justify-end gap-2 border-b border-slate-200 bg-white/70 px-6 py-2 backdrop-blur lg:flex print:!hidden">
           <button
             type="button"
             onClick={openCommandPalette}
@@ -715,13 +715,19 @@ export function AppShell({ children, user }: AppShellProps) {
             )}
           </button>
         </div>
-        <FlagshipNav />
+        <div className="print:hidden">
+          <FlagshipNav />
+        </div>
         <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col scroll-mt-20 focus:outline-none">
           <div className="mx-auto w-full max-w-7xl flex-1">{children}</div>
         </main>
-        <Footer />
+        <div className="print:hidden">
+          <Footer />
+        </div>
       </div>
-      <ShareButtons fixed />
+      <div className="print:hidden">
+        <ShareButtons fixed />
+      </div>
     </div>
   );
 }
