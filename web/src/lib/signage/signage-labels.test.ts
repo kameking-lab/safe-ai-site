@@ -45,6 +45,19 @@ describe("signage-labels", () => {
     }
   });
 
+  // R2(エスカレ項目4): 多言語が「壊れて見える」最大要因＝日本語の取りこぼし(未翻訳fallback)を防ぐ。
+  // ひらがな/カタカナは日本語固有。en/vi/tl/id のラベルに混入していたら未翻訳の疑い。
+  // （zh は漢字を正規に使うため対象外。ja は当然対象外。）
+  it("非日本語(en/vi/tl/id)のラベルに日本語かな(未翻訳fallback)が混入していない", () => {
+    const kana = /[぀-ゟ゠-ヿ]/; // ひらがな + カタカナ
+    for (const lang of ["en", "vi", "tl", "id"] as const) {
+      const set = signageLabels(lang);
+      for (const key of REQUIRED_KEYS) {
+        expect(kana.test(set[key]), `${lang}.${key} に日本語かなが混入(未翻訳の疑い): "${set[key]}"`).toBe(false);
+      }
+    }
+  });
+
   it("各言語にトグル表示名がある", () => {
     for (const lang of SIGNAGE_LANGS) {
       expect(SIGNAGE_LANG_LABELS[lang]).toBeTruthy();
