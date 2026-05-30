@@ -48,6 +48,7 @@ export const metadata: Metadata = {
 const RESEARCH_TOOLS = [
   { icon: Search, title: "法令検索", desc: `主要${LAW_SOURCE_COUNT}法令等 約${SITE_STATS.lawArticleCount}条文を全文検索。お気に入り保存に対応。`, href: "/law-search" },
   { icon: Scale, title: "通達・判例", desc: `厚労省通達・告示 ${SITE_STATS.mhlwNoticeCount}件と安全配慮義務の主要判例を拘束力レベル付きで参照。`, href: "/circulars" },
+  { icon: Scale, title: "労災裁判例コーナー", desc: "安全配慮義務・過失相殺・元請責任など労働安全の重要確定判例を要旨＋出典リンクで。顧問先説明の根拠・A4まとめ印刷に対応。", href: "/court-cases" },
   { icon: LibraryBig, title: "法令体系マップ", desc: "法→政令→省令→告示の階層構造を俯瞰。条文間の関係を一望。", href: "/law-hierarchy" },
   { icon: MessageSquare, title: "安衛法AIチャット (RAG)", desc: "回答に条文番号・通達URLを自動添付。根拠確認しながら下調べを高速化。", href: "/chatbot" },
 ];
