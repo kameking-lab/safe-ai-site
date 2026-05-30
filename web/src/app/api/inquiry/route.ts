@@ -110,9 +110,13 @@ export async function POST(request: Request) {
   const inboxAddress = process.env.INQUIRY_INBOX;
   if (inboxAddress) {
     const { sendEmailSafe } = await import("@/lib/external/resend-safe");
+    // 送信元は他の通知メール(notify/newsletter)と同じ NOTIFY_FROM 規約に統一。
+    // 以前は example.com のプレースホルダ固定で env 上書きも無く、実送信時に
+    // ドメイン未検証で配信失敗し得た（プレースホルダの是正）。
+    const fromAddress = process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.com>";
     await sendEmailSafe({
       tag: "inquiry",
-      from: "安全AIポータル <noreply@anzen-ai.example.com>",
+      from: fromAddress,
       to: inboxAddress,
       subject: `[安全AIポータル 相談] ${body.category} / ${body.subject.slice(0, 60)}`,
       text:
