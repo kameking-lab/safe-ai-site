@@ -372,8 +372,8 @@ export function ChemicalRaPanel() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
-      {/* ヘッダー */}
-      <div>
+      {/* ヘッダー（画面用イントロ。A4記録には ChemicalRaReportHeader が出るので印刷時は隠す） */}
+      <div className="print:hidden">
         <div className="flex items-center gap-2">
           <FlaskConical className="h-6 w-6 text-emerald-600" />
           <h1 className="text-xl font-bold text-slate-900 lg:text-2xl">化学物質リスクアセスメント</h1>
@@ -387,8 +387,8 @@ export function ChemicalRaPanel() {
         </p>
       </div>
 
-      {/* 検索フォーム */}
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      {/* 検索フォーム（入力UI。印刷=A4実施記録では不要なので隠す） */}
+      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
         <div className="mb-3 flex items-center justify-between gap-2 border-b border-slate-100 pb-3">
           <div>
             {/* P1-F: 「2ステップウィザード」では入口が3つ並ぶ実態と乖離するため、
