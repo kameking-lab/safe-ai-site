@@ -51,3 +51,5 @@ next-env.d.ts
 # R4 print-audit investigation artifacts (not committed)
 .r4-screens/
 scripts/r4-print.mjs
+scripts/r4-*.mjs
+.r4-*

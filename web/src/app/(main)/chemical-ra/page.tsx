@@ -51,7 +51,7 @@ export default function ChemicalRaPage() {
         offers: { "@type": "Offer", price: 0, priceCurrency: "JPY" },
         publisher: { "@type": "Organization", name: "安全AIポータル", url: "https://www.anzen-ai-portal.jp" },
       }} />
-      <PageContainer paddingY="none" className="pt-6">
+      <PageContainer paddingY="none" className="pt-6 print:hidden">
         <TranslatedPageHeader
           titleJa="化学物質リスクアセスメント"
           titleEn="Chemical Substance Risk Assessment"
@@ -72,22 +72,25 @@ export default function ChemicalRaPage() {
       </PageContainer>
       {/* P1-G: メイン入力（RAパネル）をファーストビューに、現場リストは下部へ。
           初見ユーザーが「何のページか」を即理解できるよう順序を入れ替えた。 */}
-      <PageContainer paddingY="none" className="pt-3">
+      <PageContainer paddingY="none" className="pt-3 print:hidden">
         {/* P2-1: SDS PDF/画像をAIが読み取り、RA・全法律規制へ誘導 */}
         <SdsUploadPanel />
       </PageContainer>
       <Suspense fallback={<PageSkeleton label="化学物質リスクアセスメントを読み込み中" />}>
         <ChemicalRaPanel />
       </Suspense>
-      {/* P2-4: 混合物RA（複数成分の合成リスク集約） */}
-      <PageContainer paddingY="none" className="pt-3">
+      {/* P2-4: 混合物RA（複数成分の合成リスク集約） — 印刷=単一物質のA4記録には不要 */}
+      <PageContainer paddingY="none" className="pt-3 print:hidden">
         <MixtureRaPanel />
       </PageContainer>
       {/* P1-5: 保存したRA一覧（クラウド＋ローカル） */}
-      <PageContainer paddingY="none" className="pt-2">
+      <PageContainer paddingY="none" className="pt-2 print:hidden">
         <SavedRaList />
       </PageContainer>
-      <ChemicalRaExtras />
+      <div className="print:hidden">
+        <ChemicalRaExtras />
+      </div>
+      <div className="print:hidden">
       <RelatedPageCards
         heading="合わせて使う"
         pages={[
@@ -128,6 +131,7 @@ export default function ChemicalRaPage() {
           },
         ]}
       />
+      </div>
     </>
   );
 }
