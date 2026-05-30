@@ -177,3 +177,12 @@
   - 回帰テスト6件（理由マッピング）追加。
 - **オーナー領域として明記（私は触れない）**: Supabase管理画面でのGRANT/SQL実行・env。再発時の fix.sql 再適用手順は docs/autonomous-loop-2026-05-30/signage-supabase-status-2026-05-30.md §末尾に整理。
 - 検証: lint0/tsc0/test **980 pass**(+6)/build OK。
+
+---
+## エスカレ回答処理 — 項目4: 多言語の「整える」（力を入れず・捏造翻訳禁止）
+- **実態調査**: 6言語トグルがある機能は /ky/morning のみ（signage-labels.ts: ja/en/vi/zh/tl/id）。accidents-labels・chemical-ra-labels も6言語で、いずれも**かな(未翻訳)混入0・空文字0・TODO0＝完成**。
+  - Tagalog(tl)は本文ネイティブ品質（"Pangunahing Gawain Ngayon"/"Pagturo at Pagsigaw"等）。英語のままは `signageTitle` と `fullscreen` の2ラベルのみ。"壊れて見える"状態ではない（フィリピンは英語が公用語・現場の共通語としても妥当）。日本語のfallbackは残っていない。
+  - → オーナーの枠組み（控えめ化 or「日本語が残る」注記）はTagalogには当てはまらない（ほぼ完成・日本語残存なし）。**捏造翻訳は禁止のため英語2ラベルは触れない**。
+- **行った genuine 改善（再発防止・整え）**: signage-labels.test.ts に「**非日本語(en/vi/tl/id)のラベルに日本語かな(未翻訳fallback)が混入していないこと**」を検証する回帰ガードを追加。多言語が"壊れて見える"最大要因＝日本語の取りこぼしを将来にわたり防止（zhは漢字を正規使用のため対象外）。
+- 既存の「全言語・全キー充足」テストと合わせ、i18nの完成度を二重にロック。捏造ゼロ。
+- 検証: lint0/tsc0/test 981 pass(+1)/build OK。
