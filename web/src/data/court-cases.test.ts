@@ -74,4 +74,21 @@ describe("court-cases データ整合性（捏造防止の構造ガード）", (
     const total = COURT_CASES.reduce((a, c) => a + c.issues.length, 0);
     expect(sum).toBe(total);
   });
+
+  it("R5拡充: 14件以上・新カテゴリ(派遣請負先責任/熱中症屋外)・追加2判例が存在", () => {
+    expect(COURT_CASES.length).toBeGreaterThanOrEqual(14);
+    expect(COURT_CASE_ISSUES).toContain("派遣・請負先責任");
+    expect(COURT_CASE_FIELDS).toContain("熱中症・屋外");
+    // 実在裏取り済みの追加2件（アテスト/ニコン＝派遣先責任、造園熱中症＝大阪高裁）
+    const atesuto = getCourtCaseById("atesuto-nikon");
+    expect(atesuto?.issues).toContain("派遣・請負先責任");
+    const necchu = getCourtCaseById("zoen-necchusho-osaka-h28");
+    expect(necchu?.field).toBe("熱中症・屋外");
+    // 追加2件も出典1つ以上・事実記述の holding を持つ（捏造防止ガードの再確認）
+    for (const c of [atesuto, necchu]) {
+      expect(c).toBeDefined();
+      expect(c!.sources.length).toBeGreaterThan(0);
+      expect(c!.holding).toMatch(/(判断した|認めた|是認した|とした)/);
+    }
+  });
 });
