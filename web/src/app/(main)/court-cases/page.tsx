@@ -50,6 +50,14 @@ export default function CourtCasesPage() {
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             要旨は当サイトによる要約です。正確な内容は各判例の出典（判決原文）をご確認ください。個別案件は専門家にご相談ください。
           </p>
+          <div className="mt-3">
+            <Link
+              href="/court-cases/print"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
+            >
+              🖨 全{COURT_CASE_COUNT}件をA4まとめ資料で印刷／PDF保存
+            </Link>
+          </div>
         </header>
 
         <CourtCasesBrowser />
