@@ -7,6 +7,7 @@ import {
   cloudPushWorkers,
   cloudPullWorkers,
   cloudCreateSignageSession,
+  cloudCreateSignageSessionDetailed,
   cloudGetSignageSession,
   flushKyCloudQueue,
   hasPendingKyCloudSync,
@@ -198,5 +199,45 @@ describe("storage-adapter: サイネージ共有（Phase 6）", () => {
       })
     );
     await expect(cloudGetSignageSession("123456")).resolves.toBeNull();
+  });
+});
+
+describe("cloudCreateSignageSessionDetailed: 6桁共有の失敗理由マッピング（R2 resilience）", () => {
+  const rec = normalizeKyInstructionRecord({});
+
+  it("env未設定なら cloud_not_configured", async () => {
+    delete process.env[ENV_URL];
+    const r = await cloudCreateSignageSessionDetailed(rec);
+    expect(r).toEqual({ ok: false, reason: "cloud_not_configured" });
+  });
+
+  it("成功時は code を返す", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ ok: true, code: "654321" }) })));
+    const r = await cloudCreateSignageSessionDetailed(rec);
+    expect(r).toEqual({ ok: true, code: "654321" });
+  });
+
+  it("502 db_error（Supabase権限不足等）は server_error にマップ（通信状況のせいにしない）", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 502, json: async () => ({ ok: false, reason: "db_error" }) })));
+    const r = await cloudCreateSignageSessionDetailed(rec);
+    expect(r).toEqual({ ok: false, reason: "server_error" });
+  });
+
+  it("code_collision は busy にマップ", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 503, json: async () => ({ ok: false, reason: "code_collision" }) })));
+    const r = await cloudCreateSignageSessionDetailed(rec);
+    expect(r).toEqual({ ok: false, reason: "busy" });
+  });
+
+  it("503 cloud_not_configured（サーバー側env欠落）も cloud_not_configured", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 503, json: async () => ({ ok: false, reason: "cloud_not_configured" }) })));
+    const r = await cloudCreateSignageSessionDetailed(rec);
+    expect(r).toEqual({ ok: false, reason: "cloud_not_configured" });
+  });
+
+  it("通信例外・タイムアウトは network にマップ", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => { throw new Error("network down"); }));
+    const r = await cloudCreateSignageSessionDetailed(rec);
+    expect(r).toEqual({ ok: false, reason: "network" });
   });
 });

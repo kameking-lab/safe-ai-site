@@ -167,3 +167,13 @@
 - **対応**: ハードコード「約3,700物質」4箇所（chemical-ra/page・product-search・for/manager・app-shell）を `MHLW_MERGED_CHEMICAL_COUNT` 参照に統一（ドリフト無し）。
   - メタ記述の内訳「MHLW告示251 + NITE GHS 2,729 + PRTR 398 + 化審/毒劇/CWC/廃掃 255」は合計3,633で総数3,695と不一致＝stale/未検証のため、**個別件数を削除しソース名のみ**（MHLW告示・NITE GHS・PRTR・化審/毒劇/化兵器/廃掃をCAS統合）に変更。捏造ゼロ。
 - 検証: lint0/tsc0/test974/build OK・ローカル本番で全箇所「3,695物質」描画を実機確認。
+
+---
+## エスカレ回答処理 — 項目3: サイネージ6桁共有 / Supabase権限障害
+- **状態確認の結論**: 本番のSupabase権限障害は**既に解決済**（2026-05-26、fix.sql相当をManagement APIで適用）。本セッションで本番 read-only 再確認: `/api/ky/signage?code=000000`→404 not_found・`/api/ky/records`→200 ok。権限エラー(502/42501)は再発なし＝6桁共有・KY同期は稼働中。過去メモ(MEMORY.md索引)が stale だったため修正。
+- **私ができる範囲の改善（コード resilience・defense-in-depth）**:
+  - `cloudCreateSignageSessionDetailed`（storage-adapter）新設。共有失敗理由を `cloud_not_configured/server_error/busy/network` に分類（fetchWithTimeout 12s）。
+  - 「別端末で共有」を理由別の正直な案内に変更。従来は全失敗を「通信状況をご確認ください」と誤誘導していたが、**サーバー/権限障害(server_error)時は誤誘導せず、確実に動く同一端末フォールバック（「サイネージへ」=localStorage表示）へ誘導**。
+  - 回帰テスト6件（理由マッピング）追加。
+- **オーナー領域として明記（私は触れない）**: Supabase管理画面でのGRANT/SQL実行・env。再発時の fix.sql 再適用手順は docs/autonomous-loop-2026-05-30/signage-supabase-status-2026-05-30.md §末尾に整理。
+- 検証: lint0/tsc0/test **980 pass**(+6)/build OK。
