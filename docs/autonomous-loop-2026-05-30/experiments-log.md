@@ -144,5 +144,5 @@
   - page.tsx タイトル「（サンプル表示）」除去。
 - **env方針**: GA4/GSC 実接続は環境変数(GA4_PROPERTY_ID・認証情報)が必要＝**オーナー判断事項**。本タスクでは接続せず、空状態＋運営者向け手順で対応（env新規追加せず）。
 - **stats-mock.ts / API は温存**（データ削除はせず、表示でモックを使わないだけ）。
-- 検証: lint 0(警告0) / tsc 0 / test維持 / build OK / ローカル本番で /stats が空状態描画・モック数値非表示を実機確認。
-- 採否: （CI green確認後に判断）
+- 検証: lint 0(警告0) / tsc 0 / test 968 pass / build OK / ローカル本番で /stats 空状態・モック非表示を実機確認。
+- 採否: **採用（squash merge PR #321 → main `f72b2eb8`）**。CI e2e/smoke 両 pass。約227行のデッドモックコードも削除。CI不具合は検知されず別PR不要。
