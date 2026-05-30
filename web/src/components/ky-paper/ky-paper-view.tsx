@@ -61,6 +61,7 @@ import {
 } from "@/lib/ky/approval";
 
 const AUTOSAVE_KEY = "ky-record";
+const FIRSTUSE_HINT_KEY = "safe-ai:ky-firstuse-hint-dismissed:v1";
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
 const ZOOM_STEP = 0.1;
@@ -92,6 +93,8 @@ export function KyPaperView() {
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [approvalActor, setApprovalActor] = useState("");
   const [approvalComment, setApprovalComment] = useState("");
+  // R3: 初見の職長向け 3ステップ案内（一度×で閉じると以後非表示。localStorage）。
+  const [firstUseHintOpen, setFirstUseHintOpen] = useState(false);
   const [syncStatus, setSyncStatus] = useState<KySyncStatus>(() =>
     computeKySyncStatus({ cloudEnabled: isKyCloudEnabled(), online: true, pending: false })
   );
@@ -169,6 +172,24 @@ export function KyPaperView() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // R3: 初見案内の表示判定（未読のときだけ表示）。マウント後に一度だけ。
+  useEffect(() => {
+    try {
+      if (localStorage.getItem(FIRSTUSE_HINT_KEY) !== "1") setFirstUseHintOpen(true);
+    } catch {
+      /* localStorage 不可時は何もしない */
+    }
+  }, []);
+
+  const dismissFirstUseHint = useCallback(() => {
+    setFirstUseHintOpen(false);
+    try {
+      localStorage.setItem(FIRSTUSE_HINT_KEY, "1");
+    } catch {
+      /* 無視 */
+    }
   }, []);
 
   // 自動保存（1秒デバウンス）— /ky と同じキーへ
@@ -448,6 +469,33 @@ export function KyPaperView() {
           <div className="flex items-start justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5">
             <p className="text-sm font-semibold text-emerald-900">{notice}</p>
             <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="rounded px-1.5 text-emerald-700 hover:bg-emerald-100">×</button>
+          </div>
+        </div>
+      )}
+
+      {/* R3: 初見の職長向け 3ステップ案内（紙との違い＝AI下書き＋朝礼サイネージ を明示）。×で恒久非表示。 */}
+      {firstUseHintOpen && (
+        <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
+          <div className="rounded-xl border border-amber-300 bg-amber-50 p-3">
+            <div className="flex items-start justify-between gap-3">
+              <p className="text-sm font-bold text-amber-900">はじめての方へ — 3ステップで完成</p>
+              <button
+                type="button"
+                onClick={dismissFirstUseHint}
+                aria-label="この案内を閉じる"
+                className="rounded px-1.5 text-amber-700 hover:bg-amber-100"
+              >
+                ×
+              </button>
+            </div>
+            <ol className="mt-1.5 space-y-1 text-xs leading-relaxed text-amber-900 sm:text-sm">
+              <li><span className="font-bold">① 現場名と今日の作業を入力</span>（音声入力ボタンでも可）</li>
+              <li><span className="font-bold">② 「🤖 AIに危険箇所を提案」</span>を押すと、危険と対策が自動で下書きされます</li>
+              <li><span className="font-bold">③ 「保存」→「印刷プレビュー」</span>または<span className="font-bold">「サイネージへ」</span>で朝礼の大画面に表示</li>
+            </ol>
+            <p className="mt-1.5 text-[11px] leading-snug text-amber-800">
+              紙の様式と違い、AIが危険予知を下書きし、そのまま朝礼サイネージに出せます。入力は自動保存されます。
+            </p>
           </div>
         </div>
       )}
