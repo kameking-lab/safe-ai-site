@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-05-30T21:57:52.977Z",
+  "generatedAt": "2026-05-31T21:56:50.561Z",
   "counts": {
     "approved": 11,
-    "rejected": 13,
-    "total": 24,
-    "approvalRate": 0.458
+    "rejected": 15,
+    "total": 26,
+    "approvalRate": 0.423
   },
   "byDay": [
     {
@@ -76,6 +76,13 @@
       "rejected": 0,
       "total": 1,
       "approvalRate": 1
+    },
+    {
+      "date": "2026-06-01",
+      "approved": 0,
+      "rejected": 2,
+      "total": 2,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -89,9 +96,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 2,
-      "rejected": 11,
-      "total": 13,
-      "approvalRate": 0.154
+      "rejected": 13,
+      "total": 15,
+      "approvalRate": 0.133
     }
   ],
   "byEstimatedWorkCategory": [
@@ -114,9 +121,9 @@
     {
       "type": "熱中症",
       "approved": 3,
-      "rejected": 8,
-      "total": 11,
-      "approvalRate": 0.273
+      "rejected": 10,
+      "total": 13,
+      "approvalRate": 0.231
     },
     {
       "type": "有害物質",
@@ -155,7 +162,7 @@
       "rejected": [
         0,
         2,
-        9,
+        11,
         0,
         0,
         0,
@@ -192,7 +199,7 @@
       ],
       "rejected": [
         2,
-        11,
+        13,
         0,
         0,
         0,
@@ -229,8 +236,8 @@
         0
       ],
       "rejected": [
-        9,
-        4,
+        10,
+        5,
         0,
         0,
         0,
@@ -268,7 +275,7 @@
       ],
       "rejected": [
         0,
-        8,
+        10,
         0,
         0,
         0,
@@ -283,7 +290,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 11
+      "count": 13
     },
     {
       "reason": "duplication",
@@ -506,6 +513,22 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "1日は東日本 北日本で高温続く 猛暑日のところも 熱中症対策を",
+        "aiSummary": "東日本と北日本で高温が続き、猛暑日となる地域もあるため、熱中症への警戒が必要。",
+        "score": {
+          "relevance": 20,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-05-31T21:56:45.417Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 20 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "東京都心でことし初の真夏日 あすも気温高く熱中症に注意",
         "aiSummary": "東京都心で今年初の真夏日を記録。明日も高温が予想され、熱中症への警戒を呼びかけ。",
         "score": {
@@ -566,22 +589,6 @@
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
             "relevance 25 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "広い範囲で真夏日予想 熱中症対策を 台風6号の最新情報に注意",
-        "aiSummary": "真夏日と台風6号の接近が予想されるため、熱中症対策と最新情報に注意。",
-        "score": {
-          "relevance": 20,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-05-28T22:39:58.661Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 20 < 70 (not labor-safety related for type=general_news)"
           ]
         },
         "publisher": "日本放送協会"
