@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search, AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag, Gauge, Database } from "lucide-react";
+import { Search, AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag, Gauge, Database, FileText } from "lucide-react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
 import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
@@ -625,6 +625,36 @@ export function ChemicalRaPanel() {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* STEP3 トリガ: ①(厚労省選択)/②(直接入力)/クイック検索 のどの経路でも、ここから
+            「判定 → A4実施記録(確認印枠つき)」に到達できるようにする明確な主導線。
+            第三者実機確認で「A4記録・印刷ボタン・確認印枠に辿り着けない」と報告された問題の是正。 */}
+        <div className="mt-4 border-t border-slate-100 pt-4">
+          <button
+            type="button"
+            onClick={() => void handleSearch()}
+            disabled={!chemicalName.trim() || loading}
+            aria-busy={loading}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? (
+              <>
+                <span aria-hidden="true" className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                判定中…
+              </>
+            ) : (
+              <>
+                <FileText className="h-4 w-4" aria-hidden="true" />
+                STEP 3：リスクを判定して A4実施記録（確認印枠つき）を作成
+              </>
+            )}
+          </button>
+          <p className="mt-1.5 text-center text-[11px] text-slate-500">
+            {chemicalName.trim()
+              ? "判定後、結果の下に「🖨 A4実施レポート印刷 / PDF保存」ボタンと、厚労省様式相当（実施日・事業場名・確認印枠3つ）の記録が表示されます。"
+              : "STEP 1 で物質を選ぶ（または名称を入力する）と、ここから判定して記録を作成できます。"}
+          </p>
         </div>
       </div>
 
