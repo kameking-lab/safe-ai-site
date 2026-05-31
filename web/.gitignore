@@ -53,3 +53,4 @@ next-env.d.ts
 scripts/r4-print.mjs
 scripts/r4-*.mjs
 .r4-*
+scripts/adoption-probe.mjs
