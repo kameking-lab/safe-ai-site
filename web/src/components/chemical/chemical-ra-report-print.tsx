@@ -12,13 +12,25 @@ function todayJa(): string {
   return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
-/** 印刷時のみ出る記録様式ヘッダ（会社名・実施日・実施者は手書き欄）。 */
-export function ChemicalRaReportHeader() {
+/** ISO日時を「YYYY年M月D日」に。不正値なら今日。 */
+function formatRecordDate(iso?: string): string {
+  if (!iso) return todayJa();
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return todayJa();
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+}
+
+/**
+ * 印刷時のみ出る記録様式ヘッダ（会社名・実施者は手書き欄）。
+ * recordDateIso を渡すと「実施日」をその日付で固定する（台帳から保存済み記録を再印刷する場合に、
+ * 当日ではなく実施当時の日付を保つ）。未指定なら当日（新規実施時）。
+ */
+export function ChemicalRaReportHeader({ recordDateIso }: { recordDateIso?: string } = {}) {
   return (
     <div className="hidden print:block border border-slate-400 p-3 mb-3 text-[11px] text-slate-900">
       <div className="flex items-center justify-between">
         <p className="text-sm font-bold">化学物質リスクアセスメント 実施記録</p>
-        <p>実施日: {todayJa()}</p>
+        <p>実施日: {formatRecordDate(recordDateIso)}</p>
       </div>
       <div className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1">
         <p>事業場名: ____________________________</p>
