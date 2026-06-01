@@ -19,6 +19,12 @@ export type NewsHubItem = {
   internalHref?: string;
   /** 補助バッジ（法改正の施行前/済 等） */
   badge?: string;
+  /**
+   * 関連業種タグ（法改正のみ付与＝deriveIndustryTags の結果。IndustryTag 値の配列）。
+   * 空配列 or 未定義は「全業種向け（特定業種に限定されない）」を意味する。
+   * 業種別メール配信のセグメント（filterItemsForIndustry）に使う。
+   */
+  industries?: string[];
 };
 
 export const NEWS_HUB_CATEGORY_LABEL: Record<NewsHubCategory, string> = {

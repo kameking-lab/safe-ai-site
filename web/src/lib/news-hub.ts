@@ -13,6 +13,7 @@
 import { lawRevisionCores } from "@/data/mock/law-revisions";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { buildEnforcementBadge } from "@/lib/law-revision-status";
+import { deriveIndustryTags } from "@/lib/law-revision-industry-tags";
 import { egovRevisionsMeta } from "@/data/law-revisions/egov-revisions-loaded";
 import monthlySokuhou from "@/data/accidents/monthly-sokuhou.json";
 import newsFeed from "@/data/news-feed/approved/index.json";
@@ -51,6 +52,8 @@ function lawRevisionItems(limit: number): NewsHubItem[] {
         url,
         internalHref: "/laws",
         badge: badge.label,
+        // 業種別メール配信のセグメント用。空配列＝全業種向け。
+        industries: deriveIndustryTags(r),
       };
     });
 }

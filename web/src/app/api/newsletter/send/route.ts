@@ -3,10 +3,10 @@ import { Resend } from "resend";
 import {
   listSubscribers,
   generateUnsubscribeToken,
-  buildDigestEmail,
   memSendHistory,
 } from "@/lib/newsletter";
-import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
+import { buildNewsHubItems } from "@/lib/news-hub";
+import { buildIndustryDigest } from "@/lib/news-digest";
 import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 
 function isAuthorized(req: Request): boolean {
@@ -20,66 +20,9 @@ function siteUrl(): string {
   return process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.anzen-ai-portal.jp";
 }
 
-function weekLabel(): string {
+function monthLabel(): string {
   const now = new Date();
-  const y = now.getFullYear();
-  const start = new Date(now);
-  start.setDate(now.getDate() - now.getDay() + 1);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-  const fmt = (d: Date) =>
-    `${d.getMonth() + 1}/${d.getDate()}`;
-  return `${y}年 ${fmt(start)}〜${fmt(end)}`;
-}
-
-function buildContent() {
-  const accidents = getAccidentCasesDataset();
-  const recentAccident = accidents[0] ?? null;
-
-  // Sample notices (would come from laws/mock data in full implementation)
-  const notices = [
-    {
-      title: "化学物質の自律的な管理に係る安全データシートの提供義務の対象物質の追加",
-      date: "2024-04-01",
-      url: `${siteUrl()}/laws`,
-    },
-    {
-      title: "建設業における一人親方等の安全衛生対策の推進について",
-      date: "2024-03-15",
-      url: `${siteUrl()}/laws`,
-    },
-    {
-      title: "高齢労働者の安全と健康確保のためのガイドライン改訂",
-      date: "2024-03-01",
-      url: `${siteUrl()}/laws`,
-    },
-  ];
-
-  const lawChanges = [
-    {
-      title: "労働安全衛生規則 第13条（産業医の権限強化）",
-      effectiveDate: "2024年4月1日",
-    },
-    {
-      title: "化学物質管理促進法 改正（GHS分類義務化）",
-      effectiveDate: "2024年7月1日",
-    },
-  ];
-
-  const ugcItems = [
-    { title: "製造ラインの安全パトロールチェックリスト共有", author: "某製造業安全担当" },
-    { title: "建設現場の熱中症予防グッズレビュー", author: "現場監督A" },
-    { title: "ヒヤリハット報告書の書き方テンプレート", author: "安全委員会" },
-  ];
-
-  return {
-    notices,
-    accident: recentAccident
-      ? { title: recentAccident.title, summary: recentAccident.summary ?? "" }
-      : null,
-    lawChanges,
-    ugcItems,
-  };
+  return `${now.getFullYear()}年${now.getMonth() + 1}月`;
 }
 
 export async function POST(req: Request) {
@@ -104,8 +47,10 @@ export async function POST(req: Request) {
 
   const resend = new Resend(apiKey);
   const fromAddress = process.env.NOTIFY_FROM ?? "安全AIポータル <noreply@anzen-ai.com>";
-  const subject = `【安全AIポータル】週間安全情報 ${weekLabel()}`;
-  const content = buildContent();
+  const label = monthLabel();
+  // 実データ（新着ハブ）を1回だけ構築し、購読者ごとに業種で絞ったダイジェストを生成する。
+  // 旧実装のサンプル固定本文を廃止し、e-Gov法改正・労災速報・通達・重大災害の実データを配信。
+  const items = buildNewsHubItems({ lawLimit: 40, noticeLimit: 8, mediaLimit: 6, seriousCaseLimit: 6 });
 
   const BATCH_SIZE = 50;
   let sent = 0;
@@ -116,11 +61,14 @@ export async function POST(req: Request) {
     const emails = batch.map((sub) => {
       const unsubToken = generateUnsubscribeToken(sub.email);
       const unsubUrl = `${siteUrl()}/api/newsletter/unsubscribe?email=${encodeURIComponent(sub.email)}&token=${unsubToken}`;
+      // 購読者の業種で法改正を絞ったダイジェスト（IT/その他/未指定は全業種向け）
+      const digest = buildIndustryDigest(items, label, sub.industry, unsubUrl);
       return {
         from: fromAddress,
         to: sub.email,
-        subject,
-        html: buildDigestEmail({ ...content, weekLabel: weekLabel(), unsubUrl }),
+        subject: digest.subject,
+        html: digest.html,
+        text: digest.text,
       };
     });
 
@@ -142,13 +90,14 @@ export async function POST(req: Request) {
     }
   }
 
+  const subjectSummary = `${label}の労働安全ダイジェスト（業種別・実データ）`;
   const record = {
     sentAt: new Date().toISOString(),
-    subject,
+    subject: subjectSummary,
     recipientCount: sent,
   };
   memSendHistory.push(record);
   console.log("[newsletter:send]", JSON.stringify(record));
 
-  return NextResponse.json({ ok: true, sent, failed, subject });
+  return NextResponse.json({ ok: true, sent, failed, subject: subjectSummary });
 }
