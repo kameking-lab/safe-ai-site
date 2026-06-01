@@ -125,6 +125,14 @@ export async function listChemicalRaRecords(): Promise<ChemicalRaSavedRecord[]> 
   }
 }
 
+/** raId で1件取得（クラウド＋ローカルのマージ結果から検索）。台帳からの再表示・再印刷用。 */
+export async function getChemicalRaRecord(raId: string): Promise<ChemicalRaSavedRecord | null> {
+  const id = raId.trim();
+  if (!id) return null;
+  const list = await listChemicalRaRecords();
+  return list.find((r) => r.raId === id) ?? null;
+}
+
 /** 1件削除（localStorage＋クラウド）。 */
 export async function deleteChemicalRaRecord(raId: string): Promise<void> {
   writeLocal(readLocal().filter((r) => r.raId !== raId));

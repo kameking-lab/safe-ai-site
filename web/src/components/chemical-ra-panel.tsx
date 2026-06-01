@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search, AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag, Gauge, Database, FileText } from "lucide-react";
+import { Search, AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag, Gauge, Database, FileText, FolderOpen } from "lucide-react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
 import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
@@ -11,6 +11,7 @@ import { SimpleMarkdown } from "@/components/simple-markdown";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { ChemicalRaReportHeader, ChemicalRaSignoffBoxes } from "@/components/chemical/chemical-ra-report-print";
 import { ChemicalRaSaveButton } from "@/components/chemical/chemical-ra-save";
+import { getChemicalRaRecord } from "@/lib/chemical/ra-cloud";
 import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 import {
   findByCas,
@@ -210,6 +211,8 @@ export function ChemicalRaPanel() {
   const [errorHint, setErrorHint] = useState<string | null>(null);
   const [result, setResult] = useState<ChemicalRaResponse | null>(null);
   const [mhlwSelected, setMhlwSelected] = useState<MergedChemical | null>(null);
+  // 台帳から保存済み記録を再表示しているときの実施日(ISO)。新規実施時は null（=当日）。
+  const [restoredAt, setRestoredAt] = useState<string | null>(null);
   // 既定は2ステップウィザード（物質検索→作業方法）。詳細モードを ON にすると
   // CREATE-SIMPLE 用の換気・取扱量・作業時間・測定濃度の入力欄が表示される。
   const [detailedMode, setDetailedMode] = useState(false);
@@ -278,8 +281,29 @@ export function ChemicalRaPanel() {
     };
   }, [measuredConc, activeLimit]);
 
-  // /chemical-ra?cas=108-88-3 などで起動した場合、自動選択
+  // /chemical-ra?raId=... は台帳から保存済み実施記録を再表示（原本を再印刷するため、API再実行はしない）。
+  // /chemical-ra?cas=... / ?name=... は新規実施の物質プリセット。
   useEffect(() => {
+    const raId = searchParams?.get("raId");
+    if (raId) {
+      let cancelled = false;
+      void getChemicalRaRecord(raId).then((rec) => {
+        if (cancelled || !rec) return;
+        // 保存時の payload（ChemicalRaResponse）をそのまま結果として復元（再判定しない）
+        setResult(rec.payload as ChemicalRaResponse);
+        setRestoredAt(rec.savedAt);
+        if (rec.substance) setChemicalName(rec.substance);
+        if (rec.cas) {
+          const found = findByCas(rec.cas);
+          if (found) setMhlwSelected(found);
+        }
+        setError(null);
+        setLoading(false);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
     const cas = searchParams?.get("cas");
     if (cas) {
       const found = findByCas(cas);
@@ -307,6 +331,7 @@ export function ChemicalRaPanel() {
     setError(null);
     setErrorHint(null);
     setResult(null);
+    setRestoredAt(null); // 新規実施なので実施日は当日
 
     const flowStartAt = Date.now();
     const MAX_RETRIES = 3;
@@ -710,6 +735,15 @@ export function ChemicalRaPanel() {
           aria-label="AI調査結果"
           className="space-y-6 scroll-mt-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 print:space-y-3"
         >
+          {restoredAt && (
+            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-xs text-sky-900 print:hidden">
+              <FolderOpen className="h-4 w-4 shrink-0 text-sky-600" aria-hidden="true" />
+              <span>
+                <strong className="font-semibold">保存済みの実施記録を表示中</strong>（実施日: {new Date(restoredAt).toLocaleDateString("ja-JP")}）。
+                このまま「🖨 A4実施レポート印刷 / PDF保存」で<strong className="font-semibold">原本を再発行</strong>できます（実施日は保存当時のまま）。
+              </span>
+            </div>
+          )}
           <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
             <p className="text-xs font-bold text-emerald-700">A4 実施記録（ブラウザ印刷で厚労省様式相当の記録に。会社名・実施者・確認印は印刷時に出ます）</p>
             <div className="flex items-center gap-2">
@@ -730,8 +764,8 @@ export function ChemicalRaPanel() {
               </button>
             </div>
           </div>
-          {/* P1-1: 印刷時のみA4記録様式ヘッダ（自社情報・実施日・実施者）。 */}
-          <ChemicalRaReportHeader />
+          {/* P1-1: 印刷時のみA4記録様式ヘッダ（自社情報・実施日・実施者）。台帳から再表示時は実施日を保存当時に固定。 */}
+          <ChemicalRaReportHeader recordDateIso={restoredAt ?? undefined} />
           {/* 物質概要 */}
           <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">

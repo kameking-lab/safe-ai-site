@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   upsertRecord,
   mergeRecords,
+  saveChemicalRaRecord,
+  getChemicalRaRecord,
+  deleteChemicalRaRecord,
   type ChemicalRaSavedRecord,
 } from "@/lib/chemical/ra-cloud";
 
@@ -42,5 +45,29 @@ describe("mergeRecords", () => {
 
   it("空同士は空", () => {
     expect(mergeRecords([], [])).toEqual([]);
+  });
+});
+
+describe("getChemicalRaRecord（台帳からの再表示・再印刷用の1件取得）", () => {
+  it("保存した記録を raId で取得でき、payload と savedAt が保持される", async () => {
+    const raId = await saveChemicalRaRecord({
+      substance: "トルエン",
+      cas: "108-88-3",
+      workContent: "塗装",
+      exposureBand: "II",
+      payload: { chemicalName: "トルエン", casNumber: "108-88-3" },
+    });
+    const rec = await getChemicalRaRecord(raId);
+    expect(rec).not.toBeNull();
+    expect(rec!.substance).toBe("トルエン");
+    expect((rec!.payload as { chemicalName?: string }).chemicalName).toBe("トルエン");
+    expect(typeof rec!.savedAt).toBe("string");
+    expect(Number.isNaN(new Date(rec!.savedAt).getTime())).toBe(false);
+    await deleteChemicalRaRecord(raId);
+  });
+
+  it("未知の raId は null", async () => {
+    expect(await getChemicalRaRecord("___missing___")).toBeNull();
+    expect(await getChemicalRaRecord("  ")).toBeNull();
   });
 });

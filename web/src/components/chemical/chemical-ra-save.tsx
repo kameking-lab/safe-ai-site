@@ -39,9 +39,11 @@ export function ChemicalRaSaveButton(props: {
       });
       setMsg(
         isChemicalRaCloudEnabled()
-          ? "保存しました（この端末＋クラウド）。下部「保存したRA」から開けます。"
-          : "保存しました（この端末）。下部「保存したRA」から開けます。"
+          ? "保存しました（この端末＋クラウド）。下部「実施記録の台帳」から開けます。"
+          : "保存しました（この端末）。下部「実施記録の台帳」から開けます。"
       );
+      // 同一ページ内の台帳一覧(SavedRaList)へ即時反映を通知
+      try { window.dispatchEvent(new Event("chemical-ra:saved")); } catch { /* SSR等 */ }
     } catch {
       setMsg("保存に失敗しました。");
     } finally {
@@ -74,6 +76,9 @@ export function SavedRaList() {
 
   useEffect(() => {
     reload();
+    const onSaved = () => reload();
+    window.addEventListener("chemical-ra:saved", onSaved);
+    return () => window.removeEventListener("chemical-ra:saved", onSaved);
   }, [reload]);
 
   if (list === null) return null;
@@ -83,12 +88,14 @@ export function SavedRaList() {
     <section className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5 print:hidden">
       <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
         <FolderOpen className="h-5 w-5 text-emerald-600" aria-hidden="true" />
-        保存したRA（{list.length}）
+        実施記録の台帳（{list.length}）
       </h2>
       <p className="mt-1 text-[11px] text-slate-500">
+        安衛法第57条の3の自律的管理では、リスクアセスメントの<strong className="font-semibold">記録の作成・保管</strong>が求められます。
+        各記録は「記録を開く」から<strong className="font-semibold">実施当時の実施日のまま再印刷</strong>でき、監督署対応や年次見直しに使えます。
         {isChemicalRaCloudEnabled()
-          ? "この端末とクラウドに保存。別端末でも同じ端末IDで参照できます。"
-          : "この端末に保存（クラウド未設定）。"}
+          ? "（この端末＋クラウドに保存）"
+          : "（この端末に保存）"}
       </p>
       <ul className="mt-3 space-y-2">
         {list.map((r) => (
@@ -107,13 +114,20 @@ export function SavedRaList() {
                 {new Date(r.savedAt).toLocaleString("ja-JP")}
               </span>
             </span>
-            <span className="flex shrink-0 items-center gap-1">
+            <span className="flex shrink-0 flex-col items-end gap-1">
+              <Link
+                href={`/chemical-ra?raId=${encodeURIComponent(r.raId)}`}
+                className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-600 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-700"
+              >
+                記録を開く（印刷）
+                <FolderOpen className="h-3 w-3" aria-hidden="true" />
+              </Link>
               {r.substance && (
                 <Link
                   href={`/chemical-ra?name=${encodeURIComponent(r.substance)}`}
-                  className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50"
+                  className="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-emerald-700 hover:underline"
                 >
-                  再実施
+                  同じ物質で再実施
                   <ArrowRight className="h-3 w-3" aria-hidden="true" />
                 </Link>
               )}
