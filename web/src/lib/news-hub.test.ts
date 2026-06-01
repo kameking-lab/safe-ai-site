@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildNewsHubItems, isRecent, NEWS_HUB_CATEGORY_LABEL } from "@/lib/news-hub";
+import { buildIndustryDigest, filterItemsForIndustry } from "@/lib/news-digest";
 
 describe("P1-2/P1-3 新着ハブ アグリゲータ", () => {
   const items = buildNewsHubItems();
@@ -36,5 +37,26 @@ describe("P1-2/P1-3 新着ハブ アグリゲータ", () => {
     expect(isRecent("2026-05-20", 30, now)).toBe(true);
     expect(isRecent("2026-01-01", 30, now)).toBe(false);
     expect(isRecent("2099-01-01", 30, now)).toBe(false); // 未来は新着扱いしない
+  });
+
+  it("法改正項目に業種タグ(industries)が付与される（業種別配信の基盤）", () => {
+    const laws = items.filter((i) => i.category === "law-revision");
+    expect(laws.length).toBeGreaterThan(0);
+    // industries は配列（空＝全業種向け、非空＝特定業種）。全件 配列であること。
+    expect(laws.every((i) => Array.isArray(i.industries))).toBe(true);
+  });
+
+  it("実データの業種別ダイジェストが業種ごとに構築できる（建設/製造/その他）", () => {
+    const label = "2026年6月";
+    const kensetsu = buildIndustryDigest(items, label, "建設");
+    const seizo = buildIndustryDigest(items, label, "製造");
+    const sonota = buildIndustryDigest(items, label, "その他");
+    expect(kensetsu.subject).toContain("（建設向け）");
+    expect(seizo.subject).toContain("（製造向け）");
+    expect(sonota.subject).not.toContain("向け）"); // その他=全業種
+    // 建設向けの法改正件数は、その他(全件)以下になる（業種で絞られるため）
+    const lawCount = (tag: string | null) =>
+      filterItemsForIndustry(items, tag).filter((i) => i.category === "law-revision").length;
+    expect(lawCount("construction")).toBeLessThanOrEqual(lawCount(null));
   });
 });
