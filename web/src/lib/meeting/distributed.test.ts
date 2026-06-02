@@ -5,7 +5,13 @@ import {
   sanitizeContribution,
   contributionToContractorRow,
   mergeContributionsIntoContractors,
+  isHistoryExpired,
+  activeHistory,
+  pickPreviousPayload,
+  hasWriteConflict,
+  HISTORY_RETENTION_DAYS,
   type MeetingContribution,
+  type MeetingContributionHistory,
 } from "@/lib/meeting/distributed";
 import type { MeetingContractorRow } from "@/lib/meeting/schema";
 
@@ -104,5 +110,64 @@ describe("mergeContributionsIntoContractors（集約・元請欄保護）", () =
     expect(row.actualCount).toBe("");
     expect(row.appendNote).toBe("");
     expect(row.id).toBe("contrib-c1");
+  });
+});
+
+describe("要件1: 同時入力でデータ消失しない（行レベル分離）", () => {
+  it("2社が同時に入力しても別々の行になり双方残る（後勝ちで消えない）", () => {
+    // 2社の投稿は contribution_id が異なる＝別行。順不同で取り込んでも両方残る。
+    const a = contrib("companyA");
+    const b = contrib("companyB", { companyName: "B社" });
+    const out1 = mergeContributionsIntoContractors([], [a, b]);
+    const out2 = mergeContributionsIntoContractors([], [b, a]);
+    expect(out1.map((r) => r.id).sort()).toEqual(["contrib-companyA", "contrib-companyB"]);
+    expect(out2.map((r) => r.id).sort()).toEqual(["contrib-companyA", "contrib-companyB"]);
+    expect(out1).toHaveLength(2);
+  });
+
+  it("同一社の複数回更新は単一行のまま（重複せず最新を反映）", () => {
+    const first = mergeContributionsIntoContractors([], [contrib("cX", { workContent: "v1" })]);
+    const again = mergeContributionsIntoContractors(first, [contrib("cX", { workContent: "v2" })]);
+    expect(again).toHaveLength(1);
+    expect(again[0].workContent).toBe("v2");
+  });
+
+  it("楽観ロック: 同一行(同一cid)の並行更新を検知（base≠current=競合）", () => {
+    expect(hasWriteConflict("2026-06-02T00:00:10Z", "2026-06-02T00:00:00Z")).toBe(true); // 他で更新済み
+    expect(hasWriteConflict("2026-06-02T00:00:00Z", "2026-06-02T00:00:00Z")).toBe(false); // 一致＝OK
+    expect(hasWriteConflict("2026-06-02T00:00:00Z", null)).toBe(false); // 新規/非対象
+    expect(hasWriteConflict(null, "2026-06-02T00:00:00Z")).toBe(false); // 現在行なし
+  });
+});
+
+describe("要件2: 入力履歴・期限切れ除外・一つ前に戻す", () => {
+  const H = (id: string, recordedAt: string, workContent: string): MeetingContributionHistory => ({
+    historyId: id, contributionId: "cX", token: "t".repeat(64), recordedAt,
+    payload: { ...contrib("cX").payload, workContent },
+  });
+  const now = new Date("2026-06-02T00:00:00Z").getTime();
+
+  it("保持期間(30日)超過は期限切れ判定", () => {
+    expect(HISTORY_RETENTION_DAYS).toBe(30);
+    expect(isHistoryExpired("2026-04-01T00:00:00Z", now)).toBe(true); // 60日以上前
+    expect(isHistoryExpired("2026-05-20T00:00:00Z", now)).toBe(false); // 13日前
+    expect(isHistoryExpired("not-a-date", now)).toBe(false); // 不正日付は消さない（安全側）
+  });
+
+  it("activeHistory: 期限切れを除外し新しい順", () => {
+    const hist = [H("h1", "2026-05-30T00:00:00Z", "新"), H("h0", "2026-03-01T00:00:00Z", "古(期限切れ)"), H("h2", "2026-05-31T00:00:00Z", "最新")];
+    const act = activeHistory(hist, now);
+    expect(act.map((h) => h.historyId)).toEqual(["h2", "h1"]); // h0は除外、新しい順
+  });
+
+  it("pickPreviousPayload: 現在より前の最新スナップショットを返す（一つ前に戻す）", () => {
+    const hist = [H("h1", "2026-05-30T00:00:00Z", "v1"), H("h2", "2026-05-31T00:00:00Z", "v2"), H("h3", "2026-06-01T00:00:00Z", "v3(現在)")];
+    const prev = pickPreviousPayload(hist, "2026-06-01T00:00:00Z", now);
+    expect(prev?.workContent).toBe("v2"); // 現在(v3)の一つ前=v2
+  });
+
+  it("pickPreviousPayload: 戻す先が無ければ null", () => {
+    const hist = [H("h1", "2026-05-31T00:00:00Z", "only")];
+    expect(pickPreviousPayload(hist, "2026-05-31T00:00:00Z", now)).toBeNull();
   });
 });

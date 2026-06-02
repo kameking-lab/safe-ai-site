@@ -25,7 +25,21 @@
 - クライアント: `DistributedInputBar`（元請の依頼/取り込みボタン）, `/safety-diary/contribute/[token]`（協力会社フォーム）
 - 既存の打合せ書（階層・点検項目・AI提案・クラウド保管・印刷・翌日複製）は**非破壊**。
 
-## Phase 1 テスト（純粋な認可不変条件）
+## 要件1: マージ競合しない仕組み（行レベル分離）
+- **各協力会社は自社の行(`meeting_share_inputs` の1行＝固有 contribution_id)だけを書く**。別々の行なので**そもそも競合しない**（2社同時入力でも別行＝両方残る）。
+- **元請の確定欄(actualCount)・追記欄(appendNote)は `meeting_records`（元請の別テーブル）にあり、協力会社が触る `meeting_share_inputs` とは物理的に別**。同一行・同一カラムを複数主体が触らない。
+- 元請の「取り込み」は協力会社の行を**元請ローカルへコピー**する操作。再取り込みでも `mergeContributionsIntoContractors` が**元請の当日欄・追記・階層を保持**（協力会社の申告フィールドのみ更新）。
+- 唯一「同一行を並行更新し得る」のは**同一社が同一 contribution_id を2タブ等で同時更新**する稀ケース。ここだけ**楽観ロック**: クライアントが最後に見た `submittedAt(base)` をサーバーが現在値と照合し、食い違えば **409 conflict** を返す→UIは最新を読み直して再編集を促す（**黙ってデータを消さない**）。last-write-wins による消失を防ぐ。
+- 検証（テスト）: 「2社同時→別行で両方残る」「同一社の複数更新→単一行で最新反映」「base≠current→競合検知」。
+
+## 要件2: 入力履歴・自動期限切れ・一つ前に戻す（オーナー負担ゼロ）
+- 送信のたびに `meeting_share_input_history` に**スナップショットを追記**（誰=token/contribution・いつ=recorded_at・何=payload）。監査価値（誰がいつ何を入力したか追える）。
+- **保持30日**（`HISTORY_RETENTION_DAYS`）。期限切れは**読み取り時に除外**（`activeHistory`）＋**書き込み時に自動削除**（`appendHistoryAndGc` が `recorded_at < now-30d` を毎回削除）。**専用cron不要・オーナーの手動運用ゼロ・無限蓄積しない**（無料枠内）。
+- **一つ前に戻す**: `pickPreviousPayload` が現在より前の最新スナップショットを返す。協力会社フォーム（自社cid所有）と元請（token＋cid所有）の双方が `/api/meeting/contribute/[token]` の `mode:"revert"` で復元可能（完全な版管理ではなく「直前に戻す」程度）。
+- 追加スキーマは**追記のみ**（履歴テーブル新規追加）。既存破壊なし。
+- 検証（テスト）: 「30日超過は期限切れ判定」「activeHistory が期限切れ除外＋新しい順」「pickPreviousPayload が一つ前を返す／無ければnull」。
+
+## Phase 1 テスト（純粋な認可・競合・履歴の不変条件 計16件）
 - token: 64桁hex・毎回ユニーク・不正値拒否
 - sanitize: 元請確定欄/当日欄/階層/id を受け付けない・risk クランプ・文字数上限・型強制
 - merge: 新規追加／再取り込みで重複せず元請の当日欄・追記欄・階層を保持／元請の手作り行は不変／協力会社は当日欄を持ち込めない

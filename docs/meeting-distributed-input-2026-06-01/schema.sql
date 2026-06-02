@@ -42,30 +42,52 @@ create table if not exists public.meeting_share_inputs (
 
 create index if not exists meeting_share_inputs_token_idx
   on public.meeting_share_inputs (token);
+-- 楽観ロック（同一行の並行更新検知）に使う updated_at。既存行が無い新規テーブルなので追加で安全。
+-- （meeting_share_inputs.submitted_at を基準値に使うため別カラムは不要。submitted_at で照合する。）
 
 -- ============================================================
--- (3) RLS: 匿名公開しない（anon/authenticated ポリシーを作らない＝遮断）。
+-- (3) 入力履歴（要件2・追記専用・監査＆「一つ前に戻す」用）
+--     送信のたびに1スナップショットを追記。30日超過は読み取り除外＋書き込み時に自動削除（ゼロ運用）。
+-- ============================================================
+create table if not exists public.meeting_share_input_history (
+  history_id      text       primary key,        -- サーバー生成ID
+  contribution_id text       not null,            -- どの社の入力か
+  token           text       not null,            -- どの打合せ書の共有か（スコープ）
+  payload         jsonb      not null,            -- その時点のスナップショット
+  recorded_at     timestamptz not null default now()
+);
+
+create index if not exists meeting_share_input_history_cid_idx
+  on public.meeting_share_input_history (contribution_id, recorded_at desc);
+-- 自動削除（30日超過）の対象抽出を速く：
+create index if not exists meeting_share_input_history_recorded_idx
+  on public.meeting_share_input_history (recorded_at);
+
+-- ============================================================
+-- (4) RLS: 匿名公開しない（anon/authenticated ポリシーを作らない＝遮断）。
 --     service_role（サーバールート）のみがアクセス（RLSを貫通）。
 -- ============================================================
-alter table public.meeting_shares       enable row level security;
-alter table public.meeting_share_inputs enable row level security;
+alter table public.meeting_shares             enable row level security;
+alter table public.meeting_share_inputs       enable row level security;
+alter table public.meeting_share_input_history enable row level security;
 -- 注: anon/authenticated 向けポリシーは意図的に作らない。直接の匿名アクセスは全行拒否される。
 
 -- ============================================================
--- (4) service_role への GRANT（GRANT不足障害の予防・冪等）
+-- (5) service_role への GRANT（GRANT不足障害の予防・冪等）
 -- ============================================================
 grant usage on schema public to service_role;
-grant all privileges on public.meeting_shares       to service_role;
-grant all privileges on public.meeting_share_inputs to service_role;
+grant all privileges on public.meeting_shares             to service_role;
+grant all privileges on public.meeting_share_inputs       to service_role;
+grant all privileges on public.meeting_share_input_history to service_role;
 -- 既定権限（将来の再作成時も service_role に付与）
 alter default privileges in schema public grant all on tables to service_role;
 
 -- ============================================================
--- (5) 確認クエリ（grantee=service_role が両テーブルで出ればOK）
+-- (6) 確認クエリ（grantee=service_role が3テーブルで出ればOK）
 -- ============================================================
 select table_name, grantee, privilege_type
 from information_schema.role_table_grants
 where table_schema = 'public'
-  and table_name in ('meeting_shares','meeting_share_inputs')
+  and table_name in ('meeting_shares','meeting_share_inputs','meeting_share_input_history')
   and grantee = 'service_role'
 order by table_name, privilege_type;

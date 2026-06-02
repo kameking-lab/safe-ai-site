@@ -49,6 +49,68 @@ export type MeetingContribution = {
   submittedAt: string;
 };
 
+/** 投稿履歴の1スナップショット（追記専用・監査＆復元用）。 */
+export type MeetingContributionHistory = {
+  historyId: string;
+  contributionId: string;
+  token: string;
+  payload: ContributionPayload;
+  recordedAt: string; // ISO
+};
+
+/** 履歴の保持期間（日）。これを過ぎた履歴は読み取り時に除外＆書き込み時に自動削除（ゼロ運用）。 */
+export const HISTORY_RETENTION_DAYS = 30;
+
+/** recordedAt が保持期間を過ぎているか（読み取り時の期限切れ除外用）。 */
+export function isHistoryExpired(
+  recordedAt: string,
+  now: number = Date.now(),
+  days: number = HISTORY_RETENTION_DAYS
+): boolean {
+  const t = new Date(recordedAt).getTime();
+  if (Number.isNaN(t)) return false; // 不正日付は除外しない（消さない安全側）
+  return now - t > days * 24 * 60 * 60 * 1000;
+}
+
+/** 期限切れ（保持期間超過）の履歴を除外して新しい順に返す純関数。 */
+export function activeHistory(
+  history: MeetingContributionHistory[],
+  now: number = Date.now()
+): MeetingContributionHistory[] {
+  return history
+    .filter((h) => !isHistoryExpired(h.recordedAt, now))
+    .slice()
+    .sort((a, b) => b.recordedAt.localeCompare(a.recordedAt));
+}
+
+/**
+ * 「一つ前の状態」のペイロードを返す（復元用）。
+ * 現在のスナップショット(recordedAt=currentRecordedAt)より厳密に前の、最も新しい履歴の payload。
+ * 無ければ null（戻す先が無い）。期限切れは対象外。
+ */
+export function pickPreviousPayload(
+  history: MeetingContributionHistory[],
+  currentRecordedAt: string,
+  now: number = Date.now()
+): ContributionPayload | null {
+  const prev = activeHistory(history, now).filter((h) => h.recordedAt.localeCompare(currentRecordedAt) < 0);
+  return prev.length > 0 ? prev[0].payload : null;
+}
+
+/**
+ * 楽観ロックの競合検知（同一行を複数主体が同時更新する唯一の箇所＝同一contributionIdの並行更新用）。
+ * クライアントが最後に見た submitted_at(base) と、サーバー現在値(current) が食い違えば競合＝true。
+ * base 未指定（新規 or 競合検知しない呼び出し）や current 無し（新規行）は競合なし。
+ */
+export function hasWriteConflict(
+  currentSubmittedAt: string | null | undefined,
+  baseSubmittedAt: string | null | undefined
+): boolean {
+  if (!baseSubmittedAt) return false;
+  if (!currentSubmittedAt) return false;
+  return currentSubmittedAt !== baseSubmittedAt;
+}
+
 const cap = (s: unknown, n: number): string =>
   (typeof s === "string" ? s : "").slice(0, n);
 
