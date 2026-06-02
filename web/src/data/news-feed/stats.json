@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-01T22:59:29.033Z",
+  "generatedAt": "2026-06-02T22:59:39.346Z",
   "counts": {
     "approved": 11,
-    "rejected": 15,
-    "total": 26,
-    "approvalRate": 0.423
+    "rejected": 16,
+    "total": 27,
+    "approvalRate": 0.407
   },
   "byDay": [
     {
@@ -83,6 +83,13 @@
       "rejected": 2,
       "total": 2,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-06-03",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -96,9 +103,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 2,
-      "rejected": 13,
-      "total": 15,
-      "approvalRate": 0.133
+      "rejected": 14,
+      "total": 16,
+      "approvalRate": 0.125
     }
   ],
   "byEstimatedWorkCategory": [
@@ -161,7 +168,7 @@
       ],
       "rejected": [
         0,
-        2,
+        3,
         11,
         0,
         0,
@@ -199,7 +206,7 @@
       ],
       "rejected": [
         2,
-        13,
+        14,
         0,
         0,
         0,
@@ -237,7 +244,7 @@
       ],
       "rejected": [
         10,
-        5,
+        6,
         0,
         0,
         0,
@@ -275,7 +282,7 @@
       ],
       "rejected": [
         0,
-        10,
+        11,
         0,
         0,
         0,
@@ -290,7 +297,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 13
+      "count": 14
     },
     {
       "reason": "duplication",
@@ -513,6 +520,22 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "「嵐」最終公演の東京ドームに作業員など装い侵入か 3人逮捕",
+        "aiSummary": "東京ドーム「嵐」公演に作業員を装い侵入、3人逮捕。",
+        "score": {
+          "relevance": 10,
+          "copyrightRisk": 15,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-06-02T22:59:39.283Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 10 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "1日は東日本 北日本で高温続く 猛暑日のところも 熱中症対策を",
         "aiSummary": "東日本と北日本で高温が続き、猛暑日となる地域もあるため、熱中症への警戒が必要。",
         "score": {
@@ -573,22 +596,6 @@
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
             "relevance 20 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "気温上昇 猛暑日予想も 熱中症への対策を",
-        "aiSummary": "気温上昇と猛暑日予想を受け、熱中症予防策の徹底が呼びかけられている。",
-        "score": {
-          "relevance": 25,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-05-17T21:51:58.298Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 25 < 70 (not labor-safety related for type=general_news)"
           ]
         },
         "publisher": "日本放送協会"

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-31T21:56:50.510Z",
+  "updatedAt": "2026-06-02T22:59:39.290Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -78,6 +78,34 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "1c4af1d2219bedfc",
+      "headline": "台風6号 停電の復旧中に作業員が感電か 搬送時に意識なし 沖縄",
+      "aiSummary": "沖縄で台風による停電復旧作業中の作業員が感電し、意識不明の重体。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260602/k10015138741000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 02 Jun 2026 21:00:31 +0900",
+        "fetchedAt": "2026-06-02T22:59:27.318Z"
+      },
+      "estimatedAccidentType": "感電",
+      "estimatedWorkCategory": "電気業",
+      "newsType": "accident_report",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 25,
+        "misinformationRisk": 10,
+        "duplication": 55,
+        "judgedAt": "2026-06-02T22:59:33.564Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "duplication 55 > 50 (already covered in accident DB)"
         ]
       },
       "approved": false,

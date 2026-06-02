@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-31T21:56:50.510Z",
+  "updatedAt": "2026-06-02T22:59:39.290Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -129,6 +129,32 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "6d3681742373a1f3",
+      "headline": "「嵐」最終公演の東京ドームに作業員など装い侵入か 3人逮捕",
+      "aiSummary": "東京ドーム「嵐」公演に作業員を装い侵入、3人逮捕。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260602/k10015138071000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 02 Jun 2026 12:45:04 +0900",
+        "fetchedAt": "2026-06-02T22:59:27.318Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 10,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-06-02T22:59:39.283Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 10 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
