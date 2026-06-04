@@ -19,6 +19,7 @@ import {
   generateShareToken,
   pickPreviousPayload,
   activeHistory,
+  hasWriteConflict,
   HISTORY_RETENTION_DAYS,
   type MeetingContributionHistory,
   type ContributionPayload,
@@ -148,8 +149,9 @@ export async function POST(request: Request, ctx: { params: Promise<{ token: str
     payload = prev;
     contributionId = givenCid;
   } else {
-    // 楽観ロック: 既存行があり、baseSubmittedAt が現在値と食い違えば競合（黙って消さない）
-    if (current && baseSubmittedAt && current.submitted_at !== baseSubmittedAt) {
+    // 楽観ロック: 既存行があり、baseSubmittedAt が現在値と食い違えば競合（黙って消さない）。
+    // 時刻表記差("Z" vs "+00:00")で誤検知しないよう、hasWriteConflict は時刻(ms)で比較する。
+    if (current && hasWriteConflict(current.submitted_at, baseSubmittedAt)) {
       return NextResponse.json({ ok: false, reason: "conflict", currentSubmittedAt: current.submitted_at }, { status: 409 });
     }
     payload = sanitizeContribution(body.payload);

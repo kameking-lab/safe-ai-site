@@ -106,9 +106,14 @@ export function hasWriteConflict(
   currentSubmittedAt: string | null | undefined,
   baseSubmittedAt: string | null | undefined
 ): boolean {
-  if (!baseSubmittedAt) return false;
-  if (!currentSubmittedAt) return false;
-  return currentSubmittedAt !== baseSubmittedAt;
+  if (!baseSubmittedAt || !currentSubmittedAt) return false;
+  // 「同一時刻」を文字列ではなく時刻(エポックms)で比較する。
+  // DBは timestamptz を "…+00:00" で返し、サーバー生成は "…Z" のため、同一瞬間でも
+  // 文字列比較だと誤って競合扱いになり、正当な自社行の更新が全て弾かれてしまう（実DB検証で発覚）。
+  const a = new Date(currentSubmittedAt).getTime();
+  const b = new Date(baseSubmittedAt).getTime();
+  if (Number.isNaN(a) || Number.isNaN(b)) return currentSubmittedAt !== baseSubmittedAt; // 解釈不能は文字列比較に退避
+  return a !== b;
 }
 
 const cap = (s: unknown, n: number): string =>
