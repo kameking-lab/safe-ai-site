@@ -24,6 +24,7 @@ import { loadCurrentMeeting, saveCurrentMeeting, snapshotMeeting, collectMeeting
 import { MeetingPrintSheet } from "@/components/meeting/meeting-print-sheet";
 import { estimateQualifications, inferChecklist } from "@/lib/meeting/inference";
 import { cloudPushMeeting, isMeetingCloudEnabled } from "@/lib/meeting/cloud";
+import { DistributedInputBar } from "@/components/meeting/distributed-input-bar";
 
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
@@ -325,6 +326,16 @@ export function MeetingPaperView() {
                 ))}
               </div>
             </div>
+
+            {/* 協力会社 分散入力 → 元請 自動集約（クラウド設定時のみ。print:hidden） */}
+            <DistributedInputBar
+              meetingId={record.id}
+              siteName={record.siteName}
+              workDate={`${record.workDateYear}-${record.workDateMonth}-${record.workDateDay}`}
+              onImport={(merged) => patch({ contractors: merged })}
+              contractors={record.contractors}
+            />
+
             <div className="space-y-2">
               {record.contractors.map((c) => {
                 if (hidden.has(c.id)) return null;
