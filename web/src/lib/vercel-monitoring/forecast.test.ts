@@ -40,7 +40,7 @@ describe("judgeHobbyReadiness", () => {
       imageOptimization: 5,
       fastOriginTransfer: 0.1,
     });
-    const result = judgeHobbyReadiness(snapshot);
+    const result = judgeHobbyReadiness(snapshot, NOW.getTime());
     expect(result.status).toBe("ready");
     expect(result.recommendations).toHaveLength(0);
   });
@@ -50,7 +50,7 @@ describe("judgeHobbyReadiness", () => {
       isrWrites: 36_000,
       edgeRequests: 53_000,
     });
-    const result = judgeHobbyReadiness(snapshot);
+    const result = judgeHobbyReadiness(snapshot, NOW.getTime());
     expect(result.status).toBe("blocked");
     const isr = result.projections.find((p) => p.key === "isrWrites")!;
     expect(isr.verdict).toBe("blocked");
@@ -63,7 +63,7 @@ describe("judgeHobbyReadiness", () => {
     const isrLimit = HOBBY_LIMITS.isrWrites.hobbyLimit!;
     const borderlineDaily = (isrLimit * 0.85) / 30;
     const snapshot = buildSnapshot({ isrWrites: borderlineDaily });
-    const result = judgeHobbyReadiness(snapshot);
+    const result = judgeHobbyReadiness(snapshot, NOW.getTime());
     const isr = result.projections.find((p) => p.key === "isrWrites")!;
     expect(isr.verdict).toBe("borderline");
     expect(result.status).toBe("borderline");
@@ -83,7 +83,7 @@ describe("judgeHobbyReadiness", () => {
       })),
       trend: [],
     };
-    const result = judgeHobbyReadiness(snapshot);
+    const result = judgeHobbyReadiness(snapshot, NOW.getTime());
     expect(result.status).toBe("ready");
     for (const p of result.projections) {
       if (p.limit === null) {
