@@ -22,8 +22,8 @@ import type { HobbyReadiness, QuotaKey, UsageSnapshot } from "./types";
 const WINDOW_DAYS = 14;
 const FORECAST_DAYS = 30;
 
-export function judgeHobbyReadiness(snapshot: UsageSnapshot): HobbyReadiness {
-  const todayMs = Date.now();
+export function judgeHobbyReadiness(snapshot: UsageSnapshot, now: number = Date.now()): HobbyReadiness {
+  const todayMs = now;
   const cutoffMs = todayMs - WINDOW_DAYS * 24 * 60 * 60 * 1000;
 
   const recent = snapshot.trend.filter((p) => {
