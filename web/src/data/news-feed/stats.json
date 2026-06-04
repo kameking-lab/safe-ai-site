@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-03T23:03:41.818Z",
+  "generatedAt": "2026-06-04T22:18:11.639Z",
   "counts": {
-    "approved": 11,
+    "approved": 12,
     "rejected": 16,
-    "total": 27,
-    "approvalRate": 0.407
+    "total": 28,
+    "approvalRate": 0.429
   },
   "byDay": [
     {
@@ -90,15 +90,22 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-06-05",
+      "approved": 1,
+      "rejected": 0,
+      "total": 1,
+      "approvalRate": 1
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 9,
+      "approved": 10,
       "rejected": 2,
-      "total": 11,
-      "approvalRate": 0.818
+      "total": 12,
+      "approvalRate": 0.833
     },
     {
       "publisher": "日本放送協会",
@@ -111,10 +118,10 @@
   "byEstimatedWorkCategory": [
     {
       "category": "建設業",
-      "approved": 1,
+      "approved": 2,
       "rejected": 2,
-      "total": 3,
-      "approvalRate": 0.333
+      "total": 4,
+      "approvalRate": 0.5
     },
     {
       "category": "その他の事業",
@@ -163,7 +170,7 @@
         0,
         0,
         1,
-        1,
+        2,
         9
       ],
       "rejected": [
@@ -195,7 +202,7 @@
       "approved": [
         3,
         7,
-        1,
+        2,
         0,
         0,
         0,
@@ -231,7 +238,7 @@
         "90-100"
       ],
       "approved": [
-        9,
+        10,
         2,
         0,
         0,
@@ -270,7 +277,7 @@
       ],
       "approved": [
         0,
-        10,
+        11,
         1,
         0,
         0,
@@ -331,6 +338,19 @@
           "model": "gemini-2.5-flash"
         },
         "publisher": "日本放送協会"
+      },
+      {
+        "headline": "第35回特定石綿被害建設業務労働者等認定審査会専門委員会　開催案内",
+        "aiSummary": "厚生労働省が特定石綿被害建設業務労働者等認定審査会の開催を案内。",
+        "score": {
+          "relevance": 85,
+          "copyrightRisk": 20,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-06-04T22:18:11.577Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
       },
       {
         "headline": "労働基準関係法令違反に係る公表事案",
@@ -419,19 +439,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-05-16T00:09:20.104Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "「第１回 個人事業者等安全衛生推進協議会」を５月13日に開催します",
-        "aiSummary": "厚生労働省が個人事業主の安全衛生推進に向け、初の協議会を5月13日に開催する。",
-        "score": {
-          "relevance": 88,
-          "copyrightRisk": 5,
-          "misinformationRisk": 2,
-          "duplication": 10,
-          "judgedAt": "2026-05-16T00:09:25.863Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"
