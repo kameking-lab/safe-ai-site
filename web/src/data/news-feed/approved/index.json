@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-04T22:18:11.584Z",
+  "updatedAt": "2026-06-05T22:12:47.833Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -45,6 +45,29 @@
         "misinformationRisk": 10,
         "duplication": 15,
         "judgedAt": "2026-05-20T22:22:59.495Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "7571f97d433ba969",
+      "headline": "令和８年度第３回「石綿に係る疾病の業務上外に関する検討会」を開催します",
+      "aiSummary": "厚労省が石綿関連疾病の業務上外を検討する会議を開催予定。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_73173.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-06-05T14:00:00+09:00",
+        "fetchedAt": "2026-06-05T22:12:36.579Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 25,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-06-05T22:12:47.826Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,

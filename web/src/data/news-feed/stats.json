@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-04T22:18:11.639Z",
+  "generatedAt": "2026-06-05T22:12:47.887Z",
   "counts": {
-    "approved": 12,
+    "approved": 13,
     "rejected": 16,
-    "total": 28,
-    "approvalRate": 0.429
+    "total": 29,
+    "approvalRate": 0.448
   },
   "byDay": [
     {
@@ -97,15 +97,22 @@
       "rejected": 0,
       "total": 1,
       "approvalRate": 1
+    },
+    {
+      "date": "2026-06-06",
+      "approved": 1,
+      "rejected": 0,
+      "total": 1,
+      "approvalRate": 1
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 10,
+      "approved": 11,
       "rejected": 2,
-      "total": 12,
-      "approvalRate": 0.833
+      "total": 13,
+      "approvalRate": 0.846
     },
     {
       "publisher": "日本放送協会",
@@ -171,7 +178,7 @@
         0,
         1,
         2,
-        9
+        10
       ],
       "rejected": [
         0,
@@ -202,7 +209,7 @@
       "approved": [
         3,
         7,
-        2,
+        3,
         0,
         0,
         0,
@@ -238,7 +245,7 @@
         "90-100"
       ],
       "approved": [
-        10,
+        11,
         2,
         0,
         0,
@@ -277,7 +284,7 @@
       ],
       "approved": [
         0,
-        11,
+        12,
         1,
         0,
         0,
@@ -338,6 +345,19 @@
           "model": "gemini-2.5-flash"
         },
         "publisher": "日本放送協会"
+      },
+      {
+        "headline": "令和８年度第３回「石綿に係る疾病の業務上外に関する検討会」を開催します",
+        "aiSummary": "厚労省が石綿関連疾病の業務上外を検討する会議を開催予定。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 25,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-06-05T22:12:47.826Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
       },
       {
         "headline": "第35回特定石綿被害建設業務労働者等認定審査会専門委員会　開催案内",
@@ -426,19 +446,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-05-25T22:04:46.208Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "第185回労働政策審議会安全衛生分科会（開催案内）",
-        "aiSummary": "厚生労働省が労働安全衛生政策を議論する分科会の開催を案内。",
-        "score": {
-          "relevance": 95,
-          "copyrightRisk": 5,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-05-16T00:09:20.104Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"
