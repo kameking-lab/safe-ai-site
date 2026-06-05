@@ -969,6 +969,24 @@ export function ChemicalRaPanel() {
             </div>
           </div>
 
+          {/* exp-r8-a: この物質を扱う作業の事故事例へワンタップ（作業内容を引き継ぎ事故AI分析をプリフィル）。
+              社長指摘「物質→その物質の事故事例に飛べるか」への是正。AI分析は作業文から類似災害を返すため、
+              汎用裁判例(石綿等に偏る)へのリンクは行き止まり回避のため張らない。 */}
+          <div className="rounded-xl border border-rose-200 bg-rose-50 p-4">
+            <h3 className="text-sm font-bold text-rose-900">この物質を扱う作業の事故事例を確認</h3>
+            <p className="mt-1 text-xs text-rose-900/80">
+              {result.chemicalName} を取り扱う作業で実際に起きた労働災害を、AIが過去の事例から抽出し注意点を提示します。
+            </p>
+            <div className="mt-3">
+              <a
+                href={`/accidents?work=${encodeURIComponent(`${result.chemicalName}を取り扱う作業`)}`}
+                className="inline-flex items-center gap-1 rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-500"
+              >
+                類似の労災事例をAIで調べる →
+              </a>
+            </div>
+          </div>
+
           {/* この場面で必要な保護具: 化学物質名から関連 PPE を絞り込み（フォールバックは呼吸器系） */}
           <ContextualPpePicks
             context={`${result.chemicalName} 化学物質 SDS 防塵 防毒 マスク 保護メガネ 耐薬品 手袋 保護衣`}
