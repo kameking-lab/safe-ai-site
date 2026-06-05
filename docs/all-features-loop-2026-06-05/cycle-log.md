@@ -32,3 +32,10 @@
 非自明。DistributedInputBar に初回のみ表示・×で恒久非表示の4ステップ使い方ガイドを追加（KY/打合せ書の
 初見ガイドと同方針）。client-only・DB非依存・既存非破壊。これは "あったら便利" ではなく「機能はあるが
 使い方が分からない」の是正＝flagshipレバー(#349)の採用完成。検証: lint0/tsc0/test1019/build OK。
+
+## Cycle 4 完了（2026-06-05 21:05    ）#353 マージ・本番検証済み
+分散入力 初見ガイド: CI緑(e2e/smoke pass・lint緑化=react-hooks/set-state-in-effect の disable directive)。
+本番(www.anzen-ai-portal.jp/safety-diary)で実機検証: 初回に4ステップ全文表示・「LINE等で送る/取り込む」手順・
+×で全文非表示＋「分散入力の使い方」トグル残存 を確認。main HEAD=86458435・clean・安全タグ健在。
+※途中、CIの smoke(lint) が effect内setStateを error 判定し1度赤→未マージのまま修正→緑化してマージ。
+  安全停止設計が機能（赤の間 main を汚さず、main常時デプロイ可能を維持）。
