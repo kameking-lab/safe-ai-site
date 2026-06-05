@@ -27,7 +27,10 @@ export function DistributedInputBar(props: {
   // 初見ガイド（多者間フローが非自明なので、初回だけ手順を提示。×で恒久非表示）
   const [guideOpen, setGuideOpen] = useState(false);
   useEffect(() => {
-    try { if (localStorage.getItem(GUIDE_KEY) !== "1") setGuideOpen(true); } catch { /* localStorage不可 */ }
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント直後の一度きりのlocalStorage hydration
+      if (localStorage.getItem(GUIDE_KEY) !== "1") setGuideOpen(true);
+    } catch { /* localStorage不可 */ }
   }, []);
   const dismissGuide = () => {
     setGuideOpen(false);
