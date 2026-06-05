@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { HomeQuickAccess } from "@/components/home-quick-access";
 import { NewHomeHero } from "@/components/new-home-hero";
 import { FlagshipGrid } from "@/components/flagship-grid";
 import { HomeThreePillars } from "@/components/home-three-pillars";
@@ -30,6 +31,9 @@ export default function HomePage() {
   return (
     <main>
       <PageJsonLd name={_title} description={_desc} path="/" />
+      {/* exp-r8: トップ最上部に主要9機能への直接導線（0スクロール・1タップ）。
+          社長の不満「すぐ機能に行かない」の是正。Hero(h1/キャッチ/統計＝SEO)は直下に温存。 */}
+      <HomeQuickAccess />
       <NewHomeHero />
 
       {/* exp-01 (autonomous-loop 2026-05-30): 単独の建設業バナーを 4 ペルソナ
