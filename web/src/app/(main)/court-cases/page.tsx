@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import { Scale, ClipboardList, Database, MessageSquare, FileText } from "lucide-react";
 import { PageContainer } from "@/components/layout";
@@ -60,7 +61,9 @@ export default function CourtCasesPage() {
           </div>
         </header>
 
-        <CourtCasesBrowser />
+        <Suspense fallback={<div className="py-10 text-center text-sm text-slate-400">判例を読み込み中…</div>}>
+          <CourtCasesBrowser />
+        </Suspense>
 
         {/* 関連機能への導線 */}
         <section className="mt-8">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Scale, Search, ExternalLink } from "lucide-react";
 import {
@@ -23,9 +24,22 @@ const issueColor: Record<CourtCaseIssue, string> = {
 };
 
 export function CourtCasesBrowser() {
-  const [issue, setIssue] = useState<CourtCaseIssue | "">("");
-  const [field, setField] = useState<CourtCaseField | "">("");
-  const [q, setQ] = useState("");
+  // 事故事例など他機能からの ?field= / ?issue= / ?q= ディープリンクで初期フィルタを反映。
+  // 不正値は無視（未選択扱い）。フィルタ済みビューを共有・ブックマークできるようにもなる。
+  const searchParams = useSearchParams();
+  const initialField = ((): CourtCaseField | "" => {
+    const f = searchParams?.get("field") ?? "";
+    return (COURT_CASE_FIELDS as readonly string[]).includes(f) ? (f as CourtCaseField) : "";
+  })();
+  const initialIssue = ((): CourtCaseIssue | "" => {
+    const i = searchParams?.get("issue") ?? "";
+    return (COURT_CASE_ISSUES as readonly string[]).includes(i) ? (i as CourtCaseIssue) : "";
+  })();
+  const initialQ = searchParams?.get("q") ?? "";
+
+  const [issue, setIssue] = useState<CourtCaseIssue | "">(initialIssue);
+  const [field, setField] = useState<CourtCaseField | "">(initialField);
+  const [q, setQ] = useState(initialQ);
 
   const filtered = useMemo(() => {
     const kw = q.trim();
