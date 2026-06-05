@@ -54,3 +54,4 @@ scripts/r4-print.mjs
 scripts/r4-*.mjs
 .r4-*
 .r8-screens/
+scripts/adoption-probe.mjs

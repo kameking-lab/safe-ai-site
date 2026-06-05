@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ClipboardList, Shield, BookOpen } from "lucide-react";
+import { ClipboardList, Shield, BookOpen, Scale } from "lucide-react";
 import type { AccidentCase } from "@/lib/types/domain";
 import { getAccidentRelated } from "@/lib/accident-related";
+import { courtCasesHrefForAccident } from "@/lib/court-cases/accident-court-field";
 
 type Props = {
-  accident: Pick<AccidentCase, "id" | "title" | "type">;
+  accident: Pick<AccidentCase, "id" | "title" | "type" | "workCategory">;
   /**
    * "sticky": モバイルで画面下部に固定表示。
    * "inline": 通常のフローに表示（デスクトップや展開カード内）。
@@ -27,6 +28,8 @@ export function AccidentActionBar({ accident, variant = "inline" }: Props) {
     accident.title
   )}&categories=${encodeURIComponent(related.categories.join(","))}`;
   const lawsHref = `/laws?articles=${encodeURIComponent(related.articles.join(","))}`;
+  // 事故の型・業種に対応する労災裁判例があるときだけ、分野フィルタ付きで誘導（無ければ非表示）
+  const courtHref = courtCasesHrefForAccident(accident.type, accident.workCategory);
 
   const containerClass =
     variant === "sticky"
@@ -62,6 +65,15 @@ export function AccidentActionBar({ accident, variant = "inline" }: Props) {
           <BookOpen className="h-3.5 w-3.5" />
           関連法令
         </Link>
+        {courtHref && (
+          <Link
+            href={courtHref}
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-slate-700 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-slate-800 sm:flex-none"
+          >
+            <Scale className="h-3.5 w-3.5" />
+            関連裁判例
+          </Link>
+        )}
       </div>
     </div>
   );
