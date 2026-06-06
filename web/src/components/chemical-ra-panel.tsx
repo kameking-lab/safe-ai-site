@@ -9,6 +9,7 @@ import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
 import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
 import { SimpleMarkdown } from "@/components/simple-markdown";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
+import { getChemicalKeyPoints, hasKeyPoints } from "@/lib/chemical/key-points";
 import { ChemicalRaReportHeader, ChemicalRaSignoffBoxes } from "@/components/chemical/chemical-ra-report-print";
 import { ChemicalRaSaveButton } from "@/components/chemical/chemical-ra-save";
 import { getChemicalRaRecord } from "@/lib/chemical/ra-cloud";
@@ -210,6 +211,8 @@ export function ChemicalRaPanel() {
   const [error, setError] = useState<string | null>(null);
   const [errorHint, setErrorHint] = useState<string | null>(null);
   const [result, setResult] = useState<ChemicalRaResponse | null>(null);
+  // 軸I: 結果の冒頭に「まず押さえる要点」を出すための抽出（GHS・対策・規制の再構成）。
+  const keyPoints = useMemo(() => (result ? getChemicalKeyPoints(result) : null), [result]);
   const [mhlwSelected, setMhlwSelected] = useState<MergedChemical | null>(null);
   // 台帳から保存済み記録を再表示しているときの実施日(ISO)。新規実施時は null（=当日）。
   const [restoredAt, setRestoredAt] = useState<string | null>(null);
@@ -735,6 +738,61 @@ export function ChemicalRaPanel() {
           aria-label="AI調査結果"
           className="space-y-6 scroll-mt-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 print:space-y-3"
         >
+          {/* 軸I: まず押さえる要点（専門家でなくても「一番の危険」と「まず行う対策」を冒頭で把握）。
+              下の詳細（GHS分類・濃度基準・保護具・規制）は、この要点の根拠。 */}
+          {keyPoints && hasKeyPoints(keyPoints) && (
+            <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 sm:p-5">
+              <h3 className="flex items-center gap-1.5 text-sm font-bold text-amber-900 sm:text-base">
+                📌 まず押さえる要点
+                <span className="text-[11px] font-normal text-amber-700">（詳細は下に続きます）</span>
+              </h3>
+              {keyPoints.hazards.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-[11px] font-semibold text-slate-600">主な危険性</p>
+                  <ul className="mt-1 flex flex-wrap gap-1.5">
+                    {keyPoints.hazards.map((h, i) => (
+                      <li
+                        key={`${h.category}-${i}`}
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
+                          h.signal === "危険"
+                            ? "bg-rose-600 text-white"
+                            : "border border-rose-200 bg-white text-rose-800"
+                        }`}
+                      >
+                        {h.signal ? <span className="text-[10px] opacity-90">{h.signal}</span> : null}
+                        {h.category}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {keyPoints.actions.length > 0 && (
+                <div className="mt-2.5">
+                  <p className="text-[11px] font-semibold text-slate-600">まず行う対策（優先度順）</p>
+                  <ol className="mt-1 space-y-1">
+                    {keyPoints.actions.map((a, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-slate-800">
+                        <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white">
+                          {i + 1}
+                        </span>
+                        <span className="font-semibold">{a}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+              {keyPoints.regulations.length > 0 && (
+                <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                  <span className="text-[11px] font-semibold text-slate-600">該当する主な法規制</span>
+                  {keyPoints.regulations.map((r) => (
+                    <span key={r} className="inline-flex items-center rounded-md border border-violet-300 bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-800">
+                      {r}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {restoredAt && (
             <div className="flex flex-wrap items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-xs text-sky-900 print:hidden">
               <FolderOpen className="h-4 w-4 shrink-0 text-sky-600" aria-hidden="true" />
