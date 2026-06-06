@@ -1,16 +1,274 @@
 {
-  "fetchedAt": "2026-06-06T09:35:00.511Z",
+  "fetchedAt": "2026-06-06T11:11:30.143Z",
   "source": "気象庁 (Japan Meteorological Agency)",
   "sourceUrl": "https://www.jma.go.jp/bosai/",
   "license": "気象庁ホームページ コンテンツ利用ルール（出典明記）",
   "counts": {
     "warningsPrefectures": 47,
-    "forecastOffices": 7,
+    "forecastOffices": 0,
     "earthquakes": 0
   },
   "errors": {
-    "warnings": [],
-    "forecast": [],
-    "earthquakes": null
+    "warnings": [
+      {
+        "code": "011000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "012000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "013000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "014100",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "015000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "016000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "017000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "020000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "030000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "040000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "050000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "060000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "070000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "080000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "090000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "100000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "110000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "120000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "130000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "140000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "150000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "160000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "170000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "180000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "190000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "200000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "210000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "220000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "230000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "240000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "250000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "260000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "270000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "280000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "290000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "300000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "310000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "320000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "330000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "340000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "350000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "360000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "370000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "380000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "390000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "400000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "410000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "420000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "430000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "440000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "450000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "460040",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "460100",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "471000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "472000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "473000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "474000",
+        "error": "HTTP 404"
+      }
+    ],
+    "forecast": [
+      {
+        "code": "016000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "040000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "130000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "230000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "270000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "340000",
+        "error": "HTTP 404"
+      },
+      {
+        "code": "400000",
+        "error": "HTTP 404"
+      }
+    ],
+    "earthquakes": "HTTP 404"
   }
 }
