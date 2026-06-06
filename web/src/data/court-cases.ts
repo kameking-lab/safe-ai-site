@@ -1270,6 +1270,52 @@ export const COURT_CASES: CourtCase[] = [
       { label: "Profession Journal 判例解説（マツダ防府工場事件 一審判決）", url: "https://profession-net.com/professionjournal/labor-standard-100/" },
     ],
   },
+  {
+    id: "kokusai-shinpan",
+    name: "国際信販事件",
+    court: "東京地裁",
+    date: "2002-07-09",
+    dateLabelJa: "平成14年7月9日",
+    citation: "東京地裁 平成14年7月9日判決",
+    issues: ["安全配慮義務", "役員・個人責任"],
+    field: "その他",
+    oneLine: "従業員を孤立化させ退職に追い込む一連の嫌がらせ（いじめ）を不法行為と認め、会社・役員らの損害賠償責任を認めた。",
+    summary:
+      "アルバイト時給社員として勤務していた者が、在職中に同僚・上司から嫌がらせを受けたとして、会社役員らに損害賠償を求めた（整理解雇の効力もあわせて争われた）。",
+    holding:
+      "東京地裁は、一連の行為は原告を会社の中で孤立化させ退職させるための嫌がらせといわざるを得ず、不法行為に当たるとして、慰謝料の支払いを認めた。",
+    practicePoints: [
+      "孤立化・退職強要を目的とした継続的な嫌がらせは違法なパワハラと評価される。",
+      "上司・役員による職場いじめを放置すれば、会社の責任にもつながる。",
+    ],
+    sources: [
+      { label: "社長のための労働相談マニュアル（国際信販事件・東京地判 平14.7.9）", url: "https://www.mykomon.biz/harassment/hanrei_pawahara/hanrei01.html" },
+      { label: "弁護士 林たかまさ 判例解説（国際信販事件）", url: "https://hayashi-jurist.jp/power-harassment-case-international/" },
+    ],
+  },
+  {
+    id: "u-ginko-pawahara",
+    name: "U銀行（パワハラ）事件",
+    court: "岡山地裁",
+    date: "2012-04-19",
+    dateLabelJa: "平成24年4月19日",
+    citation: "岡山地裁 平成24年4月19日判決",
+    issues: ["安全配慮義務", "役員・個人責任"],
+    field: "その他",
+    oneLine: "療養後に復職した従業員への頻繁で強い叱責（「辞めてしまえ」等）は、後遺症への無配慮も含めパワハラに当たるとして、上司と会社の責任を認めた。",
+    summary:
+      "脊髄空洞症で休職し復職した従業員が、上司から頻繁に強い叱責を受けたとして、上司らと会社に損害賠償を求めた。",
+    holding:
+      "岡山地裁は、上司が「辞めてしまえ」などと頻繁に叱責し、健常者でもかなりの精神的負担を負う態様で、後遺症にも配慮がなかったことからパワハラに当たると判示し、上司の不法行為責任と会社の使用者責任を認めた。",
+    practicePoints: [
+      "療養後の復職者には、後遺症・体調に配慮した指導が必要。",
+      "頻繁で強い叱責は、健常者でも精神的負担となる態様であればパワハラと評価され得る。",
+    ],
+    sources: [
+      { label: "労働新聞社 判例解説（U銀行パワハラ事件・岡山地判 平24.4.19）", url: "https://www.rodo.co.jp/precedent/28722/" },
+      { label: "裁判所 裁判例検索（岡山地裁 平24.4.19）", url: "https://www.courts.go.jp/app/hanrei_jp/detail4?id=18675" },
+    ],
+  },
 ];
 
 /** ID から判例を取得。 */
