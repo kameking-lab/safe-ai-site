@@ -36,6 +36,7 @@ const issueColor: Record<CourtCaseIssue, string> = {
   懲戒: "bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200",
   "就業規則・労働条件": "bg-blue-100 text-blue-800 border-blue-200",
   "賃金・退職金": "bg-yellow-100 text-yellow-800 border-yellow-200",
+  "男女・雇用差別": "bg-pink-100 text-pink-800 border-pink-200",
 };
 
 export function CourtCasesBrowser() {
