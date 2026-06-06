@@ -11,6 +11,15 @@ import {
   type CourtCaseIssue,
   type CourtCaseField,
 } from "@/data/court-cases";
+import {
+  filterCourtCases,
+  computeFacets,
+  type CourtType,
+} from "@/lib/court-cases/search";
+
+// フェーズB: 数百件規模に備え、検索ロジックは lib/court-cases/search.ts の純関数に集約。
+// 裁判所種別・年代は既存データから導出するためデータ移行不要。
+const FACETS = computeFacets(COURT_CASES);
 
 const issueColor: Record<CourtCaseIssue, string> = {
   安全配慮義務: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -36,23 +45,35 @@ export function CourtCasesBrowser() {
     return (COURT_CASE_ISSUES as readonly string[]).includes(i) ? (i as CourtCaseIssue) : "";
   })();
   const initialQ = searchParams?.get("q") ?? "";
+  const courtTypeValues = FACETS.courtTypes.map((c) => c.value);
+  const decadeValues = FACETS.decades.map((d) => d.value);
+  const initialCourtType = ((): CourtType | "" => {
+    const ct = searchParams?.get("court") ?? "";
+    return (courtTypeValues as string[]).includes(ct) ? (ct as CourtType) : "";
+  })();
+  const initialDecade = ((): string => {
+    const d = searchParams?.get("decade") ?? "";
+    return decadeValues.includes(d) ? d : "";
+  })();
 
   const [issue, setIssue] = useState<CourtCaseIssue | "">(initialIssue);
   const [field, setField] = useState<CourtCaseField | "">(initialField);
+  const [courtType, setCourtType] = useState<CourtType | "">(initialCourtType);
+  const [decade, setDecade] = useState<string>(initialDecade);
   const [q, setQ] = useState(initialQ);
 
-  const filtered = useMemo(() => {
-    const kw = q.trim();
-    return COURT_CASES.filter((c) => {
-      if (issue && !c.issues.includes(issue)) return false;
-      if (field && c.field !== field) return false;
-      if (kw) {
-        const hay = `${c.name} ${c.oneLine} ${c.summary} ${c.holding} ${c.court}`;
-        if (!hay.includes(kw)) return false;
-      }
-      return true;
-    }).sort((a, b) => b.date.localeCompare(a.date));
-  }, [issue, field, q]);
+  const filtered = useMemo(
+    () => filterCourtCases(COURT_CASES, { issue, field, courtType, decade, query: q }),
+    [issue, field, courtType, decade, q],
+  );
+  const hasFilter = !!(issue || field || courtType || decade || q);
+  const clearAll = () => {
+    setIssue("");
+    setField("");
+    setCourtType("");
+    setDecade("");
+    setQ("");
+  };
 
   return (
     <div className="space-y-4">
@@ -99,13 +120,39 @@ export function CourtCasesBrowser() {
               ))}
             </select>
           </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">裁判所</span>
+            <select
+              value={courtType}
+              onChange={(e) => setCourtType(e.target.value as CourtType | "")}
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 sm:w-36"
+            >
+              <option value="">すべての裁判所</option>
+              {FACETS.courtTypes.map((c) => (
+                <option key={c.value} value={c.value}>{c.value}（{c.count}）</option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-300">年代</span>
+            <select
+              value={decade}
+              onChange={(e) => setDecade(e.target.value)}
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 sm:w-32"
+            >
+              <option value="">すべての年代</option>
+              {FACETS.decades.map((d) => (
+                <option key={d.value} value={d.value}>{d.value}（{d.count}）</option>
+              ))}
+            </select>
+          </label>
         </div>
         <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
           {filtered.length} 件を表示（全 {COURT_CASES.length} 件・すべて実在する確定判例）
-          {(issue || field || q) && (
+          {hasFilter && (
             <button
               type="button"
-              onClick={() => { setIssue(""); setField(""); setQ(""); }}
+              onClick={clearAll}
               className="ml-2 font-semibold text-emerald-700 hover:underline dark:text-emerald-300"
             >
               絞り込みを解除
