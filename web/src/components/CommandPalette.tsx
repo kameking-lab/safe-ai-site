@@ -24,7 +24,7 @@ import {
 } from '@/lib/search-index';
 import { trackEvent } from '@/components/Analytics';
 
-const CATEGORIES: SearchCategory[] = ['notice', 'chemical', 'education', 'accident'];
+const CATEGORIES: SearchCategory[] = ['precedent', 'notice', 'chemical', 'education', 'accident'];
 
 // 空クエリ時に表示する主要ショートカット（UX-007: モバイル検索とPC Ctrl+K の機能を統一）
 type Shortcut = {
@@ -49,6 +49,7 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
     case 'chemical':  return <TestTube2 className={cls} />;
     case 'education': return <BookOpen className={cls} />;
     case 'accident':  return <AlertTriangle className={cls} />;
+    case 'precedent': return <Scale className={cls} />;
   }
 }
 
@@ -164,7 +165,7 @@ export function CommandPalette({ onClose }: Props) {
             ref={inputRef}
             type="text"
             className="flex-1 bg-transparent outline-none text-slate-900 placeholder:text-slate-400 text-sm"
-            placeholder="通達・化学物質・問題・教育・事故を検索…"
+            placeholder="判例・通達・化学物質・教育・事故を横断検索…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             autoComplete="off"

@@ -1,6 +1,6 @@
 import { normalizeSearchText } from './fuzzy-search';
 
-export type SearchCategory = 'notice' | 'chemical' | 'education' | 'accident';
+export type SearchCategory = 'notice' | 'chemical' | 'education' | 'accident' | 'precedent';
 
 export interface SearchItem {
   id: string;
@@ -18,6 +18,7 @@ export const CATEGORY_META: Record<
   chemical:  { label: '化学物質', bgColor: 'bg-orange-100', textColor: 'text-orange-700' },
   education: { label: '教育',    bgColor: 'bg-green-100',  textColor: 'text-green-700' },
   accident:  { label: '事故',    bgColor: 'bg-red-100',    textColor: 'text-red-700' },
+  precedent: { label: '判例',    bgColor: 'bg-emerald-100', textColor: 'text-emerald-700' },
 };
 
 export function searchItems(
@@ -64,6 +65,18 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
   const items: SearchItem[] = [];
 
   await Promise.allSettled([
+    // 労災・労働判例（争点・分野で横断検索できるよう全件をインデックス化）
+    import('@/data/court-cases').then(({ COURT_CASES }) => {
+      for (const c of COURT_CASES) {
+        items.push({
+          id: `precedent-${c.id}`,
+          title: c.name,
+          subtitle: `${c.court}　${c.dateLabelJa}　${c.oneLine}`,
+          category: 'precedent',
+          url: `/court-cases/${c.id}`,
+        });
+      }
+    }),
     // Accident cases (multiple files)
     Promise.all([
       import('@/data/mock/real-accident-cases'),
