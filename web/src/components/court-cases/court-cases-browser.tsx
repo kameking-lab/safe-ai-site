@@ -30,6 +30,12 @@ const issueColor: Record<CourtCaseIssue, string> = {
   "国・行政責任": "bg-violet-100 text-violet-800 border-violet-200",
   業務起因性: "bg-teal-100 text-teal-800 border-teal-200",
   労働者性: "bg-rose-100 text-rose-800 border-rose-200",
+  "解雇・雇止め": "bg-red-100 text-red-800 border-red-200",
+  "労働時間・割増賃金": "bg-indigo-100 text-indigo-800 border-indigo-200",
+  "配転・出向": "bg-lime-100 text-lime-800 border-lime-200",
+  懲戒: "bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200",
+  "就業規則・労働条件": "bg-blue-100 text-blue-800 border-blue-200",
+  "賃金・退職金": "bg-yellow-100 text-yellow-800 border-yellow-200",
 };
 
 export function CourtCasesBrowser() {

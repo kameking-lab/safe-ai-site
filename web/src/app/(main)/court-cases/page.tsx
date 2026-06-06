@@ -8,16 +8,16 @@ import { ogImageUrl } from "@/lib/og-url";
 import { COURT_CASE_COUNT } from "@/data/court-cases";
 import { CourtCasesBrowser } from "@/components/court-cases/court-cases-browser";
 
-const _title = "労災裁判例コーナー｜安全配慮義務・過失相殺・元請責任の重要判例（無料・出典付き）";
+const _title = "労災・労働判例コーナー｜安全配慮義務・過労死から解雇・労働時間・就業規則まで（無料・出典付き）";
 const _desc =
-  "安全配慮義務・過労死・じん肺/石綿・元請責任・過失相殺など、労働安全に関わる重要な確定判例を「事案の概要＋裁判所の判断要旨＋実務ポイント＋出典リンク」で解説。陸上自衛隊事件・川義事件・電通事件・建設アスベスト訴訟ほか。すべて実在する確定判例・出典付き・登録不要。";
+  "安全配慮義務・過労死・じん肺/石綿・元請責任・過失相殺といった労働安全の判例に加え、解雇権濫用・雇止め・労働時間/割増賃金・就業規則の不利益変更・パワハラ/セクハラ・労働者性まで、現場で問われる重要な確定判例を「事案の概要＋裁判所の判断要旨＋実務ポイント＋出典リンク」で解説。陸上自衛隊事件・電通事件・秋北バス事件・日本食塩製造事件ほか。争点・分野・裁判所・年代で検索可。すべて実在する確定判例・出典付き・登録不要。";
 
 export const metadata: Metadata = {
   title: _title,
   description: _desc,
   alternates: { canonical: "/court-cases" },
   openGraph: {
-    title: "労災裁判例コーナー｜安全配慮義務・過失相殺・元請責任の重要判例",
+    title: "労災・労働判例コーナー｜安全配慮義務・過労死から解雇・労働時間・就業規則まで",
     description: "労働安全に関わる重要な確定判例を要旨＋出典リンクで。すべて実在判例・無料・登録不要。",
     images: [{ url: ogImageUrl("労災裁判例コーナー"), width: 1200, height: 630 }],
   },
@@ -37,7 +37,7 @@ export default function CourtCasesPage() {
         <header className="mb-4">
           <div className="flex items-center gap-2">
             <Scale className="h-6 w-6 text-emerald-600" aria-hidden="true" />
-            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 lg:text-2xl">労災裁判例コーナー</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 lg:text-2xl">労災・労働判例コーナー</h1>
             <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
               {COURT_CASE_COUNT}件
             </span>
