@@ -31,7 +31,7 @@ export default function HomePage() {
   return (
     <main>
       <PageJsonLd name={_title} description={_desc} path="/" />
-      {/* exp-r8: トップ最上部に主要9機能への直接導線（0スクロール・1タップ）。
+      {/* exp-r8: トップ最上部に主要機能への直接導線（0スクロール・1タップ）。
           社長の不満「すぐ機能に行かない」の是正。Hero(h1/キャッチ/統計＝SEO)は直下に温存。 */}
       <HomeQuickAccess />
       <NewHomeHero />
