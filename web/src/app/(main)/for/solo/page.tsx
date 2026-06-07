@@ -244,6 +244,35 @@ export default function ForSoloPage() {
         </div>
       </section>
 
+      {/* 現場の安全記録・帳票 */}
+      <section id="records" className="mt-12 scroll-mt-20">
+        <h2 className="flex items-center gap-2 text-xl font-bold text-slate-900">
+          🗂 記録・帳票（無料・登録不要・この端末に保存）
+        </h2>
+        <p className="mt-1 text-sm text-slate-600">
+          一人親方でも、KY・作業手順・点検・ヒヤリハットを記録しておくと、元請への提出や「対策をやっている証拠」になります。
+        </p>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          {[
+            { href: "/site-records", icon: "🗂", label: "安全記録キット", sub: "まとめて" },
+            { href: "/site-records/procedure", icon: "📑", label: "作業手順書", sub: "手順×危険×対策" },
+            { href: "/site-records/inspection", icon: "🔧", label: "作業開始前点検", sub: "機械・工具" },
+            { href: "/site-records/near-miss", icon: "⚠️", label: "ヒヤリハット", sub: "気づきを記録" },
+            { href: "/court-cases/employer-liability", icon: "⚖️", label: "労災の法的責任", sub: "民事・刑事" },
+          ].map((t) => (
+            <Link
+              key={t.href}
+              href={t.href}
+              className="flex flex-col items-center justify-center gap-0.5 rounded-xl border border-orange-200 bg-white px-2 py-3 text-center shadow-sm transition hover:border-orange-400 hover:bg-orange-50"
+            >
+              <span className="text-xl leading-none" aria-hidden="true">{t.icon}</span>
+              <span className="text-[12px] font-bold leading-tight text-slate-800">{t.label}</span>
+              <span className="text-[10px] leading-tight text-slate-500">{t.sub}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* 法令早見 */}
       <section id="laws" className="mt-12 scroll-mt-20">
         <h2 className="flex items-center gap-2 text-xl font-bold text-slate-900">
