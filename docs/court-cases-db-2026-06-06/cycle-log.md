@@ -269,3 +269,8 @@
   - lib/site-records/safety-calendar.ts(データ＋毎月項目)＋テスト4件(12月揃い/安全週間7月/労働衛生週間10月)。ハブにカード(NEW)。
   - ゲート: 全1089テストpass・tsc0・lint0(errors)・build成功。
 - ミス再発防止: 前サイクルでmain直コミット→是正済。本サイクルは最初からブランチで作業。
+
+## Cycle44【軸2・月次レポート→委員会議事録 一気通貫】(2026-06-07 20:25 JST) 判例85件(変化なし)
+- 月次安全衛生レポートに「この集計を委員会議事録に反映」ボタンを追加。当月実績(パトロール/ヒヤリ/点検/教育/委員会/WBGT)＋総括をテキスト化→committee-storeのagenda下書きに渡し→/site-records/committeeを開くと先頭議題「今月の安全衛生実績」に自動挿入。記録→月次集計→委員会の一気通貫。
+  - committee-storeに putCommitteeAgendaDraft/takeCommitteeAgendaDraft(safe-ai:名前空間)を追加。WBGT計算機→記録簿と同じ下書きハンドオフ方式。
+  - ゲート: 全1089テストpass・tsc0・lint0(errors)・build成功。

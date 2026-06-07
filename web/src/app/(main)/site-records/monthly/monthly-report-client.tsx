@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Printer } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Printer, Users } from "lucide-react";
 import { aggregateMonth, recentMonths, type MonthlyInputs, type MonthlyReport } from "@/lib/site-records/monthly-report";
+import { putCommitteeAgendaDraft } from "@/lib/site-records/committee-store";
 import { getPatrolList } from "@/lib/site-records/patrol-store";
 import { getNearMissReports } from "@/lib/site-records/nearmiss-store";
 import { getInspectionList } from "@/lib/site-records/inspection-store";
@@ -11,6 +13,7 @@ import { getCommitteeList } from "@/lib/site-records/committee-store";
 import { getHeatLogList } from "@/lib/heat-illness/log-store";
 
 export function MonthlyReportClient() {
+  const router = useRouter();
   const [months, setMonths] = useState<string[]>([]);
   const [month, setMonth] = useState<string>("");
   const [inputs, setInputs] = useState<MonthlyInputs | null>(null);
@@ -43,6 +46,23 @@ export function MonthlyReportClient() {
 
   function handlePrint() {
     if (typeof window !== "undefined") window.print();
+  }
+
+  function handleToCommittee() {
+    if (!report) return;
+    const ym = month.replace("-", "年") + "月";
+    const lines = [
+      `【${ym} 安全衛生実績（自動集計）】`,
+      `・安全パトロール: 実施${report.patrol.count}回 / 指摘${report.patrol.findings}件（未是正${report.patrol.open}）`,
+      `・ヒヤリハット: ${report.nearMiss.count}件（対応中${report.nearMiss.open}${report.nearMiss.topType ? `・最多 ${report.nearMiss.topType}` : ""}）`,
+      `・作業開始前点検: ${report.inspection.count}件（使用不可${report.inspection.unusable}）`,
+      `・新規入場者受入教育: ${report.induction.count}名`,
+      `・安全衛生委員会: ${report.committee.held ? `開催${report.committee.count}回` : "未開催"}`,
+      `・WBGT記録: ${report.heat.days}日${report.heat.maxWbgt === null ? "" : `（最高${report.heat.maxWbgt.toFixed(1)}℃）`}`,
+      comment.trim() ? `総括: ${comment.trim()}` : "",
+    ].filter(Boolean);
+    putCommitteeAgendaDraft(lines.join("\n"));
+    router.push("/site-records/committee");
   }
 
   return (
@@ -95,10 +115,15 @@ export function MonthlyReportClient() {
           本レポートはこの端末に保存された各記録の当月分を自動集計したものです。数値は記録の入力状況に依存します。委員会資料・元請提出等にご活用ください。
         </p>
 
-        <div className="mt-4 print:hidden">
+        <div className="mt-4 flex flex-wrap gap-2 print:hidden">
           <button type="button" onClick={handlePrint} className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">
             <Printer className="h-4 w-4" aria-hidden="true" /> レポートを印刷／PDF
           </button>
+          {report?.hasAny && (
+            <button type="button" onClick={handleToCommittee} className="inline-flex items-center gap-1 rounded-lg border border-indigo-300 bg-white px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-50">
+              <Users className="h-4 w-4" aria-hidden="true" /> この集計を委員会議事録に反映
+            </button>
+          )}
         </div>
       </section>
     </div>
