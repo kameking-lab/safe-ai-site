@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   Wrench,
   ListOrdered,
+  GraduationCap,
   Thermometer,
   CalendarCheck,
   HeartPulse,
@@ -91,6 +92,14 @@ const NEW_TOOLS: Tool[] = [
     desc: "手順×危険（急所）×対策の3列で作業手順書を作成。使用機械・必要資格も記載し、印刷・CSV。KY・受入教育の土台に。",
     icon: ListOrdered,
     color: "indigo",
+    badge: "NEW",
+  },
+  {
+    href: "/site-records/qualifications",
+    title: "特別教育・資格 受講管理簿",
+    desc: "作業者ごとに特別教育・技能講習・資格と取得日を記録。名簿CSV・印刷で有資格者への適正配置の証跡に。",
+    icon: GraduationCap,
+    color: "teal",
     badge: "NEW",
   },
 ];
