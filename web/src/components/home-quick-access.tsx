@@ -2,7 +2,7 @@ import Link from "next/link";
 
 /**
  * トップ最上部の「現場ですぐ使う」直接導線（exp-r8）。
- * 社長の不満「すぐ機能に行かない」への是正＝トップを開いて0スクロールで主要9機能へ1タップ。
+ * 社長の不満「すぐ機能に行かない」への是正＝トップを開いて0スクロールで主要機能へ1タップ。
  * モバイル(390px)で3列＝主要機能がファーストビューに収まる。Heroのキャッチ/h1/統計(SEO)はこの下に温存。
  */
 type Tool = { href: string; icon: string; label: string; sub: string };
@@ -17,6 +17,7 @@ const TOOLS: Tool[] = [
   { href: "/signage", icon: "📺", label: "サイネージ", sub: "朝礼掲示" },
   { href: "/court-cases", icon: "⚖️", label: "労災裁判例", sub: "判例＋出典" },
   { href: "/whats-new", icon: "🆕", label: "新着", sub: "法改正・速報" },
+  { href: "/site-records", icon: "🗂️", label: "現場記録", sub: "受入教育ほか" },
 ];
 
 export function HomeQuickAccess() {
@@ -26,7 +27,7 @@ export function HomeQuickAccess() {
         <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100">現場ですぐ使う</h2>
         <span className="text-[11px] text-slate-500 dark:text-slate-400">タップですぐ起動・登録不要</span>
       </div>
-      <ul className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-9">
+      <ul className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-10">
         {TOOLS.map((t) => (
           <li key={t.href}>
             <Link
