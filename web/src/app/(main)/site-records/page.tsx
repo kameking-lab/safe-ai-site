@@ -5,6 +5,7 @@ import {
   UserPlus,
   Users,
   Footprints,
+  AlertTriangle,
   Thermometer,
   CalendarCheck,
   HeartPulse,
@@ -63,6 +64,14 @@ const NEW_TOOLS: Tool[] = [
     desc: "5大災害＋衛生の標準項目でチェックし、指摘事項を場所・危険度・担当・期日・是正状況まで管理。印刷・指摘CSV。",
     icon: Footprints,
     color: "rose",
+    badge: "NEW",
+  },
+  {
+    href: "/site-records/near-miss",
+    title: "ヒヤリハット報告・集計",
+    desc: "ヒヤリハットを蓄積し事故の型別に傾向を集計。要因・対策・是正状況を管理し、印刷・CSVで月次集計に。",
+    icon: AlertTriangle,
+    color: "amber",
     badge: "NEW",
   },
 ];
