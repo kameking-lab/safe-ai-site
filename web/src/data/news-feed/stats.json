@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-06T22:00:13.079Z",
+  "generatedAt": "2026-06-07T22:01:09.962Z",
   "counts": {
     "approved": 13,
-    "rejected": 16,
-    "total": 29,
-    "approvalRate": 0.448
+    "rejected": 17,
+    "total": 30,
+    "approvalRate": 0.433
   },
   "byDay": [
     {
@@ -104,6 +104,13 @@
       "rejected": 0,
       "total": 1,
       "approvalRate": 1
+    },
+    {
+      "date": "2026-06-08",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -117,9 +124,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 2,
-      "rejected": 14,
-      "total": 16,
-      "approvalRate": 0.125
+      "rejected": 15,
+      "total": 17,
+      "approvalRate": 0.118
     }
   ],
   "byEstimatedWorkCategory": [
@@ -129,6 +136,13 @@
       "rejected": 2,
       "total": 4,
       "approvalRate": 0.5
+    },
+    {
+      "category": "運輸交通業",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
     },
     {
       "category": "その他の事業",
@@ -151,6 +165,13 @@
       "approved": 0,
       "rejected": 2,
       "total": 2,
+      "approvalRate": 0
+    },
+    {
+      "type": "車両",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
       "approvalRate": 0
     }
   ],
@@ -187,7 +208,7 @@
         0,
         0,
         0,
-        0,
+        1,
         0,
         0,
         2
@@ -220,7 +241,7 @@
       ],
       "rejected": [
         2,
-        14,
+        15,
         0,
         0,
         0,
@@ -257,7 +278,7 @@
         0
       ],
       "rejected": [
-        10,
+        11,
         6,
         0,
         0,
@@ -302,7 +323,7 @@
         0,
         0,
         2,
-        2,
+        3,
         1,
         0
       ]
@@ -311,11 +332,11 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 14
+      "count": 15
     },
     {
       "reason": "duplication",
-      "count": 5
+      "count": 6
     }
   ],
   "samples": {
@@ -599,17 +620,18 @@
         "publisher": "日本放送協会"
       },
       {
-        "headline": "各地で真夏日 あすも気温高い状態続く 熱中症対策を",
-        "aiSummary": "日本各地で真夏日となり、明日も高温が続く見込み。熱中症対策を呼びかけ。",
+        "headline": "タンクローリー転落 81歳男性が海に飛び込み運転手救出 和歌山",
+        "aiSummary": "和歌山でタンクローリーが海に転落し、運転手が救助された。",
         "score": {
-          "relevance": 20,
+          "relevance": 65,
           "copyrightRisk": 10,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-05-25T22:04:36.844Z",
+          "misinformationRisk": 5,
+          "duplication": 70,
+          "judgedAt": "2026-06-07T22:01:04.104Z",
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
-            "relevance 20 < 70 (not labor-safety related for type=general_news)"
+            "duplication 70 > 50 (already covered in accident DB)",
+            "relevance 65 < 70 (not labor-safety related for type=accident_report)"
           ]
         },
         "publisher": "日本放送協会"
