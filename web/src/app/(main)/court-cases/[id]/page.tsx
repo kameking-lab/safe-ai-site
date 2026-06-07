@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Scale, ArrowLeft, ExternalLink, ClipboardList, Database, MessageSquare } from "lucide-react";
+import { Scale, ArrowLeft, ExternalLink, ClipboardList, Database, MessageSquare, Gavel } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { COURT_CASES, getCourtCaseById } from "@/data/court-cases";
@@ -42,6 +42,18 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
   const { id } = await params;
   const c = getCourtCaseById(id);
   if (!c) notFound();
+
+  // 同じ争点・分野を共有する関連判例（共有数の多い順に最大5件）。学習・回遊性を高める。
+  const related = COURT_CASES
+    .filter((x) => x.id !== c.id)
+    .map((x) => ({
+      x,
+      score: x.issues.filter((i) => c.issues.includes(i)).length + (x.field === c.field ? 1 : 0),
+    }))
+    .filter((r) => r.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map((r) => r.x);
 
   return (
     <>
@@ -130,7 +142,43 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
                 <MessageSquare className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" /> <span className="font-semibold">安衛法を質問する</span>
               </Link>
             </div>
+            <Link
+              href="/court-cases/employer-liability"
+              className="mt-3 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-semibold text-rose-800 hover:bg-rose-100 dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-200"
+            >
+              <Gavel className="h-4 w-4 shrink-0" aria-hidden="true" />
+              労災で会社・現場監督が問われる「民事・刑事・行政」3つの責任を整理して見る
+            </Link>
           </section>
+
+          {/* 関連判例 */}
+          {related.length > 0 && (
+            <section className="mt-6 print:hidden">
+              <h2 className="mb-2 text-sm font-bold text-slate-700 dark:text-slate-200">関連する判例（同じ争点・分野）</h2>
+              <ul className="space-y-2">
+                {related.map((r) => (
+                  <li key={r.id}>
+                    <Link
+                      href={`/court-cases/${r.id}`}
+                      className="block rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition-colors hover:border-emerald-300 hover:bg-emerald-50/40 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-emerald-500/40"
+                    >
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {r.issues.map((i) => (
+                          <span key={i} className={`rounded-full border px-1.5 py-0.5 text-[10px] font-bold ${issueColor[i] ?? "bg-slate-100 text-slate-700 border-slate-200"}`}>{i}</span>
+                        ))}
+                      </div>
+                      <p className="mt-1 flex items-start gap-1.5 text-sm font-bold text-slate-900 dark:text-slate-100">
+                        <Scale className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" aria-hidden="true" />
+                        {r.name}
+                      </p>
+                      <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{r.court}　{r.dateLabelJa}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-600 dark:text-slate-300">{r.oneLine}</p>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
       </PageContainer>
     </>
