@@ -10,6 +10,7 @@ import {
   FileText,
   ClipboardCheck,
   CalendarCheck,
+  Megaphone,
   ExternalLink,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout";
@@ -220,6 +221,21 @@ export default function HeatIllnessPreventionHubPage() {
           </p>
           <p className="mt-3 text-xs font-semibold text-teal-700 group-hover:underline">
             順化計画を作る →
+          </p>
+        </Link>
+        <Link
+          href="/heat-illness-prevention/poster"
+          className="group rounded-2xl border border-rose-200 bg-white p-5 shadow-sm transition hover:border-rose-400 hover:bg-rose-50/40"
+        >
+          <Megaphone className="h-7 w-7 text-rose-600" aria-hidden="true" />
+          <h2 className="mt-3 text-base font-bold text-slate-900">
+            緊急時対応 現場掲示ポスター
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            現場名と緊急連絡先を入れるだけで、発見→通報→冷却→医療連携の対応フローをA4掲示用に印刷。令和7年改正の「対応手順の周知（掲示）」に対応。
+          </p>
+          <p className="mt-3 text-xs font-semibold text-rose-700 group-hover:underline">
+            掲示ポスターを作る →
           </p>
         </Link>
       </section>
