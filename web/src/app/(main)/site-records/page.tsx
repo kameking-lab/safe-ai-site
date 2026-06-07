@@ -4,6 +4,7 @@ import {
   ClipboardList,
   UserPlus,
   Users,
+  Footprints,
   Thermometer,
   CalendarCheck,
   HeartPulse,
@@ -54,6 +55,14 @@ const NEW_TOOLS: Tool[] = [
     desc: "安衛法17〜19条の委員会議事録を標準議題テンプレで作成。決定・担当・期日を記録し、3年保存・周知用に印刷・CSV。",
     icon: Users,
     color: "indigo",
+    badge: "NEW",
+  },
+  {
+    href: "/site-records/patrol",
+    title: "安全パトロール・職場巡視 記録",
+    desc: "5大災害＋衛生の標準項目でチェックし、指摘事項を場所・危険度・担当・期日・是正状況まで管理。印刷・指摘CSV。",
+    icon: Footprints,
+    color: "rose",
     badge: "NEW",
   },
 ];
