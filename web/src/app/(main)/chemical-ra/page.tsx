@@ -98,6 +98,13 @@ export default function ChemicalRaPage() {
               </div>
             ))}
           </div>
+          <p className="mt-3 border-t border-slate-100 pt-2 text-xs text-slate-600 dark:border-slate-700 dark:text-slate-300">
+            なぜ評価・記録が重要か：化学物質による健康障害では、予見可能性は「安全性に疑念を抱かせる程度の抽象的な危惧で足りる」と判断され、対策を怠った会社の
+            <strong className="font-semibold">安全配慮義務違反</strong>が認められています（例: 三星化学工業 職業性膀胱がん事件）。
+            <Link href="/court-cases/employer-liability" className="ml-1 font-semibold text-rose-700 underline decoration-rose-300 underline-offset-2 hover:text-rose-900 dark:text-rose-300">労災で問われる責任を見る</Link>
+            <span className="mx-1 text-slate-300">|</span>
+            <Link href="/court-cases?field=%E8%A3%BD%E9%80%A0%E3%83%BB%E9%80%A0%E8%88%B9" className="font-semibold text-emerald-700 underline decoration-emerald-300 underline-offset-2 hover:text-emerald-900 dark:text-emerald-300">関連判例</Link>
+          </p>
         </div>
       </PageContainer>
 
