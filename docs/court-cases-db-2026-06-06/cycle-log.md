@@ -201,3 +201,9 @@
   - lib/site-records/procedure-store.ts(localStorage＋純関数 defaultSteps/summarize/CSV)＋テスト3件。印刷・CSV・端末保存・一覧。ハブにカード(NEW)。
   - ゲート: 全テストpass・tsc0・lint0(errors)・build成功。/procedure 静的生成。
 - 現場の安全記録キット6ツール(受入教育/議事録/パトロール/ヒヤリハット/点検/作業手順書)＋ライブダッシュボード。
+
+## Cycle33【軸2・建設業ペルソナ入口に新ツール導線】(2026-06-07 12:05 JST) 判例件数変化なし(83)
+- 建設業向けランディング(/for/construction)に「現場の安全記録・帳票」セクション(id=records)を追加。主要ペルソナ(建設業)に対し、これまで未露出だった新ツール群への導線を集約:
+  安全記録キット/受入教育/パトロール/ヒヤリハット/作業開始前点検/作業手順書/熱中症対策/労災の法的責任。
+- 既存のpage.test.tsx(10件)を確認し非破壊(getByText単一一致を壊さぬよう「受入教育」表記を使用)。discoverability/一気通貫の改善。
+- ゲート: 全1074テストpass(建設テスト10/10含む)・tsc0・lint0(errors)・build成功。
