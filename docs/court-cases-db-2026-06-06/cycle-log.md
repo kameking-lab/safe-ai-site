@@ -195,3 +195,9 @@
 - 判例詳細ページ(/court-cases/[id])に「関連する判例(同じ争点・分野)」セクションを追加(共有争点数＋同分野でスコア順・最大5件、サーバ集計)。1件読んだ人が類似判例へ自然に回遊。
 - 詳細ページから「労災の3つの責任ガイド」(/court-cases/employer-liability)への導線も追加。track-1判例の学習体験＋一気通貫を強化。追加的・既存非変更。
 - ゲート: tsc0・lint0(errors)・build成功・全テストpass。
+
+## Cycle32【軸2メイン・作業手順書】(2026-06-07 11:55 JST) 判例件数変化なし(83)
+- 「作業手順書 作成」を新設(/site-records/procedure)。手順×危険(急所)×対策の3列＋使用機械・必要資格で作成。安衛則35条「作業手順に関すること」の教育やKY・受入教育の土台。当日KYと違い再利用する標準手順文書。
+  - lib/site-records/procedure-store.ts(localStorage＋純関数 defaultSteps/summarize/CSV)＋テスト3件。印刷・CSV・端末保存・一覧。ハブにカード(NEW)。
+  - ゲート: 全テストpass・tsc0・lint0(errors)・build成功。/procedure 静的生成。
+- 現場の安全記録キット6ツール(受入教育/議事録/パトロール/ヒヤリハット/点検/作業手順書)＋ライブダッシュボード。

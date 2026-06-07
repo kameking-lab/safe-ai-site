@@ -7,6 +7,7 @@ import {
   Footprints,
   AlertTriangle,
   Wrench,
+  ListOrdered,
   Thermometer,
   CalendarCheck,
   HeartPulse,
@@ -82,6 +83,14 @@ const NEW_TOOLS: Tool[] = [
     desc: "建設機械・クレーン・フォークリフト・高所作業車・電動工具の始業前点検を機種別項目で記録。使用可否・印刷・CSV。",
     icon: Wrench,
     color: "sky",
+    badge: "NEW",
+  },
+  {
+    href: "/site-records/procedure",
+    title: "作業手順書 作成",
+    desc: "手順×危険（急所）×対策の3列で作業手順書を作成。使用機械・必要資格も記載し、印刷・CSV。KY・受入教育の土台に。",
+    icon: ListOrdered,
+    color: "indigo",
     badge: "NEW",
   },
 ];
