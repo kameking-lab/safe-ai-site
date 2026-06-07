@@ -27,6 +27,7 @@ const issueColor: Record<CourtCaseIssue, string> = {
   "元請・下請責任": "bg-sky-100 text-sky-800 border-sky-200",
   "派遣・請負先責任": "bg-cyan-100 text-cyan-800 border-cyan-200",
   "役員・個人責任": "bg-orange-100 text-orange-800 border-orange-200",
+  刑事責任: "bg-red-200 text-red-900 border-red-300",
   "国・行政責任": "bg-violet-100 text-violet-800 border-violet-200",
   業務起因性: "bg-teal-100 text-teal-800 border-teal-200",
   労働者性: "bg-rose-100 text-rose-800 border-rose-200",
