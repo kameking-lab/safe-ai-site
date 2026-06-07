@@ -6,6 +6,7 @@ import {
   Users,
   Footprints,
   AlertTriangle,
+  Wrench,
   Thermometer,
   CalendarCheck,
   HeartPulse,
@@ -72,6 +73,14 @@ const NEW_TOOLS: Tool[] = [
     desc: "ヒヤリハットを蓄積し事故の型別に傾向を集計。要因・対策・是正状況を管理し、印刷・CSVで月次集計に。",
     icon: AlertTriangle,
     color: "amber",
+    badge: "NEW",
+  },
+  {
+    href: "/site-records/inspection",
+    title: "作業開始前点検 記録",
+    desc: "建設機械・クレーン・フォークリフト・高所作業車・電動工具の始業前点検を機種別項目で記録。使用可否・印刷・CSV。",
+    icon: Wrench,
+    color: "sky",
     badge: "NEW",
   },
 ];
