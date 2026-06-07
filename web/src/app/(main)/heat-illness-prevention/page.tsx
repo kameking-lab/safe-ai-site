@@ -8,6 +8,7 @@ import {
   AlertCircle,
   Building2,
   FileText,
+  ClipboardCheck,
   ExternalLink,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout";
@@ -144,7 +145,7 @@ export default function HeatIllnessPreventionHubPage() {
         </div>
       </section>
 
-      <section className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <section className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Link
           href="/heat-illness-prevention/wbgt-calculator"
           className="group rounded-2xl border border-orange-200 bg-white p-5 shadow-sm transition hover:border-orange-400 hover:bg-orange-50/40"
@@ -188,6 +189,21 @@ export default function HeatIllnessPreventionHubPage() {
           </p>
           <p className="mt-3 text-xs font-semibold text-rose-700 group-hover:underline">
             チェックリストへ →
+          </p>
+        </Link>
+        <Link
+          href="/heat-illness-prevention/log"
+          className="group rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm transition hover:border-emerald-400 hover:bg-emerald-50/40"
+        >
+          <ClipboardCheck className="h-7 w-7 text-emerald-600" aria-hidden="true" />
+          <h2 className="mt-3 text-base font-bold text-slate-900">
+            WBGT日次記録簿
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            作業前・日中のWBGTと実施した対策を時刻別に記録。最高WBGT・最悪リスクを自動集計し、提出用に印刷・CSV保存（令和7年改正の証跡づくり）。
+          </p>
+          <p className="mt-3 text-xs font-semibold text-emerald-700 group-hover:underline">
+            記録簿を開く →
           </p>
         </Link>
       </section>

@@ -1,8 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Droplet, Wind, Sun, Activity, Printer } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Droplet, Wind, Sun, Activity, Printer, ClipboardCheck } from "lucide-react";
 import { assess } from "@/lib/wbgt-engine";
+import { putHeatLogDraft } from "@/lib/heat-illness/log-store";
 import type {
   AcclimatizationState,
   Environment,
@@ -68,6 +70,7 @@ const COLOR_TOKEN: Record<
 };
 
 export function WbgtCalculatorClient() {
+  const router = useRouter();
   const [form, setForm] = useState<FormState>(DEFAULTS);
 
   const result = useMemo(() => {
@@ -96,6 +99,26 @@ export function WbgtCalculatorClient() {
     if (typeof window !== "undefined") {
       window.print();
     }
+  }
+
+  function handleAddToLog() {
+    const globe = parseFloat(form.globeTempC);
+    putHeatLogDraft({
+      airTempC: form.airTempC,
+      humidity: form.humidity,
+      globeTempC: Number.isFinite(globe) ? globe : null,
+      environment: form.environment,
+      workIntensity: form.workIntensity,
+      acclimatization: form.acclimatization,
+      wbgt: result.wbgt.wbgt,
+      riskLevel: result.risk.level,
+      riskLabel: result.risk.label,
+      suggestedMeasures: [
+        `作業/休憩 ${result.recommendation.workRestRatio}`,
+        `水分 ${result.recommendation.fluidIntakeMlPerHour}`,
+      ].join("／"),
+    });
+    router.push("/heat-illness-prevention/log");
   }
 
   return (
@@ -253,6 +276,14 @@ export function WbgtCalculatorClient() {
           >
             <Printer className="h-3.5 w-3.5" aria-hidden="true" />
             結果を印刷
+          </button>
+          <button
+            type="button"
+            onClick={handleAddToLog}
+            className="inline-flex items-center gap-1 rounded-lg border border-amber-500 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-100"
+          >
+            <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
+            日次記録簿に追加
           </button>
         </div>
       </section>
