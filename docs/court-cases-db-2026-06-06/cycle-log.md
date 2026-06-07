@@ -142,3 +142,12 @@
   - トップ「現場ですぐ使う」に「現場記録」導線を追加(9→10、grid lg:10)。discoverability向上。
   - ゲート: 全1056テストpass・tsc0・lint0(errors)・build成功。/site-records と /induction を静的生成。
 - 次フェーズ予定: Phase2=安全衛生委員会 議事録(安衛法17-19条)、Phase3=安全パトロール/職場巡視記録(安衛法13条)。判例(軸1)は確証取れ次第コツコツ。
+
+## Cycle25【軸2メイン・現場安全記録キット Phase2】(2026-06-07 10:30 JST) 判例件数変化なし(83)
+- 「安全衛生委員会 議事録」を新設(/site-records/committee)。安衛法17-19条・安衛則23条(毎月1回以上開催・議事概要3年保存・労働者周知)対応。
+  - 付議事項(安衛則21・22条)に基づく標準議題8件テンプレで、議事内容・決定/措置・担当・期日を記録。議題の追加/削除可。委員会種別(安全/衛生/安全衛生)。
+  - 議事録の印刷(周知掲示用)・CSV出力・端末保存・保存一覧。lib/site-records/committee-store.ts＋純関数テスト3件。
+  - ハブ/site-recordsに議事録カード(NEW)追加。
+  - 修正: PageHeaderのiconColorは emerald|blue|amber|red のみ(indigo不可)→blueに。tsc0で検知・是正。
+  - ゲート: 全1059テストpass・tsc0・lint0(errors)・build成功。/committee 静的生成。
+- 次フェーズ: Phase3=安全パトロール/職場巡視記録(安衛法13条・週1/月1)。判例(軸1)は確証取れ次第コツコツ。

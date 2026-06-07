@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   ClipboardList,
   UserPlus,
+  Users,
   Thermometer,
   CalendarCheck,
   HeartPulse,
@@ -45,6 +46,14 @@ const NEW_TOOLS: Tool[] = [
     desc: "安衛法59条・安衛則35条の教育項目＋現場ルールをチェックして実施記録を作成。名簿CSV・受講記録の印刷に対応。",
     icon: UserPlus,
     color: "emerald",
+    badge: "NEW",
+  },
+  {
+    href: "/site-records/committee",
+    title: "安全衛生委員会 議事録",
+    desc: "安衛法17〜19条の委員会議事録を標準議題テンプレで作成。決定・担当・期日を記録し、3年保存・周知用に印刷・CSV。",
+    icon: Users,
+    color: "indigo",
     badge: "NEW",
   },
 ];
