@@ -17,6 +17,7 @@ import { PageContainer } from "@/components/layout";
 import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
+import { RecordsOverview } from "./records-overview";
 
 const _title = "現場の安全記録キット｜受入教育・KY・打合せ書・WBGT記録を無料で作成・印刷・保存";
 const _desc =
@@ -129,6 +130,8 @@ export default function SiteRecordsPage() {
         icon={ClipboardList}
         iconColor="emerald"
       />
+
+      <RecordsOverview />
 
       <section className="mt-6">
         <h2 className="mb-2 text-sm font-bold text-slate-700">新着</h2>
