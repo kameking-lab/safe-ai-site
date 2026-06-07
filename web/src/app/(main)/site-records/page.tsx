@@ -20,6 +20,7 @@ import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import { RecordsOverview } from "./records-overview";
+import { RecordsBackup } from "./records-backup";
 
 const _title = "現場の安全記録キット｜受入教育・KY・打合せ書・WBGT記録を無料で作成・印刷・保存";
 const _desc =
@@ -173,6 +174,8 @@ export default function SiteRecordsPage() {
         各ツールの記録はお使いの端末（ブラウザ）に保存され、サーバーには送信されません。印刷・CSV出力で社内提出・監督指導時の証跡としてご利用ください。
         記載内容は一般的な情報提供であり、個別の法令適用は所轄労働基準監督署・専門家にご確認ください。
       </p>
+
+      <RecordsBackup />
     </PageContainer>
   );
 }
