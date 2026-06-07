@@ -67,6 +67,7 @@ export const DEFAULT_AGENDA_TOPICS: string[] = [
 
 const LIST_KEY = "safe-ai:committee-list:v1";
 const BYID_KEY = "safe-ai:committee-by-id:v1";
+const AGENDA_DRAFT_KEY = "safe-ai:committee-agenda-draft:v1";
 export const MAX_COMMITTEE_LIST = 120;
 
 // ---- 純関数（テスト対象） ----
@@ -188,4 +189,22 @@ export function deleteCommittee(id: string): CommitteeSummary[] {
     writeRaw(BYID_KEY, byId);
   }
   return updated;
+}
+
+/** 月次レポート等 → 議事録 の受け渡し（議題に挿入する下書きテキスト）。 */
+export function putCommitteeAgendaDraft(text: string): void {
+  writeRaw(AGENDA_DRAFT_KEY, text);
+}
+
+/** 下書きを取り出して消す（議事録のマウント時に1回）。 */
+export function takeCommitteeAgendaDraft(): string | null {
+  const t = readRaw<string | null>(AGENDA_DRAFT_KEY, null);
+  if (typeof window !== "undefined") {
+    try {
+      window.localStorage.removeItem(AGENDA_DRAFT_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+  return typeof t === "string" && t.trim() !== "" ? t : null;
 }

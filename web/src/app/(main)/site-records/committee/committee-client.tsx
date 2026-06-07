@@ -12,6 +12,7 @@ import {
   minutesToCsv,
   newCommitteeId,
   newAgendaId,
+  takeCommitteeAgendaDraft,
   COMMITTEE_TYPE_JA,
   type AgendaItem,
   type CommitteeMinutes,
@@ -45,8 +46,14 @@ export function CommitteeClient() {
     setRecId(newCommitteeId());
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
     setDate(today);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 標準議題
-    setAgenda(defaultAgenda());
+    // 月次レポートからの下書きがあれば、当月実績の議題を先頭に挿入。
+    const draft = takeCommitteeAgendaDraft();
+    const base = defaultAgenda();
+    const agendaInit = draft
+      ? [{ id: newAgendaId(), topic: "今月の安全衛生実績（月次レポート集計）", discussion: draft, decision: "", owner: "", due: "" }, ...base]
+      : base;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 標準議題（必要なら月次下書きを反映）
+    setAgenda(agendaInit);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 保存一覧
     setList(getCommitteeList());
   }, []);
