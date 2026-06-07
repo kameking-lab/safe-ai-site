@@ -10,6 +10,7 @@ import {
   ListOrdered,
   GraduationCap,
   CalendarRange,
+  CalendarDays,
   Thermometer,
   CalendarCheck,
   HeartPulse,
@@ -110,6 +111,14 @@ const NEW_TOOLS: Tool[] = [
     desc: "パトロール・ヒヤリ・点検・教育・委員会・WBGTの当月分を自動集計し、月次報告を1枚で作成・印刷。元請提出・委員会資料に。",
     icon: CalendarRange,
     color: "emerald",
+    badge: "NEW",
+  },
+  {
+    href: "/site-records/calendar",
+    title: "年間 安全衛生カレンダー",
+    desc: "全国安全週間・労働衛生週間・季節リスク・毎月の法定義務を月別に一覧。今月やることが一目で分かり各ツールへ。",
+    icon: CalendarDays,
+    color: "sky",
     badge: "NEW",
   },
 ];
