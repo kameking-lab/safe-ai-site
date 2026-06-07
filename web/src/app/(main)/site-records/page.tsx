@@ -9,6 +9,7 @@ import {
   Wrench,
   ListOrdered,
   GraduationCap,
+  CalendarRange,
   Thermometer,
   CalendarCheck,
   HeartPulse,
@@ -101,6 +102,14 @@ const NEW_TOOLS: Tool[] = [
     desc: "作業者ごとに特別教育・技能講習・資格と取得日を記録。名簿CSV・印刷で有資格者への適正配置の証跡に。",
     icon: GraduationCap,
     color: "teal",
+    badge: "NEW",
+  },
+  {
+    href: "/site-records/monthly",
+    title: "月次安全衛生レポート（自動集計）",
+    desc: "パトロール・ヒヤリ・点検・教育・委員会・WBGTの当月分を自動集計し、月次報告を1枚で作成・印刷。元請提出・委員会資料に。",
+    icon: CalendarRange,
+    color: "emerald",
     badge: "NEW",
   },
 ];
