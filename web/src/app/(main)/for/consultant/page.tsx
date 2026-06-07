@@ -65,6 +65,8 @@ const SUPPORT_TOOLS = [
   { icon: ShieldCheck, title: "化学物質リスクアセスメント", desc: "CREATE-SIMPLE準拠の簡易RA。顧問先の自律管理支援に。", href: "/chemical-ra" },
   { icon: FileSearch, title: "必要資格・特別教育の判定", desc: "業種・作業から特別教育・技能講習を逆引き。教育計画の根拠に。", href: "/education-certification/finder" },
   { icon: BookOpen, title: "FAQ 200問・用語集", desc: "法令タグ付きFAQと安全用語辞書。顧問先への説明資料づくりに。", href: "/faq" },
+  { icon: ListChecks, title: "現場の安全記録キット", desc: "受入教育・パトロール・ヒヤリハット・点検・作業手順書・委員会議事録を作成・印刷・CSV。顧問先の記録運用・証跡づくりの指導に。", href: "/site-records" },
+  { icon: Scale, title: "労災の法的責任ガイド", desc: "民事(安全配慮義務)・刑事(労安法違反/業過致死傷)・行政の責任を判例とともに整理。顧問先への危機意識の喚起・提案に。", href: "/court-cases/employer-liability" },
 ];
 
 export default function ForConsultantPage() {
