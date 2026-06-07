@@ -70,6 +70,37 @@ export default function ChemicalRaPage() {
           をご覧ください。
         </div>
       </PageContainer>
+      {/* 職種別クイックスタート: 物質名のクリックでRA入力を即プリフィル（exp: 入力の手間を削減） */}
+      <PageContainer paddingY="none" className="pt-3 print:hidden">
+        <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+          <p className="text-sm font-bold text-slate-800 dark:text-slate-100">職種別クイックスタート</p>
+          <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+            扱うことが多い化学物質の<strong className="font-semibold">例</strong>です。クリックするとその物質でリスクアセスメントを開始できます（実際の取扱物質はSDSでご確認ください）。
+          </p>
+          <div className="mt-3 space-y-2">
+            {[
+              { trade: "塗装・防水・接着", subs: ["トルエン", "キシレン", "酢酸エチル", "ジクロロメタン"] },
+              { trade: "溶接・金属加工", subs: ["一酸化炭素", "マンガン", "アセチレン"] },
+              { trade: "内装・清掃・洗浄", subs: ["メタノール", "ノルマルヘキサン", "次亜塩素酸ナトリウム"] },
+              { trade: "設備・メッキ・薬品", subs: ["硫酸", "水酸化ナトリウム", "アンモニア"] },
+            ].map((g) => (
+              <div key={g.trade} className="flex flex-wrap items-center gap-1.5">
+                <span className="w-32 shrink-0 text-xs font-semibold text-slate-600 dark:text-slate-300">{g.trade}</span>
+                {g.subs.map((s) => (
+                  <Link
+                    key={s}
+                    href={`/chemical-ra?name=${encodeURIComponent(s)}`}
+                    className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+                  >
+                    {s}
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      </PageContainer>
+
       {/* P1-G: メイン入力（RAパネル）をファーストビューに、現場リストは下部へ。
           初見ユーザーが「何のページか」を即理解できるよう順序を入れ替えた。 */}
       <PageContainer paddingY="none" className="pt-3 print:hidden">
