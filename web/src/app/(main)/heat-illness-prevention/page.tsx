@@ -9,6 +9,7 @@ import {
   Building2,
   FileText,
   ClipboardCheck,
+  CalendarCheck,
   ExternalLink,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout";
@@ -204,6 +205,21 @@ export default function HeatIllnessPreventionHubPage() {
           </p>
           <p className="mt-3 text-xs font-semibold text-emerald-700 group-hover:underline">
             記録簿を開く →
+          </p>
+        </Link>
+        <Link
+          href="/heat-illness-prevention/acclimatization"
+          className="group rounded-2xl border border-teal-200 bg-white p-5 shadow-sm transition hover:border-teal-400 hover:bg-teal-50/40"
+        >
+          <CalendarCheck className="h-7 w-7 text-teal-600" aria-hidden="true" />
+          <h2 className="mt-3 text-base font-bold text-slate-900">
+            暑熱順化 計画・進捗管理
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            新規入場者・復帰者向けに7日間以上の暑熱順化プログラムを自動作成し、日々の実施・体調を記録。印刷・CSV保存に対応（計画的な暑熱順化）。
+          </p>
+          <p className="mt-3 text-xs font-semibold text-teal-700 group-hover:underline">
+            順化計画を作る →
           </p>
         </Link>
       </section>

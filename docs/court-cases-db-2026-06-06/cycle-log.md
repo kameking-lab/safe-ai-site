@@ -117,3 +117,11 @@
   - WBGT計算機に「日次記録簿に追加」ボタン(下書き連携)、ハブに記録簿カード追加。
   - ゲート: 全1046テストpass・tsc0・lint0(errors)・build成功。/heat-illness-prevention/log を静的生成。
 - 次フェーズ予定: Phase2=暑熱順化7日計画・進捗管理, Phase3=KY熱中症連携・サイネージWBGTウィジェット。
+
+## Cycle22【軸2メイン・熱中症 Phase2】(2026-06-07 09:45 JST) 判例件数変化なし(83)
+- 暑熱順化 計画・進捗管理 を新設(/heat-illness-prevention/acclimatization)。新規入場者・復帰者向けに7日間以上の段階的順化計画を自動生成し、日々の実施・体調を記録。
+  - 公的根拠: 厚労省「職場における熱中症予防」=7日以上かけてばく露を漸増(中断4日で失われ始め3-4週で消失)。既定の目安(%)は編集可能な初期値で公的固定値ではない旨を明記(捏造回避)。
+  - lib/heat-illness/acclimatization-store.ts(localStorage・計画生成・進捗集計・CSV、UTC日付計算で決定論的)+ 純関数テスト6件(addDaysIso/generatePlanDays/planProgress/planToCsv)。
+  - 区分(新規/復帰/今季初)・進捗バー・順化完了判定・印刷(計画記録書)・CSV・端末保存・保存一覧。日次記録簿との相互リンク。ハブに順化カード追加。
+  - ゲート: 全1052テストpass・tsc0・lint0(errors)・build成功。/acclimatization を静的生成。
+- 熱中症 軸2は Phase1(記録簿)+Phase2(順化) で「測る→対策→記録→提出」の日次運用が一通り完成。次フェーズ Phase3=KY熱中症連携・サイネージWBGTウィジェット、または他機能の壮大改善へ。
