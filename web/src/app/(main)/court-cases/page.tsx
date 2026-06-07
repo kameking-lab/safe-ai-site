@@ -51,7 +51,13 @@ export default function CourtCasesPage() {
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             要旨は当サイトによる要約です。正確な内容は各判例の出典（判決原文）をご確認ください。個別案件は専門家にご相談ください。
           </p>
-          <div className="mt-3">
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              href="/court-cases/employer-liability"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-100 dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-200"
+            >
+              ⚖️ 労災で会社・現場監督が問われる「3つの責任」ガイド
+            </Link>
             <Link
               href="/court-cases/print"
               className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
