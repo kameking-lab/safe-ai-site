@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ClipboardList, Shield, BookOpen, Scale } from "lucide-react";
+import { ClipboardList, Shield, BookOpen, Scale, Gavel } from "lucide-react";
 import type { AccidentCase } from "@/lib/types/domain";
 import { getAccidentRelated } from "@/lib/accident-related";
 import { courtCasesHrefForAccident } from "@/lib/court-cases/accident-court-field";
@@ -74,6 +74,13 @@ export function AccidentActionBar({ accident, variant = "inline" }: Props) {
             関連裁判例
           </Link>
         )}
+        <Link
+          href="/court-cases/employer-liability"
+          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-rose-700 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-800 sm:flex-none"
+        >
+          <Gavel className="h-3.5 w-3.5" />
+          問われる責任
+        </Link>
       </div>
     </div>
   );
