@@ -74,6 +74,40 @@ export function openCount(reports: NearMissReport[]): number {
   return reports.filter((r) => !r.resolved).length;
 }
 
+/** 重大の可能性 × 未対策 の件数（最優先で対策すべき報告）。 */
+export function openHighCount(reports: NearMissReport[]): number {
+  return reports.filter((r) => !r.resolved && r.potential === "high").length;
+}
+
+/**
+ * 対策の緊急度ランク（小さいほど先に対応すべき）。
+ * 0=未対策×重大 / 1=未対策×軽微 / 2=対策済×重大 / 3=対策済×軽微
+ */
+export function priorityRank(r: NearMissReport): 0 | 1 | 2 | 3 {
+  if (!r.resolved) return r.potential === "high" ? 0 : 1;
+  return r.potential === "high" ? 2 : 3;
+}
+
+/**
+ * 「対策すべきもの優先」の並び替え。
+ * 未対策×重大 → 未対策×軽微 → 対策済… の順。同ランク内は日付の新しい順。
+ * 元配列は破壊しない。
+ */
+export function sortByPriority(reports: NearMissReport[]): NearMissReport[] {
+  return [...reports].sort((a, b) => {
+    const ra = priorityRank(a);
+    const rb = priorityRank(b);
+    if (ra !== rb) return ra - rb;
+    if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+    return (Date.parse(b.savedAt) || 0) - (Date.parse(a.savedAt) || 0);
+  });
+}
+
+/** openOnly=true のとき未対策のみに絞り込む（元配列は破壊しない）。 */
+export function filterOpenOnly(reports: NearMissReport[], openOnly: boolean): NearMissReport[] {
+  return openOnly ? reports.filter((r) => !r.resolved) : [...reports];
+}
+
 const CSV_HEADER = ["日付", "現場", "報告者", "事故の型", "場所", "状況", "要因", "対策", "危険度", "状態"];
 
 function csvCell(v: string | number | null): string {
