@@ -310,3 +310,10 @@
 - 社長環境(Windows PowerShell 5.x)でloop-runner.ps1がパースエラー(BOMなしUTF-8をShift-JIS誤認し日本語化け→文字列終端/{}破綻)。対処: ps1本体を純ASCII化(全コメント・ログ英語)＋可変の日本語指示は loop-prompt.txt(UTF-8)に分離し実行時に -Encoding UTF8 で読込→$OutputEncoding=UTF8 で claude にstdinパイプ。
 - 実環境確認: claude=C:\Users\kanet\AppData\Roaming\npm\claude.ps1、headlessは -p/--print・bypassは --dangerously-skip-permissions(v2.1.168)。PURE_ASCII_OK＋Windows PowerShellでPARSE_OK＋runner 1イテレーション試走で claude起動・"RUNNER_SELFTEST_OK"返答・exit0を確認。
 - これで社長が powershell -File .\loop-runner.ps1 で確実に無人自走起動できる。
+
+## Cycle51【軸2: 化学物質RA 一人親方ペルソナレビュー】(2026-06-08 23:45 JST)
+- 前PR回収: PR#424(KY用紙ファースト化)はCI実行中につき次イテレーションで回収。main clean確認。
+- BACKLOG最上位の軸2タスク「化学物質RA(/chemical-ra)を一人親方(3タップ離脱)ペルソナでレビュー」を実行。ペルソナ佐藤さん(58歳塗装一人親方・専門用語読まない・3タップで結果なければ紙に戻る)になりきりPlaywrightで実操作。
+- 最重要の離脱要因を発見: 職種別クイックスタート/よく検索される物質チップは説明文で「クリックすると開始できます」と謳うのに、押しても画面下方の入力欄に名前が入るだけで結果が出ない(チップ押下後 結果ブロック非出現を実機確認)。説明と挙動が食い違う実質バグ。
+- 改善(PR#425): handleSearch(overrideName?)で即時実行可能化／runQuickSearchでチップ1タップ判定／?run=1着地で自動判定(raId除外)／職種別リンクを?name=…&run=1に／素の?name=は自動実行せず既存導線(chatbot/保存RA/SDS/化学DB/KY)を保護。再評価: チップ1タップ→結果到達OK・run=1自動判定OK・素name=は実行なし。
+- ゲート: tsc0/lint0(errors)/vitest1092pass/build成功。記録: docs/third-party-reviews/2026-06-08-chemical-ra-onemanshop.md。temp(persona spec/config/screenshot)は削除済。
