@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-07T22:01:09.906Z",
+  "updatedAt": "2026-06-08T22:23:38.692Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -45,6 +45,29 @@
         "misinformationRisk": 10,
         "duplication": 15,
         "judgedAt": "2026-05-20T22:22:59.495Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "20dffd3c992031f6",
+      "headline": "人事労務マガジン 特集第245号　中小企業事業者の皆さまへ 高年齢者の労働災害防止のための設備改善等を支援する補助金 ～令和8年度「エイジフレンドリー補助金」の受け付けが始まりました～",
+      "aiSummary": "厚労省、高年齢者の労災防止設備改善を支援するエイジフレンドリー補助金の申請受付を開始。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_73723.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-06-08T14:50:00+09:00",
+        "fetchedAt": "2026-06-08T22:23:17.770Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 20,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-06-08T22:23:38.686Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
