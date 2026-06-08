@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
+import { SignageDangerAlert } from "@/components/signage/signage-danger-alert";
 import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture-warning-map";
 import { SignageFloorPlanEditor } from "@/components/signage/signage-floor-plan-editor";
 import { SignageHeader } from "@/components/signage/signage-header";
@@ -353,6 +354,12 @@ export default function SignagePage() {
             📺 全画面
           </Link>
         </div>
+      </div>
+
+      {/* 危険イベント全画面アラート: 高リスク警報(特別警報/暴風/大雨/落雷/地震/津波)の検知で全画面赤表示＋音声。
+          バー自体は薄い1行。オーバーレイは fixed inset-0 のため通常レイアウト(1画面フィット)に影響しない。 */}
+      <div className="shrink-0">
+        <SignageDangerAlert jmaHeadline={bundle?.jmaHeadline} warnings={bundle?.selectedWarnings} />
       </div>
 
       <div className={`grid grid-cols-1 gap-2 xl:min-h-0 xl:flex-1 xl:gap-3 xl:overflow-hidden ${isPortrait ? "" : "xl:grid-cols-12"}`}>

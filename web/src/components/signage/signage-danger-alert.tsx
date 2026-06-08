@@ -22,9 +22,23 @@ function speak(text: string) {
 
 const HIGH_RISK_KEYWORDS = ["特別警報", "警報", "暴風", "大雨", "落雷", "地震", "津波"];
 
+// 無人運用(1日流しっぱなし)で、ブラウザ再読込後も自動発動の設定を保持するためのキー。
+// 再起動で黙って監視OFFになると安全機能が無効化されたことに誰も気づけないため永続化する。
+const AUTO_SPEAK_STORAGE_KEY = "signage-danger-autospeak";
+
 export function SignageDangerAlert({ jmaHeadline, warnings }: Props) {
   const [overlay, setOverlay] = useState(false);
-  const [autoSpeak, setAutoSpeak] = useState(false);
+  const [autoSpeak, setAutoSpeak] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(AUTO_SPEAK_STORAGE_KEY) === "1";
+  });
+
+  const onToggleAutoSpeak = (checked: boolean) => {
+    setAutoSpeak(checked);
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(AUTO_SPEAK_STORAGE_KEY, checked ? "1" : "0");
+    }
+  };
 
   const isHighRisk = (() => {
     const text = `${jmaHeadline ?? ""} ${(warnings ?? []).map((w) => w.status).join(" ")}`;
@@ -63,11 +77,18 @@ export function SignageDangerAlert({ jmaHeadline, warnings }: Props) {
           <input
             type="checkbox"
             checked={autoSpeak}
-            onChange={(e) => setAutoSpeak(e.target.checked)}
+            onChange={(e) => onToggleAutoSpeak(e.target.checked)}
             className="rounded"
           />
           警報時に自動発動 + 音声読み上げ
         </label>
+        {/* 無人運用での安心材料: 自動発動が有効=監視中であることを常時可視化。
+            再読込後も localStorage で復元されるため「いつの間にかOFF」を防ぐ。 */}
+        {autoSpeak && !isHighRisk && (
+          <span className="inline-flex items-center gap-1 rounded bg-emerald-700 px-1.5 py-0.5 text-[10px] font-bold text-emerald-50">
+            🟢 警報を監視中
+          </span>
+        )}
         {isHighRisk && (
           <span className="rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
             ⚠ 高リスク警報を検知中

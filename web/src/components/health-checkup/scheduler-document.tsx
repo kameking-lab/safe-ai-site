@@ -26,6 +26,10 @@ import {
   type OptimisedDecision,
 } from "@/lib/annual-schedule-optimizer";
 import { getJobById } from "@/data/health-checkup-rules";
+import {
+  MissingCheckupTracker,
+  type TrackerEntry,
+} from "./missing-checkup-tracker";
 
 interface Props {
   profile: WorkerProfile;
@@ -42,8 +46,20 @@ function formatJaDate(iso: string): string {
 const MONTHS: MonthIndex[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 export function SchedulerDocument({ profile, decision, generatedAt }: Props) {
-  const { required, schedule, missing } = decision;
+  const { required, schedule } = decision;
   const optimised: OptimisedDecision = optimiseDecision(required, schedule);
+
+  // 前回実施日トラッカーへ渡す直列化可能なエントリ。
+  const trackerEntries: TrackerEntry[] = required.map(({ rule }) => ({
+    ruleId: rule.id,
+    title: rule.title,
+    typeLabel: CHECKUP_TYPE_LABELS[rule.type],
+    intervalMonths: rule.frequency.intervalMonths,
+    eventDriven: Boolean(rule.frequency.eventDriven),
+    frequencyHuman: rule.frequency.humanReadable,
+  }));
+  // プロファイル毎に localStorage を分け、別条件の入力と混ざらないようにする。
+  const trackerKey = `safe-ai:hc-tracker:v1:${profile.industry}|${[...profile.jobIds].sort().join(",")}|${[...profile.substances].sort().join(",")}|${[...profile.workConditions].sort().join(",")}|${profile.hireDate}`;
   const grouped: Record<MonthIndex, typeof schedule.entries> = {
     1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [], 11: [], 12: [],
   };
@@ -354,25 +370,9 @@ export function SchedulerDocument({ profile, decision, generatedAt }: Props) {
 
       <section>
         <h2 className="border-l-4 border-emerald-600 pl-3 text-xl font-bold">
-          5. 漏れ・期限超過の警告
+          5. 漏れ・期限超過チェック（前回実施日を入力）
         </h2>
-        {missing.length === 0 ? (
-          <p className="mt-3 rounded border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-            実施済みの記録は未入力のため警告は表示していません。本ツールでは過去実施日の入力欄を簡略化していますが、現場での運用では年度初に前回実施日を入力して期限超過を確認することを推奨します。
-          </p>
-        ) : (
-          <ul className="mt-3 space-y-2 text-sm">
-            {missing.map((m, i) => (
-              <li
-                key={`${m.rule.id}-${i}`}
-                className="rounded border border-red-200 bg-red-50 p-3"
-              >
-                <p className="font-semibold text-red-900">{m.rule.title}</p>
-                <p className="text-red-800">{m.reason}</p>
-              </li>
-            ))}
-          </ul>
-        )}
+        <MissingCheckupTracker entries={trackerEntries} storageKey={trackerKey} />
       </section>
 
       <footer className="border-t border-slate-300 pt-4 text-xs text-slate-500">

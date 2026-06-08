@@ -1,4 +1,54 @@
 {
-  "fetchedAt": "2026-06-08T18:08:22.180Z",
-  "byIso": {}
+  "fetchedAt": "2026-06-08T20:35:51.895Z",
+  "byIso": {
+    "JP-01": {
+      "label": "北海道（石狩・空知・後志）",
+      "reportDatetime": "2026-06-09T05:00:00+09:00",
+      "publishingOffice": "札幌管区気象台",
+      "todayWeatherCode": "203",
+      "todayWeatherText": "くもり　時々　雨"
+    },
+    "JP-04": {
+      "label": "宮城県",
+      "reportDatetime": "2026-06-09T05:00:00+09:00",
+      "publishingOffice": "仙台管区気象台",
+      "todayWeatherCode": "211",
+      "todayWeatherText": "くもり　昼前　から　晴れ　所により　昼前　まで　霧"
+    },
+    "JP-13": {
+      "label": "東京都",
+      "reportDatetime": "2026-06-09T05:00:00+09:00",
+      "publishingOffice": "気象庁",
+      "todayWeatherCode": "202",
+      "todayWeatherText": "くもり　明け方　まで　雨"
+    },
+    "JP-23": {
+      "label": "愛知県",
+      "reportDatetime": "2026-06-09T05:00:00+09:00",
+      "publishingOffice": "名古屋地方気象台",
+      "todayWeatherCode": "202",
+      "todayWeatherText": "くもり　明け方　まで　雨"
+    },
+    "JP-27": {
+      "label": "大阪府",
+      "reportDatetime": "2026-06-09T05:00:00+09:00",
+      "publishingOffice": "大阪管区気象台",
+      "todayWeatherCode": "313",
+      "todayWeatherText": "雨　昼前　から　くもり"
+    },
+    "JP-34": {
+      "label": "広島県",
+      "reportDatetime": "2026-06-09T05:00:00+09:00",
+      "publishingOffice": "広島地方気象台",
+      "todayWeatherCode": "200",
+      "todayWeatherText": "くもり　所により　朝　まで　雨"
+    },
+    "JP-40": {
+      "label": "福岡県",
+      "reportDatetime": "2026-06-09T05:00:00+09:00",
+      "publishingOffice": "福岡管区気象台",
+      "todayWeatherCode": "200",
+      "todayWeatherText": "くもり"
+    }
+  }
 }
