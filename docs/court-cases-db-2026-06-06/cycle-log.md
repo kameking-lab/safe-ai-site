@@ -489,3 +489,11 @@
 - 再レビュー(Playwright実機): 手動オーバーレイ全面/閉じる(1→0)、自動発動ON→自動ポップ(1)→閉じた後再ポップ無し(0)、再読込後 localStorage=1・チェックON維持(true)・監視中/検知中表示、1画面フィット 1920×1080でscrollH-clientH=0。中村さん「朝ONにして放っておける。再起動しても見張りが生きてる。警報が出れば赤い画面が勝手に出る。現場に置ける」=採用ライン到達。
 - 補充: 軸2の真の空きが薄い(44/45は自PR在中)ため、本レビューで見つけた具体改善2件をBACKLOGへ追加(①/signage/displayフルスクリーンへ高リスク赤アラート展開 ②データ取得失敗時に警報パネルが空表示で『警報なし/取得失敗』区別不能な懸念の点検)。
 - ゲート: tsc0 / lint errors0(warning47=既存) / vitest1114pass(145ファイル) / build成功(Compiled successfully)。記録: docs/third-party-reviews/signage-danger-alert-wiring-2026-06-09.md。temp(_review_danger_alert.mjs/_da_*.png)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。
+
+## Cycle (2026-06-09) — ヒヤリハット報告 重大×未対策の優先可視化（軸2）
+- 前PR回収: CI緑(CLEAN/MERGEABLE)だった#444(受入教育CSV月次)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#445(健診スケジューラ)・#446(サイネージ緊急アラート)は別イテレーションでマージ済。古いdocs系PRは放置。
+- タスク選定: BACKLOG軸2の上位未着手「健診スケジューラ」=自PR#445、「サイネージ緊急アラート」=自PR#446が対応中・Path Aはオーナー判断待ちで、真に空いている軸2が3未満。補充指針に従い未レビューの記録ツール3件(near-miss/patrol/committee)をタスク化し、最上位「ヒヤリハット報告の重大×未対策の優先可視化」を実行。
+- 第三者レビュー: 畑山さん(54歳・ゼネコン作業所の専任安全衛生責任者・ハインリッヒの法則を信奉・最恐は重大ヒヤリの放置による本災害)になりきりPlaywright実機(iPhone 390×740)。1週間分5件(墜落/はさまれ/飛来=重大未対策・転倒/切れ=軽微対策済)を実アプリと同じ日付降順で投入。致命=一覧が日付降順固定のため対策済の軽微が最上段を占有し、最も手当てすべき「重大×未対策の墜落・転落」が5件中5番目=最下段に沈む(報告20件で視界外)。「対応中3件」バッジは件数のみで導線なし・重大未対策の視覚強調なし・未対策抽出手段なし。「これなら危険なヒヤリだけ壁に貼る方がマシ」。
+- 改善: nearmiss-store.tsに純関数priorityRank(未対策×重大=0…対策済×軽微=3)/sortByPriority(ランク昇順→日付降順、非破壊)/openHighCount/filterOpenOnly(テスト+8)を追加。near-miss-client.tsxの一覧をsortByPriorityで「重大×未対策を必ず先頭集約」へ変更＋赤い要対策アラート(N件)＋カードに赤左ボーダー&「要対策」赤バッジ＋「未対策のみ表示」トグルを新設。集計(countByType)/openCount/CSV/印刷/localStorageスキーマ/入力フォームは不変・新規依存0。
+- 再レビュー(Playwright実機): 並びが飛来→はさまれ→墜落(重大未対策3件・日付降順)→転倒→切れ(対策済)に変化＝重大未対策を先頭集約。先頭に「重大の可能性×未対策が3件…」の赤アラート、各要対策カードに赤左ボーダー&バッジ。「未対策のみ表示」ONで未対策3件に絞込み。横overflow0(iPhone390)。畑山さん「開いた瞬間に赤い要対策3件が出て危険な未対策が上から並ぶ。墜落が一番下に隠れない。毎朝これで潰す案件を決める」=採用ライン到達。
+- ゲート: tsc0 / lint errors0(warn47=既存) / vitest1129pass(+8) / build成功。記録: docs/third-party-reviews/near-miss-priority-2026-06-09.md(+afterスクショ)。temp(_nm_review.mjs/_nm_*.png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
