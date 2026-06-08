@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-07T22:01:09.906Z",
+  "updatedAt": "2026-06-08T22:23:38.692Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -319,6 +319,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "48d93d3660393944",
+      "headline": "フィリピン沖で大地震 19人死亡 津波1m超観測 建物倒壊相次ぐ",
+      "aiSummary": "フィリピン沖で発生した大地震により、多数の死者と建物の倒壊が報告された。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260608/k10015143861000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 08 Jun 2026 19:14:35 +0900",
+        "fetchedAt": "2026-06-08T22:23:17.770Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-06-08T22:23:32.938Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
