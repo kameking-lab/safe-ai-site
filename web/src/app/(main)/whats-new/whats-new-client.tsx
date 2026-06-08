@@ -6,8 +6,10 @@ import {
   type NewsHubItem,
   type NewsHubCategory,
   NEWS_HUB_CATEGORY_LABEL,
-  isRecent,
+  isNewSince,
+  filterNewsHubItems,
 } from "@/lib/news-hub-types";
+import { type IndustryTag, ALL_INDUSTRY_TAGS } from "@/lib/types/domain";
 
 const LAST_VISIT_KEY = "anzen_whatsnew_last_visit_v1";
 
@@ -28,8 +30,25 @@ const FILTERS: { value: NewsHubCategory | "all"; label: string }[] = [
   { value: "media", label: "報道" },
 ];
 
+// 業種ラベル（law-revision-list.tsx の INDUSTRY_OPTIONS と揃える）
+const INDUSTRY_LABEL: Record<IndustryTag, string> = {
+  construction: "建設",
+  manufacturing: "製造",
+  healthcare: "医療福祉",
+  transport: "運輸",
+  forestry: "林業",
+  food: "食品",
+  retail: "小売",
+  cleaning: "清掃",
+  chemical: "化学",
+  electrical: "電気",
+};
+
 export function WhatsNewClient({ items }: { items: NewsHubItem[] }) {
   const [selected, setSelected] = useState<NewsHubCategory | "all">("all");
+  const [industry, setIndustry] = useState<IndustryTag | "all">("all");
+  // 「新着のみ」＝前回閲覧以降（lastVisit 未取得時は30日以内）に絞る
+  const [newOnly, setNewOnly] = useState(false);
   // 前回閲覧日（localStorage）。これより新しい項目に「新着」バッジを付ける。
   const [lastVisit, setLastVisit] = useState<string | null>(null);
 
@@ -54,18 +73,22 @@ export function WhatsNewClient({ items }: { items: NewsHubItem[] }) {
   }, []);
 
   const filtered = useMemo(
-    () => (selected === "all" ? items : items.filter((i) => i.category === selected)),
-    [items, selected],
+    () => filterNewsHubItems(items, { category: selected, industry, newOnly, lastVisit }),
+    [items, selected, industry, newOnly, lastVisit],
   );
 
   const newCount = useMemo(
-    () => items.filter((i) => (lastVisit ? i.date > lastVisit : isRecent(i.date, 30))).length,
+    () => items.filter((i) => isNewSince(i, lastVisit)).length,
     [items, lastVisit],
   );
 
-  function isNew(item: NewsHubItem): boolean {
-    return lastVisit ? item.date > lastVisit : isRecent(item.date, 30);
-  }
+  // 業種フィルタが実際に件数を絞れる業種だけチップにする（タグ付き法改正が無い業種は出さない）
+  const availableIndustries = useMemo<IndustryTag[]>(() => {
+    const taggedOnly = items.filter((i) => i.industries && i.industries.length > 0);
+    return ALL_INDUSTRY_TAGS.filter((tag) =>
+      taggedOnly.some((i) => i.industries!.includes(tag)),
+    );
+  }, [items]);
 
   return (
     <div className="space-y-4">
@@ -73,6 +96,36 @@ export function WhatsNewClient({ items }: { items: NewsHubItem[] }) {
         新着 <span className="font-bold text-emerald-700">{newCount}</span> 件
         （前回ご覧になった以降）。すべて出典リンク付き。最終確認は公式でお願いします。
       </p>
+
+      {/* 毎朝の確認を速くする1タップ絞り込み（鮮度） */}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setNewOnly((v) => !v)}
+          aria-pressed={newOnly}
+          className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold transition ${
+            newOnly
+              ? "bg-emerald-600 text-white shadow-sm"
+              : "border border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-50"
+          }`}
+        >
+          🆕 新着のみ
+          <span className={newOnly ? "text-emerald-50" : "text-emerald-600"}>({newCount})</span>
+        </button>
+        {(newOnly || selected !== "all" || industry !== "all") && (
+          <button
+            type="button"
+            onClick={() => {
+              setNewOnly(false);
+              setSelected("all");
+              setIndustry("all");
+            }}
+            className="inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100"
+          >
+            絞り込み解除
+          </button>
+        )}
+      </div>
 
       {/* カテゴリフィルタ */}
       <div className="flex flex-wrap gap-2" role="group" aria-label="カテゴリフィルタ">
@@ -92,6 +145,44 @@ export function WhatsNewClient({ items }: { items: NewsHubItem[] }) {
         ))}
       </div>
 
+      {/* 業種フィルタ（法改正を業種で絞る。事故速報・通達など業種非依存は常に表示） */}
+      {availableIndustries.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="業種フィルタ">
+          <span className="text-xs font-semibold text-slate-500">業種で絞る:</span>
+          <button
+            type="button"
+            onClick={() => setIndustry("all")}
+            className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+              industry === "all"
+                ? "bg-indigo-600 text-white"
+                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+            }`}
+          >
+            すべて
+          </button>
+          {availableIndustries.map((tag) => (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => setIndustry(tag)}
+              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                industry === tag
+                  ? "bg-indigo-600 text-white"
+                  : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+              }`}
+            >
+              {INDUSTRY_LABEL[tag]}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {industry !== "all" && (
+        <p className="text-xs text-slate-500">
+          「{INDUSTRY_LABEL[industry]}」に関係する法改正＋業種を問わない速報・通達を表示中。
+        </p>
+      )}
+
       {/* 時系列リスト */}
       <ul className="space-y-2">
         {filtered.map((item) => (
@@ -108,7 +199,7 @@ export function WhatsNewClient({ items }: { items: NewsHubItem[] }) {
                   {item.badge}
                 </span>
               )}
-              {isNew(item) && (
+              {isNewSince(item, lastVisit) && (
                 <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[10px] font-bold text-white">
                   新着
                 </span>
@@ -137,7 +228,9 @@ export function WhatsNewClient({ items }: { items: NewsHubItem[] }) {
       </ul>
       {filtered.length === 0 && (
         <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-          該当する新着情報はありません。
+          {newOnly
+            ? "前回ご覧になった以降の新着はありません。"
+            : "該当する新着情報はありません。"}
         </p>
       )}
     </div>
