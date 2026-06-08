@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { ArrowLeft, ArrowRight, Star, RefreshCw, FlaskConical } from "lucide-react";
 import { EQUIPMENT_CATEGORIES, getCategoryById, type RefineAnswers } from "@/config/equipment-categories";
 import { recommendItems } from "@/lib/equipment-finder/recommendations";
+import { deriveComplianceBadge, formatRegulations } from "@/lib/equipment-finder/compliance";
 import { trackAffiliateClick } from "@/lib/track-events";
 import { findChemicalEquipmentProfile } from "@/lib/chemical-equipment-mapping";
 
@@ -283,11 +284,28 @@ export function EquipmentFinderClient() {
                   {item.subCategory && (
                     <p className="mt-1 text-[11px] text-slate-500">{item.subCategory}</p>
                   )}
-                  {item.spec && (
-                    <p className="mt-1 inline-block rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
-                      {item.spec}
-                    </p>
-                  )}
+                  <div className="mt-1 flex flex-wrap items-center gap-1">
+                    {(() => {
+                      const badge = deriveComplianceBadge(item.spec, item.regulations);
+                      if (!badge) return null;
+                      return (
+                        <span
+                          className={`inline-flex items-center gap-0.5 rounded px-2 py-0.5 text-[10px] font-bold ${
+                            badge.tone === "amber"
+                              ? "bg-amber-100 text-amber-800 ring-1 ring-amber-300"
+                              : "bg-blue-100 text-blue-800 ring-1 ring-blue-300"
+                          }`}
+                        >
+                          ✓ {badge.label}
+                        </span>
+                      );
+                    })()}
+                    {item.spec && (
+                      <span className="inline-block rounded bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+                        {item.spec}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 {item.score > 0 && (
                   <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
@@ -324,6 +342,22 @@ export function EquipmentFinderClient() {
                     </li>
                   ))}
                 </ul>
+              )}
+
+              {formatRegulations(item.regulations).length > 0 && (
+                <div className="mt-2 rounded-lg border border-slate-100 bg-slate-50/70 p-2">
+                  <p className="text-[10px] font-bold text-slate-500">⚖ 根拠法令・規格</p>
+                  <ul className="mt-1 flex flex-wrap gap-1">
+                    {formatRegulations(item.regulations).map((r) => (
+                      <li
+                        key={r}
+                        className="rounded bg-white px-1.5 py-0.5 text-[10px] font-medium text-slate-600 ring-1 ring-slate-200"
+                      >
+                        {r}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
               <div className="mt-3 flex flex-wrap gap-2">
