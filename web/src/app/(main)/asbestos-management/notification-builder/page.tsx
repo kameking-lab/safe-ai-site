@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { NotificationBuilder } from "./NotificationBuilder";
@@ -58,7 +59,9 @@ export default function Page() {
             工事種別・規模・石綿レベルを指定すると、提出が必要な届出書類と期限、記載事項、提出先がリスト化されます。印刷ボタンから A4 1〜2 枚に出力できます。
           </p>
         </header>
-        <NotificationBuilder />
+        <Suspense fallback={null}>
+          <NotificationBuilder />
+        </Suspense>
       </PageContainer>
     </div>
   );
