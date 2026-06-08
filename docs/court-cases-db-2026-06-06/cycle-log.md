@@ -380,3 +380,12 @@
 - 再レビュー(Playwright実機): 🎤押下→live天気+他社事故を踏まえた原稿表示+読み上げボタン。職長「これなら朝礼で使える」=採用ライン到達。
 - ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/signage-morning-foreman-2026-06-09.md(+3スクショ)。temp review .mjs と devlog 削除済。架空0・水増し0・既存破壊0。
 - BACKLOG補充: 死蔵サイネージ部品の棚卸し/結線、朝礼前プリセット意味付け、を新タスク追記。
+
+## Cycle (2026-06-09) — サイネージ「🌅朝礼前」プリセット意味付け是正（軸2）
+- 前PR回収: CI緑だった#433(signage朝礼スクリプト結線)をsquashマージ→main clean。#434(WBGT手袋)はBACKLOG/cycle-logがmainと衝突→force-push不可のためorigin/mainをbranchへmergeして解消・通常pushで反映(CI再走待ち、次イテレーション回収)。#435(受入教育)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG最上位の未着手WBGT(#434)は自分の未マージPRで対応中につき重複回避。次の真の未着手「サイネージ『🌅朝礼前』シナリオプリセットの意味付け是正」を実行。
+- 第三者レビュー: 53歳職長(紙20年・IT苦手・押して無反応なら壊れていると判断し二度と触らない)になりきりPlaywright実機(1920×1080)。致命=「🌅朝礼前」は`mode:"floorplan"`が既定値と同一で押下しても一切変化なし(押下後モーダル数0を実測)＝死んで見える。加えてactiveハイライトが`displayMode===mode`判定でfloorplan表示中は未クリックでも常時ハイライト。朝礼前が一番欲しい読み上げ原稿(#433結線済)へプリセットから辿れない。
+- 改善: 「🌅朝礼前」押下を「floorplan表示＋朝礼スクリプトのモーダルを開く」に変更し、押せば必ず読み上げ原稿が出る＝反応が一目で分かり朝礼で使う原稿に直行。active判定を各プリセットの実体(朝礼前=floorplan&原稿表示/休憩=map/退場=workdocs)に是正しfloorplan誤ハイライト解消。休憩/退場押下時はモーダルを閉じてから切替。既存SignageMorningScript/setShowMorningScriptを再利用、新規部品なし・データ/計算ロジック不変・1画面フィット(横長overflow=0)維持。
+- 再レビュー(Playwright実機): 「🌅朝礼前」押下→朝礼スクリプト(AI生成・気象+類似事故+法改正)モーダルがfloorplan上に出現(押下後モーダル数0→1を実測)。職長「押したらちゃんと原稿が出る。朝礼前にこれを押せばいいと分かる」=採用ライン到達。
+- ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/signage-asarei-preset-2026-06-09.md(+afterスクショ)。temp(review .mjs, _tmp png)削除済。架空0・水増し0・既存破壊0。
+- BACKLOG補充: 軸2の真の未着手が薄かったため改善タスク2件追記(全画面無人運用レビュー・受入教育印刷A4崩れ点検)。
