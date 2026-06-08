@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   assessReadiness,
   determineRequiredAction,
+  readinessGuidance,
   READINESS_QUESTIONS,
 } from "./mental-health-flow";
 import { STRESS_CHECK_REQUIREMENTS } from "@/data/mental-health-rules";
@@ -137,6 +138,26 @@ describe("mental-health-flow", () => {
       const r = assessReadiness({ headcount: 80, answers });
       expect(r.verdict).toBe("partial");
       expect(r.gaps.length).toBe(3);
+    });
+  });
+
+  describe("readinessGuidance", () => {
+    it("never tells a mandatory (50+) workplace to rely on the sub-50 track", () => {
+      for (const verdict of ["early", "partial", "ready"] as const) {
+        const text = readinessGuidance(verdict, "mandatory");
+        expect(text, verdict).not.toContain("50人未満");
+        expect(text, verdict).not.toContain("さんぽセンター");
+      }
+    });
+
+    it("points sub-50 workplaces at the さんぽセンター support when not yet ready", () => {
+      expect(readinessGuidance("early", "effort-duty")).toContain("さんぽセンター");
+      expect(readinessGuidance("partial", "effort-duty")).toContain("さんぽセンター");
+    });
+
+    it("reminds a mandatory workplace of the annual / reporting obligation", () => {
+      expect(readinessGuidance("early", "mandatory")).toContain("義務");
+      expect(readinessGuidance("partial", "mandatory")).toContain("様式第6号の2");
     });
   });
 });

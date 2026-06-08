@@ -77,6 +77,27 @@ export interface StressCheckRequirement {
 }
 
 /**
+ * One step in the chronological stress-check implementation procedure
+ * (年間の実施手順). Whereas {@link StressCheckRequirement} lists *what must be
+ * true*, this models *what to do, in what order, and by when* across one annual
+ * cycle — the roadmap a first-time mandatory workplace needs to avoid omissions.
+ */
+export interface StressCheckProcedureStep {
+  /** Phase grouping for the annual cycle. */
+  phase: "準備期" | "実施期" | "事後対応期" | "報告・保存期";
+  /** Imperative step title. */
+  title: string;
+  /** One- to two-sentence operational detail. */
+  detail: string;
+  /** When this step happens, relative to the survey (plain Japanese). */
+  timing: string;
+  /** Baseline requirement ids this step fulfils, for cross-reference. */
+  relatedRequirementIds: string[];
+  /** True if the step applies only to mandatory (50人以上) workplaces. */
+  mandatoryOnly?: boolean;
+}
+
+/**
  * A planning step in the small-business simplified track. Sub-50 workplaces
  * have less internal capacity, so the sequence emphasises Sanpo Center support
  * and shared external implementers over building in-house teams.
