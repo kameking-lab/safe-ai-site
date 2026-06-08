@@ -362,3 +362,12 @@
 - 改善: 編集画面の上部バー(保存一覧の隣)に「↻ 前回を複製」を常設(保存済みがある時のみ)。1タップで直近保存→翌日分を生成(各社の作業/機械/資格/予知災害/対策/RA引継・日付翌日・当日記入クリア)。既存 duplicateForNextDay を再利用(作り直し無し)。store.tsに loadLatestMeeting() 追加＋meeting-paper-view.tsxに hasLatest/handleCopyLatest/ボタン。KY用紙とUI・文言を統一。
 - 再レビュー(Playwright実機): 初見は非表示(空複製防止)→保存→リロードで上部「前回を複製」常設→1タップで通知＋作業所名引継＋翌日日付。渡辺さん「1タップで昨日の各社対策が乗る。紙に戻らない」。
 - ゲート: tsc0 / lint errors0 / vitest1092pass / build成功。記録: docs/third-party-reviews/safety-diary-genuke-anzentanto-2026-06-09.md（+ topbar スクショ）。temp(spec/config/devlog)削除済。架空0・水増し0・既存破壊0。
+
+## Cycle (2026-06-09) — 記録キットHub(/site-records) 初見導線レビュー
+- 前イテレーション回収: CI緑のPR#430(safety-diary 翌日複製)をsquashマージ→main clean。PR#431(court-cases)はe2e/smoke進行中のため次回回収。
+- 選択タスク: 軸2「記録キットHub(/site-records)を初見の安全担当ペルソナでレビュー→初見導線」。BACKLOG最上位の/court-casesは#431で着手済のため次タスクを選択。
+- 第三者レビュー: 田村さん(34歳・中小ゼネコン現場監督・先月から安全兼務・実務経験ゼロ・やること多すぎると即離脱)になりきりPlaywrightで記録ゼロ(localStorageクリーン)の初見状態を実操作。
+- 発見した致命的欠陥: 初見(hasAny=false)では画面上部の状況サマリー(RecordsOverview)が`return null`で丸ごと消える=初見者ほど道しるべが無く、17ツール・6グループ(モバイル全体7.9画面)の壁に直面。「今日何をすればいいか」の手がかりゼロ。
+- 改善: `!ov.hasAny`分岐で「はじめての方へ — まずこの3つから」スタートガイドを表示(KY用紙/受入教育/年間カレンダーへ時間軸ラベル付きの番号付き3ステップ動線+登録不要の一言)。1件記録できれば従来の状況サマリーへ自動切替=熟練者導線は不変。既存hasAny分岐を活用し既存破壊なし。"全16種類"のような固定数は誤りになるため文言から除去。
+- 再レビュー(Playwright実機・初見状態): ヘッダー直下に緑ガイドが出現、田村さん「1秒でまずKYと分かる」「明日まずKYから触る」。モバイル縦積み・sm以上3列も確認。
+- ゲート: tsc0 / lint errors0 / vitest1100pass / build成功。記録: docs/third-party-reviews/site-records-firstvisit-safety-officer-2026-06-09.md。temp(mjs/png)削除済。架空0・水増し0・既存破壊0。
