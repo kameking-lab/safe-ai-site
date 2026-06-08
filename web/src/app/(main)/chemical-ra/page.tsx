@@ -89,7 +89,7 @@ export default function ChemicalRaPage() {
                 {g.subs.map((s) => (
                   <Link
                     key={s}
-                    href={`/chemical-ra?name=${encodeURIComponent(s)}`}
+                    href={`/chemical-ra?name=${encodeURIComponent(s)}&run=1`}
                     className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
                   >
                     {s}
