@@ -8,6 +8,7 @@ import {
   FilePlus2,
   FolderOpen,
   CheckSquare,
+  UserPlus,
 } from "lucide-react";
 import {
   getInductionList,
@@ -92,6 +93,24 @@ export function InductionClient() {
     }
     setList(saveInduction(buildRecord()));
     setSavedNote("この端末に保存しました。");
+  }
+
+  function handleSaveAndNextWorker() {
+    if (!workerName.trim()) {
+      setSavedNote("新規入場者の氏名を入力してください。");
+      return;
+    }
+    // 現在の入場者を保存してから、同じ現場・実施者・実施日・教育項目を引き継いで次の人へ。
+    // 1回の受入教育で入場した複数名を記録する現場の標準フローを1タップで回す。
+    setList(saveInduction(buildRecord()));
+    setRecId(newInductionId());
+    setWorkerName("");
+    setCompany("");
+    setTrade("");
+    setNote("");
+    setConfirmedWorker(false);
+    setConfirmedEducator(false);
+    setSavedNote("保存しました。同じ現場・実施者で次の入場者を記録できます。");
   }
 
   function handleNew() {
@@ -225,6 +244,9 @@ export function InductionClient() {
         <div className="mt-4 flex flex-wrap gap-2 print:hidden">
           <button type="button" onClick={handleSave} className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700">
             <Save className="h-3.5 w-3.5" aria-hidden="true" /> この端末に保存
+          </button>
+          <button type="button" onClick={handleSaveAndNextWorker} className="inline-flex items-center gap-1 rounded-lg border border-emerald-600 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100">
+            <UserPlus className="h-3.5 w-3.5" aria-hidden="true" /> 保存して同じ現場で次の人へ
           </button>
           <button type="button" onClick={handlePrint} className="inline-flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-2 text-xs font-bold text-white hover:bg-slate-800">
             <Printer className="h-3.5 w-3.5" aria-hidden="true" /> 受講記録を印刷

@@ -143,6 +143,7 @@ export function WbgtCalculatorClient() {
             label="気温 (°C)"
             value={form.airTempC}
             step={0.1}
+            stepBy={0.5}
             min={-10}
             max={55}
             onChange={(v) => setForm((s) => ({ ...s, airTempC: v }))}
@@ -151,6 +152,7 @@ export function WbgtCalculatorClient() {
             label="相対湿度 (%)"
             value={form.humidity}
             step={1}
+            stepBy={5}
             min={5}
             max={100}
             onChange={(v) => setForm((s) => ({ ...s, humidity: v }))}
@@ -162,12 +164,13 @@ export function WbgtCalculatorClient() {
             </label>
             <input
               type="number"
+              inputMode="decimal"
               step={0.1}
               value={form.globeTempC}
               onChange={(e) =>
                 setForm((s) => ({ ...s, globeTempC: e.target.value }))
               }
-              className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
+              className="mt-1 h-11 w-full rounded-md border border-slate-300 px-3 text-base focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
               placeholder="未測定なら空欄"
               autoComplete="off"
             />
@@ -187,7 +190,7 @@ export function WbgtCalculatorClient() {
                   environment: e.target.value as Environment,
                 }))
               }
-              className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
+              className="mt-1 h-11 w-full rounded-md border border-slate-300 px-2 text-base focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
             >
               <option value="outdoor">屋外（日射あり）</option>
               <option value="indoor">屋内（日射なし）</option>
@@ -199,6 +202,7 @@ export function WbgtCalculatorClient() {
                 label="風速 (m/s)"
                 value={form.windSpeedMps}
                 step={0.1}
+                stepBy={0.5}
                 min={0}
                 max={20}
                 onChange={(v) => setForm((s) => ({ ...s, windSpeedMps: v }))}
@@ -208,6 +212,7 @@ export function WbgtCalculatorClient() {
                 label="日射量 (W/m²)"
                 value={form.solarRadiationWm2}
                 step={10}
+                stepBy={50}
                 min={0}
                 max={1200}
                 onChange={(v) =>
@@ -229,7 +234,7 @@ export function WbgtCalculatorClient() {
                   workIntensity: e.target.value as WorkIntensity,
                 }))
               }
-              className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
+              className="mt-1 h-11 w-full rounded-md border border-slate-300 px-2 text-base focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
             >
               <option value="light">軽作業（座位・軽手作業）</option>
               <option value="moderate">中程度（立位・通常歩行）</option>
@@ -249,7 +254,7 @@ export function WbgtCalculatorClient() {
                   acclimatization: e.target.value as AcclimatizationState,
                 }))
               }
-              className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
+              className="mt-1 h-11 w-full rounded-md border border-slate-300 px-2 text-base focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
             >
               <option value="acclimatized">
                 順化済み（直近7日以上連続で暑熱作業）
@@ -380,6 +385,7 @@ function NumberField({
   label,
   value,
   step,
+  stepBy,
   min,
   max,
   onChange,
@@ -388,29 +394,59 @@ function NumberField({
   label: string;
   value: number;
   step: number;
+  /** ＋/− ボタン1回あたりの増減幅（省略時は step）。手袋でのタップ調整用。 */
+  stepBy?: number;
   min: number;
   max: number;
   onChange: (v: number) => void;
   icon?: React.ReactNode;
 }) {
+  const safeValue = Number.isFinite(value) ? value : 0;
+  const bump = (dir: 1 | -1) => {
+    const inc = stepBy ?? step;
+    // 浮動小数の誤差を抑えるため小数2桁で丸める
+    const next = Math.round((safeValue + dir * inc) * 100) / 100;
+    onChange(Math.min(max, Math.max(min, next)));
+  };
   return (
     <div>
       <label className="flex items-center gap-1 text-xs font-semibold text-slate-700">
         {icon}
         {label}
       </label>
-      <input
-        type="number"
-        step={step}
-        min={min}
-        max={max}
-        value={Number.isFinite(value) ? value : 0}
-        onChange={(e) => {
-          const next = parseFloat(e.target.value);
-          if (Number.isFinite(next)) onChange(next);
-        }}
-        className="mt-1 w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
-      />
+      <div className="mt-1 flex items-stretch gap-1.5">
+        <button
+          type="button"
+          aria-label={`${label}を${stepBy ?? step}減らす`}
+          onClick={() => bump(-1)}
+          disabled={safeValue <= min}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-slate-50 text-2xl font-bold leading-none text-slate-700 active:bg-slate-200 disabled:opacity-40"
+        >
+          −
+        </button>
+        <input
+          type="number"
+          inputMode="decimal"
+          step={step}
+          min={min}
+          max={max}
+          value={safeValue}
+          onChange={(e) => {
+            const next = parseFloat(e.target.value);
+            if (Number.isFinite(next)) onChange(next);
+          }}
+          className="h-11 w-full min-w-0 rounded-md border border-slate-300 px-2 text-center text-base focus:border-orange-400 focus:outline-none focus:ring-1 focus:ring-orange-400"
+        />
+        <button
+          type="button"
+          aria-label={`${label}を${stepBy ?? step}増やす`}
+          onClick={() => bump(1)}
+          disabled={safeValue >= max}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-slate-50 text-2xl font-bold leading-none text-slate-700 active:bg-slate-200 disabled:opacity-40"
+        >
+          ＋
+        </button>
+      </div>
     </div>
   );
 }
