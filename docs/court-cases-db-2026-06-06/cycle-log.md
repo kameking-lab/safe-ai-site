@@ -339,3 +339,11 @@
 - 改善(最小・非破壊・既存データ再利用): whats-new-client.tsx に「🆕新着のみ」トグル(前回閲覧localStorage以降=件数表示と同一基準)＋業種チップ(法改正を業種で絞り、業種非依存の速報/通達と全業種向け改正は常時表示)＋「絞り込み解除」。判定を純関数 filterNewsHubItems/isNewSince/newsItemMatchesIndustry として news-hub-types.ts に切出し、news-hub-filter.test.ts 8ケースで固定検証(件数表示と新着フィルタの一致・他業種専用のみ除外 等)。
 - 再レビュー(本番ビルド): 前回=2026-06-04の常連で「新着のみ」→81件→3件(全て前回以降・表示件数と一致)。法改正40→建設26/医療福祉16。村上評価「新着のみ→建設で関係分だけ。毎朝ここで完結、e-Govを開き直さない」→採用ライン到達。検証中、テスト用セレクタが page全18 ul を数える誤り(101等の偽値)を発見→ニュース項目限定セレクタで実数(81/3/26)を再確認。
 - ゲート: tsc 0 / lint errors 0 / vitest 1100 pass(+8) / build 成功。記録: docs/third-party-reviews/whats-new-asakatsu-consultant-2026-06-09.md(+ 絞り込みスクショ)。temp(probe/persona .mjs)削除済。データ再生成2ファイルはcheckoutで復元。架空0・水増し0・既存破壊0。
+
+## Cycle53【チャットボット 現場監督目線で無限再レンダリングを根治】(2026-06-09 JST)
+- 前回PR回収: CI緑の#425(化学RA 3タップ)と#426(事故DBクイック検索)をsquashマージ→main pull→clean。#426は#425マージでBACKLOG.mdが競合したためrebaseを試みたがforce-push権限が無く、代わりにorigin/mainをマージコミットで取り込み通常push→auto-merge。#427(安全工程打合せ書)はCI実行中のため次イテレーションで回収。
+- 軸2タスク: 法令チャットボット(/chatbot)を「佐藤(48)・職長歴20年の現場監督・型落ちスマホ片手操作・条番号と原文を3秒で出したい・遅い/カクつくなら二度と使わない」ペルソナで第三者レビュー(Playwright iPhone13エミュレート/dev server localhost:3000)。
+- 致命発見: 送信すらしていない初期ロードだけでコンソールに `Maximum update depth exceeded`(setState無限ループ)が64回。原因は `ChatbotBody`/`CopilotIndustrySync` の `useEffect(..., [copilot])`。Copilot Context値は `recordVisit` 等が毎回 `updatedAt: Date.now()` を打つため同一性が毎レンダリング変化し、effect→state更新→effectの無限ループ＋localStorage書き込みの暴走に陥っていた(型落ちスマホでのもたつき・発熱・電池消費の直接原因)。
+- 改善(最小・非破壊): `copilot` 全体ではなく安定な `useCallback`(`recordVisit`/`setIndustry`/`addConcerns`)とプリミティブのみを依存に。`ChatbotBody` はマウント時1回実行に。`CopilotIndustrySync` の配列prop `concerns` は制御文字()区切りの安定キー `concernsKey` に畳んで依存化。
+- 再レビュー(Playwright再計測): `Maximum update depth` 64回→0回。送信→吹き出し52ms/本文描画開始232ms、stream 200、回答・参照条文・出典(条番号+施行日+発出機関)・信頼度バッジ全て正常描画。出典の見やすさ自体は元々良好と確認。佐藤評価「カクつきが消えた、職人の前で開ける」。
+- ゲート: tsc 0 / lint errors 0 / vitest 1092 pass / build 成功。記録: docs/third-party-reviews/chatbot-site-supervisor-2026-06-09.md。架空0・水増し0・既存破壊0。一時Playwright/スクショは削除済(差分はソース2ファイル)。
