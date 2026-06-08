@@ -20,7 +20,7 @@ import {
   type ContractorType,
   type ChecklistStatus,
 } from "@/lib/meeting/schema";
-import { loadCurrentMeeting, saveCurrentMeeting, snapshotMeeting, collectMeetingHistory, type MeetingHistory } from "@/lib/meeting/store";
+import { loadCurrentMeeting, saveCurrentMeeting, snapshotMeeting, collectMeetingHistory, loadLatestMeeting, duplicateForNextDay, type MeetingHistory } from "@/lib/meeting/store";
 import { MeetingPrintSheet } from "@/components/meeting/meeting-print-sheet";
 import { estimateQualifications, inferChecklist } from "@/lib/meeting/inference";
 import { cloudPushMeeting, isMeetingCloudEnabled } from "@/lib/meeting/cloud";
@@ -68,12 +68,16 @@ export function MeetingPaperView() {
   const [history, setHistory] = useState<MeetingHistory | null>(null);
   // R3: 初見の元請担当向け 3ステップ案内（一度×で恒久非表示。localStorage）。
   const [firstUseHintOpen, setFirstUseHintOpen] = useState(false);
+  // 「前回を複製」を上部にも出すための判定（端末に保存済みの打合せ書があるときだけ）。
+  const [hasLatest, setHasLatest] = useState(false);
 
   // 初回: 作業中の打合せ書を復元
   useEffect(() => {
     const cur = loadCurrentMeeting();
     if (cur) setRecord(cur);
     setHistory(collectMeetingHistory());
+    // 保存済みの打合せ書があれば上部にも「前回を複製」を出す（翌日分作成の最速ルート）。
+    setHasLatest(loadLatestMeeting() !== null);
   }, []);
 
   // R3: 初見案内の表示判定（未読のときだけ表示）。
@@ -92,6 +96,20 @@ export function MeetingPaperView() {
     } catch {
       /* 無視 */
     }
+  }, []);
+
+  // 上部「前回を複製」: 直近に保存した1枚を翌日分として複製（各社の作業・危険・対策を引き継ぎ、
+  // 日付は翌日・打合せ日は今日・実績/当日記入/コメント/点検はクリア）。1時間作業の大半を省く最速ルート。
+  const handleCopyLatest = useCallback(() => {
+    const latest = loadLatestMeeting();
+    if (!latest) {
+      setNotice("複製できる過去の打合せ書が見つかりませんでした。");
+      return;
+    }
+    const next = duplicateForNextDay(latest);
+    setRecord(next);
+    saveCurrentMeeting(next);
+    setNotice("前回の打合せ書を翌日分として複製しました（各社の作業・危険・対策を引き継ぎ、当日記入はクリア）。");
   }, []);
 
   // 自動保存（変更のたび）
@@ -229,6 +247,16 @@ export function MeetingPaperView() {
         <div className="flex items-center gap-2">
           <h1 className="text-sm font-bold text-slate-900">安全工程打合せ書・安全衛生指示書</h1>
           <Link href="/safety-diary/list" className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100">保存一覧</Link>
+          {hasLatest && (
+            <button
+              type="button"
+              onClick={handleCopyLatest}
+              title="前回の打合せ書を翌日分として複製（各社の作業・危険・対策を引き継ぎ、日付は翌日・当日記入はクリア）"
+              className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-100"
+            >
+              ↻ 前回を複製
+            </button>
+          )}
         </div>
         <div className="flex items-center gap-1">
           <button type="button" aria-label="縮小" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 10) / 10))} className="rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">－</button>

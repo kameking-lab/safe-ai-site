@@ -91,6 +91,13 @@ export function getMeetingList(): MeetingSummary[] {
   return Array.isArray(list) ? list : [];
 }
 
+/** 直近に保存した1枚を取得（上部「前回を複製」用。一覧は新しい順）。 */
+export function loadLatestMeeting(): MeetingRecord | null {
+  const list = getMeetingList();
+  const latest = list[0];
+  return latest ? getMeetingById(latest.id) : null;
+}
+
 export function getMeetingById(id: string): MeetingRecord | null {
   const byId = readRaw<Record<string, MeetingRecord>>(BYID_KEY, {});
   const rec = byId && typeof byId === "object" && !Array.isArray(byId) ? byId[id] : undefined;

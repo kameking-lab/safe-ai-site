@@ -317,3 +317,11 @@
 - 改善: (a)用紙ファースト化=下書き(draft)中は承認パネルを用紙の下へ、提出/承認/差し戻し(actionable)中は従来どおり用紙の上に残置(ロック解除導線を埋もれさせない)。(b)上部操作バーに「↻前回を複製」を常設(保存済みKYがある時のみ)。実装は ky-paper-view.tsx のみ(approvalPanelを変数化し条件配置＋hasLatest判定)。
 - 再レビュー(Playwright実機)で FORM_ABOVE_APPROVAL＋上部「前回を複製」表示を確認。田中監督評価「昨日のを呼んで日付だけ直して終わり。紙より速い。使う」。
 - ゲート: tsc 0 / lint errors 0 / vitest 1092 pass / build 成功。記録: docs/third-party-reviews/ky-paper-veteran-foreman-2026-06-08.md。架空0・水増し0・既存破壊0。
+
+## Cycle53【軸2: 安全工程打合せ書 元請安全担当ペルソナレビュー】(2026-06-09 00:20 JST)
+- 前PR回収: CI緑だった PR#425(化学物質RA 一人親方)は main 衝突(BACKLOG/cycle-logのみ)→ローカルで両取り解決(私の#425 Cycle51を Cycle52へ改番)・push済。auto-merge不可リポのため次イテレーションで緑確認→squash回収。#426(事故DB)はCI実行中。main は pull --ff-only で clean。
+- タスク選定: BACKLOG最上位 chemical-ra(#425)・accidents(#426) は両方とも自分の未マージPRで対応中につき重複回避。次の真の未着手「安全工程打合せ書(/safety-diary)を元請安全担当ペルソナでレビュー」を実行。
+- 第三者レビュー: 渡辺さん(54歳・元請安全担当・毎朝1時間・3分で“昨日の続き”に入れねば紙に戻る)になりきりPlaywright実操作。最大の摩擦=1時間作業の大半を省く「翌日用に複製」が保存一覧画面の中にしか無く、朝/safety-diary直行の導線では埋没(姉妹のKY用紙 Cycle51と同型欠点)。
+- 改善: 編集画面の上部バー(保存一覧の隣)に「↻ 前回を複製」を常設(保存済みがある時のみ)。1タップで直近保存→翌日分を生成(各社の作業/機械/資格/予知災害/対策/RA引継・日付翌日・当日記入クリア)。既存 duplicateForNextDay を再利用(作り直し無し)。store.tsに loadLatestMeeting() 追加＋meeting-paper-view.tsxに hasLatest/handleCopyLatest/ボタン。KY用紙とUI・文言を統一。
+- 再レビュー(Playwright実機): 初見は非表示(空複製防止)→保存→リロードで上部「前回を複製」常設→1タップで通知＋作業所名引継＋翌日日付。渡辺さん「1タップで昨日の各社対策が乗る。紙に戻らない」。
+- ゲート: tsc0 / lint errors0 / vitest1092pass / build成功。記録: docs/third-party-reviews/safety-diary-genuke-anzentanto-2026-06-09.md（+ topbar スクショ）。temp(spec/config/devlog)削除済。架空0・水増し0・既存破壊0。
