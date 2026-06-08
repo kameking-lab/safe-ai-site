@@ -6,6 +6,12 @@ import { determineManagementClass } from "@/lib/measurement-engine";
 import { MEASUREMENT_CATEGORIES } from "@/data/measurement-rules";
 import type { ManagementClassInput, ManagementClassResult, ManagementClass } from "@/types/work-environment";
 import type { MeasurementCategoryId } from "@/types/work-environment";
+import {
+  ClassJudgeRecordHeader,
+  ClassJudgeInputTable,
+  ClassJudgeSignoff,
+  type ClassJudgeRecordMeta,
+} from "@/components/work-env/class-judge-record-print";
 
 const INITIAL_FORM = {
   category: "" as MeasurementCategoryId | "",
@@ -18,11 +24,18 @@ const INITIAL_FORM = {
   useBMeasurement: false,
   /** B-measurement value */
   bValue: "",
+  /** 記録用（任意）: 単位作業場所の名称 */
+  workplace: "",
+  /** 記録用（任意）: 測定対象物質名 */
+  substance: "",
+  /** 記録用（任意）: 測定実施年月日 "YYYY-MM-DD" */
+  measuredOn: "",
 };
 
 export function WorkEnvManagementClassJudge() {
   const [form, setForm] = useState(INITIAL_FORM);
   const [result, setResult] = useState<ManagementClassResult | null>(null);
+  const [recordMeta, setRecordMeta] = useState<ClassJudgeRecordMeta | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const categoriesWithClass = MEASUREMENT_CATEGORIES.filter((c) => c.hasManagementClass);
@@ -33,6 +46,7 @@ export function WorkEnvManagementClassJudge() {
     e.preventDefault();
     setError(null);
     setResult(null);
+    setRecordMeta(null);
 
     if (!form.category) {
       setError("測定対象を選択してください。");
@@ -64,20 +78,34 @@ export function WorkEnvManagementClassJudge() {
       bMeasurementRatio = bVal / mgmtConc;
     }
 
+    const effectiveGsd = aGsd && aGsd > 1 ? aGsd : undefined;
     const input: ManagementClassInput = {
       category: form.category as MeasurementCategoryId,
       aMeasurementRatio,
-      aGsd: aGsd && aGsd > 1 ? aGsd : undefined,
+      aGsd: effectiveGsd,
       useBMeasurement: form.useBMeasurement,
       bMeasurementRatio,
     };
 
     setResult(determineManagementClass(input));
+    setRecordMeta({
+      workplace: form.workplace.trim(),
+      substance: form.substance.trim(),
+      measuredOn: form.measuredOn,
+      categoryName: selectedCategory?.name ?? "",
+      unit: selectedCategory?.unit ?? "",
+      managementConc: mgmtConc,
+      aValue: aVal,
+      aGsd: effectiveGsd,
+      useBMeasurement: form.useBMeasurement,
+      bValue: form.useBMeasurement ? parseFloat(form.bValue) : undefined,
+    });
   }
 
   function handleReset() {
     setForm(INITIAL_FORM);
     setResult(null);
+    setRecordMeta(null);
     setError(null);
   }
 
@@ -86,7 +114,7 @@ export function WorkEnvManagementClassJudge() {
       {/* Input form */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-xl border border-slate-200 bg-white p-5"
+        className="rounded-xl border border-slate-200 bg-white p-5 print:hidden"
       >
         <h2 className="mb-4 text-base font-semibold text-slate-800">
           測定値を入力
@@ -217,6 +245,56 @@ export function WorkEnvManagementClassJudge() {
           </fieldset>
         )}
 
+        {/* 記録用の任意情報（印刷時の評価記録に反映。判定そのものには不要） */}
+        <details className="mb-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <summary className="cursor-pointer text-sm font-semibold text-slate-700">
+            記録用の情報（任意・印刷時の評価記録に反映）
+          </summary>
+          <p className="mt-2 text-xs text-slate-500">
+            入力すると印刷／PDFの評価記録に反映されます。空欄でも判定・印刷はできます（手書き欄として出力）。
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-3">
+            <div>
+              <label htmlFor="workplace" className="mb-1 block text-xs font-medium text-slate-600">
+                単位作業場所の名称
+              </label>
+              <input
+                id="workplace"
+                type="text"
+                value={form.workplace}
+                onChange={(e) => setForm((f) => ({ ...f, workplace: e.target.value }))}
+                placeholder="例: 第2塗装ブース"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label htmlFor="substance" className="mb-1 block text-xs font-medium text-slate-600">
+                測定対象物質名
+              </label>
+              <input
+                id="substance"
+                type="text"
+                value={form.substance}
+                onChange={(e) => setForm((f) => ({ ...f, substance: e.target.value }))}
+                placeholder="例: トルエン"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
+            <div>
+              <label htmlFor="measuredOn" className="mb-1 block text-xs font-medium text-slate-600">
+                測定実施年月日
+              </label>
+              <input
+                id="measuredOn"
+                type="date"
+                value={form.measuredOn}
+                onChange={(e) => setForm((f) => ({ ...f, measuredOn: e.target.value }))}
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
+          </div>
+        </details>
+
         {error && (
           <p className="mb-3 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-700">{error}</p>
         )}
@@ -243,7 +321,7 @@ export function WorkEnvManagementClassJudge() {
 
       {/* Result */}
       {result && (
-        <ManagementClassResultCard result={result} />
+        <ManagementClassResultCard result={result} recordMeta={recordMeta} />
       )}
 
       {/* Explanation panel */}
@@ -252,7 +330,13 @@ export function WorkEnvManagementClassJudge() {
   );
 }
 
-function ManagementClassResultCard({ result }: { result: ManagementClassResult }) {
+function ManagementClassResultCard({
+  result,
+  recordMeta,
+}: {
+  result: ManagementClassResult;
+  recordMeta: ClassJudgeRecordMeta | null;
+}) {
   const classConfig: Record<
     ManagementClass,
     { label: string; color: string; bg: string; border: string; Icon: React.ElementType }
@@ -284,8 +368,26 @@ function ManagementClassResultCard({ result }: { result: ManagementClassResult }
   const { Icon } = cfg;
 
   return (
-    <div className={`rounded-xl border-2 ${cfg.border} ${cfg.bg} p-6`}>
-      <div className="mb-4 flex items-center gap-3">
+    <div className={`rounded-xl border-2 ${cfg.border} ${cfg.bg} p-6 print:border print:bg-white print:p-0`}>
+      {/* 記録ツールバー（印刷時は隠す） */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 print:hidden">
+        <p className="text-xs font-semibold text-slate-600">
+          評価記録として保存できます（A4・確認欄付き）
+        </p>
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50"
+        >
+          🖨 評価記録を印刷 / PDF保存
+        </button>
+      </div>
+
+      {/* 印刷専用：A4評価記録ヘッダ＋測定値の内訳 */}
+      {recordMeta && <ClassJudgeRecordHeader meta={recordMeta} />}
+      {recordMeta && <ClassJudgeInputTable meta={recordMeta} />}
+
+      <div className="mb-4 flex items-center gap-3 print:mt-3">
         <Icon className={`h-8 w-8 ${cfg.color}`} aria-hidden />
         <div>
           <p className={`text-2xl font-extrabold ${cfg.color}`}>{cfg.label}</p>
@@ -342,6 +444,9 @@ function ManagementClassResultCard({ result }: { result: ManagementClassResult }
         ※ 本判定は参考情報です。法令上の最終判定は作業環境測定機関または労働衛生コンサルタントにご確認ください。
         出典: 作業環境測定基準（昭和51年労働省告示第46号）
       </p>
+
+      {/* 印刷専用：確認欄＋保存・周知の注記 */}
+      <ClassJudgeSignoff />
     </div>
   );
 }
@@ -362,7 +467,7 @@ function PriorityBadge({ priority }: { priority: "immediate" | "within-3months" 
 
 function ManagementClassExplanation() {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-xl border border-slate-200 bg-white p-5 print:hidden">
       <div className="mb-3 flex items-center gap-2">
         <Info className="h-5 w-5 text-slate-400" aria-hidden />
         <h2 className="text-sm font-semibold text-slate-800">

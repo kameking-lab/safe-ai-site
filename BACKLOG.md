@@ -44,6 +44,9 @@
 - [x] 受入教育記録のCSV/印刷を「月次で本社へ提出する元請安全担当」ペルソナでレビュー→名簿CSVの実務品質（現場別フィルタ・並び）（2026-06-09: 名簿CSVが全件・日付降順・当日日付固定ファイル名で、3現場×3ヶ月が1ファイルに混在＝本社へ現場ごと月次提出する際に手で切り分ける致命を実機確認。名簿CSV専用ブロックを新設＝現場/月ドロップダウンで絞り込み→「現場昇順→実施日昇順」で並べ、ファイル名に月・現場を反映(induction-roster-2026-05-A棟新築工事.csv)。純関数monthOf/distinctSites/distinctMonths/buildRoster/rosterFileName＋9テストに切出し、画面/保存/スキーマ/印刷不変。docs/third-party-reviews/induction-csv-monthly-2026-06-09.md）
 - [x] 健診スケジューラ(/health-checkup-scheduler)を「健診漏れを防ぎたい安全担当」ペルソナでレビュー→未受診の可視化・リマインド導線（2026-06-09: 結果ページの「漏れ・期限超過の警告」が常に全件「実施記録なし」の同一赤箱を並べるだけ＝実際に超過しているのはどれか全く区別できない致命を実機確認。原因は`buildDecision(profile,[])`と空記録を渡しており前回実施日の入力手段が皆無で、実装・テスト済の期限判定エンジン`identifyMissing`がUIから死蔵。新規純関数classifyCheckupTiming(テスト9件)＋対話的トラッカーMissingCheckupTrackerに置換＝前回実施日を入れると即座に未記録/適正/期限間近/期限超過を色分け・超過を最上段へソート・サマリーバッジ・localStorage永続(リマインド台帳)。エンジン/データ/スキーマ不変・新規依存0・横overflow0(PC/iPhone)。docs/third-party-reviews/health-checkup-scheduler-miss-prevention-2026-06-09.md）
 - [ ] サイネージに緊急アラート(SignageDangerAlert)を結線＝高リスク警報の全画面赤表示＋音声。1画面フィットを壊さず、useEffect内setState(自動発動)の挙動を実機検証して安全に実装。
+- [x] 管理区分判定ツール(/work-environment-measurement/management-class-judge)を「測定機関の結果を受け取り記録保存・掲示する衛生管理者」ペルソナでレビュー→判定結果の記録化（印刷/保存導線）。（2026-06-09: 判定結果に保存・印刷・記録化の導線が皆無＝結果カード内ボタン0・スクショ/転記しかない致命を実機確認。作業環境測定の評価は3年(特別管理物質30年)保存義務・第3区分は労働者周知義務があるのに電卓止まりだった。化学物質RAの印刷専用パーツと同じイディオムで、結果をA4評価記録(評価記録ヘッダ＋測定値の内訳表＋確認欄＋保存/周知注記)として印刷/PDF保存できるよう結線。記録用の任意入力(単位作業場所/対象物質/測定実施日)を&lt;details&gt;で追加(判定フロー不変)。印刷時はフォーム・解説をprint:hiddenで隠し結果のみ出力。純関数formatMeasuredOn+4テスト。エンジン/データ/スキーマ不変・新規依存0・告示値は引き続きユーザー入力(捏造なし)。docs/third-party-reviews/wem-class-judge-record-2026-06-09.md）
+- [ ] 作業環境測定 対象判定(/work-environment-measurement/target-finder)を「自社が測定義務対象か知りたい中小事業者」ペルソナでレビュー→結果の実用性・次アクション導線。
+- [ ] ストレスチェック実施準備(/mental-health-management/stress-check)を「50人になったばかりの事業場の衛生担当」ペルソナでレビュー→実施手順の分かりやすさ・抜け漏れ防止。
 - [ ] 【オーナー判断/Path A】サイネージ休憩時間ビューにアフィリエイト安全グッズ(SignageFeaturedGoods)を出す是非を確認。出す方針なら結線、否なら部品削除。
 
 ## 軸1: 判例コツコツ（確証取れる分のみ・架空0）
