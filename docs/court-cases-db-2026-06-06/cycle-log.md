@@ -399,9 +399,25 @@
 - 再レビュー(Playwright実機): 1人目→ボタン押下で 現場名="田村ビル新築工事"/実施者="職長 田村"/項目=13/13 が引継ぎ・氏名空欄、2人目を氏名のみで保存→一覧2件。入力量「現場名+実施者+13チェック+氏名…」→「氏名+所属」へ。田村さん「名前だけで全員ぶん記録できる」=採用ライン到達。
 - ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/induction-record-firsttime-officer-2026-06-09.md(+3スクショ)。temp(_review .mjs)削除済・誤生成のweb/docsを撤去。架空0・水増し0・既存破壊0。env/DB変更なし。
 
+## Cycle (2026-06-09) — サイネージ「🌅朝礼前」プリセット意味付け是正（軸2）
+- 前PR回収: CI緑だった#433(signage朝礼スクリプト結線)をsquashマージ→main clean。#434(WBGT手袋)はBACKLOG/cycle-logがmainと衝突→force-push不可のためorigin/mainをbranchへmergeして解消・通常pushで反映(CI再走待ち、次イテレーション回収)。#435(受入教育)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG最上位の未着手WBGT(#434)は自分の未マージPRで対応中につき重複回避。次の真の未着手「サイネージ『🌅朝礼前』シナリオプリセットの意味付け是正」を実行。
+- 第三者レビュー: 53歳職長(紙20年・IT苦手・押して無反応なら壊れていると判断し二度と触らない)になりきりPlaywright実機(1920×1080)。致命=「🌅朝礼前」は`mode:"floorplan"`が既定値と同一で押下しても一切変化なし(押下後モーダル数0を実測)＝死んで見える。加えてactiveハイライトが`displayMode===mode`判定でfloorplan表示中は未クリックでも常時ハイライト。朝礼前が一番欲しい読み上げ原稿(#433結線済)へプリセットから辿れない。
+- 改善: 「🌅朝礼前」押下を「floorplan表示＋朝礼スクリプトのモーダルを開く」に変更し、押せば必ず読み上げ原稿が出る＝反応が一目で分かり朝礼で使う原稿に直行。active判定を各プリセットの実体(朝礼前=floorplan&原稿表示/休憩=map/退場=workdocs)に是正しfloorplan誤ハイライト解消。休憩/退場押下時はモーダルを閉じてから切替。既存SignageMorningScript/setShowMorningScriptを再利用、新規部品なし・データ/計算ロジック不変・1画面フィット(横長overflow=0)維持。
+- 再レビュー(Playwright実機): 「🌅朝礼前」押下→朝礼スクリプト(AI生成・気象+類似事故+法改正)モーダルがfloorplan上に出現(押下後モーダル数0→1を実測)。職長「押したらちゃんと原稿が出る。朝礼前にこれを押せばいいと分かる」=採用ライン到達。
+- ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/signage-asarei-preset-2026-06-09.md(+afterスクショ)。temp(review .mjs, _tmp png)削除済。架空0・水増し0・既存破壊0。
+- BACKLOG補充: 軸2の真の未着手が薄かったため改善タスク2件追記(全画面無人運用レビュー・受入教育印刷A4崩れ点検)。
+
+## Cycle (2026-06-09) — 死蔵サイネージ部品の棚卸し＆結線/削除（軸2・保守）
+- 前イテレーション回収: CI緑(CLEAN)だった PR#434(WBGT ステッパー)を squash マージ→`git checkout main && git pull --ff-only`→clean。これにより PR#435(induction)がBACKLOG/cycle-logでコンフリクト→ローカルでorigin/mainへrebase・両側のタスク/ログを統合解決し force-push(CI再走中、次イテレーションで回収)。PR#436(signage朝礼前プリセット)はCI pending につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG軸2最上位の未着手「サイネージ朝礼前プリセット是正」は自分の未マージPR#436が同件対応中につき重複回避。次の真の未着手「死蔵サイネージ部品の棚卸し＆結線可否判定」を実行。
+- 棚卸し: signage-risk-prediction / signage-danger-alert / signage-featured-goods / japan-weather-map の4部品を grep で自ファイル以外参照0件＝死蔵を確認。削除前に依存グラフを確認し、誤削除を防止。
+- 判定と実施: ①SignageRiskPrediction=当日リスク予測(気象→熱中症/週明け/降雨スリップ等を`computeTodayRisks`で自動判定)を**結線**＝右サイドバー先頭に追加。既取得の`state.riskData`を渡すだけで追加フェッチ0・純導出で副作用なし・6月は熱中症期で価値最大。section に`xl:max-h-[34vh]`+`shrink-0`を付け既存トレンド/法改正(flex-1)を圧迫しない。②JapanWeatherMap=実データの`JapanPrefectureWarningMap`(気象庁JSON)で上位互換のため**孤立ラッパー1ファイルのみ削除**。ただし`japan-weather-map-mock`/`japan-map-svg`は`/api/signage-weather`・`/risk`の`WeatherForecastPanel`が生きて使用＝**温存**(誤削除回避)。③DangerAlert(全画面緊急アラート)はuseEffect内setStateの挙動検証が要るため**保留→新タスク化**。④FeaturedGoods(アフィリエイト)はサイネージ掲示の収益方針＝**オーナー判断(Path A)→新タスク化**。
+- 検証(Playwright実機): /signage を1920×1080で描画、`本日のリスク予測`見出し存在を確認。1画面フィット維持＝横/縦オーバーフロー共に**0px**(scrollW=clientW=1920, scrollH=clientH=1080)。1080×1920縦長でも横オーバーフロー0px。右上に赤の高リスクカード(6月の熱中症高リスク)が先頭表示。
+- ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/signage-dead-component-inventory-2026-06-09.md(+スクショ)。temp(_signage_review.mjs/png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
+- BACKLOG補充: 保留2部品をタスク化(緊急アラート結線・アフィリエイト掲示のオーナー判断)。
+
 ## Cycle (2026-06-09) — KY用紙 参加者選択「2タップ完了」化（軸2）
-- 前PR回収: CI緑だった#435(受入教育 次の人へ引継ぎ)をsquashマージ→main clean。#436(signage朝礼前プリセット)はBACKLOG/cycle-logがmainと衝突→origin/mainをbranchへmergeして解消・通常pushで反映(CI再走待ち、次イテレーション回収)。#437(死蔵サイネージ部品棚卸し)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
-- タスク選定: BACKLOG最上位の未着手 #36 asarei(=#436)・#37 死蔵棚卸し(=#437) は両方とも自分の未マージPRで対応中につき重複回避。次の真の未着手「KY用紙(/ky/paper)の作業員選択をスマホで2タップ完了化」を実行。actionable未着手8件で補充不要。
 - 第三者レビュー: 山口さん(54歳・職長・紙20年・薄手手袋で片手操作・班は毎朝ほぼ同じ顔ぶれ)になりきりPlaywright実機(iPhone 12)。作業員14名(自社5/協力1次4/協力2次5・常用6)を投入。致命=常用6名を1人ずつ＝6タップ必要・班/常用のまとまり0・一括選択系ボタン0個を実測。「毎朝6人ポチポチなら紙が速い」。
 - 改善: 純関数participant-select.ts(addParticipants/clearParticipants/groupWorkersByAffiliation・9テスト)を新設し、参加者欄にワンタップ呼び出しツールバーを追加。⭐常用N名をまとめて選ぶ(isRegular一括=6→1タップ)＋協力会社など「{所属}全員」班ワンタップ＋クリア(マスター由来のみ解除・手入力温存)。個別チップは所属でグルーピングし見つけやすく。既存toggleWorker作法(空き行再利用)踏襲・データ/localStorageスキーマ不変・新規依存0・印刷体裁不変。
 - 再レビュー(Playwright実機): ⭐常用(201×44px)1タップ→参加者6名、クリア1タップ→0名、協力会社(1次)全員1タップ→4名、二重押下で6→6名(重複なし)を実測。山口さん「朝はこの⭐を押すだけ。手袋でも一発、紙より速い」=採用ライン到達。
