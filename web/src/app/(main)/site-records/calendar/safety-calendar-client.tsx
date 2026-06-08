@@ -30,8 +30,28 @@ export function SafetyCalendarClient() {
     setThisMonth(new Date().getMonth() + 1);
   }, []);
 
+  const nowMonth = SAFETY_CALENDAR.find((m) => m.month === thisMonth);
+
   return (
     <div className="space-y-6">
+      {/* 今月やること（初見でも先頭で即到達。当月確定後にのみ表示しSSR差異を回避） */}
+      {nowMonth && (
+        <section className="rounded-2xl border-2 border-emerald-400 bg-emerald-50 p-5 shadow-sm ring-2 ring-emerald-300 dark:border-emerald-500/50 dark:bg-emerald-500/10">
+          <div className="flex items-center gap-2">
+            <span className="rounded-full bg-emerald-600 px-2.5 py-0.5 text-xs font-bold text-white">今月</span>
+            <h2 className="text-lg font-bold text-emerald-900 dark:text-emerald-100">{MONTH_LABEL[nowMonth.month]}にやること</h2>
+          </div>
+          <div className="mt-2 space-y-0.5">
+            {nowMonth.items.map((it) => (
+              <ItemRow key={it.label} item={it} />
+            ))}
+          </div>
+          <p className="mt-2 border-t border-emerald-200 pt-2 text-xs text-emerald-800 dark:border-emerald-500/30 dark:text-emerald-200">
+            加えて、毎日のKY・作業前点検・受入教育などは下の「毎日・毎月・随時に行うこと」に常設されています。
+          </p>
+        </section>
+      )}
+
       {/* 毎日・毎月・随時 */}
       <section className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5 dark:border-emerald-500/30 dark:bg-emerald-500/5">
         <h2 className="text-sm font-bold text-emerald-900 dark:text-emerald-200">毎日・毎月・随時に行うこと</h2>

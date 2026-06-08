@@ -410,6 +410,26 @@ table {
   ol {
     page-break-inside: avoid;
   }
+  /* 印刷時、(main)レイアウトのコンテンツラッパーは flex-1 / min-h-full で
+     画面の縦いっぱいに引き伸ばされる。その末尾の空白がそのまま印刷され、
+     コンテンツが1ページに収まっていても余分な2ページ目（ほぼ白紙）が
+     排出される。印刷時はストレッチを解除しコンテンツ高に縮める。 */
+  #main-content,
+  #main-content > div {
+    flex: none !important;
+    min-height: 0 !important;
+  }
+  /* 表（順化計画など）の行が改ページ位置で上下に切れない（枠線切れ防止）。
+     見出し行は各ページ先頭で繰り返す。 */
+  table {
+    page-break-inside: auto;
+  }
+  thead {
+    display: table-header-group;
+  }
+  tr {
+    page-break-inside: avoid;
+  }
   /* 全ページ共通 A4 フッター情報（`.print-footer` を各ページで追記可能） */
   .print-footer {
     position: fixed;

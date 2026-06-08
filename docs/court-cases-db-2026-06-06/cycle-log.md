@@ -432,6 +432,15 @@
 - 再レビュー(Playwright実機): wakeLock呼出=1(画面スリープ抑止作動)、フッター=「30分ごと…3分後に再試行」=実挙動一致、回線断シナリオで「取得エラー」バッジ表示を確認。佐藤さん「朝置いて夕方まで任せられる。画面も消えず回線が戻れば勝手に直る」=採用ライン到達。
 - ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/signage-display-unattended-2026-06-09.md。temp(_sig_*.mjs/png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
 
+## Cycle (2026-06-09) — 各印刷ページ(WBGT/順化計画/ポスター) A4崩れ点検→是正（軸2）
+- 前PR回収: CI緑だった#439(signage全画面スリープ抑止)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#440(受入教育 印刷物の署名・押印)はBACKLOG/cycle-logが#439マージ後のmainと衝突→origin/mainをbranchへmergeし両側のタスク/ログを統合解決して通常push(force権限なしのためrebaseでなくmerge方式・CI再走中、次イテレーション回収)。#441(業種別リスク スマホ縦スクロール短縮)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG最上位の未着手「業種別リスク判定 スマホ縦スクロール短縮」は自分の未マージPR#441が同件対応中につき重複回避。次の真の未着手「各印刷ページ(WBGT結果/順化計画/ポスター)をA4プレビューし崩れ点検→是正」を実行。actionable未着手多数で補充不要。
+- 第三者レビュー: 桑原さん(48歳・ゼネコン作業所の元請安全担当・熱中症ポスターをA4で各所に1枚貼り/順化計画を本社提出・白紙混入や行切れに厳しい)になりきりPlaywright(Chromium)で実データ入力→`emulateMedia("print")`+`page.pdf({format:"A4",preferCSSPageSize:true})`でA4実機プレビュー。PDFの`/Count`と各要素のbounding boxで実測。
+- 発見した欠点: ①【致命】緊急時対応ポスターが2ページ印刷される。ポスター本体は1ページ内(高さ約939px<印刷可能高さ約1009px)なのに`/Count`=2。原因は(main)レイアウトのコンテンツラッパー(`PageContainer`の`py-6 sm:py-8`＋`#main-content > div`の`flex-1`縦ストレッチ)が印刷時も残り、末尾の空白が白紙の2枚目として排出。②順化計画を16日に伸ばすと2ページになり16行目が改ページ境界で分断され得る(`tbody tr`に改ページ抑止なし・見出し行の各ページ再表示も未明示)。③WBGT結果は入力欄print:hiddenで結果のみ印刷・1ページ・崩れなし(健全)。横はみ出しは3ページとも0px。
+- 改善(印刷専用・画面不変): `PageContainer`縦パディングに`print:py-0`を追加(全印刷ページ共通で白紙2枚目防止)。globals.css @media printに`#main-content,#main-content>div{flex:none;min-height:0}`(画面用ストレッチ解除)＋`table{page-break-inside:auto}/thead{display:table-header-group}/tr{page-break-inside:avoid}`(表の行が改ページで切れない・見出し再表示)。print:バリアント/＠media printのみ・新規依存0・スキーマ/ロジック不変。
+- 再レビュー(A4再実測): ポスター`/Count`=2→1(貼れる1枚がそのまま出力・白紙消失)、WBGT=1ページ維持、順化計画(16日)=2ページ(正当)かつ`tr`の`break-inside`計算値=avoid(行分断なし)・見出し各ページ再表示。桑原さん「押したら貼れる1枚が出る。順化表も切れずに2枚目へ続く。提出できる」=採用ライン到達。
+- ゲート: tsc0 / lint errors0(warning47=既存) / vitest1114pass / build成功。記録: docs/third-party-reviews/print-pages-a4-2026-06-09.md(+poster afterスクショ)。temp(_print_review.mjs/_poster_*.mjs/png/pdf)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
+
 ## Cycle (2026-06-09) — 受入教育記録 印刷物(A4)の提出品質是正（軸2）
 - 前PR回収: CI緑だった#437(死蔵サイネージ部品棚卸し)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#438(KY参加者2タップ)はBACKLOG/cycle-logがmainと衝突→origin/mainをbranchへmerge・両側のタスク/ログを統合解決して通常push(CI再走中、次イテレーション回収)。#439(signage全画面スリープ抑止)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
 - タスク選定: BACKLOG最上位の未着手「サイネージ全画面 無人運用レビュー」は自分の未マージPR#439が同件対応中につき重複回避。次の真の未着手「受入教育記録の印刷物(入場者名簿・教育記録)A4実機プレビュー点検→是正」を実行。actionable未着手多数で補充不要。
@@ -455,3 +464,11 @@
 - 改善: induction-store.tsに純関数monthOf/distinctSites/distinctMonths/buildRoster(現場昇順→実施日昇順→所属→氏名)/rosterFileName(月・現場をファイル名へ)を追加。induction-client.tsxの保存一覧に「名簿CSV(本社へ月次提出)」ブロックを新設＝現場/月ドロップダウン＋「名簿CSVを出力(N名)」(0件は無効化)＋絞り込み解除＋出力後通知。重複していたper-record行の「名簿CSV(全件)」ボタンは撤去し出力経路を一本化。画面/保存/localStorageスキーマ/印刷帳票は不変・新規依存0。
 - 再レビュー(Playwright実DL): A棟×5月=`induction-roster-2026-05-A棟新築工事.csv`(2名・昇順)、B橋梁×全期間=2名昇順、全現場×全期間=6名がA棟3→B橋梁2→C造成1で現場まとまり・各現場内実施日昇順。桑原さん「現場と月を選ぶだけで実施順の名簿が出る。ファイル名に月と現場が入り取り違えない。本社にそのまま添付できる」=提出ライン到達。
 - ゲート: tsc0 / lint errors0(warning47=既存) / vitest1125pass(145ファイル) / build成功。記録: docs/third-party-reviews/induction-csv-monthly-2026-06-09.md。temp(_induction_csv_*.mjs/png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
+
+## Cycle (2026-06-09) — 年間 安全衛生カレンダー 「今月やること」先頭昇格（軸2）
+- 前PR回収: CI緑(CLEAN)だった#440(受入教育印刷の署名押印欄)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#441(業種別リスクのスマホ縦長短縮)はマージ時コンフリクト(BACKLOG/cycle-logの追記衝突)→mainへrebase・両側統合解決のうえforce-push(CI再走中、次イテレーション回収)。#442(印刷ページA4)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG軸2の上位未着手「業種別リスクのスマホ短縮」=自PR#441、「印刷ページA4」=自PR#442が対応中で重複につき回避。真に空いている「年間 安全衛生カレンダーを初見の安全担当でレビュー＝今月やることへの到達・ツール連携」を実行。未着手≥3で補充不要。
+- 第三者レビュー: 持田さん(47歳・中堅製造業の総務から今月安全衛生担当に異動・年間スケジュール未習熟・知りたいのは“今月やること”だけ・スマホ通勤確認)になりきりPlaywright実機(iPhone 12 390×664)。致命=ページ全長4499px≒6.78画面で当月(6月)カードがy=1502px≒2.3画面下に埋没＝初見者が一番欲しい結論に届くまで関係ない1〜5月を5枚スクロール。皮肉にも説明文は「今月やることが一目で分かり」と謳い乖離。横崩れ0。「毎回6月を探すなら紙の年間計画表が速い」。
+- 改善: safety-calendar-client.tsxに「{月}にやること」カードを先頭へ昇格(データ/取得ロジック不変)。当月確定後にのみ描画しSSR差異回避・中身は当月SAFETY_CALENDAR項目を既存ItemRowで再利用＝ツール連携リンク(熱中症対策→/heat-illness-prevention等)を先頭でそのままタップ可・末尾に毎日基本は下の常設一覧へ誘導の一文。既存12ヶ月グリッド/当月リング/毎日セクションは不変・新規依存0・スキーマ不変。
+- 再レビュー(Playwright実機): 「今月」バッジy=1520→460px≒0.69画面(ヘッダー直下・スクロール0でファーストビューに当月対策とリンク)、横overflow0維持、当月カードのリンクtap可。持田さん「開いてすぐ“6月にやること”が緑で出て熱中症リンクをそのまま押せる。毎月開く」=採用ライン到達。
+- ゲート: tsc0 / lint errors0(warn47既存) / vitest1114pass / build成功。記録: docs/third-party-reviews/safety-calendar-firsttime-officer-2026-06-09.md。temp(_cal_review.mjs/_cal_*.png)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。
