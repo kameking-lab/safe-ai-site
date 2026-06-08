@@ -417,6 +417,21 @@
 - ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/signage-dead-component-inventory-2026-06-09.md(+スクショ)。temp(_signage_review.mjs/png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
 - BACKLOG補充: 保留2部品をタスク化(緊急アラート結線・アフィリエイト掲示のオーナー判断)。
 
+## Cycle (2026-06-09) — KY用紙 参加者選択「2タップ完了」化（軸2）
+- 第三者レビュー: 山口さん(54歳・職長・紙20年・薄手手袋で片手操作・班は毎朝ほぼ同じ顔ぶれ)になりきりPlaywright実機(iPhone 12)。作業員14名(自社5/協力1次4/協力2次5・常用6)を投入。致命=常用6名を1人ずつ＝6タップ必要・班/常用のまとまり0・一括選択系ボタン0個を実測。「毎朝6人ポチポチなら紙が速い」。
+- 改善: 純関数participant-select.ts(addParticipants/clearParticipants/groupWorkersByAffiliation・9テスト)を新設し、参加者欄にワンタップ呼び出しツールバーを追加。⭐常用N名をまとめて選ぶ(isRegular一括=6→1タップ)＋協力会社など「{所属}全員」班ワンタップ＋クリア(マスター由来のみ解除・手入力温存)。個別チップは所属でグルーピングし見つけやすく。既存toggleWorker作法(空き行再利用)踏襲・データ/localStorageスキーマ不変・新規依存0・印刷体裁不変。
+- 再レビュー(Playwright実機): ⭐常用(201×44px)1タップ→参加者6名、クリア1タップ→0名、協力会社(1次)全員1タップ→4名、二重押下で6→6名(重複なし)を実測。山口さん「朝はこの⭐を押すだけ。手袋でも一発、紙より速い」=採用ライン到達。
+- ゲート: tsc0 / lint errors0 / vitest1114pass(+9) / build成功。記録: docs/third-party-reviews/ky-paper-worker-2tap-2026-06-09.md(+before/afterスクショ)。temp(_review .mjs, _ky png)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。
+
+## Cycle (2026-06-09) — サイネージ全画面 /signage/display 無人運用レビュー（軸2）
+- 前イテレーション回収: CI緑だった PR#436(signage朝礼前プリセット是正)を squash マージ→`git checkout main && git pull --ff-only`→clean。これにより PR#437(死蔵部品棚卸し)が BACKLOG/cycle-log でコンフリクト→ローカルで main へ rebase・両側のタスク/ログを統合解決し tsc0 確認のうえ force-push(CI再走中、次イテレーション回収)。PR#438(KY用紙2タップ)は e2e/smoke 進行中につき次回回収。古いdocs系PRは放置。
+- タスク選定: BACKLOG軸2の上位未着手のうち「死蔵部品棚卸し」=自分のPR#437が、「KY用紙2タップ」=自分のPR#438が対応中につき重複回避。真に空いている「サイネージ全画面(/signage/display)を無人で1日流しっぱなし前提でレビュー」を実行。
+- 第三者レビュー: 佐藤さん(48歳・地場ゼネコン安全担当・IT非得意・朝置いて夕方まで無人で映す運用)になりきり Playwright 実機(1920×1080フルスクリーン)。
+- 発見した欠点: ①【致命】無人フルスクリーン表示が画面スリープ抑止(useWakeLock)未結線＝`navigator.wakeLock.request`呼出を実測0。常設サイネージ用フックは存在し朝礼サイネージでは使用済なのに肝心の/signage/displayで未使用→OS消灯タイマーで暗転し無人運用が破綻。②自動更新フッターが「15分ごと」表記だが実際は30分(`REFRESH_INTERVAL_MS`)＝誤情報。③取得失敗(回線断をabortで再現)時の回復が次の定期更新まで最大30分の盲点。
+- 改善: ①`SignageMapClient`に`useWakeLock(initialFullscreen)`を結線＝無人フルスクリーン(/signage/display=既定fullscreen)でのみ作動・地図編集(/signage/map=fullscreen:false)では抑止せず・非対応ブラウザは無害no-op。②フッターを「30分ごとに自動更新（タブが表示中のときのみ。取得失敗時は3分後に再試行）」に修正＝実挙動と一致。③取得エラー時のみ`ERROR_RETRY_INTERVAL_MS=3分`の短間隔リトライをスケジュール(タブ非表示skip/アンマウントでclearTimeout)＝盲点を30分→3分に短縮。新規部品0・気象/地震の取得描画ロジック不変・1画面フィット維持。
+- 再レビュー(Playwright実機): wakeLock呼出=1(画面スリープ抑止作動)、フッター=「30分ごと…3分後に再試行」=実挙動一致、回線断シナリオで「取得エラー」バッジ表示を確認。佐藤さん「朝置いて夕方まで任せられる。画面も消えず回線が戻れば勝手に直る」=採用ライン到達。
+- ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/signage-display-unattended-2026-06-09.md。temp(_sig_*.mjs/png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
+
 ## Cycle (2026-06-09) — 受入教育記録 印刷物(A4)の提出品質是正（軸2）
 - 前PR回収: CI緑だった#437(死蔵サイネージ部品棚卸し)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#438(KY参加者2タップ)はBACKLOG/cycle-logがmainと衝突→origin/mainをbranchへmerge・両側のタスク/ログを統合解決して通常push(CI再走中、次イテレーション回収)。#439(signage全画面スリープ抑止)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
 - タスク選定: BACKLOG最上位の未着手「サイネージ全画面 無人運用レビュー」は自分の未マージPR#439が同件対応中につき重複回避。次の真の未着手「受入教育記録の印刷物(入場者名簿・教育記録)A4実機プレビュー点検→是正」を実行。actionable未着手多数で補充不要。
