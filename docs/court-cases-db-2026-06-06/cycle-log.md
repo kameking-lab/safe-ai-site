@@ -340,6 +340,14 @@
 - 再レビュー(本番ビルド): 前回=2026-06-04の常連で「新着のみ」→81件→3件(全て前回以降・表示件数と一致)。法改正40→建設26/医療福祉16。村上評価「新着のみ→建設で関係分だけ。毎朝ここで完結、e-Govを開き直さない」→採用ライン到達。検証中、テスト用セレクタが page全18 ul を数える誤り(101等の偽値)を発見→ニュース項目限定セレクタで実数(81/3/26)を再確認。
 - ゲート: tsc 0 / lint errors 0 / vitest 1100 pass(+8) / build 成功。記録: docs/third-party-reviews/whats-new-asakatsu-consultant-2026-06-09.md(+ 絞り込みスクショ)。temp(probe/persona .mjs)削除済。データ再生成2ファイルはcheckoutで復元。架空0・水増し0・既存破壊0。
 
+## Cycle55【判例コーナー 顧問先説明コンサル目線で「絞り込みを印刷へ引き継ぐ」】(2026-06-09 JST)
+- 前回PR回収: CI緑の#429(新着ハブ 新着のみ＋業種)を回収。main側の#428(チャットボット)マージでBACKLOG/cycle-logが衝突→両取りでローカル解決しpush、auto-merge(squash/delete-branch)設定→main pull --ff-only で clean。#430(安全工程打合せ書 前回複製)はCI実行中→次イテレーション回収。古いdocs PR群は安全放置。
+- タスク選定: BACKLOG軸2最上位の未着手は /safety-diary だが in-flight #430 と同一領域で自己衝突回避(Cycle53/54と同方針)。次の未着手「判例コーナー(/court-cases)を顧問先説明コンサル目線で→検索・印刷・関連性」を実行。
+- 第三者レビュー: 田所さん(52・社労士兼労安コンサル・顧問先30社・会議で関係する判例だけA4で配りたい/1件だけ渡すことも多い→離脱条件=関係ない判例まで配らされる・印刷が薄い・共有できない)。本番ビルドをPlaywright実機操作(dev は当サンドボックスでHMR WS遮断によりハイドレ未完=本番で計測)。致命: ①絞り込みが印刷に一切引き継がれない(建設2件に絞っても印刷は常に全86件・?field=も無視) ②絞り込みがURLに書き戻されず共有/戻る不可(初期値は読むのに非対称) ③詳細に単票印刷が無い ④印刷版がholdingのみで概要・実務ポイント・出典URLが無い。
+- 改善(最小・非破壊・既存純関数の再利用): (a)CourtCasesBrowser がフィルタ変更で router.replace(scroll:false) によりURL同期(accidents hub-filter と同作法・テキストはデバウンス)。(b)クエリ⇄フィルタの共通純関数 courtFilterToQuery/courtFilterFromParams/describeCourtFilter を search.ts に新設＝一覧と印刷が同パラメータ名・同 filterCourtCases で結果一致を保証。(c)絞り込み中のみ「この N 件だけをA4で印刷(実務ポイント付き)」CTAを結果上部に。(d)印刷ページを searchParams 対応の動的レンダリングに(robots:noindex でSEO影響なし)＝絞り込み中は見出し「抜粋」・件数「N件(全86件から抜粋)」・条件明示、24件以下は概要＋実務ポイントも掲載。(e)詳細に単票印刷「この判例を印刷/PDF」(?only=<id>)、印刷ページは only で単票表示。空状態も追加。
+- 再レビュー(本番ビルド・Playwright): 建設・墜落に絞る→URL同期OK→CTA「この2件だけをA4で印刷」→印刷ページ2件・抜粋見出し・条件表示・概要+実務ポイント掲載。詳細(kawagi)→単票印刷→only=kawagi で1件。空クエリ→空状態。ディープリンクで状態復元。コンソールエラー0。田所評価「絞って→その2件だけ実務ポイント付きでA4に出せる、1件だけも詳細から印刷できる。自分で作り直さない、使う」→採用ライン到達。
+- ゲート: tsc 0 / lint errors 0(warningは既存・無関係) / vitest 1105 pass(+5) / build 成功(/court-cases/print が ƒ Dynamic 化)。記録: docs/third-party-reviews/court-cases-consultant-2026-06-09.md(+スクショ2枚)。temp probe 削除済。データ再生成2ファイルはcheckoutで復元。架空0・水増し0(判例データ無改変)・既存破壊0。
+
 ## Cycle53【チャットボット 現場監督目線で無限再レンダリングを根治】(2026-06-09 JST)
 - 前回PR回収: CI緑の#425(化学RA 3タップ)と#426(事故DBクイック検索)をsquashマージ→main pull→clean。#426は#425マージでBACKLOG.mdが競合したためrebaseを試みたがforce-push権限が無く、代わりにorigin/mainをマージコミットで取り込み通常push→auto-merge。#427(安全工程打合せ書)はCI実行中のため次イテレーションで回収。
 - 軸2タスク: 法令チャットボット(/chatbot)を「佐藤(48)・職長歴20年の現場監督・型落ちスマホ片手操作・条番号と原文を3秒で出したい・遅い/カクつくなら二度と使わない」ペルソナで第三者レビュー(Playwright iPhone13エミュレート/dev server localhost:3000)。

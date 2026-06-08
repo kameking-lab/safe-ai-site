@@ -1,4 +1,11 @@
-import type { CourtCase, CourtCaseField, CourtCaseIssue } from "@/data/court-cases";
+import {
+  COURT_CASES,
+  COURT_CASE_FIELDS,
+  COURT_CASE_ISSUES,
+  type CourtCase,
+  type CourtCaseField,
+  type CourtCaseIssue,
+} from "@/data/court-cases";
 
 /**
  * 労災/労働判例DB（数百件・検索可能）フェーズB: 検索基盤。
@@ -85,4 +92,52 @@ export function computeFacets(cases: CourtCase[]): CourtCaseFacets {
       .sort((a, b) => b[0].localeCompare(a[0]))
       .map(([value, count]) => ({ value, count })),
   };
+}
+
+// --- URLクエリ ⇄ フィルタ（一覧ブラウザと印刷ページで共有・対称） ---
+// 顧問先説明で使うコンサル目線レビュー(2026-06-09)で、絞り込み結果がURL/印刷へ
+// 引き継がれない欠点を是正。検索条件をクエリにシリアライズし、印刷ページが同じ
+// パラメータ名で同じ純関数を使って「絞り込んだN件だけ」をA4に出せるようにする。
+const COURT_TYPE_VALUES: CourtType[] = ["最高裁", "高裁", "地裁", "その他"];
+
+/** フィルタを URLSearchParams 文字列に（空の条件は出さない）。 */
+export function courtFilterToQuery(f: CourtCaseFilter): string {
+  const params = new URLSearchParams();
+  if (f.query?.trim()) params.set("q", f.query.trim());
+  if (f.issue) params.set("issue", f.issue);
+  if (f.field) params.set("field", f.field);
+  if (f.courtType) params.set("court", f.courtType);
+  if (f.decade) params.set("decade", f.decade);
+  return params.toString();
+}
+
+/** URLクエリ（getter）→ 検証済みフィルタ。不正値は未選択扱い。client/server 両対応。 */
+export function courtFilterFromParams(
+  get: (key: string) => string | null | undefined,
+  cases: CourtCase[] = COURT_CASES,
+): Required<CourtCaseFilter> {
+  const val = (k: string) => (get(k) ?? "").trim();
+  const issueRaw = val("issue");
+  const fieldRaw = val("field");
+  const courtRaw = val("court");
+  const decadeRaw = val("decade");
+  const decades = new Set(cases.map((c) => decadeOf(c.date)));
+  return {
+    query: val("q"),
+    issue: (COURT_CASE_ISSUES as readonly string[]).includes(issueRaw) ? (issueRaw as CourtCaseIssue) : "",
+    field: (COURT_CASE_FIELDS as readonly string[]).includes(fieldRaw) ? (fieldRaw as CourtCaseField) : "",
+    courtType: (COURT_TYPE_VALUES as string[]).includes(courtRaw) ? (courtRaw as CourtType) : "",
+    decade: decades.has(decadeRaw) ? decadeRaw : "",
+  };
+}
+
+/** 絞り込み条件を人間可読の短い文に（印刷資料の見出し・件数表示用）。未絞り込みは空配列。 */
+export function describeCourtFilter(f: CourtCaseFilter): string[] {
+  const parts: string[] = [];
+  if (f.field) parts.push(`分野: ${f.field}`);
+  if (f.issue) parts.push(`争点: ${f.issue}`);
+  if (f.courtType) parts.push(`裁判所: ${f.courtType}`);
+  if (f.decade) parts.push(`年代: ${f.decade}`);
+  if (f.query?.trim()) parts.push(`キーワード: ${f.query.trim()}`);
+  return parts;
 }

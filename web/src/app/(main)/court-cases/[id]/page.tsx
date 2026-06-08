@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Scale, ArrowLeft, ExternalLink, ClipboardList, Database, MessageSquare, Gavel } from "lucide-react";
+import { Scale, ArrowLeft, ExternalLink, ClipboardList, Database, MessageSquare, Gavel, Printer } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { COURT_CASES, getCourtCaseById } from "@/data/court-cases";
@@ -60,9 +60,18 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
       <PageJsonLd name={`${c.name}（労災裁判例）`} description={c.oneLine} path={`/court-cases/${c.id}`} />
       <PageContainer>
         <div className="mx-auto max-w-3xl">
-          <Link href="/court-cases" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-300 print:hidden">
-            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> 労災裁判例コーナーに戻る
-          </Link>
+          <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
+            <Link href="/court-cases" className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 hover:underline dark:text-emerald-300">
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" /> 労災裁判例コーナーに戻る
+            </Link>
+            {/* 顧問先に1判例だけ渡したいとき: この判例だけをA4で印刷／PDF */}
+            <Link
+              href={`/court-cases/print?only=${c.id}`}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
+            >
+              <Printer className="h-3.5 w-3.5" aria-hidden="true" /> この判例を印刷／PDF
+            </Link>
+          </div>
 
           <header className="mt-3 border-b-2 border-slate-800 pb-3 dark:border-slate-300">
             <div className="flex flex-wrap items-center gap-2">

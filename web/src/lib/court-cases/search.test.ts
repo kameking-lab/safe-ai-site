@@ -4,6 +4,9 @@ import {
   decadeOf,
   filterCourtCases,
   computeFacets,
+  courtFilterToQuery,
+  courtFilterFromParams,
+  describeCourtFilter,
 } from "./search";
 import { COURT_CASES } from "@/data/court-cases";
 
@@ -55,5 +58,50 @@ describe("court-cases search 基盤（フェーズB）", () => {
     const issueSum = f.issues.reduce((s, x) => s + x.count, 0);
     const issueTotal = COURT_CASES.reduce((s, c) => s + c.issues.length, 0);
     expect(issueSum).toBe(issueTotal); // issue は複数可
+  });
+});
+
+describe("court-cases URLクエリ ⇄ フィルタ（一覧⇄印刷の引き継ぎ）", () => {
+  const getter = (q: string) => {
+    const params = new URLSearchParams(q);
+    return (k: string) => params.get(k);
+  };
+
+  it("courtFilterToQuery: 空の条件は出さない", () => {
+    expect(courtFilterToQuery({})).toBe("");
+    expect(courtFilterToQuery({ field: "建設・墜落" })).toBe("field=%E5%BB%BA%E8%A8%AD%E3%83%BB%E5%A2%9C%E8%90%BD");
+    expect(courtFilterToQuery({ query: "  " })).toBe(""); // 空白のみは無視
+  });
+
+  it("round-trip: query→parse→filter が一覧の絞り込みと一致", () => {
+    const filter = { field: "建設・墜落" as const, query: "墜落" };
+    const q = courtFilterToQuery(filter);
+    const parsed = courtFilterFromParams(getter(q));
+    expect(parsed.field).toBe("建設・墜落");
+    expect(parsed.query).toBe("墜落");
+    // 同じ純関数で絞ると同件数（印刷ページが一覧と同じ結果を出せる保証）
+    const viaBrowser = filterCourtCases(COURT_CASES, filter);
+    const viaPrint = filterCourtCases(COURT_CASES, parsed);
+    expect(viaPrint.map((c) => c.id)).toEqual(viaBrowser.map((c) => c.id));
+    expect(viaPrint.length).toBeLessThan(COURT_CASES.length);
+  });
+
+  it("courtFilterFromParams: 不正値・未知の年代/裁判所は未選択扱い", () => {
+    const parsed = courtFilterFromParams(getter("issue=架空&field=でたらめ&court=家裁&decade=1800年代"));
+    expect(parsed).toEqual({ query: "", issue: "", field: "", courtType: "", decade: "" });
+  });
+
+  it("courtFilterFromParams: 実在する年代・裁判所種別は通す", () => {
+    const parsed = courtFilterFromParams(getter("court=最高裁&decade=1970年代"));
+    expect(parsed.courtType).toBe("最高裁");
+    expect(parsed.decade).toBe("1970年代");
+  });
+
+  it("describeCourtFilter: 絞り込みの説明文（未絞り込みは空）", () => {
+    expect(describeCourtFilter({})).toEqual([]);
+    expect(describeCourtFilter({ field: "建設・墜落", query: "墜落" })).toEqual([
+      "分野: 建設・墜落",
+      "キーワード: 墜落",
+    ]);
   });
 });

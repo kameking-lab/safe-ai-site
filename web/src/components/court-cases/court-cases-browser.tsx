@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Scale, Search, ExternalLink } from "lucide-react";
+import { Scale, Search, ExternalLink, Printer } from "lucide-react";
 import {
   COURT_CASES,
   COURT_CASE_ISSUES,
@@ -14,6 +14,7 @@ import {
 import {
   filterCourtCases,
   computeFacets,
+  courtFilterToQuery,
   type CourtType,
 } from "@/lib/court-cases/search";
 
@@ -43,6 +44,7 @@ const issueColor: Record<CourtCaseIssue, string> = {
 export function CourtCasesBrowser() {
   // 事故事例など他機能からの ?field= / ?issue= / ?q= ディープリンクで初期フィルタを反映。
   // 不正値は無視（未選択扱い）。フィルタ済みビューを共有・ブックマークできるようにもなる。
+  const router = useRouter();
   const searchParams = useSearchParams();
   const initialField = ((): CourtCaseField | "" => {
     const f = searchParams?.get("field") ?? "";
@@ -75,13 +77,29 @@ export function CourtCasesBrowser() {
     [issue, field, courtType, decade, q],
   );
   const hasFilter = !!(issue || field || courtType || decade || q);
-  const clearAll = () => {
+
+  // 絞り込みをURLに書き戻す（共有・ブラウザ戻る対応／印刷ページへ条件を引き継ぐため）。
+  // 既存の accidents hub-filter と同じ作法: scroll:false・テキストはデバウンス。
+  const query = useMemo(
+    () => courtFilterToQuery({ issue, field, courtType, decade, query: q }),
+    [issue, field, courtType, decade, q],
+  );
+  useEffect(() => {
+    const handle = window.setTimeout(() => {
+      router.replace(query ? `/court-cases?${query}` : "/court-cases", { scroll: false });
+    }, 250);
+    return () => window.clearTimeout(handle);
+  }, [query, router]);
+
+  const printHref = query ? `/court-cases/print?${query}` : "/court-cases/print";
+
+  const clearAll = useCallback(() => {
     setIssue("");
     setField("");
     setCourtType("");
     setDecade("");
     setQ("");
-  };
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -167,6 +185,16 @@ export function CourtCasesBrowser() {
             </button>
           )}
         </p>
+        {/* 顧問先説明: 絞り込んだ結果だけをA4にまとめて配れる導線（条件を印刷ページへ引き継ぐ） */}
+        {hasFilter && filtered.length > 0 && (
+          <Link
+            href={printHref}
+            className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
+          >
+            <Printer className="h-3.5 w-3.5" aria-hidden="true" />
+            この {filtered.length} 件だけをA4で印刷／PDF保存（実務ポイント付き）
+          </Link>
+        )}
       </div>
 
       {/* 一覧 */}
