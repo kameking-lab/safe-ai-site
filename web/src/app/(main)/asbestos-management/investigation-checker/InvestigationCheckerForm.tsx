@@ -11,6 +11,7 @@ import {
   type ProjectScope,
 } from "@/types/asbestos";
 import { buildPreWorkSummary } from "@/lib/asbestos-engine";
+import { asbestosScopeToQuery } from "@/lib/asbestos-scope-query";
 
 const BUILDING_OPTIONS: BuildingCategory[] = [
   "non-residential",
@@ -58,6 +59,28 @@ export function InvestigationCheckerForm() {
   );
 
   const summary = useMemo(() => buildPreWorkSummary(scope, null), [scope]);
+
+  // Step 1 → Step 2 へ入力条件を引き継ぐためのクエリ。石綿レベルは事前調査前で
+  // 未確定のため付けない（届出書類リスト側で選択する）。
+  const carryQuery = useMemo(
+    () =>
+      asbestosScopeToQuery({
+        buildingCategory,
+        projectCategory,
+        constructionStartYear,
+        contractValueJpyMan,
+        workAreaSqm,
+        asbestosKnownPresent,
+      }),
+    [
+      buildingCategory,
+      projectCategory,
+      constructionStartYear,
+      contractValueJpyMan,
+      workAreaSqm,
+      asbestosKnownPresent,
+    ],
+  );
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
@@ -211,10 +234,10 @@ export function InvestigationCheckerForm() {
 
         <div className="mt-5 flex flex-wrap gap-2">
           <Link
-            href="/asbestos-management/notification-builder"
+            href={`/asbestos-management/notification-builder?${carryQuery}`}
             className="inline-flex items-center gap-1 rounded-lg bg-stone-700 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800"
           >
-            届出書類リストを作成 →
+            この条件で届出書類リストを作成 →
           </Link>
           <Link
             href="/asbestos-management/work-plan-template"
