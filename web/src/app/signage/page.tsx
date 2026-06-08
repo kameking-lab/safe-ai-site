@@ -7,6 +7,7 @@ import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture
 import { SignageFloorPlanEditor } from "@/components/signage/signage-floor-plan-editor";
 import { SignageHeader } from "@/components/signage/signage-header";
 import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
+import { SignageMorningScript } from "@/components/signage/signage-morning-script";
 import { SignageShell } from "@/components/signage/signage-shell";
 import { SignageTodayDocuments } from "@/components/signage/signage-today-documents";
 import { getSignageLocationById, signageLocations } from "@/data/signage-locations";
@@ -74,6 +75,8 @@ export default function SignagePage() {
   });
   // トレンドニュースの拡大表示
   const [zoomedTrendIndex, setZoomedTrendIndex] = useState<number | null>(null);
+  // 朝礼スクリプト（読み上げ）モーダル
+  const [showMorningScript, setShowMorningScript] = useState(false);
 
   const selectedLocation = useMemo(
     () => getSignageLocationById(selectedLocationId) ?? getSignageLocationById("tokyo-shinjuku")!,
@@ -243,6 +246,10 @@ export default function SignagePage() {
 
   const trendItems = bundle?.laborTrend ?? [];
   const zoomedTrend = zoomedTrendIndex !== null ? trendItems[zoomedTrendIndex] ?? null : null;
+  // 朝礼の読み上げ用に、ニュース見出し末尾の媒体名（｜/ | 以降）を落として読みやすくする
+  const topAccidentTitle = trendItems[0]?.title
+    ? trendItems[0].title.split(/[｜|]/)[0].trim()
+    : null;
 
   const prefectureLevels = bundle?.prefectureLevels ?? {};
   const jmaLink = `https://www.jma.go.jp/bosai/warning/#area_type=class20s&area_code=${selectedLocation.jmaCityCode ?? "130000"}`;
@@ -289,6 +296,14 @@ export default function SignagePage() {
           </button>
         ))}
         <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowMorningScript(true)}
+            className="rounded border border-amber-300 bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-amber-950 hover:bg-amber-400"
+            title="本日の気象・類似事故・法改正から朝礼の読み上げ原稿を生成します"
+          >
+            🎤 朝礼スクリプト
+          </button>
           <button
             type="button"
             onClick={toggleOrientation}
@@ -565,6 +580,39 @@ export default function SignagePage() {
       </div>
 
       <AutoRefreshStatus intervalMinutes={REFRESH_INTERVAL_MS / 60000} lastUpdatedText={state.lastUpdatedText} />
+
+      {/* 朝礼スクリプト（読み上げ）モーダル */}
+      {showMorningScript && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 sm:p-8"
+          role="dialog"
+          aria-modal="true"
+          aria-label="朝礼スクリプト"
+          onClick={() => setShowMorningScript(false)}
+        >
+          <div
+            className="relative w-full max-w-2xl rounded-2xl border border-emerald-700 bg-slate-950 p-4 shadow-2xl sm:p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setShowMorningScript(false)}
+              className="absolute right-3 top-3 rounded-full border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-slate-700"
+              aria-label="閉じる"
+            >
+              ✕ 閉じる
+            </button>
+            <div className="mt-8">
+              <SignageMorningScript
+                jmaHeadline={bundle?.jmaHeadline}
+                warnings={bundle?.selectedWarnings}
+                topAccidentTitle={topAccidentTitle}
+                topLawTitle={topLaws[0]?.title ?? null}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* トレンドニュース拡大モーダル */}
       {zoomedTrend && (

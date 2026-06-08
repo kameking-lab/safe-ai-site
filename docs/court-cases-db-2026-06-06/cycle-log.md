@@ -363,6 +363,24 @@
 - 再レビュー(Playwright実機): 初見は非表示(空複製防止)→保存→リロードで上部「前回を複製」常設→1タップで通知＋作業所名引継＋翌日日付。渡辺さん「1タップで昨日の各社対策が乗る。紙に戻らない」。
 - ゲート: tsc0 / lint errors0 / vitest1092pass / build成功。記録: docs/third-party-reviews/safety-diary-genuke-anzentanto-2026-06-09.md（+ topbar スクショ）。temp(spec/config/devlog)削除済。架空0・水増し0・既存破壊0。
 
+## Cycle (2026-06-09) — 記録キットHub(/site-records) 初見導線レビュー
+- 前イテレーション回収: CI緑のPR#430(safety-diary 翌日複製)をsquashマージ→main clean。PR#431(court-cases)はe2e/smoke進行中のため次回回収。
+- 選択タスク: 軸2「記録キットHub(/site-records)を初見の安全担当ペルソナでレビュー→初見導線」。BACKLOG最上位の/court-casesは#431で着手済のため次タスクを選択。
+- 第三者レビュー: 田村さん(34歳・中小ゼネコン現場監督・先月から安全兼務・実務経験ゼロ・やること多すぎると即離脱)になりきりPlaywrightで記録ゼロ(localStorageクリーン)の初見状態を実操作。
+- 発見した致命的欠陥: 初見(hasAny=false)では画面上部の状況サマリー(RecordsOverview)が`return null`で丸ごと消える=初見者ほど道しるべが無く、17ツール・6グループ(モバイル全体7.9画面)の壁に直面。「今日何をすればいいか」の手がかりゼロ。
+- 改善: `!ov.hasAny`分岐で「はじめての方へ — まずこの3つから」スタートガイドを表示(KY用紙/受入教育/年間カレンダーへ時間軸ラベル付きの番号付き3ステップ動線+登録不要の一言)。1件記録できれば従来の状況サマリーへ自動切替=熟練者導線は不変。既存hasAny分岐を活用し既存破壊なし。"全16種類"のような固定数は誤りになるため文言から除去。
+- 再レビュー(Playwright実機・初見状態): ヘッダー直下に緑ガイドが出現、田村さん「1秒でまずKYと分かる」「明日まずKYから触る」。モバイル縦積み・sm以上3列も確認。
+- ゲート: tsc0 / lint errors0 / vitest1100pass / build成功。記録: docs/third-party-reviews/site-records-firstvisit-safety-officer-2026-06-09.md。temp(mjs/png)削除済。架空0・水増し0・既存破壊0。
+
+## Cycle (2026-06-09) サイネージ(/signage) 朝礼で使う職長レビュー
+- 前PR回収: CI緑だった PR#431(判例 絞り込み→印刷引継)を squash マージ→`git checkout main && git pull --ff-only`→clean。PR#432(/site-records 初見スタートガイド)はe2e/smoke実行中につき次イテレーションで回収。
+- タスク選定: BACKLOG最上位の未着手「/site-records 初見導線」は自分の未マージPR#432が同件対応中につき重複回避。次の真の未着手「サイネージ(/signage)を朝礼で使う職長ペルソナでレビュー(1画面フィット維持)」を実行。
+- 第三者レビュー: 53歳職長(紙20年・IT苦手・朝礼5分が限界・ボタン押して無反応なら触らない)になりきりPlaywright実操作(1920×1080/1080×1920)。横長は overflow=0 で1画面フィット健全。致命=朝礼の職長が一番欲しい「読み上げる原稿」を生成する `SignageMorningScript`(気象+類似事故+法改正→200字+Web Speech読み上げ)が完成済みなのに参照0件の死蔵コードだった。加えて「🌅朝礼前」プリセットが既定floorplanと同一で押下無反応。
+- 改善: 死蔵していた SignageMorningScript をシナリオバー「🎤 朝礼スクリプト」ボタン→モーダルに結線(本日の気象見出し/警報/直近類似事故/30日内法改正→原稿生成・コピー・読み上げ)。1画面フィット維持のためインラインでなくモーダルオーバーレイ(トレンド拡大と同方式)、横長overflow=0維持。読み上げ自然化のため見出しの媒体名サフィックス(｜/| 以降)を除去。新規部品は作らず既存死蔵コードを本物の前進として復活。
+- 再レビュー(Playwright実機): 🎤押下→live天気+他社事故を踏まえた原稿表示+読み上げボタン。職長「これなら朝礼で使える」=採用ライン到達。
+- ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/signage-morning-foreman-2026-06-09.md(+3スクショ)。temp review .mjs と devlog 削除済。架空0・水増し0・既存破壊0。
+- BACKLOG補充: 死蔵サイネージ部品の棚卸し/結線、朝礼前プリセット意味付け、を新タスク追記。
+
 ## Cycle (2026-06-09) — WBGT計算機 手袋現場監督レビュー（軸2）
 - 前PR回収: 自分の#432(site-records初見導線)はCI緑だがBACKLOG.mdでmainと衝突→ローカルでorigin/mainをmerge・両タスク[x]に解決しpush(CI再走待ち、次イテレーションで回収)。#433(signage朝礼)はCI進行中につき次回。古いdocs系PRは放置。
 - タスク選定: BACKLOG最上位 site-records(#432)・signage(#433) は両方とも自分の未マージPRで対応中につき重複回避。次の真の未着手「WBGT計算機/熱中症ハブを屋外・手袋の現場監督ペルソナでレビュー→スマホ実用性」を実行。

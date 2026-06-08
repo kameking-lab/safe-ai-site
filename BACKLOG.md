@@ -29,9 +29,11 @@
 - [x] 法令チャットボット(/chatbot)を「条文の根拠をすぐ知りたい現場監督」ペルソナでレビュー→回答の速さ・出典の見やすさ（2026-06-09: 初期ロードだけで`Maximum update depth exceeded`が64回＝無限再レンダリングの致命バグを発見。`ChatbotBody`/`CopilotIndustrySync`が`useEffect(...,[copilot])`でCopilot値全体に依存し、recordVisit等の`updatedAt`更新で毎回再発火していた。安定コールバック＋プリミティブ依存に修正し64→0回。出典表示(バッジ/参照条文/条番号+施行日+発出機関)自体は良好。docs/third-party-reviews/chatbot-site-supervisor-2026-06-09.md）
 - [x] 新着/法改正(/whats-new, /laws)を「毎朝チェックしたいコンサル」ペルソナでレビュー→鮮度・業種別の見やすさ（2026-06-09: ハブ/whats-newに「🆕新着のみ」トグル(鮮度・前回閲覧以降=常連で81→3件)＋業種チップ(法改正40→建設26/医療福祉16)を追加。既存の業種タグ・新着判定を再利用し純関数filterNewsHubItemsに切出し+8テスト。docs/third-party-reviews/whats-new-asakatsu-consultant-2026-06-09.md）
 - [x] 判例コーナー(/court-cases)を「顧問先説明に使うコンサル」ペルソナでレビュー→検索・印刷・関連性（2026-06-09: 絞り込みが印刷に一切引き継がれない致命を発見＝建設業の顧問先に建設2件だけ渡したいのに常に全86件。フィルタをURL同期＋印刷ページをsearchParams対応にし「この2件だけをA4で印刷(実務ポイント付き)」CTAを新設。24件以下は概要+実務ポイントも掲載。詳細から単票印刷(?only=)も追加。共通純関数courtFilterToQuery/FromParamsで一覧⇔印刷の結果一致を保証+5テスト。docs/third-party-reviews/court-cases-consultant-2026-06-09.md）
-- [ ] 記録キットHub(/site-records)とダッシュボードを「初見の安全担当」ペルソナでレビュー→初見導線
-- [ ] サイネージ(/signage)を「朝礼で使う職長」ペルソナでレビュー（1画面フィットを壊さない範囲で）
+- [x] 記録キットHub(/site-records)とダッシュボードを「初見の安全担当」ペルソナでレビュー→初見導線（2026-06-09: 記録ゼロ=初見では状況サマリーが`!hasAny`で丸ごと非表示→初見者ほど道しるべが消え、17ツールの壁に直面する致命的欠陥を発見。初見時に「はじめての方へ — まずこの3つから」スタートガイド(KY/受入教育/年間カレンダーへ時間軸ラベル付き動線)を表示。既存hasAny分岐を活用し、1件記録できれば従来の状況サマリーへ自動切替=熟練者導線は不変。docs/third-party-reviews/site-records-firstvisit-safety-officer-2026-06-09.md）
+- [x] サイネージ(/signage)を「朝礼で使う職長」ペルソナでレビュー（1画面フィットを壊さない範囲で）（2026-06-09: 朝礼の職長が一番欲しい「読み上げる原稿」を生成する SignageMorningScript（気象+類似事故+法改正→200字+Web Speech読み上げ）が完成済みなのに参照0件の死蔵コードだった→シナリオバー「🎤 朝礼スクリプト」ボタン→モーダルに結線（コピー/読み上げ）。1画面フィット維持のためインラインでなくモーダルオーバーレイ、横長overflow=0維持。見出しの媒体名サフィックス除去で読み上げ自然化。docs/third-party-reviews/signage-morning-foreman-2026-06-09.md）
 - [x] WBGT計算機/熱中症ハブを「屋外・手袋の現場監督」ペルソナでレビュー→スマホ実用性（2026-06-09: 数値入力5項目が全て高さ37px・キーボード手打ち＝手袋/炎天下で微調整できない致命を発見。主要数値に大きな[−][＋]ステッパー(44px・気温±0.5/湿度±5/風速±0.5/日射±50)を新設しタップだけで即時再計算、全数値欄にinputMode=decimal、入力欄/セレクトを44px・16px化(iOSオートズーム抑止)。NumberFieldにstepByを足して再利用、計算ロジックは不変。docs/third-party-reviews/wbgt-calculator-gloved-foreman-2026-06-09.md）
+- [ ] サイネージ「🌅朝礼前」シナリオプリセットの意味付けを是正（既定 floorplan と同一で押下しても無反応＝壊れて見える）。朝礼スクリプト直結 or 朝礼に最適なビュー組合せへ。
+- [ ] 死蔵サイネージ部品の棚卸し＆結線可否判定（signage-risk-prediction / signage-danger-alert / signage-featured-goods / japan-weather-map が参照0件）。価値あるものは結線、不要は削除して保守負債を減らす。
 - [ ] KY用紙(/ky/paper)の作業員選択をスマホで「2タップ完了」化＝よく使う班をワンタップ呼び出し（手袋の職長目線）
 - [ ] 業種別リスク判定(/heat-illness-prevention/industry-risk)をスマホで縦長スクロール短縮＝結論(対策)先頭・詳細は折りたたみ
 - [ ] 各印刷ページ(WBGT結果/順化計画/ポスター)を実際にA4プレビューし「枠線切れ・1枚に収まらない」崩れを点検→是正
