@@ -15,6 +15,19 @@ import {
   type MaterialTopic,
   type SafetyMaterial,
 } from "@/types/foreign-worker";
+import {
+  buildRecordRows,
+  parseAttendeeNames,
+} from "@/lib/foreign-worker-training-record";
+import {
+  TrainingRecordInputCard,
+  TrainingRecordPrintHeader,
+  TrainingRecordRoster,
+  type TrainingRecordMeta,
+} from "./training-record";
+
+/** 受講者名が少ない/未入力でも手書きできるよう確保する名簿の最低行数。 */
+const MIN_ROSTER_ROWS = 10;
 
 interface BuilderProps {
   /** Pre-filtered materials for the current industry only (~25 KB vs 148 KB for all). */
@@ -64,10 +77,21 @@ export function SafetyTrainingBuilder({
     "en",
     "vi",
   ]);
+  const [recordMeta, setRecordMeta] = useState<TrainingRecordMeta>({
+    date: "",
+    instructor: "",
+    worksite: "",
+  });
+  const [attendeesRaw, setAttendeesRaw] = useState("");
 
   const material = useMemo(
     () => materials.find((m) => m.topic === topic),
     [materials, topic],
+  );
+
+  const rosterRows = useMemo(
+    () => buildRecordRows(parseAttendeeNames(attendeesRaw), MIN_ROSTER_ROWS),
+    [attendeesRaw],
   );
 
   function handleIndustryChange(next: MaterialIndustry) {
@@ -149,12 +173,25 @@ export function SafetyTrainingBuilder({
         </div>
       </div>
 
+      <TrainingRecordInputCard
+        meta={recordMeta}
+        onChange={setRecordMeta}
+        attendeesRaw={attendeesRaw}
+        onAttendeesChange={setAttendeesRaw}
+      />
+
       {!material ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           該当する教材が見つかりません。組み合わせを変更してください。
         </div>
       ) : (
         <article className="rounded-lg border border-slate-200 bg-white p-5 md:p-7 print:border-0 print:p-0">
+          <TrainingRecordPrintHeader
+            meta={recordMeta}
+            industry={material.industry}
+            topic={material.topic}
+            langs={selectedLangs}
+          />
           <header className="border-b border-slate-200 pb-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
               {MATERIAL_INDUSTRY_LABELS_EN[material.industry]} ·{" "}
@@ -246,6 +283,8 @@ export function SafetyTrainingBuilder({
           <footer className="mt-6 border-t border-slate-200 pt-3 text-xs text-slate-500">
             出典：{material.source}
           </footer>
+
+          <TrainingRecordRoster rows={rosterRows} />
         </article>
       )}
     </div>

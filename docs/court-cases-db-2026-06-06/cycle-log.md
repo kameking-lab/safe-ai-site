@@ -575,6 +575,15 @@
 - 再レビュー(Playwright実機): CTA href=`?b=non-residential&p=renovation&y=1990&c=800&a=300&k=1`、Step2着地値が {改修/1990/800万/300m²} でStep1と完全一致(レベルのみ未選択=これから選ぶ)・緑帯表示・報告区分も「労基署＋自治体 両方に必要」に反映。直接訪問は {解体/500/150}・帯非表示で後方互換。横overflow0・console error0。田所さん「二度打ちが消えた、通しで使える」=採用ライン到達。
 - ゲート: tsc0 / lint errors0(warning50=既存・他ファイルのみ) / vitest1187pass(150ファイル・+10) / build成功(asbestos各routeプリレンダ維持)。記録: docs/third-party-reviews/asbestos-scope-carryover-2026-06-09.md。temp(_asbestos_*.mjs/_asb_*.png)削除済。判定エンジン/ルールブック/スキーマ/印刷/既存フォーム挙動 不変・新規依存0・架空0・水増し0・既存破壊0。env/DB変更なし。
 
+## Cycle (2026-06-09) — 外国人労働者 多言語安全教育に「教育実施記録（印刷）」を新設（軸2）
+- 前PR回収: CI緑だった自PR #456(特別教育・資格 受講管理簿 資格別逆引き名簿)をorigin/main通常マージで衝突解決(cycle-log両Cycle併記)→push→squashマージ→`git checkout main && git pull --ff-only`→clean。#457(equipment-finder 適合区分バッジ)はe2e/smoke pending につき次回回収。古いdocs系PRは放置。
+- タスク選定: 未着手の最上位は #53 Path A(SignageFeaturedGoods=オーナー判断ゲート・着手不可)、次が #57 equipment-finder だが同ページが #457 在中で衝突回避のためスキップ。実着手可能な最上位「外国人労働者 安全教育(/foreign-workers/safety-training)レビュー(母国語対応・教育記録の実用性)」を実行。未着手は他に inspection/monthly/判例 と3件以上あり補充不要。
+- 第三者レビュー: 佐々木さん(48歳・自動車部品二次サプライヤーの製造安全担当・技能実習生24名・OTIT巡回監査と元請審査で"いつ・誰に・何語で教育したか"の記録提示を求められる・スクショ転記/自前Excel名簿の二度手間を嫌う)になりきりPlaywright実機(390×844 / 794×1123印刷)。製造業×高所作業×やさしい日本語+英語+ベトナム語で印刷プレビュー確認。
+- 致命: ページは metadata でも本文でも「雇入れ時教育・特別教育の補助資料」を主目的に掲げるのに、印刷物はタイトル/導入/チェックリスト/緊急時対応の教材本文だけ＝実施日/実施者/事業場/受講者名簿/署名/使用言語の証跡がゼロ。24名教育しても「実施した記録」が残らずExcelで別途名簿を作るしかなく、外国人教育で監査の核になる「母国語で実施した」証跡も残せない。関連ガイドのEラーニング受講記録は別教材で導線が繋がらない。
+- 改善: 教材本文・翻訳データ・既存挙動を一切変えず、印刷時のみ出る教育実施記録様式を追加(管理区分判定の評価記録パーツと同型イディオム)。画面=折りたたみ任意入力カード「教育実施記録を作成」(実施日/実施者(講師)/事業場・現場名/受講者氏名1行1名、print:hidden)。印刷=先頭に記録ヘッダ「安全衛生教育 実施記録」(実施日・事業場・実施者・教材(業種/トピック)・使用言語＝母国語実施の証跡＋安衛法59条/安衛則35条注記・未入力は手書き下線)、末尾に受講者名簿(No./氏名/国籍/在留資格/署名(理解確認)・入力氏名を印字し不足分は手書き用空行で最低10行・break-inside-avoidで改ページ割れ防止)。純関数 src/lib/foreign-worker-training-record.ts(formatRecordDate/parseAttendeeNames/buildRecordRows/formatUsedLanguages)＋12テストに切出し。
+- 再レビュー(Playwright実機): 実施日2026-06-10/実施者「安全 花子」/事業場「カメキング製作所 第2工場」/受講者3名を入力→印刷でヘッダ全項目＋「使用言語: やさしい日本語・英語・ベトナム語」反映、名簿に入力3名印字＋4〜10行が手書き空欄/国籍・在留資格・署名は空欄。画面側は記録ヘッダ・名簿とも非表示(hidden print:block)で既存教材表示に非干渉。横overflow0(入力後も0)・console error0。佐々木さん「印刷1枚で“いつ・誰に・何語で教えたか”が監査にそのまま出せる、Excelの二度手間が消えた」=採用ライン到達。
+- ゲート: tsc0 / lint errors0(warning48=既存・他ファイル) / vitest1217pass(152ファイル・+12) / build成功。記録: docs/third-party-reviews/foreign-workers-training-record-2026-06-09.md。temp(_fw_*.mjs/png/pdf)削除済。再生成データ(chatbot-eval/rag-metrics)は変更なし。教材データ/翻訳/スキーマ/既存の表示・印刷挙動 不変・新規依存0・架空翻訳の追加なし(捏造0)・水増し0・既存破壊0。env/DB変更なし。
+
 ## Cycle (2026-06-09) — 保護具AIファインダー 結果カードに「適合区分＋根拠法令」を明示（軸2）
 - 前PR回収: CI緑だった #455(石綿 Step1→Step2 引き継ぎ)はBACKLOG.mdがorigin/mainと追記衝突→origin/mainを当該ブランチへ通常マージし両側統合(signage警報[x]＋石綿[x]＋新タスク併記)、tsc0確認しpush→`gh pr merge 455 --squash --auto`(CI再走後に自動land)。#456(資格逆引き)はCI pending=次回回収。古いdocs系PRは放置。
 - タスク選定: 軸2上位の真に着手可能な最上位＝/equipment-finder レビュー(Path Aのアフィリエイト是非はオーナーゲートのためスキップ)。補充指針に従い新タスク2件(ハーネス×ランヤード混在スコアリング是正/化学物質RA連携レビュー)も追記。
