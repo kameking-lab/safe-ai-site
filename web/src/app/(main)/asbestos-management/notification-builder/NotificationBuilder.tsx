@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   ASBESTOS_WORK_LEVEL_LABELS_JA,
   BUILDING_CATEGORY_LABELS_JA,
@@ -12,6 +13,22 @@ import {
   type ProjectScope,
 } from "@/types/asbestos";
 import { buildPreWorkSummary } from "@/lib/asbestos-engine";
+import {
+  asbestosScopeFromParams,
+  hasAsbestosScopeParams,
+  type AsbestosScopeFormValues,
+} from "@/lib/asbestos-scope-query";
+
+// 直接訪問時の既定値。Step 1（事前調査判定）から遷移した場合は URL クエリで上書き。
+const DEFAULT_SCOPE: AsbestosScopeFormValues = {
+  buildingCategory: "non-residential",
+  projectCategory: "demolition",
+  constructionStartYear: 1995,
+  contractValueJpyMan: 500,
+  workAreaSqm: 150,
+  asbestosKnownPresent: false,
+  workLevel: "level-2",
+};
 
 const FILED_WITH_LABELS: Record<string, string> = {
   "labour-standards-office": "労働基準監督署",
@@ -28,14 +45,35 @@ const FILED_WITH_BADGE: Record<string, string> = {
 };
 
 export function NotificationBuilder() {
-  const [buildingCategory, setBuildingCategory] =
-    useState<BuildingCategory>("non-residential");
-  const [projectCategory, setProjectCategory] =
-    useState<ProjectCategory>("demolition");
-  const [contractValueJpyMan, setContractValueJpyMan] = useState<number>(500);
-  const [workAreaSqm, setWorkAreaSqm] = useState<number>(150);
-  const [constructionStartYear, setConstructionStartYear] = useState<number>(1995);
-  const [workLevel, setWorkLevel] = useState<AsbestosWorkLevel | "">("level-2");
+  const searchParams = useSearchParams();
+  // Step 1（事前調査判定）から引き継いだ条件で初期化。クエリが無い直接訪問は
+  // 既定値のまま（従来の挙動を維持）。マウント時に一度だけ解釈する。
+  const initial = useMemo(
+    () => asbestosScopeFromParams((k) => searchParams.get(k), DEFAULT_SCOPE),
+    [searchParams],
+  );
+  const carriedFromStep1 = useMemo(
+    () => hasAsbestosScopeParams((k) => searchParams.get(k)),
+    [searchParams],
+  );
+
+  const [buildingCategory, setBuildingCategory] = useState<BuildingCategory>(
+    initial.buildingCategory,
+  );
+  const [projectCategory, setProjectCategory] = useState<ProjectCategory>(
+    initial.projectCategory,
+  );
+  const [contractValueJpyMan, setContractValueJpyMan] = useState<number>(
+    initial.contractValueJpyMan,
+  );
+  const [workAreaSqm, setWorkAreaSqm] = useState<number>(initial.workAreaSqm);
+  const [constructionStartYear, setConstructionStartYear] = useState<number>(
+    initial.constructionStartYear,
+  );
+  const [asbestosKnownPresent] = useState<boolean>(initial.asbestosKnownPresent);
+  const [workLevel, setWorkLevel] = useState<AsbestosWorkLevel | "">(
+    initial.workLevel,
+  );
 
   const scope: ProjectScope = useMemo(
     () => ({
@@ -44,6 +82,7 @@ export function NotificationBuilder() {
       constructionStartYear,
       contractValueJpy: contractValueJpyMan * 10_000,
       workAreaSqm,
+      asbestosKnownPresent,
     }),
     [
       buildingCategory,
@@ -51,6 +90,7 @@ export function NotificationBuilder() {
       constructionStartYear,
       contractValueJpyMan,
       workAreaSqm,
+      asbestosKnownPresent,
     ],
   );
 
@@ -61,6 +101,11 @@ export function NotificationBuilder() {
 
   return (
     <div>
+      {carriedFromStep1 && (
+        <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 print:hidden">
+          ✓ 事前調査判定（Step 1）の入力条件を引き継ぎました。必要に応じて下記を調整し、石綿レベルを選択してください。
+        </p>
+      )}
       <section className="rounded-xl border border-amber-200 bg-white p-5 print:hidden md:p-6">
         <h2 className="text-base font-semibold text-slate-900">プロジェクト条件</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
