@@ -109,6 +109,67 @@ function csvCell(v: string | number | boolean | null): string {
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
+// ---- 名簿の現場別・月別フィルタ／並べ替え（本社月次提出用。純関数） ----
+
+/** 実施日(YYYY-MM-DD)から月(YYYY-MM)を取り出す。不正な値は空文字。 */
+export function monthOf(date: string): string {
+  return /^\d{4}-\d{2}/.test(date) ? date.slice(0, 7) : "";
+}
+
+/** 保存済み記録に含まれる現場名を重複なく返す（あいうえお／コード順）。 */
+export function distinctSites(records: { siteName: string }[]): string[] {
+  const set = new Set<string>();
+  for (const r of records) if (r.siteName.trim()) set.add(r.siteName.trim());
+  return [...set].sort((a, b) => a.localeCompare(b, "ja"));
+}
+
+/** 保存済み記録に含まれる月(YYYY-MM)を重複なく新しい順に返す。 */
+export function distinctMonths(records: { date: string }[]): string[] {
+  const set = new Set<string>();
+  for (const r of records) {
+    const m = monthOf(r.date);
+    if (m) set.add(m);
+  }
+  return [...set].sort((a, b) => (a < b ? 1 : a > b ? -1 : 0));
+}
+
+export type RosterFilter = { site?: string; month?: string };
+
+/**
+ * 名簿を本社提出向けに絞り込み＋並べ替える。
+ * - site / month が空（未指定）ならその軸では絞らない。
+ * - 並びは「現場名 昇順 → 実施日 昇順 → 所属 → 氏名」。提出名簿は実施順が自然で、
+ *   現場でまとまるため、1ファイルに複数現場が入っても切り分けやすい。
+ */
+export function buildRoster(records: InductionRecord[], filter: RosterFilter = {}): InductionRecord[] {
+  const site = filter.site?.trim() ?? "";
+  const month = filter.month?.trim() ?? "";
+  return records
+    .filter((r) => (site ? r.siteName.trim() === site : true))
+    .filter((r) => (month ? monthOf(r.date) === month : true))
+    .slice()
+    .sort(
+      (a, b) =>
+        a.siteName.localeCompare(b.siteName, "ja") ||
+        (a.date < b.date ? -1 : a.date > b.date ? 1 : 0) ||
+        a.company.localeCompare(b.company, "ja") ||
+        a.workerName.localeCompare(b.workerName, "ja"),
+    );
+}
+
+/** 名簿CSVのファイル名。現場・月を反映し、複数DLしても区別できるようにする。 */
+export function rosterFileName(filter: RosterFilter = {}): string {
+  const site = filter.site?.trim() ?? "";
+  const month = filter.month?.trim() ?? "";
+  // ファイル名に使えない文字を除去（現場名は日本語のまま許容、記号のみ落とす）。
+  const safeSite = site.replace(/[\\/:*?"<>|]/g, "").slice(0, 30);
+  const parts = ["induction-roster"];
+  if (month) parts.push(month);
+  if (safeSite) parts.push(safeSite);
+  if (!month && !safeSite) parts.push("all");
+  return `${parts.join("-")}.csv`;
+}
+
 /** 保存済み記録の名簿CSV（1行=1名）。月次報告・人事提出用。純関数。 */
 export function rosterToCsv(records: InductionRecord[]): string {
   const rows = records.map((r) =>
