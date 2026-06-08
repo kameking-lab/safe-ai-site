@@ -1,18 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Printer, Download, Save, FilePlus2, FolderOpen, Plus, Trash2 } from "lucide-react";
+import { Printer, Download, Save, FilePlus2, FolderOpen, Plus, Trash2, CopyPlus } from "lucide-react";
 import {
   getCommitteeList,
   getCommitteeById,
   saveCommittee,
   deleteCommittee,
   defaultAgenda,
-  summarizeMinutes,
   minutesToCsv,
   newCommitteeId,
   newAgendaId,
   takeCommitteeAgendaDraft,
+  buildCarryOverMinutes,
   COMMITTEE_TYPE_JA,
   type AgendaItem,
   type CommitteeMinutes,
@@ -107,6 +107,30 @@ export function CommitteeClient() {
     setNextDate("");
     setSavedNote("");
   }
+  function applyMinutes(r: CommitteeMinutes) {
+    setRecId(r.id);
+    setDate(r.date);
+    setStartTime(r.startTime);
+    setPlace(r.place);
+    setCommitteeType(r.committeeType);
+    setChair(r.chair);
+    setSecretary(r.secretary);
+    setAttendees(r.attendees);
+    setAgenda(r.agenda);
+    setRemarks(r.remarks);
+    setNextDate(r.nextDate);
+  }
+  function carryOverFrom(id: string) {
+    const prev = getCommitteeById(id);
+    if (!prev) return;
+    const now = new Date();
+    const today = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
+    applyMinutes(buildCarryOverMinutes(prev, defaultAgenda(), newCommitteeId(), today));
+    setSavedNote(`前回（${prev.date}）を引き継いで当月分を作成しました。委員・場所はそのまま、冒頭に前回の宿題を転記しています。`);
+  }
+  function handleCarryOverLatest() {
+    if (list.length > 0) carryOverFrom(list[0]!.id);
+  }
   function handlePrint() {
     if (typeof window !== "undefined") window.print();
   }
@@ -126,17 +150,7 @@ export function CommitteeClient() {
   function openSaved(id: string) {
     const r = getCommitteeById(id);
     if (!r) return;
-    setRecId(r.id);
-    setDate(r.date);
-    setStartTime(r.startTime);
-    setPlace(r.place);
-    setCommitteeType(r.committeeType);
-    setChair(r.chair);
-    setSecretary(r.secretary);
-    setAttendees(r.attendees);
-    setAgenda(r.agenda);
-    setRemarks(r.remarks);
-    setNextDate(r.nextDate);
+    applyMinutes(r);
     setSavedNote("保存済みの議事録を開きました。");
   }
   function deleteSaved(id: string) {
@@ -226,8 +240,13 @@ export function CommitteeClient() {
           <button type="button" onClick={handleCsv} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
             <Download className="h-3.5 w-3.5" aria-hidden="true" /> CSV出力
           </button>
+          {list.length > 0 && (
+            <button type="button" onClick={handleCarryOverLatest} className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100">
+              <CopyPlus className="h-3.5 w-3.5" aria-hidden="true" /> 前回をベースに新規（委員・場所を引き継ぎ）
+            </button>
+          )}
           <button type="button" onClick={handleNew} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
-            <FilePlus2 className="h-3.5 w-3.5" aria-hidden="true" /> 新規
+            <FilePlus2 className="h-3.5 w-3.5" aria-hidden="true" /> 新規（白紙）
           </button>
           {savedNote && <span className="self-center text-xs font-semibold text-indigo-700">{savedNote}</span>}
         </div>
@@ -250,6 +269,7 @@ export function CommitteeClient() {
                   <p className="mt-0.5 text-xs text-slate-500">{s.place || "場所なし"}／議題 {s.agendaCount}・決定済 {s.decidedCount}</p>
                 </div>
                 <div className="flex shrink-0 gap-2">
+                  <button type="button" onClick={() => carryOverFrom(s.id)} className="rounded-lg border border-emerald-300 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50">この回をベースに次月を作成</button>
                   <button type="button" onClick={() => openSaved(s.id)} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50">開く</button>
                   <button type="button" onClick={() => deleteSaved(s.id)} className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50">削除</button>
                 </div>
