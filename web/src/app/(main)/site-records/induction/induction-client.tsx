@@ -19,6 +19,10 @@ import {
   defaultInductionItems,
   summarizeInduction,
   rosterToCsv,
+  buildRoster,
+  distinctSites,
+  distinctMonths,
+  rosterFileName,
   newInductionId,
   type InductionCheckItem,
   type InductionRecord,
@@ -43,6 +47,9 @@ export function InductionClient() {
   const [confirmedEducator, setConfirmedEducator] = useState(false);
   const [list, setList] = useState<InductionSummary[]>([]);
   const [savedNote, setSavedNote] = useState("");
+  // 名簿CSVの本社月次提出用フィルタ（現場・月）。
+  const [rosterSite, setRosterSite] = useState("");
+  const [rosterMonth, setRosterMonth] = useState("");
 
   useEffect(() => {
     const now = new Date();
@@ -58,6 +65,18 @@ export function InductionClient() {
   }, []);
 
   const doneCount = useMemo(() => items.filter((i) => i.checked).length, [items]);
+  // 名簿CSVフィルタの選択肢（保存一覧から現場・月を抽出）。
+  const rosterSites = useMemo(() => distinctSites(list), [list]);
+  const rosterMonths = useMemo(() => distinctMonths(list), [list]);
+  const rosterCount = useMemo(
+    () =>
+      list.filter(
+        (s) =>
+          (rosterSite ? s.siteName.trim() === rosterSite : true) &&
+          (rosterMonth ? s.date.slice(0, 7) === rosterMonth : true),
+      ).length,
+    [list, rosterSite, rosterMonth],
+  );
 
   function toggleItem(key: string) {
     setItems((arr) => arr.map((i) => (i.key === key ? { ...i, checked: !i.checked } : i)));
@@ -140,16 +159,25 @@ export function InductionClient() {
       setSavedNote("CSV出力する保存済み記録がありません。先に保存してください。");
       return;
     }
-    const csv = rosterToCsv(all);
+    // 現場・月で絞り込み、本社提出向けに「現場→実施日昇順」で並べる。
+    const filter = { site: rosterSite, month: rosterMonth };
+    const target = buildRoster(all, filter);
+    if (target.length === 0) {
+      setSavedNote("選んだ現場・月に該当する記録がありません。条件を変えてください。");
+      return;
+    }
+    const csv = rosterToCsv(target);
     const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `induction-roster-${date || "list"}.csv`;
+    a.download = rosterFileName(filter);
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+    const where = [rosterMonth || "全期間", rosterSite || "全現場"].join("／");
+    setSavedNote(`名簿CSVを出力しました（${where}・${target.length}名）。`);
   }
 
   function openSaved(id: string) {
@@ -264,9 +292,6 @@ export function InductionClient() {
           <button type="button" onClick={handlePrint} className="inline-flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-2 text-xs font-bold text-white hover:bg-slate-800">
             <Printer className="h-3.5 w-3.5" aria-hidden="true" /> 受講記録を印刷
           </button>
-          <button type="button" onClick={handleRosterCsv} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
-            <Download className="h-3.5 w-3.5" aria-hidden="true" /> 名簿CSV（保存済み全件）
-          </button>
           <button type="button" onClick={handleNew} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
             <FilePlus2 className="h-3.5 w-3.5" aria-hidden="true" /> 新規
           </button>
@@ -280,6 +305,60 @@ export function InductionClient() {
           <FolderOpen className="h-5 w-5 text-emerald-600" aria-hidden="true" />
           保存した受入教育記録（この端末）
         </h2>
+
+        {/* 名簿CSV（本社月次提出）：現場・月で絞り、現場→実施日昇順で出力する */}
+        {list.length > 0 && (
+          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <p className="text-xs font-bold text-slate-700">名簿CSV（本社へ月次提出）</p>
+            <p className="mt-0.5 text-[11px] text-slate-500">現場・月で絞り込み、現場ごと・実施日の早い順に並べて出力します。</p>
+            <div className="mt-2 flex flex-wrap items-end gap-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-[11px] font-semibold text-slate-600">現場</span>
+                <select
+                  value={rosterSite}
+                  onChange={(e) => setRosterSite(e.target.value)}
+                  className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm"
+                >
+                  <option value="">すべての現場</option>
+                  {rosterSites.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[11px] font-semibold text-slate-600">月</span>
+                <select
+                  value={rosterMonth}
+                  onChange={(e) => setRosterMonth(e.target.value)}
+                  className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-sm"
+                >
+                  <option value="">全期間</option>
+                  {rosterMonths.map((m) => (
+                    <option key={m} value={m}>{m.replace("-", "年")}月</option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={handleRosterCsv}
+                disabled={rosterCount === 0}
+                className="inline-flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-2 text-xs font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+              >
+                <Download className="h-3.5 w-3.5" aria-hidden="true" /> 名簿CSVを出力（{rosterCount}名）
+              </button>
+              {(rosterSite || rosterMonth) && (
+                <button
+                  type="button"
+                  onClick={() => { setRosterSite(""); setRosterMonth(""); }}
+                  className="text-xs font-semibold text-slate-500 underline hover:text-slate-700"
+                >
+                  絞り込み解除
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {list.length === 0 ? (
           <p className="mt-2 text-sm text-slate-400">まだ保存された記録はありません。</p>
         ) : (

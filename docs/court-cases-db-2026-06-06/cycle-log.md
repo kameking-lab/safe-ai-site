@@ -457,6 +457,14 @@
 - 再レビュー(Playwright実機): 全長3947→3537px、対策見出しy=1011px(業種選択+サマリー直下に前進・スワイプ0〜1回で到達)、details既定で全閉(0/3)・展開で暴露作業表示OK、横overflow0、logistics/agricultureも200描画。田村さん「開いてすぐ緑でやることが出る。これなら朝見る」=採用ライン到達。
 - ゲート: tsc0 / lint errors0 / vitest1114pass / build成功。記録: docs/third-party-reviews/industry-risk-mobile-scroll-2026-06-09.md。temp(_review_industry_*.mjs/_industry_*.png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
 
+## Cycle (2026-06-09) — 受入教育記録 名簿CSVの本社月次提出品質（軸2）
+- 前PR回収: CI緑(MERGEABLE)だった#441(業種別リスク スマホ縦スクロール短縮)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#442(各印刷ページA4)は#441マージでBACKLOG/cycle-logがmainと衝突→origin/mainをbranchへmergeし両側のタスク[x]/ログを統合解決して通常push(CI再走中、次イテレーション回収)。#443(年間カレンダー今月やること)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG軸2上位の未着手「各印刷ページA4」=自PR#442、「年間カレンダー」=自PR#443が対応中で重複につき回避。真に空いている「受入教育記録のCSV/印刷を月次本社提出の元請安全担当ペルソナでレビュー→名簿CSVの実務品質(現場別フィルタ・並び)」を実行。
+- 第三者レビュー: 桑原さん(48歳・ゼネコン作業所の元請安全担当・複数現場の受入教育記録を集約し毎月初に現場ごと本社へ提出)になりきりPlaywright(Chromium)で複数現場×複数月(A棟5/8×2・B橋梁5/20・A棟6/2・B橋梁6/15・C造成4/28)を保存→名簿CSVを実DLし中身を実測。致命=①現場別フィルタ無し(3現場が1ファイルに混在)②月次フィルタ無し(4/5/6月混在)③並びが日付降順(名簿は実施順が自然)④ファイル名が当日日付固定で複数DL取り違え。
+- 改善: induction-store.tsに純関数monthOf/distinctSites/distinctMonths/buildRoster(現場昇順→実施日昇順→所属→氏名)/rosterFileName(月・現場をファイル名へ)を追加。induction-client.tsxの保存一覧に「名簿CSV(本社へ月次提出)」ブロックを新設＝現場/月ドロップダウン＋「名簿CSVを出力(N名)」(0件は無効化)＋絞り込み解除＋出力後通知。重複していたper-record行の「名簿CSV(全件)」ボタンは撤去し出力経路を一本化。画面/保存/localStorageスキーマ/印刷帳票は不変・新規依存0。
+- 再レビュー(Playwright実DL): A棟×5月=`induction-roster-2026-05-A棟新築工事.csv`(2名・昇順)、B橋梁×全期間=2名昇順、全現場×全期間=6名がA棟3→B橋梁2→C造成1で現場まとまり・各現場内実施日昇順。桑原さん「現場と月を選ぶだけで実施順の名簿が出る。ファイル名に月と現場が入り取り違えない。本社にそのまま添付できる」=提出ライン到達。
+- ゲート: tsc0 / lint errors0(warning47=既存) / vitest1125pass(145ファイル) / build成功。記録: docs/third-party-reviews/induction-csv-monthly-2026-06-09.md。temp(_induction_csv_*.mjs/png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
+
 ## Cycle (2026-06-09) — 年間 安全衛生カレンダー 「今月やること」先頭昇格（軸2）
 - 前PR回収: CI緑(CLEAN)だった#440(受入教育印刷の署名押印欄)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#441(業種別リスクのスマホ縦長短縮)はマージ時コンフリクト(BACKLOG/cycle-logの追記衝突)→mainへrebase・両側統合解決のうえforce-push(CI再走中、次イテレーション回収)。#442(印刷ページA4)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
 - タスク選定: BACKLOG軸2の上位未着手「業種別リスクのスマホ短縮」=自PR#441、「印刷ページA4」=自PR#442が対応中で重複につき回避。真に空いている「年間 安全衛生カレンダーを初見の安全担当でレビュー＝今月やることへの到達・ツール連携」を実行。未着手≥3で補充不要。
