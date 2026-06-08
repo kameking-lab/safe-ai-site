@@ -347,3 +347,10 @@
 - 改善(最小・非破壊): `copilot` 全体ではなく安定な `useCallback`(`recordVisit`/`setIndustry`/`addConcerns`)とプリミティブのみを依存に。`ChatbotBody` はマウント時1回実行に。`CopilotIndustrySync` の配列prop `concerns` は制御文字()区切りの安定キー `concernsKey` に畳んで依存化。
 - 再レビュー(Playwright再計測): `Maximum update depth` 64回→0回。送信→吹き出し52ms/本文描画開始232ms、stream 200、回答・参照条文・出典(条番号+施行日+発出機関)・信頼度バッジ全て正常描画。出典の見やすさ自体は元々良好と確認。佐藤評価「カクつきが消えた、職人の前で開ける」。
 - ゲート: tsc 0 / lint errors 0 / vitest 1092 pass / build 成功。記録: docs/third-party-reviews/chatbot-site-supervisor-2026-06-09.md。架空0・水増し0・既存破壊0。一時Playwright/スクショは削除済(差分はソース2ファイル)。
+## Cycle54【軸2: 安全工程打合せ書 元請安全担当ペルソナレビュー】(2026-06-09 JST・PR#427回収)
+- 前PR回収: CI緑だった PR#425(化学物質RA 一人親方)は main 衝突(BACKLOG/cycle-logのみ)→ローカルで両取り解決(私の#425 Cycle51を Cycle52へ改番)・push済。auto-merge不可リポのため次イテレーションで緑確認→squash回収。#426(事故DB)はCI実行中。main は pull --ff-only で clean。
+- タスク選定: BACKLOG最上位 chemical-ra(#425)・accidents(#426) は両方とも自分の未マージPRで対応中につき重複回避。次の真の未着手「安全工程打合せ書(/safety-diary)を元請安全担当ペルソナでレビュー」を実行。
+- 第三者レビュー: 渡辺さん(54歳・元請安全担当・毎朝1時間・3分で“昨日の続き”に入れねば紙に戻る)になりきりPlaywright実操作。最大の摩擦=1時間作業の大半を省く「翌日用に複製」が保存一覧画面の中にしか無く、朝/safety-diary直行の導線では埋没(姉妹のKY用紙 Cycle51と同型欠点)。
+- 改善: 編集画面の上部バー(保存一覧の隣)に「↻ 前回を複製」を常設(保存済みがある時のみ)。1タップで直近保存→翌日分を生成(各社の作業/機械/資格/予知災害/対策/RA引継・日付翌日・当日記入クリア)。既存 duplicateForNextDay を再利用(作り直し無し)。store.tsに loadLatestMeeting() 追加＋meeting-paper-view.tsxに hasLatest/handleCopyLatest/ボタン。KY用紙とUI・文言を統一。
+- 再レビュー(Playwright実機): 初見は非表示(空複製防止)→保存→リロードで上部「前回を複製」常設→1タップで通知＋作業所名引継＋翌日日付。渡辺さん「1タップで昨日の各社対策が乗る。紙に戻らない」。
+- ゲート: tsc0 / lint errors0 / vitest1092pass / build成功。記録: docs/third-party-reviews/safety-diary-genuke-anzentanto-2026-06-09.md（+ topbar スクショ）。temp(spec/config/devlog)削除済。架空0・水増し0・既存破壊0。
