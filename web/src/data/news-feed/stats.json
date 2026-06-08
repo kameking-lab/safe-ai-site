@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-07T22:01:09.962Z",
+  "generatedAt": "2026-06-08T22:23:38.737Z",
   "counts": {
-    "approved": 13,
-    "rejected": 17,
-    "total": 30,
-    "approvalRate": 0.433
+    "approved": 14,
+    "rejected": 18,
+    "total": 32,
+    "approvalRate": 0.438
   },
   "byDay": [
     {
@@ -111,22 +111,29 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-06-09",
+      "approved": 1,
+      "rejected": 1,
+      "total": 2,
+      "approvalRate": 0.5
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 11,
+      "approved": 12,
       "rejected": 2,
-      "total": 13,
-      "approvalRate": 0.846
+      "total": 14,
+      "approvalRate": 0.857
     },
     {
       "publisher": "日本放送協会",
       "approved": 2,
-      "rejected": 15,
-      "total": 17,
-      "approvalRate": 0.118
+      "rejected": 16,
+      "total": 18,
+      "approvalRate": 0.111
     }
   ],
   "byEstimatedWorkCategory": [
@@ -173,6 +180,13 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "type": "崩壊・倒壊",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
     }
   ],
   "scoreHistograms": {
@@ -199,11 +213,11 @@
         0,
         1,
         2,
-        10
+        11
       ],
       "rejected": [
         0,
-        3,
+        4,
         11,
         0,
         0,
@@ -230,7 +244,7 @@
       "approved": [
         3,
         7,
-        3,
+        4,
         0,
         0,
         0,
@@ -241,7 +255,7 @@
       ],
       "rejected": [
         2,
-        15,
+        16,
         0,
         0,
         0,
@@ -266,7 +280,7 @@
         "90-100"
       ],
       "approved": [
-        11,
+        12,
         2,
         0,
         0,
@@ -278,7 +292,7 @@
         0
       ],
       "rejected": [
-        11,
+        12,
         6,
         0,
         0,
@@ -305,7 +319,7 @@
       ],
       "approved": [
         0,
-        12,
+        13,
         1,
         0,
         0,
@@ -317,7 +331,7 @@
       ],
       "rejected": [
         0,
-        11,
+        12,
         0,
         0,
         0,
@@ -332,7 +346,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 15
+      "count": 16
     },
     {
       "reason": "duplication",
@@ -366,6 +380,19 @@
           "model": "gemini-2.5-flash"
         },
         "publisher": "日本放送協会"
+      },
+      {
+        "headline": "人事労務マガジン 特集第245号　中小企業事業者の皆さまへ 高年齢者の労働災害防止のための設備改善等を支援する補助金 ～令和8年度「エイジフレンドリー補助金」の受け付けが始まりました～",
+        "aiSummary": "厚労省、高年齢者の労災防止設備改善を支援するエイジフレンドリー補助金の申請受付を開始。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 20,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-06-08T22:23:38.686Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
       },
       {
         "headline": "令和８年度第３回「石綿に係る疾病の業務上外に関する検討会」を開催します",
@@ -454,19 +481,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-05-25T22:04:41.506Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "「第２回　労働安全衛生法に基づく一般健康診断の検査項目等に関する検討会」を開催します",
-        "aiSummary": "厚生労働省が労働安全衛生法に基づく一般健康診断の検査項目に関する検討会を開催。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 20,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-05-25T22:04:46.208Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"
