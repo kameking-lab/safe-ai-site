@@ -498,6 +498,15 @@
 - 補充: 軸2の真の空きが薄い(44/45は自PR在中)ため、本レビューで見つけた具体改善2件をBACKLOGへ追加(①/signage/displayフルスクリーンへ高リスク赤アラート展開 ②データ取得失敗時に警報パネルが空表示で『警報なし/取得失敗』区別不能な懸念の点検)。
 - ゲート: tsc0 / lint errors0(warning47=既存) / vitest1114pass(145ファイル) / build成功(Compiled successfully)。記録: docs/third-party-reviews/signage-danger-alert-wiring-2026-06-09.md。temp(_review_danger_alert.mjs/_da_*.png)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。
 
+## Cycle (2026-06-09) — フルスクリーン無人キオスク(/signage/display)へ高リスク警報の全画面赤アラート結線（軸2）
+- 前PR回収: CI緑(CLEAN)だった #446(サイネージ ダッシュボードへ危険アラート結線)を squash マージ→`git checkout main && git pull --ff-only`→clean。#447(ヒヤリハット優先表示)は #446 マージで BACKLOG/cycle-log がコンフリクト→origin/main をブランチへ merge し両側のタスク[x]/ログを統合解決して push(CI再走中・次回回収)。#448(作業環境測定 区分判定の記録化)は e2e/smoke 進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG軸2の最上位の実行可能未着手(Path A=オーナー判断は除外)が「フルスクリーン無人キオスク /signage/display に高リスク警報の全画面赤アラート(自動発動)を展開」。先行#446でダッシュボード/signageには結線済み、本件はそれを無人キオスクへ展開。実行可能未着手は4件(本件・ダッシュボード空表示点検・Path A・軸1)で≥3=補充不要。
+- 第三者レビュー: 中村さん(52歳・建設現場の安全衛生責任者・タブレットを事務所に据置1日中つけっぱなし・普段はサイドパネルを閉じ地図だけ表示・設定が黙って無効化されるのを最も嫌う・注意報での誤発動=オオカミ少年化も嫌う)になりきりPlaywright実機(Chromium 1920×1080)。モックで警報レベルの大雨/暴風警報・注意報のみの2系統を注入し挙動を実検証。
+- 致命/懸念: ①素直にサイドパネル内へ部品を置くと「パネルを閉じる」常用フローで部品ごとアンマウントされ自動発動useEffectが停止＝安全機能が無音で死ぬ(BACKLOGが最も警戒する無音化)。②キオスクのbyIsoは注意報(advisory)も混在し、SignageDangerAlertはheadline/statusをキーワード照合して発動するため素で渡すと「大雨注意報」の"大雨"で誤発動。③全画面赤オーバーレイがLeafletズームコントロール(z≈1000)/パネル(z-450)の背面に回り地図UIを覆い切れない。④バーを通常フローに足すと地図の縦が削れ1画面フィット崩壊。
+- 改善: ①`<SignageDangerAlert>`をサイドパネル内ではなく signage-map-client.tsx のルート直下に常時マウント(`absolute left-14 top-2`)＝パネル開閉非依存で監視継続。②新規純関数 `web/src/lib/signage/danger-alert-source.ts` `deriveDangerAlertInput(byIso)`(テスト7件)で warning/special レベルのみ{code,status}抽出・注意報除外・最深刻headline採用・重複排除。③ラッパーを z-[1100](Leafletコントロール/パネルより前面)・transform不使用で内部fixed overlayがビューポート全面被覆。④バーはabsolute(left-14でズーム回避)・overlayはfixedで地図の縦不変。設定永続は既存localStorage("signage-danger-autospeak")を活用。部品本体ロジック/データ/スキーマ/取得不変・新規依存0。
+- 再レビュー(Playwright実機・全項目自動検証): barVisible=true(left93px=ズーム回避)、scroll x/y=0(1画面フィット)、自動発動ON前overlay=0→ON後=1(headline「東京地方に大雨警報、暴風警報が…」)、検知中バッジ表示、閉→再ポップ=0(console error0)、再読込後checkbox=checked・overlay再=1(localStorage永続)、**パネルを閉じてもバー生存=true(無音化を解消)**、**注意報のみではoverlay=0・🟢監視中バッジ(誤発動防止)**、z-[1100]是正後スクショでズーム+/−が赤画面に完全被覆。中村さん「パネルを閉じても見張りが生きてる。注意報では赤くならない。大雨警報が出れば赤画面が勝手に出て読み上げる。現場に置ける」=採用ライン到達。
+- ゲート: tsc0 / lint errors0(warning47=既存・他ファイルのみ) / vitest1141pass(147ファイル・+7) / build成功。記録: docs/third-party-reviews/signage-display-danger-alert-2026-06-09.md(+バー/オーバーレイ スクショ)。temp(_da_kiosk_review.mjs/_da_bar.mjs)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。
+
 ## Cycle (2026-06-09) — ヒヤリハット報告 重大×未対策の優先可視化（軸2）
 - 前PR回収: CI緑(CLEAN/MERGEABLE)だった#444(受入教育CSV月次)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#445(健診スケジューラ)・#446(サイネージ緊急アラート)は別イテレーションでマージ済。古いdocs系PRは放置。
 - タスク選定: BACKLOG軸2の上位未着手「健診スケジューラ」=自PR#445、「サイネージ緊急アラート」=自PR#446が対応中・Path Aはオーナー判断待ちで、真に空いている軸2が3未満。補充指針に従い未レビューの記録ツール3件(near-miss/patrol/committee)をタスク化し、最上位「ヒヤリハット報告の重大×未対策の優先可視化」を実行。
