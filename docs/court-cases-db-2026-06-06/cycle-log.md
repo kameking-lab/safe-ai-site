@@ -456,3 +456,11 @@
 - 改善: industry-risk-client.tsxを結論先頭・背景折りたたみに再構成(データ/取得ロジック不変)。①「まずやること(標準対策)」(emerald)を業種サマリー直後に昇格+「R7重点」(rose)。②背景3枚(主な暴露作業/リスク要因/関連法令・指針)を既存イディオムのネイティブ&lt;details&gt;アコーディオン(既定折りたたみ・group-openシェブロン)に格納。③関連事故レポート導線は法令アコーディオン内に温存。新規依存0・SEOはDOM保持で不変・横overflow0維持。
 - 再レビュー(Playwright実機): 全長3947→3537px、対策見出しy=1011px(業種選択+サマリー直下に前進・スワイプ0〜1回で到達)、details既定で全閉(0/3)・展開で暴露作業表示OK、横overflow0、logistics/agricultureも200描画。田村さん「開いてすぐ緑でやることが出る。これなら朝見る」=採用ライン到達。
 - ゲート: tsc0 / lint errors0 / vitest1114pass / build成功。記録: docs/third-party-reviews/industry-risk-mobile-scroll-2026-06-09.md。temp(_review_industry_*.mjs/_industry_*.png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
+
+## Cycle (2026-06-09) — 年間 安全衛生カレンダー 「今月やること」先頭昇格（軸2）
+- 前PR回収: CI緑(CLEAN)だった#440(受入教育印刷の署名押印欄)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#441(業種別リスクのスマホ縦長短縮)はマージ時コンフリクト(BACKLOG/cycle-logの追記衝突)→mainへrebase・両側統合解決のうえforce-push(CI再走中、次イテレーション回収)。#442(印刷ページA4)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG軸2の上位未着手「業種別リスクのスマホ短縮」=自PR#441、「印刷ページA4」=自PR#442が対応中で重複につき回避。真に空いている「年間 安全衛生カレンダーを初見の安全担当でレビュー＝今月やることへの到達・ツール連携」を実行。未着手≥3で補充不要。
+- 第三者レビュー: 持田さん(47歳・中堅製造業の総務から今月安全衛生担当に異動・年間スケジュール未習熟・知りたいのは“今月やること”だけ・スマホ通勤確認)になりきりPlaywright実機(iPhone 12 390×664)。致命=ページ全長4499px≒6.78画面で当月(6月)カードがy=1502px≒2.3画面下に埋没＝初見者が一番欲しい結論に届くまで関係ない1〜5月を5枚スクロール。皮肉にも説明文は「今月やることが一目で分かり」と謳い乖離。横崩れ0。「毎回6月を探すなら紙の年間計画表が速い」。
+- 改善: safety-calendar-client.tsxに「{月}にやること」カードを先頭へ昇格(データ/取得ロジック不変)。当月確定後にのみ描画しSSR差異回避・中身は当月SAFETY_CALENDAR項目を既存ItemRowで再利用＝ツール連携リンク(熱中症対策→/heat-illness-prevention等)を先頭でそのままタップ可・末尾に毎日基本は下の常設一覧へ誘導の一文。既存12ヶ月グリッド/当月リング/毎日セクションは不変・新規依存0・スキーマ不変。
+- 再レビュー(Playwright実機): 「今月」バッジy=1520→460px≒0.69画面(ヘッダー直下・スクロール0でファーストビューに当月対策とリンク)、横overflow0維持、当月カードのリンクtap可。持田さん「開いてすぐ“6月にやること”が緑で出て熱中症リンクをそのまま押せる。毎月開く」=採用ライン到達。
+- ゲート: tsc0 / lint errors0(warn47既存) / vitest1114pass / build成功。記録: docs/third-party-reviews/safety-calendar-firsttime-officer-2026-06-09.md。temp(_cal_review.mjs/_cal_*.png)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。
