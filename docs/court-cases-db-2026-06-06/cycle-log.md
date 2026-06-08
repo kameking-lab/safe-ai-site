@@ -310,3 +310,10 @@
 - 社長環境(Windows PowerShell 5.x)でloop-runner.ps1がパースエラー(BOMなしUTF-8をShift-JIS誤認し日本語化け→文字列終端/{}破綻)。対処: ps1本体を純ASCII化(全コメント・ログ英語)＋可変の日本語指示は loop-prompt.txt(UTF-8)に分離し実行時に -Encoding UTF8 で読込→$OutputEncoding=UTF8 で claude にstdinパイプ。
 - 実環境確認: claude=C:\Users\kanet\AppData\Roaming\npm\claude.ps1、headlessは -p/--print・bypassは --dangerously-skip-permissions(v2.1.168)。PURE_ASCII_OK＋Windows PowerShellでPARSE_OK＋runner 1イテレーション試走で claude起動・"RUNNER_SELFTEST_OK"返答・exit0を確認。
 - これで社長が powershell -File .\loop-runner.ps1 で確実に無人自走起動できる。
+
+## Cycle51【KY用紙 紙派ベテラン目線で用紙ファースト化】(2026-06-08 JST)
+- 前回PR回収: 直近ループPR(#420〜423)は既にマージ済・working tree clean。残る未マージPR群はループ機構以前(5月〜6/4)の古いdocs PRで mergeable=UNKNOWN、盲目マージは衝突・浪費リスクのため「安全に放置しログ」。
+- 軸2タスク: KY用紙(/ky/paper)を「58歳・KY紙20年・老眼・朝3分しかない」田中監督ペルソナで第三者レビュー(Playwright実機・Pixel7/デスクトップ)。3大欠点を抽出: ①スマホで開いても"書く場所"が画面外 ②白紙なのに「元請確認・承認」パネルが最上部に居座る(順序逆) ③最速ルート「前回を複製」が最下部6ボタンに埋没。
+- 改善: (a)用紙ファースト化=下書き(draft)中は承認パネルを用紙の下へ、提出/承認/差し戻し(actionable)中は従来どおり用紙の上に残置(ロック解除導線を埋もれさせない)。(b)上部操作バーに「↻前回を複製」を常設(保存済みKYがある時のみ)。実装は ky-paper-view.tsx のみ(approvalPanelを変数化し条件配置＋hasLatest判定)。
+- 再レビュー(Playwright実機)で FORM_ABOVE_APPROVAL＋上部「前回を複製」表示を確認。田中監督評価「昨日のを呼んで日付だけ直して終わり。紙より速い。使う」。
+- ゲート: tsc 0 / lint errors 0 / vitest 1092 pass / build 成功。記録: docs/third-party-reviews/ky-paper-veteran-foreman-2026-06-08.md。架空0・水増し0・既存破壊0。

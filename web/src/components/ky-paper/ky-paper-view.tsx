@@ -95,6 +95,8 @@ export function KyPaperView() {
   const [approvalComment, setApprovalComment] = useState("");
   // R3: 初見の職長向け 3ステップ案内（一度×で閉じると以後非表示。localStorage）。
   const [firstUseHintOpen, setFirstUseHintOpen] = useState(false);
+  // 「前回を複製」を上部にも出すための判定（保存済みKYが端末にあるときだけ）。
+  const [hasLatest, setHasLatest] = useState(false);
   const [syncStatus, setSyncStatus] = useState<KySyncStatus>(() =>
     computeKySyncStatus({ cloudEnabled: isKyCloudEnabled(), online: true, pending: false })
   );
@@ -147,6 +149,8 @@ export function KyPaperView() {
       setRecord(baseRec);
     }
     setWorkers(visibleWorkers(loadWorkers()));
+    // 保存済みKYがあれば上部にも「前回を複製」を出す（再来訪の最速ルート）。
+    setHasLatest(loadLatestKyRecord() !== null);
   }, []);
 
   // Phase 4: クラウド同期（背景・任意）。env 未設定なら何もしない＝従来どおり端末内のみ。
@@ -441,6 +445,65 @@ export function KyPaperView() {
     [record.workRows]
   );
 
+  // P1-B: 元請確認・承認パネル。下書き中は記入の邪魔になるので用紙の下に置き、
+  // 提出/承認/差し戻し中（actionable）は操作ボタンを見失わないよう用紙の上に置く。
+  const approvalPanel = (
+    <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
+      <div className="rounded-xl border border-slate-200 bg-white p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-slate-800">元請確認・承認</span>
+            <span
+              className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                approval.status === "approved"
+                  ? "bg-emerald-100 text-emerald-800"
+                  : approval.status === "submitted"
+                    ? "bg-amber-100 text-amber-800"
+                    : approval.status === "rejected"
+                      ? "bg-rose-100 text-rose-700"
+                      : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              {KY_APPROVAL_LABEL[approval.status]}
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {(approval.status === "draft" || approval.status === "rejected") && (
+              <button type="button" onClick={handleSubmitApproval} className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-700">
+                元請に提出
+              </button>
+            )}
+            {(approval.status === "submitted" || approval.status === "approved") && (
+              <>
+                <input value={approvalActor} onChange={(e) => setApprovalActor(e.target.value)} placeholder="確認者名" aria-label="確認者名" className="w-28 rounded border border-slate-300 px-2 py-1 text-xs" />
+                <input value={approvalComment} onChange={(e) => setApprovalComment(e.target.value)} placeholder="コメント(任意)" aria-label="コメント" className="w-40 rounded border border-slate-300 px-2 py-1 text-xs" />
+                {approval.status === "submitted" && (
+                  <button type="button" onClick={handleApprove} className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">承認</button>
+                )}
+                <button type="button" onClick={handleReject} className="rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50">差し戻し（編集可に）</button>
+              </>
+            )}
+          </div>
+        </div>
+        {locked && (
+          <p className="mt-2 rounded bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-800">
+            提出/承認中のため編集はロックされています。修正するには「差し戻し」してください。
+          </p>
+        )}
+        {approval.history.length > 0 && (
+          <ul className="mt-2 space-y-0.5 text-[11px] text-slate-500">
+            {approval.history.slice(-5).map((h, i) => (
+              <li key={i}>
+                {h.action === "submit" ? "提出" : h.action === "approve" ? "承認" : "差し戻し"}: {h.by}（
+                {new Date(h.at).toLocaleString("ja-JP")}）{h.comment ? `― ${h.comment}` : ""}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-slate-100 pb-24 print:bg-white print:pb-0">
       {/* 操作バー（印刷時は隠す） */}
@@ -454,6 +517,16 @@ export function KyPaperView() {
             <Link href="/ky/list" className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100">
               保存一覧
             </Link>
+            {hasLatest && (
+              <button
+                type="button"
+                onClick={handleCopyLatest}
+                title="前回のKYを当日分として複製（現場・作業・危険・対策・参加者を引き継ぎ、日付は今日に）"
+                className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-100"
+              >
+                ↻ 前回を複製
+              </button>
+            )}
           </div>
           {/* ズーム */}
           <div className="flex items-center gap-1 rounded-full border border-slate-300 bg-white p-0.5">
@@ -500,61 +573,9 @@ export function KyPaperView() {
         </div>
       )}
 
-      {/* P1-B: 元請確認・承認パネル */}
-      <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
-        <div className="rounded-xl border border-slate-200 bg-white p-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-800">元請確認・承認</span>
-              <span
-                className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
-                  approval.status === "approved"
-                    ? "bg-emerald-100 text-emerald-800"
-                    : approval.status === "submitted"
-                      ? "bg-amber-100 text-amber-800"
-                      : approval.status === "rejected"
-                        ? "bg-rose-100 text-rose-700"
-                        : "bg-slate-100 text-slate-600"
-                }`}
-              >
-                {KY_APPROVAL_LABEL[approval.status]}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {(approval.status === "draft" || approval.status === "rejected") && (
-                <button type="button" onClick={handleSubmitApproval} className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-700">
-                  元請に提出
-                </button>
-              )}
-              {(approval.status === "submitted" || approval.status === "approved") && (
-                <>
-                  <input value={approvalActor} onChange={(e) => setApprovalActor(e.target.value)} placeholder="確認者名" aria-label="確認者名" className="w-28 rounded border border-slate-300 px-2 py-1 text-xs" />
-                  <input value={approvalComment} onChange={(e) => setApprovalComment(e.target.value)} placeholder="コメント(任意)" aria-label="コメント" className="w-40 rounded border border-slate-300 px-2 py-1 text-xs" />
-                  {approval.status === "submitted" && (
-                    <button type="button" onClick={handleApprove} className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">承認</button>
-                  )}
-                  <button type="button" onClick={handleReject} className="rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50">差し戻し（編集可に）</button>
-                </>
-              )}
-            </div>
-          </div>
-          {locked && (
-            <p className="mt-2 rounded bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-800">
-              提出/承認中のため編集はロックされています。修正するには「差し戻し」してください。
-            </p>
-          )}
-          {approval.history.length > 0 && (
-            <ul className="mt-2 space-y-0.5 text-[11px] text-slate-500">
-              {approval.history.slice(-5).map((h, i) => (
-                <li key={i}>
-                  {h.action === "submit" ? "提出" : h.action === "approve" ? "承認" : "差し戻し"}: {h.by}（
-                  {new Date(h.at).toLocaleString("ja-JP")}）{h.comment ? `― ${h.comment}` : ""}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
+      {/* 元請確認・承認パネル: 提出/承認/差し戻し中のみ用紙の上（操作を見失わないため）。
+          下書き中は記入が主役なので用紙の下へ回す（持ち手＝職長がすぐ記入に入れる）。 */}
+      {approval.status !== "draft" && approvalPanel}
 
       {/* 用紙本体（ズーム対象）。印刷時は専用A4シート（下部）を使うため隠す。提出/承認中は inert で編集ロック。 */}
       <div className="overflow-x-auto px-2 py-4 print:hidden" inert={locked || undefined}>
@@ -749,6 +770,9 @@ export function KyPaperView() {
           </div>
         </div>
       </div>
+
+      {/* 下書き中の元請提出パネルは、記入を終えた用紙の下に置く（提出は記入の後）。 */}
+      {approval.status === "draft" && approvalPanel}
 
       {/* P1-A: A4印刷用シート（画面では非表示・印刷時のみ描画＝元請提出体裁） */}
       <div className="hidden print:block">
