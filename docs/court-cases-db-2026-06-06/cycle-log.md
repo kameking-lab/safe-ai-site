@@ -440,3 +440,19 @@
 - 改善(印刷専用・画面不変): `PageContainer`縦パディングに`print:py-0`を追加(全印刷ページ共通で白紙2枚目防止)。globals.css @media printに`#main-content,#main-content>div{flex:none;min-height:0}`(画面用ストレッチ解除)＋`table{page-break-inside:auto}/thead{display:table-header-group}/tr{page-break-inside:avoid}`(表の行が改ページで切れない・見出し再表示)。print:バリアント/＠media printのみ・新規依存0・スキーマ/ロジック不変。
 - 再レビュー(A4再実測): ポスター`/Count`=2→1(貼れる1枚がそのまま出力・白紙消失)、WBGT=1ページ維持、順化計画(16日)=2ページ(正当)かつ`tr`の`break-inside`計算値=avoid(行分断なし)・見出し各ページ再表示。桑原さん「押したら貼れる1枚が出る。順化表も切れずに2枚目へ続く。提出できる」=採用ライン到達。
 - ゲート: tsc0 / lint errors0(warning47=既存) / vitest1114pass / build成功。記録: docs/third-party-reviews/print-pages-a4-2026-06-09.md(+poster afterスクショ)。temp(_print_review.mjs/_poster_*.mjs/png/pdf)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
+
+## Cycle (2026-06-09) — 受入教育記録 印刷物(A4)の提出品質是正（軸2）
+- 前PR回収: CI緑だった#437(死蔵サイネージ部品棚卸し)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#438(KY参加者2タップ)はBACKLOG/cycle-logがmainと衝突→origin/mainをbranchへmerge・両側のタスク/ログを統合解決して通常push(CI再走中、次イテレーション回収)。#439(signage全画面スリープ抑止)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG最上位の未着手「サイネージ全画面 無人運用レビュー」は自分の未マージPR#439が同件対応中につき重複回避。次の真の未着手「受入教育記録の印刷物(入場者名簿・教育記録)A4実機プレビュー点検→是正」を実行。actionable未着手多数で補充不要。
+- 第三者レビュー: 桑原さん(48歳・ゼネコン作業所の元請安全担当・協力会社の受入教育記録を集めファイル化し労基署臨検/本社監査で提示・体裁にうるさい)になりきりPlaywright(Chrome)で実データ入力→`emulateMedia("print")`+`page.pdf(A4)`でA4実機プレビュー。レイアウト自体は健全(はみ出し0px・docScrollW==clientW==1200・印刷時ボタン0個・@page A4設定済)。一方、提出書類として致命=「署名・押印欄が紙に存在しない(確認はチェックのみ)」「標題がh2止まりで何の記録か弱い」「実施日が日付入力ボックスの▾付きのまま=フォームに見える」を実測。
+- 改善: 印刷専用要素のみ追加(画面/保存/CSV不変)。①署名・押印欄(`hidden print:grid`)＝教育実施者/受講者本人の2枠・氏名(educator/workerName)プレフィル＋㊞枠、純表示SignBoxに切出し。②印刷専用の帳票タイトル(`hidden print:block`・中央h1「新規入場者 受入教育 実施記録」＋安衛法59条/安衛則35条)、画面用h2は`print:hidden`で重複回避。③globals.css @media printで`input[type=date]`のカレンダー/スピナー非表示(全印刷ページ共通の清書化)。新規依存0・データ/localStorageスキーマ不変。
+- 再レビュー(A4プレビュー再実測): 先頭に大標題＋法的根拠、実施日は「2026/06/09」のみ(▾消失)、末尾に「教育実施者 署名: 職長 山田 太郎 ㊞／受講者(本人)署名: 新規 花子 ㊞」の2枠。横はみ出し0px・操作系0個維持。桑原さん「標題・署名・押印がそろった。作業所ファイルに綴じて監査に出せる」=提出ライン到達。画面表示は不変(スクショ確認)。
+- ゲート: tsc0 / lint errors0(warn47既存) / vitest1105pass / build成功。記録: docs/third-party-reviews/induction-print-a4-2026-06-09.md(+afterスクショ)。temp(_induction_print_review.mjs/_shot.mjs/png/pdf)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。
+
+## Cycle (2026-06-09) — 業種別 熱中症リスク判定 スマホ縦長スクロール短縮（軸2）
+- 前イテレーション回収: CI緑(CLEAN)だった PR#438(KY用紙2タップ)を squash マージ→`git checkout main && git pull --ff-only`→clean。PR#439(signage無人表示)はマージ時コンフリクト→origin/mainへrebase・BACKLOG/cycle-logの両側統合解決のうえ force-push(CI再走中、次イテレーション回収)。PR#440(受入教育印刷の署名押印欄)はe2e進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG軸2の上位未着手「signage/display無人運用」=自PR#439が、「受入教育印刷A4」=自PR#440が対応中で重複につき回避。真に空いている「業種別リスク判定をスマホで縦長スクロール短縮=結論先頭・詳細折りたたみ」を実行。
+- 第三者レビュー: 田村さん(45歳・建設現場監督・ヘルメット着用で片手スマホ・知りたいのは“今日やること”だけ)になりきりPlaywright実機(iPhone 12 390×664)。致命=ページ全長3947px≒5.9画面で、一番欲しい「標準対策」が上から5番目＝暴露作業・リスク要因の読み物2枚を飛ばさないと結論に届かない(対策見出しが約3画面下)。横崩れは0。「対策が下。毎朝スクロールするなら現場の貼り紙が速い」。
+- 改善: industry-risk-client.tsxを結論先頭・背景折りたたみに再構成(データ/取得ロジック不変)。①「まずやること(標準対策)」(emerald)を業種サマリー直後に昇格+「R7重点」(rose)。②背景3枚(主な暴露作業/リスク要因/関連法令・指針)を既存イディオムのネイティブ&lt;details&gt;アコーディオン(既定折りたたみ・group-openシェブロン)に格納。③関連事故レポート導線は法令アコーディオン内に温存。新規依存0・SEOはDOM保持で不変・横overflow0維持。
+- 再レビュー(Playwright実機): 全長3947→3537px、対策見出しy=1011px(業種選択+サマリー直下に前進・スワイプ0〜1回で到達)、details既定で全閉(0/3)・展開で暴露作業表示OK、横overflow0、logistics/agricultureも200描画。田村さん「開いてすぐ緑でやることが出る。これなら朝見る」=採用ライン到達。
+- ゲート: tsc0 / lint errors0 / vitest1114pass / build成功。記録: docs/third-party-reviews/industry-risk-mobile-scroll-2026-06-09.md。temp(_review_industry_*.mjs/_industry_*.png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。

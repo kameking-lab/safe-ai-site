@@ -394,6 +394,11 @@ table {
     background: white !important;
     color: black !important;
   }
+  /* 日付入力のカレンダー/スピナーは印刷の清書帳票では不要。値（日付文字列）だけ残す */
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="date"]::-webkit-inner-spin-button {
+    display: none !important;
+  }
   /* カード影・背景・ボーダーを印刷向けに単純化 */
   .shadow,
   .shadow-sm,

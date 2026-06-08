@@ -176,9 +176,15 @@ export function InductionClient() {
 
   return (
     <div className="space-y-6">
+      {/* 印刷時のみの帳票タイトル（元請・監督署へ提出する書類として何の記録かを明示） */}
+      <div className="hidden text-center print:block">
+        <h1 className="text-black">新規入場者 受入教育 実施記録</h1>
+        <p className="mt-1 text-[11px] text-slate-600">労働安全衛生法第59条・労働安全衛生規則第35条</p>
+      </div>
+
       {/* 基本情報＋帳票ヘッダー */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-3 text-base font-bold text-slate-900">受入教育 実施記録</h2>
+        <h2 className="mb-3 text-base font-bold text-slate-900 print:hidden">受入教育 実施記録</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="実施日"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" /></Field>
           <Field label="現場名"><Inp value={siteName} onChange={setSiteName} placeholder="例: ○○ビル新築工事" /></Field>
@@ -237,6 +243,13 @@ export function InductionClient() {
           </label>
         </div>
 
+        {/* 署名・押印欄（印刷時のみ）。元請・監督署提出時に「誰が教育し・誰が受けたか」の証跡を残す。
+            氏名は入力値をプレフィルするが、上から自筆署名・押印できるよう下線と㊞枠を設ける。 */}
+        <div className="mt-4 hidden grid-cols-1 gap-3 print:grid sm:grid-cols-2">
+          <SignBox role="教育実施者" name={educator} />
+          <SignBox role="受講者（本人）" name={workerName} />
+        </div>
+
         <p className="mt-3 text-[11px] leading-5 text-slate-500">
           教育項目は労働安全衛生法第59条・労働安全衛生規則第35条（2024年改正で全業種に拡大）の事項と、建設現場の受入教育で標準的な項目に基づく一般的なひな形です。教育記録は3年間の保存が求められます。実際の項目・内容は現場・業務に応じて事業者が定めてください。
         </p>
@@ -286,6 +299,18 @@ export function InductionClient() {
           </ul>
         )}
       </section>
+    </div>
+  );
+}
+
+function SignBox({ role, name }: { role: string; name: string }) {
+  return (
+    <div className="rounded border border-slate-400 p-3 text-black">
+      <p className="text-[11px] font-semibold text-slate-700">{role} 署名</p>
+      <div className="mt-4 flex items-center gap-2">
+        <span className="flex-1 border-b border-slate-500 pb-1 text-sm">{name}</span>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-400 text-[10px] text-slate-500">㊞</span>
+      </div>
     </div>
   );
 }
