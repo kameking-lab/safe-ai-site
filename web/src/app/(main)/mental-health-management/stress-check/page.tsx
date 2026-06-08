@@ -5,13 +5,24 @@ import {
   AlertCircle,
   ListChecks,
   ChevronLeft,
+  Route,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
-import { STRESS_CHECK_REQUIREMENTS } from "@/data/mental-health-rules";
+import {
+  STRESS_CHECK_REQUIREMENTS,
+  STRESS_CHECK_PROCEDURE,
+} from "@/data/mental-health-rules";
 import { ReadinessForm } from "./readiness-form";
+
+const PHASE_CLASS: Record<string, string> = {
+  準備期: "bg-sky-100 text-sky-700",
+  実施期: "bg-violet-100 text-violet-700",
+  事後対応期: "bg-amber-100 text-amber-800",
+  "報告・保存期": "bg-emerald-100 text-emerald-700",
+};
 
 const _title =
   "ストレスチェック実施チェックリスト｜11項目ベースライン＋自己評価";
@@ -77,8 +88,61 @@ export default function StressCheckImplementationPage() {
         </div>
       </section>
 
+      {/* 実施手順（年間の流れ） */}
+      <section id="procedure" className="mt-8">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
+          <Route className="h-5 w-5 text-violet-600" aria-hidden="true" />
+          実施手順（年間の流れ）
+        </h2>
+        <p className="mt-1 text-xs text-slate-500">
+          初めての事業場はこの順番で進めると抜け漏れを防げます。各ステップの「目安時期」は厚労省実施マニュアルに基づく目安で、確定は衛生委員会で行います。
+        </p>
+        <ol className="mt-4 space-y-3">
+          {STRESS_CHECK_PROCEDURE.map((step, idx) => (
+            <li
+              key={step.title}
+              className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+            >
+              <div className="flex items-start gap-3">
+                <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-600 text-xs font-bold text-white">
+                  {idx + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`inline-block rounded px-2 py-0.5 text-[11px] font-semibold ${
+                        PHASE_CLASS[step.phase] ?? "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {step.phase}
+                    </span>
+                    <span className="inline-block rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
+                      🕒 {step.timing}
+                    </span>
+                    {step.mandatoryOnly && (
+                      <span className="inline-block rounded bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700">
+                        義務事業場のみ
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="mt-1.5 text-sm font-bold text-slate-900">
+                    {step.title}
+                  </h3>
+                  <p className="mt-1 text-sm leading-6 text-slate-700">
+                    {step.detail}
+                  </p>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <p className="mt-3 text-xs text-slate-500">
+          各ステップの詳細な要件は下記「ベースライン要件」を参照してください。
+        </p>
+      </section>
+
       {/* 11項目チェックリスト */}
-      <section id="baseline" className="mt-8">
+      <section id="baseline" className="mt-10">
         <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
           <ListChecks className="h-5 w-5 text-violet-600" aria-hidden="true" />
           ベースライン要件

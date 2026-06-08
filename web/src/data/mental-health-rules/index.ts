@@ -8,6 +8,7 @@
 
 export {
   STRESS_CHECK_REQUIREMENTS,
+  STRESS_CHECK_PROCEDURE,
   getMandatoryRequirements,
   getEffortDutyRequirements,
 } from "./stress-check";

@@ -5,6 +5,7 @@ import {
   PHYSICIAN_OPINION_TEMPLATE,
   SMALL_BUSINESS_STEPS,
   STRESS_CHECK_REQUIREMENTS,
+  STRESS_CHECK_PROCEDURE,
   getMandatoryRequirements,
   getEffortDutyRequirements,
   getLinkageByType,
@@ -42,6 +43,32 @@ describe("mental-health-rules", () => {
         `step ${i}`,
       ).toBe(true);
     }
+  });
+
+  it("procedure covers every baseline requirement so no obligation is dropped", () => {
+    const covered = new Set(
+      STRESS_CHECK_PROCEDURE.flatMap((s) => s.relatedRequirementIds),
+    );
+    for (const r of STRESS_CHECK_REQUIREMENTS.filter((r) => r.baseline)) {
+      expect(covered.has(r.id), `requirement ${r.id} missing from procedure`).toBe(
+        true,
+      );
+    }
+  });
+
+  it("procedure phases run in chronological order", () => {
+    const order = ["準備期", "実施期", "事後対応期", "報告・保存期"];
+    const idxs = STRESS_CHECK_PROCEDURE.map((s) => order.indexOf(s.phase));
+    expect(idxs.every((i) => i >= 0)).toBe(true);
+    for (let i = 1; i < idxs.length; i++) {
+      expect(idxs[i] >= idxs[i - 1], `step ${i} phase out of order`).toBe(true);
+    }
+  });
+
+  it("only the labour-inspection report step is mandatory-only", () => {
+    const mandatoryOnly = STRESS_CHECK_PROCEDURE.filter((s) => s.mandatoryOnly);
+    expect(mandatoryOnly.length).toBe(1);
+    expect(mandatoryOnly[0].relatedRequirementIds).toContain("lsi-report");
   });
 
   it("interview-flow steps are sequenced and end with follow-up review", () => {

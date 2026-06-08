@@ -5,12 +5,12 @@ import { CheckCircle2, AlertTriangle, AlertOctagon } from "lucide-react";
 import {
   READINESS_QUESTIONS,
   assessReadiness,
+  readinessGuidance,
 } from "@/lib/mental-health-flow";
 
 const VERDICT_META = {
   ready: {
     label: "実施可能",
-    body: "ベースライン要件はほぼ整っています。実施スケジュールの確定と労働者周知に進んでください。",
     Icon: CheckCircle2,
     badgeClass: "bg-emerald-600",
     boxClass: "border-emerald-200 bg-emerald-50",
@@ -18,7 +18,6 @@ const VERDICT_META = {
   },
   partial: {
     label: "一部整備中",
-    body: "実施は可能ですが、未整備項目を優先的に補強してください。下記の不足項目を参考にしてください。",
     Icon: AlertTriangle,
     badgeClass: "bg-amber-500",
     boxClass: "border-amber-200 bg-amber-50",
@@ -26,7 +25,6 @@ const VERDICT_META = {
   },
   early: {
     label: "準備が必要",
-    body: "実施前にベースライン要件の整備が必要です。50人未満事業場はさんぽセンターの活用を検討してください。",
     Icon: AlertOctagon,
     badgeClass: "bg-rose-600",
     boxClass: "border-rose-200 bg-rose-50",
@@ -157,7 +155,7 @@ export function ReadinessForm() {
               </span>
             </div>
             <p className={`mt-2 text-sm leading-6 ${verdict.textClass}`}>
-              {verdict.body}
+              {readinessGuidance(assessment.verdict, assessment.obligationTier)}
             </p>
           </div>
         </div>
@@ -174,6 +172,12 @@ export function ReadinessForm() {
                 </li>
               ))}
             </ul>
+            <a
+              href="#procedure"
+              className={`mt-4 inline-flex items-center gap-1 rounded-lg border border-current/30 bg-white/70 px-3 py-1.5 text-xs font-semibold ${verdict.textClass} hover:bg-white`}
+            >
+              次にやること：実施手順で進め方を確認する →
+            </a>
           </div>
         )}
       </div>

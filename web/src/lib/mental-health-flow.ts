@@ -254,4 +254,30 @@ export function assessReadiness(input: ReadinessInput): ReadinessAssessment {
   };
 }
 
+/**
+ * Tier-aware guidance text for the readiness verdict.
+ *
+ * The advice must never contradict the obligation badge: a mandatory (50人以上)
+ * workplace must not be told to rely on the sub-50 さんぽセンター track, and a
+ * sub-50 workplace should be pointed at it. Kept as a pure function so the copy
+ * is unit-testable.
+ */
+export function readinessGuidance(
+  verdict: ReadinessAssessment["verdict"],
+  tier: ObligationTier,
+): string {
+  if (verdict === "ready") {
+    return "ベースライン要件はほぼ整っています。実施スケジュールの確定と労働者への周知に進んでください。";
+  }
+  if (verdict === "partial") {
+    return tier === "mandatory"
+      ? "実施は可能ですが、未整備項目を優先的に補強してください。50人以上の事業場は実施と労基署報告（様式第6号の2）が義務です。下記の不足項目と実施手順を確認してください。"
+      : "実施は可能ですが、未整備項目を優先的に補強してください。50人未満は努力義務のため、地域産業保健センター（さんぽセンター）の無料支援を活用できます。";
+  }
+  // early
+  return tier === "mandatory"
+    ? "実施前にベースライン要件の整備が必要です。50人以上の事業場は1年以内ごとの実施が義務です。下記の不足項目から着手し、実施手順に沿って準備してください。"
+    : "実施前にベースライン要件の整備が必要です。50人未満の事業場は地域産業保健センター（さんぽセンター）の無料支援を活用すると整備を進めやすくなります。";
+}
+
 export { STRESS_CHECK_REQUIREMENTS, INTERVIEW_FLOW_STEPS, SMALL_BUSINESS_STEPS };
