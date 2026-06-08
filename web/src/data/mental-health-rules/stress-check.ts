@@ -1,4 +1,7 @@
-import type { StressCheckRequirement } from "@/types/mental-health";
+import type {
+  StressCheckProcedureStep,
+  StressCheckRequirement,
+} from "@/types/mental-health";
 
 /**
  * Stress-check program requirements.
@@ -133,6 +136,98 @@ export const STRESS_CHECK_REQUIREMENTS: StressCheckRequirement[] = [
     ruleArticles: ["安衛則 第52条の21の2"],
     appliesTo: ["mandatory"],
     baseline: true,
+  },
+];
+
+/**
+ * The annual stress-check procedure as an ordered roadmap.
+ *
+ * Every baseline requirement in {@link STRESS_CHECK_REQUIREMENTS} is fulfilled
+ * by at least one step here, so a first-time workplace can follow the steps in
+ * order without dropping an obligation. Timing notes are MHLW実施マニュアルの
+ * 目安であり、確定スケジュールは衛生委員会で決定する。
+ */
+export const STRESS_CHECK_PROCEDURE: StressCheckProcedureStep[] = [
+  {
+    phase: "準備期",
+    title: "実施方針の策定と衛生委員会での審議",
+    detail:
+      "実施時期・対象者・実施者・実施事務従事者・結果の取扱方法（プライバシー保護を含む）を文書化し、衛生委員会で調査審議のうえ労働者へ周知する。",
+    timing: "実施の2〜3ヶ月前",
+    relatedRequirementIds: ["policy-document", "privacy-safeguards"],
+  },
+  {
+    phase: "準備期",
+    title: "実施者の指名と調査票の準備",
+    detail:
+      "医師・保健師等から実施者・実施事務従事者を指名し、3領域（仕事の負担・心身のストレス反応・周囲のサポート）を含む調査票（57項目簡易調査票等）を用意する。",
+    timing: "実施の1〜2ヶ月前",
+    relatedRequirementIds: ["designate-implementer", "questionnaire-domains"],
+  },
+  {
+    phase: "準備期",
+    title: "高ストレス者の判定基準の設定と受検案内",
+    detail:
+      "実施者が事業場ごとの高ストレス判定基準を定める。受検は任意である旨・申出窓口・不利益取扱の禁止を添えて労働者へ受検を案内する。",
+    timing: "実施の2〜4週間前",
+    relatedRequirementIds: ["high-stress-criteria"],
+  },
+  {
+    phase: "実施期",
+    title: "ストレスチェックの実施",
+    detail:
+      "常時使用する労働者に対し1年以内ごとに1回実施する。受検は労働者の任意で、受検しないことを理由とした不利益取扱は禁止。",
+    timing: "年度内の実施月",
+    relatedRequirementIds: ["annual-frequency"],
+  },
+  {
+    phase: "実施期",
+    title: "実施者から本人への結果通知",
+    detail:
+      "実施者が本人へ結果を遅滞なく直接通知する（事業者経由は不可）。高ストレス者には面接指導の対象である旨を併せて通知する。",
+    timing: "実施後 遅滞なく",
+    relatedRequirementIds: ["result-notification"],
+  },
+  {
+    phase: "事後対応期",
+    title: "面接指導の申出受付と医師面接の実施",
+    detail:
+      "高ストレス者からの面接申出を窓口で受け付け、申出があった日からおおむね1ヶ月以内に医師による面接指導を実施する。50人未満は地域産業保健センターを活用できる。",
+    timing: "結果通知後〜申出から1ヶ月以内",
+    relatedRequirementIds: ["interview-offer", "physician-interview"],
+  },
+  {
+    phase: "事後対応期",
+    title: "医師意見に基づく事後措置の検討・実施",
+    detail:
+      "面接指導後、医師から意見を聴取し、必要に応じて労働時間短縮・配置転換・深夜業の制限等の就業上の措置を本人と協議のうえ講じる。",
+    timing: "面接後 遅滞なく",
+    relatedRequirementIds: ["post-interview-measures"],
+  },
+  {
+    phase: "報告・保存期",
+    title: "集団分析と職場環境改善（推奨）",
+    detail:
+      "部署・課単位（おおむね10人以上）で集団分析を行い、職場環境改善に活用する。10人未満は本人特定リスクがあるため本人同意か上位組織との合算で行う。",
+    timing: "結果確定後",
+    relatedRequirementIds: ["group-analysis"],
+  },
+  {
+    phase: "報告・保存期",
+    title: "労働基準監督署への実施報告",
+    detail:
+      "実施報告書（様式第6号の2）を所轄労働基準監督署長へ提出する。受検者数・面接指導実施件数等を記載。義務事業場は毎年提出が必要。",
+    timing: "実施後 毎年",
+    relatedRequirementIds: ["lsi-report"],
+    mandatoryOnly: true,
+  },
+  {
+    phase: "報告・保存期",
+    title: "記録の作成と5年間保存",
+    detail:
+      "結果・面接指導記録・事後措置の内容を書類化し、実施事務従事者以外がアクセスできない管理体制で5年間保存する。",
+    timing: "継続（5年間）",
+    relatedRequirementIds: ["record-retention"],
   },
 ];
 
