@@ -416,3 +416,9 @@
 - 検証(Playwright実機): /signage を1920×1080で描画、`本日のリスク予測`見出し存在を確認。1画面フィット維持＝横/縦オーバーフロー共に**0px**(scrollW=clientW=1920, scrollH=clientH=1080)。1080×1920縦長でも横オーバーフロー0px。右上に赤の高リスクカード(6月の熱中症高リスク)が先頭表示。
 - ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/signage-dead-component-inventory-2026-06-09.md(+スクショ)。temp(_signage_review.mjs/png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
 - BACKLOG補充: 保留2部品をタスク化(緊急アラート結線・アフィリエイト掲示のオーナー判断)。
+
+## Cycle (2026-06-09) — KY用紙 参加者選択「2タップ完了」化（軸2）
+- 第三者レビュー: 山口さん(54歳・職長・紙20年・薄手手袋で片手操作・班は毎朝ほぼ同じ顔ぶれ)になりきりPlaywright実機(iPhone 12)。作業員14名(自社5/協力1次4/協力2次5・常用6)を投入。致命=常用6名を1人ずつ＝6タップ必要・班/常用のまとまり0・一括選択系ボタン0個を実測。「毎朝6人ポチポチなら紙が速い」。
+- 改善: 純関数participant-select.ts(addParticipants/clearParticipants/groupWorkersByAffiliation・9テスト)を新設し、参加者欄にワンタップ呼び出しツールバーを追加。⭐常用N名をまとめて選ぶ(isRegular一括=6→1タップ)＋協力会社など「{所属}全員」班ワンタップ＋クリア(マスター由来のみ解除・手入力温存)。個別チップは所属でグルーピングし見つけやすく。既存toggleWorker作法(空き行再利用)踏襲・データ/localStorageスキーマ不変・新規依存0・印刷体裁不変。
+- 再レビュー(Playwright実機): ⭐常用(201×44px)1タップ→参加者6名、クリア1タップ→0名、協力会社(1次)全員1タップ→4名、二重押下で6→6名(重複なし)を実測。山口さん「朝はこの⭐を押すだけ。手袋でも一発、紙より速い」=採用ライン到達。
+- ゲート: tsc0 / lint errors0 / vitest1114pass(+9) / build成功。記録: docs/third-party-reviews/ky-paper-worker-2tap-2026-06-09.md(+before/afterスクショ)。temp(_review .mjs, _ky png)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。

@@ -37,7 +37,7 @@
 - [x] 死蔵サイネージ部品の棚卸し＆結線可否判定（signage-risk-prediction / signage-danger-alert / signage-featured-goods / japan-weather-map が参照0件）。価値あるものは結線、不要は削除して保守負債を減らす。（2026-06-09: 4部品を依存グラフ込みで棚卸し。SignageRiskPrediction＝当日リスク予測(気象→熱中症等)を右サイドバー先頭に結線(state.riskData再利用・1画面フィット維持を実機0pxで確認)。JapanWeatherMap＝実データのJapanPrefectureWarningMapで上位互換のため孤立ラッパー1ファイルのみ削除(モック/SVGは/risk等が生きて使用→温存)。DangerAlert/FeaturedGoodsは保留しタスク化。docs/third-party-reviews/signage-dead-component-inventory-2026-06-09.md）
 - [ ] サイネージ全画面(/signage/display)を「無人で1日流しっぱなし」前提でレビュー＝自動更新間隔・データ取得失敗時の表示・夜間/長時間の挙動を点検し、現場に置いて放置できる状態にする。
 - [ ] 受入教育記録(/site-records 配下)の印刷物（入場者名簿・教育記録）をA4実機プレビューで崩れ・はみ出しを点検→是正（顧問先/元請提出に耐える品質へ）。
-- [ ] KY用紙(/ky/paper)の作業員選択をスマホで「2タップ完了」化＝よく使う班をワンタップ呼び出し（手袋の職長目線）
+- [x] KY用紙(/ky/paper)の作業員選択をスマホで「2タップ完了」化＝よく使う班をワンタップ呼び出し（手袋の職長目線）（2026-06-09: 常用6名を1人ずつ＝6タップ必要・班/常用のまとまり0という致命を実測。「⭐常用N名をまとめて選ぶ」(isRegular一括=6→1タップ)＋協力会社など「{所属}全員」班ワンタップ＋「クリア」を追加し、個別チップも所属でグルーピング。純関数participant-select.ts(addParticipants/clearParticipants/groupWorkersByAffiliation)＋9テストに切出し、データ/スキーマ不変・再押下で重複なし。docs/third-party-reviews/ky-paper-worker-2tap-2026-06-09.md）
 - [ ] 業種別リスク判定(/heat-illness-prevention/industry-risk)をスマホで縦長スクロール短縮＝結論(対策)先頭・詳細は折りたたみ
 - [ ] 各印刷ページ(WBGT結果/順化計画/ポスター)を実際にA4プレビューし「枠線切れ・1枚に収まらない」崩れを点検→是正
 - [ ] 年間 安全衛生カレンダー(/site-records/calendar)を「初見の安全担当」ペルソナでレビュー→「今月やること」への到達と各ツール連携
