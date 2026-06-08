@@ -1,24 +1,29 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Printer, Download, Save, FilePlus2, FolderOpen, Plus, Trash2 } from "lucide-react";
+import { Printer, Download, Save, FilePlus2, FolderOpen, Plus, Trash2, AlarmClock, ArrowUpRight } from "lucide-react";
 import {
   getPatrolList,
   getPatrolById,
+  getAllPatrolRecords,
   savePatrol,
   deletePatrol,
   defaultPatrolChecks,
   summarizePatrol,
   findingsToCsv,
+  collectOpenFindings,
+  countOverdueFindings,
   newPatrolId,
   newFindingId,
   RESULT_JA,
+  SEVERITY_JA,
   type PatrolCheckItem,
   type PatrolCheckResult,
   type PatrolFinding,
   type PatrolRecord,
   type PatrolSeverity,
   type PatrolSummary,
+  type OpenFinding,
 } from "@/lib/site-records/patrol-store";
 
 function pad2(n: number): string {
@@ -42,22 +47,32 @@ export function PatrolClient() {
   const [findings, setFindings] = useState<PatrolFinding[]>([]);
   const [summary, setSummary] = useState("");
   const [list, setList] = useState<PatrolSummary[]>([]);
+  const [allRecords, setAllRecords] = useState<PatrolRecord[]>([]);
+  const [today, setToday] = useState("");
   const [savedNote, setSavedNote] = useState("");
 
   useEffect(() => {
     const now = new Date();
-    const today = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
+    const todayIso = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 初回マウントの既定値（SSRハイドレーション差異回避）
     setRecId(newPatrolId());
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
-    setDate(today);
+    setDate(todayIso);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
     setTime(`${pad2(now.getHours())}:${pad2(now.getMinutes())}`);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 今日（期日超過判定用）
+    setToday(todayIso);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 標準チェック項目
     setChecks(defaultPatrolChecks());
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 保存一覧
     setList(getPatrolList());
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 未是正トラッカーの集約元
+    setAllRecords(getAllPatrolRecords());
   }, []);
+
+  // 全保存記録を横断して未是正の指摘を集約（期日超過→重大→期日昇順）
+  const openFindings = useMemo(() => collectOpenFindings(allRecords, today), [allRecords, today]);
+  const overdueCount = useMemo(() => countOverdueFindings(openFindings), [openFindings]);
 
   const stat = useMemo(
     () => ({
@@ -100,6 +115,7 @@ export function PatrolClient() {
 
   function handleSave() {
     setList(savePatrol(build()));
+    setAllRecords(getAllPatrolRecords());
     setSavedNote("この端末に保存しました。");
   }
   function handleNew() {
@@ -147,11 +163,13 @@ export function PatrolClient() {
     setChecks(r.checks);
     setFindings(r.findings);
     setSummary(r.summary);
-    setSavedNote("保存済みの記録を開きました。");
+    setSavedNote("保存済みの記録を開きました。是正できたら「是正済み」にチェックして再保存してください。");
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function deleteSaved(id: string) {
     if (typeof window !== "undefined" && !window.confirm("この記録を削除します。よろしいですか？")) return;
     setList(deletePatrol(id));
+    setAllRecords(getAllPatrolRecords());
   }
 
   return (
@@ -275,6 +293,43 @@ export function PatrolClient() {
         </div>
       </section>
 
+      {/* 未是正トラッカー（全巡視を横断して是正まで追う） */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
+            <AlarmClock className="h-5 w-5 text-rose-600" aria-hidden="true" />
+            未是正の指摘トラッカー（全巡視を横断）
+          </h2>
+          <div className="flex items-center gap-2">
+            {overdueCount > 0 && (
+              <span className="rounded-lg bg-rose-600 px-2 py-1 text-xs font-bold text-white">期日超過 {overdueCount}</span>
+            )}
+            <span className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700">未是正 {openFindings.length}</span>
+          </div>
+        </div>
+        {openFindings.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 py-6 text-center text-sm text-slate-400">
+            保存済みの巡視に未是正の指摘はありません。指摘を「是正済み」にして保存すると、ここから消えます。
+          </p>
+        ) : (
+          <>
+            {overdueCount > 0 && (
+              <p className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-800">
+                是正期日を過ぎた未是正が {overdueCount} 件あります。担当へ催促し、是正できたら元の記録で「是正済み」にチェックして再保存してください。
+              </p>
+            )}
+            <ul className="space-y-2">
+              {openFindings.map((f) => (
+                <OpenFindingRow key={`${f.recordId}:${f.id}`} f={f} onOpen={() => openSaved(f.recordId)} />
+              ))}
+            </ul>
+            <p className="mt-3 text-[11px] leading-5 text-slate-500">
+              未是正の指摘を、是正期日が過ぎたもの・重大なものから順に表示しています。「記録を開く」でその巡視を上に開き、是正状況を更新できます。
+            </p>
+          </>
+        )}
+      </section>
+
       {/* 保存済み一覧 */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
         <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
@@ -301,6 +356,33 @@ export function PatrolClient() {
         )}
       </section>
     </div>
+  );
+}
+
+function OpenFindingRow({ f, onOpen }: { f: OpenFinding; onOpen: () => void }) {
+  return (
+    <li className={`rounded-xl border p-3 ${f.overdue ? "border-rose-300 bg-rose-50/60" : f.severity === "high" ? "border-amber-200 bg-amber-50/40" : "border-slate-200"}`}>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {f.overdue && <span className="rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white">期日超過</span>}
+            <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${f.severity === "high" ? "bg-rose-100 text-rose-700" : "bg-slate-100 text-slate-600"}`}>{SEVERITY_JA[f.severity]}</span>
+            <span className="text-sm font-bold text-slate-900">{f.content || "（内容未記入）"}</span>
+          </div>
+          <p className="mt-1 text-xs text-slate-600">
+            {f.location || "場所未記入"}
+            <span className="mx-1 text-slate-300">|</span>
+            担当 {f.owner || "—"}
+            <span className="mx-1 text-slate-300">|</span>
+            <span className={f.overdue ? "font-bold text-rose-700" : ""}>期日 {f.due || "未設定"}</span>
+          </p>
+          <p className="mt-0.5 text-[11px] text-slate-400">{f.patrolDate} の巡視（{f.area || "範囲未設定"}）</p>
+        </div>
+        <button type="button" onClick={onOpen} className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-sky-300 px-2.5 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50">
+          記録を開く <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
+      </div>
+    </li>
   );
 }
 

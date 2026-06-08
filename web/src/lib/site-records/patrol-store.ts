@@ -90,6 +90,49 @@ export function summarizePatrol(rec: PatrolRecord): PatrolSummary {
   };
 }
 
+/** 全巡視記録を横断して集約した未是正の指摘（是正追跡用）。 */
+export type OpenFinding = PatrolFinding & {
+  recordId: string;
+  patrolDate: string; // その指摘を出した巡視日
+  area: string; // 巡視範囲
+  overdue: boolean; // 是正期日を過ぎている
+};
+
+/** 是正期日を過ぎているか（未是正前提で呼ぶ）。期日未設定は超過扱いしない。純関数。 */
+export function isFindingOverdue(due: string, todayIso: string): boolean {
+  if (!due || !todayIso) return false;
+  return due < todayIso; // ISO日付文字列は辞書順=時系列順
+}
+
+/** 期日超過→重大→期日昇順（期日なしは末尾）で並べ替え。純関数・非破壊。 */
+export function sortOpenFindings(open: OpenFinding[]): OpenFinding[] {
+  const sevRank = (s: PatrolSeverity) => (s === "high" ? 0 : 1);
+  return [...open].sort((a, b) => {
+    if (a.overdue !== b.overdue) return a.overdue ? -1 : 1;
+    if (sevRank(a.severity) !== sevRank(b.severity)) return sevRank(a.severity) - sevRank(b.severity);
+    const ad = a.due || "9999-99-99";
+    const bd = b.due || "9999-99-99";
+    return ad < bd ? -1 : ad > bd ? 1 : 0;
+  });
+}
+
+/** 全巡視記録から未是正(resolved=false)の指摘を集約し、期日超過を付与して優先順に並べる。純関数。 */
+export function collectOpenFindings(records: PatrolRecord[], todayIso: string): OpenFinding[] {
+  const open: OpenFinding[] = [];
+  for (const r of records) {
+    for (const f of r.findings) {
+      if (f.resolved) continue;
+      open.push({ ...f, recordId: r.id, patrolDate: r.date, area: r.area, overdue: isFindingOverdue(f.due, todayIso) });
+    }
+  }
+  return sortOpenFindings(open);
+}
+
+/** 期日超過の未是正件数。純関数。 */
+export function countOverdueFindings(open: OpenFinding[]): number {
+  return open.filter((f) => f.overdue).length;
+}
+
 const CSV_HEADER = ["巡視日", "巡視者", "範囲", "場所", "指摘内容", "危険度", "担当", "期日", "状態"];
 
 function csvCell(v: string | number | null): string {
@@ -151,6 +194,11 @@ function getById(): Record<string, PatrolRecord> {
 
 export function getPatrolById(id: string): PatrolRecord | null {
   return getById()[id] ?? null;
+}
+
+/** 保存済みの全巡視記録（本体）を返す。未是正トラッカーの集約元。 */
+export function getAllPatrolRecords(): PatrolRecord[] {
+  return Object.values(getById());
 }
 
 export function savePatrol(rec: PatrolRecord): PatrolSummary[] {
