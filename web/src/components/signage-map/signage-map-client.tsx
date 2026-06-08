@@ -7,6 +7,7 @@ import { EarthquakeAlertModal } from "./earthquake-alert-modal";
 import { MapLegend } from "./map-legend";
 import { PinManager } from "./pin-manager";
 import { useSignagePins } from "./use-signage-pins";
+import { useWakeLock } from "@/lib/signage/use-wake-lock";
 import type { SignagePin } from "./signage-map-leaflet";
 import type {
   JmaEarthquakesFile,
@@ -43,6 +44,8 @@ const SEEN_QUAKE_STORAGE_KEY = "signage-map-seen-quakes";
 // 30分: Vercel Edge Requests 削減 (docs/perf/edge-isr-followup-2026-05-19.md)。
 // 上流 /api/signage/jma の revalidate=3600 / CDN s-maxage=300 と整合。
 const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
+// 取得失敗時は30分の定期更新を待たず短間隔で再試行し、無人表示の「古いまま放置」を縮める。
+const ERROR_RETRY_INTERVAL_MS = 3 * 60 * 1000;
 const DEFAULT_VIEW: ViewState = { lat: 36.5, lng: 138.0, zoom: 5 };
 
 function isValidView(v: unknown): v is ViewState {
@@ -142,6 +145,10 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
 
   const { pins, addPin, deletePin, limit } = useSignagePins();
 
+  // 無人で1日流しっぱなしのフルスクリーン表示中は画面スリープを抑止する
+  // （非対応ブラウザでは無害な no-op）。地図編集モードでは抑止しない。
+  useWakeLock(initialFullscreen);
+
   // 地図表示用フォーカス（ピンクリック時の中心移動）
   const [focusOverride, setFocusOverride] = useState<{ lat: number; lng: number; zoom: number } | null>(null);
   const effectiveCenter: [number, number] = useMemo(() => {
@@ -153,6 +160,7 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
   // データ取得
   useEffect(() => {
     let cancelled = false;
+    let retryTimer: number | undefined;
     async function refresh() {
       setBundleStatus((s) => (s === "idle" ? "loading" : s));
       try {
@@ -180,6 +188,13 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
       } catch {
         if (!cancelled) {
           setBundleStatus("error");
+          // 失敗時は30分の定期更新を待たず短間隔で再試行（無人表示が古いまま放置されるのを防ぐ）
+          window.clearTimeout(retryTimer);
+          retryTimer = window.setTimeout(() => {
+            if (cancelled) return;
+            if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+            void refresh();
+          }, ERROR_RETRY_INTERVAL_MS);
         }
       }
     }
@@ -191,6 +206,7 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
     return () => {
       cancelled = true;
       window.clearInterval(interval);
+      window.clearTimeout(retryTimer);
     };
   }, []);
 
@@ -389,7 +405,7 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
             </div>
 
             <div className="mt-6 border-t border-slate-700 pt-3 text-[10px] text-slate-500">
-              <p>15分ごとに自動更新（タブが表示中のときのみ）。</p>
+              <p>30分ごとに自動更新（タブが表示中のときのみ。取得失敗時は3分後に再試行）。</p>
               <p>
                 <Link href="/about/data-sources" className="underline hover:text-slate-300">
                   データソースの詳細・出典 →
