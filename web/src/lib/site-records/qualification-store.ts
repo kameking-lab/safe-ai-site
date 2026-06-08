@@ -68,6 +68,65 @@ export function summarizeWorkerQual(rec: WorkerQual): WorkerQualSummary {
   };
 }
 
+/** 逆引き名簿（資格→有資格者）の1人分。 */
+export type QualHolder = {
+  workerId: string;
+  workerName: string;
+  company: string;
+  trade: string;
+  date: string; // 取得・修了日
+};
+
+/** 資格・教育ごとの有資格者グループ。 */
+export type QualGroup = {
+  name: string;
+  holders: QualHolder[];
+};
+
+/**
+ * 全作業者を「資格・教育名」でグルーピングし、逆引き名簿を作る。純関数。
+ * 並び: 保有者数の多い順 → 資格名昇順。
+ * - 氏名が空の作業者は名簿に出さない（適正配置の証跡にならないため）。
+ * - 同一作業者が同名資格を重複保有していても1人として数える。
+ * - 資格名は trim して空は除外。
+ */
+export function groupByQualification(workers: WorkerQual[]): QualGroup[] {
+  const map = new Map<string, QualHolder[]>();
+  for (const wk of workers) {
+    const name = wk.workerName.trim();
+    if (!name) continue;
+    const seen = new Set<string>();
+    for (const q of wk.quals) {
+      const qn = q.name.trim();
+      if (!qn || seen.has(qn)) continue;
+      seen.add(qn);
+      const holders = map.get(qn) ?? [];
+      holders.push({
+        workerId: wk.id,
+        workerName: name,
+        company: wk.company.trim(),
+        trade: wk.trade.trim(),
+        date: q.date,
+      });
+      map.set(qn, holders);
+    }
+  }
+  const groups: QualGroup[] = [];
+  for (const [name, holders] of map) {
+    holders.sort((a, b) => a.workerName.localeCompare(b.workerName, "ja"));
+    groups.push({ name, holders });
+  }
+  groups.sort((a, b) => b.holders.length - a.holders.length || a.name.localeCompare(b.name, "ja"));
+  return groups;
+}
+
+/** 逆引き名簿を資格名で絞り込む。純関数。空クエリは全件。 */
+export function filterQualGroups(groups: QualGroup[], query: string): QualGroup[] {
+  const q = query.trim();
+  if (!q) return groups;
+  return groups.filter((g) => g.name.includes(q));
+}
+
 const CSV_HEADER = ["氏名", "所属", "職種", "資格・教育", "取得・修了日"];
 
 function csvCell(v: string | number | null): string {

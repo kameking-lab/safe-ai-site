@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Printer, Download, Save, FilePlus2, FolderOpen, Plus, Trash2 } from "lucide-react";
+import { Printer, Download, Save, FilePlus2, FolderOpen, Plus, Trash2, Search, BadgeCheck } from "lucide-react";
 import {
   getWorkerQualList,
   getWorkerQualById,
@@ -9,10 +9,13 @@ import {
   saveWorkerQual,
   deleteWorkerQual,
   qualRosterToCsv,
+  groupByQualification,
+  filterQualGroups,
   newWorkerId,
   newQualId,
   PRESET_QUALIFICATIONS,
   type QualHeld,
+  type QualGroup,
   type WorkerQual,
   type WorkerQualSummary,
 } from "@/lib/site-records/qualification-store";
@@ -27,13 +30,20 @@ export function QualificationClient() {
   const [list, setList] = useState<WorkerQualSummary[]>([]);
   const [savedNote, setSavedNote] = useState("");
   const [presetPick, setPresetPick] = useState("");
+  const [groups, setGroups] = useState<QualGroup[]>([]);
+  const [qualQuery, setQualQuery] = useState("");
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 初回マウントの既定値
     setRecId(newWorkerId());
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 保存一覧
     setList(getWorkerQualList());
+    setGroups(groupByQualification(getAllWorkerQualFull()));
   }, []);
+
+  // 逆引き名簿（資格→有資格者）を保存データから再計算する。保存・削除のたびに呼ぶ。
+  function refreshGroups() {
+    setGroups(groupByQualification(getAllWorkerQualFull()));
+  }
 
   function addQual(name: string) {
     const trimmed = name.trim();
@@ -67,6 +77,7 @@ export function QualificationClient() {
       return;
     }
     setList(saveWorkerQual(build()));
+    refreshGroups();
     setSavedNote("この端末に保存しました。");
   }
   function handleNew() {
@@ -109,11 +120,15 @@ export function QualificationClient() {
     setQuals(r.quals);
     setNote(r.note);
     setSavedNote("保存済みのデータを開きました。");
+    if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   }
   function deleteSaved(id: string) {
     if (typeof window !== "undefined" && !window.confirm("このデータを削除します。よろしいですか？")) return;
     setList(deleteWorkerQual(id));
+    refreshGroups();
   }
+
+  const visibleGroups = filterQualGroups(groups, qualQuery);
 
   return (
     <div className="space-y-6">
@@ -188,6 +203,66 @@ export function QualificationClient() {
               </li>
             ))}
           </ul>
+        )}
+      </section>
+
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
+        <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
+          <BadgeCheck className="h-5 w-5 text-emerald-600" aria-hidden="true" /> 資格から有資格者を探す（逆引き名簿）
+        </h2>
+        <p className="mt-1 text-xs text-slate-500">
+          「玉掛け作業に有資格者を充てたい」など、登録済みの作業者を資格・教育から逆引きできます。適正配置の確認にどうぞ。
+        </p>
+        {groups.length === 0 ? (
+          <p className="mt-3 rounded-xl border border-dashed border-slate-300 bg-slate-50 py-6 text-center text-sm text-slate-400">
+            まだ有資格者の登録がありません。上で作業者の保有資格を登録・保存すると、ここに資格別の有資格者一覧が表示されます。
+          </p>
+        ) : (
+          <>
+            <label className="mt-3 flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2">
+              <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+              <input
+                type="text"
+                value={qualQuery}
+                onChange={(e) => setQualQuery(e.target.value)}
+                placeholder="資格・教育名で絞り込む（例: 玉掛け、フォークリフト）"
+                autoComplete="off"
+                className="w-full text-sm focus:outline-none"
+              />
+            </label>
+            {visibleGroups.length === 0 ? (
+              <p className="mt-3 text-sm text-slate-400">「{qualQuery.trim()}」に一致する資格はありません。</p>
+            ) : (
+              <ul className="mt-3 space-y-3">
+                {visibleGroups.map((g) => (
+                  <li key={g.name} className="rounded-xl border border-slate-200 p-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <h3 className="text-sm font-bold text-slate-900">{g.name}</h3>
+                      <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700">
+                        {g.holders.length}名
+                      </span>
+                    </div>
+                    <ul className="mt-2 flex flex-wrap gap-2">
+                      {g.holders.map((h) => (
+                        <li key={`${g.name}-${h.workerId}`}>
+                          <button
+                            type="button"
+                            onClick={() => openSaved(h.workerId)}
+                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-left text-xs hover:border-emerald-300 hover:bg-emerald-50"
+                            title="この作業者の記録を開く"
+                          >
+                            <span className="font-semibold text-slate-900">{h.workerName}</span>
+                            {h.company && <span className="text-slate-500">{h.company}</span>}
+                            {h.date && <span className="text-slate-400">取得 {h.date}</span>}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </>
         )}
       </section>
     </div>
