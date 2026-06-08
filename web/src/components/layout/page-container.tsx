@@ -16,9 +16,11 @@ const PADDING_X_CLASS: Record<Padding, string> = {
   none: "",
 };
 
+// 印刷時はページ余白を @page (15mm) が担うため、コンテナの縦パディングは不要。
+// 末尾の余分な縦パディングが2ページ目（白紙）の原因になるため print:py-0 で詰める。
 const PADDING_Y_CLASS: Record<Padding, string> = {
-  default: "py-6 sm:py-8",
-  tight: "py-3 sm:py-4",
+  default: "py-6 sm:py-8 print:py-0",
+  tight: "py-3 sm:py-4 print:py-0",
   none: "",
 };
 
