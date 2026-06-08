@@ -13,6 +13,7 @@ import { SignageRiskPrediction } from "@/components/signage/signage-risk-predict
 import { SignageShell } from "@/components/signage/signage-shell";
 import { SignageTodayDocuments } from "@/components/signage/signage-today-documents";
 import { getSignageLocationById, signageLocations } from "@/data/signage-locations";
+import { resolveWeatherWarningPanelState } from "@/lib/signage/weather-warning-panel-state";
 import { createServices } from "@/lib/services/service-factory";
 import type { SignageDataApiResponse } from "@/lib/types/signage-data";
 import type { LawRevision, SiteRiskWeather } from "@/lib/types/domain";
@@ -152,23 +153,33 @@ export default function SignagePage() {
       const loc = getSignageLocationById(selectedLocationId) ?? getSignageLocationById("tokyo-shinjuku")!;
       const dataUrl = `/api/signage-data?locationId=${encodeURIComponent(selectedLocationId)}`;
 
-      const [dataRes, riskResult, revisionResult] = await Promise.all([
-        fetch(dataUrl, { cache: "no-store" }),
+      // ネットワーク断（無人現場で最も起きる障害）でも fetch の reject を握りつぶさず
+      // error 状態に確実に落とす。reject のまま放置すると bundleStatus が loading のまま固まり、
+      // 警報パネルが永遠に「取得中」表示になって取得失敗を見落とす。
+      const dataPromise: Promise<{ ok: true; json: SignageDataApiResponse } | { ok: false }> = fetch(dataUrl, {
+        cache: "no-store",
+      })
+        .then(async (res) => {
+          if (!res.ok) return { ok: false as const };
+          try {
+            return { ok: true as const, json: (await res.json()) as SignageDataApiResponse };
+          } catch {
+            return { ok: false as const };
+          }
+        })
+        .catch(() => ({ ok: false as const }));
+
+      const [dataResult, riskResult, revisionResult] = await Promise.all([
+        dataPromise,
         services.weatherRisk.getTodaySiteRisk({ regionName: loc.regionName }),
         services.revision.getLawRevisions(),
       ]);
 
       if (cancelled) return;
 
-      if (dataRes.ok) {
-        try {
-          const json = (await dataRes.json()) as SignageDataApiResponse;
-          setBundle(json);
-          setBundleStatus("success");
-        } catch {
-          setBundle(null);
-          setBundleStatus("error");
-        }
+      if (dataResult.ok) {
+        setBundle(dataResult.json);
+        setBundleStatus("success");
       } else {
         setBundle(null);
         setBundleStatus("error");
@@ -255,6 +266,8 @@ export default function SignagePage() {
 
   const prefectureLevels = bundle?.prefectureLevels ?? {};
   const jmaLink = `https://www.jma.go.jp/bosai/warning/#area_type=class20s&area_code=${selectedLocation.jmaCityCode ?? "130000"}`;
+  // 取得失敗(error)を「警報なし」と取り違えないよう状態を明示分岐（無人運用の誤った安心を防ぐ）
+  const warningPanel = resolveWeatherWarningPanelState(bundleStatus, bundle?.jmaHeadline);
 
   const isPortrait = orientation === "portrait";
 
@@ -459,10 +472,25 @@ export default function SignagePage() {
 
             {/* 警報サイドパネル（図面モード時のみ表示） */}
             {displayMode === "floorplan" && (
-              <div className="shrink-0 rounded-lg border border-amber-700/50 bg-amber-950/40 p-2 sm:p-3">
+              <div
+                className={`shrink-0 rounded-lg border p-2 sm:p-3 ${
+                  warningPanel.kind === "error"
+                    ? "border-rose-600 bg-rose-950/50"
+                    : "border-amber-700/50 bg-amber-950/40"
+                }`}
+              >
                 <p className="text-[10px] font-bold uppercase tracking-widest text-amber-300 sm:text-xs">本日の気象警報</p>
-                {bundle?.jmaHeadline ? (
-                  <p className="mt-1 text-[11px] leading-snug text-amber-100 sm:text-sm">{bundle.jmaHeadline}</p>
+                {warningPanel.kind === "headline" ? (
+                  <p className="mt-1 text-[11px] leading-snug text-amber-100 sm:text-sm">{warningPanel.headline}</p>
+                ) : warningPanel.kind === "error" ? (
+                  <p className="mt-1 text-[10px] font-semibold leading-snug text-rose-200 sm:text-xs">
+                    ⚠ 気象データの取得に失敗しました。警報の有無を確認できません。
+                    <a href={jmaLink} target="_blank" rel="noreferrer" className="ml-1 text-rose-100 underline">
+                      気象庁で確認 →
+                    </a>
+                  </p>
+                ) : warningPanel.kind === "loading" ? (
+                  <p className="mt-1 text-[10px] text-amber-200/80 sm:text-xs">気象データを取得中…</p>
                 ) : (
                   <p className="mt-1 text-[10px] text-amber-200/80 sm:text-xs">現在、選択地点に発表中の警報はありません。</p>
                 )}
@@ -481,8 +509,16 @@ export default function SignagePage() {
               </div>
             )}
 
-            {displayMode === "map" && bundle?.jmaHeadline ? (
-              <p className="shrink-0 text-[11px] leading-snug text-amber-100 sm:text-sm">{bundle.jmaHeadline}</p>
+            {displayMode === "map" && warningPanel.kind === "headline" ? (
+              <p className="shrink-0 text-[11px] leading-snug text-amber-100 sm:text-sm">{warningPanel.headline}</p>
+            ) : null}
+            {displayMode === "map" && warningPanel.kind === "error" ? (
+              <p className="shrink-0 text-[11px] font-semibold leading-snug text-rose-200 sm:text-sm">
+                ⚠ 気象データの取得に失敗しました。警報の有無を確認できません。
+                <a href={jmaLink} target="_blank" rel="noreferrer" className="ml-1 text-rose-100 underline">
+                  気象庁で確認 →
+                </a>
+              </p>
             ) : null}
             {displayMode === "map" && bundle?.jmaReportTime ? (
               <p className="text-[9px] text-slate-500">気象庁データ時刻: {bundle.jmaReportTime}</p>
