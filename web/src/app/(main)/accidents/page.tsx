@@ -23,6 +23,7 @@ import {
 import { SITE_STATS } from "@/data/site-stats";
 import { PageContainer } from "@/components/layout/page-container";
 import { AccidentAiAnalyzer } from "@/components/accidents/accident-ai-analyzer";
+import { QuickAccidentSearch } from "@/components/accidents/quick-accident-search";
 import { OfficialRecentLinks } from "@/components/accidents/official-recent-links";
 import { AccidentTrendSummary } from "@/components/accidents/accident-trend-summary";
 import { SavedAccidents } from "@/components/accidents/saved-accidents";
@@ -108,6 +109,8 @@ export default function AccidentsPage() {
         <AccidentsMetaCaption />
         <AccidentsPreliminaryBanner />
         <AccidentsAnalyticsBanner totalLabel={SITE_STATS.accidents10yCount} />
+        {/* 多忙なコンサル向け: 最上部で1タップ/1検索→収録事例の絞り込み結果へ直行 */}
+        <QuickAccidentSearch />
         {/* P0-1: AI事故注意喚起（作業内容→類似事故＋危険ポイント＋対策） */}
         <AccidentAiAnalyzer />
         {/* P1-2: 直近の労働災害（厚労省・公式データ）への出典付きリンク＋鮮度表示 */}

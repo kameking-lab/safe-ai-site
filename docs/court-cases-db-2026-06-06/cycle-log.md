@@ -324,3 +324,10 @@
 - 改善: (a)用紙ファースト化=下書き(draft)中は承認パネルを用紙の下へ、提出/承認/差し戻し(actionable)中は従来どおり用紙の上に残置(ロック解除導線を埋もれさせない)。(b)上部操作バーに「↻前回を複製」を常設(保存済みKYがある時のみ)。実装は ky-paper-view.tsx のみ(approvalPanelを変数化し条件配置＋hasLatest判定)。
 - 再レビュー(Playwright実機)で FORM_ABOVE_APPROVAL＋上部「前回を複製」表示を確認。田中監督評価「昨日のを呼んで日付だけ直して終わり。紙より速い。使う」。
 - ゲート: tsc 0 / lint errors 0 / vitest 1092 pass / build 成功。記録: docs/third-party-reviews/ky-paper-veteran-foreman-2026-06-08.md。架空0・水増し0・既存破壊0。
+
+## Cycle52【事故DB 多忙コンサル目線でクイック検索を最上部化】(2026-06-08 JST)
+- 前回PR回収: CI緑の#424(KY用紙・用紙ファースト)をsquashマージ→main pull→clean。#425(化学RA 3タップ)はCI実行中のため次イテレーションで回収。古いdocs PR群は従来どおり安全に放置。
+- 軸2タスク: 事故DB(/accidents)を「佐藤(58)・独立系労働安全コンサル・移動中スマホで実例を即出したい・10秒で着かねば二度と使わない」ペルソナで第三者レビュー(Playwright実機 iPhone相当390×844/dev server)。致命2点を抽出: ①検索/絞り込みタブ列が先頭から5,561px下=約6.5画面スクロール必須 ②既定タブ名「全件検索」なのに検索窓が存在しない(キーワード欄は別タブ「サイト収録事例」に隠れている)。
+- 改善(最小・非破壊): (a)最上部に「🔎事例をすぐ検索」カード新設(quick-accident-search.tsx)=キーワード入力＋頻出事故型6チップ(墜落/転倒/はさまれ/飛来落下/熱中症/感電)、1タップで /accidents?tab=list&acc_kw=...#accident-results へフル遷移。tab=list・acc_kw は AccidentDatabasePanel が既にマウント時復元する実装済みURL導線を再利用。(b)結果パネルに id=accident-results 付与=区画先頭(自社Top5＋クロス集計)の下に結果が埋もれないよう、キーワード欄＋絞り込み結果へ直接着地。
+- 再レビュー(Playwright実機): クイック検索位置 5,561px→1,080px。1タップ「墜落・転落」→ キーワード欄「墜落」入りで42件の絞り込み結果へ自動スクロール着地。佐藤評価「1タップで実例が並ぶ、移動中でも使える」→採用ライン到達。残課題=既定タブ名の正直化・出典定義文の畳み込み(別タスク)。
+- ゲート: tsc 0 / lint errors 0 / vitest 1092 pass / build 成功。記録: docs/third-party-reviews/accidents-busy-consultant-2026-06-08.md。架空0・水増し0・既存破壊0。
