@@ -8,6 +8,7 @@ import { SignageFloorPlanEditor } from "@/components/signage/signage-floor-plan-
 import { SignageHeader } from "@/components/signage/signage-header";
 import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
 import { SignageMorningScript } from "@/components/signage/signage-morning-script";
+import { SignageRiskPrediction } from "@/components/signage/signage-risk-prediction";
 import { SignageShell } from "@/components/signage/signage-shell";
 import { SignageTodayDocuments } from "@/components/signage/signage-today-documents";
 import { getSignageLocationById, signageLocations } from "@/data/signage-locations";
@@ -524,6 +525,9 @@ export default function SignagePage() {
         </div>
 
         <div className={`flex flex-col gap-2 xl:min-h-0 xl:overflow-hidden ${isPortrait ? "" : "xl:col-span-5"}`}>
+          {/* 本日のリスク予測: 気象（気温・降水）から熱中症等の当日リスクを自動判定（朝礼前の確認用） */}
+          <SignageRiskPrediction weatherData={state.riskData} />
+
           <section className="flex flex-col rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden">
             <h2 className="shrink-0 text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">
               トレンド（労働災害・建設事故）

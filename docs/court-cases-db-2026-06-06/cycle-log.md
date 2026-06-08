@@ -407,3 +407,12 @@
 - 再レビュー(Playwright実機): 「🌅朝礼前」押下→朝礼スクリプト(AI生成・気象+類似事故+法改正)モーダルがfloorplan上に出現(押下後モーダル数0→1を実測)。職長「押したらちゃんと原稿が出る。朝礼前にこれを押せばいいと分かる」=採用ライン到達。
 - ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/signage-asarei-preset-2026-06-09.md(+afterスクショ)。temp(review .mjs, _tmp png)削除済。架空0・水増し0・既存破壊0。
 - BACKLOG補充: 軸2の真の未着手が薄かったため改善タスク2件追記(全画面無人運用レビュー・受入教育印刷A4崩れ点検)。
+
+## Cycle (2026-06-09) — 死蔵サイネージ部品の棚卸し＆結線/削除（軸2・保守）
+- 前イテレーション回収: CI緑(CLEAN)だった PR#434(WBGT ステッパー)を squash マージ→`git checkout main && git pull --ff-only`→clean。これにより PR#435(induction)がBACKLOG/cycle-logでコンフリクト→ローカルでorigin/mainへrebase・両側のタスク/ログを統合解決し force-push(CI再走中、次イテレーションで回収)。PR#436(signage朝礼前プリセット)はCI pending につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG軸2最上位の未着手「サイネージ朝礼前プリセット是正」は自分の未マージPR#436が同件対応中につき重複回避。次の真の未着手「死蔵サイネージ部品の棚卸し＆結線可否判定」を実行。
+- 棚卸し: signage-risk-prediction / signage-danger-alert / signage-featured-goods / japan-weather-map の4部品を grep で自ファイル以外参照0件＝死蔵を確認。削除前に依存グラフを確認し、誤削除を防止。
+- 判定と実施: ①SignageRiskPrediction=当日リスク予測(気象→熱中症/週明け/降雨スリップ等を`computeTodayRisks`で自動判定)を**結線**＝右サイドバー先頭に追加。既取得の`state.riskData`を渡すだけで追加フェッチ0・純導出で副作用なし・6月は熱中症期で価値最大。section に`xl:max-h-[34vh]`+`shrink-0`を付け既存トレンド/法改正(flex-1)を圧迫しない。②JapanWeatherMap=実データの`JapanPrefectureWarningMap`(気象庁JSON)で上位互換のため**孤立ラッパー1ファイルのみ削除**。ただし`japan-weather-map-mock`/`japan-map-svg`は`/api/signage-weather`・`/risk`の`WeatherForecastPanel`が生きて使用＝**温存**(誤削除回避)。③DangerAlert(全画面緊急アラート)はuseEffect内setStateの挙動検証が要るため**保留→新タスク化**。④FeaturedGoods(アフィリエイト)はサイネージ掲示の収益方針＝**オーナー判断(Path A)→新タスク化**。
+- 検証(Playwright実機): /signage を1920×1080で描画、`本日のリスク予測`見出し存在を確認。1画面フィット維持＝横/縦オーバーフロー共に**0px**(scrollW=clientW=1920, scrollH=clientH=1080)。1080×1920縦長でも横オーバーフロー0px。右上に赤の高リスクカード(6月の熱中症高リスク)が先頭表示。
+- ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/signage-dead-component-inventory-2026-06-09.md(+スクショ)。temp(_signage_review.mjs/png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
+- BACKLOG補充: 保留2部品をタスク化(緊急アラート結線・アフィリエイト掲示のオーナー判断)。
