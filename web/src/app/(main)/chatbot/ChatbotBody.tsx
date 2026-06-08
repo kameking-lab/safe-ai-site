@@ -63,9 +63,14 @@ export function ChatbotBody() {
   // Record entry to the chatbot step in the cross-feature SafetyContext so
   // the step indicator on /accidents-reports and /strategy/plan-generator
   // can light up the "1. 質問する" node.
+  // NOTE: depend on the *stable* recordVisit callback, NOT the whole copilot
+  // value. recordVisit bumps updatedAt on every call, which re-memoizes the
+  // context value; depending on `copilot` here re-fired the effect endlessly
+  // ("Maximum update depth exceeded" — 64 errors on a single idle load).
+  const recordVisit = copilot?.recordVisit;
   useEffect(() => {
-    copilot?.recordVisit("chatbot");
-  }, [copilot]);
+    recordVisit?.("chatbot");
+  }, [recordVisit]);
 
   return (
     <PageContainer width="wide">

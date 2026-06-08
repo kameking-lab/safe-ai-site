@@ -331,3 +331,11 @@
 - 改善(最小・非破壊): (a)最上部に「🔎事例をすぐ検索」カード新設(quick-accident-search.tsx)=キーワード入力＋頻出事故型6チップ(墜落/転倒/はさまれ/飛来落下/熱中症/感電)、1タップで /accidents?tab=list&acc_kw=...#accident-results へフル遷移。tab=list・acc_kw は AccidentDatabasePanel が既にマウント時復元する実装済みURL導線を再利用。(b)結果パネルに id=accident-results 付与=区画先頭(自社Top5＋クロス集計)の下に結果が埋もれないよう、キーワード欄＋絞り込み結果へ直接着地。
 - 再レビュー(Playwright実機): クイック検索位置 5,561px→1,080px。1タップ「墜落・転落」→ キーワード欄「墜落」入りで42件の絞り込み結果へ自動スクロール着地。佐藤評価「1タップで実例が並ぶ、移動中でも使える」→採用ライン到達。残課題=既定タブ名の正直化・出典定義文の畳み込み(別タスク)。
 - ゲート: tsc 0 / lint errors 0 / vitest 1092 pass / build 成功。記録: docs/third-party-reviews/accidents-busy-consultant-2026-06-08.md。架空0・水増し0・既存破壊0。
+
+## Cycle53【チャットボット 現場監督目線で無限再レンダリングを根治】(2026-06-09 JST)
+- 前回PR回収: CI緑の#425(化学RA 3タップ)と#426(事故DBクイック検索)をsquashマージ→main pull→clean。#426は#425マージでBACKLOG.mdが競合したためrebaseを試みたがforce-push権限が無く、代わりにorigin/mainをマージコミットで取り込み通常push→auto-merge。#427(安全工程打合せ書)はCI実行中のため次イテレーションで回収。
+- 軸2タスク: 法令チャットボット(/chatbot)を「佐藤(48)・職長歴20年の現場監督・型落ちスマホ片手操作・条番号と原文を3秒で出したい・遅い/カクつくなら二度と使わない」ペルソナで第三者レビュー(Playwright iPhone13エミュレート/dev server localhost:3000)。
+- 致命発見: 送信すらしていない初期ロードだけでコンソールに `Maximum update depth exceeded`(setState無限ループ)が64回。原因は `ChatbotBody`/`CopilotIndustrySync` の `useEffect(..., [copilot])`。Copilot Context値は `recordVisit` 等が毎回 `updatedAt: Date.now()` を打つため同一性が毎レンダリング変化し、effect→state更新→effectの無限ループ＋localStorage書き込みの暴走に陥っていた(型落ちスマホでのもたつき・発熱・電池消費の直接原因)。
+- 改善(最小・非破壊): `copilot` 全体ではなく安定な `useCallback`(`recordVisit`/`setIndustry`/`addConcerns`)とプリミティブのみを依存に。`ChatbotBody` はマウント時1回実行に。`CopilotIndustrySync` の配列prop `concerns` は制御文字()区切りの安定キー `concernsKey` に畳んで依存化。
+- 再レビュー(Playwright再計測): `Maximum update depth` 64回→0回。送信→吹き出し52ms/本文描画開始232ms、stream 200、回答・参照条文・出典(条番号+施行日+発出機関)・信頼度バッジ全て正常描画。出典の見やすさ自体は元々良好と確認。佐藤評価「カクつきが消えた、職人の前で開ける」。
+- ゲート: tsc 0 / lint errors 0 / vitest 1092 pass / build 成功。記録: docs/third-party-reviews/chatbot-site-supervisor-2026-06-09.md。架空0・水増し0・既存破壊0。一時Playwright/スクショは削除済(差分はソース2ファイル)。
