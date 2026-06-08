@@ -2,6 +2,10 @@ import { describe, it, expect } from "vitest";
 import {
   countByType,
   openCount,
+  openHighCount,
+  priorityRank,
+  sortByPriority,
+  filterOpenOnly,
   nearMissToCsv,
   NEAR_MISS_TYPES,
   type NearMissReport,
@@ -48,6 +52,53 @@ describe("countByType", () => {
 describe("openCount", () => {
   it("未対応(resolved=false)の件数", () => {
     expect(openCount([r({ resolved: false }), r({ resolved: true }), r({ resolved: false })])).toBe(2);
+  });
+});
+
+describe("openHighCount", () => {
+  it("未対策×重大 のみ数える", () => {
+    const reports = [
+      r({ resolved: false, potential: "high" }),
+      r({ resolved: false, potential: "low" }),
+      r({ resolved: true, potential: "high" }),
+      r({ resolved: false, potential: "high" }),
+    ];
+    expect(openHighCount(reports)).toBe(2);
+  });
+});
+
+describe("priorityRank", () => {
+  it("未対策×重大=0 が最優先、対策済×軽微=3 が最後", () => {
+    expect(priorityRank(r({ resolved: false, potential: "high" }))).toBe(0);
+    expect(priorityRank(r({ resolved: false, potential: "low" }))).toBe(1);
+    expect(priorityRank(r({ resolved: true, potential: "high" }))).toBe(2);
+    expect(priorityRank(r({ resolved: true, potential: "low" }))).toBe(3);
+  });
+});
+
+describe("sortByPriority", () => {
+  it("未対策×重大を先頭に、同ランクは日付の新しい順、元配列は不変", () => {
+    const input = [
+      r({ id: "a", date: "2026-06-08", resolved: true, potential: "low" }),
+      r({ id: "b", date: "2026-05-28", resolved: false, potential: "high" }),
+      r({ id: "c", date: "2026-06-06", resolved: false, potential: "high" }),
+      r({ id: "d", date: "2026-06-07", resolved: true, potential: "low" }),
+    ];
+    const sorted = sortByPriority(input);
+    // 重大×未対策が日付の新しい順で先頭2件
+    expect(sorted.map((x) => x.id)).toEqual(["c", "b", "a", "d"]);
+    // 元配列は破壊しない
+    expect(input.map((x) => x.id)).toEqual(["a", "b", "c", "d"]);
+  });
+});
+
+describe("filterOpenOnly", () => {
+  it("openOnly=true で未対策のみ、false で全件（コピー）", () => {
+    const reports = [r({ resolved: false }), r({ resolved: true }), r({ resolved: false })];
+    expect(filterOpenOnly(reports, true)).toHaveLength(2);
+    const all = filterOpenOnly(reports, false);
+    expect(all).toHaveLength(3);
+    expect(all).not.toBe(reports);
   });
 });
 

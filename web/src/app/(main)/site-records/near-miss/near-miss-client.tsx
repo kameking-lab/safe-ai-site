@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Printer, Download, Plus, Trash2, BarChart3 } from "lucide-react";
+import { Printer, Download, Plus, Trash2, BarChart3, AlertTriangle } from "lucide-react";
 import {
   getNearMissReports,
   saveNearMiss,
   deleteNearMiss,
   countByType,
   openCount,
+  openHighCount,
+  sortByPriority,
+  filterOpenOnly,
   nearMissToCsv,
   newNearMissId,
   NEAR_MISS_TYPES,
@@ -41,6 +44,7 @@ export function NearMissClient() {
   const [reports, setReports] = useState<NearMissReport[]>([]);
   const [form, setForm] = useState<AddForm>(emptyForm(""));
   const [savedNote, setSavedNote] = useState("");
+  const [openOnly, setOpenOnly] = useState(false);
 
   useEffect(() => {
     const now = new Date();
@@ -54,6 +58,12 @@ export function NearMissClient() {
   const tally = useMemo(() => countByType(reports), [reports]);
   const maxCount = tally.length ? tally[0]!.count : 0;
   const open = useMemo(() => openCount(reports), [reports]);
+  const openHigh = useMemo(() => openHighCount(reports), [reports]);
+  // 「対策すべきもの優先」で並べ、必要なら未対策のみに絞る
+  const visible = useMemo(
+    () => sortByPriority(filterOpenOnly(reports, openOnly)),
+    [reports, openOnly],
+  );
 
   function up<K extends keyof AddForm>(k: K, v: AddForm[K]) {
     setForm((s) => ({ ...s, [k]: v }));
@@ -182,16 +192,40 @@ export function NearMissClient() {
 
       {/* 一覧 */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-base font-bold text-slate-900">報告一覧（この端末）</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-base font-bold text-slate-900">報告一覧（この端末）</h2>
+          {reports.length > 0 && (
+            <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 print:hidden">
+              <input type="checkbox" checked={openOnly} onChange={(e) => setOpenOnly(e.target.checked)} className="h-4 w-4 accent-amber-600" />
+              未対策のみ表示
+            </label>
+          )}
+        </div>
+        {/* 要対策（重大×未対策）を最優先で可視化＝日付順に埋もれさせない */}
+        {openHigh > 0 && (
+          <div className="mt-3 flex items-start gap-2 rounded-xl border border-rose-300 bg-rose-50 p-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600" aria-hidden="true" />
+            <p className="text-sm font-bold text-rose-800">
+              重大の可能性 × 未対策が {openHigh} 件あります。下記の先頭にまとめています。優先して対策してください。
+            </p>
+          </div>
+        )}
         {reports.length === 0 ? (
           <p className="mt-2 text-sm text-slate-400">報告はまだありません。</p>
+        ) : visible.length === 0 ? (
+          <p className="mt-3 text-sm text-emerald-700">未対策の報告はありません。すべて対策済です。</p>
         ) : (
           <ul className="mt-3 space-y-2">
-            {reports.map((rep) => (
-              <li key={rep.id} className={`rounded-xl border p-3 ${rep.resolved ? "border-emerald-200 bg-emerald-50/40" : "border-slate-200"}`}>
+            {visible.map((rep) => {
+              const openHighItem = !rep.resolved && rep.potential === "high";
+              return (
+              <li key={rep.id} className={`rounded-xl border p-3 ${rep.resolved ? "border-emerald-200 bg-emerald-50/40" : openHighItem ? "border-rose-300 border-l-4 border-l-rose-500 bg-rose-50/40" : "border-slate-200"}`}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-slate-900">
+                      {openHighItem && (
+                        <span className="mr-2 rounded bg-rose-600 px-1.5 py-0.5 text-[11px] font-bold text-white">要対策</span>
+                      )}
                       <span className="mr-2 rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-bold text-amber-800">{rep.type}</span>
                       {rep.situation}
                     </p>
@@ -210,7 +244,8 @@ export function NearMissClient() {
                   </div>
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
         <p className="mt-3 text-[11px] leading-5 text-slate-500">
