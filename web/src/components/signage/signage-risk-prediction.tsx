@@ -46,7 +46,7 @@ export function SignageRiskPrediction({ weatherData }: Props) {
   const otherRisks = risks.filter((r) => r.level !== "高");
 
   return (
-    <section className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3">
+    <section className="flex min-h-0 shrink-0 flex-col overflow-hidden rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:max-h-[34vh]">
       <div className="flex shrink-0 items-center justify-between gap-2">
         <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">
           本日のリスク予測
