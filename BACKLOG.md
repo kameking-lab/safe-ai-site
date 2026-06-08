@@ -39,7 +39,7 @@
 - [ ] 受入教育記録(/site-records 配下)の印刷物（入場者名簿・教育記録）をA4実機プレビューで崩れ・はみ出しを点検→是正（顧問先/元請提出に耐える品質へ）。
 - [x] KY用紙(/ky/paper)の作業員選択をスマホで「2タップ完了」化＝よく使う班をワンタップ呼び出し（手袋の職長目線）（2026-06-09: 常用6名を1人ずつ＝6タップ必要・班/常用のまとまり0という致命を実測。「⭐常用N名をまとめて選ぶ」(isRegular一括=6→1タップ)＋協力会社など「{所属}全員」班ワンタップ＋「クリア」を追加し、個別チップも所属でグルーピング。純関数participant-select.ts(addParticipants/clearParticipants/groupWorkersByAffiliation)＋9テストに切出し、データ/スキーマ不変・再押下で重複なし。docs/third-party-reviews/ky-paper-worker-2tap-2026-06-09.md）
 - [ ] 業種別リスク判定(/heat-illness-prevention/industry-risk)をスマホで縦長スクロール短縮＝結論(対策)先頭・詳細は折りたたみ
-- [ ] 各印刷ページ(WBGT結果/順化計画/ポスター)を実際にA4プレビューし「枠線切れ・1枚に収まらない」崩れを点検→是正
+- [x] 各印刷ページ(WBGT結果/順化計画/ポスター)を実際にA4プレビューし「枠線切れ・1枚に収まらない」崩れを点検→是正（2026-06-09: Playwrightで実データ→page.pdf(A4)実測。緊急時対応ポスターが本体は1ページ内なのに(main)レイアウトの縦パディング/flex-1ストレッチが印刷時も残り白紙の2枚目を排出する致命を発見=PageContainerにprint:py-0＋#main-content印刷時flex:none で2→1ページに是正(全印刷ページ共通)。順化計画の長い表は行が改ページで切れ得たためtr break-inside:avoid＋thead再表示を追加。print:のみで画面/保存/CSV不変。docs/third-party-reviews/print-pages-a4-2026-06-09.md）
 - [ ] 年間 安全衛生カレンダー(/site-records/calendar)を「初見の安全担当」ペルソナでレビュー→「今月やること」への到達と各ツール連携
 - [ ] 受入教育記録のCSV/印刷を「月次で本社へ提出する元請安全担当」ペルソナでレビュー→名簿CSVの実務品質（現場別フィルタ・並び）
 - [ ] 健診スケジューラ(/health-checkup-scheduler)を「健診漏れを防ぎたい安全担当」ペルソナでレビュー→未受診の可視化・リマインド導線
