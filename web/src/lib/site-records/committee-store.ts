@@ -101,6 +101,69 @@ export function summarizeMinutes(rec: CommitteeMinutes): CommitteeSummary {
   };
 }
 
+/**
+ * 前回の議事録から「決定・措置事項のうち未完了で追跡が要るもの」を
+ * 当月の冒頭議題（前回議事録の確認・決定事項の措置状況）へ貼る要約テキストに整形する。
+ * 決定文が空の議題は除外。担当・期日があれば併記する。
+ */
+export function carryOverActionItems(prev: CommitteeMinutes): string {
+  return prev.agenda
+    .filter((a) => a.decision.trim() !== "")
+    .map((a) => {
+      const meta = [
+        a.owner.trim() ? `担当: ${a.owner.trim()}` : "",
+        a.due.trim() ? `期日: ${a.due.trim()}` : "",
+      ]
+        .filter(Boolean)
+        .join(" / ");
+      const topic = a.topic.trim() ? `【${a.topic.trim()}】` : "";
+      return `□ ${topic}${a.decision.trim()}${meta ? `（${meta}）` : ""}`;
+    })
+    .join("\n");
+}
+
+/** 当月の冒頭議題（措置状況確認）に入れる、前回の宿題サマリー全文。 */
+export function carryOverFirstAgendaNote(prev: CommitteeMinutes): string {
+  const header = `前回（${prev.date} ${COMMITTEE_TYPE_JA[prev.committeeType]}）の決定事項の措置状況を確認。`;
+  const items = carryOverActionItems(prev);
+  return items ? `${header}\n${items}` : header;
+}
+
+/**
+ * 前回の議事録をベースに、当月分の議事録の下書きを組み立てる純関数。
+ * - 委員会の種類・場所・委員長・書記・出席者など毎月不変の項目を引き継ぐ（再入力の手間を排除）。
+ * - 開催日は前回の「次回開催予定」があればそれ、無ければ today を採用。
+ * - 議題は標準議題（freshAgenda）を使い、冒頭の「措置状況」議題に前回の決定事項を貼り付け。
+ * - 開始時刻は毎月同時刻が多いため引き継ぐ。特記事項・次回開催予定はクリア（当月の新規入力）。
+ * id だけは window 依存のため呼び出し側で採番して渡す。
+ */
+export function buildCarryOverMinutes(
+  prev: CommitteeMinutes,
+  freshAgenda: AgendaItem[],
+  newId: string,
+  today: string,
+): CommitteeMinutes {
+  const agenda = freshAgenda.map((a) => ({ ...a }));
+  const note = carryOverFirstAgendaNote(prev);
+  const idx = agenda.findIndex((a) => a.topic.includes("前回議事録") || a.topic.includes("措置状況"));
+  const target = idx >= 0 ? idx : 0;
+  if (agenda[target]) agenda[target] = { ...agenda[target]!, discussion: note };
+  return {
+    id: newId,
+    date: prev.nextDate.trim() !== "" ? prev.nextDate : today,
+    startTime: prev.startTime,
+    place: prev.place,
+    committeeType: prev.committeeType,
+    chair: prev.chair,
+    secretary: prev.secretary,
+    attendees: prev.attendees,
+    agenda,
+    remarks: "",
+    nextDate: "",
+    savedAt: "",
+  };
+}
+
 const CSV_HEADER = ["開催日", "委員会", "場所", "議題", "議事内容", "決定・措置", "担当", "期日"];
 
 function csvCell(v: string | number | null): string {
