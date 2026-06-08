@@ -34,6 +34,11 @@ import {
   DEFAULT_WEATHER_REGION,
 } from "@/lib/ky/weather-autofill";
 import { loadWorkers, visibleWorkers, type Worker } from "@/lib/ky/workers-master";
+import {
+  addParticipants,
+  clearParticipants,
+  groupWorkersByAffiliation,
+} from "@/lib/ky/participant-select";
 import { loadLatestKyRecord, copyKyForToday } from "@/lib/ky/copy-latest";
 import {
   isKyCloudEnabled,
@@ -424,6 +429,19 @@ export function KyPaperView() {
     });
   };
 
+  // よく使う班をワンタップで呼び出す（常用まとめ・協力会社ごと全員）。1人ずつのタップを撲滅。
+  const addWorkers = (toAdd: Worker[]) => {
+    setRecord((prev) => ({ ...prev, participants: addParticipants(prev.participants, toAdd) }));
+  };
+  const clearMasterWorkers = () => {
+    setRecord((prev) => ({
+      ...prev,
+      participants: clearParticipants(prev.participants, workers.map((w) => w.name)),
+    }));
+  };
+  const regularWorkers = useMemo(() => workers.filter((w) => w.isRegular), [workers]);
+  const workerGroups = useMemo(() => groupWorkersByAffiliation(workers), [workers]);
+
   const selectedNames = useMemo(
     () => new Set(record.participants.filter((p) => p.name.trim()).map((p) => p.name)),
     [record.participants]
@@ -744,20 +762,67 @@ export function KyPaperView() {
                   に登録すると、ここでチェックするだけで参加者を選べます。
                 </p>
               ) : (
-                <div className="flex flex-wrap gap-1.5 print:hidden">
-                  {workers.map((w) => {
-                    const checked = selectedNames.has(w.name);
-                    return (
+                <div className="print:hidden">
+                  {/* ワンタップ呼び出し: 毎朝「いつもの班」を1人ずつ選ぶ手間を撲滅 */}
+                  <div className="mb-2 flex flex-wrap items-center gap-1.5">
+                    {regularWorkers.length > 0 && (
                       <button
-                        key={w.id}
                         type="button"
-                        onClick={() => toggleWorker(w, !checked)}
-                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${checked ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
+                        onClick={() => addWorkers(regularWorkers)}
+                        title="常用（毎日来る）作業員をまとめて参加者に追加します"
+                        className="rounded-full border border-amber-400 bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-amber-800 transition hover:bg-amber-100 min-h-[44px]"
                       >
-                        {checked ? "✓ " : ""}{w.name}
+                        ⭐ 常用{regularWorkers.length}名をまとめて選ぶ
                       </button>
-                    );
-                  })}
+                    )}
+                    {workerGroups.length > 1 &&
+                      workerGroups.map((g) => (
+                        <button
+                          key={g.affiliation}
+                          type="button"
+                          onClick={() => addWorkers(g.members)}
+                          title={`${g.label}の作業員${g.members.length}名をまとめて追加`}
+                          className="rounded-full border border-sky-300 bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-700 transition hover:bg-sky-100 min-h-[44px]"
+                        >
+                          {g.label}全員
+                        </button>
+                      ))}
+                    {participantCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={clearMasterWorkers}
+                        title="選択した作業員をすべて外す"
+                        className="rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:bg-slate-50 min-h-[44px]"
+                      >
+                        クリア
+                      </button>
+                    )}
+                  </div>
+                  {/* 個別調整: 所属ごとにまとめて見つけやすく */}
+                  <div className="space-y-1.5">
+                    {workerGroups.map((g) => (
+                      <div key={g.affiliation} className="flex flex-wrap items-center gap-1.5">
+                        {workerGroups.length > 1 && (
+                          <span className="w-full text-[11px] font-semibold text-slate-400 sm:w-auto sm:pr-1">
+                            {g.label}
+                          </span>
+                        )}
+                        {g.members.map((w) => {
+                          const checked = selectedNames.has(w.name);
+                          return (
+                            <button
+                              key={w.id}
+                              type="button"
+                              onClick={() => toggleWorker(w, !checked)}
+                              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition min-h-[44px] ${checked ? "border-emerald-600 bg-emerald-600 text-white" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
+                            >
+                              {checked ? "✓ " : ""}{w.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
               {/* 印刷・確認用の選択済み氏名一覧 */}

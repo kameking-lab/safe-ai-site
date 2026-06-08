@@ -398,3 +398,11 @@
 - 改善: 操作行に「👤 保存して同じ現場で次の人へ」(`handleSaveAndNextWorker`)を新設。現入場者を保存→新ID発番→現場名/教育実施者/実施日/教育項目(チェック)を引継ぎ、氏名/所属/職種/備考/確認だけクリア。氏名未入力は保存ガード。既存store `saveInduction` 再利用・新規部品0・既存の保存/新規/印刷/CSV温存=現場変更・単独記録の動線は不変。
 - 再レビュー(Playwright実機): 1人目→ボタン押下で 現場名="田村ビル新築工事"/実施者="職長 田村"/項目=13/13 が引継ぎ・氏名空欄、2人目を氏名のみで保存→一覧2件。入力量「現場名+実施者+13チェック+氏名…」→「氏名+所属」へ。田村さん「名前だけで全員ぶん記録できる」=採用ライン到達。
 - ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/induction-record-firsttime-officer-2026-06-09.md(+3スクショ)。temp(_review .mjs)削除済・誤生成のweb/docsを撤去。架空0・水増し0・既存破壊0。env/DB変更なし。
+
+## Cycle (2026-06-09) — KY用紙 参加者選択「2タップ完了」化（軸2）
+- 前PR回収: CI緑だった#435(受入教育 次の人へ引継ぎ)をsquashマージ→main clean。#436(signage朝礼前プリセット)はBACKLOG/cycle-logがmainと衝突→origin/mainをbranchへmergeして解消・通常pushで反映(CI再走待ち、次イテレーション回収)。#437(死蔵サイネージ部品棚卸し)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG最上位の未着手 #36 asarei(=#436)・#37 死蔵棚卸し(=#437) は両方とも自分の未マージPRで対応中につき重複回避。次の真の未着手「KY用紙(/ky/paper)の作業員選択をスマホで2タップ完了化」を実行。actionable未着手8件で補充不要。
+- 第三者レビュー: 山口さん(54歳・職長・紙20年・薄手手袋で片手操作・班は毎朝ほぼ同じ顔ぶれ)になりきりPlaywright実機(iPhone 12)。作業員14名(自社5/協力1次4/協力2次5・常用6)を投入。致命=常用6名を1人ずつ＝6タップ必要・班/常用のまとまり0・一括選択系ボタン0個を実測。「毎朝6人ポチポチなら紙が速い」。
+- 改善: 純関数participant-select.ts(addParticipants/clearParticipants/groupWorkersByAffiliation・9テスト)を新設し、参加者欄にワンタップ呼び出しツールバーを追加。⭐常用N名をまとめて選ぶ(isRegular一括=6→1タップ)＋協力会社など「{所属}全員」班ワンタップ＋クリア(マスター由来のみ解除・手入力温存)。個別チップは所属でグルーピングし見つけやすく。既存toggleWorker作法(空き行再利用)踏襲・データ/localStorageスキーマ不変・新規依存0・印刷体裁不変。
+- 再レビュー(Playwright実機): ⭐常用(201×44px)1タップ→参加者6名、クリア1タップ→0名、協力会社(1次)全員1タップ→4名、二重押下で6→6名(重複なし)を実測。山口さん「朝はこの⭐を押すだけ。手袋でも一発、紙より速い」=採用ライン到達。
+- ゲート: tsc0 / lint errors0 / vitest1114pass(+9) / build成功。記録: docs/third-party-reviews/ky-paper-worker-2tap-2026-06-09.md(+before/afterスクショ)。temp(_review .mjs, _ky png)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。
