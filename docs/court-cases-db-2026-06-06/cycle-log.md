@@ -305,3 +305,8 @@
 - 社長承認のもと無人自走の仕組みを自作: BACKLOG.md(タスクキュー・既存機能の第三者レビュー改善が中心)＋loop-runner.ps1(claude headlessを一定間隔で起動し1イテレーション=1タスク消化)。PARSE_OK確認済。logs/ は.gitignore。
 - 設計: 「収束で止まる」と「止まるな」を混ぜない=1イテレーション1タスク完結＋未着手3件未満で自己補充。各イテレーションで前回の緑PR回収→次タスク→ブランチ/ゲート/PR→BACKLOG更新。main常時デプロイ可能・安全タグ維持。
 - 各サイクルに第三者ペルソナ→Playwright操作→欠点指摘→改善→再レビューを標準化(docs/third-party-reviews/に記録)。方針転換: 新機能乱造→既存機能の研ぎ澄まし。
+
+## Cycle50【仕組み修正・runner文字化け解消】(2026-06-08 23:18 JST)
+- 社長環境(Windows PowerShell 5.x)でloop-runner.ps1がパースエラー(BOMなしUTF-8をShift-JIS誤認し日本語化け→文字列終端/{}破綻)。対処: ps1本体を純ASCII化(全コメント・ログ英語)＋可変の日本語指示は loop-prompt.txt(UTF-8)に分離し実行時に -Encoding UTF8 で読込→$OutputEncoding=UTF8 で claude にstdinパイプ。
+- 実環境確認: claude=C:\Users\kanet\AppData\Roaming\npm\claude.ps1、headlessは -p/--print・bypassは --dangerously-skip-permissions(v2.1.168)。PURE_ASCII_OK＋Windows PowerShellでPARSE_OK＋runner 1イテレーション試走で claude起動・"RUNNER_SELFTEST_OK"返答・exit0を確認。
+- これで社長が powershell -File .\loop-runner.ps1 で確実に無人自走起動できる。
