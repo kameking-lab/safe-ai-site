@@ -480,6 +480,14 @@
 - 再レビュー(Playwright実機): 特定業務従事者健診に2025-01-10入力→赤「期限超過」で最上段浮上＋「法定期限(2025年7月)を11か月超過。速やかに実施してください。」、別1件に2026-05-01→緑「適正」で次回期限。サマリー「期限超過1/間近0/未記録4/適正1」がリアルタイム更新。リロード後も入力値・件数・並び維持。横overflow PC0px/iPhone0px(モバイルは行が縦積み)。佐久間さん「前回やった日を入れるだけで赤いのが上に出て期限と超過月数まで出る。紙台帳の上位互換。残るなら毎年これで管理する」=採用ライン到達。
 - ゲート: tsc0 / lint errors0(warn既存・他ファイルのみ) / vitest1123pass(+9) / build成功。記録: docs/third-party-reviews/health-checkup-scheduler-miss-prevention-2026-06-09.md(+afterスクショ)。temp(_hc_*.mjs/png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
 
+## Cycle (2026-06-09) — 管理区分判定ツール 評価記録(A4)の出力導線（軸2）
+- 前PR回収: CI緑(MERGEABLE)だった#445(健診 前回実施日トラッカー)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#446(サイネージ危険アラート結線)は#445マージでBACKLOG/cycle-logが追記衝突→origin/mainへrebase・両側統合解決してforce-push(CI再走中・次回回収)。#447(ヒヤリハット優先表示)はe2e進行中につき次回。古いdocs系PRは放置。
+- タスク選定: 軸2の真の空きが薄い(46=自PR#446在中、47=Path Aオーナー判断)ため、補充指針に従い軸2の深掘り3件をBACKLOGに追加(管理区分判定の記録化・対象判定の実用性・ストレスチェック準備)。最上位の「管理区分判定ツールを“測定機関の結果を受け取り記録保存・掲示する衛生管理者”でレビュー＝判定結果の記録化」を実行。
+- 第三者レビュー: 大野さん(48歳・化学系製造業の第一種衛生管理者・有機溶剤/特化物・測定は外部機関に委託し報告書から自分で管理区分を確認→社内記録保存＋第3区分は労働者周知が仕事)になりきりPlaywright実機(PC1280/モバイル390)。致命=判定結果に保存・印刷・記録化の導線が皆無(結果カード内ボタン0を実測)＝スクショか転記しかなく、3年(特別管理物質30年)保存義務・第3区分の周知義務がある評価結果を残せない「電卓止まり」。記録に要る識別情報(作業場名/物質名/測定日)の入力欄も無し。
+- 改善: 化学物質RAの印刷専用パーツ(ChemicalRaReportHeader)と同じイディオムで、結果をA4「作業環境測定結果 評価記録(管理区分判定)」として印刷/PDF保存できるよう結線。①新規`work-env/class-judge-record-print.tsx`=ClassJudgeRecordHeader(評価記録ヘッダ・事業場名/実施者は手書き欄・作業場/物質/測定日は入力反映)＋ClassJudgeInputTable(管理濃度・A値・GSD・B値の内訳=判定根拠)＋ClassJudgeSignoff(確認欄3役＋保存/周知注記)。すべて`hidden print:block`で画面非干渉。②結果カードに「🖨 評価記録を印刷/PDF保存」ボタン＋記録用の任意入力を`<details>`で追加(判定フロー不変・空欄でも判定/印刷可)。③印刷時はフォーム・判定基準解説を`print:hidden`で隠し結果のみ白背景で出力。④純関数formatMeasuredOn(YYYY-MM-DD→和暦・不正値は空)+4テスト。判定エンジン/データ/スキーマ不変・新規依存0・管理濃度等の告示値は引き続きユーザー入力(捏造なし)。
+- 再レビュー(Playwright実機＋print mediaエミュ): 結果に印刷ボタン出現(present=true)。記録詳細に第2塗装ブース/トルエン/2026-06-05を入力→判定→print mediaで評価記録ヘッダに3項目反映・測定値内訳(25/30/2/40)・第3管理区分＋改善措置＋確認欄が1枚出力、入力フォームはdisplay:none(印刷時隠れる)を実測。横overflow0px・console error0。大野さん「報告書を見ながら値を入れればそのまま評価記録がA4で出る。作業場名・物質名・測定日・確認印欄もある。記録綴りにそのまま挟める。転記が消える」=採用ライン到達。
+- ゲート: tsc0 / lint errors0(warning47=既存・他ファイル) / vitest1138pass(+4) / build成功。記録: docs/third-party-reviews/wem-class-judge-record-2026-06-09.md。temp(_wem_*.mjs/png)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。
+
 ## Cycle (2026-06-09) — サイネージ 危険イベント全画面アラート(SignageDangerAlert)の結線（軸2）
 - 前PR回収: CI緑(MERGEABLE)だった#443(年間カレンダー今月やること先頭昇格)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#444(受入教育 名簿CSV月次)は#443マージでBACKLOG/cycle-logが追記衝突→origin/mainをbranchへmergeし両側のタスク[x]/ログを統合解決して通常push(CI再走中、次回回収)。#445(健診 前回実施日トラッカー)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
 - タスク選定: BACKLOG軸2の上位未着手のうち「受入教育CSV」=自PR#444、「健診スケジューラ」=自PR#445が対応中で重複につき回避。真に空いている「サイネージに緊急アラート(SignageDangerAlert)を結線＝高リスク警報の全画面赤表示＋音声。1画面フィット維持・useEffect自動発動を実機検証」を実行。
@@ -489,6 +497,15 @@
 - 再レビュー(Playwright実機): 手動オーバーレイ全面/閉じる(1→0)、自動発動ON→自動ポップ(1)→閉じた後再ポップ無し(0)、再読込後 localStorage=1・チェックON維持(true)・監視中/検知中表示、1画面フィット 1920×1080でscrollH-clientH=0。中村さん「朝ONにして放っておける。再起動しても見張りが生きてる。警報が出れば赤い画面が勝手に出る。現場に置ける」=採用ライン到達。
 - 補充: 軸2の真の空きが薄い(44/45は自PR在中)ため、本レビューで見つけた具体改善2件をBACKLOGへ追加(①/signage/displayフルスクリーンへ高リスク赤アラート展開 ②データ取得失敗時に警報パネルが空表示で『警報なし/取得失敗』区別不能な懸念の点検)。
 - ゲート: tsc0 / lint errors0(warning47=既存) / vitest1114pass(145ファイル) / build成功(Compiled successfully)。記録: docs/third-party-reviews/signage-danger-alert-wiring-2026-06-09.md。temp(_review_danger_alert.mjs/_da_*.png)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。
+
+## Cycle (2026-06-09) — フルスクリーン無人キオスク(/signage/display)へ高リスク警報の全画面赤アラート結線（軸2）
+- 前PR回収: CI緑(CLEAN)だった #446(サイネージ ダッシュボードへ危険アラート結線)を squash マージ→`git checkout main && git pull --ff-only`→clean。#447(ヒヤリハット優先表示)は #446 マージで BACKLOG/cycle-log がコンフリクト→origin/main をブランチへ merge し両側のタスク[x]/ログを統合解決して push(CI再走中・次回回収)。#448(作業環境測定 区分判定の記録化)は e2e/smoke 進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG軸2の最上位の実行可能未着手(Path A=オーナー判断は除外)が「フルスクリーン無人キオスク /signage/display に高リスク警報の全画面赤アラート(自動発動)を展開」。先行#446でダッシュボード/signageには結線済み、本件はそれを無人キオスクへ展開。実行可能未着手は4件(本件・ダッシュボード空表示点検・Path A・軸1)で≥3=補充不要。
+- 第三者レビュー: 中村さん(52歳・建設現場の安全衛生責任者・タブレットを事務所に据置1日中つけっぱなし・普段はサイドパネルを閉じ地図だけ表示・設定が黙って無効化されるのを最も嫌う・注意報での誤発動=オオカミ少年化も嫌う)になりきりPlaywright実機(Chromium 1920×1080)。モックで警報レベルの大雨/暴風警報・注意報のみの2系統を注入し挙動を実検証。
+- 致命/懸念: ①素直にサイドパネル内へ部品を置くと「パネルを閉じる」常用フローで部品ごとアンマウントされ自動発動useEffectが停止＝安全機能が無音で死ぬ(BACKLOGが最も警戒する無音化)。②キオスクのbyIsoは注意報(advisory)も混在し、SignageDangerAlertはheadline/statusをキーワード照合して発動するため素で渡すと「大雨注意報」の"大雨"で誤発動。③全画面赤オーバーレイがLeafletズームコントロール(z≈1000)/パネル(z-450)の背面に回り地図UIを覆い切れない。④バーを通常フローに足すと地図の縦が削れ1画面フィット崩壊。
+- 改善: ①`<SignageDangerAlert>`をサイドパネル内ではなく signage-map-client.tsx のルート直下に常時マウント(`absolute left-14 top-2`)＝パネル開閉非依存で監視継続。②新規純関数 `web/src/lib/signage/danger-alert-source.ts` `deriveDangerAlertInput(byIso)`(テスト7件)で warning/special レベルのみ{code,status}抽出・注意報除外・最深刻headline採用・重複排除。③ラッパーを z-[1100](Leafletコントロール/パネルより前面)・transform不使用で内部fixed overlayがビューポート全面被覆。④バーはabsolute(left-14でズーム回避)・overlayはfixedで地図の縦不変。設定永続は既存localStorage("signage-danger-autospeak")を活用。部品本体ロジック/データ/スキーマ/取得不変・新規依存0。
+- 再レビュー(Playwright実機・全項目自動検証): barVisible=true(left93px=ズーム回避)、scroll x/y=0(1画面フィット)、自動発動ON前overlay=0→ON後=1(headline「東京地方に大雨警報、暴風警報が…」)、検知中バッジ表示、閉→再ポップ=0(console error0)、再読込後checkbox=checked・overlay再=1(localStorage永続)、**パネルを閉じてもバー生存=true(無音化を解消)**、**注意報のみではoverlay=0・🟢監視中バッジ(誤発動防止)**、z-[1100]是正後スクショでズーム+/−が赤画面に完全被覆。中村さん「パネルを閉じても見張りが生きてる。注意報では赤くならない。大雨警報が出れば赤画面が勝手に出て読み上げる。現場に置ける」=採用ライン到達。
+- ゲート: tsc0 / lint errors0(warning47=既存・他ファイルのみ) / vitest1141pass(147ファイル・+7) / build成功。記録: docs/third-party-reviews/signage-display-danger-alert-2026-06-09.md(+バー/オーバーレイ スクショ)。temp(_da_kiosk_review.mjs/_da_bar.mjs)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。
 
 ## Cycle (2026-06-09) — ヒヤリハット報告 重大×未対策の優先可視化（軸2）
 - 前PR回収: CI緑(CLEAN/MERGEABLE)だった#444(受入教育CSV月次)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#445(健診スケジューラ)・#446(サイネージ緊急アラート)は別イテレーションでマージ済。古いdocs系PRは放置。

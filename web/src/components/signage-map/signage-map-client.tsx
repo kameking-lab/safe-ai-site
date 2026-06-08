@@ -8,6 +8,8 @@ import { MapLegend } from "./map-legend";
 import { PinManager } from "./pin-manager";
 import { useSignagePins } from "./use-signage-pins";
 import { useWakeLock } from "@/lib/signage/use-wake-lock";
+import { SignageDangerAlert } from "@/components/signage/signage-danger-alert";
+import { deriveDangerAlertInput } from "@/lib/signage/danger-alert-source";
 import type { SignagePin } from "./signage-map-leaflet";
 import type {
   JmaEarthquakesFile,
@@ -287,6 +289,9 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
     return items.slice(0, 8);
   }, [bundle]);
 
+  // 全画面赤アラートの自動発動入力: 警報・特別警報レベルのみを抽出（注意報の誤発動を防ぐ）
+  const dangerAlert = useMemo(() => deriveDangerAlertInput(bundle?.warnings.byIso), [bundle]);
+
   return (
     <div className={`relative ${initialFullscreen ? "h-screen w-screen" : "min-h-[640px] h-[calc(100vh-80px)] w-full"} bg-slate-900 text-slate-100`}>
       <div className="absolute inset-0 flex">
@@ -414,6 +419,17 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
             </div>
           </aside>
         ) : null}
+      </div>
+
+      {/* 危険イベント全画面アラート: 高リスク警報(特別警報/暴風/大雨/落雷/地震/津波)を検知すると
+          全画面赤表示＋音声で読み上げる。無人運用こそ自動発動が要るためキオスクにも結線する。
+          ・サイドパネルの開閉に関わらず常時マウント＝パネルを閉じても監視が止まらない(安全機能の無音化を防ぐ)。
+          ・バーは地図左上(ズームコントロールを避け left-14)に絶対配置。z-[1100] は Leaflet コントロール(z~1000)
+            より前面＝全画面赤オーバーレイが地図UIを完全に覆う。transform を使わないため
+            内部の fixed inset-0 オーバーレイはビューポート全面を覆い1画面フィットを壊さない。
+          ・「警報時に自動発動」は localStorage 永続で再読込後も監視を継続。 */}
+      <div className="absolute left-14 top-2 z-[1100] max-w-[calc(100%-4rem)]">
+        <SignageDangerAlert jmaHeadline={dangerAlert.jmaHeadline} warnings={dangerAlert.warnings} />
       </div>
 
       <EarthquakeAlertModal earthquake={alertedQuake} onClose={dismissEarthquakeModal} />
