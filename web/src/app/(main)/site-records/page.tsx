@@ -49,96 +49,51 @@ type Tool = {
   badge?: string;
 };
 
-const NEW_TOOLS: Tool[] = [
-  {
-    href: "/site-records/induction",
-    title: "新規入場者 受入教育 記録",
-    desc: "安衛法59条・安衛則35条の教育項目＋現場ルールをチェックして実施記録を作成。名簿CSV・受講記録の印刷に対応。",
-    icon: UserPlus,
-    color: "emerald",
-    badge: "NEW",
-  },
-  {
-    href: "/site-records/committee",
-    title: "安全衛生委員会 議事録",
-    desc: "安衛法17〜19条の委員会議事録を標準議題テンプレで作成。決定・担当・期日を記録し、3年保存・周知用に印刷・CSV。",
-    icon: Users,
-    color: "indigo",
-    badge: "NEW",
-  },
-  {
-    href: "/site-records/patrol",
-    title: "安全パトロール・職場巡視 記録",
-    desc: "5大災害＋衛生の標準項目でチェックし、指摘事項を場所・危険度・担当・期日・是正状況まで管理。印刷・指摘CSV。",
-    icon: Footprints,
-    color: "rose",
-    badge: "NEW",
-  },
-  {
-    href: "/site-records/near-miss",
-    title: "ヒヤリハット報告・集計",
-    desc: "ヒヤリハットを蓄積し事故の型別に傾向を集計。要因・対策・是正状況を管理し、印刷・CSVで月次集計に。",
-    icon: AlertTriangle,
-    color: "amber",
-    badge: "NEW",
-  },
-  {
-    href: "/site-records/inspection",
-    title: "作業開始前点検 記録",
-    desc: "建設機械・クレーン・フォークリフト・高所作業車・電動工具の始業前点検を機種別項目で記録。使用可否・印刷・CSV。",
-    icon: Wrench,
-    color: "sky",
-    badge: "NEW",
-  },
-  {
-    href: "/site-records/procedure",
-    title: "作業手順書 作成",
-    desc: "手順×危険（急所）×対策の3列で作業手順書を作成。使用機械・必要資格も記載し、印刷・CSV。KY・受入教育の土台に。",
-    icon: ListOrdered,
-    color: "indigo",
-    badge: "NEW",
-  },
-  {
-    href: "/site-records/qualifications",
-    title: "特別教育・資格 受講管理簿",
-    desc: "作業者ごとに特別教育・技能講習・資格と取得日を記録。名簿CSV・印刷で有資格者への適正配置の証跡に。",
-    icon: GraduationCap,
-    color: "teal",
-    badge: "NEW",
-  },
-  {
-    href: "/site-records/monthly",
-    title: "月次安全衛生レポート（自動集計）",
-    desc: "パトロール・ヒヤリ・点検・教育・委員会・WBGTの当月分を自動集計し、月次報告を1枚で作成・印刷。元請提出・委員会資料に。",
-    icon: CalendarRange,
-    color: "emerald",
-    badge: "NEW",
-  },
-  {
-    href: "/site-records/calendar",
-    title: "年間 安全衛生カレンダー",
-    desc: "全国安全週間・労働衛生週間・季節リスク・毎月の法定義務を月別に一覧。今月やることが一目で分かり各ツールへ。",
-    icon: CalendarDays,
-    color: "sky",
-    badge: "NEW",
-  },
-  {
-    href: "/site-records/incident-report",
-    title: "労働者死傷病報告 作成補助",
-    desc: "労災発生時の届出（安衛則97条・様式23/24号）に必要な情報を整理する下書きを作成・印刷。電子申請の前準備に。",
-    icon: FileWarning,
-    color: "rose",
-    badge: "NEW",
-  },
-];
+type ToolGroup = { heading: string; note?: string; tools: Tool[] };
 
-const EXISTING_TOOLS: Tool[] = [
-  { href: "/ky/paper", title: "KY用紙（危険予知）", desc: "4ラウンド法の危険予知活動シート。AI提案・音声入力・印刷・保存に対応。", icon: ClipboardList, color: "sky" },
-  { href: "/safety-diary", title: "安全工程打合せ書", desc: "北海道労働局公式版ベース。各社マトリクス・点検8カテゴリ・翌日複製・印刷。", icon: FileSpreadsheet, color: "indigo" },
-  { href: "/heat-illness-prevention/log", title: "WBGT日次記録簿", desc: "WBGTと実施対策を時刻別に記録。最高WBGT自動集計・印刷・CSV（令和7年改正対応）。", icon: Thermometer, color: "amber" },
-  { href: "/heat-illness-prevention/acclimatization", title: "暑熱順化 計画・進捗", desc: "新規入場者・復帰者の7日間以上の暑熱順化を計画・記録。", icon: CalendarCheck, color: "teal" },
-  { href: "/heat-illness-prevention/poster", title: "熱中症 緊急対応 掲示", desc: "緊急連絡先を入れてA4掲示用ポスターを印刷（対応手順の周知）。", icon: Megaphone, color: "rose" },
-  { href: "/health-checkup-scheduler", title: "健康診断スケジューラ", desc: "業種・職種・取扱物質から必要な健診を判定し年間計画を生成。", icon: HeartPulse, color: "fuchsia" },
+const GROUPS: ToolGroup[] = [
+  {
+    heading: "日々・都度に作成する記録",
+    tools: [
+      { href: "/ky/paper", title: "KY用紙（危険予知）", desc: "4ラウンド法の危険予知活動シート。AI提案・音声入力・印刷・保存に対応。", icon: ClipboardList, color: "sky" },
+      { href: "/safety-diary", title: "安全工程打合せ書", desc: "北海道労働局公式版ベース。各社マトリクス・点検8カテゴリ・翌日複製・印刷。", icon: FileSpreadsheet, color: "indigo" },
+      { href: "/site-records/induction", title: "新規入場者 受入教育 記録", desc: "安衛法59条・安衛則35条の教育項目＋現場ルールをチェックして実施記録を作成。名簿CSV・受講記録の印刷に対応。", icon: UserPlus, color: "emerald", badge: "NEW" },
+      { href: "/site-records/procedure", title: "作業手順書 作成", desc: "手順×危険（急所）×対策の3列で作業手順書を作成。使用機械・必要資格も記載し、印刷・CSV。", icon: ListOrdered, color: "indigo", badge: "NEW" },
+      { href: "/site-records/inspection", title: "作業開始前点検 記録", desc: "建設機械・クレーン・フォークリフト・高所作業車・電動工具の始業前点検を機種別項目で記録。使用可否・印刷・CSV。", icon: Wrench, color: "sky", badge: "NEW" },
+      { href: "/site-records/near-miss", title: "ヒヤリハット報告・集計", desc: "ヒヤリハットを蓄積し事故の型別に傾向を集計。要因・対策・是正状況を管理し、印刷・CSVで月次集計に。", icon: AlertTriangle, color: "amber", badge: "NEW" },
+    ],
+  },
+  {
+    heading: "定期の点検・会議・教育管理",
+    tools: [
+      { href: "/site-records/patrol", title: "安全パトロール・職場巡視 記録", desc: "5大災害＋衛生の標準項目でチェックし、指摘事項を場所・危険度・担当・期日・是正状況まで管理。印刷・指摘CSV。", icon: Footprints, color: "rose", badge: "NEW" },
+      { href: "/site-records/committee", title: "安全衛生委員会 議事録", desc: "安衛法17〜19条の委員会議事録を標準議題テンプレで作成。決定・担当・期日を記録し、3年保存・周知用に印刷・CSV。", icon: Users, color: "indigo", badge: "NEW" },
+      { href: "/site-records/qualifications", title: "特別教育・資格 受講管理簿", desc: "作業者ごとに特別教育・技能講習・資格と取得日を記録。名簿CSV・印刷で有資格者への適正配置の証跡に。", icon: GraduationCap, color: "teal", badge: "NEW" },
+      { href: "/health-checkup-scheduler", title: "健康診断スケジューラ", desc: "業種・職種・取扱物質から必要な健診を判定し年間計画を生成。", icon: HeartPulse, color: "fuchsia" },
+    ],
+  },
+  {
+    heading: "集計・年間計画",
+    tools: [
+      { href: "/site-records/monthly", title: "月次安全衛生レポート（自動集計）", desc: "パトロール・ヒヤリ・点検・教育・委員会・WBGTの当月分を自動集計し、月次報告を1枚で作成・印刷。元請提出・委員会資料に。", icon: CalendarRange, color: "emerald", badge: "NEW" },
+      { href: "/site-records/calendar", title: "年間 安全衛生カレンダー", desc: "全国安全週間・労働衛生週間・季節リスク・毎月の法定義務を月別に一覧。今月やることが一目で分かり各ツールへ。", icon: CalendarDays, color: "sky", badge: "NEW" },
+    ],
+  },
+  {
+    heading: "熱中症対策（令和7年改正対応）",
+    tools: [
+      { href: "/heat-illness-prevention/log", title: "WBGT日次記録簿", desc: "WBGTと実施対策を時刻別に記録。最高WBGT自動集計・印刷・CSV。", icon: Thermometer, color: "amber" },
+      { href: "/heat-illness-prevention/acclimatization", title: "暑熱順化 計画・進捗", desc: "新規入場者・復帰者の7日間以上の暑熱順化を計画・記録。", icon: CalendarCheck, color: "teal" },
+      { href: "/heat-illness-prevention/poster", title: "熱中症 緊急対応 掲示", desc: "緊急連絡先を入れてA4掲示用ポスターを印刷（対応手順の周知）。", icon: Megaphone, color: "rose" },
+    ],
+  },
+  {
+    heading: "労災が起きたら（届出・責任）",
+    tools: [
+      { href: "/site-records/incident-report", title: "労働者死傷病報告 作成補助", desc: "労災発生時の届出（安衛則97条・様式23/24号）に必要な情報を整理する下書きを作成・印刷。電子申請の前準備に。", icon: FileWarning, color: "rose", badge: "NEW" },
+      { href: "/court-cases/employer-liability", title: "労災の法的責任ガイド", desc: "民事（安全配慮義務）・刑事（労安法違反/業過致死傷）・行政の責任を判例とともに整理。予防の重要性を再確認。", icon: AlertTriangle, color: "rose" },
+    ],
+  },
 ];
 
 const COLOR: Record<string, string> = {
@@ -179,23 +134,16 @@ export default function SiteRecordsPage() {
 
       <RecordsOverview />
 
-      <section className="mt-6">
-        <h2 className="mb-2 text-sm font-bold text-slate-700">新着</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {NEW_TOOLS.map((t) => (
-            <ToolCard key={t.href} t={t} />
-          ))}
-        </div>
-      </section>
-
-      <section className="mt-8">
-        <h2 className="mb-2 text-sm font-bold text-slate-700">よく使う記録・帳票</h2>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {EXISTING_TOOLS.map((t) => (
-            <ToolCard key={t.href} t={t} />
-          ))}
-        </div>
-      </section>
+      {GROUPS.map((g) => (
+        <section key={g.heading} className="mt-8">
+          <h2 className="mb-2 text-sm font-bold text-slate-700">{g.heading}</h2>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {g.tools.map((t) => (
+              <ToolCard key={t.href} t={t} />
+            ))}
+          </div>
+        </section>
+      ))}
 
       <p className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-500">
         各ツールの記録はお使いの端末（ブラウザ）に保存され、サーバーには送信されません。印刷・CSV出力で社内提出・監督指導時の証跡としてご利用ください。
