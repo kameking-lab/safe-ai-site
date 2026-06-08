@@ -39,3 +39,6 @@ yarn.lock
 .claude/scheduled_tasks.lock
 .vercel
 .env*
+
+# 無人自走ループ runner のログ
+logs/
