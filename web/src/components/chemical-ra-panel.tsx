@@ -220,6 +220,8 @@ export function ChemicalRaPanel() {
   // CREATE-SIMPLE 用の換気・取扱量・作業時間・測定濃度の入力欄が表示される。
   const [detailedMode, setDetailedMode] = useState(false);
   const resultAnchorRef = useRef<HTMLDivElement | null>(null);
+  // ?run=1 付きで遷移してきた時に判定を一度だけ自動実行するためのガード。
+  const autoRanRef = useRef(false);
 
   // P0-6: AI調査の結果生成完了時に結果セクションへスムーズスクロール＋フォーカス移動。
   // 読み上げ・キーボード操作ユーザーが結果に到達できるよう、tabIndex=-1 のアンカーに focus する。
@@ -327,8 +329,19 @@ export function ChemicalRaPanel() {
     }
   };
 
-  const handleSearch = async () => {
-    if (!chemicalName.trim()) return;
+  // よく検索される物質チップ等から「1タップで判定まで実行」する。
+  // 紙派/IT不慣れなユーザーが物質名を押した時点で結果が出るようにする（入力欄に名前が
+  // 入るだけで何も起きない、という離脱要因の解消）。
+  const runQuickSearch = (name: string) => {
+    setChemicalName(name);
+    setMhlwSelected(null);
+    void handleSearch(name);
+  };
+
+  const handleSearch = async (overrideName?: string) => {
+    // クイックチップ等から即時実行するときは state 反映を待たず引数の物質名を使う。
+    const nameToUse = (overrideName ?? chemicalName).trim();
+    if (!nameToUse) return;
     setLoading(true);
     setRetryStatus(null);
     setError(null);
@@ -339,10 +352,13 @@ export function ChemicalRaPanel() {
     const flowStartAt = Date.now();
     const MAX_RETRIES = 3;
     const dur = durationHours.trim() ? parseFloat(durationHours) : undefined;
+    // overrideName が来ているときは mhlwSelected が古い可能性があるため CAS は名称一致時のみ採用。
+    const casForBody =
+      overrideName && mhlwSelected?.primaryName !== nameToUse ? undefined : mhlwSelected?.cas;
     const body = JSON.stringify({
-      chemicalName: chemicalName.trim(),
+      chemicalName: nameToUse,
       workContent: workContent.trim(),
-      casNumber: mhlwSelected?.cas ?? undefined,
+      casNumber: casForBody ?? undefined,
       ventilation: ventilation || undefined,
       amount: amount || undefined,
       durationHours: typeof dur === "number" && Number.isFinite(dur) ? dur : undefined,
@@ -397,6 +413,21 @@ export function ChemicalRaPanel() {
     setRetryStatus(null);
     setLoading(false);
   };
+
+  // 職種別クイックスタート等が ?name=…&run=1 / ?cas=…&run=1 で遷移してきた場合、
+  // 着地時に判定を自動実行する（押した先で「何も起きない」を解消。raId 再表示時は実行しない）。
+  useEffect(() => {
+    if (autoRanRef.current) return;
+    if (searchParams?.get("run") !== "1") return;
+    if (searchParams?.get("raId")) return;
+    const cas = searchParams?.get("cas");
+    const nameParam = searchParams?.get("name");
+    const nameToRun = cas ? findByCas(cas)?.primaryName ?? null : nameParam;
+    if (!nameToRun) return;
+    autoRanRef.current = true;
+    void handleSearch(nameToRun);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
@@ -636,18 +667,19 @@ export function ChemicalRaPanel() {
           )}
         </div>
 
-        {/* クイック検索 */}
+        {/* クイック検索: 1タップで判定まで実行（物質名を押すだけで結果が出る） */}
         <div className="mt-4">
-          <p className="text-xs font-semibold text-slate-500 mb-2">よく検索される物質</p>
+          <p className="text-xs font-semibold text-slate-500 mb-2">
+            よく扱う物質はこちら（押すとすぐに判定します）
+          </p>
           <div className="flex flex-wrap gap-1.5">
             {QUICK_CHEMICALS.map((chem) => (
               <button
                 key={chem}
                 type="button"
-                onClick={() => {
-                  setChemicalName(chem);
-                }}
-                className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600 hover:bg-emerald-50 hover:border-emerald-200 hover:text-emerald-700"
+                disabled={loading}
+                onClick={() => runQuickSearch(chem)}
+                className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 disabled:opacity-50 disabled:cursor-progress"
               >
                 {chem}
               </button>
