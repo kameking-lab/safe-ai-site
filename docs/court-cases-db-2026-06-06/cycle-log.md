@@ -416,3 +416,11 @@
 - 検証(Playwright実機): /signage を1920×1080で描画、`本日のリスク予測`見出し存在を確認。1画面フィット維持＝横/縦オーバーフロー共に**0px**(scrollW=clientW=1920, scrollH=clientH=1080)。1080×1920縦長でも横オーバーフロー0px。右上に赤の高リスクカード(6月の熱中症高リスク)が先頭表示。
 - ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/signage-dead-component-inventory-2026-06-09.md(+スクショ)。temp(_signage_review.mjs/png)削除済。再生成データ(chatbot-eval/rag-metrics)は`git checkout --`で復元。架空0・水増し0・既存破壊0。env/DB変更なし。
 - BACKLOG補充: 保留2部品をタスク化(緊急アラート結線・アフィリエイト掲示のオーナー判断)。
+
+## Cycle (2026-06-09) — 受入教育記録 印刷物(A4)の提出品質是正（軸2）
+- 前PR回収: CI緑だった#437(死蔵サイネージ部品棚卸し)をsquashマージ→`git checkout main && git pull --ff-only`→clean。#438(KY参加者2タップ)はBACKLOG/cycle-logがmainと衝突→origin/mainをbranchへmerge・両側のタスク/ログを統合解決して通常push(CI再走中、次イテレーション回収)。#439(signage全画面スリープ抑止)はe2e/smoke進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG最上位の未着手「サイネージ全画面 無人運用レビュー」は自分の未マージPR#439が同件対応中につき重複回避。次の真の未着手「受入教育記録の印刷物(入場者名簿・教育記録)A4実機プレビュー点検→是正」を実行。actionable未着手多数で補充不要。
+- 第三者レビュー: 桑原さん(48歳・ゼネコン作業所の元請安全担当・協力会社の受入教育記録を集めファイル化し労基署臨検/本社監査で提示・体裁にうるさい)になりきりPlaywright(Chrome)で実データ入力→`emulateMedia("print")`+`page.pdf(A4)`でA4実機プレビュー。レイアウト自体は健全(はみ出し0px・docScrollW==clientW==1200・印刷時ボタン0個・@page A4設定済)。一方、提出書類として致命=「署名・押印欄が紙に存在しない(確認はチェックのみ)」「標題がh2止まりで何の記録か弱い」「実施日が日付入力ボックスの▾付きのまま=フォームに見える」を実測。
+- 改善: 印刷専用要素のみ追加(画面/保存/CSV不変)。①署名・押印欄(`hidden print:grid`)＝教育実施者/受講者本人の2枠・氏名(educator/workerName)プレフィル＋㊞枠、純表示SignBoxに切出し。②印刷専用の帳票タイトル(`hidden print:block`・中央h1「新規入場者 受入教育 実施記録」＋安衛法59条/安衛則35条)、画面用h2は`print:hidden`で重複回避。③globals.css @media printで`input[type=date]`のカレンダー/スピナー非表示(全印刷ページ共通の清書化)。新規依存0・データ/localStorageスキーマ不変。
+- 再レビュー(A4プレビュー再実測): 先頭に大標題＋法的根拠、実施日は「2026/06/09」のみ(▾消失)、末尾に「教育実施者 署名: 職長 山田 太郎 ㊞／受講者(本人)署名: 新規 花子 ㊞」の2枠。横はみ出し0px・操作系0個維持。桑原さん「標題・署名・押印がそろった。作業所ファイルに綴じて監査に出せる」=提出ライン到達。画面表示は不変(スクショ確認)。
+- ゲート: tsc0 / lint errors0(warn47既存) / vitest1105pass / build成功。記録: docs/third-party-reviews/induction-print-a4-2026-06-09.md(+afterスクショ)。temp(_induction_print_review.mjs/_shot.mjs/png/pdf)削除済。架空0・水増し0・既存破壊0。env/DB変更なし。

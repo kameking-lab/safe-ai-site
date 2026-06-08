@@ -36,7 +36,7 @@
 - [x] サイネージ「🌅朝礼前」シナリオプリセットの意味付けを是正（2026-06-09: 押下しても既定floorplanと同一で無反応＝壊れて見える致命を実機確認。押下動作を「floorplan表示＋朝礼スクリプトのモーダルを開く」に変更し、押せば必ず読み上げ原稿が出る＝反応が一目で分かる。active判定も各プリセットの実体に是正しfloorplan誤ハイライト解消。既存SignageMorningScriptを再利用、ロジック不変・1画面フィット維持。docs/third-party-reviews/signage-asarei-preset-2026-06-09.md）
 - [x] 死蔵サイネージ部品の棚卸し＆結線可否判定（signage-risk-prediction / signage-danger-alert / signage-featured-goods / japan-weather-map が参照0件）。価値あるものは結線、不要は削除して保守負債を減らす。（2026-06-09: 4部品を依存グラフ込みで棚卸し。SignageRiskPrediction＝当日リスク予測(気象→熱中症等)を右サイドバー先頭に結線(state.riskData再利用・1画面フィット維持を実機0pxで確認)。JapanWeatherMap＝実データのJapanPrefectureWarningMapで上位互換のため孤立ラッパー1ファイルのみ削除(モック/SVGは/risk等が生きて使用→温存)。DangerAlert/FeaturedGoodsは保留しタスク化。docs/third-party-reviews/signage-dead-component-inventory-2026-06-09.md）
 - [ ] サイネージ全画面(/signage/display)を「無人で1日流しっぱなし」前提でレビュー＝自動更新間隔・データ取得失敗時の表示・夜間/長時間の挙動を点検し、現場に置いて放置できる状態にする。
-- [ ] 受入教育記録(/site-records 配下)の印刷物（入場者名簿・教育記録）をA4実機プレビューで崩れ・はみ出しを点検→是正（顧問先/元請提出に耐える品質へ）。
+- [x] 受入教育記録(/site-records 配下)の印刷物（入場者名簿・教育記録）をA4実機プレビューで崩れ・はみ出しを点検→是正（顧問先/元請提出に耐える品質へ）。（2026-06-09: A4プレビュー実測ではレイアウトは健全(はみ出し0px・操作系print:hidden)だが、提出書類として致命の「署名・押印欄なし」を発見。印刷専用に①署名・押印欄(実施者/本人・氏名プレフィル＋㊞枠)②大きな帳票タイトル＋法的根拠③日付入力の▾/スピナー非表示を追加。print:バリアントのみで画面/保存/CSVは不変・スキーマ不変。docs/third-party-reviews/induction-print-a4-2026-06-09.md）
 - [ ] KY用紙(/ky/paper)の作業員選択をスマホで「2タップ完了」化＝よく使う班をワンタップ呼び出し（手袋の職長目線）
 - [ ] 業種別リスク判定(/heat-illness-prevention/industry-risk)をスマホで縦長スクロール短縮＝結論(対策)先頭・詳細は折りたたみ
 - [ ] 各印刷ページ(WBGT結果/順化計画/ポスター)を実際にA4プレビューし「枠線切れ・1枚に収まらない」崩れを点検→是正
