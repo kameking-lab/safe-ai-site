@@ -277,17 +277,44 @@ export default function SignagePage() {
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-sky-700/50 bg-sky-950/40 px-3 py-2 text-xs">
         <span className="text-sky-200/80 font-semibold shrink-0">シナリオ：</span>
         {([
-          { label: "朝礼前", icon: "🌅", mode: "floorplan" as DisplayMode, title: "朝礼前 — 現場レイアウトと気象警報を確認" },
-          { label: "休憩時間", icon: "☕", mode: "map" as DisplayMode, title: "休憩時間 — 気象マップと最新ニュース確認" },
-          { label: "退場時", icon: "🌆", mode: "workdocs" as DisplayMode, title: "退場時 — 本日の作業資料と法改正確認" },
+          {
+            label: "朝礼前",
+            icon: "🌅",
+            title: "朝礼前 — 現場レイアウトを表示し、朝礼の読み上げ原稿を開きます",
+            active: displayMode === "floorplan" && showMorningScript,
+            onSelect: () => {
+              setDisplayMode("floorplan");
+              setShowMorningScript(true);
+            },
+          },
+          {
+            label: "休憩時間",
+            icon: "☕",
+            title: "休憩時間 — 気象マップと最新ニュース確認",
+            active: displayMode === "map",
+            onSelect: () => {
+              setShowMorningScript(false);
+              setDisplayMode("map");
+            },
+          },
+          {
+            label: "退場時",
+            icon: "🌆",
+            title: "退場時 — 本日の作業資料と法改正確認",
+            active: displayMode === "workdocs",
+            onSelect: () => {
+              setShowMorningScript(false);
+              setDisplayMode("workdocs");
+            },
+          },
         ] as const).map((s) => (
           <button
             key={s.label}
             type="button"
-            onClick={() => setDisplayMode(s.mode)}
+            onClick={s.onSelect}
             title={s.title}
             className={`rounded border px-2.5 py-1 text-[11px] font-bold transition min-h-[36px] ${
-              displayMode === s.mode
+              s.active
                 ? "border-sky-400 bg-sky-600 text-white"
                 : "border-sky-700 bg-sky-900/60 text-sky-200 hover:bg-sky-800/60"
             }`}
