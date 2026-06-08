@@ -11,6 +11,7 @@ import {
   GraduationCap,
   CalendarRange,
   CalendarDays,
+  FileWarning,
   Thermometer,
   CalendarCheck,
   HeartPulse,
@@ -119,6 +120,14 @@ const NEW_TOOLS: Tool[] = [
     desc: "全国安全週間・労働衛生週間・季節リスク・毎月の法定義務を月別に一覧。今月やることが一目で分かり各ツールへ。",
     icon: CalendarDays,
     color: "sky",
+    badge: "NEW",
+  },
+  {
+    href: "/site-records/incident-report",
+    title: "労働者死傷病報告 作成補助",
+    desc: "労災発生時の届出（安衛則97条・様式23/24号）に必要な情報を整理する下書きを作成・印刷。電子申請の前準備に。",
+    icon: FileWarning,
+    color: "rose",
     badge: "NEW",
   },
 ];
