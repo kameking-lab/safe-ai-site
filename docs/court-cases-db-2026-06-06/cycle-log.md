@@ -331,3 +331,11 @@
 - 改善(最小・非破壊): (a)最上部に「🔎事例をすぐ検索」カード新設(quick-accident-search.tsx)=キーワード入力＋頻出事故型6チップ(墜落/転倒/はさまれ/飛来落下/熱中症/感電)、1タップで /accidents?tab=list&acc_kw=...#accident-results へフル遷移。tab=list・acc_kw は AccidentDatabasePanel が既にマウント時復元する実装済みURL導線を再利用。(b)結果パネルに id=accident-results 付与=区画先頭(自社Top5＋クロス集計)の下に結果が埋もれないよう、キーワード欄＋絞り込み結果へ直接着地。
 - 再レビュー(Playwright実機): クイック検索位置 5,561px→1,080px。1タップ「墜落・転落」→ キーワード欄「墜落」入りで42件の絞り込み結果へ自動スクロール着地。佐藤評価「1タップで実例が並ぶ、移動中でも使える」→採用ライン到達。残課題=既定タブ名の正直化・出典定義文の畳み込み(別タスク)。
 - ゲート: tsc 0 / lint errors 0 / vitest 1092 pass / build 成功。記録: docs/third-party-reviews/accidents-busy-consultant-2026-06-08.md。架空0・水増し0・既存破壊0。
+
+## Cycle54【新着ハブ 毎朝コンサル目線で「新着のみ＋業種」絞り込み】(2026-06-09 JST)
+- 前回PR回収: 自分のCI緑未マージPRを確認。#427(安全工程打合せ書 前回複製)はmain衝突(BACKLOG/cycle-logのみ)→ローカルでrebase両取り解決済だが force-push がパーミッションで不可のため remote 更新できず、解決状態をローカル保持・ログのみ(次回手当て)。#428(チャットボット無限再描画修正)はCI実行中→次イテレーション回収。古いdocs PR群は従来どおり安全放置。main は pull --ff-only で clean。
+- タスク選定: BACKLOG軸2最上位は /chatbot だが in-flight #428 と同一領域で自己衝突回避(Cycle53の重複回避と同方針)。次の未着手「新着/法改正(/whats-new,/laws)を毎朝コンサル目線で→鮮度・業種別」を実行。
+- 第三者レビュー: 村上さん(47・独立系コンサル・顧問先 建設7/製造2・毎朝3分で差分把握→離脱条件=新着だけ見たいのに全件/他業種の改正まで読まされる)。本番ビルドをPlaywright実機(390×844)で操作。/laws は業種マルチセレクト等フィルタ充実だが、毎朝の入口 /whats-new は致命2点: ①「新着のみ」に絞れず全81件ベタ表示で新着バッジを目で探す ②業種フィルタが無い(法改正項目には industries タグが既存=メール配信で使用済なのにUI未活用)。
+- 改善(最小・非破壊・既存データ再利用): whats-new-client.tsx に「🆕新着のみ」トグル(前回閲覧localStorage以降=件数表示と同一基準)＋業種チップ(法改正を業種で絞り、業種非依存の速報/通達と全業種向け改正は常時表示)＋「絞り込み解除」。判定を純関数 filterNewsHubItems/isNewSince/newsItemMatchesIndustry として news-hub-types.ts に切出し、news-hub-filter.test.ts 8ケースで固定検証(件数表示と新着フィルタの一致・他業種専用のみ除外 等)。
+- 再レビュー(本番ビルド): 前回=2026-06-04の常連で「新着のみ」→81件→3件(全て前回以降・表示件数と一致)。法改正40→建設26/医療福祉16。村上評価「新着のみ→建設で関係分だけ。毎朝ここで完結、e-Govを開き直さない」→採用ライン到達。検証中、テスト用セレクタが page全18 ul を数える誤り(101等の偽値)を発見→ニュース項目限定セレクタで実数(81/3/26)を再確認。
+- ゲート: tsc 0 / lint errors 0 / vitest 1100 pass(+8) / build 成功。記録: docs/third-party-reviews/whats-new-asakatsu-consultant-2026-06-09.md(+ 絞り込みスクショ)。temp(probe/persona .mjs)削除済。データ再生成2ファイルはcheckoutで復元。架空0・水増し0・既存破壊0。
