@@ -7,6 +7,38 @@ export type ScoredItem = EquipmentItem & {
 };
 
 /**
+ * 「ハーネス形状（X型/Y型/H型）」はフルハーネス固有の属性で、ランヤードや胴ベルトには
+ * 形状という概念が無い。形状を指定した検索（shape ≠ any）では、形状を持たない製品が
+ * 「ランヤード種別＋業種＋高評価」の合算で同点上位化し、X型ハーネスを探したのに
+ * ランヤードが1位に出る不具合があった。形状指定時は製品クラスを優先ソートキーにし、
+ * 形状を持つフルハーネスを上位（tier 0）、形状概念の無いランヤード等を下位（tier 1）へ降格する。
+ */
+const SHAPE_QUESTION_ID = "shape";
+const HARNESS_SUBCATEGORY_MARKER = "ハーネス";
+
+/** 形状質問に「問わない」以外が選択されているか（＝フルハーネス固有属性での検索か）。 */
+export function isShapeSelected(
+  category: EquipmentCategory,
+  answers: RefineAnswers
+): boolean {
+  const hasShapeQuestion = category.refineQuestions.some(
+    (q) => q.id === SHAPE_QUESTION_ID
+  );
+  if (!hasShapeQuestion) return false;
+  const ans = answers[SHAPE_QUESTION_ID];
+  return !!ans && ans !== "any";
+}
+
+/**
+ * 製品クラスの優先ティアを返す（小さいほど上位）。
+ * 形状未指定なら全件 tier 0（従来挙動）。形状指定時のみ、フルハーネス=0／非ハーネス=1。
+ */
+export function classTier(item: EquipmentItem, shapeSelected: boolean): number {
+  if (!shapeSelected) return 0;
+  return (item.subCategory ?? "").includes(HARNESS_SUBCATEGORY_MARKER) ? 0 : 1;
+}
+
+/**
  * スコアリングルール（仕様書）:
  * - フィルタ完全一致: +30点
  * - フィルタ部分一致: +15点
@@ -19,7 +51,8 @@ export function recommendItems(
   limit = 12
 ): ScoredItem[] {
   const items = getItemsByCategory(category);
-  const scored: ScoredItem[] = items.map((item) => {
+  const shapeSelected = isShapeSelected(category, answers);
+  const scored: Array<{ item: ScoredItem; tier: number }> = items.map((item) => {
     let score = 0;
     const matched: string[] = [];
 
@@ -79,14 +112,18 @@ export function recommendItems(
       score += 10;
     }
 
-    return { ...item, score, matchedAnswers: matched };
+    return {
+      item: { ...item, score, matchedAnswers: matched },
+      tier: classTier(item, shapeSelected),
+    };
   });
 
-  // スコア降順 → レビュー数降順 でソート
+  // クラス優先（形状指定時のみ有効）→ スコア降順 → レビュー数降順 でソート
   scored.sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    return (b.reviewCount ?? 0) - (a.reviewCount ?? 0);
+    if (a.tier !== b.tier) return a.tier - b.tier;
+    if (b.item.score !== a.item.score) return b.item.score - a.item.score;
+    return (b.item.reviewCount ?? 0) - (a.item.reviewCount ?? 0);
   });
 
-  return scored.slice(0, limit);
+  return scored.slice(0, limit).map((s) => s.item);
 }
