@@ -362,3 +362,12 @@
 - 改善: 編集画面の上部バー(保存一覧の隣)に「↻ 前回を複製」を常設(保存済みがある時のみ)。1タップで直近保存→翌日分を生成(各社の作業/機械/資格/予知災害/対策/RA引継・日付翌日・当日記入クリア)。既存 duplicateForNextDay を再利用(作り直し無し)。store.tsに loadLatestMeeting() 追加＋meeting-paper-view.tsxに hasLatest/handleCopyLatest/ボタン。KY用紙とUI・文言を統一。
 - 再レビュー(Playwright実機): 初見は非表示(空複製防止)→保存→リロードで上部「前回を複製」常設→1タップで通知＋作業所名引継＋翌日日付。渡辺さん「1タップで昨日の各社対策が乗る。紙に戻らない」。
 - ゲート: tsc0 / lint errors0 / vitest1092pass / build成功。記録: docs/third-party-reviews/safety-diary-genuke-anzentanto-2026-06-09.md（+ topbar スクショ）。temp(spec/config/devlog)削除済。架空0・水増し0・既存破壊0。
+
+## Cycle (2026-06-09) — WBGT計算機 手袋現場監督レビュー（軸2）
+- 前PR回収: 自分の#432(site-records初見導線)はCI緑だがBACKLOG.mdでmainと衝突→ローカルでorigin/mainをmerge・両タスク[x]に解決しpush(CI再走待ち、次イテレーションで回収)。#433(signage朝礼)はCI進行中につき次回。古いdocs系PRは放置。
+- タスク選定: BACKLOG最上位 site-records(#432)・signage(#433) は両方とも自分の未マージPRで対応中につき重複回避。次の真の未着手「WBGT計算機/熱中症ハブを屋外・手袋の現場監督ペルソナでレビュー→スマホ実用性」を実行。
+- 第三者レビュー: 62歳・建設現場監督(炎天下・薄手手袋・片手スマホ・現場で何度も数値を入れ直す)になりきりPlaywright(iPhone 12)で実測。致命=気温/湿度/黒球温度/風速/日射の数値5項目が全て高さ37px・キーボード手打ちで、手袋では誤タップ＋炎天下でキーボードが見づらく「気温を1度上げて再計算」が一瞬でできない。+ inputMode未指定(Android機種でフルキーボード)、セレクト33px、text-smでiOSオートズーム。
+- 改善: 主要数値に大きな[−][＋]ステッパー(44px・気温±0.5/湿度±5/風速±0.5/日射±50)を新設しタップだけで即時再計算(既存useMemo)、min/max自動クランプ＋端でdisabled。全数値欄にinputMode=decimal。入力欄/セレクトを44px・16px(text-base)化しオートズーム抑止。NumberFieldにstepByプロップを足して再利用、計算ロジック(wbgt-engine/assess)は一切不変。
+- 再レビュー(Playwright実機): 気温[＋]2回で32→33°C・WBGT 30.2→31.2°Cの即時更新を実測。入力欄/セレクト/ステッパー全て高さ44px・inputMode=decimalを実測確認。手袋でもキーボード不要で数値を回せる=「現場で使う」状態。
+- ゲート: tsc0 / lint errors0 / vitest1105pass / build成功。記録: docs/third-party-reviews/wbgt-calculator-gloved-foreman-2026-06-09.md（+ after スクショ）。temp(review/interactスクリプト, _tmp png)削除済。架空0・水増し0・既存破壊0。
+- BACKLOG補充: 実質の未着手が薄かったため改善タスク3件追記(KY作業員2タップ・業種別リスク縦長短縮・印刷A4崩れ点検)。
