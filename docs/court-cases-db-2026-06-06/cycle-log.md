@@ -594,6 +594,15 @@
 - 再レビュー(Playwright実機): 防塵マスクPAPRカードで `✓国家検定品`(amber)＋spec`国家検定 P-PAPR`＋`⚖根拠法令・規格: 電動ファン付き呼吸用保護具の規格 / 石綿則 第14条` を確認＝田中さんは画面だけで検定品か/何法が根拠かを判断し選定記録に転記可。検定マーカー無しの個体(ランヤード等)はバッジ非表示・根拠法令のみ＝誤った適合表示を出さない。iPhone横overflow0・console error0・12件結果で崩れ無し。
 - ゲート: tsc0 / lint errors0(warning48=既存・本変更箇所に新規warning無し) / vitest 全1208pass(152ファイル・+10) / build成功(初回はWindowsのTS worker segfault=transient、再実行で成功)。記録: docs/third-party-reviews/equipment-finder-compliance-2026-06-09.md(＋after実機png)。temp(persona-review.mjs/shot-card.mjs/review-*.png)削除済。新規依存0・架空0・水増し0・既存破壊0・env/DB変更なし。
 
+## 2026-06-09 イテレーション（保護具ファインダー フルハーネス スコアリング是正）
+- 前PR回収: CI緑だった #457(保護具ファインダー 適合区分バッジ・根拠法令)を `gh pr merge 457 --squash --delete-branch` でland→`git checkout main && git pull --ff-only`でclean確認。#458(外国人労働者 教育実施記録)はCI IN_PROGRESS=次回回収。前イテレーションの参考メモ(範囲外として切り出した「X型ハーネスを選んでもランヤードが同点1位化」)が今回の本タスク。
+- タスク選定: 軸2の真に着手可能な最上位＝BACKLOG line59「フルハーネスカテゴリのX型/Y型/H型選択時にランヤードが1位化するスコアリング是正」。line53(アフィリエイト是非)はPath A=オーナーゲートでスキップ、line58(外国人労働者レビュー)は未マージ#458が同一ペルソナ・同一機能で完了済(#458ブランチが既に[x]化)のため重複回避し非選択。
+- 第三者レビュー: 杉本さん(41歳・鉄骨建方の元請現場代理人・X型でなければ買わない・X型を選んだのに1位がランヤードならツールが形状を理解していないと感じ即離脱)になりきりPlaywright実機(iPhone12 390×844)。フルハーネス→X型/シングル/建設→結果。
+- 致命(改善前・本番DB再現): スコアリングがフラット合算のため、形状概念を持たないシングルランヤードが 種別30＋業種30＋高評価10=70点 でX型フルハーネスと同点→レビュー数で上回り1位を奪取(1位=サンコー ランヤード巻取式シングル rev353)。X型ハーネスを探したのにランヤードが先頭という主目的違反。
+- 改善: 加点ルール/DB/スキーマ不変のまま、web/src/lib/equipment-finder/recommendations.ts に純関数 isShapeSelected/classTier を追加しソートへクラス優先ティアを導入。形状指定時(shape≠any)のみ フルハーネス=tier0／形状概念なきランヤード等=tier1 へ降格し「クラスtier昇順→スコア降順→レビュー数降順」でソート。形状=問わない時は全件tier0でスコア純ソートに戻り後方互換、形状質問の無い他カテゴリ(ヘルメット等)は isShapeSelected=false で無影響。
+- 再レビュー(Playwright実機): 同条件で1〜6位すべてフルハーネス・シングルランヤードは下位へ降格・1位は確実にX型。カードに「✓ハーネス形状: X型」マッチチップ＋JIS/根拠法令バッジ正常表示・横overflow0・console error0。杉本さん採用ライン到達。
+- ゲート: tsc0 / lint errors0(warning47=既存・本変更箇所に新規warning無し) / vitest 全1224pass(153ファイル・+9) / build成功。記録: docs/third-party-reviews/equipment-finder-harness-shape-2026-06-09.md(＋after実機png)。temp(_harness_review.mjs/_harness_after.png)削除済。新規依存0・架空0・水増し0・既存破壊0・env/DB変更なし。
+
 ## Cycle (2026-06-09) — 化学物質RA→保護具ファインダー連携で「必要な保護具一式」を全フェーズ可視化（軸2）
 - 前PR回収: CI緑だった自PR #458(外国人 教育実施記録印刷)はBACKLOG/cycle-logがorigin/mainの#457等と追記衝突→origin/mainを当該ブランチへ通常マージし両側併記(equipment-finder[x]＋foreign-workers[x]＋ハーネス/化学連携の新タスク)、tsc0確認しpush→`gh pr merge 458 --squash --auto`で自動land済→`git checkout main && git pull --ff-only`→clean。#459(ハーネス形状でランヤード降格)はe2e/smoke進行中=次回回収。古いdocs系PRは放置。
 - タスク選定: 最上位 #53 はPath A(SignageFeaturedGoods=オーナー判断ゲート・着手不可)、次の「ハーネス形状でランヤード降格」は #459 が在中(衝突回避でスキップ)。実着手可能な最上位＝「化学物質RA→保護具ファインダーのchemical連携 レビュー(受信カテゴリ自動選択の精度・防毒マスク吸収缶の初期値妥当性)」を実行。未着手は inspection/monthly/吸収缶整合/判例 と3件以上あり補充不要(レビューで新タスク1件は派生追記)。
