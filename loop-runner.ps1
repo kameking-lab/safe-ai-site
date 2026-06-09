@@ -33,7 +33,8 @@
   Command/path for the Claude CLI (default "claude").
 
 .PARAMETER Model
-  Optional model id, e.g. "claude-opus-4-8".
+  Model id passed to the Claude CLI (default "claude-fable-5").
+  Pass -Model "" to let the CLI use its own default.
 
 .PARAMETER PromptFile
   UTF-8 file with the per-iteration instruction (default loop-prompt.txt next to this script).
@@ -51,7 +52,7 @@ param(
   [string]$UntilIso = "",
   [string]$RepoPath = $PSScriptRoot,
   [string]$ClaudeCmd = "claude",
-  [string]$Model = "",
+  [string]$Model = "claude-fable-5",
   [string]$PromptFile = ""
 )
 
@@ -91,7 +92,7 @@ $prompt = Get-Content -Raw -Encoding UTF8 -Path $PromptFile
 
 $iter = 0
 Write-Log ("=== loop-runner start (interval=" + $IntervalSeconds + "s, max=" + $MaxIterations + ", until='" + $UntilIso + "', repo=" + $RepoPath + ") ===")
-Write-Log ("claude: " + $claudeResolved + " | prompt: " + $PromptFile)
+Write-Log ("claude: " + $claudeResolved + " | model: " + $(if ($Model -ne "") { $Model } else { "(cli default)" }) + " | prompt: " + $PromptFile)
 Write-Log ("log: " + $logFile)
 
 while ($true) {
