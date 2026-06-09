@@ -603,9 +603,20 @@
 - 再レビュー(Playwright実機): 同条件で1〜6位すべてフルハーネス・シングルランヤードは下位へ降格・1位は確実にX型。カードに「✓ハーネス形状: X型」マッチチップ＋JIS/根拠法令バッジ正常表示・横overflow0・console error0。杉本さん採用ライン到達。
 - ゲート: tsc0 / lint errors0(warning47=既存・本変更箇所に新規warning無し) / vitest 全1224pass(153ファイル・+9) / build成功。記録: docs/third-party-reviews/equipment-finder-harness-shape-2026-06-09.md(＋after実機png)。temp(_harness_review.mjs/_harness_after.png)削除済。新規依存0・架空0・水増し0・既存破壊0・env/DB変更なし。
 
+## Cycle (2026-06-09) — 化学物質RA→保護具ファインダー連携で「必要な保護具一式」を全フェーズ可視化（軸2）
+- 前PR回収: CI緑だった自PR #458(外国人 教育実施記録印刷)はBACKLOG/cycle-logがorigin/mainの#457等と追記衝突→origin/mainを当該ブランチへ通常マージし両側併記(equipment-finder[x]＋foreign-workers[x]＋ハーネス/化学連携の新タスク)、tsc0確認しpush→`gh pr merge 458 --squash --auto`で自動land済→`git checkout main && git pull --ff-only`→clean。#459(ハーネス形状でランヤード降格)はe2e/smoke進行中=次回回収。古いdocs系PRは放置。
+- タスク選定: 最上位 #53 はPath A(SignageFeaturedGoods=オーナー判断ゲート・着手不可)、次の「ハーネス形状でランヤード降格」は #459 が在中(衝突回避でスキップ)。実着手可能な最上位＝「化学物質RA→保護具ファインダーのchemical連携 レビュー(受信カテゴリ自動選択の精度・防毒マスク吸収缶の初期値妥当性)」を実行。未着手は inspection/monthly/吸収缶整合/判例 と3件以上あり補充不要(レビューで新タスク1件は派生追記)。
+- 第三者レビュー: 佐久間さん(46歳・化学メーカーの化学物質管理者・SDSを1枚ずつ見て1物質に必要な保護具一式を台帳化・リンクを踏んだら1種類だけ出され他が画面から消えるのを最も嫌う)になりきりPlaywright実機(iPhone12 390×844)。塩酸/トルエン/硫酸/アンモニアの `?chemical=` 着地を確認。
+- 致命: 連携着地で先頭カテゴリ1種の絞り込み(STEP2)へ問答無用ジャンプ。塩酸は防毒マスク＋手袋＋ゴーグル＋保護衣の4種が要るのに画面に出るのは防毒マスク1種だけ＝他に何が要るか手がかり皆無で取りこぼし(安全上のミスに直結)。さらにバナーは「推奨カテゴリにバッジを付けています」と謳うがcategoryフェーズを飛ばす自動遷移時はバッジ一覧が非描画＝約束と画面が不一致。
+- 参考(範囲外): chemical-equipment-mapping.tsで塩酸/硝酸が gasMaskAbsorber="ハロゲン" だが rationale は「酸性ガス用吸収缶が必要」と辞書内不一致。ハロゲンガス用吸収缶は塩化水素/酸性ガスを適用範囲に含むため一概に誤りでないが、表記整合と「酸性ガス」選択肢の要否は製品DBの該当タグ確認が要る。出典なしで吸収缶種別を書換えるのは安全情報の捏造リスクのため本PRでは触れずBACKLOGへ切出し。
+- 改善: 自動遷移の利便性は残しつつ、受信した推奨カテゴリ全種を全フェーズで可視化・ワンタップ切替できるよう受信バナー(化学/事故DB両方)に「必要な保護具(タップで切替)」チップ行を新設。各カテゴリをアイコン＋名称で列挙・現在表示中を緑＋「表示中」で明示・複数時は「この物質には複数の保護具が必要です」を併記。タップで当該絞り込みへ即遷移し、防毒マスクへ切替時は化学物質由来の吸収缶種別を初期選択(自動遷移と同じ初期化を再現)。食い違っていたバナー文言を実挙動に是正。解決ロジックは純関数 web/src/lib/equipment-finder/incoming-context.ts(resolveRecommendedCategories/firstValidCategoryId/initialAnswersForCategory)＋テスト11に切出し(不正ID除外で捏造せず・重複除去・順序維持)。
+- 再レビュー(Playwright実機): 塩酸着地に `🛡防毒マスク(表示中)/🧤手袋/🥽保護メガネ/🥼保護衣` の4種チップを確認＝必要保護具一式が一目で分かる。手袋チップ→手袋の絞り込みへ即遷移しチップが「🧤手袋 表示中」に更新、防毒マスクへ戻すと吸収缶「ハロゲンガス」が再選択。iPhone横overflow0・console error0。佐久間さん「着地した瞬間に一式が出る、1種類ずつ戻らなくていい」=採用ライン到達。
+- ゲート: tsc0 / lint errors0(warning48=既存・本変更箇所に新規warning無し) / vitest 全1238pass(154ファイル・+11) / build成功。記録: docs/third-party-reviews/equipment-finder-chemical-linkage-2026-06-09.md(＋実機png)。temp(_chem_review*.mjs)削除済。再生成データ(chatbot-eval/rag-metrics)は変更なし。受信解析(searchParams)/スコアリング/データ/スキーマ/アフィリエイト導線/事故DB連携の既存挙動 不変・新規依存0・架空0・水増し0・既存破壊0・env/DB変更なし。
+
 ## 2026-06-10 イテレーション（Fable 5 初回 — /site-records「今日やること」横断パネル・柱2第1弾）
 - 前PR回収: CI緑の #459(ハーネス形状ランヤード降格)・#460(化学RA連携 保護具一式)が BACKLOG.md再構成(Fable引き継ぎ)と衝突→両ブランチへ origin/main を通常マージ(BACKLOGはmain側の新3柱構造を採用・完了情報は「回収待ち」に反映済)しpush。#459はland確認(mainへff)。#460はリポジトリでauto-merge無効のためCI再走後に次イテレーション冒頭で回収。古いdocs系PR(#231〜#351)は方針通り放置。
 - タスク選定: 柱2最上位「/site-records ライブダッシュボードを毎朝最初に開く1枚へ」。未マージ#460(equipment-finder)とはファイル/機能とも非重複。
 - 実装: 純関数 web/src/lib/site-records/daily-actions.ts(buildDailyActions/mergeCheckupTrackerMaps/readCheckupTrackerMaps/calendarItemsForMonth/lastDayOfMonth/countBySeverity＋テスト11件)。パトロール未是正(collectOpenFindings再利用・期日超過=overdue)・重大ヒヤリ個別行＋軽微1行集約・使用不可機械・委員会今月未開催(議事録利用事業場のみナグ・実質期限=月末を期日付与)・健診期限超過/間近(hc-tracker:v1:* をプロファイル横断で最新日マージ→classifyCheckupTiming＋getRuleByIdに委譲=判定二重実装0)・カレンダー今月予定(info最大3件)。UI daily-actions-panel.tsx を records-overview の4タイル上に純追加(タイル/初見ガイド不変)。
 - 第三者レビュー: 木村さん(52・元請専任安全衛生責任者・毎朝7時に段取り・1分で優先順位が決まらなければ紙に戻る)でPlaywright実機(390px/1366px)。1回目で2点発見=①重大ヒヤリ(期日なし)が軽微指摘(期日付き)の下に沈む ②委員会未開催が期日なし扱いで「すべて表示」の中に隠れる→ソートを重大度→危険度高(hazardHigh)→期日昇順に是正＋委員会に月末期日。再レビューで 重大×期日超過の開口部指摘→健診超過→重大ヒヤリ→軽微 の理想順・y=396px(1画面目)・横overflow0(両幅)・console error0・要対応0件シードで緑表示=誤アラートなし。「これなら毎朝開く」=採用。
 - ゲート: tsc0 / lint errors0(warning47=既存) / vitest 全1247pass(+11) / build成功。記録: docs/third-party-reviews/site-records-daily-actions-2026-06-10.md(＋スマホ/PC実機png)。temp(tmp-daily-actions-*.mjs/png)削除済。新規依存0・捏造0・水増し0・既存破壊0・env/DB変更なし。
+
