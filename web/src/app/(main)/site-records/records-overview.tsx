@@ -8,6 +8,7 @@ import { getNearMissReports, openCount as nearMissOpen } from "@/lib/site-record
 import { getInspectionList } from "@/lib/site-records/inspection-store";
 import { getCommitteeList } from "@/lib/site-records/committee-store";
 import { getInductionList } from "@/lib/site-records/induction-store";
+import { DailyActionsPanel } from "./daily-actions-panel";
 
 type Overview = {
   patrolOpen: number;
@@ -61,6 +62,8 @@ export function RecordsOverview() {
   ];
 
   return (
+    <>
+    <DailyActionsPanel />
     <section className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
       <h2 className="mb-2 text-sm font-bold text-slate-700">この端末の記録の状況（今日・今月）</h2>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -88,6 +91,7 @@ export function RecordsOverview() {
         <p className="mt-2 text-[11px] text-slate-500">今月の新規入場者 受入教育: {ov.inductionThisMonth} 件記録済み</p>
       )}
     </section>
+    </>
   );
 }
 
