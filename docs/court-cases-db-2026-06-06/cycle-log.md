@@ -602,3 +602,11 @@
 - 改善: 加点ルール/DB/スキーマ不変のまま、web/src/lib/equipment-finder/recommendations.ts に純関数 isShapeSelected/classTier を追加しソートへクラス優先ティアを導入。形状指定時(shape≠any)のみ フルハーネス=tier0／形状概念なきランヤード等=tier1 へ降格し「クラスtier昇順→スコア降順→レビュー数降順」でソート。形状=問わない時は全件tier0でスコア純ソートに戻り後方互換、形状質問の無い他カテゴリ(ヘルメット等)は isShapeSelected=false で無影響。
 - 再レビュー(Playwright実機): 同条件で1〜6位すべてフルハーネス・シングルランヤードは下位へ降格・1位は確実にX型。カードに「✓ハーネス形状: X型」マッチチップ＋JIS/根拠法令バッジ正常表示・横overflow0・console error0。杉本さん採用ライン到達。
 - ゲート: tsc0 / lint errors0(warning47=既存・本変更箇所に新規warning無し) / vitest 全1224pass(153ファイル・+9) / build成功。記録: docs/third-party-reviews/equipment-finder-harness-shape-2026-06-09.md(＋after実機png)。temp(_harness_review.mjs/_harness_after.png)削除済。新規依存0・架空0・水増し0・既存破壊0・env/DB変更なし。
+
+## Cycle (2026-06-10) — 柱1: 採用レビューの「構造的限界」結論をゼロベース再検証（Fable 5 初回イテレーション）
+- 前PR回収: 自PR #462(site-records今日やることパネル)・#460(化学RA→保護具一式可視化)はいずれも e2e/smoke IN_PROGRESS のため次回回収。古いdocs系PR(#343〜#351等)は方針どおり放置。mainはclean・最新。
+- タスク選定: BACKLOG柱2の上位3件は #462 と同一機能(site-records/signageダッシュボード)のため衝突回避でスキップし、柱1最上位「採用レビューの構造的限界・コード上限結論のゼロベース再検証」を実行。
+- 検証方法: 前任の6結論(出し切り済み/習慣壁/様式壁/新着上限/法改正競合/3機能十分)を、(a)cycle-log実績との突合、(b)現行コードの一次検証(grep+実読)で再評価。調査サブエージェント報告に事実誤認3件(apple-touch-icon/sw.js/A2HS UIを「無し」と誤報→全て実在)があり、一次検証主義の必要性を実証。
+- 発見: ①「決定レバー出し切り済み」(06-05)は過剰一般化=翌日のR8/R9+軸2ループ20本超で前任自身が自己反証(軸を変えるたびレバーが出る)。②「毎朝の習慣=営業領域」は部分反証=install-pwa-prompt.tsx が beforeinstallprompt 専依存で iOS Safari(一人親方の主端末)には A2HS 導線が永久にゼロ＋Web Push未実装(CLAUDE.md優先課題7・VAPID鍵=Path A)。③「元請様式=一般化不可」は部分反証=全様式生成不可は追認だが、KYは印刷のみで CSV/コピー転記支援が皆無=「手で全転記し直す」中間レバーの見落とし。④新着コード上限・法改正競合・チャットボット/事故分析/サイネージ十分は追認(R9残課題のサイネージ朝礼伝達性等はその後の自律ループで解消済を確認)。
+- 是正: BACKLOGへ3タスク追加=【柱1是正】iOS向けホーム画面追加案内(コードのみ)/【柱1是正】KY転記支援出力(CSV/項目別コピー)/【Path A】Web Push設計ドラフト(オーナー判断待ちセクション)。記録: docs/fable-reexamination-2026-06-10/adoption-structural-limits-2026-06-10.md(前任の判断→Fableの発見→是正内容の標準フォーマット・README索引にも追記)。教訓3点(「もう無い」には探索軸を併記/二値判定を疑い中間レバーを探す/実装有無は一次検証)を明文化。
+- ゲート: docs+BACKLOGのみの変更(コード変更0)だが契約どおり tsc0 / lint errors0 / vitest全pass / build成功 を確認。新規依存0・捏造0・水増し0・既存破壊0・env/DB変更なし。
