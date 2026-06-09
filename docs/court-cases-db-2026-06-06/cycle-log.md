@@ -613,6 +613,13 @@
 - 再レビュー(Playwright実機): 塩酸着地に `🛡防毒マスク(表示中)/🧤手袋/🥽保護メガネ/🥼保護衣` の4種チップを確認＝必要保護具一式が一目で分かる。手袋チップ→手袋の絞り込みへ即遷移しチップが「🧤手袋 表示中」に更新、防毒マスクへ戻すと吸収缶「ハロゲンガス」が再選択。iPhone横overflow0・console error0。佐久間さん「着地した瞬間に一式が出る、1種類ずつ戻らなくていい」=採用ライン到達。
 - ゲート: tsc0 / lint errors0(warning48=既存・本変更箇所に新規warning無し) / vitest 全1238pass(154ファイル・+11) / build成功。記録: docs/third-party-reviews/equipment-finder-chemical-linkage-2026-06-09.md(＋実機png)。temp(_chem_review*.mjs)削除済。再生成データ(chatbot-eval/rag-metrics)は変更なし。受信解析(searchParams)/スコアリング/データ/スキーマ/アフィリエイト導線/事故DB連携の既存挙動 不変・新規依存0・架空0・水増し0・既存破壊0・env/DB変更なし。
 
+## 2026-06-10 イテレーション（Fable 5 初回 — /site-records「今日やること」横断パネル・柱2第1弾）
+- 前PR回収: CI緑の #459(ハーネス形状ランヤード降格)・#460(化学RA連携 保護具一式)が BACKLOG.md再構成(Fable引き継ぎ)と衝突→両ブランチへ origin/main を通常マージ(BACKLOGはmain側の新3柱構造を採用・完了情報は「回収待ち」に反映済)しpush。#459はland確認(mainへff)。#460はリポジトリでauto-merge無効のためCI再走後に次イテレーション冒頭で回収。古いdocs系PR(#231〜#351)は方針通り放置。
+- タスク選定: 柱2最上位「/site-records ライブダッシュボードを毎朝最初に開く1枚へ」。未マージ#460(equipment-finder)とはファイル/機能とも非重複。
+- 実装: 純関数 web/src/lib/site-records/daily-actions.ts(buildDailyActions/mergeCheckupTrackerMaps/readCheckupTrackerMaps/calendarItemsForMonth/lastDayOfMonth/countBySeverity＋テスト11件)。パトロール未是正(collectOpenFindings再利用・期日超過=overdue)・重大ヒヤリ個別行＋軽微1行集約・使用不可機械・委員会今月未開催(議事録利用事業場のみナグ・実質期限=月末を期日付与)・健診期限超過/間近(hc-tracker:v1:* をプロファイル横断で最新日マージ→classifyCheckupTiming＋getRuleByIdに委譲=判定二重実装0)・カレンダー今月予定(info最大3件)。UI daily-actions-panel.tsx を records-overview の4タイル上に純追加(タイル/初見ガイド不変)。
+- 第三者レビュー: 木村さん(52・元請専任安全衛生責任者・毎朝7時に段取り・1分で優先順位が決まらなければ紙に戻る)でPlaywright実機(390px/1366px)。1回目で2点発見=①重大ヒヤリ(期日なし)が軽微指摘(期日付き)の下に沈む ②委員会未開催が期日なし扱いで「すべて表示」の中に隠れる→ソートを重大度→危険度高(hazardHigh)→期日昇順に是正＋委員会に月末期日。再レビューで 重大×期日超過の開口部指摘→健診超過→重大ヒヤリ→軽微 の理想順・y=396px(1画面目)・横overflow0(両幅)・console error0・要対応0件シードで緑表示=誤アラートなし。「これなら毎朝開く」=採用。
+- ゲート: tsc0 / lint errors0(warning47=既存) / vitest 全1247pass(+11) / build成功。記録: docs/third-party-reviews/site-records-daily-actions-2026-06-10.md(＋スマホ/PC実機png)。temp(tmp-daily-actions-*.mjs/png)削除済。新規依存0・捏造0・水増し0・既存破壊0・env/DB変更なし。
+
 ## Cycle (2026-06-10) — 柱1: 採用レビューの「構造的限界」結論をゼロベース再検証（Fable 5 初回イテレーション）
 - 前PR回収: 自PR #462(site-records今日やることパネル)・#460(化学RA→保護具一式可視化)はいずれも e2e/smoke IN_PROGRESS のため次回回収。古いdocs系PR(#343〜#351等)は方針どおり放置。mainはclean・最新。
 - タスク選定: BACKLOG柱2の上位3件は #462 と同一機能(site-records/signageダッシュボード)のため衝突回避でスキップし、柱1最上位「採用レビューの構造的限界・コード上限結論のゼロベース再検証」を実行。
@@ -620,4 +627,5 @@
 - 発見: ①「決定レバー出し切り済み」(06-05)は過剰一般化=翌日のR8/R9+軸2ループ20本超で前任自身が自己反証(軸を変えるたびレバーが出る)。②「毎朝の習慣=営業領域」は部分反証=install-pwa-prompt.tsx が beforeinstallprompt 専依存で iOS Safari(一人親方の主端末)には A2HS 導線が永久にゼロ＋Web Push未実装(CLAUDE.md優先課題7・VAPID鍵=Path A)。③「元請様式=一般化不可」は部分反証=全様式生成不可は追認だが、KYは印刷のみで CSV/コピー転記支援が皆無=「手で全転記し直す」中間レバーの見落とし。④新着コード上限・法改正競合・チャットボット/事故分析/サイネージ十分は追認(R9残課題のサイネージ朝礼伝達性等はその後の自律ループで解消済を確認)。
 - 是正: BACKLOGへ3タスク追加=【柱1是正】iOS向けホーム画面追加案内(コードのみ)/【柱1是正】KY転記支援出力(CSV/項目別コピー)/【Path A】Web Push設計ドラフト(オーナー判断待ちセクション)。記録: docs/fable-reexamination-2026-06-10/adoption-structural-limits-2026-06-10.md(前任の判断→Fableの発見→是正内容の標準フォーマット・README索引にも追記)。教訓3点(「もう無い」には探索軸を併記/二値判定を疑い中間レバーを探す/実装有無は一次検証)を明文化。
 - ゲート: docs+BACKLOGのみの変更(コード変更0)だが契約どおり tsc0 / lint errors0 / vitest全pass / build成功 を確認。新規依存0・捏造0・水増し0・既存破壊0・env/DB変更なし。
+
 
