@@ -8,8 +8,20 @@ import { recommendItems } from "@/lib/equipment-finder/recommendations";
 import { deriveComplianceBadge, formatRegulations } from "@/lib/equipment-finder/compliance";
 import { trackAffiliateClick } from "@/lib/track-events";
 import { findChemicalEquipmentProfile } from "@/lib/chemical-equipment-mapping";
+import {
+  resolveRecommendedCategories,
+  firstValidCategoryId,
+  initialAnswersForCategory,
+} from "@/lib/equipment-finder/incoming-context";
 
 type Phase = "category" | "refine" | "result";
+
+// 受信コンテキストからカテゴリ初期回答を導出（防毒マスクなら吸収缶種別を初期選択）。
+// 自動遷移とバナーのカテゴリ切替で同じロジックを使う。
+function initialAnswersForContext(catId: string, ctx: IncomingContext): RefineAnswers {
+  const absorber = ctx && ctx.kind === "chemical" ? ctx.gasMaskAbsorber : undefined;
+  return initialAnswersForCategory(catId, absorber);
+}
 
 type IncomingContext =
   | {
@@ -69,21 +81,16 @@ export function EquipmentFinderClient() {
     if (!incoming) return;
     if (appliedContextRef.current === JSON.stringify(incoming)) return;
     if (phase !== "category") return;
-    const first = incoming.categories.find((c) => getCategoryById(c));
+    const first = firstValidCategoryId(incoming.categories);
     if (!first) return;
     appliedContextRef.current = JSON.stringify(incoming);
     // 化学物質由来で gasMaskAbsorber が指定されていれば防毒マスクの初期回答を入れる
-    const initialAnswers: RefineAnswers =
-      incoming.kind === "chemical" &&
-      incoming.gasMaskAbsorber &&
-      first === "gas-mask"
-        ? { gasType: incoming.gasMaskAbsorber }
-        : {};
+    const initialAnswers = initialAnswersForContext(first, incoming);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 受信クエリパラメータからの初期化は副作用扱いが妥当
     setCategoryId(first);
-     
+
     setAnswers(initialAnswers);
-     
+
     setPhase("refine");
   }, [incoming, phase]);
 
@@ -103,6 +110,15 @@ export function EquipmentFinderClient() {
     setPhase("refine");
   }
 
+  // 受信コンテキストの推奨カテゴリ間をワンタップで切替（複数の保護具が必要な化学物質向け）。
+  // 防毒マスクへ切替時は吸収缶種別を引き継ぐ。
+  function switchToRecommendedCategory(id: string) {
+    if (!getCategoryById(id)) return;
+    setCategoryId(id);
+    setAnswers(initialAnswersForContext(id, incoming));
+    setPhase("refine");
+  }
+
   function setAnswer(qId: string, value: string) {
     setAnswers((prev) => ({ ...prev, [qId]: value }));
   }
@@ -113,7 +129,13 @@ export function EquipmentFinderClient() {
     setAnswers({});
   }
 
-  const contextBanner = incoming ? <IncomingContextBanner ctx={incoming} /> : null;
+  const contextBanner = incoming ? (
+    <IncomingContextBanner
+      ctx={incoming}
+      currentCategoryId={phase === "category" ? "" : categoryId}
+      onSelectCategory={switchToRecommendedCategory}
+    />
+  ) : null;
 
   if (phase === "category") {
     const recommendedSet = new Set(incoming?.categories ?? []);
@@ -410,7 +432,66 @@ export function EquipmentFinderClient() {
   return null;
 }
 
-function IncomingContextBanner({ ctx }: { ctx: NonNullable<IncomingContext> }) {
+// 推奨カテゴリをワンタップで切替えるチップ行。複数の保護具が必要な化学物質/事故由来の連携で、
+// 自動遷移で隠れてしまう「他に必要な保護具」を全フェーズで見えるようにする。
+function RecommendedCategoryChips({
+  categories,
+  currentCategoryId,
+  onSelectCategory,
+  tone,
+}: {
+  categories: string[];
+  currentCategoryId: string;
+  onSelectCategory: (id: string) => void;
+  tone: "blue" | "rose";
+}) {
+  const valid = resolveRecommendedCategories(categories);
+  if (valid.length === 0) return null;
+  const label = tone === "blue" ? "text-blue-900" : "text-rose-900";
+  return (
+    <div className="mt-2.5 border-t border-white/60 pt-2.5">
+      <p className={`text-[10px] font-bold ${label}`}>
+        必要な保護具（タップで切替）
+        {valid.length > 1 && (
+          <span className="ml-1 font-normal opacity-70">— この物質には複数の保護具が必要です</span>
+        )}
+      </p>
+      <ul className="mt-1.5 flex flex-wrap gap-1.5">
+        {valid.map((c) => {
+          const active = c.id === currentCategoryId;
+          return (
+            <li key={c.id}>
+              <button
+                type="button"
+                onClick={() => onSelectCategory(c.id)}
+                aria-pressed={active}
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
+                  active
+                    ? "bg-emerald-600 text-white shadow-sm"
+                    : "bg-white text-slate-700 ring-1 ring-slate-300 hover:ring-emerald-400"
+                }`}
+              >
+                <span aria-hidden>{c.icon}</span>
+                {c.label}
+                {active && <span className="text-[9px]">表示中</span>}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+function IncomingContextBanner({
+  ctx,
+  currentCategoryId,
+  onSelectCategory,
+}: {
+  ctx: NonNullable<IncomingContext>;
+  currentCategoryId: string;
+  onSelectCategory: (id: string) => void;
+}) {
   if (ctx.kind === "chemical") {
     return (
       <div className="mb-4 rounded-2xl border border-blue-200 bg-blue-50 p-3 sm:p-4">
@@ -421,7 +502,7 @@ function IncomingContextBanner({ ctx }: { ctx: NonNullable<IncomingContext> }) {
               「{ctx.chemicalName}」の取扱いに必要な保護具
             </p>
             <p className="mt-0.5 text-[11px] text-blue-900/80">
-              化学物質リスクアセスメントから連携。推奨カテゴリにバッジを付けています。
+              化学物質リスクアセスメントから連携。下のチップで必要な保護具を切替えられます。
             </p>
             {ctx.hazards.length > 0 && (
               <ul className="mt-1.5 flex flex-wrap gap-1">
@@ -435,6 +516,12 @@ function IncomingContextBanner({ ctx }: { ctx: NonNullable<IncomingContext> }) {
                 ))}
               </ul>
             )}
+            <RecommendedCategoryChips
+              categories={ctx.categories}
+              currentCategoryId={currentCategoryId}
+              onSelectCategory={onSelectCategory}
+              tone="blue"
+            />
           </div>
         </div>
       </div>
@@ -446,8 +533,14 @@ function IncomingContextBanner({ ctx }: { ctx: NonNullable<IncomingContext> }) {
         「{ctx.accidentTitle}」の再発防止に必要な保護具
       </p>
       <p className="mt-0.5 text-[11px] text-rose-900/80">
-        事故DBから連携。推奨カテゴリにバッジを付けています。
+        事故DBから連携。下のチップで必要な保護具を切替えられます。
       </p>
+      <RecommendedCategoryChips
+        categories={ctx.categories}
+        currentCategoryId={currentCategoryId}
+        onSelectCategory={onSelectCategory}
+        tone="rose"
+      />
     </div>
   );
 }
