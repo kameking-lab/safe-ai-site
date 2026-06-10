@@ -13,6 +13,7 @@ const REQUIRED_KEYS: (keyof SignageLabelSet)[] = [
   "mainWork",
   "workPlace",
   "riskTop3",
+  "riskScore",
   "countermeasure",
   "notEntered",
   "teamGoal",

@@ -56,6 +56,11 @@ import { detectChemicalWork, chemicalRaHref } from "@/lib/chemical/work-chemical
 import { detectAccidentWork, accidentsHref } from "@/lib/accidents/work-accident-hints";
 import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
 import { KyTranscribePanel } from "@/components/ky-paper/ky-transcribe-panel";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { SAFETY_TONE, type SafetyTone } from "@/lib/design/safety-tone";
+import { computeKyPaperStatus } from "@/lib/ky/paper-status";
 import {
   submitKy,
   approveKy,
@@ -67,7 +72,6 @@ import {
 } from "@/lib/ky/approval";
 
 const AUTOSAVE_KEY = "ky-record";
-const FIRSTUSE_HINT_KEY = "safe-ai:ky-firstuse-hint-dismissed:v1";
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
 const ZOOM_STEP = 0.1;
@@ -90,7 +94,11 @@ export function KyPaperView() {
   const [weatherBusy, setWeatherBusy] = useState(false);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [savedLabel, setSavedLabel] = useState("記入すると自動保存されます");
-  const [notice, setNotice] = useState<string | null>(null);
+  // 柱0: 通知も色の文法に乗せる（成功=緑 / 失敗・要対応=黄 / 案内=青）。従来は失敗まで緑だった。
+  const [notice, setNoticeState] = useState<{ text: string; tone: SafetyTone } | null>(null);
+  const setNotice = useCallback((text: string | null, tone: SafetyTone = "safe") => {
+    setNoticeState(text === null ? null : { text, tone });
+  }, []);
   const [suggestBusy, setSuggestBusy] = useState(false);
   const [suggestions, setSuggestions] = useState<KyHazardSuggestion[]>([]);
   const [suggestSource, setSuggestSource] = useState<"gemini" | "fallback" | null>(null);
@@ -101,8 +109,6 @@ export function KyPaperView() {
   const [showTranscribe, setShowTranscribe] = useState(false);
   const [approvalActor, setApprovalActor] = useState("");
   const [approvalComment, setApprovalComment] = useState("");
-  // R3: 初見の職長向け 3ステップ案内（一度×で閉じると以後非表示。localStorage）。
-  const [firstUseHintOpen, setFirstUseHintOpen] = useState(false);
   // 「前回を複製」を上部にも出すための判定（保存済みKYが端末にあるときだけ）。
   const [hasLatest, setHasLatest] = useState(false);
   const [syncStatus, setSyncStatus] = useState<KySyncStatus>(() =>
@@ -152,7 +158,7 @@ export function KyPaperView() {
     if (params && DEEP_LINK_KEYS.some((k) => params!.has(k))) {
       const res = applyKyDeepLink(params, baseRec ?? makeToday());
       setRecord(res.record);
-      if (res.notice) setNotice(res.notice);
+      if (res.notice) setNotice(res.notice, "info");
     } else if (baseRec) {
       setRecord(baseRec);
     }
@@ -178,30 +184,12 @@ export function KyPaperView() {
       const pulled = await cloudPullKyRecords();
       if (!cancelled && pulled?.latest) {
         setRecord(pulled.latest);
-        setNotice("別端末のクラウド保存から最新KYを引き継ぎました。");
+        setNotice("別端末のクラウド保存から最新KYを引き継ぎました。", "info");
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, []);
-
-  // R3: 初見案内の表示判定（未読のときだけ表示）。マウント後に一度だけ。
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(FIRSTUSE_HINT_KEY) !== "1") setFirstUseHintOpen(true);
-    } catch {
-      /* localStorage 不可時は何もしない */
-    }
-  }, []);
-
-  const dismissFirstUseHint = useCallback(() => {
-    setFirstUseHintOpen(false);
-    try {
-      localStorage.setItem(FIRSTUSE_HINT_KEY, "1");
-    } catch {
-      /* 無視 */
-    }
   }, []);
 
   // 自動保存（1秒デバウンス）— /ky と同じキーへ
@@ -243,7 +231,7 @@ export function KyPaperView() {
         patch({ weather: w.weather, temperature: w.temperature });
         setNotice(`天気を自動取得しました（${WEATHER_REGIONS.find((r) => r.id === region)?.label ?? ""}: ${w.weather} ${w.temperature}℃）`);
       } else {
-        setNotice("天気の自動取得に失敗しました。手動で入力してください。");
+        setNotice("天気の自動取得に失敗しました。手動で入力してください。", "warning");
       }
     } finally {
       setWeatherBusy(false);
@@ -253,7 +241,7 @@ export function KyPaperView() {
   const handleCopyLatest = () => {
     const latest = loadLatestKyRecord();
     if (!latest) {
-      setNotice("複製できる過去のKYが見つかりませんでした。");
+      setNotice("複製できる過去のKYが見つかりませんでした。", "warning");
       return;
     }
     setRecord(copyKyForToday(latest));
@@ -269,7 +257,7 @@ export function KyPaperView() {
       await cloudPushKyRecord(record);
       refreshSync();
     } else {
-      setNotice(res.error?.message ?? "保存に失敗しました");
+      setNotice(res.error?.message ?? "保存に失敗しました", "warning");
     }
   };
 
@@ -277,7 +265,7 @@ export function KyPaperView() {
   const handleSuggest = async () => {
     const workContent = record.workRows[0]?.workDetail?.trim() ?? "";
     if (!workContent) {
-      setNotice("先に「本日の作業内容」を入力してください（AI提案の手がかりになります）。");
+      setNotice("先に「本日の作業内容」を入力してください（AI提案の手がかりになります）。", "warning");
       return;
     }
     setSuggestBusy(true);
@@ -288,19 +276,19 @@ export function KyPaperView() {
         body: JSON.stringify({ workContent }),
       });
       if (!res.ok) {
-        setNotice("AI提案の取得に失敗しました。時間をおいて再度お試しください。");
+        setNotice("AI提案の取得に失敗しました。時間をおいて再度お試しください。", "warning");
         return;
       }
       const data = (await res.json()) as HazardSuggestionResponse;
       setSuggestions(Array.isArray(data.suggestions) ? data.suggestions : []);
       setSuggestSource(data.source ?? null);
       if (!data.suggestions || data.suggestions.length === 0) {
-        setNotice("提案が得られませんでした。作業内容を具体的にすると精度が上がります。");
+        setNotice("提案が得られませんでした。作業内容を具体的にすると精度が上がります。", "info");
       } else if (data.note) {
-        setNotice(data.note);
+        setNotice(data.note, "info");
       }
     } catch {
-      setNotice("AI提案の通信に失敗しました。");
+      setNotice("AI提案の通信に失敗しました。", "warning");
     } finally {
       setSuggestBusy(false);
     }
@@ -342,7 +330,7 @@ export function KyPaperView() {
   // Phase 6: 現在のKYを別端末サイネージ用に共有（6桁コード発行）。
   const handleShare = async () => {
     if (!isKyCloudEnabled()) {
-      setNotice("クラウド未設定のため別端末共有は使えません。同じ端末なら「サイネージへ」ボタンですぐ表示できます。");
+      setNotice("クラウド未設定のため別端末共有は使えません。同じ端末なら「サイネージへ」ボタンですぐ表示できます。", "info");
       return;
     }
     setShareBusy(true);
@@ -357,13 +345,13 @@ export function KyPaperView() {
         setShareCode(result.code);
         setNotice(`別端末サイネージ共有コード: ${result.code}（別端末で /ky/morning に入力、または ?code=${result.code}）`);
       } else if (result.reason === "cloud_not_configured") {
-        setNotice("クラウド未設定のため別端末共有は使えません。同じ端末なら「サイネージへ」ボタンですぐ表示できます。");
+        setNotice("クラウド未設定のため別端末共有は使えません。同じ端末なら「サイネージへ」ボタンですぐ表示できます。", "info");
       } else if (result.reason === "server_error") {
-        setNotice("別端末共有サーバーが一時的に利用できません（管理者が対応中の可能性）。お急ぎの場合は、同じ端末で「サイネージへ」ボタンを押せばこのKYをすぐ表示できます。");
+        setNotice("別端末共有サーバーが一時的に利用できません（管理者が対応中の可能性）。お急ぎの場合は、同じ端末で「サイネージへ」ボタンを押せばこのKYをすぐ表示できます。", "warning");
       } else if (result.reason === "busy") {
-        setNotice("共有コードが混み合っています。少し待って再度「別端末で共有」をお試しください。すぐ表示したい場合は同じ端末の「サイネージへ」をご利用ください。");
+        setNotice("共有コードが混み合っています。少し待って再度「別端末で共有」をお試しください。すぐ表示したい場合は同じ端末の「サイネージへ」をご利用ください。", "warning");
       } else {
-        setNotice("共有コードの発行に失敗しました。通信状況をご確認のうえ、もう一度お試しください。同じ端末なら「サイネージへ」ボタンで表示できます。");
+        setNotice("共有コードの発行に失敗しました。通信状況をご確認のうえ、もう一度お試しください。同じ端末なら「サイネージへ」ボタンで表示できます。", "warning");
       }
     } finally {
       setShareBusy(false);
@@ -375,7 +363,7 @@ export function KyPaperView() {
     const pulled = await cloudPullKyRecords();
     refreshSync();
     if (!pulled?.latest) {
-      setNotice("クラウドに保存済みのKYが見つかりませんでした。");
+      setNotice("クラウドに保存済みのKYが見つかりませんでした。", "info");
       return;
     }
     if (window.confirm("クラウドの最新KYで現在の内容を置き換えますか？（この端末の未保存の変更は失われます）")) {
@@ -395,7 +383,7 @@ export function KyPaperView() {
   };
   const handleSubmitApproval = () => {
     applyApproval(submitKy(approval, approvalActor || record.foremanName || "職長"));
-    setNotice("元請に提出しました。確認待ちです（提出中は編集ロック）。");
+    setNotice("元請に提出しました。確認待ちです（提出中は編集ロック）。", "info");
   };
   const handleApprove = () => {
     applyApproval(approveKy(approval, approvalActor || "元請担当者", new Date(), approvalComment || undefined));
@@ -405,7 +393,7 @@ export function KyPaperView() {
   const handleReject = () => {
     applyApproval(rejectKy(approval, approvalActor || "元請担当者", new Date(), approvalComment || undefined));
     setApprovalComment("");
-    setNotice("差し戻しました。編集できるようになりました。");
+    setNotice("差し戻しました。編集できるようになりました。", "warning");
   };
 
   const toggleWorker = (w: Worker, checked: boolean) => {
@@ -466,27 +454,32 @@ export function KyPaperView() {
     [record.workRows]
   );
 
+  // 柱0: 画面最上部の結論カード用の状態（記入の進み具合＋承認フロー）。
+  const paperStatus = useMemo(() => computeKyPaperStatus(record), [record]);
+
   // P1-B: 元請確認・承認パネル。下書き中は記入の邪魔になるので用紙の下に置き、
   // 提出/承認/差し戻し中（actionable）は操作ボタンを見失わないよう用紙の上に置く。
   const approvalPanel = (
-    <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
+    <div id="ky-approval" className="mx-auto mt-3 max-w-5xl scroll-mt-24 px-4 print:hidden">
       <div className="rounded-xl border border-slate-200 bg-white p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold text-slate-800">元請確認・承認</span>
-            <span
-              className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+            {/* 柱0: 状態色はトークン経由（承認=緑 / 確認待ち=青 / 差し戻し=要対応の黄） */}
+            <StatusBadge
+              size="sm"
+              tone={
                 approval.status === "approved"
-                  ? "bg-emerald-100 text-emerald-800"
+                  ? "safe"
                   : approval.status === "submitted"
-                    ? "bg-amber-100 text-amber-800"
+                    ? "info"
                     : approval.status === "rejected"
-                      ? "bg-rose-100 text-rose-700"
-                      : "bg-slate-100 text-slate-600"
-              }`}
+                      ? "warning"
+                      : "neutral"
+              }
             >
               {KY_APPROVAL_LABEL[approval.status]}
-            </span>
+            </StatusBadge>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {(approval.status === "draft" || approval.status === "rejected") && (
@@ -558,41 +551,47 @@ export function KyPaperView() {
         </div>
       </div>
 
+      {/* 柱0: 結論カード=いまの状態1メッセージ（記入のこりN=青デカ数字 / 記入完了・承認済=緑 / 差し戻し=黄）。
+          未記入チップはタップでその欄へジャンプ。 */}
+      <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
+        <ConclusionCard
+          tone={paperStatus.tone}
+          value={paperStatus.remaining}
+          unit={paperStatus.remaining !== undefined ? "項目" : undefined}
+          title={paperStatus.title}
+          action={paperStatus.action ?? undefined}
+        >
+          {paperStatus.missing.length > 0 &&
+            paperStatus.missing.map((m) => (
+              <a key={m.key} href={m.anchor} className="rounded-full">
+                <StatusBadge tone="neutral" size="sm">{m.label}</StatusBadge>
+              </a>
+            ))}
+        </ConclusionCard>
+      </div>
+
       {notice && (
         <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
-          <div className="flex items-start justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5">
-            <p className="text-sm font-semibold text-emerald-900">{notice}</p>
-            <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="rounded px-1.5 text-emerald-700 hover:bg-emerald-100">×</button>
+          <div className={`flex items-start justify-between gap-3 rounded-xl border px-4 py-2.5 ${SAFETY_TONE[notice.tone].soft}`}>
+            <p className="text-sm font-semibold">{notice.text}</p>
+            <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="rounded px-1.5 hover:bg-black/10">×</button>
           </div>
         </div>
       )}
 
-      {/* R3: 初見の職長向け 3ステップ案内（紙との違い＝AI下書き＋朝礼サイネージ を明示）。×で恒久非表示。 */}
-      {firstUseHintOpen && (
-        <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
-          <div className="rounded-xl border border-amber-300 bg-amber-50 p-3">
-            <div className="flex items-start justify-between gap-3">
-              <p className="text-sm font-bold text-amber-900">はじめての方へ — 3ステップで完成</p>
-              <button
-                type="button"
-                onClick={dismissFirstUseHint}
-                aria-label="この案内を閉じる"
-                className="rounded px-1.5 text-amber-700 hover:bg-amber-100"
-              >
-                ×
-              </button>
-            </div>
-            <ol className="mt-1.5 space-y-1 text-xs leading-relaxed text-amber-900 sm:text-sm">
-              <li><span className="font-bold">① 現場名と今日の作業を入力</span>（音声入力ボタンでも可）</li>
-              <li><span className="font-bold">② 「🤖 AIに危険箇所を提案」</span>を押すと、危険と対策が自動で下書きされます</li>
-              <li><span className="font-bold">③ 「保存」→「印刷プレビュー」</span>または<span className="font-bold">「サイネージへ」</span>で朝礼の大画面に表示</li>
-            </ol>
-            <p className="mt-1.5 text-[11px] leading-snug text-amber-800">
-              紙の様式と違い、AIが危険予知を下書きし、そのまま朝礼サイネージに出せます。入力は自動保存されます。
-            </p>
-          </div>
-        </div>
-      )}
+      {/* 柱0: 初見の職長向け 3ステップ案内は折りたたみへ格納（結論カードが「次にやること」を常時案内するため）。 */}
+      <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
+        <CollapsibleDetail summary="はじめての方へ — 3ステップで完成">
+          <ol className="space-y-1">
+            <li><span className="font-bold">① 現場名と今日の作業を入力</span>（音声入力ボタンでも可）</li>
+            <li><span className="font-bold">② 「🤖 AIに危険箇所を提案」</span>を押すと、危険と対策が自動で下書きされます</li>
+            <li><span className="font-bold">③ 「保存」→「印刷プレビュー」</span>または<span className="font-bold">「サイネージへ」</span>で朝礼の大画面に表示</li>
+          </ol>
+          <p className="mt-1.5">
+            紙の様式と違い、AIが危険予知を下書きし、そのまま朝礼サイネージに出せます。入力は自動保存されます。
+          </p>
+        </CollapsibleDetail>
+      </div>
 
       {/* 元請確認・承認パネル: 提出/承認/差し戻し中のみ用紙の上（操作を見失わないため）。
           下書き中は記入が主役なので用紙の下へ回す（持ち手＝職長がすぐ記入に入れる）。 */}
@@ -653,12 +652,12 @@ export function KyPaperView() {
             </div>
 
             {/* 作業内容 */}
-            <SheetSection title="本日の作業内容">
+            <SheetSection id="ky-work" title="本日の作業内容">
               <TextareaWithVoice rows={2} value={record.workRows[0]?.workDetail ?? ""} onChange={(e) => setRecord((prev) => ({ ...prev, workRows: prev.workRows.map((r, i) => (i === 0 ? { ...r, workDetail: e.target.value } : r)) }))} placeholder="今日やる作業（例: 3F鉄骨建方、ボルト本締め）" className="text-sm" />
             </SheetSection>
 
             {/* 4R: 危険のポイントと対策（リスクアセスメント） */}
-            <SheetSection title="危険のポイントと対策（1R〜3R）">
+            <SheetSection id="ky-risks" title="危険のポイントと対策（1R〜3R）">
               {/* Phase 5: 本物のAI（Gemini）による危険箇所提案。印刷時は隠す。 */}
               <div className="mb-2 print:hidden">
                 <button
@@ -686,7 +685,7 @@ export function KyPaperView() {
                               評価値{s.evaluation}（{s.riskLabel}）
                             </span>
                             {!s.grounded && (
-                              <span className="ml-1 rounded bg-amber-100 px-1 text-[10px] text-amber-700">要確認</span>
+                              <StatusBadge tone="warning" size="sm" className="ml-1">要確認</StatusBadge>
                             )}
                           </p>
                           <p className="text-[11px] text-slate-600">対策: {s.reduction || "—"}</p>
@@ -712,9 +711,12 @@ export function KyPaperView() {
                     <div key={i} className="rounded border border-slate-300 p-2">
                       <div className="mb-1 flex items-center gap-2">
                         <span className="rounded bg-slate-800 px-1.5 py-0.5 text-[10px] font-bold text-white">{row.targetLabel || i}</span>
-                        <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${grade.grade === "high" ? "bg-red-100 text-red-700" : grade.grade === "medium" ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600"}`}>
+                        <StatusBadge
+                          size="sm"
+                          tone={grade.grade === "high" ? "danger" : grade.grade === "medium" ? "warning" : "neutral"}
+                        >
                           評価値 {score}（{grade.label}）
-                        </span>
+                        </StatusBadge>
                       </div>
                       <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                         <label className="space-y-0.5">
@@ -743,7 +745,7 @@ export function KyPaperView() {
             </SheetSection>
 
             {/* 4R: 目標設定 — チーム行動目標・重点実施項目・指差呼称 */}
-            <SheetSection title="本日の目標（4R）と指差呼称">
+            <SheetSection id="ky-goal" title="本日の目標（4R）と指差呼称">
               <div className="space-y-2">
                 <SheetField label="チーム行動目標（〜しよう）">
                   <TextareaWithVoice rows={2} value={record.teamGoal} onChange={(e) => patch({ teamGoal: e.target.value })} placeholder="例: 高所では必ず親綱に掛けてから移動しよう" className="text-sm" />
@@ -758,7 +760,7 @@ export function KyPaperView() {
             </SheetSection>
 
             {/* 参加者: マスターから選ぶ */}
-            <SheetSection title={`参加者（${participantCount}名）`}>
+            <SheetSection id="ky-members" title={`参加者（${participantCount}名）`}>
               {workers.length === 0 ? (
                 <p className="text-xs text-slate-500">
                   <Link href="/ky/workers" className="font-semibold text-emerald-700 underline">作業員マスター</Link>
@@ -935,9 +937,9 @@ function SheetField({ label, children }: { label: string; children: React.ReactN
   );
 }
 
-function SheetSection({ title, children }: { title: string; children: React.ReactNode }) {
+function SheetSection({ title, children, id }: { title: string; children: React.ReactNode; id?: string }) {
   return (
-    <section className="border-b border-slate-400 py-3 last:border-b-0">
+    <section id={id} className="scroll-mt-24 border-b border-slate-400 py-3 last:border-b-0">
       <h2 className="mb-2 text-sm font-bold text-slate-800">{title}</h2>
       {children}
     </section>

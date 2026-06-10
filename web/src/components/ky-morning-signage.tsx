@@ -15,6 +15,8 @@ import {
 } from "@/lib/signage/signage-labels";
 import { readStoredSignageLang, storeSignageLang } from "@/lib/signage/signage-prefs";
 import { SignageAccidentEducation } from "@/components/accidents/signage-accident-education";
+import { evalScore, riskGrade } from "@/lib/ky/pulldown-options";
+import { SAFETY_TONE, type SafetyTone } from "@/lib/design/safety-tone";
 
 const COUNTDOWN_SEC = 10;
 
@@ -184,9 +186,20 @@ export function KyMorningSignage() {
     return () => clearTimeout(t);
   }, [countdown]);
 
+  // 柱0: 「Top3」をラベルどおり評価値（可能性×重大性）の高い順にする。
+  // 同点は用紙の記入順を保つ（sort は安定）。色はリスク区分→JIS安全色トークン。
   const topRisks = useMemo(() => {
     if (!record) return [];
-    return record.riskRows.filter((r) => r.hazard).slice(0, 3);
+    return record.riskRows
+      .filter((r) => r.hazard)
+      .map((row) => {
+        const score = evalScore(row.likelihood, row.severity);
+        const grade = riskGrade(score).grade;
+        const tone: SafetyTone = grade === "high" ? "danger" : grade === "medium" ? "warning" : "neutral";
+        return { row, score, tone };
+      })
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3);
   }, [record]);
 
   const mainWork = record?.workRows.find((r) => r.workDetail) ?? null;
@@ -248,16 +261,19 @@ export function KyMorningSignage() {
             <p className="text-2xl font-bold">
               {remoteCode ? (remoteError ?? "共有KYを読み込み中…") : L.noData}
             </p>
-            <p className="mt-2 text-base text-white/70 print:text-slate-600">
-              {remoteCode ? (
-                "発行された6桁コードをご確認ください。作成端末で「別端末で共有」した直後に有効になります。"
-              ) : (
-                <>
-                  先に <Link href="/ky/paper" className="underline">/ky/paper</Link> でKY用紙を作成・保存するか、
-                  別端末で発行した6桁コードを入力してください。
-                </>
-              )}
-            </p>
+            {remoteCode ? (
+              <p className="mt-2 text-base text-white/70 print:text-slate-600">
+                発行された6桁コードをご確認ください。作成端末で「別端末で共有」した直後に有効になります。
+              </p>
+            ) : (
+              /* 柱0: 段落を読ませず、次にやることをデカいボタンで提示 */
+              <Link
+                href="/ky/paper"
+                className="mx-auto mt-6 flex min-h-[44px] max-w-md items-center justify-center rounded-2xl bg-emerald-500 px-6 py-4 text-xl font-bold text-white shadow-lg hover:bg-emerald-400 print:hidden"
+              >
+                ✎ この端末でKY用紙を作る
+              </Link>
+            )}
             {/* 別端末から6桁コードで開く入力フォーム */}
             <form
               className="mx-auto mt-6 flex max-w-xs items-center gap-2 print:hidden"
@@ -326,14 +342,25 @@ export function KyMorningSignage() {
                       <p className="mt-3 text-slate-500 text-[clamp(1.2rem,2.5vw,2.5rem)]">{L.notEntered}</p>
                     ) : (
                       <ul className="mt-3 space-y-3">
-                        {topRisks.map((r, i) => (
-                          <li key={i} className="rounded-2xl border-l-8 border-rose-500 bg-rose-50 p-3">
-                            <p className="font-bold leading-snug text-[clamp(1.4rem,3.6vw,4.5rem)]">
-                              {i + 1}. {r.hazard}
-                            </p>
-                            {r.reduction && (
+                        {topRisks.map(({ row, score, tone }, i) => (
+                          <li
+                            key={i}
+                            className={`rounded-2xl border-l-8 p-3 ${SAFETY_TONE[tone].leftBar} ${SAFETY_TONE[tone].soft}`}
+                          >
+                            <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+                              <p className="min-w-0 font-bold leading-snug text-[clamp(1.4rem,3.6vw,4.5rem)]">
+                                {i + 1}. {row.hazard}
+                              </p>
+                              {/* 評価値チップ: 危険の重さを読まずに色とデカ数字で伝える */}
+                              <span
+                                className={`shrink-0 rounded-xl px-3 py-1 font-bold tabular-nums ${SAFETY_TONE[tone].solid} text-[clamp(1rem,1.8vw,2.2rem)]`}
+                              >
+                                {L.riskScore} {score}
+                              </span>
+                            </div>
+                            {row.reduction && (
                               <p className="mt-1 text-emerald-800 text-[clamp(1.1rem,2.6vw,3rem)]">
-                                → {L.countermeasure}: {r.reduction}
+                                → {L.countermeasure}: {row.reduction}
                               </p>
                             )}
                           </li>
