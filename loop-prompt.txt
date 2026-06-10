@@ -13,6 +13,8 @@
 3) 1ブランチ(feat/ chore/ review/ fix/)で作業→ゲート: `cd web` で `npx tsc --noEmit`=エラー0 / `npm run lint`=errors0 / `npx vitest run`=全pass / `npm run build`=成功。再生成データは `git checkout -- web/src/data/chatbot-eval-fresh-results.json docs/rag-metrics-latest.json` で復元。一時スクリプト/スクショは削除。
 4) commit(末尾に Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>)→push→`gh pr create`。CI待ちはこのターンでマージまで待たず、次イテレーションの 1) で回収。
 5) BACKLOG.md の当該タスクを `[x]`(要約付き)にし、docs/court-cases-db-2026-06-06/cycle-log.md に1段落記録。working tree clean でターンを終える(次の起動はrunnerが行う)。
+6) (3の例外・監査反映2026-06-10) レビュー用Playwrightスクリプトは削除せず docs/third-party-reviews/scripts/ に保存しろ=「24/24 PASS」等の数値を事後検証可能にするため。一時スクショ等の画像はこれまでどおり削除してよい。
+7) (監査反映2026-06-10) マージ済みの自分のリモートブランチはイテレーション末尾で `git push origin --delete <branch>` で削除しろ。未マージのブランチ・自分以外のブランチは触るな。
 
 【不可侵の絶対ルール】
 捏造0(判例・データ・効果の偽りは1件も禁止。判例は出典2つ以上で実在確認)/水増し0(既存の作り直しで件数を稼がない・本物の前進のみ)/既存破壊0/main直接コミット禁止(やってしまったらbranch退避+`git reset --hard origin/main`で是正)/CI緑のみマージ/env・Supabase DB変更は独断禁止(Path A=schema.sqlやドラフトを用意してオーナー承認を仰ぐ)/ライセンス厳守(政府公開ソースのみ)/main常時デプロイ可能/安全タグ fable5-loop-start-2026-06-10(および既存タグ)維持。
