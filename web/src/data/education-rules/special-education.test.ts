@@ -177,6 +177,29 @@ describe("special-education: 安衛則36条との号整合", () => {
     }
   });
 
+  it("現行条文の全号をDBが網羅している（削除条号・原子力系の明示除外を除く）", () => {
+    // 第2回独立監査フォロー(2026-06-10): id↔号の1対1ピンだけでは「エントリと期待表を
+    // 同時に消す」型の網羅性後退を検出できないため、公式スナップショット側から逆引きで固定する。
+    const EXCLUDED: Set<string> = new Set([
+      "12", // 削除条号
+      "28の2",
+      "28の3",
+      "28の4",
+      "28の5", // 原子力・除染特例系: 一般事業場向けDBの対象外（special-education.ts 冒頭に明記）
+    ]);
+    const covered = new Set(
+      SPECIAL_EDUCATION.map((c) => extractItemNum(c.relatedLaw)).filter(
+        (n): n is string => n !== null,
+      ),
+    );
+    for (const num of Object.keys(OFFICIAL_ART36_ITEMS)) {
+      if (EXCLUDED.has(num)) continue;
+      expect(covered.has(num), `第36条第${num}号（${OFFICIAL_ART36_ITEMS[num]}）のエントリが消えている`).toBe(
+        true,
+      );
+    }
+  });
+
   it("是正済みの既知誤割当が再発していない", () => {
     const byId = new Map(SPECIAL_EDUCATION.map((c) => [c.id, c]));
     // クレーン運転を5号と書く誤り（5号はフォークリフト）

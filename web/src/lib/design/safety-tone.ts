@@ -26,7 +26,10 @@ export type SafetyTone = "danger" | "warning" | "safe" | "info" | "neutral";
 export type SafetyToneClasses = {
   /** トーンの意味（日本語短ラベル・UIの既定文言にも使える） */
   label: string;
-  /** 塗りバッジ・チップ: 濃色背景 + 白文字 */
+  /**
+   * 塗りバッジ・チップ: 背景+文字のペアで WCAG AA (コントラスト比4.5:1以上) を満たすこと
+   * （safety-tone.test.ts で機械検証。warning は JIS の現物標識と同じ「黄地に黒文字」）
+   */
   solid: string;
   /** 淡色面: 結論カード・行のハイライトに使う背景+枠+文字 */
   soft: string;
@@ -52,7 +55,7 @@ export const SAFETY_TONE: Record<SafetyTone, SafetyToneClasses> = {
   },
   warning: {
     label: "注意・要対応",
-    solid: "bg-amber-500 text-white",
+    solid: "bg-amber-500 text-amber-950",
     soft: "border-amber-300 bg-amber-50 text-amber-900",
     border: "border-amber-300",
     text: "text-amber-700",
@@ -61,7 +64,7 @@ export const SAFETY_TONE: Record<SafetyTone, SafetyToneClasses> = {
   },
   safe: {
     label: "良好・対応済",
-    solid: "bg-emerald-600 text-white",
+    solid: "bg-emerald-700 text-white",
     soft: "border-emerald-300 bg-emerald-50 text-emerald-900",
     border: "border-emerald-300",
     text: "text-emerald-700",
@@ -70,7 +73,7 @@ export const SAFETY_TONE: Record<SafetyTone, SafetyToneClasses> = {
   },
   info: {
     label: "指示・案内",
-    solid: "bg-sky-600 text-white",
+    solid: "bg-sky-700 text-white",
     soft: "border-sky-300 bg-sky-50 text-sky-900",
     border: "border-sky-300",
     text: "text-sky-700",
