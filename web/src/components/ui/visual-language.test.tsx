@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { StatusBadge } from "./status-badge";
+import { SAFETY_TONE } from "@/lib/design/safety-tone";
 import { ConclusionCard } from "./conclusion-card";
 import { CollapsibleDetail } from "./collapsible-detail";
 
@@ -21,7 +22,8 @@ describe("StatusBadge", () => {
         対応済
       </StatusBadge>,
     );
-    expect(container.firstElementChild?.className).toContain("bg-emerald-600");
+    // 具体色はトークン(safety-tone.ts)が真実。ここでは「solid がトークン経由で塗られること」を固定する
+    expect(container.firstElementChild?.className).toContain(SAFETY_TONE.safe.solid);
   });
 });
 
