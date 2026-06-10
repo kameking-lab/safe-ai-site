@@ -17,7 +17,7 @@ const TOOLS: Tool[] = [
   { href: "/signage", icon: "📺", label: "サイネージ", sub: "朝礼掲示" },
   { href: "/court-cases", icon: "⚖️", label: "労災裁判例", sub: "判例＋出典" },
   { href: "/whats-new", icon: "🆕", label: "新着", sub: "法改正・速報" },
-  { href: "/site-records", icon: "🗂️", label: "現場記録", sub: "受入教育ほか" },
+  { href: "/site-records", icon: "🗂️", label: "現場記録", sub: "今日やること" },
 ];
 
 export function HomeQuickAccess() {

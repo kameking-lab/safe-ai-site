@@ -44,6 +44,13 @@ export function SignageHeader({
           </Link>
           <Link
             className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800"
+            href="/site-records"
+            title="パトロール・ヒヤリ・点検などの記録の作成・管理はこちら。記録の要対応はこの画面の「現場の安全状態」に自動掲示されます"
+          >
+            記録キットへ
+          </Link>
+          <Link
+            className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800"
             href="/notifications"
           >
             通知設定へ

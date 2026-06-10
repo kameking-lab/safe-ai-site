@@ -287,6 +287,12 @@ export default function SignagePage() {
         <p className="mt-1 text-xs text-amber-200">
           スマホでは縦スクロールで全セクションを確認できます。PC/大画面TVで開くと本来のサイネージレイアウトが表示されます。
         </p>
+        <p className="mt-1.5 text-xs text-amber-200">
+          スマホで記録の作成・確認をするなら{" "}
+          <Link href="/site-records" className="font-bold text-amber-100 underline">
+            現場の安全記録キット →
+          </Link>
+        </p>
       </div>
 
       {/* C-003: scenario presets — set display mode for common use cases */}
@@ -355,17 +361,14 @@ export default function SignagePage() {
           >
             {isPortrait ? "📱 縦長" : "🖥 横長"}
           </button>
+          {/* 旧「🗺️ 地図」「📺 全画面」: 行き先はどちらも同じ防災地図キオスク（mapとdisplayは全画面か否かの差のみ）。
+              「全画面」がこのダッシュボードの全画面版と誤解させていたため、1本に統合して役割を明示。 */}
           <Link
             href="/signage/map"
-            className="rounded border border-emerald-400 bg-emerald-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
-          >
-            🗺️ 地図
-          </Link>
-          <Link
-            href="/signage/display"
+            title="全国の警報・地震を詳細地図で監視（台風・地震時）。TV用の全画面表示は地図内から切替できます"
             className="rounded border border-sky-400 bg-sky-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-sky-600"
           >
-            📺 全画面
+            🗺️ 地図サイネージ（警報・地震）
           </Link>
         </div>
       </div>

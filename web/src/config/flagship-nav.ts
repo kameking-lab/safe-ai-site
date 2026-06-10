@@ -72,12 +72,11 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     icon: "📺",
     cardTitle: "サイネージ表示",
     cardDescription:
-      "事務所モニター・現場掲示用。図面サンプル＋気象警報＋法改正＋ニュースを30分ごとに自動更新。",
+      "事務所モニター・現場掲示用。気象警報・本日のリスク・現場の安全状態（この端末の記録）・法改正・ニュースを自動更新。",
     href: "/signage",
     subItems: [
-      { label: "標準ダッシュボード", href: "/signage" },
-      { label: "地図モード", href: "/signage/map" },
-      { label: "ディスプレイ表示", href: "/signage/display" },
+      { label: "朝礼・常設ダッシュボード", href: "/signage", description: "気象・リスク予測・現場の安全状態・ニュース・法改正を1画面で常時掲示" },
+      { label: "サイネージ地図（全国の警報・地震）", href: "/signage/map", description: "台風・地震時の防災監視用の詳細地図。TVの全画面表示は地図内から切替" },
     ],
   },
   {
