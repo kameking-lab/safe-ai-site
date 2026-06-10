@@ -10,6 +10,7 @@ import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { findByCas, searchMergedChemicals, regulatoryLabels, relatedLawTexts, type MergedChemical } from "@/lib/mhlw-chemicals";
 import { AI_DISCLAIMER_SYSTEM_INSTRUCTION } from "@/lib/gemini";
+import { buildGhsHazardsFromNite } from "@/lib/chemical/nite-ghs-hazards";
 
 export type ChemicalRaRequest = {
   chemicalName: string;
@@ -291,10 +292,13 @@ function buildMhlwFallbackResponse(chemicalName: string, casNumber?: string): Ch
     ? `8時間濃度基準値: ${mhlw.details.limit8h}${mhlw.details.limitShort ? ` / 短時間: ${mhlw.details.limitShort}` : ""}`
     : undefined;
 
+  // AIなしでも物質固有の危険有害性を出す: NITE政府版GHS分類（収録があれば）
+  const ghsHazards = buildGhsHazardsFromNite(mhlw?.details?.limits?.niteGhsClassifications);
+
   return {
     chemicalName,
     casNumber: casNumber ?? mhlw?.cas ?? undefined,
-    ghsHazards: [],
+    ghsHazards,
     flashPoint: undefined,
     exposureLimit,
     ppeRecommendations: [],
@@ -302,7 +306,11 @@ function buildMhlwFallbackResponse(chemicalName: string, casNumber?: string): Ch
     emergencyMeasures: [],
     regulatoryNotes: notes,
     rawReply:
-      "⚠️ AI生成は現在利用できません。以下は厚労省公式データによる規制情報です。\nGHS分類・保護具推奨・緊急措置については製品の公式SDSをご確認ください。",
+      `⚠️ AI生成は現在利用できません。以下は厚労省公式データによる規制情報です。\n${
+        ghsHazards.length > 0
+          ? "GHS分類は政府による分類結果（NITE統合版）を表示しています。保護具推奨・緊急措置については製品の公式SDSをご確認ください。"
+          : "GHS分類・保護具推奨・緊急措置については製品の公式SDSをご確認ください。"
+      }`,
   };
 }
 
@@ -381,7 +389,7 @@ export async function POST(request: Request) {
         relatedHazards,
         aiStatus: "apikey_missing",
         aiErrorDetail: "GEMINI_API_KEY未設定",
-        rawReply: "⚠️ GEMINI_API_KEYが未設定のため、AI生成は利用できません。以下は厚労省公式データによる規制情報です。\nGHS分類・保護具推奨については製品の公式SDSをご確認ください。",
+        rawReply: mhlwFallback.rawReply,
       }, { status: 200 });
     }
     return NextResponse.json({
