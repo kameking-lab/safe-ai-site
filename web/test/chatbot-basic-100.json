@@ -345,7 +345,7 @@
         },
         {
           "lawShort": "有機則",
-          "articleNum": "第29条の2"
+          "articleNum": "第30条"
         }
       ]
     },
@@ -596,10 +596,6 @@
         {
           "lawShort": "クレーン則",
           "articleNum": "第35条"
-        },
-        {
-          "lawShort": "クレーン則",
-          "articleNum": "第36条"
         }
       ]
     },
@@ -614,15 +610,7 @@
         },
         {
           "lawShort": "クレーン則",
-          "articleNum": "第73条"
-        },
-        {
-          "lawShort": "クレーン則",
-          "articleNum": "第74条"
-        },
-        {
-          "lawShort": "クレーン則",
-          "articleNum": "第75条"
+          "articleNum": "第68条"
         }
       ]
     },
@@ -663,15 +651,15 @@
       "gold": [
         {
           "lawShort": "クレーン則",
-          "articleNum": "第32条"
+          "articleNum": "第35条"
+        },
+        {
+          "lawShort": "クレーン則",
+          "articleNum": "第36条"
         },
         {
           "lawShort": "クレーン則",
           "articleNum": "第34条"
-        },
-        {
-          "lawShort": "クレーン則",
-          "articleNum": "第35条"
         }
       ]
     },
@@ -683,14 +671,6 @@
         {
           "lawShort": "クレーン則",
           "articleNum": "第96条"
-        },
-        {
-          "lawShort": "クレーン則",
-          "articleNum": "第111条"
-        },
-        {
-          "lawShort": "クレーン則",
-          "articleNum": "第103条"
         }
       ]
     },
@@ -716,11 +696,11 @@
         },
         {
           "lawShort": "クレーン則",
-          "articleNum": "第40条"
+          "articleNum": "第9条"
         },
         {
           "lawShort": "クレーン則",
-          "articleNum": "第34条"
+          "articleNum": "第40条"
         }
       ]
     },
@@ -756,16 +736,16 @@
       "question": "局所排気装置の性能要件は？",
       "gold": [
         {
-          "lawShort": "有機則",
-          "articleNum": "第16条"
-        },
-        {
           "lawShort": "特化則",
           "articleNum": "第7条"
         },
         {
           "lawShort": "有機則",
-          "articleNum": "第28条"
+          "articleNum": "第5条"
+        },
+        {
+          "lawShort": "有機則",
+          "articleNum": "第20条"
         }
       ]
     },
@@ -780,11 +760,7 @@
         },
         {
           "lawShort": "特化則",
-          "articleNum": "第7条の2"
-        },
-        {
-          "lawShort": "有機則",
-          "articleNum": "第28条"
+          "articleNum": "第7条"
         }
       ]
     },

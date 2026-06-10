@@ -300,7 +300,7 @@ export const elearningThemesCatalog: LearningTheme[] = [
           "1年以内ごとに1回",
         ],
         correctIndex: 1,
-        explanation: "クレーン等安全規則第36条により、クレーンの定期自主検査（月次）は1ヶ月以内ごとに1回実施しなければなりません。",
+        explanation: "クレーン等安全規則第35条により、クレーンの定期自主検査（月次）は1ヶ月以内ごとに1回実施しなければなりません。",
       },
       {
         id: "el-crane-q4",
