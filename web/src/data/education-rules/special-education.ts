@@ -436,11 +436,11 @@ export const SPECIAL_EDUCATION: EducationCert[] = [
   },
   // === ゴンドラ・巻き上げ機・軌道 ===
   {
-    id: "se-36-15-gondola",
+    id: "se-36-20-gondola",
     name: "ゴンドラの操作の業務",
     certType: "special_education",
-    targetWork: "ゴンドラ（安衛法施行令第1条第3号に規定するゴンドラ）の操作の業務",
-    relatedLaw: "安衛則第36条第15号・ゴンドラ安全規則第12条",
+    targetWork: "ゴンドラ（安衛法施行令第1条第11号に規定するゴンドラ）の操作の業務",
+    relatedLaw: "安衛則第36条第20号・ゴンドラ安全規則第12条",
     duration: "9時間以上（学科6h＋実技3h）",
     workCategories: ["construction", "general"],
     keywords: ["ゴンドラ", "外壁作業", "高所作業", "ビルメンテナンス", "吊り下げ式"],
