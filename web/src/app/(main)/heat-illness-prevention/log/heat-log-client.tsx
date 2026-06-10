@@ -15,7 +15,6 @@ import { assess } from "@/lib/wbgt-engine";
 import type {
   AcclimatizationState,
   Environment,
-  RiskLevel,
   WorkIntensity,
 } from "@/types/heat-illness";
 import {
@@ -31,14 +30,21 @@ import {
   type HeatLogRecord,
   type HeatLogSummary,
 } from "@/lib/heat-illness/log-store";
+import { RISK_ORDER, RISK_VISUAL } from "@/lib/heat-illness/risk-visual";
+import { WbgtConclusion } from "@/components/heat-illness/wbgt-conclusion";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
-const RISK_COLOR: Record<RiskLevel, { chip: string; text: string; row: string }> = {
-  safe: { chip: "bg-emerald-600", text: "text-emerald-900", row: "bg-emerald-50" },
-  caution: { chip: "bg-amber-500", text: "text-amber-900", row: "bg-amber-50" },
-  warning: { chip: "bg-orange-500", text: "text-orange-900", row: "bg-orange-50" },
-  "severe-warning": { chip: "bg-red-600", text: "text-red-900", row: "bg-red-50" },
-  danger: { chip: "bg-rose-600", text: "text-rose-900", row: "bg-rose-50" },
-};
+/** 本日の記録のうち最も危険な測定（リスク区分降順→WBGT降順）。結論カードの主役。 */
+function worstEntry(entries: HeatLogEntry[]): HeatLogEntry | null {
+  if (entries.length === 0) return null;
+  return entries.reduce((worst, e) => {
+    const a = RISK_ORDER.indexOf(e.riskLevel);
+    const b = RISK_ORDER.indexOf(worst.riskLevel);
+    if (a > b || (a === b && e.wbgt > worst.wbgt)) return e;
+    return worst;
+  });
+}
 
 type AddForm = {
   time: string;
@@ -241,10 +247,42 @@ export function HeatLogClient() {
     setList(deleteHeatLog(id));
   }
 
-  const previewColor = RISK_COLOR[preview.risk.level];
+  const previewColor = RISK_VISUAL[preview.risk.level];
+  const worst = worstEntry(entries);
 
   return (
     <div className="space-y-6">
+      {/* 結論ファースト: 本日いちばん危険だった測定をデカ数字＋色帯で（柱0・画面表示のみ） */}
+      {worst ? (
+        <WbgtConclusion
+          wbgt={worst.wbgt}
+          level={worst.riskLevel}
+          heading={`本日の最も危険な測定（${worst.time}）`}
+          workIntensity={worst.workIntensity}
+          acclimatization={worst.acclimatization}
+          className="print:hidden"
+        >
+          <span className="inline-flex items-center rounded-full border border-slate-300 bg-white/80 px-3 py-1 text-xs font-bold text-slate-700">
+            記録 {summary.entryCount} 件
+          </span>
+          {summary.maxWbgt !== null && (
+            <span className="inline-flex items-center rounded-full border border-slate-300 bg-white/80 px-3 py-1 text-xs font-bold text-slate-700">
+              最高WBGT {summary.maxWbgt.toFixed(1)} ℃
+            </span>
+          )}
+        </WbgtConclusion>
+      ) : (
+        <ConclusionCard
+          tone="info"
+          value={0}
+          unit="件"
+          title="記録なし"
+          description="今日の分はまだ0件。作業前と日中のWBGTを測って記録すると、令和7年改正（安衛則612条の2）の実施記録になります。"
+          action={{ href: "#heat-log-add", label: "測定を追加する" }}
+          className="print:hidden"
+        />
+      )}
+
       {/* 記録ヘッダー（日付・現場・記録者） */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -280,7 +318,10 @@ export function HeatLogClient() {
       </section>
 
       {/* 測定の追加（印刷時は隠す） */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
+      <section
+        id="heat-log-add"
+        className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden"
+      >
         <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
           <Activity className="h-5 w-5 text-amber-600" aria-hidden="true" />
           測定を追加
@@ -345,15 +386,16 @@ export function HeatLogClient() {
           </Field>
         </div>
 
-        {/* 算出プレビュー */}
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-          <span className="text-sm font-bold text-slate-900">
-            WBGT {preview.wbgt.wbgt.toFixed(1)} ℃
+        {/* 算出プレビュー: 追加前から色とデカ数字で危険度が分かる */}
+        <div className={`mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl border ${previewColor.soft} px-4 py-3`}>
+          <span className={`text-3xl font-bold leading-none ${previewColor.text}`}>
+            {preview.wbgt.wbgt.toFixed(1)}
+            <span className="ml-0.5 text-base font-bold">℃</span>
           </span>
-          <span className={`inline-flex items-center rounded-full px-3 py-0.5 text-xs font-bold text-white ${previewColor.chip}`}>
+          <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-bold ${previewColor.chip}`}>
             {preview.risk.label}
           </span>
-          <span className="text-xs text-slate-600">{preview.risk.summary}</span>
+          <span className="text-xs opacity-80">{preview.risk.summary}</span>
         </div>
 
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -415,7 +457,7 @@ export function HeatLogClient() {
               最高WBGT {summary.maxWbgt === null ? "—" : `${summary.maxWbgt.toFixed(1)} ℃`}
             </span>
             {summary.maxRiskLevel && (
-              <span className={`rounded-lg px-2 py-1 font-bold text-white ${RISK_COLOR[summary.maxRiskLevel].chip}`}>
+              <span className={`rounded-lg px-2 py-1 font-bold ${RISK_VISUAL[summary.maxRiskLevel].chip}`}>
                 最悪リスク {entries.find((e) => e.riskLevel === summary.maxRiskLevel)?.riskLabel}
               </span>
             )}
@@ -442,11 +484,11 @@ export function HeatLogClient() {
               </thead>
               <tbody>
                 {entries.map((e) => (
-                  <tr key={e.id} className={`border-b border-slate-200 align-top ${RISK_COLOR[e.riskLevel].row}`}>
+                  <tr key={e.id} className={`border-b border-slate-200 align-top ${RISK_VISUAL[e.riskLevel].row}`}>
                     <td className="whitespace-nowrap py-2 pr-2 font-semibold text-slate-800">{e.time}</td>
                     <td className="whitespace-nowrap py-2 pr-2 font-bold text-slate-900">{e.wbgt.toFixed(1)}</td>
                     <td className="whitespace-nowrap py-2 pr-2">
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold text-white ${RISK_COLOR[e.riskLevel].chip}`}>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold ${RISK_VISUAL[e.riskLevel].chip}`}>
                         {e.riskLabel}
                       </span>
                     </td>
@@ -472,7 +514,14 @@ export function HeatLogClient() {
           </div>
         )}
 
-        <p className="mt-3 text-[11px] leading-5 text-slate-500">
+        {/* 画面では折りたたみ・印刷では帳票どおり全文（正確性は不可侵） */}
+        <CollapsibleDetail summary="この記録簿の法的位置付け・出典" className="mt-3 print:hidden">
+          <p>
+            令和7年6月施行の改正安衛則（第612条の2）では、WBGT基準値以上の作業について体制整備・対応手順の整備等が求められます。
+            本記録簿はその日次の実施記録づくりを支援するもので、最終的な作業可否は事業者・職長が現場状況を踏まえて判断してください。WBGT計算式の出典：JIS Z 8504。
+          </p>
+        </CollapsibleDetail>
+        <p className="mt-3 hidden text-[11px] leading-5 text-slate-500 print:block">
           令和7年6月施行の改正安衛則（第612条の2）では、WBGT基準値以上の作業について体制整備・対応手順の整備等が求められます。
           本記録簿はその日次の実施記録づくりを支援するもので、最終的な作業可否は事業者・職長が現場状況を踏まえて判断してください。WBGT計算式の出典：JIS Z 8504。
         </p>

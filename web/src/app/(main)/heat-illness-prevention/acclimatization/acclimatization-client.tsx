@@ -27,6 +27,8 @@ import {
   type AcclimatizationPlan,
   type AcclimatizationSummary,
 } from "@/lib/heat-illness/acclimatization-store";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -147,8 +149,33 @@ export function AcclimatizationClient() {
     setList(deleteAcclim(id));
   }
 
+  const anyStop = days.some((d) => d.condition === "stop");
+
   return (
     <div className="space-y-6">
+      {/* 結論ファースト: 進捗デカ数字＋色で「いまどこまで順化したか」（柱0・画面表示のみ） */}
+      {progress.complete ? (
+        <ConclusionCard
+          tone="safe"
+          title="順化完了"
+          description={`${progress.total}日間の計画をすべて実施しました。中断（おおむね4日以上）したら再順化が必要です。`}
+          className="print:hidden"
+        />
+      ) : (
+        <ConclusionCard
+          tone={anyStop ? "warning" : "info"}
+          value={`${progress.doneCount}/${progress.total}`}
+          unit="日"
+          title={anyStop ? "体調注意" : "順化進行中"}
+          description={
+            anyStop
+              ? "体調「作業中止」の日があります。無理に負荷を上げず、回復を待って計画を見直してください。"
+              : "実施した日は下の表で「実施」にチェック。7日以上かけて段階的に負荷を上げます。"
+          }
+          className="print:hidden"
+        />
+      )}
+
       {/* 対象者・開始日 */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -200,7 +227,15 @@ export function AcclimatizationClient() {
             ＋ 日数を追加
           </button>
         </div>
-        <p className="mt-2 text-[11px] leading-5 text-slate-500">
+        {/* 画面では折りたたみ・印刷では帳票どおり全文（正確性は不可侵） */}
+        <CollapsibleDetail summary="計画の根拠（厚労省「職場における熱中症予防」）" className="mt-2 print:hidden">
+          <p>
+            厚生労働省「職場における熱中症予防」は、暑熱作業に新たに従事する者・長期の中断から復帰する者について、
+            <strong className="font-semibold">7日以上かけて作業（ばく露）を漸増させる計画的な暑熱順化</strong>を求めています。
+            下表の「目安(%)」は現場で調整するための<strong className="font-semibold">編集可能な初期値</strong>であり、特定の公的数値ではありません。
+          </p>
+        </CollapsibleDetail>
+        <p className="mt-2 hidden text-[11px] leading-5 text-slate-500 print:block">
           厚生労働省「職場における熱中症予防」は、暑熱作業に新たに従事する者・長期の中断から復帰する者について、
           <strong className="font-semibold">7日以上かけて作業（ばく露）を漸増させる計画的な暑熱順化</strong>を求めています。
           下表の「目安(%)」は現場で調整するための<strong className="font-semibold">編集可能な初期値</strong>であり、特定の公的数値ではありません。
@@ -297,7 +332,13 @@ export function AcclimatizationClient() {
           </table>
         </div>
 
-        <p className="mt-3 text-[11px] leading-5 text-slate-500">
+        {/* 画面では折りたたみ・印刷では帳票どおり全文（正確性は不可侵） */}
+        <CollapsibleDetail summary="運用上の注意（中断時の再順化など）" className="mt-3 print:hidden">
+          <p>
+            順化が中断（おおむね4日以上）した場合は再度の順化が必要です。体調に「要注意」「作業中止」が出た日は無理に負荷を上げないでください。最終判断は事業者・職長・産業医が行ってください。出典：厚生労働省「職場における熱中症予防」。
+          </p>
+        </CollapsibleDetail>
+        <p className="mt-3 hidden text-[11px] leading-5 text-slate-500 print:block">
           順化が中断（おおむね4日以上）した場合は再度の順化が必要です。体調に「要注意」「作業中止」が出た日は無理に負荷を上げないでください。最終判断は事業者・職長・産業医が行ってください。出典：厚生労働省「職場における熱中症予防」。
         </p>
 
