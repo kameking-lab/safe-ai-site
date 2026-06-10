@@ -629,3 +629,11 @@
 - ゲート: docs+BACKLOGのみの変更(コード変更0)だが契約どおり tsc0 / lint errors0 / vitest全pass / build成功 を確認。新規依存0・捏造0・水増し0・既存破壊0・env/DB変更なし。
 
 
+
+## Cycle (2026-06-10) — 柱2: /signage に「現場の安全状態」パネル＝記録キットとサイネージの断絶を解消
+- 前PR回収: CI緑の #460(化学RA→保護具一式)・#462(site-records今日やること)・#463(柱1再検証)を回収。#462/#463はcycle-log追記衝突→origin/mainを各ブランチへ通常マージ(両側併記)で解決。#463は#462のland後に再競合したため再マージ→直接squash(リポジトリはauto-merge無効を確認)。main最新・clean。古いdocs系PRは放置。
+- タスク選定: 柱2最上位「/signage に /site-records の現場記録データを表示する『現場の安全状態』パネル」。未マージ自PRなし=衝突なし。
+- 実装: サイネージは外部情報(気象/事故/法改正)のみで自現場の記録が出ない断絶を解消。#462のbuildDailyActionsを再利用し判定二重実装0、新設は選別純関数 web/src/lib/signage/site-safety.ts(selectSignageSiteSafety＋テスト6件)とパネル web/src/components/signage/signage-site-safety.tsx のみ。現場レベル(パトロール未是正/重大・軽微ヒヤリ/使用不可機械/委員会未開催)のみ掲示し、健診(個人の健康情報を大画面に出さない)とカレンダー(参考情報)は除外。リスク予測直下にshrink-0+xl:max-h-[30vh]で配置(下のflex-1パネルが譲る)・記録ゼロ端末では非表示・枠色=赤/橙/緑で遠目に状態判別。
+- localStorage共有の実機検証(タスクの検討事項): 同一端末・同一ブラウザなら同一オリジンで共有されることをPlaywrightで確認。別タブの記録保存がstorageイベントで再読込なしに即時反映(要対応4件→5件)＋5分間隔の再集計(日付跨ぎの期日超過昇格を拾う保険)。別端末とは共有不可=Path A制約としてパネル下部に「この端末に保存された記録から自動集計」を明記。
+- 第三者レビュー: 堀田さん(49・元請専任安全衛生担当・事務所TVにサイネージ常時表示・記録は同じPCの別タブで入力・「自現場のことが出ないダッシュボードはテレビのニュースと同じ」)でPlaywright実機(1920×1080/390px)。1回目で3点発見=①detail末尾の重大度と期日が密着し「重大期日」と誤読 ②表示上限4件で使用不可機械が「ほか1件」に隠れ種別すら不明(非対話掲示では隠れた情報=無い情報) ③タイトルがトレンド見出しより小さくTVで読みにくい→「／」区切り・「ほか n件（点検）」と種別列挙・lg:text-sm に是正。再レビュー全17チェックPASS=期限超過の高所指摘(⚠)が先頭・1画面フィット縦横overflow0・法改正パネル残存・console error0。「これはもう自分の現場の掲示板だ」=採用。
+- ゲート: tsc0 / lint errors0(warning47=既存・新規ファイルはlintクリーン) / vitest 全1264pass(157ファイル・+6) / build成功。再生成データ(chatbot-eval/rag-metrics)復元済・temp(_signage_review.mjs/_signage_allclear.png)削除済。記録: docs/third-party-reviews/signage-site-safety-2026-06-10.md(＋1920×1080実機png)。新規依存0・捏造0・水増し0・既存破壊0・env/DB変更なし。
