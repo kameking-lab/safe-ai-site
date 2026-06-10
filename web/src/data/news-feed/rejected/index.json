@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-09T22:20:55.688Z",
+  "updatedAt": "2026-06-10T22:50:19.010Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -49,6 +49,33 @@
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related)",
           "duplication 70 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "211dd69a7e9f9a94",
+      "headline": "新名神高速6人死亡事故の初公判 検察「スマホ13秒脇見」",
+      "aiSummary": "新名神高速6人死亡事故の初公判で、検察は運転手のスマホ脇見が原因と主張した。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260610/k10015146211000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 10 Jun 2026 19:32:03 +0900",
+        "fetchedAt": "2026-06-10T22:50:01.333Z"
+      },
+      "estimatedAccidentType": "交通事故",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 30,
+        "copyrightRisk": 10,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-06-10T22:50:12.629Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 30 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
