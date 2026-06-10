@@ -19,7 +19,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     keywords: ["クレーン", "天井クレーン", "橋形クレーン", "5t以上", "ホイスト"],
     requiresLicense: false,
     notes: "クレーン・デリック運転士免許（限定なし）があれば技能講習は不要",
-    relatedCertIds: ["se-36-5-jukiso"],
+    relatedCertIds: ["se-36-15-crane-under5t"],
   },
   {
     id: "st-mobile-crane",
@@ -30,7 +30,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     duration: "20時間（学科12h＋実技8h）",
     workCategories: ["construction", "manufacturing", "logistics"],
     keywords: ["移動式クレーン", "ラフター", "ユニック", "1t以上5t未満"],
-    relatedCertIds: ["se-36-6-ido-crane"],
+    relatedCertIds: ["se-36-16-mobile-crane"],
     notes: "5t以上は移動式クレーン運転士免許が必要",
   },
   {
@@ -54,7 +54,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     duration: "35時間（学科12h＋実技23h）",
     workCategories: ["logistics", "manufacturing", "construction"],
     keywords: ["フォークリフト", "フォーク", "1t以上", "荷役", "倉庫"],
-    relatedCertIds: ["se-36-9-shovelloader"],
+    relatedCertIds: ["se-36-5-forklift"],
     notes: "道路上の走行は大型特殊自動車免許等が別途必要",
   },
   // === 車両系建設機械 ===
@@ -67,7 +67,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     duration: "38時間（学科13h＋実技25h）",
     workCategories: ["construction"],
     keywords: ["バックホー", "ブルドーザー", "ショベル", "建設機械", "3t以上", "土工"],
-    relatedCertIds: ["se-36-10-shovel"],
+    relatedCertIds: ["se-36-9-seichi"],
   },
   {
     id: "st-concrete-crusher",
@@ -89,7 +89,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     duration: "13時間（学科6h＋実技7h）",
     workCategories: ["construction", "forestry", "mining"],
     keywords: ["不整地運搬車", "クローラダンプ", "運搬車"],
-    relatedCertIds: ["se-36-13-sakamusu"],
+    relatedCertIds: ["se-36-5-3-fuseichi"],
   },
   {
     id: "st-high-lift",
@@ -100,7 +100,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     duration: "17時間（学科6h＋実技11h）",
     workCategories: ["construction", "general"],
     keywords: ["高所作業車", "バケット車", "スカイマスター", "10m以上"],
-    relatedCertIds: ["se-36-14-high-lift"],
+    relatedCertIds: ["se-36-10-5-koshosagyosha"],
   },
   {
     id: "st-shovel-loader",
@@ -186,7 +186,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     duration: "12時間（学科12h）",
     workCategories: ["manufacturing", "chemical"],
     keywords: ["特定化学物質", "特化物", "有害化学物質", "四アルキル鉛", "主任者"],
-    relatedCertIds: ["se-36-21-tokushu"],
+    relatedCertIds: ["se-36-25-tetraalkyl"],
   },
   {
     id: "st-yuki-chief",
@@ -197,7 +197,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     duration: "6時間（学科6h）",
     workCategories: ["manufacturing", "chemical", "construction"],
     keywords: ["有機溶剤", "塗装", "接着剤", "シンナー", "主任者"],
-    relatedCertIds: ["se-36-22-yuki"],
+    notes: "有機溶剤業務に法定の特別教育はない（通達に基づく労働衛生教育が推奨）",
   },
   {
     id: "st-lead-chief",
@@ -208,7 +208,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     duration: "6時間（学科6h）",
     workCategories: ["manufacturing", "construction"],
     keywords: ["鉛", "鉛化合物", "はんだ", "主任者"],
-    relatedCertIds: ["se-36-24-lead"],
+    notes: "鉛業務一般に法定の特別教育はない（特別教育があるのは四アルキル鉛等業務のみ）",
   },
   {
     id: "st-asbestos-chief",
@@ -219,7 +219,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     duration: "11時間（学科11h）",
     workCategories: ["construction"],
     keywords: ["石綿", "アスベスト", "解体", "改修", "除去", "主任者"],
-    relatedCertIds: ["se-36-29-asbestos"],
+    relatedCertIds: ["se-36-37-asbestos"],
     effectiveDate: "2021-04-01",
   },
   // === 粉じん・防じん ===
@@ -232,7 +232,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     duration: "10時間（学科10h）",
     workCategories: ["construction", "manufacturing", "mining"],
     keywords: ["粉じん", "じん肺", "特定粉じん", "主任者"],
-    relatedCertIds: ["se-36-28-saibai"],
+    relatedCertIds: ["se-36-29-dust"],
   },
   // === 建設・コンクリート系 ===
   {
@@ -442,7 +442,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     duration: "18時間（学科16h＋実技2h）",
     workCategories: ["forestry"],
     keywords: ["林業架線", "集材装置", "運材索道", "架線", "林業", "主任者"],
-    relatedCertIds: ["se-36-18-kizai"],
+    relatedCertIds: ["se-36-7-shuzai"],
   },
   // === 圧力容器・高圧 ===
   {
@@ -465,7 +465,7 @@ export const SKILL_TRAINING: EducationCert[] = [
     duration: "14時間（学科14h）",
     workCategories: ["construction"],
     keywords: ["高圧室内", "ケーソン", "潜函", "高圧作業", "作業主任者", "主任者"],
-    relatedCertIds: ["se-36-33-koyaku"],
+    relatedCertIds: ["se-36-24-2-koshitsunai"],
     notes: "高圧室内作業主任者免許（国家試験）と区別。技能講習修了では主任者職務は担えない場合あり",
   },
   // === 運搬機械（その他）===
