@@ -164,10 +164,17 @@ export const articleNoticeMap: Record<string, ArticleNoticeMapEntry> = {
     notices: ["mhlw-notice-0226"],
     leaflets: ["mhlw-leaflet-0113"],
   },
-  "ボイラー則|第25条": {
-    // ボイラー取扱作業主任者
+  "ボイラー則|第15条": {
+    // ボイラー検査証（押印廃止の通達）
     notices: ["mhlw-notice-0160"],
-    leaflets: ["mhlw-leaflet-0116", "mhlw-leaflet-0145"],
+  },
+  "ボイラー則|第24条": {
+    // ボイラー取扱作業主任者の選任（自動制御装置による区分の特例 = 機能安全）
+    leaflets: ["mhlw-leaflet-0116"],
+  },
+  "ボイラー則|第38条": {
+    // 性能検査・有効期間更新（2年連続運転認定制度）
+    leaflets: ["mhlw-leaflet-0145"],
   },
 
   // ──────────── 健康診断・健康管理 ────────────
