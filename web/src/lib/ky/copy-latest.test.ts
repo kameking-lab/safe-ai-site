@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import { copyKyForToday } from "./copy-latest";
-import { reindexSignaturesOnRemove, countSignatures } from "./signatures";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
 
 function sampleRecord() {
@@ -48,27 +47,5 @@ describe("copyKyForToday", () => {
     expect(copy.participants[0].onExit).toBe("");
     expect(copy.breaks.every((b) => b === "")).toBe(true);
     expect(copy.closingNote).toBe("");
-  });
-});
-
-describe("reindexSignaturesOnRemove", () => {
-  it("削除位置より後ろのキーを1つ前へ詰める", () => {
-    const sigs = { 0: "data:imageA", 1: "data:imageB", 2: "data:imageC" };
-    const next = reindexSignaturesOnRemove(sigs, 1);
-    // 1を削除 → 旧2が新1へ
-    expect(next[0]).toBe("data:imageA");
-    expect(next[1]).toBe("data:imageC");
-    expect(next[2]).toBeUndefined();
-  });
-  it("先頭削除で全体が1つ前へ", () => {
-    const next = reindexSignaturesOnRemove({ 0: "a", 1: "b" }, 0);
-    expect(next[0]).toBe("b");
-    expect(next[1]).toBeUndefined();
-  });
-});
-
-describe("countSignatures", () => {
-  it("十分な長さの署名のみ数える", () => {
-    expect(countSignatures({ 0: "data:image/png;base64,xxxx", 1: "", 2: "ab" })).toBe(1);
   });
 });

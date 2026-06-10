@@ -5,6 +5,7 @@ import { ChevronLeft, ExternalLink, FileText, Share2 } from "lucide-react";
 import { JsonLd, legalDocumentSchema, breadcrumbSchema } from "@/components/json-ld";
 import { RelatedContent, type RelatedContentGroup } from "@/components/RelatedContent";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
+import { ArticleFeedback } from "@/components/ArticleFeedback";
 import { mhlwNotices, type MhlwNotice } from "@/data/mhlw-notices";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import { safetyGoodsItems, safetyGoodsCategories } from "@/data/mock/safety-goods";
@@ -371,6 +372,8 @@ export default async function CircularDetailPage({
         title="さらに深掘り — 通達・事故・保護具"
         groups={relatedGroups}
       />
+
+      <ArticleFeedback articleSlug={`circulars/${notice.id}`} />
 
       <footer className="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-[11px] leading-5 text-slate-600">
         <p>
