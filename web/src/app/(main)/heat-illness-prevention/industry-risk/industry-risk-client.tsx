@@ -11,8 +11,34 @@ import {
   ExternalLink,
   ChevronDown,
   CheckCircle2,
+  HardHat,
+  Factory,
+  Truck,
+  Wheat,
+  Sparkles,
+  ShieldCheck,
+  ChefHat,
+  Warehouse,
+  TreePine,
+  Recycle,
+  type LucideIcon,
 } from "lucide-react";
 import { INDUSTRY_HEAT_RULES } from "@/data/heat-illness-rules";
+import type { IndustryId } from "@/types/heat-illness";
+
+/** 業種ピクトグラム（柱0: アイコンは言語より速い） */
+const INDUSTRY_ICON: Record<IndustryId, LucideIcon> = {
+  construction: HardHat,
+  manufacturing: Factory,
+  transport: Truck,
+  agriculture: Wheat,
+  cleaning: Sparkles,
+  security: ShieldCheck,
+  kitchen: ChefHat,
+  warehouse: Warehouse,
+  forestry: TreePine,
+  waste: Recycle,
+};
 
 export function IndustryRiskClient() {
   const router = useRouter();
@@ -43,18 +69,20 @@ export function IndustryRiskClient() {
         <div className="mt-4 flex flex-wrap gap-2">
           {INDUSTRY_HEAT_RULES.map((r) => {
             const active = r.id === rule.id;
+            const Icon = INDUSTRY_ICON[r.id];
             return (
               <button
                 key={r.id}
                 type="button"
                 onClick={() => handleChange(r.id)}
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border px-3.5 py-2 text-sm font-bold transition ${
                   active
-                    ? "border-amber-500 bg-amber-500 text-white"
+                    ? "border-amber-600 bg-amber-400 text-amber-950 shadow-sm"
                     : "border-slate-300 bg-white text-slate-700 hover:border-amber-300 hover:bg-amber-50"
                 }`}
                 aria-pressed={active}
               >
+                <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />
                 {r.label}
               </button>
             );
@@ -63,7 +91,13 @@ export function IndustryRiskClient() {
       </section>
 
       <section className="rounded-2xl border-2 border-amber-300 bg-amber-50/60 p-5 shadow-sm">
-        <h2 className="text-lg font-bold text-amber-900">{rule.label}</h2>
+        <div className="flex items-center gap-3">
+          {(() => {
+            const Icon = INDUSTRY_ICON[rule.id];
+            return <Icon className="h-12 w-12 shrink-0 text-amber-700" aria-hidden="true" />;
+          })()}
+          <h2 className="text-2xl font-bold text-amber-900">{rule.label}</h2>
+        </div>
         <p className="mt-2 text-sm leading-6 text-amber-900">{rule.riskProfile}</p>
       </section>
 

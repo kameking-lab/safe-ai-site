@@ -2,9 +2,20 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Droplet, Wind, Sun, Activity, Printer, ClipboardCheck } from "lucide-react";
+import {
+  Droplet,
+  Wind,
+  Sun,
+  Activity,
+  Printer,
+  ClipboardCheck,
+  Clock,
+  OctagonX,
+} from "lucide-react";
 import { assess } from "@/lib/wbgt-engine";
 import { putHeatLogDraft } from "@/lib/heat-illness/log-store";
+import { WbgtConclusion } from "@/components/heat-illness/wbgt-conclusion";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import type {
   AcclimatizationState,
   Environment,
@@ -33,42 +44,6 @@ const DEFAULTS: FormState = {
   acclimatization: "acclimatized",
 };
 
-const COLOR_TOKEN: Record<
-  "emerald" | "amber" | "orange" | "red" | "rose",
-  { bg: string; border: string; text: string; chip: string }
-> = {
-  emerald: {
-    bg: "bg-emerald-50",
-    border: "border-emerald-300",
-    text: "text-emerald-900",
-    chip: "bg-emerald-600",
-  },
-  amber: {
-    bg: "bg-amber-50",
-    border: "border-amber-300",
-    text: "text-amber-900",
-    chip: "bg-amber-500",
-  },
-  orange: {
-    bg: "bg-orange-50",
-    border: "border-orange-300",
-    text: "text-orange-900",
-    chip: "bg-orange-500",
-  },
-  red: {
-    bg: "bg-red-50",
-    border: "border-red-300",
-    text: "text-red-900",
-    chip: "bg-red-600",
-  },
-  rose: {
-    bg: "bg-rose-50",
-    border: "border-rose-300",
-    text: "text-rose-900",
-    chip: "bg-rose-600",
-  },
-};
-
 export function WbgtCalculatorClient() {
   const router = useRouter();
   const [form, setForm] = useState<FormState>(DEFAULTS);
@@ -88,8 +63,6 @@ export function WbgtCalculatorClient() {
       form.acclimatization,
     );
   }, [form]);
-
-  const color = COLOR_TOKEN[result.risk.color];
 
   function handleReset() {
     setForm(DEFAULTS);
@@ -123,6 +96,42 @@ export function WbgtCalculatorClient() {
 
   return (
     <div className="space-y-6">
+      {/* 結論ファースト: WBGTデカ数字＋危険度色帯を画面の主役に（柱0） */}
+      <WbgtConclusion
+        wbgt={result.wbgt.wbgt}
+        level={result.risk.level}
+        heading="いまの危険度（入力条件で即時更新）"
+        summary={result.risk.summary}
+        workIntensity={form.workIntensity}
+        acclimatization={form.acclimatization}
+      >
+        {result.recommendation.suspendWork ? (
+          <span className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-rose-800 px-4 py-2 text-base font-bold text-white">
+            <OctagonX className="h-5 w-5" aria-hidden="true" />
+            原則 作業中止
+          </span>
+        ) : (
+          <>
+            <span className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white/80 px-3 py-2 text-sm font-bold text-slate-800">
+              <Clock className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
+              {result.recommendation.workRestRatio}
+            </span>
+            <span className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white/80 px-3 py-2 text-sm font-bold text-slate-800">
+              <Droplet className="h-4 w-4 shrink-0 text-sky-600" aria-hidden="true" />
+              水分 {result.recommendation.fluidIntakeMlPerHour}/時
+            </span>
+          </>
+        )}
+        <button
+          type="button"
+          onClick={handleAddToLog}
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-sky-700 px-4 py-2 text-sm font-bold text-white hover:bg-sky-800"
+        >
+          <ClipboardCheck className="h-4 w-4" aria-hidden="true" />
+          日次記録簿に追加
+        </button>
+      </WbgtConclusion>
+
       <section
         aria-labelledby="wbgt-input-heading"
         className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden"
@@ -282,54 +291,7 @@ export function WbgtCalculatorClient() {
             <Printer className="h-3.5 w-3.5" aria-hidden="true" />
             結果を印刷
           </button>
-          <button
-            type="button"
-            onClick={handleAddToLog}
-            className="inline-flex items-center gap-1 rounded-lg border border-amber-500 bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-100"
-          >
-            <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
-            日次記録簿に追加
-          </button>
         </div>
-      </section>
-
-      <section
-        aria-labelledby="wbgt-result-heading"
-        className={`rounded-2xl border-2 ${color.border} ${color.bg} p-5 shadow-sm`}
-      >
-        <div className="flex flex-wrap items-center gap-3">
-          <h2
-            id="wbgt-result-heading"
-            className={`text-lg font-bold ${color.text}`}
-          >
-            WBGT {result.wbgt.wbgt.toFixed(1)} °C
-          </h2>
-          <span
-            className={`inline-flex items-center rounded-full px-3 py-0.5 text-xs font-bold uppercase tracking-wide text-white ${color.chip}`}
-          >
-            {result.risk.label}
-          </span>
-        </div>
-        <p className={`mt-2 text-sm leading-6 ${color.text}`}>
-          {result.risk.summary}
-        </p>
-        <dl className="mt-4 grid grid-cols-2 gap-3 text-xs sm:grid-cols-3">
-          <ResultStat
-            label="自然湿球温度"
-            value={`${result.wbgt.naturalWetBulbC.toFixed(1)} °C`}
-          />
-          <ResultStat
-            label="使用した黒球温度"
-            value={`${result.wbgt.globeTempUsedC.toFixed(1)} °C`}
-          />
-          <ResultStat
-            label="作業強度別の閾値"
-            value={`≥ ${result.risk.thresholdC.toFixed(0)} °C`}
-          />
-        </dl>
-        <p className="mt-3 text-[11px] text-slate-600">
-          式：{result.wbgt.notes}
-        </p>
       </section>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -368,12 +330,42 @@ export function WbgtCalculatorClient() {
         />
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-600">
-        <p>
+      <CollapsibleDetail summary="計算の内訳・式・出典（必要なときに開く）" className="print:hidden">
+        <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <ResultStat
+            label="自然湿球温度"
+            value={`${result.wbgt.naturalWetBulbC.toFixed(1)} °C`}
+          />
+          <ResultStat
+            label="使用した黒球温度"
+            value={`${result.wbgt.globeTempUsedC.toFixed(1)} °C`}
+          />
+          <ResultStat
+            label="作業強度別の閾値"
+            value={`≥ ${result.risk.thresholdC.toFixed(0)} °C`}
+          />
+        </dl>
+        <p className="mt-3">式：{result.wbgt.notes}</p>
+        <p className="mt-2">
           計算式の出典：JIS Z 8504 「暑熱環境－WBGT 指数に基づく作業者の熱ストレスの評価」、
           JSOH「許容濃度等の勧告（暑熱）」、厚生労働省「職場における熱中症予防対策マニュアル」。
         </p>
         <p className="mt-1">
+          本ツールはあくまで参考値です。最終的な作業可否判断は事業者・産業医・職長が実測値と現場状況を踏まえて行ってください。
+        </p>
+      </CollapsibleDetail>
+
+      {/* 印刷時のみ: 計算内訳と出典を畳まずに出す（提出書類の正確性は不可侵） */}
+      <section className="hidden rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-600 print:block">
+        <p>
+          自然湿球温度 {result.wbgt.naturalWetBulbC.toFixed(1)} °C／使用した黒球温度{" "}
+          {result.wbgt.globeTempUsedC.toFixed(1)} °C／作業強度別の閾値 ≥{" "}
+          {result.risk.thresholdC.toFixed(0)} °C
+        </p>
+        <p className="mt-1">式：{result.wbgt.notes}</p>
+        <p className="mt-1">
+          計算式の出典：JIS Z 8504 「暑熱環境－WBGT 指数に基づく作業者の熱ストレスの評価」、
+          JSOH「許容濃度等の勧告（暑熱）」、厚生労働省「職場における熱中症予防対策マニュアル」。
           本ツールはあくまで参考値です。最終的な作業可否判断は事業者・産業医・職長が実測値と現場状況を踏まえて行ってください。
         </p>
       </section>
