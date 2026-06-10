@@ -69,9 +69,9 @@ const CITATION_FIXES: CitationFix[] = [
     id: "eq-eyewash-x3",
     file: "web/src/data/safety-equipment-db.json (3 occurrences)",
     before: '"有機則 第61条"',
-    after: '"安衛則 第659条"',
+    after: '"安衛則 第633条"',
     reason:
-      "有機則の本則は第38条まで。洗眼器の救急用具備付け要件は安衛則第659条 (救急用具) に対応。",
+      "有機則の本則は第38条まで。洗眼器の救急用具備付け要件は安衛則第633条 (救急用具) に対応。(当初659条としていたが、2026-06-10のe-Gov公式XML突合で救急用具は第633条と確定し再是正)",
   },
   {
     id: "st-sekimen-010",
