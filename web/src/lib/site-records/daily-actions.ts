@@ -68,6 +68,12 @@ const SOURCE_LABEL: Record<DailyActionSource, string> = {
 
 const SEVERITY_RANK: Record<DailyActionSeverity, number> = { overdue: 0, alert: 1, info: 2 };
 
+/** 端末ローカル時刻での今日の日付 (yyyy-mm-dd)。buildDailyActions の todayIso 引数に渡す。 */
+export function todayIso(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 /**
  * 健診トラッカー（/health-checkup-scheduler）の localStorage キー接頭辞。
  * scheduler-document.tsx がプロファイル毎に `${PREFIX}${profile…}` で保存している。

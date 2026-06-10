@@ -8,6 +8,7 @@ import {
   countBySeverity,
   mergeCheckupTrackerMaps,
   readCheckupTrackerMaps,
+  todayIso,
   type DailyAction,
 } from "@/lib/site-records/daily-actions";
 import { getAllPatrolRecords } from "@/lib/site-records/patrol-store";
@@ -16,11 +17,6 @@ import { getInspectionList } from "@/lib/site-records/inspection-store";
 import { getCommitteeList } from "@/lib/site-records/committee-store";
 
 const VISIBLE_LIMIT = 6;
-
-function todayIso(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 
 const ROW_BORDER: Record<DailyAction["severity"], string> = {
   overdue: "border-l-rose-500 bg-rose-50/60",

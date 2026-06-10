@@ -713,3 +713,7 @@
 - 本文レベルの発見(keywords調査が端緒・監査未指摘): ①特化則36条の2「測定結果の評価」の本文が実は36条2項(記録保存)の内容=見出し整合テストの盲点 ②36条1項の除外参照「別表第3」誤り+2項3項欠落 ③40条の保存年限が存在しない条文構造(正=1項個人票5年/2項特別管理物質30年) ④44条3項(保護眼鏡)欠落 ⑤酸欠則3条2項(測定記録3年)欠落 → 全てe-Gov API v2正本と突合して是正。
 - ゲート: tsc0/lint errors0/vitest 1347全pass(rag-100q・rag-metrics・caption整合=検索回帰なし)/build成功。
 - 記録: docs/fable-reexamination-2026-06-10/corpus-stale-keywords-cleanup-2026-06-10.md。教訓=第3弾以降の是正は番号だけでなくkeywords×本文の内容突合を併用すること。
+
+## 2026-06-10 (Fable 5) — law-metadata全カバレッジ是正＋todayIso共通化 (fix/law-metadata-coverage-and-todayiso)
+
+冒頭回収: 自分の未マージPRは#474(keywords清掃)のみでCI実行中→契約どおり次イテレーション回収に回す。BACKLOG最上位(29行)は#474そのもの、45/46行(コーパス第3/4弾)は#474と同一ファイル群のためスキップし、30行(todayIso)+47行(law-metadata)を1ブランチで実行。law-metadataは機械突合で実態がBACKLOG記載と異なることを発見=「13法令未登録」ではなく17 lawShort解決不能(真の未登録12＋キー名不一致5=作環測法・女性則・年少者則・職能法・パート有期法は登録済みなのに別名キーで永遠に引けず、計約120条文でe-Govリンク・監査日・正式名称が非表示。均等法はBACKLOG側の誤記で問題なし)。法令6件はe-Gov API v2で法令番号・最新改正を機械取得(鉛則=347M50002000037/R8改正等)、指針・通達6件はMHLW通達検索と安全衛生情報センターをWeb検証して登録。law-metadata-sync.test.ts新設でcuratedコーパス⇄メタ双方向同期を恒久固定(mhlw-extras文書バンドルはLAW_SOURCE_COUNTと同根拠で除外)。付随発見1件をBACKLOG起票=熱中症通達コーパス本文が令和8年基発0318第1号で廃止済みの旧要綱を現行として記述(主軸機能のため優先度高)。todayIsoはdaily-actions.tsに1本化し両コンポーネントをimport化。ゲート: tsc 0 / lint 0 errors / vitest 164ファイル1350全pass / build成功。

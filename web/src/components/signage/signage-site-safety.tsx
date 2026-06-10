@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { buildDailyActions, type DailyAction } from "@/lib/site-records/daily-actions";
+import { buildDailyActions, todayIso, type DailyAction } from "@/lib/site-records/daily-actions";
 import { getAllPatrolRecords } from "@/lib/site-records/patrol-store";
 import { getNearMissReports } from "@/lib/site-records/nearmiss-store";
 import { getInspectionList } from "@/lib/site-records/inspection-store";
@@ -12,11 +12,6 @@ import { selectSignageSiteSafety } from "@/lib/signage/site-safety";
 // この間隔は同一タブ内での日付跨ぎ（期日超過への昇格）を拾う保険。
 const RELOAD_INTERVAL_MS = 5 * 60 * 1000;
 const VISIBLE_LIMIT = 4;
-
-function todayIso(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
 
 type PanelData = {
   /** この端末に現場記録がひとつでもあるか。無い端末ではパネル自体を出さない。 */
