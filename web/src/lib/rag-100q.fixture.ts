@@ -36,7 +36,7 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 16, topic: "教育", question: "危険有害業務に従事する労働者への教育義務は？", gold: [{ lawShort: "安衛法", articleNum: "第59条" }] },
   { id: 17, topic: "教育", question: "化学物質管理者の選任根拠を教えて。", gold: [{ lawShort: "安衛則", articleNum: "第12条の5" }, { lawShort: "安衛法", articleNum: "第57条の3" }] },
   { id: 18, topic: "教育", question: "玉掛け技能講習の根拠条文は？", gold: [{ lawShort: "クレーン則", articleNum: "第221条" }] },
-  { id: 19, topic: "教育", question: "ボイラー取扱作業主任者の資格要件は？", gold: [{ lawShort: "ボイラー則", articleNum: "第25条" }] },
+  { id: 19, topic: "教育", question: "ボイラー取扱作業主任者の資格要件は？", gold: [{ lawShort: "ボイラー則", articleNum: "第24条" }] },
   { id: 20, topic: "教育", question: "ゴンドラ操作の特別教育は何則のどこに？", gold: [{ lawShort: "ゴンドラ則", articleNum: "第12条" }] },
 
   // C. 健康診断・健康管理 (21-30)
@@ -96,7 +96,7 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 66, topic: "熱中症", question: "熱中症のWBGT測定義務は何条？", gold: [{ lawShort: "安衛則", articleNum: "第612条の2" }] },
   { id: 67, topic: "熱中症", question: "暑熱環境における労働者の健康障害防止は？", gold: [{ lawShort: "安衛則", articleNum: "第612条の2" }] },
   { id: 68, topic: "騒音", question: "気積・採光・換気・温度の規定は？", gold: [{ lawShort: "安衛則", articleNum: "第600条" }, { lawShort: "安衛則", articleNum: "第601条" }, { lawShort: "安衛則", articleNum: "第604条" }, { lawShort: "安衛則", articleNum: "第606条" }] },
-  { id: 69, topic: "ボイラー", question: "圧力容器の定期検査は？", gold: [{ lawShort: "ボイラー則", articleNum: "第32条" }, { lawShort: "ボイラー則", articleNum: "第64条" }] },
+  { id: 69, topic: "ボイラー", question: "圧力容器の定期検査は？", gold: [{ lawShort: "ボイラー則", articleNum: "第67条" }, { lawShort: "ボイラー則", articleNum: "第88条" }, { lawShort: "ボイラー則", articleNum: "第94条" }] },
   { id: 70, topic: "VDT", question: "情報機器作業（VDT作業）の指針は？", gold: [{ lawShort: "VDTガイドライン", articleNum: "第1" }, { lawShort: "VDTガイドライン", articleNum: "第2" }, { lawShort: "VDTガイドライン", articleNum: "第3" }, { lawShort: "VDTガイドライン", articleNum: "第4" }] },
   { id: 71, topic: "重量物", question: "重量物取扱いの腰痛予防は？", gold: [{ lawShort: "女性則", articleNum: "第3条" }, { lawShort: "年少者則", articleNum: "第8条" }] },
   { id: 72, topic: "高圧", question: "高気圧作業の作業主任者は？", gold: [{ lawShort: "高圧則", articleNum: "第11条" }, { lawShort: "高圧則", articleNum: "第1条" }] },
