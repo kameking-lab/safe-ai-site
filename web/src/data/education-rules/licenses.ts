@@ -18,7 +18,7 @@ export const LICENSES: EducationCert[] = [
     duration: "国家試験（学科＋実技）合格 — 受験資格に実務経験または訓練修了が必要",
     workCategories: ["construction", "manufacturing", "logistics", "shipbuilding"],
     keywords: ["クレーン運転士", "クレーン免許", "天井クレーン", "橋形クレーン", "デリック", "限定なし"],
-    relatedCertIds: ["st-crane-5t", "se-36-5-jukiso"],
+    relatedCertIds: ["st-crane-5t", "se-36-15-crane-under5t"],
     notes: "クレーン限定免許・床上運転式クレーン限定免許あり。移動式クレーンは別免許",
   },
   {
@@ -30,7 +30,7 @@ export const LICENSES: EducationCert[] = [
     duration: "国家試験（学科＋実技）合格",
     workCategories: ["construction", "manufacturing", "logistics"],
     keywords: ["移動式クレーン運転士", "ラフター", "トラッククレーン", "オールテレーン", "免許"],
-    relatedCertIds: ["st-mobile-crane", "se-36-6-ido-crane"],
+    relatedCertIds: ["st-mobile-crane", "se-36-16-mobile-crane"],
     notes: "5t未満は小型移動式クレーン運転技能講習修了で可",
   },
   {
@@ -78,7 +78,7 @@ export const LICENSES: EducationCert[] = [
     duration: "国家試験（学科）合格 — 実務経験または訓練修了が必要",
     workCategories: ["construction", "general"],
     keywords: ["潜水士", "潜水", "水中作業", "水中溶接", "海中", "免許"],
-    relatedCertIds: ["se-36-25-shokucho2"],
+    relatedCertIds: ["se-36-23-sensui-soki"],
     notes: "水深10m以上の潜水業務は免許が必須。送気式（ヘルメット潜水）も含む",
   },
   // === ガス溶接・放射線系免許 ===
@@ -103,7 +103,7 @@ export const LICENSES: EducationCert[] = [
     duration: "国家試験（学科）合格",
     workCategories: ["manufacturing", "construction"],
     keywords: ["エックス線", "X線", "非破壊検査", "放射線作業主任者", "免許"],
-    relatedCertIds: ["se-36-23-radiation", "st-radiation-chief"],
+    relatedCertIds: ["se-36-28-xray-gamma", "st-radiation-chief"],
   },
   {
     id: "lic-gamma-chief",
@@ -114,7 +114,7 @@ export const LICENSES: EducationCert[] = [
     duration: "国家試験（学科）合格",
     workCategories: ["manufacturing", "construction"],
     keywords: ["ガンマ線", "RI", "放射性同位元素", "非破壊検査", "透過写真", "免許"],
-    relatedCertIds: ["se-36-23-radiation"],
+    relatedCertIds: ["se-36-28-xray-gamma"],
   },
   // === 発破技士免許 ===
   {
