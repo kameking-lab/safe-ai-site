@@ -105,4 +105,22 @@ describe("court-cases データ整合性（捏造防止の構造ガード）", (
       expect(c!.holding).toMatch(/(判断した|認めた|是認した|とした)/);
     }
   });
+
+  it("Fable再検証(2026-06-10): 88件以上・シエスパ刑事/長崎じん肺(消滅時効)が存在", () => {
+    expect(COURT_CASES.length).toBeGreaterThanOrEqual(88);
+    // シエスパ爆発 刑事事件（従業員3名死亡・設計担当者個人の刑事責任・最決平28.5.25で確定）
+    const siespa = getCourtCaseById("shibuya-siespa-explosion-criminal");
+    expect(siespa?.issues).toContain("刑事責任");
+    expect(siespa?.issues).toContain("役員・個人責任");
+    // 長崎じん肺訴訟（最三小判平6.2.22 民集48巻2号441頁・消滅時効の起算点）
+    const nagasaki = getCourtCaseById("nagasaki-jinpai-h6");
+    expect(nagasaki?.field).toBe("じん肺・石綿");
+    expect(nagasaki?.citation).toContain("民集48巻2号441頁");
+    // 出典2つ以上・事実記述の holding（捏造防止ガード）
+    for (const c of [siespa, nagasaki]) {
+      expect(c).toBeDefined();
+      expect(c!.sources.length).toBeGreaterThanOrEqual(2);
+      expect(c!.holding).toMatch(/(判断した|認めた|是認した|とした)/);
+    }
+  });
 });
