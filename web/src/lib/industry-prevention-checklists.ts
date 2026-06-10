@@ -116,7 +116,7 @@ const MANUFACTURING: ChecklistItem[] = [
 ];
 
 const TRANSPORT: ChecklistItem[] = [
-  { no: 1, category: "high-risk-work", text: "荷役作業（トラック荷台・テールゲートリフター等）は安全衛生教育受講者を配置している", basis: "陸災防「荷役作業安全ガイドライン」/ 安衛則 第36条第5号の2（テールゲートリフター特別教育）" },
+  { no: 1, category: "high-risk-work", text: "荷役作業（トラック荷台・テールゲートリフター等）は安全衛生教育受講者を配置している", basis: "陸災防「荷役作業安全ガイドライン」/ 安衛則 第36条第5号の4（テールゲートリフター特別教育）" },
   { no: 2, category: "high-risk-work", text: "高さ2m以上のトラック荷台での作業には昇降設備・墜落制止用器具を準備している", basis: "労働安全衛生規則 第151条の67（昇降設備）" },
   { no: 3, category: "high-risk-work", text: "フォークリフト荷役は無資格者の運転を禁止し、合図者を配置している", basis: "安衛法 第61条 / 労働安全衛生規則 第151条の8（合図）" },
   { no: 4, category: "high-risk-work", text: "長距離運行は改善基準告示の拘束時間・休息時間を遵守している", basis: "自動車運転者の労働時間等の改善のための基準" },
