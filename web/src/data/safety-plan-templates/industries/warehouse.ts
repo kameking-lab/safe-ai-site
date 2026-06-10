@@ -76,7 +76,7 @@ export const warehouseIndustryMeasures: SafetyMeasure[] = [
       "テールゲートリフターによる積卸し作業に従事する者には特別教育を実施（令和6年2月施行）。修了記録を保存。",
     frequency: "新規対象者の都度",
     responsible: "倉庫長",
-    reference: "安衛則第36条第5号の3",
+    reference: "安衛則第36条第5号の4",
   },
   {
     category: "industry-specific",
@@ -120,7 +120,7 @@ export const warehouseLawReferences: LawReference[] = [
   {
     name: "労働安全衛生規則",
     articles: [
-      "第36条第5号の3（テールゲートリフター特別教育）",
+      "第36条第5号の4（テールゲートリフター特別教育）",
       "第107条（清掃等の運転停止）",
       "第151条の2〜第151条の26（フォークリフト等）",
       "第518条〜第533条（墜落の防止）",
