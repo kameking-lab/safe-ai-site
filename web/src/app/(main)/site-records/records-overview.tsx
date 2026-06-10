@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertOctagon, CheckCircle2, ClipboardList, UserPlus, CalendarDays } from "lucide-react";
+import { ClipboardList, UserPlus, CalendarDays } from "lucide-react";
+import { SAFETY_TONE, type SafetyTone } from "@/lib/design/safety-tone";
+import { TONE_DEFAULT_ICON } from "@/components/ui/status-badge";
 import { getPatrolList } from "@/lib/site-records/patrol-store";
 import { getNearMissReports, openCount as nearMissOpen } from "@/lib/site-records/nearmiss-store";
 import { getInspectionList } from "@/lib/site-records/inspection-store";
@@ -54,11 +56,12 @@ export function RecordsOverview() {
   // 記録がまだ1件も無い＝初見。17ツールの壁の前に「まず何から」を示す。
   if (!ov.hasAny) return <FirstVisitGuide />;
 
-  const tiles: { label: string; value: string; href: string; alert: boolean }[] = [
-    { label: "未是正の指摘（パトロール）", value: `${ov.patrolOpen} 件`, href: "/site-records/patrol", alert: ov.patrolOpen > 0 },
-    { label: "対応中のヒヤリハット", value: `${ov.nearMissOpen} 件`, href: "/site-records/near-miss", alert: ov.nearMissOpen > 0 },
-    { label: "使用不可の機械（点検）", value: `${ov.inspectionUnusable} 件`, href: "/site-records/inspection", alert: ov.inspectionUnusable > 0 },
-    { label: "今月の安全衛生委員会", value: ov.committeeThisMonth ? "開催済" : "未開催", href: "/site-records/committee", alert: !ov.committeeThisMonth },
+  // 共通視覚言語（柱0-0）: 赤=停止級（使用不可の機械）/ 黄=要対応 / 緑=良好
+  const tiles: { label: string; value: string; href: string; tone: SafetyTone }[] = [
+    { label: "未是正の指摘（パトロール）", value: `${ov.patrolOpen} 件`, href: "/site-records/patrol", tone: ov.patrolOpen > 0 ? "warning" : "safe" },
+    { label: "対応中のヒヤリハット", value: `${ov.nearMissOpen} 件`, href: "/site-records/near-miss", tone: ov.nearMissOpen > 0 ? "warning" : "safe" },
+    { label: "使用不可の機械（点検）", value: `${ov.inspectionUnusable} 件`, href: "/site-records/inspection", tone: ov.inspectionUnusable > 0 ? "danger" : "safe" },
+    { label: "今月の安全衛生委員会", value: ov.committeeThisMonth ? "開催済" : "未開催", href: "/site-records/committee", tone: ov.committeeThisMonth ? "safe" : "warning" },
   ];
 
   return (
@@ -67,25 +70,23 @@ export function RecordsOverview() {
     <section className="mt-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
       <h2 className="mb-2 text-sm font-bold text-slate-700">この端末の記録の状況（今日・今月）</h2>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {tiles.map((t) => (
-          <Link
-            key={t.label}
-            href={t.href}
-            className={`rounded-xl border bg-white p-3 transition hover:shadow-sm ${
-              t.alert ? "border-rose-300" : "border-emerald-200"
-            }`}
-          >
-            <span className="flex items-center gap-1 text-[11px] font-semibold text-slate-500">
-              {t.alert ? (
-                <AlertOctagon className="h-3.5 w-3.5 text-rose-500" aria-hidden="true" />
-              ) : (
-                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" aria-hidden="true" />
-              )}
-              {t.label}
-            </span>
-            <span className={`mt-1 block text-lg font-bold ${t.alert ? "text-rose-700" : "text-emerald-700"}`}>{t.value}</span>
-          </Link>
-        ))}
+        {tiles.map((t) => {
+          const tone = SAFETY_TONE[t.tone];
+          const Icon = TONE_DEFAULT_ICON[t.tone];
+          return (
+            <Link
+              key={t.label}
+              href={t.href}
+              className={`rounded-xl border bg-white p-3 transition hover:shadow-sm ${tone.border}`}
+            >
+              <span className="flex items-center gap-1 text-[11px] font-semibold text-slate-500">
+                <Icon className={`h-3.5 w-3.5 shrink-0 ${tone.icon}`} aria-hidden="true" />
+                {t.label}
+              </span>
+              <span className={`mt-1 block text-2xl font-bold leading-tight ${tone.text}`}>{t.value}</span>
+            </Link>
+          );
+        })}
       </div>
       {ov.inductionThisMonth > 0 && (
         <p className="mt-2 text-[11px] text-slate-500">今月の新規入場者 受入教育: {ov.inductionThisMonth} 件記録済み</p>
