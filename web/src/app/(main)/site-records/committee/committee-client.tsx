@@ -19,6 +19,8 @@ import {
   type CommitteeSummary,
   type CommitteeType,
 } from "@/lib/site-records/committee-store";
+import { committeeConclusion } from "@/lib/site-records/record-conclusions";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -38,13 +40,15 @@ export function CommitteeClient() {
   const [nextDate, setNextDate] = useState("");
   const [list, setList] = useState<CommitteeSummary[]>([]);
   const [savedNote, setSavedNote] = useState("");
+  // 当月の開催判定用（フォームの開催日とは独立に「今月」を固定する）
+  const [todayYm, setTodayYm] = useState("");
 
   useEffect(() => {
     const now = new Date();
     const today = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 初回マウントの既定値（SSRハイドレーション差異回避）
+    setTodayYm(today.slice(0, 7));
     setRecId(newCommitteeId());
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
     setDate(today);
     // 月次レポートからの下書きがあれば、当月実績の議題を先頭に挿入。
     const draft = takeCommitteeAgendaDraft();
@@ -52,13 +56,15 @@ export function CommitteeClient() {
     const agendaInit = draft
       ? [{ id: newAgendaId(), topic: "今月の安全衛生実績（月次レポート集計）", discussion: draft, decision: "", owner: "", due: "" }, ...base]
       : base;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 標準議題（必要なら月次下書きを反映）
     setAgenda(agendaInit);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 保存一覧
     setList(getCommitteeList());
   }, []);
 
   const decidedCount = useMemo(() => agenda.filter((a) => a.decision.trim() !== "").length, [agenda]);
+  const heldThisMonth = useMemo(
+    () => todayYm !== "" && list.some((s) => s.date.startsWith(todayYm)),
+    [list, todayYm],
+  );
 
   function updateItem(id: string, patch: Partial<AgendaItem>) {
     setAgenda((arr) => arr.map((a) => (a.id === id ? { ...a, ...patch } : a)));
@@ -160,6 +166,12 @@ export function CommitteeClient() {
 
   return (
     <div className="space-y-6">
+      {/* 結論カード（柱0）: 今月の開催実績（毎月1回以上・安衛則23条）を最上部で1メッセージに。
+          保存すると即「今月開催済」へ切り替わる */}
+      {todayYm !== "" && (
+        <ConclusionCard {...committeeConclusion(heldThisMonth)} className="print:hidden" />
+      )}
+
       {/* 開催情報 */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

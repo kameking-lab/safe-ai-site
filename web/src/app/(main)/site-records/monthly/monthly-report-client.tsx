@@ -11,6 +11,8 @@ import { getInspectionList } from "@/lib/site-records/inspection-store";
 import { getInductionList } from "@/lib/site-records/induction-store";
 import { getCommitteeList } from "@/lib/site-records/committee-store";
 import { getHeatLogList } from "@/lib/heat-illness/log-store";
+import { monthlyConclusion } from "@/lib/site-records/record-conclusions";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 export function MonthlyReportClient() {
   const router = useRouter();
@@ -67,6 +69,21 @@ export function MonthlyReportClient() {
 
   return (
     <div className="space-y-6">
+      {/* 結論カード（柱0）: 対象月の要対応合計（未是正＋対応中＋使用不可）を最上部で1メッセージに。
+          印刷帳票（正式書式）には載せない */}
+      {report && (
+        <ConclusionCard
+          {...monthlyConclusion({
+            hasAny: report.hasAny,
+            patrolOpen: report.patrol.open,
+            nearMissOpen: report.nearMiss.open,
+            inspectionUnusable: report.inspection.unusable,
+            committeeHeld: report.committee.held,
+          })}
+          className="print:hidden"
+        />
+      )}
+
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Field label="対象月">

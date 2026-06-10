@@ -25,6 +25,8 @@ import {
   type PatrolSummary,
   type OpenFinding,
 } from "@/lib/site-records/patrol-store";
+import { patrolConclusion } from "@/lib/site-records/record-conclusions";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -174,6 +176,12 @@ export function PatrolClient() {
 
   return (
     <div className="space-y-6">
+      {/* 結論カード（柱0）: 全巡視を横断した未是正・期日超過の状態を最上部で1メッセージに。
+          localStorage 読込後にのみ描画（SSR初期値の「未是正なし」を一瞬見せない） */}
+      {today !== "" && (
+        <ConclusionCard {...patrolConclusion(openFindings.length, overdueCount)} className="print:hidden" />
+      )}
+
       {/* 巡視情報 */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -294,7 +302,7 @@ export function PatrolClient() {
       </section>
 
       {/* 未是正トラッカー（全巡視を横断して是正まで追う） */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
+      <section id="open-findings" className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
             <AlarmClock className="h-5 w-5 text-rose-600" aria-hidden="true" />
