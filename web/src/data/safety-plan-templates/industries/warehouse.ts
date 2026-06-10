@@ -49,7 +49,7 @@ export const warehouseIndustryMeasures: SafetyMeasure[] = [
       "技能講習・特別教育修了者のみが運転、構内8km/h以下、歩車分離、月次・年次の点検、フォーク先端の安全表示を運用。",
     frequency: "通年 / 点検は始業前・月1回・年1回",
     responsible: "倉庫長 / 整備担当",
-    reference: "安衛則第151条の3〜第151条の25",
+    reference: "安衛則第151条の2〜第151条の26",
   },
   {
     category: "industry-specific",
@@ -122,7 +122,7 @@ export const warehouseLawReferences: LawReference[] = [
     articles: [
       "第36条第5号の3（テールゲートリフター特別教育）",
       "第107条（清掃等の運転停止）",
-      "第151条の3〜第151条の25（フォークリフト等）",
+      "第151条の2〜第151条の26（フォークリフト等）",
       "第518条〜第533条（墜落の防止）",
     ],
     summary:

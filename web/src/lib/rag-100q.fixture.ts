@@ -98,7 +98,7 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 68, topic: "騒音", question: "気積・採光・換気・温度の規定は？", gold: [{ lawShort: "安衛則", articleNum: "第600条" }, { lawShort: "安衛則", articleNum: "第604条" }, { lawShort: "安衛則", articleNum: "第607条" }, { lawShort: "安衛則", articleNum: "第627条" }] },
   { id: 69, topic: "ボイラー", question: "圧力容器の定期検査は？", gold: [{ lawShort: "ボイラー則", articleNum: "第32条" }, { lawShort: "ボイラー則", articleNum: "第64条" }] },
   { id: 70, topic: "VDT", question: "情報機器作業（VDT作業）の指針は？", gold: [{ lawShort: "VDTガイドライン", articleNum: "第1" }, { lawShort: "VDTガイドライン", articleNum: "第2" }, { lawShort: "VDTガイドライン", articleNum: "第3" }, { lawShort: "VDTガイドライン", articleNum: "第4" }] },
-  { id: 71, topic: "重量物", question: "重量物取扱いの腰痛予防は？", gold: [{ lawShort: "安衛則", articleNum: "第558条" }, { lawShort: "安衛則", articleNum: "第151条の67" }, { lawShort: "安衛則", articleNum: "第165条" }] },
+  { id: 71, topic: "重量物", question: "重量物取扱いの腰痛予防は？", gold: [{ lawShort: "女性則", articleNum: "第3条" }, { lawShort: "年少者則", articleNum: "第8条" }] },
   { id: 72, topic: "高圧", question: "高気圧作業の作業主任者は？", gold: [{ lawShort: "高圧則", articleNum: "第11条" }, { lawShort: "高圧則", articleNum: "第1条" }] },
 
   // H. 作業環境測定・SDS (73-78)
@@ -146,8 +146,8 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   // M. フォークリフト就業制限・使用基準 (105-108) – 安衛令20条11号
   { id: 105, topic: "フォークリフト", question: "フォークリフトの運転に就業制限が設けられる最大荷重は何トン以上ですか？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }] },
   { id: 106, topic: "フォークリフト", question: "フォークリフト運転業務の就業制限の根拠条文（政令）は？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }, { lawShort: "安衛法", articleNum: "第61条" }] },
-  { id: 107, topic: "フォークリフト", question: "フォークリフトの制限速度の設定義務は何条ですか？", gold: [{ lawShort: "安衛則", articleNum: "第151条の73" }] },
-  { id: 108, topic: "フォークリフト", question: "フォークリフトを主たる用途以外（人の運搬等）に使用することを禁止している条文は？", gold: [{ lawShort: "安衛則", articleNum: "第151条の74" }] },
+  { id: 107, topic: "フォークリフト", question: "フォークリフトの制限速度の設定義務は何条ですか？", gold: [{ lawShort: "安衛則", articleNum: "第151条の5" }] },
+  { id: 108, topic: "フォークリフト", question: "フォークリフトを主たる用途以外（人の運搬等）に使用することを禁止している条文は？", gold: [{ lawShort: "安衛則", articleNum: "第151条の14" }] },
 
   // N. 就業制限業務（安衛令第20条 各号）(109-112) – Recall@5強化
   { id: 109, topic: "就業制限", question: "玉掛けの資格（技能講習）は何条に規定されていますか？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }] },
@@ -159,4 +159,14 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 113, topic: "教育", question: "特別教育とは？", gold: [{ lawShort: "安衛法", articleNum: "第59条" }, { lawShort: "安衛則", articleNum: "第36条" }] },
   { id: 114, topic: "就業制限", question: "玉掛けに必要な資格は何号ですか？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }] },
   { id: 115, topic: "就業制限", question: "移動式クレーンの運転資格の根拠は何ですか？", gold: [{ lawShort: "安衛令", articleNum: "第20条" }, { lawShort: "安衛法", articleNum: "第61条" }] },
+
+  // P. 車両系条文の是正領域・現場口語 (116-123) – 2026-06-10 条番号是正の回帰固定
+  { id: 116, topic: "貨物自動車", question: "トラックの荷台に上り下りするときの昇降設備の義務は何条ですか？", gold: [{ lawShort: "安衛則", articleNum: "第151条の67" }] },
+  { id: 117, topic: "貨物自動車", question: "トラックの荷積み・荷下ろしでヘルメット（保護帽）をかぶる義務はありますか？", gold: [{ lawShort: "安衛則", articleNum: "第151条の74" }] },
+  { id: 118, topic: "フォークリフト", question: "フォークリフトの年1回の定期自主検査はどこに書いてありますか？", gold: [{ lawShort: "安衛則", articleNum: "第151条の21" }] },
+  { id: 119, topic: "フォークリフト", question: "フォークリフトで人をパレットに乗せて持ち上げるのは違反ですか？", gold: [{ lawShort: "安衛則", articleNum: "第151条の14" }] },
+  { id: 120, topic: "荷役", question: "フォークリフト作業の作業指揮者を定める義務は何条ですか？", gold: [{ lawShort: "安衛則", articleNum: "第151条の4" }] },
+  { id: 121, topic: "建設機械", question: "ユンボで荷を吊って運ぶのは用途外使用になりますか？", gold: [{ lawShort: "安衛則", articleNum: "第164条" }] },
+  { id: 122, topic: "建設機械", question: "車両系建設機械の作業計画には何を書く必要がありますか？", gold: [{ lawShort: "安衛則", articleNum: "第155条" }] },
+  { id: 123, topic: "建設機械", question: "岩が落ちてきそうな場所で使うパワーショベルのヘッドガードの義務は？", gold: [{ lawShort: "安衛則", articleNum: "第153条" }] },
 ];
