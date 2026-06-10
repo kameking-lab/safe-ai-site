@@ -67,7 +67,7 @@ export const transportationIndustryMeasures: SafetyMeasure[] = [
       "テールゲートリフターによる積卸し作業に従事する者には特別教育を実施（令和6年2月施行）。",
     frequency: "新規対象者の都度",
     responsible: "事業者 / 安全担当",
-    reference: "安衛則第36条第5号の3",
+    reference: "安衛則第36条第5号の4",
   },
   {
     category: "industry-specific",
@@ -156,7 +156,7 @@ export const transportationLawReferences: LawReference[] = [
   {
     name: "労働安全衛生規則（運輸関連）",
     articles: [
-      "第36条第5号の3（テールゲートリフター操作の特別教育）",
+      "第36条第5号の4（テールゲートリフター操作の特別教育）",
       "第151条の3（フォークリフトの作業計画）",
       "第151条の70（陸上貨物の荷役作業）",
     ],
