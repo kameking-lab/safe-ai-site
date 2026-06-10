@@ -55,6 +55,7 @@ import { applyKyDeepLink } from "@/lib/ky/deep-link-prefill";
 import { detectChemicalWork, chemicalRaHref } from "@/lib/chemical/work-chemical-hints";
 import { detectAccidentWork, accidentsHref } from "@/lib/accidents/work-accident-hints";
 import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
+import { KyTranscribePanel } from "@/components/ky-paper/ky-transcribe-panel";
 import {
   submitKy,
   approveKy,
@@ -96,6 +97,8 @@ export function KyPaperView() {
   const [shareBusy, setShareBusy] = useState(false);
   const [shareCode, setShareCode] = useState<string | null>(null);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  // 柱1是正: 元請Excel様式への転記支援（項目別コピー・表TSV・CSV）
+  const [showTranscribe, setShowTranscribe] = useState(false);
   const [approvalActor, setApprovalActor] = useState("");
   const [approvalComment, setApprovalComment] = useState("");
   // R3: 初見の職長向け 3ステップ案内（一度×で閉じると以後非表示。localStorage）。
@@ -844,6 +847,9 @@ export function KyPaperView() {
         <KyPrintSheet record={record} />
       </div>
 
+      {/* 転記支援（画面オーバーレイ。元請Excel様式への貼り付け用） */}
+      {showTranscribe && <KyTranscribePanel record={record} onClose={() => setShowTranscribe(false)} />}
+
       {/* 印刷プレビュー（画面オーバーレイ。印刷物には出さない） */}
       {showPrintPreview && (
         <div className="fixed inset-0 z-40 overflow-auto bg-slate-700/70 p-4 print:hidden">
@@ -910,6 +916,7 @@ export function KyPaperView() {
                 💬 法的根拠をAIに聞く →
               </Link>
             )}
+            <button type="button" onClick={() => setShowTranscribe(true)} className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50" title="元請指定のExcel様式へ項目ごとにコピーして貼り付け">Excel転記</button>
             <button type="button" onClick={() => setShowPrintPreview(true)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">印刷プレビュー</button>
             <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-5 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
           </div>
