@@ -28,6 +28,8 @@ export interface SignageLabelSet {
   mainWork: string;
   workPlace: string;
   riskTop3: string;
+  /** リスク評価値（可能性×重大性）チップのラベル */
+  riskScore: string;
   countermeasure: string;
   notEntered: string;
   teamGoal: string;
@@ -50,6 +52,7 @@ const LABELS: Record<SignageLang, SignageLabelSet> = {
     mainWork: "本日の主な作業",
     workPlace: "場所",
     riskTop3: "本日のリスク Top3",
+    riskScore: "評価値",
     countermeasure: "対策",
     notEntered: "（未入力）",
     teamGoal: "本日の行動目標",
@@ -70,6 +73,7 @@ const LABELS: Record<SignageLang, SignageLabelSet> = {
     mainWork: "Today's Main Work",
     workPlace: "Location",
     riskTop3: "Top 3 Risks Today",
+    riskScore: "Risk score",
     countermeasure: "Control",
     notEntered: "(not entered)",
     teamGoal: "Today's Safety Goal",
@@ -90,6 +94,7 @@ const LABELS: Record<SignageLang, SignageLabelSet> = {
     mainWork: "Công việc chính hôm nay",
     workPlace: "Địa điểm",
     riskTop3: "3 rủi ro hàng đầu hôm nay",
+    riskScore: "Điểm rủi ro",
     countermeasure: "Biện pháp",
     notEntered: "(chưa nhập)",
     teamGoal: "Mục tiêu an toàn hôm nay",
@@ -110,6 +115,7 @@ const LABELS: Record<SignageLang, SignageLabelSet> = {
     mainWork: "今日主要作业",
     workPlace: "地点",
     riskTop3: "今日风险 Top3",
+    riskScore: "风险值",
     countermeasure: "对策",
     notEntered: "（未填写）",
     teamGoal: "今日行动目标",
@@ -130,6 +136,7 @@ const LABELS: Record<SignageLang, SignageLabelSet> = {
     mainWork: "Pangunahing Gawain Ngayon",
     workPlace: "Lugar",
     riskTop3: "Top 3 na Panganib Ngayon",
+    riskScore: "Antas ng panganib",
     countermeasure: "Panukala",
     notEntered: "(walang laman)",
     teamGoal: "Layunin sa Kaligtasan Ngayon",
@@ -150,6 +157,7 @@ const LABELS: Record<SignageLang, SignageLabelSet> = {
     mainWork: "Pekerjaan Utama Hari Ini",
     workPlace: "Lokasi",
     riskTop3: "3 Risiko Teratas Hari Ini",
+    riskScore: "Skor risiko",
     countermeasure: "Tindakan",
     notEntered: "(belum diisi)",
     teamGoal: "Sasaran Keselamatan Hari Ini",
