@@ -629,3 +629,11 @@
 - ゲート: docs+BACKLOGのみの変更(コード変更0)だが契約どおり tsc0 / lint errors0 / vitest全pass / build成功 を確認。新規依存0・捏造0・水増し0・既存破壊0・env/DB変更なし。
 
 
+
+## Cycle (2026-06-10) — 柱1是正: iOS「ホーム画面に追加」案内（beforeinstallprompt 専依存の解消）
+- 前PR回収: 自PR #464(signage現場の安全状態パネル)は e2e/smoke IN_PROGRESS のため次回回収。古いdocs系PRは方針どおり放置。mainはclean・最新。
+- タスク選定: 柱2の30行目(signage結線)は #464 そのもの、31行目(ダッシュボード情報設計)も /signage 系で衝突するためスキップし、柱1是正最上位「iOS向けホーム画面に追加案内」を実行。
+- 実装: web/src/lib/pwa-install.ts 新設(純関数3本)=isIosDevice(UA判定＋iPadOS13+デスクトップ表示=MacIntel+タッチあり対応)/detectInstallGuideKind(iOS Safari→3ステップ直案内・CriOS/FxiOS/Line等→Safari誘導込み案内・他→none)/isStandaloneDisplay(display-mode standalone or navigator.standalone なら案内不要)。install-pwa-prompt.tsx にiOS分岐: 「①画面下の共有ボタン(↑) ②ホーム画面に追加 ③追加」の番号リスト、prompt()不可のため「追加する」は出さず「あとで」のみ。利用スコア閾値9・14日クールダウン・1分ごと再判定・standalone抑止は既存ロジックと共有。env追加0・Android/デスクトップ動線不変。
+- テスト: 純関数14件(iPhone/iPad/iPadOSデスクトップ表示/本物Mac除外/Android除外/Chrome iOS・LINE判別/standalone判定・matchMedia例外耐性)＋コンポーネント4件(iPhone Safariで表示・スコア不足非表示・クールダウン非表示・Androidイベント未発火非表示)=+18件。
+- 第三者レビュー: 佐藤さん(52・鳶一人親方・iPhone14 Safari・説明4行超は読まない)でPlaywright実機(chromium iPhone14エミュ・WebKitバイナリ未導入のためUAベース検証)。スコア10でトップ/kyともバナー表示・手順は番号3行・「あとで」→リロード再表示なし・新規(スコア0)非表示・底部ナビ/KYツールバー非干渉をスクショ確認。「これなら娘に聞かずにできる」=採用。残課題=LINE実機検証不可(文言確認のみ)・Web PushはPath A待ち。
+- ゲート: tsc0 / lint errors0(warning47=全て既存ファイル・本変更箇所0) / vitest 158ファイル全1272pass(+18) / build成功。記録: docs/third-party-reviews/ios-a2hs-install-guide-2026-06-10.md。temp(tmp-ios-review.mjs/png)削除済。再生成データ変更なし・新規依存0・捏造0・水増し0・既存破壊0・env/DB変更なし。
