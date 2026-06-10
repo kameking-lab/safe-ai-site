@@ -20,6 +20,7 @@ import {
   Tv,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
@@ -166,10 +167,11 @@ export default function SiteRecordsPage() {
         </section>
       ))}
 
-      <p className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-500">
+      {/* 文字ダイエット（柱0-0）: 注意書きは消さず折りたたみ詳細へ格納 */}
+      <CollapsibleDetail summary="保存先とご利用上の注意" className="mt-8">
         各ツールの記録はお使いの端末（ブラウザ）に保存され、サーバーには送信されません。印刷・CSV出力で社内提出・監督指導時の証跡としてご利用ください。
         記載内容は一般的な情報提供であり、個別の法令適用は所轄労働基準監督署・専門家にご確認ください。
-      </p>
+      </CollapsibleDetail>
 
       <RecordsBackup />
     </PageContainer>
