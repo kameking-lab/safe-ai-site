@@ -637,3 +637,12 @@
 - localStorage共有の実機検証(タスクの検討事項): 同一端末・同一ブラウザなら同一オリジンで共有されることをPlaywrightで確認。別タブの記録保存がstorageイベントで再読込なしに即時反映(要対応4件→5件)＋5分間隔の再集計(日付跨ぎの期日超過昇格を拾う保険)。別端末とは共有不可=Path A制約としてパネル下部に「この端末に保存された記録から自動集計」を明記。
 - 第三者レビュー: 堀田さん(49・元請専任安全衛生担当・事務所TVにサイネージ常時表示・記録は同じPCの別タブで入力・「自現場のことが出ないダッシュボードはテレビのニュースと同じ」)でPlaywright実機(1920×1080/390px)。1回目で3点発見=①detail末尾の重大度と期日が密着し「重大期日」と誤読 ②表示上限4件で使用不可機械が「ほか1件」に隠れ種別すら不明(非対話掲示では隠れた情報=無い情報) ③タイトルがトレンド見出しより小さくTVで読みにくい→「／」区切り・「ほか n件（点検）」と種別列挙・lg:text-sm に是正。再レビュー全17チェックPASS=期限超過の高所指摘(⚠)が先頭・1画面フィット縦横overflow0・法改正パネル残存・console error0。「これはもう自分の現場の掲示板だ」=採用。
 - ゲート: tsc0 / lint errors0(warning47=既存・新規ファイルはlintクリーン) / vitest 全1264pass(157ファイル・+6) / build成功。再生成データ(chatbot-eval/rag-metrics)復元済・temp(_signage_review.mjs/_signage_allclear.png)削除済。記録: docs/third-party-reviews/signage-site-safety-2026-06-10.md(＋1920×1080実機png)。新規依存0・捏造0・水増し0・既存破壊0・env/DB変更なし。
+
+
+## Cycle (2026-06-10) — 柱1是正: iOS「ホーム画面に追加」案内（beforeinstallprompt 専依存の解消）
+- 前PR回収: 自PR #464(signage現場の安全状態パネル)は e2e/smoke IN_PROGRESS のため次回回収。古いdocs系PRは方針どおり放置。mainはclean・最新。
+- タスク選定: 柱2の30行目(signage結線)は #464 そのもの、31行目(ダッシュボード情報設計)も /signage 系で衝突するためスキップし、柱1是正最上位「iOS向けホーム画面に追加案内」を実行。
+- 実装: web/src/lib/pwa-install.ts 新設(純関数3本)=isIosDevice(UA判定＋iPadOS13+デスクトップ表示=MacIntel+タッチあり対応)/detectInstallGuideKind(iOS Safari→3ステップ直案内・CriOS/FxiOS/Line等→Safari誘導込み案内・他→none)/isStandaloneDisplay(display-mode standalone or navigator.standalone なら案内不要)。install-pwa-prompt.tsx にiOS分岐: 「①画面下の共有ボタン(↑) ②ホーム画面に追加 ③追加」の番号リスト、prompt()不可のため「追加する」は出さず「あとで」のみ。利用スコア閾値9・14日クールダウン・1分ごと再判定・standalone抑止は既存ロジックと共有。env追加0・Android/デスクトップ動線不変。
+- テスト: 純関数14件(iPhone/iPad/iPadOSデスクトップ表示/本物Mac除外/Android除外/Chrome iOS・LINE判別/standalone判定・matchMedia例外耐性)＋コンポーネント4件(iPhone Safariで表示・スコア不足非表示・クールダウン非表示・Androidイベント未発火非表示)=+18件。
+- 第三者レビュー: 佐藤さん(52・鳶一人親方・iPhone14 Safari・説明4行超は読まない)でPlaywright実機(chromium iPhone14エミュ・WebKitバイナリ未導入のためUAベース検証)。スコア10でトップ/kyともバナー表示・手順は番号3行・「あとで」→リロード再表示なし・新規(スコア0)非表示・底部ナビ/KYツールバー非干渉をスクショ確認。「これなら娘に聞かずにできる」=採用。残課題=LINE実機検証不可(文言確認のみ)・Web PushはPath A待ち。
+- ゲート: tsc0 / lint errors0(warning47=全て既存ファイル・本変更箇所0) / vitest 158ファイル全1272pass(+18) / build成功。記録: docs/third-party-reviews/ios-a2hs-install-guide-2026-06-10.md。temp(tmp-ios-review.mjs/png)削除済。再生成データ変更なし・新規依存0・捏造0・水増し0・既存破壊0・env/DB変更なし。
