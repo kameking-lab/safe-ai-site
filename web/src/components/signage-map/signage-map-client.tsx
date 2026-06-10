@@ -346,6 +346,14 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
                 ✕ 閉じる
               </button>
             </div>
+            <p className="mt-1 text-[11px] text-slate-400">全国の警報・地震・天気を地図で監視（台風・地震時の防災用）</p>
+            <Link
+              href="/signage"
+              className="mt-2 inline-block rounded border border-slate-600 px-2.5 py-1 text-[11px] font-semibold text-slate-200 hover:bg-slate-800"
+              title="気象・本日のリスク・現場の安全状態・ニュース・法改正の常設ダッシュボード"
+            >
+              ← 朝礼ダッシュボードへ
+            </Link>
 
             <div className="mt-3 space-y-1 text-[11px] text-slate-400">
               <p>取得時刻: {bundle?.fetchedAt ?? "取得中…"}</p>

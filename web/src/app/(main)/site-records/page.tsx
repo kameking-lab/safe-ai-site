@@ -17,6 +17,7 @@ import {
   HeartPulse,
   FileSpreadsheet,
   Megaphone,
+  Tv,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageHeader } from "@/components/page-header";
@@ -133,6 +134,26 @@ export default function SiteRecordsPage() {
       />
 
       <RecordsOverview />
+
+      {/* ダッシュボード間の役割分担の明示: 作る・管理する=この画面 / TVに掲示する=サイネージ。
+          記録の要対応がサイネージへ自動掲示されることは、ここで案内しないとユーザーが知る術がない。 */}
+      <section className="mt-4 flex flex-col gap-2 rounded-2xl border border-sky-200 bg-sky-50/60 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="flex items-center gap-1.5 text-sm font-bold text-sky-900">
+            <Tv className="h-4 w-4" aria-hidden="true" />
+            事務所のTV・モニターに掲示する
+          </h2>
+          <p className="mt-1 text-xs leading-5 text-sky-800/80">
+            この端末で付けた記録の要対応（未是正の指摘・重大ヒヤリ・使用不可の機械など）は、朝礼サイネージの「現場の安全状態」に自動で掲示されます（同じ端末・同じブラウザで開いた場合）。
+          </p>
+        </div>
+        <Link
+          href="/signage"
+          className="shrink-0 rounded-xl border border-sky-300 bg-white px-4 py-2.5 text-center text-sm font-bold text-sky-700 transition hover:border-sky-500 hover:bg-sky-50"
+        >
+          サイネージを開く →
+        </Link>
+      </section>
 
       {GROUPS.map((g) => (
         <section key={g.heading} className="mt-8">
