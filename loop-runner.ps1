@@ -12,6 +12,12 @@
   (BOM-less UTF-8 with Japanese was mis-decoded as Shift-JIS and broke parsing).
   The variable Japanese instruction is kept in loop-prompt.txt (UTF-8) and read at runtime.
 
+  Backoff: when an iteration fails fast (exit code != 0 within 2 minutes, e.g. the
+  Claude usage limit is active), the wait is extended after 3 consecutive short
+  failures to 5 minutes, then capped at 10 minutes. Any successful or long-running
+  iteration restores the normal interval immediately. This avoids hammering the CLI
+  every 2 minutes for hours while a usage limit is in effect.
+
   Each iteration the agent is told to:
     1) Merge its own CI-green open PRs, pull main, ensure clean.
     2) Take the top open task in BACKLOG.md (or replenish if fewer than 3 remain).
@@ -91,6 +97,7 @@ if (-not (Test-Path $PromptFile)) {
 $prompt = Get-Content -Raw -Encoding UTF8 -Path $PromptFile
 
 $iter = 0
+$consecutiveShortFails = 0
 Write-Log ("=== loop-runner start (interval=" + $IntervalSeconds + "s, max=" + $MaxIterations + ", until='" + $UntilIso + "', repo=" + $RepoPath + ") ===")
 Write-Log ("claude: " + $claudeResolved + " | model: " + $(if ($Model -ne "") { $Model } else { "(cli default)" }) + " | prompt: " + $PromptFile)
 Write-Log ("log: " + $logFile)
@@ -105,19 +112,44 @@ while ($true) {
   Write-Log ("----- iteration #" + $iter + " start -----")
   $claudeArgs = @("-p", "--dangerously-skip-permissions")
   if ($Model -ne "") { $claudeArgs += @("--model", $Model) }
+  $iterStart = Get-Date
+  $iterExit = $null
   try {
     # Pipe the UTF-8 prompt to claude headless via stdin; tee output to the log.
     $prompt | & $ClaudeCmd @claudeArgs 2>&1 | Tee-Object -FilePath $logFile -Append
-    Write-Log ("iteration #" + $iter + " done (exit=" + $LASTEXITCODE + ")")
+    $iterExit = $LASTEXITCODE
+    Write-Log ("iteration #" + $iter + " done (exit=" + $iterExit + ")")
   } catch {
     Write-Log ("iteration #" + $iter + " exception: " + $_.Exception.Message)
+  }
+
+  # Short-failure backoff: a non-zero exit (or exception) within 2 minutes of start
+  # is treated as a fast failure (typically the usage limit). 3 in a row -> 5 min
+  # wait, 4+ in a row -> 10 min cap. Success or a long-running iteration resets it.
+  $iterSeconds = ((Get-Date) - $iterStart).TotalSeconds
+  $isShortFail = (($null -eq $iterExit) -or ($iterExit -ne 0)) -and ($iterSeconds -lt 120)
+  if ($isShortFail) {
+    $consecutiveShortFails++
+  } else {
+    if ($consecutiveShortFails -ge 3) {
+      Write-Log ("backoff reset after " + $consecutiveShortFails + " consecutive short failures; normal interval restored")
+    }
+    $consecutiveShortFails = 0
   }
 
   if ($MaxIterations -gt 0 -and $iter -ge $MaxIterations) { Write-Log "MaxIterations reached. Stop."; break }
   if ($UntilIso -ne "") {
     try { if ((Get-Date) -ge [datetime]::Parse($UntilIso)) { Write-Log ("Deadline " + $UntilIso + " reached. Stop."); break } } catch {}
   }
-  Write-Log ("waiting " + $IntervalSeconds + "s before next iteration...")
-  Start-Sleep -Seconds $IntervalSeconds
+  $waitSeconds = $IntervalSeconds
+  if ($consecutiveShortFails -ge 3) {
+    $backoff = 300
+    if ($consecutiveShortFails -ge 4) { $backoff = 600 }
+    if ($backoff -gt $waitSeconds) { $waitSeconds = $backoff }
+    Write-Log ("backoff engaged (" + $consecutiveShortFails + " consecutive short failures, likely usage limit): waiting " + $waitSeconds + "s before next iteration...")
+  } else {
+    Write-Log ("waiting " + $waitSeconds + "s before next iteration...")
+  }
+  Start-Sleep -Seconds $waitSeconds
 }
 Write-Log "=== loop-runner end ==="
