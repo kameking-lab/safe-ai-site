@@ -675,7 +675,7 @@ export const PROHIBITION_SIGNS: SafetySign[] = [
       {
         statute: "労働安全衛生規則",
         article: "第151条の20",
-        note: "車両系荷役運搬機械の最大荷重表示。",
+        note: "フォークリフトの最大荷重その他の能力を超えた使用の禁止。",
       },
     ],
     industryUsage: [

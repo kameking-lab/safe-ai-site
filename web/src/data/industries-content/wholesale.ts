@@ -57,7 +57,7 @@ export const wholesaleContent: IndustryContent = {
   ],
   lawHighlights: [
     {
-      name: "労働安全衛生規則 第151条の3〜第151条の82",
+      name: "労働安全衛生規則 第151条の2〜第151条の83",
       articles: "車両系荷役運搬機械",
       note: "フォークリフトの作業計画、運転資格、点検義務",
       href: "/law-search?q=フォークリフト",

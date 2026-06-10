@@ -228,15 +228,15 @@ export const articleNoticeMap: Record<string, ArticleNoticeMapEntry> = {
   },
 
   // ──────────── 安衛則 荷役 ────────────
-  "安衛則|第151条の21": {
-    // フォークリフトの講習等
-    notices: ["mhlw-notice-0226"],
-  },
-  "安衛則|第151条の73": {
+  // 注: 第151条の21（フォークリフト定期自主検査）に紐付いていた mhlw-notice-0226 は
+  //     クレーン則改正通達でフォークリフトと無関係のため削除（2026-06-10 条番号是正）。
+  "安衛則|第151条の67": {
+    // 貨物自動車の昇降設備（R5改正・墜落転落防止）
     notices: ["mhlw-notice-0080"],
     leaflets: ["mhlw-leaflet-0082"],
   },
   "安衛則|第151条の74": {
+    // 貨物自動車の保護帽着用（R5改正・墜落転落防止）
     notices: ["mhlw-notice-0080"],
     leaflets: ["mhlw-leaflet-0082"],
   },

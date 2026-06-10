@@ -134,7 +134,7 @@ export const INDUSTRY_CONFIGS: readonly IndustryConfig[] = [
       "腰痛・反動動作",
     ],
     laws: [
-      { name: "労働安全衛生規則 第151条の3〜第151条の82", scope: "車両系荷役運搬機械" },
+      { name: "労働安全衛生規則 第151条の2〜第151条の83", scope: "車両系荷役運搬機械" },
       { name: "陸上貨物運送事業労働災害防止規程", scope: "荷役・墜落防止" },
       { name: "改善基準告示", scope: "拘束時間・運転労働" },
     ],
