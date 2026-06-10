@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertTriangle, CheckCircle2, ChevronRight, ListTodo } from "lucide-react";
+import { AlertTriangle, ChevronRight, ListTodo } from "lucide-react";
+import { SAFETY_TONE, dominantTone, type SafetyTone } from "@/lib/design/safety-tone";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   buildDailyActions,
   countBySeverity,
@@ -18,16 +21,17 @@ import { getCommitteeList } from "@/lib/site-records/committee-store";
 
 const VISIBLE_LIMIT = 6;
 
-const ROW_BORDER: Record<DailyAction["severity"], string> = {
-  overdue: "border-l-rose-500 bg-rose-50/60",
-  alert: "border-l-amber-500 bg-amber-50/40",
-  info: "border-l-slate-300 bg-white",
+// 重大度→共通視覚言語トーン（柱0-0: 状態色は safety-tone 経由で統一）
+const SEVERITY_TONE: Record<DailyAction["severity"], SafetyTone> = {
+  overdue: "danger",
+  alert: "warning",
+  info: "neutral",
 };
 
-const CHIP_CLASS: Record<DailyAction["severity"], string> = {
-  overdue: "bg-rose-100 text-rose-700",
-  alert: "bg-amber-100 text-amber-800",
-  info: "bg-slate-100 text-slate-600",
+const ROW_BORDER: Record<DailyAction["severity"], string> = {
+  overdue: `${SAFETY_TONE.danger.leftBar} bg-rose-50/60`,
+  alert: `${SAFETY_TONE.warning.leftBar} bg-amber-50/40`,
+  info: `${SAFETY_TONE.neutral.leftBar} bg-white`,
 };
 
 /**
@@ -62,31 +66,37 @@ export function DailyActionsPanel() {
   const visibleUrgent = showAll ? urgent : urgent.slice(0, VISIBLE_LIMIT);
   const hiddenCount = urgent.length - visibleUrgent.length;
 
+  // 1画面1メッセージ: 最も重い状態をデカ数字の結論カード1枚で示す（柱0-0）
+  const tone = dominantTone({ danger: counts.overdue, warning: counts.alert });
+
   return (
     <section className="mt-2 rounded-2xl border border-slate-200 bg-white p-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="flex items-center gap-1.5 text-sm font-bold text-slate-800">
-          <ListTodo className="h-4 w-4 text-slate-500" aria-hidden="true" />
-          今日やること（期限切れ・要対応）
-        </h2>
-        {counts.overdue > 0 && (
-          <span className="rounded-full bg-rose-600 px-2 py-0.5 text-[11px] font-bold text-white">
-            期限超過 {counts.overdue}件
-          </span>
-        )}
-        {counts.alert > 0 && (
-          <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[11px] font-bold text-white">
-            要対応 {counts.alert}件
-          </span>
-        )}
-      </div>
+      <h2 className="flex items-center gap-1.5 text-sm font-bold text-slate-800">
+        <ListTodo className="h-4 w-4 text-slate-500" aria-hidden="true" />
+        今日やること（期限切れ・要対応）
+      </h2>
 
-      {urgent.length === 0 ? (
-        <p className="mt-2 flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-800">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600" aria-hidden="true" />
-          期限切れ・要対応はありません
-        </p>
+      {tone === "danger" ? (
+        <ConclusionCard
+          tone="danger"
+          value={counts.overdue}
+          unit="件"
+          title="期限超過"
+          className="mt-2"
+        >
+          {counts.alert > 0 && (
+            <StatusBadge tone="warning" size="sm">
+              ほかに要対応 {counts.alert}件
+            </StatusBadge>
+          )}
+        </ConclusionCard>
+      ) : tone === "warning" ? (
+        <ConclusionCard tone="warning" value={counts.alert} unit="件" title="要対応" className="mt-2" />
       ) : (
+        <ConclusionCard tone="safe" title="要対応なし" description="期限切れ・要対応の記録はありません。" className="mt-2" />
+      )}
+
+      {urgent.length > 0 && (
         <ul className="mt-2 space-y-1.5">
           {visibleUrgent.map((a) => (
             <li key={a.id}>
@@ -94,7 +104,7 @@ export function DailyActionsPanel() {
                 href={a.href}
                 className={`flex items-start gap-2 rounded-lg border border-slate-200 border-l-4 px-3 py-2 transition hover:shadow-sm ${ROW_BORDER[a.severity]}`}
               >
-                <span className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold ${CHIP_CLASS[a.severity]}`}>
+                <span className={`mt-0.5 shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-bold ${SAFETY_TONE[SEVERITY_TONE[a.severity]].soft}`}>
                   {a.sourceLabel}
                 </span>
                 <span className="min-w-0 flex-1">

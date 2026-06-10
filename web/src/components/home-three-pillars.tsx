@@ -9,6 +9,7 @@ import { realLawRevisionsExtra } from "@/data/mock/real-law-revisions-extra";
 import warningsData from "@/data/jma/warnings.json";
 import type { AccidentCase, LawRevisionCore } from "@/lib/types/domain";
 import { useLanguage } from "@/contexts/language-context";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 type WarningLevel = "warning" | "advisory" | "none";
 
@@ -246,6 +247,24 @@ function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
           <p className="text-[11px] font-bold uppercase tracking-widest text-amber-700">
             {isEn ? "B. Severe weather this week" : "B. 1週間の警報級悪天候"}
           </p>
+          {/* 共通視覚言語（柱0-0）: 気象庁の色文法と同じく 警報=赤 / 注意報=黄 / なし=緑 */}
+          <StatusBadge
+            tone={hasWarning ? "danger" : warnings.length > 0 ? "warning" : "safe"}
+            size="sm"
+            className="mt-1"
+          >
+            {hasWarning
+              ? isEn
+                ? "Warning in effect"
+                : "警報 発表中"
+              : warnings.length > 0
+                ? isEn
+                  ? "Advisory only"
+                  : "注意報のみ"
+                : isEn
+                  ? "All clear"
+                  : "警報・注意報なし"}
+          </StatusBadge>
           <h3 className="mt-1 text-sm font-bold leading-snug text-slate-900">
             {hasWarning
               ? isEn
