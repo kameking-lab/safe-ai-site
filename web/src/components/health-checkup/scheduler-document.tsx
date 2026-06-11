@@ -45,12 +45,16 @@ function formatJaDate(iso: string): string {
 
 const MONTHS: MonthIndex[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
-export function SchedulerDocument({ profile, decision, generatedAt }: Props) {
-  const { required, schedule } = decision;
-  const optimised: OptimisedDecision = optimiseDecision(required, schedule);
-
-  // 前回実施日トラッカーへ渡す直列化可能なエントリ。
-  const trackerEntries: TrackerEntry[] = required.map(({ rule }) => ({
+/**
+ * 前回実施日トラッカー＋結論カードへ渡す直列化可能なエントリと
+ * localStorage キー。プロファイル毎にキーを分け、別条件の入力と混ざらない
+ * ようにする（結論カードと台帳で必ず同じ値を使うためここに一本化）。
+ */
+export function buildTrackerData(
+  profile: WorkerProfile,
+  decision: CheckupDecision,
+): { entries: TrackerEntry[]; storageKey: string } {
+  const entries: TrackerEntry[] = decision.required.map(({ rule }) => ({
     ruleId: rule.id,
     title: rule.title,
     typeLabel: CHECKUP_TYPE_LABELS[rule.type],
@@ -58,8 +62,18 @@ export function SchedulerDocument({ profile, decision, generatedAt }: Props) {
     eventDriven: Boolean(rule.frequency.eventDriven),
     frequencyHuman: rule.frequency.humanReadable,
   }));
-  // プロファイル毎に localStorage を分け、別条件の入力と混ざらないようにする。
-  const trackerKey = `safe-ai:hc-tracker:v1:${profile.industry}|${[...profile.jobIds].sort().join(",")}|${[...profile.substances].sort().join(",")}|${[...profile.workConditions].sort().join(",")}|${profile.hireDate}`;
+  const storageKey = `safe-ai:hc-tracker:v1:${profile.industry}|${[...profile.jobIds].sort().join(",")}|${[...profile.substances].sort().join(",")}|${[...profile.workConditions].sort().join(",")}|${profile.hireDate}`;
+  return { entries, storageKey };
+}
+
+export function SchedulerDocument({ profile, decision, generatedAt }: Props) {
+  const { required, schedule } = decision;
+  const optimised: OptimisedDecision = optimiseDecision(required, schedule);
+
+  const { entries: trackerEntries, storageKey: trackerKey } = buildTrackerData(
+    profile,
+    decision,
+  );
   const grouped: Record<MonthIndex, typeof schedule.entries> = {
     1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: [], 9: [], 10: [], 11: [], 12: [],
   };
@@ -368,7 +382,7 @@ export function SchedulerDocument({ profile, decision, generatedAt }: Props) {
         </div>
       </section>
 
-      <section>
+      <section id="tracker" className="scroll-mt-4">
         <h2 className="border-l-4 border-emerald-600 pl-3 text-xl font-bold">
           5. 漏れ・期限超過チェック（前回実施日を入力）
         </h2>

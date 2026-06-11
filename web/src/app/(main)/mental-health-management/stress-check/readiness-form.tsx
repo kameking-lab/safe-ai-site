@@ -1,36 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, AlertTriangle, AlertOctagon } from "lucide-react";
 import {
   READINESS_QUESTIONS,
   assessReadiness,
-  readinessGuidance,
 } from "@/lib/mental-health-flow";
-
-const VERDICT_META = {
-  ready: {
-    label: "実施可能",
-    Icon: CheckCircle2,
-    badgeClass: "bg-emerald-600",
-    boxClass: "border-emerald-200 bg-emerald-50",
-    textClass: "text-emerald-900",
-  },
-  partial: {
-    label: "一部整備中",
-    Icon: AlertTriangle,
-    badgeClass: "bg-amber-500",
-    boxClass: "border-amber-200 bg-amber-50",
-    textClass: "text-amber-900",
-  },
-  early: {
-    label: "準備が必要",
-    Icon: AlertOctagon,
-    badgeClass: "bg-rose-600",
-    boxClass: "border-rose-200 bg-rose-50",
-    textClass: "text-rose-900",
-  },
-} as const;
+import { readinessConclusion } from "@/lib/mental-health/readiness-visual";
+import { SAFETY_TONE } from "@/lib/design/safety-tone";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export function ReadinessForm() {
   const [headcount, setHeadcount] = useState<number>(50);
@@ -40,13 +18,45 @@ export function ReadinessForm() {
     () => assessReadiness({ headcount, answers }),
     [headcount, answers],
   );
-
-  const verdict = VERDICT_META[assessment.verdict];
-  const VerdictIcon = verdict.Icon;
+  const answeredCount = useMemo(
+    () =>
+      READINESS_QUESTIONS.filter((q) => typeof answers[q.id] === "boolean")
+        .length,
+    [answers],
+  );
+  const conclusion = readinessConclusion(assessment, answeredCount);
+  const tone = SAFETY_TONE[conclusion.tone];
 
   return (
     <div>
-      <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      {/* 結論ファースト: 回答のこり（青）→ 全問回答で整備率%の判定色 */}
+      <ConclusionCard
+        tone={conclusion.tone}
+        value={conclusion.value}
+        unit={conclusion.unit}
+        title={conclusion.title}
+        description={conclusion.description}
+        action={
+          conclusion.settled
+            ? { href: "#procedure", label: "実施手順へ" }
+            : { href: "#readiness-questions", label: "診断に答える" }
+        }
+      >
+        <StatusBadge
+          tone={assessment.obligationTier === "mandatory" ? "info" : "neutral"}
+        >
+          {assessment.obligationTier === "mandatory"
+            ? "義務（50人以上）"
+            : "努力義務（50人未満）"}
+        </StatusBadge>
+        {conclusion.settled && (
+          <StatusBadge tone={conclusion.tone}>
+            整備 {assessment.yesCount}/{assessment.totalQuestions} 項目
+          </StatusBadge>
+        )}
+      </ConclusionCard>
+
+      <div className="mt-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <label
           htmlFor="headcount"
           className="block text-sm font-semibold text-slate-900"
@@ -67,24 +77,13 @@ export function ReadinessForm() {
             className="w-32 rounded border border-slate-300 px-3 py-2 text-sm focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
           />
           <span className="text-sm text-slate-700">人</span>
-          <span
-            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-              assessment.obligationTier === "mandatory"
-                ? "bg-violet-100 text-violet-700"
-                : "bg-amber-100 text-amber-800"
-            }`}
-          >
-            {assessment.obligationTier === "mandatory"
-              ? "義務（50人以上）"
-              : "努力義務（50人未満）"}
-          </span>
         </div>
         <p className="mt-2 text-xs text-slate-500">
           派遣労働者・パート等を含む、常時使用する労働者の人数を入力してください。
         </p>
       </div>
 
-      <ol className="mt-4 space-y-3">
+      <ol id="readiness-questions" className="mt-4 scroll-mt-4 space-y-3">
         {READINESS_QUESTIONS.map((q, idx) => {
           const v = answers[q.id];
           return (
@@ -107,7 +106,7 @@ export function ReadinessForm() {
                 <button
                   type="button"
                   onClick={() => setAnswers({ ...answers, [q.id]: true })}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                  className={`min-h-[44px] rounded-lg border px-4 py-1.5 text-xs font-semibold transition ${
                     v === true
                       ? "border-emerald-600 bg-emerald-600 text-white"
                       : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400"
@@ -118,7 +117,7 @@ export function ReadinessForm() {
                 <button
                   type="button"
                   onClick={() => setAnswers({ ...answers, [q.id]: false })}
-                  className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                  className={`min-h-[44px] rounded-lg border px-4 py-1.5 text-xs font-semibold transition ${
                     v === false
                       ? "border-rose-600 bg-rose-600 text-white"
                       : "border-slate-300 bg-white text-slate-700 hover:border-rose-400"
@@ -132,39 +131,28 @@ export function ReadinessForm() {
         })}
       </ol>
 
+      {/* 詳細: 判定の内訳（色は結論カードと同じトーン＝単一ソース） */}
       <div
-        className={`mt-6 rounded-2xl border p-5 ${verdict.boxClass}`}
+        className={`mt-6 rounded-2xl border-2 p-5 ${tone.soft}`}
         role="status"
         aria-live="polite"
       >
-        <div className="flex items-start gap-3">
-          <VerdictIcon
-            className={`mt-0.5 h-6 w-6 shrink-0 ${verdict.textClass}`}
-            aria-hidden="true"
-          />
-          <div>
-            <div className="flex flex-wrap items-baseline gap-2">
-              <p className={`text-base font-bold ${verdict.textClass}`}>
-                判定：{verdict.label}
-              </p>
-              <span
-                className={`inline-block rounded-full ${verdict.badgeClass} px-3 py-0.5 text-[11px] font-semibold text-white`}
-              >
-                整備率 {assessment.yesCount}/{assessment.totalQuestions}（
-                {Math.round(assessment.readinessRatio * 100)}%）
-              </span>
-            </div>
-            <p className={`mt-2 text-sm leading-6 ${verdict.textClass}`}>
-              {readinessGuidance(assessment.verdict, assessment.obligationTier)}
-            </p>
-          </div>
+        <div className="flex flex-wrap items-baseline gap-2">
+          <p className="text-base font-bold">
+            判定：{conclusion.title}
+          </p>
+          <span
+            className={`inline-block rounded-full px-3 py-0.5 text-[11px] font-semibold ${tone.solid}`}
+          >
+            整備率 {assessment.yesCount}/{assessment.totalQuestions}（
+            {Math.round(assessment.readinessRatio * 100)}%）
+          </span>
         </div>
-        {assessment.gaps.length > 0 && (
+        <p className="mt-2 text-sm leading-6">{conclusion.description}</p>
+        {conclusion.settled && assessment.gaps.length > 0 && (
           <div className="mt-4">
-            <p className={`text-xs font-semibold ${verdict.textClass}`}>
-              優先整備項目
-            </p>
-            <ul className={`mt-2 space-y-1 text-xs leading-5 ${verdict.textClass}`}>
+            <p className="text-xs font-semibold">優先整備項目</p>
+            <ul className="mt-2 space-y-1 text-xs leading-5">
               {assessment.gaps.map((g) => (
                 <li key={g.id} className="flex gap-2">
                   <span className="mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-current opacity-60" />
@@ -174,7 +162,7 @@ export function ReadinessForm() {
             </ul>
             <a
               href="#procedure"
-              className={`mt-4 inline-flex items-center gap-1 rounded-lg border border-current/30 bg-white/70 px-3 py-1.5 text-xs font-semibold ${verdict.textClass} hover:bg-white`}
+              className="mt-4 inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-current/30 bg-white/70 px-3 py-1.5 text-xs font-semibold hover:bg-white"
             >
               次にやること：実施手順で進め方を確認する →
             </a>
