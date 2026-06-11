@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-10T22:50:19.067Z",
+  "generatedAt": "2026-06-11T22:48:56.477Z",
   "counts": {
     "approved": 14,
-    "rejected": 19,
-    "total": 33,
-    "approvalRate": 0.424
+    "rejected": 20,
+    "total": 34,
+    "approvalRate": 0.412
   },
   "byDay": [
     {
@@ -125,6 +125,13 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-06-12",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -138,9 +145,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 2,
-      "rejected": 17,
-      "total": 19,
-      "approvalRate": 0.105
+      "rejected": 18,
+      "total": 20,
+      "approvalRate": 0.1
     }
   ],
   "byEstimatedWorkCategory": [
@@ -175,17 +182,17 @@
       "approvalRate": 0.231
     },
     {
-      "type": "有害物質",
+      "type": "交通事故",
       "approved": 0,
       "rejected": 2,
       "total": 2,
       "approvalRate": 0
     },
     {
-      "type": "交通事故",
+      "type": "有害物質",
       "approved": 0,
-      "rejected": 1,
-      "total": 1,
+      "rejected": 2,
+      "total": 2,
       "approvalRate": 0
     },
     {
@@ -234,7 +241,7 @@
         4,
         11,
         1,
-        0,
+        1,
         0,
         1,
         0,
@@ -270,7 +277,7 @@
       "rejected": [
         2,
         17,
-        0,
+        1,
         0,
         0,
         0,
@@ -307,7 +314,7 @@
       ],
       "rejected": [
         12,
-        7,
+        8,
         0,
         0,
         0,
@@ -351,7 +358,7 @@
         0,
         0,
         2,
-        3,
+        4,
         1,
         0
       ]
@@ -360,11 +367,11 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 17
+      "count": 18
     },
     {
       "reason": "duplication",
-      "count": 6
+      "count": 7
     }
   ],
   "samples": {
@@ -615,6 +622,23 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "名古屋 マイクロバス2人死亡事故で運転手の鑑定留置始まる",
+        "aiSummary": "名古屋のマイクロバス死亡事故、運転手の鑑定留置が始まる。",
+        "score": {
+          "relevance": 40,
+          "copyrightRisk": 20,
+          "misinformationRisk": 10,
+          "duplication": 70,
+          "judgedAt": "2026-06-11T22:48:49.635Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "duplication 70 > 50 (already covered in accident DB)",
+            "relevance 40 < 70 (not labor-safety related for type=accident_report)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "1日は東日本 北日本で高温続く 猛暑日のところも 熱中症対策を",
         "aiSummary": "東日本と北日本で高温が続き、猛暑日となる地域もあるため、熱中症への警戒が必要。",
         "score": {
@@ -642,23 +666,6 @@
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
             "relevance 20 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "全国的に気温上昇 真夏日になるところも 熱中症対策を",
-        "aiSummary": "全国的に気温が上昇し、熱中症予防が呼びかけられている。",
-        "score": {
-          "relevance": 15,
-          "copyrightRisk": 5,
-          "misinformationRisk": 5,
-          "duplication": 85,
-          "judgedAt": "2026-05-16T00:08:54.645Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 15 < 70 (not labor-safety related)",
-            "duplication 85 > 50 (already covered in accident DB)"
           ]
         },
         "publisher": "日本放送協会"

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-10T22:50:19.010Z",
+  "updatedAt": "2026-06-11T22:48:56.425Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -142,23 +142,23 @@
     {
       "id": "c8354d07b0ac5f63",
       "headline": "北陸道2人死亡事故 トラック運転手を酒気帯びなど疑いで逮捕",
-      "aiSummary": "トラック運転手が酒気帯び運転で2人死亡事故を起こし逮捕された。",
+      "aiSummary": "トラック運転手が酒気帯び運転で2人死亡事故を起こし逮捕。",
       "source": {
         "name": "NHK NEWS WEB（社会）",
         "url": "http://www3.nhk.or.jp/news/html/20260608/k10015144421000.html",
         "publisher": "日本放送協会",
         "publishedAt": "Mon, 08 Jun 2026 19:29:43 +0900",
-        "fetchedAt": "2026-06-10T22:50:01.333Z"
+        "fetchedAt": "2026-06-11T22:48:38.336Z"
       },
       "estimatedAccidentType": "交通事故",
       "estimatedWorkCategory": "運輸交通業",
       "newsType": "accident_report",
       "score": {
-        "relevance": 85,
+        "relevance": 90,
         "copyrightRisk": 10,
         "misinformationRisk": 5,
         "duplication": 70,
-        "judgedAt": "2026-06-10T22:50:19.003Z",
+        "judgedAt": "2026-06-11T22:48:56.418Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)"
