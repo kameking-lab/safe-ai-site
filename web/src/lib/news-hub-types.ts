@@ -25,6 +25,11 @@ export type NewsHubItem = {
    * 業種別メール配信のセグメント（filterItemsForIndustry）に使う。
    */
   industries?: string[];
+  /**
+   * 施行までの残日数（法改正で施行前のみ。buildEnforcementBadge の daysLeft）。
+   * 結論カードの「施行間近」判定（news-conclusions.ts）に使う。
+   */
+  enforcementDaysLeft?: number | null;
 };
 
 export const NEWS_HUB_CATEGORY_LABEL: Record<NewsHubCategory, string> = {
@@ -43,12 +48,26 @@ export function isRecent(date: string, days = 30, now: Date = new Date()): boole
   return now.getTime() - d <= days * 24 * 60 * 60 * 1000 && d <= now.getTime();
 }
 
+function toYmdLocal(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 /**
- * 「新着」判定（前回閲覧以降）。lastVisit があればそれより新しい日付、無ければ直近30日。
+ * 日付単体の「新着」判定。lastVisit があればそれより新しい日付、無ければ直近30日。
+ * isRecent と同じく未来日は新着扱いしない（施行日が将来の法改正は date が未来になるため、
+ * これを除外しないと「新着」バッジ・件数が永遠に消えない）。
+ */
+export function isNewDateSince(date: string, lastVisit: string | null, now: Date = new Date()): boolean {
+  if (!lastVisit) return isRecent(date, 30, now);
+  return date > lastVisit && date <= toYmdLocal(now);
+}
+
+/**
+ * 「新着」判定（前回閲覧以降）。
  * バッジ表示・「新着のみ」フィルタ・件数表示で同一基準を使うための共通関数。
  */
 export function isNewSince(item: NewsHubItem, lastVisit: string | null, now: Date = new Date()): boolean {
-  return lastVisit ? item.date > lastVisit : isRecent(item.date, 30, now);
+  return isNewDateSince(item.date, lastVisit, now);
 }
 
 /**

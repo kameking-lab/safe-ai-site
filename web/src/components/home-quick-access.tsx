@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { buildNewsHubItems } from "@/lib/news-hub";
+import { WhatsNewTileBadge } from "@/components/whats-new-tile-badge";
 
 /**
  * トップ最上部の「現場ですぐ使う」直接導線（exp-r8）。
  * 社長の不満「すぐ機能に行かない」への是正＝トップを開いて0スクロールで主要機能へ1タップ。
  * モバイル(390px)で3列＝主要機能がファーストビューに収まる。Heroのキャッチ/h1/統計(SEO)はこの下に温存。
+ * 柱0: 「新着」タイルには前回閲覧以降の未読件数バッジ（/whats-new と同一基準）。
  */
 type Tool = { href: string; icon: string; label: string; sub: string };
 
@@ -21,6 +24,8 @@ const TOOLS: Tool[] = [
 ];
 
 export function HomeQuickAccess() {
+  // サーバー側で新着ハブの日付列だけ取り出してバッジへ渡す（クライアントへは日付配列のみ）
+  const newsDates = buildNewsHubItems().map((i) => i.date);
   return (
     <section aria-label="現場ですぐ使う主要機能" className="mx-auto max-w-5xl px-4 pt-4 sm:pt-6">
       <div className="flex items-baseline justify-between">
@@ -29,7 +34,7 @@ export function HomeQuickAccess() {
       </div>
       <ul className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-10">
         {TOOLS.map((t) => (
-          <li key={t.href}>
+          <li key={t.href} className="relative">
             <Link
               href={t.href}
               className="flex h-full min-h-[78px] flex-col items-center justify-center gap-0.5 rounded-xl border border-emerald-200 bg-white px-1.5 py-2 text-center shadow-sm transition hover:border-emerald-400 hover:bg-emerald-50 dark:border-emerald-500/30 dark:bg-slate-900 dark:hover:bg-emerald-500/10"
@@ -38,6 +43,7 @@ export function HomeQuickAccess() {
               <span className="text-[12px] font-bold leading-tight text-slate-800 dark:text-slate-100">{t.label}</span>
               <span className="text-[10px] leading-tight text-slate-500 dark:text-slate-400">{t.sub}</span>
             </Link>
+            {t.href === "/whats-new" && <WhatsNewTileBadge dates={newsDates} />}
           </li>
         ))}
       </ul>
