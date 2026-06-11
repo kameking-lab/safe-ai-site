@@ -46,12 +46,13 @@ import { WeatherRiskCard } from "@/components/weather-risk-card";
 import { SITE_STATS } from "@/data/site-stats";
 import { createServices } from "@/lib/services/service-factory";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
-import type {
-  AccidentCase,
-  AccidentWorkCategory,
-  AccidentType,
-  RevisionSummary,
-  SiteRiskWeather,
+import {
+  ALL_ACCIDENT_TYPES,
+  type AccidentCase,
+  type AccidentWorkCategory,
+  type AccidentType,
+  type RevisionSummary,
+  type SiteRiskWeather,
 } from "@/lib/types/domain";
 import type {
   KyInstructionRecordState,
@@ -199,7 +200,12 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
   const [accidentCases, setAccidentCases] = useState<AccidentCase[]>([]);
   const [accidentStatus, setAccidentStatus] = useState<ServiceStatus>("idle");
   const [accidentError, setAccidentError] = useState<ServiceError | null>(null);
-  const [selectedAccidentType, setSelectedAccidentType] = useState<AccidentType | "すべて">("すべて");
+  // 型グリッド（柱0）からの acc_type 付きフル遷移で、型フィルタを初期反映する。
+  // tab=list の復元（accidentActiveTab）と同じく初回マウント時のみ読む。
+  const [selectedAccidentType, setSelectedAccidentType] = useState<AccidentType | "すべて">(() => {
+    const raw = variantProp === "accidents" ? searchParams?.get("acc_type") : null;
+    return raw && ALL_ACCIDENT_TYPES.includes(raw as AccidentType) ? (raw as AccidentType) : "すべて";
+  });
   const [selectedAccidentCategory, setSelectedAccidentCategory] = useState<AccidentWorkCategory | "すべて">("すべて");
   const [accidentActiveTab, setAccidentActiveTab] = useState<AccidentTab>(
     () =>
@@ -217,6 +223,12 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
     } else {
       params.set("tab", accidentActiveTab);
     }
+    // 型フィルタもURLへ同期（型グリッド遷移後の解除や共有URLが正しくなる）
+    if (selectedAccidentType === "すべて") {
+      params.delete("acc_type");
+    } else {
+      params.set("acc_type", selectedAccidentType);
+    }
     const qs = params.toString();
     const next = qs ? `${pathname}?${qs}` : pathname;
     const current =
@@ -224,7 +236,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
     if (next !== current) {
       router.replace(next, { scroll: false });
     }
-  }, [accidentActiveTab, variant, pathname, router, searchParams]);
+  }, [accidentActiveTab, selectedAccidentType, variant, pathname, router, searchParams]);
   const [selectedRegionName, setSelectedRegionName] = useState(
     () => services.weatherRisk.getAvailableRegions()[0]?.regionName ?? ""
   );

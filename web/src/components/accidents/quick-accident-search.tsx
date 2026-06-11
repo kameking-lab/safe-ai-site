@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import type { AccidentType } from "@/lib/types/domain";
+import { accidentTypeHref } from "@/lib/accidents/accident-visual";
+import { ACCIDENT_TYPE_SHORT } from "@/lib/accidents/accident-pictogram-map";
+import { AccidentTypePictogram } from "@/components/accidents/accident-type-pictogram";
 
 /**
  * 事故DBの最上部に置く「クイック事例検索」。
@@ -15,15 +19,9 @@ import { useState, type FormEvent } from "react";
  * AccidentDatabasePanel が既にマウント時に復元する実装済み・テスト済みの導線を再利用している。
  */
 
-// 厚労省「事故の型」のうち現場で頻出する代表型。タップでキーワード検索に直行。
-const QUICK_TYPES: { label: string; kw: string }[] = [
-  { label: "墜落・転落", kw: "墜落" },
-  { label: "転倒", kw: "転倒" },
-  { label: "はさまれ", kw: "はさまれ" },
-  { label: "飛来・落下", kw: "飛来" },
-  { label: "熱中症", kw: "熱中症" },
-  { label: "感電", kw: "感電" },
-];
+// 厚労省「事故の型」のうち現場で頻出する代表型。
+// タップで型の正確な絞り込み（acc_type）に直行。ピクトグラム＝柱0の視覚言語。
+const QUICK_TYPES: AccidentType[] = ["墜落", "転倒", "はさまれ・巻き込まれ", "飛来・落下", "熱中症", "感電"];
 
 function buildHref(kw: string): string {
   const params = new URLSearchParams();
@@ -71,11 +69,12 @@ export function QuickAccidentSearch() {
       <div className="mt-2 flex flex-wrap gap-1.5">
         {QUICK_TYPES.map((t) => (
           <a
-            key={t.kw}
-            href={buildHref(t.kw)}
-            className="rounded-full border border-rose-300 bg-white px-3 py-1 text-xs font-semibold text-rose-800 hover:bg-rose-100"
+            key={t}
+            href={accidentTypeHref(t)}
+            className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-rose-300 bg-white py-1 pl-1.5 pr-3 text-xs font-semibold text-rose-800 hover:bg-rose-100"
           >
-            {t.label}
+            <AccidentTypePictogram type={t} size="sm" />
+            {ACCIDENT_TYPE_SHORT[t]}
           </a>
         ))}
       </div>

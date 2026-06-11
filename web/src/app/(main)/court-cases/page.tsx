@@ -7,6 +7,7 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import { COURT_CASE_COUNT } from "@/data/court-cases";
 import { CourtCasesBrowser } from "@/components/court-cases/court-cases-browser";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
 const _title = "労災・労働判例コーナー｜安全配慮義務・過労死から解雇・労働時間・就業規則まで（無料・出典付き）";
 const _desc =
@@ -35,22 +36,29 @@ export default function CourtCasesPage() {
       />
       <PageContainer width="wide">
         <header className="mb-4">
-          <div className="flex items-center gap-2">
-            <Scale className="h-6 w-6 text-emerald-600" aria-hidden="true" />
+          {/* 柱0: 件数デカ数字＋1行結論。長い説明は詳細層へ（内容は不変） */}
+          <div className="flex items-center gap-2.5">
+            <Scale className="h-7 w-7 shrink-0 text-emerald-600" aria-hidden="true" />
             <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 lg:text-2xl">労災・労働判例コーナー</h1>
-            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-              {COURT_CASE_COUNT}件
+            <span className="rounded-xl bg-emerald-100 px-2.5 py-1 text-2xl font-bold leading-none text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">
+              {COURT_CASE_COUNT}
+              <span className="ml-0.5 text-xs font-semibold">件</span>
             </span>
           </div>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700 dark:text-slate-300">
-            安全配慮義務・過労死・じん肺/石綿・元請責任・過失相殺など、労働安全の実務に直結する
-            <strong className="font-semibold">重要な確定判例</strong>を、
-            「事案の概要＋裁判所の判断（要旨）＋実務上のポイント＋出典リンク」で解説します。
-            すべて<strong className="font-semibold">実在を確認できた確定判例</strong>のみを掲載しています。
+          <p className="mt-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+            すべて実在を確認できた確定判例。要旨＋実務ポイント＋出典リンク付き。
           </p>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            要旨は当サイトによる要約です。正確な内容は各判例の出典（判決原文）をご確認ください。個別案件は専門家にご相談ください。
-          </p>
+          <CollapsibleDetail summary="このコーナーの読み方（収載範囲・要約の性質・免責）" className="mt-2 max-w-3xl">
+            <p>
+              安全配慮義務・過労死・じん肺/石綿・元請責任・過失相殺など、労働安全の実務に直結する
+              <strong className="font-semibold">重要な確定判例</strong>を、
+              「事案の概要＋裁判所の判断（要旨）＋実務上のポイント＋出典リンク」で解説します。
+              すべて<strong className="font-semibold">実在を確認できた確定判例</strong>のみを掲載しています。
+            </p>
+            <p className="mt-1">
+              要旨は当サイトによる要約です。正確な内容は各判例の出典（判決原文）をご確認ください。個別案件は専門家にご相談ください。
+            </p>
+          </CollapsibleDetail>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
               href="/court-cases/employer-liability"

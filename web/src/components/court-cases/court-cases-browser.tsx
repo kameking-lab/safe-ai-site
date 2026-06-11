@@ -17,6 +17,8 @@ import {
   courtFilterToQuery,
   type CourtType,
 } from "@/lib/court-cases/search";
+import { FIELD_ICON } from "@/lib/court-cases/case-visual";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
 // フェーズB: 数百件規模に備え、検索ロジックは lib/court-cases/search.ts の純関数に集約。
 // 裁判所種別・年代は既存データから導出するためデータ移行不要。
@@ -103,6 +105,37 @@ export function CourtCasesBrowser() {
 
   return (
     <div className="space-y-4">
+      {/* 柱0: 分野アイコングリッド＝読まずに自分の分野へ（タップで絞り込み・再タップで解除） */}
+      <section aria-label="分野から探す" data-testid="court-field-grid">
+        <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">分野から探す</h2>
+        <div className="mt-2 grid grid-cols-3 gap-1.5 lg:grid-cols-9">
+          {FACETS.fields.map(({ value, count }) => {
+            const Icon = FIELD_ICON[value];
+            const isActive = field === value;
+            return (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => setField(isActive ? "" : value)}
+                className={`flex min-h-[44px] flex-col items-center gap-1 rounded-xl border p-2 text-center shadow-sm transition ${
+                  isActive
+                    ? "border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-500/10"
+                    : "border-slate-200 bg-white hover:border-emerald-300 hover:bg-emerald-50/40 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-emerald-500/40"
+                }`}
+              >
+                <Icon className="h-6 w-6 text-emerald-700 dark:text-emerald-300" aria-hidden="true" />
+                <span className="text-[11px] font-bold leading-tight text-slate-800 dark:text-slate-200">{value}</span>
+                <span className="text-lg font-bold leading-none text-slate-900 dark:text-slate-100">
+                  {count}
+                  <span className="ml-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400">件</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       {/* フィルタ */}
       <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
@@ -229,12 +262,15 @@ export function CourtCasesBrowser() {
         </p>
       )}
 
-      {/* 出典・免責 */}
-      <footer className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-[12px] leading-relaxed text-slate-600 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400">
-        <p className="flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-200">
-          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" /> 出典・ご利用にあたって
-        </p>
-        <p className="mt-1">
+      {/* 出典・免責（文字ダイエット: 詳細層へ・内容は不変） */}
+      <CollapsibleDetail
+        summary={
+          <span className="inline-flex items-center gap-1">
+            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" /> 出典・ご利用にあたって
+          </span>
+        }
+      >
+        <p>
           各判例の要旨は、裁判所「裁判例検索」・厚生労働省・法務省・判例集等の公表情報をもとにした
           <strong className="font-semibold">当サイトによる要約</strong>です。正確な内容は各判例の出典（判決原文）をご確認ください。
           事件名は実務・学術で定着した通称を用い、当事者の特定情報は掲載していません。
@@ -244,7 +280,7 @@ export function CourtCasesBrowser() {
           本コーナーは一般的な情報提供であり、個別の事案に対する法的助言ではありません。
           具体的な対応は、弁護士・社会保険労務士・労働安全/衛生コンサルタント等の専門家にご相談ください。
         </p>
-      </footer>
+      </CollapsibleDetail>
     </div>
   );
 }

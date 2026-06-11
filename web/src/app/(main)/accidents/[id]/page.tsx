@@ -12,6 +12,9 @@ import { ogImageUrl } from "@/lib/og-url";
 import type { AccidentCase } from "@/lib/types/domain";
 import { PageContainer } from "@/components/layout/page-container";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
+import { AccidentTypePictogram } from "@/components/accidents/accident-type-pictogram";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { SEVERITY_VISUAL } from "@/lib/accidents/accident-visual";
 
 const SITE_BASE = "https://www.anzen-ai-portal.jp";
 
@@ -49,13 +52,6 @@ export async function generateMetadata({
     twitter: { card: "summary_large_image", images: [ogImageUrl(accident.title)] },
   };
 }
-
-const SEVERITY_BADGE: Record<AccidentCase["severity"], string> = {
-  軽傷: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  中等傷: "bg-amber-100 text-amber-800 border-amber-200",
-  重傷: "bg-orange-100 text-orange-900 border-orange-300",
-  死亡: "bg-rose-100 text-rose-900 border-rose-300",
-};
 
 function pickSimilarAccidents(target: AccidentCase, all: AccidentCase[], limit = 3): AccidentCase[] {
   return all
@@ -99,18 +95,23 @@ export default async function AccidentDetailPage({
       </nav>
 
       <header className="mb-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-rose-100 px-2.5 py-1 text-[11px] font-bold text-rose-800">
-            {accident.type}
-          </span>
-          <span className="rounded-full bg-sky-100 px-2.5 py-1 text-[11px] font-bold text-sky-800">
-            {accident.workCategory}
-          </span>
-          <span
-            className={`rounded-full border px-2.5 py-1 text-[11px] font-bold ${SEVERITY_BADGE[accident.severity]}`}
-          >
-            {accident.severity}
-          </span>
+        {/* 柱0: 型ピクトグラムを主役に、3秒で「何の事故か・どれだけ重いか」が分かるヘッダー */}
+        <div className="flex items-center gap-3">
+          <AccidentTypePictogram type={accident.type} size="lg" />
+          <div className="min-w-0">
+            <p className="text-lg font-bold leading-tight text-slate-900">{accident.type}</p>
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              <StatusBadge
+                tone={SEVERITY_VISUAL[accident.severity].tone}
+                variant={SEVERITY_VISUAL[accident.severity].variant}
+              >
+                {accident.severity}
+              </StatusBadge>
+              <span className="rounded-full bg-sky-100 px-2.5 py-1 text-[11px] font-bold text-sky-800">
+                {accident.workCategory}
+              </span>
+            </div>
+          </div>
         </div>
         <div className="mt-3 flex items-start justify-between gap-3">
           <h1 className="text-xl font-bold leading-snug text-slate-900 sm:text-2xl">
@@ -224,7 +225,8 @@ export default async function AccidentDetailPage({
             {similar.map((c) => (
               <li key={c.id} className="rounded-lg border border-slate-100 bg-slate-50 p-3">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-800">
+                  <span className="inline-flex items-center gap-1 rounded bg-rose-100 py-0.5 pl-0.5 pr-1.5 text-[10px] font-bold text-rose-800">
+                    <AccidentTypePictogram type={c.type} size="sm" />
                     {c.type}
                   </span>
                   <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-800">

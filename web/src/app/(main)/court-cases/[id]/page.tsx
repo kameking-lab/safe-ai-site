@@ -5,6 +5,7 @@ import { Scale, ArrowLeft, ExternalLink, ClipboardList, Database, MessageSquare,
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { COURT_CASES, getCourtCaseById } from "@/data/court-cases";
+import { FIELD_ICON } from "@/lib/court-cases/case-visual";
 
 export function generateStaticParams() {
   return COURT_CASES.map((c) => ({ id: c.id }));
@@ -78,7 +79,15 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
               {c.issues.map((i) => (
                 <span key={i} className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${issueColor[i] ?? "bg-slate-100 text-slate-700 border-slate-200"}`}>{i}</span>
               ))}
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{c.field}</span>
+              {(() => {
+                const FieldIcon = FIELD_ICON[c.field];
+                return (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <FieldIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                    {c.field}
+                  </span>
+                );
+              })()}
             </div>
             <h1 className="mt-2 flex items-start gap-2 text-xl font-bold text-slate-900 dark:text-slate-100 lg:text-2xl">
               <Scale className="mt-1 h-5 w-5 shrink-0 text-emerald-600" aria-hidden="true" />
@@ -90,14 +99,15 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
             <p className="mt-2 text-sm font-medium text-emerald-900 dark:text-emerald-200">{c.oneLine}</p>
           </header>
 
+          {/* 柱0・結論ファースト: 読者が知りたいのは「裁判所がどう判断したか」— 概要より先に置く */}
+          <section className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/5">
+            <h2 className="text-sm font-bold text-emerald-800 dark:text-emerald-300">結論｜裁判所の判断（要旨）</h2>
+            <p className="mt-1 text-[15px] leading-relaxed text-slate-800 dark:text-slate-100">{c.holding}</p>
+          </section>
+
           <section className="mt-5">
             <h2 className="text-sm font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">事案の概要</h2>
             <p className="mt-1 text-[15px] leading-relaxed text-slate-800 dark:text-slate-200">{c.summary}</p>
-          </section>
-
-          <section className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/5">
-            <h2 className="text-sm font-bold text-emerald-800 dark:text-emerald-300">裁判所の判断（要旨）</h2>
-            <p className="mt-1 text-[15px] leading-relaxed text-slate-800 dark:text-slate-100">{c.holding}</p>
           </section>
 
           <section className="mt-5">

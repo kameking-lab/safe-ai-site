@@ -14,6 +14,9 @@ import { fuzzyMatchAll } from "@/lib/fuzzy-search";
 import { resolveAccidentSource } from "@/lib/accident-source";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
 import { AccidentActionBar } from "@/components/accidents/action-bar";
+import { AccidentTypePictogram } from "@/components/accidents/accident-type-pictogram";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { SEVERITY_VISUAL } from "@/lib/accidents/accident-visual";
 
 const PAGE_SIZE = 40;
 
@@ -388,15 +391,21 @@ export function AccidentDatabasePanel({
                 aria-label={`事故データ ${accident.title}`}
               >
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-800">
+                  {/* 柱0: 型ピクトグラム＋重篤度の色文法（死亡=赤solid/重傷=赤/中等傷=黄/軽傷=グレー） */}
+                  <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 py-0.5 pl-1 pr-2 text-[11px] font-semibold text-rose-800">
+                    <AccidentTypePictogram type={accident.type} size="sm" />
                     {accident.type}
                   </span>
                   <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-semibold text-sky-800">
                     {accident.workCategory}
                   </span>
-                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                  <StatusBadge
+                    tone={SEVERITY_VISUAL[accident.severity].tone}
+                    variant={SEVERITY_VISUAL[accident.severity].variant}
+                    size="sm"
+                  >
                     {accident.severity}
-                  </span>
+                  </StatusBadge>
                   {accident.provenance === "preliminary" && (
                     <span
                       className="rounded-full border border-orange-300 bg-orange-50 px-2 py-0.5 text-[11px] font-semibold text-orange-700"
