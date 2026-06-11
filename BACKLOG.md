@@ -53,6 +53,20 @@
 - [ ] 【柱0】サイネージ(/signage系)＝1画面フィット維持の範囲で大型化・JIS安全色文法への統一
 - [ ] 【柱0】リスクマップ(/risk)＋未着手の残り全ページ巡回＋全機能の無読テスト一括検収(不合格画面は個別タスク化)
 
+## 柱C: 外部酷評対応（独立レビュー2026-06-11・S/A級。詳細・実測値は docs/site-critique-2026-06-11/ 00〜06）
+運用ヒント: 柱0の残りと交互に消化してよい。特にC-1(モバイル実速度)は柱0未適用ページの改修と同一ファイルを触るため、対象が重なるページは柱0タスク側に「C-1のSSR化も同時に」を含めて1イテレーションで済ませろ。法令正確性・A4帳票・1画面フィットは不可侵（既存ルール通り）。
+- [ ] 【柱C-1・S】モバイル実速度の構造是正 第1弾: Lighthouseモバイル実測で機能ページのLCP6.3〜10.4秒・CLS最大0.853(/equipment-finder)・perf 49〜75(品質基準90+に対し14ページ中合格1)。原因はmain#main-content全体がクライアント側で後から差し替わる構造(layout-shifts検出ノードが全ページ共通でmain#main-content)。流入の多い順に /accidents・/laws・/whats-new から: ①静的に決まる本文をServer Componentで初期HTML化(localStorage依存部分のみ子Client化・mountedゲートでmain全体を隠す実装を排除) ②動的部分は同寸スケルトン先置きでCLS≦0.1 ③gtagをnext/script lazyOnload化(166KB・未使用39%が初期同梱)。完了条件=対象3ページのLighthouseモバイルperf90+/CLS0.1以下を実測記録。残りページは第2弾として分割起票。
+- [ ] 【柱C-2・S】サイト横断検索: 2,497ページに対し横断検索が存在しない(モバイルトップはヘッダーボタン0・検索入力0を実測)。チャットボットのlexical検索基盤(コーパス＋synonyms)を流用し、ヘッダー共通の横断検索(条文・通達・判例・標識・主要機能の串刺し・インクリメンタル候補)を実装。完了条件=モバイル/PCの全ページヘッダーから2タップ以内で「アーク溶接 特別教育」が教育資格DBに到達。
+- [ ] 【柱C-3・S】sitemap是正一式: ①sitemap-articles.xmlの全31 URL(lr-real-*)が本文32字の空シェルでcanonical=トップ＝soft404群(orphan・/articles一覧からのリンク0)→未知IDをnotFound()化しsitemapを実在記事から動的生成 ②sitemap-equipment.xmlの旧ID39件(ee-/fg-/hc-等)も同型シェル→現行eq-NNNN生成に差し替え ③/court-cases・/whats-new・/site-records系がどのsitemapにも不在→追加 ④lastmodが2026-04-19等で固定(トップはchangefreq=dailyと自己矛盾)→データ実更新日から生成。/about/cases・/pdfの空シェルも同時に処置。
+- [ ] 【柱C-4・S】CSR空シェルページのSSR化＋固有メタ: /ky(SSR本文32字・titleとOGPがサイト共通デフォルト・sitemap収載)・/ky/morning(114字)・/for/construction(50字・営業LPなのに)・/signage/map(406字)。静的な説明・見出し・使い方をServer Component化し、generateMetadataで固有title/description/canonical付与。robots.txtがDisallow:/api/のためクライアントfetch依存の内容はGooglebotから恒久に不可視である点に注意。
+- [ ] 【柱C-5・A】内部運用レポートの公開撤去: /audits/hobby-recovery-forecast-2026-05-19(「Vercel Hobby復帰予測レポート—Dispatch A/Bベースライン」本文15,616字)と/audits/site-status-2026-05-19がsitemap収載で一般公開中。インフラ課金・内部運用情報の露出＝専門ポータルの信頼毀損。ルート削除(docsはリポジトリに残す)またはnoindex＋robots Disallow＋sitemap除外。
+- [ ] 【柱C-6・A】巨大1ページリストのページネーション: モバイル実測でページ全高 /circulars 39,461px(約47画面・ボタン416個・読込5.4秒・絞り込み後も33,248px)・/court-cases 25,974px・/whats-new 21,211px(40px未満タップ174個)。初期20〜30件＋もっと見る/ページネーション化＋タグチップ44px化。C-1のCLS/LCP改善にも直結。
+- [ ] 【柱C-7・A】事故統計の出力手段: /accidentsにCSV・コピー・印刷・ダウンロードが一切ない(本文全文検索0件を実測)＝元請の「月例安全会議の資料に貼る」が完了しない。KY用紙のtranscribe-export方式を横展開し、集計ブロックごとにCSV/画像コピー/共有URLボタン。h1欠落(/accidents・/accidents-analytics・/laws・/law-search・/goods)と多重h1(/ky/paper・/risk・/risk-prediction・/safety-diary)も同時是正。※#489(柱0事故DB)反映後の本番で差分を再確認してから着手。
+- [ ] 【柱C-8・A】E-E-A-T配信: /aboutに労働安全コンサルタント登録番号260022のプロフィールがあるのに、通達解説・記事・判例・FAQの個別ページに監修者バイラインが無い(実測)。共通バイライン部品(氏名・資格・登録番号・aboutリンク)＋Person JSON-LDを詳細系テンプレートに敷設。
+- [ ] 【柱C-9・A】KY用紙モバイルの操作集中: /ky/paperは可視入力34個＋画面下固定ボタン13個(アクション8＋下タブ5・画面高の14%を常時占有)で「保存」(54×44px)が同格8ボタンに埋没(実測)。保存を主ボタン化(solid・常設)し複製/共有/転記/印刷は「…」シートへ格納、入力は基本情報→危険→対策→確認のステップ/アコーディオン化(既存の結論カード「記入のこりN」と整合)。A4印刷シート不変。
+- [ ] 【柱C-10・A】コンサル相談CVパス: /contactのフォームが不具合報告文脈のプレースホルダで仕事の相談と同じ箱。①「ご意見・不具合」/「コンサルティング・講演のご相談」2タブ化(同一Formspreeで件名プレフィックス分岐・env追加なし) ②判例・法改正・RA等の専門ページ下部に「労働安全コンサルタント(登録260022)に相談」カード。
+- [ ] 【柱C-11・B群一括】B/C級の磨き残し(詳細はdocs/site-critique-2026-06-11/): description50字未満27ページのテンプレート整備・title60字超4件・404ページのどん詰まり解消(リンク4本/検索なし→機能ランチャー＋横断検索)・視覚パンくず敷設(BreadcrumbList JSON-LDは192ページ生成済みなのに画面に出ていない)・アイコンボタンaria-label欠落のlint強制・og:image欠落11ページのフォールバック・モバイル下タブ5枠目のGA4実利用順見直し・データ系ページの「最終データ更新日」自動表示。1イテレーション1〜3個でついで消化可。
+
 ## 柱2: ダッシュボード強化（重点テーマ・上から実行）
 - [x] /site-records ライブダッシュボードを「安全担当が毎朝最初に開く1枚」へ強化（2026-06-10: 「今日やること（期限切れ・要対応）」横断パネルを既存4タイルの上に新設。純関数buildDailyActions＋テスト11件=パトロール未是正(collectOpenFindings再利用)・重大/軽微ヒヤリ・使用不可機械・委員会今月未開催(実質期限=月末を期日付与・議事録利用事業場のみ)・健診期限超過/間近(hc-trackerのlocalStorageをプロファイル横断マージ→classifyCheckupTiming再利用)・カレンダー今月予定を集約。並びは重大度→危険度高→期日昇順=墜落級が整理整頓の下に沈まない。ペルソナ実機レビューで重大ヒヤリ沈み・委員会が「すべて表示」に隠れる2点を発見→是正後「これなら毎朝開く」。既存タイル/スキーマ不変・判定ロジック二重実装0・新規依存0。docs/third-party-reviews/site-records-daily-actions-2026-06-10.md）
 - [x] /signage ダッシュボードに /site-records の現場記録データを表示する「現場の安全状態」パネルを結線（2026-06-10: 同一オリジンlocalStorage共有をPlaywright実機検証=別タブ保存がstorageイベントで再読込なしに即時反映。buildDailyActions(#462)を再利用し判定二重実装0、サイネージ選別の純関数selectSignageSiteSafety＋テスト6件のみ新設。現場レベルのソース(パトロール/ヒヤリ/点検/委員会)のみ掲示・健診=個人情報とカレンダー=参考情報は除外。リスク予測直下にshrink-0+max-h[30vh]で配置し1画面フィット不変(1920×1080 縦横overflow0)・記録ゼロ端末ではパネル非表示。枠色=赤(期限超過)/橙(要対応)/緑(全対応済)。ペルソナ指摘3点(「重大期日」誤読・隠れ項目の種別不明・TV文字サイズ)を是正。別端末共有はPath A制約として明記。docs/third-party-reviews/signage-site-safety-2026-06-10.md）
@@ -92,6 +106,7 @@
 - [ ] リスクマップ(/risk)を「台風前日の元請安全担当」ペルソナでレビュー→警報・防災情報の実用性
 
 ## オーナー判断待ち（Path A・自走では着手しない）
+- [ ] 【オーナー判断/Path A・柱C】robots.txtがAI検索系ボットまで全遮断(GPTBot等の学習系に加えOAI-SearchBot・ChatGPT-User・PerplexityBotも Disallow:/)。学習拒否は維持しつつ検索引用系UAのみAllowに分離するか方針判断を仰ぐ(許可ならrobots.ts数行・AI回答経由の流入チャネルが開く)。詳細=docs/site-critique-2026-06-11/01-seo-technical.md A-1。
 - [ ] 【オーナー判断/Path A】サイネージ休憩時間ビューにアフィリエイト安全グッズ(SignageFeaturedGoods)を出す是非を確認。出す方針なら結線、否なら部品削除。
 - [ ] 【オーナー判断/Path A・柱1是正】Web Push通知の導入: 未実装（CLAUDE.md優先課題7）。気象警報・法改正施行・KY提出承認などのプッシュ通知は VAPID鍵=env追加が必要なため独断禁止。自走で出来るのは設計ドラフト（通知対象イベント・購読UI・必要env・コスト0円構成）の作成まで→オーナー承認後に実装。
 
