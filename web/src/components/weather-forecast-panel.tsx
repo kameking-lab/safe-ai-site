@@ -9,6 +9,12 @@ import {
 import { JapanMapSvg } from "@/components/signage/japan-map-svg";
 import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture-warning-map";
 import type { WeatherForecastApiResponse, RegionForecast, ForecastDay } from "@/app/api/weather-forecast/route";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import {
+  buildRiskWeatherConclusion,
+  type RiskWeatherLevel,
+  type RiskWeatherSourceStatus,
+} from "@/lib/risk/weather-conclusion";
 
 // ────────────────────────────────────────────────────────────
 // ユーティリティ
@@ -183,7 +189,10 @@ export function WeatherForecastPanel() {
 
   // JMA Prefecture map のレベル (今日モード)
   const [jmaLevels, setJmaLevels] = useState<Record<string, import("@/lib/jma/parse-jma-warning").JmaMapLevel>>({});
+  // 8ブロック単位のレベル（結論カード用）
+  const [jmaBlockLevels, setJmaBlockLevels] = useState<Record<string, RiskWeatherLevel> | null>(null);
   const [jmaLoading, setJmaLoading] = useState(true);
+  const [jmaError, setJmaError] = useState(false);
 
   useEffect(() => {
     // 気象庁の都道府県別警報データ（signage-weather API today mode 経由）
@@ -198,10 +207,16 @@ export function WeatherForecastPanel() {
             levels[iso] = blockLevel ?? "none";
           });
           setJmaLevels(levels);
+          setJmaBlockLevels(data.mapLevels as Record<string, RiskWeatherLevel>);
+        } else {
+          setJmaError(true);
         }
         setJmaLoading(false);
       })
-      .catch(() => setJmaLoading(false));
+      .catch(() => {
+        setJmaError(true);
+        setJmaLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -240,11 +255,44 @@ export function WeatherForecastPanel() {
     return forecast.regions[0].days;
   }, [forecast]);
 
+  // 結論カード（今日の全国状態を1メッセージに集約・予報と気象庁警報の悪い方）
+  const conclusion = useMemo(() => {
+    const forecastStatus: RiskWeatherSourceStatus = loading ? "loading" : error ? "error" : "ok";
+    const jmaStatus: RiskWeatherSourceStatus = jmaLoading ? "loading" : jmaError ? "error" : "ok";
+    const regions = japanRegionMeta.map((meta) => {
+      const region = forecast?.regions.find((r) => r.regionId === meta.id);
+      return {
+        label: meta.label,
+        forecastLevel: region?.days[0]?.alertLevel,
+        jmaLevel: jmaBlockLevels?.[meta.id],
+      };
+    });
+    return buildRiskWeatherConclusion({ forecastStatus, jmaStatus, regions });
+  }, [loading, error, jmaLoading, jmaError, forecast, jmaBlockLevels]);
+
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
+    <div className="space-y-6">
+      {/* 結論カード: 全国の警報状態が3秒で分かる（1画面1メッセージ） */}
+      <ConclusionCard
+        tone={conclusion.tone}
+        value={conclusion.value}
+        unit={conclusion.unit}
+        title={conclusion.title}
+        description={conclusion.description}
+      >
+        <a
+          href="https://www.jma.go.jp/bosai/warning/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-[44px] items-center rounded-xl border border-current/30 px-3 text-xs font-semibold underline-offset-2 hover:underline"
+        >
+          気象庁公式で確認
+        </a>
+      </ConclusionCard>
+
       {/* ヘッダー */}
       <div>
-        <h1 className="text-xl font-bold text-slate-900 lg:text-2xl">気象警報マップ</h1>
+        <h2 className="text-xl font-bold text-slate-900 lg:text-2xl">気象警報マップ</h2>
         <p className="mt-1 text-sm text-slate-600">
           都道府県別の気象警報・注意報と向こう1週間の天気予報。
         </p>
@@ -260,7 +308,7 @@ export function WeatherForecastPanel() {
             key={tab.key}
             type="button"
             onClick={() => setMode(tab.key as ForecastMode)}
-            className={`flex-1 rounded-lg py-2 text-sm font-semibold transition ${
+            className={`min-h-[44px] flex-1 rounded-lg py-2 text-sm font-semibold transition ${
               mode === tab.key
                 ? "bg-white text-slate-900 shadow-sm"
                 : "text-slate-600 hover:text-slate-900"
@@ -364,7 +412,7 @@ export function WeatherForecastPanel() {
                   key={day.date}
                   type="button"
                   onClick={() => setSelectedDayIndex(idx)}
-                  className={`shrink-0 rounded-xl border px-3 py-2 text-center transition ${
+                  className={`min-h-[44px] shrink-0 rounded-xl border px-3 py-2 text-center transition ${
                     selectedDayIndex === idx
                       ? "border-emerald-500 bg-emerald-50 font-bold text-emerald-900 shadow-sm"
                       : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
