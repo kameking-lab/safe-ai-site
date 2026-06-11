@@ -41,39 +41,36 @@ export default function RiskPage() {
           </p>
         </header>
 
-        <RelatedPageCards
-          heading="リスクアセスメント"
-          pages={[
-            {
-              href: "/risk-prediction",
-              label: "リスク予測・判断支援",
-              description: "作業計画をもとにリスクを予測し、管理措置の優先順位を整理。",
-              color: "rose",
-              cta: "リスク予測を開く",
-            },
-            {
-              href: "/ky",
-              label: "KY用紙作成",
-              description: "4ラウンド法に対応した危険予知活動シート。音声入力・PDF出力対応。",
-              color: "emerald",
-              cta: "KY用紙を開く",
-            },
-            {
-              href: "/chemical-ra",
-              label: "化学物質リスクアセスメント",
-              description: "GHS分類に基づく化学物質の健康・爆発リスクを評価。",
-              color: "purple",
-              cta: "化学物質RAを開く",
-            },
-          ]}
-        />
+        {/* 柱0: いまの状態（気象警報の結論カード）を最上部に。ナビカードは状態の後 */}
+        <WeatherForecastPanel />
 
         <div className="mt-8">
-          <h2 className="mb-4 text-lg font-bold text-slate-800">気象警報・作業中止判断</h2>
-          <p className="mb-4 text-sm text-slate-600">
-            屋外作業・建設現場向けに、都道府県・市区町村別の気象警報と週間天気を確認できます。
-          </p>
-          <WeatherForecastPanel />
+          <RelatedPageCards
+            heading="リスクアセスメント"
+            pages={[
+              {
+                href: "/risk-prediction",
+                label: "リスク予測・判断支援",
+                description: "作業計画をもとにリスクを予測し、管理措置の優先順位を整理。",
+                color: "rose",
+                cta: "リスク予測を開く",
+              },
+              {
+                href: "/ky",
+                label: "KY用紙作成",
+                description: "4ラウンド法に対応した危険予知活動シート。音声入力・PDF出力対応。",
+                color: "emerald",
+                cta: "KY用紙を開く",
+              },
+              {
+                href: "/chemical-ra",
+                label: "化学物質リスクアセスメント",
+                description: "GHS分類に基づく化学物質の健康・爆発リスクを評価。",
+                color: "purple",
+                cta: "化学物質RAを開く",
+              },
+            ]}
+          />
         </div>
 
         <RelatedPageCards
