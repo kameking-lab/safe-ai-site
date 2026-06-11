@@ -59,7 +59,7 @@
 - [ ] 【柱C-2・S】サイト横断検索: 2,497ページに対し横断検索が存在しない(モバイルトップはヘッダーボタン0・検索入力0を実測)。チャットボットのlexical検索基盤(コーパス＋synonyms)を流用し、ヘッダー共通の横断検索(条文・通達・判例・標識・主要機能の串刺し・インクリメンタル候補)を実装。完了条件=モバイル/PCの全ページヘッダーから2タップ以内で「アーク溶接 特別教育」が教育資格DBに到達。
 - [ ] 【柱C-3・S】sitemap是正一式: ①sitemap-articles.xmlの全31 URL(lr-real-*)が本文32字の空シェルでcanonical=トップ＝soft404群(orphan・/articles一覧からのリンク0)→未知IDをnotFound()化しsitemapを実在記事から動的生成 ②sitemap-equipment.xmlの旧ID39件(ee-/fg-/hc-等)も同型シェル→現行eq-NNNN生成に差し替え ③/court-cases・/whats-new・/site-records系がどのsitemapにも不在→追加 ④lastmodが2026-04-19等で固定(トップはchangefreq=dailyと自己矛盾)→データ実更新日から生成。/about/cases・/pdfの空シェルも同時に処置。
 - [ ] 【柱C-4・S】CSR空シェルページのSSR化＋固有メタ: /ky(SSR本文32字・titleとOGPがサイト共通デフォルト・sitemap収載)・/ky/morning(114字)・/for/construction(50字・営業LPなのに)・/signage/map(406字)。静的な説明・見出し・使い方をServer Component化し、generateMetadataで固有title/description/canonical付与。robots.txtがDisallow:/api/のためクライアントfetch依存の内容はGooglebotから恒久に不可視である点に注意。
-- [ ] 【柱C-5・A】内部運用レポートの公開撤去: /audits/hobby-recovery-forecast-2026-05-19(「Vercel Hobby復帰予測レポート—Dispatch A/Bベースライン」本文15,616字)と/audits/site-status-2026-05-19がsitemap収載で一般公開中。インフラ課金・内部運用情報の露出＝専門ポータルの信頼毀損。ルート削除(docsはリポジトリに残す)またはnoindex＋robots Disallow＋sitemap除外。
+- [x] 【柱C-5・A】内部運用レポートの公開撤去（2026-06-11 即時処置PRで完了=独立インスタンス。sitemap収載2本に加え総点検で同種5本を発見し計7ルート削除: /audits配下6本(hobby-recovery-forecast/site-status/site-reality-check/2026-05-16/2026-05-17-ux-seo/law-citation-full-audit)＋/strategy「月商100万円戦略V3内部文書」。sitemap.tsの2エントリ除去・FAQ7箇所の「年間計画」誤リンク(/strategy→/strategy/plan-generator)是正・admin死リンク2箇所是正。内容はdocs/とgit履歴に残存）: /audits/hobby-recovery-forecast-2026-05-19(「Vercel Hobby復帰予測レポート—Dispatch A/Bベースライン」本文15,616字)と/audits/site-status-2026-05-19がsitemap収載で一般公開中。インフラ課金・内部運用情報の露出＝専門ポータルの信頼毀損。ルート削除(docsはリポジトリに残す)またはnoindex＋robots Disallow＋sitemap除外。
 - [ ] 【柱C-6・A】巨大1ページリストのページネーション: モバイル実測でページ全高 /circulars 39,461px(約47画面・ボタン416個・読込5.4秒・絞り込み後も33,248px)・/court-cases 25,974px・/whats-new 21,211px(40px未満タップ174個)。初期20〜30件＋もっと見る/ページネーション化＋タグチップ44px化。C-1のCLS/LCP改善にも直結。
 - [ ] 【柱C-7・A】事故統計の出力手段: /accidentsにCSV・コピー・印刷・ダウンロードが一切ない(本文全文検索0件を実測)＝元請の「月例安全会議の資料に貼る」が完了しない。KY用紙のtranscribe-export方式を横展開し、集計ブロックごとにCSV/画像コピー/共有URLボタン。h1欠落(/accidents・/accidents-analytics・/laws・/law-search・/goods)と多重h1(/ky/paper・/risk・/risk-prediction・/safety-diary)も同時是正。※#489(柱0事故DB)反映後の本番で差分を再確認してから着手。
 - [ ] 【柱C-8・A】E-E-A-T配信: /aboutに労働安全コンサルタント登録番号260022のプロフィールがあるのに、通達解説・記事・判例・FAQの個別ページに監修者バイラインが無い(実測)。共通バイライン部品(氏名・資格・登録番号・aboutリンク)＋Person JSON-LDを詳細系テンプレートに敷設。
@@ -106,7 +106,7 @@
 - [ ] リスクマップ(/risk)を「台風前日の元請安全担当」ペルソナでレビュー→警報・防災情報の実用性
 
 ## オーナー判断待ち（Path A・自走では着手しない）
-- [ ] 【オーナー判断/Path A・柱C】robots.txtがAI検索系ボットまで全遮断(GPTBot等の学習系に加えOAI-SearchBot・ChatGPT-User・PerplexityBotも Disallow:/)。学習拒否は維持しつつ検索引用系UAのみAllowに分離するか方針判断を仰ぐ(許可ならrobots.ts数行・AI回答経由の流入チャネルが開く)。詳細=docs/site-critique-2026-06-11/01-seo-technical.md A-1。
+- [x] 【オーナー判断/Path A・柱C】(2026-06-11 オーナー決裁→即時実施済み: robots.tsを学習系12UA=Disallow維持/検索引用系5UA(OAI-SearchBot・ChatGPT-User・PerplexityBot・Claude-Web・YouBot)=Allow+共通非公開パス除外に分離。帯域逼迫が再発したら検索系リストを見直す注記入り) robots.txtがAI検索系ボットまで全遮断(GPTBot等の学習系に加えOAI-SearchBot・ChatGPT-User・PerplexityBotも Disallow:/)。学習拒否は維持しつつ検索引用系UAのみAllowに分離するか方針判断を仰ぐ(許可ならrobots.ts数行・AI回答経由の流入チャネルが開く)。詳細=docs/site-critique-2026-06-11/01-seo-technical.md A-1。
 - [ ] 【オーナー判断/Path A】サイネージ休憩時間ビューにアフィリエイト安全グッズ(SignageFeaturedGoods)を出す是非を確認。出す方針なら結線、否なら部品削除。
 - [ ] 【オーナー判断/Path A・柱1是正】Web Push通知の導入: 未実装（CLAUDE.md優先課題7）。気象警報・法改正施行・KY提出承認などのプッシュ通知は VAPID鍵=env追加が必要なため独断禁止。自走で出来るのは設計ドラフト（通知対象イベント・購読UI・必要env・コスト0円構成）の作成まで→オーナー承認後に実装。
 

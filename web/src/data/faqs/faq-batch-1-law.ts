@@ -243,7 +243,7 @@ export const FAQ_BATCH_1_LAW: FAQ[] = [
     category: "law-system",
     relatedLaws: ["安衛法第28条の2", "安衛法第78条", "安衛法第88条", "安衛則第22条"],
     relatedPages: [
-      { href: "/strategy", label: "年間計画" },
+      { href: "/strategy/plan-generator", label: "年間計画" },
       { href: "/chatbot", label: "法令チャット" },
     ],
     tags: ["安全衛生計画", "計画作成", "委員会"],
@@ -465,7 +465,7 @@ export const FAQ_BATCH_1_LAW: FAQ[] = [
     relatedLaws: ["安衛法第88条", "安衛則第89条", "安衛則第90条"],
     relatedPages: [
       { href: "/chatbot", label: "法令チャット" },
-      { href: "/strategy", label: "年間計画" },
+      { href: "/strategy/plan-generator", label: "年間計画" },
     ],
     tags: ["工事計画届", "建設業", "事前届出"],
     source: "厚生労働省",
@@ -591,7 +591,7 @@ export const FAQ_BATCH_1_LAW: FAQ[] = [
     relatedLaws: ["安衛法第78条"],
     relatedPages: [
       { href: "/chatbot", label: "法令チャット" },
-      { href: "/strategy", label: "年間計画" },
+      { href: "/strategy/plan-generator", label: "年間計画" },
     ],
     tags: ["安全衛生改善計画", "勧告", "監督署"],
     source: "厚生労働省",

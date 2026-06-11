@@ -287,7 +287,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     category: "management",
     relatedLaws: ["安衛法第28条の2", "安衛則第22条"],
     relatedPages: [
-      { href: "/strategy", label: "年間計画" },
+      { href: "/strategy/plan-generator", label: "年間計画" },
       { href: "/organization", label: "組織管理" },
     ],
     tags: ["年間計画", "PDCA", "安全衛生"],
@@ -398,7 +398,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     relatedLaws: ["安衛則第22条", "安衛法第19条"],
     relatedPages: [
       { href: "/organization", label: "組織管理" },
-      { href: "/strategy", label: "年間計画" },
+      { href: "/strategy/plan-generator", label: "年間計画" },
     ],
     tags: ["安全衛生規程", "規程作成", "マネジメント"],
     source: "厚生労働省",
@@ -440,7 +440,7 @@ export const FAQ_BATCH_2_MANAGEMENT: FAQ[] = [
     relatedLaws: ["労働契約法第5条", "安衛法第25条"],
     relatedPages: [
       { href: "/risk", label: "リスク管理" },
-      { href: "/strategy", label: "年間計画" },
+      { href: "/strategy/plan-generator", label: "年間計画" },
     ],
     tags: ["BCP", "事業継続計画", "危機管理"],
     source: "厚生労働省・内閣府",
