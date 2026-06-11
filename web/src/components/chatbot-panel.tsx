@@ -33,6 +33,14 @@ import {
 import { trackEvent } from "@/components/Analytics";
 import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
 import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
+import {
+  answerCardTone,
+  evidenceBadge,
+  splitAnswerConclusion,
+} from "@/lib/chatbot-answer-visual";
+import { AnswerConclusionCard } from "@/components/chatbot/answer-conclusion-card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
 type ChatMessage = {
   id: string;
@@ -135,6 +143,16 @@ function downloadFile(content: string, filename: string, mimeType: string) {
   a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+/** 回答中の **太字** マーカーだけを描画する既存ミニレンダラ（本文は一字も変えない） */
+function renderBold(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/).map((part, idx) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return <strong key={idx}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
 }
 
 function encodeShare(messages: ChatMessage[]): string {
@@ -729,13 +747,8 @@ export function ChatbotPanel() {
         </div>
       )}
 
-      {/* 免責バナー */}
-      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
-        <p className="text-xs text-amber-800 leading-5">
-          <span className="font-bold">⚠ 免責事項：</span>
-          本サービスは法的助言ではありません。実際の判断は必ず専門家（労働安全コンサルタント等）にご確認ください。
-        </p>
-      </div>
+      {/* 免責は入力欄直下の常時表示1本に集約（柱0・文字ダイエット: 同文の二重掲示を解消。
+          内容は削っていない — 下部バナーが上位互換で常時表示） */}
 
       {/* チャット履歴 */}
       <div
@@ -758,7 +771,7 @@ export function ChatbotPanel() {
                   key={q}
                   type="button"
                   onClick={() => handleSend(q)}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-xs text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 active:scale-[0.98]"
+                  className="flex min-h-[44px] items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 active:scale-[0.98]"
                 >
                   {q}
                 </button>
@@ -767,8 +780,63 @@ export function ChatbotPanel() {
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map((msg, idx) => (
+            {messages.map((msg, idx) => {
+              // 柱0・結論ファースト: 完了済みのAI回答は冒頭1〜2文(verbatim)を結論カードで
+              // デカ表示し、残りは折りたたみへ。ストリーミング中はそのまま流す（手応え優先）。
+              const isStreamingMsg =
+                msg.role === "assistant" && isSending && idx === messages.length - 1;
+              const conclusionView =
+                msg.role === "assistant" && !isStreamingMsg && msg.content.trim().length > 0
+                  ? splitAnswerConclusion(msg.content)
+                  : null;
+              const cardTone = conclusionView
+                ? answerCardTone({
+                    sourceType: msg.source_type,
+                    confidence: msg.confidence,
+                    scopeWarningCount: msg.scopeWarnings?.length ?? 0,
+                  })
+                : null;
+              const badge = conclusionView
+                ? evidenceBadge({ sourceType: msg.source_type, confidence: msg.confidence })
+                : null;
+              return (
               <div key={msg.id}>
+                {conclusionView && cardTone ? (
+                  <div className="flex items-start gap-2">
+                    <Mascot size="sm" className="mt-1 shrink-0" alt="AI回答" />
+                    <div className="min-w-0 max-w-[88%] flex-1 space-y-2">
+                      <AnswerConclusionCard
+                        tone={cardTone}
+                        conclusion={renderBold(conclusionView.conclusion)}
+                      >
+                        {badge && (
+                          <StatusBadge tone={badge.tone} size="sm">
+                            {badge.label}
+                            {/* %は high/medium のみ（旧UIと同じ）。low で 100% と出すと過大表示になる */}
+                            {typeof msg.confidenceScore === "number" &&
+                              msg.source_type === "rag" &&
+                              msg.confidence !== "low" &&
+                              ` ${Math.round(msg.confidenceScore * 100)}%`}
+                          </StatusBadge>
+                        )}
+                        {msg.sources && msg.sources.length > 0 && (
+                          <StatusBadge tone="neutral" size="sm">
+                            出典 {msg.sources.length}件（下に表示）
+                          </StatusBadge>
+                        )}
+                      </AnswerConclusionCard>
+                      {conclusionView.rest && (
+                        <CollapsibleDetail
+                          summary={`詳しい説明（全文 ${msg.content.length}字）`}
+                        >
+                          <div className="whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-300">
+                            {renderBold(conclusionView.rest)}
+                          </div>
+                        </CollapsibleDetail>
+                      )}
+                    </div>
+                  </div>
+                ) : (
                 <div className={msg.role === "assistant" ? "flex items-start gap-2" : ""}>
                   {msg.role === "assistant" && (
                     <Mascot size="sm" className="mt-1 shrink-0" alt="AI回答" />
@@ -781,19 +849,13 @@ export function ChatbotPanel() {
                     }`}
                   >
                     {msg.role === "assistant" ? (
-                      <div className="whitespace-pre-wrap">
-                        {msg.content.split(/(\*\*[^*]+\*\*)/).map((part, idx) => {
-                          if (part.startsWith("**") && part.endsWith("**")) {
-                            return <strong key={idx}>{part.slice(2, -2)}</strong>;
-                          }
-                          return part;
-                        })}
-                      </div>
+                      <div className="whitespace-pre-wrap">{renderBold(msg.content)}</div>
                     ) : (
                       <p className="whitespace-pre-wrap">{msg.content}</p>
                     )}
                   </div>
                 </div>
+                )}
 
                 {/* コピーボタン */}
                 <div className={`mt-1 flex items-center gap-2 ${msg.role === "assistant" ? "ml-10" : ""}`}>
@@ -819,41 +881,12 @@ export function ChatbotPanel() {
                   </div>
                 )}
 
-                {/* RAGソース・信頼度バッジ */}
-                {msg.role === "assistant" && msg.source_type && (
-                  <div className="mt-1.5 ml-10 flex flex-wrap items-center gap-1.5">
-                    {msg.source_type === "rag" ? (
-                      <span className="inline-flex items-center rounded border border-green-200 bg-green-50 px-2 py-0.5 text-[11px] font-semibold text-green-700">
-                        📚 法令データベースから検索
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center rounded border border-orange-200 bg-orange-50 px-2 py-0.5 text-[11px] font-semibold text-orange-700">
-                        🤖 AI推論
-                      </span>
-                    )}
-                    {msg.confidence === "high" && (
-                      <span className="text-[11px] text-slate-500">
-                        🟢 信頼度：高
-                        {typeof msg.confidenceScore === "number" && ` (${Math.round(msg.confidenceScore * 100)}%)`}
-                      </span>
-                    )}
-                    {msg.confidence === "medium" && (
-                      <span className="text-[11px] text-slate-500">
-                        🟡 信頼度：中
-                        {typeof msg.confidenceScore === "number" && ` (${Math.round(msg.confidenceScore * 100)}%)`}
-                      </span>
-                    )}
-                    {msg.confidence === "low" && msg.source_type !== "rag" && (
-                      <span className="text-[11px] text-slate-500">🔴 条文を特定できず</span>
-                    )}
-                  </div>
-                )}
-
-                {/* 根拠条文の表示 */}
+                {/* 根拠の確かさ（法令DB/AI推論/信頼度）は結論カード内のチップに統合済み（柱0）。
+                    条文・出典は「詳細層」= 初期は折りたたみ（正確性不可侵: 内容は不変・タップで全文）。 */}
                 {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
-                  <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-slate-200 bg-white p-3" open={msg.sources.length <= 2}>
-                    <summary className="cursor-pointer text-xs font-semibold text-slate-500 hover:text-slate-700">
-                      参照条文 ({msg.sources.length}件)
+                  <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-slate-200 bg-white p-3">
+                    <summary className="flex min-h-[44px] cursor-pointer items-center text-xs font-semibold text-slate-500 hover:text-slate-700">
+                      📖 参照条文 ({msg.sources.length}件) — タップで全文
                     </summary>
                     <div className="mt-2 space-y-2">
                       {msg.sources.map((src, i) => (
@@ -863,13 +896,12 @@ export function ChatbotPanel() {
                   </details>
                 )}
 
-                {/* 構造化出典: 条文番号 + 施行日 + 発出機関 */}
+                {/* 構造化出典: 条文番号 + 施行日 + 発出機関 — 詳細層（初期は折りたたみ） */}
                 {msg.role === "assistant" && msg.citations && msg.citations.length > 0 && (
                   <details
                     className="mt-2 ml-10 max-w-[88%] rounded-lg border border-emerald-200 bg-emerald-50/60 p-3"
-                    open
                   >
-                    <summary className="cursor-pointer text-xs font-semibold text-emerald-900 hover:text-emerald-700">
+                    <summary className="flex min-h-[44px] cursor-pointer items-center text-xs font-semibold text-emerald-900 hover:text-emerald-700">
                       📎 出典（条文番号＋施行日＋発出機関）{msg.citations.length}件
                     </summary>
                     <ul className="mt-2 space-y-1.5">
@@ -1037,7 +1069,7 @@ export function ChatbotPanel() {
                           key={i}
                           type="button"
                           onClick={() => handleSend(fu.prompt)}
-                          className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-semibold text-blue-700 transition hover:bg-blue-100 active:scale-[0.98]"
+                          className="inline-flex min-h-[44px] items-center rounded-full border border-blue-200 bg-blue-50 px-4 py-1 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 active:scale-[0.98]"
                         >
                           {fu.label}
                         </button>
@@ -1060,7 +1092,7 @@ export function ChatbotPanel() {
                             ? `/accidents-reports/${copilot.state.industry}`
                             : `/accidents-reports`
                         }
-                        className="rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-[11px] font-bold text-rose-800 hover:bg-rose-100"
+                        className="inline-flex min-h-[44px] items-center rounded-full border border-rose-300 bg-rose-50 px-4 py-1 text-xs font-bold text-rose-800 hover:bg-rose-100"
                       >
                         → 業種別 事故レポート
                       </a>
@@ -1074,7 +1106,7 @@ export function ChatbotPanel() {
                           const qs = params.toString();
                           return `/strategy/plan-generator${qs ? `?${qs}` : ""}`;
                         })()}
-                        className="rounded-full border border-violet-300 bg-violet-50 px-3 py-1 text-[11px] font-bold text-violet-800 hover:bg-violet-100"
+                        className="inline-flex min-h-[44px] items-center rounded-full border border-violet-300 bg-violet-50 px-4 py-1 text-xs font-bold text-violet-800 hover:bg-violet-100"
                       >
                         → 年次計画に反映
                       </a>
@@ -1083,7 +1115,7 @@ export function ChatbotPanel() {
                         href={`/ky?q=${encodeURIComponent(
                           (messages[idx - 1]?.role === "user" ? messages[idx - 1].content : msg.content).slice(0, 80),
                         )}`}
-                        className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100"
+                        className="inline-flex min-h-[44px] items-center rounded-full border border-emerald-300 bg-emerald-50 px-4 py-1 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
                       >
                         → KYで確認
                       </a>
@@ -1091,7 +1123,7 @@ export function ChatbotPanel() {
                         href={`/chemical-ra?name=${encodeURIComponent(
                           (messages[idx - 1]?.role === "user" ? messages[idx - 1].content : msg.content).slice(0, 40),
                         )}`}
-                        className="rounded-full border border-violet-300 bg-violet-50 px-3 py-1 text-[11px] font-bold text-violet-800 hover:bg-violet-100"
+                        className="inline-flex min-h-[44px] items-center rounded-full border border-violet-300 bg-violet-50 px-4 py-1 text-xs font-bold text-violet-800 hover:bg-violet-100"
                       >
                         → 化学物質RA
                       </a>
@@ -1099,13 +1131,13 @@ export function ChatbotPanel() {
                         href={`/laws?q=${encodeURIComponent(
                           (messages[idx - 1]?.role === "user" ? messages[idx - 1].content : msg.content).slice(0, 40),
                         )}`}
-                        className="rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
+                        className="inline-flex min-h-[44px] items-center rounded-full border border-sky-300 bg-sky-50 px-4 py-1 text-xs font-bold text-sky-800 hover:bg-sky-100"
                       >
                         → 法改正一覧
                       </a>
                       <a
                         href="/signage"
-                        className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-100"
+                        className="inline-flex min-h-[44px] items-center rounded-full border border-amber-300 bg-amber-50 px-4 py-1 text-xs font-bold text-amber-800 hover:bg-amber-100"
                         title="朝礼・現場の常時表示画面で活用"
                       >
                         → サイネージで掲示
@@ -1120,7 +1152,8 @@ export function ChatbotPanel() {
                   </div>
                 )}
               </div>
-            ))}
+              );
+            })}
 
             {/* 送信中インジケータ＋停止ボタン (P1-2) */}
             {isSending && (

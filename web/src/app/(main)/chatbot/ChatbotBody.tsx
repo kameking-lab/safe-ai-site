@@ -6,6 +6,7 @@ import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { useTranslation } from "@/contexts/language-context";
 import { PageContainer } from "@/components/layout";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
 import { CopilotMemo } from "@/components/copilot/CopilotMemo";
 import { LAW_SOURCE_COUNT } from "@/data/laws";
@@ -105,28 +106,34 @@ export function ChatbotBody() {
             </span>
           ))}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
-            {t("chatbot.specialty_laws_label")}
-          </span>
-          {SPECIALTY_LAWS.map((law) => (
-            <span
-              key={law.ja}
-              className="rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-medium text-slate-600"
-            >
-              {isEn ? law.en : law.ja}
+        {/* 柱0・文字ダイエット: 専門法令チップ15個と注記段落は詳細層へ（内容は不変） */}
+        <CollapsibleDetail
+          summary={
+            isEn
+              ? `All covered laws (${LAW_SOURCE_COUNT} laws/rules/guidelines)`
+              : `対応法令ぜんぶ見る（計${LAW_SOURCE_COUNT}法令・規則・指針等）`
+          }
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">
+              {t("chatbot.specialty_laws_label")}
             </span>
-          ))}
-          <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-medium text-slate-500">
-            {isEn ? `${LAW_SOURCE_COUNT} total` : `ほか計${LAW_SOURCE_COUNT}法令等`}
-          </span>
-        </div>
+            {SPECIALTY_LAWS.map((law) => (
+              <span
+                key={law.ja}
+                className="rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-medium text-slate-600"
+              >
+                {isEn ? law.en : law.ja}
+              </span>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] leading-5 text-slate-500">
+            {isEn
+              ? `The above is a partial list. ${LAW_SOURCE_COUNT} laws, rules and guidelines in total are used for RAG search, including the Labour Standards Act, Occupational Safety and Health Act, and MHLW mental health guidelines.`
+              : `※ 上記は対応法令の一部です。労働基準法・職業安定法・職業能力開発促進法・メンタルヘルス指針など、計${LAW_SOURCE_COUNT}の法令・規則・指針等の条文をRAG検索に使用しています。`}
+          </p>
+        </CollapsibleDetail>
       </div>
-      <p className="mb-6 text-[11px] leading-5 text-slate-500">
-        {isEn
-          ? `The above is a partial list. ${LAW_SOURCE_COUNT} laws, rules and guidelines in total are used for RAG search, including the Labour Standards Act, Occupational Safety and Health Act, and MHLW mental health guidelines.`
-          : `※ 上記は対応法令の一部です。労働基準法・職業安定法・職業能力開発促進法・メンタルヘルス指針など、計${LAW_SOURCE_COUNT}の法令・規則・指針等の条文をRAG検索に使用しています。`}
-      </p>
 
       {/* Chat panel */}
       <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
@@ -149,11 +156,11 @@ export function ChatbotBody() {
         </Suspense>
       </div>
 
-      {/* Usage guide */}
-      <div className="mt-6 rounded-xl border border-amber-100 bg-amber-50 p-4">
-        <p className="text-sm font-semibold text-amber-800 mb-2">
-          {isEn ? "Before you use this tool" : "ご利用にあたって"}
-        </p>
+      {/* Usage guide — 柱0・文字ダイエット: 5行の注意書きは詳細層へ（内容は不変） */}
+      <CollapsibleDetail
+        className="mt-6"
+        summary={isEn ? "Before you use this tool" : "ご利用にあたって（RAG方式・監修・対応法令）"}
+      >
         <ul className="text-xs text-amber-700 space-y-1 leading-5">
           {guide.map((item) => (
             <li key={item}>・ {item}</li>
@@ -166,7 +173,7 @@ export function ChatbotBody() {
               : "→ 100問ベンチマーク（Recall@5 検索ヒット率）を見る"}
           </a>
         </p>
-      </div>
+      </CollapsibleDetail>
 
       {!isEn && (
         <CopilotNextSteps
