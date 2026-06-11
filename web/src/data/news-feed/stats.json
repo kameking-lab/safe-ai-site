@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-09T22:20:55.796Z",
+  "generatedAt": "2026-06-10T22:50:19.067Z",
   "counts": {
     "approved": 14,
-    "rejected": 18,
-    "total": 32,
-    "approvalRate": 0.438
+    "rejected": 19,
+    "total": 33,
+    "approvalRate": 0.424
   },
   "byDay": [
     {
@@ -118,6 +118,13 @@
       "rejected": 1,
       "total": 2,
       "approvalRate": 0.5
+    },
+    {
+      "date": "2026-06-11",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -131,9 +138,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 2,
-      "rejected": 16,
-      "total": 18,
-      "approvalRate": 0.111
+      "rejected": 17,
+      "total": 19,
+      "approvalRate": 0.105
     }
   ],
   "byEstimatedWorkCategory": [
@@ -172,6 +179,13 @@
       "approved": 0,
       "rejected": 2,
       "total": 2,
+      "approvalRate": 0
+    },
+    {
+      "type": "交通事故",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
       "approvalRate": 0
     },
     {
@@ -219,7 +233,7 @@
         0,
         4,
         11,
-        0,
+        1,
         0,
         0,
         1,
@@ -255,7 +269,7 @@
       ],
       "rejected": [
         2,
-        16,
+        17,
         0,
         0,
         0,
@@ -293,7 +307,7 @@
       ],
       "rejected": [
         12,
-        6,
+        7,
         0,
         0,
         0,
@@ -331,7 +345,7 @@
       ],
       "rejected": [
         0,
-        12,
+        13,
         0,
         0,
         0,
@@ -346,7 +360,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 16
+      "count": 17
     },
     {
       "reason": "duplication",
@@ -521,6 +535,22 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "新名神高速6人死亡事故の初公判 検察「スマホ13秒脇見」",
+        "aiSummary": "新名神高速6人死亡事故の初公判で、検察は運転手のスマホ脇見が原因と主張した。",
+        "score": {
+          "relevance": 30,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-06-10T22:50:12.629Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 30 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "熱中症 搬送者数 全国で1100人余1人死亡（5月18日～24日）",
         "aiSummary": "5月18～24日の全国熱中症搬送者は1100人超、1名死亡。",
         "score": {
@@ -629,23 +659,6 @@
           "rejectionReasons": [
             "relevance 15 < 70 (not labor-safety related)",
             "duplication 85 > 50 (already covered in accident DB)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "タンクローリー転落 81歳男性が海に飛び込み運転手救出 和歌山",
-        "aiSummary": "和歌山でタンクローリーが海に転落し、運転手が救助された。",
-        "score": {
-          "relevance": 65,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 70,
-          "judgedAt": "2026-06-07T22:01:04.104Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "duplication 70 > 50 (already covered in accident DB)",
-            "relevance 65 < 70 (not labor-safety related for type=accident_report)"
           ]
         },
         "publisher": "日本放送協会"

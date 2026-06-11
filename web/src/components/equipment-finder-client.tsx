@@ -13,6 +13,14 @@ import {
   firstValidCategoryId,
   initialAnswersForCategory,
 } from "@/lib/equipment-finder/incoming-context";
+import { PpePictogram } from "@/components/equipment/ppe-pictogram";
+import { PPE_CATEGORY_ICON } from "@/lib/equipment/ppe-pictogram-map";
+import { SAFETY_TONE } from "@/lib/design/safety-tone";
+
+// カテゴリID → 着用義務標識スタイルのピクトグラム（未知IDは汎用の盾）
+function categoryPpeIcon(categoryId: string) {
+  return PPE_CATEGORY_ICON[categoryId] ?? "shield";
+}
 
 type Phase = "category" | "refine" | "result";
 
@@ -104,6 +112,12 @@ export function EquipmentFinderClient() {
     return recommendItems(category, answers, 12);
   }, [phase, category, answers]);
 
+  // 結果フェーズへの遷移時は先頭の結論カードまで戻す（絞り込みの最下部からの遷移だと
+  // 件数カードが画面外上方に出てしまい、無読3秒の結論が見えないため）。
+  useEffect(() => {
+    if (phase === "result") window.scrollTo({ top: 0, behavior: "auto" });
+  }, [phase]);
+
   function chooseCategory(id: string) {
     setCategoryId(id);
     setAnswers({});
@@ -166,9 +180,7 @@ export function EquipmentFinderClient() {
                     推奨
                   </span>
                 )}
-                <span className="text-2xl" aria-hidden>
-                  {c.icon}
-                </span>
+                <PpePictogram icon={categoryPpeIcon(c.id)} size="lg" />
                 <span className={`text-sm font-bold group-hover:text-emerald-700 ${isRecommended ? "text-emerald-800" : "text-slate-900"}`}>
                   {c.label}
                 </span>
@@ -197,11 +209,12 @@ export function EquipmentFinderClient() {
             <ArrowLeft className="h-3.5 w-3.5" />
             種類選択へ戻る
           </button>
-          <div className="text-right">
-            <p className="text-xs font-bold text-emerald-700">STEP 2</p>
-            <p className="text-sm font-bold text-slate-900">
-              {category.icon} {category.label} の絞り込み
-            </p>
+          <div className="flex items-center justify-end gap-2 text-right">
+            <PpePictogram icon={categoryPpeIcon(category.id)} />
+            <div>
+              <p className="text-xs font-bold text-emerald-700">STEP 2</p>
+              <p className="text-sm font-bold text-slate-900">{category.label} の絞り込み</p>
+            </div>
           </div>
         </div>
 
@@ -254,14 +267,55 @@ export function EquipmentFinderClient() {
   }
 
   if (phase === "result" && category) {
+    const found = recommended.length > 0;
+    const tone = SAFETY_TONE[found ? "safe" : "warning"];
     return (
       <section>
+        {/* 柱0: 結論カード — 件数デカ数字＋カテゴリのピクトグラム。0件は黄=要対応で
+            「絞り込みを変更」のデカボタンを同一カード内に出す。
+            連携バナー（経緯の説明）より結論を先に置く=無読3秒の主役 */}
+        <div
+          role="status"
+          aria-label={`検索結果: ${recommended.length}件`}
+          data-testid="finder-conclusion"
+          className={`mb-4 rounded-2xl border-2 p-4 ${tone.soft}`}
+        >
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <PpePictogram icon={categoryPpeIcon(category.id)} size="lg" />
+            <div className="flex min-w-0 flex-1 items-baseline gap-2">
+              <span
+                data-testid="finder-big-count"
+                className={`text-5xl font-bold leading-none tracking-tight ${tone.text}`}
+              >
+                {recommended.length}
+              </span>
+              <span className="text-xl font-bold leading-tight">
+                件{found ? "" : " — 条件に合う商品なし"}
+              </span>
+              <span className="hidden text-sm font-bold opacity-80 sm:inline">{category.label}</span>
+            </div>
+            {!found && (
+              <button
+                type="button"
+                onClick={() => setPhase("refine")}
+                className={`inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm transition hover:opacity-90 ${tone.solid}`}
+              >
+                絞り込みを変更 →
+              </button>
+            )}
+          </div>
+          {!found && (
+            <p className="mt-2 text-xs opacity-80">
+              「問わない」に変えると候補が広がります。
+            </p>
+          )}
+        </div>
         {contextBanner}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div>
             <p className="text-xs font-bold text-emerald-700">STEP 3 / RESULT</p>
             <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
-              {category.icon} {category.label} のおすすめ
+              {category.label} のおすすめ
             </h2>
             <p className="text-xs text-slate-500">回答に基づきスコアリング上位 {recommended.length} 件を表示</p>
           </div>
@@ -284,12 +338,6 @@ export function EquipmentFinderClient() {
             </button>
           </div>
         </div>
-
-        {recommended.length === 0 && (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-            条件に合う商品が見つかりませんでした。「絞り込みを変更」で「問わない」に設定してください。
-          </div>
-        )}
 
         <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {recommended.map((item) => (
@@ -465,13 +513,13 @@ function RecommendedCategoryChips({
                 type="button"
                 onClick={() => onSelectCategory(c.id)}
                 aria-pressed={active}
-                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition ${
+                className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold transition ${
                   active
                     ? "bg-emerald-600 text-white shadow-sm"
                     : "bg-white text-slate-700 ring-1 ring-slate-300 hover:ring-emerald-400"
                 }`}
               >
-                <span aria-hidden>{c.icon}</span>
+                <PpePictogram icon={categoryPpeIcon(c.id)} size="sm" />
                 {c.label}
                 {active && <span className="text-[9px]">表示中</span>}
               </button>

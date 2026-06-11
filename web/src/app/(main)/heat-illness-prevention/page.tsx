@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageHeader } from "@/components/page-header";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
@@ -123,29 +124,32 @@ export default function HeatIllnessPreventionHubPage() {
         iconColor="amber"
       />
 
-      <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
-        <div className="flex items-start gap-3">
-          <AlertCircle
-            className="mt-0.5 h-5 w-5 shrink-0 text-amber-700"
-            aria-hidden="true"
-          />
-          <div className="text-sm leading-6 text-amber-900">
-            <p className="font-semibold">本ページの位置付け</p>
-            <p className="mt-1">
-              本ページは
-              <strong className="font-semibold">
-                労働安全衛生規則第612条の2（令和7年6月1日施行）
-              </strong>
-              に対応した職場の熱中症対策ガイドです。
-              JIS Z 8504準拠のWBGT計算式と厚労省「職場における熱中症予防対策マニュアル」を参照しています。
-              個別作業の安全判断は事業者・産業医・職長が現場状況を踏まえて行ってください。
-            </p>
-            <p className="mt-2 text-xs text-amber-800">
-              改正施行日：{R7_EFFECTIVE_FROM}（{R7_EFFECTIVE_FROM_JP}）— 厚生労働省令第86号
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* 位置付けの段落は折りたたみへ（柱0・文字ダイエット）。施行済みの事実だけチップで見せる */}
+      <div className="mt-6 space-y-2">
+        <p className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-900">
+            <AlertCircle className="h-3.5 w-3.5" aria-hidden="true" />
+            安衛則612条の2 対応
+          </span>
+          <span className="inline-flex items-center rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-bold text-slate-700">
+            {R7_EFFECTIVE_FROM_JP}施行済み
+          </span>
+        </p>
+        <CollapsibleDetail summary="本ページの位置付け・参照資料">
+          <p>
+            本ページは
+            <strong className="font-semibold">
+              労働安全衛生規則第612条の2（令和7年6月1日施行）
+            </strong>
+            に対応した職場の熱中症対策ガイドです。
+            JIS Z 8504準拠のWBGT計算式と厚労省「職場における熱中症予防対策マニュアル」を参照しています。
+            個別作業の安全判断は事業者・産業医・職長が現場状況を踏まえて行ってください。
+          </p>
+          <p className="mt-2">
+            改正施行日：{R7_EFFECTIVE_FROM}（{R7_EFFECTIVE_FROM_JP}）— 厚生労働省令第86号
+          </p>
+        </CollapsibleDetail>
+      </div>
 
       <section className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Link

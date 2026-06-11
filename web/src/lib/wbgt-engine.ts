@@ -142,15 +142,34 @@ const BASE_THRESHOLDS: Record<WorkIntensity, [number, number, number, number]> =
  */
 const NON_ACCLIMATIZATION_OFFSET = -2;
 
+/**
+ * Effective JSOH thresholds for the given intensity / acclimatization,
+ * ordered [caution, warning, severe-warning, danger]. Exposed so the UI
+ * can draw the five-segment risk scale from the same numbers the
+ * classifier uses (single source of truth).
+ */
+export function getRiskThresholds(
+  workIntensity: WorkIntensity,
+  acclimatization: AcclimatizationState,
+): [number, number, number, number] {
+  const offset = acclimatization === "non-acclimatized" ? NON_ACCLIMATIZATION_OFFSET : 0;
+  return BASE_THRESHOLDS[workIntensity].map((t) => t + offset) as [
+    number,
+    number,
+    number,
+    number,
+  ];
+}
+
 export function determineRiskLevel(
   wbgt: number,
   workIntensity: WorkIntensity,
   acclimatization: AcclimatizationState,
 ): RiskAssessment {
-  const offset = acclimatization === "non-acclimatized" ? NON_ACCLIMATIZATION_OFFSET : 0;
-  const [caution, warning, severe, danger] = BASE_THRESHOLDS[workIntensity].map(
-    (t) => t + offset,
-  ) as [number, number, number, number];
+  const [caution, warning, severe, danger] = getRiskThresholds(
+    workIntensity,
+    acclimatization,
+  );
 
   if (wbgt >= danger) {
     return {

@@ -29,6 +29,22 @@ import type {
   SafetyMeasure,
 } from "@/app/api/chemical-ra/route";
 import { trackEvent } from "@/components/Analytics";
+import { RaConclusionCard } from "@/components/chemical/ra-conclusion";
+import { GhsPictogram } from "@/components/chemical/ghs-pictogram";
+import { resolveGhsSymbol } from "@/lib/chemical/ghs-pictogram-map";
+import { PpePictogram } from "@/components/equipment/ppe-pictogram";
+import { resolvePpeItemIcon } from "@/lib/equipment/ppe-pictogram-map";
+
+// 保護具AIファインダーへの連携URL（必要保護具のカテゴリ・ハザードを引き継ぐ）
+function buildEquipmentHref(chemicalName: string): string {
+  const profile = findChemicalEquipmentProfile(chemicalName);
+  const params = new URLSearchParams({ chemical: chemicalName });
+  if (profile) {
+    params.set("hazards", profile.hazards.join(","));
+    params.set("categories", profile.recommendedCategories.join(","));
+  }
+  return `/equipment-finder?${params.toString()}`;
+}
 
 // ────────────────────────────────────────────────────────────
 // GHSピクトグラム（絵文字ベース）
@@ -57,25 +73,32 @@ function ghsSignalBadge(signal: string | undefined) {
 // ────────────────────────────────────────────────────────────
 
 function GhsHazardCard({ hazard }: { hazard: GhsHazard }) {
+  const symbol = resolveGhsSymbol(hazard.category, hazard.classification);
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-xs font-bold text-slate-900">{hazard.category}</p>
-        {ghsSignalBadge(hazard.signal)}
+      <div className="flex items-start gap-2">
+        {symbol && <GhsPictogram symbol={symbol} size="sm" className="print:hidden" />}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-bold text-slate-900">{hazard.category}</p>
+            {ghsSignalBadge(hazard.signal)}
+          </div>
+          <p className="mt-1 text-xs font-semibold text-slate-700">{hazard.classification}</p>
+          {hazard.hazardStatement && (
+            <p className="mt-1 text-[11px] text-slate-600">{hazard.hazardStatement}</p>
+          )}
+        </div>
       </div>
-      <p className="mt-1 text-xs font-semibold text-slate-700">{hazard.classification}</p>
-      {hazard.hazardStatement && (
-        <p className="mt-1 text-[11px] text-slate-600">{hazard.hazardStatement}</p>
-      )}
     </div>
   );
 }
 
 function PpeCard({ ppe }: { ppe: PpeRecommendation }) {
+  const icon = resolvePpeItemIcon(ppe.item) ?? "shield";
   return (
     <div className="rounded-lg border border-emerald-100 bg-emerald-50 p-3">
-      <div className="flex items-start gap-2">
-        <Shield className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+      <div className="flex items-start gap-2.5">
+        <PpePictogram icon={icon} className="print:hidden" />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-bold text-slate-900">{ppe.item}</p>
           <p className="mt-0.5 text-xs text-slate-600">{ppe.specification}</p>
@@ -351,7 +374,14 @@ export function ChemicalRaPanel() {
 
     const flowStartAt = Date.now();
     const MAX_RETRIES = 3;
-    const dur = durationHours.trim() ? parseFloat(durationHours) : undefined;
+    // 作業時間未入力でも換気+取扱量が選ばれていれば8時間（1日TWA相当の保守側既定）で
+    // 判定する。簡易モード（STEP 2）には作業時間欄が無く、これが無いと
+    // 「選ぶだけで反映」のはずのリスクレベル（I〜IV）が永遠に算出されないため。
+    const dur = durationHours.trim()
+      ? parseFloat(durationHours)
+      : ventilation && amount
+        ? 8
+        : undefined;
     // overrideName が来ているときは mhlwSelected が古い可能性があるため CAS は名称一致時のみ採用。
     const casForBody =
       overrideName && mhlwSelected?.primaryName !== nameToUse ? undefined : mhlwSelected?.cas;
@@ -534,7 +564,7 @@ export function ChemicalRaPanel() {
             <div className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-3">
               <p className="text-xs font-bold text-emerald-900">STEP 2 作業の状況を選んでください</p>
               <p className="mt-0.5 text-[11px] text-slate-600">
-                換気状況・取扱量を選ぶだけで、A4結果表に反映されます。詳細な数値入力が必要な場合は上の「詳細モード」をONにしてください。
+                2つ選ぶとリスクレベル（I〜IV）を判定します（作業時間は8時間=1日として判定。変更や測定濃度の入力は上の「詳細モード」をON）。
               </p>
               <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <label className="text-[11px] text-slate-700">
@@ -770,60 +800,16 @@ export function ChemicalRaPanel() {
           aria-label="AI調査結果"
           className="space-y-6 scroll-mt-20 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 print:space-y-3"
         >
-          {/* 軸I: まず押さえる要点（専門家でなくても「一番の危険」と「まず行う対策」を冒頭で把握）。
-              下の詳細（GHS分類・濃度基準・保護具・規制）は、この要点の根拠。 */}
-          {keyPoints && hasKeyPoints(keyPoints) && (
-            <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 sm:p-5">
-              <h3 className="flex items-center gap-1.5 text-sm font-bold text-amber-900 sm:text-base">
-                📌 まず押さえる要点
-                <span className="text-[11px] font-normal text-amber-700">（詳細は下に続きます）</span>
-              </h3>
-              {keyPoints.hazards.length > 0 && (
-                <div className="mt-2">
-                  <p className="text-[11px] font-semibold text-slate-600">主な危険性</p>
-                  <ul className="mt-1 flex flex-wrap gap-1.5">
-                    {keyPoints.hazards.map((h, i) => (
-                      <li
-                        key={`${h.category}-${i}`}
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold ${
-                          h.signal === "危険"
-                            ? "bg-rose-600 text-white"
-                            : "border border-rose-200 bg-white text-rose-800"
-                        }`}
-                      >
-                        {h.signal ? <span className="text-[10px] opacity-90">{h.signal}</span> : null}
-                        {h.category}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {keyPoints.actions.length > 0 && (
-                <div className="mt-2.5">
-                  <p className="text-[11px] font-semibold text-slate-600">まず行う対策（優先度順）</p>
-                  <ol className="mt-1 space-y-1">
-                    {keyPoints.actions.map((a, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-xs text-slate-800">
-                        <span className="mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold text-white">
-                          {i + 1}
-                        </span>
-                        <span className="font-semibold">{a}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
-              {keyPoints.regulations.length > 0 && (
-                <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                  <span className="text-[11px] font-semibold text-slate-600">該当する主な法規制</span>
-                  {keyPoints.regulations.map((r) => (
-                    <span key={r} className="inline-flex items-center rounded-md border border-violet-300 bg-violet-50 px-2 py-0.5 text-[11px] font-bold text-violet-800">
-                      {r}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
+          {/* 柱0: 結論カード（1画面1メッセージ）— リスクレベルのデカ表示＋I〜IV色帯＋
+              GHS絵表示＋まず行う対策＋保護具動線。旧「まず押さえる要点」の内容を統合
+              （hazards/actions/regulations は keyPoints から表示・正確性は不変）。
+              下の詳細（GHS分類・濃度基準・保護具・規制）は、この結論の根拠。 */}
+          {keyPoints && (hasKeyPoints(keyPoints) || result.createSimple) && (
+            <RaConclusionCard
+              result={result}
+              keyPoints={keyPoints}
+              equipmentHref={buildEquipmentHref(result.chemicalName)}
+            />
           )}
           {restoredAt && (
             <div className="flex flex-wrap items-center gap-2 rounded-xl border border-sky-200 bg-sky-50 px-4 py-2.5 text-xs text-sky-900 print:hidden">
@@ -961,22 +947,12 @@ export function ChemicalRaPanel() {
                   <Shield className="h-4 w-4 text-emerald-600" />
                   必要保護具 ({result.ppeRecommendations.length}件)
                 </h2>
-                {(() => {
-                  const profile = findChemicalEquipmentProfile(result.chemicalName);
-                  const params = new URLSearchParams({ chemical: result.chemicalName });
-                  if (profile) {
-                    params.set("hazards", profile.hazards.join(","));
-                    params.set("categories", profile.recommendedCategories.join(","));
-                  }
-                  return (
-                    <a
-                      href={`/equipment-finder?${params.toString()}`}
-                      className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
-                    >
-                      → この物質に必要な保護具を見る
-                    </a>
-                  );
-                })()}
+                <a
+                  href={buildEquipmentHref(result.chemicalName)}
+                  className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
+                >
+                  → この物質に必要な保護具を見る
+                </a>
               </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {result.ppeRecommendations.map((ppe, i) => (
