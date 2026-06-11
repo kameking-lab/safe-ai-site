@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Printer, Download, Save, FilePlus2, FolderOpen, Plus, Trash2 } from "lucide-react";
 import {
   getProcedureList,
@@ -15,6 +15,8 @@ import {
   type WorkProcedure,
   type WorkStep,
 } from "@/lib/site-records/procedure-store";
+import { countProcedureRemaining, procedureConclusion } from "@/lib/site-records/record-conclusions";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -44,6 +46,9 @@ export function ProcedureClient() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 保存一覧
     setList(getProcedureList());
   }, []);
+
+  // 記入のこり（KY用紙と同じ文法）: 作業名＋書きかけ手順行の空欄
+  const remaining = useMemo(() => countProcedureRemaining({ title, steps }), [title, steps]);
 
   function updateStep(id: string, patch: Partial<WorkStep>) {
     setSteps((arr) => arr.map((s) => (s.id === id ? { ...s, ...patch } : s)));
@@ -129,6 +134,12 @@ export function ProcedureClient() {
 
   return (
     <div className="space-y-6">
+      {/* 結論カード（柱0）: KY用紙と同じ「記入のこりN（青）→ 記入完了（緑）」。
+          A4印刷帳票（正式書式）には載せない。SSR初期値の偽表示防止に当日確定後のみ描画 */}
+      {date !== "" && (
+        <ConclusionCard {...procedureConclusion(remaining)} className="print:hidden" />
+      )}
+
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2"><Field label="作業名"><Inp value={title} onChange={setTitle} placeholder="例: 移動式クレーンによる鉄骨建方" /></Field></div>

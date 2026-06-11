@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 import {
+  calendarConclusion,
   committeeConclusion,
+  countIncidentRemaining,
   countInductionRemaining,
+  countProcedureRemaining,
+  incidentConclusion,
   inductionConclusion,
   inspectionConclusion,
   monthlyConclusion,
   nearMissConclusion,
   patrolConclusion,
+  procedureConclusion,
+  qualificationsConclusion,
 } from "./record-conclusions";
 
 // 色の文法（赤=停止級/黄=要対応/緑=良好/青=案内）が件数に対して崩れないことを固定する。
@@ -136,5 +142,114 @@ describe("monthlyConclusion", () => {
     const c = monthlyConclusion({ hasAny: true, patrolOpen: 0, nearMissOpen: 0, inspectionUnusable: 0, committeeHeld: true });
     expect(c.tone).toBe("safe");
     expect(c.title).toBe("当月良好");
+  });
+});
+
+describe("countProcedureRemaining / procedureConclusion（手順書・記入のこり文法）", () => {
+  const step = (s: string, h: string, m: string) => ({ step: s, hazard: h, measure: m });
+  it("初期状態（作業名なし・全行空）は『作業名＋手順1行』の2項目", () => {
+    expect(countProcedureRemaining({ title: "", steps: [step("", "", ""), step("", "", "")] })).toBe(2);
+  });
+  it("全欄空の行は未使用として数えない（書きかけ行の空欄だけ数える）", () => {
+    expect(
+      countProcedureRemaining({
+        title: "鉄骨建方",
+        steps: [step("玉掛け", "つり荷落下", ""), step("", "", "")],
+      }),
+    ).toBe(1);
+  });
+  it("空白だけの作業名・欄は未記入と数える", () => {
+    expect(countProcedureRemaining({ title: "  ", steps: [step("吊り上げ", " ", "立入禁止")] })).toBe(2);
+  });
+  it("作業名と書きかけ行が全部埋まればゼロ", () => {
+    expect(
+      countProcedureRemaining({ title: "鉄骨建方", steps: [step("玉掛け", "つり荷落下", "立入禁止")] }),
+    ).toBe(0);
+  });
+  it("のこりありは青の記入のこり・ゼロで緑の完了", () => {
+    expect(procedureConclusion(2)).toMatchObject({ tone: "info", value: 2, title: "記入のこり" });
+    expect(procedureConclusion(0)).toMatchObject({ tone: "safe", title: "記入完了" });
+  });
+});
+
+describe("countIncidentRemaining / incidentConclusion（死傷病報告・記入のこり文法）", () => {
+  const empty = {
+    bizType: "",
+    siteName: "",
+    siteAddress: "",
+    workerCount: "",
+    victimName: "",
+    victimSexAge: "",
+    victimJob: "",
+    victimExperience: "",
+    occurredAt: "",
+    place: "",
+    injuryName: "",
+    absenceDays: "",
+    situation: "",
+  };
+  const full = {
+    bizType: "建設業",
+    siteName: "○○新築工事",
+    siteAddress: "○○市",
+    workerCount: "25",
+    victimName: "被災 太郎",
+    victimSexAge: "男・34",
+    victimJob: "鉄筋工",
+    victimExperience: "5年",
+    occurredAt: "2026-06-01 10:30",
+    place: "3F開口部",
+    injuryName: "右足関節骨折",
+    absenceDays: "30",
+    situation: "開口部付近で作業中に墜落した。",
+  };
+  it("空の下書きは13欄すべてが記入のこり（備考は任意で数えない）", () => {
+    expect(countIncidentRemaining(empty)).toBe(13);
+  });
+  it("空白だけの欄は未記入と数える", () => {
+    expect(countIncidentRemaining({ ...full, situation: "  " })).toBe(1);
+  });
+  it("全欄が揃えばゼロ", () => {
+    expect(countIncidentRemaining(full)).toBe(0);
+  });
+  it("のこりありは青・ゼロで緑の『下書き完了』（完了しても提出ではない＝電子申請を案内）", () => {
+    expect(incidentConclusion(13)).toMatchObject({ tone: "info", value: 13, title: "記入のこり" });
+    const done = incidentConclusion(0);
+    expect(done).toMatchObject({ tone: "safe", title: "下書き完了" });
+    expect(done.description).toContain("電子申請");
+  });
+});
+
+describe("qualificationsConclusion（資格管理簿・現況カード）", () => {
+  it("登録ゼロは青の案内（デカ数字なし）", () => {
+    const c = qualificationsConclusion(0, 0);
+    expect(c.tone).toBe("info");
+    expect(c.title).toBe("登録なし");
+    expect(c.value).toBeUndefined();
+  });
+  it("登録ありは『登録N名』＋資格M種＋逆引きへの動線", () => {
+    const c = qualificationsConclusion(8, 5);
+    expect(c.tone).toBe("info");
+    expect(c.value).toBe(8);
+    expect(c.unit).toBe("名");
+    expect(c.title).toBe("登録済");
+    expect(c.description).toContain("5種");
+    expect(c.action?.href).toBe("#qual-lookup");
+  });
+});
+
+describe("calendarConclusion（安全カレンダー・今月のこり）", () => {
+  it("未消し込みありは青『今月のこりN件』＋今月の項目への動線", () => {
+    const c = calendarConclusion({ total: 4, remaining: 3 });
+    expect(c.tone).toBe("info");
+    expect(c.value).toBe(3);
+    expect(c.title).toBe("今月のこり");
+    expect(c.action?.href).toBe("#this-month");
+  });
+  it("全件消し込みで緑『今月完了』", () => {
+    expect(calendarConclusion({ total: 4, remaining: 0 })).toMatchObject({ tone: "safe", title: "今月完了" });
+  });
+  it("項目ゼロの月は無彩の案内（防御的・現データでは発生しない）", () => {
+    expect(calendarConclusion({ total: 0, remaining: 0 }).tone).toBe("neutral");
   });
 });
