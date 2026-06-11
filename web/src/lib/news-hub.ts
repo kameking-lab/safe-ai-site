@@ -52,6 +52,7 @@ function lawRevisionItems(limit: number): NewsHubItem[] {
         url,
         internalHref: "/laws",
         badge: badge.label,
+        enforcementDaysLeft: badge.daysLeft,
         // 業種別メール配信のセグメント用。空配列＝全業種向け。
         industries: deriveIndustryTags(r),
       };

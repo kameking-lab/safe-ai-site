@@ -10,6 +10,9 @@ import { JsonLd, articleListSchema } from "@/components/json-ld";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { SITE_URL } from "@/lib/seo-metadata";
 import { realLawRevisions } from "@/data/mock/real-law-revisions";
+import { lawRevisionCores } from "@/data/mock/law-revisions";
+import { computeLawsConclusion } from "@/lib/news-conclusions";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 const _title = "安全衛生法 改正情報一覧 最新";
 const _desc =
@@ -29,7 +32,12 @@ export const metadata: Metadata = {
   }),
 };
 
+// ISR: 施行カウントダウン（結論カードの残日数）を日次で再計算
+export const revalidate = 86400;
+
 export default function LawsPage() {
+  // 柱0: 結論ファースト＝一覧と同じデータ源（lawRevisionCores）から「施行間近」を集計
+  const conclusion = computeLawsConclusion(lawRevisionCores);
   const lawSchema = articleListSchema(
     realLawRevisions.map((r) => ({
       headline: r.title,
@@ -45,6 +53,16 @@ export default function LawsPage() {
       <JsonLd schema={lawSchema} />
       {/* C-004: law-hub quick-nav — surface scattered law tools at the top to reduce navigation depth */}
       <LawHubNav current="laws" />
+      {/* 柱0: 開いた瞬間に「施行が近い改正が何件あるか」が3秒で分かる */}
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6 lg:px-8">
+        <ConclusionCard
+          tone={conclusion.tone}
+          value={conclusion.value}
+          unit={conclusion.unit}
+          title={conclusion.title}
+          description={conclusion.description}
+        />
+      </div>
       <Suspense fallback={<PageSkeleton label="法改正一覧を読み込み中" />}>
         <LawsPageClient />
       </Suspense>
