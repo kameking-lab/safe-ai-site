@@ -51,7 +51,17 @@
 - [x] 【柱0】石綿＋作業環境測定＋ストレスチェック＋健診スケジューラ＝判定結果の色帯結論カード化（2026-06-11 feat/judgment-visual-first: 石綿=やることN件の青/緑+義務チップ4種+常時amber/rose是正・管理区分=第N デカ表示+3区分色帯▼+第3停止級バナー+A4記録不変を機械検証・ストレス=診断ファースト+回答のこり青→整備率%で緑黄赤(early赤は義務事業場のみ)・健診=期限超過赤→間近黄→記録のこり青→期限内緑+台帳live同期(共有ストア・保存形式不変)。純関数4本テスト23件・無読テスト26/26 PASS）
 - [x] 【柱0】外国人労働者教育(/foreign-workers)＋Eラーニング(/learning)＝ピクトグラムは言語の壁も越える（2026-06-11: ハブ最上部に2大レーン（教材を作る=青/在留資格ガイド=緑・44px超）+チェックリスト/出典をCollapsibleDetailへ（内容不変・無読テストで格納の非破壊性を機械検証）。教材ビルダー=業種6+トピック5を自作SVGピクトグラム（オリジナル描画・ライセンス問題なし）の64pxボタン化・言語ボタンは母語表記主（Tiếng Việt等）・印刷物の教材ヘッダーにもピクト常設=紙でも絵が伝える。/e-learning=最上部に結論カード（履歴ゼロ:青入門から開始/未完了:青学習のこりN・続きから=?theme同期で最終未完了テーマへ直行/全完了:緑全問正答）+採点ストリップ（回答のこり青→全問正答緑/誤答N黄+もう一度44px）・選択肢44px化。判定はlearning-conclusion.ts純関数+テスト25件で色文法固定（赤不使用=停止級なし・受講だけでは緑にしない）。柱1是正=進捗ボード進行中のamber表示を青へ（学習途中は要対応ではない=黄の乱発防止）。教材挿絵のAI画像候補7点を生成プロンプト付きでdocs/visual-assets-wanted.md新設（Path A）。無読テスト28/28 PASS（実習生受け入れ職長+実習生本人+新任安全担当の3ペルソナ・prod server・スクリプト恒久保存）。docs/third-party-reviews/learning-foreign-visual-first-2026-06-11.md）
 - [ ] 【柱0】サイネージ(/signage系)＝1画面フィット維持の範囲で大型化・JIS安全色文法への統一
-- [ ] 【柱0】リスクマップ(/risk)＋未着手の残り全ページ巡回＋全機能の無読テスト一括検収(不合格画面は個別タスク化)
+- [x] 【柱0】リスクマップ(/risk)＋未着手の残り全ページ巡回＋全機能の無読テスト一括検収(不合格画面は個別タスク化)（2026-06-11: ①/risk=気象警報の結論カードを最上部常設。予報(Open-Meteo)×気象庁警報の悪い方を採用する純関数weather-conclusion.ts+テスト12件で色文法固定=警報赤(片方取得中でも検知次第出す)>両ソース失敗黄「取得失敗」(確認不能を緑にも赤にもしない)>確認中無彩>注意報黄>片方失敗黄「一部確認不能」(偽緑なし)>全成功緑。気象庁公式リンク44px・多重h1是正・タブ44px化。無読テスト11/11 PASS(routeモック6経路・serviceWorkers:"block"必須の知見獲得=scripts/risk-noread-2026-06-11.mjs) ②残り45ページをスクリーニング巡回(scripts/noread-sweep-2026-06-11.mjs)=42画面不合格→下記9バッチ+FeedbackGateModal是正に起票 ③保存済み無読テスト11本を一括再実行=229/229 PASS回帰ゼロ(サイネージは#497マージ後)。記録=docs/third-party-reviews/noread-sweep-2026-06-11.md・risk-visual-first-2026-06-11.md）
+- [ ] 【柱1是正・高優先・巡回発見】FeedbackGateModal の全画面割込みを非ブロッキング化: (main)/layout.tsx常駐・利用スコア閾値超えでどのページでも1.5秒後にaria-modal中央モーダル(背景暗転)が出る=KY記入中・朝礼前でも割込み・ヘビーユーザーほど中断される設計で「毎朝の習慣」方針と正面衝突(スイープ実測でモバイル初回ビューを完全に覆う)。下部バナー/トーストへ降格・作業画面(/ky系・/signage系・印刷ビュー)では出さない・既定スヌーズ延長。証跡=docs/third-party-reviews/noread-sweep-2026-06-11.md §C
+- [ ] 【柱0バッチ1/9】安全日誌(/safety-diary・new・list・monthly)＝冒頭の「はじめての方へ」説明ブロックを折りたたみ・記入のこり/承認状態の結論カード(KY用紙と同文法)・多重h1(2)是正
+- [ ] 【柱0バッチ2/9】リスク予測(/risk-prediction)＝判定機能なのに結論カードなし(実測font22px)。判定結果の色帯結論カード化・多重h1(2)是正
+- [ ] 【柱0バッチ3/9】KY残り画面(/ky ハブ・/ky/list・/ky-examples・/ky/workers)＝ハブ多重h1(2)是正・一覧/事例に状態の色文法とピクトグラム(/ky/paper・morningは適用済)
+- [ ] 【柱0バッチ4/9】法令検索系(/law-search・/circulars・/law-hierarchy)＝アイコンファースト・出典注記の折りたたみ。**柱C-6の/circulars初期件数制限(39,461px→初期20〜30件)を同一イテレーションで実施**
+- [ ] 【柱0バッチ5/9】教育・資格(/education-certification・finder・/education ハブ)＝資格・教育の区分ピクトグラム(特別教育/技能講習/免許の3色区分)・finderの結果結論カード
+- [ ] 【柱0バッチ6/9】メンタル・両立系(/mental-health-management・/mental-health・/treatment-work-balance・plan-builder)＝ハブ2枚の長文段落折りたたみ・plan-builderの記入のこり結論カード(stress-checkは適用済)
+- [ ] 【柱0バッチ7/9】統計・速報系(/stats・/accidents-analytics・/accidents-reports・/accident-news)＝デカ数字サマリーカード・グラフをファーストビューへ(/accidentsは適用済)。**柱C-7の/accidentsエクスポート是正と同時に着手可**
+- [ ] 【柱0バッチ8/9】ハブ/ナビ系一括(/quick・/faq・/glossary・/guides・/features・/industries・/diversity・/resources・/handover・/notifications・/favorites・/safety-signs)＝アイコンファースト+文字ダイエット中心(状態を持たない画面群=結論カードは不要、44pxタイルと折りたたみで足りる。1イテレーションで機械的に巡回可)
+- [ ] 【柱0バッチ9/9】その他ツール(/strategy/plan-generator・/subsidies+calculator・/bcp・/organization・/insurance・/chemical-database・/goods・/leaflet・/newsletter・/heat-illness-prevention/r7-compliance・poster)＝各ツールの判定/件数結論カードと文字ダイエット
 
 ## 柱C: 外部酷評対応（独立レビュー2026-06-11・S/A級。詳細・実測値は docs/site-critique-2026-06-11/ 00〜06）
 運用ヒント: 柱0の残りと交互に消化してよい。特にC-1(モバイル実速度)は柱0未適用ページの改修と同一ファイルを触るため、対象が重なるページは柱0タスク側に「C-1のSSR化も同時に」を含めて1イテレーションで済ませろ。法令正確性・A4帳票・1画面フィットは不可侵（既存ルール通り）。
