@@ -20,6 +20,9 @@ import {
   getAccidentCasesDataset,
   getAccidentProvenanceCounts,
 } from "@/data/mock/accident-cases";
+import { computeAccidentTypeCounts } from "@/lib/accidents/accident-visual";
+import { AccidentTypeGrid } from "@/components/accidents/accident-type-grid";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { SITE_STATS } from "@/data/site-stats";
 import { PageContainer } from "@/components/layout/page-container";
 import { AccidentAiAnalyzer } from "@/components/accidents/accident-ai-analyzer";
@@ -106,8 +109,13 @@ export default function AccidentsPage() {
             );
           })()}
         </div>
-        <AccidentsMetaCaption />
-        <AccidentsPreliminaryBanner />
+        {/* 柱0: 事故の型ピクトグラム＋件数デカ数字のアイコンファーストナビ（読まずに自分の現場の事故へ） */}
+        <AccidentTypeGrid counts={computeAccidentTypeCounts(getAccidentCasesDataset())} />
+        {/* 文字ダイエット: データ内訳の定義と速報値の注意は詳細層へ（内容は不変） */}
+        <CollapsibleDetail summary="収録データの内訳と速報値の注意" className="mt-2">
+          <AccidentsMetaCaption />
+          <AccidentsPreliminaryBanner />
+        </CollapsibleDetail>
         <AccidentsAnalyticsBanner totalLabel={SITE_STATS.accidents10yCount} />
         {/* 多忙なコンサル向け: 最上部で1タップ/1検索→収録事例の絞り込み結果へ直行 */}
         <QuickAccidentSearch />
