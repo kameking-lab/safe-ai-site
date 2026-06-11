@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Printer, Download, Save, FilePlus2, FolderOpen } from "lucide-react";
 import {
   getIncidentList,
@@ -15,6 +15,8 @@ import {
   type IncidentReportSummary,
   type ReportFormType,
 } from "@/lib/site-records/incident-report-store";
+import { countIncidentRemaining, incidentConclusion } from "@/lib/site-records/record-conclusions";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -54,6 +56,9 @@ export function IncidentReportClient() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 保存一覧
     setList(getIncidentList());
   }, []);
+
+  // 記入のこり（KY用紙と同じ文法）: 下書きに必要な13欄（備考は任意）
+  const remaining = useMemo(() => countIncidentRemaining(f), [f]);
 
   function up<K extends keyof IncidentReport>(k: K, v: IncidentReport[K]) {
     setF((s) => ({ ...s, [k]: v }));
@@ -103,6 +108,13 @@ export function IncidentReportClient() {
 
   return (
     <div className="space-y-6">
+      {/* 結論カード（柱0）: 「記入のこりN欄（青）→ 下書き完了（緑）」。
+          完了＝提出ではない（提出は電子申請）ことを補足に明記。印刷帳票には載せない。
+          SSR初期値の偽表示防止に初期化後のみ描画 */}
+      {f.id !== "" && (
+        <ConclusionCard {...incidentConclusion(remaining)} className="print:hidden" />
+      )}
+
       <section className="rounded-2xl border border-rose-200 bg-rose-50/50 p-4 text-xs leading-5 text-rose-900 print:hidden">
         労働災害で労働者が死亡・休業したときは、事業者は「労働者死傷病報告」を所轄労働基準監督署長に提出する義務があります（安衛則97条。休業4日以上は様式23号で遅滞なく、4日未満は様式24号で四半期報告。2025年1月から電子申請が原則義務化）。
         <strong className="font-semibold">本ツールは提出様式そのものではなく、必要情報を整理する下書きです。</strong>実際の提出は電子申請等で行ってください。

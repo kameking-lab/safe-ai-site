@@ -19,6 +19,8 @@ import {
   type WorkerQual,
   type WorkerQualSummary,
 } from "@/lib/site-records/qualification-store";
+import { qualificationsConclusion } from "@/lib/site-records/record-conclusions";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 export function QualificationClient() {
   const [recId, setRecId] = useState("");
@@ -132,6 +134,15 @@ export function QualificationClient() {
 
   return (
     <div className="space-y-6">
+      {/* 現況カード（柱0）: 期限概念が無い画面のため「登録N名・資格M種」＋逆引きへの導線。
+          印刷帳票には載せない。SSR初期値の偽表示防止に初期化後のみ描画 */}
+      {recId !== "" && (
+        <ConclusionCard
+          {...qualificationsConclusion(list.length, groups.length)}
+          className="print:hidden"
+        />
+      )}
+
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <Field label="氏名"><Inp value={workerName} onChange={setWorkerName} placeholder="例: 作業 太郎" /></Field>
@@ -206,7 +217,10 @@ export function QualificationClient() {
         )}
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
+      <section
+        id="qual-lookup"
+        className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden"
+      >
         <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
           <BadgeCheck className="h-5 w-5 text-emerald-600" aria-hidden="true" /> 資格から有資格者を探す（逆引き名簿）
         </h2>
