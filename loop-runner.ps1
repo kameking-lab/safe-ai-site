@@ -82,6 +82,25 @@ function Write-Log([string]$msg) {
   try { Add-Content -Path $logFile -Value $line -Encoding UTF8 } catch {}
 }
 
+# Single-instance guard: exit immediately when another loop-runner.ps1 process is
+# already running, so a manual run and a Task Scheduler (logon-trigger) run never
+# overlap. A process scan is used instead of a lock file on purpose: a PC restart
+# or crash leaves no stale lock to clear, and instances started before this guard
+# existed are detected as well. Failure of the scan itself only warns (fail-open)
+# so the resurrection path never deadlocks on a broken WMI service.
+$otherLoopPids = @()
+try {
+  $otherLoopPids = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
+    Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -like '*loop-runner.ps1*' } |
+    ForEach-Object { $_.ProcessId })
+} catch {
+  Write-Log ("WARN: single-instance scan failed (" + $_.Exception.Message + "); continuing without guard")
+}
+if ($otherLoopPids.Count -gt 0) {
+  Write-Log ("GUARD: another loop-runner instance is already running (PID " + ($otherLoopPids -join ", ") + "). Exiting to keep a single instance.")
+  exit 0
+}
+
 # Preflight checks.
 $claudeResolved = $null
 try { $claudeResolved = (Get-Command $ClaudeCmd -ErrorAction Stop).Source } catch {}
