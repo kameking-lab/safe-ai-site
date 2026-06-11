@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ELearningPanel } from "@/components/elearning-panel";
+import { ElearningConclusionCard } from "@/components/elearning-conclusion-card";
 import { ElearningProgressBoard } from "@/components/elearning-progress-board";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
@@ -56,6 +57,8 @@ export default function ELearningPage() {
           iconName="GraduationCap"
           iconColor="emerald"
         />
+        {/* 柱0: 最上部は「いまの状態」1メッセージ（入門から開始/学習のこりN/全問正答） */}
+        <ElearningConclusionCard />
         <LocalStorageWarningBanner />
         {/* P0-014: 受講者進捗ボード (履歴ゼロ時は非表示) */}
         <ElearningProgressBoard />
