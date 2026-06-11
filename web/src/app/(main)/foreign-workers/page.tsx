@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ChevronRight, IdCard, Languages } from "lucide-react";
 import { PageContainer } from "@/components/layout";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { RESIDENCE_STATUS_INDEX } from "@/data/foreign-worker-rules";
@@ -94,9 +96,38 @@ export default function ForeignWorkersHubPage() {
           </h1>
           <p className="mt-3 text-base text-slate-700">
             労働基準法・労働安全衛生法・最低賃金法は<strong>国籍を問わず適用</strong>されます。
-            在留資格別の事業主義務と労働者の権利を整理し、現場ですぐ使える多言語安全教育教材
-            （やさしい日本語＋英語・ベトナム語・中国語・インドネシア語）を提供します。
           </p>
+
+          {/* 柱0: 最上部はアイコンファーストの2大動線 — 読まなくても行き先が分かる */}
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <Link
+              href="/foreign-workers/safety-training"
+              className="flex min-h-[44px] items-center gap-3 rounded-2xl border-2 border-sky-300 bg-sky-50 p-4 transition hover:border-sky-400 hover:shadow-sm"
+            >
+              <Languages className="h-10 w-10 shrink-0 text-sky-700" aria-hidden="true" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-lg font-bold text-sky-900">教材を作る</span>
+                <span className="mt-0.5 block text-xs text-sky-800">
+                  やさしい日本語＋英・越・中・尼の対訳教材を表示・印刷
+                </span>
+              </span>
+              <ChevronRight className="h-5 w-5 shrink-0 text-sky-700" aria-hidden="true" />
+            </Link>
+            <Link
+              href="#status-guide"
+              className="flex min-h-[44px] items-center gap-3 rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-4 transition hover:border-emerald-400 hover:shadow-sm"
+            >
+              <IdCard className="h-10 w-10 shrink-0 text-emerald-700" aria-hidden="true" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-lg font-bold text-emerald-900">在留資格ガイド</span>
+                <span className="mt-0.5 block text-xs text-emerald-800">
+                  資格別の事業主義務と労働者の権利を確認
+                </span>
+              </span>
+              <ChevronRight className="h-5 w-5 shrink-0 text-emerald-700" aria-hidden="true" />
+            </Link>
+          </div>
+
           <dl className="mt-5 grid grid-cols-3 gap-4 text-sm sm:max-w-md">
             <div className="rounded-lg border border-emerald-100 bg-white p-3">
               <dt className="text-xs text-slate-500">在留資格ガイド</dt>
@@ -122,7 +153,7 @@ export default function ForeignWorkersHubPage() {
           </dl>
         </header>
 
-        <section className="mb-10">
+        <section id="status-guide" className="mb-10 scroll-mt-20">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-slate-900">在留資格別ガイド</h2>
             <p className="text-xs text-slate-500">
@@ -227,9 +258,12 @@ export default function ForeignWorkersHubPage() {
           </div>
         </section>
 
-        <section className="mb-10 rounded-xl border border-emerald-200 bg-white p-5 md:p-6">
-          <h2 className="text-xl font-bold text-slate-900">事業主向けチェックリスト</h2>
-          <p className="mt-2 text-sm text-slate-700">
+        {/* 柱0・文字ダイエット: 段落系は折りたたみへ格納（内容は1文字も変えない） */}
+        <CollapsibleDetail
+          summary="事業主向けチェックリスト（在留資格共通の最低基準 8項目）"
+          className="mb-3"
+        >
+          <p className="text-sm text-slate-700">
             外国人労働者を受け入れる事業主が、在留資格にかかわらず最低限満たすべき項目です。
             該当する在留資格の詳細ページで、追加の義務を必ず確認してください。
           </p>
@@ -244,11 +278,10 @@ export default function ForeignWorkersHubPage() {
               </li>
             ))}
           </ul>
-        </section>
+        </CollapsibleDetail>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-700 md:p-6">
-          <h2 className="text-base font-semibold text-slate-900">出典・参考資料</h2>
-          <ul className="mt-3 list-disc space-y-1 pl-5">
+        <CollapsibleDetail summary="出典・参考資料">
+          <ul className="mt-1 list-disc space-y-1 pl-5">
             <li>厚生労働省「外国人労働者向け労働関係法令周知用パンフレット」</li>
             <li>出入国在留管理庁「在留資格一覧」「特定技能制度」</li>
             <li>外国人技能実習機構（OTIT）「技能実習制度運用要領」</li>
@@ -259,7 +292,7 @@ export default function ForeignWorkersHubPage() {
             本ページの情報は2024年4月以降の制度改正（特定技能2号の対象分野拡大、育成就労制度の検討等を含む）の
             公開情報に基づき編集しています。最新の運用については各官公庁の公表資料を必ず参照してください。
           </p>
-        </section>
+        </CollapsibleDetail>
       </PageContainer>
     </div>
   );

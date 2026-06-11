@@ -75,11 +75,12 @@ export function ElearningProgressBoard() {
           unit="件"
           tone="emerald"
         />
+        {/* 柱0色文法: 学習の途中は「要対応(黄)」ではなく「続きをやる=指示(青)」 */}
         <SummaryStat
           label="進行中"
           value={summary.inProgressThemes}
           unit="件"
-          tone="amber"
+          tone="sky"
         />
         <SummaryStat label="正答率" value={correctRate} unit="%" tone="sky" />
       </div>
@@ -95,14 +96,14 @@ export function ElearningProgressBoard() {
               className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2 text-xs ${
                 isComplete
                   ? "border-emerald-200 bg-white text-emerald-900"
-                  : "border-amber-200 bg-white text-amber-900"
+                  : "border-sky-200 bg-white text-sky-900"
               }`}
             >
               <span className="flex flex-1 items-center gap-1.5 truncate">
                 {isComplete ? (
                   <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
                 ) : (
-                  <Clock className="h-3.5 w-3.5 text-amber-600" aria-hidden="true" />
+                  <Clock className="h-3.5 w-3.5 text-sky-600" aria-hidden="true" />
                 )}
                 <span className="font-semibold truncate">{r.themeTitle}</span>
               </span>
@@ -118,7 +119,7 @@ export function ElearningProgressBoard() {
       </ul>
 
       {summary.inProgressThemes > 0 && (
-        <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-[11px] text-amber-900">
+        <p className="mt-3 rounded-md border border-sky-200 bg-sky-50 px-2.5 py-1.5 text-[11px] text-sky-900">
           💡 進行中のテーマ {summary.inProgressThemes} 件あります。間違えた問題を再表示して全問正答を目指せます。
         </p>
       )}

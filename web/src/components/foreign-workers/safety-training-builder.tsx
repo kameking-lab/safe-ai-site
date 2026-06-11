@@ -20,6 +20,12 @@ import {
   parseAttendeeNames,
 } from "@/lib/foreign-worker-training-record";
 import {
+  IndustryPictogram,
+  INDUSTRY_SHORT_LABELS_JA,
+  TopicPictogram,
+  TOPIC_SHORT_LABELS_JA,
+} from "./topic-pictograms";
+import {
   TrainingRecordInputCard,
   TrainingRecordPrintHeader,
   TrainingRecordRoster,
@@ -107,38 +113,72 @@ export function SafetyTrainingBuilder({
   return (
     <div className="space-y-6">
       <div className="rounded-lg border border-slate-200 bg-white p-4 print:hidden">
-        <div className="grid gap-4 md:grid-cols-3">
-          <label className="block">
-            <span className="text-xs font-semibold text-slate-600">業種</span>
-            <select
-              value={currentIndustry}
-              onChange={(e) => handleIndustryChange(e.target.value as MaterialIndustry)}
-              className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
-            >
-              {industries.map((i) => (
-                <option key={i} value={i}>
-                  {MATERIAL_INDUSTRY_LABELS_JA[i]} ({MATERIAL_INDUSTRY_LABELS_EN[i]})
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className="text-xs font-semibold text-slate-600">トピック</span>
-            <select
-              value={topic}
-              onChange={(e) => setTopic(e.target.value as MaterialTopic)}
-              className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
-            >
-              {topics.map((t) => (
-                <option key={t} value={t}>
-                  {MATERIAL_TOPIC_LABELS_JA[t]} ({MATERIAL_TOPIC_LABELS_EN[t]})
-                </option>
-              ))}
-            </select>
-          </label>
-          <div>
-            <span className="text-xs font-semibold text-slate-600">言語（複数選択可）</span>
-            <ul className="mt-1 flex flex-wrap gap-1.5">
+        {/* 柱0: 業種・トピックはピクトグラムのデカボタンで選ぶ（読まなくても選べる） */}
+        <div className="space-y-4">
+          <fieldset>
+            <legend className="text-xs font-semibold text-slate-600">業種</legend>
+            <div className="mt-1.5 grid grid-cols-3 gap-1.5 sm:grid-cols-6">
+              {industries.map((i) => {
+                const active = i === currentIndustry;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => handleIndustryChange(i)}
+                    aria-pressed={active}
+                    aria-label={`${MATERIAL_INDUSTRY_LABELS_JA[i]} (${MATERIAL_INDUSTRY_LABELS_EN[i]})`}
+                    title={MATERIAL_INDUSTRY_LABELS_JA[i]}
+                    className={
+                      "flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-xl border px-1 py-2 transition " +
+                      (active
+                        ? "border-sky-700 bg-sky-700 text-white shadow-sm"
+                        : "border-slate-300 bg-white text-slate-700 hover:border-sky-300 hover:bg-sky-50")
+                    }
+                  >
+                    <IndustryPictogram industry={i} className="h-7 w-7" />
+                    <span className="text-xs font-bold leading-none">
+                      {INDUSTRY_SHORT_LABELS_JA[i]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend className="text-xs font-semibold text-slate-600">トピック</legend>
+            <div className="mt-1.5 grid grid-cols-3 gap-1.5 sm:grid-cols-5">
+              {topics.map((t) => {
+                const active = t === topic;
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setTopic(t)}
+                    aria-pressed={active}
+                    aria-label={`${MATERIAL_TOPIC_LABELS_JA[t]} (${MATERIAL_TOPIC_LABELS_EN[t]})`}
+                    title={MATERIAL_TOPIC_LABELS_JA[t]}
+                    className={
+                      "flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-xl border px-1 py-2 transition " +
+                      (active
+                        ? "border-sky-700 bg-sky-700 text-white shadow-sm"
+                        : "border-slate-300 bg-white text-slate-700 hover:border-sky-300 hover:bg-sky-50")
+                    }
+                  >
+                    <TopicPictogram topic={t} className="h-7 w-7" />
+                    <span className="text-xs font-bold leading-none">
+                      {TOPIC_SHORT_LABELS_JA[t]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend className="text-xs font-semibold text-slate-600">
+              言語（複数選択可）
+            </legend>
+            {/* 読む本人が見つけられるよう、ネイティブ表記を主・日本語表記を従にする */}
+            <ul className="mt-1.5 flex flex-wrap gap-1.5">
               {MATERIAL_LANGUAGES.map((l) => {
                 const active = selectedLangs.includes(l);
                 return (
@@ -148,25 +188,32 @@ export function SafetyTrainingBuilder({
                       onClick={() => toggleLang(l)}
                       aria-pressed={active}
                       className={
-                        "rounded-full border px-3 py-1 text-xs transition " +
+                        "min-h-[44px] rounded-xl border px-3.5 py-1.5 text-left transition " +
                         (active
-                          ? "border-emerald-600 bg-emerald-600 text-white"
+                          ? "border-emerald-700 bg-emerald-700 text-white"
                           : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50")
                       }
                     >
-                      {MATERIAL_LANGUAGE_LABELS_JA[l]}
+                      <span className="block text-sm font-bold leading-tight">
+                        {MATERIAL_LANGUAGE_LABELS[l]}
+                      </span>
+                      {l !== "ja-easy" && (
+                        <span className="block text-[10px] leading-tight opacity-80">
+                          {MATERIAL_LANGUAGE_LABELS_JA[l]}
+                        </span>
+                      )}
                     </button>
                   </li>
                 );
               })}
             </ul>
-          </div>
+          </fieldset>
         </div>
         <div className="mt-4 flex justify-end">
           <button
             type="button"
             onClick={() => window.print()}
-            className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900"
+            className="min-h-[44px] rounded-lg bg-slate-800 px-5 py-2 text-sm font-semibold text-white hover:bg-slate-900"
           >
             印刷 / PDF出力
           </button>
@@ -192,15 +239,23 @@ export function SafetyTrainingBuilder({
             topic={material.topic}
             langs={selectedLangs}
           />
-          <header className="border-b border-slate-200 pb-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
-              {MATERIAL_INDUSTRY_LABELS_EN[material.industry]} ·{" "}
-              {MATERIAL_TOPIC_LABELS_EN[material.topic]}
-            </p>
-            <h2 className="mt-1 text-xl font-bold text-slate-900">
-              {MATERIAL_INDUSTRY_LABELS_JA[material.industry]}：
-              {MATERIAL_TOPIC_LABELS_JA[material.topic]}
-            </h2>
+          {/* 柱0: ピクトグラムは印刷物にも載せる — 文字が読めなくても何の教材か分かる */}
+          <header className="flex items-center gap-3 border-b border-slate-200 pb-4">
+            <TopicPictogram
+              topic={material.topic}
+              title={MATERIAL_TOPIC_LABELS_JA[material.topic]}
+              className="h-14 w-14 shrink-0 text-sky-800"
+            />
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+                {MATERIAL_INDUSTRY_LABELS_EN[material.industry]} ·{" "}
+                {MATERIAL_TOPIC_LABELS_EN[material.topic]}
+              </p>
+              <h2 className="mt-1 text-xl font-bold text-slate-900">
+                {MATERIAL_INDUSTRY_LABELS_JA[material.industry]}：
+                {MATERIAL_TOPIC_LABELS_JA[material.topic]}
+              </h2>
+            </div>
           </header>
 
           <section className="mt-4">

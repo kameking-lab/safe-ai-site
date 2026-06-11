@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { RotateCcw } from "lucide-react";
 import { recordThemeAttempt } from "@/lib/elearning/progress";
+import { buildQuizConclusion } from "@/lib/elearning/learning-conclusion";
+import { SAFETY_TONE } from "@/lib/design/safety-tone";
+import { TONE_DEFAULT_ICON } from "@/components/ui/status-badge";
 import { elearningThemesCatalog } from "@/data/mock/elearning-themes-data";
 import { elearningExtraThemes } from "@/data/mock/elearning-extra-themes";
 import { elearningExtraQuestions } from "@/data/mock/elearning-extra-questions";
@@ -64,6 +69,21 @@ export function ELearningPanel() {
   const [selectedCompanySize, setSelectedCompanySize] = useState<CompanySizeFilter>("全規模");
   const [selectedIndustry, setSelectedIndustry] = useState<IndustryFilter>("すべて");
   const [selectedSubId, setSelectedSubId] = useState<string>("");
+
+  // 柱0: 結論カード「続きから」「入門から始める」の行き先 (?theme=<id>#el-quiz) を受け取る。
+  // テーマIDが実在する時だけ反映し、回答はリセットして再挑戦から始める。
+  const searchParams = useSearchParams();
+  const themeParam = searchParams.get("theme");
+  const lastAppliedThemeParamRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!themeParam || lastAppliedThemeParamRef.current === themeParam) return;
+    lastAppliedThemeParamRef.current = themeParam;
+    if (!allThemes.some((t) => t.id === themeParam)) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- URL(外部システム)からの初期化として正当
+    setThemeId(themeParam);
+    setAnswers({});
+    setEditMode(false);
+  }, [themeParam]);
 
   const themes = useMemo<LearningTheme[]>(() => {
     const withOverrides = allThemes.map((t) => overrides[t.id] ?? t);
@@ -153,7 +173,10 @@ export function ELearningPanel() {
   const isIntroCourse = themeId.startsWith("intro-");
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+    <section
+      id="el-quiz"
+      className="scroll-mt-20 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+    >
       {/* 初めての方へのバナー */}
       <div className="mb-4 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white text-sm font-bold">
@@ -323,7 +346,10 @@ export function ELearningPanel() {
             <p className="text-sm font-semibold text-slate-900">{index + 1}. <EasyJapaneseText>{question.question}</EasyJapaneseText></p>
             <div className="mt-2 space-y-1 text-xs">
               {question.options.map((option, optionIndex) => (
-                <label key={option} className="block rounded border border-slate-200 px-2 py-1">
+                <label
+                  key={option}
+                  className="flex min-h-[44px] cursor-pointer items-center gap-2 rounded border border-slate-200 px-2.5 py-1.5 hover:bg-slate-50"
+                >
                   <input
                     checked={answers[question.id] === optionIndex}
                     name={question.id}
@@ -340,12 +366,65 @@ export function ELearningPanel() {
           </div>
         ))}
       </div>
-      <div className="mt-3 flex items-center justify-between">
-        <p className="text-sm font-semibold text-slate-800">学習チェック: {score} / {selectedTheme.questions.length}</p>
-        <Link className="rounded-md bg-emerald-600 px-3 py-2 text-xs font-semibold text-white" href="/ky">
-          KY用紙へ
-        </Link>
-      </div>
+      {/* 柱0: 採点の結論ストリップ — 回答のこり(青)→全問正答(緑)/誤答N問(黄=解説確認→再挑戦) */}
+      {(() => {
+        const answered = selectedTheme.questions.filter((q) => answers[q.id] != null).length;
+        const quiz = buildQuizConclusion({
+          total: selectedTheme.questions.length,
+          answered,
+          correct: score,
+        });
+        const t = SAFETY_TONE[quiz.tone];
+        const QuizIcon = TONE_DEFAULT_ICON[quiz.tone];
+        return (
+          <div
+            role="status"
+            aria-label={`採点: ${quiz.title}${quiz.value != null ? ` ${quiz.value}${quiz.unit ?? ""}` : ""}`}
+            className={`mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border-2 p-3 ${t.soft}`}
+          >
+            <div className="flex min-w-0 flex-1 items-center gap-2.5">
+              <QuizIcon className={`h-7 w-7 shrink-0 ${t.icon}`} aria-hidden="true" />
+              <div className="flex flex-wrap items-baseline gap-x-1.5">
+                {quiz.value != null && (
+                  <span className={`text-3xl font-bold leading-none ${t.text}`}>
+                    {quiz.value}
+                    {quiz.unit && <span className="ml-0.5 text-sm font-bold">{quiz.unit}</span>}
+                  </span>
+                )}
+                <span className="text-base font-bold">{quiz.title}</span>
+                {quiz.tone === "warning" && (
+                  <span className="w-full text-xs opacity-80 sm:w-auto">
+                    解説を確認して再挑戦
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {quiz.tone === "warning" && (
+                <button
+                  type="button"
+                  onClick={() => setAnswers({})}
+                  className={`inline-flex min-h-[44px] items-center gap-1 rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm transition hover:opacity-90 ${t.solid}`}
+                >
+                  <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                  もう一度
+                </button>
+              )}
+              <Link
+                className={
+                  "inline-flex min-h-[44px] items-center rounded-xl px-4 py-2.5 text-sm font-bold transition " +
+                  (quiz.tone === "safe"
+                    ? `shadow-sm hover:opacity-90 ${t.solid}`
+                    : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50")
+                }
+                href="/ky"
+              >
+                KY用紙へ
+              </Link>
+            </div>
+          </div>
+        );
+      })()}
     </section>
   );
 }
