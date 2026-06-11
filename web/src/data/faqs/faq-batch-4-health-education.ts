@@ -522,7 +522,7 @@ export const FAQ_BATCH_4_HEALTH_EDUCATION: FAQ[] = [
     category: "health-education",
     relatedLaws: ["安衛法第59条", "安衛法第60条"],
     relatedPages: [
-      { href: "/strategy", label: "年間計画" },
+      { href: "/strategy/plan-generator", label: "年間計画" },
       { href: "/e-learning", label: "Eラーニング" },
     ],
     tags: ["教育計画", "年間計画", "法定教育"],

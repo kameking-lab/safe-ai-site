@@ -170,6 +170,148 @@ export function inductionConclusion(remaining: number): RecordConclusion {
   };
 }
 
+/** 作業手順書の記入のこり: 作業名＋書きかけ手順行の空欄（全欄空の行は未使用として数えない） */
+export function countProcedureRemaining(input: {
+  title: string;
+  steps: { step: string; hazard: string; measure: string }[];
+}): number {
+  const started = input.steps.filter(
+    (s) => s.step.trim() !== "" || s.hazard.trim() !== "" || s.measure.trim() !== "",
+  );
+  const blanks = started.reduce(
+    (n, s) =>
+      n +
+      (s.step.trim() === "" ? 1 : 0) +
+      (s.hazard.trim() === "" ? 1 : 0) +
+      (s.measure.trim() === "" ? 1 : 0),
+    0,
+  );
+  return (
+    (input.title.trim() === "" ? 1 : 0) +
+    // 手順が1行も書かれていなければ「手順の記入」1項目として数える
+    (started.length === 0 ? 1 : 0) +
+    blanks
+  );
+}
+
+/** 作業手順書: KY用紙と同じ「記入のこりN → 完了」の文法 */
+export function procedureConclusion(remaining: number): RecordConclusion {
+  if (remaining > 0) {
+    return {
+      tone: "info",
+      value: remaining,
+      unit: "項目",
+      title: "記入のこり",
+      description: "作業名と、書きかけの手順行の「手順・危険・対策」が揃うと完了です。",
+    };
+  }
+  return {
+    tone: "safe",
+    title: "記入完了",
+    description: "「この端末に保存」のうえ、印刷して関係者へ周知してください。",
+  };
+}
+
+/** 死傷病報告の下書きで埋めるべき欄（備考は任意なので含めない） */
+export function countIncidentRemaining(f: {
+  bizType: string;
+  siteName: string;
+  siteAddress: string;
+  workerCount: string;
+  victimName: string;
+  victimSexAge: string;
+  victimJob: string;
+  victimExperience: string;
+  occurredAt: string;
+  place: string;
+  injuryName: string;
+  absenceDays: string;
+  situation: string;
+}): number {
+  const fields = [
+    f.bizType,
+    f.siteName,
+    f.siteAddress,
+    f.workerCount,
+    f.victimName,
+    f.victimSexAge,
+    f.victimJob,
+    f.victimExperience,
+    f.occurredAt,
+    f.place,
+    f.injuryName,
+    f.absenceDays,
+    f.situation,
+  ];
+  return fields.filter((v) => v.trim() === "").length;
+}
+
+/** 死傷病報告（下書き）: 記入のこりN → 下書き完了（提出は電子申請＝完了しても提出ではない） */
+export function incidentConclusion(remaining: number): RecordConclusion {
+  if (remaining > 0) {
+    return {
+      tone: "info",
+      value: remaining,
+      unit: "欄",
+      title: "記入のこり",
+      description: "全欄が揃うと、監督署へ報告する情報が出そろいます（備考は任意）。",
+    };
+  }
+  return {
+    tone: "safe",
+    title: "下書き完了",
+    description: "提出は電子申請で行ってください（2025年1月から原則義務化。本ツールは下書きです）。",
+  };
+}
+
+/** 資格管理簿: 期限概念が無いため「登録N名・資格M種」の現況＋逆引きへの導線 */
+export function qualificationsConclusion(
+  workerCount: number,
+  qualKindCount: number,
+): RecordConclusion {
+  if (workerCount === 0) {
+    return {
+      tone: "info",
+      title: "登録なし",
+      description: "作業者と保有資格を登録すると、資格から有資格者を逆引きできます。",
+    };
+  }
+  return {
+    tone: "info",
+    value: workerCount,
+    unit: "名",
+    title: "登録済",
+    description: `保有資格・教育 ${qualKindCount}種。配置前に有資格者を逆引きで確認できます。`,
+    action: { href: "#qual-lookup", label: "資格から逆引き" },
+  };
+}
+
+/** 安全カレンダー: 今月の定例項目の消し込み残（残N件 → 今月完了） */
+export function calendarConclusion(input: { total: number; remaining: number }): RecordConclusion {
+  if (input.total === 0) {
+    return {
+      tone: "neutral",
+      title: "予定なし",
+      description: "今月の定例項目はありません。毎日のKY・点検は常設項目をご覧ください。",
+    };
+  }
+  if (input.remaining > 0) {
+    return {
+      tone: "info",
+      value: input.remaining,
+      unit: "件",
+      title: "今月のこり",
+      description: "済んだ項目はチェックで消し込めます（この端末に保存されます）。",
+      action: { href: "#this-month", label: "今月の項目へ" },
+    };
+  }
+  return {
+    tone: "safe",
+    title: "今月完了",
+    description: "今月の定例項目はすべて消し込み済みです。",
+  };
+}
+
 /** 月次レポート: 当月の要対応合計（未是正＋対応中＋使用不可）と委員会開催で判定 */
 export function monthlyConclusion(input: {
   hasAny: boolean;

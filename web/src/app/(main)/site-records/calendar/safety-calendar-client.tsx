@@ -4,6 +4,14 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SAFETY_CALENDAR, RECURRING_ITEMS, MONTH_LABEL, type CalendarItem } from "@/lib/site-records/safety-calendar";
+import {
+  calendarMonthKey,
+  countCalendarRemaining,
+  getDoneLabels,
+  toggleDoneLabel,
+} from "@/lib/site-records/calendar-progress";
+import { calendarConclusion } from "@/lib/site-records/record-conclusions";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 function ItemRow({ item }: { item: CalendarItem }) {
   if (item.href) {
@@ -22,32 +30,88 @@ function ItemRow({ item }: { item: CalendarItem }) {
   );
 }
 
+/** 今月セクション専用: チェックで消し込める行（リンクは別タップ対象として右に分離） */
+function CheckRow({ item, done, onToggle }: { item: CalendarItem; done: boolean; onToggle: () => void }) {
+  return (
+    <div className="flex min-h-[44px] items-center gap-1.5">
+      <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 hover:bg-emerald-100/60 dark:hover:bg-emerald-500/10">
+        <input
+          type="checkbox"
+          checked={done}
+          onChange={onToggle}
+          className="h-5 w-5 shrink-0 accent-emerald-600"
+        />
+        <span
+          className={`text-sm ${
+            done
+              ? "text-slate-400 line-through dark:text-slate-500"
+              : "text-emerald-900 dark:text-emerald-100"
+          }`}
+        >
+          {item.label}
+        </span>
+      </label>
+      {item.href && (
+        <Link
+          href={item.href}
+          className="inline-flex min-h-[44px] shrink-0 items-center gap-0.5 rounded-md px-2 text-xs font-bold text-emerald-700 underline decoration-emerald-300 underline-offset-2 hover:bg-emerald-100/60 dark:text-emerald-200 dark:hover:bg-emerald-500/10"
+        >
+          開く
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+        </Link>
+      )}
+    </div>
+  );
+}
+
 export function SafetyCalendarClient() {
   const [thisMonth, setThisMonth] = useState<number>(0);
+  const [monthKey, setMonthKey] = useState("");
+  const [done, setDone] = useState<string[]>([]);
 
   useEffect(() => {
+    const now = new Date();
+    const key = calendarMonthKey(now);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 当月の強調はクライアントで（SSRハイドレーション差異回避）
-    setThisMonth(new Date().getMonth() + 1);
+    setThisMonth(now.getMonth() + 1);
+    setMonthKey(key);
+    setDone(getDoneLabels(key));
   }, []);
 
   const nowMonth = SAFETY_CALENDAR.find((m) => m.month === thisMonth);
+  const remaining = nowMonth ? countCalendarRemaining(nowMonth.items.map((i) => i.label), done) : 0;
+
+  function toggle(label: string) {
+    setDone(toggleDoneLabel(monthKey, label));
+  }
 
   return (
     <div className="space-y-6">
+      {/* 結論カード（柱0）: 「今月のこりN件（青）→ 今月完了（緑）」。当月確定後のみ描画（偽表示防止） */}
+      {nowMonth && (
+        <ConclusionCard
+          {...calendarConclusion({ total: nowMonth.items.length, remaining })}
+          className="print:hidden"
+        />
+      )}
+
       {/* 今月やること（初見でも先頭で即到達。当月確定後にのみ表示しSSR差異を回避） */}
       {nowMonth && (
-        <section className="rounded-2xl border-2 border-emerald-400 bg-emerald-50 p-5 shadow-sm ring-2 ring-emerald-300 dark:border-emerald-500/50 dark:bg-emerald-500/10">
+        <section
+          id="this-month"
+          className="scroll-mt-24 rounded-2xl border-2 border-emerald-400 bg-emerald-50 p-5 shadow-sm ring-2 ring-emerald-300 dark:border-emerald-500/50 dark:bg-emerald-500/10"
+        >
           <div className="flex items-center gap-2">
             <span className="rounded-full bg-emerald-600 px-2.5 py-0.5 text-xs font-bold text-white">今月</span>
             <h2 className="text-lg font-bold text-emerald-900 dark:text-emerald-100">{MONTH_LABEL[nowMonth.month]}にやること</h2>
           </div>
           <div className="mt-2 space-y-0.5">
             {nowMonth.items.map((it) => (
-              <ItemRow key={it.label} item={it} />
+              <CheckRow key={it.label} item={it} done={done.includes(it.label)} onToggle={() => toggle(it.label)} />
             ))}
           </div>
           <p className="mt-2 border-t border-emerald-200 pt-2 text-xs text-emerald-800 dark:border-emerald-500/30 dark:text-emerald-200">
-            加えて、毎日のKY・作業前点検・受入教育などは下の「毎日・毎月・随時に行うこと」に常設されています。
+            済んだ項目はチェックで消し込み（この端末に保存）。毎日のKY・作業前点検・受入教育などは下の「毎日・毎月・随時に行うこと」に常設されています。
           </p>
         </section>
       )}

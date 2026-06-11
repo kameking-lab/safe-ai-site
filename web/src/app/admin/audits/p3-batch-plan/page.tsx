@@ -482,13 +482,10 @@ export default function P3BatchPlanPage() {
 
       {/* Source links */}
       <div className="mt-6 text-center text-xs text-slate-400 dark:text-slate-500">
-        監査スナップショット:{" "}
-        <a href="/audits/2026-05-17-ux-seo" className="underline hover:text-slate-600">
-          /audits/2026-05-17-ux-seo
-        </a>{" "}
+        監査スナップショット: docs/audit-snapshot-2026-05-17-ux-seo.md（リポジトリ内・公開ルートは2026-06-11撤去）
         ／ P2計画:{" "}
-        <a href="/audits/p2-batch-plan" className="underline hover:text-slate-600">
-          /audits/p2-batch-plan
+        <a href="/admin/audits/p2-batch-plan" className="underline hover:text-slate-600">
+          /admin/audits/p2-batch-plan
         </a>
       </div>
     </PageContainer>
