@@ -151,10 +151,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/about/chatbot-eval", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
     { url: "/about/data-sources", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
     { url: "/about/news-feed", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
-    // Site status snapshot — public audit for external readers.
-    { url: "/audits/site-status-2026-05-19", lastModified: "2026-05-19", priority: 0.6, changeFrequency: "yearly" },
-    // Vercel Hobby recovery forecast — Dispatch A/B baseline.
-    { url: "/audits/hobby-recovery-forecast-2026-05-19", lastModified: "2026-05-19", priority: 0.5, changeFrequency: "yearly" },
     // SEO-001 keyword landings — information-intent guides funnelling to main 4 tool pages.
     { url: "/guides", lastModified: "2026-05-19", priority: 0.85, changeFrequency: "monthly" },
     { url: "/guides/anzeneho-ai-chatbot", lastModified: "2026-05-19", priority: 0.8, changeFrequency: "monthly" },

@@ -73,7 +73,21 @@ export default function StressCheckImplementationPage() {
         iconColor="blue"
       />
 
-      <section className="mt-6 rounded-2xl border border-violet-200 bg-violet-50/60 p-5">
+      {/* 自己評価フォーム（診断ファースト: 結論カードがファーストビューに入るよう説明より先に置く） */}
+      <section id="readiness" className="mt-6">
+        <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
+          <ClipboardCheck className="h-5 w-5 text-violet-600" aria-hidden="true" />
+          実施準備度合いの自己評価
+        </h2>
+        <p className="mt-1 text-xs text-slate-500">
+          常時使用する労働者数と、7項目への回答をもとに整備率を算出します。回答は端末内のメモリに保持され、送信されません。
+        </p>
+        <div className="mt-4">
+          <ReadinessForm />
+        </div>
+      </section>
+
+      <section className="mt-8 rounded-2xl border border-violet-200 bg-violet-50/60 p-5">
         <div className="flex items-start gap-3">
           <AlertCircle
             className="mt-0.5 h-5 w-5 shrink-0 text-violet-700"
@@ -82,14 +96,14 @@ export default function StressCheckImplementationPage() {
           <div className="text-sm leading-6 text-violet-900">
             <p className="font-semibold">使い方</p>
             <p className="mt-1">
-              下記の自己評価フォームで自社の整備状況を確認し、未整備項目から優先的に着手してください。判定は労務管理上の参考であり、最終的な実施可否は衛生委員会と実施者（医師・保健師等）の判断に基づきます。
+              上記の自己評価フォームで自社の整備状況を確認し、未整備項目から優先的に着手してください。判定は労務管理上の参考であり、最終的な実施可否は衛生委員会と実施者（医師・保健師等）の判断に基づきます。
             </p>
           </div>
         </div>
       </section>
 
       {/* 実施手順（年間の流れ） */}
-      <section id="procedure" className="mt-8">
+      <section id="procedure" className="mt-8 scroll-mt-4">
         <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
           <Route className="h-5 w-5 text-violet-600" aria-hidden="true" />
           実施手順（年間の流れ）
@@ -195,20 +209,6 @@ export default function StressCheckImplementationPage() {
             );
           })}
         </ol>
-      </section>
-
-      {/* 自己評価フォーム */}
-      <section id="readiness" className="mt-10">
-        <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-          <ClipboardCheck className="h-5 w-5 text-violet-600" aria-hidden="true" />
-          実施準備度合いの自己評価
-        </h2>
-        <p className="mt-1 text-xs text-slate-500">
-          常時使用する労働者数と、7項目への回答をもとに整備率を算出します。回答は端末内のメモリに保持され、送信されません。
-        </p>
-        <div className="mt-4">
-          <ReadinessForm />
-        </div>
       </section>
 
       {/* 必要書類テンプレへのリンク */}

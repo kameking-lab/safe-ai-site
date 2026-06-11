@@ -12,6 +12,9 @@ import {
 } from "@/types/asbestos";
 import { buildPreWorkSummary } from "@/lib/asbestos-engine";
 import { asbestosScopeToQuery } from "@/lib/asbestos-scope-query";
+import { computeAsbestosConclusion } from "@/lib/asbestos-conclusion";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const BUILDING_OPTIONS: BuildingCategory[] = [
   "non-residential",
@@ -59,6 +62,7 @@ export function InvestigationCheckerForm() {
   );
 
   const summary = useMemo(() => buildPreWorkSummary(scope, null), [scope]);
+  const conclusion = useMemo(() => computeAsbestosConclusion(summary), [summary]);
 
   // Step 1 → Step 2 へ入力条件を引き継ぐためのクエリ。石綿レベルは事前調査前で
   // 未確定のため付けない（届出書類リスト側で選択する）。
@@ -83,7 +87,24 @@ export function InvestigationCheckerForm() {
   );
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="space-y-6">
+      {/* 結論ファースト: 法令上やることが何件あるか（義務=指示の青・対象外=緑）。
+          モバイルではフォームより先に見える最上部に置き、入力に応じて即時更新する */}
+      <ConclusionCard
+        tone={conclusion.tone}
+        value={conclusion.count}
+        unit="件"
+        title={conclusion.title}
+        description={conclusion.description}
+      >
+        {conclusion.duties.map((d) => (
+          <StatusBadge key={d.id} tone="info">
+            {d.label}
+          </StatusBadge>
+        ))}
+      </ConclusionCard>
+
+      <div className="grid gap-6 lg:grid-cols-2">
       <section className="rounded-xl border border-stone-200 bg-white p-5 md:p-6">
         <h2 className="text-base font-semibold text-slate-900">プロジェクト情報</h2>
         <p className="mt-1 text-xs text-slate-500">
@@ -178,16 +199,23 @@ export function InvestigationCheckerForm() {
       <section className="rounded-xl border border-stone-200 bg-white p-5 md:p-6">
         <h2 className="text-base font-semibold text-slate-900">判定結果</h2>
 
-        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-amber-800">
+        {/* 詳細: 色は状態に連動（義務あり=指示の青 / 対象外=無彩。常時の黄・赤は使わない） */}
+        <div
+          className={`mt-4 rounded-lg border p-4 ${
+            summary.investigation.investigationRequired
+              ? "border-sky-300 bg-sky-50 text-sky-900"
+              : "border-slate-200 bg-slate-50 text-slate-700"
+          }`}
+        >
+          <p className="text-xs font-semibold uppercase tracking-wider opacity-80">
             事前調査
           </p>
-          <p className="mt-1 text-sm font-bold text-amber-900">
+          <p className="mt-1 text-sm font-bold">
             {summary.investigation.investigationRequired
               ? "事前調査義務あり"
               : "事前調査義務なし（新築のみ）"}
           </p>
-          <ul className="mt-2 space-y-1 text-xs text-amber-900">
+          <ul className="mt-2 space-y-1 text-xs">
             <li>
               建築物石綿含有建材調査者：
               {summary.investigation.qualifiedInvestigatorRequired ? "必須" : "不要（工作物等）"}
@@ -199,24 +227,34 @@ export function InvestigationCheckerForm() {
                 : "禁止後建築のため低リスク"}
             </li>
           </ul>
-          <p className="mt-2 text-xs text-amber-900">{summary.investigation.rationale}</p>
+          <p className="mt-2 text-xs">{summary.investigation.rationale}</p>
         </div>
 
-        <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-rose-800">
+        <div
+          className={`mt-4 rounded-lg border p-4 ${
+            summary.reporting.requirement === "investigation-only" ||
+            summary.reporting.requirement === "out-of-scope"
+              ? "border-slate-200 bg-slate-50 text-slate-700"
+              : "border-sky-300 bg-sky-50 text-sky-900"
+          }`}
+        >
+          <p className="text-xs font-semibold uppercase tracking-wider opacity-80">
             報告義務
           </p>
-          <p className="mt-1 text-sm font-bold text-rose-900">
+          <p className="mt-1 text-sm font-bold">
             {REPORTING_REQUIREMENT_LABELS_JA[summary.reporting.requirement]}
           </p>
-          <p className="mt-2 text-xs text-rose-900">{summary.reporting.rationale}</p>
+          <p className="mt-2 text-xs">{summary.reporting.rationale}</p>
         </div>
 
-        <div className="mt-4">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-600">
-            判定根拠条文
-          </p>
-          <ul className="mt-2 space-y-2 text-xs text-slate-700">
+        <details className="mt-4 rounded-lg border border-slate-200 bg-white">
+          <summary className="flex min-h-[44px] cursor-pointer items-center px-3 text-xs font-semibold uppercase tracking-wider text-slate-600">
+            判定根拠条文（
+            {summary.investigation.lawReferences.length +
+              summary.reporting.lawReferences.length}
+            件）
+          </summary>
+          <ul className="space-y-2 px-3 pb-3 text-xs text-slate-700">
             {[
               ...summary.investigation.lawReferences,
               ...summary.reporting.lawReferences,
@@ -230,23 +268,24 @@ export function InvestigationCheckerForm() {
               </li>
             ))}
           </ul>
-        </div>
+        </details>
 
         <div className="mt-5 flex flex-wrap gap-2">
           <Link
             href={`/asbestos-management/notification-builder?${carryQuery}`}
-            className="inline-flex items-center gap-1 rounded-lg bg-stone-700 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-stone-700 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800"
           >
             この条件で届出書類リストを作成 →
           </Link>
           <Link
             href="/asbestos-management/work-plan-template"
-            className="inline-flex items-center gap-1 rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-50"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-stone-300 bg-white px-4 py-2 text-sm font-semibold text-stone-800 hover:bg-stone-50"
           >
             作業計画テンプレートを見る →
           </Link>
         </div>
       </section>
+      </div>
     </div>
   );
 }
