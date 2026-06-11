@@ -1,8 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ClipboardList, AlertTriangle, CheckCircle2, XCircle, Info } from "lucide-react";
 import { determineManagementClass } from "@/lib/measurement-engine";
+import {
+  MANAGEMENT_CLASS_ORDER,
+  MANAGEMENT_CLASS_VISUAL,
+  managementClassMarkerPercent,
+} from "@/lib/work-env/class-visual";
 import { MEASUREMENT_CATEGORIES } from "@/data/measurement-rules";
 import type { ManagementClassInput, ManagementClassResult, ManagementClass } from "@/types/work-environment";
 import type { MeasurementCategoryId } from "@/types/work-environment";
@@ -37,6 +42,14 @@ export function WorkEnvManagementClassJudge() {
   const [result, setResult] = useState<ManagementClassResult | null>(null);
   const [recordMeta, setRecordMeta] = useState<ClassJudgeRecordMeta | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const resultRef = useRef<HTMLDivElement | null>(null);
+
+  // 判定直後に結論カードを画面内へ（フォームが長く、結果が画面外に出るため）
+  useEffect(() => {
+    if (result) {
+      resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [result]);
 
   const categoriesWithClass = MEASUREMENT_CATEGORIES.filter((c) => c.hasManagementClass);
 
@@ -321,7 +334,9 @@ export function WorkEnvManagementClassJudge() {
 
       {/* Result */}
       {result && (
-        <ManagementClassResultCard result={result} recordMeta={recordMeta} />
+        <div ref={resultRef}>
+          <ManagementClassResultCard result={result} recordMeta={recordMeta} />
+        </div>
       )}
 
       {/* Explanation panel */}
@@ -330,6 +345,12 @@ export function WorkEnvManagementClassJudge() {
   );
 }
 
+const CLASS_ICON: Record<ManagementClass, React.ElementType> = {
+  1: CheckCircle2,
+  2: AlertTriangle,
+  3: XCircle,
+};
+
 function ManagementClassResultCard({
   result,
   recordMeta,
@@ -337,38 +358,16 @@ function ManagementClassResultCard({
   result: ManagementClassResult;
   recordMeta: ClassJudgeRecordMeta | null;
 }) {
-  const classConfig: Record<
-    ManagementClass,
-    { label: string; color: string; bg: string; border: string; Icon: React.ElementType }
-  > = {
-    1: {
-      label: "第1管理区分",
-      color: "text-emerald-700",
-      bg: "bg-emerald-50",
-      border: "border-emerald-300",
-      Icon: CheckCircle2,
-    },
-    2: {
-      label: "第2管理区分",
-      color: "text-amber-700",
-      bg: "bg-amber-50",
-      border: "border-amber-300",
-      Icon: AlertTriangle,
-    },
-    3: {
-      label: "第3管理区分",
-      color: "text-red-700",
-      bg: "bg-red-50",
-      border: "border-red-400",
-      Icon: XCircle,
-    },
-  };
-
-  const cfg = classConfig[result.managementClass];
-  const { Icon } = cfg;
+  const v = MANAGEMENT_CLASS_VISUAL[result.managementClass];
+  const Icon = CLASS_ICON[result.managementClass];
 
   return (
-    <div className={`rounded-xl border-2 ${cfg.border} ${cfg.bg} p-6 print:border print:bg-white print:p-0`}>
+    <div
+      role="status"
+      aria-label={`判定結果: ${v.label} ${v.stateLabel}`}
+      data-testid="class-conclusion"
+      className={`rounded-2xl border-2 ${v.soft} p-6 print:border print:bg-white print:p-0`}
+    >
       {/* 記録ツールバー（印刷時は隠す） */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2 print:hidden">
         <p className="text-xs font-semibold text-slate-600">
@@ -387,10 +386,71 @@ function ManagementClassResultCard({
       {recordMeta && <ClassJudgeRecordHeader meta={recordMeta} />}
       {recordMeta && <ClassJudgeInputTable meta={recordMeta} />}
 
-      <div className="mb-4 flex items-center gap-3 print:mt-3">
-        <Icon className={`h-8 w-8 ${cfg.color}`} aria-hidden />
+      {/* 結論ファースト: 区分のデカ表示＋状態チップ（画面用） */}
+      <div className="print:hidden">
+        <p className="text-xs font-semibold opacity-70">判定結果</p>
+        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <span
+            data-testid="class-big-value"
+            className={`text-6xl font-bold leading-none tracking-tight ${v.text}`}
+          >
+            第{result.managementClass}
+            <span className="ml-1 text-2xl font-bold">管理区分</span>
+          </span>
+          <span
+            data-testid="class-state-chip"
+            className={`inline-flex items-center rounded-xl px-4 py-2 text-xl font-bold ${v.chip}`}
+          >
+            {v.stateLabel}
+          </span>
+        </div>
+        {/* 第1〜第3 色帯（順序尺度・現在区分の中央に▼） */}
+        <div className="mt-4" data-testid="class-band">
+          <div className="relative pt-3">
+            <span
+              aria-hidden="true"
+              className="absolute top-0 -translate-x-1/2 text-sm leading-none"
+              style={{ left: `${managementClassMarkerPercent(result.managementClass)}%` }}
+            >
+              ▼
+            </span>
+            <div className="flex h-4 w-full overflow-hidden rounded-full">
+              {MANAGEMENT_CLASS_ORDER.map((cls) => (
+                <span
+                  key={cls}
+                  data-testid={`class-band-seg-${cls}`}
+                  className={`h-full flex-1 ${MANAGEMENT_CLASS_VISUAL[cls].bar} ${
+                    cls === 1 ? "" : "border-l border-white/60"
+                  }`}
+                />
+              ))}
+            </div>
+            <div className="mt-0.5 flex text-[10px] font-semibold opacity-70">
+              {MANAGEMENT_CLASS_ORDER.map((cls) => (
+                <span key={cls} className="flex-1 text-center">
+                  第{cls} {MANAGEMENT_CLASS_VISUAL[cls].stateLabel}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+        {/* 次にやること（第3は停止級を最前面に） */}
+        {result.managementClass === 3 && (
+          <p className="mt-3 rounded-lg bg-rose-800 px-3 py-2 text-sm font-bold text-white">
+            ⚠ 直ちに改善 — 改善完了まで有効な呼吸用保護具の着用が必要です
+          </p>
+        )}
+        <p className="mt-3 text-sm font-semibold">
+          次にやること: {v.shortAction}
+          {result.deadline ? `（改善期限: ${result.deadline}）` : ""}
+        </p>
+      </div>
+
+      {/* 印刷専用：従来の判定見出し（A4評価記録の体裁を変えない） */}
+      <div className="mb-4 hidden items-center gap-3 print:mt-3 print:flex">
+        <Icon className={`h-8 w-8 ${v.text}`} aria-hidden />
         <div>
-          <p className={`text-2xl font-extrabold ${cfg.color}`}>{cfg.label}</p>
+          <p className={`text-2xl font-extrabold ${v.text}`}>{v.label}</p>
           {result.deadline && (
             <p className="text-sm font-semibold text-slate-600">
               改善期限: {result.deadline}
@@ -400,7 +460,7 @@ function ManagementClassResultCard({
       </div>
 
       {/* A/B class breakdown */}
-      <div className="mb-4 flex flex-wrap gap-2">
+      <div className="mb-4 mt-4 flex flex-wrap gap-2">
         <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-700 shadow-sm">
           A測定 → 第{result.aClass}管理区分
         </span>

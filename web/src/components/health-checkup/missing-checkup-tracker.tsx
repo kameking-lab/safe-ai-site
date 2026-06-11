@@ -12,13 +12,18 @@
  * 計算はマウント後のみ行い、SSR とのハイドレーション差異を避ける。
  */
 
-import { useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 import {
   CHECKUP_TIMING_LABELS,
   CHECKUP_TIMING_ORDER,
   type CheckupTimingStatus,
   classifyCheckupTiming,
 } from "@/lib/health-checkup-timing";
+import {
+  clearCheckupRecords,
+  useCheckupRecords,
+  writeCheckupRecord,
+} from "./checkup-records-store";
 
 export interface TrackerEntry {
   ruleId: string;
@@ -37,30 +42,6 @@ interface Props {
   entries: TrackerEntry[];
   /** プロファイル毎に保存を分けるキー。 */
   storageKey: string;
-}
-
-type RecordMap = Record<string, string>;
-
-function readRecords(key: string): RecordMap {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = window.localStorage.getItem(key);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as unknown;
-    if (parsed && typeof parsed === "object") return parsed as RecordMap;
-    return {};
-  } catch {
-    return {};
-  }
-}
-
-function writeRecords(key: string, value: RecordMap): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    /* 容量超過等は無視 */
-  }
 }
 
 function formatJaMonth(iso: string): string {
@@ -91,8 +72,8 @@ export function MissingCheckupTracker({ entries, storageKey }: Props) {
     () => true,
     () => false,
   );
-  // 保存済みの実施日。lazy 初期化なので effect 内 setState を発生させない。
-  const [records, setRecords] = useState<RecordMap>(() => readRecords(storageKey));
+  // 保存済みの実施日。結論カードと同じ共有ストアを購読（同一タブ内で即時同期）。
+  const records = useCheckupRecords(storageKey);
 
   // 随時実施は月別の期限管理になじまないため別枠で案内。
   const periodic = useMemo(
@@ -105,18 +86,11 @@ export function MissingCheckupTracker({ entries, storageKey }: Props) {
   );
 
   const update = (ruleId: string, value: string) => {
-    setRecords((prev) => {
-      const next = { ...prev };
-      if (value) next[ruleId] = value;
-      else delete next[ruleId];
-      writeRecords(storageKey, next);
-      return next;
-    });
+    writeCheckupRecord(storageKey, ruleId, value);
   };
 
   const clearAll = () => {
-    setRecords({});
-    writeRecords(storageKey, {});
+    clearCheckupRecords(storageKey);
   };
 
   // マウント前は今日依存の判定をしない（ハイドレーション差異回避）。

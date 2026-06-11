@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
-import { SchedulerDocument } from "@/components/health-checkup/scheduler-document";
+import {
+  SchedulerDocument,
+  buildTrackerData,
+} from "@/components/health-checkup/scheduler-document";
+import { CheckupConclusionCard } from "@/components/health-checkup/checkup-conclusion-card";
 import { PrintButton } from "@/components/health-checkup/print-button";
 import { CrossToolLinks, HEALTH_CHECKUP_TO_SLUG } from "@/components/cross-tool-links";
 import { buildDecision } from "@/lib/health-checkup-engine";
@@ -101,6 +105,7 @@ export default async function HealthCheckupSchedulerResultPage({
 
   const decision = buildDecision(profile, []);
   const generatedAt = new Date().toISOString().slice(0, 10);
+  const tracker = buildTrackerData(profile, decision);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -132,6 +137,15 @@ export default async function HealthCheckupSchedulerResultPage({
             ← 入力に戻る
           </Link>
           <PrintButton />
+        </div>
+
+        {/* 結論ファースト: 期限超過→間近→記録のこり→期限内の1メッセージ（画面専用） */}
+        <div className="mb-6 print:hidden">
+          <CheckupConclusionCard
+            entries={tracker.entries}
+            storageKey={tracker.storageKey}
+            requiredTotal={decision.required.length}
+          />
         </div>
 
         <SchedulerDocument
