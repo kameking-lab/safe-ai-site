@@ -13,7 +13,7 @@ import { selectSignageSiteSafety } from "@/lib/signage/site-safety";
 const RELOAD_INTERVAL_MS = 5 * 60 * 1000;
 const VISIBLE_LIMIT = 4;
 
-type PanelData = {
+export type SignageSiteSafetyData = {
   /** この端末に現場記録がひとつでもあるか。無い端末ではパネル自体を出さない。 */
   hasRecords: boolean;
   actions: DailyAction[];
@@ -22,13 +22,11 @@ type PanelData = {
 };
 
 /**
- * 「現場の安全状態」パネル: この端末（同一ブラウザ）の /site-records 記録キットに
- * 保存された 未是正指摘・要対策ヒヤリ・使用不可機械・委員会未開催 をサイネージに掲示する。
- * 気象・事故・法改正など外部情報のみだったサイネージに自現場のデータを結線する。
- * 健診（個人情報）とカレンダー（参考情報）は掲示しない（lib/signage/site-safety.ts）。
+ * この端末の /site-records 記録キット集計を読み込むフック。
+ * パネル表示と結論ストリップ（buildSignageConclusion）の両方が同じデータを使う。
  */
-export function SignageSiteSafety() {
-  const [data, setData] = useState<PanelData | null>(null);
+export function useSignageSiteSafetyData(): SignageSiteSafetyData | null {
+  const [data, setData] = useState<SignageSiteSafetyData | null>(null);
 
   const reload = useCallback(() => {
     const patrolRecords = getAllPatrolRecords();
@@ -64,6 +62,16 @@ export function SignageSiteSafety() {
     };
   }, [reload]);
 
+  return data;
+}
+
+/**
+ * 「現場の安全状態」パネル: この端末（同一ブラウザ）の /site-records 記録キットに
+ * 保存された 未是正指摘・要対策ヒヤリ・使用不可機械・委員会未開催 をサイネージに掲示する。
+ * 気象・事故・法改正など外部情報のみだったサイネージに自現場のデータを結線する。
+ * 健診（個人情報）とカレンダー（参考情報）は掲示しない（lib/signage/site-safety.ts）。
+ */
+export function SignageSiteSafety({ data }: { data: SignageSiteSafetyData | null }) {
   // 記録のない端末（サイネージ専用機など）では場所を取らない
   if (!data || !data.hasRecords) return null;
 
@@ -88,12 +96,12 @@ export function SignageSiteSafety() {
           現場の安全状態
         </h2>
         {data.overdueCount > 0 && (
-          <span className="rounded-full bg-rose-600 px-2 py-0.5 text-[9px] font-bold text-white sm:text-[10px]">
+          <span className="rounded-full bg-rose-600 px-2 py-0.5 text-[9px] font-bold text-white sm:text-[10px] xl:px-2.5 xl:text-sm">
             期限超過 {data.overdueCount}件
           </span>
         )}
         {data.alertCount > 0 && (
-          <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[9px] font-bold text-white sm:text-[10px]">
+          <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[9px] font-bold text-white sm:text-[10px] xl:px-2.5 xl:text-sm">
             要対応 {data.alertCount}件
           </span>
         )}

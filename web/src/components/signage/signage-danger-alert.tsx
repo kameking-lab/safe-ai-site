@@ -63,17 +63,27 @@ export function SignageDangerAlert({ jmaHeadline, warnings }: Props) {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-rose-700/60 bg-rose-950/40 px-3 py-2 text-xs">
-        <AlertOctagon className="h-4 w-4 text-rose-300" />
-        <span className="font-semibold text-rose-200">危険イベント全画面アラート</span>
+      {/* 色文法（柱0）: 赤い外枠は「高リスク警報を検知中」のときだけ。平常時に常時赤枠だと
+          赤＝危険・停止の意味が薄れ、本当の警報時に効かなくなる。発動ボタン自体は
+          非常ボタンの慣例どおり常時赤のまま。 */}
+      <div
+        data-danger-active={isHighRisk ? "1" : "0"}
+        className={`flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2 text-xs ${
+          isHighRisk ? "border-rose-500 bg-rose-950/60" : "border-slate-600 bg-slate-900/70"
+        }`}
+      >
+        <AlertOctagon className={`h-4 w-4 ${isHighRisk ? "text-rose-300" : "text-slate-400"}`} />
+        <span className={`font-semibold ${isHighRisk ? "text-rose-200" : "text-slate-300"}`}>
+          危険イベント全画面アラート
+        </span>
         <button
           type="button"
           onClick={handleManualAlert}
-          className="rounded border border-rose-400 bg-rose-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-rose-600"
+          className="min-h-[44px] rounded border border-rose-400 bg-rose-700 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-600"
         >
           🚨 アラート発動（手動）
         </button>
-        <label className="inline-flex items-center gap-1 text-[11px] text-rose-100">
+        <label className={`inline-flex min-h-[44px] items-center gap-1 text-[11px] ${isHighRisk ? "text-rose-100" : "text-slate-200"}`}>
           <input
             type="checkbox"
             checked={autoSpeak}

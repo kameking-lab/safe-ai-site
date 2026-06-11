@@ -66,7 +66,7 @@ export function SignageHourlyStrip({ hourly, locationLabel, status }: SignageHou
             <span className="my-0.5 text-lg leading-none sm:text-xl lg:text-2xl" aria-hidden>
               {weatherIcon(h.weatherCode, h.precipMm)}
             </span>
-            <span className="text-[9px] font-semibold tabular-nums text-white sm:text-[10px] lg:text-xs">{h.tempC}°</span>
+            <span className="text-[9px] font-semibold tabular-nums text-white sm:text-[10px] lg:text-xs xl:text-sm">{h.tempC}°</span>
             {h.precipMm >= 0.1 ? (
               <span className="text-[7px] tabular-nums text-sky-300 sm:text-[8px] lg:text-[9px]">{h.precipMm}mm</span>
             ) : (

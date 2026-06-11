@@ -2,11 +2,13 @@
 
 import { useMemo } from "react";
 import { computeTodayRisks } from "@/lib/utils/risk-search";
-import type { RiskLevel } from "@/lib/utils/risk-search";
+import type { RiskLevel, SeasonalRisk } from "@/lib/utils/risk-search";
 import type { SiteRiskWeather } from "@/lib/types/domain";
 
 type Props = {
   weatherData?: SiteRiskWeather | null;
+  /** ページ側で計算済みのリスク一覧（結論ストリップと同一データを使うため）。未指定なら内部で計算。 */
+  precomputedRisks?: SeasonalRisk[];
 };
 
 function riskBgClass(level: RiskLevel) {
@@ -33,14 +35,15 @@ function riskBadgeClass(level: RiskLevel) {
   }
 }
 
-export function SignageRiskPrediction({ weatherData }: Props) {
+export function SignageRiskPrediction({ weatherData, precomputedRisks }: Props) {
   const risks = useMemo(() => {
+    if (precomputedRisks) return precomputedRisks;
     return computeTodayRisks({
       date: new Date(),
       temperatureCelsius: weatherData?.temperatureCelsius,
       precipitationMm: weatherData?.precipitationMm,
     });
-  }, [weatherData]);
+  }, [weatherData, precomputedRisks]);
 
   const highRisks = risks.filter((r) => r.level === "高");
   const otherRisks = risks.filter((r) => r.level !== "高");
@@ -68,17 +71,17 @@ export function SignageRiskPrediction({ weatherData }: Props) {
             className={`rounded-lg border p-2 ${riskBgClass(risk.level)} sm:rounded-xl sm:p-2.5`}
           >
             <div className="flex items-start gap-2">
-              <span className="shrink-0 text-base">{risk.icon}</span>
+              <span className="shrink-0 text-base xl:text-2xl">{risk.icon}</span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold ${riskBadgeClass(risk.level)}`}>
+                  <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold xl:text-xs ${riskBadgeClass(risk.level)}`}>
                     {risk.level}リスク
                   </span>
-                  <span className={`text-[10px] font-bold sm:text-xs ${riskTextClass(risk.level)}`}>
+                  <span className={`text-[10px] font-bold sm:text-xs xl:text-base ${riskTextClass(risk.level)}`}>
                     {risk.label}
                   </span>
                 </div>
-                <p className={`mt-0.5 text-[9px] leading-relaxed sm:text-[10px] ${riskTextClass(risk.level)} opacity-80`}>
+                <p className={`mt-0.5 text-[9px] leading-relaxed sm:text-[10px] xl:text-xs ${riskTextClass(risk.level)} opacity-80`}>
                   {risk.reason}
                 </p>
               </div>
