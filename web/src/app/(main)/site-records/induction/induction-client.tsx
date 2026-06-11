@@ -28,6 +28,8 @@ import {
   type InductionRecord,
   type InductionSummary,
 } from "@/lib/site-records/induction-store";
+import { countInductionRemaining, inductionConclusion } from "@/lib/site-records/record-conclusions";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -65,6 +67,11 @@ export function InductionClient() {
   }, []);
 
   const doneCount = useMemo(() => items.filter((i) => i.checked).length, [items]);
+  // 記入のこり（KY用紙と同じ文法）: 氏名＋未チェック項目＋実施者/本人の確認
+  const remaining = useMemo(
+    () => countInductionRemaining({ workerName, items, confirmedWorker, confirmedEducator }),
+    [workerName, items, confirmedWorker, confirmedEducator],
+  );
   // 名簿CSVフィルタの選択肢（保存一覧から現場・月を抽出）。
   const rosterSites = useMemo(() => distinctSites(list), [list]);
   const rosterMonths = useMemo(() => distinctMonths(list), [list]);
@@ -204,6 +211,12 @@ export function InductionClient() {
 
   return (
     <div className="space-y-6">
+      {/* 結論カード（柱0）: KY用紙と同じ「記入のこりN（青）→ 記入完了（緑）」。
+          印刷帳票（正式書式）には載せない */}
+      {date !== "" && (
+        <ConclusionCard {...inductionConclusion(remaining)} className="print:hidden" />
+      )}
+
       {/* 印刷時のみの帳票タイトル（元請・監督署へ提出する書類として何の記録かを明示） */}
       <div className="hidden text-center print:block">
         <h1 className="text-black">新規入場者 受入教育 実施記録</h1>

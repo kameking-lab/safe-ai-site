@@ -18,6 +18,8 @@ import {
   type InspectionResult,
   type InspectionSummary,
 } from "@/lib/site-records/inspection-store";
+import { inspectionConclusion } from "@/lib/site-records/record-conclusions";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -53,6 +55,8 @@ export function InspectionClient() {
   }, []);
 
   const ngCount = useMemo(() => items.filter((i) => i.result === "ng").length, [items]);
+  // 保存済みの点検を横断した「使用不可」の台数（結論カードの判定元）
+  const unusableSaved = useMemo(() => list.filter((s) => !s.usable).length, [list]);
 
   function changeKind(kind: EquipKind) {
     setEquipKind(kind);
@@ -136,6 +140,11 @@ export function InspectionClient() {
 
   return (
     <div className="space-y-6">
+      {/* 結論カード（柱0）: 使用不可の機械が1台でもあれば赤（停止の文法）で最上部に */}
+      {date !== "" && (
+        <ConclusionCard {...inspectionConclusion(list.length, unusableSaved)} className="print:hidden" />
+      )}
+
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="点検日"><input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" /></Field>
@@ -213,16 +222,19 @@ export function InspectionClient() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
+      <section id="saved-inspections" className="scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden">
         <h2 className="flex items-center gap-2 text-base font-bold text-slate-900"><FolderOpen className="h-5 w-5 text-blue-600" aria-hidden="true" /> 保存した点検記録（この端末）</h2>
         {list.length === 0 ? (
           <p className="mt-2 text-sm text-slate-400">まだ保存された記録はありません。</p>
         ) : (
           <ul className="mt-3 space-y-2">
             {list.map((s) => (
-              <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 p-3">
+              <li key={s.id} className={`flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3 ${s.usable ? "border-slate-200" : "border-rose-300 border-l-4 border-l-rose-500 bg-rose-50/40"}`}>
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-slate-900">{s.date}　{EQUIP_KIND_JA[s.equipKind]}　{s.equipName || ""}</p>
+                  <p className="text-sm font-bold text-slate-900">
+                    {!s.usable && <span className="mr-2 rounded bg-rose-600 px-1.5 py-0.5 text-[11px] font-bold text-white">使用不可</span>}
+                    {s.date}　{EQUIP_KIND_JA[s.equipKind]}　{s.equipName || ""}
+                  </p>
                   <p className="mt-0.5 text-xs text-slate-500">{s.site || "現場なし"}／不良 {s.ngCount}／{s.usable ? "使用可" : "使用不可"}</p>
                 </div>
                 <div className="flex shrink-0 gap-2">
