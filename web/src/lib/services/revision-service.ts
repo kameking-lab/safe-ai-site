@@ -1,4 +1,3 @@
-import { lawRevisionCores } from "@/data/mock/law-revisions";
 import type {
   ApiForceErrorType,
   RevisionListApiResponse,
@@ -62,18 +61,29 @@ function parseErrorResponse(payload: unknown): ServiceError | null {
   };
 }
 
+// C-1（モバイル実速度の構造是正）: lawRevisionCores（serialize 64KB・依存込みで
+// 数百KB）を静的 import すると、service-factory → home-screen 経由で /laws 以外
+// （/accidents 等）のバンドルにも同梱される。データは呼び出し時に dynamic import
+// で遅延取得する。/laws の SSR 初期表示は server page から initialRevisions prop で
+// 渡す（laws/page.tsx → LawsPageClient → HomeScreen）。
+async function loadLawRevisionCores() {
+  const mod = await import("@/data/mock/law-revisions");
+  return mod.lawRevisionCores;
+}
+
 export function createMockRevisionService(): RevisionService {
   return {
     getCachedRevisions() {
-      return lawRevisionCores;
+      // 同期キャッシュは持たない（SSR初期データは initialRevisions prop 経由）
+      return [];
     },
     getInitialRevisionId() {
-      return lawRevisionCores[0]?.id ?? null;
+      return null;
     },
     async getLawRevisions() {
       return {
         ok: true,
-        data: lawRevisionCores,
+        data: await loadLawRevisionCores(),
       };
     },
   };
@@ -83,14 +93,13 @@ export function createApiRevisionService(
   fetchImpl: typeof fetch = fetch,
   endpoint = "/api/revisions"
 ): RevisionService {
-  const cachedFallback: LawRevision[] = lawRevisionCores;
-
   return {
     getCachedRevisions() {
-      return cachedFallback;
+      // 同期キャッシュは持たない（SSR初期データは initialRevisions prop 経由）
+      return [];
     },
     getInitialRevisionId() {
-      return cachedFallback[0]?.id ?? null;
+      return null;
     },
     async getLawRevisions(options) {
       try {

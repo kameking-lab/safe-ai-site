@@ -64,7 +64,9 @@ export default function LawsPage() {
         />
       </div>
       <Suspense fallback={<PageSkeleton label="法改正一覧を読み込み中" />}>
-        <LawsPageClient />
+        {/* C-1: 一覧の初期データは server で確定して渡す（クライアントの
+            データ静的importを排除しつつ SSR HTML に全件を含める） */}
+        <LawsPageClient initialRevisions={lawRevisionCores} />
       </Suspense>
       <RelatedPageCards
         heading="合わせて使う"

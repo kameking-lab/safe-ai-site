@@ -2,11 +2,32 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChatPanel, type ChatMessage } from "@/components/chat-panel";
+import { usePathname, useRouter } from "next/navigation";
+import type { ChatMessage } from "@/components/chat-panel";
 import { Mascot } from "@/components/mascot";
-import { AccidentDatabasePanel } from "@/components/accident-database-panel";
-import { AccidentExtrasPanel } from "@/components/accident-extras-panel";
+// C-1: law-revision-list を home-screen から静的 import すると /accidents の
+// バンドルにも同梱されるため、コンポーネント本体は laws-page-client が
+// LawsListComponent prop で注入する（型のみここで参照）。
+// dynamic(ssr:true)化はチェーンが1段深くなり simulated LCP が悪化したため不採用。
+import type { LawRevisionListProps } from "@/components/law-revision-list";
+import { TabNavigation, type TabId } from "@/components/tab-navigation";
+
+// C-1: 既定タブの初期描画に不要なバリアント/タブ別パネルは dynamic import で遅延。
+// /accidents・/laws のページバンドルから他バリアント（KY・通知・PDF・Eラーニング等）
+// のコードを排除して LCP を下げる。タブ切替・該当バリアント表示時にチャンクが届く。
+const ChatPanel = dynamic(
+  () => import("@/components/chat-panel").then((m) => m.ChatPanel),
+  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
+);
+// SSR時も元々 mounted ゲートでスケルトン表示のため、遅延化による初期表示の差はない
+const AccidentExtrasPanel = dynamic(
+  () => import("@/components/accident-extras-panel").then((m) => m.AccidentExtrasPanel),
+  { ssr: false, loading: () => <div className="h-[280px] animate-pulse rounded-2xl border border-slate-200 bg-slate-50/60 sm:h-[320px]" /> }
+);
+const AccidentDatabasePanel = dynamic(
+  () => import("@/components/accident-database-panel").then((m) => m.AccidentDatabasePanel),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-lg bg-slate-100" /> }
+);
 
 const AccidentAnalysisPanel = dynamic(
   () => import("@/components/accident-analysis-panel").then((m) => m.AccidentAnalysisPanel),
@@ -29,20 +50,54 @@ const MhlwDeathsPanel = dynamic(
   () => import("@/components/mhlw-deaths-panel").then((m) => m.MhlwDeathsPanel),
   { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
 );
-import { ELearningPanel } from "@/components/elearning-panel";
-import { HomeValueHero } from "@/components/home-value-hero";
-import { PersonaEntry } from "@/components/persona-entry";
-import { KyRecordList } from "@/components/ky-record-list";
-import { KySheetPanel } from "@/components/ky-sheet-panel";
-import { KyIndustryPresetPicker } from "@/components/ky-industry-preset-picker";
-import { LawRevisionList } from "@/components/law-revision-list";
-import { MailDeliveryPanel } from "@/components/mail-delivery-panel";
-import { MhlwDisasterDatabasesPanel } from "@/components/mhlw-disaster-databases-panel";
-import { NotificationSettingsPanel } from "@/components/notification-settings-panel";
-import { PdfExportPanel } from "@/components/pdf-export-panel";
-import { SummaryPanel } from "@/components/summary-panel";
-import { TabNavigation, type TabId } from "@/components/tab-navigation";
-import { WeatherRiskCard } from "@/components/weather-risk-card";
+const ELearningPanel = dynamic(
+  () => import("@/components/elearning-panel").then((m) => m.ELearningPanel),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-lg bg-slate-100" /> }
+);
+const HomeValueHero = dynamic(
+  () => import("@/components/home-value-hero").then((m) => m.HomeValueHero),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-lg bg-slate-100" /> }
+);
+const PersonaEntry = dynamic(
+  () => import("@/components/persona-entry").then((m) => m.PersonaEntry),
+  { ssr: false, loading: () => <div className="h-40 animate-pulse rounded-lg bg-slate-100" /> }
+);
+const KyRecordList = dynamic(
+  () => import("@/components/ky-record-list").then((m) => m.KyRecordList),
+  { ssr: false, loading: () => <div className="h-40 animate-pulse rounded-lg bg-slate-100" /> }
+);
+const KySheetPanel = dynamic(
+  () => import("@/components/ky-sheet-panel").then((m) => m.KySheetPanel),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-lg bg-slate-100" /> }
+);
+const KyIndustryPresetPicker = dynamic(
+  () => import("@/components/ky-industry-preset-picker").then((m) => m.KyIndustryPresetPicker),
+  { ssr: false, loading: () => <div className="h-24 animate-pulse rounded-lg bg-slate-100" /> }
+);
+const MailDeliveryPanel = dynamic(
+  () => import("@/components/mail-delivery-panel").then((m) => m.MailDeliveryPanel),
+  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
+);
+const MhlwDisasterDatabasesPanel = dynamic(
+  () => import("@/components/mhlw-disaster-databases-panel").then((m) => m.MhlwDisasterDatabasesPanel),
+  { ssr: false, loading: () => <div className="h-40 animate-pulse rounded-lg bg-slate-100" /> }
+);
+const NotificationSettingsPanel = dynamic(
+  () => import("@/components/notification-settings-panel").then((m) => m.NotificationSettingsPanel),
+  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
+);
+const PdfExportPanel = dynamic(
+  () => import("@/components/pdf-export-panel").then((m) => m.PdfExportPanel),
+  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
+);
+const SummaryPanel = dynamic(
+  () => import("@/components/summary-panel").then((m) => m.SummaryPanel),
+  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
+);
+const WeatherRiskCard = dynamic(
+  () => import("@/components/weather-risk-card").then((m) => m.WeatherRiskCard),
+  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
+);
 import { SITE_STATS } from "@/data/site-stats";
 import { createServices } from "@/lib/services/service-factory";
 import type { ServiceError, ServiceStatus } from "@/lib/types/api";
@@ -51,6 +106,7 @@ import {
   type AccidentCase,
   type AccidentWorkCategory,
   type AccidentType,
+  type LawRevision,
   type RevisionSummary,
   type SiteRiskWeather,
 } from "@/lib/types/domain";
@@ -77,6 +133,14 @@ type HomeScreenProps = {
   children: React.ReactNode;
   variant?: HomeScreenVariant;
   initialLawTab?: TabId;
+  /**
+   * C-1: /laws の法改正一覧の SSR 初期データ。server page から渡す。
+   * クライアントの revision-service は同期キャッシュを持たない
+   * （データ静的 import がバンドルに同梱されるのを防ぐため）。
+   */
+  initialRevisions?: LawRevision[];
+  /** C-1: 法改正一覧コンポーネント本体。laws variant のページが注入する */
+  LawsListComponent?: React.ComponentType<LawRevisionListProps>;
 };
 
 function makeInitialKyInstruction(): KyInstructionRecordState {
@@ -173,16 +237,17 @@ function readAccidentTabFromUrl(
     : null;
 }
 
-export function HomeScreen({ children, variant: variantProp, initialLawTab }: HomeScreenProps) {
+export function HomeScreen({ children, variant: variantProp, initialLawTab, initialRevisions, LawsListComponent }: HomeScreenProps) {
   const variant = variantProp ?? "portal";
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const services = useMemo(() => createServices(), []);
-  const [revisions, setRevisions] = useState(() => services.revision.getCachedRevisions());
+  const [revisions, setRevisions] = useState(
+    () => initialRevisions ?? services.revision.getCachedRevisions()
+  );
   const [activeTab, setActiveTab] = useState<TabId>(() => initialLawTab ?? "laws");
   const [selectedRevisionId, setSelectedRevisionId] = useState(
-    () => services.revision.getInitialRevisionId() ?? ""
+    () => initialRevisions?.[0]?.id ?? services.revision.getInitialRevisionId() ?? ""
   );
   const [isSummaryLoading, setIsSummaryLoading] = useState(false);
   const [isChatSending, setIsChatSending] = useState(false);
@@ -198,26 +263,46 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
   const [weatherRisk, setWeatherRisk] = useState<SiteRiskWeather | null>(null);
   const [weatherRiskError, setWeatherRiskError] = useState<ServiceError | null>(null);
   const [accidentCases, setAccidentCases] = useState<AccidentCase[]>([]);
+  // C-1: 全件データはバンドル同梱の同期取得をやめ、非同期サービス経由で遅延取得
+  const [allAccidentCases, setAllAccidentCases] = useState<AccidentCase[]>([]);
   const [accidentStatus, setAccidentStatus] = useState<ServiceStatus>("idle");
   const [accidentError, setAccidentError] = useState<ServiceError | null>(null);
   // 型グリッド（柱0）からの acc_type 付きフル遷移で、型フィルタを初期反映する。
-  // tab=list の復元（accidentActiveTab）と同じく初回マウント時のみ読む。
-  const [selectedAccidentType, setSelectedAccidentType] = useState<AccidentType | "すべて">(() => {
-    const raw = variantProp === "accidents" ? searchParams?.get("acc_type") : null;
-    return raw && ALL_ACCIDENT_TYPES.includes(raw as AccidentType) ? (raw as AccidentType) : "すべて";
-  });
+  // C-1: useSearchParams を使うと静的プリレンダーが Suspense フォールバックへ落ち、
+  // 本文全体がクライアント差し替え（LCP/CLS悪化）になるため、URLはマウント後に
+  // window.location から一度だけ読む。SSR/初回描画は既定タブで確定させる。
+  const [selectedAccidentType, setSelectedAccidentType] = useState<AccidentType | "すべて">("すべて");
   const [selectedAccidentCategory, setSelectedAccidentCategory] = useState<AccidentWorkCategory | "すべて">("すべて");
-  const [accidentActiveTab, setAccidentActiveTab] = useState<AccidentTab>(
-    () =>
-      (variantProp === "accidents" &&
-        readAccidentTabFromUrl(searchParams?.get("tab"))) ||
-      "mhlw-search",
-  );
+  const [accidentActiveTab, setAccidentActiveTab] = useState<AccidentTab>("mhlw-search");
+
+  // マウント時にURLクエリから状態を復元（?tab= / ?acc_type=。laws は ?tab=chat|summary）
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (variant === "accidents") {
+      const tab = readAccidentTabFromUrl(params.get("tab"));
+      if (tab) setAccidentActiveTab(tab);
+      const rawType = params.get("acc_type");
+      if (rawType && ALL_ACCIDENT_TYPES.includes(rawType as AccidentType)) {
+        setSelectedAccidentType(rawType as AccidentType);
+      }
+    } else if (variant === "laws") {
+      const tab = params.get("tab");
+      if (tab === "chat" || tab === "summary") setActiveTab(tab);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- 初回マウント時のみURLを読む
+  }, []);
 
   // Sync /accidents tab state -> URL (replace, scroll preserved)
+  // 初回実行はスキップ（既定state でURLの ?tab=/?acc_type= を消さないため。
+  // URL復元エフェクトが state を更新すれば、その再実行で正しく同期される）
+  const skippedFirstUrlSync = useRef(false);
   useEffect(() => {
     if (variant !== "accidents") return;
-    const params = new URLSearchParams(searchParams?.toString() ?? "");
+    if (!skippedFirstUrlSync.current) {
+      skippedFirstUrlSync.current = true;
+      return;
+    }
+    const params = new URLSearchParams(window.location.search);
     if (accidentActiveTab === "mhlw-search") {
       params.delete("tab");
     } else {
@@ -236,7 +321,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
     if (next !== current) {
       router.replace(next, { scroll: false });
     }
-  }, [accidentActiveTab, selectedAccidentType, variant, pathname, router, searchParams]);
+  }, [accidentActiveTab, selectedAccidentType, variant, pathname, router]);
   const [selectedRegionName, setSelectedRegionName] = useState(
     () => services.weatherRisk.getAvailableRegions()[0]?.regionName ?? ""
   );
@@ -287,7 +372,6 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
   // マウント後に日付を初期化（SSR hydration mismatch 対策）
   useEffect(() => {
     const d = new Date();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setKySheetDraft((prev) => (prev.date ? prev : { ...prev, date: d.toISOString().slice(0, 10) }));
     setKyInstructionRecord((prev) =>
       prev.workDateYear || prev.workDateMonth || prev.workDateDay
@@ -433,6 +517,18 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
       active = false;
     };
   }, [variant, services.weatherRisk, selectedRegionName]);
+
+  // 全件データ（リスト件数表示・分析タブ用）。accidents variant で一度だけ取得
+  useEffect(() => {
+    if (variant !== "accidents") return;
+    let active = true;
+    void services.accident.getAllAccidentCases().then((cases) => {
+      if (active) setAllAccidentCases(cases);
+    });
+    return () => {
+      active = false;
+    };
+  }, [variant, services.accident]);
 
   useEffect(() => {
     if (variant !== "accidents") return;
@@ -658,7 +754,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
                 <AccidentExtrasPanel />
                 <AccidentDatabasePanel
                   cases={accidentCases}
-                  allCases={services.accident.getAllAccidentCases()}
+                  allCases={allAccidentCases}
                   selectedCategory={selectedAccidentCategory}
                   selectedType={selectedAccidentType}
                   onSelectCategory={setSelectedAccidentCategory}
@@ -674,7 +770,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
             {accidentActiveTab === "industry" && <IndustryRiskRanking />}
             {accidentActiveTab === "mhlw" && <MhlwAccidentAnalysisPanel />}
             {accidentActiveTab === "analysis" && (
-              <AccidentAnalysisPanel cases={services.accident.getAllAccidentCases()} />
+              <AccidentAnalysisPanel cases={allAccidentCases} />
             )}
           </section>
         </>
@@ -692,8 +788,8 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
                 : "grid grid-cols-1 gap-4 px-4 py-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] lg:items-start lg:gap-6 lg:px-8"
             }
           >
-            {activeTab === "laws" && (
-              <LawRevisionList
+            {activeTab === "laws" && LawsListComponent && (
+              <LawsListComponent
                 revisions={revisions}
                 selectedRevisionId={selectedRevisionId}
                 loadingRevisionId={loadingRevisionId}
@@ -735,8 +831,8 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab }: Ho
               />
             )}
 
-            {activeTab !== "laws" && (
-              <LawRevisionList
+            {activeTab !== "laws" && LawsListComponent && (
+              <LawsListComponent
                 revisions={revisions}
                 selectedRevisionId={selectedRevisionId}
                 loadingRevisionId={loadingRevisionId}

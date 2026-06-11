@@ -1,6 +1,8 @@
 import { RelatedPageCards, type RelatedPage } from "@/components/related-page-cards";
 import type { IndustrySlug } from "@/lib/industry-slugs";
-import { LAW_SOURCE_COUNT } from "@/data/laws";
+// C-1: @/data/laws を import すると法令コーパス全体がバンドルに同梱されるため、
+// 件数は SITE_STATS の静的リテラル（テストで実データと突合）を使う。
+import { SITE_STATS } from "@/data/site-stats";
 import {
   HEALTH_CHECKUP_TO_SLUG,
   SAFETY_PLAN_TO_SLUG,
@@ -98,8 +100,8 @@ function buildPracticeTools(industry?: IndustrySlug, exclude?: CrossToolId): Rel
         href: "/chatbot",
         label: "安衛法AIチャットボット",
         description: lbl
-          ? `${lbl}の計画書・事故事例に関する条文確認をAIに質問。${LAW_SOURCE_COUNT}法令等を根拠条文付きで即答。`
-          : `労働安全衛生法・安衛則・特化則など${LAW_SOURCE_COUNT}法令等を根拠条文付きでAIが回答。出典必須・無料。`,
+          ? `${lbl}の計画書・事故事例に関する条文確認をAIに質問。${SITE_STATS.lawSourceCount}法令等を根拠条文付きで即答。`
+          : `労働安全衛生法・安衛則・特化則など${SITE_STATS.lawSourceCount}法令等を根拠条文付きでAIが回答。出典必須・無料。`,
         color: "blue",
         cta: "AIに質問する",
       },

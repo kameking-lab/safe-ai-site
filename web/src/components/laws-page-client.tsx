@@ -1,18 +1,20 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import { HomeScreen } from "@/components/home-screen";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
-import type { TabId } from "@/components/tab-navigation";
+// C-1: 一覧コンポーネントは laws ページ側で import して HomeScreen に注入する。
+// home-screen が静的 import すると /accidents のバンドルにも同梱されるため。
+import { LawRevisionList } from "@/components/law-revision-list";
+import type { LawRevision } from "@/lib/types/domain";
 
-export function LawsPageClient() {
-  const searchParams = useSearchParams();
-  const tab = searchParams.get("tab");
-  const initialLawTab: TabId = tab === "chat" ? "chat" : tab === "summary" ? "summary" : "laws";
-
+export function LawsPageClient({ initialRevisions }: { initialRevisions?: LawRevision[] }) {
+  // C-1: ?tab= は HomeScreen がマウント後に window.location から復元する。
+  // useSearchParams をここで呼ぶと静的プリレンダーが Suspense フォールバックへ
+  // 落ち、/laws 本文全体がクライアント差し替えになる（LCP/CLS悪化）。
+  // 法改正一覧の初期データは server page から受け取る（バンドル同梱の回避）。
   return (
-    <HomeScreen key={initialLawTab} initialLawTab={initialLawTab} variant="laws">
+    <HomeScreen variant="laws" initialRevisions={initialRevisions} LawsListComponent={LawRevisionList}>
       <TranslatedPageHeader
         titleJa="法改正一覧"
         titleEn="Law Updates"

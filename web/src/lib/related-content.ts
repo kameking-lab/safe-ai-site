@@ -12,7 +12,6 @@
 
 import { mhlwNotices, type MhlwNotice } from "@/data/mhlw-notices";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
-import { safetyGoodsItems, type SafetyGoodsItem } from "@/data/mock/safety-goods";
 import { getAllEquipment, type EquipmentItem } from "@/lib/equipment-recommendation";
 import type { AccidentCase } from "@/lib/types/domain";
 
@@ -351,25 +350,8 @@ export function relatedFromEquipment(
 /**
  * 任意のテキスト（記事タイトル＋本文や、業種・キーワードフリーテキスト）から
  * 関連保護具を引く軽量ヘルパ。D10「この場面で必要な保護具」セクション用。
+ * C-1: クライアント常設の ContextualPpePicks が本モジュール（事故・通達・設備の
+ * 全データを静的 import）を巻き込まないよう related-safety-goods.ts へ分離。
+ * サーバー側の既存呼び出し互換のため再エクスポートする。
  */
-export function relatedSafetyGoodsByText(
-  text: string,
-  opts: { limit?: number } = {}
-): SafetyGoodsItem[] {
-  const limit = Math.max(1, Math.min(10, opts.limit ?? 4));
-  const tokens = tokenize(text);
-  if (tokens.length === 0) return [];
-  const scored = safetyGoodsItems.map((g) => {
-    const haystack = `${g.name} ${g.description} ${g.tags.join(" ")}`;
-    let score = 0;
-    tokens.forEach((t) => {
-      if (haystack.includes(t)) score += 1;
-    });
-    return { g, score };
-  });
-  scored.sort((a, b) => b.score - a.score);
-  return scored
-    .filter((s) => s.score > 0)
-    .slice(0, limit)
-    .map((s) => s.g);
-}
+export { relatedSafetyGoodsByText } from "@/lib/related-safety-goods";

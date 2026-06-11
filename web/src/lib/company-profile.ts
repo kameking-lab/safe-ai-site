@@ -1,6 +1,9 @@
 "use client";
 
-import { z } from "zod";
+// C-1（モバイル実速度の構造是正）: 本モジュールは law-revision-list（/laws）・
+// accident-extras-panel（/accidents）等から広く import される。zod を使うと
+// localStorage の検証1箇所のために 60KB超(gz) がページバンドルへ同梱されるため、
+// 手書きの sanitize に置き換えた（検証内容は従来の schema と同等）。
 
 export const PROFILE_INDUSTRIES = [
   "construction",
@@ -35,23 +38,46 @@ export const SIZE_LABELS: Record<CompanySize, string> = {
   gt300: "300名超",
 };
 
-export const companyProfileSchema = z.object({
-  companyName: z.string().default(""),
-  industry: z.enum(PROFILE_INDUSTRIES).default("construction"),
-  size: z.enum(COMPANY_SIZES).default("10-50"),
+export type CompanyProfile = {
+  companyName: string;
+  industry: ProfileIndustry;
+  size: CompanySize;
   /** 取扱化学物質（自由入力、カンマ区切り） */
-  chemicals: z.array(z.string()).default([]),
+  chemicals: string[];
   /** 主要機械（自由入力） */
-  machines: z.array(z.string()).default([]),
+  machines: string[];
   /** 現場名・部署名（複数可） */
-  sites: z.array(z.string()).default([]),
+  sites: string[];
   /** 主要作業のキーワード（マッチング用） */
-  workKeywords: z.array(z.string()).default([]),
+  workKeywords: string[];
   /** ウィザードを完了したか */
-  wizardCompleted: z.boolean().default(false),
-  updatedAt: z.string().default(() => new Date().toISOString()),
-});
-export type CompanyProfile = z.infer<typeof companyProfileSchema>;
+  wizardCompleted: boolean;
+  updatedAt: string;
+};
+
+function toStringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
+}
+
+/** localStorage から読んだ未知の値を CompanyProfile に整形（旧 zod schema と同等の既定値） */
+function sanitizeProfile(input: unknown): CompanyProfile {
+  const obj = (input && typeof input === "object" ? input : {}) as Record<string, unknown>;
+  return {
+    companyName: typeof obj.companyName === "string" ? obj.companyName : "",
+    industry: (PROFILE_INDUSTRIES as readonly string[]).includes(obj.industry as string)
+      ? (obj.industry as ProfileIndustry)
+      : "construction",
+    size: (COMPANY_SIZES as readonly string[]).includes(obj.size as string)
+      ? (obj.size as CompanySize)
+      : "10-50",
+    chemicals: toStringArray(obj.chemicals),
+    machines: toStringArray(obj.machines),
+    sites: toStringArray(obj.sites),
+    workKeywords: toStringArray(obj.workKeywords),
+    wizardCompleted: typeof obj.wizardCompleted === "boolean" ? obj.wizardCompleted : false,
+    updatedAt: typeof obj.updatedAt === "string" ? obj.updatedAt : new Date().toISOString(),
+  };
+}
 
 const STORAGE_KEY = "company-profile-v1";
 
@@ -72,8 +98,7 @@ export function loadProfile(): CompanyProfile {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_PROFILE;
-    const parsed = companyProfileSchema.safeParse(JSON.parse(raw));
-    return parsed.success ? parsed.data : DEFAULT_PROFILE;
+    return sanitizeProfile(JSON.parse(raw));
   } catch {
     return DEFAULT_PROFILE;
   }

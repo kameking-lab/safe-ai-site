@@ -1,29 +1,13 @@
-import { allLawArticles } from "@/data/laws";
-import { mhlwNotices } from "@/data/mhlw-notices";
-import equipmentDb from "@/data/safety-equipment-db.json";
-import { realAccidentCases } from "@/data/mock/real-accident-cases";
-import { realAccidentCasesExtra } from "@/data/mock/real-accident-cases-extra";
-import { realAccidentCasesExtra2 } from "@/data/mock/real-accident-cases-extra2";
-import { realAccidentCasesExtra3 } from "@/data/mock/real-accident-cases-extra3";
-import { realAccidentCasesDiverseIndustries } from "@/data/mock/real-accident-cases-diverse-industries";
-import { realAccidentCases20242026 } from "@/data/mock/real-accident-cases-2024-2026";
-import { realAccidentCases2025Preliminary } from "@/data/mock/real-accident-cases-2025-preliminary";
-
-const _siteCuratedCaseCount =
-  realAccidentCases.length +
-  realAccidentCasesExtra.length +
-  realAccidentCasesExtra2.length +
-  realAccidentCasesExtra3.length +
-  realAccidentCasesDiverseIndustries.length +
-  realAccidentCases20242026.length +
-  realAccidentCases2025Preliminary.length;
-
-const _noticeCount = mhlwNotices.length;
-const _equipmentItemCount = (equipmentDb as { items: unknown[] }).items?.length ?? 0;
-
 /**
  * サイト全体で表示する KPI 数字を一元管理。
  * ページごとに別々にハードコードすると不整合が生じるため、ここから参照すること。
+ *
+ * C-1（モバイル実速度の構造是正）: 以前はデータセット（法令コーパス・通達DB・
+ * 事故事例・設備DB）を import して件数を実計算していたが、本モジュールは
+ * app-shell / share-buttons などクライアント常設部品から参照されるため、
+ * 件数表示のためだけに数MBのデータが全ページのバンドルへ同梱されていた。
+ * 現在は静的リテラルで保持し、データとの整合は site-stats.test.ts が
+ * テスト時に実データを読み直して機械検証する（ズレたらテストが落ちる）。
  */
 export const SITE_STATS = {
   /**
@@ -47,22 +31,26 @@ export const SITE_STATS = {
   /** 死亡労災件数（令和5年・建設業）厚労省統計 */
   fatalDisastersR5: "1,389",
   /** サイト独自に curated した詳細事故事例の件数（real-accident-cases* 全合算） */
-  siteCuratedCaseCount: _siteCuratedCaseCount.toLocaleString(),
+  siteCuratedCaseCount: "292",
   /** 厚労省 化学物質情報データベース 取込件数 */
   chemicalsMhlwCount: "3,984",
+  /** 化学物質検索DBの収録物質数（厚労省取込＋curated DB のマージ後 distinct） */
+  mhlwMergedChemicalCount: "3,695",
+  /** チャットボット/条文検索が根拠にする法令・規則・指針等のソース数 */
+  lawSourceCount: "55",
   /** /law-search に収録された全条文件数（curated 50法令体制） */
-  lawArticleCount: allLawArticles.length.toLocaleString(),
+  lawArticleCount: "1,018",
   /**
    * RAG 検索（chatbot/法令要約）対応の全条文数。
    * 現時点では allLawArticles と同一ソース。将来、厚労省PDF抽出分を追加すると diverge する。
    */
-  ragArticleCount: allLawArticles.length.toLocaleString(),
+  ragArticleCount: "1,018",
   /** 対応教育の種類数（特別教育・法定・労働衛生、要相談含む） */
   specialEdKinds: "12+",
   /** 厚労省 通達・告示・指針の収録件数（mhlw-notices.ts） */
-  mhlwNoticeCount: _noticeCount.toLocaleString(),
+  mhlwNoticeCount: "1,069",
   /** 保護具AIファインダーが扱う商品点数（safety-equipment-db.json） */
-  equipmentItemCount: _equipmentItemCount.toLocaleString(),
+  equipmentItemCount: "1,050",
 } as const;
 
 /**
@@ -108,6 +96,16 @@ export const SITE_STATS_META: Record<
     source: "厚労省 職場のあんぜんサイト 化学物質情報",
     sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen/kag/kag_index.html",
     asOf: "2026-04",
+  },
+  mhlwMergedChemicalCount: {
+    source: "厚労省 化学物質情報＋サイト curated 物質DB のマージ後件数（lib/mhlw-chemicals.ts）",
+    sourceUrl: "https://anzeninfo.mhlw.go.jp/anzen/kag/kag_index.html",
+    asOf: "2026-06",
+  },
+  lawSourceCount: {
+    source: "data/laws curated 法令データの distinct law 数（法令・規則47＋指針/通達等8）",
+    sourceUrl: "https://laws.e-gov.go.jp/",
+    asOf: "2026-06",
   },
   lawArticleCount: {
     source: "e-Gov 法令検索（curated 主要50法令）",

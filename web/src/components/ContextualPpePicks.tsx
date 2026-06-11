@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { safetyGoodsCategories, safetyGoodsItems, type SafetyGoodsItem } from "@/data/mock/safety-goods";
-import { relatedSafetyGoodsByText } from "@/lib/related-content";
+import { relatedSafetyGoodsByText } from "@/lib/related-safety-goods";
 import { useLanguage } from "@/contexts/language-context";
 
 type Translatable = string | { ja: string; en: string };
