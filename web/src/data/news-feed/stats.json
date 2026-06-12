@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-11T22:48:56.477Z",
+  "generatedAt": "2026-06-12T22:22:10.309Z",
   "counts": {
-    "approved": 14,
-    "rejected": 20,
-    "total": 34,
-    "approvalRate": 0.412
+    "approved": 16,
+    "rejected": 21,
+    "total": 37,
+    "approvalRate": 0.432
   },
   "byDay": [
     {
@@ -132,22 +132,29 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-06-13",
+      "approved": 2,
+      "rejected": 1,
+      "total": 3,
+      "approvalRate": 0.667
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 12,
+      "approved": 14,
       "rejected": 2,
-      "total": 14,
-      "approvalRate": 0.857
+      "total": 16,
+      "approvalRate": 0.875
     },
     {
       "publisher": "日本放送協会",
       "approved": 2,
-      "rejected": 18,
-      "total": 20,
-      "approvalRate": 0.1
+      "rejected": 19,
+      "total": 21,
+      "approvalRate": 0.095
     }
   ],
   "byEstimatedWorkCategory": [
@@ -234,11 +241,11 @@
         0,
         1,
         2,
-        11
+        13
       ],
       "rejected": [
         0,
-        4,
+        5,
         11,
         1,
         1,
@@ -264,7 +271,7 @@
       ],
       "approved": [
         3,
-        7,
+        9,
         4,
         0,
         0,
@@ -276,7 +283,7 @@
       ],
       "rejected": [
         2,
-        17,
+        18,
         1,
         0,
         0,
@@ -301,8 +308,8 @@
         "90-100"
       ],
       "approved": [
-        12,
-        2,
+        13,
+        3,
         0,
         0,
         0,
@@ -313,7 +320,7 @@
         0
       ],
       "rejected": [
-        12,
+        13,
         8,
         0,
         0,
@@ -340,7 +347,7 @@
       ],
       "approved": [
         0,
-        13,
+        15,
         1,
         0,
         0,
@@ -352,7 +359,7 @@
       ],
       "rejected": [
         0,
-        13,
+        14,
         0,
         0,
         0,
@@ -367,7 +374,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 18
+      "count": 19
     },
     {
       "reason": "duplication",
@@ -401,6 +408,32 @@
           "model": "gemini-2.5-flash"
         },
         "publisher": "日本放送協会"
+      },
+      {
+        "headline": "令和８年度第４回「石綿に係る疾病の業務上外に関する検討会」を開催します",
+        "aiSummary": "厚生労働省がアスベスト関連疾病の業務上外を検討する会議を開催。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-06-12T22:22:05.498Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
+        "headline": "第186回労働政策審議会安全衛生分科会（開催案内）",
+        "aiSummary": "厚生労働省が労働政策審議会安全衛生分科会の開催を告知。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-06-12T22:22:10.247Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
       },
       {
         "headline": "人事労務マガジン 特集第245号　中小企業事業者の皆さまへ 高年齢者の労働災害防止のための設備改善等を支援する補助金 ～令和8年度「エイジフレンドリー補助金」の受け付けが始まりました～",
@@ -476,32 +509,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-05-27T22:29:10.674Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "労働災害発生状況",
-        "aiSummary": "厚生労働省が労働災害の発生状況に関する統計を公表。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-05-27T22:29:06.635Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "労災疾病臨床研究補助金事業",
-        "aiSummary": "厚生労働省が労働災害による疾病の臨床研究を支援する補助金事業の実施を発表。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-05-25T22:04:41.506Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"

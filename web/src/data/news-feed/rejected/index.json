@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-11T22:48:56.425Z",
+  "updatedAt": "2026-06-12T22:22:10.255Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -482,6 +482,32 @@
         "rejectionReasons": [
           "relevance 15 < 70 (not labor-safety related)",
           "duplication 75 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "eed261790e66d210",
+      "headline": "インド旅客機墜落事故から1年 遺族「事故原因の早期究明を」",
+      "aiSummary": "インドで発生した旅客機墜落事故から1年が経過し、遺族が事故原因の早期解明を求めている。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260612/k10015148661000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 12 Jun 2026 18:23:07 +0900",
+        "fetchedAt": "2026-06-12T22:21:45.709Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-06-12T22:21:54.611Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
