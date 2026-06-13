@@ -9,6 +9,8 @@ import {
   COPILOT_FEATURE_PEERS,
 } from "@/components/json-ld";
 import { PlanGeneratorForm } from "@/components/safety-plan/plan-generator-form";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { FileText } from "lucide-react";
 import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
 import { CopilotMemo } from "@/components/copilot/CopilotMemo";
 import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
@@ -68,10 +70,6 @@ export default function PlanGeneratorPage() {
         })}
       />
       <PageContainer width="prose" className="py-8 md:py-12">
-        <div className="mb-4 space-y-3">
-          <CopilotStepNav current="plan-generator" />
-          <CopilotMemo />
-        </div>
         <header className="mb-6">
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
             年次安全衛生計画ジェネレーター
@@ -93,6 +91,22 @@ export default function PlanGeneratorPage() {
             </ul>
           </details>
         </header>
+
+        {/* 結論カード（柱0）: 本文を読まず3秒で「このツールが何を出すか（規模）」が分かる */}
+        <ConclusionCard
+          tone="info"
+          value={39}
+          title="テンプレートから生成"
+          description="業種13種 × 規模3段階。基本方針・重点目標・月別スケジュール・関連法令付きの年次計画書を自動生成します。"
+          icon={FileText}
+          className="mb-6"
+        />
+
+        {/* 安全Copilotのナビ/メモは結論カードの下へ（柱0: 結論をファーストビューへ） */}
+        <div className="mb-6 space-y-3">
+          <CopilotStepNav current="plan-generator" />
+          <CopilotMemo />
+        </div>
 
         <Suspense
           fallback={
