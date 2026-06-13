@@ -2,7 +2,9 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Printer, RefreshCw, FileSignature } from "lucide-react";
+import { Printer, RefreshCw, FileSignature, CheckCircle2 } from "lucide-react";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { planBuilderConclusion } from "@/lib/treatment-balance/plan-builder-conclusion";
 import {
   ALL_ILLNESS_CONDITIONS,
   ILLNESS_CATEGORIES,
@@ -82,12 +84,28 @@ export function PlanBuilderClient() {
     setForm(DEFAULT_STATE);
   };
 
+  const conclusion = planBuilderConclusion({
+    submitted,
+    conditionName: plan?.conditionName ?? null,
+  });
+
   return (
     <div className="space-y-6">
+      {/* 結論ファースト: 未生成（青の案内）→ 生成済（緑の完了） */}
+      <ConclusionCard
+        tone={conclusion.tone}
+        title={conclusion.title}
+        description={conclusion.description}
+        icon={conclusion.settled ? CheckCircle2 : FileSignature}
+        action={conclusion.action}
+        className="print:hidden"
+      />
+
       {/* Form */}
       <form
+        id="plan-form"
         onSubmit={onSubmit}
-        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden"
+        className="scroll-mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden"
       >
         <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="block text-sm">
@@ -190,17 +208,18 @@ export function PlanBuilderClient() {
           </label>
         </fieldset>
 
-        <div className="mt-5 flex flex-wrap gap-2">
+        <div className="mt-5 flex flex-wrap items-center gap-2">
           <button
             type="submit"
-            className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-emerald-600 px-6 text-base font-bold text-white shadow-sm transition hover:bg-emerald-700 sm:flex-none"
           >
+            <FileSignature className="h-5 w-5" aria-hidden="true" />
             両立支援プランを生成
           </button>
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            className="inline-flex min-h-[48px] items-center gap-1 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
           >
             <RefreshCw className="h-4 w-4" aria-hidden="true" />
             リセット
@@ -211,8 +230,9 @@ export function PlanBuilderClient() {
       {/* Plan output */}
       {plan && (
         <article
+          id="plan-output"
           aria-label="生成された両立支援プラン"
-          className="space-y-6 rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm print:border-0 print:shadow-none"
+          className="scroll-mt-4 space-y-6 rounded-2xl border border-emerald-200 bg-white p-5 shadow-sm print:border-0 print:shadow-none"
         >
           <header className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 pb-4">
             <div>

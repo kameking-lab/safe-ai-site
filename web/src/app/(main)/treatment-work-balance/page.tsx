@@ -14,6 +14,7 @@ import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
 
 const _title =
@@ -124,22 +125,23 @@ export default function TreatmentWorkBalanceHubPage() {
         iconColor="emerald"
       />
 
-      <section className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5">
-        <div className="flex items-start gap-3">
+      <section className="mt-6">
+        <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-sm leading-6 text-emerald-900">
           <AlertCircle
             className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700"
             aria-hidden="true"
           />
-          <div className="text-sm leading-6 text-emerald-900">
-            <p className="font-semibold">本ページの位置付け</p>
-            <p className="mt-1">
-              本ページは『事業場における治療と仕事の両立支援のためのガイドライン』（厚生労働省、令和5年改訂版）を踏まえた
-              <strong className="font-semibold">企業の人事・産業保健担当者向けの労務管理ガイド</strong>です。
-              診断・治療方針・就業可否の最終判断は主治医および産業医にご相談ください。
-              個別の医学的助言は行いません。
-            </p>
-          </div>
+          <p>
+            <strong className="font-semibold">企業の人事・産業保健担当者向けの労務管理ガイド。</strong>
+            診断・就業可否の最終判断は主治医・産業医にご相談ください。
+          </p>
         </div>
+        <CollapsibleDetail
+          summary="本ページの根拠ガイドラインと位置付け（詳細）"
+          className="mt-2"
+        >
+          本ページは『事業場における治療と仕事の両立支援のためのガイドライン』（厚生労働省、令和5年改訂版）を踏まえた企業の人事・産業保健担当者向けの労務管理ガイドです。診断・治療方針・就業可否の最終判断は主治医および産業医にご相談ください。個別の医学的助言は行いません。
+        </CollapsibleDetail>
       </section>
 
       {/* 法的根拠 */}
@@ -334,13 +336,9 @@ export default function TreatmentWorkBalanceHubPage() {
         </ul>
       </section>
 
-      <p className="mt-8 text-center text-xs leading-6 text-slate-500">
-        最終更新：2026年5月。本ページは法令・指針の要点解説と労務管理上のガイドです。
-        <strong className="text-slate-600">
-          疾病の診断・治療・就業可否の判断は医師法上、医師の専管事項です。
-        </strong>
-        本サイトは個別診断・治療助言を行いません。具体的事案は主治医・産業医・社労士等の専門家にご相談ください。
-      </p>
+      <CollapsibleDetail summary="免責事項・最終更新（2026年5月）" className="mt-8">
+        本ページは法令・指針の要点解説と労務管理上のガイドです。疾病の診断・治療・就業可否の判断は医師法上、医師の専管事項です。本サイトは個別診断・治療助言を行いません。具体的事案は主治医・産業医・社労士等の専門家にご相談ください。
+      </CollapsibleDetail>
     </PageContainer>
   );
 }
