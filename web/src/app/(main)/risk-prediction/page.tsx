@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { RiskPredictionPanel } from "@/components/risk-prediction-panel";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { PageContainer } from "@/components/layout";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -40,27 +41,26 @@ export default function RiskPredictionPage() {
       />
       <RiskPredictionPanel />
 
-      {/* 予測の仕組みについて */}
+      {/* 予測の仕組みについて（文字ダイエット: 段落は折りたたみへ格納・内容は不変） */}
       <PageContainer paddingY="none" className="pb-4" as="section">
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-          <h2 className="mb-3 text-sm font-bold text-slate-800">予測の仕組みについて</h2>
-          <dl className="space-y-3 text-xs leading-6 text-slate-700">
+        <CollapsibleDetail summary="予測の仕組み・データソース・精度の限界">
+          <dl className="space-y-3 leading-6">
             <div>
-              <dt className="font-semibold text-slate-900">照合ロジック</dt>
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">照合ロジック</dt>
               <dd>
                 入力された作業種別・環境・条件をもとに、事故データベース内の類似事例をキーワードマッチング＋スコアリングで抽出します。
                 上位マッチ事例の事故種別・原因を集計し、頻度の高いリスクを「高・中・低」で分類して表示します。
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-slate-900">データソース</dt>
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">データソース</dt>
               <dd>
                 厚生労働省「職場のあんぜんサイト」等の公開データを基にしたモックデータ（200件以上）を使用しています。
                 実際の事故統計に基づいて作成していますが、網羅的ではありません。
               </dd>
             </div>
             <div>
-              <dt className="font-semibold text-slate-900">精度の限界</dt>
+              <dt className="font-semibold text-slate-900 dark:text-slate-100">精度の限界</dt>
               <dd>
                 本ツールはあくまで参考情報の提供を目的としています。
                 実際の現場での安全管理は、専門家による調査・リスクアセスメントを必ず実施してください。
@@ -68,7 +68,7 @@ export default function RiskPredictionPage() {
               </dd>
             </div>
           </dl>
-        </div>
+        </CollapsibleDetail>
       </PageContainer>
 
       <RelatedPageCards
