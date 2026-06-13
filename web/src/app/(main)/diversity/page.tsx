@@ -315,9 +315,8 @@ export default function DiversityPage() {
               労働者の多様性に応じた安全衛生の基本
             </p>
             <p className="mt-1">
-              労働安全は、建設業の男性ベテランだけのものではありません。
-              本ページでは、従来の安全ポータルで手薄になりがちな労働者層の就業制限・相談窓口・合理的配慮を横断的にまとめています。
-              各項目は厚労省・関係機関の公開情報に基づく概要です。具体の判断は必ず一次資料・専門家をご確認ください。
+              建設業の男性ベテランだけが対象ではありません。手薄になりがちな労働者層ごとに、就業制限・相談窓口・合理的配慮を横断整理しました。
+              各項目は公開情報に基づく概要です。判断は一次資料・専門家にご確認ください。
             </p>
           </div>
         </div>
@@ -334,7 +333,7 @@ export default function DiversityPage() {
               <li key={s.id}>
                 <a
                   href={`#${s.id}`}
-                  className={`flex items-center gap-2 rounded-lg border ${c.border} ${c.bg} px-3 py-2 text-sm font-medium ${c.text} hover:brightness-105`}
+                  className={`flex min-h-[44px] items-center gap-2 rounded-lg border ${c.border} ${c.bg} px-3 py-2 text-sm font-medium ${c.text} hover:brightness-105`}
                 >
                   <Icon className={`h-4 w-4 shrink-0 ${c.icon}`} aria-hidden="true" />
                   {s.label}

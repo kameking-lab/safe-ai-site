@@ -946,3 +946,22 @@ sitemap.xmlは ○Static 維持を確認(new Date()は請求時API=cookies/heade
 
 ゲート全通過: tsc 0 / lint 0 errors(警告45は既存) / vitest 197ファイル1637 pass(+11) / build成功。再生成物(chatbot-eval-fresh-results.json・rag-metrics-latest.json)はgit checkoutで復元。一時ファイルなし。BACKLOG C-2-1を[x]化。
 申し送り: 次はC-2-2(ヘッダー共通検索UI=app-shellに44pxアイコン1タップ展開・このインデックスでインクリメンタル候補・CommandPalette/search-index.ts の差し替え＝旧索引撤去)→C-2-3(/search結果ページ)。C-3-3(#513)マージ後はC-3-4(lastmod動的化)が同一sitemap.tsで着手可に。
+
+---
+
+## 2026-06-14 柱0バッチ9/9（その他ツール）判定/件数結論カード 第1弾＝インタラクティブ判定/件数ツール5本（ux-tool/batch6-mental-collapse）
+冒頭回収: 再開時の自分のPR #520(柱C-7 事故統計エクスポート)はCIがsmoke/e2e/Vercel pendingでmergeable=UNSTABLE→CI緑のみマージ規約に従い見送り（次イテレで回収）。main は ff-only で最新（clean確認）。
+
+**現状確認で2件の積み残しチェックボックスを是正（捏造でなく実態反映）**: lane file BACKLOG-ux-tools.md は loop 分割時(0d810c0a)の旧スナップショットで、(a)柱0バッチ6/9 メンタル・両立系＝**既に PR #511 でmain反映済**（mental-health/-management/treatment-work-balance のハブ冒頭CollapsibleDetail・plan-builder の ConclusionCard をコードで確認）、(b)柱C-6 /circulars 初期件数制限＝**既にmain反映済**（CircularsFilterableList に `INITIAL_RENDER=24`＋「さらに表示」＋タグチップ `min-h-[44px]` を確認）。両者を[x]化。
+
+本タスク(柱0バッチ9/9の第1弾): その他ツール群のうち「いまの状態（判定・件数）」が存在するインタラクティブツール5本に結論カード(ConclusionCard・共通視覚言語)を最上部新設＋文字ダイエット。件数/収録数は「OK/完了」ではないため緑(safe)を使わず案内色 info(青)、該当0のみ warning(黄)、試算完了の「該当」だけ完了=safe(緑)という色文法を厳守（偽の緑を作らない）。
+(1) /subsidies: SubsidiesRecommender 最上部に件数カード（無絞り込み=全7制度[info青]／絞り込みN件[info]／0件[warning黄]・有効フィルタをdescriptionに併記）。重複していた h2 横の「N件ヒット」chipは撤去。page.tsx の amber イントロ箱の長文段落を CollapsibleDetail へ折りたたみ（1行結論＋詳細）。
+(2) /subsidies/calculator: PageHeader直下に試算状態カード（未試算=info青／該当N件=完了safe緑・最大支給見込み額をdescription／0件=warning黄）。右カラム下部に埋もれていた「試算結果サマリー」(該当数+最大額のデカ数字)は結論カードへ昇格したため撤去（モバイルで全フォームをスクロールしないと見えなかった→ファーストビューへ）。
+(3) /strategy/plan-generator: header直下に規模カード「39テンプレート（業種13×規模3）」(info青・サーバー側・MHLW数同様の静的件数)。CopilotStepNav/CopilotMemo が結論カードを y=736(700超)へ押し下げていた→batch7(/accidents-reports)と同方針でCopilotナビを結論カードの下へ降格→y=425へ昇格。
+(4) /chemical-database: client header上部に収録数カード（無絞り込み=MHLW 3,695物質[info]／curatedタブ=専門解説50物質[info]／絞り込み該当N件[info]／0件[warning]）。既存の「使い分け」緑バナー・h1は温存（多重h1作らず）。
+(5) /goods: SafetyGoodsPanel 上部に掲載品目カード（無絞り込み=全39品目[info]／カテゴリ・女性向け・検索の絞り込み該当N件[info]／0件[warning]）。
+
+無読テスト(../docs/third-party-reviews/scripts/tools-conclusion-cards-2026-06-14.mjs・prod3100・390×844・serviceWorkers:block): **21/21 PASS**＝5本とも結論カードがファーストビュー内(y<700: subsidies572/plan-gen425/chem322/goods313/calc376)・案内色info(sky)・件数/状態文言・h1=1、calc は施策選択→試算で完了safe(emerald)「4件 該当」へ遷移を確認。networkidle はCopilot常駐接続で30s timeout→domcontentloaded＋card.waitFor(visible)へ変更（再発時の定石）。
+ゲート全通過: tsc 0 / lint 0 errors(警告45既存) / vitest 199ファイル1656 pass / build成功。再生成物(rag-metrics-latest.json・chatbot-eval-fresh-results.json)はgit checkoutで復元。一時スクショなし。BACKLOG: バッチ6/C-6を[x]化、バッチ9に第1弾の完了範囲と残を明記。
+教訓(再確認・memory[dev-server-hang-prod-fallback]): 並列ループでport3000は他班が掴むことがある→自班testは `next start -p 3100`＋BASE_URL指定で衝突回避（他班サーバーをkillしない方針）。
+申し送り: 柱0バッチ9/9 **残**＝/bcp・/insurance(免責/前提の長文ダイエット中心)・/newsletter(登録前/登録完了の状態カード)・/organization(KPIデカ数字が既出→水増し回避で新規カードは足さない判断が妥当)・/leaflet(印刷ラッパーで状態なし=対象外候補)。これらを次イテレで処理しバッチ9を[x]化。並行して柱C-7 #520 のCI緑後マージ回収。
