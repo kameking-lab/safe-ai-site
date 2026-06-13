@@ -8,6 +8,7 @@
 - [x] 【柱C-7・A】事故統計の出力手段（2026-06-13 ux-tool/c7-accidents-export）。/accidents-analytics・/accidents-reports に CSV/要点コピー/共有/印刷ツールバーを新設（KY transcribe-export方式の横展開）。集計値はそのまま転記＝捏造なし。CSV/要点テキストは純関数(lib/export/csv・accidents-analytics/export・accidents-reports-export＝テスト17件)。h1は両ページ＋/risk・/risk-prediction・/law-search いずれも既に1個で多重/欠落なし（確認のみ）。無読テスト8/8 PASS。
 - [x] 【柱0バッチ9/9】その他ツール=各ツールの判定/件数結論カードと文字ダイエット。第1弾(PR #527)=/strategy/plan-generator・/subsidies+calculator・/chemical-database・/goods。第2弾(2026-06-14 ux-tool/batch9-status-conclusion-cards / PR #531 main反映済)=状態系3ページ /insurance(未加入カード＋調達基準を折りたたみ)・/bcp(稼働率目標99%カード)・/organization(教育修了率83.5%カード＋要フォロー先チップ・全値KPI/DEPT配列から導出＝転記のみ)。第3弾(2026-06-14 ux-tool/batch9-newsletter-status-card / PR #535)=/newsletter(登録前後の状態カード=未登録(info/青)→登録完了(safe/緑)に色帯切替)。/leaflet(A4印刷PDF)は判定/件数の状態を持たない成果物のため結論カード対象外（水増し回避）。無読テスト 第2弾15/15＋第3弾7/7 PASS。
 - [ ] 【柱3レビュー】リスクマップ(/risk)を「台風前日の元請安全担当」ペルソナで実機レビュー→警報・防災情報の実用性を改善。
+- [x] 【柱0回帰固定／補充】件数結論カードの無読テスト敷設（2026-06-14 ux-tool/noread-batch9-count-cards）。PR #527でデカ数字の件数結論カードを敷設したが専用無読スクリプトが無かった検索/件数系3本=/chemical-database(収録3,695物質)・/goods(掲載39品目)・/subsidies(活用可能7制度)に回帰テストを新設（batch9-count-cards-noread＝結論カードがファーストビュー内・デカ数字+単位+漢字短ラベル・DOM順で検索入力より前・h1=1を固定）。実機prod(3100)で18/18 PASS。**自領域の柱0監査結果**: risk-prediction/chemical-ra/law-hierarchy/accidents-reports/accident-news/circulars/subsidies/calculator/goods/chemical-database いずれも既に結論ファーストの視覚結論を最上部に保持・h1は全25route各1個で多重/欠落なし＝新規の柱0未適用箇所なし（追加カードは水増しのため見送り）。UI変更なし=既存破壊0。
 
 ## 補充の指針（未着手3件未満で起こす）
 - 自領域route の柱0未適用箇所・無読テスト不合格画面・第三者レビュー指摘。chemical RA・チャットボットの深掘り。
