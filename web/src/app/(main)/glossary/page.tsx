@@ -220,7 +220,7 @@ export default function GlossaryPage() {
                 type="button"
                 disabled={!hasTerms}
                 onClick={() => scrollToRow(row)}
-                className={`rounded-lg px-3 py-1.5 text-sm font-bold transition ${
+                className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-3 py-1.5 text-sm font-bold transition ${
                   activeRow === row
                     ? "bg-indigo-600 text-white"
                     : hasTerms

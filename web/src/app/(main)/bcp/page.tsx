@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Activity } from "lucide-react";
 import { withSiteOpenGraph } from "@/lib/seo-metadata";
 import { PageContainer } from "@/components/layout";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
@@ -21,12 +23,18 @@ export default function BcpPage() {
         <div>
           <h1 className="text-xl font-bold text-slate-900">運営継続計画（BCP）</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年4月26日</p>
-          <p className="mt-3 text-sm leading-7 text-slate-600">
-            安全AIポータルは個人事業主が運営するサービスです。
-            大企業と異なり、代替運営者や組織的なBCPチームはありません。
-            その現実を正直に開示し、利用者が適切に判断できるよう情報を提供します。
-          </p>
         </div>
+
+        {/* 柱0: 結論カード＝いまの状態（稼働率目標）を最上部に */}
+        <ConclusionCard
+          tone="info"
+          icon={Activity}
+          value={99}
+          unit="%"
+          title="稼働率目標"
+          description="個人事業運営のため代替運営者・組織的BCPチームは未整備。継続不可時はデータ引き渡し方針に従います。"
+          action={{ href: "/insurance", label: "保険状況を見る" }}
+        />
 
         <section className="space-y-3">
           <h2 className="text-base font-bold text-slate-900">1. 通常の可用性目標</h2>
