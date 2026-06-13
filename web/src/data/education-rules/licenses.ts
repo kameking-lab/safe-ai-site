@@ -116,6 +116,19 @@ export const LICENSES: EducationCert[] = [
     keywords: ["ガンマ線", "RI", "放射性同位元素", "非破壊検査", "透過写真", "免許"],
     relatedCertIds: ["se-36-28-xray-gamma"],
   },
+  // === 高圧室内作業主任者免許 ===
+  {
+    id: "lic-koatsu-shitsunai-chief",
+    name: "高圧室内作業主任者免許",
+    certType: "license",
+    targetWork: "高圧室内作業（潜函工法・潜鐘工法・圧気工法等によるゲージ圧0.1MPa以上の気圧下の作業室・シャフト内部の作業）の作業主任者",
+    relatedLaw: "安衛法第14条・安衛令第6条第1号・高気圧作業安全衛生規則第10条",
+    duration: "国家試験（学科）合格 — 免許交付申請には2年以上の高圧室内業務経験が必要",
+    workCategories: ["construction"],
+    keywords: ["高圧室内", "高圧室内作業主任者", "ケーソン", "潜函", "圧気工法", "作業主任者", "免許"],
+    relatedCertIds: ["se-36-24-2-koshitsunai"],
+    notes: "技能講習ではなく免許。事業者は作業室ごとに免許保有者から選任する（高気圧則第10条）。送気・調節等の業務は別途特別教育が必要",
+  },
   // === 発破技士免許 ===
   {
     id: "lic-hakka",

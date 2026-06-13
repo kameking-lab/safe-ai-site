@@ -7,7 +7,7 @@ import { EducationContextSections } from "@/components/education/EducationContex
 
 const TITLE = "熱中症予防 労働衛生教育";
 const DESCRIPTION =
-  "厚生労働省「職場における熱中症予防基本対策要綱」（基発0420第3号）と2025年6月施行の安衛則改正に基づく約1.5時間の労働衛生教育。屋外・高温環境作業向けにオンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
+  "厚生労働省「職場における熱中症予防対策のためのガイドライン」（令和8年3月18日基発0318第1号）と2025年6月施行の安衛則改正に基づく約1.5時間の労働衛生教育。屋外・高温環境作業向けにオンデマンド・カスタマイズ・講師派遣の3形式で提供。1社10名¥50,000〜（税込）。";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -179,7 +179,7 @@ export default function NecchuPage() {
         </div>
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">熱中症予防 労働衛生教育</h1>
         <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
-          屋外作業や高温環境作業に従事する労働者を対象に、厚生労働省「職場における熱中症予防基本対策要綱」（基発0420第3号）と2025年6月施行の安衛則改正に基づく労働衛生教育を実施します。
+          屋外作業や高温環境作業に従事する労働者を対象に、厚生労働省「職場における熱中症予防対策のためのガイドライン」（令和8年3月18日基発0318第1号）と2025年6月施行の安衛則改正に基づく労働衛生教育を実施します。
         </p>
       </header>
 
@@ -190,7 +190,7 @@ export default function NecchuPage() {
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
             <dt className="w-28 shrink-0 font-semibold text-slate-700">根拠</dt>
             <dd className="text-slate-600">
-              職場における熱中症予防基本対策要綱（基発0420第3号、令和3年4月20日付）
+              職場における熱中症予防対策のためのガイドライン（令和8年3月18日基発0318第1号。旧「職場における熱中症予防基本対策要綱」基発0420第3号を廃止）
             </dd>
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
