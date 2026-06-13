@@ -6,7 +6,7 @@
 - [x] 【柱0バッチ6/9】メンタル・両立系=ハブ3枚の長文折りたたみ＋plan-builder結論カード（PR #511 / commit 17ca4ad9 でmainに反映済。lane backlog未更新だったため確認のうえチェック）。
 - [x] 【柱C-6・A】/circulars 初期件数制限（柱0バッチ4=PR/feat/law-search-visual-first でmain反映済。INITIAL_RENDER=24＋「さらに表示」24件ずつ＋種別チップ44px＋結論カード。/court-casesはux-hub領域のため対象外）。
 - [x] 【柱C-7・A】事故統計の出力手段（2026-06-13 ux-tool/c7-accidents-export）。/accidents-analytics・/accidents-reports に CSV/要点コピー/共有/印刷ツールバーを新設（KY transcribe-export方式の横展開）。集計値はそのまま転記＝捏造なし。CSV/要点テキストは純関数(lib/export/csv・accidents-analytics/export・accidents-reports-export＝テスト17件)。h1は両ページ＋/risk・/risk-prediction・/law-search いずれも既に1個で多重/欠落なし（確認のみ）。無読テスト8/8 PASS。
-- [ ] 【柱0バッチ9/9】その他ツール(/strategy/plan-generator・/subsidies+calculator・/bcp・/organization・/insurance・/chemical-database・/goods・/leaflet・/newsletter)=各ツールの判定/件数結論カードと文字ダイエット。**着手中(2026-06-14)**: 第1弾＝判定/件数ツール5本完了→/subsidies(7制度件数カード+ROI箱折りたたみ)・/subsidies/calculator(未試算→該当N件・冗長サマリー撤去)・/strategy/plan-generator(39テンプレ規模カード+Copilotナビ降格)・/chemical-database(収録物質/該当件数カード)・/goods(掲載品目/該当件数カード)＝PR #527。第2弾＝/insurance・/bcp・/organization 状態系結論カード＝PR #531(CI待ち)。**残**: /leaflet(印刷ラッパー=対象外候補)・/newsletter(登録前後の状態カード)。
+- [x] 【柱0バッチ9/9】その他ツール=各ツールの判定/件数結論カードと文字ダイエット。第1弾(PR #527)=/strategy/plan-generator・/subsidies+calculator・/chemical-database・/goods。第2弾(2026-06-14 ux-tool/batch9-status-conclusion-cards / PR #531)=状態系3ページ /insurance(未加入カード＋調達基準を折りたたみ)・/bcp(稼働率目標99%カード)・/organization(教育修了率83.5%カード＋要フォロー先チップ・全値KPI/DEPT配列から導出＝転記のみ)。第3弾=/newsletter(登録前後の状態カード=未登録(青)→登録完了(緑) / PR #535)。/leaflet(A4印刷PDF)は判定/件数の状態を持たない成果物のため結論カード対象外（水増し回避）。無読テスト15/15 PASS。
 - [ ] 【柱3レビュー】リスクマップ(/risk)を「台風前日の元請安全担当」ペルソナで実機レビュー→警報・防災情報の実用性を改善。
 
 ## 補充の指針（未着手3件未満で起こす）

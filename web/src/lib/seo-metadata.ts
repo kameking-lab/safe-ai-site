@@ -5,6 +5,25 @@ export const SITE_URL = "https://www.anzen-ai-portal.jp";
 export const SITE_LOCALE = "ja_JP";
 export const SITE_ALTERNATE_LOCALES = ["en_US"] as const;
 
+/**
+ * サイト共通の OGP 画像（動的生成 `/api/og`、1200x630）。
+ *
+ * ルート layout.tsx は同じ画像を openGraph/twitter に敷いているが、Next.js の
+ * metadata は openGraph オブジェクトを**浅くマージ（丸ごと置換）**する
+ * （generate-metadata.md「All openGraph fields are replaced」）。そのため
+ * ページが独自の `openGraph` を export すると、ルートの `images` ごと消えて
+ * og:image が欠落する（実測: /bcp・/insurance 等）。
+ * 下記の {@link withSiteOpenGraph} / {@link withSiteTwitter} は、この画像を
+ * 既定値として再付与し、ページ側で画像を渡さなくてもフォールバックが残るようにする。
+ */
+export const DEFAULT_OG_IMAGE_URL = `${SITE_URL}/api/og`;
+export const DEFAULT_OG_IMAGE = {
+  url: DEFAULT_OG_IMAGE_URL,
+  width: 1200,
+  height: 630,
+  alt: "安全AIポータル — 現場の安全を、AIで変える。",
+} as const;
+
 type Override<T> = T extends object ? Partial<T> : T;
 
 type OpenGraphOverride = Override<NonNullable<Metadata["openGraph"]>>;
@@ -39,7 +58,9 @@ export function withSiteAlternates(
  * top level of `Metadata`).
  *
  * Pass `path` to populate `og:url`. Anything else in `extra` wins
- * over the defaults.
+ * over the defaults — including `images`, so a page that has a bespoke
+ * OG image can still pass its own; otherwise it inherits the site-wide
+ * `/api/og` fallback ({@link DEFAULT_OG_IMAGE}).
  */
 export function withSiteOpenGraph(
   path: string,
@@ -52,6 +73,7 @@ export function withSiteOpenGraph(
     alternateLocale: [...SITE_ALTERNATE_LOCALES],
     siteName: SITE_NAME,
     url: `${SITE_URL}${normalisedPath === "/" ? "" : normalisedPath}`,
+    images: [DEFAULT_OG_IMAGE],
     ...extra,
   };
 }
@@ -62,12 +84,17 @@ export function withSiteOpenGraph(
  * intentionally do not set a `site` handle here — the project has
  * no published Twitter account, and a bad handle hurts more than no
  * handle.
+ *
+ * Defaults the card image to the site-wide `/api/og` fallback so a page
+ * overriding `twitter` does not blank out its preview thumbnail; pass
+ * `images` in `extra` to override.
  */
 export function withSiteTwitter(
   extra: TwitterOverride = {},
 ): NonNullable<Metadata["twitter"]> {
   return {
     card: "summary_large_image",
+    images: [DEFAULT_OG_IMAGE_URL],
     ...extra,
   };
 }
