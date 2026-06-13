@@ -27,6 +27,13 @@ const TAB_LABEL: Record<Tab, string> = {
   accident: "事故事例",
 };
 
+/** 種別ごとの行内バッジ（ラベル + JIS色文法に沿った配色） */
+const KIND_BADGE: Record<FavoriteKind, { label: string; cls: string }> = {
+  article: { label: "条文", cls: "bg-emerald-100 text-emerald-800" },
+  notice: { label: "通達", cls: "bg-violet-100 text-violet-800" },
+  accident: { label: "事故事例", cls: "bg-rose-100 text-rose-800" },
+};
+
 function formatDate(iso: string): string {
   try {
     const d = new Date(iso);
@@ -59,7 +66,12 @@ export function FavoritesList() {
   const handleRemove = (entry: FavoriteEntry) => {
     if (!window.confirm(`「${entry.title}」をお気に入りから削除しますか?`)) return;
     removeFavorite(entry.kind, entry.id);
-    setList(loadFavorites());
+    const next = loadFavorites();
+    setList(next);
+    // 絞り込み中の種別が空になったら「すべて」へ戻す（消えたタブに取り残されない）
+    if (tab !== "all" && !next.some((e) => e.kind === tab)) {
+      setTab("all");
+    }
   };
 
   if (!hydrated) {
@@ -81,13 +93,13 @@ export function FavoritesList() {
         <div className="mt-3 flex flex-wrap gap-2">
           <Link
             href="/law-search"
-            className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
           >
             法令検索を開く →
           </Link>
           <Link
             href="/circulars"
-            className="inline-flex items-center gap-1 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-violet-700"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700"
           >
             通達一覧を開く →
           </Link>
@@ -98,8 +110,10 @@ export function FavoritesList() {
 
   return (
     <div className="space-y-3">
-      <div role="tablist" aria-label="お気に入りの種別" className="flex gap-2">
-        {(["all", "article", "notice"] as Tab[]).map((k) => {
+      <div role="tablist" aria-label="お気に入りの種別" className="flex flex-wrap gap-2">
+        {((["all", "article", "notice", "accident"] as Tab[]).filter(
+          (k) => k === "all" || k === "article" || k === "notice" || counts.accident > 0,
+        )).map((k) => {
           const isActive = tab === k;
           return (
             <button
@@ -110,8 +124,8 @@ export function FavoritesList() {
               onClick={() => setTab(k)}
               className={
                 isActive
-                  ? "rounded-full border border-emerald-600 bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white"
-                  : "rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 hover:border-emerald-300"
+                  ? "inline-flex min-h-[44px] items-center rounded-full border border-emerald-600 bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white"
+                  : "inline-flex min-h-[44px] items-center rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 hover:border-emerald-300"
               }
             >
               {TAB_LABEL[k]}
@@ -143,13 +157,9 @@ export function FavoritesList() {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2 text-[11px]">
                 <span
-                  className={
-                    e.kind === "article"
-                      ? "rounded-full bg-emerald-100 px-2 py-0.5 font-bold text-emerald-800"
-                      : "rounded-full bg-violet-100 px-2 py-0.5 font-bold text-violet-800"
-                  }
+                  className={`rounded-full px-2 py-0.5 font-bold ${KIND_BADGE[e.kind].cls}`}
                 >
-                  {e.kind === "article" ? "条文" : "通達"}
+                  {KIND_BADGE[e.kind].label}
                 </span>
                 <span className="text-slate-500">{e.subtitle}</span>
                 <span className="ml-auto text-[10px] text-slate-400">
@@ -168,7 +178,7 @@ export function FavoritesList() {
               onClick={() => handleRemove(e)}
               aria-label={`「${e.title}」を削除`}
               title="削除"
-              className="shrink-0 rounded-md p-2 text-slate-400 hover:bg-rose-50 hover:text-rose-700"
+              className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded-md text-slate-400 hover:bg-rose-50 hover:text-rose-700"
             >
               <Trash2 className="h-4 w-4" aria-hidden="true" />
             </button>
