@@ -6,26 +6,14 @@ import { expandQueryRich } from "@/lib/rag/synonyms";
 import { bm25Score, getOrBuildIndex } from "@/lib/rag/bm25";
 import { rerank } from "@/lib/rag/reranker";
 import { kanjiToArabic } from "@/lib/article-number-normalize";
+// C-1（モバイル実速度の構造是正）: カテゴリフィルタのUI選択肢は law-category-options.ts
+// に分離した。client（chatbot-panel）がこの定数のためだけに本モジュール経由で
+// 法令コーパス全体（チャンク生約1.4MB）をバンドルへ巻き込んでいたため。
+// サーバー側の既存 import 互換のためここから re-export する。
+import type { LawCategoryFilter } from "@/lib/law-category-options";
 
-/** チャットボットの法令カテゴリフィルタ（lawShort と完全一致） */
-export type LawCategoryFilter =
-  | "all"
-  | "安衛法"
-  | "安衛則"
-  | "クレーン則"
-  | "有機則"
-  | "特化則"
-  | "酸欠則";
-
-export const LAW_CATEGORY_OPTIONS: { value: LawCategoryFilter; label: string }[] = [
-  { value: "all", label: "すべて" },
-  { value: "安衛法", label: "安衛法" },
-  { value: "安衛則", label: "安衛則" },
-  { value: "クレーン則", label: "クレーン則" },
-  { value: "有機則", label: "有機則" },
-  { value: "特化則", label: "特化則" },
-  { value: "酸欠則", label: "酸欠則" },
-];
+export { LAW_CATEGORY_OPTIONS } from "@/lib/law-category-options";
+export type { LawCategoryFilter } from "@/lib/law-category-options";
 
 /**
  * トピック別の必須条文プライン（キーワードに該当する場合、RAG 検索結果の先頭に

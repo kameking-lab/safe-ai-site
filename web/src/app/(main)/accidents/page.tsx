@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+
 import { HomeScreen } from "@/components/home-screen";
 import { LadderStatsCard } from "@/components/ladder-stats-card";
 import { LastUpdatedBadge } from "@/components/last-updated-badge";
@@ -77,15 +77,11 @@ export default function AccidentsPage() {
         ]}
       />
       <AccidentHubNav current="accidents" />
-      <Suspense
-        fallback={
-          <div className="mx-auto max-w-7xl space-y-3 px-4 py-6">
-            <div className="h-8 w-2/3 animate-pulse rounded bg-slate-200" />
-            <div className="h-40 animate-pulse rounded-lg bg-slate-100" />
-          </div>
-        }
-      >
-        <HomeScreen variant="accidents">
+      {/* C-1: ここを Suspense で包むと client モジュールの非同期ロードで境界が
+          サスペンドし、静的HTMLに「フォールバック先行→$RCスワップ」が焼き込まれて
+          下の保護具セクションが初回ペイント後に6,900px押し下げられる（CLS 0.254・
+          LCP遅延）。本文は静的シェルに含める（サスペンドし得るものは無い）。 */}
+      <HomeScreen variant="accidents">
         <TranslatedPageHeader
           titleJa="事故データベース"
           titleEn="Accident Database"
@@ -132,7 +128,6 @@ export default function AccidentsPage() {
         </div>
         <NewsFeedSection />
       </HomeScreen>
-      </Suspense>
       {/* 事故事例 → 主要な労災原因に対応する予防保護具を提示 */}
       <PageContainer paddingY="none">
         <ContextualPpePicks

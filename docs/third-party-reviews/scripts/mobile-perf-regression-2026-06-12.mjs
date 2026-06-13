@@ -20,14 +20,23 @@ const ctx = await browser.newContext({
 const page = await ctx.newPage();
 
 // 1) /laws: SSR HTMLに一覧本文が含まれる（クライアント差し替え構造の解消）
+//    RSCペイロード内の文字列と区別するため、JS無効ブラウザで実DOMを数える
 {
-  const res = await page.request.get(`${BASE}/laws`);
-  const html = await res.text();
+  const ctxNoJs = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    javaScriptEnabled: false,
+    serviceWorkers: "block",
+  });
+  const pNoJs = await ctxNoJs.newPage();
+  await pNoJs.goto(`${BASE}/laws`, { waitUntil: "domcontentloaded" });
+  const liCount = await pNoJs.locator("#section-laws li").count();
+  const bodyText = (await pNoJs.locator("#section-laws").textContent().catch(() => "")) ?? "";
   check(
-    "laws: SSR HTMLに法改正一覧が含まれる",
-    (html.match(/改正/g) ?? []).length > 50 && !html.includes("法改正一覧を読み込み中"),
-    `改正 x${(html.match(/改正/g) ?? []).length}`,
+    "laws: JS無効でも法改正一覧がSSR描画される",
+    liCount >= 20 && bodyText.includes("改正"),
+    `li x${liCount}`,
   );
+  await ctxNoJs.close();
 }
 
 // 2) /laws ?tab=chat 深いリンク: マウント後にチャットタブが開く
@@ -86,8 +95,8 @@ const page = await ctx.newPage();
     .then((t) => (t ?? "").length > 0)
     .catch(() => false);
   check("accidents: ?tab=industry でタブ復元（セクション描画）", industryVisible, "");
-  // タブ切替→URL同期
-  const analysisTab = page.getByRole("button", { name: "分析レポート" }).first();
+  // タブ切替→URL同期（タブ実ラベル=「詳細事例（参考）」が analysis タブ）
+  const analysisTab = page.getByRole("button", { name: /詳細事例/ }).first();
   if (await analysisTab.isVisible().catch(() => false)) {
     await analysisTab.click();
     await page.waitForTimeout(600);
@@ -120,17 +129,71 @@ const page = await ctx.newPage();
 }
 
 // 7) /accidents ?acc_type= 型フィルタ復元（型グリッド遷移の互換）
+//    値は型グリッド/quick-accident-search が実際に渡す ALL_ACCIDENT_TYPES の「墜落」
+//    （「墜落・転落」はMHLW表記でフィルタ値としては不正→URLから除去されるのが正）
 {
-  await page.goto(`${BASE}/accidents?tab=list&acc_type=${encodeURIComponent("墜落・転落")}`, {
+  await page.goto(`${BASE}/accidents?tab=list&acc_type=${encodeURIComponent("墜落")}`, {
     waitUntil: "networkidle",
   });
   await page.waitForTimeout(1200);
   const url = page.url();
   check(
     "accidents: ?acc_type= がURLに保持される（復元+同期で消えない）",
-    decodeURIComponent(url).includes("墜落・転落"),
+    decodeURIComponent(url).includes("墜落"),
     url,
   );
+}
+
+// 8) サスペンド焼き込みの回帰防止: 静的HTMLに「loading スケルトン先行→$RCスワップ」が
+//    無いこと。許容される Suspense 境界はヘッダーの UserMenu スロット2個のみ
+//    （フォールバック=本文と同一のログインボタン=同寸・シフトゼロ）。
+//    app/loading.tsx 復活・layout直下のawait・dynamic(ssr:true)のページ直下使用などで
+//    境界が増えると即FAIL（= C-1根治のガード）。
+{
+  for (const path of ["/accidents", "/laws", "/whats-new"]) {
+    const res = await fetch(`${BASE}${path}`);
+    const html = await res.text();
+    const boundaries = [...html.matchAll(/<template id="B:\d+"/g)].length;
+    const hasPageSkeleton = html.includes("ページを読み込み中") || html.includes("法改正一覧を読み込み中");
+    check(
+      `static-shell: ${path} に loading 焼き込みが無い（境界はUserMenu2個以下）`,
+      boundaries <= 2 && !hasPageSkeleton,
+      `boundaries=${boundaries} skeleton=${hasPageSkeleton}`,
+    );
+  }
+}
+
+// 9) /accidents CLS 実測ガード: モバイル+CPU4xで layout-shift 合計 < 0.05 を2回連続確認
+//    （保護具セクションが初回ペイント後に押し下げられる回帰の検出）
+{
+  const ctx3 = await browser.newContext({
+    viewport: { width: 412, height: 823 },
+    isMobile: true,
+    hasTouch: true,
+    serviceWorkers: "block",
+  });
+  const p3 = await ctx3.newPage();
+  const cdp = await ctx3.newCDPSession(p3);
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+  await p3.addInitScript(() => {
+    window.__clsTotal = 0;
+    new PerformanceObserver((list) => {
+      for (const e of list.getEntries()) {
+        if (!e.hadRecentInput) window.__clsTotal += e.value;
+      }
+    }).observe({ type: "layout-shift", buffered: true });
+  });
+  for (let i = 1; i <= 2; i++) {
+    await p3.goto(`${BASE}/accidents`, { waitUntil: "load" });
+    await p3.waitForTimeout(2500);
+    const cls = await p3.evaluate(() => window.__clsTotal);
+    check(`accidents: 実測CLS < 0.05（${i}回目）`, cls < 0.05, `cls=${cls.toFixed(4)}`);
+    await p3.evaluate(() => (window.__clsTotal = 0));
+  }
+  // ハイドレーション後も保護具セクションが消えない（SSR/client分岐の回帰検出）
+  const ppeVisible = await p3.getByText("予防保護具").first().isVisible().catch(() => false);
+  check("accidents: ハイドレーション後も保護具セクションが表示されている", ppeVisible, "");
+  await ctx3.close();
 }
 
 await browser.close();

@@ -1,9 +1,18 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
-import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
+// C-1（モバイル実速度の構造是正）: 事故データセット（生約340KB）を静的 import すると
+// /risk-prediction の client バンドルに同梱され、本ページへ Link する全ページ
+// （/accidents 等）の RSC プリフェッチでもダウンロードされる。マウント後に
+// dynamic import で遅延取得する（検索・チップ・月次傾向の挙動は不変）。
+import type { AccidentCase } from "@/lib/types/domain";
+
+async function loadAccidentCasesDataset(): Promise<AccidentCase[]> {
+  const mod = await import("@/data/mock/accident-cases");
+  return mod.getAccidentCasesDataset();
+}
 
 const MhlwSimilarCasesPanel = dynamic(
   () =>
@@ -294,7 +303,7 @@ function SafetyScorePanel({ score, query }: { score: SafetyScore; query: string 
 }
 
 // 月別トレンドパネル
-function MonthlyTrendsPanel({ cases }: { cases: ReturnType<typeof getAccidentCasesDataset> }) {
+function MonthlyTrendsPanel({ cases }: { cases: AccidentCase[] }) {
   const trends = useMemo(() => computeMonthlyTrends(cases), [cases]);
   const maxCount = Math.max(...trends.map((t) => t.count), 1);
   const industryTrends = useMemo(() => computeIndustryTrends(cases).slice(0, 8), [cases]);
@@ -489,7 +498,16 @@ const QUICK_EXAMPLES = [
 ];
 
 export function RiskPredictionPanel() {
-  const allCases = useMemo(() => getAccidentCasesDataset(), []);
+  const [allCases, setAllCases] = useState<AccidentCase[]>([]);
+  useEffect(() => {
+    let active = true;
+    void loadAccidentCasesDataset().then((cases) => {
+      if (active) setAllCases(cases);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
   const [query, setQuery] = useState("");
   const [siteName, setSiteName] = useState("");
   const [activeTab, setActiveTab] = useState<TabId>("search");
@@ -497,13 +515,21 @@ export function RiskPredictionPanel() {
   const [searched, setSearched] = useState(false);
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
+  // データロード完了前のクリックでも0件にならないよう、検索系は常に
+  // loadAccidentCasesDataset() を経由する（2回目以降は import キャッシュで即時解決）
+  const runSearch = useCallback((q: string) => {
+    void loadAccidentCasesDataset().then((cases) => {
+      const found = searchAccidentCases(q, cases, 30);
+      setResults(found);
+      setSearched(true);
+      setActiveTab("search");
+    });
+  }, []);
+
   const handleSearch = useCallback(() => {
     if (!query.trim()) return;
-    const found = searchAccidentCases(query, allCases, 30);
-    setResults(found);
-    setSearched(true);
-    setActiveTab("search");
-  }, [query, allCases]);
+    runSearch(query);
+  }, [query, runSearch]);
 
   const safetyScore = useMemo(() => {
     if (!searched) return null;
@@ -628,12 +654,7 @@ export function RiskPredictionPanel() {
                 type="button"
                 onClick={() => {
                   setQuery(chip.query);
-                  setTimeout(() => {
-                    const found = searchAccidentCases(chip.query, allCases, 30);
-                    setResults(found);
-                    setSearched(true);
-                    setActiveTab("search");
-                  }, 0);
+                  runSearch(chip.query);
                 }}
                 className="min-h-[44px] min-w-[64px] rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 hover:border-emerald-400 hover:bg-emerald-100"
               >
@@ -653,12 +674,7 @@ export function RiskPredictionPanel() {
                 type="button"
                 onClick={() => {
                   setQuery(ex);
-                  setTimeout(() => {
-                    const found = searchAccidentCases(ex, allCases, 30);
-                    setResults(found);
-                    setSearched(true);
-                    setActiveTab("search");
-                  }, 0);
+                  runSearch(ex);
                 }}
                 className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
               >

@@ -51,7 +51,6 @@ import { PAID_MODE } from "@/lib/paid-mode";
 // ここで import すると法令コーパス・化学物質DB（数MB）が全ページのバンドルに同梱される。
 import { SITE_STATS } from "@/data/site-stats";
 import { ShareButtons } from "@/components/share-buttons";
-import { UserMenu } from "@/components/user-menu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useCommandPalette } from "@/components/CommandPaletteProvider";
 import { A11Y_HINT_DISMISSED_KEY, A11Y_HINT_DISMISSED_ATTR } from "@/lib/a11y-hint";
@@ -224,10 +223,12 @@ function navActive(pathname: string, href: string) {
 
 interface AppShellProps {
   children: React.ReactNode;
-  user?: { name?: string | null; email?: string | null; image?: string | null } | null;
+  /** C-1: 認証付きユーザーメニュー。layout が Suspense スロットとして注入する
+   * （AppShell 内で await auth() に依存しないことで静的シェルを初回フラッシュで確定） */
+  userSlot?: React.ReactNode;
 }
 
-export function AppShell({ children, user }: AppShellProps) {
+export function AppShell({ children, userSlot }: AppShellProps) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { furiganaEnabled, toggleFurigana } = useFurigana();
@@ -485,7 +486,7 @@ export function AppShell({ children, user }: AppShellProps) {
               屋外
             </button>
           </div>
-          <UserMenu user={user} />
+          {userSlot}
         </div>
       </aside>
 
@@ -508,7 +509,7 @@ export function AppShell({ children, user }: AppShellProps) {
                 <Search className="h-4 w-4" aria-hidden="true" />
               </button>
               <ThemeToggle size="sm" />
-              <UserMenu user={user} />
+              {userSlot}
               <button
                 type="button"
                 onClick={() => setIsSidebarOpen((prev) => !prev)}

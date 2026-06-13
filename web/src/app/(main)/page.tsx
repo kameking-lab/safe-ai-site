@@ -3,6 +3,9 @@ import { HomeQuickAccess } from "@/components/home-quick-access";
 import { NewHomeHero } from "@/components/new-home-hero";
 import { FlagshipGrid } from "@/components/flagship-grid";
 import { HomeThreePillars } from "@/components/home-three-pillars";
+// C-1: 3本柱のデータ選定は server で行い、小さな結果だけを client へ渡す
+// （事故/法改正/警報データのバンドル同梱と "/" プリフェッチ汚染の排除）
+import { getHomeThreePillarsData } from "@/lib/home-three-pillars-data";
 import { HomePersonaEntry } from "@/components/home-persona-entry";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
@@ -28,6 +31,7 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
+  const threePillars = getHomeThreePillarsData();
   return (
     <main>
       <PageJsonLd name={_title} description={_desc} path="/" />
@@ -43,7 +47,7 @@ export default function HomePage() {
       <HomePersonaEntry />
 
       <div className="mx-auto max-w-7xl px-4 pt-6">
-        <HomeThreePillars />
+        <HomeThreePillars {...threePillars} />
       </div>
       <div className="px-4 py-8 sm:py-10">
         <FlagshipGrid />

@@ -2,19 +2,21 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render } from "@testing-library/react";
 import { RoleAnchorScroller } from "./role-anchor-scroller";
 
-const mockGet = vi.fn();
-vi.mock("next/navigation", () => ({
-  useSearchParams: () => ({ get: mockGet }),
-}));
+// C-1: useSearchParams（CSRベイルアウトの原因）→ window.location 読みに変更したため、
+// next/navigation のモックではなく history API で実URLを設定して検証する。
+function setSearch(search: string) {
+  window.history.replaceState(null, "", `/for/construction${search}`);
+}
 
 describe("RoleAnchorScroller", () => {
   beforeEach(() => {
-    mockGet.mockReset();
     document.body.innerHTML = "";
+    setSearch("");
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
+    setSearch("");
   });
 
   it("?role=foreman で #for-foreman にスクロール", () => {
@@ -24,7 +26,7 @@ describe("RoleAnchorScroller", () => {
     const scrollSpy = vi.fn();
     target.scrollIntoView = scrollSpy as unknown as typeof target.scrollIntoView;
     document.body.appendChild(target);
-    mockGet.mockImplementation((k: string) => (k === "role" ? "foreman" : null));
+    setSearch("?role=foreman");
 
     render(<RoleAnchorScroller />);
     expect(scrollSpy).toHaveBeenCalledTimes(1);
@@ -36,7 +38,7 @@ describe("RoleAnchorScroller", () => {
     const scrollSpy = vi.fn();
     target.scrollIntoView = scrollSpy as unknown as typeof target.scrollIntoView;
     document.body.appendChild(target);
-    mockGet.mockImplementation((k: string) => (k === "role" ? "manager" : null));
+    setSearch("?role=manager");
 
     render(<RoleAnchorScroller />);
     expect(scrollSpy).toHaveBeenCalledTimes(1);
@@ -48,7 +50,7 @@ describe("RoleAnchorScroller", () => {
     const scrollSpy = vi.fn();
     target.scrollIntoView = scrollSpy as unknown as typeof target.scrollIntoView;
     document.body.appendChild(target);
-    mockGet.mockImplementation((k: string) => (k === "role" ? "supervisor" : null));
+    setSearch("?role=supervisor");
 
     render(<RoleAnchorScroller />);
     expect(scrollSpy).toHaveBeenCalledTimes(1);
@@ -60,7 +62,6 @@ describe("RoleAnchorScroller", () => {
     const scrollSpy = vi.fn();
     target.scrollIntoView = scrollSpy as unknown as typeof target.scrollIntoView;
     document.body.appendChild(target);
-    mockGet.mockImplementation(() => null);
 
     render(<RoleAnchorScroller />);
     expect(scrollSpy).not.toHaveBeenCalled();
@@ -72,14 +73,14 @@ describe("RoleAnchorScroller", () => {
     const scrollSpy = vi.fn();
     target.scrollIntoView = scrollSpy as unknown as typeof target.scrollIntoView;
     document.body.appendChild(target);
-    mockGet.mockImplementation((k: string) => (k === "role" ? "unknown-role" : null));
+    setSearch("?role=unknown-role");
 
     render(<RoleAnchorScroller />);
     expect(scrollSpy).not.toHaveBeenCalled();
   });
 
   it("該当 ID の要素が存在しなければ何もしない", () => {
-    mockGet.mockImplementation((k: string) => (k === "role" ? "foreman" : null));
+    setSearch("?role=foreman");
     // 例外を投げないこと
     expect(() => render(<RoleAnchorScroller />)).not.toThrow();
   });

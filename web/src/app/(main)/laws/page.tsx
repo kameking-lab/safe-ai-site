@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { LawsPageClient } from "@/components/laws-page-client";
-import { PageSkeleton } from "@/components/skeleton";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { LawHubNav } from "@/components/law-hub-nav";
 import { ogImageUrl } from "@/lib/og-url";
@@ -63,11 +61,12 @@ export default function LawsPage() {
           description={conclusion.description}
         />
       </div>
-      <Suspense fallback={<PageSkeleton label="法改正一覧を読み込み中" />}>
-        {/* C-1: 一覧の初期データは server で確定して渡す（クライアントの
-            データ静的importを排除しつつ SSR HTML に全件を含める） */}
-        <LawsPageClient initialRevisions={lawRevisionCores} />
-      </Suspense>
+      {/* C-1: 一覧の初期データは server で確定して渡す（クライアントの
+          データ静的importを排除しつつ SSR HTML に全件を含める）。
+          Suspense で包むと client モジュールの非同期ロードで境界がサスペンドし、
+          静的HTMLに「フォールバック先行→$RCスワップ」が焼き込まれて LCP が
+          スワップ完了まで遅延するため、本文は静的シェルに含める。 */}
+      <LawsPageClient initialRevisions={lawRevisionCores} />
       <RelatedPageCards
         heading="合わせて使う"
         pages={[

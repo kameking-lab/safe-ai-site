@@ -17,7 +17,10 @@ const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
   display: "swap",
-  preload: true,
+  // C-1: Geist は latin 専用で、日本語UIの本文・見出し（CJK）はシステムフォントで
+  // 描画される。preload すると 30KB の woff2 が全ページの LCP クリティカル窓に
+  // 入るため preload しない（数字・英字は swap で置き換わる）。
+  preload: false,
 });
 
 const geistMono = Geist_Mono({

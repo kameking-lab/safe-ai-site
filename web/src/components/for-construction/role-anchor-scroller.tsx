@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 
 const ROLE_TO_ANCHOR: Record<string, string> = {
   foreman: "for-foreman",
@@ -10,11 +9,12 @@ const ROLE_TO_ANCHOR: Record<string, string> = {
 };
 
 export function RoleAnchorScroller() {
-  const searchParams = useSearchParams();
-
+  // C-1: useSearchParams を使うと CSR ベイルアウトで静的プリレンダーが最寄りの
+  // Suspense 境界（このページでは app/loading.tsx）へ落ち、本文全体が
+  // 「スケルトン先行ペイント→クライアント差し替え」になる。?role= はマウント後の
+  // スクロール挙動にしか使わないため、window.location から1回読む。
   useEffect(() => {
-    if (!searchParams) return;
-    const role = searchParams.get("role");
+    const role = new URLSearchParams(window.location.search).get("role");
     if (!role) return;
     const anchorId = ROLE_TO_ANCHOR[role];
     if (!anchorId) return;
@@ -22,7 +22,7 @@ export function RoleAnchorScroller() {
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "start" });
     el.focus({ preventScroll: true });
-  }, [searchParams]);
+  }, []);
 
   return null;
 }

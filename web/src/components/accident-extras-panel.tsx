@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { searchMhlwSimilarStrict, getMhlwDeathsTotal, type ScoredMhlwCase } from "@/lib/mhlw-similar-cases";
 import { loadProfile, INDUSTRY_LABELS, type CompanyProfile } from "@/lib/company-profile";
 import type { AccidentCase } from "@/lib/types/domain";
@@ -35,7 +35,31 @@ function buildProfileQuery(profile: CompanyProfile): string {
 
 function CrossTab() {
   const [all, setAll] = useState<AccidentCase[]>([]);
+  // C-1: クロス集計はファーストビューの下にあるため、マウント直後ではなく
+  // セクションが画面に近づいた時にデータチャンク(生約340KB)をロードする。
+  // IntersectionObserver 非対応環境では従来どおり即ロードにフォールバック。
+  const rootRef = useRef<HTMLElement | null>(null);
+  const [nearViewport, setNearViewport] = useState(false);
   useEffect(() => {
+    if (nearViewport) return;
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      // IntersectionObserver 非対応環境のみの即ロードフォールバック（1回きり）
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setNearViewport(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) setNearViewport(true);
+      },
+      { rootMargin: "400px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [nearViewport]);
+  useEffect(() => {
+    if (!nearViewport) return;
     let active = true;
     void loadAccidentCases().then((cases) => {
       if (active) setAll(cases);
@@ -43,7 +67,7 @@ function CrossTab() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [nearViewport]);
   // 業種 × 事故型 のクロス集計
   const matrix = useMemo(() => {
     const map = new Map<string, Map<string, number>>();
@@ -65,7 +89,7 @@ function CrossTab() {
   }, [all]);
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <section ref={rootRef} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <h3 className="text-sm font-bold text-slate-900">業種 × 事故型 クロス集計（収録事例ベース）</h3>
       <p className="mt-1 text-[11px] text-slate-500">
         サイト収録の{all.length}件を業種と事故型の2軸で集計。クリックで該当条件のフィルタへ。

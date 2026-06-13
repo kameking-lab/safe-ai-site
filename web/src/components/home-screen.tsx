@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import type { ChatMessage } from "@/components/chat-panel";
-import { Mascot } from "@/components/mascot";
 // C-1: law-revision-list を home-screen から静的 import すると /accidents の
 // バンドルにも同梱されるため、コンポーネント本体は laws-page-client が
 // LawsListComponent prop で注入する（型のみここで参照）。
@@ -19,11 +18,14 @@ const ChatPanel = dynamic(
   () => import("@/components/chat-panel").then((m) => m.ChatPanel),
   { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
 );
-// SSR時も元々 mounted ゲートでスケルトン表示のため、遅延化による初期表示の差はない
-const AccidentExtrasPanel = dynamic(
-  () => import("@/components/accident-extras-panel").then((m) => m.AccidentExtrasPanel),
-  { ssr: false, loading: () => <div className="h-[280px] animate-pulse rounded-2xl border border-slate-200 bg-slate-50/60 sm:h-[320px]" /> }
-);
+// C-1: 既定タブ(mhlw-search)で初期描画される唯一のパネルのため静的 import。
+// dynamic() は ssr:true でも React.lazy として SSR 初回パスでサスペンドし、
+// ページの Suspense 境界（さらに app/loading.tsx 境界まで連鎖）が「フォールバック
+// 先行ペイント→$RC スワップ」として静的HTMLに焼き込まれ、/accidents の間欠 CLS 0.25
+// （Lighthouse 実測で約2回に1回）と LCP 遅延の根因になっていた。
+// コンポーネント本体は軽量（事故データ・死亡災害DBは内部で呼び出し時 dynamic import）
+// なので静的 import でもページバンドルは増えない。
+import { AccidentExtrasPanel } from "@/components/accident-extras-panel";
 const AccidentDatabasePanel = dynamic(
   () => import("@/components/accident-database-panel").then((m) => m.AccidentDatabasePanel),
   { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-lg bg-slate-100" /> }
@@ -50,52 +52,12 @@ const MhlwDeathsPanel = dynamic(
   () => import("@/components/mhlw-deaths-panel").then((m) => m.MhlwDeathsPanel),
   { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
 );
-const ELearningPanel = dynamic(
-  () => import("@/components/elearning-panel").then((m) => m.ELearningPanel),
-  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-lg bg-slate-100" /> }
-);
-const HomeValueHero = dynamic(
-  () => import("@/components/home-value-hero").then((m) => m.HomeValueHero),
-  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-lg bg-slate-100" /> }
-);
-const PersonaEntry = dynamic(
-  () => import("@/components/persona-entry").then((m) => m.PersonaEntry),
-  { ssr: false, loading: () => <div className="h-40 animate-pulse rounded-lg bg-slate-100" /> }
-);
-const KyRecordList = dynamic(
-  () => import("@/components/ky-record-list").then((m) => m.KyRecordList),
-  { ssr: false, loading: () => <div className="h-40 animate-pulse rounded-lg bg-slate-100" /> }
-);
-const KySheetPanel = dynamic(
-  () => import("@/components/ky-sheet-panel").then((m) => m.KySheetPanel),
-  { ssr: false, loading: () => <div className="h-64 animate-pulse rounded-lg bg-slate-100" /> }
-);
-const KyIndustryPresetPicker = dynamic(
-  () => import("@/components/ky-industry-preset-picker").then((m) => m.KyIndustryPresetPicker),
-  { ssr: false, loading: () => <div className="h-24 animate-pulse rounded-lg bg-slate-100" /> }
-);
-const MailDeliveryPanel = dynamic(
-  () => import("@/components/mail-delivery-panel").then((m) => m.MailDeliveryPanel),
-  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
-);
 const MhlwDisasterDatabasesPanel = dynamic(
   () => import("@/components/mhlw-disaster-databases-panel").then((m) => m.MhlwDisasterDatabasesPanel),
   { ssr: false, loading: () => <div className="h-40 animate-pulse rounded-lg bg-slate-100" /> }
 );
-const NotificationSettingsPanel = dynamic(
-  () => import("@/components/notification-settings-panel").then((m) => m.NotificationSettingsPanel),
-  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
-);
-const PdfExportPanel = dynamic(
-  () => import("@/components/pdf-export-panel").then((m) => m.PdfExportPanel),
-  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
-);
 const SummaryPanel = dynamic(
   () => import("@/components/summary-panel").then((m) => m.SummaryPanel),
-  { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
-);
-const WeatherRiskCard = dynamic(
-  () => import("@/components/weather-risk-card").then((m) => m.WeatherRiskCard),
   { ssr: false, loading: () => <div className="h-48 animate-pulse rounded-lg bg-slate-100" /> }
 );
 import { SITE_STATS } from "@/data/site-stats";
@@ -108,26 +70,14 @@ import {
   type AccidentType,
   type LawRevision,
   type RevisionSummary,
-  type SiteRiskWeather,
 } from "@/lib/types/domain";
-import type {
-  KyInstructionRecordState,
-  KyRecordSummary,
-  KySheetDraft,
-  MailDeliverySettings,
-  NotificationSettings,
-  PdfExportTarget,
-} from "@/lib/types/operations";
 
-export type HomeScreenVariant =
-  | "portal"
-  | "risk"
-  | "laws"
-  | "accidents"
-  | "elearning"
-  | "ky"
-  | "notifications"
-  | "pdf";
+// C-1（柱1是正・死コード削除）: 旧 variant（portal/risk/ky/elearning/pdf/notifications）
+// はどのルートからも描画されなくなって久しい（/ky は /ky/paper へ一本化、/e-learning は
+// HomeScreen 経由を廃止済み等）が、コードが残り /laws・/accidents のページチャンクに
+// KY用紙・PDF出力・通知設定等のコードが同梱され LCP を悪化させていた。
+// 実際に使われている laws / accidents の2 variant のみ残す。
+export type HomeScreenVariant = "laws" | "accidents";
 
 type HomeScreenProps = {
   children: React.ReactNode;
@@ -142,82 +92,6 @@ type HomeScreenProps = {
   /** C-1: 法改正一覧コンポーネント本体。laws variant のページが注入する */
   LawsListComponent?: React.ComponentType<LawRevisionListProps>;
 };
-
-function makeInitialKyInstruction(): KyInstructionRecordState {
-  // SSR hydration対策: 日付は空に初期化し、マウント後 useEffect で現在日付に差し替える
-  const emptyWork = (): KyInstructionRecordState["workRows"][number] => ({
-    workPlace: "",
-    workDetail: "",
-    machinery: "",
-    fireMark: "",
-    heightMark: "",
-    ppeNote: "",
-    safetyInstruction: "",
-    responsible: "",
-    primeSign: "",
-  });
-  const emptyRisk = (label: string): KyInstructionRecordState["riskRows"][number] => ({
-    targetLabel: label,
-    hazard: "",
-    qualNo: "",
-    likelihood: 1,
-    severity: 1,
-    reduction: "",
-    reLikelihood: 1,
-    reSeverity: 1,
-    reducedBelow2: "",
-    primeSign: "",
-  });
-  const emptyP = (): KyInstructionRecordState["participants"][number] => ({
-    name: "",
-    qualNo: "",
-    preWork: "",
-    onExit: "",
-  });
-  return {
-    reportStamps: ["", "", "", "", ""],
-    siteName: "",
-    projectName: "",
-    foremanName: "",
-    workDateYear: "",
-    workDateMonth: "",
-    workDateDay: "",
-    workDateNote: "",
-    weather: "",
-    temperature: "",
-    coop1Name: "",
-    coop1Chief: "",
-    coop2Name: "",
-    coop2Chief: "",
-    coop3Name: "",
-    coop3Chief: "",
-    workRows: [emptyWork(), emptyWork(), emptyWork(), emptyWork()],
-    riskRows: [
-      emptyRisk("自由記述欄"),
-      emptyRisk("①"),
-      emptyRisk("②"),
-      emptyRisk("③"),
-      emptyRisk("④"),
-    ],
-    participants: Array.from({ length: 6 }, () => emptyP()),
-    participantTotal: "",
-    breaks: ["", "", "", "", ""],
-    safetyVest: "",
-    exitLarge: "",
-    exitMedium: "",
-    exitSmall: "",
-    closingNote: "",
-    fallChecks: [
-      { good: "", bad: "", done: "" },
-      { good: "", bad: "", done: "" },
-      { good: "", bad: "", done: "" },
-    ],
-    correctionNote: "",
-    teamGoal: "",
-    priorityItems: "",
-    pointingCall: "",
-  };
-}
 
 const ACCIDENT_TABS = [
   "list",
@@ -238,7 +112,7 @@ function readAccidentTabFromUrl(
 }
 
 export function HomeScreen({ children, variant: variantProp, initialLawTab, initialRevisions, LawsListComponent }: HomeScreenProps) {
-  const variant = variantProp ?? "portal";
+  const variant = variantProp ?? "laws";
   const router = useRouter();
   const pathname = usePathname();
   const services = useMemo(() => createServices(), []);
@@ -255,13 +129,13 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
   const [summaryError, setSummaryError] = useState<ServiceError | null>(null);
   const [chatError, setChatError] = useState<ServiceError | null>(null);
   const [revisionError, setRevisionError] = useState<ServiceError | null>(null);
-  const [revisionStatus, setRevisionStatus] = useState<ServiceStatus>("idle");
+  // C-1: SSR 初期データがあれば取得済み扱いで開始（マウント時の再フェッチをしない）
+  const [revisionStatus, setRevisionStatus] = useState<ServiceStatus>(
+    initialRevisions && initialRevisions.length > 0 ? "success" : "idle"
+  );
   const [summaryStatus, setSummaryStatus] = useState<ServiceStatus>("idle");
   const [chatStatus, setChatStatus] = useState<ServiceStatus>("idle");
-  const [weatherRiskStatus, setWeatherRiskStatus] = useState<ServiceStatus>("idle");
   const [selectedSummary, setSelectedSummary] = useState<RevisionSummary | null>(null);
-  const [weatherRisk, setWeatherRisk] = useState<SiteRiskWeather | null>(null);
-  const [weatherRiskError, setWeatherRiskError] = useState<ServiceError | null>(null);
   const [accidentCases, setAccidentCases] = useState<AccidentCase[]>([]);
   // C-1: 全件データはバンドル同梱の同期取得をやめ、非同期サービス経由で遅延取得
   const [allAccidentCases, setAllAccidentCases] = useState<AccidentCase[]>([]);
@@ -322,44 +196,6 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
       router.replace(next, { scroll: false });
     }
   }, [accidentActiveTab, selectedAccidentType, variant, pathname, router]);
-  const [selectedRegionName, setSelectedRegionName] = useState(
-    () => services.weatherRisk.getAvailableRegions()[0]?.regionName ?? ""
-  );
-  const [selectedWorkType, setSelectedWorkType] = useState<"高所作業" | "電気作業" | "足場作業" | "一般作業">(
-    "一般作業"
-  );
-  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
-    weatherAlerts: true,
-    lawRevisions: true,
-    accidentUpdates: true,
-    morningReminder: false,
-    reminderTime: "07:45",
-  });
-  const [mailSettings, setMailSettings] = useState<MailDeliverySettings>({
-    enabled: false,
-    email: "",
-    frequency: "daily",
-    includeWeather: true,
-    includeLaws: true,
-    includeAccidents: true,
-    includeLearning: false,
-  });
-  const [kySheetDraft, setKySheetDraft] = useState<KySheetDraft>({
-    date: "",
-    siteName: "",
-    workSummary: "",
-    expectedRisks: "",
-    countermeasures: "",
-    callAndResponse: "",
-    notes: "",
-  });
-  const [kyInstructionRecord, setKyInstructionRecord] = useState<KyInstructionRecordState>(makeInitialKyInstruction);
-  const [kyRecordList, setKyRecordList] = useState<KyRecordSummary[]>([]);
-  const [kySimpleMode, setKySimpleMode] = useState(false);
-  const [pdfTarget, setPdfTarget] = useState<PdfExportTarget>("ky-sheet");
-  const [mailPreview, setMailPreview] = useState("配信プレビューを表示します。");
-  const [pdfPreview, setPdfPreview] = useState("PDFプレビューを表示します。");
-  const [opsSavedLabel, setOpsSavedLabel] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(services.chat.createInitialMessages());
   const [chatInput, setChatInput] = useState("");
   const chatListRef = useRef<HTMLDivElement | null>(null);
@@ -369,24 +205,12 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
     [revisions, selectedRevisionId]
   );
 
-  // マウント後に日付を初期化（SSR hydration mismatch 対策）
-  useEffect(() => {
-    const d = new Date();
-    setKySheetDraft((prev) => (prev.date ? prev : { ...prev, date: d.toISOString().slice(0, 10) }));
-    setKyInstructionRecord((prev) =>
-      prev.workDateYear || prev.workDateMonth || prev.workDateDay
-        ? prev
-        : {
-            ...prev,
-            workDateYear: String(d.getFullYear()),
-            workDateMonth: String(d.getMonth() + 1),
-            workDateDay: String(d.getDate()),
-          },
-    );
-  }, []);
-
   useEffect(() => {
     if (variant !== "laws") return;
+    // C-1: server page から initialRevisions（lawRevisionCores・一覧と同一データ源）を
+    // 受け取った場合は再フェッチしない。マウント直後に法改正データチャンク
+    // （生約130KB）を重ねてロードして同じ内容で差し替えるだけの通信だったため。
+    if (initialRevisions && initialRevisions.length > 0) return;
     let active = true;
 
     async function loadRevisions() {
@@ -410,7 +234,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
     return () => {
       active = false;
     };
-  }, [variant, services.revision]);
+  }, [variant, services.revision, initialRevisions]);
 
   useEffect(() => {
     if (!isSummaryLoading) return;
@@ -493,34 +317,12 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
     chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
   }, [chatMessages, activeTab, variant]);
 
-  useEffect(() => {
-    if (variant !== "risk" && variant !== "pdf") return;
-    let active = true;
-    async function loadWeatherRisk() {
-      setWeatherRiskStatus("loading");
-      const result = await services.weatherRisk.getTodaySiteRisk({
-        regionName: selectedRegionName || undefined,
-      });
-      if (!active) return;
-      if (!result.ok) {
-        setWeatherRiskStatus("error");
-        setWeatherRiskError(result.error);
-        setWeatherRisk(null);
-        return;
-      }
-      setWeatherRiskStatus("success");
-      setWeatherRiskError(null);
-      setWeatherRisk(result.data);
-    }
-    void loadWeatherRisk();
-    return () => {
-      active = false;
-    };
-  }, [variant, services.weatherRisk, selectedRegionName]);
-
-  // 全件データ（リスト件数表示・分析タブ用）。accidents variant で一度だけ取得
+  // 全件データ（リスト件数表示・分析タブ用）。
+  // C-1: 消費者は「サイト収録事例(list)」「詳細事例(analysis)」タブのみ。
+  // 既定タブ(mhlw-search)のままならデータチャンク(生約340KB)を一切ロードしない。
   useEffect(() => {
     if (variant !== "accidents") return;
+    if (accidentActiveTab !== "list" && accidentActiveTab !== "analysis") return;
     let active = true;
     void services.accident.getAllAccidentCases().then((cases) => {
       if (active) setAllAccidentCases(cases);
@@ -528,10 +330,12 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
     return () => {
       active = false;
     };
-  }, [variant, services.accident]);
+  }, [variant, services.accident, accidentActiveTab]);
 
   useEffect(() => {
     if (variant !== "accidents") return;
+    // C-1: フィルタ済み一覧は list タブでしか描画しない。タブ表示時に初めて取得する
+    if (accidentActiveTab !== "list") return;
     let active = true;
     async function loadAccidentCases() {
       setAccidentStatus("loading");
@@ -554,40 +358,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
     return () => {
       active = false;
     };
-  }, [variant, services.accident, selectedAccidentType, selectedAccidentCategory]);
-
-  useEffect(() => {
-    if (variant !== "notifications" && variant !== "pdf" && variant !== "ky") return;
-    let active = true;
-    async function loadOps() {
-      if (variant === "notifications") {
-        const [noti, mail] = await Promise.all([
-          services.operations.getNotificationSettings(),
-          services.operations.getMailSettings(),
-        ]);
-        if (!active) return;
-        if (noti.ok) setNotificationSettings(noti.data);
-        if (mail.ok) setMailSettings(mail.data);
-      }
-      if (variant === "pdf" || variant === "ky") {
-        const ky = await services.operations.getKyDraft();
-        if (!active) return;
-        if (ky.ok) setKySheetDraft(ky.data);
-      }
-      if (variant === "ky") {
-        const paper = await services.operations.getKyInstructionRecord();
-        if (!active) return;
-        if (paper.ok) setKyInstructionRecord(paper.data);
-        const list = await services.operations.getKyRecordList();
-        if (!active) return;
-        if (list.ok) setKyRecordList(list.data);
-      }
-    }
-    void loadOps();
-    return () => {
-      active = false;
-    };
-  }, [variant, services.operations]);
+  }, [variant, services.accident, selectedAccidentType, selectedAccidentCategory, accidentActiveTab]);
 
   const handleSendChat = async () => {
     const trimmed = chatInput.trim();
@@ -642,82 +413,6 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
 
   return (
     <>
-      {variant === "portal" ? (
-        <>
-          <section id="section-home" className="px-4 pt-4 lg:px-8">
-            {children}
-          </section>
-          <section id="section-home-hero" className="px-4 pt-4 lg:px-8">
-            <HomeValueHero />
-          </section>
-          <section id="section-persona-entry" className="px-4 pt-4 pb-6 lg:px-8">
-            <PersonaEntry />
-          </section>
-        </>
-      ) : null}
-
-      {variant === "risk" ? (
-        <>
-          <section className="px-4 pt-4 lg:px-8">{children}</section>
-          <section id="section-weather-risk" className="px-4 pt-4 lg:px-8">
-            <WeatherRiskCard
-              data={weatherRisk}
-              status={weatherRiskStatus}
-              errorMessage={weatherRiskError?.message ?? null}
-              availableRegions={services.weatherRisk.getAvailableRegions()}
-              selectedRegionName={selectedRegionName}
-              onRegionChange={setSelectedRegionName}
-              workType={selectedWorkType}
-              onWorkTypeChange={setSelectedWorkType}
-            />
-          </section>
-        </>
-      ) : null}
-
-      {variant === "ky" ? (
-        <>
-          <section className="px-4 pt-4 lg:px-8">{children}</section>
-          <section className="border-b border-slate-200/80 bg-slate-50 px-4 py-2 lg:px-8">
-            <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
-              <p>
-                KY用紙専用画面です。天候・リスクの朝礼用サマリーは
-                <a href="/risk" className="mx-1 font-semibold text-emerald-700 underline">
-                  今日の現場リスク
-                </a>
-                で確認できます。
-              </p>
-              <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-slate-700">表示モード:</span>
-                <button
-                  type="button"
-                  onClick={() => setKySimpleMode(false)}
-                  className={`rounded-l-full border px-3 py-1 text-xs font-semibold transition ${
-                    !kySimpleMode
-                      ? "border-emerald-500 bg-emerald-600 text-white"
-                      : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
-                  }`}
-                  aria-pressed={!kySimpleMode}
-                >
-                  詳細モード
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setKySimpleMode(true)}
-                  className={`rounded-r-full border px-3 py-1 text-xs font-semibold transition ${
-                    kySimpleMode
-                      ? "border-emerald-500 bg-emerald-600 text-white"
-                      : "border-slate-300 bg-white text-slate-600 hover:bg-slate-50"
-                  }`}
-                  aria-pressed={kySimpleMode}
-                >
-                  シンプルモード
-                </button>
-              </div>
-            </div>
-          </section>
-        </>
-      ) : null}
-
       {variant === "accidents" ? (
         <>
           <section className="px-4 pt-4 lg:px-8">{children}</section>
@@ -848,296 +543,6 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
         </>
       ) : null}
 
-      {variant === "elearning" ? (
-        <>
-          <section className="px-4 pt-4 lg:px-8">{children}</section>
-          <section id="section-elearning" className="px-4 pb-3 lg:px-8">
-            <ELearningPanel />
-          </section>
-        </>
-      ) : null}
-
-      {variant === "ky" && kySimpleMode ? (
-        <section id="section-ky-simple" className="px-4 pb-3 lg:px-8">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-            <h2 className="text-base font-bold text-slate-900 sm:text-lg">KY用紙（シンプルモード）</h2>
-            <p className="mt-1 text-xs text-slate-500">必須5項目のみ入力できます。詳細モードで全項目を編集できます。</p>
-            <div className="mt-3">
-              <KyIndustryPresetPicker
-                onApply={(preset) => {
-                  setKyInstructionRecord((prev) => {
-                    const workRows = prev.workRows.map((r, i) =>
-                      i === 0 ? { ...r, workDetail: preset.workExamples[0] ?? r.workDetail } : r
-                    );
-                    const riskRows = prev.riskRows.map((r, i) => {
-                      const p = preset.risks[i - 1];
-                      if (i === 0 || !p) return r;
-                      return { ...r, hazard: p.hazard, reduction: p.reduction };
-                    });
-                    return { ...prev, workRows, riskRows };
-                  });
-                }}
-              />
-            </div>
-            <div className="mt-4 space-y-5">
-              {/* ①基本情報 */}
-              <fieldset className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <legend className="px-1 text-xs font-bold text-emerald-700">① 基本情報</legend>
-                <div className="grid grid-cols-3 gap-2">
-                  <label className="text-xs font-semibold text-slate-700">
-                    年
-                    <input
-                      className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"
-                      type="number"
-                      value={kyInstructionRecord.workDateYear}
-                      onChange={(e) => setKyInstructionRecord((prev) => ({ ...prev, workDateYear: e.target.value }))}
-                    />
-                  </label>
-                  <label className="text-xs font-semibold text-slate-700">
-                    月
-                    <input
-                      className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"
-                      type="number"
-                      min={1}
-                      max={12}
-                      value={kyInstructionRecord.workDateMonth}
-                      onChange={(e) => setKyInstructionRecord((prev) => ({ ...prev, workDateMonth: e.target.value }))}
-                    />
-                  </label>
-                  <label className="text-xs font-semibold text-slate-700">
-                    日
-                    <input
-                      className="mt-1 w-full rounded-lg border border-slate-300 px-2 py-2 text-sm"
-                      type="number"
-                      min={1}
-                      max={31}
-                      value={kyInstructionRecord.workDateDay}
-                      onChange={(e) => setKyInstructionRecord((prev) => ({ ...prev, workDateDay: e.target.value }))}
-                    />
-                  </label>
-                </div>
-                <label className="mt-3 block text-xs font-semibold text-slate-700">
-                  場所（作業場所）
-                  <input
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                    placeholder="例: 〇〇ビル3階 外壁工事エリア"
-                    value={kyInstructionRecord.workRows[0]?.workPlace ?? ""}
-                    onChange={(e) =>
-                      setKyInstructionRecord((prev) => {
-                        const rows = prev.workRows.map((r, i) => (i === 0 ? { ...r, workPlace: e.target.value } : r));
-                        return { ...prev, workRows: rows };
-                      })
-                    }
-                  />
-                </label>
-              </fieldset>
-
-              {/* ②作業内容 */}
-              <fieldset className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <legend className="px-1 text-xs font-bold text-emerald-700">② 作業内容</legend>
-                <label className="block text-xs font-semibold text-slate-700">
-                  作業内容
-                  <textarea
-                    className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                    placeholder="例: 高所足場組み立て・鉄筋配筋作業"
-                    value={kyInstructionRecord.workRows[0]?.workDetail ?? ""}
-                    onChange={(e) =>
-                      setKyInstructionRecord((prev) => {
-                        const rows = prev.workRows.map((r, i) => (i === 0 ? { ...r, workDetail: e.target.value } : r));
-                        return { ...prev, workRows: rows };
-                      })
-                    }
-                  />
-                </label>
-              </fieldset>
-
-              {/* ③現地KY */}
-              <fieldset className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-                <legend className="px-1 text-xs font-bold text-emerald-700">③ 現地KY</legend>
-                <label className="block text-xs font-semibold text-slate-700">
-                  危険要因
-                  <textarea
-                    className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                    placeholder="例: 墜落・転落、資材落下"
-                    value={kyInstructionRecord.riskRows[0]?.hazard ?? ""}
-                    onChange={(e) =>
-                      setKyInstructionRecord((prev) => {
-                        const rows = prev.riskRows.map((r, i) => (i === 0 ? { ...r, hazard: e.target.value } : r));
-                        return { ...prev, riskRows: rows };
-                      })
-                    }
-                  />
-                </label>
-                <label className="mt-3 block text-xs font-semibold text-slate-700">
-                  対策
-                  <textarea
-                    className="mt-1 min-h-16 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                    placeholder="例: 要求性能墜落制止用器具使用、作業区画内立入禁止"
-                    value={kyInstructionRecord.riskRows[0]?.reduction ?? ""}
-                    onChange={(e) =>
-                      setKyInstructionRecord((prev) => {
-                        const rows = prev.riskRows.map((r, i) => (i === 0 ? { ...r, reduction: e.target.value } : r));
-                        return { ...prev, riskRows: rows };
-                      })
-                    }
-                  />
-                </label>
-              </fieldset>
-            </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-800"
-                onClick={() => {
-                  void services.operations.saveKyInstructionRecord(kyInstructionRecord).then(async (result) => {
-                    if (result.ok) {
-                      setOpsSavedLabel(`KY記録を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
-                      const list = await services.operations.getKyRecordList();
-                      if (list.ok) setKyRecordList(list.data);
-                    }
-                  });
-                }}
-              >
-                保存
-              </button>
-            </div>
-            {opsSavedLabel && (
-              <div className="mt-2 flex items-center gap-1.5">
-                <Mascot size="xs" alt="保存完了" />
-                <p className="text-[11px] font-medium text-emerald-600">{opsSavedLabel}</p>
-              </div>
-            )}
-          </div>
-        </section>
-      ) : null}
-
-      {variant === "ky" && !kySimpleMode ? (
-        <section
-          id="section-ky-sheet"
-          className="px-4 pb-3 lg:px-8 space-y-3"
-        >
-          <KyIndustryPresetPicker
-            onApply={(preset) => {
-              setKyInstructionRecord((prev) => {
-                const workRows = prev.workRows.map((r, i) =>
-                  i === 0 ? { ...r, workDetail: preset.workExamples[0] ?? r.workDetail } : r
-                );
-                const riskRows = prev.riskRows.map((r, i) => {
-                  const p = preset.risks[i - 1];
-                  if (i === 0 || !p) return r;
-                  return { ...r, hazard: p.hazard, reduction: p.reduction };
-                });
-                return { ...prev, workRows, riskRows };
-              });
-            }}
-          />
-          {/* Phase 7: 915行の旧KYフォームは /ky/paper に一本化したため削除（この variant="ky" 分岐は現在どのルートからも描画されない）。 */}
-        </section>
-      ) : null}
-
-      {variant === "ky" ? (
-        <section className="px-4 pb-6 lg:px-8">
-          <KyRecordList
-            records={kyRecordList}
-            onDelete={(id) => {
-              void services.operations.deleteKyRecord(id).then((result) => {
-                if (result.ok) setKyRecordList(result.data);
-              });
-            }}
-          />
-        </section>
-      ) : null}
-
-      {variant === "pdf" ? (
-        <>
-          <section className="px-4 pt-4 lg:px-8">{children}</section>
-          <section id="section-ky-sheet" className="px-4 pb-3 lg:px-8">
-            <KySheetPanel
-              briefingLines={
-                weatherRisk?.riskEvidences?.slice(0, 3) ?? [
-                  "現地確認を優先し、危険を感じたら作業を止める",
-                  "退避導線と連絡系統を先に共有する",
-                ]
-              }
-              onBuildPdfPreview={() => {
-                void services.operations
-                  .buildPdfPreview({
-                    target: "ky-sheet",
-                    kyDraft: kySheetDraft,
-                    briefingLines: weatherRisk?.riskEvidences ?? [],
-                  })
-                  .then((result) => {
-                    if (result.ok) setPdfPreview(result.data);
-                  });
-              }}
-              onChange={setKySheetDraft}
-              onSave={() => {
-                void services.operations.saveKyDraft(kySheetDraft).then((result) => {
-                  if (result.ok) setOpsSavedLabel(`KY保存: ${new Date().toLocaleTimeString("ja-JP")}`);
-                });
-              }}
-              savedLabel={opsSavedLabel}
-              value={kySheetDraft}
-            />
-          </section>
-          <section id="section-pdf-export" className="px-4 pb-3 lg:px-8">
-            <PdfExportPanel
-              onRefreshPreview={() => {
-                void services.operations
-                  .buildPdfPreview({
-                    target: pdfTarget,
-                    kyDraft: kySheetDraft,
-                    briefingLines: weatherRisk?.riskEvidences ?? [],
-                  })
-                  .then((result) => {
-                    if (result.ok) setPdfPreview(result.data);
-                  });
-              }}
-              onTargetChange={setPdfTarget}
-              previewText={pdfPreview}
-              target={pdfTarget}
-            />
-          </section>
-        </>
-      ) : null}
-
-      {variant === "notifications" ? (
-        <>
-          <section className="px-4 pt-4 lg:px-8">{children}</section>
-          <section id="section-notification-settings" className="px-4 pb-5 lg:px-8">
-            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-              <NotificationSettingsPanel
-                onChange={setNotificationSettings}
-                onSave={() => {
-                  void services.operations.saveNotificationSettings(notificationSettings).then((result) => {
-                    if (result.ok) setOpsSavedLabel(`通知設定を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
-                  });
-                }}
-                savedLabel={opsSavedLabel}
-                value={notificationSettings}
-              />
-              <MailDeliveryPanel
-                onBuildPreview={() => {
-                  void services.operations
-                    .buildMailPreview({ notification: notificationSettings, mail: mailSettings })
-                    .then((result) => {
-                      if (result.ok) setMailPreview(result.data);
-                    });
-                }}
-                onChange={setMailSettings}
-                onSave={() => {
-                  void services.operations.saveMailSettings(mailSettings).then((result) => {
-                    if (result.ok) setOpsSavedLabel(`配信設定を保存: ${new Date().toLocaleTimeString("ja-JP")}`);
-                  });
-                }}
-                previewText={mailPreview}
-                savedLabel={opsSavedLabel}
-                value={mailSettings}
-              />
-            </div>
-          </section>
-        </>
-      ) : null}
     </>
   );
 }

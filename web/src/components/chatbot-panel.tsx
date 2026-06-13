@@ -18,7 +18,10 @@ import {
   ChatbotLeafletList,
   ChatbotNoticeList,
 } from "@/components/chatbot/notice-leaflet-list";
-import { LAW_CATEGORY_OPTIONS, type LawCategoryFilter } from "@/lib/rag-search";
+// C-1: rag-search から import すると法令コーパス全体（チャンク生約1.4MB）が client
+// バンドルに同梱され、/chatbot 本体と「/chatbot へ Link する全ページ」のプリフェッチ
+// を直撃するため、UI 選択肢は独立モジュールから取る。
+import { LAW_CATEGORY_OPTIONS, type LawCategoryFilter } from "@/lib/law-category-options";
 import { buildContextPrefill } from "@/lib/chatbot-context-prefill";
 import { VoiceMicButton } from "@/components/voice-input-field";
 import { BindingBadge } from "@/components/AIResponseCard";
