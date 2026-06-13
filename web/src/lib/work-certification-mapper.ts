@@ -265,7 +265,7 @@ export const WORK_TAGS: WorkTag[] = [
   { id: "tag-diving", label: "潜水", certIds: ["lic-diver", "se-36-23-sensui-soki"] },
   { id: "tag-xray", label: "X線・非破壊検査", certIds: ["se-36-28-xray-gamma", "lic-xray-chief"] },
   { id: "tag-tokuka", label: "特定化学物質", certIds: ["st-tokuka-chief"] },
-  { id: "tag-dust", label: "粉じん", certIds: ["se-36-29-dust", "st-dust-chief"] },
+  { id: "tag-dust", label: "粉じん", certIds: ["se-36-29-dust"] },
   { id: "tag-tunnel", label: "トンネル", certIds: ["se-36-30-tunnel", "st-tunnel-chief", "st-tunnel-lining-chief"] },
   { id: "tag-moku", label: "木造建築", certIds: ["st-moku-chief"] },
   { id: "tag-boiler", label: "ボイラー", certIds: ["st-boiler-chief", "lic-boiler-2", "lic-boiler-1"] },
