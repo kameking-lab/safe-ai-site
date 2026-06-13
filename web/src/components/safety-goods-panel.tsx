@@ -3,6 +3,9 @@
 import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { InputWithVoice } from "@/components/voice-input-field";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { Package } from "lucide-react";
+import type { SafetyTone } from "@/lib/design/safety-tone";
 import { GoodsChatbot } from "@/components/goods-chatbot";
 import {
   safetyGoodsCategories,
@@ -335,6 +338,39 @@ export function SafetyGoodsPanel() {
     ? safetyGoodsCategories.find((c) => c.id === selectedCategoryId)
     : null;
 
+  // 結論カード（柱0）: 本文を読まず3秒で「いまの状態（掲載数／該当件数）」が分かる。
+  // 掲載数・該当数は「OK/完了」ではないため緑(safe)を使わず案内色の info（青）。該当0だけ warning（黄）。
+  const hasFilter = query.trim() !== "" || selectedCategoryId !== null || womenFilter;
+  const conclusion: {
+    tone: SafetyTone;
+    value?: number;
+    unit?: string;
+    title: string;
+    description: string;
+  } = !hasFilter
+    ? {
+        tone: "info",
+        value: safetyGoodsItems.length,
+        unit: "品目",
+        title: "掲載",
+        description: "現場の安全グッズを分野別に掲載。カテゴリ・キーワードで絞り込めます。",
+      }
+    : filteredItems.length > 0
+      ? {
+          tone: "info",
+          value: filteredItems.length,
+          unit: "件",
+          title: "該当",
+          description: selectedCategory
+            ? `「${selectedCategory.name}」の商品を表示中。`
+            : "絞り込み条件に一致する商品を表示中。",
+        }
+      : {
+          tone: "warning",
+          title: "該当なし",
+          description: "条件に一致する商品がありません。絞り込みを1つ外してください。",
+        };
+
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
       <div>
@@ -343,6 +379,15 @@ export function SafetyGoodsPanel() {
           現場で必要な安全グッズを分野別にまとめました。各商品のリンクから購入できます。
         </p>
       </div>
+
+      <ConclusionCard
+        tone={conclusion.tone}
+        value={conclusion.value}
+        unit={conclusion.unit}
+        title={conclusion.title}
+        description={conclusion.description}
+        icon={conclusion.tone === "info" ? Package : undefined}
+      />
 
       <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
         <div className="w-full shrink-0 lg:w-64">
