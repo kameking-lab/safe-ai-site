@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-10T22:50:19.010Z",
+  "updatedAt": "2026-06-12T22:22:10.255Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -45,6 +45,52 @@
         "misinformationRisk": 10,
         "duplication": 15,
         "judgedAt": "2026-05-20T22:22:59.495Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "05f4ad712b229c35",
+      "headline": "令和８年度第４回「石綿に係る疾病の業務上外に関する検討会」を開催します",
+      "aiSummary": "厚生労働省がアスベスト関連疾病の業務上外を検討する会議を開催。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_73628.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-06-12T14:00:00+09:00",
+        "fetchedAt": "2026-06-12T22:21:45.709Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-06-12T22:22:05.498Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "e41070de751925da",
+      "headline": "第186回労働政策審議会安全衛生分科会（開催案内）",
+      "aiSummary": "厚生労働省が労働政策審議会安全衛生分科会の開催を告知。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_73745.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-06-08T20:24:00+09:00",
+        "fetchedAt": "2026-06-12T22:21:45.709Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 10,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-06-12T22:22:10.247Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,

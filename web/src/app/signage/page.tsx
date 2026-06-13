@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
+import { SignageConclusionStrip } from "@/components/signage/signage-conclusion-strip";
 import { SignageDangerAlert } from "@/components/signage/signage-danger-alert";
 import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture-warning-map";
 import { SignageFloorPlanEditor } from "@/components/signage/signage-floor-plan-editor";
@@ -11,10 +12,12 @@ import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
 import { SignageMorningScript } from "@/components/signage/signage-morning-script";
 import { SignageRiskPrediction } from "@/components/signage/signage-risk-prediction";
 import { SignageShell } from "@/components/signage/signage-shell";
-import { SignageSiteSafety } from "@/components/signage/signage-site-safety";
+import { SignageSiteSafety, useSignageSiteSafetyData } from "@/components/signage/signage-site-safety";
 import { SignageTodayDocuments } from "@/components/signage/signage-today-documents";
 import { getSignageLocationById, signageLocations } from "@/data/signage-locations";
+import { buildSignageConclusion } from "@/lib/signage/signage-conclusion";
 import { resolveWeatherWarningPanelState } from "@/lib/signage/weather-warning-panel-state";
+import { computeTodayRisks } from "@/lib/utils/risk-search";
 import { createServices } from "@/lib/services/service-factory";
 import type { SignageDataApiResponse } from "@/lib/types/signage-data";
 import type { LawRevision, SiteRiskWeather } from "@/lib/types/domain";
@@ -270,6 +273,26 @@ export default function SignagePage() {
   // 取得失敗(error)を「警報なし」と取り違えないよう状態を明示分岐（無人運用の誤った安心を防ぐ）
   const warningPanel = resolveWeatherWarningPanelState(bundleStatus, bundle?.jmaHeadline);
 
+  // 結論ストリップ（柱0）: 気象・リスク予測・記録キットの要対応を1本の色帯に集約。
+  // リスク予測パネルと同一データを使うため、ここで一度だけ計算して両方へ渡す。
+  const siteSafety = useSignageSiteSafetyData();
+  const todayRisks = useMemo(
+    () =>
+      computeTodayRisks({
+        date: new Date(),
+        temperatureCelsius: state.riskData?.temperatureCelsius,
+        precipitationMm: state.riskData?.precipitationMm,
+      }),
+    [state.riskData],
+  );
+  const conclusion = buildSignageConclusion({
+    warningPanel,
+    risks: todayRisks,
+    siteSafety: siteSafety?.hasRecords
+      ? { overdueCount: siteSafety.overdueCount, alertCount: siteSafety.alertCount }
+      : null,
+  });
+
   const isPortrait = orientation === "portrait";
 
   return (
@@ -280,6 +303,9 @@ export default function SignagePage() {
         nowText={state.nowText}
         lastUpdatedText={state.lastUpdatedText}
       />
+
+      {/* 結論ストリップ（柱0）: 3秒で「いまの状態」が分かるデカ色帯。説明より先に結論 */}
+      <SignageConclusionStrip conclusion={conclusion} />
 
       {/* スマホ向け注意バナー */}
       <div className="xl:hidden rounded-lg border border-amber-500/50 bg-amber-950/70 px-3 py-2.5">
@@ -335,7 +361,7 @@ export default function SignagePage() {
             type="button"
             onClick={s.onSelect}
             title={s.title}
-            className={`rounded border px-2.5 py-1 text-[11px] font-bold transition min-h-[36px] ${
+            className={`rounded border px-2.5 py-1 text-[11px] font-bold transition min-h-[44px] ${
               s.active
                 ? "border-sky-400 bg-sky-600 text-white"
                 : "border-sky-700 bg-sky-900/60 text-sky-200 hover:bg-sky-800/60"
@@ -345,10 +371,11 @@ export default function SignagePage() {
           </button>
         ))}
         <div className="ml-auto flex items-center gap-2">
+          {/* 色文法（柱0）: 操作ボタンは青＝指示。黄は注意情報専用に取っておく */}
           <button
             type="button"
             onClick={() => setShowMorningScript(true)}
-            className="rounded border border-amber-300 bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-amber-950 hover:bg-amber-400"
+            className="min-h-[44px] rounded border border-sky-400 bg-sky-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-sky-500"
             title="本日の気象・類似事故・法改正から朝礼の読み上げ原稿を生成します"
           >
             🎤 朝礼スクリプト
@@ -356,7 +383,7 @@ export default function SignagePage() {
           <button
             type="button"
             onClick={toggleOrientation}
-            className="rounded border border-emerald-400 bg-emerald-700 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
+            className="min-h-[44px] rounded border border-slate-500 bg-slate-800 px-2.5 py-1 text-[11px] font-bold text-slate-100 hover:bg-slate-700"
             aria-pressed={isPortrait}
           >
             {isPortrait ? "📱 縦長" : "🖥 横長"}
@@ -366,7 +393,7 @@ export default function SignagePage() {
           <Link
             href="/signage/map"
             title="全国の警報・地震を詳細地図で監視（台風・地震時）。TV用の全画面表示は地図内から切替できます"
-            className="rounded border border-sky-400 bg-sky-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-sky-600"
+            className="flex min-h-[44px] items-center rounded border border-sky-400 bg-sky-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-sky-600"
           >
             🗺️ 地図サイネージ（警報・地震）
           </Link>
@@ -474,16 +501,35 @@ export default function SignagePage() {
               </div>
             </div>
 
-            {/* 警報サイドパネル（図面モード時のみ表示） */}
+            {/* 警報サイドパネル（図面モード時のみ表示）。
+                色文法（柱0）: 黄＝警報・注意報の発表中のみ。「警報なし」を黄枠で出すと
+                注意色の意味が薄れるため、なし＝緑 / 取得失敗＝赤系 / 取得中＝無彩に分ける。 */}
             {displayMode === "floorplan" && (
               <div
+                data-warning-panel-kind={warningPanel.kind}
                 className={`shrink-0 rounded-lg border p-2 sm:p-3 ${
                   warningPanel.kind === "error"
                     ? "border-rose-600 bg-rose-950/50"
-                    : "border-amber-700/50 bg-amber-950/40"
+                    : warningPanel.kind === "headline"
+                      ? "border-amber-500/70 bg-amber-950/40"
+                      : warningPanel.kind === "none"
+                        ? "border-emerald-600/50 bg-emerald-950/40"
+                        : "border-slate-600 bg-slate-900/60"
                 }`}
               >
-                <p className="text-[10px] font-bold uppercase tracking-widest text-amber-300 sm:text-xs">本日の気象警報</p>
+                <p
+                  className={`text-[10px] font-bold uppercase tracking-widest sm:text-xs ${
+                    warningPanel.kind === "headline"
+                      ? "text-amber-300"
+                      : warningPanel.kind === "error"
+                        ? "text-rose-300"
+                        : warningPanel.kind === "none"
+                          ? "text-emerald-300"
+                          : "text-slate-400"
+                  }`}
+                >
+                  本日の気象警報
+                </p>
                 {warningPanel.kind === "headline" ? (
                   <p className="mt-1 text-[11px] leading-snug text-amber-100 sm:text-sm">{warningPanel.headline}</p>
                 ) : warningPanel.kind === "error" ? (
@@ -494,9 +540,11 @@ export default function SignagePage() {
                     </a>
                   </p>
                 ) : warningPanel.kind === "loading" ? (
-                  <p className="mt-1 text-[10px] text-amber-200/80 sm:text-xs">気象データを取得中…</p>
+                  <p className="mt-1 text-[10px] text-slate-300 sm:text-xs">気象データを取得中…</p>
                 ) : (
-                  <p className="mt-1 text-[10px] text-amber-200/80 sm:text-xs">現在、選択地点に発表中の警報はありません。</p>
+                  <p className="mt-1 text-[10px] font-semibold text-emerald-200 sm:text-xs">
+                    ✓ 現在、選択地点に発表中の警報はありません。
+                  </p>
                 )}
                 {selectedLocation.jmaCityCode && bundle?.selectedWarnings && bundle.selectedWarnings.length > 0 ? (
                   <ul className="mt-2 space-y-0.5 text-[10px] text-amber-100 sm:text-xs">
@@ -573,10 +621,10 @@ export default function SignagePage() {
 
         <div className={`flex flex-col gap-2 xl:min-h-0 xl:overflow-hidden ${isPortrait ? "" : "xl:col-span-5"}`}>
           {/* 本日のリスク予測: 気象（気温・降水）から熱中症等の当日リスクを自動判定（朝礼前の確認用） */}
-          <SignageRiskPrediction weatherData={state.riskData} />
+          <SignageRiskPrediction weatherData={state.riskData} precomputedRisks={todayRisks} />
 
           {/* 現場の安全状態: この端末の /site-records 記録キット（未是正指摘・要対策ヒヤリ等）を掲示。記録のない端末では非表示 */}
-          <SignageSiteSafety />
+          <SignageSiteSafety data={siteSafety} />
 
           <section className="flex flex-col rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden">
             <h2 className="shrink-0 text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">

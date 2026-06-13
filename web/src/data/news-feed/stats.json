@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-10T22:50:19.067Z",
+  "generatedAt": "2026-06-12T22:22:10.309Z",
   "counts": {
-    "approved": 14,
-    "rejected": 19,
-    "total": 33,
-    "approvalRate": 0.424
+    "approved": 16,
+    "rejected": 21,
+    "total": 37,
+    "approvalRate": 0.432
   },
   "byDay": [
     {
@@ -125,22 +125,36 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-06-12",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
+    },
+    {
+      "date": "2026-06-13",
+      "approved": 2,
+      "rejected": 1,
+      "total": 3,
+      "approvalRate": 0.667
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 12,
+      "approved": 14,
       "rejected": 2,
-      "total": 14,
-      "approvalRate": 0.857
+      "total": 16,
+      "approvalRate": 0.875
     },
     {
       "publisher": "日本放送協会",
       "approved": 2,
-      "rejected": 17,
-      "total": 19,
-      "approvalRate": 0.105
+      "rejected": 19,
+      "total": 21,
+      "approvalRate": 0.095
     }
   ],
   "byEstimatedWorkCategory": [
@@ -175,17 +189,17 @@
       "approvalRate": 0.231
     },
     {
-      "type": "有害物質",
+      "type": "交通事故",
       "approved": 0,
       "rejected": 2,
       "total": 2,
       "approvalRate": 0
     },
     {
-      "type": "交通事故",
+      "type": "有害物質",
       "approved": 0,
-      "rejected": 1,
-      "total": 1,
+      "rejected": 2,
+      "total": 2,
       "approvalRate": 0
     },
     {
@@ -227,14 +241,14 @@
         0,
         1,
         2,
-        11
+        13
       ],
       "rejected": [
         0,
-        4,
+        5,
         11,
         1,
-        0,
+        1,
         0,
         1,
         0,
@@ -257,7 +271,7 @@
       ],
       "approved": [
         3,
-        7,
+        9,
         4,
         0,
         0,
@@ -269,8 +283,8 @@
       ],
       "rejected": [
         2,
-        17,
-        0,
+        18,
+        1,
         0,
         0,
         0,
@@ -294,8 +308,8 @@
         "90-100"
       ],
       "approved": [
-        12,
-        2,
+        13,
+        3,
         0,
         0,
         0,
@@ -306,8 +320,8 @@
         0
       ],
       "rejected": [
-        12,
-        7,
+        13,
+        8,
         0,
         0,
         0,
@@ -333,7 +347,7 @@
       ],
       "approved": [
         0,
-        13,
+        15,
         1,
         0,
         0,
@@ -345,13 +359,13 @@
       ],
       "rejected": [
         0,
-        13,
+        14,
         0,
         0,
         0,
         0,
         2,
-        3,
+        4,
         1,
         0
       ]
@@ -360,11 +374,11 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 17
+      "count": 19
     },
     {
       "reason": "duplication",
-      "count": 6
+      "count": 7
     }
   ],
   "samples": {
@@ -394,6 +408,32 @@
           "model": "gemini-2.5-flash"
         },
         "publisher": "日本放送協会"
+      },
+      {
+        "headline": "令和８年度第４回「石綿に係る疾病の業務上外に関する検討会」を開催します",
+        "aiSummary": "厚生労働省がアスベスト関連疾病の業務上外を検討する会議を開催。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-06-12T22:22:05.498Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
+        "headline": "第186回労働政策審議会安全衛生分科会（開催案内）",
+        "aiSummary": "厚生労働省が労働政策審議会安全衛生分科会の開催を告知。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-06-12T22:22:10.247Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
       },
       {
         "headline": "人事労務マガジン 特集第245号　中小企業事業者の皆さまへ 高年齢者の労働災害防止のための設備改善等を支援する補助金 ～令和8年度「エイジフレンドリー補助金」の受け付けが始まりました～",
@@ -469,32 +509,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-05-27T22:29:10.674Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "労働災害発生状況",
-        "aiSummary": "厚生労働省が労働災害の発生状況に関する統計を公表。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-05-27T22:29:06.635Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "労災疾病臨床研究補助金事業",
-        "aiSummary": "厚生労働省が労働災害による疾病の臨床研究を支援する補助金事業の実施を発表。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-05-25T22:04:41.506Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"
@@ -615,6 +629,23 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "名古屋 マイクロバス2人死亡事故で運転手の鑑定留置始まる",
+        "aiSummary": "名古屋のマイクロバス死亡事故、運転手の鑑定留置が始まる。",
+        "score": {
+          "relevance": 40,
+          "copyrightRisk": 20,
+          "misinformationRisk": 10,
+          "duplication": 70,
+          "judgedAt": "2026-06-11T22:48:49.635Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "duplication 70 > 50 (already covered in accident DB)",
+            "relevance 40 < 70 (not labor-safety related for type=accident_report)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "1日は東日本 北日本で高温続く 猛暑日のところも 熱中症対策を",
         "aiSummary": "東日本と北日本で高温が続き、猛暑日となる地域もあるため、熱中症への警戒が必要。",
         "score": {
@@ -642,23 +673,6 @@
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
             "relevance 20 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "全国的に気温上昇 真夏日になるところも 熱中症対策を",
-        "aiSummary": "全国的に気温が上昇し、熱中症予防が呼びかけられている。",
-        "score": {
-          "relevance": 15,
-          "copyrightRisk": 5,
-          "misinformationRisk": 5,
-          "duplication": 85,
-          "judgedAt": "2026-05-16T00:08:54.645Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 15 < 70 (not labor-safety related)",
-            "duplication 85 > 50 (already covered in accident DB)"
           ]
         },
         "publisher": "日本放送協会"
