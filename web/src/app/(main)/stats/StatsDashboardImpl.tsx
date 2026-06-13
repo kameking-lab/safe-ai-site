@@ -19,6 +19,7 @@ import type {
 import { PageContainer } from "@/components/layout/page-container";
 import { Stack } from "@/components/layout/stack";
 import { LazyChart } from "@/components/charts/lazy-chart";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { computeStatsLiveness } from "@/lib/stats/liveness";
 
 const PERIODS: Array<{ id: StatsPeriod; label: string }> = [
@@ -110,11 +111,16 @@ export function StatsDashboardImpl() {
       <TranslatedPageHeader
         titleJa="利用統計ダッシュボード"
         titleEn="Usage Dashboard"
-        descriptionJa="Google Analytics 4 / Search Console を接続した期間の実数値のみを表示します。未接続時はサンプル数値を表示せず、準備中の案内を表示します。検索インデックスからは除外しています。"
-        descriptionEn="Shows live numbers only for periods where GA4 / Search Console are connected. No sample numbers are shown when unconnected. This page is noindexed."
+        descriptionJa="GA4 / Search Console 接続期間の実数値のみ表示（未接続時はサンプル数値なし）。"
+        descriptionEn="Live numbers only for connected periods. No sample data when unconnected."
         iconName="BarChart3"
         iconColor="emerald"
       />
+
+      {/* 柱0バッチ7/9: 補足説明は折りたたみへ。内容は不変。 */}
+      <CollapsibleDetail summary="このダッシュボードについて">
+        Google Analytics 4 / Search Console を接続した期間の実数値のみを表示します。未接続時はサンプル数値を表示せず、準備中の案内を表示します。検索インデックスからは除外しています（noindex）。
+      </CollapsibleDetail>
 
       {anyLive ? (
         <div className="flex flex-wrap items-center justify-between gap-3">

@@ -8,6 +8,8 @@ import { Section } from "@/components/layout/section";
 import { Cluster } from "@/components/layout/stack";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { AccidentsPreliminaryBanner } from "@/components/accidents-meta-info";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
 import { CopilotMemo } from "@/components/copilot/CopilotMemo";
 import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
@@ -98,30 +100,47 @@ export default function AccidentsReportsHubPage() {
           ]}
         />
 
-        <div className="my-4 space-y-3">
-          <CopilotStepNav current="accidents-reports" />
-          <CopilotMemo />
-        </div>
-
-        <header className="rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
+        <header className="mt-3 rounded-xl border border-slate-200 bg-gradient-to-br from-slate-50 to-white p-5 dark:border-slate-800 dark:from-slate-900 dark:to-slate-950">
           <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400">業種別 自動分析</p>
           <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl dark:text-slate-100">
             業種別 労働災害分析レポート
           </h1>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
+        </header>
+
+        {/* 柱0バッチ7/9: 結論ファースト = 収録件数のデカ数字を最上部(ファーストビュー内)に。
+            安全Copilotのステッパー等の補助ナビは結論カードの下へ移動して「いまの状態」を主役に。 */}
+        <ConclusionCard
+          tone="info"
+          value={num(summary.totalCombined)}
+          unit="件"
+          title={`${summary.industries.length}業種を自動分析`}
+          description={`厚労省データ＋編集部curated事例を統合（${summary.yearRange.min}〜${summary.yearRange.max}年・うちcurated詳細 ${num(summary.totalCurated)}件）。下の業種カードから詳細レポートへ。`}
+          className="mt-4"
+        />
+
+        {/* B-001 (audit harsh-third-party-2026-05-16): make the representative-pattern
+            roadmap visible on the hub so users see the disclaimer before they drill in. */}
+        <div className="mt-3">
+          <AccidentsPreliminaryBanner />
+        </div>
+
+        <div className="mt-4 space-y-3">
+          <CopilotStepNav current="accidents-reports" />
+          <CopilotMemo />
+        </div>
+
+        <CollapsibleDetail summary="このレポートについて（データ源・更新頻度）" className="mt-3">
+          <p className="max-w-3xl text-sm leading-relaxed text-slate-700 dark:text-slate-300">
             厚労省「職場のあんぜんサイト」と編集部 curated 事例を統合した
             <span className="font-semibold"> {num(summary.totalCombined)}件 </span>
-            の労働災害事例を、5 業種に分けて自動分析しています。各レポートは事故型ランキング・原因 Top
+            の労働災害事例を、{summary.industries.length} 業種に分けて自動分析しています。各レポートは事故型ランキング・原因 Top
             10・業種特有パターン・推奨対策・関連法令を1日1回更新でまとめています。
           </p>
           <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
             データ収録期間: {summary.yearRange.min}年〜{summary.yearRange.max}年 ・ うち curated 詳細{" "}
             {num(summary.totalCurated)}件
           </p>
-          {/* B-001 (audit harsh-third-party-2026-05-16): make the representative-pattern
-              roadmap visible on the hub so users see the disclaimer before they drill in. */}
-          <AccidentsPreliminaryBanner />
-        </header>
+        </CollapsibleDetail>
 
         <Section
           title="業種を横断比較"

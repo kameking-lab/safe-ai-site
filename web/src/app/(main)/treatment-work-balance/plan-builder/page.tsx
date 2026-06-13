@@ -5,6 +5,7 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { ClipboardList } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { PlanBuilderClient } from "./plan-builder-client";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { ogImageUrl } from "@/lib/og-url";
 
 const _title =
@@ -60,25 +61,19 @@ export default function PlanBuilderPage() {
         iconColor="emerald"
       />
 
-      <section className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-sm leading-6 text-emerald-900">
-        <p className="font-semibold">本ツールの位置付け</p>
-        <p className="mt-1">
-          生成される内容は労務管理上のたたき台です。医学的判断・就業可否の最終決定は主治医および産業医にご相談ください。
-          本人の同意を取った上で職場内で共有してください。
-        </p>
-      </section>
+      <CollapsibleDetail summary="本ツールの位置付け・利用上の注意" className="mt-6">
+        生成される内容は労務管理上のたたき台です。医学的判断・就業可否の最終決定は主治医および産業医にご相談ください。本人の同意を取った上で職場内で共有してください。
+      </CollapsibleDetail>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <PlanBuilderClient />
       </div>
 
       <section className="mt-10 text-xs leading-6 text-slate-500">
-        <p>
-          ※ 本ツールは厚生労働省「事業場における治療と仕事の両立支援のためのガイドライン」（令和5年改訂版）の枠組みに沿って労務配慮の一例を提示するものです。
-          疾患特性・個別事情によって妥当な対応は変わります。
-          詳細な制度設計は産業保健総合支援センター（さんぽセンター）等にご相談ください。
-        </p>
-        <p className="mt-2">
+        <CollapsibleDetail summary="出典ガイドラインと注意事項">
+          本ツールは厚生労働省「事業場における治療と仕事の両立支援のためのガイドライン」（令和5年改訂版）の枠組みに沿って労務配慮の一例を提示するものです。疾患特性・個別事情によって妥当な対応は変わります。詳細な制度設計は産業保健総合支援センター（さんぽセンター）等にご相談ください。
+        </CollapsibleDetail>
+        <p className="mt-3">
           <Link href="/treatment-work-balance" className="underline">
             ← 両立支援ハブに戻る
           </Link>

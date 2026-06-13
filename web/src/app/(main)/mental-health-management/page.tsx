@@ -16,6 +16,7 @@ import { PageContainer } from "@/components/layout";
 import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { ogImageUrl } from "@/lib/og-url";
 import {
   HARASSMENT_LINKAGES,
@@ -130,21 +131,23 @@ export default function MentalHealthManagementHubPage() {
         iconColor="blue"
       />
 
-      <section className="mt-6 rounded-2xl border border-violet-200 bg-violet-50/60 p-5">
-        <div className="flex items-start gap-3">
+      <section className="mt-6">
+        <div className="flex items-start gap-3 rounded-2xl border border-violet-200 bg-violet-50/60 p-4 text-sm leading-6 text-violet-900">
           <AlertCircle
             className="mt-0.5 h-5 w-5 shrink-0 text-violet-700"
             aria-hidden="true"
           />
-          <div className="text-sm leading-6 text-violet-900">
-            <p className="font-semibold">本ページの位置付け</p>
-            <p className="mt-1">
-              本ページは労働安全衛生法第66条の10・労働安全衛生規則第52条の9〜21、および厚労省『ストレスチェック制度実施マニュアル』をふまえた
-              <strong className="font-semibold">事業者・人事・産業保健担当者向けの労務管理ガイド</strong>です。
-              医学的判断（診断・治療・就業可否）は医師（産業医・主治医）の専管事項であり、本サイトは個別の医学的助言を行いません。
-            </p>
-          </div>
+          <p>
+            <strong className="font-semibold">事業者・人事・産業保健担当者向けの労務管理ガイド。</strong>
+            医学的判断（診断・治療・就業可否）は医師の専管事項です。
+          </p>
         </div>
+        <CollapsibleDetail
+          summary="本ページの根拠法令と位置付け（詳細）"
+          className="mt-2"
+        >
+          本ページは労働安全衛生法第66条の10・労働安全衛生規則第52条の9〜21、および厚労省『ストレスチェック制度実施マニュアル』をふまえた事業者・人事・産業保健担当者向けの労務管理ガイドです。医学的判断（診断・治療・就業可否）は医師（産業医・主治医）の専管事項であり、本サイトは個別の医学的助言を行いません。
+        </CollapsibleDetail>
       </section>
 
       {/* 義務／努力義務の分岐 */}
@@ -325,13 +328,9 @@ export default function MentalHealthManagementHubPage() {
         </ul>
       </section>
 
-      <p className="mt-8 text-center text-xs leading-6 text-slate-500">
-        最終更新：2026年5月。本ページは法令・指針の要点解説と労務管理上のガイドです。
-        <strong className="text-slate-600">
-          メンタルヘルスの個別診断・治療・就業可否の判断は医師法上、医師の専管事項です。
-        </strong>
-        本サイトは個別診断・治療助言を行いません。具体的事案は産業医・臨床心理士・主治医・社労士等の専門家にご相談ください。
-      </p>
+      <CollapsibleDetail summary="免責事項・最終更新（2026年5月）" className="mt-8">
+        本ページは法令・指針の要点解説と労務管理上のガイドです。メンタルヘルスの個別診断・治療・就業可否の判断は医師法上、医師の専管事項です。本サイトは個別診断・治療助言を行いません。具体的事案は産業医・臨床心理士・主治医・社労士等の専門家にご相談ください。
+      </CollapsibleDetail>
     </PageContainer>
   );
 }

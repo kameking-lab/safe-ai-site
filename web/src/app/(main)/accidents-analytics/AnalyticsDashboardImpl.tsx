@@ -20,6 +20,7 @@ import {
 } from "recharts";
 import { CardGrid, PageContainer, Section, Stack } from "@/components/layout";
 import { LazyChart } from "@/components/charts/lazy-chart";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import type { AnalyticsAggregates, NameCount } from "@/lib/accidents-analytics/types";
 import { getIndustryInsight } from "@/lib/accidents-analytics/industry-insight";
 
@@ -234,10 +235,11 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
           <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
             事故統計ダッシュボード
           </h1>
-          <p className="text-xs text-slate-600 sm:text-sm">
+          {/* 柱0バッチ7/9: 長い説明文は折りたたみへ（下のKPI・軸Gがファーストビューの主役）。内容は不変。 */}
+          <CollapsibleDetail summary="このダッシュボードのデータ源について">
             curated 詳細事例＋厚労省 死亡災害DB（{formatNumber(aggregates.meta.mhlwDeathsCount)} 件 / 2019〜2024）を統合し、時系列・業種・事故種類・地域・規模・原因など多軸で集計したダッシュボードです。
             厚労省「職場のあんぜんサイト」全件DB（{formatNumber(aggregates.meta.mhlwFullDbCount)} 件 / 2006〜2021）の集計データも参照軸として併載しています。
-          </p>
+          </CollapsibleDetail>
         </header>
 
         {/* ===== 軸G: まず、自業種の要点（67枚のグラフに入る前の段階表示） ===== */}
