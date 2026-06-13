@@ -299,7 +299,7 @@ export function CommandPalette({ onClose }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+        <div className="px-4 py-2 border-t border-slate-100 flex items-center justify-between gap-3 text-xs text-slate-400">
           <span className="flex items-center gap-2">
             <span>
               <kbd className="px-1 py-0.5 bg-slate-100 border border-slate-200 rounded font-mono text-[10px]">↑↓</kbd>
@@ -310,8 +310,18 @@ export function CommandPalette({ onClose }: Props) {
               {' '}決定
             </span>
           </span>
-          {results.length > 0 && (
-            <span>{results.length}件</span>
+          {debouncedQuery && (
+            <button
+              type="button"
+              onClick={() => {
+                router.push(`/search?q=${encodeURIComponent(debouncedQuery)}`);
+                onClose();
+              }}
+              className="inline-flex items-center gap-1 font-semibold text-emerald-600 hover:text-emerald-700"
+            >
+              すべての結果を見る
+              <ArrowRight className="w-3 h-3" aria-hidden="true" />
+            </button>
           )}
         </div>
       </div>
