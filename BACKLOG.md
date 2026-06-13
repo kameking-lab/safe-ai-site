@@ -1,4 +1,4 @@
-# BACKLOG — 無人自走ループのタスクキュー（Fable 5・2026-06-10〜）
+# BACKLOG — 無人自走ループのタスクキュー（Fable 5 2026-06-10〜12／Opus 4.8 引き継ぎ 2026-06-13〜）
 
 このファイルは loop-runner.ps1 が各イテレーションで参照するタスクキュー。
 各起動で **未着手(`[ ]`)の最上位タスクを1つ**取り出して実行し、完了したら `[x]` に更新する。
@@ -22,6 +22,14 @@
 
 ## 回収待ち（タスクではない。イテレーション冒頭の PR回収で処理）
 - （なし。#459/#460/#467 回収済み 2026-06-10）
+- ※中断中C-1は通常の「未マージPR回収」ではない＝下の【再開最優先1】で扱う（ブランチ fix/mobile-perf-structural-c1 にWIP退避済み・PR未作成）。
+
+---
+
+## 【再開最優先】Opus 4.8ループ再開時の出し切り順序（2026-06-13注入・上から処理）
+Fable 5ループが使用上限＋期限で中断した。再開直後はこの2件を最優先で「出し切る」（新規タスクより先）。
+- [ ] 【再開最優先1・S・中断中C-1の回収】モバイル高速化の根治を本番に出し切る。根治コードは **ブランチ fix/mobile-perf-structural-c1**（origin にも push 済み・WIP 2コミット=1f97664d＋27c000aa）に退避済み＝app/loading.tsx 削除＋動的ユーザー向け11セグメントへ個別 loading.tsx 再配置／(main)/layout.tsx の auth() 隔離／/accidents・/laws のページ直下 Suspense 除去／AccidentExtrasPanel 静的import化／role-anchor-scroller の useSearchParams 排除／PWAアイコンpalette圧縮。**新規実装ではなく退避ブランチの回収**: ①`git checkout fix/mobile-perf-structural-c1` し origin/main を通常マージで取り込む ②ゲート(tsc0/lint errors0/test全pass/build成功)を通す ③本番ビルドで対象3ページ(/accidents・/laws・/whats-new)の Lighthouseモバイル perf90+/CLS0.1以下を実測再確認(docs/site-critique-2026-06-11/lh/ の計測スクリプトとfable*計測JSONが証跡。Fable実測=53→91/71→92/74→94・CLS0.000) ④WIPコミットを整理し PR作成→CI緑→squashマージ。約2,600ページの静的HTMLに効く根治なので最優先。完了条件=本番main反映＋実測記録。根拠=docs/fable-reexamination-2026-06-10/mobile-perf-suspense-bake-root-cause-2026-06-12.md
+- [ ] 【再開最優先2・柱1是正・本番公開中の法令誤情報】技能講習DB(skill-training.ts)の捏造疑い2件をe-Gov＋一次資料で是正＋熱中症通達の現行化。(i)「特定粉じん作業主任者技能講習」(skill-training.ts:228)=粉じんに作業主任者制度は存在しない／(ii)「高圧室内作業主任者技能講習」(同:461)=高圧室内作業主任者は免許であり技能講習ではない(データ自身のnotesも矛盾を自認)。令6条(作業主任者)・令20条(就業制限)・各技能講習規程と機械突合し、certType取り違え(技能講習⇄免許⇄特別教育)を是正。snapshot固定はspecial-education.test.tsと同方式。あわせて熱中症通達コーパス(corpus-gaps-fill.ts)が廃止済み令和3年要綱(基発0420第3号)のまま→令和8年3月18日基発0318第1号で現行化(熱中症は主軸機能)。**完了時は下の同趣旨タスク(#95「skill-training.ts技能講習」分・熱中症通達タスク)も併せて[x]化**。
 
 ---
 
@@ -66,8 +74,15 @@
 ## 柱C: 外部酷評対応（独立レビュー2026-06-11・S/A級。詳細・実測値は docs/site-critique-2026-06-11/ 00〜06）
 運用ヒント: 柱0の残りと交互に消化してよい。特にC-1(モバイル実速度)は柱0未適用ページの改修と同一ファイルを触るため、対象が重なるページは柱0タスク側に「C-1のSSR化も同時に」を含めて1イテレーションで済ませろ。法令正確性・A4帳票・1画面フィットは不可侵（既存ルール通り）。
 - [ ] 【柱C-1・S】モバイル実速度の構造是正 第1弾: Lighthouseモバイル実測で機能ページのLCP6.3〜10.4秒・CLS最大0.853(/equipment-finder)・perf 49〜75(品質基準90+に対し14ページ中合格1)。原因はmain#main-content全体がクライアント側で後から差し替わる構造(layout-shifts検出ノードが全ページ共通でmain#main-content)。流入の多い順に /accidents・/laws・/whats-new から: ①静的に決まる本文をServer Componentで初期HTML化(localStorage依存部分のみ子Client化・mountedゲートでmain全体を隠す実装を排除) ②動的部分は同寸スケルトン先置きでCLS≦0.1 ③gtagをnext/script lazyOnload化(166KB・未使用39%が初期同梱)。完了条件=対象3ページのLighthouseモバイルperf90+/CLS0.1以下を実測記録。残りページは第2弾として分割起票。
-- [ ] 【柱C-2・S】サイト横断検索: 2,497ページに対し横断検索が存在しない(モバイルトップはヘッダーボタン0・検索入力0を実測)。チャットボットのlexical検索基盤(コーパス＋synonyms)を流用し、ヘッダー共通の横断検索(条文・通達・判例・標識・主要機能の串刺し・インクリメンタル候補)を実装。完了条件=モバイル/PCの全ページヘッダーから2タップ以内で「アーク溶接 特別教育」が教育資格DBに到達。
-- [ ] 【柱C-3・S】sitemap是正一式: ①sitemap-articles.xmlの全31 URL(lr-real-*)が本文32字の空シェルでcanonical=トップ＝soft404群(orphan・/articles一覧からのリンク0)→未知IDをnotFound()化しsitemapを実在記事から動的生成 ②sitemap-equipment.xmlの旧ID39件(ee-/fg-/hc-等)も同型シェル→現行eq-NNNN生成に差し替え ③/court-cases・/whats-new・/site-records系がどのsitemapにも不在→追加 ④lastmodが2026-04-19等で固定(トップはchangefreq=dailyと自己矛盾)→データ実更新日から生成。/about/cases・/pdfの空シェルも同時に処置。
+- 【柱C-2・S】サイト横断検索（**分割済み・この親行は着手しない。下の3サブを1件ずつ実施**＝Opus向けに1イテレーション1ブランチで通り切る粒度へ再分割 2026-06-13）: 2,497ページに対し横断検索が存在しない(モバイルトップはヘッダーボタン0・検索入力0を実測)。チャットボットのlexical検索基盤(コーパス＋synonyms)を流用し、ヘッダー共通の横断検索(条文・通達・判例・標識・主要機能の串刺し・インクリメンタル候補)を実装。完了条件=モバイル/PCの全ページヘッダーから2タップ以内で「アーク溶接 特別教育」が教育資格DBに到達。
+  - [ ] 【柱C-2-1・S】横断検索インデックス構築: チャットボットの既存lexical基盤(コーパス＋synonyms)を再利用し、条文・通達・判例・標識・主要機能を1本の検索インデックス(純関数＋型)に集約。スコアリング・候補生成をユニットテストで固定(「アーク溶接 特別教育」→教育資格DBが上位)。UI無し・データ層のみ。
+  - [ ] 【柱C-2-2・S】ヘッダー共通の検索UI: 全ページ共通ヘッダー(app-shell)に検索ボタン/入力を設置(モバイル=アイコン1タップで展開・44px)。C-2-1のインデックスでインクリメンタル候補表示。CLS/既存ナビ非破壊・無読テスト。
+  - [ ] 【柱C-2-3・S】検索結果ページと到達導線: /search(または同等)で結果一覧→各機能へ2タップ以内で到達。カテゴリ別グルーピング・空状態。完了条件の実機検証(モバイル/PC両方)＋証跡をdocs/third-party-reviews/に記録。
+- 【柱C-3・S】sitemap是正一式（**分割済み・この親行は着手しない。下の4サブを1件ずつ実施**＝Opus向けに再分割 2026-06-13）: 以下4点をそれぞれ単独イテレーションで。
+  - [ ] 【柱C-3-1・S】毒シェル31記事の処置: sitemap-articles.xmlの全31 URL(lr-real-*)が本文32字の空シェルでcanonical=トップ＝soft404群(orphan・/articles一覧からのリンク0)。未知IDをnotFound()化し、sitemapを実在記事から動的生成に差し替え。/about/cases・/pdfの空シェルも同時処置。
+  - [ ] 【柱C-3-2・S】旧equipment ID 39件の差し替え: sitemap-equipment.xmlの旧ID39件(ee-/fg-/hc-等)も同型の空シェル→現行eq-NNNN生成に差し替え。
+  - [ ] 【柱C-3-3・S】欠落ページのsitemap追加: /court-cases・/whats-new・/site-records系がどのsitemapにも不在→sitemapへ追加。
+  - [ ] 【柱C-3-4・S】lastmod動的化: lastmodが2026-04-19等で固定(トップはchangefreq=dailyと自己矛盾)→各ページのデータ実更新日から生成。
 - [ ] 【柱C-4・S】CSR空シェルページのSSR化＋固有メタ: /ky(SSR本文32字・titleとOGPがサイト共通デフォルト・sitemap収載)・/ky/morning(114字)・/for/construction(50字・営業LPなのに)・/signage/map(406字)。静的な説明・見出し・使い方をServer Component化し、generateMetadataで固有title/description/canonical付与。robots.txtがDisallow:/api/のためクライアントfetch依存の内容はGooglebotから恒久に不可視である点に注意。
 - [x] 【柱C-5・A】内部運用レポートの公開撤去（2026-06-11 即時処置PRで完了=独立インスタンス。sitemap収載2本に加え総点検で同種5本を発見し計7ルート削除: /audits配下6本(hobby-recovery-forecast/site-status/site-reality-check/2026-05-16/2026-05-17-ux-seo/law-citation-full-audit)＋/strategy「月商100万円戦略V3内部文書」。sitemap.tsの2エントリ除去・FAQ7箇所の「年間計画」誤リンク(/strategy→/strategy/plan-generator)是正・admin死リンク2箇所是正。内容はdocs/とgit履歴に残存）: /audits/hobby-recovery-forecast-2026-05-19(「Vercel Hobby復帰予測レポート—Dispatch A/Bベースライン」本文15,616字)と/audits/site-status-2026-05-19がsitemap収載で一般公開中。インフラ課金・内部運用情報の露出＝専門ポータルの信頼毀損。ルート削除(docsはリポジトリに残す)またはnoindex＋robots Disallow＋sitemap除外。
 - [ ] 【柱C-6・A】巨大1ページリストのページネーション: モバイル実測でページ全高 /circulars 39,461px(約47画面・ボタン416個・読込5.4秒・絞り込み後も33,248px)・/court-cases 25,974px・/whats-new 21,211px(40px未満タップ174個)。初期20〜30件＋もっと見る/ページネーション化＋タグチップ44px化。C-1のCLS/LCP改善にも直結。※/whats-new分は柱0タスク(2026-06-11)で初期30件+もっと見る+チップ44px化を実施済み→残りは/circulars・/court-cases。
