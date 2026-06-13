@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { ogImageUrl } from "@/lib/og-url";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "メンタルヘルス・ハラスメント・VDT作業｜労働安全の見えない半分";
@@ -134,17 +135,17 @@ export default function MentalHealthPage() {
         iconColor="red"
       />
 
-      <section className="mt-6 rounded-2xl border border-violet-200 bg-violet-50/60 p-5">
-        <div className="flex items-start gap-3">
+      <section className="mt-6">
+        <div className="flex items-start gap-3 rounded-2xl border border-violet-200 bg-violet-50/60 p-4 text-sm leading-6 text-violet-900">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-violet-700" aria-hidden="true" />
-          <div className="text-sm leading-6 text-violet-900">
-            <p className="font-semibold">労働安全の『見えない半分』</p>
-            <p className="mt-1">
-              身体災害と並んで、現代の労働安全の大きな柱がメンタルヘルス・ハラスメント・VDT作業です。
-              本ページでは法令と指針の要点をまとめました。具体対応は産業医・臨床心理士・社労士と連携してください。
-            </p>
-          </div>
+          <p>
+            <strong className="font-semibold">労働安全の『見えない半分』。</strong>
+            メンタルヘルス・ハラスメント・VDT作業の法令と指針の要点をまとめています。
+          </p>
         </div>
+        <CollapsibleDetail summary="このページの位置付け（詳細）" className="mt-2">
+          身体災害と並んで、現代の労働安全の大きな柱がメンタルヘルス・ハラスメント・VDT作業です。本ページでは法令と指針の要点をまとめました。具体対応は産業医・臨床心理士・社労士と連携してください。
+        </CollapsibleDetail>
       </section>
 
       {/* ストレスチェック */}
@@ -308,11 +309,9 @@ export default function MentalHealthPage() {
         </div>
       </section>
 
-      <p className="mt-8 text-center text-xs text-slate-400">
-        最終更新：2026年4月。本ページは法令・指針の要点解説です。
-        <strong className="text-slate-500">メンタルヘルスの個別診断・治療判断は医師法上、医師の専管事項です。</strong>
-        本サイトは個別診断・治療助言を行いません。具体的事案は産業医・臨床心理士・医師・社労士等の専門家にご相談ください。
-      </p>
+      <CollapsibleDetail summary="免責事項・最終更新（2026年4月）" className="mt-8">
+        本ページは法令・指針の要点解説です。メンタルヘルスの個別診断・治療判断は医師法上、医師の専管事項です。本サイトは個別診断・治療助言を行いません。具体的事案は産業医・臨床心理士・医師・社労士等の専門家にご相談ください。
+      </CollapsibleDetail>
     </PageContainer>
   );
 }
