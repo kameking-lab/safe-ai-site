@@ -15,7 +15,8 @@ export function MeetingPrintSheet({ record }: { record: MeetingRecord }) {
   return (
     <div className="mx-auto bg-white text-[7.5pt] leading-tight text-black print:text-black" style={{ width: "277mm", maxWidth: "100%" }}>
       <div className="mb-1 flex items-end justify-between">
-        <h1 className="text-[12pt] font-bold">安全工程打合せ書及び安全衛生指示書</h1>
+        {/* 正式書式の表題。画面側の見出し(top barのh1)と二重h1にしないため、印刷帳票では非見出し要素として描画（見た目は12pt太字のまま）。 */}
+        <p className="text-[12pt] font-bold">安全工程打合せ書及び安全衛生指示書</p>
         <span className="text-[8pt]">打合せ日: {record.meetingDate}</span>
       </div>
 

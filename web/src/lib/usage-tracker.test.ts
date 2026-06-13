@@ -2,9 +2,11 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   FEEDBACK_GATE_MIN_PAGE_VIEWS,
   FEEDBACK_GATE_THRESHOLD,
+  SNOOZE_DAYS_DEFAULT,
   getPageViewCount,
   getUsageScore,
   hasSubmittedFeedback,
+  isWorkContextPath,
   markFeedbackSubmitted,
   resetUsageTracker,
   shouldShowFeedbackGate,
@@ -89,5 +91,46 @@ describe("trackUsage / shouldShowFeedbackGate", () => {
     expect(getPageViewCount()).toBe(0);
     expect(getUsageScore()).toBe(0);
     expect(shouldShowFeedbackGate()).toBe(false);
+  });
+
+  it("既定スヌーズは 30 日（§C 是正: 7日→30日でヘビーユーザーの中断を緩和）", () => {
+    expect(SNOOZE_DAYS_DEFAULT).toBe(30);
+    for (let i = 0; i < 25; i += 1) trackUsage("page_view");
+    // 引数なしの既定スヌーズで表示されなくなる
+    snoozeFeedbackGate();
+    expect(shouldShowFeedbackGate()).toBe(false);
+  });
+});
+
+describe("isWorkContextPath（作業画面ではフィードバック懇願を出さない）", () => {
+  it("/ky 系（KY記入・朝礼）では割込み禁止", () => {
+    expect(isWorkContextPath("/ky")).toBe(true);
+    expect(isWorkContextPath("/ky/paper")).toBe(true);
+    expect(isWorkContextPath("/ky/morning")).toBe(true);
+    expect(isWorkContextPath("/ky/list")).toBe(true);
+    expect(isWorkContextPath("/ky/workers")).toBe(true);
+  });
+
+  it("/signage 系（サイネージ常時表示）では割込み禁止", () => {
+    expect(isWorkContextPath("/signage")).toBe(true);
+    expect(isWorkContextPath("/signage/display")).toBe(true);
+    expect(isWorkContextPath("/signage/map")).toBe(true);
+  });
+
+  it("接頭辞が一致するだけの別ルート（/ky-examples 等）は対象外＝閲覧は許可", () => {
+    expect(isWorkContextPath("/ky-examples")).toBe(false);
+    expect(isWorkContextPath("/signage-guide")).toBe(false);
+  });
+
+  it("通常の機能ページでは表示を許可する", () => {
+    expect(isWorkContextPath("/accidents")).toBe(false);
+    expect(isWorkContextPath("/laws")).toBe(false);
+    expect(isWorkContextPath("/")).toBe(false);
+  });
+
+  it("null / undefined / 空文字は安全に false", () => {
+    expect(isWorkContextPath(null)).toBe(false);
+    expect(isWorkContextPath(undefined)).toBe(false);
+    expect(isWorkContextPath("")).toBe(false);
   });
 });
