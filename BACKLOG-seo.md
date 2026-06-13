@@ -4,6 +4,7 @@
 
 ## 未着手（上から処理）
 - [x] 【柱C-2・S 横断検索】(a) search-index 構築済(#514)。(b) 検索UI=⌘K コマンドパレットが既存(buildSearchIndex/searchItems を消費)。(c) **新規 /search 結果ページ追加**＝カテゴリタブ＋件数バッジ・空/0件状態・URL共有可・全件表示。searchItems に limit 引数追加(既定10で⌘Kは不変)＋countByCategory＋ユニットテスト9本固定。⌘K フッタに「すべての結果を見る→/search?q=」導線(2タップ到達)。webSiteSchema の SearchAction を /law-search→/search に正規化。/search は noindex,follow(サイト内検索の薄い重複ページ抑止)。
+  - 追補: app-shell モバイル検索トリガを 36px→44px(WCAG 2.5.5 タップ標的)へ。固定サイズで CLS 非破壊・dark variant 補完・aria-keyshortcuts 付与。spec の「44px」を充足。
 - [x] 【柱C-3-3・S】欠落ページのsitemap追加: /court-cases・/whats-new・/site-records系を収載済(#513)。
 - [x] 【柱C-3-4・S】lastmod動的化: 各データの実更新日から生成・未来日capで阻止(#516)。
 - [ ] 【決裁A・自走可・柱C】SNSリンクプレビュー復活: robots.ts の facebookexternalhit を学習クローラ遮断(AI_TRAINING_CRAWLERS)から検索引用系の許可リスト(Allow:/＋共通非公開パス除外)へ移す。他の学習クローラ(GPTBot/ClaudeBot/FacebookBot/Bytespider等)遮断は維持。完了条件=robots出力でfacebookexternalhitがAllow扱い＋主要ページにog:image/og:title(欠落はフォールバック)。
