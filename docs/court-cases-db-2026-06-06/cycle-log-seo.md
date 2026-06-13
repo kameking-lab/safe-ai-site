@@ -80,3 +80,21 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ）/ `vitest run`=200ファイル1665テスト全pass / `build`=成功。build 再生成データ（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は復元。working tree clean。
 
 残: 決裁A（#522 CI待ち回収）→ 柱C-4（共通 generateMetadata/JSON-LD/og フォールバック・lib部分。json-ld.tsx に20関数既存・未テスト→回帰スイート固定が次の一手）。
+
+---
+
+## イテレーション: 柱C-3-4 / A-3 サイトマップ index/equipment の lastmod 動的化（seo/c3-sitemap-index-lastmod）
+
+回収: 自分の CI 緑 PR #530（C-4 JSON-LD lib集約）を squash マージ。#537（C-3-2 役割分担是正）は #530 マージで BACKLOG/cycle-log が衝突→当該ブランチへ origin/main を通常マージで解決（追記の両立・force-push なし）し再 push（CI 再走は次イテレーションで回収）。#541（C-2 404 横断検索）は CI 進行中＝次イテレーション回収。main を ff-only で同期し clean 確認。
+
+着手前の現状確認: BACKLOG キュー空のため「補充の指針」の docs/site-critique-2026-06-11/01-seo-technical.md を本番コードと突合。S-1（articles 毒シェル）・S-3（court-cases等 sitemap 不在）・A-1（AI検索ボット分離）・A-2（内部レポート公開→/admin/audits へ移動済＝COMMON_DISALLOW でカバー）・A-4（旧equipment ID シェル）は **既に是正済み** を確認（[x] 化対象なし）。残る実害として **A-3 の lastmod 信頼性**を精査: `sitemap.ts`（本体）は #516 で実データ日に追従済みだが、**`sitemap-index.xml` は全子サイトマップに当日（new Date()）を直打ち**＝中身不変でも lastmod が毎日動く lastmod スパムが残存。同型のバグが `sitemap-equipment.xml` の per-URL lastmod にも残っていた。
+
+- 新設 `web/src/lib/sitemap/freshness.ts`: 純粋関数 `computeSitemapFreshness(buildToday)`。各セクション実データ最新日（freshestNews/LawRevision/Notice/CourtCase/accidents/equipment/article＋集約の siteFreshest）を `latestIsoDate`（#516）で導出。未来日はビルド日 cap で除外、fallback 値は `sitemap.ts` と一致させ出力乖離を防止。
+- `sitemap-index.xml/route.ts`: 4子（本体=siteFreshest / 記事=freshestArticle / 通達=freshestNotice / 保護具=equipmentDataUpdated）の lastmod を実データ日へ。
+- `sitemap-equipment.xml/route.ts`: per-URL lastmod を当日→equipmentDataUpdated（保護具DB生成日）へ。
+- テスト: `freshness.test.ts`(6 it)＝形式/cap以下/決定性/「未来 cap を渡しても cap 値そのものを返さない＝当日固定の lastmod スパムでない」/siteFreshest 単調性。`sitemap-index.xml/route.test.ts`(4 it)＝sitemapindex 構造・4子列挙・lastmod 形式・各子が実データ最新日に一致。
+- 競合回避: #537 が編集中の `sitemap.ts` 本体と circulars route は**非改変**。冒頭 freshest 群の DRY 寄せ（computeSitemapFreshness へ集約）は #537 マージ後の後追いタスクとして BACKLOG 未着手に明記。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ・自班ファイル 0）/ `vitest run`=212ファイル1759テスト全pass / `build`=Compiled successfully。working tree clean。
+
+残: #537・#541 の CI 緑回収＆マージ → C-3-4 DRY 後追い（sitemap.ts を freshness.ts 利用へ・#537 マージ後）。
