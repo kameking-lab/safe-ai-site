@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { officialNotices } from '@/data/mock/notices-and-precedents';
+import { mhlwNotices } from '@/data/mhlw-notices';
+import { latestIsoDate } from '@/lib/sitemap/lastmod';
 
 const BASE = 'https://www.anzen-ai-portal.jp';
 
@@ -8,11 +9,18 @@ function escapeXml(str: string): string {
 }
 
 export async function GET() {
-  const urls = officialNotices
+  const today = new Date().toISOString().split('T')[0];
+
+  // 正本=mhlwNotices(/circulars/[id] が generateStaticParams で実生成する mhlw-notice-NNNN ID)。
+  // 旧実装は officialNotices(notices-and-precedents・nt-* の別系統ID)を /circulars/<id> として
+  // 出力していたが、/circulars/[id] は mhlwNotices しか解決せず全URLが notFound()=幽霊URL(soft404)
+  // だった（柱C-3-2 で sitemap-equipment.xml に施した是正と同型）。
+  // lastmod は各通達の発出日(issuedDate)に追従し、null/不正値は fallback、未来日は today で cap（柱C-3-4）。
+  const urls = mhlwNotices
     .map(
       (n) => `  <url>
     <loc>${escapeXml(`${BASE}/circulars/${n.id}`)}</loc>
-    <lastmod>${n.publishedAt}</lastmod>
+    <lastmod>${latestIsoDate([n.issuedDate], '2026-04-28', today)}</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
   </url>`

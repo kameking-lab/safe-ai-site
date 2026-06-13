@@ -1,4 +1,9 @@
+import { SITE_NAME, SITE_URL } from "@/lib/seo-metadata";
+
 type Schema = Record<string, unknown>;
+
+/** ロゴ画像（180x180）への絶対URL。複数スキーマの logo/ImageObject で共有。 */
+const LOGO_URL = `${SITE_URL}/apple-touch-icon.png`;
 
 export function JsonLd({ schema }: { schema: Schema | Schema[] }) {
   return (
@@ -13,11 +18,11 @@ export function organizationSchema(): Schema {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "安全AIポータル",
-    url: "https://www.anzen-ai-portal.jp",
+    name: SITE_NAME,
+    url: SITE_URL,
     logo: {
       "@type": "ImageObject",
-      url: "https://www.anzen-ai-portal.jp/apple-touch-icon.png",
+      url: LOGO_URL,
       width: 180,
       height: 180,
     },
@@ -31,7 +36,7 @@ export function organizationSchema(): Schema {
       "化学物質管理",
       "AIシステム開発",
     ],
-    sameAs: ["https://www.anzen-ai-portal.jp"],
+    sameAs: [SITE_URL],
   };
 }
 
@@ -39,21 +44,20 @@ export function webSiteSchema(): Schema {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "安全AIポータル",
-    url: "https://www.anzen-ai-portal.jp",
+    name: SITE_NAME,
+    url: SITE_URL,
     description:
       "労働安全衛生の現場運用ポータル。法改正・リスク管理・KY用紙・Eラーニングをまとめて確認。",
     author: {
       "@type": "Organization",
-      name: "安全AIポータル",
-      url: "https://www.anzen-ai-portal.jp/about",
+      name: SITE_NAME,
+      url: `${SITE_URL}/about`,
     },
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate:
-          "https://www.anzen-ai-portal.jp/search?q={search_term_string}",
+        urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },
@@ -62,15 +66,15 @@ export function webSiteSchema(): Schema {
 
 const PUBLISHER_REF = {
   "@type": "Organization",
-  name: "安全AIポータル",
-  url: "https://www.anzen-ai-portal.jp",
+  name: SITE_NAME,
+  url: SITE_URL,
   logo: {
     "@type": "ImageObject",
-    url: "https://www.anzen-ai-portal.jp/apple-touch-icon.png",
+    url: LOGO_URL,
   },
 } as const;
 
-const DEFAULT_OG_IMAGE = "https://www.anzen-ai-portal.jp/api/og";
+const DEFAULT_OG_IMAGE = `${SITE_URL}/api/og`;
 
 export function articleListSchema(
   items: { headline: string; datePublished: string; url: string; description?: string; image?: string }[]
@@ -147,11 +151,11 @@ export function newsArticleSchema(input: {
     },
     publisher: {
       "@type": "Organization",
-      name: "安全AIポータル",
-      url: "https://www.anzen-ai-portal.jp",
+      name: SITE_NAME,
+      url: SITE_URL,
       logo: {
         "@type": "ImageObject",
-        url: "https://www.anzen-ai-portal.jp/apple-touch-icon.png",
+        url: LOGO_URL,
         width: 180,
         height: 180,
       },
@@ -197,8 +201,8 @@ export function serviceSchema(input: {
   const { name, description, url, serviceType, priceFrom, priceCurrency = "JPY" } = input;
   const provider = {
     "@type": "Organization",
-    name: "安全AIポータル",
-    url: "https://www.anzen-ai-portal.jp",
+    name: SITE_NAME,
+    url: SITE_URL,
   };
   const offers = priceFrom
     ? {
@@ -327,13 +331,13 @@ export function webPageSchema(input: {
     inLanguage,
     isPartOf: {
       "@type": "WebSite",
-      name: "安全AIポータル",
-      url: "https://www.anzen-ai-portal.jp",
+      name: SITE_NAME,
+      url: SITE_URL,
     },
     publisher: {
       "@type": "Organization",
-      name: "安全AIポータル",
-      url: "https://www.anzen-ai-portal.jp",
+      name: SITE_NAME,
+      url: SITE_URL,
     },
     ...(datePublished ? { datePublished } : {}),
     ...(dateModified ? { dateModified } : {}),
@@ -405,8 +409,8 @@ export function courseListSchema(
         description: course.description,
         provider: {
           "@type": "Organization",
-          name: "安全AIポータル",
-          url: "https://www.anzen-ai-portal.jp",
+          name: SITE_NAME,
+          url: SITE_URL,
         },
       },
     })),
@@ -432,8 +436,8 @@ export function datasetSchema(input: {
     url,
     creator: {
       "@type": "Organization",
-      name: "安全AIポータル",
-      url: "https://www.anzen-ai-portal.jp",
+      name: SITE_NAME,
+      url: SITE_URL,
     },
     inLanguage: "ja",
     ...(license ? { license } : {}),
@@ -466,8 +470,8 @@ export function qaPageSchema(input: {
     inLanguage: "ja",
     isPartOf: {
       "@type": "WebSite",
-      name: "安全AIポータル",
-      url: "https://www.anzen-ai-portal.jp",
+      name: SITE_NAME,
+      url: SITE_URL,
     },
   };
 }
@@ -517,8 +521,8 @@ export function quizSchema(input: {
     educationalUse: "practice",
     provider: {
       "@type": "Organization",
-      name: "安全AIポータル",
-      url: "https://www.anzen-ai-portal.jp",
+      name: SITE_NAME,
+      url: SITE_URL,
     },
     hasPart: input.questions.slice(0, 10).map((q) => ({
       "@type": "Question",
@@ -551,8 +555,8 @@ export function dataCatalogSchema(input: {
     inLanguage: "ja",
     creator: {
       "@type": "Organization",
-      name: "安全AIポータル",
-      url: "https://www.anzen-ai-portal.jp",
+      name: SITE_NAME,
+      url: SITE_URL,
     },
     dataset: input.datasets.map((d) => ({
       "@type": "Dataset",
@@ -626,14 +630,14 @@ export function webApplicationSchema(input: {
  * Used by webApplicationSchema callers to populate `mentions`.
  */
 export const COPILOT_FEATURE_PEERS = {
-  chatbot: { name: "安衛法AIチャットボット", url: "https://www.anzen-ai-portal.jp/chatbot" },
+  chatbot: { name: "安衛法AIチャットボット", url: `${SITE_URL}/chatbot` },
   accidentsReports: {
     name: "業種別 労働災害分析レポート",
-    url: "https://www.anzen-ai-portal.jp/accidents-reports",
+    url: `${SITE_URL}/accidents-reports`,
   },
   planGenerator: {
     name: "年次安全衛生計画ジェネレーター",
-    url: "https://www.anzen-ai-portal.jp/strategy/plan-generator",
+    url: `${SITE_URL}/strategy/plan-generator`,
   },
 } as const;
 

@@ -21,4 +21,20 @@ describe("HomePersonaEntry (トップのペルソナ選択バンド)", () => {
     expect(screen.getByText("企業の安全衛生担当者")).toBeDefined();
     expect(screen.getByText("専門家・コンサル")).toBeDefined();
   });
+
+  // 柱3: モバイルは2列＝一人親方を初手の同一行(右上)へ。回帰ガード。
+  it("カードグリッドはモバイル2列(1列に戻していない)", () => {
+    const { container } = render(<HomePersonaEntry />);
+    const grid = container.querySelector("ul");
+    expect(grid?.className).toContain("grid-cols-2");
+    expect(grid?.className).not.toContain("grid-cols-1");
+  });
+
+  it("建設業=先頭・一人親方=2番目のDOM順(2列で右上=初手行に来る)", () => {
+    render(<HomePersonaEntry />);
+    const hrefs = screen.getAllByRole("link").map((a) => a.getAttribute("href"));
+    const personaHrefs = hrefs.filter((h) => h?.startsWith("/for/"));
+    expect(personaHrefs[0]).toBe("/for/construction");
+    expect(personaHrefs[1]).toBe("/for/solo");
+  });
 });

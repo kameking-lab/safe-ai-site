@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { mhlwNotices } from "@/data/mhlw-notices";
-import { getAllEquipment } from "@/lib/equipment-recommendation";
 import { FEATURE_CATEGORIES } from "@/data/features-catalog";
 import { SAFETY_SIGNS, SIGN_CATEGORIES } from "@/data/safety-signs";
 import { INDUSTRIES } from "@/data/safety-signs/industry-usage";
@@ -253,24 +252,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const PAID_ONLY = new Set(["/pricing"]);
   const filtered = PAID_MODE ? pages : pages.filter((p) => !PAID_ONLY.has(p.url));
 
-  const circularPages: typeof pages = mhlwNotices.map((n) => ({
-    url: `/circulars/${n.id}`,
-    // 柱C-3-4: 発出日に追従。不正形式・未来日は安全側の fallback/cap で吸収。
-    lastModified: latestIsoDate([n.issuedDate], "2026-04-28", buildToday),
-    priority: 0.5,
-    changeFrequency: "yearly",
-  }));
-
-  // 記事の個別ページ（/articles/<slug>）は専用の sitemap-articles.xml が
-  // lib/articles から動的生成する（重複掲載を避けるためここでは出力しない）。
-
-  // 保護具DBの個別ページ（月次更新前提）。lastmod はDB生成日に追従（柱C-3-4）。
-  const equipmentPages: typeof pages = getAllEquipment().map((it) => ({
-    url: `/equipment/${it.id}`,
-    lastModified: equipmentDataUpdated,
-    priority: 0.4,
-    changeFrequency: "monthly",
-  }));
+  // 柱C-3-2/A-3 役割分担の是正: 個別の通達(/circulars/<id>)・保護具(/equipment/<id>)・
+  // 記事(/articles/<slug>)ページは、それぞれ専用の子サイトマップ
+  // （sitemap-circulars.xml / sitemap-equipment.xml / sitemap-articles.xml。すべて
+  // sitemap-index.xml が列挙）が正本として出力する。本体 sitemap.xml に直書きすると
+  // 同一URLが2つのサイトマップに二重掲載され、役割分担が崩壊するためここでは出力しない。
 
   const featureCategoryPages: typeof pages = FEATURE_CATEGORIES.map((c) => ({
     url: `/features/${c.id}`,
@@ -319,8 +305,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   return [
     ...filtered,
-    ...circularPages,
-    ...equipmentPages,
     ...featureCategoryPages,
     ...safetySignCategoryPages,
     ...safetySignIndustryPages,
