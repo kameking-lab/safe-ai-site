@@ -50,6 +50,24 @@
 
 **残課題**: 柱0バッチ8 の残focusは /glossary・/industries・/diversity・/handover の文字ダイエット。signage 柱0（大型化・JIS安全色統一）。
 
+## 2026-06-14 — 柱3レビュー トップページ ペルソナ最短到達（一人親方）
+
+**イテレーション頭の回収**: CI緑の自班PR #529（柱0バッチ8）は main と doc 競合(DIRTY)だったため `origin/main` を当該ブランチへ通常マージしてdoc競合のみ解消→push（CI再走は次サイクルで回収）。#534（signage JIS色）はCI in-progressのため次サイクル回収。`main` を ff-only で最新化後、本タスクに着手。
+
+**タスク源**: BACKLOG-ux-hub.md「柱3レビュー」。ブランチ `ux-hub/top-pillar3-persona-review`（main 起点）。バッチ8/signage は #529/#534 で既出荷済み（main未マージ）のため、未着手で残るこのトップ実機レビューを選択。
+
+**実機レビュー（スマホ390×844・dev実機）**: トップを上から無読でスキャン。
+- 最上部「現場ですぐ使う」=0スクロールで主要機能10タイル(min-h 78px・3列・アイコンファースト)。一人親方が必要とする KY用紙/AIに質問/事故事例DB/法改正 が全て揃う。→ 機能への最短到達は既に良好。
+- Hero(h1/SEO/3CTA/統計) と 3本柱(本日の安全トピック=事故/警報/法改正) も視認性良好。全高7,551pxでスクロール地獄なし。
+- **唯一の測定可能な欠陥**: ペルソナバンド「あなたの立場から始める」がモバイル `grid-cols-1`。先頭=建設業カードがフル高さ(約180px)を占め、その真下に一人親方カードが隠れる。「自分の立場」エントリ(/for/solo)に到達するのに建設業カードを丸ごとスクロールする必要があった＝当の一人親方ペルソナにとって最遠。
+
+**対策（home-persona-entry.tsx）**: バンドを `grid-cols-2 lg:grid-cols-4`(モバイル2列)へ。建設業は読み順1番目=左上に温存（documented priority 不変）しつつ、一人親方を同一行の右上＝初手で視界に入る位置へ引き上げ。狭い2列では説明文 `<p>` を `hidden sm:block` で畳み、アイコン+役割名+タグ(機能の一目signal)で3秒スキャン可能に。sm以上は従来通り説明文表示・lgは4列1行。card に `min-h-[44px]`・`p-3 sm:p-4`。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 205 files・1702 tests 全pass（home-persona-entry.test.tsx に2列化＋DOM順の回帰ガード2件追加）/ build 成功。※`npm run lint` 初回はWindowsのeslintワーカーがsegfaultでクラッシュ→`npx eslint .` 再実行で 0 errors（環境起因・コード無関係、前サイクルと同症状）。
+
+**無読テスト**: `docs/third-party-reviews/scripts/top-persona-shortest-reach-noread-2026-06-14.mjs` を **9/9 PASS**（dev実機・スマホ390×844）。建設業=左/一人親方=右の同一行配置(上端ズレ<80px)・主要機能タイル44px・一人親方→/for/solo 動線を実画面 boundingBox で確認。sm(768)/lg(1280) もスクリーンショットで非破壊を確認。
+
+**残課題**: 柱0バッチ8 残focus(/glossary 等は #529 で出荷済み)・signage 柱0(#534 出荷済み)の各CI回収。自領域 柱0 未適用の /features・/favorites は次サイクル候補。
 ## 2026-06-14 — 柱0 サイネージ JIS安全色文法の統一（注意黄＝黒系文字）
 
 着手前にサイネージ各コンポーネントの色使いを精査。結論ストリップ(`SignageConclusionStrip`)は既に JIS安全色の文法どおり「注意＝黄」を `bg-amber-* / text-amber-950`（黒系文字）で描画していたが、同じサイネージ配下の **リスク予測の「中」リスクバッジ**（`signage-risk-prediction.tsx`）と **現場安全状態の「要対応」チップ・出典ラベルバッジ**（`signage-site-safety.tsx`）の計3箇所だけ `bg-amber-500 text-white` のままだった。amber-500(#f59e0b)×白は約2.1:1で WCAG 不適合、数メートル先のTVでは文字が黄色に溶けて読めない（サイネージ無読テスト「遠目で色と数字が読めるか」に直接違反）。
@@ -82,3 +100,19 @@
 **無読テスト**: `docs/third-party-reviews/scripts/pillar0-batch8-text-diet-noread-2026-06-14.mjs` を8/8 PASS（dev実機・スマホ390×844）。3画面ともスクリーンショットで「どこに何があるか／次にやること（業種を選ぶ・五十音で引く・対象層を選ぶ）」が3秒で読めることを確認。
 
 **残課題**: サイネージ柱0（大型化・JIS安全色統一 → PR #534 で着手）、トップページ柱3実機レビュー。
+
+## 2026-06-14 — 柱0補充 /features 機能一覧ハブの44pxタップ標的化
+
+**タスク源**: BACKLOG-ux-hub.md の未着手は柱3トップ実機レビュー1件のみだったが、これは自分の在飛 PR #539（トップのペルソナバンド）と同じファイル領域で衝突するため、補充指針に従い独立した自領域route /features を柱0で点検した。ブランチ `ux-hub/features-pillar0-44px-targets`（main 起点・PR #529/#534 マージ反映後）。
+
+着手前に冒頭の `git checkout main && git pull --ff-only` で PR #529（batch8）をmainへ取り込み、衝突していた PR #534（signage）は origin/main を当該ブランチへ通常マージしてpush（CI再走→次サイクル回収）。
+
+`/features` を無読テストで点検したところ、カード自体はスクリーンショット付きでビジュアルファースト達成済みだったが、**指で押す要素がほぼ全て44px未満**だった: カテゴリフィルタチップ・クイックリンク（5分ツアー等）・各カードの主CTA「機能を試す →」/副CTA「詳しく見る」・下部CTAが `py-2 text-sm`（実測≈36px）。一覧の主アクション（機能を試す）が押し損ねサイズなのは初訪の一人親方（スマホ）に直接の摩擦。
+
+全タップ要素に `min-h-[44px]` を付与（フィルタ/カテゴリ/CTAは `inline-flex items-center justify-center` で縦中央寄せも追加）。**純粋なクラス追加でグリッド・余白・寸法は不変**（min-h は中身が44px超なら無効化＝既存破壊なし）。
+
+**テスト**: `features-index-client.test.tsx` を新設（5ケース）。`LanguageProvider` でラップして描画し、フィルタ/主副CTA/クイックリンクの className に `min-h-[44px]` を保証＋カード件数がカタログと一致することを確認。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 210 files・1732 tests 全pass / build 成功。data班生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）はfull suite走行で書き換わるため commit から除外（git checkout で復元）。
+
+**無読テスト**: `docs/third-party-reviews/scripts/features-44px-targets-noread-2026-06-14.mjs` を **8/8 PASS**（dev実機・スマホ390×844）。実 boundingBox でフィルタ「すべて」/先頭カテゴリ/主CTA/副CTA/クイックリンク/下部CTAが全て height≥44px・カードがスクリーンショット画像を伴う（ビジュアルファースト）ことを確認。
