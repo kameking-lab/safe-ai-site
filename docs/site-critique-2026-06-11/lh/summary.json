@@ -1,0 +1,652 @@
+{
+ "generatedAt": "2026-06-12",
+ "method": "lighthouse 13.4.0 --only-categories=performance --form-factor=mobile --screenEmulation.mobile (headless Chrome, localhost prod build npm run start)",
+ "runs": {
+  "after1-accidents": {
+   "perf": 73,
+   "lcpMs": 12398,
+   "fcpMs": 1357,
+   "tbtMs": 157,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T14:14:18.185Z"
+  },
+  "after1-laws": {
+   "perf": 73,
+   "lcpMs": 11942,
+   "fcpMs": 1357,
+   "tbtMs": 168,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T14:15:05.394Z"
+  },
+  "after1-whats-new": {
+   "perf": 75,
+   "lcpMs": 7891,
+   "fcpMs": 1208,
+   "tbtMs": 119,
+   "cls": 0,
+   "siMs": 1208,
+   "fetchTime": "2026-06-11T14:15:30.726Z"
+  },
+  "after10-accidents": {
+   "perf": 88,
+   "lcpMs": 3919,
+   "fcpMs": 1359,
+   "tbtMs": 22,
+   "cls": 0,
+   "siMs": 1359,
+   "fetchTime": "2026-06-11T15:16:42.526Z"
+  },
+  "after10-laws": {
+   "perf": 86,
+   "lcpMs": 4237,
+   "fcpMs": 1357,
+   "tbtMs": 36,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T15:16:57.314Z"
+  },
+  "after10-whats-new": {
+   "perf": 92,
+   "lcpMs": 3389,
+   "fcpMs": 1208,
+   "tbtMs": 12,
+   "cls": 0,
+   "siMs": 1208,
+   "fetchTime": "2026-06-11T15:17:42.230Z"
+  },
+  "after2-accidents": {
+   "perf": 74,
+   "lcpMs": 9177,
+   "fcpMs": 1358,
+   "tbtMs": 130,
+   "cls": 0,
+   "siMs": 1358,
+   "fetchTime": "2026-06-11T14:28:44.967Z"
+  },
+  "after2-laws": {
+   "perf": 74,
+   "lcpMs": 9026,
+   "fcpMs": 1357,
+   "tbtMs": 140,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T14:29:05.647Z"
+  },
+  "after2-whats-new": {
+   "perf": 75,
+   "lcpMs": 7450,
+   "fcpMs": 1207,
+   "tbtMs": 117,
+   "cls": 0,
+   "siMs": 1207,
+   "fetchTime": "2026-06-11T14:30:05.452Z"
+  },
+  "after3-accidents": {
+   "perf": 81,
+   "lcpMs": 5118,
+   "fcpMs": 1359,
+   "tbtMs": 40,
+   "cls": 0,
+   "siMs": 1359,
+   "fetchTime": "2026-06-11T14:43:13.984Z"
+  },
+  "after3-laws": {
+   "perf": 82,
+   "lcpMs": 4967,
+   "fcpMs": 1357,
+   "tbtMs": 38,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T14:43:33.739Z"
+  },
+  "after3-whats-new": {
+   "perf": 92,
+   "lcpMs": 3386,
+   "fcpMs": 1209,
+   "tbtMs": 9,
+   "cls": 0,
+   "siMs": 1209,
+   "fetchTime": "2026-06-11T14:44:05.615Z"
+  },
+  "after4-accidents": {
+   "perf": 81,
+   "lcpMs": 5117,
+   "fcpMs": 1359,
+   "tbtMs": 31,
+   "cls": 0,
+   "siMs": 1359,
+   "fetchTime": "2026-06-11T14:49:51.866Z"
+  },
+  "after4-laws": {
+   "perf": 81,
+   "lcpMs": 5115,
+   "fcpMs": 1357,
+   "tbtMs": 40,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T14:50:04.815Z"
+  },
+  "after4-whats-new": {
+   "perf": 92,
+   "lcpMs": 3385,
+   "fcpMs": 1208,
+   "tbtMs": 10,
+   "cls": 0,
+   "siMs": 1208,
+   "fetchTime": "2026-06-11T14:50:20.281Z"
+  },
+  "after5-accidents": {
+   "perf": 85,
+   "lcpMs": 4370,
+   "fcpMs": 1360,
+   "tbtMs": 28,
+   "cls": 0,
+   "siMs": 1360,
+   "fetchTime": "2026-06-11T14:53:49.737Z"
+  },
+  "after5-laws": {
+   "perf": 85,
+   "lcpMs": 4400,
+   "fcpMs": 1358,
+   "tbtMs": 22,
+   "cls": 0,
+   "siMs": 1358,
+   "fetchTime": "2026-06-11T14:54:04.762Z"
+  },
+  "after5-whats-new": {
+   "perf": 92,
+   "lcpMs": 3381,
+   "fcpMs": 1207,
+   "tbtMs": 8,
+   "cls": 0,
+   "siMs": 1207,
+   "fetchTime": "2026-06-11T14:54:51.461Z"
+  },
+  "after6-accidents": {
+   "perf": 87,
+   "lcpMs": 4088,
+   "fcpMs": 1359,
+   "tbtMs": 20,
+   "cls": 0,
+   "siMs": 1359,
+   "fetchTime": "2026-06-11T14:58:44.215Z"
+  },
+  "after6-laws": {
+   "perf": 86,
+   "lcpMs": 4233,
+   "fcpMs": 1357,
+   "tbtMs": 20,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T14:59:04.858Z"
+  },
+  "after6-whats-new": {
+   "perf": 92,
+   "lcpMs": 3388,
+   "fcpMs": 1210,
+   "tbtMs": 9,
+   "cls": 0,
+   "siMs": 1210,
+   "fetchTime": "2026-06-11T14:59:57.580Z"
+  },
+  "after7-accidents": {
+   "perf": 88,
+   "lcpMs": 3920,
+   "fcpMs": 1360,
+   "tbtMs": 20,
+   "cls": 0,
+   "siMs": 1360,
+   "fetchTime": "2026-06-11T15:02:24.928Z"
+  },
+  "after7-laws": {
+   "perf": 87,
+   "lcpMs": 4086,
+   "fcpMs": 1357,
+   "tbtMs": 21,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T15:02:35.932Z"
+  },
+  "after8-accidents": {
+   "perf": 83,
+   "lcpMs": 4703,
+   "fcpMs": 1362,
+   "tbtMs": 36,
+   "cls": 0,
+   "siMs": 1362,
+   "fetchTime": "2026-06-11T15:04:06.167Z"
+  },
+  "after8-laws": {
+   "perf": 87,
+   "lcpMs": 4084,
+   "fcpMs": 1357,
+   "tbtMs": 20,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T15:04:28.931Z"
+  },
+  "after8-whats-new": {
+   "perf": 92,
+   "lcpMs": 3385,
+   "fcpMs": 1209,
+   "tbtMs": 9,
+   "cls": 0,
+   "siMs": 1209,
+   "fetchTime": "2026-06-11T15:05:04.694Z"
+  },
+  "after9-accidents": {
+   "perf": 88,
+   "lcpMs": 3916,
+   "fcpMs": 1358,
+   "tbtMs": 26,
+   "cls": 0,
+   "siMs": 1358,
+   "fetchTime": "2026-06-11T15:13:01.098Z"
+  },
+  "after9-laws": {
+   "perf": 86,
+   "lcpMs": 4239,
+   "fcpMs": 1359,
+   "tbtMs": 23,
+   "cls": 0,
+   "siMs": 1359,
+   "fetchTime": "2026-06-11T15:13:12.272Z"
+  },
+  "after9-whats-new": {
+   "perf": 92,
+   "lcpMs": 3384,
+   "fcpMs": 1208,
+   "tbtMs": 8,
+   "cls": 0,
+   "siMs": 1208,
+   "fetchTime": "2026-06-11T15:13:31.024Z"
+  },
+  "baseline-accidents": {
+   "perf": 53,
+   "lcpMs": 11800,
+   "fcpMs": 1207,
+   "tbtMs": 228,
+   "cls": 0.393,
+   "siMs": 1207,
+   "fetchTime": "2026-06-11T13:55:08.172Z"
+  },
+  "baseline-laws": {
+   "perf": 71,
+   "lcpMs": 12091,
+   "fcpMs": 1206,
+   "tbtMs": 197,
+   "cls": 0.064,
+   "siMs": 1206,
+   "fetchTime": "2026-06-11T13:56:28.906Z"
+  },
+  "baseline-whats-new": {
+   "perf": 74,
+   "lcpMs": 7435,
+   "fcpMs": 1207,
+   "tbtMs": 124,
+   "cls": 0.064,
+   "siMs": 1207,
+   "fetchTime": "2026-06-11T13:56:04.932Z"
+  },
+  "cur-accidents": {
+   "perf": 83,
+   "lcpMs": 4687,
+   "fcpMs": 1356,
+   "tbtMs": 10,
+   "cls": 0,
+   "siMs": 1356,
+   "fetchTime": "2026-06-11T17:57:09.163Z"
+  },
+  "cur-laws": {
+   "perf": 89,
+   "lcpMs": 3761,
+   "fcpMs": 1356,
+   "tbtMs": 0,
+   "cls": 0,
+   "siMs": 1356,
+   "fetchTime": "2026-06-11T17:56:56.249Z"
+  },
+  "cur-whats-new": {
+   "perf": 92,
+   "lcpMs": 3379,
+   "fcpMs": 1206,
+   "tbtMs": 8,
+   "cls": 0,
+   "siMs": 1206,
+   "fetchTime": "2026-06-11T17:57:22.080Z"
+  },
+  "var-acc-1": {
+   "perf": 84,
+   "lcpMs": 4544,
+   "fcpMs": 1358,
+   "tbtMs": 28,
+   "cls": 0,
+   "siMs": 1358,
+   "fetchTime": "2026-06-11T15:06:15.722Z"
+  },
+  "var-acc-2": {
+   "perf": 83,
+   "lcpMs": 4690,
+   "fcpMs": 1357,
+   "tbtMs": 20,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T15:06:44.553Z"
+  },
+  "var-acc-3": {
+   "perf": 84,
+   "lcpMs": 4545,
+   "fcpMs": 1357,
+   "tbtMs": 20,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T15:07:05.027Z"
+  },
+  "fable1-accidents": {
+   "perf": 74,
+   "lcpMs": 3912,
+   "fcpMs": 1356,
+   "tbtMs": 104,
+   "cls": 0.254,
+   "siMs": 1356,
+   "fetchTime": "2026-06-11T19:04:18.119Z"
+  },
+  "fable1-laws": {
+   "perf": 88,
+   "lcpMs": 3910,
+   "fcpMs": 1355,
+   "tbtMs": 19,
+   "cls": 0,
+   "siMs": 1355,
+   "fetchTime": "2026-06-11T19:04:30.543Z"
+  },
+  "fable1-whats-new": {
+   "perf": 92,
+   "lcpMs": 3379,
+   "fcpMs": 1206,
+   "tbtMs": 9,
+   "cls": 0,
+   "siMs": 1206,
+   "fetchTime": "2026-06-11T19:04:43.031Z"
+  },
+  "fable2-accidents": {
+   "perf": 88,
+   "lcpMs": 3909,
+   "fcpMs": 1355,
+   "tbtMs": 19,
+   "cls": 0,
+   "siMs": 1355,
+   "fetchTime": "2026-06-11T19:08:30.312Z"
+  },
+  "fable2-laws": {
+   "perf": 89,
+   "lcpMs": 3760,
+   "fcpMs": 1355,
+   "tbtMs": 2,
+   "cls": 0,
+   "siMs": 1355,
+   "fetchTime": "2026-06-11T19:08:42.734Z"
+  },
+  "fable2-whats-new": {
+   "perf": 92,
+   "lcpMs": 3314,
+   "fcpMs": 1206,
+   "tbtMs": 1,
+   "cls": 0,
+   "siMs": 1206,
+   "fetchTime": "2026-06-11T19:08:52.261Z"
+  },
+  "fable3-accidents": {
+   "perf": 88,
+   "lcpMs": 3909,
+   "fcpMs": 1354,
+   "tbtMs": 3,
+   "cls": 0,
+   "siMs": 1354,
+   "fetchTime": "2026-06-11T19:09:01.802Z"
+  },
+  "fable3-laws": {
+   "perf": 88,
+   "lcpMs": 3911,
+   "fcpMs": 1356,
+   "tbtMs": 19,
+   "cls": 0,
+   "siMs": 1356,
+   "fetchTime": "2026-06-11T19:09:14.272Z"
+  },
+  "fable3-whats-new": {
+   "perf": 91,
+   "lcpMs": 3462,
+   "fcpMs": 1206,
+   "tbtMs": 1,
+   "cls": 0,
+   "siMs": 1206,
+   "fetchTime": "2026-06-11T19:09:26.756Z"
+  },
+  "fable4-accidents": {
+   "perf": 85,
+   "lcpMs": 4061,
+   "fcpMs": 1799,
+   "tbtMs": 104,
+   "cls": 0,
+   "siMs": 1799,
+   "fetchTime": "2026-06-11T19:14:04.135Z"
+  },
+  "fable4-laws": {
+   "perf": 87,
+   "lcpMs": 3913,
+   "fcpMs": 1669,
+   "tbtMs": 49,
+   "cls": 0,
+   "siMs": 1669,
+   "fetchTime": "2026-06-11T19:14:16.910Z"
+  },
+  "fable5-accidents": {
+   "perf": 89,
+   "lcpMs": 3764,
+   "fcpMs": 1357,
+   "tbtMs": 1,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T19:18:35.131Z"
+  },
+  "fable5-laws": {
+   "perf": 89,
+   "lcpMs": 3762,
+   "fcpMs": 1356,
+   "tbtMs": 5,
+   "cls": 0,
+   "siMs": 1356,
+   "fetchTime": "2026-06-11T19:18:47.670Z"
+  },
+  "fable6-accidents": {
+   "perf": 91,
+   "lcpMs": 3468,
+   "fcpMs": 1356,
+   "tbtMs": 10,
+   "cls": 0,
+   "siMs": 1356,
+   "fetchTime": "2026-06-11T19:22:09.484Z"
+  },
+  "fable6-laws": {
+   "perf": 91,
+   "lcpMs": 3519,
+   "fcpMs": 1355,
+   "tbtMs": 6,
+   "cls": 0,
+   "siMs": 1355,
+   "fetchTime": "2026-06-11T19:22:21.946Z"
+  },
+  "fable6-whats-new": {
+   "perf": 94,
+   "lcpMs": 3074,
+   "fcpMs": 1205,
+   "tbtMs": 8,
+   "cls": 0,
+   "siMs": 1205,
+   "fetchTime": "2026-06-11T19:22:31.373Z"
+  },
+  "fable7-accidents": {
+   "perf": 91,
+   "lcpMs": 3466,
+   "fcpMs": 1355,
+   "tbtMs": 10,
+   "cls": 0,
+   "siMs": 1355,
+   "fetchTime": "2026-06-11T19:23:35.587Z"
+  },
+  "fable7-laws": {
+   "perf": 92,
+   "lcpMs": 3318,
+   "fcpMs": 1356,
+   "tbtMs": 0,
+   "cls": 0,
+   "siMs": 1356,
+   "fetchTime": "2026-06-11T19:23:48.046Z"
+  },
+  "fable7-whats-new": {
+   "perf": 94,
+   "lcpMs": 3007,
+   "fcpMs": 1205,
+   "tbtMs": 0,
+   "cls": 0,
+   "siMs": 1205,
+   "fetchTime": "2026-06-11T19:24:00.467Z"
+  },
+  "fable8-accidents": {
+   "perf": 91,
+   "lcpMs": 3464,
+   "fcpMs": 1355,
+   "tbtMs": 0,
+   "cls": 0,
+   "siMs": 1355,
+   "fetchTime": "2026-06-11T19:24:12.773Z"
+  },
+  "fable8-laws": {
+   "perf": 92,
+   "lcpMs": 3316,
+   "fcpMs": 1355,
+   "tbtMs": 1,
+   "cls": 0,
+   "siMs": 1355,
+   "fetchTime": "2026-06-11T19:24:25.285Z"
+  },
+  "fable8-whats-new": {
+   "perf": 94,
+   "lcpMs": 3058,
+   "fcpMs": 1205,
+   "tbtMs": 0,
+   "cls": 0,
+   "siMs": 1205,
+   "fetchTime": "2026-06-11T19:24:37.869Z"
+  },
+  "final1-accidents": {
+   "perf": 73,
+   "lcpMs": 4064,
+   "fcpMs": 1355,
+   "tbtMs": 103,
+   "cls": 0.254,
+   "siMs": 1355,
+   "fetchTime": "2026-06-11T18:31:35.142Z"
+  },
+  "final1-laws": {
+   "perf": 88,
+   "lcpMs": 3912,
+   "fcpMs": 1356,
+   "tbtMs": 18,
+   "cls": 0,
+   "siMs": 1356,
+   "fetchTime": "2026-06-11T18:31:22.283Z"
+  },
+  "final1-whats-new": {
+   "perf": 92,
+   "lcpMs": 3380,
+   "fcpMs": 1206,
+   "tbtMs": 9,
+   "cls": 0,
+   "siMs": 1206,
+   "fetchTime": "2026-06-11T18:31:47.735Z"
+  },
+  "final2-accidents": {
+   "perf": 87,
+   "lcpMs": 4066,
+   "fcpMs": 1356,
+   "tbtMs": 1,
+   "cls": 0,
+   "siMs": 1356,
+   "fetchTime": "2026-06-11T18:32:12.585Z"
+  },
+  "final2-laws": {
+   "perf": 89,
+   "lcpMs": 3761,
+   "fcpMs": 1355,
+   "tbtMs": 1,
+   "cls": 0,
+   "siMs": 1355,
+   "fetchTime": "2026-06-11T18:32:00.092Z"
+  },
+  "final2-whats-new": {
+   "perf": 91,
+   "lcpMs": 3529,
+   "fcpMs": 1206,
+   "tbtMs": 9,
+   "cls": 0,
+   "siMs": 1206,
+   "fetchTime": "2026-06-11T18:32:25.327Z"
+  },
+  "final3-accidents": {
+   "perf": 74,
+   "lcpMs": 4065,
+   "fcpMs": 1356,
+   "tbtMs": 89,
+   "cls": 0.254,
+   "siMs": 1356,
+   "fetchTime": "2026-06-11T18:33:29.567Z"
+  },
+  "final4-accidents": {
+   "perf": 87,
+   "lcpMs": 4064,
+   "fcpMs": 1356,
+   "tbtMs": 6,
+   "cls": 0,
+   "siMs": 1356,
+   "fetchTime": "2026-06-11T18:33:39.399Z"
+  },
+  "fable9-accidents": {
+   "perf": 91,
+   "lcpMs": 3471,
+   "fcpMs": 1357,
+   "tbtMs": 1,
+   "cls": 0,
+   "siMs": 1357,
+   "fetchTime": "2026-06-11T19:35:20.872Z"
+  },
+  "fable9-laws": {
+   "perf": 92,
+   "lcpMs": 3314,
+   "fcpMs": 1355,
+   "tbtMs": 3,
+   "cls": 0,
+   "siMs": 1355,
+   "fetchTime": "2026-06-11T19:35:33.521Z"
+  },
+  "fable9-whats-new": {
+   "perf": 94,
+   "lcpMs": 3074,
+   "fcpMs": 1205,
+   "tbtMs": 8,
+   "cls": 0,
+   "siMs": 1205,
+   "fetchTime": "2026-06-11T19:35:46.000Z"
+  }
+ },
+ "notes": [
+  "final1-4 (2026-06-11 18:31-33) = 前セッション中断時点の状態。/accidents は4回中2回 CLS 0.254（保護具セクションが初回ペイント後に約6,300px押し下げ）・perf 73-87 で完了条件未達。",
+  "fable1-3 = Fable 5 検収開始時の再現確認（app/loading.tsx 削除前後）。fable4-5 = inlineCss 実験（FCP悪化で不採用）+ PWAアイコン最適化。",
+  "fable6-8 (2026-06-12) = 最終: 構造根治（app/loading.tsx 削除・auth() の UserMenu スロット隔離・ページ直下 Suspense 除去・AccidentExtrasPanel 静的 import 化）+ PWAアイコン palette 圧縮 (icon-192: 42.8→15.2KB) + Geist preload 停止。3ページ×3回連続 perf 90+ / CLS 0.000。",
+  "生JSONは baseline-* と fable6-8（最終）のみ保持。final1-4・fable1-5 は値抽出後に削除。",
+  "fable9 = 出荷ビルド（動的セグメント11個の個別loading.tsx追加後）での最終裏取り: accidents 91 / laws 92 / whats-new 94・CLS全て0.000。"
+ ]
+}

@@ -1,4 +1,3 @@
-import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import type { ServiceResult } from "@/lib/types/api";
 import {
   ALL_ACCIDENT_CATEGORIES,
@@ -11,7 +10,7 @@ import {
 export type AccidentService = {
   getAccidentTypes: () => { value: AccidentType | "すべて"; label: string }[];
   getWorkCategories: () => { value: AccidentWorkCategory | "すべて"; label: string }[];
-  getAllAccidentCases: () => AccidentCase[];
+  getAllAccidentCases: () => Promise<AccidentCase[]>;
   getAccidentCases: (input?: {
     type?: AccidentType | "すべて";
     category?: AccidentWorkCategory | "すべて";
@@ -28,6 +27,14 @@ const accidentCategoryOptions: { value: AccidentWorkCategory | "すべて"; labe
   ...ALL_ACCIDENT_CATEGORIES.map((c) => ({ value: c, label: c })),
 ];
 
+// C-1（モバイル実速度の構造是正）: 事故データセット（生 約340KB）を静的 import すると
+// service-factory 経由で /accidents・/laws のページバンドルに同梱され LCP を悪化させる。
+// 一覧の取得は元々非同期APIなので、データ本体は呼び出し時に dynamic import で遅延取得する。
+async function loadDataset(): Promise<AccidentCase[]> {
+  const mod = await import("@/data/mock/accident-cases");
+  return mod.getAccidentCasesDataset();
+}
+
 export const mockAccidentService: AccidentService = {
   getAccidentTypes() {
     return accidentTypeOptions;
@@ -35,13 +42,14 @@ export const mockAccidentService: AccidentService = {
   getWorkCategories() {
     return accidentCategoryOptions;
   },
-  getAllAccidentCases() {
-    return getAccidentCasesDataset();
+  async getAllAccidentCases() {
+    return loadDataset();
   },
   async getAccidentCases(input) {
     const filterType = input?.type ?? "すべて";
     const filterCategory = input?.category ?? "すべて";
-    const data = getAccidentCasesDataset().filter((item) => {
+    const dataset = await loadDataset();
+    const data = dataset.filter((item) => {
       const typeMatched = filterType === "すべて" || item.type === filterType;
       const categoryMatched = filterCategory === "すべて" || item.workCategory === filterCategory;
       return typeMatched && categoryMatched;

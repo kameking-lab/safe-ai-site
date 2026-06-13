@@ -9,6 +9,7 @@ import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
 import { InstallPwaPrompt } from "@/components/install-pwa-prompt";
 import { CommandPaletteProvider } from "@/components/CommandPaletteProvider";
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
+import { A11Y_HINT_INIT_SCRIPT } from "@/lib/a11y-hint";
 import Analytics from "@/components/Analytics";
 import AdSenseScript from "@/components/AdSenseScript";
 
@@ -16,7 +17,10 @@ const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
   display: "swap",
-  preload: true,
+  // C-1: Geist は latin 専用で、日本語UIの本文・見出し（CJK）はシステムフォントで
+  // 描画される。preload すると 30KB の woff2 が全ページの LCP クリティカル窓に
+  // 入るため preload しない（数字・英字は swap で置き換わる）。
+  preload: false,
 });
 
 const geistMono = Geist_Mono({
@@ -97,6 +101,8 @@ export default function RootLayout({
       <head>
         {/* FOUC 抑止: hydration 前に html.dark を確定させる */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        {/* CLS抑止: a11y案内バナーの既読判定を first paint 前に確定させる（C-1） */}
+        <script dangerouslySetInnerHTML={{ __html: A11Y_HINT_INIT_SCRIPT }} />
         {/* Warm up TCP/TLS for third-party origins before they're requested (B-15) */}
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://pagead2.googlesyndication.com" />

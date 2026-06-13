@@ -1,5 +1,7 @@
 "use client";
-import { LAW_SOURCE_COUNT } from "@/data/laws";
+// C-1: @/data/laws を import すると法令コーパス全体がバンドルに同梱されるため、
+// 件数は SITE_STATS の静的リテラル（テストで実データと突合）を使う。
+import { SITE_STATS } from "@/data/site-stats";
 
 /**
  * Inline panel that surfaces the next 1-2 logical steps based on the current
@@ -95,7 +97,7 @@ export function CopilotNextSteps({ current, industry, intro, extraCta }: Copilot
       label: lbl
         ? `${lbl}の関連法令を安衛法AIで深掘りする`
         : "関連法令を安衛法AIで深掘りする",
-      description: `${LAW_SOURCE_COUNT}法令等を根拠条文付きでAIが回答。具体的な選任要件・特別教育・健診を確認できます。`,
+      description: `${SITE_STATS.lawSourceCount}法令等を根拠条文付きでAIが回答。具体的な選任要件・特別教育・健診を確認できます。`,
       href: `/chatbot${q}`,
       icon: MessageSquare,
       tone: "blue",

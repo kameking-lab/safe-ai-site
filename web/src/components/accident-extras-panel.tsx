@@ -1,11 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { searchMhlwSimilarStrict, MHLW_DEATHS_TOTAL, type ScoredMhlwCase } from "@/lib/mhlw-similar-cases";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { searchMhlwSimilarStrict, getMhlwDeathsTotal, type ScoredMhlwCase } from "@/lib/mhlw-similar-cases";
 import { loadProfile, INDUSTRY_LABELS, type CompanyProfile } from "@/lib/company-profile";
-import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import type { AccidentCase } from "@/lib/types/domain";
+
+// C-1: 事故データセット（生 約340KB）を静的 import すると /accidents・/laws の
+// ページバンドルに同梱されて LCP を悪化させるため、必要時に dynamic import する。
+async function loadAccidentCases(): Promise<AccidentCase[]> {
+  const mod = await import("@/data/mock/accident-cases");
+  return mod.getAccidentCasesDataset();
+}
 
 const INDUSTRIES_FOR_PROFILE: Record<string, string[]> = {
   construction: ["建設", "足場", "高所", "型枠"],
@@ -28,7 +34,40 @@ function buildProfileQuery(profile: CompanyProfile): string {
 }
 
 function CrossTab() {
-  const all = useMemo(() => getAccidentCasesDataset(), []);
+  const [all, setAll] = useState<AccidentCase[]>([]);
+  // C-1: クロス集計はファーストビューの下にあるため、マウント直後ではなく
+  // セクションが画面に近づいた時にデータチャンク(生約340KB)をロードする。
+  // IntersectionObserver 非対応環境では従来どおり即ロードにフォールバック。
+  const rootRef = useRef<HTMLElement | null>(null);
+  const [nearViewport, setNearViewport] = useState(false);
+  useEffect(() => {
+    if (nearViewport) return;
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      // IntersectionObserver 非対応環境のみの即ロードフォールバック（1回きり）
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setNearViewport(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) setNearViewport(true);
+      },
+      { rootMargin: "400px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [nearViewport]);
+  useEffect(() => {
+    if (!nearViewport) return;
+    let active = true;
+    void loadAccidentCases().then((cases) => {
+      if (active) setAll(cases);
+    });
+    return () => {
+      active = false;
+    };
+  }, [nearViewport]);
   // 業種 × 事故型 のクロス集計
   const matrix = useMemo(() => {
     const map = new Map<string, Map<string, number>>();
@@ -50,7 +89,7 @@ function CrossTab() {
   }, [all]);
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <section ref={rootRef} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <h3 className="text-sm font-bold text-slate-900">業種 × 事故型 クロス集計（収録事例ベース）</h3>
       <p className="mt-1 text-[11px] text-slate-500">
         サイト収録の{all.length}件を業種と事故型の2軸で集計。クリックで該当条件のフィルタへ。
@@ -144,11 +183,31 @@ function findRelatedCuratedCase(
 
 function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
   const query = profile ? buildProfileQuery(profile) : "";
-  const result = useMemo(() => {
-    if (!profile || !query) return { cases: [] as ScoredMhlwCase[], mode: "none" as const };
-    return searchMhlwSimilarStrict(query, profile.industry, 5);
+  // C-1: 死亡災害DB・事故データセットとも検索実行時の dynamic import（非同期）
+  const [result, setResult] = useState<{ cases: ScoredMhlwCase[]; mode: "strict" | "loose" | "none" }>({
+    cases: [],
+    mode: "none",
+  });
+  const [curated, setCurated] = useState<AccidentCase[]>([]);
+  const [deathsTotal, setDeathsTotal] = useState<number | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    if (!profile?.wizardCompleted || !query) return;
+    void Promise.all([
+      searchMhlwSimilarStrict(query, profile.industry, 5),
+      loadAccidentCases(),
+      getMhlwDeathsTotal(),
+    ]).then(([searchResult, cases, total]) => {
+      if (!active) return;
+      setResult(searchResult);
+      setCurated(cases);
+      setDeathsTotal(total);
+    });
+    return () => {
+      active = false;
+    };
   }, [profile, query]);
-  const curated = useMemo(() => getAccidentCasesDataset(), []);
 
   if (!profile?.wizardCompleted) {
     return (
@@ -184,7 +243,7 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
         </Link>
       </div>
       <p className="mt-1 text-[11px] text-rose-800">
-        厚労省 死亡災害DB {MHLW_DEATHS_TOTAL.toLocaleString()}件から、業種・主要機械・化学物質キーワードで重み付け検索した実例。
+        厚労省 死亡災害DB{deathsTotal !== null ? ` ${deathsTotal.toLocaleString()}件` : ""}から、業種・主要機械・化学物質キーワードで重み付け検索した実例。
       </p>
       {isLoose && (
         <p className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-900">
@@ -273,7 +332,6 @@ export function AccidentExtrasPanel() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setProfile(loadProfile());
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     const onChange = () => setProfile(loadProfile());
     window.addEventListener("company-profile-changed", onChange);

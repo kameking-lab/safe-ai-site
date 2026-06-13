@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
-import { accidentCasesMock } from "@/data/mock/accident-cases";
-import { pickEducationAccidents } from "@/lib/accidents/education-pick";
+import { useEffect, useState } from "react";
+// C-1: 事故データセット（生約340KB）の静的 import を廃止。サイネージ表示後の
+// dynamic import で取得する（本コンポーネントは /signage 系で client 表示専用。
+// 静的同梱だと /signage へ Link する全ページのプリフェッチにも同データが乗る）。
+import { pickEducationAccidents, type EducationCase } from "@/lib/accidents/education-pick";
 
 /**
  * P2-2 朝礼サイネージ「本日の安全啓発（過去の労災）」セクション。
@@ -22,10 +24,18 @@ const PREVENT: Record<string, string> = {
 };
 
 export function SignageAccidentEducation({ lang = "ja", category }: { lang?: string; category?: string }) {
-  const cases = useMemo(() => {
-    const now = new Date();
-    const seed = now.getFullYear() * 366 + now.getMonth() * 31 + now.getDate(); // 日替わり
-    return pickEducationAccidents(accidentCasesMock, { category, count: 3, seed });
+  const [cases, setCases] = useState<EducationCase[]>([]);
+  useEffect(() => {
+    let active = true;
+    void import("@/data/mock/accident-cases").then((mod) => {
+      if (!active) return;
+      const now = new Date();
+      const seed = now.getFullYear() * 366 + now.getMonth() * 31 + now.getDate(); // 日替わり
+      setCases(pickEducationAccidents(mod.accidentCasesMock, { category, count: 3, seed }));
+    });
+    return () => {
+      active = false;
+    };
   }, [category]);
 
   if (cases.length === 0) return null;

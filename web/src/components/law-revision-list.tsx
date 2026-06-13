@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import type { IndustryTag, LawRevision, RevisionImpact } from "@/lib/types/domain";
 import type { ServiceError } from "@/lib/types/api";
 import { fuzzyMatchAll, fuzzyMatch } from "@/lib/fuzzy-search";
@@ -49,7 +49,7 @@ const KIND_BADGE_CLASS: Record<string, string> = {
   ガイドライン: "bg-green-100 text-green-800",
 };
 
-type LawRevisionListProps = {
+export type LawRevisionListProps = {
   revisions: LawRevision[];
   selectedRevisionId: string;
   loadingRevisionId: string | null;
@@ -60,6 +60,9 @@ type LawRevisionListProps = {
   onSelectSummary: (revisionId: string) => void;
   onSelectForQuestion: (revisionId: string) => void;
 };
+
+// C-1/C-6: 一覧の初期描画件数（whats-new と同じ「初期N件＋もっと見る」方式）
+const INITIAL_LIST_COUNT = 30;
 
 // #40: 影響度バッジ
 const IMPACT_BADGE_CLASS: Record<RevisionImpact, string> = {
@@ -194,32 +197,26 @@ export function LawRevisionList({
   onSelectForQuestion,
 }: LawRevisionListProps) {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const articlesParam = searchParams.get("articles");
-  const initialArticles = articlesParam
-    ? articlesParam.split(",").map((s) => s.trim()).filter(Boolean)
-    : [];
   const [search, setSearch] = useState("");
-  const [articleHighlights, setArticleHighlights] = useState<string[]>(initialArticles);
+  const [articleHighlights, setArticleHighlights] = useState<string[]>([]);
   const [yearFrom, setYearFrom] = useState(2016);
   const [yearTo, setYearTo] = useState(2026);
   const [selectedKind, setSelectedKind] = useState<string>("すべて");
   // 影響度フィルタ + ソート (URLパラメータ連動)
-  const [selectedImpact, setSelectedImpactState] = useState<RevisionImpact | "すべて">(
-    () => PARAM_TO_IMPACT[searchParams.get("impact") ?? ""] ?? "すべて"
-  );
-  const [sortOrder, setSortOrderState] = useState<"desc" | "asc">(
-    () => (searchParams.get("sort") === "asc" ? "asc" : "desc")
-  );
+  // C-1: useSearchParams は静的プリレンダーを Suspense フォールバックへ落とし
+  // /laws 本文全体がクライアント差し替えになるため、URLはマウント後に
+  // window.location から一度だけ読んで復元する（SSRは既定値で確定描画）。
+  const [selectedImpact, setSelectedImpactState] = useState<RevisionImpact | "すべて">("すべて");
+  const [sortOrder, setSortOrderState] = useState<"desc" | "asc">("desc");
   // 業種マルチセレクト (URLパラメータ連動: ?industries=construction,manufacturing)
   const [selectedIndustries, setSelectedIndustriesState] = useState<Set<IndustryKey>>(
-    () => parseIndustriesParam(searchParams.get("industries"))
+    () => new Set<IndustryKey>()
   );
 
   const updateUrl = useCallback(
     (industries: Set<IndustryKey>, impact: RevisionImpact | "すべて", sort: "desc" | "asc") => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(window.location.search);
       const industryVal = Array.from(industries).join(",");
       const impactVal = IMPACT_TO_PARAM[impact];
       if (industryVal) params.set("industries", industryVal); else params.delete("industries");
@@ -227,7 +224,7 @@ export function LawRevisionList({
       if (sort !== "desc") params.set("sort", sort); else params.delete("sort");
       router.replace(`?${params.toString()}`, { scroll: false });
     },
-    [router, searchParams]
+    [router]
   );
 
   const setSelectedImpact = useCallback(
@@ -247,19 +244,34 @@ export function LawRevisionList({
   );
 
   // P0-1: 施行ステータスフィルタ（URL ?status=upcoming|enforced 連動。独立更新で他フィルタに非干渉）
-  const [selectedStatus, setSelectedStatusState] = useState<EnforcementStatus | "すべて">(
-    () => PARAM_TO_STATUS[searchParams.get("status") ?? ""] ?? "すべて"
-  );
+  const [selectedStatus, setSelectedStatusState] = useState<EnforcementStatus | "すべて">("すべて");
   const setSelectedStatus = useCallback(
     (val: EnforcementStatus | "すべて") => {
       setSelectedStatusState(val);
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(window.location.search);
       if (val === "すべて") params.delete("status");
       else params.set("status", val);
       router.replace(`?${params.toString()}`, { scroll: false });
     },
-    [router, searchParams]
+    [router]
   );
+
+  // マウント時にURLクエリからフィルタ状態を一度だけ復元（共有URL・深いリンクを維持）
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const articlesParam = params.get("articles");
+    if (articlesParam) {
+      const articles = articlesParam.split(",").map((s) => s.trim()).filter(Boolean);
+      if (articles.length > 0) setArticleHighlights(articles);
+    }
+    const impact = PARAM_TO_IMPACT[params.get("impact") ?? ""];
+    if (impact) setSelectedImpactState(impact);
+    if (params.get("sort") === "asc") setSortOrderState("asc");
+    const industries = parseIndustriesParam(params.get("industries"));
+    if (industries.size > 0) setSelectedIndustriesState(industries);
+    const status = PARAM_TO_STATUS[params.get("status") ?? ""];
+    if (status) setSelectedStatusState(status);
+  }, []);
 
   const toggleIndustry = useCallback(
     (key: IndustryKey) => {
@@ -488,6 +500,12 @@ export function LawRevisionList({
   }, [articleFilterResult, filterBase, sortOrder, onlyRelevant, profile, profileIndustryTag, scoreFor]);
 
   const showEmptyState = status === "success" && !error && filtered.length === 0;
+
+  // C-1/C-6: 初期表示は30件（120件全描画は SSR HTML・hydration とも重い）。
+  // 「もっと見る」で全件展開。フィルタ・検索は全件に対して効く（filtered が母集合）。
+  const [showAllRevisions, setShowAllRevisions] = useState(false);
+  const visibleRevisions = showAllRevisions ? filtered : filtered.slice(0, INITIAL_LIST_COUNT);
+  const hiddenRevisionCount = filtered.length - visibleRevisions.length;
 
   return (
     <section
@@ -830,7 +848,7 @@ export function LawRevisionList({
         </div>
       )}
       <ul className="mt-3 max-h-[70vh] space-y-3 overflow-y-auto pr-1 print:max-h-none print:overflow-visible print:pr-0">
-        {filtered.map((revision) => {
+        {visibleRevisions.map((revision) => {
           const isSelected = selectedRevisionId === revision.id;
           const isLoadingSummary = loadingRevisionId === revision.id;
           const isDetailExpanded = expandedDetailId === revision.id;
@@ -1035,6 +1053,15 @@ export function LawRevisionList({
           );
         })}
       </ul>
+      {hiddenRevisionCount > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowAllRevisions(true)}
+          className="mt-3 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-blue-300 bg-blue-50 px-4 text-sm font-bold text-blue-800 transition hover:bg-blue-100 print:hidden"
+        >
+          もっと見る（残り {hiddenRevisionCount} 件）
+        </button>
+      )}
     </section>
   );
 }

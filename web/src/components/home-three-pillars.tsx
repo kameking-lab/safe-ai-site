@@ -1,127 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, CloudRain, Scale, Sparkles, Loader2, ExternalLink, RefreshCw, LifeBuoy } from "lucide-react";
-import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
-import { realLawRevisions } from "@/data/mock/real-law-revisions";
-import { realLawRevisionsExtra } from "@/data/mock/real-law-revisions-extra";
-import warningsData from "@/data/jma/warnings.json";
+// C-1（モバイル実速度の構造是正）: 事故データセット・法改正データ・JMA警報JSONの
+// 静的 import とクライアント側選定を廃止。選定は lib/home-three-pillars-data.ts
+// （server）が行い、page.tsx から小さな結果だけを props で受け取る。
+// "/" は全ページからリンクされるため、RSC プリフェッチで全ページが
+// このデータチャンク（生約340KB+）を落とす構造になっていた。
 import type { AccidentCase, LawRevisionCore } from "@/lib/types/domain";
+import type { WarningEntry } from "@/lib/home-three-pillars-data";
 import { useLanguage } from "@/contexts/language-context";
 import { StatusBadge } from "@/components/ui/status-badge";
 
-type WarningLevel = "warning" | "advisory" | "none";
-
-type WarningEntry = {
-  iso: string;
-  prefecture: string;
-  level: WarningLevel;
-  headline: string;
-  reportDatetime?: string;
-};
-
 type AlertKind = "fatal-accident" | "weather" | "law-revision";
-
-const PREFECTURE_LABELS: Record<string, string> = {
-  "JP-01": "北海道",
-  "JP-02": "青森県",
-  "JP-03": "岩手県",
-  "JP-04": "宮城県",
-  "JP-05": "秋田県",
-  "JP-06": "山形県",
-  "JP-07": "福島県",
-  "JP-08": "茨城県",
-  "JP-09": "栃木県",
-  "JP-10": "群馬県",
-  "JP-11": "埼玉県",
-  "JP-12": "千葉県",
-  "JP-13": "東京都",
-  "JP-14": "神奈川県",
-  "JP-15": "新潟県",
-  "JP-16": "富山県",
-  "JP-17": "石川県",
-  "JP-18": "福井県",
-  "JP-19": "山梨県",
-  "JP-20": "長野県",
-  "JP-21": "岐阜県",
-  "JP-22": "静岡県",
-  "JP-23": "愛知県",
-  "JP-24": "三重県",
-  "JP-25": "滋賀県",
-  "JP-26": "京都府",
-  "JP-27": "大阪府",
-  "JP-28": "兵庫県",
-  "JP-29": "奈良県",
-  "JP-30": "和歌山県",
-  "JP-31": "鳥取県",
-  "JP-32": "島根県",
-  "JP-33": "岡山県",
-  "JP-34": "広島県",
-  "JP-35": "山口県",
-  "JP-36": "徳島県",
-  "JP-37": "香川県",
-  "JP-38": "愛媛県",
-  "JP-39": "高知県",
-  "JP-40": "福岡県",
-  "JP-41": "佐賀県",
-  "JP-42": "長崎県",
-  "JP-43": "熊本県",
-  "JP-44": "大分県",
-  "JP-45": "宮崎県",
-  "JP-46": "鹿児島県",
-  "JP-47": "沖縄県",
-};
-
-function pickLatestFatalAccident(): AccidentCase | null {
-  const today = new Date().toISOString().slice(0, 10);
-  const fatal = getAccidentCasesDataset().filter(
-    (c) => c.severity === "死亡" && c.occurredOn <= today
-  );
-  if (fatal.length === 0) return null;
-  return [...fatal].sort((a, b) => b.occurredOn.localeCompare(a.occurredOn))[0] ?? null;
-}
-
-function pickRecentLawRevisions(): LawRevisionCore[] {
-  const merged = [...realLawRevisions, ...realLawRevisionsExtra];
-  return [...merged]
-    .sort((a, b) => {
-      const aKey = a.enforcement_date || a.publishedAt;
-      const bKey = b.enforcement_date || b.publishedAt;
-      return bKey.localeCompare(aKey);
-    })
-    .slice(0, 3);
-}
-
-function pickWarningWeather(): WarningEntry[] {
-  type WarningsShape = {
-    byIso?: Record<
-      string,
-      {
-        level?: string;
-        entries?: { headline?: string; level?: string; reportDatetime?: string }[];
-      }
-    >;
-  };
-  const data = warningsData as WarningsShape;
-  if (!data.byIso) return [];
-  const all: WarningEntry[] = Object.entries(data.byIso).map(([iso, v]) => {
-    const headline = v.entries?.[0]?.headline ?? "";
-    const reportDatetime = v.entries?.[0]?.reportDatetime;
-    const level = (v.level as WarningLevel) ?? "none";
-    return {
-      iso,
-      prefecture: PREFECTURE_LABELS[iso] ?? iso,
-      level,
-      headline,
-      reportDatetime,
-    };
-  });
-  const warnings = all.filter((e) => e.level === "warning");
-  if (warnings.length > 0) return warnings.slice(0, 5);
-  // 警報がない場合は注意報を最大3件表示（屋外作業の参考として）
-  return all.filter((e) => e.level === "advisory" && e.headline).slice(0, 3);
-}
 
 function extractAccidentSourceUrl(c: AccidentCase): string | null {
   if (c.source?.url) return c.source.url.startsWith("http") ? c.source.url : `https://${c.source.url}`;
@@ -131,10 +23,15 @@ function extractAccidentSourceUrl(c: AccidentCase): string | null {
   return url.startsWith("http") ? url : `https://${url}`;
 }
 
-export function HomeThreePillars() {
-  const fatal = useMemo(() => pickLatestFatalAccident(), []);
-  const lawRevisions = useMemo(() => pickRecentLawRevisions(), []);
-  const warnings = useMemo(() => pickWarningWeather(), []);
+export function HomeThreePillars({
+  fatal,
+  lawRevisions,
+  warnings,
+}: {
+  fatal: AccidentCase | null;
+  lawRevisions: LawRevisionCore[];
+  warnings: WarningEntry[];
+}) {
   const { language } = useLanguage();
   const isEn = language === "en";
 

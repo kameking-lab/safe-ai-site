@@ -47,18 +47,18 @@ import {
 import { Footer } from "@/components/footer";
 import { FlagshipNav } from "@/components/flagship-nav";
 import { PAID_MODE } from "@/lib/paid-mode";
-import { LAW_SOURCE_COUNT } from "@/data/laws";
-import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
+// C-1: 件数は SITE_STATS の静的リテラルを使う。@/data/laws や @/lib/mhlw-chemicals を
+// ここで import すると法令コーパス・化学物質DB（数MB）が全ページのバンドルに同梱される。
+import { SITE_STATS } from "@/data/site-stats";
 import { ShareButtons } from "@/components/share-buttons";
-import { UserMenu } from "@/components/user-menu";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useCommandPalette } from "@/components/CommandPaletteProvider";
+import { A11Y_HINT_DISMISSED_KEY, A11Y_HINT_DISMISSED_ATTR } from "@/lib/a11y-hint";
 import { useFurigana } from "@/contexts/furigana-context";
 import { useEasyJapanese } from "@/contexts/easy-japanese-context";
 
 const LARGE_FONT_KEY = "large-font-enabled";
 const HIGH_CONTRAST_KEY = "high-contrast-enabled";
-const A11Y_HINT_DISMISSED_KEY = "a11y-hint-dismissed";
 
 type NavItem = {
   id: string;
@@ -136,7 +136,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
     label: "質問する",
     description: "AIが安衛法を条文番号・出典付きで回答",
     items: [
-      { id: "chatbot", label: "安衛法AIチャット", href: "/chatbot", icon: MessageSquare, badge: "AI", description: `${LAW_SOURCE_COUNT}法令等を根拠条文付きで回答 (ストリーミング)` },
+      { id: "chatbot", label: "安衛法AIチャット", href: "/chatbot", icon: MessageSquare, badge: "AI", description: `${SITE_STATS.lawSourceCount}法令等を根拠条文付きで回答 (ストリーミング)` },
     ],
   },
   {
@@ -164,7 +164,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       { id: "court-cases", label: "労災裁判例", href: "/court-cases", icon: Scale, badge: "NEW", badgeUntil: "2026-08-31", description: "安全配慮義務・過失相殺・元請責任の重要確定判例を要旨＋出典で解説" },
       // exp-05: AccidentHubNav・flagshipに揃え、統計ダッシュボードもサイドバーから到達可に
       { id: "accidents-analytics", label: "事故統計ダッシュボード", href: "/accidents-analytics", icon: BarChart3, description: "事故型・業種・経年の傾向をグラフで把握" },
-      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: `${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()}物質の詳細・基準値・安衛法規制タグ` },
+      { id: "chemical-database", label: "化学物質検索DB", href: "/chemical-database", icon: FlaskConical, description: `${SITE_STATS.mhlwMergedChemicalCount}物質の詳細・基準値・安衛法規制タグ` },
       { id: "mental-health-management", label: "メンタル対策実務", href: "/mental-health-management", icon: Brain, badge: "NEW", badgeUntil: "2026-05-31", description: "事業場規模別の義務・面接指導・50人未満対応" },
       { id: "diversity", label: "多様性と安全", href: "/diversity", icon: Users2, description: "LGBTQ・障害・外国人労働者の安全配慮" },
       { id: "risk-prediction", label: "AIリスク予測", href: "/risk-prediction", icon: Brain, description: "作業内容から潜在リスクをAIが予測" },
@@ -223,10 +223,12 @@ function navActive(pathname: string, href: string) {
 
 interface AppShellProps {
   children: React.ReactNode;
-  user?: { name?: string | null; email?: string | null; image?: string | null } | null;
+  /** C-1: 認証付きユーザーメニュー。layout が Suspense スロットとして注入する
+   * （AppShell 内で await auth() に依存しないことで静的シェルを初回フラッシュで確定） */
+  userSlot?: React.ReactNode;
 }
 
-export function AppShell({ children, user }: AppShellProps) {
+export function AppShell({ children, userSlot }: AppShellProps) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { furiganaEnabled, toggleFurigana } = useFurigana();
@@ -301,13 +303,17 @@ export function AppShell({ children, user }: AppShellProps) {
   // モバイル初回訪問時のアクセシビリティ機能案内バナー
   // P0-2: 初期は畳んだチップだけを表示し、ファーストビュー占有を縮小する。
   // タップで詳細を展開、再タップで畳む。「閉じる」を押すと localStorage で永久非表示。
-  const [a11yHintVisible, setA11yHintVisible] = useState<boolean>(false);
+  // C-1: 既読判定はマウント後の挿入ではなく SSR 常時描画 + <head> スクリプト
+  // （A11Y_HINT_INIT_SCRIPT）の pre-paint 属性 + CSS 非表示で行う。
+  // マウント後にバナーが現れて main を押し下げる layout shift を全ページから排除。
+  const [a11yHintVisible, setA11yHintVisible] = useState<boolean>(true);
   const [a11yHintExpanded, setA11yHintExpanded] = useState<boolean>(false);
 
   useEffect(() => {
     try {
+      // 既読なら DOM からも外す（CSSで既に非表示のため layout shift は起きない）
       // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント直後の一度きりのlocalStorage hydration
-      if (localStorage.getItem(A11Y_HINT_DISMISSED_KEY) !== "true") setA11yHintVisible(true);
+      if (localStorage.getItem(A11Y_HINT_DISMISSED_KEY) === "true") setA11yHintVisible(false);
     } catch {
       // localStorage unavailable
     }
@@ -317,6 +323,7 @@ export function AppShell({ children, user }: AppShellProps) {
     setA11yHintVisible(false);
     try {
       localStorage.setItem(A11Y_HINT_DISMISSED_KEY, "true");
+      document.documentElement.setAttribute(A11Y_HINT_DISMISSED_ATTR, "1");
     } catch {
       // localStorage利用不可の場合は無視
     }
@@ -479,7 +486,7 @@ export function AppShell({ children, user }: AppShellProps) {
               屋外
             </button>
           </div>
-          <UserMenu user={user} />
+          {userSlot}
         </div>
       </aside>
 
@@ -502,7 +509,7 @@ export function AppShell({ children, user }: AppShellProps) {
                 <Search className="h-4 w-4" aria-hidden="true" />
               </button>
               <ThemeToggle size="sm" />
-              <UserMenu user={user} />
+              {userSlot}
               <button
                 type="button"
                 onClick={() => setIsSidebarOpen((prev) => !prev)}
@@ -553,6 +560,7 @@ export function AppShell({ children, user }: AppShellProps) {
           <div
             role="region"
             aria-label="アクセシビリティ機能の案内"
+            data-a11y-hint
             className="border-b border-emerald-200 bg-emerald-50/80 text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200 lg:hidden print:!hidden"
           >
             <div className="flex items-center gap-2 px-3 py-1.5">

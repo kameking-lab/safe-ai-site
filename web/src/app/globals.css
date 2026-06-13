@@ -331,6 +331,13 @@ table {
   }
 }
 
+/* a11y案内バナー（app-shell）: 既読ユーザーは <head> の A11Y_HINT_INIT_SCRIPT が
+   first paint 前に html へ属性を立て、ここで隠す。マウント後の挿入/削除による
+   layout shift（全ページ共通 CLS）を構造的に無くす（C-1）。 */
+html[data-a11y-hint-dismissed="1"] [data-a11y-hint] {
+  display: none;
+}
+
 /* 印刷 A4 1 枚リーフレット対応（ID_003/072） */
 @media print {
   @page {

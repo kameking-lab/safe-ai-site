@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { Sparkles, Loader2, AlertTriangle, ArrowRight } from "lucide-react";
 import { ALL_ACCIDENT_CATEGORIES, type AccidentWorkCategory } from "@/lib/types/domain";
 import {
@@ -37,21 +36,23 @@ export function AccidentAiAnalyzer() {
   const [aiUnavailable, setAiUnavailable] = useState(false);
   const [lang, setLang] = useState<AccLang>("ja");
   const L = accLabels(lang);
-  const searchParams = useSearchParams();
 
   useEffect(() => {
     setLang(readStoredAccLang());
   }, []);
 
   // P1-1: KY等からの ?work= / ?industry= プリフィル（初回のみ）。
+  // C-1: useSearchParams は静的プリレンダーを Suspense フォールバックへ落とす
+  // （/accidents 本文全体がクライアント差し替えになる）ため、マウント後に
+  // window.location から読む。
   useEffect(() => {
-    const w = searchParams?.get("work");
-    const ind = searchParams?.get("industry");
+    const searchParams = new URLSearchParams(window.location.search);
+    const w = searchParams.get("work");
+    const ind = searchParams.get("industry");
     if (w) setWorkContent(w);
     if (ind && (ALL_ACCIDENT_CATEGORIES as readonly string[]).includes(ind)) {
       setCategory(ind as AccidentWorkCategory);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onAnalyze = useCallback(async () => {

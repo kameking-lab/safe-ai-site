@@ -1,22 +1,38 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Database, FileText } from "lucide-react";
 import {
   searchMhlwSimilar,
-  MHLW_DEATHS_TOTAL,
+  getMhlwDeathsTotal,
+  type ScoredMhlwCase,
 } from "@/lib/mhlw-similar-cases";
 
 /**
  * 入力された作業内容に対し、MHLW 死亡災害 4,043 件から
  * 簡易キーワード重み付けで類似事例 TOP5 を表示する。
+ * C-1: 死亡災害DB（生2.4MB）は検索実行時に dynamic import されるため非同期。
  */
 export function MhlwSimilarCasesPanel({ query }: { query: string }) {
   const trimmed = query.trim();
-  const results = useMemo(
-    () => (trimmed ? searchMhlwSimilar(trimmed, 5) : []),
-    [trimmed]
-  );
+  const [results, setResults] = useState<ScoredMhlwCase[]>([]);
+  const [total, setTotal] = useState<number | null>(null);
+
+  useEffect(() => {
+    // trimmed が空の間は何も描画しない（下の early return）ため、クリアは不要
+    if (!trimmed) return;
+    let active = true;
+    void Promise.all([searchMhlwSimilar(trimmed, 5), getMhlwDeathsTotal()]).then(
+      ([cases, t]) => {
+        if (!active) return;
+        setResults(cases);
+        setTotal(t);
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [trimmed]);
 
   const maxScore = useMemo(
     () => results.reduce((m, r) => Math.max(m, r.score), 1),
@@ -29,7 +45,7 @@ export function MhlwSimilarCasesPanel({ query }: { query: string }) {
     <section className="rounded-2xl border border-rose-200 bg-rose-50/40 p-4 shadow-sm sm:p-5">
       <div className="flex items-center gap-2 text-xs font-bold text-rose-800">
         <Database className="h-3.5 w-3.5" aria-hidden="true" />
-        類似事例（MHLW 実データ {MHLW_DEATHS_TOTAL.toLocaleString()} 件）TOP {results.length}
+        類似事例（MHLW 実データ{total !== null ? ` ${total.toLocaleString()} 件` : ""}）TOP {results.length}
       </div>
       <p className="mt-1 text-[11px] text-rose-700/80">
         厚生労働省 死亡災害データベース（2019-2024）から、入力作業内容と一致するキーワードを重み付けして検索した実例です。

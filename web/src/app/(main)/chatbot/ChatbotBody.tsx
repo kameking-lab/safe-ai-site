@@ -9,7 +9,12 @@ import { PageContainer } from "@/components/layout";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
 import { CopilotMemo } from "@/components/copilot/CopilotMemo";
-import { LAW_SOURCE_COUNT } from "@/data/laws";
+// C-1: @/data/laws を client で import すると法令コーパス全体（チャンク生約1.4MB）が
+// /chatbot のバンドルに同梱され、/chatbot へ Link する全ページのプリフェッチも直撃する。
+// 件数は SITE_STATS の静的リテラル（site-stats.test.ts が実データと突合）を使う。
+import { SITE_STATS } from "@/data/site-stats";
+
+const LAW_SOURCE_COUNT = SITE_STATS.lawSourceCount;
 import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { useOptionalCopilot } from "@/components/copilot/CopilotProvider";
 
