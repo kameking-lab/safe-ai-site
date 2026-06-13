@@ -7,19 +7,80 @@ import { SAFETY_SIGNS, SIGN_CATEGORIES } from "@/data/safety-signs";
 import { INDUSTRIES } from "@/data/safety-signs/industry-usage";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
 import { COURT_CASES } from "@/data/court-cases";
+import { lawRevisionCores } from "@/data/mock/law-revisions";
+import { SERIOUS_CASES_META } from "@/lib/accident-news/serious-cases";
+import { buildNewsHubItems } from "@/lib/news-hub";
+import equipmentDb from "@/data/safety-equipment-db.json";
+import { getPublishedArticleIndex } from "@/lib/articles";
+import { latestIsoDate } from "@/lib/sitemap/lastmod";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://www.anzen-ai-portal.jp";
 
+  // 柱C-3-4: lastmod 動的化。各データの「実更新日の最大値」を採り、
+  // 将来施行日などの未来日はビルド日 cap で除外する（lastmod スパム/未来日を防止）。
+  // 現在時刻そのものを lastmod にはしない（latestIsoDate がデータ実在日のみ採用）。
+  const buildToday = new Date().toISOString().slice(0, 10);
+  // /whats-new・トップが集約する新着の最新日（法改正＋通達＋メディア＋速報＋重大災害）。
+  const freshestNews = latestIsoDate(
+    buildNewsHubItems({ lawLimit: 200, noticeLimit: 200, mediaLimit: 200, seriousCaseLimit: 200 }).map(
+      (i) => i.date,
+    ),
+    "2026-06-11",
+    buildToday,
+  );
+  // /laws が扱う法改正の最新公表日。
+  const freshestLawRevision = latestIsoDate(
+    lawRevisionCores.map((r) => r.publishedAt),
+    "2026-04-19",
+    buildToday,
+  );
+  // /circulars が扱う通達の最新発出日。
+  const freshestNotice = latestIsoDate(
+    mhlwNotices.map((n) => n.issuedDate),
+    "2026-04-28",
+    buildToday,
+  );
+  // /court-cases が扱う判例の最新判決日。
+  const freshestCourtCase = latestIsoDate(
+    COURT_CASES.map((c) => c.date),
+    "2026-06-06",
+    buildToday,
+  );
+  // 死亡災害DBスナップショットの生成日（/accidents 系のデータ実更新日）。
+  // generatedAt は ISO 日時（例 2026-04-18T17:36:53Z）のため日付部のみ採用。
+  const accidentsDataUpdated = latestIsoDate(
+    [SERIOUS_CASES_META.generatedAt?.slice(0, 10)],
+    "2026-04-19",
+    buildToday,
+  );
+  // 保護具DBの生成日（/equipment 個別ページのデータ実更新日）。
+  const equipmentDataUpdated = latestIsoDate([equipmentDb.generatedAt], "2026-04-29", buildToday);
+  // /articles 一覧の最新更新日（公開記事の publishedAt / lastReviewedAt の最大値）。
+  const articleIndex = getPublishedArticleIndex();
+  const freshestArticle = latestIsoDate(
+    articleIndex.flatMap((a) => [a.publishedAt, a.lastReviewedAt]),
+    "2026-04-28",
+    buildToday,
+  );
+  // サイト全体（トップ）の最新更新日＝主要データ源の最大値。
+  const siteFreshest = latestIsoDate(
+    [freshestNews, freshestLawRevision, freshestNotice, freshestCourtCase, accidentsDataUpdated],
+    "2026-04-19",
+    buildToday,
+  );
+
   type Freq = "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   const pages: { url: string; lastModified: string; priority: number; changeFrequency: Freq }[] = [
-    { url: "/", lastModified: "2026-04-19", priority: 1.0, changeFrequency: "daily" },
+    // 柱C-3-4: トップは changeFrequency=daily。lastmod も主要データ源の最新日に追従させる
+    //（従来の固定 2026-04-19 が daily と自己矛盾していた点を是正）。
+    { url: "/", lastModified: siteFreshest, priority: 1.0, changeFrequency: "daily" },
     { url: "/leaflet", lastModified: "2026-04-28", priority: 0.5, changeFrequency: "monthly" },
-    { url: "/circulars", lastModified: "2026-04-28", priority: 0.8, changeFrequency: "weekly" },
-    { url: "/equipment-finder", lastModified: "2026-04-28", priority: 0.7, changeFrequency: "monthly" },
-    { url: "/articles", lastModified: "2026-04-28", priority: 0.8, changeFrequency: "daily" },
-    { url: "/accidents", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
-    { url: "/accidents-analytics", lastModified: "2026-05-14", priority: 0.8, changeFrequency: "weekly" },
+    { url: "/circulars", lastModified: freshestNotice, priority: 0.8, changeFrequency: "weekly" },
+    { url: "/equipment-finder", lastModified: equipmentDataUpdated, priority: 0.7, changeFrequency: "monthly" },
+    { url: "/articles", lastModified: freshestArticle, priority: 0.8, changeFrequency: "daily" },
+    { url: "/accidents", lastModified: accidentsDataUpdated, priority: 0.9, changeFrequency: "weekly" },
+    { url: "/accidents-analytics", lastModified: accidentsDataUpdated, priority: 0.8, changeFrequency: "weekly" },
     { url: "/accidents-reports", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "weekly" },
     { url: "/accidents-reports/construction", lastModified: "2026-05-16", priority: 0.7, changeFrequency: "weekly" },
     { url: "/accidents-reports/manufacturing", lastModified: "2026-05-16", priority: 0.7, changeFrequency: "weekly" },
@@ -45,7 +106,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/industries/warehouse", lastModified: "2026-05-17", priority: 0.8, changeFrequency: "monthly" },
     { url: "/industries/office", lastModified: "2026-05-17", priority: 0.8, changeFrequency: "monthly" },
     { url: "/e-learning", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
-    { url: "/laws", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
+    { url: "/laws", lastModified: freshestLawRevision, priority: 0.9, changeFrequency: "weekly" },
     { url: "/law-hierarchy", lastModified: "2026-05-14", priority: 0.8, changeFrequency: "monthly" },
     // P0-011 (usability-audit-day2): /laws/notices-precedents は /circulars に統合済。301 redirect は next.config.ts。
     { url: "/ky", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
@@ -167,10 +228,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/contact", lastModified: "2026-04-22", priority: 0.5, changeFrequency: "yearly" },
     // 柱C-3-3: どの sitemap にも収載されていなかった実在 indexable ページを追加。
     // 新着ハブ（毎日更新の法改正・事故速報の集約）。
-    { url: "/whats-new", lastModified: "2026-06-11", priority: 0.85, changeFrequency: "daily" },
+    { url: "/whats-new", lastModified: freshestNews, priority: 0.85, changeFrequency: "daily" },
     // 労災裁判例コーナー（一覧＋責任解説。個別判例は下の courtCasePages で動的列挙）。
     // /court-cases/print は robots:{index:false} のため収載しない。
-    { url: "/court-cases", lastModified: "2026-06-06", priority: 0.85, changeFrequency: "weekly" },
+    { url: "/court-cases", lastModified: freshestCourtCase, priority: 0.85, changeFrequency: "weekly" },
     { url: "/court-cases/employer-liability", lastModified: "2026-06-06", priority: 0.8, changeFrequency: "monthly" },
     // 記録キット（現場記録ツール群。SSR本文・固有見出しを持つ実ページ）。
     { url: "/site-records", lastModified: "2026-06-11", priority: 0.7, changeFrequency: "monthly" },
@@ -194,7 +255,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const circularPages: typeof pages = mhlwNotices.map((n) => ({
     url: `/circulars/${n.id}`,
-    lastModified: n.issuedDate ?? "2026-04-28",
+    // 柱C-3-4: 発出日に追従。不正形式・未来日は安全側の fallback/cap で吸収。
+    lastModified: latestIsoDate([n.issuedDate], "2026-04-28", buildToday),
     priority: 0.5,
     changeFrequency: "yearly",
   }));
@@ -202,10 +264,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // 記事の個別ページ（/articles/<slug>）は専用の sitemap-articles.xml が
   // lib/articles から動的生成する（重複掲載を避けるためここでは出力しない）。
 
-  // 保護具DBの個別ページ（月次更新前提）
+  // 保護具DBの個別ページ（月次更新前提）。lastmod はDB生成日に追従（柱C-3-4）。
   const equipmentPages: typeof pages = getAllEquipment().map((it) => ({
     url: `/equipment/${it.id}`,
-    lastModified: "2026-04-29",
+    lastModified: equipmentDataUpdated,
     priority: 0.4,
     changeFrequency: "monthly",
   }));
@@ -247,9 +309,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // 柱C-3-3: 個別判例ページ（/court-cases/[id]。dynamicParams=false の静的生成対象＝
   // 実在 indexable ページ）。判決内容は確定済みのため changeFrequency=yearly。
+  // 柱C-3-4: lastmod は各判例の判決日（c.date）に追従（不正値は確定日 fallback）。
   const courtCasePages: typeof pages = COURT_CASES.map((c) => ({
     url: `/court-cases/${c.id}`,
-    lastModified: "2026-06-06",
+    lastModified: latestIsoDate([c.date], "2026-06-06", buildToday),
     priority: 0.6,
     changeFrequency: "yearly",
   }));

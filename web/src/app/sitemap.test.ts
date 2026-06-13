@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import sitemap from "./sitemap";
 import { COURT_CASES } from "@/data/court-cases";
+import { latestIsoDate, isIsoDate } from "@/lib/sitemap/lastmod";
 
 /**
  * 柱C-3-3 回帰テスト: どの sitemap にも収載されていなかった実在 indexable ページの
@@ -67,5 +68,61 @@ describe("sitemap.xml（柱C-3-3 欠落ページ追加）", () => {
 
   it("URL の重複がない（二重掲載ゼロ）", () => {
     expect(urlSet.size).toBe(urls.length);
+  });
+});
+
+/**
+ * 柱C-3-4 回帰テスト: lastmod 動的化。各ページの lastmod が固定値ではなく
+ * 「データの実更新日」に追従し、かつ未来日（将来施行日など）が混入しないことを固定する。
+ */
+describe("sitemap.xml（柱C-3-4 lastmod 動的化）", () => {
+  const entries = sitemap();
+  const today = new Date().toISOString().slice(0, 10);
+  const find = (path: string) => entries.find((e) => e.url === `${BASE}${path}`);
+  const lastmodOf = (path: string) => {
+    const lm = find(path)?.lastModified;
+    return typeof lm === "string" ? lm : String(lm);
+  };
+
+  it("全エントリの lastmod が YYYY-MM-DD 形式である", () => {
+    for (const e of entries) {
+      expect(isIsoDate(e.lastModified), `${e.url} -> ${String(e.lastModified)}`).toBe(true);
+    }
+  });
+
+  it("未来日の lastmod が一件も無い（将来施行日が lastmod を未来に飛ばさない）", () => {
+    for (const e of entries) {
+      expect(String(e.lastModified) <= today, `${e.url} は未来日`).toBe(true);
+    }
+  });
+
+  it("/court-cases 一覧の lastmod が判例の最新判決日に一致する", () => {
+    const expected = latestIsoDate(
+      COURT_CASES.map((c) => c.date),
+      "2026-06-06",
+      today,
+    );
+    expect(lastmodOf("/court-cases")).toBe(expected);
+  });
+
+  it("個別判例の lastmod が各判例の判決日に追従する", () => {
+    for (const c of COURT_CASES) {
+      const expected = latestIsoDate([c.date], "2026-06-06", today);
+      expect(lastmodOf(`/court-cases/${c.id}`)).toBe(expected);
+    }
+  });
+
+  it("トップ / の lastmod が主要データ源ページの lastmod 以上（全体の最大値）", () => {
+    const top = lastmodOf("/");
+    for (const path of ["/laws", "/circulars", "/court-cases", "/accidents", "/whats-new"]) {
+      expect(top >= lastmodOf(path), `top(${top}) < ${path}(${lastmodOf(path)})`).toBe(true);
+    }
+  });
+
+  it("動的化した主要ページの lastmod が旧固定値のままではない（データ追従の確認）", () => {
+    // 旧実装は / と /laws が 2026-04-19、/whats-new が 2026-06-11 固定だった。
+    // データに 2026-04-19 より新しい判例（2026-06-06）等が存在するため、
+    // トップ・/laws のどちらかは必ず旧固定値より新しくなっているはず。
+    expect(lastmodOf("/") >= "2026-06-06").toBe(true);
   });
 });
