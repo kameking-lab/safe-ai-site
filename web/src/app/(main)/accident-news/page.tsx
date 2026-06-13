@@ -13,6 +13,8 @@ import {
   SERIOUS_CASES_META,
 } from "@/lib/accident-news/serious-cases";
 import { AccidentNewsFilter } from "./accident-news-filter";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
 export const metadata: Metadata = {
   title: "重大災害事例ブラウザ｜業種・作業・原因で類型検索（無料・出典付き）",
@@ -54,6 +56,12 @@ export default async function AccidentNewsPage({
   const focusCase: SeriousCase | null = focusId ? getSeriousCaseById(focusId) : null;
   const similarCases = focusCase ? findSimilarSeriousCases(focusCase, 6) : [];
 
+  // 柱0バッチ7/9: 絞り込みの有無で「いまの状態」を1メッセージに。
+  const hasFilter = Boolean(selected.industry || selected.type || selected.year || selected.q);
+  const filterChips = [selected.industry, selected.type, selected.year && `${selected.year}年`, selected.q && `「${selected.q}」`]
+    .filter(Boolean)
+    .join("・");
+
   return (
     <>
     <AccidentHubNav current="accident-news" />
@@ -65,11 +73,6 @@ export default async function AccidentNewsPage({
       />
       <header className="mb-4">
         <h1 className="text-2xl font-bold text-slate-900">重大災害事例ブラウザ</h1>
-        <p className="mt-1 text-sm text-slate-600">
-          厚労省の死亡災害データ（公表事実・匿名）を業種・事故型・原因・年で検索できます。
-          同業種・同種事故の傾向把握や、安全教育・説明資料の作成にご活用ください。
-          <span className="font-semibold">会社名・発注者名は扱いません</span>（公表事実の引用に留めています）。
-        </p>
         {/* 事故系の相互導線は上部の AccidentHubNav に集約。ここでは別系統の新着ハブのみ補助リンク。 */}
         <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
           <Link href="/whats-new" className="font-semibold text-emerald-700 hover:underline">
@@ -78,7 +81,42 @@ export default async function AccidentNewsPage({
         </div>
       </header>
 
-      <AccidentNewsFilter options={options} selected={selected} />
+      {/* 柱0バッチ7/9: 結論ファースト。絞り込み前は収録総数、絞り込み後は該当件数のデカ数字。 */}
+      {hasFilter ? (
+        cases.length > 0 ? (
+          <ConclusionCard
+            tone="info"
+            value={cases.length}
+            unit="件"
+            title="該当事例"
+            description={`${filterChips} に該当（最大120件表示）。各カードから対策質問・類似事例・KYへ。`}
+          />
+        ) : (
+          <ConclusionCard
+            tone="warning"
+            title="該当なし"
+            description={`${filterChips} に該当する事例がありません。条件を変えてお試しください。`}
+          />
+        )
+      ) : (
+        <ConclusionCard
+          tone="info"
+          value={SERIOUS_CASES_META.total.toLocaleString()}
+          unit="件"
+          title="重大災害事例を収録"
+          description="厚労省の死亡災害データ（公表事実・匿名）。業種・事故型・原因・年で類型検索できます。"
+        />
+      )}
+
+      <CollapsibleDetail summary="このブラウザについて（出典・取り扱い）" className="mt-3">
+        厚労省の死亡災害データ（公表事実・匿名）を業種・事故型・原因・年で検索できます。
+        同業種・同種事故の傾向把握や、安全教育・説明資料の作成にご活用ください。
+        <span className="font-semibold">会社名・発注者名は扱いません</span>（公表事実の引用に留めています）。
+      </CollapsibleDetail>
+
+      <div className="mt-3">
+        <AccidentNewsFilter options={options} selected={selected} />
+      </div>
 
       {/* P2-2: 選択事例＋似た事例（業種・事故型・原因の類似度） */}
       {focusCase && (
@@ -115,7 +153,7 @@ export default async function AccidentNewsPage({
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-slate-600" aria-live="polite">
-          該当 <span className="font-bold text-emerald-700">{cases.length}</span> 件（最大120件表示）
+          該当 <span className="font-bold text-sky-800">{cases.length}</span> 件（最大120件表示）
         </p>
         {/* P1-3: 現在の絞り込みで説明資料（A4印刷）を作成 */}
         <Link
