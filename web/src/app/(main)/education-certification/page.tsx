@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { GraduationCap, Search, BookOpen, AlertCircle, ChevronRight, Scale, Award } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { GraduationCap, BookOpen, ChevronRight, HardHat, Users, Award } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { CrossToolLinks } from "@/components/cross-tool-links";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { ogImageUrl } from "@/lib/og-url";
 import { getCertsByType, CERT_TYPE_LABELS, CERT_TYPE_COLORS } from "@/lib/education-cert-engine";
 import type { EducationCert } from "@/types/education-cert";
@@ -27,24 +30,51 @@ export const metadata: Metadata = {
   },
 };
 
-function CertCountBadge({ certs, type }: { certs: EducationCert[]; type: EducationCert["certType"] }) {
+/** 資格区分ごとのピクトグラム（言葉でなくアイコンで3区分＋免許を見分ける） */
+const CERT_TYPE_ICON: Record<EducationCert["certType"], LucideIcon> = {
+  special_education: HardHat,
+  skill_training: BookOpen,
+  job_chief: Users,
+  license: Award,
+};
+
+/** セクションへ飛ぶアンカーID（カウントタイルのタップ先） */
+const CERT_TYPE_ANCHOR: Record<EducationCert["certType"], string> = {
+  special_education: "sec-special",
+  skill_training: "sec-skill",
+  job_chief: "sec-chief",
+  license: "sec-license",
+};
+
+/** デカ数字＋区分ピクトグラムのカウントタイル（タップで該当セクションへ・44px以上） */
+function CertCountTile({ certs, type }: { certs: EducationCert[]; type: EducationCert["certType"] }) {
   const colors = CERT_TYPE_COLORS[type];
   const label = CERT_TYPE_LABELS[type];
+  const Icon = CERT_TYPE_ICON[type];
   return (
-    <div className={`rounded-xl border p-4 ${colors.badge}`}>
-      <p className="text-2xl font-bold">{certs.length}<span className="ml-1 text-sm font-normal">種</span></p>
-      <p className="mt-0.5 text-sm font-medium">{label}</p>
-    </div>
+    <a
+      href={`#${CERT_TYPE_ANCHOR[type]}`}
+      className={`flex min-h-[44px] flex-col rounded-xl border-2 p-4 transition hover:opacity-90 ${colors.badge}`}
+    >
+      <Icon className="h-7 w-7" aria-hidden />
+      <p className="mt-2 text-4xl font-bold leading-none tracking-tight">
+        {certs.length}
+        <span className="ml-1 text-base font-bold">種</span>
+      </p>
+      <p className="mt-1 text-sm font-bold leading-tight">{label}</p>
+    </a>
   );
 }
 
 function CertCard({ cert }: { cert: EducationCert }) {
   const colors = CERT_TYPE_COLORS[cert.certType];
   const label = CERT_TYPE_LABELS[cert.certType];
+  const Icon = CERT_TYPE_ICON[cert.certType];
   return (
     <div className={`rounded-lg border bg-white p-3 shadow-sm border-l-4 ${colors.border} dark:bg-slate-800`}>
       <div className="flex flex-wrap items-start gap-2">
-        <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-bold ${colors.badge}`}>
+        <span className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold ${colors.badge}`}>
+          <Icon className="h-3 w-3" aria-hidden />
           {label}
         </span>
         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">{cert.name}</p>
@@ -57,11 +87,41 @@ function CertCard({ cert }: { cert: EducationCert }) {
   );
 }
 
+function CertSection({
+  type,
+  certs,
+  note,
+}: {
+  type: EducationCert["certType"];
+  certs: EducationCert[];
+  note?: string;
+}) {
+  const Icon = CERT_TYPE_ICON[type];
+  const colors = CERT_TYPE_COLORS[type];
+  return (
+    <section id={CERT_TYPE_ANCHOR[type]} className="mb-8 scroll-mt-20">
+      <div className="mb-3 flex items-center gap-2">
+        <Icon className={`h-5 w-5 ${colors.header}`} aria-hidden />
+        <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+          {CERT_TYPE_LABELS[type]} — {certs.length}種
+        </h2>
+      </div>
+      {note && <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">{note}</p>}
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {certs.map((cert) => (
+          <CertCard key={cert.id} cert={cert} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function EducationCertificationPage() {
   const specialEd = getCertsByType("special_education");
   const skillTr = getCertsByType("skill_training");
   const jobChief = getCertsByType("job_chief");
   const licenses = getCertsByType("license");
+  const total = specialEd.length + skillTr.length + jobChief.length + licenses.length;
 
   return (
     <>
@@ -81,116 +141,45 @@ export default function EducationCertificationPage() {
         />
 
         <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-          {/* Stats row */}
-          <section aria-label="資格種別カウント" className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-            <CertCountBadge certs={specialEd} type="special_education" />
-            <CertCountBadge certs={skillTr} type="skill_training" />
-            <CertCountBadge certs={jobChief} type="job_chief" />
-            <CertCountBadge certs={licenses} type="license" />
+          {/* 結論カード: いまの状態（収録数）＋次にやること（判定ツール） */}
+          <ConclusionCard
+            tone="info"
+            value={total}
+            unit="種"
+            title="必要資格データベース"
+            description="業種・作業を選ぶと必要な特別教育・技能講習・職長教育を自動判定。"
+            action={{ href: "/education-certification/finder", label: "資格を判定" }}
+            className="mb-6"
+          />
+
+          {/* デカ数字＋区分ピクトグラムのカウントタイル（タップで各一覧へ） */}
+          <section aria-label="資格区分別の収録数" className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+            <CertCountTile certs={specialEd} type="special_education" />
+            <CertCountTile certs={skillTr} type="skill_training" />
+            <CertCountTile certs={jobChief} type="job_chief" />
+            <CertCountTile certs={licenses} type="license" />
           </section>
 
-          {/* CTA: Finder */}
-          <section className="mb-8 rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-5 text-white shadow-lg sm:p-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest opacity-80">業務別資格判定</p>
-                <h2 className="mt-1 text-xl font-bold leading-snug sm:text-2xl">
-                  業種・作業を選んで<br className="sm:hidden" />必要資格を一覧表示
-                </h2>
-                <p className="mt-1.5 text-sm opacity-90">
-                  根拠条文・講習時間・関連資格を自動判定。特別教育・技能講習・職長教育を網羅。
-                </p>
-              </div>
-              <Link
-                href="/education-certification/finder"
-                className="flex shrink-0 items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-blue-700 shadow transition hover:bg-blue-50"
-              >
-                <Search className="h-4 w-4" aria-hidden />
-                資格判定ツールを使う
-                <ChevronRight className="h-4 w-4" aria-hidden />
-              </Link>
-            </div>
-          </section>
+          {/* 法的根拠（文字ダイエット: 折りたたみへ格納・内容は不変＝法令正確性は不可侵） */}
+          <CollapsibleDetail summary="法的根拠について（特別教育・技能講習・職長教育・免許の違い）" className="mb-8">
+            <ul className="space-y-1.5">
+              <li><strong>特別教育</strong>（安衛法第59条第3項・安衛則第36条）: 危険有害業務に従事させる前に事業者が実施義務。修了証発行。</li>
+              <li><strong>技能講習（就業制限）</strong>（安衛法第61条・安衛令第20条）: 修了者または免許取得者のみが従事できる業務（就業制限）。</li>
+              <li><strong>職長教育</strong>（安衛法第60条・安衛則第40条）: 製造業等で新たに職長等となる者への義務教育。</li>
+              <li><strong>免許（国家試験）</strong>（安衛法第61条・安衛令第20条）: 国家試験合格が必要な最上位資格。技能講習修了では代替不可の業務（5t以上クレーン・潜水士等）。</li>
+              <li className="mt-2 font-semibold">本データは参考情報です。最新情報は各都道府県労働局・厚生労働省で必ずご確認ください。</li>
+            </ul>
+          </CollapsibleDetail>
 
-          {/* Legal overview */}
-          <section className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/40 dark:bg-amber-950/20">
-            <div className="flex gap-3">
-              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" aria-hidden />
-              <div>
-                <h3 className="text-sm font-bold text-amber-900 dark:text-amber-200">法的根拠について</h3>
-                <ul className="mt-1.5 space-y-1 text-xs text-amber-800 dark:text-amber-300">
-                  <li><strong>特別教育</strong>（安衛法第59条第3項・安衛則第36条）: 危険有害業務に従事させる前に事業者が実施義務。修了証発行。</li>
-                  <li><strong>技能講習（就業制限）</strong>（安衛法第61条・安衛令第20条）: 修了者または免許取得者のみが従事できる業務（就業制限）。</li>
-                  <li><strong>職長教育</strong>（安衛法第60条・安衛則第40条）: 製造業等で新たに職長等となる者への義務教育。</li>
-                  <li><strong>免許（国家試験）</strong>（安衛法第61条・安衛令第20条）: 国家試験合格が必要な最上位資格。技能講習修了では代替不可の業務（5t以上クレーン・潜水士等）。</li>
-                  <li className="mt-2 font-semibold">本データは参考情報です。最新情報は各都道府県労働局・厚生労働省で必ずご確認ください。</li>
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          {/* Special education list */}
-          <section className="mb-8">
-            <div className="mb-3 flex items-center gap-2">
-              <Scale className="h-5 w-5 text-amber-600" aria-hidden />
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                特別教育（安衛則第36条）— {specialEd.length}種
-              </h2>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {specialEd.map((cert) => (
-                <CertCard key={cert.id} cert={cert} />
-              ))}
-            </div>
-          </section>
-
-          {/* Skill training list */}
-          <section className="mb-8">
-            <div className="mb-3 flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-blue-600" aria-hidden />
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                技能講習（就業制限業務）— {skillTr.length}種
-              </h2>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {skillTr.map((cert) => (
-                <CertCard key={cert.id} cert={cert} />
-              ))}
-            </div>
-          </section>
-
-          {/* Job chief list */}
-          <section className="mb-8">
-            <div className="mb-3 flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-emerald-600" aria-hidden />
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                職長教育・管理者研修 — {jobChief.length}種
-              </h2>
-            </div>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {jobChief.map((cert) => (
-                <CertCard key={cert.id} cert={cert} />
-              ))}
-            </div>
-          </section>
-
-          {/* License list */}
-          <section className="mb-8">
-            <div className="mb-3 flex items-center gap-2">
-              <Award className="h-5 w-5 text-purple-600" aria-hidden />
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                免許（国家試験）— {licenses.length}種
-              </h2>
-            </div>
-            <p className="mb-3 text-xs text-slate-500 dark:text-slate-400">
-              国家試験合格または都道府県労働局長による交付が必要。技能講習修了では代替できない就業制限業務の最上位資格。
-            </p>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {licenses.map((cert) => (
-                <CertCard key={cert.id} cert={cert} />
-              ))}
-            </div>
-          </section>
+          {/* 区分別 一覧（ピクトグラム＋3色区分） */}
+          <CertSection type="special_education" certs={specialEd} />
+          <CertSection type="skill_training" certs={skillTr} />
+          <CertSection type="job_chief" certs={jobChief} />
+          <CertSection
+            type="license"
+            certs={licenses}
+            note="国家試験合格または都道府県労働局長による交付が必要。技能講習修了では代替できない就業制限業務の最上位資格。"
+          />
 
           {/* Link to related pages */}
           <section className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
@@ -205,9 +194,10 @@ export default function EducationCertificationPage() {
                 <Link
                   key={l.href}
                   href={l.href}
-                  className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:border-blue-500 dark:hover:bg-blue-900/30 dark:hover:text-blue-300"
+                  className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-800 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-200 dark:hover:border-blue-500 dark:hover:bg-blue-900/30 dark:hover:text-blue-300"
                 >
                   {l.label}
+                  <ChevronRight className="h-3.5 w-3.5" aria-hidden />
                 </Link>
               ))}
             </div>
