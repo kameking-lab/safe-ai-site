@@ -105,6 +105,8 @@ export function KyPaperView() {
   const [shareBusy, setShareBusy] = useState(false);
   const [shareCode, setShareCode] = useState<string | null>(null);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  // 柱C-9: 操作集中。保存だけを主ボタンに残し、複製/共有/転記/印刷は「…」シートへ退避。
+  const [showActions, setShowActions] = useState(false);
   // 柱1是正: 元請Excel様式への転記支援（項目別コピー・表TSV・CSV）
   const [showTranscribe, setShowTranscribe] = useState(false);
   const [approvalActor, setApprovalActor] = useState("");
@@ -136,6 +138,16 @@ export function KyPaperView() {
       window.removeEventListener("offline", refreshSync);
     };
   }, [refreshSync]);
+
+  // 柱C-9: 「…」操作シートは Escape で閉じる（user-menu と同じ作法）。
+  useEffect(() => {
+    if (!showActions) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowActions(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showActions]);
 
   // 初回読み込み: 旧 /ky の手動保存データを引き継ぎ→自動保存KY→クロスツール連携クエリの順で反映。
   useEffect(() => {
@@ -207,6 +219,12 @@ export function KyPaperView() {
 
   const patch = useCallback((p: Partial<KyInstructionRecordState>) => {
     setRecord((prev) => ({ ...prev, ...p }));
+  }, []);
+
+  // 柱C-9: 「…」シート内の操作は実行後にシートを閉じる（操作→結果へ視線を戻す）。
+  const runAction = useCallback((fn: () => void) => {
+    setShowActions(false);
+    fn();
   }, []);
 
   const setRisk = useCallback((i: number, row: KyInstructionRiskRow) => {
@@ -519,7 +537,7 @@ export function KyPaperView() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-100 pb-24 print:bg-white print:pb-0">
+    <div className="min-h-screen bg-slate-100 pb-28 print:bg-white print:pb-0">
       {/* 操作バー（印刷時は隠す） */}
       <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
@@ -870,60 +888,141 @@ export function KyPaperView() {
         </div>
       )}
 
-      {/* 下部アクションバー */}
-      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-2.5 shadow-lg backdrop-blur print:hidden">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
-          <span className="text-[11px] text-slate-500">
+      {/* 柱C-9 操作集中: 下部バーは「保存（主ボタン・solid常設）」＋「…（その他）」の2つだけに絞る。
+          複製/共有/転記/印刷/連携は「…」シートへ退避し、保存が同格ボタンに埋もれないようにする。 */}
+      {/* モバイルの全画面共通ボトムナビ(z-40・≤480px)の上に重ねる。--mobile-bottom-nav-h は
+          デスクトップで 0px のため、PCでは従来どおり画面最下部に固定される。 */}
+      <div
+        className="fixed left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-2.5 shadow-lg backdrop-blur print:hidden"
+        style={{ bottom: "calc(var(--mobile-bottom-nav-h, 0px) + env(safe-area-inset-bottom, 0px))" }}
+      >
+        {/* モバイルは全画面共通の共有FAB(右下・z-30)があるため右端を空ける。PC(sm)はFABが画面端で
+            中央寄せの本バーと重ならないため余白不要。 */}
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 pr-16 sm:pr-0">
+          <span className="min-w-0 truncate text-[11px] text-slate-500">
             {savedLabel}
             <span className="ml-2 rounded bg-slate-100 px-2 py-0.5 font-semibold text-slate-600">{KY_SYNC_LABEL[syncStatus]}</span>
             {shareCode && (
               <span className="ml-2 rounded bg-violet-100 px-2 py-0.5 font-bold text-violet-800">共有コード {shareCode}</span>
             )}
           </span>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={handleCopyLatest} className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50">前回を複製</button>
-            <button type="button" onClick={() => void handleSave()} className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
-            {isKyCloudEnabled() && (
-              <button type="button" onClick={() => void handleFetchLatest()} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">クラウド最新取得</button>
-            )}
-            <button type="button" onClick={() => void handleShare()} disabled={shareBusy} className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50 disabled:opacity-50">{shareBusy ? "発行中…" : "別端末で共有"}</button>
-            <Link href="/ky/morning" className="rounded-lg border border-violet-300 bg-white px-3 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-50">サイネージへ →</Link>
-            {chemHint.matched && (
-              <Link
-                href={chemicalRaHref(chemHint)}
-                className="rounded-lg border border-amber-400 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100"
-                title={`この作業（${chemHint.keywords.join("・")}）で扱う化学物質の規制・ばく露注意を確認`}
-              >
-                ⚗ 化学物質リスクを見る →
-              </Link>
-            )}
-            {accHint.matched && (
-              <Link
-                href={accidentsHref(accHint)}
-                className="rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100"
-                title="この作業の類似労災事例・AI注意喚起を見る"
-              >
-                ⚠ 類似の労災事例を見る →
-              </Link>
-            )}
-            {/* P1-3完: KY→チャットボット双方向動線。作業内容を文脈として渡す */}
-            {(record.workRows[0]?.workDetail?.trim() ?? "") !== "" && (
-              <Link
-                href={`/chatbot?context=ky&work=${encodeURIComponent(
-                  (record.workRows[0]?.workDetail ?? "").trim().slice(0, 60),
-                )}`}
-                className="rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
-                title="この作業の法的根拠・必要な措置をAIチャットに質問"
-              >
-                💬 法的根拠をAIに聞く →
-              </Link>
-            )}
-            <button type="button" onClick={() => setShowTranscribe(true)} className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50" title="元請指定のExcel様式へ項目ごとにコピーして貼り付け">Excel転記</button>
-            <button type="button" onClick={() => setShowPrintPreview(true)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">印刷プレビュー</button>
-            <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-5 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => void handleSave()}
+              className="min-h-[44px] rounded-lg bg-emerald-600 px-7 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+            >
+              保存
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowActions(true)}
+              aria-haspopup="menu"
+              aria-expanded={showActions}
+              aria-label="その他の操作（複製・共有・転記・印刷）"
+              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base font-bold leading-none text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+            >
+              …
+            </button>
           </div>
         </div>
       </div>
+
+      {/* 柱C-9: その他の操作シート（複製・共有・転記・印刷・連携）。下から出る・タップしやすい1列。 */}
+      {showActions && (
+        <>
+          <div className="fixed inset-0 z-[45] bg-slate-900/40 print:hidden" onClick={() => setShowActions(false)} aria-hidden="true" />
+          <div
+            role="menu"
+            aria-label="その他の操作"
+            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[80vh] max-w-lg overflow-y-auto rounded-t-2xl border-t border-slate-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl print:hidden"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <p className="text-sm font-bold text-slate-800">その他の操作</p>
+              <button
+                type="button"
+                onClick={() => setShowActions(false)}
+                aria-label="閉じる"
+                className="min-h-[44px] rounded-lg px-3 text-lg leading-none text-slate-500 hover:bg-slate-100"
+              >
+                ×
+              </button>
+            </div>
+
+            <p className="mb-1.5 text-[11px] font-bold text-slate-400">記録</p>
+            <div className="mb-3 space-y-1.5">
+              <button type="button" role="menuitem" onClick={() => runAction(handleCopyLatest)} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-2.5 text-left hover:bg-amber-100">
+                <span className="text-sm font-bold text-amber-800">↻ 前回を複製</span>
+                <span className="text-[11px] font-normal text-amber-600">前回のKYを今日の分として引き継ぐ</span>
+              </button>
+            </div>
+
+            <p className="mb-1.5 text-[11px] font-bold text-slate-400">共有・連携</p>
+            <div className="mb-3 space-y-1.5">
+              <button type="button" role="menuitem" disabled={shareBusy} onClick={() => runAction(() => void handleShare())} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-violet-200 bg-violet-50/60 px-4 py-2.5 text-left hover:bg-violet-100 disabled:opacity-50">
+                <span className="text-sm font-bold text-violet-800">📡 {shareBusy ? "発行中…" : "別端末で共有"}</span>
+                <span className="text-[11px] font-normal text-violet-600">サイネージ用の共有コードを発行</span>
+              </button>
+              {isKyCloudEnabled() && (
+                <button type="button" role="menuitem" onClick={() => runAction(() => void handleFetchLatest())} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-left hover:bg-slate-50">
+                  <span className="text-sm font-semibold text-slate-700">☁ クラウド最新取得</span>
+                  <span className="text-[11px] font-normal text-slate-500">別端末で保存したKYを読み込む</span>
+                </button>
+              )}
+              <Link href="/ky/morning" role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center rounded-xl border border-violet-200 bg-white px-4 py-3 text-left text-sm font-semibold text-violet-700 hover:bg-violet-50">
+                🖥 朝礼サイネージへ →
+              </Link>
+              <button type="button" role="menuitem" onClick={() => runAction(() => setShowTranscribe(true))} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-left hover:bg-emerald-50" title="元請指定のExcel様式へ項目ごとにコピーして貼り付け">
+                <span className="text-sm font-semibold text-emerald-700">📋 Excel転記</span>
+                <span className="text-[11px] font-normal text-emerald-600">元請のExcel様式へ項目ごとにコピー</span>
+              </button>
+            </div>
+
+            <p className="mb-1.5 text-[11px] font-bold text-slate-400">印刷・PDF</p>
+            <div className="mb-1 space-y-1.5">
+              <button type="button" role="menuitem" onClick={() => runAction(() => setShowPrintPreview(true))} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-left hover:bg-sky-50">
+                <span className="text-sm font-semibold text-sky-700">🔍 印刷プレビュー</span>
+                <span className="text-[11px] font-normal text-sky-600">A4の体裁を確認してから印刷</span>
+              </button>
+              <button type="button" role="menuitem" onClick={() => { setShowActions(false); window.print(); }} className="flex min-h-[48px] w-full items-center rounded-xl bg-sky-600 px-4 py-3 text-left text-sm font-bold text-white hover:bg-sky-700">
+                🖨 印刷 / PDF
+              </button>
+            </div>
+
+            {(chemHint.matched || accHint.matched || (record.workRows[0]?.workDetail?.trim() ?? "") !== "") && (
+              <>
+                <p className="mb-1.5 mt-3 text-[11px] font-bold text-slate-400">この作業の関連情報</p>
+                <div className="space-y-1.5">
+                  {chemHint.matched && (
+                    <Link href={chemicalRaHref(chemHint)} role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3 text-left text-sm font-semibold text-amber-800 hover:bg-amber-100" title={`この作業（${chemHint.keywords.join("・")}）で扱う化学物質の規制・ばく露注意を確認`}>
+                      ⚗ 化学物質リスクを見る →
+                    </Link>
+                  )}
+                  {accHint.matched && (
+                    <Link href={accidentsHref(accHint)} role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-rose-200 bg-rose-50/60 px-4 py-3 text-left text-sm font-semibold text-rose-700 hover:bg-rose-100" title="この作業の類似労災事例・AI注意喚起を見る">
+                      ⚠ 類似の労災事例を見る →
+                    </Link>
+                  )}
+                  {/* P1-3完: KY→チャットボット双方向動線。作業内容を文脈として渡す */}
+                  {(record.workRows[0]?.workDetail?.trim() ?? "") !== "" && (
+                    <Link
+                      href={`/chatbot?context=ky&work=${encodeURIComponent(
+                        (record.workRows[0]?.workDetail ?? "").trim().slice(0, 60),
+                      )}`}
+                      role="menuitem"
+                      onClick={() => setShowActions(false)}
+                      className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-left text-sm font-semibold text-blue-700 hover:bg-blue-100"
+                      title="この作業の法的根拠・必要な措置をAIチャットに質問"
+                    >
+                      💬 法的根拠をAIに聞く →
+                    </Link>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
