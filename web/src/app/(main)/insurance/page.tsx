@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { ShieldAlert } from "lucide-react";
 import { withSiteOpenGraph } from "@/lib/seo-metadata";
 import { PageContainer } from "@/components/layout";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
@@ -21,26 +24,23 @@ export default function InsurancePage() {
         <div>
           <h1 className="text-xl font-bold text-slate-900">賠償責任保険加入状況</h1>
           <p className="mt-2 text-sm text-slate-500">最終更新日: 2026年5月17日</p>
-          <p className="mt-3 text-sm leading-7 text-slate-600">
-            安全AIポータルでは、利用者・取引先への万が一の被害に備えるため、賠償責任保険への加入を計画しています。
-            現状と予定を正直に開示します。
-          </p>
         </div>
 
-        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">
-          <p className="text-sm font-semibold text-amber-900">【現状】未加入</p>
-          <p className="mt-2 text-sm leading-7 text-amber-800">
-            2026年5月現在、業務賠償責任保険・データ漏洩保険には未加入です。
-            独立準備フェーズのため、加入手続きは法人化・独立後のフェーズ1で実施予定です。
-          </p>
-          <p className="mt-3 text-sm leading-7 text-amber-900">
-            <span className="font-semibold">企業のご利用について：</span>
-            企業の調達基準において賠償責任保険の付保が必須となる場合、現時点では本サービスは要件を満たさない可能性があります。
-            重要度の高い業務での利用を検討される場合は、貴社の調達基準・リスク管理基準をご確認のうえ、必要に応じて
-            <a className="underline hover:text-amber-700" href="/contact">お問い合わせフォーム</a>
-            より個別にご相談ください。
-          </p>
-        </div>
+        {/* 柱0: 結論カード＝いまの状態（未加入）を最上部に */}
+        <ConclusionCard
+          tone="warning"
+          icon={ShieldAlert}
+          title="未加入"
+          description="業務賠償責任保険・データ漏洩保険は現在未加入。法人化・独立後のフェーズ1で加入予定です。"
+          action={{ href: "/contact", label: "個別に相談" }}
+        />
+
+        <CollapsibleDetail summary="企業のご利用について（調達基準・詳しく）">
+          企業の調達基準において賠償責任保険の付保が必須となる場合、現時点では本サービスは要件を満たさない可能性があります。
+          重要度の高い業務での利用を検討される場合は、貴社の調達基準・リスク管理基準をご確認のうえ、必要に応じて
+          <a className="underline hover:text-amber-700" href="/contact">お問い合わせフォーム</a>
+          より個別にご相談ください。
+        </CollapsibleDetail>
 
         <section className="space-y-4">
           <h2 className="text-base font-bold text-slate-900">加入予定の保険</h2>
