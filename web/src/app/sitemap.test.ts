@@ -72,6 +72,38 @@ describe("sitemap.xml（柱C-3-3 欠落ページ追加）", () => {
 });
 
 /**
+ * A-3 回帰テスト: サイトマップの役割分担。個別の通達/保護具/記事ページは専用の
+ * 子サイトマップ（sitemap-circulars/-equipment/-articles.xml）が正本として出力するため、
+ * 本体 sitemap.xml には直書きしない（同一URLの二重掲載＝役割崩壊を防止）。
+ * セクションのランディングページ（/circulars・/equipment-finder）は本体に残す。
+ */
+describe("sitemap.xml（A-3 役割分担: 子サイトマップとの二重掲載なし）", () => {
+  const entries = sitemap();
+  const urls = entries.map((e) => e.url);
+  const urlSet = new Set(urls);
+  const has = (path: string) => urlSet.has(`${BASE}${path}`);
+
+  it("個別の通達ページ（/circulars/<id>）を本体 sitemap.xml に直書きしない", () => {
+    const circularDetails = urls.filter((u) =>
+      /\/circulars\/[^/]+$/.test(u.replace(`${BASE}`, "")),
+    );
+    expect(circularDetails).toEqual([]);
+  });
+
+  it("個別の保護具ページ（/equipment/<id>）を本体 sitemap.xml に直書きしない", () => {
+    const equipmentDetails = urls.filter((u) =>
+      /\/equipment\/[^/]+$/.test(u.replace(`${BASE}`, "")),
+    );
+    expect(equipmentDetails).toEqual([]);
+  });
+
+  it("セクションのランディングページは本体に残す", () => {
+    expect(has("/circulars")).toBe(true);
+    expect(has("/equipment-finder")).toBe(true);
+  });
+});
+
+/**
  * 柱C-3-4 回帰テスト: lastmod 動的化。各ページの lastmod が固定値ではなく
  * 「データの実更新日」に追従し、かつ未来日（将来施行日など）が混入しないことを固定する。
  */
