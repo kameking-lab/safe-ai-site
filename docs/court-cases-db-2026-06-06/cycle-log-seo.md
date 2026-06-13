@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-06-14 — 柱C-3-2/A-3 サイトマップ役割分担の是正（PR: seo/c3-circulars-sitemap-canonical）
+
+回収: 緑だった PR #524（C-2(b) 44px）を squash マージ→main を ff-only 同期・clean 確認。緑だった PR #528（C-4 og:image フォールバック lib層）は #524 マージで BACKLOG-seo.md・cycle-log-seo.md が追記衝突→ origin/main を通常マージで解決(force-push不可を遵守)し push、CI 再走は次イテレーションで回収。#530（JSON-LD lib consolidate）は CI pending、次回回収。
+
+着手前の現状確認: 補充指針（site-critique 01-seo-technical）を上から実機照合。S-1(articles soft404)・S-3(欠落 sitemap)・A-2(/audits 露出)・A-4(equipment 幽霊URL)・C-1(og:image) は既に是正済を確認。**未是正だったのは A-3 の役割崩壊**で、これを閉じた（捏造・水増しなし＝既存の作り直しではない実バグ修正）。
+
+- **発見した実バグ**: `sitemap-circulars.xml` が `officialNotices`(data/mock/notices-and-precedents・`nt-*` ID)から `/circulars/<id>` を出力していたが、`/circulars/[id]` ルートの `generateStaticParams` は `mhlwNotices`(`mhlw-notice-NNNN`)しか解決しない。両データはID体系が完全に別（nt-2018-harness 等 vs mhlw-notice-0001 等）で、子サイトマップの全URLが 404＝幽霊URL(soft404)だった。柱C-3-2 で sitemap-equipment.xml に施した是正（safetyGoodsItems→getAllEquipment）と同型の取りこぼし。
+- **発見した二重掲載**: 本体 `sitemap.xml`(sitemap.ts)が個別の `/circulars/<id>`(mhlwNotices 全件)・`/equipment/<id>`(getAllEquipment 全件)を直書きする一方、専用子サイトマップ(sitemap-circulars/-equipment.xml＝sitemap-index が列挙)も同一URLを出力。同じURLが2つのサイトマップに重複し、A-3 の「役割分担崩壊」状態だった。
+- **修正（自班所有の sitemap ファイルのみ）**: ①`sitemap-circulars.xml` を正本 `mhlwNotices` へ差し替え、lastmod は発出日(issuedDate)追従＋null fallback＋未来日 cap（`latestIsoDate`、柱C-3-4 と整合）。②本体 `sitemap.ts` から `circularPages`・`equipmentPages` の直書きと spread を撤去し、個別ページは専用子サイトマップに一本化（本体は各セクションのランディング /circulars・/equipment-finder のみ保持）。データ・ルートは一切変更せず。
+- **テスト**: `sitemap-circulars.xml/route.test.ts` を新規作成（6 it＝件数一致・全URLが mhlwNotices に解決・幽霊URLゼロ・nt-* 不在・lastmod の ISO/未来日なし・発出日追従）。`sitemap.test.ts` に役割分担の回帰（3 it＝個別通達/保護具URLが本体に直書きされない・ランディングは残す）を追加。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0(warnings 既存のみ) / `vitest run`=206ファイル1709テスト全pass / `build`=成功。build 再生成データ(rag-metrics-latest.json・chatbot-eval-fresh-results.json)は復元。working tree clean。
+
+残: 未着手キュー先頭は柱C-4（JSON-LD lib 整備＝#530 で着手中）。次は #528/#530 のCI回収→マージを優先し、補充は site-critique の B 系（B-1 h1 構造・B-2 description）で自領域に閉じるものから。
+
+---
+
 ## 2026-06-14 — 柱C-4 og:image フォールバックを lib層で敷設（PR: seo/c4-og-image-fallback-lib）
 
 回収: PR #522（決裁A robots facebookexternalhit 許可リスト化）が origin/main 追記と衝突→ origin/main を通常マージで解決(BACKLOG-seo.md・cycle-log-seo.md の追記衝突のみ、force-push不可を遵守)、ゲート再確認のうえ push。CI再走待ちは次イテレーションで回収。PR #524（C-2(b) モバイル検索トリガ 44px）はCI pending、これも次回回収。
