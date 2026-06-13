@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { PageContainer } from "@/components/layout";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import type { SafetyTone } from "@/lib/design/safety-tone";
 import {
   Search,
   FlaskConical,
@@ -137,8 +139,60 @@ export function ChemicalDatabaseClient() {
     });
   }, [mhlwChemicals, query, selectedTags, tagMatchMode, constructionOnly]);
 
+  // 結論カード（柱0）: 本文を読まず3秒で「いまの状態（収録数／該当件数）」が分かる。
+  // 収録数・該当数は「OK/完了」ではないため緑(safe)を使わず案内色の info（青）。該当0だけ warning（黄）。
+  const mhlwHasFilter =
+    query.trim() !== "" || selectedTags.size > 0 || constructionOnly;
+  const conclusion: {
+    tone: SafetyTone;
+    value?: string;
+    unit?: string;
+    title: string;
+    description: string;
+  } =
+    mode === "curated"
+      ? {
+          tone: "info",
+          value: chemicalSubstances.length.toLocaleString(),
+          unit: "物質",
+          title: "専門解説",
+          description: "労働安全コンサルタントによる解説付きの主要物質。",
+        }
+      : mhlwHasFilter
+        ? filteredMhlw.length > 0
+          ? {
+              tone: "info",
+              value: filteredMhlw.length.toLocaleString(),
+              unit: "件",
+              title: "該当",
+              description: `全 ${mhlwCount.toLocaleString()} 物質から絞り込み中。`,
+            }
+          : {
+              tone: "warning",
+              title: "該当なし",
+              description:
+                "条件に一致する物質がありません。キーワードや規制法令の絞り込みを見直してください。",
+            }
+        : {
+            tone: "info",
+            value: mhlwCount.toLocaleString(),
+            unit: "物質",
+            title: "収録",
+            description:
+              "厚労省の公開4リスト（皮膚等障害・SDS交付義務・がん原性・濃度基準値）をCAS番号で統合。物質名・CAS番号で検索できます。",
+          };
+
   return (
     <PageContainer width="wide">
+      <ConclusionCard
+        tone={conclusion.tone}
+        value={conclusion.value}
+        unit={conclusion.unit}
+        title={conclusion.title}
+        description={conclusion.description}
+        icon={conclusion.tone === "info" ? FlaskConical : undefined}
+        className="mb-5"
+      />
       <header className="mb-5">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-emerald-700">
           <FlaskConical className="h-4 w-4" aria-hidden="true" />
