@@ -1,7 +1,6 @@
 import type { MetadataRoute } from "next";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { mhlwNotices } from "@/data/mhlw-notices";
-import { getPublishedArticleIndex } from "@/lib/articles";
 import { getAllEquipment } from "@/lib/equipment-recommendation";
 import { FEATURE_CATEGORIES } from "@/data/features-catalog";
 import { SAFETY_SIGNS, SIGN_CATEGORIES } from "@/data/safety-signs";
@@ -123,7 +122,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/faq/chemical", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/faq/health-education", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/faq/search", lastModified: "2026-05-16", priority: 0.6, changeFrequency: "monthly" },
-    { url: "/pdf", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
+    // /pdf は permanentRedirect → /ky/paper のためサイトマップから除外（リダイレクトURLは掲載しない）
     { url: "/safety-diary", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
     { url: "/notifications", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
     { url: "/goods", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
@@ -147,7 +146,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Audit reference: harsh-third-party-2026-05-16 G-002.
     { url: "/safety-signs", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
     { url: "/about", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "yearly" },
-    { url: "/about/cases", lastModified: "2026-04-19", priority: 0.6, changeFrequency: "monthly" },
+    // /about/cases は redirect → /about のためサイトマップから除外（リダイレクトURLは掲載しない）
     { url: "/about/chatbot-eval", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
     { url: "/about/data-sources", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
     { url: "/about/news-feed", lastModified: "2026-04-19", priority: 0.5, changeFrequency: "monthly" },
@@ -180,13 +179,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "yearly",
   }));
 
-  // 時限公開: publishedAt > now() の記事は sitemap に含めない
-  const articlePages: typeof pages = getPublishedArticleIndex().map((a) => ({
-    url: `/articles/${a.slug}`,
-    lastModified: a.lastReviewedAt,
-    priority: 0.7,
-    changeFrequency: "monthly",
-  }));
+  // 記事の個別ページ（/articles/<slug>）は専用の sitemap-articles.xml が
+  // lib/articles から動的生成する（重複掲載を避けるためここでは出力しない）。
 
   // 保護具DBの個別ページ（月次更新前提）
   const equipmentPages: typeof pages = getAllEquipment().map((it) => ({
@@ -234,7 +228,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...filtered,
     ...circularPages,
-    ...articlePages,
     ...equipmentPages,
     ...featureCategoryPages,
     ...safetySignCategoryPages,
