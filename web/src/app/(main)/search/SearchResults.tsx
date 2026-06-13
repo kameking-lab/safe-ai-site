@@ -11,6 +11,7 @@ import {
   BookOpen,
   AlertTriangle,
   Scale,
+  BookMarked,
   ArrowRight,
 } from 'lucide-react';
 import {
@@ -23,7 +24,7 @@ import {
 } from '@/lib/search-index';
 import { trackEvent } from '@/components/Analytics';
 
-const CATEGORIES: SearchCategory[] = ['precedent', 'notice', 'chemical', 'education', 'accident'];
+const CATEGORIES: SearchCategory[] = ['precedent', 'notice', 'chemical', 'education', 'accident', 'glossary'];
 
 // /search はサイト内検索結果ページ（全件表示）。コマンドパレット(⌘K)が上位10件の
 // クイック移動なのに対し、こちらは件数無制限・URL共有可能・カテゴリ別タブを備える。
@@ -37,6 +38,7 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
     case 'education': return <BookOpen className={cls} aria-hidden="true" />;
     case 'accident':  return <AlertTriangle className={cls} aria-hidden="true" />;
     case 'precedent': return <Scale className={cls} aria-hidden="true" />;
+    case 'glossary':  return <BookMarked className={cls} aria-hidden="true" />;
   }
 }
 

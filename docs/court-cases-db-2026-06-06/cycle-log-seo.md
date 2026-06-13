@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-06-14 — 柱C-2 横断検索に用語集（glossary）を収載（PR: seo/c2-glossary-cross-search）
+
+回収: 緑だった PR #537（C-3-2 サイトマップ役割分担）を squash マージ→main を ff-only 同期・clean 確認。#537 マージで PR #541（C-2 404横断検索）・#547（C-3-4 sitemap-index lastmod）が BACKLOG/cycle-log の追記衝突で CONFLICTING→ origin/main を各ブランチへ通常マージで解決(force-push不可を遵守)・全ゲート再緑(tsc0/lint0/vitest全pass/build成功)を確認し push。#541/#547 とも CI 再走のため回収は次イテレーション。
+
+着手: 補充指針（site-critique 01-seo-technical の C-2＝横断検索の発見性）。在庫キューは空、かつ先頭の C-3-4 DRY後追いは依存先 `lib/sitemap/freshness.ts` が未マージ #547 にしか無く着手不可のため、双方と非競合の自領域タスクとして「横断検索の用語集収載」を選択。
+
+- **現状確認**: 横断検索インデックス(`search-index.ts`)は 判例/事故/化学物質/通達/教育 の5カテゴリを収載するが、**用語集(/glossary・約251語)が 0 件**だった。「足場とは」「玉掛けとは」等の高意図クエリが /search・⌘K で全くヒットしない発見性の穴。
+- **修正（自班所有の検索ファイルのみ）**: `search-index.ts` に `glossary` カテゴリを追加。`@/data/glossary` の 4 バッチ 152 語を read-only import で収載（id=`glossary-<term>`・title=用語名・subtitle=`読み　定義冒頭60字`・url=/glossary）。subtitle に読み(かな)と定義冒頭を載せることで、用語名／かな読み／定義中の語のいずれからもヒットし、結果一覧に定義が即表示される。`/search` の `SearchResults.tsx` と app-shell の ⌘K `CommandPalette.tsx`（いずれも当班 C-2 検索UI）にカテゴリ配列＋アイコン(BookMarked)＋件数タブを追加。`CATEGORY_META`(配色=indigo)／`countByCategory` の初期化も拡張。
+- **網羅の限界を明記（捏造・水増しなし）**: /glossary 本体 `page.tsx` に直書きされた基礎語約99語は ux-hub 所有ページ内で未 export のため対象外。完全網羅には用語データの `@/data/glossary` 一元化が要るが、それは他班(data/ux-hub)領域＝当班では行わない。今回収載した 152 語は実在データで、これまで検索 0 件だった分の純増。
+- **テスト**: `search-index.test.ts` に glossary 統合テスト3本を追加（実データ buildSearchIndex で 152語以上収載・全件 /glossary リンク・id 接頭辞／用語名・かな読み・定義語ヒット／countByCategory の all が glossary 含む全合計一致）。CATEGORY_META 網羅テストにも glossary を追加。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0(warnings 既存のみ) / `vitest run`=212ファイル1790テスト全pass（新規3含む） / `build`=成功。build 再生成データ(rag-metrics-latest.json・chatbot-eval-fresh-results.json)は復元。working tree clean。
+
+残: #541/#547 の CI 回収→マージが最優先。補充は site-critique 残件のうち自領域に閉じるもの（C-3-4 DRY後追いは #547 マージ後に解禁）。
+
+---
+
 ## 2026-06-14 — 柱C-3-2/A-3 サイトマップ役割分担の是正（PR: seo/c3-circulars-sitemap-canonical）
 
 回収: 緑だった PR #524（C-2(b) 44px）を squash マージ→main を ff-only 同期・clean 確認。緑だった PR #528（C-4 og:image フォールバック lib層）は #524 マージで BACKLOG-seo.md・cycle-log-seo.md が追記衝突→ origin/main を通常マージで解決(force-push不可を遵守)し push、CI 再走は次イテレーションで回収。#530（JSON-LD lib consolidate）は CI pending、次回回収。
