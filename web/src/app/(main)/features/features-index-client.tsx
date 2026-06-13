@@ -54,7 +54,7 @@ export function FeaturesIndexClient() {
             <Link
               key={link.href}
               href={link.href}
-              className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50"
             >
               <span aria-hidden>{link.emoji}</span>
               {link.label}
@@ -70,7 +70,7 @@ export function FeaturesIndexClient() {
             <button
               type="button"
               onClick={() => setActiveCategory("all")}
-              className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition ${
+              className={`inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition ${
                 activeCategory === "all"
                   ? "bg-slate-900 text-white shadow"
                   : "border border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
@@ -87,7 +87,7 @@ export function FeaturesIndexClient() {
                   key={cat.id}
                   type="button"
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  className={`inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition ${
                     active
                       ? `bg-gradient-to-r ${colors.gradient} text-white shadow`
                       : `border ${colors.border} ${colors.bg} ${colors.text} hover:opacity-90`
@@ -149,13 +149,13 @@ export function FeaturesIndexClient() {
                   <div className="mt-auto flex items-center justify-between gap-2 pt-2">
                     <Link
                       href={feature.href}
-                      className={`inline-flex flex-1 items-center justify-center rounded-lg bg-gradient-to-r ${colors.gradient} px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90`}
+                      className={`inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg bg-gradient-to-r ${colors.gradient} px-3 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-90`}
                     >
                       {isEn ? "Try it →" : "機能を試す →"}
                     </Link>
                     <Link
                       href={`/features/${feature.category}`}
-                      className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                      className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                     >
                       {isEn ? "Learn more" : "詳しく見る"}
                     </Link>
@@ -180,13 +180,13 @@ export function FeaturesIndexClient() {
         <div className="mt-4 flex flex-col items-center justify-center gap-2 sm:flex-row">
           <Link
             href="/contact"
-            className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
+            className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
           >
             {isEn ? "Send feedback →" : "ご意見・改善提案を送る →"}
           </Link>
           <Link
             href="/features/quick-tour"
-            className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-5 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50"
+            className="inline-flex min-h-[44px] items-center justify-center gap-1 rounded-lg border border-emerald-300 bg-white px-5 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50"
           >
             {isEn ? "Take the 5-min tour" : "5分ツアーを見る"}
           </Link>
