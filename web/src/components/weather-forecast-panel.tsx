@@ -15,6 +15,8 @@ import {
   type RiskWeatherLevel,
   type RiskWeatherSourceStatus,
 } from "@/lib/risk/weather-conclusion";
+import { buildRiskWeatherOutlook } from "@/lib/risk/weather-outlook";
+import { SAFETY_TONE } from "@/lib/design/safety-tone";
 
 // ────────────────────────────────────────────────────────────
 // ユーティリティ
@@ -270,6 +272,12 @@ export function WeatherForecastPanel() {
     return buildRiskWeatherConclusion({ forecastStatus, jmaStatus, regions });
   }, [loading, error, jmaLoading, jmaError, forecast, jmaBlockLevels]);
 
+  // 明日以降の見通し（台風前日の前倒し判断用・予報ベース）。今日は結論カードが担うので含めない。
+  const outlook = useMemo(() => {
+    if (!forecast) return [];
+    return buildRiskWeatherOutlook(forecast.regions, { startOffset: 1, days: 3 });
+  }, [forecast]);
+
   return (
     <div className="space-y-6">
       {/* 結論カード: 全国の警報状態が3秒で分かる（1画面1メッセージ） */}
@@ -289,6 +297,44 @@ export function WeatherForecastPanel() {
           気象庁公式で確認
         </a>
       </ConclusionCard>
+
+      {/* 明日以降の見通し（柱3・台風前日の前倒し判断）: 結論カード＝今日／このストリップ＝明日以降の予報。
+          タップでその日の1週間予報マップへジャンプし、どの地域かまで確認できる。 */}
+      {outlook.length > 0 && (
+        <div>
+          <div className="mb-1.5 flex items-baseline justify-between">
+            <p className="text-sm font-bold text-slate-900">明日からの見通し</p>
+            <span className="text-[11px] text-slate-500">予報ベース（今日は上の結論）</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {outlook.map((day) => {
+              const t = SAFETY_TONE[day.tone];
+              const count = day.warningCount > 0 ? day.warningCount : day.advisoryCount;
+              return (
+                <button
+                  key={day.date}
+                  type="button"
+                  onClick={() => {
+                    setMode("week");
+                    setSelectedDayIndex(day.offset);
+                  }}
+                  aria-label={`${day.dayLabel || formatDate(day.date)}は${day.levelLabel}。タップで地域別の予報マップを開く`}
+                  className={`flex min-h-[44px] flex-col items-start rounded-xl border-2 p-2.5 text-left transition hover:shadow-md ${t.soft}`}
+                >
+                  <span className="text-sm font-bold leading-tight">{day.dayLabel || "予報"}</span>
+                  <span className="text-[11px] font-semibold opacity-70">{formatDate(day.date)}</span>
+                  <span className={`mt-1 text-base font-bold leading-tight ${t.text}`}>
+                    {day.levelLabel}
+                  </span>
+                  <span className="mt-0.5 text-[11px] opacity-80">
+                    {count > 0 ? `${count}地域` : "全国おおむね良好"}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ヘッダー */}
       <div>
