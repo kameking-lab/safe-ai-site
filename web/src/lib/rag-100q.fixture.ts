@@ -99,7 +99,7 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 69, topic: "ボイラー", question: "圧力容器の定期検査は？", gold: [{ lawShort: "ボイラー則", articleNum: "第67条" }, { lawShort: "ボイラー則", articleNum: "第88条" }, { lawShort: "ボイラー則", articleNum: "第94条" }] },
   { id: 70, topic: "VDT", question: "情報機器作業（VDT作業）の指針は？", gold: [{ lawShort: "VDTガイドライン", articleNum: "第1" }, { lawShort: "VDTガイドライン", articleNum: "第2" }, { lawShort: "VDTガイドライン", articleNum: "第3" }, { lawShort: "VDTガイドライン", articleNum: "第4" }] },
   { id: 71, topic: "重量物", question: "重量物取扱いの腰痛予防は？", gold: [{ lawShort: "女性則", articleNum: "第3条" }, { lawShort: "年少者則", articleNum: "第8条" }] },
-  { id: 72, topic: "高圧", question: "高気圧作業の作業主任者は？", gold: [{ lawShort: "高圧則", articleNum: "第11条" }, { lawShort: "高圧則", articleNum: "第1条" }] },
+  { id: 72, topic: "高圧", question: "高気圧作業の作業主任者は？", gold: [{ lawShort: "高圧則", articleNum: "第10条" }] },
 
   // H. 作業環境測定・SDS (73-78)
   { id: 73, topic: "測定", question: "作業環境測定の義務は何条？", gold: [{ lawShort: "安衛法", articleNum: "第65条" }, { lawShort: "作業環境測定法", articleNum: "第3条" }] },
