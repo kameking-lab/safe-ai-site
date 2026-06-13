@@ -21,7 +21,8 @@ export function KyPrintSheet({ record }: { record: KyInstructionRecordState }) {
   return (
     <div className="mx-auto bg-white text-[9pt] text-black print:text-black" style={{ width: "186mm", maxWidth: "100%" }}>
       <div className="mb-1 flex items-end justify-between">
-        <h1 className="text-[14pt] font-bold tracking-wide">作業前 危険予知活動表（KY）</h1>
+        {/* A4正式書式の見た目(14pt太字)を保ったまま、ページ唯一のh1(画面ヘッダー)と競合させないため非見出し(p)で描画 */}
+        <p className="text-[14pt] font-bold tracking-wide">作業前 危険予知活動表（KY）</p>
         <span className="text-[9pt] text-slate-600">4ラウンド法</span>
       </div>
 

@@ -24,6 +24,7 @@ import {
   type ListPeriod,
   type ListSort,
 } from "@/lib/ky/record-list-filter";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 const AUTOSAVE_KEY = "ky-record";
 
@@ -69,6 +70,8 @@ export function KyListClient() {
     () => filterAndSortKyList(entries, { keyword, period, sort }),
     [entries, keyword, period, sort]
   );
+
+  const isFiltering = keyword.trim() !== "" || period !== "all";
 
   const loadFull = useCallback(
     async (entry: KyListEntry) => {
@@ -140,6 +143,35 @@ export function KyListClient() {
         >
           ＋ 新規KY作成
         </Link>
+      </div>
+
+      {/* 結論カード（柱0）: いまの状態＝保存件数を3秒で。保存ゼロは新規作成へ誘導。 */}
+      <div className="mt-4">
+        {entries.length === 0 ? (
+          <ConclusionCard
+            tone="info"
+            title="保存KYなし"
+            description="まずは新規KYを作成・保存しましょう。次から開いて再編集・複製できます。"
+            action={{ href: "/ky/paper", label: "新規KY作成" }}
+          />
+        ) : filtered.length === 0 ? (
+          <ConclusionCard
+            tone="neutral"
+            value={0}
+            unit="件"
+            title="該当なし"
+            description={`保存${entries.length}件のうち、いまの絞り込み条件に一致するKYはありません。条件を変えてください。`}
+          />
+        ) : (
+          <ConclusionCard
+            tone="info"
+            value={filtered.length}
+            unit="件"
+            title="保存KY"
+            description={isFiltering ? `全${entries.length}件のうち、いまの絞り込みに一致する分です。` : undefined}
+            action={{ href: "/ky/paper", label: "新規KY作成" }}
+          />
+        )}
       </div>
 
       {notice && (
