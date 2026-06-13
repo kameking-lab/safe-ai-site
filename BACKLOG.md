@@ -81,7 +81,7 @@ Fable 5ループが使用上限＋期限で中断した。再開直後はこの2
   - [ ] 【柱C-2-3・S】検索結果ページと到達導線: /search(または同等)で結果一覧→各機能へ2タップ以内で到達。カテゴリ別グルーピング・空状態。完了条件の実機検証(モバイル/PC両方)＋証跡をdocs/third-party-reviews/に記録。
 - 【柱C-3・S】sitemap是正一式（**分割済み・この親行は着手しない。下の4サブを1件ずつ実施**＝Opus向けに再分割 2026-06-13）: 以下4点をそれぞれ単独イテレーションで。
   - [ ] 【柱C-3-1・S】毒シェル31記事の処置: sitemap-articles.xmlの全31 URL(lr-real-*)が本文32字の空シェルでcanonical=トップ＝soft404群(orphan・/articles一覧からのリンク0)。未知IDをnotFound()化し、sitemapを実在記事から動的生成に差し替え。/about/cases・/pdfの空シェルも同時処置。
-  - [ ] 【柱C-3-2・S】旧equipment ID 39件の差し替え: sitemap-equipment.xmlの旧ID39件(ee-/fg-/hc-等)も同型の空シェル→現行eq-NNNN生成に差し替え。
+  - [x] 【柱C-3-2・S】旧equipment ID 39件の差し替え（2026-06-13 fix/sitemap-c3-2-equipment-ghost-ids）。真因=sitemap-equipment.xml が `safetyGoodsItems`(/goods 用・ee-/fg-/hc-/カテゴリID系の49件)を `/equipment/<id>` として出力していたが、`/equipment/[id]` は `getAllEquipment()` の eq-NNNN しか generateStaticParams/解決せず全URLが notFound()=幽霊URL(soft404)。しかも `/goods` は単一ページで safetyGoodsItems に詳細ルートが存在しない=出力先URL自体が誤り。是正=データ源を `getAllEquipment()`(正本=safety-equipment-db.json の eq-NNNN・1,050件・実在の保護具詳細ページ)へ差し替え。回帰テスト route.test.ts 4件新設(application/xml urlset・件数一致・全URLが getEquipmentById で解決・eq-プレフィックス固定/旧別系統ID不在)。ゲート全通過(tsc0/lint errors0/vitest1613pass/build成功)。C-3-1の教訓どおりの源ずれ第2例=記事と同じく正本へ寄せた。
   - [ ] 【柱C-3-3・S】欠落ページのsitemap追加: /court-cases・/whats-new・/site-records系がどのsitemapにも不在→sitemapへ追加。
   - [ ] 【柱C-3-4・S】lastmod動的化: lastmodが2026-04-19等で固定(トップはchangefreq=dailyと自己矛盾)→各ページのデータ実更新日から生成。
 - [ ] 【柱C-4・S】CSR空シェルページのSSR化＋固有メタ: /ky(SSR本文32字・titleとOGPがサイト共通デフォルト・sitemap収載)・/ky/morning(114字)・/for/construction(50字・営業LPなのに)・/signage/map(406字)。静的な説明・見出し・使い方をServer Component化し、generateMetadataで固有title/description/canonical付与。robots.txtがDisallow:/api/のためクライアントfetch依存の内容はGooglebotから恒久に不可視である点に注意。
