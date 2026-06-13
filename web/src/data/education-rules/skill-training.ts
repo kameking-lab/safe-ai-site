@@ -222,18 +222,11 @@ export const SKILL_TRAINING: EducationCert[] = [
     relatedCertIds: ["se-36-37-asbestos"],
     effectiveDate: "2021-04-01",
   },
-  // === 粉じん・防じん ===
-  {
-    id: "st-dust-chief",
-    name: "特定粉じん作業主任者技能講習",
-    certType: "skill_training",
-    targetWork: "特定粉じん作業の主任者",
-    relatedLaw: "安衛法第14条・粉じん障害防止規則",
-    duration: "10時間（学科10h）",
-    workCategories: ["construction", "manufacturing", "mining"],
-    keywords: ["粉じん", "じん肺", "特定粉じん", "主任者"],
-    relatedCertIds: ["se-36-29-dust"],
-  },
+  // 注: 粉じん（特定粉じん作業）には作業主任者制度も技能講習も存在しない。
+  // 粉じん障害防止規則に基づく就業時の資格要件は「特別教育」（粉じん則第22条・
+  // 安衛則第36条第29号）のみで、SPECIAL_EDUCATION の se-36-29-dust が正本。
+  // 旧データにあった「特定粉じん作業主任者技能講習」(st-dust-chief)は実在しない
+  // 資格の捏造だったため削除した（2026-06-13 柱1是正・e-Gov/粉じん則で確認）。
   // === 建設・コンクリート系 ===
   {
     id: "st-concrete-chief",
@@ -456,18 +449,12 @@ export const SKILL_TRAINING: EducationCert[] = [
     keywords: ["圧力容器", "第一種圧力容器", "蒸気", "熱交換器", "オートクレーブ", "主任者"],
     notes: "化学設備に係る第一種圧力容器はst-chemical-plant-chief（化学設備関係）が対象",
   },
-  {
-    id: "st-highpressure-chief",
-    name: "高圧室内作業主任者技能講習",
-    certType: "skill_training",
-    targetWork: "高圧室内（ゲージ圧0.1MPa以上の気圧下の作業室内）での作業の主任者",
-    relatedLaw: "安衛法第14条・安衛令第6条第1号・高圧則第11条",
-    duration: "14時間（学科14h）",
-    workCategories: ["construction"],
-    keywords: ["高圧室内", "ケーソン", "潜函", "高圧作業", "作業主任者", "主任者"],
-    relatedCertIds: ["se-36-24-2-koshitsunai"],
-    notes: "高圧室内作業主任者免許（国家試験）と区別。技能講習修了では主任者職務は担えない場合あり",
-  },
+  // 注: 高圧室内作業主任者は「技能講習」ではなく「免許」（高圧室内作業主任者免許）。
+  // 安衛令第6条第1号の高圧室内作業について、高気圧作業安全衛生規則第10条により
+  // 作業室ごとに高圧室内作業主任者免許を受けた者から選任する。正本は LICENSES の
+  // lic-koatsu-shitsunai-chief。旧データの「高圧室内作業主任者技能講習」
+  // (st-highpressure-chief) は資格区分（技能講習⇄免許）の取り違えだったため削除した
+  // （2026-06-13 柱1是正・高気圧則第10条/安全衛生技術試験協会で確認）。
   // === 運搬機械（その他）===
   {
     id: "st-transfer-chief",

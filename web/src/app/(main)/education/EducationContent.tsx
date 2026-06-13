@@ -47,7 +47,7 @@ const PROGRAMS: Program[] = [
   { slug: "shokucho", name: "職長等教育", basis: "安衛法第60条・安衛則第40条 (OSH Act Art.60)", hours: "12時間以上", category: "hoteikyoiku" },
   { slug: "chemical-ra", name: "化学物質のリスクアセスメント実務教育", basis: "安衛法第57条の3 (OSH Act Art.57-3)", hours: "2.5〜4時間", category: "hoteikyoiku", note: "2026年4月 自律管理制度対応" },
   { slug: "youtsu-yobou", name: "腰痛予防教育", basis: "基発0618第1号通達 (MHLW Low Back Pain Guideline)", hours: "2時間以上", category: "roudoueisei" },
-  { slug: "necchu", name: "熱中症予防教育", basis: "基発0420第3号通達 (MHLW Heat Stroke Prevention Guideline)", hours: "1.5時間以上", category: "roudoueisei" },
+  { slug: "necchu", name: "熱中症予防教育", basis: "基発0318第1号ガイドライン (MHLW Heat Stroke Prevention Guideline)", hours: "1.5時間以上", category: "roudoueisei" },
   { slug: "shindou", name: "振動障害予防教育", basis: "振動障害予防のための作業管理指針 (Vibration Disorder Prevention)", hours: "2時間以上", category: "roudoueisei" },
   { slug: "souon", name: "騒音障害防止教育", basis: "騒音障害防止ガイドライン（令和5年改訂）(Noise Guideline 2023)", hours: "1.5時間以上", category: "roudoueisei" },
 ];
