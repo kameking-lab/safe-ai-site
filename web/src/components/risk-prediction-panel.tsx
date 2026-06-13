@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 // C-1（モバイル実速度の構造是正）: 事故データセット（生約340KB）を静的 import すると
@@ -34,6 +34,14 @@ import {
   searchAccidentCases,
 } from "@/lib/utils/risk-search";
 import type { RiskLevel, ScoredAccidentCase, SafetyScore } from "@/lib/utils/risk-search";
+import {
+  computeRiskPredictionConclusion,
+  riskScoreMarkerPercent,
+  RISK_BAND_SEGMENTS,
+  RISK_LEVEL_VISUAL,
+} from "@/lib/risk/risk-prediction-visual";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { TONE_DEFAULT_ICON } from "@/components/ui/status-badge";
 
 // ---------- 色ヘルパー ----------
 
@@ -111,43 +119,87 @@ function TopSummaryCard({
   }, [results]);
 
   const severeCount = results.filter((c) => c.severity === "死亡" || c.severity === "重傷").length;
-  const scoreColor =
-    score.riskLevel === "高"
-      ? "bg-rose-50 border-rose-300 text-rose-900"
-      : score.riskLevel === "中"
-        ? "bg-amber-50 border-amber-300 text-amber-900"
-        : "bg-emerald-50 border-emerald-300 text-emerald-900";
+  const conclusion = computeRiskPredictionConclusion(score);
+  const v = conclusion.visual;
+  const ToneIcon = TONE_DEFAULT_ICON[v.tone];
 
   return (
     <section
-      className={`rounded-2xl border-2 p-4 shadow-sm sm:p-5 ${scoreColor}`}
-      aria-label="検索結果の要約カード"
+      role="status"
+      aria-label={`判定結果: ${conclusion.title}`}
+      data-testid="risk-conclusion"
+      className={`rounded-2xl border-2 p-4 shadow-sm sm:p-5 ${v.soft}`}
     >
+      {/* 主役: 安全スコアのデカ数字＋リスクレベルのチップ */}
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider opacity-80">リスク指数</p>
-          <p className="text-3xl font-black leading-none">
-            {score.overall}
-            <span className="ml-1 text-base font-semibold opacity-70">/100</span>
-          </p>
-          <p className="mt-1 text-sm font-bold">
-            {score.riskLevel}リスク
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <ToneIcon className={`h-8 w-8 shrink-0 ${v.text}`} aria-hidden="true" />
+          <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+            <span
+              data-testid="risk-big-value"
+              className={`text-5xl font-bold leading-none tracking-tight ${v.text}`}
+            >
+              {conclusion.big}
+              <span className="ml-0.5 text-xl font-bold opacity-70">/100</span>
+            </span>
+            <span
+              data-testid="risk-conclusion-chip"
+              className={`rounded-full px-2.5 py-1 text-sm font-bold ${v.chip}`}
+            >
+              {conclusion.title}
+            </span>
             {severeCount > 0 && (
-              <span className="ml-2 rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold">
+              <StatusBadge tone="danger" size="sm">
                 類似の死亡・重傷 {severeCount}件
-              </span>
+              </StatusBadge>
             )}
-          </p>
+          </div>
         </div>
         <button
           type="button"
           onClick={onShowDetail}
-          className="rounded-lg border border-white/40 bg-white/60 px-3 py-2 text-xs font-semibold hover:bg-white/80"
+          className="shrink-0 rounded-lg border border-white/50 bg-white/70 px-3 py-2 text-xs font-semibold hover:bg-white/90"
         >
           詳細スコアを見る →
         </button>
       </div>
-      <p className="mt-2 text-sm leading-relaxed">{score.comment}</p>
+
+      {/* 低→中→高 の色帯（しきい値30/60と一致・スコア位置に▼）。印刷では出さない */}
+      <div className="mt-3 print:hidden" data-testid="risk-level-band">
+        <div className="relative pt-3">
+          <span
+            aria-hidden="true"
+            className="absolute top-0 -translate-x-1/2 text-xs font-bold"
+            style={{ left: `${riskScoreMarkerPercent(conclusion.big)}%` }}
+          >
+            ▼
+          </span>
+          <div className="flex h-3 overflow-hidden rounded-full">
+            {RISK_BAND_SEGMENTS.map((seg) => (
+              <span
+                key={seg.level}
+                data-testid={`risk-band-seg-${seg.level}`}
+                className={`h-full ${RISK_LEVEL_VISUAL[seg.level].bar}`}
+                style={{ width: `${seg.widthPct}%` }}
+              />
+            ))}
+          </div>
+          <div className="mt-0.5 flex text-[10px] font-semibold opacity-70">
+            {RISK_BAND_SEGMENTS.map((seg) => (
+              <span key={seg.level} style={{ width: `${seg.widthPct}%` }} className="text-center">
+                {seg.level}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 次にやること: 短アクション＋根拠コメント */}
+      <p className="mt-3 text-sm font-bold">
+        次にやること：{conclusion.shortAction}
+      </p>
+      <p className="mt-1 text-sm leading-relaxed opacity-90">{score.comment}</p>
+
       {topPreventions.length > 0 && (
         <div className="mt-3 rounded-xl bg-white/70 p-3">
           <p className="text-[11px] font-bold uppercase tracking-wider opacity-80">今朝の主要対策（上位3件）</p>
@@ -241,10 +293,8 @@ function AccidentCard({ c, index }: { c: ScoredAccidentCase; index: number }) {
 
 // 安全スコアパネル
 function SafetyScorePanel({ score, query }: { score: SafetyScore; query: string }) {
-  const gaugeColor =
-    score.riskLevel === "高" ? "bg-rose-500"
-      : score.riskLevel === "中" ? "bg-amber-500"
-        : "bg-emerald-500";
+  // 結論カードと同じ色トークン（risk-prediction-visual.ts）で塗り、色の文法を一致させる
+  const gaugeColor = RISK_LEVEL_VISUAL[score.riskLevel].bar;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
@@ -440,7 +490,9 @@ function PrintableReport({
   return (
     <div className="hidden print:block print:text-black">
       <div className="mb-4 border-b-2 border-gray-800 pb-2">
-        <h1 className="text-xl font-bold">朝礼KY資料 - AIリスク予測レポート</h1>
+        {/* 印刷帳票の表題。画面側 PageHeader の h1 と重複させない（多重h1の是正）ため
+            見出し要素にせず、正式書式の見た目（太字大）だけを保つ。 */}
+        <p className="text-xl font-bold">朝礼KY資料 - AIリスク予測レポート</p>
         <div className="mt-1 flex gap-6 text-sm">
           <span>日付: {date}</span>
           {siteName && <span>現場名: {siteName}</span>}
@@ -514,6 +566,10 @@ export function RiskPredictionPanel() {
   const [results, setResults] = useState<ScoredAccidentCase[]>([]);
   const [searched, setSearched] = useState(false);
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  // 判定後、結論カードを画面最上部に出す（柱0: 入力の下→最上部）。
+  // チップは画面中ほどにあり、タップ後のスクロール位置のままだと結論カードを
+  // 見落とすため、検索完了時にカード先頭へスクロールして「3秒で分かる」を担保。
+  const conclusionRef = useRef<HTMLDivElement>(null);
 
   // データロード完了前のクリックでも0件にならないよう、検索系は常に
   // loadAccidentCasesDataset() を経由する（2回目以降は import キャッシュで即時解決）
@@ -523,6 +579,9 @@ export function RiskPredictionPanel() {
       setResults(found);
       setSearched(true);
       setActiveTab("search");
+      requestAnimationFrame(() => {
+        conclusionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
     });
   }, []);
 
@@ -546,6 +605,14 @@ export function RiskPredictionPanel() {
         siteName={siteName}
         date={today}
       />
+
+      {/* 判定結果の結論カード（柱0: 1画面1メッセージ・最上部）。
+          検索後は入力より上に出し、3秒で「スコア＋リスクレベル＋次にやること」が目に入る。 */}
+      <div ref={conclusionRef} className="scroll-mt-4">
+        {searched && safetyScore && (
+          <TopSummaryCard score={safetyScore} results={results} onShowDetail={() => setActiveTab("score")} />
+        )}
+      </div>
 
       {/* 検索入力エリア */}
       <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
@@ -684,11 +751,6 @@ export function RiskPredictionPanel() {
           </div>
         </div>
       </section>
-
-      {/* 検索直後のトップサマリー（スクロール不要でスコア＋主要対策が目に入る） */}
-      {searched && safetyScore && (
-        <TopSummaryCard score={safetyScore} results={results} onShowDetail={() => setActiveTab("score")} />
-      )}
 
       {/* 検索結果サマリー & タブナビ */}
       {searched && (
