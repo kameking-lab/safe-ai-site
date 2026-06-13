@@ -60,7 +60,8 @@ import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { SAFETY_TONE, type SafetyTone } from "@/lib/design/safety-tone";
-import { computeKyPaperStatus } from "@/lib/ky/paper-status";
+import { computeKyPaperStatus, computeKyPaperSteps } from "@/lib/ky/paper-status";
+import { KyPaperStepNav } from "@/components/ky-paper/ky-paper-step-nav";
 import {
   submitKy,
   approveKy,
@@ -474,6 +475,8 @@ export function KyPaperView() {
 
   // 柱0: 画面最上部の結論カード用の状態（記入の進み具合＋承認フロー）。
   const paperStatus = useMemo(() => computeKyPaperStatus(record), [record]);
+  // 柱C-9・A2: 記入の4段（基本情報→危険→対策→確認）進行ナビ。用紙ファーストは不変、用紙の上に進行を可視化。
+  const paperSteps = useMemo(() => computeKyPaperSteps(record), [record]);
 
   // P1-B: 元請確認・承認パネル。下書き中は記入の邪魔になるので用紙の下に置き、
   // 提出/承認/差し戻し中（actionable）は操作ボタンを見失わないよう用紙の上に置く。
@@ -570,7 +573,7 @@ export function KyPaperView() {
       </div>
 
       {/* 柱0: 結論カード=いまの状態1メッセージ（記入のこりN=青デカ数字 / 記入完了・承認済=緑 / 差し戻し=黄）。
-          未記入チップはタップでその欄へジャンプ。 */}
+          次にやること（最初の未記入欄）は action で案内。個別の未記入項目は下の進行ナビ（4段）で案内する。 */}
       <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
         <ConclusionCard
           tone={paperStatus.tone}
@@ -578,15 +581,17 @@ export function KyPaperView() {
           unit={paperStatus.remaining !== undefined ? "項目" : undefined}
           title={paperStatus.title}
           action={paperStatus.action ?? undefined}
-        >
-          {paperStatus.missing.length > 0 &&
-            paperStatus.missing.map((m) => (
-              <a key={m.key} href={m.anchor} className="rounded-full">
-                <StatusBadge tone="neutral" size="sm">{m.label}</StatusBadge>
-              </a>
-            ))}
-        </ConclusionCard>
+        />
       </div>
+
+      {/* 柱C-9・A2: 記入の進行ナビ（基本情報→危険→対策→確認）。記入中（下書き）だけ出す。
+          結論カードの「記入のこりN」と整合（全段の remaining 合計＝結論カードのN）。
+          用紙ファースト設計は不変＝下に完成用紙をそのまま表示する。 */}
+      {approval.status === "draft" && (
+        <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
+          <KyPaperStepNav steps={paperSteps} />
+        </div>
+      )}
 
       {notice && (
         <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
