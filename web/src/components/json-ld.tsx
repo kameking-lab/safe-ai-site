@@ -53,7 +53,7 @@ export function webSiteSchema(): Schema {
       target: {
         "@type": "EntryPoint",
         urlTemplate:
-          "https://www.anzen-ai-portal.jp/law-search?q={search_term_string}",
+          "https://www.anzen-ai-portal.jp/search?q={search_term_string}",
       },
       "query-input": "required name=search_term_string",
     },
