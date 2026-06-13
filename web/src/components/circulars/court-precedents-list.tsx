@@ -13,6 +13,7 @@
 import { useMemo, useState } from "react";
 import { Gavel, ExternalLink } from "lucide-react";
 import type { LawRevisionCore } from "@/lib/types/domain";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
 type CourtPrecedentsListProps = {
   precedents: LawRevisionCore[];
@@ -53,11 +54,11 @@ export function CourtPrecedentsList({ precedents }: CourtPrecedentsListProps) {
       >
         安全配慮義務に関する主要判例 ({sorted.length}件)
       </h2>
-      <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700">
+      <CollapsibleDetail summary="このセクションについて（出典・引用上の注意）" className="mt-3 max-w-3xl">
         通達 (行政解釈) と並んで、第2層出典として参照される最高裁・高裁判例。
         安全配慮義務・過労死・パワハラ等の労使紛争で実務上引用される代表判例を整理しています。
         本ページは概観用です。引用時は必ず裁判所・公式判例集で原文を確認してください。
-      </p>
+      </CollapsibleDetail>
 
       <ul className="mt-4 space-y-3">
         {visible.map((p) => (

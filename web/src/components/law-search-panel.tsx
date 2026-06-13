@@ -14,6 +14,8 @@ import { Stack } from "@/components/layout/stack";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { CopyCitationButton } from "@/components/favorites/copy-citation-button";
 import { formatArticleCitation } from "@/lib/favorites";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
 const MhlwLawArticlesPanel = dynamic(
   () =>
@@ -338,9 +340,8 @@ export function LawSearchPanel() {
         </p>
       </div>
 
-      {/* 出典区別の凡例 */}
-      <div className="rounded-xl border border-amber-200 bg-amber-50/60 px-3 py-2 text-[11px] text-amber-900">
-        <span className="font-bold">{isEn ? "Source legend:" : "出典の見分け方:"}</span>{" "}
+      {/* 出典区別の凡例（文字ダイエット: 初期は折りたたみへ格納・内容は不変） */}
+      <CollapsibleDetail summary={isEn ? "Source legend (Current / As-enforced)" : "出典の見分け方（現行版／施行当時版）"}>
         <span className="inline-flex items-center gap-0.5 rounded-full border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 font-semibold text-emerald-800">
           ● {isEn ? "Current (e-Gov-aligned)" : "現行（e-Gov準拠）"}
         </span>{" "}
@@ -353,7 +354,7 @@ export function LawSearchPanel() {
         {isEn
           ? "are article numbers and text as published in the MHLW PDF. Verify on e-Gov when current text is required."
           : "は厚労省PDF発行時点の条番号・条文です。引用時は識別の上、最新版が必要な場合は e-Gov で再確認してください。"}
-      </div>
+      </CollapsibleDetail>
 
       <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 w-fit">
         {(
@@ -430,11 +431,30 @@ export function LawSearchPanel() {
         ))}
       </div>
 
-      <p className="text-xs text-slate-500">
-        {isEn
-          ? `${filtered.length} articles found (of ${SITE_STATS.lawArticleCount} total)`
-          : `${filtered.length}件の条文が見つかりました（全${SITE_STATS.lawArticleCount}件）`}
-      </p>
+      {/* 結論カード: いまの状態=ヒット件数をデカ数字で（柱0ビジュアルファースト） */}
+      {filtered.length > 0 ? (
+        <ConclusionCard
+          tone="info"
+          value={filtered.length.toLocaleString(isEn ? "en-US" : "ja-JP")}
+          unit={isEn ? "" : "件"}
+          title={isEn ? "articles" : "該当"}
+          description={
+            isEn
+              ? `of ${SITE_STATS.lawArticleCount} curated articles`
+              : `全${SITE_STATS.lawArticleCount}条文から検索`
+          }
+        />
+      ) : (
+        <ConclusionCard
+          tone="warning"
+          title={isEn ? "No matches" : "該当なし"}
+          description={
+            isEn
+              ? "Loosen your keyword, article number, or law filter."
+              : "キーワード・条番号・法令の絞り込みを緩めてください。"
+          }
+        />
+      )}
 
       <div className="space-y-4">
         {filtered.slice(0, 50).map((a, i) => (

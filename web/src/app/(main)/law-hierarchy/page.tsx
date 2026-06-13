@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FileText, Landmark, BookOpen } from "lucide-react";
 import { PageContainer, Section, Stack, Cluster } from "@/components/layout";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { JsonLd, webPageSchema, breadcrumbSchema, dataCatalogSchema } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import {
@@ -227,10 +230,18 @@ export default function LawHierarchyPage() {
             <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
               労働安全衛生法 階層構造マップ
             </h1>
-            <p className="text-sm leading-6 text-slate-600">
+            {/* 結論カード: いまの状態=収録法令数をデカ数字で（柱0ビジュアルファースト） */}
+            <ConclusionCard
+              tone="info"
+              value={HIERARCHY_TOTALS.laws + HIERARCHY_TOTALS.cabinetOrders + HIERARCHY_TOTALS.ministerialOrdinances}
+              unit="法令"
+              title="階層マップ"
+              description={`法律→政令→省令→告示・通達を一枚で俯瞰。関連通達等 ${(HIERARCHY_TOTALS.noticesTotal + HIERARCHY_TOTALS.announcementsTotal + HIERARCHY_TOTALS.guidelinesTotal).toLocaleString("ja-JP")}件 収録`}
+            />
+            <CollapsibleDetail summary="このマップの使い方">
               労働安全衛生法を頂点とした政令・省令・告示・通達の階層を一枚で俯瞰します。各カードから
               e-Gov 公式条文・本サイトの条文検索（{HIERARCHY_TOTALS.laws + HIERARCHY_TOTALS.cabinetOrders + HIERARCHY_TOTALS.ministerialOrdinances}法令対象）・関連通達一覧（{HIERARCHY_TOTALS.noticesTotal + HIERARCHY_TOTALS.announcementsTotal + HIERARCHY_TOTALS.guidelinesTotal}件収録）に直接遷移できます。
-            </p>
+            </CollapsibleDetail>
             <Cluster gap="sm" wrap>
               <span className="rounded-md bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-800 ring-1 ring-rose-200">
                 法律 {HIERARCHY_TOTALS.laws}件
@@ -311,8 +322,8 @@ export default function LawHierarchyPage() {
                 href="/circulars"
                 className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:shadow-md"
               >
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700">
-                  📄 通達
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-700">
+                  <FileText className="h-3.5 w-3.5" aria-hidden="true" /> 通達
                 </span>
                 <p className="mt-2 text-2xl font-bold text-slate-900">
                   {HIERARCHY_TOTALS.noticesTotal.toLocaleString("ja-JP")}
@@ -329,8 +340,8 @@ export default function LawHierarchyPage() {
                 href="/circulars"
                 className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:shadow-md"
               >
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700">
-                  🏛 告示
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-700">
+                  <Landmark className="h-3.5 w-3.5" aria-hidden="true" /> 告示
                 </span>
                 <p className="mt-2 text-2xl font-bold text-slate-900">
                   {HIERARCHY_TOTALS.announcementsTotal.toLocaleString("ja-JP")}
@@ -347,8 +358,8 @@ export default function LawHierarchyPage() {
                 href="/circulars"
                 className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-emerald-300 hover:shadow-md"
               >
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700">
-                  📘 指針
+                <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-700">
+                  <BookOpen className="h-3.5 w-3.5" aria-hidden="true" /> 指針
                 </span>
                 <p className="mt-2 text-2xl font-bold text-slate-900">
                   {HIERARCHY_TOTALS.guidelinesTotal.toLocaleString("ja-JP")}
@@ -445,10 +456,10 @@ export default function LawHierarchyPage() {
             </div>
           </Section>
 
-          <p className="rounded-md border border-amber-100 bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-900">
+          <CollapsibleDetail summary="出典・ご利用上の注意">
             ※ 階層図は労働安全衛生法・じん肺法に関連する主要な政省令を抜粋したものです。最新の条文・告示番号は必ず e-Gov 法令検索および
             厚生労働省の一次資料で確認してください。本サイトは資料の所在を整理した参考情報です。
-          </p>
+          </CollapsibleDetail>
         </Stack>
       </PageContainer>
     </>
