@@ -21,3 +21,18 @@
 - Lighthouse スコアの前に**静的HTMLを直接読む**（`curl | grep '<template id="B:'`）。サスペンド焼き込みは1行で検出できる。
 - 「計測ごとに出たり消えたりするCLS」はレース。原因はHTML側で決定的に存在する。
 - Next.js App Router で `loading.tsx`（特にルート直下）は静的ページに対して**無料ではない**。境界内のあらゆる非同期（auth・client モジュールロード・React.lazy）がスケルトン焼き込みに化ける。
+
+## Opus 4.8 再開時の回収・再検証（2026-06-13）
+Fable ループ中断で WIP 退避していた本ブランチ（fix/mobile-perf-structural-c1）を回収。origin/main を通常マージで取り込み、ゲート全通過（tsc 0 / lint errors 0 / vitest 1578 pass / build 成功）。
+
+**重要な落とし穴（記録）**: マージ後の最初の検証で mobile-perf-regression が 13/16〜11/14 と振れ、「もっと見る不展開・a11y バナー dismiss 不発・タブURL非同期」を一時「回帰」と誤認しかけた。真因は **`.next` ビルドの内部不整合**（HTMLが参照する chunk hash が disk 上に無く、JS/CSS が 404・`text/plain` で配信され**ハイドレーション自体が起きていなかった**）。`.next` を消して**クリーン再ビルド**した瞬間、同一コードで **16/16 PASS** に回復。
+→ 教訓追加: **挙動の回帰検証の前に必ずクリーン再ビルド**（古い/部分的な `.next` は chunk 不整合で偽の「ハイドレーション失敗」を生む）。stale サーバーがポート3000に残留している可能性も毎回確認（`netstat -ano | grep :3000`）。
+
+**Lighthouse モバイル実測再確認（lighthouse 13.4.0・localhost prod build・warm cache・2026-06-13）**:
+| ページ | perf | LCP(ms) | FCP(ms) | TBT(ms) | CLS |
+|--------|------|---------|---------|---------|-----|
+| /accidents | 91 | 3464 | 1354 | 10 | 0.000 |
+| /laws | 91 | 3526 | 1355 | 9 | 0.000 |
+| /whats-new | 92 | 3374 | 1205 | 8 | 0.000 |
+
+全ページ perf 90+ / CLS 0.000（基準 perf90+・CLS0.1以下を満たす）。Fable 実測（91/92/94・CLS 0.000）と整合。mobile-perf-regression 16/16 PASS（static-shell 境界≤2・実測CLS<0.05・もっと見る30→91・タブURL同期・a11y dismiss すべて緑）。→ **本番 main へ反映可と判断、PR 化。**
