@@ -1,10 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Stethoscope } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { SchedulerForm } from "@/components/health-checkup/scheduler-form";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { ALL_CHECKUP_RULES, ALL_JOB_PROFILES } from "@/data/health-checkup-rules";
+import { CHECKUP_TYPE_LABELS } from "@/types/health-checkup";
 import { ogImageUrl } from "@/lib/og-url";
+
+// 結論カードのデカ数字はデータから算出（手書き禁止・常に実数と一致）。
+const RULE_COUNT = ALL_CHECKUP_RULES.length;
+const CATEGORY_COUNT = Object.keys(CHECKUP_TYPE_LABELS).length;
+const JOB_COUNT = ALL_JOB_PROFILES.length;
 
 const _title = "健康診断スケジューラ｜業種・職種別に必要な健診30種を自動判定";
 const _desc =
@@ -63,19 +74,42 @@ export default function HealthCheckupSchedulerPage() {
           <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
             健康診断スケジューラ
           </h1>
-          <p className="mt-3 text-base text-slate-700">
-            業種と職種、取扱化学物質、作業条件を選ぶだけで、労働安全衛生法・関係省令で求められる健康診断（一般／特定業務／特殊／じん肺／歯科特殊／電離放射線／長時間労働者面接／海外派遣の8カテゴリ・30ルール）の必要種別を判定し、雇入日を起点にした年間スケジュールを生成・操業閑散期へ自動再配置します。
-          </p>
-          <ul className="mt-4 list-disc space-y-1 pl-6 text-sm text-slate-600">
-            <li>建設業・製造業・運輸交通業・医療福祉・サービス業の代表的職種を網羅。</li>
-            <li>有機則・特化則（個別物質14種＋希少金属）・鉛則・四アルキル鉛則・高気圧則・石綿則・じん肺法・電離則の各健診規定に対応。</li>
-            <li>安衛法第66条の8 長時間労働者の医師面接指導と、安衛則第45条の2 海外派遣前後健診も判定対象。</li>
-            <li>雇入日を入力すると、雇入時健診と6か月以内ごとの再実施月を自動配置し、繁忙月の集中を閑散期へ再配置した最適化スケジュールも提示。</li>
-            <li>結果ページから印刷／PDFエクスポートが可能（安全衛生委員会の資料に利用可）。</li>
-          </ul>
+
+          <ConclusionCard
+            className="mt-4"
+            tone="info"
+            icon={Stethoscope}
+            value={RULE_COUNT}
+            unit="種"
+            title="健診を自動判定"
+            description="業種・職種・取扱物質・作業条件を選ぶと、法定健診の要否と雇入日起点の年間スケジュールを生成します。"
+            action={{ href: "#scheduler-form", label: "入力をはじめる" }}
+          >
+            <StatusBadge tone="info">{CATEGORY_COUNT}区分</StatusBadge>
+            <StatusBadge tone="neutral">{JOB_COUNT}職種対応</StatusBadge>
+            <StatusBadge tone="safe">無料・登録不要</StatusBadge>
+          </ConclusionCard>
+
+          <CollapsibleDetail
+            className="mt-3"
+            summary="この判定でカバーする範囲（8区分・対応法令）"
+          >
+            <p>
+              業種と職種、取扱化学物質、作業条件を選ぶだけで、労働安全衛生法・関係省令で求められる健康診断（一般／特定業務／特殊／じん肺／歯科特殊／電離放射線／長時間労働者面接／海外派遣の8カテゴリ・30ルール）の必要種別を判定し、雇入日を起点にした年間スケジュールを生成・操業閑散期へ自動再配置します。
+            </p>
+            <ul className="mt-3 list-disc space-y-1 pl-5">
+              <li>建設業・製造業・運輸交通業・医療福祉・サービス業の代表的職種を網羅。</li>
+              <li>有機則・特化則（個別物質14種＋希少金属）・鉛則・四アルキル鉛則・高気圧則・石綿則・じん肺法・電離則の各健診規定に対応。</li>
+              <li>安衛法第66条の8 長時間労働者の医師面接指導と、安衛則第45条の2 海外派遣前後健診も判定対象。</li>
+              <li>雇入日を入力すると、雇入時健診と6か月以内ごとの再実施月を自動配置し、繁忙月の集中を閑散期へ再配置した最適化スケジュールも提示。</li>
+              <li>結果ページから印刷／PDFエクスポートが可能（安全衛生委員会の資料に利用可）。</li>
+            </ul>
+          </CollapsibleDetail>
         </header>
 
-        <SchedulerForm />
+        <div id="scheduler-form" className="scroll-mt-20">
+          <SchedulerForm />
+        </div>
 
         <section className="mt-10 rounded border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           <h2 className="font-semibold">関連ツール</h2>

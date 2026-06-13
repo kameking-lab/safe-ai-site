@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Mail, Shield, Bell, TrendingUp, Heart } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
-import { NewsletterForm } from "./newsletter-form";
+import { NewsletterPanel } from "./newsletter-panel";
 import { PageContainer } from "@/components/layout";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -77,34 +77,26 @@ export default function NewsletterPage() {
         </p>
       </div>
 
-      {/* メリット */}
-      <div className="mb-8 grid gap-3 sm:grid-cols-2">
-        {BENEFITS.map((b) => (
-          <div
-            key={b.title}
-            className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm"
-          >
-            <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${colorMap[b.color]}`}>
-              <b.icon className="h-4.5 w-4.5" aria-hidden="true" />
+      {/* 最上部の状態カード（未登録/登録完了）＋メリット＋登録フォーム */}
+      <NewsletterPanel>
+        {/* メリット */}
+        <div className="my-8 grid gap-3 sm:grid-cols-2">
+          {BENEFITS.map((b) => (
+            <div
+              key={b.title}
+              className="flex items-start gap-3 rounded-xl border border-slate-100 bg-white p-4 shadow-sm"
+            >
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${colorMap[b.color]}`}>
+                <b.icon className="h-4.5 w-4.5" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-800">{b.title}</p>
+                <p className="mt-0.5 text-xs text-slate-500 leading-5">{b.desc}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-800">{b.title}</p>
-              <p className="mt-0.5 text-xs text-slate-500 leading-5">{b.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* 登録フォーム */}
-      <div className="rounded-2xl border border-emerald-200 bg-white p-6 shadow-sm sm:p-8">
-        <div className="mb-6">
-          <h2 className="text-lg font-bold text-slate-900">無料で登録する</h2>
-          <p className="mt-1 text-xs text-slate-500">
-            毎週月曜日 9:00 配信。スパムなし。いつでも配信停止できます。
-          </p>
+          ))}
         </div>
-        <NewsletterForm />
-      </div>
+      </NewsletterPanel>
 
       {/* 信頼バッジ */}
       <p className="mt-6 text-center text-xs text-slate-400 leading-6">
