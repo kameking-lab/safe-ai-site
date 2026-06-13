@@ -31,7 +31,27 @@ export const FEEDBACK_GATE_THRESHOLD = 20;
 // P0-4: 最低 3 回の閲覧があるまではモーダルを出さない。
 // score がスコア値で 20 を超えていても、PV 回数が 3 未満なら表示しない。
 export const FEEDBACK_GATE_MIN_PAGE_VIEWS = 3;
-const SNOOZE_DAYS_DEFAULT = 7;
+// 既定スヌーズは 30 日。ヘビーユーザーほど頻繁に再表示される設計を緩和する
+// （第三者レビュー §C 是正: 7日→30日。毎朝の習慣を妨げない間隔へ）。
+export const SNOOZE_DAYS_DEFAULT = 30;
+
+// 作業の最中に割り込んではいけない画面のパス接頭辞。
+// /ky 系（KY記入・朝礼）・/signage 系（サイネージ常時表示）では
+// フィードバック懇願を一切出さない（第三者レビュー §C 是正）。
+// 印刷ビューは別途 CSS（print:hidden）で抑止する。
+const WORK_CONTEXT_PREFIXES = ["/ky", "/signage"] as const;
+
+/**
+ * いま見ている画面が「作業の文脈」で割込み禁止かを判定する純関数。
+ * 完全一致または `<prefix>/` 始まりのみ該当（例: `/ky` と `/ky/paper` は該当、
+ * `/ky-examples`（事例の閲覧）は非該当）。
+ */
+export function isWorkContextPath(pathname: string | null | undefined): boolean {
+  if (!pathname) return false;
+  return WORK_CONTEXT_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
 
 function safeGet(key: string): string | null {
   if (typeof window === "undefined") return null;
