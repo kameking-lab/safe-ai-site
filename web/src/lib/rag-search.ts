@@ -502,7 +502,9 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     pins: [
       { law: "電離放射線障害防止規則", articleNum: "第3条" },
       { law: "電離放射線障害防止規則", articleNum: "第8条" },
-      { law: "電離放射線障害防止規則", articleNum: "第2条の2" },
+      // 旧コーパスの第2条の2（実在しない条）をe-Gov突合で是正：実効線量限度=第4条/等価線量限度=第5条
+      { law: "電離放射線障害防止規則", articleNum: "第4条" },
+      { law: "電離放射線障害防止規則", articleNum: "第5条" },
     ],
   },
   {

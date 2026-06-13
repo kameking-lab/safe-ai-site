@@ -92,7 +92,7 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
 
   // G. 物理因子・特殊業務 (64-72)
   { id: 64, topic: "電離", question: "電離放射線の管理区域とは？", gold: [{ lawShort: "電離則", articleNum: "第3条" }] },
-  { id: 65, topic: "電離", question: "電離放射線の被ばく線量限度は？", gold: [{ lawShort: "電離則", articleNum: "第8条" }, { lawShort: "電離則", articleNum: "第3条" }, { lawShort: "電離則", articleNum: "第2条の2" }] },
+  { id: 65, topic: "電離", question: "電離放射線の被ばく線量限度は？", gold: [{ lawShort: "電離則", articleNum: "第8条" }, { lawShort: "電離則", articleNum: "第3条" }, { lawShort: "電離則", articleNum: "第4条" }] },
   { id: 66, topic: "熱中症", question: "熱中症のWBGT測定義務は何条？", gold: [{ lawShort: "安衛則", articleNum: "第612条の2" }] },
   { id: 67, topic: "熱中症", question: "暑熱環境における労働者の健康障害防止は？", gold: [{ lawShort: "安衛則", articleNum: "第612条の2" }] },
   { id: 68, topic: "騒音", question: "気積・採光・換気・温度の規定は？", gold: [{ lawShort: "安衛則", articleNum: "第600条" }, { lawShort: "安衛則", articleNum: "第601条" }, { lawShort: "安衛則", articleNum: "第604条" }, { lawShort: "安衛則", articleNum: "第606条" }] },
