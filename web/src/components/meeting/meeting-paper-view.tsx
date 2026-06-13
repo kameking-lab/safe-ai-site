@@ -25,6 +25,10 @@ import { MeetingPrintSheet } from "@/components/meeting/meeting-print-sheet";
 import { estimateQualifications, inferChecklist } from "@/lib/meeting/inference";
 import { cloudPushMeeting, isMeetingCloudEnabled } from "@/lib/meeting/cloud";
 import { DistributedInputBar } from "@/components/meeting/distributed-input-bar";
+import { computeMeetingPaperStatus } from "@/lib/meeting/paper-status";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
@@ -55,8 +59,6 @@ function hiddenIds(rows: MeetingContractorRow[], collapsed: Set<string>): Set<st
   return hidden;
 }
 
-const FIRSTUSE_HINT_KEY = "safe-ai:meeting-firstuse-hint-dismissed:v1";
-
 export function MeetingPaperView() {
   const [record, setRecord] = useState<MeetingRecord>(buildDefaultMeetingRecord);
   const [zoom, setZoom] = useState(1);
@@ -66,8 +68,6 @@ export function MeetingPaperView() {
   const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [busyRow, setBusyRow] = useState<string | null>(null);
   const [history, setHistory] = useState<MeetingHistory | null>(null);
-  // R3: 初見の元請担当向け 3ステップ案内（一度×で恒久非表示。localStorage）。
-  const [firstUseHintOpen, setFirstUseHintOpen] = useState(false);
   // 「前回を複製」を上部にも出すための判定（端末に保存済みの打合せ書があるときだけ）。
   const [hasLatest, setHasLatest] = useState(false);
 
@@ -78,24 +78,6 @@ export function MeetingPaperView() {
     setHistory(collectMeetingHistory());
     // 保存済みの打合せ書があれば上部にも「前回を複製」を出す（翌日分作成の最速ルート）。
     setHasLatest(loadLatestMeeting() !== null);
-  }, []);
-
-  // R3: 初見案内の表示判定（未読のときだけ表示）。
-  useEffect(() => {
-    try {
-      if (localStorage.getItem(FIRSTUSE_HINT_KEY) !== "1") setFirstUseHintOpen(true);
-    } catch {
-      /* localStorage 不可時は何もしない */
-    }
-  }, []);
-
-  const dismissFirstUseHint = useCallback(() => {
-    setFirstUseHintOpen(false);
-    try {
-      localStorage.setItem(FIRSTUSE_HINT_KEY, "1");
-    } catch {
-      /* 無視 */
-    }
   }, []);
 
   // 上部「前回を複製」: 直近に保存した1枚を翌日分として複製（各社の作業・危険・対策を引き継ぎ、
@@ -148,6 +130,8 @@ export function MeetingPaperView() {
 
   const machines = useMemo(() => aggregateMachines(record.contractors), [record.contractors]);
   const hidden = useMemo(() => hiddenIds(record.contractors, collapsed), [record.contractors, collapsed]);
+  // 柱0: いまの状態を1メッセージに（記入のこりN＝青デカ数字 / 記入完了＝緑）。
+  const paperStatus = useMemo(() => computeMeetingPaperStatus(record), [record]);
 
   const handleSave = () => {
     const rec = { ...record, savedAt: new Date().toISOString() };
@@ -272,32 +256,38 @@ export function MeetingPaperView() {
         </div>
       )}
 
-      {/* R3: 初見の元請担当向け 3ステップ案内。前日5分で各社の危険対策を1枚に＝紙との差。×で恒久非表示。 */}
-      {firstUseHintOpen && (
-        <div className="mx-auto mt-2 max-w-5xl px-3 print:hidden">
-          <div className="rounded-xl border border-sky-300 bg-sky-50 p-3">
-            <div className="flex items-start justify-between gap-3">
-              <p className="text-sm font-bold text-sky-900">はじめての方へ — 前日5分で1枚に</p>
-              <button
-                type="button"
-                onClick={dismissFirstUseHint}
-                aria-label="この案内を閉じる"
-                className="rounded px-1.5 text-sky-700 hover:bg-sky-100"
-              >
-                ×
-              </button>
-            </div>
-            <ol className="mt-1.5 space-y-1 text-xs leading-relaxed text-sky-900 sm:text-sm">
-              <li><span className="font-bold">① 作業日・現場を入力</span></li>
-              <li><span className="font-bold">②「＋元請 / ＋1次 …」で協力会社を追加</span>し、各社の作業・使用機械・予想災害・指示を記入（<span className="font-bold">「AI提案」</span>で下書き可）</li>
-              <li><span className="font-bold">③「保存」→「印刷」</span>で重層下請の危険対策を1枚にまとめ、朝礼・各社へ共有</li>
-            </ol>
-            <p className="mt-1.5 text-[11px] leading-snug text-sky-800">
-              元請が前日5分で各社の予想災害・指示を1枚に集約。AIが指示事項を下書きします。KYへの転記も可能です。
-            </p>
-          </div>
-        </div>
-      )}
+      {/* 柱0: 結論カード=いまの状態1メッセージ（記入のこりN=青デカ数字 / 記入完了=緑）。
+          未記入チップはタップでその欄へジャンプ。 */}
+      <div className="mx-auto mt-2 max-w-5xl px-3 print:hidden">
+        <ConclusionCard
+          tone={paperStatus.tone}
+          value={paperStatus.remaining}
+          unit={paperStatus.remaining !== undefined ? "項目" : undefined}
+          title={paperStatus.title}
+          action={paperStatus.action}
+        >
+          {paperStatus.missing.length > 0 &&
+            paperStatus.missing.map((m) => (
+              <a key={m.key} href={m.anchor} className="rounded-full">
+                <StatusBadge tone="neutral" size="sm">{m.label}</StatusBadge>
+              </a>
+            ))}
+        </ConclusionCard>
+      </div>
+
+      {/* 柱0: 初見の元請担当向け 3ステップ案内は折りたたみへ格納（結論カードが「次にやること」を常時案内するため）。 */}
+      <div className="mx-auto mt-2 max-w-5xl px-3 print:hidden">
+        <CollapsibleDetail summary="はじめての方へ — 前日5分で1枚に">
+          <ol className="space-y-1">
+            <li><span className="font-bold">① 作業日・現場を入力</span></li>
+            <li><span className="font-bold">②「＋元請 / ＋1次 …」で協力会社を追加</span>し、各社の作業・使用機械・予想災害・指示を記入（<span className="font-bold">「AI提案」</span>で下書き可）</li>
+            <li><span className="font-bold">③「保存」→「印刷」</span>で重層下請の危険対策を1枚にまとめ、朝礼・各社へ共有</li>
+          </ol>
+          <p className="mt-1.5">
+            元請が前日5分で各社の予想災害・指示を1枚に集約。AIが指示事項を下書きします。KYへの転記も可能です。
+          </p>
+        </CollapsibleDetail>
+      </div>
 
       {/* A4横向き印刷指定（この画面でのみ有効） */}
       <style media="print">{"@page{size:A4 landscape;margin:8mm}"}</style>
@@ -320,7 +310,7 @@ export function MeetingPaperView() {
       <div className="overflow-x-auto px-2 py-4 print:hidden">
         <div className="mx-auto origin-top space-y-3" style={{ transform: `scale(${zoom})`, width: 980, maxWidth: "100%" }}>
           {/* ヘッダー */}
-          <section className="rounded-xl border border-slate-300 bg-white p-3">
+          <section id="mtg-header" className="scroll-mt-20 rounded-xl border border-slate-300 bg-white p-3">
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <L label="作業日">
                 <div className="flex items-center gap-1">
@@ -345,7 +335,7 @@ export function MeetingPaperView() {
           </section>
 
           {/* 各社マトリクス */}
-          <section className="rounded-xl border border-slate-300 bg-white p-3">
+          <section id="mtg-companies" className="scroll-mt-20 rounded-xl border border-slate-300 bg-white p-3">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-sm font-bold text-slate-800">各社 作業・危険対策</h2>
               <div className="flex flex-wrap gap-1">
@@ -523,7 +513,7 @@ export function MeetingPaperView() {
       )}
 
       {/* 下部アクションバー */}
-      <div className="sticky bottom-0 z-20 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-white/95 px-3 py-2 backdrop-blur print:hidden">
+      <div id="mtg-actions" className="sticky bottom-0 z-20 flex scroll-mt-20 flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-white/95 px-3 py-2 backdrop-blur print:hidden">
         <span className="text-[11px] text-slate-500">{savedLabel || "未保存"}</span>
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => setShowPrintPreview(true)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">印刷プレビュー</button>
