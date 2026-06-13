@@ -131,14 +131,8 @@ export default function IndustriesHubPage() {
           <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl dark:text-slate-100">
             業種別の安全管理ポータル
           </h1>
-          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
-            建設業・製造業・運輸業・医療福祉・サービス業・小売業・飲食業・卸売業・倉庫業・事務系の
-            <span className="font-semibold">10業種</span>
-            について、現場の重点課題と関連法令・通達・典型事故・KY・化学物質・特別教育・事故レポート・年次計画・FAQへの動線を10セクション構成で整理しています。
-          </p>
-          <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-            検索からの来訪向けに、業種固有のキーワード（30〜50/業種のロングテール）・課題・条文ハイライトを集約。事故分析（自動集計）と
-            年次計画ジェネレーター、KY業種別プリセットへワンクリックで遷移できます。
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-700 sm:text-base dark:text-slate-300">
+            あなたの業種を選ぶと、重点課題・関連法令・典型事故・KY・特別教育・事故レポート・年次計画への動線がまとまっています。
           </p>
         </header>
 
