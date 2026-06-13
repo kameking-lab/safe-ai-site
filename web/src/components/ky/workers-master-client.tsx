@@ -20,6 +20,7 @@ import {
   cloudPushWorkers,
   flushKyCloudQueue,
 } from "@/lib/ky/storage-adapter";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 const AFFILIATIONS: WorkerAffiliation[] = ["self", "coop1", "coop2", "coop3"];
 
@@ -81,6 +82,7 @@ export function WorkersMasterClient() {
     [workers, showHidden]
   );
   const hiddenCount = useMemo(() => workers.filter((w) => w.hidden).length, [workers]);
+  const registeredCount = useMemo(() => visibleWorkers(workers).length, [workers]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
@@ -97,6 +99,25 @@ export function WorkersMasterClient() {
         >
           ← KY用紙に戻る
         </Link>
+      </div>
+
+      {/* 結論カード（柱0）: いまの状態＝登録人数を3秒で。0名は登録へ誘導。 */}
+      <div className="mt-4">
+        {registeredCount === 0 ? (
+          <ConclusionCard
+            tone="info"
+            title="登録なし"
+            description="作業員を登録すると、KY用紙の参加者を「選ぶだけ」になります。下のフォームから追加してください。"
+          />
+        ) : (
+          <ConclusionCard
+            tone="info"
+            value={registeredCount}
+            unit="名"
+            title="登録済み"
+            description="KY用紙の参加者は、この一覧からチェックで選べます。氏名の手入力は不要です。"
+          />
+        )}
       </div>
 
       <p className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
