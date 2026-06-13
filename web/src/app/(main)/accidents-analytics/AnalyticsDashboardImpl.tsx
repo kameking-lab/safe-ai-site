@@ -21,8 +21,14 @@ import {
 import { CardGrid, PageContainer, Section, Stack } from "@/components/layout";
 import { LazyChart } from "@/components/charts/lazy-chart";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { DataExportToolbar } from "@/components/accidents/data-export-toolbar";
 import type { AnalyticsAggregates, NameCount } from "@/lib/accidents-analytics/types";
 import { getIndustryInsight } from "@/lib/accidents-analytics/industry-insight";
+import {
+  ANALYTICS_CSV_FILENAME,
+  analyticsToCsv,
+  analyticsToSummaryText,
+} from "@/lib/accidents-analytics/export";
 
 const PALETTE = [
   "#ef4444",
@@ -216,6 +222,10 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
 
   const yoy = aggregates.yoyComparison;
 
+  // 柱C-7: 会議資料への持ち出し（CSV/要点コピー）。集計値そのままを文字列化。
+  const exportCsv = useMemo(() => analyticsToCsv(aggregates), [aggregates]);
+  const exportText = useMemo(() => analyticsToSummaryText(aggregates), [aggregates]);
+
   return (
     <PageContainer width="full" paddingX="default" paddingY="default">
       <Stack className="space-y-6 sm:space-y-8">
@@ -240,6 +250,13 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
             curated 詳細事例＋厚労省 死亡災害DB（{formatNumber(aggregates.meta.mhlwDeathsCount)} 件 / 2019〜2024）を統合し、時系列・業種・事故種類・地域・規模・原因など多軸で集計したダッシュボードです。
             厚労省「職場のあんぜんサイト」全件DB（{formatNumber(aggregates.meta.mhlwFullDbCount)} 件 / 2006〜2021）の集計データも参照軸として併載しています。
           </CollapsibleDetail>
+          {/* 柱C-7: 集計の出力手段。月例安全会議の資料へCSV/要点コピー/共有/印刷で持ち出せる。 */}
+          <DataExportToolbar
+            filename={ANALYTICS_CSV_FILENAME}
+            csv={exportCsv}
+            text={exportText}
+            shareTitle="事故統計ダッシュボード"
+          />
         </header>
 
         {/* ===== 軸G: まず、自業種の要点（67枚のグラフに入る前の段階表示） ===== */}

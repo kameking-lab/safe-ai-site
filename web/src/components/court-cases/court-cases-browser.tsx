@@ -24,6 +24,10 @@ import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 // 裁判所種別・年代は既存データから導出するためデータ移行不要。
 const FACETS = computeFacets(COURT_CASES);
 
+// 柱C-6: モバイル全高が約26,000pxまで伸びていたため、初期表示を絞り「もっと見る」で追加読込。
+// 88件全件を一度に描画しない＝初訪ユーザーがスクロール地獄に陥らない。
+const PAGE_SIZE = 24;
+
 const issueColor: Record<CourtCaseIssue, string> = {
   安全配慮義務: "bg-emerald-100 text-emerald-800 border-emerald-200",
   過失相殺: "bg-amber-100 text-amber-800 border-amber-200",
@@ -74,11 +78,25 @@ export function CourtCasesBrowser() {
   const [decade, setDecade] = useState<string>(initialDecade);
   const [q, setQ] = useState(initialQ);
 
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
   const filtered = useMemo(
     () => filterCourtCases(COURT_CASES, { issue, field, courtType, decade, query: q }),
     [issue, field, courtType, decade, q],
   );
   const hasFilter = !!(issue || field || courtType || decade || q);
+
+  // 絞り込み条件が変わったら先頭から表示し直す（前回の「もっと見る」展開を引きずらない）。
+  // React 推奨の「レンダー中に派生状態を調整」パターン（useEffect+setState の連鎖レンダーを避ける）。
+  const filterKey = `${issue}|${field}|${courtType}|${decade}|${q}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setVisibleCount(PAGE_SIZE);
+  }
+
+  const visible = filtered.slice(0, visibleCount);
+  const remaining = filtered.length - visible.length;
 
   // 絞り込みをURLに書き戻す（共有・ブラウザ戻る対応／印刷ページへ条件を引き継ぐため）。
   // 既存の accidents hub-filter と同じ作法: scroll:false・テキストはデバウンス。
@@ -207,7 +225,7 @@ export function CourtCasesBrowser() {
           </label>
         </div>
         <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-          {filtered.length} 件を表示（全 {COURT_CASES.length} 件・すべて実在する確定判例）
+          {filtered.length} 件中 {visible.length} 件を表示（全 {COURT_CASES.length} 件・すべて実在する確定判例）
           {hasFilter && (
             <button
               type="button"
@@ -232,7 +250,7 @@ export function CourtCasesBrowser() {
 
       {/* 一覧 */}
       <ul className="space-y-3">
-        {filtered.map((c) => (
+        {visible.map((c) => (
           <li key={c.id}>
             <Link
               href={`/court-cases/${c.id}`}
@@ -256,6 +274,19 @@ export function CourtCasesBrowser() {
           </li>
         ))}
       </ul>
+
+      {/* 柱C-6: 残りを追加表示。44px以上のフル幅ボタンで指でも押しやすく。 */}
+      {remaining > 0 && (
+        <button
+          type="button"
+          data-testid="court-load-more"
+          onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+          className="flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 text-sm font-bold text-emerald-800 shadow-sm transition hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200 dark:hover:bg-emerald-500/15"
+        >
+          もっと見る（残り {remaining} 件）
+        </button>
+      )}
+
       {filtered.length === 0 && (
         <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/50">
           条件に合う判例がありません。絞り込みを解除してください。
