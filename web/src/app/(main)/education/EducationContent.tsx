@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { GraduationCap, Mail, Clock, BookOpen, Users, Building2, MessageSquare, Download } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import { GraduationCap, Mail, Clock, BookOpen, Users, Building2, MessageSquare, Download, HardHat, HeartPulse } from "lucide-react";
 import { JsonLd, serviceSchema } from "@/components/json-ld";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { useTranslation } from "@/contexts/language-context";
 
 const DESCRIPTION =
@@ -26,6 +28,13 @@ const CATEGORY_HEADING_COLOR: Record<CategoryKey, string> = {
   tokubetsu: "border-amber-400 text-amber-900",
   hoteikyoiku: "border-sky-400 text-sky-900",
   roudoueisei: "border-emerald-400 text-emerald-900",
+};
+
+/** 教育区分のピクトグラム（言葉でなくアイコンで3区分を見分ける） */
+const CATEGORY_ICON: Record<CategoryKey, LucideIcon> = {
+  tokubetsu: HardHat,
+  hoteikyoiku: GraduationCap,
+  roudoueisei: HeartPulse,
 };
 
 type Program = {
@@ -118,11 +127,19 @@ export function EducationContent() {
             ? "12 program designs. Curricula, slides, and reference notes published openly."
             : "12種の教育プログラム設計を公開。カリキュラム・スライド・参考資料を無料で閲覧できます。"}
         </h1>
-        <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
+        <p className="mt-3 text-sm font-semibold text-slate-700 sm:text-base">
+          {isEn
+            ? "Curricula supervised by a registered OSH Consultant (no. 260022) — free to browse."
+            : "労働安全衛生コンサルタント（登録番号260022）監修。無料で閲覧できます。"}
+        </p>
+        <CollapsibleDetail
+          summary={isEn ? "About this project" : "このプロジェクトについて"}
+          className="mt-3"
+        >
           {isEn
             ? "An open archive of special education, statutory training, and occupational health curricula under Japan's Occupational Safety and Health Act (安全衛生法). Supervised by an Occupational Safety & Health Consultant (registration no. 260022) and published as part of this independent research project. Field practitioners are encouraged to share gaps, errors, or improvement suggestions."
             : "労働安全衛生法に基づく特別教育・法定教育・労働衛生教育のカリキュラムを、労働安全衛生コンサルタント（登録番号260022）監修のもと公開している研究プロジェクトです。教材設計の参考としてご活用ください。現場での気づき・誤りの指摘・追加してほしいテーマがあれば、フィードバックフォームよりお寄せください。"}
-        </p>
+        </CollapsibleDetail>
       </header>
 
       {/* Delivery formats */}
@@ -171,11 +188,13 @@ export function EducationContent() {
         <div className="space-y-8">
           {CATEGORY_ORDER.map((catKey) => {
             const programs = PROGRAMS.filter((p) => p.category === catKey);
+            const CatIcon = CATEGORY_ICON[catKey];
             return (
               <div key={catKey}>
-                <h3 className={`mb-3 border-l-4 pl-3 text-base font-bold ${CATEGORY_HEADING_COLOR[catKey]}`}>
+                <h3 className={`mb-3 flex items-center gap-2 border-l-4 pl-3 text-base font-bold ${CATEGORY_HEADING_COLOR[catKey]}`}>
+                  <CatIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
                   {isEn ? CATEGORY_LABEL[catKey].en : CATEGORY_LABEL[catKey].ja}
-                  <span className="ml-2 text-sm font-normal text-slate-500">
+                  <span className="ml-1 text-sm font-normal text-slate-500">
                     ({programs.length}{isEn ? " types" : "種"})
                   </span>
                 </h3>

@@ -23,6 +23,8 @@ import {
 } from "@/lib/education-cert-engine";
 import { WORK_SCENARIOS, getCertIdsForScenarios } from "@/lib/work-certification-mapper";
 import { ALL_CERTS } from "@/data/education-rules";
+import { buildFinderConclusion } from "@/lib/education/finder-conclusion";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 import type { WorkCategory, RequiredCertResult } from "@/types/education-cert";
 
 const CATEGORIES: WorkCategory[] = [
@@ -215,6 +217,10 @@ export function CertFinderClient() {
 
   const requiredResults = results?.filter((r) => r.priority === "required") ?? [];
   const recommendedResults = results?.filter((r) => r.priority === "recommended") ?? [];
+  const conclusion =
+    results !== null
+      ? buildFinderConclusion(requiredResults.length, recommendedResults.length)
+      : null;
 
   const reset = () => {
     setSelectedCategories([]);
@@ -364,23 +370,26 @@ export function CertFinderClient() {
                 </p>
               </div>
             ) : results.length === 0 ? (
-              <div className="rounded-xl border border-slate-200 bg-white p-6 text-center dark:border-slate-700 dark:bg-slate-800">
-                <CheckCircle2 className="mx-auto mb-2 h-8 w-8 text-emerald-500" aria-hidden />
-                <p className="font-medium text-slate-700 dark:text-slate-200">
-                  該当する法定資格・講習は見つかりませんでした。
-                </p>
-                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                  別の業種・作業内容で検索してください。
-                </p>
-              </div>
+              conclusion && (
+                <ConclusionCard
+                  tone={conclusion.tone}
+                  value={conclusion.value}
+                  unit="件"
+                  title={conclusion.title}
+                  description={conclusion.description}
+                />
+              )
             ) : (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-slate-600 dark:text-slate-300">
-                    <span className="font-bold text-slate-900 dark:text-slate-100">{results.length}件</span>の資格・講習が該当
-                    （うち法令義務 <span className="font-bold text-red-600">{requiredResults.length}件</span>）
-                  </p>
-                </div>
+                {conclusion && (
+                  <ConclusionCard
+                    tone={conclusion.tone}
+                    value={conclusion.value}
+                    unit="件"
+                    title={conclusion.title}
+                    description={conclusion.description}
+                  />
+                )}
 
                 {requiredResults.length > 0 && (
                   <div>
