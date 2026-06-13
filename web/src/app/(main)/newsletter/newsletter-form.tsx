@@ -10,9 +10,11 @@ type Status = "idle" | "loading" | "success" | "error";
 
 interface Props {
   compact?: boolean;
+  /** 登録成功時に親へ通知（最上部の状態カードを「登録完了」へ切り替えるため） */
+  onSuccess?: (email: string) => void;
 }
 
-export function NewsletterForm({ compact = false }: Props) {
+export function NewsletterForm({ compact = false, onSuccess }: Props) {
   const [email, setEmail] = useState("");
   const [industry, setIndustry] = useState<Industry>("その他");
   const [status, setStatus] = useState<Status>("idle");
@@ -34,6 +36,7 @@ export function NewsletterForm({ compact = false }: Props) {
         throw new Error(data.error ?? "登録に失敗しました。");
       }
       setStatus("success");
+      onSuccess?.(email);
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "エラーが発生しました。");
       setStatus("error");
