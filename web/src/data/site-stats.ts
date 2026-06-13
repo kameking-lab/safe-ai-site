@@ -39,12 +39,12 @@ export const SITE_STATS = {
   /** チャットボット/条文検索が根拠にする法令・規則・指針等のソース数 */
   lawSourceCount: "55",
   /** /law-search に収録された全条文件数（curated 50法令体制） */
-  lawArticleCount: "1,018",
+  lawArticleCount: "1,022",
   /**
    * RAG 検索（chatbot/法令要約）対応の全条文数。
    * 現時点では allLawArticles と同一ソース。将来、厚労省PDF抽出分を追加すると diverge する。
    */
-  ragArticleCount: "1,018",
+  ragArticleCount: "1,022",
   /** 対応教育の種類数（特別教育・法定・労働衛生、要相談含む） */
   specialEdKinds: "12+",
   /** 厚労省 通達・告示・指針の収録件数（mhlw-notices.ts） */
@@ -110,11 +110,11 @@ export const SITE_STATS_META: Record<
   lawArticleCount: {
     source: "e-Gov 法令検索（curated 主要50法令）",
     sourceUrl: "https://laws.e-gov.go.jp/",
-    asOf: "2026-04",
+    asOf: "2026-06",
   },
   ragArticleCount: {
     source: "安全AIポータル RAG（curated 50法令 + 厚労省PDF抽出フィルタ後インデックス）",
-    asOf: "2026-04",
+    asOf: "2026-06",
   },
   specialEdKinds: {
     source: "安衛則第36条／酸欠則／粉じん則ほか（要相談含む）",

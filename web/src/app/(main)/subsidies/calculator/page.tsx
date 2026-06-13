@@ -18,6 +18,7 @@ import {
   Phone,
 } from "lucide-react";
 import { PageHeader } from "@/components/page-header";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 import {
   calculateSubsidies,
   formatYen,
@@ -190,6 +191,34 @@ export default function SubsidyCalculatorPage() {
         badge="無料試算"
       />
 
+      {/* 結論カード（柱0）: 本文を読まず3秒で「いまの状態（試算前／該当件数）」が分かる */}
+      {results === null ? (
+        <ConclusionCard
+          tone="info"
+          title="未試算"
+          description="業種・施策・投資予定額を入力して、申請できる助成金と概算支給額を試算します。"
+          icon={Calculator}
+          className="mt-6"
+        />
+      ) : eligibleCount > 0 ? (
+        <ConclusionCard
+          tone="safe"
+          value={eligibleCount}
+          unit="件"
+          title="該当"
+          description={`申請対象の助成金が見つかりました。最大支給見込み額（概算）${formatYen(topAmount)}。`}
+          icon={CheckCircle2}
+          className="mt-6"
+        />
+      ) : (
+        <ConclusionCard
+          tone="warning"
+          title="該当なし"
+          description="入力条件では申請対象の助成金がありません。施策・業種を見直してください。"
+          className="mt-6"
+        />
+      )}
+
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_400px] lg:items-start">
         {/* 入力フォーム */}
         <section className="space-y-5">
@@ -346,25 +375,9 @@ export default function SubsidyCalculatorPage() {
             </div>
           ) : (
             <>
-              {/* サマリー */}
-              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                <p className="text-xs font-semibold text-emerald-800">試算結果サマリー</p>
-                <div className="mt-2 grid grid-cols-2 gap-3">
-                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-                    <p className="text-[10px] text-slate-500">該当助成金数</p>
-                    <p className="text-2xl font-bold text-emerald-700">{eligibleCount}</p>
-                    <p className="text-[10px] text-slate-400">件</p>
-                  </div>
-                  <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-                    <p className="text-[10px] text-slate-500">最大支給見込み額</p>
-                    <p className="text-xl font-bold text-emerald-700">{formatYen(topAmount)}</p>
-                    <p className="text-[10px] text-slate-400">（最高額の制度1件）</p>
-                  </div>
-                </div>
-                <p className="mt-2 text-[10px] text-emerald-700">
-                  ※ 複数の助成金に同一経費を重複申請できない場合があります
-                </p>
-              </div>
+              <p className="text-[11px] text-emerald-700">
+                ※ 複数の助成金に同一経費を重複申請できない場合があります
+              </p>
 
               {/* 免責事項 */}
               <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3">

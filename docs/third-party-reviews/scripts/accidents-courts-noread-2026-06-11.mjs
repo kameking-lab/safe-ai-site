@@ -159,8 +159,10 @@ await targetTile.click();
 await page.waitForTimeout(600);
 check("タップでタイルが選択状態になる（aria-pressed）", (await targetTile.getAttribute("aria-pressed")) === "true");
 const shownText = await page.getByText(/件を表示（全/).first().innerText();
-const shownCount = Number((shownText.match(/(\d+)\s*件を表示/) ?? [])[1]);
-check("絞り込み結果の件数＝タイルの件数", shownCount === targetCount, `shown=${shownCount} tile=${targetCount}`);
+// 柱C-6: ページネーション導入後は「{絞込総数} 件中 {表示中} 件を表示（全…）」。
+// 表示中は PAGE_SIZE で頭打ちになるため、絞込総数（件中の手前）をタイル件数と照合する。
+const filteredCount = Number((shownText.match(/(\d+)\s*件中/) ?? [])[1]);
+check("絞り込み総数＝タイルの件数", filteredCount === targetCount, `filtered=${filteredCount} tile=${targetCount}`);
 
 // ---------- D) 判例詳細: 結論ファースト ----------
 console.log("\n[D] /court-cases/[id] 結論ファースト");

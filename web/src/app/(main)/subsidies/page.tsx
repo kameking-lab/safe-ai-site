@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { PageContainer } from "@/components/layout";
 import { ogImageUrl } from "@/lib/og-url";
 import { SubsidiesRecommender, type Subsidy } from "@/components/subsidies-recommender";
+import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "助成金・補助金ガイド｜中小企業の安全投資ROI";
@@ -158,20 +159,17 @@ export default function SubsidiesPage() {
         iconColor="amber"
       />
 
-      {/* イントロ */}
-      <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+      {/* イントロ（柱0: 結論1行＋詳細は折りたたみ） */}
+      <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
         <div className="flex items-start gap-3">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" aria-hidden="true" />
           <div className="text-sm leading-6 text-amber-900">
             <p className="font-semibold">
-              中小企業経営者・安全衛生担当者の方へ
+              安全衛生投資は「コスト」ではなく「補助金で取り戻せる投資」。
             </p>
-            <p className="mt-1">
-              安全衛生投資は「コスト」ではなく「補助金で取り戻せる投資」です。
-              本ページでは、中小建設・製造・運輸・介護・林業の現場で使える主要な助成金と、
-              労災1件の経済損失から見るROIを公開します。
-              最新の公募状況は必ず公式ページをご確認ください。
-            </p>
+            <CollapsibleDetail summary="このページの使い方（詳細）" className="mt-1">
+              中小建設・製造・運輸・介護・林業の現場で使える主要な助成金と、労災1件の経済損失から見るROIを公開しています。最新の公募状況は必ず公式ページをご確認ください。
+            </CollapsibleDetail>
           </div>
         </div>
       </section>
