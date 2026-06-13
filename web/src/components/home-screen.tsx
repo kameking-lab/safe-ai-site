@@ -207,10 +207,13 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
 
   useEffect(() => {
     if (variant !== "laws") return;
-    // C-1: server page から initialRevisions（lawRevisionCores・一覧と同一データ源）を
-    // 受け取った場合は再フェッチしない。マウント直後に法改正データチャンク
-    // （生約130KB）を重ねてロードして同じ内容で差し替えるだけの通信だったため。
-    if (initialRevisions && initialRevisions.length > 0) return;
+    // C-1: mock モードでは server page の initialRevisions（lawRevisionCores・
+    // 一覧と同一データ源）を受け取った時点で再フェッチしない。マウント直後に
+    // 法改正データチャンク（生約130KB）を重ねてロードして同じ内容で差し替える
+    // だけの通信だったため（本番既定の mock 速度がこの最適化の対象）。
+    // live モードの API は ingest 切替・real payload 注入・エラー注入を反映する
+    // 別データ源（JSONフェッチでチャンクは増えない）なので必ずフェッチする。
+    if (services.mode !== "live" && initialRevisions && initialRevisions.length > 0) return;
     let active = true;
 
     async function loadRevisions() {
@@ -234,7 +237,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
     return () => {
       active = false;
     };
-  }, [variant, services.revision, initialRevisions]);
+  }, [variant, services.revision, services.mode, initialRevisions]);
 
   useEffect(() => {
     if (!isSummaryLoading) return;
