@@ -43,13 +43,27 @@
   Pass -Model "" to let the CLI use its own default.
 
 .PARAMETER PromptFile
-  UTF-8 file with the per-iteration instruction (default loop-prompt.txt next to this script).
+  UTF-8 file with the per-iteration instruction (default loop-prompt.txt next to this script,
+  or loop-prompt-<lane>.txt when -Lane is set and that file exists).
+
+.PARAMETER Lane
+  Lane name for parallel multi-lane operation (default "" = legacy single all-domains loop).
+  When set (e.g. "seo", "data", "ux-records"):
+    - logs go to logs/loop-<lane>-<stamp>.log (so lanes never interleave in one log),
+    - the default prompt becomes loop-prompt-<lane>.txt when present (each lane reads only
+      its own BACKLOG-<lane>.md and touches only its own file domain),
+    - the single-instance guard becomes PER-LANE: a second runner for the SAME lane is
+      blocked, but runners for OTHER lanes (and the legacy no-lane loop) are allowed to run
+      concurrently. This is the core of safe parallelism.
 
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File .\loop-runner.ps1
 
 .EXAMPLE
   powershell -ExecutionPolicy Bypass -File .\loop-runner.ps1 -IntervalSeconds 300 -UntilIso "2026-06-09T09:13:00"
+
+.EXAMPLE
+  powershell -ExecutionPolicy Bypass -File .\loop-runner.ps1 -Lane seo -Model claude-opus-4-8 -UntilIso "2026-06-14T10:00:00"
 #>
 [CmdletBinding()]
 param(
@@ -59,7 +73,8 @@ param(
   [string]$RepoPath = $PSScriptRoot,
   [string]$ClaudeCmd = "claude",
   [string]$Model = "claude-fable-5",
-  [string]$PromptFile = ""
+  [string]$PromptFile = "",
+  [string]$Lane = ""
 )
 
 $ErrorActionPreference = "Continue"
@@ -69,12 +84,22 @@ try { [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false } c
 
 if (-not $RepoPath -or $RepoPath -eq "") { $RepoPath = (Get-Location).Path }
 Set-Location $RepoPath
-if ($PromptFile -eq "") { $PromptFile = Join-Path $RepoPath "loop-prompt.txt" }
+$laneTag = $Lane.Trim()
+# Default prompt: lane-specific (loop-prompt-<lane>.txt) when present, else the shared file.
+if ($PromptFile -eq "") {
+  if ($laneTag -ne "") {
+    $lanePrompt = Join-Path $RepoPath ("loop-prompt-" + $laneTag + ".txt")
+    if (Test-Path $lanePrompt) { $PromptFile = $lanePrompt } else { $PromptFile = Join-Path $RepoPath "loop-prompt.txt" }
+  } else {
+    $PromptFile = Join-Path $RepoPath "loop-prompt.txt"
+  }
+}
 
 $logDir = Join-Path $RepoPath "logs"
 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir | Out-Null }
 $runStamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$logFile = Join-Path $logDir ("loop-" + $runStamp + ".log")
+$logPrefix = if ($laneTag -ne "") { "loop-" + $laneTag + "-" } else { "loop-" }
+$logFile = Join-Path $logDir ($logPrefix + $runStamp + ".log")
 
 function Write-Log([string]$msg) {
   $line = "[" + (Get-Date -Format "yyyy-MM-dd HH:mm:ss") + "] " + $msg
@@ -82,22 +107,36 @@ function Write-Log([string]$msg) {
   try { Add-Content -Path $logFile -Value $line -Encoding UTF8 } catch {}
 }
 
-# Single-instance guard: exit immediately when another loop-runner.ps1 process is
-# already running, so a manual run and a Task Scheduler (logon-trigger) run never
-# overlap. A process scan is used instead of a lock file on purpose: a PC restart
-# or crash leaves no stale lock to clear, and instances started before this guard
-# existed are detected as well. Failure of the scan itself only warns (fail-open)
-# so the resurrection path never deadlocks on a broken WMI service.
-$otherLoopPids = @()
+# Single-instance guard (PER LANE): exit immediately when another loop-runner.ps1 process
+# for the SAME lane is already running, so a manual run and a Task Scheduler (logon-trigger)
+# run never overlap within a lane. Different lanes (and the legacy no-lane loop) are allowed
+# to run concurrently - that is what makes parallel multi-lane operation safe.
+# A process scan is used instead of a lock file on purpose: a PC restart or crash leaves no
+# stale lock to clear, and instances started before this guard existed are detected as well.
+# Failure of the scan itself only warns (fail-open) so the resurrection path never deadlocks
+# on a broken WMI service.
+$conflictPids = @()
 try {
-  $otherLoopPids = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-    Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -like '*loop-runner.ps1*' } |
-    ForEach-Object { $_.ProcessId })
+  $running = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
+    Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -like '*loop-runner.ps1*' })
+  foreach ($p in $running) {
+    $cl = [string]$p.CommandLine
+    $clHasLane = ($cl -match '(?i)-Lane(\s+|:|=)\S')
+    if ($laneTag -eq "") {
+      # Legacy (no lane): conflict only with another legacy runner (one that has no -Lane).
+      if (-not $clHasLane) { $conflictPids += $p.ProcessId }
+    } else {
+      # Laned: conflict only with a runner started for the SAME lane name.
+      $pat = '(?i)-Lane(\s+|:|=)["'']?' + [regex]::Escape($laneTag) + '(?=$|\s|["''])'
+      if ($cl -match $pat) { $conflictPids += $p.ProcessId }
+    }
+  }
 } catch {
   Write-Log ("WARN: single-instance scan failed (" + $_.Exception.Message + "); continuing without guard")
 }
-if ($otherLoopPids.Count -gt 0) {
-  Write-Log ("GUARD: another loop-runner instance is already running (PID " + ($otherLoopPids -join ", ") + "). Exiting to keep a single instance.")
+if ($conflictPids.Count -gt 0) {
+  $laneLabel = if ($laneTag -ne "") { $laneTag } else { "(default/legacy)" }
+  Write-Log ("GUARD: another loop-runner for lane '" + $laneLabel + "' is already running (PID " + ($conflictPids -join ", ") + "). Exiting to keep a single instance per lane.")
   exit 0
 }
 
@@ -117,7 +156,7 @@ $prompt = Get-Content -Raw -Encoding UTF8 -Path $PromptFile
 
 $iter = 0
 $consecutiveShortFails = 0
-Write-Log ("=== loop-runner start (interval=" + $IntervalSeconds + "s, max=" + $MaxIterations + ", until='" + $UntilIso + "', repo=" + $RepoPath + ") ===")
+Write-Log ("=== loop-runner start (lane=" + $(if ($laneTag -ne "") { $laneTag } else { "(default)" }) + ", interval=" + $IntervalSeconds + "s, max=" + $MaxIterations + ", until='" + $UntilIso + "', repo=" + $RepoPath + ") ===")
 Write-Log ("claude: " + $claudeResolved + " | model: " + $(if ($Model -ne "") { $Model } else { "(cli default)" }) + " | prompt: " + $PromptFile)
 Write-Log ("log: " + $logFile)
 
