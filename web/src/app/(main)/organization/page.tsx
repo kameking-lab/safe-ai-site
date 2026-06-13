@@ -4,6 +4,8 @@ import { Building2, Users, Shield, FileText, PieChart, Award } from "lucide-reac
 import { PageHeader } from "@/components/page-header";
 import { ogImageUrl } from "@/lib/og-url";
 import { PageContainer } from "@/components/layout";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "組織管理ダッシュボード｜デモ版";
@@ -47,6 +49,13 @@ const KPI = [
 ];
 
 export default function OrganizationPage() {
+  // 結論カード用の値は KPI / DEPARTMENTS から導出（デモ値・転記のみ＝捏造なし）
+  const lowestDept = DEPARTMENTS.reduce((a, b) => (b.trainingRate < a.trainingRate ? b : a));
+  const trainingPct = KPI.find((k) => k.label === "教育修了率")?.value ?? "—";
+  const accidents = KPI.find((k) => k.label === "直近事故件数")?.value ?? "—";
+  const sites = KPI.find((k) => k.label === "登録事業所")?.value ?? "—";
+  const employees = KPI.find((k) => k.label === "登録社員数")?.value ?? "—";
+
   return (
     <PageContainer width="wide">
       {/* SEO: WebPage + BreadcrumbList */}
@@ -58,6 +67,19 @@ export default function OrganizationPage() {
         iconColor="blue"
         badge="デモ版"
       />
+
+      {/* 柱0: 結論カード＝いまの状態（教育修了率と要フォロー先）を最上部に */}
+      <ConclusionCard
+        className="mt-4"
+        tone="warning"
+        icon={Award}
+        value={trainingPct}
+        title="教育修了率"
+        description={`${sites}・${employees}／直近事故 ${accidents}。最下位は${lowestDept.name}（${lowestDept.trainingRate}%）で要フォロー。すべてデモ値です。`}
+      >
+        <StatusBadge tone="safe">事故 {accidents}</StatusBadge>
+        <StatusBadge tone="danger">{lowestDept.name} {lowestDept.trainingRate}%</StatusBadge>
+      </ConclusionCard>
 
       <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-800">
         <p className="font-semibold">デモ版 / モックデータ表示中</p>
