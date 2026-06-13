@@ -70,23 +70,26 @@ export function HomePersonaEntry() {
           </p>
         </div>
       </div>
-      <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {/* 柱0/柱3: モバイルは2列。先頭=建設業を左上(読み順1番目)に温存しつつ、
+          一人親方を初手の同一行(右上)へ引き上げ＝「自分の立場」への最短到達を短縮。
+          狭い2列では説明文を畳み、アイコン+役割名+タグ(機能の一目signal)で3秒スキャン可能にする。 */}
+      <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {PERSONAS.map((p) => {
           const Icon = p.icon;
           return (
             <li key={p.href}>
               <Link
                 href={p.href}
-                className={`group flex h-full flex-col rounded-2xl border-2 bg-white p-4 shadow-sm transition ${p.ring}`}
+                className={`group flex h-full min-h-[44px] flex-col rounded-2xl border-2 bg-white p-3 shadow-sm transition sm:p-4 ${p.ring}`}
               >
                 <div className="flex items-center gap-2">
                   <span className={`rounded-full p-2 ${p.iconBg}`}>
                     <Icon className="h-5 w-5 text-white" />
                   </span>
-                  <p className="text-base font-bold text-slate-900">{p.label}</p>
+                  <p className="text-sm font-bold leading-tight text-slate-900 sm:text-base">{p.label}</p>
                 </div>
-                <p className="mt-2 flex-1 text-xs leading-relaxed text-slate-600 sm:text-sm">{p.desc}</p>
-                <div className="mt-2 flex flex-wrap gap-1">
+                <p className="mt-2 hidden flex-1 text-xs leading-relaxed text-slate-600 sm:block sm:text-sm">{p.desc}</p>
+                <div className="mt-2 flex flex-1 flex-wrap content-start gap-1 sm:flex-none">
                   {p.tags.map((t) => (
                     <span key={t} className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
                       {t}
