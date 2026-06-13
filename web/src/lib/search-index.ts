@@ -21,10 +21,15 @@ export const CATEGORY_META: Record<
   precedent: { label: '判例',    bgColor: 'bg-emerald-100', textColor: 'text-emerald-700' },
 };
 
+/**
+ * インデックスをクエリで絞り込みスコア順に返す。
+ * @param limit 返却上限。コマンドパレット(⌘K)は既定10、/search 結果ページは全件表示のため大きめを渡す。
+ */
 export function searchItems(
   items: SearchItem[],
   query: string,
   category: 'all' | SearchCategory,
+  limit = 10,
 ): SearchItem[] {
   const trimmed = query.trim();
   if (!trimmed) return [];
@@ -45,8 +50,24 @@ export function searchItems(
     })
     .filter(({ score }) => score > 0)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 10)
+    .slice(0, limit)
     .map(({ item }) => item);
+}
+
+/** カテゴリ別に件数を集計する（/search 結果ページのタブ件数バッジ用）。 */
+export function countByCategory(
+  items: SearchItem[],
+  query: string,
+): Record<'all' | SearchCategory, number> {
+  const counts: Record<'all' | SearchCategory, number> = {
+    all: 0, notice: 0, chemical: 0, education: 0, accident: 0, precedent: 0,
+  };
+  if (!query.trim()) return counts;
+  // 上限なしで全件マッチを採り、カテゴリ別に集計する。
+  const all = searchItems(items, query, 'all', Number.MAX_SAFE_INTEGER);
+  counts.all = all.length;
+  for (const item of all) counts[item.category] += 1;
+  return counts;
 }
 
 // Module-level cache — built once, reused on every keystroke
