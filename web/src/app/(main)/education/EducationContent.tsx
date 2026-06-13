@@ -5,6 +5,8 @@ import type { LucideIcon } from "lucide-react";
 import { GraduationCap, Mail, Clock, BookOpen, Users, Building2, MessageSquare, Download, HardHat, HeartPulse } from "lucide-react";
 import { JsonLd, serviceSchema } from "@/components/json-ld";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { useTranslation } from "@/contexts/language-context";
 
 const DESCRIPTION =
@@ -107,6 +109,19 @@ export function EducationContent() {
   const formats = isEn ? FORMATS.en : FORMATS.ja;
   const others = isEn ? OTHER_EXAMPLES.en : OTHER_EXAMPLES.ja;
 
+  // 結論カード用: 区分別の収録数を実データから算出（ハードコード値のドリフト防止）
+  const catCounts = CATEGORY_ORDER.map((key) => ({
+    key,
+    n: PROGRAMS.filter((p) => p.category === key).length,
+  }));
+  const breakdown = catCounts
+    .map((c) =>
+      isEn
+        ? `${CATEGORY_LABEL[c.key].en.split(" (")[0]} ${c.n}`
+        : `${CATEGORY_LABEL[c.key].ja}${c.n}`,
+    )
+    .join(isEn ? " / " : "・");
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
       <JsonLd
@@ -141,6 +156,28 @@ export function EducationContent() {
             : "労働安全衛生法に基づく特別教育・法定教育・労働衛生教育のカリキュラムを、労働安全衛生コンサルタント（登録番号260022）監修のもと公開している研究プロジェクトです。教材設計の参考としてご活用ください。現場での気づき・誤りの指摘・追加してほしいテーマがあれば、フィードバックフォームよりお寄せください。"}
         </CollapsibleDetail>
       </header>
+
+      {/* 結論カード: いまの状態（公開数＝12種・無料）＋次にやること（教育を選ぶ）。無読テストの主役 */}
+      <ConclusionCard
+        tone="info"
+        value={PROGRAMS.length}
+        unit={isEn ? "" : "種"}
+        title={isEn ? "Programs published" : "教育プログラム公開中"}
+        description={
+          isEn
+            ? `${breakdown}. All free to browse, with a downloadable PPTX sample for each.`
+            : `${breakdown}。すべて無料で閲覧でき、各教育のPPTXサンプルも配布中。`
+        }
+        action={{ href: "#programs", label: isEn ? "Browse programs" : "教育を選ぶ" }}
+        className="mb-8"
+      >
+        <StatusBadge tone="safe" size="sm">
+          {isEn ? "Free to browse" : "無料で閲覧"}
+        </StatusBadge>
+        <StatusBadge tone="info" size="sm">
+          {isEn ? "PPTX samples" : "PPTXサンプルあり"}
+        </StatusBadge>
+      </ConclusionCard>
 
       {/* Delivery formats */}
       <section className="mb-10">
@@ -181,7 +218,7 @@ export function EducationContent() {
       </section>
 
       {/* 12 program listing */}
-      <section className="mb-10">
+      <section id="programs" className="mb-10 scroll-mt-20">
         <h2 className="mb-6 text-lg font-bold text-slate-900">
           {isEn ? "Available Programs (12 types)" : "対応する教育メニュー（12種）"}
         </h2>
