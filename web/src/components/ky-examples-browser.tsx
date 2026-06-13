@@ -11,6 +11,7 @@ import {
   type KyWorkTypeId,
 } from "@/types/ky-example";
 import { KY_EXAMPLES, filterKyExamples } from "@/data/ky-examples";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 export function KyExamplesBrowser() {
   const [industry, setIndustry] = useState<KyIndustryId | "">("");
@@ -51,11 +52,32 @@ export function KyExamplesBrowser() {
           onWorkType={setWorkType}
         />
 
-        <p className="mt-4 text-xs text-slate-500">
-          該当事例: <strong>{filtered.length}</strong> 件
-        </p>
+        {/* 結論カード（柱0）: 該当事例の件数を3秒で。0件は絞り込み変更へ誘導。 */}
+        <div className="mt-4">
+          {filtered.length === 0 ? (
+            <ConclusionCard
+              tone="warning"
+              value={0}
+              unit="件"
+              title="該当なし"
+              description="いまの絞り込み条件に合致する事例がありません。業種・作業種別の絞り込みを変えてください。"
+            />
+          ) : (
+            <ConclusionCard
+              tone="info"
+              value={filtered.length}
+              unit="件"
+              title="該当事例"
+              description={
+                industry || workType
+                  ? `全${KY_EXAMPLES.length}件のうち、いまの絞り込みに一致する事例です。`
+                  : "業種・作業種別で絞り込むと、現場に近い事例だけを表示できます。"
+              }
+            />
+          )}
+        </div>
 
-        <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((ex) => (
             <li
               key={ex.id}
@@ -100,12 +122,6 @@ export function KyExamplesBrowser() {
             </li>
           ))}
         </ul>
-
-        {filtered.length === 0 && (
-          <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-800">
-            条件に合致する事例が見つかりません。フィルタを変更してください。
-          </p>
-        )}
       </div>
     </div>
   );
@@ -169,7 +185,7 @@ function Chip(props: {
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`min-h-[32px] rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
+      className={`min-h-[44px] rounded-full border px-4 py-2 text-xs font-semibold transition ${
         selected
           ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
           : "border-slate-300 bg-white text-slate-700 hover:border-emerald-400 hover:bg-emerald-50"
