@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-06-14 — 柱C-2 404 ページに横断検索ボックス（PR: seo/c2-404-cross-search）
+
+回収: 緑だった PR #528（C-4 og:image lib層）を squash マージ→main を ff-only 同期・clean 確認。#528 マージで PR #530（JSON-LD lib consolidate）が CONFLICTING（seo-metadata.ts 周辺ではなく BACKLOG/cycle-log の追記衝突）→ origin/main を通常マージで解決(force-push不可)・全ゲート再緑を確認し push。同様に PR #537（C-3-2 サイトマップ役割分担）も #528 マージで追記衝突→通常マージで解決・全ゲート再緑・push。#530/#537 とも CI 再走のため回収は次イテレーション。
+
+着手: 補充指針（site-critique 01-seo-technical）の **C-2「404どん詰まり」**。在庫キュー先頭の C-4(JSON-LD) は #530 で着手中・本体 sitemap.ts は #537 で改変中のため、双方と衝突しない自領域タスクとして C-2 を選択（横断検索＝当班の C-2 領域）。
+
+- **現状確認**: 404 は2系統。`(main)/not-found.tsx` は app-shell 配下（ナビ＋⌘K 検索あり・リンク6本）で問題なし。critique が実測した「ヘッダーナビ0・検索手段なし・リンク4本」はグローバル fallback の `app/not-found.tsx`（app-shell 外）だった。ここを是正。
+- **修正（グローバル shell ページのみ）**: `app/not-found.tsx` に (1) サイト内横断検索ボックス＝JS 非依存のネイティブ `<form action="/search" method="get">`（入力 `name="q"`、`/search` の `useSearchParams.get('q')` と一致）と (2) 主要機能ランチャー（法令/事故/判例/通達/KY/Eラーニング/安衛法チャット/問い合わせ＝全て sitemap 収載の実在ページ）を新設。旧URL流入・タイポ流入の取りこぼしを検索1発で回収できるようにした。app-shell 外で JS 描画に頼れないため、サーバーレンダリングのみで検索手段が成立するネイティブフォームを採用。入力/送信ボタンは `min-h-11`（44px・WCAG 2.5.5）。
+- **テスト**: `not-found.test.tsx` 新規（5 it＝フォームが GET で /search へ送る・`name=q` 入力・ラベル紐付け・44px タップ標的・主要機能リンク実在・noindex,nofollow 維持）。
+- **不可侵**: data/他班 route/機能コンポーネントには一切触れず。本ページはどの機能 UI 班にも属さないグローバル shell（robots/manifest と同列）で、追加要素は横断検索＝当班 C-2 領域に閉じる。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0(warnings 既存のみ) / `vitest run`=207ファイル1717テスト全pass（新規5含む） / `build`=成功。build 再生成データ(rag-metrics-latest.json・chatbot-eval-fresh-results.json)は復元。working tree clean。
+
+残: #530（JSON-LD lib）/#537（サイトマップ役割分担）の CI 回収→マージが最優先。補充は site-critique の B 系（B-1 h1 構造は各ページ UI 班・当班外、B-2 description は lib テンプレ化が当班可能だが消費は各 route UI 班）から自領域に閉じるものを選定。
+
+---
+
 ## 2026-06-14 — 柱C-4 og:image フォールバックを lib層で敷設（PR: seo/c4-og-image-fallback-lib）
 
 回収: PR #522（決裁A robots facebookexternalhit 許可リスト化）が origin/main 追記と衝突→ origin/main を通常マージで解決(BACKLOG-seo.md・cycle-log-seo.md の追記衝突のみ、force-push不可を遵守)、ゲート再確認のうえ push。CI再走待ちは次イテレーションで回収。PR #524（C-2(b) モバイル検索トリガ 44px）はCI pending、これも次回回収。
