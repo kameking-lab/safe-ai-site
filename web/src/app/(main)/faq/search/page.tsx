@@ -61,7 +61,7 @@ function SearchResultItem({ faq }: { faq: FAQ }) {
                 <Link
                   key={page.href}
                   href={page.href}
-                  className="inline-flex items-center gap-1 rounded border border-sky-200 bg-sky-50 px-2 py-1 text-xs text-sky-700 hover:bg-sky-100 transition-colors"
+                  className="inline-flex min-h-[44px] items-center gap-1 rounded border border-sky-200 bg-sky-50 px-2 py-1 text-xs text-sky-700 hover:bg-sky-100 transition-colors"
                 >
                   {page.label}
                   <ExternalLink className="h-3 w-3" aria-hidden="true" />
@@ -145,7 +145,7 @@ export default function FAQSearchPage() {
               <button
                 key={tag}
                 onClick={() => handleTagClick(tag)}
-                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 transition-colors"
+                className="inline-flex min-h-[44px] items-center rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-700 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 transition-colors"
               >
                 {tag}
               </button>

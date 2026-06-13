@@ -95,3 +95,17 @@
 **ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 210 files・1732 tests 全pass / build 成功。data班生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）はfull suite走行で書き換わるため commit から除外（git checkout で復元）。
 
 **無読テスト**: `docs/third-party-reviews/scripts/features-44px-targets-noread-2026-06-14.mjs` を **8/8 PASS**（dev実機・スマホ390×844）。実 boundingBox でフィルタ「すべて」/先頭カテゴリ/主CTA/副CTA/クイックリンク/下部CTAが全て height≥44px・カードがスクリーンショット画像を伴う（ビジュアルファースト）ことを確認。
+
+---
+
+## 2026-06-14 柱0補充 /faq ハブ/ナビ系 44pxタップ標的化（ux-hub/faq-pillar0-44px-targets）
+
+**背景**: /features に続く柱0補充。FAQ ハブ/検索/カテゴリの押せる要素のうち、ハブのカテゴリ「…の質問一覧を見る →」リンク・関連ツールチップ、検索の「よく検索されるキーワード」チップ・設問内の関連ページリンク、カテゴリ内絞り込み入力 が py-1/py-2（≈28〜36px）で44px未満。指で押し損ねるサイズだった。
+
+**対策**: 該当要素に `min-h-[44px]`、チップ/リンク類は `inline-flex items-center`（カテゴリCTAは `justify-center` も）を付与。**純粋なクラス追加で寸法・余白・グリッドは不変**（min-h は中身が44px超なら無効＝既存破壊なし）。対象3ファイル: faq/page.tsx・faq/search/page.tsx・faq/[category]/page.tsx。
+
+**テスト**: `faq-pillar0.test.tsx` を新設（4ケース）。ハブはサーバーコンポーネントを直接描画、検索はクライアントを描画、カテゴリは `next/navigation` の useParams をモックして描画し、各タップ要素の className に `min-h-[44px]` を保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/faq-44px-targets-noread-2026-06-14.mjs` を **7/7 PASS**（dev実機・スマホ390×844）。実 boundingBox でハブのカテゴリリンク/関連ツールチップ、検索の人気キーワードチップ、カテゴリ内絞り込み入力、設問内の関連ページリンクが全て height≥44px であることを確認。
