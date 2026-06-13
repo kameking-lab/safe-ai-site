@@ -30,7 +30,9 @@ function riskTextClass(level: RiskLevel) {
 function riskBadgeClass(level: RiskLevel) {
   switch (level) {
     case "高": return "bg-rose-600 text-white";
-    case "中": return "bg-amber-500 text-white";
+    // JIS安全色の文法: 注意＝黄は黒地黒文字。amber-500 に白文字は遠目で潰れる(約2.1:1)ため、
+    // 結論ストリップ(amber→amber-950)と揃えて黒系文字にし、遠距離の可読性を確保する。
+    case "中": return "bg-amber-500 text-amber-950";
     case "低": return "bg-emerald-600 text-white";
   }
 }
