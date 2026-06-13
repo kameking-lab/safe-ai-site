@@ -101,7 +101,7 @@ export function SignageSiteSafety({ data }: { data: SignageSiteSafetyData | null
           </span>
         )}
         {data.alertCount > 0 && (
-          <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[9px] font-bold text-white sm:text-[10px] xl:px-2.5 xl:text-sm">
+          <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[9px] font-bold text-amber-950 sm:text-[10px] xl:px-2.5 xl:text-sm">
             要対応 {data.alertCount}件
           </span>
         )}
@@ -133,7 +133,7 @@ export function SignageSiteSafety({ data }: { data: SignageSiteSafetyData | null
               <div className="flex items-start gap-1.5">
                 <span
                   className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[8px] font-bold sm:text-[9px] ${
-                    a.severity === "overdue" ? "bg-rose-600 text-white" : "bg-amber-500 text-white"
+                    a.severity === "overdue" ? "bg-rose-600 text-white" : "bg-amber-500 text-amber-950"
                   }`}
                 >
                   {a.sourceLabel}
