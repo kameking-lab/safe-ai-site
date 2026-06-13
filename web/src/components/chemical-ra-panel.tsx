@@ -461,11 +461,12 @@ export function ChemicalRaPanel() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
-      {/* ヘッダー（画面用イントロ。A4記録には ChemicalRaReportHeader が出るので印刷時は隠す） */}
+      {/* ヘッダー（画面用イントロ。A4記録には ChemicalRaReportHeader が出るので印刷時は隠す）。
+          ページ側 PageHeader が h1 を持つため、ここは h2（多重h1の是正・文言/見た目は不変）。 */}
       <div className="print:hidden">
         <div className="flex items-center gap-2">
           <FlaskConical className="h-6 w-6 text-emerald-600" />
-          <h1 className="text-xl font-bold text-slate-900 lg:text-2xl">化学物質リスクアセスメント</h1>
+          <h2 className="text-xl font-bold text-slate-900 lg:text-2xl">化学物質リスクアセスメント</h2>
           <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">Gemini AI</span>
         </div>
         <p className="mt-2 text-sm text-slate-600">
