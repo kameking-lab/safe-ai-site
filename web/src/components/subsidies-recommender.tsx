@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, ExternalLink, Filter } from "lucide-react";
+import { Banknote, CheckCircle2, ExternalLink, Filter } from "lucide-react";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import type { SafetyTone } from "@/lib/design/safety-tone";
 
 export type SubsidyScale = "small" | "mid" | "medium-large" | "any";
 export type SubsidyIndustry =
@@ -106,17 +108,54 @@ export function SubsidiesRecommender({ subsidies }: { subsidies: Subsidy[] }) {
 
   const hasFilter = scale !== null || industry !== null || region !== null;
 
+  // 結論カード（柱0）: 本文を読まず3秒で「いまの状態（該当件数）」が分かる。
+  // 件数は「OK/完了」ではないため緑(safe)を使わず、案内色の info（青）。該当0だけ warning（黄）。
+  const activeLabels = [
+    SCALE_OPTIONS.find((o) => o.key === scale)?.label,
+    INDUSTRY_OPTIONS.find((o) => o.key === industry)?.label,
+    REGION_OPTIONS.find((o) => o.key === region)?.label,
+  ].filter(Boolean) as string[];
+  const conclusion: {
+    tone: SafetyTone;
+    value?: number;
+    unit?: string;
+    title: string;
+    description: string;
+  } = !hasFilter
+    ? {
+        tone: "info",
+        value: subsidies.length,
+        unit: "制度",
+        title: "活用可能",
+        description: "労働安全投資に使える公的助成金。事業規模・業種・地域で絞り込めます。",
+      }
+    : filtered.length > 0
+      ? {
+          tone: "info",
+          value: filtered.length,
+          unit: "件",
+          title: "該当",
+          description: `絞り込み条件：${activeLabels.join("・")}`,
+        }
+      : {
+          tone: "warning",
+          title: "該当なし",
+          description: "条件に一致する制度がありません。フィルタを1つ外してください。",
+        };
+
   return (
     <section className="mt-8">
+      <ConclusionCard
+        tone={conclusion.tone}
+        value={conclusion.value}
+        unit={conclusion.unit}
+        title={conclusion.title}
+        description={conclusion.description}
+        icon={conclusion.tone === "info" ? Banknote : undefined}
+        className="mb-4"
+      />
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-lg font-bold text-slate-900">
-          主な助成金・補助金
-          {hasFilter && (
-            <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
-              {filtered.length}件ヒット
-            </span>
-          )}
-        </h2>
+        <h2 className="text-lg font-bold text-slate-900">主な助成金・補助金</h2>
         {hasFilter && (
           <button
             type="button"

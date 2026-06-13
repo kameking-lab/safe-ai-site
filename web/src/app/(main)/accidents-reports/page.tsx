@@ -18,6 +18,12 @@ import { EstatOfficialTables } from "@/components/accidents/estat-official-table
 import { AxisAnalysisSection } from "@/components/accidents/axis-analysis-section";
 import { MonthlySokuhouSection } from "@/components/accidents/monthly-sokuhou-section";
 import { getAllIndustriesSummary } from "@/lib/accident-analysis";
+import { DataExportToolbar } from "@/components/accidents/data-export-toolbar";
+import {
+  REPORTS_CSV_FILENAME,
+  industriesSummaryToCsv,
+  industriesSummaryToText,
+} from "@/lib/accidents-reports-export";
 import { ogImageUrl } from "@/lib/og-url";
 import { SITE_URL, withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import {
@@ -116,6 +122,16 @@ export default function AccidentsReportsHubPage() {
           title={`${summary.industries.length}業種を自動分析`}
           description={`厚労省データ＋編集部curated事例を統合（${summary.yearRange.min}〜${summary.yearRange.max}年・うちcurated詳細 ${num(summary.totalCurated)}件）。下の業種カードから詳細レポートへ。`}
           className="mt-4"
+        />
+
+        {/* 柱C-7: 業種比較サマリーの出力手段。月例安全会議・ベンチマーク資料へ持ち出せる。 */}
+        <DataExportToolbar
+          filename={REPORTS_CSV_FILENAME}
+          csv={industriesSummaryToCsv(summary)}
+          text={industriesSummaryToText(summary)}
+          shareTitle="業種別 労働災害分析レポート"
+          shareUrl={url}
+          className="mt-3"
         />
 
         {/* B-001 (audit harsh-third-party-2026-05-16): make the representative-pattern

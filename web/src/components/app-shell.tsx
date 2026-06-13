@@ -499,14 +499,16 @@ export function AppShell({ children, userSlot }: AppShellProps) {
               <p className="truncate text-[11px] text-slate-700 dark:text-slate-300 sm:text-xs">現場の安全を、AIで変える。</p>
             </div>
             <div className="flex shrink-0 items-center gap-1">
-              {/* 検索（⌘K）— モバイルはアイコンのみ */}
+              {/* 検索（⌘K）— モバイルはアイコンのみ。
+                  タップ標的は 44px（WCAG 2.5.5）。固定サイズなので CLS 非破壊。 */}
               <button
                 type="button"
                 onClick={openCommandPalette}
                 aria-label="検索を開く（Ctrl+K）"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50"
+                aria-keyshortcuts="Control+K"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
               >
-                <Search className="h-4 w-4" aria-hidden="true" />
+                <Search className="h-5 w-5" aria-hidden="true" />
               </button>
               <ThemeToggle size="sm" />
               {userSlot}
