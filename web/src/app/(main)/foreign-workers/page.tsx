@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, IdCard, Languages } from "lucide-react";
+import { ChevronRight, IdCard, Languages, ShieldCheck } from "lucide-react";
 import { PageContainer } from "@/components/layout";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
@@ -94,9 +96,21 @@ export default function ForeignWorkersHubPage() {
           <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
             外国人労働者の安全衛生支援
           </h1>
-          <p className="mt-3 text-base text-slate-700">
-            労働基準法・労働安全衛生法・最低賃金法は<strong>国籍を問わず適用</strong>されます。
-          </p>
+
+          {/* 柱0: 結論カード — 3秒で「いまの状態（国籍問わず法令適用）」と次アクションが分かる */}
+          <ConclusionCard
+            className="mt-4"
+            tone="info"
+            icon={ShieldCheck}
+            title="国籍問わず法令適用"
+            description="労働基準法・労働安全衛生法・最低賃金法は国籍を問わず適用されます。受入れ時は理解できる言語で安全衛生教育を実施してください。"
+            action={{ href: "/foreign-workers/safety-training", label: "教材を作る" }}
+          >
+            <StatusBadge tone="info">在留{RESIDENCE_STATUS_INDEX.all.length}資格</StatusBadge>
+            <StatusBadge tone="info">教材{totalMaterials}本</StatusBadge>
+            <StatusBadge tone="info">{MATERIAL_LANGUAGES.length}言語対応</StatusBadge>
+            <StatusBadge tone="safe">無料</StatusBadge>
+          </ConclusionCard>
 
           {/* 柱0: 最上部はアイコンファーストの2大動線 — 読まなくても行き先が分かる */}
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -127,30 +141,6 @@ export default function ForeignWorkersHubPage() {
               <ChevronRight className="h-5 w-5 shrink-0 text-emerald-700" aria-hidden="true" />
             </Link>
           </div>
-
-          <dl className="mt-5 grid grid-cols-3 gap-4 text-sm sm:max-w-md">
-            <div className="rounded-lg border border-emerald-100 bg-white p-3">
-              <dt className="text-xs text-slate-500">在留資格ガイド</dt>
-              <dd className="mt-1 text-xl font-bold text-emerald-700">
-                {RESIDENCE_STATUS_INDEX.all.length}
-                <span className="ml-1 text-xs font-normal text-slate-500">資格</span>
-              </dd>
-            </div>
-            <div className="rounded-lg border border-sky-100 bg-white p-3">
-              <dt className="text-xs text-slate-500">教材</dt>
-              <dd className="mt-1 text-xl font-bold text-sky-700">
-                {totalMaterials}
-                <span className="ml-1 text-xs font-normal text-slate-500">本</span>
-              </dd>
-            </div>
-            <div className="rounded-lg border border-amber-100 bg-white p-3">
-              <dt className="text-xs text-slate-500">対応言語</dt>
-              <dd className="mt-1 text-xl font-bold text-amber-700">
-                {MATERIAL_LANGUAGES.length}
-                <span className="ml-1 text-xs font-normal text-slate-500">言語</span>
-              </dd>
-            </div>
-          </dl>
         </header>
 
         <section id="status-guide" className="mb-10 scroll-mt-20">
