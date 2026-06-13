@@ -6,6 +6,7 @@ import { FEATURE_CATEGORIES } from "@/data/features-catalog";
 import { SAFETY_SIGNS, SIGN_CATEGORIES } from "@/data/safety-signs";
 import { INDUSTRIES } from "@/data/safety-signs/industry-usage";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
+import { COURT_CASES } from "@/data/court-cases";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://www.anzen-ai-portal.jp";
@@ -164,6 +165,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/quick", lastModified: "2026-04-19", priority: 0.6, changeFrequency: "monthly" },
     { url: "/signage/map", lastModified: "2026-05-06", priority: 0.4, changeFrequency: "weekly" },
     { url: "/contact", lastModified: "2026-04-22", priority: 0.5, changeFrequency: "yearly" },
+    // 柱C-3-3: どの sitemap にも収載されていなかった実在 indexable ページを追加。
+    // 新着ハブ（毎日更新の法改正・事故速報の集約）。
+    { url: "/whats-new", lastModified: "2026-06-11", priority: 0.85, changeFrequency: "daily" },
+    // 労災裁判例コーナー（一覧＋責任解説。個別判例は下の courtCasePages で動的列挙）。
+    // /court-cases/print は robots:{index:false} のため収載しない。
+    { url: "/court-cases", lastModified: "2026-06-06", priority: 0.85, changeFrequency: "weekly" },
+    { url: "/court-cases/employer-liability", lastModified: "2026-06-06", priority: 0.8, changeFrequency: "monthly" },
+    // 記録キット（現場記録ツール群。SSR本文・固有見出しを持つ実ページ）。
+    { url: "/site-records", lastModified: "2026-06-11", priority: 0.7, changeFrequency: "monthly" },
+    { url: "/site-records/patrol", lastModified: "2026-06-11", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/site-records/near-miss", lastModified: "2026-06-11", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/site-records/inspection", lastModified: "2026-06-11", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/site-records/committee", lastModified: "2026-06-11", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/site-records/induction", lastModified: "2026-06-11", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/site-records/monthly", lastModified: "2026-06-11", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/site-records/procedure", lastModified: "2026-06-11", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/site-records/incident-report", lastModified: "2026-06-11", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/site-records/qualifications", lastModified: "2026-06-11", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/site-records/calendar", lastModified: "2026-06-11", priority: 0.6, changeFrequency: "monthly" },
     { url: "/privacy", lastModified: "2025-10-01", priority: 0.3, changeFrequency: "yearly" },
     { url: "/terms", lastModified: "2025-10-01", priority: 0.3, changeFrequency: "yearly" },
   ];
@@ -225,6 +245,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
   }));
 
+  // 柱C-3-3: 個別判例ページ（/court-cases/[id]。dynamicParams=false の静的生成対象＝
+  // 実在 indexable ページ）。判決内容は確定済みのため changeFrequency=yearly。
+  const courtCasePages: typeof pages = COURT_CASES.map((c) => ({
+    url: `/court-cases/${c.id}`,
+    lastModified: "2026-06-06",
+    priority: 0.6,
+    changeFrequency: "yearly",
+  }));
+
   return [
     ...filtered,
     ...circularPages,
@@ -234,6 +263,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...safetySignIndustryPages,
     ...safetySignDetailPages,
     ...illnessGuidePages,
+    ...courtCasePages,
   ].map(
     ({ url, lastModified, priority, changeFrequency }) => {
       const absolute = `${base}${url}`;
