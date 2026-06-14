@@ -238,7 +238,7 @@ export function ResourcesClient({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="例: 熱中症 / 化学物質 / 基発0220"
-                className="block w-full rounded-md border border-slate-300 bg-white py-2 pl-8 pr-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+                className="block min-h-[44px] w-full rounded-md border border-slate-300 bg-white py-2 pl-8 pr-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
               />
             </div>
           </div>
@@ -250,7 +250,7 @@ export function ResourcesClient({
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-slate-300 bg-white py-2 px-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+              className="mt-1 block min-h-[44px] w-full rounded-md border border-slate-300 bg-white py-2 px-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
             >
               <option value="">すべて</option>
               {Object.entries(categoryOptions).map(([k, v]) => (
@@ -269,7 +269,7 @@ export function ResourcesClient({
               <select
                 value={binding}
                 onChange={(e) => setBinding(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-slate-300 bg-white py-2 px-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+                className="mt-1 block min-h-[44px] w-full rounded-md border border-slate-300 bg-white py-2 px-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
               >
                 <option value="">すべて</option>
                 <option value="binding">告示（拘束力あり）</option>
@@ -286,7 +286,7 @@ export function ResourcesClient({
             <select
               value={year}
               onChange={(e) => setYear(e.target.value)}
-              className="mt-1 block w-full rounded-md border border-slate-300 bg-white py-2 px-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
+              className="mt-1 block min-h-[44px] w-full rounded-md border border-slate-300 bg-white py-2 px-2 text-sm shadow-sm focus:border-emerald-500 focus:ring-emerald-500"
             >
               <option value="">すべて</option>
               {(tab === "リーフレット" ? leafletYears : noticeYears).map((y) => (
@@ -299,7 +299,7 @@ export function ResourcesClient({
 
           <button
             onClick={resetFilters}
-            className="inline-flex min-h-[40px] items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
           >
             <X className="h-3.5 w-3.5" />
             条件クリア
@@ -372,7 +372,7 @@ function NoticeList({ items }: { items: MhlwNotice[] }) {
                 href={n.detailUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-[36px] items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 font-semibold text-white hover:bg-blue-700"
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 font-semibold text-white hover:bg-blue-700"
               >
                 <ExternalLink className="h-3.5 w-3.5" />
                 原文（安全衛生情報センター）
@@ -381,7 +381,7 @@ function NoticeList({ items }: { items: MhlwNotice[] }) {
                 href={n.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex min-h-[36px] items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50"
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50"
               >
                 <BookOpen className="h-3.5 w-3.5" />
                 目次に戻る
@@ -453,7 +453,7 @@ function LeafletList({ items }: { items: MhlwLeaflet[] }) {
                   href={link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-[36px] items-center gap-1 rounded-md bg-rose-600 px-3 py-1.5 font-semibold text-white hover:bg-rose-700"
+                  className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-rose-600 px-3 py-1.5 font-semibold text-white hover:bg-rose-700"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                   {l.pdfUrl ? "PDFを開く（厚労省）" : "詳細を開く（厚労省）"}
@@ -462,7 +462,7 @@ function LeafletList({ items }: { items: MhlwLeaflet[] }) {
                   href={l.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex min-h-[36px] items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50"
+                  className="inline-flex min-h-[44px] items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   <BookOpen className="h-3.5 w-3.5" />
                   一覧

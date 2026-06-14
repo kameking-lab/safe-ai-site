@@ -107,6 +107,13 @@
 ゲート: tsc=0 / lint errors=0(既存warnのみ) / vitest 1812 pass / build 成功。無読テスト `docs/third-party-reviews/scripts/inspection-progress-noread-2026-06-14.mjs` 11/11 PASS。
 残: 柱0補充（/ky/list・/ky/workers 無読巡回）を次イテレーションへ。
 
+## 2026-06-14 柱0補充 受入教育 多言語安全教育教材ビルダーに結論カード
+
+着手前の回収: 自班PR #565(柱3 打合せ書 保存済み第3状態)はCI(e2e/smoke/Vercel)pending のため契約どおり次イテレーションで回収。`git checkout main && git pull --ff-only` clean を確認し本タスクへ。BACKLOG最上位の残[ ](/ky/list・/ky/workers 無読巡回)は別途 自班PR #558 で巡回完了済（/ky/list合格・/ky/workers是正）・マージ待ちのため**重複着手＝水増しを避け**、自領域の柱0未適用箇所を巡回して補充タスクを起こした。
+巡回: 所有route(safety-diary/site-records/ky/ky-examples/education-certification/education/foreign-workers/health-checkup-scheduler/account)の入口を結論カード有無で確認。記録系・健診・受入教育ハブ(#536/#543/#546)・KY系・ky-examples・education-certification は結論カード済み。真の欠落は **受入教育 `/foreign-workers/safety-training`（多言語安全教育教材ビルダー）**: 親ハブ `/foreign-workers`(#546) と兄弟ビルダーは結論カードを持つのに、この入口だけ h1 直下に2文の説明段落があり「規模(何教材・何言語)」「次にやること」を**読まないと**分からなかった（無読不合格・柱0非対称）。
+対策: 共通 `ConclusionCard` を最上部(SSR・選択状態に非依存)へ追加。デカ数字＝`SAFETY_MATERIAL_INDEX.all.length`(=30教材)、漢字短ラベル「多言語対応」、description に旧説明段落の内容(6業種×5トピックを やさしい日本語＋4言語の対訳で表示・印刷／雇入れ時教育・TBM・特別教育の補助資料)を**集約=消さず格納**、`StatusBadge`チップ「5言語対訳」「無料」、主アクション「教材を選ぶ」を `#material-builder`(ビルダーへ scroll-mt-20 ジャンプ・44px)。件数・言語数は実データ(`SAFETY_MATERIAL_INDEX`/`MATERIAL_LANGUAGES`)から導出しハードコードせず。custodian として共有部品(ConclusionCard/StatusBadge/safety-tone)は import のみ・無改変＝足すだけ。
+ゲート: tsc=0 / lint errors=0 / vitest 223ファイル1865pass(新規 component 無読 +5) / build成功。無読 component テスト `web/src/app/(main)/foreign-workers/safety-training/safety-training-pillar0.test.tsx` 5/5、Playwright `docs/third-party-reviews/scripts/foreign-safety-training-conclusion-noread-2026-06-14.mjs` を自前prod(3137・390px)で **8/8 PASS**（role=status 出現・デカ数字単位・主アクション44px・#material-builder 誘導・言語/無料チップ・industry指定でも選択非依存で常時出現）。
+残: 次イテレーションで #565(柱3) と #558(/ky/list・/ky/workers) を回収マージ。以降は柱0補充/柱3レビュー継続。
 ## 2026-06-14 柱3レビュー 安全日誌(打合せ書) 結論カードに「下書き／保存済み」の第3状態
 
 CI緑の #555（点検記録の下書き進捗バー）を squashマージ→main を ff-only 更新。未着手の柱3レビュー「安全日誌 `/safety-diary`（北海道労働局公式版ベースの安全工程打合せ書）を毎日書く職長で実機レビュー」に着手。
