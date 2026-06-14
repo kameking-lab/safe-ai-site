@@ -52,13 +52,37 @@ describe("computeMeetingPaperStatus（打合せ書の結論カード状態）", 
     expect(s.missing.map((m) => m.key)).toContain("company");
   });
 
-  it("必須4項目が埋まると緑の『記入完了』→保存・印刷へ", () => {
+  it("必須4項目が埋まり未保存なら青の『記入完了・未保存』→保存する", () => {
     const s = computeMeetingPaperStatus(filled());
     expect(s.kind).toBe("complete");
-    expect(s.tone).toBe("safe");
+    expect(s.tone).toBe("info");
     expect(s.remaining).toBeUndefined();
     expect(s.missing).toEqual([]);
-    expect(s.action).toEqual({ href: "#mtg-actions", label: "保存・印刷へ" });
+    expect(s.action).toEqual({ href: "#mtg-actions", label: "保存する" });
+  });
+
+  it("必須4項目が埋まり saved=false でも未保存（明示）として青", () => {
+    const s = computeMeetingPaperStatus(filled(), { saved: false });
+    expect(s.kind).toBe("complete");
+    expect(s.tone).toBe("info");
+    expect(s.title).toBe("記入完了・未保存");
+  });
+
+  it("必須4項目が埋まり saved=true なら緑の『保存済み』→保存一覧で確認", () => {
+    const s = computeMeetingPaperStatus(filled(), { saved: true });
+    expect(s.kind).toBe("saved");
+    expect(s.tone).toBe("safe");
+    expect(s.title).toBe("保存済み");
+    expect(s.remaining).toBeUndefined();
+    expect(s.missing).toEqual([]);
+    expect(s.action).toEqual({ href: "/safety-diary/list", label: "保存一覧で確認" });
+  });
+
+  it("未完成なら saved=true でも保存済みにならない（記入のこりが優先）", () => {
+    const s = computeMeetingPaperStatus(blank(), { saved: true });
+    expect(s.kind).toBe("incomplete");
+    expect(s.tone).toBe("info");
+    expect(s.remaining).toBe(4);
   });
 
   it("予想災害が空白だけの配列は未記入扱い", () => {
