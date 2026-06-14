@@ -8,7 +8,7 @@ export async function GET() {
   // 揃える。従来は全子サイトマップに当日（new Date()）を打っており、中身が変わらなくても
   // lastmod が毎日動く＝lastmod スパムだった（Google に無視され再クロールが遅延する）。
   const buildToday = new Date().toISOString().slice(0, 10);
-  const { siteFreshest, freshestArticle, freshestNotice, equipmentDataUpdated } =
+  const { siteFreshest, freshestArticle, freshestNotice, accidentsDataUpdated, equipmentDataUpdated } =
     computeSitemapFreshness(buildToday);
 
   const children: { loc: string; lastmod: string }[] = [
@@ -16,6 +16,8 @@ export async function GET() {
     { loc: `${BASE}/sitemap.xml`, lastmod: siteFreshest },
     // 記事個別ページ。公開記事の publishedAt / lastReviewedAt の最大値。
     { loc: `${BASE}/sitemap-articles.xml`, lastmod: freshestArticle },
+    // 事故事例 個別ページ。事故DBスナップショットの生成日。
+    { loc: `${BASE}/sitemap-accidents.xml`, lastmod: accidentsDataUpdated },
     // 通達個別ページ。通達の最新発出日。
     { loc: `${BASE}/sitemap-circulars.xml`, lastmod: freshestNotice },
     // 保護具個別ページ。保護具DBの生成日。
