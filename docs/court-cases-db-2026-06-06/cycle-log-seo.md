@@ -17,6 +17,21 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存46のみ・自班ファイル0）/ `vitest run`=223ファイル1865テスト全pass（新規2含む） / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・chatbot-eval-fresh-results.json）は復元。working tree clean。
 
 残: #561・#566 の CI 緑回収＆マージ。補充は site-critique 残件のうち自領域に閉じるもの（化学物質/教育カテゴリも同様に `/chemical-database?q=`・`/e-learning` フラットリンク＝深リンク余地ありだが #561/#566 のマージ後＝search-index.ts 競合回避のため後続イテレーションで）。
+## 2026-06-14 — 柱C-2 横断検索に法令条文（law）を収載（PR: seo/c2-laws-cross-search）
+
+回収: CI 緑だった自分の PR #553（決裁A robots 学習UA拡張）を squash マージ→main を ff-only 同期・clean 確認。#556（C-3-4 DRY sitemap freshness）は #553 マージで BACKLOG/cycle-log の追記衝突→当該ブランチへ origin/main を通常マージで解決（両イテレーション記録を併存・force-push なし）し push。#556 は CI 再走のため回収は次イテレーション（CI は元々 e2e/smoke 緑）。
+
+着手: 補充指針（site-critique 01-seo-technical の C-2＝横断検索の発見性）。在庫キュー先頭の C-3-4 DRY後追いは #556 で実施済み（マージ待ち）のため、非競合の自領域タスクとして「法令条文の横断検索収載」を選択。
+
+- **現状確認（捏造・水増しなし）**: 横断検索インデックス(`search-index.ts`)は 判例/事故/化学物質/通達/教育/用語 の6カテゴリを収載するが、**法令本文(`@/data/laws`)が 0 件**だった。安全関連ユーザーの最頻・最高意図クエリ「安衛則 第○条」「足場 規則」等が /search・⌘K で全くヒットせず、法令を引く唯一の手段が専用ページ /law-search のみという発見性の穴。
+- **修正（自班所有の検索ファイルのみ）**: `search-index.ts` に `law` カテゴリを追加。`@/data/laws` の `allLawArticles` を read-only import し、curated 中核（厚労省PDF補完=`mhlwLawArticles` は law 値が文書バンドル名で条文単位の深リンクUXに合わず除外。`law/index.ts` の LAW_SOURCE_COUNT と同じ方針）を数百条規模収載。`(law, articleNum)` でユニーク化。title=`略称 条番号`（例「安衛則 第518条」＝略称の前方一致・条番号の部分一致に効く）、subtitle=`正式名称　条文見出し　本文冒頭`（正式名称・見出し語からのヒットと結果一覧での即答）。url=`/law-search?law=<正式名称>&art=<条番号>` で当該条文へ深リンク（パネルの filter `a.law===selectedLaw` と同形＝full law 名で確実に解決）。
+- **UI（当班 C-2 検索UI）**: `/search` SearchResults と app-shell の ⌘K CommandPalette のカテゴリ配列に `law` を**先頭**追加（法令は中核コンテンツ）＋アイコン `BookText`。`CATEGORY_META`(配色=teal)・`countByCategory` の初期化も拡張。ページ説明文に「法令条文」を追記。
+- **網羅の限界を明記**: 厚労省PDF抽出の補完ソース（mhlwLawArticles）は条文単位の深リンクに不適なため除外。必要なら別途 /law-search の mhlw モードで引ける（当班外データ）。今回収載分は実在の法令条文データで、これまで検索 0 件だった分の純増。
+- **テスト**: `search-index.test.ts` に law 統合テスト4本を追加（300条以上収載・全件 /law-search 深リンク・略称/正式名称/見出し語ヒット・深リンク URL がパネルと同形＋id 一意＋PDF補完混入なし）。CATEGORY_META 網羅テストにも law を追加。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0(warnings 既存のみ・自班ファイル0) / `vitest run`（search-index.test.ts=16 pass）/ `build`=Compiled successfully。working tree clean。
+
+残: #556 の CI 緑回収＆マージ → 補充は site-critique の自領域に閉じる残件（横断検索の AND トークン化・法令略称ゆれ吸収など）から起こす。
 
 ---
 
@@ -163,6 +178,22 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ・自班ファイル 0）/ `vitest run`=212ファイル1759テスト全pass / `build`=Compiled successfully。working tree clean。
 
 残: #537・#541 の CI 緑回収＆マージ → C-3-4 DRY 後追い（sitemap.ts を freshness.ts 利用へ・#537 マージ後）。
+
+---
+
+## 2026-06-14 柱C-2 横断検索の事故事例 全件収載＋個別詳細への深リンク化 (#561)
+
+回収: #552（用語集横断検索）squashマージ済。#553（robots AI学習UA拡張）は #552 マージ後に BACKLOG/cycle-log で追記衝突 → origin/main を通常マージで解決し push（CI 緑は次イテレーションで回収）。
+
+着手: 当班所有の横断検索を点検したところ、`search-index.ts` の事故カテゴリに2つの穴を発見。(1) 事故データは正本 `getAccidentCasesDataset()` が**7ファイル**を merge するのに対し、search-index は **5ファイルだけを手で import** しており `real-accident-cases-2024-2026`・`real-accident-cases-2025-preliminary` が横断検索から丸ごと欠落（近年・速報の事故が /search・⌘K で 0 ヒット＝発見性の穴）。(2) 全事故結果が一覧トップ `/accidents` へリンクし、検索した個別事故の詳細へ到達できなかった（`/accidents/[id]` 詳細ページは実在するのに未活用）。
+
+修正: 事故ブロックを正本 `getAccidentCasesDataset()` 単一ソースへ寄せ（＝詳細 `/accidents/[id]` が `findAccident` で解決する集合そのもの）、url を `/accidents/<id>` へ深リンク化。正本由来IDのため検索結果→詳細が**必ず解決（幽霊URL/soft404 0）**し、今後の事故データ追加にも自動追従する（5/7 の手 import 漏れが再発しない）。subtitle に severity・occurredOn を追加し、件数増後の同名・類似事故を区別可能に。捏造0＝既存正本データのみ使用、新規データ作成なし。
+
+テスト: `search-index.test.ts` に2本追加（計14 it）。①index の事故ID集合 == 正本 `getAccidentCasesDataset()` のID集合（欠落是正を固定＝将来ファイル追加漏れを検知）。②全件 `/accidents/<id>` 深リンク・裸 `/accidents` 不在・url id と item.id 対応（旧バグと幽霊URL を固定）。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ・自班ファイル0）/ `vitest run`=219ファイル1838テスト全pass / `build`=成功。working tree clean。
+
+残: #553・#556 の CI 緑回収＆マージ → C-3-4 DRY 後追い（#537 マージ後）。
 
 ---
 

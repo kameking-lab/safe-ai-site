@@ -95,7 +95,7 @@ export default async function CategoryPage({ params }: RouteParams) {
 
       <Link
         href="/safety-signs"
-        className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:underline"
+        className="mt-4 inline-flex min-h-[44px] items-center gap-1 text-xs font-semibold text-emerald-700 hover:underline"
       >
         <ChevronLeft className="h-3 w-3" aria-hidden="true" />
         標識データベースに戻る

@@ -98,7 +98,8 @@ export function MeetingPaperView() {
   useEffect(() => {
     const t = setTimeout(() => {
       saveCurrentMeeting(record);
-      setSavedLabel(`自動保存: ${new Date().toLocaleTimeString("ja-JP")}`);
+      // 自動保存は端末内の下書きのみ（保存一覧には未反映）。緑「保存済み」は手動「保存」が条件。
+      setSavedLabel(`下書き自動保存: ${new Date().toLocaleTimeString("ja-JP")}`);
     }, 600);
     return () => clearTimeout(t);
   }, [record]);
@@ -130,14 +131,25 @@ export function MeetingPaperView() {
 
   const machines = useMemo(() => aggregateMachines(record.contractors), [record.contractors]);
   const hidden = useMemo(() => hiddenIds(record.contractors, collapsed), [record.contractors, collapsed]);
-  // 柱0: いまの状態を1メッセージに（記入のこりN＝青デカ数字 / 記入完了＝緑）。
-  const paperStatus = useMemo(() => computeMeetingPaperStatus(record), [record]);
+  // 柱0: いまの状態を1メッセージに（記入のこりN＝青 / 記入完了・未保存＝青 / 保存済み＝緑）。
+  // 「保存一覧に保存済みか」はセッション内で厳密追跡する。store の savedAt は自動保存・翌日複製でも
+  // 更新されるため保存済みの根拠に使えない（誤って緑にしない）。手動「保存」を押した内容と
+  // 現在の内容が一致するときだけ saved とみなす。
+  const recordJson = useMemo(() => JSON.stringify(record), [record]);
+  const [savedJson, setSavedJson] = useState<string | null>(null);
+  const isSaved = savedJson !== null && savedJson === recordJson;
+  const paperStatus = useMemo(
+    () => computeMeetingPaperStatus(record, { saved: isSaved }),
+    [record, isSaved]
+  );
 
   const handleSave = () => {
     const rec = { ...record, savedAt: new Date().toISOString() };
     saveCurrentMeeting(rec);
     snapshotMeeting(rec);
     setRecord(rec);
+    // この内容が保存一覧に入った＝結論カードを緑「保存済み」に。以後の編集で自動的に外れる。
+    setSavedJson(JSON.stringify(rec));
     void cloudPushMeeting(rec);
     setNotice(
       isMeetingCloudEnabled()
@@ -514,7 +526,9 @@ export function MeetingPaperView() {
 
       {/* 下部アクションバー */}
       <div id="mtg-actions" className="sticky bottom-0 z-20 flex scroll-mt-20 flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-white/95 px-3 py-2 backdrop-blur print:hidden">
-        <span className="text-[11px] text-slate-500">{savedLabel || "未保存"}</span>
+        <span className={`text-[11px] font-semibold ${isSaved ? "text-emerald-700" : "text-slate-500"}`}>
+          {isSaved ? "✓ 保存一覧に保存済み" : savedLabel ? `未保存（${savedLabel}）` : "未保存"}
+        </span>
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={() => setShowPrintPreview(true)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">印刷プレビュー</button>
           <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
