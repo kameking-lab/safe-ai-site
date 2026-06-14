@@ -55,6 +55,10 @@ export function InspectionClient() {
   }, []);
 
   const ngCount = useMemo(() => items.filter((i) => i.result === "ng").length, [items]);
+  // 良/対象外の内訳（書きかけ点検の進捗バーの判定元）。全項目は既定で「対象外」のため、
+  // 良or不良に動かした数＝実際に点検した項目数（judged）として進捗を出す。
+  const okCount = useMemo(() => items.filter((i) => i.result === "ok").length, [items]);
+  const judgedCount = okCount + ngCount;
   // 保存済みの点検を横断した「使用不可」の台数（結論カードの判定元）
   const unusableSaved = useMemo(() => list.filter((s) => !s.usable).length, [list]);
 
@@ -166,6 +170,12 @@ export function InspectionClient() {
             不良 {ngCount}
           </span>
         </div>
+
+        {/* 書きかけ点検の進捗（柱0・画面専用＝印刷帳票には載せない）。
+            毎朝この画面を回す職長が「あと何項目／不良の有無」を3秒で読めるように。
+            全項目は既定で「対象外」のため、まだ1項目も良/不良に動かしていない＝未点検として警告する。 */}
+        <InspectionProgress ok={okCount} ng={ngCount} total={items.length} judged={judgedCount} />
+
         <ul className="space-y-2">
           {items.map((it) => (
             <li key={it.key} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-slate-200 px-3 py-2">
@@ -246,6 +256,38 @@ export function InspectionClient() {
           </ul>
         )}
       </section>
+    </div>
+  );
+}
+
+// 書きかけ点検の進捗バー（画面専用）。色の文法は safety-tone と同じ:
+// 不良あり=赤 / 1件も判定していない=黄(未点検) / 全項目良=緑 / 途中=青。
+function InspectionProgress({ ok, ng, total, judged }: { ok: number; ng: number; total: number; judged: number }) {
+  const unjudged = total - judged;
+  const pct = total === 0 ? 0 : Math.round((judged / total) * 100);
+  const state: "ng" | "none" | "done" | "progress" =
+    ng > 0 ? "ng" : judged === 0 ? "none" : judged === total ? "done" : "progress";
+  const theme = {
+    ng: { wrap: "border-rose-300 bg-rose-50", text: "text-rose-700", bar: "bg-rose-500", label: `不良 ${ng}件 — 是正と使用可否を確認` },
+    none: { wrap: "border-amber-300 bg-amber-50", text: "text-amber-800", bar: "bg-amber-400", label: "未点検 — 各項目を 良／不良 で判定" },
+    done: { wrap: "border-emerald-300 bg-emerald-50", text: "text-emerald-700", bar: "bg-emerald-500", label: `全${total}項目 異常なし` },
+    progress: { wrap: "border-sky-300 bg-sky-50", text: "text-sky-700", bar: "bg-sky-500", label: `判定済み ${judged}／${total}項目` },
+  }[state];
+  return (
+    <div
+      role="status"
+      data-inspection-progress={state}
+      className={`mb-3 rounded-xl border px-3 py-2 print:hidden ${theme.wrap}`}
+    >
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <p className={`text-sm font-bold ${theme.text}`}>{theme.label}</p>
+        <p className="text-xs font-semibold text-slate-600">
+          良 {ok}・不良 {ng}・対象外 {unjudged}
+        </p>
+      </div>
+      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white" aria-hidden="true">
+        <div className={`h-full rounded-full ${theme.bar} transition-all`} style={{ width: `${pct}%` }} />
+      </div>
     </div>
   );
 }

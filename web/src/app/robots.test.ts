@@ -64,3 +64,49 @@ describe("robots.txt（決裁A SNSリンクプレビュー復活）", () => {
     expect(toArray(allowed?.allow)).toContain("/");
   });
 });
+
+/**
+ * AI学習専用UAの遮断拡張（2026-06-14）:
+ * 2026-06-11 決裁「学習系は遮断継続」を、各社が後発で分離・新設した AI学習専用UA へ拡張。
+ * 重要なのは *-Extended が「学習オプトアウト専用」で、検索クローラ（Googlebot/Applebot）とは
+ * 別UAである点。検索順位・流入に影響を与えないことをテストで固定する。
+ */
+describe("robots.txt（AI学習専用UAの遮断拡張）", () => {
+  it("後発の AI学習クローラはサイト全体を遮断する", () => {
+    for (const ua of [
+      "Google-Extended",
+      "Applebot-Extended",
+      "Meta-ExternalAgent",
+      "cohere-ai",
+      "AI2Bot",
+      "PanguBot",
+    ]) {
+      const rule = ruleFor(ua);
+      expect(rule, `${ua} のルールが存在する`).toBeDefined();
+      expect(toArray(rule?.disallow), `${ua} は disallow:/`).toContain("/");
+      expect(toArray(rule?.allow), `${ua} は Allow:/ を持たない`).not.toContain("/");
+    }
+  });
+
+  it("検索クローラ（Googlebot/Applebot）は遮断していない＝検索順位・流入を保つ", () => {
+    // -Extended（学習専用）の追加が、同名プレフィックスの検索UAを巻き込んで遮断していないことを保証。
+    // Googlebot/Applebot は専用の遮断ルールを持たず、UA:* の Allow:/ が適用される。
+    for (const ua of ["Googlebot", "Applebot"]) {
+      const rule = ruleFor(ua);
+      expect(rule, `${ua} には専用の遮断ルールが無い`).toBeUndefined();
+    }
+    const wildcard = ruleFor("*");
+    expect(toArray(wildcard?.allow), "UA:* は Allow:/").toContain("/");
+  });
+
+  it("Anthropic の検索/ユーザー操作UA（Claude-SearchBot/Claude-User）は許可、学習用 ClaudeBot は遮断", () => {
+    for (const ua of ["Claude-SearchBot", "Claude-User"]) {
+      const rule = ruleFor(ua);
+      expect(rule, `${ua} のルールが存在する`).toBeDefined();
+      expect(toArray(rule?.allow), `${ua} は Allow:/`).toContain("/");
+      expect(toArray(rule?.disallow), `${ua} は disallow:/ を持たない`).not.toContain("/");
+    }
+    const training = ruleFor("ClaudeBot");
+    expect(toArray(training?.disallow), "ClaudeBot は disallow:/").toContain("/");
+  });
+});

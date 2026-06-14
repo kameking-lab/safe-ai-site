@@ -111,6 +111,17 @@ function formatDate(dateStr: string): string {
   return `${d.getMonth() + 1}/${d.getDate()}(${days[d.getDay()]})`;
 }
 
+/**
+ * 見通しストリップ用：該当地域名を「九州・四国」のように並べる。
+ * 名前が取れない（regions に label がない）場合は従来の「N地域」にフォールバック。
+ * 3件以上は先頭2件＋「他N」に省略して1行に収める。
+ */
+function formatOutlookRegions(regions: string[], count: number): string {
+  if (regions.length === 0) return `${count}地域`;
+  if (regions.length <= 2) return regions.join("・");
+  return `${regions.slice(0, 2).join("・")} 他${regions.length - 2}`;
+}
+
 // ────────────────────────────────────────────────────────────
 // サブコンポーネント
 // ────────────────────────────────────────────────────────────
@@ -310,6 +321,10 @@ export function WeatherForecastPanel() {
             {outlook.map((day) => {
               const t = SAFETY_TONE[day.tone];
               const count = day.warningCount > 0 ? day.warningCount : day.advisoryCount;
+              // 「何地域か」だけでなく「どこか」を明示（台風前日に自現場の該否を3秒で判断）。
+              // 地域名は予報データそのまま＝捏造なし。多い時は先頭2件＋「他N」で省略。
+              const regionText =
+                count > 0 ? formatOutlookRegions(day.worstRegions, count) : "全国おおむね良好";
               return (
                 <button
                   key={day.date}
@@ -318,7 +333,7 @@ export function WeatherForecastPanel() {
                     setMode("week");
                     setSelectedDayIndex(day.offset);
                   }}
-                  aria-label={`${day.dayLabel || formatDate(day.date)}は${day.levelLabel}。タップで地域別の予報マップを開く`}
+                  aria-label={`${day.dayLabel || formatDate(day.date)}は${day.levelLabel}（${regionText}）。タップで地域別の予報マップを開く`}
                   className={`flex min-h-[44px] flex-col items-start rounded-xl border-2 p-2.5 text-left transition hover:shadow-md ${t.soft}`}
                 >
                   <span className="text-sm font-bold leading-tight">{day.dayLabel || "予報"}</span>
@@ -326,9 +341,7 @@ export function WeatherForecastPanel() {
                   <span className={`mt-1 text-base font-bold leading-tight ${t.text}`}>
                     {day.levelLabel}
                   </span>
-                  <span className="mt-0.5 text-[11px] opacity-80">
-                    {count > 0 ? `${count}地域` : "全国おおむね良好"}
-                  </span>
+                  <span className="mt-0.5 text-[11px] opacity-80">{regionText}</span>
                 </button>
               );
             })}
