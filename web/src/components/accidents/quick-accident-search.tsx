@@ -57,11 +57,11 @@ export function QuickAccidentSearch() {
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="例: 足場 墜落 / フォークリフト"
           aria-label="事故事例キーワード検索"
-          className="min-w-0 flex-1 rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-rose-500 focus:outline-none"
+          className="min-h-[44px] min-w-0 flex-1 rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-rose-500 focus:outline-none"
         />
         <button
           type="submit"
-          className="shrink-0 rounded-lg bg-rose-600 px-4 py-2 text-sm font-bold text-white hover:bg-rose-700"
+          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg bg-rose-600 px-4 py-2 text-sm font-bold text-white hover:bg-rose-700"
         >
           検索
         </button>
@@ -71,7 +71,7 @@ export function QuickAccidentSearch() {
           <a
             key={t}
             href={accidentTypeHref(t)}
-            className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-rose-300 bg-white py-1 pl-1.5 pr-3 text-xs font-semibold text-rose-800 hover:bg-rose-100"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-rose-300 bg-white py-1 pl-1.5 pr-3 text-xs font-semibold text-rose-800 hover:bg-rose-100"
           >
             <AccidentTypePictogram type={t} size="sm" />
             {ACCIDENT_TYPE_SHORT[t]}

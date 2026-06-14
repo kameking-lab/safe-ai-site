@@ -103,7 +103,8 @@ const main = async () => {
     const tomorrow = page.getByRole("button", { name: /^明日は警報相当/ });
     ok("②明日セルが警報相当（赤）で出る", await tomorrow.count() > 0);
     const tText = ((await tomorrow.first().textContent()) || "").replace(/\s+/g, "");
-    ok("②明日セル: デカ警報相当＋2地域", tText.includes("警報相当") && tText.includes("2地域"), tText);
+    // 2026-06-14: 「N地域」→ 該当地域名（関東・近畿）を直接表示する改修に追従。
+    ok("②明日セル: デカ警報相当＋該当地域名", tText.includes("警報相当") && tText.includes("関東") && tText.includes("近畿"), tText);
     const tcls = (await tomorrow.first().getAttribute("class")) || "";
     ok("②明日セルが赤トーン(rose)で塗られている", tcls.includes("rose"), tcls.match(/rose-\d+/)?.[0] ?? "");
 
