@@ -7,6 +7,13 @@ const COMMON_DISALLOW = ["/admin/", "/api/", "/auth/", "/dev/", "/handover", "/l
 // （Vercel帯域/Function枠の浪費防止＋学習利用拒否。2026-06-11 オーナー決裁で「検索引用系」と分離）
 // 注: FacebookBot（Meta の広告/インデックス用クローラ）は遮断を維持する。
 //     ユーザーがリンクを貼った時だけ動く facebookexternalhit（OGP取得）とは別物。
+//
+// 末尾ブロック（*-Extended / 各社AI学習クローラ）は 2026-06-11 決裁の「学習系は遮断継続」
+// 方針を、その後に各社が分離・新設した AI学習専用UA へ機械的に拡張したもの（新規方針判断ではない）。
+//   - Google-Extended / Applebot-Extended は **AI学習(Gemini / Apple Intelligence)専用のオプトアウトUA**で、
+//     Googlebot / Applebot（検索インデックス）とは別物。これを Disallow にしても検索順位・流入には一切影響しない。
+//   - Meta-ExternalAgent は Meta の AI学習クローラ（FacebookBot とは別の新UA）。
+//   - 検索引用系（OAI-SearchBot / PerplexityBot / Claude-SearchBot 等）は下の許可リストに置き、ここには入れない。
 const AI_TRAINING_CRAWLERS = [
   "GPTBot",
   "ClaudeBot",
@@ -19,6 +26,20 @@ const AI_TRAINING_CRAWLERS = [
   "Diffbot",
   "omgili",
   "omgilibot",
+  // 各社が後発で分離・新設した AI学習専用UA（検索インデックスには影響しない学習オプトアウト）
+  "Google-Extended", // Gemini / Vertex AI の学習。Googlebot（検索）とは別物
+  "Applebot-Extended", // Apple Intelligence の学習。Applebot（Siri/Spotlight 検索）とは別物
+  "Meta-ExternalAgent", // Meta の AI学習クローラ（FacebookBot とは別UA）
+  "cohere-ai", // Cohere の学習クローラ
+  "cohere-training-data-crawler",
+  "PanguBot", // Huawei PanGu の学習
+  "AI2Bot", // Allen Institute (OLMo/Dolma) の学習
+  "Timpibot", // Timpi の学習
+  "Webzio-Extended", // Webz.io の AI学習用フィード
+  "FriendlyCrawler", // AI学習データ収集
+  "ImagesiftBot", // The Hive 画像データセット収集
+  "img2dataset", // 画像データセット大量取得
+  "Kangaroo Bot", // AI学習データ収集
 ];
 
 // AI検索・引用系（回答に出典リンクを付けるボット／ユーザー操作起点のフェッチ）: 許可
@@ -27,7 +48,9 @@ const AI_SEARCH_CITATION_BOTS = [
   "OAI-SearchBot", // ChatGPT search のインデックス
   "ChatGPT-User", // ChatGPT ユーザー操作起点のフェッチ
   "PerplexityBot", // Perplexity のインデックス
-  "Claude-Web", // Anthropic ユーザー操作起点（旧称）
+  "Claude-Web", // Anthropic ユーザー操作起点（旧称・後方互換のため残置）
+  "Claude-User", // Anthropic ユーザー操作起点（現UA。学習用 ClaudeBot とは別物）
+  "Claude-SearchBot", // Anthropic 検索インデックス（学習用 ClaudeBot とは別物）
   "YouBot", // You.com 検索
 ];
 

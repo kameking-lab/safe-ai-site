@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-06-14 — 柱C-2 横断検索に用語集（glossary）を収載（PR: seo/c2-glossary-cross-search）
+
+回収: 緑だった PR #537（C-3-2 サイトマップ役割分担）を squash マージ→main を ff-only 同期・clean 確認。#537 マージで PR #541（C-2 404横断検索）・#547（C-3-4 sitemap-index lastmod）が BACKLOG/cycle-log の追記衝突で CONFLICTING→ origin/main を各ブランチへ通常マージで解決(force-push不可を遵守)・全ゲート再緑(tsc0/lint0/vitest全pass/build成功)を確認し push。#541/#547 とも CI 再走のため回収は次イテレーション。
+
+着手: 補充指針（site-critique 01-seo-technical の C-2＝横断検索の発見性）。在庫キューは空、かつ先頭の C-3-4 DRY後追いは依存先 `lib/sitemap/freshness.ts` が未マージ #547 にしか無く着手不可のため、双方と非競合の自領域タスクとして「横断検索の用語集収載」を選択。
+
+- **現状確認**: 横断検索インデックス(`search-index.ts`)は 判例/事故/化学物質/通達/教育 の5カテゴリを収載するが、**用語集(/glossary・約251語)が 0 件**だった。「足場とは」「玉掛けとは」等の高意図クエリが /search・⌘K で全くヒットしない発見性の穴。
+- **修正（自班所有の検索ファイルのみ）**: `search-index.ts` に `glossary` カテゴリを追加。`@/data/glossary` の 4 バッチ 152 語を read-only import で収載（id=`glossary-<term>`・title=用語名・subtitle=`読み　定義冒頭60字`・url=/glossary）。subtitle に読み(かな)と定義冒頭を載せることで、用語名／かな読み／定義中の語のいずれからもヒットし、結果一覧に定義が即表示される。`/search` の `SearchResults.tsx` と app-shell の ⌘K `CommandPalette.tsx`（いずれも当班 C-2 検索UI）にカテゴリ配列＋アイコン(BookMarked)＋件数タブを追加。`CATEGORY_META`(配色=indigo)／`countByCategory` の初期化も拡張。
+- **網羅の限界を明記（捏造・水増しなし）**: /glossary 本体 `page.tsx` に直書きされた基礎語約99語は ux-hub 所有ページ内で未 export のため対象外。完全網羅には用語データの `@/data/glossary` 一元化が要るが、それは他班(data/ux-hub)領域＝当班では行わない。今回収載した 152 語は実在データで、これまで検索 0 件だった分の純増。
+- **テスト**: `search-index.test.ts` に glossary 統合テスト3本を追加（実データ buildSearchIndex で 152語以上収載・全件 /glossary リンク・id 接頭辞／用語名・かな読み・定義語ヒット／countByCategory の all が glossary 含む全合計一致）。CATEGORY_META 網羅テストにも glossary を追加。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0(warnings 既存のみ) / `vitest run`=212ファイル1790テスト全pass（新規3含む） / `build`=成功。build 再生成データ(rag-metrics-latest.json・chatbot-eval-fresh-results.json)は復元。working tree clean。
+
+残: #541/#547 の CI 回収→マージが最優先。補充は site-critique 残件のうち自領域に閉じるもの（C-3-4 DRY後追いは #547 マージ後に解禁）。
+
 ## 2026-06-14 — 柱C-2 404 ページに横断検索ボックス（PR: seo/c2-404-cross-search）
 
 回収: 緑だった PR #528（C-4 og:image lib層）を squash マージ→main を ff-only 同期・clean 確認。#528 マージで PR #530（JSON-LD lib consolidate）が CONFLICTING（seo-metadata.ts 周辺ではなく BACKLOG/cycle-log の追記衝突）→ origin/main を通常マージで解決(force-push不可)・全ゲート再緑を確認し push。同様に PR #537（C-3-2 サイトマップ役割分担）も #528 マージで追記衝突→通常マージで解決・全ゲート再緑・push。#530/#537 とも CI 再走のため回収は次イテレーション。
@@ -132,6 +147,22 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ・自班ファイル 0）/ `vitest run`=212ファイル1759テスト全pass / `build`=Compiled successfully。working tree clean。
 
 残: #537・#541 の CI 緑回収＆マージ → C-3-4 DRY 後追い（sitemap.ts を freshness.ts 利用へ・#537 マージ後）。
+
+---
+
+## イテレーション: 決裁A拡張 robots 後発AI学習専用UAの遮断拡張（seo/robots-ai-training-extended）
+
+回収: 自分の CI 緑 PR #547（C-3-4/A-3 sitemap-index/equipment lastmod 動的化）を squash マージ。#552（C-2 用語集152語収載）は #547 マージで BACKLOG/cycle-log の追記が衝突→当該ブランチへ origin/main を通常マージで解決（両 [x] 追記を併存・force-push なし）し再 push（CI 再走は次イテレーションで回収）。main を ff-only で同期し clean 確認。
+
+着手内容: 2026-06-11 オーナー決裁「学習系は遮断継続／検索引用系は許可」を、**その後に各社が分離・新設した AI学習専用UA へ機械的に拡張**（新規方針判断ではない）。`robots.ts` の `AI_TRAINING_CRAWLERS` に Google-Extended（Gemini学習）・Applebot-Extended（Apple Intelligence学習）・Meta-ExternalAgent（Meta AI学習・FacebookBot とは別UA）・cohere-ai(+cohere-training-data-crawler)・PanguBot・AI2Bot・Timpibot・Webzio-Extended・FriendlyCrawler・ImagesiftBot・img2dataset・Kangaroo Bot を追加。
+
+不可侵の確認（検索流入を一切損なわない）: `*-Extended` は**学習オプトアウト専用UAで、検索インデックス用の Googlebot/Applebot とは別物**。Disallow にしても検索順位・流入には影響しない。あわせて許可リスト `AI_SEARCH_CITATION_BOTS` へ Anthropic 現UA（Claude-User＝ユーザー操作起点／Claude-SearchBot＝検索インデックス）を追記し、旧称 Claude-Web は後方互換で残置（学習用 ClaudeBot は遮断のまま）。
+
+テスト: `robots.test.ts` に回帰3本を追加し計8 it。①後発学習UA(Google-Extended/Applebot-Extended/Meta-ExternalAgent/cohere-ai/AI2Bot/PanguBot)=disallow:/ かつ Allow:/ を持たない。②検索クローラ Googlebot/Applebot は**専用の遮断ルールを持たず** UA:* の Allow:/ が適用＝同名プレフィックスの -Extended 追加で巻き込まれていないことを保証。③Claude-SearchBot/Claude-User=Allow:/・ClaudeBot=disallow:/。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ）/ `vitest run`=215ファイル1813テスト全pass / `build`=Compiled successfully。working tree clean。
+
+残: #552 の CI 緑回収＆マージ → C-3-4 DRY 後追い（sitemap.ts を freshness.ts 利用へ・#537 マージ後）。
 
 ---
 
