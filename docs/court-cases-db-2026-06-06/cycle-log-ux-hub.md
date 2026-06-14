@@ -192,3 +192,19 @@
 **ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 1866 全pass / build 成功。
 
 **無読テスト**: `docs/third-party-reviews/scripts/court-case-detail-44px-noread-2026-06-14.mjs` を **5/5 PASS**（production start 実機・スマホ390×844）。実 boundingBox で 戻る44.0px / 印刷44.0px / 3カード各46.0px を確認（全て height≥44px）。
+
+---
+
+## 2026-06-14 ux-hub/guides-hub-icon-first
+
+**タスク**: 補充・柱0。BACKLOG-ux-hub.md の未着手が全て[x]だったため、補充指針（自領域route の柱0未適用箇所）に従い `/guides` 検索意図ガイドハブを選定。
+
+**無読の所見（ペルソナ=検索から /guides に着地した初訪の職長）**: 本文を読まず3秒見ると、「ガイド一覧」の4カードが全て文字のみ（キーワード→タイトル→説明→「ガイドを読む」）で、emerald 一色・同一レイアウト。AI相談なのか災害分析なのか年次計画なのか化学物質RAなのかをアイコン/色で瞬時に弁別できず、各カードの説明文を読み切るまで自分の目的のガイドに飛べなかった。柱0（ビジュアルファースト/アイコンファースト）未適用の典型。カード全体が tap 標的で 44px は既達のため、欠陥は「視覚的弁別性」に限定。
+
+**修正**: 当ページ内に `GUIDE_VISUAL: Record<slug, {icon, badge}>` を新設し、4 slug に lucide アイコン（anzeneho-ai-chatbot=Bot / industry-accident-reports=BarChart3 / annual-safety-plan-generator=CalendarCheck / chemical-ra-create-simple=FlaskConical）と弁別色バッジ（青/ローズ/緑/琥珀）を割当。カードを `block` から `flex gap-4` の横並びへ変え、左に 48×48px(h-12 w-12) の角丸アイコンバッジ、右に既存テキスト（min-w-0 flex-1 で省略安全）を配置。**data層 KEYWORD_LANDINGS は data班凍結のため非改変**で、アイコン割当は完全に当ページ責務に閉じる。テキスト・リンク先・JSON-LD・編集方針セクションは不変。
+
+**テスト**: `guides/page.test.tsx` を新設（4ケース）。見出し描画／各カードが `/guides/<slug>` へリンク／各カードがアイコンバッジ(svg)を1つ持つ／4バッジの色トークンが重複しない（Set サイズ=件数）ことを保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 1883 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/guides-hub-icon-first-noread-2026-06-14.mjs` を **4/4 PASS**（dev実機・スマホ390×844）。実 boundingBox で4ガイドのアイコンバッジが各 48×48px、色トークン4種が重複なし（弁別 PASS）であることを確認。playwright は web/node_modules にあるため createRequire の相対解決で repo ルートから直接実行可能にした。

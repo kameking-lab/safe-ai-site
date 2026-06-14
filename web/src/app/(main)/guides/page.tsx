@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Bot,
+  BarChart3,
+  CalendarCheck,
+  FlaskConical,
+  type LucideIcon,
+} from "lucide-react";
 import { PageContainer, Section } from "@/components/layout";
 import { Breadcrumb } from "@/components/breadcrumb";
 import {
@@ -31,6 +38,15 @@ export const metadata: Metadata = {
     description,
     images: [ogImageUrl(title, description)],
   }),
+};
+
+// 柱0（ビジュアルファースト）: 4ガイドを3秒で見分けるためのアイコン＋色。
+// slug をキーに当ページ内で割り当てる（data層 KEYWORD_LANDINGS は data班凍結のため非改変）。
+const GUIDE_VISUAL: Record<string, { icon: LucideIcon; badge: string }> = {
+  "anzeneho-ai-chatbot": { icon: Bot, badge: "bg-blue-100 text-blue-700" },
+  "industry-accident-reports": { icon: BarChart3, badge: "bg-rose-100 text-rose-700" },
+  "annual-safety-plan-generator": { icon: CalendarCheck, badge: "bg-emerald-100 text-emerald-700" },
+  "chemical-ra-create-simple": { icon: FlaskConical, badge: "bg-amber-100 text-amber-800" },
 };
 
 export default function GuidesHubPage() {
@@ -75,24 +91,38 @@ export default function GuidesHubPage() {
 
         <Section title="ガイド一覧" spacing="default" className="mt-8">
           <ul className="grid gap-4">
-            {KEYWORD_LANDINGS.map((k) => (
-              <li key={k.slug}>
-                <Link
-                  href={`/guides/${k.slug}`}
-                  className="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-400 hover:shadow-md"
-                >
-                  <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
-                    {k.primaryKeyword}
-                  </p>
-                  <p className="mt-1 text-base font-bold text-slate-900 sm:text-lg">{k.title}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-700">{k.description}</p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
-                    ガイドを読む
-                    <ArrowRight className="h-3 w-3" aria-hidden="true" />
-                  </span>
-                </Link>
-              </li>
-            ))}
+            {KEYWORD_LANDINGS.map((k) => {
+              const visual = GUIDE_VISUAL[k.slug];
+              const Icon = visual?.icon;
+              return (
+                <li key={k.slug}>
+                  <Link
+                    href={`/guides/${k.slug}`}
+                    className="flex gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-400 hover:shadow-md"
+                  >
+                    {Icon ? (
+                      <span
+                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${visual.badge}`}
+                        aria-hidden="true"
+                      >
+                        <Icon className="h-6 w-6" />
+                      </span>
+                    ) : null}
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
+                        {k.primaryKeyword}
+                      </p>
+                      <p className="mt-1 text-base font-bold text-slate-900 sm:text-lg">{k.title}</p>
+                      <p className="mt-2 text-sm leading-6 text-slate-700">{k.description}</p>
+                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700">
+                        ガイドを読む
+                        <ArrowRight className="h-3 w-3" aria-hidden="true" />
+                      </span>
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </Section>
 
