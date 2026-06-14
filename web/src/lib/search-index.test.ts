@@ -74,7 +74,7 @@ describe('countByCategory', () => {
 
 describe('CATEGORY_META', () => {
   it('全カテゴリにラベルと配色を持つ', () => {
-    for (const key of ['notice', 'chemical', 'education', 'accident', 'precedent', 'glossary'] as const) {
+    for (const key of ['law', 'notice', 'chemical', 'education', 'accident', 'precedent', 'glossary'] as const) {
       expect(CATEGORY_META[key].label).toBeTruthy();
       expect(CATEGORY_META[key].bgColor).toMatch(/^bg-/);
       expect(CATEGORY_META[key].textColor).toMatch(/^text-/);
@@ -105,7 +105,73 @@ describe('buildSearchIndex — 用語集（glossary）の収載', () => {
     const index = await buildSearchIndex();
     const c = countByCategory(index, '安全');
     expect(c.all).toBe(
-      c.notice + c.chemical + c.education + c.accident + c.precedent + c.glossary,
+      c.law + c.notice + c.chemical + c.education + c.accident + c.precedent + c.glossary,
     );
+  });
+});
+
+describe('buildSearchIndex — 法令条文（law）の収載', () => {
+  it('curated 中核法令が law カテゴリで /law-search へ深リンクされる', async () => {
+    const index = await buildSearchIndex();
+    const laws = index.filter((i) => i.category === 'law');
+    // curated 中核（厚労省PDF補完=mhlwLawArticles を除く）で数百条規模を収載
+    expect(laws.length).toBeGreaterThanOrEqual(300);
+    expect(laws.every((i) => i.id.startsWith('law-'))).toBe(true);
+    // 全件が /law-search への深リンク（条番号があれば law= と art= の両方を持つ）
+    expect(laws.every((i) => i.url.startsWith('/law-search?law='))).toBe(true);
+    expect(laws.some((i) => i.url.includes('&art='))).toBe(true);
+  });
+
+  it('法令名・略称・条番号・条文見出し語のいずれからもヒットする', async () => {
+    const index = await buildSearchIndex();
+    // 略称（安衛則）— 前方一致で title にヒット
+    expect(searchItems(index, '安衛則', 'law').length).toBeGreaterThan(0);
+    // 正式名称（subtitle 先頭に full law 名を載せている）
+    expect(searchItems(index, '労働安全衛生規則', 'law').length).toBeGreaterThan(0);
+    // 条文見出し語（例: 安全管理者の選任）が subtitle からヒット
+    expect(searchItems(index, '安全管理者', 'law').length).toBeGreaterThan(0);
+  });
+
+  it('深リンク URL が law-search-panel と同形（law=正式名称 & art=条番号）で当該条文に解決する', async () => {
+    const index = await buildSearchIndex();
+    const anzeiHit = searchItems(index, '安全管理者の選任', 'law')[0];
+    expect(anzeiHit).toBeTruthy();
+    // law= は full law 名（パネルの filter が a.law === selectedLaw で照合するため）
+    expect(anzeiHit.url).toContain(`law=${encodeURIComponent('労働安全衛生規則')}`);
+    expect(anzeiHit.url).toMatch(/&art=/);
+  });
+
+  it('厚労省PDF補完（バンドル名）は law カテゴリに混入しない', async () => {
+    const index = await buildSearchIndex();
+    const laws = index.filter((i) => i.category === 'law');
+    // mhlwLawArticles の law 値（文書バンドル名）は除外済み＝条文 title は略称+条番号のみ
+    expect(laws.every((i) => i.title.length > 0)).toBe(true);
+    // id 重複なし（law|条番号 のユニーク化）
+    const ids = new Set(laws.map((i) => i.id));
+    expect(ids.size).toBe(laws.length);
+  });
+});
+
+describe('buildSearchIndex — 事故事例（accident）の収載', () => {
+  it('正本 getAccidentCasesDataset と件数・ID集合が一致する（5/7ファイルだけ手import の欠落是正）', async () => {
+    const { getAccidentCasesDataset } = await import('@/data/mock/accident-cases');
+    const index = await buildSearchIndex();
+    const accident = index.filter((i) => i.category === 'accident');
+
+    // 正本のユニークID集合（detail ページ /accidents/[id] が解決する集合そのもの）。
+    const datasetIds = new Set(getAccidentCasesDataset().map((c) => c.id));
+    const indexIds = new Set(accident.map((i) => i.id.replace(/^accident-/, '')));
+    expect(indexIds).toEqual(datasetIds);
+  });
+
+  it('各結果は一覧トップではなく個別詳細 /accidents/<id> へ深リンクする', async () => {
+    const index = await buildSearchIndex();
+    const accident = index.filter((i) => i.category === 'accident');
+    expect(accident.length).toBeGreaterThan(0);
+    expect(accident.every((i) => /^\/accidents\/.+/.test(i.url))).toBe(true);
+    // 旧実装のバグ＝全件が裸の /accidents へリンク、を回帰で固定。
+    expect(accident.some((i) => i.url === '/accidents')).toBe(false);
+    // url の id と item.id が対応＝詳細ページが必ず解決する（幽霊URL なし）。
+    expect(accident.every((i) => i.url === `/accidents/${i.id.replace(/^accident-/, '')}`)).toBe(true);
   });
 });

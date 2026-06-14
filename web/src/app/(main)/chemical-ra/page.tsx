@@ -84,13 +84,15 @@ export default function ChemicalRaPage() {
               { trade: "内装・清掃・洗浄", subs: ["メタノール", "ノルマルヘキサン", "次亜塩素酸ナトリウム"] },
               { trade: "設備・メッキ・薬品", subs: ["硫酸", "水酸化ナトリウム", "アンモニア"] },
             ].map((g) => (
-              <div key={g.trade} className="flex flex-wrap items-center gap-1.5">
+              <div key={g.trade} className="flex flex-wrap items-center gap-2">
                 <span className="w-32 shrink-0 text-xs font-semibold text-slate-600 dark:text-slate-300">{g.trade}</span>
                 {g.subs.map((s) => (
                   <Link
                     key={s}
                     href={`/chemical-ra?name=${encodeURIComponent(s)}&run=1`}
-                    className="rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+                    // 柱0: 物質名チップはRAを開始する主要CTA。指タップ標的を44px以上に
+                    // （min-h/min-w-[44px]＋inline-flexで中央寄せ。見た目のpill/色は不変）
+                    className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-amber-200 bg-amber-50 px-3.5 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
                   >
                     {s}
                   </Link>

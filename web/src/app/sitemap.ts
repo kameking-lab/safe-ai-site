@@ -1,73 +1,31 @@
 import type { MetadataRoute } from "next";
 import { PAID_MODE } from "@/lib/paid-mode";
-import { mhlwNotices } from "@/data/mhlw-notices";
 import { FEATURE_CATEGORIES } from "@/data/features-catalog";
 import { SAFETY_SIGNS, SIGN_CATEGORIES } from "@/data/safety-signs";
 import { INDUSTRIES } from "@/data/safety-signs/industry-usage";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
 import { COURT_CASES } from "@/data/court-cases";
-import { lawRevisionCores } from "@/data/mock/law-revisions";
-import { SERIOUS_CASES_META } from "@/lib/accident-news/serious-cases";
-import { buildNewsHubItems } from "@/lib/news-hub";
-import equipmentDb from "@/data/safety-equipment-db.json";
-import { getPublishedArticleIndex } from "@/lib/articles";
 import { latestIsoDate } from "@/lib/sitemap/lastmod";
+import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://www.anzen-ai-portal.jp";
 
-  // 柱C-3-4: lastmod 動的化。各データの「実更新日の最大値」を採り、
-  // 将来施行日などの未来日はビルド日 cap で除外する（lastmod スパム/未来日を防止）。
-  // 現在時刻そのものを lastmod にはしない（latestIsoDate がデータ実在日のみ採用）。
+  // 柱C-3-4 / S DRY: lastmod 動的化のためのセクション別「実データ最新日」は、
+  // sitemap-index.xml と単一ソース化するため lib/sitemap/freshness.ts に集約済み。
+  // 本体は computeSitemapFreshness() の結果を分配するだけ（fallback 値・cap 方針は
+  // そちらが正本。出力は従来と byte-identical）。
   const buildToday = new Date().toISOString().slice(0, 10);
-  // /whats-new・トップが集約する新着の最新日（法改正＋通達＋メディア＋速報＋重大災害）。
-  const freshestNews = latestIsoDate(
-    buildNewsHubItems({ lawLimit: 200, noticeLimit: 200, mediaLimit: 200, seriousCaseLimit: 200 }).map(
-      (i) => i.date,
-    ),
-    "2026-06-11",
-    buildToday,
-  );
-  // /laws が扱う法改正の最新公表日。
-  const freshestLawRevision = latestIsoDate(
-    lawRevisionCores.map((r) => r.publishedAt),
-    "2026-04-19",
-    buildToday,
-  );
-  // /circulars が扱う通達の最新発出日。
-  const freshestNotice = latestIsoDate(
-    mhlwNotices.map((n) => n.issuedDate),
-    "2026-04-28",
-    buildToday,
-  );
-  // /court-cases が扱う判例の最新判決日。
-  const freshestCourtCase = latestIsoDate(
-    COURT_CASES.map((c) => c.date),
-    "2026-06-06",
-    buildToday,
-  );
-  // 死亡災害DBスナップショットの生成日（/accidents 系のデータ実更新日）。
-  // generatedAt は ISO 日時（例 2026-04-18T17:36:53Z）のため日付部のみ採用。
-  const accidentsDataUpdated = latestIsoDate(
-    [SERIOUS_CASES_META.generatedAt?.slice(0, 10)],
-    "2026-04-19",
-    buildToday,
-  );
-  // 保護具DBの生成日（/equipment 個別ページのデータ実更新日）。
-  const equipmentDataUpdated = latestIsoDate([equipmentDb.generatedAt], "2026-04-29", buildToday);
-  // /articles 一覧の最新更新日（公開記事の publishedAt / lastReviewedAt の最大値）。
-  const articleIndex = getPublishedArticleIndex();
-  const freshestArticle = latestIsoDate(
-    articleIndex.flatMap((a) => [a.publishedAt, a.lastReviewedAt]),
-    "2026-04-28",
-    buildToday,
-  );
-  // サイト全体（トップ）の最新更新日＝主要データ源の最大値。
-  const siteFreshest = latestIsoDate(
-    [freshestNews, freshestLawRevision, freshestNotice, freshestCourtCase, accidentsDataUpdated],
-    "2026-04-19",
-    buildToday,
-  );
+  const {
+    freshestNews, // /whats-new・トップが集約する新着の最新日
+    freshestLawRevision, // /laws の法改正最新公表日
+    freshestNotice, // /circulars の通達最新発出日
+    freshestCourtCase, // /court-cases の判例最新判決日
+    accidentsDataUpdated, // 死亡災害DBスナップショット生成日
+    equipmentDataUpdated, // 保護具DB生成日
+    freshestArticle, // /articles 一覧の最新更新日
+    siteFreshest, // サイト全体（トップ）の最新日＝主要データ源の最大値
+  } = computeSitemapFreshness(buildToday);
 
   type Freq = "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   const pages: { url: string; lastModified: string; priority: number; changeFrequency: Freq }[] = [
