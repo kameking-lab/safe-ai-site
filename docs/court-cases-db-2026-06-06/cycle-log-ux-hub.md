@@ -176,3 +176,19 @@
 **ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 全pass / build 成功。
 
 **無読テスト**: `docs/third-party-reviews/scripts/faq-44px-targets-noread-2026-06-14.mjs` を **7/7 PASS**（dev実機・スマホ390×844）。実 boundingBox でハブのカテゴリリンク/関連ツールチップ、検索の人気キーワードチップ、カテゴリ内絞り込み入力、設問内の関連ページリンクが全て height≥44px であることを確認。
+
+---
+
+## 2026-06-14 ux-hub/court-case-detail-44px-targets（PR #567）
+
+**タスク**: 補充・柱0。BACKLOG-ux-hub.md の未着手が全て[x]だったため、自領域route の柱0未適用箇所を補充指針に従い起こした。`/court-cases/[id]` 判例詳細ページを対象に選定。
+
+**無読の所見（ペルソナ=一覧から1判例にタップで入った一人親方/コンサル）**: 本文を読まず最上部を3秒見ると、左の「労災裁判例コーナーに戻る」戻りリンクと右の「この判例を印刷／PDF」アクションが視認はできるが、いずれも指のヒット域が細く押し損ねる。実測で戻る≈20px・印刷≈30pxと44px未満だった。戻るは一覧へ帰る唯一の導線、印刷は顧問先に1判例だけ渡すコンサルの主要動作で、どちらも親指操作の頻出点。
+
+**修正**: 戻るリンクと印刷リンクに `min-h-[44px]` を付与（inline-flex items-center は既存のため縦中央寄せのまま高さのみ44pxへ）。加えて「現場の実務へ」3カード(KY用紙/重大災害事例/安衛法質問)が p-3 単行で丁度44px境界だったため `min-h-[44px]` を明示し、サブピクセル丸めでの44px割れを予防。すべて純粋なクラス追加で、レイアウト・`print:hidden` の印刷挙動・遷移先は不変。
+
+**テスト**: `court-cases/[id]/page.test.tsx` を新設（3ケース）。async サーバーコンポーネントを `await CourtCaseDetailPage({ params: Promise.resolve({ id }) })` で解決して描画し、戻る/印刷/3カードの className に `min-h-[44px]`+`items-center` を保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 1866 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/court-case-detail-44px-noread-2026-06-14.mjs` を **5/5 PASS**（production start 実機・スマホ390×844）。実 boundingBox で 戻る44.0px / 印刷44.0px / 3カード各46.0px を確認（全て height≥44px）。

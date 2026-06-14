@@ -101,13 +101,14 @@ export function WorkersMasterClient() {
         </Link>
       </div>
 
-      {/* 結論カード（柱0）: いまの状態＝登録人数を3秒で。0名は登録へ誘導。 */}
+      {/* 結論カード（柱0）: いまの状態＝登録人数を3秒で。次にやること＝0名は追加へ／登録済みはKY用紙で使うへ。 */}
       <div className="mt-4">
         {registeredCount === 0 ? (
           <ConclusionCard
             tone="info"
             title="登録なし"
             description="作業員を登録すると、KY用紙の参加者を「選ぶだけ」になります。下のフォームから追加してください。"
+            action={{ href: "#add-worker", label: "作業員を追加" }}
           />
         ) : (
           <ConclusionCard
@@ -116,6 +117,7 @@ export function WorkersMasterClient() {
             unit="名"
             title="登録済み"
             description="KY用紙の参加者は、この一覧からチェックで選べます。氏名の手入力は不要です。"
+            action={{ href: "/ky/paper", label: "KY用紙で使う" }}
           />
         )}
       </div>
@@ -125,7 +127,7 @@ export function WorkersMasterClient() {
       </p>
 
       {/* 新規追加 */}
-      <section className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 shadow-sm">
+      <section id="add-worker" className="mt-4 scroll-mt-20 rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 shadow-sm">
         <h2 className="mb-3 text-sm font-bold text-slate-900">作業員を追加</h2>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <label className="space-y-1">

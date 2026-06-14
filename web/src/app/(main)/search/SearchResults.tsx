@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Scale,
   BookMarked,
+  BookText,
   ArrowRight,
 } from 'lucide-react';
 import {
@@ -24,7 +25,7 @@ import {
 } from '@/lib/search-index';
 import { trackEvent } from '@/components/Analytics';
 
-const CATEGORIES: SearchCategory[] = ['precedent', 'notice', 'chemical', 'education', 'accident', 'glossary'];
+const CATEGORIES: SearchCategory[] = ['law', 'precedent', 'notice', 'chemical', 'education', 'accident', 'glossary'];
 
 // /search はサイト内検索結果ページ（全件表示）。コマンドパレット(⌘K)が上位10件の
 // クイック移動なのに対し、こちらは件数無制限・URL共有可能・カテゴリ別タブを備える。
@@ -33,6 +34,7 @@ const RESULT_LIMIT = 300;
 function CategoryIcon({ category }: { category: SearchCategory }) {
   const cls = 'h-4 w-4';
   switch (category) {
+    case 'law':       return <BookText className={cls} aria-hidden="true" />;
     case 'notice':    return <FileText className={cls} aria-hidden="true" />;
     case 'chemical':  return <TestTube2 className={cls} aria-hidden="true" />;
     case 'education': return <BookOpen className={cls} aria-hidden="true" />;
@@ -112,7 +114,7 @@ export function SearchResults() {
     <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
       <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 sm:text-2xl">サイト内 横断検索</h1>
       <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
-        判例・通達・化学物質・特別教育・事故事例をまとめて検索します。
+        法令条文・判例・通達・化学物質・特別教育・事故事例をまとめて検索します。
       </p>
 
       {/* 検索ボックス */}
@@ -267,7 +269,7 @@ function EmptyPrompt() {
         キーワードを入力して検索してください
       </p>
       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-        判例・通達・化学物質・特別教育・事故事例を横断して探せます。
+        法令条文・判例・通達・化学物質・特別教育・事故事例を横断して探せます。
       </p>
     </div>
   );
