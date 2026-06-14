@@ -1,9 +1,10 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
-import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, GraduationCap, MessageSquare, Mail, Download } from "lucide-react";
+import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, MessageSquare, Mail, Download } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
+import { CourseConclusion } from "@/components/education/CourseConclusion";
 
 const TITLE = "騒音障害防止 労働衛生教育";
 const DESCRIPTION =
@@ -162,21 +163,16 @@ export default function SouonPage() {
         <span className="text-slate-700">騒音障害防止 労働衛生教育</span>
       </nav>
 
+      {/* 結論カード（柱0）: 区分・時間とサンプル資料への導線を最上部に集約 */}
+      <CourseConclusion
+        kind="health"
+        duration="約1.5時間"
+        basis="通達ベース"
+        summary="騒音障害防止ガイドライン（基発0420第2号）に基づく、85dB以上の作業環境の作業者向け労働衛生教育。"
+      />
+
       {/* ヘッダー */}
       <header className="mb-8">
-        <div className="flex flex-wrap gap-2 mb-3">
-          <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-0.5 text-xs font-bold text-emerald-700">
-            <GraduationCap className="mr-1 h-3 w-3" />
-            労働衛生教育
-          </span>
-          <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-semibold text-slate-600">
-            通達ベース
-          </span>
-          <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-semibold text-slate-600">
-            <Clock className="mr-1 h-3 w-3" />
-            約1.5時間
-          </span>
-        </div>
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">騒音障害防止 労働衛生教育</h1>
         <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
           製造業・建設業をはじめ85dB以上の作業環境に従事する労働者を対象に、厚生労働省「騒音障害防止のためのガイドライン」（基発0420第2号、令和5年4月20日改訂）に基づく労働衛生教育を実施します。
@@ -295,7 +291,7 @@ export default function SouonPage() {
       </section>
 
       {/* サンプル資料ダウンロード */}
-      <section className="mb-8 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 sm:p-6">
+      <section id="course-sample" className="mb-8 scroll-mt-20 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 sm:p-6">
         <div className="flex flex-wrap items-start gap-4">
           <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
             <FileText className="h-6 w-6" />

@@ -1,9 +1,10 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
-import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, GraduationCap, MessageSquare, Mail, Download } from "lucide-react";
+import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, MessageSquare, Mail, Download } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
+import { CourseConclusion } from "@/components/education/CourseConclusion";
 
 const TITLE = "化学物質RA実務教育";
 const DESCRIPTION =
@@ -165,21 +166,16 @@ export default function ChemicalRaPage() {
         <span className="text-slate-700">化学物質RA実務教育</span>
       </nav>
 
+      {/* 結論カード（柱0）: 区分・時間とサンプル資料への導線を最上部に集約 */}
+      <CourseConclusion
+        kind="legal"
+        duration="約2.5〜4時間"
+        basis="法律ベース"
+        summary="安衛法第57条の3（自律的化学物質管理）に対応した、化学物質管理者・SDS/RA実務担当向けの実務教育。"
+      />
+
       {/* ヘッダー */}
       <header className="mb-8">
-        <div className="flex flex-wrap gap-2 mb-3">
-          <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-0.5 text-xs font-bold text-sky-800">
-            <GraduationCap className="mr-1 h-3 w-3" />
-            法定教育
-          </span>
-          <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-semibold text-slate-600">
-            法律ベース
-          </span>
-          <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-semibold text-slate-600">
-            <Clock className="mr-1 h-3 w-3" />
-            約2.5〜4時間
-          </span>
-        </div>
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">化学物質RA実務教育</h1>
         <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
           労働安全衛生法第57条の3に基づく自律的化学物質管理制度に対応した実務教育。化学物質管理者選任候補・SDS管理担当・RA実務担当を対象に、CREATE-SIMPLE等の手法演習を含めて実施します。
@@ -317,7 +313,7 @@ export default function ChemicalRaPage() {
       </section>
 
       {/* サンプル資料ダウンロード */}
-      <section className="mb-8 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 sm:p-6">
+      <section id="course-sample" className="mb-8 scroll-mt-20 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 sm:p-6">
         <div className="flex flex-wrap items-start gap-4">
           <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
             <FileText className="h-6 w-6" />

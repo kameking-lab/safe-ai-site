@@ -1,9 +1,10 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
-import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, GraduationCap, MessageSquare, Mail, Download } from "lucide-react";
+import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, MessageSquare, Mail, Download } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
+import { CourseConclusion } from "@/components/education/CourseConclusion";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 
 const TITLE = "腰痛予防労働衛生教育";
@@ -163,21 +164,16 @@ export default function YoutsuyobouPage() {
         <span className="text-slate-700">腰痛予防労働衛生教育</span>
       </nav>
 
+      {/* 結論カード（柱0）: 区分・時間とサンプル資料への導線を最上部に集約 */}
+      <CourseConclusion
+        kind="health"
+        duration="2時間以上"
+        basis="通達ベース"
+        summary="職場における腰痛予防対策指針（基発0618第1号）に基づく、重量物取扱い・介護・VDT作業者向けの労働衛生教育。"
+      />
+
       {/* ヘッダー */}
       <header className="mb-8">
-        <div className="flex flex-wrap gap-2 mb-3">
-          <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-0.5 text-xs font-bold text-emerald-700">
-            <GraduationCap className="mr-1 h-3 w-3" />
-            労働衛生教育
-          </span>
-          <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-semibold text-slate-600">
-            通達ベース
-          </span>
-          <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-semibold text-slate-600">
-            <Clock className="mr-1 h-3 w-3" />
-            2時間以上
-          </span>
-        </div>
         <TranslatedPageHeader
           titleJa="腰痛予防労働衛生教育"
           titleEn="Low Back Pain Prevention Training"
@@ -309,7 +305,7 @@ export default function YoutsuyobouPage() {
       </section>
 
       {/* サンプル資料ダウンロード */}
-      <section className="mb-8 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 sm:p-6">
+      <section id="course-sample" className="mb-8 scroll-mt-20 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 sm:p-6">
         <div className="flex flex-wrap items-start gap-4">
           <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
             <FileText className="h-6 w-6" />
