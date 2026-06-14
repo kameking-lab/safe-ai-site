@@ -245,6 +245,41 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
           <h1 className="text-xl font-bold text-slate-900 sm:text-2xl">
             事故統計ダッシュボード
           </h1>
+          {/* 柱0・結論ファースト: 統計DBの規模をファーストビュー最上部にデカ数字で提示。
+              値は下の「サマリーKPI」と同一ソース（収録総件数＝curatedCases＋mhlwDeathsCount、
+              内訳＝厚労省死亡災害DB mhlwDeathsCount＋curated curatedCases、期間＝meta.yearsCovered）
+              の転記のみ＝捏造なし。「いま何件を集計したダッシュボードか」を段落を読まず3秒で掴ませる。
+              ※死亡災害比率は死亡災害DB寄りの統合構成で高めに出るため、文脈注記つきの
+                サマリーKPI側に残し、ここでは誤読を避けて構成内訳チップのみ並べる。 */}
+          <div
+            data-testid="analytics-headline"
+            className="flex flex-wrap items-end gap-x-5 gap-y-2 rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+          >
+            <div>
+              <div className="text-[11px] font-semibold tracking-wide text-slate-500">
+                収録 労働災害
+              </div>
+              <div className="flex items-baseline gap-1">
+                <span className="text-4xl font-bold tabular-nums text-slate-900 sm:text-5xl">
+                  {formatNumber(
+                    aggregates.meta.curatedCases + aggregates.meta.mhlwDeathsCount,
+                  )}
+                </span>
+                <span className="text-lg font-bold text-slate-700">件</span>
+              </div>
+              <div className="mt-0.5 text-[11px] text-slate-500">
+                {aggregates.meta.yearsCovered.from}〜{aggregates.meta.yearsCovered.to}年・厚労省統合データセット
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center rounded-full border border-rose-200 bg-rose-50 px-3 py-1 text-xs font-bold text-rose-800">
+                厚労省死亡災害DB {formatNumber(aggregates.meta.mhlwDeathsCount)}件
+              </span>
+              <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold text-slate-700">
+                curated詳細 {formatNumber(aggregates.meta.curatedCases)}件
+              </span>
+            </div>
+          </div>
           {/* 柱0バッチ7/9: 長い説明文は折りたたみへ（下のKPI・軸Gがファーストビューの主役）。内容は不変。 */}
           <CollapsibleDetail summary="このダッシュボードのデータ源について">
             curated 詳細事例＋厚労省 死亡災害DB（{formatNumber(aggregates.meta.mhlwDeathsCount)} 件 / 2019〜2024）を統合し、時系列・業種・事故種類・地域・規模・原因など多軸で集計したダッシュボードです。

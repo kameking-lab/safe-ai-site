@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-06-14 — 柱C-3-3 事故事例 個別ページのサイトマップ収載（PR: seo/c3-accidents-sitemap）
+
+回収: 緑だった PR #561（C-2 事故 横断検索の正本寄せ・深リンク化）を squash マージ→main を ff-only 同期・clean 確認。#561 マージで PR #566（C-2 法令 横断検索）が `search-index.ts`／`search-index.test.ts`／BACKLOG の3点で CONFLICTING→ origin/main を当該ブランチへ通常マージで解決(force-push不可を遵守)＝両機能(law＋accident)が search-index に併存することを確認、全ゲート再緑(tsc0/lint0/該当18テストpass/build成功)→push。#566 と #571（C-2 通達 深リンク）は CI 再走のため回収は次イテレーション。
+
+着手: 在庫キュー空のため補充指針（site-critique 01-seo-technical）から自領域に閉じる項目を選定。#566/#571 が `search-index.ts` を編集中のため横断検索への新カテゴリ追加（保護具など）は競合過多と判断、**サイトマップ（別ファイル＝独立マージ可能）**の穴を選択。
+
+- **現状確認（実コード grep）**: `/accidents/[id]`（事故事例 個別詳細・約290件・`dynamicParams=true` でオンデマンド生成・固有 canonical/title/description/OG を持つ実在ページ）が**どのサイトマップにも不在**。本体 `sitemap.ts` には一覧 `/accidents` しか無く、判例 `/court-cases/[id]` は収載済みなのに事故DB（サイト最大級の独自コンテンツ）だけ個別ページが漏れていた発見性の穴。#561 で横断検索は既に `/accidents/<id>` へ深リンク済みのため、サイトマップ収載で「検索で引ける／sitemapで巡回される」が揃う。
+- **修正（当班所有のサイトマップ層のみ）**: 子サイトマップ `app/sitemap-accidents.xml/route.ts` を新設（既存の circulars/equipment/articles と同形）。正本 `getAccidentCasesDataset()` を単一ソースに `/accidents/<id>` を全件列挙（重複ID除去＝横断検索の収載ロジックと同形）。lastmod は当日打ち（lastmod スパム）を避け、`computeSitemapFreshness().accidentsDataUpdated`（事故DBスナップショット生成日）を全URL共通で使用＝事故の `occurredOn`（災害発生日）はページ更新日でないため不採用。`sitemap-index.xml` に本子を登録（本体→記事→**事故**→通達→保護具の5子構成）。robots は既に sitemap-index を広告しているため自動発見される。
+- **テスト**: `sitemap-accidents.xml/route.test.ts` 新設4本（application/xml urlset／正本の全ユニークIDを `/accidents/<id>` 出力＝件数一致・幽霊URL0／裸 `/accidents` 不在・全件個別深リンク／lastmod が accidentsDataUpdated で当日固定でない）。`sitemap-index.xml/route.test.ts` を5子構成へ更新（列挙順・lastmod 5件・各子=対応セクション実データ日）。
+- **不可侵の遵守**: `/accidents/[id]` ルート本文・事故データは他班所有のため非改変（読むだけ）。当班はサイトマップ生成のみ。捏造・水増しなし＝既存実在ページの発見性を回復しただけ。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0(warnings 既存のみ) / `vitest run`=225ファイル1880テスト全pass（新規8含む） / `build`=成功（`/sitemap-accidents.xml` ルート登録を確認）。working tree clean。
+
+残: #566/#571 の CI 回収→マージが最優先。補充は横断検索への保護具（equipment）収載が次の有力候補だが、#566/#571 マージ後に着手して `search-index.ts` の競合を避ける。
 ## 2026-06-14 — 柱C-2 横断検索に法令条文（law）を収載（PR: seo/c2-laws-cross-search）
 
 回収: CI 緑だった自分の PR #553（決裁A robots 学習UA拡張）を squash マージ→main を ff-only 同期・clean 確認。#556（C-3-4 DRY sitemap freshness）は #553 マージで BACKLOG/cycle-log の追記衝突→当該ブランチへ origin/main を通常マージで解決（両イテレーション記録を併存・force-push なし）し push。#556 は CI 再走のため回収は次イテレーション（CI は元々 e2e/smoke 緑）。
