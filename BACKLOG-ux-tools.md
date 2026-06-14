@@ -12,5 +12,7 @@
 - [x] 【柱3レビュー②／補充】/risk 見通しストリップに「該当地域名」を表示（2026-06-14 ux-tool/risk-outlook-region-names）。前回レビューで新設した「明日からの見通し」は最悪レベル＋「N地域」の件数だけで、台風前日に自現場（例:九州）が荒れるかは1週間予報を開いて地図を見るまで分からなかった。是正=セル本文と aria-label に最悪レベル該当の地域名（例「四国・九州」）を直接表示（3件以上は先頭2件＋「他N」で1行省略）。地域名は既存予報 regions[].regionLabel そのまま＝捏造ゼロ。buildRiskWeatherOutlook に worstRegions を追加（テスト+4=12件）。無読テスト 新規7/7 PASS（risk-outlook-region-names-noread）＋既存 risk-outlook-noread を地域名表示に追従し9/9維持。UI追加は1行のテキスト差し替えのみ＝既存破壊0。
 - [x] 【柱0回帰固定／補充】件数結論カードの無読テスト敷設（2026-06-14 ux-tool/noread-batch9-count-cards）。PR #527でデカ数字の件数結論カードを敷設したが専用無読スクリプトが無かった検索/件数系3本=/chemical-database(収録3,695物質)・/goods(掲載39品目)・/subsidies(活用可能7制度)に回帰テストを新設（batch9-count-cards-noread＝結論カードがファーストビュー内・デカ数字+単位+漢字短ラベル・DOM順で検索入力より前・h1=1を固定）。実機prod(3100)で18/18 PASS。**自領域の柱0監査結果**: risk-prediction/chemical-ra/law-hierarchy/accidents-reports/accident-news/circulars/subsidies/calculator/goods/chemical-database いずれも既に結論ファーストの視覚結論を最上部に保持・h1は全25route各1個で多重/欠落なし＝新規の柱0未適用箇所なし（追加カードは水増しのため見送り）。UI変更なし=既存破壊0。
 
+- [x] 【柱C-6／柱0 補充・チャットボット深掘り】/chatbot 入力欄直下の常時表示クイック質問チップを44px化（2026-06-14 ux-tool/chatbot-quick-chips-44px）。会話開始後（履歴あり）は空状態の大きな質問例ボタンが消え、この行が「打たずにタップで追質問」の唯一の動線になるが、従来 py-1/11px ≒ 高さ約24px で44px未満＝指で誤爆しやすかった。空状態の質問例ボタンと同じ `min-h-[44px]` 基準に統一＋可視ラベル「質問例：」を付与（文言・件数=EXAMPLE_QUESTIONS.slice(0,3) は不変＝捏造/水増しゼロ、タップ標的の拡大とラベル付与のみ）。無読テスト 新規5/5 PASS（chatbot-quick-chips-44px-noread＝群が常時可視・ラベル在・3個・各44px以上・タップで送信され履歴に文言）。ゲート全通過（tsc0/lint errors0/vitest 1874 pass/build成功）。
+
 ## 補充の指針（未着手3件未満で起こす）
 - 自領域route の柱0未適用箇所・無読テスト不合格画面・第三者レビュー指摘。chemical RA・チャットボットの深掘り。
