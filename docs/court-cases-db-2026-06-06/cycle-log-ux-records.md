@@ -99,3 +99,11 @@
 実機(prod start 3100・iPhone12相当390px)で発見した重畳を2件是正: (1)全画面共通の `MobileBottomNav`(z-40・≤480px) の上にバーを載せるため `--mobile-bottom-nav-h`+safe-area分を `bottom` に加算（PCは 0px で従来どおり最下部固定）。(2)全画面共通の共有FAB `ShareButtons fixed`(右下 bottom-20 right-4 z-30) と「…」が重なるため、モバイルのみバー右側に `pr-16` を確保しFABの帯を空けた（PCは中央寄せで非重畳のため `sm:pr-0`）。app-shell等の他班所有・凍結ファイルは未変更（importのみ）。
 ゲート: tsc=0 / lint errors=0(既存warn2のみ) / vitest 1643 pass / build 成功。無読テスト `docs/third-party-reviews/scripts/ky-paper-action-focus-noread-2026-06-13.mjs` 11/11 PASS。
 残: 柱C-9・A2（入力のステップ/アコーディオン化＝用紙ファースト設計との両立方針を要検討）として BACKLOG に分割・継続。
+
+## 2026-06-14 柱0補充 KY周辺ユーティリティ（/ky/list・/ky/workers）無読巡回
+
+「初めて開く職長」ペルソナで2画面を3秒無読チェック。`/ky/list`（保存済みKY一覧）は空＝「保存KYなし」＋次アクション「新規KY作成」、件数＝「N件 保存KY」＋同アクション、絞込0件＝「該当なし」の3状態とも結論カードが既設で合格＝改善不要。真の欠落は **`/ky/workers`（作業員マスター）**: 入口の結論カードが「登録なし／N名 登録済み」の状態は出すものの「次にやること」のタップ標的を持たず、空状態の次アクション（作業員を追加）は説明文に埋もれていた（同じKY系の `/ky/list` が空状態にCTAを持つのと非対称）。
+是正は共通 `ConclusionCard` の href-action（足すだけ・既存API不変）で対称化: 空状態に「作業員を追加」（`#add-worker`・44px・追加フォームへスクロールジャンプ、フォーム section に `id="add-worker"` と `scroll-mt-20` を付与）、登録済みに「KY用紙で使う」（`/ky/paper`）を付与。本文・フォーム・一覧・クラウド同期ロジックは不変。
+ゲート: tsc=0 / lint errors=0（既存warnのみ）/ vitest 1832 pass（新規 component 無読テスト `workers-master-client.test.tsx` 4本含む）/ build 成功。Playwright 無読 `docs/third-party-reviews/scripts/ky-list-workers-noread-2026-06-14.mjs` を prod start(3123・iPhone12相当390px)で実行し 15/15 PASS（両画面の空/件数の状態文言・44px・遷移先を検証）。
+注: prod確認の初回、port 3100 を前イテレーションの旧ビルドサーバ(EADDRINUSE)が占有し旧UIを配信していたため空振り→別portで再ビルド配信して合格を確認。
+残: #555(柱3レビュー /inspection 進捗バー) のCI緑待ち回収マージ。補充タスク2件（/education-certification 無読巡回・/safety-diary 柱3レビュー）を BACKLOG へ起票。
