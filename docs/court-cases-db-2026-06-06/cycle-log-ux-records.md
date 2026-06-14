@@ -135,3 +135,11 @@ CI緑の #555（点検記録の下書き進捗バー）を squashマージ→mai
 保存済み判定の正確性: store の `savedAt` は **自動保存でも `duplicateForNextDay`(翌日複製)でも更新**され「保存一覧に入った」根拠に使えない（誤って緑を出す危険）。よって savedAt は使わず、**手動「保存」を押した内容の JSON と現在内容の一致**でセッション内厳密追跡（`savedJson`）。編集すると即座に緑が外れる。下部バー文言（保存済み=緑「✓ 保存一覧に保存済み」／未保存=「未保存（下書き自動保存:HH:MM）」）と自動保存ラベルも「下書き自動保存」に是正し、結論カードと矛盾しないようにした。**A4印刷シート(`MeetingPrintSheet`)は print:hidden で一切不変**（公式帳票書式は不可侵）。
 ゲート: tsc=0 / lint errors=0(既存warnのみ) / vitest 1839 pass(`paper-status.test.ts` を3状態+未完成優先で 5→8 本に拡充) / build 成功。無読テスト `docs/third-party-reviews/scripts/safety-diary-saved-state-2026-06-14.mjs` 9/9 PASS（初見=記入のこり4／記入完了・未保存=青・保存する／保存済み=緑・保存一覧で確認・下部バー一致／保存後に1文字編集で緑が外れ未保存へ戻る回帰）。
 残: 柱0補充（/ky/list・/ky/workers 無読巡回 = #558 でCI待ち回収予定）、受入教育修了証・他の記録系の柱0/柱3巡回を継続。
+
+## 2026-06-14 柱0補充 KY周辺ユーティリティ（/ky/list・/ky/workers）無読巡回
+
+「初めて開く職長」ペルソナで2画面を3秒無読チェック。`/ky/list`（保存済みKY一覧）は空＝「保存KYなし」＋次アクション「新規KY作成」、件数＝「N件 保存KY」＋同アクション、絞込0件＝「該当なし」の3状態とも結論カードが既設で合格＝改善不要。真の欠落は **`/ky/workers`（作業員マスター）**: 入口の結論カードが「登録なし／N名 登録済み」の状態は出すものの「次にやること」のタップ標的を持たず、空状態の次アクション（作業員を追加）は説明文に埋もれていた（同じKY系の `/ky/list` が空状態にCTAを持つのと非対称）。
+是正は共通 `ConclusionCard` の href-action（足すだけ・既存API不変）で対称化: 空状態に「作業員を追加」（`#add-worker`・44px・追加フォームへスクロールジャンプ、フォーム section に `id="add-worker"` と `scroll-mt-20` を付与）、登録済みに「KY用紙で使う」（`/ky/paper`）を付与。本文・フォーム・一覧・クラウド同期ロジックは不変。
+ゲート: tsc=0 / lint errors=0（既存warnのみ）/ vitest 1832 pass（新規 component 無読テスト `workers-master-client.test.tsx` 4本含む）/ build 成功。Playwright 無読 `docs/third-party-reviews/scripts/ky-list-workers-noread-2026-06-14.mjs` を prod start(3123・iPhone12相当390px)で実行し 15/15 PASS（両画面の空/件数の状態文言・44px・遷移先を検証）。
+注: prod確認の初回、port 3100 を前イテレーションの旧ビルドサーバ(EADDRINUSE)が占有し旧UIを配信していたため空振り→別portで再ビルド配信して合格を確認。
+残: 受入教育修了証 /education-certification 無読巡回・他の記録系の柱0/柱3巡回を継続。
