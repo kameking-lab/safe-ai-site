@@ -132,3 +132,19 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ・自班ファイル 0）/ `vitest run`=212ファイル1759テスト全pass / `build`=Compiled successfully。working tree clean。
 
 残: #537・#541 の CI 緑回収＆マージ → C-3-4 DRY 後追い（sitemap.ts を freshness.ts 利用へ・#537 マージ後）。
+
+---
+
+## イテレーション: 柱C-3-4 / S DRY sitemap.ts freshest群を単一ソース化（seo/c3-sitemap-freshness-dry）
+
+回収: 自分の未マージ PR #552（C-2 用語集横断検索）・#553（決裁A robots 学習UA拡張）は CI（e2e/smoke）進行中＝マージ不可のため次イテレーションで回収。main を ff-only で同期し clean 確認。
+
+着手前の現状確認: BACKLOG 最上位（C-3-4 DRY 後追い）のブロッカー #537（sitemap.ts 編集中の C-3-2 役割分担是正）が **MERGED（2026-06-13）** であることを確認＝ブロック解除。本体 `sitemap.ts` は #543 で新設済みの `lib/sitemap/freshness.ts` と同一の freshest 計算ロジックを冒頭で**二重保持**したままだった（出力は一致するが片側更新で lastmod 乖離するリスク源）。
+
+- `sitemap.ts` 冒頭の8変数（freshestNews/LawRevision/Notice/CourtCase/accidentsDataUpdated/equipmentDataUpdated/freshestArticle/siteFreshest）を、`computeSitemapFreshness(buildToday)` の分割代入に置換。fallback 値・未来日 cap 方針は freshness.ts を正本に一本化。
+- 不要 import（mhlwNotices/lawRevisionCores/SERIOUS_CASES_META/buildNewsHubItems/equipmentDb/getPublishedArticleIndex）を撤去。`COURT_CASES`・`latestIsoDate` は courtCasePages の per-URL lastmod で継続使用。
+- **出力 byte-identical**（同一入力・同一 latestIsoDate）。sitemap.test.ts/freshness.test.ts/sitemap-index route.test.ts 含む全テストで回帰固定。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ）/ `vitest run`=219ファイル1828テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・chatbot-eval-fresh-results.json）は復元。working tree clean。PR #556。
+
+残: #552・#553 の CI 緑回収＆マージ → BACKLOG 未着手 0 件のため次は「補充の指針」（site-critique 01-seo-technical / 05-lighthouse の自領域項目）から補充。

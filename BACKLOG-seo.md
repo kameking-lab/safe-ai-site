@@ -3,9 +3,10 @@
 担当領域・契約・絶対ルールは loop-prompt-seo.txt を参照。所有ファイル=sitemap*/robots/manifest/seo-lib/JSON-LDヘルパー/横断検索(search-index・fuzzy-search・notice-search・/search)/app-shell(検索UIのみ)/両layout(metadataのみ)。**着手前に必ず本番とコードの現状を確認**（走行中の全領域ループが先に消化している項目があるため、済みなら[x]にして次へ）。マスター BACKLOG.md は参照専用。
 
 ## 未着手（上から処理）
-- [ ] 【柱C-3-4・S DRY後追い】本体 `sitemap.ts` 冒頭の freshest 群（siteFreshest/freshestArticle/freshestNotice 等）を、新設 `lib/sitemap/freshness.ts` の `computeSitemapFreshness()` 利用へ寄せて単一ソース化する。**#537（sitemap.ts を編集中）のマージ後に着手**＝それまでは二重定義のまま据え置き（出力 byte-identical のため実害なし）。
+（現在キュー空。次イテレーションは「補充の指針」から起こす）
 
 ## 完了
+- [x] 【柱C-3-4・S DRY後追い】本体 `sitemap.ts` 冒頭の freshest 群（siteFreshest/freshestArticle/freshestNotice 等8変数）を、`lib/sitemap/freshness.ts` の `computeSitemapFreshness(buildToday)` 分割代入へ置換し sitemap-index.xml と単一ソース化。#537 マージ確認後に着手。不要 import 6件撤去（COURT_CASES/latestIsoDate は courtCasePages で継続使用）。出力 byte-identical・全1828テストpass・build成功（#556）。
 - [x] 【柱C-3-4 / A-3・S サイトマップ index/equipment の lastmod 動的化】`sitemap-index.xml` は全子サイトマップに当日（new Date()）を打っており、中身不変でも lastmod が毎日動く lastmod スパム（Google に無視され再クロール遅延）だった点を是正。新設 `lib/sitemap/freshness.ts` の純粋関数 `computeSitemapFreshness(buildToday)` で各セクション実データ最新日（本体=siteFreshest/記事=freshestArticle/通達=freshestNotice/保護具=equipmentDataUpdated、未来日はビルド日 cap）を導出し、index 4子＋ `sitemap-equipment.xml` の per-URL lastmod（同じく当日打ちだった）を実データ日へ差し替え。fallback 値は `sitemap.ts` と一致。freshness.test.ts(6 it)＋ index route.test.ts(4 it) で「cap値そのものを返さない＝当日固定でない」回帰を固定。`sitemap.ts`/circulars route は #537 と競合回避のため非改変。
 - [x] 【柱C-2・S 404 横断検索ボックス】グローバル 404（app-shell 外＝ナビ/⌘K 無し）の `not-found.tsx` に、JS 非依存のネイティブ GET フォームで `/search?q=` へ送る横断検索ボックスと主要機能ランチャー（法令/事故/判例/通達/KY/Eラーニング/チャット/問い合わせ）を新設。site-critique C-2「404どん詰まり（本文199字・リンク4本・検索手段なし）」を是正＝旧URL/タイポ流入の取りこぼしを回収。入力/ボタンは min-h-11（44px）。回帰テスト not-found.test.tsx（5 it）。
 - [x] 【柱C-3-2/A-3・S サイトマップ役割分担の是正】sitemap-circulars.xml が別系統データ officialNotices(nt-* ID)を出力し /circulars/[id] で全件404する幽霊URL(soft404)だった点を、正本 mhlwNotices(mhlw-notice-NNNN)へ差し替え。あわせて本体 sitemap.xml に直書きしていた個別通達/保護具URLを撤去し、専用子サイトマップ(sitemap-circulars/-equipment.xml＝sitemap-index 列挙)へ一本化（同一URLの二重掲載＝役割崩壊を解消）。route.test.ts(6 it)＋sitemap.test.ts に二重掲載なし回帰(3 it)を追加。
