@@ -147,3 +147,17 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ・自班ファイル 0）/ `vitest run`=212ファイル1759テスト全pass / `build`=Compiled successfully。working tree clean。
 
 残: #537・#541 の CI 緑回収＆マージ → C-3-4 DRY 後追い（sitemap.ts を freshness.ts 利用へ・#537 マージ後）。
+
+## イテレーション: 決裁A拡張 robots 後発AI学習専用UAの遮断拡張（seo/robots-ai-training-extended）
+
+回収: 自分の CI 緑 PR #547（C-3-4/A-3 sitemap-index/equipment lastmod 動的化）を squash マージ。#552（C-2 用語集152語収載）は #547 マージで BACKLOG/cycle-log の追記が衝突→当該ブランチへ origin/main を通常マージで解決（両 [x] 追記を併存・force-push なし）し再 push（CI 再走は次イテレーションで回収）。main を ff-only で同期し clean 確認。
+
+着手内容: 2026-06-11 オーナー決裁「学習系は遮断継続／検索引用系は許可」を、**その後に各社が分離・新設した AI学習専用UA へ機械的に拡張**（新規方針判断ではない）。`robots.ts` の `AI_TRAINING_CRAWLERS` に Google-Extended（Gemini学習）・Applebot-Extended（Apple Intelligence学習）・Meta-ExternalAgent（Meta AI学習・FacebookBot とは別UA）・cohere-ai(+cohere-training-data-crawler)・PanguBot・AI2Bot・Timpibot・Webzio-Extended・FriendlyCrawler・ImagesiftBot・img2dataset・Kangaroo Bot を追加。
+
+不可侵の確認（検索流入を一切損なわない）: `*-Extended` は**学習オプトアウト専用UAで、検索インデックス用の Googlebot/Applebot とは別物**。Disallow にしても検索順位・流入には影響しない。あわせて許可リスト `AI_SEARCH_CITATION_BOTS` へ Anthropic 現UA（Claude-User＝ユーザー操作起点／Claude-SearchBot＝検索インデックス）を追記し、旧称 Claude-Web は後方互換で残置（学習用 ClaudeBot は遮断のまま）。
+
+テスト: `robots.test.ts` に回帰3本を追加し計8 it。①後発学習UA(Google-Extended/Applebot-Extended/Meta-ExternalAgent/cohere-ai/AI2Bot/PanguBot)=disallow:/ かつ Allow:/ を持たない。②検索クローラ Googlebot/Applebot は**専用の遮断ルールを持たず** UA:* の Allow:/ が適用＝同名プレフィックスの -Extended 追加で巻き込まれていないことを保証。③Claude-SearchBot/Claude-User=Allow:/・ClaudeBot=disallow:/。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ）/ `vitest run`=215ファイル1813テスト全pass / `build`=Compiled successfully。working tree clean。
+
+残: #552 の CI 緑回収＆マージ → C-3-4 DRY 後追い（sitemap.ts を freshness.ts 利用へ・#537 マージ後）。
