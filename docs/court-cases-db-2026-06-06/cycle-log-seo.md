@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-06-14 — 柱C-2 404 ページに横断検索ボックス（PR: seo/c2-404-cross-search）
+
+回収: 緑だった PR #528（C-4 og:image lib層）を squash マージ→main を ff-only 同期・clean 確認。#528 マージで PR #530（JSON-LD lib consolidate）が CONFLICTING（seo-metadata.ts 周辺ではなく BACKLOG/cycle-log の追記衝突）→ origin/main を通常マージで解決(force-push不可)・全ゲート再緑を確認し push。同様に PR #537（C-3-2 サイトマップ役割分担）も #528 マージで追記衝突→通常マージで解決・全ゲート再緑・push。#530/#537 とも CI 再走のため回収は次イテレーション。
+
+着手: 補充指針（site-critique 01-seo-technical）の **C-2「404どん詰まり」**。在庫キュー先頭の C-4(JSON-LD) は #530 で着手中・本体 sitemap.ts は #537 で改変中のため、双方と衝突しない自領域タスクとして C-2 を選択（横断検索＝当班の C-2 領域）。
+
+- **現状確認**: 404 は2系統。`(main)/not-found.tsx` は app-shell 配下（ナビ＋⌘K 検索あり・リンク6本）で問題なし。critique が実測した「ヘッダーナビ0・検索手段なし・リンク4本」はグローバル fallback の `app/not-found.tsx`（app-shell 外）だった。ここを是正。
+- **修正（グローバル shell ページのみ）**: `app/not-found.tsx` に (1) サイト内横断検索ボックス＝JS 非依存のネイティブ `<form action="/search" method="get">`（入力 `name="q"`、`/search` の `useSearchParams.get('q')` と一致）と (2) 主要機能ランチャー（法令/事故/判例/通達/KY/Eラーニング/安衛法チャット/問い合わせ＝全て sitemap 収載の実在ページ）を新設。旧URL流入・タイポ流入の取りこぼしを検索1発で回収できるようにした。app-shell 外で JS 描画に頼れないため、サーバーレンダリングのみで検索手段が成立するネイティブフォームを採用。入力/送信ボタンは `min-h-11`（44px・WCAG 2.5.5）。
+- **テスト**: `not-found.test.tsx` 新規（5 it＝フォームが GET で /search へ送る・`name=q` 入力・ラベル紐付け・44px タップ標的・主要機能リンク実在・noindex,nofollow 維持）。
+- **不可侵**: data/他班 route/機能コンポーネントには一切触れず。本ページはどの機能 UI 班にも属さないグローバル shell（robots/manifest と同列）で、追加要素は横断検索＝当班 C-2 領域に閉じる。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0(warnings 既存のみ) / `vitest run`=207ファイル1717テスト全pass（新規5含む） / `build`=成功。build 再生成データ(rag-metrics-latest.json・chatbot-eval-fresh-results.json)は復元。working tree clean。
+
+残: #530（JSON-LD lib）/#537（サイトマップ役割分担）の CI 回収→マージが最優先。補充は site-critique の B 系（B-1 h1 構造は各ページ UI 班・当班外、B-2 description は lib テンプレ化が当班可能だが消費は各 route UI 班）から自領域に閉じるものを選定。
+
+---
+
 ## 2026-06-14 — 柱C-3-2/A-3 サイトマップ役割分担の是正（PR: seo/c3-circulars-sitemap-canonical）
 
 回収: 緑だった PR #524（C-2(b) 44px）を squash マージ→main を ff-only 同期・clean 確認。緑だった PR #528（C-4 og:image フォールバック lib層）は #524 マージで BACKLOG-seo.md・cycle-log-seo.md が追記衝突→ origin/main を通常マージで解決(force-push不可を遵守)し push、CI 再走は次イテレーションで回収。#530（JSON-LD lib consolidate）は CI pending、次回回収。
@@ -97,3 +114,21 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ）/ `vitest run`=200ファイル1665テスト全pass / `build`=成功。build 再生成データ（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は復元。working tree clean。
 
 残: 決裁A（#522 CI待ち回収）→ 柱C-4（共通 generateMetadata/JSON-LD/og フォールバック・lib部分。json-ld.tsx に20関数既存・未テスト→回帰スイート固定が次の一手）。
+
+---
+
+## イテレーション: 柱C-3-4 / A-3 サイトマップ index/equipment の lastmod 動的化（seo/c3-sitemap-index-lastmod）
+
+回収: 自分の CI 緑 PR #530（C-4 JSON-LD lib集約）を squash マージ。#537（C-3-2 役割分担是正）は #530 マージで BACKLOG/cycle-log が衝突→当該ブランチへ origin/main を通常マージで解決（追記の両立・force-push なし）し再 push（CI 再走は次イテレーションで回収）。#541（C-2 404 横断検索）は CI 進行中＝次イテレーション回収。main を ff-only で同期し clean 確認。
+
+着手前の現状確認: BACKLOG キュー空のため「補充の指針」の docs/site-critique-2026-06-11/01-seo-technical.md を本番コードと突合。S-1（articles 毒シェル）・S-3（court-cases等 sitemap 不在）・A-1（AI検索ボット分離）・A-2（内部レポート公開→/admin/audits へ移動済＝COMMON_DISALLOW でカバー）・A-4（旧equipment ID シェル）は **既に是正済み** を確認（[x] 化対象なし）。残る実害として **A-3 の lastmod 信頼性**を精査: `sitemap.ts`（本体）は #516 で実データ日に追従済みだが、**`sitemap-index.xml` は全子サイトマップに当日（new Date()）を直打ち**＝中身不変でも lastmod が毎日動く lastmod スパムが残存。同型のバグが `sitemap-equipment.xml` の per-URL lastmod にも残っていた。
+
+- 新設 `web/src/lib/sitemap/freshness.ts`: 純粋関数 `computeSitemapFreshness(buildToday)`。各セクション実データ最新日（freshestNews/LawRevision/Notice/CourtCase/accidents/equipment/article＋集約の siteFreshest）を `latestIsoDate`（#516）で導出。未来日はビルド日 cap で除外、fallback 値は `sitemap.ts` と一致させ出力乖離を防止。
+- `sitemap-index.xml/route.ts`: 4子（本体=siteFreshest / 記事=freshestArticle / 通達=freshestNotice / 保護具=equipmentDataUpdated）の lastmod を実データ日へ。
+- `sitemap-equipment.xml/route.ts`: per-URL lastmod を当日→equipmentDataUpdated（保護具DB生成日）へ。
+- テスト: `freshness.test.ts`(6 it)＝形式/cap以下/決定性/「未来 cap を渡しても cap 値そのものを返さない＝当日固定の lastmod スパムでない」/siteFreshest 単調性。`sitemap-index.xml/route.test.ts`(4 it)＝sitemapindex 構造・4子列挙・lastmod 形式・各子が実データ最新日に一致。
+- 競合回避: #537 が編集中の `sitemap.ts` 本体と circulars route は**非改変**。冒頭 freshest 群の DRY 寄せ（computeSitemapFreshness へ集約）は #537 マージ後の後追いタスクとして BACKLOG 未着手に明記。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ・自班ファイル 0）/ `vitest run`=212ファイル1759テスト全pass / `build`=Compiled successfully。working tree clean。
+
+残: #537・#541 の CI 緑回収＆マージ → C-3-4 DRY 後追い（sitemap.ts を freshness.ts 利用へ・#537 マージ後）。

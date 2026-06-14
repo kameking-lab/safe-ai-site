@@ -1,5 +1,26 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-06-14 — 補充: /favorites 柱0(44px)＋accident種別の表示是正
+
+**イテレーション頭の回収**: CI緑の自班PR #534(signage JIS色)を squash マージ→ブランチ削除。#539(トップ柱3)は #534 マージで競合(DIRTY)化したため `origin/main` を当該ブランチへ通常マージ（doc cycle-log の競合のみ手動解消＝3エントリ共存）→push（CI再走は次サイクルで回収）。#544(/features 44px)はCI in-progressのため次サイクル。`main` を ff-only で最新化。
+
+**タスク源**: BACKLOG-ux-hub.md 最上位 `[ ]` は「柱3トップ実機レビュー」だが**既にPR #539で着手済み**（マージ前）。重複着手を避け、補充の指針「自領域route の柱0未適用箇所」から、cycle-log 残課題で次候補に挙げていた **/favorites** を選択（/features は #544 で in-flight）。ブランチ `ux-hub/favorites-pillar0-44px-accident-kind`（main 起点）。
+
+**無読＋コード精査で見つけた欠陥**:
+- 柱0タップ標的: 種別タブ(`py-1.5`≈32px)・削除ボタン(`p-2`+16pxアイコン≈32px)・空状態の導線CTA(`px-3 py-1.5 text-xs`≈28px)がいずれも44px未満（WCAG 2.5.5不適合）。
+- **既存の表示バグ**: `lib/favorites` の kind は article/notice/**accident** の3種で、/accidents の「⭐」も同じストアに入る。しかし本リストはバッジを `kind==="article" ? 条文 : 通達` の二分岐で描画していたため、**事故事例が一律「通達(violet)」と誤表示**。さらに `TAB_LABEL` には「事故事例」があるのにタブ配列は `["all","article","notice"]` 固定で**絞り込み不能**だった。
+
+**対策（favorites-list.tsx）**:
+- 行内バッジを `KIND_BADGE`（article=emerald「条文」/ notice=violet「通達」/ accident=rose「事故事例」）の表引きへ。
+- タブ配列を動的化＝`counts.accident > 0` のときだけ「事故事例」タブを追加（事故事例を保存していない大多数の画面は従来どおり3タブで不変）。削除で当該種別が0件になり絞り込み中タブが消える際は `setTab("all")` で取り残し防止。
+- 3コントロールへ `min-h-[44px]`（タブ・空状態CTA）/ `min-h-[44px] min-w-[44px]`（削除ボタン）を付与。CTAは `text-xs→text-sm`・`px-3→px-4` で可読性も底上げ。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（favorites-list.tsx に既存の「unused eslint-disable」warning 1件のみ・無関係）/ vitest 212 files・1778 tests 全pass（favorites-list.test.tsx 7件新設＝accidentバッジ是正・事故事例タブの出現/絞り込み・44pxクラスの回帰ガード）/ build 成功。full suite が書き出す data班生成物 `docs/rag-metrics-latest.json`・`web/src/data/chatbot-eval-fresh-results.json` は commit から除外（git checkout で復元）。
+
+**無読テスト**: `docs/third-party-reviews/scripts/favorites-pillar0-accident-noread-2026-06-14.mjs`。条文/通達/事故事例の3件を localStorage に仕込み、本番サーバー(build+start・スマホ390×844)で **8/8 PASS**＝事故事例行が「事故事例」バッジ（通達バッジ0件）・事故事例タブの出現と絞り込み・全タブ高さ実測44px・削除ボタン実測44×44px・空状態CTA実測48px を boundingBox で確認。スクリーンショット `favorites-pillar0-2026-06-14.png` 添付（4タブ＋rose事故事例行を確認）。port3000 は他班クローンが占有のため 3517 で起動。
+
+**残課題**: #539(トップ柱3)・#544(/features 44px) の各CI回収。自領域 柱0 未適用の /resources・/notifications・/guides は次サイクル候補。
+
 ## 2026-06-13 — 決裁C: サイネージのアフィリエイト安全グッズを「出さない」
 
 **タスク源**: BACKLOG-ux-hub.md 決裁C（自走可）。ブランチ `ux-hub/decision-c-remove-signage-goods`。
@@ -95,3 +116,21 @@
 **無読テスト**: `docs/third-party-reviews/scripts/accidents-pillar0-44px-noread-2026-06-14.mjs` を5/5 PASS（dev実機・スマホ390×844・実 boundingBox 測定）。ハブナビ4チップ・入力欄・検索ボタン・型チップ・削除ボタンの全てが44px以上であることを実測確認。
 
 **残課題**: #544/#548 のCI緑確認とマージ回収。自領域route の柱0/柱3レビュー継続。
+
+---
+
+## 2026-06-14 — 柱0補充 /features 機能一覧ハブの44pxタップ標的化
+
+**タスク源**: BACKLOG-ux-hub.md の未着手は柱3トップ実機レビュー1件のみだったが、これは自分の在飛 PR #539（トップのペルソナバンド）と同じファイル領域で衝突するため、補充指針に従い独立した自領域route /features を柱0で点検した。ブランチ `ux-hub/features-pillar0-44px-targets`（main 起点・PR #529/#534 マージ反映後）。
+
+着手前に冒頭の `git checkout main && git pull --ff-only` で PR #529（batch8）をmainへ取り込み、衝突していた PR #534（signage）は origin/main を当該ブランチへ通常マージしてpush（CI再走→次サイクル回収）。
+
+`/features` を無読テストで点検したところ、カード自体はスクリーンショット付きでビジュアルファースト達成済みだったが、**指で押す要素がほぼ全て44px未満**だった: カテゴリフィルタチップ・クイックリンク（5分ツアー等）・各カードの主CTA「機能を試す →」/副CTA「詳しく見る」・下部CTAが `py-2 text-sm`（実測≈36px）。一覧の主アクション（機能を試す）が押し損ねサイズなのは初訪の一人親方（スマホ）に直接の摩擦。
+
+全タップ要素に `min-h-[44px]` を付与（フィルタ/カテゴリ/CTAは `inline-flex items-center justify-center` で縦中央寄せも追加）。**純粋なクラス追加でグリッド・余白・寸法は不変**（min-h は中身が44px超なら無効化＝既存破壊なし）。
+
+**テスト**: `features-index-client.test.tsx` を新設（5ケース）。`LanguageProvider` でラップして描画し、フィルタ/主副CTA/クイックリンクの className に `min-h-[44px]` を保証＋カード件数がカタログと一致することを確認。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 210 files・1732 tests 全pass / build 成功。data班生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）はfull suite走行で書き換わるため commit から除外（git checkout で復元）。
+
+**無読テスト**: `docs/third-party-reviews/scripts/features-44px-targets-noread-2026-06-14.mjs` を **8/8 PASS**（dev実機・スマホ390×844）。実 boundingBox でフィルタ「すべて」/先頭カテゴリ/主CTA/副CTA/クイックリンク/下部CTAが全て height≥44px・カードがスクリーンショット画像を伴う（ビジュアルファースト）ことを確認。

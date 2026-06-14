@@ -1,12 +1,27 @@
 {
-  "generated_at": "2026-05-24T07:25:48.143Z",
+  "generated_at": "2026-06-13T16:23:19.122Z",
   "source": "test/chatbot-fresh-100.json",
   "total": 100,
-  "correct": 100,
-  "accuracy": 1,
+  "correct": 98,
+  "accuracy": 0.98,
   "target": 0.9,
   "passed": true,
-  "failures": [],
+  "failures": [
+    {
+      "id": 39,
+      "topic": "足場",
+      "question": "足場の組立て・変更後に必要な点検と記録の根拠条文は？",
+      "expected": "安衛則第567条 / 安衛則第568条",
+      "actual": "安衛則第565条, 安衛則第38条, ボイラー則第62条, 特化則第27条, 安衛則第359条"
+    },
+    {
+      "id": 79,
+      "topic": "酸欠",
+      "question": "酸素欠乏症等の防止措置（換気・呼吸用保護具）の根拠条文は？",
+      "expected": "酸欠則第5条",
+      "actual": "安衛則第600条, 安衛則第601条, 安衛則第604条, 酸欠則第6条, 酸欠則第12条"
+    }
+  ],
   "topic_breakdown": {
     "総則": {
       "total": 4,
@@ -35,8 +50,8 @@
     },
     "足場": {
       "total": 5,
-      "correct": 5,
-      "accuracy": 1
+      "correct": 4,
+      "accuracy": 0.8
     },
     "化学物質": {
       "total": 10,
@@ -80,8 +95,8 @@
     },
     "酸欠": {
       "total": 2,
-      "correct": 2,
-      "accuracy": 1
+      "correct": 1,
+      "accuracy": 0.5
     },
     "事故報告": {
       "total": 2,

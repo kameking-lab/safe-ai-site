@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAllEquipment } from '@/lib/equipment-recommendation';
+import { computeSitemapFreshness } from '@/lib/sitemap/freshness';
 
 const BASE = 'https://www.anzen-ai-portal.jp';
 
@@ -8,7 +9,10 @@ function escapeXml(str: string): string {
 }
 
 export async function GET() {
-  const today = new Date().toISOString().split('T')[0];
+  // 柱C-3-4 / A-3: lastmod は当日（new Date()）ではなく保護具DBの実生成日に追従させる。
+  // 当日打ちは中身不変でも毎日 lastmod が動く lastmod スパムで、Google に無視される。
+  const buildToday = new Date().toISOString().slice(0, 10);
+  const { equipmentDataUpdated } = computeSitemapFreshness(buildToday);
 
   // 正本=getAllEquipment()(eq-NNNN・/equipment/[id] が generateStaticParams で実生成する正規ID)。
   // 旧実装は safetyGoodsItems(/goods 用・ee-/fg-/hc- 等の別系統ID)を /equipment/<id> として
@@ -17,7 +21,7 @@ export async function GET() {
     .map(
       (item) => `  <url>
     <loc>${escapeXml(`${BASE}/equipment/${item.id}`)}</loc>
-    <lastmod>${today}</lastmod>
+    <lastmod>${equipmentDataUpdated}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>`
