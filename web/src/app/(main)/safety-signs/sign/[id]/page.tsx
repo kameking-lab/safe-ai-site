@@ -109,7 +109,7 @@ export default async function SignDetailPage({ params }: RouteParams) {
 
       <Link
         href={`/safety-signs/category/${category.id}`}
-        className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:underline"
+        className="mt-4 inline-flex min-h-[44px] items-center gap-1 text-xs font-semibold text-emerald-700 hover:underline"
       >
         <ChevronLeft className="h-3 w-3" aria-hidden="true" />
         {category.label}に戻る
@@ -242,7 +242,7 @@ export default async function SignDetailPage({ params }: RouteParams) {
             <Link
               key={ind.id}
               href={`/safety-signs/industry/${ind.id}`}
-              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50/40"
+              className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-emerald-300 hover:bg-emerald-50/40"
             >
               <span className="mr-1" aria-hidden="true">
                 {ind.icon}

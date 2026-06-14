@@ -141,7 +141,7 @@ export default function FAQHubPage() {
                 <div className="px-4 pb-4">
                   <Link
                     href={`/faq/${cat}`}
-                    className="block w-full rounded-lg bg-slate-800 py-2 text-center text-xs font-bold text-white hover:bg-slate-700 transition-colors"
+                    className="flex w-full min-h-[44px] items-center justify-center rounded-lg bg-slate-800 py-2 text-center text-xs font-bold text-white hover:bg-slate-700 transition-colors"
                   >
                     {FAQ_CATEGORY_LABELS[cat]}の質問一覧を見る →
                   </Link>
@@ -167,7 +167,7 @@ export default function FAQHubPage() {
             <Link
               key={tool.href}
               href={tool.href}
-              className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+              className="inline-flex min-h-[44px] items-center rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100 transition-colors"
             >
               {tool.label}
             </Link>
