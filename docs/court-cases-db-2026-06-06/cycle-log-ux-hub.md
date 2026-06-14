@@ -101,6 +101,24 @@
 
 **残課題**: サイネージ柱0（大型化・JIS安全色統一 → PR #534 で着手）、トップページ柱3実機レビュー。
 
+---
+
+## 2026-06-14 イテレーション（/accidents 事故DB 柱0補充 タップ標的44px化）
+
+**着手**: 当班のCI緑PR #539（トップ ペルソナバンド2列化）を squashマージ→main同期。#544（/features 44px）は main更新でBACKLOG衝突→origin/mainを取り込み解消し再push（CI再回収待ち）。#548（/favorites）はCI pendingのため次イテレーションへ。BACKLOG未着手が全[x]のため補充指針に従い自領域route /accidents の柱0未適用箇所を起こした。
+
+**作業**: 事故DBページ最上部の主要操作が指で押しにくいサイズだった（無読＝現場の一人親方がスマホ親指で「探す/検索する」を押し損ねる）。`AccidentHubNav` の事故系4ルートのナビチップ(px-3 py-1≈28px)・`QuickAccidentSearch` のキーワード入力欄/検索ボタン(py-2≈38px)と事故型チップ(min-h-[36px])・`SavedAccidents` の削除ボタン(px-2 py-1≈24px) を、いずれも min-h-[44px]／h-11 w-11 へ是正。純粋なクラス追加（inline-flex中央寄せ込み）でレイアウトは不変。`AccidentTypeGrid`（柱0のピクトグラムナビ）は既に min-h-[44px] 達成済みのため非変更。
+
+**テスト**: vitest 8ケース追加（accident-hub-nav に44pxガード1・quick-accident-search 新規4・saved-accidents 新規3）。SavedAccidents は localStorage(safe-ai:favorites:v1) を直接シードして描画。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/accidents-pillar0-44px-noread-2026-06-14.mjs` を5/5 PASS（dev実機・スマホ390×844・実 boundingBox 測定）。ハブナビ4チップ・入力欄・検索ボタン・型チップ・削除ボタンの全てが44px以上であることを実測確認。
+
+**残課題**: #544/#548 のCI緑確認とマージ回収。自領域route の柱0/柱3レビュー継続。
+
+---
+
 ## 2026-06-14 — 柱0補充 /features 機能一覧ハブの44pxタップ標的化
 
 **タスク源**: BACKLOG-ux-hub.md の未着手は柱3トップ実機レビュー1件のみだったが、これは自分の在飛 PR #539（トップのペルソナバンド）と同じファイル領域で衝突するため、補充指針に従い独立した自領域route /features を柱0で点検した。ブランチ `ux-hub/features-pillar0-44px-targets`（main 起点・PR #529/#534 マージ反映後）。

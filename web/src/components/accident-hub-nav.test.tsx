@@ -35,4 +35,15 @@ describe("AccidentHubNav", () => {
     render(<AccidentHubNav current="accidents-analytics" />);
     expect(screen.getByText(/約5,000件.*可視化/)).toBeDefined();
   });
+
+  // 柱0: 事故系ナビは初訪の現場ペルソナが最上部でタップする入口。
+  // 全リンクが 44px タップ標的を満たす（px-3 py-1 ≈28px への退行を防ぐ）。
+  it("4ルートのナビチップが全て min-h-[44px] タップ標的", () => {
+    render(<AccidentHubNav current="accidents" />);
+    const links = screen.getAllByRole("link");
+    expect(links).toHaveLength(4);
+    for (const a of links) {
+      expect(a.className).toContain("min-h-[44px]");
+    }
+  });
 });
