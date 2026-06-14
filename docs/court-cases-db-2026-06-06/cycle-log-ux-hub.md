@@ -1,5 +1,17 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-06-14 — 補充: /notifications 気象警報メール登録フォーム 柱0(44px)
+
+**イテレーション頭の回収**: 自班の未マージPR #554(/faq 44px)・#551(/accidents 44px)はいずれもCI pending（smoke/e2e/Vercel）でマージ不可→次サイクルで回収。`git checkout main && git pull --ff-only` で clean 確認。
+
+**タスク源**: BACKLOG-ux-hub.md「未着手」は全て `[x]`＝補充モード。補充の指針「自領域route の柱0未適用箇所」から、残ハブroute(quick/guides/notifications/resources/safety-signs)を実地調査。**/notifications** の気象警報メール登録フォーム（SubscribeForm）の主入力＝メールアドレス入力・対象地域セレクトが `py-2.5`（≈40px）で44px未満という測定可能な欠陥を特定。一人親方が最初にタップする無料通知登録の主入力が押し損ねサイズだったため選択。ブランチ `ux-hub/notifications-pillar0-44px-form`（main 起点）。
+
+**変更**: `subscribe-form.tsx` の email input・prefecture select を `min-h-[44px]`＋`py-3` へ。送信ボタン(既に py-3)にも `min-h-[44px]` を明示。純粋なTailwindクラス追加でレイアウト・送信ロジック・SEO不変。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0（eslint直叩き・notificationsディレクトリ EXIT 0。`npm run lint` 経由は環境segfaultのため直叩きで確認）/ vitest 220 files・1839 tests 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/notifications-44px-form-noread-2026-06-14.mjs`（dev実機・スマホ390×844、実 boundingBox）でメール入力・地域セレクト・登録ボタンの3標的が全て height≥44px を **3/3 PASS** で検証する設計。vitest 3件で `min-h-[44px]` クラスと py-2.5 退行禁止を回帰固定。
+
 ## 2026-06-14 — 補充: /favorites 柱0(44px)＋accident種別の表示是正
 
 **イテレーション頭の回収**: CI緑の自班PR #534(signage JIS色)を squash マージ→ブランチ削除。#539(トップ柱3)は #534 マージで競合(DIRTY)化したため `origin/main` を当該ブランチへ通常マージ（doc cycle-log の競合のみ手動解消＝3エントリ共存）→push（CI再走は次サイクルで回収）。#544(/features 44px)はCI in-progressのため次サイクル。`main` を ff-only で最新化。
@@ -137,6 +149,22 @@
 
 ---
 
+## 2026-06-14 /safety-signs サブページ ナビ・タップ標的44px化（柱0補充）
+
+**着手理由**: BACKLOG-ux-hub 未着手キューが全て[x]のため補充指針（自領域routeの柱0未適用箇所）から起こす。所有route /safety-signs を実機レビューしたところ、ハブ本体（カテゴリ/業種カード）は44px達成済みだが、サブページ（カテゴリ詳細・業種詳細・標識詳細）のナビ操作が退行していた。
+
+**欠陥（既存）**: 標識→カテゴリ→業種を行き来する主ナビが親指で押し損ねるサイズ。① 各サブページ先頭の「…に戻る」リンク3箇所が `text-xs` の素の `inline-flex`（パディング/min-h無し、≈16〜20px）。② 「他の業種ガイド」（業種詳細）/「業種別ガイドへ」（標識詳細）チップが `px-3 py-2 text-xs`（≈32px）。
+
+**対策**: ① 戻るリンク3箇所に `min-h-[44px]` を付与。② 業種チップ2箇所に `inline-flex items-center min-h-[44px]` を付与（グリッドセル内で縦中央寄せ・44px高）。いずれも純粋なクラス追加でレイアウト不変。標識詳細の本文中・業種インラインリンク（`rounded-lg` を持たない）は性質が異なるため対象外とし、テスト/無読も `rounded-lg` で限定。
+
+**テスト**: `safety-signs-tap-targets.test.tsx` を新設（3ケース）。async server page を `await` して `LanguageProvider`/`FuriganaProvider`/`EasyJapaneseProvider` でラップ描画し、戻るリンク・業種チップの className に `min-h-[44px]` を保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors / vitest 222 files・1847 tests 全pass / build 成功。data班生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）はdev起動で書き換わるため commit から除外（git checkout で復元）。
+
+**無読テスト**: `docs/third-party-reviews/scripts/safety-signs-subpages-44px-noread-2026-06-14.mjs` を **5/5 PASS**（dev実機・スマホ390×844）。実 boundingBox で カテゴリ/業種/標識の各詳細の戻るリンク・業種チップ群が全て height≥44px であることを確認。
+
+---
+
 ## 2026-06-14 柱0補充 /faq ハブ/ナビ系 44pxタップ標的化（ux-hub/faq-pillar0-44px-targets）
 
 **背景**: /features に続く柱0補充。FAQ ハブ/検索/カテゴリの押せる要素のうち、ハブのカテゴリ「…の質問一覧を見る →」リンク・関連ツールチップ、検索の「よく検索されるキーワード」チップ・設問内の関連ページリンク、カテゴリ内絞り込み入力 が py-1/py-2（≈28〜36px）で44px未満。指で押し損ねるサイズだった。
@@ -148,3 +176,19 @@
 **ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 全pass / build 成功。
 
 **無読テスト**: `docs/third-party-reviews/scripts/faq-44px-targets-noread-2026-06-14.mjs` を **7/7 PASS**（dev実機・スマホ390×844）。実 boundingBox でハブのカテゴリリンク/関連ツールチップ、検索の人気キーワードチップ、カテゴリ内絞り込み入力、設問内の関連ページリンクが全て height≥44px であることを確認。
+
+---
+
+## 2026-06-14 ux-hub/court-case-detail-44px-targets（PR #567）
+
+**タスク**: 補充・柱0。BACKLOG-ux-hub.md の未着手が全て[x]だったため、自領域route の柱0未適用箇所を補充指針に従い起こした。`/court-cases/[id]` 判例詳細ページを対象に選定。
+
+**無読の所見（ペルソナ=一覧から1判例にタップで入った一人親方/コンサル）**: 本文を読まず最上部を3秒見ると、左の「労災裁判例コーナーに戻る」戻りリンクと右の「この判例を印刷／PDF」アクションが視認はできるが、いずれも指のヒット域が細く押し損ねる。実測で戻る≈20px・印刷≈30pxと44px未満だった。戻るは一覧へ帰る唯一の導線、印刷は顧問先に1判例だけ渡すコンサルの主要動作で、どちらも親指操作の頻出点。
+
+**修正**: 戻るリンクと印刷リンクに `min-h-[44px]` を付与（inline-flex items-center は既存のため縦中央寄せのまま高さのみ44pxへ）。加えて「現場の実務へ」3カード(KY用紙/重大災害事例/安衛法質問)が p-3 単行で丁度44px境界だったため `min-h-[44px]` を明示し、サブピクセル丸めでの44px割れを予防。すべて純粋なクラス追加で、レイアウト・`print:hidden` の印刷挙動・遷移先は不変。
+
+**テスト**: `court-cases/[id]/page.test.tsx` を新設（3ケース）。async サーバーコンポーネントを `await CourtCaseDetailPage({ params: Promise.resolve({ id }) })` で解決して描画し、戻る/印刷/3カードの className に `min-h-[44px]`+`items-center` を保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 1866 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/court-case-detail-44px-noread-2026-06-14.mjs` を **5/5 PASS**（production start 実機・スマホ390×844）。実 boundingBox で 戻る44.0px / 印刷44.0px / 3カード各46.0px を確認（全て height≥44px）。

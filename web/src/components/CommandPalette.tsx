@@ -12,6 +12,7 @@ import {
   ArrowRight,
   Scale,
   BookMarked,
+  BookText,
   MessageSquare,
   ListChecks,
   BarChart3,
@@ -25,7 +26,7 @@ import {
 } from '@/lib/search-index';
 import { trackEvent } from '@/components/Analytics';
 
-const CATEGORIES: SearchCategory[] = ['precedent', 'notice', 'chemical', 'education', 'accident', 'glossary'];
+const CATEGORIES: SearchCategory[] = ['law', 'precedent', 'notice', 'chemical', 'education', 'accident', 'glossary'];
 
 // 空クエリ時に表示する主要ショートカット（UX-007: モバイル検索とPC Ctrl+K の機能を統一）
 type Shortcut = {
@@ -46,6 +47,7 @@ const QUICK_SHORTCUTS: Shortcut[] = [
 function CategoryIcon({ category }: { category: SearchCategory }) {
   const cls = 'w-3.5 h-3.5';
   switch (category) {
+    case 'law':       return <BookText className={cls} />;
     case 'notice':    return <FileText className={cls} />;
     case 'chemical':  return <TestTube2 className={cls} />;
     case 'education': return <BookOpen className={cls} />;
