@@ -99,37 +99,24 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
         });
       }
     }),
-    // Accident cases (multiple files)
-    Promise.all([
-      import('@/data/mock/real-accident-cases'),
-      import('@/data/mock/real-accident-cases-extra'),
-      import('@/data/mock/real-accident-cases-extra2'),
-      import('@/data/mock/real-accident-cases-extra3'),
-      import('@/data/mock/real-accident-cases-diverse-industries'),
-    ]).then((mods) => {
+    // 事故事例（労働災害DB）。正本 getAccidentCasesDataset() を単一ソースに使う。
+    // 旧実装は 7 データファイル中 5 つだけを手で import しており、2024-2026 確定事例と
+    // 速報事例の 2 ファイルが横断検索から欠落していた（近年の事故が引けない発見性の穴）。
+    // さらに全件が一覧トップ /accidents へリンクし、検索した個別事故へ到達できなかった。
+    // 正本＝/accidents/[id] が findAccident() で解決する集合そのものなので、
+    // ここから引けば「検索結果→詳細ページ」が必ず解決し（幽霊URL 0）、データ追加にも追従する。
+    import('@/data/mock/accident-cases').then(({ getAccidentCasesDataset }) => {
       const seen = new Set<string>();
-      for (const mod of mods) {
-        const cases = (mod as { realAccidentCases?: unknown[]; realAccidentCasesExtra?: unknown[]; realAccidentCasesExtra2?: unknown[]; realAccidentCasesExtra3?: unknown[]; realAccidentCasesDiverseIndustries?: unknown[] });
-        const arr = (
-          cases.realAccidentCases ??
-          cases.realAccidentCasesExtra ??
-          cases.realAccidentCasesExtra2 ??
-          cases.realAccidentCasesExtra3 ??
-          cases.realAccidentCasesDiverseIndustries ??
-          []
-        ) as Array<{ id: string; title: string; workCategory: string; type: string }>;
-        for (const a of arr) {
-          if (!seen.has(a.id)) {
-            seen.add(a.id);
-            items.push({
-              id: `accident-${a.id}`,
-              title: a.title,
-              subtitle: `${a.workCategory} / ${a.type}`,
-              category: 'accident',
-              url: `/accidents`,
-            });
-          }
-        }
+      for (const a of getAccidentCasesDataset()) {
+        if (seen.has(a.id)) continue;
+        seen.add(a.id);
+        items.push({
+          id: `accident-${a.id}`,
+          title: a.title,
+          subtitle: `${a.workCategory} / ${a.type} / ${a.severity}（${a.occurredOn}）`,
+          category: 'accident',
+          url: `/accidents/${a.id}`,
+        });
       }
     }),
 

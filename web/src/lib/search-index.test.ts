@@ -109,3 +109,27 @@ describe('buildSearchIndex — 用語集（glossary）の収載', () => {
     );
   });
 });
+
+describe('buildSearchIndex — 事故事例（accident）の収載', () => {
+  it('正本 getAccidentCasesDataset と件数・ID集合が一致する（5/7ファイルだけ手import の欠落是正）', async () => {
+    const { getAccidentCasesDataset } = await import('@/data/mock/accident-cases');
+    const index = await buildSearchIndex();
+    const accident = index.filter((i) => i.category === 'accident');
+
+    // 正本のユニークID集合（detail ページ /accidents/[id] が解決する集合そのもの）。
+    const datasetIds = new Set(getAccidentCasesDataset().map((c) => c.id));
+    const indexIds = new Set(accident.map((i) => i.id.replace(/^accident-/, '')));
+    expect(indexIds).toEqual(datasetIds);
+  });
+
+  it('各結果は一覧トップではなく個別詳細 /accidents/<id> へ深リンクする', async () => {
+    const index = await buildSearchIndex();
+    const accident = index.filter((i) => i.category === 'accident');
+    expect(accident.length).toBeGreaterThan(0);
+    expect(accident.every((i) => /^\/accidents\/.+/.test(i.url))).toBe(true);
+    // 旧実装のバグ＝全件が裸の /accidents へリンク、を回帰で固定。
+    expect(accident.some((i) => i.url === '/accidents')).toBe(false);
+    // url の id と item.id が対応＝詳細ページが必ず解決する（幽霊URL なし）。
+    expect(accident.every((i) => i.url === `/accidents/${i.id.replace(/^accident-/, '')}`)).toBe(true);
+  });
+});
