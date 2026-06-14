@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-06-14 — 柱C-2 横断検索の通達を個別詳細へ深リンク化（PR: seo/c2-notices-deeplink）
+
+回収: 緑だった PR #556（C-3-4 DRY sitemap freshest 単一ソース化）を squash マージ→main を ff-only 同期・clean 確認。#561（C-2 事故深リンク）は #556 マージで BACKLOG/cycle-log が追記衝突→当該ブランチへ origin/main を通常マージで解決（両 [x]・両イテレーション記録を併存・force-push なし）し再 push（CI 再走は次イテレーションで回収）。#566（C-2 法令条文収載）は CI（e2e/smoke）進行中＝マージ不可、次回回収。
+
+着手: BACKLOG 未着手キューは空（C-3-4 DRY が #556 で消化済）。補充指針（site-critique 01-seo-technical の C-2＝横断検索の発見性）から、走行中の #561/#566 と非競合（search-index.ts の別ブロック＝通達ブロックのみ改変）の自領域タスクを選択。
+
+- **現状確認（実バグ）**: 横断検索(/search・⌘K)の通達カテゴリ（mhlwNotices 全件）は url が `/resources?q=<title slice 50>` だったが、`resources-client.tsx` を grep した結果 `?q=` URL パラメータを**一切読まない**ことを確認。＝検索した個別通達へ到達できず、毎回 /resources の全1,158件一覧へ無フィルタで落ちていた（#561 の事故フラットリンクと同型・かつ q が黙殺される分さらに悪い発見性の穴）。一方 `/circulars/[id]` 詳細ルートは `generateStaticParams` が mhlwNotices 全件の id を解決する（findNotice で照合・未解決は notFound()）ことを確認＝深リンク先が必ず実在。
+- **修正（自班所有の search-index.ts のみ）**: 通達ブロックの url を `/circulars/${n.id}` へ深リンク化。正本 mhlwNotices 由来 id のため検索結果→詳細が**必ず解決（幽霊URL/soft404 0）**し、今後の通達データ追加にも自動追従する。subtitle（noticeNumber/docType + 発出日）は据え置き。データ・ルート・他班ファイルは一切不変。捏造0＝既存正本データのみ使用。
+- **テスト**: `search-index.test.ts` に2本追加（計14 it）。①全 notice が `/circulars/<id>` で始まり `/resources?q=` を含まず、url の id == item.id（`notice-<id>`）対応＝旧バグと幽霊URL を固定。②深リンク先 id 集合 == 正本 `mhlwNotices` の id 集合・件数一致＝詳細の generateStaticParams が解決する集合との一致を固定（将来の取りこぼし検知）。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存46のみ・自班ファイル0）/ `vitest run`=223ファイル1865テスト全pass（新規2含む） / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・chatbot-eval-fresh-results.json）は復元。working tree clean。
+
+残: #561・#566 の CI 緑回収＆マージ。補充は site-critique 残件のうち自領域に閉じるもの（化学物質/教育カテゴリも同様に `/chemical-database?q=`・`/e-learning` フラットリンク＝深リンク余地ありだが #561/#566 のマージ後＝search-index.ts 競合回避のため後続イテレーションで）。
 ## 2026-06-14 — 柱C-3-3 事故事例 個別ページのサイトマップ収載（PR: seo/c3-accidents-sitemap）
 
 回収: 緑だった PR #561（C-2 事故 横断検索の正本寄せ・深リンク化）を squash マージ→main を ff-only 同期・clean 確認。#561 マージで PR #566（C-2 法令 横断検索）が `search-index.ts`／`search-index.test.ts`／BACKLOG の3点で CONFLICTING→ origin/main を当該ブランチへ通常マージで解決(force-push不可を遵守)＝両機能(law＋accident)が search-index に併存することを確認、全ゲート再緑(tsc0/lint0/該当18テストpass/build成功)→push。#566 と #571（C-2 通達 深リンク）は CI 再走のため回収は次イテレーション。

@@ -181,7 +181,9 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
       }
     }),
 
-    // 1,158 MHLW notices
+    // MHLW 通達/告示/指針（正本 mhlwNotices）。詳細 /circulars/[id] は
+    // generateStaticParams が mhlwNotices 全件の id を解決するため、検索結果から
+    // 個別通達へ深リンクできる（旧 /resources?q= は q を無視＝全件一覧へ落ちていた）。
     import('@/data/mhlw-notices').then(({ mhlwNotices }) => {
       for (const n of mhlwNotices) {
         items.push({
@@ -189,7 +191,7 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           title: n.title,
           subtitle: `${n.noticeNumber ?? n.docType} ${n.issuedDateRaw ?? ''}`.trim(),
           category: 'notice',
-          url: `/resources?q=${encodeURIComponent(n.title.slice(0, 50))}`,
+          url: `/circulars/${n.id}`,
         });
       }
     }),
