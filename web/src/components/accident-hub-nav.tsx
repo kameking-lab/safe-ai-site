@@ -48,7 +48,7 @@ export function AccidentHubNav({ current }: AccidentHubNavProps) {
               href={item.href}
               aria-current={item.id === current ? "page" : undefined}
               title={`${item.label} — ${item.description}`}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+              className={`inline-flex min-h-[44px] items-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                 item.id === current
                   ? "bg-rose-600 text-white"
                   : "border border-slate-300 bg-white text-slate-700 hover:border-rose-300 hover:text-rose-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-rose-500 dark:hover:text-rose-300"

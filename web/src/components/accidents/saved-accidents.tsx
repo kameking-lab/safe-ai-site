@@ -45,7 +45,7 @@ export function SavedAccidents() {
                 reload();
               }}
               aria-label="保存から削除"
-              className="shrink-0 rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-500 hover:bg-rose-50 hover:text-rose-600"
             >
               <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
             </button>

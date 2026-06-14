@@ -1,6 +1,6 @@
 import { normalizeSearchText } from './fuzzy-search';
 
-export type SearchCategory = 'notice' | 'chemical' | 'education' | 'accident' | 'precedent';
+export type SearchCategory = 'notice' | 'chemical' | 'education' | 'accident' | 'precedent' | 'glossary';
 
 export interface SearchItem {
   id: string;
@@ -19,6 +19,7 @@ export const CATEGORY_META: Record<
   education: { label: '教育',    bgColor: 'bg-green-100',  textColor: 'text-green-700' },
   accident:  { label: '事故',    bgColor: 'bg-red-100',    textColor: 'text-red-700' },
   precedent: { label: '判例',    bgColor: 'bg-emerald-100', textColor: 'text-emerald-700' },
+  glossary:  { label: '用語',    bgColor: 'bg-indigo-100', textColor: 'text-indigo-700' },
 };
 
 /**
@@ -60,7 +61,7 @@ export function countByCategory(
   query: string,
 ): Record<'all' | SearchCategory, number> {
   const counts: Record<'all' | SearchCategory, number> = {
-    all: 0, notice: 0, chemical: 0, education: 0, accident: 0, precedent: 0,
+    all: 0, notice: 0, chemical: 0, education: 0, accident: 0, precedent: 0, glossary: 0,
   };
   if (!query.trim()) return counts;
   // 上限なしで全件マッチを採り、カテゴリ別に集計する。
@@ -186,6 +187,21 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           subtitle: theme.description.slice(0, 60),
           category: 'education',
           url: `/e-learning`,
+        });
+      }
+    }),
+
+    // 用語集（@/data/glossary の 4 バッチ＝高意図の「○○とは」語を横断検索へ収載）。
+    // ※ /glossary 本体に直書きされた基礎語は当班所有外のため対象外。読み・定義冒頭も
+    //   subtitle に載せ、読み（かな）や定義語からのヒットと結果一覧での即答を可能にする。
+    import('@/data/glossary').then(({ EXTRA_TERMS }) => {
+      for (const t of EXTRA_TERMS) {
+        items.push({
+          id: `glossary-${t.term}`,
+          title: t.term,
+          subtitle: `${t.reading}　${t.definition.slice(0, 60)}`,
+          category: 'glossary',
+          url: `/glossary`,
         });
       }
     }),
