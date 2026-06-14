@@ -66,7 +66,7 @@ function FAQItem({ faq }: { faq: FAQ }) {
                 <Link
                   key={page.href}
                   href={page.href}
-                  className="inline-flex items-center gap-1 rounded border border-sky-200 bg-sky-50 px-2 py-1 text-xs text-sky-700 hover:bg-sky-100 transition-colors"
+                  className="inline-flex min-h-[44px] items-center gap-1 rounded border border-sky-200 bg-sky-50 px-2 py-1 text-xs text-sky-700 hover:bg-sky-100 transition-colors"
                 >
                   {page.label}
                   <ExternalLink className="h-3 w-3" aria-hidden="true" />
@@ -135,7 +135,7 @@ export default function FAQCategoryPage() {
           placeholder="このカテゴリ内で絞り込み…"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
+          className="w-full min-h-[44px] rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
         />
         {searchQuery && (
           <p className="mt-1.5 text-xs text-slate-500">
