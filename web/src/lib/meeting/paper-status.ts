@@ -5,11 +5,14 @@
  * 「3秒で分かる1メッセージ」（トーン・短ラベル・デカ数字・次にやること）を返す純粋関数。
  * KY用紙の computeKyPaperStatus（paper-status.ts）と同じ文法で揃える。
  * 色の文法は safety-tone.ts に従う:
- *   青 = 案内・進行中（記入のこり）
- *   緑 = 完了（記入完了＝各社の予想災害と指示が1枚に揃った）
+ *   青 = 案内・進行中（記入のこり／記入は済んだが未保存）
+ *   緑 = 完了して保存一覧に保存済み（毎日書く職長が「今日の分はもう保存した」と一目で分かる）
  *
  * 注: 打合せ書には承認フローが無い（協力会社の分散入力→元請集約はあるが提出/承認の状態は持たない）ため、
- * KY用紙のような submitted/approved/rejected は扱わず、記入の充足のみを結論にする。
+ * KY用紙のような submitted/approved/rejected は扱わない。代わりに「記入の充足」と
+ * 「保存一覧に保存済みか」の2軸で、下書き(青)／保存済み(緑)を3秒で読めるようにする。
+ * saved 判定は呼び出し側がセッション内で厳密に行う（store の savedAt は自動保存・翌日複製でも
+ * 更新されるため保存済みの根拠に使えない）。
  */
 import type { MeetingRecord } from "@/lib/meeting/schema";
 import type { SafetyTone } from "@/lib/design/safety-tone";
@@ -25,7 +28,7 @@ export type MeetingPaperMissingItem = {
 };
 
 export type MeetingPaperStatus = {
-  kind: "incomplete" | "complete";
+  kind: "incomplete" | "complete" | "saved";
   tone: SafetyTone;
   /** 体言止めの短ラベル */
   title: string;
@@ -62,25 +65,42 @@ function isFilled(record: MeetingRecord, key: MeetingPaperMissingKey): boolean {
   }
 }
 
-/** 打合せ書の現在状態を結論カード1メッセージに要約する。 */
-export function computeMeetingPaperStatus(record: MeetingRecord): MeetingPaperStatus {
+/**
+ * 打合せ書の現在状態を結論カード1メッセージに要約する。
+ * @param opts.saved いま画面の内容が保存一覧に保存済みか（呼び出し側がセッション内で厳密判定）。
+ */
+export function computeMeetingPaperStatus(
+  record: MeetingRecord,
+  opts?: { saved?: boolean }
+): MeetingPaperStatus {
   const missing = ESSENTIALS.filter((item) => !isFilled(record, item.key));
-  if (missing.length === 0) {
+  if (missing.length > 0) {
+    const next = missing[0];
     return {
-      kind: "complete",
-      tone: "safe",
-      title: "記入完了",
-      missing: [],
-      action: { href: "#mtg-actions", label: "保存・印刷へ" },
+      kind: "incomplete",
+      tone: "info",
+      title: "記入のこり",
+      remaining: missing.length,
+      missing,
+      action: { href: next.anchor, label: `${next.label}を記入` },
     };
   }
-  const next = missing[0];
+  // 必須4項目が揃った後は「保存一覧に保存済みか」で結論を分ける。
+  // 緑=保存済み（もう安心） / 青=記入は済んだがまだ未保存（次は保存）。
+  if (opts?.saved) {
+    return {
+      kind: "saved",
+      tone: "safe",
+      title: "保存済み",
+      missing: [],
+      action: { href: "/safety-diary/list", label: "保存一覧で確認" },
+    };
+  }
   return {
-    kind: "incomplete",
+    kind: "complete",
     tone: "info",
-    title: "記入のこり",
-    remaining: missing.length,
-    missing,
-    action: { href: next.anchor, label: `${next.label}を記入` },
+    title: "記入完了・未保存",
+    missing: [],
+    action: { href: "#mtg-actions", label: "保存する" },
   };
 }
