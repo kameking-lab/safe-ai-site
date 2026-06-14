@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-06-14 — 柱0補充 教育コース詳細12ページに結論カード新設（PR: ux-rec/c0-education-course-conclusion）
+
+回収: 自班のCI緑PR #565（安全日誌の保存済み第3状態）を squashマージ済み。#558（/ky/list・/ky/workers 無読巡回）はCI緑だが squashマージ時にBACKLOG/cycle-logで競合→契約どおり origin/main を #558 ブランチへ通常マージで解消（コード競合なし・docsのみ）→push、CI再走の緑を次イテレーションで回収。#568（受入教育ビルダー結論カード）はCI走行中で未マージ＝次回収。main は `git pull --ff-only` で同期・clean。
+
+着手前監査の振替: BACKLOG最上位[ ]はKY周辺(/ky/list・/ky/workers)だが #558 で実装済み・在庫中のため重複回避。次位に在庫した「/education-certification 発行/一覧（修了者数・未発行）」は**再監査で前提誤りと判明**＝/education-certification は資格"発行/修了者一覧"機能ではなく特別教育・技能講習の**必要資格DB＋判定finder**で、入口(`page.tsx`)・finder(`CertFinderClient`)とも ConclusionCard 既設・無読合格。捏造（無い機能への作り込み）を避け当該タスクを取消し、自班route横断で真の柱0欠落を再探索。
+
+真の欠落＝**教育コース詳細12ページ**（`/education/tokubetsu/*`6・`/education/roudoueisei/*`4・`/education/hoteikyoiku/*`2）。各ページは「区分・根拠・時間」の小チップ＋h1＋本文段落で始まり、最重要の次操作（サンプル資料ダウンロード節）は本文下部に埋もれていた＝「初めて開く安全担当（新人に受講させたい）」が3秒見ても "次にやること" を言えない。自班の他route入口（/education カタログ#536・/foreign-workers#546・/health-checkup#543・記録系）が全て結論カード済みなのと非対称だった。
+
+是正（足す＋重複解消・法令正確性不可侵）:
+- 当班所有の新部品 `web/src/components/education/CourseConclusion.tsx` を新設（custodian基盤 ConclusionCard/StatusBadge を **import のみ・無改変**）。props=区分(kind: special/legal/health)・時間(duration)・根拠種別(basis 任意)・1行要約(summary)・アンカー(sampleHref 既定#course-sample)。tone=info・GraduationCapアイコン・状態ラベル=区分、時間チップ(Clock)＋根拠チップ(Scale)、主操作「サンプル資料を見る」(44px担保は部品側)。
+- 全12ページのパンくず直下に `<CourseConclusion>` を配置。既存の「サンプル資料ダウンロード」節（全12で同一markup）に `id="course-sample" scroll-mt-20` を付与しアンカー先を用意。
+- **重複解消**: 旧ヘッダーの小チップ列（`flex flex-wrap gap-2 mb-3`＝区分/根拠/時間）を撤去し結論カードへ一本化。未使用化した `GraduationCap` の lucide import も各ページから除去（Clockはカリキュラムで継続使用のため残置）。h1・description・法的根拠・対象者・カリキュラム・料金・PPTX DL・修了証・FAQ・CTA・A4印刷物は不変。
+- 区分・時間・根拠条文の文言は**各ページ既載のもの（チップ/本文）に一致**させ、新規の法的主張は一切足さない（法令正確性は不可侵）。`youtsu-yobou` は localized header(`TranslatedPageHeader`/`iconName="GraduationCap"`文字列)を持つが、撤去対象は手前のチップ列のみで本体は不変。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（既存warn46のみ・変更ファイルにerror0）/ `vitest run`=225ファイル1880テスト全pass（新規 component 無読テスト `CourseConclusion.test.tsx` 6本含む）/ `build`=成功（12ページとも静的生成）。無読テスト `docs/third-party-reviews/scripts/education-course-conclusion-noread-2026-06-14.mjs` を prod start(3147)で実行＝**72/72 PASS**（12ページ×[200配信・結論カードrole=status区分ラベル・時間チップ・次操作#course-sample・アンカー先存在・旧重複チップ撤去]）。working tree clean。
+
+残: #558（/ky/workers 結論カード対称化）・#568（受入教育ビルダー結論カード）のCI緑を次イテレーションで回収マージ。以降は記録系/教育系の柱3レビュー継続。
+
+---
+
 ## 2026-06-14 — 柱0仕上げ② 外国人労働者ハブ入口に結論カード新設（PR: ux-rec/c0-foreign-workers-conclusion）
 
 回収: 本イテレーションで自班PR #533（C-9・A2 KY記入の進行ナビ）・#543（柱0仕上げ③ /health-checkup 入口の結論カード）をCI再走緑を確認のうえ squashマージ済み。#536（柱0仕上げ /education 結論カード）はCI全緑だが squashマージ時にBACKLOG/cycle-logで競合→契約どおり origin/main を #536 ブランチへ通常マージで解消（コード競合なし・docsのみ）→tsc0/lint0/vitest1757pass/build成功を確認しpush、auto-merge無効のため再走CI緑を次イテレーションで回収。main は `git pull --ff-only` で同期・clean。

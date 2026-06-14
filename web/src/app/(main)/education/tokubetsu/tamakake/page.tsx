@@ -1,9 +1,10 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
-import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, GraduationCap, MessageSquare, Mail, Download } from "lucide-react";
+import { ExternalLink, Clock, FileText, Users, BookOpen, Building2, MessageSquare, Mail, Download } from "lucide-react";
 import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
+import { CourseConclusion } from "@/components/education/CourseConclusion";
 
 const TITLE = "玉掛け 特別教育（1t未満）";
 const DESCRIPTION =
@@ -165,21 +166,16 @@ export default function TamakakePage() {
         <span className="text-slate-700">玉掛け特別教育（1t未満）</span>
       </nav>
 
+      {/* 結論カード（柱0）: 区分・時間とサンプル資料への導線を最上部に集約 */}
+      <CourseConclusion
+        kind="special"
+        duration="約9時間"
+        basis="省令ベース"
+        summary="安衛則第36条第19号・別表第5に基づく、つり上げ荷重1t未満の玉掛け業務者向け特別教育。"
+      />
+
       {/* ヘッダー */}
       <header className="mb-8">
-        <div className="flex flex-wrap gap-2 mb-3">
-          <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-3 py-0.5 text-xs font-bold text-amber-700">
-            <GraduationCap className="mr-1 h-3 w-3" />
-            特別教育
-          </span>
-          <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-semibold text-slate-600">
-            省令ベース
-          </span>
-          <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-0.5 text-xs font-semibold text-slate-600">
-            <Clock className="mr-1 h-3 w-3" />
-            約9時間
-          </span>
-        </div>
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">玉掛け 特別教育（1t未満）</h1>
         <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
           つり上げ荷重1トン未満のクレーン・移動式クレーン・デリックの玉掛け業務に従事する労働者を対象に、労働安全衛生規則第36条第19号および別表第5に基づく特別教育を実施します。
@@ -287,7 +283,7 @@ export default function TamakakePage() {
       </section>
 
       {/* サンプル資料ダウンロード */}
-      <section className="mb-8 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 sm:p-6">
+      <section id="course-sample" className="mb-8 scroll-mt-20 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 sm:p-6">
         <div className="flex flex-wrap items-start gap-4">
           <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
             <FileText className="h-6 w-6" />
