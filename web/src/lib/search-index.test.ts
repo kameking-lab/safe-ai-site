@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   searchItems,
   countByCategory,
+  buildSearchIndex,
   CATEGORY_META,
   type SearchItem,
 } from './search-index';
@@ -73,10 +74,38 @@ describe('countByCategory', () => {
 
 describe('CATEGORY_META', () => {
   it('全カテゴリにラベルと配色を持つ', () => {
-    for (const key of ['notice', 'chemical', 'education', 'accident', 'precedent'] as const) {
+    for (const key of ['notice', 'chemical', 'education', 'accident', 'precedent', 'glossary'] as const) {
       expect(CATEGORY_META[key].label).toBeTruthy();
       expect(CATEGORY_META[key].bgColor).toMatch(/^bg-/);
       expect(CATEGORY_META[key].textColor).toMatch(/^text-/);
     }
+  });
+});
+
+describe('buildSearchIndex — 用語集（glossary）の収載', () => {
+  it('@/data/glossary の語が glossary カテゴリで /glossary へリンクされる', async () => {
+    const index = await buildSearchIndex();
+    const glossary = index.filter((i) => i.category === 'glossary');
+    // 4 バッチ＝152 語を収載（基礎語は /glossary 本体直書きのため対象外）
+    expect(glossary.length).toBeGreaterThanOrEqual(150);
+    expect(glossary.every((i) => i.url === '/glossary')).toBe(true);
+    expect(glossary.every((i) => i.id.startsWith('glossary-'))).toBe(true);
+  });
+
+  it('用語名・読み（かな）・定義語のいずれからもヒットする', async () => {
+    const index = await buildSearchIndex();
+    // 用語名で完全一致（バッチ1 法令語）
+    expect(searchItems(index, '労働基準法', 'glossary').length).toBeGreaterThan(0);
+    // subtitle に読みと定義冒頭を載せているため、かな読みでも引ける
+    const byReading = searchItems(index, 'ろうどうきじゅんほう', 'glossary');
+    expect(byReading.some((i) => i.title === '労働基準法')).toBe(true);
+  });
+
+  it('countByCategory の all は glossary を含む全カテゴリ合計に一致する', async () => {
+    const index = await buildSearchIndex();
+    const c = countByCategory(index, '安全');
+    expect(c.all).toBe(
+      c.notice + c.chemical + c.education + c.accident + c.precedent + c.glossary,
+    );
   });
 });
