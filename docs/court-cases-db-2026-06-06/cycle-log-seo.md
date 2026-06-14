@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-06-14 — 柱C-2 横断検索に法令条文（law）を収載（PR: seo/c2-laws-cross-search）
+
+回収: CI 緑だった自分の PR #553（決裁A robots 学習UA拡張）を squash マージ→main を ff-only 同期・clean 確認。#556（C-3-4 DRY sitemap freshness）は #553 マージで BACKLOG/cycle-log の追記衝突→当該ブランチへ origin/main を通常マージで解決（両イテレーション記録を併存・force-push なし）し push。#556 は CI 再走のため回収は次イテレーション（CI は元々 e2e/smoke 緑）。
+
+着手: 補充指針（site-critique 01-seo-technical の C-2＝横断検索の発見性）。在庫キュー先頭の C-3-4 DRY後追いは #556 で実施済み（マージ待ち）のため、非競合の自領域タスクとして「法令条文の横断検索収載」を選択。
+
+- **現状確認（捏造・水増しなし）**: 横断検索インデックス(`search-index.ts`)は 判例/事故/化学物質/通達/教育/用語 の6カテゴリを収載するが、**法令本文(`@/data/laws`)が 0 件**だった。安全関連ユーザーの最頻・最高意図クエリ「安衛則 第○条」「足場 規則」等が /search・⌘K で全くヒットせず、法令を引く唯一の手段が専用ページ /law-search のみという発見性の穴。
+- **修正（自班所有の検索ファイルのみ）**: `search-index.ts` に `law` カテゴリを追加。`@/data/laws` の `allLawArticles` を read-only import し、curated 中核（厚労省PDF補完=`mhlwLawArticles` は law 値が文書バンドル名で条文単位の深リンクUXに合わず除外。`law/index.ts` の LAW_SOURCE_COUNT と同じ方針）を数百条規模収載。`(law, articleNum)` でユニーク化。title=`略称 条番号`（例「安衛則 第518条」＝略称の前方一致・条番号の部分一致に効く）、subtitle=`正式名称　条文見出し　本文冒頭`（正式名称・見出し語からのヒットと結果一覧での即答）。url=`/law-search?law=<正式名称>&art=<条番号>` で当該条文へ深リンク（パネルの filter `a.law===selectedLaw` と同形＝full law 名で確実に解決）。
+- **UI（当班 C-2 検索UI）**: `/search` SearchResults と app-shell の ⌘K CommandPalette のカテゴリ配列に `law` を**先頭**追加（法令は中核コンテンツ）＋アイコン `BookText`。`CATEGORY_META`(配色=teal)・`countByCategory` の初期化も拡張。ページ説明文に「法令条文」を追記。
+- **網羅の限界を明記**: 厚労省PDF抽出の補完ソース（mhlwLawArticles）は条文単位の深リンクに不適なため除外。必要なら別途 /law-search の mhlw モードで引ける（当班外データ）。今回収載分は実在の法令条文データで、これまで検索 0 件だった分の純増。
+- **テスト**: `search-index.test.ts` に law 統合テスト4本を追加（300条以上収載・全件 /law-search 深リンク・略称/正式名称/見出し語ヒット・深リンク URL がパネルと同形＋id 一意＋PDF補完混入なし）。CATEGORY_META 網羅テストにも law を追加。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0(warnings 既存のみ・自班ファイル0) / `vitest run`（search-index.test.ts=16 pass）/ `build`=Compiled successfully。working tree clean。
+
+残: #556 の CI 緑回収＆マージ → 補充は site-critique の自領域に閉じる残件（横断検索の AND トークン化・法令略称ゆれ吸収など）から起こす。
+
+---
+
 ## 2026-06-14 — 柱C-2 横断検索に用語集（glossary）を収載（PR: seo/c2-glossary-cross-search）
 
 回収: 緑だった PR #537（C-3-2 サイトマップ役割分担）を squash マージ→main を ff-only 同期・clean 確認。#537 マージで PR #541（C-2 404横断検索）・#547（C-3-4 sitemap-index lastmod）が BACKLOG/cycle-log の追記衝突で CONFLICTING→ origin/main を各ブランチへ通常マージで解決(force-push不可を遵守)・全ゲート再緑(tsc0/lint0/vitest全pass/build成功)を確認し push。#541/#547 とも CI 再走のため回収は次イテレーション。
