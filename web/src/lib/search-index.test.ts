@@ -109,3 +109,30 @@ describe('buildSearchIndex — 用語集（glossary）の収載', () => {
     );
   });
 });
+
+describe('buildSearchIndex — 通達（notice）の個別詳細への深リンク', () => {
+  it('全 notice が /circulars/<id> へ深リンクし、裸 /resources?q= は使わない', async () => {
+    const index = await buildSearchIndex();
+    const notices = index.filter((i) => i.category === 'notice');
+    expect(notices.length).toBeGreaterThan(0);
+    // 旧実装の /resources?q=（q を無視＝全件一覧へ落ちる）が残っていないこと
+    expect(notices.every((i) => i.url.startsWith('/circulars/'))).toBe(true);
+    expect(notices.some((i) => i.url.includes('/resources'))).toBe(false);
+    // url の id と item.id（notice-<id>）が対応する
+    expect(
+      notices.every((i) => i.url === `/circulars/${i.id.replace(/^notice-/, '')}`),
+    ).toBe(true);
+  });
+
+  it('深リンク先 id 集合が正本 mhlwNotices に解決する（幽霊URL 0）', async () => {
+    const index = await buildSearchIndex();
+    const { mhlwNotices } = await import('@/data/mhlw-notices');
+    const canonical = new Set(mhlwNotices.map((n) => n.id));
+    const linkedIds = index
+      .filter((i) => i.category === 'notice')
+      .map((i) => i.url.replace(/^\/circulars\//, ''));
+    // 詳細 /circulars/[id] の generateStaticParams が解決する集合と一致＝soft404 ゼロ
+    expect(linkedIds.every((id) => canonical.has(id))).toBe(true);
+    expect(linkedIds.length).toBe(mhlwNotices.length);
+  });
+});
