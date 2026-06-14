@@ -17,6 +17,8 @@ import type { SafetyTone } from "@/lib/design/safety-tone";
 export type OutlookAlertLevel = "none" | "advisory" | "warning";
 
 export type RiskWeatherOutlookInput = {
+  /** 地域ブロック名（"九州" 等・該当地域の明示に使う。省略時は集計のみ） */
+  regionLabel?: string;
   days: { date: string; alertLevel: OutlookAlertLevel }[];
 };
 
@@ -39,6 +41,12 @@ export type RiskWeatherOutlookDay = {
   advisoryCount: number;
   /** 集計対象の地域ブロック総数 */
   totalRegions: number;
+  /**
+   * その日の最悪レベル（level）に該当する地域ブロック名。
+   * 入力に regionLabel がある場合のみ収集（予報データそのままで捏造なし）。
+   * 「何地域か」だけでなく「どこか」を3秒で示し、台風前日の前倒し判断に使う。
+   */
+  worstRegions: string[];
 };
 
 const RELATIVE_LABELS: Record<number, string> = { 1: "明日", 2: "明後日" };
@@ -77,14 +85,25 @@ export function buildRiskWeatherOutlook(
 
     let warningCount = 0;
     let advisoryCount = 0;
+    const warningRegions: string[] = [];
+    const advisoryRegions: string[] = [];
     for (const region of regions) {
       const lvl = region.days[idx]?.alertLevel;
-      if (lvl === "warning") warningCount += 1;
-      else if (lvl === "advisory") advisoryCount += 1;
+      if (lvl === "warning") {
+        warningCount += 1;
+        if (region.regionLabel) warningRegions.push(region.regionLabel);
+      } else if (lvl === "advisory") {
+        advisoryCount += 1;
+        if (region.regionLabel) advisoryRegions.push(region.regionLabel);
+      }
     }
 
     const level: OutlookAlertLevel =
       warningCount > 0 ? "warning" : advisoryCount > 0 ? "advisory" : "none";
+
+    // 最悪レベルに該当する地域名のみ（none の日は空＝表示は「全国おおむね良好」）
+    const worstRegions =
+      level === "warning" ? warningRegions : level === "advisory" ? advisoryRegions : [];
 
     out.push({
       date: baseDay.date,
@@ -96,6 +115,7 @@ export function buildRiskWeatherOutlook(
       warningCount,
       advisoryCount,
       totalRegions: regions.length,
+      worstRegions,
     });
   }
 

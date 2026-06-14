@@ -5,9 +5,11 @@ import {
   type RiskWeatherOutlookInput,
 } from "./weather-outlook";
 
-/** 8地域 × N日分の予報を組み立てるヘルパー。levels[regionIdx][dayIdx] = レベル */
-function build(levels: OutlookAlertLevel[][]): RiskWeatherOutlookInput[] {
-  return levels.map((dayLevels) => ({
+/** 8地域 × N日分の予報を組み立てるヘルパー。levels[regionIdx][dayIdx] = レベル。
+ *  labels[regionIdx] を渡すと地域名（worstRegions 検証用）を付与する。 */
+function build(levels: OutlookAlertLevel[][], labels?: string[]): RiskWeatherOutlookInput[] {
+  return levels.map((dayLevels, regionIdx) => ({
+    regionLabel: labels?.[regionIdx],
     days: dayLevels.map((alertLevel, i) => ({
       date: `2026-06-${String(14 + i).padStart(2, "0")}`,
       alertLevel,
@@ -90,5 +92,41 @@ describe("buildRiskWeatherOutlook: 明日以降の見通しストリップ", () 
 
   it("地域配列が空なら空配列（クラッシュしない）", () => {
     expect(buildRiskWeatherOutlook([])).toEqual([]);
+  });
+
+  describe("worstRegions: 該当地域名の明示（台風前日に自現場の該否を3秒で）", () => {
+    const LABELS = ["北海道", "東北", "関東", "中部", "近畿", "中国", "四国", "九州"];
+
+    it("警報日は警報相当の地域名のみを並べる（注意報地域は混ぜない）", () => {
+      const levels = Array.from({ length: 8 }, () => ["none", "none", "none"] as OutlookAlertLevel[]);
+      levels[7][1] = "warning"; // 九州・明日
+      levels[6][1] = "warning"; // 四国・明日
+      levels[2][1] = "advisory"; // 関東・明日（最悪レベルは警報なので除外される）
+      const out = buildRiskWeatherOutlook(build(levels, LABELS));
+      expect(out[0].level).toBe("warning");
+      expect(out[0].worstRegions).toEqual(["四国", "九州"]); // region配列の順序を保持
+      expect(out[0].worstRegions).not.toContain("関東");
+    });
+
+    it("注意報のみの日は注意報相当の地域名を並べる", () => {
+      const levels = Array.from({ length: 8 }, () => ["none", "none", "none"] as OutlookAlertLevel[]);
+      levels[4][1] = "advisory"; // 近畿
+      const out = buildRiskWeatherOutlook(build(levels, LABELS));
+      expect(out[0].level).toBe("advisory");
+      expect(out[0].worstRegions).toEqual(["近畿"]);
+    });
+
+    it("おおむね良好の日は worstRegions 空", () => {
+      const out = buildRiskWeatherOutlook(build(Array.from({ length: 8 }, () => ["none", "none", "none"] as OutlookAlertLevel[]), LABELS));
+      expect(out[0].worstRegions).toEqual([]);
+    });
+
+    it("地域名が無い入力では worstRegions は空（件数表示にフォールバック）", () => {
+      const levels = Array.from({ length: 8 }, () => ["none", "none", "none"] as OutlookAlertLevel[]);
+      levels[0][1] = "warning";
+      const out = buildRiskWeatherOutlook(build(levels)); // labels なし
+      expect(out[0].warningCount).toBe(1);
+      expect(out[0].worstRegions).toEqual([]);
+    });
   });
 });

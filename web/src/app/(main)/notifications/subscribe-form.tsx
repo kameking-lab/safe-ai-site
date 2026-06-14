@@ -70,7 +70,7 @@ export function SubscribeForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="example@company.jp"
-          className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+          className="min-h-[44px] w-full rounded-lg border border-slate-200 px-3 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
         />
       </div>
       <div>
@@ -81,7 +81,7 @@ export function SubscribeForm() {
           id="notify-prefecture"
           value={prefecture}
           onChange={(e) => setPrefecture(e.target.value)}
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
+          className="min-h-[44px] w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 focus:border-blue-400 focus:outline-none"
         >
           <option value="">全国（地域指定なし）</option>
           {PREFECTURES.map((p) => (
@@ -97,7 +97,7 @@ export function SubscribeForm() {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-60"
+        className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-60"
       >
         <Mail className="h-4 w-4" aria-hidden="true" />
         {status === "loading" ? "登録中..." : "気象警報通知を登録する"}
