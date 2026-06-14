@@ -7,10 +7,13 @@ import { ogImageUrl } from "@/lib/og-url";
 import {
   MATERIAL_INDUSTRY_LABELS_JA,
   MATERIAL_TOPIC_LABELS_JA,
+  MATERIAL_LANGUAGES,
   type MaterialIndustry,
   type MaterialTopic,
 } from "@/types/foreign-worker";
 import { SafetyTrainingBuilder } from "@/components/foreign-workers/safety-training-builder";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const DEFAULT_INDUSTRY: MaterialIndustry = "construction";
 
@@ -76,28 +79,42 @@ export default async function SafetyTrainingPage({ searchParams }: PageProps) {
         ]}
       />
       <PageContainer width="wide" className="py-8 md:py-12">
-        <header className="mb-6">
+        <header className="mb-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-sky-700">
             Multilingual Safety Training Material Builder
           </p>
           <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
             多言語安全教育教材ビルダー
           </h1>
-          <p className="mt-3 text-sm text-slate-700">
-            業種・トピック・言語を選ぶと、やさしい日本語＋4言語の対訳教材を表示・印刷できます。
-            雇入れ時教育、TBM（ツールボックスミーティング）、特別教育の補助資料としてご活用ください。
-          </p>
-          <p className="mt-2 text-xs text-slate-500">
-            ※ 翻訳は機械翻訳をベースに整備しています。実際の現場運用ではネイティブチェックを併用してください。
-          </p>
         </header>
 
-        <SafetyTrainingBuilder
-          materials={filteredMaterials}
-          industries={industries}
-          topics={topics}
-          currentIndustry={industry}
-        />
+        {/* 結論カード（柱0）: 本文を読まず3秒で「規模＝何教材・何言語」と「次にやること＝教材を選ぶ」が分かる。
+            旧・説明文の内容（業種×トピックを対訳で表示・印刷／雇入れ時教育・TBM）はカードへ集約（消さず格納）。 */}
+        <ConclusionCard
+          tone="info"
+          value={SAFETY_MATERIAL_INDEX.all.length}
+          unit="教材"
+          title="多言語対応"
+          description={`${industries.length}業種×${topics.length}トピックを やさしい日本語＋${MATERIAL_LANGUAGES.length - 1}言語の対訳で表示・印刷。雇入れ時教育・TBM・特別教育の補助資料にそのまま使えます。`}
+          action={{ href: "#material-builder", label: "教材を選ぶ" }}
+          className="mb-4"
+        >
+          <StatusBadge tone="info" size="sm">{MATERIAL_LANGUAGES.length}言語対訳</StatusBadge>
+          <StatusBadge tone="safe" size="sm">無料</StatusBadge>
+        </ConclusionCard>
+
+        <p className="mb-6 text-xs text-slate-500">
+          ※ 翻訳は機械翻訳をベースに整備しています。実際の現場運用ではネイティブチェックを併用してください。
+        </p>
+
+        <div id="material-builder" className="scroll-mt-20">
+          <SafetyTrainingBuilder
+            materials={filteredMaterials}
+            industries={industries}
+            topics={topics}
+            currentIndustry={industry}
+          />
+        </div>
 
         <section className="mt-10 rounded-lg border border-emerald-200 bg-white p-5 text-sm text-slate-700 print:hidden">
           <h2 className="text-base font-semibold text-slate-900">関連ガイド</h2>
