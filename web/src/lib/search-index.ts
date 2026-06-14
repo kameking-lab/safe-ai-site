@@ -1,6 +1,6 @@
 import { normalizeSearchText } from './fuzzy-search';
 
-export type SearchCategory = 'notice' | 'chemical' | 'education' | 'accident' | 'precedent' | 'glossary';
+export type SearchCategory = 'law' | 'notice' | 'chemical' | 'education' | 'accident' | 'precedent' | 'glossary';
 
 export interface SearchItem {
   id: string;
@@ -14,6 +14,7 @@ export const CATEGORY_META: Record<
   SearchCategory,
   { label: string; bgColor: string; textColor: string }
 > = {
+  law:       { label: '法令',    bgColor: 'bg-teal-100',   textColor: 'text-teal-700' },
   notice:    { label: '通達',    bgColor: 'bg-blue-100',   textColor: 'text-blue-700' },
   chemical:  { label: '化学物質', bgColor: 'bg-orange-100', textColor: 'text-orange-700' },
   education: { label: '教育',    bgColor: 'bg-green-100',  textColor: 'text-green-700' },
@@ -61,7 +62,7 @@ export function countByCategory(
   query: string,
 ): Record<'all' | SearchCategory, number> {
   const counts: Record<'all' | SearchCategory, number> = {
-    all: 0, notice: 0, chemical: 0, education: 0, accident: 0, precedent: 0, glossary: 0,
+    all: 0, law: 0, notice: 0, chemical: 0, education: 0, accident: 0, precedent: 0, glossary: 0,
   };
   if (!query.trim()) return counts;
   // 上限なしで全件マッチを採り、カテゴリ別に集計する。
@@ -87,6 +88,34 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
   const items: SearchItem[] = [];
 
   await Promise.allSettled([
+    // 法令・規則・指針の条文（curated 中核＝最高意図クエリ「安衛則 第○条」「足場 規則」を
+    // 横断検索／⌘K から直接引けるよう収載）。これまで法令本文は 0 件ヒットで、検索手段は
+    // 専用ページ /law-search のみだった。各結果は /law-search?law=&art= で当該条文へ深リンク。
+    // 厚労省PDF抽出の補完ソース（mhlwLawArticles）は law 値が文書バンドル名で条文単位の
+    // 深リンク UX に合わないため除外する（law/index.ts の LAW_SOURCE_COUNT と同じ方針）。
+    import('@/data/laws').then(({ allLawArticles, mhlwLawArticles }) => {
+      const mhlwSet = new Set<unknown>(mhlwLawArticles);
+      const seen = new Set<string>();
+      for (const a of allLawArticles) {
+        if (mhlwSet.has(a)) continue;
+        const key = `${a.law}|${a.articleNum}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const heading = [a.articleTitle, a.text]
+          .map((s) => (s ?? '').trim())
+          .filter(Boolean)
+          .join('　');
+        items.push({
+          id: `law-${key}`,
+          title: a.articleNum ? `${a.lawShort} ${a.articleNum}` : a.lawShort,
+          subtitle: `${a.law}　${heading}`.slice(0, 90),
+          category: 'law',
+          url: a.articleNum
+            ? `/law-search?law=${encodeURIComponent(a.law)}&art=${encodeURIComponent(a.articleNum)}`
+            : `/law-search?law=${encodeURIComponent(a.law)}`,
+        });
+      }
+    }),
     // 労災・労働判例（争点・分野で横断検索できるよう全件をインデックス化）
     import('@/data/court-cases').then(({ COURT_CASES }) => {
       for (const c of COURT_CASES) {
