@@ -1224,15 +1224,18 @@ export function ChatbotPanel() {
         </span>
       </div>
 
-      {/* C-001: quick-question chips above textarea — always visible for beginners */}
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label="クイック質問例">
+      {/* C-001 / 柱C-6: quick-question chips above textarea — always visible for beginners.
+          会話開始後（履歴あり）はこの行が「打たずにタップで追質問」の唯一の動線になるため、
+          指タップで誤爆なく押せるよう最小タップ標的を 44px に統一（空状態の質問例ボタンと同基準）。 */}
+      <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="クイック質問例">
+        <span className="text-[11px] font-semibold text-slate-500">質問例：</span>
         {EXAMPLE_QUESTIONS.slice(0, 3).map((q) => (
           <button
             key={q}
             type="button"
             disabled={isSending}
             onClick={() => handleSend(q)}
-            className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-medium text-blue-700 transition hover:bg-blue-100 active:scale-[0.98] disabled:opacity-40"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700 transition hover:bg-blue-100 active:scale-[0.98] disabled:opacity-40"
           >
             {q}
           </button>
