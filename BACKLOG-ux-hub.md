@@ -11,6 +11,7 @@
 - [x] 【柱0補充】/features 機能一覧ハブの44pxタップ標的化。→ カテゴリフィルタチップ・クイックリンク・各カードの主CTA「機能を試す →」/副CTA「詳しく見る」・下部CTA が py-2 (≈36px) で44px未満だったため `min-h-[44px]`＋inline-flex中央寄せへ是正（主アクションが押し損ねサイズだった）。純粋なクラス追加でレイアウト不変。vitest 5件追加・無読テスト8/8 PASS（実 boundingBox 測定）。(2026-06-14 / ux-hub/features-pillar0-44px-targets)
 - [x] 【補充・柱0】/favorites のタップ標的44px化＋accident種別の表示是正。→ タブ・削除ボタン・空状態CTAの3コントロールが32〜28pxだったのを min-h-[44px]/44×44px へ。さらに lib/favorites の kind=accident（/accidents で⭐した事故事例）が本リストで一律「通達(violet)」と誤表示され絞り込みタブも無かった既存バグを是正＝「事故事例(rose)」バッジ＋件数>0時のみ出る事故事例タブを追加（タブ消滅時はすべてへ自動復帰）。vitest 7件追加・無読テスト8/8 PASS（boundingBoxで実測44px確認）。(2026-06-14 / ux-hub/favorites-pillar0-44px-accident-kind)
 - [x] 【柱0補充】/accidents 事故DB 最上部操作のタップ標的44px化。→ 事故情報ハブナビ4チップ(px-3 py-1≈28px)・クイック検索の入力欄/検索ボタン(py-2≈38px)・事故型チップ(min-h-[36px])・保存事例の削除ボタン(px-2 py-1≈24px) が44px未満で親指操作が押し損ねサイズだった。いずれも min-h-[44px]／h-11 w-11 へ是正(純粋なクラス追加でレイアウト不変)。AccidentTypeGridは既に44px達成済み。vitest 8件追加・無読テスト5/5 PASS(実 boundingBox 測定)。(2026-06-14 / ux-hub/accidents-pillar0-44px-targets)
+- [x] 【柱0補充】/safety-signs サブページ(カテゴリ詳細・業種詳細・標識詳細)のナビ・タップ標的44px化。→ 標識→カテゴリ→業種を行き来する主ナビが押し損ねサイズだった既存欠陥を是正。「…に戻る」リンク3箇所が text-xs の素の inline-flex(≈16〜20px)、「他の業種ガイド」/「業種別ガイドへ」チップが px-3 py-2(≈32px)。前者に min-h-[44px]、後者に inline-flex items-center min-h-[44px] を付与(純粋なクラス追加でレイアウト不変、本文中の業種インラインリンクは対象外)。ハブ本体のカテゴリ/業種カードは既に44px達成済み。vitest 3件追加・無読テスト5/5 PASS(実 boundingBox 測定)。(2026-06-14 / ux-hub/safety-signs-subpages-44px-targets)
 
 ## 補充の指針（未着手3件未満で起こす）
 - 自領域route の柱0未適用箇所・無読テスト不合格画面・第三者レビュー指摘。404どん詰まり解消・視覚パンくず可視化(画面側)。
