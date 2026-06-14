@@ -1,5 +1,21 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-06-14 — 補充: /resources 厚労省一次資料DB フィルタ・各エントリ操作 柱0(44px)
+
+**イテレーション頭の回収**: 自班の緑PR #564(/safety-signs サブページ44px)が main とコンフリクト（自班トラッキング文書 BACKLOG-ux-hub.md・cycle-log-ux-hub.md のみ衝突＝コード非衝突）。`git merge origin/main`→両文書を両エントリ保持で手解決→push→CI再走で squash マージ済み(#564)。PR #567(/court-cases 詳細44px)は smoke/e2e pending のため次サイクルで回収。`git checkout main && git pull --ff-only` で clean 確認。
+
+**タスク源**: BACKLOG-ux-hub.md「未着手」は全て `[x]`＝補充モード。補充の指針「自領域route の柱0未適用箇所」から残ハブroute(quick/guides/resources)を実地調査。**/resources** の厚労省一次資料DB（通達・告示・指針・リーフレット計1,158件）の `ResourcesClient` で、一次資料を絞り込んで原文へ飛ぶDBの主操作群が44px未満という測定可能な欠陥を特定。① キーワード検索 input(`py-2`≈38px)、② カテゴリ/法的拘束力/年度の3 select(`py-2`≈38px)、③ 条件クリアボタン(`min-h-[40px]`)、④ 各エントリの原文/目次に戻る/PDF/一覧リンク(`min-h-[36px]`)。タブ(`min-h-[44px]`)とハブ本体page.tsx(関連リソースカード min-h-[64px]・戻るリンク min-h-[44px])は達成済み。ブランチ `ux-hub/resources-db-44px-targets`（main 起点）。
+
+**変更**: `resources-client.tsx` の検索 input・3 select に `min-h-[44px]`、条件クリアを `min-h-[40px]`→`min-h-[44px]`、通達/リーフレット各エントリのアクションリンク4種を `min-h-[36px]`→`min-h-[44px]`。純粋なTailwindクラス追加（min-hは中身が44px超なら無効＝既存破壊なし）でレイアウト・絞り込みロジック・SEO不変。
+
+**テスト**: `resources-client.test.tsx` を新設（5ケース）。最小フィクスチャ(通達1件・リーフレット1件)で `ResourcesClient` を直接描画し、検索input・combobox全件・条件クリア・通達アクション2種・リーフレットアクション2種の className に `min-h-[44px]` を保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 225 files・1879 tests 全pass / build 成功。dev起動で書き換わる data班生成物(rag-metrics-latest.json)は commit から除外（git checkout で復元）。
+
+**無読テスト**: `docs/third-party-reviews/scripts/resources-db-44px-noread-2026-06-14.mjs` を **8/8 PASS**（dev実機・スマホ390×844）。実 boundingBox で件数ヘッドライン視認・検索input・フィルタselect全件・条件クリア・通達エントリの原文/目次リンク・リーフレットエントリのPDFリンクが全て height≥44px であることを確認。
+
+---
+
 ## 2026-06-14 — 補充: /notifications 気象警報メール登録フォーム 柱0(44px)
 
 **イテレーション頭の回収**: 自班の未マージPR #554(/faq 44px)・#551(/accidents 44px)はいずれもCI pending（smoke/e2e/Vercel）でマージ不可→次サイクルで回収。`git checkout main && git pull --ff-only` で clean 確認。
