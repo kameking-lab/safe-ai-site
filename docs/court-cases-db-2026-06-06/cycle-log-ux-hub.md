@@ -1,5 +1,17 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-06-14 — 補充: /notifications 気象警報メール登録フォーム 柱0(44px)
+
+**イテレーション頭の回収**: 自班の未マージPR #554(/faq 44px)・#551(/accidents 44px)はいずれもCI pending（smoke/e2e/Vercel）でマージ不可→次サイクルで回収。`git checkout main && git pull --ff-only` で clean 確認。
+
+**タスク源**: BACKLOG-ux-hub.md「未着手」は全て `[x]`＝補充モード。補充の指針「自領域route の柱0未適用箇所」から、残ハブroute(quick/guides/notifications/resources/safety-signs)を実地調査。**/notifications** の気象警報メール登録フォーム（SubscribeForm）の主入力＝メールアドレス入力・対象地域セレクトが `py-2.5`（≈40px）で44px未満という測定可能な欠陥を特定。一人親方が最初にタップする無料通知登録の主入力が押し損ねサイズだったため選択。ブランチ `ux-hub/notifications-pillar0-44px-form`（main 起点）。
+
+**変更**: `subscribe-form.tsx` の email input・prefecture select を `min-h-[44px]`＋`py-3` へ。送信ボタン(既に py-3)にも `min-h-[44px]` を明示。純粋なTailwindクラス追加でレイアウト・送信ロジック・SEO不変。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0（eslint直叩き・notificationsディレクトリ EXIT 0。`npm run lint` 経由は環境segfaultのため直叩きで確認）/ vitest 220 files・1839 tests 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/notifications-44px-form-noread-2026-06-14.mjs`（dev実機・スマホ390×844、実 boundingBox）でメール入力・地域セレクト・登録ボタンの3標的が全て height≥44px を **3/3 PASS** で検証する設計。vitest 3件で `min-h-[44px]` クラスと py-2.5 退行禁止を回帰固定。
+
 ## 2026-06-14 — 補充: /favorites 柱0(44px)＋accident種別の表示是正
 
 **イテレーション頭の回収**: CI緑の自班PR #534(signage JIS色)を squash マージ→ブランチ削除。#539(トップ柱3)は #534 マージで競合(DIRTY)化したため `origin/main` を当該ブランチへ通常マージ（doc cycle-log の競合のみ手動解消＝3エントリ共存）→push（CI再走は次サイクルで回収）。#544(/features 44px)はCI in-progressのため次サイクル。`main` を ff-only で最新化。
