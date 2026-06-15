@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-13T21:59:53.586Z",
+  "updatedAt": "2026-06-15T22:59:41.766Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -374,6 +374,32 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "658e60aa1967b4be",
+      "headline": "東京女子医大 2歳児死亡事故 検察控訴せず元研修医の無罪確定",
+      "aiSummary": "東京女子医大の2歳児死亡医療事故、元研修医の無罪が確定。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260615/k10015150151000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 15 Jun 2026 11:21:11 +0900",
+        "fetchedAt": "2026-06-15T22:59:32.540Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-06-15T22:59:41.760Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
