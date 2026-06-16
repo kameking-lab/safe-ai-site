@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-15T22:59:41.766Z",
+  "updatedAt": "2026-06-16T22:51:26.833Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -45,6 +45,52 @@
         "misinformationRisk": 10,
         "duplication": 15,
         "judgedAt": "2026-05-20T22:22:59.495Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "a567ca53c66a6ce0",
+      "headline": "令和７年「労働災害動向調査（事業所調査（事業所規模100人以上）及び総合工事業調査）」の結果を公表します",
+      "aiSummary": "厚生労働省が令和7年の労働災害動向調査結果を公表。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/toukei/itiran/roudou/saigai/25/",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-06-16T14:00:00+09:00",
+        "fetchedAt": "2026-06-16T22:51:14.746Z"
+      },
+      "newsType": "statistics_release",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 20,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-06-16T22:51:26.825Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "753e89f9a03d76ae",
+      "headline": "令和８年度「安全衛生に係る優良事業場、団体又は 功労者に対する厚生労働大臣表彰」の受賞者を決定しました",
+      "aiSummary": "厚生労働省が安全衛生功労者・優良事業場・団体への大臣表彰受賞者を決定。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_73861.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-06-16T14:00:00+09:00",
+        "fetchedAt": "2026-06-16T22:51:14.746Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 20,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-06-16T22:51:21.426Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
