@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-16T22:51:26.887Z",
+  "generatedAt": "2026-06-17T22:43:52.420Z",
   "counts": {
-    "approved": 18,
+    "approved": 20,
     "rejected": 22,
-    "total": 40,
-    "approvalRate": 0.45
+    "total": 42,
+    "approvalRate": 0.476
   },
   "byDay": [
     {
@@ -153,15 +153,22 @@
       "rejected": 0,
       "total": 2,
       "approvalRate": 1
+    },
+    {
+      "date": "2026-06-18",
+      "approved": 2,
+      "rejected": 0,
+      "total": 2,
+      "approvalRate": 1
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 16,
+      "approved": 18,
       "rejected": 2,
-      "total": 18,
-      "approvalRate": 0.889
+      "total": 20,
+      "approvalRate": 0.9
     },
     {
       "publisher": "日本放送協会",
@@ -174,10 +181,10 @@
   "byEstimatedWorkCategory": [
     {
       "category": "建設業",
-      "approved": 2,
+      "approved": 3,
       "rejected": 2,
-      "total": 4,
-      "approvalRate": 0.5
+      "total": 5,
+      "approvalRate": 0.6
     },
     {
       "category": "運輸交通業",
@@ -196,6 +203,20 @@
   ],
   "byEstimatedAccidentType": [
     {
+      "type": "有害物等との接触",
+      "approved": 1,
+      "rejected": 0,
+      "total": 1,
+      "approvalRate": 1
+    },
+    {
+      "type": "有害物質",
+      "approved": 1,
+      "rejected": 2,
+      "total": 3,
+      "approvalRate": 0.333
+    },
+    {
       "type": "熱中症",
       "approved": 3,
       "rejected": 10,
@@ -204,13 +225,6 @@
     },
     {
       "type": "交通事故",
-      "approved": 0,
-      "rejected": 2,
-      "total": 2,
-      "approvalRate": 0
-    },
-    {
-      "type": "有害物質",
       "approved": 0,
       "rejected": 2,
       "total": 2,
@@ -255,7 +269,7 @@
         0,
         1,
         2,
-        15
+        17
       ],
       "rejected": [
         0,
@@ -285,7 +299,7 @@
       ],
       "approved": [
         3,
-        9,
+        11,
         6,
         0,
         0,
@@ -322,7 +336,7 @@
         "90-100"
       ],
       "approved": [
-        14,
+        16,
         4,
         0,
         0,
@@ -361,7 +375,7 @@
       ],
       "approved": [
         0,
-        17,
+        19,
         1,
         0,
         0,
@@ -422,6 +436,32 @@
           "model": "gemini-2.5-flash"
         },
         "publisher": "日本放送協会"
+      },
+      {
+        "headline": "第５３回特定石綿被害建設業務労働者等認定審査会　開催案内",
+        "aiSummary": "厚生労働省が第53回特定石綿被害認定審査会の開催を案内。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-06-17T22:43:52.358Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
+        "headline": "「令和７年度　石綿による疾病に関する労災保険給付などの請求・決定状況まとめ（速報値）」を公表します",
+        "aiSummary": "厚生労働省が、石綿関連疾病の労災保険給付の請求・決定状況（速報値）を公表した。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-06-17T22:43:45.885Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
       },
       {
         "headline": "令和７年「労働災害動向調査（事業所調査（事業所規模100人以上）及び総合工事業調査）」の結果を公表します",
@@ -497,32 +537,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-06-05T22:12:47.826Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "第35回特定石綿被害建設業務労働者等認定審査会専門委員会　開催案内",
-        "aiSummary": "厚生労働省が特定石綿被害建設業務労働者等認定審査会の開催を案内。",
-        "score": {
-          "relevance": 85,
-          "copyrightRisk": 20,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-06-04T22:18:11.577Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "労働基準関係法令違反に係る公表事案",
-        "aiSummary": "厚生労働省が労働基準関係法令に違反した企業の事案を公表。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-05-29T22:26:52.592Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"

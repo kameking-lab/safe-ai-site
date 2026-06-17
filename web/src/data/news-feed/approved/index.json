@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-16T22:51:26.833Z",
+  "updatedAt": "2026-06-17T22:43:52.366Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -45,6 +45,55 @@
         "misinformationRisk": 10,
         "duplication": 15,
         "judgedAt": "2026-05-20T22:22:59.495Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "34edbb4363cb0ba0",
+      "headline": "第５３回特定石綿被害建設業務労働者等認定審査会　開催案内",
+      "aiSummary": "厚生労働省が第53回特定石綿被害認定審査会の開催を案内。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_73422.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-06-17T14:00:00+09:00",
+        "fetchedAt": "2026-06-17T22:43:39.381Z"
+      },
+      "estimatedAccidentType": "有害物質",
+      "estimatedWorkCategory": "建設業",
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-06-17T22:43:52.358Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "7e736df3983d7c64",
+      "headline": "「令和７年度　石綿による疾病に関する労災保険給付などの請求・決定状況まとめ（速報値）」を公表します",
+      "aiSummary": "厚生労働省が、石綿関連疾病の労災保険給付の請求・決定状況（速報値）を公表した。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_73803.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-06-17T14:00:00+09:00",
+        "fetchedAt": "2026-06-17T22:43:39.381Z"
+      },
+      "estimatedAccidentType": "有害物等との接触",
+      "newsType": "statistics_release",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-06-17T22:43:45.885Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
