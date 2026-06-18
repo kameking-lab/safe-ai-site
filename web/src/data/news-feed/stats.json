@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-17T22:43:52.420Z",
+  "generatedAt": "2026-06-18T22:54:28.363Z",
   "counts": {
     "approved": 20,
-    "rejected": 22,
-    "total": 42,
-    "approvalRate": 0.476
+    "rejected": 23,
+    "total": 43,
+    "approvalRate": 0.465
   },
   "byDay": [
     {
@@ -160,6 +160,13 @@
       "rejected": 0,
       "total": 2,
       "approvalRate": 1
+    },
+    {
+      "date": "2026-06-19",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -173,9 +180,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 2,
-      "rejected": 20,
-      "total": 22,
-      "approvalRate": 0.091
+      "rejected": 21,
+      "total": 23,
+      "approvalRate": 0.087
     }
   ],
   "byEstimatedWorkCategory": [
@@ -231,14 +238,14 @@
       "approvalRate": 0
     },
     {
-      "type": "車両",
+      "type": "崩壊・倒壊",
       "approved": 0,
-      "rejected": 1,
-      "total": 1,
+      "rejected": 2,
+      "total": 2,
       "approvalRate": 0
     },
     {
-      "type": "崩壊・倒壊",
+      "type": "車両",
       "approved": 0,
       "rejected": 1,
       "total": 1,
@@ -273,7 +280,7 @@
       ],
       "rejected": [
         0,
-        6,
+        7,
         11,
         1,
         1,
@@ -311,7 +318,7 @@
       ],
       "rejected": [
         2,
-        19,
+        20,
         1,
         0,
         0,
@@ -349,7 +356,7 @@
       ],
       "rejected": [
         14,
-        8,
+        9,
         0,
         0,
         0,
@@ -387,7 +394,7 @@
       ],
       "rejected": [
         0,
-        15,
+        16,
         0,
         0,
         0,
@@ -402,7 +409,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 20
+      "count": 21
     },
     {
       "reason": "duplication",
@@ -657,6 +664,22 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "大分 九重町 土砂崩れ 住宅1棟巻き込まれ 住人の女性大けが",
+        "aiSummary": "大分県九重町で土砂崩れが発生し、住宅が巻き込まれ住人女性が重傷。",
+        "score": {
+          "relevance": 10,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-06-18T22:54:28.248Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 10 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "名古屋 マイクロバス2人死亡事故で運転手の鑑定留置始まる",
         "aiSummary": "名古屋のマイクロバス死亡事故、運転手の鑑定留置が始まる。",
         "score": {
@@ -682,22 +705,6 @@
           "misinformationRisk": 10,
           "duplication": 10,
           "judgedAt": "2026-05-31T21:56:45.417Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 20 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "東京都心でことし初の真夏日 あすも気温高く熱中症に注意",
-        "aiSummary": "東京都心で今年初の真夏日を記録。明日も高温が予想され、熱中症への警戒を呼びかけ。",
-        "score": {
-          "relevance": 20,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-05-17T21:52:04.401Z",
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
             "relevance 20 < 70 (not labor-safety related for type=general_news)"

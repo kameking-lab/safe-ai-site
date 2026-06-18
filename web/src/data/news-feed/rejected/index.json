@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-17T22:43:52.366Z",
+  "updatedAt": "2026-06-18T22:54:28.255Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -179,6 +179,33 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-06-02T22:59:39.283Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 10 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "e23a479dccad83f5",
+      "headline": "大分 九重町 土砂崩れ 住宅1棟巻き込まれ 住人の女性大けが",
+      "aiSummary": "大分県九重町で土砂崩れが発生し、住宅が巻き込まれ住人女性が重傷。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260618/k10015153311000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 18 Jun 2026 12:46:18 +0900",
+        "fetchedAt": "2026-06-18T22:54:21.921Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 10,
+        "copyrightRisk": 10,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-06-18T22:54:28.248Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 10 < 70 (not labor-safety related for type=general_news)"
