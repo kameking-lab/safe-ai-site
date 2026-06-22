@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-18T22:54:28.255Z",
+  "updatedAt": "2026-06-22T22:43:45.315Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -374,6 +374,31 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "05ea95b5ac144c9d",
+      "headline": "北海道 旭川 高校生転落死事件 23歳被告に懲役27年 旭川地裁",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260622/k10015156111000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 22 Jun 2026 20:27:19 +0900",
+        "fetchedAt": "2026-06-22T22:43:44.114Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 0,
+        "misinformationRisk": 0,
+        "duplication": 0,
+        "judgedAt": "2026-06-22T22:43:45.307Z",
+        "model": "prefilter",
+        "rejectionReasons": [
+          "prefilter:school-context"
         ]
       },
       "approved": false,
