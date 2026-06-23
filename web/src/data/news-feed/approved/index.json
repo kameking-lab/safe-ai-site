@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-22T22:43:45.315Z",
+  "updatedAt": "2026-06-23T22:09:09.229Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -45,6 +45,30 @@
         "misinformationRisk": 10,
         "duplication": 15,
         "judgedAt": "2026-05-20T22:22:59.495Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "23ad59aaf82bd940",
+      "headline": "5月の全国熱中症搬送4176人 2015年以降2番目の多さ",
+      "aiSummary": "全国の5月熱中症搬送者数は4176人。2015年以降で2番目に多い。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260623/k10015157481000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 23 Jun 2026 20:00:35 +0900",
+        "fetchedAt": "2026-06-23T22:09:00.182Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "statistics_release",
+      "score": {
+        "relevance": 85,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-06-23T22:09:09.221Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,

@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-22T22:43:45.372Z",
+  "generatedAt": "2026-06-23T22:09:09.340Z",
   "counts": {
-    "approved": 20,
+    "approved": 21,
     "rejected": 24,
-    "total": 44,
-    "approvalRate": 0.455
+    "total": 45,
+    "approvalRate": 0.467
   },
   "byDay": [
     {
@@ -174,6 +174,13 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-06-24",
+      "approved": 1,
+      "rejected": 0,
+      "total": 1,
+      "approvalRate": 1
     }
   ],
   "byPublisher": [
@@ -186,10 +193,10 @@
     },
     {
       "publisher": "日本放送協会",
-      "approved": 2,
+      "approved": 3,
       "rejected": 22,
-      "total": 24,
-      "approvalRate": 0.083
+      "total": 25,
+      "approvalRate": 0.12
     }
   ],
   "byEstimatedWorkCategory": [
@@ -232,10 +239,10 @@
     },
     {
       "type": "熱中症",
-      "approved": 3,
+      "approved": 4,
       "rejected": 10,
-      "total": 13,
-      "approvalRate": 0.231
+      "total": 14,
+      "approvalRate": 0.286
     },
     {
       "type": "交通事故",
@@ -282,7 +289,7 @@
         0,
         0,
         1,
-        2,
+        3,
         17
       ],
       "rejected": [
@@ -313,7 +320,7 @@
       ],
       "approved": [
         3,
-        11,
+        12,
         6,
         0,
         0,
@@ -350,7 +357,7 @@
         "90-100"
       ],
       "approved": [
-        16,
+        17,
         4,
         0,
         0,
@@ -389,7 +396,7 @@
       ],
       "approved": [
         0,
-        19,
+        20,
         1,
         0,
         0,
@@ -451,6 +458,19 @@
           "misinformationRisk": 10,
           "duplication": 15,
           "judgedAt": "2026-05-20T22:22:59.495Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "5月の全国熱中症搬送4176人 2015年以降2番目の多さ",
+        "aiSummary": "全国の5月熱中症搬送者数は4176人。2015年以降で2番目に多い。",
+        "score": {
+          "relevance": 85,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-06-23T22:09:09.221Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "日本放送協会"
@@ -542,19 +562,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-06-08T22:23:38.686Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "令和８年度第３回「石綿に係る疾病の業務上外に関する検討会」を開催します",
-        "aiSummary": "厚労省が石綿関連疾病の業務上外を検討する会議を開催予定。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 25,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-06-05T22:12:47.826Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"
