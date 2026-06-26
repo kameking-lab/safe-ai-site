@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-23T22:09:09.229Z",
+  "updatedAt": "2026-06-26T22:08:38.923Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -529,6 +529,33 @@
         "misinformationRisk": 5,
         "duplication": 10,
         "judgedAt": "2026-05-28T22:39:58.661Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "7d8d7154af06ea4b",
+      "headline": "【大雨 台風】大阪 柏原で車水没 奈良で男性水路に転落し骨折",
+      "aiSummary": "奈良県で大雨により男性が水路に転落し骨折した。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260626/k10015160731000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 26 Jun 2026 19:24:45 +0900",
+        "fetchedAt": "2026-06-26T22:08:24.221Z"
+      },
+      "estimatedAccidentType": "墜落",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-06-26T22:08:34.268Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"
