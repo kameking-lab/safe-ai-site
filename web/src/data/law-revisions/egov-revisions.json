@@ -1,10 +1,29 @@
 {
-  "fetchedAt": "2026-05-28T22:29:37.284Z",
+  "fetchedAt": "2026-06-29T04:13:20.216Z",
   "source": "e-Gov 法令API v2（政府標準利用規約2.0・出典明示）",
   "total": 20,
   "skipped": 0,
   "skippedLaws": [],
   "revisions": [
+    {
+      "id": "lr-egov-322AC0000000049-20260624",
+      "title": "労働基準法（民法等の一部を改正する法律の施行に伴う関係法律の整備等に関する法律）",
+      "publishedAt": "2026-06-24",
+      "revisionNumber": "令和八年法律第四十六号",
+      "kind": "law",
+      "category": "法律",
+      "issuer": "厚生労働省",
+      "summary": "労基法の最新改正（出典: e-Gov法令検索の構造データ）。改正法令「民法等の一部を改正する法律の施行に伴う関係法律の整備等に関する法律」。公布 2026-06-24、施行日 2026-06-24。改正内容の詳細はe-Govの原文で必ずご確認ください。",
+      "source": {
+        "url": "https://laws.e-gov.go.jp/law/322AC0000000049",
+        "label": "e-Gov 労働基準法"
+      },
+      "official_notice_number": "",
+      "publication_date": "2026-06-24",
+      "enforcement_date": "2026-06-24",
+      "enforcement_status": "enforced",
+      "source_url": "https://laws.e-gov.go.jp/law/322AC0000000049"
+    },
     {
       "id": "lr-egov-322M40000100023-20260401",
       "title": "労働基準法施行規則（労働者災害補償保険法施行規則等の一部を改正する省令）",
@@ -373,25 +392,6 @@
         "chemical",
         "manufacturing"
       ]
-    },
-    {
-      "id": "lr-egov-322AC0000000049-20250601",
-      "title": "労働基準法（刑法等の一部を改正する法律の施行に伴う関係法律の整理等に関する法律　抄）",
-      "publishedAt": "2022-06-17",
-      "revisionNumber": "令和四年法律第六十八号",
-      "kind": "law",
-      "category": "法律",
-      "issuer": "厚生労働省",
-      "summary": "労基法の最新改正（出典: e-Gov法令検索の構造データ）。改正法令「刑法等の一部を改正する法律の施行に伴う関係法律の整理等に関する法律　抄」。公布 2022-06-17、施行日 2025-06-01。改正内容の詳細はe-Govの原文で必ずご確認ください。",
-      "source": {
-        "url": "https://laws.e-gov.go.jp/law/322AC0000000049",
-        "label": "e-Gov 労働基準法"
-      },
-      "official_notice_number": "",
-      "publication_date": "2022-06-17",
-      "enforcement_date": "2025-06-01",
-      "enforcement_status": "enforced",
-      "source_url": "https://laws.e-gov.go.jp/law/322AC0000000049"
     },
     {
       "id": "lr-egov-347M50002000043-20221201",
