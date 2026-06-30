@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-26T22:08:38.923Z",
+  "updatedAt": "2026-06-30T22:13:34.817Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -69,6 +69,29 @@
         "misinformationRisk": 5,
         "duplication": 10,
         "judgedAt": "2026-06-23T22:09:09.221Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "de314f0ac6316ecc",
+      "headline": "「第３回　労働安全衛生法に基づく一般健康診断の検査項目等に関する検討会」を開催します",
+      "aiSummary": "厚生労働省が労働安全衛生法に基づく一般健康診断の検査項目に関する検討会を開催。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_74071.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-06-30T14:00:00+09:00",
+        "fetchedAt": "2026-06-30T22:13:19.297Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 20,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-06-30T22:13:34.810Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,

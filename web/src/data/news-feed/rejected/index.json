@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-26T22:08:38.923Z",
+  "updatedAt": "2026-06-30T22:13:34.817Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -76,6 +76,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 30 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "b82c9bb2b2108dbb",
+      "headline": "和歌山 タンクローリー海転落 救助の81歳男性らに感謝状",
+      "aiSummary": "和歌山でタンクローリーが海に転落した事故で、救助活動を行った市民に感謝状が贈呈された。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260630/k10015164711000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 30 Jun 2026 18:26:47 +0900",
+        "fetchedAt": "2026-06-30T22:13:19.297Z"
+      },
+      "estimatedAccidentType": "車両",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-06-30T22:13:29.115Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
