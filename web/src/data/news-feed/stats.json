@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-06-30T22:13:34.873Z",
+  "generatedAt": "2026-07-01T22:15:14.843Z",
   "counts": {
     "approved": 23,
-    "rejected": 26,
-    "total": 49,
-    "approvalRate": 0.469
+    "rejected": 27,
+    "total": 50,
+    "approvalRate": 0.46
   },
   "byDay": [
     {
@@ -195,6 +195,13 @@
       "rejected": 1,
       "total": 2,
       "approvalRate": 0.5
+    },
+    {
+      "date": "2026-07-02",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -208,9 +215,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 3,
-      "rejected": 24,
-      "total": 27,
-      "approvalRate": 0.111
+      "rejected": 25,
+      "total": 28,
+      "approvalRate": 0.107
     }
   ],
   "byEstimatedWorkCategory": [
@@ -315,7 +322,7 @@
       ],
       "rejected": [
         1,
-        7,
+        8,
         13,
         1,
         1,
@@ -353,7 +360,7 @@
       ],
       "rejected": [
         3,
-        22,
+        23,
         1,
         0,
         0,
@@ -390,7 +397,7 @@
         0
       ],
       "rejected": [
-        16,
+        17,
         10,
         0,
         0,
@@ -429,7 +436,7 @@
       ],
       "rejected": [
         1,
-        18,
+        19,
         0,
         0,
         0,
@@ -444,7 +451,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 23
+      "count": 24
     },
     {
       "reason": "duplication",
@@ -639,6 +646,22 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "ベネズエラ地震被災地 大雨で土砂崩れや建物倒壊のおそれも",
+        "aiSummary": "ベネズエラ地震被災地で大雨、土砂崩れや建物倒壊の危険増大。",
+        "score": {
+          "relevance": 15,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-01T22:15:14.726Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 15 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "和歌山 タンクローリー海転落 救助の81歳男性らに感謝状",
         "aiSummary": "和歌山でタンクローリーが海に転落した事故で、救助活動を行った市民に感謝状が贈呈された。",
         "score": {
@@ -730,23 +753,6 @@
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
             "relevance 10 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "名古屋 マイクロバス2人死亡事故で運転手の鑑定留置始まる",
-        "aiSummary": "名古屋のマイクロバス死亡事故、運転手の鑑定留置が始まる。",
-        "score": {
-          "relevance": 40,
-          "copyrightRisk": 20,
-          "misinformationRisk": 10,
-          "duplication": 70,
-          "judgedAt": "2026-06-11T22:48:49.635Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "duplication 70 > 50 (already covered in accident DB)",
-            "relevance 40 < 70 (not labor-safety related for type=accident_report)"
           ]
         },
         "publisher": "日本放送協会"

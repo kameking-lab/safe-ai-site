@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-30T22:13:34.817Z",
+  "updatedAt": "2026-07-01T22:15:14.734Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -76,6 +76,32 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 30 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "667f8474a41e506f",
+      "headline": "ベネズエラ地震被災地 大雨で土砂崩れや建物倒壊のおそれも",
+      "aiSummary": "ベネズエラ地震被災地で大雨、土砂崩れや建物倒壊の危険増大。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260701/k10015165381000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 01 Jul 2026 15:32:53 +0900",
+        "fetchedAt": "2026-07-01T22:15:06.462Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-01T22:15:14.726Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
