@@ -3,7 +3,18 @@
 担当領域・契約・絶対ルールは loop-prompt-ux-hub.txt を参照。所有route=quick/faq/glossary/guides/features/industries/diversity/resources/handover/notifications/favorites/safety-signs/accidents/court-cases/signage、およびトップ((main)/page.tsx・home-screen.tsx・home-three-pillars.tsx)。**着手前に現状確認**（済みは[x]）。マスター BACKLOG.md は参照専用。
 
 ## 未着手（上から処理）
-- [x] 【補充・柱0】/guides ハブ=アイコンファースト化。4ガイド(安衛法AIチャット/業種別災害分析/年次安全衛生計画/化学物質RA)が文字のみのカードで並び、初訪の職長が本文を読まないと見分けられなかった既存欠陥を是正。slug→アイコン(Bot/BarChart3/CalendarCheck/FlaskConical)＋弁別色(青/ローズ/緑/琥珀)を当ページ内マップで割当(data層 KEYWORD_LANDINGS は data班凍結のため非改変)、各カードを48×48pxアイコンバッジ付き横並びへ。色重複ゼロで3秒スキャン可能に。vitest 4件追加・無読テスト4/4 PASS(実 boundingBox 48px＋色弁別測定)。(2026-06-14 / ux-hub/guides-hub-icon-first)
+
+### 2026-07-02 Fable診断注入（診断書: docs/fable-diagnosis-2026-07-02/01・07）
+- [ ] 【Opus・P0】O2: サイネージ気象データのランタイム取得化＝/api/signage/jma のビルド焼き込み廃止（本番で18日凍結を実測: 取得時刻2026-06-14のまま）＋デプロイ健全性ウォッチ（データ齢24h超で検知）。完了条件=本番APIの fetchedAt が常に60分以内（時間を置いた2回のcurl）（01のT1+T2）。
+- [ ] 【Opus・P0】O3: 警報バナー判定を市区町村×警報コード区分に修正＝伊豆諸島の注意報を新宿の現場に赤「警報 発表中」と誤報する県ヘッドライン判定を廃止。完了条件=注意報のみの実データ日に赤バナーが出ず黄「注意報」になる＋新規ユニットテスト緑（01のT3）。
+- [ ] 【Opus・P1】O9: サイネージ表示の全面改修＝視認距離向け文字サイズ再設計（12px以下61%→本文24px以上）＋パネル自動ローテーション＋更新間隔15分化＋失敗時リトライ＋日次フルリロード。完了条件=1920x1080実測で12px以下が操作UI以外0件・6分間DOM観察で内容変化あり（01のT4+T5）。
+- [ ] 【Sonnet・P1】S4: サイネージのデータ品位3本＝地点マスタ47都道府県化（現状30箇所ハードコード・40県選択不可）＋ニュース鮮度フィルタ・重複排除・鮮度加重ソート（中央値50日前を14日以内へ）＋データ時刻の「◯分前」人間化＋2h超stale黄帯（01のT6+T7+T9）。
+- [ ] 【Sonnet・P2】S5: サイネージ常掲価値の追加＝無災害日数・今日の唱和・WBGT連動の日替わり3項目（01のT10。教育スライドのサイネージ組込み=ux-records班S3との連携口もここで受ける）。
+- [ ] 【Sonnet・P1】S11: /handover（引き継ぎ書）の公開閉鎖＝ルート撤去しdocsへ退避 or 認証ゲート化。本番404/403を確認（07の3c・情報露出）。
+- [ ] 【Sonnet・P1】S9: コンサル相談CVパス＝/contact 2タブ化（同一Formspree・件名プレフィックス）＋専門ページ下部に相談カード（07のP1-5・6/11酷評E-2の未着手残）。
+- [ ] 【Sonnet・P1】S10: /signage/map・/for/construction のSSR/固有メタ仕上げ＋/accidents 本体への出力3ボタン（CSV/要点コピー/共有URL＝#520の横展開）（07のP1-7+P1-7b）。
+- [ ] 【Sonnet・P1】S8-b: E-E-A-T監修者バイライン＝判例詳細（/court-cases/[id]・現状author=Organizationのみ）とFAQへのPerson JSON-LD＋バイライン配線（07のP1-4の自班route分）。
+- [ ] 【Opus・P2・設計ドラフトのみ=Path A】サイネージ設定の外部化＝PC設定→6桁コード/QRでTV適用（01のT8。DB利用のためオーナー確認）＋Web Push通知の設計ドラフト（07のP2-9・VAPID鍵待ち）。4ガイド(安衛法AIチャット/業種別災害分析/年次安全衛生計画/化学物質RA)が文字のみのカードで並び、初訪の職長が本文を読まないと見分けられなかった既存欠陥を是正。slug→アイコン(Bot/BarChart3/CalendarCheck/FlaskConical)＋弁別色(青/ローズ/緑/琥珀)を当ページ内マップで割当(data層 KEYWORD_LANDINGS は data班凍結のため非改変)、各カードを48×48pxアイコンバッジ付き横並びへ。色重複ゼロで3秒スキャン可能に。vitest 4件追加・無読テスト4/4 PASS(実 boundingBox 48px＋色弁別測定)。(2026-06-14 / ux-hub/guides-hub-icon-first)
 - [x] 【柱0補充】/resources 厚労省一次資料DB(1,158件)のフィルタ・検索・各エントリ操作のタップ標的44px化。→ 一次資料を絞り込んで原文へ飛ぶDBの主操作が押し損ねサイズだった既存欠陥を是正。キーワード検索入力・カテゴリ/法的拘束力/年度の3 select(py-2≈38px)・条件クリア(min-h-[40px])・各エントリの原文/目次に戻る/PDF/一覧リンク(min-h-[36px])を全て min-h-[44px] へ。純粋なクラス追加でレイアウト・絞り込みロジック不変。タブは既に44px達成済み。vitest 5件追加・無読テスト8/8 PASS(実 boundingBox 測定)。(2026-06-14 / ux-hub/resources-db-44px-targets)
 - [x] 【柱0補充】/court-cases/[id] 判例詳細 最上部の戻る/印刷リンク・実務導線のタップ標的44px化。→ 一覧から1判例にタップで入った一人親方/コンサルが最初に触る「労災裁判例コーナーに戻る」戻りリンク(パディング無し≈20px)・「この判例を印刷／PDF」リンク(py-1.5 text-xs≈30px)が44px未満だった既存欠陥を是正。「現場の実務へ」3カード(p-3単行で丁度44px境界)も min-h-[44px] 明示。純粋なクラス追加でレイアウト・print:hidden挙動不変。vitest 3件追加・無読テスト5/5 PASS(実 boundingBox: 戻る44.0/印刷44.0/3カード46.0px)。(2026-06-14 / ux-hub/court-case-detail-44px-targets / PR #567)
 - [x] 【柱0バッチ8/9】ハブ/ナビ系一括(/quick・/faq・/glossary・/guides・/features・/industries・/diversity・/resources・/handover・/notifications・/favorites・/safety-signs)=アイコンファースト＋文字ダイエット中心・44pxタイル・折りたたみ。状態を持たない画面群なので結論カードは不要。→ /industries ヘッダーを3段落（10業種インライン列挙＋クローラ向けキーワード段落）から1文ガイドへ圧縮、/glossary 五十音インデックスを44×44pxタップ標的化、/diversity 導入文ダイエット＋目次チップ44px化（一次資料確認の注意書きは保持）。/handover は noindex＋key gate の社内文書のためペルソナ対象外として除外。vitest 10件追加・無読テスト8/8 PASS。(2026-06-14 / ux-hub/pillar0-batch8-text-diet / PR #529)

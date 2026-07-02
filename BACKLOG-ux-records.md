@@ -3,7 +3,15 @@
 担当領域・契約・絶対ルールは loop-prompt-ux-records.txt を参照。所有route=safety-diary/site-records/ky/ky-examples/education-certification/education/foreign-workers/health-checkup-scheduler/account。共有ビジュアル基盤(safety-tone.ts・ConclusionCard/StatusBadge/CollapsibleDetail)の custodian=当班（足すだけ・壊さない）。**着手前に現状確認**（走行中ループが柱0の多くを消化済み＝済みは[x]）。マスター BACKLOG.md は参照専用。
 
 ## 未着手（上から処理）
-- [x] 【柱C-9・A1】KY用紙 下部アクションバーの操作集中: 固定ボタン13→「保存(solid主ボタン)」＋「…」の2つに集約。複製/共有/転記/印刷/連携は「…」その他操作シート(記録/共有・連携/印刷・PDF/関連でグループ化)へ退避。全画面共通の共有FAB・モバイルボトムナビとの重畳も解消。A4印刷シートは不変。無読11/11合格。(2026-06-13, #521)
+
+### 2026-07-02 Fable診断注入（診断書: docs/fable-diagnosis-2026-07-02/02・06・07）
+- [ ] 【Opus・P1】O13: /ky/paper の React error #418（hydration mismatch）毎ロード発生の原因特定と是正。SSR/CSR分岐値（日付・localStorage初期値・乱数系）が第一容疑。完了条件=本番相当ビルドでコンソールエラー0・CLS 0.000維持（07の3b）。
+- [ ] 【Opus・P1】O10: KY用紙Phase2＝全欄の直接操作化（危険行・4R・参加者・行追加）＋未記入ハイライト・zoom-to-cell＋AI提案/音声入力のエディタ統合＋canvas UIの既定切替（02のT4〜T7）。**依存: BACKLOG-fable.md F1（方式確立）が先**。完了条件=旧UIデータが canvas でそのまま編集可・既存E2E全緑。
+- [ ] 【Opus・P1】O15: SlideDeck コンポーネント＝view/present/print 3モード＋統計チャートのprint対応（06のT4+T5）。**依存: dataレーンO14（型別サマリ生成）が先**。完了条件=/education/hazard-slides/fall が3モードで崩れなし（Playwrightスクショ＋実印刷確認）。
+- [ ] 【Sonnet・P1】S1: 打合せ用紙（安全工程打合せ）への直接操作UI横展開＝MeetingPrintSheetのeditable化＋フィールドマップ＋分散入力/AI提案/履歴サジェスト統合＋既定切替（02のT8+T9）。**依存: O10完了＝PaperStage/フィールドマップ規約の確立後**。新規設計はフィールド定義のみ。
+- [ ] 【Sonnet・P1】S2: 教育スライド量産＝主要8型の対策辞書・クイズ→21型横展開＋ハブページ（06のT6+T7）。**出典明記必須・provenance=synthetic/preliminaryは事例枠に不使用**（機械検証がO14のガードで効く）。依存: O15。
+- [ ] 【Sonnet・P1】S3: スライド配備統合＝教育コース詳細/朝礼(/ky/morning)/Eラーニング/事故DB深リンク（06のT8。サイネージ側の組込みはux-hub班へ「要・他班」連携）。完了条件=各入口から2タップ以内でスライド到達。
+- [ ] 【Sonnet・P2】S12: /education-certification 発行/一覧の3秒無読チェック→是正（既存キュー残の実施。下の2026-06-14起票分と同一＝重複着手しない）。: 固定ボタン13→「保存(solid主ボタン)」＋「…」の2つに集約。複製/共有/転記/印刷/連携は「…」その他操作シート(記録/共有・連携/印刷・PDF/関連でグループ化)へ退避。全画面共通の共有FAB・モバイルボトムナビとの重畳も解消。A4印刷シートは不変。無読11/11合格。(2026-06-13, #521)
 - [x] 【柱C-4・S（自班route分）】/ky・/ky/morning の固有メタ・SSR化。監査の結果 /ky/paper・/ky/list・/ky/workers は固有メタ済み、/ky は意図的な恒久リダイレクト（canonicalな /ky/paper へ転送・メタ不要）。残ギャップ＝/ky/morning が兄弟ページで唯一 openGraph/twitter 欠落だったため SSR メタに追加（LINE等の共有プレビュー整備）。sitemap収載は seo班。(2026-06-13, #525)
 - [x] 【柱C-9・A2】KY用紙 入力のステップ/アコーディオン化: 用紙ファースト(完成用紙を最初に見せる=社長要件)を壊さない両立策として、用紙を隠すウィザード化ではなく「記入の進行ナビ(基本情報→危険→対策→確認)」を用紙の上に追加。緑=記入済み/青=いまここ/灰=未着手、各段44px超でその欄へジャンプ。全段のこり合計＝結論カード「記入のこりN」と一致(整合保証=ユニット+無読で検証)。下書き中のみ表示。A4印刷シートは不変。無読10/10合格。(2026-06-14, #533)
 - [x] 【柱0仕上げ】記録系・受入教育・健診スケジューラで結論カード/無読テストが未達の画面を巡回し是正。巡回の結果、記録系(site-records 全subroute・safety-diary・education-certification)は結論カード済みで合格。未達3画面を特定: /education・/foreign-workers・/health-checkup-scheduler。本イテレーションで **/education** を是正（教材カタログ最上部に ConclusionCard「12種 教育プログラム公開中（特別教育6・法定教育2・労働衛生教育4・無料）」＋次アクション「教育を選ぶ」#programs を新設、共通基盤に足すのみ）。無読11/11合格。残る /foreign-workers・/health-checkup-scheduler は下記に分割。(2026-06-14, #536)

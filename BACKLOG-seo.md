@@ -3,7 +3,15 @@
 担当領域・契約・絶対ルールは loop-prompt-seo.txt を参照。所有ファイル=sitemap*/robots/manifest/seo-lib/JSON-LDヘルパー/横断検索(search-index・fuzzy-search・notice-search・/search)/app-shell(検索UIのみ)/両layout(metadataのみ)。**着手前に必ず本番とコードの現状を確認**（走行中の全領域ループが先に消化している項目があるため、済みなら[x]にして次へ）。マスター BACKLOG.md は参照専用。
 
 ## 未着手（上から処理）
-（現在キュー空。次イテレーションは「補充の指針」から起こす）
+
+### 2026-07-02 Fable診断注入（診断書: docs/fable-diagnosis-2026-07-02/05-search-egov.md）
+- [ ] 【Opus・P0】O8-a: /search・⌘K を死蔵の lib/cross-search/（AND＋シノニム＋keywords対応・6月実装済みだが未配線）へ載せ替え。完了条件=本番 /search で「石綿 事前調査」「クレーン 過負荷」「足場 作業床」各1件以上・目的条文3位以内・応答200ms以内・既存vitest緑（05のT1）。
+- [ ] 【Opus・P0】O8-b: 条番号クエリパーサ＝法令名+条番号の複合・漢数字・枝番「61-2」対応（/law-search の kanjiToNum 流用）。完了条件=「安衛法61条」「安衛法 88条」「第六十一条」「安衛則563条」がいずれも該当条文トップ表示（05のT2）。
+- [ ] 【Opus・P0】O8-c: 法令エイリアス辞書（正式名称・かな読み・別略称）を law-metadata 連携で検索展開。完了条件=「労働安全衛生規則 第563条」1位＝安衛則563条・「あんえいほう」で安衛法条文ヒット（05のT3。e-Gov API `abbrev` フィールドが種に使える）。
+- [ ] 【Sonnet・P1】S6: 0件時のe-Govフォールバック（クエリ引継ぎリンク・収録範囲の明示＝未収録条番号を「規定なし」と誤読させない）＋ランキング調整（「就業制限」1位=安衛法61条）＋0件クエリの週次確認手順（05のT4+T8）。
+- [ ] 【Opus・P1】O18: 条文本文の参照自動リンク（「第○条」「令第○条」→内部 or e-Gov条アンカー）。完了条件=生成リンク解決率100%のビルド時テスト・幽霊リンク0（05のT5）。
+- [ ] 【Opus・P2・L】O17: 条文パーマリンク /laws/[law]/[art] ＋束ねパネル（関連通達・判例・用語・教育資格・e-Gov）。e-Gov超えの本丸＝「束ね」はe-Govに構造的に不可能（05のT6）。
+- [ ] 【Opus・P2・設計ドラフトのみ=Path A】e-Gov API v2 全文取込（抄録1,065条→全文カバレッジ）の設計書作成。外部API取込のため実装はオーナー確認後（05のT7）。
 
 ## 完了
 - [x] 【柱C-2・S 横断検索の通達を個別詳細へ深リンク化】横断検索(/search・⌘K)の通達カテゴリが全件 `/resources?q=<title>` へリンクしていたが、`resources-client.tsx` は `q` を読まない＝検索した個別通達へ到達できず全1,158件一覧へ落ちていた（#561 と同型の発見性の穴）。`search-index.ts` の通達 url を正本 `/circulars/<id>` へ深リンク化＝詳細 `/circulars/[id]` の generateStaticParams が mhlwNotices 全件 id を解決するため必ず着地（幽霊URL 0）しデータ追加にも自動追従。回帰2本追加（全 notice が /circulars/<id>・/resources?q= 不在・url id と item.id 対応／深リンク先 id 集合 == 正本 mhlwNotices 集合・件数一致）計14 it。

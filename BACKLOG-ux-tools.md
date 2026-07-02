@@ -3,7 +3,12 @@
 担当領域・契約・絶対ルールは loop-prompt-ux-tools.txt を参照。所有route=risk-prediction/risk/chemical-database/chemical-ra/chemical*/stress-check/mental-health*/treatment-work-balance/law-search/circulars/law-hierarchy/chatbot/stats/accidents-analytics/accidents-reports/accident-news/bcp/subsidies/insurance/organization/strategy/goods/leaflet/newsletter。**着手前に現状確認**（済みは[x]）。マスター BACKLOG.md は参照専用。
 
 ## 未着手（上から処理）
-- [x] 【柱0バッチ6/9】メンタル・両立系=ハブ3枚の長文折りたたみ＋plan-builder結論カード（PR #511 / commit 17ca4ad9 でmainに反映済。lane backlog未更新だったため確認のうえチェック）。
+
+### 2026-07-02 Fable診断注入（診断書: docs/fable-diagnosis-2026-07-02/04・07）
+- [ ] 【Opus・P0】O4: チャットボット偽「範囲外」警告の根絶＝chatbot-enrichment.ts detectOutOfScopeLawReferences の長音分断＋正式名⇄短縮名照合の修正（正答の25%に偽警告・信頼度不当降格を実測）＋派遣法45条要約の是正（「派遣元」が正）＋SYSTEM_PROMPT「施行：YYYY年MM月」プレースホルダ漏出対策（04のT1+T2+T3）。完了条件=本番プローブ20問で偽陽性scope警告0件・YYYY出力0件。
+- [ ] 【Opus・P0】O5: synonyms.ts:166「気積→事務所則第14条」を第2条へ是正（dataレーン#538申し送りの取り逃し・第14条は排水）＋口語同義語の拡充（頻度/資格/何人/何トン系）。完了条件=「健康診断の頻度」で安衛則44・45条がtop5・main/fresh eval非退行100%/98%以上（04のT4・07のP0-1）。
+- [ ] 【Sonnet・P2】S7: チャットボット小粒4本＝一般語PINの文脈ガード（fresh 100/100目標）・adjacentヘッダ誤発火抑制・no-hit時のrelatedノイズ抑制・本番週次スモークプローブ5問（04のT6+T8+T9+T10）。合否は生成品質eval（BACKLOG-fable.md F3で新設）で機械判定。
+- [ ] 【Sonnet・P1】S8-a: E-E-A-T監修者バイライン＝通達詳細（/circulars/[id]）への氏名・労働安全コンサルタント登録260022・aboutリンク＋Person JSON-LD配線（07のP1-4の自班route分。判例詳細/FAQはux-hub班）。=ハブ3枚の長文折りたたみ＋plan-builder結論カード（PR #511 / commit 17ca4ad9 でmainに反映済。lane backlog未更新だったため確認のうえチェック）。
 - [x] 【柱C-6・A】/circulars 初期件数制限（柱0バッチ4=PR/feat/law-search-visual-first でmain反映済。INITIAL_RENDER=24＋「さらに表示」24件ずつ＋種別チップ44px＋結論カード。/court-casesはux-hub領域のため対象外）。
 - [x] 【柱C-7・A】事故統計の出力手段（2026-06-13 ux-tool/c7-accidents-export）。/accidents-analytics・/accidents-reports に CSV/要点コピー/共有/印刷ツールバーを新設（KY transcribe-export方式の横展開）。集計値はそのまま転記＝捏造なし。CSV/要点テキストは純関数(lib/export/csv・accidents-analytics/export・accidents-reports-export＝テスト17件)。h1は両ページ＋/risk・/risk-prediction・/law-search いずれも既に1個で多重/欠落なし（確認のみ）。無読テスト8/8 PASS。
 - [x] 【柱0バッチ9/9】その他ツール=各ツールの判定/件数結論カードと文字ダイエット。第1弾(PR #527)=/strategy/plan-generator・/subsidies+calculator・/chemical-database・/goods。第2弾(2026-06-14 ux-tool/batch9-status-conclusion-cards / PR #531 main反映済)=状態系3ページ /insurance(未加入カード＋調達基準を折りたたみ)・/bcp(稼働率目標99%カード)・/organization(教育修了率83.5%カード＋要フォロー先チップ・全値KPI/DEPT配列から導出＝転記のみ)。第3弾(2026-06-14 ux-tool/batch9-newsletter-status-card / PR #535)=/newsletter(登録前後の状態カード=未登録(info/青)→登録完了(safe/緑)に色帯切替)。/leaflet(A4印刷PDF)は判定/件数の状態を持たない成果物のため結論カード対象外（水増し回避）。無読テスト 第2弾15/15＋第3弾7/7 PASS。
