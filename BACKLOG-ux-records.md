@@ -30,5 +30,8 @@
 
 - [x] 【補充・診断07残課題】lint警告46件のうち当班所有ファイル分23件を掃除（site-records各client 7ファイル: incident-report/induction/inspection/monthly/near-miss/patrol/procedure ＋ ky-paper-view.tsx）。上位未着手5件(O10/O15/S1/S2/S3)がF1(fable)/O14(data)依存で全ブロック中のため補充。原因は`react-hooks/set-state-in-effect`が各useEffect内の最初のsetState呼び出し1箇所のみ診断対象なのに、2箇所目以降にも重複してeslint-disableを付与していたこと＝各effect1箇所のみ残し重複除去（実地検証で裏取り）。未使用import(summarizePatrol/summarizeInduction、定義側は他所で使用中のため残置)・ky-paper-view.tsxのexhaustive-deps(setNoticeをdeps追加、useCallback([])で安定参照のため無害)も是正。他班ファイル分23件は対象外・不変。tsc=0/lint errors=0(当班分23→0)/vitest 1975 pass/build成功。(2026-07-03, #597)
 
+- [x] 【柱0補充・巡回】上位5件(O10/O15/S1/S2/S3)がF1(fable)/O14(data)未完了で全ブロック中のため、自領域の未監査route(/ky-examples・/account)を巡回。/ky-examplesはConclusionCard導入済みだが`action`未指定＋主CTAが44px未満で軽微。真の欠落は**/account（マイページ）**: 共通基盤(ConclusionCard/StatusBadge)が未導入で、状態バナー(支払い遅延/未払い/解約)最大2件と「現在のプラン」独自の状態ピルが並立し「1画面1メッセージ」に反していた(過去のsafety-diary柱3レビュー#565と同種の非対称)。ConclusionCardへ統合＝赤(支払い遅延/未払い)＞黄(解約済み)＞青(フリー)＞緑(利用中)の優先順で1状態に絞り、次アクション(プラン管理/アップグレード/再加入)をカードのaction/children枠へ集約。判定ロジックは`computeAccountConclusion`(lib/account-conclusion.ts)へ純粋関数として切出しvitest 8/8で全状態網羅。プラン取得・Stripeポータル呼出等の課金ロジックは無変更(表示の再配置のみ)。/accountはGoogle OAuth必須でこのdev環境にAUTH_SECRET未設定のためPlaywright無読は実行不可(捏造回避のため実施せず明記)＝結論ロジックのunit testと目視でのコード確認で代替。tsc=0/lint errors=0/vitest 1997 pass/build成功(`ƒ /account`)。/ky-examplesの軽微な欠落(action未指定・CTA44px未満)は次点タスクとして下記に起票。(2026-07-03, PR未確定)
+- [ ] 【柱0補充・次点】/ky-examples: `KyExamplesBrowser`のConclusionCardに`action`未指定＋主要CTA「KY用紙の作成へ進む→」(header内)が`px-3 py-1.5 text-xs`でタップ標的44px未満。兄弟route(ky/list等)と対称化するため、結論カードへ`action={href:"/ky/paper", label:"KY用紙を作る"}`相当を追加しヘッダー内の重複CTAは整理。
+
 ## 補充の指針（未着手3件未満で起こす）
 - 自領域route の柱0未適用箇所・無読テスト不合格画面・第三者レビュー指摘。
