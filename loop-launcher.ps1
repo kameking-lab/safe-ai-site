@@ -79,6 +79,11 @@ $statePath = Join-Path $repoRoot "loop-state.json"
 $statusPath = Join-Path $repoRoot "docs\loop-status.md"
 $stringsPath = Join-Path $repoRoot "loop-status-strings.txt"
 
+# Export the ONE central status file to every child (lane runners + one-shots) so a lane running
+# in its own clone (..\safe-ai-lanes\<name>) self-reports into THIS file, not its local copy.
+# loop-report-status.ps1 reads $env:SAFE_AI_LOOP_STATUS (see diagnosis 08 section D).
+$env:SAFE_AI_LOOP_STATUS = $statusPath
+
 $logDir = Join-Path $repoRoot "logs"
 if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir | Out-Null }
 $launchStamp = Get-Date -Format "yyyyMMdd-HHmmss"
@@ -287,6 +292,41 @@ function Write-Status {
   }
 }
 
+# ---------------------------------------------------------------------------
+# Lane self-report region (diagnosis 08 section D). The launcher owns the top of the file and
+# rewrites it wholesale; this region is owned by the lanes (loop-report-status.ps1). We PRESERVE
+# whatever the lanes wrote verbatim, so a live row survives a launcher pass. On first run (no
+# region yet) we emit a placeholder row per enabled lane so the section is never empty.
+# Markers are ASCII literals shared with loop-report-status.ps1.
+$reportBegin = "<!-- LANE-REPORT:BEGIN (managed by loop-report-status.ps1) -->"
+$reportEnd = "<!-- LANE-REPORT:END -->"
+function Add-LaneReportSection {
+  Add-Status ""
+  Add-Status (S "reportHeader")
+  Add-Status ""
+  $preserved = $null
+  if (Test-Path $statusPath) {
+    try {
+      $old = @(Get-Content -Encoding UTF8 -Path $statusPath)
+      $b = -1; $e = -1
+      for ($k = 0; $k -lt $old.Count; $k++) {
+        if ($old[$k].Trim() -eq $reportBegin) { $b = $k }
+        elseif ($old[$k].Trim() -eq $reportEnd) { $e = $k; break }
+      }
+      if ($b -ge 0 -and $e -gt $b) { $preserved = $old[$b..$e] }
+    } catch {}
+  }
+  if ($preserved) {
+    foreach ($l in $preserved) { Add-Status $l }
+  } else {
+    Add-Status $reportBegin
+    foreach ($lane in $cfg.lanes) {
+      if ($lane.enabled) { Add-Status (Fmt "reportPlaceholder" @{ LANE = $lane.name }) }
+    }
+    Add-Status $reportEnd
+  }
+}
+
 $running = Get-RunningLanes
 $remainStr = if ($null -ne $daysRemaining) { Fmt "remain" @{ DAYS = $daysRemaining } } else { "" }
 
@@ -321,6 +361,7 @@ if ($deadlinePassed) {
   Add-Status (Fmt "stoppedBody1" @{ UNTIL = [string]$cfg.untilIso })
   Add-Status (S "stoppedBody2")
   Add-Status (S "stoppedBody3")
+  Add-LaneReportSection
   Write-Launcher ("DEADLINE PASSED (" + ([string]$cfg.untilIso) + "). No lanes launched. Wrote stop banner to status.")
   Write-Status
   Write-Launcher "=== loop-launcher end (stopped: deadline) ==="
@@ -416,6 +457,8 @@ foreach ($lane in $cfg.lanes) {
   $stateLabel = if ($wasRunning) { S "laneRunning" } else { S "laneStart" }
   Add-Status (Fmt "laneRow" @{ LANE = $lane.name; MODEL = [string]$lane.model; INTERVAL = [string]$lane.intervalSeconds; OPEN = [string]$open; STATE = $stateLabel })
 }
+
+Add-LaneReportSection
 
 Add-Status ""
 Add-Status (S "watchHeader")
