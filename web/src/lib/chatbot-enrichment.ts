@@ -1,5 +1,6 @@
 import type { LawArticle } from "@/data/laws";
 import {
+  LAW_METADATA,
   getLawMetadata,
   getArticleEffectiveDate,
 } from "@/data/law-metadata";
@@ -373,6 +374,16 @@ const KNOWN_LAW_SHORTS = new Set<string>([
   "過重労働通達",
 ]);
 
+// lawShort⇄正式名称の対応表（law-metadata.ts を単一ソースとして再利用）。
+// 正式名称は短縮名と字面が重ならないことが多い（例: 「労働安全衛生法」⊅「安衛法」、
+// 「酸素欠乏症等防止規則」⊅「酸欠則」）ため、substring 照合とは別に完全一致で
+// 判定する集合を用意する。
+const KNOWN_LAW_FULL_NAMES = new Set<string>(
+  Object.values(LAW_METADATA)
+    .map((m) => m.fullName)
+    .filter((name): name is string => Boolean(name))
+);
+
 /**
  * 回答中に出現する「○○法/則/規則/指針/通達 + 第N条」表現を抽出し、
  * RAGコーパスに含まれない法令名を引用しているかどうかを判定する。
@@ -383,17 +394,21 @@ export function detectOutOfScopeLawReferences(
   hitLawShorts: Iterable<string>
 ): string[] {
   const hits = new Set(hitLawShorts);
-  const lawPattern = /([一-龥ぁ-んァ-ヴA-Za-z0-9]{2,12}(?:法|則|規則|指針|通達|告示|条例))第\s*[一二三四五六七八九十百0-9]+条/g;
+  // 長音「ー」「々」を文字クラスに含めないと「クレーン等安全規則」のような
+  // 長音入り法令名が「ン等安全規則」等に分断され、既知法令なのに偽の範囲外
+  // 警告が出る（実測: 正答の25%で誤発火）。
+  const lawPattern = /([一-龥ぁ-んァ-ヴー々A-Za-z0-9]{2,12}(?:法|則|規則|指針|通達|告示|条例))第\s*[一二三四五六七八九十百0-9]+条/g;
   const found = new Set<string>();
   let match: RegExpExecArray | null;
   while ((match = lawPattern.exec(answer))) {
     const name = match[1];
     // 「同法」「本法」「上記法令」等の指示語は除外
     if (/^(同|本|上記|該当|当該|該|本件|先述|次の|前述)/.test(name)) continue;
-    // KNOWN_LAW_SHORTS に含まれる場合は安全。lawShort と完全一致しない場合
-    // （正式名称で書かれている等）は、簡易チェックとして「含む」関係でも安全とみなす。
+    // KNOWN_LAW_SHORTS/KNOWN_LAW_FULL_NAMES に完全一致すれば安全。
+    // それ以外は簡易チェックとして「含む」関係（略記の一部表記ゆれ等）でも安全とみなす。
     const safe =
       KNOWN_LAW_SHORTS.has(name) ||
+      KNOWN_LAW_FULL_NAMES.has(name) ||
       [...KNOWN_LAW_SHORTS].some((k) => name.includes(k) || k.includes(name)) ||
       [...hits].some((k) => name.includes(k) || k.includes(name));
     if (!safe) found.add(name);
