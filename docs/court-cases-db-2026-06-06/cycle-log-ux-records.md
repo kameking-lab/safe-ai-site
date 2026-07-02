@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-03 — 柱0補充 /safety-diary/list に結論カード新設（PR: ux-rec/c0-safety-diary-list-conclusion）
+
+回収: 自班のCI緑PR #589（/ky/paper hydration mismatch是正）をsquashマージ済み。ローカルに残っていた既マージ済みの陳腐ブランチ3本（c0-education-course-conclusion #577・c0-foreign-safety-training-conclusion #568・c0-ky-list-workers-noread #558）を削除。main は `git pull --ff-only` で同期・clean。
+
+着手前監査: BACKLOG最上位[ ]はO10〜S3（KY用紙canvas/SlideDeck/教育スライド量産等）だが、依存先のBACKLOG-fable.md F1（KY用紙canvas方式確立）・BACKLOG-data.md O14（型別サマリ生成）がともに他レーンで未着手のため全件ブロック中。契約どおり自領域の柱0/柱3レビューから補充。
+
+自班route横断調査の結果、大半（site-records本体・safety-diary本体・ky/paper・education系12ページ・foreign-workers本体・health-checkup-scheduler・ky-examples）はConclusionCard導入済みで合格。真の欠落＝**/safety-diary/list（保存した打合せ書一覧）**: 対になる `/ky/list`（保存済みKY一覧）は空/件数/絞込0件の3状態ともConclusionCard＋次アクション（新規KY作成）が既設なのに、`/safety-diary/list`（実体`MeetingListClient`）はh1+説明文+検索/並替のみで結論カードが無く非対称だった。
+
+是正（足すだけ・共通基盤変更なし）: `MeetingListClient` に `/ky/list` と同型の3状態ConclusionCardを追加。(1)保存0件=info「保存した打合せ書なし」＋次アクション「新規作成」(/safety-diary)。(2)検索/条件で0件=neutral「該当なし」（該当数を明示）。(3)通常=info「N件 保存した打合せ書」＋次アクション「新規作成」。isFiltering（keyword非空）で絞込中の説明文を出し分け。
+
+検証: tsc=0・lint errors=0（既存warning46件のみ・自分の変更起因なし）・vitest 237ファイル1973件全pass・build成功（`/safety-diary/list` 静的生成確認）。無読Playwrightスクリプト `docs/third-party-reviews/scripts/safety-diary-list-noread-2026-07-03.mjs` を新規（空/1件/検索0件の3状態×次アクションの可視性・44px・遷移先を検証）＝7/7合格。working tree clean。
+
+---
+
 ## 2026-06-14 — 柱0補充 教育コース詳細12ページに結論カード新設（PR: ux-rec/c0-education-course-conclusion）
 
 回収: 自班のCI緑PR #565（安全日誌の保存済み第3状態）を squashマージ済み。#558（/ky/list・/ky/workers 無読巡回）はCI緑だが squashマージ時にBACKLOG/cycle-logで競合→契約どおり origin/main を #558 ブランチへ通常マージで解消（コード競合なし・docsのみ）→push、CI再走の緑を次イテレーションで回収。#568（受入教育ビルダー結論カード）はCI走行中で未マージ＝次回収。main は `git pull --ff-only` で同期・clean。
