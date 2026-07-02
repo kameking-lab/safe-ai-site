@@ -178,6 +178,153 @@ if ($Register) {
 $startupFolder = [Environment]::GetFolderPath('Startup')
 $startupCmdPath = Join-Path $startupFolder "safe-ai-loop-launcher.cmd"
 
+# Scheduler self-check: is the 'safe-ai-loop-runner' task actually pointing at THIS launcher
+# (permanent fix active), or still at the old baked-deadline loop-runner (needs one elevated
+# -Register)? Surfacing 'stale'/'missing' in loop-status.md keeps the one remaining manual
+# step visible in the same file the operator watches. Defined here (before the -InstallUserStartup
+# path) so the install can reconcile the banner without a full launcher run.
+function Get-SchedulerHealth {
+  try {
+    $t = Get-ScheduledTask -TaskName 'safe-ai-loop-runner' -ErrorAction Stop
+    $a = [string]$t.Actions[0].Arguments
+    if (($a -match 'loop-launcher\.ps1') -and ($a -notmatch 'UntilIso')) { return 'ok' }
+    return 'stale'
+  } catch { return 'missing' }
+}
+
+# Admin-free resurrection self-check: does the current user's Startup entry exist and point at THIS
+# launcher? When present, PC-restart recovery is guaranteed with NO admin, so the loud "no
+# auto-resurrection" banner must NOT fire even if the (admin) scheduler task is still stale.
+function Get-StartupResurrectionHealth {
+  try {
+    if (-not (Test-Path $startupCmdPath)) { return 'missing' }
+    $body = Get-Content -Raw -Path $startupCmdPath
+    if ($body -match 'loop-launcher\.ps1') { return 'ok' }
+    return 'stale'
+  } catch { return 'missing' }
+}
+
+# Surgically reconcile the reboot-resurrection banner inside an EXISTING loop-status.md to the
+# current (or just-installed) health, WITHOUT a full launcher regeneration. Called from the
+# -InstallUserStartup path: otherwise the loud "no auto-resurrection" alarm from a prior launcher
+# run lingers until the next logon run (the scheduler is stale, so there is no daily 07:00 pass),
+# while the per-iteration heartbeat keeps the top "last updated" line fresh - so a false loud
+# banner looks current and pushes the owner toward an admin step that O17 made optional.
+#
+# ASCII-safe by construction: this .ps1 stays pure ASCII (Windows PowerShell 5.x mis-decodes
+# BOM-less Japanese as Shift-JIS), so it NEVER pattern-matches Japanese literals. Instead it locates
+# the banner STRUCTURALLY using anchors read at runtime from loop-status-strings.txt (UTF-8): the
+# resurrection banner is the first "## " block sitting between the deadline line and the lanes
+# header that is NOT one of the deadline banners (warn / stopped). This handles the current header
+# text AND any legacy text, and never clobbers the deadline banners or the lane rows below.
+function Set-ResurrectionBanner {
+  param([switch]$AssumeStartupInstalled, [switch]$Preview)
+  if (-not (Test-Path $statusPath)) {
+    Write-Launcher "banner reconcile skipped: loop-status.md not present yet (next launcher run creates it)."
+    return
+  }
+  $sched = Get-SchedulerHealth
+  $startup = if ($AssumeStartupInstalled) { 'ok' } else { Get-StartupResurrectionHealth }
+  $launcherFile = Join-Path $repoRoot 'loop-launcher.ps1'
+  # Desired banner lines for the current health (empty = both paths covered -> no banner at all).
+  $desired = @()
+  if ($sched -ne 'ok' -and $startup -ne 'ok') {
+    $desired = @((S "resurrectMissingHeader"), "", (S "resurrectMissingBody1"),
+      (Fmt "resurrectMissingBody2" @{ LAUNCHER = $launcherFile }),
+      (Fmt "resurrectMissingBody3" @{ LAUNCHER = $launcherFile }))
+  } elseif ($sched -ne 'ok' -and $startup -eq 'ok') {
+    $desired = @((S "resurrectStartupHeader"), "", (S "resurrectStartupBody1"),
+      (Fmt "resurrectStartupBody2" @{ LAUNCHER = $launcherFile }))
+  }
+  # Runtime anchors (all from the UTF-8 strings file - never hard-coded Japanese here).
+  $deadlineTpl = S "deadline"; $dph = $deadlineTpl.IndexOf('{UNTIL}')
+  $deadlinePrefix = if ($dph -ge 0) { $deadlineTpl.Substring(0, $dph) } else { $deadlineTpl }
+  $lanesHeader = (S "lanesHeader").Trim()
+  $warnTpl = S "warnHeader"; $wph = $warnTpl.IndexOf('{DAYS}')
+  $warnPrefix = if ($wph -ge 0) { $warnTpl.Substring(0, $wph) } else { $warnTpl }
+  $stoppedHeader = (S "stoppedHeader").Trim()
+  if ($deadlinePrefix.Trim() -eq "" -or $lanesHeader -eq "" -or $lanesHeader -eq "lanesHeader") {
+    Write-Launcher "banner reconcile skipped: status strings unavailable (safe no-op)."
+    return
+  }
+  # Serialize the read-modify-write against the lane heartbeats (loop-report-status.ps1), which
+  # write this same file every iteration under the same lock. Preview writes to a private dry file,
+  # so it needs no lock. Non-fatal: if the lock cannot be taken, skip rather than risk a torn write.
+  $lockPath = $statusPath + ".lock"
+  $haveLock = $false
+  if (-not $Preview) {
+    for ($try = 0; $try -lt 25; $try++) {
+      try {
+        $fs = [System.IO.File]::Open($lockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+        $fs.Close(); $haveLock = $true; break
+      } catch { Start-Sleep -Milliseconds 200 }
+    }
+    if (-not $haveLock) {
+      Write-Launcher "banner reconcile skipped: could not acquire status lock (non-fatal)."
+      return
+    }
+  }
+  try {
+  $lines = @(Get-Content -Encoding UTF8 -Path $statusPath)
+  # Anchor the search window between the deadline line and the lanes header.
+  $deadlineIdx = -1; $lanesIdx = -1
+  for ($i = 0; $i -lt $lines.Count; $i++) {
+    $t = [string]$lines[$i]
+    if ($deadlineIdx -lt 0 -and $t.StartsWith($deadlinePrefix)) { $deadlineIdx = $i }
+    elseif ($deadlineIdx -ge 0 -and $t.Trim() -eq $lanesHeader) { $lanesIdx = $i; break }
+  }
+  if ($deadlineIdx -lt 0 -or $lanesIdx -lt 0) {
+    Write-Launcher "banner reconcile skipped: deadline/lanes anchors not found (next full launcher run regenerates)."
+    return
+  }
+  # Within the window, the resurrection banner is the FIRST "## " block that is not a deadline banner.
+  function Test-IsDeadlineBanner([string]$h) {
+    $ht = $h.Trim()
+    if ($ht -eq $stoppedHeader) { return $true }
+    if ($warnPrefix.Trim() -ne "" -and $h.StartsWith($warnPrefix)) { return $true }
+    return $false
+  }
+  $bstart = -1
+  for ($j = $deadlineIdx + 1; $j -lt $lanesIdx; $j++) {
+    if ([string]$lines[$j] -match '^##\s') {
+      if (Test-IsDeadlineBanner ([string]$lines[$j])) { break }  # deadline banner first => no resurrection banner
+      $bstart = $j; break
+    }
+  }
+  $result = New-Object System.Collections.Generic.List[string]
+  if ($bstart -ge 0) {
+    # Resurrection banner block = [bstart, next "## " heading within window) incl. its trailing blanks.
+    $bend = $lanesIdx
+    for ($j = $bstart + 1; $j -lt $lanesIdx; $j++) { if ([string]$lines[$j] -match '^##\s') { $bend = $j; break } }
+    for ($k = 0; $k -lt $bstart; $k++) { $result.Add([string]$lines[$k]) }
+    if ($desired.Count -gt 0) { foreach ($d in $desired) { $result.Add([string]$d) }; $result.Add("") }
+    for ($k = $bend; $k -lt $lines.Count; $k++) { $result.Add([string]$lines[$k]) }
+  } elseif ($desired.Count -gt 0) {
+    # No resurrection banner present but one is now needed: insert after the deadline line's blank.
+    $insertAt = $deadlineIdx + 1
+    if ($insertAt -lt $lines.Count -and ([string]$lines[$insertAt]).Trim() -eq "") { $insertAt++ }
+    for ($k = 0; $k -lt $insertAt; $k++) { $result.Add([string]$lines[$k]) }
+    foreach ($d in $desired) { $result.Add([string]$d) }
+    $result.Add("")
+    for ($k = $insertAt; $k -lt $lines.Count; $k++) { $result.Add([string]$lines[$k]) }
+  } else {
+    Write-Launcher "banner reconcile: no banner needed and none present (no-op)."
+    return
+  }
+  $newText = ($result -join "`r`n") + "`r`n"
+  if ($Preview) {
+    $dry = Join-Path $logDir "loop-status.bannerdry.md"
+    Set-Content -Path $dry -Value $newText -Encoding UTF8
+    Write-Launcher ("[WHATIF] resurrection banner reconcile -> " + $dry + " (sched=" + $sched + ", startup=" + $startup + ", bannerLines=" + $desired.Count + ")")
+  } else {
+    Set-Content -Path $statusPath -Value $newText -Encoding UTF8
+    Write-Launcher ("resurrection banner reconciled in loop-status.md (sched=" + $sched + ", startup=" + $startup + ", bannerLines=" + $desired.Count + ")")
+  }
+  } finally {
+    if ($haveLock) { try { Remove-Item -Path $lockPath -Force -ErrorAction SilentlyContinue } catch {} }
+  }
+}
+
 function Install-UserStartupEntry {
   param([string]$LauncherPath)
   # A .cmd (not a .lnk) so it is plain text, diff-able, and needs no COM/WScript.Shell. -WindowStyle
@@ -202,6 +349,10 @@ if ($InstallUserStartup) {
   $launcherPath = Join-Path $repoRoot "loop-launcher.ps1"
   try {
     Install-UserStartupEntry -LauncherPath $launcherPath
+    # Clear the loud "no auto-resurrection" alarm in loop-status.md immediately (the entry now
+    # exists), instead of leaving it stale until the next full launcher run. AssumeStartupInstalled
+    # so a -WhatIf preview reflects the intended post-install banner, not the pre-install health.
+    Set-ResurrectionBanner -AssumeStartupInstalled -Preview:$WhatIf
     if (-not $WhatIf) {
       Write-Launcher "Done. The loops now auto-resurrect at every logon with NO admin. Optional: run -Register from an elevated PowerShell to also get the daily 07:00 heartbeat."
     }
@@ -273,30 +424,8 @@ function Get-RunningLanes {
   return $map
 }
 
-# Scheduler self-check: is the 'safe-ai-loop-runner' task actually pointing at THIS launcher
-# (permanent fix active), or still at the old baked-deadline loop-runner (needs one elevated
-# -Register)? Surfacing 'stale'/'missing' in loop-status.md keeps the one remaining manual
-# step visible in the same file the operator watches.
-function Get-SchedulerHealth {
-  try {
-    $t = Get-ScheduledTask -TaskName 'safe-ai-loop-runner' -ErrorAction Stop
-    $a = [string]$t.Actions[0].Arguments
-    if (($a -match 'loop-launcher\.ps1') -and ($a -notmatch 'UntilIso')) { return 'ok' }
-    return 'stale'
-  } catch { return 'missing' }
-}
-
-# Admin-free resurrection self-check: does the current user's Startup entry exist and point at THIS
-# launcher? When present, PC-restart recovery is guaranteed with NO admin, so the loud "no
-# auto-resurrection" banner must NOT fire even if the (admin) scheduler task is still stale.
-function Get-StartupResurrectionHealth {
-  try {
-    if (-not (Test-Path $startupCmdPath)) { return 'missing' }
-    $body = Get-Content -Raw -Path $startupCmdPath
-    if ($body -match 'loop-launcher\.ps1') { return 'ok' }
-    return 'stale'
-  } catch { return 'missing' }
-}
+# (Get-SchedulerHealth and Get-StartupResurrectionHealth are defined earlier, before the
+# -InstallUserStartup path, so the install can reconcile the resurrection banner in place.)
 
 # ---------------------------------------------------------------------------
 # Deadline evaluation (the heart of the permanent fix).
