@@ -5,7 +5,8 @@
  * WYSIWYG を成立させる核心のデータ。Phase 1 はヘッダー6欄のみだった。
  * Phase 2 第一弾で本日の作業内容・4R目標（チーム行動目標/重点実施項目/指差呼称）を追加。
  * Phase 2 第二弾で危険行（インデックス付きキー "risk.N.hazard"/"risk.N.eval"/"risk.N.reduction"、
- * 行数は record.riskRows.length に追従＝動的行・行追加に対応）を追加。参加者は次の段で拡張する。
+ * 行数は record.riskRows.length に追従＝動的行・行追加に対応）を追加。
+ * Phase 2 第三弾で参加者（作業員マスターのチップ選択、type="participants"）を追加し記入順を完結させた。
  */
 import type { KyInstructionRecordState, KyInstructionRiskRow } from "@/lib/types/operations";
 
@@ -21,6 +22,7 @@ export const KY_PAPER_FIELD_ORDER = [
   "teamGoal",
   "priorityItems",
   "pointingCall",
+  "participants",
 ] as const;
 
 export type KyPaperStaticFieldKey = (typeof KY_PAPER_FIELD_ORDER)[number];
@@ -36,7 +38,7 @@ export type KyPaperFieldDef = {
   /** エディタ見出し（紙の欄名と一致させる） */
   label: string;
   /** エディタの出し分け */
-  type: "text" | "textarea" | "date3" | "weatherTemp" | "riskEval";
+  type: "text" | "textarea" | "date3" | "weatherTemp" | "riskEval" | "participants";
   /** InputWithVoice/TextareaWithVoice を使うか（音声入力） */
   voice?: boolean;
   placeholder?: string;
@@ -154,6 +156,14 @@ export const KY_PAPER_FIELDS: Record<KyPaperStaticFieldKey, KyPaperFieldDef> = {
     get: (r) => r.pointingCall,
     set: (r, v) => ({ pointingCall: v }),
     isEmpty: (r) => r.pointingCall.trim() === "",
+    next: "participants",
+  },
+  participants: {
+    key: "participants",
+    label: "参加者",
+    // チップ選択UI（作業員マスターから選ぶ）。get/set は使わず record.participants を直接読む。
+    type: "participants",
+    isEmpty: (r) => r.participants.every((p) => !p.name.trim()),
   },
 };
 

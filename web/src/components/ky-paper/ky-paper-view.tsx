@@ -587,7 +587,7 @@ export function KyPaperView() {
           </div>
         </PaperStage>
 
-        {/* 欄タップで開く入力エディタ（Phase 2: ヘッダー6欄＋本日の作業内容＋4R目標3欄） */}
+        {/* 欄タップで開く入力エディタ（Phase 2: ヘッダー6欄＋本日の作業内容＋4R目標3欄＋危険行＋参加者） */}
         {activeFieldKey && !locked && (
           <FieldEditorSheet
             fieldKey={activeFieldKey}
@@ -596,6 +596,7 @@ export function KyPaperView() {
             onClose={() => setActiveFieldKey(null)}
             onSelectField={(key) => setActiveFieldKey(key)}
             weather={{ region, setRegion, fetchWeather: () => void handleWeather(), busy: weatherBusy }}
+            participants={{ workers, regularWorkers, workerGroups, selectedNames, toggleWorker, addWorkers, clearMasterWorkers }}
           />
         )}
 

@@ -64,9 +64,14 @@ check("さらに『次の欄へ』で重点実施項目のエディタに進む"
 await sheet.locator("textarea").fill("足場の手すり点検");
 await sheet.getByRole("button", { name: /次の欄へ/ }).click();
 await page.waitForTimeout(150);
-check("さらに『次の欄へ』で指差呼称のエディタに進む（最終欄）", await sheet.getByText("指差呼称（ヨシ！）").first().isVisible().catch(() => false));
-check("最終欄は『次の欄へ』ではなく『完了』ボタン", await sheet.getByRole("button", { name: "完了" }).isVisible().catch(() => false));
+check("さらに『次の欄へ』で指差呼称のエディタに進む", await sheet.getByText("指差呼称（ヨシ！）").first().isVisible().catch(() => false));
 await sheet.locator("input").fill("親綱 ヨシ！ 足元 ヨシ！");
+// O10（続き・第三弾）で参加者を記入順チェーンへ追加したため、指差呼称の次は参加者（最終欄）につながる。
+check("指差呼称の次は『次の欄へ』で参加者エディタへ（最終欄は完了ではなく参加者）", await sheet.getByRole("button", { name: /次の欄へ/ }).isVisible().catch(() => false));
+await sheet.getByRole("button", { name: /次の欄へ/ }).click();
+await page.waitForTimeout(150);
+check("参加者エディタに進む（用紙の記入順の最終欄）", await sheet.getByText("選択中").first().isVisible().catch(() => false));
+check("参加者は記入順の最終欄＝『次の欄へ』ではなく『完了』ボタン", await sheet.getByRole("button", { name: "完了" }).isVisible().catch(() => false));
 await sheet.getByRole("button", { name: "完了" }).click();
 await page.waitForTimeout(200);
 

@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-03（4） — O10・第三弾 KY用紙Phase2続き＝参加者（チップ選択）をcanvas直接編集化
+
+回収: 自班PR #621（O10・第一弾/第二弾）はCI（e2e/smoke）が実行中のためこのイテレーションではマージ見送り（契約どおり次イテレーションで回収）。作業ブランチ`ux-rec/o10-ky-canvas-phase2-work-goal`はclean・origin同期済みのため、同一PRへの追加コミットとして継続（第一弾・第二弾と同じ積み上げ方式）。
+
+着手: BACKLOG最上位[ ]の「O10（続き）」＝参加者・zoom-to-cell・AI提案統合・canvas既定切替のうち、規模を検証可能な単位に割るため参加者（チップ選択）のみを今イテレーションのスコープにした。
+
+実装: `paper-fields.ts`に静的欄`participants`を追加（チップ選択UIのため専用type、get/setは持たずrecord.participantsを直接参照）、記入順チェーン末尾（指差呼称の次）に接続＝旧UIの全欄がcanvasで編集可能になった。`KyPrintSheet`の参加者セルを`EditableCell`でラップ（editing未指定時のHTMLはスナップショット一致で不変を確認、印刷不可侵）。`FieldEditorSheet`に`participants` propを追加し、従来UI（クラシック表示）が既に持つ純粋関数（`toggleWorker`/`addWorkers`/`clearMasterWorkers`/`groupWorkersByAffiliation`）をそのままチップUIへ再利用＝ロジックの二重実装を避けた。
+
+検証: `tsc --noEmit`=0 / `lint`=errors0（既存warning23件のみ） / `vitest run`=242ファイル2061テスト全pass / `build`=成功。無読Playwright新規`ky-canvas-phase2-participants-2026-07-03.mjs`15/15合格（チップ表示・個別/一括選択・記入順末尾の完了ボタン・用紙反映・印刷同期・解除の双方向反映）。既存の第一弾スクリプトは記入順チェーンが指差呼称→参加者へ延伸したため最終欄アサーションを更新し15/15回帰合格、第二弾スクリプトは無変更で15/15回帰合格。テスト実行で副生成される`docs/rag-metrics-latest.json`・`web/src/data/chatbot-eval-fresh-results.json`（他レーン所有）はcommitから除外。
+
+残: zoom-to-cell（結論カード「のこりN」タップで最初の未記入セルへ）・AI提案（🤖）のエディタ統合・canvas既定切替（β外し）はBACKLOG-ux-records.mdへ「O10（続き・第四弾）」として継続。
+
+---
+
 ## 2026-07-03（3） — O10・第一弾 KY用紙Phase2着手＝本日の作業内容＋4R目標3欄をcanvas直接編集化
 
 回収: 自班PR #606（/account 結論カード）はCI再走を確認しマージ済み（mainとのdirtyをorigin/main通常マージで解消、docsのみ競合）。#613（在留資格ガイド詳細11ページ結論カード）もCI全緑を確認しsquashマージ済み。main は `git pull --ff-only` で同期・clean。テスト実行で副生成される `docs/rag-metrics-latest.json`・`web/src/data/chatbot-eval-fresh-results.json`（他レーン所有）はcommitから除外。

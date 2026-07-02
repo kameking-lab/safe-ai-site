@@ -67,12 +67,12 @@ describe("F1/O10: editing prop（印刷不可侵とタップ標的）", () => {
     expect(screen.queryAllByRole("button")).toHaveLength(0);
   });
 
-  it("editing 指定でヘッダー6欄＋本日の作業内容＋4R目標3欄がタップ標的になり、タップでキーが飛ぶ", () => {
+  it("editing 指定でヘッダー6欄＋本日の作業内容＋4R目標3欄＋参加者がタップ標的になり、タップでキーが飛ぶ", () => {
     const onTapField = vi.fn();
     render(<KyPrintSheet record={rec} editing={{ onTapField }} />);
-    // 静的10欄 + 危険行(既定5行×3部位。可能性/重大性は2セルとも同じrisk.N.evalキー) = 10 + 5*4 = 30
+    // 静的11欄(参加者含む) + 危険行(既定5行×3部位。可能性/重大性は2セルとも同じrisk.N.evalキー) = 11 + 5*4 = 31
     const cells = screen.getAllByRole("button");
-    expect(cells).toHaveLength(30);
+    expect(cells).toHaveLength(31);
     fireEvent.click(screen.getByRole("button", { name: "現場名を入力" }));
     expect(onTapField).toHaveBeenCalledWith("siteName");
     fireEvent.click(screen.getByRole("button", { name: "元請会社を入力" }));
@@ -81,6 +81,8 @@ describe("F1/O10: editing prop（印刷不可侵とタップ標的）", () => {
     expect(onTapField).toHaveBeenCalledWith("workDetail");
     fireEvent.click(screen.getByRole("button", { name: "指差呼称（ヨシ！）を入力" }));
     expect(onTapField).toHaveBeenCalledWith("pointingCall");
+    fireEvent.click(screen.getByRole("button", { name: "参加者を入力" }));
+    expect(onTapField).toHaveBeenCalledWith("participants");
   });
 
   it("O10（続き）: 危険行の危険/対策/可能性・重大性がタップ標的になる", () => {

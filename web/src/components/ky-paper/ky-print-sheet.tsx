@@ -251,7 +251,11 @@ export function KyPrintSheet({
         <tbody>
           <tr>
             <th className={`${th} w-[18%]`}>参加者（{participants.length}名）</th>
-            <td className={td}>{participants.map((p) => p.name + (p.qualNo ? `（${p.qualNo}）` : "")).join("　")}</td>
+            <td className={td}>
+              <EditableCell editing={editing} fieldKey="participants">
+                {participants.map((p) => p.name + (p.qualNo ? `（${p.qualNo}）` : "")).join("　")}
+              </EditableCell>
+            </td>
           </tr>
         </tbody>
       </table>

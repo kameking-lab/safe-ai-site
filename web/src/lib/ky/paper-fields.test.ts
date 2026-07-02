@@ -13,8 +13,8 @@ import {
 } from "./paper-fields";
 
 describe("F1/O10: KY用紙フィールドマップ", () => {
-  it("10の静的欄が定義され、workDetail の次は危険行(risk.0.hazard)につながる", () => {
-    expect(KY_PAPER_FIELD_ORDER).toHaveLength(10);
+  it("11の静的欄が定義され、workDetail の次は危険行(risk.0.hazard)につながる", () => {
+    expect(KY_PAPER_FIELD_ORDER).toHaveLength(11);
     expect(KY_PAPER_FIELDS.workDetail.next).toBe("risk.0.hazard");
   });
 
@@ -75,6 +75,7 @@ describe("F1/O10: KY用紙フィールドマップ", () => {
     expect(keys.has("teamGoal")).toBe(true);
     expect(keys.has("priorityItems")).toBe(true);
     expect(keys.has("pointingCall")).toBe(true);
+    expect(keys.has("participants")).toBe(true);
 
     const filled = normalizeKyInstructionRecord({
       siteName: "A現場",
@@ -92,7 +93,17 @@ describe("F1/O10: KY用紙フィールドマップ", () => {
     filled.workRows = [{ ...filled.workRows[0], workDetail: "3F鉄骨建方" }];
     // 危険行(既定5行)も全行 hazard/reduction を埋める（riskEvalは既定値ありで常に記入済み扱い）
     filled.riskRows = filled.riskRows.map((row) => ({ ...row, hazard: "危険あり", reduction: "対策あり" }));
+    filled.participants = [{ name: "山田太郎", qualNo: "", preWork: "", onExit: "" }];
     expect(emptyKyPaperFieldKeys(filled).size).toBe(0);
+  });
+
+  it("参加者(participants)は氏名が1件でもあれば記入済み扱い", () => {
+    const r = normalizeKyInstructionRecord({});
+    expect(KY_PAPER_FIELDS.participants.isEmpty(r)).toBe(true);
+    const withOne = { ...r, participants: [{ name: "山田太郎", qualNo: "", preWork: "", onExit: "" }] };
+    expect(KY_PAPER_FIELDS.participants.isEmpty(withOne)).toBe(false);
+    expect(nextKyPaperFieldKey("pointingCall", r)).toBe("participants");
+    expect(nextKyPaperFieldKey("participants", r)).toBeUndefined();
   });
 
   it("気温だけ入っていれば天気・気温欄は記入済み扱い", () => {

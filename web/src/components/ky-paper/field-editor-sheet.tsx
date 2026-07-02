@@ -11,6 +11,7 @@
  */
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import type { KyInstructionRecordState } from "@/lib/types/operations";
 import { getKyPaperFieldDef, nextKyPaperFieldKey, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
@@ -23,6 +24,8 @@ import {
   SEVERITY_OPTIONS,
 } from "@/lib/ky/pulldown-options";
 import { WEATHER_REGIONS } from "@/lib/ky/weather-autofill";
+import type { Worker } from "@/lib/ky/workers-master";
+import type { WorkerGroup } from "@/lib/ky/participant-select";
 
 export type FieldEditorSheetProps = {
   fieldKey: KyPaperFieldKey;
@@ -38,6 +41,16 @@ export type FieldEditorSheetProps = {
     fetchWeather: () => void;
     busy: boolean;
   };
+  /** O10（続き）: 参加者エディタ用（作業員マスターのチップ選択。従来UIと同じ純粋関数群を共有） */
+  participants: {
+    workers: Worker[];
+    regularWorkers: Worker[];
+    workerGroups: WorkerGroup[];
+    selectedNames: ReadonlySet<string>;
+    toggleWorker: (w: Worker, checked: boolean) => void;
+    addWorkers: (toAdd: Worker[]) => void;
+    clearMasterWorkers: () => void;
+  };
 };
 
 const selectCls =
@@ -50,16 +63,19 @@ export function FieldEditorSheet({
   onClose,
   onSelectField,
   weather,
+  participants,
 }: FieldEditorSheetProps) {
   const def = getKyPaperFieldDef(fieldKey);
   const next = nextKyPaperFieldKey(fieldKey, record);
   const sheetRef = useRef<HTMLDivElement | null>(null);
 
-  // 開いたら最初の入力へフォーカス（キーボード/音声にすぐ入れる）
+  // 開いたら最初の入力へフォーカス（キーボード/音声にすぐ入れる）。
+  // 参加者エディタはチップ選択が主操作でフォーカス移動が邪魔になるため対象外。
   useEffect(() => {
+    if (def.type === "participants") return;
     const first = sheetRef.current?.querySelector<HTMLElement>("input, select");
     first?.focus();
-  }, [fieldKey]);
+  }, [fieldKey, def.type]);
 
   // Escape で閉じる（既存の「…」シートと同じ作法）
   useEffect(() => {
@@ -236,6 +252,88 @@ export function FieldEditorSheet({
               </select>
               <span className="text-sm">℃</span>
             </div>
+          </div>
+        )}
+
+        {def.type === "participants" && (
+          <div className="max-h-[50vh] space-y-2 overflow-y-auto">
+            <p className="text-xs font-semibold text-slate-500">
+              選択中 {participants.selectedNames.size}名
+            </p>
+            {participants.workers.length === 0 ? (
+              <p className="text-sm text-slate-500">
+                <Link href="/ky/workers" className="font-semibold text-emerald-700 underline">
+                  作業員マスター
+                </Link>
+                に登録すると、ここでタップするだけで参加者を選べます。
+              </p>
+            ) : (
+              <>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {participants.regularWorkers.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => participants.addWorkers(participants.regularWorkers)}
+                      title="常用（毎日来る）作業員をまとめて参加者に追加します"
+                      className="min-h-[44px] rounded-full border border-amber-400 bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-100"
+                    >
+                      ⭐ 常用{participants.regularWorkers.length}名をまとめて選ぶ
+                    </button>
+                  )}
+                  {participants.workerGroups.length > 1 &&
+                    participants.workerGroups.map((g) => (
+                      <button
+                        key={g.affiliation}
+                        type="button"
+                        onClick={() => participants.addWorkers(g.members)}
+                        title={`${g.label}の作業員${g.members.length}名をまとめて追加`}
+                        className="min-h-[44px] rounded-full border border-sky-300 bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-100"
+                      >
+                        {g.label}全員
+                      </button>
+                    ))}
+                  {participants.selectedNames.size > 0 && (
+                    <button
+                      type="button"
+                      onClick={participants.clearMasterWorkers}
+                      title="選択した作業員をすべて外す"
+                      className="min-h-[44px] rounded-full border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 hover:bg-slate-50"
+                    >
+                      クリア
+                    </button>
+                  )}
+                </div>
+                <div className="space-y-1.5">
+                  {participants.workerGroups.map((g) => (
+                    <div key={g.affiliation} className="flex flex-wrap items-center gap-1.5">
+                      {participants.workerGroups.length > 1 && (
+                        <span className="w-full text-[11px] font-semibold text-slate-400 sm:w-auto sm:pr-1">
+                          {g.label}
+                        </span>
+                      )}
+                      {g.members.map((w) => {
+                        const checked = participants.selectedNames.has(w.name);
+                        return (
+                          <button
+                            key={w.id}
+                            type="button"
+                            onClick={() => participants.toggleWorker(w, !checked)}
+                            className={`min-h-[44px] rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                              checked
+                                ? "border-emerald-600 bg-emerald-600 text-white"
+                                : "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                            }`}
+                          >
+                            {checked ? "✓ " : ""}
+                            {w.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         )}
 
