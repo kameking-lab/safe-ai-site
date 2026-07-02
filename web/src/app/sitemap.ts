@@ -71,6 +71,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // P0-011 (usability-audit-day2): /laws/notices-precedents は /circulars に統合済。301 redirect は next.config.ts。
     { url: "/ky", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
     { url: "/ky-examples", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
+    // KY入力の正規ページ（robots index:true・自己canonical・HowTo JSON-LD付の実在ツール）。
+    // /pdf の permanentRedirect 先だが本体URLは /ky/paper。孤立していたため収載する
+    //（リダイレクト元 /pdf 自体は下記コメントの通り非収載）。
+    { url: "/ky/paper", lastModified: "2026-05-25", priority: 0.75, changeFrequency: "monthly" },
     { url: "/risk", lastModified: "2026-04-19", priority: 0.8, changeFrequency: "daily" },
     { url: "/chatbot", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
     { url: "/law-search", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
