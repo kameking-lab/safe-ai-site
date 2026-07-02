@@ -46,11 +46,8 @@ export function InspectionClient() {
     const today = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 初回マウントの既定値（SSRハイドレーション差異回避）
     setRecId(newInspectionId());
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
     setDate(today);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 機種の標準項目
     setItems(itemsForKind("vehicle-construction"));
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 保存一覧
     setList(getInspectionList());
   }, []);
 
