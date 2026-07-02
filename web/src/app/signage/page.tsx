@@ -11,6 +11,7 @@ import { SignageHeader } from "@/components/signage/signage-header";
 import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
 import { SignageMorningScript } from "@/components/signage/signage-morning-script";
 import { SignageRiskPrediction } from "@/components/signage/signage-risk-prediction";
+import { SignageRotator } from "@/components/signage/signage-rotator";
 import { SignageShell } from "@/components/signage/signage-shell";
 import { SignageSiteSafety, useSignageSiteSafetyData } from "@/components/signage/signage-site-safety";
 import { SignageTodayDocuments } from "@/components/signage/signage-today-documents";
@@ -37,9 +38,13 @@ function hintForJmaCode(code: string) {
   return JMA_CODE_HINT[code] ?? `コード ${code}`;
 }
 
-// 60分: Vercel Edge Requests 削減 (docs/perf/edge-isr-followup-2026-05-19.md)。
-// 上流 /api/signage-data の CDN s-maxage=300 / 内側 revalidate=7200 と整合。
-const REFRESH_INTERVAL_MS = 60 * 60 * 1000;
+// 15分（Fable診断01 T5: 60分では現場の休憩所TVで鮮度が悪すぎるため短縮）。
+// 上流 /api/signage-data は CDN s-maxage=300 で応答するため、Edge Requests増は限定的。
+const REFRESH_INTERVAL_MS = 15 * 60 * 1000;
+// 取得失敗時（無人現場のネットワーク断で最も起きる障害）は次の定期更新を待たず短間隔で再試行する。
+const RETRY_INTERVAL_MS = 3 * 60 * 1000;
+// 常時点灯TVが古いJSバンドルを掴み続けないよう、深夜に1日1回フルリロードして新デプロイを取り込む。
+const DAILY_RELOAD_HOUR = 3;
 const LOCATION_STORAGE_KEY = "signage-location-id";
 const ORIENTATION_STORAGE_KEY = "signage-orientation";
 
@@ -84,6 +89,11 @@ export default function SignagePage() {
   const [zoomedTrendIndex, setZoomedTrendIndex] = useState<number | null>(null);
   // 朝礼スクリプト（読み上げ）モーダル
   const [showMorningScript, setShowMorningScript] = useState(false);
+  // キオスクモード（常掲用）: ?kiosk=1 でナビ・シナリオ操作等の運用UIを隠し、本文の視認性を優先する
+  const [isKiosk] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return new URLSearchParams(window.location.search).get("kiosk") === "1";
+  });
 
   const selectedLocation = useMemo(
     () => getSignageLocationById(selectedLocationId) ?? getSignageLocationById("tokyo-shinjuku")!,
@@ -138,6 +148,7 @@ export default function SignagePage() {
 
   useEffect(() => {
     let cancelled = false;
+    let retryTimer: number | undefined;
     const formatter = new Intl.DateTimeFormat("ja-JP", {
       year: "numeric",
       month: "2-digit",
@@ -184,9 +195,17 @@ export default function SignagePage() {
       if (dataResult.ok) {
         setBundle(dataResult.json);
         setBundleStatus("success");
+        window.clearTimeout(retryTimer);
       } else {
         setBundle(null);
         setBundleStatus("error");
+        // 通常の15分待たず3分後に再試行（無人表示が古いまま放置されるのを防ぐ）
+        window.clearTimeout(retryTimer);
+        retryTimer = window.setTimeout(() => {
+          if (cancelled) return;
+          if (typeof document !== "undefined" && document.visibilityState === "hidden") return;
+          void refreshAll();
+        }, RETRY_INTERVAL_MS);
       }
 
       setState((prev) => {
@@ -236,9 +255,25 @@ export default function SignagePage() {
     return () => {
       cancelled = true;
       window.clearInterval(intervalId);
+      window.clearTimeout(retryTimer);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [services, selectedLocationId]);
+
+  // 日次フルリロード（T5）: 常時点灯TVが古いJSバンドルを掴み続けないよう、深夜に1回だけ再読込。
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const now = new Date();
+    const next = new Date(now);
+    next.setHours(DAILY_RELOAD_HOUR, 0, 0, 0);
+    if (next.getTime() <= now.getTime()) {
+      next.setDate(next.getDate() + 1);
+    }
+    const timer = window.setTimeout(() => {
+      window.location.reload();
+    }, next.getTime() - now.getTime());
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const onLocationChange = (id: string) => {
     setSelectedLocationId(id);
@@ -299,6 +334,7 @@ export default function SignagePage() {
     <SignageShell>
       <SignageHeader
         compact
+        hideNav={isKiosk}
         regionLabel={state.regionLabel}
         nowText={state.nowText}
         lastUpdatedText={state.lastUpdatedText}
@@ -321,7 +357,8 @@ export default function SignagePage() {
         </p>
       </div>
 
-      {/* C-003: scenario presets — set display mode for common use cases */}
+      {/* C-003: scenario presets — set display mode for common use cases。キオスクモードでは運用UIとして隠す */}
+      {!isKiosk && (
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-sky-700/50 bg-sky-950/40 px-3 py-2 text-xs">
         <span className="text-sky-200/80 font-semibold shrink-0">シナリオ：</span>
         {([
@@ -399,6 +436,7 @@ export default function SignagePage() {
           </Link>
         </div>
       </div>
+      )}
 
       {/* 危険イベント全画面アラート: 高リスク警報(特別警報/暴風/大雨/落雷/地震/津波)の検知で全画面赤表示＋音声。
           バー自体は薄い1行。オーバーレイは fixed inset-0 のため通常レイアウト(1画面フィット)に影響しない。 */}
@@ -408,6 +446,7 @@ export default function SignagePage() {
 
       <div className={`grid grid-cols-1 gap-2 xl:min-h-0 xl:flex-1 xl:gap-3 xl:overflow-hidden ${isPortrait ? "" : "xl:grid-cols-12"}`}>
         <div className={`flex flex-col gap-2 overflow-x-hidden xl:min-h-0 xl:overflow-y-auto ${isPortrait ? "" : "xl:col-span-7"}`}>
+          {!isKiosk && (
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             <label className="ml-auto flex max-w-full items-center gap-2 text-[10px] text-slate-300 sm:text-xs">
               <span className="shrink-0 whitespace-nowrap">地点</span>
@@ -424,18 +463,19 @@ export default function SignagePage() {
               </select>
             </label>
           </div>
+          )}
 
           <div className="flex flex-col gap-2 overflow-x-hidden rounded-2xl border border-slate-600 bg-slate-950/60 p-2 sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
             <div className="flex shrink-0 flex-wrap items-start justify-between gap-2">
               <div>
-                <p className="text-xs font-bold text-slate-100 sm:text-sm lg:text-base">
+                <p className="text-xs font-bold text-slate-100 sm:text-sm lg:text-base xl:text-xl">
                   {displayMode === "floorplan"
                     ? "現場レイアウト"
                     : displayMode === "map"
                       ? "気象庁 注意報・警報（都道府県）"
                       : "本日の作業資料"}
                 </p>
-                <p className="mt-0.5 text-[9px] text-slate-400 sm:text-[10px]">
+                <p className="mt-0.5 text-[9px] text-slate-400 sm:text-[10px] xl:text-sm">
                   {displayMode === "floorplan" && (
                     <>図面サンプルを表示中。気象警報は右サイドパネルで確認できます。</>
                   )}
@@ -453,6 +493,7 @@ export default function SignagePage() {
                   )}
                 </p>
               </div>
+              {!isKiosk && (
               <div className="flex shrink-0 items-center gap-1">
                 <button
                   type="button"
@@ -499,6 +540,7 @@ export default function SignagePage() {
                   気象庁 →
                 </a>
               </div>
+              )}
             </div>
 
             {/* 警報サイドパネル（図面モード時のみ表示）。
@@ -518,7 +560,7 @@ export default function SignagePage() {
                 }`}
               >
                 <p
-                  className={`text-[10px] font-bold uppercase tracking-widest sm:text-xs ${
+                  className={`text-[10px] font-bold uppercase tracking-widest sm:text-xs xl:text-lg ${
                     warningPanel.kind === "headline"
                       ? "text-amber-300"
                       : warningPanel.kind === "error"
@@ -531,23 +573,23 @@ export default function SignagePage() {
                   本日の気象警報
                 </p>
                 {warningPanel.kind === "headline" ? (
-                  <p className="mt-1 text-[11px] leading-snug text-amber-100 sm:text-sm">{warningPanel.headline}</p>
+                  <p className="mt-1 text-[11px] leading-snug text-amber-100 sm:text-sm xl:text-2xl">{warningPanel.headline}</p>
                 ) : warningPanel.kind === "error" ? (
-                  <p className="mt-1 text-[10px] font-semibold leading-snug text-rose-200 sm:text-xs">
+                  <p className="mt-1 text-[10px] font-semibold leading-snug text-rose-200 sm:text-xs xl:text-xl">
                     ⚠ 気象データの取得に失敗しました。警報の有無を確認できません。
                     <a href={jmaLink} target="_blank" rel="noreferrer" className="ml-1 text-rose-100 underline">
                       気象庁で確認 →
                     </a>
                   </p>
                 ) : warningPanel.kind === "loading" ? (
-                  <p className="mt-1 text-[10px] text-slate-300 sm:text-xs">気象データを取得中…</p>
+                  <p className="mt-1 text-[10px] text-slate-300 sm:text-xs xl:text-xl">気象データを取得中…</p>
                 ) : (
-                  <p className="mt-1 text-[10px] font-semibold text-emerald-200 sm:text-xs">
+                  <p className="mt-1 text-[10px] font-semibold text-emerald-200 sm:text-xs xl:text-xl">
                     ✓ 現在、選択地点に発表中の警報はありません。
                   </p>
                 )}
                 {selectedLocation.jmaCityCode && bundle?.selectedWarnings && bundle.selectedWarnings.length > 0 ? (
-                  <ul className="mt-2 space-y-0.5 text-[10px] text-amber-100 sm:text-xs">
+                  <ul className="mt-2 space-y-0.5 text-[10px] text-amber-100 sm:text-xs xl:text-lg">
                     {bundle.selectedWarnings.map((w, i) => (
                       <li key={`${w.code}-${i}`}>
                         ・{hintForJmaCode(w.code)}（{w.status}）
@@ -556,16 +598,16 @@ export default function SignagePage() {
                   </ul>
                 ) : null}
                 {bundle?.jmaReportTime ? (
-                  <p className="mt-2 text-[9px] text-amber-300/70">気象庁データ時刻: {bundle.jmaReportTime}</p>
+                  <p className="mt-2 text-[9px] text-amber-300/70 xl:text-sm">気象庁データ時刻: {bundle.jmaReportTime}</p>
                 ) : null}
               </div>
             )}
 
             {displayMode === "map" && warningPanel.kind === "headline" ? (
-              <p className="shrink-0 text-[11px] leading-snug text-amber-100 sm:text-sm">{warningPanel.headline}</p>
+              <p className="shrink-0 text-[11px] leading-snug text-amber-100 sm:text-sm xl:text-2xl">{warningPanel.headline}</p>
             ) : null}
             {displayMode === "map" && warningPanel.kind === "error" ? (
-              <p className="shrink-0 text-[11px] font-semibold leading-snug text-rose-200 sm:text-sm">
+              <p className="shrink-0 text-[11px] font-semibold leading-snug text-rose-200 sm:text-sm xl:text-xl">
                 ⚠ 気象データの取得に失敗しました。警報の有無を確認できません。
                 <a href={jmaLink} target="_blank" rel="noreferrer" className="ml-1 text-rose-100 underline">
                   気象庁で確認 →
@@ -573,10 +615,10 @@ export default function SignagePage() {
               </p>
             ) : null}
             {displayMode === "map" && bundle?.jmaReportTime ? (
-              <p className="text-[9px] text-slate-500">気象庁データ時刻: {bundle.jmaReportTime}</p>
+              <p className="text-[9px] text-slate-500 xl:text-sm">気象庁データ時刻: {bundle.jmaReportTime}</p>
             ) : null}
             {displayMode === "map" && selectedLocation.jmaCityCode && bundle?.selectedWarnings && bundle.selectedWarnings.length > 0 ? (
-              <ul className="shrink-0 space-y-0.5 text-[10px] text-slate-200">
+              <ul className="shrink-0 space-y-0.5 text-[10px] text-slate-200 xl:text-lg">
                 {bundle.selectedWarnings.map((w, i) => (
                   <li key={`${w.code}-${i}`}>
                     {hintForJmaCode(w.code)}（{w.status}）
@@ -599,14 +641,14 @@ export default function SignagePage() {
 
             {state.riskData?.riskEvidences && state.riskData.riskEvidences.length > 0 && (
               <div className="shrink-0 rounded-lg border border-amber-600/50 bg-amber-950/60 px-2.5 py-2 sm:rounded-xl">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-amber-400 sm:text-[10px]">
+                <p className="text-[9px] font-bold uppercase tracking-widest text-amber-400 sm:text-[10px] xl:text-base">
                   本日の現場注意事項
                 </p>
-                <p className="mt-0.5 text-[10px] leading-snug text-amber-100 sm:text-xs">
+                <p className="mt-0.5 text-[10px] leading-snug text-amber-100 sm:text-xs xl:text-xl">
                   {state.riskData.riskEvidences[0]}
                 </p>
                 {state.riskData.riskEvidences[1] && (
-                  <p className="mt-0.5 text-[9px] leading-snug text-amber-200/80 sm:text-[10px]">
+                  <p className="mt-0.5 text-[9px] leading-snug text-amber-200/80 sm:text-[10px] xl:text-lg">
                     {state.riskData.riskEvidences[1]}
                   </p>
                 )}
@@ -615,7 +657,7 @@ export default function SignagePage() {
           </div>
 
           {state.riskStatus === "error" && (
-            <p className="shrink-0 text-[10px] text-amber-200 sm:text-xs">地点リスク（日次）の取得に失敗しました。</p>
+            <p className="shrink-0 text-[10px] text-amber-200 sm:text-xs xl:text-lg">地点リスク（日次）の取得に失敗しました。</p>
           )}
         </div>
 
@@ -627,41 +669,47 @@ export default function SignagePage() {
           <SignageSiteSafety data={siteSafety} />
 
           <section className="flex flex-col rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden">
-            <h2 className="shrink-0 text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">
+            <h2 className="shrink-0 text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base xl:text-xl">
               トレンド（労働災害・建設事故）
             </h2>
-            <p className="mt-0.5 shrink-0 text-[9px] text-slate-400 sm:text-[10px]">
+            <p className="mt-0.5 shrink-0 text-[9px] text-slate-400 sm:text-[10px] xl:text-sm">
               GoogleニュースのRSSから取得（サーバー側で約1時間キャッシュ）。記事元へ直接リンクします。
             </p>
-            <ul className="mt-2 space-y-2 pr-0.5 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
-              {bundleStatus === "success" && bundle && bundle.laborTrend.length === 0 ? (
-                <li className="text-xs text-slate-400">現在取得できるニュースがありません。</li>
-              ) : null}
-              {trendItems.map((item, idx) => (
-                <li key={`${item.link}-${idx}`}>
-                  <button
-                    type="button"
-                    onClick={() => setZoomedTrendIndex(idx)}
-                    className="w-full rounded-lg border border-slate-700 bg-slate-950/60 p-2 text-left transition hover:border-emerald-600/80 hover:bg-slate-900 sm:rounded-xl sm:p-3"
-                  >
-                    <p className="text-[9px] text-slate-300 sm:text-[10px]">{item.pubDate || "日時不明"}</p>
-                    <p className="mt-0.5 text-sm font-semibold leading-snug text-slate-50 sm:text-base lg:text-lg">{item.title}</p>
-                    <p className="mt-1 text-[10px] font-semibold text-emerald-400 sm:text-xs">タップで拡大表示 / 記事を開く →</p>
-                  </button>
-                </li>
-              ))}
-              {bundleStatus === "loading" || bundleStatus === "idle" ? (
-                <li className="h-20 animate-pulse rounded-lg bg-slate-800/80" />
-              ) : null}
-            </ul>
+            {bundleStatus === "success" && bundle && bundle.laborTrend.length === 0 ? (
+              <p className="mt-2 text-xs text-slate-400 xl:text-lg">現在取得できるニュースがありません。</p>
+            ) : null}
+            {(bundleStatus === "loading" || bundleStatus === "idle") && trendItems.length === 0 ? (
+              <div className="mt-2 h-20 animate-pulse rounded-lg bg-slate-800/80" />
+            ) : null}
+            {trendItems.length > 0 && (
+              // 1件ずつ大きく表示して15〜20秒周期で全件を自動周回（T5: 隠れていたニュース2件目以降を露出）
+              <div className="mt-2 min-h-0 flex-1">
+                <SignageRotator
+                  items={trendItems}
+                  ariaLabel="トレンドニュース"
+                  getKey={(item, idx) => `${item.link}-${idx}`}
+                  renderItem={(item, idx) => (
+                    <button
+                      type="button"
+                      onClick={() => setZoomedTrendIndex(idx)}
+                      className="h-full w-full rounded-lg border border-slate-700 bg-slate-950/60 p-2 text-left transition hover:border-emerald-600/80 hover:bg-slate-900 sm:rounded-xl sm:p-3 xl:p-4"
+                    >
+                      <p className="text-[9px] text-slate-300 sm:text-[10px] xl:text-base">{item.pubDate || "日時不明"}</p>
+                      <p className="mt-0.5 text-sm font-semibold leading-snug text-slate-50 sm:text-base lg:text-lg xl:text-3xl">{item.title}</p>
+                      <p className="mt-1 text-[10px] font-semibold text-emerald-400 sm:text-xs xl:text-lg">タップで拡大表示 / 記事を開く →</p>
+                    </button>
+                  )}
+                />
+              </div>
+            )}
           </section>
 
           <section className="flex flex-col rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden">
             <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
-              <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">直近の法改正（5件・要約）</h2>
+              <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base xl:text-xl">直近の法改正（5件・要約）</h2>
               <Link
                 href="/laws"
-                className="flex items-center rounded-lg border border-emerald-600/60 px-2 py-2.5 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-950/50 min-h-[44px]"
+                className="flex items-center rounded-lg border border-emerald-600/60 px-2 py-2.5 text-[10px] font-semibold text-emerald-300 hover:bg-emerald-950/50 min-h-[44px] xl:text-base"
               >
                 一覧ページへ
               </Link>
@@ -675,34 +723,42 @@ export default function SignagePage() {
               </div>
             )}
             {state.lawStatus === "error" && (
-              <p className="mt-2 text-xs text-rose-200">法改正一覧を表示できませんでした。</p>
+              <p className="mt-2 text-xs text-rose-200 xl:text-lg">法改正一覧を表示できませんでした。</p>
             )}
             {state.lawStatus === "success" && topLaws.length === 0 && (
-              <p className="mt-2 text-xs text-slate-300">表示できる法改正がありません。</p>
+              <p className="mt-2 text-xs text-slate-300 xl:text-lg">表示できる法改正がありません。</p>
             )}
-            <ul className="mt-2 space-y-2 pr-0.5 xl:min-h-0 xl:flex-1 xl:overflow-y-auto">
-              {topLaws.map((rev) => (
-                <li key={rev.id} className="rounded-lg border border-slate-700 bg-slate-950/50 p-2 sm:rounded-xl sm:p-3">
-                  <div className="flex flex-wrap items-center gap-1.5 text-[9px] text-slate-400 sm:text-xs">
-                    <span className="rounded-full bg-sky-600/90 px-2 py-0.5 font-semibold text-white">{rev.kind}</span>
-                    <span>{rev.publishedAt}</span>
-                    <span>{rev.issuer}</span>
-                  </div>
-                  <h3 className="mt-1 text-sm font-bold text-slate-50 sm:text-base lg:text-lg">{rev.title}</h3>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-200 sm:text-sm lg:text-base">{rev.summary || "要約は未設定です。"}</p>
-                  {rev.source?.url ? (
-                    <a
-                      href={rev.source.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 inline-block text-[10px] font-semibold text-emerald-400 hover:text-emerald-300 sm:text-xs"
-                    >
-                      出典（{rev.source.label ?? rev.issuer}）を開く →
-                    </a>
-                  ) : null}
-                </li>
-              ))}
-            </ul>
+            {topLaws.length > 0 && (
+              // 1件ずつ大きく表示して周回（T5: 隠れていた法改正2件目以降を露出）
+              <div className="mt-2 min-h-0 flex-1">
+                <SignageRotator
+                  items={topLaws}
+                  ariaLabel="直近の法改正"
+                  getKey={(rev) => rev.id}
+                  renderItem={(rev) => (
+                    <div className="h-full rounded-lg border border-slate-700 bg-slate-950/50 p-2 sm:rounded-xl sm:p-3 xl:p-4">
+                      <div className="flex flex-wrap items-center gap-1.5 text-[9px] text-slate-400 sm:text-xs xl:text-lg">
+                        <span className="rounded-full bg-sky-600/90 px-2 py-0.5 font-semibold text-white">{rev.kind}</span>
+                        <span>{rev.publishedAt}</span>
+                        <span>{rev.issuer}</span>
+                      </div>
+                      <h3 className="mt-1 text-sm font-bold text-slate-50 sm:text-base lg:text-lg xl:text-3xl">{rev.title}</h3>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-200 sm:text-sm lg:text-base xl:text-2xl">{rev.summary || "要約は未設定です。"}</p>
+                      {rev.source?.url ? (
+                        <a
+                          href={rev.source.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-2 inline-block text-[10px] font-semibold text-emerald-400 hover:text-emerald-300 sm:text-xs xl:text-lg"
+                        >
+                          出典（{rev.source.label ?? rev.issuer}）を開く →
+                        </a>
+                      ) : null}
+                    </div>
+                  )}
+                />
+              </div>
+            )}
           </section>
 
         </div>
