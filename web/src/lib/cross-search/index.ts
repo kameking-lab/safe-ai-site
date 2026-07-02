@@ -5,4 +5,4 @@
 export type { CrossSearchCategory, CrossSearchItem } from './types';
 export { CROSS_SEARCH_CATEGORY_LABEL } from './types';
 export { buildCrossSearchIndex, __resetCrossSearchIndexCache } from './build';
-export { searchCrossIndex, type CrossSearchOptions } from './score';
+export { searchCrossIndex, type CrossSearchOptions, type ScorableItem } from './score';
