@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-07-03（3） — O10・第一弾 KY用紙Phase2着手＝本日の作業内容＋4R目標3欄をcanvas直接編集化
+
+回収: 自班PR #606（/account 結論カード）はCI再走を確認しマージ済み（mainとのdirtyをorigin/main通常マージで解消、docsのみ競合）。#613（在留資格ガイド詳細11ページ結論カード）もCI全緑を確認しsquashマージ済み。main は `git pull --ff-only` で同期・clean。テスト実行で副生成される `docs/rag-metrics-latest.json`・`web/src/data/chatbot-eval-fresh-results.json`（他レーン所有）はcommitから除外。
+
+着手前確認: BACKLOG最上位[ ]はO10（KY用紙Phase2）だが、依存の BACKLOG-fable.md F1「KY用紙 直接操作UI・方式確立」が本日 #609 でマージ済みと判明＝ブロック解消。O15/S1/S2/S3はdataレーンO14未着手で引き続きブロック中のため、O10に着手。
+
+規模判断: 診断書(docs/fable-diagnosis-2026-07-02/02-ky-sheet-ui.md)のT4〜T7見積りは「2〜3日（14〜22h）」と大きく、全欄・全機能を1イテレーションで一気に実装すると検証が粗くなり「半端な実装」のリスクがある。CLAUDE.mdの品質原則（半端な実装を残さない）に従い、完全に検証できる単位へ分割し第一弾を実施。
+
+実装: `web/src/lib/ky/paper-fields.ts` をヘッダー6欄限定の `KY_HEADER_FIELDS`/`KY_HEADER_FIELD_ORDER` から用紙全欄を指す `KY_PAPER_FIELDS`/`KY_PAPER_FIELD_ORDER` へリネーム＋拡張。各フィールド定義に `get`/`set`（イミュータブル更新関数）を追加し、`FieldEditorSheet` 側の型キャスト(`record[fieldKey as TextFieldKey]`)を排除して汎用化＝今後の危険行・参加者拡張（インデックス付きキー・複雑な更新ロジック）の土台を整備。新規フィールドタイプ `"textarea"` を追加し `TextareaWithVoice` をエディタに統合。
+
+対象4欄を追加: 「本日の作業内容」（`workRows[0].workDetail` と連動・textarea・音声入力）、「チーム行動目標」「重点実施項目」（textarea・音声入力）、「指差呼称（ヨシ！）」（text・音声入力、記入順の最終欄）。`KyPrintSheet` の該当4セルを `EditableCell` でラップ（既存の6欄と同じ方式・省略可能propのため印刷経路は無変更）。承認ロック中は6欄と同じく `editing` プロパティごとundefinedになりタップ不可（既存の仕組みをそのまま継承・追加実装なし）。
+
+検証: `tsc --noEmit`=0 / `lint`=errors0（既存warning23件のみ・変更ファイル起因の新規warning0）/ `vitest run`=242ファイル2052テスト全pass（`paper-fields.test.ts`にget/set・新4欄のisEmpty検証を追加）/ `build`=成功。**印刷不可侵の機械的な担保**: `ky-print-sheet.test.tsx` のスナップショットを比較した結果、`editing`未指定時のHTMLはリネーム前後でバイト単位一致（差分はテストのdescribe名のみ）＝A4正式書式は1バイトも変わっていないことを確認。無読Playwright `docs/third-party-reviews/scripts/ky-canvas-phase2-work-goal-2026-07-03.mjs` を新規（本番相当ビルドをprod start・iPhone12相当390pxで実行）＝**13/13 PASS**（4欄のタップ標的可視・エディタ起動・「次の欄へ」連鎖・入力が画面キャンバスと印刷専用コピーの両方に同一反映＝WYSIWYG・未記入セルのヒント表示を確認）。
+
+残: O10の続き（危険行の動的行・＋行追加ホットスポット・参加者のチップ選択・未記入ハイライトの「のこりN」タップ連動(zoom-to-cell)・AI提案/音声入力のエディタ統合・canvas既定切替）はBACKLOG-ux-records.mdへ「O10（続き）」として起票済み。次イテレーションで継続。
+
+---
+
 ## 2026-07-03（2） — 柱0補充 /foreign-workers/status/[status] 全11ページに結論カード新設（PR: ux-rec/foreign-workers-status-conclusion）
 
 回収: 自班のCI緑PR #593（/safety-diary/list 結論カード）をmainとの競合（BACKLOG-ux-records.md、他班#597と同時完了による行競合のみ・コード競合なし）を通常マージで解消しsquashマージ。main は `git pull --ff-only` で同期・clean（不要になった自動生成ファイル docs/rag-metrics-latest.json・chatbot-eval-fresh-results.json のローカル差分は破棄）。

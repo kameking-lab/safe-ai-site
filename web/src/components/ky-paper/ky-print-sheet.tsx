@@ -11,7 +11,7 @@ import type { KyInstructionRecordState } from "@/lib/types/operations";
 import type { ReactNode } from "react";
 import { evalScore, riskGrade } from "@/lib/ky/pulldown-options";
 import { KY_APPROVAL_LABEL } from "@/lib/ky/approval";
-import { KY_HEADER_FIELDS, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
+import { KY_PAPER_FIELDS, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
 
 const th = "border border-black bg-slate-100 px-1.5 py-1 text-left align-top font-bold whitespace-nowrap";
 const td = "border border-black px-1.5 py-1 align-top";
@@ -40,7 +40,7 @@ function EditableCell({
   children: ReactNode;
 }) {
   if (!editing) return <>{children}</>;
-  const label = KY_HEADER_FIELDS[fieldKey].label;
+  const label = KY_PAPER_FIELDS[fieldKey].label;
   const isActive = editing.activeKey === fieldKey;
   const isEmpty = editing.emptyKeys?.has(fieldKey) ?? false;
   return (
@@ -134,7 +134,9 @@ export function KyPrintSheet({
         <tbody>
           <tr>
             <th className={`${th} w-[18%]`}>本日の作業内容</th>
-            <td className={`${td} whitespace-pre-wrap`}>{workDetail}</td>
+            <td className={`${td} whitespace-pre-wrap`}>
+              <EditableCell editing={editing} fieldKey="workDetail">{workDetail}</EditableCell>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -184,15 +186,21 @@ export function KyPrintSheet({
         <tbody>
           <tr>
             <th className={`${th} w-[18%]`}>チーム行動目標</th>
-            <td className={`${td} whitespace-pre-wrap`}>{record.teamGoal}</td>
+            <td className={`${td} whitespace-pre-wrap`}>
+              <EditableCell editing={editing} fieldKey="teamGoal">{record.teamGoal}</EditableCell>
+            </td>
           </tr>
           <tr>
             <th className={th}>重点実施項目</th>
-            <td className={`${td} whitespace-pre-wrap`}>{record.priorityItems}</td>
+            <td className={`${td} whitespace-pre-wrap`}>
+              <EditableCell editing={editing} fieldKey="priorityItems">{record.priorityItems}</EditableCell>
+            </td>
           </tr>
           <tr>
             <th className={th}>指差呼称（ヨシ！）</th>
-            <td className={td}>{record.pointingCall}</td>
+            <td className={td}>
+              <EditableCell editing={editing} fieldKey="pointingCall">{record.pointingCall}</EditableCell>
+            </td>
           </tr>
         </tbody>
       </table>

@@ -1,23 +1,21 @@
 "use client";
 
 /**
- * F1（KY用紙 直接操作UI・方式確立）: 欄タップで開く入力エディタ。
+ * F1→O10（KY用紙 直接操作UI）: 欄タップで開く入力エディタ。
  *
  * contentEditable を使わない核心＝紙のセルはタップ標的、入力はこの専用UIで行う
  * （日本語IME・音声入力・プルダウンが通常のフォーム部品として確実に動く）。
  * スマホ: 下から出るボトムシート / PC: 右下のパネル。
- * 「次の欄へ」で紙の記入順（KY_HEADER_FIELDS.next）を辿れる。
+ * 「次の欄へ」で紙の記入順（KY_PAPER_FIELDS.next）を辿れる。
  * 入力フォントは16px以上（iOS Safari のフォーカス自動ズームを防ぐ）。
  */
 
 import { useEffect, useRef } from "react";
-import { InputWithVoice } from "@/components/voice-input-field";
+import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import type { KyInstructionRecordState } from "@/lib/types/operations";
-import { KY_HEADER_FIELDS, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
+import { KY_PAPER_FIELDS, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
 import { MONTH_OPTIONS, dayOptions, temperatureOptions, yearOptions } from "@/lib/ky/pulldown-options";
 import { WEATHER_REGIONS } from "@/lib/ky/weather-autofill";
-
-type TextFieldKey = Extract<KyPaperFieldKey, "siteName" | "projectName" | "foremanName" | "coop1Name">;
 
 export type FieldEditorSheetProps = {
   fieldKey: KyPaperFieldKey;
@@ -46,7 +44,7 @@ export function FieldEditorSheet({
   onSelectField,
   weather,
 }: FieldEditorSheetProps) {
-  const def = KY_HEADER_FIELDS[fieldKey];
+  const def = KY_PAPER_FIELDS[fieldKey];
   const sheetRef = useRef<HTMLDivElement | null>(null);
 
   // 開いたら最初の入力へフォーカス（キーボード/音声にすぐ入れる）
@@ -94,10 +92,20 @@ export function FieldEditorSheet({
 
         {def.type === "text" && (
           <InputWithVoice
-            value={record[fieldKey as TextFieldKey]}
-            onChange={(e) => patch({ [fieldKey]: e.target.value } as Partial<KyInstructionRecordState>)}
+            value={def.get?.(record) ?? ""}
+            onChange={(e) => patch(def.set?.(record, e.target.value) ?? {})}
             placeholder={def.placeholder}
             className="min-h-[44px] text-base"
+          />
+        )}
+
+        {def.type === "textarea" && (
+          <TextareaWithVoice
+            rows={3}
+            value={def.get?.(record) ?? ""}
+            onChange={(e) => patch(def.set?.(record, e.target.value) ?? {})}
+            placeholder={def.placeholder}
+            className="min-h-[88px] text-base"
           />
         )}
 

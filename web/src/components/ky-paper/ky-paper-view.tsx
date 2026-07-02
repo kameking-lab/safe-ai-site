@@ -58,7 +58,7 @@ import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
 import { KyTranscribePanel } from "@/components/ky-paper/ky-transcribe-panel";
 import { PaperStage } from "@/components/ky-paper/paper-stage";
 import { FieldEditorSheet } from "@/components/ky-paper/field-editor-sheet";
-import { emptyKyHeaderFieldKeys, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
+import { emptyKyPaperFieldKeys, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
@@ -515,8 +515,8 @@ export function KyPaperView() {
       /* URL操作不可の環境では state のみ */
     }
   }, []);
-  // F1: 未記入ヘッダー欄（キャンバス上のうっすらハイライト用）
-  const emptyHeaderKeys = useMemo(() => emptyKyHeaderFieldKeys(record), [record]);
+  // F1/O10: 未記入の全欄（キャンバス上のうっすらハイライト用）
+  const emptyPaperFieldKeys = useMemo(() => emptyKyPaperFieldKeys(record), [record]);
 
   // F1: 用紙キャンバス（β）。全hooks評価後の分岐＝クラシックUIと状態を完全共有する
   // （record/自動保存/クラウド同期/承認ロック/深リンクがそのまま効く）。
@@ -572,14 +572,14 @@ export function KyPaperView() {
                   : {
                       onTapField: (key) => setActiveFieldKey(key),
                       activeKey: activeFieldKey,
-                      emptyKeys: emptyHeaderKeys,
+                      emptyKeys: emptyPaperFieldKeys,
                     }
               }
             />
           </div>
         </PaperStage>
 
-        {/* 欄タップで開く入力エディタ（Phase 1 はヘッダー6欄） */}
+        {/* 欄タップで開く入力エディタ（Phase 2: ヘッダー6欄＋本日の作業内容＋4R目標3欄） */}
         {activeFieldKey && !locked && (
           <FieldEditorSheet
             fieldKey={activeFieldKey}
