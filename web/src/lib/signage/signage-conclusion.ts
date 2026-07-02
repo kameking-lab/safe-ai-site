@@ -4,8 +4,8 @@
  * 現場のTVを数メートル先から3秒見ただけで「いまの状態」と「次にやること」が
  * 分かるよう、ページ内に散らばる状態（気象警報・本日のリスク予測・記録キットの
  * 要対応）を1本の色帯に集約する。色はJIS安全色の文法に従う:
- *   赤   = 危険・停止級（警報発表中 / 是正期日の超過）
- *   黄   = 注意（気象の取得失敗=確認不能 / 高リスク予測 / 要対応の記録）
+ *   赤   = 危険・停止級（特別警報・警報発表中 / 是正期日の超過）
+ *   黄   = 注意（注意報発表中 / 気象の取得失敗=確認不能 / 高リスク予測 / 要対応の記録）
  *   緑   = 安全・OK（警報なし・停止級なし）
  *   無彩 = 確認中（取得完了前。誤った安心も誤った警告も出さない）
  *
@@ -54,8 +54,8 @@ type Condition = {
 };
 
 /**
- * 状態の優先順位: 警報発表中 > 期限超過 > 気象取得失敗 > 高リスク予測 > 要対応 >
- * 確認中 > 警報なし。最上位が主文（デカ表示）、残りはチップになる。
+ * 状態の優先順位: 特別警報/警報発表中 > 期限超過 > 注意報発表中 > 気象取得失敗 >
+ * 高リスク予測 > 要対応 > 確認中 > 警報なし。最上位が主文（デカ表示）、残りはチップになる。
  */
 export function buildSignageConclusion(input: SignageConclusionInput): SignageConclusion {
   const { warningPanel, risks, siteSafety } = input;
@@ -66,12 +66,12 @@ export function buildSignageConclusion(input: SignageConclusionInput): SignageCo
 
   const conditions: Condition[] = [];
 
-  if (warningPanel.kind === "headline") {
+  if (warningPanel.kind === "special" || warningPanel.kind === "warning") {
     conditions.push({
       chip: { tone: "red", text: "気象警報" },
       main: {
         tone: "red",
-        label: "警報 発表中",
+        label: warningPanel.kind === "special" ? "特別警報 発表中" : "警報 発表中",
         sub: warningPanel.headline,
       },
     });
@@ -83,6 +83,16 @@ export function buildSignageConclusion(input: SignageConclusionInput): SignageCo
         tone: "red",
         label: `期限超過 ${overdueCount}件`,
         sub: "是正期日を過ぎた記録あり — 記録キットで確認",
+      },
+    });
+  }
+  if (warningPanel.kind === "advisory") {
+    conditions.push({
+      chip: { tone: "amber", text: "気象 注意報" },
+      main: {
+        tone: "amber",
+        label: "注意報 発表中",
+        sub: warningPanel.headline,
       },
     });
   }
