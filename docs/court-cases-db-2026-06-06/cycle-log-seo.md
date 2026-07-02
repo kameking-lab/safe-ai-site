@@ -275,3 +275,27 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=234ファイル1964テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・web/src/data/chatbot-eval-fresh-results.json）は commit 前に `main` から復元。working tree clean。
 
 残: O8-c（法令エイリアス辞書＝正式名称・かな読み・別略称の展開）が P0 で続く。S6（0件時 e-Gov フォールバック＋ランキング調整）が P1。
+
+---
+
+## 2026-07-03 S6: 横断検索 0件時の e-Gov フォールバック＋収録範囲明示＋0件クエリ運用ループ（診断T4+T8）
+
+診断書 05-search-egov.md の G7短期（収録の透明性）と T8運用面。着手時、O8-c（法令エイリアス）は自班 PR #600 が CI 保留で in-flight のため、未着手最上位の次点 S6 を着手。S6 は T4（0件フォールバック）＋T8（ランキング調整＋0件クエリ運用ループ）の合成。
+
+**背景（診断の穴）**: 横断検索は curated 抄録（安衛則は実際には第677条まであるが未収載条番号あり）を検索対象にしており、0 件が「規定が存在しない」と誤読されると安全上のリスク（G7）。従来の `/search` 0件画面は汎用アドバイス＋`/law-search`・`/chatbot` リンクのみで、原文（e-Gov）への逃がしも収録範囲の断りも無かった。
+
+**実装（自領域のみ）**:
+- `lib/cross-search/egov-fallback.ts` 新設＝`EGOV_LAW_SEARCH_URL`（到達可能な e-Gov ポータルトップに固定）＋`egovHandoffQuery`（引継ぎクエリ整形）。e-Gov 新 UI は SPA でキーワードのディープリンク URL が非公開＝誤ったクエリ付き URL は幽霊リンクになり得るため（`lsg0500` は詳細ルートで検索ではない、WebFetch でも SPA シェルしか返らず検証不能）、**「常に到達可能なトップ＋検索語コピーで引継ぎ」**に固定＝幽霊リンク 0 を保証。実測でトップは HTTP200・検索ボックス有を確認。
+- `SearchResults.tsx` の `NoResults` を刷新: (1) 収録範囲明示コピー「見つからない＝規定がないではない」（未収載≠規定なし・原文は e-Gov 確認）、(2) e-Gov 外部リンク（target=_blank rel=noopener）＋検索語コピーボタン（`navigator.clipboard` ガード付き）、(3) 既存 `/law-search`・`/chatbot` 導線を min-h-[40px] タップ標的で維持。
+- 計装 `trackEvent('search_zero_result_egov', {query})` を e-Gov クリックに追加＝既存 `search_results_view{result_count}` と併せ 0 件率と e-Gov 逃がし数を計測可能に。
+- `docs/fable-diagnosis-2026-07-02/s6-zero-result-runbook.md` 新設＝週次手順（GA4 で result_count=0 抽出→同義語/エイリアス/条番号ゆらぎ/真の未収載の 4 分類トリアージ→`search-index.test.ts` の it.each へ回帰追加）。
+
+**ランキング（T8）**: 「就業制限」1位＝安衛法61条は O8-a で既達で、`search-index.test.ts` の it.each（`{query:'就業制限', rank:1}`）で既にロック済み。SEARCH_CATEGORY_PRIORITY で law 最優先のため現状維持を確認し、**再実装せず**（既存の作り直しで件数を稼がない）。
+
+**要・他班**: `/law-search`（`law-search-panel.tsx`＝UI 班所有）の 0 件画面・収録外条番号→e-Gov 条アンカー(`#Mp-At_N`)誘導は当班の領域外＝対象外と明記。
+
+回帰: `egov-fallback.test.ts`(2 it)＋`SearchResults.test.tsx`(3 it・next/navigation モックで no-hit クエリを固定→0件描画で e-Gov/収録範囲/コピー導線を検証)。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=240ファイル1994テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・web/src/data/chatbot-eval-fresh-results.json）は commit 前に `main` から復元。working tree clean。
+
+残: O8-c（PR #600 CI 待ち→次イテレーションで回収）、O18（条文参照の自動リンク）、O17（条文パーマリンク＋束ね）が続く。
