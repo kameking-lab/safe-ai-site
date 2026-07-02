@@ -287,3 +287,20 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=235ファイル1981テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・web/src/data/chatbot-eval-fresh-results.json）は commit 前に `main` から復元。O8-b(#591) 上にスタック（PR base=seo/o8b-article-query-parser）。working tree clean。
 
 残: S6（0件時 e-Gov フォールバック＋ランキング調整）が P1。O18（条文本文の参照自動リンク）が P1。
+
+---
+
+## 2026-07-03 T7 設計ドラフト（Path A）: e-Gov API v2 全文取込の設計書起票（診断 T7/G7 中期策）
+
+回収/衝突解決: CI 緑だった自班 PR #607（S6）が main 進行（O8-c #600 ほか）で CONFLICTING 化 → 当該ブランチへ origin/main を**通常マージで解決**（force-push 不可を遵守）。衝突は3点＝(a) `cross-search/index.ts`＝両者が別 export 行を追加のみ→両立ユニオン、(b) BACKLOG-seo.md 未着手＝HEAD が O8-c・main が S6 を残置＝**両方とも完了済み**のため両除去し O18/O17/e-Gov のみ残す、(c) BACKLOG/cycle-log 完了節＝S6 と O8-c の両追記を併存。tsc0・cross-search 32テスト緑・lint errors0 を確認し push（CI 再走は次イテレーションで回収）。#614（O18）は CI 進行中で今ターンはマージ不可。
+
+着手判断: 未着手最上位は S6（#607 in-flight）→O18（#614 in-flight）→O17（**L・O18 の未マージ linkifier に依存**）→e-Gov API 全文取込（**Path A・設計のみ**）。in-flight 2件と依存関係を踏まえ、**コード非改変でゼロ競合・独立マージ可能**な T7 設計ドラフトを選択（docs のみ＝#607/#614 と衝突面ゼロ）。
+
+- **成果物**: `docs/fable-diagnosis-2026-07-02/T7-egov-fulltext-ingest-design.md` 1本のみ（コード0・データ0）。診断 G7（収録カバレッジの穴＝抄録1,065条で安衛則の未収録条が「規定なし」と誤読されるリスク）の中期策を設計に落とした。短期止血（0件フォールバック）は S6 で実装済みのため、本書はカバレッジ穴そのものの中期埋め。
+- **設計の核（既存資産の拡張＝新規基盤ではない）**: `scripts/etl/egov-revisions-fetch.ts`（e-Gov API v2 ETL・認証不要・政府標準利用規約2.0・実在検証済み lawId×20・diff-only・skip-on-missing の作法）／`egov-caption-snapshot.ts`＋`article-caption-integrity.test.ts`（チェックイン済みスナップショット＋整合テストの先例）／`LAW_METADATA.egovLawId`／`LawArticle` 型／`allLawArticles` 集約／`scripts/law-data-import/README.md`（取得手順既記）を土台に再利用する方針を明記。
+- **方式の要点**: (1) 「ビルド時に外部API」ではなく**オフライン取得→git チェックイン→静的 import**（CI/デプロイ再現性・main 常時デプロイ可能の担保）、(2) **新規 env 不要**（API キー無し）、(3) 段階投入（安衛法/令/則→主要特別則→その他）、(4) **バンドル肥大対策＝検索インデックスと本文の分離・遅延ロード・PWA プリキャッシュ見直し**（診断 G8 の宿題＝SEO/ux-tools/PWA 班の横断合意要）、(5) 原文サンプル照合・削除条ガード・出典必須のテスト設計。
+- **Path A 境界の明示（§8/§10）**: 外部API本番取込みの是非・データ所有（`web/src/data/laws/**` は data 班領域）・取得頻度（単発 or Vercel Cron）は**オーナー/他班判断**。SEO班は「全文が入った後の検索インデックス統合＋カバレッジ透明性」に限る。本イテレーションでは取得スクリプト・データ・`search-index.ts`・`sw.js` を一切書かない＝設計ドキュメント1本が成果物。
+
+ゲート: **コード変更0**（docs＋BACKLOG＋本ログのみ）につき tsc/lint/vitest/build は本質的に非改変で全緑維持。working tree clean。
+
+残: #607（S6）・#614（O18）の CI 緑回収＆マージ。次の未着手は O17（条文パーマリンク＋束ねパネル・O18 の linkifier マージ後に着手）。T7 は**オーナー GO 待ち**（承認後 P2 実装は data 班/オーナー主導）。
