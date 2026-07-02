@@ -224,3 +224,21 @@
 **ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 1883 全pass / build 成功。
 
 **無読テスト**: `docs/third-party-reviews/scripts/guides-hub-icon-first-noread-2026-06-14.mjs` を **4/4 PASS**（dev実機・スマホ390×844）。実 boundingBox で4ガイドのアイコンバッジが各 48×48px、色トークン4種が重複なし（弁別 PASS）であることを確認。playwright は web/node_modules にあるため createRequire の相対解決で repo ルートから直接実行可能にした。
+
+---
+
+## 2026-07-02 ux-hub/signage-jma-runtime-fetch
+
+**タスク**: BACKLOG-ux-hub.md 最上位（2026-07-02 Fable診断注入 O2, 診断書 `docs/fable-diagnosis-2026-07-02/01-signage.md` T1+T2）。サイネージ気象データ(`/api/signage/jma`)が本番で18日間凍結していた不具合の是正。
+
+**真因**: `route.ts` が `@/data/jma/*.json` を `export const dynamic = "force-static"` でビルド時 static import しており、返り値はビルド時点のJSONに完全固定されていた。一方 `.github/workflows/jma-data-update.yml` は15分毎にJMAデータを取得しコミットするが、コミット件名 `[skip ci]` を `vercel.json` の `ignoreCommand` が検出してVercelデプロイをスキップする設計のため、通常デプロイ（コード変更）が起きない限り本番のJMAデータは更新されなかった。ローカルリポジトリの `web/src/data/jma/index.json` は常に新鮮（GH Actionsは正常稼働）だが本番だけ古い、という乖離を確認。
+
+**修正**: `route.ts` から static import を撤去し、気象庁 bosai JSON（警報47都道府県・天気予報7地方・地震一覧）をリクエスト時に直接 fetch する新規 `web/src/lib/jma/fetch-jma-runtime.ts` を追加。既存の `/api/signage-data` と同じ構え（`unstable_cache` + `next: { revalidate: 1800 }`）で30分キャッシュし、デプロイ有無に依存せず鮮度を保つ。全都道府県/全地方の取得が総崩れした場合のみ、既存の静的スナップショット（`@/data/jma/*.json`）へフォールバック——GH Actions cron は「緊急時フォールバックの供給元」へ役割変更し、削除はしていない。パース処理は既存 `parse-jma-warning.ts` に純関数 `summarizeWarningPayload` を追加、天気/地震は新規 `parse-jma-forecast.ts`/`parse-jma-earthquakes.ts` に分離（いずれもネットワーク非依存の純関数でユニットテスト可能）。
+
+**デプロイ健全性ウォッチ(T2)**: `/api/cron/signage-jma-health` を新設し `vercel.json` に日次cron登録。データ齢24hを超えたら非2xxを返し、Vercel Cron の失敗検知に自然に乗る設計（新規の通知チャネル・環境変数は導入せず、Deploy Hook 追加はオーナー確認事項として見送り＝診断書付記に準拠）。しきい値判定は純関数 `web/src/lib/jma/data-freshness.ts` に切り出しユニットテスト済み。
+
+**実機確認**: `npm run dev` で `/api/signage/jma` を実際に叩き、初回820ms（気象庁への実ネットワークfetch）→2回目8ms（unstable_cacheヒット）を確認。返却された東京都(JP-13)のheadline/reportDatetimeを気象庁APIへの直curl結果と突合し完全一致（ライブデータであることを確認、フォールバックではない）。`/signage`・`/signage/map`・`/signage/display` は全て200で既存表示のまま描画。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 1951 全pass（新規18件）/ build 成功（`/api/signage/jma`・`/api/cron/signage-jma-health` とも `ƒ Dynamic` へ変化したことを確認＝ force-static 撤去の裏付け）。
+
+**残課題**: O3（警報バナー誤報判定の是正）・O9（サイネージ文字サイズ再設計）以下は次イテレーション以降で対応。
