@@ -194,7 +194,7 @@ export function KyPaperView() {
     setWorkers(visibleWorkers(loadWorkers()));
     // 保存済みKYがあれば上部にも「前回を複製」を出す（再来訪の最速ルート）。
     setHasLatest(loadLatestKyRecord() !== null);
-  }, []);
+  }, [setNotice]);
 
   // Phase 4: クラウド同期（背景・任意）。env 未設定なら何もしない＝従来どおり端末内のみ。
   // ローカルに編集中ドラフトがあれば必ずそれを優先し、空のときだけ別端末の最新を引き継ぐ。
@@ -219,7 +219,7 @@ export function KyPaperView() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [setNotice]);
 
   // 自動保存（1秒デバウンス）— /ky と同じキーへ
   useEffect(() => {
