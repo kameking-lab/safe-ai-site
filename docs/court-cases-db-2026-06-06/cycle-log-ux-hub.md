@@ -260,3 +260,63 @@
 **ゲート結果（cd web）**: tsc=0（`.next/dev` の生成物由来エラーのみ・本変更と無関係。`validator.ts` 単体削除で解消し再ビルドで正常再生成を確認）/ lint=0 errors（46 warnings は既存・無関係）/ vitest 1979 全pass（新規/更新13件: `parse-jma-warning.test.ts`・`weather-warning-panel-state.test.ts`・`signage-conclusion.test.ts`）/ build 成功。dev実行で書き換わる他班生成物(`rag-metrics-latest.json`・`chatbot-eval-fresh-results.json`)は commit から除外。
 
 **残課題**: O9（サイネージ文字サイズ再設計）以下は次イテレーション以降で対応。
+
+---
+
+## 2026-07-03 ux-hub/o9-signage-typography-rotation
+
+**タスク**: BACKLOG-ux-hub.md 最上位（2026-07-02 Fable診断注入 O9, 診断書 `docs/fable-diagnosis-2026-07-02/01-signage.md` T4+T5）。サイネージ本文の6割が12px以下で3m先から読めず、6分間観察でDOMが（時計以外）1文字も変化しない「動かない掲示板」問題の是正。
+
+**着手前の状況**: 前イテレーションで着手した O3（警報バナー誤報判定）は PR #594 として提出済みだが CI(e2e/smoke)が pending のままだったため、今回はマージせず次イテレーションへ回収。BACKLOG-ux-hub.md 上の O3 は main 未マージのため引き続き未着手表記のまま、O9 に着手した。
+
+**タイポグラフィ**: `xl:` ブレークポイント（1920幅TV想定・`lg:`/`sm:` のモバイル向けサイズは不変）で本文系フォントを最低24px、キーナンバー（気温・リスクラベル・トレンド見出し・法改正タイトル等）を28〜32px超へ再設計。対象: `signage-header.tsx`（地点/時刻）、`signage-hourly-strip.tsx`（時刻・気温・降水）、`signage-risk-prediction.tsx`（リスクラベル・理由）、`signage-site-safety.tsx`、`auto-refresh-status.tsx`、`signage-danger-alert.tsx`、`signage-floor-plan-editor.tsx`（ピン注記）、`app/signage/page.tsx` の気象警報パネル・現場注意事項・トレンド/法改正カード。
+
+**キオスクモード**: `?kiosk=1` クエリを追加。`SignageHeader` に `hideNav` プロップを新設しナビリンク行を隠し、`page.tsx` 側でシナリオ操作バー・地点セレクト・表示モード切替ボタン群を条件非表示にした。常掲設置時はこのURLで開けば運用UIがゼロになり、本文の視認性のみが残る。
+
+**自動ローテーション**: 新規 `web/src/components/signage/signage-rotator.tsx`（汎用コンポーネント）。トレンドニュース・法改正の「全件スクロールリスト」を「1件を大きく表示し16秒周期で自動周回」に置き換え、進捗ドットで手動切替も可能。ホバー/フォーカス中は一時停止、`prefers-reduced-motion` では自動切替を止める。従来は2件目以降が `xl:overflow-y-auto` の内部スクロールに隠れ、無人運用では誰の目にも触れなかった。
+
+**鮮度・自動復旧**: `REFRESH_INTERVAL_MS` を60分→15分に短縮。データ取得失敗時は次の定期更新を待たず3分後に再試行する `retryTimer`（`signage-map-client.tsx` と同じ構え）を追加。常時点灯TVが古いJSバンドルを掴み続けないよう、深夜3時に1回だけ `window.location.reload()` する日次フルリロードを新設。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warningのみ）/ vitest 239ファイル1988件 全pass（新規17件: `signage-rotator.test.tsx` 5件・`page-refresh-config.test.ts` 6件・既存ファイルへの追加分含む）/ build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/signage-o9-typography-rotation-noread-2026-07-03.mjs`（build+start、Playwright、1920x1080）**6/6 PASS**。①キオスクモードでシナリオバー・ポータルへ戻るリンクが非表示、②本文系（button/select/input/label以外）で12px以下フォントが0/217件、③1画面フィット維持（scrollHeight=1080≦viewport=1080）、④トレンド/法改正パネルが存在、⑤35秒待機（既定16秒間隔×2周期）後にDOM内容が変化——を実測確認。スクリーンショット2枚（通常モード／キオスクモード）を同ディレクトリに保存。
+
+**残課題**: S4以下（地点47都道府県化・ニュース鮮度フィルタ・常掲価値追加等）は未着手のまま次回以降へ。
+
+---
+
+## 2026-07-03 ux-hub/s4-signage-data-quality
+
+**イテレーション頭の回収**: 自班の緑PR #594(O3警報バナー市区町村コード判定)を squashマージ。`git checkout main && git pull --ff-only` でclean確認。O9(PR #604・サイネージ文字サイズ再設計)はCI進行中（e2e/smoke pending）のため重複着手を避け次イテレーションで回収。
+
+**タスク**: BACKLOG-ux-hub.md 最上位 S4（サイネージのデータ品位3本、診断書 `docs/fable-diagnosis-2026-07-02/01-signage.md` T6+T7+T9）。
+
+**①地点マスタ47都道府県化**: `signage-locations.ts` は東京23区＋7政令市の計30箇所のみで、JP-01/04/13/23/27/34/37/40 の8県しか選択できなかった（39県が選択不可）。未収録39県の県庁所在地を追加。緯度経度は捏造せず、data班所有 `web/src/data/jma/prefecture-centroids.ts`（都道府県庁所在地の代表座標）を `centroidByIso()` 経由で参照利用（読み取りのみ・data班領域は非改変）。市区町村コード(`jmaCityCode`)は、気象庁公式エリアマスタ(`https://www.jma.go.jp/bosai/common/const/area.json`)を実地確認したところ、政令指定都市や県庁所在地の一部は class20s が区・地域ごとに細分化され単一コードへ一意対応しない（例: 横浜市→北部/南部、神戸市→行政区ごと）ことを確認したため、精度を偽らず既存7政令市と同じく未設定のまま（県単位の `prefectureIso` 経由で見出し・警報レベルは取得される既存フォールバックに委ねる）。
+
+**②ニュース鮮度フィルタ・重複排除・鮮度加重ソート**: `parse-labor-rss.ts` の `fetchLaborTrendItems` はリンク完全一致のみでdedupeしており、Google Newsがクエリ・媒体ごとに別URLで返す同一記事が素通りしていた（診断実測: 表示10件中2件が完全同一記事の重複、中央値≒50日前）。`normalizeTitleForDedupe`（末尾「 - 媒体名」除去＋空白除去）でタイトルベースのdedupeを追加。`selectLaborTrendItems` に分離し、14日以内の記事を優先（`freshnessWeightedScore`: 重大度スコア＋0日+40〜14日で0への線形減衰ボーナス）、不足時のみ古い記事で補完するロジックへ変更。
+
+**③データ時刻の人間化＋stale黄帯**: 画面上の「気象庁データ時刻: {jmaReportTime}」が生ISO文字列のまま表示され、相対時間換算も色分けもなかった（既存の `lib/jma/data-freshness.ts` の `isDataStale`/`ageHours` はcronヘルスチェック専用でUIに未接続）。新規 `lib/signage/relative-time.ts` の `formatRelativeTimeJa`（分/時間/日単位で人間化）・`isDataTimeStale`（既定2h超で stale）を追加し、floorplan/mapモード双方の気象庁データ時刻表示に接続。stale時は `bg-amber-400 text-amber-950`（JIS安全色文法に整合＝黄地に黒系文字）で黄帯警告を表示。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warningのみ・無関係）/ vitest 241 files・2031 tests 全pass（新規39件: signage-locations 5・parse-labor-rss 14・relative-time 20）/ build 成功。
+
+**無読テスト**: 47都道府県の選択可能性・重複排除ロジック・stale判定はいずれも実測boundingBoxではなく純関数の入出力検証がテストの本体（サイネージ地図/データ取得はネットワーク依存のため）。vitestで実際の値（例: 沖縄県 那覇市の選択解決、離れた日付の記事が古い順に落ちること、2時間超で stale=true）を確認し、既存の signage-jis-amber-noread スクリプトが検証する「1画面フィット」「注意色=黒系文字」の不変を損なわないことをコードレビューで確認（該当箇所は色クラスの入替のみで寸法変更なし）。
+
+**残課題**: S5(常掲価値追加)・S8-b(E-E-A-T)・S9(相談CV)・S10(SSR/メタ)・S11(/handover閉鎖)以下は次イテレーション以降で対応。
+
+---
+
+## 2026-07-03 ux-hub/s5-signage-daily-values
+
+**イテレーション頭の回収**: 自班の緑PR #604(O9文字サイズ再設計)・#610(S4データ品位3本)はいずれもmainとdocコンフリクト（BACKLOG-ux-hub.md・cycle-log-ux-hub.md・signage/page.tsx の3ファイル、コードは同一箇所の書式差分のみで意味的競合なし）。それぞれ `git merge origin/main` で手動解決（両エントリを時系列順で共存、page.tsxはO9のxl:サイズ指定とS4/O3の判定ロジック・相対時刻表示を両立するようマージ）→ゲート緑を確認しpush→squashマージ。`git checkout main && git pull --ff-only` でclean確認後、本タスクに着手。
+
+**タスク**: BACKLOG-ux-hub.md 最上位 S5（サイネージ常掲価値の追加、診断書 `docs/fable-diagnosis-2026-07-02/01-signage.md` T10）。「休憩所のTVが毎日同じ画面」問題（無災害日数・唱和・WBGTなど現場常掲の定番が無い）の是正。
+
+**調査**: 無災害日数カウンタ・スローガンローテーション・signageへのWBGT連動はいずれも未実装（既存の朝礼スクリプト `signage-morning-script.tsx` は唱和ではなく読み上げ原稿生成、WBGT計算エンジン `wbgt-engine.ts` はheat-illness-prevention配下で手動気温入力のみ・signageの自動気象データには未接続で湿度も欠測）。
+
+**実装**: 結論ストリップ直下に3タイル横並びの新規 `SignageDailyValues` を追加。①**無災害日数**: `lib/signage/no-accident-store.ts`（この端末のlocalStorageに起点日を保存、他ストアと同じ readRaw/writeRaw パターン）＋純関数 `noAccidentDays`。未設定時は設定ボタン、設定後は経過日数の大きな数字＋変更リンク。②**今日の一言**: `lib/signage/daily-values.ts` に現場向け安全標語28件（中災防等が例年掲げる標語の類型を参考にした一般的な文言・特定年度の著作物は転載せず）と、日付(day-of-year)から決定論的に1件選ぶ純関数 `pickDailySlogan`（同日は常に同じ内容・日付が変われば必ず変わる＝ローテーションではなく「今日の担当」方式）。③**WBGT**: 上流 `open-meteo-hourly.ts` の `hourly` クエリに `relative_humidity_2m` を追加し `SignageHourlyPoint.humidityPct`（欠測時は`undefined`のまま・捏造しない）として新規スレッド。既存 `wbgt-engine.ts`（JIS Z 8504/ISO 7243、黒球温度未計測時の屋外推定式）をそのまま再利用し、現在時刻(`bundle.hourly[0]`)の気温・湿度からWBGT概算とリスクレベルを算出。JIS安全色文法（黄=黒文字等）で表示、湿度未取得時は「湿度データ取得中…」を表示し値を捏造しない。データ層(`web/src/data/**`)・他班route(heat-illness-prevention等)は非改変、`open-meteo-hourly.ts`/`SignageHourlyPoint` の消費元はsignageのみであることをGrepで確認済み。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warningのみ・無関係）/ vitest 253 files・2124 tests 全pass（新規40件: daily-values 8・no-accident-store 4・open-meteo-hourly humidity 2・SignageDailyValues 6、他は既存ファイルへの積み増し分）/ build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/signage-s5-daily-values-noread-2026-07-03.mjs`（build+start、Playwright、1920x1080）**9/9 PASS**。①3タイル（無災害日数・今日の一言・暑さ指数(WBGT)）が表示される、②起点日を保存すると経過日数表示に切り替わる、③Playwright Clock APIで翌日に時刻を固定してリロードし「今日の一言」の内容が実際に変わることを確認（2日連続比較の代替）、④1画面フィット不変（scrollHeight≦viewport）——を実測確認。スクリーンショット添付（結論ストリップ直下に3タイル、WBGT=注意で黄地黒文字のJIS色を確認）。
+
+**残課題**: S8-b(E-E-A-T)・S9(相談CV)・S10(SSR/メタ)・S11(/handover閉鎖)は次イテレーション以降で対応。

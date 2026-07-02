@@ -75,6 +75,7 @@ param(
   [switch]$Register,
   [switch]$InstallUserStartup,
   [switch]$WhatIf,
+  [switch]$SelfTest,
   [string]$ConfigPath = "",
   [string]$ClaudeCmd = "claude"
 )
@@ -120,6 +121,101 @@ function Fmt([string]$key, [hashtable]$vals) {
   $t = S $key
   if ($vals) { foreach ($k in $vals.Keys) { $t = $t.Replace('{' + $k + '}', [string]$vals[$k]) } }
   return $t
+}
+
+# Acquire the exclusive docs/loop-status.md lock (CreateNew = atomic "only if absent"), reclaiming a
+# STALE orphan. If a prior holder is killed between CreateNew and Remove-Item, the .lock survives
+# forever and every future status write fails to acquire it - freezing the liveness heartbeat into a
+# false "loop is dead" alarm (watch point #1). A legit hold is sub-second even with all six lanes
+# serialized, so a lock older than $StaleSeconds cannot be live: reclaim it once and retry. Returns
+# $true if held (caller MUST Remove-Item the lock when done), $false after exhausting retries. Shared
+# by every status write in this launcher (banner reconcile, config-error banner) and mirrors the
+# identical Get-StatusLock in loop-report-status.ps1 so the two writers agree on reclamation.
+function Get-LauncherStatusLock {
+  param([string]$LockPath, [int]$StaleSeconds = 60, [int]$Tries = 25, [int]$DelayMs = 200)
+  for ($try = 0; $try -lt $Tries; $try++) {
+    try {
+      $fs = [System.IO.File]::Open($LockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+      $fs.Close(); return $true
+    } catch {
+      $reclaimed = $false
+      try {
+        $li = Get-Item -LiteralPath $LockPath -ErrorAction SilentlyContinue
+        if ($li -and (((Get-Date) - $li.LastWriteTime).TotalSeconds -gt $StaleSeconds)) {
+          Remove-Item -LiteralPath $LockPath -Force -ErrorAction SilentlyContinue
+          Write-Launcher ("reclaimed stale status lock (age > " + $StaleSeconds + "s; prior holder likely killed mid-write).")
+          $reclaimed = $true
+        }
+      } catch {}
+      if (-not $reclaimed) { Start-Sleep -Milliseconds $DelayMs }
+    }
+  }
+  return $false
+}
+
+# ---------------------------------------------------------------------------
+# Decide what to persist as lastCriticIso after a critic one-shot. On success we stamp $Now (the full
+# criticEveryDays interval elapses before the next run). On failure (timeout kill / non-zero exit /
+# could-not-run) we BACK-DATE the stamp so the next launcher pass retries in ~$RetryDays instead of
+# hiding a broken inspection system for a full interval - and without re-firing a blocking 30-min
+# one-shot on every single logon. Pure function so -SelfTest can cover it offline.
+# ---------------------------------------------------------------------------
+function Resolve-CriticStamp {
+  param([string]$Outcome, [datetime]$Now, [int]$CriticEveryDays, [int]$RetryDays = 1)
+  if ($Outcome -eq 'ok') { return $Now }
+  $back = [Math]::Max(0, $CriticEveryDays - $RetryDays)
+  return $Now.AddDays(-$back)
+}
+
+# ---------------------------------------------------------------------------
+# -SelfTest: offline verification of the shared status-lock helper (stale-orphan reclamation +
+# fresh-lock respect). Temp files only - no Claude, no real status file, no config, no network.
+# Exits 0 on PASS, 1 on FAIL. Runs before any config read so a broken config cannot block the test.
+# ---------------------------------------------------------------------------
+if ($SelfTest) {
+  $fails = 0
+  $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("loop-launcher-selftest-" + [System.Guid]::NewGuid().ToString("N"))
+  New-Item -ItemType Directory -Path $tmp -Force | Out-Null
+  $lp = Join-Path $tmp "status.md.lock"
+  function Assert-L([string]$n, [bool]$c) {
+    if ($c) { Write-Launcher ("[SELFTEST] PASS: " + $n) } else { Write-Launcher ("[SELFTEST] FAIL: " + $n); $script:fails++ }
+  }
+  try {
+    # A) Clean acquire when no lock exists -> true, lock file left for the holder.
+    $a = Get-LauncherStatusLock $lp 60 5 50
+    Assert-L "clean acquire returns true" ($a -eq $true)
+    Assert-L "clean acquire leaves lock file" (Test-Path -LiteralPath $lp)
+    if (Test-Path -LiteralPath $lp) { Remove-Item -LiteralPath $lp -Force }
+    # B) A FRESH foreign lock (age 0) must be respected, not reclaimed -> false.
+    $fs = [System.IO.File]::Open($lp, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None); $fs.Close()
+    $b = Get-LauncherStatusLock $lp 60 3 30
+    Assert-L "fresh foreign lock is NOT reclaimed" ($b -eq $false)
+    Assert-L "fresh foreign lock still present" (Test-Path -LiteralPath $lp)
+    # C) A STALE orphan (backdated past threshold) is reclaimed and acquired -> true.
+    (Get-Item -LiteralPath $lp).LastWriteTime = (Get-Date).AddSeconds(-120)
+    $c = Get-LauncherStatusLock $lp 60 5 50
+    Assert-L "stale orphan lock is reclaimed and acquired" ($c -eq $true)
+    if (Test-Path -LiteralPath $lp) { Remove-Item -LiteralPath $lp -Force }
+    # D) Resolve-CriticStamp: success stamps now (next due exactly at the full interval).
+    $fixed = [datetime]"2026-07-03T08:00:00"
+    $sOk = Resolve-CriticStamp -Outcome "ok" -Now $fixed -CriticEveryDays 7 -RetryDays 1
+    Assert-L "critic ok stamps now (full interval)" ($sOk -eq $fixed)
+    # E) A FAILED critic back-dates so it is NOT due after ~half a day but IS due after ~1 day
+    #    (bounded retry: no 7-day blackout, no every-logon 30-min re-fire).
+    $sFail = Resolve-CriticStamp -Outcome "timeout" -Now $fixed -CriticEveryDays 7 -RetryDays 1
+    Assert-L "critic failure is NOT due 12h later" ((($fixed.AddHours(12)) - $sFail).TotalDays -lt 7)
+    Assert-L "critic failure IS due ~1 day later" ((($fixed.AddDays(1)) - $sFail).TotalDays -ge 7)
+    # F) nonzero exit behaves the same as timeout (any non-ok = degraded retry).
+    $sNz = Resolve-CriticStamp -Outcome "nonzero" -Now $fixed -CriticEveryDays 7 -RetryDays 1
+    Assert-L "critic nonzero back-dates like timeout" ($sNz -eq $sFail)
+    # G) Edge: RetryDays >= CriticEveryDays clamps back-date to 0 (no negative interval).
+    $sEdge = Resolve-CriticStamp -Outcome "timeout" -Now $fixed -CriticEveryDays 1 -RetryDays 1
+    Assert-L "critic retry clamps to now when RetryDays>=interval" ($sEdge -eq $fixed)
+  } finally {
+    try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
+  }
+  if ($fails -eq 0) { Write-Launcher "[SELFTEST] ALL PASS"; exit 0 }
+  Write-Launcher ("[SELFTEST] " + $fails + " FAILURE(S)"); exit 1
 }
 
 # ---------------------------------------------------------------------------
@@ -253,26 +349,7 @@ function Set-ResurrectionBanner {
   $lockPath = $statusPath + ".lock"
   $haveLock = $false
   if (-not $Preview) {
-    # Reclaim a STALE orphan lock: if a prior holder was killed mid-write the .lock survives forever
-    # and freezes the liveness heartbeat into a false "loop is dead" alarm. A legit hold is sub-second
-    # even with all lanes serialized, so a lock older than 60s cannot be live - reclaim and retry.
-    for ($try = 0; $try -lt 25; $try++) {
-      try {
-        $fs = [System.IO.File]::Open($lockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
-        $fs.Close(); $haveLock = $true; break
-      } catch {
-        $reclaimed = $false
-        try {
-          $li = Get-Item -LiteralPath $lockPath -ErrorAction SilentlyContinue
-          if ($li -and (((Get-Date) - $li.LastWriteTime).TotalSeconds -gt 60)) {
-            Remove-Item -LiteralPath $lockPath -Force -ErrorAction SilentlyContinue
-            Write-Launcher "reclaimed stale status lock (age > 60s; prior holder likely killed mid-write)."
-            $reclaimed = $true
-          }
-        } catch {}
-        if (-not $reclaimed) { Start-Sleep -Milliseconds 200 }
-      }
-    }
+    $haveLock = Get-LauncherStatusLock $lockPath
     if (-not $haveLock) {
       Write-Launcher "banner reconcile skipped: could not acquire status lock (non-fatal)."
       return
@@ -378,13 +455,88 @@ if ($InstallUserStartup) {
 }
 
 # ---------------------------------------------------------------------------
+# Config-error LOUD banner. When loop-config.json is missing or unparseable the launcher CANNOT
+# start any lane - but the OLD design exited 1 writing only to the private launcher log, never to
+# docs/loop-status.md. The owner's single watch-file then froze at its last good render with NO
+# explanation - the exact silent-death class O16 exists to kill, and the owner's most common manual
+# action (hand-editing untilIso) is precisely what fat-fingers the JSON. This rewrites the watch-file
+# with a loud "config broken, lanes NOT started, fix the JSON" banner, preserving the lanes'
+# self-report region verbatim (a lane from a PRIOR launch may still be alive and reporting) so the
+# emergency rewrite never destroys live self-reports. Honors -WhatIf; serialized by the shared lock.
+function Write-ConfigErrorStatus {
+  param([string]$ConfigFile, [string]$ErrorMsg)
+  $reportBegin = "<!-- LANE-REPORT:BEGIN (managed by loop-report-status.ps1) -->"
+  $reportEnd = "<!-- LANE-REPORT:END -->"
+  $now = Get-Date
+  $out = New-Object System.Collections.Generic.List[string]
+  $out.Add((S "title")); $out.Add("")
+  $out.Add((S "intro1")); $out.Add((S "intro2")); $out.Add("")
+  $out.Add((Fmt "updated" @{ NOW = $now.ToString("yyyy-MM-dd HH:mm:ss") })); $out.Add("")
+  $out.Add((S "configErrorHeader")); $out.Add("")
+  $out.Add((Fmt "configErrorBody1" @{ CONFIG = $ConfigFile }))
+  $out.Add((S "configErrorBody2"))
+  $out.Add((Fmt "configErrorBody3" @{ ERROR = $ErrorMsg }))
+  # Preserve the lanes' self-report region verbatim if present (never destroy live self-reports).
+  $preserved = $null
+  if (Test-Path $statusPath) {
+    try {
+      $old = @(Get-Content -Encoding UTF8 -Path $statusPath)
+      $b = -1; $e = -1
+      for ($k = 0; $k -lt $old.Count; $k++) {
+        if ($old[$k].Trim() -eq $reportBegin) { $b = $k }
+        elseif ($old[$k].Trim() -eq $reportEnd) { $e = $k; break }
+      }
+      if ($b -ge 0 -and $e -gt $b) { $preserved = $old[$b..$e] }
+    } catch {}
+  }
+  $out.Add(""); $out.Add((S "reportHeader")); $out.Add("")
+  if ($preserved) { foreach ($l in $preserved) { $out.Add([string]$l) } }
+  $out.Add(""); $out.Add((S "watchHeader"))
+  $out.Add((S "watch1")); $out.Add((S "watch2")); $out.Add((S "watch3"))
+  $text = ($out -join "`r`n") + "`r`n"
+  if ($WhatIf) {
+    $dry = Join-Path $logDir "loop-status.dryrun.md"
+    Set-Content -Path $dry -Value $text -Encoding UTF8
+    Write-Launcher ("[WHATIF] config-error banner -> " + $dry + " (config=" + $ConfigFile + ")")
+    return
+  }
+  $lockPath = $statusPath + ".lock"
+  $haveLock = Get-LauncherStatusLock $lockPath
+  if (-not $haveLock) {
+    Write-Launcher "WARN: config-error banner skipped: could not acquire status lock (non-fatal). See launcher log for the error."
+    return
+  }
+  try {
+    $statusDir = Split-Path -Parent $statusPath
+    if ($statusDir -and -not (Test-Path $statusDir)) { New-Item -ItemType Directory -Path $statusDir | Out-Null }
+    Set-Content -Path $statusPath -Value $text -Encoding UTF8
+    Write-Launcher ("config-error banner written to " + $statusPath)
+  } catch {
+    Write-Launcher ("WARN: could not write config-error status (non-fatal): " + $_.Exception.Message)
+  } finally {
+    try { Remove-Item -Path $lockPath -Force -ErrorAction SilentlyContinue } catch {}
+  }
+}
+
+# ---------------------------------------------------------------------------
 # Read config + state.
 # ---------------------------------------------------------------------------
-if (-not (Test-Path $ConfigPath)) { Write-Launcher ("ERROR: config not found: " + $ConfigPath); exit 1 }
+if (-not (Test-Path $ConfigPath)) {
+  Write-Launcher ("ERROR: config not found: " + $ConfigPath)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg (S "configErrorNotFound")
+  exit 1
+}
 try {
   $cfg = Get-Content -Raw -Encoding UTF8 -Path $ConfigPath | ConvertFrom-Json
 } catch {
-  Write-Launcher ("ERROR: could not parse " + $ConfigPath + ": " + $_.Exception.Message); exit 1
+  Write-Launcher ("ERROR: could not parse " + $ConfigPath + ": " + $_.Exception.Message)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg $_.Exception.Message
+  exit 1
+}
+if ($null -eq $cfg -or -not ($cfg.PSObject.Properties.Name -contains "lanes") -or @($cfg.lanes).Count -eq 0) {
+  Write-Launcher ("ERROR: config parsed but has no lanes: " + $ConfigPath)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg (S "configErrorNoLanes")
+  exit 1
 }
 
 $state = $null
@@ -466,22 +618,24 @@ function Invoke-OneShot {
     [string]$Model, [string]$PromptFile, [int]$TimeoutMin
   )
   $runner = Join-Path $LaneRepo "loop-runner.ps1"
-  if (-not (Test-Path $runner)) { Write-Launcher ("WARN: " + $Kind + " skipped, no runner at " + $runner); return }
-  if (-not (Test-Path $PromptFile)) { Write-Launcher ("WARN: " + $Kind + " skipped, no prompt " + $PromptFile); return }
+  if (-not (Test-Path $runner)) { Write-Launcher ("WARN: " + $Kind + " skipped, no runner at " + $runner); return "skipped" }
+  if (-not (Test-Path $PromptFile)) { Write-Launcher ("WARN: " + $Kind + " skipped, no prompt " + $PromptFile); return "skipped" }
   $tag = $LaneName + "-" + $Kind
   $argList = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $runner,
     "-Lane", $tag, "-RepoPath", $LaneRepo, "-Model", $Model,
     "-PromptFile", $PromptFile, "-MaxIterations", "1")
   if ($ClaudeCmd -ne "claude") { $argList += @("-ClaudeCmd", $ClaudeCmd) }
-  if ($WhatIf) { Write-Launcher ("[WHATIF] would run " + $Kind + " one-shot (tag=" + $tag + ", model=" + $Model + ", repo=" + $LaneRepo + ", prompt=" + $PromptFile + ")"); return }
+  if ($WhatIf) { Write-Launcher ("[WHATIF] would run " + $Kind + " one-shot (tag=" + $tag + ", model=" + $Model + ", repo=" + $LaneRepo + ", prompt=" + $PromptFile + ")"); return "whatif" }
   Write-Launcher ("running " + $Kind + " one-shot (tag=" + $tag + ", model=" + $Model + ", timeout=" + $TimeoutMin + "min)...")
   $p = Start-Process -FilePath "powershell" -ArgumentList $argList -WorkingDirectory $LaneRepo -PassThru
   if (-not $p.WaitForExit($TimeoutMin * 60 * 1000)) {
     try { $p.Kill() } catch {}
     Write-Launcher ("WARN: " + $Kind + " one-shot exceeded " + $TimeoutMin + "min; killed and continuing.")
-  } else {
-    Write-Launcher ($Kind + " one-shot finished (exit=" + $p.ExitCode + ").")
+    return "timeout"
   }
+  Write-Launcher ($Kind + " one-shot finished (exit=" + $p.ExitCode + ").")
+  if ($p.ExitCode -eq 0) { return "ok" }
+  return "nonzero"
 }
 
 # ---------------------------------------------------------------------------
@@ -602,8 +756,12 @@ if ($nearDeadline) {
 
 # ---------------------------------------------------------------------------
 # Inspection gate (critic): once per criticEveryDays. Runs BEFORE the lane loop so it never
-# overlaps the ops lane in the main tree. Best-effort; lastCriticIso is stamped immediately so
-# it does not re-fire on the same day even if it takes a while.
+# overlaps the ops lane in the main tree. lastCriticIso is PRE-stamped to now so a launcher that
+# starts concurrently (e.g. a logon near the 07:00 pass) sees not-due and does not fire a second
+# overlapping critic while this 30-min one-shot runs. But a silently FAILED critic (timeout kill /
+# non-zero exit / could-not-run) must NOT then hide behind that full-interval stamp: on failure we
+# back-date the stamp for a ~1-day retry and BLARE a note on the dashboard, so watch point #1 shows
+# the inspection system is degraded instead of the critique silently never running for a full week.
 # ---------------------------------------------------------------------------
 $criticEvery = if ($cfg.criticEveryDays) { [int]$cfg.criticEveryDays } else { 7 }
 $lastCritic = $null
@@ -616,7 +774,18 @@ if ($criticDue -and (Test-Path $criticPrompt)) {
   Write-Launcher ("critic due (last=" + ([string]$state.lastCriticIso) + ", every=" + $criticEvery + "d). Firing critic one-shot in main repo.")
   $state.lastCriticIso = $now.ToString("o")
   Save-State
-  Invoke-OneShot -Kind "critic" -LaneName "site" -LaneRepo $repoRoot -Model $criticModel -PromptFile $criticPrompt -TimeoutMin 30
+  $criticOutcome = Invoke-OneShot -Kind "critic" -LaneName "site" -LaneRepo $repoRoot -Model $criticModel -PromptFile $criticPrompt -TimeoutMin 30
+  if (-not $WhatIf -and $criticOutcome -ne "ok") {
+    $retryStamp = Resolve-CriticStamp -Outcome $criticOutcome -Now $now -CriticEveryDays $criticEvery -RetryDays 1
+    $state.lastCriticIso = $retryStamp.ToString("o")
+    Save-State
+    Add-Status (Fmt "criticFailHeader" @{ REASON = [string]$criticOutcome })
+    Add-Status ""
+    Add-Status (S "criticFailBody1")
+    Add-Status (S "criticFailBody2")
+    Add-Status ""
+    Write-Launcher ("WARN: critic one-shot degraded (" + $criticOutcome + "). Back-dated lastCriticIso for ~1-day retry; wrote dashboard note.")
+  }
 } else {
   Write-Launcher ("critic not due (last=" + ([string]$state.lastCriticIso) + ", every=" + $criticEvery + "d).")
 }

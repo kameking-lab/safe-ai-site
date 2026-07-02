@@ -97,6 +97,16 @@ function Get-BackoffSeconds([int]$ConsecutiveShortFails, [int]$IntervalSeconds) 
   return $IntervalSeconds
 }
 
+# Whether a run should self-report its deadline stop into the central docs/loop-status.md.
+# Only a PERSISTENT LANED runner qualifies: a one-shot planner/critic pass (-MaxIterations >= 1)
+# must not stamp a spurious "stopped: deadline" row, and the legacy no-lane loop has no lane row to
+# upsert. Pure function so -SelfTest can assert the gate without launching anything. (See
+# Report-DeadlineStop below for why the runner must self-report: on a genuine deadline stop there is
+# no further claude iteration to run the per-iteration report step, so the runner reports it itself.)
+function Test-ShouldReportDeadlineStop([string]$LaneTag, [int]$MaxIter) {
+  return (($LaneTag -ne "") -and ($MaxIter -le 0))
+}
+
 # Dry-run self-check of the backoff schedule. Runs BEFORE any Claude CLI / scheduler
 # dependency so it is safe to invoke on any machine: powershell -File loop-runner.ps1 -SelfTest
 if ($SelfTest) {
@@ -118,7 +128,23 @@ if ($SelfTest) {
   # Core assertion for S13-b: the schedule must reach the 30-minute (1800s) cap.
   $capReached = ((Get-BackoffSeconds 5 60) -eq 1800) -and ((Get-BackoffSeconds 99 60) -eq 1800)
   Write-Host ("[selftest] 30-min (1800s) cap reached at 5+ consecutive short fails: " + $(if ($capReached) { "YES" } else { "NO" }))
-  if ($ok -and $capReached) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
+
+  # Deadline-stop reporting gate: only a persistent laned runner self-reports its deadline stop.
+  $gateCases = @(
+    @{ lane = ""; max = 0; want = $false },     # legacy no-lane loop: no lane row -> no report
+    @{ lane = "ops"; max = 0; want = $true },   # persistent laned runner -> report the stop
+    @{ lane = "ops"; max = 1; want = $false },  # one-shot planner/critic pass -> no spurious stop
+    @{ lane = "data"; max = 5; want = $false }  # capped run -> no report
+  )
+  $gateOk = $true
+  foreach ($g in $gateCases) {
+    $got = Test-ShouldReportDeadlineStop $g.lane $g.max
+    $pass = ($got -eq $g.want)
+    if (-not $pass) { $gateOk = $false }
+    Write-Host ("[selftest] deadline-stop gate lane='" + $g.lane + "' max=" + $g.max + " -> " + $got + " (want " + $g.want + ") " + $(if ($pass) { "OK" } else { "FAIL" }))
+  }
+
+  if ($ok -and $capReached -and $gateOk) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
 }
 
 if (-not $RepoPath -or $RepoPath -eq "") { $RepoPath = (Get-Location).Path }
@@ -193,6 +219,40 @@ if (-not (Test-Path $PromptFile)) {
 
 $prompt = Get-Content -Raw -Encoding UTF8 -Path $PromptFile
 
+# Self-report a genuine deadline stop into the ONE central docs/loop-status.md via
+# loop-report-status.ps1. When UntilIso is reached the runner breaks and exits 0; historically that
+# stop was logged only to this lane's PRIVATE log, so the owner's single watch-file kept showing the
+# lane "起動" with a FROZEN heartbeat and NO reason - the exact silent normal-stop O16 exists to kill
+# (the launcher's loud stop banner only re-appears at the NEXT logon / 07:00 pass). There is no
+# further claude iteration to run the per-iteration report step, so the runner reports the stop
+# itself: a "stopped: deadline" note into the lane's own row, prompting the untilIso edit. The child
+# powershell inherits $env:SAFE_AI_LOOP_STATUS (exported by the launcher) so it routes to the central
+# file, exactly like the per-iteration reports. Non-fatal by design (never blocks shutdown).
+function Report-DeadlineStop {
+  if (-not (Test-ShouldReportDeadlineStop $laneTag $MaxIterations)) { return }
+  $reporter = Join-Path $RepoPath "loop-report-status.ps1"
+  if (-not (Test-Path $reporter)) { Write-Log ("deadline-stop report skipped: no reporter at " + $reporter); return }
+  # Japanese note lives in loop-status-strings.txt (this .ps1 stays pure ASCII); ASCII fallback if
+  # the strings file or key is missing, so the report is never blank.
+  $note = "stopped: run deadline (untilIso " + $UntilIso + ") reached; edit loop-config.json untilIso and re-run launcher to resume"
+  try {
+    $sp = Join-Path $RepoPath "loop-status-strings.txt"
+    if (Test-Path $sp) {
+      foreach ($ln in (Get-Content -Encoding UTF8 -Path $sp)) {
+        if ($ln -match '^\s*#') { continue }
+        $i = $ln.IndexOf('=')
+        if ($i -gt 0 -and $ln.Substring(0, $i) -eq 'runnerDeadlineStop') { $note = $ln.Substring($i + 1).Replace('{UNTIL}', $UntilIso); break }
+      }
+    }
+  } catch {}
+  try {
+    Write-Log ("reporting deadline stop to central status (lane=" + $laneTag + ").")
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $reporter -Lane $laneTag -Note $note 2>&1 | Tee-Object -FilePath $logFile -Append | Out-Null
+  } catch {
+    Write-Log ("WARN: deadline-stop report failed (non-fatal): " + $_.Exception.Message)
+  }
+}
+
 $iter = 0
 $consecutiveShortFails = 0
 Write-Log ("=== loop-runner start (lane=" + $(if ($laneTag -ne "") { $laneTag } else { "(default)" }) + ", interval=" + $IntervalSeconds + "s, max=" + $MaxIterations + ", until='" + $UntilIso + "', repo=" + $RepoPath + ") ===")
@@ -203,7 +263,7 @@ while ($true) {
   $iter++
   if ($MaxIterations -gt 0 -and $iter -gt $MaxIterations) { Write-Log "MaxIterations reached. Stop."; break }
   if ($UntilIso -ne "") {
-    try { if ((Get-Date) -ge [datetime]::Parse($UntilIso)) { Write-Log ("Deadline " + $UntilIso + " reached. Stop."); break } } catch {}
+    try { if ((Get-Date) -ge [datetime]::Parse($UntilIso)) { Write-Log ("Deadline " + $UntilIso + " reached. Stop."); Report-DeadlineStop; break } } catch {}
   }
 
   Write-Log ("----- iteration #" + $iter + " start -----")
@@ -237,7 +297,7 @@ while ($true) {
 
   if ($MaxIterations -gt 0 -and $iter -ge $MaxIterations) { Write-Log "MaxIterations reached. Stop."; break }
   if ($UntilIso -ne "") {
-    try { if ((Get-Date) -ge [datetime]::Parse($UntilIso)) { Write-Log ("Deadline " + $UntilIso + " reached. Stop."); break } } catch {}
+    try { if ((Get-Date) -ge [datetime]::Parse($UntilIso)) { Write-Log ("Deadline " + $UntilIso + " reached. Stop."); Report-DeadlineStop; break } } catch {}
   }
   $waitSeconds = Get-BackoffSeconds $consecutiveShortFails $IntervalSeconds
   if ($consecutiveShortFails -ge 3) {

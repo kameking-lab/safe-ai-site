@@ -276,6 +276,32 @@
 
 残: O8-c（法令エイリアス辞書＝正式名称・かな読み・別略称の展開）が P0 で続く。S6（0件時 e-Gov フォールバック＋ランキング調整）が P1。
 
+---
+
+## 2026-07-03 S6: 横断検索 0件時の e-Gov フォールバック＋収録範囲明示＋0件クエリ運用ループ（診断T4+T8）
+
+診断書 05-search-egov.md の G7短期（収録の透明性）と T8運用面。着手時、O8-c（法令エイリアス）は自班 PR #600 が CI 保留で in-flight のため、未着手最上位の次点 S6 を着手。S6 は T4（0件フォールバック）＋T8（ランキング調整＋0件クエリ運用ループ）の合成。
+
+**背景（診断の穴）**: 横断検索は curated 抄録（安衛則は実際には第677条まであるが未収載条番号あり）を検索対象にしており、0 件が「規定が存在しない」と誤読されると安全上のリスク（G7）。従来の `/search` 0件画面は汎用アドバイス＋`/law-search`・`/chatbot` リンクのみで、原文（e-Gov）への逃がしも収録範囲の断りも無かった。
+
+**実装（自領域のみ）**:
+- `lib/cross-search/egov-fallback.ts` 新設＝`EGOV_LAW_SEARCH_URL`（到達可能な e-Gov ポータルトップに固定）＋`egovHandoffQuery`（引継ぎクエリ整形）。e-Gov 新 UI は SPA でキーワードのディープリンク URL が非公開＝誤ったクエリ付き URL は幽霊リンクになり得るため（`lsg0500` は詳細ルートで検索ではない、WebFetch でも SPA シェルしか返らず検証不能）、**「常に到達可能なトップ＋検索語コピーで引継ぎ」**に固定＝幽霊リンク 0 を保証。実測でトップは HTTP200・検索ボックス有を確認。
+- `SearchResults.tsx` の `NoResults` を刷新: (1) 収録範囲明示コピー「見つからない＝規定がないではない」（未収載≠規定なし・原文は e-Gov 確認）、(2) e-Gov 外部リンク（target=_blank rel=noopener）＋検索語コピーボタン（`navigator.clipboard` ガード付き）、(3) 既存 `/law-search`・`/chatbot` 導線を min-h-[40px] タップ標的で維持。
+- 計装 `trackEvent('search_zero_result_egov', {query})` を e-Gov クリックに追加＝既存 `search_results_view{result_count}` と併せ 0 件率と e-Gov 逃がし数を計測可能に。
+- `docs/fable-diagnosis-2026-07-02/s6-zero-result-runbook.md` 新設＝週次手順（GA4 で result_count=0 抽出→同義語/エイリアス/条番号ゆらぎ/真の未収載の 4 分類トリアージ→`search-index.test.ts` の it.each へ回帰追加）。
+
+**ランキング（T8）**: 「就業制限」1位＝安衛法61条は O8-a で既達で、`search-index.test.ts` の it.each（`{query:'就業制限', rank:1}`）で既にロック済み。SEARCH_CATEGORY_PRIORITY で law 最優先のため現状維持を確認し、**再実装せず**（既存の作り直しで件数を稼がない）。
+
+**要・他班**: `/law-search`（`law-search-panel.tsx`＝UI 班所有）の 0 件画面・収録外条番号→e-Gov 条アンカー(`#Mp-At_N`)誘導は当班の領域外＝対象外と明記。
+
+回帰: `egov-fallback.test.ts`(2 it)＋`SearchResults.test.tsx`(3 it・next/navigation モックで no-hit クエリを固定→0件描画で e-Gov/収録範囲/コピー導線を検証)。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=240ファイル1994テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・web/src/data/chatbot-eval-fresh-results.json）は commit 前に `main` から復元。working tree clean。
+
+残: O8-c（PR #600 CI 待ち→次イテレーションで回収）、O18（条文参照の自動リンク）、O17（条文パーマリンク＋束ね）が続く。
+
+---
+
 ## O8-c 法令名かな読みの正略称展開（診断書 05-search-egov.md T3・比較 c）
 
 横断検索(/search・⌘K)で e-Gov も当サイトも 0 件だった**法令名かな読み**（「あんえいほう」「くれーんそく」等＝現場のうろ覚え・音声入力で頻発）を該当条文へ着地させた。着手前に本番インデックスで切り分け実測: 正式名称「労働安全衛生規則 第563条」→既に 1 位＝安衛則563条・別略称「労安衛法 61条」→既に 1 位＝安衛法61条（keyword「安衛法」への部分一致で拾える）＝**正式名称・別略称は O8-a で解決済み**。残る真の穴は**かな読み**（あんえいほう/あんえいそく/くれーんそく/ゆうきそく/とっかそく/さんけつそく/せきめんそく/ふんじんそく/じんぱいほう…が全て 0 件＝インデックスにもコンテンツにも literal で現れない）。この一次調査に基づき、水増しを避けて「読み」に絞った（e-Gov API `abbrev` 由来の別略称の辞書化は既存の部分一致で概ね解決済みのため見送り）。
@@ -287,3 +313,38 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=235ファイル1981テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・web/src/data/chatbot-eval-fresh-results.json）は commit 前に `main` から復元。O8-b(#591) 上にスタック（PR base=seo/o8b-article-query-parser）。working tree clean。
 
 残: S6（0件時 e-Gov フォールバック＋ランキング調整）が P1。O18（条文本文の参照自動リンク）が P1。
+
+---
+
+## O18 条文本文の参照自動リンク（診断書 05-search-egov.md T5・比較 h）
+
+条文カード本文に素テキストで現れる条番号参照（「第30条」「第30条第1項」「安衛則第36条」「クレーン等安全規則第23条」等＝紙のコピーと同じ死んだテキスト）を、収録済みなら当サイト深リンク `/law-search?law=<正式名称>&art=<条番号>`（内部）、収録外でも法令番号があれば e-Gov 条アンカー `https://laws.e-gov.go.jp/law/<id>#Mp-At_<N>`（外部）へ変換する純粋関数 `linkifyArticleReferences` を `lib/law-links/article-ref-linkify.ts` に新設。診断書 比較 h（参照ジャンプの完敗）の返上。
+
+領域境界: リンカーは **表示非依存のセグメント配列**（`{text}` / `{text,href,external}`）を返す lib 層の純粋関数＝発見性/内部リンクは当班領域。条文カードへの結線（`article.text` を linkify して `<a>` を描く 1 行）は law-search-panel.tsx＝ux-tools 所有のため **要・他班**とし当班は着手せず、リンカー本体と「解決率100%・幽霊リンク0」のビルド時保証テストまでを担当（loop-prompt「跨りは自領域分だけ実施し他班分は要・他班と注記」）。返り値を JSX でなくデータにしたのはこの結線を 1 行で済ませ、かつ当班側で完結させるため。
+
+法令正確性は不可侵のため「解決できない・曖昧な参照は一切リンク化しない」を設計原則にした（誤リンクは消すのでなく作らない）: (1)「令第6条」「法第43条」「同法第20条」等 直前が別法令を示す文字（令/法/則/例/同/附/別/表/章/節/款）の裸参照は参照先法令が一意に定まらないためスキップ、(2) 収録外の枝番（第○条の△）は e-Gov 条アンカーが基条（Mp-At_N）しか指せず枝番へ着地できないため e-Gov フォールバックは基条参照のみ、(3) 未知の法令名接頭も非リンク。参照先解決の唯一のソースは read-only import（捏造0）＝`allLawArticles`(curated 中核・mhlwLawArticles 補完は law 値が文書バンドル名で深リンク不可のため除外＝search-index.ts と同方針)の収録集合＋`@/data/law-metadata` の LAW_METADATA（略称→正式名称・e-Gov 法令番号 egovLawId）。名前アルタネーションは正式名称＋略称を長い順に並べ最長一致（「労働安全衛生法施行令」が「労働安全衛生法」より先に当たる）。
+
+DRY: 漢数字/全角/枝番/項の数値化は O8-b `article-query.ts` の非公開ロジック（元は /law-search の kanjiToNum 再実装）を `lib/law-links/kanji-numerals.ts`（`NUM_CLASS`/`toArabic`/`kanjiRunToArabic`）へ切り出し、article-query.ts をそこへ載せ替え（挙動不変・article-query.test.ts 11本で回帰固定）。リンカーも同じ変換を共有。
+
+完了条件充足: `article-ref-linkify.test.ts` 12本。核は**コーパス全文回帰**＝curated 全条文の text にリンカーを流し、生成された全リンクが (a) 内部なら decode した `${正式名称}|${条番号}` が収録集合に存在、(b) e-Gov なら法令番号が LAW_METADATA の既知 egovLawId かつ `Mp-At_<正整数>`、を満たすことを検証＝「生成リンクの解決率100%・幽霊リンク0」。加えて非空虚性（実生成リンク>20＝空虚に pass しない）とセグメント連結==入力（表示の欠落・重複0）を恒久固定。単体は 内部/略称接頭/漢数字/収録外e-Gov/令ブロック/同法ブロック/枝番非リンク/未知法令 を網羅。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=240ファイル2033テスト全pass / `build`=成功。UI/深リンク/カバレッジは非改変。main から分岐（O8-c #600 マージ後）。working tree clean。
+
+残: S6（0件時 e-Gov フォールバック）実装済み・PR #607 CI 待ち。O17（条文パーマリンク /laws/[law]/[art]＋束ねパネル・P2/L）が次の本丸で、O18 のリンカーを束ねパネルの参照解決へ再利用予定。
+
+---
+
+## 2026-07-03 T7 設計ドラフト（Path A）: e-Gov API v2 全文取込の設計書起票（診断 T7/G7 中期策）
+
+回収/衝突解決: CI 緑だった自班 PR #607（S6）が main 進行（O8-c #600 ほか）で CONFLICTING 化 → 当該ブランチへ origin/main を**通常マージで解決**（force-push 不可を遵守）。衝突は3点＝(a) `cross-search/index.ts`＝両者が別 export 行を追加のみ→両立ユニオン、(b) BACKLOG-seo.md 未着手＝HEAD が O8-c・main が S6 を残置＝**両方とも完了済み**のため両除去し O18/O17/e-Gov のみ残す、(c) BACKLOG/cycle-log 完了節＝S6 と O8-c の両追記を併存。tsc0・cross-search 32テスト緑・lint errors0 を確認し push（CI 再走は次イテレーションで回収）。#614（O18）は CI 進行中で今ターンはマージ不可。
+
+着手判断: 未着手最上位は S6（#607 in-flight）→O18（#614 in-flight）→O17（**L・O18 の未マージ linkifier に依存**）→e-Gov API 全文取込（**Path A・設計のみ**）。in-flight 2件と依存関係を踏まえ、**コード非改変でゼロ競合・独立マージ可能**な T7 設計ドラフトを選択（docs のみ＝#607/#614 と衝突面ゼロ）。
+
+- **成果物**: `docs/fable-diagnosis-2026-07-02/T7-egov-fulltext-ingest-design.md` 1本のみ（コード0・データ0）。診断 G7（収録カバレッジの穴＝抄録1,065条で安衛則の未収録条が「規定なし」と誤読されるリスク）の中期策を設計に落とした。短期止血（0件フォールバック）は S6 で実装済みのため、本書はカバレッジ穴そのものの中期埋め。
+- **設計の核（既存資産の拡張＝新規基盤ではない）**: `scripts/etl/egov-revisions-fetch.ts`（e-Gov API v2 ETL・認証不要・政府標準利用規約2.0・実在検証済み lawId×20・diff-only・skip-on-missing の作法）／`egov-caption-snapshot.ts`＋`article-caption-integrity.test.ts`（チェックイン済みスナップショット＋整合テストの先例）／`LAW_METADATA.egovLawId`／`LawArticle` 型／`allLawArticles` 集約／`scripts/law-data-import/README.md`（取得手順既記）を土台に再利用する方針を明記。
+- **方式の要点**: (1) 「ビルド時に外部API」ではなく**オフライン取得→git チェックイン→静的 import**（CI/デプロイ再現性・main 常時デプロイ可能の担保）、(2) **新規 env 不要**（API キー無し）、(3) 段階投入（安衛法/令/則→主要特別則→その他）、(4) **バンドル肥大対策＝検索インデックスと本文の分離・遅延ロード・PWA プリキャッシュ見直し**（診断 G8 の宿題＝SEO/ux-tools/PWA 班の横断合意要）、(5) 原文サンプル照合・削除条ガード・出典必須のテスト設計。
+- **Path A 境界の明示（§8/§10）**: 外部API本番取込みの是非・データ所有（`web/src/data/laws/**` は data 班領域）・取得頻度（単発 or Vercel Cron）は**オーナー/他班判断**。SEO班は「全文が入った後の検索インデックス統合＋カバレッジ透明性」に限る。本イテレーションでは取得スクリプト・データ・`search-index.ts`・`sw.js` を一切書かない＝設計ドキュメント1本が成果物。
+
+ゲート: **コード変更0**（docs＋BACKLOG＋本ログのみ）につき tsc/lint/vitest/build は本質的に非改変で全緑維持。working tree clean。
+
+残: #607（S6）・#614（O18）の CI 緑回収＆マージ。次の未着手は O17（条文パーマリンク＋束ねパネル・O18 の linkifier マージ後に着手）。T7 は**オーナー GO 待ち**（承認後 P2 実装は data 班/オーナー主導）。

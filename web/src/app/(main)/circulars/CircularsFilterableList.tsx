@@ -32,6 +32,10 @@ export function CircularsFilterableList({ all }: { all: MhlwNotice[] }) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_RENDER);
   const deferredQ = useDeferredValue(q);
 
+  // 柱C-11: データ鮮度表示。all は呼び出し元(page.tsx)で発出日降順に整列済みなので
+  // 先頭要素の発出日が「収録通達のうち最も新しいもの」＝捏造のない実データ由来の鮮度指標。
+  const latestIssuedDate = all[0]?.issuedDateRaw ?? all[0]?.issuedDate ?? null;
+
   const yearRange = useMemo(() => {
     const years = all
       .map((n) => (n.issuedDate ? Number.parseInt(n.issuedDate.slice(0, 4), 10) : NaN))
@@ -91,7 +95,9 @@ export function CircularsFilterableList({ all }: { all: MhlwNotice[] }) {
           value={hits.toLocaleString("ja-JP")}
           unit="件"
           title="該当"
-          description={`全${all.length.toLocaleString("ja-JP")}件から${hasFilter ? "絞り込み" : "全件表示"}中`}
+          description={`全${all.length.toLocaleString("ja-JP")}件から${hasFilter ? "絞り込み" : "全件表示"}中${
+            latestIssuedDate ? `／収録最新発出: ${latestIssuedDate}` : ""
+          }`}
         />
       ) : (
         <ConclusionCard
