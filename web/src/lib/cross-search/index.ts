@@ -6,3 +6,4 @@ export type { CrossSearchCategory, CrossSearchItem } from './types';
 export { CROSS_SEARCH_CATEGORY_LABEL } from './types';
 export { buildCrossSearchIndex, __resetCrossSearchIndexCache } from './build';
 export { searchCrossIndex, type CrossSearchOptions, type ScorableItem } from './score';
+export { normalizeArticleQuery } from './article-query';

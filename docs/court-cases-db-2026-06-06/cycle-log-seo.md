@@ -261,3 +261,17 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ）/ `vitest run`=232ファイル1940テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・chatbot-eval-fresh-results.json）は復元。working tree clean。
 
 残: O8-b（条番号クエリパーサ）・O8-c（法令エイリアス辞書）が P0 で続く。
+
+---
+
+## 2026-07-03 O8-b 条番号クエリパーサ（法令名＋条番号の複合）＝診断T2（#591）
+
+前サイクルの O8-a（#586）を CI 緑確認のうえ squash マージ → `main` を ff-only 同期。前サイクルで宙吊りにしていた WIP ブランチ `seo/o8b-article-number-parser` は、当時の古い `main` から派生していたため他班の既マージ作業（jma データ・loop スクリプト・chemical-db・BACKLOG-data 等）を丸ごと reverting する差分を巻き込んでおり再利用は危険と判断。最新 `main` から新ブランチ `seo/o8b-article-query-parser` を切り、WIP から O8-b 該当の 5 ファイルのみ（`cross-search/article-query.ts`＋test・`cross-search/index.ts` の export・`search-index.ts` の配線・`search-index.test.ts` の T2）を救出して起点にした。O8-a の squash マージ内容が WIP の O8-a ベースと byte 一致することは `git diff main..WIP -- search-index.ts` が O8-b 差分のみを示すことで確認済み。
+
+作業: `lib/cross-search/article-query.ts` に純粋関数 `normalizeArticleQuery` を新設し、`searchItems` の `searchCrossIndex` 委譲の直前に前処理として配線。横断検索(/search・⌘K)の生クエリに含まれる「法令名＋条番号」の地続き表現（e-Gov でも 0 件になる診断書 比較 a,b）を、curated 条文インデックスのタイトル/keywords へ合流できる正規形へ書き換える。(1) 地続き「安衛法61条」→「安衛法 第61条」（cross-search の AND エンジンは空白区切り各語で扱うため分解が必須）、(2) 漢数字「第六十一条」→「第61条」（/law-search の `kanjiToNum` と同一ロジックを当班 lib へ再実装＝コンポーネント内非公開関数で import 不可）、(3) 全角数字「６１条」半角化・枝番「61-2条」「第10条-3」→「第61条の2」「第10条の3」。誤変換防止として全分岐で末尾「条」を必須にし、裸の数字・日付範囲「2024-2026」・「第一種」「三大災害」を素通し＝O8-a の 2 語 AND 検索（石綿 事前調査/クレーン 過負荷）を一切壊さない。
+
+完了条件充足（本番インデックス回帰 `search-index.test.ts` T2）: 「安衛法61条」「安衛法 88条」「安衛則563条」「第六十一条」がいずれも 1 位に該当条文（category=law・`/law-search?law=&art=` 深リンク）。回帰: 単体 `article-query.test.ts` 11本＋統合 T2 4本。UI(SearchResults/CommandPalette)・深リンク・カバレッジは API 不変で無改修。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=234ファイル1964テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・web/src/data/chatbot-eval-fresh-results.json）は commit 前に `main` から復元。working tree clean。
+
+残: O8-c（法令エイリアス辞書＝正式名称・かな読み・別略称の展開）が P0 で続く。S6（0件時 e-Gov フォールバック＋ランキング調整）が P1。
