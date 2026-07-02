@@ -240,3 +240,24 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ）/ `vitest run`=219ファイル1828テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・chatbot-eval-fresh-results.json）は復元。working tree clean。PR #556。
 
 残: #552・#553 の CI 緑回収＆マージ → BACKLOG 未着手 0 件のため次は「補充の指針」（site-critique 01-seo-technical / 05-lighthouse の自領域項目）から補充。
+
+## 2026-07-02 O8-a（P0・診断T1）: /search・⌘K を死蔵 cross-search エンジンへ載せ替え
+
+診断書 05-search-egov.md が指摘した「一番賢い実装が完全死蔵」＝`lib/cross-search/`（空白AND＋シノニム展開＋keywords重み＋カテゴリ優先タイブレーク、6月実装＆テスト済みだがどこからも import されず）を、本番の /search・⌘K へ配線した。旧 `searchItems` はクエリ全体を 1 つの部分文字列として扱うため 2 語クエリが全滅（今日の敗因の大半）していた。
+
+- `cross-search/score.ts`: `searchCrossIndex` を `ScorableItem`（keywords 任意）でジェネリック化し、`CrossSearchItem` 専用から汎用スコアラへ。`categoryPriority` オプションを追加（未指定は従来の cross 標準＝cross-search.test.ts は不変で緑）。WeakMap キャッシュ・variantScore/termScore もジェネリック対応。
+- `search-index.ts`: `SearchItem` に任意 `keywords` を追加。build 各カテゴリへ keyword を供給（law=条文keywords+articleTitle+法令名+略称+条番号 / precedent=field+issues+court / accident=workCategory+type+severity+industry_detail / chemical=cas+name_en / notice=docType+番号+category+issuer / glossary=reading）。`searchItems` を `searchCrossIndex` へ委譲し、law/education を上位に寄せる `SEARCH_CATEGORY_PRIORITY` を渡す。`normalizeSearchText` 直接依存を撤去（エンジン内で正規化）。
+- **不可侵の非改変**: 深リンク（/circulars/<id>・/accidents/<id>・/law-search?law=&art=）・カバレッジ・glossary 収載は一切触らず維持。UI（SearchResults.tsx / CommandPalette.tsx）は公開 API 不変のため無改修。
+
+本番インデックス実測（buildSearchIndex 経由）:
+- 「石綿 事前調査」→ 1位 石綿則 第3条（事前調査及び分析調査）
+- 「クレーン 過負荷」→ 1位 クレーン則 第23条（過負荷の制限）
+- 「足場 作業床」→ 1位 安衛則 第518条（作業床の設置等）、第563条（足場における作業床）も3位以内
+- ボーナス「就業制限」→ 1位 安衛法 第61条（診断 T8 の意図も同エンジンで充足）
+- 応答は全クエリ <25ms（完了条件 200ms を大きく下回る）
+
+回帰: search-index.test.ts に AND/keywords/シノニム単体3本＋本番2語クエリ収束4本（it.each で石綿・クレーン・足場・就業制限）を追加。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ）/ `vitest run`=232ファイル1940テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・chatbot-eval-fresh-results.json）は復元。working tree clean。
+
+残: O8-b（条番号クエリパーサ）・O8-c（法令エイリアス辞書）が P0 で続く。
