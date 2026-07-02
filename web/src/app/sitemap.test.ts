@@ -72,6 +72,51 @@ describe("sitemap.xml（柱C-3-3 欠落ページ追加）", () => {
 });
 
 /**
+ * 柱C-3-3 追補2 回帰テスト: 孤立していた実在 indexable ページの追加を固定。
+ * - /accident-news（重大災害事例ブラウザ・死亡災害DB類型検索・自己canonical・revalidate）
+ * - /heat-illness-prevention/{acclimatization,log,poster}
+ *   （令和7年6月改正安衛則対応の実在ツールページ・自己canonical・PageJsonLd付）
+ * これらは page.tsx として実在し indexable だが、いずれの sitemap にも含まれていなかった。
+ * あわせて「収載してはいけない」境界（redirect スタブ / リリース前デモ / 印刷専用）を
+ * 明示的にロックし、機械的な全ページ追加＝誤収載の再発を防ぐ。
+ */
+describe("sitemap.xml（柱C-3-3 追補2: 追加した孤立ページと非収載境界）", () => {
+  const entries = sitemap();
+  const urls = entries.map((e) => e.url);
+  const urlSet = new Set(urls);
+  const has = (path: string) => urlSet.has(`${BASE}${path}`);
+  const entryFor = (path: string) => entries.find((e) => e.url === `${BASE}${path}`);
+
+  it("重大災害事例ブラウザ /accident-news を収載する", () => {
+    expect(has("/accident-news")).toBe(true);
+  });
+
+  it("熱中症対策ハブの実在サブページ3本を収載する", () => {
+    expect(has("/heat-illness-prevention/acclimatization")).toBe(true);
+    expect(has("/heat-illness-prevention/log")).toBe(true);
+    expect(has("/heat-illness-prevention/poster")).toBe(true);
+  });
+
+  it("/accident-news の lastmod が死亡災害DBの更新日（/accidents と同一）に追従する", () => {
+    const accidentNews = entryFor("/accident-news");
+    const accidents = entryFor("/accidents");
+    expect(accidentNews?.lastModified).toBeDefined();
+    // 死亡災害DB由来のため /accidents と同一の accidentsDataUpdated を共有する
+    expect(accidentNews?.lastModified).toBe(accidents?.lastModified);
+  });
+
+  it("非収載境界: redirect スタブ・リリース前デモ・印刷専用は収載しない", () => {
+    // /about/cases → /about、/quick-start → /quick の redirect() スタブ（実体URLでない）
+    expect(has("/about/cases")).toBe(false);
+    expect(has("/quick-start")).toBe(false);
+    // /organization は「正式リリース前のデモ版」モック
+    expect(has("/organization")).toBe(false);
+    // 印刷専用ユーティリティ
+    expect(has("/accident-news/print")).toBe(false);
+  });
+});
+
+/**
  * A-3 回帰テスト: サイトマップの役割分担。個別の通達/保護具/記事ページは専用の
  * 子サイトマップ（sitemap-circulars/-equipment/-articles.xml）が正本として出力するため、
  * 本体 sitemap.xml には直書きしない（同一URLの二重掲載＝役割崩壊を防止）。
