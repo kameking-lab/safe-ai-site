@@ -7,6 +7,7 @@ import {
   suggestDigDeeperLinks,
   detectOutOfScopeLawReferences,
   detectUngroundedAssertions,
+  sanitizePlaceholderCitations,
 } from "@/lib/chatbot-enrichment";
 
 const article: LawArticle = {
@@ -118,6 +119,39 @@ describe("detectOutOfScopeLawReferences", () => {
       ["安衛法"]
     );
     expect(result).toEqual([]);
+  });
+});
+
+describe("sanitizePlaceholderCitations", () => {
+  it("strips the literal YYYY年MM月 enactment placeholder but keeps the issuer", () => {
+    const result = sanitizePlaceholderCitations(
+      "クレーン則第22条（施行：YYYY年MM月、所管：厚生労働省）により5トン以上は免許が必要です。"
+    );
+    expect(result).not.toContain("YYYY");
+    expect(result).toContain("クレーン則第22条");
+    expect(result).toContain("所管：厚生労働省");
+  });
+
+  it("removes the whole parenthetical when nothing but the placeholder remains", () => {
+    const result = sanitizePlaceholderCitations("安衛則第518条（施行：YYYY年MM月）が根拠です。");
+    expect(result).not.toContain("YYYY");
+    expect(result).not.toMatch(/（\s*）/);
+    expect(result).toContain("安衛則第518条");
+  });
+
+  it("removes an unfilled 第XX条 placeholder parenthetical", () => {
+    const result = sanitizePlaceholderCitations("根拠は○○則第XX条（施行：2020年4月）です。");
+    expect(result).not.toContain("第XX条");
+  });
+
+  it("leaves answers with real dates and article numbers untouched", () => {
+    const original = "安衛則第612条の2（施行：2023年4月、所管：厚生労働省）に基づきます。";
+    expect(sanitizePlaceholderCitations(original)).toBe(original);
+  });
+
+  it("is a no-op on text with no placeholder tokens", () => {
+    const original = "特に問題のない通常の回答テキストです。";
+    expect(sanitizePlaceholderCitations(original)).toBe(original);
   });
 });
 

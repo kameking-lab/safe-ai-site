@@ -401,6 +401,28 @@ export function detectOutOfScopeLawReferences(
   return [...found];
 }
 
+// SYSTEM_PROMPT の引用フォーマット例「（施行：YYYY年MM月、所管：厚生労働省）」を
+// Geminiがテンプレートのまま出力してしまう事故（本番実測で1問中3箇所）を防ぐ後処理。
+const PLACEHOLDER_ENACTMENT_RE = /施行[：:]\s*YYYY年(?:MM月)?(?:DD日)?[、，]?\s*/g;
+const PLACEHOLDER_ARTICLE_RE = /第XX条/g;
+const PLACEHOLDER_TOKEN_RE = /YYYY|第XX条/;
+const PLACEHOLDER_PAREN_RE = /[（(][^（）()]*YYYY[^（）()]*[）)]/g;
+
+/**
+ * 応答中に残った「YYYY年MM月」「第XX条」等の未置換プレースホルダを除去する。
+ * まず日付句のみを狙い撃ちで除去（所管等の実データは残す）、それでも
+ * トークンが残る場合は該当する丸括弧ごと除去するフォールバックを適用する。
+ */
+export function sanitizePlaceholderCitations(answer: string): string {
+  if (!answer || !PLACEHOLDER_TOKEN_RE.test(answer)) return answer;
+  let sanitized = answer.replace(PLACEHOLDER_ENACTMENT_RE, "");
+  sanitized = sanitized.replace(PLACEHOLDER_PAREN_RE, "");
+  sanitized = sanitized.replace(PLACEHOLDER_ARTICLE_RE, "");
+  // 除去後に空になった丸括弧を整理
+  sanitized = sanitized.replace(/[（(]\s*[）)]/g, "");
+  return sanitized;
+}
+
 /**
  * Geminiが出力した可能性のある不確実表現（断定なし・推測表現）を
  * 注記とともに残すための検出ヘルパー。
