@@ -92,16 +92,16 @@ export function SignageSiteSafety({ data }: { data: SignageSiteSafetyData | null
       className={`flex min-h-0 shrink-0 flex-col overflow-hidden rounded-xl border bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:max-h-[30vh] ${frameClass}`}
     >
       <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-        <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">
+        <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base xl:text-xl">
           現場の安全状態
         </h2>
         {data.overdueCount > 0 && (
-          <span className="rounded-full bg-rose-600 px-2 py-0.5 text-[9px] font-bold text-white sm:text-[10px] xl:px-2.5 xl:text-sm">
+          <span className="rounded-full bg-rose-600 px-2 py-0.5 text-[9px] font-bold text-white sm:text-[10px] xl:px-2.5 xl:text-base">
             期限超過 {data.overdueCount}件
           </span>
         )}
         {data.alertCount > 0 && (
-          <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[9px] font-bold text-amber-950 sm:text-[10px] xl:px-2.5 xl:text-sm">
+          <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[9px] font-bold text-amber-950 sm:text-[10px] xl:px-2.5 xl:text-base">
             要対応 {data.alertCount}件
           </span>
         )}
@@ -109,14 +109,14 @@ export function SignageSiteSafety({ data }: { data: SignageSiteSafetyData | null
           href="/site-records"
           target="_blank"
           rel="noreferrer"
-          className="ml-auto rounded-lg border border-emerald-600/60 px-2 py-1 text-[9px] font-semibold text-emerald-300 hover:bg-emerald-950/50 sm:text-[10px]"
+          className="ml-auto rounded-lg border border-emerald-600/60 px-2 py-1 text-[9px] font-semibold text-emerald-300 hover:bg-emerald-950/50 sm:text-[10px] xl:text-sm"
         >
           記録キット →
         </a>
       </div>
 
       {allClear ? (
-        <p className="mt-1.5 rounded-lg border border-emerald-600/40 bg-emerald-950/50 px-2 py-1.5 text-[10px] font-semibold text-emerald-200 sm:text-xs">
+        <p className="mt-1.5 rounded-lg border border-emerald-600/40 bg-emerald-950/50 px-2 py-1.5 text-[10px] font-semibold text-emerald-200 sm:text-xs xl:text-lg">
           ✓ 未是正の指摘・要対策ヒヤリ・使用不可機械はありません
         </p>
       ) : (
@@ -132,19 +132,19 @@ export function SignageSiteSafety({ data }: { data: SignageSiteSafetyData | null
             >
               <div className="flex items-start gap-1.5">
                 <span
-                  className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[8px] font-bold sm:text-[9px] ${
+                  className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[8px] font-bold sm:text-[9px] xl:text-sm ${
                     a.severity === "overdue" ? "bg-rose-600 text-white" : "bg-amber-500 text-amber-950"
                   }`}
                 >
                   {a.sourceLabel}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[10px] font-semibold leading-snug text-slate-50 sm:text-xs lg:text-sm">
+                  <p className="text-[10px] font-semibold leading-snug text-slate-50 sm:text-xs lg:text-sm xl:text-lg">
                     {a.hazardHigh && <span aria-hidden="true">⚠ </span>}
                     {a.title}
                   </p>
                   {(a.detail || a.due) && (
-                    <p className="mt-0.5 text-[9px] leading-snug text-slate-300 sm:text-[10px]">
+                    <p className="mt-0.5 text-[9px] leading-snug text-slate-300 sm:text-[10px] xl:text-sm">
                       {a.detail}
                       {a.due && (
                         <span
@@ -162,7 +162,7 @@ export function SignageSiteSafety({ data }: { data: SignageSiteSafetyData | null
             </li>
           ))}
           {hiddenCount > 0 && (
-            <li className="text-[9px] font-semibold text-slate-400 sm:text-[10px]">
+            <li className="text-[9px] font-semibold text-slate-400 sm:text-[10px] xl:text-sm">
               {/* 非対話の常時掲示では隠れた項目は存在しないのと同じ。種別だけでも声に出せるようにする */}
               ほか {hiddenCount} 件（{hiddenSourceLabels}） — 記録キットで確認してください
             </li>
@@ -170,7 +170,7 @@ export function SignageSiteSafety({ data }: { data: SignageSiteSafetyData | null
         </ul>
       )}
 
-      <p className="mt-1 shrink-0 text-[8px] text-slate-500 sm:text-[9px]">
+      <p className="mt-1 shrink-0 text-[8px] text-slate-500 sm:text-[9px] xl:text-sm">
         この端末に保存された記録（パトロール・ヒヤリ・点検・委員会）から自動集計。別タブでの保存も即時反映。
       </p>
     </section>
