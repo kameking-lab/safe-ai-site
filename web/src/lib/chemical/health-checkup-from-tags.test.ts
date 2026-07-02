@@ -26,8 +26,25 @@ describe("healthCheckupsFromTags", () => {
   });
 
   it("複数の特化則タグは1件に重複排除", () => {
-    const r = healthCheckupsFromTags(["tokutei-1", "tokutei-2", "tokutei-3"]);
+    const r = healthCheckupsFromTags(["tokutei-1", "tokutei-2"]);
     expect(r).toHaveLength(1);
+  });
+
+  it("第三類（tokutei-3）は特化則健診の対象外（令22条1項3号は第1号・第2号のみ）", () => {
+    expect(healthCheckupsFromTags(["tokutei-3"])).toEqual([]);
+    // 硫酸(7664-93-9)等の第三類物質のページに健診が出ないこと
+    expect(healthCheckupsFromTags(["tokutei-3"], "7664-93-9")).toEqual([]);
+  });
+
+  it("エチレンオキシド・ホルムアルデヒドは第二類だが令22条括弧書きで健診対象外", () => {
+    expect(healthCheckupsFromTags(["tokutei-2"], "75-21-8")).toEqual([]);
+    expect(healthCheckupsFromTags(["tokutei-2"], "50-00-0")).toEqual([]);
+    // 通常の第二類（ベンゼン）は対象のまま
+    expect(healthCheckupsFromTags(["tokutei-2"], "71-43-2")).toHaveLength(1);
+  });
+
+  it("有機則第三種（yuki-3）はタンク等内部業務に限るため物質単位では導出しない", () => {
+    expect(healthCheckupsFromTags(["yuki-3"], "8006-61-9")).toEqual([]);
   });
 
   it("健診に無関係なタグ（nite/prtr1）は健診を生成しない", () => {
