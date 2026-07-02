@@ -18,3 +18,13 @@ BACKLOG-ops O16-a/b/c を1PRで実装。運転計画(11-operation-plan.md)手順
 - **設計逸脱2点**（理由は O16-implementation-notes.md）: (1)可変状態 lastCriticIso は追跡config でなく gitignore の loop-state.json へ（opsレーンのclean-tree契約維持）。(2)loop-status.md は各レーン書込みでなく launcher単独生成＋gitignore（クロスクローン衝突回避、S13-aを概ね置換）。
 - **検証**: PSParser構文チェック緑、`-WhatIf` スタブ試走（本物のclaude不使用）で config parse→期限判定→critic/plannerゲート→6レーン起動計画→status生成を確認。期限切れconfigで停止バナー分岐も確認。
 - 次: 手順③（常設レーン点火）＝ launcher 実起動で data/seo/ops=Opus・ux系3本=Sonnet5 を立ち上げ。手順②(Fableデイリー)は社長の手動運用。
+
+## 2026-07-03 O17: 自動復活の管理者不要化（Startup フォルダ経由・admin待ちゼロ）
+
+BACKLOG-ops 未着手の最上位は「掃除系一括」だが web/src を触る掃除で他レーン全6本が稼働中（loop-status.md 実測=全レーン起動）のため契約通りスキップ。運用4系統の欠陥から補充＝**点火系の最大欠陥「PC再起動後の自動復活が admin 待ちで数週間未有効」**を着手。
+
+- **実測で前提を検証**: 現行スケジューラ タスク `safe-ai-loop-runner` は RunLevel=**Limited**/LogonType=Interactive/UserId=kanet（＝非elevated）だが action は旧 `loop-runner.ps1 -UntilIso "2026-06-12T08:00:00"`（3週間前に失効した焼込み期限＝O16が殺すはずの失敗が現存）。launcher の -Register 拒否メッセージの理由「既存タスクがelevatedだから更新に admin 必要」は**虚偽**。ただし非admin での Register-ScheduledTask を Limited/Interactive タスクで実プローブ→**Access Denied**＝この環境ではタスク登録自体に admin が要る（＝「残1手動 admin」は不可避）ことを確定。
+- **admin不要の本線を新設**: `loop-launcher.ps1 -InstallUserStartup`＝現ユーザー Startup フォルダ（`[Environment]::GetFolderPath('Startup')`・既に note-worker-startup.cmd の先例あり・書込み可を実測）に `safe-ai-loop-launcher.cmd`（`powershell -WindowStyle Hidden -File <launcher>`）を配置。Task Scheduler も admin も不要で PC再起動→ログオン時に launcher が起動し全レーン冪等復活。冪等・-WhatIf対応・post-verify（ファイル存在＋launcherパス参照を確認、無ければ throw）。
+- **status の警告を2分岐**: 復活経路（admin の scheduler / admin不要の startup）が**両方無い時だけ大声バナー**（-InstallUserStartup を案内）、**startup済みなら静かなINFO**（再起動復活はOK・-Register は毎日07:00点検の任意上乗せ）。`Get-StartupResurrectionHealth` 追加。-Register 拒否メッセージも正確化し admin不要の -InstallUserStartup を第一推奨に。
+- **検証**: PSParser 構文緑／`-InstallUserStartup -WhatIf`（書込みゼロ・would 表示）→実インストール（post-verify PASS・cmd 実配置確認）→ launcher 通常 `-WhatIf` で banner が「startup済み=静かなINFO・scheduler=stale」へ分岐することを dryrun status で実測。web/src 不触＝tsc/lint/build 対象外。
+- **効果**: 「残1手動＝管理者で -Register を1回」の admin 依存を解消。Startup エントリ実配置済みのため、次回ログオン以降は admin 操作ゼロで自動復活が効く（毎日07:00の定期点検だけは任意で admin -Register を上乗せ可能）。
