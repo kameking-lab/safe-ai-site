@@ -235,6 +235,22 @@ describe("legalDocumentSchema", () => {
     expect(full.datePublished).toBe("2026-01-01");
     expect(full.author).toMatchObject({ "@type": "Organization", name: "厚生労働省" });
   });
+
+  it("監修者（労働安全衛生コンサルタント）をcontributorとして常に出力する", () => {
+    const schema = legalDocumentSchema({
+      url: `${SITE_URL}/circulars/3`,
+      title: "通達3",
+      noticeNumber: null,
+      issuer: null,
+      issuedDate: null,
+      description: "説明",
+    });
+    expect(schema.contributor).toMatchObject({
+      "@type": "Person",
+      name: "労働安全衛生コンサルタント（登録番号260022）",
+      url: `${SITE_URL}/about`,
+    });
+  });
 });
 
 describe("webPageSchema", () => {

@@ -6,6 +6,7 @@ import { JsonLd, legalDocumentSchema, breadcrumbSchema } from "@/components/json
 import { RelatedContent, type RelatedContentGroup } from "@/components/RelatedContent";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { ArticleFeedback } from "@/components/ArticleFeedback";
+import { SupervisorByline } from "@/components/SupervisorByline";
 import { mhlwNotices, type MhlwNotice } from "@/data/mhlw-notices";
 import { getAccidentCasesDataset } from "@/data/mock/accident-cases";
 import { safetyGoodsItems, safetyGoodsCategories } from "@/data/mock/safety-goods";
@@ -211,6 +212,12 @@ export default async function CircularDetailPage({
           <div>
             <dt className="inline font-bold text-slate-700">カテゴリ: </dt>
             <dd className="inline">{notice.category}</dd>
+          </div>
+          <div>
+            <dt className="inline font-bold text-slate-700">監修者: </dt>
+            <dd className="inline">
+              <SupervisorByline />
+            </dd>
           </div>
         </dl>
       </header>
