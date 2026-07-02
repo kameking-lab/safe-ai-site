@@ -72,8 +72,12 @@ export function useZoomPan(options?: UseZoomPanOptions): ZoomPanApi {
 
   const viewportElRef = useRef<HTMLDivElement | null>(null);
   const contentElRef = useRef<HTMLDivElement | null>(null);
+  // 安定 useCallback（onPointerDown 等）から最新 transform を読むためのミラー。
+  // render 中に書くと react-hooks/refs に触れるため、確定後（effect）に同期する。
   const transformRef = useRef(transform);
-  transformRef.current = transform;
+  useEffect(() => {
+    transformRef.current = transform;
+  }, [transform]);
   const viewportSizeRef = useRef<Size>({ width: 1, height: 1 });
   const contentSizeRef = useRef<Size>({ width: 1, height: 1 });
   const readyRef = useRef(false);
@@ -83,7 +87,9 @@ export function useZoomPan(options?: UseZoomPanOptions): ZoomPanApi {
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const pinchStartRef = useRef<{ distance: number; scale: number } | null>(null);
   const boundsRef = useRef({ minScale: opts.minScale, maxScale: opts.maxScale });
-  boundsRef.current = { minScale: opts.minScale, maxScale: opts.maxScale };
+  useEffect(() => {
+    boundsRef.current = { minScale: opts.minScale, maxScale: opts.maxScale };
+  }, [opts.minScale, opts.maxScale]);
 
   const doFit = useCallback(() => {
     const t = fitTransform(viewportSizeRef.current, contentSizeRef.current, {
@@ -111,8 +117,9 @@ export function useZoomPan(options?: UseZoomPanOptions): ZoomPanApi {
     const vp = vpEl;
     const content = contentEl;
     if (!vp || !content) return;
+    // 実寸確定まで未フィット扱い（初期 ready は useState(false)。visibility の
+    // 反映は下の setReady(true) が担う＝effect 直下での setState は行わない）。
     readyRef.current = false;
-    setReady(false);
     const ro = new ResizeObserver(() => {
       measure();
       if (!readyRef.current) {

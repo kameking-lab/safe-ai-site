@@ -23,27 +23,31 @@ export function PaperStage({
   heightClassName?: string;
   label?: string;
 }) {
-  const zp = useZoomPan({ minScale: 0.15, maxScale: 2.5, fitPadding: 12 });
-  const pct = Math.round(zp.transform.scale * 100);
+  const { setViewportEl, setContentEl, transform, ready, zoomIn, zoomOut, fit, setScale, handlers } = useZoomPan({
+    minScale: 0.15,
+    maxScale: 2.5,
+    fitPadding: 12,
+  });
+  const pct = Math.round(transform.scale * 100);
 
   return (
     <div className={`relative w-full overflow-hidden bg-slate-200 ${heightClassName}`}>
       <div
-        ref={zp.viewportRef}
+        ref={setViewportEl}
         role="application"
         aria-label={label}
         data-testid="paper-stage-viewport"
         className="absolute inset-0 cursor-grab touch-none select-none active:cursor-grabbing"
-        {...zp.handlers}
+        {...handlers}
       >
         <div
-          ref={zp.contentRef}
+          ref={setContentEl}
           data-testid="paper-stage-content"
           className="absolute left-0 top-0 shadow-xl"
           style={{
-            transform: `translate(${zp.transform.x}px, ${zp.transform.y}px) scale(${zp.transform.scale})`,
+            transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
             transformOrigin: "0 0",
-            visibility: zp.ready ? "visible" : "hidden",
+            visibility: ready ? "visible" : "hidden",
             // KyPrintSheet は width:186mm（≒703px）。max-width:100% がビューポート幅に
             // 巻き込まれて縮まないよう、実寸で固定してから transform で見た目を変える。
             width: "max-content",
@@ -58,7 +62,7 @@ export function PaperStage({
         <button
           type="button"
           aria-label="縮小"
-          onClick={zp.zoomOut}
+          onClick={zoomOut}
           className="min-h-[44px] min-w-[44px] rounded-full text-lg font-bold text-slate-700 hover:bg-slate-100"
         >
           －
@@ -67,7 +71,7 @@ export function PaperStage({
           type="button"
           aria-label="等倍にする"
           data-testid="paper-stage-scale"
-          onClick={() => zp.setScale(1)}
+          onClick={() => setScale(1)}
           className="min-h-[44px] min-w-[3.5rem] rounded-full px-1 text-xs font-semibold text-slate-600 hover:bg-slate-100"
         >
           {pct}%
@@ -75,7 +79,7 @@ export function PaperStage({
         <button
           type="button"
           aria-label="拡大"
-          onClick={zp.zoomIn}
+          onClick={zoomIn}
           className="min-h-[44px] min-w-[44px] rounded-full text-lg font-bold text-slate-700 hover:bg-slate-100"
         >
           ＋
@@ -83,7 +87,7 @@ export function PaperStage({
         <button
           type="button"
           aria-label="全体を表示"
-          onClick={zp.fit}
+          onClick={fit}
           className="min-h-[44px] rounded-full px-3 text-xs font-bold text-sky-700 hover:bg-sky-50"
         >
           ⛶ 全体

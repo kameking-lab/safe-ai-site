@@ -184,14 +184,9 @@ export function FieldEditorSheet({
           </div>
         )}
 
+        {/* 閉じるは右上×・背面タップ・Escape で担う（フッターは前進操作のみ＝
+            同名「閉じる」ボタンの重複と読み上げの二重を避ける）。 */}
         <div className="mt-4 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="min-h-[44px] rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-          >
-            閉じる
-          </button>
           {def.next ? (
             <button
               type="button"

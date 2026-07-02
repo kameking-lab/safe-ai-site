@@ -27,8 +27,13 @@ async function expectPaperFullyVisible(page: Page) {
   expect(box!.y).toBeGreaterThanOrEqual(-1);
   expect(box!.x + box!.width).toBeLessThanOrEqual(viewport!.width + 1);
   expect(box!.y + box!.height).toBeLessThanOrEqual(viewport!.height + 1);
-  // 「見えている」だけでなく読み取り可能な大きさで表示されている（豆粒でない）
-  expect(box!.height).toBeGreaterThan(viewport!.height * 0.4);
+  // 「見えている」だけでなく大きく（豆粒でなく）表示されている。縦A4の用紙は
+  // PC（横長）では高さ支配・スマホ（縦長）では幅支配でフィットするため、支配軸の
+  // どちらかが画面の大半を占めていることを要件とする（縦の高さ%固定は横フィット時に
+  // 不当に厳しく、実測で用紙は幅の94%を占めていた）。
+  const fillsWidth = box!.width >= viewport!.width * 0.6;
+  const fillsHeight = box!.height >= viewport!.height * 0.4;
+  expect(fillsWidth || fillsHeight).toBe(true);
 }
 
 test.describe("KY用紙キャンバスβ（F1 方式確立）", () => {

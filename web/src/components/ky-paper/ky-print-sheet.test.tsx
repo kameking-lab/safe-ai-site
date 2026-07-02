@@ -40,10 +40,16 @@ describe("KyPrintSheet (A4印刷レイアウト)", () => {
 });
 
 describe("F1: editing prop（印刷不可侵とタップ標的）", () => {
+  // 印刷不可侵スナップショットは決定論でなければならない。作業日を明示固定しないと
+  // normalize が既定で new Date()（今日）を埋め、実行日ごとにスナップショットが
+  // 揺れて偽陽性で落ちる（この不具合を修理）。日付は固定センチネルにピン留めする。
   const rec = normalizeKyInstructionRecord({
     siteName: "○○ビル新築",
     projectName: "3工区",
     foremanName: "山田",
+    workDateYear: "2026",
+    workDateMonth: "7",
+    workDateDay: "1",
     workRows: [{ workDetail: "鉄骨建方" }],
     riskRows: [{ targetLabel: "①", hazard: "墜落", reduction: "親綱使用", likelihood: 3, severity: 3 }],
     teamGoal: "親綱に掛けてから移動しよう",
