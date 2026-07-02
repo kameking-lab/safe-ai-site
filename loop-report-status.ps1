@@ -51,6 +51,14 @@
 .PARAMETER StringsPath
   loop-status-strings.txt (default: next to this script).
 
+.PARAMETER StaleMinutes
+  A lane whose "最終稼働" timestamp is older than this (default 120) is flagged as a silent per-lane
+  stop in the region health line while OTHER lanes stay alive (which keep the top heartbeat fresh).
+  Deliberately generous: a heavy single iteration (implement + build + lint + vitest + PR) tops out
+  near 30-40 min of wall-clock and CI waits are deferred to the next iteration, so 120 gives >3x
+  headroom against false alarms while cutting dead-lane detection from ~24h (next launcher pass) to
+  ~2h. The alarm self-clears: the lane's next successful report rewrites its own row fresh.
+
 .PARAMETER WhatIf
   Dry run: compute and print the line that WOULD be written and the resolved target path; touch
   no file and take no lock. Used for stub verification.
@@ -76,6 +84,7 @@ param(
   [string]$StatusPath = "",
   [string]$RepoPath = "",
   [string]$StringsPath = "",
+  [int]$StaleMinutes = 120,
   [switch]$WhatIf,
   [switch]$SelfTest
 )
@@ -144,6 +153,75 @@ function Get-StatusLock([string]$lockPath, [int]$StaleSeconds = 60, [int]$Tries 
 $beginMarker = "<!-- LANE-REPORT:BEGIN (managed by loop-report-status.ps1) -->"
 $endMarker = "<!-- LANE-REPORT:END -->"
 
+# Detect lanes that went silently dead WHILE OTHER LANES STAY ALIVE. The top heartbeat ("最終更新")
+# is bumped by ANY living lane every iteration, so if one lane's runner wedges/dies (not a deadline
+# stop, not a config error - just one process gone) the heartbeat still reads fresh and nothing tells
+# the owner WHICH lane fell silent. He would have to eyeball six "最終稼働" timestamps against "now"
+# by hand. This is the per-lane residue of the same silent-death class #602/#608/#611/#616/#619 killed
+# at the aggregate level. Every reporting (=alive) lane recomputes this from the region rows, so a dead
+# lane is flagged within one healthy lane's interval (minutes) instead of waiting for the next launcher
+# pass (up to ~24h). Pure function of (rows, now, threshold, template): the Japanese "最終稼働" literal
+# lives in the template (from strings), never in this source, so the regex is built at runtime.
+# Returns PSCustomObjects { Lane; LastRun; AgeMinutes } for rows older than $StaleMinutes.
+function Get-StaleLanes {
+  param([string[]]$Rows, [datetime]$Now, [int]$StaleMinutes, [string]$RowTemplate)
+  $result = New-Object System.Collections.Generic.List[object]
+  if (-not $RowTemplate -or -not $RowTemplate.Contains('{LANE}') -or -not $RowTemplate.Contains('{LASTRUN}')) {
+    return $result.ToArray()
+  }
+  # Build a parse regex from the localized row template so the Japanese stays in strings, not source.
+  # NOTE: [regex]::Escape escapes "{" (-> "\{") but NOT "}", so match "\{NAME}" (escaped open, bare close).
+  $rx = [regex]::Escape($RowTemplate)
+  $rx = $rx -replace '\\\{LANE}', '(?<lane>\S+)'
+  $rx = $rx -replace '\\\{LASTRUN}', '(?<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2})'
+  $rx = $rx -replace '\\\{PR}', '.*?'
+  $rx = $rx -replace '\\\{OPEN}', '.*?'
+  $rx = $rx -replace '\\\{NOTE}', '.*'
+  foreach ($r in $Rows) {
+    if ($null -eq $r) { continue }
+    $m = [regex]::Match([string]$r, $rx)
+    if (-not $m.Success) { continue }
+    $ts = $null
+    try { $ts = [datetime]::ParseExact($m.Groups['ts'].Value, 'yyyy-MM-dd HH:mm', $null) } catch { $ts = $null }
+    if ($null -eq $ts) { continue }
+    $age = ($Now - $ts).TotalMinutes
+    if ($age -ge $StaleMinutes) {
+      $result.Add([PSCustomObject]@{ Lane = $m.Groups['lane'].Value; LastRun = $ts; AgeMinutes = [int]$age })
+    }
+  }
+  return $result.ToArray()
+}
+
+# Build the ONE managed health-summary line placed at the top of the region, or $null when the health
+# strings are absent (older strings files stay a safe no-op) or no lane row parses. Uses Get-StaleLanes
+# twice: a threshold of Int.MinValue counts every parseable lane row (even this lane's just-stamped row
+# whose age is momentarily ~0), and $StaleMinutes selects the silently-dead ones.
+function Get-LaneHealthLine {
+  param([string[]]$Rows, [datetime]$Now, [int]$StaleMinutes)
+  if (-not $LS.ContainsKey("laneHealthOk") -or -not $LS.ContainsKey("laneHealthStale")) { return $null }
+  $rowTpl = S "reportLine"
+  $all = @(Get-StaleLanes -Rows $Rows -Now $Now -StaleMinutes ([int]::MinValue) -RowTemplate $rowTpl)
+  if ($all.Count -eq 0) { return $null }
+  $stale = @(Get-StaleLanes -Rows $Rows -Now $Now -StaleMinutes $StaleMinutes -RowTemplate $rowTpl)
+  if ($stale.Count -gt 0) {
+    $sep = S "laneHealthSep"
+    $items = @()
+    foreach ($s in $stale) {
+      $hours = [math]::Round($s.AgeMinutes / 60.0, 1)
+      $items += (Fmt "laneHealthItem" @{ LANE = $s.Lane; LASTRUN = $s.LastRun.ToString("yyyy-MM-dd HH:mm"); HOURS = $hours })
+    }
+    return (Fmt "laneHealthStale" @{ LANES = ($items -join $sep); MIN = $StaleMinutes })
+  }
+  return (Fmt "laneHealthOk" @{ TOTAL = $all.Count; MIN = $StaleMinutes; NOW = $Now.ToString("yyyy-MM-dd HH:mm") })
+}
+
+# Prefix (template text before the first placeholder) used to idempotently strip a prior health line.
+function Get-TplPrefix([string]$key) {
+  $t = S $key
+  $i = $t.IndexOf('{')
+  if ($i -ge 0) { return $t.Substring(0, $i) } else { return $t }
+}
+
 # ---- Self-test: offline verification of the lock's stale-orphan reclamation -------------------
 if ($SelfTest) {
   $fails = 0
@@ -172,6 +250,26 @@ if ($SelfTest) {
     $c = Get-StatusLock $lp 60 5 50
     Assert-Test "stale orphan lock is reclaimed and acquired" ($c -eq $true)
     if (Test-Path -LiteralPath $lp) { Remove-Item -LiteralPath $lp -Force }
+
+    # D) Get-StaleLanes: parse rows built from an ASCII-only template (keeps this source ASCII while
+    # exercising the same regex-build path the real Japanese template uses) and select the silent ones.
+    $tpl = "- {LANE} : LR {LASTRUN} / PR {PR} / open {OPEN} / {NOTE}"
+    $now = [datetime]"2026-07-03 12:00"
+    $fresh = "- ops : LR 2026-07-03 11:58 / PR #1 / open 2 / ok"      # 2 min old  -> alive
+    $dead  = "- data : LR 2026-07-03 08:00 / PR #2 / open 5 / ok"     # 240 min old -> stale
+    $edge  = "- seo : LR 2026-07-03 10:00 / PR #3 / open 1 / ok"      # 120 min old -> stale (>=)
+    $junk  = "health: not a lane row at all"
+    $stale = @(Get-StaleLanes -Rows @($fresh, $dead, $edge, $junk) -Now $now -StaleMinutes 120 -RowTemplate $tpl)
+    Assert-Test "stale detection flags exactly the two silent lanes" ($stale.Count -eq 2)
+    Assert-Test "stale detection does NOT flag the fresh lane" (-not ($stale | Where-Object { $_.Lane -eq "ops" }))
+    Assert-Test "stale detection flags the dead lane by name" ([bool]($stale | Where-Object { $_.Lane -eq "data" }))
+    Assert-Test "stale age is computed in minutes" (($stale | Where-Object { $_.Lane -eq "data" }).AgeMinutes -eq 240)
+    $none = @(Get-StaleLanes -Rows @($fresh) -Now $now -StaleMinutes 120 -RowTemplate $tpl)
+    Assert-Test "all-fresh region yields no stale lanes" ($none.Count -eq 0)
+    $allCount = @(Get-StaleLanes -Rows @($fresh, $dead, $edge, $junk) -Now $now -StaleMinutes ([int]::MinValue) -RowTemplate $tpl)
+    Assert-Test "MinValue threshold counts every parseable lane row (junk excluded)" ($allCount.Count -eq 3)
+    $noTpl = @(Get-StaleLanes -Rows @($dead) -Now $now -StaleMinutes 120 -RowTemplate "no placeholders here")
+    Assert-Test "template without placeholders parses nothing (safe no-op)" ($noTpl.Count -eq 0)
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -234,6 +332,31 @@ Write-Rep ("computed row: " + $laneLine)
 if ($WhatIf) {
   Write-Rep "[WHATIF] no file written, no lock taken."
   Write-Rep ("[WHATIF] would also refresh the top heartbeat line to: " + (Fmt "updated" @{ NOW = $lastRun }))
+  # Read-only preview of the per-lane health line: take existing region rows + this lane's fresh row,
+  # strip any prior health line, and show what would be computed (no file is touched, no lock taken).
+  if ($LS.ContainsKey("laneHealthOk") -and $LS.ContainsKey("laneHealthStale") -and (Test-Path $StatusPath)) {
+    try {
+      $prev = @(Get-Content -Encoding UTF8 -Path $StatusPath)
+      $okPre = Get-TplPrefix "laneHealthOk"; $stalePre = Get-TplPrefix "laneHealthStale"
+      $rows = New-Object System.Collections.Generic.List[string]
+      $bI = -1; $eI = -1
+      for ($k = 0; $k -lt $prev.Count; $k++) {
+        if ($prev[$k].Trim() -eq $beginMarker) { $bI = $k } elseif ($prev[$k].Trim() -eq $endMarker) { $eI = $k; break }
+      }
+      $selfPrefix = "- " + $Lane + " :"; $sawSelf = $false
+      if ($bI -ge 0 -and $eI -gt $bI) {
+        for ($k = $bI + 1; $k -lt $eI; $k++) {
+          $t = $prev[$k].TrimStart()
+          if (($okPre.Trim() -ne "" -and $t.StartsWith($okPre)) -or ($stalePre.Trim() -ne "" -and $t.StartsWith($stalePre))) { continue }
+          if ($t.StartsWith($selfPrefix)) { $rows.Add($laneLine); $sawSelf = $true } else { $rows.Add($prev[$k]) }
+        }
+      }
+      if (-not $sawSelf) { $rows.Add($laneLine) }
+      $hl = Get-LaneHealthLine -Rows $rows.ToArray() -Now (Get-Date) -StaleMinutes $StaleMinutes
+      if ($hl) { Write-Rep ("[WHATIF] would set the region health line to: " + $hl) }
+      else { Write-Rep "[WHATIF] no health line would be written (no parseable lane rows)." }
+    } catch { Write-Rep ("[WHATIF] health preview skipped: " + $_.Exception.Message) }
+  }
   exit 0
 }
 
@@ -286,6 +409,36 @@ try {
     $newLines.Add($laneLine)
     $newLines.Add($endMarker)
     $lines = $newLines.ToArray()
+  }
+
+  # Per-lane liveness: recompute the ONE managed health line at the top of the region from the current
+  # lane rows, so a lane that fell silent WHILE OTHERS RUN (the top heartbeat stays fresh because living
+  # lanes bump it) is flagged the moment any healthy lane next reports - not hours later at the launcher
+  # pass. Idempotent: strip any prior health line (matched by either template's pre-placeholder prefix)
+  # then reinsert the fresh one right after BEGIN. No-op when health strings are absent (older files).
+  if ($LS.ContainsKey("laneHealthOk") -and $LS.ContainsKey("laneHealthStale")) {
+    $bIdx = -1; $eIdx = -1
+    for ($k = 0; $k -lt $lines.Count; $k++) {
+      if ($lines[$k].Trim() -eq $beginMarker) { $bIdx = $k }
+      elseif ($lines[$k].Trim() -eq $endMarker) { $eIdx = $k; break }
+    }
+    if ($bIdx -ge 0 -and $eIdx -gt $bIdx) {
+      $okPre = Get-TplPrefix "laneHealthOk"
+      $stalePre = Get-TplPrefix "laneHealthStale"
+      $inner = New-Object System.Collections.Generic.List[string]
+      for ($k = $bIdx + 1; $k -lt $eIdx; $k++) {
+        $t = $lines[$k].TrimStart()
+        if (($okPre.Trim() -ne "" -and $t.StartsWith($okPre)) -or ($stalePre.Trim() -ne "" -and $t.StartsWith($stalePre))) { continue }
+        $inner.Add($lines[$k])
+      }
+      $healthLine = Get-LaneHealthLine -Rows $inner.ToArray() -Now (Get-Date) -StaleMinutes $StaleMinutes
+      $rebuilt = New-Object System.Collections.Generic.List[string]
+      for ($k = 0; $k -le $bIdx; $k++) { $rebuilt.Add($lines[$k]) }
+      if ($healthLine) { $rebuilt.Add($healthLine) }
+      foreach ($l in $inner) { $rebuilt.Add($l) }
+      for ($k = $eIdx; $k -lt $lines.Count; $k++) { $rebuilt.Add($lines[$k]) }
+      $lines = $rebuilt.ToArray()
+    }
   }
 
   # Keep the top "last updated" line an HONEST heartbeat. The launcher stamps it ONLY on its
