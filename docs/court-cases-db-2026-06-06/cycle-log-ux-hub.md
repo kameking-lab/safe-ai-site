@@ -302,3 +302,21 @@
 **無読テスト**: 47都道府県の選択可能性・重複排除ロジック・stale判定はいずれも実測boundingBoxではなく純関数の入出力検証がテストの本体（サイネージ地図/データ取得はネットワーク依存のため）。vitestで実際の値（例: 沖縄県 那覇市の選択解決、離れた日付の記事が古い順に落ちること、2時間超で stale=true）を確認し、既存の signage-jis-amber-noread スクリプトが検証する「1画面フィット」「注意色=黒系文字」の不変を損なわないことをコードレビューで確認（該当箇所は色クラスの入替のみで寸法変更なし）。
 
 **残課題**: S5(常掲価値追加)・S8-b(E-E-A-T)・S9(相談CV)・S10(SSR/メタ)・S11(/handover閉鎖)以下は次イテレーション以降で対応。
+
+---
+
+## 2026-07-03 ux-hub/s5-signage-daily-values
+
+**イテレーション頭の回収**: 自班の緑PR #604(O9文字サイズ再設計)・#610(S4データ品位3本)はいずれもmainとdocコンフリクト（BACKLOG-ux-hub.md・cycle-log-ux-hub.md・signage/page.tsx の3ファイル、コードは同一箇所の書式差分のみで意味的競合なし）。それぞれ `git merge origin/main` で手動解決（両エントリを時系列順で共存、page.tsxはO9のxl:サイズ指定とS4/O3の判定ロジック・相対時刻表示を両立するようマージ）→ゲート緑を確認しpush→squashマージ。`git checkout main && git pull --ff-only` でclean確認後、本タスクに着手。
+
+**タスク**: BACKLOG-ux-hub.md 最上位 S5（サイネージ常掲価値の追加、診断書 `docs/fable-diagnosis-2026-07-02/01-signage.md` T10）。「休憩所のTVが毎日同じ画面」問題（無災害日数・唱和・WBGTなど現場常掲の定番が無い）の是正。
+
+**調査**: 無災害日数カウンタ・スローガンローテーション・signageへのWBGT連動はいずれも未実装（既存の朝礼スクリプト `signage-morning-script.tsx` は唱和ではなく読み上げ原稿生成、WBGT計算エンジン `wbgt-engine.ts` はheat-illness-prevention配下で手動気温入力のみ・signageの自動気象データには未接続で湿度も欠測）。
+
+**実装**: 結論ストリップ直下に3タイル横並びの新規 `SignageDailyValues` を追加。①**無災害日数**: `lib/signage/no-accident-store.ts`（この端末のlocalStorageに起点日を保存、他ストアと同じ readRaw/writeRaw パターン）＋純関数 `noAccidentDays`。未設定時は設定ボタン、設定後は経過日数の大きな数字＋変更リンク。②**今日の一言**: `lib/signage/daily-values.ts` に現場向け安全標語28件（中災防等が例年掲げる標語の類型を参考にした一般的な文言・特定年度の著作物は転載せず）と、日付(day-of-year)から決定論的に1件選ぶ純関数 `pickDailySlogan`（同日は常に同じ内容・日付が変われば必ず変わる＝ローテーションではなく「今日の担当」方式）。③**WBGT**: 上流 `open-meteo-hourly.ts` の `hourly` クエリに `relative_humidity_2m` を追加し `SignageHourlyPoint.humidityPct`（欠測時は`undefined`のまま・捏造しない）として新規スレッド。既存 `wbgt-engine.ts`（JIS Z 8504/ISO 7243、黒球温度未計測時の屋外推定式）をそのまま再利用し、現在時刻(`bundle.hourly[0]`)の気温・湿度からWBGT概算とリスクレベルを算出。JIS安全色文法（黄=黒文字等）で表示、湿度未取得時は「湿度データ取得中…」を表示し値を捏造しない。データ層(`web/src/data/**`)・他班route(heat-illness-prevention等)は非改変、`open-meteo-hourly.ts`/`SignageHourlyPoint` の消費元はsignageのみであることをGrepで確認済み。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warningのみ・無関係）/ vitest 253 files・2124 tests 全pass（新規40件: daily-values 8・no-accident-store 4・open-meteo-hourly humidity 2・SignageDailyValues 6、他は既存ファイルへの積み増し分）/ build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/signage-s5-daily-values-noread-2026-07-03.mjs`（build+start、Playwright、1920x1080）**9/9 PASS**。①3タイル（無災害日数・今日の一言・暑さ指数(WBGT)）が表示される、②起点日を保存すると経過日数表示に切り替わる、③Playwright Clock APIで翌日に時刻を固定してリロードし「今日の一言」の内容が実際に変わることを確認（2日連続比較の代替）、④1画面フィット不変（scrollHeight≦viewport）——を実測確認。スクリーンショット添付（結論ストリップ直下に3タイル、WBGT=注意で黄地黒文字のJIS色を確認）。
+
+**残課題**: S8-b(E-E-A-T)・S9(相談CV)・S10(SSR/メタ)・S11(/handover閉鎖)は次イテレーション以降で対応。

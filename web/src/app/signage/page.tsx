@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
 import { SignageConclusionStrip } from "@/components/signage/signage-conclusion-strip";
+import { SignageDailyValues } from "@/components/signage/signage-daily-values";
 import { SignageDangerAlert } from "@/components/signage/signage-danger-alert";
 import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture-warning-map";
 import { SignageFloorPlanEditor } from "@/components/signage/signage-floor-plan-editor";
@@ -349,6 +350,13 @@ export default function SignagePage() {
 
       {/* 結論ストリップ（柱0）: 3秒で「いまの状態」が分かるデカ色帯。説明より先に結論 */}
       <SignageConclusionStrip conclusion={conclusion} />
+
+      {/* 常掲価値3項目（Fable診断01 T10）: 無災害日数・今日の一言・WBGT。毎日内容が変わり「見る理由」を作る */}
+      <SignageDailyValues
+        now={new Date()}
+        currentTempC={bundle?.hourly?.[0]?.tempC}
+        currentHumidityPct={bundle?.hourly?.[0]?.humidityPct}
+      />
 
       {/* スマホ向け注意バナー */}
       <div className="xl:hidden rounded-lg border border-amber-500/50 bg-amber-950/70 px-3 py-2.5">
