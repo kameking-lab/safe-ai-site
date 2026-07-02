@@ -25,5 +25,8 @@
 
 - [x] 【Opus・P0】O4のT1: チャットボット偽「範囲外」警告の根絶（2026-07-02 ux-tool/chatbot-out-of-scope-false-positive / PR #583）。診断書04のT1是正＝`chatbot-enrichment.ts` `detectOutOfScopeLawReferences` の2バグ修正: (a) 法令名抽出の文字クラスに長音「ー」・「々」が無く「クレーン等安全規則」が「ン等安全規則」に分断され誤発火する不具合を修正、(b) 正式名称⇄短縮名の対応表が無く substring 照合のみで「労働安全衛生法」⊅「安衛法」等が全て範囲外扱いされていた不具合を、既存 `law-metadata.ts` の `LAW_METADATA` を単一ソースにした正式名称完全一致集合 `KNOWN_LAW_FULL_NAMES` の新設で是正。回帰テスト2件追加（既存17件+2=19件 pass）。T2(派遣法45条要約)・T3(YYYYプレースホルダ)は残タスクとして上のO4残に切り出し。ゲート全通過（tsc0/lint errors0/vitest 1935 pass/build成功）。
 
+- [x] 【柱C-11補充／データ鮮度表示】/circulars 一覧に収録通達の実データ由来の鮮度指標を表示（2026-07-03 ux-tool/circulars-latest-issued-date-freshness）。診断07 柱C-11「データ鮮度表示」の自班route分。Explore調査で law-search/circulars(一覧)/chemical-database の3ページに鮮度表示が皆無と判明。うち circulars(一覧) は既存フッター文言が「最終確認日を付与したものです」と実際には存在しない日付表示を暗黙に主張していた不整合（真の捏造ではないが未達成の約束＝是正対象）。是正=`CircularsFilterableList` の結論カード description に、呼び出し元で発出日降順に整列済みの `all[0]`（＝収録通達の中で最も新しい発出日）を「収録最新発出: {issuedDateRaw|issuedDate}」として追加＝**新規データの捏造ゼロ・既存の実データ転記のみ**。フッター文言も実態に一致させ「収録通達のうち最も新しい発出日を上部に表示しています」に是正（法令本文・発出者表記は無変更）。law-search・chemical-database は該当データに機械可読な鮮度フィールドが無く（かつ web/src/data/**はdata班所有で追加不可）、捏造リスクを避けるため本イテレは対象外＝次点で申し送り。単体テスト3件新設（最新日付の表示・issuedDateRaw欠落時のISOフォールバック・全件日付nullでもクラッシュしない）。無読テスト1/1 PASS（circulars-freshness-noread-2026-07-03＝鮮度文言表示・h1=1・フッター文言整合・旧フッター文言の残存なし）。ゲート全通過（tsc0/lint errors0/vitest 2029 pass/build成功）。
+
 ## 補充の指針（未着手3件未満で起こす）
 - 自領域route の柱0未適用箇所・無読テスト不合格画面・第三者レビュー指摘。chemical RA・チャットボットの深掘り。
+- 次点: /law-search・/chemical-database のデータ鮮度表示（機械可読な鮮度フィールドがdata班所有ファイルに無いため、data班との連携または新規フィールド追加の要否をまず確認してから着手）。
