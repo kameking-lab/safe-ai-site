@@ -75,6 +75,7 @@ param(
   [switch]$Register,
   [switch]$InstallUserStartup,
   [switch]$WhatIf,
+  [switch]$SelfTest,
   [string]$ConfigPath = "",
   [string]$ClaudeCmd = "claude"
 )
@@ -120,6 +121,72 @@ function Fmt([string]$key, [hashtable]$vals) {
   $t = S $key
   if ($vals) { foreach ($k in $vals.Keys) { $t = $t.Replace('{' + $k + '}', [string]$vals[$k]) } }
   return $t
+}
+
+# Acquire the exclusive docs/loop-status.md lock (CreateNew = atomic "only if absent"), reclaiming a
+# STALE orphan. If a prior holder is killed between CreateNew and Remove-Item, the .lock survives
+# forever and every future status write fails to acquire it - freezing the liveness heartbeat into a
+# false "loop is dead" alarm (watch point #1). A legit hold is sub-second even with all six lanes
+# serialized, so a lock older than $StaleSeconds cannot be live: reclaim it once and retry. Returns
+# $true if held (caller MUST Remove-Item the lock when done), $false after exhausting retries. Shared
+# by every status write in this launcher (banner reconcile, config-error banner) and mirrors the
+# identical Get-StatusLock in loop-report-status.ps1 so the two writers agree on reclamation.
+function Get-LauncherStatusLock {
+  param([string]$LockPath, [int]$StaleSeconds = 60, [int]$Tries = 25, [int]$DelayMs = 200)
+  for ($try = 0; $try -lt $Tries; $try++) {
+    try {
+      $fs = [System.IO.File]::Open($LockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+      $fs.Close(); return $true
+    } catch {
+      $reclaimed = $false
+      try {
+        $li = Get-Item -LiteralPath $LockPath -ErrorAction SilentlyContinue
+        if ($li -and (((Get-Date) - $li.LastWriteTime).TotalSeconds -gt $StaleSeconds)) {
+          Remove-Item -LiteralPath $LockPath -Force -ErrorAction SilentlyContinue
+          Write-Launcher ("reclaimed stale status lock (age > " + $StaleSeconds + "s; prior holder likely killed mid-write).")
+          $reclaimed = $true
+        }
+      } catch {}
+      if (-not $reclaimed) { Start-Sleep -Milliseconds $DelayMs }
+    }
+  }
+  return $false
+}
+
+# ---------------------------------------------------------------------------
+# -SelfTest: offline verification of the shared status-lock helper (stale-orphan reclamation +
+# fresh-lock respect). Temp files only - no Claude, no real status file, no config, no network.
+# Exits 0 on PASS, 1 on FAIL. Runs before any config read so a broken config cannot block the test.
+# ---------------------------------------------------------------------------
+if ($SelfTest) {
+  $fails = 0
+  $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("loop-launcher-selftest-" + [System.Guid]::NewGuid().ToString("N"))
+  New-Item -ItemType Directory -Path $tmp -Force | Out-Null
+  $lp = Join-Path $tmp "status.md.lock"
+  function Assert-L([string]$n, [bool]$c) {
+    if ($c) { Write-Launcher ("[SELFTEST] PASS: " + $n) } else { Write-Launcher ("[SELFTEST] FAIL: " + $n); $script:fails++ }
+  }
+  try {
+    # A) Clean acquire when no lock exists -> true, lock file left for the holder.
+    $a = Get-LauncherStatusLock $lp 60 5 50
+    Assert-L "clean acquire returns true" ($a -eq $true)
+    Assert-L "clean acquire leaves lock file" (Test-Path -LiteralPath $lp)
+    if (Test-Path -LiteralPath $lp) { Remove-Item -LiteralPath $lp -Force }
+    # B) A FRESH foreign lock (age 0) must be respected, not reclaimed -> false.
+    $fs = [System.IO.File]::Open($lp, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None); $fs.Close()
+    $b = Get-LauncherStatusLock $lp 60 3 30
+    Assert-L "fresh foreign lock is NOT reclaimed" ($b -eq $false)
+    Assert-L "fresh foreign lock still present" (Test-Path -LiteralPath $lp)
+    # C) A STALE orphan (backdated past threshold) is reclaimed and acquired -> true.
+    (Get-Item -LiteralPath $lp).LastWriteTime = (Get-Date).AddSeconds(-120)
+    $c = Get-LauncherStatusLock $lp 60 5 50
+    Assert-L "stale orphan lock is reclaimed and acquired" ($c -eq $true)
+    if (Test-Path -LiteralPath $lp) { Remove-Item -LiteralPath $lp -Force }
+  } finally {
+    try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
+  }
+  if ($fails -eq 0) { Write-Launcher "[SELFTEST] ALL PASS"; exit 0 }
+  Write-Launcher ("[SELFTEST] " + $fails + " FAILURE(S)"); exit 1
 }
 
 # ---------------------------------------------------------------------------
@@ -253,26 +320,7 @@ function Set-ResurrectionBanner {
   $lockPath = $statusPath + ".lock"
   $haveLock = $false
   if (-not $Preview) {
-    # Reclaim a STALE orphan lock: if a prior holder was killed mid-write the .lock survives forever
-    # and freezes the liveness heartbeat into a false "loop is dead" alarm. A legit hold is sub-second
-    # even with all lanes serialized, so a lock older than 60s cannot be live - reclaim and retry.
-    for ($try = 0; $try -lt 25; $try++) {
-      try {
-        $fs = [System.IO.File]::Open($lockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
-        $fs.Close(); $haveLock = $true; break
-      } catch {
-        $reclaimed = $false
-        try {
-          $li = Get-Item -LiteralPath $lockPath -ErrorAction SilentlyContinue
-          if ($li -and (((Get-Date) - $li.LastWriteTime).TotalSeconds -gt 60)) {
-            Remove-Item -LiteralPath $lockPath -Force -ErrorAction SilentlyContinue
-            Write-Launcher "reclaimed stale status lock (age > 60s; prior holder likely killed mid-write)."
-            $reclaimed = $true
-          }
-        } catch {}
-        if (-not $reclaimed) { Start-Sleep -Milliseconds 200 }
-      }
-    }
+    $haveLock = Get-LauncherStatusLock $lockPath
     if (-not $haveLock) {
       Write-Launcher "banner reconcile skipped: could not acquire status lock (non-fatal)."
       return
@@ -378,13 +426,88 @@ if ($InstallUserStartup) {
 }
 
 # ---------------------------------------------------------------------------
+# Config-error LOUD banner. When loop-config.json is missing or unparseable the launcher CANNOT
+# start any lane - but the OLD design exited 1 writing only to the private launcher log, never to
+# docs/loop-status.md. The owner's single watch-file then froze at its last good render with NO
+# explanation - the exact silent-death class O16 exists to kill, and the owner's most common manual
+# action (hand-editing untilIso) is precisely what fat-fingers the JSON. This rewrites the watch-file
+# with a loud "config broken, lanes NOT started, fix the JSON" banner, preserving the lanes'
+# self-report region verbatim (a lane from a PRIOR launch may still be alive and reporting) so the
+# emergency rewrite never destroys live self-reports. Honors -WhatIf; serialized by the shared lock.
+function Write-ConfigErrorStatus {
+  param([string]$ConfigFile, [string]$ErrorMsg)
+  $reportBegin = "<!-- LANE-REPORT:BEGIN (managed by loop-report-status.ps1) -->"
+  $reportEnd = "<!-- LANE-REPORT:END -->"
+  $now = Get-Date
+  $out = New-Object System.Collections.Generic.List[string]
+  $out.Add((S "title")); $out.Add("")
+  $out.Add((S "intro1")); $out.Add((S "intro2")); $out.Add("")
+  $out.Add((Fmt "updated" @{ NOW = $now.ToString("yyyy-MM-dd HH:mm:ss") })); $out.Add("")
+  $out.Add((S "configErrorHeader")); $out.Add("")
+  $out.Add((Fmt "configErrorBody1" @{ CONFIG = $ConfigFile }))
+  $out.Add((S "configErrorBody2"))
+  $out.Add((Fmt "configErrorBody3" @{ ERROR = $ErrorMsg }))
+  # Preserve the lanes' self-report region verbatim if present (never destroy live self-reports).
+  $preserved = $null
+  if (Test-Path $statusPath) {
+    try {
+      $old = @(Get-Content -Encoding UTF8 -Path $statusPath)
+      $b = -1; $e = -1
+      for ($k = 0; $k -lt $old.Count; $k++) {
+        if ($old[$k].Trim() -eq $reportBegin) { $b = $k }
+        elseif ($old[$k].Trim() -eq $reportEnd) { $e = $k; break }
+      }
+      if ($b -ge 0 -and $e -gt $b) { $preserved = $old[$b..$e] }
+    } catch {}
+  }
+  $out.Add(""); $out.Add((S "reportHeader")); $out.Add("")
+  if ($preserved) { foreach ($l in $preserved) { $out.Add([string]$l) } }
+  $out.Add(""); $out.Add((S "watchHeader"))
+  $out.Add((S "watch1")); $out.Add((S "watch2")); $out.Add((S "watch3"))
+  $text = ($out -join "`r`n") + "`r`n"
+  if ($WhatIf) {
+    $dry = Join-Path $logDir "loop-status.dryrun.md"
+    Set-Content -Path $dry -Value $text -Encoding UTF8
+    Write-Launcher ("[WHATIF] config-error banner -> " + $dry + " (config=" + $ConfigFile + ")")
+    return
+  }
+  $lockPath = $statusPath + ".lock"
+  $haveLock = Get-LauncherStatusLock $lockPath
+  if (-not $haveLock) {
+    Write-Launcher "WARN: config-error banner skipped: could not acquire status lock (non-fatal). See launcher log for the error."
+    return
+  }
+  try {
+    $statusDir = Split-Path -Parent $statusPath
+    if ($statusDir -and -not (Test-Path $statusDir)) { New-Item -ItemType Directory -Path $statusDir | Out-Null }
+    Set-Content -Path $statusPath -Value $text -Encoding UTF8
+    Write-Launcher ("config-error banner written to " + $statusPath)
+  } catch {
+    Write-Launcher ("WARN: could not write config-error status (non-fatal): " + $_.Exception.Message)
+  } finally {
+    try { Remove-Item -Path $lockPath -Force -ErrorAction SilentlyContinue } catch {}
+  }
+}
+
+# ---------------------------------------------------------------------------
 # Read config + state.
 # ---------------------------------------------------------------------------
-if (-not (Test-Path $ConfigPath)) { Write-Launcher ("ERROR: config not found: " + $ConfigPath); exit 1 }
+if (-not (Test-Path $ConfigPath)) {
+  Write-Launcher ("ERROR: config not found: " + $ConfigPath)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg (S "configErrorNotFound")
+  exit 1
+}
 try {
   $cfg = Get-Content -Raw -Encoding UTF8 -Path $ConfigPath | ConvertFrom-Json
 } catch {
-  Write-Launcher ("ERROR: could not parse " + $ConfigPath + ": " + $_.Exception.Message); exit 1
+  Write-Launcher ("ERROR: could not parse " + $ConfigPath + ": " + $_.Exception.Message)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg $_.Exception.Message
+  exit 1
+}
+if ($null -eq $cfg -or -not ($cfg.PSObject.Properties.Name -contains "lanes") -or @($cfg.lanes).Count -eq 0) {
+  Write-Launcher ("ERROR: config parsed but has no lanes: " + $ConfigPath)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg (S "configErrorNoLanes")
+  exit 1
 }
 
 $state = $null
