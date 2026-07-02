@@ -17,24 +17,22 @@ import { SignageTodayDocuments } from "@/components/signage/signage-today-docume
 import { getSignageLocationById, signageLocations } from "@/data/signage-locations";
 import { buildSignageConclusion } from "@/lib/signage/signage-conclusion";
 import { resolveWeatherWarningPanelState } from "@/lib/signage/weather-warning-panel-state";
+import { levelFromWarningCode } from "@/lib/jma/parse-jma-warning";
+import { levelLabel } from "@/lib/jma/jma-data";
 import { computeTodayRisks } from "@/lib/utils/risk-search";
 import { createServices } from "@/lib/services/service-factory";
 import type { SignageDataApiResponse } from "@/lib/types/signage-data";
 import type { LawRevision, SiteRiskWeather } from "@/lib/types/domain";
 import type { ApiMode, ServiceStatus } from "@/lib/types/api";
 
-/** 気象庁JSONの code をざっくり表示用に（公式名称はPDF参照） */
-const JMA_CODE_HINT: Record<string, string> = {
-  "02": "大雪注意報",
-  "03": "大雨注意報",
-  "05": "強風注意報",
-  "12": "雷雨注意報",
-  "15": "波浪注意報",
-  "16": "波浪注意報",
-};
-
+/**
+ * 気象庁コードの表示ラベル。以前は6件のみの手書き辞書（フォールバックは「コード XX」）で
+ * 大雪/大雨等の現象名を決め打ちしていたが、未収録コードとの対応が不正確だった（T3是正）。
+ * 現象名を捏造しないよう、コード先頭桁から確定できる区分名（警報/注意報/特別警報）のみ表示する。
+ */
 function hintForJmaCode(code: string) {
-  return JMA_CODE_HINT[code] ?? `コード ${code}`;
+  const level = levelFromWarningCode(code);
+  return level && level !== "none" ? levelLabel(level) : `コード ${code}`;
 }
 
 // 60分: Vercel Edge Requests 削減 (docs/perf/edge-isr-followup-2026-05-19.md)。
@@ -270,8 +268,9 @@ export default function SignagePage() {
 
   const prefectureLevels = bundle?.prefectureLevels ?? {};
   const jmaLink = `https://www.jma.go.jp/bosai/warning/#area_type=class20s&area_code=${selectedLocation.jmaCityCode ?? "130000"}`;
-  // 取得失敗(error)を「警報なし」と取り違えないよう状態を明示分岐（無人運用の誤った安心を防ぐ）
-  const warningPanel = resolveWeatherWarningPanelState(bundleStatus, bundle?.jmaHeadline);
+  // 取得失敗(error)を「警報なし」と取り違えないよう状態を明示分岐（無人運用の誤った安心を防ぐ）。
+  // 判定は県ヘッドラインではなく選択地点(市区町村)の selectedWarnings を主軸にする（T3是正）。
+  const warningPanel = resolveWeatherWarningPanelState(bundleStatus, bundle?.selectedWarnings, bundle?.jmaHeadline);
 
   // 結論ストリップ（柱0）: 気象・リスク予測・記録キットの要対応を1本の色帯に集約。
   // リスク予測パネルと同一データを使うため、ここで一度だけ計算して両方へ渡す。
@@ -510,28 +509,40 @@ export default function SignagePage() {
                 className={`shrink-0 rounded-lg border p-2 sm:p-3 ${
                   warningPanel.kind === "error"
                     ? "border-rose-600 bg-rose-950/50"
-                    : warningPanel.kind === "headline"
-                      ? "border-amber-500/70 bg-amber-950/40"
-                      : warningPanel.kind === "none"
-                        ? "border-emerald-600/50 bg-emerald-950/40"
-                        : "border-slate-600 bg-slate-900/60"
+                    : warningPanel.kind === "special" || warningPanel.kind === "warning"
+                      ? "border-rose-600 bg-rose-950/40"
+                      : warningPanel.kind === "advisory"
+                        ? "border-amber-500/70 bg-amber-950/40"
+                        : warningPanel.kind === "none"
+                          ? "border-emerald-600/50 bg-emerald-950/40"
+                          : "border-slate-600 bg-slate-900/60"
                 }`}
               >
                 <p
                   className={`text-[10px] font-bold uppercase tracking-widest sm:text-xs ${
-                    warningPanel.kind === "headline"
-                      ? "text-amber-300"
-                      : warningPanel.kind === "error"
-                        ? "text-rose-300"
-                        : warningPanel.kind === "none"
-                          ? "text-emerald-300"
-                          : "text-slate-400"
+                    warningPanel.kind === "special" || warningPanel.kind === "warning"
+                      ? "text-rose-300"
+                      : warningPanel.kind === "advisory"
+                        ? "text-amber-300"
+                        : warningPanel.kind === "error"
+                          ? "text-rose-300"
+                          : warningPanel.kind === "none"
+                            ? "text-emerald-300"
+                            : "text-slate-400"
                   }`}
                 >
                   本日の気象警報
                 </p>
-                {warningPanel.kind === "headline" ? (
-                  <p className="mt-1 text-[11px] leading-snug text-amber-100 sm:text-sm">{warningPanel.headline}</p>
+                {warningPanel.kind === "special" || warningPanel.kind === "warning" ? (
+                  <p className="mt-1 text-[11px] font-semibold leading-snug text-rose-100 sm:text-sm">
+                    {warningPanel.kind === "special" ? "特別警報 発表中" : "警報 発表中"}
+                    {warningPanel.headline ? `｜${warningPanel.headline}` : ""}
+                  </p>
+                ) : warningPanel.kind === "advisory" ? (
+                  <p className="mt-1 text-[11px] leading-snug text-amber-100 sm:text-sm">
+                    注意報 発表中
+                    {warningPanel.headline ? `｜${warningPanel.headline}` : ""}
+                  </p>
                 ) : warningPanel.kind === "error" ? (
                   <p className="mt-1 text-[10px] font-semibold leading-snug text-rose-200 sm:text-xs">
                     ⚠ 気象データの取得に失敗しました。警報の有無を確認できません。
@@ -561,8 +572,17 @@ export default function SignagePage() {
               </div>
             )}
 
-            {displayMode === "map" && warningPanel.kind === "headline" ? (
-              <p className="shrink-0 text-[11px] leading-snug text-amber-100 sm:text-sm">{warningPanel.headline}</p>
+            {displayMode === "map" && (warningPanel.kind === "special" || warningPanel.kind === "warning") ? (
+              <p className="shrink-0 text-[11px] font-semibold leading-snug text-rose-100 sm:text-sm">
+                {warningPanel.kind === "special" ? "特別警報 発表中" : "警報 発表中"}
+                {warningPanel.headline ? `｜${warningPanel.headline}` : ""}
+              </p>
+            ) : null}
+            {displayMode === "map" && warningPanel.kind === "advisory" ? (
+              <p className="shrink-0 text-[11px] leading-snug text-amber-100 sm:text-sm">
+                注意報 発表中
+                {warningPanel.headline ? `｜${warningPanel.headline}` : ""}
+              </p>
             ) : null}
             {displayMode === "map" && warningPanel.kind === "error" ? (
               <p className="shrink-0 text-[11px] font-semibold leading-snug text-rose-200 sm:text-sm">

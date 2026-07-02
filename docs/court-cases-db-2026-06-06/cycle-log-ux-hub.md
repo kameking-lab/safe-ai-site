@@ -242,3 +242,21 @@
 **ゲート結果（cd web）**: tsc=0 / lint=0 errors（46 warnings は既存・無関係）/ vitest 1951 全pass（新規18件）/ build 成功（`/api/signage/jma`・`/api/cron/signage-jma-health` とも `ƒ Dynamic` へ変化したことを確認＝ force-static 撤去の裏付け）。
 
 **残課題**: O3（警報バナー誤報判定の是正）・O9（サイネージ文字サイズ再設計）以下は次イテレーション以降で対応。
+
+---
+
+## 2026-07-03 ux-hub/o3-warning-banner-city-code-fix（PR #594）
+
+**イテレーション頭の回収**: 自班の緑PR #587(signage-jma-runtime-fetch)を squashマージ。`git checkout main && git pull --ff-only` でclean確認。
+
+**タスク**: BACKLOG-ux-hub.md 最上位（2026-07-02 Fable診断注入 O3, 診断書 `docs/fable-diagnosis-2026-07-02/01-signage.md` T3）。赤バナー「警報 発表中」の誤報是正。
+
+**真因**: `resolveWeatherWarningPanelState` が県単位の `headlineText` の有無だけで `kind:"headline"` を返し、`buildSignageConclusion` がそれを無条件に赤表示していた。気象庁 `130000.json` を直接fetchして実測したところ、headlineText は「伊豆諸島南部では、強風や高波に注意してください…」（離島の注意報）である一方、新宿区(130010)の市区町村別 `warnings` は `{"status":"発表警報・注意報はなし"}`（codeフィールドなし）で実質空。つまり現場と無関係な離島の情報のみで、注意報を「警報」と誤表示・全画面赤にしていた。
+
+**修正**: 判定軸を県ヘッドラインから市区町村コード一致の `selectedWarnings` へ変更。`parse-jma-warning.ts` に `maxLevelFromSelectedWarnings`（気象庁コード先頭桁: `3`=特別警報/`0`=警報/`1`・`2`=注意報で最大区分を算出）と公開版 `levelFromWarningCode` を追加。`weather-warning-panel-state.ts` の `WeatherWarningPanelKind` を `"headline"` 単一種別から `"special"|"warning"|"advisory"|"none"`（+`loading`/`error`）へ分割し、`resolveWeatherWarningPanelState` は selectedWarnings ベースで区分を返す（headlineは該当区分がある場合の補足文として保持するのみ）。`buildSignageConclusion` を「特別警報/警報=赤・注意報=黄・なし=緑」に対応（優先順位: 特別警報/警報 > 期限超過 > 注意報 > 気象取得失敗 > 高リスク予測 > 要対応 > 確認中 > 警報なし）。`signage/page.tsx` の警報サイドパネル・地図モード表示も新kindに追随。`JMA_CODE_HINT`（6件のみの手書き辞書・未収録コードは「コード XX」とフォールバックしていた）は現象名の捏造防止のため廃止し、コード区分ラベル（警報/注意報/特別警報）表示へ置換。
+
+**実機確認**: 気象庁 `130000.json` を直接fetchし、離島headline×新宿(130010)空配列という実例を再確認。修正後のロジックで同入力が `kind:"none"`（緑・「本日 警報なし」）になることをユニットテストで保証。
+
+**ゲート結果（cd web）**: tsc=0（`.next/dev` の生成物由来エラーのみ・本変更と無関係。`validator.ts` 単体削除で解消し再ビルドで正常再生成を確認）/ lint=0 errors（46 warnings は既存・無関係）/ vitest 1979 全pass（新規/更新13件: `parse-jma-warning.test.ts`・`weather-warning-panel-state.test.ts`・`signage-conclusion.test.ts`）/ build 成功。dev実行で書き換わる他班生成物(`rag-metrics-latest.json`・`chatbot-eval-fresh-results.json`)は commit から除外。
+
+**残課題**: O9（サイネージ文字サイズ再設計）以下は次イテレーション以降で対応。
