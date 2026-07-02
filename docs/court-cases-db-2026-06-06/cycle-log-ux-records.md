@@ -159,3 +159,13 @@ CLS実測: prod build を3回巡回した結果 CLS=0.0006〜0.0108 で変更前
 ゲート: tsc=0 / lint errors=0（既存warn2件のみ・変更ファイル内）/ vitest 232ファイル1933 pass / build成功（`○ /ky/paper` 静的生成を確認）。無読ではなく技術検証のため Playwright は console error 0件・CLS実測・作業日が当日値に収束することを機械確認する `docs/third-party-reviews/scripts/ky-paper-hydration-cls-2026-07-02.mjs` を新規保存し、prod start(4173)で3回連続 console errors=0 を確認。
 バックログ整理（コード変更なし）: BACKLOG-ux-records.md の7行目注記が明示的に取消可としていた「/education-certification 発行/一覧」の残存重複行を[x]closeし、「KY周辺ユーティリティ(/ky/list・/ky/workers)」の着手中/未着手の重複2行（#558で既に完了・マージ済み）を統合整理。
 残: O10(KY用紙Phase2)はF1依存待ち、O15(SlideDeck)はdataレーンO14依存待りで着手不可。次イテレーションは依存解消状況を確認のうえ、着手可能な柱0補充/柱3レビューへ振替を検討。
+
+## 2026-07-03 lint警告23件の掃除（自班route分）＝#597
+
+着手前の回収: 自班PR #593（安全日誌/list 結論カード新設）はCI(e2e/smoke/Vercel)pending のため契約どおり次イテレーションで回収。main を `git pull --ff-only` して clean を確認し本タスクへ。
+BACKLOG-ux-records.md 最上位の未着手5件（O10/O15/S1/S2/S3）を確認したが、O10・S1はBACKLOG-fable.md F1（KY用紙・直接操作UIの方式確立）が未着手のため依存でブロック、O15・S2・S3はBACKLOG-data.md O14（災害の型正規化＋型別サマリ生成）が未着手のため依存でブロック＝未着手3件未満（実質0件）につき契約どおり自領域レビューから補充。
+診断07（残課題スイープ・2026-07-02）の「11. lint警告46件の掃除（33件は`--fix`可・ky-paper-view の exhaustive-deps 2件は手当）」を実地確認したところ、46件中23件が当班所有ファイル（site-records各client 7ファイル: incident-report/induction/inspection/monthly/near-miss/patrol/procedure ＋ `ky-paper-view.tsx`）に集中していたため、当班所有分のみを是正対象とした（他班ファイル=for/construction・heat-illness-prevention・search・elearning-progress-board・favorites・safety-plan の23件は対象外・不変）。
+発見: `react-hooks/set-state-in-effect` の「Unused eslint-disable directive」警告は、各 `useEffect` 内で**最初のsetState呼び出し1箇所のみ**がこのルールの診断対象であるにも関わらず、過去のPRで効果内の全setState呼び出し行に個別の `eslint-disable-next-line` を重複して付与していたことが原因（2箇所目以降は元々何も抑制していない＝真に不要）。実地検証: 先に全件除去→`npm run lint`で7ファイルにエラー(react-hooks/set-state-in-effect)が新規発生することを確認→各effectの最初の1行にのみ disable コメントを復元して再検証しエラー0を確認（安易な一括削除は避け実測で裏取り）。
+その他: `patrol-client.tsx`/`induction-client.tsx` の未使用import `summarizePatrol`/`summarizeInduction`（関数定義自体は `patrol-store.ts`/`induction-store.ts` 側で他所から使用中のため削除せず、importのみ除去）。`ky-paper-view.tsx` の2箇所の `useEffect` は `useCallback(deps=[])` で安定参照の `setNotice` を呼ぶが依存配列に含めておらず exhaustive-deps 警告＝deps配列に追加（`setNotice` はレンダー間で参照不変のため再実行リスクなし）。
+ゲート: tsc=0 / lint errors=0（当班route分の警告23件→0、他班分23件は不変）/ vitest 237ファイル1975 pass / build成功。挙動変更を伴わない静的解析クリーンアップのため無読テスト・Playwrightスクリプトは対象外。テスト実行中に副生成された `docs/rag-metrics-latest.json`・`web/src/data/chatbot-eval-fresh-results.json`（他レーン所有のevalメトリクス）は変更前に revert しコミットから除外。
+残: #593（安全日誌/list 結論カード）はCI待ちで次回収。O10/O15/S1/S2/S3は引き続きクロスレーン依存待ち。次イテレーションは依存解消状況を再確認のうえ、着手可能なら本命タスクへ、未解消なら柱0/柱3レビュー継続。
