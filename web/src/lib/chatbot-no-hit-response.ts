@@ -23,6 +23,17 @@ import type { FallbackLawSuggestion } from "@/lib/chatbot-fallback-logic";
 import type { AllowedCitation } from "@/lib/chatbot-prompt-builder";
 import { formatAllowedCitationsSection } from "@/lib/chatbot-prompt-builder";
 
+/**
+ * no-hit 時の「関連条文」ノイズ抑制の下限スコア（2026-07-03 T9・診断04）。
+ *
+ * normalizedScore はソート済み結果の先頭スコアなので、これを下回る場合は
+ * slice(0,8) の全件がそれ以下＝ノイズ（診断04 Q21「明日の東京の天気」で
+ * 港湾労働法第2条が無関係に提示された事例、score=0.04相当）。実測で
+ * score=0.12（解雇予告→労働契約法第16条、意味のある関連提示）は残す必要が
+ * あるため、両者の中間の 0.08 を閾値とする。
+ */
+export const NO_HIT_NOISE_FLOOR = 0.08;
+
 /** 公式情報への誘導リンク（全 no-hit 応答の末尾に必ず付与） */
 export const OFFICIAL_GUIDANCE_LINKS: ReadonlyArray<{ label: string; url: string }> = [
   { label: "e-Gov 法令検索（条文の最新・正確な原文）", url: "https://laws.e-gov.go.jp/" },
@@ -78,9 +89,14 @@ export function buildNoHitTemplate(args: {
   const { query, relatedArticles, partialMatches, disclaimer } = args;
   const topic = query.length > 40 ? query.slice(0, 40) + "…" : query;
 
+  const hasAnyRelated = relatedArticles.length > 0 || partialMatches.length > 0;
   const parts: string[] = [
     `ご質問の「${topic}」を直接規定する条文は、本ツールの収録データからは特定できませんでした。`,
-    `ただし、関連する可能性のある法令・一般原則をご案内します（参考情報です。確定的な法令解釈ではありません）。`,
+    // T9（欠落明示）: 関連条文・関連分野が実際に1件もない場合は「関連情報を案内する」と
+    // 予告してから空振りするのではなく、収録範囲に該当が無かったことを正直に述べる。
+    hasAnyRelated
+      ? `ただし、関連する可能性のある法令・一般原則をご案内します（参考情報です。確定的な法令解釈ではありません）。`
+      : `本ツールの収録範囲（労働安全衛生関連の主要法令＋関連通達）内に該当する関連情報は見つかりませんでした。一般原則のみ参考としてご案内します。`,
   ];
 
   const related = formatRelatedArticlesList(relatedArticles);
