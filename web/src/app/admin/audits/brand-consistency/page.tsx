@@ -186,7 +186,7 @@ type ArchiveItem = {
 
 const ARCHIVE_CANDIDATES: ArchiveItem[] = [
   { page: "/api-docs", status: "resolved", rationale: "実APIなし、ロードマップのみ。法人化・API提供開始時に再公開。", followUpPR: "F-002 解決済（noindex / sitemap除外 / robots Disallow）" },
-  { page: "/handover", status: "resolved", rationale: "内部用ページ。HANDOVER_GATE_KEY 認証で実質的に非公開。", followUpPR: "F-003 解決済" },
+  { page: "/handover", status: "resolved", rationale: "公開リポジトリ上でゲートキーのデフォルト値がソースに残る情報露出リスクのため、ルート自体を撤去（内容は docs/session-handover-2026-04-21.md へ）。", followUpPR: "S11 解決済" },
   { page: "/dpa", status: "resolved", rationale: "個人運営でのDPA提供は法的責任曖昧。法人化後に再公開予定。", followUpPR: "G-002 解決済 (PR #200)" },
   { page: "/lms", status: "needs-redesign", rationale: "法人化後β提供予定。ウェイティングリストのみ。", followUpPR: "F-001 解決済（noindex化）" },
   { page: "/pricing", status: "needs-redesign", rationale: "M6期に課金事業再開時に復活。PAID_MODE 無効時は「準備中」表示。", followUpPR: "F-004 解決済" },
