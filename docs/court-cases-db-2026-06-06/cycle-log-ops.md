@@ -1,5 +1,18 @@
 # cycle-log-ops — 運用・自律運転インフラ班の作業ログ
 
+## 2026-07-03 (O・報告系補充) — 稼働期限の沈黙停止を正直化（Report-DeadlineStop）
+
+- **背景**: 自ブランチ未マージPR ゼロ・main clean（#616=設定破損の大声化 を squash マージ済）。BACKLOG-ops 未着手[ ]は掃除系一括／モバイルperf第2弾 実測の2件のみ・両方とも **全6レーン稼働中**（loop-status で ops/data/seo/ux-tools/ux-records/ux-hub の6本が最終稼働07:41〜07:56）で静穏窓待ちブロック（3件未満）→補充の指針に従い運用4系統(報告)の欠陥から補充。
+- **欠陥（コード読取りで構造確認・cycle-log未記載の残穴）**: 直近4件（#602 ハートビート正直化／#608 復活バナー正直化／#611 stale-orphanロック回収／#616 設定破損の大声化）は一貫して**偽アラームの掃討**＝「生きているのに死んで見える」を潰してきた。その**裏返し**が未閉：`loop-runner.ps1` は `UntilIso` 到達で `Write-Log "Deadline reached"`→`break`→exit 0 するが、**私的なレーンログにしか書かず docs/loop-status.md を一切触らない**。稼働中に期限が過ぎると（再起動なしのセッション中）全6レーンが順に黙って exit 0 し、社長の監視ファイルは launcher が最後に書いた「起動」表示のまま・ハートビートが**凍結・理由なし**で残る。launcher の停止バナーは次のログオン/毎日07:00パスまで出ず、admin スケジューラは未登録（O17）＝実質**次ログオンまで無言**＝O16 が殺すはずの沈黙正常停止そのもの。期限延長を促す near-deadline 警告も launcher実行時しか出ないため、この窓では誰も untilIso を延ばせない。
+- **修正（loop-runner.ps1 +60/-2, loop-status-strings.txt +1）**:
+  - `Report-DeadlineStop` 新設＝期限breakの**2箇所**（ループ先頭の事前チェック／反復後チェック）で当レーンの自己報告行を **loop-report-status.ps1 経由**で「停止:稼働期限(untilIso …)到達で当レーン終了。延長は loop-config.json の untilIso を書換え→launcher再実行で全レーン復活」に upsert。子 powershell は launcher が export 済の `$env:SAFE_AI_LOOP_STATUS` を継承＝毎イテレーション報告と同一の中央ファイルへルーティング。非致命（停止処理をブロックしない）。停止時に heartbeat も停止時刻へ正直に bump＝「凍結」に理由が付く。
+  - ゲート `Test-ShouldReportDeadlineStop($LaneTag,$MaxIter)` を**純関数**化＝`LaneTag≠"" かつ MaxIter≤0`（**永続laned runのみ**）。one-shot planner/critic（`-MaxIterations 1`）は誤って停止行を stamp せず、legacy 無lane ループは upsert 対象行が無いので除外。Report-DeadlineStop・-SelfTest 双方から呼べるよう Get-BackoffSeconds 隣（-SelfTest ブロック手前）に定義。
+  - 日本語ノートは `loop-status-strings.txt` の新キー `runnerDeadlineStop`（{UNTIL}差込）から**実行時読取り**＝runner は pure ASCII 維持（PS5.x の Shift-JIS 誤読対策）。strings/キー欠落時は ASCII フォールバック文＝ノートが空にならない。
+- **自己検証（契約3）**: `-SelfTest` に deadline-stop ゲート4ケース（legacy無lane→false／永続laned→true／one-shot max=1→false／capped max=5→false）を追加し **ALL PASS**（backoff6アサート＋30分キャップ＋gate4＝exit 0）を実測。**E2E**（過去日 UntilIso=2020-01-01＋捨てレーン `selftest-deadline`＋ClaudeCmd=powershell）で **実 runner→中央 status に停止ノートを外科 upsert＋heartbeat 07:00:00→停止時刻(08:06:52)へ bump** を実測。先頭 break で停止＝**claude 非起動**、親コマンドラインにトークンを埋めない harness で **GUARD 誤爆なし**を確認。Parser::ParseFile PARSE OK。検証 harness は logs/（gitignore）に置き実行後削除。
+- **無回帰**: 変更はすべて**期限break経路とオフライン純関数/-SelfTest**に閉じ、毎イテレーションのホットパス（claude起動・backoff・単一インスタンスガード）は不変。既存 backoff 6アサート＋30分キャップは従来通り PASS。
+- **ゲート（契約3）**: web/src 不触＝tsc/lint/vitest/build 対象外。ps1 + strings + BACKLOG/cycle-log のみ。PowerShell は -SelfTest（ドライラン相当）＋実 E2E で自己検証。
+- **BACKLOG-ops 更新**: 本タスクを [x] で追加、補充理由（静穏窓ブロックで3件未満→報告系欠陥）を明記。
+
 ## 2026-07-03 報告系補充 `最終更新:` を毎イテレーションの正直なハートビート化
 
 BACKLOG-ops の未着手[ ]が line12（掃除系）/line14（perf第2弾実測）の2件のみで、両方とも「他レーン停止＝静穏窓待ち」でブロック（現に6レーン全稼働＝ops07:02/ux-tools07:04/ux-hub06:52）。3件未満につき契約どおり運用4系統（点火・補給・点検・報告）の欠陥から**補充**（機能改善は積まない）。**発見した報告系の欠陥**: 監視ポイント#1「ループが生きているか」の一次シグナルである先頭 `最終更新:` 行を刻印するのは launcher のみ（ログオン＋毎日07:00）。ところが `loop-report-status.ps1` は毎イテレーションこのファイルを書換えるのに `最終更新:` を更新しない＝launcherパス間（07:00〜次回ログオンで最悪ほぼ丸1日）は全レーンが生存していても時刻が凍結。社長は「生存」と「無言の死」を区別できず、実際に本イテレーション冒頭の実ファイルは `最終更新 06:38`（O17前の launcherパス）で凍結し、既に解消済みの「管理者を待っています」大声バナーが偽装表示されていた。**修正**（`loop-report-status.ps1` 当班所有・自己完結）: 書込み直前に region 外の `最終更新:` 行を label 接頭辞（`{NOW}` 前の文字列）一致で**その場更新のみ**（新規作成せず launcher の所有を尊重／strings 欠落時は接頭辞が非日本語キーになり無マッチ＝安全 no-op）。これで `最終更新:` は「少なくとも1レーンが X 時点で生存」の真のハートビートになり、どのレーンかは既存の per-lane `最終稼働` 行が示す。launcher バナー（復活/期限）の一時的staleは次の定期パスで自己修復するため本PRでは触らない。**実測**: (1)`-WhatIf` がハートビート予告を出力しファイル無変更・ロック無取得。(2)実ファイルの temp コピーへ実書込み→`最終更新` 06:38:53→現在時刻へbump、launcher の点火行（`- ops : model=...`・prefix衝突）/他レーン報告行（ux-hub 06:52/#587）/region markers はすべて不変、ops 報告行のみ外科upsert を確認。web/src 不変につき tsc ゲート対象外。
