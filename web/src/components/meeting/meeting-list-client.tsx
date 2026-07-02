@@ -18,6 +18,7 @@ import {
   cloudGetMeetingById,
   cloudDeleteMeeting,
 } from "@/lib/meeting/cloud";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 type Row = MeetingSummary & { source: "local" | "cloud" };
 
@@ -62,6 +63,8 @@ export function MeetingListClient() {
     });
     return out;
   }, [list, keyword, sort]);
+
+  const isFiltering = keyword.trim() !== "";
 
   const loadFull = async (row: Row) => (row.source === "cloud" ? cloudGetMeetingById(row.id) : getMeetingById(row.id));
 
@@ -109,6 +112,35 @@ export function MeetingListClient() {
           <p className="mt-1 text-sm text-slate-600">過去の打合せ書を開いて再編集・翌日用に複製できます。{usingCloud ? "（クラウドの履歴を表示中）" : "（この端末の履歴）"}</p>
         </div>
         <Link href="/safety-diary" className="rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50">＋ 新規作成</Link>
+      </div>
+
+      {/* 結論カード（柱0）: いまの状態＝保存件数を3秒で。保存ゼロは新規作成へ誘導。 */}
+      <div className="mt-4">
+        {list.length === 0 ? (
+          <ConclusionCard
+            tone="info"
+            title="打合せ書なし"
+            description="まずは新規に打合せ書を作成・保存しましょう。次から開いて再編集・翌日用に複製できます。"
+            action={{ href: "/safety-diary", label: "新規作成" }}
+          />
+        ) : filtered.length === 0 ? (
+          <ConclusionCard
+            tone="neutral"
+            value={0}
+            unit="件"
+            title="該当なし"
+            description={`保存${list.length}件のうち、いまの検索条件に一致する打合せ書はありません。条件を変えてください。`}
+          />
+        ) : (
+          <ConclusionCard
+            tone="info"
+            value={filtered.length}
+            unit="件"
+            title="保存打合せ書"
+            description={isFiltering ? `全${list.length}件のうち、いまの検索条件に一致する分です。` : undefined}
+            action={{ href: "/safety-diary", label: "新規作成" }}
+          />
+        )}
       </div>
 
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">

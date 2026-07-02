@@ -285,3 +285,44 @@ describe('T2: 条番号クエリが該当条文をトップ表示（本番イン
     expect(results[0]?.title).toMatch(/ 第61条$/);
   });
 });
+
+// T3（診断書 05-search-egov.md / O8-c）: 法令名かな読みを正略称へ展開し、e-Gov も当サイトも
+// 0 件だった「あんえいほう」等（比較 c＝現場のうろ覚え・音声入力）を該当条文へ着地させる。
+// 正式名称・別略称は O8-a で解決済みのため、本タスクの本丸は「読み」で 0→ヒットにすること。
+describe('T3: 法令名かな読みが該当法令の条文へ着地（本番インデックス回帰）', () => {
+  // かな読み → その法令（lawShort）の条文が law カテゴリで 1 件以上ヒットする。
+  const READINGS: { query: string; lawShort: string }[] = [
+    { query: 'あんえいほう', lawShort: '安衛法' },
+    { query: 'あんえいそく', lawShort: '安衛則' },
+    { query: 'くれーんそく', lawShort: 'クレーン則' },
+    { query: 'ゆうきそく', lawShort: '有機則' },
+    { query: 'とっかそく', lawShort: '特化則' },
+    { query: 'さんけつそく', lawShort: '酸欠則' },
+  ];
+
+  it.each(READINGS)('「$query」で $lawShort の条文がヒットする（読みで 0→ヒット）', async ({ query, lawShort }) => {
+    const index = await buildSearchIndex();
+    const results = searchItems(index, query, 'law', 10);
+    expect(results.length).toBeGreaterThan(0);
+    // 全件が当該法令の条文（title が「<略称> 第N条」形）で、他法令へ流れない。
+    expect(results.every((r) => r.title.startsWith(`${lawShort} `))).toBe(true);
+  });
+
+  it('読み＋条番号「あんえいほう 88条」は 1位が 安衛法 第88条（O8-b と相乗）', async () => {
+    const index = await buildSearchIndex();
+    const results = searchItems(index, 'あんえいほう 88条', 'all', 10);
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0]?.category).toBe('law');
+    expect(results[0]?.title).toBe('安衛法 第88条');
+    expect(results[0]?.url).toContain('&art=');
+  });
+
+  it('正式名称・別略称は従来どおり（読み展開が既存ヒットを奪わない回帰）', async () => {
+    const index = await buildSearchIndex();
+    // 正式名称（O8-a で解決済み）: 1位が 安衛則 第563条 のまま
+    const full = searchItems(index, '労働安全衛生規則 第563条', 'all', 10);
+    expect(full[0]?.title).toBe('安衛則 第563条');
+    // 2 語 AND（読みでない通常語）も不変
+    expect(searchItems(index, '石綿 事前調査', 'all', 10).length).toBeGreaterThan(0);
+  });
+});
