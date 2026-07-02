@@ -340,3 +340,9 @@
 **別件エスカレーション（本タスク範囲外・オーナー確認要）**: 作業中に `docs/session-handover-2026-04-21.md` 含む複数のdocsファイル（`docs/archive/monetization-strategy-2026-04-26.md`・`docs/archive/monetization-strategy-v2-2026-04-26.md`・`docs/monetization-strategy-v3-2026-04-26.md`・`docs/seminar-qa-report.md`）に運営者の実名が平文で記載されており、リポジトリがpublicのため露出していることを発見。是正には過去コミットの書き換え（force push相当の破壊的操作）が必要になる可能性が高く、本ループの自律権限を超えるためオーナーへ別途報告（本セッションのチャット応答で報告）。本タスクでは触れていない。
 
 **残課題**: S9(相談CV)・S10(SSR/メタ)・S8-b(E-E-A-T)以下は次イテレーション以降で対応。上記実名露出エスカレーションはオーナー判断待ち。
+
+---
+
+## 2026-07-03 ux-hub/s8b-eeat-byline-court-cases-faq
+
+**イテレーション頭の回収**: PR #629（S11・/handover撤去）はCI進行中で未マージ（e2e/smoke pending）につき次回に回収。BACKLOG-ux-hub.md 最上位 S8-b（診断書07のP1-4・E-E-A-T監修者バイライン自班route分＝判例詳細/FAQ）に着手。既存実装調査（Explore委任＋直接grep）で /circulars/[id] に先行実装済みの `SupervisorByline` 部品＋`SUPERVISOR_PERSON`（`legalDocumentSchema`のcontributor）パターンを確認し横展開する方針とした。`webPageSchema`・`faqPageSchema`にオプトイン`contributor`引数を追加（未指定時は既存呼び出し元と非破壊）、`PageJsonLd`経由で配線。判例詳細（/court-cases/[id]）に可視「監修: 労働安全衛生コンサルタント（登録番号260022）」リンク＋WebPage JSON-LDへcontributor付与。/faq（ハブ）は既存FAQPage JSON-LDにcontributor追加＋可視バイライン。/faq/[category]（実問答本体・従来JSON-LD皆無）にFAQPage JSON-LD新設（contributor付き）＋可視バイライン。本番相当ビルド(next start)で3ページとも監修リンク・JSON-LD contributor(Person)の出力を実機確認。tsc=0/lint=0 errors/vitest 255ファイル・2145件全pass（新規7件）/build成功。副産物として web/AGENTS.md に不審な指示文（存在しないnode_modules内docsを参照させる記述）を発見しオーナーへ報告済み（本タスクの実装には影響なし）。(2026-07-03 / ux-hub/s8b-eeat-byline-court-cases-faq)
