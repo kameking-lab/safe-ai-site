@@ -56,6 +56,9 @@ import { detectChemicalWork, chemicalRaHref } from "@/lib/chemical/work-chemical
 import { detectAccidentWork, accidentsHref } from "@/lib/accidents/work-accident-hints";
 import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
 import { KyTranscribePanel } from "@/components/ky-paper/ky-transcribe-panel";
+import { PaperStage } from "@/components/ky-paper/paper-stage";
+import { FieldEditorSheet } from "@/components/ky-paper/field-editor-sheet";
+import { emptyKyHeaderFieldKeys, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
@@ -110,6 +113,10 @@ export function KyPaperView() {
   const [showActions, setShowActions] = useState(false);
   // 柱1是正: 元請Excel様式への転記支援（項目別コピー・表TSV・CSV）
   const [showTranscribe, setShowTranscribe] = useState(false);
+  // F1（直接操作UI・方式確立）: 用紙キャンバス（β）。?canvas=1 で併存導入し、
+  // 「全体俯瞰→ズーム→セルタップ→その場入力」を正式書式そのものの上で行う。
+  const [canvasMode, setCanvasMode] = useState(false);
+  const [activeFieldKey, setActiveFieldKey] = useState<KyPaperFieldKey | null>(null);
   const [approvalActor, setApprovalActor] = useState("");
   const [approvalComment, setApprovalComment] = useState("");
   // 「前回を複製」を上部にも出すための判定（保存済みKYが端末にあるときだけ）。
@@ -168,6 +175,7 @@ export function KyPaperView() {
     } catch {
       params = null;
     }
+    if (params?.get("canvas") === "1") setCanvasMode(true);
     if (params && DEEP_LINK_KEYS.some((k) => params!.has(k))) {
       const res = applyKyDeepLink(params, baseRec ?? makeToday());
       setRecord(res.record);
@@ -478,6 +486,103 @@ export function KyPaperView() {
   // 柱C-9・A2: 記入の4段（基本情報→危険→対策→確認）進行ナビ。用紙ファーストは不変、用紙の上に進行を可視化。
   const paperSteps = useMemo(() => computeKyPaperSteps(record), [record]);
 
+  // F1: キャンバスβの切替（URLの ?canvas=1 と同期＝リロード/共有しても状態が保てる）。
+  const toggleCanvasMode = useCallback((on: boolean) => {
+    setCanvasMode(on);
+    setActiveFieldKey(null);
+    try {
+      const url = new URL(window.location.href);
+      if (on) url.searchParams.set("canvas", "1");
+      else url.searchParams.delete("canvas");
+      window.history.replaceState(null, "", url.toString());
+    } catch {
+      /* URL操作不可の環境では state のみ */
+    }
+  }, []);
+  // F1: 未記入ヘッダー欄（キャンバス上のうっすらハイライト用）
+  const emptyHeaderKeys = useMemo(() => emptyKyHeaderFieldKeys(record), [record]);
+
+  // F1: 用紙キャンバス（β）。全hooks評価後の分岐＝クラシックUIと状態を完全共有する
+  // （record/自動保存/クラウド同期/承認ロック/深リンクがそのまま効く）。
+  if (canvasMode) {
+    return (
+      <div className="min-h-screen bg-slate-100 pb-24 sm:pb-4 print:bg-white print:pb-0">
+        {/* コンパクトバー: 用紙が主役なので操作は1行に集約 */}
+        <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-3 py-1.5 backdrop-blur print:hidden">
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-slate-900">KY用紙</span>
+              <span className="rounded-full border border-sky-300 bg-sky-50 px-2 py-0.5 text-[11px] font-bold text-sky-800">
+                キャンバスβ
+              </span>
+              {paperStatus.remaining !== undefined && paperStatus.remaining > 0 && (
+                <span className="rounded-full bg-sky-600 px-2.5 py-0.5 text-[11px] font-bold text-white">
+                  のこり{paperStatus.remaining}項目
+                </span>
+              )}
+              {locked && (
+                <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800">
+                  {KY_APPROVAL_LABEL[approval.status]}・編集ロック中
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="hidden text-[11px] text-slate-500 sm:inline">{savedLabel}</span>
+              <Link
+                href="/ky/list"
+                className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
+              >
+                保存一覧
+              </Link>
+              <button
+                type="button"
+                onClick={() => toggleCanvasMode(false)}
+                className="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100"
+              >
+                従来表示
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 用紙キャンバス: 初期表示＝全体フィット。タップで入力、ピンチ/ホイール/ボタンでズーム */}
+        <PaperStage heightClassName="h-[calc(100dvh-200px)] min-h-[320px] sm:h-[calc(100dvh-150px)]">
+          <div className="bg-white p-3">
+            <KyPrintSheet
+              record={record}
+              editing={
+                locked
+                  ? undefined
+                  : {
+                      onTapField: (key) => setActiveFieldKey(key),
+                      activeKey: activeFieldKey,
+                      emptyKeys: emptyHeaderKeys,
+                    }
+              }
+            />
+          </div>
+        </PaperStage>
+
+        {/* 欄タップで開く入力エディタ（Phase 1 はヘッダー6欄） */}
+        {activeFieldKey && !locked && (
+          <FieldEditorSheet
+            fieldKey={activeFieldKey}
+            record={record}
+            patch={patch}
+            onClose={() => setActiveFieldKey(null)}
+            onSelectField={(key) => setActiveFieldKey(key)}
+            weather={{ region, setRegion, fetchWeather: () => void handleWeather(), busy: weatherBusy }}
+          />
+        )}
+
+        {/* 印刷経路は従来と同一（正式書式は editing なしの KyPrintSheet） */}
+        <div className="hidden print:block">
+          <KyPrintSheet record={record} />
+        </div>
+      </div>
+    );
+  }
+
   // P1-B: 元請確認・承認パネル。下書き中は記入の邪魔になるので用紙の下に置き、
   // 提出/承認/差し戻し中（actionable）は操作ボタンを見失わないよう用紙の上に置く。
   const approvalPanel = (
@@ -563,6 +668,15 @@ export function KyPaperView() {
               </button>
             )}
           </div>
+          {/* F1: 用紙キャンバスβ（全体俯瞰→ズーム→タップ入力）への入口 */}
+          <button
+            type="button"
+            onClick={() => toggleCanvasMode(true)}
+            title="用紙全体を1画面で見ながら、タップした欄をその場で入力できる新表示（β）"
+            className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
+          >
+            🗺 キャンバスβ
+          </button>
           {/* ズーム */}
           <div className="flex items-center gap-1 rounded-full border border-slate-300 bg-white p-0.5">
             <button type="button" aria-label="縮小" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 10) / 10))} className="rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">－</button>
