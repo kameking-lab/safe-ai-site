@@ -53,7 +53,6 @@ export function NearMissClient() {
     const today = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 既定日付（SSRハイドレーション差異回避）
     setForm(emptyForm(today));
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 保存済み報告の読込
     setReports(getNearMissReports());
   }, []);
 
