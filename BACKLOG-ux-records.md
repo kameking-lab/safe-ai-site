@@ -30,6 +30,7 @@
 
 - [x] 【柱0補充】/safety-diary/list（保存した打合せ書一覧）に結論カード未設置＝対になる `/ky/list` はConclusionCard＋次アクション済みなのに、こちらはh1+説明文+検索/並替のみで非対称だった（O10〜S3系タスクは他レーン未着手で全ブロック中のため柱0/柱3巡回で補充・発見）。`MeetingListClient` に `/ky/list` と同型の3状態ConclusionCard（空=「保存した打合せ書なし」＋次アクション「新規作成」／検索0件=「該当なし」／通常=件数＋「新規作成」）を追加し対称化。共通基盤は import のみ（足すだけ）。無読Playwright 7/7合格。(2026-07-03, #593)
 - [x] 【補充・診断07残課題】lint警告46件のうち当班所有ファイル分23件を掃除（site-records各client 7ファイル: incident-report/induction/inspection/monthly/near-miss/patrol/procedure ＋ ky-paper-view.tsx）。上位未着手5件(O10/O15/S1/S2/S3)がF1(fable)/O14(data)依存で全ブロック中のため補充。原因は`react-hooks/set-state-in-effect`が各useEffect内の最初のsetState呼び出し1箇所のみ診断対象なのに、2箇所目以降にも重複してeslint-disableを付与していたこと＝各effect1箇所のみ残し重複除去（実地検証で裏取り）。未使用import(summarizePatrol/summarizeInduction、定義側は他所で使用中のため残置)・ky-paper-view.tsxのexhaustive-deps(setNoticeをdeps追加、useCallback([])で安定参照のため無害)も是正。他班ファイル分23件は対象外・不変。tsc=0/lint errors=0(当班分23→0)/vitest 1975 pass/build成功。(2026-07-03, #597)
+- [x] 【柱0補充】/foreign-workers/status/[status]（在留資格ガイド詳細・全11ページ）に結論カード未設置＝教育コース詳細12ページ(#536系)と同型で、区分見出し＋本文段落から始まり次アクション(多言語安全教育教材を見る)がページ最下部navに埋もれていた（上位未着手5件がF1/O14依存で全ブロック中のため柱0巡回で補充）。当班所有 `StatusConclusion`（components/foreign-workers/status-conclusion.tsx）を新設し全11ページheader直下へ配置＝在留期間／就労制限の有無／転職可否の3チップ＋次アクション「多言語安全教育教材を見る」(→/foreign-workers/safety-training)。旧ヘッダーの重複summary段落は撤去しカードdescriptionへ集約（足す＋重複解消）。表示文言はrule既載データのまま・新規の法的主張なし。generateStaticParams・11ページのSSGは不変。無読Playwright 58/58合格（全11ページ×5項目＋就労制限/転職可否の対称チェック3件）。(2026-07-03, PR未確定)
 
 ## 補充の指針（未着手3件未満で起こす）
 - 自領域route の柱0未適用箇所・無読テスト不合格画面・第三者レビュー指摘。

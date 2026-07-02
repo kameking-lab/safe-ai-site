@@ -1,4 +1,5 @@
 import { SITE_NAME, SITE_URL } from "@/lib/seo-metadata";
+import { SUPERVISOR_NAME } from "@/components/SupervisorByline";
 
 type Schema = Record<string, unknown>;
 
@@ -271,6 +272,22 @@ export function breadcrumbSchema(items: { name: string; url: string }[]): Schema
   };
 }
 
+/**
+ * サイト監修者（労働安全衛生コンサルタント）のPerson表現。
+ * 通達の発出者（author/publisher=Organization）とは別軸のE-E-A-T表記のため
+ * contributor（schema.org公式プロパティ＝二次的な寄与者）として付与する。
+ */
+const SUPERVISOR_PERSON: Schema = {
+  "@type": "Person",
+  name: SUPERVISOR_NAME,
+  url: `${SITE_URL}/about`,
+  hasOccupation: {
+    "@type": "Occupation",
+    name: "労働安全衛生コンサルタント",
+    occupationLocation: { "@type": "Country", name: "Japan" },
+  },
+};
+
 export function legalDocumentSchema(input: {
   url: string;
   title: string;
@@ -304,6 +321,7 @@ export function legalDocumentSchema(input: {
     ...(input.legislationApplies
       ? { legislationApplies: input.legislationApplies }
       : {}),
+    contributor: SUPERVISOR_PERSON,
     inLanguage: "ja",
   };
 }

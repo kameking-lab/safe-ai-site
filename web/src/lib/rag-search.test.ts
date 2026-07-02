@@ -73,3 +73,26 @@ describe("Chrome R8 emergency RAG pins", () => {
     expect(hit).toBe(true);
   });
 });
+
+describe("O5: synonyms.ts:166 是正＋口語「頻度」「資格」拡充（診断書04 T4）", () => {
+  it("「健康診断の頻度」で安衛則第44条・第45条が top5 に入る", () => {
+    const { articles } = searchRelevantArticlesWithScore("健康診断の頻度", 5);
+    const nums = articles
+      .filter((a) => a.lawShort === "安衛則")
+      .map((a) => a.articleNum);
+    expect(nums).toContain("第44条");
+    expect(nums).toContain("第45条");
+  });
+
+  it("「酸欠 資格」で酸欠則第11条が top5 に入る", () => {
+    const { articles } = searchRelevantArticlesWithScore("酸欠 資格", 5);
+    const hit = articles.some((a) => a.lawShort === "酸欠則" && a.articleNum === "第11条");
+    expect(hit).toBe(true);
+  });
+
+  it("気積の同義語展開先が事務所則第2条（第14条=排水は誤り）", () => {
+    const { articles } = searchRelevantArticlesWithScore("気積の基準", 5);
+    const jimusho = articles.find((a) => a.lawShort === "事務所則");
+    expect(jimusho?.articleNum).toBe("第2条");
+  });
+});

@@ -75,6 +75,7 @@ param(
   [switch]$Register,
   [switch]$InstallUserStartup,
   [switch]$WhatIf,
+  [switch]$SelfTest,
   [string]$ConfigPath = "",
   [string]$ClaudeCmd = "claude"
 )
@@ -120,6 +121,72 @@ function Fmt([string]$key, [hashtable]$vals) {
   $t = S $key
   if ($vals) { foreach ($k in $vals.Keys) { $t = $t.Replace('{' + $k + '}', [string]$vals[$k]) } }
   return $t
+}
+
+# Acquire the exclusive docs/loop-status.md lock (CreateNew = atomic "only if absent"), reclaiming a
+# STALE orphan. If a prior holder is killed between CreateNew and Remove-Item, the .lock survives
+# forever and every future status write fails to acquire it - freezing the liveness heartbeat into a
+# false "loop is dead" alarm (watch point #1). A legit hold is sub-second even with all six lanes
+# serialized, so a lock older than $StaleSeconds cannot be live: reclaim it once and retry. Returns
+# $true if held (caller MUST Remove-Item the lock when done), $false after exhausting retries. Shared
+# by every status write in this launcher (banner reconcile, config-error banner) and mirrors the
+# identical Get-StatusLock in loop-report-status.ps1 so the two writers agree on reclamation.
+function Get-LauncherStatusLock {
+  param([string]$LockPath, [int]$StaleSeconds = 60, [int]$Tries = 25, [int]$DelayMs = 200)
+  for ($try = 0; $try -lt $Tries; $try++) {
+    try {
+      $fs = [System.IO.File]::Open($LockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+      $fs.Close(); return $true
+    } catch {
+      $reclaimed = $false
+      try {
+        $li = Get-Item -LiteralPath $LockPath -ErrorAction SilentlyContinue
+        if ($li -and (((Get-Date) - $li.LastWriteTime).TotalSeconds -gt $StaleSeconds)) {
+          Remove-Item -LiteralPath $LockPath -Force -ErrorAction SilentlyContinue
+          Write-Launcher ("reclaimed stale status lock (age > " + $StaleSeconds + "s; prior holder likely killed mid-write).")
+          $reclaimed = $true
+        }
+      } catch {}
+      if (-not $reclaimed) { Start-Sleep -Milliseconds $DelayMs }
+    }
+  }
+  return $false
+}
+
+# ---------------------------------------------------------------------------
+# -SelfTest: offline verification of the shared status-lock helper (stale-orphan reclamation +
+# fresh-lock respect). Temp files only - no Claude, no real status file, no config, no network.
+# Exits 0 on PASS, 1 on FAIL. Runs before any config read so a broken config cannot block the test.
+# ---------------------------------------------------------------------------
+if ($SelfTest) {
+  $fails = 0
+  $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("loop-launcher-selftest-" + [System.Guid]::NewGuid().ToString("N"))
+  New-Item -ItemType Directory -Path $tmp -Force | Out-Null
+  $lp = Join-Path $tmp "status.md.lock"
+  function Assert-L([string]$n, [bool]$c) {
+    if ($c) { Write-Launcher ("[SELFTEST] PASS: " + $n) } else { Write-Launcher ("[SELFTEST] FAIL: " + $n); $script:fails++ }
+  }
+  try {
+    # A) Clean acquire when no lock exists -> true, lock file left for the holder.
+    $a = Get-LauncherStatusLock $lp 60 5 50
+    Assert-L "clean acquire returns true" ($a -eq $true)
+    Assert-L "clean acquire leaves lock file" (Test-Path -LiteralPath $lp)
+    if (Test-Path -LiteralPath $lp) { Remove-Item -LiteralPath $lp -Force }
+    # B) A FRESH foreign lock (age 0) must be respected, not reclaimed -> false.
+    $fs = [System.IO.File]::Open($lp, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None); $fs.Close()
+    $b = Get-LauncherStatusLock $lp 60 3 30
+    Assert-L "fresh foreign lock is NOT reclaimed" ($b -eq $false)
+    Assert-L "fresh foreign lock still present" (Test-Path -LiteralPath $lp)
+    # C) A STALE orphan (backdated past threshold) is reclaimed and acquired -> true.
+    (Get-Item -LiteralPath $lp).LastWriteTime = (Get-Date).AddSeconds(-120)
+    $c = Get-LauncherStatusLock $lp 60 5 50
+    Assert-L "stale orphan lock is reclaimed and acquired" ($c -eq $true)
+    if (Test-Path -LiteralPath $lp) { Remove-Item -LiteralPath $lp -Force }
+  } finally {
+    try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
+  }
+  if ($fails -eq 0) { Write-Launcher "[SELFTEST] ALL PASS"; exit 0 }
+  Write-Launcher ("[SELFTEST] " + $fails + " FAILURE(S)"); exit 1
 }
 
 # ---------------------------------------------------------------------------
@@ -178,6 +245,148 @@ if ($Register) {
 $startupFolder = [Environment]::GetFolderPath('Startup')
 $startupCmdPath = Join-Path $startupFolder "safe-ai-loop-launcher.cmd"
 
+# Scheduler self-check: is the 'safe-ai-loop-runner' task actually pointing at THIS launcher
+# (permanent fix active), or still at the old baked-deadline loop-runner (needs one elevated
+# -Register)? Surfacing 'stale'/'missing' in loop-status.md keeps the one remaining manual
+# step visible in the same file the operator watches. Defined here (before the -InstallUserStartup
+# path) so the install can reconcile the banner without a full launcher run.
+function Get-SchedulerHealth {
+  try {
+    $t = Get-ScheduledTask -TaskName 'safe-ai-loop-runner' -ErrorAction Stop
+    $a = [string]$t.Actions[0].Arguments
+    if (($a -match 'loop-launcher\.ps1') -and ($a -notmatch 'UntilIso')) { return 'ok' }
+    return 'stale'
+  } catch { return 'missing' }
+}
+
+# Admin-free resurrection self-check: does the current user's Startup entry exist and point at THIS
+# launcher? When present, PC-restart recovery is guaranteed with NO admin, so the loud "no
+# auto-resurrection" banner must NOT fire even if the (admin) scheduler task is still stale.
+function Get-StartupResurrectionHealth {
+  try {
+    if (-not (Test-Path $startupCmdPath)) { return 'missing' }
+    $body = Get-Content -Raw -Path $startupCmdPath
+    if ($body -match 'loop-launcher\.ps1') { return 'ok' }
+    return 'stale'
+  } catch { return 'missing' }
+}
+
+# Surgically reconcile the reboot-resurrection banner inside an EXISTING loop-status.md to the
+# current (or just-installed) health, WITHOUT a full launcher regeneration. Called from the
+# -InstallUserStartup path: otherwise the loud "no auto-resurrection" alarm from a prior launcher
+# run lingers until the next logon run (the scheduler is stale, so there is no daily 07:00 pass),
+# while the per-iteration heartbeat keeps the top "last updated" line fresh - so a false loud
+# banner looks current and pushes the owner toward an admin step that O17 made optional.
+#
+# ASCII-safe by construction: this .ps1 stays pure ASCII (Windows PowerShell 5.x mis-decodes
+# BOM-less Japanese as Shift-JIS), so it NEVER pattern-matches Japanese literals. Instead it locates
+# the banner STRUCTURALLY using anchors read at runtime from loop-status-strings.txt (UTF-8): the
+# resurrection banner is the first "## " block sitting between the deadline line and the lanes
+# header that is NOT one of the deadline banners (warn / stopped). This handles the current header
+# text AND any legacy text, and never clobbers the deadline banners or the lane rows below.
+function Set-ResurrectionBanner {
+  param([switch]$AssumeStartupInstalled, [switch]$Preview)
+  if (-not (Test-Path $statusPath)) {
+    Write-Launcher "banner reconcile skipped: loop-status.md not present yet (next launcher run creates it)."
+    return
+  }
+  $sched = Get-SchedulerHealth
+  $startup = if ($AssumeStartupInstalled) { 'ok' } else { Get-StartupResurrectionHealth }
+  $launcherFile = Join-Path $repoRoot 'loop-launcher.ps1'
+  # Desired banner lines for the current health (empty = both paths covered -> no banner at all).
+  $desired = @()
+  if ($sched -ne 'ok' -and $startup -ne 'ok') {
+    $desired = @((S "resurrectMissingHeader"), "", (S "resurrectMissingBody1"),
+      (Fmt "resurrectMissingBody2" @{ LAUNCHER = $launcherFile }),
+      (Fmt "resurrectMissingBody3" @{ LAUNCHER = $launcherFile }))
+  } elseif ($sched -ne 'ok' -and $startup -eq 'ok') {
+    $desired = @((S "resurrectStartupHeader"), "", (S "resurrectStartupBody1"),
+      (Fmt "resurrectStartupBody2" @{ LAUNCHER = $launcherFile }))
+  }
+  # Runtime anchors (all from the UTF-8 strings file - never hard-coded Japanese here).
+  $deadlineTpl = S "deadline"; $dph = $deadlineTpl.IndexOf('{UNTIL}')
+  $deadlinePrefix = if ($dph -ge 0) { $deadlineTpl.Substring(0, $dph) } else { $deadlineTpl }
+  $lanesHeader = (S "lanesHeader").Trim()
+  $warnTpl = S "warnHeader"; $wph = $warnTpl.IndexOf('{DAYS}')
+  $warnPrefix = if ($wph -ge 0) { $warnTpl.Substring(0, $wph) } else { $warnTpl }
+  $stoppedHeader = (S "stoppedHeader").Trim()
+  if ($deadlinePrefix.Trim() -eq "" -or $lanesHeader -eq "" -or $lanesHeader -eq "lanesHeader") {
+    Write-Launcher "banner reconcile skipped: status strings unavailable (safe no-op)."
+    return
+  }
+  # Serialize the read-modify-write against the lane heartbeats (loop-report-status.ps1), which
+  # write this same file every iteration under the same lock. Preview writes to a private dry file,
+  # so it needs no lock. Non-fatal: if the lock cannot be taken, skip rather than risk a torn write.
+  $lockPath = $statusPath + ".lock"
+  $haveLock = $false
+  if (-not $Preview) {
+    $haveLock = Get-LauncherStatusLock $lockPath
+    if (-not $haveLock) {
+      Write-Launcher "banner reconcile skipped: could not acquire status lock (non-fatal)."
+      return
+    }
+  }
+  try {
+  $lines = @(Get-Content -Encoding UTF8 -Path $statusPath)
+  # Anchor the search window between the deadline line and the lanes header.
+  $deadlineIdx = -1; $lanesIdx = -1
+  for ($i = 0; $i -lt $lines.Count; $i++) {
+    $t = [string]$lines[$i]
+    if ($deadlineIdx -lt 0 -and $t.StartsWith($deadlinePrefix)) { $deadlineIdx = $i }
+    elseif ($deadlineIdx -ge 0 -and $t.Trim() -eq $lanesHeader) { $lanesIdx = $i; break }
+  }
+  if ($deadlineIdx -lt 0 -or $lanesIdx -lt 0) {
+    Write-Launcher "banner reconcile skipped: deadline/lanes anchors not found (next full launcher run regenerates)."
+    return
+  }
+  # Within the window, the resurrection banner is the FIRST "## " block that is not a deadline banner.
+  function Test-IsDeadlineBanner([string]$h) {
+    $ht = $h.Trim()
+    if ($ht -eq $stoppedHeader) { return $true }
+    if ($warnPrefix.Trim() -ne "" -and $h.StartsWith($warnPrefix)) { return $true }
+    return $false
+  }
+  $bstart = -1
+  for ($j = $deadlineIdx + 1; $j -lt $lanesIdx; $j++) {
+    if ([string]$lines[$j] -match '^##\s') {
+      if (Test-IsDeadlineBanner ([string]$lines[$j])) { break }  # deadline banner first => no resurrection banner
+      $bstart = $j; break
+    }
+  }
+  $result = New-Object System.Collections.Generic.List[string]
+  if ($bstart -ge 0) {
+    # Resurrection banner block = [bstart, next "## " heading within window) incl. its trailing blanks.
+    $bend = $lanesIdx
+    for ($j = $bstart + 1; $j -lt $lanesIdx; $j++) { if ([string]$lines[$j] -match '^##\s') { $bend = $j; break } }
+    for ($k = 0; $k -lt $bstart; $k++) { $result.Add([string]$lines[$k]) }
+    if ($desired.Count -gt 0) { foreach ($d in $desired) { $result.Add([string]$d) }; $result.Add("") }
+    for ($k = $bend; $k -lt $lines.Count; $k++) { $result.Add([string]$lines[$k]) }
+  } elseif ($desired.Count -gt 0) {
+    # No resurrection banner present but one is now needed: insert after the deadline line's blank.
+    $insertAt = $deadlineIdx + 1
+    if ($insertAt -lt $lines.Count -and ([string]$lines[$insertAt]).Trim() -eq "") { $insertAt++ }
+    for ($k = 0; $k -lt $insertAt; $k++) { $result.Add([string]$lines[$k]) }
+    foreach ($d in $desired) { $result.Add([string]$d) }
+    $result.Add("")
+    for ($k = $insertAt; $k -lt $lines.Count; $k++) { $result.Add([string]$lines[$k]) }
+  } else {
+    Write-Launcher "banner reconcile: no banner needed and none present (no-op)."
+    return
+  }
+  $newText = ($result -join "`r`n") + "`r`n"
+  if ($Preview) {
+    $dry = Join-Path $logDir "loop-status.bannerdry.md"
+    Set-Content -Path $dry -Value $newText -Encoding UTF8
+    Write-Launcher ("[WHATIF] resurrection banner reconcile -> " + $dry + " (sched=" + $sched + ", startup=" + $startup + ", bannerLines=" + $desired.Count + ")")
+  } else {
+    Set-Content -Path $statusPath -Value $newText -Encoding UTF8
+    Write-Launcher ("resurrection banner reconciled in loop-status.md (sched=" + $sched + ", startup=" + $startup + ", bannerLines=" + $desired.Count + ")")
+  }
+  } finally {
+    if ($haveLock) { try { Remove-Item -Path $lockPath -Force -ErrorAction SilentlyContinue } catch {} }
+  }
+}
+
 function Install-UserStartupEntry {
   param([string]$LauncherPath)
   # A .cmd (not a .lnk) so it is plain text, diff-able, and needs no COM/WScript.Shell. -WindowStyle
@@ -202,6 +411,10 @@ if ($InstallUserStartup) {
   $launcherPath = Join-Path $repoRoot "loop-launcher.ps1"
   try {
     Install-UserStartupEntry -LauncherPath $launcherPath
+    # Clear the loud "no auto-resurrection" alarm in loop-status.md immediately (the entry now
+    # exists), instead of leaving it stale until the next full launcher run. AssumeStartupInstalled
+    # so a -WhatIf preview reflects the intended post-install banner, not the pre-install health.
+    Set-ResurrectionBanner -AssumeStartupInstalled -Preview:$WhatIf
     if (-not $WhatIf) {
       Write-Launcher "Done. The loops now auto-resurrect at every logon with NO admin. Optional: run -Register from an elevated PowerShell to also get the daily 07:00 heartbeat."
     }
@@ -213,13 +426,88 @@ if ($InstallUserStartup) {
 }
 
 # ---------------------------------------------------------------------------
+# Config-error LOUD banner. When loop-config.json is missing or unparseable the launcher CANNOT
+# start any lane - but the OLD design exited 1 writing only to the private launcher log, never to
+# docs/loop-status.md. The owner's single watch-file then froze at its last good render with NO
+# explanation - the exact silent-death class O16 exists to kill, and the owner's most common manual
+# action (hand-editing untilIso) is precisely what fat-fingers the JSON. This rewrites the watch-file
+# with a loud "config broken, lanes NOT started, fix the JSON" banner, preserving the lanes'
+# self-report region verbatim (a lane from a PRIOR launch may still be alive and reporting) so the
+# emergency rewrite never destroys live self-reports. Honors -WhatIf; serialized by the shared lock.
+function Write-ConfigErrorStatus {
+  param([string]$ConfigFile, [string]$ErrorMsg)
+  $reportBegin = "<!-- LANE-REPORT:BEGIN (managed by loop-report-status.ps1) -->"
+  $reportEnd = "<!-- LANE-REPORT:END -->"
+  $now = Get-Date
+  $out = New-Object System.Collections.Generic.List[string]
+  $out.Add((S "title")); $out.Add("")
+  $out.Add((S "intro1")); $out.Add((S "intro2")); $out.Add("")
+  $out.Add((Fmt "updated" @{ NOW = $now.ToString("yyyy-MM-dd HH:mm:ss") })); $out.Add("")
+  $out.Add((S "configErrorHeader")); $out.Add("")
+  $out.Add((Fmt "configErrorBody1" @{ CONFIG = $ConfigFile }))
+  $out.Add((S "configErrorBody2"))
+  $out.Add((Fmt "configErrorBody3" @{ ERROR = $ErrorMsg }))
+  # Preserve the lanes' self-report region verbatim if present (never destroy live self-reports).
+  $preserved = $null
+  if (Test-Path $statusPath) {
+    try {
+      $old = @(Get-Content -Encoding UTF8 -Path $statusPath)
+      $b = -1; $e = -1
+      for ($k = 0; $k -lt $old.Count; $k++) {
+        if ($old[$k].Trim() -eq $reportBegin) { $b = $k }
+        elseif ($old[$k].Trim() -eq $reportEnd) { $e = $k; break }
+      }
+      if ($b -ge 0 -and $e -gt $b) { $preserved = $old[$b..$e] }
+    } catch {}
+  }
+  $out.Add(""); $out.Add((S "reportHeader")); $out.Add("")
+  if ($preserved) { foreach ($l in $preserved) { $out.Add([string]$l) } }
+  $out.Add(""); $out.Add((S "watchHeader"))
+  $out.Add((S "watch1")); $out.Add((S "watch2")); $out.Add((S "watch3"))
+  $text = ($out -join "`r`n") + "`r`n"
+  if ($WhatIf) {
+    $dry = Join-Path $logDir "loop-status.dryrun.md"
+    Set-Content -Path $dry -Value $text -Encoding UTF8
+    Write-Launcher ("[WHATIF] config-error banner -> " + $dry + " (config=" + $ConfigFile + ")")
+    return
+  }
+  $lockPath = $statusPath + ".lock"
+  $haveLock = Get-LauncherStatusLock $lockPath
+  if (-not $haveLock) {
+    Write-Launcher "WARN: config-error banner skipped: could not acquire status lock (non-fatal). See launcher log for the error."
+    return
+  }
+  try {
+    $statusDir = Split-Path -Parent $statusPath
+    if ($statusDir -and -not (Test-Path $statusDir)) { New-Item -ItemType Directory -Path $statusDir | Out-Null }
+    Set-Content -Path $statusPath -Value $text -Encoding UTF8
+    Write-Launcher ("config-error banner written to " + $statusPath)
+  } catch {
+    Write-Launcher ("WARN: could not write config-error status (non-fatal): " + $_.Exception.Message)
+  } finally {
+    try { Remove-Item -Path $lockPath -Force -ErrorAction SilentlyContinue } catch {}
+  }
+}
+
+# ---------------------------------------------------------------------------
 # Read config + state.
 # ---------------------------------------------------------------------------
-if (-not (Test-Path $ConfigPath)) { Write-Launcher ("ERROR: config not found: " + $ConfigPath); exit 1 }
+if (-not (Test-Path $ConfigPath)) {
+  Write-Launcher ("ERROR: config not found: " + $ConfigPath)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg (S "configErrorNotFound")
+  exit 1
+}
 try {
   $cfg = Get-Content -Raw -Encoding UTF8 -Path $ConfigPath | ConvertFrom-Json
 } catch {
-  Write-Launcher ("ERROR: could not parse " + $ConfigPath + ": " + $_.Exception.Message); exit 1
+  Write-Launcher ("ERROR: could not parse " + $ConfigPath + ": " + $_.Exception.Message)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg $_.Exception.Message
+  exit 1
+}
+if ($null -eq $cfg -or -not ($cfg.PSObject.Properties.Name -contains "lanes") -or @($cfg.lanes).Count -eq 0) {
+  Write-Launcher ("ERROR: config parsed but has no lanes: " + $ConfigPath)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg (S "configErrorNoLanes")
+  exit 1
 }
 
 $state = $null
@@ -273,30 +561,8 @@ function Get-RunningLanes {
   return $map
 }
 
-# Scheduler self-check: is the 'safe-ai-loop-runner' task actually pointing at THIS launcher
-# (permanent fix active), or still at the old baked-deadline loop-runner (needs one elevated
-# -Register)? Surfacing 'stale'/'missing' in loop-status.md keeps the one remaining manual
-# step visible in the same file the operator watches.
-function Get-SchedulerHealth {
-  try {
-    $t = Get-ScheduledTask -TaskName 'safe-ai-loop-runner' -ErrorAction Stop
-    $a = [string]$t.Actions[0].Arguments
-    if (($a -match 'loop-launcher\.ps1') -and ($a -notmatch 'UntilIso')) { return 'ok' }
-    return 'stale'
-  } catch { return 'missing' }
-}
-
-# Admin-free resurrection self-check: does the current user's Startup entry exist and point at THIS
-# launcher? When present, PC-restart recovery is guaranteed with NO admin, so the loud "no
-# auto-resurrection" banner must NOT fire even if the (admin) scheduler task is still stale.
-function Get-StartupResurrectionHealth {
-  try {
-    if (-not (Test-Path $startupCmdPath)) { return 'missing' }
-    $body = Get-Content -Raw -Path $startupCmdPath
-    if ($body -match 'loop-launcher\.ps1') { return 'ok' }
-    return 'stale'
-  } catch { return 'missing' }
-}
+# (Get-SchedulerHealth and Get-StartupResurrectionHealth are defined earlier, before the
+# -InstallUserStartup path, so the install can reconcile the resurrection banner in place.)
 
 # ---------------------------------------------------------------------------
 # Deadline evaluation (the heart of the permanent fix).

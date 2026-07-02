@@ -39,38 +39,38 @@ export function SignageHourlyStrip({ hourly, locationLabel, status }: SignageHou
   return (
     <div className="rounded-xl border border-slate-600 bg-slate-950/90 p-2">
       <div className="flex flex-wrap items-baseline justify-between gap-1">
-        <p className="text-[10px] font-bold text-slate-100 sm:text-xs">1時間ごとの天気（現在の時間帯〜明日・Open-Meteo）</p>
-        <p className="max-w-[55%] truncate text-[9px] text-slate-400">{locationLabel}</p>
+        <p className="text-[10px] font-bold text-slate-100 sm:text-xs xl:text-lg">1時間ごとの天気（現在の時間帯〜明日・Open-Meteo）</p>
+        <p className="max-w-[55%] truncate text-[9px] text-slate-400 xl:text-sm">{locationLabel}</p>
       </div>
-      <p className="mt-0.5 text-[8px] text-slate-500">先頭が現在の時間帯。幅に応じて折り返し表示（横スクロールなし）。</p>
+      <p className="mt-0.5 text-[8px] text-slate-500 xl:text-sm">先頭が現在の時間帯。幅に応じて折り返し表示（横スクロールなし）。</p>
       <div
-        className="mt-2 grid gap-1 [grid-template-columns:repeat(auto-fill,minmax(46px,1fr))]"
+        className="mt-2 grid gap-1 [grid-template-columns:repeat(auto-fill,minmax(46px,1fr))] xl:[grid-template-columns:repeat(auto-fill,minmax(72px,1fr))]"
         role="list"
         aria-label="1時間ごとの天気予報"
       >
         <div
-          className="flex min-h-[4.5rem] min-w-[2.75rem] flex-col items-center justify-center rounded-lg border border-cyan-700/50 bg-cyan-950/40 px-0.5 py-1 text-center"
+          className="flex min-h-[4.5rem] min-w-[2.75rem] flex-col items-center justify-center rounded-lg border border-cyan-700/50 bg-cyan-950/40 px-0.5 py-1 text-center xl:min-h-[6rem]"
           role="presentation"
         >
-          <span className="text-[8px] font-bold leading-tight text-cyan-200">現在</span>
-          <span className="text-[7px] leading-tight text-cyan-400/90">の時間帯</span>
-          <span className="text-[7px] leading-tight text-cyan-500/80">から</span>
+          <span className="text-[8px] font-bold leading-tight text-cyan-200 xl:text-base">現在</span>
+          <span className="text-[7px] leading-tight text-cyan-400/90 xl:text-sm">の時間帯</span>
+          <span className="text-[7px] leading-tight text-cyan-500/80 xl:text-sm">から</span>
         </div>
         {hourly.map((h) => (
           <div
             key={h.time}
             role="listitem"
-            className="flex min-h-[4.5rem] min-w-0 flex-col items-center justify-start rounded-lg border border-slate-700/90 bg-slate-900/80 px-0.5 py-1 text-center lg:min-h-[5.5rem]"
+            className="flex min-h-[4.5rem] min-w-0 flex-col items-center justify-start rounded-lg border border-slate-700/90 bg-slate-900/80 px-0.5 py-1 text-center lg:min-h-[5.5rem] xl:min-h-[6rem]"
           >
-            <span className="line-clamp-2 text-[7px] leading-tight text-slate-300 sm:text-[8px] lg:text-[9px]">{h.hourLabel}</span>
-            <span className="my-0.5 text-lg leading-none sm:text-xl lg:text-2xl" aria-hidden>
+            <span className="line-clamp-2 text-[7px] leading-tight text-slate-300 sm:text-[8px] lg:text-[9px] xl:text-sm">{h.hourLabel}</span>
+            <span className="my-0.5 text-lg leading-none sm:text-xl lg:text-2xl xl:text-3xl" aria-hidden>
               {weatherIcon(h.weatherCode, h.precipMm)}
             </span>
-            <span className="text-[9px] font-semibold tabular-nums text-white sm:text-[10px] lg:text-xs xl:text-sm">{h.tempC}°</span>
+            <span className="text-[9px] font-semibold tabular-nums text-white sm:text-[10px] lg:text-xs xl:text-2xl">{h.tempC}°</span>
             {h.precipMm >= 0.1 ? (
-              <span className="text-[7px] tabular-nums text-sky-300 sm:text-[8px] lg:text-[9px]">{h.precipMm}mm</span>
+              <span className="text-[7px] tabular-nums text-sky-300 sm:text-[8px] lg:text-[9px] xl:text-sm">{h.precipMm}mm</span>
             ) : (
-              <span className="text-[7px] text-slate-600 sm:text-[8px]">—</span>
+              <span className="text-[7px] text-slate-600 sm:text-[8px] xl:text-sm">—</span>
             )}
           </div>
         ))}

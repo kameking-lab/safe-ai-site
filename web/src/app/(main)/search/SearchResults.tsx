@@ -14,6 +14,9 @@ import {
   BookMarked,
   BookText,
   ArrowRight,
+  ExternalLink,
+  Copy,
+  Check,
 } from 'lucide-react';
 import {
   buildSearchIndex,
@@ -23,6 +26,7 @@ import {
   type SearchItem,
   type SearchCategory,
 } from '@/lib/search-index';
+import { EGOV_LAW_SEARCH_URL, egovHandoffQuery } from '@/lib/cross-search';
 import { trackEvent } from '@/components/Analytics';
 
 const CATEGORIES: SearchCategory[] = ['law', 'precedent', 'notice', 'chemical', 'education', 'accident', 'glossary'];
@@ -276,6 +280,26 @@ function EmptyPrompt() {
 }
 
 function NoResults({ query }: { query: string }) {
+  const [copied, setCopied] = useState(false);
+  const handoff = egovHandoffQuery(query);
+
+  // クエリを e-Gov の検索ボックスへ貼り付けてもらうためクリップボードへ引き継ぐ
+  // （e-Gov 新 UI はキーワードのディープリンク URL が非公開のため、リンクは常に到達可能な
+  //   ポータルトップに固定し、クエリ本文はコピーで渡す＝幽霊リンク 0）。
+  const copyQuery = useCallback(async () => {
+    if (typeof navigator === 'undefined' || !navigator.clipboard) return;
+    try {
+      await navigator.clipboard.writeText(handoff);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // クリップボード不許可環境は黙って無視（e-Gov リンク自体は機能する）
+    }
+  }, [handoff]);
+
+  const linkCls =
+    'inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300';
+
   return (
     <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-800/50">
       <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -284,11 +308,39 @@ function NoResults({ query }: { query: string }) {
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         表記を変える（カタカナ／漢字）、語を短くする、別のキーワードでお試しください。
       </p>
+
+      {/* 収録範囲の明示：0件を「規定がない」と誤読させない（安全上の誤読防止）。 */}
+      <p className="mx-auto mt-4 max-w-xl rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-left text-xs leading-relaxed text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+        <span className="font-semibold">見つからない＝「規定がない」ではありません。</span>
+        本サイトは主要法令の条文（抄録）・通達・判例などを収載しており、未収載の条文もあります。
+        条文の有無・原文は政府公式の <span className="font-semibold">e-Gov 法令検索</span> でご確認ください。
+      </p>
+
       <div className="mt-4 flex flex-wrap justify-center gap-2 text-xs">
-        <Link href="/law-search" className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+        <Link href="/law-search" className={linkCls}>
           法令条文を全文検索
         </Link>
-        <Link href="/chatbot" className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 font-semibold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
+        <a
+          href={EGOV_LAW_SEARCH_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => trackEvent('search_zero_result_egov', { query })}
+          className={linkCls}
+        >
+          <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+          e-Gov法令検索で調べる
+        </a>
+        {handoff && (
+          <button type="button" onClick={copyQuery} className={linkCls} aria-live="polite">
+            {copied ? (
+              <Check className="h-3.5 w-3.5 text-emerald-600" aria-hidden="true" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+            )}
+            {copied ? 'コピーしました' : '検索語をコピー'}
+          </button>
+        )}
+        <Link href="/chatbot" className={linkCls}>
           AIに質問する
         </Link>
       </div>

@@ -53,12 +53,12 @@ export function SignageRiskPrediction({ weatherData, precomputedRisks }: Props) 
   return (
     <section className="flex min-h-0 shrink-0 flex-col overflow-hidden rounded-xl border border-slate-600 bg-slate-900/90 p-2 sm:rounded-2xl sm:p-3 xl:max-h-[34vh]">
       <div className="flex shrink-0 items-center justify-between gap-2">
-        <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base">
+        <h2 className="text-xs font-bold tracking-wide text-slate-100 sm:text-sm lg:text-base xl:text-xl">
           本日のリスク予測
         </h2>
         <a
           href="/risk-prediction"
-          className="rounded-lg border border-blue-600/60 px-2 py-1 text-[9px] font-semibold text-blue-300 hover:bg-blue-950/50 sm:text-[10px]"
+          className="rounded-lg border border-blue-600/60 px-2 py-1 text-[9px] font-semibold text-blue-300 hover:bg-blue-950/50 sm:text-[10px] xl:text-sm"
           target="_blank"
           rel="noreferrer"
         >
@@ -73,17 +73,17 @@ export function SignageRiskPrediction({ weatherData, precomputedRisks }: Props) 
             className={`rounded-lg border p-2 ${riskBgClass(risk.level)} sm:rounded-xl sm:p-2.5`}
           >
             <div className="flex items-start gap-2">
-              <span className="shrink-0 text-base xl:text-2xl">{risk.icon}</span>
+              <span className="shrink-0 text-base xl:text-3xl">{risk.icon}</span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold xl:text-xs ${riskBadgeClass(risk.level)}`}>
+                  <span className={`rounded px-1.5 py-0.5 text-[9px] font-bold xl:text-base ${riskBadgeClass(risk.level)}`}>
                     {risk.level}リスク
                   </span>
-                  <span className={`text-[10px] font-bold sm:text-xs xl:text-base ${riskTextClass(risk.level)}`}>
+                  <span className={`text-[10px] font-bold sm:text-xs xl:text-2xl ${riskTextClass(risk.level)}`}>
                     {risk.label}
                   </span>
                 </div>
-                <p className={`mt-0.5 text-[9px] leading-relaxed sm:text-[10px] xl:text-xs ${riskTextClass(risk.level)} opacity-80`}>
+                <p className={`mt-0.5 text-[9px] leading-relaxed sm:text-[10px] xl:text-lg ${riskTextClass(risk.level)} opacity-80`}>
                   {risk.reason}
                 </p>
               </div>
@@ -97,11 +97,11 @@ export function SignageRiskPrediction({ weatherData, precomputedRisks }: Props) 
             className={`rounded-lg border p-1.5 ${riskBgClass(risk.level)} sm:rounded-xl sm:p-2`}
           >
             <div className="flex items-center gap-1.5">
-              <span className="text-sm">{risk.icon}</span>
-              <span className={`rounded px-1.5 py-0.5 text-[8px] font-bold ${riskBadgeClass(risk.level)}`}>
+              <span className="text-sm xl:text-xl">{risk.icon}</span>
+              <span className={`rounded px-1.5 py-0.5 text-[8px] font-bold xl:text-sm ${riskBadgeClass(risk.level)}`}>
                 {risk.level}
               </span>
-              <span className={`text-[9px] font-semibold sm:text-[10px] ${riskTextClass(risk.level)}`}>
+              <span className={`text-[9px] font-semibold sm:text-[10px] xl:text-lg ${riskTextClass(risk.level)}`}>
                 {risk.label}
               </span>
             </div>
