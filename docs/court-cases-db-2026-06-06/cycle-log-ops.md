@@ -1,5 +1,9 @@
 # cycle-log-ops — 運用・自律運転インフラ班の作業ログ
 
+## 2026-07-02 S13-a 報告の一元化（loop-status.md 自己報告区画）
+
+BACKLOG-ops S13-a（報告の一元化）を実装。診断08 §D「各レーンがイテレーション末尾に最終稼働・直近マージPR・残open・判断1行を1ファイルへ書く」を、O16逸脱2の「launcher単独生成で概ね不要」判断を覆して正式実装した（理由: launcherは点火/日次でしか更新できず、permanent runnerが回る大半の時間は行が固定＝§Dの per-iteration 鮮度を原理的に出せない）。新規 `loop-report-status.ps1`（レーン別に最終稼働/直近PR(git log origin/main の`(#NNN)`・レーンscope優先)/残open(BACKLOG-<lane>.mdの`- [ ]`数)/判断1行を、`<!-- LANE-REPORT:BEGIN…END -->`区画へ**自レーン行だけ外科upsert**・ロックファイルで6レーン直列化・全失敗を非致命化・ASCIIソース＋`-WhatIf`）。集約は launcher が点火時に環境変数 `SAFE_AI_LOOP_STATUS`＝本体リポジトリの docs/loop-status.md 絶対パスを子へexportし、別クローンのレーンも**1ファイル**へ書く（loop-status.md は gitignore なので追跡churn無し）。launcher は全面書換え時に区画を**逐語保存**（`Add-LaneReportSection`）＋初回は enabled レーン数だけプレースホルダ行。loop-status-strings.txt に reportHeader/reportLine/reportEmptyNote/reportPlaceholder を追加。6レーンプロンプトに step5.5（報告一元化）を追記。**実測**: launcher `-WhatIf` で scaffold生成＋生きた行(ux-hub PRESERVE-TEST-ROW)の保存を確認、reporter で ops/data 2レーンが環境変数経由で同一ファイルへ書込み・ops再報告が行を重複せず置換（count=1）を確認＝S13-a完了条件充足。規約の正本は O16-implementation-notes.md「逸脱2の解消」。
+
 ## 2026-07-02 O16 一括（点火の恒久解＋補給＋点検）
 
 BACKLOG-ops O16-a/b/c を1PRで実装。運転計画(11-operation-plan.md)手順①。

@@ -26,6 +26,7 @@
 3) ゲート: `cd web` で `npx tsc --noEmit`=0 / `npm run lint`=errors0 / `npx vitest run`=全pass / `npm run build`=成功。再生成データは復元。一時物は削除。
 4) commit(末尾に Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>)→push→`gh pr create`。CI待ちはこのターンで待たず次イテレーションの1)で回収。
 5) BACKLOG-seo.md の当該を[x](要約付き)に、docs/court-cases-db-2026-06-06/cycle-log-seo.md に1段落記録。working tree clean で終える。
+5.5) 【報告一元化】イテレーション末尾に `powershell -NoProfile -ExecutionPolicy Bypass -File ./loop-report-status.ps1 -Lane seo -Note "<直近の判断1行>"` を実行し docs/loop-status.md の自レーン行（最終稼働・直近マージPR・残open・判断1行）を更新（gitignore対象・環境変数 SAFE_AI_LOOP_STATUS で集約先へ自動ルーティング・失敗は非致命なので気にせず次へ）。
 6) マージ済みの自分のリモートブランチは末尾で `git push origin --delete <branch>`。未マージ・他班のブランチは触るな。
 
 【不可侵の絶対ルール】捏造0/水増し0(既存の作り直しで件数を稼がない)/既存破壊0/法令正確性は不可侵(隠すのは可・消す/曖昧化/捏造は不可)/main直接コミット禁止/CI緑のみマージ/env・Supabase・課金は独断禁止(Path A=設計ドラフトまで・実装は社長の明示指示待ち)/ライセンス厳守(政府公開ソースのみ)/main常時デプロイ可能/安全タグ fable5-loop-start-2026-06-10(および既存タグ)維持。

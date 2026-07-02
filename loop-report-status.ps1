@@ -1,0 +1,234 @@
+<#
+.SYNOPSIS
+  Per-lane self-report writer for docs/loop-status.md (diagnosis 08 section D:
+  "report unification"). Each lane calls this at the END of every iteration to stamp its own
+  row - last active time, latest merged PR, remaining open task count, and a one-line judgment -
+  into the SINGLE status file the owner watches.
+
+.DESCRIPTION
+  loop-launcher.ps1 owns the top of docs/loop-status.md (deadline banner, scheduler health, the
+  per-lane ignition rows) and rewrites it on every logon / daily 07:00 / ignition. This script
+  owns ONE delimited region inside that same file:
+
+      <!-- LANE-REPORT:BEGIN (managed by loop-report-status.ps1) -->
+      - ops : ... one line per lane ...
+      <!-- LANE-REPORT:END -->
+
+  The launcher PRESERVES this region verbatim when it rewrites the file (see loop-launcher.ps1
+  Get-PreservedLaneReport), so a live lane row survives a launcher pass. This script only ever
+  touches its OWN lane's line inside the region (surgical upsert keyed by "- <lane> :"), so six
+  lanes writing near-simultaneously never clobber each other - a lightweight lock file serializes
+  the read-modify-write.
+
+  CENTRAL FILE LOCATION (why lanes in separate clones still write ONE file):
+  content lanes run in their own clone under ..\safe-ai-lanes\<name>, whose local
+  docs/loop-status.md is a DIFFERENT file from the main repo's. loop-launcher.ps1 exports the
+  absolute path of the main repo's status file as the environment variable SAFE_AI_LOOP_STATUS
+  before igniting each lane runner, so the child claude inherits it and this script routes there.
+  Resolution order: -StatusPath > $env:SAFE_AI_LOOP_STATUS > <RepoPath>\docs\loop-status.md
+  (the last is correct for the ops lane, which runs in the main repo itself).
+
+  NON-FATAL BY DESIGN: reporting must never break a lane iteration. Any failure (missing git,
+  lock contention, unwritable path) logs a warning and exits 0.
+
+  Pure ASCII source (Windows PowerShell 5.x mis-decodes BOM-less UTF-8 with Japanese as
+  Shift-JIS and breaks parsing). Japanese labels are read at runtime from loop-status-strings.txt,
+  exactly like loop-launcher.ps1. The Japanese -Note is runtime DATA, written UTF-8, never parsed
+  as source.
+
+.PARAMETER Lane
+  Lane name whose row to upsert (ops / data / seo / ux-tools / ux-records / ux-hub).
+
+.PARAMETER Note
+  One-line judgment for this iteration (Japanese OK). Optional.
+
+.PARAMETER StatusPath
+  Explicit central status file. Overrides env and the RepoPath default.
+
+.PARAMETER RepoPath
+  Repo whose BACKLOG-<lane>.md and git log are read (default: this script's directory).
+
+.PARAMETER StringsPath
+  loop-status-strings.txt (default: next to this script).
+
+.PARAMETER WhatIf
+  Dry run: compute and print the line that WOULD be written and the resolved target path; touch
+  no file and take no lock. Used for stub verification.
+
+.EXAMPLE
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-report-status.ps1 -Lane ops -Note "報告一元化を実装"
+
+.EXAMPLE
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-report-status.ps1 -Lane data -WhatIf
+#>
+[CmdletBinding()]
+param(
+  [Parameter(Mandatory = $true)][string]$Lane,
+  [string]$Note = "",
+  [string]$StatusPath = "",
+  [string]$RepoPath = "",
+  [string]$StringsPath = "",
+  [switch]$WhatIf
+)
+
+$ErrorActionPreference = "Continue"
+$OutputEncoding = New-Object System.Text.UTF8Encoding $false
+try { [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding $false } catch {}
+
+$scriptRoot = $PSScriptRoot
+if (-not $scriptRoot -or $scriptRoot -eq "") { $scriptRoot = (Get-Location).Path }
+if ($RepoPath -eq "") { $RepoPath = $scriptRoot }
+if ($StringsPath -eq "") { $StringsPath = Join-Path $scriptRoot "loop-status-strings.txt" }
+
+function Write-Rep([string]$msg) {
+  Write-Host ("[loop-report-status][" + $Lane + "] " + $msg)
+}
+
+# ---- Japanese label strings (same external-file convention as loop-launcher.ps1) -------------
+$LS = @{}
+if (Test-Path $StringsPath) {
+  foreach ($ln in (Get-Content -Encoding UTF8 -Path $StringsPath)) {
+    if ($ln -match '^\s*#') { continue }
+    $i = $ln.IndexOf('=')
+    if ($i -gt 0) { $LS[$ln.Substring(0, $i)] = $ln.Substring($i + 1) }
+  }
+}
+function S([string]$key) { if ($LS.ContainsKey($key)) { return [string]$LS[$key] } else { return $key } }
+function Fmt([string]$key, [hashtable]$vals) {
+  $t = S $key
+  if ($vals) { foreach ($k in $vals.Keys) { $t = $t.Replace('{' + $k + '}', [string]$vals[$k]) } }
+  return $t
+}
+
+# Region markers are ASCII literals (NOT localized) so parsing stays stable across encodings.
+$beginMarker = "<!-- LANE-REPORT:BEGIN (managed by loop-report-status.ps1) -->"
+$endMarker = "<!-- LANE-REPORT:END -->"
+
+# ---- Resolve the central status file ---------------------------------------------------------
+if ($StatusPath -eq "") {
+  if ([string]$env:SAFE_AI_LOOP_STATUS -ne "") { $StatusPath = [string]$env:SAFE_AI_LOOP_STATUS }
+  else { $StatusPath = Join-Path $RepoPath "docs\loop-status.md" }
+}
+# Normalize to a rooted, backslash path so Split-Path -Parent is correct even if a relative or
+# forward-slash path was passed (the launcher always passes an absolute path; this guards manual use).
+try {
+  if (-not [System.IO.Path]::IsPathRooted($StatusPath)) { $StatusPath = Join-Path (Get-Location).Path $StatusPath }
+  $StatusPath = [System.IO.Path]::GetFullPath($StatusPath)
+} catch {}
+Write-Rep ("target status file = " + $StatusPath)
+
+# ---- Compute this lane's facts ---------------------------------------------------------------
+$lastRun = (Get-Date -Format "yyyy-MM-dd HH:mm")
+
+# Remaining open tasks = unchecked checkboxes in BACKLOG-<lane>.md.
+$open = "?"
+$backlog = Join-Path $RepoPath ("BACKLOG-" + $Lane + ".md")
+if (Test-Path $backlog) {
+  try { $open = [string]@(Select-String -Path $backlog -Pattern '^- \[ \]').Count } catch { $open = "?" }
+}
+
+# Latest merged PR: newest "(#NNN)" on origin/main, preferring a commit scoped to this lane
+# (e.g. "fix(ops): ... (#583)"); fall back to the newest merged PR overall, else "-".
+$pr = "-"
+try {
+  $refCandidates = @("origin/main", "main", "HEAD")
+  $logLines = $null
+  foreach ($ref in $refCandidates) {
+    $out = & git -C $RepoPath log --oneline -50 $ref 2>$null
+    if ($LASTEXITCODE -eq 0 -and $out) { $logLines = @($out); break }
+  }
+  if ($logLines) {
+    $laneEsc = [regex]::Escape($Lane)
+    foreach ($l in $logLines) {
+      if (($l -match ('\(' + $laneEsc + '\)')) -and ($l -match '\(#(\d+)\)')) { $pr = "#" + $Matches[1]; break }
+    }
+    if ($pr -eq "-") {
+      foreach ($l in $logLines) {
+        if ($l -match '\(#(\d+)\)') { $pr = "#" + $Matches[1]; break }
+      }
+    }
+  }
+} catch { $pr = "-" }
+
+$noteText = $Note.Trim()
+if ($noteText -eq "") { $noteText = S "reportEmptyNote" }
+$laneLine = Fmt "reportLine" @{ LANE = $Lane; LASTRUN = $lastRun; PR = $pr; OPEN = $open; NOTE = $noteText }
+
+Write-Rep ("computed row: " + $laneLine)
+
+if ($WhatIf) {
+  Write-Rep "[WHATIF] no file written, no lock taken."
+  exit 0
+}
+
+# ---- Serialize the read-modify-write with a lock file (reporter-vs-reporter safety) -----------
+$lockPath = $StatusPath + ".lock"
+$haveLock = $false
+for ($try = 0; $try -lt 25; $try++) {
+  try {
+    $fs = [System.IO.File]::Open($lockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+    $fs.Close()
+    $haveLock = $true
+    break
+  } catch {
+    Start-Sleep -Milliseconds 200
+  }
+}
+if (-not $haveLock) {
+  Write-Rep "WARN: could not acquire status lock after retries; skipping report (non-fatal)."
+  exit 0
+}
+
+try {
+  $statusDir = Split-Path -Parent $StatusPath
+  if ($statusDir -and -not (Test-Path $statusDir)) { New-Item -ItemType Directory -Path $statusDir | Out-Null }
+
+  $lines = @()
+  if (Test-Path $StatusPath) {
+    try { $lines = @(Get-Content -Encoding UTF8 -Path $StatusPath) } catch { $lines = @() }
+  }
+
+  $beginIdx = -1; $endIdx = -1
+  for ($k = 0; $k -lt $lines.Count; $k++) {
+    if ($lines[$k].Trim() -eq $beginMarker) { $beginIdx = $k }
+    elseif ($lines[$k].Trim() -eq $endMarker) { $endIdx = $k; break }
+  }
+
+  $rowPrefix = "- " + $Lane + " :"
+  if ($beginIdx -ge 0 -and $endIdx -gt $beginIdx) {
+    # Region exists: replace this lane's row in place, or insert just before END if absent.
+    $replaced = $false
+    $newLines = New-Object System.Collections.Generic.List[string]
+    for ($k = 0; $k -lt $lines.Count; $k++) {
+      if ($k -gt $beginIdx -and $k -lt $endIdx -and $lines[$k].TrimStart().StartsWith($rowPrefix)) {
+        $newLines.Add($laneLine); $replaced = $true
+      } elseif ($k -eq $endIdx -and -not $replaced) {
+        $newLines.Add($laneLine); $newLines.Add($lines[$k])
+      } else {
+        $newLines.Add($lines[$k])
+      }
+    }
+    $lines = $newLines.ToArray()
+  } else {
+    # No region yet (file absent, or written by a pre-S13a launcher). Append a fresh region.
+    $newLines = New-Object System.Collections.Generic.List[string]
+    foreach ($l in $lines) { $newLines.Add($l) }
+    if ($lines.Count -gt 0) { $newLines.Add("") }
+    $newLines.Add((S "reportHeader"))
+    $newLines.Add("")
+    $newLines.Add($beginMarker)
+    $newLines.Add($laneLine)
+    $newLines.Add($endMarker)
+    $lines = $newLines.ToArray()
+  }
+
+  $text = ($lines -join "`r`n") + "`r`n"
+  Set-Content -Path $StatusPath -Value $text -Encoding UTF8
+  Write-Rep ("row written to " + $StatusPath)
+} catch {
+  Write-Rep ("WARN: report write failed (non-fatal): " + $_.Exception.Message)
+} finally {
+  try { Remove-Item -Path $lockPath -Force -ErrorAction SilentlyContinue } catch {}
+}
+
+exit 0

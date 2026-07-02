@@ -23,6 +23,7 @@
 3) ゲート: `cd web` で tsc=0 / lint errors0 / vitest全pass / build成功。
 4) commit(末尾 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>)→push→`gh pr create`。CI待ちは次イテレーションで回収。
 5) BACKLOG-ux-records.md を[x]更新、docs/court-cases-db-2026-06-06/cycle-log-ux-records.md に1段落。無読テストのPlaywrightスクリプトは docs/third-party-reviews/scripts/ に保存。working tree clean で終える。
+5.5) 【報告一元化】イテレーション末尾に `powershell -NoProfile -ExecutionPolicy Bypass -File ./loop-report-status.ps1 -Lane ux-records -Note "<直近の判断1行>"` を実行し docs/loop-status.md の自レーン行（最終稼働・直近マージPR・残open・判断1行）を更新（gitignore対象・環境変数 SAFE_AI_LOOP_STATUS で集約先へ自動ルーティング・失敗は非致命なので気にせず次へ）。
 6) マージ済みの自分のリモートブランチは末尾で削除。他班・未マージは触るな。
 
 【無読テスト(必須)】本文を読まず画面を3秒見て、ペルソナ(現場の安全担当・職長・一人親方)が「いまの状態」と「次にやること」を言えるか。言えなければ不合格。
