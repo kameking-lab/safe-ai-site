@@ -8,6 +8,8 @@ import {
   TAG_CATEGORY_LABELS,
   CONSTRUCTION_PRIORITY_CAS,
   CONSTRUCTION_PRIORITY_CAS_SET,
+  oshaTagsForCas,
+  isSpecialControlSubstance,
 } from "./regulation-tag-labels";
 
 describe("Phase 1e + P0-009: 規制タグラベル定義", () => {
@@ -112,5 +114,40 @@ describe("Phase 1e: タグカテゴリの正確性", () => {
     expect(REGULATION_TAGS.sankketsu.category).toBe("osha");
     expect(REGULATION_TAGS.funjin.category).toBe("osha");
     expect(REGULATION_TAGS.sekimen.category).toBe("osha");
+  });
+});
+
+describe("特化則区分の正本整合 (令別表第3・e-Gov 2026-07-02 突合)", () => {
+  it("塩素(7782-50-5)は第二類 (令別表第3第2号7)。第三類は誤り", () => {
+    expect(oshaTagsForCas("7782-50-5")).toEqual(["tokutei-2"]);
+  });
+
+  it("フッ化水素(7664-39-3)は第二類 (同2号28)。第三類は誤り", () => {
+    expect(oshaTagsForCas("7664-39-3")).toEqual(["tokutei-2"]);
+  });
+
+  it("クロロホルム(67-66-3)・四塩化炭素(56-23-5)は特化則第二類の特別有機溶剤 (同2号11の2・18の2)。有機則第一種は平成26年改正前の区分", () => {
+    expect(oshaTagsForCas("67-66-3")).toEqual(["tokutei-2"]);
+    expect(oshaTagsForCas("56-23-5")).toEqual(["tokutei-2"]);
+    expect(isSpecialControlSubstance("67-66-3")).toBe(true);
+    expect(isSpecialControlSubstance("56-23-5")).toBe(true);
+  });
+
+  it("アクリルアミド(79-06-1)は第二類だが特別管理物質ではない (特化則38条の4の列挙外)", () => {
+    expect(oshaTagsForCas("79-06-1")).toEqual(["tokutei-2"]);
+    expect(isSpecialControlSubstance("79-06-1")).toBe(false);
+  });
+
+  it("第三類は塩化水素・硝酸等の急性中毒系のみ (アンモニア〜硫酸の8種)。塩素・フッ化水素を含まない", () => {
+    expect(oshaTagsForCas("7647-01-0")).toEqual(["tokutei-3"]);
+    expect(oshaTagsForCas("7697-37-2")).toEqual(["tokutei-3"]);
+    expect(REGULATION_TAGS["tokutei-3"].summary).not.toContain("塩素、");
+    expect(REGULATION_TAGS["tokutei-3"].summary).not.toContain("フッ化水素");
+  });
+
+  it("有機則第一種の解説はクロロホルム等を現行第一種として例示しない (現行は2物質のみ)", () => {
+    const s = REGULATION_TAGS["yuki-1"].summary;
+    expect(s).toContain("二硫化炭素");
+    expect(s).not.toMatch(/第一種.*\(クロロホルム、四塩化炭素、トリクロロエチレン/);
   });
 });
