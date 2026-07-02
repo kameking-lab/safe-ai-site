@@ -1,0 +1,16 @@
+{
+  "$comment": "Self-run loop configuration (single source of truth for ignition). Extend the run by editing untilIso on ONE line - the Task Scheduler is never re-registered. loop-launcher.ps1 reads this at every logon and every day at 07:00. Mutable runtime state (lastCriticIso) lives in the gitignored loop-state.json, NOT here, so the ops lane's clean-tree contract is never broken. See docs/fable-diagnosis-2026-07-02/O16-implementation-notes.md.",
+  "untilIso": "2026-07-31T23:00:00",
+  "lanesRoot": "..\\safe-ai-lanes",
+  "warnWithinDays": 3,
+  "criticEveryDays": 7,
+  "criticModel": "claude-opus-4-8",
+  "lanes": [
+    { "name": "ops",        "model": "claude-opus-4-8", "enabled": true, "intervalSeconds": 195, "repoPath": "." },
+    { "name": "data",       "model": "claude-opus-4-8", "enabled": true, "intervalSeconds": 135 },
+    { "name": "seo",        "model": "claude-opus-4-8", "enabled": true, "intervalSeconds": 120 },
+    { "name": "ux-tools",   "model": "claude-sonnet-5", "enabled": true, "intervalSeconds": 165 },
+    { "name": "ux-records", "model": "claude-sonnet-5", "enabled": true, "intervalSeconds": 150 },
+    { "name": "ux-hub",     "model": "claude-sonnet-5", "enabled": true, "intervalSeconds": 180 }
+  ]
+}

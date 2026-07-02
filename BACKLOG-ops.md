@@ -3,9 +3,9 @@
 担当領域: リポジトリ直下の loop-*.ps1 / loop-*.txt / loop-config.json / BACKLOG*.md の運用機構 / docs/loop-status.md / タスクスケジューラ登録 / 横断計測スクリプト。**web/src は原則触らない**（掃除系タスクのみ例外・他レーン停止時間帯に実行）。契約・絶対ルールは loop-prompt-ops.txt を参照。
 
 ## 未着手（上から処理）
-- [ ] 【Opus・P0】O16-a: 点火の恒久解＝loop-config.json＋loop-launcher.ps1（引数ゼロ・configのlanes/model/untilIsoを読んで各レーンrunnerを冪等起動）＋タスクスケジューラ再登録（launcherを「ログオン時＋毎日07:00」・引数焼込みゼロ）。untilIso超過時は docs/loop-status.md に停止理由を書いてから終了（黙って死なない）。設計は docs/fable-diagnosis-2026-07-02/08-autonomous-operations.md §A。完了条件=スケジューラから起動→全enabledレーンが立ち上がる実機確認＋期限切れconfigで停止理由がstatusに残る確認。
-- [ ] 【Opus・P0】O16-b: 補給の自動化＝loop-prompt-planner.txt 新設（レーンBACKLOG open<3 で launcher が当該レーンで planner を1回先行起動。補充源の優先順=①診断docsの未起票タスク②直近critique S/A残③第三者レビュー自己診断。水増し禁止・実測完了条件必須を強制）。完了条件=openを2件に減らした擬似レーンで planner が2〜5件補充し、各タスクに完了条件が付くこと。設計は同§B。
-- [ ] 【Opus・P1】O16-c: 点検の自動化＝loop-prompt-critic.txt 新設＋launcher連動（lastCriticIsoから7日超で通常レーンより先に1回起動→docs/site-critique-<date>/ 生成→S/A級を該当レーンBACKLOG冒頭へ注入→lastCriticIso更新）。設計は同§C。完了条件=手動1回実行で critique docs とレーン注入が生成される。
+- [x] 【Opus・P0】O16-a: 点火の恒久解＝loop-config.json＋loop-launcher.ps1（引数ゼロ・configのlanes/model/untilIsoを読んで各レーンrunnerを冪等起動）＋タスクスケジューラ再登録（launcherを「ログオン時＋毎日07:00」・引数焼込みゼロ）。untilIso超過時は docs/loop-status.md に停止理由を書いてから終了（黙って死なない）。設計は docs/fable-diagnosis-2026-07-02/08-autonomous-operations.md §A。→ 2026-07-02完了(PR)。恒久解3層＋逸脱2点は docs/fable-diagnosis-2026-07-02/O16-implementation-notes.md 参照。
+- [x] 【Opus・P0】O16-b: 補給の自動化＝loop-prompt-planner.txt 新設（レーンBACKLOG open<3 で launcher が当該レーンで planner を1回先行起動。補充源の優先順=①診断docsの未起票タスク②直近critique S/A残③第三者レビュー自己診断。水増し禁止・実測完了条件必須を強制）。→ 2026-07-02完了(PR)。launcherに open<3 ゲート＋対象レーン注入の一時プロンプト＋別タグ非衝突ワンショットを実装。
+- [x] 【Opus・P1】O16-c: 点検の自動化＝loop-prompt-critic.txt 新設＋launcher連動（lastCriticIsoから7日超で通常レーンより先に1回起動→docs/site-critique-<date>/ 生成→S/A級を該当レーンBACKLOG冒頭へ注入→lastCriticIso更新）。→ 2026-07-02完了(PR)。lastCriticIsoは gitignore の loop-state.json に保持(逸脱1)。
 - [ ] 【Sonnet・P1】S13-a: 報告の一元化＝docs/loop-status.md 規約新設＋各レーンプロンプトへ「イテレーション末尾に自レーン行を更新」を追記。完了条件=2レーンを1イテレーション回した後に status に最終稼働・直近PR・残open数が載る。
 - [ ] 【Sonnet・P1】S13-b: プロンプト鮮度是正＝loop-prompt*.txt から「あなたはOpus 4.8」等のモデル名直書き・処理済みの【再開最優先2026-06-13】節を除去しモデル非依存化（runnerの -Model が正）。バックオフ上限を10分→30分の3段（5/10/30）へ延長。完了条件=全プロンプトにモデル名焼込みゼロ・runnerのバックオフテスト（ドライラン）で30分到達。
 - [ ] 【Sonnet・P2】掃除系一括（他レーン停止時間帯に実行・1PR/群）: lint警告46件（33件は--fix、ky-paper-viewのexhaustive-deps 2件は手当）／scripts/audit/internal-link-graph.json 再生成／news-feed LLM判定基準の明文化（週次熱中症搬送記事の承認ゆらぎ是正）。診断 07-residuals-sweep.md P2群。
