@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { StatusConclusion } from "@/components/foreign-workers/status-conclusion";
 import {
   getResidenceStatusIds,
   getResidenceStatusRule,
@@ -83,8 +84,16 @@ export default async function StatusDetailPage(props: StatusPageProps) {
             {rule.labelJa}の安全衛生ガイド
           </h1>
           <p className="mt-1 text-sm text-slate-500">{rule.labelEn}</p>
-          <p className="mt-4 text-base text-slate-700">{rule.summary}</p>
         </header>
+
+        <StatusConclusion
+          labelJa={rule.labelJa}
+          summary={rule.summary}
+          periodOfStay={rule.periodOfStay}
+          unlimitedWorkScope={rule.unlimitedWorkScope}
+          transferAllowed={rule.transferAllowed}
+          className="mb-8"
+        />
 
         <section className="mb-8 rounded-lg border border-slate-200 bg-white p-5">
           <h2 className="text-base font-bold text-slate-900">在留資格の基本</h2>

@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-03（2） — 柱0補充 /foreign-workers/status/[status] 全11ページに結論カード新設（PR: ux-rec/foreign-workers-status-conclusion）
+
+回収: 自班のCI緑PR #593（/safety-diary/list 結論カード）をmainとの競合（BACKLOG-ux-records.md、他班#597と同時完了による行競合のみ・コード競合なし）を通常マージで解消しsquashマージ。main は `git pull --ff-only` で同期・clean（不要になった自動生成ファイル docs/rag-metrics-latest.json・chatbot-eval-fresh-results.json のローカル差分は破棄）。
+
+着手前監査: BACKLOG最上位[ ]はO10〜S3（KY用紙canvas/SlideDeck/教育スライド量産等）だが、依存先のBACKLOG-fable.md F1（未着手・作業中ブランチはあるがPR化前）・BACKLOG-data.md O14（未着手）がともに他レーンで未完了のため全件ブロック継続。契約どおり自領域の柱0/柱3レビューから補充。
+
+自班route全ページ棚卸しの結果、大半はConclusionCard導入済み。真の欠落＝**/foreign-workers/status/[status]（在留資格ガイド詳細・全11ページ）**: `/education/tokubetsu/*`等の教育コース詳細ページ（#536系）と同型の「区分見出し＋本文段落で始まり次アクションが本文下部（あるいはページ最下部nav）に埋もれる」パターンで、ConclusionCard未設置のまま非対称に残っていた。「初めてこの在留資格の外国人材を受け入れる現場の安全担当」が3秒で「この資格は何か」「就労制限・転職可否」「次にやること」を言えない。
+
+是正（足す＋重複解消・法令正確性不可侵）: 当班所有 `StatusConclusion`（`components/foreign-workers/status-conclusion.tsx`、ConclusionCard＋StatusBadgeをimportのみ）を新設し全11ページのheader直下へ配置。旧ヘッダーの平文summary段落（重複）を撤去しカードdescriptionへ集約。補助チップ=在留期間／就労制限の有無（safe=なし・warning=あり）／転職可否（safe=可能・warning=不可）の3種。次アクション=「多言語安全教育教材を見る」→既存の`/foreign-workers/safety-training`（ページ最下部navと同じ遷移先を最上部でも即到達可能に）。表示文言・区分・期間・制限はrule既載データをそのまま使用、新規の法的主張なし。generateStaticParams・11ページのSSG(●)は不変。
+
+検証: tsc=0・lint errors=0（既存warning23件のみ・自分の変更起因なし）・vitest 240ファイル2027件全pass（新規5件含む）・build成功（`● /foreign-workers/status/[status]`のSSGを維持し11パス確認）。無読Playwrightスクリプト `docs/third-party-reviews/scripts/foreign-workers-status-conclusion-2026-07-03.mjs` を新規（全11ページ×5項目＋就労制限/転職可否の対称チェック3件）＝58/58合格。working tree clean。
+
+---
+
 ## 2026-07-03 — 柱0補充 /safety-diary/list に結論カード新設（PR: ux-rec/c0-safety-diary-list-conclusion）
 
 回収: 自班のCI緑PR #589（/ky/paper hydration mismatch是正）をsquashマージ済み。ローカルに残っていた既マージ済みの陳腐ブランチ3本（c0-education-course-conclusion #577・c0-foreign-safety-training-conclusion #568・c0-ky-list-workers-noread #558）を削除。main は `git pull --ff-only` で同期・clean。
