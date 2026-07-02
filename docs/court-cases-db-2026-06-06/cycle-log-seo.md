@@ -261,3 +261,29 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings 既存のみ）/ `vitest run`=232ファイル1940テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・chatbot-eval-fresh-results.json）は復元。working tree clean。
 
 残: O8-b（条番号クエリパーサ）・O8-c（法令エイリアス辞書）が P0 で続く。
+
+---
+
+## 2026-07-03 O8-b 条番号クエリパーサ（法令名＋条番号の複合）＝診断T2（#591）
+
+前サイクルの O8-a（#586）を CI 緑確認のうえ squash マージ → `main` を ff-only 同期。前サイクルで宙吊りにしていた WIP ブランチ `seo/o8b-article-number-parser` は、当時の古い `main` から派生していたため他班の既マージ作業（jma データ・loop スクリプト・chemical-db・BACKLOG-data 等）を丸ごと reverting する差分を巻き込んでおり再利用は危険と判断。最新 `main` から新ブランチ `seo/o8b-article-query-parser` を切り、WIP から O8-b 該当の 5 ファイルのみ（`cross-search/article-query.ts`＋test・`cross-search/index.ts` の export・`search-index.ts` の配線・`search-index.test.ts` の T2）を救出して起点にした。O8-a の squash マージ内容が WIP の O8-a ベースと byte 一致することは `git diff main..WIP -- search-index.ts` が O8-b 差分のみを示すことで確認済み。
+
+作業: `lib/cross-search/article-query.ts` に純粋関数 `normalizeArticleQuery` を新設し、`searchItems` の `searchCrossIndex` 委譲の直前に前処理として配線。横断検索(/search・⌘K)の生クエリに含まれる「法令名＋条番号」の地続き表現（e-Gov でも 0 件になる診断書 比較 a,b）を、curated 条文インデックスのタイトル/keywords へ合流できる正規形へ書き換える。(1) 地続き「安衛法61条」→「安衛法 第61条」（cross-search の AND エンジンは空白区切り各語で扱うため分解が必須）、(2) 漢数字「第六十一条」→「第61条」（/law-search の `kanjiToNum` と同一ロジックを当班 lib へ再実装＝コンポーネント内非公開関数で import 不可）、(3) 全角数字「６１条」半角化・枝番「61-2条」「第10条-3」→「第61条の2」「第10条の3」。誤変換防止として全分岐で末尾「条」を必須にし、裸の数字・日付範囲「2024-2026」・「第一種」「三大災害」を素通し＝O8-a の 2 語 AND 検索（石綿 事前調査/クレーン 過負荷）を一切壊さない。
+
+完了条件充足（本番インデックス回帰 `search-index.test.ts` T2）: 「安衛法61条」「安衛法 88条」「安衛則563条」「第六十一条」がいずれも 1 位に該当条文（category=law・`/law-search?law=&art=` 深リンク）。回帰: 単体 `article-query.test.ts` 11本＋統合 T2 4本。UI(SearchResults/CommandPalette)・深リンク・カバレッジは API 不変で無改修。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=234ファイル1964テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・web/src/data/chatbot-eval-fresh-results.json）は commit 前に `main` から復元。working tree clean。
+
+残: O8-c（法令エイリアス辞書＝正式名称・かな読み・別略称の展開）が P0 で続く。S6（0件時 e-Gov フォールバック＋ランキング調整）が P1。
+
+## O8-c 法令名かな読みの正略称展開（診断書 05-search-egov.md T3・比較 c）
+
+横断検索(/search・⌘K)で e-Gov も当サイトも 0 件だった**法令名かな読み**（「あんえいほう」「くれーんそく」等＝現場のうろ覚え・音声入力で頻発）を該当条文へ着地させた。着手前に本番インデックスで切り分け実測: 正式名称「労働安全衛生規則 第563条」→既に 1 位＝安衛則563条・別略称「労安衛法 61条」→既に 1 位＝安衛法61条（keyword「安衛法」への部分一致で拾える）＝**正式名称・別略称は O8-a で解決済み**。残る真の穴は**かな読み**（あんえいほう/あんえいそく/くれーんそく/ゆうきそく/とっかそく/さんけつそく/せきめんそく/ふんじんそく/じんぱいほう…が全て 0 件＝インデックスにもコンテンツにも literal で現れない）。この一次調査に基づき、水増しを避けて「読み」に絞った（e-Gov API `abbrev` 由来の別略称の辞書化は既存の部分一致で概ね解決済みのため見送り）。
+
+実装: `lib/cross-search/law-alias.ts` に純粋関数 `expandLawAliases` を新設。かな読み・稀な漢字別表記（塵肺法）トークンを正略称（安衛法・じん肺法…）へ **normalizeSearchText 経由の完全一致で差し替え**（部分一致は誤爆源のため不採用）。差し替えても失うヒットが無い語だけに限定＝既存 AND 検索を無改変。`searchItems` の cross-search 委譲直前へ O8-b の後段として `expandLawAliases(normalizeArticleQuery(query))` を配線（読み＋条番号「あんえいほう88条」は先に「あんえいほう 第88条」へ分解済みのため読みが独立トークンになり展開が効く）。エイリアス表のキー（正略称）は data/law-metadata.ts の `LAW_METADATA`（read-only import）に実在する lawShort であることを同期ガードテストで担保＝診断書の「law-metadata 連携」要件を、data班領域を改変せず lib 層で満たした。
+
+完了条件充足（本番インデックス回帰 `search-index.test.ts` T3）: 「あんえいほう」→安衛法の条文がヒット（全件 安衛法条文で他法令へ流れない）・6 読み it.each（安衛法/安衛則/クレーン則/有機則/特化則/酸欠則）・「あんえいほう 88条」→1位 安衛法88条（O8-b と相乗）・「労働安全衛生規則 第563条」→1位 安衛則563条は不変（読み展開が既存ヒットを奪わない回帰）。回帰: 単体 `law-alias.test.ts` 10本＋統合 T3 8本。UI(SearchResults/CommandPalette)・深リンク・カバレッジは API 不変で無改修。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=235ファイル1981テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・web/src/data/chatbot-eval-fresh-results.json）は commit 前に `main` から復元。O8-b(#591) 上にスタック（PR base=seo/o8b-article-query-parser）。working tree clean。
+
+残: S6（0件時 e-Gov フォールバック＋ランキング調整）が P1。O18（条文本文の参照自動リンク）が P1。

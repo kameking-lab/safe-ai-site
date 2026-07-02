@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { summarizeWarningPayload, type JmaWarningPayload } from "./parse-jma-warning";
+import { maxLevelFromSelectedWarnings, summarizeWarningPayload, type JmaWarningPayload } from "./parse-jma-warning";
 
 describe("summarizeWarningPayload", () => {
   it("発表中の警報(code先頭0)を warning レベルとして拾う", () => {
@@ -77,5 +77,29 @@ describe("summarizeWarningPayload", () => {
     expect(summary.warnings).toEqual([]);
     expect(summary.reportDatetime).toBeNull();
     expect(summary.publishingOffice).toBeNull();
+  });
+});
+
+describe("maxLevelFromSelectedWarnings", () => {
+  it("空配列は none（サイネージ警報バナーを赤/黄にしない）", () => {
+    expect(maxLevelFromSelectedWarnings([])).toBe("none");
+  });
+
+  it("注意報コード(先頭1/2)のみは advisory", () => {
+    expect(maxLevelFromSelectedWarnings([{ code: "12" }])).toBe("advisory");
+    expect(maxLevelFromSelectedWarnings([{ code: "22" }])).toBe("advisory");
+  });
+
+  it("警報コード(先頭0)は warning", () => {
+    expect(maxLevelFromSelectedWarnings([{ code: "03" }])).toBe("warning");
+  });
+
+  it("特別警報コード(先頭3)は special", () => {
+    expect(maxLevelFromSelectedWarnings([{ code: "33" }])).toBe("special");
+  });
+
+  it("複数混在時は最大レベルを採用", () => {
+    expect(maxLevelFromSelectedWarnings([{ code: "12" }, { code: "03" }])).toBe("warning");
+    expect(maxLevelFromSelectedWarnings([{ code: "12" }, { code: "03" }, { code: "33" }])).toBe("special");
   });
 });
