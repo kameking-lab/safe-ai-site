@@ -253,11 +253,25 @@ function Set-ResurrectionBanner {
   $lockPath = $statusPath + ".lock"
   $haveLock = $false
   if (-not $Preview) {
+    # Reclaim a STALE orphan lock: if a prior holder was killed mid-write the .lock survives forever
+    # and freezes the liveness heartbeat into a false "loop is dead" alarm. A legit hold is sub-second
+    # even with all lanes serialized, so a lock older than 60s cannot be live - reclaim and retry.
     for ($try = 0; $try -lt 25; $try++) {
       try {
         $fs = [System.IO.File]::Open($lockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
         $fs.Close(); $haveLock = $true; break
-      } catch { Start-Sleep -Milliseconds 200 }
+      } catch {
+        $reclaimed = $false
+        try {
+          $li = Get-Item -LiteralPath $lockPath -ErrorAction SilentlyContinue
+          if ($li -and (((Get-Date) - $li.LastWriteTime).TotalSeconds -gt 60)) {
+            Remove-Item -LiteralPath $lockPath -Force -ErrorAction SilentlyContinue
+            Write-Launcher "reclaimed stale status lock (age > 60s; prior holder likely killed mid-write)."
+            $reclaimed = $true
+          }
+        } catch {}
+        if (-not $reclaimed) { Start-Sleep -Milliseconds 200 }
+      }
     }
     if (-not $haveLock) {
       Write-Launcher "banner reconcile skipped: could not acquire status lock (non-fatal)."
