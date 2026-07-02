@@ -53,7 +53,6 @@ export function IncidentReportClient() {
     const today = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 初回マウントの既定値
     setF({ ...EMPTY(today), id: newIncidentId() });
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 保存一覧
     setList(getIncidentList());
   }, []);
 

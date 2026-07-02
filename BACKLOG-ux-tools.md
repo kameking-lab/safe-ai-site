@@ -23,5 +23,7 @@
 
 - [x] 【柱C-6／柱0 補充・チャットボット深掘り】/chatbot 入力欄直下の常時表示クイック質問チップを44px化（2026-06-14 ux-tool/chatbot-quick-chips-44px）。会話開始後（履歴あり）は空状態の大きな質問例ボタンが消え、この行が「打たずにタップで追質問」の唯一の動線になるが、従来 py-1/11px ≒ 高さ約24px で44px未満＝指で誤爆しやすかった。空状態の質問例ボタンと同じ `min-h-[44px]` 基準に統一＋可視ラベル「質問例：」を付与（文言・件数=EXAMPLE_QUESTIONS.slice(0,3) は不変＝捏造/水増しゼロ、タップ標的の拡大とラベル付与のみ）。無読テスト 新規5/5 PASS（chatbot-quick-chips-44px-noread＝群が常時可視・ラベル在・3個・各44px以上・タップで送信され履歴に文言）。ゲート全通過（tsc0/lint errors0/vitest 1874 pass/build成功）。
 
+- [x] 【Opus・P0】O4のT1: チャットボット偽「範囲外」警告の根絶（2026-07-02 ux-tool/chatbot-out-of-scope-false-positive / PR #583）。診断書04のT1是正＝`chatbot-enrichment.ts` `detectOutOfScopeLawReferences` の2バグ修正: (a) 法令名抽出の文字クラスに長音「ー」・「々」が無く「クレーン等安全規則」が「ン等安全規則」に分断され誤発火する不具合を修正、(b) 正式名称⇄短縮名の対応表が無く substring 照合のみで「労働安全衛生法」⊅「安衛法」等が全て範囲外扱いされていた不具合を、既存 `law-metadata.ts` の `LAW_METADATA` を単一ソースにした正式名称完全一致集合 `KNOWN_LAW_FULL_NAMES` の新設で是正。回帰テスト2件追加（既存17件+2=19件 pass）。T2(派遣法45条要約)・T3(YYYYプレースホルダ)は残タスクとして上のO4残に切り出し。ゲート全通過（tsc0/lint errors0/vitest 1935 pass/build成功）。
+
 ## 補充の指針（未着手3件未満で起こす）
 - 自領域route の柱0未適用箇所・無読テスト不合格画面・第三者レビュー指摘。chemical RA・チャットボットの深掘り。
