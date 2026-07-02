@@ -37,6 +37,19 @@ describe("decideFallbackTier", () => {
     expect(decideFallbackTier(0.49, 5)).toBe("out-of-scope");
     expect(decideFallbackTier(0, 0)).toBe("out-of-scope");
   });
+
+  it("T8: hadPins=true なら score<0.75 でも direct（診断書04 Q7: 職長教育score0.73相当）", () => {
+    expect(decideFallbackTier(0.73, 2, true)).toBe("direct");
+    expect(decideFallbackTier(0.7, 3, true)).toBe("direct");
+  });
+
+  it("T8: hadPins=true でも articles<=1 は adjacent のまま", () => {
+    expect(decideFallbackTier(0.9, 1, true)).toBe("adjacent");
+  });
+
+  it("T8: hadPins=true でも score<0.5 は out-of-scope のまま", () => {
+    expect(decideFallbackTier(0.3, 5, true)).toBe("out-of-scope");
+  });
 });
 
 describe("searchPartialMatches - ペルソナ失敗11件カバレッジ", () => {

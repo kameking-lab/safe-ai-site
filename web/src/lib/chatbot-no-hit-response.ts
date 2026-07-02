@@ -30,6 +30,27 @@ export const OFFICIAL_GUIDANCE_LINKS: ReadonlyArray<{ label: string; url: string
   { label: "全国の労働基準監督署（個別事案の相談窓口）", url: "https://www.mhlw.go.jp/kouseiroudoushou/shozaiannai/roudoukyoku/" },
 ];
 
+/**
+ * no-hit 時に「関連条文」として提示してよい最低スコア（normalizedScore = topScore/25）。
+ * 診断書04 T9: 「明日の東京の天気は」で港湾労働法第2条（「東京」の1語だけが条文本文中の
+ * 地名列挙に偶然一致・topScore=1=0.04）がノイズとして提示されていた問題への対処。
+ * 一方「解雇予告のルール」→労契法第16条（キーワード一致でtopScore=3=0.12、診断書04 Q23で
+ * 「誠実な挙動」と評価済み）は残すため、閾値は両者の間（0.08=topScore2相当）に設定する。
+ */
+export const MIN_RELATED_SCORE_FOR_DISPLAY = 0.08;
+
+/**
+ * no-hit 応答で提示する関連条文を選ぶ。全体の最高スコアが閾値未満（＝キーワードの
+ * 偶然一致のみ）の場合は、関連条文欄そのものを出さずノイズを抑制する。
+ */
+export function selectNoHitRelatedArticles(
+  articles: readonly LawArticle[],
+  normalizedScore: number
+): readonly LawArticle[] {
+  if (normalizedScore < MIN_RELATED_SCORE_FOR_DISPLAY) return [];
+  return articles;
+}
+
 /** 関連条文（低スコア含む）を「参考」リストの Markdown に整形する。最大5件。 */
 export function formatRelatedArticlesList(articles: readonly LawArticle[]): string {
   if (articles.length === 0) return "";

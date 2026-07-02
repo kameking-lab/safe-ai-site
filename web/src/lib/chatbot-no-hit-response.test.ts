@@ -7,12 +7,15 @@ import { describe, it, expect } from "vitest";
 import type { LawArticle } from "@/data/laws";
 import { searchPartialMatches } from "@/lib/chatbot-fallback-logic";
 import { buildAllowedCitations } from "@/lib/chatbot-prompt-builder";
+import { searchRelevantArticlesWithScore } from "@/lib/rag-search";
 import {
   OFFICIAL_GUIDANCE_LINKS,
   buildNoHitTemplate,
   buildNoHitGeminiPrompt,
   formatRelatedArticlesList,
   formatOfficialLinks,
+  selectNoHitRelatedArticles,
+  MIN_RELATED_SCORE_FOR_DISPLAY,
 } from "@/lib/chatbot-no-hit-response";
 
 const DISCLAIMER = "本回答はAIによる情報提供であり…専門家にご相談ください。";
@@ -148,5 +151,31 @@ describe("P1-5 該当条文無し応答パターン", () => {
     }
     // 少なくとも一部は関連分野マッピングにヒットする（網羅性の担保）
     expect(withSuggestions).toBeGreaterThan(0);
+  });
+});
+
+describe("S7 T9: no-hit時のrelatedノイズ抑制（診断書04 Q21）", () => {
+  it("selectNoHitRelatedArticles: 閾値未満のスコアは空配列を返す", () => {
+    const arts = [art("港湾労働法", "第2条", "定義")];
+    expect(selectNoHitRelatedArticles(arts, 0.04)).toEqual([]);
+    expect(selectNoHitRelatedArticles(arts, MIN_RELATED_SCORE_FOR_DISPLAY - 0.01)).toEqual([]);
+  });
+
+  it("selectNoHitRelatedArticles: 閾値以上のスコアはそのまま返す", () => {
+    const arts = [art("労働契約法", "第16条", "解雇")];
+    expect(selectNoHitRelatedArticles(arts, MIN_RELATED_SCORE_FOR_DISPLAY)).toEqual(arts);
+    expect(selectNoHitRelatedArticles(arts, 0.5)).toEqual(arts);
+  });
+
+  it("「明日の東京の天気は」の実クエリで無関係法令（港湾労働法）が0件になる", () => {
+    const { articles, normalizedScore } = searchRelevantArticlesWithScore("明日の東京の天気は", 10);
+    const related = selectNoHitRelatedArticles(articles, normalizedScore);
+    expect(related).toHaveLength(0);
+  });
+
+  it("「解雇予告のルール」は誠実な挙動を維持＝労働契約法第16条を関連提示する", () => {
+    const { articles, normalizedScore } = searchRelevantArticlesWithScore("解雇予告のルール", 10);
+    const related = selectNoHitRelatedArticles(articles, normalizedScore);
+    expect(related.some((a) => a.lawShort === "労契法" && a.articleNum === "第16条")).toBe(true);
   });
 });

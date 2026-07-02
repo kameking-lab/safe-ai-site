@@ -23,6 +23,18 @@ export type { LawCategoryFilter } from "@/lib/law-category-options";
 export type PinnedTopic = {
   /** このトピックに該当させるキーワード（いずれか1つが query に含まれれば適用） */
   triggers: string[];
+  /**
+   * これらの語が query に含まれる場合はトリガー一致していてもこのトピックを適用しない。
+   * 「換気」等の一般語トリガーが別トピック（酸欠・坑内・有機溶剤等）の質問を
+   * 乗っ取る誤発火を防ぐための文脈ガード。
+   */
+  excludeIfContains?: string[];
+  /**
+   * triggers（いずれか1つでOK）とは別に、これら全ての語が query に含まれる場合のみ
+   * 適用する共起条件。単一の固定フレーズでは拾えない言い回し違い（例:
+   * 「酸素欠乏症等の防止措置（換気・呼吸用保護具）」）を、他トピックへの誤爆なく拾うための追加条件。
+   */
+  requireAllOf?: string[];
   /** 先頭に差し込む条文の { law, articleNum } ペア */
   pins: { law: string; articleNum: string }[];
 };
@@ -185,8 +197,10 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     pins: [{ law: "石綿障害予防規則", articleNum: "第3条" }],
   },
   {
-    // 酸欠作業前の換気
+    // 酸欠作業前の換気（2026-07-03: 固定フレーズ外の言い回し「酸素欠乏症等の防止措置（換気・
+    // 呼吸用保護具）」等も拾えるよう、「酸素欠乏」×「換気」の共起条件を追加＝fresh Q79対応）
     triggers: ["酸欠換気", "酸欠の換気", "酸素欠乏作業前の換気", "酸欠作業前の換気"],
+    requireAllOf: ["酸素欠乏", "換気"],
     pins: [
       { law: "酸素欠乏症等防止規則", articleNum: "第5条" },
       { law: "酸素欠乏症等防止規則", articleNum: "第5条の2" },
@@ -240,7 +254,10 @@ export const PINNED_TOPICS: PinnedTopic[] = [
   },
   {
     // 気積・採光・換気（2026-06-10 e-Gov突合是正: 600=気積/601=換気を収録し正しい条番号へ。旧607/627は照度/給水の誤割当だった）
+    // 2026-07-03: 「換気」は一般語のため酸欠・坑内・有機溶剤文脈の質問（酸欠則5条等が正解）を
+    // 乗っ取っていた（fresh Q79）。当該文脈が共起する場合は事務所則系PINを抑止する。
     triggers: ["気積", "採光", "換気", "事務所衛生基準"],
+    excludeIfContains: ["酸欠", "酸素欠乏", "坑内", "有機溶剤"],
     pins: [
       { law: "労働安全衛生規則", articleNum: "第600条" },
       { law: "労働安全衛生規則", articleNum: "第601条" },
@@ -653,7 +670,13 @@ function applyPinnedTopics(
   const pinned: LawArticle[] = [];
   const seen = new Set<string>();
   for (const topic of PINNED_TOPICS) {
-    if (!topic.triggers.some((t) => query.includes(t) || lowered.includes(t.toLowerCase()))) {
+    const has = (t: string) => query.includes(t) || lowered.includes(t.toLowerCase());
+    const triggerHit = topic.triggers.some(has);
+    const coOccurHit = (topic.requireAllOf?.length ?? 0) > 0 && topic.requireAllOf!.every(has);
+    if (!triggerHit && !coOccurHit) {
+      continue;
+    }
+    if (topic.excludeIfContains?.some(has)) {
       continue;
     }
     for (const pin of topic.pins) {
@@ -693,7 +716,7 @@ export function searchRelevantArticlesWithScore(
   query: string,
   topK = 10,
   category: LawCategoryFilter = "all"
-): { articles: LawArticle[]; topScore: number; normalizedScore: number } {
+): { articles: LawArticle[]; topScore: number; normalizedScore: number; hadPins: boolean } {
   // Phase B: 軽量な口語→正式名展開 (expandQuery) → 広域同義語/法令略称展開 (expandQueryRich)
   // の二段でクエリを拡張してからトークン化する。expandQueryRich は安全衛生分野に
   // 特化した 100+ パターンの語彙ゆれを補正する（web/src/lib/rag/synonyms.ts）。
@@ -701,7 +724,7 @@ export function searchRelevantArticlesWithScore(
   const queryTokens = tokenize(expandedQuery);
 
   if (queryTokens.length === 0) {
-    return { articles: [], topScore: 0, normalizedScore: 0 };
+    return { articles: [], topScore: 0, normalizedScore: 0, hadPins: false };
   }
 
   const corpus =
@@ -759,6 +782,7 @@ export function searchRelevantArticlesWithScore(
     articles: finalArticles,
     topScore,
     normalizedScore: adjustedScore,
+    hadPins,
   };
 }
 

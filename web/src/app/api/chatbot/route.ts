@@ -30,7 +30,7 @@ import {
   buildFallbackDecision,
   searchPartialMatches,
 } from "@/lib/chatbot-fallback-logic";
-import { buildNoHitTemplate } from "@/lib/chatbot-no-hit-response";
+import { buildNoHitTemplate, selectNoHitRelatedArticles } from "@/lib/chatbot-no-hit-response";
 import { getClientIp, checkRateLimit, rateLimitMessage } from "@/lib/chatbot-rate-limit";
 // Phase 4 通達・リーフレット添付
 import {
@@ -309,7 +309,7 @@ export async function POST(request: Request) {
   }
 
   // RAG: 関連条文の検索（スコア付き）
-  const { articles: allRelevant, normalizedScore } = searchRelevantArticlesWithScore(message, 10, lawCategory);
+  const { articles: allRelevant, normalizedScore, hadPins } = searchRelevantArticlesWithScore(message, 10, lawCategory);
   // MLIT資料の関連検索（所管省庁資料の追加コンテキスト）
   const mlitMatches = searchMlitResources(message, 3);
 
@@ -335,7 +335,7 @@ export async function POST(request: Request) {
   // P1-5: 直接ヒット無しでも「該当無し」で突き放さず、低スコアの関連条文＋一般原則＋
   // 公式誘導を返す。stream route と同じ buildNoHitTemplate を使い挙動を揃える。
   if (!hasRagHits) {
-    const relatedForNoHit = allRelevant.slice(0, 8);
+    const relatedForNoHit = selectNoHitRelatedArticles(allRelevant, normalizedScore).slice(0, 8);
     const partialMatches = searchPartialMatches(message);
     const noHitAnswer = buildNoHitTemplate({
       query: message,
@@ -387,6 +387,7 @@ export async function POST(request: Request) {
     query: message,
     normalizedScore,
     articles: relevantArticles,
+    hadPins,
   });
 
   // Gemini Flash API呼び出し（多ターン会話対応） — 失敗時は RAG ヒットを degraded 回答として返す

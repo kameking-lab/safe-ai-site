@@ -587,18 +587,25 @@ export function searchPartialMatches(query: string): FallbackLawSuggestion[] {
 /**
  * RAG 検索のスコアと記事数から fallback tier を決定する。
  *
- * 設計参照: 05-fallback-logic-design.md §2
+ * 設計参照: 05-fallback-logic-design.md §2、診断書04 T8（adjacentヘッダ誤発火抑制）
  *
  * - Direct: score >= 0.75 かつ articles >= 2
  * - Adjacent: 0.5 <= score < 0.75、または articles == 1
  * - Out-of-Scope: score < 0.5
+ *
+ * hadPins（rag-search.ts の PINNED_TOPICS が確定ヒットした）が true の場合は、
+ * 手動キュレーション済みの確定ソースであるためスコア閾値(<0.75)を免除して direct 扱いにする
+ * （例: 職長教育「対象業種は？」が score0.73 で誤って adjacent 化していた問題）。
+ * articleCount<=1（裏付け条文が1件のみ）の場合は PIN 有無に関わらず adjacent のまま。
  */
 export function decideFallbackTier(
   normalizedScore: number,
-  articleCount: number
+  articleCount: number,
+  hadPins = false
 ): FallbackTier {
   if (normalizedScore < 0.5) return "out-of-scope";
-  if (normalizedScore < 0.75 || articleCount <= 1) return "adjacent";
+  if (articleCount <= 1) return "adjacent";
+  if (!hadPins && normalizedScore < 0.75) return "adjacent";
   return "direct";
 }
 
@@ -610,9 +617,10 @@ export function buildFallbackDecision(args: {
   query: string;
   normalizedScore: number;
   articles: LawArticle[];
+  hadPins?: boolean;
 }): FallbackDecision {
-  const { query, normalizedScore, articles } = args;
-  const tier = decideFallbackTier(normalizedScore, articles.length);
+  const { query, normalizedScore, articles, hadPins = false } = args;
+  const tier = decideFallbackTier(normalizedScore, articles.length, hadPins);
 
   if (tier === "direct") {
     return { tier, suggestions: [] };
