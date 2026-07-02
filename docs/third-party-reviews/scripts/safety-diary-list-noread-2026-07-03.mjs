@@ -2,8 +2,8 @@
 // 実行: cd web && (PORT=3100 npm run start &) ; node ../docs/third-party-reviews/scripts/safety-diary-list-noread-2026-07-03.mjs
 // 無読の問い: 「毎日書く職長」が画面を3秒見て、保存件数（いまの状態）と次にやることを言えるか。
 // 確認点:
-//  (1)空: 結論カード「保存した打合せ書なし」＋次アクション「新規作成」(44px,/safety-diary)
-//  (2)1件: 結論カード「1件 保存した打合せ書」＋次アクション「新規作成」
+//  (1)空: 結論カード「打合せ書なし」＋次アクション「新規作成」(44px,/safety-diary)
+//  (2)1件: 結論カード「1件 保存打合せ書」＋次アクション「新規作成」
 //  (3)検索で0件: 結論カード「該当なし」
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
@@ -48,7 +48,7 @@ async function cardText(page) {
 {
   const page = await open("/safety-diary/list", { [LIST_KEY]: "[]" });
   const t = await cardText(page);
-  check("空: 結論カードに『保存した打合せ書なし』", /保存した打合せ書なし/.test(t), t.trim());
+  check("空: 結論カードに『打合せ書なし』", /打合せ書なし/.test(t), t.trim());
   const cta = card(page).getByRole("link", { name: /新規作成/ });
   check("空: 次アクション『新規作成』が見える", await cta.isVisible().catch(() => false));
   const box = await cta.boundingBox();
@@ -71,7 +71,7 @@ async function cardText(page) {
   ];
   const page = await open("/safety-diary/list", { [LIST_KEY]: JSON.stringify(summary) });
   const t = await cardText(page);
-  check("1件: 結論カードに『1』『保存した打合せ書』", /\b1\b/.test(t) && /保存した打合せ書/.test(t), t.trim());
+  check("1件: 結論カードに『1』『保存打合せ書』", /\b1\b/.test(t) && /保存打合せ書/.test(t), t.trim());
   check(
     "1件: 次アクション『新規作成』が見える",
     await card(page).getByRole("link", { name: /新規作成/ }).isVisible().catch(() => false)

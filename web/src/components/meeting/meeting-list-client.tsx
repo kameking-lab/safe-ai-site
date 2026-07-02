@@ -119,7 +119,7 @@ export function MeetingListClient() {
         {list.length === 0 ? (
           <ConclusionCard
             tone="info"
-            title="保存した打合せ書なし"
+            title="打合せ書なし"
             description="まずは新規に打合せ書を作成・保存しましょう。次から開いて再編集・翌日用に複製できます。"
             action={{ href: "/safety-diary", label: "新規作成" }}
           />
@@ -136,7 +136,7 @@ export function MeetingListClient() {
             tone="info"
             value={filtered.length}
             unit="件"
-            title="保存した打合せ書"
+            title="保存打合せ書"
             description={isFiltering ? `全${list.length}件のうち、いまの検索条件に一致する分です。` : undefined}
             action={{ href: "/safety-diary", label: "新規作成" }}
           />
