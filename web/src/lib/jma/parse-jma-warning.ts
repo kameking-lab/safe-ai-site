@@ -39,6 +39,11 @@ function levelFromCode(code: string | undefined): JmaMapLevel | null {
   return "advisory";
 }
 
+/** 気象庁コードの警報/注意報/特別警報区分（先頭桁）を公開版として提供 */
+export function levelFromWarningCode(code: string | undefined): JmaMapLevel | null {
+  return levelFromCode(code);
+}
+
 const rank: Record<JmaMapLevel, number> = {
   none: 0,
   advisory: 1,
@@ -76,6 +81,22 @@ export type SelectedAreaWarning = {
   status: string;
   nameHint?: string;
 };
+
+/**
+ * 市区町村コード一致で抽出した selectedWarnings（{code,status}[]）から最大区分を算出。
+ * サイネージの警報バナー判定は県単位の headlineText ではなく、この市区町村コード
+ * ベースの区分を主軸にする（離島の注意報などで現場と無関係に赤くなるのを防ぐ）。
+ */
+export function maxLevelFromSelectedWarnings(
+  warnings: ReadonlyArray<{ code: string }>
+): JmaMapLevel {
+  let out: JmaMapLevel = "none";
+  for (const w of warnings) {
+    const lv = levelFromCode(w.code);
+    if (lv) out = maxLevel(out, lv);
+  }
+  return out;
+}
 
 /** 市区町村コード一致の注警報一覧（headline は別フィールドで返す） */
 export function warningsForCityCode(payload: JmaWarningPayload, cityCode: string): SelectedAreaWarning[] {

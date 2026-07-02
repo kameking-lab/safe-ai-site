@@ -55,11 +55,19 @@
   Dry run: compute and print the line that WOULD be written and the resolved target path; touch
   no file and take no lock. Used for stub verification.
 
+.PARAMETER SelfTest
+  Offline self-check of the status-lock acquisition (stale-orphan reclamation + fresh-lock respect).
+  Uses only temp files - no Claude, no real status file, no network. Exits 0 on PASS, 1 on FAIL.
+  -Lane is ignored in this mode (pass any placeholder to avoid an interactive prompt).
+
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-report-status.ps1 -Lane ops -Note "報告一元化を実装"
 
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-report-status.ps1 -Lane data -WhatIf
+
+.EXAMPLE
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-report-status.ps1 -Lane selftest -SelfTest
 #>
 [CmdletBinding()]
 param(
@@ -68,7 +76,8 @@ param(
   [string]$StatusPath = "",
   [string]$RepoPath = "",
   [string]$StringsPath = "",
-  [switch]$WhatIf
+  [switch]$WhatIf,
+  [switch]$SelfTest
 )
 
 $ErrorActionPreference = "Continue"
@@ -100,9 +109,75 @@ function Fmt([string]$key, [hashtable]$vals) {
   return $t
 }
 
+# Acquire an exclusive lock on the status file (CreateNew = atomic "only if absent"), reclaiming a
+# STALE orphan. If a prior holder is killed (Ctrl-C, sleep, crash) between CreateNew and Remove-Item,
+# the .lock file survives forever and every future report/banner write then fails to acquire it -
+# freezing the liveness heartbeat and manufacturing a false "loop is dead" alarm (watch point #1).
+# Worst-case legitimate hold is a few hundred ms even with all six lanes serialized, so a lock older
+# than $StaleSeconds cannot be a live holder: reclaim it once and retry immediately. Returns $true if
+# the lock is held (caller MUST Remove-Item the lockPath when done), $false after exhausting retries.
+function Get-StatusLock([string]$lockPath, [int]$StaleSeconds = 60, [int]$Tries = 25, [int]$DelayMs = 200) {
+  for ($try = 0; $try -lt $Tries; $try++) {
+    try {
+      $fs = [System.IO.File]::Open($lockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+      $fs.Close()
+      return $true
+    } catch {
+      $reclaimed = $false
+      try {
+        $li = Get-Item -LiteralPath $lockPath -ErrorAction SilentlyContinue
+        if ($li -and (((Get-Date) - $li.LastWriteTime).TotalSeconds -gt $StaleSeconds)) {
+          Remove-Item -LiteralPath $lockPath -Force -ErrorAction SilentlyContinue
+          Write-Rep ("reclaimed stale status lock (age > " + $StaleSeconds + "s; prior holder likely killed mid-write).")
+          $reclaimed = $true
+        }
+      } catch {}
+      # After reclaiming, retry CreateNew at once (no sleep) - whoever wins CreateNew holds it; a rare
+      # double-reclaim race just means last-writer-wins on content, which the lock already tolerates.
+      if (-not $reclaimed) { Start-Sleep -Milliseconds $DelayMs }
+    }
+  }
+  return $false
+}
+
 # Region markers are ASCII literals (NOT localized) so parsing stays stable across encodings.
 $beginMarker = "<!-- LANE-REPORT:BEGIN (managed by loop-report-status.ps1) -->"
 $endMarker = "<!-- LANE-REPORT:END -->"
+
+# ---- Self-test: offline verification of the lock's stale-orphan reclamation -------------------
+if ($SelfTest) {
+  $fails = 0
+  $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("loop-report-selftest-" + [System.Guid]::NewGuid().ToString("N"))
+  New-Item -ItemType Directory -Path $tmp -Force | Out-Null
+  $lp = Join-Path $tmp "status.md.lock"
+  function Assert-Test([string]$name, [bool]$cond) {
+    if ($cond) { Write-Rep ("[SELFTEST] PASS: " + $name) }
+    else { Write-Rep ("[SELFTEST] FAIL: " + $name); $script:fails++ }
+  }
+  try {
+    # A) Clean acquire when no lock exists -> true, and the lock file is left behind for the holder.
+    $a = Get-StatusLock $lp 60 5 50
+    Assert-Test "clean acquire returns true" ($a -eq $true)
+    Assert-Test "clean acquire leaves lock file" (Test-Path -LiteralPath $lp)
+    if (Test-Path -LiteralPath $lp) { Remove-Item -LiteralPath $lp -Force }
+
+    # B) A FRESH foreign lock (age 0) must be respected, not reclaimed -> false after a few tries.
+    $fs = [System.IO.File]::Open($lp, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None); $fs.Close()
+    $b = Get-StatusLock $lp 60 3 30
+    Assert-Test "fresh foreign lock is NOT reclaimed" ($b -eq $false)
+    Assert-Test "fresh foreign lock still present" (Test-Path -LiteralPath $lp)
+
+    # C) A STALE orphan (backdated well past the threshold) is reclaimed and acquired -> true.
+    (Get-Item -LiteralPath $lp).LastWriteTime = (Get-Date).AddSeconds(-120)
+    $c = Get-StatusLock $lp 60 5 50
+    Assert-Test "stale orphan lock is reclaimed and acquired" ($c -eq $true)
+    if (Test-Path -LiteralPath $lp) { Remove-Item -LiteralPath $lp -Force }
+  } finally {
+    try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
+  }
+  if ($fails -eq 0) { Write-Rep "[SELFTEST] ALL PASS"; exit 0 }
+  Write-Rep ("[SELFTEST] " + $fails + " FAILURE(S)"); exit 1
+}
 
 # ---- Resolve the central status file ---------------------------------------------------------
 if ($StatusPath -eq "") {
@@ -158,22 +233,13 @@ Write-Rep ("computed row: " + $laneLine)
 
 if ($WhatIf) {
   Write-Rep "[WHATIF] no file written, no lock taken."
+  Write-Rep ("[WHATIF] would also refresh the top heartbeat line to: " + (Fmt "updated" @{ NOW = $lastRun }))
   exit 0
 }
 
 # ---- Serialize the read-modify-write with a lock file (reporter-vs-reporter safety) -----------
 $lockPath = $StatusPath + ".lock"
-$haveLock = $false
-for ($try = 0; $try -lt 25; $try++) {
-  try {
-    $fs = [System.IO.File]::Open($lockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
-    $fs.Close()
-    $haveLock = $true
-    break
-  } catch {
-    Start-Sleep -Milliseconds 200
-  }
-}
+$haveLock = Get-StatusLock $lockPath 60 25 200
 if (-not $haveLock) {
   Write-Rep "WARN: could not acquire status lock after retries; skipping report (non-fatal)."
   exit 0
@@ -220,6 +286,24 @@ try {
     $newLines.Add($laneLine)
     $newLines.Add($endMarker)
     $lines = $newLines.ToArray()
+  }
+
+  # Keep the top "last updated" line an HONEST heartbeat. The launcher stamps it ONLY on its
+  # (logon / daily-07:00) passes, but lanes touch this file every iteration - so between launcher
+  # passes (potentially all day) it stays frozen even while lanes run, and the owner cannot tell
+  # "alive" from "silently dead" (watch point #1: does the loop live?). Bump it to now on every
+  # write so it reads "at least one lane was alive as of X"; the per-lane rows still show WHICH.
+  # Refresh in place only (never create it) - the launcher owns emitting the line. Match by the
+  # label prefix (text before {NOW}); if strings are missing the prefix is a non-Japanese key that
+  # matches nothing, so this is a safe no-op.
+  $updatedTpl = S "updated"
+  $ph = $updatedTpl.IndexOf('{NOW}')
+  $updPrefix = if ($ph -ge 0) { $updatedTpl.Substring(0, $ph) } else { $updatedTpl }
+  if ($updPrefix.Trim() -ne "") {
+    $freshUpdated = Fmt "updated" @{ NOW = (Get-Date -Format "yyyy-MM-dd HH:mm:ss") }
+    for ($k = 0; $k -lt $lines.Count; $k++) {
+      if ($lines[$k].TrimStart().StartsWith($updPrefix)) { $lines[$k] = $freshUpdated; break }
+    }
   }
 
   $text = ($lines -join "`r`n") + "`r`n"

@@ -1,15 +1,82 @@
 /**
  * KY全面再設計 P1-A: A4印刷用 KY用紙レイアウト（全建協/建災防様式に寄せた表組み＋確認印枠）。
  * 画面では既定で非表示。/ky/paper が print 時（hidden print:block）と印刷プレビューで描画する。
+ *
+ * F1（直接操作UI・方式確立）: 省略可能な `editing` prop を追加。
+ * 指定時のみ各欄がタップ標的（EditableCell）になり、画面キャンバス（PaperStage）上で
+ * 「紙をタップして書く」を成立させる。**`editing` 未指定の出力HTMLは従来と完全一致**
+ * （ky-print-sheet.test.tsx のスナップショットで機械的に固定＝A4正式書式は不可侵）。
  */
 import type { KyInstructionRecordState } from "@/lib/types/operations";
+import type { ReactNode } from "react";
 import { evalScore, riskGrade } from "@/lib/ky/pulldown-options";
 import { KY_APPROVAL_LABEL } from "@/lib/ky/approval";
+import { KY_HEADER_FIELDS, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
 
 const th = "border border-black bg-slate-100 px-1.5 py-1 text-left align-top font-bold whitespace-nowrap";
 const td = "border border-black px-1.5 py-1 align-top";
 
-export function KyPrintSheet({ record }: { record: KyInstructionRecordState }) {
+export type KyPrintSheetEditing = {
+  /** セル（欄）タップ時に呼ばれる */
+  onTapField: (key: KyPaperFieldKey) => void;
+  /** いま編集中の欄（青リング表示） */
+  activeKey?: KyPaperFieldKey | null;
+  /** 未記入の欄（うっすらアンバー＋点線表示） */
+  emptyKeys?: ReadonlySet<string>;
+};
+
+/**
+ * 欄の中身をタップ標的でラップする。editing 未指定時は中身をそのまま返す
+ * （＝印刷/プレビュー経路のHTMLに1バイトも影響しない）。
+ * 装飾はセル内側のオーバーレイのみで、表組みの罫線・寸法には触らない。
+ */
+function EditableCell({
+  editing,
+  fieldKey,
+  children,
+}: {
+  editing: KyPrintSheetEditing | undefined;
+  fieldKey: KyPaperFieldKey;
+  children: ReactNode;
+}) {
+  if (!editing) return <>{children}</>;
+  const label = KY_HEADER_FIELDS[fieldKey].label;
+  const isActive = editing.activeKey === fieldKey;
+  const isEmpty = editing.emptyKeys?.has(fieldKey) ?? false;
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`${label}を入力`}
+      data-zoompan-skip="1"
+      data-field-key={fieldKey}
+      onClick={() => editing.onTapField(fieldKey)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          editing.onTapField(fieldKey);
+        }
+      }}
+      className={`-mx-1.5 -my-1 min-h-[1.6em] cursor-pointer rounded-sm px-1.5 py-1 ${
+        isActive
+          ? "ring-2 ring-inset ring-sky-500"
+          : isEmpty
+            ? "border border-dashed border-amber-400 bg-amber-50/70"
+            : "hover:bg-sky-50"
+      }`}
+    >
+      {isEmpty ? <span className="text-[8pt] text-amber-700/80">タップして入力</span> : children}
+    </div>
+  );
+}
+
+export function KyPrintSheet({
+  record,
+  editing,
+}: {
+  record: KyInstructionRecordState;
+  editing?: KyPrintSheetEditing;
+}) {
   const participants = record.participants.filter((p) => p.name.trim());
   const risks = record.riskRows.filter((r) => r.hazard.trim() || r.reduction.trim());
   const workDetail = record.workRows.find((r) => r.workDetail.trim())?.workDetail ?? "";
@@ -31,21 +98,33 @@ export function KyPrintSheet({ record }: { record: KyInstructionRecordState }) {
         <tbody>
           <tr>
             <th className={`${th} w-[18%]`}>現場名</th>
-            <td className={`${td} w-[32%]`}>{record.siteName}</td>
+            <td className={`${td} w-[32%]`}>
+              <EditableCell editing={editing} fieldKey="siteName">{record.siteName}</EditableCell>
+            </td>
             <th className={`${th} w-[18%]`}>工事名・工区</th>
-            <td className={`${td} w-[32%]`}>{record.projectName}</td>
+            <td className={`${td} w-[32%]`}>
+              <EditableCell editing={editing} fieldKey="projectName">{record.projectName}</EditableCell>
+            </td>
           </tr>
           <tr>
             <th className={th}>作業日</th>
-            <td className={td}>{dateStr}</td>
+            <td className={td}>
+              <EditableCell editing={editing} fieldKey="workDate">{dateStr}</EditableCell>
+            </td>
             <th className={th}>天気・気温</th>
-            <td className={td}>{[record.weather, temp].filter(Boolean).join(" ")}</td>
+            <td className={td}>
+              <EditableCell editing={editing} fieldKey="weatherTemp">{[record.weather, temp].filter(Boolean).join(" ")}</EditableCell>
+            </td>
           </tr>
           <tr>
             <th className={th}>職長（リーダー）</th>
-            <td className={td}>{record.foremanName}</td>
+            <td className={td}>
+              <EditableCell editing={editing} fieldKey="foremanName">{record.foremanName}</EditableCell>
+            </td>
             <th className={th}>元請会社</th>
-            <td className={td}>{record.coop1Name}</td>
+            <td className={td}>
+              <EditableCell editing={editing} fieldKey="coop1Name">{record.coop1Name}</EditableCell>
+            </td>
           </tr>
         </tbody>
       </table>
