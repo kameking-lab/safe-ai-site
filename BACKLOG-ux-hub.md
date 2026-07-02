@@ -5,7 +5,7 @@
 ## 未着手（上から処理）
 
 ### 2026-07-02 Fable診断注入（診断書: docs/fable-diagnosis-2026-07-02/01・07）
-- [ ] 【Sonnet・P1】S11: /handover（引き継ぎ書）の公開閉鎖＝ルート撤去しdocsへ退避 or 認証ゲート化。本番404/403を確認（07の3c・情報露出）。
+- [x] 【Sonnet・P1】S11: /handover（引き継ぎ書）の公開閉鎖＝ルート撤去しdocsへ退避 or 認証ゲート化。本番404/403を確認（07の3c・情報露出）。→ 真因: クエリキー認証がHANDOVER_GATE_KEY未設定時にソース内フォールバック値へ暗黙フォールバックしており、公開GitHubリポジトリを読める人なら誰でも突破可能だった（env命名ガイド未記載＝本番未設定の疑い濃厚）。内容は既存の docs/session-handover-2026-04-21.md に同等アーカイブがあるためルート本体を撤去（本文自体は実名は出力していなかった）。admin監査ページの該当行を実情へ更新。ローカルnext start実機で /handover・?key=handover2026 いずれも404を確認。tsc/lint/vitest(2138件)/build全緑。別件の重大発見(docs内複数ファイルに実名平文露出)はオーナーへ別途エスカレーション。(2026-07-03 / ux-hub/s11-handover-route-removal / PR #629)
 - [ ] 【Sonnet・P1】S9: コンサル相談CVパス＝/contact 2タブ化（同一Formspree・件名プレフィックス）＋専門ページ下部に相談カード（07のP1-5・6/11酷評E-2の未着手残）。
 - [ ] 【Sonnet・P1】S10: /signage/map・/for/construction のSSR/固有メタ仕上げ＋/accidents 本体への出力3ボタン（CSV/要点コピー/共有URL＝#520の横展開）（07のP1-7+P1-7b）。
 - [ ] 【Sonnet・P1】S8-b: E-E-A-T監修者バイライン＝判例詳細（/court-cases/[id]・現状author=Organizationのみ）とFAQへのPerson JSON-LD＋バイライン配線（07のP1-4の自班route分）。

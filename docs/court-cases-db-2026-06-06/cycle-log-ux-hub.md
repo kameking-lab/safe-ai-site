@@ -320,3 +320,23 @@
 **無読テスト**: `docs/third-party-reviews/scripts/signage-s5-daily-values-noread-2026-07-03.mjs`（build+start、Playwright、1920x1080）**9/9 PASS**。①3タイル（無災害日数・今日の一言・暑さ指数(WBGT)）が表示される、②起点日を保存すると経過日数表示に切り替わる、③Playwright Clock APIで翌日に時刻を固定してリロードし「今日の一言」の内容が実際に変わることを確認（2日連続比較の代替）、④1画面フィット不変（scrollHeight≦viewport）——を実測確認。スクリーンショット添付（結論ストリップ直下に3タイル、WBGT=注意で黄地黒文字のJIS色を確認）。
 
 **残課題**: S8-b(E-E-A-T)・S9(相談CV)・S10(SSR/メタ)・S11(/handover閉鎖)は次イテレーション以降で対応。
+
+---
+
+## 2026-07-03 ux-hub/s11-handover-route-removal
+
+**イテレーション頭の回収**: mainは自班の直近マージ(#622)まで反映済み・working tree clean。自分の未マージ緑PRなし（`gh pr list --author @me` に `ux-hub/` prefixのPRなし）。`git checkout main && git pull --ff-only` でclean確認後、本タスクに着手。
+
+**タスク**: BACKLOG-ux-hub.md 最上位 S11（診断書 `docs/fable-diagnosis-2026-07-02/07` の3c・情報露出）。`/handover`（引き継ぎ書）の公開閉鎖。
+
+**調査**: `web/src/app/(main)/handover/page.tsx` はクエリキー `?key=...` で `notFound()` を出し分ける簡易ゲートだが、`VALID_KEY = process.env.HANDOVER_GATE_KEY ?? "handover2026"` とフォールバック値がソースに直書きされていた。リポジトリは `gh repo view` で `visibility: PUBLIC` を確認。`docs/env-naming-guide-2026-05-02.md`・`docs/env-cleanup-candidates.md`・`web/.env.example` のいずれにも `HANDOVER_GATE_KEY` の記載がなく、本番Vercelで明示設定されている根拠がない＝公開ソースのフォールバック値がそのまま本番の実質パスワードになっている疑いが濃厚（`docs/session-handover-2026-04-21.md` 冒頭にも `?key=handover2026` のURLがそのまま平文記載されており裏付け）。ページ本体は料金・サービス単価・内部運用ルール・レビュースコア推移等の非公開情報を含む一方、真の実名は出力していなかった（既存の安全策どおり）。ナビ・sitemap からのリンクは無く、`robots.ts`（seo班所有・不可侵）が Disallow 済み、`web/src/app/admin/audits/brand-consistency/page.tsx` の監査台帳のみ「解決済み」として参照。
+
+**実装**: `web/src/app/(main)/handover/`（page.tsx・loading.tsx）を撤去。内容は既存 `docs/session-handover-2026-04-21.md` に同等アーカイブが既にあるため二重退避はせず、ルート撤去のみで完結。admin監査ページの `/handover` 行を「ルート撤去」の実情へ更新。`robots.ts` は seo班所有のため不可侵ルールに従い変更なし（存在しないパスへのDisallowエントリが残るが無害）。
+
+**ゲート結果（cd web）**: `.next/types` のstaleキャッシュにより初回 `tsc --noEmit` が削除済みルートを指すエラーを出したため `npm run build` で型を再生成し解消。tsc=0 / lint=0 errors（既存warning 23件のみ・本変更に無関係）/ vitest 255 files・2138 tests 全pass / build 成功（ビルド出力のルート一覧に `/handover` 不在を確認）。
+
+**無読テスト**: 本番相当のローカル `next start`（port 3901）実機で `GET /handover` と `GET /handover?key=handover2026` の両方が404であることをcurlで確認（旧フォールバックキーを使っても突破できないことを実証）。
+
+**別件エスカレーション（本タスク範囲外・オーナー確認要）**: 作業中に `docs/session-handover-2026-04-21.md` 含む複数のdocsファイル（`docs/archive/monetization-strategy-2026-04-26.md`・`docs/archive/monetization-strategy-v2-2026-04-26.md`・`docs/monetization-strategy-v3-2026-04-26.md`・`docs/seminar-qa-report.md`）に運営者の実名が平文で記載されており、リポジトリがpublicのため露出していることを発見。是正には過去コミットの書き換え（force push相当の破壊的操作）が必要になる可能性が高く、本ループの自律権限を超えるためオーナーへ別途報告（本セッションのチャット応答で報告）。本タスクでは触れていない。
+
+**残課題**: S9(相談CV)・S10(SSR/メタ)・S8-b(E-E-A-T)以下は次イテレーション以降で対応。上記実名露出エスカレーションはオーナー判断待ち。
