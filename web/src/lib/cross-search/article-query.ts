@@ -14,43 +14,13 @@
  * 既存の 2 語 AND 検索（O8-a）を一切壊さない。
  *
  * 漢数字→算用数字は /law-search（law-search-panel.tsx）の kanjiToNum と同一ロジック。
- * 当該関数はコンポーネント内の非公開関数のため import できず、当班 lib へ再実装している。
+ * 当該関数はコンポーネント内の非公開関数のため import できず、当班 lib の
+ * {@link ../law-links/kanji-numerals} へ切り出して共有している（O18 のリンカーも同じ変換を使う）。
  */
-
-/** 漢数字 1 文字→値。十／百／千は位取り。 */
-const KANJI_DIGIT: Record<string, number> = {
-  一: 1, 二: 2, 三: 3, 四: 4, 五: 5,
-  六: 6, 七: 7, 八: 8, 九: 9, 〇: 0,
-  十: 10, 百: 100, 千: 1000,
-};
-
-/** 連続した漢数字（例「六十一」）を算用数字文字列（"61"）へ。変換不能はそのまま返す。 */
-function kanjiRunToArabic(run: string): string {
-  let result = 0;
-  let current = 0;
-  for (const ch of run) {
-    const val = KANJI_DIGIT[ch] ?? 0;
-    if (val >= 10) {
-      result += (current || 1) * val;
-      current = 0;
-    } else {
-      current = val;
-    }
-  }
-  result += current;
-  return result > 0 ? String(result) : run;
-}
-
-/** 数字トークン（半角/全角/漢数字混在可）を算用数字文字列へ正規化。 */
-function toArabic(token: string): string {
-  // 全角数字→半角
-  const half = token.replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xfee0));
-  if (/^[0-9]+$/.test(half)) return half;
-  return kanjiRunToArabic(half);
-}
+import { NUM_CLASS, toArabic } from '../law-links/kanji-numerals';
 
 /** 条番号に現れうる数字（半角/全角/漢数字）1 文字クラス。 */
-const NUM = '[0-9０-９一二三四五六七八九〇十百千]';
+const NUM = `[${NUM_CLASS}]`;
 
 /**
  * 条番号表現の抽出。いずれの分岐も末尾「条」必須（裸の数字・日付範囲の誤変換防止）。
