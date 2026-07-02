@@ -1,4 +1,4 @@
-import { searchCrossIndex, normalizeArticleQuery } from './cross-search';
+import { searchCrossIndex, normalizeArticleQuery, expandLawAliases } from './cross-search';
 
 export type SearchCategory = 'law' | 'notice' | 'chemical' | 'education' | 'accident' | 'precedent' | 'glossary';
 
@@ -56,6 +56,11 @@ export const CATEGORY_META: Record<
  * 「61-2条」を「第61条の2」へ書き換えてから AND エンジンへ渡す。これにより e-Gov でも
  * 0 件になる生クエリが該当条文をトップ表示できる（診断書 05-search-egov.md 比較 a,b）。
  *
+ * 加えて法令名のかな読み・別表記（{@link expandLawAliases}）を正略称へ展開する＝条番号
+ * 分解の後段で「あんえいほう 第88条」→「安衛法 第88条」へ、「じんぱいほう」→「じん肺法」へ。
+ * かな読みはインデックスにもコンテンツにも現れず 0 件だった取り逃し（比較 c）を、既存ヒットを
+ * 一切奪わずに拾う（正式名称・別略称は O8-a で解決済みのため対象外）。
+ *
  * @param limit 返却上限。コマンドパレット(⌘K)は既定10、/search 結果ページは全件表示のため大きめを渡す。
  */
 export function searchItems(
@@ -64,7 +69,7 @@ export function searchItems(
   category: 'all' | SearchCategory,
   limit = 10,
 ): SearchItem[] {
-  return searchCrossIndex(items, normalizeArticleQuery(query), {
+  return searchCrossIndex(items, expandLawAliases(normalizeArticleQuery(query)), {
     category,
     limit,
     categoryPriority: SEARCH_CATEGORY_PRIORITY,
