@@ -11,7 +11,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
-import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
+import { normalizeKyInstructionRecord, makeEmptyKyRiskRow } from "@/lib/services/operations-service";
 import { createServices } from "@/lib/services/service-factory";
 import type {
   KyInstructionParticipant,
@@ -58,7 +58,7 @@ import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
 import { KyTranscribePanel } from "@/components/ky-paper/ky-transcribe-panel";
 import { PaperStage } from "@/components/ky-paper/paper-stage";
 import { FieldEditorSheet } from "@/components/ky-paper/field-editor-sheet";
-import { emptyKyPaperFieldKeys, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
+import { emptyKyPaperFieldKeys, riskFieldKey, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
@@ -258,6 +258,13 @@ export function KyPaperView() {
       riskRows: prev.riskRows.map((r, idx) => (idx === i ? row : r)),
     }));
   }, []);
+
+  // O10（続き）: 危険行の「＋行追加」ホットスポット。追加した行の危険欄をそのまま開く（zoom-to-cellの先取り）。
+  const handleAddRiskRow = useCallback(() => {
+    const newIndex = record.riskRows.length;
+    setRecord((prev) => ({ ...prev, riskRows: [...prev.riskRows, makeEmptyKyRiskRow(prev.riskRows.length)] }));
+    setActiveFieldKey(riskFieldKey(newIndex, "hazard"));
+  }, [record.riskRows.length]);
 
   const years = useMemo(() => yearOptions(), []);
   const days = useMemo(
@@ -573,6 +580,7 @@ export function KyPaperView() {
                       onTapField: (key) => setActiveFieldKey(key),
                       activeKey: activeFieldKey,
                       emptyKeys: emptyPaperFieldKeys,
+                      onAddRiskRow: handleAddRiskRow,
                     }
               }
             />

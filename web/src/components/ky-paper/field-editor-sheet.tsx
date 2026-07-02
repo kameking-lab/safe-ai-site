@@ -13,8 +13,15 @@
 import { useEffect, useRef } from "react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import type { KyInstructionRecordState } from "@/lib/types/operations";
-import { KY_PAPER_FIELDS, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
-import { MONTH_OPTIONS, dayOptions, temperatureOptions, yearOptions } from "@/lib/ky/pulldown-options";
+import { getKyPaperFieldDef, nextKyPaperFieldKey, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
+import {
+  MONTH_OPTIONS,
+  dayOptions,
+  temperatureOptions,
+  yearOptions,
+  LIKELIHOOD_OPTIONS,
+  SEVERITY_OPTIONS,
+} from "@/lib/ky/pulldown-options";
 import { WEATHER_REGIONS } from "@/lib/ky/weather-autofill";
 
 export type FieldEditorSheetProps = {
@@ -44,7 +51,8 @@ export function FieldEditorSheet({
   onSelectField,
   weather,
 }: FieldEditorSheetProps) {
-  const def = KY_PAPER_FIELDS[fieldKey];
+  const def = getKyPaperFieldDef(fieldKey);
+  const next = nextKyPaperFieldKey(fieldKey, record);
   const sheetRef = useRef<HTMLDivElement | null>(null);
 
   // 開いたら最初の入力へフォーカス（キーボード/音声にすぐ入れる）
@@ -147,6 +155,45 @@ export function FieldEditorSheet({
           </div>
         )}
 
+        {def.type === "riskEval" && def.riskIndex !== undefined && (
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-1.5 text-sm text-slate-700">
+              可能性
+              <select
+                aria-label="可能性"
+                value={String(record.riskRows[def.riskIndex]?.likelihood ?? 1)}
+                onChange={(e) => {
+                  const idx = def.riskIndex!;
+                  const v = Number(e.target.value) as 1 | 2 | 3;
+                  patch({ riskRows: record.riskRows.map((row, i) => (i === idx ? { ...row, likelihood: v } : row)) });
+                }}
+                className={selectCls}
+              >
+                {LIKELIHOOD_OPTIONS.map((o) => (
+                  <option key={o.value} value={String(o.value)}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+            <label className="flex items-center gap-1.5 text-sm text-slate-700">
+              重大性
+              <select
+                aria-label="重大性"
+                value={String(record.riskRows[def.riskIndex]?.severity ?? 1)}
+                onChange={(e) => {
+                  const idx = def.riskIndex!;
+                  const v = Number(e.target.value) as 1 | 2 | 3;
+                  patch({ riskRows: record.riskRows.map((row, i) => (i === idx ? { ...row, severity: v } : row)) });
+                }}
+                className={selectCls}
+              >
+                {SEVERITY_OPTIONS.map((o) => (
+                  <option key={o.value} value={String(o.value)}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+        )}
+
         {def.type === "weatherTemp" && (
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-1.5">
@@ -195,10 +242,10 @@ export function FieldEditorSheet({
         {/* 閉じるは右上×・背面タップ・Escape で担う（フッターは前進操作のみ＝
             同名「閉じる」ボタンの重複と読み上げの二重を避ける）。 */}
         <div className="mt-4 flex items-center justify-end gap-2">
-          {def.next ? (
+          {next ? (
             <button
               type="button"
-              onClick={() => onSelectField(def.next!)}
+              onClick={() => onSelectField(next)}
               className="min-h-[44px] rounded-lg bg-sky-600 px-4 text-sm font-bold text-white hover:bg-sky-700"
             >
               次の欄へ →

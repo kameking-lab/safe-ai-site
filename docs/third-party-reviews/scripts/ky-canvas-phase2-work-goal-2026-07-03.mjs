@@ -50,10 +50,13 @@ check(
   await page.getByText("3F鉄骨建方 ボルト本締め").first().isVisible().catch(() => false)
 );
 
-// (2) 「次の欄へ」で4R目標(チーム行動目標→重点実施項目→指差呼称)を辿れる。
-await sheet.getByRole("button", { name: /次の欄へ/ }).click();
+// (2) 4R目標(チーム行動目標→重点実施項目→指差呼称)を辿れる。
+// O10（続き・危険行対応）で workDetail の「次の欄へ」は危険行(risk.0.hazard)につながるよう
+// 記入順（紙の上から下）を正しくしたため、ここでは目標欄を直接タップして開く（用紙上の実タップ標的を検証）。
+await page.keyboard.press("Escape");
 await page.waitForTimeout(150);
-check("『次の欄へ』でチーム行動目標のエディタに進む", await sheet.getByText("チーム行動目標").first().isVisible().catch(() => false));
+await page.getByRole("button", { name: "チーム行動目標を入力" }).click();
+check("『チーム行動目標』セルの直接タップでエディタが開く", await sheet.getByText("チーム行動目標").first().isVisible().catch(() => false));
 await sheet.locator("textarea").fill("高所では必ず親綱に掛けてから移動しよう");
 await sheet.getByRole("button", { name: /次の欄へ/ }).click();
 await page.waitForTimeout(150);

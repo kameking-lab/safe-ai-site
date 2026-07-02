@@ -11,7 +11,7 @@ import type { KyInstructionRecordState } from "@/lib/types/operations";
 import type { ReactNode } from "react";
 import { evalScore, riskGrade } from "@/lib/ky/pulldown-options";
 import { KY_APPROVAL_LABEL } from "@/lib/ky/approval";
-import { KY_PAPER_FIELDS, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
+import { getKyPaperFieldDef, riskFieldKey, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
 
 const th = "border border-black bg-slate-100 px-1.5 py-1 text-left align-top font-bold whitespace-nowrap";
 const td = "border border-black px-1.5 py-1 align-top";
@@ -23,6 +23,8 @@ export type KyPrintSheetEditing = {
   activeKey?: KyPaperFieldKey | null;
   /** 未記入の欄（うっすらアンバー＋点線表示） */
   emptyKeys?: ReadonlySet<string>;
+  /** 危険行の追加ホットスポット（O10: 動的行）。省略時は「＋危険行を追加」を出さない。 */
+  onAddRiskRow?: () => void;
 };
 
 /**
@@ -40,7 +42,7 @@ function EditableCell({
   children: ReactNode;
 }) {
   if (!editing) return <>{children}</>;
-  const label = KY_PAPER_FIELDS[fieldKey].label;
+  const label = getKyPaperFieldDef(fieldKey).label;
   const isActive = editing.activeKey === fieldKey;
   const isEmpty = editing.emptyKeys?.has(fieldKey) ?? false;
   return (
@@ -154,7 +156,46 @@ export function KyPrintSheet({
           </tr>
         </thead>
         <tbody>
-          {risks.length === 0 ? (
+          {editing ? (
+            <>
+              {/* O10（続き）: 動的行。全行(空欄含む)をタップ標的にし、可能性/重大性はプルダウン付きエディタへ */}
+              {record.riskRows.map((r, i) => {
+                const score = evalScore(r.likelihood, r.severity);
+                return (
+                  <tr key={i}>
+                    <td className={`${td} text-center`}>{r.targetLabel || i + 1}</td>
+                    <td className={`${td} whitespace-pre-wrap`}>
+                      <EditableCell editing={editing} fieldKey={riskFieldKey(i, "hazard")}>{r.hazard}</EditableCell>
+                    </td>
+                    <td className={`${td} text-center`}>
+                      <EditableCell editing={editing} fieldKey={riskFieldKey(i, "eval")}>{r.likelihood}</EditableCell>
+                    </td>
+                    <td className={`${td} text-center`}>
+                      <EditableCell editing={editing} fieldKey={riskFieldKey(i, "eval")}>{r.severity}</EditableCell>
+                    </td>
+                    <td className={`${td} text-center`}>{score}（{riskGrade(score).label}）</td>
+                    <td className={`${td} whitespace-pre-wrap`}>
+                      <EditableCell editing={editing} fieldKey={riskFieldKey(i, "reduction")}>{r.reduction}</EditableCell>
+                    </td>
+                  </tr>
+                );
+              })}
+              {editing.onAddRiskRow && (
+                <tr>
+                  <td colSpan={6} className={`${td} text-center`}>
+                    <button
+                      type="button"
+                      data-zoompan-skip="1"
+                      onClick={editing.onAddRiskRow}
+                      className="min-h-[36px] rounded border border-dashed border-sky-400 bg-sky-50/70 px-3 py-1 text-xs font-bold text-sky-800 hover:bg-sky-100"
+                    >
+                      ＋ 危険行を追加
+                    </button>
+                  </td>
+                </tr>
+              )}
+            </>
+          ) : risks.length === 0 ? (
             <tr>
               <td className={`${td} text-center`}>1</td>
               <td className={td}>&nbsp;</td>
