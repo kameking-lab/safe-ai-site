@@ -38,6 +38,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/articles", lastModified: freshestArticle, priority: 0.8, changeFrequency: "daily" },
     { url: "/accidents", lastModified: accidentsDataUpdated, priority: 0.9, changeFrequency: "weekly" },
     { url: "/accidents-analytics", lastModified: accidentsDataUpdated, priority: 0.8, changeFrequency: "weekly" },
+    // 重大災害事例ブラウザ（死亡災害DBの類型検索・自己canonical・実在indexableページ）。
+    // 死亡災害DB由来のためlastmodは accidentsDataUpdated（= SERIOUS_CASES_META.generatedAt）に追従。
+    { url: "/accident-news", lastModified: accidentsDataUpdated, priority: 0.85, changeFrequency: "weekly" },
     { url: "/accidents-reports", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "weekly" },
     { url: "/accidents-reports/construction", lastModified: "2026-05-16", priority: 0.7, changeFrequency: "weekly" },
     { url: "/accidents-reports/manufacturing", lastModified: "2026-05-16", priority: 0.7, changeFrequency: "weekly" },
@@ -68,6 +71,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // P0-011 (usability-audit-day2): /laws/notices-precedents は /circulars に統合済。301 redirect は next.config.ts。
     { url: "/ky", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
     { url: "/ky-examples", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
+    // KY入力の正規ページ（robots index:true・自己canonical・HowTo JSON-LD付の実在ツール）。
+    // /pdf の permanentRedirect 先だが本体URLは /ky/paper。孤立していたため収載する
+    //（リダイレクト元 /pdf 自体は下記コメントの通り非収載）。
+    { url: "/ky/paper", lastModified: "2026-05-25", priority: 0.75, changeFrequency: "monthly" },
     { url: "/risk", lastModified: "2026-04-19", priority: 0.8, changeFrequency: "daily" },
     { url: "/chatbot", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
     { url: "/law-search", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
@@ -81,6 +88,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/heat-illness-prevention/wbgt-calculator", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/heat-illness-prevention/industry-risk", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/heat-illness-prevention/r7-compliance", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
+    // 令和7年6月施行 改正安衛則(第612条の2)対応の実在indexableツールページ（自己canonical・PageJsonLd付）。
+    // 兄弟ページ(wbgt-calculator/industry-risk/r7-compliance)と同節のためlastmod方針を踏襲。
+    { url: "/heat-illness-prevention/acclimatization", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
+    { url: "/heat-illness-prevention/log", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
+    { url: "/heat-illness-prevention/poster", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/asbestos-management", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
     { url: "/asbestos-management/investigation-checker", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/asbestos-management/notification-builder", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
