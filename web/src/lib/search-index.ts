@@ -1,4 +1,4 @@
-import { searchCrossIndex } from './cross-search';
+import { searchCrossIndex, normalizeArticleQuery } from './cross-search';
 
 export type SearchCategory = 'law' | 'notice' | 'chemical' | 'education' | 'accident' | 'precedent' | 'glossary';
 
@@ -51,6 +51,11 @@ export const CATEGORY_META: Record<
  * 「クレーン 過負荷」「足場 作業床」のような 2 語クエリが目的条文へ収束する
  * （従来はクエリ全体を 1 つの部分文字列として扱い、2 語クエリが全滅していた）。
  *
+ * さらに条番号クエリ（{@link normalizeArticleQuery}）を前処理で正規化し、地続きの
+ * 「安衛法61条」を「安衛法 第61条」へ、漢数字「第六十一条」を「第61条」へ、枝番
+ * 「61-2条」を「第61条の2」へ書き換えてから AND エンジンへ渡す。これにより e-Gov でも
+ * 0 件になる生クエリが該当条文をトップ表示できる（診断書 05-search-egov.md 比較 a,b）。
+ *
  * @param limit 返却上限。コマンドパレット(⌘K)は既定10、/search 結果ページは全件表示のため大きめを渡す。
  */
 export function searchItems(
@@ -59,7 +64,7 @@ export function searchItems(
   category: 'all' | SearchCategory,
   limit = 10,
 ): SearchItem[] {
-  return searchCrossIndex(items, query, {
+  return searchCrossIndex(items, normalizeArticleQuery(query), {
     category,
     limit,
     categoryPriority: SEARCH_CATEGORY_PRIORITY,

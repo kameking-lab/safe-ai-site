@@ -39,11 +39,8 @@ export function ProcedureClient() {
     const now = new Date();
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 初回マウントの既定値（SSRハイドレーション差異回避）
     setRecId(newProcedureId());
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
     setDate(`${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 既定の空ステップ
     setSteps(defaultSteps());
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 保存一覧
     setList(getProcedureList());
   }, []);
 

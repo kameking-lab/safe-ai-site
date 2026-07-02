@@ -38,7 +38,17 @@
 
 .PARAMETER Register
   (Re)register the Task Scheduler task 'safe-ai-loop-runner' to run THIS launcher with no baked
-  arguments, triggered at logon and daily at 07:00. Run once after pulling O16 to main.
+  arguments, triggered at logon and daily at 07:00. Registering a Scheduled Task requires an
+  ELEVATED PowerShell on this machine (empirically verified: even a per-user Limited/Interactive
+  task registration returns Access Denied without admin). This path adds the DAILY 07:00 heartbeat
+  (status refresh + long-uptime dead-lane resurrection) on top of logon resurrection.
+
+.PARAMETER InstallUserStartup
+  ADMIN-FREE logon resurrection (O17). Writes a launcher shortcut command into the CURRENT USER'S
+  Startup folder (shell:startup) so the launcher fires at every logon with NO Task Scheduler and NO
+  admin rights. This is the primary, always-available resurrection path: it alone guarantees the
+  loops come back after a PC restart. -Register remains an OPTIONAL upgrade for the daily heartbeat.
+  Idempotent, -WhatIf aware, and post-verified (throws if the entry is not written as intended).
 
 .PARAMETER WhatIf
   Dry run: parse config, evaluate every gate, and print what WOULD happen WITHOUT launching any
@@ -63,6 +73,7 @@
 [CmdletBinding()]
 param(
   [switch]$Register,
+  [switch]$InstallUserStartup,
   [switch]$WhatIf,
   [string]$ConfigPath = "",
   [string]$ClaudeCmd = "claude"
@@ -142,8 +153,9 @@ if ($Register) {
   try { $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator) } catch {}
   if (-not $isAdmin) {
     Write-Launcher "ERROR: -Register needs an ELEVATED PowerShell (Run as administrator)."
-    Write-Launcher "The existing 'safe-ai-loop-runner' task was created elevated, so updating it requires admin rights. Nothing was changed."
-    Write-Launcher ('Run this ONCE from an elevated PowerShell:  powershell -ExecutionPolicy Bypass -File "' + $launcherPath + '" -Register')
+    Write-Launcher "Registering a Task Scheduler task requires admin on this machine (even a per-user Limited task returns Access Denied without elevation). Nothing was changed."
+    Write-Launcher ('If you can elevate, run this ONCE:  powershell -ExecutionPolicy Bypass -File "' + $launcherPath + '" -Register')
+    Write-Launcher ('Otherwise use the ADMIN-FREE resurrection instead (covers PC-restart recovery):  powershell -ExecutionPolicy Bypass -File "' + $launcherPath + '" -InstallUserStartup')
     exit 1
   }
   try {
@@ -154,6 +166,50 @@ if ($Register) {
     exit 1
   }
   exit 0
+}
+
+# ---------------------------------------------------------------------------
+# ADMIN-FREE logon resurrection (O17). The Task Scheduler path (-Register) needs admin, which the
+# self-run loops cannot obtain unattended - so for weeks the scheduler stayed at the old baked
+# deadline and "PC restart -> auto-resurrection" was never actually enabled. The current user's
+# Startup folder needs NO admin (there is already a note-worker-startup.cmd precedent there) and
+# fires the launcher at every logon. That alone guarantees the loops come back after a restart.
+# ---------------------------------------------------------------------------
+$startupFolder = [Environment]::GetFolderPath('Startup')
+$startupCmdPath = Join-Path $startupFolder "safe-ai-loop-launcher.cmd"
+
+function Install-UserStartupEntry {
+  param([string]$LauncherPath)
+  # A .cmd (not a .lnk) so it is plain text, diff-able, and needs no COM/WScript.Shell. -WindowStyle
+  # Hidden keeps logon quiet; the launcher itself is short-lived (it ignites detached runners).
+  $line = 'start "" /min powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "' + $LauncherPath + '"'
+  $body = "@echo off`r`nrem safe-ai-site self-run loops - admin-free logon resurrection (O17). Managed by loop-launcher.ps1 -InstallUserStartup.`r`n" + $line + "`r`n"
+  if ($WhatIf) {
+    Write-Launcher ("[WHATIF] would write Startup entry: " + $startupCmdPath)
+    Write-Launcher ("[WHATIF] entry command: " + $line)
+    return
+  }
+  if (-not (Test-Path $startupFolder)) { throw ("Startup folder not found: " + $startupFolder) }
+  Set-Content -Path $startupCmdPath -Value $body -Encoding ASCII -ErrorAction Stop
+  # Post-verify: the file must exist and reference THIS launcher (never a silent no-op).
+  if (-not (Test-Path $startupCmdPath)) { throw ("post-verify failed: " + $startupCmdPath + " was not created") }
+  $written = Get-Content -Raw -Path $startupCmdPath
+  if ($written -notmatch [regex]::Escape($LauncherPath)) { throw ("post-verify failed: Startup entry does not reference the launcher") }
+  Write-Launcher ("Admin-free Startup resurrection installed and verified: " + $startupCmdPath)
+}
+
+if ($InstallUserStartup) {
+  $launcherPath = Join-Path $repoRoot "loop-launcher.ps1"
+  try {
+    Install-UserStartupEntry -LauncherPath $launcherPath
+    if (-not $WhatIf) {
+      Write-Launcher "Done. The loops now auto-resurrect at every logon with NO admin. Optional: run -Register from an elevated PowerShell to also get the daily 07:00 heartbeat."
+    }
+    exit 0
+  } catch {
+    Write-Launcher ("ERROR: Startup install failed (nothing changed): " + $_.Exception.Message)
+    exit 1
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -226,6 +282,18 @@ function Get-SchedulerHealth {
     $t = Get-ScheduledTask -TaskName 'safe-ai-loop-runner' -ErrorAction Stop
     $a = [string]$t.Actions[0].Arguments
     if (($a -match 'loop-launcher\.ps1') -and ($a -notmatch 'UntilIso')) { return 'ok' }
+    return 'stale'
+  } catch { return 'missing' }
+}
+
+# Admin-free resurrection self-check: does the current user's Startup entry exist and point at THIS
+# launcher? When present, PC-restart recovery is guaranteed with NO admin, so the loud "no
+# auto-resurrection" banner must NOT fire even if the (admin) scheduler task is still stale.
+function Get-StartupResurrectionHealth {
+  try {
+    if (-not (Test-Path $startupCmdPath)) { return 'missing' }
+    $body = Get-Content -Raw -Path $startupCmdPath
+    if ($body -match 'loop-launcher\.ps1') { return 'ok' }
     return 'stale'
   } catch { return 'missing' }
 }
@@ -339,16 +407,28 @@ Add-Status (Fmt "updated" @{ NOW = $now.ToString("yyyy-MM-dd HH:mm:ss") })
 Add-Status (Fmt "deadline" @{ UNTIL = [string]$cfg.untilIso; REMAIN = $remainStr })
 Add-Status ""
 
-# Surface a stale/missing scheduler as a loud banner in the operator's one file.
+# Reboot-resurrection is covered by EITHER the (admin) scheduler task OR the (admin-free) Startup
+# entry. Blare the loud banner ONLY when NEITHER exists. When the admin-free Startup path is in
+# place but the scheduler is still stale, show a calm info note (restart recovery is fine; the
+# daily 07:00 heartbeat is the only thing the optional -Register adds).
 $schedHealth = Get-SchedulerHealth
-if ($schedHealth -ne 'ok') {
-  Add-Status (S "schedWarnHeader")
+$startupHealth = Get-StartupResurrectionHealth
+$launcherFile = Join-Path $repoRoot 'loop-launcher.ps1'
+if ($schedHealth -ne 'ok' -and $startupHealth -ne 'ok') {
+  Add-Status (S "resurrectMissingHeader")
   Add-Status ""
-  Add-Status (S "schedWarnBody1")
-  Add-Status (S "schedWarnBody2")
-  Add-Status (Fmt "schedWarnBody3" @{ LAUNCHER = (Join-Path $repoRoot 'loop-launcher.ps1') })
+  Add-Status (S "resurrectMissingBody1")
+  Add-Status (Fmt "resurrectMissingBody2" @{ LAUNCHER = $launcherFile })
+  Add-Status (Fmt "resurrectMissingBody3" @{ LAUNCHER = $launcherFile })
   Add-Status ""
-  Write-Launcher ("WARN: scheduler health=" + $schedHealth + " (task not pointing at loop-launcher.ps1). One elevated -Register needed.")
+  Write-Launcher ("WARN: NO auto-resurrection (scheduler=" + $schedHealth + ", startup=" + $startupHealth + "). Run -InstallUserStartup (no admin) to fix.")
+} elseif ($schedHealth -ne 'ok' -and $startupHealth -eq 'ok') {
+  Add-Status (S "resurrectStartupHeader")
+  Add-Status ""
+  Add-Status (S "resurrectStartupBody1")
+  Add-Status (Fmt "resurrectStartupBody2" @{ LAUNCHER = $launcherFile })
+  Add-Status ""
+  Write-Launcher ("INFO: reboot-resurrection via Startup folder (admin-free). Scheduler=" + $schedHealth + "; optional -Register adds the daily 07:00 heartbeat.")
 }
 
 # ---------------------------------------------------------------------------

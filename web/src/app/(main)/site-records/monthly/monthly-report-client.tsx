@@ -28,9 +28,7 @@ export function MonthlyReportClient() {
     const ms = recentMonths(now.getFullYear(), now.getMonth() + 1, 12);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 初回マウントの既定（SSRハイドレーション差異回避）
     setMonths(ms);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 既定は当月
     setMonth(ms[0] ?? "");
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 各ストア(localStorage)を読み込み集計入力に
     setInputs({
       patrol: getPatrolList(),
       nearmiss: getNearMissReports(),

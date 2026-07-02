@@ -7,9 +7,14 @@ const none: WeatherWarningPanelState = { kind: "none", headline: null };
 const loading: WeatherWarningPanelState = { kind: "loading", headline: null };
 const error: WeatherWarningPanelState = { kind: "error", headline: null };
 const headline: WeatherWarningPanelState = {
-  kind: "headline",
+  kind: "warning",
   headline: "東京都では、土砂災害や河川の増水に警戒してください。",
 };
+const special: WeatherWarningPanelState = {
+  kind: "special",
+  headline: "暴風特別警報を発表しました。",
+};
+const advisory: WeatherWarningPanelState = { kind: "advisory", headline: null };
 
 function input(partial: Partial<SignageConclusionInput>): SignageConclusionInput {
   return { warningPanel: none, risks: [], siteSafety: null, ...partial };
@@ -27,6 +32,28 @@ describe("buildSignageConclusion: 主文の優先順位", () => {
     expect(c.tone).toBe("red");
     expect(c.label).toBe("警報 発表中");
     expect(c.sub).toBe(headline.headline);
+  });
+
+  it("特別警報は最優先で赤・ラベルに「特別警報」を明示", () => {
+    const c = buildSignageConclusion(input({ warningPanel: special }));
+    expect(c.tone).toBe("red");
+    expect(c.label).toBe("特別警報 発表中");
+    expect(c.sub).toBe(special.headline);
+  });
+
+  it("注意報のみ(市区町村コードがadvisory級)は赤にせず黄「注意報」（本タスクの核心＝T3）", () => {
+    const c = buildSignageConclusion(input({ warningPanel: advisory }));
+    expect(c.tone).toBe("amber");
+    expect(c.label).toBe("注意報 発表中");
+  });
+
+  it("注意報より期限超過（赤）が優先される", () => {
+    const c = buildSignageConclusion(
+      input({ warningPanel: advisory, siteSafety: { overdueCount: 1, alertCount: 0 } }),
+    );
+    expect(c.tone).toBe("red");
+    expect(c.label).toBe("期限超過 1件");
+    expect(c.chips).toEqual([{ tone: "amber", text: "気象 注意報" }]);
   });
 
   it("警報なしでも期限超過があれば赤", () => {

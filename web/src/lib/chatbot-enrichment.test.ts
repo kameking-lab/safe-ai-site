@@ -120,6 +120,24 @@ describe("detectOutOfScopeLawReferences", () => {
     );
     expect(result).toEqual([]);
   });
+
+  it("does not flag full official law names that share no substring with lawShort", () => {
+    // 「労働安全衛生法」⊅「安衛法」、正式名称そのものでの言及も安全と判定する
+    const result = detectOutOfScopeLawReferences(
+      "労働安全衛生法第66条の10に基づき、酸素欠乏症等防止規則第11条を確認してください。",
+      ["安衛則"]
+    );
+    expect(result).toEqual([]);
+  });
+
+  it("does not split long-vowel law names such as クレーン等安全規則", () => {
+    // 「ー」が文字クラスから漏れていると「ン等安全規則」に分断されて偽の範囲外警告になる
+    const result = detectOutOfScopeLawReferences(
+      "クレーン等安全規則第22条により5トン以上は免許が必要です。",
+      ["クレーン則"]
+    );
+    expect(result).toEqual([]);
+  });
 });
 
 describe("sanitizePlaceholderCitations", () => {
