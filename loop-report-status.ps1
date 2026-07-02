@@ -158,6 +158,7 @@ Write-Rep ("computed row: " + $laneLine)
 
 if ($WhatIf) {
   Write-Rep "[WHATIF] no file written, no lock taken."
+  Write-Rep ("[WHATIF] would also refresh the top heartbeat line to: " + (Fmt "updated" @{ NOW = $lastRun }))
   exit 0
 }
 
@@ -220,6 +221,24 @@ try {
     $newLines.Add($laneLine)
     $newLines.Add($endMarker)
     $lines = $newLines.ToArray()
+  }
+
+  # Keep the top "last updated" line an HONEST heartbeat. The launcher stamps it ONLY on its
+  # (logon / daily-07:00) passes, but lanes touch this file every iteration - so between launcher
+  # passes (potentially all day) it stays frozen even while lanes run, and the owner cannot tell
+  # "alive" from "silently dead" (watch point #1: does the loop live?). Bump it to now on every
+  # write so it reads "at least one lane was alive as of X"; the per-lane rows still show WHICH.
+  # Refresh in place only (never create it) - the launcher owns emitting the line. Match by the
+  # label prefix (text before {NOW}); if strings are missing the prefix is a non-Japanese key that
+  # matches nothing, so this is a safe no-op.
+  $updatedTpl = S "updated"
+  $ph = $updatedTpl.IndexOf('{NOW}')
+  $updPrefix = if ($ph -ge 0) { $updatedTpl.Substring(0, $ph) } else { $updatedTpl }
+  if ($updPrefix.Trim() -ne "") {
+    $freshUpdated = Fmt "updated" @{ NOW = (Get-Date -Format "yyyy-MM-dd HH:mm:ss") }
+    for ($k = 0; $k -lt $lines.Count; $k++) {
+      if ($lines[$k].TrimStart().StartsWith($updPrefix)) { $lines[$k] = $freshUpdated; break }
+    }
   }
 
   $text = ($lines -join "`r`n") + "`r`n"
