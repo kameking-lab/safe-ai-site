@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { summaryMockByRevisionId } from "@/data/mock/summaries";
-import { realLawRevisions } from "@/data/mock/real-law-revisions";
+import { getLawRevisionById } from "@/data/mock/law-revisions";
 import type { SummaryApiRouteResponse } from "@/lib/types/api";
-import type { LawRevisionSummary } from "@/lib/types/domain";
+import type { LawRevision, LawRevisionSummary } from "@/lib/types/domain";
 import { withCircuitBreaker } from "@/lib/external/circuit-breaker";
 import { fetchWithTimeout } from "@/lib/external/fetch-with-timeout";
 import { cdnCacheHeaders, noStoreHeaders } from "@/lib/api-cache";
@@ -83,7 +83,10 @@ export async function GET(request: NextRequest) {
   }
 
   // Fallback: 事前要約が未作成の場合は、AI or ヒューリスティックで生成
-  const revision = realLawRevisions.find((r) => r.id === revisionId);
+  // 探索は一覧表示と同じ統合リスト（sample＋e-Gov自動取込＋real＋extra）を使う。
+  // realLawRevisions 単独だと、e-Gov ETL が新しい改正を先頭に積んだ時点で
+  // 一覧の先頭カードの要約が 404 になる（2026-06-29〜のCI恒常failの真因）。
+  const revision = getLawRevisionById(revisionId);
   if (!revision) {
     return errorResponse(404, "要約データが見つかりませんでした。", "NOT_FOUND", false);
   }
@@ -98,7 +101,7 @@ export async function GET(request: NextRequest) {
 }
 
 async function generateSummaryForRevision(
-  revision: (typeof realLawRevisions)[number]
+  revision: LawRevision
 ): Promise<LawRevisionSummary> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   // AI生成を試みる（失敗時はヒューリスティックにフォールバック）

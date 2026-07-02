@@ -35,8 +35,9 @@ async function getSummaryByRevisionIdMock(
     };
   }
 
-  // lr-real-* and lr-extra-* IDs use a generic stub so E2E smoke tests pass
-  if (/^lr-(real|extra)-/.test(input.revisionId)) {
+  // lr-real-* / lr-extra-* / lr-egov-* IDs use a generic stub so E2E smoke tests pass
+  // (lr-egov-* は e-Gov ETL が月次で自動追加するため、mockモードでも404にしない)
+  if (/^lr-(real|extra|egov)-/.test(input.revisionId)) {
     return {
       ok: true,
       data: {
