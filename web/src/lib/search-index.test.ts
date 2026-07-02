@@ -55,6 +55,34 @@ describe('searchItems', () => {
     expect(searchItems(many, '溶接', 'all')).toHaveLength(10);
     expect(searchItems(many, '溶接', 'all', 100)).toHaveLength(25);
   });
+
+  // T1: cross-search エンジン（AND＋シノニム＋keywords）への載せ替え規約。
+  // 旧実装はクエリ全体を 1 つの部分文字列として扱い、2 語クエリが全滅していた。
+  it('複数語クエリは全語 AND（全語がどこかに当たった項目のみ採用）', () => {
+    const items: SearchItem[] = [
+      { id: 'x', title: '足場の作業床', subtitle: '安衛則563条', category: 'law', url: '/x', keywords: ['足場', '作業床'] },
+      { id: 'y', title: '足場の組立て', subtitle: '特別教育', category: 'law', url: '/y', keywords: ['足場'] },
+      { id: 'z', title: '天井クレーン', subtitle: '作業床のない設備', category: 'law', url: '/z', keywords: ['作業床'] },
+    ];
+    // 「足場 作業床」は両語を満たす x のみ（y=作業床なし・z=足場なし は除外）
+    expect(searchItems(items, '足場 作業床', 'all').map((r) => r.id)).toEqual(['x']);
+  });
+
+  it('keywords に当たる語でもヒットする（title/subtitle に出ない別名）', () => {
+    const items: SearchItem[] = [
+      { id: 'k', title: '第563条', subtitle: '安衛則', category: 'law', url: '/k', keywords: ['作業床', '足場'] },
+    ];
+    // title/subtitle には無い「作業床」が keywords 経由でヒット
+    expect(searchItems(items, '作業床', 'all').map((r) => r.id)).toContain('k');
+  });
+
+  it('シノニム展開が効く（アスベスト→石綿／石綿則）', () => {
+    const items: SearchItem[] = [
+      { id: 's', title: '石綿則 第3条', subtitle: '石綿障害予防規則 事前調査', category: 'law', url: '/s', keywords: ['石綿', '事前調査'] },
+    ];
+    // 口語「アスベスト」は query-expansion で「石綿」「石綿則」へ展開され条文に届く
+    expect(searchItems(items, 'アスベスト', 'all').map((r) => r.id)).toContain('s');
+  });
 });
 
 describe('countByCategory', () => {
@@ -200,5 +228,60 @@ describe('buildSearchIndex — 事故事例（accident）の収載', () => {
     expect(accident.some((i) => i.url === '/accidents')).toBe(false);
     // url の id と item.id が対応＝詳細ページが必ず解決する（幽霊URL なし）。
     expect(accident.every((i) => i.url === `/accidents/${i.id.replace(/^accident-/, '')}`)).toBe(true);
+  });
+});
+
+// T1（診断書 05-search-egov.md）: /search・⌘K を cross-search エンジンへ載せ替えた後、
+// 2 語クエリが目的条文へ収束することを本番インデックスで固定する。旧実装ではこれらが全滅していた。
+describe('T1: 2語クエリが目的条文へ収束する（本番インデックス回帰）', () => {
+  // 目的の条文（law カテゴリ・当該法令への深リンク）が上位 rank 位以内に出ることを検証。
+  const CASES: { query: string; lawShort: string; artFragment: string; rank: number }[] = [
+    { query: '石綿 事前調査', lawShort: '石綿則', artFragment: '第3条', rank: 3 },
+    { query: 'クレーン 過負荷', lawShort: 'クレーン則', artFragment: '第23条', rank: 3 },
+    { query: '足場 作業床', lawShort: '安衛則', artFragment: '第563条', rank: 3 },
+    // T8 の意図（「就業制限」1位＝安衛法61条）も同エンジンで満たされることを併記。
+    { query: '就業制限', lawShort: '安衛法', artFragment: '第61条', rank: 1 },
+  ];
+
+  it.each(CASES)('「$query」→ $lawShort $artFragment が $rank位以内・1件以上', async ({ query, lawShort, artFragment, rank }) => {
+    const index = await buildSearchIndex();
+    const results = searchItems(index, query, 'all', 10);
+    expect(results.length).toBeGreaterThan(0);
+    const top = results.slice(0, rank);
+    const hit = top.find((r) => r.category === 'law' && r.title === `${lawShort} ${artFragment}`);
+    expect(hit, `「${query}」上位${rank}件に ${lawShort} ${artFragment} が無い: ${top.map((r) => r.title).join(' / ')}`).toBeTruthy();
+    // 目的条文へ深リンク（幽霊URL なし＝/law-search?law=&art=）
+    expect(hit?.url).toContain('/law-search?law=');
+    expect(hit?.url).toContain('&art=');
+  });
+});
+
+// T2（診断書 05-search-egov.md / O8-b）: 条番号クエリパーサを通した生クエリが
+// 該当条文をトップ表示することを本番インデックスで固定する。e-Gov でも 0 件になる
+// 「安衛法61条」等をトップ着地させるのが本タスクの勝ち筋（比較 a,b）。
+describe('T2: 条番号クエリが該当条文をトップ表示（本番インデックス回帰）', () => {
+  // top=1 は 1 位に当該条文（law・指定法令 or 条番号一致）が出ること。
+  const CASES: { query: string; title: string }[] = [
+    { query: '安衛法61条', title: '安衛法 第61条' },
+    { query: '安衛法 88条', title: '安衛法 第88条' },
+    { query: '安衛則563条', title: '安衛則 第563条' },
+  ];
+
+  it.each(CASES)('「$query」→ 1位が $title', async ({ query, title }) => {
+    const index = await buildSearchIndex();
+    const results = searchItems(index, query, 'all', 10);
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0]?.category).toBe('law');
+    expect(results[0]?.title).toBe(title);
+    expect(results[0]?.url).toContain('/law-search?law=');
+    expect(results[0]?.url).toContain('&art=');
+  });
+
+  it('漢数字「第六十一条」は 1位が 第61条 の法令条文（法令名指定なしでも着地）', async () => {
+    const index = await buildSearchIndex();
+    const results = searchItems(index, '第六十一条', 'all', 10);
+    expect(results.length).toBeGreaterThan(0);
+    expect(results[0]?.category).toBe('law');
+    expect(results[0]?.title).toMatch(/ 第61条$/);
   });
 });

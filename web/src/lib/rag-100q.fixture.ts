@@ -169,4 +169,7 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 121, topic: "建設機械", question: "ユンボで荷を吊って運ぶのは用途外使用になりますか？", gold: [{ lawShort: "安衛則", articleNum: "第164条" }] },
   { id: 122, topic: "建設機械", question: "車両系建設機械の作業計画には何を書く必要がありますか？", gold: [{ lawShort: "安衛則", articleNum: "第155条" }] },
   { id: 123, topic: "建設機械", question: "岩が落ちてきそうな場所で使うパワーショベルのヘッドガードの義務は？", gold: [{ lawShort: "安衛則", articleNum: "第153条" }] },
+
+  // Q. 派遣労働者の雇入れ時教育（124）– 2026-07-02 診断04 T2: 派遣元/派遣先の誤答回帰固定
+  { id: 124, topic: "派遣", question: "派遣労働者の雇入れ時教育は派遣元と派遣先のどちらが行いますか？", gold: [{ lawShort: "派遣法", articleNum: "第45条" }] },
 ];

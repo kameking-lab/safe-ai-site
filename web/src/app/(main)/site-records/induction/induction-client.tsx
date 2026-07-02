@@ -17,7 +17,6 @@ import {
   saveInduction,
   deleteInduction,
   defaultInductionItems,
-  summarizeInduction,
   rosterToCsv,
   buildRoster,
   distinctSites,
@@ -58,11 +57,8 @@ export function InductionClient() {
     const today = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 初回マウントの既定値（SSRハイドレーション差異回避）
     setRecId(newInductionId());
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
     setDate(today);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 既定の教育項目
     setItems(defaultInductionItems());
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 保存一覧
     setList(getInductionList());
   }, []);
 

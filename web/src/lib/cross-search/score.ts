@@ -10,10 +10,27 @@
  */
 import { normalizeSearchText } from '../fuzzy-search';
 import { expandQuery } from '../query-expansion';
-import type { CrossSearchCategory, CrossSearchItem } from './types';
 
-/** 同点時のカテゴリ優先度（小さいほど上位）。機能・教育資格を導線として優先。 */
-const CATEGORY_PRIORITY: CrossSearchCategory[] = [
+/**
+ * スコアリングが必要とする最小構造。cross-search の {@link CrossSearchItem} だけでなく、
+ * 同形の横断検索インデックス（lib/search-index の SearchItem 等）も受け付けられるよう
+ * 汎化した契約。keywords は任意（無い実装でも title/subtitle だけで動く）。
+ */
+export interface ScorableItem {
+  id: string;
+  title: string;
+  subtitle: string;
+  keywords?: string[];
+  category: string;
+  url: string;
+}
+
+/**
+ * 同点時のカテゴリ優先度（先頭ほど上位）。機能・教育資格を導線として優先。
+ * cross-search 標準の並び。呼び出し側が {@link CrossSearchOptions.categoryPriority} で
+ * 独自の並びを渡した場合はそちらを使う（例: 用語集を持つ search-index）。
+ */
+const DEFAULT_CATEGORY_PRIORITY: readonly string[] = [
   'feature',
   'education',
   'law',
@@ -34,27 +51,27 @@ const W_SUBTITLE_INCLUDES = 18;
 /** シノニム（リテラル以外）一致への減点係数。 */
 const SYNONYM_FACTOR = 0.6;
 
-interface Scorable {
-  item: CrossSearchItem;
+interface Scorable<T extends ScorableItem> {
+  item: T;
   nTitle: string;
   nSubtitle: string;
   nKeywords: string[];
 }
 
 /** 配列の同一性をキーに正規化済みフィールドをメモ化（キー入力ごとの再計算を避ける）。 */
-const scorableCache = new WeakMap<CrossSearchItem[], Scorable[]>();
+const scorableCache = new WeakMap<object, Scorable<ScorableItem>[]>();
 
-function getScorables(items: CrossSearchItem[]): Scorable[] {
+function getScorables<T extends ScorableItem>(items: T[]): Scorable<T>[] {
   const cached = scorableCache.get(items);
-  if (cached) return cached;
-  const built: Scorable[] = items.map((item) => ({
+  if (cached) return cached as Scorable<T>[];
+  const built: Scorable<T>[] = items.map((item) => ({
     item,
     // 実データに null/undefined が混じってもクラッシュしないよう coerce
     nTitle: normalizeSearchText(item.title ?? ''),
     nSubtitle: normalizeSearchText(item.subtitle ?? ''),
     nKeywords: (item.keywords ?? []).map((k) => normalizeSearchText(k ?? '')).filter(Boolean),
   }));
-  scorableCache.set(items, built);
+  scorableCache.set(items, built as Scorable<ScorableItem>[]);
   return built;
 }
 
@@ -81,7 +98,7 @@ function buildTermSpec(term: string): TermSpec | null {
 }
 
 /** 1 つの語（正規化済み variant 群のうちのひとつ）に対する field 重みの最大値。 */
-function variantScore(variant: string, s: Scorable): number {
+function variantScore(variant: string, s: Scorable<ScorableItem>): number {
   if (!variant) return 0;
   let best = 0;
   if (s.nTitle === variant) best = Math.max(best, W_TITLE_EXACT);
@@ -99,7 +116,7 @@ function variantScore(variant: string, s: Scorable): number {
 }
 
 /** 1 語（リテラル＋シノニム）の合成スコア。シノニムは減点して採用。 */
-function termScore(spec: TermSpec, s: Scorable): number {
+function termScore(spec: TermSpec, s: Scorable<ScorableItem>): number {
   const literalScore = variantScore(spec.literal, s);
   let synonymBest = 0;
   for (const syn of spec.synonyms) {
@@ -110,21 +127,26 @@ function termScore(spec: TermSpec, s: Scorable): number {
 
 export interface CrossSearchOptions {
   /** カテゴリ絞り込み。既定は全カテゴリ横断。 */
-  category?: 'all' | CrossSearchCategory;
+  category?: string;
   /** 返却上限。既定 12。 */
   limit?: number;
+  /**
+   * 同点時のカテゴリ優先度（先頭ほど上位）。省略時は cross-search 標準
+   * ({@link DEFAULT_CATEGORY_PRIORITY})。ここに無いカテゴリは末尾扱い。
+   */
+  categoryPriority?: readonly string[];
 }
 
 /**
  * 横断検索。全語（AND）にマッチした項目のみを、合成スコア降順で返す。
  * クエリが空なら空配列（候補は呼び出し側で別途用意）。
  */
-export function searchCrossIndex(
-  items: CrossSearchItem[],
+export function searchCrossIndex<T extends ScorableItem>(
+  items: T[],
   query: string,
   options: CrossSearchOptions = {},
-): CrossSearchItem[] {
-  const { category = 'all', limit = 12 } = options;
+): T[] {
+  const { category = 'all', limit = 12, categoryPriority = DEFAULT_CATEGORY_PRIORITY } = options;
   const terms = queryTerms(query);
   if (terms.length === 0) return [];
 
@@ -134,7 +156,13 @@ export function searchCrossIndex(
   const scorables = getScorables(items);
   const pool = category === 'all' ? scorables : scorables.filter((s) => s.item.category === category);
 
-  const scored: { s: Scorable; total: number }[] = [];
+  // 優先度配列に無いカテゴリは末尾（length）へ寄せ、決定的な順序を保つ。
+  const priorityOf = (cat: string): number => {
+    const idx = categoryPriority.indexOf(cat);
+    return idx === -1 ? categoryPriority.length : idx;
+  };
+
+  const scored: { s: Scorable<T>; total: number }[] = [];
   for (const s of pool) {
     let total = 0;
     let allMatched = true;
@@ -151,8 +179,8 @@ export function searchCrossIndex(
 
   scored.sort((a, b) => {
     if (b.total !== a.total) return b.total - a.total;
-    const pa = CATEGORY_PRIORITY.indexOf(a.s.item.category);
-    const pb = CATEGORY_PRIORITY.indexOf(b.s.item.category);
+    const pa = priorityOf(a.s.item.category);
+    const pb = priorityOf(b.s.item.category);
     if (pa !== pb) return pa - pb;
     if (a.s.nTitle.length !== b.s.nTitle.length) return a.s.nTitle.length - b.s.nTitle.length;
     return a.s.item.id < b.s.item.id ? -1 : 1;

@@ -9,7 +9,6 @@ import {
   savePatrol,
   deletePatrol,
   defaultPatrolChecks,
-  summarizePatrol,
   findingsToCsv,
   collectOpenFindings,
   countOverdueFindings,
@@ -58,17 +57,11 @@ export function PatrolClient() {
     const todayIso = `${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 初回マウントの既定値（SSRハイドレーション差異回避）
     setRecId(newPatrolId());
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
     setDate(todayIso);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 同上
     setTime(`${pad2(now.getHours())}:${pad2(now.getMinutes())}`);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 今日（期日超過判定用）
     setToday(todayIso);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 標準チェック項目
     setChecks(defaultPatrolChecks());
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 保存一覧
     setList(getPatrolList());
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 未是正トラッカーの集約元
     setAllRecords(getAllPatrolRecords());
   }, []);
 

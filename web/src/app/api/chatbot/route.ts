@@ -14,6 +14,7 @@ import {
   suggestDigDeeperLinks,
   detectOutOfScopeLawReferences,
   detectUngroundedAssertions,
+  sanitizePlaceholderCitations,
   type StructuredCitation,
   type RelatedLawLink,
   type DigDeeperLink,
@@ -117,7 +118,7 @@ export const SYSTEM_PROMPT = `あなたは労働安全衛生法の専門家AIア
 7. これまでの会話履歴がある場合は、文脈を踏まえて回答すること（「先ほどの〜について」等の指示語を解釈する）
 8. 法的義務として明文化されている事項（資格・免許・特別教育・技能講習・作業主任者の選任など）は、参照条文に明示があれば「〜が必要です」「〜しなければなりません」と断定形で書くこと。「〜とされています」「〜と考えられます」等のぼかし表現は、解釈の余地が残る論点に限定する
 9. 「法令上の明確な規定は見つかりませんでした」「明確な規定がありません」のようなぼかし表現は、参照条文に該当論点の規定が本当に存在しない場合に限り使用すること。参照条文に該当条文がある場合に逃げ口上として使うことを禁ずる
-10. 法令条文を引用する際は、「○○則第XX条」だけでなく可能な限り「○○則第XX条（施行：YYYY年MM月、所管：厚生労働省）」のように「条文番号＋施行日＋発出機関」の3点セットで明示すること。施行日が提供条文の文中に明記されていない場合は省略してよく、根拠なく日付を作らないこと
+10. 法令条文を引用する際は、条番号だけでなく可能な限り「条文番号＋施行日＋発出機関」の3点セットで明示すること（例：「安衛則第518条（施行：2020年12月、所管：厚生労働省）」）。施行日が提供条文の文中に明記されていない場合は施行日を省略し「（所管：厚生労働省）」のみ書くこと。「YYYY年MM月」「第XX条」のようなプレースホルダ・記号のまま出力することは絶対に禁止（施行日不明時は省略、条番号不明時はその条文自体を引用しない）
 11. 参照法令条文に含まれない法令（例：架空の通達番号、根拠不明のガイドライン名）を断定的に引用してはならない。範囲外の場合は必ず「本ツールの提供データ範囲外のため、e-Gov・MHLW公式情報でご確認ください」と明示的に断ること
 
 資格系質問（フォークリフト・クレーン・玉掛け・酸欠・有機溶剤などの「運転に必要な資格は？」「教育は何が必要？」型の質問）への回答ルール：
@@ -413,7 +414,9 @@ export async function POST(request: Request) {
           const result = historyContents.length > 0
             ? await model.startChat({ history: historyContents }).sendMessage(userPrompt)
             : await model.generateContent(userPrompt);
-          return result.response.text();
+          // SYSTEM_PROMPTのフォーマット例「YYYY年MM月」等をGeminiがテンプレートのまま
+          // 出力してしまう事故を防ぐ（本番実測で1問中3箇所の漏出を確認）
+          return sanitizePlaceholderCitations(result.response.text());
         },
         { failureThreshold: 4, cooldownMs: 60_000 }
       );

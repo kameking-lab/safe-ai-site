@@ -7,6 +7,7 @@ import {
   suggestDigDeeperLinks,
   detectOutOfScopeLawReferences,
   detectUngroundedAssertions,
+  sanitizePlaceholderCitations,
 } from "@/lib/chatbot-enrichment";
 
 const article: LawArticle = {
@@ -118,6 +119,57 @@ describe("detectOutOfScopeLawReferences", () => {
       ["安衛法"]
     );
     expect(result).toEqual([]);
+  });
+
+  it("does not flag full official law names that share no substring with lawShort", () => {
+    // 「労働安全衛生法」⊅「安衛法」、正式名称そのものでの言及も安全と判定する
+    const result = detectOutOfScopeLawReferences(
+      "労働安全衛生法第66条の10に基づき、酸素欠乏症等防止規則第11条を確認してください。",
+      ["安衛則"]
+    );
+    expect(result).toEqual([]);
+  });
+
+  it("does not split long-vowel law names such as クレーン等安全規則", () => {
+    // 「ー」が文字クラスから漏れていると「ン等安全規則」に分断されて偽の範囲外警告になる
+    const result = detectOutOfScopeLawReferences(
+      "クレーン等安全規則第22条により5トン以上は免許が必要です。",
+      ["クレーン則"]
+    );
+    expect(result).toEqual([]);
+  });
+});
+
+describe("sanitizePlaceholderCitations", () => {
+  it("strips the literal YYYY年MM月 enactment placeholder but keeps the issuer", () => {
+    const result = sanitizePlaceholderCitations(
+      "クレーン則第22条（施行：YYYY年MM月、所管：厚生労働省）により5トン以上は免許が必要です。"
+    );
+    expect(result).not.toContain("YYYY");
+    expect(result).toContain("クレーン則第22条");
+    expect(result).toContain("所管：厚生労働省");
+  });
+
+  it("removes the whole parenthetical when nothing but the placeholder remains", () => {
+    const result = sanitizePlaceholderCitations("安衛則第518条（施行：YYYY年MM月）が根拠です。");
+    expect(result).not.toContain("YYYY");
+    expect(result).not.toMatch(/（\s*）/);
+    expect(result).toContain("安衛則第518条");
+  });
+
+  it("removes an unfilled 第XX条 placeholder parenthetical", () => {
+    const result = sanitizePlaceholderCitations("根拠は○○則第XX条（施行：2020年4月）です。");
+    expect(result).not.toContain("第XX条");
+  });
+
+  it("leaves answers with real dates and article numbers untouched", () => {
+    const original = "安衛則第612条の2（施行：2023年4月、所管：厚生労働省）に基づきます。";
+    expect(sanitizePlaceholderCitations(original)).toBe(original);
+  });
+
+  it("is a no-op on text with no placeholder tokens", () => {
+    const original = "特に問題のない通常の回答テキストです。";
+    expect(sanitizePlaceholderCitations(original)).toBe(original);
   });
 });
 
