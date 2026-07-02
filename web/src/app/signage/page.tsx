@@ -18,6 +18,7 @@ import { SignageTodayDocuments } from "@/components/signage/signage-today-docume
 import { getSignageLocationById, signageLocations } from "@/data/signage-locations";
 import { buildSignageConclusion } from "@/lib/signage/signage-conclusion";
 import { resolveWeatherWarningPanelState } from "@/lib/signage/weather-warning-panel-state";
+import { formatRelativeTimeJa, isDataTimeStale } from "@/lib/signage/relative-time";
 import { levelFromWarningCode } from "@/lib/jma/parse-jma-warning";
 import { levelLabel } from "@/lib/jma/jma-data";
 import { computeTodayRisks } from "@/lib/utils/risk-search";
@@ -53,6 +54,7 @@ type DashboardState = {
   mode: ApiMode;
   regionLabel: string;
   nowText: string;
+  nowMs: number;
   lastUpdatedText: string;
   riskStatus: ServiceStatus;
   riskData: SiteRiskWeather | null;
@@ -103,6 +105,7 @@ export default function SignagePage() {
     regionLabel: selectedLocation.label,
     // SSR/client hydration mismatch 対策: 時刻はクライアント側 useEffect でセット
     nowText: "--:--",
+    nowMs: 0,
     lastUpdatedText: "起動中…",
     riskStatus: "idle",
     riskData: null,
@@ -127,9 +130,11 @@ export default function SignagePage() {
     });
 
     const updateNow = () => {
+      const now = new Date();
       setState((prev) => ({
         ...prev,
-        nowText: formatter.format(new Date()),
+        nowText: formatter.format(now),
+        nowMs: now.getTime(),
       }));
     };
 
@@ -306,6 +311,9 @@ export default function SignagePage() {
   // 取得失敗(error)を「警報なし」と取り違えないよう状態を明示分岐（無人運用の誤った安心を防ぐ）。
   // 判定は県ヘッドラインではなく選択地点(市区町村)の selectedWarnings を主軸にする（T3是正）。
   const warningPanel = resolveWeatherWarningPanelState(bundleStatus, bundle?.selectedWarnings, bundle?.jmaHeadline);
+  // データ時刻の人間化＋2h超stale黄帯（S4）: 生ISO文字列のままだと現場は鮮度を判断できない。
+  const jmaDataTimeText = bundle?.jmaReportTime ? formatRelativeTimeJa(bundle.jmaReportTime, state.nowMs) : null;
+  const jmaDataTimeStale = bundle?.jmaReportTime ? isDataTimeStale(bundle.jmaReportTime, state.nowMs) : false;
 
   // 結論ストリップ（柱0）: 気象・リスク予測・記録キットの要対応を1本の色帯に集約。
   // リスク予測パネルと同一データを使うため、ここで一度だけ計算して両方へ渡す。
@@ -608,8 +616,17 @@ export default function SignagePage() {
                     ))}
                   </ul>
                 ) : null}
-                {bundle?.jmaReportTime ? (
-                  <p className="mt-2 text-[9px] text-amber-300/70 xl:text-sm">気象庁データ時刻: {bundle.jmaReportTime}</p>
+                {jmaDataTimeText ? (
+                  <p
+                    className={`mt-2 text-[9px] xl:text-sm ${
+                      jmaDataTimeStale
+                        ? "inline-block rounded bg-amber-400 px-1.5 py-0.5 font-bold text-amber-950"
+                        : "text-amber-300/70"
+                    }`}
+                  >
+                    気象庁データ時刻: {jmaDataTimeText}
+                    {jmaDataTimeStale ? "（データが古い可能性）" : ""}
+                  </p>
                 ) : null}
               </div>
             )}
@@ -634,8 +651,17 @@ export default function SignagePage() {
                 </a>
               </p>
             ) : null}
-            {displayMode === "map" && bundle?.jmaReportTime ? (
-              <p className="text-[9px] text-slate-500 xl:text-sm">気象庁データ時刻: {bundle.jmaReportTime}</p>
+            {displayMode === "map" && jmaDataTimeText ? (
+              <p
+                className={`text-[9px] xl:text-sm ${
+                  jmaDataTimeStale
+                    ? "inline-block rounded bg-amber-400 px-1.5 py-0.5 font-bold text-amber-950"
+                    : "text-slate-500"
+                }`}
+              >
+                気象庁データ時刻: {jmaDataTimeText}
+                {jmaDataTimeStale ? "（データが古い可能性）" : ""}
+              </p>
             ) : null}
             {displayMode === "map" && selectedLocation.jmaCityCode && bundle?.selectedWarnings && bundle.selectedWarnings.length > 0 ? (
               <ul className="shrink-0 space-y-0.5 text-[10px] text-slate-200 xl:text-lg">
