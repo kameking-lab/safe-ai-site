@@ -24,6 +24,9 @@ configErrorBody2=直し方: loop-config.json の JSON 構文を修正（untilIso
 configErrorBody3=エラー内容: {ERROR}
 configErrorNotFound=設定ファイルが存在しません（パスを確認してください）。
 configErrorNoLanes=JSON は読めましたが lanes 配列が空か欠落しています。
+criticFailHeader=## 注意: 定期点検（critic）が前回失敗しました（理由: {REASON}）
+criticFailBody1=週次のサイト自己点検が最後の起動で完了しませんでした（timeout=時間切れ強制終了／nonzero=異常終了／skipped=起動できず）。site-critique が生成されず、S/A級の指摘が各レーンに補充されていない可能性があります。
+criticFailBody2=約1日後の次回 launcher 起動で自動再試行します（全期間ブラックアウトも毎ログオン再点火も避ける設計）。繰り返す場合は logs/ の launcher ログと loop-prompt-critic.txt を確認してください。
 lanesHeader=## 各レーン
 laneRow=- {LANE} : model={MODEL}, interval={INTERVAL}s, open={OPEN}, {STATE}
 laneRunning=既に稼働中(冪等)
