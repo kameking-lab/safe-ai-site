@@ -316,6 +316,24 @@
 
 ---
 
+## O18 条文本文の参照自動リンク（診断書 05-search-egov.md T5・比較 h）
+
+条文カード本文に素テキストで現れる条番号参照（「第30条」「第30条第1項」「安衛則第36条」「クレーン等安全規則第23条」等＝紙のコピーと同じ死んだテキスト）を、収録済みなら当サイト深リンク `/law-search?law=<正式名称>&art=<条番号>`（内部）、収録外でも法令番号があれば e-Gov 条アンカー `https://laws.e-gov.go.jp/law/<id>#Mp-At_<N>`（外部）へ変換する純粋関数 `linkifyArticleReferences` を `lib/law-links/article-ref-linkify.ts` に新設。診断書 比較 h（参照ジャンプの完敗）の返上。
+
+領域境界: リンカーは **表示非依存のセグメント配列**（`{text}` / `{text,href,external}`）を返す lib 層の純粋関数＝発見性/内部リンクは当班領域。条文カードへの結線（`article.text` を linkify して `<a>` を描く 1 行）は law-search-panel.tsx＝ux-tools 所有のため **要・他班**とし当班は着手せず、リンカー本体と「解決率100%・幽霊リンク0」のビルド時保証テストまでを担当（loop-prompt「跨りは自領域分だけ実施し他班分は要・他班と注記」）。返り値を JSX でなくデータにしたのはこの結線を 1 行で済ませ、かつ当班側で完結させるため。
+
+法令正確性は不可侵のため「解決できない・曖昧な参照は一切リンク化しない」を設計原則にした（誤リンクは消すのでなく作らない）: (1)「令第6条」「法第43条」「同法第20条」等 直前が別法令を示す文字（令/法/則/例/同/附/別/表/章/節/款）の裸参照は参照先法令が一意に定まらないためスキップ、(2) 収録外の枝番（第○条の△）は e-Gov 条アンカーが基条（Mp-At_N）しか指せず枝番へ着地できないため e-Gov フォールバックは基条参照のみ、(3) 未知の法令名接頭も非リンク。参照先解決の唯一のソースは read-only import（捏造0）＝`allLawArticles`(curated 中核・mhlwLawArticles 補完は law 値が文書バンドル名で深リンク不可のため除外＝search-index.ts と同方針)の収録集合＋`@/data/law-metadata` の LAW_METADATA（略称→正式名称・e-Gov 法令番号 egovLawId）。名前アルタネーションは正式名称＋略称を長い順に並べ最長一致（「労働安全衛生法施行令」が「労働安全衛生法」より先に当たる）。
+
+DRY: 漢数字/全角/枝番/項の数値化は O8-b `article-query.ts` の非公開ロジック（元は /law-search の kanjiToNum 再実装）を `lib/law-links/kanji-numerals.ts`（`NUM_CLASS`/`toArabic`/`kanjiRunToArabic`）へ切り出し、article-query.ts をそこへ載せ替え（挙動不変・article-query.test.ts 11本で回帰固定）。リンカーも同じ変換を共有。
+
+完了条件充足: `article-ref-linkify.test.ts` 12本。核は**コーパス全文回帰**＝curated 全条文の text にリンカーを流し、生成された全リンクが (a) 内部なら decode した `${正式名称}|${条番号}` が収録集合に存在、(b) e-Gov なら法令番号が LAW_METADATA の既知 egovLawId かつ `Mp-At_<正整数>`、を満たすことを検証＝「生成リンクの解決率100%・幽霊リンク0」。加えて非空虚性（実生成リンク>20＝空虚に pass しない）とセグメント連結==入力（表示の欠落・重複0）を恒久固定。単体は 内部/略称接頭/漢数字/収録外e-Gov/令ブロック/同法ブロック/枝番非リンク/未知法令 を網羅。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=240ファイル2033テスト全pass / `build`=成功。UI/深リンク/カバレッジは非改変。main から分岐（O8-c #600 マージ後）。working tree clean。
+
+残: S6（0件時 e-Gov フォールバック）実装済み・PR #607 CI 待ち。O17（条文パーマリンク /laws/[law]/[art]＋束ねパネル・P2/L）が次の本丸で、O18 のリンカーを束ねパネルの参照解決へ再利用予定。
+
+---
+
 ## 2026-07-03 T7 設計ドラフト（Path A）: e-Gov API v2 全文取込の設計書起票（診断 T7/G7 中期策）
 
 回収/衝突解決: CI 緑だった自班 PR #607（S6）が main 進行（O8-c #600 ほか）で CONFLICTING 化 → 当該ブランチへ origin/main を**通常マージで解決**（force-push 不可を遵守）。衝突は3点＝(a) `cross-search/index.ts`＝両者が別 export 行を追加のみ→両立ユニオン、(b) BACKLOG-seo.md 未着手＝HEAD が O8-c・main が S6 を残置＝**両方とも完了済み**のため両除去し O18/O17/e-Gov のみ残す、(c) BACKLOG/cycle-log 完了節＝S6 と O8-c の両追記を併存。tsc0・cross-search 32テスト緑・lint errors0 を確認し push（CI 再走は次イテレーションで回収）。#614（O18）は CI 進行中で今ターンはマージ不可。

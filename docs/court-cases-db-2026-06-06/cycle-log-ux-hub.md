@@ -282,3 +282,23 @@
 **無読テスト**: `docs/third-party-reviews/scripts/signage-o9-typography-rotation-noread-2026-07-03.mjs`（build+start、Playwright、1920x1080）**6/6 PASS**。①キオスクモードでシナリオバー・ポータルへ戻るリンクが非表示、②本文系（button/select/input/label以外）で12px以下フォントが0/217件、③1画面フィット維持（scrollHeight=1080≦viewport=1080）、④トレンド/法改正パネルが存在、⑤35秒待機（既定16秒間隔×2周期）後にDOM内容が変化——を実測確認。スクリーンショット2枚（通常モード／キオスクモード）を同ディレクトリに保存。
 
 **残課題**: S4以下（地点47都道府県化・ニュース鮮度フィルタ・常掲価値追加等）は未着手のまま次回以降へ。
+
+---
+
+## 2026-07-03 ux-hub/s4-signage-data-quality
+
+**イテレーション頭の回収**: 自班の緑PR #594(O3警報バナー市区町村コード判定)を squashマージ。`git checkout main && git pull --ff-only` でclean確認。O9(PR #604・サイネージ文字サイズ再設計)はCI進行中（e2e/smoke pending）のため重複着手を避け次イテレーションで回収。
+
+**タスク**: BACKLOG-ux-hub.md 最上位 S4（サイネージのデータ品位3本、診断書 `docs/fable-diagnosis-2026-07-02/01-signage.md` T6+T7+T9）。
+
+**①地点マスタ47都道府県化**: `signage-locations.ts` は東京23区＋7政令市の計30箇所のみで、JP-01/04/13/23/27/34/37/40 の8県しか選択できなかった（39県が選択不可）。未収録39県の県庁所在地を追加。緯度経度は捏造せず、data班所有 `web/src/data/jma/prefecture-centroids.ts`（都道府県庁所在地の代表座標）を `centroidByIso()` 経由で参照利用（読み取りのみ・data班領域は非改変）。市区町村コード(`jmaCityCode`)は、気象庁公式エリアマスタ(`https://www.jma.go.jp/bosai/common/const/area.json`)を実地確認したところ、政令指定都市や県庁所在地の一部は class20s が区・地域ごとに細分化され単一コードへ一意対応しない（例: 横浜市→北部/南部、神戸市→行政区ごと）ことを確認したため、精度を偽らず既存7政令市と同じく未設定のまま（県単位の `prefectureIso` 経由で見出し・警報レベルは取得される既存フォールバックに委ねる）。
+
+**②ニュース鮮度フィルタ・重複排除・鮮度加重ソート**: `parse-labor-rss.ts` の `fetchLaborTrendItems` はリンク完全一致のみでdedupeしており、Google Newsがクエリ・媒体ごとに別URLで返す同一記事が素通りしていた（診断実測: 表示10件中2件が完全同一記事の重複、中央値≒50日前）。`normalizeTitleForDedupe`（末尾「 - 媒体名」除去＋空白除去）でタイトルベースのdedupeを追加。`selectLaborTrendItems` に分離し、14日以内の記事を優先（`freshnessWeightedScore`: 重大度スコア＋0日+40〜14日で0への線形減衰ボーナス）、不足時のみ古い記事で補完するロジックへ変更。
+
+**③データ時刻の人間化＋stale黄帯**: 画面上の「気象庁データ時刻: {jmaReportTime}」が生ISO文字列のまま表示され、相対時間換算も色分けもなかった（既存の `lib/jma/data-freshness.ts` の `isDataStale`/`ageHours` はcronヘルスチェック専用でUIに未接続）。新規 `lib/signage/relative-time.ts` の `formatRelativeTimeJa`（分/時間/日単位で人間化）・`isDataTimeStale`（既定2h超で stale）を追加し、floorplan/mapモード双方の気象庁データ時刻表示に接続。stale時は `bg-amber-400 text-amber-950`（JIS安全色文法に整合＝黄地に黒系文字）で黄帯警告を表示。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warningのみ・無関係）/ vitest 241 files・2031 tests 全pass（新規39件: signage-locations 5・parse-labor-rss 14・relative-time 20）/ build 成功。
+
+**無読テスト**: 47都道府県の選択可能性・重複排除ロジック・stale判定はいずれも実測boundingBoxではなく純関数の入出力検証がテストの本体（サイネージ地図/データ取得はネットワーク依存のため）。vitestで実際の値（例: 沖縄県 那覇市の選択解決、離れた日付の記事が古い順に落ちること、2時間超で stale=true）を確認し、既存の signage-jis-amber-noread スクリプトが検証する「1画面フィット」「注意色=黒系文字」の不変を損なわないことをコードレビューで確認（該当箇所は色クラスの入替のみで寸法変更なし）。
+
+**残課題**: S5(常掲価値追加)・S8-b(E-E-A-T)・S9(相談CV)・S10(SSR/メタ)・S11(/handover閉鎖)以下は次イテレーション以降で対応。

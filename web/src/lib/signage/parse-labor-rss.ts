@@ -56,6 +56,39 @@ export function scoreLaborNewsSeriousness(title: string): number {
   return s;
 }
 
+/** RSS pubDate（RFC822等）をパースしたミリ秒。パース不能は null */
+export function parsePubDateMs(pubDate: string): number | null {
+  if (!pubDate) return null;
+  const t = Date.parse(pubDate);
+  return Number.isFinite(t) ? t : null;
+}
+
+/**
+ * Google Newsは同一記事でもクエリ・媒体ごとに別URLを返すため、リンク完全一致dedupeだけでは
+ * 重複記事（媒体違いURL）が素通りする。見出し末尾の「 - 媒体名」を落とし、空白を除去して比較する。
+ */
+export function normalizeTitleForDedupe(title: string): string {
+  return title
+    .replace(/\s*[-–—]\s*[^-–—]{1,30}$/u, "")
+    .replace(/\s+/g, "")
+    .toLowerCase();
+}
+
+/**
+ * 重大度スコアに鮮度加点を足した並べ替え用スコア。0日で最大+40、14日で0まで線形減衰、
+ * それ以降は加点なし（重大度のみ）。中央値50日前だった掲示記事を14日以内優先へ寄せる。
+ */
+export function freshnessWeightedScore(title: string, pubDate: string, nowMs: number): number {
+  const seriousness = scoreLaborNewsSeriousness(title);
+  const publishedMs = parsePubDateMs(pubDate);
+  if (publishedMs === null) return seriousness;
+  const ageDays = Math.max(0, (nowMs - publishedMs) / 86_400_000);
+  const FRESHNESS_WINDOW_DAYS = 14;
+  const FRESHNESS_MAX_BONUS = 40;
+  const freshnessBonus = Math.max(0, FRESHNESS_MAX_BONUS - (ageDays * FRESHNESS_MAX_BONUS) / FRESHNESS_WINDOW_DAYS);
+  return seriousness + freshnessBonus;
+}
+
 const RSS_QUERIES = [
   "労働災害+死亡",
   "建設+事故+死亡",
@@ -71,47 +104,57 @@ function googleNewsRssUrl(encodedQuery: string) {
   return `https://news.google.com/rss/search?q=${encodedQuery}&hl=ja&gl=JP&ceid=JP%3Aja`;
 }
 
-export async function fetchLaborTrendItems(maxTotal: number): Promise<LaborRssItem[]> {
+/**
+ * 取得済みRSS記事から表示用リストを組み立てる純関数（テスト用に fetch から分離）。
+ * 1) タイトル正規化ベースでdedupe（同一記事の媒体違いURLを除去）
+ * 2) 14日以内優先の鮮度フィルタ（不足時のみ古い記事で補完）
+ * 3) 鮮度加重スコアで並べ替え
+ */
+export function selectLaborTrendItems(items: LaborRssItem[], maxTotal: number, nowMs: number): LaborRssItem[] {
+  const deduped: LaborRssItem[] = [];
+  const seenLinks = new Set<string>();
+  const seenTitles = new Set<string>();
+  for (const item of items) {
+    if (seenLinks.has(item.link)) continue;
+    const normalizedTitle = normalizeTitleForDedupe(item.title);
+    if (normalizedTitle && seenTitles.has(normalizedTitle)) continue;
+    seenLinks.add(item.link);
+    if (normalizedTitle) seenTitles.add(normalizedTitle);
+    deduped.push(item);
+  }
+
+  const FRESHNESS_WINDOW_DAYS = 14;
+  const isFresh = (item: LaborRssItem) => {
+    const publishedMs = parsePubDateMs(item.pubDate);
+    return publishedMs !== null && (nowMs - publishedMs) / 86_400_000 <= FRESHNESS_WINDOW_DAYS;
+  };
+  const byFreshnessScore = (a: LaborRssItem, b: LaborRssItem) =>
+    freshnessWeightedScore(b.title, b.pubDate, nowMs) - freshnessWeightedScore(a.title, a.pubDate, nowMs);
+
+  const fresh = deduped.filter(isFresh).sort(byFreshnessScore);
+  const stale = deduped.filter((item) => !isFresh(item)).sort(byFreshnessScore);
+
+  // 鮮度優先。件数が足りない場合のみ、鮮度加重スコア順で古い記事を補完する。
+  return [...fresh, ...stale].slice(0, maxTotal);
+}
+
+export async function fetchLaborTrendItems(maxTotal: number, nowMs: number = Date.now()): Promise<LaborRssItem[]> {
   const urls = RSS_QUERIES.map((q) => googleNewsRssUrl(encodeURIComponent(q)));
   const headers = {
     "User-Agent": "safe-ai-site-signage/1.0 (labor-trend; +https://github.com/kameking-lab/safe-ai-site)",
   };
   const merged: LaborRssItem[] = [];
-  const seen = new Set<string>();
   for (const url of urls) {
     try {
       // 6h: トレンド表示用 news (docs/perf/isr-followup.md)
       const res = await fetch(url, { headers, next: { revalidate: 21600 } });
       if (!res.ok) continue;
       const xml = await res.text();
-      for (const item of parseLaborRssItems(xml, 14)) {
-        if (seen.has(item.link)) continue;
-        seen.add(item.link);
-        merged.push(item);
-      }
+      merged.push(...parseLaborRssItems(xml, 14));
     } catch {
       continue;
     }
   }
 
-  merged.sort((a, b) => scoreLaborNewsSeriousness(b.title) - scoreLaborNewsSeriousness(a.title));
-
-  const out: LaborRssItem[] = [];
-  for (const item of merged) {
-    if (scoreLaborNewsSeriousness(item.title) < 30 && out.length >= 4) {
-      continue;
-    }
-    out.push(item);
-    if (out.length >= maxTotal) break;
-  }
-
-  if (out.length < maxTotal) {
-    for (const item of merged) {
-      if (out.includes(item)) continue;
-      out.push(item);
-      if (out.length >= maxTotal) break;
-    }
-  }
-
-  return out.slice(0, maxTotal);
+  return selectLaborTrendItems(merged, maxTotal, nowMs);
 }
