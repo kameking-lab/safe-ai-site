@@ -313,3 +313,21 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=235ファイル1981テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・web/src/data/chatbot-eval-fresh-results.json）は commit 前に `main` から復元。O8-b(#591) 上にスタック（PR base=seo/o8b-article-query-parser）。working tree clean。
 
 残: S6（0件時 e-Gov フォールバック＋ランキング調整）が P1。O18（条文本文の参照自動リンク）が P1。
+
+---
+
+## 2026-07-03 柱C-3-3 追補: 孤立していた実在 indexable ページの sitemap 収載（seo/sitemap-missing-pages-c3-3）
+
+イテレーション頭で自班の CI 緑 PR を回収: #607(S6) を squash マージ→`main` を pull。#614(O18)・#617(T7) は #607 マージで BACKLOG-seo.md が追記衝突したため `origin/main` を各ブランチへ通常マージし、BACKLOG の 未着手/完了 セクションを手で解決して push（force-push なし・CI は次イテレーションで回収）。
+
+本題: 全 `page.tsx`（152 静的ルート）を機械抽出し `sitemap.ts` の全 URL と `comm` 照合。robots noindex でないのにどの sitemap にも無い孤立ページを洗い出し、実在・indexable・非リダイレクトの 6 ページを本体 `sitemap.ts` へ収載。
+- `/accident-news`（重大災害事例ブラウザ・出典付き無料・238行の実コンテンツ）
+- `/organization`（組織管理ダッシュボード・232行）
+- `/ky/paper`（**robots index:true の正規ページ＝`/pdf` の permanentRedirect 先なのに未収載だった明確な穴**）
+- `/heat-illness-prevention/{acclimatization,log,poster}`（既収載の wbgt-calculator/industry-risk/r7-compliance と同構造なのに兄弟間で収載漏れ）
+
+lastmod は当日打ち（lastmodスパム）回避のため各 page.tsx の git 最終コミット日（実コンテンツ更新日）を採用。誤って収載してはいけない境界も同時に回帰固定＝リダイレクト専用（/about/cases→/about・/quick-start→/quick・/feedback→/contact の 301 先は掲載しない）／noindex・index:false（/stats・/ky/list・/favorites・/account）／印刷専用（/accident-news/print・/features/print）。
+
+**要・他班**: `/ky/workers`（作業員マスター＝個人データ入力ツール・36行の薄いラッパ）・`/profile`（自社プロファイル設定）は noindex 付与の是非を含め所有 UI 班の判断のため当班は収載保留（水増し回避）。
+
+回帰: `sitemap.test.ts` に追補 describe 7 it（新6ページ収載＋暑さ対策兄弟全収載＋リダイレクト/noindex/print の非収載）＝計22 it。ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=246ファイル2078テスト全pass / `build`=成功。working tree clean。

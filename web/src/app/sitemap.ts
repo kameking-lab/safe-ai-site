@@ -38,6 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/articles", lastModified: freshestArticle, priority: 0.8, changeFrequency: "daily" },
     { url: "/accidents", lastModified: accidentsDataUpdated, priority: 0.9, changeFrequency: "weekly" },
     { url: "/accidents-analytics", lastModified: accidentsDataUpdated, priority: 0.8, changeFrequency: "weekly" },
+    { url: "/accident-news", lastModified: "2026-06-13", priority: 0.8, changeFrequency: "weekly" },
     { url: "/accidents-reports", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "weekly" },
     { url: "/accidents-reports/construction", lastModified: "2026-05-16", priority: 0.7, changeFrequency: "weekly" },
     { url: "/accidents-reports/manufacturing", lastModified: "2026-05-16", priority: 0.7, changeFrequency: "weekly" },
@@ -68,6 +69,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // P0-011 (usability-audit-day2): /laws/notices-precedents は /circulars に統合済。301 redirect は next.config.ts。
     { url: "/ky", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
     { url: "/ky-examples", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
+    // /ky/paper は robots index:true の正規ページ（/pdf の permanentRedirect 先＝KY用紙PDF出力）。
+    { url: "/ky/paper", lastModified: "2026-05-25", priority: 0.75, changeFrequency: "monthly" },
     { url: "/risk", lastModified: "2026-04-19", priority: 0.8, changeFrequency: "daily" },
     { url: "/chatbot", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
     { url: "/law-search", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
@@ -81,6 +84,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/heat-illness-prevention/wbgt-calculator", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/heat-illness-prevention/industry-risk", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/heat-illness-prevention/r7-compliance", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
+    { url: "/heat-illness-prevention/acclimatization", lastModified: "2026-06-07", priority: 0.8, changeFrequency: "monthly" },
+    { url: "/heat-illness-prevention/log", lastModified: "2026-06-07", priority: 0.8, changeFrequency: "monthly" },
+    { url: "/heat-illness-prevention/poster", lastModified: "2026-06-07", priority: 0.8, changeFrequency: "monthly" },
     { url: "/asbestos-management", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
     { url: "/asbestos-management/investigation-checker", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/asbestos-management/notification-builder", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
@@ -144,6 +150,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // /pdf は permanentRedirect → /ky/paper のためサイトマップから除外（リダイレクトURLは掲載しない）
     { url: "/safety-diary", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
     { url: "/notifications", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
+    { url: "/organization", lastModified: "2026-06-14", priority: 0.6, changeFrequency: "monthly" },
     { url: "/goods", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
     { url: "/work-environment-measurement", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/work-environment-measurement/target-finder", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },

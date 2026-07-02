@@ -71,6 +71,59 @@ describe("sitemap.xml（柱C-3-3 欠落ページ追加）", () => {
   });
 });
 
+describe("sitemap.xml（柱C-3-3 追補: 孤立していた実在 indexable ページの収載）", () => {
+  const entries = sitemap();
+  const urls = entries.map((e) => e.url);
+  const urlSet = new Set(urls);
+  const has = (path: string) => urlSet.has(`${BASE}${path}`);
+
+  // どの sitemap にも無かったが robots noindex ではない実在ページ群。
+  it("重大災害事例ブラウザ /accident-news を収載する", () => {
+    expect(has("/accident-news")).toBe(true);
+  });
+
+  it("組織管理ダッシュボード /organization を収載する", () => {
+    expect(has("/organization")).toBe(true);
+  });
+
+  it("KY用紙ページ /ky/paper（robots index:true・/pdf のリダイレクト先）を収載する", () => {
+    expect(has("/ky/paper")).toBe(true);
+  });
+
+  it("暑さ対策の全 indexable サブページを収載する（兄弟間の収載漏れ是正）", () => {
+    for (const path of [
+      "/heat-illness-prevention/wbgt-calculator",
+      "/heat-illness-prevention/industry-risk",
+      "/heat-illness-prevention/r7-compliance",
+      "/heat-illness-prevention/acclimatization",
+      "/heat-illness-prevention/log",
+      "/heat-illness-prevention/poster",
+    ]) {
+      expect(has(path), `${path} が sitemap に無い`).toBe(true);
+    }
+  });
+
+  // 収載してはいけない境界: リダイレクト専用ページ（301先を掲載しない）と
+  // robots noindex / index:false のページ。誤って追加されるのを防ぐ。
+  it("リダイレクト専用ページ（/about/cases・/quick-start・/feedback）は収載しない", () => {
+    expect(has("/about/cases")).toBe(false);
+    expect(has("/quick-start")).toBe(false);
+    expect(has("/feedback")).toBe(false);
+  });
+
+  it("noindex / index:false のページ（/stats・/ky/list・/favorites・/account）は収載しない", () => {
+    expect(has("/stats")).toBe(false);
+    expect(has("/ky/list")).toBe(false);
+    expect(has("/favorites")).toBe(false);
+    expect(has("/account")).toBe(false);
+  });
+
+  it("印刷専用ページ（/accident-news/print・/features/print）は収載しない", () => {
+    expect(has("/accident-news/print")).toBe(false);
+    expect(has("/features/print")).toBe(false);
+  });
+});
+
 /**
  * A-3 回帰テスト: サイトマップの役割分担。個別の通達/保護具/記事ページは専用の
  * 子サイトマップ（sitemap-circulars/-equipment/-articles.xml）が正本として出力するため、
