@@ -42,3 +42,8 @@ yarn.lock
 
 # 無人自走ループ runner のログ
 logs/
+
+# 無人自走ループ launcher が生成するローカル専用の実行時アーティファクト
+# (loop-config.json は追跡・人手編集。可変状態と現況ダッシュボードは追跡しない)
+loop-state.json
+docs/loop-status.md

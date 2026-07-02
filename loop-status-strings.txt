@@ -1,0 +1,24 @@
+title=# ループ稼働状況 (loop-status.md)
+intro1=> loop-launcher.ps1 が起動のたびに自動生成するローカル専用ダッシュボード（gitignore）。
+intro2=> 社長が見るのはここだけ。止まっていたら理由がこの真上に大きく書いてある。
+updated=最終更新: {NOW}
+deadline=稼働期限 (loop-config.json untilIso): {UNTIL}{REMAIN}
+remain=  （残り {DAYS} 日）
+stoppedHeader=## !!! 停止中: 稼働期限を超過しました !!!
+stoppedBody1=期限 {UNTIL} を過ぎたため、全レーンを起動していません。
+stoppedBody2=再開するには loop-config.json の "untilIso" を先の日付に1行書き換えるだけ（スケジューラの再登録は不要）。
+stoppedBody3=次回のログオン時／毎日07:00にこの launcher が再判定し、期限が未来なら自動で全レーンが立ち上がります。
+warnHeader=## 注意: 稼働期限まで残り {DAYS} 日
+warnBody1=レーンはまだ稼働中です。延長するなら今のうちに loop-config.json の untilIso を1行書き換えてください。
+warnBody2=（期限が切れてから気づく事故を防ぐため、稼働中に予告しています。）
+lanesHeader=## 各レーン
+laneRow=- {LANE} : model={MODEL}, interval={INTERVAL}s, open={OPEN}, {STATE}
+laneRunning=既に稼働中(冪等)
+laneStart=起動
+laneDisabled=- {LANE} : disabled（loop-config.json で enabled=false）
+laneNotSetUp=- {LANE} : 未セットアップ（{RUNNER} が無い）→ scripts/multilane/setup-lanes.ps1 を実行
+watchHeader=## 監視ポイント（この3つだけ）
+watch1=1. このファイル（ループが生きているか・止まっていれば理由）
+watch2=2. 本番サイネージの気象データ時刻（常に60分以内か）
+watch3=3. GitHub のマージ済みPR一覧（出荷の実体）
+plannerLaneHeader=【対象レーン: {LANE} / BACKLOG-{LANE}.md】
