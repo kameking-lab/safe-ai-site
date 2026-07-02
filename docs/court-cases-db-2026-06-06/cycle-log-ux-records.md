@@ -150,3 +150,12 @@ CI緑の #555（点検記録の下書き進捗バー）を squashマージ→mai
 ゲート: tsc=0 / lint errors=0（既存warnのみ）/ vitest 1832 pass（新規 component 無読テスト `workers-master-client.test.tsx` 4本含む）/ build 成功。Playwright 無読 `docs/third-party-reviews/scripts/ky-list-workers-noread-2026-06-14.mjs` を prod start(3123・iPhone12相当390px)で実行し 15/15 PASS（両画面の空/件数の状態文言・44px・遷移先を検証）。
 注: prod確認の初回、port 3100 を前イテレーションの旧ビルドサーバ(EADDRINUSE)が占有し旧UIを配信していたため空振り→別portで再ビルド配信して合格を確認。
 残: 受入教育修了証 /education-certification 無読巡回・他の記録系の柱0/柱3巡回を継続。
+
+## 2026-07-02 O13 /ky/paper hydration mismatch(#418)是正＋バックログ重複整理
+
+前回イテレーション以降マージ済みPRなし・ux-rec/ の未マージPRなし＝main clean のまま着手。Fable診断注入(07の候補3b)で起票された O13「/ky/paper の React error #418 毎ロード発生」に着手。原因調査を先行実施: `KyPaperView`（`web/src/components/ky-paper/ky-paper-view.tsx`）の `useState(makeToday)` 初期化子が `new Date()` をレンダー中に直接評価。`npm run build` で `/ky/paper` が `○`（静的プリレンダリング）であることを実測確認したため、HTMLにはビルド時刻の作業日が焼き込まれ、ハイドレーション時のクライアント実時刻とほぼ確実にズレる＝「毎ロード発生」の説明と一致（`normalizeKyInstructionRecord({})` が内部で呼ぶ `buildDefaultKyInstructionRecord()` の `new Date()` も同根で二重に日付依存だった）。
+是正: 初期状態を日付非依存の `emptyKyRecord()`（workDateYear/Month/Day="")に変更しSSR/CSRの初回描画を完全一致させ、ローカル保存も深リンクも無い場合のみマウント後effect（クライアント専用）で `withTodayWorkDate` により「今日」を補う設計へ統一。この「初期stateは空・実値はマウント後effectで補う」パターンは同じKYドメインの `ky-morning-signage.tsx` が既に採用している安全な既存パターンで、新規発明ではなく整合を取った。年/月/日プルダウンには空→実値の切替でも幅が変わらないよう `min-w-*` を追加（CLS抑止の予防線）。
+CLS実測: prod build を3回巡回した結果 CLS=0.0006〜0.0108 で変更前後とも同値。attribution付きprobeで発生源は「端末内保存」同期状態ラベル（本タスクで未変更の箇所）と特定し、`main`（変更前）でも同一の0.0006が再現することを確認済み＝今回の変更が原因ではない既存の無害な残余CLS（0.1未満の "good" 域）と判断し追加対応はスコープ外とした。
+ゲート: tsc=0 / lint errors=0（既存warn2件のみ・変更ファイル内）/ vitest 232ファイル1933 pass / build成功（`○ /ky/paper` 静的生成を確認）。無読ではなく技術検証のため Playwright は console error 0件・CLS実測・作業日が当日値に収束することを機械確認する `docs/third-party-reviews/scripts/ky-paper-hydration-cls-2026-07-02.mjs` を新規保存し、prod start(4173)で3回連続 console errors=0 を確認。
+バックログ整理（コード変更なし）: BACKLOG-ux-records.md の7行目注記が明示的に取消可としていた「/education-certification 発行/一覧」の残存重複行を[x]closeし、「KY周辺ユーティリティ(/ky/list・/ky/workers)」の着手中/未着手の重複2行（#558で既に完了・マージ済み）を統合整理。
+残: O10(KY用紙Phase2)はF1依存待ち、O15(SlideDeck)はdataレーンO14依存待りで着手不可。次イテレーションは依存解消状況を確認のうえ、着手可能な柱0補充/柱3レビューへ振替を検討。
