@@ -120,17 +120,32 @@ function Register-LoopTask {
   # StartWhenAvailable: if the PC was off at 07:00, run at next boot (so the heartbeat/warning
   # is never skipped). IgnoreNew: never stack a second launcher on top of a running one.
   $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -MultipleInstances IgnoreNew
-  Register-ScheduledTask -TaskName $taskName -Action $action -Trigger @($tLogon, $tDaily) -Principal $principal -Settings $settings -Force | Out-Null
-  Write-Launcher ("Task Scheduler '" + $taskName + "' registered: launcher='" + $LauncherPath + "', triggers=AtLogon+Daily07:00, args=(none baked).")
+  # -ErrorAction Stop so a denied/failed registration THROWS (never a silent success - that
+  # silent-success-on-failure is the very failure class O16 exists to kill).
+  Register-ScheduledTask -TaskName $taskName -Action $action -Trigger @($tLogon, $tDaily) -Principal $principal -Settings $settings -Force -ErrorAction Stop | Out-Null
+  # Post-verify: the registered action must point at THIS launcher with NO baked -UntilIso.
+  $reg = (Get-ScheduledTask -TaskName $taskName -ErrorAction Stop).Actions[0].Arguments
+  if (($reg -notmatch 'loop-launcher\.ps1') -or ($reg -match 'UntilIso')) {
+    throw ("post-verify failed: task action is still '" + $reg + "'")
+  }
+  Write-Launcher ("Task Scheduler '" + $taskName + "' registered and verified. action args = " + $reg)
 }
 
 if ($Register) {
   $launcherPath = Join-Path $repoRoot "loop-launcher.ps1"
+  $isAdmin = $false
+  try { $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator) } catch {}
+  if (-not $isAdmin) {
+    Write-Launcher "ERROR: -Register needs an ELEVATED PowerShell (Run as administrator)."
+    Write-Launcher "The existing 'safe-ai-loop-runner' task was created elevated, so updating it requires admin rights. Nothing was changed."
+    Write-Launcher ('Run this ONCE from an elevated PowerShell:  powershell -ExecutionPolicy Bypass -File "' + $launcherPath + '" -Register')
+    exit 1
+  }
   try {
     Register-LoopTask -LauncherPath $launcherPath
     Write-Launcher "Register done. The scheduler now runs the zero-arg launcher; extend the run by editing loop-config.json untilIso only."
   } catch {
-    Write-Launcher ("ERROR: registration failed: " + $_.Exception.Message)
+    Write-Launcher ("ERROR: registration failed (nothing changed): " + $_.Exception.Message)
     exit 1
   }
   exit 0
@@ -195,6 +210,19 @@ function Get-RunningLanes {
     }
   } catch {}
   return $map
+}
+
+# Scheduler self-check: is the 'safe-ai-loop-runner' task actually pointing at THIS launcher
+# (permanent fix active), or still at the old baked-deadline loop-runner (needs one elevated
+# -Register)? Surfacing 'stale'/'missing' in loop-status.md keeps the one remaining manual
+# step visible in the same file the operator watches.
+function Get-SchedulerHealth {
+  try {
+    $t = Get-ScheduledTask -TaskName 'safe-ai-loop-runner' -ErrorAction Stop
+    $a = [string]$t.Actions[0].Arguments
+    if (($a -match 'loop-launcher\.ps1') -and ($a -notmatch 'UntilIso')) { return 'ok' }
+    return 'stale'
+  } catch { return 'missing' }
 }
 
 # ---------------------------------------------------------------------------
@@ -270,6 +298,18 @@ Add-Status ""
 Add-Status (Fmt "updated" @{ NOW = $now.ToString("yyyy-MM-dd HH:mm:ss") })
 Add-Status (Fmt "deadline" @{ UNTIL = [string]$cfg.untilIso; REMAIN = $remainStr })
 Add-Status ""
+
+# Surface a stale/missing scheduler as a loud banner in the operator's one file.
+$schedHealth = Get-SchedulerHealth
+if ($schedHealth -ne 'ok') {
+  Add-Status (S "schedWarnHeader")
+  Add-Status ""
+  Add-Status (S "schedWarnBody1")
+  Add-Status (S "schedWarnBody2")
+  Add-Status (Fmt "schedWarnBody3" @{ LAUNCHER = (Join-Path $repoRoot 'loop-launcher.ps1') })
+  Add-Status ""
+  Write-Launcher ("WARN: scheduler health=" + $schedHealth + " (task not pointing at loop-launcher.ps1). One elevated -Register needed.")
+}
 
 # ---------------------------------------------------------------------------
 # When the deadline has passed: DO NOT launch. Write the loud stop banner and exit.
