@@ -73,17 +73,17 @@ export function SignageDangerAlert({ jmaHeadline, warnings }: Props) {
         }`}
       >
         <AlertOctagon className={`h-4 w-4 ${isHighRisk ? "text-rose-300" : "text-slate-400"}`} />
-        <span className={`font-semibold ${isHighRisk ? "text-rose-200" : "text-slate-300"}`}>
+        <span className={`font-semibold xl:text-sm ${isHighRisk ? "text-rose-200" : "text-slate-300"}`}>
           危険イベント全画面アラート
         </span>
         <button
           type="button"
           onClick={handleManualAlert}
-          className="min-h-[44px] rounded border border-rose-400 bg-rose-700 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-600"
+          className="min-h-[44px] rounded border border-rose-400 bg-rose-700 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-600 xl:text-sm"
         >
           🚨 アラート発動（手動）
         </button>
-        <label className={`inline-flex min-h-[44px] items-center gap-1 text-[11px] ${isHighRisk ? "text-rose-100" : "text-slate-200"}`}>
+        <label className={`inline-flex min-h-[44px] items-center gap-1 text-[11px] xl:text-sm ${isHighRisk ? "text-rose-100" : "text-slate-200"}`}>
           <input
             type="checkbox"
             checked={autoSpeak}
@@ -95,12 +95,12 @@ export function SignageDangerAlert({ jmaHeadline, warnings }: Props) {
         {/* 無人運用での安心材料: 自動発動が有効=監視中であることを常時可視化。
             再読込後も localStorage で復元されるため「いつの間にかOFF」を防ぐ。 */}
         {autoSpeak && !isHighRisk && (
-          <span className="inline-flex items-center gap-1 rounded bg-emerald-700 px-1.5 py-0.5 text-[10px] font-bold text-emerald-50">
+          <span className="inline-flex items-center gap-1 rounded bg-emerald-700 px-1.5 py-0.5 text-[10px] font-bold text-emerald-50 xl:text-sm">
             🟢 警報を監視中
           </span>
         )}
         {isHighRisk && (
-          <span className="rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white">
+          <span className="rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white xl:text-sm">
             ⚠ 高リスク警報を検知中
           </span>
         )}

@@ -263,6 +263,28 @@
 
 ---
 
+## 2026-07-03 ux-hub/o9-signage-typography-rotation
+
+**タスク**: BACKLOG-ux-hub.md 最上位（2026-07-02 Fable診断注入 O9, 診断書 `docs/fable-diagnosis-2026-07-02/01-signage.md` T4+T5）。サイネージ本文の6割が12px以下で3m先から読めず、6分間観察でDOMが（時計以外）1文字も変化しない「動かない掲示板」問題の是正。
+
+**着手前の状況**: 前イテレーションで着手した O3（警報バナー誤報判定）は PR #594 として提出済みだが CI(e2e/smoke)が pending のままだったため、今回はマージせず次イテレーションへ回収。BACKLOG-ux-hub.md 上の O3 は main 未マージのため引き続き未着手表記のまま、O9 に着手した。
+
+**タイポグラフィ**: `xl:` ブレークポイント（1920幅TV想定・`lg:`/`sm:` のモバイル向けサイズは不変）で本文系フォントを最低24px、キーナンバー（気温・リスクラベル・トレンド見出し・法改正タイトル等）を28〜32px超へ再設計。対象: `signage-header.tsx`（地点/時刻）、`signage-hourly-strip.tsx`（時刻・気温・降水）、`signage-risk-prediction.tsx`（リスクラベル・理由）、`signage-site-safety.tsx`、`auto-refresh-status.tsx`、`signage-danger-alert.tsx`、`signage-floor-plan-editor.tsx`（ピン注記）、`app/signage/page.tsx` の気象警報パネル・現場注意事項・トレンド/法改正カード。
+
+**キオスクモード**: `?kiosk=1` クエリを追加。`SignageHeader` に `hideNav` プロップを新設しナビリンク行を隠し、`page.tsx` 側でシナリオ操作バー・地点セレクト・表示モード切替ボタン群を条件非表示にした。常掲設置時はこのURLで開けば運用UIがゼロになり、本文の視認性のみが残る。
+
+**自動ローテーション**: 新規 `web/src/components/signage/signage-rotator.tsx`（汎用コンポーネント）。トレンドニュース・法改正の「全件スクロールリスト」を「1件を大きく表示し16秒周期で自動周回」に置き換え、進捗ドットで手動切替も可能。ホバー/フォーカス中は一時停止、`prefers-reduced-motion` では自動切替を止める。従来は2件目以降が `xl:overflow-y-auto` の内部スクロールに隠れ、無人運用では誰の目にも触れなかった。
+
+**鮮度・自動復旧**: `REFRESH_INTERVAL_MS` を60分→15分に短縮。データ取得失敗時は次の定期更新を待たず3分後に再試行する `retryTimer`（`signage-map-client.tsx` と同じ構え）を追加。常時点灯TVが古いJSバンドルを掴み続けないよう、深夜3時に1回だけ `window.location.reload()` する日次フルリロードを新設。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warningのみ）/ vitest 239ファイル1988件 全pass（新規17件: `signage-rotator.test.tsx` 5件・`page-refresh-config.test.ts` 6件・既存ファイルへの追加分含む）/ build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/signage-o9-typography-rotation-noread-2026-07-03.mjs`（build+start、Playwright、1920x1080）**6/6 PASS**。①キオスクモードでシナリオバー・ポータルへ戻るリンクが非表示、②本文系（button/select/input/label以外）で12px以下フォントが0/217件、③1画面フィット維持（scrollHeight=1080≦viewport=1080）、④トレンド/法改正パネルが存在、⑤35秒待機（既定16秒間隔×2周期）後にDOM内容が変化——を実測確認。スクリーンショット2枚（通常モード／キオスクモード）を同ディレクトリに保存。
+
+**残課題**: S4以下（地点47都道府県化・ニュース鮮度フィルタ・常掲価値追加等）は未着手のまま次回以降へ。
+
+---
+
 ## 2026-07-03 ux-hub/s4-signage-data-quality
 
 **イテレーション頭の回収**: 自班の緑PR #594(O3警報バナー市区町村コード判定)を squashマージ。`git checkout main && git pull --ff-only` でclean確認。O9(PR #604・サイネージ文字サイズ再設計)はCI進行中（e2e/smoke pending）のため重複着手を避け次イテレーションで回収。
@@ -279,4 +301,4 @@
 
 **無読テスト**: 47都道府県の選択可能性・重複排除ロジック・stale判定はいずれも実測boundingBoxではなく純関数の入出力検証がテストの本体（サイネージ地図/データ取得はネットワーク依存のため）。vitestで実際の値（例: 沖縄県 那覇市の選択解決、離れた日付の記事が古い順に落ちること、2時間超で stale=true）を確認し、既存の signage-jis-amber-noread スクリプトが検証する「1画面フィット」「注意色=黒系文字」の不変を損なわないことをコードレビューで確認（該当箇所は色クラスの入替のみで寸法変更なし）。
 
-**残課題**: O9(PR #604)のCI回収。S5(常掲価値追加)・S8-b(E-E-A-T)・S9(相談CV)・S10(SSR/メタ)・S11(/handover閉鎖)以下は次イテレーション以降で対応。
+**残課題**: S5(常掲価値追加)・S8-b(E-E-A-T)・S9(相談CV)・S10(SSR/メタ)・S11(/handover閉鎖)以下は次イテレーション以降で対応。

@@ -182,7 +182,7 @@ export function SignageFloorPlanEditor() {
             アップロード解除
           </button>
         )}
-        <span className="ml-auto text-[10px] text-slate-400">
+        <span className="ml-auto text-[10px] text-slate-400 xl:text-sm">
           ピン: {pins.length}件 / 端末内に保存
         </span>
       </div>
@@ -230,7 +230,7 @@ export function SignageFloorPlanEditor() {
                 <MapPin className="h-3.5 w-3.5 text-white" />
               </div>
               <span
-                className="rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-bold text-white"
+                className="rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-bold text-white xl:text-sm"
                 style={{ marginBottom: 2 }}
               >
                 {p.label}
@@ -253,7 +253,7 @@ export function SignageFloorPlanEditor() {
         ))}
       </div>
 
-      <p className="px-1 text-[10px] leading-snug text-slate-400">
+      <p className="px-1 text-[10px] leading-snug text-slate-400 xl:text-sm">
         ※ 図面とピンはこの端末（localStorage）に保存され、外部送信はされません。
       </p>
     </div>
