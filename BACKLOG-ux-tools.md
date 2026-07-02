@@ -5,7 +5,7 @@
 ## 未着手（上から処理）
 
 ### 2026-07-02 Fable診断注入（診断書: docs/fable-diagnosis-2026-07-02/04・07）
-- [ ] 【Opus・P0】O4: チャットボット偽「範囲外」警告の根絶＝chatbot-enrichment.ts detectOutOfScopeLawReferences の長音分断＋正式名⇄短縮名照合の修正（正答の25%に偽警告・信頼度不当降格を実測）＋派遣法45条要約の是正（「派遣元」が正）＋SYSTEM_PROMPT「施行：YYYY年MM月」プレースホルダ漏出対策（04のT1+T2+T3）。完了条件=本番プローブ20問で偽陽性scope警告0件・YYYY出力0件。
+- [ ] 【Opus・P0】O4残: 派遣法45条要約の是正（「派遣元」が正）＋SYSTEM_PROMPT「施行：YYYY年MM月」プレースホルダ漏出対策（04のT2+T3。T1は下記PR #583で対応済み）。完了条件=本番プローブ20問でYYYY出力0件・「派遣 雇入れ時教育」質問で「派遣元」を含む。
 - [ ] 【Opus・P0】O5: synonyms.ts:166「気積→事務所則第14条」を第2条へ是正（dataレーン#538申し送りの取り逃し・第14条は排水）＋口語同義語の拡充（頻度/資格/何人/何トン系）。完了条件=「健康診断の頻度」で安衛則44・45条がtop5・main/fresh eval非退行100%/98%以上（04のT4・07のP0-1）。
 - [ ] 【Sonnet・P2】S7: チャットボット小粒4本＝一般語PINの文脈ガード（fresh 100/100目標）・adjacentヘッダ誤発火抑制・no-hit時のrelatedノイズ抑制・本番週次スモークプローブ5問（04のT6+T8+T9+T10）。合否は生成品質eval（BACKLOG-fable.md F3で新設）で機械判定。
 - [ ] 【Sonnet・P1】S8-a: E-E-A-T監修者バイライン＝通達詳細（/circulars/[id]）への氏名・労働安全コンサルタント登録260022・aboutリンク＋Person JSON-LD配線（07のP1-4の自班route分。判例詳細/FAQはux-hub班）。
@@ -22,6 +22,8 @@
 - [x] 【柱0補充／無読不合格是正】/accidents-analytics 統計DB規模ヘッドライン（2026-06-14 ux-tool/analytics-headline-conclusion）。自領域25ルートの無読スウィープ再実行（prod 3100・390×844・SW block）で /accidents-analytics がファーストビュー maxFont=22・デカ数字なしと判定＝事故統計ダッシュボードなのに初期ビューがナビ＋h1＋出力ツールバー＋「業種を選んで」案内のみで、肝心の「このDBは何件の労働災害を集計しているか」が fold 下（サマリーKPIは line441）。是正＝h1直下に統計DB規模ヘッドライン新設（デカ数字 5,074件＝収録総件数・期間2007〜2026・内訳チップ=厚労省死亡災害DB 4,782件＋curated詳細 292件）。全値は既存 aggregates.meta/kpi の転記のみ＝捏造ゼロ。死亡災害比率96%は死亡災害DB寄り構成で高く出るため誤読回避でヘッドラインには出さず文脈注記つきサマリーKPI側に残置。無読テスト7/7 PASS（analytics-headline-noread-2026-06-14＝ヘッドラインFV内y=477・デカ数字36px・単位件・漢字短ラベル収録・DOM順で最初の入力より前・h1=1・デカ数字がサマリーKPI収録総件数と一致）。他24ルートの無読スウィープ結果は status系/検索系/ハブ系/チャット空状態/印刷/admin など画面種別由来の偽陽性のみで新規の実害なし（h1は全25route各1個を再確認）。
 
 - [x] 【柱C-6／柱0 補充・チャットボット深掘り】/chatbot 入力欄直下の常時表示クイック質問チップを44px化（2026-06-14 ux-tool/chatbot-quick-chips-44px）。会話開始後（履歴あり）は空状態の大きな質問例ボタンが消え、この行が「打たずにタップで追質問」の唯一の動線になるが、従来 py-1/11px ≒ 高さ約24px で44px未満＝指で誤爆しやすかった。空状態の質問例ボタンと同じ `min-h-[44px]` 基準に統一＋可視ラベル「質問例：」を付与（文言・件数=EXAMPLE_QUESTIONS.slice(0,3) は不変＝捏造/水増しゼロ、タップ標的の拡大とラベル付与のみ）。無読テスト 新規5/5 PASS（chatbot-quick-chips-44px-noread＝群が常時可視・ラベル在・3個・各44px以上・タップで送信され履歴に文言）。ゲート全通過（tsc0/lint errors0/vitest 1874 pass/build成功）。
+
+- [x] 【Opus・P0】O4のT1: チャットボット偽「範囲外」警告の根絶（2026-07-02 ux-tool/chatbot-out-of-scope-false-positive / PR #583）。診断書04のT1是正＝`chatbot-enrichment.ts` `detectOutOfScopeLawReferences` の2バグ修正: (a) 法令名抽出の文字クラスに長音「ー」・「々」が無く「クレーン等安全規則」が「ン等安全規則」に分断され誤発火する不具合を修正、(b) 正式名称⇄短縮名の対応表が無く substring 照合のみで「労働安全衛生法」⊅「安衛法」等が全て範囲外扱いされていた不具合を、既存 `law-metadata.ts` の `LAW_METADATA` を単一ソースにした正式名称完全一致集合 `KNOWN_LAW_FULL_NAMES` の新設で是正。回帰テスト2件追加（既存17件+2=19件 pass）。T2(派遣法45条要約)・T3(YYYYプレースホルダ)は残タスクとして上のO4残に切り出し。ゲート全通過（tsc0/lint errors0/vitest 1935 pass/build成功）。
 
 ## 補充の指針（未着手3件未満で起こす）
 - 自領域route の柱0未適用箇所・無読テスト不合格画面・第三者レビュー指摘。chemical RA・チャットボットの深掘り。
