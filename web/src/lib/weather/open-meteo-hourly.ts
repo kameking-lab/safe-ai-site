@@ -7,6 +7,7 @@ type HourlyPayload = {
     precipitation?: number[];
     weather_code?: number[];
     wind_speed_10m?: number[];
+    relative_humidity_2m?: number[];
   };
 };
 
@@ -106,6 +107,7 @@ export function buildSignageHourlyFromPayload(
     const precip = hourly?.precipitation?.[i];
     const code = hourly?.weather_code?.[i] ?? 0;
     const wind = hourly?.wind_speed_10m?.[i];
+    const humidity = hourly?.relative_humidity_2m?.[i];
     if (typeof temp !== "number" || typeof wind !== "number" || typeof precip !== "number") continue;
 
     let dayPrefix = "";
@@ -122,6 +124,7 @@ export function buildSignageHourlyFromPayload(
       windMs: windKmhToMs(wind),
       weatherLabel: codeToOverview(code),
       weatherCode: code,
+      humidityPct: typeof humidity === "number" ? Math.round(humidity) : undefined,
     });
   }
   return out;
@@ -133,7 +136,7 @@ export async function fetchOpenMeteoHourlyPayload(lat: number, lon: number): Pro
   u.searchParams.set("longitude", String(lon));
   u.searchParams.set("timezone", "Asia/Tokyo");
   u.searchParams.set("forecast_days", "3");
-  u.searchParams.set("hourly", "temperature_2m,precipitation,weather_code,wind_speed_10m");
+  u.searchParams.set("hourly", "temperature_2m,precipitation,weather_code,wind_speed_10m,relative_humidity_2m");
   const res = await fetch(u.toString(), {
     headers: { Accept: "application/json" },
     // 1h: 上流データ更新が 1h サイクル (docs/perf/isr-followup.md)
