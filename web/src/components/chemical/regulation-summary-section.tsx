@@ -2,6 +2,7 @@ import { ExternalLink, ListChecks, Stethoscope, FileQuestion } from "lucide-reac
 import {
   REGULATION_TAGS,
   normalizeTags,
+  oshaTagsForCas,
   type RegulationTag,
 } from "@/lib/regulation-tag-labels";
 import {
@@ -51,11 +52,15 @@ export function RegulationSummarySection({
   cas: string;
   regulationTags?: string[];
 }) {
-  const tags = normalizeTags(regulationTags);
+  // F2 (2026-07-03): concentration-limits.json のタグ（他法令）に、正本突合済みの
+  // 安衛法特別則タグ（OSHA_REGULATION_TAGS_BY_CAS）を合流。従来はここが分断されており、
+  // メタノール等で「該当が確認できる法律 0件」・特殊健診の欠落が本番表示されていた（診断03 §2-2②）。
+  const mergedTags = [...new Set([...(regulationTags ?? []), ...oshaTagsForCas(cas)])];
+  const tags = normalizeTags(mergedTags);
   const soil = soilContaminationForCas(cas);
   const air = airPollutionForCas(cas);
   const water = waterPollutionForCas(cas);
-  const checkups = healthCheckupsFromTags(regulationTags);
+  const checkups = healthCheckupsFromTags(mergedTags, cas);
 
   // 該当が確認できる法律ファミリー（重複排除・出現順）。
   const families: string[] = [];
