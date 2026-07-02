@@ -23,7 +23,7 @@ import {
 // を直撃するため、UI 選択肢は独立モジュールから取る。
 import { LAW_CATEGORY_OPTIONS, type LawCategoryFilter } from "@/lib/law-category-options";
 import { buildContextPrefill } from "@/lib/chatbot-context-prefill";
-import { VoiceMicButton } from "@/components/voice-input-field";
+import { VoiceMicButton, describeVoiceError } from "@/components/voice-input-field";
 import { BindingBadge } from "@/components/AIResponseCard";
 import { Mascot } from "@/components/mascot";
 import {
@@ -178,6 +178,7 @@ export function ChatbotPanel() {
   const [shareToast, setShareToast] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [voiceMode, setVoiceMode] = useState(false);
+  const [voiceInputError, setVoiceInputError] = useState<string | null>(null);
   const [lawCategory, setLawCategory] = useState<LawCategoryFilter>("all");
   // P1-2: 生成停止（AbortController）と失敗時の再試行
   const [retryableQuestion, setRetryableQuestion] = useState<string | null>(null);
@@ -208,28 +209,36 @@ export function ChatbotPanel() {
       lang: string;
       interimResults: boolean;
       onresult: (e: { results: { 0: { transcript: string } }[] }) => void;
-      onerror: () => void;
+      onerror: (event: { error?: string }) => void;
       start: () => void;
     } };
     const w = window as unknown as { webkitSpeechRecognition?: SR; SpeechRecognition?: SR };
     const Ctor = w.webkitSpeechRecognition ?? w.SpeechRecognition;
     if (!Ctor) {
-      alert("音声入力に対応していないブラウザです。Chrome系をお試しください。");
+      setVoiceInputError(describeVoiceError("not-supported"));
       return;
     }
-    const recog = new Ctor();
-    recog.lang = "ja-JP";
-    recog.interimResults = false;
-    recog.onresult = (e) => {
-      const text = e.results[0]?.[0]?.transcript ?? "";
-      if (text) {
-        setInput(text);
-        // 自動送信（音声完結モード）
-        setTimeout(() => void handleSend(text), 200);
-      }
-    };
-    recog.onerror = () => {};
-    recog.start();
+    setVoiceInputError(null);
+    try {
+      const recog = new Ctor();
+      recog.lang = "ja-JP";
+      recog.interimResults = false;
+      recog.onresult = (e) => {
+        const text = e.results[0]?.[0]?.transcript ?? "";
+        if (text) {
+          setInput(text);
+          // 自動送信（音声完結モード）
+          setTimeout(() => void handleSend(text), 200);
+        }
+      };
+      recog.onerror = (event) => {
+        setVoiceInputError(describeVoiceError(event?.error));
+      };
+      recog.start();
+    } catch (err) {
+      const name = err instanceof Error ? err.name : undefined;
+      setVoiceInputError(describeVoiceError(name));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -628,7 +637,10 @@ export function ChatbotPanel() {
           {/* 6.3: 音声完結モード */}
           <button
             type="button"
-            onClick={() => setVoiceMode((v) => !v)}
+            onClick={() => {
+              setVoiceMode((v) => !v);
+              setVoiceInputError(null);
+            }}
             aria-pressed={voiceMode}
             className={`flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-bold ${
               voiceMode
@@ -647,6 +659,14 @@ export function ChatbotPanel() {
             >
               🎤 話して質問する
             </button>
+          )}
+          {voiceMode && voiceInputError && (
+            <span
+              role="alert"
+              className="max-w-[240px] text-xs font-semibold leading-snug text-rose-600"
+            >
+              {voiceInputError}
+            </span>
           )}
         </div>
         {hasMessages && (
