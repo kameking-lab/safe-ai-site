@@ -78,18 +78,31 @@ const ZOOM_MAX = 1.6;
 const ZOOM_STEP = 0.1;
 const DEEP_LINK_KEYS = ["preset", "template", "industry", "fromAccident", "fromDiary", "import"] as const;
 
-function makeToday(): KyInstructionRecordState {
+// 作業日は SSR（ビルド/リクエスト時）とハイドレーション（実際の閲覧時）で
+// new Date() の評価タイミングがずれ React error #418（hydration mismatch）を
+// 毎ロード引き起こしていた。初期描画は日付非依存で固定し、マウント後（クライ
+// アントのみ）に withTodayWorkDate で「今日」を補う。
+function emptyKyRecord(): KyInstructionRecordState {
   const base = normalizeKyInstructionRecord({});
-  const d = new Date();
-  base.workDateYear = String(d.getFullYear());
-  base.workDateMonth = String(d.getMonth() + 1);
-  base.workDateDay = String(d.getDate());
+  base.workDateYear = "";
+  base.workDateMonth = "";
+  base.workDateDay = "";
   return base;
+}
+
+function withTodayWorkDate(rec: KyInstructionRecordState): KyInstructionRecordState {
+  const d = new Date();
+  return {
+    ...rec,
+    workDateYear: String(d.getFullYear()),
+    workDateMonth: String(d.getMonth() + 1),
+    workDateDay: String(d.getDate()),
+  };
 }
 
 export function KyPaperView() {
   const services = useMemo(() => createServices(), []);
-  const [record, setRecord] = useState<KyInstructionRecordState>(makeToday);
+  const [record, setRecord] = useState<KyInstructionRecordState>(emptyKyRecord);
   const [zoom, setZoom] = useState(1);
   const [region, setRegion] = useState(DEFAULT_WEATHER_REGION);
   const [weatherBusy, setWeatherBusy] = useState(false);
@@ -169,11 +182,14 @@ export function KyPaperView() {
       params = null;
     }
     if (params && DEEP_LINK_KEYS.some((k) => params!.has(k))) {
-      const res = applyKyDeepLink(params, baseRec ?? makeToday());
+      const res = applyKyDeepLink(params, baseRec ?? withTodayWorkDate(emptyKyRecord()));
       setRecord(res.record);
       if (res.notice) setNotice(res.notice, "info");
     } else if (baseRec) {
       setRecord(baseRec);
+    } else {
+      // 保存データも深リンクも無ければ「今日」を補う（クライアントのみ＝hydration安全）。
+      setRecord((prev) => withTodayWorkDate(prev));
     }
     setWorkers(visibleWorkers(loadWorkers()));
     // 保存済みKYがあれば上部にも「前回を複製」を出す（再来訪の最速ルート）。
@@ -649,11 +665,11 @@ export function KyPaperView() {
               </SheetField>
               <SheetField label="作業日">
                 <div className="flex items-center gap-1">
-                  <Pulldown ariaLabel="年" value={record.workDateYear} onChange={(v) => patch({ workDateYear: v })} options={years.map((y) => ({ value: String(y), label: String(y) }))} />
+                  <Pulldown ariaLabel="年" value={record.workDateYear} onChange={(v) => patch({ workDateYear: v })} options={years.map((y) => ({ value: String(y), label: String(y) }))} minWidthClassName="min-w-14" />
                   <span className="text-xs">年</span>
-                  <Pulldown ariaLabel="月" value={record.workDateMonth} onChange={(v) => patch({ workDateMonth: v })} options={MONTH_OPTIONS.map((m) => ({ value: String(m), label: String(m) }))} />
+                  <Pulldown ariaLabel="月" value={record.workDateMonth} onChange={(v) => patch({ workDateMonth: v })} options={MONTH_OPTIONS.map((m) => ({ value: String(m), label: String(m) }))} minWidthClassName="min-w-11" />
                   <span className="text-xs">月</span>
-                  <Pulldown ariaLabel="日" value={record.workDateDay} onChange={(v) => patch({ workDateDay: v })} options={days.map((d) => ({ value: String(d), label: String(d) }))} />
+                  <Pulldown ariaLabel="日" value={record.workDateDay} onChange={(v) => patch({ workDateDay: v })} options={days.map((d) => ({ value: String(d), label: String(d) }))} minWidthClassName="min-w-11" />
                   <span className="text-xs">日</span>
                 </div>
               </SheetField>
@@ -1055,18 +1071,20 @@ function Pulldown({
   onChange,
   options,
   ariaLabel,
+  minWidthClassName,
 }: {
   value: string;
   onChange: (v: string) => void;
   options: { value: string; label: string }[];
   ariaLabel: string;
+  minWidthClassName?: string;
 }) {
   return (
     <select
       aria-label={ariaLabel}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="rounded border border-slate-300 bg-white px-1.5 py-1.5 text-sm"
+      className={`rounded border border-slate-300 bg-white px-1.5 py-1.5 text-sm ${minWidthClassName ?? ""}`}
     >
       {options.map((o) => (
         <option key={o.value} value={o.value}>

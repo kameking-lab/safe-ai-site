@@ -1,39 +1,42 @@
 import { NextResponse } from "next/server";
-import warnings from "@/data/jma/warnings.json";
-import weather from "@/data/jma/weather.json";
-import earthquakes from "@/data/jma/earthquakes.json";
-import indexMeta from "@/data/jma/index.json";
-import type {
-  JmaEarthquakesFile,
-  JmaIndexFile,
-  JmaWarningsFile,
-  JmaWeatherFile,
-} from "@/lib/jma/jma-data";
+import { getJmaEarthquakesRuntime, getJmaWarningsRuntime, getJmaWeatherRuntime } from "@/lib/jma/fetch-jma-runtime";
 
-export const dynamic = "force-static";
-// JMA データはバンドル import (build-time) で取り込んでいるため、再生成しても
-// 結果は同じ。GH Actions の JMA cron は [skip ci] コミットで Vercel deploy
-// skip されるため、データ反映は実 deploy 時のみ。revalidate=3600 (1h) で
-// 他 signage API (signage-data / weather-forecast) と運用統一しつつ、無駄な
-// 再生成を 12 倍削減する。
-export const revalidate = 3600;
+// 気象庁 bosai JSON をリクエスト時に直接 fetch（30分キャッシュ）。旧実装は
+// @/data/jma/*.json を静的 import(force-static) していたため、Vercel が
+// 再デプロイされない限り fetchedAt が更新されず本番で18日凍結した
+// (docs/fable-diagnosis-2026-07-02/01-signage.md T1)。デプロイ有無に依存しない
+// よう、この route はダイナミック実行のまま getJma*Runtime 内の unstable_cache
+// に鮮度を委譲する（/api/signage-data と同じ構え）。
+export const maxDuration = 60;
+
+const JMA_SOURCE = "気象庁 (Japan Meteorological Agency)";
+const JMA_SOURCE_URL = "https://www.jma.go.jp/bosai/";
+const JMA_LICENSE = "気象庁ホームページ コンテンツ利用ルール（出典明記）";
 
 export async function GET() {
+  const [warnings, weather, earthquakes] = await Promise.all([
+    getJmaWarningsRuntime(),
+    getJmaWeatherRuntime(),
+    getJmaEarthquakesRuntime(),
+  ]);
+
+  const fetchedAt = [warnings.fetchedAt, weather.fetchedAt, earthquakes.fetchedAt].sort().at(-1) ?? new Date().toISOString();
+
   const body = {
-    fetchedAt: (indexMeta as JmaIndexFile).fetchedAt,
-    source: (indexMeta as JmaIndexFile).source,
-    sourceUrl: (indexMeta as JmaIndexFile).sourceUrl,
-    license: (indexMeta as JmaIndexFile).license,
-    warnings: warnings as JmaWarningsFile,
-    weather: weather as JmaWeatherFile,
-    earthquakes: earthquakes as JmaEarthquakesFile,
+    fetchedAt,
+    source: JMA_SOURCE,
+    sourceUrl: JMA_SOURCE_URL,
+    license: JMA_LICENSE,
+    warnings,
+    weather,
+    earthquakes,
   };
 
   return NextResponse.json(body, {
     status: 200,
     headers: {
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=900",
-      "x-data-source": "jma-batch",
+      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=900",
+      "x-data-source": "jma-runtime",
     },
   });
 }

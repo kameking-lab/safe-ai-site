@@ -1,4 +1,4 @@
-import { normalizeSearchText } from './fuzzy-search';
+import { searchCrossIndex } from './cross-search';
 
 export type SearchCategory = 'law' | 'notice' | 'chemical' | 'education' | 'accident' | 'precedent' | 'glossary';
 
@@ -8,7 +8,26 @@ export interface SearchItem {
   subtitle: string;
   category: SearchCategory;
   url: string;
+  /**
+   * 追加のマッチ用キーワード（title/subtitle に出ない別名・分類ラベル・関連語）。
+   * 複数語 AND クエリ「石綿 事前調査」「クレーン 過負荷」を条文へ収束させるために使う。
+   */
+  keywords?: string[];
 }
+
+/**
+ * 同点時のカテゴリ優先度（先頭ほど上位）。目的条文・教育導線を上位に寄せる。
+ * cross-search の searchCrossIndex に渡す（このリストに無いカテゴリは末尾扱い）。
+ */
+const SEARCH_CATEGORY_PRIORITY: readonly SearchCategory[] = [
+  'law',
+  'education',
+  'precedent',
+  'notice',
+  'glossary',
+  'chemical',
+  'accident',
+];
 
 export const CATEGORY_META: Record<
   SearchCategory,
@@ -25,6 +44,13 @@ export const CATEGORY_META: Record<
 
 /**
  * インデックスをクエリで絞り込みスコア順に返す。
+ *
+ * マッチ規約は cross-search エンジン（{@link searchCrossIndex}）に一本化している:
+ * 空白区切りの各語を AND で扱い（全語がどこかに当たった項目のみ採用）、シノニム展開
+ * （アスベスト→石綿則 等）と keywords 重み付けを行う。これにより「石綿 事前調査」
+ * 「クレーン 過負荷」「足場 作業床」のような 2 語クエリが目的条文へ収束する
+ * （従来はクエリ全体を 1 つの部分文字列として扱い、2 語クエリが全滅していた）。
+ *
  * @param limit 返却上限。コマンドパレット(⌘K)は既定10、/search 結果ページは全件表示のため大きめを渡す。
  */
 export function searchItems(
@@ -33,27 +59,11 @@ export function searchItems(
   category: 'all' | SearchCategory,
   limit = 10,
 ): SearchItem[] {
-  const trimmed = query.trim();
-  if (!trimmed) return [];
-
-  const nq = normalizeSearchText(trimmed);
-  const pool = category === 'all' ? items : items.filter((i) => i.category === category);
-
-  return pool
-    .map((item) => {
-      const nt = normalizeSearchText(item.title);
-      const ns = normalizeSearchText(item.subtitle);
-      let score = 0;
-      if (nt === nq) score = 100;
-      else if (nt.startsWith(nq)) score = 80;
-      else if (nt.includes(nq)) score = 60;
-      else if (ns.includes(nq)) score = 30;
-      return { item, score };
-    })
-    .filter(({ score }) => score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, limit)
-    .map(({ item }) => item);
+  return searchCrossIndex(items, query, {
+    category,
+    limit,
+    categoryPriority: SEARCH_CATEGORY_PRIORITY,
+  });
 }
 
 /** カテゴリ別に件数を集計する（/search 結果ページのタブ件数バッジ用）。 */
@@ -110,6 +120,9 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           title: a.articleNum ? `${a.lawShort} ${a.articleNum}` : a.lawShort,
           subtitle: `${a.law}　${heading}`.slice(0, 90),
           category: 'law',
+          // 略称・正式名称・条番号・見出し・条文キーワードのいずれの語でも AND マッチさせる
+          // （例: 「石綿 事前調査」「クレーン 過負荷」「足場 作業床」が目的条文へ収束）。
+          keywords: [...a.keywords, a.articleTitle, a.law, a.lawShort, a.articleNum].filter(Boolean),
           url: a.articleNum
             ? `/law-search?law=${encodeURIComponent(a.law)}&art=${encodeURIComponent(a.articleNum)}`
             : `/law-search?law=${encodeURIComponent(a.law)}`,
@@ -124,6 +137,7 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           title: c.name,
           subtitle: `${c.court}　${c.dateLabelJa}　${c.oneLine}`,
           category: 'precedent',
+          keywords: [c.field, ...c.issues, c.court],
           url: `/court-cases/${c.id}`,
         });
       }
@@ -144,6 +158,7 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           title: a.title,
           subtitle: `${a.workCategory} / ${a.type} / ${a.severity}（${a.occurredOn}）`,
           category: 'accident',
+          keywords: [a.workCategory, a.type, a.severity, a.industry_detail ?? ''].filter(Boolean),
           url: `/accidents/${a.id}`,
         });
       }
@@ -157,6 +172,7 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           title: c.name,
           subtitle: `CAS ${c.cas}${c.name_en ? ` / ${c.name_en}` : ''}`,
           category: 'chemical',
+          keywords: [c.cas, c.name_en ?? ''].filter(Boolean),
           url: `/chemical-database?q=${encodeURIComponent(c.name)}`,
         });
       }
@@ -175,6 +191,7 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
             title: e.name,
             subtitle: `CAS ${e.cas} / ${e.categoryLabel}`,
             category: 'chemical',
+            keywords: [e.cas, e.categoryLabel].filter(Boolean),
             url: `/chemical-database?q=${encodeURIComponent(e.name)}`,
           });
         }
@@ -191,6 +208,7 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           title: n.title,
           subtitle: `${n.noticeNumber ?? n.docType} ${n.issuedDateRaw ?? ''}`.trim(),
           category: 'notice',
+          keywords: [n.docType, n.noticeNumber ?? '', n.category, n.issuer ?? ''].filter(Boolean),
           url: `/circulars/${n.id}`,
         });
       }
@@ -219,6 +237,7 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           title: t.term,
           subtitle: `${t.reading}　${t.definition.slice(0, 60)}`,
           category: 'glossary',
+          keywords: [t.reading].filter(Boolean),
           url: `/glossary`,
         });
       }

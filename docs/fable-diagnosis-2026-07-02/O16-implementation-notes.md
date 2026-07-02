@@ -21,7 +21,16 @@
 ### 逸脱2: loop-status.md は「各レーンが自分の行を書く」のではなく launcher単独が生成（gitignore）
 08 §D は各レーンがイテレーション末尾に自分の行を更新する設計。しかし**各レーンは別クローンで走る**ため、追跡ファイルに各クローンから行を書くと恒常的なクロスクローン衝突・churn になる。
 - 最小修正: launcher が本体リポジトリで全レーンを config から知っているので、観測可能な状態（実行中プロセス走査・最新ログの時刻・BACKLOG の open 数）から**consolidatedな loop-status.md を単独生成**する。gitignore にしてローカル専用にする（版管理しない実行時ダッシュボード）。
-- 影響: これで社長が見る1ファイルは launcher が毎回作る。Sonnetタスク S13-a（各レーンプロンプトへ「自レーン行更新」を追記）は本方式で概ね不要になる。S13-a を消化するSonnetレーンは、この事実を確認した上で「launcher単独生成に置換済み」としてスキップ or 縮小してよい。
+- 影響: これで社長が見る1ファイルは launcher が毎回作る。
+
+### 逸脱2の解消＝S13-a を実装した（2026-07-02）
+逸脱2は「S13-aは概ね不要」と判断したが、これは**過小評価だった**。launcher単独生成は「ログオン時／毎日07:00／点火時」しか更新されない＝permanent runnerが回っている大半の時間は行が固定のまま（最新PRも判断も反映されない）。§Dが求める「イテレーション末尾ごとの最終稼働・直近PR・残open・判断1行」は、launcherには per-iteration フックが無いので原理的に出せない。よって S13-a を正式実装した。逸脱2が挙げたクロスクローン衝突の懸念は次の設計で解消済み:
+- **追跡ファイルchurn無し**: loop-status.md は gitignore。各クローンから書いても版管理は汚れない。
+- **集約先は1ファイル**: launcher が点火時に環境変数 `SAFE_AI_LOOP_STATUS`＝本体リポジトリの docs/loop-status.md 絶対パスを子（各レーンrunner）へ export。別クローンで走るレーンも自分のローカル複製ではなく**この1ファイル**へ書く。解決順は `-StatusPath` > 環境変数 > `<clone>/docs/loop-status.md`（最後はopsレーン＝本体リポジトリ用の正しい既定）。
+- **衝突しない上書き**: 各レーンは `loop-report-status.ps1` で自レーン行だけを外科的に upsert（キー`- <lane> :`・置換のみ・重複しない）。6レーン同時書込みはロックファイルで直列化。失敗は全て非致命（レーンのイテレーションを壊さない）。
+- **launcherが領域を保存**: launcher の全面書換え時、`<!-- LANE-REPORT:BEGIN … END -->` 区画を**逐語保存**するので生きた行が消えない。区画が無い初回は enabled レーン数だけプレースホルダ行を出す。
+- **規約（このファイルが正）**: 本体上部＝launcher所有（期限バナー/スケジューラ健全性/点火行）、区画＝レーン所有（自己報告）。マーカーはASCIIリテラル固定。日本語ラベルは loop-status-strings.txt（reportHeader/reportLine/reportEmptyNote/reportPlaceholder）。両スクリプトともASCIIソース＋`-WhatIf`ドライラン自己検証つき。
+- 実測: launcher `-WhatIf` で区画scaffold生成・生きた行の保存を確認。reporter で2レーン（ops/data）が環境変数経由で同一ファイルへ最終稼働/直近PR/残open/判断1行を書込み・再報告が行を重複せず置換することを確認（S13-a 完了条件を満たす）。
 
 ## planner / critic ワンショットの衝突回避
 planner（補給）と critic（点検）は loop-runner.ps1 を `-MaxIterations 1` ＋**別レーンタグ**（`<lane>-planner` / `site-critic`）で起動する。別タグなので永続レーンのガードに弾かれない。かつ **永続レーンを起動する前に**（planner はそのレーン起動直前・critic はレーンループ全体の前に）ブロッキング実行するため、同一クローン内で永続runnerと git 操作が衝突しない。ハングに備え timeout（planner 20分・critic 30分）で kill して続行する。planner は対象レーン名を注入した一時プロンプトを渡す（共有テンプレートに対象BACKLOGを教えるため）。

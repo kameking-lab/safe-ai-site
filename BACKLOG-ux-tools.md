@@ -5,7 +5,7 @@
 ## 未着手（上から処理）
 
 ### 2026-07-02 Fable診断注入（診断書: docs/fable-diagnosis-2026-07-02/04・07）
-- [ ] 【Opus・P0】O4残: 派遣法45条要約の是正（「派遣元」が正）＋SYSTEM_PROMPT「施行：YYYY年MM月」プレースホルダ漏出対策（04のT2+T3。T1は下記PR #583で対応済み）。完了条件=本番プローブ20問でYYYY出力0件・「派遣 雇入れ時教育」質問で「派遣元」を含む。
+- [x] 【Opus・P0】O4: チャットボット偽「範囲外」警告の根絶＋派遣法45条要約の是正＋SYSTEM_PROMPT「施行：YYYY年MM月」プレースホルダ漏出対策（04のT1+T2+T3）。T1(2026-07-02 ux-tool/chatbot-out-of-scope-false-positive / PR #583)=`chatbot-enrichment.ts` `detectOutOfScopeLawReferences` の長音「ー」分断＋正式名⇄短縮名照合欠如を是正（正答の25%に偽警告・信頼度不当降格を実測）。T2+T3(2026-07-02 ux-tool/haken-education-yyyy-placeholder / PR #588)=`haken-anzen-eisei.ts` 第45条要約が雇入れ時教育(59条1項)を派遣先義務の列挙に含めていた不具合を是正（派遣先の義務は59条2項・3項に限定し雇入れ時教育・一般定期健診は派遣元と明記／rag-100q回帰問id124追加）＋SYSTEM_PROMPTルール10の「YYYY年MM月」テンプレート例を実在例に差し替え＋出力後sanitizer`sanitizePlaceholderCitations()`を新設（本番プローブQ10で1問中3箇所の漏出を実測）。両PRともゲート全通過。
 - [ ] 【Opus・P0】O5: synonyms.ts:166「気積→事務所則第14条」を第2条へ是正（dataレーン#538申し送りの取り逃し・第14条は排水）＋口語同義語の拡充（頻度/資格/何人/何トン系）。完了条件=「健康診断の頻度」で安衛則44・45条がtop5・main/fresh eval非退行100%/98%以上（04のT4・07のP0-1）。
 - [ ] 【Sonnet・P2】S7: チャットボット小粒4本＝一般語PINの文脈ガード（fresh 100/100目標）・adjacentヘッダ誤発火抑制・no-hit時のrelatedノイズ抑制・本番週次スモークプローブ5問（04のT6+T8+T9+T10）。合否は生成品質eval（BACKLOG-fable.md F3で新設）で機械判定。
 - [ ] 【Sonnet・P1】S8-a: E-E-A-T監修者バイライン＝通達詳細（/circulars/[id]）への氏名・労働安全コンサルタント登録260022・aboutリンク＋Person JSON-LD配線（07のP1-4の自班route分。判例詳細/FAQはux-hub班）。

@@ -98,3 +98,44 @@ export function headlineFromPayload(payload: JmaWarningPayload): string | null {
   const h = payload.headlineText?.trim();
   return h && h.length > 0 ? h : null;
 }
+
+export type JmaWarningPayloadSummary = {
+  level: JmaMapLevel;
+  headline: string | null;
+  reportDatetime: string | null;
+  publishingOffice: string | null;
+  warnings: Array<{
+    areaCode: string | null;
+    code: string | null;
+    status: string | null;
+    level: JmaMapLevel | null;
+  }>;
+};
+
+/** 1ファイル分を /api/signage/jma の JmaWarningEntry 形へ要約（サイネージ地図の全項目表示用） */
+export function summarizeWarningPayload(payload: JmaWarningPayload): JmaWarningPayloadSummary {
+  let level: JmaMapLevel = "none";
+  const warnings: JmaWarningPayloadSummary["warnings"] = [];
+  for (const t of payload.areaTypes ?? []) {
+    for (const area of t.areas ?? []) {
+      for (const w of area.warnings ?? []) {
+        if (!isActiveWarningStatus(w.status)) continue;
+        const lv = levelFromCode(w.code);
+        if (lv) level = maxLevel(level, lv);
+        warnings.push({
+          areaCode: area.code ?? null,
+          code: w.code ?? null,
+          status: w.status ?? null,
+          level: lv,
+        });
+      }
+    }
+  }
+  return {
+    level,
+    headline: headlineFromPayload(payload),
+    reportDatetime: payload.reportDatetime ?? null,
+    publishingOffice: payload.publishingOffice ?? null,
+    warnings,
+  };
+}
