@@ -22,4 +22,10 @@ describe("/features/use-cases 関連機能ピル（柱0 44px）", () => {
       expect(link.className).toContain("min-h-[44px]");
     }
   });
+
+  it("下部CTAの2リンクが min-h-[44px] を持つ", () => {
+    const { getByRole } = render(<UseCasesPage />);
+    expect(getByRole("link", { name: /業種別の相談を送る/ }).className).toContain("min-h-[44px]");
+    expect(getByRole("link", { name: "機能一覧に戻る" }).className).toContain("min-h-[44px]");
+  });
 });
