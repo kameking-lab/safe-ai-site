@@ -8,8 +8,14 @@ export async function GET() {
   // 揃える。従来は全子サイトマップに当日（new Date()）を打っており、中身が変わらなくても
   // lastmod が毎日動く＝lastmod スパムだった（Google に無視され再クロールが遅延する）。
   const buildToday = new Date().toISOString().slice(0, 10);
-  const { siteFreshest, freshestArticle, freshestNotice, accidentsDataUpdated, equipmentDataUpdated } =
-    computeSitemapFreshness(buildToday);
+  const {
+    siteFreshest,
+    freshestArticle,
+    freshestNotice,
+    accidentsDataUpdated,
+    equipmentDataUpdated,
+    chemicalsDataUpdated,
+  } = computeSitemapFreshness(buildToday);
 
   const children: { loc: string; lastmod: string }[] = [
     // 本体（静的＋カテゴリ＋判例個別ページ等）。最新日はサイト全体の最新データ日に追従。
@@ -22,6 +28,8 @@ export async function GET() {
     { loc: `${BASE}/sitemap-circulars.xml`, lastmod: freshestNotice },
     // 保護具個別ページ。保護具DBの生成日。
     { loc: `${BASE}/sitemap-equipment.xml`, lastmod: equipmentDataUpdated },
+    // 化学物質 個別ページ（約3,515物質）。濃度基準DBスナップショットの生成日。
+    { loc: `${BASE}/sitemap-chemicals.xml`, lastmod: chemicalsDataUpdated },
   ];
 
   const entries = children
