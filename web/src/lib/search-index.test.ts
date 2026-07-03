@@ -158,7 +158,7 @@ describe('buildSearchIndex — 用語集（glossary）の収載', () => {
     const index = await buildSearchIndex();
     const c = countByCategory(index, '安全');
     expect(c.all).toBe(
-      c.law + c.notice + c.chemical + c.equipment + c.education + c.accident + c.precedent + c.glossary + c.faq + c.sign + c.article + c.feature,
+      c.law + c.revision + c.notice + c.chemical + c.equipment + c.education + c.accident + c.precedent + c.glossary + c.faq + c.sign + c.article + c.feature,
     );
   });
 });
@@ -498,6 +498,43 @@ describe('buildSearchIndex — 法令条文（law）の収載', () => {
     // id 重複なし（law|条番号 のユニーク化）
     const ids = new Set(laws.map((i) => i.id));
     expect(ids.size).toBe(laws.length);
+  });
+});
+
+describe('buildSearchIndex — 法改正（revision）の収載', () => {
+  it('正本 lawRevisionCores（placeholder除外）と ID 集合が一致する', async () => {
+    const { lawRevisionCores } = await import('@/data/mock/law-revisions');
+    const index = await buildSearchIndex();
+    const revisions = index.filter((i) => i.category === 'revision');
+    expect(revisions.length).toBeGreaterThan(0);
+    // 収載集合＝正本の（読込失敗 placeholder を除いた）ユニーク id 集合。
+    const canonical = new Set(
+      lawRevisionCores
+        .filter((r) => !r.id.startsWith('lr-fallback'))
+        .map((r) => r.id),
+    );
+    const indexIds = new Set(revisions.map((i) => i.id.replace(/^revision-/, '')));
+    expect(indexIds).toEqual(canonical);
+    // 読込失敗 placeholder（lr-fallback-*）は索引に載せない。
+    expect(revisions.some((i) => i.id.includes('lr-fallback'))).toBe(false);
+  });
+
+  it('個別詳細ページ未実装のため全件 /laws 一覧ハブへリンクする（幽霊URL 0）', async () => {
+    const index = await buildSearchIndex();
+    const revisions = index.filter((i) => i.category === 'revision');
+    expect(revisions.length).toBeGreaterThan(0);
+    // /laws は実在ハブ。glossary→/glossary・faq→/faq と同じく一覧へ寄せる。
+    expect(revisions.every((i) => i.url === '/laws')).toBe(true);
+    expect(revisions.every((i) => i.id.startsWith('revision-'))).toBe(true);
+  });
+
+  it('これまで 0 件だった法改正名クエリが revision カテゴリで発見できる', async () => {
+    const index = await buildSearchIndex();
+    // 実データのタイトルに literal で存在する語（石綿障害予防規則・クレーン等安全規則）。
+    expect(searchItems(index, '石綿', 'revision').length).toBeGreaterThan(0);
+    expect(searchItems(index, 'クレーン', 'revision').length).toBeGreaterThan(0);
+    // 発見先が /laws へ着地する（検索経由で法改正一覧へ到達できる）。
+    expect(searchItems(index, '石綿', 'revision').every((i) => i.url === '/laws')).toBe(true);
   });
 });
 

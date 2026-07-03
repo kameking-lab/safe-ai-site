@@ -112,7 +112,7 @@ export function KyIndustryPresetPicker({ onApply }: Props) {
             <ul className="mt-0.5 space-y-1.5 text-slate-600">
               {preset.risks.map((r, i) => (
                 <li key={i} className="rounded border border-slate-100 bg-slate-50 p-1.5">
-                  <span className="font-semibold text-red-700">危険：</span>{r.hazard}
+                  <span className="font-semibold text-rose-700">危険：</span>{r.hazard}
                   <br />
                   <span className="font-semibold text-emerald-700">対策：</span>{r.reduction}
                 </li>

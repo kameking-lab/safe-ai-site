@@ -64,6 +64,7 @@ export function StatsDashboardImpl() {
   const [pageAnalytics, setPageAnalytics] = useState<PageAnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
   const panelId = useId();
   const activePeriodIndex = PERIODS.findIndex((p) => p.id === period);
   const { getTabProps } = useRovingTablist(PERIODS.length, activePeriodIndex, (i) => setPeriod(PERIODS[i].id));
@@ -106,7 +107,7 @@ export function StatsDashboardImpl() {
     return () => {
       cancelled = true;
     };
-  }, [period]);
+  }, [period, retryNonce]);
 
   // 実データ源が接続済みかどうか。未接続のサンプル(モック)数値は一切表示しない（捏造防止）。
   const { ga4Live, gscLive, paLive, anyLive } = computeStatsLiveness(data, gsc, pageAnalytics);
@@ -187,15 +188,20 @@ export function StatsDashboardImpl() {
         </div>
       ) : null}
 
-      {error ? (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-          データ取得に失敗しました: {error}
-        </div>
-      ) : null}
-
-      {loading || !data ? (
+      {loading ? (
         <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500">
           読み込み中…
+        </div>
+      ) : error ? (
+        <div className="rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center">
+          <p className="text-sm text-rose-700">データ取得に失敗しました: {error}</p>
+          <button
+            type="button"
+            onClick={() => setRetryNonce((n) => n + 1)}
+            className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded-full border border-rose-300 bg-white px-5 text-sm font-semibold text-rose-700 hover:bg-rose-100"
+          >
+            再試行
+          </button>
         </div>
       ) : !anyLive ? (
         // 実データ未接続: サンプル(モック)数値は表示せず、正直な準備中の案内のみ。
@@ -220,7 +226,7 @@ export function StatsDashboardImpl() {
             ページでご確認いただけます。
           </p>
         </div>
-      ) : (
+      ) : !data ? null : (
         // 各データ源が live のときのみ、その源から実測した指標だけを表示する。
         // GA4 単体で取得できない指標（前期間比・機能別利用・離脱フロー・コンバージョン・
         // チャット指標・インサイト）はモック値のため一切表示しない（捏造防止）。
