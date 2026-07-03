@@ -238,10 +238,10 @@ export function InductionClient() {
           <h2 className="text-base font-bold text-slate-900">教育項目（実施したらチェック）</h2>
           <div className="flex items-center gap-2">
             <span className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700">{doneCount}/{items.length} 実施</span>
-            <button type="button" onClick={() => checkAll(true)} className="rounded-lg border border-emerald-300 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 print:hidden">
+            <button type="button" onClick={() => checkAll(true)} className="min-h-[44px] rounded-lg border border-emerald-300 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 print:hidden">
               全て実施
             </button>
-            <button type="button" onClick={() => checkAll(false)} className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 print:hidden">
+            <button type="button" onClick={() => checkAll(false)} className="min-h-[44px] rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100 print:hidden">
               クリア
             </button>
           </div>

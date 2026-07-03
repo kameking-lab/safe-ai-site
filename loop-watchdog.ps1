@@ -142,6 +142,22 @@ function Get-ConfigUntilIso([string]$ConfigPath) {
   } catch { return "" }
 }
 
+# Pure: does a process command line genuinely LAUNCH loop-watchdog.ps1 (invoked via -File), as opposed to
+# merely MENTIONING the filename somewhere in its arguments (e.g. an operator/agent diagnostic run with
+# -Command "... loop-watchdog.ps1 ...")? The single-instance guard below (and the launcher's
+# Invoke-EnsureHealWatchdog) counted ANY powershell whose command line CONTAINED the substring
+# "loop-watchdog.ps1", so a stray command that names the script spoofs the liveness scan: it can make a
+# correctly-spawned watchdog self-exit here (thinking a competitor exists) into a zero-watchdog gap whose
+# only resurrector is a rare full launcher pass, or (in the launcher's scan) suppress spawning a genuinely
+# dead watchdog. Both REAL launch forms use -File: the launcher's ensure-spawn (-File <path>\loop-watchdog.ps1)
+# and the self-respawn hand-off (Get-WatchdogRelaunchArgs, -File "<path>\loop-watchdog.ps1"). Match that
+# shape - a path ending in loop-watchdog.ps1 immediately after -File, quoted or bare - so a -Command mention
+# (which has no -File before the path) no longer counts. Pure so -SelfTest asserts it offline.
+function Test-IsWatchdogProcess([string]$CommandLine) {
+  if ([string]::IsNullOrEmpty($CommandLine)) { return $false }
+  return ($CommandLine -match '(?i)-File\s+"?[^"]*loop-watchdog\.ps1(?:"|\s|$)')
+}
+
 # Dry-run self-check of the pure gates. Runs BEFORE any launcher / process dependency so it is safe
 # on any machine: powershell -File loop-watchdog.ps1 -SelfTest
 if ($SelfTest) {
@@ -204,6 +220,26 @@ if ($SelfTest) {
   if (-not $relaunchOk) { $ok = $false }
   Write-Host ("[selftest] relaunch args carry -File(self) + -SupersedePid(outgoing pid) + interval: " + $(if ($relaunchOk) { "OK" } else { "FAIL" }) + " [" + $joined + "]")
 
+  # Watchdog-process identity: the single-instance scan must count a real -File launch of loop-watchdog.ps1
+  # (ensure-spawn bare form, self-respawn quoted form) and must NOT count a mere command-line MENTION
+  # (a -Command diagnostic that names the script) - the false match that could suppress a spawn or force a
+  # correct watchdog to self-exit into a zero-watchdog gap.
+  $wdIdCases = @(
+    @{ name = "bare -File launch (ensure-spawn form) -> watchdog";      cl = 'powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File C:\r\loop-watchdog.ps1'; want = $true },
+    @{ name = "quoted -File launch (self-respawn form) -> watchdog";    cl = 'powershell -NoProfile -File "C:\r\loop-watchdog.ps1" -SupersedePid 100 -IntervalSeconds 300'; want = $true },
+    @{ name = "bare -File launch with trailing args -> watchdog";       cl = 'powershell -File C:\r\loop-watchdog.ps1 -ClaudeCmd claude'; want = $true },
+    @{ name = "-Command MENTION (diagnostic) -> NOT watchdog";          cl = 'powershell -NoProfile -Command "gci | ? { $_.CommandLine -like ''*loop-watchdog.ps1*'' }"'; want = $false },
+    @{ name = "substring-only -like filter text -> NOT watchdog";       cl = "powershell -Command `"Get-Process # loop-watchdog.ps1`""; want = $false },
+    @{ name = "a lane runner -File launch -> NOT watchdog";             cl = 'powershell -File C:\r\loop-runner.ps1 -Lane ops'; want = $false },
+    @{ name = "empty command line -> NOT watchdog (null-safe)";         cl = ""; want = $false }
+  )
+  foreach ($w in $wdIdCases) {
+    $got = Test-IsWatchdogProcess $w.cl
+    $pass = ($got -eq $w.want)
+    if (-not $pass) { $ok = $false }
+    Write-Host ("[selftest] wd-id " + $w.name + " -> " + $got + " (want " + $w.want + ") " + $(if ($pass) { "OK" } else { "FAIL" }))
+  }
+
   if ($ok) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
 }
 
@@ -232,7 +268,7 @@ function Write-Log([string]$msg) {
 # into a zero-watchdog gap (Select-CompetingWatchdogPids).
 try {
   $scanPids = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-    Where-Object { $_.CommandLine -like '*loop-watchdog.ps1*' } | ForEach-Object { $_.ProcessId })
+    Where-Object { Test-IsWatchdogProcess ([string]$_.CommandLine) } | ForEach-Object { $_.ProcessId })
   $competitors = @(Select-CompetingWatchdogPids $scanPids $PID $SupersedePid)
   if ($competitors.Count -gt 0) {
     Write-Log ("GUARD: another loop-watchdog is already running (PID " + ($competitors -join ", ") + "). Exiting to keep a single instance.")
