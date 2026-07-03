@@ -567,6 +567,42 @@ function Get-MissingCriticTargets {
   return $missing.ToArray()
 }
 
+# The critic injection roster (Get-CriticInjectionTargets AND the loop-prompt-critic.txt step-4 list)
+# is HARDCODED, but loop-config.json is the single source of truth for which lanes run (section E of
+# the design doc has the owner reconfigure lanes by editing config). Derive the targets the config
+# actually implies - each ENABLED lane owns BACKLOG-<name>.md as its S/A-finding sink - so a rehearsal
+# can compare intent against the hardcoded list. Null/blank-safe; ignores disabled and nameless lanes.
+function Get-ExpectedCriticTargets {
+  param($Lanes)
+  $out = New-Object System.Collections.Generic.List[string]
+  foreach ($l in @($Lanes)) {
+    if ($null -eq $l) { continue }
+    if (-not $l.enabled) { continue }
+    $n = [string]$l.name
+    if ([string]::IsNullOrWhiteSpace($n)) { continue }
+    $t = "BACKLOG-" + $n + ".md"
+    if (-not ($out -contains $t)) { $out.Add($t) }
+  }
+  return ($out.ToArray() | Sort-Object)
+}
+
+# Pure set-difference between the HARDCODED critic targets and the config-derived expectation. Returns
+# @{ UncoveredLanes = <enabled config lanes with NO hardcoded target>; StaleTargets = <hardcoded targets
+# no enabled lane backs> }. UncoveredLanes is the dangerous case: an enabled lane the critic would NEVER
+# inject into while the file-existence check (Get-MissingCriticTargets) still passes - the roster-level
+# twin of the false-PASS #760 closed. StaleTargets is benign (an intentionally disabled lane whose
+# BACKLOG is kept). Case-insensitive, null/blank-safe.
+function Get-CriticTargetRosterDrift {
+  param([string[]]$Hardcoded, [string[]]$Expected)
+  $hc = @{}; foreach ($t in @($Hardcoded)) { if (-not [string]::IsNullOrWhiteSpace($t)) { $hc[$t.ToLowerInvariant()] = $t } }
+  $ex = @{}; foreach ($t in @($Expected)) { if (-not [string]::IsNullOrWhiteSpace($t)) { $ex[$t.ToLowerInvariant()] = $t } }
+  $uncovered = New-Object System.Collections.Generic.List[string]
+  foreach ($k in $ex.Keys) { if (-not $hc.ContainsKey($k)) { $uncovered.Add($ex[$k]) } }
+  $stale = New-Object System.Collections.Generic.List[string]
+  foreach ($k in $hc.Keys) { if (-not $ex.ContainsKey($k)) { $stale.Add($hc[$k]) } }
+  return @{ UncoveredLanes = ($uncovered.ToArray() | Sort-Object); StaleTargets = ($stale.ToArray() | Sort-Object) }
+}
+
 # ---------------------------------------------------------------------------
 # Exercise the EXACT git-worktree plumbing the weekly critic uses (fetch origin/main -> worktree add
 # --detach a sibling checkout -> verify it carries its own loop-runner.ps1 -> worktree remove --force
@@ -580,18 +616,35 @@ function Get-MissingCriticTargets {
 # loop-runner.ps1 (the one-shot's target), or a worktree left behind after teardown.
 # ---------------------------------------------------------------------------
 function Invoke-CriticRehearsal {
-  param([string]$RepoRoot, [string]$Stamp, [switch]$DryRun)
+  param([string]$RepoRoot, [string]$Stamp, [switch]$DryRun, [object[]]$ConfigLanes = $null)
   $steps = New-Object System.Collections.Generic.List[string]
   $wtPath = Get-CriticWorktreePath -RepoRoot $RepoRoot -Stamp ("rehearsal-" + $Stamp)
   if (-not (Test-WorktreeIsIsolated -RepoRoot $RepoRoot -WorktreePath $wtPath)) {
     $steps.Add("FAIL: computed rehearsal worktree is not isolated from the main tree: " + $wtPath)
     return @{ ok = $false; steps = $steps; worktree = $wtPath }
   }
+  # Roster-drift gate (pure, no git): when the caller supplies loop-config.json's lanes, verify the
+  # HARDCODED critic targets still cover every ENABLED lane. This catches the section-E reconfiguration
+  # hole - an owner adds a lane to config but forgets the hardcoded roster, so the critic never injects
+  # into it while the file-existence check below still passes (the roster-level twin of #760's false PASS).
+  $rosterOk = $true
+  if ($null -ne $ConfigLanes) {
+    $expected = Get-ExpectedCriticTargets -Lanes $ConfigLanes
+    $drift = Get-CriticTargetRosterDrift -Hardcoded (Get-CriticInjectionTargets) -Expected $expected
+    if (@($drift.UncoveredLanes).Count -eq 0) {
+      $steps.Add("critic targets cover every enabled config lane [" + ($expected -join ', ') + "]: True")
+    } else {
+      $steps.Add("FAIL: enabled config lanes have NO critic injection target (update Get-CriticInjectionTargets AND loop-prompt-critic.txt): " + (@($drift.UncoveredLanes) -join ', ')); $rosterOk = $false
+    }
+    if (@($drift.StaleTargets).Count -gt 0) {
+      $steps.Add("note: critic targets no enabled config lane backs (benign if the lane was intentionally disabled): " + (@($drift.StaleTargets) -join ', '))
+    }
+  }
   if ($DryRun) {
     $steps.Add("[WHATIF] would fetch origin/main, add a detached worktree at " + $wtPath + " (git " + ((Get-WorktreeAddArgs -Path $wtPath -Ref 'origin/main') -join ' ') + "), verify it carries its own loop-runner.ps1 AND all critic injection targets [" + ((Get-CriticInjectionTargets) -join ', ') + "], then remove it (git " + ((Get-WorktreeRemoveArgs -Path $wtPath) -join ' ') + "). No git executed in dry-run.")
-    return @{ ok = $true; steps = $steps; worktree = $wtPath }
+    return @{ ok = $rosterOk; steps = $steps; worktree = $wtPath }
   }
-  $ok = $true
+  $ok = $rosterOk
   try {
     $f = Invoke-Git -RepoRoot $RepoRoot -GitArgs @("fetch", "origin", "main", "--quiet")
     $steps.Add("fetch origin main: " + $(if ($f.ok) { "ok" } else { "FAIL " + $f.out })); if (-not $f.ok) { $ok = $false }
@@ -701,6 +754,30 @@ if ($SelfTest) {
     Assert-L "a removed target is reported missing (rehearsal would FAIL)" ($miss.Count -eq 1 -and $miss[0] -eq 'BACKLOG-seo.md')
     Assert-L "missing-targets on a blank root reports ALL targets (never silently passes)" ((Get-MissingCriticTargets -Root '' -Targets $targets).Count -eq 6)
     Assert-L "missing-targets ignores blank entries in the target list (null-safe)" ((Get-MissingCriticTargets -Root $tgtRoot -Targets @('', $null)).Count -eq 0)
+    # J2) Roster drift: the hardcoded critic targets must cover every ENABLED config lane, else a config
+    #     edit (section E) silently strands a live lane with no critic sink while J's file check passes.
+    $jLanes = @(
+      [pscustomobject]@{ name = "ops";  enabled = $true },
+      [pscustomobject]@{ name = "data"; enabled = $true },
+      [pscustomobject]@{ name = "seo";  enabled = $false }
+    )
+    $jExpected = Get-ExpectedCriticTargets -Lanes $jLanes
+    Assert-L "expected targets follow ENABLED lanes only (disabled 'seo' dropped)" (($jExpected -join ',') -eq 'BACKLOG-data.md,BACKLOG-ops.md')
+    Assert-L "expected targets ignore null/blank-named lanes (null-safe)" ((Get-ExpectedCriticTargets -Lanes @($null, [pscustomobject]@{ name = ''; enabled = $true })).Count -eq 0)
+    $jNoDrift = Get-CriticTargetRosterDrift -Hardcoded @('BACKLOG-data.md', 'BACKLOG-ops.md') -Expected $jExpected
+    Assert-L "no drift when hardcoded == expected (order/case-insensitive)" ((@($jNoDrift.UncoveredLanes).Count -eq 0) -and (@($jNoDrift.StaleTargets).Count -eq 0))
+    $jNewLane = Get-CriticTargetRosterDrift -Hardcoded @('BACKLOG-ops.md') -Expected @('BACKLOG-ops.md', 'BACKLOG-newlane.md')
+    Assert-L "an enabled lane with no hardcoded target is reported UNCOVERED (rehearsal FAILs)" ((@($jNewLane.UncoveredLanes) -join ',') -eq 'BACKLOG-newlane.md')
+    $jDisabled = Get-CriticTargetRosterDrift -Hardcoded @('BACKLOG-ops.md', 'BACKLOG-gone.md') -Expected @('BACKLOG-ops.md')
+    Assert-L "a hardcoded target no enabled lane backs is STALE, not uncovered (benign)" ((@($jDisabled.UncoveredLanes).Count -eq 0) -and ((@($jDisabled.StaleTargets) -join ',') -eq 'BACKLOG-gone.md'))
+    Assert-L "roster drift is null-safe on empty inputs (never throws)" ((@((Get-CriticTargetRosterDrift -Hardcoded @() -Expected @()).UncoveredLanes).Count -eq 0))
+    # The LIVE config's enabled lanes must be fully covered by the shipped hardcoded targets (guards THIS repo).
+    $jLive = $null
+    try { if (Test-Path $ConfigPath) { $jLive = @((Get-Content -Raw -Encoding UTF8 -Path $ConfigPath | ConvertFrom-Json).lanes) } } catch {}
+    if ($null -ne $jLive) {
+      $jLiveDrift = Get-CriticTargetRosterDrift -Hardcoded (Get-CriticInjectionTargets) -Expected (Get-ExpectedCriticTargets -Lanes $jLive)
+      Assert-L "SHIPPED critic targets cover every enabled lane in loop-config.json (no live drift)" (@($jLiveDrift.UncoveredLanes).Count -eq 0)
+    }
     # J) The git arg builders emit the exact isolating command (detached add, forced remove).
     $addArgs = Get-WorktreeAddArgs -Path $wt -Ref "origin/main"
     Assert-L "worktree add is detached at the given ref" (($addArgs -join " ") -eq ("worktree add --detach " + $wt + " origin/main"))
@@ -829,7 +906,12 @@ if ($SelfTest) {
 # ---------------------------------------------------------------------------
 if ($RehearseCritic) {
   Write-Launcher ("critic-rehearsal: exercising fetch/worktree-add/verify/teardown (no Claude one-shot)" + $(if ($WhatIf) { " [dry-run]" } else { "" }) + ".")
-  $reh = Invoke-CriticRehearsal -RepoRoot $repoRoot -Stamp $launchStamp -DryRun:$WhatIf
+  # Best-effort config read (this path runs before the main config load) so the rehearsal can also
+  # verify the hardcoded critic targets still cover every enabled lane. Unreadable config -> null ->
+  # roster check skipped (the git plumbing is still fully rehearsed; config health is a separate gate).
+  $rehLanes = $null
+  try { if (Test-Path $ConfigPath) { $rehLanes = @((Get-Content -Raw -Encoding UTF8 -Path $ConfigPath | ConvertFrom-Json).lanes) } } catch {}
+  $reh = Invoke-CriticRehearsal -RepoRoot $repoRoot -Stamp $launchStamp -DryRun:$WhatIf -ConfigLanes $rehLanes
   foreach ($s in $reh.steps) { Write-Launcher ("  " + $s) }
   if ($reh.ok) { Write-Launcher "[REHEARSE-CRITIC] PASS (critic plumbing sound; no worktree leaked)."; exit 0 }
   Write-Launcher "[REHEARSE-CRITIC] FAIL (see steps above; critic would break on plumbing)."; exit 1
@@ -1480,7 +1562,7 @@ if ($criticDue -and (Test-Path $criticPrompt)) {
   # ~1-day retry (the block below) instead of silently blackholing the critic season. In -WhatIf the
   # rehearsal is itself a dry-run (prints its plan, runs no git); the real fire then falls into its own
   # plan-only branch, so a dry-run shows the full wiring: rehearse -> (pass) -> fire.
-  $preflight = Invoke-CriticRehearsal -RepoRoot $repoRoot -Stamp $launchStamp -DryRun:$WhatIf
+  $preflight = Invoke-CriticRehearsal -RepoRoot $repoRoot -Stamp $launchStamp -DryRun:$WhatIf -ConfigLanes @($cfg.lanes)
   foreach ($ln in $preflight.steps) { Write-Launcher ("critic pre-flight: " + $ln) }
   # Run the critic in a throwaway worktree so its checkout/commit/push never shares an index with
   # the ops persistent runner in the main tree. The critic prompt is fed by absolute path from the
