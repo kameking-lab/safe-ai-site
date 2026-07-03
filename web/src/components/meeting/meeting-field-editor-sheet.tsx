@@ -1,21 +1,33 @@
 "use client";
 
 /**
- * S1（打合せ用紙 直接操作UI・第一弾〜第四弾）: 欄タップで開く入力エディタ。
+ * S1（打合せ用紙 直接操作UI・第一弾〜第六弾）: 欄タップで開く入力エディタ。
  * KYの FieldEditorSheet と同型（欄タップ＝タップ標的／入力は専用UIで行う／
  * 「次の欄へ」で紙の記入順を辿る／入力フォントは16px以上）。
  * 第三弾で各社マトリクス7部位のうち会社名/階層・作業内容・使用機械・リスク（重大性/可能性）・
  * 安全衛生指示事項・協力会社責任者・実績人員を追加。第四弾で残り3部位（必要資格・予想災害＝
- * タグ選択、予定人員＝固定プルダウン）を追加し7部位すべてに対応。
+ * タグ選択、予定人員＝固定プルダウン）を追加し7部位すべてに対応。第六弾で点検項目8カテゴリ
+ * （カテゴリ内の各項目を44px四方のtri-state（○/×/－）ボタンで直接タップ切替。テキスト入力が
+ * 無いためタッチ操作のみで完結し、他の型と異なりオートフォーカス対象外）を追加。
  */
 
 import { useEffect, useRef } from "react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import { MeetingTagField } from "@/components/meeting/meeting-tag-field";
-import { CONTRACTOR_TYPES, MEETING_COUNT_OPTIONS, MEETING_WEATHER_OPTIONS, PRIORITY_LABEL, type ContractorType, type MeetingRecord } from "@/lib/meeting/schema";
+import { STATUS_MARK } from "@/components/meeting/meeting-print-sheet";
+import {
+  CONTRACTOR_TYPES,
+  MEETING_COUNT_OPTIONS,
+  MEETING_WEATHER_OPTIONS,
+  PRIORITY_LABEL,
+  type ChecklistStatus,
+  type ContractorType,
+  type MeetingRecord,
+} from "@/lib/meeting/schema";
 import {
   getMeetingPaperFieldDef,
   nextMeetingPaperFieldKey,
+  setChecklistItemStatus,
   setContractorCompanyField,
   setContractorPlannedCountField,
   setContractorRiskField,
@@ -23,6 +35,12 @@ import {
   type MeetingPaperFieldKey,
 } from "@/lib/meeting/paper-fields";
 import { MONTH_OPTIONS, dayOptions, yearOptions } from "@/lib/ky/pulldown-options";
+
+const CHECKLIST_STATUS_OPTIONS: { status: ChecklistStatus; label: string; on: string }[] = [
+  { status: "ok", label: "該当・実施", on: "bg-emerald-600 text-white" },
+  { status: "ng", label: "要是正", on: "bg-rose-600 text-white" },
+  { status: "na", label: "該当無", on: "bg-slate-400 text-white" },
+];
 
 export type MeetingFieldEditorSheetProps = {
   fieldKey: MeetingPaperFieldKey;
@@ -40,6 +58,7 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
   const next = nextMeetingPaperFieldKey(fieldKey, record);
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const contractorRow = def.contractorId ? record.contractors.find((c) => c.id === def.contractorId) : undefined;
+  const checklistCategory = def.checklistCategoryKey ? record.checklist.find((c) => c.key === def.checklistCategoryKey) : undefined;
 
   // 開いたら最初の入力へフォーカス（キーボード/音声にすぐ入れる）。
   useEffect(() => {
@@ -250,6 +269,32 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
             <span className="text-slate-400">→</span>
             <span className="rounded bg-slate-200 px-2 py-1 text-sm font-bold text-slate-700">{PRIORITY_LABEL[contractorRow.risk.priority]}</span>
           </div>
+        )}
+
+        {def.type === "checklist" && checklistCategory && (
+          <ul className="space-y-1.5">
+            {checklistCategory.items.map((it) => (
+              <li key={it.key} className="flex items-center justify-between gap-2">
+                <span className="min-w-0 flex-1 text-sm text-slate-700">{it.label}</span>
+                <span className="flex shrink-0 gap-1">
+                  {CHECKLIST_STATUS_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.status}
+                      type="button"
+                      aria-label={`${it.label}: ${opt.label}`}
+                      aria-pressed={it.status === opt.status}
+                      onClick={() => patch(setChecklistItemStatus(record, checklistCategory.key, it.key, opt.status))}
+                      className={`min-h-[44px] min-w-[44px] rounded-lg text-base font-bold ${
+                        it.status === opt.status ? opt.on : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                      }`}
+                    >
+                      {STATUS_MARK[opt.status]}
+                    </button>
+                  ))}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
 
         <div className="mt-4 flex items-center justify-end gap-2">

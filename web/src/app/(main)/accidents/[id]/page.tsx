@@ -236,7 +236,7 @@ export default async function AccidentDetailPage({
                 </div>
                 <Link
                   href={`/accidents/${c.id}`}
-                  className="mt-1 block text-xs font-semibold text-slate-900 hover:text-emerald-700 hover:underline"
+                  className="mt-1 flex min-h-[44px] items-center text-xs font-semibold text-slate-900 hover:text-emerald-700 hover:underline"
                 >
                   {c.title}
                 </Link>
@@ -246,7 +246,7 @@ export default async function AccidentDetailPage({
           </ul>
           <Link
             href="/accidents"
-            className="mt-3 inline-block text-xs font-bold text-emerald-700 hover:underline"
+            className="mt-3 inline-flex min-h-[44px] items-center px-2 text-xs font-bold text-emerald-700 hover:underline"
           >
             事故DBに戻る →
           </Link>

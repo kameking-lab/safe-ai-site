@@ -34,7 +34,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { PaperStage, type PaperStageHandle } from "@/components/ky-paper/paper-stage";
 import { MeetingFieldEditorSheet } from "@/components/meeting/meeting-field-editor-sheet";
-import { contractorFieldKey, emptyMeetingPaperFieldKeys, firstEmptyMeetingPaperFieldKey, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
+import { contractorFieldKey, deliveryFieldKey, emptyMeetingPaperFieldKeys, firstEmptyMeetingPaperFieldKey, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
 
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
@@ -74,10 +74,10 @@ export function MeetingPaperView() {
   const [history, setHistory] = useState<MeetingHistory | null>(null);
   // 「前回を複製」を上部にも出すための判定（端末に保存済みの打合せ書があるときだけ）。
   const [hasLatest, setHasLatest] = useState(false);
-  // S1（打合せ用紙 直接操作UI・第一弾〜第三弾）: 用紙キャンバス（β）。KYのF1と同じ方式で
+  // S1（打合せ用紙 直接操作UI・第一弾〜第六弾）: 用紙キャンバス（β）。KYのF1と同じ方式で
   // 既定はオフ（?canvas=1 または「🗺 キャンバス(β)」ボタンで切替）。ヘッダー7欄・明日のイベント5欄・
-  // 統括安全責任者コメント・各社マトリクス7部位（会社名/階層・作業内容・使用機械・リスク・
-  // 安全衛生指示事項・協力会社責任者・実績人員）に対応。
+  // 統括安全責任者コメント・各社マトリクス10部位・搬入出（動的行）・点検項目8カテゴリに対応。
+  // 残＝AI提案のエディタ内統合・履歴サジェストのcanvas内提供・既定切替（β外し）。
   const [canvasMode, setCanvasMode] = useState(false);
   const [activeFieldKey, setActiveFieldKey] = useState<MeetingPaperFieldKey | null>(null);
   const stageRef = useRef<PaperStageHandle>(null);
@@ -168,6 +168,14 @@ export function MeetingPaperView() {
     const newRow = emptyContractorRow(type, null);
     setRecord((prev) => ({ ...prev, contractors: [...prev.contractors, newRow] }));
     setActiveFieldKey(contractorFieldKey(newRow.id, "company"));
+  }, []);
+
+  // S1（第五弾）: 用紙キャンバスβの「＋搬入出行を追加」ホットスポット。追加した行の
+  // 「物」欄をそのまま開く（各社マトリクス行追加(第三弾)と同じ「そのまま開く」作法）。
+  const handleAddDeliveryRow = useCallback(() => {
+    const newRow = emptyDeliveryRow();
+    setRecord((prev) => ({ ...prev, deliveries: [...prev.deliveries, newRow] }));
+    setActiveFieldKey(deliveryFieldKey(newRow.id, "item"));
   }, []);
 
   const machines = useMemo(() => aggregateMachines(record.contractors), [record.contractors]);
@@ -343,6 +351,7 @@ export function MeetingPaperView() {
                 activeKey: activeFieldKey,
                 emptyKeys: emptyPaperFieldKeys,
                 onAddContractorRow: handleAddContractorRow,
+                onAddDeliveryRow: handleAddDeliveryRow,
               }}
             />
           </div>

@@ -24,12 +24,11 @@ import {
   buildSearchIndex,
   searchItems,
   CATEGORY_META,
+  SEARCH_CATEGORIES,
   type SearchItem,
   type SearchCategory,
 } from '@/lib/search-index';
 import { trackEvent } from '@/components/Analytics';
-
-const CATEGORIES: SearchCategory[] = ['law', 'faq', 'precedent', 'notice', 'chemical', 'equipment', 'education', 'accident', 'glossary', 'sign'];
 
 // 空クエリ時に表示する主要ショートカット（UX-007: モバイル検索とPC Ctrl+K の機能を統一）
 type Shortcut = {
@@ -207,7 +206,7 @@ export function CommandPalette({ onClose }: Props) {
           >
             全て
           </button>
-          {CATEGORIES.map((cat) => {
+          {SEARCH_CATEGORIES.map((cat) => {
             const meta = CATEGORY_META[cat];
             const active = activeCategory === cat;
             return (

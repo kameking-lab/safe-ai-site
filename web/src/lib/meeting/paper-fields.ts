@@ -13,12 +13,24 @@
  * タグ選択、plannedCount=予定人員は固定プルダウン）を追加し、7部位すべてcanvas対応が完了。
  * 印刷シートの列順（業者→作業内容→使用機械→必要資格→予定→予想災害→重/可→安全衛生指示事項→
  * 責任者→実績）に合わせ machines と risk の間に挿入。appendNote（印刷シート非掲載）のみ対象外。
- * 搬入出・点検項目は未着手。
+ * 第五弾で搬入出（deliveries、動的行・id始まりのキー "delivery.<id>.<part>"。物/時刻/場所の3部位。
+ * 各社マトリクスと同型だがタグ/プルダウンが無いため全部位type="text"）を追加。記入順チェーンは
+ * その他(free)の次→搬入出1行目→…→最終行の次→統括安全責任者コメント、に挿入。
+ * 第六弾で点検項目8カテゴリ（カテゴリ単位のキー "checklist.<categoryKey>"。カテゴリ内の項目は
+ * 固定構造＝行の追加・削除・並び替えを持たないため、危険行/各社マトリクスのようなid採番は不要で
+ * カテゴリのkeyをそのまま識別子に使う）を追加。記入順チェーンは統括安全責任者コメントの次→
+ * 1カテゴリ目→…→最終カテゴリの次→次欄なし（用紙全体の記入順チェーンの終端）。○/×/－は既定値(na)が
+ * 「該当無」という正当な回答でもあるため、リスク欄(重大性・可能性)と同じ扱いで未記入ハイライト・
+ * zoom-to-cellの対象外にする（誤って「未記入」と誤認させない）。
+ * AI提案のエディタ統合・履歴サジェスト・既定切替は未着手。
  */
 import {
   computePriority,
+  DEFAULT_CHECKLIST,
+  type ChecklistStatus,
   type ContractorType,
   type MeetingContractorRow,
+  type MeetingDeliveryRow,
   type MeetingRecord,
 } from "@/lib/meeting/schema";
 
@@ -72,7 +84,21 @@ export type MeetingContractorTagPart = "qualifications" | "predictedDisasters";
 
 export type MeetingContractorFieldKey = `contractor.${string}.${MeetingContractorFieldPart}`;
 
-export type MeetingPaperFieldKey = MeetingPaperStaticFieldKey | MeetingContractorFieldKey;
+/** 搬入出予定1行分の3部位(id始まりのキー。行の追加に追従する)。 */
+export type MeetingDeliveryFieldPart = "item" | "time" | "place";
+
+export const DELIVERY_FIELD_PARTS: readonly MeetingDeliveryFieldPart[] = ["item", "time", "place"];
+
+export type MeetingDeliveryFieldKey = `delivery.${string}.${MeetingDeliveryFieldPart}`;
+
+/** 点検項目1カテゴリぶんのキー(カテゴリkeyそのものを識別子に使う。項目は固定構造のため個別idは不要)。 */
+export type MeetingChecklistFieldKey = `checklist.${string}`;
+
+export type MeetingPaperFieldKey =
+  | MeetingPaperStaticFieldKey
+  | MeetingContractorFieldKey
+  | MeetingDeliveryFieldKey
+  | MeetingChecklistFieldKey;
 
 export type MeetingPaperFieldDef = {
   key: MeetingPaperFieldKey;
@@ -88,7 +114,8 @@ export type MeetingPaperFieldDef = {
     | "contractorCompany"
     | "contractorRisk"
     | "contractorTags"
-    | "contractorPlannedCount";
+    | "contractorPlannedCount"
+    | "checklist";
   /** InputWithVoice/TextareaWithVoice を使うか（音声入力） */
   voice?: boolean;
   placeholder?: string;
@@ -102,6 +129,8 @@ export type MeetingPaperFieldDef = {
   contractorId?: string;
   /** type="contractorTags" のとき、対象の配列部位（qualifications/predictedDisasters） */
   tagField?: MeetingContractorTagPart;
+  /** type="checklist" のときの対象カテゴリkey */
+  checklistCategoryKey?: string;
   /** 記入順の次フィールド（エディタの「次の欄へ」送り）。静的欄のみ。各社マトリクスは nextMeetingPaperFieldKey で解決。 */
   next?: MeetingPaperFieldKey;
 };
@@ -243,6 +272,8 @@ export const MEETING_PAPER_FIELDS: Record<MeetingPaperStaticFieldKey, MeetingPap
 };
 
 const CONTRACTOR_FIELD_KEY_RE = /^contractor\.([^.]+)\.(company|workContent|machines|qualifications|plannedCount|predictedDisasters|risk|safetyInstructions|responsibleName|actualCount)$/;
+const DELIVERY_FIELD_KEY_RE = /^delivery\.([^.]+)\.(item|time|place)$/;
+const CHECKLIST_FIELD_KEY_RE = /^checklist\.([^.]+)$/;
 
 /** 各社マトリクスの欄キー組み立て（行id指定）。 */
 export function contractorFieldKey(id: string, part: MeetingContractorFieldPart): MeetingContractorFieldKey {
@@ -256,13 +287,43 @@ export function parseContractorFieldKey(key: string): { id: string; part: Meetin
   return { id: m[1]!, part: m[2] as MeetingContractorFieldPart };
 }
 
+/** 搬入出予定の欄キー組み立て（行id指定）。 */
+export function deliveryFieldKey(id: string, part: MeetingDeliveryFieldPart): MeetingDeliveryFieldKey {
+  return `delivery.${id}.${part}`;
+}
+
+/** 搬入出予定の欄キー分解。静的欄キーや不正な文字列には null を返す。 */
+export function parseDeliveryFieldKey(key: string): { id: string; part: MeetingDeliveryFieldPart } | null {
+  const m = DELIVERY_FIELD_KEY_RE.exec(key);
+  if (!m) return null;
+  return { id: m[1]!, part: m[2] as MeetingDeliveryFieldPart };
+}
+
+/** 点検項目カテゴリの欄キー組み立て（カテゴリkey指定）。 */
+export function checklistFieldKey(categoryKey: string): MeetingChecklistFieldKey {
+  return `checklist.${categoryKey}`;
+}
+
+/** 点検項目カテゴリの欄キー分解。静的欄キーや不正な文字列には null を返す。 */
+export function parseChecklistFieldKey(key: string): { categoryKey: string } | null {
+  const m = CHECKLIST_FIELD_KEY_RE.exec(key);
+  if (!m) return null;
+  return { categoryKey: m[1]! };
+}
+
 export function isMeetingPaperFieldKey(key: string): key is MeetingPaperFieldKey {
   if ((MEETING_PAPER_FIELD_ORDER as readonly string[]).includes(key)) return true;
-  return parseContractorFieldKey(key) !== null;
+  if (parseContractorFieldKey(key) !== null) return true;
+  if (parseDeliveryFieldKey(key) !== null) return true;
+  return parseChecklistFieldKey(key) !== null;
 }
 
 function findContractor(r: MeetingRecord, id: string): MeetingContractorRow | undefined {
   return r.contractors.find((c) => c.id === id);
+}
+
+function findDelivery(r: MeetingRecord, id: string): MeetingDeliveryRow | undefined {
+  return r.deliveries.find((d) => d.id === id);
 }
 
 type ContractorTextPart = "workContent" | "machines" | "safetyInstructions" | "responsibleName" | "actualCount";
@@ -381,10 +442,57 @@ function buildContractorFieldDef(id: string, part: MeetingContractorFieldPart): 
   }
 }
 
-/** フィールド定義の解決（静的欄・各社マトリクスの両方に対応する唯一の窓口）。 */
+const DELIVERY_FIELD_LABEL: Record<MeetingDeliveryFieldPart, string> = { item: "搬入出（物）", time: "時刻", place: "場所" };
+const DELIVERY_FIELD_PLACEHOLDER: Record<MeetingDeliveryFieldPart, string> = { item: "例: 生コン", time: "例: 9:00", place: "例: 東側ゲート" };
+
+function deliveryTextGet(id: string, part: MeetingDeliveryFieldPart) {
+  return (r: MeetingRecord): string => findDelivery(r, id)?.[part] ?? "";
+}
+
+function deliveryTextSet(id: string, part: MeetingDeliveryFieldPart) {
+  return (r: MeetingRecord, v: string): Partial<MeetingRecord> => ({
+    deliveries: r.deliveries.map((d) => (d.id === id ? { ...d, [part]: v } : d)),
+  });
+}
+
+/** 搬入出予定1行分のフィールド定義（物/時刻/場所の3部位）を組み立てる。 */
+function buildDeliveryFieldDef(id: string, part: MeetingDeliveryFieldPart): MeetingPaperFieldDef {
+  return {
+    key: deliveryFieldKey(id, part),
+    label: DELIVERY_FIELD_LABEL[part],
+    type: "text",
+    voice: part === "item",
+    placeholder: DELIVERY_FIELD_PLACEHOLDER[part],
+    get: deliveryTextGet(id, part),
+    set: deliveryTextSet(id, part),
+    isEmpty: (r) => (findDelivery(r, id)?.[part] ?? "").trim() === "",
+  };
+}
+
+/** カテゴリkey→標準ラベル（公式8カテゴリぶん。カスタム/クラウド取込のカテゴリは汎用ラベルにフォールバック）。 */
+const CHECKLIST_CATEGORY_LABEL: Record<string, string> = Object.fromEntries(DEFAULT_CHECKLIST.map((c) => [c.key, c.label]));
+
+/** 点検項目1カテゴリぶんのフィールド定義を組み立てる。 */
+function buildChecklistFieldDef(categoryKey: string): MeetingPaperFieldDef {
+  const label = CHECKLIST_CATEGORY_LABEL[categoryKey] ?? "点検項目";
+  return {
+    key: checklistFieldKey(categoryKey),
+    label: `点検（${label}）`,
+    type: "checklist",
+    checklistCategoryKey: categoryKey,
+    // 既定値(na=該当無)が正当な回答でもあるため、リスク欄(重大性・可能性)と同じくハイライト対象外。
+    isEmpty: () => false,
+  };
+}
+
+/** フィールド定義の解決（静的欄・各社マトリクス・搬入出・点検項目の全てに対応する唯一の窓口）。 */
 export function getMeetingPaperFieldDef(key: MeetingPaperFieldKey): MeetingPaperFieldDef {
   const c = parseContractorFieldKey(key);
   if (c) return buildContractorFieldDef(c.id, c.part);
+  const d = parseDeliveryFieldKey(key);
+  if (d) return buildDeliveryFieldDef(d.id, d.part);
+  const chk = parseChecklistFieldKey(key);
+  if (chk) return buildChecklistFieldDef(chk.categoryKey);
   return MEETING_PAPER_FIELDS[key as MeetingPaperStaticFieldKey];
 }
 
@@ -392,23 +500,51 @@ export function getMeetingPaperFieldDef(key: MeetingPaperFieldKey): MeetingPaper
  * 記入順の「次の欄」を返す（エディタの「次の欄へ」送り用）。各社マトリクスは record.contractors の
  * 並び順に追従するため、作成担当者(author)の次は1行目のcompany欄へ、最終行の最終部位の次は
  * 安全大会(safetyMeeting)へ折り返す。行が1件も無い場合は author→safetyMeeting に直接続く。
+ * 搬入出（deliveries）も同様に record.deliveries の並び順に追従し、その他(free)の次は
+ * 1行目のitem欄へ、最終行の最終部位の次は統括安全責任者コメントへ折り返す。行が1件も無い場合は
+ * free→supervisorComment に直接続く。
+ * 点検項目（checklist）は record.checklist の並び順に追従し、統括安全責任者コメントの次は
+ * 1カテゴリ目へ、最終カテゴリの次は次欄なし（用紙全体の記入順チェーンの終端）。カテゴリが1件も
+ * 無い場合は supervisorComment で従来どおりチェーンが終わる。
  */
 export function nextMeetingPaperFieldKey(key: MeetingPaperFieldKey, record: MeetingRecord): MeetingPaperFieldKey | undefined {
   const c = parseContractorFieldKey(key);
-  if (!c) {
-    const staticDef = MEETING_PAPER_FIELDS[key as MeetingPaperStaticFieldKey];
-    if (key === "author" && record.contractors.length > 0) {
-      return contractorFieldKey(record.contractors[0]!.id, CONTRACTOR_FIELD_PARTS[0]!);
+  if (c) {
+    const partIndex = CONTRACTOR_FIELD_PARTS.indexOf(c.part);
+    if (partIndex < CONTRACTOR_FIELD_PARTS.length - 1) {
+      return contractorFieldKey(c.id, CONTRACTOR_FIELD_PARTS[partIndex + 1]!);
     }
-    return staticDef.next;
+    const rowIndex = record.contractors.findIndex((row) => row.id === c.id);
+    const nextRow = rowIndex >= 0 ? record.contractors[rowIndex + 1] : undefined;
+    return nextRow ? contractorFieldKey(nextRow.id, CONTRACTOR_FIELD_PARTS[0]!) : "safetyMeeting";
   }
-  const partIndex = CONTRACTOR_FIELD_PARTS.indexOf(c.part);
-  if (partIndex < CONTRACTOR_FIELD_PARTS.length - 1) {
-    return contractorFieldKey(c.id, CONTRACTOR_FIELD_PARTS[partIndex + 1]!);
+  const d = parseDeliveryFieldKey(key);
+  if (d) {
+    const partIndex = DELIVERY_FIELD_PARTS.indexOf(d.part);
+    if (partIndex < DELIVERY_FIELD_PARTS.length - 1) {
+      return deliveryFieldKey(d.id, DELIVERY_FIELD_PARTS[partIndex + 1]!);
+    }
+    const rowIndex = record.deliveries.findIndex((row) => row.id === d.id);
+    const nextRow = rowIndex >= 0 ? record.deliveries[rowIndex + 1] : undefined;
+    return nextRow ? deliveryFieldKey(nextRow.id, DELIVERY_FIELD_PARTS[0]!) : "supervisorComment";
   }
-  const rowIndex = record.contractors.findIndex((row) => row.id === c.id);
-  const nextRow = rowIndex >= 0 ? record.contractors[rowIndex + 1] : undefined;
-  return nextRow ? contractorFieldKey(nextRow.id, CONTRACTOR_FIELD_PARTS[0]!) : "safetyMeeting";
+  const chk = parseChecklistFieldKey(key);
+  if (chk) {
+    const catIndex = record.checklist.findIndex((cat) => cat.key === chk.categoryKey);
+    const nextCat = catIndex >= 0 ? record.checklist[catIndex + 1] : undefined;
+    return nextCat ? checklistFieldKey(nextCat.key) : undefined;
+  }
+  const staticDef = MEETING_PAPER_FIELDS[key as MeetingPaperStaticFieldKey];
+  if (key === "author" && record.contractors.length > 0) {
+    return contractorFieldKey(record.contractors[0]!.id, CONTRACTOR_FIELD_PARTS[0]!);
+  }
+  if (key === "free" && record.deliveries.length > 0) {
+    return deliveryFieldKey(record.deliveries[0]!.id, DELIVERY_FIELD_PARTS[0]!);
+  }
+  if (key === "supervisorComment" && record.checklist.length > 0) {
+    return checklistFieldKey(record.checklist[0]!.key);
+  }
+  return staticDef.next;
 }
 
 /** 記入順（紙の上から下、各社マトリクスの動的挿入込み）で最初の未記入欄を返す（zoom-to-cell用）。 */
@@ -423,7 +559,7 @@ export function firstEmptyMeetingPaperFieldKey(record: MeetingRecord): MeetingPa
   return undefined;
 }
 
-/** 未記入の欄キー集合（EditableCell のハイライトに渡す）。各社マトリクスは現在の行数ぶんを含む。 */
+/** 未記入の欄キー集合（EditableCell のハイライトに渡す）。各社マトリクス・搬入出は現在の行数ぶんを含む。 */
 export function emptyMeetingPaperFieldKeys(record: MeetingRecord): Set<string> {
   const out = new Set<string>();
   for (const key of MEETING_PAPER_FIELD_ORDER) {
@@ -434,6 +570,16 @@ export function emptyMeetingPaperFieldKeys(record: MeetingRecord): Set<string> {
       const fieldKey = contractorFieldKey(c.id, part);
       if (getMeetingPaperFieldDef(fieldKey).isEmpty(record)) out.add(fieldKey);
     }
+  }
+  for (const dRow of record.deliveries) {
+    for (const part of DELIVERY_FIELD_PARTS) {
+      const fieldKey = deliveryFieldKey(dRow.id, part);
+      if (getMeetingPaperFieldDef(fieldKey).isEmpty(record)) out.add(fieldKey);
+    }
+  }
+  for (const cat of record.checklist) {
+    const fieldKey = checklistFieldKey(cat.key);
+    if (getMeetingPaperFieldDef(fieldKey).isEmpty(record)) out.add(fieldKey);
   }
   return out;
 }
@@ -482,5 +628,19 @@ export function setContractorTagsField(
 export function setContractorPlannedCountField(record: MeetingRecord, id: string, value: string): Partial<MeetingRecord> {
   return {
     contractors: record.contractors.map((c) => (c.id === id ? { ...c, plannedCount: value } : c)),
+  };
+}
+
+/** 点検項目1件のステータス(○/×/－)を更新する（エディタ・キャンバス共通で使う純粋関数。クラシック表示の inline 更新とも同型）。 */
+export function setChecklistItemStatus(
+  record: MeetingRecord,
+  categoryKey: string,
+  itemKey: string,
+  status: ChecklistStatus
+): Partial<MeetingRecord> {
+  return {
+    checklist: record.checklist.map((c) =>
+      c.key === categoryKey ? { ...c, items: c.items.map((i) => (i.key === itemKey ? { ...i, status } : i)) } : c
+    ),
   };
 }
