@@ -587,17 +587,24 @@ export function searchPartialMatches(query: string): FallbackLawSuggestion[] {
 /**
  * RAG 検索のスコアと記事数から fallback tier を決定する。
  *
- * 設計参照: 05-fallback-logic-design.md §2
+ * 設計参照: 05-fallback-logic-design.md §2 / 2026-07-03 T8（診断04）
  *
  * - Direct: score >= 0.75 かつ articles >= 2
- * - Adjacent: 0.5 <= score < 0.75、または articles == 1
+ * - Direct（トピック信号）: 就業制限・選任・教育系など curated PIN が確定的に
+ *   刺さった（hadPins）場合は score 0.7台でも direct 扱い（articles >= 2 は必須）。
+ *   PIN は e-Gov突合済みの確定ソースのため、score 不足だけで「限定的です」と
+ *   誤ってぼかすのを防ぐ（診断04 Q7: 職長教育=施行令19条直撃で score0.73 のに
+ *   adjacent誤判定・「直接的に答える条文は限定的です」の誤ヘッダが付いていた）。
+ * - Adjacent: 0.5 <= score < 0.75、または articles == 1（PIN信号なし）
  * - Out-of-Scope: score < 0.5
  */
 export function decideFallbackTier(
   normalizedScore: number,
-  articleCount: number
+  articleCount: number,
+  hadPins = false
 ): FallbackTier {
   if (normalizedScore < 0.5) return "out-of-scope";
+  if (hadPins && normalizedScore >= 0.7 && articleCount >= 2) return "direct";
   if (normalizedScore < 0.75 || articleCount <= 1) return "adjacent";
   return "direct";
 }
@@ -610,9 +617,10 @@ export function buildFallbackDecision(args: {
   query: string;
   normalizedScore: number;
   articles: LawArticle[];
+  hadPins?: boolean;
 }): FallbackDecision {
-  const { query, normalizedScore, articles } = args;
-  const tier = decideFallbackTier(normalizedScore, articles.length);
+  const { query, normalizedScore, articles, hadPins = false } = args;
+  const tier = decideFallbackTier(normalizedScore, articles.length, hadPins);
 
   if (tier === "direct") {
     return { tier, suggestions: [] };

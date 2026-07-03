@@ -31,3 +31,22 @@ describe("/court-cases/[id] 柱0 44pxタップ標的", () => {
     }
   });
 });
+
+describe("/court-cases/[id] E-E-A-T監修者バイライン", () => {
+  it("監修者バイライン（労働安全衛生コンサルタント登録260022）が/aboutへのリンクとして表示される", async () => {
+    render(await CourtCaseDetailPage({ params: Promise.resolve({ id }) }));
+    const byline = screen.getByRole("link", { name: /労働安全衛生コンサルタント（登録番号260022）/ });
+    expect(byline.getAttribute("href")).toBe("/about");
+  });
+
+  it("Person contributor が JSON-LD (WebPage) に配線されている", async () => {
+    const { container } = render(await CourtCaseDetailPage({ params: Promise.resolve({ id }) }));
+    const script = container.querySelector('script[type="application/ld+json"]');
+    expect(script).not.toBeNull();
+    const parsed = JSON.parse(script!.innerHTML) as Array<Record<string, unknown>>;
+    const webPage = parsed.find((s) => s["@type"] === "WebPage");
+    expect((webPage?.contributor as { name?: string })?.name).toBe(
+      "労働安全衛生コンサルタント（登録番号260022）"
+    );
+  });
+});

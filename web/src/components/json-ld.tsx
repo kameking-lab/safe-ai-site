@@ -338,8 +338,10 @@ export function webPageSchema(input: {
   datePublished?: string;
   dateModified?: string;
   keywords?: string[];
+  /** E-E-A-T監修者をcontributorとして付与するか（法令隣接コンテンツ向け） */
+  contributor?: boolean;
 }): Schema {
-  const { name, description, url, inLanguage = "ja", datePublished, dateModified, keywords } = input;
+  const { name, description, url, inLanguage = "ja", datePublished, dateModified, keywords, contributor } = input;
   return {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -360,6 +362,7 @@ export function webPageSchema(input: {
     ...(datePublished ? { datePublished } : {}),
     ...(dateModified ? { dateModified } : {}),
     ...(keywords && keywords.length ? { keywords: keywords.join(", ") } : {}),
+    ...(contributor ? { contributor: SUPERVISOR_PERSON } : {}),
   };
 }
 
@@ -367,7 +370,8 @@ export function webPageSchema(input: {
  * FAQPage スキーマ。/qa-knowledge のような Q&A ページで使う。
  */
 export function faqPageSchema(
-  qa: { question: string; answer: string }[]
+  qa: { question: string; answer: string }[],
+  opts?: { contributor?: boolean }
 ): Schema {
   return {
     "@context": "https://schema.org",
@@ -380,6 +384,7 @@ export function faqPageSchema(
         text: it.answer,
       },
     })),
+    ...(opts?.contributor ? { contributor: SUPERVISOR_PERSON } : {}),
   };
 }
 

@@ -9,6 +9,7 @@ import { searchPartialMatches } from "@/lib/chatbot-fallback-logic";
 import { buildAllowedCitations } from "@/lib/chatbot-prompt-builder";
 import {
   OFFICIAL_GUIDANCE_LINKS,
+  NO_HIT_NOISE_FLOOR,
   buildNoHitTemplate,
   buildNoHitGeminiPrompt,
   formatRelatedArticlesList,
@@ -88,6 +89,25 @@ describe("P1-5 該当条文無し応答パターン", () => {
     const md = formatRelatedArticlesList(many);
     const count = (md.match(/第\d+条/g) ?? []).length;
     expect(count).toBe(5);
+  });
+
+  it("T9（欠落明示）: 関連条文・関連分野が共に0件のときは『収録範囲内に該当なし』と正直に述べ、『ご案内します』と予告だけして空振りしない", () => {
+    const t = buildNoHitTemplate({
+      query: "明日の東京の天気",
+      relatedArticles: [],
+      partialMatches: [],
+      disclaimer: DISCLAIMER,
+    });
+    expect(t).toContain("直接規定する条文");
+    expect(t).toContain("特定できませんでした");
+    expect(t).toContain("収録範囲");
+    expect(t).toContain("該当する関連情報は見つかりませんでした");
+    expect(t).not.toContain("関連する可能性のある法令・一般原則をご案内します");
+  });
+
+  it("T9: NO_HIT_NOISE_FLOOR は港湾労働法ノイズ(score0.04)を除外し解雇予告の関連提示(score0.12)は残す閾値", () => {
+    expect(NO_HIT_NOISE_FLOOR).toBeGreaterThan(0.04);
+    expect(NO_HIT_NOISE_FLOOR).toBeLessThan(0.12);
   });
 
   it("関連分野（partialMatches）があれば提示する", () => {
