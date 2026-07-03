@@ -933,4 +933,36 @@
 
 **無読テスト**: `docs/third-party-reviews/scripts/breadcrumb-action-bar-analysis-panel-44px-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**10/10 PASS**（/industries/construction のパンくず2要素・/accidents/[id] のアクションバー4リンク・/accidents のMHLW実データ分析/詳細事例（参考）タブ内パネル4要素、いずれも実boundingBox≧44px）。ESM実行時に`docs/third-party-reviews/scripts/`が`web/node_modules`の外にあり`@playwright/test`が解決できない問題に遭遇したため、実行時のみ`web/`直下へ一時コピーして検証（保存先は規定どおり`docs/`配下）。
 
+---
+
+## 2026-07-04 ux-hub/court-cases-issue-color-consolidate 追加コミット（PR #852）
+
+**イテレーション頭の回収**: 自班のCI待ちPR #852(court-cases争点タグ配色一本化)がまだCI pending中でマージ不可。BACKLOG-ux-hub.mdの未着手[ ]がゼロ（全件[x]）だったため、契約に従いExplore agentへ担当route全体の柱0・色文法の未是正箇所調査を委任。
+
+**発見**: 同PRで新設された`issue-color.ts`(16分類の争点タグ配色を一覧/詳細で共有する集約モジュール)の中に「賃金・退職金」1件のみ生の`yellow-*`(`bg-yellow-100 text-yellow-800 border-yellow-200`)が残存し、サイト共通の色文法(注意・保存系はamber系、生yellowは`saved-accidents.test.tsx`等で明示的に`not.toContain("yellow-")`を検証する事実上の禁止色)から外れていた既存欠陥と判明。
+
+**修正**: `web/src/lib/court-cases/issue-color.ts`の「賃金・退職金」を`bg-amber-200 text-amber-950 border-amber-400`へ是正(既存の「過失相殺」amber-100とはシェードを変えて視覚的に区別)。ファイルが未マージのPR #852ブランチにのみ存在するため、新規ブランチではなく同ブランチへ追加コミットしてpush(mainには影響なし)。
+
+**テスト**: `issue-color.test.ts`に「生の yellow-* を使わない」回帰テスト1件追加(16分類全件を走査)。
+
+**ゲート結果（cd web、PR #852ブランチ上）**: tsc=0 / lint=0 errors / vitest 4件 pass（issue-color.test.ts）・全体2728件 pass / build成功。
+
+**残課題**: PR #852のCI(e2e/smoke)は引き続きpending。次イテレーションで緑化確認後にsquashマージ回収予定。
+
+---
+
+## 2026-07-04 ux-hub/quicktour-safetysigns-44px（PR #858）
+
+**イテレーション頭の回収**: PR #852のCIが引き続きpendingでマージ不可。BACKLOG-ux-hub.mdの未着手[ ]がゼロ（全件[x]）だったため、契約に従いExplore agentへ担当route全体の柱0未是正箇所調査を委任（上記の色文法欠陥と合わせて計5件の候補を受領、確度検証の結果3件を採用）。
+
+**修正**: 3ファイル計3パターンに`h-11 w-11`/`min-h-[44px]`を付与（純粋なクラス追加でレイアウト・遷移先・ロジック不変）。①`/features/quick-tour`のステップジャンプナビ7個（`h-8 w-8`≈32px→`h-11 w-11`）、②`/safety-signs/industry/[industry]`の標識名リンク（タップ標的無し→`min-h-[44px]`）と掲示済みチェックボックスのラベル（ネイティブ16pxのままだったが囲うlabelに`min-h-[44px] min-w-[44px]`を付与）、③`/safety-signs/sign/[id]`の業種別使用例リンク（パディング無し→`min-h-[44px]`）。既存の`safety-signs-tap-targets.test.tsx`は「戻る」リンクとチップグリッドのみ検証しており、これら個別行内リンクは回帰テストの網から漏れていたと判明。
+
+**テスト**: `quick-tour/page.test.tsx`に1件・`safety-signs-tap-targets.test.tsx`に2件追加。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 324 files + 1 skipped・2737 tests 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/quicktour-safetysigns-44px-check.mjs`（next start実機・Playwright・スマホ390×844）**20/20 PASS**。短文の行内リンク（標識名・業種名）は幅がテキスト内容に追従するため、このサイトの既存慣行どおり高さ(`min-h-[44px]`)のみを合否基準とした（チェックボックスラベルとジャンプナビの正方形ボタンのみ幅も検証）。
+
+**残課題**: PR #852・#858ともCI回収は次イテレーション。Explore調査での残存候補（issue-color.tsの生yellow是正）は本イテレーションで採用済みのため使い果たした。次回は補充の指針（無読テスト再走査・404/パンくず確認）から再着手予定。
+
 **残課題**: Explore調査での残存候補は使い果たしたため、次回は補充の指針（無読テスト再走査・404/パンくず確認）から再着手予定。

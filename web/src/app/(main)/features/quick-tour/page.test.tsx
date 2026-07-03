@@ -21,6 +21,17 @@ describe("/features/quick-tour 柱0 44pxタップ標的", () => {
     }
   });
 
+  it("進行マップ（ステップへジャンプ）の各アンカーが44px標的を満たす", () => {
+    render(<QuickTourPage />);
+    const jumpNav = screen.getByRole("navigation", { name: "ステップへジャンプ" });
+    const jumpLinks = jumpNav.querySelectorAll("a[href^='#step-']");
+    expect(jumpLinks.length).toBeGreaterThan(0);
+    for (const link of jumpLinks) {
+      expect(link.className).toContain("h-11");
+      expect(link.className).toContain("w-11");
+    }
+  });
+
   it("下部CTAの2リンクが min-h-[44px] を満たす", () => {
     render(<QuickTourPage />);
     expect(screen.getByRole("link", { name: /機能一覧で詳しく見る/ }).className).toContain(
