@@ -98,7 +98,7 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 68, topic: "騒音", question: "気積・採光・換気・温度の規定は？", gold: [{ lawShort: "安衛則", articleNum: "第600条" }, { lawShort: "安衛則", articleNum: "第601条" }, { lawShort: "安衛則", articleNum: "第604条" }, { lawShort: "安衛則", articleNum: "第606条" }] },
   { id: 69, topic: "ボイラー", question: "圧力容器の定期検査は？", gold: [{ lawShort: "ボイラー則", articleNum: "第67条" }, { lawShort: "ボイラー則", articleNum: "第88条" }, { lawShort: "ボイラー則", articleNum: "第94条" }] },
   { id: 70, topic: "VDT", question: "情報機器作業（VDT作業）の指針は？", gold: [{ lawShort: "VDTガイドライン", articleNum: "第1" }, { lawShort: "VDTガイドライン", articleNum: "第2" }, { lawShort: "VDTガイドライン", articleNum: "第3" }, { lawShort: "VDTガイドライン", articleNum: "第4" }] },
-  { id: 71, topic: "重量物", question: "重量物取扱いの腰痛予防は？", gold: [{ lawShort: "女性則", articleNum: "第3条" }, { lawShort: "年少者則", articleNum: "第8条" }] },
+  { id: 71, topic: "重量物", question: "重量物取扱いの腰痛予防は？", gold: [{ lawShort: "女性則", articleNum: "第3条" }, { lawShort: "年少者則", articleNum: "第7条" }] },
   { id: 72, topic: "高圧", question: "高気圧作業の作業主任者は？", gold: [{ lawShort: "高圧則", articleNum: "第10条" }] },
 
   // H. 作業環境測定・SDS (73-78)
@@ -122,7 +122,7 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 86, topic: "労基", question: "法定休日は週何日？", gold: [{ lawShort: "労基法", articleNum: "第35条" }] },
   { id: 87, topic: "労基", question: "36協定の根拠条文は？", gold: [{ lawShort: "労基法", articleNum: "第36条" }] },
   { id: 88, topic: "労基", question: "時間外労働の割増賃金は？", gold: [{ lawShort: "労基法", articleNum: "第37条" }] },
-  { id: 89, topic: "労基", question: "年少者の深夜業の制限は？", gold: [{ lawShort: "労基法", articleNum: "第61条" }, { lawShort: "年少者労働基準規則", articleNum: "第3条" }] },
+  { id: 89, topic: "労基", question: "年少者の深夜業の制限は？", gold: [{ lawShort: "労基法", articleNum: "第61条" }, { lawShort: "年少者労働基準規則", articleNum: "第5条" }] },
   { id: 90, topic: "労基", question: "業務上負傷の療養補償は？", gold: [{ lawShort: "労基法", articleNum: "第75条" }] },
   { id: 91, topic: "育介", question: "育児休業の取得要件は？", gold: [{ lawShort: "育介法", articleNum: "第5条" }, { lawShort: "育介法", articleNum: "第2条" }] },
   { id: 92, topic: "育介", question: "介護休業は何日まで？", gold: [{ lawShort: "育介法", articleNum: "第11条" }] },
