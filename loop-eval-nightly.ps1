@@ -17,11 +17,13 @@
   this at the tail of every iteration (loop-prompt-ops.txt step 5.7). The per-night guard makes every
   call after the day's first a fast no-op, so a ~195s ops cadence still measures exactly once/day.
 
-  Idempotency = the day's daily file exists. The guard is the LOAD-BEARING budget control: the daily
-  marker is written on BOTH a successful measure AND a definitive eval failure (a failure where the
-  eval process actually started), so a transient prod blip cannot make the ops loop re-hammer the
-  prod Gemini budget every 195s for the rest of the day. A pure setup failure (web/ not installed)
-  writes NO marker and simply retries next call, since no requests were spent.
+  Idempotency = the day has a TERMINAL daily record. The guard is the LOAD-BEARING budget control: a
+  terminal marker is written on a successful measure, on a parseable-but-incomplete measure, AND on a
+  no-report failure once its bounded retries (-MaxEvalAttempts, default 3) are exhausted - so a transient
+  prod blip cannot make the ops loop re-hammer the prod Gemini budget every 195s for the rest of the day.
+  A no-report failure with retries REMAINING writes a NON-terminal marker so the next ops tick tries again
+  (O18-a's sibling fix: a single 02:xx cold-start/deploy/DNS blip no longer costs the whole day's data).
+  A pure setup failure (web/ not installed) writes NO marker and simply retries next call, no requests spent.
 
   Outputs (all gitignored, main tree only - so this never dirties the ops clean-tree contract nor
   races the ops runner's git; a committed snapshot for /about is O18(b)):
@@ -50,6 +52,15 @@
 .PARAMETER RepoPath
   Main-tree repo root that owns web/ (default = this script's dir).
 
+.PARAMETER MaxEvalAttempts
+  How many no-report HARD failures are tolerated per calendar day before the day is burned (default 3).
+  A no-report failure (node/vitest wrote nothing parseable - typically a prod cold start, a deploy in
+  flight, or a DNS blip at the one 02:xx attempt) is NOT a spent measurement, so burning the whole day on
+  the first one is the silent data loss this lane exists to kill. Each ops tick retries until a parseable
+  report lands OR attempts reach this cap; only then is a terminal marker written. A parseable report
+  (success OR incomplete) terminates the day immediately regardless. Bounds worst-case wasted prod Gemini
+  budget on a persistently-broken day at MaxEvalAttempts x 23 questions.
+
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-eval-nightly.ps1
 
@@ -62,6 +73,7 @@ param(
   [double]$Target = 0.80,
   [string]$OutDir = "",
   [string]$RepoPath = "",
+  [int]$MaxEvalAttempts = 3,
   [switch]$WhatIf,
   [switch]$SelfTest
 )
@@ -83,10 +95,26 @@ function Get-NightlyDailyPath {
   return (Join-Path $Dir ($Stamp + ".json"))
 }
 
-# The budget guard: has today's measurement already run? Existence of the daily file is the whole test.
+# The budget guard: is the day DONE? A daily marker exists AND it is terminal. Terminal means one of:
+#   - a real measurement (ok=true), complete or incomplete - the night's 23Q actually ran; or
+#   - a no-report failure (ok=false) whose bounded retries are exhausted (attempts >= MaxAttempts).
+# A no-report failure with retries remaining (attempts < MaxAttempts) is NON-terminal => returns $false so
+# the next ops tick retries: a single transient blip must not burn the whole day (O18-a's sibling fix).
+# Legacy failure records (pre-retry, no 'attempts' field) count as 0 attempts => retryable, recovering a
+# day the old logic wrongly burned. An unreadable or unknown-shape marker (no 'ok' field) is treated as
+# terminal - conservative: never re-hammer prod off a corrupt file.
 function Test-AlreadyRanTonight {
-  param([string]$Dir, [string]$Stamp)
-  return (Test-Path -LiteralPath (Get-NightlyDailyPath -Dir $Dir -Stamp $Stamp))
+  param([string]$Dir, [string]$Stamp, [int]$MaxAttempts = 3)
+  $path = Get-NightlyDailyPath -Dir $Dir -Stamp $Stamp
+  if (-not (Test-Path -LiteralPath $path)) { return $false }
+  $rec = $null
+  try { $rec = Get-Content -Raw -Encoding UTF8 -LiteralPath $path | ConvertFrom-Json } catch { $rec = $null }
+  if ($null -eq $rec) { return $true }                                   # corrupt marker: do not re-hammer
+  if ($null -eq $rec.PSObject.Properties['ok']) { return $true }         # unknown shape: conservative
+  if ($rec.ok) { return $true }                                          # measured: day done
+  $attempts = 0
+  if ($null -ne $rec.attempts) { $attempts = [int]$rec.attempts }
+  return ($attempts -ge $MaxAttempts)                                    # failure: done only once exhausted
 }
 
 # Regression classification. Kept separate so O18(b)'s dashboard banner reuses the SAME predicate the
@@ -143,16 +171,21 @@ function ConvertTo-NightlyRecord {
   }
 }
 
-# A definitive-failure record (the eval process started but did not yield a usable report). Written to
-# the daily marker so the day's budget is treated as spent (no 195s re-hammer). Distinct shape (ok=false).
+# A no-report failure record (the eval process started but did not yield a usable report). Distinct shape
+# (ok=false). Carries the running attempt count so the budget guard can distinguish a still-retryable blip
+# (attempts < MaxAttempts => NON-terminal, next tick retries) from an exhausted day (terminal => day spent,
+# no 195s re-hammer). 'terminal' is stamped for self-documentation; Test-AlreadyRanTonight re-derives it.
 function New-FailureRecord {
-  param([string]$Stamp, [string]$RanAtIso, [int]$ExitCode, [string]$ErrorText)
+  param([string]$Stamp, [string]$RanAtIso, [int]$ExitCode, [string]$ErrorText, [int]$Attempts = 1, [int]$MaxAttempts = 3)
   return [ordered]@{
-    date     = $Stamp
-    ranAt    = $RanAtIso
-    ok       = $false
-    exitCode = $ExitCode
-    error    = $ErrorText
+    date        = $Stamp
+    ranAt       = $RanAtIso
+    ok          = $false
+    exitCode    = $ExitCode
+    error       = $ErrorText
+    attempts    = $Attempts
+    maxAttempts = $MaxAttempts
+    terminal    = ($Attempts -ge $MaxAttempts)
   }
 }
 
@@ -339,10 +372,28 @@ if ($SelfTest) {
     $stamp = "2026-07-04"
     $daily = Get-NightlyDailyPath -Dir $tmp -Stamp $stamp
     Assert-E "daily path is <dir>\<stamp>.json" ($daily -eq (Join-Path $tmp "2026-07-04.json"))
-    Assert-E "before write: not already ran" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp))
+    Assert-E "before write: not already ran" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3))
     Set-Content -LiteralPath $daily -Value "{}" -Encoding UTF8
-    Assert-E "after write: already ran (budget guard trips)" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp)
-    Assert-E "a DIFFERENT day is not yet run" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp "2026-07-05"))
+    Assert-E "unknown-shape marker (no ok field): treated as terminal (conservative, no re-hammer)" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3)
+    Assert-E "a DIFFERENT day is not yet run" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp "2026-07-05" -MaxAttempts 3))
+
+    # B2) Retry-aware guard: a measurement (ok=true) is terminal; a no-report failure is terminal ONLY once
+    # attempts reach MaxAttempts. This is the O18-a sibling fix - a single transient blip must not burn the day.
+    $okRec = ConvertTo-Json -Depth 5 -InputObject ([ordered]@{ date = $stamp; ok = $true })
+    Write-JsonNoBom -Path $daily -Text $okRec
+    Assert-E "ok=true record: day terminal" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3)
+
+    $legacyFail = ConvertTo-Json -Depth 5 -InputObject ([ordered]@{ date = $stamp; ok = $false; exitCode = 1; error = "x" })
+    Write-JsonNoBom -Path $daily -Text $legacyFail
+    Assert-E "legacy failure (no attempts field) => 0 attempts => RETRYABLE (recovers a wrongly-burned day)" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3))
+
+    $fail1 = ConvertTo-Json -Depth 5 -InputObject (New-FailureRecord -Stamp $stamp -RanAtIso "t" -ExitCode 1 -ErrorText "x" -Attempts 1 -MaxAttempts 3)
+    Write-JsonNoBom -Path $daily -Text $fail1
+    Assert-E "failure attempt 1/3: NON-terminal (retry allowed)" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3))
+
+    $fail3 = ConvertTo-Json -Depth 5 -InputObject (New-FailureRecord -Stamp $stamp -RanAtIso "t" -ExitCode 1 -ErrorText "x" -Attempts 3 -MaxAttempts 3)
+    Write-JsonNoBom -Path $daily -Text $fail3
+    Assert-E "failure attempt 3/3: TERMINAL (retries exhausted, day burned)" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3)
   } finally {
     Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
   }
@@ -377,10 +428,14 @@ if ($SelfTest) {
   Assert-E "history line round-trips strictAccuracy" ([math]::Abs([double]$round.strictAccuracy - 0.9047619047619048) -lt 1e-9)
   Assert-E "history line round-trips date" ($round.date -eq "2026-07-04")
 
-  # F) Failure record marks the day spent (ok=false) so the budget guard still trips.
-  $fail = New-FailureRecord -Stamp "2026-07-04" -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 1 -ErrorText "harness failed"
+  # F) Failure record: ok=false, carries the attempt count, and stamps terminal only when exhausted.
+  $fail = New-FailureRecord -Stamp "2026-07-04" -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 1 -ErrorText "harness failed" -Attempts 1 -MaxAttempts 3
   Assert-E "failure record ok=false" (-not $fail.ok)
   Assert-E "failure record carries exit code" ($fail.exitCode -eq 1)
+  Assert-E "failure record carries attempts" ($fail.attempts -eq 1)
+  Assert-E "failure record attempt 1/3 is NOT terminal" (-not $fail.terminal)
+  $failLast = New-FailureRecord -Stamp "2026-07-04" -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 1 -ErrorText "harness failed" -Attempts 3 -MaxAttempts 3
+  Assert-E "failure record attempt 3/3 IS terminal" ([bool]$failLast.terminal)
 
   # G) Written JSON is BOM-free so a JS/Node consumer (O18(b) /about) can JSON.parse it. WinPS 5.1
   # Set-Content -Encoding UTF8 would prepend a BOM (EF BB BF) that JSON.parse rejects; verify the
@@ -576,8 +631,8 @@ $historyPath = Join-Path $genDir "history.jsonl"
 Write-Log ("=== loop-eval-nightly start (date=" + $stamp + ", base=" + $BaseUrl + ", target=" + $Target + ") ===")
 
 # Budget guard: if today's marker already exists, this is a later ops iteration of the same day - no-op.
-if (Test-AlreadyRanTonight -Dir $genDir -Stamp $stamp) {
-  Write-Log ("already measured today (" + $stamp + "); skipping (idempotent - caps prod Gemini at 23Q/night). Daily record: " + $dailyPath)
+if (Test-AlreadyRanTonight -Dir $genDir -Stamp $stamp -MaxAttempts $MaxEvalAttempts) {
+  Write-Log ("day already terminal for " + $stamp + " (measured, or no-report retries exhausted); skipping (idempotent - caps prod Gemini at 23Q/night). Daily record: " + $dailyPath)
   exit 0
 }
 
@@ -647,12 +702,27 @@ if (Test-Path -LiteralPath $tmpReport) {
 }
 
 if ($null -eq $report) {
-  # No parseable report at all = a genuine hard failure (node/vitest could not run, or wrote nothing). We
-  # STILL mark the day (the eval process started = budget considered spent) so ops does not re-hammer.
-  $rec = New-FailureRecord -Stamp $stamp -RanAtIso $now.ToString("o") -ExitCode $exitCode -ErrorText "eval harness did not produce a parseable report"
+  # No parseable report at all = a hard failure (node/vitest could not run, or wrote nothing). Under the
+  # old logic this burned the WHOLE day on the first occurrence - a single 02:xx prod cold start / deploy
+  # in flight / DNS blip cost the entire day's measurement, the exact silent data loss this lane exists to
+  # kill. Now: count the attempt, and only write a TERMINAL marker once attempts reach -MaxEvalAttempts; a
+  # non-terminal marker lets the next ops tick retry. Read the prior attempt count off the day's record.
+  $priorAttempts = 0
+  if (Test-Path -LiteralPath $dailyPath) {
+    try {
+      $prev = Get-Content -Raw -Encoding UTF8 -LiteralPath $dailyPath | ConvertFrom-Json
+      if ($null -ne $prev -and $null -ne $prev.attempts) { $priorAttempts = [int]$prev.attempts }
+    } catch {}
+  }
+  $attempts = $priorAttempts + 1
+  $rec = New-FailureRecord -Stamp $stamp -RanAtIso $now.ToString("o") -ExitCode $exitCode -ErrorText "eval harness did not produce a parseable report" -Attempts $attempts -MaxAttempts $MaxEvalAttempts
   try { Write-JsonNoBom -Path $dailyPath -Text ($rec | ConvertTo-Json -Depth 5) } catch {}
   try { Add-JsonLineNoBom -Path $historyPath -Line (Format-HistoryLine -Record $rec) } catch {}
-  Write-Log ("WARN: eval did not yield a usable report (exit=" + $exitCode + "); wrote a failure marker for " + $stamp + " so the day's budget is not re-spent. Tail:")
+  if ($rec.terminal) {
+    Write-Log ("WARN: eval did not yield a usable report (exit=" + $exitCode + "); attempt " + $attempts + "/" + $MaxEvalAttempts + " EXHAUSTED - wrote a terminal failure marker for " + $stamp + " so the day's budget is not re-spent. Tail:")
+  } else {
+    Write-Log ("WARN: eval did not yield a usable report (exit=" + $exitCode + "); attempt " + $attempts + "/" + $MaxEvalAttempts + " - non-terminal, a later ops tick will retry (transient availability, not a spent day). Tail:")
+  }
   Write-Log (($evalOut).ToString().Trim() | Out-String).Trim()
   try { Remove-Item -LiteralPath $tmpReport -Force -ErrorAction SilentlyContinue } catch {}
   exit 0
