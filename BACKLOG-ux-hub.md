@@ -45,5 +45,7 @@
 
 - [x] 【柱0補充候補・2026-07-03 Explore調査で発見】トップ `home-three-pillars.tsx` の3柱本体CTA「業種別 事故分析レポートへ →」(L117-122)・「気象リスク詳細を見る →」(L220-225)・「法改正一覧を見る →」(L275-280)が`px-3 py-2 text-xs`のみでmin-h未指定(実測≈32px)。同ファイル内の他リンク/ボタン(出典URL・AlertGenerator送信・再試行・管理者連絡・10年DB一覧)は既に44px是正済みだったが、最も目立つ3柱の主動線CTAだけ取り残されていた既存欠陥。→ 3リンクに`min-h-[44px]`を付与(純粋なクラス追加でレイアウト・遷移先不変)。vitest 3件追加。next start実機のPlaywright boundingBox実測で3/3とも44px以上を確認。tsc=0/lint=0 errors/vitest(2438件)/build全緑。(2026-07-03 / ux-hub/top-three-pillars-main-cta-44px)
 
+- [x] 【柱0補充候補・2026-07-03 Explore調査で発見】`home-screen.tsx` の /accidents 主タブ切替(全件検索/死亡災害/業種別ランキング/MHLW実データ分析/サイト収録事例/詳細事例の6ボタン、L438行付近)が`px-4 py-1.5 text-sm`のみでmin-h未指定(実測≈32px)。同ファイルは/accidents本体の最上部に位置する最頻操作(データビュー切替)であるにも関わらず44px化の対象から漏れており(ハブ側のチップ・検索・保存事例は既に是正済みだったがこのタブバー自体は未着手)、隣接ボタンへの押し損ねが起きやすかった既存欠陥。→ タブボタンに`inline-flex min-h-[44px] items-center`を付与(純粋なクラス追加でレイアウト・ロジック不変、既存の`accident-hub-nav.tsx`と同一パターンに統一)。vitest 1件追加(ソーステキスト検査によるclassName回帰ガード)。next start実機のPlaywright boundingBox実測で6/6ボタンとも44.0pxを確認。tsc=0/lint=0 errors/vitest(2444件)/build全緑。(2026-07-03 / ux-hub/accidents-tab-switcher-44px)
+
 ## 補充の指針（未着手3件未満で起こす）
 - 自領域route の柱0未適用箇所・無読テスト不合格画面・第三者レビュー指摘。404どん詰まり解消・視覚パンくず可視化(画面側)。

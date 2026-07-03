@@ -1,5 +1,21 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: home-screen.tsx /accidents 主タブ切替 柱0(44px)
+
+**イテレーション頭の回収**: 自班の唯一のオープンPR #726(/court-cases ハブ最上部2リンク44px)はe2e/smokeが実行中(CI未緑)だったためマージ見送り、次イテレーションで回収。working treeはclean。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Explore調査で発見した「`home-screen.tsx`の/accidents主タブ切替(6ボタン)が44px未満・同ファイルは過去のタップ標的一斉是正から漏れていた」を採用。
+
+**修正**: `home-screen.tsx`のタブボタン(全件検索/死亡災害/業種別ランキング/MHLW実データ分析/サイト収録事例/詳細事例)className先頭に`inline-flex min-h-[44px] items-center`を付与(既存`accident-hub-nav.tsx`と同一パターン)。純粋なクラス追加でレイアウト・タブ切替ロジック不変。
+
+**テスト**: `home-screen.test.tsx`新設(vitest 1件)。HomeScreenは動的import/SWR依存が重くフルレンダーが困難なため、`page-json-ld.test.tsx`と同じソーステキスト検査方式でタブボタンのclassNameに`min-h-[44px]`/`inline-flex`/`items-center`を含むことを保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 288 files・2443 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/accidents-tab-44px-check.mjs`（next start実機・Playwright・スマホ390×844）**6/6 PASS**（全タブボタンboundingBox height=44px実測）。
+
+**残課題**: PR #726(court-cases 2リンク44px)のCI回収は次イテレーション。
+
 ## 2026-07-03 — 補充: トップ home-three-pillars.tsx 3柱・主CTA 柱0(44px)
 
 **イテレーション頭の回収**: 自班の緑PR #705(/industries/[industry] 副リンク6箇所＋キーワードピル44px)がmainとコンフリクト(BACKLOG-ux-hub.md同時追記)していたため、ブランチへ`origin/main`を通常マージしBACKLOG-ux-hub.mdの重複記載を解消→ゲート再実行→squashマージ→`git checkout main && git pull --ff-only`でclean確認。
