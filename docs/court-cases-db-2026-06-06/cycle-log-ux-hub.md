@@ -1,5 +1,19 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: /court-cases・/accidents 残存44px未満5箇所の一括是正
+
+**イテレーション頭の回収**: 自班のオープンPR #732(home-screen.tsx /accidents主タブ切替44px)と#739(use-cases業種ジャンプナビ＋事故詳細パンくず44px)がいずれもe2e/smoke緑を確認できたため両方squashマージ・リモートブランチ削除。main pullでworking tree clean。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route群(court-cases/accidents/signage/features等)の残存44px未満パターンを再調査し、確度上位5件を採用（signage-daily-values.tsx・signage-rotator.tsxの小型タイル内ボタン群は「1画面フィット」制約下の意図的な密集レイアウトのため今回は対象外とし、素直な44px化候補のみ着手）。
+
+**修正**: ①`CourtCasesPrintButton`の`min-h-[40px]`→`min-h-[44px]`、②`/court-cases/print`の「労災裁判例コーナーに戻る」戻りリンクと③0件時「コーナーに戻って絞り込みを見直す」リンクに`inline-flex min-h-[44px] items-center`付与、④`CourtCasesBrowser`の「絞り込みを解除」ボタン（絞り込み時のみ出現）に同様付与、⑤`AccidentTrendSummary`の「厚労省 速報 原典を見る →」リンク（AI要約実行後のみ出現）に同様付与。すべて純粋なクラス追加でレイアウト・遷移先・ロジック不変。
+
+**テスト**: `court-cases-print-button.test.tsx`新設・`court-cases/print/page.test.tsx`新設(3件)・`court-cases-browser.test.tsx`へ1件追加(検索語入力→絞り込みを解除ボタンのclassName検証)・`accident-trend-summary.test.tsx`新設(fetchモック→AI要約実行→速報原典リンクのclassName検証)。計6件追加。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 292 files・2477 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/court-cases-accidents-44px-batch-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**5/5 PASS**（全対象の実boundingBox height≧44px実測）。
+
 ## 2026-07-03 — 補充: home-screen.tsx /accidents 主タブ切替 柱0(44px)
 
 **イテレーション頭の回収**: 自班の唯一のオープンPR #726(/court-cases ハブ最上部2リンク44px)はe2e/smokeが実行中(CI未緑)だったためマージ見送り、次イテレーションで回収。working treeはclean。

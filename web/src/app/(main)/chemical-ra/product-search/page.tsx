@@ -31,7 +31,7 @@ export default function ProductSearchPage() {
       <div className="mx-auto max-w-7xl px-4 pt-4">
         <Link
           href="/chemical-ra"
-          className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm text-slate-600 hover:bg-slate-50"
+          className="inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 py-1 text-sm text-slate-600 hover:bg-slate-50"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           化学物質RA に戻る

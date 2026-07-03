@@ -102,7 +102,7 @@ export function KyTranscribePanel({
           <button
             type="button"
             onClick={onClose}
-            className="whitespace-nowrap rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            className="min-h-[44px] whitespace-nowrap rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
           >
             閉じる
           </button>
@@ -119,7 +119,7 @@ export function KyTranscribePanel({
           <button
             type="button"
             onClick={handleCsv}
-            className="rounded-lg bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-700"
+            className="min-h-[44px] rounded-lg bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-700"
           >
             CSVをダウンロード（控え・集計用）
           </button>

@@ -58,7 +58,10 @@ export default async function CourtCasesPrintPage({ searchParams }: Props) {
     <div className="mx-auto max-w-[820px] bg-white px-6 py-6 text-slate-900 print:px-0 print:py-0">
       {/* 操作バー（印刷時は隠す） */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2 print:hidden">
-        <Link href="/court-cases" className="text-sm font-semibold text-emerald-700 hover:underline">
+        <Link
+          href="/court-cases"
+          className="inline-flex min-h-[44px] items-center text-sm font-semibold text-emerald-700 hover:underline"
+        >
           ← 労災裁判例コーナーに戻る
         </Link>
         <CourtCasesPrintButton />
@@ -80,7 +83,10 @@ export default async function CourtCasesPrintPage({ searchParams }: Props) {
       {cases.length === 0 ? (
         <p className="mt-6 rounded border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500 print:hidden">
           条件に合う判例がありません。
-          <Link href="/court-cases" className="ml-1 font-semibold text-emerald-700 hover:underline">
+          <Link
+            href="/court-cases"
+            className="ml-1 inline-flex min-h-[44px] items-center font-semibold text-emerald-700 hover:underline"
+          >
             コーナーに戻って絞り込みを見直す
           </Link>
         </p>

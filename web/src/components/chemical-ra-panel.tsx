@@ -1023,13 +1023,13 @@ export function ChemicalRaPanel() {
             <div className="mt-3 flex flex-wrap gap-2">
               <a
                 href={`/chatbot?q=${encodeURIComponent(`${result.chemicalName} の取扱い基準と関連する特化則・有機則の条文を教えて`)}`}
-                className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500"
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-500"
               >
                 法令チャットで質問する →
               </a>
               <a
                 href={`/law-search?q=${encodeURIComponent(result.chemicalName)}`}
-                className="inline-flex items-center gap-1 rounded-lg border border-blue-300 bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-blue-300 bg-white px-3 py-2 text-xs font-semibold text-blue-700 hover:bg-blue-100"
               >
                 法令全文検索で調べる →
               </a>
@@ -1047,7 +1047,7 @@ export function ChemicalRaPanel() {
             <div className="mt-3">
               <a
                 href={`/accidents?work=${encodeURIComponent(`${result.chemicalName}を取り扱う作業`)}`}
-                className="inline-flex items-center gap-1 rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-500"
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-500"
               >
                 類似の労災事例をAIで調べる →
               </a>

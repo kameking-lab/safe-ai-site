@@ -155,7 +155,7 @@ export function NearMissClient() {
           <Field label="対策"><textarea value={form.countermeasure} onChange={(e) => up("countermeasure", e.target.value)} rows={2} className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" placeholder="例: 設置面の確認・脚立点検を徹底" /></Field>
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-2">
-          <button type="button" onClick={addReport} className="inline-flex items-center gap-1 rounded-lg bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700">
+          <button type="button" onClick={addReport} className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700">
             <Plus className="h-4 w-4" aria-hidden="true" /> 報告を登録
           </button>
           {savedNote && <span className="text-xs font-semibold text-amber-700">{savedNote}</span>}
