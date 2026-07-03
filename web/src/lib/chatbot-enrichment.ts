@@ -1,9 +1,6 @@
 import type { LawArticle } from "@/data/laws";
-import {
-  LAW_METADATA,
-  getLawMetadata,
-  getArticleEffectiveDate,
-} from "@/data/law-metadata";
+import { getLawMetadata, getArticleEffectiveDate } from "@/data/law-metadata";
+import { LAW_SHORT_SET, LAW_FULL_NAME_SET } from "@/lib/law-name-registry";
 
 /**
  * Structured citation for a single law article, exposing the
@@ -333,56 +330,15 @@ export function formatCitationTriples(citations: StructuredCitation[]): string {
   return `\n\n📎 出典（条文番号＋施行日＋発出機関）：\n${lines.join("\n")}`;
 }
 
-const KNOWN_LAW_SHORTS = new Set<string>([
-  "安衛法",
-  "安衛則",
-  "安衛令",
-  "クレーン則",
-  "有機則",
-  "特化則",
-  "酸欠則",
-  "石綿則",
-  "粉じん則",
-  "電離則",
-  "鉛則",
-  "四アルキル鉛則",
-  "ボイラー則",
-  "ゴンドラ則",
-  "高圧則",
-  "事務所則",
-  "機械等検定規則",
-  "作環測法",
-  "じん肺法",
-  "労基法",
-  "労基則",
-  "労契法",
-  "最賃法",
-  "労災保険法",
-  "育介法",
-  "均等法",
-  "パート有期法",
-  "職安法",
-  "職能法",
-  "派遣法",
-  "建設業法",
-  "女性則",
-  "年少者則",
-  "THP指針",
-  "メンタル指針",
-  "VDTガイドライン",
-  "化学物質RA指針",
-  "過重労働通達",
-]);
-
-// lawShort⇄正式名称の対応表（law-metadata.ts を単一ソースとして再利用）。
+// lawShort⇄正式名称の既知集合は law-name-registry.ts（data/laws を単一ソースに自動生成）
+// を再利用する。以前はここに手動の重複リストを持っており、50法令体制拡張後に
+// 追加された法令（過労死防止法・化審法・毒劇法ほか）が未登録のまま漏れ、
+// 正当な引用まで「範囲外」警告してしまう既知のドリフトがあった。
 // 正式名称は短縮名と字面が重ならないことが多い（例: 「労働安全衛生法」⊅「安衛法」、
 // 「酸素欠乏症等防止規則」⊅「酸欠則」）ため、substring 照合とは別に完全一致で
 // 判定する集合を用意する。
-const KNOWN_LAW_FULL_NAMES = new Set<string>(
-  Object.values(LAW_METADATA)
-    .map((m) => m.fullName)
-    .filter((name): name is string => Boolean(name))
-);
+const KNOWN_LAW_SHORTS = LAW_SHORT_SET;
+const KNOWN_LAW_FULL_NAMES = LAW_FULL_NAME_SET;
 
 /**
  * 回答中に出現する「○○法/則/規則/指針/通達 + 第N条」表現を抽出し、

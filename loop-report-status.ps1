@@ -215,20 +215,94 @@ function Get-StaleLanes {
   return $result.ToArray()
 }
 
+# Marker line (ASCII, machine-only) persisted INSIDE the region to give NEVER-reported lanes a clock.
+# The health line can time a lane that once reported (its row carries a "最終稼働" timestamp Get-StaleLanes
+# reads), but a lane that has produced NO parseable row has no timestamp - so #628/#631 could only ever
+# flag it as a QUIET note, and a born-dead runner or a broken report path stays soft-worded ("clears in a
+# few minutes") FOREVER. That is the last false-reassurance hole in watch point #1. We stamp the first
+# time the fleet observes each enabled-but-unreported lane; once that stamp ages past the SAME threshold
+# used for stale, the health line escalates the lane to the LOUD born-dead banner. The stamp lives in the
+# region (not a side file) so it is serialized by the same status lock as every other write, rides the
+# launcher's verbatim region preservation, and self-clears the instant the lane finally reports (its stamp
+# is dropped). ASCII literal; full line looks like: "<!-- lane-missing-since: seo=2026-07-03T12:05:00 -->".
+$missingMarkerPrefix = "<!-- lane-missing-since:"
+
+# Enabled roster lanes with NO parseable report row (never reported this file-lifetime). Pure: reuses the
+# Get-StaleLanes MinValue path (which returns every parseable reportLine row regardless of age) to get the
+# reported set, then subtracts it from the roster. Empty roster -> no missing (caller falls back to legacy).
+function Get-MissingLanes {
+  param([string[]]$Rows, [string[]]$ExpectedLanes, [string]$RowTemplate)
+  if (-not $ExpectedLanes -or $ExpectedLanes.Count -eq 0) { return @() }
+  $reported = @(Get-StaleLanes -Rows $Rows -Now ([datetime]'2000-01-01') -StaleMinutes ([int]::MinValue) -RowTemplate $RowTemplate | ForEach-Object { $_.Lane })
+  return @($ExpectedLanes | Where-Object { $reported -notcontains $_ })
+}
+
+# Parse the missing-since marker among region rows -> hashtable lane -> [datetime]. Garbled/absent entries
+# are skipped (safe: an unparseable stamp just means that lane gets a fresh stamp this run). Pure.
+function Get-MissingSinceMap {
+  param([string[]]$Rows)
+  $map = @{}
+  if (-not $Rows) { return $map }
+  foreach ($r in $Rows) {
+    if ($null -eq $r) { continue }
+    $t = ([string]$r).Trim()
+    if (-not $t.StartsWith($missingMarkerPrefix)) { continue }
+    $body = $t.Substring($missingMarkerPrefix.Length)
+    $body = $body -replace '-->\s*$', ''
+    foreach ($tok in ($body -split '\s+')) {
+      if ($tok -eq '') { continue }
+      $eq = $tok.IndexOf('=')
+      if ($eq -le 0) { continue }
+      $lane = $tok.Substring(0, $eq)
+      $iso = $tok.Substring($eq + 1)
+      $dt = $null
+      try { $dt = [datetime]::ParseExact($iso, 'yyyy-MM-ddTHH:mm:ss', $null) } catch { $dt = $null }
+      if ($null -ne $dt) { $map[$lane] = $dt }
+    }
+    break
+  }
+  return $map
+}
+
+# New map for this run: KEEP the prior stamp for a still-missing lane (its clock keeps running), stamp a
+# newly-missing lane at $Now, and DROP any lane no longer missing (it reported, or left the roster). Pure.
+function Update-MissingSinceMap {
+  param([hashtable]$Old, [string[]]$MissingLanes, [datetime]$Now)
+  $new = @{}
+  foreach ($lane in $MissingLanes) {
+    if ($Old -and $Old.ContainsKey($lane)) { $new[$lane] = $Old[$lane] }
+    else { $new[$lane] = $Now }
+  }
+  return $new
+}
+
+# Render the marker line from a map, or $null when empty (so no marker line is written). Lanes are sorted
+# for a deterministic, diff-stable line. Pure.
+function Format-MissingSinceMarker {
+  param([hashtable]$Map)
+  if (-not $Map -or $Map.Keys.Count -eq 0) { return $null }
+  $parts = @(foreach ($lane in ($Map.Keys | Sort-Object)) { "$lane=" + ($Map[$lane].ToString('yyyy-MM-ddTHH:mm:ss')) })
+  return ($missingMarkerPrefix + ' ' + ($parts -join ' ') + ' -->')
+}
+
 # Build the ONE managed health-summary line placed at the top of the region, or $null when the health
 # strings are absent (older strings files stay a safe no-op) or nothing can be said. Uses Get-StaleLanes
 # twice: a threshold of Int.MinValue counts every parseable lane row (even this lane's just-stamped row
 # whose age is momentarily ~0), and $StaleMinutes selects the silently-dead ones. $ExpectedLanes is the
 # enabled roster from loop-config.json: it lets the line distinguish two failure modes and pick the
 # roster (not the region) as the denominator -
-#   * STALE  (loud) : a lane that WAS reporting and stopped >StaleMinutes ago (report-then-silent death).
-#   * MISSING (note): an enabled lane with NO parseable report row at all (never reported - born dead or
-#                     a broken report path). Softer wording because a fresh ignition legitimately shows
-#                     this for the minutes until each lane's first report; it self-clears as they report.
-# Precedence stale > missing > ok keeps each banner single-purpose. When the roster is unknown (empty)
-# the function reverts exactly to the pre-roster behavior (TOTAL = reported count, no missing detection).
+#   * STALE     (loud) : a lane that WAS reporting and stopped >StaleMinutes ago (report-then-silent death).
+#   * BORN-DEAD (loud) : an enabled lane with NO parseable report row whose missing-since stamp has aged
+#                        past StaleMinutes (never reported for 2h+ = runner dying at ignition or a broken
+#                        report path - no longer a fresh-ignition transient). $MissingSince supplies the
+#                        clock these rowless lanes otherwise lack.
+#   * MISSING   (note): an enabled lane with NO parseable report row, still WITHIN the grace window (or with
+#                        no stamp yet). Softer wording because a fresh ignition legitimately shows this for
+#                        the minutes until each lane's first report; it self-clears as they report.
+# Precedence stale > born-dead > missing > ok keeps each banner single-purpose. When the roster is unknown
+# (empty) the function reverts exactly to the pre-roster behavior (TOTAL = reported count, no detection).
 function Get-LaneHealthLine {
-  param([string[]]$Rows, [datetime]$Now, [int]$StaleMinutes, [string[]]$ExpectedLanes)
+  param([string[]]$Rows, [datetime]$Now, [int]$StaleMinutes, [string[]]$ExpectedLanes, [hashtable]$MissingSince)
   if (-not $LS.ContainsKey("laneHealthOk") -or -not $LS.ContainsKey("laneHealthStale")) { return $null }
   $rowTpl = S "reportLine"
   $all = @(Get-StaleLanes -Rows $Rows -Now $Now -StaleMinutes ([int]::MinValue) -RowTemplate $rowTpl)
@@ -248,8 +322,24 @@ function Get-LaneHealthLine {
     }
     return (Fmt "laneHealthStale" @{ LANES = ($items -join $sep); MIN = $StaleMinutes })
   }
-  if ($missing.Count -gt 0 -and $LS.ContainsKey("laneHealthUnreported")) {
-    return (Fmt "laneHealthUnreported" @{ LANES = ($missing -join $sep); MISSING = $missing.Count; TOTAL = $ExpectedLanes.Count })
+  # Split never-reported lanes by how long they have been missing: those stamped >= StaleMinutes ago are
+  # born-dead (loud); the rest are still within the fresh-ignition grace window (quiet note). If the
+  # born-dead string is absent (older strings file) treat every missing lane as quiet so it is still named
+  # by the unreported banner - NEVER let a rowless lane fall through to the falsely-OK banner.
+  $canBornDead = $LS.ContainsKey("laneHealthBornDead")
+  $bornDead = @()
+  $quietMissing = @()
+  foreach ($m in $missing) {
+    $since = $null
+    if ($MissingSince -and $MissingSince.ContainsKey($m)) { $since = $MissingSince[$m] }
+    if ($canBornDead -and $null -ne $since -and ($Now - $since).TotalMinutes -ge $StaleMinutes) { $bornDead += $m }
+    else { $quietMissing += $m }
+  }
+  if ($bornDead.Count -gt 0 -and $LS.ContainsKey("laneHealthBornDead")) {
+    return (Fmt "laneHealthBornDead" @{ LANES = ($bornDead -join $sep); MIN = $StaleMinutes })
+  }
+  if ($quietMissing.Count -gt 0 -and $LS.ContainsKey("laneHealthUnreported")) {
+    return (Fmt "laneHealthUnreported" @{ LANES = ($quietMissing -join $sep); MISSING = $quietMissing.Count; TOTAL = $ExpectedLanes.Count })
   }
   $total = if ($ExpectedLanes -and $ExpectedLanes.Count -gt 0) { $ExpectedLanes.Count } else { $all.Count }
   return (Fmt "laneHealthOk" @{ TOTAL = $total; MIN = $StaleMinutes; NOW = $Now.ToString("yyyy-MM-dd HH:mm") })
@@ -351,6 +441,43 @@ if ($SelfTest) {
       $f4 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @()
       $f4exp = Fmt "laneHealthOk" @{ TOTAL = 2; MIN = 120; NOW = $hNow.ToString("yyyy-MM-dd HH:mm") }
       Assert-Test "empty roster falls back to legacy reported-count OK banner" ($f4 -eq $f4exp)
+
+      # G: born-dead escalation for NEVER-reported lanes + missing-since map parse/update/format.
+      if ($LS.ContainsKey("laneHealthBornDead")) {
+        # G1: a never-reported lane still WITHIN grace (stamp 30 min old < 120) stays the quiet banner.
+        $mapFresh = @{ "seo" = $hNow.AddMinutes(-30) }
+        $g1 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapFresh
+        Assert-Test "never-reported within grace stays the quiet unreported banner" ($g1 -eq $f1exp)
+
+        # G2: the SAME lane past grace (stamp 200 min old >= 120) escalates to the LOUD born-dead banner.
+        $mapOld = @{ "seo" = $hNow.AddMinutes(-200) }
+        $g2 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapOld
+        $g2exp = Fmt "laneHealthBornDead" @{ LANES = "seo"; MIN = 120 }
+        Assert-Test "never-reported past grace escalates to the loud born-dead banner" ($g2 -eq $g2exp)
+
+        # G3: a report-then-silent (stale) lane still outranks a born-dead lane.
+        $g3 = Get-LaneHealthLine -Rows @($rOps, $rDataStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapOld
+        Assert-Test "stale still outranks born-dead" ($g3 -eq $f3exp)
+
+        # G4: Update keeps a prior stamp for a still-missing lane, stamps a newly-missing lane at now, and
+        # drops a lane that recovered (no longer in the missing set).
+        $u = Update-MissingSinceMap -Old @{ "seo" = $hNow.AddMinutes(-200); "data" = $hNow.AddMinutes(-10) } -MissingLanes @("seo", "ux-records") -Now $hNow
+        Assert-Test "Update keeps the prior stamp for a still-missing lane" ($u["seo"] -eq $hNow.AddMinutes(-200))
+        Assert-Test "Update stamps a newly-missing lane at now" ($u["ux-records"] -eq $hNow)
+        Assert-Test "Update drops a lane that recovered (no longer missing)" (-not $u.ContainsKey("data"))
+
+        # G5: marker format <-> parse round-trip (ASCII prefix, ISO stamps, empty map -> no line).
+        $mk = Format-MissingSinceMarker -Map @{ "seo" = $hNow; "data" = $hNow.AddMinutes(-5) }
+        Assert-Test "marker carries the ASCII prefix" ($mk.StartsWith($missingMarkerPrefix))
+        $rt = Get-MissingSinceMap -Rows @($mk)
+        Assert-Test "marker round-trips the seo stamp" ($rt["seo"] -eq $hNow)
+        Assert-Test "marker round-trips the data stamp" ($rt["data"] -eq $hNow.AddMinutes(-5))
+        Assert-Test "empty map renders no marker line" ($null -eq (Format-MissingSinceMarker -Map @{}))
+
+        # G6: Get-MissingLanes = enabled roster minus lanes that have a parseable report row.
+        $ml = @(Get-MissingLanes -Rows @($rOps, $rData) -ExpectedLanes @("ops", "data", "seo", "ux-records") -RowTemplate (S "reportLine"))
+        Assert-Test "missing lanes = enabled roster minus reported" (($ml.Count -eq 2) -and ($ml -contains "seo") -and ($ml -contains "ux-records"))
+      }
     }
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
@@ -426,8 +553,9 @@ if ($WhatIf) {
   if ($LS.ContainsKey("laneHealthOk") -and $LS.ContainsKey("laneHealthStale") -and (Test-Path $StatusPath)) {
     try {
       $prev = @(Get-Content -Encoding UTF8 -Path $StatusPath)
-      $okPre = Get-TplPrefix "laneHealthOk"; $stalePre = Get-TplPrefix "laneHealthStale"; $unrepPre = Get-TplPrefix "laneHealthUnreported"
+      $okPre = Get-TplPrefix "laneHealthOk"; $stalePre = Get-TplPrefix "laneHealthStale"; $unrepPre = Get-TplPrefix "laneHealthUnreported"; $bdPre = Get-TplPrefix "laneHealthBornDead"
       $rows = New-Object System.Collections.Generic.List[string]
+      $markerRows = New-Object System.Collections.Generic.List[string]
       $bI = -1; $eI = -1
       for ($k = 0; $k -lt $prev.Count; $k++) {
         if ($prev[$k].Trim() -eq $beginMarker) { $bI = $k } elseif ($prev[$k].Trim() -eq $endMarker) { $eI = $k; break }
@@ -436,14 +564,21 @@ if ($WhatIf) {
       if ($bI -ge 0 -and $eI -gt $bI) {
         for ($k = $bI + 1; $k -lt $eI; $k++) {
           $t = $prev[$k].TrimStart()
-          if (($okPre.Trim() -ne "" -and $t.StartsWith($okPre)) -or ($stalePre.Trim() -ne "" -and $t.StartsWith($stalePre)) -or ($unrepPre.Trim() -ne "" -and $t.StartsWith($unrepPre))) { continue }
+          if ($t.StartsWith($missingMarkerPrefix)) { $markerRows.Add($prev[$k]); continue }
+          if (($okPre.Trim() -ne "" -and $t.StartsWith($okPre)) -or ($stalePre.Trim() -ne "" -and $t.StartsWith($stalePre)) -or ($unrepPre.Trim() -ne "" -and $t.StartsWith($unrepPre)) -or ($bdPre.Trim() -ne "" -and $t.StartsWith($bdPre))) { continue }
           if ($t.StartsWith($selfPrefix)) { $rows.Add($laneLine); $sawSelf = $true } else { $rows.Add($prev[$k]) }
         }
       }
       if (-not $sawSelf) { $rows.Add($laneLine) }
-      $hl = Get-LaneHealthLine -Rows $rows.ToArray() -Now (Get-Date) -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes
+      $rowTpl = S "reportLine"; $nowH = Get-Date
+      $missingLanes = @(Get-MissingLanes -Rows $rows.ToArray() -ExpectedLanes $ExpectedLanes -RowTemplate $rowTpl)
+      $newMap = Update-MissingSinceMap -Old (Get-MissingSinceMap -Rows $markerRows.ToArray()) -MissingLanes $missingLanes -Now $nowH
+      $hl = Get-LaneHealthLine -Rows $rows.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes -MissingSince $newMap
       if ($hl) { Write-Rep ("[WHATIF] would set the region health line to: " + $hl) }
       else { Write-Rep "[WHATIF] no health line would be written (no parseable lane rows)." }
+      $mk = Format-MissingSinceMarker -Map $newMap
+      if ($mk) { Write-Rep ("[WHATIF] would set the missing-since marker to: " + $mk) }
+      else { Write-Rep "[WHATIF] no missing-since marker would be written (all enabled lanes reporting)." }
     } catch { Write-Rep ("[WHATIF] health preview skipped: " + $_.Exception.Message) }
   }
   exit 0
@@ -515,16 +650,26 @@ try {
       $okPre = Get-TplPrefix "laneHealthOk"
       $stalePre = Get-TplPrefix "laneHealthStale"
       $unrepPre = Get-TplPrefix "laneHealthUnreported"
+      $bdPre = Get-TplPrefix "laneHealthBornDead"
+      # Peel the region into: the persisted missing-since marker (captured, to keep prior clocks running)
+      # and the real lane rows (health + marker lines stripped so they never accumulate).
+      $markerRows = New-Object System.Collections.Generic.List[string]
       $inner = New-Object System.Collections.Generic.List[string]
       for ($k = $bIdx + 1; $k -lt $eIdx; $k++) {
         $t = $lines[$k].TrimStart()
-        if (($okPre.Trim() -ne "" -and $t.StartsWith($okPre)) -or ($stalePre.Trim() -ne "" -and $t.StartsWith($stalePre)) -or ($unrepPre.Trim() -ne "" -and $t.StartsWith($unrepPre))) { continue }
+        if ($t.StartsWith($missingMarkerPrefix)) { $markerRows.Add($lines[$k]); continue }
+        if (($okPre.Trim() -ne "" -and $t.StartsWith($okPre)) -or ($stalePre.Trim() -ne "" -and $t.StartsWith($stalePre)) -or ($unrepPre.Trim() -ne "" -and $t.StartsWith($unrepPre)) -or ($bdPre.Trim() -ne "" -and $t.StartsWith($bdPre))) { continue }
         $inner.Add($lines[$k])
       }
-      $healthLine = Get-LaneHealthLine -Rows $inner.ToArray() -Now (Get-Date) -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes
+      $rowTpl = S "reportLine"; $nowH = Get-Date
+      $missingLanes = @(Get-MissingLanes -Rows $inner.ToArray() -ExpectedLanes $ExpectedLanes -RowTemplate $rowTpl)
+      $newMap = Update-MissingSinceMap -Old (Get-MissingSinceMap -Rows $markerRows.ToArray()) -MissingLanes $missingLanes -Now $nowH
+      $healthLine = Get-LaneHealthLine -Rows $inner.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes -MissingSince $newMap
+      $markerLine = Format-MissingSinceMarker -Map $newMap
       $rebuilt = New-Object System.Collections.Generic.List[string]
       for ($k = 0; $k -le $bIdx; $k++) { $rebuilt.Add($lines[$k]) }
       if ($healthLine) { $rebuilt.Add($healthLine) }
+      if ($markerLine) { $rebuilt.Add($markerLine) }
       foreach ($l in $inner) { $rebuilt.Add($l) }
       for ($k = $eIdx; $k -lt $lines.Count; $k++) { $rebuilt.Add($lines[$k]) }
       $lines = $rebuilt.ToArray()
