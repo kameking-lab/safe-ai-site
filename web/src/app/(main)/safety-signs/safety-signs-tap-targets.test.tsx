@@ -9,6 +9,7 @@ import { INDUSTRIES } from "@/data/safety-signs/industry-usage";
 import CategoryPage from "./category/[category]/page";
 import IndustryPage from "./industry/[industry]/page";
 import SignPage from "./sign/[id]/page";
+import SafetySignsHubPage from "./page";
 
 function renderPage(ui: ReactNode) {
   return render(
@@ -70,6 +71,18 @@ describe("safety-signs サブページのタップ標的44px化", () => {
     expect(industryChips.length).toBeGreaterThan(0);
     for (const chip of industryChips) {
       expect(chip.className).toContain("min-h-[44px]");
+    }
+  });
+
+  it("親ハブ: 『関連機能』セクションの3リンクが全て min-h-[44px]", () => {
+    renderPage(<SafetySignsHubPage />);
+    const related = [
+      screen.getByRole("link", { name: /サイネージ表示/ }),
+      screen.getByRole("link", { name: /KY簡易作成/ }),
+      screen.getByRole("link", { name: /建設業のリスク・対策/ }),
+    ];
+    for (const link of related) {
+      expect(link.className).toContain("min-h-[44px]");
     }
   });
 });

@@ -48,7 +48,7 @@ export function AccidentNewsFilter({
         <select
           value={selected.industry}
           onChange={(e) => pushWith({ industry: e.target.value })}
-          className="mt-1 min-h-[40px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800"
+          className="mt-1 min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800"
         >
           <option value="">すべて</option>
           {options.industries.map((o) => (
@@ -63,7 +63,7 @@ export function AccidentNewsFilter({
         <select
           value={selected.type}
           onChange={(e) => pushWith({ type: e.target.value })}
-          className="mt-1 min-h-[40px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800"
+          className="mt-1 min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800"
         >
           <option value="">すべて</option>
           {options.types.map((o) => (
@@ -78,7 +78,7 @@ export function AccidentNewsFilter({
         <select
           value={selected.year}
           onChange={(e) => pushWith({ year: e.target.value })}
-          className="mt-1 min-h-[40px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800"
+          className="mt-1 min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-800"
         >
           <option value="">すべて</option>
           {options.years.map((y) => (
@@ -94,12 +94,12 @@ export function AccidentNewsFilter({
           name="q"
           defaultValue={selected.q}
           placeholder="作業・原因など（例: 足場、はさまれ）"
-          className="mt-1 min-h-[40px] min-w-[12rem] rounded-lg border border-slate-300 bg-white px-3 py-1 text-sm text-slate-800"
+          className="mt-1 min-h-[44px] min-w-[12rem] rounded-lg border border-slate-300 bg-white px-3 py-1 text-sm text-slate-800"
         />
       </label>
       <button
         type="submit"
-        className="min-h-[40px] rounded-lg bg-emerald-600 px-4 py-1 text-sm font-bold text-white hover:bg-emerald-700"
+        className="min-h-[44px] rounded-lg bg-emerald-600 px-4 py-1 text-sm font-bold text-white hover:bg-emerald-700"
       >
         検索
       </button>
@@ -107,7 +107,7 @@ export function AccidentNewsFilter({
         <button
           type="button"
           onClick={() => router.push("/accident-news")}
-          className="min-h-[40px] rounded-lg border border-slate-300 px-3 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+          className="min-h-[44px] rounded-lg border border-slate-300 px-3 py-1 text-sm font-semibold text-slate-600 hover:bg-slate-50"
         >
           条件クリア
         </button>

@@ -102,7 +102,7 @@ describe('countByCategory', () => {
 
 describe('CATEGORY_META', () => {
   it('全カテゴリにラベルと配色を持つ', () => {
-    for (const key of ['law', 'notice', 'chemical', 'education', 'accident', 'precedent', 'glossary', 'faq'] as const) {
+    for (const key of ['law', 'notice', 'chemical', 'education', 'accident', 'precedent', 'glossary', 'faq', 'sign'] as const) {
       expect(CATEGORY_META[key].label).toBeTruthy();
       expect(CATEGORY_META[key].bgColor).toMatch(/^bg-/);
       expect(CATEGORY_META[key].textColor).toMatch(/^text-/);
@@ -133,7 +133,7 @@ describe('buildSearchIndex — 用語集（glossary）の収載', () => {
     const index = await buildSearchIndex();
     const c = countByCategory(index, '安全');
     expect(c.all).toBe(
-      c.law + c.notice + c.chemical + c.education + c.accident + c.precedent + c.glossary + c.faq,
+      c.law + c.notice + c.chemical + c.equipment + c.education + c.accident + c.precedent + c.glossary + c.faq + c.sign,
     );
   });
 });
@@ -179,6 +179,52 @@ describe('buildSearchIndex — FAQ の収載', () => {
     expect(byQuestion.every((i) => i.subtitle.length > 0)).toBe(true);
     // keywords（関連法令）経由で条番号からも引ける
     expect(searchItems(index, '安衛法第11条', 'faq').length).toBeGreaterThan(0);
+  });
+});
+
+describe('buildSearchIndex — 安全標識（sign）の収載', () => {
+  it('@/data/safety-signs の全標識が sign カテゴリで /safety-signs/sign/<id> へ深リンクされる', async () => {
+    const [index, signMod] = await Promise.all([
+      buildSearchIndex(),
+      import('@/data/safety-signs'),
+    ]);
+    const signItems = index.filter((i) => i.category === 'sign');
+    // SAFETY_SIGNS（5 分類の union）を漏れなく収載＝正本と件数一致（欠落分類 0）
+    expect(signItems.length).toBe(signMod.SAFETY_SIGNS.length);
+    expect(signItems.length).toBeGreaterThanOrEqual(50);
+    expect(signItems.every((i) => i.id.startsWith('sign-'))).toBe(true);
+    // 深リンク先は個別詳細ページのみ＝裸 /safety-signs には落とさない
+    expect(signItems.every((i) => i.url.startsWith('/safety-signs/sign/'))).toBe(true);
+    expect(signItems.some((i) => i.url === '/safety-signs')).toBe(false);
+  });
+
+  it('深リンク先 id 集合が正本 SAFETY_SIGNS に解決する（幽霊URL 0＝generateStaticParams 一致）', async () => {
+    const [index, signMod] = await Promise.all([
+      buildSearchIndex(),
+      import('@/data/safety-signs'),
+    ]);
+    // 詳細 /safety-signs/sign/[id] の generateStaticParams は SAFETY_SIGNS 全件 id を返し、
+    // 未知 id は notFound() で弾く＝収載集合＝解決集合であることを固定（soft404 ゼロ）。
+    const canonical = new Set(signMod.SAFETY_SIGNS.map((s) => s.id));
+    const linkedIds = index
+      .filter((i) => i.category === 'sign')
+      .map((i) => i.url.replace(/^\/safety-signs\/sign\//, ''));
+    expect(linkedIds.every((id) => canonical.has(id))).toBe(true);
+    expect(new Set(linkedIds).size).toBe(canonical.size);
+  });
+
+  it('標識名・英名・関連法令のいずれからも引け、意味が subtitle に出る', async () => {
+    const index = await buildSearchIndex();
+    // 現場頻用の標識名（禁止標識「立入禁止」）でヒット
+    const byName = searchItems(index, '立入禁止', 'sign');
+    expect(byName.length).toBeGreaterThan(0);
+    expect(byName[0]?.url).toBe('/safety-signs/sign/no-entry');
+    // 結果一覧で用途が分かるよう意味を subtitle に載せている
+    expect(byName.every((i) => i.subtitle.length > 0)).toBe(true);
+    // keywords（英名）経由で英語照会からも引ける
+    expect(searchItems(index, 'No entry', 'sign').length).toBeGreaterThan(0);
+    // keywords（関連法令）経由で条番号からも引ける（立入禁止＝安衛則 第325条ほか）
+    expect(searchItems(index, '労働安全衛生規則 第325条', 'sign').length).toBeGreaterThan(0);
   });
 });
 
@@ -272,6 +318,45 @@ describe('buildSearchIndex — 事故事例（accident）の収載', () => {
     expect(accident.some((i) => i.url === '/accidents')).toBe(false);
     // url の id と item.id が対応＝詳細ページが必ず解決する（幽霊URL なし）。
     expect(accident.every((i) => i.url === `/accidents/${i.id.replace(/^accident-/, '')}`)).toBe(true);
+  });
+});
+
+describe('buildSearchIndex — 保護具（equipment）の収載＋個別詳細への深リンク', () => {
+  it('正本 getAllEquipment と件数・ID集合が一致する（横断検索に丸ごと欠落していた穴の是正）', async () => {
+    const { getAllEquipment } = await import('@/lib/equipment-recommendation');
+    const index = await buildSearchIndex();
+    const equipment = index.filter((i) => i.category === 'equipment');
+
+    // 正本のID集合＝詳細 /equipment/[id] の generateStaticParams が解決する集合そのもの。
+    const datasetIds = new Set(getAllEquipment().map((e) => e.id));
+    const indexIds = new Set(equipment.map((i) => i.id.replace(/^equipment-/, '')));
+    expect(indexIds).toEqual(datasetIds);
+    expect(equipment.length).toBe(getAllEquipment().length);
+    // 非空虚性（1000件超の保護具DBが確かに収載されている）。
+    expect(equipment.length).toBeGreaterThan(500);
+  });
+
+  it('各結果は一覧トップではなく個別詳細 /equipment/<id> へ深リンクする（幽霊URL 0）', async () => {
+    const index = await buildSearchIndex();
+    const equipment = index.filter((i) => i.category === 'equipment');
+    expect(equipment.every((i) => /^\/equipment\/.+/.test(i.url))).toBe(true);
+    // 一覧トップ /equipment-finder や裸 /equipment へ落とさない。
+    expect(equipment.some((i) => i.url === '/equipment' || i.url === '/equipment-finder')).toBe(false);
+    // url の id と item.id が対応＝詳細ページが必ず解決する（正本 getAllEquipment 由来）。
+    expect(equipment.every((i) => i.url === `/equipment/${i.id.replace(/^equipment-/, '')}`)).toBe(true);
+  });
+
+  it('製品名・カテゴリ名・メーカー・JIS規格のいずれからも引ける（現場頻用の保護具名で発見可能）', async () => {
+    const index = await buildSearchIndex();
+    const equipment = index.filter((i) => i.category === 'equipment');
+    // 現場頻用の保護具カテゴリがヒットする（title=製品名 or keywords=カテゴリ名）。
+    const harness = searchItems(equipment, 'フルハーネス', 'equipment');
+    expect(harness.length).toBeGreaterThan(0);
+    // カテゴリ名は keywords 経由でも引ける。
+    const fallCat = searchItems(equipment, '墜落制止用器具', 'equipment');
+    expect(fallCat.length).toBeGreaterThan(0);
+    // subtitle にカテゴリ名＋規格を出して結果一覧で識別できる。
+    expect(equipment.every((i) => i.subtitle.length > 0)).toBe(true);
   });
 });
 
