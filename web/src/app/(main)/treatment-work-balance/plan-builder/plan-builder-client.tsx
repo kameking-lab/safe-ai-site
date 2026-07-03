@@ -254,7 +254,7 @@ export function PlanBuilderClient() {
             <button
               type="button"
               onClick={() => window.print()}
-              className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 print:hidden"
+              className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 print:hidden"
             >
               <Printer className="h-4 w-4" aria-hidden="true" />
               印刷／PDF
