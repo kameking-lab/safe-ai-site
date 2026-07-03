@@ -154,6 +154,34 @@ function Get-LauncherStatusLock {
 }
 
 # ---------------------------------------------------------------------------
+# Decide what to persist as lastCriticIso after a critic one-shot. On success we stamp $Now (the full
+# criticEveryDays interval elapses before the next run). On failure (timeout kill / non-zero exit /
+# could-not-run) we BACK-DATE the stamp so the next launcher pass retries in ~$RetryDays instead of
+# hiding a broken inspection system for a full interval - and without re-firing a blocking 30-min
+# one-shot on every single logon. Pure function so -SelfTest can cover it offline.
+# ---------------------------------------------------------------------------
+function Resolve-CriticStamp {
+  param([string]$Outcome, [datetime]$Now, [int]$CriticEveryDays, [int]$RetryDays = 1)
+  if ($Outcome -eq 'ok') { return $Now }
+  $back = [Math]::Max(0, $CriticEveryDays - $RetryDays)
+  return $Now.AddDays(-$back)
+}
+
+# ---------------------------------------------------------------------------
+# Supply gate (planner): decide whether to fire a planner one-shot for a lane. The gate must NOT
+# fire when that lane's persistent runner is ALREADY running, because the one-shot and the live
+# runner would operate the SAME clone concurrently (two claude+git processes -> index.lock
+# contention / branch clobber). At cold start (reboot/logon) nothing is running, so a drained
+# backlog is replenished before ignition; on the daily 07:00 self-healing re-run the lane is
+# already alive and self-replenishes per its own contract, so the one-shot is both unnecessary
+# and unsafe. Open<0 means the BACKLOG file is missing (never fire). Pure so -SelfTest covers it.
+# ---------------------------------------------------------------------------
+function Test-ShouldFirePlanner {
+  param([int]$Open, [bool]$LaneRunning, [bool]$HasPrompt)
+  return ($HasPrompt -and (-not $LaneRunning) -and ($Open -ge 0) -and ($Open -lt 3))
+}
+
+# ---------------------------------------------------------------------------
 # -SelfTest: offline verification of the shared status-lock helper (stale-orphan reclamation +
 # fresh-lock respect). Temp files only - no Claude, no real status file, no config, no network.
 # Exits 0 on PASS, 1 on FAIL. Runs before any config read so a broken config cannot block the test.
@@ -182,6 +210,28 @@ if ($SelfTest) {
     $c = Get-LauncherStatusLock $lp 60 5 50
     Assert-L "stale orphan lock is reclaimed and acquired" ($c -eq $true)
     if (Test-Path -LiteralPath $lp) { Remove-Item -LiteralPath $lp -Force }
+    # D) Resolve-CriticStamp: success stamps now (next due exactly at the full interval).
+    $fixed = [datetime]"2026-07-03T08:00:00"
+    $sOk = Resolve-CriticStamp -Outcome "ok" -Now $fixed -CriticEveryDays 7 -RetryDays 1
+    Assert-L "critic ok stamps now (full interval)" ($sOk -eq $fixed)
+    # E) A FAILED critic back-dates so it is NOT due after ~half a day but IS due after ~1 day
+    #    (bounded retry: no 7-day blackout, no every-logon 30-min re-fire).
+    $sFail = Resolve-CriticStamp -Outcome "timeout" -Now $fixed -CriticEveryDays 7 -RetryDays 1
+    Assert-L "critic failure is NOT due 12h later" ((($fixed.AddHours(12)) - $sFail).TotalDays -lt 7)
+    Assert-L "critic failure IS due ~1 day later" ((($fixed.AddDays(1)) - $sFail).TotalDays -ge 7)
+    # F) nonzero exit behaves the same as timeout (any non-ok = degraded retry).
+    $sNz = Resolve-CriticStamp -Outcome "nonzero" -Now $fixed -CriticEveryDays 7 -RetryDays 1
+    Assert-L "critic nonzero back-dates like timeout" ($sNz -eq $sFail)
+    # G) Edge: RetryDays >= CriticEveryDays clamps back-date to 0 (no negative interval).
+    $sEdge = Resolve-CriticStamp -Outcome "timeout" -Now $fixed -CriticEveryDays 1 -RetryDays 1
+    Assert-L "critic retry clamps to now when RetryDays>=interval" ($sEdge -eq $fixed)
+    # H) Test-ShouldFirePlanner: fires only when a drained backlog exists AND the lane is NOT
+    #    already running (the core fix: no one-shot in a clone with a live runner -> no git race).
+    Assert-L "planner fires when drained + not running + prompt" (Test-ShouldFirePlanner -Open 2 -LaneRunning $false -HasPrompt $true)
+    Assert-L "planner SKIPS when lane already running (concurrent-git guard)" (-not (Test-ShouldFirePlanner -Open 0 -LaneRunning $true -HasPrompt $true))
+    Assert-L "planner SKIPS when backlog not drained (open=3)" (-not (Test-ShouldFirePlanner -Open 3 -LaneRunning $false -HasPrompt $true))
+    Assert-L "planner SKIPS when backlog missing (open=-1)" (-not (Test-ShouldFirePlanner -Open -1 -LaneRunning $false -HasPrompt $true))
+    Assert-L "planner SKIPS when no planner prompt present" (-not (Test-ShouldFirePlanner -Open 1 -LaneRunning $false -HasPrompt $false))
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -589,22 +639,24 @@ function Invoke-OneShot {
     [string]$Model, [string]$PromptFile, [int]$TimeoutMin
   )
   $runner = Join-Path $LaneRepo "loop-runner.ps1"
-  if (-not (Test-Path $runner)) { Write-Launcher ("WARN: " + $Kind + " skipped, no runner at " + $runner); return }
-  if (-not (Test-Path $PromptFile)) { Write-Launcher ("WARN: " + $Kind + " skipped, no prompt " + $PromptFile); return }
+  if (-not (Test-Path $runner)) { Write-Launcher ("WARN: " + $Kind + " skipped, no runner at " + $runner); return "skipped" }
+  if (-not (Test-Path $PromptFile)) { Write-Launcher ("WARN: " + $Kind + " skipped, no prompt " + $PromptFile); return "skipped" }
   $tag = $LaneName + "-" + $Kind
   $argList = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $runner,
     "-Lane", $tag, "-RepoPath", $LaneRepo, "-Model", $Model,
     "-PromptFile", $PromptFile, "-MaxIterations", "1")
   if ($ClaudeCmd -ne "claude") { $argList += @("-ClaudeCmd", $ClaudeCmd) }
-  if ($WhatIf) { Write-Launcher ("[WHATIF] would run " + $Kind + " one-shot (tag=" + $tag + ", model=" + $Model + ", repo=" + $LaneRepo + ", prompt=" + $PromptFile + ")"); return }
+  if ($WhatIf) { Write-Launcher ("[WHATIF] would run " + $Kind + " one-shot (tag=" + $tag + ", model=" + $Model + ", repo=" + $LaneRepo + ", prompt=" + $PromptFile + ")"); return "whatif" }
   Write-Launcher ("running " + $Kind + " one-shot (tag=" + $tag + ", model=" + $Model + ", timeout=" + $TimeoutMin + "min)...")
   $p = Start-Process -FilePath "powershell" -ArgumentList $argList -WorkingDirectory $LaneRepo -PassThru
   if (-not $p.WaitForExit($TimeoutMin * 60 * 1000)) {
     try { $p.Kill() } catch {}
     Write-Launcher ("WARN: " + $Kind + " one-shot exceeded " + $TimeoutMin + "min; killed and continuing.")
-  } else {
-    Write-Launcher ($Kind + " one-shot finished (exit=" + $p.ExitCode + ").")
+    return "timeout"
   }
+  Write-Launcher ($Kind + " one-shot finished (exit=" + $p.ExitCode + ").")
+  if ($p.ExitCode -eq 0) { return "ok" }
+  return "nonzero"
 }
 
 # ---------------------------------------------------------------------------
@@ -725,8 +777,12 @@ if ($nearDeadline) {
 
 # ---------------------------------------------------------------------------
 # Inspection gate (critic): once per criticEveryDays. Runs BEFORE the lane loop so it never
-# overlaps the ops lane in the main tree. Best-effort; lastCriticIso is stamped immediately so
-# it does not re-fire on the same day even if it takes a while.
+# overlaps the ops lane in the main tree. lastCriticIso is PRE-stamped to now so a launcher that
+# starts concurrently (e.g. a logon near the 07:00 pass) sees not-due and does not fire a second
+# overlapping critic while this 30-min one-shot runs. But a silently FAILED critic (timeout kill /
+# non-zero exit / could-not-run) must NOT then hide behind that full-interval stamp: on failure we
+# back-date the stamp for a ~1-day retry and BLARE a note on the dashboard, so watch point #1 shows
+# the inspection system is degraded instead of the critique silently never running for a full week.
 # ---------------------------------------------------------------------------
 $criticEvery = if ($cfg.criticEveryDays) { [int]$cfg.criticEveryDays } else { 7 }
 $lastCritic = $null
@@ -739,7 +795,18 @@ if ($criticDue -and (Test-Path $criticPrompt)) {
   Write-Launcher ("critic due (last=" + ([string]$state.lastCriticIso) + ", every=" + $criticEvery + "d). Firing critic one-shot in main repo.")
   $state.lastCriticIso = $now.ToString("o")
   Save-State
-  Invoke-OneShot -Kind "critic" -LaneName "site" -LaneRepo $repoRoot -Model $criticModel -PromptFile $criticPrompt -TimeoutMin 30
+  $criticOutcome = Invoke-OneShot -Kind "critic" -LaneName "site" -LaneRepo $repoRoot -Model $criticModel -PromptFile $criticPrompt -TimeoutMin 30
+  if (-not $WhatIf -and $criticOutcome -ne "ok") {
+    $retryStamp = Resolve-CriticStamp -Outcome $criticOutcome -Now $now -CriticEveryDays $criticEvery -RetryDays 1
+    $state.lastCriticIso = $retryStamp.ToString("o")
+    Save-State
+    Add-Status (Fmt "criticFailHeader" @{ REASON = [string]$criticOutcome })
+    Add-Status ""
+    Add-Status (S "criticFailBody1")
+    Add-Status (S "criticFailBody2")
+    Add-Status ""
+    Write-Launcher ("WARN: critic one-shot degraded (" + $criticOutcome + "). Back-dated lastCriticIso for ~1-day retry; wrote dashboard note.")
+  }
 } else {
   Write-Launcher ("critic not due (last=" + ([string]$state.lastCriticIso) + ", every=" + $criticEvery + "d).")
 }
@@ -771,7 +838,13 @@ foreach ($lane in $cfg.lanes) {
   }
 
   # Supply gate: replenish an almost-empty backlog before starting the persistent runner.
-  if ($open -ge 0 -and $open -lt 3 -and (Test-Path $plannerPrompt)) {
+  # Skip when the lane's persistent runner is already alive: a one-shot in the same clone as a
+  # live runner races git (index.lock / branch clobber). A running lane self-replenishes anyway.
+  $laneAlreadyRunning = $running.ContainsKey($lane.name)
+  if ($open -ge 0 -and $open -lt 3 -and $laneAlreadyRunning) {
+    Write-Launcher ("lane '" + $lane.name + "' open=" + $open + " (<3) but runner already alive; skipping planner one-shot (avoids concurrent-git race; live lane self-replenishes).")
+  }
+  if ((Test-ShouldFirePlanner -Open $open -LaneRunning $laneAlreadyRunning -HasPrompt (Test-Path $plannerPrompt))) {
     Write-Launcher ("lane '" + $lane.name + "' open=" + $open + " (<3). Firing planner one-shot before ignition.")
     $laneTaggedPrompt = $plannerPrompt
     if (-not $WhatIf) {
