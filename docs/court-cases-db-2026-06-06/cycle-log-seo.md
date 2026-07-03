@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-07-03 柱C-2/T4後段 ⌘K パリティ＝⌘K 0件フォールバックへ e-Gov 条アンカー直リンクを結線（PR: seo/cmdk-egov-article-anchor-parity）
+
+**契約1) 回収**: 前イテレーションの追記衝突を解消＝#774(feed 逆カバレッジガード)・#780(現場語彙シノニム)は #772(manifest 資産実在ガード)マージで main が進み BACKLOG/cycle-log の完了欄が追記競合していたため、各ブランチへ `git merge origin/main`（force-push なし・完了欄は両側保持）で解決し再push（CI 再走→次イテレーション回収）。#772 は squash マージ済み→main を同期。#786(化学物質 canonical 深リンク)は e2e/smoke 進行中で継続。他班 OPEN PR は不可侵。
+
+**着手判断**: BACKLOG-seo 未着手キューは空（O17/T6・T7 は Path A/オーナー承認待ち）。補充指針に従い自領域から補充。#767 の cycle-log が明記していた**唯一の未結線後続**＝「⌘K 側の e-Gov 条アンカー結線（#743 との同一ファイル二重編集回避で保留）」に着手。#743 は既にマージ済みで overlap 解消済みを確認。
+
+**背景/穴**: 横断検索は /search（結果ページ）と ⌘K（CommandPalette）の 2 入口が同一インデックスを共有する。#767 で「法令名＋条番号→当該法令の e-Gov 該当条(#Mp-At_N)へ1タップ直リンク」を `/search` NoResults に結線したが、**⌘K 側は portal トップ導線止まり**で、curated 未収載の条番号を打った現場ユーザーが第2入口では原文への最短導線を得られない非対称が残っていた。
+
+**是正**: `CommandPalette.tsx` に `egovAnchor = useMemo(() => egovArticleAnchor(debouncedQuery), …)` を追加し、0件ブロックの amber 収録範囲注記とポータルトップ導線の間に、非nullのとき teal の直リンク「e-Gov で『{正式名称} {第N条}』を開く」（44px・target=_blank・rel=noopener・`trackEvent('search_zero_result_egov_article')`＝/search と同一イベント名）を描画。lib 純関数の再利用のみで実装重複0・可視の検索UI以外は無改変。
+
+**法令正確性・幽霊リンク0**: egovArticleAnchor は #767 の不変条件（裸条番号/枝番/未知法令は null＝誤誘導回避）をそのまま継承。法令トップURLは必ず実在で、当該条が無くてもアンカー不発になるだけ（404 でない）＝amber 注記と整合。
+
+**回帰**: `CommandPalette.test.tsx` に 1 it 追加＝「安衛則 第9999条」で0件→ `#Mp-At_9999` 直リンク（href が `https://laws.e-gov.go.jp/law/{安衛則egovLawId}#Mp-At_9999`・target/rel）を RTL 実描画で駆動＝`SearchResults.egov-anchor.test.tsx`(/search 側)と同型固定＝両入口の T4 後段パリティを CI で保証。
+
+**ゲート**: `tsc --noEmit`=0 / `lint`=errors0（warn 23 は既存の別ファイル）/ `vitest run`=300ファイル2573 pass・1 skip（新規1含む）/ `build`=成功。build 再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は `git checkout` で復元。working tree は自班2ファイルのみ。
+
+**残**: 本PRの CI 緑回収＆マージ（次イテレーション 1)）。#774・#780・#786 の緑回収も継続。条文カード本文への参照リンカー結線（O18）は law-search-panel.tsx 所有の ux-tools 班。O17/T6・T7 実装はオーナー承認待ち。
+
+---
+
 ## 2026-07-03 柱C-2/T4後段 0件フォールバックを e-Gov 条アンカー直リンクへ格上げ（egovArticleAnchor 新設）
 
 **契約1) 回収**: 前イテレーションの自班 CI 緑 PR を回収＝#743（⌘K 0件パリティ）・#750（sitemap 逆カバレッジガード＋/profile 収載）はいずれも #758 マージ後に追記衝突で CONFLICTING 化していたため、各ブランチへ `git merge origin/main`（force-push なし）で BACKLOG/cycle-log の追記衝突のみ解決（コードは #743=CommandPalette 自動マージ・#750=sitemap 非衝突）→ tsc/対象テスト緑を確認して再push。auto-merge は本リポジトリ無効のため CI 再走の緑回収は次イテレーション 1)。他班 OPEN PR（#761/#762/#763 等）は不可侵。
