@@ -333,6 +333,32 @@ function Get-AncestorPids {
   return $out
 }
 
+# Force-kill a process AND its whole child tree. Windows PowerShell 5.1 runs on .NET Framework, whose
+# [System.Diagnostics.Process].Kill() has NO entireProcessTree overload - it kills ONLY the named process.
+# So a plain $p.Kill() on a timed-out one-shot (planner/critic) leaves the claude child tree ORPHANED and
+# still running: for the critic that is a live claude writing inside the very worktree the finally then
+# 'git worktree remove --force's (corruption / a leaked worktree / the git race the isolation exists to
+# prevent, re-opened); for the planner an orphan racing the lane runner the ignition loop then starts in
+# the same clone. taskkill /F /T terminates the descendants too, mirroring the runner's wedge monitor.
+# Pure arg builder so -SelfTest can assert the exact command offline.
+function Get-TreeKillArgs {
+  param([int]$ProcessId)
+  return @("/F", "/T", "/PID", [string]$ProcessId)
+}
+
+# Thin live wrapper: tree-kill $Proc, then wait (bounded) for it to actually exit so a caller's teardown
+# (e.g. the critic worktree remove) never races a still-dying tree. Safe no-op on a null handle; never
+# throws (a scan/kill failure must not abort the launcher pass).
+function Stop-ProcessTree {
+  param([System.Diagnostics.Process]$Proc)
+  if ($null -eq $Proc) { return }
+  try {
+    $killArgs = Get-TreeKillArgs -ProcessId $Proc.Id
+    & taskkill @killArgs 2>&1 | Out-Null
+  } catch {}
+  try { $null = $Proc.WaitForExit(10000) } catch {}
+}
+
 # Cooperatively cycle (kill-only) every below-floor lane runner that is currently idle. Returns the list
 # of lane names cycled (or that WOULD be cycled under -WhatIf). Kill-only by design: the caller's normal
 # relaunch path resurrects the lane onto fresh code. Honors -WhatIf (logs, kills nothing). The optional
@@ -734,6 +760,14 @@ if ($SelfTest) {
     Assert-L "watchdog: script present + one already running -> do NOT spawn (idempotent, no churn)" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $true -AlreadyRunning $true))
     Assert-L "watchdog: script missing -> never spawn (even when none running)" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $false -AlreadyRunning $false))
     Assert-L "watchdog: script missing + one running -> still no spawn" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $false -AlreadyRunning $true))
+    # S) Get-TreeKillArgs / Stop-ProcessTree: a timed-out one-shot must be TREE-killed (taskkill /F /T), not
+    #    single-process $p.Kill()'d, or its claude child tree orphans and (for the critic) keeps writing
+    #    inside the worktree the finally then force-removes. Assert the exact command + the null no-op.
+    Assert-L "treekill: builds the exact 'taskkill /F /T /PID <id>' arg vector" (((Get-TreeKillArgs -ProcessId 4242) -join " ") -eq "/F /T /PID 4242")
+    Assert-L "treekill: emits 4 tokens with the PID rendered as a string" (((Get-TreeKillArgs -ProcessId 7).Count -eq 4) -and ((Get-TreeKillArgs -ProcessId 7)[3] -eq "7"))
+    $treeNullSafe = $true
+    try { Stop-ProcessTree -Proc $null } catch { $treeNullSafe = $false }
+    Assert-L "treekill: Stop-ProcessTree on a null handle is a safe no-op (never throws)" $treeNullSafe
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -1237,8 +1271,11 @@ function Invoke-OneShot {
   Write-Launcher ("running " + $Kind + " one-shot (tag=" + $tag + ", model=" + $Model + ", timeout=" + $TimeoutMin + "min)...")
   $p = Start-Process -FilePath "powershell" -ArgumentList $argList -WorkingDirectory $LaneRepo -PassThru
   if (-not $p.WaitForExit($TimeoutMin * 60 * 1000)) {
-    try { $p.Kill() } catch {}
-    Write-Launcher ("WARN: " + $Kind + " one-shot exceeded " + $TimeoutMin + "min; killed and continuing.")
+    # Tree-kill (NOT $p.Kill(), which is single-process on .NET Framework): orphaning the claude child
+    # would let it keep writing inside the critic worktree the finally then force-removes. Stop-ProcessTree
+    # also waits (bounded) for the tree to die so that teardown does not race a still-dying claude.
+    Stop-ProcessTree -Proc $p
+    Write-Launcher ("WARN: " + $Kind + " one-shot exceeded " + $TimeoutMin + "min; force-killed its whole process tree (claude included) and continuing.")
     return "timeout"
   }
   Write-Launcher ($Kind + " one-shot finished (exit=" + $p.ExitCode + ").")
