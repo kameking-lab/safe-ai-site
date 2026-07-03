@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-07-03 — OGP画像(/api/og)の透かしドメインを SITE_URL 単一ソース化＋og-url.ts 回帰テスト（PR: seo/og-watermark-domain-single-source）
+
+回収: 前イテレーション着手の自班 CI 緑 PR を回収＝#691（法令名かな読みエイリアス12法令）が CLEAN/MERGEABLE のため squash マージ→`git checkout main && git pull --ff-only`→clean。#698（page-json-ld 単一ソース化）は #691 マージで BACKLOG/cycle-log の [x] 追記が CONFLICTING/DIRTY→当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決し両完了エントリを併存させ push、CI 再走を次イテレーションで回収。#704（JSON-LD @id グラフ化）は e2e/smoke pending のため持ち越し。他班 OPEN PR（#702/#701/#694/#693 等）は不可侵。
+
+着手判断: BACKLOG-seo 未着手キューは空（O17/T6・T7 は Path A 設計ドラフト＝オーナー承認待ち）＋在庫 PR は #698/#704 の2本（<3）のため補充指針に従い自領域から新規補充。**構造化データ・OGP の全域再監査**を実施＝#530/#698 で JSON-LD（json-ld.tsx / page-json-ld.tsx）はサイトURLを `seo-metadata.ts` 単一ソース化済みだが、**OGP画像 route `api/og/route.tsx` が透かしに `anzen-ai-portal.jp` をリテラル直書きで取り残されている**ことを特定＝`SITE_URL` を替えると透かしだけ旧ドメインへ無言ドリフトする同型の穴。対象（api/og route・og-url・seo-metadata）は当班所有（"og-image 関連 route"・seo-lib）で、in-flight の #698(page-json-ld.tsx)・#704(json-ld.tsx) とは非重複＝衝突ゼロを確認して選択。
+
+- **現状（実バグ＝OGP透かしのドリフト源）**: `api/og/route.tsx` が右下透かしに `anzen-ai-portal.jp` を直書き。edge runtime の ImageResponse で全ページ共通の 1200×630 SNSカード画像を生成する route で、`SITE_URL`（=`https://www.anzen-ai-portal.jp`）変更時に透かしだけ旧ドメインへ乖離する（tsc は文字列リテラルのドリフトを検知しない）。
+- **修正（当班所有のみ）**: `seo-metadata.ts` に `SITE_DISPLAY_HOST`（`SITE_URL` からプロトコル・`www.`・末尾スラッシュを除いた表示用ホスト＝現行 `anzen-ai-portal.jp`）を新設し、route の透かしを `{SITE_DISPLAY_HOST}` へ差し替え（edge-safe＝seo-metadata は `next` 型 import のみで node 依存なし）。**挙動不変**＝導出値が現行透かしと同一のため描画は byte 相当で不変。
+- **テスト（無テスト解消＋ハードコード回帰ガード）**: 無テストだった OGP画像URL生成ヘルパー `og-url.ts`（layout.tsx metadata・json-ld.tsx が全ページの og:image に使用）に `og-url.test.ts`(9 it)を新設＝(1)ogImageUrl: title のみ/desc/lang='ja'省略(route 既定 ja と整合)/lang='en'のみ付与/記号・空白の URLエンコード往復 (2)SITE_DISPLAY_HOST: SITE_URL 由来導出・プロトコル/www./スラッシュ/パス不在・現行本番ドメイン一致で挙動固定 (3)**og route ソースのハードコード回帰ガード**＝SITE_DISPLAY_HOST を seo-metadata から import・`{SITE_DISPLAY_HOST}` 使用・裸ドメインリテラル不在（page-json-ld 直書きガードと同方針）。
+- **実測検証（end-to-end）**: dev server を起動し `curl /api/og`・`/api/og?title=…&lang=en` ＝ともに HTTP200・`image/png`・1200×630 RGBA PNG を確認、既定画像を目視で透かし `anzen-ai-portal.jp`・タグライン・タイトルが従来どおり描画されることを確認。
+- **ゲート**: `tsc --noEmit`=0 / `eslint`(4ファイル)=errors0 / `vitest run`=**全2411テスト緑**（新規9含む・skipped1）/ `build`=成功。build 再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は `git checkout` で復元・dev 検証の一時PNGは削除＝working tree は api/og route・seo-metadata・og-url.test の3ファイル＋BACKLOG/cycle-log のみで clean。
+- **要・他班なし**＝全て当班所有（OGP画像 route・seo-lib）内で完結。
+
+残: 本 PR＋#698(再走)＋#704 の CI 緑回収＆マージ（次イテレーション 1)）。次の未着手は補充の指針§に従い自領域から補充。
+
+---
+
 ## 2026-07-03 — 柱C-2 法令名かな読みエイリアスを現場頻用12法令へ拡張（PR: seo/law-alias-kana-readings-field-laws）
 
 回収: 自班 CI 緑 PR #674（RSSフィード自動発見）を squashマージ→`git checkout main && git pull --ff-only`→clean。#680（notice-search テスト）は #674 マージで BACKLOG/cycle-log の [x] 追記が衝突→当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決＝両完了エントリを併存させ push、CI 再走を次イテレーションで回収。#684（カテゴリタブ単一ソース化）は CI pending のため持ち越し。他班 OPEN PR は不可侵。
