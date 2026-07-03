@@ -96,27 +96,50 @@ function Test-EvalBelowTarget {
   return ($StrictAccuracy -lt $Target)
 }
 
+# Count questions whose live probe did NOT return HTTP 200 (0 = fetch failure/timeout, 5xx = server
+# error, 429 = rate limit). chatbot-genquality-live.test.ts writes the FULL report first, then asserts
+# every httpStatus is 200 - so one transient non-200 makes the harness exit non-zero while a complete,
+# valid report sits on disk. Those are AVAILABILITY failures, not answer-quality regressions: the record
+# flags them (incomplete) so a blip never masquerades as a chatbot quality drop. Pure (no IO).
+function Get-ReportHttpFailureCount {
+  param([object]$Report)
+  if ($null -eq $Report -or $null -eq $Report.results) { return 0 }
+  $n = 0
+  foreach ($r in $Report.results) {
+    if ($null -ne $r -and $null -ne $r.httpStatus -and ([int]$r.httpStatus) -ne 200) { $n++ }
+  }
+  return $n
+}
+
 # Build the machine-readable record from a parsed eval report (report.summary shape is fixed by
 # web/scripts/chatbot-eval-phase2.ts). Pure: takes the parsed object, returns an ordered hashtable.
 function ConvertTo-NightlyRecord {
-  param([object]$Report, [string]$Stamp, [double]$Target, [string]$RanAtIso)
+  param([object]$Report, [string]$Stamp, [double]$Target, [string]$RanAtIso, [int]$ExitCode = 0, [int]$HttpFailures = 0)
   $s = $Report.summary
   $strict = [double]$s.strictAccuracy
+  # A run is INCOMPLETE when the harness exited non-zero OR any question failed to reach the server. Its
+  # strictAccuracy is unreliable (unreached questions score as wrong), so we do NOT raise a quality
+  # regression from it: belowTarget stays false and the incomplete flag drives a distinct notice instead.
+  # ExitCode/HttpFailures default to 0 so a clean exit-0 report behaves exactly as before (backward compat).
+  $incomplete = ($ExitCode -ne 0 -or $HttpFailures -gt 0)
   return [ordered]@{
-    date           = $Stamp
-    ranAt          = $RanAtIso
-    baseUrl        = [string]$Report.base_url
-    mode           = [string]$Report.mode
-    generatedAt    = [string]$Report.generated_at
-    strictAccuracy = $strict
-    correct        = [int]$s.correct
-    partial        = [int]$s.partial
-    incorrect      = [int]$s.incorrect
-    scorable       = [int]$s.scorable
-    usefulRate     = [double]$s.usefulRate
-    target         = $Target
-    belowTarget    = (Test-EvalBelowTarget -StrictAccuracy $strict -Target $Target)
-    ok             = $true
+    date            = $Stamp
+    ranAt           = $RanAtIso
+    baseUrl         = [string]$Report.base_url
+    mode            = [string]$Report.mode
+    generatedAt     = [string]$Report.generated_at
+    strictAccuracy  = $strict
+    correct         = [int]$s.correct
+    partial         = [int]$s.partial
+    incorrect       = [int]$s.incorrect
+    scorable        = [int]$s.scorable
+    usefulRate      = [double]$s.usefulRate
+    target          = $Target
+    harnessExitCode = $ExitCode
+    httpFailures    = $HttpFailures
+    incomplete      = $incomplete
+    belowTarget     = ((-not $incomplete) -and (Test-EvalBelowTarget -StrictAccuracy $strict -Target $Target))
+    ok              = $true
   }
 }
 
@@ -150,6 +173,147 @@ function Write-JsonNoBom {
 function Add-JsonLineNoBom {
   param([string]$Path, [string]$Line)
   [System.IO.File]::AppendAllText($Path, ($Line + "`n"), (New-Object System.Text.UTF8Encoding($false)))
+}
+
+# ---------------------------------------------------------------------------
+# O18(b) part 1: surface a below-target measurement onto docs/loop-status.md (the owner's ONE watch file)
+# as a loud, self-healing warning banner. "Don't silently degrade": a regression the record already
+# stamped must be visible where the owner looks, and clear itself the moment quality recovers.
+# ---------------------------------------------------------------------------
+
+# Region markers for the eval-quality banner (ASCII literals, NOT localized - stable across encodings and
+# shared with loop-launcher.ps1, which preserves this banner verbatim across a full status render so a
+# launcher pass never silently wipes a live warning).
+$EvalBeginMarker = "<!-- EVAL-QUALITY:BEGIN (managed by loop-eval-nightly.ps1) -->"
+$EvalEndMarker   = "<!-- EVAL-QUALITY:END -->"
+
+# Load the localized status strings (Japanese lives in loop-status-strings.txt, read at RUNTIME so THIS
+# source stays pure ASCII - a Japanese literal here would be mis-decoded by Windows PowerShell 5.x and
+# break parsing). Same external-file convention as loop-launcher.ps1 / loop-report-status.ps1.
+function Import-StatusStrings {
+  param([string]$Path)
+  $ls = @{}
+  if ($Path -and (Test-Path $Path)) {
+    foreach ($ln in (Get-Content -Encoding UTF8 -Path $Path)) {
+      if ($ln -match '^\s*#') { continue }
+      $i = $ln.IndexOf('=')
+      if ($i -gt 0) { $ls[$ln.Substring(0, $i)] = $ln.Substring($i + 1) }
+    }
+  }
+  return $ls
+}
+
+# Format one localized string, substituting {KEY} placeholders. Returns the raw key when absent so a
+# missing/garbled strings file degrades to a visible ASCII marker rather than throwing.
+function Format-StatusString {
+  param([hashtable]$Strings, [string]$Key, [hashtable]$Vals)
+  $t = if ($Strings -and $Strings.ContainsKey($Key)) { [string]$Strings[$Key] } else { $Key }
+  if ($Vals) { foreach ($k in $Vals.Keys) { $t = $t.Replace('{' + $k + '}', [string]$Vals[$k]) } }
+  return $t
+}
+
+# The desired banner body for a record: the localized 3-line warning when the record is a below-target
+# measurement, otherwise an EMPTY array (= clear the banner). Pure: the SAME belowTarget the record was
+# stamped with (Test-EvalBelowTarget) drives this, so the dashboard and the record can never disagree.
+function Get-EvalBannerLines {
+  param([hashtable]$Strings, [object]$Record)
+  if ($null -eq $Record -or -not $Record.ok) { return @() }
+  # A genuine below-target measurement (complete run, strictAccuracy < target): the loud quality-regression
+  # warning. Takes precedence - a complete run is never incomplete, so the two branches never both fire.
+  if ($Record.belowTarget) {
+    $pct = [math]::Round([double]$Record.strictAccuracy * 100, 1)
+    $tgt = [math]::Round([double]$Record.target * 100, 0)
+    $vals = @{ PCT = $pct; TARGET = $tgt; DATE = [string]$Record.date; CORRECT = [string]$Record.correct; SCORABLE = [string]$Record.scorable }
+    return @(
+      (Format-StatusString -Strings $Strings -Key "evalBelowHeader" -Vals $vals),
+      "",
+      (Format-StatusString -Strings $Strings -Key "evalBelowBody1" -Vals $vals),
+      (Format-StatusString -Strings $Strings -Key "evalBelowBody2" -Vals $vals)
+    )
+  }
+  # An INCOMPLETE run (some question could not reach the server / harness exited non-zero): still surfaced
+  # so the night is never silently lost, but as an availability notice - NOT a quality-regression alarm.
+  if ($Record.incomplete) {
+    $vals = @{ DATE = [string]$Record.date; HTTPFAILS = [string]$Record.httpFailures; EXIT = [string]$Record.harnessExitCode }
+    return @(
+      (Format-StatusString -Strings $Strings -Key "evalIncompleteHeader" -Vals $vals),
+      "",
+      (Format-StatusString -Strings $Strings -Key "evalIncompleteBody1" -Vals $vals)
+    )
+  }
+  return @()
+}
+
+# Idempotently reconcile the eval-quality region in a status file's LINES. Removes any existing
+# BEGIN..END block (plus one trailing blank), then - when $Desired is non-empty - reinserts a fresh block
+# immediately BEFORE the self-report header ($ReportHeader), the one anchor present in BOTH the
+# reporter-only file and a launcher full render (falls back to the top of the file when that header is
+# absent). Applying it twice with the same $Desired yields identical lines (idempotent). Pure: operates on
+# and returns a string array, so -SelfTest exercises raise/clear/idempotent/preserve entirely offline.
+function Set-EvalRegion {
+  param([string[]]$Lines, [string[]]$Desired, [string]$ReportHeader, [string]$BeginMarker = $EvalBeginMarker, [string]$EndMarker = $EvalEndMarker)
+  $src = @($Lines)
+  # 1) Strip any existing region (BEGIN..END) plus a single trailing blank line if present.
+  $b = -1; $e = -1
+  for ($i = 0; $i -lt $src.Count; $i++) {
+    if (([string]$src[$i]).Trim() -eq $BeginMarker) { $b = $i }
+    elseif (([string]$src[$i]).Trim() -eq $EndMarker) { $e = $i; break }
+  }
+  $stripped = New-Object System.Collections.Generic.List[string]
+  if ($b -ge 0 -and $e -gt $b) {
+    for ($i = 0; $i -lt $b; $i++) { $stripped.Add([string]$src[$i]) }
+    $after = $e + 1
+    if ($after -lt $src.Count -and ([string]$src[$after]).Trim() -eq "") { $after++ }
+    for ($i = $after; $i -lt $src.Count; $i++) { $stripped.Add([string]$src[$i]) }
+  } else {
+    foreach ($l in $src) { $stripped.Add([string]$l) }
+  }
+  if (-not $Desired -or $Desired.Count -eq 0) { return $stripped.ToArray() }
+  # 2) Build the fresh region block (markers wrap the desired body; one trailing blank separates it).
+  $block = New-Object System.Collections.Generic.List[string]
+  $block.Add($BeginMarker)
+  foreach ($d in $Desired) { $block.Add([string]$d) }
+  $block.Add($EndMarker)
+  $block.Add("")
+  # 3) Insert before the report header (or at the top when it is absent).
+  $insertAt = 0
+  if ($ReportHeader) {
+    for ($i = 0; $i -lt $stripped.Count; $i++) {
+      if (([string]$stripped[$i]).Trim() -eq $ReportHeader.Trim()) { $insertAt = $i; break }
+    }
+  }
+  $result = New-Object System.Collections.Generic.List[string]
+  for ($i = 0; $i -lt $insertAt; $i++) { $result.Add([string]$stripped[$i]) }
+  foreach ($l in $block) { $result.Add([string]$l) }
+  for ($i = $insertAt; $i -lt $stripped.Count; $i++) { $result.Add([string]$stripped[$i]) }
+  return $result.ToArray()
+}
+
+# Acquire an exclusive lock on the status file (CreateNew = atomic "only if absent"), reclaiming a STALE
+# orphan older than $StaleSeconds. Identical semantics to loop-report-status.ps1's Get-StatusLock so the
+# eval banner serializes against the lane heartbeats that write this same file under the same .lock every
+# iteration. Returns $true if held (caller MUST Remove-Item the lockPath), $false after exhausting retries.
+function Get-StatusLock {
+  param([string]$LockPath, [int]$StaleSeconds = 60, [int]$Tries = 25, [int]$DelayMs = 200)
+  for ($try = 0; $try -lt $Tries; $try++) {
+    try {
+      $fs = [System.IO.File]::Open($LockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+      $fs.Close()
+      return $true
+    } catch {
+      $reclaimed = $false
+      try {
+        $li = Get-Item -LiteralPath $LockPath -ErrorAction SilentlyContinue
+        if ($li -and (((Get-Date) - $li.LastWriteTime).TotalSeconds -gt $StaleSeconds)) {
+          Remove-Item -LiteralPath $LockPath -Force -ErrorAction SilentlyContinue
+          Write-Host "[loop-eval-nightly] reclaimed stale status lock (age > $StaleSeconds s; prior holder likely killed mid-write)."
+          $reclaimed = $true
+        }
+      } catch {}
+      if (-not $reclaimed) { Start-Sleep -Milliseconds $DelayMs }
+    }
+  }
+  return $false
 }
 
 # ---------------------------------------------------------------------------
@@ -233,6 +397,105 @@ if ($SelfTest) {
     Remove-Item -LiteralPath $tmp2 -Force -ErrorAction SilentlyContinue
   }
 
+  # H) O18(b) eval-quality banner: strings loader, banner body, and the idempotent region reconciler.
+  # Synthetic ASCII strings so this never depends on the real loop-status-strings.txt (keeps the gate
+  # hermetic and this source ASCII).
+  $S = @{
+    evalBelowHeader = "## WARN: gen-quality below target (strictAccuracy {PCT}% < target {TARGET}%)"
+    evalBelowBody1  = "{DATE} eval: {CORRECT}/{SCORABLE}={PCT}% below target {TARGET}%."
+    evalBelowBody2  = "Check recent RAG/prompt/corpus changes."
+    reportHeader    = "## SELF-REPORT HEADER"
+  }
+  # H1) Strings round-trip from a temp file (comment + KEY=VALUE lines).
+  $tmpS = Join-Path ([System.IO.Path]::GetTempPath()) ("eval-strings-" + [guid]::NewGuid().ToString("N") + ".txt")
+  try {
+    Set-Content -LiteralPath $tmpS -Value @("# a comment", "evalBelowHeader=HDR {PCT}", "reportHeader=RH") -Encoding UTF8
+    $ls = Import-StatusStrings -Path $tmpS
+    Assert-E "H1: strings loader skips comments and parses KEY=VALUE" (($ls["evalBelowHeader"] -eq "HDR {PCT}") -and ($ls["reportHeader"] -eq "RH") -and (-not $ls.ContainsKey("# a comment")))
+  } finally { Remove-Item -LiteralPath $tmpS -Force -ErrorAction SilentlyContinue }
+  Assert-E "H1b: absent strings file -> empty map (no throw)" ((Import-StatusStrings -Path (Join-Path ([System.IO.Path]::GetTempPath()) ("nope-" + [guid]::NewGuid().ToString("N")))).Count -eq 0)
+
+  # H2) Banner body: a below-target record yields the localized 4-line block; ok/above and failure yield none.
+  $below = ConvertTo-NightlyRecord -Report $fixtureBad -Stamp "2026-07-04" -Target 0.80 -RanAtIso "2026-07-04T03:05:00+09:00"
+  $bLines = Get-EvalBannerLines -Strings $S -Record $below
+  Assert-E "H2: below-target record -> 4 banner lines" ($bLines.Count -eq 4)
+  Assert-E "H2: header carries the rounded pct and target" (($bLines[0] -match "71\.4%") -and ($bLines[0] -match "80%"))
+  Assert-E "H2: body carries correct/scorable" ($bLines[2] -match "15/21")
+  Assert-E "H2: at/above-target record -> NO banner (empty)" ((Get-EvalBannerLines -Strings $S -Record $rec).Count -eq 0)
+  $failRec = New-FailureRecord -Stamp "2026-07-04" -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 1 -ErrorText "x"
+  Assert-E "H2: failure record (ok=false) -> NO banner" ((Get-EvalBannerLines -Strings $S -Record $failRec).Count -eq 0)
+
+  # H3) Region reconciler on a fixture that mirrors the live reporter-only status file.
+  $doc = @(
+    "## SELF-REPORT HEADER",
+    "",
+    "<!-- LANE-REPORT:BEGIN (managed by loop-report-status.ps1) -->",
+    "- ops : last run ...",
+    "<!-- LANE-REPORT:END -->"
+  )
+  $raised = Set-EvalRegion -Lines $doc -Desired $bLines -ReportHeader "## SELF-REPORT HEADER"
+  Assert-E "H3: raise inserts the region ABOVE the self-report header" (($raised -join "`n").IndexOf($EvalBeginMarker) -lt ($raised -join "`n").IndexOf("## SELF-REPORT HEADER"))
+  Assert-E "H3: raised region carries the warning header line" (($raised -join "`n") -match "gen-quality below target")
+  Assert-E "H3: the lane rows are preserved verbatim" (($raised -join "`n") -match "- ops : last run")
+  # H4) Idempotent: re-applying the same desired yields identical lines (no duplicate region).
+  $raised2 = Set-EvalRegion -Lines $raised -Desired $bLines -ReportHeader "## SELF-REPORT HEADER"
+  Assert-E "H4: reconcile is idempotent (2nd apply == 1st)" (($raised -join "`n") -eq ($raised2 -join "`n"))
+  Assert-E "H4: exactly one BEGIN marker after double-apply" ((([regex]::Matches(($raised2 -join "`n"), [regex]::Escape($EvalBeginMarker))).Count) -eq 1)
+  # H5) Clear: empty desired removes the region and restores the original document exactly.
+  $cleared = Set-EvalRegion -Lines $raised -Desired @() -ReportHeader "## SELF-REPORT HEADER"
+  Assert-E "H5: clearing removes the region entirely" (-not (($cleared -join "`n") -match "EVAL-QUALITY"))
+  Assert-E "H5: cleared document equals the original (self-healing)" (($cleared -join "`n") -eq ($doc -join "`n"))
+  # H6) No header present -> insert at the very top (still visible, never lost).
+  $noHdr = Set-EvalRegion -Lines @("some other line") -Desired $bLines -ReportHeader "## MISSING HEADER"
+  Assert-E "H6: absent header -> region inserted at the top" ($noHdr[0] -eq $EvalBeginMarker)
+
+  # H7) Status lock: clean acquire / fresh respect / stale reclaim (parity with loop-report-status.ps1).
+  $lp = Join-Path ([System.IO.Path]::GetTempPath()) ("eval-lock-" + [guid]::NewGuid().ToString("N") + ".lock")
+  try {
+    Assert-E "H7: clean acquire on absent lock" (Get-StatusLock -LockPath $lp -StaleSeconds 60 -Tries 5 -DelayMs 20)
+    Assert-E "H7: a FRESH lock is respected (not reclaimed)" (-not (Get-StatusLock -LockPath $lp -StaleSeconds 60 -Tries 2 -DelayMs 20))
+    (Get-Item -LiteralPath $lp).LastWriteTime = (Get-Date).AddSeconds(-120)
+    Assert-E "H7: a STALE lock (>60s) is reclaimed and re-acquired" (Get-StatusLock -LockPath $lp -StaleSeconds 60 -Tries 5 -DelayMs 20)
+  } finally { Remove-Item -LiteralPath $lp -Force -ErrorAction SilentlyContinue }
+
+  # I) Incomplete-run handling: a report that PARSES but whose harness exited non-zero (or had HTTP
+  # failures) must be RECORDED (not discarded), flagged incomplete, and must NOT raise a false quality
+  # regression - it raises a distinct availability notice instead. This is the anti-silent-loss core.
+  # I1) HTTP-failure counter over the report.results shape.
+  $repMixed = [pscustomobject]@{ results = @(
+    [pscustomobject]@{ id = "GQ01"; httpStatus = 200 },
+    [pscustomobject]@{ id = "GQ02"; httpStatus = 0 },
+    [pscustomobject]@{ id = "GQ03"; httpStatus = 503 },
+    [pscustomobject]@{ id = "GQ04"; httpStatus = 200 }
+  ) }
+  Assert-E "I1: http-failure count = number of non-200 results" ((Get-ReportHttpFailureCount -Report $repMixed) -eq 2)
+  Assert-E "I1: all-200 report -> 0 http failures" ((Get-ReportHttpFailureCount -Report ([pscustomobject]@{ results = @([pscustomobject]@{ httpStatus = 200 }) })) -eq 0)
+  Assert-E "I1: null/absent results -> 0 (no throw)" ((Get-ReportHttpFailureCount -Report ([pscustomobject]@{})) -eq 0)
+  # I2) A parseable report + non-zero exit = incomplete, belowTarget SUPPRESSED even below the floor.
+  $recIncompleteExit = ConvertTo-NightlyRecord -Report $fixtureBad -Stamp "2026-07-04" -Target 0.80 -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 1 -HttpFailures 0
+  Assert-E "I2: non-zero exit -> incomplete=true" ([bool]$recIncompleteExit.incomplete)
+  Assert-E "I2: incomplete run does NOT raise belowTarget (availability != quality)" (-not $recIncompleteExit.belowTarget)
+  Assert-E "I2: incomplete run still ok=true (data preserved, not a failure marker)" ([bool]$recIncompleteExit.ok)
+  Assert-E "I2: record carries harnessExitCode" ($recIncompleteExit.harnessExitCode -eq 1)
+  # I3) HTTP failures alone (exit 0 is unusual with failures, but flag is HttpFailures-driven too).
+  $recIncompleteHttp = ConvertTo-NightlyRecord -Report $fixtureBad -Stamp "2026-07-04" -Target 0.80 -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 0 -HttpFailures 3
+  Assert-E "I3: httpFailures>0 -> incomplete=true, belowTarget suppressed" (($recIncompleteHttp.incomplete) -and (-not $recIncompleteHttp.belowTarget))
+  Assert-E "I3: record carries httpFailures" ($recIncompleteHttp.httpFailures -eq 3)
+  # I4) A clean exit-0 report with no failures behaves EXACTLY as before (backward compat).
+  $recClean = ConvertTo-NightlyRecord -Report $fixtureBad -Stamp "2026-07-04" -Target 0.80 -RanAtIso "2026-07-04T03:05:00+09:00"
+  Assert-E "I4: clean run (default exit 0/0) -> NOT incomplete" (-not $recClean.incomplete)
+  Assert-E "I4: clean below-floor run still raises belowTarget (unchanged)" ([bool]$recClean.belowTarget)
+  # I5) Banner: an incomplete record raises the DISTINCT availability notice, not the quality warning.
+  $Si = $S.Clone()
+  $Si["evalIncompleteHeader"] = "## NOTICE: eval incomplete ({HTTPFAILS} unreachable / exit {EXIT})"
+  $Si["evalIncompleteBody1"]  = "{DATE}: {HTTPFAILS} of 23 failed HTTP; quality verdict withheld."
+  $biLines = Get-EvalBannerLines -Strings $Si -Record $recIncompleteHttp
+  Assert-E "I5: incomplete record -> 3 banner lines (notice, blank, body)" ($biLines.Count -eq 3)
+  Assert-E "I5: notice header carries the failure count, NOT a quality-regression header" (($biLines[0] -match "eval incomplete") -and ($biLines[0] -notmatch "below target"))
+  Assert-E "I5: notice body carries the failure count and date" (($biLines[2] -match "3 of 23") -and ($biLines[2] -match "2026-07-04"))
+  Assert-E "I5: a clean at/above-target record still yields NO banner" ((Get-EvalBannerLines -Strings $Si -Record $rec).Count -eq 0)
+  Assert-E "I5: a genuine complete below-target record still yields the 4-line quality warning" ((Get-EvalBannerLines -Strings $Si -Record $below).Count -eq 4)
+
   if ($ok) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
 }
 
@@ -256,6 +519,52 @@ function Write-Log([string]$msg) {
   $line = "[" + (Get-Date -Format "yyyy-MM-dd HH:mm:ss") + "] " + $msg
   Write-Host $line
   if (-not $WhatIf) { try { Add-Content -Path $logFile -Value $line -Encoding UTF8 } catch {} }
+}
+
+# The owner's ONE watch file. Resolve exactly like loop-report-status.ps1: the central status via
+# SAFE_AI_LOOP_STATUS (the main tree the launcher reads/writes), else this tree's docs/loop-status.md.
+$statusPath = if ([string]$env:SAFE_AI_LOOP_STATUS -ne "") { [string]$env:SAFE_AI_LOOP_STATUS } else { Join-Path $RepoPath "docs\loop-status.md" }
+$stringsPath = Join-Path $RepoPath "loop-status-strings.txt"
+$Strings = Import-StatusStrings -Path $stringsPath
+$reportHeader = Format-StatusString -Strings $Strings -Key "reportHeader" -Vals $null
+
+# Reconcile the below-target warning banner in the status file for a measured record: RAISE it when the
+# record is below target, CLEAR it otherwise (self-healing on recovery). Lock-serialized against the lane
+# heartbeats. -Preview writes a private dry file and takes no lock. Non-fatal throughout - a surfacing
+# hiccup must never fail the measurement that already succeeded.
+function Update-EvalStatusBanner {
+  param([object]$Record, [switch]$Preview)
+  if (-not $statusPath) { Write-Log "eval banner: no status path resolved; skipping (non-fatal)."; return }
+  if (-not (Test-Path -LiteralPath $statusPath)) {
+    Write-Log ("eval banner: status file not present yet (" + $statusPath + "); skipping (the reporter/launcher own its creation). Non-fatal.")
+    return
+  }
+  $desired = @(Get-EvalBannerLines -Strings $Strings -Record $Record)
+  $action = if ($desired.Count -gt 0) { "RAISE below-target warning" } else { "CLEAR (quality at/above target)" }
+  if ($Preview) {
+    try {
+      $lines = @(Get-Content -Encoding UTF8 -Path $statusPath)
+      $new = @(Set-EvalRegion -Lines $lines -Desired $desired -ReportHeader $reportHeader)
+      $dry = Join-Path $logDir ("loop-status.evaldry-" + $runStamp + ".md")
+      Set-Content -Path $dry -Value (($new -join "`r`n") + "`r`n") -Encoding UTF8 -NoNewline
+      Write-Log ("[WHATIF] eval banner would " + $action + " -> " + $dry + " (no lock; real status untouched).")
+    } catch { Write-Log ("[WHATIF] eval banner preview skipped: " + $_.Exception.Message) }
+    return
+  }
+  $lockPath = $statusPath + ".lock"
+  if (-not (Get-StatusLock -LockPath $lockPath -StaleSeconds 60 -Tries 25 -DelayMs 200)) {
+    Write-Log "eval banner: could not acquire status lock after retries; skipping (non-fatal)."
+    return
+  }
+  try {
+    $lines = @(Get-Content -Encoding UTF8 -Path $statusPath)
+    $new = @(Set-EvalRegion -Lines $lines -Desired $desired -ReportHeader $reportHeader)
+    # Trim EOF blank lines so repeated writes never accumulate bloat (parity with the reporter's write).
+    while ($new.Count -gt 0 -and ([string]$new[$new.Count - 1]).Trim() -eq "") { $new = $new[0..($new.Count - 2)] }
+    Set-Content -Path $statusPath -Value (($new -join "`r`n") + "`r`n") -Encoding UTF8 -NoNewline
+    Write-Log ("eval banner: " + $action + " in " + $statusPath)
+  } catch { Write-Log ("eval banner: write failed (non-fatal): " + $_.Exception.Message) }
+  finally { try { Remove-Item -LiteralPath $lockPath -Force -ErrorAction SilentlyContinue } catch {} }
 }
 
 $now = Get-Date
@@ -287,8 +596,15 @@ if ($WhatIf) {
   Write-Log "[WHATIF] today is NOT yet measured; would run the production generation-quality eval:"
   Write-Log ("[WHATIF]   cd " + $webDir + " ; CHATBOT_EVAL_BASE_URL=" + $BaseUrl + " CHATBOT_GENQUALITY_OUT=" + $tmpReport + " npm run eval:chatbot-gen")
   Write-Log ("[WHATIF]   -> on success write daily=" + $dailyPath + ", overwrite latest=" + $latestPath + ", append history=" + $historyPath)
-  Write-Log ("[WHATIF]   -> record belowTarget when strictAccuracy < " + $Target + " (baseline 0.905); dashboard surfacing is O18(b))")
-  Write-Log "[WHATIF] no npm run, no network, no writes performed."
+  Write-Log ("[WHATIF]   -> record belowTarget when strictAccuracy < " + $Target + " (baseline 0.905); on belowTarget, RAISE the loop-status warning banner (O18(b) part 1))")
+  Write-Log ("[WHATIF]   status file = " + $statusPath + " (reconcile eval-quality banner: raise below-target / clear otherwise)")
+  # Preview the banner reconcile against the REAL status file (read-only -> dry file) using the most
+  # recent measurement, if any, so a dry run shows exactly what the below-target warning would do.
+  $latestForPreview = $null
+  if (Test-Path -LiteralPath $latestPath) { try { $latestForPreview = Get-Content -Raw -Encoding UTF8 -LiteralPath $latestPath | ConvertFrom-Json } catch {} }
+  if ($latestForPreview) { Update-EvalStatusBanner -Record $latestForPreview -Preview }
+  else { Write-Log "[WHATIF] no latest.json yet; eval banner preview skipped (nothing measured)." }
+  Write-Log "[WHATIF] no npm run, no network, no real-status writes performed."
   exit 0
 }
 
@@ -318,14 +634,21 @@ try {
   $env:CHATBOT_GENQUALITY_OUT = $prevOut
 }
 
-# Parse the report the eval wrote. exit 0 = ran (report present). Anything else = harness failure; we
-# STILL mark the day (the eval process started = budget considered spent) so ops does not re-hammer.
+# Parse the report the eval wrote. CRITICAL: read it whenever it PARSES, regardless of the harness exit
+# code. chatbot-genquality-live.test.ts writes the FULL report (line 154) BEFORE asserting every question
+# returned HTTP 200, so a single transient non-200 makes vitest (and the harness) exit non-zero while a
+# complete, valid report sits on disk. The old `-eq 0` gate DISCARDED that real measurement and wrote a
+# generic "unparseable" failure marker - silently losing the night's data AND blocking retry (the exact
+# silent degradation this lane exists to kill). Now: a parseable report is always recorded; a non-zero
+# exit / any HTTP failure only marks the run incomplete (availability, not a quality regression).
 $report = $null
-if ($exitCode -eq 0 -and (Test-Path -LiteralPath $tmpReport)) {
+if (Test-Path -LiteralPath $tmpReport) {
   try { $report = Get-Content -Raw -Encoding UTF8 -LiteralPath $tmpReport | ConvertFrom-Json } catch { $report = $null }
 }
 
 if ($null -eq $report) {
+  # No parseable report at all = a genuine hard failure (node/vitest could not run, or wrote nothing). We
+  # STILL mark the day (the eval process started = budget considered spent) so ops does not re-hammer.
   $rec = New-FailureRecord -Stamp $stamp -RanAtIso $now.ToString("o") -ExitCode $exitCode -ErrorText "eval harness did not produce a parseable report"
   try { Write-JsonNoBom -Path $dailyPath -Text ($rec | ConvertTo-Json -Depth 5) } catch {}
   try { Add-JsonLineNoBom -Path $historyPath -Line (Format-HistoryLine -Record $rec) } catch {}
@@ -335,7 +658,10 @@ if ($null -eq $report) {
   exit 0
 }
 
-$rec = ConvertTo-NightlyRecord -Report $report -Stamp $stamp -Target $Target -RanAtIso $now.ToString("o")
+# A report exists and parsed. Record the real measurement. A non-zero exit or any HTTP failure marks the
+# run incomplete so belowTarget does not raise a false quality alarm from an availability blip.
+$httpFailures = Get-ReportHttpFailureCount -Report $report
+$rec = ConvertTo-NightlyRecord -Report $report -Stamp $stamp -Target $Target -RanAtIso $now.ToString("o") -ExitCode $exitCode -HttpFailures $httpFailures
 $recJson = $rec | ConvertTo-Json -Depth 5
 try { Write-JsonNoBom -Path $dailyPath -Text $recJson } catch { Write-Log ("WARN: could not write daily record: " + $_.Exception.Message) }
 try { Write-JsonNoBom -Path $latestPath -Text $recJson } catch { Write-Log ("WARN: could not write latest.json: " + $_.Exception.Message) }
@@ -343,10 +669,17 @@ try { Add-JsonLineNoBom -Path $historyPath -Line (Format-HistoryLine -Record $re
 try { Remove-Item -LiteralPath $tmpReport -Force -ErrorAction SilentlyContinue } catch {}
 
 $pct = [math]::Round([double]$rec.strictAccuracy * 100, 1)
-if ($rec.belowTarget) {
-  Write-Log ("MEASURED " + $stamp + ": strictAccuracy=" + $pct + "% (" + $rec.correct + "/" + $rec.scorable + ") BELOW target " + ([math]::Round($Target * 100, 0)) + "% - a regression. (loop-status surfacing is O18(b).) Records: " + $dailyPath)
+if ($rec.incomplete) {
+  Write-Log ("MEASURED (INCOMPLETE) " + $stamp + ": strictAccuracy=" + $pct + "% (" + $rec.correct + "/" + $rec.scorable + "), httpFailures=" + $rec.httpFailures + ", harnessExit=" + $rec.harnessExitCode + " - quality verdict WITHHELD (availability issue, not a regression). Surfacing the incomplete-eval notice. Records: " + $dailyPath + " / latest.json / history.jsonl")
+} elseif ($rec.belowTarget) {
+  Write-Log ("MEASURED " + $stamp + ": strictAccuracy=" + $pct + "% (" + $rec.correct + "/" + $rec.scorable + ") BELOW target " + ([math]::Round($Target * 100, 0)) + "% - a regression. Raising the loop-status warning banner. Records: " + $dailyPath)
 } else {
   Write-Log ("MEASURED " + $stamp + ": strictAccuracy=" + $pct + "% (" + $rec.correct + "/" + $rec.scorable + "), useful=" + [math]::Round([double]$rec.usefulRate * 100, 0) + "%, target " + ([math]::Round($Target * 100, 0)) + "% met. Records: " + $dailyPath + " / latest.json / history.jsonl")
 }
+
+# Surface (O18(b) part 1): raise the loud below-target warning on the owner's watch file when belowTarget,
+# clear it otherwise (self-healing on recovery). Non-fatal - the measurement above already succeeded.
+Update-EvalStatusBanner -Record $rec
+
 Write-Log "=== loop-eval-nightly end ==="
 exit 0
