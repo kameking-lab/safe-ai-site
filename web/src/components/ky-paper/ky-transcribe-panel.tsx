@@ -153,7 +153,7 @@ export function KyTranscribePanel({
                 type="button"
                 onClick={() => void handleCopy(f.key, f.value)}
                 disabled={!f.value}
-                className={`shrink-0 rounded-lg border px-3 py-1 text-[11px] font-semibold disabled:opacity-40 ${
+                className={`min-h-[44px] shrink-0 rounded-lg border px-3 py-1 text-[11px] font-semibold disabled:opacity-40 ${
                   copiedKey === f.key
                     ? "border-emerald-400 bg-emerald-50 text-emerald-700"
                     : "border-sky-300 bg-white text-sky-700 hover:bg-sky-50"
