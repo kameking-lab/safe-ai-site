@@ -263,14 +263,14 @@ function CrossLinksBlock({ cas, name }: { cas: string; name: string }) {
       <div className="flex gap-2">
         <Link
           href={`/chemical-ra?cas=${encodeURIComponent(cas)}`}
-          className="inline-flex items-center gap-1 rounded-md bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-sm font-medium"
+          className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 text-sm font-medium"
         >
           RAを開始
           <ArrowRight className="w-4 h-4" aria-hidden="true" />
         </Link>
         <Link
           href="/chemical-database"
-          className="inline-flex items-center gap-1 rounded-md border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm"
+          className="inline-flex min-h-[44px] items-center gap-1 rounded-md border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm"
         >
           <ArrowLeft className="w-4 h-4" aria-hidden="true" />
           一覧に戻る
