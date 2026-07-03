@@ -240,6 +240,26 @@ function Get-LogsToPrune {
   return $out
 }
 
+# The retention sweep must cover EVERY lane's logs/, not just this tree's. loop-runner.ps1 writes its
+# loop-<lane>-*.log into <RepoPath>\logs, and non-ops lanes run in sibling clones under lanesRoot - so
+# the main-tree-only sweep left 5 of 6 log dirs growing without bound (only the ops lane shares this
+# tree). This dedups the candidate log dirs (main tree + each lane clone) by normalized full path so a
+# lane whose repoPath resolves to this tree (ops) is not swept twice. Pure (string-only, no IO) so
+# -SelfTest covers the dedup offline; non-existent dirs are handled at the call site by Get-ChildItem.
+function Get-UniqueLogDirs {
+  param([string[]]$Dirs)
+  $seen = @{}
+  $out = @()
+  foreach ($d in $Dirs) {
+    if ([string]$d -eq "") { continue }
+    $key = [string]$d
+    try { $key = [System.IO.Path]::GetFullPath($d) } catch {}
+    $key = $key.TrimEnd('\', '/').ToLowerInvariant()
+    if (-not $seen.ContainsKey($key)) { $seen[$key] = $true; $out += [string]$d }
+  }
+  return $out
+}
+
 # ---------------------------------------------------------------------------
 # Isolate the weekly critic in a dedicated git worktree. The critic runs as -Lane site and does
 # git checkout/commit/push; the ops persistent runner works the SAME main tree, so running the
@@ -390,6 +410,15 @@ if ($SelfTest) {
     Assert-L "prune: a non-loop .txt file is NEVER deleted" (-not ($pruned -contains "note.txt"))
     Assert-L "prune: KeepMin newest matched logs are retained even when old" (@(Get-LogsToPrune -Files @((& $mk "loop-a.log" 40), (& $mk "loop-b.log" 41)) -Now $nowL -RetentionDays 14 -KeepMin 2).Count -eq 0)
     Assert-L "prune: nothing to do on an empty logs dir" (@(Get-LogsToPrune -Files @() -Now $nowL -RetentionDays 14 -KeepMin 20).Count -eq 0)
+    # Get-UniqueLogDirs: the sweep now covers every lane clone's logs/, deduped so the ops tree (which
+    # equals the main tree) is not swept twice, and blanks are dropped.
+    $ud = @(Get-UniqueLogDirs -Dirs @("C:\repo\logs", "C:\lanes\data\logs", "C:\lanes\seo\logs"))
+    Assert-L "logdirs: distinct dirs all kept" ($ud.Count -eq 3)
+    $udDup = @(Get-UniqueLogDirs -Dirs @("C:\repo\logs", "C:\repo\logs", "c:\repo\Logs\"))
+    Assert-L "logdirs: case/trailing-slash duplicates collapse to one" ($udDup.Count -eq 1)
+    $udBlank = @(Get-UniqueLogDirs -Dirs @("C:\a\logs", "", "C:\b\logs"))
+    Assert-L "logdirs: blank entries are dropped" ($udBlank.Count -eq 2)
+    Assert-L "logdirs: empty input yields empty" (@(Get-UniqueLogDirs -Dirs @()).Count -eq 0)
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -1175,23 +1204,42 @@ if (-not $deadlinePassed) {
 
 # Log retention sweep: bound the unbounded growth of logs/ so the operator's diagnostic surface stays
 # readable and disk cannot slowly fill. Runs on every full pass (NOT under -HealOnly, which exited
-# earlier) and regardless of the deadline - cleanup is always safe. Deletes only stale loop-generated
-# logs beyond the 20 newest (Get-LogsToPrune); a still-open runner log is Windows-write-locked so its
-# delete simply fails and is skipped. -WhatIf lists what WOULD be pruned and touches nothing.
+# earlier) and regardless of the deadline - cleanup is always safe. Sweeps EVERY lane's logs/ (this
+# tree PLUS each sibling clone under lanesRoot - non-ops lanes write their loop-*.log there and it
+# would otherwise never be pruned), deduped by full path so the ops tree is not swept twice. Keeps the
+# 20 newest per dir + last 14d (Get-LogsToPrune); a still-open runner log is Windows-write-locked so
+# its delete simply fails and is skipped. -WhatIf lists what WOULD be pruned and touches nothing.
 try {
-  $logItems = @(Get-ChildItem -LiteralPath $logDir -File -ErrorAction SilentlyContinue)
-  $toPrune = @(Get-LogsToPrune -Files $logItems -Now (Get-Date) -RetentionDays 14 -KeepMin 20)
-  if ($toPrune.Count -eq 0) {
-    Write-Launcher ("log retention: nothing to prune (" + $logItems.Count + " files, keep>=20 newest + last 14d).")
-  } elseif ($WhatIf) {
-    Write-Launcher ("[WHATIF] log retention: would prune " + $toPrune.Count + " stale log(s): " + (($toPrune | Select-Object -First 8) -join ", ") + $(if ($toPrune.Count -gt 8) { " ..." } else { "" }))
-  } else {
-    $deleted = 0
-    foreach ($name in $toPrune) {
-      $p = Join-Path $logDir $name
-      try { Remove-Item -LiteralPath $p -Force -ErrorAction Stop; $deleted++ } catch {}
+  $candidateDirs = @($logDir)
+  foreach ($lane in $cfg.lanes) {
+    $lr = Resolve-LaneRepo $lane
+    if ([string]$lr -ne "") { $candidateDirs += (Join-Path $lr "logs") }
+  }
+  $sweepDirs = @(Get-UniqueLogDirs -Dirs $candidateDirs)
+  $now = Get-Date
+  $totalPrune = 0; $totalDeleted = 0; $totalFiles = 0
+  foreach ($dir in $sweepDirs) {
+    if (-not (Test-Path -LiteralPath $dir)) { continue }
+    $logItems = @(Get-ChildItem -LiteralPath $dir -File -ErrorAction SilentlyContinue)
+    $totalFiles += $logItems.Count
+    $toPrune = @(Get-LogsToPrune -Files $logItems -Now $now -RetentionDays 14 -KeepMin 20)
+    if ($toPrune.Count -eq 0) { continue }
+    $totalPrune += $toPrune.Count
+    if ($WhatIf) {
+      Write-Launcher ("[WHATIF] log retention: " + $dir + " -> would prune " + $toPrune.Count + " stale log(s): " + (($toPrune | Select-Object -First 8) -join ", ") + $(if ($toPrune.Count -gt 8) { " ..." } else { "" }))
+    } else {
+      foreach ($name in $toPrune) {
+        $p = Join-Path $dir $name
+        try { Remove-Item -LiteralPath $p -Force -ErrorAction Stop; $totalDeleted++ } catch {}
+      }
     }
-    Write-Launcher ("log retention: pruned " + $deleted + " of " + $toPrune.Count + " stale log(s) (kept 20 newest + last 14d).")
+  }
+  if ($totalPrune -eq 0) {
+    Write-Launcher ("log retention: nothing to prune across " + $sweepDirs.Count + " lane log dir(s) (" + $totalFiles + " files, keep>=20 newest + last 14d).")
+  } elseif ($WhatIf) {
+    Write-Launcher ("[WHATIF] log retention: would prune " + $totalPrune + " stale log(s) across " + $sweepDirs.Count + " lane log dir(s).")
+  } else {
+    Write-Launcher ("log retention: pruned " + $totalDeleted + " of " + $totalPrune + " stale log(s) across " + $sweepDirs.Count + " lane log dir(s) (kept 20 newest + last 14d per dir).")
   }
 } catch {
   Write-Launcher ("WARN: log retention sweep failed (non-fatal): " + $_.Exception.Message)
