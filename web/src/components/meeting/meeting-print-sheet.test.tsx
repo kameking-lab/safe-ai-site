@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MeetingPrintSheet } from "@/components/meeting/meeting-print-sheet";
 import { normalizeMeetingRecord } from "@/lib/meeting/schema";
-import { contractorFieldKey, deliveryFieldKey, emptyMeetingPaperFieldKeys } from "@/lib/meeting/paper-fields";
+import { checklistFieldKey, contractorFieldKey, deliveryFieldKey, emptyMeetingPaperFieldKeys } from "@/lib/meeting/paper-fields";
 
 describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
   const rec = normalizeMeetingRecord({
@@ -38,13 +38,14 @@ describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
     expect(container.innerHTML).toMatchSnapshot();
   });
 
-  it("editing 指定でヘッダー7欄＋明日のイベント5欄＋統括安全責任者コメント＋各社マトリクス7部位がタップ標的になり、タップでキーが飛ぶ", () => {
+  it("editing 指定でヘッダー7欄＋明日のイベント5欄＋統括安全責任者コメント＋各社マトリクス7部位＋点検項目8カテゴリがタップ標的になり、タップでキーが飛ぶ", () => {
     const onTapField = vi.fn();
     render(<MeetingPrintSheet record={rec} editing={{ onTapField }} />);
     const cells = screen.getAllByRole("button");
     // 静的13欄 + 各社1行ぶん11タップ標的（company/workContent/machines/qualifications/plannedCount/
     // predictedDisasters/risk×2セル/safetyInstructions/responsibleName/actualCount）+ 搬入出1行ぶん3タップ標的
-    expect(cells).toHaveLength(27);
+    // + 点検項目8カテゴリぶん8タップ標的
+    expect(cells).toHaveLength(35);
     fireEvent.click(screen.getByRole("button", { name: "打合せ日（前日）を入力" }));
     expect(onTapField).toHaveBeenCalledWith("meetingDate");
     fireEvent.click(screen.getByRole("button", { name: "作業日を入力" }));
@@ -101,6 +102,10 @@ describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
     expect(onTapField).toHaveBeenCalledWith(deliveryFieldKey(deliveryId, "time"));
     fireEvent.click(screen.getByRole("button", { name: "場所を入力" }));
     expect(onTapField).toHaveBeenCalledWith(deliveryFieldKey(deliveryId, "place"));
+    for (const cat of rec.checklist) {
+      fireEvent.click(screen.getByRole("button", { name: `点検（${cat.label}）を入力` }));
+      expect(onTapField).toHaveBeenCalledWith(checklistFieldKey(cat.key));
+    }
   });
 
   it("onAddContractorRow 指定時のみ「＋元請/1次/2次/3次」ホットスポットが出て、タップで型が渡る", () => {

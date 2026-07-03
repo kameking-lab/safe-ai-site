@@ -3,7 +3,8 @@
 // 無読の問い: ヘッダー7欄の記入順の続きとして、明日のイベント5欄（安全大会/検査/パトロール/明日の安全目標/その他）＋
 //   統括安全責任者コメントをcanvas上でタップ編集でき、用紙（＝印刷と同一WYSIWYG）にすぐ反映されるか。
 //   記入順チェーンが作成担当者→安全大会→…→その他→（第五弾で挿入された既定1行の搬入出＝物→時刻→場所）
-//   →統括安全責任者コメント（最終欄）まで一筆書きで辿れるか。印刷経路（editing無し）は不変か。
+//   →統括安全責任者コメント→（第六弾で挿入された点検項目1カテゴリ目）まで一筆書きで辿れるか。
+//   印刷経路（editing無し）は不変か。
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 const webDir = fileURLToPath(new URL("../../../web/", import.meta.url));
@@ -72,8 +73,15 @@ await sheet.getByRole("button", { name: /次の欄へ/ }).click();
 await page.waitForTimeout(150);
 check("さらに『次の欄へ』で統括安全責任者コメントのエディタに進む（記入順の最終欄）", await sheet.getByText("統括安全責任者コメント").first().isVisible().catch(() => false));
 await sheet.locator("textarea").first().fill("高所作業は特に注意すること。");
-check("統括安全責任者コメントは記入順の最終欄＝『次の欄へ』ではなく『完了』ボタン", await sheet.getByRole("button", { name: "完了" }).isVisible().catch(() => false));
-await sheet.getByRole("button", { name: "完了" }).click();
+// S1第六弾: 点検項目8カテゴリが記入順チェーンに追加されたため、統括安全責任者コメントは
+// もう最終欄ではなく次は点検項目1カテゴリ目（一般事項）に進む（真の最終欄検証は phase6 スクリプトで担保）。
+await sheet.getByRole("button", { name: /次の欄へ/ }).click();
+await page.waitForTimeout(150);
+check(
+  "統括安全責任者コメントの次は点検項目1カテゴリ目（S1第六弾で追加された記入順）に進む",
+  await sheet.getByText("点検（一般事項）", { exact: true }).first().isVisible().catch(() => false)
+);
+await sheet.getByRole("button", { name: "閉じる" }).click();
 await page.waitForTimeout(200);
 
 check("検査が用紙に反映", await page.getByText("足場検査 13:00").first().isVisible().catch(() => false));
