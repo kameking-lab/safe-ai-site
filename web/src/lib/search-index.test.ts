@@ -158,7 +158,7 @@ describe('buildSearchIndex — 用語集（glossary）の収載', () => {
     const index = await buildSearchIndex();
     const c = countByCategory(index, '安全');
     expect(c.all).toBe(
-      c.law + c.notice + c.chemical + c.equipment + c.education + c.accident + c.precedent + c.glossary + c.faq + c.sign,
+      c.law + c.notice + c.chemical + c.equipment + c.education + c.accident + c.precedent + c.glossary + c.faq + c.sign + c.article,
     );
   });
 });
@@ -250,6 +250,52 @@ describe('buildSearchIndex — 安全標識（sign）の収載', () => {
     expect(searchItems(index, 'No entry', 'sign').length).toBeGreaterThan(0);
     // keywords（関連法令）経由で条番号からも引ける（立入禁止＝安衛則 第325条ほか）
     expect(searchItems(index, '労働安全衛生規則 第325条', 'sign').length).toBeGreaterThan(0);
+  });
+});
+
+describe('buildSearchIndex — 法改正記事（article）の収載', () => {
+  it('公開済み記事が article カテゴリで /articles/<slug> へ深リンクされる（横断検索から丸ごと欠落していた穴の是正）', async () => {
+    const [index, { getPublishedArticleSearchEntries }] = await Promise.all([
+      buildSearchIndex(),
+      import('@/lib/articles-search-source'),
+    ]);
+    const articleItems = index.filter((i) => i.category === 'article');
+    // ブラウザ安全な射影源の公開済みエントリを漏れなく収載＝件数一致（欠落 0）
+    expect(articleItems.length).toBe(getPublishedArticleSearchEntries().length);
+    expect(articleItems.length).toBeGreaterThanOrEqual(10);
+    expect(articleItems.every((i) => i.id.startsWith('article-'))).toBe(true);
+    // 深リンク先は個別記事のみ＝裸 /articles 一覧には落とさない
+    expect(articleItems.every((i) => i.url.startsWith('/articles/'))).toBe(true);
+    expect(articleItems.some((i) => i.url === '/articles')).toBe(false);
+    // subtitle（記事概要）が結果一覧で内容判別に足る
+    expect(articleItems.every((i) => i.subtitle.length > 0)).toBe(true);
+  });
+
+  it('深リンク先 slug 集合が正本 getPublishedArticleSlugs に解決する（幽霊URL 0＝generateStaticParams 一致）', async () => {
+    const [index, { getPublishedArticleSlugs }] = await Promise.all([
+      buildSearchIndex(),
+      import('@/lib/articles'),
+    ]);
+    // 詳細 /articles/[slug] の generateStaticParams は getPublishedArticleSlugs() を返し、
+    // 未知/未公開 slug は getPublishedArticleBySlug が null→notFound()。収載集合＝解決集合を固定。
+    const canonical = new Set(getPublishedArticleSlugs());
+    const linkedSlugs = index
+      .filter((i) => i.category === 'article')
+      .map((i) => i.url.replace(/^\/articles\//, ''));
+    expect(linkedSlugs.every((s) => canonical.has(s))).toBe(true);
+    // 公開済み記事を漏れなく収載＝双方向一致（soft404 ゼロ・発見性の穴ゼロ）
+    expect(new Set(linkedSlugs)).toEqual(canonical);
+  });
+
+  it('タグ・キーワードから引け、結果が該当記事へ着地する', async () => {
+    const index = await buildSearchIndex();
+    // タグ「熱中症」で法改正記事がヒット
+    const heat = searchItems(index, '熱中症', 'article');
+    expect(heat.length).toBeGreaterThan(0);
+    expect(heat.some((i) => i.url === '/articles/heat-stroke-2025-mandatory')).toBe(true);
+    // キーワード「フルハーネス」でも引ける
+    const harness = searchItems(index, 'フルハーネス', 'article');
+    expect(harness.some((i) => i.url === '/articles/fullharness-2022-revision')).toBe(true);
   });
 });
 

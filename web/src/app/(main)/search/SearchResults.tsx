@@ -16,6 +16,7 @@ import {
   HelpCircle,
   HardHat,
   Signpost,
+  Newspaper,
   ArrowRight,
   ExternalLink,
   Copy,
@@ -50,6 +51,7 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
     case 'faq':       return <HelpCircle className={cls} aria-hidden="true" />;
     case 'equipment': return <HardHat className={cls} aria-hidden="true" />;
     case 'sign':      return <Signpost className={cls} aria-hidden="true" />;
+    case 'article':   return <Newspaper className={cls} aria-hidden="true" />;
   }
 }
 

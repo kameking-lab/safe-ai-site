@@ -1,6 +1,6 @@
 import { searchCrossIndex, normalizeArticleQuery, expandLawAliases } from './cross-search';
 
-export type SearchCategory = 'law' | 'notice' | 'chemical' | 'equipment' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq' | 'sign';
+export type SearchCategory = 'law' | 'notice' | 'chemical' | 'equipment' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq' | 'sign' | 'article';
 
 export interface SearchItem {
   id: string;
@@ -25,6 +25,9 @@ const SEARCH_CATEGORY_PRIORITY: readonly SearchCategory[] = [
   // FAQ は高意図の疑問（「衛生管理者は何人？」「SDS交付は義務？」）へ即答を返すため、
   // 同点時は判例・通達より上位に寄せる（条文・教育の次点）。
   'faq',
+  // 法改正記事（監修済みの解説コンテンツ）は法改正の背景・実装ガイドを平易にまとめる。
+  // 同点時は判例・通達より上位（FAQ の次点）に寄せ、条文・教育・FAQ には譲る。
+  'article',
   'precedent',
   'notice',
   'glossary',
@@ -52,6 +55,7 @@ export const CATEGORY_META: Record<
   glossary:  { label: '用語',    bgColor: 'bg-indigo-100', textColor: 'text-indigo-700' },
   faq:       { label: 'FAQ',     bgColor: 'bg-sky-100',    textColor: 'text-sky-700' },
   sign:      { label: '標識',    bgColor: 'bg-amber-100',  textColor: 'text-amber-700' },
+  article:   { label: '記事',    bgColor: 'bg-violet-100', textColor: 'text-violet-700' },
 };
 
 /**
@@ -68,7 +72,7 @@ export const CATEGORY_META: Record<
  * 忘れる／タブにあるのにメタが無い、の両方向のドリフトを検知）。
  */
 export const SEARCH_CATEGORIES: readonly SearchCategory[] = [
-  'law', 'faq', 'precedent', 'notice', 'chemical', 'equipment', 'education', 'accident', 'glossary', 'sign',
+  'law', 'faq', 'article', 'precedent', 'notice', 'chemical', 'equipment', 'education', 'accident', 'glossary', 'sign',
 ];
 
 /**
@@ -111,7 +115,7 @@ export function countByCategory(
   query: string,
 ): Record<'all' | SearchCategory, number> {
   const counts: Record<'all' | SearchCategory, number> = {
-    all: 0, law: 0, notice: 0, chemical: 0, equipment: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0, sign: 0,
+    all: 0, law: 0, notice: 0, chemical: 0, equipment: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0, sign: 0, article: 0,
   };
   if (!query.trim()) return counts;
   // 上限なしで全件マッチを採り、カテゴリ別に集計する。
@@ -388,6 +392,28 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
             ...s.relatedLaws.flatMap((r) => (r.article ? [r.statute, r.article] : [r.statute])),
           ].filter(Boolean),
           url: `/safety-signs/sign/${s.id}`,
+        });
+      }
+    }),
+
+    // 法改正記事（src/data/articles/*.json＝監修済みの法改正・実装ガイド解説）。
+    // 正本 getPublishedArticleIndex は node:fs 依存でブラウザ非安全のため、client 検索は
+    // ブラウザ安全な射影源 `@/lib/articles-search-source` から引く（本文除外の軽量エントリ・
+    // drift ガードで実在ファイル集合と同期）。これまで法改正記事は /articles 一覧と
+    // sitemap-articles.xml に載っているのに横断検索(/search・⌘K)から 0 件だった発見性の穴
+    // （site-critique 01 S-1）を是正。url は /articles/<slug> 深リンク＝/articles/[slug] の
+    // generateStaticParams が公開済み slug 全件を解決するため必ず着地する（幽霊URL 0）。
+    // 時限公開（publishedAt が未来）の記事は実行時 now で除外する（正本と同セマンティクス）。
+    import('@/lib/articles-search-source').then(({ getPublishedArticleSearchEntries }) => {
+      for (const a of getPublishedArticleSearchEntries()) {
+        items.push({
+          id: `article-${a.slug}`,
+          title: a.title,
+          subtitle: a.description.slice(0, 90),
+          category: 'article',
+          // タグ・キーワードから引ける（例「熱中症 WBGT」「フルハーネス 墜落制止」）。
+          keywords: [...a.tags, ...a.keywords].filter(Boolean),
+          url: `/articles/${a.slug}`,
         });
       }
     }),

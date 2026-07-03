@@ -5,7 +5,7 @@ import { SearchResults } from "./SearchResults";
 
 const _title = "サイト内 横断検索";
 const _desc =
-  "労災判例・厚労省通達・化学物質・特別教育・事故事例をまとめて横断検索。キーワード1つで安全衛生の必要情報へ最短到達。";
+  "法令条文・法改正記事・労災判例・厚労省通達・化学物質・特別教育・事故事例をまとめて横断検索。キーワード1つで安全衛生の必要情報へ最短到達。";
 
 export const metadata: Metadata = {
   title: _title,
