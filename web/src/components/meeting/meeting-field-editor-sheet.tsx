@@ -27,6 +27,7 @@ import {
 import {
   getMeetingPaperFieldDef,
   nextMeetingPaperFieldKey,
+  parseContractorFieldKey,
   setChecklistItemStatus,
   setContractorCompanyField,
   setContractorPlannedCountField,
@@ -49,16 +50,24 @@ export type MeetingFieldEditorSheetProps = {
   onClose: () => void;
   /** 「次の欄へ」（次が無い欄では「完了」になる） */
   onSelectField: (key: MeetingPaperFieldKey) => void;
+  /** S1（続き・第七弾）: 作業内容欄でのAI提案（従来UIと同じ /api/meeting/suggest を共有・その行に直接反映）。 */
+  onSuggestRow?: (id: string) => void;
+  /** AI提案が実行中の行id（従来UIのbusyRowと同じstate） */
+  suggestBusyId?: string | null;
 };
 
 const selectCls = "min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 text-base text-slate-900";
 
-export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSelectField }: MeetingFieldEditorSheetProps) {
+export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSelectField, onSuggestRow, suggestBusyId }: MeetingFieldEditorSheetProps) {
   const def = getMeetingPaperFieldDef(fieldKey);
   const next = nextMeetingPaperFieldKey(fieldKey, record);
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const contractorRow = def.contractorId ? record.contractors.find((c) => c.id === def.contractorId) : undefined;
   const checklistCategory = def.checklistCategoryKey ? record.checklist.find((c) => c.key === def.checklistCategoryKey) : undefined;
+  // 作業内容欄のときだけAI提案ボタンを出す（予想災害・指示・必要資格・リスクの入力元のため）。
+  // workContentのフィールド定義はcontractorIdを持たない（get/setがcontractorTextGet/Setで完結するため）ので、
+  // キー自体から行idを取り出す。
+  const workContentContractorId = parseContractorFieldKey(def.key)?.part === "workContent" ? parseContractorFieldKey(def.key)!.id : null;
 
   // 開いたら最初の入力へフォーカス（キーボード/音声にすぐ入れる）。
   useEffect(() => {
@@ -119,6 +128,19 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
             placeholder={def.placeholder}
             className="min-h-[88px] text-base"
           />
+        )}
+
+        {/* S1（続き・第七弾）: 作業内容欄でのAI提案。従来UI（クラシック表示）と同じ /api/meeting/suggest を共有し、
+            編集中のその行に直接反映（予想災害・安全衛生指示事項・必要資格・リスクをまとめて自動入力）。 */}
+        {workContentContractorId && onSuggestRow && (
+          <button
+            type="button"
+            disabled={suggestBusyId === workContentContractorId}
+            onClick={() => onSuggestRow(workContentContractorId)}
+            className="mt-2 min-h-[44px] w-full rounded-lg border border-indigo-300 bg-indigo-50 px-3 text-sm font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50"
+          >
+            {suggestBusyId === workContentContractorId ? "AI提案中…" : "🤖 AI提案（予想災害・指示・資格・リスクを自動入力）"}
+          </button>
         )}
 
         {def.type === "date" && (
