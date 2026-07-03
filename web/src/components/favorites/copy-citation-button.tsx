@@ -48,7 +48,7 @@ export function CopyCitationButton({
         onClick={handleClick}
         aria-label={copied ? "コピーしました" : label}
         title={copied ? "コピーしました" : label}
-        className={`inline-flex h-7 w-7 items-center justify-center rounded-md border transition ${
+        className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border transition ${
           copied
             ? "border-emerald-300 bg-emerald-50 text-emerald-700"
             : "border-slate-200 bg-white text-slate-400 hover:border-emerald-300 hover:text-emerald-700"
@@ -69,7 +69,7 @@ export function CopyCitationButton({
       onClick={handleClick}
       aria-label={copied ? "コピーしました" : label}
       title={label}
-      className={`inline-flex items-center gap-1 rounded-lg border px-3 py-1 text-[11px] font-semibold transition ${
+      className={`inline-flex min-h-[44px] items-center gap-1 rounded-lg border px-3 py-1 text-[11px] font-semibold transition ${
         copied
           ? "border-emerald-300 bg-emerald-50 text-emerald-800"
           : "border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
