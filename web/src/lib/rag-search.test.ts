@@ -72,6 +72,17 @@ describe("Chrome R8 emergency RAG pins", () => {
     );
     expect(hit).toBe(true);
   });
+
+  it("pins 安衛則第567条 for 足場「組立て・変更後」の点検・記録 questions (fresh eval Q39)", () => {
+    const { articles } = searchRelevantArticlesWithScore(
+      "足場の組立て・変更後に必要な点検と記録の根拠条文は？",
+      5
+    );
+    const hit = articles.some(
+      (a) => a.law === "労働安全衛生規則（足場等）" && a.articleNum === "第567条"
+    );
+    expect(hit).toBe(true);
+  });
 });
 
 describe("O5: synonyms.ts:166 是正＋口語「頻度」「資格」拡充（診断書04 T4）", () => {

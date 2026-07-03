@@ -1,20 +1,12 @@
 {
-  "generated_at": "2026-07-02T23:50:30.147Z",
+  "generated_at": "2026-07-03T03:04:54.142Z",
   "source": "test/chatbot-fresh-100.json",
   "total": 100,
-  "correct": 99,
-  "accuracy": 0.99,
+  "correct": 100,
+  "accuracy": 1,
   "target": 0.9,
   "passed": true,
-  "failures": [
-    {
-      "id": 39,
-      "topic": "足場",
-      "question": "足場の組立て・変更後に必要な点検と記録の根拠条文は？",
-      "expected": "安衛則第567条 / 安衛則第568条",
-      "actual": "安衛則第565条, 安衛則第38条, ボイラー則第62条, 安衛令第6条, 特化則第27条"
-    }
-  ],
+  "failures": [],
   "topic_breakdown": {
     "総則": {
       "total": 4,
@@ -43,8 +35,8 @@
     },
     "足場": {
       "total": 5,
-      "correct": 4,
-      "accuracy": 0.8
+      "correct": 5,
+      "accuracy": 1
     },
     "化学物質": {
       "total": 10,
