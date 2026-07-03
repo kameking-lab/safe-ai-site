@@ -1,5 +1,19 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: accident-database-panel.tsx (/accidents本体) 未着手コンポーネントの44px是正
+
+**イテレーション頭の回収**: 自班のオープンPR #775(共有部品breadcrumb・action-bar・analysis-panel 44px)はe2e/smoke/VercelがIN_PROGRESS/PENDINGで未緑のため今回はマージ見送り、次イテレーションで回収。`git checkout main && git pull --ff-only`でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、`web/src/components/accident-database-panel.tsx`（/accidents本体・タブ切替後に描画される主要フィルタ・一覧・home-screen経由で高トラフィック）がこれまでの44px一括是正バッチの対象から漏れていた未着手コンポーネントと判明。PR #775の差分（breadcrumb.tsx・accidents/action-bar.tsx・accident-analysis-panel.tsx・mhlw-accident-analysis-panel.tsx）と非重複であることをdiff --statで確認済み。
+
+**修正**: `accident-database-panel.tsx`1ファイルに`inline-flex min-h-[44px] items-center`を7箇所付与。業種フィルタ10チップ・「フィルタをリセット」(パディング無し)・対象属性7ボタン・事業所規模4ボタン・作業カテゴリボタン・ページネーション前へ/次へ、各カードの「詳細を見る」トグル・「→ 詳細ページへ」/「この事例で学習する」/「→ 日誌に記録」リンク・出典外部リンク。純粋なクラス追加でレイアウト・絞り込みロジック・遷移先不変。
+
+**テスト**: `accident-database-panel.test.tsx`新設(7件・EasyJapaneseProvider配下でrender)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 301 files・2559 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/accident-database-panel-44px-2026-07-03.mjs`（next start実機・Playwright・390×844）**7/7 PASS**（業種フィルタ「建設」チップ・対象属性「女性労働者」・事業所規模「全規模」・「詳細を見る」・「→ 詳細ページへ」・「→ 日誌に記録」すべて実boundingBox height=44.0px実測）。
+
 ## 2026-07-03 — 補充: /faq・/glossary 検索導線＋/features系5サブページCTAの44px是正
 
 **イテレーション頭の回収**: #795(signage-floor-plan-editor-44px)がe2e/smoke/Vercel全緑・mergeStateStatus=CLEANのためsquashマージ→`git checkout main && git pull --ff-only`でclean確認。#781(accident-database-panel-44px)はe2e/smoke IN_PROGRESSのため今回は見送り、次イテレーションで回収。
