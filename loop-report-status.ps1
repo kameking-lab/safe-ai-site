@@ -396,7 +396,14 @@ function Get-LaneHealthLine {
     return (Fmt "laneHealthBornDead" @{ LANES = ($bornDead -join $sep); MIN = $StaleMinutes })
   }
   if ($aliveNoReport.Count -gt 0 -and $canAliveNoReport) {
-    return (Fmt "laneHealthAliveNoReport" @{ LANES = ($aliveNoReport -join $sep); MISSING = $aliveNoReport.Count; TOTAL = $ExpectedLanes.Count })
+    # TOTAL is the denominator on the owner's watch line ("N/TOTAL running-but-silent"). This branch is the
+    # ONLY one reachable with an EMPTY roster: $missing needs a roster, but $staleAlive is derived from rows
+    # alone, so a config that is momentarily unreadable in a clone (mid git-checkout) while a lane is stale-
+    # but-alive falls here with $ExpectedLanes.Count = 0 and would print a nonsense "N/0". The documented
+    # contract (see the header) is that an unknown roster reverts to pre-roster behavior, so fall back to the
+    # reported-lane count exactly like the OK branch below. When the roster IS known this is unchanged.
+    $anrTotal = if ($ExpectedLanes -and $ExpectedLanes.Count -gt 0) { $ExpectedLanes.Count } else { $all.Count }
+    return (Fmt "laneHealthAliveNoReport" @{ LANES = ($aliveNoReport -join $sep); MISSING = $aliveNoReport.Count; TOTAL = $anrTotal })
   }
   if ($quietMissing.Count -gt 0 -and $LS.ContainsKey("laneHealthUnreported")) {
     return (Fmt "laneHealthUnreported" @{ LANES = ($quietMissing -join $sep); MISSING = $quietMissing.Count; TOTAL = $ExpectedLanes.Count })
@@ -788,6 +795,17 @@ if ($SelfTest) {
           # M4: a genuinely born-dead missing lane still outranks a demoted stale-alive lane (loud wins).
           $m4 = Get-LaneHealthLine -Rows @($rOps, $rDataStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapOld -AliveLanes @("data")
           Assert-Test "M4: a truly born-dead missing lane still outranks a demoted stale-alive lane" ($m4 -eq $g2exp)
+          # O) Empty-roster denominator: a config momentarily unreadable in a clone (mid git-checkout) yields an
+          # EMPTY roster while a lane is stale-but-alive. That path returned "N/0" (nonsense fraction on the
+          # owner's watch line) because TOTAL was $ExpectedLanes.Count. The contract says an unknown roster
+          # reverts to pre-roster behavior, so TOTAL must fall back to the reported-lane count.
+          # O1: empty roster + stale-alive data -> alive-no-report with TOTAL = reported count (2), not 0.
+          $o1 = Get-LaneHealthLine -Rows @($rOps, $rDataStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @() -AliveLanes @("data")
+          $o1exp = Fmt "laneHealthAliveNoReport" @{ LANES = "data"; MISSING = 1; TOTAL = 2 }
+          Assert-Test "O1: empty roster + stale-alive lane -> TOTAL falls back to reported count (no nonsense /0)" ($o1 -eq $o1exp)
+          # O2: regression - a KNOWN roster is unchanged (TOTAL stays the roster size, here 2), same as M1.
+          $o2 = Get-LaneHealthLine -Rows @($rOps, $rDataStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data") -AliveLanes @("data")
+          Assert-Test "O2: known roster still uses the roster size as TOTAL (no regression)" ($o2 -eq $m1exp)
         }
       }
     }

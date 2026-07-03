@@ -74,10 +74,10 @@ export function MeetingPaperView() {
   const [history, setHistory] = useState<MeetingHistory | null>(null);
   // 「前回を複製」を上部にも出すための判定（端末に保存済みの打合せ書があるときだけ）。
   const [hasLatest, setHasLatest] = useState(false);
-  // S1（打合せ用紙 直接操作UI・第一弾〜第六弾）: 用紙キャンバス（β）。KYのF1と同じ方式で
+  // S1（打合せ用紙 直接操作UI・第一弾〜第七弾）: 用紙キャンバス（β）。KYのF1と同じ方式で
   // 既定はオフ（?canvas=1 または「🗺 キャンバス(β)」ボタンで切替）。ヘッダー7欄・明日のイベント5欄・
-  // 統括安全責任者コメント・各社マトリクス10部位・搬入出（動的行）・点検項目8カテゴリに対応。
-  // 残＝AI提案のエディタ内統合・履歴サジェストのcanvas内提供・既定切替（β外し）。
+  // 統括安全責任者コメント・各社マトリクス10部位・搬入出（動的行）・点検項目8カテゴリ・
+  // 作業内容欄でのAI提案に対応。残＝履歴サジェストのcanvas内提供・既定切替（β外し）。
   const [canvasMode, setCanvasMode] = useState(false);
   const [activeFieldKey, setActiveFieldKey] = useState<MeetingPaperFieldKey | null>(null);
   const stageRef = useRef<PaperStageHandle>(null);
@@ -365,6 +365,8 @@ export function MeetingPaperView() {
             patch={patch}
             onClose={() => setActiveFieldKey(null)}
             onSelectField={(key) => setActiveFieldKey(key)}
+            onSuggestRow={(id) => void suggestRow(id)}
+            suggestBusyId={busyRow}
           />
         )}
 
