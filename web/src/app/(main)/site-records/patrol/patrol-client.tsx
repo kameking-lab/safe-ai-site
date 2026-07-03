@@ -348,8 +348,8 @@ export function PatrolClient() {
                   <p className="mt-0.5 text-xs text-slate-500">巡視者 {s.inspector || "—"}／要改善 {s.ngCount}／指摘 {s.findingCount}（未是正 {s.openCount}）</p>
                 </div>
                 <div className="flex shrink-0 gap-2">
-                  <button type="button" onClick={() => openSaved(s.id)} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50">開く</button>
-                  <button type="button" onClick={() => deleteSaved(s.id)} className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50">削除</button>
+                  <button type="button" onClick={() => openSaved(s.id)} className="min-h-[44px] rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50">開く</button>
+                  <button type="button" onClick={() => deleteSaved(s.id)} className="min-h-[44px] rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50">削除</button>
                 </div>
               </li>
             ))}
@@ -379,7 +379,7 @@ function OpenFindingRow({ f, onOpen }: { f: OpenFinding; onOpen: () => void }) {
           </p>
           <p className="mt-0.5 text-[11px] text-slate-400">{f.patrolDate} の巡視（{f.area || "範囲未設定"}）</p>
         </div>
-        <button type="button" onClick={onOpen} className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-sky-300 px-2.5 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50">
+        <button type="button" onClick={onOpen} className="inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-lg border border-sky-300 px-2.5 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50">
           記録を開く <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       </div>

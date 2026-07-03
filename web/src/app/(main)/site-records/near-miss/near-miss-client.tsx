@@ -241,10 +241,10 @@ export function NearMissClient() {
                     )}
                   </div>
                   <div className="flex shrink-0 gap-2 print:hidden">
-                    <button type="button" onClick={() => toggleResolved(rep)} className={`rounded-lg border px-2.5 py-1.5 text-xs font-bold ${rep.resolved ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50" : "border-slate-300 text-slate-600 hover:bg-slate-100"}`}>
+                    <button type="button" onClick={() => toggleResolved(rep)} className={`min-h-[44px] rounded-lg border px-2.5 py-1.5 text-xs font-bold ${rep.resolved ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50" : "border-slate-300 text-slate-600 hover:bg-slate-100"}`}>
                       {rep.resolved ? "対策済" : "対応中"}
                     </button>
-                    <button type="button" onClick={() => remove(rep.id)} className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50" aria-label="削除">
+                    <button type="button" onClick={() => remove(rep.id)} className="min-h-[44px] rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50" aria-label="削除">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
