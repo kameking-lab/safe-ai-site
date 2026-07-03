@@ -2,6 +2,18 @@ import type { Metadata } from "next";
 
 export const SITE_NAME = "安全AIポータル";
 export const SITE_URL = "https://www.anzen-ai-portal.jp";
+/**
+ * 表示用のドメイン（プロトコル・`www.`・末尾スラッシュを除いたホスト名）。
+ *
+ * OGP 画像（`/api/og`）の透かしなど「見せるドメイン」に使う。値は {@link SITE_URL}
+ * 由来の単一ソースで、`SITE_URL` を別ドメインへ替えても自動追従する（旧実装は
+ * og route が `"anzen-ai-portal.jp"` をリテラル直書きし、`SITE_URL` 変更時に
+ * OGP 透かしだけ旧ドメインへ無言ドリフトする穴だった）。
+ */
+export const SITE_DISPLAY_HOST = SITE_URL
+  .replace(/^https?:\/\//, "")
+  .replace(/^www\./, "")
+  .replace(/\/+$/, "");
 export const SITE_LOCALE = "ja_JP";
 export const SITE_ALTERNATE_LOCALES = ["en_US"] as const;
 
