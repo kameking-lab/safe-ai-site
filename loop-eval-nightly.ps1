@@ -28,7 +28,8 @@
   Outputs (all gitignored, main tree only - so this never dirties the ops clean-tree contract nor
   races the ops runner's git; a committed snapshot for /about is O18(b)):
     .loop-eval/genquality/<yyyy-MM-dd>.json  per-night full record (existence = "already ran today")
-    .loop-eval/genquality/latest.json        overwritten each success (most-recent, for /about later)
+    .loop-eval/genquality/latest.json        the current-quality pointer for /about: advanced ONLY on a
+                                             COMPLETE measurement (an incomplete/blip run does not clobber it)
     .loop-eval/genquality/history.jsonl      one compact line per run (trend history)
 
   This file is intentionally PURE ASCII so Windows PowerShell 5.x parses it as BOM-less UTF-8
@@ -122,6 +123,18 @@ function Test-AlreadyRanTonight {
 function Test-EvalBelowTarget {
   param([double]$StrictAccuracy, [double]$Target)
   return ($StrictAccuracy -lt $Target)
+}
+
+# Should this record advance latest.json (the "current quality" pointer O18(b)'s /about reads)? ONLY a
+# COMPLETE measurement (ok=true AND not incomplete). An INCOMPLETE run's strictAccuracy is unreliable
+# (questions that never reached the server score as wrong), so writing it to latest.json would clobber the
+# last known-good number with an availability-blip low - and /about naively reading latest.strictAccuracy
+# would show a FALSE public-facing quality regression the site never had. The daily marker (the day guard)
+# and history.jsonl (the trend) STILL record the incomplete run; only this "current quality" pointer must
+# not regress on a transient blip. A failure record (ok=false) never advances latest either. Pure (no IO).
+function Test-ShouldAdvanceLatest {
+  param([object]$Record)
+  return ($null -ne $Record -and [bool]$Record.ok -and -not [bool]$Record.incomplete)
 }
 
 # Count questions whose live probe did NOT return HTTP 200 (0 = fetch failure/timeout, 5xx = server
@@ -608,6 +621,15 @@ if ($SelfTest) {
   Assert-E "I5: notice body carries the failure count and date" (($biLines[2] -match "3 of 23") -and ($biLines[2] -match "2026-07-04"))
   Assert-E "I5: a clean at/above-target record still yields NO banner" ((Get-EvalBannerLines -Strings $Si -Record $rec).Count -eq 0)
   Assert-E "I5: a genuine complete below-target record still yields the 4-line quality warning" ((Get-EvalBannerLines -Strings $Si -Record $below).Count -eq 4)
+  # I6) latest.json advance gate: ONLY a complete measurement advances the current-quality pointer /about
+  # reads. An incomplete run (non-zero exit / HTTP failure) must NOT clobber latest.json with its
+  # unreliable strictAccuracy - else /about would show a false public-facing regression from a blip.
+  Assert-E "I6: a clean at/above-target record advances latest.json" (Test-ShouldAdvanceLatest -Record $rec)
+  Assert-E "I6: a clean below-target (complete) record still advances latest.json (genuine number)" (Test-ShouldAdvanceLatest -Record $below)
+  Assert-E "I6: an INCOMPLETE run (exit!=0) does NOT advance latest.json" (-not (Test-ShouldAdvanceLatest -Record $recIncompleteExit))
+  Assert-E "I6: an INCOMPLETE run (httpFailures>0) does NOT advance latest.json" (-not (Test-ShouldAdvanceLatest -Record $recIncompleteHttp))
+  Assert-E "I6: a no-report FAILURE record (ok=false) does NOT advance latest.json" (-not (Test-ShouldAdvanceLatest -Record $failRec))
+  Assert-E "I6: a null record does NOT advance latest.json (no throw)" (-not (Test-ShouldAdvanceLatest -Record $null))
 
   if ($ok) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
 }
@@ -792,7 +814,14 @@ $httpFailures = Get-ReportHttpFailureCount -Report $report
 $rec = ConvertTo-NightlyRecord -Report $report -Stamp $stamp -Target $Target -RanAtIso $now.ToString("o") -ExitCode $exitCode -HttpFailures $httpFailures
 $recJson = $rec | ConvertTo-Json -Depth 5
 try { Write-JsonNoBom -Path $dailyPath -Text $recJson } catch { Write-Log ("WARN: could not write daily record: " + $_.Exception.Message) }
-try { Write-JsonNoBom -Path $latestPath -Text $recJson } catch { Write-Log ("WARN: could not write latest.json: " + $_.Exception.Message) }
+# latest.json = the "current quality" pointer O18(b)'s /about reads. Advance it ONLY on a COMPLETE
+# measurement: an incomplete run's strictAccuracy is unreliable, so overwriting latest with it would
+# surface a false regression on /about. Incomplete runs still land in the daily marker + history above.
+if (Test-ShouldAdvanceLatest -Record $rec) {
+  try { Write-JsonNoBom -Path $latestPath -Text $recJson } catch { Write-Log ("WARN: could not write latest.json: " + $_.Exception.Message) }
+} else {
+  Write-Log ("latest.json NOT advanced (run incomplete - unreliable strictAccuracy); the last complete measurement stays the current-quality pointer for /about. Daily+history still recorded " + $stamp + ".")
+}
 try { Add-JsonLineNoBom -Path $historyPath -Line (Format-HistoryLine -Record $rec) } catch { Write-Log ("WARN: could not append history: " + $_.Exception.Message) }
 try { Remove-Item -LiteralPath $tmpReport -Force -ErrorAction SilentlyContinue } catch {}
 
