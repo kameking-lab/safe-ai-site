@@ -47,12 +47,28 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: "maskable",
       },
     ],
+    // ホーム画面ロングタップのクイックアクション。現場でよく使う順に並べる。
+    // 横断検索(/search)＝発見性の入口・AI質問(/chatbot)＝安衛法の即答をショートカット化し、
+    // インストール済みユーザーが1タップで到達できるようにする。URL は全て実在ルートで、
+    // manifest.test.ts が page.tsx の実在を回帰固定する（幽霊ショートカット防止）。
     shortcuts: [
       {
         name: "今日のKY",
         short_name: "KY",
         description: "KY用紙を開く",
         url: "/ky",
+      },
+      {
+        name: "横断検索",
+        short_name: "検索",
+        description: "法令・通達・事故・用語をまとめて検索",
+        url: "/search",
+      },
+      {
+        name: "AIに質問（安衛法）",
+        short_name: "AI質問",
+        description: "安衛法をその場でAIに質問",
+        url: "/chatbot",
       },
       {
         name: "法改正",
