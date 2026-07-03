@@ -139,6 +139,19 @@ function Format-HistoryLine {
   return (ConvertTo-Json -InputObject $Record -Compress -Depth 5)
 }
 
+# Write JSON WITHOUT a UTF-8 BOM. Windows PowerShell 5.1's `Set-Content -Encoding UTF8` prepends a BOM,
+# which Node's JSON.parse rejects (a leading ﻿ is a SyntaxError) - and these files are the machine-
+# readable contract O18(b)'s /about will read from JS. UTF8Encoding($false) = no BOM. ASCII-only content
+# here anyway, but this keeps the bytes clean for any consumer.
+function Write-JsonNoBom {
+  param([string]$Path, [string]$Text)
+  [System.IO.File]::WriteAllText($Path, $Text, (New-Object System.Text.UTF8Encoding($false)))
+}
+function Add-JsonLineNoBom {
+  param([string]$Path, [string]$Line)
+  [System.IO.File]::AppendAllText($Path, ($Line + "`n"), (New-Object System.Text.UTF8Encoding($false)))
+}
+
 # ---------------------------------------------------------------------------
 # -SelfTest: pure gates only (no npm / no network / no writes).
 # ---------------------------------------------------------------------------
@@ -204,6 +217,21 @@ if ($SelfTest) {
   $fail = New-FailureRecord -Stamp "2026-07-04" -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 1 -ErrorText "harness failed"
   Assert-E "failure record ok=false" (-not $fail.ok)
   Assert-E "failure record carries exit code" ($fail.exitCode -eq 1)
+
+  # G) Written JSON is BOM-free so a JS/Node consumer (O18(b) /about) can JSON.parse it. WinPS 5.1
+  # Set-Content -Encoding UTF8 would prepend a BOM (EF BB BF) that JSON.parse rejects; verify the
+  # first bytes are the raw '{' of the JSON, not a BOM.
+  $tmp2 = Join-Path ([System.IO.Path]::GetTempPath()) ("eval-bom-" + [guid]::NewGuid().ToString("N") + ".json")
+  try {
+    Write-JsonNoBom -Path $tmp2 -Text ($rec | ConvertTo-Json -Depth 5)
+    $bytes = [System.IO.File]::ReadAllBytes($tmp2)
+    $hasBom = ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF)
+    Assert-E "written JSON has NO UTF-8 BOM (Node JSON.parse-safe)" (-not $hasBom)
+    Assert-E "written JSON first char is '{'" ([char]$bytes[0] -eq '{')
+    Add-JsonLineNoBom -Path $tmp2 -Line (Format-HistoryLine -Record $rec)
+  } finally {
+    Remove-Item -LiteralPath $tmp2 -Force -ErrorAction SilentlyContinue
+  }
 
   if ($ok) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
 }
@@ -299,8 +327,8 @@ if ($exitCode -eq 0 -and (Test-Path -LiteralPath $tmpReport)) {
 
 if ($null -eq $report) {
   $rec = New-FailureRecord -Stamp $stamp -RanAtIso $now.ToString("o") -ExitCode $exitCode -ErrorText "eval harness did not produce a parseable report"
-  try { $rec | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $dailyPath -Encoding UTF8 } catch {}
-  try { Add-Content -LiteralPath $historyPath -Value (Format-HistoryLine -Record $rec) -Encoding UTF8 } catch {}
+  try { Write-JsonNoBom -Path $dailyPath -Text ($rec | ConvertTo-Json -Depth 5) } catch {}
+  try { Add-JsonLineNoBom -Path $historyPath -Line (Format-HistoryLine -Record $rec) } catch {}
   Write-Log ("WARN: eval did not yield a usable report (exit=" + $exitCode + "); wrote a failure marker for " + $stamp + " so the day's budget is not re-spent. Tail:")
   Write-Log (($evalOut).ToString().Trim() | Out-String).Trim()
   try { Remove-Item -LiteralPath $tmpReport -Force -ErrorAction SilentlyContinue } catch {}
@@ -309,9 +337,9 @@ if ($null -eq $report) {
 
 $rec = ConvertTo-NightlyRecord -Report $report -Stamp $stamp -Target $Target -RanAtIso $now.ToString("o")
 $recJson = $rec | ConvertTo-Json -Depth 5
-try { $recJson | Set-Content -LiteralPath $dailyPath -Encoding UTF8 } catch { Write-Log ("WARN: could not write daily record: " + $_.Exception.Message) }
-try { $recJson | Set-Content -LiteralPath $latestPath -Encoding UTF8 } catch { Write-Log ("WARN: could not write latest.json: " + $_.Exception.Message) }
-try { Add-Content -LiteralPath $historyPath -Value (Format-HistoryLine -Record $rec) -Encoding UTF8 } catch { Write-Log ("WARN: could not append history: " + $_.Exception.Message) }
+try { Write-JsonNoBom -Path $dailyPath -Text $recJson } catch { Write-Log ("WARN: could not write daily record: " + $_.Exception.Message) }
+try { Write-JsonNoBom -Path $latestPath -Text $recJson } catch { Write-Log ("WARN: could not write latest.json: " + $_.Exception.Message) }
+try { Add-JsonLineNoBom -Path $historyPath -Line (Format-HistoryLine -Record $rec) } catch { Write-Log ("WARN: could not append history: " + $_.Exception.Message) }
 try { Remove-Item -LiteralPath $tmpReport -Force -ErrorAction SilentlyContinue } catch {}
 
 $pct = [math]::Round([double]$rec.strictAccuracy * 100, 1)
