@@ -34,4 +34,16 @@ describe("/features/[category] 柱0 44pxタップ標的", () => {
       "min-h-[44px]",
     );
   });
+
+  it("「他のカテゴリ」グリッドの各リンクが min-h-[44px] を満たす", async () => {
+    const category = FEATURE_CATEGORIES[0];
+    const ui = await CategoryDetailPage({ params: Promise.resolve({ category: category.id }) });
+    render(ui);
+
+    const otherCategories = FEATURE_CATEGORIES.filter((c) => c.id !== category.id);
+    expect(otherCategories.length).toBeGreaterThan(0);
+    for (const c of otherCategories) {
+      expect(screen.getByRole("link", { name: c.title }).className).toContain("min-h-[44px]");
+    }
+  });
 });

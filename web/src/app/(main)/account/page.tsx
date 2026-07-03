@@ -40,6 +40,8 @@ export default async function AccountPage({ searchParams }: Props) {
   let status = "active";
   let currentPeriodEnd: Date | null = null;
   let hasStripeCustomer = false;
+  let subscriptionLookupFailed = false;
+  let sdsHistoryFailed = false;
   let sdsHistory: Array<{
     id: string;
     productName: string;
@@ -58,6 +60,7 @@ export default async function AccountPage({ searchParams }: Props) {
       }
     } catch (err) {
       console.error("[account] subscription lookup failed", err);
+      subscriptionLookupFailed = true;
     }
     try {
       const rows = await prisma.sdsSearch.findMany({
@@ -69,6 +72,7 @@ export default async function AccountPage({ searchParams }: Props) {
       sdsHistory = rows;
     } catch (err) {
       console.error("[account] sds history lookup failed", err);
+      sdsHistoryFailed = true;
     }
   }
 
@@ -81,8 +85,13 @@ export default async function AccountPage({ searchParams }: Props) {
     ? currentPeriodEnd.toLocaleDateString("ja-JP")
     : null;
 
-  // 結論カードの1状態に集約（赤=支払い要対応 > 黄=解約済み > 青=フリー > 緑=利用中）
-  const conclusion = computeAccountConclusion({ planName, status, periodEndLabel });
+  // 結論カードの1状態に集約（灰=確認失敗 > 赤=支払い要対応 > 黄=解約済み > 青=フリー > 緑=利用中）
+  const conclusion = computeAccountConclusion({
+    planName,
+    status,
+    periodEndLabel,
+    lookupFailed: subscriptionLookupFailed,
+  });
 
   return (
     <PageContainer width="narrow" paddingY="none" className="py-8">
@@ -103,7 +112,11 @@ export default async function AccountPage({ searchParams }: Props) {
         value={planLabel}
         title={conclusion.title}
         description={conclusion.description}
-        action={!hasStripeCustomer ? { href: "/pricing", label: "プランをアップグレード" } : undefined}
+        action={
+          !subscriptionLookupFailed && !hasStripeCustomer
+            ? { href: "/pricing", label: "プランをアップグレード" }
+            : undefined
+        }
         className="mt-8"
       >
         {hasStripeCustomer && (
@@ -138,7 +151,11 @@ export default async function AccountPage({ searchParams }: Props) {
             新規検索 →
           </Link>
         </div>
-        {sdsHistory.length === 0 ? (
+        {sdsHistoryFailed ? (
+          <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
+            履歴の読み込みに失敗しました。時間をおいてページを再読み込みしてください。
+          </p>
+        ) : sdsHistory.length === 0 ? (
           <p className="mt-3 text-xs text-slate-500">
             まだ履歴がありません。製品検索＋自動RAを実行すると、ここに最新10件が表示されます。
           </p>

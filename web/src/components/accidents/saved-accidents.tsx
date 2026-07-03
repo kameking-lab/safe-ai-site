@@ -34,7 +34,7 @@ export function SavedAccidents() {
       <ul className="mt-3 space-y-1.5">
         {list.map((e) => (
           <li key={e.id} className="flex items-start gap-2 rounded-xl border border-slate-200 bg-white p-2.5">
-            <Link href={e.href} className="flex-1">
+            <Link href={e.href} className="flex min-h-[44px] flex-1 flex-col justify-center">
               <span className="block text-sm font-semibold text-slate-800">{e.title}</span>
               <span className="mt-0.5 block text-[11px] text-slate-500">{e.subtitle}</span>
             </Link>
