@@ -16,11 +16,13 @@ import {
   PRIORITY_LABEL,
   CONTRACTOR_TYPES,
   MEETING_WEATHER_OPTIONS,
+  MEETING_COUNT_OPTIONS,
   type MeetingRecord,
   type MeetingContractorRow,
   type ContractorType,
   type ChecklistStatus,
 } from "@/lib/meeting/schema";
+import { MeetingTagField } from "@/components/meeting/meeting-tag-field";
 import { loadCurrentMeeting, saveCurrentMeeting, snapshotMeeting, collectMeetingHistory, loadLatestMeeting, duplicateForNextDay, type MeetingHistory } from "@/lib/meeting/store";
 import { MeetingPrintSheet } from "@/components/meeting/meeting-print-sheet";
 import { estimateQualifications, inferChecklist } from "@/lib/meeting/inference";
@@ -37,7 +39,6 @@ import { contractorFieldKey, emptyMeetingPaperFieldKeys, firstEmptyMeetingPaperF
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
 const ZOOM_STEP = 0.1;
-const COUNT_OPTIONS = ["", ...Array.from({ length: 30 }, (_, i) => String(i + 1)), "30+"];
 const TYPE_INDENT: Record<ContractorType, string> = { 元請: "ml-0", "1次": "ml-4", "2次": "ml-8", "3次": "ml-12" };
 const TYPE_TAG: Record<ContractorType, string> = {
   元請: "bg-slate-700 text-white",
@@ -539,13 +540,13 @@ export function MeetingPaperView() {
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                       <L label="作業内容"><input value={c.workContent} onChange={(e) => patchContractor(c.id, { workContent: e.target.value })} list="mtg-works" className={inp} /></L>
                       <L label="使用機械"><input value={c.machines} onChange={(e) => patchContractor(c.id, { machines: e.target.value })} placeholder="例: バックホウ、ダンプ" list="mtg-machines" className={inp} /></L>
-                      <L label="必要資格"><TagField values={c.qualifications} onChange={(v) => patchContractor(c.id, { qualifications: v })} /></L>
+                      <L label="必要資格"><MeetingTagField values={c.qualifications} onChange={(v) => patchContractor(c.id, { qualifications: v })} /></L>
                       <L label="予定人員">
                         <select value={c.plannedCount} onChange={(e) => patchContractor(c.id, { plannedCount: e.target.value })} className={inp}>
-                          {COUNT_OPTIONS.map((n) => <option key={n} value={n}>{n || "―"}</option>)}
+                          {MEETING_COUNT_OPTIONS.map((n) => <option key={n} value={n}>{n || "―"}</option>)}
                         </select>
                       </L>
-                      <L label="予想災害"><TagField values={c.predictedDisasters} onChange={(v) => patchContractor(c.id, { predictedDisasters: v })} /></L>
+                      <L label="予想災害"><MeetingTagField values={c.predictedDisasters} onChange={(v) => patchContractor(c.id, { predictedDisasters: v })} /></L>
                       <L label="リスク(重大性/可能性→優先度)">
                         <div className="flex items-center gap-1">
                           <RiskSel value={c.risk.severity} onChange={(v) => setRisk(c.id, "severity", v)} label="重大性" />
@@ -744,32 +745,3 @@ function Tri({ value, onChange }: { value: ChecklistStatus; onChange: (s: Checkl
   );
 }
 
-function TagField({ values, onChange }: { values: string[]; onChange: (v: string[]) => void }) {
-  const [draft, setDraft] = useState("");
-  const add = () => {
-    const v = draft.trim();
-    if (v && !values.includes(v)) onChange([...values, v]);
-    setDraft("");
-  };
-  return (
-    <div className="rounded border border-slate-300 p-1">
-      <div className="flex flex-wrap gap-1">
-        {values.map((v) => (
-          <span key={v} className="flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[11px] text-emerald-800">
-            {v}
-            <button type="button" onClick={() => onChange(values.filter((x) => x !== v))} className="text-emerald-600 hover:text-emerald-900" aria-label="削除">×</button>
-          </span>
-        ))}
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
-          onBlur={add}
-          placeholder="＋"
-          className="min-w-[3rem] flex-1 px-1 text-[11px] outline-none"
-          aria-label="追加"
-        />
-      </div>
-    </div>
-  );
-}

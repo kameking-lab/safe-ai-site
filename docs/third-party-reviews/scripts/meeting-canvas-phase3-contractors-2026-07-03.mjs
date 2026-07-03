@@ -58,6 +58,19 @@ await page.waitForTimeout(150);
 check("さらに『次の欄へ』で使用機械のエディタに進む", await sheet.getByText("使用機械").first().isVisible().catch(() => false));
 await sheet.locator("input").first().fill("移動式クレーン");
 
+// 第四弾で使用機械とリスクの間に必要資格/予定人員/予想災害が挿入されたため、それらを素通りしてリスクへ進む。
+await sheet.getByRole("button", { name: /次の欄へ/ }).click();
+await page.waitForTimeout(150);
+check("さらに『次の欄へ』で必要資格のエディタに進む（第四弾で挿入）", await sheet.getByText("必要資格").first().isVisible().catch(() => false));
+
+await sheet.getByRole("button", { name: /次の欄へ/ }).click();
+await page.waitForTimeout(150);
+check("さらに『次の欄へ』で予定人員のエディタに進む（第四弾で挿入）", await sheet.getByText("予定人員").first().isVisible().catch(() => false));
+
+await sheet.getByRole("button", { name: /次の欄へ/ }).click();
+await page.waitForTimeout(150);
+check("さらに『次の欄へ』で予想災害のエディタに進む（第四弾で挿入）", await sheet.getByText("予想災害").first().isVisible().catch(() => false));
+
 await sheet.getByRole("button", { name: /次の欄へ/ }).click();
 await page.waitForTimeout(150);
 check("さらに『次の欄へ』でリスク（重大性・可能性）のエディタに進む", await sheet.getByText("リスク（重大性・可能性）").first().isVisible().catch(() => false));

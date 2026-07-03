@@ -13,6 +13,9 @@ export const CONTRACTOR_TYPES: readonly ContractorType[] = ["元請", "1次", "2
 /** 天気プルダウンの選択肢（クラシック表示・canvas第一弾の天気エディタで共有）。 */
 export const MEETING_WEATHER_OPTIONS: readonly string[] = ["晴れ", "曇り", "雨", "雪", "強風", "猛暑", "厳寒"];
 
+/** 予定人員プルダウンの選択肢（クラシック表示・canvas第四弾の予定人員エディタで共有）。 */
+export const MEETING_COUNT_OPTIONS: readonly string[] = ["", ...Array.from({ length: 30 }, (_, i) => String(i + 1)), "30+"];
+
 export type ChecklistStatus = "ok" | "ng" | "na"; // ○ / × / 該当無
 
 export type MeetingRiskEval = {

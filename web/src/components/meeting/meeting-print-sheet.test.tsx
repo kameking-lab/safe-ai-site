@@ -42,8 +42,9 @@ describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
     const onTapField = vi.fn();
     render(<MeetingPrintSheet record={rec} editing={{ onTapField }} />);
     const cells = screen.getAllByRole("button");
-    // 静的13欄 + 各社1行ぶん8タップ標的（company/workContent/machines/risk×2セル/safetyInstructions/responsibleName/actualCount）
-    expect(cells).toHaveLength(21);
+    // 静的13欄 + 各社1行ぶん11タップ標的（company/workContent/machines/qualifications/plannedCount/
+    // predictedDisasters/risk×2セル/safetyInstructions/responsibleName/actualCount）
+    expect(cells).toHaveLength(24);
     fireEvent.click(screen.getByRole("button", { name: "打合せ日（前日）を入力" }));
     expect(onTapField).toHaveBeenCalledWith("meetingDate");
     fireEvent.click(screen.getByRole("button", { name: "作業日を入力" }));
@@ -76,6 +77,12 @@ describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
     expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "workContent"));
     fireEvent.click(screen.getByRole("button", { name: "使用機械を入力" }));
     expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "machines"));
+    fireEvent.click(screen.getByRole("button", { name: "必要資格を入力" }));
+    expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "qualifications"));
+    fireEvent.click(screen.getByRole("button", { name: "予定人員を入力" }));
+    expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "plannedCount"));
+    fireEvent.click(screen.getByRole("button", { name: "予想災害を入力" }));
+    expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "predictedDisasters"));
     // リスク欄は重大性/可能性の2セルが同一キーのタップ標的（KYのriskEvalと同型）
     for (const cell of screen.getAllByRole("button", { name: "リスク（重大性・可能性）を入力" })) {
       fireEvent.click(cell);

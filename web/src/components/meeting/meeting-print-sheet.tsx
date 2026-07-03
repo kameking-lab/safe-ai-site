@@ -3,9 +3,10 @@
  * 画面では非表示（hidden）、印刷時のみ表示（paper-view が hidden print:block で包む）。
  * 各社マトリクスを正式な表組みで再現。点検項目・使用機械・確認欄を含む。
  *
- * S1（打合せ用紙 直接操作UI・第一弾〜第三弾）: KYと同じ方式で省略可能な `editing` prop を追加。
- * 指定時のみヘッダー7欄・明日のイベント5欄・統括安全責任者コメント・各社マトリクス7部位が
- * タップ標的（EditableCell）になる。**`editing` 未指定の出力HTMLは従来と完全一致**
+ * S1（打合せ用紙 直接操作UI・第一弾〜第四弾）: KYと同じ方式で省略可能な `editing` prop を追加。
+ * 指定時のみヘッダー7欄・明日のイベント5欄・統括安全責任者コメント・各社マトリクス7部位（第四弾で
+ * 必要資格・予定人員・予想災害を追加し全部位が対応完了）がタップ標的（EditableCell）になる。
+ * **`editing` 未指定の出力HTMLは従来と完全一致**
  * （meeting-print-sheet.test.tsx のスナップショットで機械的に固定＝A4正式書式は不可侵）。
  */
 import type { ReactNode } from "react";
@@ -153,9 +154,15 @@ export function MeetingPrintSheet({ record, editing }: { record: MeetingRecord; 
               <td className={td}>
                 <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "machines")}>{c.machines}</EditableCell>
               </td>
-              <td className={td}>{c.qualifications.join("、")}</td>
-              <td className={`${td} text-center`}>{c.plannedCount}</td>
-              <td className={td}>{c.predictedDisasters.join("、")}</td>
+              <td className={td}>
+                <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "qualifications")}>{c.qualifications.join("、")}</EditableCell>
+              </td>
+              <td className={`${td} text-center`}>
+                <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "plannedCount")}>{c.plannedCount}</EditableCell>
+              </td>
+              <td className={td}>
+                <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "predictedDisasters")}>{c.predictedDisasters.join("、")}</EditableCell>
+              </td>
               <td className={`${td} text-center`}>
                 <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "risk")}>{c.risk.severity}</EditableCell>
               </td>

@@ -1,22 +1,25 @@
 "use client";
 
 /**
- * S1（打合せ用紙 直接操作UI・第一弾〜第三弾）: 欄タップで開く入力エディタ。
+ * S1（打合せ用紙 直接操作UI・第一弾〜第四弾）: 欄タップで開く入力エディタ。
  * KYの FieldEditorSheet と同型（欄タップ＝タップ標的／入力は専用UIで行う／
  * 「次の欄へ」で紙の記入順を辿る／入力フォントは16px以上）。
  * 第三弾で各社マトリクス7部位のうち会社名/階層・作業内容・使用機械・リスク（重大性/可能性）・
- * 安全衛生指示事項・協力会社責任者・実績人員を追加（必要資格/予定人員/予想災害はタグ/固定
- * プルダウン専用UIが要るため後続弾）。
+ * 安全衛生指示事項・協力会社責任者・実績人員を追加。第四弾で残り3部位（必要資格・予想災害＝
+ * タグ選択、予定人員＝固定プルダウン）を追加し7部位すべてに対応。
  */
 
 import { useEffect, useRef } from "react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
-import { CONTRACTOR_TYPES, MEETING_WEATHER_OPTIONS, PRIORITY_LABEL, type ContractorType, type MeetingRecord } from "@/lib/meeting/schema";
+import { MeetingTagField } from "@/components/meeting/meeting-tag-field";
+import { CONTRACTOR_TYPES, MEETING_COUNT_OPTIONS, MEETING_WEATHER_OPTIONS, PRIORITY_LABEL, type ContractorType, type MeetingRecord } from "@/lib/meeting/schema";
 import {
   getMeetingPaperFieldDef,
   nextMeetingPaperFieldKey,
   setContractorCompanyField,
+  setContractorPlannedCountField,
   setContractorRiskField,
+  setContractorTagsField,
   type MeetingPaperFieldKey,
 } from "@/lib/meeting/paper-fields";
 import { MONTH_OPTIONS, dayOptions, yearOptions } from "@/lib/ky/pulldown-options";
@@ -193,6 +196,26 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
               className="min-h-[44px] text-base"
             />
           </div>
+        )}
+
+        {def.type === "contractorTags" && contractorRow && def.tagField && (
+          <MeetingTagField
+            values={contractorRow[def.tagField]}
+            onChange={(v) => patch(setContractorTagsField(record, contractorRow.id, def.tagField!, v))}
+          />
+        )}
+
+        {def.type === "contractorPlannedCount" && contractorRow && (
+          <select
+            aria-label={def.label}
+            value={contractorRow.plannedCount}
+            onChange={(e) => patch(setContractorPlannedCountField(record, contractorRow.id, e.target.value))}
+            className={selectCls}
+          >
+            {MEETING_COUNT_OPTIONS.map((n) => (
+              <option key={n} value={n}>{n || "―"}</option>
+            ))}
+          </select>
         )}
 
         {def.type === "contractorRisk" && contractorRow && (

@@ -8,8 +8,11 @@
  * 第三弾で各社マトリクス（インデックスではなくidキー "contractor.<id>.<part>"。KYの危険行と違い
  * 行の並び替え・階層(元請/1次/2次/3次)・削除を持つため、位置ではなくidで欄を特定する）を追加。
  * 対象はcompany(階層＋業者名)/workContent/machines/risk(重大性・可能性)/safetyInstructions/
- * responsibleName/actualCount の7部位。qualifications・plannedCount・predictedDisasters・
- * appendNote（タグ選択/固定プルダウン専用UIが要る・appendNoteは印刷シート非掲載）は後続弾で拡張する。
+ * responsibleName/actualCount の7部位。
+ * 第四弾で各社マトリクスの残り3部位（qualifications=必要資格・predictedDisasters=予想災害は
+ * タグ選択、plannedCount=予定人員は固定プルダウン）を追加し、7部位すべてcanvas対応が完了。
+ * 印刷シートの列順（業者→作業内容→使用機械→必要資格→予定→予想災害→重/可→安全衛生指示事項→
+ * 責任者→実績）に合わせ machines と risk の間に挿入。appendNote（印刷シート非掲載）のみ対象外。
  * 搬入出・点検項目は未着手。
  */
 import {
@@ -38,11 +41,14 @@ export const MEETING_PAPER_FIELD_ORDER = [
 
 export type MeetingPaperStaticFieldKey = (typeof MEETING_PAPER_FIELD_ORDER)[number];
 
-/** 各社マトリクス1行分の7部位（id始まりのキー。行の追加・削除・並び替えに追従する）。 */
+/** 各社マトリクス1行分の10部位（id始まりのキー。行の追加・削除・並び替えに追従する）。 */
 export type MeetingContractorFieldPart =
   | "company"
   | "workContent"
   | "machines"
+  | "qualifications"
+  | "plannedCount"
+  | "predictedDisasters"
   | "risk"
   | "safetyInstructions"
   | "responsibleName"
@@ -52,11 +58,17 @@ export const CONTRACTOR_FIELD_PARTS: readonly MeetingContractorFieldPart[] = [
   "company",
   "workContent",
   "machines",
+  "qualifications",
+  "plannedCount",
+  "predictedDisasters",
   "risk",
   "safetyInstructions",
   "responsibleName",
   "actualCount",
 ];
+
+/** タグ選択(type="contractorTags")が対象とする2部位。 */
+export type MeetingContractorTagPart = "qualifications" | "predictedDisasters";
 
 export type MeetingContractorFieldKey = `contractor.${string}.${MeetingContractorFieldPart}`;
 
@@ -67,7 +79,16 @@ export type MeetingPaperFieldDef = {
   /** エディタ見出し（紙の欄名と一致させる） */
   label: string;
   /** エディタの出し分け */
-  type: "text" | "textarea" | "date" | "date3" | "weatherTemp" | "contractorCompany" | "contractorRisk";
+  type:
+    | "text"
+    | "textarea"
+    | "date"
+    | "date3"
+    | "weatherTemp"
+    | "contractorCompany"
+    | "contractorRisk"
+    | "contractorTags"
+    | "contractorPlannedCount";
   /** InputWithVoice/TextareaWithVoice を使うか（音声入力） */
   voice?: boolean;
   placeholder?: string;
@@ -77,8 +98,10 @@ export type MeetingPaperFieldDef = {
   set?: (r: MeetingRecord, v: string) => Partial<MeetingRecord>;
   /** 未記入判定（未記入セルのハイライトに使用） */
   isEmpty: (r: MeetingRecord) => boolean;
-  /** type="contractorCompany"|"contractorRisk" のときの対象行id */
+  /** type="contractorCompany"|"contractorRisk"|"contractorTags"|"contractorPlannedCount" のときの対象行id */
   contractorId?: string;
+  /** type="contractorTags" のとき、対象の配列部位（qualifications/predictedDisasters） */
+  tagField?: MeetingContractorTagPart;
   /** 記入順の次フィールド（エディタの「次の欄へ」送り）。静的欄のみ。各社マトリクスは nextMeetingPaperFieldKey で解決。 */
   next?: MeetingPaperFieldKey;
 };
@@ -219,7 +242,7 @@ export const MEETING_PAPER_FIELDS: Record<MeetingPaperStaticFieldKey, MeetingPap
   },
 };
 
-const CONTRACTOR_FIELD_KEY_RE = /^contractor\.([^.]+)\.(company|workContent|machines|risk|safetyInstructions|responsibleName|actualCount)$/;
+const CONTRACTOR_FIELD_KEY_RE = /^contractor\.([^.]+)\.(company|workContent|machines|qualifications|plannedCount|predictedDisasters|risk|safetyInstructions|responsibleName|actualCount)$/;
 
 /** 各社マトリクスの欄キー組み立て（行id指定）。 */
 export function contractorFieldKey(id: string, part: MeetingContractorFieldPart): MeetingContractorFieldKey {
@@ -287,6 +310,32 @@ function buildContractorFieldDef(id: string, part: MeetingContractorFieldPart): 
         get: contractorTextGet(id, "machines"),
         set: contractorTextSet(id, "machines"),
         isEmpty: (r) => (findContractor(r, id)?.machines ?? "").trim() === "",
+      };
+    case "qualifications":
+      return {
+        key,
+        label: "必要資格",
+        type: "contractorTags",
+        contractorId: id,
+        tagField: "qualifications",
+        isEmpty: (r) => (findContractor(r, id)?.qualifications.length ?? 0) === 0,
+      };
+    case "plannedCount":
+      return {
+        key,
+        label: "予定人員",
+        type: "contractorPlannedCount",
+        contractorId: id,
+        isEmpty: (r) => (findContractor(r, id)?.plannedCount ?? "").trim() === "",
+      };
+    case "predictedDisasters":
+      return {
+        key,
+        label: "予想災害",
+        type: "contractorTags",
+        contractorId: id,
+        tagField: "predictedDisasters",
+        isEmpty: (r) => (findContractor(r, id)?.predictedDisasters.length ?? 0) === 0,
       };
     case "risk":
       return {
@@ -414,5 +463,24 @@ export function setContractorCompanyField(
 ): Partial<MeetingRecord> {
   return {
     contractors: record.contractors.map((c) => (c.id === id ? { ...c, ...patch } : c)),
+  };
+}
+
+/** 必要資格・予想災害のタグ配列を更新する（エディタ・キャンバス共通で使う純粋関数）。 */
+export function setContractorTagsField(
+  record: MeetingRecord,
+  id: string,
+  field: MeetingContractorTagPart,
+  values: string[]
+): Partial<MeetingRecord> {
+  return {
+    contractors: record.contractors.map((c) => (c.id === id ? { ...c, [field]: values } : c)),
+  };
+}
+
+/** 予定人員（固定プルダウン）を更新する（エディタ・キャンバス共通で使う純粋関数）。 */
+export function setContractorPlannedCountField(record: MeetingRecord, id: string, value: string): Partial<MeetingRecord> {
+  return {
+    contractors: record.contractors.map((c) => (c.id === id ? { ...c, plannedCount: value } : c)),
   };
 }
