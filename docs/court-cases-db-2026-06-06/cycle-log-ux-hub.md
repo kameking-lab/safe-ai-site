@@ -419,6 +419,26 @@
 
 ---
 
+## 2026-07-03 ux-hub/top-three-pillars-44px-targets
+
+**イテレーション頭の回収**: 自班の緑PR #655(/quick WBGT誤配線是正)をsquashマージ・delete-branch。PR #663(視覚パンくず可視化)はCI進行中のため今回は据え置き（次サイクルで回収）。`git checkout main && git pull --ff-only` でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手の最上位＝前サイクルExplore調査で発見済みの「トップ `home-three-pillars.tsx` のAlertGenerator送信ボタン・関連リンクが44px未満」。
+
+**発見・修正**: 直近の死亡事故パネル（初訪の一人親方がトップ最上部で最初にタップする導線）で以下4箇所が親指操作の押し損ねサイズだった既存欠陥を是正。①「10年事故DB一覧へ」リンク（パディング無し・`mt-1.5 text-[11px]`≈21px）②AlertGeneratorの「注意喚起文を作成」送信ボタン（`px-2.5 py-1 text-[11px]`≈24px・fatal-accident/weather/law-revisionの3種で共用の共通コンポーネント）③「出典・報道URLを開く」リンク（パディング無し）④生成失敗時の「再試行」ボタン・3回連続失敗時の「管理者に連絡」リンク（追補Explore調査で同一ファイル内に発見）。全て`min-h-[44px]`＋最小限のpx付与（純粋なクラス追加でレイアウト・ロジック不変）。
+
+**テスト**: `home-three-pillars.test.tsx` を新設（5ケース）。静的描画で「10年事故DB一覧へ」「出典・報道URLを開く」「注意喚起文を作成」の className に `min-h-[44px]` を保証。`fetch`をモックしAPI失敗をシミュレートして「再試行」ボタン・（2回連続失敗後の）「管理者に連絡」リンクにも `min-h-[44px]` を確認。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係）/ vitest 267 files・2259 tests 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/top-three-pillars-44px-2026-07-03.mjs`（build+start実機・Playwright・スマホ390×844）**2/2 PASS**。「10年事故DB一覧へ」リンク・「注意喚起文を作成」送信ボタンの実boundingBoxが両方とも44px以上であることを確認。
+
+**補充**: 未着手が1件のみ（/safety-signs親ハブ関連機能リンク）に減ったため、Explore委任で追加2件を発見・補充。①`/features/use-cases`のrelated-featureピル(`px-2 py-1 text-[11px]`)、②`/court-cases/employer-liability`のIssueLinkチップ(`px-2.5 py-1 text-xs`)。いずれもmin-h/h-11未付与で次サイクル候補。
+
+**残課題**: PR #663(視覚パンくず可視化)のCI回収。上記3件の柱0補充候補が次サイクルへ持ち越し。
+
+---
+
 ## 2026-07-03 ux-hub/safety-signs-hub-related-links-44px
 
 **イテレーション頭の回収**: 自班のPR #668(トップhome-three-pillars 44px化)はCI進行中(e2e/smoke IN_PROGRESS)のため未マージ・今回は回収スキップ。`git checkout main && git pull --ff-only`でclean確認(mainは5コミット進行・data/seo/ux-records/ux-tools各班のマージ分)。
