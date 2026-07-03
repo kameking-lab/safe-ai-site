@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, FlaskConical, X } from "lucide-react";
 import {
   searchMergedChemicals,
@@ -23,7 +23,9 @@ export function MhlwChemicalSelector({
 }) {
   const [internalQuery, setInternalQuery] = useState(value?.primaryName ?? "");
   const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
   const ref = useRef<HTMLDivElement | null>(null);
+  const listboxId = useId();
   // value が指定されていればそれを表示、未指定ならユーザー入力を表示する。
   // useEffect で同期しないことで cascading render を回避。
   const query = value ? value.primaryName : internalQuery;
@@ -44,6 +46,49 @@ export function MhlwChemicalSelector({
     return searchMergedChemicals(query, 20);
   }, [query, open]);
 
+  // 検索結果が変わるたびにキーボードのハイライト位置をリセットする。
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [results]);
+
+  const selectResult = (m: MergedChemical) => {
+    onSelect(m);
+    setQuery(m.primaryName);
+    setOpen(false);
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (!open) {
+        setOpen(true);
+        return;
+      }
+      if (results.length > 0) {
+        setActiveIndex((prev) => (prev + 1) % results.length);
+      }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!open) {
+        setOpen(true);
+        return;
+      }
+      if (results.length > 0) {
+        setActiveIndex((prev) => (prev <= 0 ? results.length - 1 : prev - 1));
+      }
+    } else if (e.key === "Enter") {
+      if (open && activeIndex >= 0 && results[activeIndex]) {
+        e.preventDefault();
+        selectResult(results[activeIndex]);
+      }
+    } else if (e.key === "Escape") {
+      if (open) {
+        e.preventDefault();
+        setOpen(false);
+      }
+    }
+  };
+
   const showClear = !!value || query.length > 0;
 
   return (
@@ -52,6 +97,14 @@ export function MhlwChemicalSelector({
         <FlaskConical className="h-4 w-4 shrink-0 text-emerald-500" aria-hidden="true" />
         <input
           type="search"
+          role="combobox"
+          aria-expanded={open}
+          aria-haspopup="listbox"
+          aria-controls={listboxId}
+          aria-autocomplete="list"
+          aria-activedescendant={
+            open && activeIndex >= 0 ? `${listboxId}-option-${activeIndex}` : undefined
+          }
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
@@ -61,6 +114,7 @@ export function MhlwChemicalSelector({
             }
           }}
           onFocus={() => setOpen(true)}
+          onKeyDown={handleInputKeyDown}
           placeholder={placeholder}
           className="min-h-[36px] flex-1 bg-transparent text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
         />
@@ -88,17 +142,22 @@ export function MhlwChemicalSelector({
         </button>
       </div>
       {open && results.length > 0 && (
-        <ul className="absolute z-10 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">
+        <ul id={listboxId} role="listbox" className="absolute z-10 mt-1 max-h-72 w-full overflow-auto rounded-lg border border-slate-200 bg-white shadow-lg">
           {results.map((m, i) => (
-            <li key={`${m.cas ?? "no-cas"}-${m.primaryName}-${i}`}>
+            <li
+              key={`${m.cas ?? "no-cas"}-${m.primaryName}-${i}`}
+              id={`${listboxId}-option-${i}`}
+              role="option"
+              aria-selected={i === activeIndex}
+            >
               <button
                 type="button"
-                onClick={() => {
-                  onSelect(m);
-                  setQuery(m.primaryName);
-                  setOpen(false);
-                }}
-                className="flex w-full items-start justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-emerald-50"
+                tabIndex={-1}
+                onClick={() => selectResult(m)}
+                onMouseEnter={() => setActiveIndex(i)}
+                className={`flex w-full items-start justify-between gap-2 px-3 py-2 text-left text-sm hover:bg-emerald-50 ${
+                  i === activeIndex ? "bg-emerald-50" : ""
+                }`}
               >
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-semibold text-slate-800">
