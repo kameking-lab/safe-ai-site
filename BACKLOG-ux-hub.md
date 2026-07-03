@@ -4,6 +4,8 @@
 
 ## 未着手（上から処理）
 
+- [x] 【柱0補充候補・2026-07-04 Explore調査で発見】サイネージ`signage-rotator.tsx`のトレンドニュース/法改正ローテーター進捗ドット(`min-h-[24px] min-w-[24px]`)と`signage-danger-alert.tsx`の危険イベント全画面アラート「閉じる」ボタン(`p-2`+`h-6`アイコンのみ≈40px)が44px未満。加えて`accidents/saved-accidents.tsx`の保存済み事故事例パネルがサイト共通の`amber`系「保存」表現から外れ`yellow`を直書きしていた既存欠陥(色の文法違反、favorites-list.tsxと不整合)。→ 3ファイル計2要素の`min-h`/`min-w`を44pxへ、色クラスをyellow→amberへ是正(純粋なクラス変更でレイアウト・ロジック不変)。vitest 3件追加(signage-rotator 1件・saved-accidents 1件・signage-danger-alert新設1件)。next start実機(1920×1080サイネージ・スマホ390×844)のPlaywright boundingBox/HTML実測3/3 PASS。tsc=0/lint=0 errors/vitest(2647件)/build全緑。(2026-07-04 / ux-hub/signage-rotator-danger-alert-44px-color)
+
 - [x] 【柱0補充候補・2026-07-04 Explore調査で発見】`accident-trend-summary.tsx`(/accidents)の集計期間セレクト・「AIで要約」ボタン、`court-cases-browser.tsx`(/court-cases)のキーワード検索欄・争点/分野/裁判所/年代の4セレクトが44px未満。同ファイル内の他ボタン(絞り込みを解除・印刷リンク・分野アイコン・厚労省原典リンク等)は既に是正済みだったが、検索・絞り込みフォーム本体は一括是正から漏れていた既存欠陥。→ 2ファイル計6要素に`min-h-[44px]`を付与(純粋なクラス追加でレイアウト・遷移先・ロジック不変)。vitest 3件追加。next start実機のPlaywright boundingBox実測で7/7 PASS。tsc=0/lint=0 errors/vitest全pass/build全緑。(2026-07-04 / ux-hub/trend-summary-court-filter-44px)
 
 ### 2026-07-02 Fable診断注入（診断書: docs/fable-diagnosis-2026-07-02/01・07）
