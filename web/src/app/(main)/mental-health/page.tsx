@@ -296,13 +296,13 @@ export default function MentalHealthPage() {
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
             href="/diversity"
-            className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
           >
             多様な働き方の安全 →
           </Link>
           <Link
             href="/glossary"
-            className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-4 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-300 bg-white px-4 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
           >
             安全用語辞書
           </Link>
