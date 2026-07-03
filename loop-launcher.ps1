@@ -610,19 +610,31 @@ function Get-CriticTargetRosterDrift {
 # loop-prompt-critic.txt" - yet NOTHING verified the prompt half stayed in sync. So an owner adding a
 # section-E lane could satisfy the oracle (GREEN rehearsal, no roster drift) while the stale prompt still
 # omits the lane, and the critic would never route findings to it - the false-PASS class of #760/#764 at
-# the prompt-vs-oracle leg. Case-insensitive substring of each enabled lane's name against the prompt;
-# null/blank-safe; a blank prompt reports ALL enabled lanes uncovered (never silently passes), mirroring
-# Get-MissingCriticTargets' blank-root contract. Disabled/nameless lanes are ignored.
+# the prompt-vs-oracle leg.
+#
+# Matching is WHOLE-TOKEN, not raw substring: #765 used $text.Contains($name), which FALSELY passed a
+# lane whose name is a SUBSTRING of an already-routed token - a "records" lane inside "ux-records", or a
+# "ux" lane inside "ux-hub"/"ux-tools" - so the critic would never route to it yet the rehearsal reported
+# GREEN, re-opening the very false-PASS class this chain closes at the substring-precision leg. We tokenize
+# the prompt into maximal [a-z0-9-] runs (hyphen is a TOKEN char since lane names contain it, so "records"
+# cannot match inside the "ux-records" token) and treat a lane as covered iff some token equals the lane
+# name bare ("seo" in the step-4 slash-list) OR equals "backlog-<lane>" (the BACKLOG-<lane>.md routing
+# form, e.g. "backlog-data"). Null/blank-safe; a blank prompt reports ALL enabled lanes uncovered (never
+# silently passes), mirroring Get-MissingCriticTargets' blank-root contract. Disabled/nameless lanes ignored.
 function Get-CriticPromptUncoveredLanes {
   param([string]$PromptText, $Lanes)
   $uncovered = New-Object System.Collections.Generic.List[string]
   $text = if ($null -eq $PromptText) { "" } else { $PromptText.ToLowerInvariant() }
+  $tokens = @{}
+  foreach ($m in [regex]::Matches($text, '[a-z0-9-]+')) { $tokens[$m.Value] = $true }
   foreach ($l in @($Lanes)) {
     if ($null -eq $l) { continue }
     if (-not $l.enabled) { continue }
     $n = [string]$l.name
     if ([string]::IsNullOrWhiteSpace($n)) { continue }
-    if (-not $text.Contains($n.ToLowerInvariant())) { $uncovered.Add($n) }
+    $nl = $n.ToLowerInvariant()
+    if ($tokens.ContainsKey($nl) -or $tokens.ContainsKey("backlog-" + $nl)) { continue }
+    $uncovered.Add($n)
   }
   return ($uncovered.ToArray() | Sort-Object -Unique)
 }
@@ -834,6 +846,14 @@ if ($SelfTest) {
     Assert-L "prompt-coverage: a BLANK prompt reports ALL enabled lanes (never silently passes)" ((@(Get-CriticPromptUncoveredLanes -PromptText "" -Lanes $j3Lanes) -join ',') -eq 'data,seo')
     Assert-L "prompt-coverage: null prompt / null lanes are null-safe (never throws)" ((@(Get-CriticPromptUncoveredLanes -PromptText $null -Lanes $null).Count -eq 0))
     Assert-L "prompt-coverage: nameless enabled lanes are ignored (null-safe)" (@(Get-CriticPromptUncoveredLanes -PromptText $j3Prompt -Lanes @([pscustomobject]@{ name = ""; enabled = $true })).Count -eq 0)
+    # J4) Substring precision: #765 matched with a raw .Contains(), which FALSELY passed a lane whose name
+    #     is only a SUBSTRING of an already-routed token (a "tools"/"ux" lane inside "ux-tools") - the critic
+    #     would never route to it yet the rehearsal reported GREEN. Match WHOLE routing tokens only.
+    $j4Prompt = "route to BACKLOG-data / ux-tools.md / ux-records.md"
+    Assert-L "prompt-coverage: a lane that is only a SUBSTRING of a routed token is UNCOVERED (no false PASS)" ((@(Get-CriticPromptUncoveredLanes -PromptText $j4Prompt -Lanes @([pscustomobject]@{ name = "tools"; enabled = $true })) -join ',') -eq 'tools')
+    Assert-L "prompt-coverage: a short substring lane ('ux' inside 'ux-tools') is UNCOVERED (no false PASS)" ((@(Get-CriticPromptUncoveredLanes -PromptText $j4Prompt -Lanes @([pscustomobject]@{ name = "ux"; enabled = $true })) -join ',') -eq 'ux')
+    Assert-L "prompt-coverage: the BACKLOG-<lane> routing form still counts as covered (no regression)" (@(Get-CriticPromptUncoveredLanes -PromptText "only BACKLOG-data here" -Lanes @([pscustomobject]@{ name = "data"; enabled = $true })).Count -eq 0)
+    Assert-L "prompt-coverage: a bare hyphenated lane token still matches through the .md suffix (no regression)" (@(Get-CriticPromptUncoveredLanes -PromptText "inject ux-tools.md" -Lanes @([pscustomobject]@{ name = "ux-tools"; enabled = $true })).Count -eq 0)
     # The SHIPPED loop-prompt-critic.txt must name every enabled live lane (guards THIS repo's prompt leg).
     $j3PromptPath = Join-Path $repoRoot "loop-prompt-critic.txt"
     if ($null -ne $jLive -and (Test-Path $j3PromptPath)) {
