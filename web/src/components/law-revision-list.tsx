@@ -582,7 +582,7 @@ export function LawRevisionList({
                 setArticleHighlights([]);
                 setSearch("");
               }}
-              className="rounded px-1.5 text-violet-700 hover:bg-violet-100"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded text-violet-700 hover:bg-violet-100"
               aria-label="絞り込みを解除"
             >
               ×

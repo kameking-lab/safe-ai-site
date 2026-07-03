@@ -181,7 +181,7 @@ export function GoodsChatbot() {
             type="button"
             onClick={() => sendMessage(q)}
             disabled={sending}
-            className="rounded-full border border-emerald-200 bg-white px-2.5 py-1 text-[11px] text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-emerald-200 bg-white px-2.5 py-1 text-[11px] text-emerald-700 hover:bg-emerald-50 disabled:opacity-50"
           >
             {q.length > 20 ? q.slice(0, 20) + "…" : q}
           </button>

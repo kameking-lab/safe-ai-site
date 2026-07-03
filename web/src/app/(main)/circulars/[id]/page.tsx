@@ -273,7 +273,7 @@ export default async function CircularDetailPage({
             )}&url=${encodeURIComponent(url)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-100"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-100"
           >
             X (Twitter) で共有
           </a>
@@ -281,13 +281,13 @@ export default async function CircularDetailPage({
             href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-100"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-100"
           >
             Facebookで共有
           </a>
           <a
             href={`mailto:?subject=${encodeURIComponent(notice.title)}&body=${encodeURIComponent(url)}`}
-            className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-100"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 font-semibold text-slate-700 hover:bg-slate-100"
           >
             メールで送る
           </a>
