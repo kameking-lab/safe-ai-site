@@ -253,6 +253,27 @@ function Report-DeadlineStop {
   }
 }
 
+# Runner-emitted liveness heartbeat after EVERY iteration. Self-reporting must NOT depend on the agent
+# running step5.5: observed live, seo and ux-records ran 30+ iterations, merged PRs, yet NEVER self-
+# reported, so the per-lane health banner (#628/#631/#640) kept flagging two ALIVE, working lanes as
+# unreported/born-dead - a FALSE silent-death alarm, the exact class those fixes exist to remove. After
+# each iteration the runner refreshes its own lane row via loop-report-status.ps1 -HeartbeatOnly, which
+# swaps ONLY the timestamp so a rich note the agent DID write survives, and for a never-reporting lane
+# writes an honest "agent has not self-reported" row - turning the false alarm into an accurate "alive
+# but not reporting" signal. Only for persistent laned runs (same gate as the deadline stop - never a
+# one-shot planner/critic). The child powershell inherits $env:SAFE_AI_LOOP_STATUS so it routes to the
+# central file, exactly like the per-iteration and deadline reports. Non-fatal by design.
+function Report-Heartbeat {
+  if (-not (Test-ShouldReportDeadlineStop $laneTag $MaxIterations)) { return }
+  $reporter = Join-Path $RepoPath "loop-report-status.ps1"
+  if (-not (Test-Path $reporter)) { return }
+  try {
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $reporter -Lane $laneTag -HeartbeatOnly 2>&1 | Tee-Object -FilePath $logFile -Append | Out-Null
+  } catch {
+    Write-Log ("WARN: heartbeat report failed (non-fatal): " + $_.Exception.Message)
+  }
+}
+
 $iter = 0
 $consecutiveShortFails = 0
 Write-Log ("=== loop-runner start (lane=" + $(if ($laneTag -ne "") { $laneTag } else { "(default)" }) + ", interval=" + $IntervalSeconds + "s, max=" + $MaxIterations + ", until='" + $UntilIso + "', repo=" + $RepoPath + ") ===")
@@ -279,6 +300,10 @@ while ($true) {
   } catch {
     Write-Log ("iteration #" + $iter + " exception: " + $_.Exception.Message)
   }
+
+  # Liveness heartbeat: keep this lane's central-status row honest (fresh timestamp; rich agent note
+  # preserved) even when the agent skipped step5.5 this iteration. Non-fatal.
+  Report-Heartbeat
 
   # Short-failure backoff: a non-zero exit (or exception) within 2 minutes of start
   # is treated as a fast failure (typically the usage limit). 3 in a row -> 5 min,
