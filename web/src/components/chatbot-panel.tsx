@@ -579,6 +579,11 @@ export function ChatbotPanel() {
 
   function handleDeleteSession(id: string, e: React.MouseEvent) {
     e.stopPropagation();
+    const ok =
+      typeof window === "undefined"
+        ? true
+        : window.confirm("この保存済み会話を削除します。元に戻せません。よろしいですか？");
+    if (!ok) return;
     const updated = sessions.filter((s) => s.id !== id);
     saveSessions(updated);
     setSessions(updated);

@@ -122,7 +122,7 @@ export default function QuickTourPage() {
             <li key={s.step}>
               <a
                 href={`#step-${s.step}`}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white hover:bg-emerald-700"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white hover:bg-emerald-700"
                 aria-label={`ステップ${s.step}: ${s.title}`}
               >
                 {s.step}

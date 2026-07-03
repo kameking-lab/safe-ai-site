@@ -367,7 +367,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和41年法律第132号",
     latestRevision: "令和7年改正（令和7年法律第63号）",
     eGovUrl: "https://laws.e-gov.go.jp/law/341AC0000000132",
-    auditedAt: "2026-06-10",
+    auditedAt: "2026-07-04",
   },
   // 指針・通達6件は e-Gov 非収録のため MHLW 通達検索/安全衛生情報センターの全文を出典とする
   // （メンタル指針・VDTガイドラインと同じ扱い）。

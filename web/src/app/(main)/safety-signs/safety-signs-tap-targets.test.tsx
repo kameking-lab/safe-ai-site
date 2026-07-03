@@ -54,6 +54,28 @@ describe("safety-signs サブページのタップ標的44px化", () => {
     }
   });
 
+  it("業種詳細: 標識名リンクと掲示済みチェックボックスの標的が44pxを満たす", async () => {
+    const industry = INDUSTRIES[0];
+    const ui = await IndustryPage({ params: Promise.resolve({ industry: industry.id }) });
+    renderPage(ui);
+
+    const signLinks = screen
+      .getAllByRole("link")
+      .filter((a) => a.getAttribute("href")?.startsWith("/safety-signs/sign/"));
+    expect(signLinks.length).toBeGreaterThan(0);
+    for (const link of signLinks) {
+      expect(link.className).toContain("min-h-[44px]");
+    }
+
+    const checkboxes = screen.getAllByRole("checkbox");
+    expect(checkboxes.length).toBeGreaterThan(0);
+    for (const checkbox of checkboxes) {
+      const label = checkbox.closest("label");
+      expect(label?.className).toContain("min-h-[44px]");
+      expect(label?.className).toContain("min-w-[44px]");
+    }
+  });
+
   it("標識詳細: 戻るリンクと『業種別ガイドへ』チップが全て min-h-[44px]", async () => {
     const sign = SAFETY_SIGNS[0];
     const ui = await SignPage({ params: Promise.resolve({ id: sign.id }) });
@@ -71,6 +93,18 @@ describe("safety-signs サブページのタップ標的44px化", () => {
     expect(industryChips.length).toBeGreaterThan(0);
     for (const chip of industryChips) {
       expect(chip.className).toContain("min-h-[44px]");
+    }
+
+    const usageIndustryLinks = screen
+      .getAllByRole("link")
+      .filter(
+        (a) =>
+          a.getAttribute("href")?.startsWith("/safety-signs/industry/") &&
+          !a.className.includes("rounded-lg"),
+      );
+    expect(usageIndustryLinks.length).toBeGreaterThan(0);
+    for (const link of usageIndustryLinks) {
+      expect(link.className).toContain("min-h-[44px]");
     }
   });
 
