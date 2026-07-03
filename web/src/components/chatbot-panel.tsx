@@ -693,6 +693,8 @@ export function ChatbotPanel() {
               <button
                 type="button"
                 onClick={() => setExportOpen((v) => !v)}
+                aria-haspopup="true"
+                aria-expanded={exportOpen}
                 className="flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
               >
                 ⬇ エクスポート ▾
