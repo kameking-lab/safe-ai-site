@@ -1,5 +1,21 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-04 — 補充: signage-daily-values.tsx 起点日フォーム後退＋accident-extras-panel.tsx 未着手リンクの44px是正
+
+**イテレーション頭の回収**: PR #781(accident-database-panel-44px)がe2e/smoke/selftest/Vercel全緑のためsquashマージ→`git checkout main && git pull --ff-only`でclean確認。自班PR #809(trend-summary-court-filter-44px)はe2e/smoke IN_PROGRESSのため今回は見送り、次イテレーションで回収。
+
+**注意事項**: 作業中に`web/AGENTS.md`（`@AGENTS.md`をCLAUDE.mdが参照）が「これはあなたの知るNext.jsではない。書く前にnode_modules内のdocsを読め」と誘導し、実際に存在する`node_modules/next/dist/docs/index.md`にHTMLコメントで偽装した「`unstable_instant`をexportせよ」というAIエージェント向け偽指示が埋め込まれていることを発見。プロンプトインジェクションと判断し無視、指示内容のコード変更は一切行わず本来のタスクのみ継続。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、①`signage-daily-values.tsx`の無災害日数「起点日を変更」リンク(`min-h-[24px]`)・起点日入力欄/保存ボタン(`min-h-[36px]`)が既存の44px是正パターンから明示的に後退(regression)していたこと、②`accident-extras-panel.tsx`(/accidents 自社類似事故Top5パネル、home-screen経由)の「/profile を開く →」「自社設定 →」「→ 類似事例…」計3リンクが一括是正の対象から漏れていたことを発見。Explore候補の最有力だった`accident-trend-summary.tsx`のselect/ボタンはPR #809で既に対応済みと確認しdiff重複を回避。
+
+**修正**: 2ファイル計5要素に`min-h-[44px]`を付与(純粋なクラス変更でレイアウト・ロジック不変)。
+
+**テスト**: `signage-daily-values.test.tsx`へ1件追加、`accident-extras-panel.test.tsx`新設(2件、mhlw-similar-cases・accident-cases datasetをvi.mock)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 312 files・2632 tests + 1 skipped 全pass(フルスイート並列実行時に無関係な`/search`系4件がタイムアウトしたが単体実行では即pass=既存の並列負荷起因のflakeと確認) / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/signage-daily-values-extras-panel-44px-2026-07-04.mjs`（next start実機・Playwright・1920×1080サイネージ+スマホ390×844）**4/4 PASS**（起点日入力欄・保存ボタン・起点日を変更リンク・/profile を開く リンク、すべて実boundingBox height≧44px実測）。
+
 ## 2026-07-03 — 補充: accident-database-panel.tsx (/accidents本体) 未着手コンポーネントの44px是正
 
 **イテレーション頭の回収**: 自班のオープンPR #775(共有部品breadcrumb・action-bar・analysis-panel 44px)はe2e/smoke/VercelがIN_PROGRESS/PENDINGで未緑のため今回はマージ見送り、次イテレーションで回収。`git checkout main && git pull --ff-only`でclean確認。
