@@ -872,6 +872,8 @@ export function ChatbotPanel() {
                         ? "ml-auto bg-blue-600 text-white"
                         : "border border-slate-200 bg-white text-slate-800"
                     }`}
+                    aria-live={isStreamingMsg ? "polite" : undefined}
+                    aria-atomic={isStreamingMsg ? "false" : undefined}
                   >
                     {msg.role === "assistant" ? (
                       <div className="whitespace-pre-wrap">{renderBold(msg.content)}</div>
@@ -1205,7 +1207,10 @@ export function ChatbotPanel() {
 
       {/* エラー表示＋再試行 (P1-2) */}
       {error && (
-        <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700"
+        >
           <span>{error}</span>
           {retryableQuestion && !isSending && (
             <button
