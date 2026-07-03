@@ -1,5 +1,21 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: /features/use-cases 業種ジャンプナビ＋/accidents/[id] パンくずリンク 柱0(44px)
+
+**イテレーション頭の回収**: 自班の緑PR #734(/glossary 関連ページリンク＋/signage モーダル閉じるボタン44px化)をsquashマージ→`git checkout main && git pull --ff-only`でclean確認(CI e2e/smoke完了待ちで数分待機してから回収)。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手項目が0件だったため、Explore調査で担当route群の柱0未適用箇所を補充探索。既知の完了記録と重複しない新規候補として①`/features/use-cases`業種ジャンプナビ各ピル(`page.tsx:356-363`、`px-3 py-1.5 text-xs`≈28px)、②`/accidents/[id]`最上部パンくずの「事故データベース」リンク(`page.tsx:88-92`、パディング無し≈20px・下部の「事故DBに戻る →」は既に44px是正済みだったが上部パンくずは取り残されていた)を特定。ブランチ`ux-hub/use-cases-jump-nav-accident-breadcrumb-44px`（main起点）。
+
+**変更**: 両ファイルの対象要素に`min-h-[44px]`を付与。純粋なクラス追加でレイアウト・遷移先・ロジック不変。
+
+**テスト**: `features/use-cases/page.test.tsx`に1件追加(業種ジャンプナビ全リンクのclassName検証)。`accidents/[id]/page.test.tsx`に1件追加(パンくず「事故データベース」リンクのclassName検証、既存の「事故DBに戻る」テストと並列)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors / vitest 288 files・2469 tests 全pass(1 skipped) / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/use-cases-accident-breadcrumb-44px-2026-07-03.mjs` を **11/11 PASS**（next start実機・スマホ390×844・ジャンプナビ9ピル+パンくずリンク1件、全てheight≧44px）。
+
+**PR**: #739
+
 ## 2026-07-03 — 補充: /glossary 関連ページリンク＋/signage モーダル閉じるボタン 柱0(44px)
 
 **イテレーション頭の回収**: 自班の緑PR #726(/court-cases ハブ最上部h1直下2リンク44px)をsquashマージ→`git checkout main && git pull --ff-only`でclean確認。PR #732(home-screen.tsx主タブ切替44px)はCI進行中のため次回に回収。
