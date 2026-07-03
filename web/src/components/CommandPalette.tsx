@@ -31,7 +31,7 @@ import {
   type SearchItem,
   type SearchCategory,
 } from '@/lib/search-index';
-import { EGOV_LAW_SEARCH_URL } from '@/lib/cross-search';
+import { EGOV_LAW_SEARCH_URL, egovArticleAnchor } from '@/lib/cross-search';
 import { trackEvent } from '@/components/Analytics';
 
 // 空クエリ時に表示する主要ショートカット（UX-007: モバイル検索とPC Ctrl+K の機能を統一）
@@ -112,6 +112,11 @@ export function CommandPalette({ onClose }: Props) {
     () => (debouncedQuery ? searchItems(index, debouncedQuery, activeCategory) : []),
     [debouncedQuery, index, activeCategory],
   );
+
+  // クエリが「法令名＋条番号」を明示していれば、当該法令の e-Gov 条アンカーへ直リンク
+  // （抄録未収載の条番号でも 1 タップで原文へ着地＝/search NoResults の T4 後段パリティ）。
+  // 条件を満たさなければ null で従来のポータルトップ導線に委ねる。
+  const egovAnchor = useMemo(() => egovArticleAnchor(debouncedQuery), [debouncedQuery]);
 
   // Scroll selected item into view
   useEffect(() => {
@@ -286,6 +291,19 @@ export function CommandPalette({ onClose }: Props) {
                 <span className="font-semibold">見つからない＝「規定がない」ではありません。</span>
                 本サイトは主要法令の条文（抄録）・通達・判例などを収載しており、未収載の条文もあります。条文の有無・原文は政府公式の e-Gov 法令検索でご確認ください。
               </p>
+              {/* 法令名＋条番号が明示されたクエリは e-Gov の該当条へ直リンク（貼り付け不要で原文へ着地）。 */}
+              {egovAnchor && (
+                <a
+                  href={egovAnchor.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackEvent('search_zero_result_egov_article', { query: debouncedQuery })}
+                  className="mx-auto mt-3 inline-flex min-h-[44px] max-w-md items-center justify-center gap-1.5 rounded-lg border border-teal-300 bg-teal-50 px-4 py-2 text-xs font-semibold text-teal-800 hover:bg-teal-100"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                  e-Gov で「{egovAnchor.fullName} {egovAnchor.articleLabel}」を開く
+                </a>
+              )}
               <a
                 href={EGOV_LAW_SEARCH_URL}
                 target="_blank"
