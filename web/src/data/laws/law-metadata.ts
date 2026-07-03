@@ -122,9 +122,9 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   労基則: {
     fullName: "労働基準法施行規則",
     promulgation: "昭和22年厚生省令第23号",
-    latestRevision: "令和6年改正",
+    latestRevision: "令和8年改正（労災保険法施行規則等改正省令・2026-04-01施行）",
     eGovUrl: "https://laws.e-gov.go.jp/law/322M40000100023",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   最賃法: {
     fullName: "最低賃金法",
