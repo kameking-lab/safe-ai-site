@@ -162,7 +162,7 @@ function MethodologyAccordion() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+        className="flex min-h-[44px] w-full items-center justify-between px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
         aria-expanded={open}
       >
         <span className="flex items-center gap-1.5">
@@ -309,7 +309,7 @@ export function MhlwAccidentAnalysisPanel() {
           <button
             type="button"
             onClick={exportAggregatesCsv}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm hover:bg-emerald-50 transition-colors"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-emerald-200 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 shadow-sm hover:bg-emerald-50 transition-colors"
           >
             <Download className="h-3.5 w-3.5" />
             集計CSV
