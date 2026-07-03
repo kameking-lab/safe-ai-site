@@ -151,7 +151,7 @@ export function ProcedureClient() {
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-base font-bold text-slate-900">作業手順（手順 × 危険・急所 × 対策）</h2>
-          <button type="button" onClick={addStep} className="inline-flex items-center gap-1 rounded-lg border border-blue-300 px-2 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50 print:hidden">
+          <button type="button" onClick={addStep} className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-blue-300 px-2 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-50 print:hidden">
             <Plus className="h-3.5 w-3.5" aria-hidden="true" /> 手順を追加
           </button>
         </div>

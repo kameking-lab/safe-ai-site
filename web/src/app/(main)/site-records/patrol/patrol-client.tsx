@@ -227,7 +227,7 @@ export function PatrolClient() {
           <h2 className="text-base font-bold text-slate-900">指摘事項・是正管理</h2>
           <div className="flex items-center gap-2">
             <span className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700">指摘 {findings.length}／未是正 {stat.open}</span>
-            <button type="button" onClick={addFinding} className="inline-flex items-center gap-1 rounded-lg border border-rose-300 px-2 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-50 print:hidden">
+            <button type="button" onClick={addFinding} className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-rose-300 px-2 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-50 print:hidden">
               <Plus className="h-3.5 w-3.5" aria-hidden="true" /> 指摘を追加
             </button>
           </div>

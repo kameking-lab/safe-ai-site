@@ -167,9 +167,9 @@ export function MeetingListClient() {
                     <p className="mt-0.5 text-xs text-slate-500">作業日 {s.workDate}／作成 {s.author || "—"}／{s.contractorCount}社</p>
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">
-                    <button type="button" disabled={busy} onClick={() => void open(s)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50 disabled:opacity-50">開く（再編集）</button>
-                    <button type="button" disabled={busy} onClick={() => void copyNext(s)} className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:opacity-50">翌日用に複製</button>
-                    <button type="button" disabled={busy} onClick={() => void remove(s)} className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50">削除</button>
+                    <button type="button" disabled={busy} onClick={() => void open(s)} className="min-h-[44px] rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50 disabled:opacity-50">開く（再編集）</button>
+                    <button type="button" disabled={busy} onClick={() => void copyNext(s)} className="min-h-[44px] rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:opacity-50">翌日用に複製</button>
+                    <button type="button" disabled={busy} onClick={() => void remove(s)} className="min-h-[44px] rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50">削除</button>
                   </div>
                 </div>
               </li>

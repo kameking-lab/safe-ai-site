@@ -158,10 +158,10 @@ export function QualificationClient() {
             <option value="">候補から選ぶ…</option>
             {PRESET_QUALIFICATIONS.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
-          <button type="button" onClick={() => { addQual(presetPick); setPresetPick(""); }} className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 px-2 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">
+          <button type="button" onClick={() => { addQual(presetPick); setPresetPick(""); }} className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-300 px-2 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">
             <Plus className="h-3.5 w-3.5" aria-hidden="true" /> 候補を追加
           </button>
-          <button type="button" onClick={() => addQual("（自由入力）")} className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100">
+          <button type="button" onClick={() => addQual("（自由入力）")} className="min-h-[44px] rounded-lg border border-slate-300 px-2 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100">
             ＋ 自由入力で追加
           </button>
         </div>
