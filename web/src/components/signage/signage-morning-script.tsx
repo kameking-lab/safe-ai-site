@@ -65,14 +65,14 @@ export function SignageMorningScript(props: Props) {
           <button
             type="button"
             onClick={regenerate}
-            className="rounded border border-emerald-400 bg-emerald-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
+            className="inline-flex min-h-[44px] items-center rounded border border-emerald-400 bg-emerald-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
           >
             再生成
           </button>
           <button
             type="button"
             onClick={handleCopy}
-            className="inline-flex items-center gap-1 rounded border border-emerald-400 bg-emerald-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded border border-emerald-400 bg-emerald-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-600"
           >
             <Copy className="h-3 w-3" />
             コピー
@@ -80,7 +80,7 @@ export function SignageMorningScript(props: Props) {
           <button
             type="button"
             onClick={() => speak(text)}
-            className="inline-flex items-center gap-1 rounded border border-emerald-400 bg-white px-2 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-50"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded border border-emerald-400 bg-white px-2 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-50"
           >
             <Volume2 className="h-3 w-3" />
             読み上げ

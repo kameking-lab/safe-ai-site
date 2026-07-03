@@ -109,7 +109,7 @@ export function SignageSiteSafety({ data }: { data: SignageSiteSafetyData | null
           href="/site-records"
           target="_blank"
           rel="noreferrer"
-          className="ml-auto rounded-lg border border-emerald-600/60 px-2 py-1 text-[9px] font-semibold text-emerald-300 hover:bg-emerald-950/50 sm:text-[10px] xl:text-sm"
+          className="ml-auto inline-flex min-h-[44px] items-center rounded-lg border border-emerald-600/60 px-2 py-1 text-[9px] font-semibold text-emerald-300 hover:bg-emerald-950/50 sm:text-[10px] xl:text-sm"
         >
           記録キット →
         </a>

@@ -58,7 +58,7 @@ export function SignageRiskPrediction({ weatherData, precomputedRisks }: Props) 
         </h2>
         <a
           href="/risk-prediction"
-          className="rounded-lg border border-blue-600/60 px-2 py-1 text-[9px] font-semibold text-blue-300 hover:bg-blue-950/50 sm:text-[10px] xl:text-sm"
+          className="inline-flex min-h-[44px] items-center rounded-lg border border-blue-600/60 px-2 py-1 text-[9px] font-semibold text-blue-300 hover:bg-blue-950/50 sm:text-[10px] xl:text-sm"
           target="_blank"
           rel="noreferrer"
         >
