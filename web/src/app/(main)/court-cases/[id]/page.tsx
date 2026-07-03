@@ -7,6 +7,7 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { SupervisorByline } from "@/components/SupervisorByline";
 import { COURT_CASES, getCourtCaseById } from "@/data/court-cases";
 import { FIELD_ICON } from "@/lib/court-cases/case-visual";
+import { ISSUE_COLOR } from "@/lib/court-cases/issue-color";
 
 export function generateStaticParams() {
   return COURT_CASES.map((c) => ({ id: c.id }));
@@ -27,18 +28,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     openGraph: { title, description },
   };
 }
-
-const issueColor: Record<string, string> = {
-  安全配慮義務: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  過失相殺: "bg-amber-100 text-amber-800 border-amber-200",
-  "元請・下請責任": "bg-sky-100 text-sky-800 border-sky-200",
-  "派遣・請負先責任": "bg-cyan-100 text-cyan-800 border-cyan-200",
-  "役員・個人責任": "bg-orange-100 text-orange-800 border-orange-200",
-  刑事責任: "bg-red-200 text-red-900 border-red-300",
-  "国・行政責任": "bg-violet-100 text-violet-800 border-violet-200",
-  業務起因性: "bg-teal-100 text-teal-800 border-teal-200",
-  労働者性: "bg-rose-100 text-rose-800 border-rose-200",
-};
 
 export default async function CourtCaseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -78,7 +67,7 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
           <header className="mt-3 border-b-2 border-slate-800 pb-3 dark:border-slate-300">
             <div className="flex flex-wrap items-center gap-2">
               {c.issues.map((i) => (
-                <span key={i} className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${issueColor[i] ?? "bg-slate-100 text-slate-700 border-slate-200"}`}>{i}</span>
+                <span key={i} className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${ISSUE_COLOR[i]}`}>{i}</span>
               ))}
               {(() => {
                 const FieldIcon = FIELD_ICON[c.field];
@@ -187,7 +176,7 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
                     >
                       <div className="flex flex-wrap items-center gap-1.5">
                         {r.issues.map((i) => (
-                          <span key={i} className={`rounded-full border px-1.5 py-0.5 text-[10px] font-bold ${issueColor[i] ?? "bg-slate-100 text-slate-700 border-slate-200"}`}>{i}</span>
+                          <span key={i} className={`rounded-full border px-1.5 py-0.5 text-[10px] font-bold ${ISSUE_COLOR[i]}`}>{i}</span>
                         ))}
                       </div>
                       <p className="mt-1 flex items-start gap-1.5 text-sm font-bold text-slate-900 dark:text-slate-100">

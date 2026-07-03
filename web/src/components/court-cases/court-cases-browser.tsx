@@ -18,6 +18,7 @@ import {
   type CourtType,
 } from "@/lib/court-cases/search";
 import { FIELD_ICON } from "@/lib/court-cases/case-visual";
+import { ISSUE_COLOR } from "@/lib/court-cases/issue-color";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
 // フェーズB: 数百件規模に備え、検索ロジックは lib/court-cases/search.ts の純関数に集約。
@@ -27,25 +28,6 @@ const FACETS = computeFacets(COURT_CASES);
 // 柱C-6: モバイル全高が約26,000pxまで伸びていたため、初期表示を絞り「もっと見る」で追加読込。
 // 88件全件を一度に描画しない＝初訪ユーザーがスクロール地獄に陥らない。
 const PAGE_SIZE = 24;
-
-const issueColor: Record<CourtCaseIssue, string> = {
-  安全配慮義務: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  過失相殺: "bg-amber-100 text-amber-800 border-amber-200",
-  "元請・下請責任": "bg-sky-100 text-sky-800 border-sky-200",
-  "派遣・請負先責任": "bg-cyan-100 text-cyan-800 border-cyan-200",
-  "役員・個人責任": "bg-orange-100 text-orange-800 border-orange-200",
-  刑事責任: "bg-red-200 text-red-900 border-red-300",
-  "国・行政責任": "bg-violet-100 text-violet-800 border-violet-200",
-  業務起因性: "bg-teal-100 text-teal-800 border-teal-200",
-  労働者性: "bg-rose-100 text-rose-800 border-rose-200",
-  "解雇・雇止め": "bg-red-100 text-red-800 border-red-200",
-  "労働時間・割増賃金": "bg-indigo-100 text-indigo-800 border-indigo-200",
-  "配転・出向": "bg-lime-100 text-lime-800 border-lime-200",
-  懲戒: "bg-fuchsia-100 text-fuchsia-800 border-fuchsia-200",
-  "就業規則・労働条件": "bg-blue-100 text-blue-800 border-blue-200",
-  "賃金・退職金": "bg-yellow-100 text-yellow-800 border-yellow-200",
-  "男女・雇用差別": "bg-pink-100 text-pink-800 border-pink-200",
-};
 
 export function CourtCasesBrowser() {
   // 事故事例など他機能からの ?field= / ?issue= / ?q= ディープリンクで初期フィルタを反映。
@@ -258,7 +240,7 @@ export function CourtCasesBrowser() {
             >
               <div className="flex flex-wrap items-center gap-2">
                 {c.issues.map((i) => (
-                  <span key={i} className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${issueColor[i]}`}>{i}</span>
+                  <span key={i} className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${ISSUE_COLOR[i]}`}>{i}</span>
                 ))}
                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{c.field}</span>
               </div>

@@ -54,7 +54,7 @@ const SHORTCUTS: Shortcut[] = [
   },
   {
     label: "フルハーネス",
-    href: "/education",
+    href: "/education/tokubetsu/fullharness",
     icon: <HardHat size={26} aria-hidden="true" />,
   },
   {
