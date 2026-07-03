@@ -243,7 +243,7 @@ export default async function PreviewPage({ params, searchParams }: PageProps) {
         <div className="mb-6 flex flex-col items-stretch gap-3 print:hidden sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/strategy/plan-generator"
-            className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
+            className="min-h-[44px] inline-flex items-center justify-center gap-1 rounded-md border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
             title="事業者名・業種・規模・計画年度を再編集して新しい計画書を生成します"
           >
             ← 事業者名・業種等を再編集

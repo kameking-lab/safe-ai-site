@@ -4,8 +4,8 @@
 
 ## 未着手（上から処理）
 
-### 2026-07-03 柱0スウィープ申し送り（chatbot-toolbar-44px着手時のExplore調査で検出・未着手）
-- [ ] 【柱0補充／タップ標的】`law-search-panel.tsx`(103-115行=検索対象データソース切替タブ)・`mhlw-law-articles-panel.tsx`(135,150行=絞り込みチップ、234,245行=前へ/次へページネーション)・`strategy/plan-generator/preview/[id]/page.tsx`(244-250行=「← 事業者名・業種等を再編集」リンク)が`px-3〜4 py-1〜1.5 text-xs〜sm`のみで`min-h-[44px]`指定が無く約28〜36px。いずれも「次にやること」の主要導線（法令検索のデータソース切替・結果ページ送り・計画書プレビューからの再編集導線）。寸法のみのmin-h-[44px]付与で是正可能。
+### 2026-07-03 柱0スウィープ申し送り（chatbot-toolbar-44px着手時のExplore調査で検出・完了）
+- [x] 【柱0補充／タップ標的】`law-search-panel.tsx`(103-115行=検索対象データソース切替タブ)・`mhlw-law-articles-panel.tsx`(135,150行=絞り込みチップ、234,245行=前へ/次へページネーション)・`strategy/plan-generator/preview/[id]/page.tsx`(244-250行=「← 事業者名・業種等を再編集」リンク)を44px化（2026-07-03 ux-tool/mhlw-plan-preview-44px）。うち`law-search-panel.tsx`のデータソース切替タブは同日先行の`ux-tool/risk-lawsearch-tabs-44px`(PR #728)で既に是正済みと判明。残り3箇所（法令名フィルタチップ、前へ/次へページネーション、計画書プレビュー再編集リンク）が`px-3〜4 py-1〜1.5 text-xs〜sm`のみで`min-h-[44px]`指定が無く約24〜36pxだったのを是正。いずれも「次にやること」の主要導線（法令検索のMHLW公式PDF絞り込み・結果ページ送り・計画書プレビューからの再編集導線）。是正=計5箇所に`min-h-[44px]`（+`inline-flex items-center justify-center`）を付与（寸法のみ、文言・onClick/href不変＝既存破壊0）。無読テスト新設4/4 PASS（own prod 3100・390×844・domcontentloaded＝/law-search?mode=mhlwの法令名フィルタチップ全件・次へページネーション・plan-generator→preview遷移後の再編集リンクがいずれも44px以上）。ゲート全通過（tsc0/lint errors0/vitest 2454 pass/build成功）。スクリプト=docs/third-party-reviews/scripts/mhlw-plan-preview-44px-noread-2026-07-03.mjs。
 
 ### 2026-07-03 補充（S7完了により3件未満のため、診断04 §5.1-1 + fresh eval残欠陥から補充）
 - [x] 【補充・小】fresh eval Q39「足場の組立て・変更後に必要な点検と記録」PIN trigger拡充（2026-07-03 ux-tool/q39-ashiba-henkougo-tenken-pin）。既存「足場の点検」PIN（567条・566条）のtriggersに「組立て・変更後」「組立て、変更後」を追加＝Q39の言い回し「足場の組立て・変更後に必要な点検と記録の根拠条文は？」が既存4trigger（足場の点検/足場点検/足場の作業開始前点検/足場用墜落防止設備の点検）いずれにも一致せず安衛則565条ほかを誤取得していた不具合を是正。安衛則567条2項（"足場の組立て、一部解体若しくは変更の後において...点検させ...補修"）が実体根拠＝corpus実データと整合、rag-search.tsのみで完結（data班領域未接触）。gold側の568条（つり足場の点検）はcorpusに全文未収録のためPIN対象外だが、isMatchはgold内OR判定のため567条のヒットのみで正答扱い。回帰テスト1件追加（rag-search.test.ts）。完了条件達成=fresh eval Recall@5 100/100（99→100）・main eval 124/124=100%非退行（PIN group拡張でMRRは僅かに変動=0.8297→0.8257だがrecall5は不変）。ゲート全通過（tsc0/lint errors0/vitest 2211 pass・261 files/build成功）。
