@@ -5,7 +5,7 @@
 ## 未着手（上から処理）
 
 ### 2026-07-03 補充（S7完了により3件未満のため、診断04 §5.1-1 + fresh eval残欠陥から補充）
-- [ ] 【補充・小】fresh eval Q39「足場の組立て・変更後に必要な点検と記録」PIN trigger拡充。現状「足場の点検」PINは trigger未一致で567/568条を引けず安衛則565条ほかを誤取得（rag-search.tsのみで完結・data班領域には触れない）。完了条件: fresh eval Recall@5 99→100/100、main非退行。
+- [x] 【補充・小】fresh eval Q39「足場の組立て・変更後に必要な点検と記録」PIN trigger拡充（2026-07-03 ux-tool/q39-ashiba-henkougo-tenken-pin）。既存「足場の点検」PIN（567条・566条）のtriggersに「組立て・変更後」「組立て、変更後」を追加＝Q39の言い回し「足場の組立て・変更後に必要な点検と記録の根拠条文は？」が既存4trigger（足場の点検/足場点検/足場の作業開始前点検/足場用墜落防止設備の点検）いずれにも一致せず安衛則565条ほかを誤取得していた不具合を是正。安衛則567条2項（"足場の組立て、一部解体若しくは変更の後において...点検させ...補修"）が実体根拠＝corpus実データと整合、rag-search.tsのみで完結（data班領域未接触）。gold側の568条（つり足場の点検）はcorpusに全文未収録のためPIN対象外だが、isMatchはgold内OR判定のため567条のヒットのみで正答扱い。回帰テスト1件追加（rag-search.test.ts）。完了条件達成=fresh eval Recall@5 100/100（99→100）・main eval 124/124=100%非退行（PIN group拡張でMRRは僅かに変動=0.8297→0.8257だがrecall5は不変）。ゲート全通過（tsc0/lint errors0/vitest 2211 pass・261 files/build成功）。
 - [ ] 【補充・中】診断04 §5.1-1: 法令名正規化テーブルの単一ソース化。`chatbot-enrichment.ts`の`KNOWN_LAW_FULL_NAMES`・`synonyms.ts`・`notice-search`がそれぞれ独自に法令名⇄略称の対応を持ち重複・ドリフトの温床（O4のT1で場当たり的に前者へ追加した経緯あり）。`data/laws/index.ts`由来の単一ソースに統合し3箇所から参照させる。完了条件: 3箇所の法令名判定が同一データソース由来になり、main/fresh eval非退行。
 - [ ] 【補充・次点／要data班確認】/law-search・/chemical-database のデータ鮮度表示（/circularsは2026-07-03に実施済＝#619参照）。両ページの対象データに機械可読な鮮度フィールドが無く、web/src/data/**はdata班所有のため、フィールド追加の要否をdata班へ申告してから着手する（自班のみでは実装不可）。
 
