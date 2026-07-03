@@ -28,7 +28,11 @@ function loadSiteList(): SiteChemical[] {
 
 function saveSiteList(list: SiteChemical[]) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(SITE_LIST_KEY, JSON.stringify(list));
+  try {
+    window.localStorage.setItem(SITE_LIST_KEY, JSON.stringify(list));
+  } catch {
+    // ignore storage errors（chatbot-panel.tsx saveSessions等の既存パターンを踏襲）
+  }
 }
 
 export function ChemicalRaExtras() {
