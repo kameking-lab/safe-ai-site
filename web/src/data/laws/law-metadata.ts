@@ -199,9 +199,9 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   女性則: {
     fullName: "女性労働基準規則",
     promulgation: "昭和61年労働省令第3号",
-    latestRevision: "令和4年改正",
+    latestRevision: "令和元年厚生労働省令第1号（元号表記の整理・2019-05-07施行）",
     eGovUrl: "https://laws.e-gov.go.jp/law/361M50002000003",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   年少者則: {
     fullName: "年少者労働基準規則",
