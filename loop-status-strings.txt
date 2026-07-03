@@ -41,6 +41,7 @@ plannerLaneHeader=【対象レーン: {LANE} / BACKLOG-{LANE}.md】
 reportHeader=## 各レーンの自己報告（最終稼働・直近マージPR・残open・直近の判断1行）
 reportLine=- {LANE} : 最終稼働 {LASTRUN} / 直近PR {PR} / 残open {OPEN} / {NOTE}
 reportEmptyNote=（判断メモなし）
+reportRunnerHeartbeat=runner heartbeat: レーンは稼働中だがエージェントがstep5.5の自己報告を実行していない（loop-prompt-<lane>.txt の報告手順を確認）
 reportPlaceholder=- {LANE} : （まだ自己報告なし）
 laneHealthOk=健在性: 全{TOTAL}レーンが直近{MIN}分以内に自己報告（{NOW}時点・個別レーンの沈黙停止なし）
 laneHealthStale=健在性 !!! 停止疑い: {LANES}（{MIN}分以上 自己報告なし・他レーンは稼働中＝個別レーンだけが黙って停止した可能性。復活=該当レーンのrunner再起動 or 次回ログオン／毎日07:00の launcher）

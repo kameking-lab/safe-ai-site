@@ -85,6 +85,7 @@ param(
   [string]$RepoPath = "",
   [string]$StringsPath = "",
   [int]$StaleMinutes = 120,
+  [switch]$HeartbeatOnly,
   [switch]$WhatIf,
   [switch]$SelfTest
 )
@@ -378,6 +379,41 @@ function Get-TplPrefix([string]$key) {
   if ($i -ge 0) { return $t.Substring(0, $i) } else { return $t }
 }
 
+# ---- Heartbeat (runner-emitted liveness) ------------------------------------------------------
+# Reporting must NOT depend on the agent remembering step5.5. Observed live: seo and ux-records ran
+# 30+ iterations over ~6.5h, merged PRs, yet NEVER self-reported - so the per-lane health banner
+# (#628/#631/#640) kept flagging two ALIVE, working lanes as unreported/born-dead (a FALSE silent-death
+# alarm, the very class those fixes exist to remove). The persistent lane RUNNER therefore emits a
+# liveness heartbeat after every iteration (-HeartbeatOnly). To avoid clobbering a rich note the agent
+# DID write, a heartbeat swaps ONLY the {LASTRUN} timestamp of the lane's existing row; when the lane has
+# produced no row yet it writes a minimal row whose note honestly states the agent has not self-reported,
+# so the operator sees "alive, but its agent is skipping the report step" - never a false silent death.
+
+# Swap the {LASTRUN} timestamp (the first yyyy-MM-dd HH:mm, which structurally precedes the note in the
+# reportLine template) in an existing row for a fresh one, leaving PR/OPEN/NOTE byte-identical. Pure.
+function Set-RowTimestamp {
+  param([string]$ExistingRow, [string]$FreshLastRun)
+  if ($null -eq $ExistingRow) { return $ExistingRow }
+  return [regex]::Replace([string]$ExistingRow, '\d{4}-\d{2}-\d{2} \d{2}:\d{2}', $FreshLastRun, 1)
+}
+
+# The row a heartbeat should upsert: refresh the lane's existing row's timestamp (note preserved), or -
+# when the lane has produced no row yet - the supplied minimal placeholder row (honest no-self-report
+# note). Pure function of the current region rows so -SelfTest can verify both branches offline.
+function Get-HeartbeatRow {
+  param([string[]]$Rows, [string]$Lane, [string]$FreshLastRun, [string]$PlaceholderRow)
+  $prefix = "- " + $Lane + " :"
+  if ($Rows) {
+    foreach ($r in $Rows) {
+      if ($null -eq $r) { continue }
+      if (([string]$r).TrimStart().StartsWith($prefix)) {
+        return (Set-RowTimestamp -ExistingRow ([string]$r) -FreshLastRun $FreshLastRun)
+      }
+    }
+  }
+  return $PlaceholderRow
+}
+
 # ---- Self-test: offline verification of the lock's stale-orphan reclamation -------------------
 if ($SelfTest) {
   $fails = 0
@@ -528,6 +564,22 @@ if ($SelfTest) {
         Assert-Test "missing lanes = enabled roster minus reported" (($ml.Count -eq 2) -and ($ml -contains "seo") -and ($ml -contains "ux-records"))
       }
     }
+
+    # H) Heartbeat helpers: the runner-emitted liveness upsert must preserve a rich note, swap only the
+    # timestamp, and (for a never-reported lane) fall back to the honest placeholder row. Pure - no I/O.
+    $hbFresh = "2026-07-03 13:20"
+    $richRow = "- seo : LR 2026-07-03 08:01 / PR #666 / open 1 / merged #666; sitemap fix landed (2026-07-03)"
+    $swapped = Set-RowTimestamp -ExistingRow $richRow -FreshLastRun $hbFresh
+    Assert-Test "H1: heartbeat swaps ONLY the leading timestamp to the fresh one" ($swapped -eq ("- seo : LR " + $hbFresh + " / PR #666 / open 1 / merged #666; sitemap fix landed (2026-07-03)"))
+    Assert-Test "H1b: a date inside the note is NOT touched (only the first timestamp)" ($swapped.EndsWith("(2026-07-03)"))
+    $placeholder = "- ux-records : LR " + $hbFresh + " / PR - / open 0 / runner heartbeat: agent not self-reporting"
+    $existRow = Get-HeartbeatRow -Rows @("- ops : LR 2026-07-03 13:00 / PR #1 / open 2 / ok", $richRow) -Lane "seo" -FreshLastRun $hbFresh -PlaceholderRow $placeholder
+    Assert-Test "H2: existing lane row -> its own row with a fresh timestamp (note preserved)" ($existRow -eq $swapped)
+    $newRow = Get-HeartbeatRow -Rows @("- ops : LR 2026-07-03 13:00 / PR #1 / open 2 / ok") -Lane "ux-records" -FreshLastRun $hbFresh -PlaceholderRow $placeholder
+    Assert-Test "H3: no row for the lane -> the honest placeholder row is used" ($newRow -eq $placeholder)
+    $emptyRow = Get-HeartbeatRow -Rows @() -Lane "seo" -FreshLastRun $hbFresh -PlaceholderRow $placeholder
+    Assert-Test "H4: empty region -> placeholder row (no throw)" ($emptyRow -eq $placeholder)
+    Assert-Test "H5: Set-RowTimestamp on a null/empty row is safe (no throw, empty result)" ((Set-RowTimestamp -ExistingRow $null -FreshLastRun $hbFresh) -eq "")
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -591,13 +643,38 @@ try {
 } catch { $pr = "-" }
 
 $noteText = $Note.Trim()
-if ($noteText -eq "") { $noteText = S "reportEmptyNote" }
+if ($noteText -eq "") {
+  if ($HeartbeatOnly) {
+    # Placeholder note for a lane that has produced NO row yet: honestly says the agent is not
+    # self-reporting (ASCII fallback when the strings file lacks the key). Only used when creating a
+    # fresh row; an existing row's own note is preserved verbatim by Get-HeartbeatRow.
+    $hb = S "reportRunnerHeartbeat"
+    if ($hb -eq "reportRunnerHeartbeat") { $hb = "runner heartbeat: lane alive, but its agent has not run the step5.5 self-report" }
+    $noteText = $hb
+  } else {
+    $noteText = S "reportEmptyNote"
+  }
+}
 $laneLine = Fmt "reportLine" @{ LANE = $Lane; LASTRUN = $lastRun; PR = $pr; OPEN = $open; NOTE = $noteText }
 
 Write-Rep ("computed row: " + $laneLine)
 
 if ($WhatIf) {
   Write-Rep "[WHATIF] no file written, no lock taken."
+  # Heartbeat: preview the row we WOULD upsert (existing row's timestamp swapped, or the placeholder
+  # row when the lane has no row yet) so the health preview below reflects heartbeat semantics.
+  if ($HeartbeatOnly -and (Test-Path $StatusPath)) {
+    try {
+      $hbPrev = @(Get-Content -Encoding UTF8 -Path $StatusPath)
+      $hbB = -1; $hbE = -1
+      for ($k = 0; $k -lt $hbPrev.Count; $k++) {
+        if ($hbPrev[$k].Trim() -eq $beginMarker) { $hbB = $k } elseif ($hbPrev[$k].Trim() -eq $endMarker) { $hbE = $k; break }
+      }
+      $hbRows = @(); if ($hbB -ge 0 -and $hbE -gt $hbB) { for ($k = $hbB + 1; $k -lt $hbE; $k++) { $hbRows += $hbPrev[$k] } }
+      $laneLine = Get-HeartbeatRow -Rows $hbRows -Lane $Lane -FreshLastRun $lastRun -PlaceholderRow $laneLine
+    } catch {}
+    Write-Rep ("[WHATIF][HEARTBEAT] would upsert row: " + $laneLine)
+  }
   Write-Rep ("[WHATIF] would also refresh the top heartbeat line to: " + (Fmt "updated" @{ NOW = $lastRun }))
   # Read-only preview of the per-lane health line: take existing region rows + this lane's fresh row,
   # strip any prior health line, and show what would be computed (no file is touched, no lock taken).
@@ -656,6 +733,16 @@ try {
   for ($k = 0; $k -lt $lines.Count; $k++) {
     if ($lines[$k].Trim() -eq $beginMarker) { $beginIdx = $k }
     elseif ($lines[$k].Trim() -eq $endMarker) { $endIdx = $k; break }
+  }
+
+  # Heartbeat mode: refresh only this lane's timestamp (note preserved), or create the honest
+  # placeholder row when the lane has no row yet. Derived from the CURRENT region rows under the lock.
+  if ($HeartbeatOnly) {
+    $regionRows = @()
+    if ($beginIdx -ge 0 -and $endIdx -gt $beginIdx) {
+      for ($k = $beginIdx + 1; $k -lt $endIdx; $k++) { $regionRows += $lines[$k] }
+    }
+    $laneLine = Get-HeartbeatRow -Rows $regionRows -Lane $Lane -FreshLastRun $lastRun -PlaceholderRow $laneLine
   }
 
   $rowPrefix = "- " + $Lane + " :"
