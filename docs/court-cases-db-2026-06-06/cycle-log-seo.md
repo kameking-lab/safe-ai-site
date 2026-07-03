@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-03 — sitemap 逆カバレッジガード新設＋発見された /profile 収載（PR: seo/sitemap-reverse-coverage-guard）
+
+**回収**: 前イテレーションの自班 CI 緑 PR を回収＝#729（JSON-LD 低頻度 provider/creator @id 集約・#719 統合）を squash マージ→main を ff-only 更新。連鎖して #738（横断検索へ法改正記事10本収載）が CONFLICTING 化したため `git merge origin/main`（force-push なし）で解決＝衝突は BACKLOG-seo.md / cycle-log-seo.md の追記のみ（コードは非衝突）で #729・#738 両エントリを併存させ再push（CI 再走は次イテレーション回収）。#743（⌘K 0件フォールバックのパリティ化）は e2e/smoke pending のため持ち越し。他班 OPEN PR（#744/#741 等）は不可侵。
+
+**着手判断**: BACKLOG-seo 未着手キューは空（O17/T6・T7 は Path A 設計ドラフト＝オーナー承認待ち）のため補充指針に従い自領域から補充。前々回の sitemap 全域再監査（ゴーストURLガード #724）で「sitemap→ルート」の片方向は固めたが、**逆向き「ルート→sitemap」（実在 indexable ページの欠落検知）が未整備**だった。並列マルチループで他班が公開ページを新設し sitemap.ts へ収載し忘れる＝孤立ページ化する構造的リスクの恒久ガードとして着手。
+
+**変更**: (1) `sitemap.test.ts` に逆カバレッジガード describe（4 it）新設＝`src/app` 配下の静的ルートを全走査し、各々が (a) robots.ts Disallow 配下（`robots()` 出力から**単一ソース参照**＝/admin/ ・/auth/ ・/lms 等を二重管理せず自動追従。前方一致誤爆なし＝/lms が /laws を巻き込まないことも固定）、(b) `robots:{index:false}` 宣言、(c) redirect/permanentRedirect スタブ、(d) 当班の意図的非収載 allowlist（`SEO_INTENTIONALLY_EXCLUDED`＝現状 `/organization` のみ・理由必須）のいずれにも当たらない＝indexable な実ページなら sitemap 収載必須。所有UI班が noindex 宣言すればガードは自動追従（当班がページ本文の index 方針を決めない設計）。(2) 本ガードで全169静的ルートを機械分類し、**`/profile`（自社プロファイル登録＝index:true・自己canonical・OGP付き・全機能の初期表示最適化の入口）がどの sitemap にも未収載だった発見性の穴**を検出→ `sitemap.ts` へ収載（lastmod=2026-05-29 git履歴由来・priority0.6・monthly。兄弟の /notifications・/safety-diary と同節）。`/organization`（事業所ダッシュボード）は既存の非収載境界テスト（「正式リリース前デモ版モック」）が非収載を固定済みのため、逆ガード側は allowlist へ理由付きで対に明示（index:true のまま検索面に出さない少数例）。
+
+**実測（ミューテーション）**: /profile を sitemap から外すと逆カバレッジ it（欠落0）が `expected [ '/profile' ] to deeply equal []` で赤化することを確認＝ガードが実際に穴を捕捉する。復元で緑。
+
+**ゲート**: `tsc --noEmit`=0 / `lint`=errors0（warnは既存の別ファイル23件）/ `vitest run`=290ファイル2479 pass・1 skip（新規4含む）/ `build`=成功。build 再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は `git checkout` で復元。working tree は sitemap.ts / sitemap.test.ts の2ファイルのみ。
+
+**残**: 本 PR の CI 緑回収＆マージ（次イテレーション 1)）。#743・#738 の CI 回収も継続。O17/T6・T7 実装はオーナー承認待ち。/organization の index 方針（noindex 化するか公開するか）は所有UI班マター＝当班は sitemap 側の対応のみ実施。
+
+---
+
 ## 2026-07-03 柱C-2 横断検索に「機能・目的地ページ」を収載（feature カテゴリ新設）＝機能名0件の穴を是正
 
 **契約1) 回収**: 前イテレーションの緑PR #738（法改正記事の横断検索収載）を squash マージ→main を ff-only 更新。CONFLICTING だった #743（⌘K 0件フォールバック）は BACKLOG/cycle-log の追記衝突を origin/main 通常マージで解決し再push（CI 再実行→次イテレーション回収）。#750（sitemap 逆カバレッジガード）は CI 進行中で継続。
