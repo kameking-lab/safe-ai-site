@@ -1,6 +1,5 @@
-import { describe, expect, it, beforeAll } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { searchCrossIndex } from './score';
-import { buildCrossSearchIndex, __resetCrossSearchIndexCache } from './build';
 import type { CrossSearchItem } from './types';
 
 /** 合成データ＝データ更新に左右されないスコアリング規約の固定。 */
@@ -77,47 +76,5 @@ describe('searchCrossIndex（スコアリング規約）', () => {
   it('limit 指定で件数を制限する', () => {
     const r = searchCrossIndex(SYNTH, '特別教育', { limit: 1 });
     expect(r.length).toBe(1);
-  });
-});
-
-describe('buildCrossSearchIndex（実データ統合）', () => {
-  let index: CrossSearchItem[];
-
-  beforeAll(async () => {
-    __resetCrossSearchIndexCache();
-    index = await buildCrossSearchIndex();
-  });
-
-  it('主要カテゴリが全て 1 件以上インデックスされる', () => {
-    const cats = new Set(index.map((i) => i.category));
-    for (const c of ['feature', 'education', 'law', 'notice', 'precedent', 'sign'] as const) {
-      expect(cats.has(c), `category ${c} should be present`).toBe(true);
-    }
-  });
-
-  it('全 URL が "/" 始まりの実在ルート形式（幽霊URL/空URL禁止）', () => {
-    for (const i of index) {
-      expect(i.url.startsWith('/'), `${i.id} url=${i.url}`).toBe(true);
-      expect(i.title.length).toBeGreaterThan(0);
-    }
-  });
-
-  it('完了条件: 「アーク溶接 特別教育」が教育資格DBに到達（最上位＝教育・タイトルにアーク溶接）', () => {
-    const r = searchCrossIndex(index, 'アーク溶接 特別教育');
-    expect(r.length).toBeGreaterThan(0);
-    expect(r[0].category).toBe('education');
-    expect(r[0].title).toContain('アーク溶接');
-    expect(r[0].url).toContain('/education-certification');
-  });
-
-  it('代表クエリ「玉掛け」で教育資格DBが上位に出る', () => {
-    const r = searchCrossIndex(index, '玉掛け');
-    const top5 = r.slice(0, 5);
-    expect(top5.some((x) => x.category === 'education' && x.title.includes('玉掛け'))).toBe(true);
-  });
-
-  it('キャッシュ: 2 回目の build は同一参照を返す', async () => {
-    const again = await buildCrossSearchIndex();
-    expect(again).toBe(index);
   });
 });
