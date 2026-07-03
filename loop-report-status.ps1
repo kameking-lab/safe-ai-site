@@ -326,10 +326,17 @@ function Format-MissingSinceMarker {
 #   * MISSING   (note): an enabled lane with NO parseable report row, still WITHIN the grace window (or with
 #                        no stamp yet). Softer wording because a fresh ignition legitimately shows this for
 #                        the minutes until each lane's first report; it self-clears as they report.
-# Precedence stale > born-dead > missing > ok keeps each banner single-purpose. When the roster is unknown
-# (empty) the function reverts exactly to the pre-roster behavior (TOTAL = reported count, no detection).
+#   * ALIVE-NO-REPORT (note): an enabled lane with NO parseable report row WHOSE RUNNER PROCESS IS ALIVE
+#                        ($AliveLanes, ground truth from Get-AliveRunnerLanes). It is provably NOT dead, so
+#                        it must NEVER escalate to the loud born-dead banner regardless of stamp age - it is
+#                        simply alive and not self-reporting (old runner / agent skipping step5.5). This is
+#                        the process-liveness tie-breaker that stops the born-dead FALSE alarm.
+# Precedence stale > born-dead > alive-no-report > missing > ok keeps each banner single-purpose. When the
+# roster is unknown (empty) the function reverts exactly to the pre-roster behavior (TOTAL = reported count,
+# no detection). $AliveLanes defaults to empty, so callers that cannot scan processes (or older self-tests)
+# get exactly the prior behavior.
 function Get-LaneHealthLine {
-  param([string[]]$Rows, [datetime]$Now, [int]$StaleMinutes, [string[]]$ExpectedLanes, [hashtable]$MissingSince)
+  param([string[]]$Rows, [datetime]$Now, [int]$StaleMinutes, [string[]]$ExpectedLanes, [hashtable]$MissingSince, [string[]]$AliveLanes = @())
   if (-not $LS.ContainsKey("laneHealthOk") -or -not $LS.ContainsKey("laneHealthStale")) { return $null }
   $rowTpl = S "reportLine"
   $all = @(Get-StaleLanes -Rows $Rows -Now $Now -StaleMinutes ([int]::MinValue) -RowTemplate $rowTpl)
@@ -349,21 +356,31 @@ function Get-LaneHealthLine {
     }
     return (Fmt "laneHealthStale" @{ LANES = ($items -join $sep); MIN = $StaleMinutes })
   }
-  # Split never-reported lanes by how long they have been missing: those stamped >= StaleMinutes ago are
-  # born-dead (loud); the rest are still within the fresh-ignition grace window (quiet note). If the
-  # born-dead string is absent (older strings file) treat every missing lane as quiet so it is still named
-  # by the unreported banner - NEVER let a rowless lane fall through to the falsely-OK banner.
+  # Split never-reported lanes three ways. A lane whose RUNNER PROCESS is alive ($AliveLanes) is provably
+  # NOT dead, so it goes to alive-no-report (calm note) regardless of stamp age - this is the ground-truth
+  # tie-breaker that prevents the born-dead FALSE alarm. Of the rest, lanes stamped >= StaleMinutes ago are
+  # born-dead (loud); those still within the fresh-ignition grace window are quiet. Fallbacks that NEVER let
+  # a rowless lane reach the falsely-OK banner: if the born-dead string is absent, its lanes fold into quiet;
+  # if the alive-no-report string is absent, alive lanes fold into quiet (still named, never dropped).
   $canBornDead = $LS.ContainsKey("laneHealthBornDead")
+  $canAliveNoReport = $LS.ContainsKey("laneHealthAliveNoReport")
   $bornDead = @()
+  $aliveNoReport = @()
   $quietMissing = @()
   foreach ($m in $missing) {
+    if ($canAliveNoReport -and ($AliveLanes -contains $m)) { $aliveNoReport += $m; continue }
     $since = $null
     if ($MissingSince -and $MissingSince.ContainsKey($m)) { $since = $MissingSince[$m] }
+    # A lane confirmed alive is never born-dead even without the alive-no-report string: fold it to quiet.
+    if ($AliveLanes -contains $m) { $quietMissing += $m; continue }
     if ($canBornDead -and $null -ne $since -and ($Now - $since).TotalMinutes -ge $StaleMinutes) { $bornDead += $m }
     else { $quietMissing += $m }
   }
   if ($bornDead.Count -gt 0 -and $LS.ContainsKey("laneHealthBornDead")) {
     return (Fmt "laneHealthBornDead" @{ LANES = ($bornDead -join $sep); MIN = $StaleMinutes })
+  }
+  if ($aliveNoReport.Count -gt 0 -and $canAliveNoReport) {
+    return (Fmt "laneHealthAliveNoReport" @{ LANES = ($aliveNoReport -join $sep); MISSING = $aliveNoReport.Count; TOTAL = $ExpectedLanes.Count })
   }
   if ($quietMissing.Count -gt 0 -and $LS.ContainsKey("laneHealthUnreported")) {
     return (Fmt "laneHealthUnreported" @{ LANES = ($quietMissing -join $sep); MISSING = $quietMissing.Count; TOTAL = $ExpectedLanes.Count })
@@ -452,6 +469,34 @@ function Repair-MsysMangledNote {
   if (-not $Note -or -not $MsysRoot) { return $Note }
   $slashFlexible = ([regex]::Escape($MsysRoot)) -replace '/', '[\\/]'
   return [regex]::Replace($Note, $slashFlexible + '[\\/]', '/', 'IgnoreCase')
+}
+
+# ---- Process-liveness corroboration for the born-dead banner ----------------------------------
+# A NEVER-reported lane is ambiguous: it is either genuinely born dead (runner crashed at ignition ->
+# loud born-dead is right) OR alive and working but simply not self-reporting (its agent skips step5.5
+# AND its runner predates the #672 heartbeat / can't hot-swap it in). The central status file alone
+# cannot tell these apart, so #640's born-dead escalation fired LOUD on both - observed live: seo and
+# ux-records ran all afternoon merging PRs yet were about to be flagged "born dead" at the 120-min mark.
+# The tie-breaker is ground truth: is a loop-runner PROCESS for that lane alive on this machine? WMI is
+# machine-global, so a reporter in any clone sees every lane's runner. Best-effort and gated to the rare
+# case where a missing lane exists: any failure (WMI outage, non-Windows) returns an EMPTY set, which
+# makes Get-LaneHealthLine behave exactly as before (safe degradation - never worse than today). Mirrors
+# loop-launcher.ps1 Get-RunningLanes; kept as a tiny local copy because the two scripts share no module
+# and the reporter runs in separate lane clones.
+function Get-AliveRunnerLanes {
+  $names = New-Object System.Collections.Generic.List[string]
+  try {
+    $procs = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
+      Where-Object { $_.CommandLine -like '*loop-runner.ps1*' })
+    foreach ($p in $procs) {
+      $m = [regex]::Match([string]$p.CommandLine, '(?i)-Lane(\s+|:|=)["'']?([\w\-]+)')
+      if ($m.Success) {
+        $lane = $m.Groups[2].Value
+        if (-not $names.Contains($lane)) { $names.Add($lane) }
+      }
+    }
+  } catch {}
+  return $names.ToArray()
 }
 
 # ---- Trailing-blank hygiene for the status file -----------------------------------------------
@@ -622,6 +667,28 @@ if ($SelfTest) {
         # G6: Get-MissingLanes = enabled roster minus lanes that have a parseable report row.
         $ml = @(Get-MissingLanes -Rows @($rOps, $rData) -ExpectedLanes @("ops", "data", "seo", "ux-records") -RowTemplate (S "reportLine"))
         Assert-Test "missing lanes = enabled roster minus reported" (($ml.Count -eq 2) -and ($ml -contains "seo") -and ($ml -contains "ux-records"))
+
+        # K) Process-liveness tie-breaker: a NEVER-reported lane whose runner PROCESS is alive ($AliveLanes)
+        # must NOT escalate to the loud born-dead banner even past grace - it surfaces as the calm
+        # alive-no-report note. This is the ground-truth fix for the seo/ux-records false alarm.
+        if ($LS.ContainsKey("laneHealthAliveNoReport")) {
+          # K1: seo never reported, stamp 200 min old (>=120 = past grace), but its runner is ALIVE ->
+          # alive-no-report note naming seo, NOT the born-dead banner.
+          $k1 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapOld -AliveLanes @("seo")
+          $k1exp = Fmt "laneHealthAliveNoReport" @{ LANES = "seo"; MISSING = 1; TOTAL = 3 }
+          Assert-Test "K1: alive never-reported lane past grace is alive-no-report, NOT born-dead" ($k1 -eq $k1exp)
+          # K2: regression - the SAME past-grace lane with NO live process still escalates to born-dead.
+          $k2 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapOld -AliveLanes @()
+          Assert-Test "K2: dead never-reported lane past grace still escalates to born-dead" ($k2 -eq $g2exp)
+          # K3: a genuinely dead lane (born-dead) still outranks an alive-no-report lane in the same file.
+          $mapTwo = @{ "seo" = $hNow.AddMinutes(-200); "ux-records" = $hNow.AddMinutes(-200) }
+          $k3 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo", "ux-records") -MissingSince $mapTwo -AliveLanes @("seo")
+          $k3exp = Fmt "laneHealthBornDead" @{ LANES = "ux-records"; MIN = 120 }
+          Assert-Test "K3: born-dead (truly dead lane) outranks alive-no-report" ($k3 -eq $k3exp)
+          # K4: an alive lane still WITHIN grace is also the calm alive-no-report note (confirmed alive).
+          $k4 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapFresh -AliveLanes @("seo")
+          Assert-Test "K4: alive lane within grace is alive-no-report (calm, named)" ($k4 -eq $k1exp)
+        }
       }
     }
 
@@ -791,7 +858,7 @@ if ($WhatIf) {
   if ($LS.ContainsKey("laneHealthOk") -and $LS.ContainsKey("laneHealthStale") -and (Test-Path $StatusPath)) {
     try {
       $prev = @(Get-Content -Encoding UTF8 -Path $StatusPath)
-      $okPre = Get-TplPrefix "laneHealthOk"; $stalePre = Get-TplPrefix "laneHealthStale"; $unrepPre = Get-TplPrefix "laneHealthUnreported"; $bdPre = Get-TplPrefix "laneHealthBornDead"
+      $okPre = Get-TplPrefix "laneHealthOk"; $stalePre = Get-TplPrefix "laneHealthStale"; $unrepPre = Get-TplPrefix "laneHealthUnreported"; $bdPre = Get-TplPrefix "laneHealthBornDead"; $anrPre = Get-TplPrefix "laneHealthAliveNoReport"
       $rows = New-Object System.Collections.Generic.List[string]
       $markerRows = New-Object System.Collections.Generic.List[string]
       $bI = -1; $eI = -1
@@ -803,7 +870,7 @@ if ($WhatIf) {
         for ($k = $bI + 1; $k -lt $eI; $k++) {
           $t = $prev[$k].TrimStart()
           if ($t.StartsWith($missingMarkerPrefix)) { $markerRows.Add($prev[$k]); continue }
-          if (($okPre.Trim() -ne "" -and $t.StartsWith($okPre)) -or ($stalePre.Trim() -ne "" -and $t.StartsWith($stalePre)) -or ($unrepPre.Trim() -ne "" -and $t.StartsWith($unrepPre)) -or ($bdPre.Trim() -ne "" -and $t.StartsWith($bdPre))) { continue }
+          if (($okPre.Trim() -ne "" -and $t.StartsWith($okPre)) -or ($stalePre.Trim() -ne "" -and $t.StartsWith($stalePre)) -or ($unrepPre.Trim() -ne "" -and $t.StartsWith($unrepPre)) -or ($bdPre.Trim() -ne "" -and $t.StartsWith($bdPre)) -or ($anrPre.Trim() -ne "" -and $t.StartsWith($anrPre))) { continue }
           if ($t.StartsWith($selfPrefix)) { $rows.Add($laneLine); $sawSelf = $true } else { $rows.Add($prev[$k]) }
         }
       }
@@ -811,7 +878,10 @@ if ($WhatIf) {
       $rowTpl = S "reportLine"; $nowH = Get-Date
       $missingLanes = @(Get-MissingLanes -Rows $rows.ToArray() -ExpectedLanes $ExpectedLanes -RowTemplate $rowTpl)
       $newMap = Update-MissingSinceMap -Old (Get-MissingSinceMap -Rows $markerRows.ToArray()) -MissingLanes $missingLanes -Now $nowH
-      $hl = Get-LaneHealthLine -Rows $rows.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes -MissingSince $newMap
+      # Ground-truth process liveness (best-effort) only when a lane is missing, so a provably-alive lane
+      # is never falsely escalated to born-dead. Empty on any failure -> prior behavior.
+      $aliveLanes = @(); if ($missingLanes.Count -gt 0) { $aliveLanes = @(Get-AliveRunnerLanes) }
+      $hl = Get-LaneHealthLine -Rows $rows.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes -MissingSince $newMap -AliveLanes $aliveLanes
       if ($hl) { Write-Rep ("[WHATIF] would set the region health line to: " + $hl) }
       else { Write-Rep "[WHATIF] no health line would be written (no parseable lane rows)." }
       $mk = Format-MissingSinceMarker -Map $newMap
@@ -899,6 +969,7 @@ try {
       $stalePre = Get-TplPrefix "laneHealthStale"
       $unrepPre = Get-TplPrefix "laneHealthUnreported"
       $bdPre = Get-TplPrefix "laneHealthBornDead"
+      $anrPre = Get-TplPrefix "laneHealthAliveNoReport"
       # Peel the region into: the persisted missing-since marker (captured, to keep prior clocks running)
       # and the real lane rows (health + marker lines stripped so they never accumulate).
       $markerRows = New-Object System.Collections.Generic.List[string]
@@ -906,13 +977,16 @@ try {
       for ($k = $bIdx + 1; $k -lt $eIdx; $k++) {
         $t = $lines[$k].TrimStart()
         if ($t.StartsWith($missingMarkerPrefix)) { $markerRows.Add($lines[$k]); continue }
-        if (($okPre.Trim() -ne "" -and $t.StartsWith($okPre)) -or ($stalePre.Trim() -ne "" -and $t.StartsWith($stalePre)) -or ($unrepPre.Trim() -ne "" -and $t.StartsWith($unrepPre)) -or ($bdPre.Trim() -ne "" -and $t.StartsWith($bdPre))) { continue }
+        if (($okPre.Trim() -ne "" -and $t.StartsWith($okPre)) -or ($stalePre.Trim() -ne "" -and $t.StartsWith($stalePre)) -or ($unrepPre.Trim() -ne "" -and $t.StartsWith($unrepPre)) -or ($bdPre.Trim() -ne "" -and $t.StartsWith($bdPre)) -or ($anrPre.Trim() -ne "" -and $t.StartsWith($anrPre))) { continue }
         $inner.Add($lines[$k])
       }
       $rowTpl = S "reportLine"; $nowH = Get-Date
       $missingLanes = @(Get-MissingLanes -Rows $inner.ToArray() -ExpectedLanes $ExpectedLanes -RowTemplate $rowTpl)
       $newMap = Update-MissingSinceMap -Old (Get-MissingSinceMap -Rows $markerRows.ToArray()) -MissingLanes $missingLanes -Now $nowH
-      $healthLine = Get-LaneHealthLine -Rows $inner.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes -MissingSince $newMap
+      # Ground-truth process liveness (best-effort) only when a lane is missing, so a provably-alive lane is
+      # never falsely escalated to born-dead. Empty on any failure (WMI outage / non-Windows) -> prior behavior.
+      $aliveLanes = @(); if ($missingLanes.Count -gt 0) { $aliveLanes = @(Get-AliveRunnerLanes) }
+      $healthLine = Get-LaneHealthLine -Rows $inner.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes -MissingSince $newMap -AliveLanes $aliveLanes
       $markerLine = Format-MissingSinceMarker -Map $newMap
       $rebuilt = New-Object System.Collections.Generic.List[string]
       for ($k = 0; $k -le $bIdx; $k++) { $rebuilt.Add($lines[$k]) }
