@@ -1,5 +1,21 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: /accidents/[id] 事故詳細「事故DBに戻る」・類似事例タイトルリンク 柱0(44px)
+
+**イテレーション頭の回収**: 自班の緑PR2件を squash マージ＝#668(トップ死亡事故パネル4タップ標的44px)・#663(視覚パンくず可視化)。両方 e2e/smoke pass 確認済みでコンフリクトなし。PR #687(トップAlertGenerator・関連リンク44px)はCI pending のため次サイクル回収。`git checkout main && git pull --ff-only` で clean 確認。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手最上位＝2026-07-03 Explore調査で発見済みの `/accidents/[id]` 事故詳細ページの2箇所。「事故DBに戻る →」リンク(パディング無し・text-xs≈16px)と類似事故カードのタイトルリンク(block text-xs・パディング無し)がいずれも44px未満で、詳細ページから一覧へ戻る主導線・関連事故への遷移リンクが指の押し損ねサイズだった。ブランチ `ux-hub/accident-detail-back-related-links-44px`（main起点）。
+
+**変更**: `web/src/app/(main)/accidents/[id]/page.tsx` の「事故DBに戻る →」リンクに `inline-flex min-h-[44px] items-center px-2`、類似事例タイトルリンク(`block`→`flex`)に `min-h-[44px] items-center` を付与。純粋なクラス変更でレイアウト・遷移先・ロジック不変。
+
+**テスト**: `page.test.tsx` を新設（2ケース）。async サーバーコンポーネントを `await AccidentDetailPage({ params })` で描画し、類似事例が存在する事故(同type/workCategoryが他に存在するものをデータセットから自動選定)で「事故DBに戻る」リンクと類似事例セクション内タイトルリンク全件の className に `min-h-[44px]`・`items-center` を保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存警告23件は無関係）/ vitest 279 files・2358 tests 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/accident-detail-back-related-links-44px-noread-2026-07-03.mjs` を **4/4 PASS**（next start実機・スマホ390×844）。/accidents一覧を型フィルタ(墜落)で一覧表示→詳細ページへ遷移→「事故DBに戻る →」リンクと類似事例タイトルリンク3本の実boundingBoxが全てheight=44pxであることを確認。
+
+---
+
 ## 2026-06-14 — 補充: /resources 厚労省一次資料DB フィルタ・各エントリ操作 柱0(44px)
 
 **イテレーション頭の回収**: 自班の緑PR #564(/safety-signs サブページ44px)が main とコンフリクト（自班トラッキング文書 BACKLOG-ux-hub.md・cycle-log-ux-hub.md のみ衝突＝コード非衝突）。`git merge origin/main`→両文書を両エントリ保持で手解決→push→CI再走で squash マージ済み(#564)。PR #567(/court-cases 詳細44px)は smoke/e2e pending のため次サイクルで回収。`git checkout main && git pull --ff-only` で clean 確認。
