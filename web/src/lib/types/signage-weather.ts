@@ -9,6 +9,8 @@ export type SignageHourlyPoint = {
   weatherLabel: string;
   /** WMO Open-Meteo weathercode */
   weatherCode: number;
+  /** 相対湿度(%)。WBGT常掲値の算出に使用（S5）。上流欠測時は undefined */
+  humidityPct?: number;
 };
 
 export type SignageWeatherApiResponse = {

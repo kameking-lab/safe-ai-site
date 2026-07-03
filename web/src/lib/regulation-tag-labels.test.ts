@@ -13,8 +13,8 @@ import {
 } from "./regulation-tag-labels";
 
 describe("Phase 1e + P0-009: 規制タグラベル定義", () => {
-  it("17 種類のタグが全て定義されている (Phase 1e の 9 種 + P0-009 OSHA 8 種)", () => {
-    expect(ALL_REGULATION_TAGS).toHaveLength(17);
+  it("20 種類のタグが全て定義されている (Phase 1e の 9 種 + P0-009 OSHA 8 種 + F2 の 3 種)", () => {
+    expect(ALL_REGULATION_TAGS).toHaveLength(20);
     for (const t of ALL_REGULATION_TAGS) {
       expect(REGULATION_TAGS[t]).toBeDefined();
       expect(REGULATION_TAGS[t].shortLabel).toBeTruthy();
@@ -104,6 +104,11 @@ describe("Phase 1e: タグカテゴリの正確性", () => {
   });
   it("NITE が 'nite'", () => {
     expect(REGULATION_TAGS.nite.category).toBe("nite");
+  });
+  it("F2: 追加語彙 (yuki-3/namari/yonalkyl) が 'osha' カテゴリ", () => {
+    expect(REGULATION_TAGS["yuki-3"].category).toBe("osha");
+    expect(REGULATION_TAGS.namari.category).toBe("osha");
+    expect(REGULATION_TAGS.yonalkyl.category).toBe("osha");
   });
   it("P0-009: 安衛法 特別則 8 種が 'osha' カテゴリ", () => {
     expect(REGULATION_TAGS["tokutei-1"].category).toBe("osha");

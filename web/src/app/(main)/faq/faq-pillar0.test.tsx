@@ -38,3 +38,28 @@ describe("/faq 柱0 44pxタップ標的", () => {
     expect(input.className).toContain("min-h-[44px]");
   });
 });
+
+describe("/faq E-E-A-T監修者バイライン", () => {
+  it("ハブ: 監修者バイラインが/aboutへのリンクとして表示される", () => {
+    render(<FAQHubPage />);
+    const byline = screen.getByRole("link", { name: /労働安全衛生コンサルタント（登録番号260022）/ });
+    expect(byline.getAttribute("href")).toBe("/about");
+  });
+
+  it("カテゴリ: 監修者バイラインが/aboutへのリンクとして表示される", () => {
+    render(<FAQCategoryPage />);
+    const byline = screen.getByRole("link", { name: /労働安全衛生コンサルタント（登録番号260022）/ });
+    expect(byline.getAttribute("href")).toBe("/about");
+  });
+
+  it("カテゴリ: FAQPage JSON-LD に Person contributor が配線されている", () => {
+    const { container } = render(<FAQCategoryPage />);
+    const script = container.querySelector('script[type="application/ld+json"]');
+    expect(script).not.toBeNull();
+    const parsed = JSON.parse(script!.innerHTML) as Record<string, unknown>;
+    expect(parsed["@type"]).toBe("FAQPage");
+    expect((parsed.contributor as { name?: string })?.name).toBe(
+      "労働安全衛生コンサルタント（登録番号260022）"
+    );
+  });
+});

@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-07-03 — 柱C-3-3 追補4 孤立していた実在ツールページ /ky/workers を sitemap 収載（PR: seo/c3-3-supplement4-ky-workers-sitemap）
+
+回収: 自班の未マージ `seo/` PR は無し（直近の #627 追補2・#635 O17設計ドラフト等は main へマージ済）。`git status` clean・main を ff-only 同期済み。他班の OPEN PR（#636 data 等）は触らず。
+
+着手: BACKLOG-seo 未着手キューは空（Fable診断の実装タスクは消化済、O17/T6・T7 は Path A 設計ドラフトで実装オーナー承認待ち）。補充指針に従い、site-critique の S-1/S-3 系「実在 indexable ページの sitemap 発見性」を自領域で再点検＝静的ルート全件（page.tsx 193本）を sitemap 収載 URL と機械突合。
+
+- **現状確認（実バグ）**: `find src/app -name page.tsx` の静的（非動的）ルート172本と、`sitemap.ts` の literal url + 子サイトマップ収載分を機械 diff。差分40本を1本ずつ「robots index:false / redirect・notFound スタブ / robots.ts Disallow 配下（/admin,/auth,/dev,/api-docs,/lms,/dpa）/ リリース前デモ / ツール状態ページ」で分類した結果、**唯一 `/ky/workers`（作業員マスター）だけが真の孤立ページ**と判明＝`robots` 上書き無し（＝index:true）・`alternates.canonical:"/ky/workers"` 自己canonical・`PageJsonLd` 付・OG 完備の実在ツールなのに全 sitemap 不在。兄弟 `/ky/paper`（追補3で収載済）と同じ KY全面再設計 Phase1-3（#285）で追加されたのに漏れていた。
+- **修正（自班所有の sitemap.ts のみ）**: `/ky/workers` を `/ky/paper` の直後へ追加。lastmod は当該再設計日 `2026-05-25`（兄弟と同節・当日打ちの lastmod スパム回避）、priority 0.7（ツール従属ページ）、changeFrequency monthly。データ・ルート・他班ファイルは一切不変。捏造0＝実在 page.tsx のみ収載。
+- **テスト**: `sitemap.test.ts` に追補4 describe（3 it）追加＝①/ky/workers 収載 ②lastmod==2026-05-25 ③非収載境界 /ky/list（保存済みKY一覧・robots index:false のツール状態）は不収載。追補2 の境界ロック思想を KY 配下へ延伸し、機械的全ページ追加＝誤収載の再発を防止。sitemap.test 24 it 緑・全2178テスト緑・tsc0・lint errors0・build成功。
+- **要・他班（注記のみ・当班は非改変）**: 突合中に `/organization`（正式リリース前デモ）と `/profile`（ユーザ個別ページ）が page 側で `robots index:false` を持たず**潜在的に indexable** な点を発見。sitemap からは正しく除外済み（内部リンク経由クロールのみ）だが、根治には当該ページの generateMetadata へ noindex 付与が要る＝所有 UI 班の担当。/search（当班所有）は既に noindex,follow で問題なし。
+
+---
+
 ## 2026-06-14 — 柱C-2 横断検索の通達を個別詳細へ深リンク化（PR: seo/c2-notices-deeplink）
 
 回収: 緑だった PR #556（C-3-4 DRY sitemap freshest 単一ソース化）を squash マージ→main を ff-only 同期・clean 確認。#561（C-2 事故深リンク）は #556 マージで BACKLOG/cycle-log が追記衝突→当該ブランチへ origin/main を通常マージで解決（両 [x]・両イテレーション記録を併存・force-push なし）し再 push（CI 再走は次イテレーションで回収）。#566（C-2 法令条文収載）は CI（e2e/smoke）進行中＝マージ不可、次回回収。
@@ -276,6 +289,32 @@
 
 残: O8-c（法令エイリアス辞書＝正式名称・かな読み・別略称の展開）が P0 で続く。S6（0件時 e-Gov フォールバック＋ランキング調整）が P1。
 
+---
+
+## 2026-07-03 S6: 横断検索 0件時の e-Gov フォールバック＋収録範囲明示＋0件クエリ運用ループ（診断T4+T8）
+
+診断書 05-search-egov.md の G7短期（収録の透明性）と T8運用面。着手時、O8-c（法令エイリアス）は自班 PR #600 が CI 保留で in-flight のため、未着手最上位の次点 S6 を着手。S6 は T4（0件フォールバック）＋T8（ランキング調整＋0件クエリ運用ループ）の合成。
+
+**背景（診断の穴）**: 横断検索は curated 抄録（安衛則は実際には第677条まであるが未収載条番号あり）を検索対象にしており、0 件が「規定が存在しない」と誤読されると安全上のリスク（G7）。従来の `/search` 0件画面は汎用アドバイス＋`/law-search`・`/chatbot` リンクのみで、原文（e-Gov）への逃がしも収録範囲の断りも無かった。
+
+**実装（自領域のみ）**:
+- `lib/cross-search/egov-fallback.ts` 新設＝`EGOV_LAW_SEARCH_URL`（到達可能な e-Gov ポータルトップに固定）＋`egovHandoffQuery`（引継ぎクエリ整形）。e-Gov 新 UI は SPA でキーワードのディープリンク URL が非公開＝誤ったクエリ付き URL は幽霊リンクになり得るため（`lsg0500` は詳細ルートで検索ではない、WebFetch でも SPA シェルしか返らず検証不能）、**「常に到達可能なトップ＋検索語コピーで引継ぎ」**に固定＝幽霊リンク 0 を保証。実測でトップは HTTP200・検索ボックス有を確認。
+- `SearchResults.tsx` の `NoResults` を刷新: (1) 収録範囲明示コピー「見つからない＝規定がないではない」（未収載≠規定なし・原文は e-Gov 確認）、(2) e-Gov 外部リンク（target=_blank rel=noopener）＋検索語コピーボタン（`navigator.clipboard` ガード付き）、(3) 既存 `/law-search`・`/chatbot` 導線を min-h-[40px] タップ標的で維持。
+- 計装 `trackEvent('search_zero_result_egov', {query})` を e-Gov クリックに追加＝既存 `search_results_view{result_count}` と併せ 0 件率と e-Gov 逃がし数を計測可能に。
+- `docs/fable-diagnosis-2026-07-02/s6-zero-result-runbook.md` 新設＝週次手順（GA4 で result_count=0 抽出→同義語/エイリアス/条番号ゆらぎ/真の未収載の 4 分類トリアージ→`search-index.test.ts` の it.each へ回帰追加）。
+
+**ランキング（T8）**: 「就業制限」1位＝安衛法61条は O8-a で既達で、`search-index.test.ts` の it.each（`{query:'就業制限', rank:1}`）で既にロック済み。SEARCH_CATEGORY_PRIORITY で law 最優先のため現状維持を確認し、**再実装せず**（既存の作り直しで件数を稼がない）。
+
+**要・他班**: `/law-search`（`law-search-panel.tsx`＝UI 班所有）の 0 件画面・収録外条番号→e-Gov 条アンカー(`#Mp-At_N`)誘導は当班の領域外＝対象外と明記。
+
+回帰: `egov-fallback.test.ts`(2 it)＋`SearchResults.test.tsx`(3 it・next/navigation モックで no-hit クエリを固定→0件描画で e-Gov/収録範囲/コピー導線を検証)。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=240ファイル1994テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・web/src/data/chatbot-eval-fresh-results.json）は commit 前に `main` から復元。working tree clean。
+
+残: O8-c（PR #600 CI 待ち→次イテレーションで回収）、O18（条文参照の自動リンク）、O17（条文パーマリンク＋束ね）が続く。
+
+---
+
 ## O8-c 法令名かな読みの正略称展開（診断書 05-search-egov.md T3・比較 c）
 
 横断検索(/search・⌘K)で e-Gov も当サイトも 0 件だった**法令名かな読み**（「あんえいほう」「くれーんそく」等＝現場のうろ覚え・音声入力で頻発）を該当条文へ着地させた。着手前に本番インデックスで切り分け実測: 正式名称「労働安全衛生規則 第563条」→既に 1 位＝安衛則563条・別略称「労安衛法 61条」→既に 1 位＝安衛法61条（keyword「安衛法」への部分一致で拾える）＝**正式名称・別略称は O8-a で解決済み**。残る真の穴は**かな読み**（あんえいほう/あんえいそく/くれーんそく/ゆうきそく/とっかそく/さんけつそく/せきめんそく/ふんじんそく/じんぱいほう…が全て 0 件＝インデックスにもコンテンツにも literal で現れない）。この一次調査に基づき、水増しを避けて「読み」に絞った（e-Gov API `abbrev` 由来の別略称の辞書化は既存の部分一致で概ね解決済みのため見送り）。
@@ -287,3 +326,101 @@
 ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=235ファイル1981テスト全pass / `build`=成功。build 再生成データ（docs/rag-metrics-latest.json・web/src/data/chatbot-eval-fresh-results.json）は commit 前に `main` から復元。O8-b(#591) 上にスタック（PR base=seo/o8b-article-query-parser）。working tree clean。
 
 残: S6（0件時 e-Gov フォールバック＋ランキング調整）が P1。O18（条文本文の参照自動リンク）が P1。
+
+---
+
+## O18 条文本文の参照自動リンク（診断書 05-search-egov.md T5・比較 h）
+
+条文カード本文に素テキストで現れる条番号参照（「第30条」「第30条第1項」「安衛則第36条」「クレーン等安全規則第23条」等＝紙のコピーと同じ死んだテキスト）を、収録済みなら当サイト深リンク `/law-search?law=<正式名称>&art=<条番号>`（内部）、収録外でも法令番号があれば e-Gov 条アンカー `https://laws.e-gov.go.jp/law/<id>#Mp-At_<N>`（外部）へ変換する純粋関数 `linkifyArticleReferences` を `lib/law-links/article-ref-linkify.ts` に新設。診断書 比較 h（参照ジャンプの完敗）の返上。
+
+領域境界: リンカーは **表示非依存のセグメント配列**（`{text}` / `{text,href,external}`）を返す lib 層の純粋関数＝発見性/内部リンクは当班領域。条文カードへの結線（`article.text` を linkify して `<a>` を描く 1 行）は law-search-panel.tsx＝ux-tools 所有のため **要・他班**とし当班は着手せず、リンカー本体と「解決率100%・幽霊リンク0」のビルド時保証テストまでを担当（loop-prompt「跨りは自領域分だけ実施し他班分は要・他班と注記」）。返り値を JSX でなくデータにしたのはこの結線を 1 行で済ませ、かつ当班側で完結させるため。
+
+法令正確性は不可侵のため「解決できない・曖昧な参照は一切リンク化しない」を設計原則にした（誤リンクは消すのでなく作らない）: (1)「令第6条」「法第43条」「同法第20条」等 直前が別法令を示す文字（令/法/則/例/同/附/別/表/章/節/款）の裸参照は参照先法令が一意に定まらないためスキップ、(2) 収録外の枝番（第○条の△）は e-Gov 条アンカーが基条（Mp-At_N）しか指せず枝番へ着地できないため e-Gov フォールバックは基条参照のみ、(3) 未知の法令名接頭も非リンク。参照先解決の唯一のソースは read-only import（捏造0）＝`allLawArticles`(curated 中核・mhlwLawArticles 補完は law 値が文書バンドル名で深リンク不可のため除外＝search-index.ts と同方針)の収録集合＋`@/data/law-metadata` の LAW_METADATA（略称→正式名称・e-Gov 法令番号 egovLawId）。名前アルタネーションは正式名称＋略称を長い順に並べ最長一致（「労働安全衛生法施行令」が「労働安全衛生法」より先に当たる）。
+
+DRY: 漢数字/全角/枝番/項の数値化は O8-b `article-query.ts` の非公開ロジック（元は /law-search の kanjiToNum 再実装）を `lib/law-links/kanji-numerals.ts`（`NUM_CLASS`/`toArabic`/`kanjiRunToArabic`）へ切り出し、article-query.ts をそこへ載せ替え（挙動不変・article-query.test.ts 11本で回帰固定）。リンカーも同じ変換を共有。
+
+完了条件充足: `article-ref-linkify.test.ts` 12本。核は**コーパス全文回帰**＝curated 全条文の text にリンカーを流し、生成された全リンクが (a) 内部なら decode した `${正式名称}|${条番号}` が収録集合に存在、(b) e-Gov なら法令番号が LAW_METADATA の既知 egovLawId かつ `Mp-At_<正整数>`、を満たすことを検証＝「生成リンクの解決率100%・幽霊リンク0」。加えて非空虚性（実生成リンク>20＝空虚に pass しない）とセグメント連結==入力（表示の欠落・重複0）を恒久固定。単体は 内部/略称接頭/漢数字/収録外e-Gov/令ブロック/同法ブロック/枝番非リンク/未知法令 を網羅。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=240ファイル2033テスト全pass / `build`=成功。UI/深リンク/カバレッジは非改変。main から分岐（O8-c #600 マージ後）。working tree clean。
+
+残: S6（0件時 e-Gov フォールバック）実装済み・PR #607 CI 待ち。O17（条文パーマリンク /laws/[law]/[art]＋束ねパネル・P2/L）が次の本丸で、O18 のリンカーを束ねパネルの参照解決へ再利用予定。
+
+---
+
+## 2026-07-03 T7 設計ドラフト（Path A）: e-Gov API v2 全文取込の設計書起票（診断 T7/G7 中期策）
+
+回収/衝突解決: CI 緑だった自班 PR #607（S6）が main 進行（O8-c #600 ほか）で CONFLICTING 化 → 当該ブランチへ origin/main を**通常マージで解決**（force-push 不可を遵守）。衝突は3点＝(a) `cross-search/index.ts`＝両者が別 export 行を追加のみ→両立ユニオン、(b) BACKLOG-seo.md 未着手＝HEAD が O8-c・main が S6 を残置＝**両方とも完了済み**のため両除去し O18/O17/e-Gov のみ残す、(c) BACKLOG/cycle-log 完了節＝S6 と O8-c の両追記を併存。tsc0・cross-search 32テスト緑・lint errors0 を確認し push（CI 再走は次イテレーションで回収）。#614（O18）は CI 進行中で今ターンはマージ不可。
+
+着手判断: 未着手最上位は S6（#607 in-flight）→O18（#614 in-flight）→O17（**L・O18 の未マージ linkifier に依存**）→e-Gov API 全文取込（**Path A・設計のみ**）。in-flight 2件と依存関係を踏まえ、**コード非改変でゼロ競合・独立マージ可能**な T7 設計ドラフトを選択（docs のみ＝#607/#614 と衝突面ゼロ）。
+
+- **成果物**: `docs/fable-diagnosis-2026-07-02/T7-egov-fulltext-ingest-design.md` 1本のみ（コード0・データ0）。診断 G7（収録カバレッジの穴＝抄録1,065条で安衛則の未収録条が「規定なし」と誤読されるリスク）の中期策を設計に落とした。短期止血（0件フォールバック）は S6 で実装済みのため、本書はカバレッジ穴そのものの中期埋め。
+- **設計の核（既存資産の拡張＝新規基盤ではない）**: `scripts/etl/egov-revisions-fetch.ts`（e-Gov API v2 ETL・認証不要・政府標準利用規約2.0・実在検証済み lawId×20・diff-only・skip-on-missing の作法）／`egov-caption-snapshot.ts`＋`article-caption-integrity.test.ts`（チェックイン済みスナップショット＋整合テストの先例）／`LAW_METADATA.egovLawId`／`LawArticle` 型／`allLawArticles` 集約／`scripts/law-data-import/README.md`（取得手順既記）を土台に再利用する方針を明記。
+- **方式の要点**: (1) 「ビルド時に外部API」ではなく**オフライン取得→git チェックイン→静的 import**（CI/デプロイ再現性・main 常時デプロイ可能の担保）、(2) **新規 env 不要**（API キー無し）、(3) 段階投入（安衛法/令/則→主要特別則→その他）、(4) **バンドル肥大対策＝検索インデックスと本文の分離・遅延ロード・PWA プリキャッシュ見直し**（診断 G8 の宿題＝SEO/ux-tools/PWA 班の横断合意要）、(5) 原文サンプル照合・削除条ガード・出典必須のテスト設計。
+- **Path A 境界の明示（§8/§10）**: 外部API本番取込みの是非・データ所有（`web/src/data/laws/**` は data 班領域）・取得頻度（単発 or Vercel Cron）は**オーナー/他班判断**。SEO班は「全文が入った後の検索インデックス統合＋カバレッジ透明性」に限る。本イテレーションでは取得スクリプト・データ・`search-index.ts`・`sw.js` を一切書かない＝設計ドキュメント1本が成果物。
+
+ゲート: **コード変更0**（docs＋BACKLOG＋本ログのみ）につき tsc/lint/vitest/build は本質的に非改変で全緑維持。working tree clean。
+
+残: #607（S6）・#614（O18）の CI 緑回収＆マージ。次の未着手は O17（条文パーマリンク＋束ねパネル・O18 の linkifier マージ後に着手）。T7 は**オーナー GO 待ち**（承認後 P2 実装は data 班/オーナー主導）。
+
+---
+
+## 2026-07-03 柱C-3-3 追補2: 孤立していた実在indexableページ4本をsitemap収載＋非収載境界を回帰固定
+
+回収: CI 緑だった自班 PR #614（O18）を squash マージ → main へ O18（`lib/law-links/*`）着地。続けて #617（T7 設計ドラフト・docs のみ）が #614 マージで BACKLOG-seo.md／cycle-log-seo.md に追記衝突 → 当該ブランチへ origin/main を**通常マージで解決**（force-push 不可を遵守）し #617 もマージ。両ブランチは --delete-branch 済み。#623（C-3-3 accidents）は前イテレーションの成果で CI 進行中＝今ターンはマージ対象外。main を ff-only 同期し clean 確認。
+
+着手判断: 未着手最上位は O17（条文パーマリンク /laws/[law]/[art]＋束ねパネル）だが、これは**新規コンテンツページ本体＝ux-tools 所有**の本文構築が主で当班単独完結しない（P2・L・当班分は sitemap/JSON-LD スライスのみでページ実体がまだ無い）。当班の in-lane タスクが 3 件未満のため loop-prompt「3件未満なら自領域から補充」に従い、**C-3-3（欠落sitemap）の続きを自領域で補充**＝孤立 indexable ページの機械的な再監査を実施。
+
+監査手法（捏造0・全数突合）: `find src/app -name page.tsx` の全 194 ルート → route-group/dynamic を正規化し**静的173本**を抽出 → sitemap.ts の url 文字列と `comm -23` で差集合 → 差分 41 本を1本ずつ (a) noindex か（`index:false`/COMMON_DISALLOW 配下 admin/auth/dev/api-docs/dpa/handover/lms）(b) redirect スタブか (c) 自己canonical & 実コンテンツか で判定。
+
+追加した実在孤立ページ（4本・自己canonical確認済み）:
+- **`/accident-news`** ＝「重大災害事例ブラウザ」。厚労省 死亡災害DB の類型検索（業種/事故型/原因/年）・`revalidate=86400`・OG付・`alternates.canonical="/accident-news"`。判例 /court-cases[id] や /accidents は収載済みなのに、この独自コンテンツ browser だけ全 sitemap 不在だった。lastmod は `accidentsDataUpdated`（freshness.ts で `SERIOUS_CASES_META.generatedAt` から算出＝当該ページのデータ源そのもの）に追従＝/accidents と同一値を共有。priority 0.85 / weekly。
+- **`/heat-illness-prevention/{acclimatization,log,poster}`** ＝令和7年6月施行 改正安衛則（第612条の2）対応の実在ツール3本。暑熱順化計画・WBGT記録帳票・緊急対応ポスター印刷。いずれも自己canonical・PageJsonLd（構造化データ）・固有メタ。親 /heat-illness-prevention と兄弟3本（wbgt-calculator/industry-risk/r7-compliance）は収載済みなのに、後発のこの3本だけ漏れていた。兄弟と同節のため lastmod=2026-05-16・priority 0.8・monthly を踏襲。
+
+非収載境界の明示ロック（機械的全ページ追加＝誤収載の再発防止）:
+- redirect スタブは実体URLでないため除外＝`/about/cases`（→/about）・`/quick-start`（→/quick）は `redirect()` のみのファイル。
+- リリース前デモは除外＝`/organization`「組織管理ダッシュボード｜デモ版…正式リリース前のデモ版です」（モック）。noindex 付与は ux 班判断のため当班は sitemap 非収載に留める。
+- 印刷専用ユーティリティ `/accident-news/print` は除外。
+- noindex（admin/auth/dev/account/favorites/stats）・utility（/pdf・各 print・/signage/display・/search）は従来どおり除外。
+
+回帰: `sitemap.test.ts` に describe「柱C-3-3 追補2」5本追加＝(1) /accident-news 収載 (2) 熱中症3本収載 (3) /accident-news の lastmod == /accidents（死亡災害DB同一源）(4) 非収載境界＝redirect スタブ・デモ・印刷は false。全 19 本。子 sitemap は無改変（単一 URL のため本体 pages 配列へ直書き＝circulars/equipment/articles/accidents の動的子とは役割分担を維持）。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ）/ `vitest run`=255ファイル2142テスト全pass / `build`=成功。build 再生成物（rag-metrics-latest.json・ky-print-sheet snapshot・chatbot-eval-fresh-results.json）は `git checkout` で復元。working tree は sitemap.ts / sitemap.test.ts の2ファイルのみ。
+
+残: #623（C-3-3 accidents 個別ページ）・本 PR の CI 緑回収＆マージ。次の未着手は O17（**要・ux-tools**＝ページ本体は他班・当班分は sitemap/JSON-LD スライス。ページ実体着地後に着手）。決裁A は既達確認済み。
+
+---
+
+## 2026-07-03 柱C-3-3 追補3: 二重着手 #623 の統合＝/ky/paper のみ収載・/organization はデモ版のため非収載を堅持
+
+回収状況: 前イテレーションで CI 緑だった #614(O18)・#617(T7) はマージ・ブランチ削除済み。今ターン頭で自班 PR を再点検すると、**同じ「孤立ページ収載」を古い base で並走していた別ブランチ #623 が存在**（CI 緑）。だが `gh pr merge 623` は clean merge 不可（base が古く他班の大量ファイル追加とドリフト）。安易にマージ解決する前に #623 の実追加を精査した。
+
+精査結果（#623 が追加した6本の判定）:
+- `/accident-news`＋`/heat-illness-prevention/{acclimatization,log,poster}` の**4本は本ブランチ #627(追補2)と重複**。しかも本ブランチの方が良質＝/accident-news の lastmod を `accidentsDataUpdated` へ動的追従させ、非収載境界（redirect/デモ/print）を回帰ロック済み。#623 は静的 lastmod（2026-06-13 等）で劣る。両者マージすると**同一URLが二重掲載＝役割崩壊＋水増し**。
+- `/organization` は #623 が追加していたが、**本ブランチ追補2の非収載境界テストが `expect(has("/organization")).toBe(false)` で明示的に禁止**している。page.tsx を実査＝タイトル「組織管理ダッシュボード｜デモ版」・「正式リリース前のデモ版です」・架空の拠点名/社員数(273名)/修了率のデモ値・全ボタン disabled「デモ版（正式リリース後に有効化）」。**検索エンジンに index させるべきでないモック**であり #623 の追加は誤り。#627 の境界判断が正しい。
+- 残る `/ky/paper` の**1本だけが正当な未収載孤立ページ**＝`robots: { index: true }`・`alternates.canonical="/ky/paper"`・HowTo JSON-LD・`/pdf` の permanentRedirect 先（sitemap.ts 既存コメントも /pdf→/ky/paper を明記）。KY入力の正規ページなのに全 sitemap 不在だった。
+
+対応: `/ky/paper` を本ブランチ #627 へ取り込み（/ky-examples の直後・lastmod=page.tsx 最終更新 2026-05-25・priority 0.75・monthly）。これで #627 が #623 の正当分を完全に内包し、誤収載(/organization)を含む #623 は superseded として close＋ブランチ削除する（未マージだが自班の誤り含む重複ブランチ＝放置すると将来 /organization 誤収載の再マージ事故になるため統合して閉じる）。
+
+回帰: `sitemap.test.ts` 追補2 describe に2本追加＝(1) `/ky/paper` 収載 (2) 非収載境界＝`/pdf`（/ky/paper への permanentRedirect スタブ）は false＝実体URLのみ収載しリダイレクト元は載せない原則を固定。sitemap.test は 21本 全 pass。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warnings は他班ファイルの既存のみ・当班差分は sitemap.ts/sitemap.test.ts の2ファイルのみ）/ `vitest`=sitemap.test 21本緑 / `build`=成功。working tree clean。
+
+残: 本 PR #627 の CI 緑回収＆マージ・#623 の close/delete。次の未着手は O17（**要・ux-tools**）。
+
+---
+
+## 2026-07-03 O17/T6 条文パーマリンク＋束ねパネル＝Path A 設計ドラフト起票（実装はオーナー承認待ち）
+
+回収: 前イテレーションの PR #627（追補2＝孤立4本収載＋非収載境界＋/ky/paper 統合）の CI 緑（e2e/smoke pass・full skip）を確認し squash マージ→ブランチ削除。`git checkout main && git pull --ff-only` で clean 確認。BACKLOG-seo の未着手は O17/T6 のみ＝1件（<3）。
+
+着手判断: BACKLOG-seo 最上位の唯一の未着手 O17（条文パーマリンク `/laws/[law]/[art]`＋束ねパネル）を精査。**これは数百〜約1,065本の新規 indexable URL名前空間 `/laws/*` の新設**であり、CLAUDE.md「必ずオーナーに確認すること＝**ページ構成の大幅変更（URL変更を伴うもの）**」に該当。URL/canonical は一方通行のドア（後からのURL変更はSEO資産を毀損）。sibling タスク T7（e-Gov全文取込＝外部API）を本レーンが **Path A 設計ドラフト**で扱った先例に倣い、**SEO班単独で実装着手せず設計ドラフトを起票**する判断。
+
+実データ監査で「一度に完成できない」ことを技術的に確定: 束ね（G6）の中身＝条文↔各DBの相互参照を精査した結果、(a) **通達**は `mhlwNotices.lawRef`＋title 地の文の条番号を **O18 リンカで機械抽出＝捏造なしで導出可能**、(b) **判例(COURT_CASES)** は `field`/`issues` が topical で**条文キーの構造化フィールド無し**、(c) **教育資格/用語**も条文キー無し＝いずれも **keyword 推測で埋めるのは捏造（法令正確性不可侵）**＝data班の条文キー付きマップが前提（要・他班）。よって Phase1骨格（SEO班単独・捏造ゼロ）→Phase2通達束ね（リンカ導出）→Phase3判例/資格（data班マップ前提）の段階투입が必然。
+
+成果物: `docs/fable-diagnosis-2026-07-02/T6-law-permalink-bundle-design.md`（設計のみ・コード/データ生成0）。§2 URL設計（推奨案A `/laws/<egovLawId>/<artSlug>`＝ASCII安定・e-Gov原文1:1・改称不変・slug衝突ゼロ回帰）／§4 Phase1本文（**O18 リンカを本文へ通し G4 条間リンクをライブ化**＝これまで描画面ゼロで dormant だったリンカが初の描画面を得る）／§5 捏造ゼロの境界監査表／§7 schema.org `Legislation` JSON-LDヘルパー案（既存 LegalDocument=通達 と別型）／§8 e-Gov 透明性（枝番は基条アンカー誤着地を避け非アンカー）／§10 thin/duplicate 対策（`/law-search` ツール面と競合させず `/laws/*` を唯一 indexable home）／§11 オーナー・他班判断事項／§12 Path A 境界。
+
+副次: BACKLOG-seo の O17 を [x]（Path A 化）へ移動。未着手の実装タスクは 0 件になったため、次イテレーションは補充の指針§（site-critique の SEO/構造化データ系で自領域に閉じるもの）から補充する旨を明記。
+
+ゲート: コード変更 0（docs のみ）＝`tsc --noEmit`/`lint`/`vitest`/`build` は非改変で全緑維持（前 PR #627 の CI 緑で担保）。working tree は docs/BACKLOG/cycle-log の3差分のみで clean。
+
+残: 本 PR の CI 緑回収＆マージ（次イテレーション 1)）。O17 実装は**オーナーの明示指示待ち**（承認時の着手単位は Phase1＝SEO班単独・捏造ゼロ）。

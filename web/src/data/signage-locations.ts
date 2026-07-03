@@ -3,6 +3,8 @@
  * 東京23区は気象庁の市区町村コード（130000.json 内の area.code）に対応
  */
 
+import { centroidByIso } from "./jma/prefecture-centroids";
+
 export type SignageLocation = {
   id: string;
   /** 天気API・リスク表示名 */
@@ -43,6 +45,72 @@ const TOKYO_WARDS: Omit<SignageLocation, "prefectureIso">[] = [
   { id: "tokyo-edogawa", regionName: "東京都 江戸川区", label: "東京都 江戸川区", latitude: 35.7068, longitude: 139.8683, jmaCityCode: "1312300" },
 ];
 
+/**
+ * 未収録39県: 県庁所在地を代表地点として追加（S4: 30箇所→47都道府県化）。
+ * 緯度経度は data班所有の PREFECTURE_CENTROIDS（都道府県庁所在地の代表座標）を参照のみ利用。
+ * jmaCityCode は未設定＝既存の政令市7件（札幌/仙台/名古屋/大阪/広島/高松/福岡）と同じ扱い。
+ * 気象庁の class20s（市区町村単位）は政令市などで区・地域ごとに細分化され単一コードに
+ * 一意対応しないため、捏造を避けて県単位の見出し（prefectureIso 経由）にとどめる。
+ */
+const OTHER_PREFECTURE_CAPITALS: { id: string; prefectureIso: string; regionName: string }[] = [
+  { id: "aomori-aomori", prefectureIso: "JP-02", regionName: "青森県 青森市" },
+  { id: "iwate-morioka", prefectureIso: "JP-03", regionName: "岩手県 盛岡市" },
+  { id: "akita-akita", prefectureIso: "JP-05", regionName: "秋田県 秋田市" },
+  { id: "yamagata-yamagata", prefectureIso: "JP-06", regionName: "山形県 山形市" },
+  { id: "fukushima-fukushima", prefectureIso: "JP-07", regionName: "福島県 福島市" },
+  { id: "ibaraki-mito", prefectureIso: "JP-08", regionName: "茨城県 水戸市" },
+  { id: "tochigi-utsunomiya", prefectureIso: "JP-09", regionName: "栃木県 宇都宮市" },
+  { id: "gunma-maebashi", prefectureIso: "JP-10", regionName: "群馬県 前橋市" },
+  { id: "saitama-saitama", prefectureIso: "JP-11", regionName: "埼玉県 さいたま市" },
+  { id: "chiba-chiba", prefectureIso: "JP-12", regionName: "千葉県 千葉市" },
+  { id: "kanagawa-yokohama", prefectureIso: "JP-14", regionName: "神奈川県 横浜市" },
+  { id: "niigata-niigata", prefectureIso: "JP-15", regionName: "新潟県 新潟市" },
+  { id: "toyama-toyama", prefectureIso: "JP-16", regionName: "富山県 富山市" },
+  { id: "ishikawa-kanazawa", prefectureIso: "JP-17", regionName: "石川県 金沢市" },
+  { id: "fukui-fukui", prefectureIso: "JP-18", regionName: "福井県 福井市" },
+  { id: "yamanashi-kofu", prefectureIso: "JP-19", regionName: "山梨県 甲府市" },
+  { id: "nagano-nagano", prefectureIso: "JP-20", regionName: "長野県 長野市" },
+  { id: "gifu-gifu", prefectureIso: "JP-21", regionName: "岐阜県 岐阜市" },
+  { id: "shizuoka-shizuoka", prefectureIso: "JP-22", regionName: "静岡県 静岡市" },
+  { id: "mie-tsu", prefectureIso: "JP-24", regionName: "三重県 津市" },
+  { id: "shiga-otsu", prefectureIso: "JP-25", regionName: "滋賀県 大津市" },
+  { id: "kyoto-kyoto", prefectureIso: "JP-26", regionName: "京都府 京都市" },
+  { id: "hyogo-kobe", prefectureIso: "JP-28", regionName: "兵庫県 神戸市" },
+  { id: "nara-nara", prefectureIso: "JP-29", regionName: "奈良県 奈良市" },
+  { id: "wakayama-wakayama", prefectureIso: "JP-30", regionName: "和歌山県 和歌山市" },
+  { id: "tottori-tottori", prefectureIso: "JP-31", regionName: "鳥取県 鳥取市" },
+  { id: "shimane-matsue", prefectureIso: "JP-32", regionName: "島根県 松江市" },
+  { id: "okayama-okayama", prefectureIso: "JP-33", regionName: "岡山県 岡山市" },
+  { id: "yamaguchi-yamaguchi", prefectureIso: "JP-35", regionName: "山口県 山口市" },
+  { id: "tokushima-tokushima", prefectureIso: "JP-36", regionName: "徳島県 徳島市" },
+  { id: "ehime-matsuyama", prefectureIso: "JP-38", regionName: "愛媛県 松山市" },
+  { id: "kochi-kochi", prefectureIso: "JP-39", regionName: "高知県 高知市" },
+  { id: "saga-saga", prefectureIso: "JP-41", regionName: "佐賀県 佐賀市" },
+  { id: "nagasaki-nagasaki", prefectureIso: "JP-42", regionName: "長崎県 長崎市" },
+  { id: "kumamoto-kumamoto", prefectureIso: "JP-43", regionName: "熊本県 熊本市" },
+  { id: "oita-oita", prefectureIso: "JP-44", regionName: "大分県 大分市" },
+  { id: "miyazaki-miyazaki", prefectureIso: "JP-45", regionName: "宮崎県 宮崎市" },
+  { id: "kagoshima-kagoshima", prefectureIso: "JP-46", regionName: "鹿児島県 鹿児島市" },
+  { id: "okinawa-naha", prefectureIso: "JP-47", regionName: "沖縄県 那覇市" },
+];
+
+function buildOtherPrefectureLocations(): SignageLocation[] {
+  return OTHER_PREFECTURE_CAPITALS.map((c) => {
+    const centroid = centroidByIso(c.prefectureIso);
+    if (!centroid) {
+      throw new Error(`signage-locations: centroid not found for ${c.prefectureIso}`);
+    }
+    return {
+      id: c.id,
+      regionName: c.regionName,
+      label: c.regionName,
+      latitude: centroid.lat,
+      longitude: centroid.lng,
+      prefectureIso: c.prefectureIso,
+    };
+  });
+}
+
 export const signageLocations: SignageLocation[] = [
   ...TOKYO_WARDS.map((w) => ({ ...w, prefectureIso: "JP-13" as const })),
   { id: "hokkaido-sapporo", regionName: "北海道 札幌市", label: "北海道 札幌市", latitude: 43.0618, longitude: 141.3545, prefectureIso: "JP-01" },
@@ -52,6 +120,7 @@ export const signageLocations: SignageLocation[] = [
   { id: "hiroshima-hiroshima", regionName: "広島県 広島市", label: "広島県 広島市", latitude: 34.3853, longitude: 132.4553, prefectureIso: "JP-34" },
   { id: "kagawa-takamatsu", regionName: "香川県 高松市", label: "香川県 高松市", latitude: 34.3403, longitude: 134.0439, prefectureIso: "JP-37" },
   { id: "fukuoka-fukuoka", regionName: "福岡県 福岡市", label: "福岡県 福岡市", latitude: 33.5902, longitude: 130.4017, prefectureIso: "JP-40" },
+  ...buildOtherPrefectureLocations(),
 ];
 
 export function getSignageLocationById(id: string): SignageLocation | undefined {

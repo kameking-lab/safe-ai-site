@@ -5,6 +5,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { ManagePlanButton } from "./manage-plan-button";
 import { PageContainer } from "@/components/layout";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { computeAccountConclusion } from "@/lib/account-conclusion";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 export const metadata: Metadata = {
@@ -19,13 +21,6 @@ const PLAN_LABEL: Record<string, string> = {
   free: "フリー",
   standard: "スタンダード",
   pro: "プロ",
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  active: "利用中",
-  past_due: "支払い遅延",
-  canceled: "解約済み",
-  unpaid: "未払い",
 };
 
 interface Props {
@@ -78,17 +73,16 @@ export default async function AccountPage({ searchParams }: Props) {
   }
 
   const planLabel = PLAN_LABEL[planName] ?? planName;
-  const statusLabel = STATUS_LABEL[status] ?? status;
   const isFree = planName === "free";
   const isCanceled = status === "canceled";
-  const isPastDue = status === "past_due";
-  const isUnpaid = status === "unpaid";
-  const hasAlert = isPastDue || isUnpaid || isCanceled;
 
   // 期間終了日の表示ラベル
   const periodEndLabel = currentPeriodEnd
     ? currentPeriodEnd.toLocaleDateString("ja-JP")
     : null;
+
+  // 結論カードの1状態に集約（赤=支払い要対応 > 黄=解約済み > 青=フリー > 緑=利用中）
+  const conclusion = computeAccountConclusion({ planName, status, periodEndLabel });
 
   return (
     <PageContainer width="narrow" paddingY="none" className="py-8">
@@ -97,87 +91,42 @@ export default async function AccountPage({ searchParams }: Props) {
       <h1 className="text-2xl font-bold text-slate-900">マイページ</h1>
       <p className="mt-2 text-sm text-slate-500">{session.user.email}</p>
 
-      {/* ポータル返遷成功バナー */}
+      {/* ポータル返遷成功バナー（一時的な確認メッセージ・状態カードとは別枠） */}
       {portal_return === "1" && (
         <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
           プラン情報を更新しました。反映まで数分かかる場合があります。
         </div>
       )}
 
-      {/* 状態アラートバナー */}
-      {isPastDue && (
-        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800">
-          <p className="font-semibold">支払いに失敗しました</p>
-          <p>登録済みのカードへの請求が失敗しています。「プラン管理」から支払い方法を更新してください。更新がない場合、サービスが停止されます。</p>
-        </div>
-      )}
-      {isUnpaid && (
-        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-800">
-          <p className="font-semibold">未払いがあります</p>
-          <p>請求が未払いです。「プラン管理」から対応してください。</p>
-        </div>
-      )}
-      {isCanceled && (
-        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800">
-          <p className="font-semibold">プランが解約されました</p>
-          <p>
-            {periodEndLabel
-              ? `${periodEndLabel}まで現在の機能をご利用いただけます。その後フリープランに移行します。`
-              : "請求期間の終了後、フリープランに移行します。"}
-          </p>
-        </div>
-      )}
-
-      <section className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-base font-bold text-slate-800">現在のプラン</h2>
-        <div className="mt-4 flex items-baseline gap-3">
-          <span className="text-3xl font-bold text-slate-900">{planLabel}</span>
-          <span
-            className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-              status === "active"
-                ? "bg-emerald-100 text-emerald-700"
-                : hasAlert
-                  ? "bg-red-100 text-red-700"
-                  : "bg-amber-100 text-amber-700"
-            }`}
-          >
-            {statusLabel}
-          </span>
-        </div>
-        {currentPeriodEnd && (
-          <p className="mt-3 text-xs text-slate-500">
-            {isCanceled ? "利用期限" : "次回更新日"}：{periodEndLabel}
-          </p>
-        )}
-
-        <div className="mt-6 flex flex-wrap gap-3">
-          {hasStripeCustomer ? (
+      <ConclusionCard
+        tone={conclusion.tone}
+        value={planLabel}
+        title={conclusion.title}
+        description={conclusion.description}
+        action={!hasStripeCustomer ? { href: "/pricing", label: "プランをアップグレード" } : undefined}
+        className="mt-8"
+      >
+        {hasStripeCustomer && (
+          <>
             <ManagePlanButton />
-          ) : (
-            <Link
-              href="/pricing"
-              className="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-700"
-            >
-              プランをアップグレード
-            </Link>
-          )}
-          {/* フリープランまたは解約済みでStripe顧客なし → アップグレード誘導 */}
-          {(isFree || isCanceled) && hasStripeCustomer && (
-            <Link
-              href="/pricing"
-              className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            >
-              {isCanceled ? "再加入する" : "他のプランを見る"}
-            </Link>
-          )}
-        </div>
-
-        {!prisma && (
-          <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
-            データベース未設定のため、プラン情報を読み込めませんでした。
-          </p>
+            {/* フリープランまたは解約済みでStripe顧客あり → アップグレード誘導 */}
+            {(isFree || isCanceled) && (
+              <Link
+                href="/pricing"
+                className="inline-flex min-h-[44px] items-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                {isCanceled ? "再加入する" : "他のプランを見る"}
+              </Link>
+            )}
+          </>
         )}
-      </section>
+      </ConclusionCard>
+
+      {!prisma && (
+        <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">
+          データベース未設定のため、プラン情報を読み込めませんでした。
+        </p>
+      )}
 
       <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between gap-3">

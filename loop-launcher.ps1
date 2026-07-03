@@ -50,10 +50,17 @@
   loops come back after a PC restart. -Register remains an OPTIONAL upgrade for the daily heartbeat.
   Idempotent, -WhatIf aware, and post-verified (throws if the entry is not written as intended).
 
-.PARAMETER WhatIf
-  Dry run: parse config, evaluate every gate, and print what WOULD happen WITHOUT launching any
-  runner, invoking claude, or touching docs/loop-status.md. Writes the computed status to
-  logs/loop-status.dryrun.md so it can be inspected. Used for stub verification.
+.PARAMETER HealOnly
+  Lightweight watchdog (recovery half of the dead-lane story). Re-launches ONLY the enabled lanes
+  whose persistent runner has died, and does NOTHING else - no deadline eval, no planner/critic gate,
+  no git worktree, no docs/loop-status.md rewrite. Meant to be called every interval by the
+  always-alive ops lane so an individually-wedged lane recovers in ~one ops interval instead of
+  waiting for the next logon / 07:00 full launcher pass (up to ~22h without the admin-only 07:00
+  task). Idempotent by construction: loop-runner.ps1's per-lane single-instance guard makes a
+  re-launch of a still-alive lane self-exit. Refuses to act if the process scan shows ZERO running
+  lanes (a WMI outage returns empty AND makes the runner guard fail-open -> double-launch risk; a
+  genuinely cold machine is the launcher's logon job, not heal's). Respects untilIso: past the
+  deadline it heals nothing (the run is meant to be stopped). Combine with -WhatIf to preview.
 
 .PARAMETER ConfigPath
   Path to loop-config.json (default: next to this script).
@@ -74,7 +81,9 @@
 param(
   [switch]$Register,
   [switch]$InstallUserStartup,
+  [switch]$HealOnly,
   [switch]$WhatIf,
+  [switch]$SelfTest,
   [string]$ConfigPath = "",
   [string]$ClaudeCmd = "claude"
 )
@@ -120,6 +129,226 @@ function Fmt([string]$key, [hashtable]$vals) {
   $t = S $key
   if ($vals) { foreach ($k in $vals.Keys) { $t = $t.Replace('{' + $k + '}', [string]$vals[$k]) } }
   return $t
+}
+
+# Acquire the exclusive docs/loop-status.md lock (CreateNew = atomic "only if absent"), reclaiming a
+# STALE orphan. If a prior holder is killed between CreateNew and Remove-Item, the .lock survives
+# forever and every future status write fails to acquire it - freezing the liveness heartbeat into a
+# false "loop is dead" alarm (watch point #1). A legit hold is sub-second even with all six lanes
+# serialized, so a lock older than $StaleSeconds cannot be live: reclaim it once and retry. Returns
+# $true if held (caller MUST Remove-Item the lock when done), $false after exhausting retries. Shared
+# by every status write in this launcher (banner reconcile, config-error banner) and mirrors the
+# identical Get-StatusLock in loop-report-status.ps1 so the two writers agree on reclamation.
+function Get-LauncherStatusLock {
+  param([string]$LockPath, [int]$StaleSeconds = 60, [int]$Tries = 25, [int]$DelayMs = 200)
+  for ($try = 0; $try -lt $Tries; $try++) {
+    try {
+      $fs = [System.IO.File]::Open($LockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+      $fs.Close(); return $true
+    } catch {
+      $reclaimed = $false
+      try {
+        $li = Get-Item -LiteralPath $LockPath -ErrorAction SilentlyContinue
+        if ($li -and (((Get-Date) - $li.LastWriteTime).TotalSeconds -gt $StaleSeconds)) {
+          Remove-Item -LiteralPath $LockPath -Force -ErrorAction SilentlyContinue
+          Write-Launcher ("reclaimed stale status lock (age > " + $StaleSeconds + "s; prior holder likely killed mid-write).")
+          $reclaimed = $true
+        }
+      } catch {}
+      if (-not $reclaimed) { Start-Sleep -Milliseconds $DelayMs }
+    }
+  }
+  return $false
+}
+
+# ---------------------------------------------------------------------------
+# Decide what to persist as lastCriticIso after a critic one-shot. On success we stamp $Now (the full
+# criticEveryDays interval elapses before the next run). On failure (timeout kill / non-zero exit /
+# could-not-run) we BACK-DATE the stamp so the next launcher pass retries in ~$RetryDays instead of
+# hiding a broken inspection system for a full interval - and without re-firing a blocking 30-min
+# one-shot on every single logon. Pure function so -SelfTest can cover it offline.
+# ---------------------------------------------------------------------------
+function Resolve-CriticStamp {
+  param([string]$Outcome, [datetime]$Now, [int]$CriticEveryDays, [int]$RetryDays = 1)
+  if ($Outcome -eq 'ok') { return $Now }
+  $back = [Math]::Max(0, $CriticEveryDays - $RetryDays)
+  return $Now.AddDays(-$back)
+}
+
+# ---------------------------------------------------------------------------
+# Supply gate (planner): decide whether to fire a planner one-shot for a lane. The gate must NOT
+# fire when that lane's persistent runner is ALREADY running, because the one-shot and the live
+# runner would operate the SAME clone concurrently (two claude+git processes -> index.lock
+# contention / branch clobber). At cold start (reboot/logon) nothing is running, so a drained
+# backlog is replenished before ignition; on the daily 07:00 self-healing re-run the lane is
+# already alive and self-replenishes per its own contract, so the one-shot is both unnecessary
+# and unsafe. Open<0 means the BACKLOG file is missing (never fire). Pure so -SelfTest covers it.
+# ---------------------------------------------------------------------------
+function Test-ShouldFirePlanner {
+  param([int]$Open, [bool]$LaneRunning, [bool]$HasPrompt)
+  return ($HasPrompt -and (-not $LaneRunning) -and ($Open -ge 0) -and ($Open -lt 3))
+}
+
+# ---------------------------------------------------------------------------
+# Watchdog (heal): which enabled lanes have NO live runner and must be re-launched. Pure - takes the
+# config lanes and the process-scan map, does no IO - so -SelfTest covers it offline. A disabled lane
+# is never healed (owner turned it off on purpose). This backs the -HealOnly mode: the always-alive
+# ops lane calls the launcher with -HealOnly every interval, so an individually-wedged lane recovers
+# in ~one ops interval instead of waiting for the next logon / 07:00 launcher pass (up to ~22h - the
+# recovery half of the dead-lane story whose DETECTION half is the loop-status health banner).
+# ---------------------------------------------------------------------------
+function Get-LanesToHeal {
+  param($Lanes, [hashtable]$Running)
+  $out = @()
+  foreach ($lane in $Lanes) {
+    if (-not $lane.enabled) { continue }
+    $name = [string]$lane.name
+    if ($name -eq "") { continue }
+    if (-not $Running.ContainsKey($name)) { $out += $name }
+  }
+  # Plain return (NOT ,$out): callers ALWAYS wrap in @() so empty/single/multi all normalize; the
+  # unary-comma idiom double-wraps under an inline @(...) call and is the wrong tool here.
+  return $out
+}
+
+# ---------------------------------------------------------------------------
+# Isolate the weekly critic in a dedicated git worktree. The critic runs as -Lane site and does
+# git checkout/commit/push; the ops persistent runner works the SAME main tree, so running the
+# critic in-place races git (index.lock contention / branch clobber) - the same family the planner
+# guard closes. But the critic CANNOT be skipped-when-running like the planner: ops is nearly always
+# alive, so skipping would starve the weekly critique forever. Isolation is the only correct fix -
+# a separate worktree has its own index + HEAD, so its git activity never collides with the main
+# tree. These helpers are pure so -SelfTest can cover the worktree path offline (no git, no network).
+# ---------------------------------------------------------------------------
+function Get-CriticWorktreePath {
+  param([string]$RepoRoot, [string]$Stamp)
+  # A SIBLING of the repo, never inside it: a nested worktree would show up in the main tree's own
+  # git status and could be committed by accident. Deterministic per launch stamp for clean teardown.
+  $parent = Split-Path -Parent $RepoRoot
+  return (Join-Path $parent ("safe-ai-critic-wt-" + $Stamp))
+}
+function Get-WorktreeAddArgs {
+  param([string]$Path, [string]$Ref)
+  # Detached HEAD at the ref: the critic creates its own ops/critique-<date> branch inside the
+  # worktree, so there is no branch name to collide with whatever the main tree has checked out
+  # (git refuses to check out one branch in two worktrees).
+  return @("worktree", "add", "--detach", $Path, $Ref)
+}
+function Get-WorktreeRemoveArgs {
+  param([string]$Path)
+  return @("worktree", "remove", "--force", $Path)
+}
+function Test-WorktreeIsIsolated {
+  param([string]$RepoRoot, [string]$WorktreePath)
+  # Invariant: the worktree must live OUTSIDE the main tree, else its git ops re-enter the very
+  # tree we are isolating from. Compare normalized full paths, case-insensitive (Windows).
+  try {
+    $r = [System.IO.Path]::GetFullPath($RepoRoot).TrimEnd('\', '/')
+    $w = [System.IO.Path]::GetFullPath($WorktreePath).TrimEnd('\', '/')
+    if ($w.Length -eq 0 -or $r.Length -eq 0) { return $false }
+    if ($w -eq $r) { return $false }
+    $sep = [System.IO.Path]::DirectorySeparatorChar
+    return (-not $w.StartsWith($r + $sep, [System.StringComparison]::OrdinalIgnoreCase))
+  } catch { return $false }
+}
+# Thin git wrapper: runs `git -C <RepoRoot> <args>`, returns @{ ok; out }. Never throws so the
+# critic lifecycle can branch on outcome without try/catch at every call site.
+function Invoke-Git {
+  param([string]$RepoRoot, [string[]]$GitArgs)
+  try {
+    $all = @("-C", $RepoRoot) + $GitArgs
+    $out = & git @all 2>&1
+    return @{ ok = ($LASTEXITCODE -eq 0); out = ($out | Out-String).Trim() }
+  } catch { return @{ ok = $false; out = $_.Exception.Message } }
+}
+
+# ---------------------------------------------------------------------------
+# -SelfTest: offline verification of the shared status-lock helper (stale-orphan reclamation +
+# fresh-lock respect). Temp files only - no Claude, no real status file, no config, no network.
+# Exits 0 on PASS, 1 on FAIL. Runs before any config read so a broken config cannot block the test.
+# ---------------------------------------------------------------------------
+if ($SelfTest) {
+  $fails = 0
+  $tmp = Join-Path ([System.IO.Path]::GetTempPath()) ("loop-launcher-selftest-" + [System.Guid]::NewGuid().ToString("N"))
+  New-Item -ItemType Directory -Path $tmp -Force | Out-Null
+  $lp = Join-Path $tmp "status.md.lock"
+  function Assert-L([string]$n, [bool]$c) {
+    if ($c) { Write-Launcher ("[SELFTEST] PASS: " + $n) } else { Write-Launcher ("[SELFTEST] FAIL: " + $n); $script:fails++ }
+  }
+  try {
+    # A) Clean acquire when no lock exists -> true, lock file left for the holder.
+    $a = Get-LauncherStatusLock $lp 60 5 50
+    Assert-L "clean acquire returns true" ($a -eq $true)
+    Assert-L "clean acquire leaves lock file" (Test-Path -LiteralPath $lp)
+    if (Test-Path -LiteralPath $lp) { Remove-Item -LiteralPath $lp -Force }
+    # B) A FRESH foreign lock (age 0) must be respected, not reclaimed -> false.
+    $fs = [System.IO.File]::Open($lp, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None); $fs.Close()
+    $b = Get-LauncherStatusLock $lp 60 3 30
+    Assert-L "fresh foreign lock is NOT reclaimed" ($b -eq $false)
+    Assert-L "fresh foreign lock still present" (Test-Path -LiteralPath $lp)
+    # C) A STALE orphan (backdated past threshold) is reclaimed and acquired -> true.
+    (Get-Item -LiteralPath $lp).LastWriteTime = (Get-Date).AddSeconds(-120)
+    $c = Get-LauncherStatusLock $lp 60 5 50
+    Assert-L "stale orphan lock is reclaimed and acquired" ($c -eq $true)
+    if (Test-Path -LiteralPath $lp) { Remove-Item -LiteralPath $lp -Force }
+    # D) Resolve-CriticStamp: success stamps now (next due exactly at the full interval).
+    $fixed = [datetime]"2026-07-03T08:00:00"
+    $sOk = Resolve-CriticStamp -Outcome "ok" -Now $fixed -CriticEveryDays 7 -RetryDays 1
+    Assert-L "critic ok stamps now (full interval)" ($sOk -eq $fixed)
+    # E) A FAILED critic back-dates so it is NOT due after ~half a day but IS due after ~1 day
+    #    (bounded retry: no 7-day blackout, no every-logon 30-min re-fire).
+    $sFail = Resolve-CriticStamp -Outcome "timeout" -Now $fixed -CriticEveryDays 7 -RetryDays 1
+    Assert-L "critic failure is NOT due 12h later" ((($fixed.AddHours(12)) - $sFail).TotalDays -lt 7)
+    Assert-L "critic failure IS due ~1 day later" ((($fixed.AddDays(1)) - $sFail).TotalDays -ge 7)
+    # F) nonzero exit behaves the same as timeout (any non-ok = degraded retry).
+    $sNz = Resolve-CriticStamp -Outcome "nonzero" -Now $fixed -CriticEveryDays 7 -RetryDays 1
+    Assert-L "critic nonzero back-dates like timeout" ($sNz -eq $sFail)
+    # G) Edge: RetryDays >= CriticEveryDays clamps back-date to 0 (no negative interval).
+    $sEdge = Resolve-CriticStamp -Outcome "timeout" -Now $fixed -CriticEveryDays 1 -RetryDays 1
+    Assert-L "critic retry clamps to now when RetryDays>=interval" ($sEdge -eq $fixed)
+    # H) Test-ShouldFirePlanner: fires only when a drained backlog exists AND the lane is NOT
+    #    already running (the core fix: no one-shot in a clone with a live runner -> no git race).
+    Assert-L "planner fires when drained + not running + prompt" (Test-ShouldFirePlanner -Open 2 -LaneRunning $false -HasPrompt $true)
+    Assert-L "planner SKIPS when lane already running (concurrent-git guard)" (-not (Test-ShouldFirePlanner -Open 0 -LaneRunning $true -HasPrompt $true))
+    Assert-L "planner SKIPS when backlog not drained (open=3)" (-not (Test-ShouldFirePlanner -Open 3 -LaneRunning $false -HasPrompt $true))
+    Assert-L "planner SKIPS when backlog missing (open=-1)" (-not (Test-ShouldFirePlanner -Open -1 -LaneRunning $false -HasPrompt $true))
+    Assert-L "planner SKIPS when no planner prompt present" (-not (Test-ShouldFirePlanner -Open 1 -LaneRunning $false -HasPrompt $false))
+    # I) Critic worktree path is a SIBLING of the repo (outside it), stamp-scoped, and passes the
+    #    isolation invariant. A path inside the repo (or equal to it) must FAIL isolation so we never
+    #    run the critic in the very tree we are protecting.
+    $repoFixture = Join-Path $tmp "repo"
+    New-Item -ItemType Directory -Path $repoFixture -Force | Out-Null
+    $wt = Get-CriticWorktreePath -RepoRoot $repoFixture -Stamp "20260703-080000"
+    Assert-L "worktree path carries the launch stamp" ($wt -like "*safe-ai-critic-wt-20260703-080000")
+    Assert-L "worktree path is a sibling of the repo (not nested)" (Test-WorktreeIsIsolated -RepoRoot $repoFixture -WorktreePath $wt)
+    Assert-L "a nested worktree path FAILS isolation" (-not (Test-WorktreeIsIsolated -RepoRoot $repoFixture -WorktreePath (Join-Path $repoFixture "wt")))
+    Assert-L "the repo path itself FAILS isolation" (-not (Test-WorktreeIsIsolated -RepoRoot $repoFixture -WorktreePath $repoFixture))
+    # J) The git arg builders emit the exact isolating command (detached add, forced remove).
+    $addArgs = Get-WorktreeAddArgs -Path $wt -Ref "origin/main"
+    Assert-L "worktree add is detached at the given ref" (($addArgs -join " ") -eq ("worktree add --detach " + $wt + " origin/main"))
+    $rmArgs = Get-WorktreeRemoveArgs -Path $wt
+    Assert-L "worktree remove is forced" (($rmArgs -join " ") -eq ("worktree remove --force " + $wt))
+    # K) Get-LanesToHeal: names exactly the enabled lanes that have no live runner. A disabled lane
+    #    is never healed even when absent from the scan; an alive lane is never re-launched.
+    $healLanes = @(
+      [pscustomobject]@{ name = "ops";  enabled = $true },
+      [pscustomobject]@{ name = "data"; enabled = $true },
+      [pscustomobject]@{ name = "seo";  enabled = $false }
+    )
+    $allAlive = @{ ops = $true; data = $true; seo = $true }
+    Assert-L "heal: nothing to do when every enabled lane is alive" (@(Get-LanesToHeal -Lanes $healLanes -Running $allAlive).Count -eq 0)
+    $dataDead = @{ ops = $true }
+    $deadList = @(Get-LanesToHeal -Lanes $healLanes -Running $dataDead)
+    Assert-L "heal: names the one dead enabled lane" (($deadList -join ",") -eq "data")
+    $seoDeadToo = @{ ops = $true }  # seo is disabled AND absent -> must NOT be healed
+    Assert-L "heal: a disabled lane is never healed even when absent" (-not (@(Get-LanesToHeal -Lanes $healLanes -Running $seoDeadToo) -contains "seo"))
+    $noneAlive = @{}
+    Assert-L "heal: empty scan yields all enabled lanes (caller gates on this to refuse under WMI outage)" ((@(Get-LanesToHeal -Lanes $healLanes -Running $noneAlive) -join ",") -eq "ops,data")
+  } finally {
+    try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
+  }
+  if ($fails -eq 0) { Write-Launcher "[SELFTEST] ALL PASS"; exit 0 }
+  Write-Launcher ("[SELFTEST] " + $fails + " FAILURE(S)"); exit 1
 }
 
 # ---------------------------------------------------------------------------
@@ -253,26 +482,7 @@ function Set-ResurrectionBanner {
   $lockPath = $statusPath + ".lock"
   $haveLock = $false
   if (-not $Preview) {
-    # Reclaim a STALE orphan lock: if a prior holder was killed mid-write the .lock survives forever
-    # and freezes the liveness heartbeat into a false "loop is dead" alarm. A legit hold is sub-second
-    # even with all lanes serialized, so a lock older than 60s cannot be live - reclaim and retry.
-    for ($try = 0; $try -lt 25; $try++) {
-      try {
-        $fs = [System.IO.File]::Open($lockPath, [System.IO.FileMode]::CreateNew, [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
-        $fs.Close(); $haveLock = $true; break
-      } catch {
-        $reclaimed = $false
-        try {
-          $li = Get-Item -LiteralPath $lockPath -ErrorAction SilentlyContinue
-          if ($li -and (((Get-Date) - $li.LastWriteTime).TotalSeconds -gt 60)) {
-            Remove-Item -LiteralPath $lockPath -Force -ErrorAction SilentlyContinue
-            Write-Launcher "reclaimed stale status lock (age > 60s; prior holder likely killed mid-write)."
-            $reclaimed = $true
-          }
-        } catch {}
-        if (-not $reclaimed) { Start-Sleep -Milliseconds 200 }
-      }
-    }
+    $haveLock = Get-LauncherStatusLock $lockPath
     if (-not $haveLock) {
       Write-Launcher "banner reconcile skipped: could not acquire status lock (non-fatal)."
       return
@@ -378,13 +588,88 @@ if ($InstallUserStartup) {
 }
 
 # ---------------------------------------------------------------------------
+# Config-error LOUD banner. When loop-config.json is missing or unparseable the launcher CANNOT
+# start any lane - but the OLD design exited 1 writing only to the private launcher log, never to
+# docs/loop-status.md. The owner's single watch-file then froze at its last good render with NO
+# explanation - the exact silent-death class O16 exists to kill, and the owner's most common manual
+# action (hand-editing untilIso) is precisely what fat-fingers the JSON. This rewrites the watch-file
+# with a loud "config broken, lanes NOT started, fix the JSON" banner, preserving the lanes'
+# self-report region verbatim (a lane from a PRIOR launch may still be alive and reporting) so the
+# emergency rewrite never destroys live self-reports. Honors -WhatIf; serialized by the shared lock.
+function Write-ConfigErrorStatus {
+  param([string]$ConfigFile, [string]$ErrorMsg)
+  $reportBegin = "<!-- LANE-REPORT:BEGIN (managed by loop-report-status.ps1) -->"
+  $reportEnd = "<!-- LANE-REPORT:END -->"
+  $now = Get-Date
+  $out = New-Object System.Collections.Generic.List[string]
+  $out.Add((S "title")); $out.Add("")
+  $out.Add((S "intro1")); $out.Add((S "intro2")); $out.Add("")
+  $out.Add((Fmt "updated" @{ NOW = $now.ToString("yyyy-MM-dd HH:mm:ss") })); $out.Add("")
+  $out.Add((S "configErrorHeader")); $out.Add("")
+  $out.Add((Fmt "configErrorBody1" @{ CONFIG = $ConfigFile }))
+  $out.Add((S "configErrorBody2"))
+  $out.Add((Fmt "configErrorBody3" @{ ERROR = $ErrorMsg }))
+  # Preserve the lanes' self-report region verbatim if present (never destroy live self-reports).
+  $preserved = $null
+  if (Test-Path $statusPath) {
+    try {
+      $old = @(Get-Content -Encoding UTF8 -Path $statusPath)
+      $b = -1; $e = -1
+      for ($k = 0; $k -lt $old.Count; $k++) {
+        if ($old[$k].Trim() -eq $reportBegin) { $b = $k }
+        elseif ($old[$k].Trim() -eq $reportEnd) { $e = $k; break }
+      }
+      if ($b -ge 0 -and $e -gt $b) { $preserved = $old[$b..$e] }
+    } catch {}
+  }
+  $out.Add(""); $out.Add((S "reportHeader")); $out.Add("")
+  if ($preserved) { foreach ($l in $preserved) { $out.Add([string]$l) } }
+  $out.Add(""); $out.Add((S "watchHeader"))
+  $out.Add((S "watch1")); $out.Add((S "watch2")); $out.Add((S "watch3"))
+  $text = ($out -join "`r`n") + "`r`n"
+  if ($WhatIf) {
+    $dry = Join-Path $logDir "loop-status.dryrun.md"
+    Set-Content -Path $dry -Value $text -Encoding UTF8
+    Write-Launcher ("[WHATIF] config-error banner -> " + $dry + " (config=" + $ConfigFile + ")")
+    return
+  }
+  $lockPath = $statusPath + ".lock"
+  $haveLock = Get-LauncherStatusLock $lockPath
+  if (-not $haveLock) {
+    Write-Launcher "WARN: config-error banner skipped: could not acquire status lock (non-fatal). See launcher log for the error."
+    return
+  }
+  try {
+    $statusDir = Split-Path -Parent $statusPath
+    if ($statusDir -and -not (Test-Path $statusDir)) { New-Item -ItemType Directory -Path $statusDir | Out-Null }
+    Set-Content -Path $statusPath -Value $text -Encoding UTF8
+    Write-Launcher ("config-error banner written to " + $statusPath)
+  } catch {
+    Write-Launcher ("WARN: could not write config-error status (non-fatal): " + $_.Exception.Message)
+  } finally {
+    try { Remove-Item -Path $lockPath -Force -ErrorAction SilentlyContinue } catch {}
+  }
+}
+
+# ---------------------------------------------------------------------------
 # Read config + state.
 # ---------------------------------------------------------------------------
-if (-not (Test-Path $ConfigPath)) { Write-Launcher ("ERROR: config not found: " + $ConfigPath); exit 1 }
+if (-not (Test-Path $ConfigPath)) {
+  Write-Launcher ("ERROR: config not found: " + $ConfigPath)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg (S "configErrorNotFound")
+  exit 1
+}
 try {
   $cfg = Get-Content -Raw -Encoding UTF8 -Path $ConfigPath | ConvertFrom-Json
 } catch {
-  Write-Launcher ("ERROR: could not parse " + $ConfigPath + ": " + $_.Exception.Message); exit 1
+  Write-Launcher ("ERROR: could not parse " + $ConfigPath + ": " + $_.Exception.Message)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg $_.Exception.Message
+  exit 1
+}
+if ($null -eq $cfg -or -not ($cfg.PSObject.Properties.Name -contains "lanes") -or @($cfg.lanes).Count -eq 0) {
+  Write-Launcher ("ERROR: config parsed but has no lanes: " + $ConfigPath)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg (S "configErrorNoLanes")
+  exit 1
 }
 
 $state = $null
@@ -442,6 +727,62 @@ function Get-RunningLanes {
 # -InstallUserStartup path, so the install can reconcile the resurrection banner in place.)
 
 # ---------------------------------------------------------------------------
+# -HealOnly: watchdog re-launch of individually-dead lanes, and NOTHING else. This is the recovery
+# half of the dead-lane story (loop-status' health banner is the detection half): the always-alive
+# ops lane calls this every interval, so a lane whose runner wedged/crashed comes back in ~one ops
+# interval rather than waiting for the next logon / 07:00 full launcher pass. Deliberately minimal -
+# no deadline banner, no planner/critic gate, no git, no status rewrite - to be cheap and side-effect
+# free enough to run on a hot loop. Idempotency is provided by loop-runner.ps1's own per-lane
+# single-instance guard (a re-launched live lane self-exits), so we never double-run a healthy lane.
+# ---------------------------------------------------------------------------
+if ($HealOnly) {
+  # Respect the run deadline: past untilIso the run is meant to be STOPPED, so heal nothing (else the
+  # ops watchdog would fight the runners' own deadline-break and resurrect an expired run forever).
+  $healUntil = $null
+  if ([string]$cfg.untilIso -ne "") { try { $healUntil = [datetime]::Parse([string]$cfg.untilIso) } catch {} }
+  if (($null -ne $healUntil) -and ((Get-Date) -ge $healUntil)) {
+    Write-Launcher ("[HEAL] past deadline (untilIso=" + ([string]$cfg.untilIso) + "); healing nothing (run is meant to be stopped).")
+    exit 0
+  }
+  $healRunning = Get-RunningLanes
+  # Fail-safe: an empty scan means either a genuinely cold machine (logon launcher's job, not heal's)
+  # OR a WMI outage - and under a WMI outage the runner's OWN guard fail-opens, so re-launching now
+  # would double-run every lane. Either way, refuse: heal only ever fixes "some alive, one dead".
+  if ($healRunning.Count -eq 0) {
+    Write-Launcher "[HEAL] process scan shows ZERO running lanes; refusing to heal (cold start is the logon launcher's job; an empty scan may also be a WMI outage where re-launch would double-run). No action."
+    exit 0
+  }
+  $toHeal = @(Get-LanesToHeal -Lanes $cfg.lanes -Running $healRunning)
+  if ($toHeal.Count -eq 0) {
+    Write-Launcher ("[HEAL] all enabled lanes alive (" + (($healRunning.Keys | Sort-Object) -join ", ") + "); nothing to resurrect.")
+    exit 0
+  }
+  foreach ($name in $toHeal) {
+    $lane = $cfg.lanes | Where-Object { [string]$_.name -eq $name } | Select-Object -First 1
+    if ($null -eq $lane) { continue }
+    $laneRepo = Resolve-LaneRepo -lane $lane
+    $runner = Join-Path $laneRepo "loop-runner.ps1"
+    if (-not (Test-Path $runner)) {
+      Write-Launcher ("[HEAL] WARN: lane '" + $name + "' has no runner at " + $runner + "; cannot resurrect. Skipping.")
+      continue
+    }
+    $argList = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $runner,
+      "-Lane", $name, "-RepoPath", $laneRepo, "-Model", [string]$lane.model,
+      "-IntervalSeconds", [string][int]$lane.intervalSeconds)
+    if ([string]$cfg.untilIso -ne "") { $argList += @("-UntilIso", [string]$cfg.untilIso) }
+    if ($ClaudeCmd -ne "claude") { $argList += @("-ClaudeCmd", $ClaudeCmd) }
+    if ($WhatIf) {
+      Write-Launcher ("[HEAL][WHATIF] would resurrect dead lane '" + $name + "' (model=" + $lane.model + ", interval=" + $lane.intervalSeconds + "s, repo=" + $laneRepo + ").")
+    } else {
+      Write-Launcher ("[HEAL] resurrecting dead lane '" + $name + "' (model=" + $lane.model + ", interval=" + $lane.intervalSeconds + "s, repo=" + $laneRepo + "). Runner's own guard makes this a no-op if it is actually alive.")
+      Start-Process -FilePath "powershell" -ArgumentList $argList -WorkingDirectory $laneRepo
+    }
+  }
+  Write-Launcher ("[HEAL] done. Alive=[" + (($healRunning.Keys | Sort-Object) -join ", ") + "] Resurrected=[" + ($toHeal -join ", ") + "]" + $(if ($WhatIf) { " (WHATIF: nothing actually launched)" } else { "" }))
+  exit 0
+}
+
+# ---------------------------------------------------------------------------
 # Deadline evaluation (the heart of the permanent fix).
 # ---------------------------------------------------------------------------
 $now = Get-Date
@@ -466,22 +807,24 @@ function Invoke-OneShot {
     [string]$Model, [string]$PromptFile, [int]$TimeoutMin
   )
   $runner = Join-Path $LaneRepo "loop-runner.ps1"
-  if (-not (Test-Path $runner)) { Write-Launcher ("WARN: " + $Kind + " skipped, no runner at " + $runner); return }
-  if (-not (Test-Path $PromptFile)) { Write-Launcher ("WARN: " + $Kind + " skipped, no prompt " + $PromptFile); return }
+  if (-not (Test-Path $runner)) { Write-Launcher ("WARN: " + $Kind + " skipped, no runner at " + $runner); return "skipped" }
+  if (-not (Test-Path $PromptFile)) { Write-Launcher ("WARN: " + $Kind + " skipped, no prompt " + $PromptFile); return "skipped" }
   $tag = $LaneName + "-" + $Kind
   $argList = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $runner,
     "-Lane", $tag, "-RepoPath", $LaneRepo, "-Model", $Model,
     "-PromptFile", $PromptFile, "-MaxIterations", "1")
   if ($ClaudeCmd -ne "claude") { $argList += @("-ClaudeCmd", $ClaudeCmd) }
-  if ($WhatIf) { Write-Launcher ("[WHATIF] would run " + $Kind + " one-shot (tag=" + $tag + ", model=" + $Model + ", repo=" + $LaneRepo + ", prompt=" + $PromptFile + ")"); return }
+  if ($WhatIf) { Write-Launcher ("[WHATIF] would run " + $Kind + " one-shot (tag=" + $tag + ", model=" + $Model + ", repo=" + $LaneRepo + ", prompt=" + $PromptFile + ")"); return "whatif" }
   Write-Launcher ("running " + $Kind + " one-shot (tag=" + $tag + ", model=" + $Model + ", timeout=" + $TimeoutMin + "min)...")
   $p = Start-Process -FilePath "powershell" -ArgumentList $argList -WorkingDirectory $LaneRepo -PassThru
   if (-not $p.WaitForExit($TimeoutMin * 60 * 1000)) {
     try { $p.Kill() } catch {}
     Write-Launcher ("WARN: " + $Kind + " one-shot exceeded " + $TimeoutMin + "min; killed and continuing.")
-  } else {
-    Write-Launcher ($Kind + " one-shot finished (exit=" + $p.ExitCode + ").")
+    return "timeout"
   }
+  Write-Launcher ($Kind + " one-shot finished (exit=" + $p.ExitCode + ").")
+  if ($p.ExitCode -eq 0) { return "ok" }
+  return "nonzero"
 }
 
 # ---------------------------------------------------------------------------
@@ -602,8 +945,12 @@ if ($nearDeadline) {
 
 # ---------------------------------------------------------------------------
 # Inspection gate (critic): once per criticEveryDays. Runs BEFORE the lane loop so it never
-# overlaps the ops lane in the main tree. Best-effort; lastCriticIso is stamped immediately so
-# it does not re-fire on the same day even if it takes a while.
+# overlaps the ops lane in the main tree. lastCriticIso is PRE-stamped to now so a launcher that
+# starts concurrently (e.g. a logon near the 07:00 pass) sees not-due and does not fire a second
+# overlapping critic while this 30-min one-shot runs. But a silently FAILED critic (timeout kill /
+# non-zero exit / could-not-run) must NOT then hide behind that full-interval stamp: on failure we
+# back-date the stamp for a ~1-day retry and BLARE a note on the dashboard, so watch point #1 shows
+# the inspection system is degraded instead of the critique silently never running for a full week.
 # ---------------------------------------------------------------------------
 $criticEvery = if ($cfg.criticEveryDays) { [int]$cfg.criticEveryDays } else { 7 }
 $lastCritic = $null
@@ -613,10 +960,62 @@ $criticModel = if ([string]$cfg.criticModel -ne "") { [string]$cfg.criticModel }
 $criticPrompt = Join-Path $repoRoot "loop-prompt-critic.txt"
 
 if ($criticDue -and (Test-Path $criticPrompt)) {
-  Write-Launcher ("critic due (last=" + ([string]$state.lastCriticIso) + ", every=" + $criticEvery + "d). Firing critic one-shot in main repo.")
+  Write-Launcher ("critic due (last=" + ([string]$state.lastCriticIso) + ", every=" + $criticEvery + "d). Firing critic one-shot in an ISOLATED git worktree (main tree untouched).")
   $state.lastCriticIso = $now.ToString("o")
   Save-State
-  Invoke-OneShot -Kind "critic" -LaneName "site" -LaneRepo $repoRoot -Model $criticModel -PromptFile $criticPrompt -TimeoutMin 30
+  # Run the critic in a throwaway worktree so its checkout/commit/push never shares an index with
+  # the ops persistent runner in the main tree. The critic prompt is fed by absolute path from the
+  # main tree; the worktree is a full origin/main checkout, so it has its own loop-runner.ps1.
+  $wtPath = Get-CriticWorktreePath -RepoRoot $repoRoot -Stamp $launchStamp
+  $criticOutcome = $null
+  if (-not (Test-WorktreeIsIsolated -RepoRoot $repoRoot -WorktreePath $wtPath)) {
+    Write-Launcher ("WARN: computed critic worktree '" + $wtPath + "' is not isolated from the main tree; refusing to run critic in-place (would re-open the git race). Treating as failure.")
+    $criticOutcome = "worktree-unsafe"
+  } elseif ($WhatIf) {
+    # Honest dry-run: the worktree is NOT created in WhatIf, so we must NOT call Invoke-OneShot against
+    # $wtPath (its Test-Path runner guard would fire and mislead the log with "skipped, no runner").
+    # Report the exact plan instead - a real worktree checkout carries its own loop-runner.ps1.
+    Write-Launcher ("[WHATIF] would fetch origin/main, create a detached worktree at " + $wtPath + " (git " + ((Get-WorktreeAddArgs -Path $wtPath -Ref 'origin/main') -join ' ') + "), run the critic one-shot there (tag=site-critic, model=" + $criticModel + ", timeout=30min), then remove the worktree (git " + ((Get-WorktreeRemoveArgs -Path $wtPath) -join ' ') + ").")
+    $criticOutcome = "whatif"
+  } else {
+    # Fresh base: fetch origin/main so the critique runs against the deployed HEAD, not a stale local
+    # ref. Prune + remove any orphan worktree from a prior crashed pass before (re)creating.
+    $null = Invoke-Git -RepoRoot $repoRoot -GitArgs @("fetch", "origin", "main", "--quiet")
+    $null = Invoke-Git -RepoRoot $repoRoot -GitArgs @("worktree", "prune")
+    if (Test-Path -LiteralPath $wtPath) {
+      $null = Invoke-Git -RepoRoot $repoRoot -GitArgs (Get-WorktreeRemoveArgs -Path $wtPath)
+      if (Test-Path -LiteralPath $wtPath) { try { Remove-Item -LiteralPath $wtPath -Recurse -Force -ErrorAction SilentlyContinue } catch {} }
+    }
+    $add = Invoke-Git -RepoRoot $repoRoot -GitArgs (Get-WorktreeAddArgs -Path $wtPath -Ref "origin/main")
+    if (-not $add.ok) {
+      Write-Launcher ("WARN: git worktree add failed; critic NOT run this pass (better than racing the main tree). " + $add.out)
+      $criticOutcome = "worktree-setup-failed"
+    } else {
+      Write-Launcher ("critic worktree ready at " + $wtPath + " (detached @origin/main).")
+      try {
+        $criticOutcome = Invoke-OneShot -Kind "critic" -LaneName "site" -LaneRepo $wtPath -Model $criticModel -PromptFile $criticPrompt -TimeoutMin 30
+      } finally {
+        # Always tear the worktree down, even on timeout/kill. The critic's branch is already pushed,
+        # so removing the worktree does not lose its PR.
+        $rm = Invoke-Git -RepoRoot $repoRoot -GitArgs (Get-WorktreeRemoveArgs -Path $wtPath)
+        if (-not $rm.ok) { Write-Launcher ("WARN: git worktree remove reported: " + $rm.out) }
+        if (Test-Path -LiteralPath $wtPath) { try { Remove-Item -LiteralPath $wtPath -Recurse -Force -ErrorAction SilentlyContinue } catch {} }
+        $null = Invoke-Git -RepoRoot $repoRoot -GitArgs @("worktree", "prune")
+        Write-Launcher ("critic worktree removed (" + $wtPath + ").")
+      }
+    }
+  }
+  if (-not $WhatIf -and $criticOutcome -ne "ok") {
+    $retryStamp = Resolve-CriticStamp -Outcome $criticOutcome -Now $now -CriticEveryDays $criticEvery -RetryDays 1
+    $state.lastCriticIso = $retryStamp.ToString("o")
+    Save-State
+    Add-Status (Fmt "criticFailHeader" @{ REASON = [string]$criticOutcome })
+    Add-Status ""
+    Add-Status (S "criticFailBody1")
+    Add-Status (S "criticFailBody2")
+    Add-Status ""
+    Write-Launcher ("WARN: critic one-shot degraded (" + $criticOutcome + "). Back-dated lastCriticIso for ~1-day retry; wrote dashboard note.")
+  }
 } else {
   Write-Launcher ("critic not due (last=" + ([string]$state.lastCriticIso) + ", every=" + $criticEvery + "d).")
 }
@@ -648,7 +1047,13 @@ foreach ($lane in $cfg.lanes) {
   }
 
   # Supply gate: replenish an almost-empty backlog before starting the persistent runner.
-  if ($open -ge 0 -and $open -lt 3 -and (Test-Path $plannerPrompt)) {
+  # Skip when the lane's persistent runner is already alive: a one-shot in the same clone as a
+  # live runner races git (index.lock / branch clobber). A running lane self-replenishes anyway.
+  $laneAlreadyRunning = $running.ContainsKey($lane.name)
+  if ($open -ge 0 -and $open -lt 3 -and $laneAlreadyRunning) {
+    Write-Launcher ("lane '" + $lane.name + "' open=" + $open + " (<3) but runner already alive; skipping planner one-shot (avoids concurrent-git race; live lane self-replenishes).")
+  }
+  if ((Test-ShouldFirePlanner -Open $open -LaneRunning $laneAlreadyRunning -HasPrompt (Test-Path $plannerPrompt))) {
     Write-Launcher ("lane '" + $lane.name + "' open=" + $open + " (<3). Firing planner one-shot before ignition.")
     $laneTaggedPrompt = $plannerPrompt
     if (-not $WhatIf) {

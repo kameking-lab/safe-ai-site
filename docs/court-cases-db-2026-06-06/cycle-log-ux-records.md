@@ -78,6 +78,22 @@
 
 検証: tsc=0・lint errors=0（既存warning46件のみ・自分の変更起因なし）・vitest 237ファイル1973件全pass・build成功（`/safety-diary/list` 静的生成確認）。無読Playwrightスクリプト `docs/third-party-reviews/scripts/safety-diary-list-noread-2026-07-03.mjs` を新規（空/1件/検索0件の3状態×次アクションの可視性・44px・遷移先を検証）＝7/7合格。working tree clean。
 
+## 2026-07-03 — 柱0補充 /account（マイページ）に結論カード新設（PR: ux-rec/account-conclusion-card）
+
+回収: 自班CI緑PR #597（lint掃除23件）をsquashマージ済み。main は `git pull --ff-only` で同期・clean。#593（safety-diary/list結論カード）はCIまだpendingのため今回は回収せず次回。
+
+着手前監査: BACKLOG最上位5件(O10/O15/S1/S2/S3)は全てF1(fable)/O14(data)の他レーン依存で未完了のため全ブロック中。契約どおり自領域の柱0未監査routeを補充探索＝サブエージェントで`/ky-examples`・`/account`を巡回（両方とも過去ログに監査記録なし）。
+
+結果: `/ky-examples`はConclusionCard導入済みで概ね合格（`action`未指定・主CTAが44px未満の軽微欠落のみ→次点タスクとしてBACKLOG起票）。真の欠落は**`/account`**: 共通基盤(ConclusionCard/StatusBadge)が未導入で、状態バナー(支払い遅延/未払い/解約済み、最大2件同時表示可)と「現在のプラン」独自の状態ピル(SAFETY_TONE不使用のemerald/red/amber直書き)が並立し、結論カード規約「1画面1メッセージ」に反していた（安全日誌#565と同種の非対称）。
+
+是正: `web/src/app/(main)/account/page.tsx`にconclusion-card/status-badgeの共通基盤(custodian・無改変)を導入。優先順位=赤(支払い遅延/未払い)＞黄(解約済み)＞青(フリー)＞緑(利用中)で1状態に絞りConclusionCardへ集約、次アクション(プラン管理ボタン/アップグレードLink/再加入Link)はカードのaction propまたはchildren枠に一本化(ManagePlanButtonはStripeポータルへの非同期リダイレクトのためaction propのLinkでは表現できずchildrenへ)。判定ロジックは`web/src/lib/account-conclusion.ts`の`computeAccountConclusion`へ純粋関数として切出し(computeCheckupConclusion等の既存パターンに準拠)、vitest 8/8で全状態(支払い遅延/未払い/解約済み×期限有無/フリー/有料利用中×期限有無)を網羅。プラン取得(Prisma)・Stripeポータル呼出等の課金ロジック自体は無変更＝表示の再配置のみ（課金・認証実装の独断変更ではない）。
+
+無読テストの制約: `/account`はGoogle OAuth必須で、このdev環境はAUTH_SECRET未設定（auth()は常にnullを返し signin へリダイレクト）のためPlaywright実機無読テストが実行不可。捏造回避のため実施せず明記＝結論ロジックのunit test(vitest 8/8)とコード目視確認で代替。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0(warn23件は他班ファイル分で不変・account/account-conclusion.ts分は新規warn0) / `vitest run`=239ファイル1997テスト全pass(新規`account-conclusion.test.ts`8本含む) / `build`=成功(`ƒ /account`)。working tree clean。
+
+残: `/ky-examples`のConclusionCard action追加・CTA44px化は次点タスクとしてBACKLOG-ux-records.mdへ起票。BACKLOG最上位5件のブロック状況は次イテレーションで再確認。
+
 ---
 
 ## 2026-06-14 — 柱0補充 教育コース詳細12ページに結論カード新設（PR: ux-rec/c0-education-course-conclusion）

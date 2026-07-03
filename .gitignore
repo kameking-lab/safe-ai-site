@@ -20,6 +20,10 @@ __pycache__/
 # News-feed inter-stage handoff (regenerated each run by fetch-news-feed.mjs)
 scripts/etl/data/news-feed-candidates.json
 
+# チャットボット週次スモークプローブ (web/scripts/chatbot-prod-smoke-probe.mjs) の
+# 実行結果。実行のたびに上書きされる一時レポートのため追跡しない
+web/docs/third-party-reviews/scripts/chatbot-prod-smoke-latest.json
+
 # OS / editor
 .DS_Store
 Thumbs.db

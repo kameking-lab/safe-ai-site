@@ -72,6 +72,88 @@ describe("sitemap.xml（柱C-3-3 欠落ページ追加）", () => {
 });
 
 /**
+ * 柱C-3-3 追補2 回帰テスト: 孤立していた実在 indexable ページの追加を固定。
+ * - /accident-news（重大災害事例ブラウザ・死亡災害DB類型検索・自己canonical・revalidate）
+ * - /heat-illness-prevention/{acclimatization,log,poster}
+ *   （令和7年6月改正安衛則対応の実在ツールページ・自己canonical・PageJsonLd付）
+ * - /ky/paper（KY入力の正規ページ・robots index:true・/pdf の permanentRedirect 先）
+ * これらは page.tsx として実在し indexable だが、いずれの sitemap にも含まれていなかった。
+ * あわせて「収載してはいけない」境界（redirect スタブ / リリース前デモ / 印刷専用）を
+ * 明示的にロックし、機械的な全ページ追加＝誤収載の再発を防ぐ。
+ */
+describe("sitemap.xml（柱C-3-3 追補2: 追加した孤立ページと非収載境界）", () => {
+  const entries = sitemap();
+  const urls = entries.map((e) => e.url);
+  const urlSet = new Set(urls);
+  const has = (path: string) => urlSet.has(`${BASE}${path}`);
+  const entryFor = (path: string) => entries.find((e) => e.url === `${BASE}${path}`);
+
+  it("重大災害事例ブラウザ /accident-news を収載する", () => {
+    expect(has("/accident-news")).toBe(true);
+  });
+
+  it("熱中症対策ハブの実在サブページ3本を収載する", () => {
+    expect(has("/heat-illness-prevention/acclimatization")).toBe(true);
+    expect(has("/heat-illness-prevention/log")).toBe(true);
+    expect(has("/heat-illness-prevention/poster")).toBe(true);
+  });
+
+  it("KY入力の正規ページ /ky/paper を収載する（robots index:true の実在ページ）", () => {
+    expect(has("/ky/paper")).toBe(true);
+  });
+
+  it("非収載境界: /pdf は /ky/paper への permanentRedirect スタブのため収載しない", () => {
+    // リダイレクト元URLは掲載せず、実体URL /ky/paper のみを収載する
+    expect(has("/pdf")).toBe(false);
+  });
+
+  it("/accident-news の lastmod が死亡災害DBの更新日（/accidents と同一）に追従する", () => {
+    const accidentNews = entryFor("/accident-news");
+    const accidents = entryFor("/accidents");
+    expect(accidentNews?.lastModified).toBeDefined();
+    // 死亡災害DB由来のため /accidents と同一の accidentsDataUpdated を共有する
+    expect(accidentNews?.lastModified).toBe(accidents?.lastModified);
+  });
+
+  it("非収載境界: redirect スタブ・リリース前デモ・印刷専用は収載しない", () => {
+    // /about/cases → /about、/quick-start → /quick の redirect() スタブ（実体URLでない）
+    expect(has("/about/cases")).toBe(false);
+    expect(has("/quick-start")).toBe(false);
+    // /organization は「正式リリース前のデモ版」モック
+    expect(has("/organization")).toBe(false);
+    // 印刷専用ユーティリティ
+    expect(has("/accident-news/print")).toBe(false);
+  });
+});
+
+/**
+ * 柱C-3-3 追補4 回帰テスト: 静的ルート再突合で発見した孤立ページの追加を固定。
+ * - /ky/workers（作業員マスター＝KY用紙の参加者選択ツール・robots index:true・自己canonical・
+ *   PageJsonLd付）。兄弟 /ky/paper と同じ KY全面再設計（#285）で追加されたが sitemap から
+ *   漏れていた実在 indexable ページ。
+ * あわせて「収載してはいけない」KY配下のツール状態ページ（/ky/list=保存済みKY一覧は
+ * robots index:false）を境界としてロックし、機械的な全ページ追加＝誤収載を防ぐ。
+ */
+describe("sitemap.xml（柱C-3-3 追補4: /ky/workers 追加と KY配下の非収載境界）", () => {
+  const entries = sitemap();
+  const urlSet = new Set(entries.map((e) => e.url));
+  const has = (path: string) => urlSet.has(`${BASE}${path}`);
+  const entryFor = (path: string) => entries.find((e) => e.url === `${BASE}${path}`);
+
+  it("作業員マスター /ky/workers を収載する（robots index:true の実在ツールページ）", () => {
+    expect(has("/ky/workers")).toBe(true);
+  });
+
+  it("/ky/workers の lastmod は KY全面再設計の 2026-05-25（兄弟 /ky/paper と同節）", () => {
+    expect(entryFor("/ky/workers")?.lastModified).toBe("2026-05-25");
+  });
+
+  it("非収載境界: /ky/list（保存済みKY一覧）は robots index:false のため収載しない", () => {
+    expect(has("/ky/list")).toBe(false);
+  });
+});
+
+/**
  * A-3 回帰テスト: サイトマップの役割分担。個別の通達/保護具/記事ページは専用の
  * 子サイトマップ（sitemap-circulars/-equipment/-articles.xml）が正本として出力するため、
  * 本体 sitemap.xml には直書きしない（同一URLの二重掲載＝役割崩壊を防止）。
