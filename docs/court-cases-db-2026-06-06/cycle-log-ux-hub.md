@@ -451,4 +451,4 @@
 
 **無読テスト**: `docs/third-party-reviews/scripts/features-use-cases-court-employer-liability-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**52/52 PASS**（/features/use-cases 関連機能ピル48件・/court-cases/employer-liability 論点チップ4件、全てboundingBox height≥44px実測）。
 
-**残課題**: BACKLOG-ux-hub.md未着手は1件（トップhome-three-pillars=PR #668で着手済み・マージ待ち）のみに減少。PR #668・#663のCI回収は次イテレーション。3件未満のため補充候補をExplore委任で調査中（次イテレーションで反映）。
+**残課題**: BACKLOG-ux-hub.md未着手は1件（トップhome-three-pillars=PR #668で着手済み・マージ待ち）のみに減少。PR #668・#663のCI回収は次イテレーション。3件未満のためExplore委任で補充調査を実施し、実在確認済みの2件（`/accidents/[id]`の「事故DBに戻る」リンク・類似事故カードのタイトルリンク／`/diversity/women`のAmazon・楽天アフィリエイトボタン・関連ページナビ3リンク、いずれも44px未満をコード確認済み）をBACKLOG-ux-hub.mdへ追記（PR #682へ追加コミット）。Explore調査中に発生したリポジトリ外への一時ファイル書き出し(`C:\Users\kanet\ux-hub-scan.txt`)は削除済み。
