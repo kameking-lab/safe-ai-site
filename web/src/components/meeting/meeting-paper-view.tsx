@@ -74,10 +74,10 @@ export function MeetingPaperView() {
   const [history, setHistory] = useState<MeetingHistory | null>(null);
   // 「前回を複製」を上部にも出すための判定（端末に保存済みの打合せ書があるときだけ）。
   const [hasLatest, setHasLatest] = useState(false);
-  // S1（打合せ用紙 直接操作UI・第一弾〜第七弾）: 用紙キャンバス（β）。KYのF1と同じ方式で
+  // S1（打合せ用紙 直接操作UI・第一弾〜第八弾）: 用紙キャンバス（β）。KYのF1と同じ方式で
   // 既定はオフ（?canvas=1 または「🗺 キャンバス(β)」ボタンで切替）。ヘッダー7欄・明日のイベント5欄・
   // 統括安全責任者コメント・各社マトリクス10部位・搬入出（動的行）・点検項目8カテゴリ・
-  // 作業内容欄でのAI提案に対応。残＝履歴サジェストのcanvas内提供・既定切替（β外し）。
+  // 作業内容欄でのAI提案・履歴サジェスト（datalist）に対応。残＝既定切替（β外し）。
   const [canvasMode, setCanvasMode] = useState(false);
   const [activeFieldKey, setActiveFieldKey] = useState<MeetingPaperFieldKey | null>(null);
   const stageRef = useRef<PaperStageHandle>(null);
@@ -293,6 +293,21 @@ export function MeetingPaperView() {
     }
   };
 
+  // Phase3/S1（続き・第八弾）: 履歴サジェスト（過去の打合せ書から候補）。従来UI・キャンバス両方の
+  // list= 参照先として共有する（キャンバス側もタップ→エディタ内の入力欄で同じ候補が出るように）。
+  const historyDatalists = history && (
+    <>
+      <datalist id="mtg-sites">{history.sites.map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="mtg-companies">{history.companies.map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="mtg-works">{history.works.map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="mtg-machines">{history.machines.map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="mtg-responsibles">{history.responsibles.map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="mtg-authors">{history.authors.map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="mtg-managers">{history.managers.map((v) => <option key={v} value={v} />)}</datalist>
+      <datalist id="mtg-supervisors">{history.supervisors.map((v) => <option key={v} value={v} />)}</datalist>
+    </>
+  );
+
   // S1（打合せ用紙 直接操作UI）: 用紙キャンバス（β）。全hooks評価後の分岐＝
   // クラシックUIと状態を完全共有する（record/自動保存/保存判定がそのまま効く）。
   // KYのF1と同じく既定はオフ。搬入出・点検項目・必要資格/予定人員/予想災害は後続弾で拡張。
@@ -334,12 +349,14 @@ export function MeetingPaperView() {
         {notice && (
           <div className="mx-auto mt-2 flex max-w-5xl items-start justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 print:hidden">
             <p className="text-sm font-semibold text-emerald-900">{notice}</p>
-            <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="rounded px-1.5 text-emerald-700 hover:bg-emerald-100">×</button>
+            <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="flex min-h-[44px] items-center rounded px-1.5 text-emerald-700 hover:bg-emerald-100">×</button>
           </div>
         )}
 
         {/* A4横向き印刷指定（この画面でのみ有効） */}
         <style media="print">{"@page{size:A4 landscape;margin:8mm}"}</style>
+
+        {historyDatalists}
 
         {/* 用紙キャンバス: 初期表示＝全体フィット。タップで入力、ピンチ/ホイール/ボタンでズーム */}
         <PaperStage ref={stageRef} heightClassName="h-[calc(100dvh-200px)] min-h-[320px] sm:h-[calc(100dvh-150px)]">
@@ -467,19 +484,7 @@ export function MeetingPaperView() {
       {/* A4横向き印刷指定（この画面でのみ有効） */}
       <style media="print">{"@page{size:A4 landscape;margin:8mm}"}</style>
 
-      {/* Phase3: 履歴サジェスト（過去の打合せ書から候補） */}
-      {history && (
-        <>
-          <datalist id="mtg-sites">{history.sites.map((v) => <option key={v} value={v} />)}</datalist>
-          <datalist id="mtg-companies">{history.companies.map((v) => <option key={v} value={v} />)}</datalist>
-          <datalist id="mtg-works">{history.works.map((v) => <option key={v} value={v} />)}</datalist>
-          <datalist id="mtg-machines">{history.machines.map((v) => <option key={v} value={v} />)}</datalist>
-          <datalist id="mtg-responsibles">{history.responsibles.map((v) => <option key={v} value={v} />)}</datalist>
-          <datalist id="mtg-authors">{history.authors.map((v) => <option key={v} value={v} />)}</datalist>
-          <datalist id="mtg-managers">{history.managers.map((v) => <option key={v} value={v} />)}</datalist>
-          <datalist id="mtg-supervisors">{history.supervisors.map((v) => <option key={v} value={v} />)}</datalist>
-        </>
-      )}
+      {historyDatalists}
 
       {/* 用紙本体（編集UI。印刷時は専用A4シートを使うため隠す） */}
       <div className="overflow-x-auto px-2 py-4 print:hidden">
