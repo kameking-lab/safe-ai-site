@@ -1,5 +1,19 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: トップ home-three-pillars.tsx AlertGenerator・関連リンク 柱0(44px)
+
+**イテレーション頭の回収**: 自班の直近PR #682（/features/use-cases・/court-cases/employer-liability 関連ピル44px）はイテレーション開始時点でCI(e2e/smoke)が pending だったためマージ見送り、回収は次サイクル。他PRは触らず。`git checkout main && git pull --ff-only` は不要（作業ブランチが最新main起点のため）clean確認済み。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手3件のうち最上位（2026-07-03 Explore調査で発見した柱0補充候補）。トップ`home-three-pillars.tsx`（当班所有＝home-three-pillars.tsx）で、AI生成ボタン群と死亡事故カードの2次導線リンクが指の押し損ねサイズだった。
+
+**変更**: 共有部品`AlertGenerator`（3柱＝死亡事故/気象警報/法改正それぞれで再利用）の「注意喚起文を作成」ボタン・エラー時「再試行」ボタン・「管理者に連絡」リンクの3箇所と、死亡事故カード内「10年事故DB一覧へ」リンク・「出典・報道URLを開く」リンクの2箇所、計5箇所に`min-h-[44px]`を追加。純粋なTailwindクラス追加でレイアウト・AI生成ロジック・遷移先は不変。
+
+**テスト**: `web/src/components/home-three-pillars.test.tsx`を新設（3ケース）。`LanguageProvider`配下で`HomeThreePillars`をfatal/warnings/revisionsのモックpropsで直接描画し、出典リンク・DB一覧リンク・AlertGeneratorボタン（各柱ぶん複数）のclassNameに`min-h-[44px]`が含まれることを確認。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（23 warnings は既存・無関係）/ vitest 274 files・2313 tests 全pass（+1 skipped、既存分）/ build 成功。dev/test実行で書き換わる生成物(docs/rag-metrics-latest.json・web/src/data/chatbot-eval-fresh-results.json・ky-print-sheet snapshot)は commit から除外（git checkout で復元）。
+
+**無読テスト**: `docs/third-party-reviews/scripts/top-alertgenerator-related-link-44px-check.mjs`を**7/7 PASS**（next start本番相当・スマホ390×844）。実boundingBoxで「注意喚起文を作成」ボタン×5（死亡事故1/気象警報1/法改正3件ぶん）・「10年事故DB一覧へ」・「出典・報道URLを開く」が全てheight=44pxを確認。
+
 ## 2026-06-14 — 補充: /resources 厚労省一次資料DB フィルタ・各エントリ操作 柱0(44px)
 
 **イテレーション頭の回収**: 自班の緑PR #564(/safety-signs サブページ44px)が main とコンフリクト（自班トラッキング文書 BACKLOG-ux-hub.md・cycle-log-ux-hub.md のみ衝突＝コード非衝突）。`git merge origin/main`→両文書を両エントリ保持で手解決→push→CI再走で squash マージ済み(#564)。PR #567(/court-cases 詳細44px)は smoke/e2e pending のため次サイクルで回収。`git checkout main && git pull --ff-only` で clean 確認。

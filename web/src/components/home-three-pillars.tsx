@@ -97,7 +97,7 @@ function PillarFatalAccident({ fatal }: { fatal: AccidentCase | null }) {
               href={sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 hover:underline"
+              className="mt-2 inline-flex min-h-[44px] items-center gap-1 text-[11px] font-semibold text-rose-700 hover:underline"
             >
               <ExternalLink className="h-3 w-3" />
               {isEn ? "Open press source" : "出典・報道URLを開く"}
@@ -122,7 +122,7 @@ function PillarFatalAccident({ fatal }: { fatal: AccidentCase | null }) {
       </Link>
       <Link
         href="/accidents"
-        className="mt-1.5 inline-flex items-center justify-center text-[11px] font-semibold text-rose-700/80 hover:text-rose-800 hover:underline"
+        className="mt-1.5 inline-flex min-h-[44px] items-center justify-center text-[11px] font-semibold text-rose-700/80 hover:text-rose-800 hover:underline"
       >
         {isEn ? "10-year accident DB list →" : "10年事故DB一覧へ →"}
       </Link>
@@ -344,7 +344,7 @@ function AlertGenerator({
         type="button"
         onClick={handleGenerate}
         disabled={loading}
-        className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${accentClasses[accent]} disabled:cursor-not-allowed disabled:opacity-60`}
+        className={`inline-flex min-h-[44px] items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${accentClasses[accent]} disabled:cursor-not-allowed disabled:opacity-60`}
       >
         {loading ? (
           <Loader2 className="h-3 w-3 animate-spin" />
@@ -372,7 +372,7 @@ function AlertGenerator({
               type="button"
               onClick={handleGenerate}
               disabled={loading}
-              className="inline-flex items-center gap-1 rounded-full border border-rose-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-rose-800 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-rose-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-rose-800 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RefreshCw className="h-3 w-3" />
               {isEn ? "Retry" : "再試行"}
@@ -380,7 +380,7 @@ function AlertGenerator({
             {showContactCta && (
               <Link
                 href="/contact"
-                className="inline-flex items-center gap-1 rounded-full border border-rose-300 bg-rose-100 px-2.5 py-1 text-[11px] font-semibold text-rose-900 hover:bg-rose-200"
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-rose-300 bg-rose-100 px-2.5 py-1 text-[11px] font-semibold text-rose-900 hover:bg-rose-200"
               >
                 <LifeBuoy className="h-3 w-3" />
                 {isEn ? "Contact administrator" : "管理者に連絡（3回連続失敗）"}
