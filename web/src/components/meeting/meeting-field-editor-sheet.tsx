@@ -69,16 +69,43 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
   // キー自体から行idを取り出す。
   const workContentContractorId = parseContractorFieldKey(def.key)?.part === "workContent" ? parseContractorFieldKey(def.key)!.id : null;
 
+  // 開く直前にフォーカスがあった要素（タップしたセル）を記憶し、シートが閉じたら復帰。
+  // 「次の欄へ」でfieldKeyが変わってもシート自体は閉じないため、マウント/アンマウント時のみ実行。
+  // 下の初期フォーカス処理より先に宣言し、記憶がフォーカス移動より先に走るようにする。
+  useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    return () => {
+      previouslyFocused?.focus();
+    };
+  }, []);
+
   // 開いたら最初の入力へフォーカス（キーボード/音声にすぐ入れる）。
   useEffect(() => {
     const first = sheetRef.current?.querySelector<HTMLElement>("input, select, textarea");
     first?.focus();
   }, [fieldKey]);
 
-  // Escape で閉じる（KY版・「…」シートと同じ作法）
+  // Escape で閉じる（KY版・「…」シートと同じ作法）＋ Tabキーをシート内に閉じ込める（フォーカストラップ）
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const focusables = sheetRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusables || focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
