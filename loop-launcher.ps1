@@ -182,6 +182,57 @@ function Test-ShouldFirePlanner {
 }
 
 # ---------------------------------------------------------------------------
+# Isolate the weekly critic in a dedicated git worktree. The critic runs as -Lane site and does
+# git checkout/commit/push; the ops persistent runner works the SAME main tree, so running the
+# critic in-place races git (index.lock contention / branch clobber) - the same family the planner
+# guard closes. But the critic CANNOT be skipped-when-running like the planner: ops is nearly always
+# alive, so skipping would starve the weekly critique forever. Isolation is the only correct fix -
+# a separate worktree has its own index + HEAD, so its git activity never collides with the main
+# tree. These helpers are pure so -SelfTest can cover the worktree path offline (no git, no network).
+# ---------------------------------------------------------------------------
+function Get-CriticWorktreePath {
+  param([string]$RepoRoot, [string]$Stamp)
+  # A SIBLING of the repo, never inside it: a nested worktree would show up in the main tree's own
+  # git status and could be committed by accident. Deterministic per launch stamp for clean teardown.
+  $parent = Split-Path -Parent $RepoRoot
+  return (Join-Path $parent ("safe-ai-critic-wt-" + $Stamp))
+}
+function Get-WorktreeAddArgs {
+  param([string]$Path, [string]$Ref)
+  # Detached HEAD at the ref: the critic creates its own ops/critique-<date> branch inside the
+  # worktree, so there is no branch name to collide with whatever the main tree has checked out
+  # (git refuses to check out one branch in two worktrees).
+  return @("worktree", "add", "--detach", $Path, $Ref)
+}
+function Get-WorktreeRemoveArgs {
+  param([string]$Path)
+  return @("worktree", "remove", "--force", $Path)
+}
+function Test-WorktreeIsIsolated {
+  param([string]$RepoRoot, [string]$WorktreePath)
+  # Invariant: the worktree must live OUTSIDE the main tree, else its git ops re-enter the very
+  # tree we are isolating from. Compare normalized full paths, case-insensitive (Windows).
+  try {
+    $r = [System.IO.Path]::GetFullPath($RepoRoot).TrimEnd('\', '/')
+    $w = [System.IO.Path]::GetFullPath($WorktreePath).TrimEnd('\', '/')
+    if ($w.Length -eq 0 -or $r.Length -eq 0) { return $false }
+    if ($w -eq $r) { return $false }
+    $sep = [System.IO.Path]::DirectorySeparatorChar
+    return (-not $w.StartsWith($r + $sep, [System.StringComparison]::OrdinalIgnoreCase))
+  } catch { return $false }
+}
+# Thin git wrapper: runs `git -C <RepoRoot> <args>`, returns @{ ok; out }. Never throws so the
+# critic lifecycle can branch on outcome without try/catch at every call site.
+function Invoke-Git {
+  param([string]$RepoRoot, [string[]]$GitArgs)
+  try {
+    $all = @("-C", $RepoRoot) + $GitArgs
+    $out = & git @all 2>&1
+    return @{ ok = ($LASTEXITCODE -eq 0); out = ($out | Out-String).Trim() }
+  } catch { return @{ ok = $false; out = $_.Exception.Message } }
+}
+
+# ---------------------------------------------------------------------------
 # -SelfTest: offline verification of the shared status-lock helper (stale-orphan reclamation +
 # fresh-lock respect). Temp files only - no Claude, no real status file, no config, no network.
 # Exits 0 on PASS, 1 on FAIL. Runs before any config read so a broken config cannot block the test.
@@ -232,6 +283,21 @@ if ($SelfTest) {
     Assert-L "planner SKIPS when backlog not drained (open=3)" (-not (Test-ShouldFirePlanner -Open 3 -LaneRunning $false -HasPrompt $true))
     Assert-L "planner SKIPS when backlog missing (open=-1)" (-not (Test-ShouldFirePlanner -Open -1 -LaneRunning $false -HasPrompt $true))
     Assert-L "planner SKIPS when no planner prompt present" (-not (Test-ShouldFirePlanner -Open 1 -LaneRunning $false -HasPrompt $false))
+    # I) Critic worktree path is a SIBLING of the repo (outside it), stamp-scoped, and passes the
+    #    isolation invariant. A path inside the repo (or equal to it) must FAIL isolation so we never
+    #    run the critic in the very tree we are protecting.
+    $repoFixture = Join-Path $tmp "repo"
+    New-Item -ItemType Directory -Path $repoFixture -Force | Out-Null
+    $wt = Get-CriticWorktreePath -RepoRoot $repoFixture -Stamp "20260703-080000"
+    Assert-L "worktree path carries the launch stamp" ($wt -like "*safe-ai-critic-wt-20260703-080000")
+    Assert-L "worktree path is a sibling of the repo (not nested)" (Test-WorktreeIsIsolated -RepoRoot $repoFixture -WorktreePath $wt)
+    Assert-L "a nested worktree path FAILS isolation" (-not (Test-WorktreeIsIsolated -RepoRoot $repoFixture -WorktreePath (Join-Path $repoFixture "wt")))
+    Assert-L "the repo path itself FAILS isolation" (-not (Test-WorktreeIsIsolated -RepoRoot $repoFixture -WorktreePath $repoFixture))
+    # J) The git arg builders emit the exact isolating command (detached add, forced remove).
+    $addArgs = Get-WorktreeAddArgs -Path $wt -Ref "origin/main"
+    Assert-L "worktree add is detached at the given ref" (($addArgs -join " ") -eq ("worktree add --detach " + $wt + " origin/main"))
+    $rmArgs = Get-WorktreeRemoveArgs -Path $wt
+    Assert-L "worktree remove is forced" (($rmArgs -join " ") -eq ("worktree remove --force " + $wt))
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -792,10 +858,51 @@ $criticModel = if ([string]$cfg.criticModel -ne "") { [string]$cfg.criticModel }
 $criticPrompt = Join-Path $repoRoot "loop-prompt-critic.txt"
 
 if ($criticDue -and (Test-Path $criticPrompt)) {
-  Write-Launcher ("critic due (last=" + ([string]$state.lastCriticIso) + ", every=" + $criticEvery + "d). Firing critic one-shot in main repo.")
+  Write-Launcher ("critic due (last=" + ([string]$state.lastCriticIso) + ", every=" + $criticEvery + "d). Firing critic one-shot in an ISOLATED git worktree (main tree untouched).")
   $state.lastCriticIso = $now.ToString("o")
   Save-State
-  $criticOutcome = Invoke-OneShot -Kind "critic" -LaneName "site" -LaneRepo $repoRoot -Model $criticModel -PromptFile $criticPrompt -TimeoutMin 30
+  # Run the critic in a throwaway worktree so its checkout/commit/push never shares an index with
+  # the ops persistent runner in the main tree. The critic prompt is fed by absolute path from the
+  # main tree; the worktree is a full origin/main checkout, so it has its own loop-runner.ps1.
+  $wtPath = Get-CriticWorktreePath -RepoRoot $repoRoot -Stamp $launchStamp
+  $criticOutcome = $null
+  if (-not (Test-WorktreeIsIsolated -RepoRoot $repoRoot -WorktreePath $wtPath)) {
+    Write-Launcher ("WARN: computed critic worktree '" + $wtPath + "' is not isolated from the main tree; refusing to run critic in-place (would re-open the git race). Treating as failure.")
+    $criticOutcome = "worktree-unsafe"
+  } elseif ($WhatIf) {
+    # Honest dry-run: the worktree is NOT created in WhatIf, so we must NOT call Invoke-OneShot against
+    # $wtPath (its Test-Path runner guard would fire and mislead the log with "skipped, no runner").
+    # Report the exact plan instead - a real worktree checkout carries its own loop-runner.ps1.
+    Write-Launcher ("[WHATIF] would fetch origin/main, create a detached worktree at " + $wtPath + " (git " + ((Get-WorktreeAddArgs -Path $wtPath -Ref 'origin/main') -join ' ') + "), run the critic one-shot there (tag=site-critic, model=" + $criticModel + ", timeout=30min), then remove the worktree (git " + ((Get-WorktreeRemoveArgs -Path $wtPath) -join ' ') + ").")
+    $criticOutcome = "whatif"
+  } else {
+    # Fresh base: fetch origin/main so the critique runs against the deployed HEAD, not a stale local
+    # ref. Prune + remove any orphan worktree from a prior crashed pass before (re)creating.
+    $null = Invoke-Git -RepoRoot $repoRoot -GitArgs @("fetch", "origin", "main", "--quiet")
+    $null = Invoke-Git -RepoRoot $repoRoot -GitArgs @("worktree", "prune")
+    if (Test-Path -LiteralPath $wtPath) {
+      $null = Invoke-Git -RepoRoot $repoRoot -GitArgs (Get-WorktreeRemoveArgs -Path $wtPath)
+      if (Test-Path -LiteralPath $wtPath) { try { Remove-Item -LiteralPath $wtPath -Recurse -Force -ErrorAction SilentlyContinue } catch {} }
+    }
+    $add = Invoke-Git -RepoRoot $repoRoot -GitArgs (Get-WorktreeAddArgs -Path $wtPath -Ref "origin/main")
+    if (-not $add.ok) {
+      Write-Launcher ("WARN: git worktree add failed; critic NOT run this pass (better than racing the main tree). " + $add.out)
+      $criticOutcome = "worktree-setup-failed"
+    } else {
+      Write-Launcher ("critic worktree ready at " + $wtPath + " (detached @origin/main).")
+      try {
+        $criticOutcome = Invoke-OneShot -Kind "critic" -LaneName "site" -LaneRepo $wtPath -Model $criticModel -PromptFile $criticPrompt -TimeoutMin 30
+      } finally {
+        # Always tear the worktree down, even on timeout/kill. The critic's branch is already pushed,
+        # so removing the worktree does not lose its PR.
+        $rm = Invoke-Git -RepoRoot $repoRoot -GitArgs (Get-WorktreeRemoveArgs -Path $wtPath)
+        if (-not $rm.ok) { Write-Launcher ("WARN: git worktree remove reported: " + $rm.out) }
+        if (Test-Path -LiteralPath $wtPath) { try { Remove-Item -LiteralPath $wtPath -Recurse -Force -ErrorAction SilentlyContinue } catch {} }
+        $null = Invoke-Git -RepoRoot $repoRoot -GitArgs @("worktree", "prune")
+        Write-Launcher ("critic worktree removed (" + $wtPath + ").")
+      }
+    }
+  }
   if (-not $WhatIf -and $criticOutcome -ne "ok") {
     $retryStamp = Resolve-CriticStamp -Outcome $criticOutcome -Now $now -CriticEveryDays $criticEvery -RetryDays 1
     $state.lastCriticIso = $retryStamp.ToString("o")
