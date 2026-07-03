@@ -129,7 +129,7 @@ export default function FAQSearchPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoFocus
-          className="w-full rounded-xl border border-slate-300 py-3 pl-10 pr-4 text-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
+          className="min-h-[44px] w-full rounded-xl border border-slate-300 py-3 pl-10 pr-4 text-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-100"
         />
       </div>
 

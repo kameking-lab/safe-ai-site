@@ -10,6 +10,8 @@ export interface AccountConclusionInput {
   status: string;
   /** 表示済みの期間終了日ラベル（未確定なら null） */
   periodEndLabel: string | null;
+  /** プラン照会そのものが失敗し、planName/statusが既定値のままか（真の「フリープラン」と区別する） */
+  lookupFailed?: boolean;
 }
 
 export interface AccountConclusion {
@@ -22,7 +24,15 @@ export function computeAccountConclusion({
   planName,
   status,
   periodEndLabel,
+  lookupFailed,
 }: AccountConclusionInput): AccountConclusion {
+  if (lookupFailed) {
+    return {
+      tone: "neutral",
+      title: "プラン情報を確認できません",
+      description: "契約情報の読み込みに失敗しました。時間をおいて再度このページを開いてください。",
+    };
+  }
   if (status === "past_due") {
     return {
       tone: "danger",

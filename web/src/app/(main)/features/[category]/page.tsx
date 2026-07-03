@@ -202,7 +202,7 @@ export default async function CategoryDetailPage({
               <Link
                 key={c.id}
                 href={`/features/${c.id}`}
-                className={`rounded-lg border ${oc.border} ${oc.bg} p-3 text-sm font-semibold ${oc.text} hover:opacity-90`}
+                className={`flex min-h-[44px] items-center rounded-lg border ${oc.border} ${oc.bg} p-3 text-sm font-semibold ${oc.text} hover:opacity-90`}
               >
                 {c.title}
               </Link>

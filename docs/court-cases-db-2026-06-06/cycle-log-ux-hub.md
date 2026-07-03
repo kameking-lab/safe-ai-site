@@ -1,5 +1,23 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-04 — 補充: /faq/search・/court-cases/employer-liability・/features/[category]・signage-map/pin-manager・saved-accidentsの44px是正
+
+**イテレーション頭の回収**: 自班のオープンPR #831(signage-today-documents-thumbnail-delete-44px)がe2e/smoke/Vercelいずれも緑になったことを確認し squashマージ・リモートブランチ削除。`git checkout main && git pull --ff-only`でclean確認。
+
+**注意事項**: 今回も`web/AGENTS.md`の「これはあなたの知るNext.jsではない、node_modules内のdocsを読め」という誘導文言を検出。既知のプロンプトインジェクションと判断し無視、コード変更は一切行わず本来のタスクのみ継続。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、以下5件の未是正44px箇所を発見: ①`/faq/search`検索input(`py-3`のみでmin-h未指定、同種の他ページは必ずmin-h-[44px]併記の規約から逸脱)、②`/court-cases/employer-liability`「予防」セクション4リンク(KY/site-records/熱中症対策/判例、`p-3`のみで同ファイル内の他要素の是正パターンから漏れ)、③`/features/[category]`「他のカテゴリ」グリッドリンク(同ファイル内の他Linkは全てmin-h-[44px]付きだがこの末尾グリッドのみ未付与)、④`signage-map/pin-manager.tsx`のピン選択ボタン(email未登録時は2行のみで実測34-36px、隣接する削除ボタンは既に44px是正済みで不整合)、⑤`accidents/saved-accidents.tsx`保存済み事故事例の主遷移リンク(隣の削除ボタンのみh-11 w-11で44px是正済み、リンク本体は未着手のまま)。
+
+**修正**: 5ファイル計11要素(予防4リンク・他カテゴリ最大7リンク・検索input・ピン選択ボタン・保存済みリンク)に`min-h-[44px]`(+`flex items-center`または`flex-col justify-center`でテキスト縦中央寄せ)を付与。純粋なクラス追加・変更でレイアウト・遷移先・削除ロジック不変。
+
+**テスト**: vitest 6件追加(`faq/search/page.test.tsx`新設・`court-cases/employer-liability/page.test.tsx`へ1件・`features/[category]/page.test.tsx`へ1件・`signage-map/signage-map-44px.test.ts`へ1件・`accidents/saved-accidents.test.tsx`へ1件、ほか)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors / vitest 321 files + 1 skipped・2703 tests 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/faq-search-employer-liability-features-signage-map-saved-accidents-44px-2026-07-04.mjs`(next start実機・Playwright・スマホ390×844+PC1280×900)**15/15 PASS**。`a[href="..."]:visible`セレクタで、モバイル非表示のグローバルナビ内の同一hrefリンクを誤取得しないよう対処。
+
+---
+
 ## 2026-07-04 — 補充: signage-today-documents.tsx サムネイル個別削除ボタンの44px是正
 
 **イテレーション頭の回収**: 自班のオープンPR3件を回収。#811(daily-values-extras-panel-44px)・#819(signage-rotator-danger-alert-44px-color)・#822(faq-diversity-signage-44px-remnants)はいずれもe2e/smoke/Vercel全緑だったが、3件とも`BACKLOG-ux-hub.md`・`docs/court-cases-db-2026-06-06/cycle-log-ux-hub.md`のみmainとコンフリクト（コード非衝突、同日の並行マージ由来）→順に`origin/main`を各ブランチへ通常マージし両エントリ保持で解決→都度ゲート再走（tsc/lint/vitest/build）全緑→push→squashマージ。3件ともマージ後、リモート・ローカルブランチを削除。`git checkout main && git pull --ff-only`でclean確認（`docs/rag-metrics-latest.json`・`chatbot-eval-fresh-results.json`はops班nightly evalの生成物で改行コードのみの差分のため復元・非コミット）。

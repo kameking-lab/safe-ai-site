@@ -1,4 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   searchItems,
   countByCategory,
@@ -158,7 +161,7 @@ describe('buildSearchIndex — 用語集（glossary）の収載', () => {
     const index = await buildSearchIndex();
     const c = countByCategory(index, '安全');
     expect(c.all).toBe(
-      c.law + c.notice + c.chemical + c.equipment + c.education + c.accident + c.precedent + c.glossary + c.faq + c.sign + c.article + c.feature,
+      c.law + c.revision + c.notice + c.chemical + c.equipment + c.education + c.accident + c.precedent + c.glossary + c.faq + c.sign + c.article + c.feature,
     );
   });
 });
@@ -501,6 +504,43 @@ describe('buildSearchIndex — 法令条文（law）の収載', () => {
   });
 });
 
+describe('buildSearchIndex — 法改正（revision）の収載', () => {
+  it('正本 lawRevisionCores（placeholder除外）と ID 集合が一致する', async () => {
+    const { lawRevisionCores } = await import('@/data/mock/law-revisions');
+    const index = await buildSearchIndex();
+    const revisions = index.filter((i) => i.category === 'revision');
+    expect(revisions.length).toBeGreaterThan(0);
+    // 収載集合＝正本の（読込失敗 placeholder を除いた）ユニーク id 集合。
+    const canonical = new Set(
+      lawRevisionCores
+        .filter((r) => !r.id.startsWith('lr-fallback'))
+        .map((r) => r.id),
+    );
+    const indexIds = new Set(revisions.map((i) => i.id.replace(/^revision-/, '')));
+    expect(indexIds).toEqual(canonical);
+    // 読込失敗 placeholder（lr-fallback-*）は索引に載せない。
+    expect(revisions.some((i) => i.id.includes('lr-fallback'))).toBe(false);
+  });
+
+  it('個別詳細ページ未実装のため全件 /laws 一覧ハブへリンクする（幽霊URL 0）', async () => {
+    const index = await buildSearchIndex();
+    const revisions = index.filter((i) => i.category === 'revision');
+    expect(revisions.length).toBeGreaterThan(0);
+    // /laws は実在ハブ。glossary→/glossary・faq→/faq と同じく一覧へ寄せる。
+    expect(revisions.every((i) => i.url === '/laws')).toBe(true);
+    expect(revisions.every((i) => i.id.startsWith('revision-'))).toBe(true);
+  });
+
+  it('これまで 0 件だった法改正名クエリが revision カテゴリで発見できる', async () => {
+    const index = await buildSearchIndex();
+    // 実データのタイトルに literal で存在する語（石綿障害予防規則・クレーン等安全規則）。
+    expect(searchItems(index, '石綿', 'revision').length).toBeGreaterThan(0);
+    expect(searchItems(index, 'クレーン', 'revision').length).toBeGreaterThan(0);
+    // 発見先が /laws へ着地する（検索経由で法改正一覧へ到達できる）。
+    expect(searchItems(index, '石綿', 'revision').every((i) => i.url === '/laws')).toBe(true);
+  });
+});
+
 describe('buildSearchIndex — 事故事例（accident）の収載', () => {
   it('正本 getAccidentCasesDataset と件数・ID集合が一致する（5/7ファイルだけ手import の欠落是正）', async () => {
     const { getAccidentCasesDataset } = await import('@/data/mock/accident-cases');
@@ -596,8 +636,12 @@ describe('buildSearchIndex — Eラーニング（education）の全テーマ収
 
   it('education の ID 集合が panel の全テーマ源（allThemes）と一致する（1源だけ import の欠落是正）', async () => {
     const index = await buildSearchIndex();
+    // education カテゴリは e-learning テーマ（id=edu-*）と教育コース（id=education-course-*）の
+    // 2 源を持つため、テーマ源との一致は edu-* サブセットに限定して固定する（feature の page-* 同様）。
     const eduIds = new Set(
-      index.filter((i) => i.category === 'education').map((i) => i.id.replace(/^edu-/, '')),
+      index
+        .filter((i) => i.id.startsWith('edu-'))
+        .map((i) => i.id.replace(/^edu-/, '')),
     );
     expect(eduIds).toEqual(await expectedThemeIds());
     // 業種別カタログ（1源 import 時代は欠落）が確かに含まれる。
@@ -608,7 +652,8 @@ describe('buildSearchIndex — Eラーニング（education）の全テーマ収
 
   it('各結果は一覧トップではなく個別テーマ /e-learning?theme=<id>#el-quiz へ深リンクする', async () => {
     const index = await buildSearchIndex();
-    const edu = index.filter((i) => i.category === 'education');
+    // e-learning テーマ源（id=edu-*）に限定＝教育コース（education-course-*）と混同しない。
+    const edu = index.filter((i) => i.id.startsWith('edu-'));
     expect(edu.length).toBeGreaterThan(0);
     // 旧実装のバグ＝全件が裸の /e-learning へリンク、を回帰で固定。
     expect(edu.some((i) => i.url === '/e-learning')).toBe(false);
@@ -725,5 +770,55 @@ describe('T3: 法令名かな読みが該当法令の条文へ着地（本番イ
     expect(full[0]?.title).toBe('安衛則 第563条');
     // 2 語 AND（読みでない通常語）も不変
     expect(searchItems(index, '石綿 事前調査', 'all', 10).length).toBeGreaterThan(0);
+  });
+});
+
+describe('buildSearchIndex — 教育コース（education）の /education/<slug> 収載', () => {
+  // src/lib/search-index.test.ts → src/app へ登り、教育ページの実在（幽霊URL 0）を突合する。
+  const LIB_DIR = dirname(fileURLToPath(import.meta.url));
+  const educationPageExists = (slug: string): boolean =>
+    existsSync(join(LIB_DIR, '..', 'app', '(main)', 'education', slug, 'page.tsx'));
+
+  it('EDUCATION_CONTEXTS の全コースが education カテゴリで /education/<slug> へ収載される（収載集合＝正本）', async () => {
+    const [index, { EDUCATION_CONTEXTS }] = await Promise.all([
+      buildSearchIndex(),
+      import('@/data/education-context'),
+    ]);
+    const courseItems = index.filter((i) => i.id.startsWith('education-course-'));
+    const slugs = Object.keys(EDUCATION_CONTEXTS);
+    // 収載集合＝正本の全コース（欠落 0・水増し 0）
+    expect(courseItems.length).toBe(slugs.length);
+    expect(courseItems.length).toBeGreaterThanOrEqual(12);
+    expect(courseItems.every((i) => i.category === 'education')).toBe(true);
+    // url は正本 slug と 1:1 一致（/education/<slug>・クエリ/ハッシュ無しのベースパス）
+    const validUrls = new Set(slugs.map((s) => `/education/${s}`));
+    expect(courseItems.every((i) => validUrls.has(i.url))).toBe(true);
+    // title は正本 title（各ページ TITLE と同値）を保つ＝ドリフト 0
+    const titleBySlug = new Map(
+      Object.values(EDUCATION_CONTEXTS).map((c) => [`/education/${c.slug}`, c.title]),
+    );
+    expect(courseItems.every((i) => i.title === titleBySlug.get(i.url))).toBe(true);
+    expect(courseItems.every((i) => i.subtitle.length > 0)).toBe(true);
+  });
+
+  it('全 url が実在の教育ページ（page.tsx）へ解決する＝幽霊URL 0', async () => {
+    const [index] = await Promise.all([buildSearchIndex()]);
+    const courseItems = index.filter((i) => i.id.startsWith('education-course-'));
+    const missing = courseItems
+      .map((i) => i.url.replace(/^\/education\//, ''))
+      .filter((slug) => !educationPageExists(slug));
+    expect(missing, `実在ページへ解決しない教育コースURL: ${missing.join(', ')}`).toEqual([]);
+  });
+
+  it('現場語彙クエリで目的の教育コースへ着地する（フルハーネス/足場/職長/腰痛/酸欠）', async () => {
+    const index = await buildSearchIndex();
+    const lands = (q: string, url: string) =>
+      searchItems(index, q, 'education').some((i) => i.url === url);
+    // タイトル語＋講習種別ラベルの 2 語 AND、および法令/事故マッチの現場語彙で着地する
+    expect(lands('フルハーネス 特別教育', '/education/tokubetsu/fullharness')).toBe(true);
+    expect(lands('足場 特別教育', '/education/tokubetsu/ashiba')).toBe(true);
+    expect(lands('職長', '/education/hoteikyoiku/shokucho')).toBe(true);
+    expect(lands('腰痛 予防', '/education/roudoueisei/youtsu-yobou')).toBe(true);
+    expect(lands('酸欠 特別教育', '/education/tokubetsu/sankesu')).toBe(true);
   });
 });

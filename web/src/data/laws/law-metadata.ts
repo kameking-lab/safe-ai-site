@@ -129,9 +129,9 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   最賃法: {
     fullName: "最低賃金法",
     promulgation: "昭和34年法律第137号",
-    latestRevision: "令和6年改正",
+    latestRevision: "令和4年改正（刑法整備法・2025-06-01施行）",
     eGovUrl: "https://laws.e-gov.go.jp/law/334AC0000000137",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   労契法: {
     fullName: "労働契約法",
@@ -166,7 +166,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和44年法律第64号",
     latestRevision: "令和4年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/344AC0000000064",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   ゴンドラ則: {
     fullName: "ゴンドラ安全規則",
