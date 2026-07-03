@@ -129,9 +129,9 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   最賃法: {
     fullName: "最低賃金法",
     promulgation: "昭和34年法律第137号",
-    latestRevision: "令和6年改正",
+    latestRevision: "令和4年改正（刑法整備法・2025-06-01施行）",
     eGovUrl: "https://laws.e-gov.go.jp/law/334AC0000000137",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   労契法: {
     fullName: "労働契約法",
@@ -166,7 +166,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和44年法律第64号",
     latestRevision: "令和4年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/344AC0000000064",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   ゴンドラ則: {
     fullName: "ゴンドラ安全規則",
@@ -194,14 +194,14 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和24年法律第100号",
     latestRevision: "令和6年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/324AC0000000100",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   女性則: {
     fullName: "女性労働基準規則",
     promulgation: "昭和61年労働省令第3号",
-    latestRevision: "令和4年改正",
+    latestRevision: "令和元年厚生労働省令第1号（元号表記の整理・2019-05-07施行）",
     eGovUrl: "https://laws.e-gov.go.jp/law/361M50002000003",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   年少者則: {
     fullName: "年少者労働基準規則",
@@ -213,9 +213,9 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   パート有期法: {
     fullName: "短時間労働者及び有期雇用労働者の雇用管理の改善等に関する法律",
     promulgation: "平成5年法律第76号",
-    latestRevision: "令和2年改正",
+    latestRevision: "令和元年改正（働き方改革・2020-06-01施行）",
     eGovUrl: "https://laws.e-gov.go.jp/law/405AC0000000076",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   メンタル指針: {
     fullName: "労働者の心の健康の保持増進のための指針",

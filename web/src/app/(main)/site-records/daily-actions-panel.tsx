@@ -150,7 +150,7 @@ export function DailyActionsPanel() {
               <li key={a.id}>
                 <Link
                   href={a.href}
-                  className="inline-block rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600 transition hover:border-slate-300 hover:bg-white"
+                  className="inline-flex min-h-[44px] items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600 transition hover:border-slate-300 hover:bg-white"
                 >
                   {a.title}
                 </Link>
@@ -159,7 +159,7 @@ export function DailyActionsPanel() {
             <li>
               <Link
                 href="/site-records/calendar"
-                className="inline-block rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 transition hover:bg-white"
+                className="inline-flex min-h-[44px] items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700 transition hover:bg-white"
               >
                 カレンダーで全予定 →
               </Link>

@@ -62,6 +62,16 @@
   (success OR incomplete) terminates the day immediately regardless. Bounds worst-case wasted prod Gemini
   budget on a persistently-broken day at MaxEvalAttempts x 23 questions.
 
+.PARAMETER RetryCooldownMinutes
+  Minimum real-time gap between the bounded no-report retries (default 40). MaxEvalAttempts bounds the COST
+  of retries; without this floor it does NOT bound their CLUSTERING: the ops loop pokes this script every
+  ~195s, so 3 retries fire within ~10 minutes and any prod deploy/outage lasting longer than that cluster
+  burns the whole day's measurement even though prod is healthy the other ~21 hours - the same silent data
+  loss the retry budget was added to kill. This cooldown decouples retry timing from the ops-tick cadence
+  so the MaxEvalAttempts retries SPREAD across the day (attempts at ~T, ~T+cooldown, ~T+2*cooldown), letting
+  a transient outage recover before the budget is spent. Bounded COST is unchanged (still <= MaxEvalAttempts
+  x 23Q/day). Set 0 to disable (retry on the very next tick, the pre-cooldown behaviour).
+
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-eval-nightly.ps1
 
@@ -75,6 +85,7 @@ param(
   [string]$OutDir = "",
   [string]$RepoPath = "",
   [int]$MaxEvalAttempts = 3,
+  [int]$RetryCooldownMinutes = 40,
   [switch]$WhatIf,
   [switch]$SelfTest
 )
@@ -104,8 +115,16 @@ function Get-NightlyDailyPath {
 # Legacy failure records (pre-retry, no 'attempts' field) count as 0 attempts => retryable, recovering a
 # day the old logic wrongly burned. An unreadable or unknown-shape marker (no 'ok' field) is treated as
 # terminal - conservative: never re-hammer prod off a corrupt file.
+#
+# Retry COOLDOWN (returns $true while a non-terminal failure is still cooling down): MaxAttempts bounds the
+# retry COST but not its CLUSTERING - the ops loop pokes this script every ~195s, so without a real-time
+# floor the bounded retries fire within ~10 min and a prod deploy/outage longer than that burns the whole
+# day (prod healthy the other ~21h). When a caller supplies $Now (and $RetryCooldownMinutes > 0) and the
+# record's ranAt parses, a non-terminal failure younger than the cooldown is reported as "not runnable this
+# tick" so the retries SPREAD across the day (~T, ~T+cooldown, ...). Callers/tests that pass no clock, a
+# zero cooldown, or a record with an unparseable ranAt fall through to retry-now (backward compatible).
 function Test-AlreadyRanTonight {
-  param([string]$Dir, [string]$Stamp, [int]$MaxAttempts = 3)
+  param([string]$Dir, [string]$Stamp, [int]$MaxAttempts = 3, [datetime]$Now = ([datetime]::MinValue), [int]$RetryCooldownMinutes = 40)
   $path = Get-NightlyDailyPath -Dir $Dir -Stamp $Stamp
   if (-not (Test-Path -LiteralPath $path)) { return $false }
   $rec = $null
@@ -115,7 +134,14 @@ function Test-AlreadyRanTonight {
   if ($rec.ok) { return $true }                                          # measured: day done
   $attempts = 0
   if ($null -ne $rec.attempts) { $attempts = [int]$rec.attempts }
-  return ($attempts -ge $MaxAttempts)                                    # failure: done only once exhausted
+  if ($attempts -ge $MaxAttempts) { return $true }                       # failure: exhausted => terminal
+  # Retries remain. Hold this tick only while the last attempt is still inside the cooldown window.
+  if ($Now -ne [datetime]::MinValue -and $RetryCooldownMinutes -gt 0 -and $null -ne $rec.ranAt) {
+    $last = $null
+    try { $last = [datetime]::Parse([string]$rec.ranAt, [System.Globalization.CultureInfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::RoundtripKind) } catch { $last = $null }
+    if ($null -ne $last -and ($Now - $last).TotalMinutes -lt $RetryCooldownMinutes) { return $true }
+  }
+  return $false                                                          # retry now
 }
 
 # Regression classification. Kept separate so O18(b)'s dashboard banner reuses the SAME predicate the
@@ -290,7 +316,24 @@ function Format-StatusString {
 # stamped with (Test-EvalBelowTarget) drives this, so the dashboard and the record can never disagree.
 function Get-EvalBannerLines {
   param([hashtable]$Strings, [object]$Record)
-  if ($null -eq $Record -or -not $Record.ok) { return @() }
+  if ($null -eq $Record) { return @() }
+  # A no-report failure (the eval could not produce a usable report at all). While retries remain
+  # (non-terminal) stay quiet: a single blip must not flap the banner, the next ops tick retries. But once
+  # the day's retries are EXHAUSTED (terminal), the night is unmeasured with NO recovery today - surface a
+  # distinct availability notice so the owner's ONE watch file never silently goes dark on a total outage
+  # (the exact silent loss this lane exists to kill, at its outermost layer: the measure failing entirely,
+  # not just degrading). NOT a quality alarm - nothing was measured, so strictAccuracy is absent here.
+  if (-not $Record.ok) {
+    if ($Record.terminal) {
+      $vals = @{ DATE = [string]$Record.date; ATTEMPTS = [string]$Record.attempts; MAXATTEMPTS = [string]$Record.maxAttempts; EXIT = [string]$Record.exitCode }
+      return @(
+        (Format-StatusString -Strings $Strings -Key "evalFailedHeader" -Vals $vals),
+        "",
+        (Format-StatusString -Strings $Strings -Key "evalFailedBody1" -Vals $vals)
+      )
+    }
+    return @()
+  }
   # A genuine below-target measurement (complete run, strictAccuracy < target): the loud quality-regression
   # warning. Takes precedence - a complete run is never incomplete, so the two branches never both fire.
   if ($Record.belowTarget) {
@@ -434,6 +477,26 @@ if ($SelfTest) {
     $fail3 = ConvertTo-Json -Depth 5 -InputObject (New-FailureRecord -Stamp $stamp -RanAtIso "t" -ExitCode 1 -ErrorText "x" -Attempts 3 -MaxAttempts 3)
     Write-JsonNoBom -Path $daily -Text $fail3
     Assert-E "failure attempt 3/3: TERMINAL (retries exhausted, day burned)" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3)
+
+    # B3) Retry COOLDOWN: a non-terminal failure holds the tick while its last attempt is younger than the
+    # cooldown, then becomes runnable again once the cooldown elapses. Bounds retry CLUSTERING so a prod
+    # outage longer than the ~10 min it takes to poke this script MaxAttempts times does not burn the day.
+    $ranIso = "2026-07-04T02:34:00+09:00"
+    $ranAt = [datetime]::Parse($ranIso, [System.Globalization.CultureInfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::RoundtripKind)
+    $failCd = ConvertTo-Json -Depth 5 -InputObject (New-FailureRecord -Stamp $stamp -RanAtIso $ranIso -ExitCode 1 -ErrorText "x" -Attempts 1 -MaxAttempts 3)
+    Write-JsonNoBom -Path $daily -Text $failCd
+    Assert-E "cooldown: non-terminal failure 5 min old (<40) HOLDS the tick (do not re-hammer)" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3 -Now $ranAt.AddMinutes(5) -RetryCooldownMinutes 40)
+    Assert-E "cooldown: non-terminal failure 50 min old (>40) is RUNNABLE again (retry now)" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3 -Now $ranAt.AddMinutes(50) -RetryCooldownMinutes 40))
+    Assert-E "cooldown: no clock supplied => cooldown OFF => runnable (backward compatible)" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3))
+    Assert-E "cooldown: RetryCooldownMinutes 0 => cooldown OFF even inside the window => runnable" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3 -Now $ranAt.AddMinutes(5) -RetryCooldownMinutes 0))
+    # Exhausted attempts are terminal REGARDLESS of the cooldown clock (the day is genuinely spent).
+    $fail3Cd = ConvertTo-Json -Depth 5 -InputObject (New-FailureRecord -Stamp $stamp -RanAtIso $ranIso -ExitCode 1 -ErrorText "x" -Attempts 3 -MaxAttempts 3)
+    Write-JsonNoBom -Path $daily -Text $fail3Cd
+    Assert-E "cooldown: exhausted (3/3) stays TERMINAL even with a fresh clock (cooldown never revives it)" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3 -Now $ranAt.AddMinutes(5) -RetryCooldownMinutes 40)
+    # An unparseable ranAt with a clock supplied falls through to retry-now (fail-open, never a stuck day).
+    $failBadTime = ConvertTo-Json -Depth 5 -InputObject (New-FailureRecord -Stamp $stamp -RanAtIso "not-a-date" -ExitCode 1 -ErrorText "x" -Attempts 1 -MaxAttempts 3)
+    Write-JsonNoBom -Path $daily -Text $failBadTime
+    Assert-E "cooldown: unparseable ranAt + clock => fall through to RUNNABLE (fail-open, no stuck day)" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3 -Now $ranAt.AddMinutes(5) -RetryCooldownMinutes 40))
   } finally {
     Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
   }
@@ -530,6 +593,8 @@ if ($SelfTest) {
     evalBelowHeader = "## WARN: gen-quality below target (strictAccuracy {PCT}% < target {TARGET}%)"
     evalBelowBody1  = "{DATE} eval: {CORRECT}/{SCORABLE}={PCT}% below target {TARGET}%."
     evalBelowBody2  = "Check recent RAG/prompt/corpus changes."
+    evalFailedHeader = "## NOTICE: gen-quality eval could not run today ({ATTEMPTS}/{MAXATTEMPTS} retries exhausted, unmeasured)"
+    evalFailedBody1  = "{DATE}: {ATTEMPTS} attempts produced no parseable report (exit {EXIT}); day unmeasured, prior number kept."
     reportHeader    = "## SELF-REPORT HEADER"
   }
   # H1) Strings round-trip from a temp file (comment + KEY=VALUE lines).
@@ -549,7 +614,20 @@ if ($SelfTest) {
   Assert-E "H2: body carries correct/scorable" ($bLines[2] -match "15/21")
   Assert-E "H2: at/above-target record -> NO banner (empty)" ((Get-EvalBannerLines -Strings $S -Record $rec).Count -eq 0)
   $failRec = New-FailureRecord -Stamp "2026-07-04" -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 1 -ErrorText "x"
-  Assert-E "H2: failure record (ok=false) -> NO banner" ((Get-EvalBannerLines -Strings $S -Record $failRec).Count -eq 0)
+  Assert-E "H2: a still-retryable (non-terminal) failure record stays quiet -> NO banner" ((Get-EvalBannerLines -Strings $S -Record $failRec).Count -eq 0)
+
+  # H2b) A TERMINAL no-report failure (retries exhausted, the day is unmeasured with NO recovery today) must
+  # NOT go silently dark: it raises a DISTINCT availability notice on the owner's watch file - never the
+  # quality-regression alarm (nothing was measured). A non-terminal failure stays quiet (asserted above) so
+  # a single blip never flaps the banner. This closes the outermost silent-loss hole: below-target and
+  # incomplete were surfaced, but a total no-report failure that spent the day's budget surfaced nothing.
+  $failTerminal = New-FailureRecord -Stamp "2026-07-04" -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 7 -ErrorText "x" -Attempts 3 -MaxAttempts 3
+  $tLines = Get-EvalBannerLines -Strings $S -Record $failTerminal
+  Assert-E "H2b: terminal failure -> 3 banner lines (notice, blank, body)" ($tLines.Count -eq 3)
+  Assert-E "H2b: notice header is an availability notice, NOT a quality-regression header" (($tLines[0] -match "could not run") -and ($tLines[0] -notmatch "below target"))
+  Assert-E "H2b: notice header carries attempts/max (3/3)" ($tLines[0] -match "3/3")
+  Assert-E "H2b: notice body carries the date and harness exit code" (($tLines[2] -match "2026-07-04") -and ($tLines[2] -match "exit 7"))
+  Assert-E "H2b: an at/above-target measured record is unaffected -> still NO banner" ((Get-EvalBannerLines -Strings $S -Record $rec).Count -eq 0)
 
   # H3) Region reconciler on a fixture that mirrors the live reporter-only status file.
   $doc = @(
@@ -675,7 +753,7 @@ function Update-EvalStatusBanner {
     return
   }
   $desired = @(Get-EvalBannerLines -Strings $Strings -Record $Record)
-  $action = if ($desired.Count -gt 0) { "RAISE below-target warning" } else { "CLEAR (quality at/above target)" }
+  $action = if ($desired.Count -gt 0) { "RAISE eval-quality banner (below-target / incomplete / could-not-run)" } else { "CLEAR eval-quality banner (measured at/above target)" }
   if ($Preview) {
     try {
       $lines = @(Get-Content -Encoding UTF8 -Path $statusPath)
@@ -711,8 +789,10 @@ $historyPath = Join-Path $genDir "history.jsonl"
 Write-Log ("=== loop-eval-nightly start (date=" + $stamp + ", base=" + $BaseUrl + ", target=" + $Target + ") ===")
 
 # Budget guard: if today's marker already exists, this is a later ops iteration of the same day - no-op.
-if (Test-AlreadyRanTonight -Dir $genDir -Stamp $stamp -MaxAttempts $MaxEvalAttempts) {
-  Write-Log ("day already terminal for " + $stamp + " (measured, or no-report retries exhausted); skipping (idempotent - caps prod Gemini at 23Q/night). Daily record: " + $dailyPath)
+# Now-aware so a non-terminal no-report failure still inside its retry cooldown holds THIS tick (the retry
+# fires a later tick, once the cooldown elapses) instead of re-hammering prod at the ~195s ops cadence.
+if (Test-AlreadyRanTonight -Dir $genDir -Stamp $stamp -MaxAttempts $MaxEvalAttempts -Now $now -RetryCooldownMinutes $RetryCooldownMinutes) {
+  Write-Log ("day not runnable this tick for " + $stamp + " (measured, no-report retries exhausted, or a prior no-report failure still within its " + $RetryCooldownMinutes + "-min retry cooldown); skipping (idempotent - caps prod Gemini at 23Q/night). Daily record: " + $dailyPath)
   exit 0
 }
 
@@ -805,6 +885,11 @@ if ($null -eq $report) {
   }
   Write-Log (($evalOut).ToString().Trim() | Out-String).Trim()
   try { Remove-Item -LiteralPath $tmpReport -Force -ErrorAction SilentlyContinue } catch {}
+  # Surface a TERMINAL no-report failure on the owner's watch file: the day is unmeasured with no retry
+  # left, so raise a distinct availability notice (self-clears the next day a measurement lands). A
+  # NON-terminal failure leaves the banner untouched - it retries this same day and must not flap a banner
+  # on a single transient blip. Non-fatal: a surfacing hiccup must never fail the marker already written.
+  if ($rec.terminal) { Update-EvalStatusBanner -Record $rec }
   exit 0
 }
 

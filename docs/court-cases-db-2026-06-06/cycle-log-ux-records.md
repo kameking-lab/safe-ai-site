@@ -586,6 +586,21 @@ Exploreエージェントで未監査route(safety-diary個別ページ5種・sit
 
 残: O15/S2/S3は引き続きdataレーンO14依存でブロック。S1は残り既定切替（β外し・O10第五弾と同様に機能パリティ確立が前提）のみ。PR #778（前回収・44px是正9箇所）はCI待ちで次回収。
 
+## 2026-07-04 柱0磨き 巡回発見・続き⑧＝タグチップ削除×・今月の予定チップ・warning色場当たり流用の是正
+
+契約ステップ1: PR #814（前回収・ky/safety-diary list保存ゼロ誤表示是正）はCIが`e2e`/`smoke`とも`pending`のまま（squashマージ可能な緑未マージPRなし）と確認。`main`はclean・fast-forward済み。
+
+着手: BACKLOG-ux-records.md最上位の未着手3件(O15/S2/S3)はいずれもdataレーンO14が未着手のまま(`BACKLOG-data.md`で`[ ]`)で全ブロック中と確認。補充の指針どおりExploreエージェントで自領域の柱0巡回を実施。
+
+発見: 過去の巡回（下部操作バー・行内リストボタン・トグル・通知バー閉じるボタン中心）が対象外だった3系統で5箇所を発見。(1) `meeting-tag-field.tsx`（各社マトリクスの必要資格/予想災害タグ選択、canvas UI内の子コンポーネント）のタグ削除×ボタンが44px未満＝呼び出し元`meeting-field-editor-sheet.tsx`は他の全ボタンが44px済みで巡回済みだったが、埋め込まれた子コンポーネントだけ取り残されていた。(2) `daily-actions-panel.tsx`（/site-records トップの「今日やること」パネル）の「今月の予定」チップ・「カレンダーで全予定→」リンクが44px未満＝同パネル内の「残りN件を表示」ボタンは既に44px済みで非対称。(3) `distributed-input-bar.tsx`の初見ガイド閉じる×・「分散入力の使い方」トグルが44px未満。副次で色文法違反2件: `health-checkup/scheduler-form.tsx`の必須マーカー「*」が`SAFETY_TONE`のdangerトークンを経由せず`text-red-600`直書き、`/health-checkup-scheduler`ページの「関連ツール」案内（状態を持たない中立の案内文なのに warning色=amberを場当たり流用、他ページのslate中立色パターンと非対称）。
+
+実装: (1)は`meeting-field-editor-sheet.tsx`の閉じるボタンと同じ確立済みの`min-h-[44px] min-w-[44px]`型で是正。(2)(3)は`min-h-[44px]`を足すだけ。色文法2件は`SAFETY_TONE.danger.text`（rose系）・他ページと同型の`border-slate-200 bg-slate-50 text-slate-700`へ統一（構造・判定ロジックは無変更）。
+
+ゲート: tsc=0・lint errors=0（既存warn23件のみ、当班分の増減なし）・vitest 2639 pass（既存回帰のみ）・build成功（site-records・health-checkup-scheduler全route静的生成`○`維持）。
+
+無読Playwright: 新規`docs/third-party-reviews/scripts/meeting-tag-daily-actions-color-44px-2026-07-04.mjs`9/9合格（/safety-diary?canvas=1でタグ追加→削除×ボタンの実測44x44px、/site-recordsにパトロール記録1件seedしてFirstVisitGuideを回避した上で「今月の予定」チップ・全予定リンクの実測44px、/health-checkup-schedulerの必須マーカーclass=rose系・「関連ツール」class=slate系を確認）。`distributed-input-bar.tsx`の2ボタンはこのdev環境がSupabase未設定で`isMeetingCloudEnabled()===false`のため実機描画不可（既知の制約、コードレビューで44pxクラス付与を確認済み）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。PR #814はCI待ちで次回収。
 ## 2026-07-04 /ky/list・/safety-diary/list のクラウド確認中に「保存ゼロ」を誤表示する柱0違反を是正
 
 契約ステップ1: 自レーンのPR #807（前回収・cert-finder-color-grammar）のCIがpending中と確認し先送りしたところ、自領域巡回タスク選定中にCIが緑（e2e/smoke/Vercelとも SUCCESS）に転じたため squashマージ→`git checkout main && git pull --ff-only`でclean確認。
@@ -615,5 +630,65 @@ Exploreエージェントで未監査route(safety-diary個別ページ5種・sit
 検証: `/foreign-workers`系2件は無読Playwright新規`docs/third-party-reviews/scripts/foreign-workers-preset-picker-44px-color-2026-07-04.mjs`4/4合格（実機で44px実測）。`distributed-input-bar.tsx`はこのdev環境がSupabase未設定で`isMeetingCloudEnabled()===false`のため実機Playwrightで到達不可（既知の制約、#799等と同型）＝`distributed-input-bar.test.tsx`新規vitest+RTL 4件で色出し分け・44pxクラスを検証。`ky-industry-preset-picker.tsx`は未使用コンポーネントのためコードレビューで確認（実害なし、色文法の一貫性のみ）。
 
 ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2653 pass（新規4件）・build成功。working tree clean（PR #827の未マージPRあり、次回収で回収）。
+
+## 2026-07-04 柱0磨き 巡回発見・続き⑨＝/accountでDB照会失敗を「フリープラン」と誤断定する柱0違反を是正
+
+契約ステップ1: 自レーンのPR #821（前回収・タグチップ/今月の予定チップ44px＋色文法）はCIが緑（e2e/smoke/Vercelとも SUCCESS）と確認しsquashマージを試みたところ、`main`から#814マージ後に発生した進捗との間でマージコンフリクトを検知（`gh pr merge`が「merge commit cannot be cleanly created」）。契約どおり`gh pr checkout 821 && git fetch origin main && git merge origin/main`で通常マージし解消（衝突は`docs/court-cases-db-2026-06-06/cycle-log-ux-records.md`の1箇所のみ、双方の巡回ログ本文をどちらも保持する形で解決）。ゲート再検証（tsc=0・lint errors=0・vitest 2677 pass・build成功）後にpush・squashマージ・`git checkout main && git pull --ff-only`でclean確認。
+
+着手: BACKLOG-ux-records.md最上位の未着手3件(O15/S2/S3)はいずれもdataレーンO14が本回収時点でも`BACKLOG-data.md`で`[ ]`未着手のままで全ブロック中と確認。補充の指針どおりExploreエージェントで自領域の柱0/柱3巡回を実施（過去の巡回で対象外だった44px以外の切り口＝「結論カードの状態表示ロジックそのものの誤り」を重点的に探索するよう指示）。
+
+発見: `/account`（マイページ）の`page.tsx`で、`prisma.subscription.findUnique`が例外を投げた場合（`catch`で`console.error`のみ）、`planName`/`status`が宣言時デフォルト`"free"`/`"active"`のまま`computeAccountConclusion`に渡り、DB照会が失敗しても「フリープランです」というtone=info・確定的な結論カードを表示していた。有料課金中のユーザーの照会がたまたま失敗した場合でも「フリープランです」という誤った断定を無読3秒で読ませてしまう柱0違反（誤って重複契約や不要な問い合わせに誘導するおそれ）。同型の欠落がSDS検索履歴取得（`prisma.sdsSearch.findMany`）にもあり、失敗時に「まだ履歴がありません」という真の空状態と同じ文言を出していた。
+
+実装: `account-conclusion.ts`の`computeAccountConclusion`に`lookupFailed`引数を追加し、他のどの状態（支払い遅延・未払い・解約済み・フリー・利用中）よりも優先してtone=neutral「プラン情報を確認できません」を返す分岐を先頭に追加（既存の優先順位ロジックは変更せず先頭に1分岐を足すのみ）。`page.tsx`に`subscriptionLookupFailed`/`sdsHistoryFailed`のフラグを追加しconclusion計算・SDS履歴表示へ配線、失敗時は「アップグレード」の誤ったCTAも抑止し、SDS履歴セクションは失敗時専用の案内文へ差し替え。判定ロジック・DBスキーマ・Stripe連携・課金導線は無変更（足すだけ）。
+
+検証: このdev環境は`AUTH_SECRET`未設定でセッションが確立できず`/account`は常に`/api/auth/signin`へリダイレクトされるため、DB照会失敗分岐そのものを実機描画できない（既知の制約、#未のcontribute柱0補充タスクと同型）。`account-conclusion.test.ts`に`lookupFailed`分岐の新規vitestユニットテスト2件（tone/title確認＋他状態より優先されることの固定）を追加。Playwright新規`docs/third-party-reviews/scripts/account-lookup-failure-conclusion-2026-07-04.mjs`2/2合格（未ログイン時に500化せずサインイン導線へ正しく遷移する非退行確認）。
+
+ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2683 pass（新規2件）・build成功（`/account`ルートビルド維持）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。
+
+## 2026-07-04 柱0磨き 巡回発見・続き⑫＝site-records 8画面の保存フィードバック色文法の系統的崩れを是正
+
+契約ステップ1: 自レーンの未マージPR #844（`ux-rec/workers-loading-state-44px-2026-07-04`）はCI（e2e/smoke）が実行中でまだ緑化しておらず、契約どおりマージを見送り次回収へ回収を持ち越し。
+
+着手: BACKLOG-ux-records.md最上位の未着手3件(O15/S2/S3)はいずれもdataレーンO14が本回収時点でも`BACKLOG-data.md`で`[ ]`未着手のままで全ブロック中と確認。補充の指針どおりExploreエージェントで自領域の柱0/柱3巡回を実施（過去に何十回も巡回済みの44px・既存の色文法パターンとは別の切り口＝a11y・結果表示ページ・破壊的操作の確認漏れ等を重点的に探索するよう指示）。
+
+発見: site-records 8画面（induction/qualifications/patrol/incident-report/procedure/inspection/committee/near-miss）の保存フィードバック`savedNote`stateが、入力エラー文言と保存成功文言を同一stateで使い回しながら描画側は画面ごとの固定色クラスになっており、safety-tone.tsの「赤=危険・停止／緑=安全・OK・完了」の文法（不可侵の柱0-0）が画面によっては完全に反転していた: induction/qualificationsは`text-emerald-700`固定＝氏名未入力エラーまで緑で表示、patrol/incident-reportは逆に`text-rose-700`固定＝保存成功まで赤で表示、near-missは`text-amber-700`固定で両方同色のため判別不能、procedure/inspection/committeeは`text-blue-700`/`text-indigo-700`というSAFETY_TONE非経由の生色を直書き。#792(records-backup.tsx)・#814(distributed-input-bar.tsx)と同型の違反が、当班所有routeで最も操作頻度の高い日次記録フォーム群（受入教育・資格台帳・パトロール・労災報告・手順書・点検・委員会・ヒヤリハット）に系統的に残存していたと判明。
+
+実装: `records-backup.tsx`で確立済みのパターン（`SAFETY_TONE`をimport、`savedTone`state(danger/safe)をエラー/成功の分岐ごとに設定、描画を`role="status"`＋`SAFETY_TONE[savedTone].text`に統一）を6ファイル（induction/qualifications/patrol/incident-report/procedure/near-miss）に適用。inspection/committeeはエラー分岐が存在せず常に成功メッセージのみのため、savedTone stateを追加せず`SAFETY_TONE.safe.text`への直接置換のみで対応（不要な状態は増やさない）。保存・CSV出力・削除等の判定ロジックは無変更（足すだけ）。
+
+検証: 無読Playwright新規`docs/third-party-reviews/scripts/site-records-save-feedback-color-grammar-2026-07-04.mjs`39/39合格（8画面それぞれでバリデーションエラーを発火させ`role="status"`要素がrose系クラスであること、続けて正しく保存し emerald系クラスに切り替わること、旧固定色クラスに戻っていないことを実機で確認。ConclusionCardも`role="status"`を持つため`span[role="status"]`セレクタで区別）。
+
+ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2711 pass（既存回帰のみ）・build成功（対象8route全て静的生成`○`維持）。working tree clean（PR #844は未マージのまま次回収で回収）。
+
+## 2026-07-04 /ky/workersのクラウド確認中「登録なし」誤表示＋44px欠落14箇所を是正
+
+契約ステップ1: 自レーンのPR #821（タグチップ削除×等）・PR #834（/account DB照会失敗）ともCI緑と確認しsquashマージ。main側の進捗（PR #829等）との間で2回マージコンフリクト（BACKLOG-ux-records.mdの追記重複・cycle-log-ux-records.mdの追記重複、いずれも双方の巡回ログ本文を保持しBACKLOG側は⑨番号衝突を⑩⑪へ振り直して解決）が発生したため、契約どおり`git merge origin/main`で通常マージし解消→ゲート再検証後にpush・squashマージ→`git checkout main && git pull --ff-only`でclean確認。
+
+着手: BACKLOG-ux-records.md最上位の未着手3件(O15/S2/S3)はいずれもdataレーンO14が本回収時点でも`BACKLOG-data.md`で`[ ]`未着手のままで全ブロック中と確認。補充の指針どおりExploreエージェントで自領域の柱0/柱3巡回を実施。
+
+発見: **新規のsilent-lie state**: `WorkersMasterClient`(`/ky/workers`)は`KyListClient`/`MeetingListClient`(#814で是正済み)と同型のlocal-firstクラウド引き継ぎ設計だが、`loading`状態が無く待機中も`workers`初期値`[]`をそのまま結論カードへ渡していたため、別端末のクラウド確認が終わるまで実際には登録済み作業員がいても「登録なし」という誤った結論を無読3秒で読ませてしまっていた（#814の巡回対象から漏れていた同型の欠落）。加えて44px欠落14箇所を新規発見: `workers-master-client.tsx`「← KY用紙に戻る」リンク／`ky-transcribe-panel.tsx`（/ky/paper Excel転記支援モーダル）の項目別コピー行内ボタン（`.map()`内のみ取り残されていた非対称）／`meeting-paper-view.tsx`（/safety-diary クラシックUI、`?canvas=0`）の12箇所＝点検項目8カテゴリの○/×/－トグル(`Tri`、canvas版の同等ボタンは既にmin-h-[44px] min-w-[44px]済みで非対称)・各社マトリクスの折りたたみ▶/▼・＋下位・AI提案・KYを作成・削除・搬入出予定の＋行・×削除・点検項目のAIで該当項目を推論・公式版に戻す・×項目削除・＋項目を追加。
+
+実装: `workers-master-client.tsx`に#814と同型の`loading`状態(既定true)を追加しクラウド確認完了までtone=neutral「確認中」を出し分け（件数判定ロジック無変更・足すだけ）。44px欠落14箇所すべてに`min-h-[44px]`（正方形ボタンは`min-w-[44px]`も）を追加（足すだけ・ロジック無変更、印刷シート`MeetingPrintSheet`は対象外で不変）。
+
+検証: このdev環境はSupabase未設定(`isKyCloudEnabled`常時false)のためクラウド確認中の遷移をPlaywright実機で再現できない（既知の制約、#814と同型）＝`isKyCloudEnabled`/`cloudPullWorkers`をモックしたvitest+RTL新規`workers-master-client-loading.test.tsx`2件で「確認中」表示→解決後の正しい人数への収束を検証。44px欠落14箇所は無読Playwright新規`docs/third-party-reviews/scripts/workers-loading-meeting-transcribe-44px-2026-07-04.mjs`13/13合格（実機で44px実測、各社マトリクスの折りたたみボタンは子行が無い初期状態のため非表示=対象外SKIP扱い）。
+
+ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2711 pass（新規2件）・build成功（`/ky/workers`・`/ky/paper`・`○ /safety-diary`静的生成維持）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。
+
+## 2026-07-04 /ky/listの通知バー色文法違反（開く/複製失敗時も緑固定）を是正
+
+契約ステップ1: mainはclean・自レーンの未マージPRなし。作業ツリーに前回イテレーション由来と見られる未コミット差分（`ky-list-client.tsx`/`.test.tsx`の通知トーン対応）を発見・内容を検証（SAFETY_TONE経由の色出し分けとして完全・整合）し、そのまま本サイクルの成果として引き継ぎ確定。
+
+着手: BACKLOG-ux-records.md最上位の未着手3件(O15/S2/S3)はいずれもdataレーンO14依存で全ブロック中と確認。補充の指針どおり柱0巡回で新規発見分を採用。
+
+発見: **色の文法違反**: `KyListClient`(`/ky/list`)の通知バー（「開く」「今日用に複製」失敗時・「削除」成功時に出る帯）が`border-emerald-300 bg-emerald-50`固定で表示されており、本体を読み込めない失敗時でも緑の安全色が出て誤読を招いていた＝`records-backup.tsx`(#792)・`distributed-input-bar.tsx`(#799続き⑨)と同型のsafety-tone.ts不可侵ルール違反。
+
+実装: `SAFETY_TONE`(danger/safe)をimportし`noticeTone`stateを追加。`handleOpen`/`handleCopy`の本体読込失敗2箇所はdanger、`handleDelete`の削除完了はsafeを設定して通知バーの背景/枠/文字色・閉じるボタン文字色をトーンに追従（足すだけ・件数判定/保存ロジックは無変更）。
+
+検証: `ky-list-client.test.tsx`に新規4件（失敗時=rose系クラス・成功時=emerald系クラスをRTLで検証）。無読Playwright新規`docs/third-party-reviews/scripts/ky-list-notice-color-grammar-2026-07-04.mjs`6/6合格（本番ビルド起動・localStorageで本体無しエントリ/削除対象エントリを注入し実機で色クラスを確認）。
+
+ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2736 pass（新規4件）・build成功（`○ /ky/list`静的生成維持）。working tree clean。
 
 残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。

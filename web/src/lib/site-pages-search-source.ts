@@ -26,7 +26,10 @@
  *  検索の発見性だけを是正する（ナビ config は当班所有外）。件数は絞り、全 url が sitemap に実在
  *  することを drift ガードで固定＝幽霊URL 0・薄い/noindex ページの混入 0。
  *  収載対象は (a) 助成金ハブ／試算ツール、(b) 対象ユーザー4類型のペルソナ別実務ポータル
- *  （/for/<persona>＝現場監督・一人親方・安全担当・労働安全コンサルの立場名で引ける入口ハブ）。
+ *  （/for/<persona>＝現場監督・一人親方・安全担当・労働安全コンサルの立場名で引ける入口ハブ）、
+ *  (c) 最新情報の入口＝新着情報ハブ（/whats-new）、(d) 現場記録ツールの束＝安全記録キット
+ *  （/site-records）。いずれも機能名やトピック名では引けても「新着」「記録キット」等のハブ概念語で
+ *  0 件だった独立ハブに限る。
  */
 import { FLAGSHIP_FEATURES } from '@/config/flagship-nav';
 
@@ -81,6 +84,32 @@ export const EXTRA_DESTINATION_PAGES: SitePageSearchEntry[] = [
     subtitle: '業種・人数・施策から申請できる助成金と概算支給額を試算',
     url: '/subsidies/calculator',
     keywords: ['助成金', '補助金', '試算', 'シミュレーション', '支給額', '受給', '計算'],
+  },
+  {
+    // 新着情報ハブ（/whats-new）。法改正・労災の月次速報・厚労省通達・関連報道を新着順に
+    // 一元表示する daily 更新（sitemap priority 0.85・changeFrequency daily）の indexable ハブだが、
+    // FLAGSHIP ナビ非掲載＝「新着」「更新情報」「速報」と**最新情報の入口**を探した現場ユーザーが
+    // 0 件だった発見性の穴。keyword はページ metadata（title/description）が自ら advertise する
+    // ハブ概念語（新着・更新情報・速報・RSS）のみに絞り、「法改正」「通達」の裸クエリは入れない
+    // ＝法改正レコード(revision)・通達(notice)の権威クエリを汚さない（ペルソナ/機能ページと同方針）。
+    id: 'page-/whats-new',
+    title: '新着情報ハブ',
+    subtitle: '法改正・労災速報・通達・報道を新着順に一元表示（出典リンク付き・無料・RSS対応）',
+    url: '/whats-new',
+    keywords: ['新着情報', '新着', '更新情報', '最新情報', '速報', '一元表示', 'RSS'],
+  },
+  {
+    // 現場の安全記録キット（/site-records）。受入教育記録・KY用紙・安全工程打合せ書・WBGT記録簿など
+    // 現場で日々／定期に作る安全記録ツールを束ねる indexable ハブ（sitemap 収載済み）だが、配下の
+    // 個別ツール（/ky/paper 等）はナビ掲載でもハブ自体は FLAGSHIP 非掲載＝「記録キット」「安全記録」
+    // 「帳票」と**記録ツールの束**を探した現場監督・安全担当・一人親方が 0 件だった発見性の穴。
+    // keyword はページ metadata が advertise する umbrella 語のみに絞り、KY/WBGT 等の個別ツール名は
+    // 入れない（各ツールは自ページへ解決するため二重化しない）。
+    id: 'page-/site-records',
+    title: '現場の安全記録キット',
+    subtitle: '受入教育・KY・打合せ書・WBGT記録など現場の安全記録をまとめて作成・印刷・保存',
+    url: '/site-records',
+    keywords: ['記録キット', '現場記録', '安全記録', '記録簿', '帳票', '現場帳票'],
   },
   // ペルソナ別 実務ポータル（/for/<persona>）。当サイトの対象ユーザー4類型（現場監督/一人親方/
   // 安全担当/労働安全コンサル）ごとに、その立場で必要な機能・法令・ツールを集約する高優先度

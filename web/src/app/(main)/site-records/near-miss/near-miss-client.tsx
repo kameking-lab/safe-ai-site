@@ -21,6 +21,7 @@ import {
 } from "@/lib/site-records/nearmiss-store";
 import { nearMissConclusion } from "@/lib/site-records/record-conclusions";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { SAFETY_TONE, type SafetyTone } from "@/lib/design/safety-tone";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -46,6 +47,7 @@ export function NearMissClient() {
   const [reports, setReports] = useState<NearMissReport[]>([]);
   const [form, setForm] = useState<AddForm>(emptyForm(""));
   const [savedNote, setSavedNote] = useState("");
+  const [savedTone, setSavedTone] = useState<SafetyTone>("safe");
   const [openOnly, setOpenOnly] = useState(false);
 
   useEffect(() => {
@@ -72,6 +74,7 @@ export function NearMissClient() {
 
   function addReport() {
     if (!form.situation.trim()) {
+      setSavedTone("danger");
       setSavedNote("「状況」を入力してください。");
       return;
     }
@@ -92,6 +95,7 @@ export function NearMissClient() {
     setReports(saveNearMiss(rec));
     const now = new Date();
     setForm(emptyForm(`${now.getFullYear()}-${pad2(now.getMonth() + 1)}-${pad2(now.getDate())}`));
+    setSavedTone("safe");
     setSavedNote("報告を登録しました。");
   }
 
@@ -158,7 +162,7 @@ export function NearMissClient() {
           <button type="button" onClick={addReport} className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700">
             <Plus className="h-4 w-4" aria-hidden="true" /> 報告を登録
           </button>
-          {savedNote && <span className="text-xs font-semibold text-amber-700">{savedNote}</span>}
+          {savedNote && <span role="status" className={`text-xs font-semibold ${SAFETY_TONE[savedTone].text}`}>{savedNote}</span>}
         </div>
       </section>
 

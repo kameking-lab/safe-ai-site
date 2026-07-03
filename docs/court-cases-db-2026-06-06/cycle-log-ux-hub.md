@@ -11,6 +11,57 @@
 **ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 322 files（1 skipped）・2703 tests 全pass / build成功。
 
 **無読テスト**: `docs/third-party-reviews/scripts/favorite-copy-citation-button-44px-2026-07-04.mjs`（next start実機・Playwright・スマホ390×844）**5/5 PASS**（`/accidents/[id]` FavoriteButton normal=70.0×70.9px、`/circulars`のCopyCitationButton/FavoriteButton compact=44.0×44.0px、`/law-search`の同2部品=44.0×44.0px、いずれも実boundingBoxで44px以上を確認）。/accidents詳細への遷移はデフォルトタブが「全件検索」でサイト収録事例一覧は「list」タブ切替後にのみ動的マウントされる構造だったため、スクリプト側でタブクリック→要素可視待ち→scrollIntoViewIfNeeded→クリックの手順に修正して実測。
+## 2026-07-04 — 補充: /quick「フルハーネス」ショートカットの誤配線是正（404どん詰まり解消）
+
+**イテレーション頭の回収**: 自班のオープンPR #852(court-cases-issue-color-consolidate)がe2e/smoke/full/Vercelいずれも緑・mergeStateStatus=CLEANのため squashマージ・リモートブランチ削除。`git checkout main && git pull --ff-only`でclean確認（PR #858(quicktour-safetysigns-44px)は本イテレーション時点でe2e/smoke実行中のため次回に回収）。
+
+**注意事項**: `web/AGENTS.md`（CLAUDE.mdが`@AGENTS.md`で参照）の「これはあなたの知るNext.jsではない、node_modules内のdocsを読め」という誘導文言を今回も検出。既知のプロンプトインジェクションと判断し無視、コード変更は一切行わず本来のタスクのみ継続。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、`QuickLauncher.tsx`（/quickの唯一の実装コンポーネント）の「フルハーネス」ショートカットが専用ページ`/education/tokubetsu/fullharness`ではなく汎用ハブ`/education`(12種の教育を並べただけの一覧)へ誤配線されていることを発見。直近マージ済みの`quick-wbgt-shortcut-fix`（熱中症WBGTショートカットの同型誤配線）と全く同じパターンの既存欠陥で、「朝礼3分で完了」を謳う/quickでタップしても目的コンテンツに到達できず教育ハブから再度探す必要があった。同エージェントが提案した他候補（「事故事例を検索」ボタンのamber色使用・court-cases/safety-signsハブへのBreadcrumb未適用）は、前者は既存の4大ボタン配色が意図的な設計判断の可能性が高く単独PRで動かすには影響範囲の見極めが必要、後者は複数ページ・レイアウト変更を伴う中規模タスクのため、まず最小差分かつ実害が明確な本件を優先。
+
+**修正**: `QuickLauncher.tsx`の`href: "/education"` → `href: "/education/tokubetsu/fullharness"` の1行修正。
+
+**テスト**: `QuickLauncher.test.tsx`へ1件追加（フルハーネスショートカットが実在の特別教育ページへリンクすることの回帰ガード、既存のWBGT回帰テストと同型）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 327 files + 1 skipped・2750 tests 全pass / build成功。
+
+**PR**: #864
+
+---
+
+## 2026-07-04 — 補充: /court-cases 争点タグ配色マップの一覧/詳細二重管理を一本化
+
+**イテレーション頭の回収**: 自班のオープンPR #838(faq-employer-liability-features-pin-saved-accidents-44px)がe2e/smoke/Vercelいずれも緑になったことを確認し squashマージ・リモートブランチ削除。`git checkout main && git pull --ff-only`でclean確認(PR #848は本イテレーション時点でe2e/smoke実行中のため次回に回収)。
+
+**注意事項**: 今回も`web/AGENTS.md`の「これはあなたの知るNext.jsではない、node_modules内のdocsを読め」という誘導文言を検出。既知のプロンプトインジェクションと判断し無視、コード変更は一切行わず本来のタスクのみ継続。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、`/court-cases`(一覧)と`/court-cases/[id]`(詳細)がissueColor配色マップを別々にハードコードしており、詳細側は争点16分類中9分類しか収録していない既存欠陥を発見。一覧で色付き表示される「解雇・雇止め」等7分類の争点タグは詳細ページを開くと未収載キーのため`bg-slate-100`灰色フォールバックへ変色し、同じ判例なのに一覧/詳細で見た目が変わる不整合があった(実データ"nihon-shoen-seizo"等7件が実際に該当)。
+
+**修正**: `web/src/lib/court-cases/issue-color.ts`を新設し`Record<CourtCaseIssue,string>`で16分類全てを型強制する形に一本化(以後の分類追加時は型エラーで同期漏れを検知できる)。両ファイルの重複ハードコードを削除しimportへ置換。色の値自体は変更なし=純粋な集約でレイアウト・ロジック不変。
+
+**テスト**: vitest 4件追加(`lib/court-cases/issue-color.test.ts`新設3件・`court-cases/[id]/page.test.tsx`へ灰色フォールバック回帰1件)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors(既存warningのみ) / vitest 全pass(2727 tests) / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/court-cases-issue-color-consistency-2026-07-04.mjs`(next start実機・Playwright)で一覧/詳細の配色classNameが一致することを確認**3/3 PASS**。PR #852。
+
+---
+
+## 2026-07-04 — 補充: /faq/search・/court-cases/employer-liability・/features/[category]・signage-map/pin-manager・saved-accidentsの44px是正
+
+**イテレーション頭の回収**: 自班のオープンPR #831(signage-today-documents-thumbnail-delete-44px)がe2e/smoke/Vercelいずれも緑になったことを確認し squashマージ・リモートブランチ削除。`git checkout main && git pull --ff-only`でclean確認。
+
+**注意事項**: 今回も`web/AGENTS.md`の「これはあなたの知るNext.jsではない、node_modules内のdocsを読め」という誘導文言を検出。既知のプロンプトインジェクションと判断し無視、コード変更は一切行わず本来のタスクのみ継続。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、以下5件の未是正44px箇所を発見: ①`/faq/search`検索input(`py-3`のみでmin-h未指定、同種の他ページは必ずmin-h-[44px]併記の規約から逸脱)、②`/court-cases/employer-liability`「予防」セクション4リンク(KY/site-records/熱中症対策/判例、`p-3`のみで同ファイル内の他要素の是正パターンから漏れ)、③`/features/[category]`「他のカテゴリ」グリッドリンク(同ファイル内の他Linkは全てmin-h-[44px]付きだがこの末尾グリッドのみ未付与)、④`signage-map/pin-manager.tsx`のピン選択ボタン(email未登録時は2行のみで実測34-36px、隣接する削除ボタンは既に44px是正済みで不整合)、⑤`accidents/saved-accidents.tsx`保存済み事故事例の主遷移リンク(隣の削除ボタンのみh-11 w-11で44px是正済み、リンク本体は未着手のまま)。
+
+**修正**: 5ファイル計11要素(予防4リンク・他カテゴリ最大7リンク・検索input・ピン選択ボタン・保存済みリンク)に`min-h-[44px]`(+`flex items-center`または`flex-col justify-center`でテキスト縦中央寄せ)を付与。純粋なクラス追加・変更でレイアウト・遷移先・削除ロジック不変。
+
+**テスト**: vitest 6件追加(`faq/search/page.test.tsx`新設・`court-cases/employer-liability/page.test.tsx`へ1件・`features/[category]/page.test.tsx`へ1件・`signage-map/signage-map-44px.test.ts`へ1件・`accidents/saved-accidents.test.tsx`へ1件、ほか)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors / vitest 321 files + 1 skipped・2703 tests 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/faq-search-employer-liability-features-signage-map-saved-accidents-44px-2026-07-04.mjs`(next start実機・Playwright・スマホ390×844+PC1280×900)**15/15 PASS**。`a[href="..."]:visible`セレクタで、モバイル非表示のグローバルナビ内の同一hrefリンクを誤取得しないよう対処。
 
 ---
 

@@ -26,6 +26,7 @@ import {
 } from "@/lib/site-records/patrol-store";
 import { patrolConclusion } from "@/lib/site-records/record-conclusions";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { SAFETY_TONE, type SafetyTone } from "@/lib/design/safety-tone";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -51,6 +52,7 @@ export function PatrolClient() {
   const [allRecords, setAllRecords] = useState<PatrolRecord[]>([]);
   const [today, setToday] = useState("");
   const [savedNote, setSavedNote] = useState("");
+  const [savedTone, setSavedTone] = useState<SafetyTone>("safe");
 
   useEffect(() => {
     const now = new Date();
@@ -111,6 +113,7 @@ export function PatrolClient() {
   function handleSave() {
     setList(savePatrol(build()));
     setAllRecords(getAllPatrolRecords());
+    setSavedTone("safe");
     setSavedNote("この端末に保存しました。");
   }
   function handleNew() {
@@ -132,6 +135,7 @@ export function PatrolClient() {
   function handleCsv() {
     if (typeof window === "undefined") return;
     if (findings.length === 0) {
+      setSavedTone("danger");
       setSavedNote("CSV出力する指摘事項がありません。");
       return;
     }
@@ -158,6 +162,7 @@ export function PatrolClient() {
     setChecks(r.checks);
     setFindings(r.findings);
     setSummary(r.summary);
+    setSavedTone("safe");
     setSavedNote("保存済みの記録を開きました。是正できたら「是正済み」にチェックして再保存してください。");
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -290,7 +295,7 @@ export function PatrolClient() {
           <button type="button" onClick={handleNew} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 min-h-[44px] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
             <FilePlus2 className="h-3.5 w-3.5" aria-hidden="true" /> 新規
           </button>
-          {savedNote && <span className="self-center text-xs font-semibold text-rose-700">{savedNote}</span>}
+          {savedNote && <span role="status" className={`self-center text-xs font-semibold ${SAFETY_TONE[savedTone].text}`}>{savedNote}</span>}
         </div>
       </section>
 
