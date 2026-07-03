@@ -238,7 +238,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和47年法律第113号",
     latestRevision: "令和元年改正（ハラスメント関係）",
     eGovUrl: "https://laws.e-gov.go.jp/law/347AC0000000113",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   // 50法令体制（+12法令）
   過労死防止法: {

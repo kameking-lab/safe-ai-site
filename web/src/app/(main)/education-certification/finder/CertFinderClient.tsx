@@ -106,7 +106,7 @@ function ResultCard({ result }: { result: RequiredCertResult }) {
             {label}
           </span>
           {priority === "required" ? (
-            <span className="flex items-center gap-0.5 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700 dark:bg-red-900/30 dark:text-red-400">
+            <span className="flex items-center gap-0.5 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">
               <AlertCircle className="h-3 w-3" aria-hidden />
               法令義務
             </span>
@@ -296,7 +296,7 @@ export function CertFinderClient() {
                   <button
                     type="button"
                     onClick={reset}
-                    className="flex min-h-[44px] items-center gap-1 text-xs text-slate-500 hover:text-red-600"
+                    className="flex min-h-[44px] items-center gap-1 text-xs text-slate-500 hover:text-rose-600"
                     aria-label="条件をリセット"
                   >
                     <RotateCcw className="h-3.5 w-3.5" aria-hidden />
@@ -394,7 +394,7 @@ export function CertFinderClient() {
                 {requiredResults.length > 0 && (
                   <div>
                     <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-100">
-                      <AlertCircle className="h-4 w-4 text-red-500" aria-hidden />
+                      <AlertCircle className="h-4 w-4 text-rose-500" aria-hidden />
                       法令義務（{requiredResults.length}件）
                     </h3>
                     <div className="grid gap-3 sm:grid-cols-2">

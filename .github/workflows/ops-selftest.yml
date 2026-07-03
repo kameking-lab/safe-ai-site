@@ -16,6 +16,7 @@ on:
       - "loop-launcher.ps1"
       - "loop-report-status.ps1"
       - "loop-watchdog.ps1"
+      - "loop-eval-nightly.ps1"
       - "loop-config.json"
       - ".github/workflows/ops-selftest.yml"
   pull_request:
@@ -24,6 +25,7 @@ on:
       - "loop-launcher.ps1"
       - "loop-report-status.ps1"
       - "loop-watchdog.ps1"
+      - "loop-eval-nightly.ps1"
       - "loop-config.json"
       - ".github/workflows/ops-selftest.yml"
   workflow_dispatch:
@@ -55,3 +57,7 @@ jobs:
       - name: 点火/復活 - watchdog -SelfTest（単一インスタンスguard/hotswap/生存スキャン識別）
         shell: powershell
         run: powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-watchdog.ps1 -SelfTest
+
+      - name: 計測 - nightly genquality eval -SelfTest（1日1回の冪等guard/回帰判定/記録整形）
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-eval-nightly.ps1 -SelfTest

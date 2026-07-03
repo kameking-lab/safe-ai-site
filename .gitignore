@@ -51,3 +51,5 @@ logs/
 # (loop-config.json は追跡・人手編集。可変状態と現況ダッシュボードは追跡しない)
 loop-state.json
 docs/loop-status.md
+# 夜間 生成品質eval(O18) のローカル専用 機械可読アーティファクト(main tree・/about用の追跡スナップショットは別途)
+.loop-eval/

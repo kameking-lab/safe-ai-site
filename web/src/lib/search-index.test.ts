@@ -328,6 +328,29 @@ describe('buildSearchIndex — 機能ページ（feature）の収載', () => {
     // 2 語 AND も subtitle（カード見出し/配下説明）で補助して機能へ収束する
     expect(searchItems(index, '事故 分析', 'feature').length).toBeGreaterThan(0);
   });
+
+  it('補充: FLAGSHIP 外の助成金ハブが「助成金」「補助金」で着地する（0 件だった穴の是正）', async () => {
+    const index = await buildSearchIndex();
+    expect(searchItems(index, '助成金', 'feature').some((i) => i.url === '/subsidies')).toBe(true);
+    expect(searchItems(index, '補助金', 'feature').some((i) => i.url === '/subsidies')).toBe(true);
+    // 試算ツールも支給額シミュレーションの語で着地する
+    expect(
+      searchItems(index, '助成金 試算', 'feature').some((i) => i.url === '/subsidies/calculator'),
+    ).toBe(true);
+  });
+
+  it('補充: 対象4類型のペルソナ別ポータルが立場名クエリで着地する（0 件だった穴の是正）', async () => {
+    const index = await buildSearchIndex();
+    // 立場名（現場監督/一人親方/安全担当/コンサル）で自分専用の入口ハブ /for/<persona> へ着地。
+    const lands = (q: string, url: string) =>
+      searchItems(index, q, 'feature').some((i) => i.url === url);
+    expect(lands('職長', '/for/construction')).toBe(true);
+    expect(lands('現場代理人', '/for/construction')).toBe(true);
+    expect(lands('一人親方', '/for/solo')).toBe(true);
+    expect(lands('安全衛生担当', '/for/manager')).toBe(true);
+    expect(lands('社労士', '/for/consultant')).toBe(true);
+    expect(lands('労働安全コンサルタント', '/for/consultant')).toBe(true);
+  });
 });
 
 describe('buildSearchIndex — 治療と仕事の両立支援 病態別ガイド（feature）の収載', () => {

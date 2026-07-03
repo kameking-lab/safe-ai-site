@@ -36,4 +36,10 @@ describe("AccidentTrendSummary 柱0（44pxタップ標的）", () => {
     expect(link.className).toContain("min-h-[44px]");
     expect(link.className).toContain("items-center");
   });
+
+  it("集計期間セレクト・AIで要約ボタンが 44px タップ標的を満たす", () => {
+    render(<AccidentTrendSummary />);
+    expect(screen.getByLabelText("集計期間").className).toContain("min-h-[44px]");
+    expect(screen.getByRole("button", { name: /AIで要約/ }).className).toContain("min-h-[44px]");
+  });
 });

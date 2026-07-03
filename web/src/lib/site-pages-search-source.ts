@@ -19,6 +19,14 @@
  *  各エントリの url はハッシュ・クエリを除いたベースパス。全 url が実在ルートへ解決することを
  *  drift ガードで機械固定する（`/industries/<slug>` は generateStaticParams の
  *  {@link INDUSTRY_CONTENT_SLUGS} に解決）。
+ *
+ * 補充（{@link EXTRA_DESTINATION_PAGES}）:
+ *  FLAGSHIP ナビに載らないが **sitemap 収載済みで indexable な独立の目的地ページ** のうち、
+ *  横断検索から 0 件だった高検索意図のハブ／ツールを少数だけ手当てで補う。ナビ正本を汚さずに
+ *  検索の発見性だけを是正する（ナビ config は当班所有外）。件数は絞り、全 url が sitemap に実在
+ *  することを drift ガードで固定＝幽霊URL 0・薄い/noindex ページの混入 0。
+ *  収載対象は (a) 助成金ハブ／試算ツール、(b) 対象ユーザー4類型のペルソナ別実務ポータル
+ *  （/for/<persona>＝現場監督・一人親方・安全担当・労働安全コンサルの立場名で引ける入口ハブ）。
  */
 import { FLAGSHIP_FEATURES } from '@/config/flagship-nav';
 
@@ -35,6 +43,82 @@ export interface SitePageSearchEntry {
 function basePath(href: string): string {
   return href.replace(/[#?].*$/, '');
 }
+
+/**
+ * FLAGSHIP ナビに載らないが sitemap 収載済み・indexable な独立目的地ページの手当て補充。
+ *
+ * ここに載せるのは「機能名で引けるが具体トピック名で 0 件だった」高検索意図のハブ／ツールに限る。
+ * title/subtitle/keywords は所有ページ（当班は本文を触らない）の metadata・見出しに準拠し、
+ * data を写経・捏造しない（例: 個別助成金の金額・条件は載せず、ページが自ら advertise する
+ * 制度名のみ keyword 化）。全 url が sitemap に実在することを drift ガードで固定する。
+ */
+export const EXTRA_DESTINATION_PAGES: SitePageSearchEntry[] = [
+  {
+    // 助成金・補助金ガイド（/subsidies）。中小企業/一人親方の安全投資に直結する高検索意図の
+    // 独立ハブだが FLAGSHIP ナビ非掲載＝「助成金」「補助金」で横断検索が 0 件だった。
+    // keyword の制度名はページ metadata description が自ら列挙する 3 制度に準拠（写経・捏造なし）。
+    id: 'page-/subsidies',
+    title: '助成金・補助金ガイド',
+    subtitle: '中小企業の労働安全投資に使える公的助成金・補助金と労災の経済損失試算',
+    url: '/subsidies',
+    keywords: [
+      '助成金',
+      '補助金',
+      '支援金',
+      '給付金',
+      '中小企業',
+      '一人親方',
+      '安全投資',
+      'エイジフレンドリー補助金',
+      '働き方改革推進支援助成金',
+      '建退共',
+    ],
+  },
+  {
+    // 助成金 支給額試算ツール（/subsidies/calculator）。業種・人数・施策から概算支給額を試算。
+    id: 'page-/subsidies/calculator',
+    title: '助成金 支給額試算ツール',
+    subtitle: '業種・人数・施策から申請できる助成金と概算支給額を試算',
+    url: '/subsidies/calculator',
+    keywords: ['助成金', '補助金', '試算', 'シミュレーション', '支給額', '受給', '計算'],
+  },
+  // ペルソナ別 実務ポータル（/for/<persona>）。当サイトの対象ユーザー4類型（現場監督/一人親方/
+  // 安全担当/労働安全コンサル）ごとに、その立場で必要な機能・法令・ツールを集約する高優先度
+  // （sitemap priority 0.85〜0.9）の自己canonical・indexable な独立ハブ。FLAGSHIP ナビには載らず、
+  // 横断検索(/search・⌘K)からは 0 件だった＝「一人親方」「職長」「社労士」と**自分の立場名**で
+  // 探した対象ユーザーが、自分専用の入口ハブへ検索経由で着けない発見性の穴（#561 等と同型）。
+  // keywords は各ページ metadata の title/description が自ら advertise する**立場・役割名のみ**に絞り、
+  // 墜落/足場/化学物質等のハザード語や法令名は入れない＝条文・通達の権威クエリを汚さない
+  // （保護具/機能ページ/疾患ガイドと同方針）。feature 扱いで既存カテゴリへ収載＝新規タブ追加なし。
+  {
+    id: 'page-/for/construction',
+    title: '建設業の安全衛生ポータル',
+    subtitle: '職長・元請担当・現場代理人のための実務ポータル（KY用紙・朝礼ネタ・年次計画・法令早見）',
+    url: '/for/construction',
+    keywords: ['建設業', '建設', '職長', '元請', '現場代理人', '現場監督', '施工管理'],
+  },
+  {
+    id: 'page-/for/solo',
+    title: '一人親方の安全衛生ポータル',
+    subtitle: '特別加入・一人KY・資格・熱中症を一人で回すための実務ポータル',
+    url: '/for/solo',
+    keywords: ['一人親方', '個人事業主', 'フリーランス', '特別加入', '一人KY'],
+  },
+  {
+    id: 'page-/for/manager',
+    title: '企業の安全衛生担当者ポータル',
+    subtitle: '体制づくり・委員会・ストレスチェック・年次計画を一気通貫で（規模別の義務早見つき）',
+    url: '/for/manager',
+    keywords: ['安全衛生担当', '安全衛生担当者', '衛生管理者', '総務', '人事', '安全委員会', '衛生委員会', '事業者'],
+  },
+  {
+    id: 'page-/for/consultant',
+    title: '専門家向けポータル',
+    subtitle: '労働安全コンサルタント・社労士・診断士のためのリサーチ&顧問先支援',
+    url: '/for/consultant',
+    keywords: ['労働安全コンサルタント', '社会保険労務士', '社労士', '中小企業診断士', '診断士', '顧問', '専門家'],
+  },
+];
 
 /**
  * {@link FLAGSHIP_FEATURES} を目的地ページの検索エントリへ射影する。
@@ -68,6 +152,12 @@ export function getSitePageSearchEntries(): SitePageSearchEntry[] {
         keywords: [],
       });
     }
+  }
+  // 補充分は FLAGSHIP 由来の後に載せ、パス衝突時はナビ正本を優先（先勝ち）。
+  for (const extra of EXTRA_DESTINATION_PAGES) {
+    const p = basePath(extra.url);
+    if (byPath.has(p)) continue;
+    byPath.set(p, { ...extra, url: p });
   }
   return [...byPath.values()];
 }

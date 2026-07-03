@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-03 /education-certification/finder の色の文法違反（法令義務バッジ等のred直書き）を是正（柱0磨き・巡回発見）
+
+回収: 自ブランチPR #792（バックアップ取り込みメッセージの色文法違反＋44px3箇所）がCI緑と確認しsquashマージ→main pull。PR #799（site-records/health-checkup-scheduler等44px14箇所+色文法2箇所）はmainとdirty（BACKLOG/cycle-logの同時追記のみ・コード競合なし）と判明したため、契約どおりorigin/mainを当該ブランチへ通常マージで解消（本ログ・BACKLOGとも直前2エントリを時系列順に統合）→ tsc=0/lint errors0/vitest 2622 pass/build成功を確認しpush。CI再走の緑は次イテレーションで回収。
+
+着手: 上位3件(O15/S2/S3)は引き続きdataレーンO14依存で全ブロック中のため、Exploreエージェントに`/education-certification`配下の柱0再巡回を依頼。**色の文法違反を新規発見**: `/education-certification/finder`（業務別必要資格判定ツール）の「法令義務」バッジ・その見出しアイコン（`AlertCircle`）・「条件をリセット」ボタンのhover色が`SAFETY_TONE`のdangerトークン(rose系)を経由せず`red-*`(`bg-red-100`/`text-red-700`/`text-red-500`/`hover:text-red-600`)を直書きしており、safety-tone.tsの「状態を伝える色は必ずこのトークン経由で塗る」規約（不可侵の柱0-0）に反していた。既存の`missing-checkup-tracker.tsx`のoverdueチップ等と同型の是正パターン。
+
+実装: `CertFinderClient.tsx`の対象3箇所（バッジ・見出しアイコン・リセットボタンhover）を`red-*`→`rose-*`へクラス名統一（構造・判定ロジックは無変更、色相のみ）。
+
+検証: `tsc --noEmit`=0 / `lint`=errors0（既存warn23件のみ）/ `vitest run`=309ファイル2622テスト全pass / `build`=成功（`○ /education-certification/finder`静的生成維持）。無読Playwright新規`docs/third-party-reviews/scripts/cert-finder-color-grammar-2026-07-03.mjs`をprod start(3100)で実行し10/10 PASS（高さ2m以上の高所作業シナリオを選択→「法令義務」バッジ・見出しアイコン・リセットボタンhoverのクラス名がrose-*であることを確認）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。PR #799はCI待ちで次回収。
+
+---
+
 ## 2026-07-03 バックアップ取り込みメッセージの色の文法違反＋44px未満3箇所を是正（柱0磨き・巡回発見）
 
 回収: 自ブランチPR #778（`/safety-diary`等44px9箇所）がCI緑と確認しsquashマージ。main pull後working tree clean。PR #785（S1第八弾・履歴サジェスト）はCI進行中のため次回収。
@@ -571,3 +585,19 @@ Exploreエージェントで未監査route(safety-diary個別ページ5種・sit
 無読Playwright: 新規`docs/third-party-reviews/scripts/meeting-canvas-phase8-history-suggest-2026-07-03.mjs`17/17合格（過去の打合せ書1件をlocalStorageに注入→クラシック表示のdatalist候補を確認→キャンバス表示でも同じdatalistが存在・作業所名/作業所長/主任等/作成担当者/業者名/使用機械/協力会社責任者の各エディタinputが正しいlist属性を参照することを確認）＋既存`meeting-canvas-phase1-header-2026-07-03.mjs`17/17・`meeting-canvas-phase3-contractors-2026-07-03.mjs`25/25は無影響で回帰合格。working tree clean。
 
 残: O15/S2/S3は引き続きdataレーンO14依存でブロック。S1は残り既定切替（β外し・O10第五弾と同様に機能パリティ確立が前提）のみ。PR #778（前回収・44px是正9箇所）はCI待ちで次回収。
+
+## 2026-07-04 /ky/list・/safety-diary/list のクラウド確認中に「保存ゼロ」を誤表示する柱0違反を是正
+
+契約ステップ1: 自レーンのPR #807（前回収・cert-finder-color-grammar）のCIがpending中と確認し先送りしたところ、自領域巡回タスク選定中にCIが緑（e2e/smoke/Vercelとも SUCCESS）に転じたため squashマージ→`git checkout main && git pull --ff-only`でclean確認。
+
+着手: BACKLOG-ux-records.md最上位の未着手3件(O15/S2/S3)はいずれもdataレーンO14（本回収時点でも`BACKLOG-data.md`で`[ ]`未着手）依存で全ブロック中と確認したため、補充指針どおりExploreエージェントで自領域の柱0/柱3巡回を実施。過去の巡回はタップ標的44px・色の文法違反が中心だったため、今回は「状態表示ロジックそのものの欠落」に絞って探索するようエージェントへ指示。
+
+発見: `KyListClient`(`/ky/list`)・`MeetingListClient`(`/safety-diary/list`)とも local-first のフォールバック設計＝ローカルが空のとき`await`で別端末のクラウド履歴を引き継ぐが、その待機中を示すフラグが無く`entries`/`list`の初期値`[]`をそのまま結論カードへ渡していた。新デバイスでクラウド確認が終わるまでの間、実際には記録があっても「保存KYなし」「打合せ書なし」という誤った結論を無読3秒で読ませてしまう柱0違反（誤って重複作成に誘導するおそれ）。
+
+実装: 両ファイルに`loading`状態(既定true)を追加し、`loadList`/`reload`をtry/finallyで包んで確認完了までtrueを維持。結論カードの分岐先頭に`loading`判定を追加しtone=neutral「確認中」を表示（件数判定ロジック・action構造は無変更、足すだけ）。
+
+検証: このdev環境はSupabase未設定(`isKyCloudEnabled`/`isMeetingCloudEnabled`とも常時false)のためクラウド確認中の遷移をPlaywright実機で再現できない（既知の制約、過去のcontribute/account柱0補充タスクと同型）。代わりに`isKyCloudEnabled`/`cloudPullKyRecords`・`isMeetingCloudEnabled`/`cloudPullMeetings`をモックしたvitest+RTL新規4件で「確認中」表示→解決後の正しい件数への収束を検証（`ky-list-client.test.tsx`・`meeting-list-client.test.tsx`）。既存のローカルファースト経路（空/1件/検索0件）は退行していないことをPlaywrightで確認: 新規`docs/third-party-reviews/scripts/list-loading-regression-check-2026-07-04.mjs`3/3合格＋既存`ky-list-workers-noread-2026-06-14.mjs`15/15合格。既存`safety-diary-list-noread-2026-07-03.mjs`は本イテレーションの実行環境で`networkidle`待ちが1〜3件目のいずれかで不定にタイムアウトする既環境フレークを確認（空/1件の状態は毎回到達し結論カード内容もPASSしていたため退行の証跡なし、`domcontentloaded`+要素待ちに切替えた上記regression-checkスクリプトで代替確認）。
+
+ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2643 pass（新規4件）・build成功（`○ /ky/list`・`○ /safety-diary/list`静的生成維持）。1回目のbuildでTurbopackの`internal error: entered unreachable code`(`/accidents-analytics`、自班所有外route起因)が発生したが再実行で成功する一過性エラーと確認。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。

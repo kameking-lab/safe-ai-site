@@ -16,6 +16,20 @@
 
 **無読テスト**: `docs/third-party-reviews/scripts/signage-daily-values-extras-panel-44px-2026-07-04.mjs`（next start実機・Playwright・1920×1080サイネージ+スマホ390×844）**4/4 PASS**（起点日入力欄・保存ボタン・起点日を変更リンク・/profile を開く リンク、すべて実boundingBox height≧44px実測）。
 
+## 2026-07-04 — 補充: /accidents トレンド要約＋/court-cases 検索・絞り込みフォームの44px是正
+
+**イテレーション頭の回収**: 自班のオープンPR2件を回収。#804(faq-glossary-features-search-cta-44px)はe2e/smoke/Vercel全緑のためsquashマージ。#781(accident-database-panel-44px)は`docs/court-cases-db-2026-06-06/cycle-log-ux-hub.md`のみmainとコンフリクト(コード非衝突、#804マージ由来)→`origin/main`を通常マージし両エントリ保持で解決→ゲート再走(tsc/lint/vitest2624件/build)全緑→push（CI待ちのため本イテレーションは次タスクへ先行着手）。`git checkout main && git pull --ff-only`でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、`accident-trend-summary.tsx`(/accidents「最近の労災トレンド（AI要約）」)の集計期間セレクト・「AIで要約」ボタンと、`court-cases-browser.tsx`(/court-cases主要フィルタUI)のキーワード検索欄・争点/分野/裁判所/年代の4セレクトが、いずれも`px-3 py-2 text-sm`のみでmin-h未指定(≈36〜40px)のまま残っていたことを発見。同ファイル内の他要素(絞り込みを解除・A4印刷リンク・分野アイコングリッド・厚労省速報原典リンク等)は既に是正済みだったが、検索・絞り込みフォーム本体だけが従来の一括是正から漏れていた。
+
+**修正**: 2ファイル計6要素に`min-h-[44px]`を付与（純粋なクラス追加でレイアウト・遷移先・ロジック不変）。
+
+**テスト**: `accident-trend-summary.test.tsx`へ1件追加、`court-cases-browser.test.tsx`へ1件追加（計2ファイル3件、既存min-h-[44px]確認パターンに準拠）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 309 files・2624 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/accident-trend-court-cases-filter-44px-2026-07-04.mjs`（next start実機・Playwright・スマホ390×844）**7/7 PASS**（集計期間セレクト・AIで要約ボタン・キーワード検索欄枠・争点/分野/裁判所/年代の各セレクト、すべて実boundingBox height≧44px実測）。`<select>`のaccessible nameがoption一覧テキストを含んでしまう既存パターンのため`getByLabel`は完全一致でなくprefix正規表現＋`<select>`要素との積集合で解決（テストのみの対応・本体コードは非改変）。
+
 ## 2026-07-03 — 補充: accident-database-panel.tsx (/accidents本体) 未着手コンポーネントの44px是正
 
 **イテレーション頭の回収**: 自班のオープンPR #775(共有部品breadcrumb・action-bar・analysis-panel 44px)はe2e/smoke/VercelがIN_PROGRESS/PENDINGで未緑のため今回はマージ見送り、次イテレーションで回収。`git checkout main && git pull --ff-only`でclean確認。
