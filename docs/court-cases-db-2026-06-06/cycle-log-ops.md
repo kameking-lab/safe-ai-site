@@ -1,5 +1,15 @@
 # cycle-log-ops — 運用・自律運転インフラ班の作業ログ
 
+## 2026-07-03 (O・報告系補充) — 監視ファイルのtrailing空行 無制限肥大を封止（-NoNewline＋EOF trim）
+
+- **契約1（回収）**: 自ops PR #683（レーン自己報告noteのMSYSパス変換破損を reporter入口で無害化・SelfTest43 ALL PASS・Vercel緑・mergeStateStatus=CLEAN）を squash マージ→`git checkout main && git pull --ff-only`→working tree clean 確認。他5レーン・未マージPRは不可侵。
+- **タスク選定＋実測診断**: BACKLOG-ops 未着手[ ]は掃除系一括／モバイルperf第2弾 実測の2件のみ・両方とも**全6レーン稼働中**（loop-status.md heartbeat が ops/ux-tools/ux-hub/data を14:00-14:05に記録・seo/ux-records は grace 窓内 missing）で静穏窓待ちブロック（3件未満）→補充の指針に従い運用4系統から補充。**水増しを避けるため** reporter/launcher を精読し**真の欠陥**を探索＝live docs/loop-status.md が region 末尾に**19本の空行**を抱えていた。transient と即断せず**実測追跡**＝live形状のコピーへ実reporterを3回撃つと **19→20→21→22** と1本ずつ成長（無制限）＝#661 logs肥大の同族＝報告系 watch surface bloat と確定。
+- **根因（double-append × Get-Content の非対称）**: 5箇所の status writer（reporter 1＋launcher: Write-Status/Write-ConfigErrorStatus/Set-ResurrectionBanner）が `($lines -join CRLF) + CRLF` を作った上で `Set-Content -Value`（PS 5.x は**もう1つ** terminator を付け足す）→ファイル末尾が DOUBLE CRLF。次の `Get-Content` は末尾 terminator を**1つだけ**残す＝read-modify-write の1往復ごとに **+1 空行**。reporter は毎イテレーション×6レーンで恒常発火＝可視の無制限成長で、社長が唯一見る監視面が空行ゴミで本文を押し流す（＝#602〜#672 が磨いてきた watch surface の劣化）。
+- **修正2点**: **(1)** 全 status write（reporter実書込み1＋launcher実書込み3＋dryrun3）を `Set-Content -NoNewline` 化＝ファイル末尾は合成テキストが既に持つ**単一CRLFのみ**（成長を発生源で停止・write が round-trip stable）。dryrun も -NoNewline で実書込みと byte一致＝`-WhatIf` ゲートの忠実性を維持。**(2)** reporter に純関数 `Remove-TrailingBlankLines` 新設＝合成前に EOF 空行を trim（既に溜まった空行を次回 write で**自己修復**）。EOF 空行は無意味（最終実行行は region END marker か launcher の watch3）＝trim 常時安全。
+- **自己検証（契約3・PowerShellはドライラン相当）**: reporter `-SelfTest` に J群7アサート追加（EOF空行drop＋内部空行維持／already-clean no-op／all-blank→空／null安全／**実ファイル往復**で seed21本→1回目 heal で0本＋2回目 write も0本維持＝再成長なし）→**ALL PASS(計43)**、launcher `-SelfTest` **無回帰 ALL PASS**、両 .ps1 **PSParser 0-error**。**実測E2E**＝live status 形状のコピー(21空行)へ実reporterを3回撃つと1回目で **0本へheal・以後0本で安定**（旧コードの 19→22 成長を停止）、launcher `-WhatIf` で live loop-status.md は **md5 byte不変(read-only)**。
+- **活性化**: reporter は fresh process で常に最新 on-disk 版を読む（hot-swap不要）＝マージ後、各クローンの次 git pull＋次回 step5.5 report で live status が自己修復。本イテレーション末尾の ops step5.5 は既に更新済 reporter を撃つため live を即 heal。ASCII厳守（追加分は全ASCII・既存の日本語コメントは先行在庫で本PR不介入）・web/src非侵・main常時デプロイ可能。
+- **ゲート**: web/src 不触＝tsc/lint/vitest/build 対象外。変更は loop-report-status.ps1＋loop-launcher.ps1＋BACKLOG/cycle-log のみ。`-SelfTest` ALL PASS が PSParser 構文健全性を保証。working tree clean で終了。
+
 ## 2026-07-03 (O・報告系補充) — レーン自己報告のエージェント依存を封止＝runner駆動 liveness heartbeat
 
 - **契約1（回収）**: 自ops PR #667（logs保持sweepを全レーンクローンへ拡張・SelfTest47 ALL PASS・Vercel緑・mergeStateStatus=CLEAN）を squash マージ→`git checkout main && git pull --ff-only`→working tree clean 確認。他5レーン・未マージPR(#665/#666等)は不可侵。
