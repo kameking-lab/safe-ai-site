@@ -47,4 +47,10 @@ describe("サイネージ /signage の鮮度・自動復旧の定数", () => {
       expect(block[0]).toMatch(/min-h-\[44px\]/);
     }
   });
+
+  it("トレンド拡大モーダルの「記事を開く →」リンクが44pxタップ標的を満たす", () => {
+    const linkBlock = SOURCE.match(/<a[\s\S]{0,500}?記事を開く/);
+    expect(linkBlock).not.toBeNull();
+    expect(linkBlock![0]).toMatch(/min-h-\[44px\]/);
+  });
 });

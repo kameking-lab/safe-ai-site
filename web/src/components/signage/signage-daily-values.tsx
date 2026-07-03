@@ -70,7 +70,7 @@ export function SignageDailyValues({ now, currentTempC, currentHumidityPct }: Pr
                   setDraftDate(startDate ?? "");
                   setEditingStart(true);
                 }}
-                className="min-h-[24px] text-[8px] text-slate-400 underline sm:text-[9px] xl:text-sm"
+                className="min-h-[44px] text-[8px] text-slate-400 underline sm:text-[9px] xl:text-sm"
               >
                 起点日を変更
               </button>
@@ -97,12 +97,12 @@ export function SignageDailyValues({ now, currentTempC, currentHumidityPct }: Pr
               value={draftDate}
               onChange={(e) => setDraftDate(e.target.value)}
               aria-label="無災害日数の起点日"
-              className="min-h-[36px] w-[104px] rounded border border-slate-600 bg-slate-800 px-1 text-[10px] text-white"
+              className="min-h-[44px] w-[104px] rounded border border-slate-600 bg-slate-800 px-1 text-[10px] text-white"
             />
             <button
               type="button"
               onClick={handleSaveStartDate}
-              className="min-h-[36px] shrink-0 rounded bg-emerald-600 px-2 text-[10px] font-bold text-white hover:bg-emerald-500"
+              className="min-h-[44px] shrink-0 rounded bg-emerald-600 px-2 text-[10px] font-bold text-white hover:bg-emerald-500"
             >
               保存
             </button>
