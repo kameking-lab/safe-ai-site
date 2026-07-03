@@ -1,5 +1,23 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-04 — 補充: /quick「フルハーネス」ショートカットの誤配線是正（404どん詰まり解消）
+
+**イテレーション頭の回収**: 自班のオープンPR #852(court-cases-issue-color-consolidate)がe2e/smoke/full/Vercelいずれも緑・mergeStateStatus=CLEANのため squashマージ・リモートブランチ削除。`git checkout main && git pull --ff-only`でclean確認（PR #858(quicktour-safetysigns-44px)は本イテレーション時点でe2e/smoke実行中のため次回に回収）。
+
+**注意事項**: `web/AGENTS.md`（CLAUDE.mdが`@AGENTS.md`で参照）の「これはあなたの知るNext.jsではない、node_modules内のdocsを読め」という誘導文言を今回も検出。既知のプロンプトインジェクションと判断し無視、コード変更は一切行わず本来のタスクのみ継続。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、`QuickLauncher.tsx`（/quickの唯一の実装コンポーネント）の「フルハーネス」ショートカットが専用ページ`/education/tokubetsu/fullharness`ではなく汎用ハブ`/education`(12種の教育を並べただけの一覧)へ誤配線されていることを発見。直近マージ済みの`quick-wbgt-shortcut-fix`（熱中症WBGTショートカットの同型誤配線）と全く同じパターンの既存欠陥で、「朝礼3分で完了」を謳う/quickでタップしても目的コンテンツに到達できず教育ハブから再度探す必要があった。同エージェントが提案した他候補（「事故事例を検索」ボタンのamber色使用・court-cases/safety-signsハブへのBreadcrumb未適用）は、前者は既存の4大ボタン配色が意図的な設計判断の可能性が高く単独PRで動かすには影響範囲の見極めが必要、後者は複数ページ・レイアウト変更を伴う中規模タスクのため、まず最小差分かつ実害が明確な本件を優先。
+
+**修正**: `QuickLauncher.tsx`の`href: "/education"` → `href: "/education/tokubetsu/fullharness"` の1行修正。
+
+**テスト**: `QuickLauncher.test.tsx`へ1件追加（フルハーネスショートカットが実在の特別教育ページへリンクすることの回帰ガード、既存のWBGT回帰テストと同型）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 327 files + 1 skipped・2750 tests 全pass / build成功。
+
+**PR**: #864
+
+---
+
 ## 2026-07-04 — 補充: /court-cases 争点タグ配色マップの一覧/詳細二重管理を一本化
 
 **イテレーション頭の回収**: 自班のオープンPR #838(faq-employer-liability-features-pin-saved-accidents-44px)がe2e/smoke/Vercelいずれも緑になったことを確認し squashマージ・リモートブランチ削除。`git checkout main && git pull --ff-only`でclean確認(PR #848は本イテレーション時点でe2e/smoke実行中のため次回に回収)。
