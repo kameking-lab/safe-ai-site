@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-03 — 柱C-4 PageJsonLd のサイトURLを seo-metadata.ts 単一ソース化（PR: seo/page-json-ld-site-url-single-source / #698）
+
+回収: 前イテレーション着手済み(working tree に未コミット)の本タスク(page-json-ld 単一ソース化)を完成させて出荷。並行して自班 CI 緑 PR を2本回収＝#684（カテゴリタブ単一ソース化）を squash マージ→`git checkout main && git pull --ff-only`→clean。#691（法令名かな読みエイリアス）は #684 マージで BACKLOG/cycle-log の [x] 追記が衝突(CONFLICTING/DIRTY)→当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決＝両完了エントリ(かな読み/カテゴリタブ/notice-search)を全て併存させ push、CI 再走を次イテレーションで回収。他班 OPEN PR は不可侵。着手前の working tree にあった再生成物（rag-metrics-latest.json・ky/meeting print snapshot・chatbot-eval-fresh-results.json）は `git checkout` で復元。
+
+着手判断: 未着手キューの実装タスクは空（O17/T6・T7 は Path A 設計ドラフト＝オーナー承認待ち）。前イテレーションで着手済みだった **PageJsonLd のサイトURL単一ソース化**（柱C-4 の未消化残＝#530 で `json-ld.tsx` は集約済みだが sibling の `page-json-ld.tsx` がドメイン直書きのまま取り残されていた）を完成。対象は当班所有の JSON-LD ヘルパー lib 領域＝他班 in-flight と非重複。
+
+- **現状（実バグ＝構造化データのドリフト源）**: `page-json-ld.tsx`（全ページ共通の汎用 WebPage + BreadcrumbList + 可視パンくず出力ヘルパー）が `const SITE_BASE = "https://www.anzen-ai-portal.jp"` とドメインを直書き保持。`SITE_URL` を変えると `json-ld.tsx` 系は追従するのに本ヘルパーだけ旧ドメインへ取り残され、WebPage `@id`/`url` と BreadcrumbList の `item` 絶対URLが乖離する（tsc は文字列リテラルのドリフトを検知しない）。
+- **修正（当班所有のみ）**: `SITE_BASE` を `import { SITE_URL } from "@/lib/seo-metadata"` 由来へ差し替え（エイリアス名 `SITE_BASE` は呼び出し側の可読性のため残し、値の直書きだけ撤去）。出力 JSON-LD は SITE_URL が同値のため不変＝挙動 byte 相当で無改変。
+- **テスト（ハードコード回帰ガード付き）**: `page-json-ld.test.tsx`(5 it)を新設＝(1)既定パンくずが `${SITE_URL}/pricing` 等の絶対URLを出力・position 1始まり連番 (2)明示パンくずの全 item が `SITE_URL` prefix (3)keywords/contributor(Person)/isPartOf(SITE_NAME/SITE_URL) の WebPage 伝播 (4)可視パンくず `<nav aria-label="パンくずリスト">` を1つ描画 (5)**ソース文字列に `SITE_URL` の裸ドメインを一切埋め込まない**＝再度の直書き取り残しを機械検知（json-ld.tsx 集約と同方針の drift ガード）。
+- **ゲート**: `tsc --noEmit`=0 / `eslint`=errors0（既存 warn 23 は無改変・当該2ファイル外）/ `vitest run`=**全2382テスト緑**（新規5含む）/ `build`=成功。build 再生成物は `git checkout` で復元。working tree は page-json-ld.tsx/test の2ファイル＋BACKLOG/cycle-log のみで clean。
+- **要・他班なし**＝全て当班所有の JSON-LD ヘルパー lib 内で完結。
+
+残: 本 PR #698＋#691(再走) の CI 緑回収＆マージ（次イテレーション 1)）。次の未着手は補充の指針§に従い自領域から補充。
+
+---
+
 ## 2026-07-03 — 柱C-2 横断検索 notice-search.ts の回帰テスト新設（PR: seo/search-categories-single-source）
 
 回収: 前イテレーションの自班 CI 緑 PR #666（安全標識 横断検索）を squashマージ→`git checkout main && git pull --ff-only`→clean。#670（保護具 横断検索）は #666 マージで search-index.ts/SearchResults/CommandPalette/BACKLOG/cycle-log が衝突(DIRTY)→**origin/main を当該ブランチへ通常マージ**で解決＝`SearchCategory` union は equipment(HEAD)∪sign(main) の和集合に、CATEGORIES 配列・countByCategory・CategoryIcon も両方併存させ、BACKLOG/cycle-log の [x] 完了エントリは3本(保護具/標識/化学物質)を全て残す（force-push 不可を厳守）。tsc0・lint errors0・全2311テスト緑・build成功を確認して push＝CI 再走は次イテレーションで回収。#674(RSS)は CI pending のため持ち越し。他班 OPEN PR は不可侵。
