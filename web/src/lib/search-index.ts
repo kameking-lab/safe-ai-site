@@ -1,6 +1,6 @@
 import { searchCrossIndex, normalizeArticleQuery, expandLawAliases } from './cross-search';
 
-export type SearchCategory = 'law' | 'notice' | 'chemical' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq';
+export type SearchCategory = 'law' | 'notice' | 'chemical' | 'equipment' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq';
 
 export interface SearchItem {
   id: string;
@@ -30,6 +30,9 @@ const SEARCH_CATEGORY_PRIORITY: readonly SearchCategory[] = [
   'glossary',
   'chemical',
   'accident',
+  // 保護具は商品レコメンド（アフィリエイト）＝法令・通達・判例より権威が低いため、
+  // 同点タイブレークでは最下位に置き、権威コンテンツの上位を決して奪わない。
+  'equipment',
 ];
 
 export const CATEGORY_META: Record<
@@ -39,6 +42,7 @@ export const CATEGORY_META: Record<
   law:       { label: '法令',    bgColor: 'bg-teal-100',   textColor: 'text-teal-700' },
   notice:    { label: '通達',    bgColor: 'bg-blue-100',   textColor: 'text-blue-700' },
   chemical:  { label: '化学物質', bgColor: 'bg-orange-100', textColor: 'text-orange-700' },
+  equipment: { label: '保護具',   bgColor: 'bg-amber-100',  textColor: 'text-amber-700' },
   education: { label: '教育',    bgColor: 'bg-green-100',  textColor: 'text-green-700' },
   accident:  { label: '事故',    bgColor: 'bg-red-100',    textColor: 'text-red-700' },
   precedent: { label: '判例',    bgColor: 'bg-emerald-100', textColor: 'text-emerald-700' },
@@ -86,7 +90,7 @@ export function countByCategory(
   query: string,
 ): Record<'all' | SearchCategory, number> {
   const counts: Record<'all' | SearchCategory, number> = {
-    all: 0, law: 0, notice: 0, chemical: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0,
+    all: 0, law: 0, notice: 0, chemical: 0, equipment: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0,
   };
   if (!query.trim()) return counts;
   // 上限なしで全件マッチを採り、カテゴリ別に集計する。
@@ -209,6 +213,27 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
             url: `/chemical-database?q=${encodeURIComponent(e.name)}`,
           });
         }
+      }
+    }),
+
+    // 保護具（安全用品DB）。正本 getAllEquipment()＝詳細 /equipment/[id] の
+    // generateStaticParams が解決する集合そのもの（eq-NNNN）なので、ここから引けば
+    // 「検索結果→詳細ページ」が必ず解決し（幽霊URL 0）データ追加にも自動追従する。
+    // これまで保護具（フルハーネス・防じんマスク・安全帯…）は横断検索(/search・⌘K)から
+    // 丸ごと 0 件で、sitemap-equipment.xml に個別ページを収載済みなのに現場頻用の保護具名で
+    // 引けない発見性の穴だった（#561 accident・化学物質と同型）。keywords はカテゴリ名・
+    // 小分類・メーカー・JIS/検定規格＝日本語で実際に検索される語のみ（industries/hazards は
+    // 英語コードのため除外＝ノイズ回避）。title は製品名、subtitle にカテゴリ名＋規格を出す。
+    import('@/lib/equipment-recommendation').then(({ getAllEquipment }) => {
+      for (const e of getAllEquipment()) {
+        items.push({
+          id: `equipment-${e.id}`,
+          title: e.name,
+          subtitle: `${e.categoryName}　${e.spec}`.slice(0, 90),
+          category: 'equipment',
+          keywords: [e.categoryName, e.subCategory ?? '', e.maker ?? '', e.jisOrCertification].filter(Boolean),
+          url: `/equipment/${e.id}`,
+        });
       }
     }),
 
