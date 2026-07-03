@@ -37,6 +37,12 @@ describe("/faq 柱0 44pxタップ標的", () => {
     const input = screen.getByPlaceholderText("このカテゴリ内で絞り込み…");
     expect(input.className).toContain("min-h-[44px]");
   });
+
+  it("ハブ: 「FAQを検索する」リンクが 44px タップ標的を満たす", () => {
+    render(<FAQHubPage />);
+    const link = screen.getByRole("link", { name: /FAQを検索する/ });
+    expect(link.className).toContain("min-h-[44px]");
+  });
 });
 
 describe("/faq E-E-A-T監修者バイライン", () => {

@@ -118,7 +118,7 @@ export function SchedulerForm() {
                 key={j.id}
                 onClick={() => toggle(jobIds, j.id, setJobIds)}
                 aria-pressed={active}
-                className={`rounded border px-3 py-2 text-left text-sm transition ${
+                className={`min-h-[44px] rounded border px-3 py-2 text-left text-sm transition ${
                   active
                     ? "border-emerald-600 bg-emerald-50 text-emerald-900"
                     : "border-slate-300 bg-white text-slate-700 hover:border-emerald-600"
@@ -150,7 +150,7 @@ export function SchedulerForm() {
                 key={s}
                 onClick={() => toggle(substances, s, setSubstances)}
                 aria-pressed={active}
-                className={`rounded-full border px-3 py-1.5 text-xs transition ${
+                className={`min-h-[44px] rounded-full border px-3 py-1.5 text-xs transition ${
                   active
                     ? "border-emerald-600 bg-emerald-600 text-white"
                     : "border-slate-300 bg-white text-slate-700 hover:border-emerald-600"
@@ -180,7 +180,7 @@ export function SchedulerForm() {
                 key={c}
                 onClick={() => toggle(workConditions, c, setWorkConditions)}
                 aria-pressed={active}
-                className={`rounded-full border px-3 py-1.5 text-xs transition ${
+                className={`min-h-[44px] rounded-full border px-3 py-1.5 text-xs transition ${
                   active
                     ? "border-emerald-600 bg-emerald-600 text-white"
                     : "border-slate-300 bg-white text-slate-700 hover:border-emerald-600"
@@ -197,13 +197,13 @@ export function SchedulerForm() {
         <button
           type="button"
           onClick={handleReset}
-          className="rounded border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:border-slate-400 hover:bg-slate-50"
+          className="min-h-[44px] rounded border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:border-slate-400 hover:bg-slate-50"
         >
           選択をリセット
         </button>
         <button
           type="submit"
-          className="rounded bg-emerald-600 px-6 py-2.5 text-base font-semibold text-white shadow hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+          className="min-h-[44px] rounded bg-emerald-600 px-6 py-2.5 text-base font-semibold text-white shadow hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
         >
           必要な健診を判定する
         </button>

@@ -225,7 +225,7 @@ export function CommitteeClient() {
                     <input type="date" value={a.due} onChange={(e) => updateItem(a.id, { due: e.target.value })} className="rounded-md border border-slate-300 px-2 py-1 text-xs" />
                   </div>
                 </div>
-                <button type="button" onClick={() => removeItem(a.id)} className="shrink-0 rounded p-1 text-rose-500 hover:bg-rose-50 print:hidden" aria-label={`議題${idx + 1}を削除`}>
+                <button type="button" onClick={() => removeItem(a.id)} className="flex min-h-[44px] shrink-0 items-center rounded p-1 text-rose-500 hover:bg-rose-50 print:hidden" aria-label={`議題${idx + 1}を削除`}>
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>

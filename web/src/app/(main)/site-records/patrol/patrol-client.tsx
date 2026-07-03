@@ -202,7 +202,7 @@ export function PatrolClient() {
                     key={r}
                     type="button"
                     onClick={() => setResult(c.key, r)}
-                    className={`rounded-md border px-2.5 py-1 text-xs font-bold transition ${
+                    className={`min-h-[44px] rounded-md border px-2.5 py-1 text-xs font-bold transition ${
                       c.result === r
                         ? r === "ok"
                           ? "border-emerald-500 bg-emerald-600 text-white"
@@ -258,7 +258,7 @@ export function PatrolClient() {
                       </label>
                     </div>
                   </div>
-                  <button type="button" onClick={() => removeFinding(f.id)} className="shrink-0 rounded p-1 text-rose-500 hover:bg-rose-50 print:hidden" aria-label={`指摘${idx + 1}を削除`}>
+                  <button type="button" onClick={() => removeFinding(f.id)} className="flex min-h-[44px] shrink-0 items-center rounded p-1 text-rose-500 hover:bg-rose-50 print:hidden" aria-label={`指摘${idx + 1}を削除`}>
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>

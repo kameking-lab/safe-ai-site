@@ -86,7 +86,7 @@ export default function FAQHubPage() {
         <div className="mt-4">
           <Link
             href="/faq/search"
-            className="inline-flex items-center gap-2 rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-bold text-white shadow hover:bg-slate-700 transition-colors"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-slate-800 px-4 py-2.5 text-sm font-bold text-white shadow hover:bg-slate-700 transition-colors"
           >
             <Search className="h-4 w-4" aria-hidden="true" />
             FAQを検索する

@@ -298,7 +298,7 @@ export function SignageTodayDocuments() {
             <>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-600 sm:text-sm"
+                className="min-h-[44px] rounded-lg bg-emerald-700 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-600 sm:text-sm"
               >
                 ＋ 資料を追加
               </button>
@@ -315,7 +315,7 @@ export function SignageTodayDocuments() {
           {items.length > 0 && (
             <button
               onClick={handleClearAll}
-              className="rounded-lg border border-rose-600/60 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-950/50 sm:text-sm"
+              className="min-h-[44px] rounded-lg border border-rose-600/60 px-3 py-1.5 text-xs font-semibold text-rose-300 hover:bg-rose-950/50 sm:text-sm"
             >
               一括クリア
             </button>
@@ -372,7 +372,7 @@ export function SignageTodayDocuments() {
               <button
                 onClick={() => handleRemove(currentItem.id)}
                 aria-label="この資料を削除"
-                className="absolute left-2 top-2 z-10 rounded-lg bg-rose-900/80 px-2 py-1 text-xs font-bold text-rose-200 hover:bg-rose-800 active:bg-rose-700"
+                className="absolute left-2 top-2 z-10 min-h-[44px] rounded-lg bg-rose-900/80 px-2 py-1 text-xs font-bold text-rose-200 hover:bg-rose-800 active:bg-rose-700"
               >
                 ✕ 削除
               </button>
