@@ -31,6 +31,30 @@ describe('expandLawAliases', () => {
     expect(expandLawAliases('いしわたそく')).toBe('石綿則');
   });
 
+  it('現場・一人親方・人事の頻用法令のかな読みを正略称へ差し替える', () => {
+    // 建設現場・一人親方の中核（音声/うろ覚え入力で頻発）
+    expect(expandLawAliases('けんせつぎょうほう')).toBe('建設業法');
+    expect(expandLawAliases('ろうさいほけんほう')).toBe('労災保険法');
+    // 人事・労務の頻用法令
+    expect(expandLawAliases('きんとうほう')).toBe('均等法');
+    expect(expandLawAliases('いくかいほう')).toBe('育介法');
+    expect(expandLawAliases('さいちんほう')).toBe('最賃法');
+    expect(expandLawAliases('しょくあんほう')).toBe('職安法');
+    expect(expandLawAliases('しょくのうほう')).toBe('職能法');
+    // 労基法の下位規則
+    expect(expandLawAliases('じょせいそく')).toBe('女性則');
+    expect(expandLawAliases('ねんしょうしゃそく')).toBe('年少者則');
+    // 専門規則
+    expect(expandLawAliases('さくかんそくほう')).toBe('作環測法');
+    expect(expandLawAliases('よんあるきるなまりそく')).toBe('四アルキル鉛則');
+    expect(expandLawAliases('きかいとうけんていきそく')).toBe('機械等検定規則');
+  });
+
+  it('追加読みも条番号分解の後段で他語を保って展開', () => {
+    expect(expandLawAliases('けんせつぎょうほう 第3条')).toBe('建設業法 第3条');
+    expect(expandLawAliases('ろうさいほけんほう 第7条')).toBe('労災保険法 第7条');
+  });
+
   it('表記ゆれ（全角・長音・小書き）を正規化して照合', () => {
     // normalizeSearchText 経由なので長音符種別・全角が違っても当たる
     expect(expandLawAliases('くれ−んそく')).toBe('クレーン則'); // U+2212 の長音

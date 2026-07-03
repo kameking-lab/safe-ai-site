@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-03 — 柱C-2 法令名かな読みエイリアスを現場頻用12法令へ拡張（PR: seo/law-alias-kana-readings-field-laws）
+
+回収: 自班 CI 緑 PR #674（RSSフィード自動発見）を squashマージ→`git checkout main && git pull --ff-only`→clean。#680（notice-search テスト）は #674 マージで BACKLOG/cycle-log の [x] 追記が衝突→当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決＝両完了エントリを併存させ push、CI 再走を次イテレーションで回収。#684（カテゴリタブ単一ソース化）は CI pending のため持ち越し。他班 OPEN PR は不可侵。
+
+着手判断: BACKLOG-seo 未着手キューは空（Fable診断の実装消化済・O17/T6・T7 は Path A 設計ドラフトでオーナー承認待ち）＋既存の補充候補「カテゴリタブ単一ソース化」は #684 で in-flight のため、補充指針に従い自領域から新規補充。**発見性の全域再監査**を実施＝(1) 静的ルート172本を sitemap.ts＋子sitemap6本と機械突合＝孤立ページ0（39差分は全て admin/auth/dev/print/redirect/noindex/user-generated で正しく非収載）、(2) robots(決裁A済)・manifest・sitemap-index は既達、(3) 横断検索10カテゴリも populate 済。真に残る穴として、**法令名かな読みエイリアス表(`law-alias.ts`)が現場頻用法令をカバーしていない**ことを特定＝LAW_METADATA 38法令中エイリアスは20法令のみ、うち検索可能条文を持つのに読みエイリアスが無い12法令（建設業法・労災保険法・均等法・育介法・最賃法・職安法・職能法・女性則・年少者則・作環測法・四アルキル鉛則・機械等検定規則）が音声/かな入力で0件になる取り逃し。※対象ファイル `law-alias.ts`（＋test）は in-flight の #680(notice-search.test)・#684(search-index/SearchResults/CommandPalette)と非重複＝衝突ゼロを確認して選択。
+
+実装: `LAW_NAME_ALIASES` に12法令のかな読み（略称の機械的音読み・コンテンツに literal 非出現＝既存ヒット非奪取の不変条件を厳守）を追加。**空振りエイリアス0の保証**＝収載前に `allLawArticles`/`mhlwLawArticles` を集計し全12法令が実在の検索可能条文を持つことを機械確認（建設業法4・労災保険法8・均等法4・女性則3…）。**実測検証**＝expandLawAliases＋searchCrossIndex で raw かな読みは0件→展開後に各法令の実条文が4/8/4/3件ヒットすることを確認（取り逃し是正を実証）。
+
+回帰: `law-alias.test.ts` に頻用12法令の展開1本＋条番号分解後段の他語保持1本を追加。既存の同期ガード(`LAW_ALIAS_SHORTS`⊂`KNOWN_LAW_SHORTS`)が全12略称の LAW_METADATA 実在を自動担保。locked不変条件(就業制限1位=安衛法61条・石綿事前調査1位=石綿則3条)は新読みトークンが当該クエリに非出現のため無影響。
+
+ゲート: `tsc --noEmit`=0（NODE_OPTIONS=--max-old-space-size=8192）/ `eslint`(2ファイル)=errors0 / `vitest run`=**全2351テスト緑**（cross-search 34含む・新規2）/ `build`=成功。build 再生成物（rag-metrics-latest.json・ky/meeting print snapshot・chatbot-eval-fresh-results.json）は `git checkout` で復元。working tree は law-alias.ts＋test の2ファイル＋BACKLOG/cycle-log のみで clean。
+
+残: 本 PR＋#680(再走)＋#684 の CI 緑回収＆マージ（次イテレーション 1)）。次の補充は自領域から。
+
+---
+
 ## 2026-07-03 — 横断検索カテゴリタブの単一ソース化（DRY・回帰／PR: seo/search-category-tabs-single-source）
 
 回収: 自班の CI 緑 PR を回収＝#670（保護具 横断検索）を squash マージ→`git checkout main && git pull --ff-only`→clean。#674（RSS フィード自動発見）は #670 マージで origin/main と CONFLICTING（BACKLOG/cycle-log の [x] 追記衝突2件のみ・コードは auto-merge）だったため当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決し push＝CI 再走を次イテレーションで回収。#680（notice-search 回帰テスト）は CI 実行中のため持ち越し。他班 OPEN PR は不可侵。
