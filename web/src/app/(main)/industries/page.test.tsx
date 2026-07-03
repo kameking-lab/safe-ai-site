@@ -29,4 +29,22 @@ describe("/industries hub page (業種別案内)", () => {
       expect(link.className).toContain("items-center");
     }
   });
+
+  it("「関連ページ」セクションのリンクが44pxタップ標的を満たす", () => {
+    render(<IndustriesHubPage />);
+    const relatedHrefs = [
+      "/accidents-reports",
+      "/strategy/plan-generator",
+      "/ky",
+      "/chatbot",
+      "/education-certification",
+      "/circulars",
+    ];
+    const links = screen.getAllByRole("link").filter((a) => relatedHrefs.includes(a.getAttribute("href") ?? ""));
+    expect(links).toHaveLength(relatedHrefs.length);
+    for (const link of links) {
+      expect(link.className).toContain("min-h-[44px]");
+      expect(link.className).toContain("items-center");
+    }
+  });
 });
