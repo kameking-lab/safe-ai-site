@@ -25,6 +25,7 @@ import {
   type ListSort,
 } from "@/lib/ky/record-list-filter";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { SAFETY_TONE, type SafetyTone } from "@/lib/design/safety-tone";
 
 const AUTOSAVE_KEY = "ky-record";
 
@@ -40,6 +41,7 @@ export function KyListClient() {
   const [sort, setSort] = useState<ListSort>("newest");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [noticeTone, setNoticeTone] = useState<SafetyTone>("safe");
   const [usingCloud, setUsingCloud] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -93,6 +95,7 @@ export function KyListClient() {
     try {
       const full = await loadFull(entry);
       if (!full) {
+        setNoticeTone("danger");
         setNotice("この記録の本体を読み込めませんでした（端末を移行した場合は元の端末に残っています）。");
         return;
       }
@@ -108,6 +111,7 @@ export function KyListClient() {
     try {
       const full = await loadFull(entry);
       if (!full) {
+        setNoticeTone("danger");
         setNotice("複製元の本体を読み込めませんでした。");
         return;
       }
@@ -128,6 +132,7 @@ export function KyListClient() {
         await ops.deleteKyRecord(entry.id);
       }
       await loadList();
+      setNoticeTone("safe");
       setNotice("削除しました。");
     } finally {
       setBusy(false);
@@ -184,9 +189,9 @@ export function KyListClient() {
       </div>
 
       {notice && (
-        <div className="mt-3 flex items-start justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5">
-          <p className="text-sm font-semibold text-emerald-900">{notice}</p>
-          <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="flex min-h-[44px] items-center rounded px-1.5 text-emerald-700 hover:bg-emerald-100">×</button>
+        <div role="status" className={`mt-3 flex items-start justify-between gap-3 rounded-xl border px-4 py-2.5 ${SAFETY_TONE[noticeTone].soft}`}>
+          <p className="text-sm font-semibold">{notice}</p>
+          <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className={`flex min-h-[44px] items-center rounded px-1.5 ${SAFETY_TONE[noticeTone].text} hover:bg-black/5`}>×</button>
         </div>
       )}
 

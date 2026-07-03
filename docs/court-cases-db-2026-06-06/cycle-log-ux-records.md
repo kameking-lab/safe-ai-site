@@ -662,3 +662,19 @@ Exploreエージェントで未監査route(safety-diary個別ページ5種・sit
 ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2711 pass（新規2件）・build成功（`/ky/workers`・`/ky/paper`・`○ /safety-diary`静的生成維持）。working tree clean。
 
 残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。
+
+## 2026-07-04 /ky/listの通知バー色文法違反（開く/複製失敗時も緑固定）を是正
+
+契約ステップ1: mainはclean・自レーンの未マージPRなし。作業ツリーに前回イテレーション由来と見られる未コミット差分（`ky-list-client.tsx`/`.test.tsx`の通知トーン対応）を発見・内容を検証（SAFETY_TONE経由の色出し分けとして完全・整合）し、そのまま本サイクルの成果として引き継ぎ確定。
+
+着手: BACKLOG-ux-records.md最上位の未着手3件(O15/S2/S3)はいずれもdataレーンO14依存で全ブロック中と確認。補充の指針どおり柱0巡回で新規発見分を採用。
+
+発見: **色の文法違反**: `KyListClient`(`/ky/list`)の通知バー（「開く」「今日用に複製」失敗時・「削除」成功時に出る帯）が`border-emerald-300 bg-emerald-50`固定で表示されており、本体を読み込めない失敗時でも緑の安全色が出て誤読を招いていた＝`records-backup.tsx`(#792)・`distributed-input-bar.tsx`(#799続き⑨)と同型のsafety-tone.ts不可侵ルール違反。
+
+実装: `SAFETY_TONE`(danger/safe)をimportし`noticeTone`stateを追加。`handleOpen`/`handleCopy`の本体読込失敗2箇所はdanger、`handleDelete`の削除完了はsafeを設定して通知バーの背景/枠/文字色・閉じるボタン文字色をトーンに追従（足すだけ・件数判定/保存ロジックは無変更）。
+
+検証: `ky-list-client.test.tsx`に新規4件（失敗時=rose系クラス・成功時=emerald系クラスをRTLで検証）。無読Playwright新規`docs/third-party-reviews/scripts/ky-list-notice-color-grammar-2026-07-04.mjs`6/6合格（本番ビルド起動・localStorageで本体無しエントリ/削除対象エントリを注入し実機で色クラスを確認）。
+
+ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2736 pass（新規4件）・build成功（`○ /ky/list`静的生成維持）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。
