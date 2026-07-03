@@ -1013,7 +1013,7 @@ export function KyPaperView() {
                       <option key={r.id} value={r.id}>{r.label}</option>
                     ))}
                   </select>
-                  <button type="button" onClick={handleWeather} disabled={weatherBusy} className="rounded border border-sky-300 bg-sky-50 px-2 py-1.5 text-xs font-bold text-sky-800 hover:bg-sky-100 disabled:opacity-50 print:hidden">
+                  <button type="button" onClick={handleWeather} disabled={weatherBusy} className="min-h-[44px] rounded border border-sky-300 bg-sky-50 px-2 py-1.5 text-xs font-bold text-sky-800 hover:bg-sky-100 disabled:opacity-50 print:hidden">
                     {weatherBusy ? "取得中…" : "自動取得"}
                   </button>
                   <input value={record.weather} onChange={(e) => patch({ weather: e.target.value })} placeholder="天気" className="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" />
@@ -1036,7 +1036,7 @@ export function KyPaperView() {
                   type="button"
                   onClick={() => void handleSuggest()}
                   disabled={suggestBusy}
-                  className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-800 hover:bg-indigo-100 disabled:opacity-50"
+                  className="min-h-[44px] rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-800 hover:bg-indigo-100 disabled:opacity-50"
                 >
                   {suggestBusy ? "AIが分析中…" : "🤖 AIに危険箇所を提案させる"}
                 </button>

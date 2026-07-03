@@ -158,7 +158,7 @@ describe('buildSearchIndex — 用語集（glossary）の収載', () => {
     const index = await buildSearchIndex();
     const c = countByCategory(index, '安全');
     expect(c.all).toBe(
-      c.law + c.notice + c.chemical + c.equipment + c.education + c.accident + c.precedent + c.glossary + c.faq + c.sign + c.article,
+      c.law + c.notice + c.chemical + c.equipment + c.education + c.accident + c.precedent + c.glossary + c.faq + c.sign + c.article + c.feature,
     );
   });
 });
@@ -296,6 +296,35 @@ describe('buildSearchIndex — 法改正記事（article）の収載', () => {
     // キーワード「フルハーネス」でも引ける
     const harness = searchItems(index, 'フルハーネス', 'article');
     expect(harness.some((i) => i.url === '/articles/fullharness-2022-revision')).toBe(true);
+  });
+});
+
+describe('buildSearchIndex — 機能ページ（feature）の収載', () => {
+  it('FLAGSHIP_FEATURES の主要機能が feature カテゴリで収載される（機能名 0 件だった穴の是正）', async () => {
+    const [index, { getSitePageSearchEntries }, { FLAGSHIP_FEATURES }] = await Promise.all([
+      buildSearchIndex(),
+      import('@/lib/site-pages-search-source'),
+      import('@/config/flagship-nav'),
+    ]);
+    const featureItems = index.filter((i) => i.category === 'feature');
+    // 射影源のエントリを漏れなく収載＝件数一致（欠落 0）
+    expect(featureItems.length).toBe(getSitePageSearchEntries().length);
+    expect(featureItems.length).toBeGreaterThanOrEqual(FLAGSHIP_FEATURES.length);
+    expect(featureItems.every((i) => i.id.startsWith('page-'))).toBe(true);
+    // url はベースパス（ハッシュ・クエリを含まない）＝実在ルートへ解決（drift ガードで機械固定）
+    expect(featureItems.every((i) => /^\/[^#?]*$/.test(i.url))).toBe(true);
+    expect(featureItems.every((i) => i.subtitle.length > 0)).toBe(true);
+  });
+
+  it('機能名クエリで目的の機能ページがヒットする（サイネージ・化学物質RA・作業環境測定）', async () => {
+    const index = await buildSearchIndex();
+    expect(searchItems(index, 'サイネージ', 'feature').some((i) => i.url === '/signage')).toBe(true);
+    expect(searchItems(index, '化学物質RA', 'feature').some((i) => i.url === '/chemical-ra')).toBe(true);
+    expect(
+      searchItems(index, '作業環境測定', 'feature').some((i) => i.url === '/work-environment-measurement'),
+    ).toBe(true);
+    // 2 語 AND も subtitle（カード見出し/配下説明）で補助して機能へ収束する
+    expect(searchItems(index, '事故 分析', 'feature').length).toBeGreaterThan(0);
   });
 });
 

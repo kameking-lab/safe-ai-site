@@ -333,6 +333,32 @@ function Get-AncestorPids {
   return $out
 }
 
+# Force-kill a process AND its whole child tree. Windows PowerShell 5.1 runs on .NET Framework, whose
+# [System.Diagnostics.Process].Kill() has NO entireProcessTree overload - it kills ONLY the named process.
+# So a plain $p.Kill() on a timed-out one-shot (planner/critic) leaves the claude child tree ORPHANED and
+# still running: for the critic that is a live claude writing inside the very worktree the finally then
+# 'git worktree remove --force's (corruption / a leaked worktree / the git race the isolation exists to
+# prevent, re-opened); for the planner an orphan racing the lane runner the ignition loop then starts in
+# the same clone. taskkill /F /T terminates the descendants too, mirroring the runner's wedge monitor.
+# Pure arg builder so -SelfTest can assert the exact command offline.
+function Get-TreeKillArgs {
+  param([int]$ProcessId)
+  return @("/F", "/T", "/PID", [string]$ProcessId)
+}
+
+# Thin live wrapper: tree-kill $Proc, then wait (bounded) for it to actually exit so a caller's teardown
+# (e.g. the critic worktree remove) never races a still-dying tree. Safe no-op on a null handle; never
+# throws (a scan/kill failure must not abort the launcher pass).
+function Stop-ProcessTree {
+  param([System.Diagnostics.Process]$Proc)
+  if ($null -eq $Proc) { return }
+  try {
+    $killArgs = Get-TreeKillArgs -ProcessId $Proc.Id
+    & taskkill @killArgs 2>&1 | Out-Null
+  } catch {}
+  try { $null = $Proc.WaitForExit(10000) } catch {}
+}
+
 # Cooperatively cycle (kill-only) every below-floor lane runner that is currently idle. Returns the list
 # of lane names cycled (or that WOULD be cycled under -WhatIf). Kill-only by design: the caller's normal
 # relaunch path resurrects the lane onto fresh code. Honors -WhatIf (logs, kills nothing). The optional
@@ -518,6 +544,29 @@ function Invoke-Git {
   } catch { return @{ ok = $false; out = $_.Exception.Message } }
 }
 
+# The BACKLOG files the critic INJECTS its S/A findings into (loop-prompt-critic.txt step 4): one per
+# lane plus the ops-mechanism sink. Kept as a pure single-source-of-truth list so both the rehearsal
+# (below) and -SelfTest can assert the set without re-typing it. If a lane's BACKLOG is ever renamed
+# and this list drifts, the mismatch surfaces in the rehearsal's own target check rather than in a
+# silent stray-file commit by the unattended critic.
+function Get-CriticInjectionTargets {
+  return @('BACKLOG-data.md', 'BACKLOG-seo.md', 'BACKLOG-ux-hub.md', 'BACKLOG-ux-records.md', 'BACKLOG-ux-tools.md', 'BACKLOG-ops.md')
+}
+# Pure set-difference: which of $Targets do NOT exist as files directly under $Root. Offline-testable
+# (temp dir, no git) and null/blank-safe so -SelfTest covers the missing-target failure mode. A missing
+# target means the critic would either misfire its injection or `git add` a brand-new stray BACKLOG at
+# the repo root - so the rehearsal treats a non-empty result as a hard FAIL.
+function Get-MissingCriticTargets {
+  param([string]$Root, [string[]]$Targets)
+  $missing = New-Object System.Collections.Generic.List[string]
+  if ([string]::IsNullOrWhiteSpace($Root)) { foreach ($t in @($Targets)) { if (-not [string]::IsNullOrWhiteSpace($t)) { $missing.Add($t) } }; return $missing.ToArray() }
+  foreach ($t in @($Targets)) {
+    if ([string]::IsNullOrWhiteSpace($t)) { continue }
+    if (-not (Test-Path -LiteralPath (Join-Path $Root $t))) { $missing.Add($t) }
+  }
+  return $missing.ToArray()
+}
+
 # ---------------------------------------------------------------------------
 # Exercise the EXACT git-worktree plumbing the weekly critic uses (fetch origin/main -> worktree add
 # --detach a sibling checkout -> verify it carries its own loop-runner.ps1 -> worktree remove --force
@@ -539,7 +588,7 @@ function Invoke-CriticRehearsal {
     return @{ ok = $false; steps = $steps; worktree = $wtPath }
   }
   if ($DryRun) {
-    $steps.Add("[WHATIF] would fetch origin/main, add a detached worktree at " + $wtPath + " (git " + ((Get-WorktreeAddArgs -Path $wtPath -Ref 'origin/main') -join ' ') + "), verify it carries its own loop-runner.ps1, then remove it (git " + ((Get-WorktreeRemoveArgs -Path $wtPath) -join ' ') + "). No git executed in dry-run.")
+    $steps.Add("[WHATIF] would fetch origin/main, add a detached worktree at " + $wtPath + " (git " + ((Get-WorktreeAddArgs -Path $wtPath -Ref 'origin/main') -join ' ') + "), verify it carries its own loop-runner.ps1 AND all critic injection targets [" + ((Get-CriticInjectionTargets) -join ', ') + "], then remove it (git " + ((Get-WorktreeRemoveArgs -Path $wtPath) -join ' ') + "). No git executed in dry-run.")
     return @{ ok = $true; steps = $steps; worktree = $wtPath }
   }
   $ok = $true
@@ -557,6 +606,14 @@ function Invoke-CriticRehearsal {
       $hasRunner = Test-Path -LiteralPath (Join-Path $wtPath "loop-runner.ps1")
       $steps.Add("checkout carries its own loop-runner.ps1 (one-shot target): " + $hasRunner); if (-not $hasRunner) { $ok = $false }
       $steps.Add("checkout carries loop-prompt-critic.txt (origin/main sanity): " + (Test-Path -LiteralPath (Join-Path $wtPath "loop-prompt-critic.txt")))
+      # The other half of the critic's plumbing: the BACKLOG files it injects S/A findings into must
+      # exist in the deployed HEAD, else the unattended fire would misfire or commit a stray BACKLOG.
+      $missingTargets = Get-MissingCriticTargets -Root $wtPath -Targets (Get-CriticInjectionTargets)
+      if ($missingTargets.Count -eq 0) {
+        $steps.Add("checkout carries all critic injection targets [" + ((Get-CriticInjectionTargets) -join ', ') + "]: True")
+      } else {
+        $steps.Add("FAIL: critic injection targets MISSING from origin/main checkout: " + ($missingTargets -join ', ')); $ok = $false
+      }
     }
   } finally {
     if (Test-Path -LiteralPath $wtPath) {
@@ -631,6 +688,19 @@ if ($SelfTest) {
     Assert-L "worktree path is a sibling of the repo (not nested)" (Test-WorktreeIsIsolated -RepoRoot $repoFixture -WorktreePath $wt)
     Assert-L "a nested worktree path FAILS isolation" (-not (Test-WorktreeIsIsolated -RepoRoot $repoFixture -WorktreePath (Join-Path $repoFixture "wt")))
     Assert-L "the repo path itself FAILS isolation" (-not (Test-WorktreeIsIsolated -RepoRoot $repoFixture -WorktreePath $repoFixture))
+    # J) Critic injection targets: the rehearsal must catch a MISSING BACKLOG sink before the unattended
+    #    fire silently misfires/commits a stray file. Get-MissingCriticTargets is the offline oracle.
+    $targets = Get-CriticInjectionTargets
+    Assert-L "critic targets are the 5 lane BACKLOGs + ops sink" ($targets.Count -eq 6 -and ($targets -contains 'BACKLOG-ops.md') -and ($targets -contains 'BACKLOG-ux-hub.md'))
+    $tgtRoot = Join-Path $tmp "tgtroot"
+    New-Item -ItemType Directory -Path $tgtRoot -Force | Out-Null
+    foreach ($t in $targets) { New-Item -ItemType File -Path (Join-Path $tgtRoot $t) -Force | Out-Null }
+    Assert-L "all targets present -> zero missing" ((Get-MissingCriticTargets -Root $tgtRoot -Targets $targets).Count -eq 0)
+    Remove-Item -LiteralPath (Join-Path $tgtRoot 'BACKLOG-seo.md') -Force
+    $miss = @(Get-MissingCriticTargets -Root $tgtRoot -Targets $targets)
+    Assert-L "a removed target is reported missing (rehearsal would FAIL)" ($miss.Count -eq 1 -and $miss[0] -eq 'BACKLOG-seo.md')
+    Assert-L "missing-targets on a blank root reports ALL targets (never silently passes)" ((Get-MissingCriticTargets -Root '' -Targets $targets).Count -eq 6)
+    Assert-L "missing-targets ignores blank entries in the target list (null-safe)" ((Get-MissingCriticTargets -Root $tgtRoot -Targets @('', $null)).Count -eq 0)
     # J) The git arg builders emit the exact isolating command (detached add, forced remove).
     $addArgs = Get-WorktreeAddArgs -Path $wt -Ref "origin/main"
     Assert-L "worktree add is detached at the given ref" (($addArgs -join " ") -eq ("worktree add --detach " + $wt + " origin/main"))
@@ -734,6 +804,14 @@ if ($SelfTest) {
     Assert-L "watchdog: script present + one already running -> do NOT spawn (idempotent, no churn)" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $true -AlreadyRunning $true))
     Assert-L "watchdog: script missing -> never spawn (even when none running)" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $false -AlreadyRunning $false))
     Assert-L "watchdog: script missing + one running -> still no spawn" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $false -AlreadyRunning $true))
+    # S) Get-TreeKillArgs / Stop-ProcessTree: a timed-out one-shot must be TREE-killed (taskkill /F /T), not
+    #    single-process $p.Kill()'d, or its claude child tree orphans and (for the critic) keeps writing
+    #    inside the worktree the finally then force-removes. Assert the exact command + the null no-op.
+    Assert-L "treekill: builds the exact 'taskkill /F /T /PID <id>' arg vector" (((Get-TreeKillArgs -ProcessId 4242) -join " ") -eq "/F /T /PID 4242")
+    Assert-L "treekill: emits 4 tokens with the PID rendered as a string" (((Get-TreeKillArgs -ProcessId 7).Count -eq 4) -and ((Get-TreeKillArgs -ProcessId 7)[3] -eq "7"))
+    $treeNullSafe = $true
+    try { Stop-ProcessTree -Proc $null } catch { $treeNullSafe = $false }
+    Assert-L "treekill: Stop-ProcessTree on a null handle is a safe no-op (never throws)" $treeNullSafe
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -1237,8 +1315,11 @@ function Invoke-OneShot {
   Write-Launcher ("running " + $Kind + " one-shot (tag=" + $tag + ", model=" + $Model + ", timeout=" + $TimeoutMin + "min)...")
   $p = Start-Process -FilePath "powershell" -ArgumentList $argList -WorkingDirectory $LaneRepo -PassThru
   if (-not $p.WaitForExit($TimeoutMin * 60 * 1000)) {
-    try { $p.Kill() } catch {}
-    Write-Launcher ("WARN: " + $Kind + " one-shot exceeded " + $TimeoutMin + "min; killed and continuing.")
+    # Tree-kill (NOT $p.Kill(), which is single-process on .NET Framework): orphaning the claude child
+    # would let it keep writing inside the critic worktree the finally then force-removes. Stop-ProcessTree
+    # also waits (bounded) for the tree to die so that teardown does not race a still-dying claude.
+    Stop-ProcessTree -Proc $p
+    Write-Launcher ("WARN: " + $Kind + " one-shot exceeded " + $TimeoutMin + "min; force-killed its whole process tree (claude included) and continuing.")
     return "timeout"
   }
   Write-Launcher ($Kind + " one-shot finished (exit=" + $p.ExitCode + ").")

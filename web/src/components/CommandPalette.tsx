@@ -17,6 +17,7 @@ import {
   HardHat,
   Signpost,
   Newspaper,
+  LayoutGrid,
   MessageSquare,
   ListChecks,
   BarChart3,
@@ -63,6 +64,7 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
     case 'equipment': return <HardHat className={cls} />;
     case 'sign':      return <Signpost className={cls} />;
     case 'article':   return <Newspaper className={cls} />;
+    case 'feature':   return <LayoutGrid className={cls} />;
   }
 }
 
