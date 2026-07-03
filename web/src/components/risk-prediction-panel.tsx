@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 // C-1（モバイル実速度の構造是正）: 事故データセット（生約340KB）を静的 import すると
 // /risk-prediction の client バンドルに同梱され、本ページへ Link する全ページ
@@ -579,6 +580,7 @@ export function RiskPredictionPanel() {
   const [activeTab, setActiveTab] = useState<TabId>("search");
   const [results, setResults] = useState<ScoredAccidentCase[]>([]);
   const [searched, setSearched] = useState(false);
+  const [searching, setSearching] = useState(false);
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   // 判定後、結論カードを画面最上部に出す（柱0: 入力の下→最上部）。
   // チップは画面中ほどにあり、タップ後のスクロール位置のままだと結論カードを
@@ -588,11 +590,16 @@ export function RiskPredictionPanel() {
   // データロード完了前のクリックでも0件にならないよう、検索系は常に
   // loadAccidentCasesDataset() を経由する（2回目以降は import キャッシュで即時解決）
   const runSearch = useCallback((q: string) => {
+    setSearching(true);
+    requestAnimationFrame(() => {
+      conclusionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
     void loadAccidentCasesDataset().then((cases) => {
       const found = searchAccidentCases(q, cases, 30);
       setResults(found);
       setSearched(true);
       setActiveTab("search");
+      setSearching(false);
       requestAnimationFrame(() => {
         conclusionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       });
@@ -623,8 +630,20 @@ export function RiskPredictionPanel() {
       {/* 判定結果の結論カード（柱0: 1画面1メッセージ・最上部）。
           検索後は入力より上に出し、3秒で「スコア＋リスクレベル＋次にやること」が目に入る。 */}
       <div ref={conclusionRef} className="scroll-mt-4">
-        {searched && safetyScore && (
-          <TopSummaryCard score={safetyScore} results={results} onShowDetail={() => setActiveTab("score")} />
+        {searching ? (
+          <div
+            role="status"
+            aria-live="polite"
+            data-testid="risk-searching"
+            className="flex items-center gap-2 rounded-2xl border-2 border-slate-200 bg-slate-50 p-4 text-sm font-semibold text-slate-600 shadow-sm sm:p-5"
+          >
+            <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+            検索中…
+          </div>
+        ) : (
+          searched && safetyScore && (
+            <TopSummaryCard score={safetyScore} results={results} onShowDetail={() => setActiveTab("score")} />
+          )
         )}
       </div>
 
@@ -714,11 +733,12 @@ export function RiskPredictionPanel() {
           <div className="flex flex-col justify-end">
             <button
               type="button"
-              className="h-full min-h-[44px] rounded-xl bg-emerald-600 px-6 py-2 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 sm:text-base"
+              className="h-full min-h-[44px] inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-2 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50 sm:text-base"
               onClick={handleSearch}
-              disabled={!query.trim()}
+              disabled={!query.trim() || searching}
             >
-              検索
+              {searching && <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />}
+              {searching ? "検索中…" : "検索"}
             </button>
           </div>
         </div>
@@ -737,7 +757,8 @@ export function RiskPredictionPanel() {
                   setQuery(chip.query);
                   runSearch(chip.query);
                 }}
-                className="min-h-[44px] min-w-[64px] rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 hover:border-emerald-400 hover:bg-emerald-100"
+                disabled={searching}
+                className="min-h-[44px] min-w-[64px] rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 hover:border-emerald-400 hover:bg-emerald-100 disabled:opacity-50"
               >
                 {chip.label}
               </button>
@@ -757,7 +778,8 @@ export function RiskPredictionPanel() {
                   setQuery(ex);
                   runSearch(ex);
                 }}
-                className="min-h-[44px] rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                disabled={searching}
+                className="min-h-[44px] rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700 disabled:opacity-50"
               >
                 {ex}
               </button>
