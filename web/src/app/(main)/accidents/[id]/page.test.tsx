@@ -11,6 +11,7 @@ const all = getAccidentCasesDataset();
 const target = all.find(
   (c) => all.filter((o) => o.id !== c.id && (o.type === c.type || o.workCategory === c.workCategory)).length > 0
 )!;
+const targetWithSourceUrl = all.find((c) => /^mhlw-\d+$/.test(c.id))!;
 
 describe("/accidents/[id] 柱0 44pxタップ標的", () => {
   it("「事故DBに戻る →」リンクが 44px タップ標的を満たす", async () => {
@@ -31,5 +32,12 @@ describe("/accidents/[id] 柱0 44pxタップ標的", () => {
       expect(link.className).toContain("min-h-[44px]");
       expect(link.className).toContain("items-center");
     }
+  });
+
+  it("「出典元を開く」外部リンクが 44px タップ標的を満たす", async () => {
+    render(await AccidentDetailPage({ params: Promise.resolve({ id: targetWithSourceUrl.id }) }));
+    const sourceLink = screen.getByRole("link", { name: /出典元を開く/ });
+    expect(sourceLink.className).toContain("min-h-[44px]");
+    expect(sourceLink.className).toContain("items-center");
   });
 });

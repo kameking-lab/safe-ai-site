@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   organizationSchema,
   webSiteSchema,
+  ORG_ID,
+  WEBSITE_ID,
   articleListSchema,
   newsArticleSchema,
   newsArticleListSchema,
@@ -44,7 +46,19 @@ describe("organizationSchema / webSiteSchema", () => {
       width: 180,
       height: 180,
     });
-    expect(s.sameAs).toEqual([SITE_URL]);
+    // 主要エンティティは安定 @id で同定する（グラフ集約の基点）。
+    expect(s["@id"]).toBe(ORG_ID);
+    expect(ORG_ID).toBe(`${SITE_URL}/#organization`);
+    // 自己参照 sameAs（同定価値ゼロ・バリデータ smell）は付与しない。
+    expect(s.sameAs).toBeUndefined();
+  });
+
+  it("WebSite は @id を持ち publisher で Organization を参照する", () => {
+    const s = webSiteSchema();
+    expect(s["@id"]).toBe(WEBSITE_ID);
+    expect(WEBSITE_ID).toBe(`${SITE_URL}/#website`);
+    // インライン再宣言ではなく @id 参照で正準 Organization ノードへ結ぶ。
+    expect(s.publisher).toEqual({ "@id": ORG_ID });
   });
 
   it("WebSite の SearchAction は /search に正規化されている", () => {
@@ -63,6 +77,59 @@ describe("organizationSchema / webSiteSchema", () => {
     expect(action.target.urlTemplate).toContain("/search?q=");
     expect(action.target.urlTemplate).not.toContain("/law-search");
     expect(action["query-input"]).toBe("required name=search_term_string");
+  });
+});
+
+describe("エンティティグラフ: 発行主体ノードの @id 集約", () => {
+  // 各スキーマが author/publisher/provider として出す「自サイト組織」ノードは、
+  // 全て正準 Organization ノード（ORG_ID）を指し、重複ノードへ分裂しないこと。
+  it("Article/NewsArticle リストの author・publisher が ORG_ID を指す", () => {
+    const els = articleListSchema([
+      { headline: "x", datePublished: "2026-01-01", url: `${SITE_URL}/x` },
+    ]).itemListElement as Array<{
+      item: { author: { "@id": string }; publisher: { "@id": string } };
+    }>;
+    expect(els[0].item.author["@id"]).toBe(ORG_ID);
+    expect(els[0].item.publisher["@id"]).toBe(ORG_ID);
+
+    const nels = newsArticleListSchema([
+      { headline: "x", datePublished: "2026-01-01", url: `${SITE_URL}/x` },
+    ]).itemListElement as Array<{
+      item: { author: { "@id": string }; publisher: { "@id": string } };
+    }>;
+    expect(nels[0].item.author["@id"]).toBe(ORG_ID);
+    expect(nels[0].item.publisher["@id"]).toBe(ORG_ID);
+  });
+
+  it("個別 NewsArticle の publisher が ORG_ID を指す", () => {
+    const s = newsArticleSchema({
+      headline: "見出し",
+      description: "説明",
+      url: `${SITE_URL}/news/1`,
+      datePublished: "2026-01-01",
+      dateModified: "2026-02-01",
+      authorName: "編集部",
+    });
+    expect((s.publisher as { "@id": string })["@id"]).toBe(ORG_ID);
+  });
+
+  it("WebPage の isPartOf=WEBSITE_ID・publisher=ORG_ID を参照する", () => {
+    const s = webPageSchema({
+      name: "ページ",
+      description: "説明",
+      url: `${SITE_URL}/p`,
+    });
+    expect((s.isPartOf as { "@id": string })["@id"]).toBe(WEBSITE_ID);
+    expect((s.publisher as { "@id": string })["@id"]).toBe(ORG_ID);
+  });
+
+  it("WebApplication の provider が ORG_ID を指す", () => {
+    const s = webApplicationSchema({
+      name: "ツール",
+      description: "説明",
+      url: `${SITE_URL}/tool`,
+    });
+    expect((s.provider as { "@id": string })["@id"]).toBe(ORG_ID);
   });
 });
 

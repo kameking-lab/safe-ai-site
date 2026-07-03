@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
+import { SITE_DISPLAY_HOST } from "@/lib/seo-metadata";
 
 export const runtime = "edge";
 
@@ -101,7 +102,7 @@ export function GET(req: NextRequest) {
             letterSpacing: "0.05em",
           }}
         >
-          anzen-ai-portal.jp
+          {SITE_DISPLAY_HOST}
         </div>
       </div>
     ),
