@@ -11,7 +11,7 @@
  */
 import type { ReactNode } from "react";
 import { CONTRACTOR_TYPES, PRIORITY_LABEL, type MeetingRecord, type ContractorType } from "@/lib/meeting/schema";
-import { contractorFieldKey, getMeetingPaperFieldDef, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
+import { contractorFieldKey, deliveryFieldKey, getMeetingPaperFieldDef, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
 
 const th = "border border-black bg-slate-100 px-1 py-0.5 text-center align-middle font-bold";
 const td = "border border-black px-1 py-0.5 align-top";
@@ -27,6 +27,8 @@ export type MeetingPrintSheetEditing = {
   emptyKeys?: ReadonlySet<string>;
   /** 各社マトリクスの行追加ホットスポット（S1第三弾: 動的行）。省略時は「＋元請/1次/2次/3次」を出さない。 */
   onAddContractorRow?: (type: ContractorType) => void;
+  /** 搬入出予定の行追加ホットスポット（S1第五弾: 動的行）。省略時は「＋搬入出行を追加」を出さない。 */
+  onAddDeliveryRow?: () => void;
 };
 
 /**
@@ -217,10 +219,39 @@ export function MeetingPrintSheet({ record, editing }: { record: MeetingRecord; 
         <table className="w-full border-collapse">
           <thead><tr><th className={`${th} w-[40%]`}>搬入出 物</th><th className={`${th} w-[25%]`}>時刻</th><th className={th}>場所</th></tr></thead>
           <tbody>
-            {record.deliveries.filter((d) => d.item || d.time || d.place).map((d) => (
-              <tr key={d.id}><td className={td}>{d.item}</td><td className={`${td} text-center`}>{d.time}</td><td className={td}>{d.place}</td></tr>
-            ))}
-            {record.deliveries.every((d) => !d.item && !d.time && !d.place) && (<tr><td className={td}>&nbsp;</td><td className={td}></td><td className={td}></td></tr>)}
+            {editing ? (
+              <>
+                {/* S1第五弾: 動的行。全行(空欄含む)をタップ標的にする */}
+                {record.deliveries.map((d) => (
+                  <tr key={d.id}>
+                    <td className={td}><EditableCell editing={editing} fieldKey={deliveryFieldKey(d.id, "item")}>{d.item}</EditableCell></td>
+                    <td className={`${td} text-center`}><EditableCell editing={editing} fieldKey={deliveryFieldKey(d.id, "time")}>{d.time}</EditableCell></td>
+                    <td className={td}><EditableCell editing={editing} fieldKey={deliveryFieldKey(d.id, "place")}>{d.place}</EditableCell></td>
+                  </tr>
+                ))}
+                {editing.onAddDeliveryRow && (
+                  <tr>
+                    <td colSpan={3} className={`${td} text-center`}>
+                      <button
+                        type="button"
+                        data-zoompan-skip="1"
+                        onClick={editing.onAddDeliveryRow}
+                        className="min-h-[36px] rounded border border-dashed border-sky-400 bg-sky-50/70 px-3 py-1 text-xs font-bold text-sky-800 hover:bg-sky-100"
+                      >
+                        ＋搬入出行を追加
+                      </button>
+                    </td>
+                  </tr>
+                )}
+              </>
+            ) : (
+              <>
+                {record.deliveries.filter((d) => d.item || d.time || d.place).map((d) => (
+                  <tr key={d.id}><td className={td}>{d.item}</td><td className={`${td} text-center`}>{d.time}</td><td className={td}>{d.place}</td></tr>
+                ))}
+                {record.deliveries.every((d) => !d.item && !d.time && !d.place) && (<tr><td className={td}>&nbsp;</td><td className={td}></td><td className={td}></td></tr>)}
+              </>
+            )}
           </tbody>
         </table>
         <table className="w-full border-collapse">
