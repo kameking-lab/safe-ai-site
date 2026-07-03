@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-07-03 柱C-3-3補充 RSS フィード逆カバレッジガード新設＝自動発見不能な孤立フィードの検知（PR: seo/feed-reverse-coverage-guard）
+
+**契約1) 回収**: 前イテレーションの自班 CI 緑 PR を回収＝#750（sitemap 逆カバレッジガード＋/profile 収載）を squash マージ→main を ff-only 更新。連鎖で CONFLICTING 化した #767（egov 条アンカー直リンク）へ `git merge origin/main`（force-push なし）で BACKLOG/cycle-log の追記衝突のみ解決し再push（CI 再走→次イテレーション回収）。#772（manifest メディア資産実在ガード）は e2e/smoke 進行中で継続。他班 OPEN PR（#769/#770/#771/#773 等）は不可侵。
+
+**着手判断**: BACKLOG-seo 未着手キューは空（O17/T6・T7 は Path A/オーナー承認待ち）のため補充指針に従い自領域から補充。決裁A（robots facebookexternalhit 許可リスト化）は `SOCIAL_LINK_PREVIEW_BOTS` へ分離済＝完了を実コードで再確認。#750 で sitemap の「route→登録簿」逆カバレッジを固めた流れで、**同型の穴が RSS フィード発見性にも残存**していることを発見＝着手。
+
+**背景/穴**: `SITE_FEEDS`（feeds.ts）は全ページ `<head>` の `<link rel="alternate" type="application/rss+xml">` を敷く単一ソース。既存 `feeds.test.ts` は forward（登録 path→route.ts 実在・title↔channel 一致）を守るが、**逆向き「実在 route→登録簿」が皆無**。当班/他班が `src/app/feed/<slug>.xml/route.ts` を新設しても `SITE_FEEDS` へ登録し忘れると、そのフィードはどのページ `<head>` にも広告されず RSS リーダー・クローラから自動発見不能な孤立フィードのまま放置される。
+
+**是正**: `feeds.test.ts` に逆カバレッジ describe（1 it・コード変更0の純ガード）を追加。`discoverFeedRoutePaths()` が `readdirSync` で `src/app/feed` 直下を走査し、GET ハンドラ（`export function GET`/`export const GET`）を持つ `<slug>.xml/route.ts`（route group `(x)`/private `_` は除外）を全て `/feed/<slug>.xml` へ射影＝実在フィードの真の集合を得て、各々が `SITE_FEEDS` 登録済みであることを必須化（走査サニティ＝既知4本以上を検出）。現状の実在4フィード（news/law-revisions/accident-reports/serious-cases）は全登録済みのため**コード修正は不要**。
+
+**実測（ミューテーション）**: `SITE_FEEDS` から serious-cases を外すと当該 it が `実在するが SITE_FEEDS 未登録のフィード: /feed/serious-cases.xml … expected [ '/feed/serious-cases.xml' ] to deeply equal []` で赤化することを確認＝ガードが実際に穴を捕捉。復元で緑。
+
+**ゲート**: `tsc --noEmit`=0 / `lint`=errors0（warn 23 は既存の別ファイル）/ `vitest run`=298ファイル2538 pass・1 skip（新規1含む）/ `build`=成功。build 再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は `git checkout` で復元。working tree は feeds.test.ts の1ファイルのみ。
+
+**残**: 本 PR の CI 緑回収＆マージ（次イテレーション 1)）。#767・#772 の CI 回収も継続。O17/T6・T7 実装はオーナー承認待ち。
+
+---
+
 ## 2026-07-03 — sitemap 逆カバレッジガード新設＋発見された /profile 収載（PR: seo/sitemap-reverse-coverage-guard）
 
 **回収**: 前イテレーションの自班 CI 緑 PR を回収＝#729（JSON-LD 低頻度 provider/creator @id 集約・#719 統合）を squash マージ→main を ff-only 更新。連鎖して #738（横断検索へ法改正記事10本収載）が CONFLICTING 化したため `git merge origin/main`（force-push なし）で解決＝衝突は BACKLOG-seo.md / cycle-log-seo.md の追記のみ（コードは非衝突）で #729・#738 両エントリを併存させ再push（CI 再走は次イテレーション回収）。#743（⌘K 0件フォールバックのパリティ化）は e2e/smoke pending のため持ち越し。他班 OPEN PR（#744/#741 等）は不可侵。
