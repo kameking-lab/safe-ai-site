@@ -362,3 +362,37 @@
 **無読テスト**: Playwright実機（モバイル390×844、`npm run build && npm run start`）で `?tab=business&industry=...` アクセス時にタブが自動選択され法人向け文言が表示されること、`/contact` 単独アクセスでは既定「ご意見・ご質問」タブになること、`/industries/construction` の相談カードのhrefが正しく44px超のタップ標的（実測187px高）であることを確認。
 
 **残課題**: S10(/signage/map・/for/constructionのSSR/メタ仕上げ＋/accidents出力3ボタン)・サイネージ設定外部化(設計ドラフトのみ)は次イテレーション以降で対応。(2026-07-03 / ux-hub/s9-contact-2tab-consult-cta / PR #638)
+
+---
+
+## 2026-07-03 ux-hub/s10-signage-map-meta-accidents-export-buttons
+
+**イテレーション頭の回収**: 自班の緑PR #642（S9完了記録docs）をsquashマージ→`git checkout main && git pull --ff-only`でclean確認。
+
+**タスク**: BACKLOG-ux-hub.md 最上位 S10（診断書07のP1-7+P1-7b・/signage/map・/for/constructionのSSR/固有メタ仕上げ＋/accidents本体への出力3ボタン）。
+
+**調査で判明した現状のズレ**: `/for/construction`は既にcanonical/OGP画像(`ogImageUrl`)/twitter/JsonLd(webPageSchema+breadcrumbSchema)完備で対応不要と確認（バックログ記載時点から別途完了済みの可能性）。実際に欠落していたのは`/signage/map`側で、title/descriptionのみでOGP画像・twitterカード・canonicalが無かった。
+
+**実装**: `/signage/map`のmetadataに`withSiteOpenGraph`/`withSiteTwitter`（サイト共通ヘルパー）＋`ogImageUrl`でOGP画像・twitterカード・canonical(`/signage/map`)を追加し他ページと同構えに統一。`/accidents`本体（事故DB一覧トップ）へ#520の`DataExportToolbar`（accidents-analytics/accidents-reportsで先行実装済みの部品）を横展開。総収録件数・provenance内訳(mhlw/curated/preliminary/synthetic)・事故の型ランキングをそのまま転記する純関数`web/src/lib/accidents/export.ts`(`accidentsSummaryToCsv`/`accidentsSummaryToText`)を新設（既存集計関数`computeAccidentTypeCounts`・`getAccidentProvenanceCounts`の結果をそのまま渡すのみ＝捏造・水増しなし）。CSV/要点コピー/共有URL/印刷の4手段。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・本変更に無関係）/ vitest 263 files・2218 tests 全pass（新規8件）/ build成功（`/signage/map`・`/accidents`とも静的プリレンダー確認）。dev/build実行で書き換わるdata班生成物(rag-metrics-latest.json・chatbot-eval-fresh-results.json・ky-print-sheetスナップショット)はcommitから除外。
+
+**無読テスト**: 本番相当の`next start`実機で`/accidents`に「会議資料に：CSVダウンロード／要点をコピー／共有／印刷」の4ボタンが描画されること、`/signage/map`のHTMLにog:title/og:image/og:url/twitter:card/canonicalが正しく出力されることをcurlで確認。
+
+**残課題**: サイネージ設定外部化（設計ドラフトのみ・DB利用のためオーナー確認）は次イテレーション以降で対応。(2026-07-03 / ux-hub/s10-signage-map-meta-accidents-export-buttons / PR #646)
+
+---
+
+## 2026-07-03 ux-hub/s12-signage-settings-push-design-drafts
+
+**イテレーション頭の回収**: PR #646（S10・/signage/map SSRメタ＋/accidents出力3ボタン）はCI進行中（e2e/smoke pending）につき次回に回収。BACKLOG-ux-hub.md 最上位の未着手2件のうち、S10相当（PR #646として既に着手・未マージ）を避け、次の【Opus・P2・設計ドラフトのみ=Path A】サイネージ設定外部化＋Web Push設計ドラフトに着手。
+
+**タスク**: 診断書01のT8（サイネージ設定の外部化＝PC設定→6桁コード/QRでTV適用、DB利用のためオーナー確認）＋診断書07のP2項9・決裁B（Web Push通知の設計ドラフト、VAPID鍵待ち）。両者とも「設計ドラフトまでは自走可・実装は待ち」のPath A指定。
+
+**調査（Explore委任＋直接grep）**: サイネージ設定は全て`/signage`ページのlocalStorage（地点・向き・キオスク等）に閉じており他端末共有の受け皿がゼロと確認。一方でKY朝礼サイネージ（/ky/morning）に構造がほぼ同一の6桁コード共有機構（`lib/ky/signage-code.ts`・Supabase `signage_sessions`テーブル・`getServiceSupabase()`）が既に本番稼働中と判明、これを一般化転用する方針を採用。Web Push側は`public/sw.js`に`push`イベントリスナーのプレースホルダー実装（`showNotification`呼び出し）が既に存在するが、それより手前（許諾UI・購読API・VAPID鍵・送信基盤・`notificationclick`/`pushsubscriptionchange`ハンドラ）が丸ごと未配線と判明。
+
+**成果物**: `docs/fable-diagnosis-2026-07-02/T8-signage-settings-and-web-push-design-drafts.md`。T8は新規テーブル`signage_config_sessions`案（既存`signage_sessions`拡張より事故影響範囲が隔離される）・スコープ（図面画像は既存の「外部送信なし」明示文言と衝突するため除外を提案）・UXフロー（TV側は数字キーパッド手入力を主経路、QRはPC/スマホ側の補助）を設計。決裁Bは`web-push`npm依存・VAPID鍵3種env・`push_subscriptions`テーブル・クライアント購読フロー・sw.js拡張を設計。オーナー判断事項6点（新規テーブルスキーマ承認・図面画像共有可否・TV実機入力手段・VAPID発行者・npm依存承認・テーブル作成実行）を明記。
+
+**ゲート結果（cd web）**: コード/データ/依存変更ゼロ（docs追加のみ）。tsc=0 / lint=0 errors（既存warning 23件のみ・本変更に無関係）/ vitest 261 files・2210 tests 全pass（新規0件・非改変確認）/ build成功。
+
+**残課題**: S10(/signage/map・/for/constructionのSSR/メタ仕上げ＋/accidents出力3ボタン)はPR #646としてCI進行中、次イテレーションで回収予定。(2026-07-03 / ux-hub/s12-signage-settings-push-design-drafts)

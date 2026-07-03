@@ -1095,4 +1095,36 @@ Add-Status (S "watch2")
 Add-Status (S "watch3")
 
 Write-Status
+
+# ---------------------------------------------------------------------------
+# Spawn the main-tree heal watchdog (loop-watchdog.ps1). This closes the ops single-point-of-failure
+# in the recovery path: ops runs -HealOnly every iteration to resurrect OTHER lanes, but if the OPS
+# runner itself dies nothing resurrects it until the next logon/07:00 pass (and only a MAIN-TREE
+# process can heal correctly, since the 5 non-ops lanes live in separate clones). The watchdog is a
+# tiny git-free/claude-free loop that calls -HealOnly on an interval, so a dead ops runner comes back
+# in ~one watchdog interval. Spawned here on every FULL pass (never under -HealOnly, which exits
+# earlier) so the admin-free logon->launcher chain covers the watchdog's own resurrection. Idempotent:
+# the watchdog's own single-instance guard makes a second spawn a no-op, but we also skip when one is
+# already alive to avoid a useless process churn. Skipped past the deadline (nothing to heal).
+if (-not $deadlinePassed) {
+  $watchdog = Join-Path $repoRoot "loop-watchdog.ps1"
+  if (Test-Path $watchdog) {
+    $wdRunning = $false
+    try {
+      $wdRunning = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
+        Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -like '*loop-watchdog.ps1*' }).Count -gt 0
+    } catch {}
+    if ($wdRunning) {
+      Write-Launcher "heal watchdog already running; not spawning a second."
+    } elseif ($WhatIf) {
+      Write-Launcher ("[WHATIF] would spawn heal watchdog: " + $watchdog)
+    } else {
+      $wdArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", $watchdog)
+      if ($ClaudeCmd -ne "claude") { $wdArgs += @("-ClaudeCmd", $ClaudeCmd) }
+      Start-Process -FilePath "powershell" -ArgumentList $wdArgs -WorkingDirectory $repoRoot
+      Write-Launcher ("spawned heal watchdog (" + $watchdog + ").")
+    }
+  }
+}
+
 Write-Launcher "=== loop-launcher end ==="

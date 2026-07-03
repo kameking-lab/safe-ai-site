@@ -102,7 +102,7 @@ describe('countByCategory', () => {
 
 describe('CATEGORY_META', () => {
   it('全カテゴリにラベルと配色を持つ', () => {
-    for (const key of ['law', 'notice', 'chemical', 'education', 'accident', 'precedent', 'glossary'] as const) {
+    for (const key of ['law', 'notice', 'chemical', 'education', 'accident', 'precedent', 'glossary', 'faq'] as const) {
       expect(CATEGORY_META[key].label).toBeTruthy();
       expect(CATEGORY_META[key].bgColor).toMatch(/^bg-/);
       expect(CATEGORY_META[key].textColor).toMatch(/^text-/);
@@ -133,8 +133,52 @@ describe('buildSearchIndex — 用語集（glossary）の収載', () => {
     const index = await buildSearchIndex();
     const c = countByCategory(index, '安全');
     expect(c.all).toBe(
-      c.law + c.notice + c.chemical + c.education + c.accident + c.precedent + c.glossary,
+      c.law + c.notice + c.chemical + c.education + c.accident + c.precedent + c.glossary + c.faq,
     );
+  });
+});
+
+describe('buildSearchIndex — FAQ の収載', () => {
+  const FAQ_CATEGORY_SLUGS = new Set([
+    'law-system',
+    'management',
+    'chemical',
+    'health-education',
+  ]);
+
+  it('@/data/faqs の全 FAQ が faq カテゴリで /faq/<category> へ深リンクされる', async () => {
+    const [index, faqMod] = await Promise.all([
+      buildSearchIndex(),
+      import('@/data/faqs'),
+    ]);
+    const faqItems = index.filter((i) => i.category === 'faq');
+    // ALL_FAQS（4 バッチ）を漏れなく収載＝正本と件数一致（欠落バッチ 0）
+    expect(faqItems.length).toBe(faqMod.ALL_FAQS.length);
+    expect(faqItems.length).toBeGreaterThanOrEqual(150);
+    expect(faqItems.every((i) => i.id.startsWith('faq-'))).toBe(true);
+    // 深リンク先はカテゴリ一覧のみ＝裸 /faq には落とさない
+    expect(faqItems.every((i) => i.url.startsWith('/faq/'))).toBe(true);
+    expect(faqItems.some((i) => i.url === '/faq')).toBe(false);
+  });
+
+  it('深リンク先の category slug は実在する /faq/<slug> 一覧ページに解決する（幽霊リンク 0）', async () => {
+    const index = await buildSearchIndex();
+    const faqItems = index.filter((i) => i.category === 'faq');
+    for (const i of faqItems) {
+      const slug = i.url.replace('/faq/', '');
+      expect(FAQ_CATEGORY_SLUGS.has(slug)).toBe(true);
+    }
+  });
+
+  it('疑問文・関連法令・タグのいずれからもヒットし回答が subtitle に出る', async () => {
+    const index = await buildSearchIndex();
+    // 質問インテント（安全管理者の選任要件＝法令 FAQ）で faq 結果が返る
+    const byQuestion = searchItems(index, '安全管理者 選任', 'faq');
+    expect(byQuestion.length).toBeGreaterThan(0);
+    // 結果一覧で即答できるよう回答冒頭を subtitle に載せている
+    expect(byQuestion.every((i) => i.subtitle.length > 0)).toBe(true);
+    // keywords（関連法令）経由で条番号からも引ける
+    expect(searchItems(index, '安衛法第11条', 'faq').length).toBeGreaterThan(0);
   });
 });
 
@@ -228,6 +272,74 @@ describe('buildSearchIndex — 事故事例（accident）の収載', () => {
     expect(accident.some((i) => i.url === '/accidents')).toBe(false);
     // url の id と item.id が対応＝詳細ページが必ず解決する（幽霊URL なし）。
     expect(accident.every((i) => i.url === `/accidents/${i.id.replace(/^accident-/, '')}`)).toBe(true);
+  });
+});
+
+describe('buildSearchIndex — Eラーニング（education）の全テーマ収載＋個別テーマ深リンク', () => {
+  // 正本＝ELearningPanel が allThemes として描画する 9 源の union（入門＋カタログ＋追補＋業種別6）。
+  // 旧実装は elearningThemesCatalog 1 源だけを import しており業種別等が欠落していた。
+  async function expectedThemeIds(): Promise<Set<string>> {
+    const mods = await Promise.all([
+      import('@/data/mock/elearning-intro-course'),
+      import('@/data/mock/elearning-themes-data'),
+      import('@/data/mock/elearning-extra-themes'),
+      import('@/data/mock/elearning-manufacturing-themes'),
+      import('@/data/mock/elearning-healthcare-themes'),
+      import('@/data/mock/elearning-transport-themes'),
+      import('@/data/mock/elearning-forestry-themes'),
+      import('@/data/mock/elearning-food-themes'),
+      import('@/data/mock/elearning-retail-themes'),
+    ]);
+    return new Set(
+      [
+        ...mods[0].elearningIntroCourse,
+        ...mods[1].elearningThemesCatalog,
+        ...mods[2].elearningExtraThemes,
+        ...mods[3].elearningManufacturingThemes,
+        ...mods[4].elearningHealthcareThemes,
+        ...mods[5].elearningTransportThemes,
+        ...mods[6].elearningForestryThemes,
+        ...mods[7].elearningFoodThemes,
+        ...mods[8].elearningRetailThemes,
+      ].map((t) => t.id),
+    );
+  }
+
+  it('education の ID 集合が panel の全テーマ源（allThemes）と一致する（1源だけ import の欠落是正）', async () => {
+    const index = await buildSearchIndex();
+    const eduIds = new Set(
+      index.filter((i) => i.category === 'education').map((i) => i.id.replace(/^edu-/, '')),
+    );
+    expect(eduIds).toEqual(await expectedThemeIds());
+    // 業種別カタログ（1源 import 時代は欠落）が確かに含まれる。
+    expect(eduIds).toContain('el-mfg-chemical');
+    expect(eduIds).toContain('el-hc-back');
+    expect(eduIds).toContain('el-rt-slipfall');
+  });
+
+  it('各結果は一覧トップではなく個別テーマ /e-learning?theme=<id>#el-quiz へ深リンクする', async () => {
+    const index = await buildSearchIndex();
+    const edu = index.filter((i) => i.category === 'education');
+    expect(edu.length).toBeGreaterThan(0);
+    // 旧実装のバグ＝全件が裸の /e-learning へリンク、を回帰で固定。
+    expect(edu.some((i) => i.url === '/e-learning')).toBe(false);
+    // url の theme= と item.id が対応＝panel が allThemes 検証で必ず解決する（幽霊リンク 0）。
+    expect(
+      edu.every(
+        (i) =>
+          i.url === `/e-learning?theme=${encodeURIComponent(i.id.replace(/^edu-/, ''))}#el-quiz`,
+      ),
+    ).toBe(true);
+    // 深リンク先 theme id は panel の allThemes（収載源の union）に必ず存在する。
+    const valid = await expectedThemeIds();
+    expect(edu.every((i) => valid.has(i.id.replace(/^edu-/, '')))).toBe(true);
+  });
+
+  it('業種語（製造業）・出典種別からも keywords 経由でヒットする', async () => {
+    const index = await buildSearchIndex();
+    // industry_detail / sourceType を keywords に載せたことで業種横断で引ける。
+    const mfg = searchItems(index, '製造業', 'education', Number.MAX_SAFE_INTEGER);
+    expect(mfg.length).toBeGreaterThan(0);
   });
 });
 
