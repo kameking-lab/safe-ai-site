@@ -1,5 +1,17 @@
 # cycle-log-ops — 運用・自律運転インフラ班の作業ログ
 
+## 2026-07-03 (O・点火/報告系補充) — #777の`-File`精密照合を lane runner 生存スキャン4箇所へ横展開
+
+- **契約1（回収）**: 自ops PR #777（復活watchdogの生存スキャン偽陽性を`-File`精密照合で封止・watchdog/launcher `-SelfTest` 両ALL PASS・Vercel SUCCESS・mergeStateStatus=CLEAN）を squash マージ→`git checkout main && git pull --ff-only`→working tree clean 確認。他5レーン・未マージPR(#770/#772/#774/#775/#776/#778等)は不可侵。
+- **タスク選定＋実測診断**: BACKLOG-ops 未着手[ ]は掃除系一括(line51)／モバイルperf第2弾 実測(line53)の2件のみ・両方とも**全6レーン稼働中**（WMIスキャンで data/ops/seo/ux-hub/ux-records/ux-tools の runnerプロセス生存を確認）で静穏窓待ちブロック（3件未満）→補充の指針に従い運用4系統から補充。**水増しを避けるため**、直前にマージした #777 の脚注「#602〜#771 が runner/lane scan で `-Lane` 正規表現＋config-lane keying により封じてきた scan精度欠陥」を**検証**したところ、その主張は**不完全**＝lane runner 生存スキャンは実は無防備で、#777 が watchdog で封じた `-Command`言及 spoof の**対称残渣**が4箇所に残存していると確定。
+- **根因（-Lane抽出は言及を除外しない）**: lane runner の生存判定4箇所（loop-runner.ps1 単一インスタンスguard／launcher Get-RunningLanes・Get-RunnerProcInfo／reporter Get-AliveRunnerLanes）が依然 `CommandLine -like '*loop-runner.ps1*'` の**生の部分一致**でプロセスを数え、`-Lane` 正規表現は「どの lane か」を抽出するだけで `-Command "... loop-runner.ps1 ... -Lane data ..."` 型の点検コマンド（オペレータ/エージェント＝#777の watchdog spoofと同族）を除外しない＝config-lane keying も素通り。
+- **影響4箇所と帰結**: **(1)loop-runner.ps1 単一インスタンスguard**（最重要）＝spoofプロセスを同lane競合と誤認し、hot-swap clean-exit(#672/#690)や heal後に**正しくrelaunchされたrunnerがself-exit→lane死亡**。**(2)launcher Get-RunningLanes**＝死んだlaneを「alive」と誤報告し `-HealOnly` が復活をskip（(1)と連鎖＝lane恒久死）。**(3)Get-RunnerProcInfo**＝協調drainのPID/起動時刻マップ汚染。**(4)reporter Get-AliveRunnerLanes**＝#696/#703の健在性tiebreakが**死んだlaneをaliveと誤認し停止バナーを誤ってcalm化**（#777とは逆方向の害＝真の死を隠す）。
+- **修正**: 純関数 `Test-IsRunnerProcess($CommandLine)`＝`(?i)-File\s+"?[^"]*loop-runner\.ps1(?:"|\s|$)` で**実launch形（persistent/heal spawn＋one-shot planner/critic＋手動＝全て `-File <path>\loop-runner.ps1`）だけ**を照合し `-File` 前置なしの `-Command` 言及を除外。3スクリプトはモジュール非共有のため局所コピー（#777の `Test-IsWatchdogProcess`／`Get-AliveRunnerLanes` の先例に倣う・全所同一意味論）。legacy無lane runner も `-File` 形なので温存、watchdog `-File` は別 filename＝非マッチ。
+- **自己検証（契約3・PowerShellはドライラン相当）**: runner `-SelfTest` に RID群7ケース（bare/quoted/one-shot planner/legacy無lane `-File`→runner／`-Command`言及＋lane→非runner＝spoof封止／watchdog `-File`→非runner／空→null安全）、launcher `-SelfTest` に R3群5・reporter `-SelfTest` に R群5アサート追加→**3スクリプト全ALL PASS**、3スクリプト**PSParser 0-error**・追加行の**非ASCII 0**を実測。
+- **live実測**: `-HealOnly -WhatIf` が実6レーン(全て真の `-File` launch)を新predicateで正しく「all enabled lanes alive; nothing to resurrect」検出＝**無回帰**・loop-status.md **md5 byte不変**。**live spoofer E2E**＝`-Command "... loop-runner.ps1 -Lane data ..."` の実プロセスを起こし旧`-like`は**True(バグ＝dataがalive誤報告)**／新`Test-IsRunnerProcess`は**False(修正)**を実プロセスで実証。
+- **活性化**: 各クローンの次 git pull＋runner/launcher の hot-swap/relaunch（reporterはfresh processで即）で新predicateが有効化。ASCII厳守・web/src非侵・main常時デプロイ可能。
+- **ゲート**: web/src 不触＝tsc/lint/vitest/build 対象外。変更は loop-runner.ps1＋loop-launcher.ps1＋loop-report-status.ps1＋BACKLOG/cycle-log のみ。`-SelfTest` ALL PASS×3 が PSParser 構文健全性を保証。working tree clean で終了。
+
 ## 2026-07-03 (O・報告系補充) — 監視ファイルのtrailing空行 無制限肥大を封止（-NoNewline＋EOF trim）
 
 - **契約1（回収）**: 自ops PR #683（レーン自己報告noteのMSYSパス変換破損を reporter入口で無害化・SelfTest43 ALL PASS・Vercel緑・mergeStateStatus=CLEAN）を squash マージ→`git checkout main && git pull --ff-only`→working tree clean 確認。他5レーン・未マージPRは不可侵。
