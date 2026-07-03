@@ -62,4 +62,22 @@ describe("HomeThreePillars 柱0 44pxタップ標的", () => {
     const contactLink = await waitFor(() => screen.getByRole("link", { name: /管理者に連絡/ }));
     expect(contactLink.className).toContain("min-h-[44px]");
   });
+
+  it("「業種別 事故分析レポートへ」主CTAリンクが min-h-[44px]", () => {
+    render(<HomeThreePillars fatal={fatal} lawRevisions={[]} warnings={[]} />);
+    const link = screen.getByRole("link", { name: /業種別 事故分析レポートへ/ });
+    expect(link.className).toContain("min-h-[44px]");
+  });
+
+  it("「気象リスク詳細を見る」主CTAリンクが min-h-[44px]", () => {
+    render(<HomeThreePillars fatal={fatal} lawRevisions={[]} warnings={[]} />);
+    const link = screen.getByRole("link", { name: /気象リスク詳細を見る/ });
+    expect(link.className).toContain("min-h-[44px]");
+  });
+
+  it("「法改正一覧を見る」主CTAリンクが min-h-[44px]", () => {
+    render(<HomeThreePillars fatal={fatal} lawRevisions={[]} warnings={[]} />);
+    const link = screen.getByRole("link", { name: /法改正一覧を見る/ });
+    expect(link.className).toContain("min-h-[44px]");
+  });
 });
