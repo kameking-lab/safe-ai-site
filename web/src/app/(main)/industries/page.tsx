@@ -240,7 +240,7 @@ export default function IndustriesHubPage() {
                       <td className="whitespace-nowrap px-3 py-2 text-right">
                         <Link
                           href={`/industries/${s.slug}`}
-                          className="text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+                          className="inline-flex min-h-[44px] items-center justify-end px-2 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
                         >
                           開く →
                         </Link>
