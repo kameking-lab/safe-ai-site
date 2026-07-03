@@ -146,7 +146,7 @@ function SourceInfoBox({ revision }: { revision: LawRevision }) {
               href={eGovUrl!}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 rounded bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-blue-700 transition"
+              className="inline-flex min-h-[44px] items-center gap-1 rounded bg-blue-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-blue-700 transition"
             >
               e-Govで原文を確認 →
             </a>
@@ -519,7 +519,7 @@ export function LawRevisionList({
             type="button"
             onClick={() => setOnlyRelevant((v) => !v)}
             aria-pressed={onlyRelevant}
-            className={`rounded-full px-3 py-1 text-xs font-bold transition ${
+            className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-bold transition ${
               onlyRelevant
                 ? "border border-emerald-400 bg-emerald-600 text-white"
                 : "border border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50"
@@ -658,7 +658,7 @@ export function LawRevisionList({
               key={key}
               type="button"
               onClick={() => toggleIndustry(key)}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+              className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                 selectedIndustries.has(key)
                   ? "bg-blue-600 text-white"
                   : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -679,7 +679,7 @@ export function LawRevisionList({
                 key={attr}
                 type="button"
                 onClick={() => setSelectedWorkerAttribute(attr)}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                   selectedWorkerAttribute === attr
                     ? "bg-violet-600 text-white"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -698,7 +698,7 @@ export function LawRevisionList({
                 key={size}
                 type="button"
                 onClick={() => setSelectedCompanySize(size)}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                   selectedCompanySize === size
                     ? "bg-teal-600 text-white"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -718,7 +718,7 @@ export function LawRevisionList({
               key={k}
               type="button"
               onClick={() => setSelectedKind(k)}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+              className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                 selectedKind === k
                   ? "bg-emerald-600 text-white"
                   : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -740,7 +740,7 @@ export function LawRevisionList({
                 key={imp}
                 type="button"
                 onClick={() => setSelectedImpact(imp)}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                   selectedImpact === imp
                     ? "bg-indigo-600 text-white"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -759,7 +759,7 @@ export function LawRevisionList({
                 key={s.label}
                 type="button"
                 onClick={() => setSelectedStatus(s.value)}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                   selectedStatus === s.value
                     ? "bg-amber-600 text-white"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -776,7 +776,7 @@ export function LawRevisionList({
             <button
               type="button"
               onClick={() => setSortOrder("desc")}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+              className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                 sortOrder === "desc"
                   ? "bg-slate-700 text-white"
                   : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -787,7 +787,7 @@ export function LawRevisionList({
             <button
               type="button"
               onClick={() => setSortOrder("asc")}
-              className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+              className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                 sortOrder === "asc"
                   ? "bg-slate-700 text-white"
                   : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -825,7 +825,7 @@ export function LawRevisionList({
                 setSelectedCompanySize("全規模");
                 setOnlyRelevant(false);
               }}
-              className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-700"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-700"
             >
               ↺ 条件を全て解除して再検索
             </button>
@@ -833,14 +833,14 @@ export function LawRevisionList({
               <button
                 type="button"
                 onClick={() => setArticleHighlights([])}
-                className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-50"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-50"
               >
                 条文絞り込みのみ解除
               </button>
             )}
             <a
               href="/chatbot"
-              className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-50"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-50"
             >
               💬 AIに類似条文を質問
             </a>
@@ -962,7 +962,7 @@ export function LawRevisionList({
                         type="button"
                         disabled={rewriteBusyId === revision.id}
                         onClick={() => void handleRewrite(revision)}
-                        className="rounded border border-violet-300 bg-violet-50 px-2 py-1 text-[11px] font-bold text-violet-800 hover:bg-violet-100 disabled:opacity-50"
+                        className="inline-flex min-h-[44px] items-center justify-center rounded border border-violet-300 bg-violet-50 px-2 py-1 text-[11px] font-bold text-violet-800 hover:bg-violet-100 disabled:opacity-50"
                       >
                         {rewriteBusyId === revision.id ? "生成中…" : "✏️ 自社版に書き換え"}
                       </button>
@@ -1009,7 +1009,7 @@ export function LawRevisionList({
                     href={eGovUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 underline decoration-blue-200 underline-offset-2 hover:text-blue-800"
+                    className="inline-flex min-h-[44px] items-center gap-1 text-xs font-semibold text-blue-600 underline decoration-blue-200 underline-offset-2 hover:text-blue-800"
                   >
                     e-Govで原文を確認 →
                   </a>
@@ -1033,7 +1033,7 @@ export function LawRevisionList({
                   type="button"
                   onClick={() => onSelectSummary(revision.id)}
                   disabled={isLoadingSummary}
-                  className={`rounded-lg px-3 py-2 text-sm font-medium text-white transition ${
+                  className={`inline-flex min-h-[44px] items-center justify-center rounded-lg px-3 py-2 text-sm font-medium text-white transition ${
                     isLoadingSummary
                       ? "cursor-not-allowed bg-emerald-300"
                       : "bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99]"
@@ -1044,7 +1044,7 @@ export function LawRevisionList({
                 <button
                   type="button"
                   onClick={() => onSelectForQuestion(revision.id)}
-                  className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 active:scale-[0.99]"
+                  className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50 active:scale-[0.99]"
                 >
                   質問する
                 </button>

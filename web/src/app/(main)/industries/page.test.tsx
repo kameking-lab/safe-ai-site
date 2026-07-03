@@ -19,4 +19,14 @@ describe("/industries hub page (業種別案内)", () => {
     const links = screen.getAllByRole("link").map((a) => a.getAttribute("href"));
     expect(links.some((h) => h?.startsWith("/industries/"))).toBe(true);
   });
+
+  it("業種別統計テーブルの「開く →」リンクが44pxタップ標的を満たす", () => {
+    render(<IndustriesHubPage />);
+    const links = screen.getAllByRole("link", { name: "開く →" });
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links) {
+      expect(link.className).toContain("min-h-[44px]");
+      expect(link.className).toContain("items-center");
+    }
+  });
 });
