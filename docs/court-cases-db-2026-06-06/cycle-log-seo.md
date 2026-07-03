@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-07-03 柱C-2 横断検索に「機能・目的地ページ」を収載（feature カテゴリ新設）＝機能名0件の穴を是正
+
+**契約1) 回収**: 前イテレーションの緑PR #738（法改正記事の横断検索収載）を squash マージ→main を ff-only 更新。CONFLICTING だった #743（⌘K 0件フォールバック）は BACKLOG/cycle-log の追記衝突を origin/main 通常マージで解決し再push（CI 再実行→次イテレーション回収）。#750（sitemap 逆カバレッジガード）は CI 進行中で継続。
+
+**背景/穴**: 横断検索(/search・⌘K)はコンテンツレコード（条文・通達・判例・化学物質・事故・教育・用語・FAQ・標識・保護具・記事）のみ収載し、**サイトの主要な目的地ページそのもの**（サイネージ・KY用紙・化学物質RA・作業環境測定・事故DB・法改正…）が丸ごと0件だった。「サイネージ」「KY」「作業環境測定」と機能名を打った現場ユーザーが目的機能へ検索経由で着けない（⌘K の空クエリ用ショートカット4件は検索対象外・サイドバー回遊だけが導線）。BACKLOG 未着手キューは実装0（診断 05-search-egov の T1/T2/T3＝AND/シノニム/条番号/エイリアスは既に配線済＝コードが診断書より先行、O17/T6/T7 は承認待ち）のため、補充の指針に従い自領域から補充。
+
+**是正**: ブラウザ安全な射影源 `lib/site-pages-search-source.ts` を新設。機能ナビ正本 `FLAGSHIP_FEATURES`(`@/config/flagship-nav`)を単一ソースに、主要機能12＋配下機能(subItems)をベースパス(ハッシュ/クエリ除去)で重複除去して射影（アイコン絵文字は検索不要＝射影せず検索チャンク軽量化）。`search-index.ts` に `feature` カテゴリを新設し動的importで収載（CATEGORY_META=slate・SEARCH_CATEGORIES・countByCategory・全カテゴリ合計テストへ c.feature 追加）。SEARCH_CATEGORY_PRIORITY は保護具の直上＝コンテンツ系より下位ティアに置き、高意図クエリの権威を奪わない（cross-search 既定優先度が元々 `feature` を先頭に持つ設計とも整合＝engine 側の意図の実体化）。title=機能名(打鍵一致)・subtitle=カード見出し/配下説明(2語AND補助)。UI(SearchResults/CommandPalette)に 機能 タブ＋LayoutGrid アイコン。
+
+**幽霊URL 0 / drift ガード**: `site-pages-search-source.test.ts`(6 it)＝(1)非空・app走査サニティ (2)全 url が実在 page ルートへ構造解決（sitemap ゴーストガードと同 resolver を流用） (3)`/industries/<slug>` が generateStaticParams の `INDUSTRY_CONTENT_SLUGS` へ台帳一致（動的スラッグの実在を明示固定） (4)全 FLAGSHIP 主要機能 href の収載漏れ0 (5)url重複0 (6)title/subtitle/絶対path 具備。機能追加/削除を「検索へ結線し忘れる／デッドURLが残る」穴として CI で検知。`search-index.test.ts` に feature describe(2 it)＝射影源件数一致・機能名クエリ(サイネージ/化学物質RA/作業環境測定)着地・2語AND(事故 分析)。
+
+**不変条件**: locked（就業制限1位=安衛法61条・石綿事前調査3位=石綿則3条）は無回帰＝機能エントリは当該語で高スコアにならず下位ティアのため T1/T2/T3 回帰緑。可視の検索UI/メタ以外は無改変（捏造0・既存破壊0・水増し0＝正本の射影のみ）。
+
+**ゲート**: `tsc --noEmit`=0 / `lint`=errors0（warnは SearchResults の既存 unused-disable 1件＝本変更外）/ `vitest run`=294ファイル2500テスト全pass・1skip（新規8含む）/ `build`=成功。build 再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は `git checkout` で復元。working tree は自班6ファイルのみ。
+
+**残**: 本PRの CI 緑回収＆マージ（次イテレーション 1)）。#743・#750 の緑回収も継続。非flagshipのユーティリティpage・個別記事本文SSRは対象外（要・他班）。O17/T6・T7 実装はオーナー承認待ち。
+
+---
+
 ## 2026-07-03 — sitemap ゴーストURL回帰ガード新設（PR: seo/sitemap-ghost-url-guard）
 
 回収: 前イテレーション着手の自班 CI 緑 PR を回収＝#713（sitemap/robots ドメイン単一ソース化）が green だったが CONFLICTING（merge commit clean 不可）＝`gh pr checkout 713`→`git merge origin/main`（force-push なし）。衝突は BACKLOG-seo.md / cycle-log-seo.md の追記のみ（コードは非衝突）で、origin/main が先に載せた #710(OGP透かし)・#704(@id グラフ) の完了エントリと自 #713 エントリを併存させて解決・push。auto-merge はリポジトリ設定で不許可のため merge commit の CI 再走を次イテレーションで回収する。#719（json-ld provider/creator @id 集約 #704 follow-up）は e2e/smoke pending のため持ち越し。他班 OPEN PR（#720/#718/#717/#714 等）は不可侵。

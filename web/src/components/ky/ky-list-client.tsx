@@ -235,9 +235,9 @@ export function KyListClient() {
                     <p className="mt-1 truncate text-sm text-slate-700">作業: {e.workDetail || "（未入力）"}</p>
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">
-                    <button type="button" disabled={busy} onClick={() => void handleOpen(e)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50 disabled:opacity-50">開く（再編集）</button>
-                    <button type="button" disabled={busy} onClick={() => void handleCopy(e)} className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:opacity-50">今日用に複製</button>
-                    <button type="button" disabled={busy} onClick={() => void handleDelete(e)} className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50">削除</button>
+                    <button type="button" disabled={busy} onClick={() => void handleOpen(e)} className="min-h-[44px] rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50 disabled:opacity-50">開く（再編集）</button>
+                    <button type="button" disabled={busy} onClick={() => void handleCopy(e)} className="min-h-[44px] rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-50 disabled:opacity-50">今日用に複製</button>
+                    <button type="button" disabled={busy} onClick={() => void handleDelete(e)} className="min-h-[44px] rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-50">削除</button>
                   </div>
                 </div>
               </li>

@@ -190,7 +190,7 @@ function GoodsCard({ item }: { item: SafetyGoodsItem }) {
             href={amazonHref}
             target="_blank"
             rel="noopener noreferrer sponsored"
-            className="rounded-lg bg-amber-500 py-2 text-center text-xs font-bold text-white hover:bg-amber-600"
+            className="flex min-h-[44px] items-center justify-center rounded-lg bg-amber-500 py-2 text-center text-xs font-bold text-white hover:bg-amber-600"
             onClick={() =>
               trackAffiliateClick({
                 productId: item.id,
@@ -207,7 +207,7 @@ function GoodsCard({ item }: { item: SafetyGoodsItem }) {
             href={rakutenHref}
             target="_blank"
             rel="noopener noreferrer sponsored"
-            className="rounded-lg bg-rose-500 py-2 text-center text-xs font-bold text-white hover:bg-rose-600"
+            className="flex min-h-[44px] items-center justify-center rounded-lg bg-rose-500 py-2 text-center text-xs font-bold text-white hover:bg-rose-600"
             onClick={() =>
               trackAffiliateClick({
                 productId: item.id,
@@ -286,7 +286,7 @@ function SelectionGuideSection() {
                 href={generateAmazonAffiliateUrl(guide.searchQuery)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-lg bg-amber-500 py-2 text-center text-xs font-bold text-white hover:bg-amber-600"
+                className="flex min-h-[44px] items-center justify-center rounded-lg bg-amber-500 py-2 text-center text-xs font-bold text-white hover:bg-amber-600"
                 onClick={() => trackEvent("affiliate_click", { platform: "amazon", product_id: guide.id, product_name: guide.title, page_location: "goods_guide" })}
               >
                 Amazonで探す
@@ -295,7 +295,7 @@ function SelectionGuideSection() {
                 href={generateRakutenSearchUrl(guide.searchQuery)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-lg bg-rose-500 py-2 text-center text-xs font-bold text-white hover:bg-rose-600"
+                className="flex min-h-[44px] items-center justify-center rounded-lg bg-rose-500 py-2 text-center text-xs font-bold text-white hover:bg-rose-600"
                 onClick={() => trackEvent("affiliate_click", { platform: "rakuten", product_id: guide.id, product_name: guide.title, page_location: "goods_guide" })}
               >
                 楽天で探す
@@ -396,7 +396,7 @@ export function SafetyGoodsPanel() {
           <button
             type="button"
             onClick={() => setWomenFilter((prev) => !prev)}
-            className={`mb-2 flex w-full items-center gap-2 rounded-xl border px-4 py-2.5 text-left text-sm font-semibold transition ${
+            className={`mb-2 flex min-h-[44px] w-full items-center gap-2 rounded-xl border px-4 py-2.5 text-left text-sm font-semibold transition ${
               womenFilter
                 ? "border-rose-400 bg-rose-50 text-rose-800 shadow-sm"
                 : "border-slate-200 bg-white text-slate-700 hover:border-rose-200 hover:bg-rose-50"

@@ -275,7 +275,7 @@ export function EducationContent() {
                           href={pptxHref}
                           download
                           aria-label={`${p.name} PPTXサンプルをダウンロード`}
-                          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-700 hover:border-slate-900 hover:bg-slate-900 hover:text-white transition-colors"
+                          className="mt-3 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-[11px] font-semibold text-slate-700 hover:border-slate-900 hover:bg-slate-900 hover:text-white transition-colors"
                         >
                           <Download className="h-3 w-3" aria-hidden="true" />
                           {isEn ? "PPTX sample" : "PPTXサンプル"}
