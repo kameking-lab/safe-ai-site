@@ -152,7 +152,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和22年法律第50号",
     latestRevision: "令和6年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/322AC0000000050",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   職安法: {
     fullName: "職業安定法",
