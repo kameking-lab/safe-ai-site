@@ -179,14 +179,29 @@ const TERM_EXPANSIONS: Record<string, string[]> = {
   "5トン以上": ["クレーン製造許可", "つり上げ荷重", "クレーン則第3条"],
   "1トン以上": ["クレーン", "玉掛け", "フォークリフト"],
 
-  // 口語「頻度」「資格」系（04診断T4: 検索取りこぼしの解消）
+  // 口語「頻度」系（04診断T4: 検索取りこぼしの解消）
   "健康診断の頻度": ["定期健康診断", "1年以内ごと", "安衛則第44条", "特定業務従事者の健康診断", "6月以内ごと", "安衛則第45条"],
   "健診の頻度": ["定期健康診断", "1年以内ごと", "安衛則第44条", "特定業務従事者の健康診断", "安衛則第45条"],
   "健康診断は何年ごと": ["定期健康診断", "1年以内ごと", "安衛則第44条"],
-  "酸欠 資格": ["酸素欠乏危険作業主任者", "技能講習", "酸欠則第11条"],
-  "酸欠の資格": ["酸素欠乏危険作業主任者", "技能講習", "酸欠則第11条"],
-  "酸欠作業の資格": ["酸素欠乏危険作業主任者", "技能講習", "酸欠則第11条"],
 };
+
+/**
+ * 2語の「共起」でのみ展開する辞書（Fable差分監査F5・O5残欠陥）。
+ *
+ * TERM_EXPANSIONS の固定フレーズ一致（例:「酸欠 資格」）は字面が完全一致した
+ * クエリにしか効かず、「酸欠作業に必要な資格は何ですか？」のような自然文の
+ * 言い回しゆれに弱い。groupA・groupB それぞれから最低1語ずつ（順不同・
+ * 隣接不問）が query に含まれた場合にのみ additions を展開することで、
+ * 語順・助詞・敬体の違いに影響されない共起判定にする。
+ */
+const COOCCURRENCE_EXPANSIONS: { groupA: string[]; groupB: string[]; additions: string[] }[] = [
+  {
+    // 酸欠系語 × 資格系語 → 酸素欠乏危険作業主任者（酸欠則第11条）
+    groupA: ["酸欠", "酸素欠乏", "第1種酸欠", "第2種酸欠"],
+    groupB: ["資格", "免許", "講習", "技能講習", "作業主任者", "受講"],
+    additions: ["酸素欠乏危険作業主任者", "技能講習", "酸欠則第11条"],
+  },
+];
 
 /** 配列を一意化したスペース区切りクエリを返す */
 function dedup(values: string[]): string[] {
@@ -210,6 +225,12 @@ export function expandQueryRich(query: string): string {
   for (const group of LAW_ALIASES) {
     if (group.some((g) => query.includes(g))) {
       additions.push(...group);
+    }
+  }
+
+  for (const { groupA, groupB, additions: coAdditions } of COOCCURRENCE_EXPANSIONS) {
+    if (groupA.some((a) => query.includes(a)) && groupB.some((b) => query.includes(b))) {
+      additions.push(...coAdditions);
     }
   }
 
