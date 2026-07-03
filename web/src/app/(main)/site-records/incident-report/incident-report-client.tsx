@@ -17,6 +17,7 @@ import {
 } from "@/lib/site-records/incident-report-store";
 import { countIncidentRemaining, incidentConclusion } from "@/lib/site-records/record-conclusions";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { SAFETY_TONE, type SafetyTone } from "@/lib/design/safety-tone";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -47,6 +48,7 @@ export function IncidentReportClient() {
   const [f, setF] = useState<IncidentReport>(EMPTY(""));
   const [list, setList] = useState<IncidentReportSummary[]>([]);
   const [savedNote, setSavedNote] = useState("");
+  const [savedTone, setSavedTone] = useState<SafetyTone>("safe");
 
   useEffect(() => {
     const now = new Date();
@@ -66,10 +68,12 @@ export function IncidentReportClient() {
 
   function handleSave() {
     if (!f.victimName.trim() && !f.siteName.trim()) {
+      setSavedTone("danger");
       setSavedNote("被災者名または事業場名を入力してください。");
       return;
     }
     setList(saveIncident({ ...f, savedAt: new Date().toISOString() }));
+    setSavedTone("safe");
     setSavedNote("この端末に保存しました。");
   }
   function handleNew() {
@@ -98,6 +102,7 @@ export function IncidentReportClient() {
     const r = getIncidentById(id);
     if (!r) return;
     setF(r);
+    setSavedTone("safe");
     setSavedNote("保存済みの下書きを開きました。");
   }
   function deleteSaved(id: string) {
@@ -173,7 +178,7 @@ export function IncidentReportClient() {
           <button type="button" onClick={handlePrint} className="inline-flex items-center gap-1 rounded-lg bg-slate-700 min-h-[44px] px-3 py-2 text-xs font-bold text-white hover:bg-slate-800"><Printer className="h-3.5 w-3.5" aria-hidden="true" /> 下書きを印刷</button>
           <button type="button" onClick={handleCsv} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 min-h-[44px] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"><Download className="h-3.5 w-3.5" aria-hidden="true" /> CSV出力</button>
           <button type="button" onClick={handleNew} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 min-h-[44px] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"><FilePlus2 className="h-3.5 w-3.5" aria-hidden="true" /> 新規</button>
-          {savedNote && <span className="self-center text-xs font-semibold text-rose-700">{savedNote}</span>}
+          {savedNote && <span role="status" className={`self-center text-xs font-semibold ${SAFETY_TONE[savedTone].text}`}>{savedNote}</span>}
         </div>
       </section>
 
