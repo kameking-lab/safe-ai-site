@@ -224,15 +224,49 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
       }
     }),
 
-    // Education themes
-    import('@/data/mock/elearning-themes-data').then(({ elearningThemesCatalog }) => {
-      for (const theme of elearningThemesCatalog) {
+    // Eラーニング テーマ。正本＝ELearningPanel が `allThemes` として実際に描画する
+    // 全テーマ源（入門コース＋汎用カタログ＋追補＋業種別6分野）を単一ソースにする。
+    // 旧実装は 9 源のうち elearningThemesCatalog 1 つだけを import しており、業種別
+    // （製造/医療福祉/運輸/林業/食品/小売）・入門・追補テーマが横断検索から丸ごと
+    // 欠落していた（近年追加分が引けない発見性の穴＝#561 の accident と同型）。さらに
+    // 全件が一覧トップ /e-learning へリンクし、検索したテーマへ到達できなかった。
+    // url は panel が受け取る深リンク `/e-learning?theme=<id>#el-quiz`（panel 側で
+    // allThemes に対し id 検証済み＝収載源が allThemes と一致するため必ず解決。未知idは
+    // panel が無視して先頭テーマ表示＝幽霊リンク 0）。theme.id をキーに重複除去する。
+    Promise.all([
+      import('@/data/mock/elearning-intro-course'),
+      import('@/data/mock/elearning-themes-data'),
+      import('@/data/mock/elearning-extra-themes'),
+      import('@/data/mock/elearning-manufacturing-themes'),
+      import('@/data/mock/elearning-healthcare-themes'),
+      import('@/data/mock/elearning-transport-themes'),
+      import('@/data/mock/elearning-forestry-themes'),
+      import('@/data/mock/elearning-food-themes'),
+      import('@/data/mock/elearning-retail-themes'),
+    ]).then((mods) => {
+      const themes = [
+        ...mods[0].elearningIntroCourse,
+        ...mods[1].elearningThemesCatalog,
+        ...mods[2].elearningExtraThemes,
+        ...mods[3].elearningManufacturingThemes,
+        ...mods[4].elearningHealthcareThemes,
+        ...mods[5].elearningTransportThemes,
+        ...mods[6].elearningForestryThemes,
+        ...mods[7].elearningFoodThemes,
+        ...mods[8].elearningRetailThemes,
+      ];
+      const seen = new Set<string>();
+      for (const theme of themes) {
+        if (seen.has(theme.id)) continue;
+        seen.add(theme.id);
         items.push({
           id: `edu-${theme.id}`,
           title: theme.title,
           subtitle: theme.description.slice(0, 60),
           category: 'education',
-          url: `/e-learning`,
+          // 業種・出典種別・レベルからも引けるよう keywords に補う（例「製造業 化学」）。
+          keywords: [theme.sourceType, theme.level, theme.industry_detail ?? ''].filter(Boolean),
+          url: `/e-learning?theme=${encodeURIComponent(theme.id)}#el-quiz`,
         });
       }
     }),
