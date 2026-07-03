@@ -16,10 +16,12 @@ export function MhlwChemicalSelector({
   value,
   onSelect,
   placeholder = `MHLW ${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()} 物質から CAS / 名称で検索`,
+  id,
 }: {
   value: MergedChemical | null;
   onSelect: (m: MergedChemical | null) => void;
   placeholder?: string;
+  id?: string;
 }) {
   const [internalQuery, setInternalQuery] = useState(value?.primaryName ?? "");
   const [open, setOpen] = useState(false);
@@ -51,6 +53,7 @@ export function MhlwChemicalSelector({
       <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 focus-within:border-emerald-400 focus-within:ring-2 focus-within:ring-emerald-100">
         <FlaskConical className="h-4 w-4 shrink-0 text-emerald-500" aria-hidden="true" />
         <input
+          id={id}
           type="search"
           value={query}
           onChange={(e) => {
