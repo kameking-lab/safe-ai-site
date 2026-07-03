@@ -376,3 +376,23 @@
 **ゲート結果（cd web）**: コード/データ/依存変更ゼロ（docs追加のみ）。tsc=0 / lint=0 errors（既存warning 23件のみ・本変更に無関係）/ vitest 261 files・2210 tests 全pass（新規0件・非改変確認）/ build成功。
 
 **残課題**: S10(/signage/map・/for/constructionのSSR/メタ仕上げ＋/accidents出力3ボタン)はPR #646としてCI進行中、次イテレーションで回収予定。(2026-07-03 / ux-hub/s12-signage-settings-push-design-drafts)
+
+---
+
+## 2026-07-03 ux-hub/quick-wbgt-shortcut-fix
+
+**イテレーション頭の回収**: 自班の緑PR #650(S12・設計ドラフト)をsquashマージ。直後にPR #646(S10)がmainとdocコンフリクト(BACKLOG-ux-hub.md・cycle-log-ux-hub.mdの単純追記競合のみ・コード非衝突)になったため `git merge origin/main` で両エントリ共存の手動解決→ゲート緑（`web/src/app/signage/map/page.test.ts` がmainの型定義更新後の`tsc`で`metadata.twitter?.card`型不整合を検出したため`Record<string, unknown>`castへ追補修正）→push（PR #646はCI再走中のため今回はマージせず次イテレーションで回収）。`git checkout main && git pull --ff-only` でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手はS10のみで、これは既にPR #646として着手済み（重複回避）。補充指針（自領域routeの柱0未適用箇所・404どん詰まり解消）に従い、Explore委任で /quick 含む複数routeを実地調査。
+
+**発見した既存欠陥**: `/quick`（朝礼クイックアクセスハブ）の「熱中症WBGT」ショートカット（`QuickLauncher.tsx`）が `/education`（特別教育の一般カタログ・WBGT計算機なし）へ誤配線されており、隣の「フルハーネス」ショートカットと同一hrefだった。一人親方が朝礼3分で「今日のWBGTを見る」つもりでタップしても、実際のWBGT計算機・業種別リスク判定ハブ(`/heat-illness-prevention`、既存で稼働中)には到達できない行き止まりだった（測定可能な404どん詰まり相当の欠陥）。
+
+**修正**: `QuickLauncher.tsx` の該当hrefを `/education` → `/heat-illness-prevention` へ1行修正。他のショートカット・ヒーローボタンのhref/レイアウトは不変。
+
+**テスト**: `QuickLauncher.test.tsx` を新設（2ケース）。①「熱中症WBGT」リンクのhrefが`/heat-illness-prevention`であることを回帰ガード、②ショートカット/ヒーローボタン全リンクのhrefに重複がないことを保証（同種の誤配線の再発防止）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係）/ vitest 263 files・2226 tests 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/quick-wbgt-shortcut-noread-2026-07-03.mjs`（build+start実機・Playwright・スマホ390×844）**3/3 PASS**。①ショートカットのhrefが`/heat-illness-prevention`、②実際にタップした遷移先が`/heat-illness-prevention`、③遷移先にWBGT計算機ハブの見出しが実在（行き止まりでないことを実地確認）。
+
+**残課題**: PR #646(S10)のCI回収。/quickは今回の1件以外は44px達成済み（ヒーローボタンmin-h-[140px]・ショートカットタイル共に余裕あり）。home-three-pillars.tsx のAlertGenerator送信ボタン(py-1 text-[11px]≈21-24px)・safety-signs親ハブの「関連機能」プレーンテキストリンク(text-sm≈24px)が次サイクルの柱0補充候補として残る（Explore調査で発見・未着手）。
