@@ -318,7 +318,9 @@ function Format-MissingSinceMarker {
 # whose age is momentarily ~0), and $StaleMinutes selects the silently-dead ones. $ExpectedLanes is the
 # enabled roster from loop-config.json: it lets the line distinguish two failure modes and pick the
 # roster (not the region) as the denominator -
-#   * STALE     (loud) : a lane that WAS reporting and stopped >StaleMinutes ago (report-then-silent death).
+#   * STALE     (loud) : a lane that WAS reporting and stopped >StaleMinutes ago (report-then-silent death)
+#                        WHOSE RUNNER PROCESS IS NOT alive. A stale lane whose runner IS alive ($AliveLanes)
+#                        is demoted to ALIVE-NO-REPORT (it reported then its agent went quiet, not a crash).
 #   * BORN-DEAD (loud) : an enabled lane with NO parseable report row whose missing-since stamp has aged
 #                        past StaleMinutes (never reported for 2h+ = runner dying at ignition or a broken
 #                        report path - no longer a fresh-ignition transient). $MissingSince supplies the
@@ -326,11 +328,12 @@ function Format-MissingSinceMarker {
 #   * MISSING   (note): an enabled lane with NO parseable report row, still WITHIN the grace window (or with
 #                        no stamp yet). Softer wording because a fresh ignition legitimately shows this for
 #                        the minutes until each lane's first report; it self-clears as they report.
-#   * ALIVE-NO-REPORT (note): an enabled lane with NO parseable report row WHOSE RUNNER PROCESS IS ALIVE
-#                        ($AliveLanes, ground truth from Get-AliveRunnerLanes). It is provably NOT dead, so
-#                        it must NEVER escalate to the loud born-dead banner regardless of stamp age - it is
-#                        simply alive and not self-reporting (old runner / agent skipping step5.5). This is
-#                        the process-liveness tie-breaker that stops the born-dead FALSE alarm.
+#   * ALIVE-NO-REPORT (note): an enabled lane WHOSE RUNNER PROCESS IS ALIVE ($AliveLanes, ground truth from
+#                        Get-AliveRunnerLanes) but is not self-reporting - EITHER never reported OR reported
+#                        then went silent (demoted from STALE). It is provably NOT dead, so it must NEVER
+#                        escalate to a loud stopped/born-dead banner regardless of stamp age - it is simply
+#                        alive and not self-reporting (old runner / agent skipping step5.5). This is the
+#                        process-liveness tie-breaker that stops BOTH the born-dead and the stale FALSE alarm.
 # Precedence stale > born-dead > alive-no-report > missing > ok keeps each banner single-purpose. When the
 # roster is unknown (empty) the function reverts exactly to the pre-roster behavior (TOTAL = reported count,
 # no detection). $AliveLanes defaults to empty, so callers that cannot scan processes (or older self-tests)
@@ -347,10 +350,24 @@ function Get-LaneHealthLine {
   }
   if ($all.Count -eq 0 -and $missing.Count -eq 0) { return $null }
   $sep = S "laneHealthSep"
+  $canBornDead = $LS.ContainsKey("laneHealthBornDead")
+  $canAliveNoReport = $LS.ContainsKey("laneHealthAliveNoReport")
+  # STALE lanes reported once then fell silent past $StaleMinutes. A stale lane whose RUNNER PROCESS is alive
+  # ($AliveLanes, ground truth from Get-AliveRunnerLanes) is provably NOT crashed - it reported earlier then
+  # its agent went quiet (old runner without heartbeat / agent skipping step5.5), the report-then-silent twin
+  # of the never-reported alive case (#696). Demote it out of the loud "stopped" banner into the calm alive-
+  # no-report note so a working lane is never falsely mourned. Guard on $canAliveNoReport: with older strings
+  # that lack the calm banner, keep every stale lane LOUD (never fall through to a falsely-OK banner). Stale
+  # lanes with no live runner always keep the loud alarm.
   $stale = @(Get-StaleLanes -Rows $Rows -Now $Now -StaleMinutes $StaleMinutes -RowTemplate $rowTpl)
-  if ($stale.Count -gt 0) {
+  $staleDead = @()
+  $staleAlive = @()
+  foreach ($s in $stale) {
+    if ($canAliveNoReport -and ($AliveLanes -contains $s.Lane)) { $staleAlive += $s.Lane } else { $staleDead += $s }
+  }
+  if ($staleDead.Count -gt 0) {
     $items = @()
-    foreach ($s in $stale) {
+    foreach ($s in $staleDead) {
       $hours = [math]::Round($s.AgeMinutes / 60.0, 1)
       $items += (Fmt "laneHealthItem" @{ LANE = $s.Lane; LASTRUN = $s.LastRun.ToString("yyyy-MM-dd HH:mm"); HOURS = $hours })
     }
@@ -362,10 +379,9 @@ function Get-LaneHealthLine {
   # born-dead (loud); those still within the fresh-ignition grace window are quiet. Fallbacks that NEVER let
   # a rowless lane reach the falsely-OK banner: if the born-dead string is absent, its lanes fold into quiet;
   # if the alive-no-report string is absent, alive lanes fold into quiet (still named, never dropped).
-  $canBornDead = $LS.ContainsKey("laneHealthBornDead")
-  $canAliveNoReport = $LS.ContainsKey("laneHealthAliveNoReport")
+  # $staleAlive (reported-then-silent but process-alive) seeds the same calm bucket as never-reported-alive.
   $bornDead = @()
-  $aliveNoReport = @()
+  $aliveNoReport = @($staleAlive)
   $quietMissing = @()
   foreach ($m in $missing) {
     if ($canAliveNoReport -and ($AliveLanes -contains $m)) { $aliveNoReport += $m; continue }
@@ -720,6 +736,27 @@ if ($SelfTest) {
           # K4: an alive lane still WITHIN grace is also the calm alive-no-report note (confirmed alive).
           $k4 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapFresh -AliveLanes @("seo")
           Assert-Test "K4: alive lane within grace is alive-no-report (calm, named)" ($k4 -eq $k1exp)
+
+          # M) Stale (report-then-silent) tie-breaker: a lane that reported then fell silent >120 min but
+          # whose runner PROCESS is alive is demoted OUT of the loud stale banner into the calm alive-no-report
+          # note - it is not a crash, just an old runner / agent that stopped self-reporting. This is the fix
+          # for the live "data(2h ago)" false stopped-alarm while its runner was provably alive.
+          # M1: data is stale (200 min) but ALIVE -> calm alive-no-report naming data, NOT the loud stale banner.
+          $m1 = Get-LaneHealthLine -Rows @($rOps, $rDataStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data") -AliveLanes @("data")
+          $m1exp = Fmt "laneHealthAliveNoReport" @{ LANES = "data"; MISSING = 1; TOTAL = 2 }
+          Assert-Test "M1: stale-but-alive lane is demoted to calm alive-no-report, NOT loud stale" ($m1 -eq $m1exp)
+          # M2: regression - the SAME stale lane with NO live runner still fires the loud stale banner.
+          $m2 = Get-LaneHealthLine -Rows @($rOps, $rDataStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data") -AliveLanes @()
+          Assert-Test "M2: stale lane with no live runner still fires the loud stale banner" ($m2 -eq $f3exp)
+          # M3: two stale lanes, one alive one dead -> loud stale names ONLY the dead one (alive not mourned).
+          $rSeoStale = Fmt "reportLine" @{ LANE = "seo"; LASTRUN = $staleTs; PR = "#3"; OPEN = "1"; NOTE = "ok" }
+          $m3 = Get-LaneHealthLine -Rows @($rOps, $rDataStale, $rSeoStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -AliveLanes @("data")
+          $m3item = Fmt "laneHealthItem" @{ LANE = "seo"; LASTRUN = $staleTs; HOURS = [math]::Round(200 / 60.0, 1) }
+          $m3exp = Fmt "laneHealthStale" @{ LANES = $m3item; MIN = 120 }
+          Assert-Test "M3: loud stale names only the dead stale lane; the alive stale lane is not mourned" ($m3 -eq $m3exp)
+          # M4: a genuinely born-dead missing lane still outranks a demoted stale-alive lane (loud wins).
+          $m4 = Get-LaneHealthLine -Rows @($rOps, $rDataStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapOld -AliveLanes @("data")
+          Assert-Test "M4: a truly born-dead missing lane still outranks a demoted stale-alive lane" ($m4 -eq $g2exp)
         }
       }
     }
