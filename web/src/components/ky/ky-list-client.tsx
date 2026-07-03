@@ -41,24 +41,30 @@ export function KyListClient() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [usingCloud, setUsingCloud] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const loadList = useCallback(async () => {
-    const localRes = await ops.getKyRecordList();
-    const local = localRes.ok ? localRes.data : [];
-    if (local.length > 0 || !isKyCloudEnabled()) {
-      setEntries(local.map((s) => ({ ...s, source: "local" as const })));
-      setUsingCloud(false);
-      return;
-    }
-    // ローカルが空 → 別端末のクラウド履歴を引き継ぐ
-    await flushKyCloudQueue();
-    const pulled = await cloudPullKyRecords();
-    if (pulled && pulled.list.length > 0) {
-      setEntries(pulled.list.map((s) => ({ ...s, source: "cloud" as const })));
-      setUsingCloud(true);
-    } else {
-      setEntries([]);
-      setUsingCloud(false);
+    setLoading(true);
+    try {
+      const localRes = await ops.getKyRecordList();
+      const local = localRes.ok ? localRes.data : [];
+      if (local.length > 0 || !isKyCloudEnabled()) {
+        setEntries(local.map((s) => ({ ...s, source: "local" as const })));
+        setUsingCloud(false);
+        return;
+      }
+      // ローカルが空 → 別端末のクラウド履歴を引き継ぐ
+      await flushKyCloudQueue();
+      const pulled = await cloudPullKyRecords();
+      if (pulled && pulled.list.length > 0) {
+        setEntries(pulled.list.map((s) => ({ ...s, source: "cloud" as const })));
+        setUsingCloud(true);
+      } else {
+        setEntries([]);
+        setUsingCloud(false);
+      }
+    } finally {
+      setLoading(false);
     }
   }, [ops]);
 
@@ -145,9 +151,12 @@ export function KyListClient() {
         </Link>
       </div>
 
-      {/* 結論カード（柱0）: いまの状態＝保存件数を3秒で。保存ゼロは新規作成へ誘導。 */}
+      {/* 結論カード（柱0）: いまの状態＝保存件数を3秒で。保存ゼロは新規作成へ誘導。
+          読込中（別端末のクラウド履歴を確認中）は「保存ゼロ」と誤読させないよう確認中の状態を出す。 */}
       <div className="mt-4">
-        {entries.length === 0 ? (
+        {loading ? (
+          <ConclusionCard tone="neutral" title="確認中" description="保存済みのKYを確認しています…" />
+        ) : entries.length === 0 ? (
           <ConclusionCard
             tone="info"
             title="保存KYなし"

@@ -29,21 +29,27 @@ export function MeetingListClient() {
   const [sort, setSort] = useState<"newest" | "oldest" | "site">("newest");
   const [busy, setBusy] = useState(false);
   const [usingCloud, setUsingCloud] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const reload = useCallback(async () => {
-    const local = getMeetingList();
-    if (local.length > 0 || !isMeetingCloudEnabled()) {
-      setList(local.map((s) => ({ ...s, source: "local" as const })));
-      setUsingCloud(false);
-      return;
-    }
-    const cloud = await cloudPullMeetings();
-    if (cloud && cloud.length > 0) {
-      setList(cloud.map((s) => ({ ...s, source: "cloud" as const })));
-      setUsingCloud(true);
-    } else {
-      setList([]);
-      setUsingCloud(false);
+    setLoading(true);
+    try {
+      const local = getMeetingList();
+      if (local.length > 0 || !isMeetingCloudEnabled()) {
+        setList(local.map((s) => ({ ...s, source: "local" as const })));
+        setUsingCloud(false);
+        return;
+      }
+      const cloud = await cloudPullMeetings();
+      if (cloud && cloud.length > 0) {
+        setList(cloud.map((s) => ({ ...s, source: "cloud" as const })));
+        setUsingCloud(true);
+      } else {
+        setList([]);
+        setUsingCloud(false);
+      }
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -114,9 +120,12 @@ export function MeetingListClient() {
         <Link href="/safety-diary" className="rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50">＋ 新規作成</Link>
       </div>
 
-      {/* 結論カード（柱0）: いまの状態＝保存件数を3秒で。保存ゼロは新規作成へ誘導。 */}
+      {/* 結論カード（柱0）: いまの状態＝保存件数を3秒で。保存ゼロは新規作成へ誘導。
+          読込中（別端末のクラウド履歴を確認中）は「保存ゼロ」と誤読させないよう確認中の状態を出す。 */}
       <div className="mt-4">
-        {list.length === 0 ? (
+        {loading ? (
+          <ConclusionCard tone="neutral" title="確認中" description="保存済みの打合せ書を確認しています…" />
+        ) : list.length === 0 ? (
           <ConclusionCard
             tone="info"
             title="打合せ書なし"

@@ -208,7 +208,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和29年労働省令第13号",
     latestRevision: "令和3年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/329M50002000013",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   パート有期法: {
     fullName: "短時間労働者及び有期雇用労働者の雇用管理の改善等に関する法律",
