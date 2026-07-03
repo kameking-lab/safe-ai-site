@@ -288,7 +288,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和48年法律第117号",
     latestRevision: "令和3年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/348AC0000000117",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   毒劇法: {
     fullName: "毒物及び劇物取締法",
