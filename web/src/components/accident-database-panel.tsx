@@ -252,7 +252,7 @@ export function AccidentDatabasePanel({
               <button
                 type="button"
                 onClick={resetIndustries}
-                className="text-[11px] font-semibold text-slate-500 hover:text-red-500 transition"
+                className="inline-flex min-h-[44px] items-center px-2 text-[11px] font-semibold text-slate-500 hover:text-red-500 transition"
               >
                 フィルタをリセット
               </button>
@@ -264,7 +264,7 @@ export function AccidentDatabasePanel({
                 key={key}
                 type="button"
                 onClick={() => toggleIndustry(key)}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                className={`inline-flex min-h-[44px] items-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                   selectedIndustries.has(key) ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                 }`}
               >
@@ -286,7 +286,7 @@ export function AccidentDatabasePanel({
                     setSelectedWorkerAttribute(attr);
                     setPage(0);
                   }}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  className={`inline-flex min-h-[44px] items-center rounded-full px-3 py-1 text-xs font-semibold ${
                     attr === selectedWorkerAttribute ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
                 >
@@ -306,7 +306,7 @@ export function AccidentDatabasePanel({
                     setSelectedCompanySize(size);
                     setPage(0);
                   }}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  className={`inline-flex min-h-[44px] items-center rounded-full px-3 py-1 text-xs font-semibold ${
                     size === selectedCompanySize ? "bg-teal-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
                 >
@@ -329,7 +329,7 @@ export function AccidentDatabasePanel({
                     onSelectCategory(option);
                     setPage(0);
                   }}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                  className={`inline-flex min-h-[44px] items-center rounded-full px-3 py-1 text-xs font-semibold ${
                     isActive ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700"
                   }`}
                 >
@@ -466,19 +466,19 @@ export function AccidentDatabasePanel({
                   <button
                     type="button"
                     onClick={() => setExpandedId(isExpanded ? null : accident.id)}
-                    className="text-xs font-semibold text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
+                    className="inline-flex min-h-[44px] items-center text-xs font-semibold text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-700"
                   >
                     {isExpanded ? "閉じる" : "詳細を見る"}
                   </button>
                   <Link
                     href={`/accidents/${accident.id}`}
-                    className="text-xs font-semibold text-blue-700 underline decoration-blue-300 underline-offset-2 hover:text-blue-900"
+                    className="inline-flex min-h-[44px] items-center text-xs font-semibold text-blue-700 underline decoration-blue-300 underline-offset-2 hover:text-blue-900"
                   >
                     → 詳細ページへ
                   </Link>
                   <Link
                     href="/e-learning"
-                    className="text-xs font-semibold text-emerald-700 underline decoration-emerald-300 underline-offset-2"
+                    className="inline-flex min-h-[44px] items-center text-xs font-semibold text-emerald-700 underline decoration-emerald-300 underline-offset-2"
                   >
                     この事例で学習する
                   </Link>
@@ -489,7 +489,7 @@ export function AccidentDatabasePanel({
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   <Link
                     href={`/safety-diary/new?q=${encodeURIComponent(accident.title)}`}
-                    className="rounded-full border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-50"
+                    className="inline-flex min-h-[44px] items-center rounded-full border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-50"
                   >
                     → 日誌に記録
                   </Link>
@@ -502,7 +502,7 @@ export function AccidentDatabasePanel({
                         href={source.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs font-semibold text-amber-800 underline decoration-amber-300 underline-offset-2"
+                        className="inline-flex min-h-[44px] items-center text-xs font-semibold text-amber-800 underline decoration-amber-300 underline-offset-2"
                       >
                         出典: {source.site}
                         {source.caseId ? `（No.${source.caseId}）` : ""} ↗
@@ -528,7 +528,7 @@ export function AccidentDatabasePanel({
             disabled={page === 0}
             onClick={() => setPage((p) => p - 1)}
             aria-label="前のページへ"
-            className="rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-40"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-40"
           >
             前へ
           </button>
@@ -540,7 +540,7 @@ export function AccidentDatabasePanel({
             disabled={page >= totalPages - 1}
             onClick={() => setPage((p) => p + 1)}
             aria-label="次のページへ"
-            className="rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-40"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-40"
           >
             次へ
           </button>
