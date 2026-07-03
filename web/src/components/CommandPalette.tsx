@@ -14,6 +14,7 @@ import {
   BookMarked,
   BookText,
   HelpCircle,
+  HardHat,
   Signpost,
   MessageSquare,
   ListChecks,
@@ -28,7 +29,7 @@ import {
 } from '@/lib/search-index';
 import { trackEvent } from '@/components/Analytics';
 
-const CATEGORIES: SearchCategory[] = ['law', 'faq', 'precedent', 'notice', 'chemical', 'education', 'accident', 'glossary', 'sign'];
+const CATEGORIES: SearchCategory[] = ['law', 'faq', 'precedent', 'notice', 'chemical', 'equipment', 'education', 'accident', 'glossary', 'sign'];
 
 // 空クエリ時に表示する主要ショートカット（UX-007: モバイル検索とPC Ctrl+K の機能を統一）
 type Shortcut = {
@@ -57,6 +58,7 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
     case 'precedent': return <Scale className={cls} />;
     case 'glossary':  return <BookMarked className={cls} />;
     case 'faq':       return <HelpCircle className={cls} />;
+    case 'equipment': return <HardHat className={cls} />;
     case 'sign':      return <Signpost className={cls} />;
   }
 }

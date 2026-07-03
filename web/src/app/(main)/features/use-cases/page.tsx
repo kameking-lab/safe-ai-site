@@ -399,7 +399,7 @@ export default function UseCasesPage() {
                         <Link
                           key={rf.href}
                           href={rf.href}
-                          className="inline-flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100"
+                          className="inline-flex min-h-[44px] items-center rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100"
                         >
                           {rf.label} →
                         </Link>

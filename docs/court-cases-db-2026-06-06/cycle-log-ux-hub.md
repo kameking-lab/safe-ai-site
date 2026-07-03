@@ -399,6 +399,24 @@
 
 ---
 
+## 2026-07-03 ux-hub/accidents-diversity-visible-breadcrumb
+
+**イテレーション頭の回収**: 自班の緑PR #646（S10・/signage/map SSRメタ＋/accidents出力3ボタン）はCI全緑を確認しsquashマージ→`git checkout main && git pull --ff-only`でclean確認。BACKLOG-ux-hub.md 未着手0件のため補充発動（指針: 「視覚パンくず可視化(画面側)」）。
+
+**調査**: Explore委任で担当route群の可視パンくず実装状況を調査したところ「大半のハブページに可視パンくずが無い」という結果が出たため着手。しかし実装確認の過程で、この初回サーベイが `PageJsonLd`（`web/src/components/page-json-ld.tsx`）内部に既に可視`<Breadcrumb>`が自動描画されている事実を見落としていたと判明（JSON-LD schemaの一部としか読んでいなかった）。同様に`ScaffoldPage`（/diversity/disability等7ページが使用）も内部で可視パンくずを描画済みと判明。当初 /safety-signs の3サブページに手動で`<Breadcrumb>`を追加したところvitestで「同一aria-labelのnavが2つ存在」の失敗が発生し、これを手がかりに`PageJsonLd`の既存自動描画を発見・当該3ファイルの変更を`git checkout`でロールバックした（捏造・重複防止）。
+
+**再調査で確定した真の欠落**: 担当19route・約60ページを`PageJsonLd`/`ScaffoldPage`/`<Breadcrumb>`直接使用/手書きnavの有無で全数grep確認し、欠落2件に絞り込み。①`/accidents`（事故DBハブ最上部）: 生の`JsonLd`+`breadcrumbSchema`のみでJSON-LDは出力されるが画面上のnavが皆無。②`/diversity/women`: 他7本のD&Iサブページ(disability/elderly/foreign-workers/lgbtq/non-regular/remote/sogi)は`ScaffoldPage`経由で「多様性と安全 › ページ名」の3階層パンくずを持つ中、本ページだけ独自実装で「多様性と安全に戻る」という単一リンクのみだった不整合。（`/features/print`・`/court-cases/print`はrobots noindexの印刷専用ビューのため意図的に対象外、`/accidents/[id]`は独自の手書きnavが既に可視のため対象外）
+
+**実装**: ①`/accidents`の`AccidentHubNav`直前に共通`Breadcrumb`（`web/src/components/breadcrumb.tsx`）で「事故データベース」の現在地を追加。②`/diversity/women`の「戻る」リンク（`ArrowLeft`アイコン+テキスト）を同じ共通`Breadcrumb`に置換し「多様性と安全 › 女性向け PPE・妊産婦就業ガイド」の2階層表示へ（他7ページと体裁統一）。いずれも純粋なnav差し替えで本文・データ・ロジックは不変。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・本変更に無関係）/ vitest 266 files・2237 tests 全pass（新規2件）/ build成功。
+
+**無読テスト**: `next start`実機で `/accidents` に「🏠 › 事故データベース」パンくずDOM出力、`/diversity/women` に「🏠 › 多様性と安全 › 女性向け PPE・妊産婦就業ガイド」パンくずDOM出力（旧「多様性と安全に戻る」テキストは消滅）をcurlで確認。
+
+**残課題**: なし（本タスクの範囲は完了）。次イテレーションはBACKLOG-ux-hub.md補充分から継続。(2026-07-03 / ux-hub/accidents-diversity-visible-breadcrumb)
+
+---
+
 ## 2026-07-03 ux-hub/quick-wbgt-shortcut-fix
 
 **イテレーション頭の回収**: 自班の緑PR #650(S12・設計ドラフト)をsquashマージ。直後にPR #646(S10)がmainとdocコンフリクト(BACKLOG-ux-hub.md・cycle-log-ux-hub.mdの単純追記競合のみ・コード非衝突)になったため `git merge origin/main` で両エントリ共存の手動解決→ゲート緑（`web/src/app/signage/map/page.test.ts` がmainの型定義更新後の`tsc`で`metadata.twitter?.card`型不整合を検出したため`Record<string, unknown>`castへ追補修正）→push（PR #646はCI再走中のため今回はマージせず次イテレーションで回収）。`git checkout main && git pull --ff-only` でclean確認。
@@ -419,6 +437,26 @@
 
 ---
 
+## 2026-07-03 ux-hub/top-three-pillars-44px-targets
+
+**イテレーション頭の回収**: 自班の緑PR #655(/quick WBGT誤配線是正)をsquashマージ・delete-branch。PR #663(視覚パンくず可視化)はCI進行中のため今回は据え置き（次サイクルで回収）。`git checkout main && git pull --ff-only` でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手の最上位＝前サイクルExplore調査で発見済みの「トップ `home-three-pillars.tsx` のAlertGenerator送信ボタン・関連リンクが44px未満」。
+
+**発見・修正**: 直近の死亡事故パネル（初訪の一人親方がトップ最上部で最初にタップする導線）で以下4箇所が親指操作の押し損ねサイズだった既存欠陥を是正。①「10年事故DB一覧へ」リンク（パディング無し・`mt-1.5 text-[11px]`≈21px）②AlertGeneratorの「注意喚起文を作成」送信ボタン（`px-2.5 py-1 text-[11px]`≈24px・fatal-accident/weather/law-revisionの3種で共用の共通コンポーネント）③「出典・報道URLを開く」リンク（パディング無し）④生成失敗時の「再試行」ボタン・3回連続失敗時の「管理者に連絡」リンク（追補Explore調査で同一ファイル内に発見）。全て`min-h-[44px]`＋最小限のpx付与（純粋なクラス追加でレイアウト・ロジック不変）。
+
+**テスト**: `home-three-pillars.test.tsx` を新設（5ケース）。静的描画で「10年事故DB一覧へ」「出典・報道URLを開く」「注意喚起文を作成」の className に `min-h-[44px]` を保証。`fetch`をモックしAPI失敗をシミュレートして「再試行」ボタン・（2回連続失敗後の）「管理者に連絡」リンクにも `min-h-[44px]` を確認。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係）/ vitest 267 files・2259 tests 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/top-three-pillars-44px-2026-07-03.mjs`（build+start実機・Playwright・スマホ390×844）**2/2 PASS**。「10年事故DB一覧へ」リンク・「注意喚起文を作成」送信ボタンの実boundingBoxが両方とも44px以上であることを確認。
+
+**補充**: 未着手が1件のみ（/safety-signs親ハブ関連機能リンク）に減ったため、Explore委任で追加2件を発見・補充。①`/features/use-cases`のrelated-featureピル(`px-2 py-1 text-[11px]`)、②`/court-cases/employer-liability`のIssueLinkチップ(`px-2.5 py-1 text-xs`)。いずれもmin-h/h-11未付与で次サイクル候補。
+
+**残課題**: PR #663(視覚パンくず可視化)のCI回収。上記3件の柱0補充候補が次サイクルへ持ち越し。
+
+---
+
 ## 2026-07-03 ux-hub/safety-signs-hub-related-links-44px
 
 **イテレーション頭の回収**: 自班のPR #668(トップhome-three-pillars 44px化)はCI進行中(e2e/smoke IN_PROGRESS)のため未マージ・今回は回収スキップ。`git checkout main && git pull --ff-only`でclean確認(mainは5コミット進行・data/seo/ux-records/ux-tools各班のマージ分)。
@@ -434,3 +472,21 @@
 **無読テスト**: `docs/third-party-reviews/scripts/safety-signs-hub-related-links-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**3/3 PASS**（3リンク全てboundingBox height=44px実測）。
 
 **残課題**: PR #668（トップhome-three-pillars 44px化）のCI回収は次イテレーション。BACKLOG-ux-hub.mdの未着手件数が2件（トップhome-three-pillars=PR #668で着手済み・重複回避のため今回はスキップ）に減っていたため、Explore不要で直接コード確認した2件（`/features/use-cases`のrelated-featureピル・`/court-cases/employer-liability`のIssueLinkチップ、いずれも実コードで44px未満を確認済み）を補充。
+
+---
+
+## 2026-07-03 ux-hub/features-use-cases-related-pill-44px
+
+**イテレーション頭の回収**: 自班の緑PR未マージが2件判明（#668 トップhome-three-pillars・#663 視覚パンくず可視化）。いずれもCI緑ながら`gh pr merge --squash`が「merge commit cannot be cleanly created」で失敗＝main側の並行マージでBACKLOG-ux-hub.md/cycle-log-ux-hub.mdの追記競合が発生していたため、2ブランチとも`git checkout <branch> && git merge origin/main`で手動解決（両エントリを時系列順で共存、コード側の衝突は無し）→ゲート緑（tsc/lint/vitest/build）確認→push（CI再走のため今回のマージは次イテレーションへ持ち越し）。加えて、直前に別のクローンが作った重複ブランチ`ux-hub/home-three-pillars-44px-targets`(PR #676)が#668と全く同一ファイル(home-three-pillars.tsx)の同一AlertGenerator/リンクを44px化する重複PRだった（#668の方が「出典・報道URLを開く」リンクも追加是正済みで上位互換）と判明したため、#676をクローズしローカル/リモートブランチを削除して重複作業を解消。`git checkout main && git pull --ff-only`でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md未着手2件のうち最上位（トップhome-three-pillars=PR #668で着手済みのため重複回避でスキップ）に続く「/features/use-cases のrelated-featureピル・/court-cases/employer-liabilityのIssueLinkチップが44px未満」の2件（いずれも小粒・独立ファイルのため同一PRで消化）。
+
+**修正**: `features/use-cases/page.tsx`のrelated-featureピル（`px-2 py-1 text-[11px]`、402行）と`court-cases/employer-liability/page.tsx`のIssueLinkチップ（`px-2.5 py-1 text-xs`、29行）にそれぞれ`min-h-[44px]`を付与。いずれも純粋なクラス追加でレイアウト・遷移先・文言は不変。
+
+**テスト**: `features/use-cases/page.test.tsx`・`court-cases/employer-liability/page.test.tsx`を各1ケース新設し、該当リンクのclassNameに`min-h-[44px]`を含むことを保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係）/ vitest 272 files・2310 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/features-use-cases-court-employer-liability-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**52/52 PASS**（/features/use-cases 関連機能ピル48件・/court-cases/employer-liability 論点チップ4件、全てboundingBox height≥44px実測）。
+
+**残課題**: BACKLOG-ux-hub.md未着手は1件（トップhome-three-pillars=PR #668で着手済み・マージ待ち）のみに減少。PR #668・#663のCI回収は次イテレーション。3件未満のためExplore委任で補充調査を実施し、実在確認済みの2件（`/accidents/[id]`の「事故DBに戻る」リンク・類似事故カードのタイトルリンク／`/diversity/women`のAmazon・楽天アフィリエイトボタン・関連ページナビ3リンク、いずれも44px未満をコード確認済み）をBACKLOG-ux-hub.mdへ追記（PR #682へ追加コミット）。Explore調査中に発生したリポジトリ外への一時ファイル書き出し(`C:\Users\kanet\ux-hub-scan.txt`)は削除済み。

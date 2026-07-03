@@ -4,6 +4,49 @@
 
 ---
 
+## 2026-07-03 — 柱C-2 横断検索 notice-search.ts の回帰テスト新設（PR: seo/search-categories-single-source）
+
+回収: 前イテレーションの自班 CI 緑 PR #666（安全標識 横断検索）を squashマージ→`git checkout main && git pull --ff-only`→clean。#670（保護具 横断検索）は #666 マージで search-index.ts/SearchResults/CommandPalette/BACKLOG/cycle-log が衝突(DIRTY)→**origin/main を当該ブランチへ通常マージ**で解決＝`SearchCategory` union は equipment(HEAD)∪sign(main) の和集合に、CATEGORIES 配列・countByCategory・CategoryIcon も両方併存させ、BACKLOG/cycle-log の [x] 完了エントリは3本(保護具/標識/化学物質)を全て残す（force-push 不可を厳守）。tsc0・lint errors0・全2311テスト緑・build成功を確認して push＝CI 再走は次イテレーションで回収。#674(RSS)は CI pending のため持ち越し。他班 OPEN PR は不可侵。
+
+着手判断: BACKLOG-seo 未着手は 0 件（O17/T6・T7 は Path A 設計ドラフト=オーナー承認待ち）のため補充の指針§に従い自領域から補充。まず**発見性の全面監査**を実施＝(1) 動的ルート全20種([id]/[cas]/[slug]…)を generateStaticParams と sitemap 収載で機械突合し**全 indexable 名前空間が子sitemap or 静的収載で網羅済**を確認（/accidents-reports/[industry] は INDUSTRY_CONFIGS の5 slug=sitemap 5件と一致・user生成の /safety-diary・/chatbot/share は noindex で正しく非収載）、(2) 横断検索10カテゴリ(law/notice/chemical/equipment/sign/faq/education/accident/precedent/glossary)が全て buildSearchIndex で populate 済を確認、(3) robots(決裁A済)・sitemap-index(lastmod 動的化 C-3-4 済)も既達。真に残る穴として、当班 C-2 領域の `lib/notice-search.ts`（チャットボットの通達出典提示に直結）が**テスト皆無**を特定。※本来やりたい CATEGORIES 単一ソース化(SearchResults/CommandPalette のハンド重複を search-index 集約)は、対象ファイルが in-flight の #670 と全面衝突するため見送り、in-flight PR が触らない notice-search を選択。
+
+実装: `notice-search.test.ts`(9 it)を新設。実データ `@/data/mhlw-notices`(100件・binding無/indirect78/reference22)を直接流し、入力ガード(空/空白/1文字語→0件)・トピック語ヒットの id 実在性(捏造0)・シノニム展開(アスベスト→石綿タイトル)・自然文正規化・k 上限制御・ランキング決定性(小k=大k先頭・冪等)・NoticeHit の正本射影一致・NOTICE_BINDING_LABELS 網羅 を固定。**コード変更0**＝既存挙動の特徴づけ回帰のみ（水増し無し）。
+
+ゲート: `tsc --noEmit`=0（NODE_OPTIONS=--max-old-space-size=8192。既定は tsc worker OOM segfault=139 のため増量が定石）/ `eslint`(新規1ファイル)=errors0 / `vitest run`=272ファイル**2317テスト全緑**(notice-search 9含む) / `build`=成功。build 再生成物(rag-metrics-latest.json・ky-print-sheet snapshot・chatbot-eval-fresh-results.json)は `git checkout` で復元。working tree は新規 notice-search.test.ts＋BACKLOG/cycle-log のみで clean。
+
+残: 本 PR＋#670＋#674 の CI 緑回収＆マージ（次イテレーション 1)）。次の補充候補: CATEGORIES 単一ソース化(#670 マージ後に着手＝衝突回避)。
+
+---
+
+## 2026-07-03 — 発見性 実在RSSフィード4本を全ページ<head>で自動発見可能化（PR: seo/rss-feed-autodiscovery / #674）
+
+回収: 自班の CI 緑 PR #657（化学物質 sitemap）を squashマージ→`git checkout main && git pull --ff-only`→clean。#666（安全標識 横断検索）が #657 マージで origin/main と CONFLICTING（BACKLOG/cycle-log の [x] 追記衝突2件のみ・コードは auto-merge）だったため当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決し push＝CI 再走を次イテレーションで回収。#670（保護具 横断検索）は CI 実行中のため持ち越し。
+
+着手判断: BACKLOG-seo 未着手キューは空（O17/T6・T7 は Path A 設計ドラフト=オーナー承認待ち）のため補充の指針§に従い自領域から補充。**発見性サーフェスの全域監査**を実施＝(1) sitemap: 全 [param] 動的ルート族（accidents/articles/chemical-database/circulars/court-cases/equipment/faq/features/foreign-workers/industries/safety-signs×3/illness-guide/accidents-reports）が子sitemap or sitemap.ts の `.map()` で収載済＝**穴なし**、(2) robots/manifest: 既達、(3) **RSSフィード**: `/feed/{news,law-revisions,accident-reports,serious-cases}.xml` の4本が実在・クロール可（robots で /feed 非Disallow）なのに**どのページ `<head>` からも `<link rel="alternate">` で広告されておらず自動発見不能**の真の穴を特定（`grep application/rss+xml src` は生成lib `lib/rss.ts` のみヒット＝alternate リンク0）。
+
+実装: `lib/seo/feeds.ts`（当班owned `lib/seo/**`）を単一ソースに新設＝`SITE_FEEDS` 登録簿(path+title)＋`rssAlternateTypes()`。ルート `layout.tsx`（当班 core/shell custodian）の `alternates` に `types: application/rss+xml` を追加。Next Metadata の `alternates.types`（node_modules 型定義で `AlternateLinkDescriptor[]` を確認）が全ページ共通 `<head>` に `<link rel="alternate" type="application/rss+xml" href title>` を出力＝`metadataBase` により相対path `/feed/*.xml` を絶対URLへ解決。既存 `canonical` は保持・`openGraph`/`twitter` は無改変（openGraph 浅マージ地雷を回避）。
+
+回帰: `feeds.test.ts` 5本＝(1)登録簿2本以上・path形式 (2)path重複0 (3)全 path が実在 `route.ts`(GETハンドラ)へ node:fs で解決＝**幽霊フィードリンク0**（manifest.test/sitemap孤立突合と同方針）(4)登録 title が各 route の RSS channel title と一致＝**drift ガード**（route 側のタイトル変更で失敗）(5)`rssAlternateTypes()` 網羅。**実測検証**＝build 後 `.next/server/app/*.html` を grep し4本の `rel=alternate type=application/rss+xml`（絶対URL・正 title）出力を確認。
+
+ゲート: `tsc --noEmit`=0 / `eslint`(3ファイル)=errors0 / `vitest run`=**全2304テスト緑**（新規5含む）/ `build`=成功（NODE_OPTIONS=--max-old-space-size=6144）。build 再生成物（rag-metrics-latest.json・ky-print-sheet snapshot・chatbot-eval-fresh-results.json）は `git checkout` で復元。working tree は layout.tsx＋新設 lib/seo/{feeds.ts,feeds.test.ts} の3ファイルのみで clean。
+
+残: 本 PR #674＋#666(再走)＋#670 の CI 緑回収＆マージ（次イテレーション 1)）。次の未着手は補充。
+
+---
+
+## 2026-07-03 — 柱C-2 追補 横断検索に保護具(安全用品DB 1,050件)を収載（PR: seo/c2-equipment-cross-search）
+
+回収: 前イテレーションの自班 PR を CI 緑で回収＝#653（PWA ショートカット）を squash マージ→main を ff-only 同期。#657（化学物質 sitemap）は #653 の追記と BACKLOG-seo.md で衝突→`git merge origin/main` を当該ブランチへ通常マージして解決（両完了項目を併存・force-push 不可を遵守）し push、CI 再走は次イテレーションで回収。他班 OPEN PR は不可侵。
+
+着手: BACKLOG-seo 未着手キューは空（Fable診断の実装は消化済・O17/T6・T7 は Path A 設計ドラフトでオーナー承認待ち）。補充指針に従い自領域（横断検索の発見性）を再点検＝横断検索カテゴリと実在の indexable コンテンツ集合を機械突合。
+
+- **現状確認（実バグ）**: `search-index.ts` のカテゴリは law/notice/chemical/education/accident/precedent/glossary/faq の8型のみ。一方 `/equipment/[id]`（保護具 個別詳細・約1,050件）が実在し `sitemap-equipment.xml` に個別収載済み・`generateStaticParams` が `getAllEquipment()` の eq-NNNN 全件を解決・detail は自己canonical/indexable。**にもかかわらず横断検索(/search・⌘K)に equipment カテゴリが無く、フルハーネス・防じんマスク・安全帯・保護帽 等 現場が最も検索する保護具名が丸ごと0件**＝#561 accident・化学物質と同型の発見性の穴。sitemap 静的ルート全件（page.tsx 155本）を sitemap.ts と機械突合し新規孤立 sitemap 対象が無いことも確認済（/feedback・/safety-diary/new は redirect、/ky/list・/safety-diary/list・…/result は robots index:false で正しく非収載）。
+- **修正（自班所有のみ）**: `search-index.ts` に `equipment` カテゴリを新設。正本 `getAllEquipment()`（＝detail の generateStaticParams・sitemap-equipment と同一ソース）を dynamic import し title=製品名・subtitle=カテゴリ名＋規格・keywords=カテゴリ名/小分類/メーカー/JIS規格（industries/hazards は英語コード＝日本語検索に無意味なため除外＝ノイズ回避、regulations は法令権威クエリ汚染回避のため除外）・url=`/equipment/<id>`（正本由来＝必ず解決・幽霊URL0・データ追加に自動追従）。`SEARCH_CATEGORY_PRIORITY` の**末尾**に配置＝保護具は商品レコメンド(アフィリエイト)で権威が低く、同点タイブレークでも法令・通達・判例の上位を決して奪わない。`CATEGORY_META`(amber/保護具) と `countByCategory` の初期化 Record も拡張。UI(SearchResults/CommandPalette)へ保護具タブ＋`HardHat` アイコンを追加（既存 faq/glossary 追加と同パターン、検索UIのみ改変）。
+- **テスト**: `search-index.test.ts` に equipment describe（3 it）追加＝①正本 getAllEquipment と件数・ID集合一致＋500件超の非空虚性 ②全件 /equipment/<id> 深リンク・裸/equipment・/equipment-finder 不在・url↔id 対応(幽霊URL0) ③フルハーネス/墜落制止用器具/メーカー/JIS でヒット＋subtitle非空。既存 countByCategory 合計テストへ c.equipment を追加。**locked不変条件**（T1-T3＝「就業制限」1位=安衛法61条・「石綿 事前調査」1位=石綿則3条 等）が保護具追加後も不変であることを既存回帰で確認（末尾優先度＋keyword を JP有意語に限定した効果）。tsc0・lint errors0・全2267テスト緑（新規3含む）・build成功。
+- **要・他班（注記のみ・当班は非改変）**: 保護具一覧 `/equipment-finder` 本文の改善は所有 UI 班(ux-tools)の担当。当班は横断検索インデックスの発見性のみ是正した。
+
+---
+
 ## 2026-07-03 — 柱C-2追補 横断検索に安全標識(JIS Z 9101・約110種)を収載（PR: seo/c2-safety-signs-cross-search / #666）
 
 回収: 自班の緑・未マージ PR #647（FAQ200問）を squashマージ→`git checkout main && git pull --ff-only`→clean。#653（PWA/かな折り畳み却下）が origin/main と CONFLICTING（BACKLOG/cycle-log の追記衝突のみ・コードは auto-merge）だったため当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決し push（CI 再走は次イテレーションで回収）。#657（化学物質 sitemap）は CI 実行中のため持ち越し。
