@@ -95,6 +95,50 @@ describe("searchRelevantNotices — 実データ照合", () => {
   });
 });
 
+describe("searchRelevantNotices — 現場口語・旧称・障害名の橋渡し（recall）", () => {
+  const noticeIds = new Set(mhlwNotices.map((n) => n.id));
+  const titles = mhlwNotices.map((n) => n.title).join("\n");
+
+  it("前提: 現場口語「酸欠」「振動障害」は通達タイトルに literal では現れない（橋渡しでのみ拾える）", () => {
+    // この前提が崩れた場合、以下の「hits>0＝橋渡しが効いた」証明が直接一致に化けるため固定する。
+    expect(titles.includes("酸欠")).toBe(false);
+    expect(titles.includes("振動障害")).toBe(false);
+    // 一方、橋渡し先の正式表記は実在する（捏造した橋渡しではない）。
+    expect(titles.includes("酸素欠乏")).toBe(true);
+    expect(titles.includes("チェーンソー")).toBe(true);
+  });
+
+  it("現場口語「酸欠」→ 酸素欠乏・硫化水素の通達を surface する", () => {
+    // 「酸欠」はタイトルに 0 件＝TOPIC_SYNONYMS(酸素欠乏↔酸欠↔硫化水素)の展開でのみ拾える。
+    const hits = searchRelevantNotices("酸欠");
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits.every((h) => noticeIds.has(h.id))).toBe(true);
+    expect(hits.some((h) => /酸素欠乏|硫化水素/.test(h.title))).toBe(true);
+  });
+
+  it("障害名「振動障害」→ チェーンソー振動ばく露の通達を surface する", () => {
+    // 「振動障害」もタイトルに 0 件＝チェーンソー群への展開でのみ拾える。
+    const hits = searchRelevantNotices("振動障害");
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits.every((h) => noticeIds.has(h.id))).toBe(true);
+    expect(hits.some((h) => h.title.includes("チェーンソー"))).toBe(true);
+  });
+
+  it("旧法令名「安全帯」→ 墜落制止用器具・墜落/転落の通達を surface する", () => {
+    // 2019 改称前の旧称「安全帯」から現行の墜落防止通達群へ橋渡しする。
+    const hits = searchRelevantNotices("安全帯");
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits.every((h) => noticeIds.has(h.id))).toBe(true);
+    expect(hits.some((h) => /墜落|転落|安全帯/.test(h.title))).toBe(true);
+  });
+
+  it("「職長」→ 安全衛生教育の通達群へ展開する", () => {
+    const hits = searchRelevantNotices("職長");
+    expect(hits.length).toBeGreaterThan(0);
+    expect(hits.every((h) => noticeIds.has(h.id))).toBe(true);
+  });
+});
+
 describe("NOTICE_BINDING_LABELS", () => {
   it("拘束力レベル 3 種すべてに日本語ラベルがある", () => {
     expect(NOTICE_BINDING_LABELS.binding).toContain("告示");

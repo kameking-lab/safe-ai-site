@@ -45,4 +45,14 @@ describe("SavedAccidents", () => {
     expect(btn.className).toContain("h-11");
     expect(btn.className).toContain("w-11");
   });
+
+  // 色の文法: サイト共通の「保存済み」表現は amber 系（favorites-list.tsx と同一）。
+  // yellow 直書きへの退行を防ぐ。
+  it("保存済みセクションが amber 系で統一されている（yellow直書き禁止）", async () => {
+    seed();
+    const { container } = render(<SavedAccidents />);
+    await screen.findByText("足場からの墜落");
+    expect(container.innerHTML).not.toContain("yellow-");
+    expect(container.innerHTML).toContain("amber-");
+  });
 });
