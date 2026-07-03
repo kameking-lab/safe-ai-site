@@ -66,4 +66,14 @@ describe("CourtCasesBrowser 柱0（44pxタップ標的）", () => {
     const printLink = screen.getByRole("link", { name: /A4で印刷／PDF保存/ });
     expect(printLink.className).toContain("min-h-[44px]");
   });
+
+  it("キーワード検索欄・争点/分野/裁判所/年代の各セレクトは44px以上のタップ標的を持つ", () => {
+    render(<CourtCasesBrowser />);
+    const searchWrapper = screen.getByPlaceholderText(/安全配慮義務、墜落、過労、石綿/).parentElement;
+    expect(searchWrapper?.className).toContain("min-h-[44px]");
+    expect(screen.getByLabelText("争点", { selector: "select" }).className).toContain("min-h-[44px]");
+    expect(screen.getByLabelText("分野", { selector: "select" }).className).toContain("min-h-[44px]");
+    expect(screen.getByLabelText("裁判所", { selector: "select" }).className).toContain("min-h-[44px]");
+    expect(screen.getByLabelText("年代", { selector: "select" }).className).toContain("min-h-[44px]");
+  });
 });

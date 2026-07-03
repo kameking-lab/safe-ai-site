@@ -77,7 +77,7 @@ export function AccidentTrendSummary() {
           value={months}
           onChange={(e) => setMonths(e.target.value as "1" | "3" | "12")}
           aria-label="集計期間"
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="min-h-[44px] rounded-lg border border-slate-300 px-3 py-2 text-sm"
         >
           <option value="1">直近1か月</option>
           <option value="3">直近3か月</option>
@@ -87,7 +87,7 @@ export function AccidentTrendSummary() {
           type="button"
           onClick={() => void run()}
           disabled={busy}
-          className="inline-flex items-center gap-1 rounded-lg bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700 disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-amber-600 px-4 py-2 text-sm font-bold text-white hover:bg-amber-700 disabled:opacity-50"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <TrendingUp className="h-4 w-4" />}
           AIで要約

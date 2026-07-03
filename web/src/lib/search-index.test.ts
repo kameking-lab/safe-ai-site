@@ -338,6 +338,19 @@ describe('buildSearchIndex — 機能ページ（feature）の収載', () => {
       searchItems(index, '助成金 試算', 'feature').some((i) => i.url === '/subsidies/calculator'),
     ).toBe(true);
   });
+
+  it('補充: 対象4類型のペルソナ別ポータルが立場名クエリで着地する（0 件だった穴の是正）', async () => {
+    const index = await buildSearchIndex();
+    // 立場名（現場監督/一人親方/安全担当/コンサル）で自分専用の入口ハブ /for/<persona> へ着地。
+    const lands = (q: string, url: string) =>
+      searchItems(index, q, 'feature').some((i) => i.url === url);
+    expect(lands('職長', '/for/construction')).toBe(true);
+    expect(lands('現場代理人', '/for/construction')).toBe(true);
+    expect(lands('一人親方', '/for/solo')).toBe(true);
+    expect(lands('安全衛生担当', '/for/manager')).toBe(true);
+    expect(lands('社労士', '/for/consultant')).toBe(true);
+    expect(lands('労働安全コンサルタント', '/for/consultant')).toBe(true);
+  });
 });
 
 describe('buildSearchIndex — 治療と仕事の両立支援 病態別ガイド（feature）の収載', () => {
