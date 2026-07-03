@@ -4,6 +4,7 @@
 
 ## 未着手（上から処理）
 
+- [x] 【柱0補充候補・2026-07-04 Explore調査で発見】サイネージ`signage-daily-values.tsx`の無災害日数「起点日を変更」リンク(`min-h-[24px]`)・起点日入力欄/保存ボタン(`min-h-[36px]`)が既存44px是正パターンから明示的に後退していた。加えて事故DB`accident-extras-panel.tsx`の自社類似事故Top5パネル「/profile を開く →」「自社設定 →」「→ 類似事例…」3リンクが一括是正の対象から漏れていた。→ 2ファイル計5要素に`min-h-[44px]`を付与(純粋なクラス変更でレイアウト・ロジック不変)。vitest 3件追加(signage-daily-values 1件・accident-extras-panel新設2件)。next start実機(1920×1080サイネージ・スマホ390×844)のPlaywright boundingBox実測4/4 PASS。tsc=0/lint=0 errors/vitest(2632件)/build全緑。(2026-07-04 / ux-hub/daily-values-extras-panel-44px)
 - [x] 【柱0補充候補・2026-07-04 Explore調査で発見】`accident-trend-summary.tsx`(/accidents)の集計期間セレクト・「AIで要約」ボタン、`court-cases-browser.tsx`(/court-cases)のキーワード検索欄・争点/分野/裁判所/年代の4セレクトが44px未満。同ファイル内の他ボタン(絞り込みを解除・印刷リンク・分野アイコン・厚労省原典リンク等)は既に是正済みだったが、検索・絞り込みフォーム本体は一括是正から漏れていた既存欠陥。→ 2ファイル計6要素に`min-h-[44px]`を付与(純粋なクラス追加でレイアウト・遷移先・ロジック不変)。vitest 3件追加。next start実機のPlaywright boundingBox実測で7/7 PASS。tsc=0/lint=0 errors/vitest全pass/build全緑。(2026-07-04 / ux-hub/trend-summary-court-filter-44px)
 
 ### 2026-07-02 Fable診断注入（診断書: docs/fable-diagnosis-2026-07-02/01・07）
