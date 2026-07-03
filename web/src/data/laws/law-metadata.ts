@@ -136,9 +136,9 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   労契法: {
     fullName: "労働契約法",
     promulgation: "平成19年法律第128号",
-    latestRevision: "令和2年改正",
+    latestRevision: "平成30年改正（働き方改革整備法・2020-04-01施行）",
     eGovUrl: "https://laws.e-gov.go.jp/law/419AC0000000128",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   育介法: {
     fullName: "育児休業、介護休業等育児又は家族介護を行う労働者の福祉に関する法律",
@@ -208,7 +208,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和29年労働省令第13号",
     latestRevision: "令和3年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/329M50002000013",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   パート有期法: {
     fullName: "短時間労働者及び有期雇用労働者の雇用管理の改善等に関する法律",

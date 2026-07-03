@@ -9,3 +9,4 @@ export { searchCrossIndex, type CrossSearchOptions, type ScorableItem } from './
 export { normalizeArticleQuery } from './article-query';
 export { EGOV_LAW_SEARCH_URL, egovHandoffQuery, egovArticleAnchor, type EgovArticleAnchor } from './egov-fallback';
 export { expandLawAliases } from './law-alias';
+export { chemicalDetailUrl, hasChemicalDetailPage } from './chemical-detail-url';

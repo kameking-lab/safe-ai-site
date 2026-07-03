@@ -23,6 +23,7 @@ export function DistributedInputBar(props: {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState<"" | "share" | "import">("");
   const [msg, setMsg] = useState<string | null>(null);
+  const [msgTone, setMsgTone] = useState<"safe" | "danger">("safe");
   const [copied, setCopied] = useState(false);
   // 初見ガイド（多者間フローが非自明なので、初回だけ手順を提示。×で恒久非表示）
   const [guideOpen, setGuideOpen] = useState(false);
@@ -49,9 +50,10 @@ export function DistributedInputBar(props: {
     setBusy("share"); setMsg(null);
     const token = await cloudCreateMeetingShare(props.meetingId, props.siteName, props.workDate);
     setBusy("");
-    if (!token) { setMsg("共有リンクの発行に失敗しました。時間をおいて再度お試しください。"); return; }
+    if (!token) { setMsgTone("danger"); setMsg("共有リンクの発行に失敗しました。時間をおいて再度お試しください。"); return; }
     const url = `${window.location.origin}/safety-diary/contribute/${token}`;
     setShareUrl(url);
+    setMsgTone("safe");
     setMsg("共有リンクを発行しました。各協力会社にLINE等で送ってください。");
   };
 
@@ -59,10 +61,11 @@ export function DistributedInputBar(props: {
     setBusy("import"); setMsg(null);
     const contribs = await cloudFetchMeetingContributions(props.meetingId);
     setBusy("");
-    if (contribs === null) { setMsg("取り込みに失敗しました。"); return; }
-    if (contribs.length === 0) { setMsg("まだ協力会社の入力はありません。"); return; }
+    if (contribs === null) { setMsgTone("danger"); setMsg("取り込みに失敗しました。"); return; }
+    if (contribs.length === 0) { setMsgTone("safe"); setMsg("まだ協力会社の入力はありません。"); return; }
     const merged = mergeContributionsIntoContractors(props.contractors, contribs);
     props.onImport(merged);
+    setMsgTone("safe");
     setMsg(`${contribs.length}社の入力を取り込みました（当日欄・追記は保持）。`);
   };
 
@@ -87,11 +90,11 @@ export function DistributedInputBar(props: {
               </ol>
               <p className="mt-0.5 text-[10px] text-slate-500">毎日の重層下請の集約（各社へ電話/転記）が、リンク1本で済みます。当日欄・追記は元請のまま保持されます。</p>
             </div>
-            <button type="button" onClick={dismissGuide} aria-label="使い方を閉じる" className="shrink-0 rounded px-1 text-[11px] font-bold text-slate-400 hover:text-slate-600">×</button>
+            <button type="button" onClick={dismissGuide} aria-label="使い方を閉じる" className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded px-1 text-[11px] font-bold text-slate-400 hover:text-slate-600">×</button>
           </div>
         </div>
       ) : (
-        <button type="button" onClick={() => setGuideOpen(true)} className="mb-1 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 hover:underline">
+        <button type="button" onClick={() => setGuideOpen(true)} className="mb-1 inline-flex min-h-[44px] items-center gap-1 text-[10px] font-semibold text-emerald-700 hover:underline">
           <HelpCircle className="h-3 w-3" aria-hidden="true" /> 分散入力の使い方
         </button>
       )}
@@ -114,7 +117,9 @@ export function DistributedInputBar(props: {
           </button>
         </div>
       )}
-      {msg && <p className="mt-1 text-[11px] text-emerald-700">{msg}</p>}
+      {msg && (
+        <p className={`mt-1 text-[11px] ${msgTone === "danger" ? "text-rose-700" : "text-emerald-700"}`}>{msg}</p>
+      )}
     </div>
   );
 }

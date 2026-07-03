@@ -25,9 +25,9 @@ export function SavedAccidents() {
   if (list === null || list.length === 0) return null;
 
   return (
-    <section className="mt-4 rounded-2xl border border-yellow-200 bg-yellow-50/50 p-4 sm:p-5">
+    <section className="mt-4 rounded-2xl border border-amber-200 bg-amber-50/50 p-4 sm:p-5">
       <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
-        <Star className="h-5 w-5 text-yellow-500" aria-hidden="true" />
+        <Star className="h-5 w-5 text-amber-500" aria-hidden="true" />
         保存した事故事例（{list.length}）
       </h2>
       <p className="mt-1 text-[11px] text-slate-500">この端末に保存。報告書・朝礼資料の準備にご活用ください。</p>

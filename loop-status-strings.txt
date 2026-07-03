@@ -55,3 +55,5 @@ runnerDeadlineStop=停止:稼働期限(untilIso {UNTIL})到達で当レーン終
 evalBelowHeader=## 注意: 生成品質evalが目標を下回りました（strictAccuracy {PCT}% ＜ 目標 {TARGET}%）
 evalBelowBody1={DATE} の本番自動生成品質eval（23問・strictAccuracy {CORRECT}/{SCORABLE}={PCT}%）が目標 {TARGET}% を下回りました（ベースライン90.5%）。チャットボットの回答品質が劣化した可能性があります。
 evalBelowBody2=直近のRAG／プロンプト／コーパス変更を確認してください。詳細な採点は web で `npm run eval:chatbot-gen`。再測定は翌日の自動evalで実施され、品質が目標以上に回復した翌測定でこのバナーは自動的に消えます。
+evalIncompleteHeader=## 注意: 生成品質evalが不完全でした（{HTTPFAILS}問がサーバに到達できず・品質判定は保留）
+evalIncompleteBody1={DATE} の本番自動生成品質eval（23問）のうち {HTTPFAILS} 問が HTTP 異常（fetch失敗／5xx／レート制限・harness exit={EXIT}）となり、正答率が信頼できないため品質劣化の判定は保留しました。本番 /api/chatbot の一時的な不調かレート制限の可能性があります。翌日の自動evalで再測定され、全問正常応答の測定でこのバナーは自動的に消えます。
