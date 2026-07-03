@@ -540,10 +540,9 @@ const RAW_CASES: RawGenQualityCase[] = [
     diagVerdict: "○-",
     question: "解雇予告のルールを教えてください。",
     mustInclude: [["30日", "三十日"], ["予告"]],
-    // 既知の到達性ギャップ（2026-07-03実測）: 労基法20条は#615で収録済だが、
-    // この言い回しのRAGスコアが0.12でno-hit経路に落ちる（口語→条文の同義語課題）。
-    // 改善はレーン仕事（synonyms/PIN）。是正したらこのフラグをtrueへ（ratchetテストが強制する）
-    expectRetrievable: false,
+    // 2026-07-03是正: 「解雇予告」PIN（rag-search.ts）を新設し労基法第20条を
+    // 強制ヒット化。従来はRAGスコア0.12でno-hit経路に落ちていた。
+    expectRetrievable: true,
     goldCitations: [{ lawShort: "労基法", articleNum: "第20条" }],
     corpusEvidence: [
       {

@@ -445,6 +445,37 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
         });
       }
     }),
+
+    // 治療と仕事の両立支援 病態別ガイド（/treatment-work-balance/illness-guide/[illness]＝
+    // がん/脳卒中/心疾患/糖尿病/メンタルヘルス/難病の6疾患。自己canonical・OGP付・PageJsonLd
+    // の実在 indexable ページで sitemap 収載済み）。親ハブ /treatment-work-balance は FLAGSHIP
+    // ナビ subItem として feature 収載済みだが、**疾患別の6ガイドは横断検索から 0 件**だった＝
+    // 「がん 両立支援」「脳卒中 復職」「糖尿病 就業配慮」と打った安全担当/産業医が疾患名で
+    // 個別ガイドへ検索経由で着けない発見性の穴を是正（#561 等と同型・目的地ページ扱いで feature へ）。
+    // url は generateStaticParams（dynamicParams=false）が ILLNESS_CATEGORIES 全 id を解決＝
+    // 収載集合＝解決集合で必ず着地する（幽霊URL 0）。関連法令は 条文の権威クエリを汚さぬよう
+    // keywords へ入れない（保護具/機能ページと同方針）。
+    import('@/data/illness-considerations').then(({ ILLNESS_CATEGORIES }) => {
+      for (const c of ILLNESS_CATEGORIES) {
+        items.push({
+          id: `illness-guide-${c.id}`,
+          title: `${c.shortLabel}と仕事の両立支援ガイド`,
+          subtitle: c.summary.slice(0, 90),
+          category: 'feature',
+          // 疾患名（正式名/短縮名）・両立支援の頻用語・病態別リスク（症状語で引ける）から着地。
+          keywords: [
+            c.label,
+            '両立支援',
+            '治療と仕事の両立支援',
+            '復職',
+            '就業配慮',
+            '労務配慮',
+            ...c.riskHighlights,
+          ].filter(Boolean),
+          url: `/treatment-work-balance/illness-guide/${c.id}`,
+        });
+      }
+    }),
   ]);
 
   cachedIndex = items;

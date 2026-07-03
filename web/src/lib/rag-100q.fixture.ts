@@ -104,7 +104,7 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   // H. 作業環境測定・SDS (73-78)
   { id: 73, topic: "測定", question: "作業環境測定の義務は何条？", gold: [{ lawShort: "安衛法", articleNum: "第65条" }, { lawShort: "作業環境測定法", articleNum: "第3条" }] },
   { id: 74, topic: "測定", question: "作業環境測定の管理区分は？", gold: [{ lawShort: "作業環境測定法", articleNum: "第2条" }, { lawShort: "作業環境測定法", articleNum: "第3条" }, { lawShort: "安衛法", articleNum: "第65条" }] },
-  { id: 75, topic: "測定", question: "作業環境測定士の登録は？", gold: [{ lawShort: "作業環境測定法", articleNum: "第33条" }, { lawShort: "作業環境測定法", articleNum: "第36条" }, { lawShort: "作業環境測定法", articleNum: "第41条" }] },
+  { id: 75, topic: "測定", question: "作業環境測定士の登録は？", gold: [{ lawShort: "作業環境測定法", articleNum: "第7条" }, { lawShort: "作業環境測定法", articleNum: "第5条" }] },
   { id: 76, topic: "測定", question: "粉じん作業場の作業環境測定の頻度は？", gold: [{ lawShort: "粉じん則", articleNum: "第26条" }, { lawShort: "粉じん則", articleNum: "第27条" }, { lawShort: "粉じん則", articleNum: "第22条" }] },
   { id: 77, topic: "測定", question: "有機溶剤の作業環境測定は何条？", gold: [{ lawShort: "有機則", articleNum: "第28条" }] },
   { id: 78, topic: "測定", question: "特定化学物質の作業環境測定は？", gold: [{ lawShort: "特化則", articleNum: "第36条" }, { lawShort: "特化則", articleNum: "第36条の2" }] },
@@ -129,8 +129,8 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 93, topic: "賃金", question: "最低賃金の決定方式は？", gold: [{ lawShort: "最賃法", articleNum: "第9条" }, { lawShort: "最賃法", articleNum: "第4条" }] },
 
   // K. 労災・契約・派遣等 (94-100)
-  { id: 94, topic: "労災", question: "労災保険の業務災害給付は？", gold: [{ lawShort: "労災保険法", articleNum: "第7条" }, { lawShort: "労災保険法", articleNum: "第12条の8" }] },
-  { id: 95, topic: "労災", question: "通勤災害の認定は？", gold: [{ lawShort: "労災保険法", articleNum: "第7条" }, { lawShort: "労災保険法", articleNum: "第7条第3項" }] },
+  { id: 94, topic: "労災", question: "労災保険の業務災害給付は？", gold: [{ lawShort: "労災保険法", articleNum: "第7条" }, { lawShort: "労災保険法", articleNum: "第14条" }] },
+  { id: 95, topic: "労災", question: "通勤災害の認定は？", gold: [{ lawShort: "労災保険法", articleNum: "第7条" }, { lawShort: "労災保険法", articleNum: "第7条第2項" }] },
   { id: 96, topic: "契約", question: "労働契約成立の原則は？", gold: [{ lawShort: "労契法", articleNum: "第1条" }, { lawShort: "労契法", articleNum: "第5条" }] },
   { id: 97, topic: "契約", question: "解雇権濫用法理は？", gold: [{ lawShort: "労契法", articleNum: "第16条" }] },
   { id: 98, topic: "契約", question: "有期労働契約の無期転換は？", gold: [{ lawShort: "労契法", articleNum: "第18条" }] },

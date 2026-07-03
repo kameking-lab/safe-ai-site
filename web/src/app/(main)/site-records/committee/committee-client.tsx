@@ -199,7 +199,7 @@ export function CommitteeClient() {
           <h2 className="text-base font-bold text-slate-900">議題・審議事項</h2>
           <div className="flex items-center gap-2">
             <span className="rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700">議題 {agenda.length}／決定済 {decidedCount}</span>
-            <button type="button" onClick={addItem} className="inline-flex items-center gap-1 rounded-lg border border-indigo-300 px-2 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 print:hidden">
+            <button type="button" onClick={addItem} className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-indigo-300 px-2 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 print:hidden">
               <Plus className="h-3.5 w-3.5" aria-hidden="true" /> 議題を追加
             </button>
           </div>
@@ -225,7 +225,7 @@ export function CommitteeClient() {
                     <input type="date" value={a.due} onChange={(e) => updateItem(a.id, { due: e.target.value })} className="rounded-md border border-slate-300 px-2 py-1 text-xs" />
                   </div>
                 </div>
-                <button type="button" onClick={() => removeItem(a.id)} className="shrink-0 rounded p-1 text-rose-500 hover:bg-rose-50 print:hidden" aria-label={`議題${idx + 1}を削除`}>
+                <button type="button" onClick={() => removeItem(a.id)} className="flex min-h-[44px] shrink-0 items-center rounded p-1 text-rose-500 hover:bg-rose-50 print:hidden" aria-label={`議題${idx + 1}を削除`}>
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>

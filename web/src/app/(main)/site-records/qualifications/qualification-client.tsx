@@ -158,10 +158,10 @@ export function QualificationClient() {
             <option value="">候補から選ぶ…</option>
             {PRESET_QUALIFICATIONS.map((p) => <option key={p} value={p}>{p}</option>)}
           </select>
-          <button type="button" onClick={() => { addQual(presetPick); setPresetPick(""); }} className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 px-2 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">
+          <button type="button" onClick={() => { addQual(presetPick); setPresetPick(""); }} className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-300 px-2 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">
             <Plus className="h-3.5 w-3.5" aria-hidden="true" /> 候補を追加
           </button>
-          <button type="button" onClick={() => addQual("（自由入力）")} className="rounded-lg border border-slate-300 px-2 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100">
+          <button type="button" onClick={() => addQual("（自由入力）")} className="min-h-[44px] rounded-lg border border-slate-300 px-2 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100">
             ＋ 自由入力で追加
           </button>
         </div>
@@ -173,7 +173,7 @@ export function QualificationClient() {
               <li key={q.id} className="flex flex-wrap items-center gap-2 rounded-xl border border-slate-200 p-2">
                 <input type="text" value={q.name} onChange={(e) => updateQual(q.id, { name: e.target.value })} className="min-w-[12rem] flex-1 rounded-md border border-slate-300 px-2 py-1.5 text-sm" autoComplete="off" />
                 <label className="flex items-center gap-1 text-xs text-slate-500">取得日 <input type="date" value={q.date} onChange={(e) => updateQual(q.id, { date: e.target.value })} className="rounded-md border border-slate-300 px-2 py-1 text-xs" /></label>
-                <button type="button" onClick={() => removeQual(q.id)} className="rounded p-1 text-rose-500 hover:bg-rose-50 print:hidden" aria-label="削除"><Trash2 className="h-4 w-4" /></button>
+                <button type="button" onClick={() => removeQual(q.id)} className="flex min-h-[44px] items-center rounded p-1 text-rose-500 hover:bg-rose-50 print:hidden" aria-label="削除"><Trash2 className="h-4 w-4" /></button>
               </li>
             ))}
           </ul>

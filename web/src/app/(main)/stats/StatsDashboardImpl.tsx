@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import {
   Cell,
   Legend,
@@ -23,6 +23,7 @@ import { LazyChart } from "@/components/charts/lazy-chart";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { computeStatsLiveness } from "@/lib/stats/liveness";
+import { useRovingTablist } from "@/lib/a11y/use-roving-tablist";
 
 const PERIODS: Array<{ id: StatsPeriod; label: string }> = [
   { id: "7d", label: "直近 7 日" },
@@ -63,6 +64,9 @@ export function StatsDashboardImpl() {
   const [pageAnalytics, setPageAnalytics] = useState<PageAnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const panelId = useId();
+  const activePeriodIndex = PERIODS.findIndex((p) => p.id === period);
+  const { getTabProps } = useRovingTablist(PERIODS.length, activePeriodIndex, (i) => setPeriod(PERIODS[i].id));
 
   useEffect(() => {
     let cancelled = false;
@@ -155,14 +159,16 @@ export function StatsDashboardImpl() {
       {anyLive ? (
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div role="tablist" aria-label="期間切替" className="inline-flex rounded-full border border-slate-200 bg-slate-50 p-0.5 text-xs">
-            {PERIODS.map((p) => {
+            {PERIODS.map((p, i) => {
               const active = period === p.id;
               return (
                 <button
                   key={p.id}
                   role="tab"
                   aria-selected={active}
+                  aria-controls={panelId}
                   onClick={() => setPeriod(p.id)}
+                  {...getTabProps(i)}
                   className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 font-semibold transition-colors ${
                     active
                       ? "bg-white text-emerald-700 shadow-sm"
@@ -218,7 +224,7 @@ export function StatsDashboardImpl() {
         // 各データ源が live のときのみ、その源から実測した指標だけを表示する。
         // GA4 単体で取得できない指標（前期間比・機能別利用・離脱フロー・コンバージョン・
         // チャット指標・インサイト）はモック値のため一切表示しない（捏造防止）。
-        <>
+        <div id={panelId} role="tabpanel">
           {ga4Live ? <SectionSummary data={data} /> : null}
           {ga4Live ? <SectionPages data={data} /> : null}
           {ga4Live ? <SectionSources data={data} /> : null}
@@ -237,7 +243,7 @@ export function StatsDashboardImpl() {
               ※ 機能別利用・離脱フロー・コンバージョン・チャット指標・前期間比は、GA4 カスタムイベント連携後に対応予定のため表示していません（実測前の推定値・サンプルは表示しない方針）。
             </p>
           ) : null}
-        </>
+        </div>
       )}
       </Stack>
     </PageContainer>

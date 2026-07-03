@@ -30,4 +30,10 @@ describe("/glossary page (用語辞書)", () => {
       expect(link.className).toContain("min-h-[44px]");
     }
   });
+
+  it("検索入力欄が 44px タップ標的を満たす", () => {
+    render(<GlossaryPage />);
+    const search = screen.getByPlaceholderText("用語・読み・説明を検索...");
+    expect(search.className).toContain("min-h-[44px]");
+  });
 });

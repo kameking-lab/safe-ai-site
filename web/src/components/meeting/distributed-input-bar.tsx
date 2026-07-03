@@ -98,18 +98,18 @@ export function DistributedInputBar(props: {
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[11px] font-bold text-emerald-800">協力会社 分散入力</span>
         <button type="button" onClick={() => void onShare()} disabled={busy !== ""}
-          className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50">
+          className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50">
           <Link2 className="h-3 w-3" /> {busy === "share" ? "発行中…" : "協力会社に入力を依頼"}
         </button>
         <button type="button" onClick={() => void onImport()} disabled={busy !== ""}
-          className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50">
+          className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50">
           <Download className="h-3 w-3" /> {busy === "import" ? "取り込み中…" : "協力会社の入力を取り込む"}
         </button>
       </div>
       {shareUrl && (
         <div className="mt-2 flex items-center gap-2">
           <input readOnly value={shareUrl} className="min-w-0 flex-1 rounded border border-slate-300 bg-white px-2 py-1 text-[11px] text-slate-700" onFocus={(e) => e.currentTarget.select()} />
-          <button type="button" onClick={() => void copy()} className="inline-flex items-center gap-1 rounded border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">
+          <button type="button" onClick={() => void copy()} className="inline-flex min-h-[44px] items-center gap-1 rounded border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">
             {copied ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />} {copied ? "コピー済" : "コピー"}
           </button>
         </div>

@@ -422,13 +422,13 @@ export default function UseCasesPage() {
         <div className="mt-4 flex flex-col items-center justify-center gap-2 sm:flex-row">
           <Link
             href="/contact"
-            className="inline-flex items-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
+            className="inline-flex min-h-[44px] items-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
           >
             業種別の相談を送る →
           </Link>
           <Link
             href="/features"
-            className="inline-flex items-center rounded-lg border border-emerald-300 bg-white px-5 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-emerald-300 bg-white px-5 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50"
           >
             機能一覧に戻る
           </Link>

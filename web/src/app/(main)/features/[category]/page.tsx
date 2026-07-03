@@ -151,13 +151,13 @@ export default async function CategoryDetailPage({
                 <div className="mt-3 flex flex-wrap gap-2">
                   <Link
                     href={f.href}
-                    className={`inline-flex items-center rounded-lg bg-gradient-to-r ${colors.gradient} px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90`}
+                    className={`inline-flex min-h-[44px] items-center rounded-lg bg-gradient-to-r ${colors.gradient} px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90`}
                   >
                     機能を試す →
                   </Link>
                   <Link
                     href={`/features#${f.slug}`}
-                    className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                   >
                     一覧に戻る
                   </Link>
@@ -179,13 +179,13 @@ export default async function CategoryDetailPage({
         <div className="mt-4 flex flex-col items-center justify-center gap-2 sm:flex-row">
           <Link
             href="/contact"
-            className={`inline-flex items-center rounded-lg bg-gradient-to-r ${colors.gradient} px-5 py-2.5 text-sm font-bold text-white shadow hover:opacity-90`}
+            className={`inline-flex min-h-[44px] items-center rounded-lg bg-gradient-to-r ${colors.gradient} px-5 py-2.5 text-sm font-bold text-white shadow hover:opacity-90`}
           >
             ご意見・改善提案を送る →
           </Link>
           <Link
             href="/features"
-            className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
           >
             他のカテゴリを見る
           </Link>

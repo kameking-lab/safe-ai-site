@@ -100,7 +100,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和35年法律第30号",
     latestRevision: "令和元年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/335AC0000000030",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   // キーはコーパス(LawArticle.lawShort)の実使用値に一致させること。
   // 不一致だと article-registry / chatbot がメタを引けず e-Gov リンクが欠落する
@@ -108,9 +108,9 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   作環測法: {
     fullName: "作業環境測定法",
     promulgation: "昭和50年法律第28号",
-    latestRevision: "令和元年改正",
+    latestRevision: "令和7年改正（令和8年4月1日施行）",
     eGovUrl: "https://laws.e-gov.go.jp/law/350AC0000000028",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   労基法: {
     fullName: "労働基準法",
@@ -143,16 +143,16 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   育介法: {
     fullName: "育児休業、介護休業等育児又は家族介護を行う労働者の福祉に関する法律",
     promulgation: "平成3年法律第76号",
-    latestRevision: "令和7年改正（柔軟な働き方関連）",
+    latestRevision: "令和6年改正（2025-10-01施行・柔軟な働き方関連）",
     eGovUrl: "https://laws.e-gov.go.jp/law/403AC0000000076",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   労災保険法: {
     fullName: "労働者災害補償保険法",
     promulgation: "昭和22年法律第50号",
     latestRevision: "令和6年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/322AC0000000050",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   職安法: {
     fullName: "職業安定法",

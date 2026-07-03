@@ -776,7 +776,7 @@ export function KyPaperView() {
                   onClick={handleZoomToNextEmpty}
                   disabled={!firstEmptyFieldKey}
                   title="最初の未記入セルへズームして開く"
-                  className="min-h-[28px] rounded-full bg-sky-600 px-2.5 py-0.5 text-[11px] font-bold text-white hover:bg-sky-700 disabled:opacity-60"
+                  className="min-h-[44px] rounded-full bg-sky-600 px-2.5 py-0.5 text-[11px] font-bold text-white hover:bg-sky-700 disabled:opacity-60"
                 >
                   のこり{paperStatus.remaining}項目 →
                 </button>
@@ -816,7 +816,7 @@ export function KyPaperView() {
           <div className="mx-auto mt-2 max-w-5xl px-3 print:hidden">
             <div className={`flex items-start justify-between gap-3 rounded-xl border px-3 py-2 ${SAFETY_TONE[notice.tone].soft}`}>
               <p className="text-xs font-semibold">{notice.text}</p>
-              <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="rounded px-1.5 hover:bg-black/10">×</button>
+              <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="flex min-h-[44px] items-center rounded px-1.5 hover:bg-black/10">×</button>
             </div>
           </div>
         )}
@@ -914,9 +914,9 @@ export function KyPaperView() {
           </button>
           {/* ズーム */}
           <div className="flex items-center gap-1 rounded-full border border-slate-300 bg-white p-0.5">
-            <button type="button" aria-label="縮小" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 10) / 10))} className="rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">－</button>
-            <button type="button" onClick={() => setZoom(1)} className="min-w-[3.5rem] rounded-full px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100">{Math.round(zoom * 100)}%</button>
-            <button type="button" aria-label="拡大" onClick={() => setZoom((z) => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 10) / 10))} className="rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">＋</button>
+            <button type="button" aria-label="縮小" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 10) / 10))} className="min-h-[44px] min-w-[44px] rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">－</button>
+            <button type="button" onClick={() => setZoom(1)} className="min-h-[44px] min-w-[3.5rem] rounded-full px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100">{Math.round(zoom * 100)}%</button>
+            <button type="button" aria-label="拡大" onClick={() => setZoom((z) => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 10) / 10))} className="min-h-[44px] min-w-[44px] rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">＋</button>
           </div>
         </div>
       </div>

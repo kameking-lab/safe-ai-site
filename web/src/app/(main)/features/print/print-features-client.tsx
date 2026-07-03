@@ -67,13 +67,13 @@ export function PrintFeaturesClient() {
               <button
                 type="button"
                 onClick={() => window.print()}
-                className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
+                className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
               >
                 🖨 印刷する / PDF保存
               </button>
               <Link
                 href="/features"
-                className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
               >
                 通常表示に戻る
               </Link>

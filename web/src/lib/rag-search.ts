@@ -239,7 +239,7 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     triggers: ["通勤災害", "通勤途上災害"],
     pins: [
       { law: "労働者災害補償保険法", articleNum: "第7条" },
-      { law: "労働者災害補償保険法", articleNum: "第7条第3項" },
+      { law: "労働者災害補償保険法", articleNum: "第7条第2項" },
     ],
   },
   {
@@ -247,7 +247,7 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     triggers: ["業務災害", "労災保険給付", "労災給付"],
     pins: [
       { law: "労働者災害補償保険法", articleNum: "第7条" },
-      { law: "労働者災害補償保険法", articleNum: "第12条の8" },
+      { law: "労働者災害補償保険法", articleNum: "第14条" },
     ],
   },
   {
@@ -602,6 +602,11 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     // 年次有給休暇 労基法第39条
     triggers: ["年次有給休暇の付与", "年休の付与", "労基法第39条", "年5日"],
     pins: [{ law: "労働基準法", articleNum: "第39条" }],
+  },
+  {
+    // 解雇予告 労基法第20条（Fable差分監査F5・GQ23=RAGスコア0.12でno-hit経路に落ちていた）
+    triggers: ["解雇予告", "解雇の予告", "予告手当", "解雇予告手当"],
+    pins: [{ law: "労働基準法", articleNum: "第20条" }],
   },
   {
     // 粉じん作業対策

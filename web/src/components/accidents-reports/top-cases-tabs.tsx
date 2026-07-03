@@ -14,13 +14,14 @@
  *   recharts のような重いライブラリ依存は無い。
  */
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import Link from "next/link";
 import { Calendar, AlertTriangle } from "lucide-react";
 import type { AccidentCase } from "@/lib/types/domain";
 import { Section } from "@/components/layout/section";
 import { Stack, Cluster } from "@/components/layout/stack";
 import { CardGrid } from "@/components/layout/card-grid";
+import { useRovingTablist } from "@/lib/a11y/use-roving-tablist";
 
 const SEVERITY_TONE: Record<AccidentCase["severity"], string> = {
   軽傷: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -92,6 +93,9 @@ export function TopCasesTabs({
   recent7Cases,
 }: TopCasesTabsProps) {
   const [tab, setTab] = useState<TabKey>("all");
+  const panelId = useId();
+  const activeTabIndex = TAB_DEFS.findIndex((t) => t.key === tab);
+  const { getTabProps } = useRovingTablist(TAB_DEFS.length, activeTabIndex, (i) => setTab(TAB_DEFS[i].key));
 
   const groups: Record<TabKey, AccidentCase[]> = {
     all: allTimeCases,
@@ -126,7 +130,7 @@ export function TopCasesTabs({
           aria-label="重大事故の表示期間"
           className="flex flex-wrap gap-2 print:hidden"
         >
-          {TAB_DEFS.map((def) => {
+          {TAB_DEFS.map((def, i) => {
             const isActive = def.key === tab;
             return (
               <button
@@ -134,7 +138,9 @@ export function TopCasesTabs({
                 type="button"
                 role="tab"
                 aria-selected={isActive}
+                aria-controls={panelId}
                 onClick={() => setTab(def.key)}
+                {...getTabProps(i)}
                 className={
                   isActive
                     ? "inline-flex min-h-[44px] items-center rounded-full border border-emerald-600 bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm"
@@ -156,24 +162,26 @@ export function TopCasesTabs({
           })}
         </div>
 
-        {active.length > 0 ? (
-          <CardGrid cols={2} gap="md">
-            {active.map((c) => (
-              <TopCaseCard key={c.id} accident={c} />
-            ))}
-          </CardGrid>
-        ) : (
-          <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50/60 p-6 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
-            <p className="font-semibold">
-              {activeDef.label}に該当する重大事故事例はありません
-            </p>
-            <p className="mt-1 text-xs leading-5">
-              本サイトの curated 事例は厚労省 死亡災害DB 抜粋を中心に整備しており、{" "}
-              {activeDef.label}に発生・公表された事例が登録されていない場合があります。
-              「全期間」タブで業種全体の代表例をご確認ください。
-            </p>
-          </div>
-        )}
+        <div id={panelId} role="tabpanel">
+          {active.length > 0 ? (
+            <CardGrid cols={2} gap="md">
+              {active.map((c) => (
+                <TopCaseCard key={c.id} accident={c} />
+              ))}
+            </CardGrid>
+          ) : (
+            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50/60 p-6 text-center text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-400">
+              <p className="font-semibold">
+                {activeDef.label}に該当する重大事故事例はありません
+              </p>
+              <p className="mt-1 text-xs leading-5">
+                本サイトの curated 事例は厚労省 死亡災害DB 抜粋を中心に整備しており、{" "}
+                {activeDef.label}に発生・公表された事例が登録されていない場合があります。
+                「全期間」タブで業種全体の代表例をご確認ください。
+              </p>
+            </div>
+          )}
+        </div>
 
         {/* 印刷時は全期間のみ出す。タブUIが消えるので必ず全期間表示にフォールバック */}
         <div className="hidden print:block">

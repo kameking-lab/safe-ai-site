@@ -1,0 +1,57 @@
+name: ops-selftest
+
+# 自律運転インフラ班(ops)の運用機構=点火/補給/点検/報告の純関数 -SelfTest を CI で常設ゲート化する。
+# これまで loop-*.ps1 の -SelfTest はローカル手動実行のみが守っており、PR時に誰も回さないため
+# 機構(launcher/runner/reporter/watchdog)のリグレッション(生存スキャンの偽陽性・wedge天井・報告upsert・
+# 復活watchdogの単一インスタンスguard/hotswap)が無防備に main へ着地しうる=点検系の穴。ops機構ファイルが
+# 変わったPRでだけ Windows PowerShell(=本番と同じ実行環境)で4本の -SelfTest を回して緑を必須にする。
+# loop-config.json(点火の唯一の正=社長が最頻で手編集する untilIso 行)も対象=構文破損だけでなく構造破損
+# (レーン名/model空・intervalSeconds非正・レーン名重複・untilIso不parse)も launcher -SelfTest の
+# Get-ConfigValidationErrors ライブ検査でPR時に落とす=約22時間後の次パスで無言に着地するのを封止。
+# パスフィルタで通常PRには走らない。
+on:
+  push:
+    paths:
+      - "loop-runner.ps1"
+      - "loop-launcher.ps1"
+      - "loop-report-status.ps1"
+      - "loop-watchdog.ps1"
+      - "loop-config.json"
+      - ".github/workflows/ops-selftest.yml"
+  pull_request:
+    paths:
+      - "loop-runner.ps1"
+      - "loop-launcher.ps1"
+      - "loop-report-status.ps1"
+      - "loop-watchdog.ps1"
+      - "loop-config.json"
+      - ".github/workflows/ops-selftest.yml"
+  workflow_dispatch:
+
+jobs:
+  selftest:
+    # 本番は Windows PowerShell (powershell 5.1) で powershell -File 起動するため実行環境を一致させる。
+    runs-on: windows-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 本番と同一の powershell -File 子プロセス起動。子の exit 0/1 が $LASTEXITCODE に入り、
+      # GitHub の powershell シェルラッパが $LASTEXITCODE をそのまま伝播するのでゲートが成立する。
+      - name: 点火/補給/点検 - launcher -SelfTest
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-launcher.ps1 -SelfTest
+
+      - name: runner -SelfTest（backoff/hotswap/wedge天井/生存スキャン識別）
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-runner.ps1 -SelfTest
+
+      - name: 報告 - reporter -SelfTest（区画upsert/生存スキャン識別）
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-report-status.ps1 -Lane selftest -SelfTest
+
+      - name: 点火/復活 - watchdog -SelfTest（単一インスタンスguard/hotswap/生存スキャン識別）
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-watchdog.ps1 -SelfTest
