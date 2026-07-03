@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-07-04 柱C-2 DRY — 死んだ並行索引 cross-search/build.ts 撤去＝実データ横断索引を単一正本へ一本化（PR: seo/remove-dead-cross-search-index-builder）
+
+**契約1) 回収**: 冒頭で緑の自班PR #841（robots UAバケット排他性ガード）を squash マージ→main ff同期。#849（横断検索・独立ハブ2件収載）は #841 マージで CONFLICTING 化したため `git merge main`（force-push なし）で BACKLOG-seo の追記衝突（両側保持）のみ解決し再push＝CI再走を次イテレーションで回収。#856（OGP画像クランプ）は CI 進行中のため保留。他班 OPEN PR は不可侵。
+
+**着手判断**: BACKLOG-seo 未着手キューは空のため補充指針で自領域探索。sitemap（ゴーストURLガード＋孤立ページ収載済み・静的indexableルートの未収載は redirect/admin/demo のみ＝真の孤立0）・robots（決裁A済）・manifest（icon/screenshot 実在ガード済）・feeds（4本 forward/reverse ガード済）・org/website JSON-LD（root layout で全ページ出力済）・cross-search（14カテゴリ＋全業種ページ＋教育コース＋疾患ガイド＋ペルソナ＋助成金 収載済）と成熟を実測確認。near-dup 回避（[[avoid-overlapping-followup-prs]]）で guard/収載追加ではなく **構造の穴** を探索中、実データ統合索引ビルダが2本並存（`cross-search/build.ts::buildCrossSearchIndex` と `search-index.ts::buildSearchIndex`）と判明。両UI（/search・⌘K）が読むのは後者のみ・後者は前者の上位集合・前者は自テスト以外に実行時消費者0＝編集がUIに反映されない“ドリフトの罠”かつ 222 行の死蔵コード。
+
+**実装**: `build.ts` 削除／barrel `cross-search/index.ts` から `buildCrossSearchIndex`・`__resetCrossSearchIndexCache` 輸出除去＋「実データ索引は buildSearchIndex に一本化」の理由を docstring 明記／`cross-search.test.ts` から死索引 import と実データ describe（5 it）を除去し、**生きた純関数 `searchCrossIndex` のスコアリング規約 describe（SYNTH・6 it）は保持**。稼働側純関数（score/article-query/law-alias/egov-fallback/chemical-detail/types）は不変。
+
+**既存破壊0の確認**: 削除した実データアサート（主要カテゴリ存在・全URL "/"始まり・「アーク溶接 特別教育」→教育DB・「玉掛け」・キャッシュ同一性）は、稼働中の buildSearchIndex を対象に `search-index.test.ts` が同等以上に既固定（glossary/faq 実データ収載・幽霊リンク0・複数語AND・シノニム・かな読み）＝意味のあるカバレッジ喪失なし。捏造0/水増し0＝件数稼ぎでなく重複除去。
+
+**ゲート**: `tsc --noEmit`=0 / `lint`=errors0（既存warn23は無関係の別ファイル）/ `vitest run`=324ファイル2738 pass・1 skip（cross-search 78 含む）/ `build`=成功。再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は `git checkout` で復元。
+
+**残**: #849/#856 の CI 緑回収＆マージ（次イテレーション 1)）。O17/T6 実装はオーナー承認待ち。
 ## 2026-07-04 S補充 — OGP画像 title/desc 過長時の縦溢れ是正（PR: seo/og-image-text-overflow-clamp）
 
 **契約1) 回収**: 冒頭で緑の自班PRを回収＝#837(かな畳み込み)・#845(教育コース収載)を squash マージ→main ff同期。連鎖で CONFLICTING 化した #845(教育)・#841(robots UAガード)へ `git merge origin/main`（force-push なし）で BACKLOG/cycle-log の追記衝突（両側保持）のみ解決し再push。#845 は再走緑を確認して即マージ、#841/#849(独立ハブ2件) は CI 進行中のため次イテレーション回収（本repoは auto-merge 無効のため即時マージ不可）。他班 OPEN PR は不可侵。
