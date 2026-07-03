@@ -22,7 +22,8 @@
  * 1カテゴリ目→…→最終カテゴリの次→次欄なし（用紙全体の記入順チェーンの終端）。○/×/－は既定値(na)が
  * 「該当無」という正当な回答でもあるため、リスク欄(重大性・可能性)と同じ扱いで未記入ハイライト・
  * zoom-to-cellの対象外にする（誤って「未記入」と誤認させない）。
- * AI提案のエディタ統合・履歴サジェスト・既定切替は未着手。
+ * 第七弾でAI提案（作業内容欄の🤖ボタン）をエディタ統合。第八弾で履歴サジェスト（datalist、
+ * historyList プロパティで対象欄と datalist id を紐付け）をcanvas内へ提供。既定切替は未着手。
  */
 import {
   computePriority,
@@ -133,6 +134,8 @@ export type MeetingPaperFieldDef = {
   checklistCategoryKey?: string;
   /** 記入順の次フィールド（エディタの「次の欄へ」送り）。静的欄のみ。各社マトリクスは nextMeetingPaperFieldKey で解決。 */
   next?: MeetingPaperFieldKey;
+  /** 履歴サジェスト用 datalist id（従来UIの list= と同じ候補源。type="text"|"contractorCompany" のみ使用）。 */
+  historyList?: string;
 };
 
 export const MEETING_PAPER_FIELDS: Record<MeetingPaperStaticFieldKey, MeetingPaperFieldDef> = {
@@ -169,6 +172,7 @@ export const MEETING_PAPER_FIELDS: Record<MeetingPaperStaticFieldKey, MeetingPap
     set: (r, v) => ({ siteName: v }),
     isEmpty: (r) => r.siteName.trim() === "",
     next: "siteManager",
+    historyList: "mtg-sites",
   },
   siteManager: {
     key: "siteManager",
@@ -180,6 +184,7 @@ export const MEETING_PAPER_FIELDS: Record<MeetingPaperStaticFieldKey, MeetingPap
     set: (r, v) => ({ siteManager: v }),
     isEmpty: (r) => r.siteManager.trim() === "",
     next: "supervisor",
+    historyList: "mtg-managers",
   },
   supervisor: {
     key: "supervisor",
@@ -191,6 +196,7 @@ export const MEETING_PAPER_FIELDS: Record<MeetingPaperStaticFieldKey, MeetingPap
     set: (r, v) => ({ supervisor: v }),
     isEmpty: (r) => r.supervisor.trim() === "",
     next: "author",
+    historyList: "mtg-supervisors",
   },
   author: {
     key: "author",
@@ -203,6 +209,7 @@ export const MEETING_PAPER_FIELDS: Record<MeetingPaperStaticFieldKey, MeetingPap
     isEmpty: (r) => r.author.trim() === "",
     // 各社マトリクス（動的行）へ渡す。行が1件も無い場合のみここ(safetyMeeting)へ直接続く（nextMeetingPaperFieldKeyで分岐）。
     next: "safetyMeeting",
+    historyList: "mtg-authors",
   },
   safetyMeeting: {
     key: "safetyMeeting",
@@ -349,6 +356,7 @@ function buildContractorFieldDef(id: string, part: MeetingContractorFieldPart): 
         type: "contractorCompany",
         contractorId: id,
         isEmpty: (r) => (findContractor(r, id)?.companyName ?? "").trim() === "",
+        historyList: "mtg-companies",
       };
     case "workContent":
       return {
@@ -371,6 +379,7 @@ function buildContractorFieldDef(id: string, part: MeetingContractorFieldPart): 
         get: contractorTextGet(id, "machines"),
         set: contractorTextSet(id, "machines"),
         isEmpty: (r) => (findContractor(r, id)?.machines ?? "").trim() === "",
+        historyList: "mtg-machines",
       };
     case "qualifications":
       return {
@@ -428,6 +437,7 @@ function buildContractorFieldDef(id: string, part: MeetingContractorFieldPart): 
         get: contractorTextGet(id, "responsibleName"),
         set: contractorTextSet(id, "responsibleName"),
         isEmpty: (r) => (findContractor(r, id)?.responsibleName ?? "").trim() === "",
+        historyList: "mtg-responsibles",
       };
     case "actualCount":
       return {

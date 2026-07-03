@@ -116,6 +116,7 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
             value={def.get?.(record) ?? ""}
             onChange={(e) => patch(def.set?.(record, e.target.value) ?? {})}
             placeholder={def.placeholder}
+            list={def.historyList}
             className="min-h-[44px] text-base"
           />
         )}
@@ -234,6 +235,7 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
               value={contractorRow.companyName}
               onChange={(e) => patch(setContractorCompanyField(record, contractorRow.id, { companyName: e.target.value }))}
               placeholder="業者名"
+              list={def.historyList}
               className="min-h-[44px] text-base"
             />
           </div>
