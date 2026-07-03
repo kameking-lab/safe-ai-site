@@ -418,6 +418,19 @@ function Test-ShouldSpawnWatchdog {
   return ($WatchdogExists -and (-not $AlreadyRunning))
 }
 
+# Pure: does a process command line genuinely LAUNCH loop-watchdog.ps1 (via -File), not merely MENTION the
+# filename (an operator/agent diagnostic run with -Command "... loop-watchdog.ps1 ...")? Invoke-EnsureHealWatchdog's
+# scan counted ANY powershell whose command line contained the substring "loop-watchdog.ps1", so a stray
+# command naming the script spoofs the running-scan: AlreadyRunning falsely reads $true and a genuinely-dead
+# watchdog is NOT spawned (until a later pass when the stray command is gone). The watchdog's own guard has
+# the mirror bug (fixed identically in loop-watchdog.ps1 Test-IsWatchdogProcess); kept as a local copy since
+# the two scripts share no module. Both real launch forms use -File; a -Command mention has no -File before
+# the path so it no longer counts. Pure so -SelfTest asserts it offline.
+function Test-IsWatchdogProcess([string]$CommandLine) {
+  if ([string]::IsNullOrEmpty($CommandLine)) { return $false }
+  return ($CommandLine -match '(?i)-File\s+"?[^"]*loop-watchdog\.ps1(?:"|\s|$)')
+}
+
 # Live wrapper: ensure a heal watchdog is alive. Returns "spawned"/"running"/"absent"/"whatif". Reads the
 # script-scope $repoRoot/$ClaudeCmd/$WhatIf at call time; NEVER invoked from -SelfTest (only the pure
 # Test-ShouldSpawnWatchdog is), so it never spawns during tests.
@@ -427,7 +440,7 @@ function Invoke-EnsureHealWatchdog {
   $wdRunning = $false
   try {
     $wdRunning = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-      Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -like '*loop-watchdog.ps1*' }).Count -gt 0
+      Where-Object { $_.ProcessId -ne $PID -and (Test-IsWatchdogProcess ([string]$_.CommandLine)) }).Count -gt 0
   } catch {}
   if (-not (Test-ShouldSpawnWatchdog -WatchdogExists $true -AlreadyRunning $wdRunning)) {
     Write-Launcher "heal watchdog already running; not spawning a second."
@@ -964,6 +977,14 @@ if ($SelfTest) {
     Assert-L "watchdog: script present + one already running -> do NOT spawn (idempotent, no churn)" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $true -AlreadyRunning $true))
     Assert-L "watchdog: script missing -> never spawn (even when none running)" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $false -AlreadyRunning $false))
     Assert-L "watchdog: script missing + one running -> still no spawn" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $false -AlreadyRunning $true))
+    # R2) Test-IsWatchdogProcess: the ensure-scan (AlreadyRunning) must count a real -File launch of
+    #     loop-watchdog.ps1 and must NOT count a mere command-line MENTION (a -Command diagnostic that names
+    #     the script) - the false match that spoofs AlreadyRunning=$true and suppresses spawning a dead watchdog.
+    Assert-L "wd-id: bare -File launch (ensure-spawn form) is a watchdog process" (Test-IsWatchdogProcess 'powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File C:\r\loop-watchdog.ps1')
+    Assert-L "wd-id: quoted -File launch (self-respawn form) is a watchdog process" (Test-IsWatchdogProcess 'powershell -File "C:\r\loop-watchdog.ps1" -SupersedePid 100 -IntervalSeconds 300')
+    Assert-L "wd-id: a -Command MENTION of the filename is NOT a watchdog process (false-match fix)" (-not (Test-IsWatchdogProcess 'powershell -NoProfile -Command "gci | ? { $_.CommandLine -like ''*loop-watchdog.ps1*'' }"'))
+    Assert-L "wd-id: a lane runner -File launch is NOT a watchdog process" (-not (Test-IsWatchdogProcess 'powershell -File C:\r\loop-runner.ps1 -Lane ops'))
+    Assert-L "wd-id: empty command line is NOT a watchdog process (null-safe)" (-not (Test-IsWatchdogProcess ""))
     # S) Get-TreeKillArgs / Stop-ProcessTree: a timed-out one-shot must be TREE-killed (taskkill /F /T), not
     #    single-process $p.Kill()'d, or its claude child tree orphans and (for the critic) keeps writing
     #    inside the worktree the finally then force-removes. Assert the exact command + the null no-op.
