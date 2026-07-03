@@ -79,7 +79,7 @@ function TabButton({ id, activeTab, label, onClick }: { id: TabId; activeTab: Ta
     <button
       type="button"
       onClick={() => onClick(id)}
-      className={`flex-1 rounded-lg px-2 py-2 text-xs font-semibold sm:text-sm ${
+      className={`flex-1 min-h-[44px] inline-flex items-center justify-center rounded-lg px-2 py-2 text-xs font-semibold sm:text-sm ${
         active ? "bg-emerald-600 text-white shadow" : "bg-white text-slate-600 hover:bg-slate-50 border border-slate-200"
       }`}
     >
