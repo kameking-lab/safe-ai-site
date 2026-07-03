@@ -103,6 +103,8 @@ function emptyWorkRow(): KyInstructionRecordState["workRows"][number] {
   };
 }
 
+const RISK_ROW_LABELS = ["上記", "①", "②", "③", "④"];
+
 function emptyRiskRow(label: string): KyInstructionRecordState["riskRows"][number] {
   return {
     targetLabel: label,
@@ -116,6 +118,11 @@ function emptyRiskRow(label: string): KyInstructionRecordState["riskRows"][numbe
     reducedBelow2: "",
     primeSign: "",
   };
+}
+
+/** O10（続き）: 危険行の「＋行追加」ホットスポット用。既定5行を超えた行にも同じ採番規則を適用する。 */
+export function makeEmptyKyRiskRow(index: number): KyInstructionRecordState["riskRows"][number] {
+  return emptyRiskRow(RISK_ROW_LABELS[index] ?? `(${index})`);
 }
 
 function emptyParticipant(): KyInstructionRecordState["participants"][number] {
@@ -190,10 +197,9 @@ export function normalizeKyInstructionRecord(raw: unknown): KyInstructionRecordS
   if (workRows.length < 4) {
     while (workRows.length < 4) workRows.push(emptyWorkRow());
   }
-  const riskLabels = ["上記", "①", "②", "③", "④"];
   const riskRows = ensureArray<KyInstructionRecordState["riskRows"][number]>(merged.riskRows, []);
   if (riskRows.length < 5) {
-    while (riskRows.length < 5) riskRows.push(emptyRiskRow(riskLabels[riskRows.length] ?? `(${riskRows.length})`));
+    while (riskRows.length < 5) riskRows.push(emptyRiskRow(RISK_ROW_LABELS[riskRows.length] ?? `(${riskRows.length})`));
   }
   const participants = ensureArray<KyInstructionRecordState["participants"][number]>(merged.participants, []);
   if (participants.length < 6) {
