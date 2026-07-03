@@ -165,7 +165,7 @@ export function AccidentTrendSummary() {
                 href={sokuhou.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-1.5 inline-block text-[11px] font-semibold text-blue-700 hover:underline"
+                className="mt-1.5 inline-flex min-h-[44px] items-center text-[11px] font-semibold text-blue-700 hover:underline"
               >
                 厚労省 速報 原典を見る →
               </a>

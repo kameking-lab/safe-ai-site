@@ -102,7 +102,7 @@ export function KyTranscribePanel({
           <button
             type="button"
             onClick={onClose}
-            className="whitespace-nowrap rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            className="min-h-[44px] whitespace-nowrap rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
           >
             閉じる
           </button>
@@ -119,7 +119,7 @@ export function KyTranscribePanel({
           <button
             type="button"
             onClick={handleCsv}
-            className="rounded-lg bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-700"
+            className="min-h-[44px] rounded-lg bg-emerald-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-emerald-700"
           >
             CSVをダウンロード（控え・集計用）
           </button>
@@ -127,7 +127,7 @@ export function KyTranscribePanel({
             type="button"
             onClick={() => void handleCopy("riskTable", riskTsv)}
             disabled={!riskTsv}
-            className="rounded-lg border border-emerald-300 bg-white px-4 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 disabled:opacity-40"
+            className="min-h-[44px] rounded-lg border border-emerald-300 bg-white px-4 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 disabled:opacity-40"
             title="タブ区切りでコピーします。Excelの「危険のポイント」先頭セルを選んで貼り付けると表ごと入ります"
           >
             {copiedKey === "riskTable" ? "✓ コピーしました" : failedKey === "riskTable" ? "コピーできませんでした" : "危険と対策の表をコピー（Excel貼り付け用）"}

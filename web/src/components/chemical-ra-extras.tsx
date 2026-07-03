@@ -115,7 +115,7 @@ export function ChemicalRaExtras() {
             type="button"
             onClick={addItem}
             disabled={!name.trim()}
-            className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-700 disabled:opacity-50"
           >
             <Plus className="h-3.5 w-3.5" />
             {isEn ? "Add" : "追加"}

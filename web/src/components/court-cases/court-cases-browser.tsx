@@ -230,7 +230,7 @@ export function CourtCasesBrowser() {
             <button
               type="button"
               onClick={clearAll}
-              className="ml-2 font-semibold text-emerald-700 hover:underline dark:text-emerald-300"
+              className="ml-2 inline-flex min-h-[44px] items-center font-semibold text-emerald-700 hover:underline dark:text-emerald-300"
             >
               絞り込みを解除
             </button>
@@ -240,7 +240,7 @@ export function CourtCasesBrowser() {
         {hasFilter && filtered.length > 0 && (
           <Link
             href={printHref}
-            className="mt-2 inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
+            className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
           >
             <Printer className="h-3.5 w-3.5" aria-hidden="true" />
             この {filtered.length} 件だけをA4で印刷／PDF保存（実務ポイント付き）
