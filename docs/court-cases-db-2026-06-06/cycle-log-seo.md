@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-04 柱C-2補充 横断検索に教育コース12件を /education/<slug> 深リンクで収載（講習名0件の是正）
+
+**課題（発見性の穴）**: 特別教育/法定教育/労働衛生教育の**12コースページ**（`/education/tokubetsu/fullharness`・`/education/hoteikyoiku/shokucho`・`/education/roudoueisei/youtsu-yobou` 等）は固有 title/description＋Course JSON-LD を持ち sitemap 収載済みの実在 indexable ランディング（講習形式・料金・法令根拠を載せた専用ページ）なのに、横断検索(/search・⌘K)の `buildSearchIndex` に import が皆無で丸ごと0件だった。「フルハーネス 特別教育」「足場 特別教育」「職長」「腰痛 予防」「酸欠 特別教育」と現場語彙で自分に要る講習を打った現場ユーザー（現場監督・一人親方・安全担当）が講習コースへ検索経由で着けなかった（#561 等と同型）。
+
+**設計判断**: 正本＝`EDUCATION_CONTEXTS`（`@/data/education-context`。slug↔ルート 1:1・`title` は各ページ TITLE と同値・`import type` のみでブラウザ安全）を単一ソースに使い、既存 `education` カテゴリへ収載＝新規タブ/カテゴリ追加なし（12件に比例的）。e-learning テーマ（`/e-learning?theme=`＝クイズ演習）とは別軸の「講習コースそのもの」で URL も別。url=`/education/<slug>`（実在ページへ解決）、keywords=`lawMatch.keywords`＋`accidentMatch.keywords`（現場語彙・法令名・ハザード語）＋講習種別ラベル、subtitle=種別ラベル｜現場の安全教育コース。
+
+**既存破壊0**: `education` カテゴリの e-learning テスト2本が「全 education が /e-learning?theme= へ深リンク」を前提にしていたため、テーマ源(id=`edu-*`)サブセットへ限定して固定（feature の `page-*` 限定と同型＝2源共存に追従）。
+
+**回帰**: `search-index.test.ts` に「教育コース(education)の収載」describe 3 it 追加＝(1)全12コースが `education` カテゴリで `/education/<slug>` 収載・収載集合=正本・title 同値(ドリフト0) (2)全 url が実在ページ `page.tsx` へ `existsSync` 解決＝幽霊URL 0（data班が13番目のslugをページ無しで足したら赤化） (3)現場語彙5クエリで目的コース着地＝旧0件の是正証明。
+
+**ゲート**: `tsc --noEmit`=0 / `lint`=errors0（warnは既存の別ファイル）/ `vitest run`=全2712 pass（新規3含む・1 skip）/ `build`=成功。再生成データ（docs/rag-metrics-latest.json・chatbot-eval-fresh-results.json）は復元・working tree clean。
+
+**残**: 教育ページ本文/metadata は所有 UI 班マター（当班は検索発見性のみ是正）。O17/T6 実装はオーナー承認待ち。
+
 ## 2026-07-04 柱C-2 補充 横断検索に法改正レコードを新カテゴリ「法改正」で収載（PR: seo/cross-search-law-revisions）
 
 **契約1) 回収**: 冒頭で緑の自班PRを回収＝#774(feed逆カバレッジ)を squash マージ→main ff同期。連鎖で CONFLICTING 化した #780(通達シノニム)・#786(化学物質deeplink)・#818(root metadata単一ソース)へ `git merge origin/main`（force-push なし）で BACKLOG/cycle-log の追記衝突（両側保持）のみ解決し再push。#780/#786 は緑を確認して即マージ、#818 は CI 再走中のため次イテレーション回収。#823(sitemap逆カバレッジ)も CI 進行中。他班 OPEN PR は不可侵。
