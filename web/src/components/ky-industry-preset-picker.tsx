@@ -90,7 +90,7 @@ export function KyIndustryPresetPicker({ onApply }: Props) {
           type="button"
           onClick={handleApply}
           disabled={!preset}
-          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
+          className="min-h-[44px] rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {applied ? "適用しました ✓" : "プリセットを適用"}
         </button>
