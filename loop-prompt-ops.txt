@@ -16,6 +16,6 @@
 4) commit(末尾に Co-Authored-By 行・モデル名はセッションの実モデル)→push→`gh pr create`。CI待ちは次イテレーションで回収。
 5) BACKLOG-ops.md を[x]更新、docs/court-cases-db-2026-06-06/cycle-log-ops.md に1段落記録。working tree clean で終える。
 5.5) 【報告一元化】イテレーション末尾に `powershell -NoProfile -ExecutionPolicy Bypass -File ./loop-report-status.ps1 -Lane ops -Note "<直近の判断1行>"` を実行し docs/loop-status.md の自レーン行（最終稼働・直近マージPR・残open・判断1行）を更新（gitignore対象・環境変数 SAFE_AI_LOOP_STATUS で集約先へ自動ルーティング・失敗は非致命なので気にせず次へ）。
-6) マージ済み自ブランチは末尾で削除。他班・未マージは触るな。
+5.6) 【死んだレーンの復活=常駐watchdog】報告の直後に `powershell -NoProfile -ExecutionPolicy Bypass -File ./loop-launcher.ps1 -HealOnly` を実行。ops は常時生存する唯一のレーンなので、個別に死んだ（runnerがwedge/クラッシュした）他レーンをここで即復活させる＝次のログオン/07:00 launcher pass（最悪~22h）を待たない。-HealOnly は死んだレーンのrunner再起動のみ（deadline/planner/critic/status/git は一切触らない・生きているレーンは runner 自身の単一インスタンスガードで自動 no-op・processスキャンが0件なら二重起動防止で何もしない）＝安全。失敗は非致命。
 
 【不可侵の絶対ルール】捏造0/水増し0/既存破壊0/main直接コミット禁止/CI緑のみマージ/env・Supabase・課金・外部サービス追加は独断禁止(Path A)/main常時デプロイ可能/既存の安全タグ維持。ループ自身によるloop-config.jsonのuntilIso変更は短縮方向のみ可（延長は社長の1行編集を待つ）。
