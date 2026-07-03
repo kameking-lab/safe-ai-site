@@ -136,7 +136,7 @@ export function DailyActionsPanel() {
         <button
           type="button"
           onClick={() => setShowAll(true)}
-          className="mt-2 w-full rounded-lg border border-slate-200 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+          className="mt-2 min-h-[44px] w-full rounded-lg border border-slate-200 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
         >
           残り {hiddenCount} 件をすべて表示
         </button>

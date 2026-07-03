@@ -1,5 +1,19 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: /signage/map (signage-map/*) 未着手ディレクトリの44px一括是正
+
+**イテレーション頭の回収**: 自班のオープンPR2件を回収。#761(/industries/[industry] 下部CTA＋court-cases印刷リンク44px)はe2e/smoke/Vercel全緑のためsquashマージ。#756(/industries 関連ページ6リンク44px)はマージ直後にBACKLOG-ux-hub.md記録行のみmainとコンフリクト(コード非衝突)→`origin/main`を当該ブランチへ通常マージして両エントリ保持で解決→ゲート再走(tsc/lint/vitest2531件/build)全緑→push→CI緑確認後squashマージ。`git checkout main && git pull --ff-only`でclean確認（テスト実行由来の一時差分 rag-metrics-latest.json 等はdiscard）。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route群を再調査し、これまでの44px一括是正が`signage/*`（signage-header・signage-morning-script等）のみに留まっており、地図サイネージ`signage-map/*`ディレクトリ丸ごとが未着手のまま残っていたことを発見。最優先候補は`EarthquakeAlertModal`の「閉じる」ボタン＝フルスクリーン地震速報の唯一のタップ解除手段(キーボードEscapeのみが他の手段だがタッチ運用端末では無意味)で、押し損ねサイズの中でも最も実害が大きい欠陥と判断。
+
+**修正**: `signage-map/*`配下4ファイル計12要素に`inline-flex min-h-[44px] items-center`（入力欄2箇所は`min-h-[44px]`のみ）を付与。①`earthquake-alert-modal.tsx`「閉じる」、②`pin-manager.tsx`「クリア」・ラベル/通知メール入力欄・「ピンを追加」・「削除」、③`signage-map-client.tsx`「☰ パネルを開く」「✕ 閉じる」「← 朝礼ダッシュボードへ」「現在のURLをコピー」「フルスクリーン表示 →」、④`signage-map-leaflet.tsx`ピンPopup内「このピンを削除」。純粋なクラス追加でレイアウト・遷移先・ロジック不変。
+
+**テスト**: `signage-map-44px.test.ts`新設(ソース走査・11件)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 297 files・2531 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/signage-map-44px-2026-07-03.mjs`（next start実機・Playwright・1280×800）**8/8 PASS**（常時表示のサイドパネル5要素・ピンフォーム3要素すべて実boundingBox height=44.0px実測）。地震モーダルの「閉じる」・ピンPopupの「削除」・pending座標時のみ出る「クリア」は実データ/既存ピンが必要な条件付き要素のためソース走査のみで検証（class付与済みを確認）。
+
 ## 2026-07-03 — 補充: /industries/[industry] 下部CTA・他業種リンク＋court-cases印刷リンク 柱0(44px)
 
 **イテレーション頭の回収**: 自班のオープンPR #753(サイネージヘッダーナビ・パネル副リンク44px)がe2e/smoke/Vercel全緑だったためsquashマージ・リモートブランチ削除。main pullでworking tree clean。PR #756(/industries 関連ページ6リンク44px)はe2e/smoke進行中のため次回回収に持ち越し。

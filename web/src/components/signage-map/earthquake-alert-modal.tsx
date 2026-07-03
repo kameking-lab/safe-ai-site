@@ -35,7 +35,7 @@ export function EarthquakeAlertModal({ earthquake, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded border border-rose-300 px-2 py-1 text-xs font-bold text-rose-100 hover:bg-rose-900"
+            className="inline-flex min-h-[44px] items-center rounded border border-rose-300 px-3 text-xs font-bold text-rose-100 hover:bg-rose-900"
           >
             閉じる
           </button>

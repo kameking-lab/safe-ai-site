@@ -326,7 +326,7 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
             <button
               type="button"
               onClick={() => setSidePanelOpen(true)}
-              className="absolute right-2 top-12 z-[400] rounded border border-slate-600 bg-slate-900/85 px-3 py-2 text-xs font-bold text-slate-100 shadow hover:bg-slate-800"
+              className="absolute right-2 top-12 z-[400] inline-flex min-h-[44px] items-center rounded border border-slate-600 bg-slate-900/85 px-3 text-xs font-bold text-slate-100 shadow hover:bg-slate-800"
             >
               ☰ パネルを開く
             </button>
@@ -341,7 +341,7 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
               <button
                 type="button"
                 onClick={() => setSidePanelOpen(false)}
-                className="rounded border border-slate-600 px-2 py-1 text-[11px] text-slate-300 hover:bg-slate-800"
+                className="inline-flex min-h-[44px] items-center rounded border border-slate-600 px-3 text-[11px] text-slate-300 hover:bg-slate-800"
               >
                 ✕ 閉じる
               </button>
@@ -349,7 +349,7 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
             <p className="mt-1 text-[11px] text-slate-400">全国の警報・地震・天気を地図で監視（台風・地震時の防災用）</p>
             <Link
               href="/signage"
-              className="mt-2 inline-block rounded border border-slate-600 px-2.5 py-1 text-[11px] font-semibold text-slate-200 hover:bg-slate-800"
+              className="mt-2 inline-flex min-h-[44px] items-center rounded border border-slate-600 px-2.5 text-[11px] font-semibold text-slate-200 hover:bg-slate-800"
               title="気象・本日のリスク・現場の安全状態・ニュース・法改正の常設ダッシュボード"
             >
               ← 朝礼ダッシュボードへ
@@ -371,13 +371,13 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
               <button
                 type="button"
                 onClick={copyShareUrl}
-                className="rounded bg-sky-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-sky-500"
+                className="inline-flex min-h-[44px] items-center justify-center rounded bg-sky-600 px-3 text-xs font-bold text-white hover:bg-sky-500"
               >
                 {shareCopied ? "コピーしました ✓" : "現在のURLをコピー"}
               </button>
               <Link
                 href={`/signage/display?fullscreen=true&lat=${view.lat.toFixed(4)}&lng=${view.lng.toFixed(4)}&zoom=${view.zoom}`}
-                className="rounded border border-emerald-500 px-3 py-1.5 text-center text-xs font-bold text-emerald-300 hover:bg-emerald-950/40"
+                className="inline-flex min-h-[44px] items-center justify-center rounded border border-emerald-500 px-3 text-center text-xs font-bold text-emerald-300 hover:bg-emerald-950/40"
               >
                 フルスクリーン表示 →
               </Link>

@@ -114,7 +114,7 @@ export function ComparisonIndustrySelector({
                       ? `最低 ${MIN_COMPARE_INDUSTRIES} 業種が必要です`
                       : undefined
                 }
-                className={`inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 ${
+                className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 ${
                   active
                     ? cls
                     : "border-slate-200 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
@@ -133,7 +133,7 @@ export function ComparisonIndustrySelector({
           <button
             type="button"
             onClick={reset}
-            className="inline-flex items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
           >
             <RefreshCw className="h-3 w-3" aria-hidden="true" />
             選択を戻す
@@ -143,7 +143,7 @@ export function ComparisonIndustrySelector({
           type="button"
           onClick={apply}
           disabled={!changed || tooFew || isPending}
-          className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
+          className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-300 dark:disabled:bg-slate-700"
         >
           {isPending ? "更新中…" : "比較を更新"}
         </button>
