@@ -131,6 +131,60 @@ describe("エンティティグラフ: 発行主体ノードの @id 集約", () 
     });
     expect((s.provider as { "@id": string })["@id"]).toBe(ORG_ID);
   });
+
+  it("WebSite の author も ORG_ID を参照する（別 /about 組織ノードへ分裂しない）", () => {
+    const s = webSiteSchema();
+    expect(s.author).toEqual({ "@id": ORG_ID });
+  });
+
+  it("Service / Quiz の provider・Dataset / DataCatalog の creator が ORG_ID を指す", () => {
+    const svc = serviceSchema({
+      name: "サービス",
+      description: "説明",
+      url: `${SITE_URL}/s`,
+      serviceType: "コンサル",
+    });
+    expect((svc.provider as { "@id": string })["@id"]).toBe(ORG_ID);
+
+    const quiz = quizSchema({
+      name: "クイズ",
+      description: "説明",
+      url: `${SITE_URL}/q`,
+      questions: [{ text: "問", choices: ["a", "b"], correct: 0 }],
+    });
+    expect((quiz.provider as { "@id": string })["@id"]).toBe(ORG_ID);
+
+    const cat = dataCatalogSchema({
+      name: "カタログ",
+      description: "説明",
+      url: `${SITE_URL}/c`,
+      datasets: [{ name: "DS", url: `${SITE_URL}/ds` }],
+    });
+    expect((cat.creator as { "@id": string })["@id"]).toBe(ORG_ID);
+  });
+
+  it("QAPage の isPartOf が WEBSITE_ID を参照する（別 WebSite ノードへ分裂しない）", () => {
+    const s = qaPageSchema({ name: "q", description: "d", url: `${SITE_URL}/q` });
+    expect((s.isPartOf as { "@id": string })["@id"]).toBe(WEBSITE_ID);
+  });
+
+  it("自サイトの Organization/WebSite ノードは全て @id を持つ（発出者=通達issuerは対象外）", () => {
+    // legalDocumentSchema の author/publisher は通達の発出者（政府機関）＝別エンティティで @id を持たない。
+    // それ以外の全ヘルパーが出す「自サイト組織/サイト」ノードは @id で正準ノードへ集約されること。
+    const nodes: Array<Record<string, unknown>> = [
+      serviceSchema({ name: "s", description: "d", url: `${SITE_URL}/s`, serviceType: "t" }).provider as Record<string, unknown>,
+      (courseListSchema([{ name: "c", description: "d" }]).itemListElement as Array<{ item: { provider: Record<string, unknown> } }>)[0].item.provider,
+      datasetSchema({ name: "d", description: "d", url: `${SITE_URL}/d` }).creator as Record<string, unknown>,
+      dataCatalogSchema({ name: "c", description: "d", url: `${SITE_URL}/c`, datasets: [] }).creator as Record<string, unknown>,
+      quizSchema({ name: "q", description: "d", url: `${SITE_URL}/q`, questions: [] }).provider as Record<string, unknown>,
+      qaPageSchema({ name: "q", description: "d", url: `${SITE_URL}/q` }).isPartOf as Record<string, unknown>,
+      webSiteSchema().author as Record<string, unknown>,
+    ];
+    for (const node of nodes) {
+      expect(typeof node["@id"]).toBe("string");
+      expect([ORG_ID, WEBSITE_ID]).toContain(node["@id"]);
+    }
+  });
 });
 
 describe("breadcrumbSchema", () => {
@@ -436,14 +490,10 @@ describe("faqPageSchema / productCollectionSchema / definedTermSetSchema / quizS
 });
 
 describe("courseListSchema / datasetSchema / qaPageSchema / dataCatalogSchema", () => {
-  it("CourseList は provider を共通組織に固定", () => {
+  it("CourseList は provider を正準 Organization ノード（ORG_ID）へ集約", () => {
     const s = courseListSchema([{ name: "講座", description: "説明" }]);
-    const els = s.itemListElement as Array<{ item: { provider: { name: string; url: string } } }>;
-    expect(els[0].item.provider).toEqual({
-      "@type": "Organization",
-      name: SITE_NAME,
-      url: SITE_URL,
-    });
+    const els = s.itemListElement as Array<{ item: { provider: { "@id": string } } }>;
+    expect(els[0].item.provider["@id"]).toBe(ORG_ID);
   });
 
   it("Dataset は任意フィールドを存在時のみ出力", () => {
@@ -451,7 +501,7 @@ describe("courseListSchema / datasetSchema / qaPageSchema / dataCatalogSchema", 
     expect(minimal["@type"]).toBe("Dataset");
     expect(minimal.license).toBeUndefined();
     expect(minimal.keywords).toBeUndefined();
-    expect(minimal.creator).toMatchObject({ name: SITE_NAME, url: SITE_URL });
+    expect((minimal.creator as { "@id": string })["@id"]).toBe(ORG_ID);
 
     const full = datasetSchema({
       name: "DS",

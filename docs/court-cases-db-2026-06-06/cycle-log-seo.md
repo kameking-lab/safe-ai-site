@@ -4,6 +4,25 @@
 
 ---
 
+## 2026-07-03 — JSON-LD provider/creator/isPartOf の残存インラインノードを @id 集約（#704 follow-up／PR: seo/json-ld-provider-id-graph）
+
+回収: 前イテレーション着手の自班 CI 緑 PR を回収＝#704（JSON-LD @id グラフ化）と #710（OGP透かし単一ソース化）が e2e/smoke SUCCESS のため squash マージ。両ブランチとも古い base 由来で BACKLOG/cycle-log の [x] 追記が CONFLICTING→各ブランチへ `origin/main` を通常マージ（force-push なし）で解決＝完了エントリを時系列で併存させ、tsc/該当テストで無回帰を確認して push→auto-merge。`git checkout main && git pull --ff-only`→clean。#713（sitemap/robots ドメイン単一ソース化）は smoke IN_PROGRESS のため持ち越し（次イテレーション 1) で回収）。他班 OPEN PR は不可侵。
+
+着手判断: 未着手キューは空（O17/T6・T7 は Path A 設計ドラフト＝オーナー承認待ち）＋在庫 PR は #713 のみ（<3）のため補充指針に従い自領域から補充。**#704 が完了エントリで明記した follow-up**＝「serviceSchema.provider・courseListSchema.provider・datasetSchema.creator 等の低頻度ノードの @id 化（primary グラフ確立後）」を完遂。対象は当班所有の JSON-LD ヘルパー lib（json-ld.tsx）で、in-flight #713（sitemap/robots）とは非重複＝衝突ゼロを確認して選択。
+
+- **現状（実欠陥＝構造化データのエンティティ分裂）**: #704 は organization/webSite/Article/NewsArticle/WebApplication/WebPage の主要ノードを正準 @id（ORG_ID/WEBSITE_ID）へ集約したが、`serviceSchema.provider`・`courseListSchema` の Course.provider・`datasetSchema.creator`・`quizSchema.provider`・`dataCatalogSchema.creator`・`qaPageSchema.isPartOf`・`webSiteSchema.author` が**自サイト組織/サイトを @id 無しでインライン再宣言したまま**取り残されていた。特に `webSiteSchema.author` は url=`${SITE_URL}/about` の**別ノード**として分裂していた。検索エンジンから見て同一の実世界エンティティが複数ノードに割れ、ナレッジグラフ/ブランド同定が希釈される（tsc は意味論的な重複ノードを検知しない）。
+- **修正（当班所有のみ）**: 組織参照は #704 が「author/publisher/**provider** の共有参照」と明記済みの既存 `PUBLISHER_REF`（@id=ORG_ID）へ寄せ（service/course/quiz の provider・dataset/dataCatalog の creator）、WebSite 参照は新設共有 const `WEBSITE_REF`（@id=WEBSITE_ID・PUBLISHER_REF の WebSite 版）へ寄せ（qaPage.isPartOf）。`webSiteSchema.author` は sibling の publisher と同形の bare `{ "@id": ORG_ID }` に統一。
+- **法令正確性は不可侵（意図的な非対象）**: `legalDocumentSchema` の author/publisher は `input.issuer`＝**通達の発出者（政府機関）で自サイトとは別の実世界エンティティ**のため ORG_ID を一切付けず（誤同定＝捏造を回避）。この境界を回帰テストで明示ロック。
+- **挙動不変**: JSON-LD の @id リンク付けのみ＝可視UI/ルーティング/メタ本文/検索/カバレッジは無改変（捏造0・既存破壊0）。全ノードは name/url を保持しつつ @id を追加するだけで、消費側は @id でマージするため意味的に正準ノードへ収束。
+- **実測検証（end-to-end）**: `npm run build` 後の prerendered HTML を実grep＝e-learning の `Course.provider`・law-hierarchy の `DataCatalog.creator` がともに `@id:"https://www.anzen-ai-portal.jp/#organization"` を出力することを確認（＝実際に配信される構造化データで集約が効いている）。
+- **テスト（回帰＋境界ロック）**: `json-ld.test.ts` の「@id 集約」describe に4本追加＝(1)webSite.author=ORG_ID（/about 分裂ノードの復活検知） (2)service/quiz provider・dataset/dataCatalog creator=ORG_ID (3)qaPage.isPartOf=WEBSITE_ID (4)**自サイトの全 Organization/WebSite ノードが ORG_ID|WEBSITE_ID を持つ＝発出者issuerは対象外**を1テストで網羅（将来の新ヘルパーがインライン再宣言で回帰したら検知）。既存2本（CourseList provider・Dataset creator）は旧inline shape 前提だったため新 @id shape へ更新。
+- **ゲート**: `tsc --noEmit`=0 / `eslint`(json-ld.tsx/test)=errors0 / `vitest run`=**全2437テスト緑**（json-ld 35 it・skipped1）/ `build`=成功。build 再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は `git checkout` で復元＝working tree は json-ld.tsx/test の2ファイル＋BACKLOG/cycle-log のみで clean。
+- **要・他班なし**＝全て当班所有の JSON-LD ヘルパー lib 内で完結。**follow-up候補なし**（自サイト組織/サイトの全参照ノードを本PRで @id 集約完了＝#704 の残タスクを消化）。
+
+残: 本 PR＋#713（再走・回収）の CI 緑マージ（次イテレーション 1)）。次の未着手は補充の指針§に従い自領域から補充。
+
+---
+
 ## 2026-07-03 — OGP画像(/api/og)の透かしドメインを SITE_URL 単一ソース化＋og-url.ts 回帰テスト（PR: seo/og-watermark-domain-single-source）
 
 回収: 前イテレーション着手の自班 CI 緑 PR を回収＝#691（法令名かな読みエイリアス12法令）が CLEAN/MERGEABLE のため squash マージ→`git checkout main && git pull --ff-only`→clean。#698（page-json-ld 単一ソース化）は #691 マージで BACKLOG/cycle-log の [x] 追記が CONFLICTING/DIRTY→当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決し両完了エントリを併存させ push、CI 再走を次イテレーションで回収。#704（JSON-LD @id グラフ化）は e2e/smoke pending のため持ち越し。他班 OPEN PR（#702/#701/#694/#693 等）は不可侵。
