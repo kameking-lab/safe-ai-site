@@ -694,3 +694,21 @@
 **無読テスト**: `docs/third-party-reviews/scripts/court-cases-hub-header-links-44px-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**2/2 PASS**（3つの責任ガイド=54.6px・A4まとめ資料=44.0px、boundingBox実測）。
 
 **残課題**: Explore調査で発見した残り4件（/accidents home-screen.tsx変体タブ・/industries/[industry]下部CTA3個+他業種リンク・/industries関連ページ6リンク・/glossary用語カード関連リンク）を次イテレーション以降でBACKLOG-ux-hub.mdへ補充予定。PR #726のCI回収は次イテレーション。
+
+---
+
+## 2026-07-03 ux-hub/industries-related-links-44px
+
+**イテレーション頭の回収**: 自班のCI待ちPR #753（サイネージヘッダーナビ・パネル副リンク44px化）はe2e/smokeがpending継続中のため今回はマージ見送り（次イテレーションで回収）。`git checkout main && git pull --ff-only`でclean確認・3件の他班マージを反映。
+
+**タスク源**: BACKLOG-ux-hub.mdの未着手[ ]がゼロ（全件[x]）だったため、契約に従いExplore agentへ担当route全体の柱0未是正箇所調査を委任。装飾用span/pのfalse positiveを多数除外した結果、確度の高い残存欠陥は`/industries`ハブ最下部「関連ページ」セクションの6リンクのみと判明。
+
+**修正**: `industries/page.tsx`の関連ページセクション6リンク(事故分析レポート/年次安全衛生計画/KY用紙作成/安衛法AIチャット/特別教育・技能講習/通達原文、`px-3 py-1.5 text-sm`≈32px)に`min-h-[44px]`を付与。純粋なクラス追加でレイアウト・遷移先不変。
+
+**テスト**: `industries/page.test.tsx`に1件追加。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 293 files・2493 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/industries-related-links-44px-check.mjs`（next start実機・Playwright・スマホ390×844）**6/6 PASS**（全リンクboundingBox実測=44.0px）。初回実行時はDOM内に同一hrefを持つモバイル非表示のサイドバーnavリンクが先にマッチし誤ってFAIL判定になったため、`:visible`フィルタ＋`.last()`で対象を絞り込んで再検証。
+
+**残課題**: PR #753・#756ともCI回収は次イテレーション。Explore調査での残存候補は使い果たしたため、次回は補充の指針（無読テスト再走査・404/パンくず確認）から再着手予定。
