@@ -110,7 +110,7 @@ function ArticleCard({ article, onSummarize }: { article: LawArticle; onSummariz
               href={eGovUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-semibold text-blue-700 hover:bg-blue-100 transition"
+              className="min-h-[44px] inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-semibold text-blue-700 hover:bg-blue-100 transition"
             >
               e-Gov
             </a>
@@ -118,7 +118,7 @@ function ArticleCard({ article, onSummarize }: { article: LawArticle; onSummariz
           <button
             type="button"
             onClick={() => onSummarize(article)}
-            className="rounded-lg border border-violet-300 bg-violet-50 px-3 py-1 text-[11px] font-semibold text-violet-700 hover:bg-violet-100 transition"
+            className="min-h-[44px] inline-flex items-center rounded-lg border border-violet-300 bg-violet-50 px-3 py-1 text-[11px] font-semibold text-violet-700 hover:bg-violet-100 transition"
           >
             {isEn ? "AI summary" : "AI要約"}
           </button>
@@ -291,7 +291,7 @@ export function LawSearchResults({
         <button
           type="button"
           onClick={() => setSelectedLaw("all")}
-          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+          className={`min-h-[44px] inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold transition ${
             selectedLaw === "all"
               ? "bg-emerald-600 text-white"
               : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -304,7 +304,7 @@ export function LawSearchResults({
             key={name}
             type="button"
             onClick={() => setSelectedLaw(name)}
-            className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${
+            className={`min-h-[44px] inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold transition ${
               selectedLaw === name
                 ? "bg-emerald-600 text-white"
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
