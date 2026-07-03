@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-07-03 — 柱C-3-3 追補5 化学物質 個別詳細ページ約3,515本を子サイトマップ収載（PR: seo/c3-3-chemicals-sitemap）
+
+回収: 自班の CI 緑 PR #641（教育 全テーマ源拡張）を squashマージ→main を ff-only 同期。PR #647（FAQ収載）は #641 マージで search-index.ts が追記衝突→**origin/main を当該ブランチへ通常マージ**で解決（BACKLOG/cycle-log の追記衝突2件はどちらも [x] 完了エントリのため両方残す・コードは auto-merge・tsc0/search-index.test 45緑を確認）してpush＝CI再走を次イテレーションで回収。PR #653（PWAショートカット）はまだ e2e/smoke IN_PROGRESS で持ち越し。force-push 不可を厳守。
+
+着手: BACKLOG-seo 未着手キューは空（O17/T6・T7 は Path A 設計ドラフト＝オーナー承認待ち）。補充指針に従い自領域の「実在 indexable ページの sitemap 発見性」を再点検。静的172ルートは追補4で消化済のため**動的ルート族**を sitemap 収載と機械突合＝features/safety-signs/illness-guide/court-cases は本体 sitemap.ts が `.map()` で全件展開済、accidents/articles/circulars/equipment は子sitemap済。唯一の大穴として `/chemical-database/[cas]`（濃度基準DB **約3,515物質**の個別詳細・自己canonical・indexable・on-demand ISR）が**全sitemap不在**を発見＝サイト最大級の未収載独自コンテンツ（事故290・保護具より遥かに大きい）。
+
+実装: 子サイトマップ `sitemap-chemicals.xml/route.ts` を新設（accidents/equipment と同形）。正本＝`CONCENTRATION_LIMITS.substances` のキー集合（3,515・全て `[0-9-]` にノーマライズ済）を単一ソースに全件 `/chemical-database/<cas>` を深リンク。**幽霊URL0**＝詳細ページが同集合外の CAS を `notFound()` で弾く＝キー集合＝解決集合そのもの。**canonical乖離0**＝全キーが URL 安全なので loc（要エンコード面）と詳細 canonical `/chemical-database/${cas}`（decodeURIComponent 面）が 1:1 一致。lastmod は `CONCENTRATION_LIMITS.generatedAt`（2026-05-24）へ追従＝`lib/sitemap/freshness.ts` に `chemicalsDataUpdated` を追加し index と単一ソース化（当日打ち lastmodスパム回避）。`sitemap-index.xml` へ本子を6番目に登録（本体→記事→事故→通達→保護具→化学物質）。robots は sitemap-index 広告済のため自動発見。priority 0.6・monthly。
+
+回帰: `sitemap-chemicals.xml/route.test.ts` 5本（正本キー全件一致・1000超の非空虚性・裸/chemical-database不在・全キー`[0-9-]`のみ＝エンコード乖離0・lastmod=chemicalsDataUpdated当日固定でない）＋`freshness.test.ts` 1本（chemicalsDataUpdated=2026-05-24）＋`sitemap-index.xml/route.test.ts` を6子構成へ更新（5→6件）。
+
+ゲート: `tsc --noEmit`=0 / `eslint`(変更5ファイル)=errors0 / `vitest run`=263ファイル2233テスト全緑 / `build`=成功（NODE_OPTIONS=--max-old-space-size=6144）。build 再生成物（rag-metrics-latest.json・ky-print-sheet snapshot・chatbot-eval-fresh-results.json）は `git checkout` で復元。working tree は本タスクの5ファイル（新設 route/test 2＋freshness.ts/test＋index route/test）のみ。
+
+要・他班（注記のみ）: 一覧 `/chemical-database`(index) の client は `getAllMergedChemicals()` 全件へ「開く」リンクを出すが `CONCENTRATION_LIMITS.substances` 外の CAS は詳細で notFound＝潜在ソフト404。sitemap は解決集合のみ収載で正だが client 側リンク条件是正は所有UI班(ux-tools)担当。
+
+残: 本 PR＋#647＋#653 の CI 緑回収＆マージ（次イテレーション 1)）。
+
+---
+
 ## 2026-07-03 — 柱C-3-3 追補4 孤立していた実在ツールページ /ky/workers を sitemap 収載（PR: seo/c3-3-supplement4-ky-workers-sitemap）
 
 回収: 自班の未マージ `seo/` PR は無し（直近の #627 追補2・#635 O17設計ドラフト等は main へマージ済）。`git status` clean・main を ff-only 同期済み。他班の OPEN PR（#636 data 等）は触らず。
