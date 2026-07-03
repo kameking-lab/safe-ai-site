@@ -15,6 +15,7 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
 
 const _title =
@@ -123,6 +124,16 @@ export default function TreatmentWorkBalanceHubPage() {
         description="厚労省ガイドライン（令和5年改訂）に沿った企業向け実務ガイドと、両立支援プラン作成ツール"
         icon={HeartHandshake}
         iconColor="emerald"
+      />
+
+      <ConclusionCard
+        tone="info"
+        value={FRAMEWORK_STEPS.length}
+        unit="ステップ"
+        title="支援フロー"
+        description="申出→プラン作成→就業上の措置→定期見直し。プラン作成ツールで配慮事項を自動生成できます。"
+        action={{ href: "/treatment-work-balance/plan-builder", label: "プランを作成する" }}
+        className="mt-6"
       />
 
       <section className="mt-6">
