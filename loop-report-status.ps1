@@ -396,7 +396,14 @@ function Get-LaneHealthLine {
     return (Fmt "laneHealthBornDead" @{ LANES = ($bornDead -join $sep); MIN = $StaleMinutes })
   }
   if ($aliveNoReport.Count -gt 0 -and $canAliveNoReport) {
-    return (Fmt "laneHealthAliveNoReport" @{ LANES = ($aliveNoReport -join $sep); MISSING = $aliveNoReport.Count; TOTAL = $ExpectedLanes.Count })
+    # TOTAL is the denominator on the owner's watch line ("N/TOTAL running-but-silent"). This branch is the
+    # ONLY one reachable with an EMPTY roster: $missing needs a roster, but $staleAlive is derived from rows
+    # alone, so a config that is momentarily unreadable in a clone (mid git-checkout) while a lane is stale-
+    # but-alive falls here with $ExpectedLanes.Count = 0 and would print a nonsense "N/0". The documented
+    # contract (see the header) is that an unknown roster reverts to pre-roster behavior, so fall back to the
+    # reported-lane count exactly like the OK branch below. When the roster IS known this is unchanged.
+    $anrTotal = if ($ExpectedLanes -and $ExpectedLanes.Count -gt 0) { $ExpectedLanes.Count } else { $all.Count }
+    return (Fmt "laneHealthAliveNoReport" @{ LANES = ($aliveNoReport -join $sep); MISSING = $aliveNoReport.Count; TOTAL = $anrTotal })
   }
   if ($quietMissing.Count -gt 0 -and $LS.ContainsKey("laneHealthUnreported")) {
     return (Fmt "laneHealthUnreported" @{ LANES = ($quietMissing -join $sep); MISSING = $quietMissing.Count; TOTAL = $ExpectedLanes.Count })
@@ -547,6 +554,23 @@ function Get-AliveRunnerLanes {
   return $names.ToArray()
 }
 
+# Whether the ground-truth process-liveness scan (Get-AliveRunnerLanes) must run this write. The scan feeds
+# the alive/dead tie-breaker that demotes a provably-alive lane out of the LOUD banners. #696 wired that
+# demotion for NEVER-reported lanes (missing -> born-dead) and the callers gated the scan on
+# "missingLanes.Count > 0". #703 then extended the SAME demotion to STALE lanes (reported-once-then-silent),
+# but the scan gate was never widened - so once every enabled lane has reported at least once (zero missing)
+# and one then falls silent, the gate skips the scan, $aliveLanes is empty, and Get-LaneHealthLine's stale-
+# alive branch can never fire: the #703 fix silently reverts to a FALSE loud "stopped" alarm on a working
+# lane (the exact class #602..#703 exist to remove). Gate on EITHER a missing lane OR a stale lane so the
+# scan runs whenever a demotion is possible. Pure: callers pass the already-computed missing count so the
+# region is not parsed twice; stale is derived from the rows. Empty rows / no stale -> false (legacy no-scan).
+function Test-NeedsAliveScan {
+  param([int]$MissingCount, [string[]]$Rows, [datetime]$Now, [int]$StaleMinutes, [string]$RowTemplate)
+  if ($MissingCount -gt 0) { return $true }
+  $stale = @(Get-StaleLanes -Rows $Rows -Now $Now -StaleMinutes $StaleMinutes -RowTemplate $RowTemplate)
+  return ($stale.Count -gt 0)
+}
+
 # ---- Trailing-blank hygiene for the status file -----------------------------------------------
 # The status writers compose "($lines -join CRLF) + CRLF" and then Set-Content APPENDS its own
 # terminator, so each write leaves the file ending in a DOUBLE CRLF; Get-Content preserves all-but-one
@@ -680,6 +704,20 @@ if ($SelfTest) {
       $f4exp = Fmt "laneHealthOk" @{ TOTAL = 2; MIN = 120; NOW = $hNow.ToString("yyyy-MM-dd HH:mm") }
       Assert-Test "empty roster falls back to legacy reported-count OK banner" ($f4 -eq $f4exp)
 
+      # N) Test-NeedsAliveScan gates the ground-truth process scan feeding the alive/dead tie-breaker. #703
+      # made the STALE (report-then-silent) branch a consumer of $aliveLanes, but the call sites kept gating
+      # the scan on missing-count only - so a zero-missing fleet with one stale lane skipped the scan, left
+      # $aliveLanes empty, and reverted to a FALSE loud "stopped" alarm. The gate must fire on missing OR stale.
+      $rowTplN = S "reportLine"
+      $nA = Test-NeedsAliveScan -MissingCount 1 -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -RowTemplate $rowTplN
+      Assert-Test "N1: a missing lane forces the alive scan (legacy trigger preserved)" ($nA -eq $true)
+      $nB = Test-NeedsAliveScan -MissingCount 0 -Rows @($rOps, $rDataStale) -Now $hNow -StaleMinutes 120 -RowTemplate $rowTplN
+      Assert-Test "N2: zero missing but a stale lane STILL forces the scan (the #703-gate regression fix)" ($nB -eq $true)
+      $nC = Test-NeedsAliveScan -MissingCount 0 -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -RowTemplate $rowTplN
+      Assert-Test "N3: no missing and no stale lane -> no scan (legacy no-op preserved)" ($nC -eq $false)
+      $nD = Test-NeedsAliveScan -MissingCount 0 -Rows @() -Now $hNow -StaleMinutes 120 -RowTemplate $rowTplN
+      Assert-Test "N4: empty rows with zero missing -> no scan, no throw" ($nD -eq $false)
+
       # G: born-dead escalation for NEVER-reported lanes + missing-since map parse/update/format.
       if ($LS.ContainsKey("laneHealthBornDead")) {
         # G1: a never-reported lane still WITHIN grace (stamp 30 min old < 120) stays the quiet banner.
@@ -757,6 +795,17 @@ if ($SelfTest) {
           # M4: a genuinely born-dead missing lane still outranks a demoted stale-alive lane (loud wins).
           $m4 = Get-LaneHealthLine -Rows @($rOps, $rDataStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapOld -AliveLanes @("data")
           Assert-Test "M4: a truly born-dead missing lane still outranks a demoted stale-alive lane" ($m4 -eq $g2exp)
+          # O) Empty-roster denominator: a config momentarily unreadable in a clone (mid git-checkout) yields an
+          # EMPTY roster while a lane is stale-but-alive. That path returned "N/0" (nonsense fraction on the
+          # owner's watch line) because TOTAL was $ExpectedLanes.Count. The contract says an unknown roster
+          # reverts to pre-roster behavior, so TOTAL must fall back to the reported-lane count.
+          # O1: empty roster + stale-alive data -> alive-no-report with TOTAL = reported count (2), not 0.
+          $o1 = Get-LaneHealthLine -Rows @($rOps, $rDataStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @() -AliveLanes @("data")
+          $o1exp = Fmt "laneHealthAliveNoReport" @{ LANES = "data"; MISSING = 1; TOTAL = 2 }
+          Assert-Test "O1: empty roster + stale-alive lane -> TOTAL falls back to reported count (no nonsense /0)" ($o1 -eq $o1exp)
+          # O2: regression - a KNOWN roster is unchanged (TOTAL stays the roster size, here 2), same as M1.
+          $o2 = Get-LaneHealthLine -Rows @($rOps, $rDataStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data") -AliveLanes @("data")
+          Assert-Test "O2: known roster still uses the roster size as TOTAL (no regression)" ($o2 -eq $m1exp)
         }
       }
     }
@@ -973,9 +1022,11 @@ if ($WhatIf) {
       $rowTpl = S "reportLine"; $nowH = Get-Date
       $missingLanes = @(Get-MissingLanes -Rows $rows.ToArray() -ExpectedLanes $ExpectedLanes -RowTemplate $rowTpl)
       $newMap = Update-MissingSinceMap -Old (Get-MissingSinceMap -Rows $markerRows.ToArray()) -MissingLanes $missingLanes -Now $nowH
-      # Ground-truth process liveness (best-effort) only when a lane is missing, so a provably-alive lane
-      # is never falsely escalated to born-dead. Empty on any failure -> prior behavior.
-      $aliveLanes = @(); if ($missingLanes.Count -gt 0) { $aliveLanes = @(Get-AliveRunnerLanes) }
+      # Ground-truth process liveness (best-effort) when a lane is missing OR stale, so a provably-alive
+      # lane is never falsely escalated to born-dead (#696) OR to a loud stale "stopped" alarm (#703).
+      # Empty on any failure -> prior behavior.
+      $aliveLanes = @()
+      if (Test-NeedsAliveScan -MissingCount $missingLanes.Count -Rows $rows.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -RowTemplate $rowTpl) { $aliveLanes = @(Get-AliveRunnerLanes) }
       $hl = Get-LaneHealthLine -Rows $rows.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes -MissingSince $newMap -AliveLanes $aliveLanes
       if ($hl) { Write-Rep ("[WHATIF] would set the region health line to: " + $hl) }
       else { Write-Rep "[WHATIF] no health line would be written (no parseable lane rows)." }
@@ -1075,9 +1126,11 @@ try {
       $rowTpl = S "reportLine"; $nowH = Get-Date
       $missingLanes = @(Get-MissingLanes -Rows $inner.ToArray() -ExpectedLanes $ExpectedLanes -RowTemplate $rowTpl)
       $newMap = Update-MissingSinceMap -Old (Get-MissingSinceMap -Rows $markerRows.ToArray()) -MissingLanes $missingLanes -Now $nowH
-      # Ground-truth process liveness (best-effort) only when a lane is missing, so a provably-alive lane is
-      # never falsely escalated to born-dead. Empty on any failure (WMI outage / non-Windows) -> prior behavior.
-      $aliveLanes = @(); if ($missingLanes.Count -gt 0) { $aliveLanes = @(Get-AliveRunnerLanes) }
+      # Ground-truth process liveness (best-effort) when a lane is missing OR stale, so a provably-alive lane
+      # is never falsely escalated to born-dead (#696) OR to a loud stale "stopped" alarm (#703). Empty on any
+      # failure (WMI outage / non-Windows) -> prior behavior.
+      $aliveLanes = @()
+      if (Test-NeedsAliveScan -MissingCount $missingLanes.Count -Rows $inner.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -RowTemplate $rowTpl) { $aliveLanes = @(Get-AliveRunnerLanes) }
       $healthLine = Get-LaneHealthLine -Rows $inner.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes -MissingSince $newMap -AliveLanes $aliveLanes
       $markerLine = Format-MissingSinceMarker -Map $newMap
       $rebuilt = New-Object System.Collections.Generic.List[string]

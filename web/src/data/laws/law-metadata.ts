@@ -281,7 +281,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和43年法律第98号",
     latestRevision: "令和4年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/343AC0000000098",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   化審法: {
     fullName: "化学物質の審査及び製造等の規制に関する法律",

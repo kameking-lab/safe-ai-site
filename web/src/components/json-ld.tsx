@@ -6,6 +6,17 @@ type Schema = Record<string, unknown>;
 /** ロゴ画像（180x180）への絶対URL。複数スキーマの logo/ImageObject で共有。 */
 const LOGO_URL = `${SITE_URL}/apple-touch-icon.png`;
 
+/**
+ * サイトの主要エンティティ（Organization / WebSite）の安定 @id。
+ * 全ページの <head> で Organization と WebSite を別々に出力しているため、
+ * 両者を @id で同定し WebSite→Organization（publisher）を参照で結ぶことで、
+ * 検索エンジンが「同一の発行主体」として重複なくエンティティグラフを構築できる
+ * （publisher/author を各所でインライン再宣言する重複ノードを 1 つの正準ノードへ集約）。
+ * フラグメント（#organization / #website）は URL に依存する安定識別子。
+ */
+export const ORG_ID = `${SITE_URL}/#organization`;
+export const WEBSITE_ID = `${SITE_URL}/#website`;
+
 export function JsonLd({ schema }: { schema: Schema | Schema[] }) {
   return (
     <script
@@ -19,6 +30,7 @@ export function organizationSchema(): Schema {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": ORG_ID,
     name: SITE_NAME,
     url: SITE_URL,
     logo: {
@@ -37,7 +49,9 @@ export function organizationSchema(): Schema {
       "化学物質管理",
       "AIシステム開発",
     ],
-    sameAs: [SITE_URL],
+    // sameAs は「外部の権威ある同一エンティティ表現（公式SNS・Wikipedia・法人登記等）」を
+    // 列挙するプロパティ。自サイト URL を指す自己参照は同定価値ゼロ（バリデータの smell）で、
+    // 外部プロフィールが未整備の現状は付与しない（将来の公式アカウント整備時に追加する）。
   };
 }
 
@@ -45,10 +59,14 @@ export function webSiteSchema(): Schema {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": WEBSITE_ID,
     name: SITE_NAME,
     url: SITE_URL,
     description:
       "労働安全衛生の現場運用ポータル。法改正・リスク管理・KY用紙・Eラーニングをまとめて確認。",
+    // WebSite の発行主体を Organization ノード（@id）へ参照で結ぶ。インライン再宣言せず
+    // 正準 Organization ノードへ集約し、両エンティティを 1 つのグラフとして同定させる。
+    publisher: { "@id": ORG_ID },
     author: {
       "@type": "Organization",
       name: SITE_NAME,
@@ -65,8 +83,12 @@ export function webSiteSchema(): Schema {
   };
 }
 
+// Article / NewsArticle / WebApplication が author・publisher・provider として共有する
+// 組織参照。@id を付し、全ての発行主体ノードを正準 Organization ノード（ORG_ID）へ
+// 同定する（各所のインライン再宣言が別ノードに分裂するのを防ぐ）。
 const PUBLISHER_REF = {
   "@type": "Organization",
+  "@id": ORG_ID,
   name: SITE_NAME,
   url: SITE_URL,
   logo: {
@@ -152,6 +174,7 @@ export function newsArticleSchema(input: {
     },
     publisher: {
       "@type": "Organization",
+      "@id": ORG_ID,
       name: SITE_NAME,
       url: SITE_URL,
       logo: {
@@ -351,11 +374,13 @@ export function webPageSchema(input: {
     inLanguage,
     isPartOf: {
       "@type": "WebSite",
+      "@id": WEBSITE_ID,
       name: SITE_NAME,
       url: SITE_URL,
     },
     publisher: {
       "@type": "Organization",
+      "@id": ORG_ID,
       name: SITE_NAME,
       url: SITE_URL,
     },
