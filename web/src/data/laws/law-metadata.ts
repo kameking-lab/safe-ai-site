@@ -100,7 +100,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和35年法律第30号",
     latestRevision: "令和元年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/335AC0000000030",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   // キーはコーパス(LawArticle.lawShort)の実使用値に一致させること。
   // 不一致だと article-registry / chatbot がメタを引けず e-Gov リンクが欠落する
