@@ -258,13 +258,13 @@ export default function SubsidiesPage() {
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
             href="/pricing"
-            className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
           >
             料金プランを見る
           </Link>
           <Link
             href="/contact"
-            className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-white px-4 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-300 bg-white px-4 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
           >
             導入相談をする
           </Link>
