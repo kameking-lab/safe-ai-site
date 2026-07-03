@@ -253,7 +253,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和39年法律第118号",
     latestRevision: "令和元年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/339AC0000000118",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   健康増進法: {
     fullName: "健康増進法",

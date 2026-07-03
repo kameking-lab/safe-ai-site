@@ -34,27 +34,27 @@ export function SignageHeader({
         )}
         {!hideNav && (
           <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] sm:text-xs">
-            <Link className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/">
+            <Link className="inline-flex min-h-[44px] items-center rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/">
               ポータルへ戻る
             </Link>
             <Link
-              className="rounded-full border border-emerald-600/70 bg-emerald-900/40 px-3 py-1 font-semibold text-emerald-100 hover:bg-emerald-900/60"
+              className="inline-flex min-h-[44px] items-center rounded-full border border-emerald-600/70 bg-emerald-900/40 px-3 py-1 font-semibold text-emerald-100 hover:bg-emerald-900/60"
               href="/laws"
             >
               法改正一覧へ
             </Link>
-            <Link className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/ky">
+            <Link className="inline-flex min-h-[44px] items-center rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800" href="/ky">
               KY用紙へ
             </Link>
             <Link
-              className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800"
+              className="inline-flex min-h-[44px] items-center rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800"
               href="/site-records"
               title="パトロール・ヒヤリ・点検などの記録の作成・管理はこちら。記録の要対応はこの画面の「現場の安全状態」に自動掲示されます"
             >
               記録キットへ
             </Link>
             <Link
-              className="rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800"
+              className="inline-flex min-h-[44px] items-center rounded-full border border-slate-500/60 px-3 py-1 text-slate-100 hover:bg-slate-800"
               href="/notifications"
             >
               通知設定へ
