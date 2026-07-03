@@ -133,6 +133,20 @@ describe('site-pages-search-source（機能ページ射影の drift ガード）
       expect(hub?.keywords).toContain('補助金');
     });
 
+    it('独立ハブ（新着情報 /whats-new・記録キット /site-records）がハブ概念語 keyword で結線されている', () => {
+      // 機能名では引けてもハブ概念語（新着・記録キット）で 0 件だった独立ハブ。最新情報の入口／
+      // 現場記録ツールの束を「その束を名指す語」で引けることを機械固定する（旧 0 件の是正証明）。
+      const byUrl = new Map(entries.map((e) => [e.url, e]));
+      const whatsNew = byUrl.get('/whats-new');
+      expect(whatsNew, '/whats-new が射影されていない').toBeTruthy();
+      expect(whatsNew?.keywords).toContain('新着情報');
+      expect(whatsNew?.keywords).toContain('更新情報');
+      const records = byUrl.get('/site-records');
+      expect(records, '/site-records が射影されていない').toBeTruthy();
+      expect(records?.keywords).toContain('記録キット');
+      expect(records?.keywords).toContain('安全記録');
+    });
+
     it('補充 url が最終射影（getSitePageSearchEntries）にすべて含まれる', () => {
       const covered = new Set(entries.map((e) => e.url));
       const missing = EXTRA_DESTINATION_PAGES.map((e) => e.url).filter(

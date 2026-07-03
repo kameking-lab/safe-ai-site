@@ -520,7 +520,7 @@ export function MeetingPaperView() {
               <h2 className="text-sm font-bold text-slate-800">各社 作業・危険対策</h2>
               <div className="flex flex-wrap gap-1">
                 {CONTRACTOR_TYPES.map((t) => (
-                  <button key={t} type="button" onClick={() => addContractor(t, null)} className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50">＋{t}</button>
+                  <button key={t} type="button" onClick={() => addContractor(t, null)} className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-50">＋{t}</button>
                 ))}
               </div>
             </div>
@@ -542,16 +542,16 @@ export function MeetingPaperView() {
                   <div key={c.id} className={`rounded-lg border border-slate-200 bg-slate-50 p-2 ${TYPE_INDENT[c.type]}`}>
                     <div className="mb-1 flex flex-wrap items-center gap-1.5">
                       {hasChildren && (
-                        <button type="button" onClick={() => setCollapsed((s) => { const n = new Set(s); if (n.has(c.id)) n.delete(c.id); else n.add(c.id); return n; })} className="rounded px-1 text-xs text-slate-500 hover:bg-slate-200" aria-label="折りたたみ">{collapsed.has(c.id) ? "▶" : "▼"}</button>
+                        <button type="button" onClick={() => setCollapsed((s) => { const n = new Set(s); if (n.has(c.id)) n.delete(c.id); else n.add(c.id); return n; })} className="min-h-[44px] min-w-[44px] rounded text-xs text-slate-500 hover:bg-slate-200" aria-label="折りたたみ">{collapsed.has(c.id) ? "▶" : "▼"}</button>
                       )}
                       <select value={c.type} onChange={(e) => patchContractor(c.id, { type: e.target.value as ContractorType })} className={`rounded px-1.5 py-0.5 text-[11px] font-bold ${TYPE_TAG[c.type]}`} aria-label="階層">
                         {CONTRACTOR_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
                       </select>
                       <input value={c.companyName} onChange={(e) => patchContractor(c.id, { companyName: e.target.value })} placeholder="業者名" list="mtg-companies" className={inp + " flex-1 min-w-[8rem]"} aria-label="業者名" />
-                      <button type="button" onClick={() => addContractor(nextType(c.type), c.id)} className="rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-600 hover:bg-slate-100">＋下位</button>
-                      <button type="button" disabled={busyRow === c.id} onClick={() => void suggestRow(c.id)} className="rounded border border-indigo-300 bg-indigo-50 px-1.5 py-0.5 text-[10px] font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50">{busyRow === c.id ? "提案中…" : "AI提案"}</button>
-                      <Link href={kyHrefFromRow(c)} className="rounded border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 hover:bg-emerald-100">KYを作成</Link>
-                      <button type="button" onClick={() => removeContractor(c.id)} className="rounded border border-rose-200 bg-white px-1.5 py-0.5 text-[10px] text-rose-600 hover:bg-rose-50">削除</button>
+                      <button type="button" onClick={() => addContractor(nextType(c.type), c.id)} className="min-h-[44px] rounded border border-slate-300 bg-white px-1.5 py-0.5 text-[10px] text-slate-600 hover:bg-slate-100">＋下位</button>
+                      <button type="button" disabled={busyRow === c.id} onClick={() => void suggestRow(c.id)} className="min-h-[44px] rounded border border-indigo-300 bg-indigo-50 px-1.5 py-0.5 text-[10px] font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50">{busyRow === c.id ? "提案中…" : "AI提案"}</button>
+                      <Link href={kyHrefFromRow(c)} className="flex min-h-[44px] items-center rounded border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 hover:bg-emerald-100">KYを作成</Link>
+                      <button type="button" onClick={() => removeContractor(c.id)} className="min-h-[44px] rounded border border-rose-200 bg-white px-1.5 py-0.5 text-[10px] text-rose-600 hover:bg-rose-50">削除</button>
                     </div>
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                       <L label="作業内容"><input value={c.workContent} onChange={(e) => patchContractor(c.id, { workContent: e.target.value })} list="mtg-works" className={inp} /></L>
@@ -599,7 +599,7 @@ export function MeetingPaperView() {
             <section className="rounded-xl border border-slate-300 bg-white p-3">
               <div className="mb-2 flex items-center justify-between">
                 <h2 className="text-sm font-bold text-slate-800">搬入出予定</h2>
-                <button type="button" onClick={() => patch({ deliveries: [...record.deliveries, emptyDeliveryRow()] })} className="rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-700 hover:bg-slate-50">＋行</button>
+                <button type="button" onClick={() => patch({ deliveries: [...record.deliveries, emptyDeliveryRow()] })} className="min-h-[44px] rounded border border-slate-300 bg-white px-2 py-0.5 text-[11px] text-slate-700 hover:bg-slate-50">＋行</button>
               </div>
               <div className="space-y-1.5">
                 {record.deliveries.map((d) => (
@@ -607,7 +607,7 @@ export function MeetingPaperView() {
                     <input value={d.item} onChange={(e) => patch({ deliveries: record.deliveries.map((x) => x.id === d.id ? { ...x, item: e.target.value } : x) })} placeholder="物" className={inp + " flex-1"} aria-label="物" />
                     <input value={d.time} onChange={(e) => patch({ deliveries: record.deliveries.map((x) => x.id === d.id ? { ...x, time: e.target.value } : x) })} placeholder="時刻" className={inp + " w-20"} aria-label="時刻" />
                     <input value={d.place} onChange={(e) => patch({ deliveries: record.deliveries.map((x) => x.id === d.id ? { ...x, place: e.target.value } : x) })} placeholder="場所" className={inp + " w-24"} aria-label="場所" />
-                    <button type="button" onClick={() => patch({ deliveries: record.deliveries.filter((x) => x.id !== d.id) })} className="px-1 text-rose-500 hover:text-rose-700" aria-label="削除">×</button>
+                    <button type="button" onClick={() => patch({ deliveries: record.deliveries.filter((x) => x.id !== d.id) })} className="min-h-[44px] min-w-[44px] px-1 text-rose-500 hover:text-rose-700" aria-label="削除">×</button>
                   </div>
                 ))}
               </div>
@@ -624,8 +624,8 @@ export function MeetingPaperView() {
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-sm font-bold text-slate-800">点検項目（○=該当・実施 / ×=要是正 / －=該当無）</h2>
               <div className="flex gap-1.5">
-                <button type="button" onClick={inferChecklistAll} className="rounded-lg border border-indigo-300 bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700 hover:bg-indigo-100">AIで該当項目を推論</button>
-                <button type="button" onClick={resetChecklist} className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">公式版に戻す</button>
+                <button type="button" onClick={inferChecklistAll} className="min-h-[44px] rounded-lg border border-indigo-300 bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700 hover:bg-indigo-100">AIで該当項目を推論</button>
+                <button type="button" onClick={resetChecklist} className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-600 hover:bg-slate-50">公式版に戻す</button>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -642,12 +642,12 @@ export function MeetingPaperView() {
                         )}
                         <span className="flex shrink-0 items-center gap-0.5">
                           <Tri value={it.status} onChange={(s) => patch({ checklist: record.checklist.map((cc) => cc.key === cat.key ? { ...cc, items: cc.items.map((ii) => ii.key === it.key ? { ...ii, status: s } : ii) } : cc) })} />
-                          {isCustomItem(it.key) && <button type="button" onClick={() => removeChecklistItem(cat.key, it.key)} className="px-0.5 text-rose-400 hover:text-rose-600" aria-label="項目削除">×</button>}
+                          {isCustomItem(it.key) && <button type="button" onClick={() => removeChecklistItem(cat.key, it.key)} className="min-h-[44px] min-w-[44px] px-0.5 text-rose-400 hover:text-rose-600" aria-label="項目削除">×</button>}
                         </span>
                       </li>
                     ))}
                   </ul>
-                  <button type="button" onClick={() => addChecklistItem(cat.key)} className="mt-1 w-full rounded border border-dashed border-slate-300 py-0.5 text-[10px] text-slate-500 hover:bg-slate-50">＋ 項目を追加</button>
+                  <button type="button" onClick={() => addChecklistItem(cat.key)} className="mt-1 min-h-[44px] w-full rounded border border-dashed border-slate-300 py-0.5 text-[10px] text-slate-500 hover:bg-slate-50">＋ 項目を追加</button>
                 </div>
               ))}
             </div>
@@ -755,7 +755,7 @@ function Tri({ value, onChange }: { value: ChecklistStatus; onChange: (s: Checkl
   return (
     <span className="flex gap-0.5">
       {opts.map((o) => (
-        <button key={o.s} type="button" onClick={() => onChange(o.s)} className={`h-5 w-5 rounded text-[11px] font-bold ${value === o.s ? o.on : "bg-slate-100 text-slate-400 hover:bg-slate-200"}`}>{o.t}</button>
+        <button key={o.s} type="button" onClick={() => onChange(o.s)} className={`min-h-[44px] min-w-[44px] rounded text-[11px] font-bold ${value === o.s ? o.on : "bg-slate-100 text-slate-400 hover:bg-slate-200"}`}>{o.t}</button>
       ))}
     </span>
   );

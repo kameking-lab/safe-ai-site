@@ -32,21 +32,27 @@ export function WorkersMasterClient() {
   const [draftCompany, setDraftCompany] = useState("");
   const [draftQual, setDraftQual] = useState("");
   const [draftRegular, setDraftRegular] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const local = loadWorkers();
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- マウント時の一度きりのlocalStorage読み込み
     setWorkers(local);
     // Phase 4: クラウド同期（背景・任意）。ローカルが空のときだけ別端末の登録を引き継ぐ。
-    if (!isKyCloudEnabled()) return;
+    if (!isKyCloudEnabled() || local.length > 0) {
+      setLoading(false);
+      return;
+    }
     let cancelled = false;
     void (async () => {
-      await flushKyCloudQueue();
-      if (local.length > 0) return;
-      const cloud = await cloudPullWorkers();
-      if (!cancelled && cloud && cloud.length > 0) {
-        saveWorkers(cloud);
-        setWorkers(cloud);
+      try {
+        await flushKyCloudQueue();
+        const cloud = await cloudPullWorkers();
+        if (!cancelled && cloud && cloud.length > 0) {
+          saveWorkers(cloud);
+          setWorkers(cloud);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     })();
     return () => {
@@ -95,15 +101,18 @@ export function WorkersMasterClient() {
         </div>
         <Link
           href="/ky/paper"
-          className="rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
+          className="flex min-h-[44px] items-center rounded-lg border border-emerald-300 bg-white px-3 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
         >
           ← KY用紙に戻る
         </Link>
       </div>
 
-      {/* 結論カード（柱0）: いまの状態＝登録人数を3秒で。次にやること＝0名は追加へ／登録済みはKY用紙で使うへ。 */}
+      {/* 結論カード（柱0）: いまの状態＝登録人数を3秒で。次にやること＝0名は追加へ／登録済みはKY用紙で使うへ。
+          読込中（別端末のクラウド履歴を確認中）は「登録なし」と誤読させないよう確認中の状態を出す（ky-list-client.tsxと同型）。 */}
       <div className="mt-4">
-        {registeredCount === 0 ? (
+        {loading ? (
+          <ConclusionCard tone="neutral" title="確認中" description="登録済みの作業員を確認しています…" />
+        ) : registeredCount === 0 ? (
           <ConclusionCard
             tone="info"
             title="登録なし"
