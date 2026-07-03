@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import results from "@/data/chatbot-eval-results.json";
 import freshResults from "@/data/chatbot-eval-fresh-results.json";
+import genqualitySnapshot from "@/data/chatbot-genquality-latest.json";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 import { ogImageUrl } from "@/lib/og-url";
@@ -58,7 +59,64 @@ function formatDate(iso: string): string {
   }
 }
 
+// 生成回答の正答率（本番23問・機械採点）。Recall@5（検索ヒット率）とは別レンズ。
+// 実測値は loop-eval-nightly.ps1 が本番へ23問投げて更新する追跡スナップショットから読む。
+// スナップショット欠損・破損時は 2026-07-03 のベースライン（19/21 = 90.5%）へ静的フォールバック
+// （docs/chatbot-genquality-eval-2026-07-03.md）。
+type GenQuality = {
+  date: string;
+  strictAccuracy: number;
+  correct: number;
+  partial: number;
+  scorable: number;
+  usefulRate: number;
+  target: number;
+  isFallback: boolean;
+};
+
+const GENQUALITY_BASELINE: GenQuality = {
+  date: "2026-07-03",
+  strictAccuracy: 19 / 21,
+  correct: 19,
+  partial: 1,
+  scorable: 21,
+  usefulRate: 1,
+  target: 0.8,
+  isFallback: true,
+};
+
+function readNumber(v: unknown): number | undefined {
+  return typeof v === "number" && Number.isFinite(v) ? v : undefined;
+}
+
+function loadGenQuality(): GenQuality {
+  const raw = genqualitySnapshot as Record<string, unknown>;
+  const strictAccuracy = readNumber(raw.strictAccuracy);
+  const scorable = readNumber(raw.scorable);
+  // 正答率が [0,1] 外・採点母数が非正・欠損なら破綻させずベースラインへ退避。
+  if (
+    strictAccuracy === undefined ||
+    strictAccuracy < 0 ||
+    strictAccuracy > 1 ||
+    scorable === undefined ||
+    scorable <= 0
+  ) {
+    return GENQUALITY_BASELINE;
+  }
+  return {
+    date: typeof raw.date === "string" ? raw.date : GENQUALITY_BASELINE.date,
+    strictAccuracy,
+    correct: readNumber(raw.correct) ?? 0,
+    partial: readNumber(raw.partial) ?? 0,
+    scorable,
+    usefulRate: readNumber(raw.usefulRate) ?? GENQUALITY_BASELINE.usefulRate,
+    target: readNumber(raw.target) ?? GENQUALITY_BASELINE.target,
+    isFallback: false,
+  };
+}
+
 export default function ChatbotEvalPage() {
+  const gq = loadGenQuality();
   const r = results as EvalResult;
   const sortedTopics = Object.entries(r.topic_breakdown).sort(
     ([, a], [, b]) => b.total - a.total
@@ -105,12 +163,15 @@ export default function ChatbotEvalPage() {
         />
       </section>
       <p className="mt-3 text-xs text-slate-500">
-        ※ 本ページの「Recall@5」は RAG 検索の根拠条文 検索ヒット率であり、Gemini が生成する回答文の正答率ではありません。<br />
+        ※ 本ページの「Recall@5」は RAG 検索の根拠条文 検索ヒット率です。Gemini が生成する回答文そのものの正答率は下記「生成回答の正答率」で別途公開しています。<br />
         最終評価: {formatDate(r.generated_at)} ／ ソース:{" "}
         <code className="rounded bg-slate-100 px-1">test/chatbot-basic-100.json</code>
         ／ 実行コマンド:{" "}
         <code className="rounded bg-slate-100 px-1">npm run eval:chatbot</code>
       </p>
+
+      {/* 生成回答の正答率（本番23問・機械採点） */}
+      <GenQualitySection g={gq} />
 
       {/* トピック別 */}
       <section className="mt-8">
@@ -194,7 +255,7 @@ export default function ChatbotEvalPage() {
             に固定。トピックは労働安全衛生の主要 33 法令から横断選定。
           </li>
           <li>
-            ・評価対象は <strong>RAG 検索の根拠条文ヒット率</strong>。Gemini の生成回答の文章品質は別途評価。
+            ・本セクションの評価対象は <strong>RAG 検索の根拠条文ヒット率</strong>。Gemini の生成回答そのものの正答率は上記「生成回答の正答率（本番23問・機械採点）」で公開。
           </li>
           <li>
             ・上位 5 件のうち gold 1 件でも含まれれば検索ヒットとみなす（Recall@5 ベース）。
@@ -261,6 +322,60 @@ function Stat({
         {value}
       </p>
     </div>
+  );
+}
+
+function GenQualitySection({ g }: { g: GenQuality }) {
+  const passed = g.strictAccuracy >= g.target;
+  return (
+    <section className="mt-8 rounded-xl border border-emerald-200 bg-emerald-50/60 p-5">
+      <div className="flex flex-wrap items-baseline gap-2">
+        <h2 className="text-lg font-bold text-slate-900">
+          生成回答の正答率（本番23問・機械採点）
+        </h2>
+        <span className="rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
+          回答文の中身を採点
+        </span>
+      </div>
+      <p className="mt-2 text-xs leading-6 text-slate-600">
+        上の Recall@5 は「正しい条文を<strong>検索</strong>できたか」の指標です。こちらは本番同一エンドポイントに
+        23 問の golden 質問を投げ、<strong>Gemini が実際に生成した回答文</strong>を機械採点（完全正答／部分正答／誤答）した
+        「回答の中身」の正答率です。数値は本番を毎晩測定したスナップショットを読み出しています。
+      </p>
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat label="完全正答率" value={formatPct(g.strictAccuracy)} accent />
+        <Stat
+          label="完全正答数"
+          value={`${g.correct} / ${g.scorable}`}
+          accent
+        />
+        <Stat label="有用回答率" value={formatPct(g.usefulRate)} />
+        <Stat
+          label="判定"
+          value={passed ? "✅ 達成" : "❌ 未達"}
+          accent={passed}
+        />
+      </div>
+      <p className="mt-3 text-xs text-slate-500">
+        測定日: {g.date}
+        {g.isFallback ? (
+          <>
+            （公開ベースライン・スナップショット未配備時のフォールバック）
+          </>
+        ) : (
+          <>（本番23問の夜間自動測定・実測値）</>
+        )}
+        {" "}／ 目標値: {formatPct(g.target)}
+        {" "}／ 採点器:{" "}
+        <code className="rounded bg-slate-100 px-1">chatbot-genquality-scorer</code>
+        ／ 実行コマンド:{" "}
+        <code className="rounded bg-slate-100 px-1">npm run eval:chatbot-gen</code>
+      </p>
+      <p className="mt-2 text-xs text-slate-500">
+        ※ 部分正答（要点は正しいが一部不足）は完全正答率には数えず、有用回答率（完全＋部分）に含みます。
+        誤結論・条番号誤り・ハルシネーションは誤答として減点します。
+      </p>
+    </section>
   );
 }
 
