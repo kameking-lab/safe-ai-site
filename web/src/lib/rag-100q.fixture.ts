@@ -104,7 +104,7 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   // H. 作業環境測定・SDS (73-78)
   { id: 73, topic: "測定", question: "作業環境測定の義務は何条？", gold: [{ lawShort: "安衛法", articleNum: "第65条" }, { lawShort: "作業環境測定法", articleNum: "第3条" }] },
   { id: 74, topic: "測定", question: "作業環境測定の管理区分は？", gold: [{ lawShort: "作業環境測定法", articleNum: "第2条" }, { lawShort: "作業環境測定法", articleNum: "第3条" }, { lawShort: "安衛法", articleNum: "第65条" }] },
-  { id: 75, topic: "測定", question: "作業環境測定士の登録は？", gold: [{ lawShort: "作業環境測定法", articleNum: "第33条" }, { lawShort: "作業環境測定法", articleNum: "第36条" }, { lawShort: "作業環境測定法", articleNum: "第41条" }] },
+  { id: 75, topic: "測定", question: "作業環境測定士の登録は？", gold: [{ lawShort: "作業環境測定法", articleNum: "第7条" }, { lawShort: "作業環境測定法", articleNum: "第5条" }] },
   { id: 76, topic: "測定", question: "粉じん作業場の作業環境測定の頻度は？", gold: [{ lawShort: "粉じん則", articleNum: "第26条" }, { lawShort: "粉じん則", articleNum: "第27条" }, { lawShort: "粉じん則", articleNum: "第22条" }] },
   { id: 77, topic: "測定", question: "有機溶剤の作業環境測定は何条？", gold: [{ lawShort: "有機則", articleNum: "第28条" }] },
   { id: 78, topic: "測定", question: "特定化学物質の作業環境測定は？", gold: [{ lawShort: "特化則", articleNum: "第36条" }, { lawShort: "特化則", articleNum: "第36条の2" }] },

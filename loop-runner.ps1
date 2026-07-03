@@ -76,7 +76,7 @@ param(
   [string]$Model = "claude-fable-5",
   [string]$PromptFile = "",
   [string]$Lane = "",
-  [int]$IterationTimeoutSeconds = 7200,
+  [int]$IterationTimeoutSeconds = 5400,
   [switch]$SelfTest,
   [switch]$RehearseTimeout
 )
@@ -107,6 +107,24 @@ function Get-BackoffSeconds([int]$ConsecutiveShortFails, [int]$IntervalSeconds) 
 # no further claude iteration to run the per-iteration report step, so the runner reports it itself.)
 function Test-ShouldReportDeadlineStop([string]$LaneTag, [int]$MaxIter) {
   return (($LaneTag -ne "") -and ($MaxIter -le 0))
+}
+
+# Pure: does a process command line genuinely LAUNCH loop-runner.ps1 (invoked via -File), as opposed to
+# merely MENTIONING the filename in its arguments (e.g. an operator/agent diagnostic run with
+# -Command "... loop-runner.ps1 ... -Lane data ...")? The single-instance guard below counted ANY
+# powershell whose command line CONTAINED the substring "loop-runner.ps1", so a stray command that names
+# the script (and a lane) spoofs the liveness scan exactly as a bare mention spoofed the watchdog scan
+# before it was hardened. The concrete harm: a legitimately relaunched runner (after a hot-swap clean-exit
+# or a heal pass) sees the diagnostic as a same-lane competitor and self-exits, and Get-RunningLanes then
+# reports the lane "alive" so -HealOnly will not resurrect it -> the lane stays dead while the diagnostic
+# lingers. Every REAL launch form uses -File: the launcher's persistent/heal spawn and one-shot planner/
+# critic (-File <path>\loop-runner.ps1) and every manual/usage form. Match that shape - a path ending in
+# loop-runner.ps1 immediately after -File, quoted or bare - so a -Command mention (no -File before the
+# path) no longer counts. Pure so -SelfTest asserts it offline. (loop-watchdog.ps1 / loop-launcher.ps1 keep
+# their own local copies of the sibling predicate because the scripts share no module.)
+function Test-IsRunnerProcess([string]$CommandLine) {
+  if ([string]::IsNullOrEmpty($CommandLine)) { return $false }
+  return ($CommandLine -match '(?i)-File\s+"?[^"]*loop-runner\.ps1(?:"|\s|$)')
 }
 
 # Hot-swap gate: whether the running runner's OWN script file has changed on disk since launch, i.e. an
@@ -150,6 +168,23 @@ function Test-TimeoutMonitorEnabled([int]$TimeoutSeconds) {
 function Get-IterationWaitSeconds([int]$TimeoutSeconds) {
   if ($TimeoutSeconds -le 0) { return 0 }
   return $TimeoutSeconds
+}
+
+# Reporter coupling (see loop-report-status.ps1 StaleMinutes, default 120 min): the wedge monitor is the
+# ONLY thing that refreshes this lane's central-status heartbeat DURING a hung claude turn - the agent
+# never reaches its own step5.5 report while wedged, and Report-Heartbeat fires only AFTER the turn ends.
+# So a maximally-wedged iteration freezes the lane's last-run timestamp for the FULL IterationTimeoutSeconds.
+# If that ceiling reaches the reporter's StaleMinutes (both were 7200s / 120min = ZERO headroom), a single
+# wedge drives the row's age to the reporter's `-ge 120min` boundary and the reporter raises a FALSE
+# "silent per-lane death / manual restart" alarm for a lane that is alive and self-heals next iteration -
+# defeating the very heartbeat this monitor exists to feed (see the WEDGE-log comment in the loop). The
+# ceiling MUST therefore stay below the stale threshold with margin so the post-wedge heartbeat lands
+# before that boundary; the default 5400s (90min) vs 120min stale leaves 30min headroom. A disabled monitor
+# (<=0, legacy infinite wait) is exempt: a truly infinite hang is a genuine death the reporter SHOULD flag.
+# Pure so -SelfTest asserts the invariant offline (with the reporter's StaleMinutes literal it must match).
+function Test-WedgeCeilingUnderStale([int]$TimeoutSeconds, [int]$ReporterStaleMinutes, [int]$MarginSeconds) {
+  if ($TimeoutSeconds -le 0) { return $true }
+  return ($TimeoutSeconds -le (($ReporterStaleMinutes * 60) - $MarginSeconds))
 }
 
 # Arm an out-of-band monitor for one claude turn. Returns a Job handle (or $null when disabled) so the
@@ -244,7 +279,8 @@ if ($SelfTest) {
   # (legacy infinite wait). Get-IterationWaitSeconds maps <=0 -> 0 (no monitor) and passes positives
   # through unchanged. Pure - no process is spawned here (the live plumbing is proven by -RehearseTimeout).
   $wedgeCases = @(
-    @{ t = 7200; wantEnabled = $true;  wantWait = 7200 },  # default 2h -> armed
+    @{ t = 5400; wantEnabled = $true;  wantWait = 5400 },  # default 90min -> armed
+    @{ t = 7200; wantEnabled = $true;  wantWait = 7200 },  # explicit 2h -> armed, passthrough
     @{ t = 1;    wantEnabled = $true;  wantWait = 1 },     # any positive -> armed, passthrough
     @{ t = 0;    wantEnabled = $false; wantWait = 0 },     # disabled -> no monitor (legacy infinite wait)
     @{ t = -5;   wantEnabled = $false; wantWait = 0 }      # negative -> disabled (fail-safe)
@@ -263,7 +299,54 @@ if ($SelfTest) {
   Write-Host ("[selftest] Stop-WedgeMonitor(null) no-op: " + $(if ($nullSafe) { "OK" } else { "FAIL" }))
   if (-not $nullSafe) { $wedgeOk = $false }
 
-  if ($ok -and $capReached -and $gateOk -and $swapOk -and $wedgeOk) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
+  # Wedge-vs-stale coupling (Y group): the wedge ceiling must stay below the reporter's StaleMinutes with
+  # margin, so a maximally-wedged iteration refreshes the heartbeat BEFORE the reporter flags the lane
+  # silently-dead (else a wedge = a FALSE "manual restart" alarm). Reporter StaleMinutes default = 120min
+  # (loop-report-status.ps1); assert the SHIPPING default ceiling leaves >=15min headroom, and that the old
+  # zero-headroom 7200s value would have been caught, and that a disabled monitor is exempt.
+  $reporterStaleMin = 120   # keep in sync with loop-report-status.ps1 -StaleMinutes default
+  $marginSec = 900          # >=15min: post-wedge heartbeat + prior-iteration tail must land before the boundary
+  $yCases = @(
+    @{ name = "shipping default ceiling (5400s/90min) is under 120min stale with headroom"; t = 5400; want = $true },
+    @{ name = "old zero-headroom ceiling (7200s = stale) is REJECTED (the bug this fixes)";  t = 7200; want = $false },
+    @{ name = "at the headroom boundary (6300s = stale-15min) is accepted";                  t = 6300; want = $true },
+    @{ name = "just over the boundary (6301s) is rejected";                                  t = 6301; want = $false },
+    @{ name = "disabled monitor (0, legacy infinite wait) is exempt - infinite hang is a real death"; t = 0; want = $true },
+    @{ name = "disabled monitor (negative) is exempt";                                       t = -5; want = $true }
+  )
+  $yOk = $true
+  foreach ($y in $yCases) {
+    $got = Test-WedgeCeilingUnderStale $y.t $reporterStaleMin $marginSec
+    $pass = ($got -eq $y.want)
+    if (-not $pass) { $yOk = $false }
+    Write-Host ("[selftest] wedge-vs-stale: " + $y.name + " -> " + $got + " (want " + $y.want + ") " + $(if ($pass) { "OK" } else { "FAIL" }))
+  }
+  # Guard the SHIPPING param default itself (not just an arbitrary input): the default must satisfy the invariant.
+  $defaultCeilingOk = (Test-WedgeCeilingUnderStale $IterationTimeoutSeconds $reporterStaleMin $marginSec)
+  Write-Host ("[selftest] shipping IterationTimeoutSeconds default (" + $IterationTimeoutSeconds + "s) is under " + $reporterStaleMin + "min stale with >=" + $marginSec + "s margin: " + $(if ($defaultCeilingOk) { "OK" } else { "FAIL" }))
+  if (-not $defaultCeilingOk) { $yOk = $false }
+
+  # Runner process-identity gate (RID group): the single-instance guard must count only a genuine -File
+  # launch of loop-runner.ps1, never a -Command mention of the filename (an operator/agent diagnostic that
+  # spoofs the liveness scan and makes a relaunched runner self-exit into a dead lane).
+  $ridCases = @(
+    @{ name = "bare -File launch (heal/persistent form) is a runner";        cl = 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\r\loop-runner.ps1 -Lane data -RepoPath C:\r'; want = $true },
+    @{ name = "quoted -File launch (spaced path) is a runner";               cl = 'powershell -File "C:\Program Files\r\loop-runner.ps1" -Lane seo';                          want = $true },
+    @{ name = "one-shot -File launch (planner tag) is a runner";             cl = 'powershell -File C:\r\loop-runner.ps1 -Lane data-planner -MaxIterations 1';                want = $true },
+    @{ name = "legacy -File launch (no -Lane) is a runner";                  cl = 'powershell -File C:\r\loop-runner.ps1 -IntervalSeconds 300';                              want = $true },
+    @{ name = "a -Command MENTION of the filename is NOT a runner (spoof)";  cl = 'powershell -NoProfile -Command "gci | ? { $_.CommandLine -like ''*loop-runner.ps1*'' -and ''-Lane data'' }"'; want = $false },
+    @{ name = "a watchdog -File launch is NOT a runner";                     cl = 'powershell -File C:\r\loop-watchdog.ps1 -SupersedePid 100';                               want = $false },
+    @{ name = "empty command line is NOT a runner (null-safe)";              cl = "";                                                                                       want = $false }
+  )
+  $ridOk = $true
+  foreach ($r in $ridCases) {
+    $got = Test-IsRunnerProcess $r.cl
+    $pass = ($got -eq $r.want)
+    if (-not $pass) { $ridOk = $false }
+    Write-Host ("[selftest] runner-id: " + $r.name + " -> " + $got + " (want " + $r.want + ") " + $(if ($pass) { "OK" } else { "FAIL" }))
+  }
+
+  if ($ok -and $capReached -and $gateOk -and $swapOk -and $wedgeOk -and $ridOk -and $yOk) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
 }
 
 # Live rehearsal of the wedge-monitor plumbing against a DUMMY child (no claude / no usage), mirroring
@@ -347,7 +430,7 @@ function Write-Log([string]$msg) {
 $conflictPids = @()
 try {
   $running = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-    Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -like '*loop-runner.ps1*' })
+    Where-Object { $_.ProcessId -ne $PID -and (Test-IsRunnerProcess ([string]$_.CommandLine)) })
   foreach ($p in $running) {
     $cl = [string]$p.CommandLine
     $clHasLane = ($cl -match '(?i)-Lane(\s+|:|=)\S')
@@ -390,7 +473,7 @@ $launchScriptHash = Get-ScriptHashSafe $PSCommandPath
 # Self-report a genuine deadline stop into the ONE central docs/loop-status.md via
 # loop-report-status.ps1. When UntilIso is reached the runner breaks and exits 0; historically that
 # stop was logged only to this lane's PRIVATE log, so the owner's single watch-file kept showing the
-# lane "起動" with a FROZEN heartbeat and NO reason - the exact silent normal-stop O16 exists to kill
+# lane "running" with a FROZEN heartbeat and NO reason - the exact silent normal-stop O16 exists to kill
 # (the launcher's loud stop banner only re-appears at the NEXT logon / 07:00 pass). There is no
 # further claude iteration to run the per-iteration report step, so the runner reports the stop
 # itself: a "stopped: deadline" note into the lane's own row, prompting the untilIso edit. The child

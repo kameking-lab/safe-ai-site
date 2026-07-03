@@ -46,21 +46,21 @@ export function AccidentActionBar({ accident, variant = "inline" }: Props) {
       <div className="flex flex-wrap gap-2">
         <Link
           href={kyHref}
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 sm:flex-none"
+          className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 sm:flex-none"
         >
           <ClipboardList className="h-3.5 w-3.5" />
           KYを起票
         </Link>
         <Link
           href={equipHref}
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-sky-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-sky-700 sm:flex-none"
+          className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-sky-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-sky-700 sm:flex-none"
         >
           <Shield className="h-3.5 w-3.5" />
           必要保護具を見る
         </Link>
         <Link
           href={lawsHref}
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-violet-700 sm:flex-none"
+          className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-violet-700 sm:flex-none"
         >
           <BookOpen className="h-3.5 w-3.5" />
           関連法令
@@ -68,7 +68,7 @@ export function AccidentActionBar({ accident, variant = "inline" }: Props) {
         {courtHref && (
           <Link
             href={courtHref}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-slate-700 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-slate-800 sm:flex-none"
+            className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-slate-700 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-slate-800 sm:flex-none"
           >
             <Scale className="h-3.5 w-3.5" />
             関連裁判例
@@ -76,7 +76,7 @@ export function AccidentActionBar({ accident, variant = "inline" }: Props) {
         )}
         <Link
           href="/court-cases/employer-liability"
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-rose-700 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-800 sm:flex-none"
+          className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-1.5 rounded-lg bg-rose-700 px-3 py-2 text-xs font-bold text-white shadow-sm hover:bg-rose-800 sm:flex-none"
         >
           <Gavel className="h-3.5 w-3.5" />
           問われる責任
