@@ -116,7 +116,7 @@ export function SignageDangerAlert({ jmaHeadline, warnings }: Props) {
           <button
             type="button"
             onClick={() => setOverlay(false)}
-            className="absolute right-6 top-6 rounded-full bg-white/20 p-2 hover:bg-white/30"
+            className="absolute right-6 top-6 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-white/20 hover:bg-white/30"
             aria-label="アラートを閉じる"
           >
             <X className="h-6 w-6 text-white" />

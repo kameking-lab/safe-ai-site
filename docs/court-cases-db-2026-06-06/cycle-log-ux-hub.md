@@ -1,5 +1,19 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-04 — 補充: signage-rotator進捗ドット・signage-danger-alert閉じるボタン44px是正＋saved-accidents色文法是正
+
+**イテレーション頭の回収**: 自班のオープンPR #809(trend-summary-court-filter-44px)がe2e/smoke/Vercel全緑だったがmainと`docs/court-cases-db-2026-06-06/cycle-log-ux-hub.md`のみコンフリクト(コード非衝突、#810等の他班マージ由来)→`origin/main`を当該ブランチへ通常マージし両エントリ保持で解決→ゲート再走(tsc/lint/vitest2647件/build)全緑→push→CI緑確認後squashマージ・リモートブランチ削除。PR #811(daily-values-extras-panel-44px)はsmoke IN_PROGRESSのため今回は見送り、次イテレーションで回収。`git checkout main && git pull --ff-only`でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、①サイネージ`signage-rotator.tsx`(トレンドニュース・法改正ローテーターの汎用共通部品)の進捗ドットが`min-h-[24px] min-w-[24px]`と明示的に24pxのまま残っていたこと、②`signage-danger-alert.tsx`の危険イベント全画面アラート唯一のタップ解除手段「✕ 閉じる」ボタンが`p-2`+`h-6`アイコンのみ(実測≈40px)で44px未満だったこと、③`accidents/saved-accidents.tsx`(保存した事故事例パネル)が同種の「保存」表現である`favorites/favorites-list.tsx`は`amber`系で統一されているのに対し本ファイルのみ`yellow-200`/`yellow-50`/`yellow-500`を直書きしていた色の文法違反、を発見。いずれも既存の一括是正バッチの走査対象から漏れていた。
+
+**修正**: 3ファイルの`min-h`/`min-w`計2要素を44pxへ、色クラス3箇所をyellow→amberへ是正(純粋なクラス変更でレイアウト・ロジック不変)。ローテーターのドット拡大は`xl:flex-1 xl:overflow-hidden`のセクション内で`shrink-0`の行が20px分伸びるだけのため、サイネージ不可侵の1画面フィットには影響しない設計であることをコード上確認済み。
+
+**テスト**: `signage-rotator.test.tsx`へ1件追加(全ドットの`min-h-[44px]`/`min-w-[44px]`確認)、`saved-accidents.test.tsx`へ1件追加(yellow直書き不在＋amber使用の回帰ガード)、`signage-danger-alert.test.tsx`を新設(手動発動→オーバーレイ表示→閉じるボタンの44×44px確認)。計3ファイル3件追加。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 314 files・2647 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/rotator-danger-alert-saved-accidents-44px-color-2026-07-04.mjs`（next start実機・Playwright・サイネージ1920×1080/`/accidents`スマホ390×844）**3/3 PASS**（危険イベントアラート「閉じる」ボタン44.0×44.0px実測・トレンド/法改正ローテーター進捗ドット計15件すべて44×44px以上実測・保存した事故事例パネルのHTML内にyellow直書き無し＋amber使用を確認）。localStorageへの事前投入は`page.addInitScript`で実施。
+
 ## 2026-07-04 — 補充: signage-daily-values.tsx 起点日フォーム後退＋accident-extras-panel.tsx 未着手リンクの44px是正
 
 **イテレーション頭の回収**: PR #781(accident-database-panel-44px)がe2e/smoke/selftest/Vercel全緑のためsquashマージ→`git checkout main && git pull --ff-only`でclean確認。自班PR #809(trend-summary-court-filter-44px)はe2e/smoke IN_PROGRESSのため今回は見送り、次イテレーションで回収。

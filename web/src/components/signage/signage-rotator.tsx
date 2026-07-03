@@ -72,7 +72,7 @@ export function SignageRotator<T>({
               aria-selected={i === safeIndex}
               aria-label={`${i + 1}件目を表示`}
               onClick={() => setIndex(i)}
-              className="flex min-h-[24px] min-w-[24px] items-center justify-center"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center"
             >
               <span
                 aria-hidden
