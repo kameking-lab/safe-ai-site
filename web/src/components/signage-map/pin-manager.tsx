@@ -125,7 +125,7 @@ export function PinManager({
             <button
               type="button"
               onClick={() => onFocus(p)}
-              className="flex-1 text-left"
+              className="flex min-h-[44px] flex-1 flex-col justify-center text-left"
             >
               <p className="text-xs font-semibold text-slate-100">{p.label}</p>
               <p className="text-[10px] text-slate-400">

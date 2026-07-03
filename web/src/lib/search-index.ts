@@ -371,6 +371,44 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
       }
     }),
 
+    // 教育コース（/education/<slug>＝特別教育・法定教育・労働衛生教育の 12 コース）。
+    // 各コースは固有 title/description＋Course JSON-LD を持ち sitemap 収載済みの実在
+    // indexable ページ（/education/tokubetsu/fullharness 等）だが、横断検索(/search・⌘K)
+    // からは丸ごと 0 件だった＝「フルハーネス 特別教育」「足場 特別教育」「職長 教育」
+    // 「腰痛 予防」「酸欠 特別教育」と現場語彙で自分に要る教育コースを打った現場ユーザー
+    // （現場監督・一人親方・安全担当）が、講習形式・法令根拠を載せた専用ランディングへ
+    // 検索経由で着けなかった発見性の穴（#561 等と同型）を是正。e-learning テーマ（/e-learning?theme=
+    // ＝クイズ演習）とは別軸の「講習コースそのもの」の発見性であり URL も別。
+    // 正本＝EDUCATION_CONTEXTS（slug↔ルート 1:1・title は各ページ TITLE と同値・型のみ import で
+    // ブラウザ安全）。url は `/education/<slug>` で実在ページへ解決（下記 search-index.test.ts の
+    // existsSync ガードで slug↔ページディレクトリの一致を機械固定＝幽霊URL 0）。
+    // keywords は法令マッチ・事故マッチの現場語彙＋講習種別ラベルで、法令名/ハザード語/種別から着地。
+    import('@/data/education-context').then(({ EDUCATION_CONTEXTS }) => {
+      const typeLabel = (slug: string): string =>
+        slug.startsWith('tokubetsu/')
+          ? '特別教育'
+          : slug.startsWith('hoteikyoiku/')
+            ? '法定教育'
+            : '労働衛生教育';
+      for (const ctx of Object.values(EDUCATION_CONTEXTS)) {
+        const label = typeLabel(ctx.slug);
+        items.push({
+          id: `education-course-${ctx.slug}`,
+          title: ctx.title,
+          subtitle: `${label}｜現場の安全教育コース`,
+          category: 'education',
+          keywords: Array.from(
+            new Set(
+              [label, ...ctx.lawMatch.keywords, ...(ctx.accidentMatch.keywords ?? [])].filter(
+                Boolean
+              )
+            )
+          ),
+          url: `/education/${ctx.slug}`,
+        });
+      }
+    }),
+
     // 用語集（@/data/glossary の 4 バッチ＝高意図の「○○とは」語を横断検索へ収載）。
     // ※ /glossary 本体に直書きされた基礎語は当班所有外のため対象外。読み・定義冒頭も
     //   subtitle に載せ、読み（かな）や定義語からのヒットと結果一覧での即答を可能にする。

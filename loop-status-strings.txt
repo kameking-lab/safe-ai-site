@@ -57,3 +57,5 @@ evalBelowBody1={DATE} の本番自動生成品質eval（23問・strictAccuracy {
 evalBelowBody2=直近のRAG／プロンプト／コーパス変更を確認してください。詳細な採点は web で `npm run eval:chatbot-gen`。再測定は翌日の自動evalで実施され、品質が目標以上に回復した翌測定でこのバナーは自動的に消えます。
 evalIncompleteHeader=## 注意: 生成品質evalが不完全でした（{HTTPFAILS}問がサーバに到達できず・品質判定は保留）
 evalIncompleteBody1={DATE} の本番自動生成品質eval（23問）のうち {HTTPFAILS} 問が HTTP 異常（fetch失敗／5xx／レート制限・harness exit={EXIT}）となり、正答率が信頼できないため品質劣化の判定は保留しました。本番 /api/chatbot の一時的な不調かレート制限の可能性があります。翌日の自動evalで再測定され、全問正常応答の測定でこのバナーは自動的に消えます。
+evalFailedHeader=## 注意: 生成品質evalが本日測定できませんでした（{ATTEMPTS}/{MAXATTEMPTS}回の再試行を使い切り・品質未測定）
+evalFailedBody1={DATE} の本番自動生成品質eval（23問）が {ATTEMPTS} 回連続で解析可能なレポートを生成できず（harness exit={EXIT}）、本日の再試行予算を使い切りました。本番 /api/chatbot の停止・デプロイ中断・ネットワーク障害の可能性があります。本日の品質は未測定です（直近の測定値は据え置き）。翌日の自動evalで再測定され、正常に測定できた翌測定でこのバナーは自動的に消えます。

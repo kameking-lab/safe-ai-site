@@ -290,7 +290,24 @@ function Format-StatusString {
 # stamped with (Test-EvalBelowTarget) drives this, so the dashboard and the record can never disagree.
 function Get-EvalBannerLines {
   param([hashtable]$Strings, [object]$Record)
-  if ($null -eq $Record -or -not $Record.ok) { return @() }
+  if ($null -eq $Record) { return @() }
+  # A no-report failure (the eval could not produce a usable report at all). While retries remain
+  # (non-terminal) stay quiet: a single blip must not flap the banner, the next ops tick retries. But once
+  # the day's retries are EXHAUSTED (terminal), the night is unmeasured with NO recovery today - surface a
+  # distinct availability notice so the owner's ONE watch file never silently goes dark on a total outage
+  # (the exact silent loss this lane exists to kill, at its outermost layer: the measure failing entirely,
+  # not just degrading). NOT a quality alarm - nothing was measured, so strictAccuracy is absent here.
+  if (-not $Record.ok) {
+    if ($Record.terminal) {
+      $vals = @{ DATE = [string]$Record.date; ATTEMPTS = [string]$Record.attempts; MAXATTEMPTS = [string]$Record.maxAttempts; EXIT = [string]$Record.exitCode }
+      return @(
+        (Format-StatusString -Strings $Strings -Key "evalFailedHeader" -Vals $vals),
+        "",
+        (Format-StatusString -Strings $Strings -Key "evalFailedBody1" -Vals $vals)
+      )
+    }
+    return @()
+  }
   # A genuine below-target measurement (complete run, strictAccuracy < target): the loud quality-regression
   # warning. Takes precedence - a complete run is never incomplete, so the two branches never both fire.
   if ($Record.belowTarget) {
@@ -530,6 +547,8 @@ if ($SelfTest) {
     evalBelowHeader = "## WARN: gen-quality below target (strictAccuracy {PCT}% < target {TARGET}%)"
     evalBelowBody1  = "{DATE} eval: {CORRECT}/{SCORABLE}={PCT}% below target {TARGET}%."
     evalBelowBody2  = "Check recent RAG/prompt/corpus changes."
+    evalFailedHeader = "## NOTICE: gen-quality eval could not run today ({ATTEMPTS}/{MAXATTEMPTS} retries exhausted, unmeasured)"
+    evalFailedBody1  = "{DATE}: {ATTEMPTS} attempts produced no parseable report (exit {EXIT}); day unmeasured, prior number kept."
     reportHeader    = "## SELF-REPORT HEADER"
   }
   # H1) Strings round-trip from a temp file (comment + KEY=VALUE lines).
@@ -549,7 +568,20 @@ if ($SelfTest) {
   Assert-E "H2: body carries correct/scorable" ($bLines[2] -match "15/21")
   Assert-E "H2: at/above-target record -> NO banner (empty)" ((Get-EvalBannerLines -Strings $S -Record $rec).Count -eq 0)
   $failRec = New-FailureRecord -Stamp "2026-07-04" -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 1 -ErrorText "x"
-  Assert-E "H2: failure record (ok=false) -> NO banner" ((Get-EvalBannerLines -Strings $S -Record $failRec).Count -eq 0)
+  Assert-E "H2: a still-retryable (non-terminal) failure record stays quiet -> NO banner" ((Get-EvalBannerLines -Strings $S -Record $failRec).Count -eq 0)
+
+  # H2b) A TERMINAL no-report failure (retries exhausted, the day is unmeasured with NO recovery today) must
+  # NOT go silently dark: it raises a DISTINCT availability notice on the owner's watch file - never the
+  # quality-regression alarm (nothing was measured). A non-terminal failure stays quiet (asserted above) so
+  # a single blip never flaps the banner. This closes the outermost silent-loss hole: below-target and
+  # incomplete were surfaced, but a total no-report failure that spent the day's budget surfaced nothing.
+  $failTerminal = New-FailureRecord -Stamp "2026-07-04" -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 7 -ErrorText "x" -Attempts 3 -MaxAttempts 3
+  $tLines = Get-EvalBannerLines -Strings $S -Record $failTerminal
+  Assert-E "H2b: terminal failure -> 3 banner lines (notice, blank, body)" ($tLines.Count -eq 3)
+  Assert-E "H2b: notice header is an availability notice, NOT a quality-regression header" (($tLines[0] -match "could not run") -and ($tLines[0] -notmatch "below target"))
+  Assert-E "H2b: notice header carries attempts/max (3/3)" ($tLines[0] -match "3/3")
+  Assert-E "H2b: notice body carries the date and harness exit code" (($tLines[2] -match "2026-07-04") -and ($tLines[2] -match "exit 7"))
+  Assert-E "H2b: an at/above-target measured record is unaffected -> still NO banner" ((Get-EvalBannerLines -Strings $S -Record $rec).Count -eq 0)
 
   # H3) Region reconciler on a fixture that mirrors the live reporter-only status file.
   $doc = @(
@@ -675,7 +707,7 @@ function Update-EvalStatusBanner {
     return
   }
   $desired = @(Get-EvalBannerLines -Strings $Strings -Record $Record)
-  $action = if ($desired.Count -gt 0) { "RAISE below-target warning" } else { "CLEAR (quality at/above target)" }
+  $action = if ($desired.Count -gt 0) { "RAISE eval-quality banner (below-target / incomplete / could-not-run)" } else { "CLEAR eval-quality banner (measured at/above target)" }
   if ($Preview) {
     try {
       $lines = @(Get-Content -Encoding UTF8 -Path $statusPath)
@@ -805,6 +837,11 @@ if ($null -eq $report) {
   }
   Write-Log (($evalOut).ToString().Trim() | Out-String).Trim()
   try { Remove-Item -LiteralPath $tmpReport -Force -ErrorAction SilentlyContinue } catch {}
+  # Surface a TERMINAL no-report failure on the owner's watch file: the day is unmeasured with no retry
+  # left, so raise a distinct availability notice (self-clears the next day a measurement lands). A
+  # NON-terminal failure leaves the banner untouched - it retries this same day and must not flap a banner
+  # on a single transient blip. Non-fatal: a surfacing hiccup must never fail the marker already written.
+  if ($rec.terminal) { Update-EvalStatusBanner -Record $rec }
   exit 0
 }
 

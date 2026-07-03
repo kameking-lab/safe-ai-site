@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Printer, RefreshCw, FileSignature, CheckCircle2 } from "lucide-react";
+import { Printer, RefreshCw, FileSignature, CheckCircle2, AlertTriangle } from "lucide-react";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { planBuilderConclusion } from "@/lib/treatment-balance/plan-builder-conclusion";
 import {
@@ -52,20 +52,24 @@ export function PlanBuilderClient() {
     [form.category],
   );
 
-  const plan = useMemo(() => {
-    if (!submitted) return null;
+  const planResult = useMemo(() => {
+    if (!submitted) return { plan: null, failed: false };
     try {
-      return generateSupportPlan({
-        conditionId: form.conditionId,
-        workType: form.workType,
-        severity: form.severity,
-        arrangement: form.arrangement,
-        employeeNote: form.employeeNote,
-      });
+      return {
+        plan: generateSupportPlan({
+          conditionId: form.conditionId,
+          workType: form.workType,
+          severity: form.severity,
+          arrangement: form.arrangement,
+          employeeNote: form.employeeNote,
+        }),
+        failed: false,
+      };
     } catch {
-      return null;
+      return { plan: null, failed: true };
     }
   }, [submitted, form]);
+  const plan = planResult.plan;
 
   const onCategoryChange = (next: IllnessCategory) => {
     const firstId =
@@ -87,6 +91,7 @@ export function PlanBuilderClient() {
   const conclusion = planBuilderConclusion({
     submitted,
     conditionName: plan?.conditionName ?? null,
+    generationFailed: planResult.failed,
   });
 
   return (
@@ -96,7 +101,13 @@ export function PlanBuilderClient() {
         tone={conclusion.tone}
         title={conclusion.title}
         description={conclusion.description}
-        icon={conclusion.settled ? CheckCircle2 : FileSignature}
+        icon={
+          planResult.failed
+            ? AlertTriangle
+            : conclusion.settled
+              ? CheckCircle2
+              : FileSignature
+        }
         action={conclusion.action}
         className="print:hidden"
       />

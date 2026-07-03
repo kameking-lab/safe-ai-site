@@ -116,16 +116,16 @@ export default function EmployerLiabilityPage() {
             当ポータルの無料ツールで、予防と記録をその場で完結できます。
           </p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            <Link href="/ky/paper" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-800 hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+            <Link href="/ky/paper" className="flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-800 hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
               <ClipboardList className="h-4 w-4 text-emerald-600" aria-hidden="true" /> KY（危険予知）で当日の危険を洗い出す
             </Link>
-            <Link href="/site-records" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-800 hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+            <Link href="/site-records" className="flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-800 hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
               <ClipboardList className="h-4 w-4 text-emerald-600" aria-hidden="true" /> 受入教育・パトロール・点検などを記録する
             </Link>
-            <Link href="/heat-illness-prevention" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-800 hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+            <Link href="/heat-illness-prevention" className="flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-800 hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
               <ClipboardList className="h-4 w-4 text-emerald-600" aria-hidden="true" /> 熱中症対策（令和7年義務化）に対応する
             </Link>
-            <Link href="/court-cases" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-800 hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+            <Link href="/court-cases" className="flex min-h-[44px] items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 text-sm font-semibold text-slate-800 hover:border-emerald-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
               <Scale className="h-4 w-4 text-emerald-600" aria-hidden="true" /> 判例で「何が問われたか」を学ぶ
             </Link>
           </div>
