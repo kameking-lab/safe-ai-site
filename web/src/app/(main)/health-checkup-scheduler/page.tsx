@@ -111,7 +111,7 @@ export default function HealthCheckupSchedulerPage() {
           <SchedulerForm />
         </div>
 
-        <section className="mt-10 rounded border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <section className="mt-10 rounded border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
           <h2 className="font-semibold">関連ツール</h2>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             <li>

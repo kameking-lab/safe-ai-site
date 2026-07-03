@@ -87,11 +87,11 @@ export function DistributedInputBar(props: {
               </ol>
               <p className="mt-0.5 text-[10px] text-slate-500">毎日の重層下請の集約（各社へ電話/転記）が、リンク1本で済みます。当日欄・追記は元請のまま保持されます。</p>
             </div>
-            <button type="button" onClick={dismissGuide} aria-label="使い方を閉じる" className="shrink-0 rounded px-1 text-[11px] font-bold text-slate-400 hover:text-slate-600">×</button>
+            <button type="button" onClick={dismissGuide} aria-label="使い方を閉じる" className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center rounded px-1 text-[11px] font-bold text-slate-400 hover:text-slate-600">×</button>
           </div>
         </div>
       ) : (
-        <button type="button" onClick={() => setGuideOpen(true)} className="mb-1 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 hover:underline">
+        <button type="button" onClick={() => setGuideOpen(true)} className="mb-1 inline-flex min-h-[44px] items-center gap-1 text-[10px] font-semibold text-emerald-700 hover:underline">
           <HelpCircle className="h-3 w-3" aria-hidden="true" /> 分散入力の使い方
         </button>
       )}
