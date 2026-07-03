@@ -37,7 +37,9 @@
   as source.
 
 .PARAMETER Lane
-  Lane name whose row to upsert (ops / data / seo / ux-tools / ux-records / ux-hub).
+  Lane name whose row to upsert (ops / data / seo / ux-tools / ux-records / ux-hub). Required for every
+  real run; only -SelfTest may omit it. Enforced in code (Test-LaneMissing) rather than a param-layer
+  Mandatory=$true, so -SelfTest stays runnable under non-interactive `powershell -File`.
 
 .PARAMETER Note
   One-line judgment for this iteration (Japanese OK). Optional.
@@ -64,9 +66,10 @@
   no file and take no lock. Used for stub verification.
 
 .PARAMETER SelfTest
-  Offline self-check of the status-lock acquisition (stale-orphan reclamation + fresh-lock respect).
-  Uses only temp files - no Claude, no real status file, no network. Exits 0 on PASS, 1 on FAIL.
-  -Lane is ignored in this mode (pass any placeholder to avoid an interactive prompt).
+  Offline self-check of the status-lock acquisition (stale-orphan reclamation + fresh-lock respect),
+  the region/heartbeat/hygiene helpers, and the -Lane guard. Uses only temp files - no Claude, no real
+  status file, no network. Exits 0 on PASS, 1 on FAIL. Runs argument-free like the sibling ops scripts:
+  -Lane is NOT required in this mode (real runs still require it; see the Test-LaneMissing guard).
 
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-report-status.ps1 -Lane ops -Note "報告一元化を実装"
@@ -75,11 +78,11 @@
   powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-report-status.ps1 -Lane data -WhatIf
 
 .EXAMPLE
-  powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-report-status.ps1 -Lane selftest -SelfTest
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-report-status.ps1 -SelfTest
 #>
 [CmdletBinding()]
 param(
-  [Parameter(Mandatory = $true)][string]$Lane,
+  [string]$Lane = "",
   [string]$Note = "",
   [string]$StatusPath = "",
   [string]$RepoPath = "",
@@ -669,6 +672,19 @@ function Remove-TrailingBlankLines {
   return @($Lines[0..$last])
 }
 
+# -Lane keys the region row this lane upserts, so every REAL run needs it - but -SelfTest exercises
+# only the offline lock/region/hygiene helpers and needs no lane. It was declared Mandatory=$true, which
+# made -SelfTest UNREACHABLE in non-interactive automation: under `powershell -File` (CI, the launcher,
+# this contract's gate) a missing mandatory parameter is a FATAL "Missing mandatory parameter" error, NOT
+# the interactive prompt the old docstring assumed ("pass any placeholder"). So the reporter was the one
+# ops script whose contract-3 self-check could not run argument-free like its siblings (launcher / runner
+# / eval-nightly / watchdog all self-test with zero args). Fix: Lane is optional at the param layer and
+# enforced HERE for real runs only. Pure so -SelfTest asserts both branches offline.
+function Test-LaneMissing([bool]$SelfTest, [string]$Lane) {
+  if ($SelfTest) { return $false }
+  return [string]::IsNullOrWhiteSpace($Lane)
+}
+
 # ---- Self-test: offline verification of the lock's stale-orphan reclamation -------------------
 if ($SelfTest) {
   $fails = 0
@@ -1028,11 +1044,30 @@ if ($SelfTest) {
     Assert-Test "W3: a -Command MENTION of the filename is NOT a watchdog (spoof fix)" (-not (Test-IsWatchdogProcess 'powershell -Command "gci | ? { $_.CommandLine -like ''*loop-watchdog.ps1*'' }"'))
     Assert-Test "W4: a runner -File launch is NOT a watchdog" (-not (Test-IsWatchdogProcess 'powershell -File C:\r\loop-runner.ps1 -Lane data'))
     Assert-Test "W5: empty command line is NOT a watchdog (null-safe)" (-not (Test-IsWatchdogProcess ""))
+
+    # N) Test-LaneMissing: the guard that lets -SelfTest run argument-free while real runs still require
+    # -Lane. This is the exact regression this change fixes - a Mandatory=$true Lane made THIS self-test
+    # unreachable under `powershell -File` (fatal missing-mandatory error, no prompt).
+    Assert-Test "N1: -SelfTest with no lane is allowed (guard returns false)" (-not (Test-LaneMissing $true ""))
+    Assert-Test "N2: -SelfTest ignores a provided lane (still false)" (-not (Test-LaneMissing $true "ops"))
+    Assert-Test "N3: a real run with a lane is allowed (false)" (-not (Test-LaneMissing $false "ops"))
+    Assert-Test "N4: a real run with an empty lane is rejected (true)" (Test-LaneMissing $false "")
+    Assert-Test "N5: a real run with a whitespace-only lane is rejected (true)" (Test-LaneMissing $false "   ")
+    Assert-Test "N6: a real run with a null lane is rejected (null-safe, true)" (Test-LaneMissing $false $null)
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
   if ($fails -eq 0) { Write-Rep "[SELFTEST] ALL PASS"; exit 0 }
   Write-Rep ("[SELFTEST] " + $fails + " FAILURE(S)"); exit 1
+}
+
+# Enforce -Lane for every real run (only -SelfTest, which already exited above, may omit it). This
+# replaces the old param-layer Mandatory=$true whose non-interactive failure mode broke the self-test.
+# Non-fatal-by-design still holds for the reporting itself; a caller-error like a missing lane exits
+# cleanly with a helpful message rather than half-writing a row keyed on an empty lane.
+if (Test-LaneMissing ([bool]$SelfTest) $Lane) {
+  Write-Rep "ERROR: -Lane is required (ops / data / seo / ux-tools / ux-records / ux-hub). Only -SelfTest may omit it."
+  exit 2
 }
 
 # ---- Resolve the central status file ---------------------------------------------------------
