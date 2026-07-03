@@ -52,6 +52,7 @@ import {
   buildNoHitTemplate,
   buildNoHitGeminiPrompt,
   formatOfficialLinks,
+  NO_HIT_NOISE_FLOOR,
 } from "@/lib/chatbot-no-hit-response";
 import { getClientIp, checkRateLimit, rateLimitMessage } from "@/lib/chatbot-rate-limit";
 import type { LawArticle } from "@/data/laws";
@@ -137,7 +138,7 @@ export async function POST(request: Request) {
         send("progress", { step: "rag", message: "関連条文を検索しています…" });
 
         // RAG 検索 (関数引数の型ガード上 message は trim 済の string)
-        const { articles: allRelevant, normalizedScore } =
+        const { articles: allRelevant, normalizedScore, hadPins } =
           searchRelevantArticlesWithScore(message, 10, lawCategory);
         const mlitMatches = searchMlitResources(message, 3);
         const relatedNotices = searchRelevantNotices(message, 3);
@@ -147,7 +148,13 @@ export async function POST(request: Request) {
         // P1-5: 直接ヒットが無くても低スコアの関連条文を「参考」として根拠提示に使う。
         // 「該当条文無し」で突き放さず、関連条文＋一般原則＋公式誘導を返す。
         const noHitMode = !hasDirectHit;
-        const relevantArticles = hasDirectHit ? allRelevant : allRelevant.slice(0, 8);
+        // T9: no-hit時は normalizedScore が下限未満ならslice内の全件がノイズ
+        // （診断04 Q21「明日の東京の天気」→港湾労働法第2条 の誤提示事例）。
+        const relevantArticles = hasDirectHit
+          ? allRelevant
+          : normalizedScore >= NO_HIT_NOISE_FLOOR
+            ? allRelevant.slice(0, 8)
+            : [];
         const partialMatches = searchPartialMatches(message);
         const context = buildContextFromArticles(relevantArticles);
         const confidenceScore = Math.round(normalizedScore * 100) / 100;
@@ -202,6 +209,7 @@ export async function POST(request: Request) {
           query: message,
           normalizedScore,
           articles: relevantArticles,
+          hadPins,
         });
 
         send("progress", { step: "ai", message: "AIが回答を生成しています…" });

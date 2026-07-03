@@ -12,6 +12,7 @@ import {
   HelpCircle,
   ScrollText,
   Hash,
+  MessageSquare,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { Section } from "@/components/layout/section";
@@ -870,6 +871,31 @@ export default async function IndustryLandingPage({ params }: { params: Params }
               )}
             </Cluster>
           </div>
+        </Section>
+
+        {/* 柱C-10: コンサル相談CVパス。専門ページ(業種別ポータル)下部に相談カードを設置 */}
+        <Section spacing="tight" className="mt-8">
+          <Link
+            href={`/contact?tab=business&industry=${encodeURIComponent(content.label)}`}
+            className="group block rounded-xl border border-emerald-300 bg-emerald-50 p-4 transition hover:-translate-y-0.5 hover:shadow-md dark:border-emerald-800 dark:bg-emerald-950/30"
+          >
+            <Cluster gap="sm">
+              <MessageSquare className="h-6 w-6 shrink-0 text-emerald-700 dark:text-emerald-300" aria-hidden="true" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-emerald-900 dark:text-emerald-200">
+                  {content.label}の安全管理をコンサルタントに相談する
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-emerald-800 dark:text-emerald-300">
+                  このページは労働安全コンサルタント（土木）の資格を持つ運営者が実務経験をもとに編集しています。
+                  法人・団体からのコンサル・受託開発のご相談を承ります。
+                </p>
+              </div>
+              <ArrowUpRight
+                className="h-5 w-5 shrink-0 text-emerald-600 group-hover:translate-x-0.5 dark:text-emerald-400"
+                aria-hidden="true"
+              />
+            </Cluster>
+          </Link>
         </Section>
 
         {/* Other industries */}

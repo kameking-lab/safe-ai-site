@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronDown, ChevronUp, HelpCircle, ArrowLeft, ExternalLink } from "lucide-react";
+import { JsonLd, faqPageSchema } from "@/components/json-ld";
+import { SupervisorByline } from "@/components/SupervisorByline";
 import { getFAQsByCategory } from "@/data/faqs";
 import {
   FAQ_CATEGORY_LABELS,
@@ -111,6 +113,12 @@ export default function FAQCategoryPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:py-10">
+      <JsonLd
+        schema={faqPageSchema(
+          allFaqs.map((f) => ({ question: f.question, answer: f.answer })),
+          { contributor: true }
+        )}
+      />
       {/* Breadcrumb */}
       <nav className="mb-4 flex items-center gap-2 text-xs text-slate-500" aria-label="パンくず">
         <Link href="/faq" className="hover:text-sky-600 hover:underline">FAQ</Link>
@@ -126,6 +134,9 @@ export default function FAQCategoryPage() {
         </p>
         <h1 className="mt-3 text-xl font-bold text-slate-900 sm:text-2xl">{title}</h1>
         <p className="mt-1.5 text-sm text-slate-600 leading-relaxed">{description}</p>
+        <p className="mt-1.5 text-xs text-slate-500">
+          監修: <SupervisorByline className="text-sky-700 hover:underline" />
+        </p>
       </header>
 
       {/* Search filter */}

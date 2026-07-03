@@ -272,6 +272,27 @@ describe("webPageSchema", () => {
     });
     expect(withKw.keywords).toBe("a, b");
   });
+
+  it("contributor は明示的に true を渡した時だけ監修者Personを出力する", () => {
+    const withoutContributor = webPageSchema({
+      name: "ページ",
+      description: "説明",
+      url: `${SITE_URL}/p`,
+    });
+    expect(withoutContributor.contributor).toBeUndefined();
+
+    const withContributor = webPageSchema({
+      name: "ページ",
+      description: "説明",
+      url: `${SITE_URL}/p`,
+      contributor: true,
+    });
+    expect(withContributor.contributor).toMatchObject({
+      "@type": "Person",
+      name: "労働安全衛生コンサルタント（登録番号260022）",
+      url: `${SITE_URL}/about`,
+    });
+  });
 });
 
 describe("faqPageSchema / productCollectionSchema / definedTermSetSchema / quizSchema", () => {
@@ -289,6 +310,16 @@ describe("faqPageSchema / productCollectionSchema / definedTermSetSchema / quizS
     expect(main).toHaveLength(20);
     expect(main[0]["@type"]).toBe("Question");
     expect(main[0].acceptedAnswer).toEqual({ "@type": "Answer", text: "A0" });
+  });
+
+  it("FAQPage は opts.contributor=true の時だけ監修者Personを出力する", () => {
+    const qa = [{ question: "Q", answer: "A" }];
+    expect(faqPageSchema(qa).contributor).toBeUndefined();
+    expect(faqPageSchema(qa, { contributor: false }).contributor).toBeUndefined();
+    expect(faqPageSchema(qa, { contributor: true }).contributor).toMatchObject({
+      "@type": "Person",
+      name: "労働安全衛生コンサルタント（登録番号260022）",
+    });
   });
 
   it("ProductCollection は最大20件で brand を任意出力", () => {

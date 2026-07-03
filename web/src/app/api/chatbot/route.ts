@@ -30,7 +30,7 @@ import {
   buildFallbackDecision,
   searchPartialMatches,
 } from "@/lib/chatbot-fallback-logic";
-import { buildNoHitTemplate } from "@/lib/chatbot-no-hit-response";
+import { buildNoHitTemplate, NO_HIT_NOISE_FLOOR } from "@/lib/chatbot-no-hit-response";
 import { getClientIp, checkRateLimit, rateLimitMessage } from "@/lib/chatbot-rate-limit";
 // Phase 4 通達・リーフレット添付
 import {
@@ -264,8 +264,12 @@ export async function POST(request: Request) {
 
   const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
   if (!apiKey || apiKey === "dummy") {
-    // APIキー未設定時もRAG検索による条文引用は提供する
-    const { articles } = searchRelevantArticlesWithScore(message, 5, lawCategory);
+    // APIキー未設定時もRAG検索による条文引用は提供する。
+    // T9: normalizedScore が下限未満なら無関係条文（ノイズ）とみなし除外する
+    // （このdegradedパスは通常フローのno-hit noise floorを経由しないため個別適用）。
+    const { articles: degradedArticles, normalizedScore: degradedScore } =
+      searchRelevantArticlesWithScore(message, 5, lawCategory);
+    const articles = degradedScore >= NO_HIT_NOISE_FLOOR ? degradedArticles : [];
     const mlitMatches = searchMlitResources(message, 3);
     const sources: ChatbotSource[] = [
       ...articles.map((a) => ({
@@ -309,7 +313,7 @@ export async function POST(request: Request) {
   }
 
   // RAG: 関連条文の検索（スコア付き）
-  const { articles: allRelevant, normalizedScore } = searchRelevantArticlesWithScore(message, 10, lawCategory);
+  const { articles: allRelevant, normalizedScore, hadPins } = searchRelevantArticlesWithScore(message, 10, lawCategory);
   // MLIT資料の関連検索（所管省庁資料の追加コンテキスト）
   const mlitMatches = searchMlitResources(message, 3);
 
@@ -335,7 +339,10 @@ export async function POST(request: Request) {
   // P1-5: 直接ヒット無しでも「該当無し」で突き放さず、低スコアの関連条文＋一般原則＋
   // 公式誘導を返す。stream route と同じ buildNoHitTemplate を使い挙動を揃える。
   if (!hasRagHits) {
-    const relatedForNoHit = allRelevant.slice(0, 8);
+    // T9: normalizedScore は先頭ヒットのスコアなので、これが下限未満ならslice内の
+    // 全件がノイズ（診断04 Q21「明日の東京の天気」→港湾労働法第2条 の誤提示事例）。
+    const relatedForNoHit =
+      normalizedScore >= NO_HIT_NOISE_FLOOR ? allRelevant.slice(0, 8) : [];
     const partialMatches = searchPartialMatches(message);
     const noHitAnswer = buildNoHitTemplate({
       query: message,
@@ -387,6 +394,7 @@ export async function POST(request: Request) {
     query: message,
     normalizedScore,
     articles: relevantArticles,
+    hadPins,
   });
 
   // Gemini Flash API呼び出し（多ターン会話対応） — 失敗時は RAG ヒットを degraded 回答として返す
