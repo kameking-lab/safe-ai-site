@@ -50,10 +50,17 @@
   loops come back after a PC restart. -Register remains an OPTIONAL upgrade for the daily heartbeat.
   Idempotent, -WhatIf aware, and post-verified (throws if the entry is not written as intended).
 
-.PARAMETER WhatIf
-  Dry run: parse config, evaluate every gate, and print what WOULD happen WITHOUT launching any
-  runner, invoking claude, or touching docs/loop-status.md. Writes the computed status to
-  logs/loop-status.dryrun.md so it can be inspected. Used for stub verification.
+.PARAMETER HealOnly
+  Lightweight watchdog (recovery half of the dead-lane story). Re-launches ONLY the enabled lanes
+  whose persistent runner has died, and does NOTHING else - no deadline eval, no planner/critic gate,
+  no git worktree, no docs/loop-status.md rewrite. Meant to be called every interval by the
+  always-alive ops lane so an individually-wedged lane recovers in ~one ops interval instead of
+  waiting for the next logon / 07:00 full launcher pass (up to ~22h without the admin-only 07:00
+  task). Idempotent by construction: loop-runner.ps1's per-lane single-instance guard makes a
+  re-launch of a still-alive lane self-exit. Refuses to act if the process scan shows ZERO running
+  lanes (a WMI outage returns empty AND makes the runner guard fail-open -> double-launch risk; a
+  genuinely cold machine is the launcher's logon job, not heal's). Respects untilIso: past the
+  deadline it heals nothing (the run is meant to be stopped). Combine with -WhatIf to preview.
 
 .PARAMETER ConfigPath
   Path to loop-config.json (default: next to this script).
@@ -74,6 +81,7 @@
 param(
   [switch]$Register,
   [switch]$InstallUserStartup,
+  [switch]$HealOnly,
   [switch]$WhatIf,
   [switch]$SelfTest,
   [string]$ConfigPath = "",
@@ -179,6 +187,28 @@ function Resolve-CriticStamp {
 function Test-ShouldFirePlanner {
   param([int]$Open, [bool]$LaneRunning, [bool]$HasPrompt)
   return ($HasPrompt -and (-not $LaneRunning) -and ($Open -ge 0) -and ($Open -lt 3))
+}
+
+# ---------------------------------------------------------------------------
+# Watchdog (heal): which enabled lanes have NO live runner and must be re-launched. Pure - takes the
+# config lanes and the process-scan map, does no IO - so -SelfTest covers it offline. A disabled lane
+# is never healed (owner turned it off on purpose). This backs the -HealOnly mode: the always-alive
+# ops lane calls the launcher with -HealOnly every interval, so an individually-wedged lane recovers
+# in ~one ops interval instead of waiting for the next logon / 07:00 launcher pass (up to ~22h - the
+# recovery half of the dead-lane story whose DETECTION half is the loop-status health banner).
+# ---------------------------------------------------------------------------
+function Get-LanesToHeal {
+  param($Lanes, [hashtable]$Running)
+  $out = @()
+  foreach ($lane in $Lanes) {
+    if (-not $lane.enabled) { continue }
+    $name = [string]$lane.name
+    if ($name -eq "") { continue }
+    if (-not $Running.ContainsKey($name)) { $out += $name }
+  }
+  # Plain return (NOT ,$out): callers ALWAYS wrap in @() so empty/single/multi all normalize; the
+  # unary-comma idiom double-wraps under an inline @(...) call and is the wrong tool here.
+  return $out
 }
 
 # ---------------------------------------------------------------------------
@@ -298,6 +328,22 @@ if ($SelfTest) {
     Assert-L "worktree add is detached at the given ref" (($addArgs -join " ") -eq ("worktree add --detach " + $wt + " origin/main"))
     $rmArgs = Get-WorktreeRemoveArgs -Path $wt
     Assert-L "worktree remove is forced" (($rmArgs -join " ") -eq ("worktree remove --force " + $wt))
+    # K) Get-LanesToHeal: names exactly the enabled lanes that have no live runner. A disabled lane
+    #    is never healed even when absent from the scan; an alive lane is never re-launched.
+    $healLanes = @(
+      [pscustomobject]@{ name = "ops";  enabled = $true },
+      [pscustomobject]@{ name = "data"; enabled = $true },
+      [pscustomobject]@{ name = "seo";  enabled = $false }
+    )
+    $allAlive = @{ ops = $true; data = $true; seo = $true }
+    Assert-L "heal: nothing to do when every enabled lane is alive" (@(Get-LanesToHeal -Lanes $healLanes -Running $allAlive).Count -eq 0)
+    $dataDead = @{ ops = $true }
+    $deadList = @(Get-LanesToHeal -Lanes $healLanes -Running $dataDead)
+    Assert-L "heal: names the one dead enabled lane" (($deadList -join ",") -eq "data")
+    $seoDeadToo = @{ ops = $true }  # seo is disabled AND absent -> must NOT be healed
+    Assert-L "heal: a disabled lane is never healed even when absent" (-not (@(Get-LanesToHeal -Lanes $healLanes -Running $seoDeadToo) -contains "seo"))
+    $noneAlive = @{}
+    Assert-L "heal: empty scan yields all enabled lanes (caller gates on this to refuse under WMI outage)" ((@(Get-LanesToHeal -Lanes $healLanes -Running $noneAlive) -join ",") -eq "ops,data")
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -679,6 +725,62 @@ function Get-RunningLanes {
 
 # (Get-SchedulerHealth and Get-StartupResurrectionHealth are defined earlier, before the
 # -InstallUserStartup path, so the install can reconcile the resurrection banner in place.)
+
+# ---------------------------------------------------------------------------
+# -HealOnly: watchdog re-launch of individually-dead lanes, and NOTHING else. This is the recovery
+# half of the dead-lane story (loop-status' health banner is the detection half): the always-alive
+# ops lane calls this every interval, so a lane whose runner wedged/crashed comes back in ~one ops
+# interval rather than waiting for the next logon / 07:00 full launcher pass. Deliberately minimal -
+# no deadline banner, no planner/critic gate, no git, no status rewrite - to be cheap and side-effect
+# free enough to run on a hot loop. Idempotency is provided by loop-runner.ps1's own per-lane
+# single-instance guard (a re-launched live lane self-exits), so we never double-run a healthy lane.
+# ---------------------------------------------------------------------------
+if ($HealOnly) {
+  # Respect the run deadline: past untilIso the run is meant to be STOPPED, so heal nothing (else the
+  # ops watchdog would fight the runners' own deadline-break and resurrect an expired run forever).
+  $healUntil = $null
+  if ([string]$cfg.untilIso -ne "") { try { $healUntil = [datetime]::Parse([string]$cfg.untilIso) } catch {} }
+  if (($null -ne $healUntil) -and ((Get-Date) -ge $healUntil)) {
+    Write-Launcher ("[HEAL] past deadline (untilIso=" + ([string]$cfg.untilIso) + "); healing nothing (run is meant to be stopped).")
+    exit 0
+  }
+  $healRunning = Get-RunningLanes
+  # Fail-safe: an empty scan means either a genuinely cold machine (logon launcher's job, not heal's)
+  # OR a WMI outage - and under a WMI outage the runner's OWN guard fail-opens, so re-launching now
+  # would double-run every lane. Either way, refuse: heal only ever fixes "some alive, one dead".
+  if ($healRunning.Count -eq 0) {
+    Write-Launcher "[HEAL] process scan shows ZERO running lanes; refusing to heal (cold start is the logon launcher's job; an empty scan may also be a WMI outage where re-launch would double-run). No action."
+    exit 0
+  }
+  $toHeal = @(Get-LanesToHeal -Lanes $cfg.lanes -Running $healRunning)
+  if ($toHeal.Count -eq 0) {
+    Write-Launcher ("[HEAL] all enabled lanes alive (" + (($healRunning.Keys | Sort-Object) -join ", ") + "); nothing to resurrect.")
+    exit 0
+  }
+  foreach ($name in $toHeal) {
+    $lane = $cfg.lanes | Where-Object { [string]$_.name -eq $name } | Select-Object -First 1
+    if ($null -eq $lane) { continue }
+    $laneRepo = Resolve-LaneRepo -lane $lane
+    $runner = Join-Path $laneRepo "loop-runner.ps1"
+    if (-not (Test-Path $runner)) {
+      Write-Launcher ("[HEAL] WARN: lane '" + $name + "' has no runner at " + $runner + "; cannot resurrect. Skipping.")
+      continue
+    }
+    $argList = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $runner,
+      "-Lane", $name, "-RepoPath", $laneRepo, "-Model", [string]$lane.model,
+      "-IntervalSeconds", [string][int]$lane.intervalSeconds)
+    if ([string]$cfg.untilIso -ne "") { $argList += @("-UntilIso", [string]$cfg.untilIso) }
+    if ($ClaudeCmd -ne "claude") { $argList += @("-ClaudeCmd", $ClaudeCmd) }
+    if ($WhatIf) {
+      Write-Launcher ("[HEAL][WHATIF] would resurrect dead lane '" + $name + "' (model=" + $lane.model + ", interval=" + $lane.intervalSeconds + "s, repo=" + $laneRepo + ").")
+    } else {
+      Write-Launcher ("[HEAL] resurrecting dead lane '" + $name + "' (model=" + $lane.model + ", interval=" + $lane.intervalSeconds + "s, repo=" + $laneRepo + "). Runner's own guard makes this a no-op if it is actually alive.")
+      Start-Process -FilePath "powershell" -ArgumentList $argList -WorkingDirectory $laneRepo
+    }
+  }
+  Write-Launcher ("[HEAL] done. Alive=[" + (($healRunning.Keys | Sort-Object) -join ", ") + "] Resurrected=[" + ($toHeal -join ", ") + "]" + $(if ($WhatIf) { " (WHATIF: nothing actually launched)" } else { "" }))
+  exit 0
+}
 
 # ---------------------------------------------------------------------------
 # Deadline evaluation (the heart of the permanent fix).
