@@ -1,0 +1,13 @@
+{
+  "$comment": "Tracked snapshot of the production chatbot GENERATION-quality eval (23-question golden set, machine-scored). Public-safe projection of .loop-eval/genquality/latest.json (gitignored, produced nightly by loop-eval-nightly.ps1 against the live site). Seeded from the real 2026-07-04 nightly run. Refreshed by copying the real latest.json projection here in an ops PR - never fabricated. The /about/chatbot-eval page reads this with a static baseline fallback (docs/chatbot-genquality-eval-2026-07-03.md = 90.5%) so it never breaks when the file is absent.",
+  "date": "2026-07-04",
+  "generatedAt": "2026-07-03T18:39:30.269Z",
+  "mode": "live",
+  "strictAccuracy": 0.9523809523809524,
+  "correct": 20,
+  "partial": 1,
+  "incorrect": 0,
+  "scorable": 21,
+  "usefulRate": 1,
+  "target": 0.8
+}
