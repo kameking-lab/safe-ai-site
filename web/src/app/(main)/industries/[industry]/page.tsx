@@ -247,7 +247,7 @@ export default async function IndustryLandingPage({ params }: { params: Params }
                   <Link
                     key={kw.label}
                     href={kw.href}
-                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs ring-1 ring-slate-200 hover:opacity-80 dark:ring-slate-700 ${swatch.pillBg}`}
+                    className={`inline-flex min-h-[44px] items-center rounded-full px-2.5 py-0.5 text-xs ring-1 ring-slate-200 hover:opacity-80 dark:ring-slate-700 ${swatch.pillBg}`}
                   >
                     #{kw.label}
                   </Link>
@@ -386,14 +386,14 @@ export default async function IndustryLandingPage({ params }: { params: Params }
           <Cluster gap="sm" className="mt-3">
             <Link
               href="/law-search"
-              className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+              className="inline-flex min-h-[44px] items-center gap-1 px-2 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
             >
               条文検索を開く
               <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
             </Link>
             <Link
               href="/laws"
-              className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+              className="inline-flex min-h-[44px] items-center gap-1 px-2 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
             >
               法改正一覧
               <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
@@ -475,7 +475,7 @@ export default async function IndustryLandingPage({ params }: { params: Params }
           <div className="mt-3">
             <Link
               href="/circulars"
-              className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+              className="inline-flex min-h-[44px] items-center gap-1 px-2 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
             >
               通達一覧をすべて見る
               <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
@@ -516,7 +516,7 @@ export default async function IndustryLandingPage({ params }: { params: Params }
           <div className="mt-3">
             <Link
               href="/ky"
-              className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+              className="inline-flex min-h-[44px] items-center gap-1 px-2 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
             >
               KY用紙作成ツールを開く
               <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
@@ -566,14 +566,14 @@ export default async function IndustryLandingPage({ params }: { params: Params }
             <Cluster gap="sm" className="mt-3">
               <Link
                 href="/chemical-ra"
-                className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+                className="inline-flex min-h-[44px] items-center gap-1 px-2 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
               >
                 化学物質リスクアセスメント
                 <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
               </Link>
               <Link
                 href="/chemical-database"
-                className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+                className="inline-flex min-h-[44px] items-center gap-1 px-2 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
               >
                 化学物質データベース
                 <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
@@ -622,7 +622,7 @@ export default async function IndustryLandingPage({ params }: { params: Params }
           <div className="mt-3">
             <Link
               href="/education-certification"
-              className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
+              className="inline-flex min-h-[44px] items-center gap-1 px-2 text-xs font-medium text-emerald-700 hover:text-emerald-800 dark:text-emerald-400"
             >
               特別教育・技能講習ファインダー
               <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
