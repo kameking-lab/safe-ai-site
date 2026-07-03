@@ -132,7 +132,7 @@ export function MhlwLawArticlesPanel() {
           <button
             type="button"
             onClick={() => setSelectedLaw("all")}
-            className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+            className={`min-h-[44px] inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
               selectedLaw === "all"
                 ? "bg-emerald-600 text-white"
                 : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -147,7 +147,7 @@ export function MhlwLawArticlesPanel() {
                 key={name}
                 type="button"
                 onClick={() => setSelectedLaw(name)}
-                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                className={`min-h-[44px] inline-flex items-center justify-center rounded-full px-3 py-1 text-xs font-semibold transition ${
                   selectedLaw === name
                     ? "bg-emerald-600 text-white"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
@@ -231,7 +231,7 @@ export function MhlwLawArticlesPanel() {
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={pageSafe <= 1}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-40"
+            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-40"
           >
             前へ
           </button>
@@ -242,7 +242,7 @@ export function MhlwLawArticlesPanel() {
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={pageSafe >= totalPages}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-40"
+            className="min-h-[44px] inline-flex items-center justify-center rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 disabled:opacity-40"
           >
             次へ
           </button>

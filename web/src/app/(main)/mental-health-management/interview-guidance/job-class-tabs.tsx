@@ -24,7 +24,7 @@ export function JobClassTabs() {
             type="button"
             aria-selected={active === c}
             onClick={() => setActive(c)}
-            className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+            className={`inline-flex min-h-[44px] items-center justify-center rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
               active === c
                 ? "border-violet-600 bg-violet-600 text-white"
                 : "border-slate-300 bg-white text-slate-700 hover:border-violet-400"

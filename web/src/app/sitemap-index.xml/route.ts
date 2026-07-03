@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { computeSitemapFreshness } from '@/lib/sitemap/freshness';
+import { SITE_URL } from '@/lib/seo-metadata';
 
-const BASE = 'https://www.anzen-ai-portal.jp';
+// 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL 単一ソース（末尾スラッシュ無し）。
+const BASE = SITE_URL;
 
 export async function GET() {
   // 柱C-3-4 / A-3: 各子サイトマップの lastmod を「その子が列挙する URL の実データ最新日」に

@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { readdirSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import sitemap from "./sitemap";
 import { COURT_CASES } from "@/data/court-cases";
 import { latestIsoDate, isIsoDate } from "@/lib/sitemap/lastmod";
@@ -238,5 +241,77 @@ describe("sitemap.xml（柱C-3-4 lastmod 動的化）", () => {
     // データに 2026-04-19 より新しい判例（2026-06-06）等が存在するため、
     // トップ・/laws のどちらかは必ず旧固定値より新しくなっているはず。
     expect(lastmodOf("/") >= "2026-06-06").toBe(true);
+  });
+});
+
+/**
+ * ゴーストURL回帰ガード: sitemap() が出力する全 URL が、実在の Next.js ルート
+ * （page.* を持つディレクトリ、または一致する動的セグメント）へ解決することを
+ * ファイルシステムと機械突合する。
+ *
+ * 守る失敗モード: 当班以外（ux-records/ux-tools/ux-hub 等）がページを削除・改名した際に、
+ * sitemap.ts のハンド保守された静的URL列に旧URLが取り残されると、検索エンジンへ
+ * 404 のデッドURLを提出し続け、クロールバジェット浪費・Search Console エラーを招く。
+ * 既存テストは「特定ページが載っている／非収載境界」だけを固定しており、
+ * 「全URLが実在ルートへ解決する」逆方向のガードが皆無だった穴を埋める。
+ *
+ * 注: 動的ルート（[id] 等）は構造（セグメント数・動的位置）のみ突合する。
+ * 動的パラメータ値の実在（例: /court-cases/[id] が COURT_CASES と1対1）は
+ * 上の「柱C-3-3」describe が別途固定しているため、ここでは二重管理しない。
+ */
+describe("sitemap.xml（ゴーストURL回帰ガード: 全URLが実在ルートへ解決）", () => {
+  const APP_DIR = dirname(fileURLToPath(import.meta.url)); // = src/app（本テストの所在）
+
+  /** app 配下を走査し、page.* を持つルートのセグメント列（route group 除去・動的[x]保持）を集める */
+  function collectRoutePatterns(dir: string = APP_DIR, segs: string[] = []): string[][] {
+    const entries = readdirSync(dir, { withFileTypes: true });
+    const patterns: string[][] = [];
+    if (entries.some((e) => e.isFile() && e.name.startsWith("page."))) {
+      patterns.push(segs);
+    }
+    for (const e of entries) {
+      if (!e.isDirectory()) continue;
+      const name = e.name;
+      // 並列ルート(@slot)・プライベート(_folder)・route group( (x) ) はURLセグメントに寄与しない
+      if (name.startsWith("@") || name.startsWith("_")) continue;
+      const isGroup = name.startsWith("(") && name.endsWith(")");
+      patterns.push(...collectRoutePatterns(join(dir, name), isGroup ? segs : [...segs, name]));
+    }
+    return patterns;
+  }
+
+  /** URL パスが、いずれかのルートパターン（静的一致 or 動的[x]セグメント）へ解決するか */
+  function resolvesToRoute(pathname: string, patterns: string[][]): boolean {
+    const segs = pathname.split("/").filter(Boolean);
+    return patterns.some(
+      (pat) =>
+        pat.length === segs.length &&
+        pat.every((p, i) => p === segs[i] || (p.startsWith("[") && p.endsWith("]"))),
+    );
+  }
+
+  const patterns = collectRoutePatterns();
+  const entries = sitemap();
+
+  it("app 配下から page.* を持つルートを検出できている（走査のサニティ）", () => {
+    // 静的ルートだけで 150 超（本監査時点で 172 静的 + 21 動的）。走査失敗の早期検知。
+    expect(patterns.length).toBeGreaterThan(150);
+    expect(patterns).toContainEqual([]); // ルート "/" が (main)/page.tsx から検出される
+  });
+
+  it("sitemap() の全URLが実在の page ルートへ解決する＝デッドURL0", () => {
+    const unresolved = entries
+      .map((e) => new URL(e.url).pathname)
+      .filter((pathname) => !resolvesToRoute(pathname, patterns));
+    expect(unresolved, `実在ルートへ解決しないURL: ${unresolved.join(", ")}`).toEqual([]);
+  });
+
+  it("解決ロジックが偽陽性を出さない（構造的に存在しないパスは未解決）", () => {
+    // トップレベルの動的ルートは存在しないため、未知の1階層パスは解決しない
+    expect(resolvesToRoute("/this-route-does-not-exist-xyz", patterns)).toBe(false);
+    // court-cases 配下に3階層のルートは無いため未解決
+    expect(resolvesToRoute("/court-cases/foo/bar", patterns)).toBe(false);
+    // 逆に、実在の動的ルート配下は構造一致で解決する（ガードの土台確認）
+    expect(resolvesToRoute("/court-cases/any-id", patterns)).toBe(true);
   });
 });

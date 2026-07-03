@@ -104,7 +104,7 @@ export function LawSearchPanel() {
             key={tab.id}
             type="button"
             onClick={() => setMode(tab.id)}
-            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+            className={`min-h-[44px] inline-flex items-center justify-center rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
               mode === tab.id
                 ? "bg-white text-slate-900 shadow-sm"
                 : "text-slate-500 hover:text-slate-700"
