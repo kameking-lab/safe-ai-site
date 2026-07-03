@@ -45,6 +45,7 @@ reportPlaceholder=- {LANE} : （まだ自己報告なし）
 laneHealthOk=健在性: 全{TOTAL}レーンが直近{MIN}分以内に自己報告（{NOW}時点・個別レーンの沈黙停止なし）
 laneHealthStale=健在性 !!! 停止疑い: {LANES}（{MIN}分以上 自己報告なし・他レーンは稼働中＝個別レーンだけが黙って停止した可能性。復活=該当レーンのrunner再起動 or 次回ログオン／毎日07:00の launcher）
 laneHealthUnreported=健在性 注意: {MISSING}/{TOTAL}レーンが未報告: {LANES}（loop-config.jsonでenabledだが一度も自己報告していない＝起動直後なら数分で解消・長時間続く場合は該当レーンのrunnerと報告経路 loop-report-status.ps1 を確認）
+laneHealthBornDead=健在性 !!! 停止疑い: {LANES}（enabledなのに {MIN}分以上 一度も自己報告なし＝runnerが起動直後に落ちているか報告経路 loop-report-status.ps1 が壊れている可能性。復活=該当レーンのrunnerログを確認し手動再起動 or 次回ログオン／毎日07:00の launcher）
 laneHealthItem={LANE}(最終{LASTRUN}／約{HOURS}h前)
 laneHealthSep=、
 runnerDeadlineStop=停止:稼働期限(untilIso {UNTIL})到達で当レーン終了。延長は loop-config.json の untilIso を書き換え→launcher再実行で全レーン復活

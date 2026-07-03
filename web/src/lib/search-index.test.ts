@@ -275,6 +275,74 @@ describe('buildSearchIndex — 事故事例（accident）の収載', () => {
   });
 });
 
+describe('buildSearchIndex — Eラーニング（education）の全テーマ収載＋個別テーマ深リンク', () => {
+  // 正本＝ELearningPanel が allThemes として描画する 9 源の union（入門＋カタログ＋追補＋業種別6）。
+  // 旧実装は elearningThemesCatalog 1 源だけを import しており業種別等が欠落していた。
+  async function expectedThemeIds(): Promise<Set<string>> {
+    const mods = await Promise.all([
+      import('@/data/mock/elearning-intro-course'),
+      import('@/data/mock/elearning-themes-data'),
+      import('@/data/mock/elearning-extra-themes'),
+      import('@/data/mock/elearning-manufacturing-themes'),
+      import('@/data/mock/elearning-healthcare-themes'),
+      import('@/data/mock/elearning-transport-themes'),
+      import('@/data/mock/elearning-forestry-themes'),
+      import('@/data/mock/elearning-food-themes'),
+      import('@/data/mock/elearning-retail-themes'),
+    ]);
+    return new Set(
+      [
+        ...mods[0].elearningIntroCourse,
+        ...mods[1].elearningThemesCatalog,
+        ...mods[2].elearningExtraThemes,
+        ...mods[3].elearningManufacturingThemes,
+        ...mods[4].elearningHealthcareThemes,
+        ...mods[5].elearningTransportThemes,
+        ...mods[6].elearningForestryThemes,
+        ...mods[7].elearningFoodThemes,
+        ...mods[8].elearningRetailThemes,
+      ].map((t) => t.id),
+    );
+  }
+
+  it('education の ID 集合が panel の全テーマ源（allThemes）と一致する（1源だけ import の欠落是正）', async () => {
+    const index = await buildSearchIndex();
+    const eduIds = new Set(
+      index.filter((i) => i.category === 'education').map((i) => i.id.replace(/^edu-/, '')),
+    );
+    expect(eduIds).toEqual(await expectedThemeIds());
+    // 業種別カタログ（1源 import 時代は欠落）が確かに含まれる。
+    expect(eduIds).toContain('el-mfg-chemical');
+    expect(eduIds).toContain('el-hc-back');
+    expect(eduIds).toContain('el-rt-slipfall');
+  });
+
+  it('各結果は一覧トップではなく個別テーマ /e-learning?theme=<id>#el-quiz へ深リンクする', async () => {
+    const index = await buildSearchIndex();
+    const edu = index.filter((i) => i.category === 'education');
+    expect(edu.length).toBeGreaterThan(0);
+    // 旧実装のバグ＝全件が裸の /e-learning へリンク、を回帰で固定。
+    expect(edu.some((i) => i.url === '/e-learning')).toBe(false);
+    // url の theme= と item.id が対応＝panel が allThemes 検証で必ず解決する（幽霊リンク 0）。
+    expect(
+      edu.every(
+        (i) =>
+          i.url === `/e-learning?theme=${encodeURIComponent(i.id.replace(/^edu-/, ''))}#el-quiz`,
+      ),
+    ).toBe(true);
+    // 深リンク先 theme id は panel の allThemes（収載源の union）に必ず存在する。
+    const valid = await expectedThemeIds();
+    expect(edu.every((i) => valid.has(i.id.replace(/^edu-/, '')))).toBe(true);
+  });
+
+  it('業種語（製造業）・出典種別からも keywords 経由でヒットする', async () => {
+    const index = await buildSearchIndex();
+    // industry_detail / sourceType を keywords に載せたことで業種横断で引ける。
+    const mfg = searchItems(index, '製造業', 'education', Number.MAX_SAFE_INTEGER);
+    expect(mfg.length).toBeGreaterThan(0);
+  });
+});
+
 // T1（診断書 05-search-egov.md）: /search・⌘K を cross-search エンジンへ載せ替えた後、
 // 2 語クエリが目的条文へ収束することを本番インデックスで固定する。旧実装ではこれらが全滅していた。
 describe('T1: 2語クエリが目的条文へ収束する（本番インデックス回帰）', () => {
