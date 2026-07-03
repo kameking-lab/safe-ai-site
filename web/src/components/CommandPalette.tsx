@@ -18,6 +18,7 @@ import {
   Signpost,
   Newspaper,
   LayoutGrid,
+  ScrollText,
   MessageSquare,
   ListChecks,
   BarChart3,
@@ -54,6 +55,7 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
   const cls = 'w-3.5 h-3.5';
   switch (category) {
     case 'law':       return <BookText className={cls} />;
+    case 'revision':  return <ScrollText className={cls} />;
     case 'notice':    return <FileText className={cls} />;
     case 'chemical':  return <TestTube2 className={cls} />;
     case 'education': return <BookOpen className={cls} />;
