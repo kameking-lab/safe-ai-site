@@ -4,6 +4,26 @@
 
 ---
 
+## 2026-07-03 柱C-2/T4後段 0件フォールバックを e-Gov 条アンカー直リンクへ格上げ（egovArticleAnchor 新設）
+
+**契約1) 回収**: 前イテレーションの自班 CI 緑 PR を回収＝#743（⌘K 0件パリティ）・#750（sitemap 逆カバレッジガード＋/profile 収載）はいずれも #758 マージ後に追記衝突で CONFLICTING 化していたため、各ブランチへ `git merge origin/main`（force-push なし）で BACKLOG/cycle-log の追記衝突のみ解決（コードは #743=CommandPalette 自動マージ・#750=sitemap 非衝突）→ tsc/対象テスト緑を確認して再push。auto-merge は本リポジトリ無効のため CI 再走の緑回収は次イテレーション 1)。他班 OPEN PR（#761/#762/#763 等）は不可侵。
+
+**着手判断**: BACKLOG-seo 未着手キューは空（O17/T6・T7 は Path A/オーナー承認待ち）。担当タスク源の「決裁A（robots facebookexternalhit 許可リスト化）」は現状コードで既に `SOCIAL_LINK_PREVIEW_BOTS` へ分離済み＝完了を確認。診断書 05-search-egov の T1/T2/T3（AND/シノニム/条番号/エイリアス）も searchItems が `searchCrossIndex(items, expandLawAliases(normalizeArticleQuery(query)))` で配線済＝完了を実コードで確認。**唯一の実装未了は T4 後段「収録外条番号→当該法の e-Gov 条アンカーへ誘導」**（#743 まではポータルトップ＋クリップボード引き継ぎ止まり）だったため、補充指針に従い自領域から着手。
+
+**背景/穴**: 抄録は curated 中核に限る（安衛則は実際には第677条超まである）。収録外の条番号を打った現場ユーザーは、0件時にポータルトップへ飛ばされ「貼り付け→検索→目次スクロール」の複数ステップを踏まされていた。法令が一意に定まるクエリなら当該法令の e-Gov 該当条へ 1 タップで着地させる方が速く確実（G7 の信頼担保）。
+
+**是正**: `lib/cross-search/egov-fallback.ts` に純関数 `egovArticleAnchor(query)` を新設。`normalizeArticleQuery`＋`expandLawAliases` で表記ゆらぎ（安衛則577条／あんえいそく 577条／第五百七十七条）を正規形へ寄せ、**法令名（略称/正式名称）明示＋e-Gov 法令番号(`LAW_METADATA.egovLawId`)保有＋基条番号**のときのみ `https://laws.e-gov.go.jp/law/{id}#Mp-At_{N}`（O18 リンカーと同形・実測有効）を返す。index.ts から re-export。`/search` NoResults に teal の直リンク「e-Gov で『{正式名称} 第N条』を開く」（44px・`trackEvent('search_zero_result_egov_article')`）を amber 注記直下へ追加。
+
+**法令正確性・幽霊リンク0**: (1)裸の条番号から法令を推測しない＝null (2)枝番「第N条のM」は Mp-At_N が基条しか指せず誤着地するため対象外 (3)番号なし/未知法令は null＝従来トップ導線へ委譲。法令トップURLは必ず実在で、当該条が無くてもアンカー不発になるだけ（404 でない）＝amber 注記「条文の有無・原文は e-Gov で」と整合。⌘K 側は在庫 #743 と同一ファイル二重編集の overlap を避け本PR不介入（後続結線）。
+
+**回帰**: `egov-fallback.test.ts` に 8 it（略称/正式名称/かな/漢数字の解決・最長一致=施行令>親法・枝番null・裸条番号null・未知/条番号なしnull・生成番号が LAW_METADATA 実在=捏造0）。`SearchResults.egov-anchor.test.tsx` 新設＝安衛則 第9999条（抄録未収載）で NoResults を実描画し #Mp-At_9999 直リンク・target/rel を RTL 駆動。
+
+**ゲート**: `tsc --noEmit`=0 / `lint`=errors0（warn 23 は既存の別ファイル）/ `vitest run`=297ファイル2529 pass・1 skip（新規9含む）/ `build`=成功。build 再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は `git checkout` で復元。working tree は自班5ファイルのみ。
+
+**残**: 本PRの CI 緑回収＆マージ（次イテレーション 1)）。#743・#750 の緑回収も継続。条文カード本文への参照リンカー結線（O18）と ⌘K 側の条アンカー結線は後続（law-search-panel.tsx は ux-tools 所有＝当班は lib＋/search 導線まで）。O17/T6・T7 実装はオーナー承認待ち。
+
+---
+
 ## 2026-07-03 柱C-2 横断検索に「機能・目的地ページ」を収載（feature カテゴリ新設）＝機能名0件の穴を是正
 
 **契約1) 回収**: 前イテレーションの緑PR #738（法改正記事の横断検索収載）を squash マージ→main を ff-only 更新。CONFLICTING だった #743（⌘K 0件フォールバック）は BACKLOG/cycle-log の追記衝突を origin/main 通常マージで解決し再push（CI 再実行→次イテレーション回収）。#750（sitemap 逆カバレッジガード）は CI 進行中で継続。
