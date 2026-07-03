@@ -2,8 +2,8 @@
 // 実行: cd web && (PORT=4213 npm run start &) ; node ../docs/third-party-reviews/scripts/meeting-canvas-phase2-tomorrow-events-2026-07-03.mjs
 // 無読の問い: ヘッダー7欄の記入順の続きとして、明日のイベント5欄（安全大会/検査/パトロール/明日の安全目標/その他）＋
 //   統括安全責任者コメントをcanvas上でタップ編集でき、用紙（＝印刷と同一WYSIWYG）にすぐ反映されるか。
-//   記入順チェーンが作成担当者→安全大会→…→統括安全責任者コメント（最終欄）まで一筆書きで辿れるか。
-//   印刷経路（editing無し）は不変か。
+//   記入順チェーンが作成担当者→安全大会→…→その他→（第五弾で挿入された既定1行の搬入出＝物→時刻→場所）
+//   →統括安全責任者コメント（最終欄）まで一筆書きで辿れるか。印刷経路（editing無し）は不変か。
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 const webDir = fileURLToPath(new URL("../../../web/", import.meta.url));
@@ -61,6 +61,12 @@ for (const s of steps) {
   await page.waitForTimeout(150);
   check(`『次の欄へ』で${s.label}のエディタに進む`, await sheet.getByText(s.label).first().isVisible().catch(() => false));
   await sheet.locator("textarea").first().fill(s.value);
+}
+// その他(free)の次は第五弾で挿入された既定1行の搬入出（物→時刻→場所）を経由してから最終欄へ辿る。
+for (const label of ["搬入出（物）", "時刻", "場所"]) {
+  await sheet.getByRole("button", { name: /次の欄へ/ }).click();
+  await page.waitForTimeout(150);
+  check(`『次の欄へ』で搬入出の${label}欄を経由する（S1第五弾で挿入された記入順）`, await sheet.getByText(label, { exact: true }).first().isVisible().catch(() => false));
 }
 await sheet.getByRole("button", { name: /次の欄へ/ }).click();
 await page.waitForTimeout(150);
