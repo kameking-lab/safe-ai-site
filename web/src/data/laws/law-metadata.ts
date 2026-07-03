@@ -143,9 +143,9 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   育介法: {
     fullName: "育児休業、介護休業等育児又は家族介護を行う労働者の福祉に関する法律",
     promulgation: "平成3年法律第76号",
-    latestRevision: "令和7年改正（柔軟な働き方関連）",
+    latestRevision: "令和6年改正（2025-10-01施行・柔軟な働き方関連）",
     eGovUrl: "https://laws.e-gov.go.jp/law/403AC0000000076",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   労災保険法: {
     fullName: "労働者災害補償保険法",
