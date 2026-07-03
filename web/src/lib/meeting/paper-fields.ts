@@ -1,14 +1,15 @@
 /**
- * S1（打合せ用紙 直接操作UI・第一弾）: 用紙の欄 → 入力フィールドの対応マップ。
+ * S1（打合せ用紙 直接操作UI）: 用紙の欄 → 入力フィールドの対応マップ。
  *
  * KYのcanvas方式（F1で確立・O10で実証）をそのまま踏襲: contentEditable を使わず
  * 「印刷シートのセル＝タップ標的、入力は専用エディタ」でWYSIWYGを成立させる核心のデータ。
- * 第一弾はヘッダー7欄（打合せ日・作業日・天気気温・作業所名・作業所長・主任等・作成担当者）のみ。
- * 各社マトリクス（動的行）・明日のイベント・搬入出・点検項目は後続弾で拡張する。
+ * 第一弾はヘッダー7欄（打合せ日・作業日・天気気温・作業所名・作業所長・主任等・作成担当者）。
+ * 第二弾で明日のイベント5欄＋統括安全責任者コメントを追加（記入順チェーンの続き）。
+ * 各社マトリクス（動的・階層行）・搬入出・点検項目は後続弾で拡張する。
  */
 import type { MeetingRecord } from "@/lib/meeting/schema";
 
-/** 第一弾時点の欄（紙の記入順＝タイトル行→ヘッダー表 左上から）。 */
+/** 現時点の欄（紙の記入順＝タイトル行→ヘッダー表→下段左ブロック）。 */
 export const MEETING_PAPER_FIELD_ORDER = [
   "meetingDate",
   "workDate",
@@ -17,6 +18,12 @@ export const MEETING_PAPER_FIELD_ORDER = [
   "siteManager",
   "supervisor",
   "author",
+  "safetyMeeting",
+  "inspection",
+  "patrol",
+  "tomorrowGoal",
+  "free",
+  "supervisorComment",
 ] as const;
 
 export type MeetingPaperFieldKey = (typeof MEETING_PAPER_FIELD_ORDER)[number];
@@ -26,13 +33,13 @@ export type MeetingPaperFieldDef = {
   /** エディタ見出し（紙の欄名と一致させる） */
   label: string;
   /** エディタの出し分け */
-  type: "text" | "date" | "date3" | "weatherTemp";
-  /** InputWithVoice を使うか（音声入力） */
+  type: "text" | "textarea" | "date" | "date3" | "weatherTemp";
+  /** InputWithVoice/TextareaWithVoice を使うか（音声入力） */
   voice?: boolean;
   placeholder?: string;
-  /** 現在値の取得（type="text"|"date" のみ使用。date3/weatherTemp は専用UIで直接 record を読む） */
+  /** 現在値の取得（type="text"|"textarea"|"date" のみ使用。date3/weatherTemp は専用UIで直接 record を読む） */
   get?: (r: MeetingRecord) => string;
-  /** イミュータブル更新（type="text"|"date" のみ使用） */
+  /** イミュータブル更新（type="text"|"textarea"|"date" のみ使用） */
   set?: (r: MeetingRecord, v: string) => Partial<MeetingRecord>;
   /** 未記入判定（未記入セルのハイライトに使用） */
   isEmpty: (r: MeetingRecord) => boolean;
@@ -106,6 +113,72 @@ export const MEETING_PAPER_FIELDS: Record<MeetingPaperFieldKey, MeetingPaperFiel
     get: (r) => r.author,
     set: (r, v) => ({ author: v }),
     isEmpty: (r) => r.author.trim() === "",
+    next: "safetyMeeting",
+  },
+  safetyMeeting: {
+    key: "safetyMeeting",
+    label: "安全大会",
+    type: "textarea",
+    voice: true,
+    placeholder: "予定・内容",
+    get: (r) => r.tomorrowEvents.safetyMeeting,
+    set: (r, v) => ({ tomorrowEvents: { ...r.tomorrowEvents, safetyMeeting: v } }),
+    isEmpty: (r) => r.tomorrowEvents.safetyMeeting.trim() === "",
+    next: "inspection",
+  },
+  inspection: {
+    key: "inspection",
+    label: "検査",
+    type: "textarea",
+    voice: true,
+    placeholder: "予定・内容",
+    get: (r) => r.tomorrowEvents.inspection,
+    set: (r, v) => ({ tomorrowEvents: { ...r.tomorrowEvents, inspection: v } }),
+    isEmpty: (r) => r.tomorrowEvents.inspection.trim() === "",
+    next: "patrol",
+  },
+  patrol: {
+    key: "patrol",
+    label: "パトロール",
+    type: "textarea",
+    voice: true,
+    placeholder: "予定・内容",
+    get: (r) => r.tomorrowEvents.patrol,
+    set: (r, v) => ({ tomorrowEvents: { ...r.tomorrowEvents, patrol: v } }),
+    isEmpty: (r) => r.tomorrowEvents.patrol.trim() === "",
+    next: "tomorrowGoal",
+  },
+  tomorrowGoal: {
+    key: "tomorrowGoal",
+    label: "明日の安全目標",
+    type: "textarea",
+    voice: true,
+    placeholder: "例: 高所作業の墜落防止を徹底する",
+    get: (r) => r.tomorrowEvents.tomorrowGoal,
+    set: (r, v) => ({ tomorrowEvents: { ...r.tomorrowEvents, tomorrowGoal: v } }),
+    isEmpty: (r) => r.tomorrowEvents.tomorrowGoal.trim() === "",
+    next: "free",
+  },
+  free: {
+    key: "free",
+    label: "その他",
+    type: "textarea",
+    voice: true,
+    placeholder: "自由記入",
+    get: (r) => r.tomorrowEvents.free,
+    set: (r, v) => ({ tomorrowEvents: { ...r.tomorrowEvents, free: v } }),
+    isEmpty: (r) => r.tomorrowEvents.free.trim() === "",
+    next: "supervisorComment",
+  },
+  supervisorComment: {
+    key: "supervisorComment",
+    label: "統括安全責任者コメント",
+    type: "textarea",
+    voice: true,
+    placeholder: "コメント",
+    get: (r) => r.supervisorComment,
+    set: (r, v) => ({ supervisorComment: v }),
+    isEmpty: (r) => r.supervisorComment.trim() === "",
   },
 };
 

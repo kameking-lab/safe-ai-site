@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import { InputWithVoice } from "@/components/voice-input-field";
+import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import { MEETING_WEATHER_OPTIONS, type MeetingRecord } from "@/lib/meeting/schema";
 import { getMeetingPaperFieldDef, nextMeetingPaperFieldKey, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
 import { MONTH_OPTIONS, dayOptions, yearOptions } from "@/lib/ky/pulldown-options";
@@ -30,7 +30,7 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
 
   // 開いたら最初の入力へフォーカス（キーボード/音声にすぐ入れる）。
   useEffect(() => {
-    const first = sheetRef.current?.querySelector<HTMLElement>("input, select");
+    const first = sheetRef.current?.querySelector<HTMLElement>("input, select, textarea");
     first?.focus();
   }, [fieldKey]);
 
@@ -76,6 +76,16 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
             onChange={(e) => patch(def.set?.(record, e.target.value) ?? {})}
             placeholder={def.placeholder}
             className="min-h-[44px] text-base"
+          />
+        )}
+
+        {def.type === "textarea" && (
+          <TextareaWithVoice
+            rows={3}
+            value={def.get?.(record) ?? ""}
+            onChange={(e) => patch(def.set?.(record, e.target.value) ?? {})}
+            placeholder={def.placeholder}
+            className="min-h-[88px] text-base"
           />
         )}
 

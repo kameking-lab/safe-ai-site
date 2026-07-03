@@ -62,10 +62,12 @@ check("さらに『次の欄へ』で主任等のエディタに進む", await s
 await sheet.locator("input").first().fill("佐藤次郎");
 await sheet.getByRole("button", { name: /次の欄へ/ }).click();
 await page.waitForTimeout(150);
-check("さらに『次の欄へ』で作成担当者のエディタに進む（記入順の最終欄）", await sheet.getByText("作成担当者").first().isVisible().catch(() => false));
+check("さらに『次の欄へ』で作成担当者のエディタに進む（ヘッダー7欄の最終欄）", await sheet.getByText("作成担当者").first().isVisible().catch(() => false));
 await sheet.locator("input").first().fill("鈴木三郎");
-check("作成担当者は記入順の最終欄＝『次の欄へ』ではなく『完了』ボタン", await sheet.getByRole("button", { name: "完了" }).isVisible().catch(() => false));
-await sheet.getByRole("button", { name: "完了" }).click();
+// 第二弾で記入順チェーンが延伸（作成担当者の次は安全大会）＝ここでは『完了』ではなく『次の欄へ』になる。
+// ヘッダー7欄の検証はここで区切るため、続きは辿らず閉じる（第二弾以降の欄は別スクリプトで検証）。
+check("作成担当者の次は記入順が続く＝『次の欄へ』ボタン（第二弾で明日のイベント欄へ延伸）", await sheet.getByRole("button", { name: /次の欄へ/ }).isVisible().catch(() => false));
+await sheet.getByRole("button", { name: "閉じる" }).click();
 await page.waitForTimeout(200);
 
 check("作業所長が用紙に反映", await page.getByText("山田太郎").first().isVisible().catch(() => false));

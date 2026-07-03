@@ -38,11 +38,11 @@ describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
     expect(container.innerHTML).toMatchSnapshot();
   });
 
-  it("editing 指定でヘッダー7欄がタップ標的になり、タップでキーが飛ぶ", () => {
+  it("editing 指定でヘッダー7欄＋明日のイベント5欄＋統括安全責任者コメントがタップ標的になり、タップでキーが飛ぶ", () => {
     const onTapField = vi.fn();
     render(<MeetingPrintSheet record={rec} editing={{ onTapField }} />);
     const cells = screen.getAllByRole("button");
-    expect(cells).toHaveLength(7);
+    expect(cells).toHaveLength(13);
     fireEvent.click(screen.getByRole("button", { name: "打合せ日（前日）を入力" }));
     expect(onTapField).toHaveBeenCalledWith("meetingDate");
     fireEvent.click(screen.getByRole("button", { name: "作業日を入力" }));
@@ -57,6 +57,18 @@ describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
     expect(onTapField).toHaveBeenCalledWith("supervisor");
     fireEvent.click(screen.getByRole("button", { name: "作成担当者を入力" }));
     expect(onTapField).toHaveBeenCalledWith("author");
+    fireEvent.click(screen.getByRole("button", { name: "安全大会を入力" }));
+    expect(onTapField).toHaveBeenCalledWith("safetyMeeting");
+    fireEvent.click(screen.getByRole("button", { name: "検査を入力" }));
+    expect(onTapField).toHaveBeenCalledWith("inspection");
+    fireEvent.click(screen.getByRole("button", { name: "パトロールを入力" }));
+    expect(onTapField).toHaveBeenCalledWith("patrol");
+    fireEvent.click(screen.getByRole("button", { name: "明日の安全目標を入力" }));
+    expect(onTapField).toHaveBeenCalledWith("tomorrowGoal");
+    fireEvent.click(screen.getByRole("button", { name: "その他を入力" }));
+    expect(onTapField).toHaveBeenCalledWith("free");
+    fireEvent.click(screen.getByRole("button", { name: "統括安全責任者コメントを入力" }));
+    expect(onTapField).toHaveBeenCalledWith("supervisorComment");
   });
 
   it("キーボード（Enter/Space）でも欄を開ける（a11y）", () => {

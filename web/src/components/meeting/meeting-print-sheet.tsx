@@ -162,11 +162,11 @@ export function MeetingPrintSheet({ record, editing }: { record: MeetingRecord; 
       <div className="mt-1 grid grid-cols-3 gap-1">
         <table className="w-full border-collapse">
           <tbody>
-            <tr><th className={`${th} w-[40%]`}>安全大会</th><td className={td}>{record.tomorrowEvents.safetyMeeting}</td></tr>
-            <tr><th className={th}>検査</th><td className={td}>{record.tomorrowEvents.inspection}</td></tr>
-            <tr><th className={th}>パトロール</th><td className={td}>{record.tomorrowEvents.patrol}</td></tr>
-            <tr><th className={th}>明日の安全目標</th><td className={td}>{record.tomorrowEvents.tomorrowGoal}</td></tr>
-            <tr><th className={th}>その他</th><td className={td}>{record.tomorrowEvents.free}</td></tr>
+            <tr><th className={`${th} w-[40%]`}>安全大会</th><td className={td}><EditableCell editing={editing} fieldKey="safetyMeeting">{record.tomorrowEvents.safetyMeeting}</EditableCell></td></tr>
+            <tr><th className={th}>検査</th><td className={td}><EditableCell editing={editing} fieldKey="inspection">{record.tomorrowEvents.inspection}</EditableCell></td></tr>
+            <tr><th className={th}>パトロール</th><td className={td}><EditableCell editing={editing} fieldKey="patrol">{record.tomorrowEvents.patrol}</EditableCell></td></tr>
+            <tr><th className={th}>明日の安全目標</th><td className={td}><EditableCell editing={editing} fieldKey="tomorrowGoal">{record.tomorrowEvents.tomorrowGoal}</EditableCell></td></tr>
+            <tr><th className={th}>その他</th><td className={td}><EditableCell editing={editing} fieldKey="free">{record.tomorrowEvents.free}</EditableCell></td></tr>
           </tbody>
         </table>
         <table className="w-full border-collapse">
@@ -180,7 +180,7 @@ export function MeetingPrintSheet({ record, editing }: { record: MeetingRecord; 
         </table>
         <table className="w-full border-collapse">
           <thead><tr><th className={th}>統括安全責任者コメント</th></tr></thead>
-          <tbody><tr><td className={`${td} whitespace-pre-wrap`} style={{ height: "20mm" }}>{record.supervisorComment}</td></tr></tbody>
+          <tbody><tr><td className={`${td} whitespace-pre-wrap`} style={{ height: "20mm" }}><EditableCell editing={editing} fieldKey="supervisorComment">{record.supervisorComment}</EditableCell></td></tr></tbody>
         </table>
       </div>
 

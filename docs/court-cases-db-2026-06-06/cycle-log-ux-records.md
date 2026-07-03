@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-03（7） — S1・第二弾 打合せ用紙の続き＝明日のイベント5欄＋統括安全責任者コメントをcanvas直接編集化
+
+回収: 自班PR #621（O10・第一〜五弾・完）がCI全緑（e2e/smoke/Vercelとも SUCCESS）と確認できたためsquashマージ＋作業ブランチ削除。`main`は`git pull --ff-only`で57ファイル分fast-forward・clean。作業ブランチ`ux-rec/s1-meeting-canvas-phase1-header`（PR #660・S1第一弾）はCI（e2e/smoke）がIN_PROGRESSのためマージ見送り、同一ブランチへ`main`をマージ（`docs/court-cases-db-2026-06-06/cycle-log-ux-records.md`の1件のみ競合＝直近ログ追記同士の行競合・コード競合なしを通常マージで解消）した上で継続。
+
+着手: BACKLOG最上位[ ]はS1（第一弾）だが、直前のS1第一弾コミットで実装済み・在庫中（水増し回避）。次段のS1（続き・第二弾）に着手。O15/S2/S3は引き続きdataレーンO14依存でブロック。
+
+規模判断: 打合せ書の残り欄（各社マトリクス・明日のイベント・搬入出・点検項目8カテゴリ）のうち、各社マトリクスは業者×階層(元請/1次/2次/3次)の動的グリッドで専用キースキームの設計が要り規模が大きい。O10が危険行（動的行）より先に単純なテキスト欄群（作業内容＋4R目標3欄）から着手した前例に倣い、本弾は下段左ブロックの明日のイベント5欄（安全大会・検査・パトロール・明日の安全目標・その他）＋統括安全責任者コメントという、動的行を伴わない単純テキスト欄6つに限定した。
+
+実装: `paper-fields.ts`にKY paper-fields.tsと同型の`type: "textarea"`を追加。6欄の`get`/`set`はMeetingRecordのネストしたプロパティ（`tomorrowEvents.safetyMeeting`等5つ）と最上位プロパティ（`supervisorComment`）の両方に対応させ、記入順チェーンを`author.next`から`safetyMeeting→inspection→patrol→tomorrowGoal→free→supervisorComment`（最終欄）へ延伸。`MeetingFieldEditorSheet`にtextarea分岐（`TextareaWithVoice`をKYのFieldEditorSheetと同じ形で追加、フォーカス対象セレクタに`textarea`を追加）。`MeetingPrintSheet`の該当6セルを`EditableCell`でラップ（`editing`未指定時はEditableCellが`<>{children}</>`を返す構造のためHTML出力はバイト同一＝既存スナップショットが無変更のまま全合格することで印刷不可侵を機械確認）。
+
+検証: `tsc --noEmit`=0 / `lint`=errors0（既存warn23件のみ）/ `vitest run`=267ファイル2269テスト全pass（`paper-fields.test.ts`に第二弾チェーン検証5本、`meeting-print-sheet.test.tsx`のタップ標的数アサーションを7→13に更新）/ `build`=成功（1回目はNode側のセグメンテーション違反で異常終了したが既知の環境フレーク＝コード非依存と切り分け、再実行で正常終了・`○ /safety-diary`静的生成を維持）。無読Playwright新規`docs/third-party-reviews/scripts/meeting-canvas-phase2-tomorrow-events-2026-07-03.mjs`を prod start(4213)で実行し18/18 PASS（textarea表示・記入順チェーンの連鎖・用紙反映・印刷同期・クラシック表示との相互反映・最終欄の完了ボタンを確認）。既存`meeting-canvas-phase1-header-2026-07-03.mjs`は記入順チェーンが延伸し作成担当者の次が「完了」から「次の欄へ」に変わったため該当アサーションを更新のうえ17/17回帰合格。テスト実行の副生成物（`docs/rag-metrics-latest.json`・`web/src/data/chatbot-eval-fresh-results.json`。他レーン所有）および内容変化のない改行コードのみのsnapshot差分（ky-print-sheet.test.tsx.snap等）はコミットから除外。working tree clean。
+
+残: 各社マトリクス（業者×階層の動的行）・搬入出動的行・点検項目8カテゴリのcanvas対応、AI提案（`/api/meeting/suggest`統合）、履歴サジェスト（datalist）、既定切替（β外し）はBACKLOG-ux-records.mdへ「S1（続き・第三弾）」として起票済み。PR #660（S1第一弾・本弾で追加コミット）はCI待ちで次回収。
+
+---
+
 ## 2026-07-03（6） — O10・第五弾（完） canvas UIの既定切替＝先に機能パリティを確立してから既定化
 
 回収: 自班PR #606（account結論カード）がCI全緑・未マージだったためsquashマージ。`main`は33コミット分fast-forward（`git pull --ff-only`）。作業ブランチ`ux-rec/o10-ky-canvas-phase2-work-goal`（PR #621、O10第一〜四弾）はCI実行中で緑未確定のためマージ見送り、同一PRへの追加コミットとして継続。
