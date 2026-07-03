@@ -21,6 +21,8 @@ import {
   getAccidentProvenanceCounts,
 } from "@/data/mock/accident-cases";
 import { computeAccidentTypeCounts } from "@/lib/accidents/accident-visual";
+import { ACCIDENTS_CSV_FILENAME, accidentsSummaryToCsv, accidentsSummaryToText } from "@/lib/accidents/export";
+import { DataExportToolbar } from "@/components/accidents/data-export-toolbar";
 import { AccidentTypeGrid } from "@/components/accidents/accident-type-grid";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { SITE_STATS } from "@/data/site-stats";
@@ -50,7 +52,10 @@ export const metadata: Metadata = {
 };
 
 export default function AccidentsPage() {
-  const totalCount = getAccidentCasesDataset().length;
+  const dataset = getAccidentCasesDataset();
+  const totalCount = dataset.length;
+  const provenanceCounts = getAccidentProvenanceCounts();
+  const typeCounts = computeAccidentTypeCounts(dataset);
 
   return (
     <>
@@ -92,21 +97,39 @@ export default function AccidentsPage() {
         />
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <LastUpdatedBadge />
-          {(() => {
-            const counts = getAccidentProvenanceCounts();
-            return (
-              <AccidentsMetaInfo
-                total={getAccidentCasesDataset().length}
-                mhlw={counts.mhlw}
-                curated={counts.curated}
-                preliminary={counts.preliminary ?? 0}
-                synthetic={counts.synthetic}
-              />
-            );
-          })()}
+          <AccidentsMetaInfo
+            total={totalCount}
+            mhlw={provenanceCounts.mhlw}
+            curated={provenanceCounts.curated}
+            preliminary={provenanceCounts.preliminary ?? 0}
+            synthetic={provenanceCounts.synthetic}
+          />
         </div>
+        {/* 柱C-7横展開: 収録件数サマリーの出力手段。月例安全会議の資料に持ち出せる（#520の事故統計ダッシュボードと同構え） */}
+        <DataExportToolbar
+          filename={ACCIDENTS_CSV_FILENAME}
+          csv={accidentsSummaryToCsv({
+            total: totalCount,
+            mhlw: provenanceCounts.mhlw,
+            curated: provenanceCounts.curated,
+            preliminary: provenanceCounts.preliminary ?? 0,
+            synthetic: provenanceCounts.synthetic,
+            typeCounts,
+          })}
+          text={accidentsSummaryToText({
+            total: totalCount,
+            mhlw: provenanceCounts.mhlw,
+            curated: provenanceCounts.curated,
+            preliminary: provenanceCounts.preliminary ?? 0,
+            synthetic: provenanceCounts.synthetic,
+            typeCounts,
+          })}
+          shareTitle={_title}
+          shareUrl={`${SITE_URL}/accidents`}
+          className="mt-2"
+        />
         {/* 柱0: 事故の型ピクトグラム＋件数デカ数字のアイコンファーストナビ（読まずに自分の現場の事故へ） */}
-        <AccidentTypeGrid counts={computeAccidentTypeCounts(getAccidentCasesDataset())} />
+        <AccidentTypeGrid counts={typeCounts} />
         {/* 文字ダイエット: データ内訳の定義と速報値の注意は詳細層へ（内容は不変） */}
         <CollapsibleDetail summary="収録データの内訳と速報値の注意" className="mt-2">
           <AccidentsMetaCaption />
