@@ -84,13 +84,20 @@ describe("inspectionConclusion", () => {
 
 describe("committeeConclusion", () => {
   it("今月開催済は緑", () => {
-    expect(committeeConclusion(true).tone).toBe("safe");
+    expect(committeeConclusion(true, true).tone).toBe("safe");
   });
-  it("今月未開催は黄＋安衛則23条の根拠", () => {
-    const c = committeeConclusion(false);
+  it("今月未開催・前回ありは黄＋安衛則23条の根拠＋前回をベースに新規への動線", () => {
+    const c = committeeConclusion(false, true);
     expect(c.tone).toBe("warning");
     expect(c.title).toBe("今月未開催");
     expect(c.description).toContain("安衛則23条");
+    expect(c.action).toEqual({ href: "#committee-actions", label: "前回をベースに新規" });
+  });
+  it("今月未開催・前回なしは黄＋議事録を作成への動線", () => {
+    const c = committeeConclusion(false, false);
+    expect(c.tone).toBe("warning");
+    expect(c.title).toBe("今月未開催");
+    expect(c.action).toEqual({ href: "#committee-actions", label: "議事録を作成" });
   });
 });
 
@@ -121,16 +128,24 @@ describe("monthlyConclusion", () => {
     expect(c.tone).toBe("neutral");
     expect(c.title).toBe("記録なし");
   });
-  it("使用不可を含む要対応は赤・合計件数", () => {
+  it("使用不可を含む要対応は赤・合計件数・点検確認への動線", () => {
     const c = monthlyConclusion({ hasAny: true, patrolOpen: 2, nearMissOpen: 1, inspectionUnusable: 1, committeeHeld: true });
     expect(c.tone).toBe("danger");
     expect(c.value).toBe(4);
     expect(c.title).toBe("要対応");
+    expect(c.action).toEqual({ href: "/site-records/inspection#saved-inspections", label: "点検を確認" });
   });
-  it("使用不可なしの要対応は黄", () => {
+  it("使用不可なしの要対応は黄・パトロール確認への動線", () => {
     const c = monthlyConclusion({ hasAny: true, patrolOpen: 2, nearMissOpen: 0, inspectionUnusable: 0, committeeHeld: true });
     expect(c.tone).toBe("warning");
     expect(c.value).toBe(2);
+    expect(c.action).toEqual({ href: "/site-records/patrol#open-findings", label: "パトロールを確認" });
+  });
+  it("パトロールなし・ヒヤリハットのみの要対応はヒヤリハット確認への動線", () => {
+    const c = monthlyConclusion({ hasAny: true, patrolOpen: 0, nearMissOpen: 3, inspectionUnusable: 0, committeeHeld: true });
+    expect(c.tone).toBe("warning");
+    expect(c.value).toBe(3);
+    expect(c.action).toEqual({ href: "/site-records/near-miss#nearmiss-list", label: "ヒヤリハットを確認" });
   });
   it("要対応ゼロでも委員会未開催なら黄＋委員会への動線", () => {
     const c = monthlyConclusion({ hasAny: true, patrolOpen: 0, nearMissOpen: 0, inspectionUnusable: 0, committeeHeld: false });

@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getPublishedArticleIndex } from '@/lib/articles';
+import { SITE_URL } from '@/lib/seo-metadata';
 
-const BASE = 'https://www.anzen-ai-portal.jp';
+// 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL 単一ソース（末尾スラッシュ無し）。
+const BASE = SITE_URL;
 
 function escapeXml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

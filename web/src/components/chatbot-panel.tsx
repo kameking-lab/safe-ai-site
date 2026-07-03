@@ -628,7 +628,7 @@ export function ChatbotPanel() {
           <button
             type="button"
             onClick={() => setShowHistory((v) => !v)}
-            className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+            className="flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
             aria-label="保存済み会話を開く"
             title="保存済みの会話セッションを一覧表示します"
           >
@@ -642,7 +642,7 @@ export function ChatbotPanel() {
               setVoiceInputError(null);
             }}
             aria-pressed={voiceMode}
-            className={`flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-bold ${
+            className={`flex min-h-[44px] items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-bold ${
               voiceMode
                 ? "border-emerald-400 bg-emerald-600 text-white"
                 : "border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50"
@@ -655,7 +655,7 @@ export function ChatbotPanel() {
             <button
               type="button"
               onClick={startVoiceInput}
-              className="flex items-center gap-1 rounded-lg border border-emerald-400 bg-white px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-50"
+              className="flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-400 bg-white px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-50"
             >
               🎤 話して質問する
             </button>
@@ -675,7 +675,7 @@ export function ChatbotPanel() {
             <button
               type="button"
               onClick={handleClearCurrent}
-              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+              className="flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
               title={`進行中の会話を削除（最大${CHAT_HISTORY_MAX_MESSAGES}件まで自動保存）`}
             >
               🗑 履歴をクリア
@@ -684,7 +684,7 @@ export function ChatbotPanel() {
             <button
               type="button"
               onClick={handleShare}
-              className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              className="flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
             >
               🔗 共有URL
             </button>
@@ -693,7 +693,7 @@ export function ChatbotPanel() {
               <button
                 type="button"
                 onClick={() => setExportOpen((v) => !v)}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                className="flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
               >
                 ⬇ エクスポート ▾
               </button>
@@ -702,25 +702,25 @@ export function ChatbotPanel() {
                   <button
                     type="button"
                     onClick={handleExportMD}
-                    className="block w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+                    className="flex min-h-[44px] w-full items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
                   >
                     📄 Markdown (.md)
                   </button>
                   <button
                     type="button"
                     onClick={handleExportTXT}
-                    className="block w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+                    className="flex min-h-[44px] w-full items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
                   >
                     📝 テキスト (.txt)
                   </button>
                   <button
                     type="button"
                     onClick={handleExportJSON}
-                    className="block w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+                    className="flex min-h-[44px] w-full items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
                   >
                     🗄 JSON (.json)
                   </button>
-                  <label className="block cursor-pointer w-full px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50 border-t border-slate-100">
+                  <label className="flex min-h-[44px] w-full cursor-pointer items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50 border-t border-slate-100">
                     ⬆ JSONをインポート
                     <input type="file" accept=".json" className="sr-only" onChange={handleImportJSON} />
                   </label>
@@ -744,7 +744,7 @@ export function ChatbotPanel() {
                   <button
                     type="button"
                     onClick={() => handleLoadSession(s)}
-                    className="flex w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-xs text-slate-700 hover:bg-blue-50 hover:border-blue-200"
+                    className="flex min-h-[44px] w-full items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-xs text-slate-700 hover:bg-blue-50 hover:border-blue-200"
                   >
                     <span className="truncate max-w-[200px]">{s.title}</span>
                     <span className="flex items-center gap-2 shrink-0">
@@ -756,7 +756,7 @@ export function ChatbotPanel() {
                         tabIndex={0}
                         onClick={(e) => handleDeleteSession(s.id, e)}
                         onKeyDown={(e) => e.key === "Enter" && handleDeleteSession(s.id, e as unknown as React.MouseEvent)}
-                        className="text-slate-300 hover:text-red-500"
+                        className="flex min-h-[44px] min-w-[44px] items-center justify-center text-slate-300 hover:text-red-500"
                         aria-label="削除"
                       >
                         ✕
