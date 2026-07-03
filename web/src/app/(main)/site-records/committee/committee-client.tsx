@@ -281,9 +281,9 @@ export function CommitteeClient() {
                   <p className="mt-0.5 text-xs text-slate-500">{s.place || "場所なし"}／議題 {s.agendaCount}・決定済 {s.decidedCount}</p>
                 </div>
                 <div className="flex shrink-0 gap-2">
-                  <button type="button" onClick={() => carryOverFrom(s.id)} className="rounded-lg border border-emerald-300 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50">この回をベースに次月を作成</button>
-                  <button type="button" onClick={() => openSaved(s.id)} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50">開く</button>
-                  <button type="button" onClick={() => deleteSaved(s.id)} className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50">削除</button>
+                  <button type="button" onClick={() => carryOverFrom(s.id)} className="min-h-[44px] rounded-lg border border-emerald-300 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50">この回をベースに次月を作成</button>
+                  <button type="button" onClick={() => openSaved(s.id)} className="min-h-[44px] rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50">開く</button>
+                  <button type="button" onClick={() => deleteSaved(s.id)} className="min-h-[44px] rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50">削除</button>
                 </div>
               </li>
             ))}

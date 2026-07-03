@@ -208,8 +208,8 @@ export function QualificationClient() {
                   <p className="mt-0.5 text-xs text-slate-500">保有資格・教育 {s.qualCount} 件</p>
                 </div>
                 <div className="flex shrink-0 gap-2">
-                  <button type="button" onClick={() => openSaved(s.id)} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50">開く</button>
-                  <button type="button" onClick={() => deleteSaved(s.id)} className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50">削除</button>
+                  <button type="button" onClick={() => openSaved(s.id)} className="min-h-[44px] rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50">開く</button>
+                  <button type="button" onClick={() => deleteSaved(s.id)} className="min-h-[44px] rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50">削除</button>
                 </div>
               </li>
             ))}
@@ -262,7 +262,7 @@ export function QualificationClient() {
                           <button
                             type="button"
                             onClick={() => openSaved(h.workerId)}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-left text-xs hover:border-emerald-300 hover:bg-emerald-50"
+                            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-left text-xs hover:border-emerald-300 hover:bg-emerald-50"
                             title="この作業者の記録を開く"
                           >
                             <span className="font-semibold text-slate-900">{h.workerName}</span>
