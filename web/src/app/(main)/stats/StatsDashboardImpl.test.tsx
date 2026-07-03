@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { LanguageProvider } from "@/contexts/language-context";
 import { FuriganaProvider } from "@/contexts/furigana-context";
 import { EasyJapaneseProvider } from "@/contexts/easy-japanese-context";
@@ -79,5 +79,33 @@ describe("StatsDashboardImpl 柱0結論カード", () => {
     });
     const card = screen.getByRole("status", { name: "いまの状態: 未接続" });
     expect(card.textContent).not.toContain("12,345");
+  });
+
+  it("取得失敗時: エラー表示のみで「読み込み中…」が残留しない＋再試行で復帰する", async () => {
+    let fail = true;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: string) => {
+        if (url.includes("/api/stats?")) {
+          if (fail) return Promise.resolve({ ok: false, json: () => Promise.resolve({}) });
+          return Promise.resolve({ ok: true, json: () => Promise.resolve(ga4Stats) });
+        }
+        return Promise.resolve({ ok: false, json: () => Promise.resolve({}) });
+      }),
+    );
+    renderDashboard();
+
+    await waitFor(() => {
+      expect(screen.getByText(/データ取得に失敗しました/)).toBeDefined();
+    });
+    expect(screen.queryByText("読み込み中…")).toBeNull();
+
+    fail = false;
+    fireEvent.click(screen.getByRole("button", { name: "再試行" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("アクセス実績")).toBeDefined();
+    });
+    expect(screen.queryByText(/データ取得に失敗しました/)).toBeNull();
   });
 });

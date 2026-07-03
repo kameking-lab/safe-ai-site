@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-07-04 柱C-2 補充 横断検索に法改正レコードを新カテゴリ「法改正」で収載（PR: seo/cross-search-law-revisions）
+
+**契約1) 回収**: 冒頭で緑の自班PRを回収＝#774(feed逆カバレッジ)を squash マージ→main ff同期。連鎖で CONFLICTING 化した #780(通達シノニム)・#786(化学物質deeplink)・#818(root metadata単一ソース)へ `git merge origin/main`（force-push なし）で BACKLOG/cycle-log の追記衝突（両側保持）のみ解決し再push。#780/#786 は緑を確認して即マージ、#818 は CI 再走中のため次イテレーション回収。#823(sitemap逆カバレッジ)も CI 進行中。他班 OPEN PR は不可侵。
+
+**着手判断**: BACKLOG-seo 未着手キューは空（O17/T6 は Path A/オーナー承認待ち）のため補充指針に従い自領域(C-2 横断検索)から補充。既に2 PR が in-flight のため near-dup 回避（[[avoid-overlapping-followup-prs]]）で **distinct な穴** を探索＝`buildSearchIndex` は law/notice/accident/chemical/equipment/education/glossary/faq/sign/article/feature/precedent の12カテゴリを収載するのに、**法改正(法令改正・省令改正・通達の構造化レコード) の import が皆無**で丸ごと0件だった。法改正は本サイトの中核（CLAUDE.md 優先#3・専用 RSS `/feed/law-revisions.xml`・一覧 `/laws`・`/whats-new`）なのに横断検索から発見不能＝#561(accident) と同型の発見性の穴。
+
+**ブラウザ安全性の実証**: articles で必要だった別射影源（node:fs 正本→軽量射影）が本件で不要なことを import トレースで確認＝`@/data/mock/law-revisions` の依存（revisions-ingest/index・load-sample・egov-revisions-loaded・real-law-revisions(-extra)）は **JSON＋型＋純関数のみ**で node:fs 非依存。server専用 `REVISIONS_REAL_SOURCE_PAYLOAD_JSON` はブラウザで undefined＝sample+egov+real 統合パスへフォールバックし常にデータを返す。データ量も 24〜57KB/源の bounded set（既存の chemical compact 919件より軽い）。
+
+**実装**: 新カテゴリ `revision`（ラベル「法改正」・cyan・ScrollTextアイコン）。正本 `lawRevisionCores`（`/laws` が描画する集合そのもの）から射影。url は個別詳細ページ未実装のため `/laws` 一覧ハブへ寄せる（glossary/faq と同方針＝実在ハブで幽霊URL 0）。placeholder `lr-fallback-*` は非収載。keywords は category(和名)/改正番号/発出元/告示番号/業種＝`kind`(英語コード)は日本語検索のノイズ回避で除外。カテゴリ追加の単一ソース（型・PRIORITY・META・タブ配列・countByCategory）を整合更新し、両UI(`SearchResults`/`CommandPalette`)の CategoryIcon exhaustive switch へ追記。タイブレークは記事の次点・判例/通達の直上（条文の権威を奪わない）。
+
+**回帰**: `search-index.test.ts` に describe 3 it 追加（正本ID集合一致・placeholder非収載／全件/laws着地／「石綿」「クレーン」revisionカテゴリで hits>0＝旧0件是正の証明）。既存の三方向ドリフトガードと all件数一致断言（`c.revision` を加算）も新カテゴリを自動検証。
+
+**ゲート**: `tsc --noEmit`=0 / `lint`=errors0（既存warn1は SearchResults 別行の unused-disable＝無関係）/ `vitest run`=315ファイル2676 pass・1 skip（新規3含む）/ `build`=成功。再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は `git checkout` で復元。
+
+**残**: 本 PR・#818・#823 の CI 緑回収＆マージ（次イテレーション 1)）。法改正の個別詳細/深リンクは `/laws` 本文所有の UI 班マター（要・他班）。O17/T6 実装はオーナー承認待ち。
+
+---
+
 ## 2026-07-04 柱C-3 / S DRY — ルート layout.tsx metadata のドメイン/ロケール単一ソース化
 
 **タスク**: `seo/root-metadata-domain-single-source`。冒頭で緑の自班PR #812（ペルソナ別ポータル /for/<persona> 横断検索収載）を squash マージし main を ff 同期。決裁A（robots.ts facebookexternalhit 許可）と C-3-4（sitemap lastmod 動的化）は現状確認で既に完了済みのため、補充指針に従い自領域の DRY 取り残しを是正。
