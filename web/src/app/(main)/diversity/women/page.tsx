@@ -10,12 +10,12 @@ import {
   Baby,
   Heart,
   DoorOpen,
-  ArrowLeft,
   ExternalLink,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
 import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
+import { Breadcrumb } from "@/components/breadcrumb";
 
 // ── PPEデータ ──────────────────────────────────────────────────
 const PPE_ITEMS = [
@@ -187,14 +187,12 @@ export default function WomenPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
-      {/* 戻る */}
-      <Link
-        href="/diversity"
-        className="mb-4 inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 py-1 text-sm text-slate-600 hover:bg-slate-50"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        多様性と安全に戻る
-      </Link>
+      <Breadcrumb
+        items={[
+          { name: "多様性と安全", href: "/diversity" },
+          { name: "女性向け PPE・妊産婦就業ガイド" },
+        ]}
+      />
 
       {/* ヘッダー */}
       <header className="mb-6">
@@ -255,7 +253,7 @@ export default function WomenPage() {
                     href={generateAmazonAffiliateUrl(item.searchQuery)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1 rounded-lg bg-amber-500 py-2 text-xs font-bold text-white hover:bg-amber-600"
+                    className="flex min-h-[44px] items-center justify-center gap-1 rounded-lg bg-amber-500 py-2 text-xs font-bold text-white hover:bg-amber-600"
                   >
                     <ExternalLink className="h-3 w-3" />
                     Amazonで探す
@@ -264,7 +262,7 @@ export default function WomenPage() {
                     href={generateRakutenSearchUrl(item.searchQuery)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-1 rounded-lg bg-rose-500 py-2 text-xs font-bold text-white hover:bg-rose-600"
+                    className="flex min-h-[44px] items-center justify-center gap-1 rounded-lg bg-rose-500 py-2 text-xs font-bold text-white hover:bg-rose-600"
                   >
                     <ExternalLink className="h-3 w-3" />
                     楽天で探す
@@ -383,7 +381,7 @@ export default function WomenPage() {
             <Link
               key={p.href}
               href={p.href}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-center text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              className="flex min-h-[44px] items-center justify-center rounded-lg border border-slate-200 px-3 py-2 text-center text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
               {p.label}
             </Link>

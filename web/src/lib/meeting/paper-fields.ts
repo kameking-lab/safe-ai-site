@@ -13,12 +13,16 @@
  * タグ選択、plannedCount=予定人員は固定プルダウン）を追加し、7部位すべてcanvas対応が完了。
  * 印刷シートの列順（業者→作業内容→使用機械→必要資格→予定→予想災害→重/可→安全衛生指示事項→
  * 責任者→実績）に合わせ machines と risk の間に挿入。appendNote（印刷シート非掲載）のみ対象外。
- * 搬入出・点検項目は未着手。
+ * 第五弾で搬入出（deliveries、動的行・id始まりのキー "delivery.<id>.<part>"。物/時刻/場所の3部位。
+ * 各社マトリクスと同型だがタグ/プルダウンが無いため全部位type="text"）を追加。記入順チェーンは
+ * その他(free)の次→搬入出1行目→…→最終行の次→統括安全責任者コメント、に挿入。
+ * 点検項目8カテゴリ・AI提案のエディタ統合・履歴サジェスト・既定切替は未着手。
  */
 import {
   computePriority,
   type ContractorType,
   type MeetingContractorRow,
+  type MeetingDeliveryRow,
   type MeetingRecord,
 } from "@/lib/meeting/schema";
 
@@ -72,7 +76,14 @@ export type MeetingContractorTagPart = "qualifications" | "predictedDisasters";
 
 export type MeetingContractorFieldKey = `contractor.${string}.${MeetingContractorFieldPart}`;
 
-export type MeetingPaperFieldKey = MeetingPaperStaticFieldKey | MeetingContractorFieldKey;
+/** 搬入出予定1行分の3部位(id始まりのキー。行の追加に追従する)。 */
+export type MeetingDeliveryFieldPart = "item" | "time" | "place";
+
+export const DELIVERY_FIELD_PARTS: readonly MeetingDeliveryFieldPart[] = ["item", "time", "place"];
+
+export type MeetingDeliveryFieldKey = `delivery.${string}.${MeetingDeliveryFieldPart}`;
+
+export type MeetingPaperFieldKey = MeetingPaperStaticFieldKey | MeetingContractorFieldKey | MeetingDeliveryFieldKey;
 
 export type MeetingPaperFieldDef = {
   key: MeetingPaperFieldKey;
@@ -243,6 +254,7 @@ export const MEETING_PAPER_FIELDS: Record<MeetingPaperStaticFieldKey, MeetingPap
 };
 
 const CONTRACTOR_FIELD_KEY_RE = /^contractor\.([^.]+)\.(company|workContent|machines|qualifications|plannedCount|predictedDisasters|risk|safetyInstructions|responsibleName|actualCount)$/;
+const DELIVERY_FIELD_KEY_RE = /^delivery\.([^.]+)\.(item|time|place)$/;
 
 /** 各社マトリクスの欄キー組み立て（行id指定）。 */
 export function contractorFieldKey(id: string, part: MeetingContractorFieldPart): MeetingContractorFieldKey {
@@ -256,13 +268,30 @@ export function parseContractorFieldKey(key: string): { id: string; part: Meetin
   return { id: m[1]!, part: m[2] as MeetingContractorFieldPart };
 }
 
+/** 搬入出予定の欄キー組み立て（行id指定）。 */
+export function deliveryFieldKey(id: string, part: MeetingDeliveryFieldPart): MeetingDeliveryFieldKey {
+  return `delivery.${id}.${part}`;
+}
+
+/** 搬入出予定の欄キー分解。静的欄キーや不正な文字列には null を返す。 */
+export function parseDeliveryFieldKey(key: string): { id: string; part: MeetingDeliveryFieldPart } | null {
+  const m = DELIVERY_FIELD_KEY_RE.exec(key);
+  if (!m) return null;
+  return { id: m[1]!, part: m[2] as MeetingDeliveryFieldPart };
+}
+
 export function isMeetingPaperFieldKey(key: string): key is MeetingPaperFieldKey {
   if ((MEETING_PAPER_FIELD_ORDER as readonly string[]).includes(key)) return true;
-  return parseContractorFieldKey(key) !== null;
+  if (parseContractorFieldKey(key) !== null) return true;
+  return parseDeliveryFieldKey(key) !== null;
 }
 
 function findContractor(r: MeetingRecord, id: string): MeetingContractorRow | undefined {
   return r.contractors.find((c) => c.id === id);
+}
+
+function findDelivery(r: MeetingRecord, id: string): MeetingDeliveryRow | undefined {
+  return r.deliveries.find((d) => d.id === id);
 }
 
 type ContractorTextPart = "workContent" | "machines" | "safetyInstructions" | "responsibleName" | "actualCount";
@@ -381,10 +410,39 @@ function buildContractorFieldDef(id: string, part: MeetingContractorFieldPart): 
   }
 }
 
-/** フィールド定義の解決（静的欄・各社マトリクスの両方に対応する唯一の窓口）。 */
+const DELIVERY_FIELD_LABEL: Record<MeetingDeliveryFieldPart, string> = { item: "搬入出（物）", time: "時刻", place: "場所" };
+const DELIVERY_FIELD_PLACEHOLDER: Record<MeetingDeliveryFieldPart, string> = { item: "例: 生コン", time: "例: 9:00", place: "例: 東側ゲート" };
+
+function deliveryTextGet(id: string, part: MeetingDeliveryFieldPart) {
+  return (r: MeetingRecord): string => findDelivery(r, id)?.[part] ?? "";
+}
+
+function deliveryTextSet(id: string, part: MeetingDeliveryFieldPart) {
+  return (r: MeetingRecord, v: string): Partial<MeetingRecord> => ({
+    deliveries: r.deliveries.map((d) => (d.id === id ? { ...d, [part]: v } : d)),
+  });
+}
+
+/** 搬入出予定1行分のフィールド定義（物/時刻/場所の3部位）を組み立てる。 */
+function buildDeliveryFieldDef(id: string, part: MeetingDeliveryFieldPart): MeetingPaperFieldDef {
+  return {
+    key: deliveryFieldKey(id, part),
+    label: DELIVERY_FIELD_LABEL[part],
+    type: "text",
+    voice: part === "item",
+    placeholder: DELIVERY_FIELD_PLACEHOLDER[part],
+    get: deliveryTextGet(id, part),
+    set: deliveryTextSet(id, part),
+    isEmpty: (r) => (findDelivery(r, id)?.[part] ?? "").trim() === "",
+  };
+}
+
+/** フィールド定義の解決（静的欄・各社マトリクス・搬入出の全てに対応する唯一の窓口）。 */
 export function getMeetingPaperFieldDef(key: MeetingPaperFieldKey): MeetingPaperFieldDef {
   const c = parseContractorFieldKey(key);
   if (c) return buildContractorFieldDef(c.id, c.part);
+  const d = parseDeliveryFieldKey(key);
+  if (d) return buildDeliveryFieldDef(d.id, d.part);
   return MEETING_PAPER_FIELDS[key as MeetingPaperStaticFieldKey];
 }
 
@@ -392,23 +450,39 @@ export function getMeetingPaperFieldDef(key: MeetingPaperFieldKey): MeetingPaper
  * 記入順の「次の欄」を返す（エディタの「次の欄へ」送り用）。各社マトリクスは record.contractors の
  * 並び順に追従するため、作成担当者(author)の次は1行目のcompany欄へ、最終行の最終部位の次は
  * 安全大会(safetyMeeting)へ折り返す。行が1件も無い場合は author→safetyMeeting に直接続く。
+ * 搬入出（deliveries）も同様に record.deliveries の並び順に追従し、その他(free)の次は
+ * 1行目のitem欄へ、最終行の最終部位の次は統括安全責任者コメントへ折り返す。行が1件も無い場合は
+ * free→supervisorComment に直接続く。
  */
 export function nextMeetingPaperFieldKey(key: MeetingPaperFieldKey, record: MeetingRecord): MeetingPaperFieldKey | undefined {
   const c = parseContractorFieldKey(key);
-  if (!c) {
-    const staticDef = MEETING_PAPER_FIELDS[key as MeetingPaperStaticFieldKey];
-    if (key === "author" && record.contractors.length > 0) {
-      return contractorFieldKey(record.contractors[0]!.id, CONTRACTOR_FIELD_PARTS[0]!);
+  if (c) {
+    const partIndex = CONTRACTOR_FIELD_PARTS.indexOf(c.part);
+    if (partIndex < CONTRACTOR_FIELD_PARTS.length - 1) {
+      return contractorFieldKey(c.id, CONTRACTOR_FIELD_PARTS[partIndex + 1]!);
     }
-    return staticDef.next;
+    const rowIndex = record.contractors.findIndex((row) => row.id === c.id);
+    const nextRow = rowIndex >= 0 ? record.contractors[rowIndex + 1] : undefined;
+    return nextRow ? contractorFieldKey(nextRow.id, CONTRACTOR_FIELD_PARTS[0]!) : "safetyMeeting";
   }
-  const partIndex = CONTRACTOR_FIELD_PARTS.indexOf(c.part);
-  if (partIndex < CONTRACTOR_FIELD_PARTS.length - 1) {
-    return contractorFieldKey(c.id, CONTRACTOR_FIELD_PARTS[partIndex + 1]!);
+  const d = parseDeliveryFieldKey(key);
+  if (d) {
+    const partIndex = DELIVERY_FIELD_PARTS.indexOf(d.part);
+    if (partIndex < DELIVERY_FIELD_PARTS.length - 1) {
+      return deliveryFieldKey(d.id, DELIVERY_FIELD_PARTS[partIndex + 1]!);
+    }
+    const rowIndex = record.deliveries.findIndex((row) => row.id === d.id);
+    const nextRow = rowIndex >= 0 ? record.deliveries[rowIndex + 1] : undefined;
+    return nextRow ? deliveryFieldKey(nextRow.id, DELIVERY_FIELD_PARTS[0]!) : "supervisorComment";
   }
-  const rowIndex = record.contractors.findIndex((row) => row.id === c.id);
-  const nextRow = rowIndex >= 0 ? record.contractors[rowIndex + 1] : undefined;
-  return nextRow ? contractorFieldKey(nextRow.id, CONTRACTOR_FIELD_PARTS[0]!) : "safetyMeeting";
+  const staticDef = MEETING_PAPER_FIELDS[key as MeetingPaperStaticFieldKey];
+  if (key === "author" && record.contractors.length > 0) {
+    return contractorFieldKey(record.contractors[0]!.id, CONTRACTOR_FIELD_PARTS[0]!);
+  }
+  if (key === "free" && record.deliveries.length > 0) {
+    return deliveryFieldKey(record.deliveries[0]!.id, DELIVERY_FIELD_PARTS[0]!);
+  }
+  return staticDef.next;
 }
 
 /** 記入順（紙の上から下、各社マトリクスの動的挿入込み）で最初の未記入欄を返す（zoom-to-cell用）。 */
@@ -423,7 +497,7 @@ export function firstEmptyMeetingPaperFieldKey(record: MeetingRecord): MeetingPa
   return undefined;
 }
 
-/** 未記入の欄キー集合（EditableCell のハイライトに渡す）。各社マトリクスは現在の行数ぶんを含む。 */
+/** 未記入の欄キー集合（EditableCell のハイライトに渡す）。各社マトリクス・搬入出は現在の行数ぶんを含む。 */
 export function emptyMeetingPaperFieldKeys(record: MeetingRecord): Set<string> {
   const out = new Set<string>();
   for (const key of MEETING_PAPER_FIELD_ORDER) {
@@ -432,6 +506,12 @@ export function emptyMeetingPaperFieldKeys(record: MeetingRecord): Set<string> {
   for (const c of record.contractors) {
     for (const part of CONTRACTOR_FIELD_PARTS) {
       const fieldKey = contractorFieldKey(c.id, part);
+      if (getMeetingPaperFieldDef(fieldKey).isEmpty(record)) out.add(fieldKey);
+    }
+  }
+  for (const dRow of record.deliveries) {
+    for (const part of DELIVERY_FIELD_PARTS) {
+      const fieldKey = deliveryFieldKey(dRow.id, part);
       if (getMeetingPaperFieldDef(fieldKey).isEmpty(record)) out.add(fieldKey);
     }
   }
