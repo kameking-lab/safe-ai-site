@@ -67,11 +67,9 @@ export function webSiteSchema(): Schema {
     // WebSite の発行主体を Organization ノード（@id）へ参照で結ぶ。インライン再宣言せず
     // 正準 Organization ノードへ集約し、両エンティティを 1 つのグラフとして同定させる。
     publisher: { "@id": ORG_ID },
-    author: {
-      "@type": "Organization",
-      name: SITE_NAME,
-      url: `${SITE_URL}/about`,
-    },
+    // author も別 url（/about）のインライン Organization ではなく正準 @id 参照へ集約し、
+    // publisher と同一の Organization ノードへ同定する（別ノードへの分裂を防ぐ）。
+    author: { "@id": ORG_ID },
     potentialAction: {
       "@type": "SearchAction",
       target: {

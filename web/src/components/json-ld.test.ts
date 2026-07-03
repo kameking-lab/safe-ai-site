@@ -59,6 +59,9 @@ describe("organizationSchema / webSiteSchema", () => {
     expect(WEBSITE_ID).toBe(`${SITE_URL}/#website`);
     // インライン再宣言ではなく @id 参照で正準 Organization ノードへ結ぶ。
     expect(s.publisher).toEqual({ "@id": ORG_ID });
+    // author も別 url（/about）のインライン Organization ではなく publisher と同一の
+    // 正準 Organization ノード（ORG_ID）へ集約し、別ノードへ分裂させない。
+    expect(s.author).toEqual({ "@id": ORG_ID });
   });
 
   it("WebSite の SearchAction は /search に正規化されている", () => {
