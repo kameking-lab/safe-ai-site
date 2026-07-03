@@ -34,7 +34,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { PaperStage, type PaperStageHandle } from "@/components/ky-paper/paper-stage";
 import { MeetingFieldEditorSheet } from "@/components/meeting/meeting-field-editor-sheet";
-import { contractorFieldKey, emptyMeetingPaperFieldKeys, firstEmptyMeetingPaperFieldKey, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
+import { contractorFieldKey, deliveryFieldKey, emptyMeetingPaperFieldKeys, firstEmptyMeetingPaperFieldKey, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
 
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
@@ -168,6 +168,14 @@ export function MeetingPaperView() {
     const newRow = emptyContractorRow(type, null);
     setRecord((prev) => ({ ...prev, contractors: [...prev.contractors, newRow] }));
     setActiveFieldKey(contractorFieldKey(newRow.id, "company"));
+  }, []);
+
+  // S1（第五弾）: 用紙キャンバスβの「＋搬入出行を追加」ホットスポット。追加した行の
+  // 「物」欄をそのまま開く（各社マトリクス行追加(第三弾)と同じ「そのまま開く」作法）。
+  const handleAddDeliveryRow = useCallback(() => {
+    const newRow = emptyDeliveryRow();
+    setRecord((prev) => ({ ...prev, deliveries: [...prev.deliveries, newRow] }));
+    setActiveFieldKey(deliveryFieldKey(newRow.id, "item"));
   }, []);
 
   const machines = useMemo(() => aggregateMachines(record.contractors), [record.contractors]);
@@ -343,6 +351,7 @@ export function MeetingPaperView() {
                 activeKey: activeFieldKey,
                 emptyKeys: emptyPaperFieldKeys,
                 onAddContractorRow: handleAddContractorRow,
+                onAddDeliveryRow: handleAddDeliveryRow,
               }}
             />
           </div>

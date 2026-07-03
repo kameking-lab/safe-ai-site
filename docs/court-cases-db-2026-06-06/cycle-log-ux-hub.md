@@ -506,3 +506,21 @@
 **無読テスト**: `docs/third-party-reviews/scripts/features-use-cases-court-employer-liability-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**52/52 PASS**（/features/use-cases 関連機能ピル48件・/court-cases/employer-liability 論点チップ4件、全てboundingBox height≥44px実測）。
 
 **残課題**: BACKLOG-ux-hub.md未着手は1件（トップhome-three-pillars=PR #668で着手済み・マージ待ち）のみに減少。PR #668・#663のCI回収は次イテレーション。3件未満のためExplore委任で補充調査を実施し、実在確認済みの2件（`/accidents/[id]`の「事故DBに戻る」リンク・類似事故カードのタイトルリンク／`/diversity/women`のAmazon・楽天アフィリエイトボタン・関連ページナビ3リンク、いずれも44px未満をコード確認済み）をBACKLOG-ux-hub.mdへ追記（PR #682へ追加コミット）。Explore調査中に発生したリポジトリ外への一時ファイル書き出し(`C:\Users\kanet\ux-hub-scan.txt`)は削除済み。
+
+---
+
+## 2026-07-03 ux-hub/diversity-women-44px-targets
+
+**イテレーション頭の回収**: 自班のローカルCI待ちブランチが2件あることを確認（`ux-hub/accident-detail-back-related-links-44px`=PR #690・`ux-hub/top-alertgenerator-related-link-44px`=PR #687）。#687をマージ試行したところ、main（`origin/main`）に既に別インスタンスが同一ファイル(`home-three-pillars.tsx`)の同一AlertGenerator/リンクを44px化するPR #668が先着マージ済みと判明し、`git merge`でコンフリクトを実際に確認した上で重複と断定。`gh pr close 687 --delete-branch`でクローズ（重複作業の解消）。続けて残りの緑PR `docs/ux-hub-backlog-supplement-2026-07-03`(PR #692・柱0補充候補3件追記のみ)をsquashマージ。`git checkout main && git pull --ff-only`でclean確認。PR #690（事故詳細の戻る/類似事例リンク44px化）はCI(smoke)がまだ進行中のため今回はマージ見送り、次イテレーションで回収。
+
+**タスク源**: BACKLOG-ux-hub.md未着手の最上位（1番目=/accidents/[id]戻る導線はPR #690で着手済み・マージ待ちのためスキップ）に続く「/diversity/women のAmazon・楽天アフィリエイトボタン8個・関連ページナビ3リンクが44px未満」。
+
+**修正**: `diversity/women/page.tsx`の4個のPPEカードそれぞれが持つAmazon/楽天アフィリエイトボタン（計8個、`py-2 text-xs`≈32px）と、下部「関連ページ」ナビグリッドの3リンク（`px-3 py-2 text-xs`）に`min-h-[44px]`（ナビリンクは`flex items-center justify-center`も追加）を付与。純粋なクラス追加でレイアウト・アフィリエイトURL生成ロジック・遷移先は不変。
+
+**テスト**: `women-44px-targets.test.tsx`を新設（vitest 2件）。アフィリエイトボタン全件・関連ページナビ全件のclassNameに`min-h-[44px]`を含むことを保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 281 files・2379 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/diversity-women-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**11/11 PASS**（Amazonで探す×4・楽天で探す×4・関連ページナビ×3、全てboundingBox height≥44px実測）。
+
+**残課題**: BACKLOG-ux-hub.md未着手は4件（/accidents/[id]戻る導線=PR #690マージ待ち・/industries一覧「開く→」リンク・/industries/[industry]副リンク群+キーワードピル・/accidents/[id]出典元リンク）。PR #690のCI回収は次イテレーション。

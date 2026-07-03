@@ -743,7 +743,7 @@ export function RiskPredictionPanel() {
                   setQuery(ex);
                   runSearch(ex);
                 }}
-                className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
+                className="min-h-[44px] rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
               >
                 {ex}
               </button>
