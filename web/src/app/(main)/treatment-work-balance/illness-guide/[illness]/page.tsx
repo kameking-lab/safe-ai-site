@@ -5,6 +5,7 @@ import { Stethoscope, BookOpen, ScrollText, Users } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 import {
   ILLNESS_CATEGORIES,
   getCategoryMeta,
@@ -89,6 +90,16 @@ export default async function IllnessGuidePage({
         description={meta.summary}
         icon={Stethoscope}
         iconColor="emerald"
+      />
+
+      <ConclusionCard
+        tone="info"
+        value={conditions.length}
+        unit="病態"
+        title="配慮ガイド"
+        description="典型病態ごとの労務配慮を整理。プラン作成ツールで配慮事項を自動生成できます。"
+        action={{ href: "/treatment-work-balance/plan-builder", label: "プランビルダーを開く" }}
+        className="mt-6"
       />
 
       <section className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 text-sm leading-6 text-emerald-900">

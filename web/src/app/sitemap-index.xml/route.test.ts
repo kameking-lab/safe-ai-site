@@ -23,7 +23,7 @@ describe("GET /sitemap-index.xml", () => {
     expect(xml).toContain('xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"');
   });
 
-  it("は5つの子サイトマップ（本体/記事/事故/通達/保護具）を順に列挙する", async () => {
+  it("は6つの子サイトマップ（本体/記事/事故/通達/保護具/化学物質）を順に列挙する", async () => {
     const xml = await getXml();
     const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
     expect(locs).toEqual([
@@ -32,13 +32,14 @@ describe("GET /sitemap-index.xml", () => {
       `${BASE}/sitemap-accidents.xml`,
       `${BASE}/sitemap-circulars.xml`,
       `${BASE}/sitemap-equipment.xml`,
+      `${BASE}/sitemap-chemicals.xml`,
     ]);
   });
 
-  it("の全 lastmod は YYYY-MM-DD 形式で5件", async () => {
+  it("の全 lastmod は YYYY-MM-DD 形式で6件", async () => {
     const xml = await getXml();
     const mods = [...xml.matchAll(/<lastmod>([^<]+)<\/lastmod>/g)].map((m) => m[1]);
-    expect(mods.length).toBe(5);
+    expect(mods.length).toBe(6);
     for (const m of mods) expect(m).toMatch(ISO);
   });
 
@@ -55,5 +56,6 @@ describe("GET /sitemap-index.xml", () => {
     expect(map[`${BASE}/sitemap-accidents.xml`]).toBe(f.accidentsDataUpdated);
     expect(map[`${BASE}/sitemap-circulars.xml`]).toBe(f.freshestNotice);
     expect(map[`${BASE}/sitemap-equipment.xml`]).toBe(f.equipmentDataUpdated);
+    expect(map[`${BASE}/sitemap-chemicals.xml`]).toBe(f.chemicalsDataUpdated);
   });
 });

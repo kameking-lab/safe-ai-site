@@ -1,6 +1,6 @@
 import { searchCrossIndex, normalizeArticleQuery, expandLawAliases } from './cross-search';
 
-export type SearchCategory = 'law' | 'notice' | 'chemical' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq';
+export type SearchCategory = 'law' | 'notice' | 'chemical' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq' | 'sign';
 
 export interface SearchItem {
   id: string;
@@ -28,6 +28,9 @@ const SEARCH_CATEGORY_PRIORITY: readonly SearchCategory[] = [
   'precedent',
   'notice',
   'glossary',
+  // 安全標識（立入禁止・保護具着用など）は特定名の直接照会。用語と同じ参照系の
+  // ティアに置き、法令・教育・FAQ より下位・化学物質より上位で同点解決する。
+  'sign',
   'chemical',
   'accident',
 ];
@@ -44,6 +47,7 @@ export const CATEGORY_META: Record<
   precedent: { label: '判例',    bgColor: 'bg-emerald-100', textColor: 'text-emerald-700' },
   glossary:  { label: '用語',    bgColor: 'bg-indigo-100', textColor: 'text-indigo-700' },
   faq:       { label: 'FAQ',     bgColor: 'bg-sky-100',    textColor: 'text-sky-700' },
+  sign:      { label: '標識',    bgColor: 'bg-amber-100',  textColor: 'text-amber-700' },
 };
 
 /**
@@ -86,7 +90,7 @@ export function countByCategory(
   query: string,
 ): Record<'all' | SearchCategory, number> {
   const counts: Record<'all' | SearchCategory, number> = {
-    all: 0, law: 0, notice: 0, chemical: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0,
+    all: 0, law: 0, notice: 0, chemical: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0, sign: 0,
   };
   if (!query.trim()) return counts;
   // 上限なしで全件マッチを採り、カテゴリ別に集計する。
@@ -315,6 +319,33 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           category: 'faq',
           keywords: [...(f.tags ?? []), ...(f.relatedLaws ?? [])].filter(Boolean),
           url: `/faq/${f.category}`,
+        });
+      }
+    }),
+
+    // 安全標識（@/data/safety-signs の JIS Z 9101 準拠 5 分類＝禁止/警告/指示/安全状態/防火）。
+    // 「立入禁止」「感電注意」「保護めがね着用」等の標識名は現場で頻用されるのに、これまで
+    // 横断検索(/search・⌘K)から 0 件ヒットだった（用語・FAQ とも別軸＝視覚標識の直接照会）。
+    // 各標識は既に sitemap 収載済みの実在詳細ページ /safety-signs/sign/<id> を持つが、
+    // 発見手段が /safety-signs ハブの回遊のみだった発見性の穴を是正。url は詳細ページへ深リンク＝
+    // 詳細 /safety-signs/sign/[id] の generateStaticParams が SAFETY_SIGNS 全件 id を解決し
+    // 未知 id は notFound() で弾くため、収載集合＝解決集合で必ず着地する（幽霊URL 0）。
+    // 名称(name)・英名(nameEn)・分類ラベル・関連法令（statute+article）・意味/用途語から引ける。
+    import('@/data/safety-signs').then(({ SAFETY_SIGNS, SIGN_CATEGORIES }) => {
+      const categoryLabel = new Map(SIGN_CATEGORIES.map((c) => [c.id, c.label]));
+      for (const s of SAFETY_SIGNS) {
+        const label = categoryLabel.get(s.category) ?? '安全標識';
+        items.push({
+          id: `sign-${s.id}`,
+          title: s.name,
+          subtitle: `${label}　${s.meaning}`.slice(0, 90),
+          category: 'sign',
+          keywords: [
+            s.nameEn,
+            label,
+            ...s.relatedLaws.flatMap((r) => (r.article ? [r.statute, r.article] : [r.statute])),
+          ].filter(Boolean),
+          url: `/safety-signs/sign/${s.id}`,
         });
       }
     }),

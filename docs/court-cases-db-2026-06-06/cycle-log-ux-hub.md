@@ -436,3 +436,21 @@
 **補充**: 未着手が1件のみ（/safety-signs親ハブ関連機能リンク）に減ったため、Explore委任で追加2件を発見・補充。①`/features/use-cases`のrelated-featureピル(`px-2 py-1 text-[11px]`)、②`/court-cases/employer-liability`のIssueLinkチップ(`px-2.5 py-1 text-xs`)。いずれもmin-h/h-11未付与で次サイクル候補。
 
 **残課題**: PR #663(視覚パンくず可視化)のCI回収。上記3件の柱0補充候補が次サイクルへ持ち越し。
+
+---
+
+## 2026-07-03 ux-hub/safety-signs-hub-related-links-44px
+
+**イテレーション頭の回収**: 自班のPR #668(トップhome-three-pillars 44px化)はCI進行中(e2e/smoke IN_PROGRESS)のため未マージ・今回は回収スキップ。`git checkout main && git pull --ff-only`でclean確認(mainは5コミット進行・data/seo/ux-records/ux-tools各班のマージ分)。
+
+**タスク源**: BACKLOG-ux-hub.md未着手最上位（前サイクルExplore調査で発見済み）＝「/safety-signs 親ハブ本体の『関連機能』セクションが44px未満」。
+
+**修正**: `web/src/app/(main)/safety-signs/page.tsx` の「関連機能」セクション（サイネージ表示／KY簡易作成／建設業のリスク・対策の3リンク、227-256行）にそれぞれ `min-h-[44px]`＋`inline-flex items-center` を付与。純粋なクラス追加でレイアウト・文言・遷移先は不変。サブページ（戻る/業種チップ）は既に是正済みだったが親ハブ自身の当該リンクのみ未着手だった。
+
+**テスト**: 既存 `safety-signs-tap-targets.test.tsx` に親ハブ用ケース1件を追加（3リンク全てのclassNameが`min-h-[44px]`を含むことを検証）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係）/ vitest 270 files・2289 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/safety-signs-hub-related-links-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**3/3 PASS**（3リンク全てboundingBox height=44px実測）。
+
+**残課題**: PR #668（トップhome-three-pillars 44px化）のCI回収は次イテレーション。BACKLOG-ux-hub.mdの未着手件数が2件（トップhome-three-pillars=PR #668で着手済み・重複回避のため今回はスキップ）に減っていたため、Explore不要で直接コード確認した2件（`/features/use-cases`のrelated-featureピル・`/court-cases/employer-liability`のIssueLinkチップ、いずれも実コードで44px未満を確認済み）を補充。
