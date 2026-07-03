@@ -239,7 +239,7 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     triggers: ["通勤災害", "通勤途上災害"],
     pins: [
       { law: "労働者災害補償保険法", articleNum: "第7条" },
-      { law: "労働者災害補償保険法", articleNum: "第7条第3項" },
+      { law: "労働者災害補償保険法", articleNum: "第7条第2項" },
     ],
   },
   {
@@ -247,7 +247,7 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     triggers: ["業務災害", "労災保険給付", "労災給付"],
     pins: [
       { law: "労働者災害補償保険法", articleNum: "第7条" },
-      { law: "労働者災害補償保険法", articleNum: "第12条の8" },
+      { law: "労働者災害補償保険法", articleNum: "第14条" },
     ],
   },
   {
