@@ -69,7 +69,7 @@ function ActionLink({
   variant?: "default" | "primary" | "ghost";
 }) {
   const base =
-    "inline-flex min-h-[36px] items-center rounded-md px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1";
+    "inline-flex min-h-[44px] items-center rounded-md px-3 py-1.5 text-xs font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-1";
   const variantClass =
     variant === "primary"
       ? "bg-emerald-600 text-white hover:bg-emerald-700"

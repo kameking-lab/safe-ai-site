@@ -4,7 +4,7 @@
  * 安全工程打合せ書及び安全衛生指示書 — 用紙ファーストUI（Phase 1,2,4,5）。
  * KYの設計（ズーム・自動保存・用紙そのまま編集）を踏襲。AI/クラウド/印刷/一覧は後続Phaseで付加。
  */
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   buildDefaultMeetingRecord,
@@ -15,11 +15,14 @@ import {
   buildDefaultChecklist,
   PRIORITY_LABEL,
   CONTRACTOR_TYPES,
+  MEETING_WEATHER_OPTIONS,
+  MEETING_COUNT_OPTIONS,
   type MeetingRecord,
   type MeetingContractorRow,
   type ContractorType,
   type ChecklistStatus,
 } from "@/lib/meeting/schema";
+import { MeetingTagField } from "@/components/meeting/meeting-tag-field";
 import { loadCurrentMeeting, saveCurrentMeeting, snapshotMeeting, collectMeetingHistory, loadLatestMeeting, duplicateForNextDay, type MeetingHistory } from "@/lib/meeting/store";
 import { MeetingPrintSheet } from "@/components/meeting/meeting-print-sheet";
 import { estimateQualifications, inferChecklist } from "@/lib/meeting/inference";
@@ -29,12 +32,13 @@ import { computeMeetingPaperStatus } from "@/lib/meeting/paper-status";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { PaperStage, type PaperStageHandle } from "@/components/ky-paper/paper-stage";
+import { MeetingFieldEditorSheet } from "@/components/meeting/meeting-field-editor-sheet";
+import { contractorFieldKey, deliveryFieldKey, emptyMeetingPaperFieldKeys, firstEmptyMeetingPaperFieldKey, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
 
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
 const ZOOM_STEP = 0.1;
-const WEATHER = ["晴れ", "曇り", "雨", "雪", "強風", "猛暑", "厳寒"];
-const COUNT_OPTIONS = ["", ...Array.from({ length: 30 }, (_, i) => String(i + 1)), "30+"];
 const TYPE_INDENT: Record<ContractorType, string> = { 元請: "ml-0", "1次": "ml-4", "2次": "ml-8", "3次": "ml-12" };
 const TYPE_TAG: Record<ContractorType, string> = {
   元請: "bg-slate-700 text-white",
@@ -70,6 +74,13 @@ export function MeetingPaperView() {
   const [history, setHistory] = useState<MeetingHistory | null>(null);
   // 「前回を複製」を上部にも出すための判定（端末に保存済みの打合せ書があるときだけ）。
   const [hasLatest, setHasLatest] = useState(false);
+  // S1（打合せ用紙 直接操作UI・第一弾〜第三弾）: 用紙キャンバス（β）。KYのF1と同じ方式で
+  // 既定はオフ（?canvas=1 または「🗺 キャンバス(β)」ボタンで切替）。ヘッダー7欄・明日のイベント5欄・
+  // 統括安全責任者コメント・各社マトリクス7部位（会社名/階層・作業内容・使用機械・リスク・
+  // 安全衛生指示事項・協力会社責任者・実績人員）に対応。
+  const [canvasMode, setCanvasMode] = useState(false);
+  const [activeFieldKey, setActiveFieldKey] = useState<MeetingPaperFieldKey | null>(null);
+  const stageRef = useRef<PaperStageHandle>(null);
 
   // 初回: 作業中の打合せ書を復元
   useEffect(() => {
@@ -78,6 +89,28 @@ export function MeetingPaperView() {
     setHistory(collectMeetingHistory());
     // 保存済みの打合せ書があれば上部にも「前回を複製」を出す（翌日分作成の最速ルート）。
     setHasLatest(loadLatestMeeting() !== null);
+    // キャンバスβの状態をURLと同期（リロード/共有しても状態が保てる）。
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("canvas") === "1") setCanvasMode(true);
+      else if (params.get("canvas") === "0") setCanvasMode(false);
+    } catch {
+      /* URL操作不可の環境では既定値のまま */
+    }
+  }, []);
+
+  // S1: キャンバスβの切替（URLの ?canvas=1 と同期）。
+  const toggleCanvasMode = useCallback((on: boolean) => {
+    setCanvasMode(on);
+    setActiveFieldKey(null);
+    try {
+      const url = new URL(window.location.href);
+      if (on) url.searchParams.set("canvas", "1");
+      else url.searchParams.delete("canvas");
+      window.history.replaceState(null, "", url.toString());
+    } catch {
+      /* URL操作不可の環境では state のみ */
+    }
   }, []);
 
   // 上部「前回を複製」: 直近に保存した1枚を翌日分として複製（各社の作業・危険・対策を引き継ぎ、
@@ -129,6 +162,22 @@ export function MeetingPaperView() {
   const removeContractor = (id: string) =>
     setRecord((r) => ({ ...r, contractors: r.contractors.filter((c) => c.id !== id && c.parentId !== id) }));
 
+  // S1（第三弾）: 用紙キャンバスβの「＋元請/1次/2次/3次」ホットスポット。追加した行の
+  // 会社名・階層欄をそのまま開く（危険行追加(O10)と同じ「そのまま開く」作法）。
+  const handleAddContractorRow = useCallback((type: ContractorType) => {
+    const newRow = emptyContractorRow(type, null);
+    setRecord((prev) => ({ ...prev, contractors: [...prev.contractors, newRow] }));
+    setActiveFieldKey(contractorFieldKey(newRow.id, "company"));
+  }, []);
+
+  // S1（第五弾）: 用紙キャンバスβの「＋搬入出行を追加」ホットスポット。追加した行の
+  // 「物」欄をそのまま開く（各社マトリクス行追加(第三弾)と同じ「そのまま開く」作法）。
+  const handleAddDeliveryRow = useCallback(() => {
+    const newRow = emptyDeliveryRow();
+    setRecord((prev) => ({ ...prev, deliveries: [...prev.deliveries, newRow] }));
+    setActiveFieldKey(deliveryFieldKey(newRow.id, "item"));
+  }, []);
+
   const machines = useMemo(() => aggregateMachines(record.contractors), [record.contractors]);
   const hidden = useMemo(() => hiddenIds(record.contractors, collapsed), [record.contractors, collapsed]);
   // 柱0: いまの状態を1メッセージに（記入のこりN＝青 / 記入完了・未保存＝青 / 保存済み＝緑）。
@@ -142,6 +191,14 @@ export function MeetingPaperView() {
     () => computeMeetingPaperStatus(record, { saved: isSaved }),
     [record, isSaved]
   );
+  // S1: 用紙キャンバスβ用。未記入欄集合とzoom-to-cell。
+  const emptyPaperFieldKeys = useMemo(() => emptyMeetingPaperFieldKeys(record), [record]);
+  const firstEmptyFieldKey = useMemo(() => firstEmptyMeetingPaperFieldKey(record), [record]);
+  const handleZoomToNextEmpty = useCallback(() => {
+    if (!firstEmptyFieldKey) return;
+    stageRef.current?.focusField(firstEmptyFieldKey);
+    setActiveFieldKey(firstEmptyFieldKey);
+  }, [firstEmptyFieldKey]);
 
   const handleSave = () => {
     const rec = { ...record, savedAt: new Date().toISOString() };
@@ -236,6 +293,99 @@ export function MeetingPaperView() {
     }
   };
 
+  // S1（打合せ用紙 直接操作UI）: 用紙キャンバス（β）。全hooks評価後の分岐＝
+  // クラシックUIと状態を完全共有する（record/自動保存/保存判定がそのまま効く）。
+  // KYのF1と同じく既定はオフ。搬入出・点検項目・必要資格/予定人員/予想災害は後続弾で拡張。
+  if (canvasMode) {
+    const remaining = emptyPaperFieldKeys.size;
+    return (
+      <div className="min-h-screen bg-slate-100 pb-20 print:bg-white print:pb-0">
+        <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-3 py-1.5 backdrop-blur print:hidden">
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-bold text-slate-900">安全工程打合せ書</span>
+              {remaining > 0 && (
+                <button
+                  type="button"
+                  onClick={handleZoomToNextEmpty}
+                  disabled={!firstEmptyFieldKey}
+                  title="最初の未記入セルへズームして開く"
+                  className="min-h-[28px] rounded-full bg-sky-600 px-2.5 py-0.5 text-[11px] font-bold text-white hover:bg-sky-700 disabled:opacity-60"
+                >
+                  のこり{remaining}項目 →
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <Link href="/safety-diary/list" className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100">
+                保存一覧
+              </Link>
+              <button
+                type="button"
+                onClick={() => toggleCanvasMode(false)}
+                className="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100"
+              >
+                従来表示
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {notice && (
+          <div className="mx-auto mt-2 flex max-w-5xl items-start justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 print:hidden">
+            <p className="text-sm font-semibold text-emerald-900">{notice}</p>
+            <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="rounded px-1.5 text-emerald-700 hover:bg-emerald-100">×</button>
+          </div>
+        )}
+
+        {/* A4横向き印刷指定（この画面でのみ有効） */}
+        <style media="print">{"@page{size:A4 landscape;margin:8mm}"}</style>
+
+        {/* 用紙キャンバス: 初期表示＝全体フィット。タップで入力、ピンチ/ホイール/ボタンでズーム */}
+        <PaperStage ref={stageRef} heightClassName="h-[calc(100dvh-200px)] min-h-[320px] sm:h-[calc(100dvh-150px)]">
+          <div className="bg-white p-3">
+            <MeetingPrintSheet
+              record={record}
+              editing={{
+                onTapField: (key) => setActiveFieldKey(key),
+                activeKey: activeFieldKey,
+                emptyKeys: emptyPaperFieldKeys,
+                onAddContractorRow: handleAddContractorRow,
+                onAddDeliveryRow: handleAddDeliveryRow,
+              }}
+            />
+          </div>
+        </PaperStage>
+
+        {/* 欄タップで開く入力エディタ */}
+        {activeFieldKey && (
+          <MeetingFieldEditorSheet
+            fieldKey={activeFieldKey}
+            record={record}
+            patch={patch}
+            onClose={() => setActiveFieldKey(null)}
+            onSelectField={(key) => setActiveFieldKey(key)}
+          />
+        )}
+
+        {/* 印刷経路は従来と同一（正式書式は editing なしの MeetingPrintSheet） */}
+        <div className="hidden print:block">
+          <MeetingPrintSheet record={record} />
+        </div>
+
+        <div className="sticky bottom-0 z-20 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-white/95 px-3 py-2 backdrop-blur print:hidden">
+          <span className={`text-[11px] font-semibold ${isSaved ? "text-emerald-700" : "text-slate-500"}`}>
+            {isSaved ? "✓ 保存一覧に保存済み" : savedLabel ? `未保存（${savedLabel}）` : "未保存"}
+          </span>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
+            <button type="button" onClick={handleSave} className="rounded-lg border border-emerald-300 bg-white px-4 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-100">
       {/* 上部バー */}
@@ -254,10 +404,21 @@ export function MeetingPaperView() {
             </button>
           )}
         </div>
-        <div className="flex items-center gap-1">
-          <button type="button" aria-label="縮小" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 10) / 10))} className="rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">－</button>
-          <button type="button" onClick={() => setZoom(1)} className="min-w-[3.5rem] rounded-full px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100">{Math.round(zoom * 100)}%</button>
-          <button type="button" aria-label="拡大" onClick={() => setZoom((z) => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 10) / 10))} className="rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">＋</button>
+        <div className="flex items-center gap-2">
+          {/* S1: タップ入力できる新しい表示（β）への入口。既定はまだクラシック表示。 */}
+          <button
+            type="button"
+            onClick={() => toggleCanvasMode(true)}
+            title="用紙全体を1画面で見ながら、タップした欄をその場で入力できる新しい表示を試す（β）"
+            className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
+          >
+            🗺 キャンバス(β)
+          </button>
+          <div className="flex items-center gap-1">
+            <button type="button" aria-label="縮小" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 10) / 10))} className="rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">－</button>
+            <button type="button" onClick={() => setZoom(1)} className="min-w-[3.5rem] rounded-full px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100">{Math.round(zoom * 100)}%</button>
+            <button type="button" aria-label="拡大" onClick={() => setZoom((z) => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 10) / 10))} className="rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">＋</button>
+          </div>
         </div>
       </div>
 
@@ -334,7 +495,7 @@ export function MeetingPaperView() {
               <L label="天気">
                 <select value={record.weather} onChange={(e) => patch({ weather: e.target.value })} className={inp}>
                   <option value="">―</option>
-                  {WEATHER.map((w) => <option key={w} value={w}>{w}</option>)}
+                  {MEETING_WEATHER_OPTIONS.map((w) => <option key={w} value={w}>{w}</option>)}
                 </select>
               </L>
               <L label="気温(℃)"><input value={record.temperature} onChange={(e) => patch({ temperature: e.target.value })} className={inp} /></L>
@@ -388,13 +549,13 @@ export function MeetingPaperView() {
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                       <L label="作業内容"><input value={c.workContent} onChange={(e) => patchContractor(c.id, { workContent: e.target.value })} list="mtg-works" className={inp} /></L>
                       <L label="使用機械"><input value={c.machines} onChange={(e) => patchContractor(c.id, { machines: e.target.value })} placeholder="例: バックホウ、ダンプ" list="mtg-machines" className={inp} /></L>
-                      <L label="必要資格"><TagField values={c.qualifications} onChange={(v) => patchContractor(c.id, { qualifications: v })} /></L>
+                      <L label="必要資格"><MeetingTagField values={c.qualifications} onChange={(v) => patchContractor(c.id, { qualifications: v })} /></L>
                       <L label="予定人員">
                         <select value={c.plannedCount} onChange={(e) => patchContractor(c.id, { plannedCount: e.target.value })} className={inp}>
-                          {COUNT_OPTIONS.map((n) => <option key={n} value={n}>{n || "―"}</option>)}
+                          {MEETING_COUNT_OPTIONS.map((n) => <option key={n} value={n}>{n || "―"}</option>)}
                         </select>
                       </L>
-                      <L label="予想災害"><TagField values={c.predictedDisasters} onChange={(v) => patchContractor(c.id, { predictedDisasters: v })} /></L>
+                      <L label="予想災害"><MeetingTagField values={c.predictedDisasters} onChange={(v) => patchContractor(c.id, { predictedDisasters: v })} /></L>
                       <L label="リスク(重大性/可能性→優先度)">
                         <div className="flex items-center gap-1">
                           <RiskSel value={c.risk.severity} onChange={(v) => setRisk(c.id, "severity", v)} label="重大性" />
@@ -593,32 +754,3 @@ function Tri({ value, onChange }: { value: ChecklistStatus; onChange: (s: Checkl
   );
 }
 
-function TagField({ values, onChange }: { values: string[]; onChange: (v: string[]) => void }) {
-  const [draft, setDraft] = useState("");
-  const add = () => {
-    const v = draft.trim();
-    if (v && !values.includes(v)) onChange([...values, v]);
-    setDraft("");
-  };
-  return (
-    <div className="rounded border border-slate-300 p-1">
-      <div className="flex flex-wrap gap-1">
-        {values.map((v) => (
-          <span key={v} className="flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[11px] text-emerald-800">
-            {v}
-            <button type="button" onClick={() => onChange(values.filter((x) => x !== v))} className="text-emerald-600 hover:text-emerald-900" aria-label="削除">×</button>
-          </span>
-        ))}
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
-          onBlur={add}
-          placeholder="＋"
-          className="min-w-[3rem] flex-1 px-1 text-[11px] outline-none"
-          aria-label="追加"
-        />
-      </div>
-    </div>
-  );
-}
