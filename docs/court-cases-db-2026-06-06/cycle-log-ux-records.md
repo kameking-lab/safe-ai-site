@@ -17,6 +17,9 @@
 残: O15/S2/S3は引き続きdataレーンO14依存でブロック。PR #785はCI待ちで次回収。
 
 ---
+## 2026-07-03 site-records/health-checkup-scheduler等の残存44px欠落14箇所＋色文法違反2箇所を是正（柱0磨き・巡回発見）
+
+回収: 自ブランチPR #785（打合せ用紙S1第八弾・履歴サジェスト）がCI緑（e2e/smoke/Vercel SUCCESS）と確認できたためsquashマージ→`main`をpull。未着手キュー(O15/S2/S3)は引き続きdataレーンO14未完了で全ブロック中のため、契約どおりExploreエージェントで柱0/柱3残存欠落を再巡回。過去の巡回（下部操作バー・行内リストボタン中心）が対象外だった「動的チェックリストの結果トグル」「モーダル/通知バーの閉じるボタン」「新規ファイル(health-checkup-scheduler/scheduler-form.tsx)の未対応」という3つの再発パターンで14箇所を発見・是正: `inspection-client.tsx`/`patrol-client.tsx`の良/不良/対象外トグル、`committee`/`patrol`/`procedure`/`qualifications`の行内ゴミ箱削除ボタン、`induction-client.tsx`「絞り込み解除」、`scheduler-form.tsx`（判定フォーム全ボタン・新規ファイルで未対応だった）、`missing-checkup-tracker.tsx`「入力した実施日をすべて消去」、`account/manage-plan-button.tsx`「プラン管理」＋エラー閉じるボタン、`ky/workers-master-client.tsx`「＋ 追加」、`ky-paper-view.tsx`「のこりN項目」（旧`min-h-[28px]`と44px未満が確定的だった）＋通知バー「×」2箇所、`meeting-paper-view.tsx`/`ky-list-client.tsx`の通知バー「×」に`min-h-[44px]`を追加（足すだけ・ロジック無変更）。副次発見の色文法違反2件も是正: `missing-checkup-tracker.tsx`のCHIP_CLASS/ROW_CLASS「期限超過」が兄弟ステータス（due-soon=amber・unrecorded=slate・ok=emerald）と異なり唯一`red-*`を直書き（`SAFETY_TONE.danger`のrose系と不一致）、`account/manage-plan-button.tsx`のエラーバナーも同型のred直書き。両方をrose系に統一（色相のみ変更・既存の濃淡パターンは維持）。/accountは開発環境でGoogle OAuth未設定のため未ログイン時はボタン非表示となりPlaywrightでは確認不可（既知の制約=/safety-diary/contribute等と同型、コードレビューで44px確認済み・スクリプト内でスキップと明記）。tsc=0・lint errors=0（既存warn23件のみ）・vitest 2580 pass・build成功。無読Playwright新規`docs/third-party-reviews/scripts/checkup-inspection-patrol-44px-color-2026-07-03.mjs`15/15合格。
 
 ## 2026-07-03 教育コース詳細12ページの主要CTA3種を44px化（柱0磨き）
 
