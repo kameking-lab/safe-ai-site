@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-03 `/site-records/committee`・`/site-records/monthly` ConclusionCardのaction未指定を是正
+
+回収: PR #702（/ky-examples 結論カードaction未指定＋主CTA44px是正）がCI全緑（e2e/smoke SUCCESS）と確認できたためsquashマージ＋作業ブランチ削除。`main`は`git pull --ff-only`で21ファイル分fast-forward・clean。自ブランチPR #715（/safety-diary/contribute 結論カード＋44px化）はe2e/smokeがまだIN_PROGRESSのためマージ見送り＝次イテレーションで回収。
+
+着手: 上位5件（O15/S2/S3含む）はF1/O14依存でブロック中のため、柱0巡回で発見済みの未着手[ ]（`/site-records/committee`・`/site-records/monthly`のConclusionCard action未指定）に着手。
+
+実装: `record-conclusions.ts`の`committeeConclusion()`に`hasPrevious`引数を追加。「今月未開催」時、保存済み議事録が1件以上あれば`action={href:"#committee-actions",label:"前回をベースに新規"}`、無ければ`{href:"#committee-actions",label:"議事録を作成"}`とし、`committee-client.tsx`の下部操作バー（保存・印刷・CSV・前回をベースに新規・新規（白紙）ボタン群）に`id="committee-actions"`（`scroll-mt-24`付き）を新設して接続。`monthlyConclusion()`の「要対応」分岐（3ツール横断集計のため単一アンカーでは足りない）は優先度順（使用不可＞パトロール未是正＞ヒヤリハット未対策）で該当ツールの既存アンカーへ動的に振り分け（`/site-records/inspection#saved-inspections`・`/site-records/patrol#open-findings`・`/site-records/near-miss#nearmiss-list`、いずれも各ツール画面に既存の`id`をそのまま再利用＝新規アンカー追加は committee側の1箇所のみ）。
+
+検証: `tsc --noEmit`=0 / `lint`=errors0（既存warn23件のみ）/ `vitest run`=284ファイル2435テスト全pass（`record-conclusions.test.ts`に新規4件）/ `build`=成功（`○ /site-records/committee`・`○ /site-records/monthly`静的生成維持）。無読Playwright新規`docs/third-party-reviews/scripts/committee-monthly-action-links-2026-07-03.mjs`をprod start(3100)で実行し18/18 PASS（committee: 今月開催済/前回あり/前回なしの3状態でaction文言・44px・`#committee-actions`遷移後に実ボタン可視化を確認、monthly: 使用不可あり/パトロールのみ/ヒヤリハットのみの3分岐でaction先URLを確認）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14/fableレーンF1依存でブロック。PR #715（/safety-diary/contribute）はCI待ちで次回収。
+
+---
+
 ## 2026-07-03（7） — S1・第二弾 打合せ用紙の続き＝明日のイベント5欄＋統括安全責任者コメントをcanvas直接編集化
 
 回収: 自班PR #621（O10・第一〜五弾・完）がCI全緑（e2e/smoke/Vercelとも SUCCESS）と確認できたためsquashマージ＋作業ブランチ削除。`main`は`git pull --ff-only`で57ファイル分fast-forward・clean。作業ブランチ`ux-rec/s1-meeting-canvas-phase1-header`（PR #660・S1第一弾）はCI（e2e/smoke）がIN_PROGRESSのためマージ見送り、同一ブランチへ`main`をマージ（`docs/court-cases-db-2026-06-06/cycle-log-ux-records.md`の1件のみ競合＝直近ログ追記同士の行競合・コード競合なしを通常マージで解消）した上で継続。

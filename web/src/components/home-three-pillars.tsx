@@ -116,7 +116,7 @@ function PillarFatalAccident({ fatal }: { fatal: AccidentCase | null }) {
       {/* メイン3機能: 業種別事故分析レポートを主動線とし、10年DB一覧はセカンダリに格下げ */}
       <Link
         href="/accidents-reports"
-        className="mt-3 inline-flex items-center justify-center rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50"
+        className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-rose-200 bg-white px-3 py-2 text-xs font-bold text-rose-700 hover:bg-rose-50"
       >
         {isEn ? "Industry accident reports →" : "業種別 事故分析レポートへ →"}
       </Link>
@@ -219,7 +219,7 @@ function PillarWeather({ warnings }: { warnings: WarningEntry[] }) {
 
       <Link
         href="/risk"
-        className="mt-3 inline-flex items-center justify-center rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50"
+        className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs font-bold text-amber-700 hover:bg-amber-50"
       >
         {isEn ? "Weather risk detail →" : "気象リスク詳細を見る →"}
       </Link>
@@ -274,7 +274,7 @@ function PillarLawRevisions({ revisions }: { revisions: LawRevisionCore[] }) {
 
       <Link
         href="/laws"
-        className="mt-3 inline-flex items-center justify-center rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50"
+        className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-emerald-200 bg-white px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50"
       >
         {isEn ? "Law amendments list →" : "法改正一覧を見る →"}
       </Link>

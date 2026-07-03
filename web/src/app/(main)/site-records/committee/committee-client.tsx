@@ -169,7 +169,7 @@ export function CommitteeClient() {
       {/* 結論カード（柱0）: 今月の開催実績（毎月1回以上・安衛則23条）を最上部で1メッセージに。
           保存すると即「今月開催済」へ切り替わる */}
       {todayYm !== "" && (
-        <ConclusionCard {...committeeConclusion(heldThisMonth)} className="print:hidden" />
+        <ConclusionCard {...committeeConclusion(heldThisMonth, list.length > 0)} className="print:hidden" />
       )}
 
       {/* 開催情報 */}
@@ -242,7 +242,7 @@ export function CommitteeClient() {
           安全委員会・衛生委員会・安全衛生委員会は毎月1回以上の開催が必要です（安衛則23条）。議事の概要等は3年間保存し、議事の概要を遅滞なく労働者へ周知（掲示・書面交付・電磁的記録）してください。標準議題は付議事項（安衛則21・22条）に基づくひな形です。
         </p>
 
-        <div className="mt-4 flex flex-wrap gap-2 print:hidden">
+        <div id="committee-actions" className="mt-4 flex scroll-mt-24 flex-wrap gap-2 print:hidden">
           <button type="button" onClick={handleSave} className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 min-h-[44px] px-3 py-2 text-xs font-bold text-white hover:bg-indigo-700">
             <Save className="h-3.5 w-3.5" aria-hidden="true" /> この端末に保存
           </button>
