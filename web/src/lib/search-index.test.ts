@@ -102,7 +102,7 @@ describe('countByCategory', () => {
 
 describe('CATEGORY_META', () => {
   it('全カテゴリにラベルと配色を持つ', () => {
-    for (const key of ['law', 'notice', 'chemical', 'education', 'accident', 'precedent', 'glossary'] as const) {
+    for (const key of ['law', 'notice', 'chemical', 'education', 'accident', 'precedent', 'glossary', 'faq'] as const) {
       expect(CATEGORY_META[key].label).toBeTruthy();
       expect(CATEGORY_META[key].bgColor).toMatch(/^bg-/);
       expect(CATEGORY_META[key].textColor).toMatch(/^text-/);
@@ -133,8 +133,52 @@ describe('buildSearchIndex — 用語集（glossary）の収載', () => {
     const index = await buildSearchIndex();
     const c = countByCategory(index, '安全');
     expect(c.all).toBe(
-      c.law + c.notice + c.chemical + c.education + c.accident + c.precedent + c.glossary,
+      c.law + c.notice + c.chemical + c.education + c.accident + c.precedent + c.glossary + c.faq,
     );
+  });
+});
+
+describe('buildSearchIndex — FAQ の収載', () => {
+  const FAQ_CATEGORY_SLUGS = new Set([
+    'law-system',
+    'management',
+    'chemical',
+    'health-education',
+  ]);
+
+  it('@/data/faqs の全 FAQ が faq カテゴリで /faq/<category> へ深リンクされる', async () => {
+    const [index, faqMod] = await Promise.all([
+      buildSearchIndex(),
+      import('@/data/faqs'),
+    ]);
+    const faqItems = index.filter((i) => i.category === 'faq');
+    // ALL_FAQS（4 バッチ）を漏れなく収載＝正本と件数一致（欠落バッチ 0）
+    expect(faqItems.length).toBe(faqMod.ALL_FAQS.length);
+    expect(faqItems.length).toBeGreaterThanOrEqual(150);
+    expect(faqItems.every((i) => i.id.startsWith('faq-'))).toBe(true);
+    // 深リンク先はカテゴリ一覧のみ＝裸 /faq には落とさない
+    expect(faqItems.every((i) => i.url.startsWith('/faq/'))).toBe(true);
+    expect(faqItems.some((i) => i.url === '/faq')).toBe(false);
+  });
+
+  it('深リンク先の category slug は実在する /faq/<slug> 一覧ページに解決する（幽霊リンク 0）', async () => {
+    const index = await buildSearchIndex();
+    const faqItems = index.filter((i) => i.category === 'faq');
+    for (const i of faqItems) {
+      const slug = i.url.replace('/faq/', '');
+      expect(FAQ_CATEGORY_SLUGS.has(slug)).toBe(true);
+    }
+  });
+
+  it('疑問文・関連法令・タグのいずれからもヒットし回答が subtitle に出る', async () => {
+    const index = await buildSearchIndex();
+    // 質問インテント（安全管理者の選任要件＝法令 FAQ）で faq 結果が返る
+    const byQuestion = searchItems(index, '安全管理者 選任', 'faq');
+    expect(byQuestion.length).toBeGreaterThan(0);
+    // 結果一覧で即答できるよう回答冒頭を subtitle に載せている
+    expect(byQuestion.every((i) => i.subtitle.length > 0)).toBe(true);
+    // keywords（関連法令）経由で条番号からも引ける
+    expect(searchItems(index, '安衛法第11条', 'faq').length).toBeGreaterThan(0);
   });
 });
 
