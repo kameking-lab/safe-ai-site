@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-03 — 柱C-2追補 横断検索に安全標識(JIS Z 9101・約110種)を収載（PR: seo/c2-safety-signs-cross-search / #666）
+
+回収: 自班の緑・未マージ PR #647（FAQ200問）を squashマージ→`git checkout main && git pull --ff-only`→clean。#653（PWA/かな折り畳み却下）が origin/main と CONFLICTING（BACKLOG/cycle-log の追記衝突のみ・コードは auto-merge）だったため当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決し push（CI 再走は次イテレーションで回収）。#657（化学物質 sitemap）は CI 実行中のため持ち越し。
+
+着手判断: BACKLOG-seo 未着手は 0 件（O17/T6・T7 は Path A 設計ドラフト=オーナー承認待ち）のため補充の指針§に従い自領域から補充。site-critique 01(S-1〜A-4)/robots(A-1) を再点検し、大半は既達を確認（sitemap-articles=実在記事の動的生成済／robots のAI検索引用系=OAI-SearchBot/ChatGPT-User/PerplexityBot は許可リスト済／/audits 内部レポートはページごと削除済）。残る真の発見性の穴として、横断検索が **安全標識(safety-signs)** を1件も収載していない点を特定＝`@/data/safety-signs` の JIS Z 9101 準拠 約110種（禁止/警告/指示/安全状態/防火）は個別詳細ページ `/safety-signs/sign/[id]` が既に sitemap 収載済みなのに、⌘K・/search から 0 件で、発見手段が /safety-signs ハブ回遊のみだった（用語・FAQ とも別軸の視覚標識の直接照会）。
+
+実装: `search-index.ts` に `sign` カテゴリ新設。`SAFETY_SIGNS`(node:fs非依存=ブラウザ安全)＋`SIGN_CATEGORIES`(分類ラベル) を read-only import。title=標識名・subtitle=分類ラベル+意味(90字cap)・keywords=英名(nameEn)+分類ラベル+関連法令(statute+article・article は任意のため三項で string[] を保証)。url=`/safety-signs/sign/<id>`＝詳細の `generateStaticParams` が SAFETY_SIGNS 全件 id を返し未知 id を `notFound()` で弾く＝**収載集合＝解決集合（幽霊URL0）**。UI(SearchResults/CommandPalette)に 標識 タブ＋Signpost(amber) を追加、CATEGORY_META/countByCategory/CATEGORIES を拡張。同点タイブレークは `SEARCH_CATEGORY_PRIORITY` で用語と同じ参照系ティア（glossary の次・chemical/accident の前）に置き、法令・教育・FAQ より下位＝locked不変条件「就業制限」1位=安衛法61条(O8-a/T8) は標識名と非衝突。
+
+回帰: search-index.test.ts に sign describe 3本追加＝(1)全SAFETY_SIGNS収載(件数一致・裸/safety-signs不在・深リンク)(2)id集合が正本SAFETY_SIGNSに解決(generateStaticParams一致=soft404ゼロ)(3)標識名「立入禁止」→/safety-signs/sign/no-entry・英名「No entry」・関連法令「労働安全衛生規則 第325条」ヒット＋意味subtitle。既存 glossary の countByCategory 合計テストに c.sign を追記（query「安全」が標識にも当たるため）、CATEGORY_META 網羅テストに sign を追記。
+
+ゲート: `tsc --noEmit`=0（初回 tsc worker が segfault=139＝OOM、NODE_OPTIONS=--max-old-space-size=6144 で再実行し 0）/ `eslint`(4ファイル)=errors0(warn は既存の未使用 disable directive 1・当該行は無改変)/ `vitest run`=264ファイル**2241テスト全緑**（sign 3本含む）/ `build`=成功。build 再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json・ky-print-sheet snapshot）は `git checkout` で復元。working tree は search-index.ts/test・SearchResults・CommandPalette の4ファイルのみで clean。
+
+残: 本 PR #666＋#653＋#657 の CI 緑回収＆マージ（次イテレーション 1)）。次の未着手は補充（記事横断検索は data班のブラウザ安全集約待ち＝要・他班・O17 実装はオーナー承認待ち）。
+
+---
+
 ## 2026-07-03 — 柱C-3-3 追補4 孤立していた実在ツールページ /ky/workers を sitemap 収載（PR: seo/c3-3-supplement4-ky-workers-sitemap）
 
 回収: 自班の未マージ `seo/` PR は無し（直近の #627 追補2・#635 O17設計ドラフト等は main へマージ済）。`git status` clean・main を ff-only 同期済み。他班の OPEN PR（#636 data 等）は触らず。
