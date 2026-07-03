@@ -299,7 +299,7 @@ export default function ShokuchoPage() {
               <a
                 href="/seminars/shokucho.pptx"
                 download
-                className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-slate-800 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 min-h-[44px] text-sm font-bold text-white shadow-sm hover:bg-slate-800 transition-colors"
               >
                 <Download className="h-4 w-4" />
                 PPTXサンプルをダウンロード
@@ -370,14 +370,14 @@ export default function ShokuchoPage() {
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
             href="/contact?category=education&course=shokucho"
-            className="inline-flex items-center gap-2 rounded-lg bg-sky-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-sky-800 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg bg-sky-700 px-5 py-2.5 min-h-[44px] text-sm font-bold text-white shadow-sm hover:bg-sky-800 transition-colors"
           >
             <Mail className="h-4 w-4" />
             ご質問・改善提案を送る
           </Link>
           <Link
             href="/contact?category=education&course=shokucho&type=document"
-            className="inline-flex items-center gap-2 rounded-lg border border-sky-700 bg-white px-5 py-2.5 text-sm font-bold text-sky-800 hover:bg-sky-50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg border border-sky-700 bg-white px-5 py-2.5 min-h-[44px] text-sm font-bold text-sky-800 hover:bg-sky-50 transition-colors"
           >
             <FileText className="h-4 w-4" />
             教材についての質問

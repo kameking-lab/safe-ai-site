@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-03 教育コース詳細12ページの主要CTA3種を44px化（柱0磨き）
+
+回収: 自ブランチPR #749（ky/education 残存44px8箇所）がCI緑（e2e/smoke SUCCESS）と確認できたが、`main`とdirty（BACKLOG/cycle-logの同時追記による行競合のみ・コード競合なし）と判明。squashマージ前に契約どおり origin/main を当該ブランチへ通常マージで解消（本ログの直前エントリ2件を時系列順に並べ替えて統合）→ tsc=0/lint errors0/vitest 2492 pass/build成功を確認しpush。CI再走の緑は次イテレーションで回収（auto-merge無効のためこのイテレーションではマージ見送り）。
+
+着手: 上位未着手3件（O15/S2/S3）はいずれもdataレーンO14（型別サマリ生成）依存で全ブロック継続中のため、Exploreエージェントに当班所有route/componentの柱0（3秒で状態＋次アクションが分かるか）・44px巡回を依頼。/education-certification・/health-checkup-scheduler（今回のブリーフで名指しされた2領域）はConclusionCard導入・action配線とも既に徹底済みと確認（新規の欠落なし）。一方、教育コース詳細12ページ（`/education/tokubetsu/*`6・`/education/roudoueisei/*`4・`/education/hoteikyoiku/*`2、いずれも同一テンプレート）の共通テンプレートに存在する主要CTA3種（PPTXサンプルDL・ご質問送信・資料請求/教材についての質問）が実測36〜40pxで`min-h-[44px]`未指定のまま残存と判明（ページ最上部の`CourseConclusion`ConclusionCard自体のaction導線は既に44px化済みなのに、本文下部の実CTAが非対称に取り残されていた）。
+
+実装（足すだけ・`min-h-[44px]`追加のみ、ロジック無変更）: 12ページ×3箇所＝36インスタンスに`min-h-[44px]`を追加。3箇所とも全12ページで同一classNameパターン（PPTXサンプルDL＝`bg-slate-900 px-4 py-2`、問い合わせ2ボタン＝`px-5 py-2.5`系）だったため機械的sed置換で統一適用し、置換後に各ファイルのマッチ件数(1+2=3)が想定どおりであることを事前確認。
+
+検証: `tsc --noEmit`=0 / `lint`=errors0（既存warn23件のみ、当班分の増減なし）/ `vitest run`=293ファイル2492テスト全pass（クラス名追加のみのため新規ユニットテストなし）/ `build`=成功。無読Playwright新規`docs/third-party-reviews/scripts/education-course-cta-44px-2026-07-03.mjs`を prod start(3100)で実行し36/36 PASS（全12ページ×PPTXサンプルDL・ご質問送信・2番目CTAの3ボタンの実測高さ。2番目CTAの文言は`tamakake`のみ「資料請求」で他11ページは「教材についての質問」と非対称だったため`href*="type=document"`で識別し文言差異を吸収）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。PR #749はCI待ちで次回収。
+
+---
+
 ## 2026-07-03 巡回発見の残存44px未満ボタンを是正（柱0磨き・続き）
 
 回収: 自ブランチPR #737（回収サイクルログ）がCI全緑（Vercel SUCCESS）と確認できたためsquashマージ＋作業ブランチ削除。`git pull --ff-only`で以後の他班マージ分含め`main`をfast-forward・clean確認。マージ済みの旧自班リモートブランチ4本（committee-conclusion-action/contribute-conclusion-card-44px/ky-examples-conclusion-cta-44px/site-records-action-bar-44px、いずれもPR #718/#715/#702/#725として既にマージ済み）は`git fetch --prune`で既に削除済みと確認。
