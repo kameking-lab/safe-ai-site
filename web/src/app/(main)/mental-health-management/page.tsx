@@ -17,6 +17,7 @@ import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { ogImageUrl } from "@/lib/og-url";
 import {
   HARASSMENT_LINKAGES,
@@ -129,6 +130,19 @@ export default function MentalHealthManagementHubPage() {
         description="ストレスチェック制度の実施・面接指導・50人未満事業場対応・ハラスメント対策連携を実務担当者向けに整理"
         icon={Brain}
         iconColor="blue"
+      />
+
+      <ConclusionCard
+        tone="info"
+        value={SUBPAGES.length}
+        unit="本"
+        title="実務ガイド"
+        description="事業場規模で義務／努力義務が分かれます。まずは実施準備チェックリストから。"
+        action={{
+          href: "/mental-health-management/stress-check",
+          label: "チェックリストを見る",
+        }}
+        className="mt-6"
       />
 
       <section className="mt-6">
