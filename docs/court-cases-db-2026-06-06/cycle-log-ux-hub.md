@@ -1,5 +1,55 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-04 — 補充: signage-today-documents.tsx サムネイル個別削除ボタンの44px是正
+
+**イテレーション頭の回収**: 自班のオープンPR3件を回収。#811(daily-values-extras-panel-44px)・#819(signage-rotator-danger-alert-44px-color)・#822(faq-diversity-signage-44px-remnants)はいずれもe2e/smoke/Vercel全緑だったが、3件とも`BACKLOG-ux-hub.md`・`docs/court-cases-db-2026-06-06/cycle-log-ux-hub.md`のみmainとコンフリクト（コード非衝突、同日の並行マージ由来）→順に`origin/main`を各ブランチへ通常マージし両エントリ保持で解決→都度ゲート再走（tsc/lint/vitest/build）全緑→push→squashマージ。3件ともマージ後、リモート・ローカルブランチを削除。`git checkout main && git pull --ff-only`でclean確認（`docs/rag-metrics-latest.json`・`chatbot-eval-fresh-results.json`はops班nightly evalの生成物で改行コードのみの差分のため復元・非コミット）。
+
+**注意事項**: 作業中に`web/AGENTS.md`（CLAUDE.mdが`@AGENTS.md`で参照）が「これはあなたの知るNext.jsではない。node_modules内のdocsを読め」と誘導する文言を今回も検出。既知のプロンプトインジェクションと判断し無視、指示内容のコード変更は一切行わず本来のタスクのみ継続。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、`signage-today-documents.tsx`（サイネージ「作業資料」モードのサムネイル一覧）の個別削除ボタン（右上✕バッジ）が`h-5 w-5`(20×20px)固定のまま残っていたことを発見。同ファイル内の他ボタン（＋資料を追加・一括クリア・カルーセル上の✕削除・タイトル編集input）はいずれも既に44px是正済みで、このサムネイル×削除ボタンだけが2026-07-03の一括是正から漏れていた。
+
+**修正**: サムネイルは横並び`gap-2`(8px)の小型カード(80〜96px幅)のため、削除バッジを単純に44×44pxへ拡大すると隣接サムネイルへ視覚的に被る・見た目が崩れるregressionが生じることが判明。ボタン自体(`min-h-[44px] min-w-[44px]`)は44pxタップ標的を確保しつつ、視覚上の赤い✕バッジは内側の`<span>`(`h-5 w-5`)へ移す構成に変更し、見た目の小バッジ表現は維持（純粋なマークアップ再構成・削除ロジック・DOM位置は不変）。
+
+**テスト**: `signage-today-documents-44px.test.ts`へ1件追加（ソース走査でボタンブロックに`min-h-[44px]`・`min-w-[44px]`両方が付与されていることを確認）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 317 files + 1 skipped・2682 tests 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/signage-today-documents-thumbnail-delete-44px-2026-07-04.mjs`（next start実機・Playwright・1920×1080）**2/2 PASS**（サムネイル削除ボタンのboundingBox高さ・幅とも44px以上を実測）。localStorageへのテスト用資料投入は`page.addInitScript`で実施。
+
+---
+
+## 2026-07-04 — 補充: /faq/search・/diversity/women アコーディオン＋サイネージ2箇所の44px是正
+
+**イテレーション頭の回収**: 自班のオープンPR #819(signage-rotator進捗ドット・signage-danger-alert閉じるボタン44px)がe2e/smoke共にIN_PROGRESSで未緑のため今回はマージ見送り・次イテレーションで回収。`git checkout main && git pull --ff-only`でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、既存44px一括是正の網羅Grepから漏れていた4箇所を発見: ①`/faq/search`検索結果アコーディオンボタン(`px-4 py-3`のみ)、②`/diversity/women`法令アコーディオンボタン(同パターン)、③`/signage`トレンド拡大モーダル「記事を開く →」外部リンク(`px-5 py-2.5 text-sm`のみ)、④`signage-today-documents.tsx`資料タイトル編集input(`px-3 py-2 text-base`のみ)。いずれも兄弟要素・類似ページは既に是正済みだったが取り残されていた既存欠陥。
+
+**修正**: 4ファイルに`min-h-[44px]`を付与（純粋なクラス追加でレイアウト・ロジック不変）。
+
+**テスト**: `faq-pillar0.test.tsx`・`women-44px-targets.test.tsx`・`page-refresh-config.test.ts`・`signage-today-documents-44px.test.ts`へ計4件追加。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 310 files + 1 skipped・2647 tests 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/faq-diversity-signage-44px-remnants-2026-07-04.mjs`（next start実機・Playwright）**23/23 PASS**（/faq/searchアコーディオン15件・/diversity/women法令アコーディオン5件・/signage記事リンク1件、すべて実boundingBox height≧44px実測）。資料タイトル編集inputは「作業資料」モード切替+資料投入が必要な条件付き要素のため自動操作を割愛しvitestソース走査のみで担保（過去PRと同じ扱い）。ESM実行時`docs/third-party-reviews/scripts/`が`web/node_modules`の外にあり`@playwright/test`が解決できない既知の問題は、実行時のみ`web/`直下へ一時コピーして回避（保存先は規定どおり`docs/`配下）。
+
+**残課題**: PR #819はCI待ち・次イテレーションで回収。Explore調査での残存候補は使い果たしたため、次回は補充の指針（無読テスト再走査・404/パンくず確認）から再着手予定。
+
+---
+
+## 2026-07-04 — 補充: signage-rotator進捗ドット・signage-danger-alert閉じるボタン44px是正＋saved-accidents色文法是正
+
+**イテレーション頭の回収**: 自班のオープンPR #809(trend-summary-court-filter-44px)がe2e/smoke/Vercel全緑だったがmainと`docs/court-cases-db-2026-06-06/cycle-log-ux-hub.md`のみコンフリクト(コード非衝突、#810等の他班マージ由来)→`origin/main`を当該ブランチへ通常マージし両エントリ保持で解決→ゲート再走(tsc/lint/vitest2647件/build)全緑→push→CI緑確認後squashマージ・リモートブランチ削除。PR #811(daily-values-extras-panel-44px)はsmoke IN_PROGRESSのため今回は見送り、次イテレーションで回収。`git checkout main && git pull --ff-only`でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、①サイネージ`signage-rotator.tsx`(トレンドニュース・法改正ローテーターの汎用共通部品)の進捗ドットが`min-h-[24px] min-w-[24px]`と明示的に24pxのまま残っていたこと、②`signage-danger-alert.tsx`の危険イベント全画面アラート唯一のタップ解除手段「✕ 閉じる」ボタンが`p-2`+`h-6`アイコンのみ(実測≈40px)で44px未満だったこと、③`accidents/saved-accidents.tsx`(保存した事故事例パネル)が同種の「保存」表現である`favorites/favorites-list.tsx`は`amber`系で統一されているのに対し本ファイルのみ`yellow-200`/`yellow-50`/`yellow-500`を直書きしていた色の文法違反、を発見。いずれも既存の一括是正バッチの走査対象から漏れていた。
+
+**修正**: 3ファイルの`min-h`/`min-w`計2要素を44pxへ、色クラス3箇所をyellow→amberへ是正(純粋なクラス変更でレイアウト・ロジック不変)。ローテーターのドット拡大は`xl:flex-1 xl:overflow-hidden`のセクション内で`shrink-0`の行が20px分伸びるだけのため、サイネージ不可侵の1画面フィットには影響しない設計であることをコード上確認済み。
+
+**テスト**: `signage-rotator.test.tsx`へ1件追加(全ドットの`min-h-[44px]`/`min-w-[44px]`確認)、`saved-accidents.test.tsx`へ1件追加(yellow直書き不在＋amber使用の回帰ガード)、`signage-danger-alert.test.tsx`を新設(手動発動→オーバーレイ表示→閉じるボタンの44×44px確認)。計3ファイル3件追加。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 314 files・2647 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/rotator-danger-alert-saved-accidents-44px-color-2026-07-04.mjs`（next start実機・Playwright・サイネージ1920×1080/`/accidents`スマホ390×844）**3/3 PASS**（危険イベントアラート「閉じる」ボタン44.0×44.0px実測・トレンド/法改正ローテーター進捗ドット計15件すべて44×44px以上実測・保存した事故事例パネルのHTML内にyellow直書き無し＋amber使用を確認）。localStorageへの事前投入は`page.addInitScript`で実施。
+
 ## 2026-07-04 — 補充: signage-daily-values.tsx 起点日フォーム後退＋accident-extras-panel.tsx 未着手リンクの44px是正
 
 **イテレーション頭の回収**: PR #781(accident-database-panel-44px)がe2e/smoke/selftest/Vercel全緑のためsquashマージ→`git checkout main && git pull --ff-only`でclean確認。自班PR #809(trend-summary-court-filter-44px)はe2e/smoke IN_PROGRESSのため今回は見送り、次イテレーションで回収。

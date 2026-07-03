@@ -469,7 +469,7 @@ export function SignageTodayDocuments() {
                 value={currentItem.title}
                 onChange={(e) => handleUpdateItem(currentItem.id, "title", e.target.value)}
                 placeholder="タイトル（例：3階躯体図面）"
-                className="w-full rounded-lg bg-slate-700 px-3 py-2 text-base font-bold text-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 sm:text-xl"
+                className="w-full min-h-[44px] rounded-lg bg-slate-700 px-3 py-2 text-base font-bold text-slate-50 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 sm:text-xl"
               />
               <textarea
                 value={currentItem.memo}
@@ -531,16 +531,18 @@ export function SignageTodayDocuments() {
                     </div>
                   )}
                 </div>
-                {/* 個別削除ボタン（右上の×） */}
+                {/* 個別削除ボタン（右上の×・タップ標的は44px確保しつつ見た目は小バッジのまま） */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     handleRemove(item.id);
                   }}
                   aria-label={`資料 ${idx + 1} を削除`}
-                  className="absolute -right-1.5 -top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-rose-700 text-[11px] font-bold text-white shadow hover:bg-rose-500"
+                  className="absolute -right-1.5 -top-1.5 z-10 flex min-h-[44px] min-w-[44px] items-center justify-center"
                 >
-                  ✕
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-700 text-[11px] font-bold text-white shadow hover:bg-rose-500">
+                    ✕
+                  </span>
                 </button>
               </div>
             ))}

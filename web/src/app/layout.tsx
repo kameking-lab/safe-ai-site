@@ -5,6 +5,12 @@ import { FuriganaProvider } from "@/contexts/furigana-context";
 import { EasyJapaneseProvider } from "@/contexts/easy-japanese-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { JsonLd, organizationSchema, webSiteSchema } from "@/components/json-ld";
+import {
+  SITE_URL,
+  SITE_NAME,
+  SITE_LOCALE,
+  SITE_ALTERNATE_LOCALES,
+} from "@/lib/seo-metadata";
 import { ServiceWorkerRegistrar } from "@/components/service-worker-registrar";
 import { InstallPwaPrompt } from "@/components/install-pwa-prompt";
 import { CommandPaletteProvider } from "@/components/CommandPaletteProvider";
@@ -54,18 +60,28 @@ export const metadata: Metadata = {
     : {}),
   description:
     "労働安全衛生分野のAI・DX活用研究プロジェクト。通達・事故事例・化学物質情報を一次ソース付きで無料公開。",
-  metadataBase: new URL("https://www.anzen-ai-portal.jp"),
+  // 柱C-3 / S DRY: ルート metadata の絶対URLオリジン（metadataBase・サイトルート
+  // canonical）も seo-metadata.ts の SITE_URL 単一ソースへ集約する。sitemap/robots/
+  // og-image/json-ld/page-json-ld は既に SITE_URL 集約済みで、ルート layout.tsx の
+  // metadataBase と canonical だけがドメイン直書きの取り残しだった。ここは全ページの
+  // og:url/canonical 解決の基点かつサイトルート canonical という最重要箇所で、SITE_URL を
+  // 別ドメインへ替えても追従しない構造上の穴だった。SITE_URL は末尾スラッシュ無し＝従来の
+  // 直書き値と同値のため出力は byte-identical。
+  metadataBase: new URL(SITE_URL),
   alternates: {
-    canonical: "https://www.anzen-ai-portal.jp",
+    canonical: SITE_URL,
     // 実在する公開RSSフィード（/feed/*.xml）を全ページ <head> で広告し、RSSリーダー・
     // ブラウザ・クローラからの自動発見を有効化する。登録簿は lib/seo/feeds.ts が単一ソース。
     types: rssAlternateTypes(),
   },
   openGraph: {
     type: "website",
-    locale: "ja_JP",
-    alternateLocale: ["en_US"],
-    siteName: "安全AIポータル",
+    // locale/alternateLocale/siteName も seo-metadata.ts の単一ソースへ集約
+    //（SITE_LOCALE="ja_JP" / SITE_ALTERNATE_LOCALES=["en_US"] / SITE_NAME="安全AIポータル"
+    // ＝従来の直書き値と同値のため出力は byte-identical）。
+    locale: SITE_LOCALE,
+    alternateLocale: [...SITE_ALTERNATE_LOCALES],
+    siteName: SITE_NAME,
     title: {
       default: "安全AIポータル｜現場の安全を、AIで変える。",
       template: "%s｜安全AIポータル",
