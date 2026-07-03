@@ -436,11 +436,12 @@ describe("faqPageSchema / productCollectionSchema / definedTermSetSchema / quizS
 });
 
 describe("courseListSchema / datasetSchema / qaPageSchema / dataCatalogSchema", () => {
-  it("CourseList は provider を共通組織に固定", () => {
+  it("CourseList は provider を正準 Organization ノード（ORG_ID）へ集約", () => {
     const s = courseListSchema([{ name: "講座", description: "説明" }]);
     const els = s.itemListElement as Array<{ item: { provider: { name: string; url: string } } }>;
     expect(els[0].item.provider).toEqual({
       "@type": "Organization",
+      "@id": ORG_ID,
       name: SITE_NAME,
       url: SITE_URL,
     });
@@ -479,6 +480,63 @@ describe("courseListSchema / datasetSchema / qaPageSchema / dataCatalogSchema", 
     });
     expect(cat["@type"]).toBe("DataCatalog");
     expect((cat.dataset as unknown[]).length).toBe(1);
+  });
+});
+
+describe("エンティティグラフ: 低頻度 provider/creator ノードの @id 集約", () => {
+  // provider / creator / isPartOf として自サイト組織・サイトを指す低頻度スキーマも、
+  // 主要エンティティ（#704）と同じ正準 ORG_ID / WEBSITE_ID を参照し、name/url を
+  // インライン再宣言する重複ノードへ分裂しないこと。@id を欠くと検索エンジンから
+  // 「別の組織/サイト」に見え、ナレッジグラフのブランド同定シグナルが希釈される。
+  const orgRef = {
+    "@type": "Organization",
+    "@id": ORG_ID,
+    name: SITE_NAME,
+    url: SITE_URL,
+  };
+  const websiteRef = {
+    "@type": "WebSite",
+    "@id": WEBSITE_ID,
+    name: SITE_NAME,
+    url: SITE_URL,
+  };
+
+  it("Service の provider が ORG_ID を指す", () => {
+    const s = serviceSchema({
+      name: "プラン",
+      description: "d",
+      url: `${SITE_URL}/pricing`,
+      serviceType: "SaaS",
+    });
+    expect(s.provider).toEqual(orgRef);
+  });
+
+  it("Dataset / DataCatalog の creator が ORG_ID を指す", () => {
+    const ds = datasetSchema({ name: "DS", description: "d", url: `${SITE_URL}/ds` });
+    expect(ds.creator).toEqual(orgRef);
+    const cat = dataCatalogSchema({
+      name: "catalog",
+      description: "d",
+      url: `${SITE_URL}/c`,
+      datasets: [{ name: "DS", url: `${SITE_URL}/ds` }],
+    });
+    expect(cat.creator).toEqual(orgRef);
+  });
+
+  it("Quiz の provider が ORG_ID を指す", () => {
+    const s = quizSchema({
+      name: "テスト",
+      description: "d",
+      url: `${SITE_URL}/quiz`,
+      questions: [{ text: "Q", choices: ["ア", "イ"], correct: 0 }],
+    });
+    expect(s.provider).toEqual(orgRef);
+  });
+
+  it("QAPage の isPartOf=WEBSITE_ID・publisher=ORG_ID を参照する", () => {
+    const s = qaPageSchema({ name: "q", description: "d", url: `${SITE_URL}/q` });
+    expect(s.isPartOf).toEqual(websiteRef);
+    expect(s.publisher).toEqual(orgRef);
   });
 });
 

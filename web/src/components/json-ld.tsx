@@ -97,6 +97,27 @@ const PUBLISHER_REF = {
   },
 } as const;
 
+/**
+ * 正準 Organization / WebSite ノードへの軽量参照（ロゴ無し）。
+ * provider / creator / isPartOf として自サイト組織・サイトを指す低頻度スキーマ
+ * （Service・Course・Dataset・Quiz・DataCatalog・QAPage 等）が、name/url を
+ * インライン再宣言して別ノードへ分裂するのを防ぎ、@id で ORG_ID / WEBSITE_ID の
+ * 正準ノードへ集約する（PUBLISHER_REF＝ロゴ付き発行主体ノードと同じ @id を共有）。
+ */
+const ORG_REF = {
+  "@type": "Organization",
+  "@id": ORG_ID,
+  name: SITE_NAME,
+  url: SITE_URL,
+} as const;
+
+const WEBSITE_REF = {
+  "@type": "WebSite",
+  "@id": WEBSITE_ID,
+  name: SITE_NAME,
+  url: SITE_URL,
+} as const;
+
 const DEFAULT_OG_IMAGE = `${SITE_URL}/api/og`;
 
 export function articleListSchema(
@@ -223,11 +244,7 @@ export function serviceSchema(input: {
   priceCurrency?: string;
 }): Schema {
   const { name, description, url, serviceType, priceFrom, priceCurrency = "JPY" } = input;
-  const provider = {
-    "@type": "Organization",
-    name: SITE_NAME,
-    url: SITE_URL,
-  };
+  const provider = ORG_REF;
   const offers = priceFrom
     ? {
         offers: {
@@ -372,18 +389,8 @@ export function webPageSchema(input: {
     description,
     url,
     inLanguage,
-    isPartOf: {
-      "@type": "WebSite",
-      "@id": WEBSITE_ID,
-      name: SITE_NAME,
-      url: SITE_URL,
-    },
-    publisher: {
-      "@type": "Organization",
-      "@id": ORG_ID,
-      name: SITE_NAME,
-      url: SITE_URL,
-    },
+    isPartOf: WEBSITE_REF,
+    publisher: ORG_REF,
     ...(datePublished ? { datePublished } : {}),
     ...(dateModified ? { dateModified } : {}),
     ...(keywords && keywords.length ? { keywords: keywords.join(", ") } : {}),
@@ -455,11 +462,7 @@ export function courseListSchema(
         "@type": "Course",
         name: course.name,
         description: course.description,
-        provider: {
-          "@type": "Organization",
-          name: SITE_NAME,
-          url: SITE_URL,
-        },
+        provider: ORG_REF,
       },
     })),
   };
@@ -482,11 +485,7 @@ export function datasetSchema(input: {
     name,
     description,
     url,
-    creator: {
-      "@type": "Organization",
-      name: SITE_NAME,
-      url: SITE_URL,
-    },
+    creator: ORG_REF,
     inLanguage: "ja",
     ...(license ? { license } : {}),
     ...(keywords ? { keywords } : {}),
@@ -516,11 +515,8 @@ export function qaPageSchema(input: {
     description: input.description,
     url: input.url,
     inLanguage: "ja",
-    isPartOf: {
-      "@type": "WebSite",
-      name: SITE_NAME,
-      url: SITE_URL,
-    },
+    isPartOf: WEBSITE_REF,
+    publisher: ORG_REF,
   };
 }
 
@@ -567,11 +563,7 @@ export function quizSchema(input: {
     inLanguage: "ja",
     ...(input.about ? { about: { "@type": "Thing", name: input.about } } : {}),
     educationalUse: "practice",
-    provider: {
-      "@type": "Organization",
-      name: SITE_NAME,
-      url: SITE_URL,
-    },
+    provider: ORG_REF,
     hasPart: input.questions.slice(0, 10).map((q) => ({
       "@type": "Question",
       name: q.text,
@@ -601,11 +593,7 @@ export function dataCatalogSchema(input: {
     description: input.description,
     url: input.url,
     inLanguage: "ja",
-    creator: {
-      "@type": "Organization",
-      name: SITE_NAME,
-      url: SITE_URL,
-    },
+    creator: ORG_REF,
     dataset: input.datasets.map((d) => ({
       "@type": "Dataset",
       name: d.name,
