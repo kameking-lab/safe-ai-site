@@ -16,12 +16,15 @@ export function PageJsonLd({
   path,
   breadcrumbs,
   keywords,
+  contributor,
 }: {
   name: string;
   description: string;
   path: string;
   breadcrumbs?: Crumb[];
   keywords?: string[];
+  /** E-E-A-T監修者をcontributorとして付与するか（法令隣接コンテンツ向け） */
+  contributor?: boolean;
 }) {
   const url = `${SITE_BASE}${path}`;
   const crumbs: Crumb[] = breadcrumbs ?? [
@@ -39,7 +42,7 @@ export function PageJsonLd({
     <>
       <JsonLd
         schema={[
-          webPageSchema({ name, description, url, keywords }),
+          webPageSchema({ name, description, url, keywords, contributor }),
           breadcrumbSchema(crumbs),
         ]}
       />

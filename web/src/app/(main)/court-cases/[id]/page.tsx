@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Scale, ArrowLeft, ExternalLink, ClipboardList, Database, MessageSquare, Gavel, Printer } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { SupervisorByline } from "@/components/SupervisorByline";
 import { COURT_CASES, getCourtCaseById } from "@/data/court-cases";
 import { FIELD_ICON } from "@/lib/court-cases/case-visual";
 
@@ -58,7 +59,7 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
 
   return (
     <>
-      <PageJsonLd name={`${c.name}（労災裁判例）`} description={c.oneLine} path={`/court-cases/${c.id}`} />
+      <PageJsonLd name={`${c.name}（労災裁判例）`} description={c.oneLine} path={`/court-cases/${c.id}`} contributor />
       <PageContainer>
         <div className="mx-auto max-w-3xl">
           <div className="flex flex-wrap items-center justify-between gap-2 print:hidden">
@@ -97,6 +98,9 @@ export default async function CourtCaseDetailPage({ params }: { params: Promise<
               {c.court}　{c.dateLabelJa}（{c.date.replace(/-/g, "/")}）{c.citation ? `　${c.citation}` : ""}
             </p>
             <p className="mt-2 text-sm font-medium text-emerald-900 dark:text-emerald-200">{c.oneLine}</p>
+            <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
+              監修: <SupervisorByline className="text-emerald-700 hover:underline dark:text-emerald-300" />
+            </p>
           </header>
 
           {/* 柱0・結論ファースト: 読者が知りたいのは「裁判所がどう判断したか」— 概要より先に置く */}

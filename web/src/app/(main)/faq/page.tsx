@@ -3,6 +3,7 @@ import Link from "next/link";
 import { HelpCircle, Scale, Users, FlaskConical, Heart, Search } from "lucide-react";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd, faqPageSchema, breadcrumbSchema } from "@/components/json-ld";
+import { SupervisorByline } from "@/components/SupervisorByline";
 import { ALL_FAQS, getFAQsByCategory } from "@/data/faqs";
 import { FAQ_CATEGORY_LABELS, FAQ_CATEGORY_DESCRIPTIONS, type FAQCategory } from "@/types/faq";
 import { ogImageUrl } from "@/lib/og-url";
@@ -61,7 +62,7 @@ export default function FAQHubPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-6 sm:py-10">
       <PageJsonLd name={TITLE} description={DESCRIPTION} path="/faq" />
-      <JsonLd schema={faqPageSchema(topFaqs)} />
+      <JsonLd schema={faqPageSchema(topFaqs, { contributor: true })} />
       <JsonLd
         schema={breadcrumbSchema([
           { name: "ホーム", url: "https://www.anzen-ai-portal.jp" },
@@ -77,6 +78,9 @@ export default function FAQHubPage() {
         </p>
         <h1 className="mt-3 text-2xl font-bold text-slate-900 sm:text-3xl">{TITLE}</h1>
         <p className="mt-2 text-sm leading-relaxed text-slate-600 sm:text-base">{DESCRIPTION}</p>
+        <p className="mt-1.5 text-xs text-slate-500">
+          監修: <SupervisorByline className="text-sky-700 hover:underline" />
+        </p>
 
         {/* Search link */}
         <div className="mt-4">

@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-07-03 — 柱C-3-3 追補4 孤立していた実在ツールページ /ky/workers を sitemap 収載（PR: seo/c3-3-supplement4-ky-workers-sitemap）
+
+回収: 自班の未マージ `seo/` PR は無し（直近の #627 追補2・#635 O17設計ドラフト等は main へマージ済）。`git status` clean・main を ff-only 同期済み。他班の OPEN PR（#636 data 等）は触らず。
+
+着手: BACKLOG-seo 未着手キューは空（Fable診断の実装タスクは消化済、O17/T6・T7 は Path A 設計ドラフトで実装オーナー承認待ち）。補充指針に従い、site-critique の S-1/S-3 系「実在 indexable ページの sitemap 発見性」を自領域で再点検＝静的ルート全件（page.tsx 193本）を sitemap 収載 URL と機械突合。
+
+- **現状確認（実バグ）**: `find src/app -name page.tsx` の静的（非動的）ルート172本と、`sitemap.ts` の literal url + 子サイトマップ収載分を機械 diff。差分40本を1本ずつ「robots index:false / redirect・notFound スタブ / robots.ts Disallow 配下（/admin,/auth,/dev,/api-docs,/lms,/dpa）/ リリース前デモ / ツール状態ページ」で分類した結果、**唯一 `/ky/workers`（作業員マスター）だけが真の孤立ページ**と判明＝`robots` 上書き無し（＝index:true）・`alternates.canonical:"/ky/workers"` 自己canonical・`PageJsonLd` 付・OG 完備の実在ツールなのに全 sitemap 不在。兄弟 `/ky/paper`（追補3で収載済）と同じ KY全面再設計 Phase1-3（#285）で追加されたのに漏れていた。
+- **修正（自班所有の sitemap.ts のみ）**: `/ky/workers` を `/ky/paper` の直後へ追加。lastmod は当該再設計日 `2026-05-25`（兄弟と同節・当日打ちの lastmod スパム回避）、priority 0.7（ツール従属ページ）、changeFrequency monthly。データ・ルート・他班ファイルは一切不変。捏造0＝実在 page.tsx のみ収載。
+- **テスト**: `sitemap.test.ts` に追補4 describe（3 it）追加＝①/ky/workers 収載 ②lastmod==2026-05-25 ③非収載境界 /ky/list（保存済みKY一覧・robots index:false のツール状態）は不収載。追補2 の境界ロック思想を KY 配下へ延伸し、機械的全ページ追加＝誤収載の再発を防止。sitemap.test 24 it 緑・全2178テスト緑・tsc0・lint errors0・build成功。
+- **要・他班（注記のみ・当班は非改変）**: 突合中に `/organization`（正式リリース前デモ）と `/profile`（ユーザ個別ページ）が page 側で `robots index:false` を持たず**潜在的に indexable** な点を発見。sitemap からは正しく除外済み（内部リンク経由クロールのみ）だが、根治には当該ページの generateMetadata へ noindex 付与が要る＝所有 UI 班の担当。/search（当班所有）は既に noindex,follow で問題なし。
+
+---
+
 ## 2026-06-14 — 柱C-2 横断検索の通達を個別詳細へ深リンク化（PR: seo/c2-notices-deeplink）
 
 回収: 緑だった PR #556（C-3-4 DRY sitemap freshest 単一ソース化）を squash マージ→main を ff-only 同期・clean 確認。#561（C-2 事故深リンク）は #556 マージで BACKLOG/cycle-log が追記衝突→当該ブランチへ origin/main を通常マージで解決（両 [x]・両イテレーション記録を併存・force-push なし）し再 push（CI 再走は次イテレーションで回収）。#566（C-2 法令条文収載）は CI（e2e/smoke）進行中＝マージ不可、次回回収。
