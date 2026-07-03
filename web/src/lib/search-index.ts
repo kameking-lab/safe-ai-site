@@ -1,4 +1,4 @@
-import { searchCrossIndex, normalizeArticleQuery, expandLawAliases } from './cross-search';
+import { searchCrossIndex, normalizeArticleQuery, expandLawAliases, chemicalDetailUrl } from './cross-search';
 
 export type SearchCategory = 'law' | 'notice' | 'chemical' | 'equipment' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq' | 'sign' | 'article' | 'feature';
 
@@ -212,7 +212,11 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
       }
     }),
 
-    // 50 mock chemical substances with full detail
+    // 50 mock chemical substances with full detail。
+    // canonical な個別詳細 /chemical-database/[cas] が実在する CAS はそこへ深リンクし
+    // （sitemap-chemicals.xml 収載＝サイト最大級の独自コンテンツへ内部リンクを通す）、
+    // 濃度基準DB 未収載の CAS のみ従来の一覧クエリページへフォールバックする（幽霊URL 0）。
+    // 事故 /accidents/[id]・保護具 /equipment/[id]・通達 /circulars/[id] と同型の深リンク方針。
     import('@/data/mock/chemical-substances-db').then(({ chemicalSubstances }) => {
       for (const c of chemicalSubstances) {
         items.push({
@@ -221,7 +225,7 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           subtitle: `CAS ${c.cas}${c.name_en ? ` / ${c.name_en}` : ''}`,
           category: 'chemical',
           keywords: [c.cas, c.name_en ?? ''].filter(Boolean),
-          url: `/chemical-database?q=${encodeURIComponent(c.name)}`,
+          url: chemicalDetailUrl(c.cas, c.name),
         });
       }
     }),
@@ -240,7 +244,7 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
             subtitle: `CAS ${e.cas} / ${e.categoryLabel}`,
             category: 'chemical',
             keywords: [e.cas, e.categoryLabel].filter(Boolean),
-            url: `/chemical-database?q=${encodeURIComponent(e.name)}`,
+            url: chemicalDetailUrl(e.cas, e.name),
           });
         }
       }
