@@ -33,6 +33,7 @@ import { OfficialRecentLinks } from "@/components/accidents/official-recent-link
 import { AccidentTrendSummary } from "@/components/accidents/accident-trend-summary";
 import { SavedAccidents } from "@/components/accidents/saved-accidents";
 import { AccidentHubNav } from "@/components/accident-hub-nav";
+import { Breadcrumb } from "@/components/breadcrumb";
 
 const _title = "労働災害 事故事例データベース";
 const _desc = `墜落・転倒・はさまれなど10年統合${SITE_STATS.accidents10yCount}件の労働災害 事故事例を業種・事故型で検索。厚生労働省データ（${SITE_STATS.mhlwDeathsCount}件死亡＋${SITE_STATS.accidentDbCount}件全件）＋curated詳細事例（${SITE_STATS.siteCuratedCaseCount}件）を統合し再発防止に活用。`;
@@ -81,6 +82,9 @@ export default function AccidentsPage() {
           }),
         ]}
       />
+      <div className="mx-auto max-w-7xl px-4 pt-3 sm:px-6 lg:px-8">
+        <Breadcrumb items={[{ name: "事故データベース" }]} />
+      </div>
       <AccidentHubNav current="accidents" />
       {/* C-1: ここを Suspense で包むと client モジュールの非同期ロードで境界が
           サスペンドし、静的HTMLに「フォールバック先行→$RCスワップ」が焼き込まれて

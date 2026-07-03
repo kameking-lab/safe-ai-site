@@ -10,12 +10,12 @@ import {
   Baby,
   Heart,
   DoorOpen,
-  ArrowLeft,
   ExternalLink,
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
 import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
+import { Breadcrumb } from "@/components/breadcrumb";
 
 // ── PPEデータ ──────────────────────────────────────────────────
 const PPE_ITEMS = [
@@ -187,14 +187,12 @@ export default function WomenPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 sm:px-6">
-      {/* 戻る */}
-      <Link
-        href="/diversity"
-        className="mb-4 inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 py-1 text-sm text-slate-600 hover:bg-slate-50"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        多様性と安全に戻る
-      </Link>
+      <Breadcrumb
+        items={[
+          { name: "多様性と安全", href: "/diversity" },
+          { name: "女性向け PPE・妊産婦就業ガイド" },
+        ]}
+      />
 
       {/* ヘッダー */}
       <header className="mb-6">
