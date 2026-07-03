@@ -176,7 +176,7 @@ export default function SignageMapLeaflet({
                 <button
                   type="button"
                   onClick={() => onPinDelete(p.id)}
-                  className="mt-2 rounded border border-rose-400 bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-100"
+                  className="mt-2 inline-flex min-h-[44px] items-center rounded border border-rose-400 bg-rose-50 px-3 text-[11px] font-semibold text-rose-700 hover:bg-rose-100"
                 >
                   このピンを削除
                 </button>
