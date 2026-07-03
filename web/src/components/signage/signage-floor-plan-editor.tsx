@@ -117,7 +117,7 @@ export function SignageFloorPlanEditor() {
     <div className="space-y-2">
       {/* ツールバー */}
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-slate-700 bg-slate-900/60 px-2 py-2 text-xs">
-        <label className="inline-flex cursor-pointer items-center gap-1 rounded-md bg-emerald-700 px-2 py-1.5 text-[11px] font-bold text-white hover:bg-emerald-600">
+        <label className="inline-flex min-h-[44px] cursor-pointer items-center gap-1 rounded-md bg-emerald-700 px-2 py-1.5 text-[11px] font-bold text-white hover:bg-emerald-600">
           <Upload className="h-3 w-3" />
           自社図面アップロード
           <input
@@ -133,7 +133,7 @@ export function SignageFloorPlanEditor() {
         <button
           type="button"
           onClick={() => setEditing((v) => !v)}
-          className={`inline-flex items-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-bold ${
+          className={`inline-flex min-h-[44px] items-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-bold ${
             editing
               ? "border border-amber-400 bg-amber-700 text-white"
               : "border border-slate-600 bg-slate-900 text-slate-200 hover:bg-slate-800"
@@ -147,7 +147,7 @@ export function SignageFloorPlanEditor() {
             <select
               value={draftType}
               onChange={(e) => setDraftType(e.target.value as Pin["type"])}
-              className="rounded-md border border-slate-600 bg-slate-950 px-2 py-1 text-[11px] text-slate-100"
+              className="min-h-[44px] rounded-md border border-slate-600 bg-slate-950 px-2 py-1 text-[11px] text-slate-100"
             >
               <option value="danger">危険箇所（赤）</option>
               <option value="info">情報（青）</option>
@@ -158,7 +158,7 @@ export function SignageFloorPlanEditor() {
               value={draftLabel}
               onChange={(e) => setDraftLabel(e.target.value)}
               placeholder="ラベル（例: 開口部）"
-              className="rounded-md border border-slate-600 bg-slate-950 px-2 py-1 text-[11px] text-slate-100"
+              className="min-h-[44px] rounded-md border border-slate-600 bg-slate-950 px-2 py-1 text-[11px] text-slate-100"
             />
           </>
         )}
@@ -166,7 +166,7 @@ export function SignageFloorPlanEditor() {
           <button
             type="button"
             onClick={clearAll}
-            className="inline-flex items-center gap-1 rounded-md border border-rose-600/60 bg-rose-950/50 px-2 py-1.5 text-[11px] font-bold text-rose-200 hover:bg-rose-900/50"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-md border border-rose-600/60 bg-rose-950/50 px-2 py-1.5 text-[11px] font-bold text-rose-200 hover:bg-rose-900/50"
           >
             <Trash2 className="h-3 w-3" />
             全削除
@@ -176,7 +176,7 @@ export function SignageFloorPlanEditor() {
           <button
             type="button"
             onClick={removeImage}
-            className="inline-flex items-center gap-1 rounded-md border border-slate-600 bg-slate-900 px-2 py-1.5 text-[11px] text-slate-300 hover:bg-slate-800"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-md border border-slate-600 bg-slate-900 px-2 py-1.5 text-[11px] text-slate-300 hover:bg-slate-800"
           >
             <X className="h-3 w-3" />
             アップロード解除
