@@ -203,6 +203,72 @@ function Test-ShouldFirePlanner {
 }
 
 # ---------------------------------------------------------------------------
+# Config STRUCTURE validation (ignition-system integrity). The runtime read below only guards three
+# coarse failures - file missing / JSON unparseable / lanes[] absent-or-empty - and NOTHING validates
+# the committed loop-config.json at PR time. But loop-config.json is the single source of truth for
+# ignition AND the owner's most frequent hand-edit (untilIso), and a config that PARSES yet is
+# structurally broken slips straight past those guards into every launcher pass:
+#   - a lane with a blank/absent `name` -> Resolve-LaneRepo builds a garbage clone path, the runner
+#     starts with an empty -Lane, and heal/planner/critic routing (all keyed on name) misfire;
+#   - a lane with a blank/absent `model` -> the runner starts with an empty -Model (silent bad ignition);
+#   - a non-positive/garbage `intervalSeconds` -> the runner's sleep math is nonsense;
+#   - a DUPLICATE lane name -> two persistent runners drive the SAME clone (index.lock / branch clobber)
+#     AND the heal/liveness scan (keyed on name) can never tell them apart;
+#   - an `untilIso` that does not parse -> the deadline evaluation the whole run hinges on is undefined.
+# None of these strand ignition LOUDLY today: the worst case is a broken config landing on main and the
+# next launcher pass (logon / 07:00, up to ~22h later) igniting garbage or half the fleet. This pure
+# function is the shared oracle: the runtime path routes its errors through the SAME loud config-error
+# banner as a parse failure, and -SelfTest asserts the LIVE committed config passes so a bad edit fails
+# at PR time (once loop-config.json is in the ops-selftest path filter) instead of ~22h later in prod.
+# Pure (takes the parsed object, does no IO) so -SelfTest covers every failure mode offline. Returns a
+# list of human-readable ASCII error strings; empty list == structurally valid.
+# ---------------------------------------------------------------------------
+function Get-ConfigValidationErrors {
+  param($Cfg)
+  $errs = New-Object System.Collections.Generic.List[string]
+  if ($null -eq $Cfg) { $errs.Add("config is null (unparseable)"); return $errs }
+  if (-not ($Cfg.PSObject.Properties.Name -contains "lanes")) { $errs.Add("no 'lanes' property"); return $errs }
+  $lanes = @($Cfg.lanes)
+  if ($lanes.Count -eq 0) { $errs.Add("'lanes' is empty (no lane to ignite)"); return $errs }
+  # untilIso is the deadline the whole run hinges on; a present-but-unparseable value is worse than
+  # absent (absent falls back to a default downstream, garbage silently breaks deadline math).
+  if ($Cfg.PSObject.Properties.Name -contains "untilIso") {
+    $u = [string]$Cfg.untilIso
+    if ($u -ne "") {
+      $parsedUntil = [datetime]::MinValue
+      if (-not [datetime]::TryParse($u, [ref]$parsedUntil)) { $errs.Add("untilIso does not parse as a date: '" + $u + "'") }
+    }
+  }
+  $seen = @{}
+  for ($i = 0; $i -lt $lanes.Count; $i++) {
+    $lane = $lanes[$i]
+    $label = "lane[" + $i + "]"
+    if ($null -eq $lane) { $errs.Add($label + " is null"); continue }
+    $name = ""
+    if ($lane.PSObject.Properties.Name -contains "name") { $name = ([string]$lane.name).Trim() }
+    if ($name -eq "") {
+      $errs.Add($label + " has a blank/absent 'name'")
+    } else {
+      $label = "lane '" + $name + "'"
+      $key = $name.ToLowerInvariant()
+      if ($seen.ContainsKey($key)) { $errs.Add("duplicate lane name '" + $name + "' (two runners would drive the same clone)") }
+      else { $seen[$key] = $true }
+    }
+    $model = ""
+    if ($lane.PSObject.Properties.Name -contains "model") { $model = ([string]$lane.model).Trim() }
+    if ($model -eq "") { $errs.Add($label + " has a blank/absent 'model'") }
+    # intervalSeconds is optional (the runner has a default), but if present it must be a positive int.
+    if ($lane.PSObject.Properties.Name -contains "intervalSeconds") {
+      $iv = 0
+      if (-not [int]::TryParse([string]$lane.intervalSeconds, [ref]$iv) -or $iv -le 0) {
+        $errs.Add($label + " has a non-positive/garbage 'intervalSeconds': '" + [string]$lane.intervalSeconds + "'")
+      }
+    }
+  }
+  return $errs
+}
+
+# ---------------------------------------------------------------------------
 # Watchdog (heal): which enabled lanes have NO live runner and must be re-launched. Pure - takes the
 # config lanes and the process-scan map, does no IO - so -SelfTest covers it offline. A disabled lane
 # is never healed (owner turned it off on purpose). This backs the -HealOnly mode: the always-alive
@@ -809,6 +875,44 @@ if ($SelfTest) {
     Assert-L "planner SKIPS when backlog not drained (open=3)" (-not (Test-ShouldFirePlanner -Open 3 -LaneRunning $false -HasPrompt $true))
     Assert-L "planner SKIPS when backlog missing (open=-1)" (-not (Test-ShouldFirePlanner -Open -1 -LaneRunning $false -HasPrompt $true))
     Assert-L "planner SKIPS when no planner prompt present" (-not (Test-ShouldFirePlanner -Open 1 -LaneRunning $false -HasPrompt $false))
+    # H2) Get-ConfigValidationErrors: a config that PARSES yet is structurally broken must be caught here
+    #     (blank name/model, non-positive interval, duplicate lane, unparseable untilIso) so the runtime
+    #     path can route it through the loud config-error banner instead of igniting garbage on next pass.
+    $goodCfg = [pscustomobject]@{ untilIso = "2026-07-31T23:00:00"; lanes = @(
+      [pscustomobject]@{ name = "ops";  model = "claude-opus-4-8"; enabled = $true;  intervalSeconds = 195 },
+      [pscustomobject]@{ name = "data"; model = "claude-opus-4-8"; enabled = $true;  intervalSeconds = 135 }
+    ) }
+    Assert-L "config: a well-formed config yields zero errors" ((Get-ConfigValidationErrors -Cfg $goodCfg).Count -eq 0)
+    Assert-L "config: a null config is reported (unparseable)" ((Get-ConfigValidationErrors -Cfg $null).Count -eq 1)
+    Assert-L "config: no 'lanes' property is reported" ((Get-ConfigValidationErrors -Cfg ([pscustomobject]@{ untilIso = "2026-07-31T23:00:00" })).Count -eq 1)
+    Assert-L "config: empty lanes[] is reported" ((Get-ConfigValidationErrors -Cfg ([pscustomobject]@{ lanes = @() })).Count -eq 1)
+    $blankName = [pscustomobject]@{ lanes = @([pscustomobject]@{ name = "  "; model = "m" }) }
+    Assert-L "config: a blank-name lane is reported" (@(Get-ConfigValidationErrors -Cfg $blankName) -join '|' -like "*blank/absent 'name'*")
+    $noModel = [pscustomobject]@{ lanes = @([pscustomobject]@{ name = "ops" }) }
+    Assert-L "config: a missing-model lane is reported (keyed by lane name)" (@(Get-ConfigValidationErrors -Cfg $noModel) -join '|' -like "*lane 'ops' has a blank/absent 'model'*")
+    $badIv = [pscustomobject]@{ lanes = @([pscustomobject]@{ name = "ops"; model = "m"; intervalSeconds = 0 }) }
+    Assert-L "config: a non-positive intervalSeconds is reported" (@(Get-ConfigValidationErrors -Cfg $badIv) -join '|' -like "*non-positive/garbage 'intervalSeconds'*")
+    $garbageIv = [pscustomobject]@{ lanes = @([pscustomobject]@{ name = "ops"; model = "m"; intervalSeconds = "soon" }) }
+    Assert-L "config: a non-numeric intervalSeconds is reported" (@(Get-ConfigValidationErrors -Cfg $garbageIv) -join '|' -like "*non-positive/garbage 'intervalSeconds'*")
+    $missingIvOk = [pscustomobject]@{ lanes = @([pscustomobject]@{ name = "ops"; model = "m" }) }
+    Assert-L "config: an ABSENT intervalSeconds is fine (runner default) - no error" ((Get-ConfigValidationErrors -Cfg $missingIvOk).Count -eq 0)
+    $dup = [pscustomobject]@{ lanes = @(
+      [pscustomobject]@{ name = "ops"; model = "m" }, [pscustomobject]@{ name = "OPS"; model = "m" }
+    ) }
+    Assert-L "config: a duplicate lane name (case-insensitive) is reported" (@(Get-ConfigValidationErrors -Cfg $dup) -join '|' -like "*duplicate lane name 'OPS'*")
+    $badUntil = [pscustomobject]@{ untilIso = "not-a-date"; lanes = @([pscustomobject]@{ name = "ops"; model = "m" }) }
+    Assert-L "config: an unparseable untilIso is reported" (@(Get-ConfigValidationErrors -Cfg $badUntil) -join '|' -like "*untilIso does not parse*")
+    $absentUntilOk = [pscustomobject]@{ lanes = @([pscustomobject]@{ name = "ops"; model = "m" }) }
+    Assert-L "config: an ABSENT untilIso is fine (default applies downstream) - no error" ((Get-ConfigValidationErrors -Cfg $absentUntilOk).Count -eq 0)
+    $nullLane = [pscustomobject]@{ lanes = @([pscustomobject]@{ name = "ops"; model = "m" }, $null) }
+    Assert-L "config: a null lane entry is reported, not thrown" (@(Get-ConfigValidationErrors -Cfg $nullLane) -join '|' -like "*is null*")
+    # The LIVE committed loop-config.json MUST be structurally valid (this is what the CI path filter on
+    # loop-config.json exercises: a fat-fingered edit fails at PR time, not ~22h later at the next pass).
+    $liveCfg = $null
+    try { if (Test-Path $ConfigPath) { $liveCfg = Get-Content -Raw -Encoding UTF8 -Path $ConfigPath | ConvertFrom-Json } } catch {}
+    if ($null -ne $liveCfg) {
+      Assert-L "config: the SHIPPED loop-config.json is structurally valid (zero errors)" ((Get-ConfigValidationErrors -Cfg $liveCfg).Count -eq 0)
+    }
     # I) Critic worktree path is a SIBLING of the repo (outside it), stamp-scoped, and passes the
     #    isolation invariant. A path inside the repo (or equal to it) must FAIL isolation so we never
     #    run the critic in the very tree we are protecting.
@@ -1360,6 +1464,17 @@ try {
 if ($null -eq $cfg -or -not ($cfg.PSObject.Properties.Name -contains "lanes") -or @($cfg.lanes).Count -eq 0) {
   Write-Launcher ("ERROR: config parsed but has no lanes: " + $ConfigPath)
   Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg (S "configErrorNoLanes")
+  exit 1
+}
+# Structure gate: a config that PARSES and has lanes can still be broken (blank name/model, non-positive
+# interval, duplicate lane, unparseable untilIso). Route those through the SAME loud banner as a parse
+# failure so a fat-fingered edit strands ignition VISIBLY (owner's watch-file), never silently igniting
+# garbage or half the fleet on the next pass. See Get-ConfigValidationErrors for the failure catalogue.
+$cfgErrors = @(Get-ConfigValidationErrors -Cfg $cfg)
+if ($cfgErrors.Count -gt 0) {
+  $joined = ($cfgErrors -join "; ")
+  Write-Launcher ("ERROR: config is structurally invalid: " + $joined)
+  Write-ConfigErrorStatus -ConfigFile $ConfigPath -ErrorMsg ("structurally invalid: " + $joined)
   exit 1
 }
 
