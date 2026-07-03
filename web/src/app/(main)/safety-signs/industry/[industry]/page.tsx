@@ -164,7 +164,7 @@ export default async function IndustryGuidePage({ params }: RouteParams) {
                     <div className="flex flex-wrap items-center gap-2">
                       <Link
                         href={`/safety-signs/sign/${sign.id}`}
-                        className="text-sm font-bold text-slate-900 hover:text-emerald-800 hover:underline"
+                        className="inline-flex min-h-[44px] items-center text-sm font-bold text-slate-900 hover:text-emerald-800 hover:underline"
                       >
                         {sign.name}
                       </Link>
@@ -176,7 +176,7 @@ export default async function IndustryGuidePage({ params }: RouteParams) {
                     </div>
                     <p className="mt-1 text-xs leading-5 text-slate-600">{e.examples.join("、")}</p>
                   </div>
-                  <label className="flex items-center gap-1 print:flex">
+                  <label className="flex min-h-[44px] min-w-[44px] items-center justify-center gap-1 print:flex">
                     <input
                       type="checkbox"
                       className="h-4 w-4 accent-emerald-600"

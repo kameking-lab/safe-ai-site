@@ -205,7 +205,7 @@ export default async function SignDetailPage({ params }: RouteParams) {
                   <span aria-hidden="true">{ind.icon}</span>
                   <Link
                     href={`/safety-signs/industry/${u.industry}`}
-                    className="font-semibold text-slate-900 hover:text-emerald-800 hover:underline"
+                    className="inline-flex min-h-[44px] items-center font-semibold text-slate-900 hover:text-emerald-800 hover:underline"
                   >
                     {ind.label}
                   </Link>
