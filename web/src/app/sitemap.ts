@@ -7,9 +7,14 @@ import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
 import { COURT_CASES } from "@/data/court-cases";
 import { latestIsoDate } from "@/lib/sitemap/lastmod";
 import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
+import { SITE_URL } from "@/lib/seo-metadata";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://www.anzen-ai-portal.jp";
+  // 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL を単一ソースにする
+  //（og-image・json-ld・page-json-ld と同じ正本）。従来のドメイン直書きは SITE_URL 変更時に
+  // sitemap の loc が旧ドメインへ無言ドリフトする発見性の穴だった。SITE_URL は末尾スラッシュ無し
+  // ＝従来の base と同値のため出力は byte-identical。
+  const base = SITE_URL;
 
   // 柱C-3-4 / S DRY: lastmod 動的化のためのセクション別「実データ最新日」は、
   // sitemap-index.xml と単一ソース化するため lib/sitemap/freshness.ts に集約済み。

@@ -1,5 +1,19 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: トップ home-three-pillars.tsx 3柱・主CTA 柱0(44px)
+
+**イテレーション頭の回収**: 自班の緑PR #705(/industries/[industry] 副リンク6箇所＋キーワードピル44px)がmainとコンフリクト(BACKLOG-ux-hub.md同時追記)していたため、ブランチへ`origin/main`を通常マージしBACKLOG-ux-hub.mdの重複記載を解消→ゲート再実行→squashマージ→`git checkout main && git pull --ff-only`でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手項目が0件だったため、Explore調査で担当route(quick/faq/glossary/guides/features/industries/diversity/resources/handover/notifications/favorites/safety-signs/accidents/court-cases/signage・トップ)の柱0未適用箇所を補充探索。最有力候補＝トップ`home-three-pillars.tsx`の3柱本体CTA「業種別 事故分析レポートへ →」「気象リスク詳細を見る →」「法改正一覧を見る →」が`px-3 py-2 text-xs`のみでmin-h未指定(実測≈32px)。同ファイル内の他リンク/ボタンは既に44px是正済みだったが、最も目立つ3柱の主動線だけ取り残されていた。ブランチ`ux-hub/top-three-pillars-main-cta-44px`（main起点）。
+
+**変更**: `web/src/components/home-three-pillars.tsx` の3リンク(`/accidents-reports`・`/risk`・`/laws`)に`min-h-[44px]`を付与。純粋なクラス追加でレイアウト・遷移先不変。
+
+**テスト**: `home-three-pillars.test.tsx` に3ケース追加（各リンクのclassNameに`min-h-[44px]`を保証）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存警告23件は無関係）/ vitest 285 files・2438 tests 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/top-three-pillars-main-cta-44px-2026-07-03.mjs` を **3/3 PASS**（next start実機・スマホ390×844）。3柱の主CTAリンクの実boundingBoxがいずれも44px以上であることを確認。
+
 ## 2026-07-03 — 補充: /accidents/[id] 出典元リンク 柱0(44px)
 
 **イテレーション頭の回収**: 自班の緑PR #701(/industries 業種一覧テーブル「開く →」リンク44px)を squash マージ→`git checkout main && git pull --ff-only`でclean確認。現在ブランチのPR #705(/industries/[industry] 副リンク6箇所＋キーワードピル44px)はCI進行中のため次イテレーションで回収。

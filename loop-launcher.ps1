@@ -176,6 +176,18 @@ function Resolve-CriticStamp {
   return $Now.AddDays(-$back)
 }
 
+# Pre-flight gate: after the side-effect-free rehearsal (Invoke-CriticRehearsal exercises the exact
+# fetch/worktree-add/verify/teardown the real critic uses), decide whether the expensive real critic
+# one-shot may fire. A FAILED rehearsal means the isolated-worktree plumbing is broken RIGHT NOW, so
+# the unattended real fire would fail the same way after burning setup and a blocking 30-min slot -
+# skip it and let the caller back-date (Resolve-CriticStamp treats the "rehearsal-failed" outcome as
+# non-ok -> ~1-day retry + a degraded dashboard note) instead of blackholing the whole critic season.
+# Pure so -SelfTest covers the skip-on-failure wiring offline (no git, no worktree, no Claude).
+function Test-CriticFireAfterRehearsal {
+  param([bool]$RehearsalOk)
+  return [bool]$RehearsalOk
+}
+
 # ---------------------------------------------------------------------------
 # Supply gate (planner): decide whether to fire a planner one-shot for a lane. The gate must NOT
 # fire when that lane's persistent runner is ALREADY running, because the one-shot and the live
@@ -210,6 +222,127 @@ function Get-LanesToHeal {
   # Plain return (NOT ,$out): callers ALWAYS wrap in @() so empty/single/multi all normalize; the
   # unary-comma idiom double-wraps under an inline @(...) call and is the wrong tool here.
   return $out
+}
+
+# ---------------------------------------------------------------------------
+# Version-floor / cooperative stale-runner cycle (the "live-but-ancient runner" bootstrap fix).
+#
+# The hot-swap self-update (#675) and the runner-driven heartbeat (#672) can only take effect from the
+# NEXT process launch onward: a persistent runner reads its whole script into memory at start, so a
+# process that was ALREADY running when those fixes landed has no self-update code and can never exit to
+# pick up the new version. The watchdog (-HealOnly / Get-LanesToHeal) only resurrects DEAD lanes, so a
+# live-but-ancient runner is invisible to every existing recovery path and executes stale code until the
+# machine is restarted. `runnerFloorIso` in loop-config.json marks the instant before which a runner is
+# below floor; the launcher cooperatively cycles such runners so the fix reaches them unattended.
+#
+# "Cooperative" = the runner is only killed when IDLE (between iterations): a runner mid-iteration has a
+# live `claude` child process, so zero child processes means the Claude turn has fully ended and the tree
+# is clean - the exact safe point the hot-swap check itself uses. Cycling a below-floor runner only when
+# idle therefore never breaks an in-flight iteration (existing-work-destruction = 0). Killing is all the
+# cycle does: the existing relaunch paths (full-pass ignition loop; -HealOnly Get-LanesToHeal) then see
+# the lane as DEAD and resurrect it onto the fresh on-disk code - no duplicate launch logic.
+# ---------------------------------------------------------------------------
+
+# Is a runner below the version floor? Pure so -SelfTest covers it offline. An empty/unparseable floor
+# means "no floor configured" -> never below floor -> the cycle is a no-op (fail-safe: never cycle when
+# the marker is absent or malformed). A runner that started AT or AFTER the floor already carries the
+# fix and is left alone.
+function Test-RunnerBelowFloor {
+  param([datetime]$ProcStart, [string]$FloorIso)
+  if ([string]::IsNullOrWhiteSpace($FloorIso)) { return $false }
+  $floor = $null
+  try { $floor = [datetimeoffset]::Parse($FloorIso).UtcDateTime } catch { return $false }
+  return ($ProcStart.ToUniversalTime() -lt $floor)
+}
+
+# Should a below-floor runner be cycled THIS pass? Pure. Cycle ONLY when idle: ChildCount -eq 0 means no
+# in-flight Claude turn. ChildCount -lt 0 is the "scan failed / unknown" sentinel and must be treated as
+# BUSY (never cycle on an ambiguous scan), so a transient WMI hiccup can never kill a working runner.
+function Test-ShouldCycleStaleRunner {
+  param([bool]$BelowFloor, [int]$ChildCount)
+  return ($BelowFloor -and ($ChildCount -eq 0))
+}
+
+# Live scan: map lane name -> @{ Pid; Start } for every running loop-runner.ps1 whose -Lane matches an
+# enabled config lane. Separate from Get-RunningLanes (which returns only booleans and is used for
+# planner/heal gating) because the cycle needs the PID and start time. Never throws.
+function Get-RunnerProcInfo {
+  $map = @{}
+  try {
+    $procs = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
+      Where-Object { $_.CommandLine -like '*loop-runner.ps1*' })
+    foreach ($p in $procs) {
+      $cl = [string]$p.CommandLine
+      $m = [regex]::Match($cl, '(?i)-Lane(\s+|:|=)["'']?([\w\-]+)')
+      if ($m.Success) { $map[$m.Groups[2].Value] = @{ Pid = [int]$p.ProcessId; Start = [datetime]$p.CreationDate } }
+    }
+  } catch {}
+  return $map
+}
+
+# Count direct child processes of a PID (a runner mid-iteration owns a claude/node child; an idle runner
+# between iterations owns none). Returns -1 on any scan failure so the caller treats "unknown" as busy.
+function Get-ProcChildCount {
+  param([int]$ProcId)
+  try {
+    return @(Get-CimInstance Win32_Process -Filter ("ParentProcessId = " + $ProcId) -ErrorAction Stop).Count
+  } catch { return -1 }
+}
+
+# PIDs of the current process's ancestor chain (parent, grandparent, ...). Used to guarantee the cycle
+# never stops a runner that spawned this launcher (e.g. the ops runner calling -HealOnly). Never throws;
+# a scan failure returns whatever was collected so far (the idle gate is the primary safeguard anyway).
+function Get-AncestorPids {
+  $out = @()
+  try {
+    $cur = $PID
+    for ($i = 0; $i -lt 12 -and $cur -gt 0; $i++) {
+      $p = Get-CimInstance Win32_Process -Filter ("ProcessId = " + $cur) -ErrorAction Stop
+      if ($null -eq $p) { break }
+      $out += [int]$cur
+      $cur = [int]$p.ParentProcessId
+    }
+  } catch {}
+  return $out
+}
+
+# Cooperatively cycle (kill-only) every below-floor lane runner that is currently idle. Returns the list
+# of lane names cycled (or that WOULD be cycled under -WhatIf). Kill-only by design: the caller's normal
+# relaunch path resurrects the lane onto fresh code. Honors -WhatIf (logs, kills nothing). The optional
+# -ExcludePids guards against a runner cycling an ancestor of the current process (belt-and-braces on top
+# of the idle gate, which already spares a busy runner that owns this launcher as a child).
+function Invoke-StaleRunnerCycle {
+  param($Lanes, [string]$FloorIso, [switch]$DryRun, [int[]]$ExcludePids = @())
+  $cycled = @()
+  if ([string]::IsNullOrWhiteSpace($FloorIso)) { return $cycled }
+  $info = Get-RunnerProcInfo
+  foreach ($lane in $Lanes) {
+    if (-not $lane.enabled) { continue }
+    $name = [string]$lane.name
+    if ($name -eq "" -or -not $info.ContainsKey($name)) { continue }
+    $rp = $info[$name]
+    if ($ExcludePids -contains $rp.Pid) { continue }
+    if (-not (Test-RunnerBelowFloor -ProcStart $rp.Start -FloorIso $FloorIso)) { continue }
+    $children = Get-ProcChildCount -ProcId $rp.Pid
+    if (-not (Test-ShouldCycleStaleRunner -BelowFloor $true -ChildCount $children)) {
+      Write-Launcher ("[CYCLE] lane '" + $name + "' PID " + $rp.Pid + " is below floor (started " + $rp.Start.ToString("yyyy-MM-dd HH:mm:ss") + ") but BUSY (children=" + $children + "); deferring cycle to a later idle pass (no in-flight iteration is broken).")
+      continue
+    }
+    if ($DryRun) {
+      Write-Launcher ("[CYCLE][WHATIF] would cooperatively cycle idle below-floor lane '" + $name + "' PID " + $rp.Pid + " (started " + $rp.Start.ToString("yyyy-MM-dd HH:mm:ss") + "); the relaunch path would then start it on fresh code.")
+      $cycled += $name
+      continue
+    }
+    try {
+      Write-Launcher ("[CYCLE] cooperatively cycling idle below-floor lane '" + $name + "' PID " + $rp.Pid + " (started " + $rp.Start.ToString("yyyy-MM-dd HH:mm:ss") + "); stopping so the relaunch path starts it on fresh code.")
+      Stop-Process -Id $rp.Pid -ErrorAction Stop
+      try { Wait-Process -Id $rp.Pid -Timeout 10 -ErrorAction SilentlyContinue } catch {}
+      $cycled += $name
+    } catch {
+      Write-Launcher ("[CYCLE] WARN: failed to stop lane '" + $name + "' PID " + $rp.Pid + " (non-fatal, will retry next pass): " + $_.Exception.Message)
+    }
+  }
+  return $cycled
 }
 
 # ---------------------------------------------------------------------------
@@ -439,6 +572,16 @@ if ($SelfTest) {
     Assert-L "rehearsal path never collides with a real critic worktree of the same launch stamp" ($rehWt -ne (Get-CriticWorktreePath -RepoRoot $repoFixture -Stamp "20260703-080000"))
     $rehDry = Invoke-CriticRehearsal -RepoRoot $repoFixture -Stamp "20260703-080000" -DryRun
     Assert-L "rehearsal dry-run reports ok and executes no git" ($rehDry.ok -and (($rehDry.steps -join " ") -like "*WHATIF*") -and (-not (Test-Path -LiteralPath $rehDry.worktree)))
+    # Q) Auto pre-flight wiring: the rehearsal result gates the real (expensive) critic fire. A PASSING
+    #    rehearsal lets the real one-shot proceed; a FAILING rehearsal skips it, and the "rehearsal-failed"
+    #    outcome then flows through the SAME back-date + degraded-note block as any other non-ok outcome.
+    Assert-L "preflight: a passing rehearsal lets the real critic fire" (Test-CriticFireAfterRehearsal -RehearsalOk $true)
+    Assert-L "preflight: a failing rehearsal skips the real critic fire" (-not (Test-CriticFireAfterRehearsal -RehearsalOk $false))
+    $rehFixed = [datetime]"2026-07-03T08:00:00"
+    $sReh = Resolve-CriticStamp -Outcome "rehearsal-failed" -Now $rehFixed -CriticEveryDays 7 -RetryDays 1
+    Assert-L "preflight: rehearsal-failed back-dates (NOT due 12h later)" ((($rehFixed.AddHours(12)) - $sReh).TotalDays -lt 7)
+    Assert-L "preflight: rehearsal-failed IS due ~1 day later (bounded retry, no 7d blackout)" ((($rehFixed.AddDays(1)) - $sReh).TotalDays -ge 7)
+    Assert-L "preflight: rehearsal-failed is a non-ok outcome so the degraded dashboard note fires" ("rehearsal-failed" -ne "ok")
     # K) Get-LanesToHeal: names exactly the enabled lanes that have no live runner. A disabled lane
     #    is never healed even when absent from the scan; an alive lane is never re-launched.
     $healLanes = @(
@@ -481,6 +624,24 @@ if ($SelfTest) {
     $udBlank = @(Get-UniqueLogDirs -Dirs @("C:\a\logs", "", "C:\b\logs"))
     Assert-L "logdirs: blank entries are dropped" ($udBlank.Count -eq 2)
     Assert-L "logdirs: empty input yields empty" (@(Get-UniqueLogDirs -Dirs @()).Count -eq 0)
+    # M) Test-RunnerBelowFloor: a runner started before the floor is stale; one started at/after carries
+    #    the fix; an empty/garbage floor disables the whole cycle (never below floor = fail-safe).
+    $floor = "2026-07-03T13:43:09+09:00"
+    Assert-L "floor: a runner started BEFORE the floor is below floor" (Test-RunnerBelowFloor -ProcStart ([datetime]"2026-07-03T06:38:54+09:00") -FloorIso $floor)
+    Assert-L "floor: a runner started AFTER the floor is NOT below floor" (-not (Test-RunnerBelowFloor -ProcStart ([datetime]"2026-07-03T17:42:11+09:00") -FloorIso $floor))
+    Assert-L "floor: a runner started AT the floor is NOT below floor (boundary)" (-not (Test-RunnerBelowFloor -ProcStart ([datetimeoffset]"2026-07-03T13:43:09+09:00").UtcDateTime -FloorIso $floor))
+    Assert-L "floor: an empty floor marker disables cycling (never below floor)" (-not (Test-RunnerBelowFloor -ProcStart ([datetime]"2000-01-01T00:00:00Z") -FloorIso ""))
+    Assert-L "floor: an unparseable floor marker disables cycling (never below floor)" (-not (Test-RunnerBelowFloor -ProcStart ([datetime]"2000-01-01T00:00:00Z") -FloorIso "not-a-date"))
+    # N) Test-ShouldCycleStaleRunner: cycle ONLY a below-floor runner that is idle (zero children);
+    #    a busy (>=1 child) or unknown (-1 scan failure) runner is NEVER cycled -> no in-flight iteration
+    #    is ever broken, and a not-below-floor runner is never touched regardless of idleness.
+    Assert-L "cycle: below-floor AND idle (0 children) -> cycle" (Test-ShouldCycleStaleRunner -BelowFloor $true -ChildCount 0)
+    Assert-L "cycle: below-floor but BUSY (1 child = live claude turn) -> do NOT cycle" (-not (Test-ShouldCycleStaleRunner -BelowFloor $true -ChildCount 1))
+    Assert-L "cycle: below-floor but scan FAILED (-1 = unknown) -> do NOT cycle (treat as busy)" (-not (Test-ShouldCycleStaleRunner -BelowFloor $true -ChildCount -1))
+    Assert-L "cycle: NOT below floor + idle -> do NOT cycle (already carries the fix)" (-not (Test-ShouldCycleStaleRunner -BelowFloor $false -ChildCount 0))
+    # O) Invoke-StaleRunnerCycle: an empty floor marker short-circuits to a no-op (kills nothing) even
+    #    when lanes are configured - the guard that makes an unset marker completely inert.
+    Assert-L "cycle: empty floor marker makes Invoke-StaleRunnerCycle a no-op" (@(Invoke-StaleRunnerCycle -Lanes $healLanes -FloorIso "" -DryRun).Count -eq 0)
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -905,6 +1066,15 @@ if ($HealOnly) {
     Write-Launcher "[HEAL] process scan shows ZERO running lanes; refusing to heal (cold start is the logon launcher's job; an empty scan may also be a WMI outage where re-launch would double-run). No action."
     exit 0
   }
+  # Cooperative stale-runner cycle FIRST: kill (only) any idle below-floor runner so the resurrection
+  # path below relaunches it on fresh code. Exclude this launcher's ancestor chain so heal can never kill
+  # the ops runner that spawned it (the idle gate already spares it - it owns this launcher as a child -
+  # but the exclusion is belt-and-braces). Re-scan after so a just-cycled lane counts as DEAD -> healed.
+  $cycledHeal = @(Invoke-StaleRunnerCycle -Lanes $cfg.lanes -FloorIso ([string]$cfg.runnerFloorIso) -DryRun:$WhatIf -ExcludePids (Get-AncestorPids))
+  if ($cycledHeal.Count -gt 0) {
+    Write-Launcher ("[HEAL] cooperatively cycled below-floor lanes [" + ($cycledHeal -join ", ") + "]" + $(if ($WhatIf) { " (WHATIF)" } else { "; re-scanning so the resurrection path relaunches them on fresh code." }))
+    if (-not $WhatIf) { $healRunning = Get-RunningLanes }
+  }
   $toHeal = @(Get-LanesToHeal -Lanes $cfg.lanes -Running $healRunning)
   if ($toHeal.Count -eq 0) {
     Write-Launcher ("[HEAL] all enabled lanes alive (" + (($healRunning.Keys | Sort-Object) -join ", ") + "); nothing to resurrect.")
@@ -1034,6 +1204,16 @@ function Add-LaneReportSection {
   }
 }
 
+# Cooperative stale-runner cycle (full pass): before scanning who is running, stop any idle below-floor
+# runner so the ignition loop below sees it as absent and relaunches it on fresh code. Skipped past the
+# deadline (the run is meant to be stopping). -WhatIf logs only. Then $running reflects the post-cycle
+# state so cycled lanes are (re)started rather than treated as already-alive no-ops.
+if (-not $deadlinePassed) {
+  $cycledFull = @(Invoke-StaleRunnerCycle -Lanes $cfg.lanes -FloorIso ([string]$cfg.runnerFloorIso) -DryRun:$WhatIf -ExcludePids (Get-AncestorPids))
+  if ($cycledFull.Count -gt 0) {
+    Write-Launcher ("cooperatively cycled below-floor lanes [" + ($cycledFull -join ", ") + "]" + $(if ($WhatIf) { " (WHATIF)" } else { "; the ignition loop will relaunch them on fresh code." }))
+  }
+}
 $running = Get-RunningLanes
 $remainStr = if ($null -ne $daysRemaining) { Fmt "remain" @{ DAYS = $daysRemaining } } else { "" }
 
@@ -1116,12 +1296,24 @@ if ($criticDue -and (Test-Path $criticPrompt)) {
   Write-Launcher ("critic due (last=" + ([string]$state.lastCriticIso) + ", every=" + $criticEvery + "d). Firing critic one-shot in an ISOLATED git worktree (main tree untouched).")
   $state.lastCriticIso = $now.ToString("o")
   Save-State
+  # Pre-flight: rehearse the EXACT git-worktree plumbing (side-effect-free, no Claude) before spending
+  # a blocking 30-min one-shot. Invoke-CriticRehearsal runs the same fetch/worktree-add/verify/teardown
+  # under a non-colliding "rehearsal-" stamp; if that add/verify/teardown is broken RIGHT NOW, the
+  # unattended real fire would fail the same way after burning setup, so we skip it and back-date for a
+  # ~1-day retry (the block below) instead of silently blackholing the critic season. In -WhatIf the
+  # rehearsal is itself a dry-run (prints its plan, runs no git); the real fire then falls into its own
+  # plan-only branch, so a dry-run shows the full wiring: rehearse -> (pass) -> fire.
+  $preflight = Invoke-CriticRehearsal -RepoRoot $repoRoot -Stamp $launchStamp -DryRun:$WhatIf
+  foreach ($ln in $preflight.steps) { Write-Launcher ("critic pre-flight: " + $ln) }
   # Run the critic in a throwaway worktree so its checkout/commit/push never shares an index with
   # the ops persistent runner in the main tree. The critic prompt is fed by absolute path from the
   # main tree; the worktree is a full origin/main checkout, so it has its own loop-runner.ps1.
   $wtPath = Get-CriticWorktreePath -RepoRoot $repoRoot -Stamp $launchStamp
   $criticOutcome = $null
-  if (-not (Test-WorktreeIsIsolated -RepoRoot $repoRoot -WorktreePath $wtPath)) {
+  if (-not $WhatIf -and -not (Test-CriticFireAfterRehearsal -RehearsalOk ([bool]$preflight.ok))) {
+    Write-Launcher ("WARN: critic pre-flight rehearsal FAILED; NOT firing the real critic one-shot this pass (the isolated-worktree plumbing is broken now and the unattended fire would fail the same way). Back-dating for a ~1-day retry and blaring a dashboard note.")
+    $criticOutcome = "rehearsal-failed"
+  } elseif (-not (Test-WorktreeIsIsolated -RepoRoot $repoRoot -WorktreePath $wtPath)) {
     Write-Launcher ("WARN: computed critic worktree '" + $wtPath + "' is not isolated from the main tree; refusing to run critic in-place (would re-open the git race). Treating as failure.")
     $criticOutcome = "worktree-unsafe"
   } elseif ($WhatIf) {
