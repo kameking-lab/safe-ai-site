@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-04 決裁A延長 — robots.ts UAバケット排他性・非公開パス保護ガード新設（PR: seo/robots-ua-bucket-disjointness-guard）
+
+**契約1) 回収**: 冒頭で緑の自班PR #823（sitemap-index 逆カバレッジガード）を squash マージ→main ff同期。CONFLICTING 化した #829（横断検索・法改正収載）へ `git merge origin/main`（force-push なし）で BACKLOG/cycle-log の追記衝突（両側保持）のみ解決し再push＝CI再走を次イテレーションで回収。#837（かな畳み込み）は CI 進行中のため保留。他班 OPEN PR は不可侵。
+
+**着手判断**: BACKLOG-seo 未着手キューは空（O17/T6 は Path A/オーナー承認待ち）のため補充指針に従い自領域から補充。in-flight の #829/#837 が両方 cross-search のため near-dup 回避（[[avoid-overlapping-followup-prs]]）で **cross-search 外の distinct な穴** を探索＝json-ld.tsx（19スキーマ全てテスト済み・成熟）・sitemap lastmod（データ源追従は実装済み）を確認後、`robots.ts` に着目。3つのハンド保守 UAリスト（遮断/許可×2）を決裁ごとに継ぎ足す構造なのに、既存 `robots.test.ts` は個別UAの意図だけを固定し「同一UAが遮断と許可の両リストに紛れ込む二重定義」を未ガード＝リスト肥大に比例して再発確率が上がる発見性/アンチスクレイピング境界の穴。
+
+**実装**: `robots.test.ts` に排他性ガード describe（4 it・コード変更0）追加。`robots()` 出力から機械検知＝(1)全ルールのUA集計で重複0（バケット間二重定義＋同一リスト内重複を1testで検知） (2)遮断UAは Allow:/ 非併持 (3)許可ボットは /admin・/api・/auth を必ず除外（新規許可ボットの私設パス露出封止） (4)遮断母数>10 の空振り防止。ソースは無改変（純ガード）。
+
+**ミューテーション実測**: 許可リストの `PerplexityBot` を `AI_TRAINING_CRAWLERS` へ二重登録→重複UA検知 it が赤化することを確認後、復元。
+
+**ゲート**: `tsc --noEmit`=0 / `lint`=errors0（既存warn23は無関係の別ファイル set-state-in-effect）/ `vitest run`=320ファイル2704 pass・1 skip（新規4含む）/ `build`=成功。再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は `git checkout` で復元。
+
+**残**: #829/#837 の CI 緑回収＆マージ（次イテレーション 1)）。O17/T6 実装はオーナー承認待ち。
+
 ## 2026-07-04 柱C-2補充 横断検索に教育コース12件を /education/<slug> 深リンクで収載（講習名0件の是正）
 
 **課題（発見性の穴）**: 特別教育/法定教育/労働衛生教育の**12コースページ**（`/education/tokubetsu/fullharness`・`/education/hoteikyoiku/shokucho`・`/education/roudoueisei/youtsu-yobou` 等）は固有 title/description＋Course JSON-LD を持ち sitemap 収載済みの実在 indexable ランディング（講習形式・料金・法令根拠を載せた専用ページ）なのに、横断検索(/search・⌘K)の `buildSearchIndex` に import が皆無で丸ごと0件だった。「フルハーネス 特別教育」「足場 特別教育」「職長」「腰痛 予防」「酸欠 特別教育」と現場語彙で自分に要る講習を打った現場ユーザー（現場監督・一人親方・安全担当）が講習コースへ検索経由で着けなかった（#561 等と同型）。
