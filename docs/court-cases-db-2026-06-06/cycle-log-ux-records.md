@@ -601,3 +601,20 @@ Exploreエージェントで未監査route(safety-diary個別ページ5種・sit
 ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2643 pass（新規4件）・build成功（`○ /ky/list`・`○ /safety-diary/list`静的生成維持）。1回目のbuildでTurbopackの`internal error: entered unreachable code`(`/accidents-analytics`、自班所有外route起因)が発生したが再実行で成功する一過性エラーと確認。working tree clean。
 
 残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。
+
+
+## 2026-07-04 柱0磨き 巡回発見・続き⑨＝/accountでDB照会失敗を「フリープラン」と誤断定する柱0違反を是正
+
+契約ステップ1: 自レーンのPR #821（前回収・タグチップ/今月の予定チップ44px＋色文法）はCIが緑（e2e/smoke/Vercelとも SUCCESS）と確認しsquashマージを試みたところ、`main`から#814マージ後に発生した進捗との間でマージコンフリクトを検知（`gh pr merge`が「merge commit cannot be cleanly created」）。契約どおり`gh pr checkout 821 && git fetch origin main && git merge origin/main`で通常マージし解消（衝突は`docs/court-cases-db-2026-06-06/cycle-log-ux-records.md`の1箇所のみ、双方の巡回ログ本文をどちらも保持する形で解決）。ゲート再検証（tsc=0・lint errors=0・vitest 2677 pass・build成功）後にpush・squashマージ・`git checkout main && git pull --ff-only`でclean確認。
+
+着手: BACKLOG-ux-records.md最上位の未着手3件(O15/S2/S3)はいずれもdataレーンO14が本回収時点でも`BACKLOG-data.md`で`[ ]`未着手のままで全ブロック中と確認。補充の指針どおりExploreエージェントで自領域の柱0/柱3巡回を実施（過去の巡回で対象外だった44px以外の切り口＝「結論カードの状態表示ロジックそのものの誤り」を重点的に探索するよう指示）。
+
+発見: `/account`（マイページ）の`page.tsx`で、`prisma.subscription.findUnique`が例外を投げた場合（`catch`で`console.error`のみ）、`planName`/`status`が宣言時デフォルト`"free"`/`"active"`のまま`computeAccountConclusion`に渡り、DB照会が失敗しても「フリープランです」というtone=info・確定的な結論カードを表示していた。有料課金中のユーザーの照会がたまたま失敗した場合でも「フリープランです」という誤った断定を無読3秒で読ませてしまう柱0違反（誤って重複契約や不要な問い合わせに誘導するおそれ）。同型の欠落がSDS検索履歴取得（`prisma.sdsSearch.findMany`）にもあり、失敗時に「まだ履歴がありません」という真の空状態と同じ文言を出していた。
+
+実装: `account-conclusion.ts`の`computeAccountConclusion`に`lookupFailed`引数を追加し、他のどの状態（支払い遅延・未払い・解約済み・フリー・利用中）よりも優先してtone=neutral「プラン情報を確認できません」を返す分岐を先頭に追加（既存の優先順位ロジックは変更せず先頭に1分岐を足すのみ）。`page.tsx`に`subscriptionLookupFailed`/`sdsHistoryFailed`のフラグを追加しconclusion計算・SDS履歴表示へ配線、失敗時は「アップグレード」の誤ったCTAも抑止し、SDS履歴セクションは失敗時専用の案内文へ差し替え。判定ロジック・DBスキーマ・Stripe連携・課金導線は無変更（足すだけ）。
+
+検証: このdev環境は`AUTH_SECRET`未設定でセッションが確立できず`/account`は常に`/api/auth/signin`へリダイレクトされるため、DB照会失敗分岐そのものを実機描画できない（既知の制約、#未のcontribute柱0補充タスクと同型）。`account-conclusion.test.ts`に`lookupFailed`分岐の新規vitestユニットテスト2件（tone/title確認＋他状態より優先されることの固定）を追加。Playwright新規`docs/third-party-reviews/scripts/account-lookup-failure-conclusion-2026-07-04.mjs`2/2合格（未ログイン時に500化せずサインイン導線へ正しく遷移する非退行確認）。
+
+ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2683 pass（新規2件）・build成功（`/account`ルートビルド維持）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。
