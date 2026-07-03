@@ -396,6 +396,38 @@ function Get-TplPrefix([string]$key) {
   if ($i -ge 0) { return $t.Substring(0, $i) } else { return $t }
 }
 
+# Ordinal longest-common-prefix of a set of strings ("" when there is no non-empty shared prefix). Pure.
+function Get-CommonPrefix([string[]]$Items) {
+  $nonEmpty = @($Items | Where-Object { $null -ne $_ -and $_ -ne "" })
+  if ($nonEmpty.Count -eq 0) { return "" }
+  $stem = [string]$nonEmpty[0]
+  foreach ($p in $nonEmpty) {
+    $max = [math]::Min($stem.Length, $p.Length); $i = 0
+    while ($i -lt $max -and $stem[$i] -eq $p[$i]) { $i++ }
+    $stem = $stem.Substring(0, $i)
+    if ($stem -eq "") { break }
+  }
+  return $stem
+}
+
+# True when a region line is a per-lane health BANNER that must be stripped before the fresh one is
+# reinserted. Two matchers, union-ed so the result is always a SUPERSET of the legacy explicit list
+# (never a regression): (a) the runtime-derived shared stem of all banner templates, and (b) each known
+# pre-placeholder prefix. (a) is the load-bearing fix for version skew: when a NEW reporter writes a
+# banner keyed by a string an OLD clone's reporter does not yet know (observed live: an "alive-no-report"
+# banner beside a stale "unreported" one because the old strip list lacked the new key -> two
+# contradictory health lines on the operator's only watch surface), the shared stem still matches it, so
+# any reporter version - old or new - removes any banner variant. Stem is "" -> fall back to (b) alone
+# (strictly today's behavior), so a garbled strings file never strips everything. Lane rows ("- lane :")
+# and the missing-since marker ("<!--") share no stem with the banners, so they are never touched.
+function Test-IsHealthBanner {
+  param([string]$TrimmedLine, [string]$Stem, [string[]]$KnownPrefixes)
+  if ($null -eq $TrimmedLine) { return $false }
+  if ($Stem -and $Stem.Trim() -ne "" -and $TrimmedLine.StartsWith($Stem)) { return $true }
+  foreach ($p in $KnownPrefixes) { if ($p -and $p.Trim() -ne "" -and $TrimmedLine.StartsWith($p)) { return $true } }
+  return $false
+}
+
 # ---- Heartbeat (runner-emitted liveness) ------------------------------------------------------
 # Reporting must NOT depend on the agent remembering step5.5. Observed live: seo and ux-records ran
 # 30+ iterations over ~6.5h, merged PRs, yet NEVER self-reported - so the per-lane health banner
@@ -751,6 +783,31 @@ if ($SelfTest) {
     Assert-Test "J5: seed file starts with accumulated trailing blanks" ($seedBlanks -ge 5)
     Assert-Test "J6: first heal removes ALL trailing blanks" ($afterHeal1 -eq 0)
     Assert-Test "J7: second write stays at 0 blanks (round-trip stable, no re-growth)" ($afterHeal2 -eq 0)
+
+    # L) Version-robust health-banner stripping. The region-cleanup used to enumerate a FIXED set of
+    # banner prefixes; a reporter that predated a newer banner key failed to strip that banner and added
+    # its own alongside it -> two contradictory health lines (observed live). Get-CommonPrefix + the
+    # shared-stem matcher in Test-IsHealthBanner make the strip a version-independent superset.
+    # First the pure prefix math on SYNTHETIC ASCII inputs (deterministic, no strings-file dependency):
+    Assert-Test "L1: common prefix of banner-like strings is the shared stem" ((Get-CommonPrefix @("HZ: full", "HZ warn: x", "HZ info: y")) -eq "HZ")
+    Assert-Test "L2: no shared prefix yields empty stem" ((Get-CommonPrefix @("abc", "xyz")) -eq "")
+    Assert-Test "L3: blanks/nulls are ignored when computing the stem" ((Get-CommonPrefix @("", $null, "PRE-a", "PRE-b")) -eq "PRE-")
+    Assert-Test "L4: empty input yields empty stem (no throw)" ((Get-CommonPrefix @()) -eq "")
+    # The regression proof: an OLD reporter's known list LACKS the alive-no-report key, yet the stem still
+    # identifies that banner as strippable. Real banners are built from $LS via Fmt (Japanese stays in the
+    # strings file, never in this ASCII source) so the test tracks the shipped templates exactly.
+    if ($LS.ContainsKey("laneHealthUnreported") -and $LS.ContainsKey("laneHealthAliveNoReport")) {
+      $realUnrep = Fmt "laneHealthUnreported" @{ MISSING = 2; TOTAL = 6; LANES = "seo" }
+      $realAnr = Fmt "laneHealthAliveNoReport" @{ MISSING = 2; TOTAL = 6; LANES = "seo" }
+      $knownOld = @((Get-TplPrefix "laneHealthOk"), (Get-TplPrefix "laneHealthStale"), (Get-TplPrefix "laneHealthUnreported"), (Get-TplPrefix "laneHealthBornDead"))
+      $stemOld = Get-CommonPrefix $knownOld
+      Assert-Test "L5: shared stem derived from an OLD prefix list is still non-empty" ($stemOld -ne "")
+      Assert-Test "L6: the stem strips an alive-no-report banner an OLD prefix list would miss" (Test-IsHealthBanner -TrimmedLine $realAnr -Stem $stemOld -KnownPrefixes $knownOld)
+      Assert-Test "L7: a known banner is still stripped (superset, no regression)" (Test-IsHealthBanner -TrimmedLine $realUnrep -Stem $stemOld -KnownPrefixes $knownOld)
+      Assert-Test "L8: a lane row is NOT treated as a health banner" (-not (Test-IsHealthBanner -TrimmedLine "- ops : LR 2026-07-03 14:37 / PR #696 / open 2 / note" -Stem $stemOld -KnownPrefixes $knownOld))
+      Assert-Test "L9: the missing-since marker is NOT treated as a health banner" (-not (Test-IsHealthBanner -TrimmedLine "<!-- lane-missing-since: seo=2026-07-03T12:55:54 -->" -Stem $stemOld -KnownPrefixes $knownOld))
+      Assert-Test "L10: empty stem falls back to the known prefix list only (never strips everything)" ((Test-IsHealthBanner -TrimmedLine $realUnrep -Stem "" -KnownPrefixes $knownOld) -and (-not (Test-IsHealthBanner -TrimmedLine $realAnr -Stem "" -KnownPrefixes $knownOld)))
+    }
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -858,7 +915,8 @@ if ($WhatIf) {
   if ($LS.ContainsKey("laneHealthOk") -and $LS.ContainsKey("laneHealthStale") -and (Test-Path $StatusPath)) {
     try {
       $prev = @(Get-Content -Encoding UTF8 -Path $StatusPath)
-      $okPre = Get-TplPrefix "laneHealthOk"; $stalePre = Get-TplPrefix "laneHealthStale"; $unrepPre = Get-TplPrefix "laneHealthUnreported"; $bdPre = Get-TplPrefix "laneHealthBornDead"; $anrPre = Get-TplPrefix "laneHealthAliveNoReport"
+      $knownHealthPrefixes = @((Get-TplPrefix "laneHealthOk"), (Get-TplPrefix "laneHealthStale"), (Get-TplPrefix "laneHealthUnreported"), (Get-TplPrefix "laneHealthBornDead"), (Get-TplPrefix "laneHealthAliveNoReport"))
+      $healthStem = Get-CommonPrefix $knownHealthPrefixes
       $rows = New-Object System.Collections.Generic.List[string]
       $markerRows = New-Object System.Collections.Generic.List[string]
       $bI = -1; $eI = -1
@@ -870,7 +928,7 @@ if ($WhatIf) {
         for ($k = $bI + 1; $k -lt $eI; $k++) {
           $t = $prev[$k].TrimStart()
           if ($t.StartsWith($missingMarkerPrefix)) { $markerRows.Add($prev[$k]); continue }
-          if (($okPre.Trim() -ne "" -and $t.StartsWith($okPre)) -or ($stalePre.Trim() -ne "" -and $t.StartsWith($stalePre)) -or ($unrepPre.Trim() -ne "" -and $t.StartsWith($unrepPre)) -or ($bdPre.Trim() -ne "" -and $t.StartsWith($bdPre)) -or ($anrPre.Trim() -ne "" -and $t.StartsWith($anrPre))) { continue }
+          if (Test-IsHealthBanner -TrimmedLine $t -Stem $healthStem -KnownPrefixes $knownHealthPrefixes) { continue }
           if ($t.StartsWith($selfPrefix)) { $rows.Add($laneLine); $sawSelf = $true } else { $rows.Add($prev[$k]) }
         }
       }
@@ -965,11 +1023,8 @@ try {
       elseif ($lines[$k].Trim() -eq $endMarker) { $eIdx = $k; break }
     }
     if ($bIdx -ge 0 -and $eIdx -gt $bIdx) {
-      $okPre = Get-TplPrefix "laneHealthOk"
-      $stalePre = Get-TplPrefix "laneHealthStale"
-      $unrepPre = Get-TplPrefix "laneHealthUnreported"
-      $bdPre = Get-TplPrefix "laneHealthBornDead"
-      $anrPre = Get-TplPrefix "laneHealthAliveNoReport"
+      $knownHealthPrefixes = @((Get-TplPrefix "laneHealthOk"), (Get-TplPrefix "laneHealthStale"), (Get-TplPrefix "laneHealthUnreported"), (Get-TplPrefix "laneHealthBornDead"), (Get-TplPrefix "laneHealthAliveNoReport"))
+      $healthStem = Get-CommonPrefix $knownHealthPrefixes
       # Peel the region into: the persisted missing-since marker (captured, to keep prior clocks running)
       # and the real lane rows (health + marker lines stripped so they never accumulate).
       $markerRows = New-Object System.Collections.Generic.List[string]
@@ -977,7 +1032,7 @@ try {
       for ($k = $bIdx + 1; $k -lt $eIdx; $k++) {
         $t = $lines[$k].TrimStart()
         if ($t.StartsWith($missingMarkerPrefix)) { $markerRows.Add($lines[$k]); continue }
-        if (($okPre.Trim() -ne "" -and $t.StartsWith($okPre)) -or ($stalePre.Trim() -ne "" -and $t.StartsWith($stalePre)) -or ($unrepPre.Trim() -ne "" -and $t.StartsWith($unrepPre)) -or ($bdPre.Trim() -ne "" -and $t.StartsWith($bdPre)) -or ($anrPre.Trim() -ne "" -and $t.StartsWith($anrPre))) { continue }
+        if (Test-IsHealthBanner -TrimmedLine $t -Stem $healthStem -KnownPrefixes $knownHealthPrefixes) { continue }
         $inner.Add($lines[$k])
       }
       $rowTpl = S "reportLine"; $nowH = Get-Date
