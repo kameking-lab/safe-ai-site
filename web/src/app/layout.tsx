@@ -12,6 +12,7 @@ import { ThemeProvider, THEME_INIT_SCRIPT } from "@/lib/theme";
 import { A11Y_HINT_INIT_SCRIPT } from "@/lib/a11y-hint";
 import Analytics from "@/components/Analytics";
 import AdSenseScript from "@/components/AdSenseScript";
+import { rssAlternateTypes } from "@/lib/seo/feeds";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,6 +57,9 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://www.anzen-ai-portal.jp"),
   alternates: {
     canonical: "https://www.anzen-ai-portal.jp",
+    // 実在する公開RSSフィード（/feed/*.xml）を全ページ <head> で広告し、RSSリーダー・
+    // ブラウザ・クローラからの自動発見を有効化する。登録簿は lib/seo/feeds.ts が単一ソース。
+    types: rssAlternateTypes(),
   },
   openGraph: {
     type: "website",
