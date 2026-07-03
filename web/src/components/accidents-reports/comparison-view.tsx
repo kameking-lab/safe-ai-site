@@ -108,7 +108,7 @@ function IndustryKpiCard({ row }: { row: ComparisonRow }) {
         </div>
         <Link
           href={`/accidents-reports/${config.slug}`}
-          className="inline-flex items-center gap-0.5 rounded-md border border-slate-300 bg-white/70 px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-white print:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+          className="inline-flex min-h-[44px] items-center gap-0.5 rounded-md border border-slate-300 bg-white/70 px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-white print:hidden dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
         >
           詳細 <ArrowUpRight className="h-3 w-3" aria-hidden="true" />
         </Link>
@@ -680,7 +680,7 @@ export function ComparisonView({
                 <Link
                   key={r.slug}
                   href={`/accidents-reports/${r.slug}`}
-                  className={`inline-flex items-center gap-1 rounded-full border-2 px-3 py-1.5 text-sm font-medium hover:shadow-sm ${sw.chip}`}
+                  className={`inline-flex min-h-[44px] items-center gap-1 rounded-full border-2 px-3 py-1.5 text-sm font-medium hover:shadow-sm ${sw.chip}`}
                 >
                   <span aria-hidden="true">{r.config.icon}</span>
                   {r.config.label}の詳細レポート
