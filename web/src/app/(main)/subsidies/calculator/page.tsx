@@ -68,7 +68,7 @@ function ResultCard({ est, investment }: { est: SubsidyEstimate; investment: num
           href={est.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+          className="inline-flex min-h-[44px] shrink-0 items-center gap-1 rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100"
         >
           公式ページ <ExternalLink className="h-3 w-3" aria-hidden="true" />
         </a>

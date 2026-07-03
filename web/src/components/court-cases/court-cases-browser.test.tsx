@@ -57,4 +57,13 @@ describe("CourtCasesBrowser 柱0（44pxタップ標的）", () => {
     const clear = screen.getByRole("button", { name: "絞り込みを解除" });
     expect(clear.className).toContain("min-h-[44px]");
   });
+
+  it("絞り込み中の「A4で印刷／PDF保存」リンクは44px以上のタップ標的を持つ", () => {
+    render(<CourtCasesBrowser />);
+    fireEvent.change(screen.getByPlaceholderText(/安全配慮義務、墜落、過労、石綿/), {
+      target: { value: "墜落" },
+    });
+    const printLink = screen.getByRole("link", { name: /A4で印刷／PDF保存/ });
+    expect(printLink.className).toContain("min-h-[44px]");
+  });
 });

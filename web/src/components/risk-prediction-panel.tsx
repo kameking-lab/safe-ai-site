@@ -69,6 +69,15 @@ function matrixCellColor(severity: number, frequency: number): string {
   return "bg-emerald-100 text-slate-600";
 }
 
+// 色のみに依存しないよう、セルのリスク段階をテキストでも表現する（aria-label用）
+function matrixCellRiskLabel(severity: number, frequency: number): string {
+  const risk = severity * frequency;
+  if (risk >= 16) return "高リスク";
+  if (risk >= 9) return "中高リスク";
+  if (risk >= 4) return "中リスク";
+  return "低リスク";
+}
+
 // ---------- サブコンポーネント ----------
 
 type TabId = "search" | "trends" | "matrix" | "score";
@@ -447,10 +456,15 @@ function RiskMatrixPanel({ cases }: { cases: ScoredAccidentCase[] }) {
                   <tr key={sevIdx}>
                     <td className="pr-2 text-left text-slate-500">{SEV_LABELS[sevIdx]}</td>
                     {row.map((cell) => (
-                      <td key={cell.frequency} className="p-0.5">
+                      <td
+                        key={cell.frequency}
+                        className="p-0.5"
+                        aria-label={`${SEV_LABELS[sevIdx] ?? ""}×頻度${FREQ_LABELS[cell.frequency - 1]}: ${matrixCellRiskLabel(cell.severity, cell.frequency)}${cell.count > 0 ? `（${cell.count}件）` : ""}`}
+                      >
                         <div
                           className={`flex h-10 w-10 items-center justify-center rounded-lg text-xs font-bold ${matrixCellColor(cell.severity, cell.frequency)} mx-auto`}
                           title={cell.cases.map((c) => c.title).join("\n")}
+                          aria-hidden="true"
                         >
                           {cell.count > 0 ? cell.count : ""}
                         </div>
