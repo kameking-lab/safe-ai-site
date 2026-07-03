@@ -137,8 +137,8 @@ export function TopCasesTabs({
                 onClick={() => setTab(def.key)}
                 className={
                   isActive
-                    ? "rounded-full border border-emerald-600 bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm"
-                    : "rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 hover:border-emerald-300 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                    ? "inline-flex min-h-[44px] items-center rounded-full border border-emerald-600 bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm"
+                    : "inline-flex min-h-[44px] items-center rounded-full border border-slate-300 bg-white px-4 py-1.5 text-sm font-medium text-slate-700 hover:border-emerald-300 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
                 }
               >
                 {def.label}
