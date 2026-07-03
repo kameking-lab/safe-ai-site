@@ -165,6 +165,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // /pdf は permanentRedirect → /ky/paper のためサイトマップから除外（リダイレクトURLは掲載しない）
     { url: "/safety-diary", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
     { url: "/notifications", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
+    // 自社プロファイル登録（index:true・自己canonical・OGP付きの実在ページ＝全機能の初期表示
+    // 最適化の入口）。逆カバレッジガード（下記 sitemap.test.ts）で検出した「indexable なのに
+    // どの sitemap にも載っていなかった」発見性の穴を収載。
+    // ※ /organization（事業所ダッシュボード）は「正式リリース前デモ版モック」として意図的に非収載
+    //   （sitemap.test.ts の非収載境界テストで固定）。noindex 化されれば逆ガードも自動追従する。
+    { url: "/profile", lastModified: "2026-05-29", priority: 0.6, changeFrequency: "monthly" },
     { url: "/goods", lastModified: "2026-03-01", priority: 0.6, changeFrequency: "monthly" },
     { url: "/work-environment-measurement", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },
     { url: "/work-environment-measurement/target-finder", lastModified: "2026-05-16", priority: 0.8, changeFrequency: "monthly" },

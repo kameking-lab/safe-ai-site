@@ -567,6 +567,66 @@ function Get-MissingCriticTargets {
   return $missing.ToArray()
 }
 
+# The critic injection roster (Get-CriticInjectionTargets AND the loop-prompt-critic.txt step-4 list)
+# is HARDCODED, but loop-config.json is the single source of truth for which lanes run (section E of
+# the design doc has the owner reconfigure lanes by editing config). Derive the targets the config
+# actually implies - each ENABLED lane owns BACKLOG-<name>.md as its S/A-finding sink - so a rehearsal
+# can compare intent against the hardcoded list. Null/blank-safe; ignores disabled and nameless lanes.
+function Get-ExpectedCriticTargets {
+  param($Lanes)
+  $out = New-Object System.Collections.Generic.List[string]
+  foreach ($l in @($Lanes)) {
+    if ($null -eq $l) { continue }
+    if (-not $l.enabled) { continue }
+    $n = [string]$l.name
+    if ([string]::IsNullOrWhiteSpace($n)) { continue }
+    $t = "BACKLOG-" + $n + ".md"
+    if (-not ($out -contains $t)) { $out.Add($t) }
+  }
+  return ($out.ToArray() | Sort-Object)
+}
+
+# Pure set-difference between the HARDCODED critic targets and the config-derived expectation. Returns
+# @{ UncoveredLanes = <enabled config lanes with NO hardcoded target>; StaleTargets = <hardcoded targets
+# no enabled lane backs> }. UncoveredLanes is the dangerous case: an enabled lane the critic would NEVER
+# inject into while the file-existence check (Get-MissingCriticTargets) still passes - the roster-level
+# twin of the false-PASS #760 closed. StaleTargets is benign (an intentionally disabled lane whose
+# BACKLOG is kept). Case-insensitive, null/blank-safe.
+function Get-CriticTargetRosterDrift {
+  param([string[]]$Hardcoded, [string[]]$Expected)
+  $hc = @{}; foreach ($t in @($Hardcoded)) { if (-not [string]::IsNullOrWhiteSpace($t)) { $hc[$t.ToLowerInvariant()] = $t } }
+  $ex = @{}; foreach ($t in @($Expected)) { if (-not [string]::IsNullOrWhiteSpace($t)) { $ex[$t.ToLowerInvariant()] = $t } }
+  $uncovered = New-Object System.Collections.Generic.List[string]
+  foreach ($k in $ex.Keys) { if (-not $hc.ContainsKey($k)) { $uncovered.Add($ex[$k]) } }
+  $stale = New-Object System.Collections.Generic.List[string]
+  foreach ($k in $hc.Keys) { if (-not $ex.ContainsKey($k)) { $stale.Add($hc[$k]) } }
+  return @{ UncoveredLanes = ($uncovered.ToArray() | Sort-Object); StaleTargets = ($stale.ToArray() | Sort-Object) }
+}
+
+# Pure: which ENABLED lanes are NOT named anywhere in the critic PROMPT text. Get-CriticInjectionTargets
+# is only an OFFLINE oracle - the unattended critic actually reads loop-prompt-critic.txt (repo root) and
+# injects per its step-4 prose roster (line 1552: $criticPrompt is the file the one-shot fires with).
+# #764 pinned that oracle to config, and its FAIL text names "update Get-CriticInjectionTargets AND
+# loop-prompt-critic.txt" - yet NOTHING verified the prompt half stayed in sync. So an owner adding a
+# section-E lane could satisfy the oracle (GREEN rehearsal, no roster drift) while the stale prompt still
+# omits the lane, and the critic would never route findings to it - the false-PASS class of #760/#764 at
+# the prompt-vs-oracle leg. Case-insensitive substring of each enabled lane's name against the prompt;
+# null/blank-safe; a blank prompt reports ALL enabled lanes uncovered (never silently passes), mirroring
+# Get-MissingCriticTargets' blank-root contract. Disabled/nameless lanes are ignored.
+function Get-CriticPromptUncoveredLanes {
+  param([string]$PromptText, $Lanes)
+  $uncovered = New-Object System.Collections.Generic.List[string]
+  $text = if ($null -eq $PromptText) { "" } else { $PromptText.ToLowerInvariant() }
+  foreach ($l in @($Lanes)) {
+    if ($null -eq $l) { continue }
+    if (-not $l.enabled) { continue }
+    $n = [string]$l.name
+    if ([string]::IsNullOrWhiteSpace($n)) { continue }
+    if (-not $text.Contains($n.ToLowerInvariant())) { $uncovered.Add($n) }
+  }
+  return ($uncovered.ToArray() | Sort-Object -Unique)
+}
+
 # ---------------------------------------------------------------------------
 # Exercise the EXACT git-worktree plumbing the weekly critic uses (fetch origin/main -> worktree add
 # --detach a sibling checkout -> verify it carries its own loop-runner.ps1 -> worktree remove --force
@@ -580,18 +640,51 @@ function Get-MissingCriticTargets {
 # loop-runner.ps1 (the one-shot's target), or a worktree left behind after teardown.
 # ---------------------------------------------------------------------------
 function Invoke-CriticRehearsal {
-  param([string]$RepoRoot, [string]$Stamp, [switch]$DryRun)
+  param([string]$RepoRoot, [string]$Stamp, [switch]$DryRun, [object[]]$ConfigLanes = $null)
   $steps = New-Object System.Collections.Generic.List[string]
   $wtPath = Get-CriticWorktreePath -RepoRoot $RepoRoot -Stamp ("rehearsal-" + $Stamp)
   if (-not (Test-WorktreeIsIsolated -RepoRoot $RepoRoot -WorktreePath $wtPath)) {
     $steps.Add("FAIL: computed rehearsal worktree is not isolated from the main tree: " + $wtPath)
     return @{ ok = $false; steps = $steps; worktree = $wtPath }
   }
+  # Roster-drift gate (pure, no git): when the caller supplies loop-config.json's lanes, verify the
+  # HARDCODED critic targets still cover every ENABLED lane. This catches the section-E reconfiguration
+  # hole - an owner adds a lane to config but forgets the hardcoded roster, so the critic never injects
+  # into it while the file-existence check below still passes (the roster-level twin of #760's false PASS).
+  $rosterOk = $true
+  if ($null -ne $ConfigLanes) {
+    $expected = Get-ExpectedCriticTargets -Lanes $ConfigLanes
+    $drift = Get-CriticTargetRosterDrift -Hardcoded (Get-CriticInjectionTargets) -Expected $expected
+    if (@($drift.UncoveredLanes).Count -eq 0) {
+      $steps.Add("critic targets cover every enabled config lane [" + ($expected -join ', ') + "]: True")
+    } else {
+      $steps.Add("FAIL: enabled config lanes have NO critic injection target (update Get-CriticInjectionTargets AND loop-prompt-critic.txt): " + (@($drift.UncoveredLanes) -join ', ')); $rosterOk = $false
+    }
+    if (@($drift.StaleTargets).Count -gt 0) {
+      $steps.Add("note: critic targets no enabled config lane backs (benign if the lane was intentionally disabled): " + (@($drift.StaleTargets) -join ', '))
+    }
+    # Prompt-coverage gate (pure, no git): the roster gate above pins only the OFFLINE oracle to config;
+    # the critic actually reads loop-prompt-critic.txt (repo root). Verify that exact prompt names every
+    # enabled lane, so the oracle can never be satisfied while the prompt the critic truly consumes has
+    # drifted (owner updated Get-CriticInjectionTargets but forgot the prompt). Absent prompt -> the real
+    # critic gate (Test-Path $criticPrompt, ~line 1552) simply won't fire, so no injection drift -> skip.
+    $promptPath = Join-Path $RepoRoot "loop-prompt-critic.txt"
+    if (Test-Path -LiteralPath $promptPath) {
+      $promptText = ""
+      try { $promptText = Get-Content -LiteralPath $promptPath -Raw -Encoding UTF8 } catch { $promptText = "" }
+      $uncoveredPrompt = @(Get-CriticPromptUncoveredLanes -PromptText $promptText -Lanes $ConfigLanes)
+      if ($uncoveredPrompt.Count -eq 0) {
+        $steps.Add("loop-prompt-critic.txt names every enabled config lane (step-4 injection roster in sync): True")
+      } else {
+        $steps.Add("FAIL: loop-prompt-critic.txt step-4 does NOT route these enabled lanes (add them to the critic prompt): " + ($uncoveredPrompt -join ', ')); $rosterOk = $false
+      }
+    }
+  }
   if ($DryRun) {
     $steps.Add("[WHATIF] would fetch origin/main, add a detached worktree at " + $wtPath + " (git " + ((Get-WorktreeAddArgs -Path $wtPath -Ref 'origin/main') -join ' ') + "), verify it carries its own loop-runner.ps1 AND all critic injection targets [" + ((Get-CriticInjectionTargets) -join ', ') + "], then remove it (git " + ((Get-WorktreeRemoveArgs -Path $wtPath) -join ' ') + "). No git executed in dry-run.")
-    return @{ ok = $true; steps = $steps; worktree = $wtPath }
+    return @{ ok = $rosterOk; steps = $steps; worktree = $wtPath }
   }
-  $ok = $true
+  $ok = $rosterOk
   try {
     $f = Invoke-Git -RepoRoot $RepoRoot -GitArgs @("fetch", "origin", "main", "--quiet")
     $steps.Add("fetch origin main: " + $(if ($f.ok) { "ok" } else { "FAIL " + $f.out })); if (-not $f.ok) { $ok = $false }
@@ -701,6 +794,53 @@ if ($SelfTest) {
     Assert-L "a removed target is reported missing (rehearsal would FAIL)" ($miss.Count -eq 1 -and $miss[0] -eq 'BACKLOG-seo.md')
     Assert-L "missing-targets on a blank root reports ALL targets (never silently passes)" ((Get-MissingCriticTargets -Root '' -Targets $targets).Count -eq 6)
     Assert-L "missing-targets ignores blank entries in the target list (null-safe)" ((Get-MissingCriticTargets -Root $tgtRoot -Targets @('', $null)).Count -eq 0)
+    # J2) Roster drift: the hardcoded critic targets must cover every ENABLED config lane, else a config
+    #     edit (section E) silently strands a live lane with no critic sink while J's file check passes.
+    $jLanes = @(
+      [pscustomobject]@{ name = "ops";  enabled = $true },
+      [pscustomobject]@{ name = "data"; enabled = $true },
+      [pscustomobject]@{ name = "seo";  enabled = $false }
+    )
+    $jExpected = Get-ExpectedCriticTargets -Lanes $jLanes
+    Assert-L "expected targets follow ENABLED lanes only (disabled 'seo' dropped)" (($jExpected -join ',') -eq 'BACKLOG-data.md,BACKLOG-ops.md')
+    Assert-L "expected targets ignore null/blank-named lanes (null-safe)" ((Get-ExpectedCriticTargets -Lanes @($null, [pscustomobject]@{ name = ''; enabled = $true })).Count -eq 0)
+    $jNoDrift = Get-CriticTargetRosterDrift -Hardcoded @('BACKLOG-data.md', 'BACKLOG-ops.md') -Expected $jExpected
+    Assert-L "no drift when hardcoded == expected (order/case-insensitive)" ((@($jNoDrift.UncoveredLanes).Count -eq 0) -and (@($jNoDrift.StaleTargets).Count -eq 0))
+    $jNewLane = Get-CriticTargetRosterDrift -Hardcoded @('BACKLOG-ops.md') -Expected @('BACKLOG-ops.md', 'BACKLOG-newlane.md')
+    Assert-L "an enabled lane with no hardcoded target is reported UNCOVERED (rehearsal FAILs)" ((@($jNewLane.UncoveredLanes) -join ',') -eq 'BACKLOG-newlane.md')
+    $jDisabled = Get-CriticTargetRosterDrift -Hardcoded @('BACKLOG-ops.md', 'BACKLOG-gone.md') -Expected @('BACKLOG-ops.md')
+    Assert-L "a hardcoded target no enabled lane backs is STALE, not uncovered (benign)" ((@($jDisabled.UncoveredLanes).Count -eq 0) -and ((@($jDisabled.StaleTargets) -join ',') -eq 'BACKLOG-gone.md'))
+    Assert-L "roster drift is null-safe on empty inputs (never throws)" ((@((Get-CriticTargetRosterDrift -Hardcoded @() -Expected @()).UncoveredLanes).Count -eq 0))
+    # The LIVE config's enabled lanes must be fully covered by the shipped hardcoded targets (guards THIS repo).
+    $jLive = $null
+    try { if (Test-Path $ConfigPath) { $jLive = @((Get-Content -Raw -Encoding UTF8 -Path $ConfigPath | ConvertFrom-Json).lanes) } } catch {}
+    if ($null -ne $jLive) {
+      $jLiveDrift = Get-CriticTargetRosterDrift -Hardcoded (Get-CriticInjectionTargets) -Expected (Get-ExpectedCriticTargets -Lanes $jLive)
+      Assert-L "SHIPPED critic targets cover every enabled lane in loop-config.json (no live drift)" (@($jLiveDrift.UncoveredLanes).Count -eq 0)
+    }
+    # J3) Prompt coverage: the roster gate pins the offline oracle to config, but the critic reads the
+    #     PROMPT. Verify the prompt-vs-config leg so an oracle-only fix can't leave the critic prompt stale.
+    $j3Lanes = @(
+      [pscustomobject]@{ name = "data"; enabled = $true },
+      [pscustomobject]@{ name = "seo";  enabled = $true },
+      [pscustomobject]@{ name = "gone"; enabled = $false }
+    )
+    $j3Prompt = "inject into BACKLOG-data / seo / ux-tools.md; ops-mechanism to BACKLOG-ops.md"
+    Assert-L "prompt-coverage: enabled lanes named in the prompt are covered (0 uncovered)" (@(Get-CriticPromptUncoveredLanes -PromptText $j3Prompt -Lanes $j3Lanes).Count -eq 0)
+    $j3New = @(Get-CriticPromptUncoveredLanes -PromptText $j3Prompt -Lanes @([pscustomobject]@{ name = "newlane"; enabled = $true }))
+    Assert-L "prompt-coverage: an enabled lane absent from the prompt is UNCOVERED (rehearsal FAILs)" (($j3New -join ',') -eq 'newlane')
+    Assert-L "prompt-coverage: a DISABLED lane absent from the prompt is NOT flagged (benign)" (@(Get-CriticPromptUncoveredLanes -PromptText $j3Prompt -Lanes @([pscustomobject]@{ name = "gone"; enabled = $false })).Count -eq 0)
+    Assert-L "prompt-coverage: matching is case-insensitive" (@(Get-CriticPromptUncoveredLanes -PromptText "route to backlog-SEO" -Lanes @([pscustomobject]@{ name = "seo"; enabled = $true })).Count -eq 0)
+    Assert-L "prompt-coverage: a BLANK prompt reports ALL enabled lanes (never silently passes)" ((@(Get-CriticPromptUncoveredLanes -PromptText "" -Lanes $j3Lanes) -join ',') -eq 'data,seo')
+    Assert-L "prompt-coverage: null prompt / null lanes are null-safe (never throws)" ((@(Get-CriticPromptUncoveredLanes -PromptText $null -Lanes $null).Count -eq 0))
+    Assert-L "prompt-coverage: nameless enabled lanes are ignored (null-safe)" (@(Get-CriticPromptUncoveredLanes -PromptText $j3Prompt -Lanes @([pscustomobject]@{ name = ""; enabled = $true })).Count -eq 0)
+    # The SHIPPED loop-prompt-critic.txt must name every enabled live lane (guards THIS repo's prompt leg).
+    $j3PromptPath = Join-Path $repoRoot "loop-prompt-critic.txt"
+    if ($null -ne $jLive -and (Test-Path $j3PromptPath)) {
+      $j3Live = ""
+      try { $j3Live = Get-Content -LiteralPath $j3PromptPath -Raw -Encoding UTF8 } catch {}
+      Assert-L "SHIPPED loop-prompt-critic.txt names every enabled lane in loop-config.json (no prompt drift)" (@(Get-CriticPromptUncoveredLanes -PromptText $j3Live -Lanes $jLive).Count -eq 0)
+    }
     # J) The git arg builders emit the exact isolating command (detached add, forced remove).
     $addArgs = Get-WorktreeAddArgs -Path $wt -Ref "origin/main"
     Assert-L "worktree add is detached at the given ref" (($addArgs -join " ") -eq ("worktree add --detach " + $wt + " origin/main"))
@@ -829,7 +969,12 @@ if ($SelfTest) {
 # ---------------------------------------------------------------------------
 if ($RehearseCritic) {
   Write-Launcher ("critic-rehearsal: exercising fetch/worktree-add/verify/teardown (no Claude one-shot)" + $(if ($WhatIf) { " [dry-run]" } else { "" }) + ".")
-  $reh = Invoke-CriticRehearsal -RepoRoot $repoRoot -Stamp $launchStamp -DryRun:$WhatIf
+  # Best-effort config read (this path runs before the main config load) so the rehearsal can also
+  # verify the hardcoded critic targets still cover every enabled lane. Unreadable config -> null ->
+  # roster check skipped (the git plumbing is still fully rehearsed; config health is a separate gate).
+  $rehLanes = $null
+  try { if (Test-Path $ConfigPath) { $rehLanes = @((Get-Content -Raw -Encoding UTF8 -Path $ConfigPath | ConvertFrom-Json).lanes) } } catch {}
+  $reh = Invoke-CriticRehearsal -RepoRoot $repoRoot -Stamp $launchStamp -DryRun:$WhatIf -ConfigLanes $rehLanes
   foreach ($s in $reh.steps) { Write-Launcher ("  " + $s) }
   if ($reh.ok) { Write-Launcher "[REHEARSE-CRITIC] PASS (critic plumbing sound; no worktree leaked)."; exit 0 }
   Write-Launcher "[REHEARSE-CRITIC] FAIL (see steps above; critic would break on plumbing)."; exit 1
@@ -1480,7 +1625,7 @@ if ($criticDue -and (Test-Path $criticPrompt)) {
   # ~1-day retry (the block below) instead of silently blackholing the critic season. In -WhatIf the
   # rehearsal is itself a dry-run (prints its plan, runs no git); the real fire then falls into its own
   # plan-only branch, so a dry-run shows the full wiring: rehearse -> (pass) -> fire.
-  $preflight = Invoke-CriticRehearsal -RepoRoot $repoRoot -Stamp $launchStamp -DryRun:$WhatIf
+  $preflight = Invoke-CriticRehearsal -RepoRoot $repoRoot -Stamp $launchStamp -DryRun:$WhatIf -ConfigLanes @($cfg.lanes)
   foreach ($ln in $preflight.steps) { Write-Launcher ("critic pre-flight: " + $ln) }
   # Run the critic in a throwaway worktree so its checkout/commit/push never shares an index with
   # the ops persistent runner in the main tree. The critic prompt is fed by absolute path from the

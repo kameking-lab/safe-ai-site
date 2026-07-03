@@ -1,5 +1,19 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: /signage/map (signage-map/*) 未着手ディレクトリの44px一括是正
+
+**イテレーション頭の回収**: 自班のオープンPR2件を回収。#761(/industries/[industry] 下部CTA＋court-cases印刷リンク44px)はe2e/smoke/Vercel全緑のためsquashマージ。#756(/industries 関連ページ6リンク44px)はマージ直後にBACKLOG-ux-hub.md記録行のみmainとコンフリクト(コード非衝突)→`origin/main`を当該ブランチへ通常マージして両エントリ保持で解決→ゲート再走(tsc/lint/vitest2531件/build)全緑→push→CI緑確認後squashマージ。`git checkout main && git pull --ff-only`でclean確認（テスト実行由来の一時差分 rag-metrics-latest.json 等はdiscard）。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route群を再調査し、これまでの44px一括是正が`signage/*`（signage-header・signage-morning-script等）のみに留まっており、地図サイネージ`signage-map/*`ディレクトリ丸ごとが未着手のまま残っていたことを発見。最優先候補は`EarthquakeAlertModal`の「閉じる」ボタン＝フルスクリーン地震速報の唯一のタップ解除手段(キーボードEscapeのみが他の手段だがタッチ運用端末では無意味)で、押し損ねサイズの中でも最も実害が大きい欠陥と判断。
+
+**修正**: `signage-map/*`配下4ファイル計12要素に`inline-flex min-h-[44px] items-center`（入力欄2箇所は`min-h-[44px]`のみ）を付与。①`earthquake-alert-modal.tsx`「閉じる」、②`pin-manager.tsx`「クリア」・ラベル/通知メール入力欄・「ピンを追加」・「削除」、③`signage-map-client.tsx`「☰ パネルを開く」「✕ 閉じる」「← 朝礼ダッシュボードへ」「現在のURLをコピー」「フルスクリーン表示 →」、④`signage-map-leaflet.tsx`ピンPopup内「このピンを削除」。純粋なクラス追加でレイアウト・遷移先・ロジック不変。
+
+**テスト**: `signage-map-44px.test.ts`新設(ソース走査・11件)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 297 files・2531 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/signage-map-44px-2026-07-03.mjs`（next start実機・Playwright・1280×800）**8/8 PASS**（常時表示のサイドパネル5要素・ピンフォーム3要素すべて実boundingBox height=44.0px実測）。地震モーダルの「閉じる」・ピンPopupの「削除」・pending座標時のみ出る「クリア」は実データ/既存ピンが必要な条件付き要素のためソース走査のみで検証（class付与済みを確認）。
+
 ## 2026-07-03 — 補充: /industries/[industry] 下部CTA・他業種リンク＋court-cases印刷リンク 柱0(44px)
 
 **イテレーション頭の回収**: 自班のオープンPR #753(サイネージヘッダーナビ・パネル副リンク44px)がe2e/smoke/Vercel全緑だったためsquashマージ・リモートブランチ削除。main pullでworking tree clean。PR #756(/industries 関連ページ6リンク44px)はe2e/smoke進行中のため次回回収に持ち越し。
@@ -694,3 +708,21 @@
 **無読テスト**: `docs/third-party-reviews/scripts/court-cases-hub-header-links-44px-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**2/2 PASS**（3つの責任ガイド=54.6px・A4まとめ資料=44.0px、boundingBox実測）。
 
 **残課題**: Explore調査で発見した残り4件（/accidents home-screen.tsx変体タブ・/industries/[industry]下部CTA3個+他業種リンク・/industries関連ページ6リンク・/glossary用語カード関連リンク）を次イテレーション以降でBACKLOG-ux-hub.mdへ補充予定。PR #726のCI回収は次イテレーション。
+
+---
+
+## 2026-07-03 ux-hub/industries-related-links-44px
+
+**イテレーション頭の回収**: 自班のCI待ちPR #753（サイネージヘッダーナビ・パネル副リンク44px化）はe2e/smokeがpending継続中のため今回はマージ見送り（次イテレーションで回収）。`git checkout main && git pull --ff-only`でclean確認・3件の他班マージを反映。
+
+**タスク源**: BACKLOG-ux-hub.mdの未着手[ ]がゼロ（全件[x]）だったため、契約に従いExplore agentへ担当route全体の柱0未是正箇所調査を委任。装飾用span/pのfalse positiveを多数除外した結果、確度の高い残存欠陥は`/industries`ハブ最下部「関連ページ」セクションの6リンクのみと判明。
+
+**修正**: `industries/page.tsx`の関連ページセクション6リンク(事故分析レポート/年次安全衛生計画/KY用紙作成/安衛法AIチャット/特別教育・技能講習/通達原文、`px-3 py-1.5 text-sm`≈32px)に`min-h-[44px]`を付与。純粋なクラス追加でレイアウト・遷移先不変。
+
+**テスト**: `industries/page.test.tsx`に1件追加。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 293 files・2493 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/industries-related-links-44px-check.mjs`（next start実機・Playwright・スマホ390×844）**6/6 PASS**（全リンクboundingBox実測=44.0px）。初回実行時はDOM内に同一hrefを持つモバイル非表示のサイドバーnavリンクが先にマッチし誤ってFAIL判定になったため、`:visible`フィルタ＋`.last()`で対象を絞り込んで再検証。
+
+**残課題**: PR #753・#756ともCI回収は次イテレーション。Explore調査での残存候補は使い果たしたため、次回は補充の指針（無読テスト再走査・404/パンくず確認）から再着手予定。

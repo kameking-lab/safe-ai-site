@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { readdirSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import sitemap from "./sitemap";
+import robots from "./robots";
 import { COURT_CASES } from "@/data/court-cases";
 import { latestIsoDate, isIsoDate } from "@/lib/sitemap/lastmod";
 
@@ -313,5 +314,132 @@ describe("sitemap.xml（ゴーストURL回帰ガード: 全URLが実在ルート
     expect(resolvesToRoute("/court-cases/foo/bar", patterns)).toBe(false);
     // 逆に、実在の動的ルート配下は構造一致で解決する（ガードの土台確認）
     expect(resolvesToRoute("/court-cases/any-id", patterns)).toBe(true);
+  });
+});
+
+/**
+ * 逆カバレッジガード（柱C-3-3 の逆方向）: 実在する **静的 indexable ページ** が
+ * どの sitemap にも載っていない「発見性の穴」を機械検知する。
+ *
+ * 上のゴーストURLガードは sitemap → ルート（載っているURLが実在するか＝デッドURL0）を守る。
+ * 本ガードは逆向き ルート → sitemap（実在するindexableページが載っているか＝欠落0）を守る。
+ * 守る失敗モード: 当班以外（ux-records/ux-tools/ux-hub）が新しい公開ページを追加した際、
+ * sitemap.ts のハンド保守された静的URL列へ収載し忘れると、そのページは検索エンジンから
+ * 発見されにくい孤立ページのまま放置される（本ガード新設時に /profile・/organization の
+ * 2 ページがまさにこの穴に落ちていたのを検出し収載した）。
+ *
+ * 「収載すべき」の判定は原則**機械的な除外規則**で行い、ページ単位の index 判断は各所有UI班に委ねる:
+ *   (a) robots.ts の Disallow 配下（/admin/ ・/auth/ ・/dev/ ・/lms ・/api-docs ・/dpa 等。単一ソース）
+ *   (b) ページ自身が `robots: { index: false }` を宣言（noindex のツール状態/印刷/検索結果ページ）
+ *   (c) redirect / permanentRedirect スタブ（実体URLのみ収載し、リダイレクト元は載せない）
+ * のいずれにも当たらない＝**indexable な実ページ**なら、sitemap 収載が必須。所有班が noindex に
+ * したければ (b) を宣言すればガードは自動追従する（当班がページ本文の index 方針を決めるのではない）。
+ *
+ * (d) 例外＝当班（SEO班）が意図的に非収載とする indexable ページは {@link SEO_INTENTIONALLY_EXCLUDED}
+ * に理由付きで明示列挙する。ページは index:true のまま（所有班が noindex 宣言していない）だが、
+ * 発見性上の判断で sitemap から外す少数の例（正式リリース前デモ・極薄ランディング等）。ここに無い
+ * 未知の indexable ページが現れたら本ガードが赤化し、「収載 or noindex or 例外追記」の判断を強制する。
+ *
+ * 動的ルート（[id] 等）は個別値の実在を上の柱C-3-3 / ゴーストガードが担保するため対象外。
+ */
+describe("sitemap.xml（逆カバレッジガード: 実在 indexable ページの欠落0）", () => {
+  const APP_DIR = dirname(fileURLToPath(import.meta.url)); // = src/app
+
+  /** app 配下を走査し、静的ルート（動的[x]を含まない）を [URLパス, page.*の絶対パス] で集める。 */
+  function collectStaticRoutes(dir: string = APP_DIR, segs: string[] = []): Array<[string, string]> {
+    const entries = readdirSync(dir, { withFileTypes: true });
+    const out: Array<[string, string]> = [];
+    const pageFile = entries.find((e) => e.isFile() && /^page\.(t|j)sx?$/.test(e.name));
+    if (pageFile) out.push(["/" + segs.join("/"), join(dir, pageFile.name)]);
+    for (const e of entries) {
+      if (!e.isDirectory()) continue;
+      const name = e.name;
+      // api（非indexable）・signage（独立レイアウト＝別扱い）は横断検索/通常sitemapの対象外
+      if (name === "api" || name === "signage") continue;
+      if (name.startsWith("@") || name.startsWith("_")) continue; // 並列/プライベート
+      const isGroup = name.startsWith("(") && name.endsWith(")");
+      out.push(...collectStaticRoutes(join(dir, name), isGroup ? segs : [...segs, name]));
+    }
+    return out;
+  }
+
+  // robots.ts の UA:* Disallow を単一ソースとして参照（当班がここへ列を二重管理しない）。
+  const commonDisallow: string[] = (() => {
+    const star = robots().rules;
+    const rules = Array.isArray(star) ? star : star ? [star] : [];
+    const wildcard = rules.find((r) => r.userAgent === "*");
+    const dis = wildcard?.disallow;
+    return (Array.isArray(dis) ? dis : dis ? [dis] : []).filter((d): d is string => typeof d === "string");
+  })();
+
+  /** ルートが robots Disallow 配下か（"/admin/"→/admin 自身と配下、"/dpa"→/dpa と配下）。 */
+  function isDisallowed(route: string): boolean {
+    return commonDisallow.some((d) => {
+      const base = d.endsWith("/") ? d.slice(0, -1) : d;
+      return route === base || route.startsWith(base + "/");
+    });
+  }
+
+  // (d) 当班が意図的に非収載とする indexable ページ（index:true のまま sitemap から外す少数例）。
+  // 追加時は理由を必須とし、上の「非収載境界」describe の該当アサーションと対で管理する。
+  const SEO_INTENTIONALLY_EXCLUDED = new Set<string>([
+    // 事業所・部署ダッシュボード。「正式リリース前デモ版モック」のため公開検索面へは出さない
+    // （非収載境界テストで has("/organization")===false を固定）。noindex 化されれば削除してよい。
+    "/organization",
+  ]);
+
+  const staticRoutes = collectStaticRoutes().filter(([r]) => !r.includes("["));
+  const sitemapPaths = new Set(sitemap().map((e) => new URL(e.url).pathname));
+
+  /** noindex 宣言 or redirect スタブ＝収載不要。機械検知（ページ本文の index 方針は所有班マター）。 */
+  function isExcludedBySource(file: string): boolean {
+    const src = readFileSync(file, "utf8");
+    if (/robots:\s*\{[^}]*index:\s*false/.test(src)) return true; // 明示 noindex
+    if (/\b(?:permanentRedirect|redirect)\s*\(\s*["'`]/.test(src)) return true; // redirect スタブ
+    return false;
+  }
+
+  it("静的ルートを十分に検出できている（走査のサニティ）", () => {
+    expect(staticRoutes.length).toBeGreaterThan(150);
+    expect(staticRoutes.some(([r]) => r === "/")).toBe(true);
+  });
+
+  it("robots Disallow を robots.ts から単一ソースで参照できている", () => {
+    expect(commonDisallow).toContain("/admin/");
+    expect(isDisallowed("/admin/health")).toBe(true);
+    expect(isDisallowed("/lms")).toBe(true);
+    expect(isDisallowed("/laws")).toBe(false); // 前方一致の誤爆なし（/lms が /laws を巻き込まない）
+  });
+
+  it("実在する indexable な静的ページが全て sitemap に収載されている＝欠落0", () => {
+    const missing = staticRoutes
+      .filter(([route]) => !sitemapPaths.has(route))
+      .filter(([route]) => !isDisallowed(route))
+      .filter(([route]) => !SEO_INTENTIONALLY_EXCLUDED.has(route))
+      .filter(([, file]) => !isExcludedBySource(file))
+      .map(([route]) => route);
+    expect(
+      missing,
+      `indexable なのに sitemap 未収載のページ（sitemap.ts へ追加するか、所有UI班が該当ページに ` +
+        `robots:{index:false} を宣言すること）: ${missing.join(", ")}`,
+    ).toEqual([]);
+  });
+
+  it("除外分類のサニティ（各除外機構が実在ページで機能している）", () => {
+    // (a) Disallow 配下
+    expect(isDisallowed("/admin/status")).toBe(true);
+    // (b) noindex 宣言と (c) redirect スタブが実ファイルで検知できる
+    const byRoute = new Map(staticRoutes);
+    const search = byRoute.get("/search");
+    const pdf = byRoute.get("/pdf");
+    expect(search && isExcludedBySource(search)).toBe(true); // /search は index:false
+    expect(pdf && isExcludedBySource(pdf)).toBe(true); // /pdf は permanentRedirect スタブ
+    // 本ガード新設で収載した /profile は sitemap 側に載っている（回帰固定）。
+    expect(sitemapPaths.has("/profile")).toBe(true);
+    // (d) 意図的例外 /organization は index:true だが sitemap 非収載のまま（デモ）。
+    expect(byRoute.has("/organization")).toBe(true); // ルートは実在
+    const org = byRoute.get("/organization");
+    expect(org && isExcludedBySource(org)).toBe(false); // noindex/redirect ではない（=例外扱いが必要）
+    expect(sitemapPaths.has("/organization")).toBe(false); // sitemap には載せない
   });
 });
