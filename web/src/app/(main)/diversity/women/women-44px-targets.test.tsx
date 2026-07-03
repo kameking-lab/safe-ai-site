@@ -41,4 +41,13 @@ describe("/diversity/women 44pxタップ標的", () => {
       expect(link.className).toContain("min-h-[44px]");
     });
   });
+
+  it("法令アコーディオンの開閉ボタンがすべて min-h-[44px] を持つ", () => {
+    renderPage();
+    const toggles = screen.getAllByRole("button", { expanded: false });
+    expect(toggles.length).toBeGreaterThan(0);
+    toggles.forEach((toggle) => {
+      expect(toggle.className).toContain("min-h-[44px]");
+    });
+  });
 });

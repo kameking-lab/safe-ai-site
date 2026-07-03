@@ -79,6 +79,16 @@ describe("SignageRotator", () => {
     expect(tabs[2]!.getAttribute("aria-selected")).toBe("true");
   });
 
+  // 柱0: 進捗ドットのタップ標的が44×44pxであること（min-h-[24px]への退行を防ぐ）。
+  it("進捗ドットが44×44pxタップ標的", () => {
+    renderRotator();
+    const tabs = screen.getAllByRole("tab");
+    for (const tab of tabs) {
+      expect(tab.className).toContain("min-h-[44px]");
+      expect(tab.className).toContain("min-w-[44px]");
+    }
+  });
+
   it("マウスホバー中は自動切替を一時停止する", () => {
     const { container } = renderRotator();
     const root = container.firstElementChild as HTMLElement;

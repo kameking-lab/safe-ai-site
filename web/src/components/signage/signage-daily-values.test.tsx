@@ -51,4 +51,16 @@ describe("SignageDailyValues", () => {
     expect(screen.queryByText("湿度データ取得中…")).toBeNull();
     expect(screen.getByText("℃", { exact: false })).toBeDefined();
   });
+
+  it("起点日変更フォームの入力欄・保存ボタン・変更リンクが44pxタップ標的を満たす", () => {
+    render(<SignageDailyValues now={NOW} />);
+    fireEvent.click(screen.getByText("起点日を設定"));
+    expect(screen.getByLabelText("無災害日数の起点日").className).toContain("min-h-[44px]");
+    expect(screen.getByText("保存").className).toContain("min-h-[44px]");
+    fireEvent.change(screen.getByLabelText("無災害日数の起点日"), {
+      target: { value: "2026-07-01" },
+    });
+    fireEvent.click(screen.getByText("保存"));
+    expect(screen.getByText("起点日を変更").className).toContain("min-h-[44px]");
+  });
 });

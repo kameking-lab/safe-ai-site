@@ -69,6 +69,8 @@ export function ChemicalRaSaveButton(props: {
 
 export function SavedRaList() {
   const [list, setList] = useState<ChemicalRaSavedRecord[] | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const reload = useCallback(() => {
     void listChemicalRaRecords().then(setList);
@@ -80,6 +82,22 @@ export function SavedRaList() {
     window.addEventListener("chemical-ra:saved", onSaved);
     return () => window.removeEventListener("chemical-ra:saved", onSaved);
   }, [reload]);
+
+  const onDelete = useCallback(
+    (r: ChemicalRaSavedRecord) => {
+      const ok = window.confirm(
+        `「${r.substance || "この記録"}」の実施記録を削除します。よろしいですか？（元に戻せません）`
+      );
+      if (!ok) return;
+      setDeleteError(null);
+      setDeletingId(r.raId);
+      void deleteChemicalRaRecord(r.raId)
+        .then(() => reload())
+        .catch(() => setDeleteError("削除に失敗しました。通信状況を確認してもう一度お試しください。"))
+        .finally(() => setDeletingId(null));
+    },
+    [reload]
+  );
 
   if (list === null) return null;
   if (list.length === 0) return null;
@@ -97,6 +115,11 @@ export function SavedRaList() {
           ? "（この端末＋クラウドに保存）"
           : "（この端末に保存）"}
       </p>
+      {deleteError && (
+        <p role="alert" className="mt-2 text-[11px] font-semibold text-rose-600">
+          {deleteError}
+        </p>
+      )}
       <ul className="mt-3 space-y-2">
         {list.map((r) => (
           <li
@@ -133,13 +156,16 @@ export function SavedRaList() {
               )}
               <button
                 type="button"
-                onClick={() => {
-                  void deleteChemicalRaRecord(r.raId).then(reload);
-                }}
+                onClick={() => onDelete(r)}
+                disabled={deletingId === r.raId}
                 aria-label="削除"
-                className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                className="inline-flex items-center rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-500 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
               >
-                <Trash2 className="h-3 w-3" aria-hidden="true" />
+                {deletingId === r.raId ? (
+                  <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Trash2 className="h-3 w-3" aria-hidden="true" />
+                )}
               </button>
             </span>
           </li>
