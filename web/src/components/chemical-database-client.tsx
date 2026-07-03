@@ -222,7 +222,7 @@ export function ChemicalDatabaseClient() {
             key={tab.id}
             type="button"
             onClick={() => setMode(tab.id)}
-            className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+            className={`inline-flex min-h-[44px] items-center justify-center rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
               mode === tab.id
                 ? "bg-white text-slate-900 shadow-sm"
                 : "text-slate-500 hover:text-slate-700"
@@ -289,7 +289,7 @@ export function ChemicalDatabaseClient() {
                       key={m}
                       type="button"
                       onClick={() => setTagMatchMode(m)}
-                      className={`px-2.5 py-1 ${
+                      className={`inline-flex min-h-[44px] items-center justify-center px-2.5 py-1 ${
                         tagMatchMode === m
                           ? "bg-slate-800 text-white"
                           : "bg-white text-slate-600 hover:bg-slate-50"
@@ -303,7 +303,7 @@ export function ChemicalDatabaseClient() {
                   <button
                     type="button"
                     onClick={clearTagFilter}
-                    className="inline-flex items-center gap-1 rounded border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+                    className="inline-flex min-h-[44px] items-center gap-1 rounded border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
                   >
                     <X className="h-3 w-3" aria-hidden="true" />
                     クリア
@@ -330,7 +330,7 @@ export function ChemicalDatabaseClient() {
                           key={t}
                           type="button"
                           onClick={() => toggleTag(t)}
-                          className={`inline-flex items-center rounded border text-xs px-2 py-0.5 font-medium whitespace-nowrap ${info.badgeClass} ${
+                          className={`inline-flex min-h-[44px] items-center rounded border text-xs px-2 py-0.5 font-medium whitespace-nowrap ${info.badgeClass} ${
                             selected ? "ring-2 ring-offset-1 ring-slate-700" : "opacity-70 hover:opacity-100"
                           }`}
                           title={info.fullLabel}
@@ -565,7 +565,7 @@ export function ChemicalDatabaseClient() {
                             ? `/chemical-ra?cas=${encodeURIComponent(s.cas)}`
                             : `/chemical-ra?name=${encodeURIComponent(s.name)}`
                         }
-                        className="inline-flex min-h-[36px] items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-700"
+                        className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow hover:bg-emerald-700"
                       >
                         <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
                         この物質のリスクアセスメントを実施
@@ -575,7 +575,7 @@ export function ChemicalDatabaseClient() {
                           href={s.sds_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex min-h-[36px] items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                          className="inline-flex min-h-[44px] items-center gap-1 rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                         >
                           <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
                           厚労省SDS情報を見る
@@ -609,7 +609,7 @@ export function ChemicalDatabaseClient() {
           <li>
             <Link
               href="/chemical-ra"
-              className="inline-flex min-h-[36px] items-center rounded-md border border-emerald-300 bg-white px-3 py-1.5 font-semibold text-emerald-700 hover:bg-emerald-50"
+              className="inline-flex min-h-[44px] items-center rounded-md border border-emerald-300 bg-white px-3 py-1.5 font-semibold text-emerald-700 hover:bg-emerald-50"
             >
               化学物質リスクアセスメント
             </Link>
@@ -617,7 +617,7 @@ export function ChemicalDatabaseClient() {
           <li>
             <Link
               href="/circulars"
-              className="inline-flex min-h-[36px] items-center rounded-md border border-emerald-300 bg-white px-3 py-1.5 font-semibold text-emerald-700 hover:bg-emerald-50"
+              className="inline-flex min-h-[44px] items-center rounded-md border border-emerald-300 bg-white px-3 py-1.5 font-semibold text-emerald-700 hover:bg-emerald-50"
             >
               通達・判例
             </Link>
@@ -625,7 +625,7 @@ export function ChemicalDatabaseClient() {
           <li>
             <Link
               href="/glossary"
-              className="inline-flex min-h-[36px] items-center rounded-md border border-emerald-300 bg-white px-3 py-1.5 font-semibold text-emerald-700 hover:bg-emerald-50"
+              className="inline-flex min-h-[44px] items-center rounded-md border border-emerald-300 bg-white px-3 py-1.5 font-semibold text-emerald-700 hover:bg-emerald-50"
             >
               安全用語辞書
             </Link>
