@@ -59,7 +59,7 @@ const SHORTCUTS: Shortcut[] = [
   },
   {
     label: "熱中症WBGT",
-    href: "/education",
+    href: "/heat-illness-prevention",
     icon: <Thermometer size={26} aria-hidden="true" />,
   },
 ];
