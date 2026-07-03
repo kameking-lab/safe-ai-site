@@ -567,11 +567,22 @@ function Repair-MsysMangledNote {
 # makes Get-LaneHealthLine behave exactly as before (safe degradation - never worse than today). Mirrors
 # loop-launcher.ps1 Get-RunningLanes; kept as a tiny local copy because the two scripts share no module
 # and the reporter runs in separate lane clones.
+# Pure: does a process command line genuinely LAUNCH loop-runner.ps1 (invoked via -File), not merely MENTION
+# the filename (an operator/agent -Command diagnostic that names the script + a lane)? A bare mention spoofs
+# the alive-tiebreak below into treating a dead lane as alive, which is the WRONG direction here: it would
+# calm a genuinely dead lane's health banner. Every real runner launches via -File <path>\loop-runner.ps1;
+# match that shape so a -Command mention no longer counts. Local copy of the sibling predicate in
+# loop-runner.ps1 / loop-launcher.ps1 (the scripts share no module). Pure so -SelfTest asserts it offline.
+function Test-IsRunnerProcess([string]$CommandLine) {
+  if ([string]::IsNullOrEmpty($CommandLine)) { return $false }
+  return ($CommandLine -match '(?i)-File\s+"?[^"]*loop-runner\.ps1(?:"|\s|$)')
+}
+
 function Get-AliveRunnerLanes {
   $names = New-Object System.Collections.Generic.List[string]
   try {
     $procs = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-      Where-Object { $_.CommandLine -like '*loop-runner.ps1*' })
+      Where-Object { Test-IsRunnerProcess ([string]$_.CommandLine) })
     foreach ($p in $procs) {
       $m = [regex]::Match([string]$p.CommandLine, '(?i)-Lane(\s+|:|=)["'']?([\w\-]+)')
       if ($m.Success) {
@@ -985,6 +996,15 @@ if ($SelfTest) {
       Assert-Test "L9: the missing-since marker is NOT treated as a health banner" (-not (Test-IsHealthBanner -TrimmedLine "<!-- lane-missing-since: seo=2026-07-03T12:55:54 -->" -Stem $stemOld -KnownPrefixes $knownOld))
       Assert-Test "L10: empty stem falls back to the known prefix list only (never strips everything)" ((Test-IsHealthBanner -TrimmedLine $realUnrep -Stem "" -KnownPrefixes $knownOld) -and (-not (Test-IsHealthBanner -TrimmedLine $realAnr -Stem "" -KnownPrefixes $knownOld)))
     }
+
+    # R) Test-IsRunnerProcess: the alive-tiebreak (Get-AliveRunnerLanes) must count a real -File launch of
+    #    loop-runner.ps1 and must NOT count a -Command MENTION of the filename + a lane - the false match that
+    #    would calm a genuinely dead lane's health banner by reporting it "alive".
+    Assert-Test "R1: bare -File launch is a runner" (Test-IsRunnerProcess 'powershell -NoProfile -File C:\r\loop-runner.ps1 -Lane data')
+    Assert-Test "R2: quoted -File launch (spaced path) is a runner" (Test-IsRunnerProcess 'powershell -File "C:\Program Files\r\loop-runner.ps1" -Lane seo')
+    Assert-Test "R3: a -Command MENTION of the filename + lane is NOT a runner (spoof fix)" (-not (Test-IsRunnerProcess 'powershell -Command "gci | ? { $_.CommandLine -like ''*loop-runner.ps1*'' -and ''-Lane data'' }"'))
+    Assert-Test "R4: a watchdog -File launch is NOT a runner" (-not (Test-IsRunnerProcess 'powershell -File C:\r\loop-watchdog.ps1'))
+    Assert-Test "R5: empty command line is NOT a runner (null-safe)" (-not (Test-IsRunnerProcess ""))
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }

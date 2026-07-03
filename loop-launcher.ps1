@@ -271,7 +271,7 @@ function Get-RunnerProcInfo {
   $map = @{}
   try {
     $procs = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-      Where-Object { $_.CommandLine -like '*loop-runner.ps1*' })
+      Where-Object { Test-IsRunnerProcess ([string]$_.CommandLine) })
     foreach ($p in $procs) {
       $cl = [string]$p.CommandLine
       $m = [regex]::Match($cl, '(?i)-Lane(\s+|:|=)["'']?([\w\-]+)')
@@ -429,6 +429,19 @@ function Test-ShouldSpawnWatchdog {
 function Test-IsWatchdogProcess([string]$CommandLine) {
   if ([string]::IsNullOrEmpty($CommandLine)) { return $false }
   return ($CommandLine -match '(?i)-File\s+"?[^"]*loop-watchdog\.ps1(?:"|\s|$)')
+}
+
+# Pure: does a process command line genuinely LAUNCH loop-runner.ps1 (invoked via -File), not merely MENTION
+# the filename (an operator/agent diagnostic run with -Command "... loop-runner.ps1 ... -Lane data ...")? The
+# lane liveness scans (Get-RunnerProcInfo, Get-RunningLanes) matched ANY powershell whose command line
+# CONTAINED "loop-runner.ps1", so a stray command that names the script + a lane spoofs them: Get-RunningLanes
+# then reports a dead lane "alive" and -HealOnly skips resurrecting it. Same class as the watchdog scan bug
+# above, and the same -File discriminator: every real runner (persistent/heal spawn + one-shot planner/critic)
+# launches via -File <path>\loop-runner.ps1. Local copy of the sibling predicate in loop-runner.ps1 (the
+# scripts share no module). Pure so -SelfTest asserts it offline.
+function Test-IsRunnerProcess([string]$CommandLine) {
+  if ([string]::IsNullOrEmpty($CommandLine)) { return $false }
+  return ($CommandLine -match '(?i)-File\s+"?[^"]*loop-runner\.ps1(?:"|\s|$)')
 }
 
 # Live wrapper: ensure a heal watchdog is alive. Returns "spawned"/"running"/"absent"/"whatif". Reads the
@@ -985,6 +998,14 @@ if ($SelfTest) {
     Assert-L "wd-id: a -Command MENTION of the filename is NOT a watchdog process (false-match fix)" (-not (Test-IsWatchdogProcess 'powershell -NoProfile -Command "gci | ? { $_.CommandLine -like ''*loop-watchdog.ps1*'' }"'))
     Assert-L "wd-id: a lane runner -File launch is NOT a watchdog process" (-not (Test-IsWatchdogProcess 'powershell -File C:\r\loop-runner.ps1 -Lane ops'))
     Assert-L "wd-id: empty command line is NOT a watchdog process (null-safe)" (-not (Test-IsWatchdogProcess ""))
+    # R3) Test-IsRunnerProcess: the lane liveness scans (Get-RunnerProcInfo / Get-RunningLanes) must count a
+    #     real -File launch of loop-runner.ps1 and must NOT count a -Command MENTION of the filename + a lane
+    #     name - the false match that makes Get-RunningLanes report a dead lane "alive" so -HealOnly skips it.
+    Assert-L "runner-id: bare -File launch (heal/persistent form) is a runner" (Test-IsRunnerProcess 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\r\loop-runner.ps1 -Lane data -RepoPath C:\r')
+    Assert-L "runner-id: quoted -File launch (spaced path) is a runner" (Test-IsRunnerProcess 'powershell -File "C:\Program Files\r\loop-runner.ps1" -Lane seo')
+    Assert-L "runner-id: a -Command MENTION of the filename + lane is NOT a runner (spoof fix)" (-not (Test-IsRunnerProcess 'powershell -NoProfile -Command "gci | ? { $_.CommandLine -like ''*loop-runner.ps1*'' -and ''-Lane data'' }"'))
+    Assert-L "runner-id: a watchdog -File launch is NOT a runner" (-not (Test-IsRunnerProcess 'powershell -File C:\r\loop-watchdog.ps1 -SupersedePid 100'))
+    Assert-L "runner-id: empty command line is NOT a runner (null-safe)" (-not (Test-IsRunnerProcess ""))
     # S) Get-TreeKillArgs / Stop-ProcessTree: a timed-out one-shot must be TREE-killed (taskkill /F /T), not
     #    single-process $p.Kill()'d, or its claude child tree orphans and (for the critic) keeps writing
     #    inside the worktree the finally then force-removes. Assert the exact command + the null no-op.
@@ -1383,7 +1404,7 @@ function Get-RunningLanes {
   $map = @{}
   try {
     $procs = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-      Where-Object { $_.CommandLine -like '*loop-runner.ps1*' })
+      Where-Object { Test-IsRunnerProcess ([string]$_.CommandLine) })
     foreach ($p in $procs) {
       $cl = [string]$p.CommandLine
       $m = [regex]::Match($cl, '(?i)-Lane(\s+|:|=)["'']?([\w\-]+)')
