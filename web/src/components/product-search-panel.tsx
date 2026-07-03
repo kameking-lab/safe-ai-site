@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { SdsProduct } from "@/lib/sds-fetcher";
 import type {
   AmountLevel,
@@ -58,6 +59,7 @@ export function ProductSearchPanel() {
   const [searching, setSearching] = useState(false);
   const [searchHits, setSearchHits] = useState<SearchHit[]>([]);
   const [searchSource, setSearchSource] = useState<string>("");
+  const [hasSearched, setHasSearched] = useState(false);
   const [running, setRunning] = useState(false);
   const [raResult, setRaResult] = useState<RaApiResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +68,7 @@ export function ProductSearchPanel() {
     setError(null);
     setSearchHits([]);
     setRaResult(null);
+    setHasSearched(false);
     if (!productName.trim()) {
       setError("製品名を入力してください。");
       return;
@@ -84,9 +87,7 @@ export function ProductSearchPanel() {
       }
       setSearchHits(json.hits ?? []);
       setSearchSource(json.source ?? "");
-      if ((json.hits ?? []).length === 0) {
-        setError("該当する製品が見つかりませんでした（主要10製品収録）。");
-      }
+      setHasSearched(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "検索に失敗しました。");
     } finally {
@@ -177,6 +178,26 @@ export function ProductSearchPanel() {
         >
           {searching ? "検索中…" : "SDS DB を検索"}
         </button>
+
+        {hasSearched && searchHits.length === 0 && (
+          <div className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <p>該当する製品が見つかりませんでした（主要10製品収録）。次のいずれかをお試しください。</p>
+            <div className="flex flex-wrap gap-2">
+              <Link
+                href="/chemical-ra"
+                className="inline-flex items-center rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-100"
+              >
+                化学物質RA（手入力）で成分名から評価する
+              </Link>
+              <Link
+                href="/chemical-database"
+                className="inline-flex items-center rounded-lg border border-amber-300 bg-white px-3 py-2 text-xs font-semibold text-amber-800 hover:bg-amber-100"
+              >
+                化学物質検索DBで物質名を調べる
+              </Link>
+            </div>
+          </div>
+        )}
 
         {searchHits.length > 0 && (
           <div className="space-y-2">
