@@ -4,6 +4,24 @@
 
 ---
 
+## 2026-07-03 — sitemap ゴーストURL回帰ガード新設（PR: seo/sitemap-ghost-url-guard）
+
+回収: 前イテレーション着手の自班 CI 緑 PR を回収＝#713（sitemap/robots ドメイン単一ソース化）が green だったが CONFLICTING（merge commit clean 不可）＝`gh pr checkout 713`→`git merge origin/main`（force-push なし）。衝突は BACKLOG-seo.md / cycle-log-seo.md の追記のみ（コードは非衝突）で、origin/main が先に載せた #710(OGP透かし)・#704(@id グラフ) の完了エントリと自 #713 エントリを併存させて解決・push。auto-merge はリポジトリ設定で不許可のため merge commit の CI 再走を次イテレーションで回収する。#719（json-ld provider/creator @id 集約 #704 follow-up）は e2e/smoke pending のため持ち越し。他班 OPEN PR（#720/#718/#717/#714 等）は不可侵。
+
+着手判断: BACKLOG-seo 未着手キューは空（O17/T6・T7 は Path A 設計ドラフト＝オーナー承認待ち）＋在庫 PR は #713/#719 の2本（<3）のため補充指針に従い自領域から新規補充。**発見性インフラ（sitemap）の全域再監査**を実施＝`src/app` 配下を機械走査し全 193 ルート（172 静的 + 21 動的）を抽出、`sitemap.ts` の出力 URL と双方向突合。結果、**sitemap は現状クリーン**＝(a) ゴーストURL 0（literal の "ghost 30 件" は全て `/faq/[category]`・`/foreign-workers/status/[status]`・`/industries/[industry]`・`/accidents-reports/[industry]` 等の動的セグメント経由で実在）、(b) 誤欠落 0（未収載の実在ルートは admin/auth/print/redirect スタブ/app-state で全て正当除外、当班 `/search` は結果ページゆえ `robots:{index:false}` で正当除外を実測確認）。
+
+穴: sitemap 自体は正しいが、既存テスト（sitemap.test.ts の柱C-3-3/C-3-4/A-3 describe）は「特定ページが載っている／非収載境界」だけを固定し、**「sitemap() の全URLが実在ルートへ解決する」逆方向のガードが皆無**だった。当班以外（ux-records/ux-tools/ux-hub）がページを削除・改名した際、`sitemap.ts` のハンド保守された静的URL列に旧URLが取り残されると、検索エンジンへ 404 のデッドURLを提出し続けクロールバジェット浪費・Search Console「Submitted URL not found (404)」を招く＝発見性インフラの整合穴。
+
+是正: `sitemap.test.ts` に「ゴーストURL回帰ガード」describe を追加（**コード変更0・テストのみ**）。`readdirSync` で `src/app` を再帰走査し `page.*` を持つルートのセグメント列（route group `(x)` / 並列 `@slot` / プライベート `_folder` を除去、動的 `[x]` は保持）を収集する `collectRoutePatterns()` と、URL パスを静的一致 or 動的セグメント構造一致で解決判定する `resolvesToRoute()` を実装。3 it＝(1) 走査サニティ（page ルート 150 超・ルート `/` を `(main)/page.tsx` から検出） (2) `sitemap()` 全 URL を `new URL().pathname` 正規化し全件が実在ルートへ解決＝デッドURL0 (3) 解決ロジックの偽陽性ガード（未知の1階層/3階層 path は未解決・実在動的配下は解決）。動的パラメータ値の実在（/court-cases/[id] が COURT_CASES と 1:1 等）は既存 柱C-3-3 describe が別途固定のため構造のみ突合＝二重管理回避。origin は `new URL().pathname` で剥がすため #713（SITE_URL 単一ソース化）マージ後も無改変で通る。
+
+検証: 対象 it をゴーストURL（`/deleted-ghost-page`）注入で赤転→復元で緑を実測（偽緑でないことを確認）。sitemap.ts は無改変（`git diff --stat` で確認）。
+
+ゲート: `tsc --noEmit`=0 / `lint`=errors0（warn は既存の別ファイル 23 件のみ・当該0）/ `vitest run`=286ファイル2442テスト全pass（sitemap.test は 24→27 pass）/ `build`=成功。build 再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は `git checkout` で復元。working tree は sitemap.test.ts の1ファイルのみ。
+
+残: 本 PR の CI 緑回収＆マージ＋#713 merge commit の CI 再走回収（次イテレーション 1)）。#719 は pending 持ち越し。未着手キューは空＝次も補充（自領域 SEO/構造化データ/横断検索）。
+
+---
+
 ## 2026-07-03 — OGP画像(/api/og)の透かしドメインを SITE_URL 単一ソース化＋og-url.ts 回帰テスト（PR: seo/og-watermark-domain-single-source）
 
 回収: 前イテレーション着手の自班 CI 緑 PR を回収＝#691（法令名かな読みエイリアス12法令）が CLEAN/MERGEABLE のため squash マージ→`git checkout main && git pull --ff-only`→clean。#698（page-json-ld 単一ソース化）は #691 マージで BACKLOG/cycle-log の [x] 追記が CONFLICTING/DIRTY→当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決し両完了エントリを併存させ push、CI 再走を次イテレーションで回収。#704（JSON-LD @id グラフ化）は e2e/smoke pending のため持ち越し。他班 OPEN PR（#702/#701/#694/#693 等）は不可侵。
