@@ -29,4 +29,20 @@ describe("/industries/[industry] 柱0 44pxタップ標的", () => {
       expect(link.className).toContain("min-h-[44px]");
     }
   });
+
+  it("ページ下部「次のアクション」CTA3件・「他の業種」リンクが min-h-[44px] を持つ", async () => {
+    render(await IndustryLandingPage({ params: Promise.resolve({ industry: "construction" }) }));
+    const ctaNames = ["📝 KYを作成", "📋 年次計画を生成", "🚨 事故分析を見る"];
+    for (const name of ctaNames) {
+      const link = screen.getByRole("link", { name });
+      expect(link.className).toContain("min-h-[44px]");
+    }
+    const otherIndustryLinks = screen.getAllByRole("link").filter((a) =>
+      (a.getAttribute("href") ?? "").startsWith("/industries/") && a.getAttribute("href") !== "/industries/construction",
+    );
+    expect(otherIndustryLinks.length).toBeGreaterThan(0);
+    for (const link of otherIndustryLinks) {
+      expect(link.className).toContain("min-h-[44px]");
+    }
+  });
 });
