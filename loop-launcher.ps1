@@ -168,6 +168,20 @@ function Resolve-CriticStamp {
 }
 
 # ---------------------------------------------------------------------------
+# Supply gate (planner): decide whether to fire a planner one-shot for a lane. The gate must NOT
+# fire when that lane's persistent runner is ALREADY running, because the one-shot and the live
+# runner would operate the SAME clone concurrently (two claude+git processes -> index.lock
+# contention / branch clobber). At cold start (reboot/logon) nothing is running, so a drained
+# backlog is replenished before ignition; on the daily 07:00 self-healing re-run the lane is
+# already alive and self-replenishes per its own contract, so the one-shot is both unnecessary
+# and unsafe. Open<0 means the BACKLOG file is missing (never fire). Pure so -SelfTest covers it.
+# ---------------------------------------------------------------------------
+function Test-ShouldFirePlanner {
+  param([int]$Open, [bool]$LaneRunning, [bool]$HasPrompt)
+  return ($HasPrompt -and (-not $LaneRunning) -and ($Open -ge 0) -and ($Open -lt 3))
+}
+
+# ---------------------------------------------------------------------------
 # -SelfTest: offline verification of the shared status-lock helper (stale-orphan reclamation +
 # fresh-lock respect). Temp files only - no Claude, no real status file, no config, no network.
 # Exits 0 on PASS, 1 on FAIL. Runs before any config read so a broken config cannot block the test.
@@ -211,6 +225,13 @@ if ($SelfTest) {
     # G) Edge: RetryDays >= CriticEveryDays clamps back-date to 0 (no negative interval).
     $sEdge = Resolve-CriticStamp -Outcome "timeout" -Now $fixed -CriticEveryDays 1 -RetryDays 1
     Assert-L "critic retry clamps to now when RetryDays>=interval" ($sEdge -eq $fixed)
+    # H) Test-ShouldFirePlanner: fires only when a drained backlog exists AND the lane is NOT
+    #    already running (the core fix: no one-shot in a clone with a live runner -> no git race).
+    Assert-L "planner fires when drained + not running + prompt" (Test-ShouldFirePlanner -Open 2 -LaneRunning $false -HasPrompt $true)
+    Assert-L "planner SKIPS when lane already running (concurrent-git guard)" (-not (Test-ShouldFirePlanner -Open 0 -LaneRunning $true -HasPrompt $true))
+    Assert-L "planner SKIPS when backlog not drained (open=3)" (-not (Test-ShouldFirePlanner -Open 3 -LaneRunning $false -HasPrompt $true))
+    Assert-L "planner SKIPS when backlog missing (open=-1)" (-not (Test-ShouldFirePlanner -Open -1 -LaneRunning $false -HasPrompt $true))
+    Assert-L "planner SKIPS when no planner prompt present" (-not (Test-ShouldFirePlanner -Open 1 -LaneRunning $false -HasPrompt $false))
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -817,7 +838,13 @@ foreach ($lane in $cfg.lanes) {
   }
 
   # Supply gate: replenish an almost-empty backlog before starting the persistent runner.
-  if ($open -ge 0 -and $open -lt 3 -and (Test-Path $plannerPrompt)) {
+  # Skip when the lane's persistent runner is already alive: a one-shot in the same clone as a
+  # live runner races git (index.lock / branch clobber). A running lane self-replenishes anyway.
+  $laneAlreadyRunning = $running.ContainsKey($lane.name)
+  if ($open -ge 0 -and $open -lt 3 -and $laneAlreadyRunning) {
+    Write-Launcher ("lane '" + $lane.name + "' open=" + $open + " (<3) but runner already alive; skipping planner one-shot (avoids concurrent-git race; live lane self-replenishes).")
+  }
+  if ((Test-ShouldFirePlanner -Open $open -LaneRunning $laneAlreadyRunning -HasPrompt (Test-Path $plannerPrompt))) {
     Write-Launcher ("lane '" + $lane.name + "' open=" + $open + " (<3). Firing planner one-shot before ignition.")
     $laneTaggedPrompt = $plannerPrompt
     if (-not $WhatIf) {
