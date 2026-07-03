@@ -11,6 +11,7 @@ import {
 import { PageContainer } from "@/components/layout";
 import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { ogImageUrl } from "@/lib/og-url";
 import {
   INTERVIEW_FLOW_STEPS,
@@ -79,6 +80,16 @@ export default function InterviewGuidancePage() {
         description="結果通知→申出→面接→事後措置→経過観察までの8ステップを実務担当者向けに整理"
         icon={Stethoscope}
         iconColor="blue"
+      />
+
+      <ConclusionCard
+        tone="info"
+        value={INTERVIEW_FLOW_STEPS.length}
+        unit="ステップ"
+        title="実務フロー"
+        description="結果通知から事後措置・経過観察まで。医師意見書テンプレと職種別措置案つき。"
+        action={{ href: "#flow", label: "フローを見る" }}
+        className="mt-6"
       />
 
       <section className="mt-6 rounded-2xl border border-sky-200 bg-sky-50/60 p-5">
