@@ -2,34 +2,115 @@
  * Phase 10: 安全工程打合せ書 A4横 印刷レイアウト。
  * 画面では非表示（hidden）、印刷時のみ表示（paper-view が hidden print:block で包む）。
  * 各社マトリクスを正式な表組みで再現。点検項目・使用機械・確認欄を含む。
+ *
+ * S1（打合せ用紙 直接操作UI・第一弾）: KYと同じ方式で省略可能な `editing` prop を追加。
+ * 指定時のみヘッダー7欄がタップ標的（EditableCell）になる。**`editing` 未指定の出力HTMLは
+ * 従来と完全一致**（meeting-print-sheet.test.tsx のスナップショットで機械的に固定＝A4正式書式は不可侵）。
  */
+import type { ReactNode } from "react";
 import { PRIORITY_LABEL, type MeetingRecord, type ContractorType } from "@/lib/meeting/schema";
+import { getMeetingPaperFieldDef, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
 
 const th = "border border-black bg-slate-100 px-1 py-0.5 text-center align-middle font-bold";
 const td = "border border-black px-1 py-0.5 align-top";
 const STATUS_MARK = { ok: "○", ng: "×", na: "－" } as const;
 const TYPE_PAD: Record<ContractorType, string> = { 元請: "0", "1次": "6px", "2次": "12px", "3次": "18px" };
 
-export function MeetingPrintSheet({ record }: { record: MeetingRecord }) {
+export type MeetingPrintSheetEditing = {
+  /** セル（欄）タップ時に呼ばれる */
+  onTapField: (key: MeetingPaperFieldKey) => void;
+  /** いま編集中の欄（青リング表示） */
+  activeKey?: MeetingPaperFieldKey | null;
+  /** 未記入の欄（うっすらアンバー＋点線表示） */
+  emptyKeys?: ReadonlySet<string>;
+};
+
+/**
+ * 欄の中身をタップ標的でラップする。editing 未指定時は中身をそのまま返す
+ * （＝印刷/プレビュー経路のHTMLに1バイトも影響しない）。KyPrintSheetのEditableCellと同型。
+ */
+function EditableCell({
+  editing,
+  fieldKey,
+  children,
+}: {
+  editing: MeetingPrintSheetEditing | undefined;
+  fieldKey: MeetingPaperFieldKey;
+  children: ReactNode;
+}) {
+  if (!editing) return <>{children}</>;
+  const label = getMeetingPaperFieldDef(fieldKey).label;
+  const isActive = editing.activeKey === fieldKey;
+  const isEmpty = editing.emptyKeys?.has(fieldKey) ?? false;
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`${label}を入力`}
+      data-zoompan-skip="1"
+      data-field-key={fieldKey}
+      onClick={() => editing.onTapField(fieldKey)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          editing.onTapField(fieldKey);
+        }
+      }}
+      className={`-mx-1 -my-0.5 min-h-[1.4em] cursor-pointer rounded-sm px-1 py-0.5 ${
+        isActive
+          ? "ring-2 ring-inset ring-sky-500"
+          : isEmpty
+            ? "border border-dashed border-amber-400 bg-amber-50/70"
+            : "hover:bg-sky-50"
+      }`}
+    >
+      {isEmpty ? <span className="text-[6.5pt] text-amber-700/80">タップして入力</span> : children}
+    </div>
+  );
+}
+
+export function MeetingPrintSheet({ record, editing }: { record: MeetingRecord; editing?: MeetingPrintSheetEditing }) {
   const date = `${record.workDateYear}年${record.workDateMonth}月${record.workDateDay}日`;
   return (
     <div className="mx-auto bg-white text-[7.5pt] leading-tight text-black print:text-black" style={{ width: "277mm", maxWidth: "100%" }}>
       <div className="mb-1 flex items-end justify-between">
         {/* 正式書式の表題。画面側の見出し(top barのh1)と二重h1にしないため、印刷帳票では非見出し要素として描画（見た目は12pt太字のまま）。 */}
         <p className="text-[12pt] font-bold">安全工程打合せ書及び安全衛生指示書</p>
-        <span className="text-[8pt]">打合せ日: {record.meetingDate}</span>
+        <span className="text-[8pt]">
+          打合せ日: <EditableCell editing={editing} fieldKey="meetingDate">{record.meetingDate}</EditableCell>
+        </span>
       </div>
 
       {/* ヘッダー */}
       <table className="w-full table-fixed border-collapse">
         <tbody>
           <tr>
-            <th className={`${th} w-[8%]`}>作業日</th><td className={`${td} w-[14%]`}>{date}</td>
-            <th className={`${th} w-[6%]`}>天気</th><td className={`${td} w-[10%]`}>{[record.weather, record.temperature && `${record.temperature}℃`].filter(Boolean).join(" ")}</td>
-            <th className={`${th} w-[8%]`}>作業所名</th><td className={`${td} w-[18%]`}>{record.siteName}</td>
-            <th className={`${th} w-[8%]`}>作業所長</th><td className={`${td} w-[10%]`}>{record.siteManager}</td>
-            <th className={`${th} w-[6%]`}>主任</th><td className={`${td}`}>{record.supervisor}</td>
-            <th className={`${th} w-[8%]`}>作成担当</th><td className={`${td} w-[8%]`}>{record.author}</td>
+            <th className={`${th} w-[8%]`}>作業日</th>
+            <td className={`${td} w-[14%]`}>
+              <EditableCell editing={editing} fieldKey="workDate">{date}</EditableCell>
+            </td>
+            <th className={`${th} w-[6%]`}>天気</th>
+            <td className={`${td} w-[10%]`}>
+              <EditableCell editing={editing} fieldKey="weatherTemp">
+                {[record.weather, record.temperature && `${record.temperature}℃`].filter(Boolean).join(" ")}
+              </EditableCell>
+            </td>
+            <th className={`${th} w-[8%]`}>作業所名</th>
+            <td className={`${td} w-[18%]`}>
+              <EditableCell editing={editing} fieldKey="siteName">{record.siteName}</EditableCell>
+            </td>
+            <th className={`${th} w-[8%]`}>作業所長</th>
+            <td className={`${td} w-[10%]`}>
+              <EditableCell editing={editing} fieldKey="siteManager">{record.siteManager}</EditableCell>
+            </td>
+            <th className={`${th} w-[6%]`}>主任</th>
+            <td className={`${td}`}>
+              <EditableCell editing={editing} fieldKey="supervisor">{record.supervisor}</EditableCell>
+            </td>
+            <th className={`${th} w-[8%]`}>作成担当</th>
+            <td className={`${td} w-[8%]`}>
+              <EditableCell editing={editing} fieldKey="author">{record.author}</EditableCell>
+            </td>
           </tr>
         </tbody>
       </table>

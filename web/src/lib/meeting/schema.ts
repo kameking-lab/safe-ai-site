@@ -10,6 +10,9 @@ import { evalScore } from "@/lib/ky/pulldown-options";
 export type ContractorType = "元請" | "1次" | "2次" | "3次";
 export const CONTRACTOR_TYPES: readonly ContractorType[] = ["元請", "1次", "2次", "3次"];
 
+/** 天気プルダウンの選択肢（クラシック表示・canvas第一弾の天気エディタで共有）。 */
+export const MEETING_WEATHER_OPTIONS: readonly string[] = ["晴れ", "曇り", "雨", "雪", "強風", "猛暑", "厳寒"];
+
 export type ChecklistStatus = "ok" | "ng" | "na"; // ○ / × / 該当無
 
 export type MeetingRiskEval = {
