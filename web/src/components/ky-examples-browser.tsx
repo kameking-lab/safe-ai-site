@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import {
   KY_INDUSTRY_IDS,
   KY_INDUSTRY_LABELS,
@@ -35,14 +34,6 @@ export function KyExamplesBrowser() {
             建設・製造・運輸・医療福祉・サービスの5業種×10作業別に整理した {KY_EXAMPLES.length} 件の参考KY事例。
             出典は厚労省・中災防・建災防の公開教材を独自要約しています。
           </p>
-          <p className="mt-2">
-            <Link
-              href="/ky"
-              className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100"
-            >
-              KY用紙の作成へ進む →
-            </Link>
-          </p>
         </header>
 
         <Filters
@@ -61,6 +52,7 @@ export function KyExamplesBrowser() {
               unit="件"
               title="該当なし"
               description="いまの絞り込み条件に合致する事例がありません。業種・作業種別の絞り込みを変えてください。"
+              action={{ href: "/ky/paper", label: "KY用紙を作る" }}
             />
           ) : (
             <ConclusionCard
@@ -73,6 +65,7 @@ export function KyExamplesBrowser() {
                   ? `全${KY_EXAMPLES.length}件のうち、いまの絞り込みに一致する事例です。`
                   : "業種・作業種別で絞り込むと、現場に近い事例だけを表示できます。"
               }
+              action={{ href: "/ky/paper", label: "KY用紙を作る" }}
             />
           )}
         </div>
