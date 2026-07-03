@@ -454,6 +454,26 @@ function Repair-MsysMangledNote {
   return [regex]::Replace($Note, $slashFlexible + '[\\/]', '/', 'IgnoreCase')
 }
 
+# ---- Trailing-blank hygiene for the status file -----------------------------------------------
+# The status writers compose "($lines -join CRLF) + CRLF" and then Set-Content APPENDS its own
+# terminator, so each write leaves the file ending in a DOUBLE CRLF; Get-Content preserves all-but-one
+# trailing terminator on the next read, so one extra blank line reappears - a net +1 trailing blank
+# per write. Measured live: the owner's single watch file (docs/loop-status.md) grew 19->20->21->22
+# blank lines across three reports, unbounded (the same watch-surface-bloat class as the #661 logs
+# fix). The two-part fix: (1) -NoNewline on the Set-Content so the file ends in exactly the single CRLF
+# the composed text already carries (stops the growth at the source; the write becomes round-trip
+# stable), and (2) this trim before composing, so the already-accumulated bloat self-heals on the next
+# write. EOF blank lines carry no meaning (the file's last real line is the region END marker, or the
+# launcher's watch3 line), so trimming them is always safe. Pure.
+function Remove-TrailingBlankLines {
+  param([string[]]$Lines)
+  if ($null -eq $Lines) { return @() }
+  $last = $Lines.Count - 1
+  while ($last -ge 0 -and ([string]$Lines[$last]).Trim() -eq "") { $last-- }
+  if ($last -lt 0) { return @() }
+  return @($Lines[0..$last])
+}
+
 # ---- Self-test: offline verification of the lock's stale-orphan reclamation -------------------
 if ($SelfTest) {
   $fails = 0
@@ -631,6 +651,39 @@ if ($SelfTest) {
     Assert-Test "I4: a note WITHOUT the install path is untouched (real /route stays)" ((Repair-MsysMangledNote -Note "merged #675; /stats already clean" -MsysRoot $synthRoot) -eq "merged #675; /stats already clean")
     Assert-Test "I5: null root is a safe no-op (not launched from Git Bash)" ((Repair-MsysMangledNote -Note "C:/Program Files/Git/stats" -MsysRoot $null) -eq "C:/Program Files/Git/stats")
     Assert-Test "I6: empty note is safe (no throw)" ((Repair-MsysMangledNote -Note "" -MsysRoot $synthRoot) -eq "")
+
+    # J) Trailing-blank hygiene: Remove-TrailingBlankLines must drop EOF blanks, keep interior blanks,
+    # be a no-op on already-clean input, and (composed with -NoNewline) make the write round-trip stable
+    # so the owner's watch file stops accumulating blank lines. First the pure-function contract:
+    $jTrim = @(Remove-TrailingBlankLines -Lines @("a", "", "b", "", "  ", "`t"))
+    Assert-Test "J1: trailing blanks (incl. whitespace-only) are dropped, interior blank kept" (($jTrim.Count -eq 3) -and ($jTrim[0] -eq "a") -and ($jTrim[1] -eq "") -and ($jTrim[2] -eq "b"))
+    $jClean = @(Remove-TrailingBlankLines -Lines @("x", "y"))
+    Assert-Test "J2: already-clean input is unchanged (no-op)" (($jClean.Count -eq 2) -and ($jClean[1] -eq "y"))
+    Assert-Test "J3: all-blank input collapses to empty array (no throw)" ((@(Remove-TrailingBlankLines -Lines @("", "  ", "")).Count) -eq 0)
+    Assert-Test "J4: null input is safe (empty array)" ((@(Remove-TrailingBlankLines -Lines $null).Count) -eq 0)
+    # Real file round-trip: seed a file whose EOF has 5 trailing blanks (as the double-append bug leaves),
+    # then run the exact heal+write recipe (trim -> join+CRLF -> Set-Content -NoNewline) twice and read
+    # back. The trailing-blank count must land at 0 on the first heal and STAY 0 (stable, not re-growing).
+    $jFile = Join-Path $tmp ("blank-roundtrip-" + [System.Guid]::NewGuid().ToString("N") + ".md")
+    Set-Content -Path $jFile -Value ((@("- ops : row", "<!-- LANE-REPORT:END -->", "", "", "", "", "") -join "`r`n") + "`r`n") -Encoding UTF8
+    $countTrailing = {
+      param($p)
+      $l = @(Get-Content -Encoding UTF8 -Path $p); $c = 0
+      for ($i = $l.Count - 1; $i -ge 0; $i--) { if (([string]$l[$i]).Trim() -eq "") { $c++ } else { break } }
+      return $c
+    }
+    $seedBlanks = & $countTrailing $jFile
+    $healOnce = {
+      param($p)
+      $ln = @(Get-Content -Encoding UTF8 -Path $p)
+      $ln = Remove-TrailingBlankLines -Lines $ln
+      Set-Content -Path $p -Value (($ln -join "`r`n") + "`r`n") -Encoding UTF8 -NoNewline
+    }
+    & $healOnce $jFile; $afterHeal1 = & $countTrailing $jFile
+    & $healOnce $jFile; $afterHeal2 = & $countTrailing $jFile
+    Assert-Test "J5: seed file starts with accumulated trailing blanks" ($seedBlanks -ge 5)
+    Assert-Test "J6: first heal removes ALL trailing blanks" ($afterHeal1 -eq 0)
+    Assert-Test "J7: second write stays at 0 blanks (round-trip stable, no re-growth)" ($afterHeal2 -eq 0)
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -889,8 +942,11 @@ try {
     }
   }
 
+  # Trim EOF blank lines so accumulated bloat self-heals, and write with -NoNewline so the file ends in
+  # exactly one CRLF (Set-Content would otherwise append a second terminator -> +1 blank line per write).
+  $lines = Remove-TrailingBlankLines -Lines $lines
   $text = ($lines -join "`r`n") + "`r`n"
-  Set-Content -Path $StatusPath -Value $text -Encoding UTF8
+  Set-Content -Path $StatusPath -Value $text -Encoding UTF8 -NoNewline
   Write-Rep ("row written to " + $StatusPath)
 } catch {
   Write-Rep ("WARN: report write failed (non-fatal): " + $_.Exception.Message)

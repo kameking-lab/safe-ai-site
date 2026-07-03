@@ -613,10 +613,10 @@ function Set-ResurrectionBanner {
   $newText = ($result -join "`r`n") + "`r`n"
   if ($Preview) {
     $dry = Join-Path $logDir "loop-status.bannerdry.md"
-    Set-Content -Path $dry -Value $newText -Encoding UTF8
+    Set-Content -Path $dry -Value $newText -Encoding UTF8 -NoNewline
     Write-Launcher ("[WHATIF] resurrection banner reconcile -> " + $dry + " (sched=" + $sched + ", startup=" + $startup + ", bannerLines=" + $desired.Count + ")")
   } else {
-    Set-Content -Path $statusPath -Value $newText -Encoding UTF8
+    Set-Content -Path $statusPath -Value $newText -Encoding UTF8 -NoNewline
     Write-Launcher ("resurrection banner reconciled in loop-status.md (sched=" + $sched + ", startup=" + $startup + ", bannerLines=" + $desired.Count + ")")
   }
   } finally {
@@ -704,7 +704,7 @@ function Write-ConfigErrorStatus {
   $text = ($out -join "`r`n") + "`r`n"
   if ($WhatIf) {
     $dry = Join-Path $logDir "loop-status.dryrun.md"
-    Set-Content -Path $dry -Value $text -Encoding UTF8
+    Set-Content -Path $dry -Value $text -Encoding UTF8 -NoNewline
     Write-Launcher ("[WHATIF] config-error banner -> " + $dry + " (config=" + $ConfigFile + ")")
     return
   }
@@ -717,7 +717,7 @@ function Write-ConfigErrorStatus {
   try {
     $statusDir = Split-Path -Parent $statusPath
     if ($statusDir -and -not (Test-Path $statusDir)) { New-Item -ItemType Directory -Path $statusDir | Out-Null }
-    Set-Content -Path $statusPath -Value $text -Encoding UTF8
+    Set-Content -Path $statusPath -Value $text -Encoding UTF8 -NoNewline
     Write-Launcher ("config-error banner written to " + $statusPath)
   } catch {
     Write-Launcher ("WARN: could not write config-error status (non-fatal): " + $_.Exception.Message)
@@ -911,12 +911,12 @@ function Write-Status {
   $statusText = ($statusLines -join "`r`n") + "`r`n"
   if ($WhatIf) {
     $dry = Join-Path $logDir "loop-status.dryrun.md"
-    Set-Content -Path $dry -Value $statusText -Encoding UTF8
+    Set-Content -Path $dry -Value $statusText -Encoding UTF8 -NoNewline
     Write-Launcher ("[WHATIF] wrote status to " + $dry)
   } else {
     $statusDir = Split-Path -Parent $statusPath
     if (-not (Test-Path $statusDir)) { New-Item -ItemType Directory -Path $statusDir | Out-Null }
-    Set-Content -Path $statusPath -Value $statusText -Encoding UTF8
+    Set-Content -Path $statusPath -Value $statusText -Encoding UTF8 -NoNewline
     Write-Launcher ("status written to " + $statusPath)
   }
 }
