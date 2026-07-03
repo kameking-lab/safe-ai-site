@@ -586,3 +586,21 @@
 **無読テスト**: `docs/third-party-reviews/scripts/diversity-women-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**11/11 PASS**（Amazonで探す×4・楽天で探す×4・関連ページナビ×3、全てboundingBox height≥44px実測）。
 
 **残課題**: BACKLOG-ux-hub.md未着手は4件（/accidents/[id]戻る導線=PR #690マージ待ち・/industries一覧「開く→」リンク・/industries/[industry]副リンク群+キーワードピル・/accidents/[id]出典元リンク）。PR #690のCI回収は次イテレーション。
+
+---
+
+## 2026-07-03 ux-hub/court-cases-hub-header-links-44px
+
+**イテレーション頭の回収**: 自班のCI待ちPR #722（トップ3柱主CTA44px化）のe2e/smokeがpendingだったため、ScheduleWakeupで待機しCI緑を確認後に`gh pr merge 722 --squash --delete-branch`でマージ。`git checkout main && git pull --ff-only`でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.mdの未着手[ ]がゼロ（全件[x]）だったため、契約に従いExplore agentへ担当route全体の柱0未是正箇所調査を委任。上位候補5件（/court-cases ハブ最上部リンク・/accidents home-screen変体タブ・/industries/[industry]下部CTA・/industries関連ページリンク・/glossary用語カードリンク）のうち、h1直下・初訪ユーザーが最初に見る導線である/court-casesハブを最優先で着手。
+
+**修正**: `court-cases/page.tsx`のh1直下2リンク「⚖️ 3つの責任ガイド」「🖨 A4まとめ資料で印刷／PDF保存」（`px-3 py-1.5 text-xs`≈30px）に`min-h-[44px]`を付与。純粋なクラス追加でレイアウト・遷移先不変。下部「関連機能への導線」4カードはp-3+2行テキストで既に44px相当のためスコープ外（無関係な変更を避けるため一度追加したmin-hを差し戻し）。
+
+**テスト**: `court-cases/page.test.tsx`を新設（vitest 2件、next/navigationのuseRouter/useSearchParamsをモック）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 288 files・2444 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/court-cases-hub-header-links-44px-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**2/2 PASS**（3つの責任ガイド=54.6px・A4まとめ資料=44.0px、boundingBox実測）。
+
+**残課題**: Explore調査で発見した残り4件（/accidents home-screen.tsx変体タブ・/industries/[industry]下部CTA3個+他業種リンク・/industries関連ページ6リンク・/glossary用語カード関連リンク）を次イテレーション以降でBACKLOG-ux-hub.mdへ補充予定。PR #726のCI回収は次イテレーション。
