@@ -96,7 +96,7 @@ export function NewsletterForm({ compact = false, onSuccess }: Props) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="example@company.jp"
-          className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+          className="w-full min-h-[44px] rounded-lg border border-slate-200 px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100"
         />
       </div>
 
@@ -108,7 +108,7 @@ export function NewsletterForm({ compact = false, onSuccess }: Props) {
           id="nl-industry"
           value={industry}
           onChange={(e) => setIndustry(e.target.value as Industry)}
-          className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-emerald-400 focus:outline-none"
+          className="w-full min-h-[44px] rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-emerald-400 focus:outline-none"
         >
           {INDUSTRIES.map((ind) => (
             <option key={ind} value={ind}>{ind}</option>
