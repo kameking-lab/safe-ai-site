@@ -1,5 +1,21 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: トップ home-three-pillars.tsx AlertGenerator・関連リンク 柱0(44px)
+
+**イテレーション頭の回収**: 自班の緑PR #671(/safety-signs親ハブ「関連機能」3リンク44px化)を確認。e2e/smoke共にIN_PROGRESSだったため `gh run watch` で両ワークフローの完了を待機し全緑を確認後、squashマージ＋ブランチ削除。`git checkout main && git pull --ff-only` で clean 確認。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手最上位＝2026-07-03 Explore調査で発見済みの「トップ `home-three-pillars.tsx` のAlertGenerator送信ボタン・関連リンクが44px未満」。ブランチ `ux-hub/home-three-pillars-44px-targets`（main 起点）。
+
+**変更**: `home-three-pillars.tsx` の4箇所に `min-h-[44px]` を追加。① 死亡事故カードの補助リンク「10年事故DB一覧へ →」(`mt-1.5 text-[11px]`・パディング無し)。② 3枠共通コンポーネント`AlertGenerator`の本体送信ボタン「注意喚起文を作成」(`px-2.5 py-1 text-[11px]`)。③ 失敗時の再試行ボタン。④ 3回連続失敗後に出る「管理者に連絡」リンク。純粋なクラス追加でレイアウト・文言・ロジック不変。
+
+**テスト**: `home-three-pillars.test.tsx` を新設（3ケース）。死亡事故・法改正のフィクスチャで `HomeThreePillars` を直接描画し、①10年事故DB一覧へリンク、②全AlertGeneratorボタン、③fetchを3回失敗させた後の再試行ボタン・管理者連絡リンクの className に `min-h-[44px]` を保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（24 warnings は既存・無関係）/ vitest 272 files・2306 tests 全pass / build 成功。dev/build起動で書き換わる data班・chatbot生成物(rag-metrics-latest.json・chatbot-eval-fresh-results.json)は commit から除外（git checkout で復元）。
+
+**無読テスト**: `docs/third-party-reviews/scripts/home-three-pillars-44px-noread-2026-07-03.mjs` を **4/4 PASS**（next start実機・スマホ390×844）。サービスワーカーを`block`した上で`/api/safety-alert`を`route.abort()`で強制失敗させ再試行/管理者連絡導線を誘発、実boundingBoxで4箇所とも height=44px を確認。
+
+---
+
 ## 2026-06-14 — 補充: /resources 厚労省一次資料DB フィルタ・各エントリ操作 柱0(44px)
 
 **イテレーション頭の回収**: 自班の緑PR #564(/safety-signs サブページ44px)が main とコンフリクト（自班トラッキング文書 BACKLOG-ux-hub.md・cycle-log-ux-hub.md のみ衝突＝コード非衝突）。`git merge origin/main`→両文書を両エントリ保持で手解決→push→CI再走で squash マージ済み(#564)。PR #567(/court-cases 詳細44px)は smoke/e2e pending のため次サイクルで回収。`git checkout main && git pull --ff-only` で clean 確認。
