@@ -632,3 +632,19 @@ Exploreエージェントで未監査route(safety-diary個別ページ5種・sit
 ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2653 pass（新規4件）・build成功。working tree clean（PR #827の未マージPRあり、次回収で回収）。
 
 残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。
+
+## 2026-07-04 /ky/workersのクラウド確認中「登録なし」誤表示＋44px欠落14箇所を是正
+
+契約ステップ1: 自レーンのPR #821（タグチップ削除×等）・PR #834（/account DB照会失敗）ともCI緑と確認しsquashマージ。main側の進捗（PR #829等）との間で2回マージコンフリクト（BACKLOG-ux-records.mdの追記重複・cycle-log-ux-records.mdの追記重複、いずれも双方の巡回ログ本文を保持しBACKLOG側は⑨番号衝突を⑩⑪へ振り直して解決）が発生したため、契約どおり`git merge origin/main`で通常マージし解消→ゲート再検証後にpush・squashマージ→`git checkout main && git pull --ff-only`でclean確認。
+
+着手: BACKLOG-ux-records.md最上位の未着手3件(O15/S2/S3)はいずれもdataレーンO14が本回収時点でも`BACKLOG-data.md`で`[ ]`未着手のままで全ブロック中と確認。補充の指針どおりExploreエージェントで自領域の柱0/柱3巡回を実施。
+
+発見: **新規のsilent-lie state**: `WorkersMasterClient`(`/ky/workers`)は`KyListClient`/`MeetingListClient`(#814で是正済み)と同型のlocal-firstクラウド引き継ぎ設計だが、`loading`状態が無く待機中も`workers`初期値`[]`をそのまま結論カードへ渡していたため、別端末のクラウド確認が終わるまで実際には登録済み作業員がいても「登録なし」という誤った結論を無読3秒で読ませてしまっていた（#814の巡回対象から漏れていた同型の欠落）。加えて44px欠落14箇所を新規発見: `workers-master-client.tsx`「← KY用紙に戻る」リンク／`ky-transcribe-panel.tsx`（/ky/paper Excel転記支援モーダル）の項目別コピー行内ボタン（`.map()`内のみ取り残されていた非対称）／`meeting-paper-view.tsx`（/safety-diary クラシックUI、`?canvas=0`）の12箇所＝点検項目8カテゴリの○/×/－トグル(`Tri`、canvas版の同等ボタンは既にmin-h-[44px] min-w-[44px]済みで非対称)・各社マトリクスの折りたたみ▶/▼・＋下位・AI提案・KYを作成・削除・搬入出予定の＋行・×削除・点検項目のAIで該当項目を推論・公式版に戻す・×項目削除・＋項目を追加。
+
+実装: `workers-master-client.tsx`に#814と同型の`loading`状態(既定true)を追加しクラウド確認完了までtone=neutral「確認中」を出し分け（件数判定ロジック無変更・足すだけ）。44px欠落14箇所すべてに`min-h-[44px]`（正方形ボタンは`min-w-[44px]`も）を追加（足すだけ・ロジック無変更、印刷シート`MeetingPrintSheet`は対象外で不変）。
+
+検証: このdev環境はSupabase未設定(`isKyCloudEnabled`常時false)のためクラウド確認中の遷移をPlaywright実機で再現できない（既知の制約、#814と同型）＝`isKyCloudEnabled`/`cloudPullWorkers`をモックしたvitest+RTL新規`workers-master-client-loading.test.tsx`2件で「確認中」表示→解決後の正しい人数への収束を検証。44px欠落14箇所は無読Playwright新規`docs/third-party-reviews/scripts/workers-loading-meeting-transcribe-44px-2026-07-04.mjs`13/13合格（実機で44px実測、各社マトリクスの折りたたみボタンは子行が無い初期状態のため非表示=対象外SKIP扱い）。
+
+ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2711 pass（新規2件）・build成功（`/ky/workers`・`/ky/paper`・`○ /safety-diary`静的生成維持）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。
