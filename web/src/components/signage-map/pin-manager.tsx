@@ -67,7 +67,7 @@ export function PinManager({
             候補: {pendingCoords.lat.toFixed(4)}, {pendingCoords.lng.toFixed(4)}
             <button
               type="button"
-              className="ml-2 text-emerald-300 underline"
+              className="ml-2 inline-flex min-h-[44px] items-center text-emerald-300 underline"
               onClick={onClearPending}
             >
               クリア
@@ -83,7 +83,7 @@ export function PinManager({
             onChange={(e) => setLabel(e.target.value)}
             maxLength={60}
             placeholder="例: 第二現場"
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-100"
+            className="mt-1 min-h-[44px] w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-100"
             disabled={!pendingCoords || submitting}
           />
         </label>
@@ -94,7 +94,7 @@ export function PinManager({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="warn@example.jp"
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-100"
+            className="mt-1 min-h-[44px] w-full rounded border border-slate-700 bg-slate-900 px-2 py-1.5 text-xs text-slate-100"
             disabled={submitting}
           />
         </label>
@@ -105,7 +105,7 @@ export function PinManager({
         <button
           type="submit"
           disabled={!canSubmit}
-          className="w-full rounded bg-emerald-600 px-3 py-2 text-xs font-bold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+          className="flex min-h-[44px] w-full items-center justify-center rounded bg-emerald-600 px-3 text-xs font-bold text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
         >
           {submitting ? "保存中…" : "ピンを追加"}
         </button>
@@ -136,7 +136,7 @@ export function PinManager({
             <button
               type="button"
               onClick={() => onDelete(p.id)}
-              className="rounded border border-rose-500/50 bg-rose-950/60 px-2 py-1 text-[10px] font-semibold text-rose-200 hover:bg-rose-900/60"
+              className="inline-flex min-h-[44px] items-center rounded border border-rose-500/50 bg-rose-950/60 px-3 text-[10px] font-semibold text-rose-200 hover:bg-rose-900/60"
             >
               削除
             </button>
