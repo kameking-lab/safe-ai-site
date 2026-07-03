@@ -205,8 +205,8 @@ export function InspectionClient() {
           <div className="rounded-xl border border-slate-200 p-3">
             <p className="text-xs font-bold text-slate-700">本日の使用可否</p>
             <div className="mt-2 flex gap-2">
-              <button type="button" onClick={() => setUsable(true)} className={`rounded-lg border px-3 py-1.5 text-xs font-bold ${usable ? "border-emerald-500 bg-emerald-600 text-white" : "border-slate-300 bg-white text-slate-600"}`}>使用可</button>
-              <button type="button" onClick={() => setUsable(false)} className={`rounded-lg border px-3 py-1.5 text-xs font-bold ${!usable ? "border-rose-500 bg-rose-600 text-white" : "border-slate-300 bg-white text-slate-600"}`}>使用不可</button>
+              <button type="button" onClick={() => setUsable(true)} className={`min-h-[44px] rounded-lg border px-3 py-1.5 text-xs font-bold ${usable ? "border-emerald-500 bg-emerald-600 text-white" : "border-slate-300 bg-white text-slate-600"}`}>使用可</button>
+              <button type="button" onClick={() => setUsable(false)} className={`min-h-[44px] rounded-lg border px-3 py-1.5 text-xs font-bold ${!usable ? "border-rose-500 bg-rose-600 text-white" : "border-slate-300 bg-white text-slate-600"}`}>使用不可</button>
             </div>
             {ngCount > 0 && usable && <p className="mt-2 text-[11px] font-semibold text-rose-600">不良があります。是正するまで使用不可の検討を。</p>}
           </div>
@@ -245,8 +245,8 @@ export function InspectionClient() {
                   <p className="mt-0.5 text-xs text-slate-500">{s.site || "現場なし"}／不良 {s.ngCount}／{s.usable ? "使用可" : "使用不可"}</p>
                 </div>
                 <div className="flex shrink-0 gap-2">
-                  <button type="button" onClick={() => openSaved(s.id)} className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50">開く</button>
-                  <button type="button" onClick={() => deleteSaved(s.id)} className="rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50">削除</button>
+                  <button type="button" onClick={() => openSaved(s.id)} className="min-h-[44px] rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-bold text-sky-700 hover:bg-sky-50">開く</button>
+                  <button type="button" onClick={() => deleteSaved(s.id)} className="min-h-[44px] rounded-lg border border-rose-200 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50">削除</button>
                 </div>
               </li>
             ))}
