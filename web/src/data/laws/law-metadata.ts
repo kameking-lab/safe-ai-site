@@ -108,9 +108,9 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   作環測法: {
     fullName: "作業環境測定法",
     promulgation: "昭和50年法律第28号",
-    latestRevision: "令和元年改正",
+    latestRevision: "令和7年改正（令和8年4月1日施行）",
     eGovUrl: "https://laws.e-gov.go.jp/law/350AC0000000028",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   労基法: {
     fullName: "労働基準法",
@@ -360,7 +360,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和60年法律第88号",
     latestRevision: "令和7年改正（令和7年法律第63号）",
     eGovUrl: "https://laws.e-gov.go.jp/law/360AC0000000088",
-    auditedAt: "2026-06-10",
+    auditedAt: "2026-07-03",
   },
   労施法: {
     fullName: "労働施策の総合的な推進並びに労働者の雇用の安定及び職業生活の充実等に関する法律",

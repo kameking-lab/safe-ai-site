@@ -15,7 +15,7 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
     <nav aria-label="パンくずリスト" className="mb-3 flex flex-wrap items-center gap-1 text-xs text-slate-500">
       <Link
         href="/"
-        className="flex items-center gap-0.5 rounded px-1 py-0.5 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+        className="flex min-h-[44px] items-center gap-0.5 rounded px-1 py-0.5 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
         aria-label="ホーム"
       >
         <Home className="h-3 w-3" aria-hidden="true" />
@@ -32,7 +32,7 @@ export function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
             ) : (
               <Link
                 href={item.href}
-                className="rounded px-1 py-0.5 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                className="inline-flex min-h-[44px] items-center rounded px-1 py-0.5 hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
               >
                 {item.name}
               </Link>

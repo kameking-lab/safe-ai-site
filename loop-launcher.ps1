@@ -271,7 +271,7 @@ function Get-RunnerProcInfo {
   $map = @{}
   try {
     $procs = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-      Where-Object { $_.CommandLine -like '*loop-runner.ps1*' })
+      Where-Object { Test-IsRunnerProcess ([string]$_.CommandLine) })
     foreach ($p in $procs) {
       $cl = [string]$p.CommandLine
       $m = [regex]::Match($cl, '(?i)-Lane(\s+|:|=)["'']?([\w\-]+)')
@@ -418,6 +418,32 @@ function Test-ShouldSpawnWatchdog {
   return ($WatchdogExists -and (-not $AlreadyRunning))
 }
 
+# Pure: does a process command line genuinely LAUNCH loop-watchdog.ps1 (via -File), not merely MENTION the
+# filename (an operator/agent diagnostic run with -Command "... loop-watchdog.ps1 ...")? Invoke-EnsureHealWatchdog's
+# scan counted ANY powershell whose command line contained the substring "loop-watchdog.ps1", so a stray
+# command naming the script spoofs the running-scan: AlreadyRunning falsely reads $true and a genuinely-dead
+# watchdog is NOT spawned (until a later pass when the stray command is gone). The watchdog's own guard has
+# the mirror bug (fixed identically in loop-watchdog.ps1 Test-IsWatchdogProcess); kept as a local copy since
+# the two scripts share no module. Both real launch forms use -File; a -Command mention has no -File before
+# the path so it no longer counts. Pure so -SelfTest asserts it offline.
+function Test-IsWatchdogProcess([string]$CommandLine) {
+  if ([string]::IsNullOrEmpty($CommandLine)) { return $false }
+  return ($CommandLine -match '(?i)-File\s+"?[^"]*loop-watchdog\.ps1(?:"|\s|$)')
+}
+
+# Pure: does a process command line genuinely LAUNCH loop-runner.ps1 (invoked via -File), not merely MENTION
+# the filename (an operator/agent diagnostic run with -Command "... loop-runner.ps1 ... -Lane data ...")? The
+# lane liveness scans (Get-RunnerProcInfo, Get-RunningLanes) matched ANY powershell whose command line
+# CONTAINED "loop-runner.ps1", so a stray command that names the script + a lane spoofs them: Get-RunningLanes
+# then reports a dead lane "alive" and -HealOnly skips resurrecting it. Same class as the watchdog scan bug
+# above, and the same -File discriminator: every real runner (persistent/heal spawn + one-shot planner/critic)
+# launches via -File <path>\loop-runner.ps1. Local copy of the sibling predicate in loop-runner.ps1 (the
+# scripts share no module). Pure so -SelfTest asserts it offline.
+function Test-IsRunnerProcess([string]$CommandLine) {
+  if ([string]::IsNullOrEmpty($CommandLine)) { return $false }
+  return ($CommandLine -match '(?i)-File\s+"?[^"]*loop-runner\.ps1(?:"|\s|$)')
+}
+
 # Live wrapper: ensure a heal watchdog is alive. Returns "spawned"/"running"/"absent"/"whatif". Reads the
 # script-scope $repoRoot/$ClaudeCmd/$WhatIf at call time; NEVER invoked from -SelfTest (only the pure
 # Test-ShouldSpawnWatchdog is), so it never spawns during tests.
@@ -427,7 +453,7 @@ function Invoke-EnsureHealWatchdog {
   $wdRunning = $false
   try {
     $wdRunning = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-      Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -like '*loop-watchdog.ps1*' }).Count -gt 0
+      Where-Object { $_.ProcessId -ne $PID -and (Test-IsWatchdogProcess ([string]$_.CommandLine)) }).Count -gt 0
   } catch {}
   if (-not (Test-ShouldSpawnWatchdog -WatchdogExists $true -AlreadyRunning $wdRunning)) {
     Write-Launcher "heal watchdog already running; not spawning a second."
@@ -610,19 +636,31 @@ function Get-CriticTargetRosterDrift {
 # loop-prompt-critic.txt" - yet NOTHING verified the prompt half stayed in sync. So an owner adding a
 # section-E lane could satisfy the oracle (GREEN rehearsal, no roster drift) while the stale prompt still
 # omits the lane, and the critic would never route findings to it - the false-PASS class of #760/#764 at
-# the prompt-vs-oracle leg. Case-insensitive substring of each enabled lane's name against the prompt;
-# null/blank-safe; a blank prompt reports ALL enabled lanes uncovered (never silently passes), mirroring
-# Get-MissingCriticTargets' blank-root contract. Disabled/nameless lanes are ignored.
+# the prompt-vs-oracle leg.
+#
+# Matching is WHOLE-TOKEN, not raw substring: #765 used $text.Contains($name), which FALSELY passed a
+# lane whose name is a SUBSTRING of an already-routed token - a "records" lane inside "ux-records", or a
+# "ux" lane inside "ux-hub"/"ux-tools" - so the critic would never route to it yet the rehearsal reported
+# GREEN, re-opening the very false-PASS class this chain closes at the substring-precision leg. We tokenize
+# the prompt into maximal [a-z0-9-] runs (hyphen is a TOKEN char since lane names contain it, so "records"
+# cannot match inside the "ux-records" token) and treat a lane as covered iff some token equals the lane
+# name bare ("seo" in the step-4 slash-list) OR equals "backlog-<lane>" (the BACKLOG-<lane>.md routing
+# form, e.g. "backlog-data"). Null/blank-safe; a blank prompt reports ALL enabled lanes uncovered (never
+# silently passes), mirroring Get-MissingCriticTargets' blank-root contract. Disabled/nameless lanes ignored.
 function Get-CriticPromptUncoveredLanes {
   param([string]$PromptText, $Lanes)
   $uncovered = New-Object System.Collections.Generic.List[string]
   $text = if ($null -eq $PromptText) { "" } else { $PromptText.ToLowerInvariant() }
+  $tokens = @{}
+  foreach ($m in [regex]::Matches($text, '[a-z0-9-]+')) { $tokens[$m.Value] = $true }
   foreach ($l in @($Lanes)) {
     if ($null -eq $l) { continue }
     if (-not $l.enabled) { continue }
     $n = [string]$l.name
     if ([string]::IsNullOrWhiteSpace($n)) { continue }
-    if (-not $text.Contains($n.ToLowerInvariant())) { $uncovered.Add($n) }
+    $nl = $n.ToLowerInvariant()
+    if ($tokens.ContainsKey($nl) -or $tokens.ContainsKey("backlog-" + $nl)) { continue }
+    $uncovered.Add($n)
   }
   return ($uncovered.ToArray() | Sort-Object -Unique)
 }
@@ -834,6 +872,14 @@ if ($SelfTest) {
     Assert-L "prompt-coverage: a BLANK prompt reports ALL enabled lanes (never silently passes)" ((@(Get-CriticPromptUncoveredLanes -PromptText "" -Lanes $j3Lanes) -join ',') -eq 'data,seo')
     Assert-L "prompt-coverage: null prompt / null lanes are null-safe (never throws)" ((@(Get-CriticPromptUncoveredLanes -PromptText $null -Lanes $null).Count -eq 0))
     Assert-L "prompt-coverage: nameless enabled lanes are ignored (null-safe)" (@(Get-CriticPromptUncoveredLanes -PromptText $j3Prompt -Lanes @([pscustomobject]@{ name = ""; enabled = $true })).Count -eq 0)
+    # J4) Substring precision: #765 matched with a raw .Contains(), which FALSELY passed a lane whose name
+    #     is only a SUBSTRING of an already-routed token (a "tools"/"ux" lane inside "ux-tools") - the critic
+    #     would never route to it yet the rehearsal reported GREEN. Match WHOLE routing tokens only.
+    $j4Prompt = "route to BACKLOG-data / ux-tools.md / ux-records.md"
+    Assert-L "prompt-coverage: a lane that is only a SUBSTRING of a routed token is UNCOVERED (no false PASS)" ((@(Get-CriticPromptUncoveredLanes -PromptText $j4Prompt -Lanes @([pscustomobject]@{ name = "tools"; enabled = $true })) -join ',') -eq 'tools')
+    Assert-L "prompt-coverage: a short substring lane ('ux' inside 'ux-tools') is UNCOVERED (no false PASS)" ((@(Get-CriticPromptUncoveredLanes -PromptText $j4Prompt -Lanes @([pscustomobject]@{ name = "ux"; enabled = $true })) -join ',') -eq 'ux')
+    Assert-L "prompt-coverage: the BACKLOG-<lane> routing form still counts as covered (no regression)" (@(Get-CriticPromptUncoveredLanes -PromptText "only BACKLOG-data here" -Lanes @([pscustomobject]@{ name = "data"; enabled = $true })).Count -eq 0)
+    Assert-L "prompt-coverage: a bare hyphenated lane token still matches through the .md suffix (no regression)" (@(Get-CriticPromptUncoveredLanes -PromptText "inject ux-tools.md" -Lanes @([pscustomobject]@{ name = "ux-tools"; enabled = $true })).Count -eq 0)
     # The SHIPPED loop-prompt-critic.txt must name every enabled live lane (guards THIS repo's prompt leg).
     $j3PromptPath = Join-Path $repoRoot "loop-prompt-critic.txt"
     if ($null -ne $jLive -and (Test-Path $j3PromptPath)) {
@@ -944,6 +990,22 @@ if ($SelfTest) {
     Assert-L "watchdog: script present + one already running -> do NOT spawn (idempotent, no churn)" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $true -AlreadyRunning $true))
     Assert-L "watchdog: script missing -> never spawn (even when none running)" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $false -AlreadyRunning $false))
     Assert-L "watchdog: script missing + one running -> still no spawn" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $false -AlreadyRunning $true))
+    # R2) Test-IsWatchdogProcess: the ensure-scan (AlreadyRunning) must count a real -File launch of
+    #     loop-watchdog.ps1 and must NOT count a mere command-line MENTION (a -Command diagnostic that names
+    #     the script) - the false match that spoofs AlreadyRunning=$true and suppresses spawning a dead watchdog.
+    Assert-L "wd-id: bare -File launch (ensure-spawn form) is a watchdog process" (Test-IsWatchdogProcess 'powershell -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File C:\r\loop-watchdog.ps1')
+    Assert-L "wd-id: quoted -File launch (self-respawn form) is a watchdog process" (Test-IsWatchdogProcess 'powershell -File "C:\r\loop-watchdog.ps1" -SupersedePid 100 -IntervalSeconds 300')
+    Assert-L "wd-id: a -Command MENTION of the filename is NOT a watchdog process (false-match fix)" (-not (Test-IsWatchdogProcess 'powershell -NoProfile -Command "gci | ? { $_.CommandLine -like ''*loop-watchdog.ps1*'' }"'))
+    Assert-L "wd-id: a lane runner -File launch is NOT a watchdog process" (-not (Test-IsWatchdogProcess 'powershell -File C:\r\loop-runner.ps1 -Lane ops'))
+    Assert-L "wd-id: empty command line is NOT a watchdog process (null-safe)" (-not (Test-IsWatchdogProcess ""))
+    # R3) Test-IsRunnerProcess: the lane liveness scans (Get-RunnerProcInfo / Get-RunningLanes) must count a
+    #     real -File launch of loop-runner.ps1 and must NOT count a -Command MENTION of the filename + a lane
+    #     name - the false match that makes Get-RunningLanes report a dead lane "alive" so -HealOnly skips it.
+    Assert-L "runner-id: bare -File launch (heal/persistent form) is a runner" (Test-IsRunnerProcess 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\r\loop-runner.ps1 -Lane data -RepoPath C:\r')
+    Assert-L "runner-id: quoted -File launch (spaced path) is a runner" (Test-IsRunnerProcess 'powershell -File "C:\Program Files\r\loop-runner.ps1" -Lane seo')
+    Assert-L "runner-id: a -Command MENTION of the filename + lane is NOT a runner (spoof fix)" (-not (Test-IsRunnerProcess 'powershell -NoProfile -Command "gci | ? { $_.CommandLine -like ''*loop-runner.ps1*'' -and ''-Lane data'' }"'))
+    Assert-L "runner-id: a watchdog -File launch is NOT a runner" (-not (Test-IsRunnerProcess 'powershell -File C:\r\loop-watchdog.ps1 -SupersedePid 100'))
+    Assert-L "runner-id: empty command line is NOT a runner (null-safe)" (-not (Test-IsRunnerProcess ""))
     # S) Get-TreeKillArgs / Stop-ProcessTree: a timed-out one-shot must be TREE-killed (taskkill /F /T), not
     #    single-process $p.Kill()'d, or its claude child tree orphans and (for the critic) keeps writing
     #    inside the worktree the finally then force-removes. Assert the exact command + the null no-op.
@@ -1342,7 +1404,7 @@ function Get-RunningLanes {
   $map = @{}
   try {
     $procs = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-      Where-Object { $_.CommandLine -like '*loop-runner.ps1*' })
+      Where-Object { Test-IsRunnerProcess ([string]$_.CommandLine) })
     foreach ($p in $procs) {
       $cl = [string]$p.CommandLine
       $m = [regex]::Match($cl, '(?i)-Lane(\s+|:|=)["'']?([\w\-]+)')

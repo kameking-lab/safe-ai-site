@@ -109,6 +109,24 @@ function Test-ShouldReportDeadlineStop([string]$LaneTag, [int]$MaxIter) {
   return (($LaneTag -ne "") -and ($MaxIter -le 0))
 }
 
+# Pure: does a process command line genuinely LAUNCH loop-runner.ps1 (invoked via -File), as opposed to
+# merely MENTIONING the filename in its arguments (e.g. an operator/agent diagnostic run with
+# -Command "... loop-runner.ps1 ... -Lane data ...")? The single-instance guard below counted ANY
+# powershell whose command line CONTAINED the substring "loop-runner.ps1", so a stray command that names
+# the script (and a lane) spoofs the liveness scan exactly as a bare mention spoofed the watchdog scan
+# before it was hardened. The concrete harm: a legitimately relaunched runner (after a hot-swap clean-exit
+# or a heal pass) sees the diagnostic as a same-lane competitor and self-exits, and Get-RunningLanes then
+# reports the lane "alive" so -HealOnly will not resurrect it -> the lane stays dead while the diagnostic
+# lingers. Every REAL launch form uses -File: the launcher's persistent/heal spawn and one-shot planner/
+# critic (-File <path>\loop-runner.ps1) and every manual/usage form. Match that shape - a path ending in
+# loop-runner.ps1 immediately after -File, quoted or bare - so a -Command mention (no -File before the
+# path) no longer counts. Pure so -SelfTest asserts it offline. (loop-watchdog.ps1 / loop-launcher.ps1 keep
+# their own local copies of the sibling predicate because the scripts share no module.)
+function Test-IsRunnerProcess([string]$CommandLine) {
+  if ([string]::IsNullOrEmpty($CommandLine)) { return $false }
+  return ($CommandLine -match '(?i)-File\s+"?[^"]*loop-runner\.ps1(?:"|\s|$)')
+}
+
 # Hot-swap gate: whether the running runner's OWN script file has changed on disk since launch, i.e. an
 # ops fix to loop-runner.ps1 has been pulled into this lane's clone but the long-lived process is still
 # executing the OLD code. A persistent runner reads its whole script into the process at launch, so
@@ -263,7 +281,27 @@ if ($SelfTest) {
   Write-Host ("[selftest] Stop-WedgeMonitor(null) no-op: " + $(if ($nullSafe) { "OK" } else { "FAIL" }))
   if (-not $nullSafe) { $wedgeOk = $false }
 
-  if ($ok -and $capReached -and $gateOk -and $swapOk -and $wedgeOk) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
+  # Runner process-identity gate (RID group): the single-instance guard must count only a genuine -File
+  # launch of loop-runner.ps1, never a -Command mention of the filename (an operator/agent diagnostic that
+  # spoofs the liveness scan and makes a relaunched runner self-exit into a dead lane).
+  $ridCases = @(
+    @{ name = "bare -File launch (heal/persistent form) is a runner";        cl = 'powershell -NoProfile -ExecutionPolicy Bypass -File C:\r\loop-runner.ps1 -Lane data -RepoPath C:\r'; want = $true },
+    @{ name = "quoted -File launch (spaced path) is a runner";               cl = 'powershell -File "C:\Program Files\r\loop-runner.ps1" -Lane seo';                          want = $true },
+    @{ name = "one-shot -File launch (planner tag) is a runner";             cl = 'powershell -File C:\r\loop-runner.ps1 -Lane data-planner -MaxIterations 1';                want = $true },
+    @{ name = "legacy -File launch (no -Lane) is a runner";                  cl = 'powershell -File C:\r\loop-runner.ps1 -IntervalSeconds 300';                              want = $true },
+    @{ name = "a -Command MENTION of the filename is NOT a runner (spoof)";  cl = 'powershell -NoProfile -Command "gci | ? { $_.CommandLine -like ''*loop-runner.ps1*'' -and ''-Lane data'' }"'; want = $false },
+    @{ name = "a watchdog -File launch is NOT a runner";                     cl = 'powershell -File C:\r\loop-watchdog.ps1 -SupersedePid 100';                               want = $false },
+    @{ name = "empty command line is NOT a runner (null-safe)";              cl = "";                                                                                       want = $false }
+  )
+  $ridOk = $true
+  foreach ($r in $ridCases) {
+    $got = Test-IsRunnerProcess $r.cl
+    $pass = ($got -eq $r.want)
+    if (-not $pass) { $ridOk = $false }
+    Write-Host ("[selftest] runner-id: " + $r.name + " -> " + $got + " (want " + $r.want + ") " + $(if ($pass) { "OK" } else { "FAIL" }))
+  }
+
+  if ($ok -and $capReached -and $gateOk -and $swapOk -and $wedgeOk -and $ridOk) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
 }
 
 # Live rehearsal of the wedge-monitor plumbing against a DUMMY child (no claude / no usage), mirroring
@@ -347,7 +385,7 @@ function Write-Log([string]$msg) {
 $conflictPids = @()
 try {
   $running = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-    Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -like '*loop-runner.ps1*' })
+    Where-Object { $_.ProcessId -ne $PID -and (Test-IsRunnerProcess ([string]$_.CommandLine)) })
   foreach ($p in $running) {
     $cl = [string]$p.CommandLine
     $clHasLane = ($cl -match '(?i)-Lane(\s+|:|=)\S')
