@@ -2,7 +2,7 @@
   "summary": [
     {
       "route": "/",
-      "outgoing": 120,
+      "outgoing": 147,
       "incoming": 5,
       "incomingFromPages": 3,
       "incomingFromShared": 2
@@ -10,30 +10,30 @@
     {
       "route": "/about",
       "outgoing": 8,
-      "incoming": 11,
-      "incomingFromPages": 5,
-      "incomingFromShared": 6
+      "incoming": 14,
+      "incomingFromPages": 6,
+      "incomingFromShared": 8
     },
     {
       "route": "/about/cases",
       "outgoing": 1,
-      "incoming": 3,
-      "incomingFromPages": 2,
+      "incoming": 2,
+      "incomingFromPages": 1,
       "incomingFromShared": 1
     },
     {
       "route": "/about/chatbot-eval",
       "outgoing": 3,
-      "incoming": 3,
+      "incoming": 4,
       "incomingFromPages": 3,
-      "incomingFromShared": 0
+      "incomingFromShared": 1
     },
     {
       "route": "/about/data-sources",
       "outgoing": 1,
-      "incoming": 6,
-      "incomingFromPages": 4,
-      "incomingFromShared": 2
+      "incoming": 8,
+      "incomingFromPages": 5,
+      "incomingFromShared": 3
     },
     {
       "route": "/about/news-feed",
@@ -43,49 +43,140 @@
       "incomingFromShared": 1
     },
     {
+      "route": "/accident-news",
+      "outgoing": 1,
+      "incoming": 8,
+      "incomingFromPages": 4,
+      "incomingFromShared": 4
+    },
+    {
+      "route": "/accident-news/print",
+      "outgoing": 0,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
+    },
+    {
       "route": "/accidents",
       "outgoing": 2,
-      "incoming": 44,
-      "incomingFromPages": 19,
-      "incomingFromShared": 25
+      "incoming": 47,
+      "incomingFromPages": 20,
+      "incomingFromShared": 27
     },
     {
       "route": "/accidents-analytics",
       "outgoing": 5,
-      "incoming": 7,
-      "incomingFromPages": 3,
-      "incomingFromShared": 4
+      "incoming": 11,
+      "incomingFromPages": 4,
+      "incomingFromShared": 7
     },
     {
       "route": "/accidents-reports",
-      "outgoing": 5,
-      "incoming": 5,
-      "incomingFromPages": 3,
-      "incomingFromShared": 2
+      "outgoing": 8,
+      "incoming": 20,
+      "incomingFromPages": 7,
+      "incomingFromShared": 13
     },
     {
       "route": "/accidents-reports/[industry]",
+      "outgoing": 2,
+      "incoming": 23,
+      "incomingFromPages": 7,
+      "incomingFromShared": 16
+    },
+    {
+      "route": "/accidents-reports/compare",
       "outgoing": 0,
-      "incoming": 14,
-      "incomingFromPages": 5,
-      "incomingFromShared": 9
+      "incoming": 16,
+      "incomingFromPages": 6,
+      "incomingFromShared": 10
     },
     {
       "route": "/accidents/[id]",
       "outgoing": 1,
-      "incoming": 3,
+      "incoming": 10,
       "incomingFromPages": 0,
-      "incomingFromShared": 3
+      "incomingFromShared": 10
     },
     {
       "route": "/account",
       "outgoing": 2,
-      "incoming": 3,
+      "incoming": 2,
       "incomingFromPages": 1,
-      "incomingFromShared": 2
+      "incomingFromShared": 1
+    },
+    {
+      "route": "/admin/audits/brand-consistency",
+      "outgoing": 0,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/admin/audits/content-quality-cleanup",
+      "outgoing": 0,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/admin/audits/news-feed-stats",
+      "outgoing": 0,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/admin/audits/p1-batch-plan",
+      "outgoing": 0,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/admin/audits/p2-batch-plan",
+      "outgoing": 2,
+      "incoming": 1,
+      "incomingFromPages": 1,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/admin/audits/p3-batch-plan",
+      "outgoing": 1,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/admin/audits/post-2week-regression",
+      "outgoing": 0,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/admin/audits/review-dashboard",
+      "outgoing": 5,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
     },
     {
       "route": "/admin/env-audit",
+      "outgoing": 0,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/admin/health",
+      "outgoing": 0,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/admin/health-check",
       "outgoing": 0,
       "incoming": 0,
       "incomingFromPages": 0,
@@ -106,32 +197,25 @@
       "incomingFromShared": 0
     },
     {
-      "route": "/admin/ugc/review",
-      "outgoing": 0,
+      "route": "/api-docs",
+      "outgoing": 1,
       "incoming": 0,
       "incomingFromPages": 0,
       "incomingFromShared": 0
     },
     {
-      "route": "/api-docs",
-      "outgoing": 1,
-      "incoming": 4,
-      "incomingFromPages": 3,
-      "incomingFromShared": 1
-    },
-    {
       "route": "/articles",
       "outgoing": 1,
-      "incoming": 4,
-      "incomingFromPages": 3,
+      "incoming": 3,
+      "incomingFromPages": 2,
       "incomingFromShared": 1
     },
     {
       "route": "/articles/[slug]",
       "outgoing": 6,
       "incoming": 2,
-      "incomingFromPages": 2,
-      "incomingFromShared": 0
+      "incomingFromPages": 1,
+      "incomingFromShared": 1
     },
     {
       "route": "/asbestos-management",
@@ -142,7 +226,7 @@
     },
     {
       "route": "/asbestos-management/investigation-checker",
-      "outgoing": 2,
+      "outgoing": 1,
       "incoming": 2,
       "incomingFromPages": 2,
       "incomingFromShared": 0
@@ -150,50 +234,22 @@
     {
       "route": "/asbestos-management/notification-builder",
       "outgoing": 0,
-      "incoming": 3,
-      "incomingFromPages": 3,
+      "incoming": 2,
+      "incomingFromPages": 2,
       "incomingFromShared": 0
     },
     {
       "route": "/asbestos-management/qualifications",
       "outgoing": 3,
-      "incoming": 2,
+      "incoming": 3,
       "incomingFromPages": 2,
-      "incomingFromShared": 0
+      "incomingFromShared": 1
     },
     {
       "route": "/asbestos-management/work-plan-template",
       "outgoing": 0,
       "incoming": 3,
       "incomingFromPages": 3,
-      "incomingFromShared": 0
-    },
-    {
-      "route": "/audits/2026-05-16",
-      "outgoing": 22,
-      "incoming": 0,
-      "incomingFromPages": 0,
-      "incomingFromShared": 0
-    },
-    {
-      "route": "/audits/content-quality-cleanup",
-      "outgoing": 0,
-      "incoming": 0,
-      "incomingFromPages": 0,
-      "incomingFromShared": 0
-    },
-    {
-      "route": "/audits/news-feed-stats",
-      "outgoing": 0,
-      "incoming": 0,
-      "incomingFromPages": 0,
-      "incomingFromShared": 0
-    },
-    {
-      "route": "/audits/p1-batch-plan",
-      "outgoing": 7,
-      "incoming": 0,
-      "incomingFromPages": 0,
       "incomingFromShared": 0
     },
     {
@@ -219,80 +275,94 @@
     },
     {
       "route": "/chatbot",
-      "outgoing": 3,
-      "incoming": 44,
-      "incomingFromPages": 14,
-      "incomingFromShared": 30
+      "outgoing": 8,
+      "incoming": 60,
+      "incomingFromPages": 23,
+      "incomingFromShared": 37
     },
     {
       "route": "/chatbot/share/[id]",
       "outgoing": 1,
-      "incoming": 0,
+      "incoming": 1,
       "incomingFromPages": 0,
-      "incomingFromShared": 0
+      "incomingFromShared": 1
     },
     {
       "route": "/chemical-database",
       "outgoing": 3,
-      "incoming": 24,
-      "incomingFromPages": 7,
-      "incomingFromShared": 17
+      "incoming": 29,
+      "incomingFromPages": 10,
+      "incomingFromShared": 19
+    },
+    {
+      "route": "/chemical-database/[cas]",
+      "outgoing": 1,
+      "incoming": 8,
+      "incomingFromPages": 3,
+      "incomingFromShared": 5
     },
     {
       "route": "/chemical-ra",
-      "outgoing": 4,
-      "incoming": 28,
-      "incomingFromPages": 11,
-      "incomingFromShared": 17
+      "outgoing": 7,
+      "incoming": 36,
+      "incomingFromPages": 15,
+      "incomingFromShared": 21
     },
     {
       "route": "/chemical-ra/product-search",
-      "outgoing": 3,
-      "incoming": 3,
-      "incomingFromPages": 3,
-      "incomingFromShared": 0
-    },
-    {
-      "route": "/circulars",
-      "outgoing": 3,
-      "incoming": 14,
-      "incomingFromPages": 10,
-      "incomingFromShared": 4
-    },
-    {
-      "route": "/circulars/[id]",
-      "outgoing": 3,
-      "incoming": 7,
-      "incomingFromPages": 5,
-      "incomingFromShared": 2
-    },
-    {
-      "route": "/community-cases",
-      "outgoing": 2,
-      "incoming": 4,
-      "incomingFromPages": 2,
-      "incomingFromShared": 2
-    },
-    {
-      "route": "/community-cases/[id]",
       "outgoing": 3,
       "incoming": 4,
       "incomingFromPages": 3,
       "incomingFromShared": 1
     },
     {
-      "route": "/community-cases/submit",
+      "route": "/circulars",
       "outgoing": 2,
-      "incoming": 5,
-      "incomingFromPages": 3,
-      "incomingFromShared": 2
+      "incoming": 28,
+      "incomingFromPages": 19,
+      "incomingFromShared": 9
+    },
+    {
+      "route": "/circulars/[id]",
+      "outgoing": 3,
+      "incoming": 8,
+      "incomingFromPages": 4,
+      "incomingFromShared": 4
     },
     {
       "route": "/contact",
       "outgoing": 1,
-      "incoming": 36,
+      "incoming": 39,
       "incomingFromPages": 32,
+      "incomingFromShared": 7
+    },
+    {
+      "route": "/court-cases",
+      "outgoing": 6,
+      "incoming": 8,
+      "incomingFromPages": 6,
+      "incomingFromShared": 2
+    },
+    {
+      "route": "/court-cases/[id]",
+      "outgoing": 6,
+      "incoming": 4,
+      "incomingFromPages": 1,
+      "incomingFromShared": 3
+    },
+    {
+      "route": "/court-cases/employer-liability",
+      "outgoing": 4,
+      "incoming": 13,
+      "incomingFromPages": 9,
       "incomingFromShared": 4
+    },
+    {
+      "route": "/court-cases/print",
+      "outgoing": 1,
+      "incoming": 6,
+      "incomingFromPages": 3,
+      "incomingFromShared": 3
     },
     {
       "route": "/dev/layout-preview",
@@ -367,177 +437,163 @@
     {
       "route": "/dpa",
       "outgoing": 2,
-      "incoming": 2,
-      "incomingFromPages": 2,
+      "incoming": 0,
+      "incomingFromPages": 0,
       "incomingFromShared": 0
     },
     {
       "route": "/e-learning",
-      "outgoing": 2,
+      "outgoing": 1,
       "incoming": 19,
-      "incomingFromPages": 7,
-      "incomingFromShared": 12
+      "incomingFromPages": 6,
+      "incomingFromShared": 13
     },
     {
       "route": "/education",
       "outgoing": 13,
-      "incoming": 27,
-      "incomingFromPages": 19,
+      "incoming": 25,
+      "incomingFromPages": 17,
       "incomingFromShared": 8
     },
     {
       "route": "/education-certification",
       "outgoing": 4,
-      "incoming": 7,
+      "incoming": 8,
       "incomingFromPages": 6,
-      "incomingFromShared": 1
+      "incomingFromShared": 2
     },
     {
       "route": "/education-certification/finder",
       "outgoing": 1,
-      "incoming": 5,
-      "incomingFromPages": 3,
+      "incoming": 8,
+      "incomingFromPages": 6,
       "incomingFromShared": 2
     },
     {
       "route": "/education/hoteikyoiku/chemical-ra",
       "outgoing": 4,
-      "incoming": 4,
+      "incoming": 7,
       "incomingFromPages": 4,
-      "incomingFromShared": 0
+      "incomingFromShared": 3
     },
     {
       "route": "/education/hoteikyoiku/shokucho",
       "outgoing": 4,
-      "incoming": 3,
+      "incoming": 5,
       "incomingFromPages": 3,
-      "incomingFromShared": 0
+      "incomingFromShared": 2
     },
     {
       "route": "/education/roudoueisei/necchu",
       "outgoing": 5,
-      "incoming": 5,
+      "incoming": 7,
       "incomingFromPages": 5,
-      "incomingFromShared": 0
+      "incomingFromShared": 2
     },
     {
       "route": "/education/roudoueisei/shindou",
       "outgoing": 5,
-      "incoming": 4,
+      "incoming": 6,
       "incomingFromPages": 4,
-      "incomingFromShared": 0
+      "incomingFromShared": 2
     },
     {
       "route": "/education/roudoueisei/souon",
       "outgoing": 5,
-      "incoming": 4,
+      "incoming": 6,
       "incomingFromPages": 4,
-      "incomingFromShared": 0
+      "incomingFromShared": 2
     },
     {
       "route": "/education/roudoueisei/youtsu-yobou",
       "outgoing": 2,
-      "incoming": 7,
+      "incoming": 9,
       "incomingFromPages": 7,
-      "incomingFromShared": 0
+      "incomingFromShared": 2
     },
     {
       "route": "/education/tokubetsu/ashiba",
       "outgoing": 6,
-      "incoming": 4,
+      "incoming": 6,
       "incomingFromPages": 4,
-      "incomingFromShared": 0
+      "incomingFromShared": 2
     },
     {
       "route": "/education/tokubetsu/fullharness",
       "outgoing": 2,
-      "incoming": 5,
+      "incoming": 7,
       "incomingFromPages": 5,
-      "incomingFromShared": 0
+      "incomingFromShared": 2
     },
     {
       "route": "/education/tokubetsu/kensaku-toishi",
       "outgoing": 6,
-      "incoming": 4,
+      "incoming": 6,
       "incomingFromPages": 4,
-      "incomingFromShared": 0
+      "incomingFromShared": 2
     },
     {
       "route": "/education/tokubetsu/sankesu",
       "outgoing": 2,
-      "incoming": 2,
+      "incoming": 4,
       "incomingFromPages": 2,
-      "incomingFromShared": 0
+      "incomingFromShared": 2
     },
     {
       "route": "/education/tokubetsu/tamakake",
       "outgoing": 2,
-      "incoming": 5,
+      "incoming": 7,
       "incomingFromPages": 5,
-      "incomingFromShared": 0
+      "incomingFromShared": 2
     },
     {
       "route": "/education/tokubetsu/teiatsu-denki",
       "outgoing": 6,
-      "incoming": 4,
+      "incoming": 6,
       "incomingFromPages": 4,
-      "incomingFromShared": 0
+      "incomingFromShared": 2
     },
     {
       "route": "/equipment-finder",
       "outgoing": 3,
-      "incoming": 13,
+      "incoming": 14,
       "incomingFromPages": 7,
-      "incomingFromShared": 6
+      "incomingFromShared": 7
     },
     {
       "route": "/equipment/[id]",
       "outgoing": 4,
-      "incoming": 3,
-      "incomingFromPages": 2,
-      "incomingFromShared": 1
-    },
-    {
-      "route": "/exam-quiz",
-      "outgoing": 4,
-      "incoming": 18,
-      "incomingFromPages": 9,
-      "incomingFromShared": 9
-    },
-    {
-      "route": "/exam-quiz/[slug]",
-      "outgoing": 3,
-      "incoming": 2,
-      "incomingFromPages": 2,
-      "incomingFromShared": 0
-    },
-    {
-      "route": "/exam-quiz/[slug]/result",
-      "outgoing": 4,
-      "incoming": 2,
-      "incomingFromPages": 2,
-      "incomingFromShared": 0
+      "incoming": 4,
+      "incomingFromPages": 1,
+      "incomingFromShared": 3
     },
     {
       "route": "/faq",
-      "outgoing": 9,
-      "incoming": 7,
-      "incomingFromPages": 3,
+      "outgoing": 8,
+      "incoming": 9,
+      "incomingFromPages": 5,
       "incomingFromShared": 4
     },
     {
       "route": "/faq/[category]",
       "outgoing": 2,
-      "incoming": 3,
+      "incoming": 4,
       "incomingFromPages": 3,
-      "incomingFromShared": 0
+      "incomingFromShared": 1
     },
     {
       "route": "/faq/search",
       "outgoing": 2,
-      "incoming": 4,
+      "incoming": 5,
       "incomingFromPages": 4,
-      "incomingFromShared": 0
+      "incomingFromShared": 1
+    },
+    {
+      "route": "/favorites",
+      "outgoing": 0,
+      "incoming": 1,
+      "incomingFromPages": 0,
+      "incomingFromShared": 1
     },
     {
       "route": "/features",
@@ -555,7 +611,7 @@
     },
     {
       "route": "/features/comparison",
-      "outgoing": 3,
+      "outgoing": 2,
       "incoming": 3,
       "incomingFromPages": 3,
       "incomingFromShared": 0
@@ -570,9 +626,9 @@
     {
       "route": "/features/quick-tour",
       "outgoing": 8,
-      "incoming": 4,
+      "incoming": 5,
       "incomingFromPages": 3,
-      "incomingFromShared": 1
+      "incomingFromShared": 2
     },
     {
       "route": "/features/use-cases",
@@ -584,9 +640,37 @@
     {
       "route": "/feedback",
       "outgoing": 1,
-      "incoming": 2,
+      "incoming": 1,
       "incomingFromPages": 0,
-      "incomingFromShared": 2
+      "incomingFromShared": 1
+    },
+    {
+      "route": "/for/construction",
+      "outgoing": 20,
+      "incoming": 7,
+      "incomingFromPages": 3,
+      "incomingFromShared": 4
+    },
+    {
+      "route": "/for/consultant",
+      "outgoing": 17,
+      "incoming": 4,
+      "incomingFromPages": 1,
+      "incomingFromShared": 3
+    },
+    {
+      "route": "/for/manager",
+      "outgoing": 19,
+      "incoming": 4,
+      "incomingFromPages": 1,
+      "incomingFromShared": 3
+    },
+    {
+      "route": "/for/solo",
+      "outgoing": 16,
+      "incoming": 4,
+      "incomingFromPages": 1,
+      "incomingFromShared": 3
     },
     {
       "route": "/foreign-workers",
@@ -598,9 +682,9 @@
     {
       "route": "/foreign-workers/safety-training",
       "outgoing": 3,
-      "incoming": 3,
+      "incoming": 4,
       "incomingFromPages": 3,
-      "incomingFromShared": 0
+      "incomingFromShared": 1
     },
     {
       "route": "/foreign-workers/status/[status]",
@@ -611,31 +695,59 @@
     },
     {
       "route": "/glossary",
-      "outgoing": 9,
-      "incoming": 13,
+      "outgoing": 8,
+      "incoming": 14,
       "incomingFromPages": 7,
-      "incomingFromShared": 6
+      "incomingFromShared": 7
     },
     {
       "route": "/goods",
       "outgoing": 0,
-      "incoming": 7,
-      "incomingFromPages": 2,
-      "incomingFromShared": 5
+      "incoming": 5,
+      "incomingFromPages": 1,
+      "incomingFromShared": 4
     },
     {
-      "route": "/handover",
-      "outgoing": 0,
-      "incoming": 2,
+      "route": "/guides",
+      "outgoing": 4,
+      "incoming": 3,
       "incomingFromPages": 2,
-      "incomingFromShared": 0
+      "incomingFromShared": 1
+    },
+    {
+      "route": "/guides/annual-safety-plan-generator",
+      "outgoing": 3,
+      "incoming": 7,
+      "incomingFromPages": 6,
+      "incomingFromShared": 1
+    },
+    {
+      "route": "/guides/anzeneho-ai-chatbot",
+      "outgoing": 3,
+      "incoming": 7,
+      "incomingFromPages": 6,
+      "incomingFromShared": 1
+    },
+    {
+      "route": "/guides/chemical-ra-create-simple",
+      "outgoing": 3,
+      "incoming": 7,
+      "incomingFromPages": 6,
+      "incomingFromShared": 1
+    },
+    {
+      "route": "/guides/industry-accident-reports",
+      "outgoing": 3,
+      "incoming": 7,
+      "incomingFromPages": 6,
+      "incomingFromShared": 1
     },
     {
       "route": "/health-checkup-scheduler",
       "outgoing": 4,
-      "incoming": 10,
-      "incomingFromPages": 8,
-      "incomingFromShared": 2
+      "incoming": 14,
+      "incomingFromPages": 10,
+      "incomingFromShared": 4
     },
     {
       "route": "/health-checkup-scheduler/result",
@@ -646,16 +758,37 @@
     },
     {
       "route": "/heat-illness-prevention",
-      "outgoing": 8,
-      "incoming": 8,
-      "incomingFromPages": 1,
-      "incomingFromShared": 7
+      "outgoing": 11,
+      "incoming": 14,
+      "incomingFromPages": 4,
+      "incomingFromShared": 10
+    },
+    {
+      "route": "/heat-illness-prevention/acclimatization",
+      "outgoing": 1,
+      "incoming": 4,
+      "incomingFromPages": 3,
+      "incomingFromShared": 1
     },
     {
       "route": "/heat-illness-prevention/industry-risk",
-      "outgoing": 2,
+      "outgoing": 3,
       "incoming": 2,
       "incomingFromPages": 2,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/heat-illness-prevention/log",
+      "outgoing": 0,
+      "incoming": 7,
+      "incomingFromPages": 6,
+      "incomingFromShared": 1
+    },
+    {
+      "route": "/heat-illness-prevention/poster",
+      "outgoing": 2,
+      "incoming": 3,
+      "incomingFromPages": 3,
       "incomingFromShared": 0
     },
     {
@@ -667,66 +800,87 @@
     },
     {
       "route": "/heat-illness-prevention/wbgt-calculator",
-      "outgoing": 0,
-      "incoming": 2,
-      "incomingFromPages": 2,
+      "outgoing": 1,
+      "incoming": 3,
+      "incomingFromPages": 3,
       "incomingFromShared": 0
     },
     {
       "route": "/industries",
       "outgoing": 7,
-      "incoming": 3,
-      "incomingFromPages": 2,
-      "incomingFromShared": 1
+      "incoming": 5,
+      "incomingFromPages": 3,
+      "incomingFromShared": 2
     },
     {
       "route": "/industries/[industry]",
-      "outgoing": 13,
-      "incoming": 6,
-      "incomingFromPages": 4,
+      "outgoing": 14,
+      "incoming": 7,
+      "incomingFromPages": 5,
       "incomingFromShared": 2
     },
     {
       "route": "/insurance",
       "outgoing": 2,
-      "incoming": 4,
-      "incomingFromPages": 4,
+      "incoming": 2,
+      "incomingFromPages": 2,
       "incomingFromShared": 0
     },
     {
       "route": "/ky",
       "outgoing": 0,
-      "incoming": 41,
-      "incomingFromPages": 18,
-      "incomingFromShared": 23
+      "incoming": 34,
+      "incomingFromPages": 19,
+      "incomingFromShared": 15
     },
     {
       "route": "/ky-examples",
       "outgoing": 0,
-      "incoming": 4,
-      "incomingFromPages": 1,
+      "incoming": 6,
+      "incomingFromPages": 3,
       "incomingFromShared": 3
+    },
+    {
+      "route": "/ky/list",
+      "outgoing": 0,
+      "incoming": 1,
+      "incomingFromPages": 0,
+      "incomingFromShared": 1
     },
     {
       "route": "/ky/morning",
       "outgoing": 0,
-      "incoming": 2,
+      "incoming": 3,
       "incomingFromPages": 1,
-      "incomingFromShared": 1
+      "incomingFromShared": 2
+    },
+    {
+      "route": "/ky/paper",
+      "outgoing": 0,
+      "incoming": 15,
+      "incomingFromPages": 6,
+      "incomingFromShared": 9
+    },
+    {
+      "route": "/ky/workers",
+      "outgoing": 0,
+      "incoming": 3,
+      "incomingFromPages": 1,
+      "incomingFromShared": 2
     },
     {
       "route": "/law-hierarchy",
-      "outgoing": 6,
-      "incoming": 5,
-      "incomingFromPages": 2,
+      "outgoing": 5,
+      "incoming": 7,
+      "incomingFromPages": 4,
       "incomingFromShared": 3
     },
     {
       "route": "/law-search",
       "outgoing": 3,
-      "incoming": 23,
-      "incomingFromPages": 10,
-      "incomingFromShared": 13
+      "incoming": 28,
+      "incomingFromPages": 11,
+      "incomingFromShared": 17
     },
     {
       "route": "/laws",
@@ -764,13 +918,6 @@
       "incomingFromShared": 3
     },
     {
-      "route": "/laws/notices-precedents",
-      "outgoing": 1,
-      "incoming": 13,
-      "incomingFromPages": 11,
-      "incomingFromShared": 2
-    },
-    {
       "route": "/leaflet",
       "outgoing": 0,
       "incoming": 3,
@@ -780,13 +927,13 @@
     {
       "route": "/lms",
       "outgoing": 1,
-      "incoming": 6,
-      "incomingFromPages": 5,
+      "incoming": 4,
+      "incomingFromPages": 3,
       "incomingFromShared": 1
     },
     {
       "route": "/mental-health",
-      "outgoing": 2,
+      "outgoing": 3,
       "incoming": 20,
       "incomingFromPages": 11,
       "incomingFromShared": 9
@@ -794,8 +941,8 @@
     {
       "route": "/mental-health-management",
       "outgoing": 7,
-      "incoming": 8,
-      "incomingFromPages": 4,
+      "incoming": 9,
+      "incomingFromPages": 5,
       "incomingFromShared": 4
     },
     {
@@ -815,8 +962,8 @@
     {
       "route": "/mental-health-management/stress-check",
       "outgoing": 1,
-      "incoming": 2,
-      "incomingFromPages": 2,
+      "incoming": 3,
+      "incomingFromPages": 3,
       "incomingFromShared": 0
     },
     {
@@ -829,8 +976,8 @@
     {
       "route": "/notifications",
       "outgoing": 0,
-      "incoming": 3,
-      "incomingFromPages": 1,
+      "incoming": 4,
+      "incomingFromPages": 2,
       "incomingFromShared": 2
     },
     {
@@ -842,17 +989,17 @@
     },
     {
       "route": "/pdf",
-      "outgoing": 0,
-      "incoming": 3,
-      "incomingFromPages": 2,
+      "outgoing": 1,
+      "incoming": 1,
+      "incomingFromPages": 0,
       "incomingFromShared": 1
     },
     {
       "route": "/pricing",
       "outgoing": 2,
-      "incoming": 13,
-      "incomingFromPages": 9,
-      "incomingFromShared": 4
+      "incoming": 9,
+      "incomingFromPages": 4,
+      "incomingFromShared": 5
     },
     {
       "route": "/pricing/success",
@@ -864,23 +1011,16 @@
     {
       "route": "/privacy",
       "outgoing": 2,
-      "incoming": 6,
-      "incomingFromPages": 5,
+      "incoming": 5,
+      "incomingFromPages": 4,
       "incomingFromShared": 1
     },
     {
       "route": "/profile",
       "outgoing": 0,
       "incoming": 2,
-      "incomingFromPages": 0,
-      "incomingFromShared": 2
-    },
-    {
-      "route": "/qa-knowledge",
-      "outgoing": 2,
-      "incoming": 4,
-      "incomingFromPages": 2,
-      "incomingFromShared": 2
+      "incomingFromPages": 1,
+      "incomingFromShared": 1
     },
     {
       "route": "/quick",
@@ -897,17 +1037,10 @@
       "incomingFromShared": 0
     },
     {
-      "route": "/quiz",
-      "outgoing": 0,
-      "incoming": 0,
-      "incomingFromPages": 0,
-      "incomingFromShared": 0
-    },
-    {
       "route": "/resources",
       "outgoing": 4,
-      "incoming": 10,
-      "incomingFromPages": 7,
+      "incoming": 9,
+      "incomingFromPages": 6,
       "incomingFromShared": 3
     },
     {
@@ -920,58 +1053,72 @@
     {
       "route": "/risk",
       "outgoing": 5,
-      "incoming": 13,
-      "incomingFromPages": 4,
-      "incomingFromShared": 9
+      "incoming": 11,
+      "incomingFromPages": 3,
+      "incomingFromShared": 8
     },
     {
       "route": "/risk-prediction",
       "outgoing": 2,
       "incoming": 19,
-      "incomingFromPages": 7,
-      "incomingFromShared": 12
+      "incomingFromPages": 8,
+      "incomingFromShared": 11
     },
     {
       "route": "/safety-diary",
-      "outgoing": 3,
-      "incoming": 20,
-      "incomingFromPages": 5,
-      "incomingFromShared": 15
+      "outgoing": 0,
+      "incoming": 27,
+      "incomingFromPages": 13,
+      "incomingFromShared": 14
     },
     {
       "route": "/safety-diary/[id]",
-      "outgoing": 0,
-      "incoming": 5,
+      "outgoing": 1,
+      "incoming": 0,
       "incomingFromPages": 0,
-      "incomingFromShared": 5
+      "incomingFromShared": 0
     },
     {
       "route": "/safety-diary/[id]/print",
-      "outgoing": 0,
-      "incoming": 5,
+      "outgoing": 1,
+      "incoming": 0,
       "incomingFromPages": 0,
-      "incomingFromShared": 5
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/safety-diary/contribute/[token]",
+      "outgoing": 0,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/safety-diary/list",
+      "outgoing": 0,
+      "incoming": 4,
+      "incomingFromPages": 0,
+      "incomingFromShared": 4
     },
     {
       "route": "/safety-diary/monthly/[ym]",
-      "outgoing": 0,
-      "incoming": 6,
+      "outgoing": 1,
+      "incoming": 0,
       "incomingFromPages": 0,
-      "incomingFromShared": 6
+      "incomingFromShared": 0
     },
     {
       "route": "/safety-diary/new",
-      "outgoing": 2,
-      "incoming": 8,
-      "incomingFromPages": 1,
-      "incomingFromShared": 7
+      "outgoing": 1,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
     },
     {
       "route": "/safety-diary/new/detail",
-      "outgoing": 2,
-      "incoming": 7,
-      "incomingFromPages": 1,
-      "incomingFromShared": 6
+      "outgoing": 1,
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
     },
     {
       "route": "/safety-signs",
@@ -997,8 +1144,15 @@
     {
       "route": "/safety-signs/sign/[id]",
       "outgoing": 2,
-      "incoming": 3,
+      "incoming": 5,
       "incomingFromPages": 3,
+      "incomingFromShared": 2
+    },
+    {
+      "route": "/search",
+      "outgoing": 2,
+      "incoming": 1,
+      "incomingFromPages": 1,
       "incomingFromShared": 0
     },
     {
@@ -1011,16 +1165,16 @@
     {
       "route": "/signage",
       "outgoing": 3,
-      "incoming": 11,
-      "incomingFromPages": 5,
-      "incomingFromShared": 6
+      "incoming": 15,
+      "incomingFromPages": 7,
+      "incomingFromShared": 8
     },
     {
       "route": "/signage/display",
       "outgoing": 0,
-      "incoming": 2,
-      "incomingFromPages": 1,
-      "incomingFromShared": 1
+      "incoming": 0,
+      "incomingFromPages": 0,
+      "incomingFromShared": 0
     },
     {
       "route": "/signage/map",
@@ -1030,52 +1184,122 @@
       "incomingFromShared": 1
     },
     {
-      "route": "/stats",
-      "outgoing": 0,
-      "incoming": 6,
-      "incomingFromPages": 1,
-      "incomingFromShared": 5
+      "route": "/site-records",
+      "outgoing": 18,
+      "incoming": 11,
+      "incomingFromPages": 7,
+      "incomingFromShared": 4
     },
     {
-      "route": "/strategy",
+      "route": "/site-records/calendar",
       "outgoing": 0,
-      "incoming": 3,
-      "incomingFromPages": 0,
+      "incoming": 2,
+      "incomingFromPages": 2,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/site-records/committee",
+      "outgoing": 0,
+      "incoming": 7,
+      "incomingFromPages": 4,
       "incomingFromShared": 3
     },
     {
-      "route": "/strategy/plan-generator",
-      "outgoing": 2,
-      "incoming": 14,
-      "incomingFromPages": 9,
-      "incomingFromShared": 5
+      "route": "/site-records/incident-report",
+      "outgoing": 0,
+      "incoming": 2,
+      "incomingFromPages": 2,
+      "incomingFromShared": 0
     },
     {
-      "route": "/strategy/plan-generator/preview/[id]",
-      "outgoing": 1,
-      "incoming": 1,
-      "incomingFromPages": 0,
+      "route": "/site-records/induction",
+      "outgoing": 0,
+      "incoming": 5,
+      "incomingFromPages": 4,
       "incomingFromShared": 1
     },
     {
-      "route": "/subsidies",
-      "outgoing": 2,
-      "incoming": 6,
-      "incomingFromPages": 3,
-      "incomingFromShared": 3
+      "route": "/site-records/inspection",
+      "outgoing": 0,
+      "incoming": 7,
+      "incomingFromPages": 5,
+      "incomingFromShared": 2
     },
     {
-      "route": "/subsidies/calculator",
-      "outgoing": 2,
+      "route": "/site-records/monthly",
+      "outgoing": 1,
       "incoming": 3,
       "incomingFromPages": 2,
       "incomingFromShared": 1
     },
     {
+      "route": "/site-records/near-miss",
+      "outgoing": 0,
+      "incoming": 7,
+      "incomingFromPages": 5,
+      "incomingFromShared": 2
+    },
+    {
+      "route": "/site-records/patrol",
+      "outgoing": 0,
+      "incoming": 7,
+      "incomingFromPages": 4,
+      "incomingFromShared": 3
+    },
+    {
+      "route": "/site-records/procedure",
+      "outgoing": 0,
+      "incoming": 5,
+      "incomingFromPages": 5,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/site-records/qualifications",
+      "outgoing": 0,
+      "incoming": 2,
+      "incomingFromPages": 2,
+      "incomingFromShared": 0
+    },
+    {
+      "route": "/stats",
+      "outgoing": 1,
+      "incoming": 3,
+      "incomingFromPages": 1,
+      "incomingFromShared": 2
+    },
+    {
+      "route": "/strategy/plan-generator",
+      "outgoing": 3,
+      "incoming": 31,
+      "incomingFromPages": 15,
+      "incomingFromShared": 16
+    },
+    {
+      "route": "/strategy/plan-generator/preview/[id]",
+      "outgoing": 3,
+      "incoming": 4,
+      "incomingFromPages": 0,
+      "incomingFromShared": 4
+    },
+    {
+      "route": "/subsidies",
+      "outgoing": 2,
+      "incoming": 7,
+      "incomingFromPages": 3,
+      "incomingFromShared": 4
+    },
+    {
+      "route": "/subsidies/calculator",
+      "outgoing": 2,
+      "incoming": 4,
+      "incomingFromPages": 2,
+      "incomingFromShared": 2
+    },
+    {
       "route": "/terms",
       "outgoing": 0,
-      "incoming": 6,
-      "incomingFromPages": 5,
+      "incoming": 5,
+      "incomingFromPages": 4,
       "incomingFromShared": 1
     },
     {
@@ -1088,9 +1312,9 @@
     {
       "route": "/treatment-work-balance/illness-guide/[illness]",
       "outgoing": 2,
-      "incoming": 3,
+      "incoming": 5,
       "incomingFromPages": 3,
-      "incomingFromShared": 0
+      "incomingFromShared": 2
     },
     {
       "route": "/treatment-work-balance/plan-builder",
@@ -1100,11 +1324,18 @@
       "incomingFromShared": 0
     },
     {
+      "route": "/whats-new",
+      "outgoing": 4,
+      "incoming": 6,
+      "incomingFromPages": 3,
+      "incomingFromShared": 3
+    },
+    {
       "route": "/work-environment-measurement",
       "outgoing": 2,
-      "incoming": 5,
+      "incoming": 6,
       "incomingFromPages": 3,
-      "incomingFromShared": 2
+      "incomingFromShared": 3
     },
     {
       "route": "/work-environment-measurement/management-class-judge",
@@ -1125,16 +1356,16 @@
     "/": {
       "outgoing": [
         "/about",
-        "/about/cases",
         "/about/chatbot-eval",
         "/about/data-sources",
         "/about/news-feed",
+        "/accident-news",
         "/accidents",
         "/accidents-analytics",
         "/accidents-reports",
         "/accidents-reports/[industry]",
+        "/accidents-reports/compare",
         "/articles",
-        "/articles/[slug]",
         "/asbestos-management",
         "/asbestos-management/investigation-checker",
         "/asbestos-management/notification-builder",
@@ -1143,11 +1374,15 @@
         "/bcp",
         "/chatbot",
         "/chemical-database",
+        "/chemical-database/[cas]",
         "/chemical-ra",
         "/chemical-ra/product-search",
         "/circulars",
-        "/circulars/[id]",
         "/contact",
+        "/court-cases",
+        "/court-cases/[id]",
+        "/court-cases/employer-liability",
+        "/court-cases/print",
         "/diversity",
         "/diversity/disability",
         "/diversity/elderly",
@@ -1174,8 +1409,6 @@
         "/education/tokubetsu/tamakake",
         "/education/tokubetsu/teiatsu-denki",
         "/equipment-finder",
-        "/equipment/[id]",
-        "/exam-quiz",
         "/faq",
         "/faq/[category]",
         "/faq/search",
@@ -1185,14 +1418,26 @@
         "/features/print",
         "/features/quick-tour",
         "/features/use-cases",
+        "/for/construction",
+        "/for/consultant",
+        "/for/manager",
+        "/for/solo",
         "/foreign-workers",
         "/foreign-workers/safety-training",
         "/foreign-workers/status/[status]",
         "/glossary",
         "/goods",
+        "/guides",
+        "/guides/annual-safety-plan-generator",
+        "/guides/anzeneho-ai-chatbot",
+        "/guides/chemical-ra-create-simple",
+        "/guides/industry-accident-reports",
         "/health-checkup-scheduler",
         "/heat-illness-prevention",
+        "/heat-illness-prevention/acclimatization",
         "/heat-illness-prevention/industry-risk",
+        "/heat-illness-prevention/log",
+        "/heat-illness-prevention/poster",
         "/heat-illness-prevention/r7-compliance",
         "/heat-illness-prevention/wbgt-calculator",
         "/industries",
@@ -1201,6 +1446,8 @@
         "/ky",
         "/ky-examples",
         "/ky/morning",
+        "/ky/paper",
+        "/ky/workers",
         "/law-hierarchy",
         "/law-search",
         "/laws",
@@ -1208,7 +1455,6 @@
         "/laws/freelance-rosai",
         "/laws/gig-work",
         "/laws/glossary",
-        "/laws/notices-precedents",
         "/leaflet",
         "/mental-health",
         "/mental-health-management",
@@ -1217,10 +1463,9 @@
         "/mental-health-management/stress-check",
         "/newsletter",
         "/notifications",
-        "/pdf",
         "/pricing",
         "/privacy",
-        "/qa-knowledge",
+        "/profile",
         "/quick",
         "/resources",
         "/resources/mlit",
@@ -1231,9 +1476,21 @@
         "/safety-signs/category/[category]",
         "/safety-signs/industry/[industry]",
         "/safety-signs/sign/[id]",
+        "/search",
         "/security",
         "/signage",
         "/signage/map",
+        "/site-records",
+        "/site-records/calendar",
+        "/site-records/committee",
+        "/site-records/incident-report",
+        "/site-records/induction",
+        "/site-records/inspection",
+        "/site-records/monthly",
+        "/site-records/near-miss",
+        "/site-records/patrol",
+        "/site-records/procedure",
+        "/site-records/qualifications",
         "/strategy/plan-generator",
         "/subsidies",
         "/subsidies/calculator",
@@ -1241,6 +1498,7 @@
         "/treatment-work-balance",
         "/treatment-work-balance/illness-guide/[illness]",
         "/treatment-work-balance/plan-builder",
+        "/whats-new",
         "/work-environment-measurement",
         "/work-environment-measurement/management-class-judge",
         "/work-environment-measurement/target-finder"
@@ -1258,8 +1516,8 @@
         "/about/cases",
         "/about/chatbot-eval",
         "/about/data-sources",
-        "/api-docs",
         "/contact",
+        "/guides",
         "/organization",
         "/pricing",
         "/terms"
@@ -1269,10 +1527,13 @@
         "/about/cases",
         "/about/chatbot-eval",
         "/about/news-feed",
-        "/audits/2026-05-16",
+        "/admin/audits/p2-batch-plan",
+        "/for/consultant",
+        "shared:components/SupervisorByline.tsx",
         "shared:components/app-shell.tsx",
         "shared:components/footer.tsx",
         "shared:components/home-value-hero.tsx",
+        "shared:components/seo/keyword-landing-view.tsx",
         "shared:data/faqs/faq-batch-2-management.ts",
         "shared:data/features-catalog.ts",
         "shared:data/mock/stats-mock.ts"
@@ -1283,7 +1544,6 @@
         "/about"
       ],
       "incoming": [
-        "/",
         "/about",
         "shared:components/footer.tsx"
       ]
@@ -1297,7 +1557,8 @@
       "incoming": [
         "/",
         "/about",
-        "/chatbot"
+        "/chatbot",
+        "shared:data/seo/keyword-landing.ts"
       ]
     },
     "/about/data-sources": {
@@ -1309,7 +1570,9 @@
         "/about",
         "/about/chatbot-eval",
         "/about/news-feed",
+        "/stats",
         "shared:components/accidents-meta-info.tsx",
+        "shared:components/footer.tsx",
         "shared:components/signage-map/signage-map-client.tsx"
       ]
     },
@@ -1324,6 +1587,25 @@
         "/",
         "shared:components/news-feed-section.tsx"
       ]
+    },
+    "/accident-news": {
+      "outgoing": [
+        "/whats-new"
+      ],
+      "incoming": [
+        "/",
+        "/court-cases",
+        "/court-cases/[id]",
+        "/whats-new",
+        "shared:components/accident-hub-nav.tsx",
+        "shared:components/app-shell.tsx",
+        "shared:config/flagship-nav.ts",
+        "shared:lib/news-hub.ts"
+      ]
+    },
+    "/accident-news/print": {
+      "outgoing": [],
+      "incoming": []
     },
     "/accidents": {
       "outgoing": [
@@ -1345,23 +1627,23 @@
         "/equipment/[id]",
         "/features/quick-tour",
         "/features/use-cases",
+        "/for/consultant",
+        "/for/solo",
         "/laws",
         "/laws/bcp",
         "/risk",
         "/risk-prediction",
-        "/safety-diary",
         "shared:components/QuickLauncher.tsx",
+        "shared:components/accident-hub-nav.tsx",
+        "shared:components/accidents-reports/comparison-view.tsx",
         "shared:components/accidents-reports/industry-report-view.tsx",
         "shared:components/app-shell.tsx",
         "shared:components/footer.tsx",
+        "shared:components/home-quick-access.tsx",
         "shared:components/home-three-pillars.tsx",
         "shared:components/home-value-hero.tsx",
-        "shared:components/ky-page-content.tsx",
         "shared:components/ladder-stats-card.tsx",
-        "shared:components/morning-digest.tsx",
         "shared:components/persona-entry.tsx",
-        "shared:components/safety-diary/diary-detail-client.tsx",
-        "shared:components/safety-diary/diary-monthly-client.tsx",
         "shared:config/flagship-nav.ts",
         "shared:data/faqs/faq-batch-1-law.ts",
         "shared:data/faqs/faq-batch-2-management.ts",
@@ -1374,7 +1656,10 @@
         "shared:data/industries-content/warehouse.ts",
         "shared:data/industries-content/wholesale.ts",
         "shared:data/mock/page-analytics-mock.ts",
-        "shared:data/mock/stats-mock.ts"
+        "shared:data/mock/stats-mock.ts",
+        "shared:data/seo/keyword-landing.ts",
+        "shared:lib/cross-search/cross-search.test.ts",
+        "shared:lib/news-hub.ts"
       ]
     },
     "/accidents-analytics": {
@@ -1389,37 +1674,71 @@
         "/",
         "/about/news-feed",
         "/accidents-reports",
+        "/for/consultant",
+        "shared:components/accident-hub-nav.tsx",
         "shared:components/accidents-meta-info.tsx",
         "shared:components/accidents-reports/industry-report-view.tsx",
+        "shared:components/app-shell.tsx",
         "shared:components/news-feed-section.tsx",
-        "shared:config/flagship-nav.ts"
+        "shared:config/flagship-nav.ts",
+        "shared:data/seo/keyword-landing.ts"
       ]
     },
     "/accidents-reports": {
       "outgoing": [
         "/accidents",
         "/accidents-analytics",
-        "/accidents-reports/[industry]",
+        "/accidents-reports/compare",
+        "/chatbot",
+        "/guides/industry-accident-reports",
         "/ky",
-        "/risk-prediction"
+        "/risk-prediction",
+        "/strategy/plan-generator"
       ],
       "incoming": [
         "/",
         "/accidents-analytics",
+        "/admin/audits/review-dashboard",
+        "/chatbot",
+        "/for/consultant",
         "/industries",
+        "/whats-new",
+        "shared:components/CommandPalette.tsx",
+        "shared:components/MobileBottomNav.tsx",
+        "shared:components/accident-hub-nav.tsx",
+        "shared:components/accidents-reports/comparison-view.tsx",
         "shared:components/accidents-reports/industry-report-view.tsx",
-        "shared:config/flagship-nav.ts"
+        "shared:components/app-shell.tsx",
+        "shared:components/copilot/CopilotStepNav.tsx",
+        "shared:components/footer.tsx",
+        "shared:components/home-three-pillars.tsx",
+        "shared:components/new-home-hero.tsx",
+        "shared:config/flagship-nav.ts",
+        "shared:data/seo/keyword-landing.ts",
+        "shared:lib/news-hub.ts"
       ]
     },
     "/accidents-reports/[industry]": {
-      "outgoing": [],
+      "outgoing": [
+        "/accidents-reports/compare",
+        "/for/construction"
+      ],
       "incoming": [
         "/",
-        "/accidents-reports",
+        "/for/construction",
+        "/for/solo",
         "/heat-illness-prevention",
         "/heat-illness-prevention/industry-risk",
         "/industries/[industry]",
+        "/strategy/plan-generator/preview/[id]",
+        "shared:components/accidents-reports/comparison-view.tsx",
+        "shared:components/accidents-reports/hub-filter.tsx",
+        "shared:components/chatbot-panel.tsx",
+        "shared:components/copilot/CopilotNextSteps.tsx",
+        "shared:components/copilot/CopilotStepNav.tsx",
         "shared:components/cross-tool-links.tsx",
+        "shared:components/industries/today-three-cta-band.tsx",
+        "shared:components/safety-plan/plan-generator-form.tsx",
         "shared:data/industries-content/construction.ts",
         "shared:data/industries-content/healthcare.ts",
         "shared:data/industries-content/manufacturing.ts",
@@ -1430,6 +1749,27 @@
         "shared:lib/chatbot-enrichment.ts"
       ]
     },
+    "/accidents-reports/compare": {
+      "outgoing": [],
+      "incoming": [
+        "/",
+        "/accidents-reports",
+        "/accidents-reports/[industry]",
+        "/heat-illness-prevention/industry-risk",
+        "/industries/[industry]",
+        "/strategy/plan-generator/preview/[id]",
+        "shared:components/accidents-reports/comparison-view.tsx",
+        "shared:components/accidents-reports/hub-filter.tsx",
+        "shared:components/chatbot-panel.tsx",
+        "shared:components/copilot/CopilotNextSteps.tsx",
+        "shared:components/copilot/CopilotStepNav.tsx",
+        "shared:components/cross-tool-links.tsx",
+        "shared:components/industries/today-three-cta-band.tsx",
+        "shared:components/safety-plan/plan-generator-form.tsx",
+        "shared:data/seo/keyword-landing.ts",
+        "shared:lib/chatbot-enrichment.ts"
+      ]
+    },
     "/accidents/[id]": {
       "outgoing": [
         "/accidents"
@@ -1437,7 +1777,14 @@
       "incoming": [
         "shared:components/accident-database-panel.tsx",
         "shared:components/accident-extras-panel.tsx",
-        "shared:components/accidents-reports/industry-report-view.tsx"
+        "shared:components/accidents-reports/top-cases-tabs.tsx",
+        "shared:components/accidents/accident-ai-analyzer-44px.test.ts",
+        "shared:components/accidents/accident-ai-analyzer.tsx",
+        "shared:components/accidents/saved-accidents.test.tsx",
+        "shared:components/chemical/accident-cross-section.tsx",
+        "shared:components/favorites/favorites-list.test.tsx",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/account": {
@@ -1447,11 +1794,63 @@
       ],
       "incoming": [
         "/pricing/success",
-        "shared:components/MobileBottomNav.tsx",
         "shared:components/user-menu.tsx"
       ]
     },
+    "/admin/audits/brand-consistency": {
+      "outgoing": [],
+      "incoming": []
+    },
+    "/admin/audits/content-quality-cleanup": {
+      "outgoing": [],
+      "incoming": []
+    },
+    "/admin/audits/news-feed-stats": {
+      "outgoing": [],
+      "incoming": []
+    },
+    "/admin/audits/p1-batch-plan": {
+      "outgoing": [],
+      "incoming": []
+    },
+    "/admin/audits/p2-batch-plan": {
+      "outgoing": [
+        "/about",
+        "/chatbot"
+      ],
+      "incoming": [
+        "/admin/audits/p3-batch-plan"
+      ]
+    },
+    "/admin/audits/p3-batch-plan": {
+      "outgoing": [
+        "/admin/audits/p2-batch-plan"
+      ],
+      "incoming": []
+    },
+    "/admin/audits/post-2week-regression": {
+      "outgoing": [],
+      "incoming": []
+    },
+    "/admin/audits/review-dashboard": {
+      "outgoing": [
+        "/accidents-reports",
+        "/chatbot",
+        "/safety-diary",
+        "/signage",
+        "/strategy/plan-generator"
+      ],
+      "incoming": []
+    },
     "/admin/env-audit": {
+      "outgoing": [],
+      "incoming": []
+    },
+    "/admin/health": {
+      "outgoing": [],
+      "incoming": []
+    },
+    "/admin/health-check": {
       "outgoing": [],
       "incoming": []
     },
@@ -1463,20 +1862,11 @@
       "outgoing": [],
       "incoming": []
     },
-    "/admin/ugc/review": {
-      "outgoing": [],
-      "incoming": []
-    },
     "/api-docs": {
       "outgoing": [
         "/contact"
       ],
-      "incoming": [
-        "/about",
-        "/audits/2026-05-16",
-        "/audits/p1-batch-plan",
-        "shared:components/footer.tsx"
-      ]
+      "incoming": []
     },
     "/articles": {
       "outgoing": [
@@ -1485,7 +1875,6 @@
       "incoming": [
         "/",
         "/articles/[slug]",
-        "/audits/2026-05-16",
         "shared:components/home-value-hero.tsx"
       ]
     },
@@ -1499,8 +1888,8 @@
         "/equipment/[id]"
       ],
       "incoming": [
-        "/",
-        "/articles"
+        "/articles",
+        "shared:lib/search-index.ts"
       ]
     },
     "/asbestos-management": {
@@ -1523,7 +1912,6 @@
     },
     "/asbestos-management/investigation-checker": {
       "outgoing": [
-        "/asbestos-management/notification-builder",
         "/asbestos-management/work-plan-template"
       ],
       "incoming": [
@@ -1535,8 +1923,7 @@
       "outgoing": [],
       "incoming": [
         "/",
-        "/asbestos-management",
-        "/asbestos-management/investigation-checker"
+        "/asbestos-management"
       ]
     },
     "/asbestos-management/qualifications": {
@@ -1547,7 +1934,8 @@
       ],
       "incoming": [
         "/",
-        "/asbestos-management"
+        "/asbestos-management",
+        "shared:components/page-json-ld.test.tsx"
       ]
     },
     "/asbestos-management/work-plan-template": {
@@ -1557,53 +1945,6 @@
         "/asbestos-management",
         "/asbestos-management/investigation-checker"
       ]
-    },
-    "/audits/2026-05-16": {
-      "outgoing": [
-        "/about",
-        "/api-docs",
-        "/articles",
-        "/chatbot",
-        "/chemical-database",
-        "/dpa",
-        "/education",
-        "/exam-quiz",
-        "/glossary",
-        "/goods",
-        "/handover",
-        "/insurance",
-        "/ky",
-        "/lms",
-        "/pricing",
-        "/privacy",
-        "/qa-knowledge",
-        "/resources",
-        "/risk",
-        "/safety-diary",
-        "/signage",
-        "/terms"
-      ],
-      "incoming": []
-    },
-    "/audits/content-quality-cleanup": {
-      "outgoing": [],
-      "incoming": []
-    },
-    "/audits/news-feed-stats": {
-      "outgoing": [],
-      "incoming": []
-    },
-    "/audits/p1-batch-plan": {
-      "outgoing": [
-        "/api-docs",
-        "/dpa",
-        "/exam-quiz",
-        "/handover",
-        "/insurance",
-        "/lms",
-        "/pricing"
-      ],
-      "incoming": []
     },
     "/auth/error": {
       "outgoing": [
@@ -1633,31 +1974,51 @@
     "/chatbot": {
       "outgoing": [
         "/about/chatbot-eval",
+        "/accidents-reports",
         "/e-learning",
-        "/law-search"
+        "/guides/anzeneho-ai-chatbot",
+        "/ky",
+        "/law-search",
+        "/safety-diary",
+        "/strategy/plan-generator"
       ],
       "incoming": [
         "/",
         "/about/chatbot-eval",
-        "/audits/2026-05-16",
+        "/accidents-reports",
+        "/admin/audits/p2-batch-plan",
+        "/admin/audits/review-dashboard",
         "/chatbot/share/[id]",
+        "/court-cases",
+        "/court-cases/[id]",
         "/education-certification",
         "/faq",
         "/faq/search",
         "/features/quick-tour",
         "/features/use-cases",
+        "/for/construction",
+        "/for/consultant",
+        "/for/manager",
+        "/for/solo",
         "/glossary",
         "/industries",
         "/law-hierarchy",
         "/laws",
         "/pricing/success",
+        "/search",
+        "shared:components/CommandPalette.tsx",
         "shared:components/MobileBottomNav.tsx",
         "shared:components/QuickLauncher.tsx",
+        "shared:components/accidents-reports/hub-filter.tsx",
         "shared:components/app-shell.tsx",
+        "shared:components/copilot/CopilotStepNav.tsx",
+        "shared:components/cross-tool-links.tsx",
         "shared:components/footer.tsx",
+        "shared:components/home-quick-access.tsx",
         "shared:components/home-value-hero.tsx",
         "shared:components/law-hub-nav.tsx",
         "shared:components/law-revision-list.tsx",
+        "shared:components/main-feature-next-actions.tsx",
         "shared:components/new-home-hero.tsx",
         "shared:config/flagship-nav.ts",
         "shared:data/faqs/faq-batch-1-law.ts",
@@ -1680,14 +2041,17 @@
         "shared:data/industries-content/warehouse.ts",
         "shared:data/industries-content/wholesale.ts",
         "shared:data/mock/page-analytics-mock.ts",
-        "shared:data/mock/stats-mock.ts"
+        "shared:data/mock/stats-mock.ts",
+        "shared:data/seo/keyword-landing.ts"
       ]
     },
     "/chatbot/share/[id]": {
       "outgoing": [
         "/chatbot"
       ],
-      "incoming": []
+      "incoming": [
+        "shared:components/copilot/CopilotNextSteps.tsx"
+      ]
     },
     "/chemical-database": {
       "outgoing": [
@@ -1697,15 +2061,19 @@
       ],
       "incoming": [
         "/",
-        "/audits/2026-05-16",
+        "/chemical-database/[cas]",
         "/chemical-ra",
         "/chemical-ra/product-search",
         "/equipment-finder",
         "/features/use-cases",
+        "/for/construction",
+        "/for/consultant",
+        "/for/solo",
         "/industries/[industry]",
         "shared:components/QuickLauncher.tsx",
         "shared:components/app-shell.tsx",
         "shared:components/footer.tsx",
+        "shared:components/product-search-panel.tsx",
         "shared:config/flagship-nav.ts",
         "shared:data/faqs/faq-batch-3-chemical.ts",
         "shared:data/features-catalog.ts",
@@ -1719,15 +2087,34 @@
         "shared:data/industries-content/transport.ts",
         "shared:data/industries-content/warehouse.ts",
         "shared:data/industries-content/wholesale.ts",
-        "shared:data/mock/page-analytics-mock.ts"
+        "shared:data/mock/page-analytics-mock.ts",
+        "shared:data/seo/keyword-landing.ts"
+      ]
+    },
+    "/chemical-database/[cas]": {
+      "outgoing": [
+        "/chemical-database"
+      ],
+      "incoming": [
+        "/",
+        "/for/construction",
+        "/for/solo",
+        "shared:components/chemical-database-client.tsx",
+        "shared:components/chemical/sds-upload-panel.tsx",
+        "shared:components/mhlw-chemical-info-card.tsx",
+        "shared:lib/cross-search/chemical-detail-cas.test.ts",
+        "shared:lib/cross-search/chemical-detail-url.ts"
       ]
     },
     "/chemical-ra": {
       "outgoing": [
         "/chemical-database",
         "/chemical-ra/product-search",
+        "/court-cases",
+        "/court-cases/employer-liability",
         "/education/hoteikyoiku/chemical-ra",
-        "/equipment-finder"
+        "/equipment-finder",
+        "/guides/chemical-ra-create-simple"
       ],
       "incoming": [
         "/",
@@ -1737,16 +2124,23 @@
         "/faq",
         "/features/quick-tour",
         "/features/use-cases",
+        "/for/construction",
+        "/for/consultant",
+        "/for/manager",
+        "/for/solo",
         "/glossary",
         "/health-checkup-scheduler",
         "/industries/[industry]",
         "/risk",
+        "shared:components/MobileBottomNav.tsx",
         "shared:components/app-shell.tsx",
         "shared:components/chemical-database-client.tsx",
         "shared:components/footer.tsx",
+        "shared:components/home-quick-access.tsx",
         "shared:components/home-value-hero.tsx",
+        "shared:components/main-feature-next-actions.tsx",
         "shared:components/persona-entry.tsx",
-        "shared:components/safety-diary/diary-list-client.tsx",
+        "shared:components/product-search-panel.tsx",
         "shared:config/flagship-nav.ts",
         "shared:data/faqs/faq-batch-1-law.ts",
         "shared:data/faqs/faq-batch-2-management.ts",
@@ -1757,7 +2151,8 @@
         "shared:data/glossary/glossary-batch-2-chemical.ts",
         "shared:data/glossary/glossary-batch-4-health-stats.ts",
         "shared:data/industries-content/manufacturing.ts",
-        "shared:data/industries-content/warehouse.ts"
+        "shared:data/industries-content/warehouse.ts",
+        "shared:data/seo/keyword-landing.ts"
       ]
     },
     "/chemical-ra/product-search": {
@@ -1769,13 +2164,13 @@
       "incoming": [
         "/",
         "/account",
-        "/chemical-ra"
+        "/chemical-ra",
+        "shared:data/seo/keyword-landing.ts"
       ]
     },
     "/circulars": {
       "outgoing": [
         "/circulars/[id]",
-        "/laws/notices-precedents",
         "/resources"
       ],
       "incoming": [
@@ -1783,16 +2178,30 @@
         "/articles/[slug]",
         "/asbestos-management",
         "/circulars/[id]",
+        "/diversity/disability",
+        "/diversity/lgbtq",
+        "/diversity/sogi",
         "/equipment/[id]",
+        "/for/consultant",
         "/industries",
         "/industries/[industry]",
         "/law-hierarchy",
+        "/law-search",
+        "/laws",
+        "/laws/bcp",
+        "/laws/freelance-rosai",
+        "/laws/glossary",
         "/resources",
         "/strategy/plan-generator",
+        "shared:components/app-shell.tsx",
+        "shared:components/chemical-database-client.tsx",
+        "shared:components/favorites/favorites-list.tsx",
         "shared:components/footer.tsx",
         "shared:components/home-value-hero.tsx",
         "shared:components/law-hub-nav.tsx",
-        "shared:config/flagship-nav.ts"
+        "shared:config/flagship-nav.ts",
+        "shared:data/seo/keyword-landing.ts",
+        "shared:lib/news-hub.ts"
       ]
     },
     "/circulars/[id]": {
@@ -1802,51 +2211,14 @@
         "/equipment-finder"
       ],
       "incoming": [
-        "/",
         "/articles/[slug]",
         "/circulars",
         "/equipment/[id]",
         "/industries/[industry]",
-        "shared:components/morning-digest.tsx",
-        "shared:lib/related-content.ts"
-      ]
-    },
-    "/community-cases": {
-      "outgoing": [
-        "/community-cases/[id]",
-        "/community-cases/submit"
-      ],
-      "incoming": [
-        "/community-cases/[id]",
-        "/community-cases/submit",
-        "shared:components/community-voice-section.tsx",
-        "shared:data/features-catalog.ts"
-      ]
-    },
-    "/community-cases/[id]": {
-      "outgoing": [
-        "/community-cases",
-        "/community-cases/submit",
-        "/laws"
-      ],
-      "incoming": [
-        "/community-cases",
-        "/community-cases/submit",
-        "/qa-knowledge",
-        "shared:components/community-voice-section.tsx"
-      ]
-    },
-    "/community-cases/submit": {
-      "outgoing": [
-        "/community-cases",
-        "/community-cases/[id]"
-      ],
-      "incoming": [
-        "/community-cases",
-        "/community-cases/[id]",
-        "/qa-knowledge",
-        "shared:components/FeedbackGateModal.tsx",
-        "shared:components/community-voice-section.tsx"
+        "shared:components/favorites/favorites-list.test.tsx",
+        "shared:lib/related-content.ts",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/contact": {
@@ -1888,8 +2260,83 @@
         "/subsidies/calculator",
         "shared:components/app-shell.tsx",
         "shared:components/footer.tsx",
+        "shared:components/home-three-pillars.tsx",
         "shared:components/home-value-hero.tsx",
-        "shared:components/persona-entry.tsx"
+        "shared:components/persona-entry.tsx",
+        "shared:components/seo/keyword-landing-view.tsx",
+        "shared:config/flagship-nav.ts"
+      ]
+    },
+    "/court-cases": {
+      "outgoing": [
+        "/accident-news",
+        "/chatbot",
+        "/court-cases/employer-liability",
+        "/court-cases/print",
+        "/ky/paper",
+        "/safety-diary"
+      ],
+      "incoming": [
+        "/",
+        "/chemical-ra",
+        "/court-cases/[id]",
+        "/court-cases/employer-liability",
+        "/court-cases/print",
+        "/for/consultant",
+        "shared:components/app-shell.tsx",
+        "shared:components/home-quick-access.tsx"
+      ]
+    },
+    "/court-cases/[id]": {
+      "outgoing": [
+        "/accident-news",
+        "/chatbot",
+        "/court-cases",
+        "/court-cases/employer-liability",
+        "/court-cases/print",
+        "/ky/paper"
+      ],
+      "incoming": [
+        "/",
+        "shared:components/court-cases/court-cases-browser.tsx",
+        "shared:lib/cross-search/build.ts",
+        "shared:lib/search-index.ts"
+      ]
+    },
+    "/court-cases/employer-liability": {
+      "outgoing": [
+        "/court-cases",
+        "/heat-illness-prevention",
+        "/ky/paper",
+        "/site-records"
+      ],
+      "incoming": [
+        "/",
+        "/chemical-ra",
+        "/court-cases",
+        "/court-cases/[id]",
+        "/for/construction",
+        "/for/consultant",
+        "/for/manager",
+        "/for/solo",
+        "/site-records",
+        "shared:components/accidents/action-bar.tsx",
+        "shared:components/court-cases/court-cases-browser.tsx",
+        "shared:lib/cross-search/build.ts",
+        "shared:lib/search-index.ts"
+      ]
+    },
+    "/court-cases/print": {
+      "outgoing": [
+        "/court-cases"
+      ],
+      "incoming": [
+        "/",
+        "/court-cases",
+        "/court-cases/[id]",
+        "shared:components/court-cases/court-cases-browser.tsx",
+        "shared:lib/cross-search/build.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/dev/layout-preview": {
@@ -1928,11 +2375,11 @@
     },
     "/diversity/disability": {
       "outgoing": [
+        "/circulars",
         "/contact",
         "/diversity",
         "/diversity/sogi",
         "/laws",
-        "/laws/notices-precedents",
         "/mental-health"
       ],
       "incoming": [
@@ -1971,10 +2418,10 @@
     },
     "/diversity/lgbtq": {
       "outgoing": [
+        "/circulars",
         "/diversity",
         "/diversity/sogi",
         "/laws",
-        "/laws/notices-precedents",
         "/mental-health"
       ],
       "incoming": [
@@ -2007,9 +2454,9 @@
     },
     "/diversity/sogi": {
       "outgoing": [
+        "/circulars",
         "/diversity",
         "/diversity/disability",
-        "/laws/notices-precedents",
         "/mental-health"
       ],
       "incoming": [
@@ -2034,22 +2481,17 @@
         "/contact",
         "/privacy"
       ],
-      "incoming": [
-        "/audits/2026-05-16",
-        "/audits/p1-batch-plan"
-      ]
+      "incoming": []
     },
     "/e-learning": {
       "outgoing": [
-        "/accidents",
-        "/exam-quiz"
+        "/accidents"
       ],
       "incoming": [
         "/",
         "/chatbot",
         "/diversity/foreign-workers",
         "/diversity/women",
-        "/exam-quiz",
         "/features/use-cases",
         "/glossary",
         "shared:components/accident-database-panel.tsx",
@@ -2063,7 +2505,8 @@
         "shared:data/faqs/faq-batch-4-health-education.ts",
         "shared:data/features-catalog.ts",
         "shared:data/glossary/glossary-batch-2-chemical.ts",
-        "shared:data/glossary/glossary-batch-3-machinery.ts"
+        "shared:data/glossary/glossary-batch-3-machinery.ts",
+        "shared:lib/cross-search/cross-search.test.ts"
       ]
     },
     "/education": {
@@ -2084,7 +2527,6 @@
       ],
       "incoming": [
         "/",
-        "/audits/2026-05-16",
         "/education-certification",
         "/education/hoteikyoiku/chemical-ra",
         "/education/hoteikyoiku/shokucho",
@@ -2098,7 +2540,6 @@
         "/education/tokubetsu/sankesu",
         "/education/tokubetsu/tamakake",
         "/education/tokubetsu/teiatsu-denki",
-        "/exam-quiz/[slug]/result",
         "/faq",
         "/features/quick-tour",
         "/features/use-cases",
@@ -2126,6 +2567,7 @@
         "/education-certification/finder",
         "/industries",
         "/industries/[industry]",
+        "shared:components/app-shell.tsx",
         "shared:config/flagship-nav.ts"
       ]
     },
@@ -2137,6 +2579,9 @@
         "/",
         "/asbestos-management/qualifications",
         "/education-certification",
+        "/for/consultant",
+        "/for/manager",
+        "/for/solo",
         "shared:components/cross-tool-links.tsx",
         "shared:config/flagship-nav.ts"
       ]
@@ -2152,7 +2597,10 @@
         "/",
         "/chemical-ra",
         "/education",
-        "/education/hoteikyoiku/shokucho"
+        "/education/hoteikyoiku/shokucho",
+        "shared:data/seo/keyword-landing.ts",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/education/hoteikyoiku/shokucho": {
@@ -2165,7 +2613,9 @@
       "incoming": [
         "/",
         "/education",
-        "/education/hoteikyoiku/chemical-ra"
+        "/education/hoteikyoiku/chemical-ra",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/education/roudoueisei/necchu": {
@@ -2181,7 +2631,9 @@
         "/education",
         "/education/roudoueisei/shindou",
         "/education/roudoueisei/souon",
-        "/heat-illness-prevention"
+        "/heat-illness-prevention",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/education/roudoueisei/shindou": {
@@ -2196,7 +2648,9 @@
         "/",
         "/education",
         "/education/roudoueisei/necchu",
-        "/education/roudoueisei/souon"
+        "/education/roudoueisei/souon",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/education/roudoueisei/souon": {
@@ -2211,7 +2665,9 @@
         "/",
         "/education",
         "/education/roudoueisei/necchu",
-        "/education/roudoueisei/shindou"
+        "/education/roudoueisei/shindou",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/education/roudoueisei/youtsu-yobou": {
@@ -2226,7 +2682,9 @@
         "/education/hoteikyoiku/shokucho",
         "/education/roudoueisei/necchu",
         "/education/roudoueisei/shindou",
-        "/education/roudoueisei/souon"
+        "/education/roudoueisei/souon",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/education/tokubetsu/ashiba": {
@@ -2242,7 +2700,9 @@
         "/",
         "/education",
         "/education/tokubetsu/kensaku-toishi",
-        "/education/tokubetsu/teiatsu-denki"
+        "/education/tokubetsu/teiatsu-denki",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/education/tokubetsu/fullharness": {
@@ -2255,7 +2715,9 @@
         "/education",
         "/education/tokubetsu/ashiba",
         "/education/tokubetsu/kensaku-toishi",
-        "/education/tokubetsu/teiatsu-denki"
+        "/education/tokubetsu/teiatsu-denki",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/education/tokubetsu/kensaku-toishi": {
@@ -2271,7 +2733,9 @@
         "/",
         "/education",
         "/education/tokubetsu/ashiba",
-        "/education/tokubetsu/teiatsu-denki"
+        "/education/tokubetsu/teiatsu-denki",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/education/tokubetsu/sankesu": {
@@ -2281,7 +2745,9 @@
       ],
       "incoming": [
         "/",
-        "/education"
+        "/education",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/education/tokubetsu/tamakake": {
@@ -2294,7 +2760,9 @@
         "/education",
         "/education/tokubetsu/ashiba",
         "/education/tokubetsu/kensaku-toishi",
-        "/education/tokubetsu/teiatsu-denki"
+        "/education/tokubetsu/teiatsu-denki",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/education/tokubetsu/teiatsu-denki": {
@@ -2310,7 +2778,9 @@
         "/",
         "/education",
         "/education/tokubetsu/ashiba",
-        "/education/tokubetsu/kensaku-toishi"
+        "/education/tokubetsu/kensaku-toishi",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/equipment-finder": {
@@ -2332,7 +2802,8 @@
         "shared:components/home-value-hero.tsx",
         "shared:data/faqs/faq-batch-1-law.ts",
         "shared:data/faqs/faq-batch-2-management.ts",
-        "shared:data/faqs/faq-batch-3-chemical.ts"
+        "shared:data/faqs/faq-batch-3-chemical.ts",
+        "shared:data/seo/keyword-landing.ts"
       ]
     },
     "/equipment/[id]": {
@@ -2343,60 +2814,10 @@
         "/equipment-finder"
       ],
       "incoming": [
-        "/",
         "/articles/[slug]",
-        "shared:lib/related-content.ts"
-      ]
-    },
-    "/exam-quiz": {
-      "outgoing": [
-        "/e-learning",
-        "/exam-quiz/[slug]",
-        "/exam-quiz/[slug]/result",
-        "/law-search"
-      ],
-      "incoming": [
-        "/",
-        "/audits/2026-05-16",
-        "/audits/p1-batch-plan",
-        "/e-learning",
-        "/exam-quiz/[slug]",
-        "/exam-quiz/[slug]/result",
-        "/faq",
-        "/glossary",
-        "/industries/[industry]",
-        "shared:components/app-shell.tsx",
-        "shared:components/home-value-hero.tsx",
-        "shared:data/faqs/faq-batch-1-law.ts",
-        "shared:data/faqs/faq-batch-2-management.ts",
-        "shared:data/faqs/faq-batch-3-chemical.ts",
-        "shared:data/faqs/faq-batch-4-health-education.ts",
-        "shared:data/features-catalog.ts",
-        "shared:data/glossary/glossary-batch-3-machinery.ts",
-        "shared:data/mock/page-analytics-mock.ts"
-      ]
-    },
-    "/exam-quiz/[slug]": {
-      "outgoing": [
-        "/exam-quiz",
-        "/exam-quiz/[slug]/result",
-        "/pricing"
-      ],
-      "incoming": [
-        "/exam-quiz",
-        "/exam-quiz/[slug]/result"
-      ]
-    },
-    "/exam-quiz/[slug]/result": {
-      "outgoing": [
-        "/education",
-        "/exam-quiz",
-        "/exam-quiz/[slug]",
-        "/pricing"
-      ],
-      "incoming": [
-        "/exam-quiz",
-        "/exam-quiz/[slug]"
+        "shared:lib/related-content.ts",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/faq": {
@@ -2404,7 +2825,6 @@
         "/chatbot",
         "/chemical-ra",
         "/education",
-        "/exam-quiz",
         "/faq/[category]",
         "/faq/search",
         "/law-search",
@@ -2415,6 +2835,8 @@
         "/",
         "/faq/[category]",
         "/faq/search",
+        "/for/consultant",
+        "/for/manager",
         "shared:components/app-shell.tsx",
         "shared:components/cross-tool-links.tsx",
         "shared:components/footer.tsx",
@@ -2429,7 +2851,8 @@
       "incoming": [
         "/",
         "/faq",
-        "/industries/[industry]"
+        "/industries/[industry]",
+        "shared:lib/search-index.ts"
       ]
     },
     "/faq/search": {
@@ -2441,7 +2864,14 @@
         "/",
         "/faq",
         "/faq/[category]",
-        "/industries/[industry]"
+        "/industries/[industry]",
+        "shared:lib/search-index.ts"
+      ]
+    },
+    "/favorites": {
+      "outgoing": [],
+      "incoming": [
+        "shared:components/app-shell.tsx"
       ]
     },
     "/features": {
@@ -2484,8 +2914,7 @@
     "/features/comparison": {
       "outgoing": [
         "/contact",
-        "/features",
-        "/pricing"
+        "/features"
       ],
       "incoming": [
         "/",
@@ -2518,6 +2947,7 @@
         "/",
         "/features",
         "/features/[category]",
+        "shared:components/flagship-grid.tsx",
         "shared:components/home-value-hero.tsx"
       ]
     },
@@ -2556,8 +2986,122 @@
         "/contact"
       ],
       "incoming": [
-        "shared:components/FeedbackGateModal.tsx",
-        "shared:components/morning-digest.tsx"
+        "shared:components/FeedbackGateModal.tsx"
+      ]
+    },
+    "/for/construction": {
+      "outgoing": [
+        "/accidents-reports/[industry]",
+        "/chatbot",
+        "/chemical-database",
+        "/chemical-database/[cas]",
+        "/chemical-ra",
+        "/court-cases/employer-liability",
+        "/heat-illness-prevention",
+        "/industries/[industry]",
+        "/ky",
+        "/ky-examples",
+        "/risk-prediction",
+        "/safety-diary",
+        "/signage",
+        "/site-records",
+        "/site-records/induction",
+        "/site-records/inspection",
+        "/site-records/near-miss",
+        "/site-records/patrol",
+        "/site-records/procedure",
+        "/strategy/plan-generator"
+      ],
+      "incoming": [
+        "/",
+        "/accidents-reports/[industry]",
+        "/industries/[industry]",
+        "shared:components/app-shell.tsx",
+        "shared:components/home-persona-entry.tsx",
+        "shared:components/safety-plan/plan-generator-form.tsx",
+        "shared:lib/site-pages-search-source.ts"
+      ]
+    },
+    "/for/consultant": {
+      "outgoing": [
+        "/about",
+        "/accidents",
+        "/accidents-analytics",
+        "/accidents-reports",
+        "/chatbot",
+        "/chemical-database",
+        "/chemical-ra",
+        "/circulars",
+        "/court-cases",
+        "/court-cases/employer-liability",
+        "/education-certification/finder",
+        "/faq",
+        "/glossary",
+        "/law-hierarchy",
+        "/law-search",
+        "/site-records",
+        "/strategy/plan-generator"
+      ],
+      "incoming": [
+        "/",
+        "shared:components/app-shell.tsx",
+        "shared:components/home-persona-entry.tsx",
+        "shared:lib/site-pages-search-source.ts"
+      ]
+    },
+    "/for/manager": {
+      "outgoing": [
+        "/chatbot",
+        "/chemical-ra",
+        "/court-cases/employer-liability",
+        "/education-certification/finder",
+        "/faq",
+        "/health-checkup-scheduler",
+        "/industries",
+        "/law-hierarchy",
+        "/mental-health-management",
+        "/safety-diary",
+        "/site-records",
+        "/site-records/committee",
+        "/site-records/induction",
+        "/site-records/inspection",
+        "/site-records/near-miss",
+        "/site-records/patrol",
+        "/site-records/procedure",
+        "/strategy/plan-generator",
+        "/whats-new"
+      ],
+      "incoming": [
+        "/",
+        "shared:components/app-shell.tsx",
+        "shared:components/home-persona-entry.tsx",
+        "shared:lib/site-pages-search-source.ts"
+      ]
+    },
+    "/for/solo": {
+      "outgoing": [
+        "/accidents",
+        "/accidents-reports/[industry]",
+        "/chatbot",
+        "/chemical-database",
+        "/chemical-database/[cas]",
+        "/chemical-ra",
+        "/court-cases/employer-liability",
+        "/education-certification/finder",
+        "/heat-illness-prevention",
+        "/ky",
+        "/ky-examples",
+        "/laws",
+        "/site-records",
+        "/site-records/inspection",
+        "/site-records/near-miss",
+        "/site-records/procedure"
+      ],
+      "incoming": [
+        "/",
+        "shared:components/app-shell.tsx",
+        "shared:components/home-persona-entry.tsx",
+        "shared:lib/site-pages-search-source.ts"
       ]
     },
     "/foreign-workers": {
@@ -2583,7 +3127,8 @@
       "incoming": [
         "/",
         "/foreign-workers",
-        "/foreign-workers/status/[status]"
+        "/foreign-workers/status/[status]",
+        "shared:components/foreign-workers/status-conclusion.tsx"
       ]
     },
     "/foreign-workers/status/[status]": {
@@ -2601,7 +3146,6 @@
         "/chatbot",
         "/chemical-ra",
         "/e-learning",
-        "/exam-quiz",
         "/ky",
         "/law-search",
         "/laws",
@@ -2610,9 +3154,9 @@
       ],
       "incoming": [
         "/",
-        "/audits/2026-05-16",
         "/diversity/foreign-workers",
         "/features/use-cases",
+        "/for/consultant",
         "/laws/gig-work",
         "/laws/glossary",
         "/mental-health",
@@ -2620,6 +3164,7 @@
         "shared:components/chemical-database-client.tsx",
         "shared:components/footer.tsx",
         "shared:components/law-hub-nav.tsx",
+        "shared:components/page-json-ld.test.tsx",
         "shared:config/flagship-nav.ts",
         "shared:data/features-catalog.ts"
       ]
@@ -2628,19 +3173,87 @@
       "outgoing": [],
       "incoming": [
         "/",
-        "/audits/2026-05-16",
         "shared:components/app-shell.tsx",
         "shared:components/footer.tsx",
         "shared:components/home-value-hero.tsx",
-        "shared:components/signage/signage-featured-goods.tsx",
         "shared:data/features-catalog.ts"
       ]
     },
-    "/handover": {
-      "outgoing": [],
+    "/guides": {
+      "outgoing": [
+        "/guides/annual-safety-plan-generator",
+        "/guides/anzeneho-ai-chatbot",
+        "/guides/chemical-ra-create-simple",
+        "/guides/industry-accident-reports"
+      ],
       "incoming": [
-        "/audits/2026-05-16",
-        "/audits/p1-batch-plan"
+        "/",
+        "/about",
+        "shared:components/seo/keyword-landing-view.tsx"
+      ]
+    },
+    "/guides/annual-safety-plan-generator": {
+      "outgoing": [
+        "/guides/anzeneho-ai-chatbot",
+        "/guides/chemical-ra-create-simple",
+        "/guides/industry-accident-reports"
+      ],
+      "incoming": [
+        "/",
+        "/guides",
+        "/guides/anzeneho-ai-chatbot",
+        "/guides/chemical-ra-create-simple",
+        "/guides/industry-accident-reports",
+        "/strategy/plan-generator",
+        "shared:data/seo/keyword-landing.ts"
+      ]
+    },
+    "/guides/anzeneho-ai-chatbot": {
+      "outgoing": [
+        "/guides/annual-safety-plan-generator",
+        "/guides/chemical-ra-create-simple",
+        "/guides/industry-accident-reports"
+      ],
+      "incoming": [
+        "/",
+        "/chatbot",
+        "/guides",
+        "/guides/annual-safety-plan-generator",
+        "/guides/chemical-ra-create-simple",
+        "/guides/industry-accident-reports",
+        "shared:data/seo/keyword-landing.ts"
+      ]
+    },
+    "/guides/chemical-ra-create-simple": {
+      "outgoing": [
+        "/guides/annual-safety-plan-generator",
+        "/guides/anzeneho-ai-chatbot",
+        "/guides/industry-accident-reports"
+      ],
+      "incoming": [
+        "/",
+        "/chemical-ra",
+        "/guides",
+        "/guides/annual-safety-plan-generator",
+        "/guides/anzeneho-ai-chatbot",
+        "/guides/industry-accident-reports",
+        "shared:data/seo/keyword-landing.ts"
+      ]
+    },
+    "/guides/industry-accident-reports": {
+      "outgoing": [
+        "/guides/annual-safety-plan-generator",
+        "/guides/anzeneho-ai-chatbot",
+        "/guides/chemical-ra-create-simple"
+      ],
+      "incoming": [
+        "/",
+        "/accidents-reports",
+        "/guides",
+        "/guides/annual-safety-plan-generator",
+        "/guides/anzeneho-ai-chatbot",
+        "/guides/chemical-ra-create-simple",
+        "shared:data/seo/keyword-landing.ts"
       ]
     },
     "/health-checkup-scheduler": {
@@ -2654,13 +3267,17 @@
         "/",
         "/asbestos-management",
         "/asbestos-management/qualifications",
+        "/for/manager",
         "/health-checkup-scheduler/result",
         "/heat-illness-prevention",
         "/mental-health-management",
+        "/site-records",
         "/treatment-work-balance",
         "/treatment-work-balance/plan-builder",
         "shared:components/cross-tool-links.tsx",
-        "shared:config/flagship-nav.ts"
+        "shared:config/flagship-nav.ts",
+        "shared:lib/site-records/daily-actions.ts",
+        "shared:lib/site-records/safety-calendar.ts"
       ]
     },
     "/health-checkup-scheduler/result": {
@@ -2674,7 +3291,10 @@
         "/accidents-reports/[industry]",
         "/education/roudoueisei/necchu",
         "/health-checkup-scheduler",
+        "/heat-illness-prevention/acclimatization",
         "/heat-illness-prevention/industry-risk",
+        "/heat-illness-prevention/log",
+        "/heat-illness-prevention/poster",
         "/heat-illness-prevention/r7-compliance",
         "/heat-illness-prevention/wbgt-calculator",
         "/strategy/plan-generator",
@@ -2682,23 +3302,64 @@
       ],
       "incoming": [
         "/",
+        "/court-cases/employer-liability",
+        "/for/construction",
+        "/for/solo",
+        "shared:components/QuickLauncher.tsx",
+        "shared:components/app-shell.tsx",
         "shared:components/cross-tool-links.tsx",
         "shared:config/flagship-nav.ts",
         "shared:data/industries-content/food.ts",
         "shared:data/industries-content/retail.ts",
         "shared:data/industries-content/service.ts",
         "shared:data/industries-content/transport.ts",
-        "shared:data/industries-content/wholesale.ts"
+        "shared:data/industries-content/wholesale.ts",
+        "shared:lib/site-records/safety-calendar.ts"
+      ]
+    },
+    "/heat-illness-prevention/acclimatization": {
+      "outgoing": [
+        "/heat-illness-prevention/log"
+      ],
+      "incoming": [
+        "/",
+        "/heat-illness-prevention",
+        "/site-records",
+        "shared:lib/site-records/safety-calendar.ts"
       ]
     },
     "/heat-illness-prevention/industry-risk": {
       "outgoing": [
         "/accidents-reports/[industry]",
+        "/accidents-reports/compare",
         "/heat-illness-prevention/r7-compliance"
       ],
       "incoming": [
         "/",
         "/heat-illness-prevention"
+      ]
+    },
+    "/heat-illness-prevention/log": {
+      "outgoing": [],
+      "incoming": [
+        "/",
+        "/heat-illness-prevention",
+        "/heat-illness-prevention/acclimatization",
+        "/heat-illness-prevention/poster",
+        "/heat-illness-prevention/wbgt-calculator",
+        "/site-records",
+        "shared:lib/site-records/safety-calendar.ts"
+      ]
+    },
+    "/heat-illness-prevention/poster": {
+      "outgoing": [
+        "/heat-illness-prevention/log",
+        "/heat-illness-prevention/wbgt-calculator"
+      ],
+      "incoming": [
+        "/",
+        "/heat-illness-prevention",
+        "/site-records"
       ]
     },
     "/heat-illness-prevention/r7-compliance": {
@@ -2710,10 +3371,13 @@
       ]
     },
     "/heat-illness-prevention/wbgt-calculator": {
-      "outgoing": [],
+      "outgoing": [
+        "/heat-illness-prevention/log"
+      ],
       "incoming": [
         "/",
-        "/heat-illness-prevention"
+        "/heat-illness-prevention",
+        "/heat-illness-prevention/poster"
       ]
     },
     "/industries": {
@@ -2728,21 +3392,24 @@
       ],
       "incoming": [
         "/",
+        "/for/manager",
         "/industries/[industry]",
+        "shared:components/app-shell.tsx",
         "shared:config/flagship-nav.ts"
       ]
     },
     "/industries/[industry]": {
       "outgoing": [
         "/accidents-reports/[industry]",
+        "/accidents-reports/compare",
         "/chemical-database",
         "/chemical-ra",
         "/circulars",
         "/circulars/[id]",
         "/education-certification",
-        "/exam-quiz",
         "/faq/[category]",
         "/faq/search",
+        "/for/construction",
         "/industries",
         "/ky",
         "/law-search",
@@ -2751,6 +3418,7 @@
       "incoming": [
         "/",
         "/asbestos-management",
+        "/for/construction",
         "/industries",
         "/safety-signs",
         "shared:components/cross-tool-links.tsx",
@@ -2764,8 +3432,6 @@
       ],
       "incoming": [
         "/",
-        "/audits/2026-05-16",
-        "/audits/p1-batch-plan",
         "/bcp"
       ]
     },
@@ -2776,10 +3442,12 @@
         "/accidents",
         "/accidents-analytics",
         "/accidents-reports",
-        "/audits/2026-05-16",
+        "/chatbot",
         "/diversity/foreign-workers",
         "/features/quick-tour",
         "/features/use-cases",
+        "/for/construction",
+        "/for/solo",
         "/foreign-workers/safety-training",
         "/glossary",
         "/industries",
@@ -2788,26 +3456,17 @@
         "/laws/gig-work",
         "/risk",
         "/risk-prediction",
-        "/safety-diary",
         "/safety-signs",
-        "shared:components/MobileBottomNav.tsx",
         "shared:components/QuickLauncher.tsx",
         "shared:components/accidents-reports/industry-report-view.tsx",
-        "shared:components/app-shell.tsx",
         "shared:components/elearning-panel.tsx",
         "shared:components/footer.tsx",
         "shared:components/home-value-hero.tsx",
-        "shared:components/ky-examples-browser.tsx",
-        "shared:components/ky-morning-signage.tsx",
-        "shared:components/ky-page-content.tsx",
         "shared:components/ladder-stats-card.tsx",
+        "shared:components/main-feature-next-actions.tsx",
         "shared:components/new-home-hero.tsx",
         "shared:components/persona-entry.tsx",
-        "shared:components/safety-diary/diary-form-required.tsx",
-        "shared:components/safety-diary/diary-list-client.tsx",
         "shared:components/signage/signage-header.tsx",
-        "shared:components/today-safety-dashboard.tsx",
-        "shared:config/flagship-nav.ts",
         "shared:data/faqs/faq-batch-2-management.ts",
         "shared:data/faqs/faq-batch-4-health-education.ts",
         "shared:data/features-catalog.ts",
@@ -2819,16 +3478,53 @@
       "outgoing": [],
       "incoming": [
         "/",
+        "/for/construction",
+        "/for/solo",
         "shared:components/cross-tool-links.tsx",
         "shared:components/footer.tsx",
         "shared:config/flagship-nav.ts"
+      ]
+    },
+    "/ky/list": {
+      "outgoing": [],
+      "incoming": [
+        "shared:components/ky-paper/ky-paper-view.tsx"
       ]
     },
     "/ky/morning": {
       "outgoing": [],
       "incoming": [
         "/",
-        "shared:components/ky-page-content.tsx"
+        "shared:components/ky-paper/ky-paper-view.tsx",
+        "shared:lib/ky/paper-status.ts"
+      ]
+    },
+    "/ky/paper": {
+      "outgoing": [],
+      "incoming": [
+        "/",
+        "/court-cases",
+        "/court-cases/[id]",
+        "/court-cases/employer-liability",
+        "/pdf",
+        "/site-records",
+        "shared:components/MobileBottomNav.tsx",
+        "shared:components/app-shell.tsx",
+        "shared:components/home-quick-access.tsx",
+        "shared:components/ky-examples-browser.tsx",
+        "shared:components/ky-morning-signage.tsx",
+        "shared:components/ky/ky-list-client.tsx",
+        "shared:components/ky/workers-master-client.tsx",
+        "shared:config/flagship-nav.ts",
+        "shared:lib/site-records/safety-calendar.ts"
+      ]
+    },
+    "/ky/workers": {
+      "outgoing": [],
+      "incoming": [
+        "/",
+        "shared:components/ky-paper/field-editor-sheet.tsx",
+        "shared:components/ky-paper/ky-paper-view.tsx"
       ]
     },
     "/law-hierarchy": {
@@ -2837,11 +3533,12 @@
         "/circulars",
         "/law-search",
         "/laws",
-        "/laws/glossary",
-        "/laws/notices-precedents"
+        "/laws/glossary"
       ],
       "incoming": [
         "/",
+        "/for/consultant",
+        "/for/manager",
         "/laws",
         "shared:components/app-shell.tsx",
         "shared:components/law-hub-nav.tsx",
@@ -2850,26 +3547,30 @@
     },
     "/law-search": {
       "outgoing": [
+        "/circulars",
         "/laws/glossary",
-        "/laws/notices-precedents",
         "/resources"
       ],
       "incoming": [
         "/",
         "/chatbot",
         "/education-certification",
-        "/exam-quiz",
         "/faq",
         "/features/use-cases",
+        "/for/consultant",
         "/glossary",
         "/industries/[industry]",
         "/law-hierarchy",
         "/resources",
+        "/search",
+        "shared:components/CommandPalette.tsx",
         "shared:components/MobileBottomNav.tsx",
         "shared:components/accidents-reports/industry-report-view.tsx",
         "shared:components/app-shell.tsx",
+        "shared:components/favorites/favorites-list.tsx",
         "shared:components/home-value-hero.tsx",
         "shared:components/law-hub-nav.tsx",
+        "shared:components/new-home-hero.tsx",
         "shared:components/persona-entry.tsx",
         "shared:components/summary-panel.tsx",
         "shared:config/flagship-nav.ts",
@@ -2877,25 +3578,25 @@
         "shared:data/faqs/faq-batch-3-chemical.ts",
         "shared:data/features-catalog.ts",
         "shared:data/glossary/glossary-batch-1-law.ts",
-        "shared:data/glossary/glossary-batch-2-chemical.ts"
+        "shared:data/glossary/glossary-batch-2-chemical.ts",
+        "shared:data/seo/keyword-landing.ts"
       ]
     },
     "/laws": {
       "outgoing": [
         "/accidents",
         "/chatbot",
+        "/circulars",
         "/law-hierarchy",
         "/laws/bcp",
         "/laws/freelance-rosai",
         "/laws/gig-work",
         "/laws/glossary",
-        "/laws/notices-precedents",
         "/resources"
       ],
       "incoming": [
         "/",
         "/chemical-database",
-        "/community-cases/[id]",
         "/diversity/disability",
         "/diversity/elderly",
         "/diversity/foreign-workers",
@@ -2903,6 +3604,7 @@
         "/diversity/non-regular",
         "/diversity/remote",
         "/features/use-cases",
+        "/for/solo",
         "/glossary",
         "/health-checkup-scheduler",
         "/industries/[industry]",
@@ -2911,22 +3613,19 @@
         "/laws/freelance-rosai",
         "/laws/gig-work",
         "/laws/glossary",
-        "/laws/notices-precedents",
         "/resources",
         "/signage",
         "/strategy/plan-generator",
+        "/whats-new",
         "shared:components/accidents-reports/industry-report-view.tsx",
         "shared:components/app-shell.tsx",
         "shared:components/footer.tsx",
+        "shared:components/home-quick-access.tsx",
         "shared:components/home-three-pillars.tsx",
         "shared:components/home-value-hero.tsx",
         "shared:components/law-hub-nav.tsx",
-        "shared:components/morning-digest.tsx",
         "shared:components/persona-entry.tsx",
-        "shared:components/safety-diary/diary-detail-client.tsx",
-        "shared:components/safety-diary/diary-monthly-client.tsx",
         "shared:components/signage/signage-header.tsx",
-        "shared:components/today-safety-dashboard.tsx",
         "shared:config/flagship-nav.ts",
         "shared:data/faqs/faq-batch-1-law.ts",
         "shared:data/faqs/faq-batch-2-management.ts",
@@ -2939,15 +3638,18 @@
         "shared:data/glossary/glossary-batch-4-health-stats.ts",
         "shared:data/industries-content/transport.ts",
         "shared:data/mock/page-analytics-mock.ts",
-        "shared:data/mock/stats-mock.ts"
+        "shared:data/mock/stats-mock.ts",
+        "shared:data/seo/keyword-landing.ts",
+        "shared:lib/news-hub.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/laws/bcp": {
       "outgoing": [
         "/accidents",
+        "/circulars",
         "/ky",
-        "/laws",
-        "/laws/notices-precedents"
+        "/laws"
       ],
       "incoming": [
         "/",
@@ -2956,10 +3658,10 @@
     },
     "/laws/freelance-rosai": {
       "outgoing": [
+        "/circulars",
         "/diversity/foreign-workers",
         "/laws",
-        "/laws/gig-work",
-        "/laws/notices-precedents"
+        "/laws/gig-work"
       ],
       "incoming": [
         "/",
@@ -2983,9 +3685,9 @@
     },
     "/laws/glossary": {
       "outgoing": [
+        "/circulars",
         "/glossary",
         "/laws",
-        "/laws/notices-precedents",
         "/resources"
       ],
       "incoming": [
@@ -2996,26 +3698,6 @@
         "shared:components/laws-page-client.tsx",
         "shared:data/glossary/glossary-batch-1-law.ts",
         "shared:data/mock/stats-mock.ts"
-      ]
-    },
-    "/laws/notices-precedents": {
-      "outgoing": [
-        "/laws"
-      ],
-      "incoming": [
-        "/",
-        "/circulars",
-        "/diversity/disability",
-        "/diversity/lgbtq",
-        "/diversity/sogi",
-        "/law-hierarchy",
-        "/law-search",
-        "/laws",
-        "/laws/bcp",
-        "/laws/freelance-rosai",
-        "/laws/glossary",
-        "shared:components/chemical-database-client.tsx",
-        "shared:config/flagship-nav.ts"
       ]
     },
     "/leaflet": {
@@ -3031,8 +3713,6 @@
         "/contact"
       ],
       "incoming": [
-        "/audits/2026-05-16",
-        "/audits/p1-batch-plan",
         "/features/use-cases",
         "/foreign-workers/safety-training",
         "/health-checkup-scheduler",
@@ -3042,7 +3722,8 @@
     "/mental-health": {
       "outgoing": [
         "/diversity",
-        "/glossary"
+        "/glossary",
+        "/mental-health-management/stress-check"
       ],
       "incoming": [
         "/",
@@ -3079,6 +3760,7 @@
       ],
       "incoming": [
         "/",
+        "/for/manager",
         "/mental-health-management/interview-guidance",
         "/mental-health-management/small-business",
         "/mental-health-management/stress-check",
@@ -3112,6 +3794,7 @@
       ],
       "incoming": [
         "/",
+        "/mental-health",
         "/mental-health-management"
       ]
     },
@@ -3126,6 +3809,7 @@
       "outgoing": [],
       "incoming": [
         "/",
+        "/whats-new",
         "shared:components/app-shell.tsx",
         "shared:components/signage/signage-header.tsx"
       ]
@@ -3143,10 +3827,10 @@
       ]
     },
     "/pdf": {
-      "outgoing": [],
+      "outgoing": [
+        "/ky/paper"
+      ],
       "incoming": [
-        "/",
-        "/safety-diary",
         "shared:config/flagship-nav.ts"
       ]
     },
@@ -3159,15 +3843,11 @@
         "/",
         "/about",
         "/account",
-        "/audits/2026-05-16",
-        "/audits/p1-batch-plan",
-        "/exam-quiz/[slug]",
-        "/exam-quiz/[slug]/result",
-        "/features/comparison",
         "/subsidies",
         "shared:components/app-shell.tsx",
         "shared:components/footer.tsx",
         "shared:components/home-value-hero.tsx",
+        "shared:components/page-json-ld.test.tsx",
         "shared:components/user-menu.tsx"
       ]
     },
@@ -3186,7 +3866,6 @@
       ],
       "incoming": [
         "/",
-        "/audits/2026-05-16",
         "/auth/signin",
         "/contact",
         "/dpa",
@@ -3196,20 +3875,8 @@
     "/profile": {
       "outgoing": [],
       "incoming": [
-        "shared:components/accident-extras-panel.tsx",
-        "shared:components/today-safety-dashboard.tsx"
-      ]
-    },
-    "/qa-knowledge": {
-      "outgoing": [
-        "/community-cases/[id]",
-        "/community-cases/submit"
-      ],
-      "incoming": [
         "/",
-        "/audits/2026-05-16",
-        "shared:components/footer.tsx",
-        "shared:config/flagship-nav.ts"
+        "shared:components/accident-extras-panel.tsx"
       ]
     },
     "/quick": {
@@ -3226,10 +3893,6 @@
       ],
       "incoming": []
     },
-    "/quiz": {
-      "outgoing": [],
-      "incoming": []
-    },
     "/resources": {
       "outgoing": [
         "/circulars",
@@ -3239,7 +3902,6 @@
       ],
       "incoming": [
         "/",
-        "/audits/2026-05-16",
         "/circulars",
         "/features/use-cases",
         "/law-search",
@@ -3267,14 +3929,12 @@
       ],
       "incoming": [
         "/",
-        "/audits/2026-05-16",
         "/features/use-cases",
         "/glossary",
+        "shared:components/MobileBottomNav.tsx",
         "shared:components/app-shell.tsx",
         "shared:components/footer.tsx",
-        "shared:components/home-screen.tsx",
         "shared:components/home-three-pillars.tsx",
-        "shared:components/ky-instruction-record-form.tsx",
         "shared:data/faqs/faq-batch-1-law.ts",
         "shared:data/faqs/faq-batch-2-management.ts",
         "shared:data/faqs/faq-batch-3-chemical.ts",
@@ -3292,13 +3952,13 @@
         "/accidents-analytics",
         "/accidents-reports",
         "/features/use-cases",
+        "/for/construction",
         "/glossary",
         "/risk",
         "shared:components/QuickLauncher.tsx",
         "shared:components/accidents-reports/industry-report-view.tsx",
         "shared:components/app-shell.tsx",
         "shared:components/home-value-hero.tsx",
-        "shared:components/ky-page-content.tsx",
         "shared:components/persona-entry.tsx",
         "shared:components/signage/signage-risk-prediction.tsx",
         "shared:config/flagship-nav.ts",
@@ -3309,25 +3969,28 @@
       ]
     },
     "/safety-diary": {
-      "outgoing": [
-        "/accidents",
-        "/ky",
-        "/pdf"
-      ],
+      "outgoing": [],
       "incoming": [
         "/",
-        "/audits/2026-05-16",
+        "/admin/audits/review-dashboard",
+        "/chatbot",
+        "/court-cases",
         "/features/use-cases",
+        "/for/construction",
+        "/for/manager",
+        "/safety-diary/[id]",
+        "/safety-diary/[id]/print",
+        "/safety-diary/monthly/[ym]",
         "/safety-diary/new",
         "/safety-diary/new/detail",
+        "/site-records",
+        "shared:components/MobileBottomNav.tsx",
+        "shared:components/accidents-reports/industry-report-view.tsx",
         "shared:components/app-shell.tsx",
         "shared:components/footer.tsx",
-        "shared:components/ky-page-content.tsx",
-        "shared:components/safety-diary/diary-detail-client.tsx",
-        "shared:components/safety-diary/diary-form-detail.tsx",
-        "shared:components/safety-diary/diary-form-required.tsx",
-        "shared:components/safety-diary/diary-monthly-client.tsx",
-        "shared:components/safety-diary/diary-print-client.tsx",
+        "shared:components/home-quick-access.tsx",
+        "shared:components/main-feature-next-actions.tsx",
+        "shared:components/meeting/meeting-list-client.tsx",
         "shared:config/flagship-nav.ts",
         "shared:data/faqs/faq-batch-2-management.ts",
         "shared:data/faqs/faq-batch-3-chemical.ts",
@@ -3338,66 +4001,47 @@
       ]
     },
     "/safety-diary/[id]": {
-      "outgoing": [],
-      "incoming": [
-        "shared:components/safety-diary/diary-detail-client.tsx",
-        "shared:components/safety-diary/diary-form-detail.tsx",
-        "shared:components/safety-diary/diary-form-required.tsx",
-        "shared:components/safety-diary/diary-list-client.tsx",
-        "shared:components/safety-diary/diary-print-client.tsx"
-      ]
+      "outgoing": [
+        "/safety-diary"
+      ],
+      "incoming": []
     },
     "/safety-diary/[id]/print": {
+      "outgoing": [
+        "/safety-diary"
+      ],
+      "incoming": []
+    },
+    "/safety-diary/contribute/[token]": {
+      "outgoing": [],
+      "incoming": []
+    },
+    "/safety-diary/list": {
       "outgoing": [],
       "incoming": [
-        "shared:components/safety-diary/diary-detail-client.tsx",
-        "shared:components/safety-diary/diary-form-detail.tsx",
-        "shared:components/safety-diary/diary-form-required.tsx",
-        "shared:components/safety-diary/diary-list-client.tsx",
-        "shared:components/safety-diary/diary-print-client.tsx"
+        "shared:components/meeting/meeting-paper-view.tsx",
+        "shared:config/flagship-nav.ts",
+        "shared:lib/meeting/paper-status.test.ts",
+        "shared:lib/meeting/paper-status.ts"
       ]
     },
     "/safety-diary/monthly/[ym]": {
-      "outgoing": [],
-      "incoming": [
-        "shared:components/safety-diary/diary-detail-client.tsx",
-        "shared:components/safety-diary/diary-form-detail.tsx",
-        "shared:components/safety-diary/diary-form-required.tsx",
-        "shared:components/safety-diary/diary-list-client.tsx",
-        "shared:components/safety-diary/diary-monthly-client.tsx",
-        "shared:components/safety-diary/diary-print-client.tsx"
-      ]
+      "outgoing": [
+        "/safety-diary"
+      ],
+      "incoming": []
     },
     "/safety-diary/new": {
       "outgoing": [
-        "/safety-diary",
-        "/safety-diary/new/detail"
+        "/safety-diary"
       ],
-      "incoming": [
-        "/safety-diary/new/detail",
-        "shared:components/safety-diary/diary-detail-client.tsx",
-        "shared:components/safety-diary/diary-form-detail.tsx",
-        "shared:components/safety-diary/diary-form-required.tsx",
-        "shared:components/safety-diary/diary-list-client.tsx",
-        "shared:components/safety-diary/diary-print-client.tsx",
-        "shared:components/today-safety-dashboard.tsx",
-        "shared:config/flagship-nav.ts"
-      ]
+      "incoming": []
     },
     "/safety-diary/new/detail": {
       "outgoing": [
-        "/safety-diary",
-        "/safety-diary/new"
+        "/safety-diary"
       ],
-      "incoming": [
-        "/safety-diary/new",
-        "shared:components/safety-diary/diary-detail-client.tsx",
-        "shared:components/safety-diary/diary-form-detail.tsx",
-        "shared:components/safety-diary/diary-form-required.tsx",
-        "shared:components/safety-diary/diary-list-client.tsx",
-        "shared:components/safety-diary/diary-print-client.tsx",
-        "shared:config/flagship-nav.ts"
-      ]
+      "incoming": []
     },
     "/safety-signs": {
       "outgoing": [
@@ -3445,7 +4089,18 @@
       "incoming": [
         "/",
         "/safety-signs/category/[category]",
-        "/safety-signs/industry/[industry]"
+        "/safety-signs/industry/[industry]",
+        "shared:lib/cross-search/build.ts",
+        "shared:lib/search-index.ts"
+      ]
+    },
+    "/search": {
+      "outgoing": [
+        "/chatbot",
+        "/law-search"
+      ],
+      "incoming": [
+        "/"
       ]
     },
     "/security": {
@@ -3461,29 +4116,30 @@
     "/signage": {
       "outgoing": [
         "/laws",
-        "/signage/display",
-        "/signage/map"
+        "/signage/map",
+        "/site-records"
       ],
       "incoming": [
         "/",
-        "/audits/2026-05-16",
+        "/admin/audits/review-dashboard",
         "/features/use-cases",
+        "/for/construction",
         "/risk",
         "/safety-signs",
+        "/site-records",
         "shared:components/app-shell.tsx",
+        "shared:components/chatbot-panel.tsx",
         "shared:components/footer.tsx",
-        "shared:components/safety-diary/diary-detail-client.tsx",
-        "shared:components/safety-diary/diary-monthly-client.tsx",
+        "shared:components/home-quick-access.tsx",
+        "shared:components/signage-map/signage-map-client.tsx",
         "shared:config/flagship-nav.ts",
-        "shared:data/features-catalog.ts"
+        "shared:data/features-catalog.ts",
+        "shared:lib/site-records/safety-calendar.ts"
       ]
     },
     "/signage/display": {
       "outgoing": [],
-      "incoming": [
-        "/signage",
-        "shared:config/flagship-nav.ts"
-      ]
+      "incoming": []
     },
     "/signage/map": {
       "outgoing": [],
@@ -3493,53 +4149,201 @@
         "shared:config/flagship-nav.ts"
       ]
     },
-    "/stats": {
-      "outgoing": [],
+    "/site-records": {
+      "outgoing": [
+        "/court-cases/employer-liability",
+        "/health-checkup-scheduler",
+        "/heat-illness-prevention/acclimatization",
+        "/heat-illness-prevention/log",
+        "/heat-illness-prevention/poster",
+        "/ky/paper",
+        "/safety-diary",
+        "/signage",
+        "/site-records/calendar",
+        "/site-records/committee",
+        "/site-records/incident-report",
+        "/site-records/induction",
+        "/site-records/inspection",
+        "/site-records/monthly",
+        "/site-records/near-miss",
+        "/site-records/patrol",
+        "/site-records/procedure",
+        "/site-records/qualifications"
+      ],
       "incoming": [
-        "/accidents-analytics",
-        "shared:components/app-shell.tsx",
-        "shared:components/footer.tsx",
-        "shared:components/home-value-hero.tsx",
-        "shared:config/flagship-nav.ts",
-        "shared:data/faqs/faq-batch-2-management.ts"
+        "/",
+        "/court-cases/employer-liability",
+        "/for/construction",
+        "/for/consultant",
+        "/for/manager",
+        "/for/solo",
+        "/signage",
+        "shared:components/home-quick-access.tsx",
+        "shared:components/signage/signage-header.tsx",
+        "shared:components/signage/signage-site-safety.tsx",
+        "shared:lib/signage/site-safety.test.ts"
       ]
     },
-    "/strategy": {
+    "/site-records/calendar": {
       "outgoing": [],
       "incoming": [
-        "shared:data/faqs/faq-batch-1-law.ts",
-        "shared:data/faqs/faq-batch-2-management.ts",
-        "shared:data/faqs/faq-batch-4-health-education.ts"
+        "/",
+        "/site-records"
+      ]
+    },
+    "/site-records/committee": {
+      "outgoing": [],
+      "incoming": [
+        "/",
+        "/for/manager",
+        "/site-records",
+        "/site-records/monthly",
+        "shared:lib/site-records/daily-actions.ts",
+        "shared:lib/site-records/record-conclusions.ts",
+        "shared:lib/site-records/safety-calendar.ts"
+      ]
+    },
+    "/site-records/incident-report": {
+      "outgoing": [],
+      "incoming": [
+        "/",
+        "/site-records"
+      ]
+    },
+    "/site-records/induction": {
+      "outgoing": [],
+      "incoming": [
+        "/",
+        "/for/construction",
+        "/for/manager",
+        "/site-records",
+        "shared:lib/site-records/safety-calendar.ts"
+      ]
+    },
+    "/site-records/inspection": {
+      "outgoing": [],
+      "incoming": [
+        "/",
+        "/for/construction",
+        "/for/manager",
+        "/for/solo",
+        "/site-records",
+        "shared:lib/site-records/daily-actions.ts",
+        "shared:lib/site-records/safety-calendar.ts"
+      ]
+    },
+    "/site-records/monthly": {
+      "outgoing": [
+        "/site-records/committee"
+      ],
+      "incoming": [
+        "/",
+        "/site-records",
+        "shared:lib/site-records/safety-calendar.ts"
+      ]
+    },
+    "/site-records/near-miss": {
+      "outgoing": [],
+      "incoming": [
+        "/",
+        "/for/construction",
+        "/for/manager",
+        "/for/solo",
+        "/site-records",
+        "shared:lib/site-records/daily-actions.ts",
+        "shared:lib/site-records/safety-calendar.ts"
+      ]
+    },
+    "/site-records/patrol": {
+      "outgoing": [],
+      "incoming": [
+        "/",
+        "/for/construction",
+        "/for/manager",
+        "/site-records",
+        "shared:components/ui/visual-language.test.tsx",
+        "shared:lib/site-records/daily-actions.ts",
+        "shared:lib/site-records/safety-calendar.ts"
+      ]
+    },
+    "/site-records/procedure": {
+      "outgoing": [],
+      "incoming": [
+        "/",
+        "/for/construction",
+        "/for/manager",
+        "/for/solo",
+        "/site-records"
+      ]
+    },
+    "/site-records/qualifications": {
+      "outgoing": [],
+      "incoming": [
+        "/",
+        "/site-records"
+      ]
+    },
+    "/stats": {
+      "outgoing": [
+        "/about/data-sources"
+      ],
+      "incoming": [
+        "/accidents-analytics",
+        "shared:components/home-value-hero.tsx",
+        "shared:data/faqs/faq-batch-2-management.ts"
       ]
     },
     "/strategy/plan-generator": {
       "outgoing": [
         "/circulars",
+        "/guides/annual-safety-plan-generator",
         "/laws"
       ],
       "incoming": [
         "/",
+        "/accidents-reports",
+        "/admin/audits/review-dashboard",
+        "/chatbot",
         "/features/quick-tour",
         "/features/use-cases",
+        "/for/construction",
+        "/for/consultant",
+        "/for/manager",
         "/health-checkup-scheduler",
         "/heat-illness-prevention",
         "/industries",
         "/mental-health-management",
         "/strategy/plan-generator/preview/[id]",
         "/treatment-work-balance",
+        "shared:components/CommandPalette.tsx",
+        "shared:components/MobileBottomNav.tsx",
+        "shared:components/accidents-reports/industry-report-view.tsx",
         "shared:components/app-shell.tsx",
-        "shared:components/cross-tool-links.tsx",
+        "shared:components/copilot/CopilotStepNav.tsx",
+        "shared:components/footer.tsx",
+        "shared:components/main-feature-next-actions.tsx",
+        "shared:components/new-home-hero.tsx",
         "shared:components/persona-entry.tsx",
         "shared:config/flagship-nav.ts",
-        "shared:data/features-catalog.ts"
+        "shared:data/faqs/faq-batch-1-law.ts",
+        "shared:data/faqs/faq-batch-2-management.ts",
+        "shared:data/faqs/faq-batch-4-health-education.ts",
+        "shared:data/features-catalog.ts",
+        "shared:data/seo/keyword-landing.ts",
+        "shared:lib/site-records/safety-calendar.ts"
       ]
     },
     "/strategy/plan-generator/preview/[id]": {
       "outgoing": [
+        "/accidents-reports/[industry]",
+        "/accidents-reports/compare",
         "/strategy/plan-generator"
       ],
       "incoming": [
-        "shared:components/safety-plan/plan-generator-form.tsx"
+        "shared:components/chatbot-panel.tsx",
+        "shared:components/safety-plan/plan-generator-form.tsx",
+        "shared:lib/copilot/copilot.test.ts",
+        "shared:lib/safety-plan/history.test.ts"
       ]
     },
     "/subsidies": {
@@ -3553,7 +4357,8 @@
         "/subsidies/calculator",
         "shared:components/app-shell.tsx",
         "shared:data/faqs/faq-batch-1-law.ts",
-        "shared:data/faqs/faq-batch-2-management.ts"
+        "shared:data/faqs/faq-batch-2-management.ts",
+        "shared:lib/site-pages-search-source.ts"
       ]
     },
     "/subsidies/calculator": {
@@ -3564,7 +4369,8 @@
       "incoming": [
         "/",
         "/features/use-cases",
-        "shared:data/features-catalog.ts"
+        "shared:data/features-catalog.ts",
+        "shared:lib/site-pages-search-source.ts"
       ]
     },
     "/terms": {
@@ -3572,7 +4378,6 @@
       "incoming": [
         "/",
         "/about",
-        "/audits/2026-05-16",
         "/auth/signin",
         "/insurance",
         "shared:components/footer.tsx"
@@ -3606,7 +4411,9 @@
       "incoming": [
         "/",
         "/treatment-work-balance",
-        "/treatment-work-balance/plan-builder"
+        "/treatment-work-balance/plan-builder",
+        "shared:lib/search-index.test.ts",
+        "shared:lib/search-index.ts"
       ]
     },
     "/treatment-work-balance/plan-builder": {
@@ -3622,6 +4429,22 @@
         "/treatment-work-balance/illness-guide/[illness]"
       ]
     },
+    "/whats-new": {
+      "outgoing": [
+        "/accident-news",
+        "/accidents-reports",
+        "/laws",
+        "/notifications"
+      ],
+      "incoming": [
+        "/",
+        "/accident-news",
+        "/for/manager",
+        "shared:components/app-shell.tsx",
+        "shared:components/home-quick-access.tsx",
+        "shared:lib/rss.test.ts"
+      ]
+    },
     "/work-environment-measurement": {
       "outgoing": [
         "/work-environment-measurement/management-class-judge",
@@ -3631,6 +4454,7 @@
         "/",
         "/work-environment-measurement/management-class-judge",
         "/work-environment-measurement/target-finder",
+        "shared:components/app-shell.tsx",
         "shared:components/cross-tool-links.tsx",
         "shared:config/flagship-nav.ts"
       ]
@@ -3657,5 +4481,5 @@
       ]
     }
   },
-  "generatedAt": "2026-05-17T04:35:55.151Z"
+  "generatedAt": "2026-07-03T20:22:25.311Z"
 }

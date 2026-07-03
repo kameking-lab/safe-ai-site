@@ -30,6 +30,21 @@ function toArray(v: string | string[] | undefined): string[] {
   return Array.isArray(v) ? v : [v];
 }
 
+function allRules(): Rule[] {
+  const { rules } = robots();
+  return (Array.isArray(rules) ? rules : rules ? [rules] : []) as Rule[];
+}
+
+/** ルールが「サイト全体許可」（allow に "/" を含む）か。 */
+function isAllowAll(r: Rule): boolean {
+  return toArray(r.allow).includes("/");
+}
+
+/** ルールが「サイト全体遮断」（disallow に "/" を含む）か。 */
+function isDisallowAll(r: Rule): boolean {
+  return toArray(r.disallow).includes("/");
+}
+
 describe("robots.txt（決裁A SNSリンクプレビュー復活）", () => {
   it("facebookexternalhit は Allow:/ 扱いになっている", () => {
     const rule = ruleFor("facebookexternalhit");
@@ -108,5 +123,56 @@ describe("robots.txt（AI学習専用UAの遮断拡張）", () => {
     }
     const training = ruleFor("ClaudeBot");
     expect(toArray(training?.disallow), "ClaudeBot は disallow:/").toContain("/");
+  });
+});
+
+/**
+ * UAバケットの排他性・非公開パス保護ガード（コード変更0の回帰ガード）:
+ *
+ * robots.ts は 3つのハンド保守 UA リスト（AI_TRAINING_CRAWLERS＝遮断 /
+ * AI_SEARCH_CITATION_BOTS＝許可 / SOCIAL_LINK_PREVIEW_BOTS＝許可）を、その後の
+ * オーナー決裁（決裁A・AI学習UA拡張…）ごとに継ぎ足していく構造で、**同一UAが
+ * 遮断リストと許可リストの両方に紛れ込む**と、そのUAに対して allow:/ と disallow:/ の
+ * 2ルールが同時生成され「遮断のはずが許可に無言反転」または「AI検索引用系（発見性）を
+ * 誤って遮断」する事故を招く。既存テストは個別UAの意図だけを固定し、この**バケット間の
+ * 二重定義（排他性違反）は未ガード**だった。加えて、許可リストへボットを足す際に
+ * 非公開パス（COMMON_DISALLOW）の付与を忘れると /admin・/api 等が当該ボットへ露出する。
+ * いずれも robots() 出力から機械検知する（現状は全緑＝純ガード・水増し無し）。
+ */
+describe("robots.txt（UAバケット排他性・非公開パス保護ガード）", () => {
+  it("同一UAが複数ルールに跨らない＝遮断と許可の二重定義（意図の無言反転）を防ぐ", () => {
+    const uas = allRules().flatMap((r) => toArray(r.userAgent));
+    // 走査サニティ: UA:* ＋ 許可/遮断ボット群で十分な母数がある
+    expect(uas.length, "robots ルールのUA総数が十分").toBeGreaterThan(20);
+    const seen = new Map<string, number>();
+    for (const ua of uas) seen.set(ua, (seen.get(ua) ?? 0) + 1);
+    const duplicates = [...seen.entries()].filter(([, n]) => n > 1).map(([ua]) => ua);
+    // 重複UAは「同一UAが2バケットに存在」または「同一リスト内の重複」を意味する
+    expect(duplicates, `重複UA（バケット二重定義）: ${duplicates.join(", ")}`).toEqual([]);
+  });
+
+  it("遮断UA（disallow:/）は Allow:/ を同時に持たない＝許可への無言反転を防ぐ", () => {
+    for (const r of allRules().filter(isDisallowAll)) {
+      const ua = toArray(r.userAgent).join(",");
+      expect(isAllowAll(r), `${ua} は遮断ルールなのに Allow:/ を持つ`).toBe(false);
+    }
+  });
+
+  it("許可扱いの全ボット（allow:/）は非公開パス /admin・/api・/auth を必ず除外し続ける", () => {
+    const allowRules = allRules().filter(isAllowAll);
+    // 走査サニティ: 少なくとも UA:* ＋ 検索/SNS 許可ボットが存在
+    expect(allowRules.length, "許可ルールが複数存在").toBeGreaterThan(3);
+    for (const r of allowRules) {
+      const ua = toArray(r.userAgent).join(",");
+      const disallow = toArray(r.disallow);
+      for (const priv of ["/admin/", "/api/", "/auth/"]) {
+        expect(disallow, `${ua} は非公開パス ${priv} を除外し続ける`).toContain(priv);
+      }
+    }
+  });
+
+  it("遮断リストは十分な母数を持つ（ガードが空振りでない走査サニティ）", () => {
+    const blocked = allRules().filter(isDisallowAll);
+    expect(blocked.length, "AI学習クローラ等の遮断ルールが多数存在").toBeGreaterThan(10);
   });
 });

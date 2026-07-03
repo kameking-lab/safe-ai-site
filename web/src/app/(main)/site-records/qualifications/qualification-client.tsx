@@ -21,6 +21,7 @@ import {
 } from "@/lib/site-records/qualification-store";
 import { qualificationsConclusion } from "@/lib/site-records/record-conclusions";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { SAFETY_TONE, type SafetyTone } from "@/lib/design/safety-tone";
 
 export function QualificationClient() {
   const [recId, setRecId] = useState("");
@@ -31,6 +32,7 @@ export function QualificationClient() {
   const [note, setNote] = useState("");
   const [list, setList] = useState<WorkerQualSummary[]>([]);
   const [savedNote, setSavedNote] = useState("");
+  const [savedTone, setSavedTone] = useState<SafetyTone>("safe");
   const [presetPick, setPresetPick] = useState("");
   const [groups, setGroups] = useState<QualGroup[]>([]);
   const [qualQuery, setQualQuery] = useState("");
@@ -75,11 +77,13 @@ export function QualificationClient() {
 
   function handleSave() {
     if (!workerName.trim()) {
+      setSavedTone("danger");
       setSavedNote("氏名を入力してください。");
       return;
     }
     setList(saveWorkerQual(build()));
     refreshGroups();
+    setSavedTone("safe");
     setSavedNote("この端末に保存しました。");
   }
   function handleNew() {
@@ -98,6 +102,7 @@ export function QualificationClient() {
     if (typeof window === "undefined") return;
     const all = getAllWorkerQualFull();
     if (all.length === 0) {
+      setSavedTone("danger");
       setSavedNote("CSV出力する保存済みデータがありません。先に保存してください。");
       return;
     }
@@ -121,6 +126,7 @@ export function QualificationClient() {
     setTrade(r.trade);
     setQuals(r.quals);
     setNote(r.note);
+    setSavedTone("safe");
     setSavedNote("保存済みのデータを開きました。");
     if (typeof window !== "undefined") window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -191,7 +197,7 @@ export function QualificationClient() {
           <button type="button" onClick={handlePrint} className="inline-flex items-center gap-1 rounded-lg bg-slate-700 min-h-[44px] px-3 py-2 text-xs font-bold text-white hover:bg-slate-800"><Printer className="h-3.5 w-3.5" aria-hidden="true" /> 印刷</button>
           <button type="button" onClick={handleRosterCsv} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 min-h-[44px] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"><Download className="h-3.5 w-3.5" aria-hidden="true" /> 名簿CSV（全員）</button>
           <button type="button" onClick={handleNew} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 min-h-[44px] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100"><FilePlus2 className="h-3.5 w-3.5" aria-hidden="true" /> 新規</button>
-          {savedNote && <span className="self-center text-xs font-semibold text-emerald-700">{savedNote}</span>}
+          {savedNote && <span role="status" className={`self-center text-xs font-semibold ${SAFETY_TONE[savedTone].text}`}>{savedNote}</span>}
         </div>
       </section>
 

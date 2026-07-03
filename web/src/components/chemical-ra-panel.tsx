@@ -758,7 +758,11 @@ export function ChemicalRaPanel() {
       {loading && (
         <div className="space-y-3">
           {retryStatus && (
-            <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <div
+              role="status"
+              aria-live="polite"
+              className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800"
+            >
               <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
               {retryStatus}
             </div>
@@ -771,7 +775,7 @@ export function ChemicalRaPanel() {
 
       {/* エラー */}
       {error && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
+        <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
           <div className="flex items-start gap-2">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <div className="flex-1">

@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-02T22:03:24.522Z",
+  "generatedAt": "2026-07-03T22:01:35.604Z",
   "counts": {
-    "approved": 24,
+    "approved": 25,
     "rejected": 27,
-    "total": 51,
-    "approvalRate": 0.471
+    "total": 52,
+    "approvalRate": 0.481
   },
   "byDay": [
     {
@@ -209,15 +209,22 @@
       "rejected": 0,
       "total": 1,
       "approvalRate": 1
+    },
+    {
+      "date": "2026-07-04",
+      "approved": 1,
+      "rejected": 0,
+      "total": 1,
+      "approvalRate": 1
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 21,
+      "approved": 22,
       "rejected": 2,
-      "total": 23,
-      "approvalRate": 0.913
+      "total": 24,
+      "approvalRate": 0.917
     },
     {
       "publisher": "日本放送協会",
@@ -324,7 +331,7 @@
         0,
         0,
         1,
-        3,
+        4,
         20
       ],
       "rejected": [
@@ -355,7 +362,7 @@
       ],
       "approved": [
         3,
-        14,
+        15,
         7,
         0,
         0,
@@ -392,7 +399,7 @@
         "90-100"
       ],
       "approved": [
-        19,
+        20,
         5,
         0,
         0,
@@ -431,7 +438,7 @@
       ],
       "approved": [
         0,
-        23,
+        24,
         1,
         0,
         0,
@@ -511,6 +518,19 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "労働基準監督官採用試験広報HP",
+        "aiSummary": "厚生労働省が労働基準監督官採用試験の広報サイトを開設。",
+        "score": {
+          "relevance": 85,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-03T22:01:35.487Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
         "headline": "第36回特定石綿被害建設業務労働者等認定審査会専門委員会　開催案内",
         "aiSummary": "厚生労働省が石綿被害建設業務労働者の認定審査会専門委員会を開催する。",
         "score": {
@@ -584,19 +604,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-06-16T22:51:26.825Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "令和８年度「安全衛生に係る優良事業場、団体又は 功労者に対する厚生労働大臣表彰」の受賞者を決定しました",
-        "aiSummary": "厚生労働省が安全衛生功労者・優良事業場・団体への大臣表彰受賞者を決定。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 20,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-06-16T22:51:21.426Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"

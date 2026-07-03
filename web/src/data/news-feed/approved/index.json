@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-02T22:03:24.410Z",
+  "updatedAt": "2026-07-03T22:01:35.495Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -69,6 +69,29 @@
         "misinformationRisk": 5,
         "duplication": 10,
         "judgedAt": "2026-06-23T22:09:09.221Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "f674a1a52f6a4be6",
+      "headline": "労働基準監督官採用試験広報HP",
+      "aiSummary": "厚生労働省が労働基準監督官採用試験の広報サイトを開設。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/kouseiroudoushou/saiyou/kantokukan.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-07-03T10:00:00+09:00",
+        "fetchedAt": "2026-07-03T22:01:28.920Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 85,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-03T22:01:35.487Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
