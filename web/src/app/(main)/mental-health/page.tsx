@@ -14,6 +14,7 @@ import {
 import { PageHeader } from "@/components/page-header";
 import { ogImageUrl } from "@/lib/og-url";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 
 import { PageJsonLd } from "@/components/page-json-ld";
 const _title = "メンタルヘルス・ハラスメント・VDT作業｜労働安全の見えない半分";
@@ -103,6 +104,13 @@ const CASEHARA: InfoCard[] = [
   },
 ];
 
+const HUB_TOPICS = [
+  { id: "stress-check", label: "ストレスチェック" },
+  { id: "four-cares", label: "4つのケア" },
+  { id: "casehara", label: "カスハラ対策" },
+  { id: "vdt", label: "VDT作業" },
+];
+
 const VDT: InfoCard[] = [
   {
     title: "作業時間",
@@ -133,6 +141,16 @@ export default function MentalHealthPage() {
         description="ストレスチェック・4つのケア・カスハラ対策・情報機器作業ガイドライン"
         icon={Heart}
         iconColor="red"
+      />
+
+      <ConclusionCard
+        tone="info"
+        value={HUB_TOPICS.length}
+        unit="分野"
+        title="要点まとめ"
+        description="ストレスチェック・4つのケア・カスハラ対策・VDT作業の法令要点を掲載。まずはストレスチェックの実施手順から確認できます。"
+        action={{ href: "/mental-health-management/stress-check", label: "ストレスチェックを見る" }}
+        className="mt-6"
       />
 
       <section className="mt-6">
