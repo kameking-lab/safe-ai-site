@@ -881,7 +881,7 @@ export default function SignagePage() {
               href={zoomedTrend.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-6 inline-block rounded-lg border border-emerald-500 bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-600 sm:text-base"
+              className="mt-6 inline-flex min-h-[44px] items-center rounded-lg border border-emerald-500 bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-600 sm:text-base"
             >
               記事を開く →
             </a>

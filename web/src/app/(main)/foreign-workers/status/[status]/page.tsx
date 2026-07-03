@@ -241,7 +241,7 @@ export default async function StatusDetailPage(props: StatusPageProps) {
           </Link>
           <Link
             href="/foreign-workers/safety-training"
-            className="rounded-lg bg-sky-700 px-4 py-2 font-semibold text-white hover:bg-sky-800"
+            className="flex min-h-[44px] items-center rounded-lg bg-sky-700 px-4 py-2 font-semibold text-white hover:bg-sky-800"
           >
             多言語安全教育教材を見る
           </Link>

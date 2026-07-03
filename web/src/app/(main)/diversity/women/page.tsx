@@ -300,7 +300,7 @@ export default function WomenPage() {
                         <button
                           type="button"
                           onClick={() => toggleLaw(key)}
-                          className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-slate-50"
+                          className="flex w-full min-h-[44px] items-start gap-3 px-4 py-3 text-left hover:bg-slate-50"
                           aria-expanded={open}
                         >
                           <span className={`mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold ${c.badge}`}>

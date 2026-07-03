@@ -17,16 +17,19 @@
   this at the tail of every iteration (loop-prompt-ops.txt step 5.7). The per-night guard makes every
   call after the day's first a fast no-op, so a ~195s ops cadence still measures exactly once/day.
 
-  Idempotency = the day's daily file exists. The guard is the LOAD-BEARING budget control: the daily
-  marker is written on BOTH a successful measure AND a definitive eval failure (a failure where the
-  eval process actually started), so a transient prod blip cannot make the ops loop re-hammer the
-  prod Gemini budget every 195s for the rest of the day. A pure setup failure (web/ not installed)
-  writes NO marker and simply retries next call, since no requests were spent.
+  Idempotency = the day has a TERMINAL daily record. The guard is the LOAD-BEARING budget control: a
+  terminal marker is written on a successful measure, on a parseable-but-incomplete measure, AND on a
+  no-report failure once its bounded retries (-MaxEvalAttempts, default 3) are exhausted - so a transient
+  prod blip cannot make the ops loop re-hammer the prod Gemini budget every 195s for the rest of the day.
+  A no-report failure with retries REMAINING writes a NON-terminal marker so the next ops tick tries again
+  (O18-a's sibling fix: a single 02:xx cold-start/deploy/DNS blip no longer costs the whole day's data).
+  A pure setup failure (web/ not installed) writes NO marker and simply retries next call, no requests spent.
 
   Outputs (all gitignored, main tree only - so this never dirties the ops clean-tree contract nor
   races the ops runner's git; a committed snapshot for /about is O18(b)):
     .loop-eval/genquality/<yyyy-MM-dd>.json  per-night full record (existence = "already ran today")
-    .loop-eval/genquality/latest.json        overwritten each success (most-recent, for /about later)
+    .loop-eval/genquality/latest.json        the current-quality pointer for /about: advanced ONLY on a
+                                             COMPLETE measurement (an incomplete/blip run does not clobber it)
     .loop-eval/genquality/history.jsonl      one compact line per run (trend history)
 
   This file is intentionally PURE ASCII so Windows PowerShell 5.x parses it as BOM-less UTF-8
@@ -50,6 +53,15 @@
 .PARAMETER RepoPath
   Main-tree repo root that owns web/ (default = this script's dir).
 
+.PARAMETER MaxEvalAttempts
+  How many no-report HARD failures are tolerated per calendar day before the day is burned (default 3).
+  A no-report failure (node/vitest wrote nothing parseable - typically a prod cold start, a deploy in
+  flight, or a DNS blip at the one 02:xx attempt) is NOT a spent measurement, so burning the whole day on
+  the first one is the silent data loss this lane exists to kill. Each ops tick retries until a parseable
+  report lands OR attempts reach this cap; only then is a terminal marker written. A parseable report
+  (success OR incomplete) terminates the day immediately regardless. Bounds worst-case wasted prod Gemini
+  budget on a persistently-broken day at MaxEvalAttempts x 23 questions.
+
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-eval-nightly.ps1
 
@@ -62,6 +74,7 @@ param(
   [double]$Target = 0.80,
   [string]$OutDir = "",
   [string]$RepoPath = "",
+  [int]$MaxEvalAttempts = 3,
   [switch]$WhatIf,
   [switch]$SelfTest
 )
@@ -83,10 +96,26 @@ function Get-NightlyDailyPath {
   return (Join-Path $Dir ($Stamp + ".json"))
 }
 
-# The budget guard: has today's measurement already run? Existence of the daily file is the whole test.
+# The budget guard: is the day DONE? A daily marker exists AND it is terminal. Terminal means one of:
+#   - a real measurement (ok=true), complete or incomplete - the night's 23Q actually ran; or
+#   - a no-report failure (ok=false) whose bounded retries are exhausted (attempts >= MaxAttempts).
+# A no-report failure with retries remaining (attempts < MaxAttempts) is NON-terminal => returns $false so
+# the next ops tick retries: a single transient blip must not burn the whole day (O18-a's sibling fix).
+# Legacy failure records (pre-retry, no 'attempts' field) count as 0 attempts => retryable, recovering a
+# day the old logic wrongly burned. An unreadable or unknown-shape marker (no 'ok' field) is treated as
+# terminal - conservative: never re-hammer prod off a corrupt file.
 function Test-AlreadyRanTonight {
-  param([string]$Dir, [string]$Stamp)
-  return (Test-Path -LiteralPath (Get-NightlyDailyPath -Dir $Dir -Stamp $Stamp))
+  param([string]$Dir, [string]$Stamp, [int]$MaxAttempts = 3)
+  $path = Get-NightlyDailyPath -Dir $Dir -Stamp $Stamp
+  if (-not (Test-Path -LiteralPath $path)) { return $false }
+  $rec = $null
+  try { $rec = Get-Content -Raw -Encoding UTF8 -LiteralPath $path | ConvertFrom-Json } catch { $rec = $null }
+  if ($null -eq $rec) { return $true }                                   # corrupt marker: do not re-hammer
+  if ($null -eq $rec.PSObject.Properties['ok']) { return $true }         # unknown shape: conservative
+  if ($rec.ok) { return $true }                                          # measured: day done
+  $attempts = 0
+  if ($null -ne $rec.attempts) { $attempts = [int]$rec.attempts }
+  return ($attempts -ge $MaxAttempts)                                    # failure: done only once exhausted
 }
 
 # Regression classification. Kept separate so O18(b)'s dashboard banner reuses the SAME predicate the
@@ -94,6 +123,18 @@ function Test-AlreadyRanTonight {
 function Test-EvalBelowTarget {
   param([double]$StrictAccuracy, [double]$Target)
   return ($StrictAccuracy -lt $Target)
+}
+
+# Should this record advance latest.json (the "current quality" pointer O18(b)'s /about reads)? ONLY a
+# COMPLETE measurement (ok=true AND not incomplete). An INCOMPLETE run's strictAccuracy is unreliable
+# (questions that never reached the server score as wrong), so writing it to latest.json would clobber the
+# last known-good number with an availability-blip low - and /about naively reading latest.strictAccuracy
+# would show a FALSE public-facing quality regression the site never had. The daily marker (the day guard)
+# and history.jsonl (the trend) STILL record the incomplete run; only this "current quality" pointer must
+# not regress on a transient blip. A failure record (ok=false) never advances latest either. Pure (no IO).
+function Test-ShouldAdvanceLatest {
+  param([object]$Record)
+  return ($null -ne $Record -and [bool]$Record.ok -and -not [bool]$Record.incomplete)
 }
 
 # Count questions whose live probe did NOT return HTTP 200 (0 = fetch failure/timeout, 5xx = server
@@ -143,16 +184,21 @@ function ConvertTo-NightlyRecord {
   }
 }
 
-# A definitive-failure record (the eval process started but did not yield a usable report). Written to
-# the daily marker so the day's budget is treated as spent (no 195s re-hammer). Distinct shape (ok=false).
+# A no-report failure record (the eval process started but did not yield a usable report). Distinct shape
+# (ok=false). Carries the running attempt count so the budget guard can distinguish a still-retryable blip
+# (attempts < MaxAttempts => NON-terminal, next tick retries) from an exhausted day (terminal => day spent,
+# no 195s re-hammer). 'terminal' is stamped for self-documentation; Test-AlreadyRanTonight re-derives it.
 function New-FailureRecord {
-  param([string]$Stamp, [string]$RanAtIso, [int]$ExitCode, [string]$ErrorText)
+  param([string]$Stamp, [string]$RanAtIso, [int]$ExitCode, [string]$ErrorText, [int]$Attempts = 1, [int]$MaxAttempts = 3)
   return [ordered]@{
-    date     = $Stamp
-    ranAt    = $RanAtIso
-    ok       = $false
-    exitCode = $ExitCode
-    error    = $ErrorText
+    date        = $Stamp
+    ranAt       = $RanAtIso
+    ok          = $false
+    exitCode    = $ExitCode
+    error       = $ErrorText
+    attempts    = $Attempts
+    maxAttempts = $MaxAttempts
+    terminal    = ($Attempts -ge $MaxAttempts)
   }
 }
 
@@ -170,9 +216,36 @@ function Write-JsonNoBom {
   param([string]$Path, [string]$Text)
   [System.IO.File]::WriteAllText($Path, $Text, (New-Object System.Text.UTF8Encoding($false)))
 }
+# Does the file already start with a UTF-8 BOM (EF BB BF)? A legacy history.jsonl written by the old
+# `Set-Content -Encoding UTF8` path carries one at byte 0 forever - and AppendAllText (below) can add a
+# clean line but CANNOT strip a BOM that is already there, so line 1 stays a JSON.parse SyntaxError for
+# any O18(b) consumer. Returns $false on any IO error (never throws - append must stay best-effort).
+function Test-FileStartsWithBom {
+  param([string]$Path)
+  try {
+    $fs = [System.IO.File]::OpenRead($Path)
+    try {
+      if ($fs.Length -lt 3) { return $false }
+      $b = New-Object byte[] 3
+      [void]$fs.Read($b, 0, 3)
+      return ($b[0] -eq 0xEF -and $b[1] -eq 0xBB -and $b[2] -eq 0xBF)
+    } finally { $fs.Dispose() }
+  } catch { return $false }
+}
+# Append one line WITHOUT a UTF-8 BOM, and SELF-HEAL a pre-existing BOM. Plain AppendAllText never adds a
+# BOM but also never removes one already at byte 0 (a legacy/externally-touched file stays broken). So if
+# the target already starts with a BOM, rewrite the whole file BOM-free (ReadAllText auto-strips the BOM
+# on read) with the new line appended; otherwise plain append. Converges any consumer (O18(b) /about
+# trend reader) to Node JSON.parse-safe bytes without needing to touch the gitignored file by hand.
 function Add-JsonLineNoBom {
   param([string]$Path, [string]$Line)
-  [System.IO.File]::AppendAllText($Path, ($Line + "`n"), (New-Object System.Text.UTF8Encoding($false)))
+  $enc = New-Object System.Text.UTF8Encoding($false)
+  if ((Test-Path -LiteralPath $Path) -and (Test-FileStartsWithBom -Path $Path)) {
+    $existing = [System.IO.File]::ReadAllText($Path)
+    [System.IO.File]::WriteAllText($Path, ($existing + $Line + "`n"), $enc)
+  } else {
+    [System.IO.File]::AppendAllText($Path, ($Line + "`n"), $enc)
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -339,10 +412,28 @@ if ($SelfTest) {
     $stamp = "2026-07-04"
     $daily = Get-NightlyDailyPath -Dir $tmp -Stamp $stamp
     Assert-E "daily path is <dir>\<stamp>.json" ($daily -eq (Join-Path $tmp "2026-07-04.json"))
-    Assert-E "before write: not already ran" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp))
+    Assert-E "before write: not already ran" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3))
     Set-Content -LiteralPath $daily -Value "{}" -Encoding UTF8
-    Assert-E "after write: already ran (budget guard trips)" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp)
-    Assert-E "a DIFFERENT day is not yet run" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp "2026-07-05"))
+    Assert-E "unknown-shape marker (no ok field): treated as terminal (conservative, no re-hammer)" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3)
+    Assert-E "a DIFFERENT day is not yet run" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp "2026-07-05" -MaxAttempts 3))
+
+    # B2) Retry-aware guard: a measurement (ok=true) is terminal; a no-report failure is terminal ONLY once
+    # attempts reach MaxAttempts. This is the O18-a sibling fix - a single transient blip must not burn the day.
+    $okRec = ConvertTo-Json -Depth 5 -InputObject ([ordered]@{ date = $stamp; ok = $true })
+    Write-JsonNoBom -Path $daily -Text $okRec
+    Assert-E "ok=true record: day terminal" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3)
+
+    $legacyFail = ConvertTo-Json -Depth 5 -InputObject ([ordered]@{ date = $stamp; ok = $false; exitCode = 1; error = "x" })
+    Write-JsonNoBom -Path $daily -Text $legacyFail
+    Assert-E "legacy failure (no attempts field) => 0 attempts => RETRYABLE (recovers a wrongly-burned day)" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3))
+
+    $fail1 = ConvertTo-Json -Depth 5 -InputObject (New-FailureRecord -Stamp $stamp -RanAtIso "t" -ExitCode 1 -ErrorText "x" -Attempts 1 -MaxAttempts 3)
+    Write-JsonNoBom -Path $daily -Text $fail1
+    Assert-E "failure attempt 1/3: NON-terminal (retry allowed)" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3))
+
+    $fail3 = ConvertTo-Json -Depth 5 -InputObject (New-FailureRecord -Stamp $stamp -RanAtIso "t" -ExitCode 1 -ErrorText "x" -Attempts 3 -MaxAttempts 3)
+    Write-JsonNoBom -Path $daily -Text $fail3
+    Assert-E "failure attempt 3/3: TERMINAL (retries exhausted, day burned)" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3)
   } finally {
     Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
   }
@@ -377,10 +468,14 @@ if ($SelfTest) {
   Assert-E "history line round-trips strictAccuracy" ([math]::Abs([double]$round.strictAccuracy - 0.9047619047619048) -lt 1e-9)
   Assert-E "history line round-trips date" ($round.date -eq "2026-07-04")
 
-  # F) Failure record marks the day spent (ok=false) so the budget guard still trips.
-  $fail = New-FailureRecord -Stamp "2026-07-04" -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 1 -ErrorText "harness failed"
+  # F) Failure record: ok=false, carries the attempt count, and stamps terminal only when exhausted.
+  $fail = New-FailureRecord -Stamp "2026-07-04" -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 1 -ErrorText "harness failed" -Attempts 1 -MaxAttempts 3
   Assert-E "failure record ok=false" (-not $fail.ok)
   Assert-E "failure record carries exit code" ($fail.exitCode -eq 1)
+  Assert-E "failure record carries attempts" ($fail.attempts -eq 1)
+  Assert-E "failure record attempt 1/3 is NOT terminal" (-not $fail.terminal)
+  $failLast = New-FailureRecord -Stamp "2026-07-04" -RanAtIso "2026-07-04T03:05:00+09:00" -ExitCode 1 -ErrorText "harness failed" -Attempts 3 -MaxAttempts 3
+  Assert-E "failure record attempt 3/3 IS terminal" ([bool]$failLast.terminal)
 
   # G) Written JSON is BOM-free so a JS/Node consumer (O18(b) /about) can JSON.parse it. WinPS 5.1
   # Set-Content -Encoding UTF8 would prepend a BOM (EF BB BF) that JSON.parse rejects; verify the
@@ -395,6 +490,37 @@ if ($SelfTest) {
     Add-JsonLineNoBom -Path $tmp2 -Line (Format-HistoryLine -Record $rec)
   } finally {
     Remove-Item -LiteralPath $tmp2 -Force -ErrorAction SilentlyContinue
+  }
+
+  # G2) history.jsonl self-heal: a legacy file that ALREADY starts with a BOM (old Set-Content -Encoding
+  # UTF8) must lose the BOM the next time we append, so line 1 stops being a JSON.parse SyntaxError. Seed a
+  # BOM+line file, append via Add-JsonLineNoBom, and assert the BOM is gone AND both lines survive in order.
+  $tmp3 = Join-Path ([System.IO.Path]::GetTempPath()) ("eval-bomheal-" + [guid]::NewGuid().ToString("N") + ".jsonl")
+  try {
+    $bom = [byte[]]@(0xEF, 0xBB, 0xBF)
+    $seed = [System.Text.Encoding]::UTF8.GetBytes('{"date":"2026-07-04","ok":false}' + "`n")
+    [System.IO.File]::WriteAllBytes($tmp3, ($bom + $seed))
+    Assert-E "G2: seeded legacy file starts with a BOM" (Test-FileStartsWithBom -Path $tmp3)
+    Add-JsonLineNoBom -Path $tmp3 -Line '{"date":"2026-07-04","ok":true}'
+    $healed = [System.IO.File]::ReadAllBytes($tmp3)
+    $stillBom = ($healed.Length -ge 3 -and $healed[0] -eq 0xEF -and $healed[1] -eq 0xBB -and $healed[2] -eq 0xBF)
+    Assert-E "G2: append self-heals the pre-existing BOM" (-not $stillBom)
+    Assert-E "G2: healed file first char is '{'" ([char]$healed[0] -eq '{')
+    $lines = [System.IO.File]::ReadAllText($tmp3).TrimEnd("`n").Split("`n")
+    Assert-E "G2: both lines survive in order (seed then appended)" (($lines.Count -eq 2) -and ($lines[0] -eq '{"date":"2026-07-04","ok":false}') -and ($lines[1] -eq '{"date":"2026-07-04","ok":true}'))
+    # A clean (no-BOM) file must still plain-append without introducing a BOM.
+    Add-JsonLineNoBom -Path $tmp3 -Line '{"date":"2026-07-04","ok":true,"n":3}'
+    $after = [System.IO.File]::ReadAllBytes($tmp3)
+    Assert-E "G2: clean file stays BOM-free after append" (-not ($after.Length -ge 3 -and $after[0] -eq 0xEF -and $after[1] -eq 0xBB -and $after[2] -eq 0xBF))
+    # Non-existent target: Test-FileStartsWithBom is safe and append creates a BOM-free file.
+    $tmp4 = Join-Path ([System.IO.Path]::GetTempPath()) ("eval-bomnew-" + [guid]::NewGuid().ToString("N") + ".jsonl")
+    Assert-E "G2: missing file reports no BOM (no throw)" (-not (Test-FileStartsWithBom -Path $tmp4))
+    Add-JsonLineNoBom -Path $tmp4 -Line '{"n":1}'
+    $created = [System.IO.File]::ReadAllBytes($tmp4)
+    Assert-E "G2: newly created file has no BOM" (-not ($created.Length -ge 3 -and $created[0] -eq 0xEF -and $created[1] -eq 0xBB -and $created[2] -eq 0xBF))
+    Remove-Item -LiteralPath $tmp4 -Force -ErrorAction SilentlyContinue
+  } finally {
+    Remove-Item -LiteralPath $tmp3 -Force -ErrorAction SilentlyContinue
   }
 
   # H) O18(b) eval-quality banner: strings loader, banner body, and the idempotent region reconciler.
@@ -495,6 +621,15 @@ if ($SelfTest) {
   Assert-E "I5: notice body carries the failure count and date" (($biLines[2] -match "3 of 23") -and ($biLines[2] -match "2026-07-04"))
   Assert-E "I5: a clean at/above-target record still yields NO banner" ((Get-EvalBannerLines -Strings $Si -Record $rec).Count -eq 0)
   Assert-E "I5: a genuine complete below-target record still yields the 4-line quality warning" ((Get-EvalBannerLines -Strings $Si -Record $below).Count -eq 4)
+  # I6) latest.json advance gate: ONLY a complete measurement advances the current-quality pointer /about
+  # reads. An incomplete run (non-zero exit / HTTP failure) must NOT clobber latest.json with its
+  # unreliable strictAccuracy - else /about would show a false public-facing regression from a blip.
+  Assert-E "I6: a clean at/above-target record advances latest.json" (Test-ShouldAdvanceLatest -Record $rec)
+  Assert-E "I6: a clean below-target (complete) record still advances latest.json (genuine number)" (Test-ShouldAdvanceLatest -Record $below)
+  Assert-E "I6: an INCOMPLETE run (exit!=0) does NOT advance latest.json" (-not (Test-ShouldAdvanceLatest -Record $recIncompleteExit))
+  Assert-E "I6: an INCOMPLETE run (httpFailures>0) does NOT advance latest.json" (-not (Test-ShouldAdvanceLatest -Record $recIncompleteHttp))
+  Assert-E "I6: a no-report FAILURE record (ok=false) does NOT advance latest.json" (-not (Test-ShouldAdvanceLatest -Record $failRec))
+  Assert-E "I6: a null record does NOT advance latest.json (no throw)" (-not (Test-ShouldAdvanceLatest -Record $null))
 
   if ($ok) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
 }
@@ -576,8 +711,8 @@ $historyPath = Join-Path $genDir "history.jsonl"
 Write-Log ("=== loop-eval-nightly start (date=" + $stamp + ", base=" + $BaseUrl + ", target=" + $Target + ") ===")
 
 # Budget guard: if today's marker already exists, this is a later ops iteration of the same day - no-op.
-if (Test-AlreadyRanTonight -Dir $genDir -Stamp $stamp) {
-  Write-Log ("already measured today (" + $stamp + "); skipping (idempotent - caps prod Gemini at 23Q/night). Daily record: " + $dailyPath)
+if (Test-AlreadyRanTonight -Dir $genDir -Stamp $stamp -MaxAttempts $MaxEvalAttempts) {
+  Write-Log ("day already terminal for " + $stamp + " (measured, or no-report retries exhausted); skipping (idempotent - caps prod Gemini at 23Q/night). Daily record: " + $dailyPath)
   exit 0
 }
 
@@ -647,12 +782,27 @@ if (Test-Path -LiteralPath $tmpReport) {
 }
 
 if ($null -eq $report) {
-  # No parseable report at all = a genuine hard failure (node/vitest could not run, or wrote nothing). We
-  # STILL mark the day (the eval process started = budget considered spent) so ops does not re-hammer.
-  $rec = New-FailureRecord -Stamp $stamp -RanAtIso $now.ToString("o") -ExitCode $exitCode -ErrorText "eval harness did not produce a parseable report"
+  # No parseable report at all = a hard failure (node/vitest could not run, or wrote nothing). Under the
+  # old logic this burned the WHOLE day on the first occurrence - a single 02:xx prod cold start / deploy
+  # in flight / DNS blip cost the entire day's measurement, the exact silent data loss this lane exists to
+  # kill. Now: count the attempt, and only write a TERMINAL marker once attempts reach -MaxEvalAttempts; a
+  # non-terminal marker lets the next ops tick retry. Read the prior attempt count off the day's record.
+  $priorAttempts = 0
+  if (Test-Path -LiteralPath $dailyPath) {
+    try {
+      $prev = Get-Content -Raw -Encoding UTF8 -LiteralPath $dailyPath | ConvertFrom-Json
+      if ($null -ne $prev -and $null -ne $prev.attempts) { $priorAttempts = [int]$prev.attempts }
+    } catch {}
+  }
+  $attempts = $priorAttempts + 1
+  $rec = New-FailureRecord -Stamp $stamp -RanAtIso $now.ToString("o") -ExitCode $exitCode -ErrorText "eval harness did not produce a parseable report" -Attempts $attempts -MaxAttempts $MaxEvalAttempts
   try { Write-JsonNoBom -Path $dailyPath -Text ($rec | ConvertTo-Json -Depth 5) } catch {}
   try { Add-JsonLineNoBom -Path $historyPath -Line (Format-HistoryLine -Record $rec) } catch {}
-  Write-Log ("WARN: eval did not yield a usable report (exit=" + $exitCode + "); wrote a failure marker for " + $stamp + " so the day's budget is not re-spent. Tail:")
+  if ($rec.terminal) {
+    Write-Log ("WARN: eval did not yield a usable report (exit=" + $exitCode + "); attempt " + $attempts + "/" + $MaxEvalAttempts + " EXHAUSTED - wrote a terminal failure marker for " + $stamp + " so the day's budget is not re-spent. Tail:")
+  } else {
+    Write-Log ("WARN: eval did not yield a usable report (exit=" + $exitCode + "); attempt " + $attempts + "/" + $MaxEvalAttempts + " - non-terminal, a later ops tick will retry (transient availability, not a spent day). Tail:")
+  }
   Write-Log (($evalOut).ToString().Trim() | Out-String).Trim()
   try { Remove-Item -LiteralPath $tmpReport -Force -ErrorAction SilentlyContinue } catch {}
   exit 0
@@ -664,7 +814,14 @@ $httpFailures = Get-ReportHttpFailureCount -Report $report
 $rec = ConvertTo-NightlyRecord -Report $report -Stamp $stamp -Target $Target -RanAtIso $now.ToString("o") -ExitCode $exitCode -HttpFailures $httpFailures
 $recJson = $rec | ConvertTo-Json -Depth 5
 try { Write-JsonNoBom -Path $dailyPath -Text $recJson } catch { Write-Log ("WARN: could not write daily record: " + $_.Exception.Message) }
-try { Write-JsonNoBom -Path $latestPath -Text $recJson } catch { Write-Log ("WARN: could not write latest.json: " + $_.Exception.Message) }
+# latest.json = the "current quality" pointer O18(b)'s /about reads. Advance it ONLY on a COMPLETE
+# measurement: an incomplete run's strictAccuracy is unreliable, so overwriting latest with it would
+# surface a false regression on /about. Incomplete runs still land in the daily marker + history above.
+if (Test-ShouldAdvanceLatest -Record $rec) {
+  try { Write-JsonNoBom -Path $latestPath -Text $recJson } catch { Write-Log ("WARN: could not write latest.json: " + $_.Exception.Message) }
+} else {
+  Write-Log ("latest.json NOT advanced (run incomplete - unreliable strictAccuracy); the last complete measurement stays the current-quality pointer for /about. Daily+history still recorded " + $stamp + ".")
+}
 try { Add-JsonLineNoBom -Path $historyPath -Line (Format-HistoryLine -Record $rec) } catch { Write-Log ("WARN: could not append history: " + $_.Exception.Message) }
 try { Remove-Item -LiteralPath $tmpReport -Force -ErrorAction SilentlyContinue } catch {}
 

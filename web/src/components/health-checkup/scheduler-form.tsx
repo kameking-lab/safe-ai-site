@@ -12,6 +12,7 @@ import {
   type WorkConditionId,
 } from "@/types/health-checkup";
 import { ALL_JOB_PROFILES, getJobsByIndustry } from "@/data/health-checkup-rules";
+import { SAFETY_TONE } from "@/lib/design/safety-tone";
 
 const TODAY = new Date().toISOString().slice(0, 10);
 
@@ -70,7 +71,7 @@ export function SchedulerForm() {
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="block">
           <span className="block text-sm font-semibold text-slate-700">
-            業種 <span className="text-red-600">*</span>
+            業種 <span className={SAFETY_TONE.danger.text}>*</span>
           </span>
           <select
             value={industry}
@@ -87,7 +88,7 @@ export function SchedulerForm() {
         </label>
         <label className="block">
           <span className="block text-sm font-semibold text-slate-700">
-            雇入日 / 起算日 <span className="text-red-600">*</span>
+            雇入日 / 起算日 <span className={SAFETY_TONE.danger.text}>*</span>
           </span>
           <input
             type="date"
