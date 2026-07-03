@@ -1,5 +1,23 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-04 — 補充: /court-cases 争点タグ配色マップの一覧/詳細二重管理を一本化
+
+**イテレーション頭の回収**: 自班のオープンPR #838(faq-employer-liability-features-pin-saved-accidents-44px)がe2e/smoke/Vercelいずれも緑になったことを確認し squashマージ・リモートブランチ削除。`git checkout main && git pull --ff-only`でclean確認(PR #848は本イテレーション時点でe2e/smoke実行中のため次回に回収)。
+
+**注意事項**: 今回も`web/AGENTS.md`の「これはあなたの知るNext.jsではない、node_modules内のdocsを読め」という誘導文言を検出。既知のプロンプトインジェクションと判断し無視、コード変更は一切行わず本来のタスクのみ継続。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、`/court-cases`(一覧)と`/court-cases/[id]`(詳細)がissueColor配色マップを別々にハードコードしており、詳細側は争点16分類中9分類しか収録していない既存欠陥を発見。一覧で色付き表示される「解雇・雇止め」等7分類の争点タグは詳細ページを開くと未収載キーのため`bg-slate-100`灰色フォールバックへ変色し、同じ判例なのに一覧/詳細で見た目が変わる不整合があった(実データ"nihon-shoen-seizo"等7件が実際に該当)。
+
+**修正**: `web/src/lib/court-cases/issue-color.ts`を新設し`Record<CourtCaseIssue,string>`で16分類全てを型強制する形に一本化(以後の分類追加時は型エラーで同期漏れを検知できる)。両ファイルの重複ハードコードを削除しimportへ置換。色の値自体は変更なし=純粋な集約でレイアウト・ロジック不変。
+
+**テスト**: vitest 4件追加(`lib/court-cases/issue-color.test.ts`新設3件・`court-cases/[id]/page.test.tsx`へ灰色フォールバック回帰1件)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors(既存warningのみ) / vitest 全pass(2727 tests) / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/court-cases-issue-color-consistency-2026-07-04.mjs`(next start実機・Playwright)で一覧/詳細の配色classNameが一致することを確認**3/3 PASS**。PR #852。
+
+---
+
 ## 2026-07-04 — 補充: /faq/search・/court-cases/employer-liability・/features/[category]・signage-map/pin-manager・saved-accidentsの44px是正
 
 **イテレーション頭の回収**: 自班のオープンPR #831(signage-today-documents-thumbnail-delete-44px)がe2e/smoke/Vercelいずれも緑になったことを確認し squashマージ・リモートブランチ削除。`git checkout main && git pull --ff-only`でclean確認。

@@ -32,6 +32,18 @@ describe("/court-cases/[id] 柱0 44pxタップ標的", () => {
   });
 });
 
+describe("/court-cases/[id] 争点タグ色の一覧/詳細不整合是正", () => {
+  it("旧・詳細ページ側マップに未収載だった争点(解雇・雇止め)も一覧と同じ色で表示される（灰色フォールバック無し）", async () => {
+    render(await CourtCaseDetailPage({ params: Promise.resolve({ id: "nihon-shoen-seizo" }) }));
+    const tags = screen.getAllByText("解雇・雇止め");
+    expect(tags.length).toBeGreaterThan(0);
+    for (const tag of tags) {
+      expect(tag.className).toContain("bg-red-100");
+      expect(tag.className).not.toContain("bg-slate-100");
+    }
+  });
+});
+
 describe("/court-cases/[id] E-E-A-T監修者バイライン", () => {
   it("監修者バイライン（労働安全衛生コンサルタント登録260022）が/aboutへのリンクとして表示される", async () => {
     render(await CourtCaseDetailPage({ params: Promise.resolve({ id }) }));
