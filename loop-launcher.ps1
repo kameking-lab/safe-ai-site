@@ -542,9 +542,13 @@ function Invoke-EnsureHealWatchdog {
 # pass (logon / 07:00) plus every watchdog heal spawn drops a fresh launcher-*/watchdog-* log, and
 # each runner restart drops a loop-*.log. Unbounded growth degrades the operator's primary diagnostic
 # surface (the reporting system) and, eventually, disk. This picks ONLY the loop's OWN generated logs
-# (launcher-*.log / loop-*.log / watchdog-*.log / planner-*.txt) - hand-authored progress/audit .md
-# files and every non-matching file are untouched - and NEVER prunes the KeepMin newest, so recent
-# diagnostics always survive even a burst; among the rest it deletes those older than RetentionDays.
+# (launcher-*.log / loop-*.log / watchdog-*.log / planner-*.txt / eval-nightly-*.log) - hand-authored
+# progress/audit .md files and every non-matching file are untouched - and NEVER prunes the KeepMin
+# newest, so recent diagnostics always survive even a burst; among the rest it deletes those older than
+# RetentionDays. eval-nightly-*.log is the FASTEST-growing type: loop-eval-nightly.ps1 logs its start
+# line BEFORE the already-ran guard, so EVERY ops iteration (~195s, step 5.7) drops a fresh 2-line file
+# even on the once/day no-op skip (~480/day). It was added after this pruner (O18) and grew unbounded
+# until it was added to the allowlist here.
 # Pure (takes a file list, does no IO) so -SelfTest covers it offline; a currently-open runner log is
 # further protected at the call site by Remove-Item's per-file failure on a Windows write lock.
 # ---------------------------------------------------------------------------
@@ -553,7 +557,8 @@ function Get-LogsToPrune {
   $eligible = @($Files | Where-Object {
     $n = [string]$_.Name
     ($n -like 'launcher-*.log') -or ($n -like 'loop-*.log') -or `
-    ($n -like 'watchdog-*.log') -or ($n -like 'planner-*.txt')
+    ($n -like 'watchdog-*.log') -or ($n -like 'planner-*.txt') -or `
+    ($n -like 'eval-nightly-*.log')
   })
   if ($eligible.Count -le $KeepMin) { return @() }
   $sorted = @($eligible | Sort-Object LastWriteTime -Descending)
@@ -1053,12 +1058,15 @@ if ($SelfTest) {
     $mk = { param($n, $daysOld) [pscustomobject]@{ Name = $n; LastWriteTime = $nowL.AddDays(-$daysOld) } }
     $logFixture = @(
       (& $mk "launcher-old.log" 40), (& $mk "loop-ops-old.log" 30), (& $mk "watchdog-old.log" 20),
-      (& $mk "planner-seo-old.txt" 25), (& $mk "launcher-recent.log" 2), (& $mk "loop-data-recent.log" 1),
+      (& $mk "planner-seo-old.txt" 25), (& $mk "eval-nightly-old.log" 22), (& $mk "launcher-recent.log" 2),
+      (& $mk "loop-data-recent.log" 1), (& $mk "eval-nightly-recent.log" 1),
       (& $mk "audit-progress.md" 90), (& $mk "loop-status.dryrun.md" 99), (& $mk "note.txt" 88)
     )
     $pruned = @(Get-LogsToPrune -Files $logFixture -Now $nowL -RetentionDays 14 -KeepMin 2)
     Assert-L "prune: an old launcher log beyond keep-min is deleted" ($pruned -contains "launcher-old.log")
     Assert-L "prune: an old planner one-shot is deleted" ($pruned -contains "planner-seo-old.txt")
+    Assert-L "prune: an old eval-nightly log is deleted (O18 fastest-growing type, per-ops-tick)" ($pruned -contains "eval-nightly-old.log")
+    Assert-L "prune: a recent eval-nightly log is NEVER deleted" (-not ($pruned -contains "eval-nightly-recent.log"))
     Assert-L "prune: a recent log is NEVER deleted" (-not ($pruned -contains "launcher-recent.log"))
     Assert-L "prune: a hand-authored .md artifact is NEVER deleted" (-not ($pruned -contains "audit-progress.md") -and -not ($pruned -contains "loop-status.dryrun.md"))
     Assert-L "prune: a non-loop .txt file is NEVER deleted" (-not ($pruned -contains "note.txt"))
