@@ -167,7 +167,10 @@ export function SearchResults() {
         </div>
       </form>
 
-      {/* カテゴリタブ（件数バッジ付き） */}
+      {/* カテゴリタブ（件数バッジ付き）。ヒット0のカテゴリは畳んで表示しない＝
+          スマホでタブが多段に折り返すのを防ぎ、押しても空になるタブへの誤タップを断つ
+          （ファセット検索の空ファセット非表示の定石）。現在選択中のカテゴリは、クエリ変更で
+          0件へ転じても選択状態を見失わせないよう常に残す。「すべて」は常設。 */}
       {urlQuery && (
         <div className="mt-4 flex flex-wrap gap-1.5" role="tablist" aria-label="カテゴリで絞り込み">
           <CategoryTab
@@ -176,7 +179,7 @@ export function SearchResults() {
             active={activeCategory === 'all'}
             onClick={() => pushQuery(urlQuery, 'all')}
           />
-          {SEARCH_CATEGORIES.map((cat) => (
+          {SEARCH_CATEGORIES.filter((cat) => counts[cat] > 0 || cat === activeCategory).map((cat) => (
             <CategoryTab
               key={cat}
               label={CATEGORY_META[cat].label}
