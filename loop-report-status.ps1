@@ -414,6 +414,46 @@ function Get-HeartbeatRow {
   return $PlaceholderRow
 }
 
+# ---- MSYS/Git-Bash path-conversion repair for -Note -------------------------------------------
+# Git-Bash/MSYS applies POSIX->Windows path conversion to any command-line argument that LOOKS like a
+# leading-slash path BEFORE this script ever receives -Note. A lane note that mentions a site route such
+# as "/stats" is silently rewritten in the SHELL layer to the Git install root + that token
+# ("C:/Program Files/Git/stats"), corrupting the operator-facing status surface (observed live in the
+# ux-tools row: "C:/Program Files/Git/stats ..." where the lane's note began with the route "/stats"). The
+# reporter is the ONE shell-agnostic choke point every caller funnels through (agents via Bash, runner
+# heartbeat/deadline via PowerShell), so repair it here instead of trying to make six free-form notes
+# each remember to escape. Discover the ACTUAL MSYS root at runtime and revert only "<root><sep><rest>"
+# back to "/<rest>"; a legitimate lane note never contains the literal Git install directory, and when
+# no root can be resolved (not launched from Git Bash, so no mangling occurred) it is a pure no-op.
+function Get-MsysRoot {
+  # `cygpath -m /` is the authoritative MSYS root in mixed (forward-slash) form and resolves on PATH
+  # whenever the mangling could have happened (both ship with Git for Windows). EXEPATH's PARENT is a
+  # best-effort fallback (EXEPATH points at ...\Git\bin). Returns a plausible rooted path or $null.
+  $root = $null
+  try {
+    $cp = & cygpath -m / 2>$null
+    if ($LASTEXITCODE -eq 0 -and $cp) { $root = ([string]$cp).Trim() }
+  } catch {}
+  if ((-not $root) -and $env:EXEPATH) {
+    try { $p = Split-Path -Parent ([string]$env:EXEPATH); if ($p) { $root = ($p -replace '\\', '/') } } catch {}
+  }
+  if ($root) { $root = $root.TrimEnd('/') }
+  # Require a drive-letter-rooted path so a garbage value can never strip arbitrary text from a note.
+  if ($root -and ($root -match '^[A-Za-z]:/.+')) { return $root }
+  return $null
+}
+
+# Revert a shell-mangled leading-slash token: collapse "<MsysRoot><sep>" back to a single leading "/".
+# Matches the root in EITHER slash form (MSYS emits '/', but guard '\' for MSYS2_ARG_CONV variants),
+# anchored to the discovered root so nothing else in the note is affected. Case-insensitive (Windows
+# paths). Pure; $null/empty root or note -> unchanged (so -SelfTest and non-Git-Bash callers no-op).
+function Repair-MsysMangledNote {
+  param([string]$Note, [string]$MsysRoot)
+  if (-not $Note -or -not $MsysRoot) { return $Note }
+  $slashFlexible = ([regex]::Escape($MsysRoot)) -replace '/', '[\\/]'
+  return [regex]::Replace($Note, $slashFlexible + '[\\/]', '/', 'IgnoreCase')
+}
+
 # ---- Self-test: offline verification of the lock's stale-orphan reclamation -------------------
 if ($SelfTest) {
   $fails = 0
@@ -580,6 +620,17 @@ if ($SelfTest) {
     $emptyRow = Get-HeartbeatRow -Rows @() -Lane "seo" -FreshLastRun $hbFresh -PlaceholderRow $placeholder
     Assert-Test "H4: empty region -> placeholder row (no throw)" ($emptyRow -eq $placeholder)
     Assert-Test "H5: Set-RowTimestamp on a null/empty row is safe (no throw, empty result)" ((Set-RowTimestamp -ExistingRow $null -FreshLastRun $hbFresh) -eq "")
+
+    # I) Repair-MsysMangledNote reverts Git-Bash path-conversion of a leading-slash route token, using a
+    # SYNTHETIC root so the check is deterministic offline (independent of this machine's real cygpath).
+    # Real lane notes never contain the install path, so unrelated text stays byte-identical.
+    $synthRoot = "C:/Program Files/Git"
+    Assert-Test "I1: forward-slash mangled route is reverted to /route" ((Repair-MsysMangledNote -Note "C:/Program Files/Git/stats conclusion card" -MsysRoot $synthRoot) -eq "/stats conclusion card")
+    Assert-Test "I2: backslash-mangled route is reverted to /route" ((Repair-MsysMangledNote -Note "C:\Program Files\Git\stats fixed" -MsysRoot $synthRoot) -eq "/stats fixed")
+    Assert-Test "I3: a mangled token mid-note is reverted too" ((Repair-MsysMangledNote -Note "shipped C:/Program Files/Git/ky/paper canvas" -MsysRoot $synthRoot) -eq "shipped /ky/paper canvas")
+    Assert-Test "I4: a note WITHOUT the install path is untouched (real /route stays)" ((Repair-MsysMangledNote -Note "merged #675; /stats already clean" -MsysRoot $synthRoot) -eq "merged #675; /stats already clean")
+    Assert-Test "I5: null root is a safe no-op (not launched from Git Bash)" ((Repair-MsysMangledNote -Note "C:/Program Files/Git/stats" -MsysRoot $null) -eq "C:/Program Files/Git/stats")
+    Assert-Test "I6: empty note is safe (no throw)" ((Repair-MsysMangledNote -Note "" -MsysRoot $synthRoot) -eq "")
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -641,6 +692,12 @@ try {
     }
   }
 } catch { $pr = "-" }
+
+# Undo any Git-Bash/MSYS path-conversion mangling the shell applied to a leading-slash route token in
+# the note before it reached this script (see Repair-MsysMangledNote). No-op when not launched from Git
+# Bash (no root resolves) or when the note contains no install-path token, so it can never corrupt a
+# clean note. Applied before the WhatIf preview so the dry run shows the same repaired text as a real write.
+$Note = Repair-MsysMangledNote -Note $Note -MsysRoot (Get-MsysRoot)
 
 $noteText = $Note.Trim()
 if ($noteText -eq "") {
