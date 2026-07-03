@@ -346,6 +346,52 @@ function Invoke-StaleRunnerCycle {
 }
 
 # ---------------------------------------------------------------------------
+# Heal-watchdog liveness. The watchdog (loop-watchdog.ps1, #654) is the recovery backbone: it is the ONLY
+# non-ops process that fires -HealOnly, so it is the only thing that can cooperatively cycle the OPS runner
+# itself (ops excludes its own ancestor chain and is never idle during its own heal) and the only thing
+# that resurrects a dead ops runner. But the watchdog is spawned ONLY on a FULL launcher pass (logon/07:00
+# /reboot); on a long logged-in session no full pass recurs, so a watchdog that was never spawned (the
+# full pass predated #654) or that died stays absent for up to ~a day. That is the exact "nothing brings X
+# back until a rare full pass" silent gap the watchdog itself was built to close - here reflected onto the
+# watchdog. Fix: ops runs -HealOnly every iteration, so ensuring the watchdog from -HealOnly (as well as
+# the full pass) makes ops's frequent heal the watchdog's own resurrection trigger (~1 ops interval, not
+# ~22h). Idempotent (running-scan + the watchdog's own single-instance guard); honors -WhatIf.
+# ---------------------------------------------------------------------------
+
+# Pure decision: (re)spawn the heal watchdog only when the script exists AND none is already alive. Pure so
+# -SelfTest covers it offline (the live scan/spawn stays in the thin wrapper below).
+function Test-ShouldSpawnWatchdog {
+  param([bool]$WatchdogExists, [bool]$AlreadyRunning)
+  return ($WatchdogExists -and (-not $AlreadyRunning))
+}
+
+# Live wrapper: ensure a heal watchdog is alive. Returns "spawned"/"running"/"absent"/"whatif". Reads the
+# script-scope $repoRoot/$ClaudeCmd/$WhatIf at call time; NEVER invoked from -SelfTest (only the pure
+# Test-ShouldSpawnWatchdog is), so it never spawns during tests.
+function Invoke-EnsureHealWatchdog {
+  $watchdog = Join-Path $repoRoot "loop-watchdog.ps1"
+  if (-not (Test-Path $watchdog)) { return "absent" }
+  $wdRunning = $false
+  try {
+    $wdRunning = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
+      Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -like '*loop-watchdog.ps1*' }).Count -gt 0
+  } catch {}
+  if (-not (Test-ShouldSpawnWatchdog -WatchdogExists $true -AlreadyRunning $wdRunning)) {
+    Write-Launcher "heal watchdog already running; not spawning a second."
+    return "running"
+  }
+  if ($WhatIf) {
+    Write-Launcher ("[WHATIF] would spawn heal watchdog: " + $watchdog)
+    return "whatif"
+  }
+  $wdArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", $watchdog)
+  if ($ClaudeCmd -ne "claude") { $wdArgs += @("-ClaudeCmd", $ClaudeCmd) }
+  Start-Process -FilePath "powershell" -ArgumentList $wdArgs -WorkingDirectory $repoRoot
+  Write-Launcher ("spawned heal watchdog (" + $watchdog + ").")
+  return "spawned"
+}
+
+# ---------------------------------------------------------------------------
 # Log retention: which files under logs/ are stale loop artifacts safe to delete. Nothing prunes the
 # logs/ dir today, so on a machine that stays logged in it grows without bound - every full launcher
 # pass (logon / 07:00) plus every watchdog heal spawn drops a fresh launcher-*/watchdog-* log, and
@@ -642,6 +688,13 @@ if ($SelfTest) {
     # O) Invoke-StaleRunnerCycle: an empty floor marker short-circuits to a no-op (kills nothing) even
     #    when lanes are configured - the guard that makes an unset marker completely inert.
     Assert-L "cycle: empty floor marker makes Invoke-StaleRunnerCycle a no-op" (@(Invoke-StaleRunnerCycle -Lanes $healLanes -FloorIso "" -DryRun).Count -eq 0)
+    # R) Test-ShouldSpawnWatchdog: (re)spawn the heal watchdog ONLY when the script exists AND none is
+    #    already alive. This is what makes -HealOnly (run by ops every iteration) the watchdog's own
+    #    resurrection trigger, so a never-spawned/dead watchdog no longer stays absent until a rare full pass.
+    Assert-L "watchdog: script present + none running -> spawn" (Test-ShouldSpawnWatchdog -WatchdogExists $true -AlreadyRunning $false)
+    Assert-L "watchdog: script present + one already running -> do NOT spawn (idempotent, no churn)" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $true -AlreadyRunning $true))
+    Assert-L "watchdog: script missing -> never spawn (even when none running)" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $false -AlreadyRunning $false))
+    Assert-L "watchdog: script missing + one running -> still no spawn" (-not (Test-ShouldSpawnWatchdog -WatchdogExists $false -AlreadyRunning $true))
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -1075,6 +1128,10 @@ if ($HealOnly) {
     Write-Launcher ("[HEAL] cooperatively cycled below-floor lanes [" + ($cycledHeal -join ", ") + "]" + $(if ($WhatIf) { " (WHATIF)" } else { "; re-scanning so the resurrection path relaunches them on fresh code." }))
     if (-not $WhatIf) { $healRunning = Get-RunningLanes }
   }
+  # Ensure the recovery backbone (heal watchdog) is alive on EVERY -HealOnly pass - before the "nothing to
+  # heal" early-exit, so it runs even when all lanes are up (today's live state: 6 lanes alive, no
+  # watchdog). Ops runs -HealOnly each iteration, so this is the watchdog's frequent resurrection trigger.
+  $null = Invoke-EnsureHealWatchdog
   $toHeal = @(Get-LanesToHeal -Lanes $cfg.lanes -Running $healRunning)
   if ($toHeal.Count -eq 0) {
     Write-Launcher ("[HEAL] all enabled lanes alive (" + (($healRunning.Keys | Sort-Object) -join ", ") + "); nothing to resurrect.")
@@ -1452,24 +1509,7 @@ Write-Status
 # the watchdog's own single-instance guard makes a second spawn a no-op, but we also skip when one is
 # already alive to avoid a useless process churn. Skipped past the deadline (nothing to heal).
 if (-not $deadlinePassed) {
-  $watchdog = Join-Path $repoRoot "loop-watchdog.ps1"
-  if (Test-Path $watchdog) {
-    $wdRunning = $false
-    try {
-      $wdRunning = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-        Where-Object { $_.ProcessId -ne $PID -and $_.CommandLine -like '*loop-watchdog.ps1*' }).Count -gt 0
-    } catch {}
-    if ($wdRunning) {
-      Write-Launcher "heal watchdog already running; not spawning a second."
-    } elseif ($WhatIf) {
-      Write-Launcher ("[WHATIF] would spawn heal watchdog: " + $watchdog)
-    } else {
-      $wdArgs = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden", "-File", $watchdog)
-      if ($ClaudeCmd -ne "claude") { $wdArgs += @("-ClaudeCmd", $ClaudeCmd) }
-      Start-Process -FilePath "powershell" -ArgumentList $wdArgs -WorkingDirectory $repoRoot
-      Write-Launcher ("spawned heal watchdog (" + $watchdog + ").")
-    }
-  }
+  $null = Invoke-EnsureHealWatchdog
 }
 
 # Log retention sweep: bound the unbounded growth of logs/ so the operator's diagnostic surface stays
