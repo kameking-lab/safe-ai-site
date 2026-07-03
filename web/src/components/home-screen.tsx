@@ -435,7 +435,7 @@ export function HomeScreen({ children, variant: variantProp, initialLawTab, init
                 <button
                   key={tab.id}
                   onClick={() => setAccidentActiveTab(tab.id)}
-                  className={`rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
+                  className={`inline-flex min-h-[44px] items-center rounded-lg px-4 py-1.5 text-sm font-semibold transition-colors ${
                     accidentActiveTab === tab.id
                       ? "bg-white text-slate-900 shadow-sm"
                       : "text-slate-500 hover:text-slate-700"
