@@ -307,11 +307,13 @@ describe('buildSearchIndex — 機能ページ（feature）の収載', () => {
       import('@/config/flagship-nav'),
     ]);
     const featureItems = index.filter((i) => i.category === 'feature');
-    // 射影源のエントリを漏れなく収載＝件数一致（欠落 0）
-    expect(featureItems.length).toBe(getSitePageSearchEntries().length);
-    expect(featureItems.length).toBeGreaterThanOrEqual(FLAGSHIP_FEATURES.length);
-    expect(featureItems.every((i) => i.id.startsWith('page-'))).toBe(true);
-    // url はベースパス（ハッシュ・クエリを含まない）＝実在ルートへ解決（drift ガードで機械固定）
+    // feature カテゴリは FLAGSHIP 目的地ページ（id=page-*）と病態別ガイド（id=illness-guide-*）の
+    // 2 源を持つ。FLAGSHIP 射影源のエントリを漏れなく収載＝件数一致（欠落 0）は page-* に限定して固定。
+    const pageItems = featureItems.filter((i) => i.id.startsWith('page-'));
+    expect(pageItems.length).toBe(getSitePageSearchEntries().length);
+    expect(pageItems.length).toBeGreaterThanOrEqual(FLAGSHIP_FEATURES.length);
+    // url はベースパス（ハッシュ・クエリを含まない）＝実在ルートへ解決（drift ガードで機械固定）。
+    // subtitle 非空は feature カテゴリ全体（目的地ページ＋病態別ガイド）で担保する。
     expect(featureItems.every((i) => /^\/[^#?]*$/.test(i.url))).toBe(true);
     expect(featureItems.every((i) => i.subtitle.length > 0)).toBe(true);
   });
@@ -325,6 +327,47 @@ describe('buildSearchIndex — 機能ページ（feature）の収載', () => {
     ).toBe(true);
     // 2 語 AND も subtitle（カード見出し/配下説明）で補助して機能へ収束する
     expect(searchItems(index, '事故 分析', 'feature').length).toBeGreaterThan(0);
+  });
+});
+
+describe('buildSearchIndex — 治療と仕事の両立支援 病態別ガイド（feature）の収載', () => {
+  it('ILLNESS_CATEGORIES の全疾患が feature カテゴリで illness-guide 深リンクへ着地（幽霊URL 0）', async () => {
+    const [index, { ILLNESS_CATEGORIES }] = await Promise.all([
+      buildSearchIndex(),
+      import('@/data/illness-considerations'),
+    ]);
+    const guideItems = index.filter((i) => i.id.startsWith('illness-guide-'));
+    // 収載集合＝正本の全疾患（欠落 0・水増し 0）
+    expect(guideItems.length).toBe(ILLNESS_CATEGORIES.length);
+    expect(guideItems.length).toBeGreaterThanOrEqual(6);
+    expect(guideItems.every((i) => i.category === 'feature')).toBe(true);
+    // 全 url が generateStaticParams（dynamicParams=false）の解決集合へ着地＝幽霊URL 0。
+    const validUrls = new Set(
+      ILLNESS_CATEGORIES.map((c) => `/treatment-work-balance/illness-guide/${c.id}`),
+    );
+    expect(guideItems.every((i) => validUrls.has(i.url))).toBe(true);
+    // 親ハブ止まりでなく疾患別の深リンクである（発見性の穴＝疾患名 0 件の是正）。
+    expect(guideItems.every((i) => i.url !== '/treatment-work-balance')).toBe(true);
+    expect(guideItems.every((i) => i.subtitle.length > 0)).toBe(true);
+  });
+
+  it('疾患名クエリで個別ガイドへ着地する（がん・脳卒中・糖尿病）', async () => {
+    const index = await buildSearchIndex();
+    expect(
+      searchItems(index, 'がん 両立支援', 'feature').some(
+        (i) => i.url === '/treatment-work-balance/illness-guide/cancer',
+      ),
+    ).toBe(true);
+    expect(
+      searchItems(index, '脳卒中 復職', 'feature').some(
+        (i) => i.url === '/treatment-work-balance/illness-guide/stroke',
+      ),
+    ).toBe(true);
+    expect(
+      searchItems(index, '糖尿病 就業配慮', 'feature').some(
+        (i) => i.url === '/treatment-work-balance/illness-guide/diabetes',
+      ),
+    ).toBe(true);
   });
 });
 
