@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-03 KY周辺・教育の残存44px未満ボタン8箇所を是正（PR #744とは非重複の別発見分）
+
+回収: 自分のオープンPRは#744（site-records/ky 残存44px7箇所）1本のみだが、squashマージ対象となるCI緑はまだ確認できず（e2e/smoke ともIN_PROGRESS）＝マージ見送り。`main`は`git fetch`で7コミット遅れと判明したため`git pull --ff-only`で26ファイル分fast-forward・working tree clean。
+
+着手: 上位未着手3件（O15/S2/S3）は依然dataレーンO14／fableレーンF1依存で全ブロック中。Exploreエージェントに当班所有route/componentの44px未満の主要CTAを再監査させたところ、`ky-paper-view.tsx`/`ky-transcribe-panel.tsx`の一部ボタンはPR #744が既に対応済みと判明した一方、PR #744の対象外の8箇所（クラシックUI(`?canvas=0`)の天気自動取得・AI提案ボタン、転記支援の表コピーボタン、`/ky/list`の行内3ボタン、`/ky/workers`の行内2ボタン、`/education`のPPTXサンプルDL）が未対応と確認。
+
+実装: 8ファイル8箇所に`min-h-[44px]`を追加（足すだけ・ロジック無変更）。canvas既定切替(O10第五弾)後もクラシックUI経由や動的リスト行内の操作ボタンは同一画面の主要ボタン群から見た目上独立しており、過去の巡回対象から漏れやすい構造だったと確認。
+
+検証: `tsc --noEmit`=0 / `lint`=errors0（既存warn23件のみ、当班分の増減なし）/ `vitest run`=289ファイル2475テスト全pass（クラス名追加のみのため新規ユニットテストなし）/ `build`=成功。無読Playwright新規`docs/third-party-reviews/scripts/remaining-primary-buttons-44px-round2-2026-07-03.mjs`をprod start(3100)で実行し9/9 PASS（`/ky/paper?canvas=0`の天気自動取得・AI提案・転記支援内コピー、`/ky/list`・`/ky/workers`はlocalStorageで各1件を再現し行内操作ボタンを実測、`/education`先頭カードのPPTXサンプルDL）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14/fableレーンF1依存でブロック。PR #744はCI待ちで次回収。
+
+---
+
 ## 2026-07-03 `/site-records/committee`・`/site-records/monthly` ConclusionCardのaction未指定を是正
 
 回収: PR #702（/ky-examples 結論カードaction未指定＋主CTA44px是正）がCI全緑（e2e/smoke SUCCESS）と確認できたためsquashマージ＋作業ブランチ削除。`main`は`git pull --ff-only`で21ファイル分fast-forward・clean。自ブランチPR #715（/safety-diary/contribute 結論カード＋44px化）はe2e/smokeがまだIN_PROGRESSのためマージ見送り＝次イテレーションで回収。

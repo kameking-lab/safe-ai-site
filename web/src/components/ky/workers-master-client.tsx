@@ -293,7 +293,7 @@ export function WorkersMasterClient() {
                     <button
                       type="button"
                       onClick={() => commit(setWorkerHidden(workers, w.id, !w.hidden))}
-                      className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                      className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
                     >
                       {w.hidden ? "再表示" : "退職（非表示）"}
                     </button>
@@ -304,7 +304,7 @@ export function WorkersMasterClient() {
                           commit(removeWorker(workers, w.id));
                         }
                       }}
-                      className="rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                      className="min-h-[44px] rounded-lg border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50"
                     >
                       削除
                     </button>
