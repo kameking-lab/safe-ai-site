@@ -122,7 +122,7 @@ export function inspectionConclusion(savedCount: number, unusableCount: number):
 }
 
 /** 安全衛生委員会: 当月の開催実績で判定（毎月1回以上・安衛則23条） */
-export function committeeConclusion(heldThisMonth: boolean): RecordConclusion {
+export function committeeConclusion(heldThisMonth: boolean, hasPrevious: boolean): RecordConclusion {
   if (heldThisMonth) {
     return {
       tone: "safe",
@@ -130,10 +130,19 @@ export function committeeConclusion(heldThisMonth: boolean): RecordConclusion {
       description: "議事概要の労働者への周知と3年間の保存を忘れずに。",
     };
   }
+  if (hasPrevious) {
+    return {
+      tone: "warning",
+      title: "今月未開催",
+      description: "毎月1回以上の開催が必要です（安衛則23条）。「前回をベースに新規」が最短です。",
+      action: { href: "#committee-actions", label: "前回をベースに新規" },
+    };
+  }
   return {
     tone: "warning",
     title: "今月未開催",
-    description: "毎月1回以上の開催が必要です（安衛則23条）。「前回をベースに新規」が最短です。",
+    description: "毎月1回以上の開催が必要です（安衛則23条）。議事録を作成してください。",
+    action: { href: "#committee-actions", label: "議事録を作成" },
   };
 }
 
@@ -329,6 +338,12 @@ export function monthlyConclusion(input: {
   }
   const attention = input.patrolOpen + input.nearMissOpen + input.inspectionUnusable;
   if (attention > 0) {
+    const action =
+      input.inspectionUnusable > 0
+        ? { href: "/site-records/inspection#saved-inspections", label: "点検を確認" }
+        : input.patrolOpen > 0
+          ? { href: "/site-records/patrol#open-findings", label: "パトロールを確認" }
+          : { href: "/site-records/near-miss#nearmiss-list", label: "ヒヤリハットを確認" };
     return {
       tone: input.inspectionUnusable > 0 ? "danger" : "warning",
       value: attention,
@@ -338,6 +353,7 @@ export function monthlyConclusion(input: {
         input.inspectionUnusable > 0
           ? "使用不可の機械を含む要対応があります。各ツールで是正状況を更新してください。"
           : "未是正・対応中の項目があります。月内の是正を。",
+      action,
     };
   }
   if (!input.committeeHeld) {
