@@ -205,7 +205,7 @@ export default function GlossaryPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="用語・読み・説明を検索..."
-          className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm focus:border-indigo-400 focus:outline-none"
+          className="w-full min-h-[44px] rounded-xl border border-slate-200 bg-white py-2.5 pl-9 pr-4 text-sm focus:border-indigo-400 focus:outline-none"
         />
       </div>
 
