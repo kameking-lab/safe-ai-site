@@ -16,6 +16,7 @@ import {
   HelpCircle,
   HardHat,
   Signpost,
+  Newspaper,
   MessageSquare,
   ListChecks,
   BarChart3,
@@ -61,6 +62,7 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
     case 'faq':       return <HelpCircle className={cls} />;
     case 'equipment': return <HardHat className={cls} />;
     case 'sign':      return <Signpost className={cls} />;
+    case 'article':   return <Newspaper className={cls} />;
   }
 }
 

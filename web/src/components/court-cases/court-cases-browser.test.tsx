@@ -45,3 +45,16 @@ describe("CourtCasesBrowser ページネーション（柱C-6）", () => {
     expect(screen.queryByTestId("court-load-more")).toBeNull();
   });
 });
+
+describe("CourtCasesBrowser 柱0（44pxタップ標的）", () => {
+  afterEach(cleanup);
+
+  it("「絞り込みを解除」ボタンは44px以上のタップ標的を持つ", () => {
+    render(<CourtCasesBrowser />);
+    fireEvent.change(screen.getByPlaceholderText(/安全配慮義務、墜落、過労、石綿/), {
+      target: { value: "墜落" },
+    });
+    const clear = screen.getByRole("button", { name: "絞り込みを解除" });
+    expect(clear.className).toContain("min-h-[44px]");
+  });
+});

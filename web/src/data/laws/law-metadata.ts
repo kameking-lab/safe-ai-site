@@ -51,7 +51,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和47年労働省令第34号",
     latestRevision: "令和5年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/347M50002000034",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   有機則: {
     fullName: "有機溶剤中毒予防規則",
@@ -314,9 +314,9 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
   港湾労働法: {
     fullName: "港湾労働法",
     promulgation: "昭和63年法律第40号",
-    latestRevision: "令和2年改正",
+    latestRevision: "令和4年改正（令和4年法律第68号・令和7年6月施行＝拘禁刑化）",
     eGovUrl: "https://laws.e-gov.go.jp/law/363AC0000000040",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   船員安衛則: {
     fullName: "船員労働安全衛生規則",

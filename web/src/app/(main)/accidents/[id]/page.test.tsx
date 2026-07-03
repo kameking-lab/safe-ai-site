@@ -21,6 +21,13 @@ describe("/accidents/[id] 柱0 44pxタップ標的", () => {
     expect(back.className).toContain("items-center");
   });
 
+  it("最上部パンくずの「事故データベース」リンクが 44px タップ標的を満たす", async () => {
+    render(await AccidentDetailPage({ params: Promise.resolve({ id: target.id }) }));
+    const crumb = screen.getByRole("link", { name: /事故データベース/ });
+    expect(crumb.className).toContain("min-h-[44px]");
+    expect(crumb.className).toContain("items-center");
+  });
+
   it("類似する事故事例のタイトルリンクが 44px タップ標的を満たす", async () => {
     render(await AccidentDetailPage({ params: Promise.resolve({ id: target.id }) }));
     const heading = screen.getByRole("heading", { name: /類似する事故事例/ });

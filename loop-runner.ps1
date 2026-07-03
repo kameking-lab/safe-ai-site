@@ -76,7 +76,9 @@ param(
   [string]$Model = "claude-fable-5",
   [string]$PromptFile = "",
   [string]$Lane = "",
-  [switch]$SelfTest
+  [int]$IterationTimeoutSeconds = 7200,
+  [switch]$SelfTest,
+  [switch]$RehearseTimeout
 )
 
 $ErrorActionPreference = "Continue"
@@ -130,6 +132,58 @@ function Get-ScriptHashSafe([string]$Path) {
     if (-not $Path -or -not (Test-Path $Path)) { return "" }
     return (Get-FileHash -Algorithm SHA256 -Path $Path -ErrorAction Stop).Hash
   } catch { return "" }
+}
+
+# Wedge self-heal: whether a bounded-timeout monitor should guard the claude turn. The invocation
+# `$prompt | & claude | Tee-Object` has NO timeout, so a hung claude (network/stdin deadlock) blocks the
+# pipe forever - the runner never returns to the loop top, never re-reads the prompt (no hot-swap), never
+# heartbeats -> a PERMANENT wedge that #736 could only REPORT (LOUD "manual restart" banner at 4h), not
+# clear. A positive bound arms an out-of-band monitor that force-kills the hung child tree so the pipe
+# unblocks, the runner heartbeats, and the next iteration self-heals. <=0 disables it (legacy infinite
+# wait / fail-safe kill switch). Pure so -SelfTest can assert the gate without spawning anything.
+function Test-TimeoutMonitorEnabled([int]$TimeoutSeconds) {
+  return ($TimeoutSeconds -gt 0)
+}
+
+# Seconds the wedge monitor sleeps before killing, or 0 when disabled. Pure so -SelfTest can assert the
+# mapping (<=0 -> 0 = no monitor; positive -> passthrough) without spawning anything.
+function Get-IterationWaitSeconds([int]$TimeoutSeconds) {
+  if ($TimeoutSeconds -le 0) { return 0 }
+  return $TimeoutSeconds
+}
+
+# Arm an out-of-band monitor for one claude turn. Returns a Job handle (or $null when disabled) so the
+# main thread runs the EXISTING inline pipe unchanged (streaming + UTF-8 stdin preserved) while a sibling
+# process waits $TimeoutSeconds and, on expiry, force-kills the runner's claude child tree (taskkill /T)
+# and drops a sentinel file. The kill unblocks the blocked pipe on the main thread. NameFilter restricts
+# the kill to the known claude chain (claude / node / the claude.cmd shim's cmd.exe) as defense-in-depth;
+# the monitor only ever fires on a genuine multi-hour hang, when that tree is the runner's sole child.
+function Start-WedgeMonitor([int]$RunnerPid, [int]$TimeoutSeconds, [string]$SentinelPath, [string]$NameFilter = '^(claude|node|cmd)') {
+  if (-not (Test-TimeoutMonitorEnabled $TimeoutSeconds)) { return $null }
+  return Start-Job -ScriptBlock {
+    param($ppid, $sec, $sentinel, $nameRe)
+    Start-Sleep -Seconds $sec
+    # Drop the sentinel BEFORE killing: the kill unblocks the main thread's pipe, which then Stop-Job's
+    # this monitor - if the sentinel were written after the kill it could lose that race and the wedge
+    # would go unlogged. Written first, it is always on disk by the time the pipe unblocks.
+    try { Set-Content -Path $sentinel -Value "fired" -Encoding ASCII } catch {}
+    try {
+      $kids = Get-CimInstance Win32_Process -Filter ("ParentProcessId=" + $ppid) -ErrorAction SilentlyContinue
+      foreach ($k in $kids) {
+        if ($k.Name -match $nameRe) {
+          try { & taskkill /F /T /PID $k.ProcessId 2>&1 | Out-Null } catch {}
+        }
+      }
+    } catch {}
+  } -ArgumentList $RunnerPid, $TimeoutSeconds, $SentinelPath, $NameFilter
+}
+
+# Tear down a wedge monitor (no-op on $null). Always called in a finally so a completed OR still-sleeping
+# monitor never leaks a background job.
+function Stop-WedgeMonitor($Job) {
+  if ($null -eq $Job) { return }
+  try { Stop-Job $Job -ErrorAction SilentlyContinue } catch {}
+  try { Remove-Job $Job -Force -ErrorAction SilentlyContinue } catch {}
 }
 
 # Dry-run self-check of the backoff schedule. Runs BEFORE any Claude CLI / scheduler
@@ -186,7 +240,75 @@ if ($SelfTest) {
     Write-Host ("[selftest] hotswap launch='" + $s.launch + "' cur='" + $s.cur + "' -> " + $got + " (want " + $s.want + ") " + $(if ($pass) { "OK" } else { "FAIL" }))
   }
 
-  if ($ok -and $capReached -and $gateOk -and $swapOk) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
+  # Wedge self-heal gate (X group): a positive iteration-timeout arms the monitor; <=0 disables it
+  # (legacy infinite wait). Get-IterationWaitSeconds maps <=0 -> 0 (no monitor) and passes positives
+  # through unchanged. Pure - no process is spawned here (the live plumbing is proven by -RehearseTimeout).
+  $wedgeCases = @(
+    @{ t = 7200; wantEnabled = $true;  wantWait = 7200 },  # default 2h -> armed
+    @{ t = 1;    wantEnabled = $true;  wantWait = 1 },     # any positive -> armed, passthrough
+    @{ t = 0;    wantEnabled = $false; wantWait = 0 },     # disabled -> no monitor (legacy infinite wait)
+    @{ t = -5;   wantEnabled = $false; wantWait = 0 }      # negative -> disabled (fail-safe)
+  )
+  $wedgeOk = $true
+  foreach ($w in $wedgeCases) {
+    $gotEnabled = Test-TimeoutMonitorEnabled $w.t
+    $gotWait = Get-IterationWaitSeconds $w.t
+    $pass = (($gotEnabled -eq $w.wantEnabled) -and ($gotWait -eq $w.wantWait))
+    if (-not $pass) { $wedgeOk = $false }
+    Write-Host ("[selftest] wedge timeout=" + $w.t + "s -> enabled=" + $gotEnabled + " wait=" + $gotWait + "s (want enabled=" + $w.wantEnabled + " wait=" + $w.wantWait + ") " + $(if ($pass) { "OK" } else { "FAIL" }))
+  }
+  # Stop-WedgeMonitor must be a safe no-op on a null handle (disabled path never leaks / never throws).
+  $nullSafe = $true
+  try { Stop-WedgeMonitor $null } catch { $nullSafe = $false }
+  Write-Host ("[selftest] Stop-WedgeMonitor(null) no-op: " + $(if ($nullSafe) { "OK" } else { "FAIL" }))
+  if (-not $nullSafe) { $wedgeOk = $false }
+
+  if ($ok -and $capReached -and $gateOk -and $swapOk -and $wedgeOk) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
+}
+
+# Live rehearsal of the wedge-monitor plumbing against a DUMMY child (no claude / no usage), mirroring
+# -RehearseCritic: proves the never-before-fired kill path actually kills a hung child, unblocks the pipe,
+# and leaves a fast child untouched - before it must fire unattended on a real multi-hour hang. Uses the
+# SAME Start-/Stop-WedgeMonitor functions the loop uses, only substituting a cmd/ping child for claude.
+if ($RehearseTimeout) {
+  Write-Host "[rehearse-timeout] exercising the wedge monitor against a dummy cmd child (no claude, no usage)"
+  $allPass = $true
+
+  # Case 1: a hung child must be force-killed within the bound and unblock the pipe (~seconds, not ~60s).
+  $sent1 = Join-Path $env:TEMP ("loop-wedge-rehearse-kill-" + $PID + ".flag")
+  Remove-Item -Force $sent1 -ErrorAction SilentlyContinue
+  $t0 = Get-Date
+  $job1 = Start-WedgeMonitor $PID 2 $sent1
+  "x" | & cmd /c "ping -n 61 127.0.0.1 >nul" 2>&1 | Out-Null
+  Stop-WedgeMonitor $job1
+  $elapsed1 = ((Get-Date) - $t0).TotalSeconds
+  $killed1 = Test-Path $sent1
+  $unblocked1 = ($elapsed1 -lt 30)   # ~60s if the kill had NOT unblocked the pipe
+  Remove-Item -Force $sent1 -ErrorAction SilentlyContinue
+  $p1 = ($killed1 -and $unblocked1)
+  if (-not $p1) { $allPass = $false }
+  Write-Host ("[rehearse-timeout] KILL: sentinel=" + $killed1 + " elapsed=" + [Math]::Round($elapsed1, 1) + "s (<30 expected) " + $(if ($p1) { "OK" } else { "FAIL" }))
+
+  # Case 2: a fast child completes normally -> no kill, no sentinel.
+  $sent2 = Join-Path $env:TEMP ("loop-wedge-rehearse-pass-" + $PID + ".flag")
+  Remove-Item -Force $sent2 -ErrorAction SilentlyContinue
+  $job2 = Start-WedgeMonitor $PID 30 $sent2
+  "x" | & cmd /c "ping -n 2 127.0.0.1 >nul" 2>&1 | Out-Null
+  Stop-WedgeMonitor $job2
+  $killed2 = Test-Path $sent2
+  Remove-Item -Force $sent2 -ErrorAction SilentlyContinue
+  $p2 = (-not $killed2)
+  if (-not $p2) { $allPass = $false }
+  Write-Host ("[rehearse-timeout] PASS-THROUGH: fast child, sentinel=" + $killed2 + " (expected False) " + $(if ($p2) { "OK" } else { "FAIL" }))
+
+  # Case 3: disabled (<=0) -> no monitor job at all (legacy infinite wait preserved exactly).
+  $job3 = Start-WedgeMonitor $PID 0 (Join-Path $env:TEMP "loop-wedge-rehearse-off.flag")
+  $p3 = ($null -eq $job3)
+  Stop-WedgeMonitor $job3
+  if (-not $p3) { $allPass = $false }
+  Write-Host ("[rehearse-timeout] DISABLED: timeout<=0 -> no monitor job (" + $(if ($p3) { "OK" } else { "FAIL" }) + ")")
+
+  if ($allPass) { Write-Host "[rehearse-timeout] PASS"; exit 0 } else { Write-Host "[rehearse-timeout] FAIL"; exit 1 }
 }
 
 if (-not $RepoPath -or $RepoPath -eq "") { $RepoPath = (Get-Location).Path }
@@ -347,6 +469,12 @@ while ($true) {
   if ($Model -ne "") { $claudeArgs += @("--model", $Model) }
   $iterStart = Get-Date
   $iterExit = $null
+  # Arm the wedge monitor around the (otherwise unbounded) claude pipe. On a genuine multi-hour hang it
+  # force-kills the claude tree so the pipe below unblocks; on the happy path it is Stop-Job'd in the
+  # finally long before it fires, leaving the streaming invocation byte-identical to before.
+  $wedgeSentinel = Join-Path $env:TEMP ("loop-wedge-" + $PID + "-" + $iter + ".flag")
+  if (Test-Path $wedgeSentinel) { Remove-Item -Force $wedgeSentinel -ErrorAction SilentlyContinue }
+  $wedgeJob = Start-WedgeMonitor $PID $IterationTimeoutSeconds $wedgeSentinel
   try {
     # Pipe the UTF-8 prompt to claude headless via stdin; tee output to the log.
     $prompt | & $ClaudeCmd @claudeArgs 2>&1 | Tee-Object -FilePath $logFile -Append
@@ -354,6 +482,15 @@ while ($true) {
     Write-Log ("iteration #" + $iter + " done (exit=" + $iterExit + ")")
   } catch {
     Write-Log ("iteration #" + $iter + " exception: " + $_.Exception.Message)
+  } finally {
+    Stop-WedgeMonitor $wedgeJob
+  }
+  # If the monitor fired, the turn was a wedge: log LOUDLY and continue. The heartbeat below keeps the
+  # lane's central-status row fresh (so the reporter does NOT escalate to the 4h "manual restart" banner),
+  # and the next iteration re-reads the prompt (hot-swap) -> the runner self-heals with no human action.
+  if (Test-Path $wedgeSentinel) {
+    Write-Log ("!!! iteration #" + $iter + " WEDGE TIMEOUT: claude turn exceeded " + $IterationTimeoutSeconds + "s and its process tree was force-killed; runner continues (heartbeat + next iteration self-heal).")
+    Remove-Item -Force $wedgeSentinel -ErrorAction SilentlyContinue
   }
 
   # Liveness heartbeat: keep this lane's central-status row honest (fresh timestamp; rich agent note
