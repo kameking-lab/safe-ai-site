@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 
 import FAQHubPage from "./page";
 import FAQSearchPage from "./search/page";
@@ -42,6 +42,17 @@ describe("/faq 柱0 44pxタップ標的", () => {
     render(<FAQHubPage />);
     const link = screen.getByRole("link", { name: /FAQを検索する/ });
     expect(link.className).toContain("min-h-[44px]");
+  });
+
+  it("検索: 検索結果の開閉ボタンが 44px タップ標的を満たす", () => {
+    render(<FAQSearchPage />);
+    const input = screen.getByPlaceholderText(/例: ストレスチェック/);
+    fireEvent.change(input, { target: { value: "ストレスチェック" } });
+    const toggles = screen.getAllByRole("button", { expanded: false });
+    expect(toggles.length).toBeGreaterThan(0);
+    toggles.forEach((toggle) => {
+      expect(toggle.className).toContain("min-h-[44px]");
+    });
   });
 });
 

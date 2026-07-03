@@ -20,7 +20,7 @@ function SearchResultItem({ faq }: { faq: FAQ }) {
     <div className="border border-slate-200 rounded-xl bg-white shadow-sm overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full text-left px-4 py-3 flex items-start gap-3"
+        className="w-full min-h-[44px] text-left px-4 py-3 flex items-start gap-3"
         aria-expanded={open}
       >
         <span className="shrink-0 mt-0.5 text-xs font-bold text-sky-600 bg-sky-50 border border-sky-200 rounded px-1.5 py-0.5">
