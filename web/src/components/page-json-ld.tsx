@@ -1,7 +1,12 @@
 import { JsonLd, webPageSchema, breadcrumbSchema } from "./json-ld";
 import { Breadcrumb, type BreadcrumbItem } from "./breadcrumb";
+import { SITE_URL } from "@/lib/seo-metadata";
 
-const SITE_BASE = "https://www.anzen-ai-portal.jp";
+// 柱C-4: サイトURLは seo-metadata.ts の単一ソース（SITE_URL）から取る。
+// json-ld.tsx は #530 で集約済みだが本ファイルはドメイン文字列を直書きしたまま
+// 取り残されており、SITE_URL 変更時に WebPage @id / breadcrumb URL が旧ドメインへ
+// ドリフトする穴だった。エイリアスは名称のみ残し値はハードコードしない。
+const SITE_BASE = SITE_URL;
 
 type Crumb = { name: string; url: string };
 
