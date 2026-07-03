@@ -1,5 +1,21 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: /accidents/[id] 事故詳細「事故DBに戻る」・類似事例タイトルリンク 柱0(44px)
+
+**イテレーション頭の回収**: 自班の緑PR2件を squash マージ＝#668(トップ死亡事故パネル4タップ標的44px)・#663(視覚パンくず可視化)。両方 e2e/smoke pass 確認済みでコンフリクトなし。PR #687(トップAlertGenerator・関連リンク44px)はCI pending のため次サイクル回収。`git checkout main && git pull --ff-only` で clean 確認。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手最上位＝2026-07-03 Explore調査で発見済みの `/accidents/[id]` 事故詳細ページの2箇所。「事故DBに戻る →」リンク(パディング無し・text-xs≈16px)と類似事故カードのタイトルリンク(block text-xs・パディング無し)がいずれも44px未満で、詳細ページから一覧へ戻る主導線・関連事故への遷移リンクが指の押し損ねサイズだった。ブランチ `ux-hub/accident-detail-back-related-links-44px`（main起点）。
+
+**変更**: `web/src/app/(main)/accidents/[id]/page.tsx` の「事故DBに戻る →」リンクに `inline-flex min-h-[44px] items-center px-2`、類似事例タイトルリンク(`block`→`flex`)に `min-h-[44px] items-center` を付与。純粋なクラス変更でレイアウト・遷移先・ロジック不変。
+
+**テスト**: `page.test.tsx` を新設（2ケース）。async サーバーコンポーネントを `await AccidentDetailPage({ params })` で描画し、類似事例が存在する事故(同type/workCategoryが他に存在するものをデータセットから自動選定)で「事故DBに戻る」リンクと類似事例セクション内タイトルリンク全件の className に `min-h-[44px]`・`items-center` を保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存警告23件は無関係）/ vitest 279 files・2358 tests 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/accident-detail-back-related-links-44px-noread-2026-07-03.mjs` を **4/4 PASS**（next start実機・スマホ390×844）。/accidents一覧を型フィルタ(墜落)で一覧表示→詳細ページへ遷移→「事故DBに戻る →」リンクと類似事例タイトルリンク3本の実boundingBoxが全てheight=44pxであることを確認。
+
+---
+
 ## 2026-06-14 — 補充: /resources 厚労省一次資料DB フィルタ・各エントリ操作 柱0(44px)
 
 **イテレーション頭の回収**: 自班の緑PR #564(/safety-signs サブページ44px)が main とコンフリクト（自班トラッキング文書 BACKLOG-ux-hub.md・cycle-log-ux-hub.md のみ衝突＝コード非衝突）。`git merge origin/main`→両文書を両エントリ保持で手解決→push→CI再走で squash マージ済み(#564)。PR #567(/court-cases 詳細44px)は smoke/e2e pending のため次サイクルで回収。`git checkout main && git pull --ff-only` で clean 確認。
@@ -490,3 +506,21 @@
 **無読テスト**: `docs/third-party-reviews/scripts/features-use-cases-court-employer-liability-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**52/52 PASS**（/features/use-cases 関連機能ピル48件・/court-cases/employer-liability 論点チップ4件、全てboundingBox height≥44px実測）。
 
 **残課題**: BACKLOG-ux-hub.md未着手は1件（トップhome-three-pillars=PR #668で着手済み・マージ待ち）のみに減少。PR #668・#663のCI回収は次イテレーション。3件未満のためExplore委任で補充調査を実施し、実在確認済みの2件（`/accidents/[id]`の「事故DBに戻る」リンク・類似事故カードのタイトルリンク／`/diversity/women`のAmazon・楽天アフィリエイトボタン・関連ページナビ3リンク、いずれも44px未満をコード確認済み）をBACKLOG-ux-hub.mdへ追記（PR #682へ追加コミット）。Explore調査中に発生したリポジトリ外への一時ファイル書き出し(`C:\Users\kanet\ux-hub-scan.txt`)は削除済み。
+
+---
+
+## 2026-07-03 ux-hub/diversity-women-44px-targets
+
+**イテレーション頭の回収**: 自班のローカルCI待ちブランチが2件あることを確認（`ux-hub/accident-detail-back-related-links-44px`=PR #690・`ux-hub/top-alertgenerator-related-link-44px`=PR #687）。#687をマージ試行したところ、main（`origin/main`）に既に別インスタンスが同一ファイル(`home-three-pillars.tsx`)の同一AlertGenerator/リンクを44px化するPR #668が先着マージ済みと判明し、`git merge`でコンフリクトを実際に確認した上で重複と断定。`gh pr close 687 --delete-branch`でクローズ（重複作業の解消）。続けて残りの緑PR `docs/ux-hub-backlog-supplement-2026-07-03`(PR #692・柱0補充候補3件追記のみ)をsquashマージ。`git checkout main && git pull --ff-only`でclean確認。PR #690（事故詳細の戻る/類似事例リンク44px化）はCI(smoke)がまだ進行中のため今回はマージ見送り、次イテレーションで回収。
+
+**タスク源**: BACKLOG-ux-hub.md未着手の最上位（1番目=/accidents/[id]戻る導線はPR #690で着手済み・マージ待ちのためスキップ）に続く「/diversity/women のAmazon・楽天アフィリエイトボタン8個・関連ページナビ3リンクが44px未満」。
+
+**修正**: `diversity/women/page.tsx`の4個のPPEカードそれぞれが持つAmazon/楽天アフィリエイトボタン（計8個、`py-2 text-xs`≈32px）と、下部「関連ページ」ナビグリッドの3リンク（`px-3 py-2 text-xs`）に`min-h-[44px]`（ナビリンクは`flex items-center justify-center`も追加）を付与。純粋なクラス追加でレイアウト・アフィリエイトURL生成ロジック・遷移先は不変。
+
+**テスト**: `women-44px-targets.test.tsx`を新設（vitest 2件）。アフィリエイトボタン全件・関連ページナビ全件のclassNameに`min-h-[44px]`を含むことを保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 281 files・2379 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/diversity-women-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**11/11 PASS**（Amazonで探す×4・楽天で探す×4・関連ページナビ×3、全てboundingBox height≥44px実測）。
+
+**残課題**: BACKLOG-ux-hub.md未着手は4件（/accidents/[id]戻る導線=PR #690マージ待ち・/industries一覧「開く→」リンク・/industries/[industry]副リンク群+キーワードピル・/accidents/[id]出典元リンク）。PR #690のCI回収は次イテレーション。

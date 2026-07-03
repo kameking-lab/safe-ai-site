@@ -3,19 +3,21 @@
  * 画面では非表示（hidden）、印刷時のみ表示（paper-view が hidden print:block で包む）。
  * 各社マトリクスを正式な表組みで再現。点検項目・使用機械・確認欄を含む。
  *
- * S1（打合せ用紙 直接操作UI・第一弾〜第四弾）: KYと同じ方式で省略可能な `editing` prop を追加。
+ * S1（打合せ用紙 直接操作UI・第一弾〜第五弾）: KYと同じ方式で省略可能な `editing` prop を追加。
  * 指定時のみヘッダー7欄・明日のイベント5欄・統括安全責任者コメント・各社マトリクス7部位（第四弾で
- * 必要資格・予定人員・予想災害を追加し全部位が対応完了）がタップ標的（EditableCell）になる。
+ * 必要資格・予定人員・予想災害を追加し全部位が対応完了）・搬入出（第五弾・動的行）・
+ * 点検項目8カテゴリ（第六弾・カテゴリ単位）がタップ標的（EditableCell）になる。
  * **`editing` 未指定の出力HTMLは従来と完全一致**
  * （meeting-print-sheet.test.tsx のスナップショットで機械的に固定＝A4正式書式は不可侵）。
  */
 import type { ReactNode } from "react";
 import { CONTRACTOR_TYPES, PRIORITY_LABEL, type MeetingRecord, type ContractorType } from "@/lib/meeting/schema";
-import { contractorFieldKey, getMeetingPaperFieldDef, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
+import { checklistFieldKey, contractorFieldKey, deliveryFieldKey, getMeetingPaperFieldDef, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
 
 const th = "border border-black bg-slate-100 px-1 py-0.5 text-center align-middle font-bold";
 const td = "border border-black px-1 py-0.5 align-top";
-const STATUS_MARK = { ok: "○", ng: "×", na: "－" } as const;
+/** 点検項目のステータス表示マーク。canvas第六弾のエディタ内tri-stateボタンとも共有。 */
+export const STATUS_MARK = { ok: "○", ng: "×", na: "－" } as const;
 const TYPE_PAD: Record<ContractorType, string> = { 元請: "0", "1次": "6px", "2次": "12px", "3次": "18px" };
 
 export type MeetingPrintSheetEditing = {
@@ -27,6 +29,8 @@ export type MeetingPrintSheetEditing = {
   emptyKeys?: ReadonlySet<string>;
   /** 各社マトリクスの行追加ホットスポット（S1第三弾: 動的行）。省略時は「＋元請/1次/2次/3次」を出さない。 */
   onAddContractorRow?: (type: ContractorType) => void;
+  /** 搬入出予定の行追加ホットスポット（S1第五弾: 動的行）。省略時は「＋搬入出行を追加」を出さない。 */
+  onAddDeliveryRow?: () => void;
 };
 
 /**
@@ -217,10 +221,39 @@ export function MeetingPrintSheet({ record, editing }: { record: MeetingRecord; 
         <table className="w-full border-collapse">
           <thead><tr><th className={`${th} w-[40%]`}>搬入出 物</th><th className={`${th} w-[25%]`}>時刻</th><th className={th}>場所</th></tr></thead>
           <tbody>
-            {record.deliveries.filter((d) => d.item || d.time || d.place).map((d) => (
-              <tr key={d.id}><td className={td}>{d.item}</td><td className={`${td} text-center`}>{d.time}</td><td className={td}>{d.place}</td></tr>
-            ))}
-            {record.deliveries.every((d) => !d.item && !d.time && !d.place) && (<tr><td className={td}>&nbsp;</td><td className={td}></td><td className={td}></td></tr>)}
+            {editing ? (
+              <>
+                {/* S1第五弾: 動的行。全行(空欄含む)をタップ標的にする */}
+                {record.deliveries.map((d) => (
+                  <tr key={d.id}>
+                    <td className={td}><EditableCell editing={editing} fieldKey={deliveryFieldKey(d.id, "item")}>{d.item}</EditableCell></td>
+                    <td className={`${td} text-center`}><EditableCell editing={editing} fieldKey={deliveryFieldKey(d.id, "time")}>{d.time}</EditableCell></td>
+                    <td className={td}><EditableCell editing={editing} fieldKey={deliveryFieldKey(d.id, "place")}>{d.place}</EditableCell></td>
+                  </tr>
+                ))}
+                {editing.onAddDeliveryRow && (
+                  <tr>
+                    <td colSpan={3} className={`${td} text-center`}>
+                      <button
+                        type="button"
+                        data-zoompan-skip="1"
+                        onClick={editing.onAddDeliveryRow}
+                        className="min-h-[36px] rounded border border-dashed border-sky-400 bg-sky-50/70 px-3 py-1 text-xs font-bold text-sky-800 hover:bg-sky-100"
+                      >
+                        ＋搬入出行を追加
+                      </button>
+                    </td>
+                  </tr>
+                )}
+              </>
+            ) : (
+              <>
+                {record.deliveries.filter((d) => d.item || d.time || d.place).map((d) => (
+                  <tr key={d.id}><td className={td}>{d.item}</td><td className={`${td} text-center`}>{d.time}</td><td className={td}>{d.place}</td></tr>
+                ))}
+                {record.deliveries.every((d) => !d.item && !d.time && !d.place) && (<tr><td className={td}>&nbsp;</td><td className={td}></td><td className={td}></td></tr>)}
+              </>
+            )}
           </tbody>
         </table>
         <table className="w-full border-collapse">
@@ -236,10 +269,12 @@ export function MeetingPrintSheet({ record, editing }: { record: MeetingRecord; 
             <tr key={ri}>
               {row.map((cat) => (
                 <td key={cat.key} className={`${td} w-1/4`}>
-                  <span className="font-bold">{cat.label}: </span>
-                  {cat.items.map((it) => (
-                    <span key={it.key} className="mr-1 whitespace-nowrap">{it.label}<span className="font-bold">{STATUS_MARK[it.status]}</span></span>
-                  ))}
+                  <EditableCell editing={editing} fieldKey={checklistFieldKey(cat.key)}>
+                    <span className="font-bold">{cat.label}: </span>
+                    {cat.items.map((it) => (
+                      <span key={it.key} className="mr-1 whitespace-nowrap">{it.label}<span className="font-bold">{STATUS_MARK[it.status]}</span></span>
+                    ))}
+                  </EditableCell>
                 </td>
               ))}
             </tr>
