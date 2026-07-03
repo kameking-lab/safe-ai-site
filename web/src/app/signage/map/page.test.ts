@@ -14,6 +14,7 @@ describe("/signage/map metadata", () => {
   });
 
   it("twitter カードを summary_large_image で設定", () => {
-    expect(metadata.twitter?.card).toBe("summary_large_image");
+    const tw = metadata.twitter as Record<string, unknown>;
+    expect(tw.card).toBe("summary_large_image");
   });
 });
