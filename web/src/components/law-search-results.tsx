@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { allLawArticles, type LawArticle } from "@/data/laws";
 import { SITE_STATS } from "@/data/site-stats";
 import { SimpleMarkdown } from "@/components/simple-markdown";
@@ -169,10 +169,38 @@ function AiSummaryModal({
   const [summary, setSummary] = useState("");
   const { language } = useLanguage();
   const isEn = language === "en";
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  // 開いた際に閉じるボタンへ初期フォーカス、閉じた際は開く直前にフォーカスがあった要素へ復帰
+  useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    closeButtonRef.current?.focus();
+    return () => {
+      previouslyFocused?.focus();
+    };
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const focusables = dialogRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusables || focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -207,6 +235,7 @@ function AiSummaryModal({
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         className="w-full max-w-lg rounded-2xl bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
@@ -216,6 +245,7 @@ function AiSummaryModal({
             <p id="ai-summary-title" className="text-sm font-bold text-slate-900">{article.articleTitle || (isEn ? "AI summary" : "AI要約")}</p>
           </div>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             aria-label={isEn ? "Close this dialog" : "このダイアログを閉じる"}

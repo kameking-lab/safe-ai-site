@@ -585,6 +585,22 @@ function Get-UniqueLogDirs {
   return $out
 }
 
+# Extract a marker-delimited region (BEGIN..END inclusive) from a status file's lines, or an empty array
+# when the markers are absent/malformed. Pure so -SelfTest covers it offline. Used to PRESERVE the
+# eval-quality warning banner (owned by loop-eval-nightly.ps1) verbatim across a launcher full render -
+# the launcher rewrites the whole file, so without this a full pass (logon / 07:00) would silently wipe a
+# live below-target warning, re-introducing exactly the silent-degradation this lane exists to kill.
+function Get-RegionLines {
+  param([string[]]$Lines, [string]$BeginMarker, [string]$EndMarker)
+  $b = -1; $e = -1
+  for ($k = 0; $k -lt $Lines.Count; $k++) {
+    if (([string]$Lines[$k]).Trim() -eq $BeginMarker) { $b = $k }
+    elseif (([string]$Lines[$k]).Trim() -eq $EndMarker) { $e = $k; break }
+  }
+  if ($b -ge 0 -and $e -gt $b) { return @($Lines[$b..$e]) }
+  return @()
+}
+
 # ---------------------------------------------------------------------------
 # Isolate the weekly critic in a dedicated git worktree. The critic runs as -Lane site and does
 # git checkout/commit/push; the ops persistent runner works the SAME main tree, so running the
@@ -1057,6 +1073,15 @@ if ($SelfTest) {
     $udBlank = @(Get-UniqueLogDirs -Dirs @("C:\a\logs", "", "C:\b\logs"))
     Assert-L "logdirs: blank entries are dropped" ($udBlank.Count -eq 2)
     Assert-L "logdirs: empty input yields empty" (@(Get-UniqueLogDirs -Dirs @()).Count -eq 0)
+    # L2) Get-RegionLines: preserve the eval-quality banner verbatim across a full render (BEGIN..END
+    #     inclusive), and return empty when the markers are absent or malformed (no banner to preserve).
+    $eb = "<!-- EVAL-QUALITY:BEGIN (managed by loop-eval-nightly.ps1) -->"
+    $ee = "<!-- EVAL-QUALITY:END -->"
+    $rgDoc = @("top line", $eb, "## WARN below target", "detail", $ee, "## SELF-REPORT HEADER", "- ops : ...")
+    $rg = @(Get-RegionLines -Lines $rgDoc -BeginMarker $eb -EndMarker $ee)
+    Assert-L "region: extracts BEGIN..END inclusive" (($rg.Count -eq 4) -and ($rg[0] -eq $eb) -and ($rg[$rg.Count - 1] -eq $ee))
+    Assert-L "region: absent markers -> empty (nothing to preserve)" (@(Get-RegionLines -Lines @("a", "b") -BeginMarker $eb -EndMarker $ee).Count -eq 0)
+    Assert-L "region: END-before-BEGIN (malformed) -> empty" (@(Get-RegionLines -Lines @($ee, $eb) -BeginMarker $eb -EndMarker $ee).Count -eq 0)
     # M) Test-RunnerBelowFloor: a runner started before the floor is stale; one started at/after carries
     #    the fix; an empty/garbage floor disables the whole cycle (never below floor = fail-safe).
     $floor = "2026-07-03T13:43:09+09:00"
@@ -1676,8 +1701,20 @@ function Write-Status {
 # Markers are ASCII literals shared with loop-report-status.ps1.
 $reportBegin = "<!-- LANE-REPORT:BEGIN (managed by loop-report-status.ps1) -->"
 $reportEnd = "<!-- LANE-REPORT:END -->"
+# Eval-quality warning banner markers (owned by loop-eval-nightly.ps1). Preserved verbatim here so a
+# launcher full render never wipes a live below-target warning (see Get-RegionLines).
+$evalBegin = "<!-- EVAL-QUALITY:BEGIN (managed by loop-eval-nightly.ps1) -->"
+$evalEnd = "<!-- EVAL-QUALITY:END -->"
 function Add-LaneReportSection {
   Add-Status ""
+  # Preserve the below-target eval-quality banner (if the current file carries one) just ABOVE the
+  # self-report header - the same anchor loop-eval-nightly.ps1 places it at - so a full pass keeps it.
+  if (Test-Path $statusPath) {
+    try {
+      $evalRegion = Get-RegionLines -Lines @(Get-Content -Encoding UTF8 -Path $statusPath) -BeginMarker $evalBegin -EndMarker $evalEnd
+      if ($evalRegion.Count -gt 0) { foreach ($l in $evalRegion) { Add-Status ([string]$l) }; Add-Status "" }
+    } catch {}
+  }
   Add-Status (S "reportHeader")
   Add-Status ""
   $preserved = $null

@@ -218,7 +218,7 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
         </p>
         <Link
           href="/profile"
-          className="mt-2 inline-block rounded-full border border-emerald-400 bg-white px-3 py-1 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
+          className="mt-2 inline-flex min-h-[44px] items-center rounded-full border border-emerald-400 bg-white px-3 text-xs font-bold text-emerald-800 hover:bg-emerald-100"
         >
           /profile を開く →
         </Link>
@@ -237,7 +237,7 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
         </h3>
         <Link
           href="/profile"
-          className="rounded-full border border-rose-300 bg-white px-3 py-1 text-[11px] font-bold text-rose-800 hover:bg-rose-100"
+          className="inline-flex min-h-[44px] items-center rounded-full border border-rose-300 bg-white px-3 text-[11px] font-bold text-rose-800 hover:bg-rose-100"
         >
           自社設定 →
         </Link>
@@ -312,7 +312,7 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   <Link
                     href={detailHref}
-                    className="inline-flex items-center gap-1 rounded-full border border-rose-300 bg-white px-2 py-0.5 text-[11px] font-bold text-rose-800 hover:bg-rose-50"
+                    className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-rose-300 bg-white px-2 text-[11px] font-bold text-rose-800 hover:bg-rose-50"
                   >
                     {linkLabel}
                   </Link>
