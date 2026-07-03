@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { CONTRACTOR_TYPES, type ContractorType } from "@/lib/meeting/schema";
 import type { ContributionPayload } from "@/lib/meeting/distributed";
 import { fetchContributeContext, submitContribution, revertContribution } from "@/lib/meeting/cloud";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 const CID_KEY = (token: string) => `safe-ai:meeting-contrib-cid:${token}`;
 const emptyPayload = (): ContributionPayload => ({
@@ -105,19 +107,30 @@ export function ContributeClient({ token }: { token: string }) {
   return (
     <div className="mx-auto max-w-xl px-4 py-6">
       <h1 className="text-lg font-bold text-slate-900">協力会社 入力フォーム</h1>
-      <p className="mt-1 text-sm text-slate-600">
-        元請から共有された打合せ書に、<strong>自社分</strong>を入力してください。送信すると元請の画面に自動で集約されます。
-      </p>
-      <div className="mt-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900">
-        現場: {ctx.siteName || "（未設定）"}　／　作業日: {ctx.workDate || "（未設定）"}
-        {cid && <span className="ml-2 rounded bg-white px-1.5 py-0.5 text-[10px] text-sky-700">この端末は編集者として登録済み（再送信で上書き）</span>}
+
+      {/* 結論カード（柱0）: いまの状態＝未送信/編集中/送信済みを3秒で。 */}
+      <div className="mt-3">
+        <ConclusionCard
+          tone={done ? "safe" : "info"}
+          title={done ? "送信済み" : cid ? "編集中（送信済みあり）" : "未送信"}
+          description={
+            done
+              ? "元請の画面に自動集約されました。修正があれば続けて編集し、再送信してください。"
+              : cid
+                ? "前回の送信内容を編集できます。修正のうえ再送信してください。"
+                : "自社分の内容を入力し、送信してください。送信すると元請の画面に自動で集約されます。"
+          }
+        >
+          <StatusBadge tone="neutral" size="sm">現場: {ctx.siteName || "（未設定）"}</StatusBadge>
+          <StatusBadge tone="neutral" size="sm">作業日: {ctx.workDate || "（未設定）"}</StatusBadge>
+          {cid && <StatusBadge tone="info" size="sm">この端末は編集者として登録済み</StatusBadge>}
+        </ConclusionCard>
       </div>
 
       {done ? (
-        <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
-          <p className="font-bold">送信しました。元請の画面に集約されます。</p>
-          <p className="mt-1 text-xs">修正があれば、このリンクを再度開いて編集・再送信できます（この端末で開けば前回内容が復元されます）。</p>
-          <button type="button" onClick={() => setDone(false)} className="mt-3 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700">続けて編集する</button>
+        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+          <p className="text-xs">このリンクを再度開いて編集・再送信できます（この端末で開けば前回内容が復元されます）。</p>
+          <button type="button" onClick={() => setDone(false)} className="mt-3 inline-flex min-h-[44px] items-center rounded-lg border border-emerald-300 bg-white px-4 py-2 text-sm font-semibold text-emerald-700">続けて編集する</button>
         </div>
       ) : (
         <div className="mt-4 space-y-3">
@@ -153,7 +166,7 @@ export function ContributeClient({ token }: { token: string }) {
           </button>
           {cid && historyCount > 1 && (
             <button type="button" disabled={saving} onClick={() => void onRevert()}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">
+              className="min-h-[44px] w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-50">
               ↩ 一つ前の入力内容に戻す（履歴は30日保持）
             </button>
           )}
