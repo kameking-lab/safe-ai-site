@@ -32,6 +32,22 @@
 
 ---
 
+## 2026-07-03 — 補充: /industries/[industry] 業種詳細ページ 副リンク6箇所＋キーワードピル 柱0(44px)
+
+**イテレーション頭の回収**: 自班の未マージPRは #701（業種一覧「開く →」リンク44px化）のみでCI pendingのため見送り、次サイクルで回収。`git checkout main && git pull --ff-only` で clean 確認（他班の並行マージによりfast-forward）。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手最上位＝2026-07-03 Explore調査で発見済みの `/industries/[industry]` 業種詳細ページ。同一ページ内で構造的に反復する副リンクパターン(`inline-flex items-center gap-1 text-xs`のみでpy無し＝条文検索を開く/法改正一覧/通達一覧をすべて見る/KY用紙作成ツールを開く/化学物質リスクアセスメント/化学物質データベース/特別教育・技能講習ファインダーの6箇所)と、ヒーローのhref付きキーワードピル(`px-2.5 py-0.5 text-xs`≈22-24px)が44px未満だった。ブランチ `ux-hub/industry-detail-sub-links-pill-44px`（main起点）。
+
+**変更**: `web/src/app/(main)/industries/[industry]/page.tsx` の副リンク6箇所に `min-h-[44px] px-2`、ヒーローのhref付きキーワードピルに `min-h-[44px]` を付与。href無しの装飾用span(該当キーワードにリンク先が無い場合の代替表示)はタップ標的でないため非改変。純粋なクラス追加でレイアウト・遷移先・ロジック不変。
+
+**テスト**: `industry-detail-44px-targets.test.tsx` を新設（2ケース）。async サーバーコンポーネントを `await IndustryLandingPage({ params })` で描画し、construction(keyword href あり・chemicalSubstances 非空で全パターン網羅)を対象に、対象8要素すべての className に `min-h-[44px]` を保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存警告23件は無関係）/ vitest 283 files・2402 tests 全pass / build 成功。
+
+**無読テスト**: next start実機（ポート3901・スマホ390×844）のPlaywright boundingBox実測で、/industries/construction の対象8要素（副リンク6・キーワードピル1・+検証用1）すべてheight=44.0pxであることを確認。
+
+---
+
 ## 2026-07-03 — 補充: /accidents/[id] 事故詳細「事故DBに戻る」・類似事例タイトルリンク 柱0(44px)
 
 **イテレーション頭の回収**: 自班の緑PR2件を squash マージ＝#668(トップ死亡事故パネル4タップ標的44px)・#663(視覚パンくず可視化)。両方 e2e/smoke pass 確認済みでコンフリクトなし。PR #687(トップAlertGenerator・関連リンク44px)はCI pending のため次サイクル回収。`git checkout main && git pull --ff-only` で clean 確認。
