@@ -26,13 +26,12 @@ import {
   searchItems,
   countByCategory,
   CATEGORY_META,
+  SEARCH_CATEGORIES,
   type SearchItem,
   type SearchCategory,
 } from '@/lib/search-index';
 import { EGOV_LAW_SEARCH_URL, egovHandoffQuery } from '@/lib/cross-search';
 import { trackEvent } from '@/components/Analytics';
-
-const CATEGORIES: SearchCategory[] = ['law', 'faq', 'precedent', 'notice', 'chemical', 'equipment', 'education', 'accident', 'glossary', 'sign'];
 
 // /search はサイト内検索結果ページ（全件表示）。コマンドパレット(⌘K)が上位10件の
 // クイック移動なのに対し、こちらは件数無制限・URL共有可能・カテゴリ別タブを備える。
@@ -60,7 +59,7 @@ export function SearchResults() {
   const urlQuery = searchParams.get('q') ?? '';
   const urlCat = searchParams.get('cat');
   const activeCategory: 'all' | SearchCategory =
-    urlCat && (CATEGORIES as string[]).includes(urlCat) ? (urlCat as SearchCategory) : 'all';
+    urlCat && (SEARCH_CATEGORIES as readonly string[]).includes(urlCat) ? (urlCat as SearchCategory) : 'all';
 
   const [input, setInput] = useState(urlQuery);
   const [index, setIndex] = useState<SearchItem[]>([]);
@@ -171,7 +170,7 @@ export function SearchResults() {
             active={activeCategory === 'all'}
             onClick={() => pushQuery(urlQuery, 'all')}
           />
-          {CATEGORIES.map((cat) => (
+          {SEARCH_CATEGORIES.map((cat) => (
             <CategoryTab
               key={cat}
               label={CATEGORY_META[cat].label}
