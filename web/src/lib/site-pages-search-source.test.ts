@@ -140,5 +140,22 @@ describe('site-pages-search-source（機能ページ射影の drift ガード）
       );
       expect(missing, `射影から漏れた補充URL: ${missing.join(', ')}`).toEqual([]);
     });
+
+    it('対象ユーザー4類型のペルソナ別ポータル /for/<persona> が立場名 keyword で結線されている', () => {
+      // サイトの唯一のゴール（対象4類型が日本一使いやすい）に直結する入口ハブ。立場名で 0 件
+      // だった発見性の穴を塞ぐため、各ポータルが「その立場を名指す語」で引けることを機械固定する。
+      const byUrl = new Map(entries.map((e) => [e.url, e]));
+      const personaKeyword: Record<string, string> = {
+        '/for/construction': '職長',
+        '/for/solo': '一人親方',
+        '/for/manager': '安全衛生担当',
+        '/for/consultant': '社労士',
+      };
+      for (const [url, kw] of Object.entries(personaKeyword)) {
+        const hub = byUrl.get(url);
+        expect(hub, `${url} が射影されていない`).toBeTruthy();
+        expect(hub?.keywords, `${url} に立場名 keyword「${kw}」が無い`).toContain(kw);
+      }
+    });
   });
 });
