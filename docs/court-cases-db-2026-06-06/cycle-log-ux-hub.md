@@ -1,8 +1,24 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: /industries 業種一覧テーブル「開く →」リンク 柱0(44px)
+
+**イテレーション頭の回収**: 自班の緑PR2件を squash マージ＝#697(/diversity/women PPE/アフィリエイトボタン・関連ページ44px)・#690(/accidents/[id] 戻る・類似事例リンク44px)。#690はBACKLOG-ux-hub.md/cycle-log-ux-hub.mdの記録行のみ他班マージ分とコンフリクト（コード非衝突）→`git merge origin/main`で両エントリを保持する形に手解決→ゲート再走(tsc/lint/vitest 2386件/build)全緑→push→CI緑を確認しsquashマージ。`git checkout main && git pull --ff-only`でclean確認（テスト実行由来の一時差分 rag-metrics-latest.json 等はdiscard）。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手最上位＝2026-07-03 Explore調査で発見済みの `/industries` 業種一覧テーブル。統計テーブル各行の「開く →」リンク(`page.tsx` 241-246行付近、text-xsのみ・パディング無し)が44px未満で、個別業種ページへ飛ぶ唯一の導線が指の押し損ねサイズだった。ブランチ `ux-hub/industries-list-open-link-44px`（main起点）。
+
+**変更**: `web/src/app/(main)/industries/page.tsx` の「開く →」リンクに `inline-flex min-h-[44px] items-center justify-end px-2` を付与。純粋なクラス追加でレイアウト・遷移先不変。
+
+**テスト**: `page.test.tsx` に1ケース追加。テーブル内「開く →」リンク全件（表示中の全業種行）の className に `min-h-[44px]`・`items-center` を保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存警告23件は無関係）/ vitest 282 files・2390 tests 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/industries-list-open-link-44px-noread-2026-07-03.mjs` を **5/5 PASS**（next start実機・スマホ390×844）。/industriesページの業種別統計テーブル5行すべての「開く →」リンクの実boundingBoxがheight=44pxであることを確認。
+
+---
+
 ## 2026-07-03 — 補充: /industries/[industry] 業種詳細ページ 副リンク6箇所＋キーワードピル 柱0(44px)
 
-**イテレーション頭の回収**: 自班の未マージPRは #701(業種一覧「開く →」リンク44px化)のみでCI pending のため見送り、次サイクルで回収。`git checkout main && git pull --ff-only` で clean 確認（他班の並行マージによりfast-forward）。
+**イテレーション頭の回収**: 自班の未マージPRは #701（業種一覧「開く →」リンク44px化）のみでCI pendingのため見送り、次サイクルで回収。`git checkout main && git pull --ff-only` で clean 確認（他班の並行マージによりfast-forward）。
 
 **タスク源**: BACKLOG-ux-hub.md 未着手最上位＝2026-07-03 Explore調査で発見済みの `/industries/[industry]` 業種詳細ページ。同一ページ内で構造的に反復する副リンクパターン(`inline-flex items-center gap-1 text-xs`のみでpy無し＝条文検索を開く/法改正一覧/通達一覧をすべて見る/KY用紙作成ツールを開く/化学物質リスクアセスメント/化学物質データベース/特別教育・技能講習ファインダーの6箇所)と、ヒーローのhref付きキーワードピル(`px-2.5 py-0.5 text-xs`≈22-24px)が44px未満だった。ブランチ `ux-hub/industry-detail-sub-links-pill-44px`（main起点）。
 
