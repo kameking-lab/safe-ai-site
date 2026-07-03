@@ -19,6 +19,8 @@ yarn.lock
 /test-results/
 /playwright-report/
 /audit-out/
+# 生成品質evalの実測レポート出力（正本記録は docs/ に明示コピーする運用）
+/.genquality/
 
 # next.js
 /.next/
