@@ -399,6 +399,24 @@
 
 ---
 
+## 2026-07-03 ux-hub/accidents-diversity-visible-breadcrumb
+
+**イテレーション頭の回収**: 自班の緑PR #646（S10・/signage/map SSRメタ＋/accidents出力3ボタン）はCI全緑を確認しsquashマージ→`git checkout main && git pull --ff-only`でclean確認。BACKLOG-ux-hub.md 未着手0件のため補充発動（指針: 「視覚パンくず可視化(画面側)」）。
+
+**調査**: Explore委任で担当route群の可視パンくず実装状況を調査したところ「大半のハブページに可視パンくずが無い」という結果が出たため着手。しかし実装確認の過程で、この初回サーベイが `PageJsonLd`（`web/src/components/page-json-ld.tsx`）内部に既に可視`<Breadcrumb>`が自動描画されている事実を見落としていたと判明（JSON-LD schemaの一部としか読んでいなかった）。同様に`ScaffoldPage`（/diversity/disability等7ページが使用）も内部で可視パンくずを描画済みと判明。当初 /safety-signs の3サブページに手動で`<Breadcrumb>`を追加したところvitestで「同一aria-labelのnavが2つ存在」の失敗が発生し、これを手がかりに`PageJsonLd`の既存自動描画を発見・当該3ファイルの変更を`git checkout`でロールバックした（捏造・重複防止）。
+
+**再調査で確定した真の欠落**: 担当19route・約60ページを`PageJsonLd`/`ScaffoldPage`/`<Breadcrumb>`直接使用/手書きnavの有無で全数grep確認し、欠落2件に絞り込み。①`/accidents`（事故DBハブ最上部）: 生の`JsonLd`+`breadcrumbSchema`のみでJSON-LDは出力されるが画面上のnavが皆無。②`/diversity/women`: 他7本のD&Iサブページ(disability/elderly/foreign-workers/lgbtq/non-regular/remote/sogi)は`ScaffoldPage`経由で「多様性と安全 › ページ名」の3階層パンくずを持つ中、本ページだけ独自実装で「多様性と安全に戻る」という単一リンクのみだった不整合。（`/features/print`・`/court-cases/print`はrobots noindexの印刷専用ビューのため意図的に対象外、`/accidents/[id]`は独自の手書きnavが既に可視のため対象外）
+
+**実装**: ①`/accidents`の`AccidentHubNav`直前に共通`Breadcrumb`（`web/src/components/breadcrumb.tsx`）で「事故データベース」の現在地を追加。②`/diversity/women`の「戻る」リンク（`ArrowLeft`アイコン+テキスト）を同じ共通`Breadcrumb`に置換し「多様性と安全 › 女性向け PPE・妊産婦就業ガイド」の2階層表示へ（他7ページと体裁統一）。いずれも純粋なnav差し替えで本文・データ・ロジックは不変。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・本変更に無関係）/ vitest 266 files・2237 tests 全pass（新規2件）/ build成功。
+
+**無読テスト**: `next start`実機で `/accidents` に「🏠 › 事故データベース」パンくずDOM出力、`/diversity/women` に「🏠 › 多様性と安全 › 女性向け PPE・妊産婦就業ガイド」パンくずDOM出力（旧「多様性と安全に戻る」テキストは消滅）をcurlで確認。
+
+**残課題**: なし（本タスクの範囲は完了）。次イテレーションはBACKLOG-ux-hub.md補充分から継続。(2026-07-03 / ux-hub/accidents-diversity-visible-breadcrumb)
+
+---
+
 ## 2026-07-03 ux-hub/quick-wbgt-shortcut-fix
 
 **イテレーション頭の回収**: 自班の緑PR #650(S12・設計ドラフト)をsquashマージ。直後にPR #646(S10)がmainとdocコンフリクト(BACKLOG-ux-hub.md・cycle-log-ux-hub.mdの単純追記競合のみ・コード非衝突)になったため `git merge origin/main` で両エントリ共存の手動解決→ゲート緑（`web/src/app/signage/map/page.test.ts` がmainの型定義更新後の`tsc`で`metadata.twitter?.card`型不整合を検出したため`Record<string, unknown>`castへ追補修正）→push（PR #646はCI再走中のため今回はマージせず次イテレーションで回収）。`git checkout main && git pull --ff-only` でclean確認。

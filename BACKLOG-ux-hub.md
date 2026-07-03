@@ -38,5 +38,7 @@
 - [ ] 【柱0補充候補・2026-07-03 Explore調査で発見】/accidents/[id] 事故詳細ページの「事故DBに戻る →」リンク(`page.tsx` 247-252行、パディング無し・text-xs≈16px)と類似事故カードのタイトルリンク(237-242行、block text-xs・パディング無し)が44px未満。前者は詳細ページから一覧へ戻る主導線、後者は関連事故への遷移リンクで、いずれも指の押し損ねサイズ。
 - [ ] 【柱0補充候補・2026-07-03 Explore調査で発見】/diversity/women の「Amazonで探す」「楽天で探す」アフィリエイトボタン(`page.tsx` 254-271行、py-2 text-xs≈32px)と「関連ページ」ナビグリッド3リンク(383-389行、px-3 py-2 text-xs)が44px未満。min-h/h-11いずれも未付与。
 
+- [x] 【補充・柱0】視覚パンくず可視化＝/accidents（ハブ最上部）と/diversity/womenの現在地表示欠落を是正。→ 全担当route調査の結果、`PageJsonLd`/`ScaffoldPage`/共通`Breadcrumb`のいずれかが既にほぼ全routeで可視パンくずを自動描画済みと判明（初回のExploreサーベイは`PageJsonLd`内部の自動描画を見落とし過大な欠落と誤判定→着手前に実装で検証し、既存の`safety-signs`3サブページへ二重描画するミスを自己検出・ロールバックして復旧）。実際の欠落は2箇所のみ：①/accidents（ハブ最上部・生JsonLd+breadcrumbSchemaのみで可視nav皆無）に共通`Breadcrumb`を追加、②/diversity/women（他7本のD&IサブページはScaffoldPage経由で3階層パンくず済みなのに本ページのみ「戻る」単一リンクだった不整合）を共通`Breadcrumb`へ置換。vitest 2件追加。next start実機で両ページのパンくずDOM出力・旧「戻る」テキスト消滅を確認。tsc=0/lint=0 errors/vitest 266 files・2237 tests全pass/build成功。(2026-07-03 / ux-hub/accidents-diversity-visible-breadcrumb)
+
 ## 補充の指針（未着手3件未満で起こす）
 - 自領域route の柱0未適用箇所・無読テスト不合格画面・第三者レビュー指摘。404どん詰まり解消・視覚パンくず可視化(画面側)。
