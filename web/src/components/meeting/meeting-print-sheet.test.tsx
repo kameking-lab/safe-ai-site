@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MeetingPrintSheet } from "@/components/meeting/meeting-print-sheet";
 import { normalizeMeetingRecord } from "@/lib/meeting/schema";
-import { contractorFieldKey, emptyMeetingPaperFieldKeys } from "@/lib/meeting/paper-fields";
+import { contractorFieldKey, deliveryFieldKey, emptyMeetingPaperFieldKeys } from "@/lib/meeting/paper-fields";
 
 describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
   const rec = normalizeMeetingRecord({
@@ -43,8 +43,8 @@ describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
     render(<MeetingPrintSheet record={rec} editing={{ onTapField }} />);
     const cells = screen.getAllByRole("button");
     // 静的13欄 + 各社1行ぶん11タップ標的（company/workContent/machines/qualifications/plannedCount/
-    // predictedDisasters/risk×2セル/safetyInstructions/responsibleName/actualCount）
-    expect(cells).toHaveLength(24);
+    // predictedDisasters/risk×2セル/safetyInstructions/responsibleName/actualCount）+ 搬入出1行ぶん3タップ標的
+    expect(cells).toHaveLength(27);
     fireEvent.click(screen.getByRole("button", { name: "打合せ日（前日）を入力" }));
     expect(onTapField).toHaveBeenCalledWith("meetingDate");
     fireEvent.click(screen.getByRole("button", { name: "作業日を入力" }));
@@ -94,6 +94,13 @@ describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
     expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "responsibleName"));
     fireEvent.click(screen.getByRole("button", { name: "実績人員（当日）を入力" }));
     expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "actualCount"));
+    const deliveryId = rec.deliveries[0]!.id;
+    fireEvent.click(screen.getByRole("button", { name: "搬入出（物）を入力" }));
+    expect(onTapField).toHaveBeenCalledWith(deliveryFieldKey(deliveryId, "item"));
+    fireEvent.click(screen.getByRole("button", { name: "時刻を入力" }));
+    expect(onTapField).toHaveBeenCalledWith(deliveryFieldKey(deliveryId, "time"));
+    fireEvent.click(screen.getByRole("button", { name: "場所を入力" }));
+    expect(onTapField).toHaveBeenCalledWith(deliveryFieldKey(deliveryId, "place"));
   });
 
   it("onAddContractorRow 指定時のみ「＋元請/1次/2次/3次」ホットスポットが出て、タップで型が渡る", () => {
@@ -112,6 +119,18 @@ describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
   it("onAddContractorRow 未指定では「＋元請」等のホットスポットが出ない", () => {
     render(<MeetingPrintSheet record={rec} editing={{ onTapField: () => {} }} />);
     expect(screen.queryByRole("button", { name: "＋元請" })).toBeNull();
+  });
+
+  it("onAddDeliveryRow 指定時のみ「＋搬入出行を追加」が出てタップで発火する", () => {
+    const onAddDeliveryRow = vi.fn();
+    render(<MeetingPrintSheet record={rec} editing={{ onTapField: () => {}, onAddDeliveryRow }} />);
+    fireEvent.click(screen.getByRole("button", { name: "＋搬入出行を追加" }));
+    expect(onAddDeliveryRow).toHaveBeenCalledOnce();
+  });
+
+  it("onAddDeliveryRow 未指定では「＋搬入出行を追加」ホットスポットが出ない", () => {
+    render(<MeetingPrintSheet record={rec} editing={{ onTapField: () => {} }} />);
+    expect(screen.queryByRole("button", { name: "＋搬入出行を追加" })).toBeNull();
   });
 
   it("キーボード（Enter/Space）でも欄を開ける（a11y）", () => {
