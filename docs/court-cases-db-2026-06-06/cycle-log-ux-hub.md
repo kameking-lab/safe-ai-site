@@ -14,6 +14,34 @@
 
 **無読テスト**: `docs/third-party-reviews/scripts/accident-database-panel-44px-2026-07-03.mjs`（next start実機・Playwright・390×844）**7/7 PASS**（業種フィルタ「建設」チップ・対象属性「女性労働者」・事業所規模「全規模」・「詳細を見る」・「→ 詳細ページへ」・「→ 日誌に記録」すべて実boundingBox height=44.0px実測）。
 
+## 2026-07-03 — 補充: /faq・/glossary 検索導線＋/features系5サブページCTAの44px是正
+
+**イテレーション頭の回収**: #795(signage-floor-plan-editor-44px)がe2e/smoke/Vercel全緑・mergeStateStatus=CLEANのためsquashマージ→`git checkout main && git pull --ff-only`でclean確認。#781(accident-database-panel-44px)はe2e/smoke IN_PROGRESSのため今回は見送り、次イテレーションで回収。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route群を再調査し、/faqハブの「FAQを検索する」ボタン・/glossary検索入力欄（いずれも主要検索導線）と、/features/[category]・use-cases・quick-tour・comparison・print の各CTAリンク/ボタン計12箇所が`py-2〜2.5`のみでmin-h未指定(≈36〜40px)のまま取り残されていたことを発見。
+
+**修正**: 7ファイル計14要素に`min-h-[44px]`を付与（純粋なクラス追加でレイアウト・遷移先・ロジック不変）。`/diversity/women`の外部参照カード(2行構成・px-3 py-2.5)は既に44px超と判断し対象外。
+
+**テスト**: 既存`faq-pillar0.test.tsx`・`glossary/page.test.tsx`・`features/use-cases/page.test.tsx`へ計3件追加、新規`features/[category]/page.test.tsx`(2件)・`features/quick-tour/page.test.tsx`(3件)・`features/comparison/page.test.tsx`(1件)・`features/print/print-features-client.test.tsx`(1件)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 307 files・2602 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/faq-glossary-features-search-cta-44px-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**7/7 PASS**（FAQ検索ボタン・用語集検索欄・quick-tour STEP1リンク/下部CTA・comparison下部CTA・print印刷ボタン/戻るリンク、すべて実boundingBox height≧44px実測）。
+
+## 2026-07-03 — 補充: signage-floor-plan-editor.tsx（/signage既定モード）未着手コンポーネントの44px是正
+
+**イテレーション頭の回収**: 自班のオープンPR2件を回収。#787(signage-today-documents.tsx・accident-ai-analyzer.tsx 44px)はe2e/smoke/Vercel全緑のためsquashマージ→`git checkout main && git pull --ff-only`でclean確認。#781(accident-database-panel-44px)はBACKLOG-ux-hub.md記録行のみmainとコンフリクト(コード非衝突、#775マージ由来)→`origin/main`を通常マージし両エントリ保持で解決→ゲート再走(tsc/lint/vitest2579件/build)全緑→push。CI待ちのため本イテレーションは次タスクへ先行着手し、#787マージ後に再度#781がコンフリクト(#787由来の同種テキスト競合)→本コミットで再度解消予定。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route群を再調査し、サイネージ本体`/signage`の既定表示モードである`signage-floor-plan-editor.tsx`（図面ピン配置エディタ）が、兄弟コンポーネント`pin-manager.tsx`（地図サイネージ側の同種エディタ）は既に44px是正済みの一方、本ファイルのみ従来の一括是正から漏れて未着手のまま残っていたことを発見。最優先候補と判断（サイネージのデフォルト画面で毎回目に入る操作群のため）。
+
+**修正**: 1ファイル計6要素（「自社図面アップロード」label・「ピン配置モード」トグル・ピン種別select・ラベルinput・「全削除」・「アップロード解除」）に`min-h-[44px]`を付与（純粋なクラス追加でレイアウト・ロジック不変）。
+
+**テスト**: `signage-floor-plan-editor-44px.test.ts`新設（ソース走査・6件）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 304 files・2586 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/signage-floor-plan-editor-44px-2026-07-03.mjs`（next start実機・Playwright・1920×1080）**5/5 PASS**（常時表示の2要素＋編集モード誘発後のselect/input/全削除ボタン、すべて実boundingBox height=44.0px実測）。「アップロード解除」は画像アップロード後のみ出現する条件付き要素のためソース走査のみで検証（class付与済みを確認）。ESM実行時に`docs/`が`web/node_modules`の外にあり`playwright`が解決できない問題は、実行時のみ`web/`直下へ一時コピーして検証（保存先は規定どおり`docs/`配下、実行後に一時コピーは削除）。
+
 ## 2026-07-03 — 補充: signage-today-documents.tsx + accident-ai-analyzer.tsx 未着手コンポーネントの44px是正
 
 **イテレーション頭の回収**: 自班のオープンPR2件のうちCI全緑だった#775(共有部品breadcrumb・action-bar・analysis-panel 44px)をsquashマージ。`git checkout main && git pull --ff-only`でclean確認。#781(accident-database-panel-44px)はe2e/smoke実行中のため次イテレーションで回収。

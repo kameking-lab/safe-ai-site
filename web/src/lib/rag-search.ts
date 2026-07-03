@@ -604,6 +604,11 @@ export const PINNED_TOPICS: PinnedTopic[] = [
     pins: [{ law: "労働基準法", articleNum: "第39条" }],
   },
   {
+    // 解雇予告 労基法第20条（Fable差分監査F5・GQ23=RAGスコア0.12でno-hit経路に落ちていた）
+    triggers: ["解雇予告", "解雇の予告", "予告手当", "解雇予告手当"],
+    pins: [{ law: "労働基準法", articleNum: "第20条" }],
+  },
+  {
     // 粉じん作業対策
     triggers: ["粉じん作業", "特定粉じん発生源"],
     pins: [

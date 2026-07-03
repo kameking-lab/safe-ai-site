@@ -500,17 +500,18 @@ export function ChemicalRaPanel() {
         </div>
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label htmlFor="chemical-ra-mhlw-selector" className="block text-xs font-semibold text-slate-700 mb-1">
               ① 厚労省 {MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()} 物質から選ぶ（推奨）— 濃度基準値・規制区分が即座に表示されます
             </label>
-            <MhlwChemicalSelector value={mhlwSelected} onSelect={handleSelectMhlw} />
+            <MhlwChemicalSelector id="chemical-ra-mhlw-selector" value={mhlwSelected} onSelect={handleSelectMhlw} />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label htmlFor="chemical-ra-name-input" className="block text-xs font-semibold text-slate-700 mb-1">
               ② 物質名を直接入力（リストにない物質・俗称・英語名）
             </label>
             <div className="flex gap-2">
               <InputWithVoice
+                id="chemical-ra-name-input"
                 className="flex-1"
                 value={chemicalName}
                 onChange={(e) => {
@@ -549,10 +550,11 @@ export function ChemicalRaPanel() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
+            <label htmlFor="chemical-ra-work-content" className="block text-xs font-semibold text-slate-700 mb-1">
               作業内容（任意）— より精度の高い保護具推奨のために入力
             </label>
             <TextareaWithVoice
+              id="chemical-ra-work-content"
               className="min-h-16"
               value={workContent}
               onChange={(e) => setWorkContent(e.target.value)}
