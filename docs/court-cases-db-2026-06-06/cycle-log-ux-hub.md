@@ -434,3 +434,21 @@
 **無読テスト**: `docs/third-party-reviews/scripts/safety-signs-hub-related-links-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**3/3 PASS**（3リンク全てboundingBox height=44px実測）。
 
 **残課題**: PR #668（トップhome-three-pillars 44px化）のCI回収は次イテレーション。BACKLOG-ux-hub.mdの未着手件数が2件（トップhome-three-pillars=PR #668で着手済み・重複回避のため今回はスキップ）に減っていたため、Explore不要で直接コード確認した2件（`/features/use-cases`のrelated-featureピル・`/court-cases/employer-liability`のIssueLinkチップ、いずれも実コードで44px未満を確認済み）を補充。
+
+---
+
+## 2026-07-03 ux-hub/features-use-cases-related-pill-44px
+
+**イテレーション頭の回収**: 自班の緑PR未マージが2件判明（#668 トップhome-three-pillars・#663 視覚パンくず可視化）。いずれもCI緑ながら`gh pr merge --squash`が「merge commit cannot be cleanly created」で失敗＝main側の並行マージでBACKLOG-ux-hub.md/cycle-log-ux-hub.mdの追記競合が発生していたため、2ブランチとも`git checkout <branch> && git merge origin/main`で手動解決（両エントリを時系列順で共存、コード側の衝突は無し）→ゲート緑（tsc/lint/vitest/build）確認→push（CI再走のため今回のマージは次イテレーションへ持ち越し）。加えて、直前に別のクローンが作った重複ブランチ`ux-hub/home-three-pillars-44px-targets`(PR #676)が#668と全く同一ファイル(home-three-pillars.tsx)の同一AlertGenerator/リンクを44px化する重複PRだった（#668の方が「出典・報道URLを開く」リンクも追加是正済みで上位互換）と判明したため、#676をクローズしローカル/リモートブランチを削除して重複作業を解消。`git checkout main && git pull --ff-only`でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md未着手2件のうち最上位（トップhome-three-pillars=PR #668で着手済みのため重複回避でスキップ）に続く「/features/use-cases のrelated-featureピル・/court-cases/employer-liabilityのIssueLinkチップが44px未満」の2件（いずれも小粒・独立ファイルのため同一PRで消化）。
+
+**修正**: `features/use-cases/page.tsx`のrelated-featureピル（`px-2 py-1 text-[11px]`、402行）と`court-cases/employer-liability/page.tsx`のIssueLinkチップ（`px-2.5 py-1 text-xs`、29行）にそれぞれ`min-h-[44px]`を付与。いずれも純粋なクラス追加でレイアウト・遷移先・文言は不変。
+
+**テスト**: `features/use-cases/page.test.tsx`・`court-cases/employer-liability/page.test.tsx`を各1ケース新設し、該当リンクのclassNameに`min-h-[44px]`を含むことを保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係）/ vitest 272 files・2310 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/features-use-cases-court-employer-liability-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**52/52 PASS**（/features/use-cases 関連機能ピル48件・/court-cases/employer-liability 論点チップ4件、全てboundingBox height≥44px実測）。
+
+**残課題**: BACKLOG-ux-hub.md未着手は1件（トップhome-three-pillars=PR #668で着手済み・マージ待ち）のみに減少。PR #668・#663のCI回収は次イテレーション。3件未満のためExplore委任で補充調査を実施し、実在確認済みの2件（`/accidents/[id]`の「事故DBに戻る」リンク・類似事故カードのタイトルリンク／`/diversity/women`のAmazon・楽天アフィリエイトボタン・関連ページナビ3リンク、いずれも44px未満をコード確認済み）をBACKLOG-ux-hub.mdへ追記（PR #682へ追加コミット）。Explore調査中に発生したリポジトリ外への一時ファイル書き出し(`C:\Users\kanet\ux-hub-scan.txt`)は削除済み。

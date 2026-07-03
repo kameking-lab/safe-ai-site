@@ -34,8 +34,9 @@
 
 - [ ] 【柱0補充候補・2026-07-03 Explore調査で発見】トップ `home-three-pillars.tsx` のAlertGenerator送信ボタン(py-1 text-[11px]≈21-24px)・関連リンク(mt-1.5 text-[11px]、パディング無し)が44px未満。
 - [x] 【柱0補充候補・2026-07-03 Explore調査で発見】/safety-signs 親ハブ本体の「関連機能」セクション（サイネージ表示等へのプレーンテキストリンク、`page.tsx` 227-256行）がtext-sm・パディング無しで44px未満（サブページの戻る/業種チップは既に是正済みだが親ハブ自身の当該リンクは未着手）。→ 3リンク(サイネージ表示/KY簡易作成/建設業のリスク・対策)全てに min-h-[44px]＋inline-flex items-center を付与（純粋なクラス追加でレイアウト・文言不変）。既存 safety-signs-tap-targets.test.tsx に親ハブ用ケースを追加(vitest 1件)。next start実機のPlaywright boundingBox実測で3/3とも44px達成を確認。tsc/lint(0 errors)/vitest(2290件)/build全緑。(2026-07-03 / ux-hub/safety-signs-hub-related-links-44px)
-- [ ] 【柱0補充候補・2026-07-03 発見】/features/use-cases のrelated-featureピル(`page.tsx` 402行、`px-2 py-1 text-[11px]`)が44px未満。min-h/h-11いずれも未付与。
-- [ ] 【柱0補充候補・2026-07-03 発見】/court-cases/employer-liability のIssueLinkチップ(`page.tsx` 29行、`px-2.5 py-1 text-xs`)が44px未満。min-h/h-11いずれも未付与。
+- [x] 【柱0補充候補・2026-07-03 発見】/features/use-cases のrelated-featureピル(`page.tsx` 402行、`px-2 py-1 text-[11px]`)が44px未満。min-h/h-11いずれも未付与。→ 併せて /court-cases/employer-liability のIssueLinkチップ(`page.tsx` 29行)も同一パターンで44px未満だったため同一PRで是正。両ファイルのピル/チップに`min-h-[44px]`を付与（純粋なクラス追加でレイアウト・遷移先不変）。vitest 2件新設(各ページ1件)・無読テスト52/52 PASS(next start実機・スマホ390×844・全リンク実boundingBox測定)。(2026-07-03 / ux-hub/features-use-cases-related-pill-44px)
+- [ ] 【柱0補充候補・2026-07-03 Explore調査で発見】/accidents/[id] 事故詳細ページの「事故DBに戻る →」リンク(`page.tsx` 247-252行、パディング無し・text-xs≈16px)と類似事故カードのタイトルリンク(237-242行、block text-xs・パディング無し)が44px未満。前者は詳細ページから一覧へ戻る主導線、後者は関連事故への遷移リンクで、いずれも指の押し損ねサイズ。
+- [ ] 【柱0補充候補・2026-07-03 Explore調査で発見】/diversity/women の「Amazonで探す」「楽天で探す」アフィリエイトボタン(`page.tsx` 254-271行、py-2 text-xs≈32px)と「関連ページ」ナビグリッド3リンク(383-389行、px-3 py-2 text-xs)が44px未満。min-h/h-11いずれも未付与。
 
 ## 補充の指針（未着手3件未満で起こす）
 - 自領域route の柱0未適用箇所・無読テスト不合格画面・第三者レビュー指摘。404どん詰まり解消・視覚パンくず可視化(画面側)。
