@@ -616,3 +616,19 @@ Exploreエージェントで未監査route(safety-diary個別ページ5種・sit
 ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2643 pass（新規4件）・build成功（`○ /ky/list`・`○ /safety-diary/list`静的生成維持）。1回目のbuildでTurbopackの`internal error: entered unreachable code`(`/accidents-analytics`、自班所有外route起因)が発生したが再実行で成功する一過性エラーと確認。working tree clean。
 
 残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。
+
+## 2026-07-04 44px欠落2箇所＋色文法違反2箇所（distributed-input-bar含む）を是正
+
+契約ステップ1: 自レーンのPR #814（前回収・list-loading-state）のCIが全緑（e2e/smoke/Vercelとも SUCCESS）と確認しsquashマージ→`git checkout main && git pull --ff-only`でclean確認。
+
+着手: BACKLOG-ux-records.md最上位の未着手3件(O15/S2/S3)はいずれもdataレーンO14（本回収時点でも`BACKLOG-data.md`で`[ ]`未着手）依存で全ブロック中と確認したため、補充指針どおりExploreエージェントで自領域の柱0/柱3巡回を実施。
+
+発見: (1) `/foreign-workers`下部「多言語安全教育教材ビルダー」セクションの「教材を作る →」CTAが44px未満（同ページ上部の同一導線は既に44px済みで非対称）。(2) `/foreign-workers/status/[status]`（在留資格ガイド詳細・全11ページ）下部ナビ「多言語安全教育教材を見る」CTAが44px未満。(3) `ky-industry-preset-picker.tsx`（未使用コンポーネント、過去#744でも未使用のまま44px化のみ実施した前例あり）の「危険：」ラベルが`text-red-700`直書き＝SAFETY_TONE非経由（不可侵の柱0-0違反）で、同コンポーネント内「対策：」は正しく`emerald-700`なのに非対称。(4) `distributed-input-bar.tsx`（打合せ書の協力会社分散入力バー）で、共有リンク発行・取り込みの失敗メッセージが成功メッセージと同じ`text-emerald-700`（安全色）固定表示＝#792の`records-backup.tsx`と同型のより重大な色文法違反。加えて同ファイルの初見ガイド「×」閉じるボタン・「使い方」トグルボタンの44px欠落も発見。
+
+実装: (1)(2)に`min-h-[44px]`を追加。(3)を`text-rose-700`へ是正。(4)は`msgTone`state(safe/danger)を追加し成功/失敗で色を出し分け（判定ロジック無変更・足すだけ）、閉じる/トグルボタンに`min-h-[44px]`（閉じるボタンは`min-w-[44px]`も）を追加。
+
+検証: `/foreign-workers`系2件は無読Playwright新規`docs/third-party-reviews/scripts/foreign-workers-preset-picker-44px-color-2026-07-04.mjs`4/4合格（実機で44px実測）。`distributed-input-bar.tsx`はこのdev環境がSupabase未設定で`isMeetingCloudEnabled()===false`のため実機Playwrightで到達不可（既知の制約、#799等と同型）＝`distributed-input-bar.test.tsx`新規vitest+RTL 4件で色出し分け・44pxクラスを検証。`ky-industry-preset-picker.tsx`は未使用コンポーネントのためコードレビューで確認（実害なし、色文法の一貫性のみ）。
+
+ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2653 pass（新規4件）・build成功。working tree clean（PR #827の未マージPRあり、次回収で回収）。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。

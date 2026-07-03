@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-04 柱C-3 / S DRY — ルート layout.tsx metadata のドメイン/ロケール単一ソース化
+
+**タスク**: `seo/root-metadata-domain-single-source`。冒頭で緑の自班PR #812（ペルソナ別ポータル /for/<persona> 横断検索収載）を squash マージし main を ff 同期。決裁A（robots.ts facebookexternalhit 許可）と C-3-4（sitemap lastmod 動的化）は現状確認で既に完了済みのため、補充指針に従い自領域の DRY 取り残しを是正。
+
+**是正内容**: sitemap/robots/og-image/json-ld/page-json-ld は既に `SITE_URL` 集約済みだったのに、**全ページの og:url/canonical 解決の基点かつサイトルート canonical という最重要箇所**であるルート `layout.tsx` の `metadataBase: new URL("https://…")` と `alternates.canonical: "https://…"` だけがドメイン直書きの取り残しだった＝`SITE_URL` を別ドメインへ替えてもホームページ canonical と全ページ og:url 基点が旧ドメインへ無言ドリフトする穴。あわせて `openGraph.locale`/`alternateLocale`/`siteName` の直書きも `SITE_LOCALE`/`SITE_ALTERNATE_LOCALES`/`SITE_NAME` へ集約。各定数は従来リテラルと同値のため **metadata 出力は byte-identical**（挙動変更0）。
+
+**回帰**: `src/app/layout-metadata-single-source.test.ts` 新設（sitemap-domain-single-source.test.ts と同型の source-scan ガード）＝(1)layout.tsx にドメイン直書き（bareDomain）が残らず SITE_URL を import (2)locale/siteName も単一ソース定数使用・旧リテラル消滅 (3)単一ソース定数が従来値と同値＝byte-identical の前提固定。
+
+**ゲート**: `tsc --noEmit`=0 / `lint`=errors0（warnは既存の別ファイル）/ 新規3 it 緑 + 関連(sitemap-domain-single-source/sitemap/seo-metadata)53 pass / `build`=成功(exit0)。working tree は変更2ファイルのみ・再生成データ drift なし。
+
+**残**: 他の SEO 自班PR（#786 化学物質deeplink・#780 通達シノニム・#774 feed逆カバレッジガード）は CI 再走中のため次イテレーション冒頭で回収。
+
+---
+
 ## 2026-07-03 柱C-3-3補充 RSS フィード逆カバレッジガード新設＝自動発見不能な孤立フィードの検知（PR: seo/feed-reverse-coverage-guard）
 
 **契約1) 回収**: 前イテレーションの自班 CI 緑 PR を回収＝#750（sitemap 逆カバレッジガード＋/profile 収載）を squash マージ→main を ff-only 更新。連鎖で CONFLICTING 化した #767（egov 条アンカー直リンク）へ `git merge origin/main`（force-push なし）で BACKLOG/cycle-log の追記衝突のみ解決し再push（CI 再走→次イテレーション回収）。#772（manifest メディア資産実在ガード）は e2e/smoke 進行中で継続。他班 OPEN PR（#769/#770/#771/#773 等）は不可侵。

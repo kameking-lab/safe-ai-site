@@ -28,7 +28,8 @@
   Outputs (all gitignored, main tree only - so this never dirties the ops clean-tree contract nor
   races the ops runner's git; a committed snapshot for /about is O18(b)):
     .loop-eval/genquality/<yyyy-MM-dd>.json  per-night full record (existence = "already ran today")
-    .loop-eval/genquality/latest.json        overwritten each success (most-recent, for /about later)
+    .loop-eval/genquality/latest.json        the current-quality pointer for /about: advanced ONLY on a
+                                             COMPLETE measurement (an incomplete/blip run does not clobber it)
     .loop-eval/genquality/history.jsonl      one compact line per run (trend history)
 
   This file is intentionally PURE ASCII so Windows PowerShell 5.x parses it as BOM-less UTF-8
@@ -124,6 +125,18 @@ function Test-EvalBelowTarget {
   return ($StrictAccuracy -lt $Target)
 }
 
+# Should this record advance latest.json (the "current quality" pointer O18(b)'s /about reads)? ONLY a
+# COMPLETE measurement (ok=true AND not incomplete). An INCOMPLETE run's strictAccuracy is unreliable
+# (questions that never reached the server score as wrong), so writing it to latest.json would clobber the
+# last known-good number with an availability-blip low - and /about naively reading latest.strictAccuracy
+# would show a FALSE public-facing quality regression the site never had. The daily marker (the day guard)
+# and history.jsonl (the trend) STILL record the incomplete run; only this "current quality" pointer must
+# not regress on a transient blip. A failure record (ok=false) never advances latest either. Pure (no IO).
+function Test-ShouldAdvanceLatest {
+  param([object]$Record)
+  return ($null -ne $Record -and [bool]$Record.ok -and -not [bool]$Record.incomplete)
+}
+
 # Count questions whose live probe did NOT return HTTP 200 (0 = fetch failure/timeout, 5xx = server
 # error, 429 = rate limit). chatbot-genquality-live.test.ts writes the FULL report first, then asserts
 # every httpStatus is 200 - so one transient non-200 makes the harness exit non-zero while a complete,
@@ -203,9 +216,36 @@ function Write-JsonNoBom {
   param([string]$Path, [string]$Text)
   [System.IO.File]::WriteAllText($Path, $Text, (New-Object System.Text.UTF8Encoding($false)))
 }
+# Does the file already start with a UTF-8 BOM (EF BB BF)? A legacy history.jsonl written by the old
+# `Set-Content -Encoding UTF8` path carries one at byte 0 forever - and AppendAllText (below) can add a
+# clean line but CANNOT strip a BOM that is already there, so line 1 stays a JSON.parse SyntaxError for
+# any O18(b) consumer. Returns $false on any IO error (never throws - append must stay best-effort).
+function Test-FileStartsWithBom {
+  param([string]$Path)
+  try {
+    $fs = [System.IO.File]::OpenRead($Path)
+    try {
+      if ($fs.Length -lt 3) { return $false }
+      $b = New-Object byte[] 3
+      [void]$fs.Read($b, 0, 3)
+      return ($b[0] -eq 0xEF -and $b[1] -eq 0xBB -and $b[2] -eq 0xBF)
+    } finally { $fs.Dispose() }
+  } catch { return $false }
+}
+# Append one line WITHOUT a UTF-8 BOM, and SELF-HEAL a pre-existing BOM. Plain AppendAllText never adds a
+# BOM but also never removes one already at byte 0 (a legacy/externally-touched file stays broken). So if
+# the target already starts with a BOM, rewrite the whole file BOM-free (ReadAllText auto-strips the BOM
+# on read) with the new line appended; otherwise plain append. Converges any consumer (O18(b) /about
+# trend reader) to Node JSON.parse-safe bytes without needing to touch the gitignored file by hand.
 function Add-JsonLineNoBom {
   param([string]$Path, [string]$Line)
-  [System.IO.File]::AppendAllText($Path, ($Line + "`n"), (New-Object System.Text.UTF8Encoding($false)))
+  $enc = New-Object System.Text.UTF8Encoding($false)
+  if ((Test-Path -LiteralPath $Path) -and (Test-FileStartsWithBom -Path $Path)) {
+    $existing = [System.IO.File]::ReadAllText($Path)
+    [System.IO.File]::WriteAllText($Path, ($existing + $Line + "`n"), $enc)
+  } else {
+    [System.IO.File]::AppendAllText($Path, ($Line + "`n"), $enc)
+  }
 }
 
 # ---------------------------------------------------------------------------
@@ -452,6 +492,37 @@ if ($SelfTest) {
     Remove-Item -LiteralPath $tmp2 -Force -ErrorAction SilentlyContinue
   }
 
+  # G2) history.jsonl self-heal: a legacy file that ALREADY starts with a BOM (old Set-Content -Encoding
+  # UTF8) must lose the BOM the next time we append, so line 1 stops being a JSON.parse SyntaxError. Seed a
+  # BOM+line file, append via Add-JsonLineNoBom, and assert the BOM is gone AND both lines survive in order.
+  $tmp3 = Join-Path ([System.IO.Path]::GetTempPath()) ("eval-bomheal-" + [guid]::NewGuid().ToString("N") + ".jsonl")
+  try {
+    $bom = [byte[]]@(0xEF, 0xBB, 0xBF)
+    $seed = [System.Text.Encoding]::UTF8.GetBytes('{"date":"2026-07-04","ok":false}' + "`n")
+    [System.IO.File]::WriteAllBytes($tmp3, ($bom + $seed))
+    Assert-E "G2: seeded legacy file starts with a BOM" (Test-FileStartsWithBom -Path $tmp3)
+    Add-JsonLineNoBom -Path $tmp3 -Line '{"date":"2026-07-04","ok":true}'
+    $healed = [System.IO.File]::ReadAllBytes($tmp3)
+    $stillBom = ($healed.Length -ge 3 -and $healed[0] -eq 0xEF -and $healed[1] -eq 0xBB -and $healed[2] -eq 0xBF)
+    Assert-E "G2: append self-heals the pre-existing BOM" (-not $stillBom)
+    Assert-E "G2: healed file first char is '{'" ([char]$healed[0] -eq '{')
+    $lines = [System.IO.File]::ReadAllText($tmp3).TrimEnd("`n").Split("`n")
+    Assert-E "G2: both lines survive in order (seed then appended)" (($lines.Count -eq 2) -and ($lines[0] -eq '{"date":"2026-07-04","ok":false}') -and ($lines[1] -eq '{"date":"2026-07-04","ok":true}'))
+    # A clean (no-BOM) file must still plain-append without introducing a BOM.
+    Add-JsonLineNoBom -Path $tmp3 -Line '{"date":"2026-07-04","ok":true,"n":3}'
+    $after = [System.IO.File]::ReadAllBytes($tmp3)
+    Assert-E "G2: clean file stays BOM-free after append" (-not ($after.Length -ge 3 -and $after[0] -eq 0xEF -and $after[1] -eq 0xBB -and $after[2] -eq 0xBF))
+    # Non-existent target: Test-FileStartsWithBom is safe and append creates a BOM-free file.
+    $tmp4 = Join-Path ([System.IO.Path]::GetTempPath()) ("eval-bomnew-" + [guid]::NewGuid().ToString("N") + ".jsonl")
+    Assert-E "G2: missing file reports no BOM (no throw)" (-not (Test-FileStartsWithBom -Path $tmp4))
+    Add-JsonLineNoBom -Path $tmp4 -Line '{"n":1}'
+    $created = [System.IO.File]::ReadAllBytes($tmp4)
+    Assert-E "G2: newly created file has no BOM" (-not ($created.Length -ge 3 -and $created[0] -eq 0xEF -and $created[1] -eq 0xBB -and $created[2] -eq 0xBF))
+    Remove-Item -LiteralPath $tmp4 -Force -ErrorAction SilentlyContinue
+  } finally {
+    Remove-Item -LiteralPath $tmp3 -Force -ErrorAction SilentlyContinue
+  }
+
   # H) O18(b) eval-quality banner: strings loader, banner body, and the idempotent region reconciler.
   # Synthetic ASCII strings so this never depends on the real loop-status-strings.txt (keeps the gate
   # hermetic and this source ASCII).
@@ -550,6 +621,15 @@ if ($SelfTest) {
   Assert-E "I5: notice body carries the failure count and date" (($biLines[2] -match "3 of 23") -and ($biLines[2] -match "2026-07-04"))
   Assert-E "I5: a clean at/above-target record still yields NO banner" ((Get-EvalBannerLines -Strings $Si -Record $rec).Count -eq 0)
   Assert-E "I5: a genuine complete below-target record still yields the 4-line quality warning" ((Get-EvalBannerLines -Strings $Si -Record $below).Count -eq 4)
+  # I6) latest.json advance gate: ONLY a complete measurement advances the current-quality pointer /about
+  # reads. An incomplete run (non-zero exit / HTTP failure) must NOT clobber latest.json with its
+  # unreliable strictAccuracy - else /about would show a false public-facing regression from a blip.
+  Assert-E "I6: a clean at/above-target record advances latest.json" (Test-ShouldAdvanceLatest -Record $rec)
+  Assert-E "I6: a clean below-target (complete) record still advances latest.json (genuine number)" (Test-ShouldAdvanceLatest -Record $below)
+  Assert-E "I6: an INCOMPLETE run (exit!=0) does NOT advance latest.json" (-not (Test-ShouldAdvanceLatest -Record $recIncompleteExit))
+  Assert-E "I6: an INCOMPLETE run (httpFailures>0) does NOT advance latest.json" (-not (Test-ShouldAdvanceLatest -Record $recIncompleteHttp))
+  Assert-E "I6: a no-report FAILURE record (ok=false) does NOT advance latest.json" (-not (Test-ShouldAdvanceLatest -Record $failRec))
+  Assert-E "I6: a null record does NOT advance latest.json (no throw)" (-not (Test-ShouldAdvanceLatest -Record $null))
 
   if ($ok) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
 }
@@ -734,7 +814,14 @@ $httpFailures = Get-ReportHttpFailureCount -Report $report
 $rec = ConvertTo-NightlyRecord -Report $report -Stamp $stamp -Target $Target -RanAtIso $now.ToString("o") -ExitCode $exitCode -HttpFailures $httpFailures
 $recJson = $rec | ConvertTo-Json -Depth 5
 try { Write-JsonNoBom -Path $dailyPath -Text $recJson } catch { Write-Log ("WARN: could not write daily record: " + $_.Exception.Message) }
-try { Write-JsonNoBom -Path $latestPath -Text $recJson } catch { Write-Log ("WARN: could not write latest.json: " + $_.Exception.Message) }
+# latest.json = the "current quality" pointer O18(b)'s /about reads. Advance it ONLY on a COMPLETE
+# measurement: an incomplete run's strictAccuracy is unreliable, so overwriting latest with it would
+# surface a false regression on /about. Incomplete runs still land in the daily marker + history above.
+if (Test-ShouldAdvanceLatest -Record $rec) {
+  try { Write-JsonNoBom -Path $latestPath -Text $recJson } catch { Write-Log ("WARN: could not write latest.json: " + $_.Exception.Message) }
+} else {
+  Write-Log ("latest.json NOT advanced (run incomplete - unreliable strictAccuracy); the last complete measurement stays the current-quality pointer for /about. Daily+history still recorded " + $stamp + ".")
+}
 try { Add-JsonLineNoBom -Path $historyPath -Line (Format-HistoryLine -Record $rec) } catch { Write-Log ("WARN: could not append history: " + $_.Exception.Message) }
 try { Remove-Item -LiteralPath $tmpReport -Force -ErrorAction SilentlyContinue } catch {}
 

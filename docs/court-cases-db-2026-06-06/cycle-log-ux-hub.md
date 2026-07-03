@@ -1,5 +1,23 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-04 — 補充: /faq/search・/diversity/women アコーディオン＋サイネージ2箇所の44px是正
+
+**イテレーション頭の回収**: 自班のオープンPR #819(signage-rotator進捗ドット・signage-danger-alert閉じるボタン44px)がe2e/smoke共にIN_PROGRESSで未緑のため今回はマージ見送り・次イテレーションで回収。`git checkout main && git pull --ff-only`でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントで担当route/コンポーネント群を再調査し、既存44px一括是正の網羅Grepから漏れていた4箇所を発見: ①`/faq/search`検索結果アコーディオンボタン(`px-4 py-3`のみ)、②`/diversity/women`法令アコーディオンボタン(同パターン)、③`/signage`トレンド拡大モーダル「記事を開く →」外部リンク(`px-5 py-2.5 text-sm`のみ)、④`signage-today-documents.tsx`資料タイトル編集input(`px-3 py-2 text-base`のみ)。いずれも兄弟要素・類似ページは既に是正済みだったが取り残されていた既存欠陥。
+
+**修正**: 4ファイルに`min-h-[44px]`を付与（純粋なクラス追加でレイアウト・ロジック不変）。
+
+**テスト**: `faq-pillar0.test.tsx`・`women-44px-targets.test.tsx`・`page-refresh-config.test.ts`・`signage-today-documents-44px.test.ts`へ計4件追加。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 310 files + 1 skipped・2647 tests 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/faq-diversity-signage-44px-remnants-2026-07-04.mjs`（next start実機・Playwright）**23/23 PASS**（/faq/searchアコーディオン15件・/diversity/women法令アコーディオン5件・/signage記事リンク1件、すべて実boundingBox height≧44px実測）。資料タイトル編集inputは「作業資料」モード切替+資料投入が必要な条件付き要素のため自動操作を割愛しvitestソース走査のみで担保（過去PRと同じ扱い）。ESM実行時`docs/third-party-reviews/scripts/`が`web/node_modules`の外にあり`@playwright/test`が解決できない既知の問題は、実行時のみ`web/`直下へ一時コピーして回避（保存先は規定どおり`docs/`配下）。
+
+**残課題**: PR #819はCI待ち・次イテレーションで回収。Explore調査での残存候補は使い果たしたため、次回は補充の指針（無読テスト再走査・404/パンくず確認）から再着手予定。
+
+---
+
 ## 2026-07-04 — 補充: signage-rotator進捗ドット・signage-danger-alert閉じるボタン44px是正＋saved-accidents色文法是正
 
 **イテレーション頭の回収**: 自班のオープンPR #809(trend-summary-court-filter-44px)がe2e/smoke/Vercel全緑だったがmainと`docs/court-cases-db-2026-06-06/cycle-log-ux-hub.md`のみコンフリクト(コード非衝突、#810等の他班マージ由来)→`origin/main`を当該ブランチへ通常マージし両エントリ保持で解決→ゲート再走(tsc/lint/vitest2647件/build)全緑→push→CI緑確認後squashマージ・リモートブランチ削除。PR #811(daily-values-extras-panel-44px)はsmoke IN_PROGRESSのため今回は見送り、次イテレーションで回収。`git checkout main && git pull --ff-only`でclean確認。
