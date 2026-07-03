@@ -47,3 +47,46 @@ describe("ChatbotPanel a11y", () => {
     });
   });
 });
+
+describe("ChatbotPanel 保存済み会話の削除確認", () => {
+  function seedSavedSession() {
+    window.localStorage.setItem(
+      "chatbot_history_v2",
+      JSON.stringify([
+        {
+          id: "s1",
+          title: "テスト会話",
+          savedAt: Date.now(),
+          messages: [{ role: "user", content: "こんにちは" }],
+        },
+      ]),
+    );
+  }
+
+  it("キャンセル時は保存済みセッションが削除されない", async () => {
+    seedSavedSession();
+    vi.stubGlobal("confirm", vi.fn().mockReturnValue(false));
+    render(<ChatbotPanel />);
+
+    fireEvent.click(screen.getByLabelText("保存済み会話を開く"));
+    const deleteButton = await screen.findByLabelText("削除");
+    fireEvent.click(deleteButton);
+
+    expect(window.confirm).toHaveBeenCalled();
+    expect(screen.queryByText("テスト会話")).not.toBeNull();
+  });
+
+  it("確認して削除すると保存済みセッションが消える", async () => {
+    seedSavedSession();
+    vi.stubGlobal("confirm", vi.fn().mockReturnValue(true));
+    render(<ChatbotPanel />);
+
+    fireEvent.click(screen.getByLabelText("保存済み会話を開く"));
+    const deleteButton = await screen.findByLabelText("削除");
+    fireEvent.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.queryByText("テスト会話")).toBeNull();
+    });
+  });
+});
