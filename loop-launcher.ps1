@@ -255,9 +255,10 @@ function Test-RunnerBelowFloor {
   return ($ProcStart.ToUniversalTime() -lt $floor)
 }
 
-# Should a below-floor runner be cycled THIS pass? Pure. Cycle ONLY when idle: ChildCount -eq 0 means no
-# in-flight Claude turn. ChildCount -lt 0 is the "scan failed / unknown" sentinel and must be treated as
-# BUSY (never cycle on an ambiguous scan), so a transient WMI hiccup can never kill a working runner.
+# Should a below-floor runner be cycled THIS pass? Pure. Cycle ONLY when idle: ChildCount here is the
+# WORK-child count (persistent conhost excluded by Get-ProcChildCount), so 0 means no in-flight Claude
+# turn. ChildCount -lt 0 is the "scan failed / unknown" sentinel and must be treated as BUSY (never cycle
+# on an ambiguous scan), so a transient WMI hiccup can never kill a working runner.
 function Test-ShouldCycleStaleRunner {
   param([bool]$BelowFloor, [int]$ChildCount)
   return ($BelowFloor -and ($ChildCount -eq 0))
@@ -280,12 +281,38 @@ function Get-RunnerProcInfo {
   return $map
 }
 
-# Count direct child processes of a PID (a runner mid-iteration owns a claude/node child; an idle runner
-# between iterations owns none). Returns -1 on any scan failure so the caller treats "unknown" as busy.
+# Persistent console-host helpers that Windows attaches to a console-attached PowerShell runner for its
+# ENTIRE lifetime (not just during a claude turn). A live runner therefore ALWAYS owns >= 1 such child,
+# so counting raw children makes an idle runner read as "busy" forever and the stale-runner cycle can
+# never fire (observed: below-floor lanes stuck for hours despite the drain running every heal pass).
+# These MUST be excluded from the idle gate. Names are lower-cased for comparison.
+$script:PersistentConsoleHelpers = @('conhost.exe', 'openconsole.exe')
+
+# Pure: given the direct child process NAMES of a runner, count only the ones that represent actual
+# in-flight WORK (a claude turn spawns claude/node/cmd/git children). Persistent console hosts are
+# excluded because they live the runner's whole lifetime. 0 => idle (safe to cooperatively cycle).
+# Never negative; the "-1 = scan failed" sentinel is produced only by Get-ProcChildCount's catch.
+function Get-WorkChildCount {
+  param([string[]]$ChildNames)
+  if ($null -eq $ChildNames) { return 0 }
+  $n = 0
+  foreach ($cn in $ChildNames) {
+    if ([string]::IsNullOrWhiteSpace($cn)) { continue }
+    if ($script:PersistentConsoleHelpers -contains $cn.ToLowerInvariant()) { continue }
+    $n++
+  }
+  return $n
+}
+
+# Count the WORK child processes of a PID (a runner mid-iteration owns a claude/node child; an idle runner
+# between iterations owns only its persistent conhost helper). Delegates the classification to the pure
+# Get-WorkChildCount so the conhost exclusion is unit-testable. Returns -1 on any scan failure so the
+# caller treats "unknown" as busy (a transient WMI hiccup can never kill a working runner).
 function Get-ProcChildCount {
   param([int]$ProcId)
   try {
-    return @(Get-CimInstance Win32_Process -Filter ("ParentProcessId = " + $ProcId) -ErrorAction Stop).Count
+    $names = @(Get-CimInstance Win32_Process -Filter ("ParentProcessId = " + $ProcId) -ErrorAction Stop | ForEach-Object { [string]$_.Name })
+    return (Get-WorkChildCount -ChildNames $names)
   } catch { return -1 }
 }
 
@@ -685,6 +712,18 @@ if ($SelfTest) {
     Assert-L "cycle: below-floor but BUSY (1 child = live claude turn) -> do NOT cycle" (-not (Test-ShouldCycleStaleRunner -BelowFloor $true -ChildCount 1))
     Assert-L "cycle: below-floor but scan FAILED (-1 = unknown) -> do NOT cycle (treat as busy)" (-not (Test-ShouldCycleStaleRunner -BelowFloor $true -ChildCount -1))
     Assert-L "cycle: NOT below floor + idle -> do NOT cycle (already carries the fix)" (-not (Test-ShouldCycleStaleRunner -BelowFloor $false -ChildCount 0))
+    # N2) Get-WorkChildCount: the persistent conhost/openconsole helper is NOT work -> an idle runner that
+    #     owns ONLY a conhost reads as 0 (cycle-eligible). Any real child (claude/node/git) reads as busy.
+    #     This is the fix for the drain being inert: a live console runner always owns a conhost, so the
+    #     old raw-child count never reached 0 and no below-floor runner was ever cycled.
+    Assert-L "workchild: idle runner owns only conhost -> 0 (cycle-eligible)" ((Get-WorkChildCount -ChildNames @('conhost.exe')) -eq 0)
+    Assert-L "workchild: conhost + live claude turn -> 1 (busy)" ((Get-WorkChildCount -ChildNames @('conhost.exe','claude.exe')) -eq 1)
+    Assert-L "workchild: conhost is matched case-insensitively -> 0" ((Get-WorkChildCount -ChildNames @('ConHost.EXE')) -eq 0)
+    Assert-L "workchild: openconsole helper is also excluded -> 0" ((Get-WorkChildCount -ChildNames @('conhost.exe','OpenConsole.exe')) -eq 0)
+    Assert-L "workchild: no children at all -> 0" ((Get-WorkChildCount -ChildNames @()) -eq 0)
+    Assert-L "workchild: null input is safe -> 0 (never throws)" ((Get-WorkChildCount -ChildNames $null) -eq 0)
+    Assert-L "workchild: blank/whitespace names are ignored -> 0" ((Get-WorkChildCount -ChildNames @('conhost.exe','',' ')) -eq 0)
+    Assert-L "workchild: multiple real children (claude+node+git) -> 3 (busy)" ((Get-WorkChildCount -ChildNames @('conhost.exe','claude.exe','node.exe','git.exe')) -eq 3)
     # O) Invoke-StaleRunnerCycle: an empty floor marker short-circuits to a no-op (kills nothing) even
     #    when lanes are configured - the guard that makes an unset marker completely inert.
     Assert-L "cycle: empty floor marker makes Invoke-StaleRunnerCycle a no-op" (@(Invoke-StaleRunnerCycle -Lanes $healLanes -FloorIso "" -DryRun).Count -eq 0)
