@@ -567,11 +567,36 @@ function Repair-MsysMangledNote {
 # makes Get-LaneHealthLine behave exactly as before (safe degradation - never worse than today). Mirrors
 # loop-launcher.ps1 Get-RunningLanes; kept as a tiny local copy because the two scripts share no module
 # and the reporter runs in separate lane clones.
+# Pure: does a process command line genuinely LAUNCH loop-runner.ps1 (invoked via -File), not merely MENTION
+# the filename (an operator/agent -Command diagnostic that names the script + a lane)? A bare mention spoofs
+# the alive-tiebreak below into treating a dead lane as alive, which is the WRONG direction here: it would
+# calm a genuinely dead lane's health banner. Every real runner launches via -File <path>\loop-runner.ps1;
+# match that shape so a -Command mention no longer counts. Local copy of the sibling predicate in
+# loop-runner.ps1 / loop-launcher.ps1 (the scripts share no module). Pure so -SelfTest asserts it offline.
+function Test-IsRunnerProcess([string]$CommandLine) {
+  if ([string]::IsNullOrEmpty($CommandLine)) { return $false }
+  return ($CommandLine -match '(?i)-File\s+"?[^"]*loop-runner\.ps1(?:"|\s|$)')
+}
+
+# Pure: does a process command line genuinely LAUNCH loop-watchdog.ps1 (invoked via -File), not merely
+# MENTION the filename? Same spoof class as Test-IsRunnerProcess above, but for the resurrection watchdog:
+# Get-WatchdogUptimeMinutes below counts resident watchdogs to gate the LOUD wedge banner, and a bare mention
+# (an operator/agent -Command diagnostic that names the script - e.g. `-Command "... loop-watchdog.ps1 ..."`)
+# raw-substring-matched into that scan, inflating the perceived watchdog uptime and corrupting the drain-has-
+# had-time gate. Every real watchdog launches via -File <path>\loop-watchdog.ps1 (bare or quoted); match that
+# shape only. Local copy of the identical sibling predicate in loop-watchdog.ps1 / loop-launcher.ps1 (the
+# scripts share no module). Pure so -SelfTest asserts it offline. Closes the last raw -like watchdog scan
+# after #777 (watchdog guard/ensure) and #782 (the 4 lane-runner scans) hardened every other site.
+function Test-IsWatchdogProcess([string]$CommandLine) {
+  if ([string]::IsNullOrEmpty($CommandLine)) { return $false }
+  return ($CommandLine -match '(?i)-File\s+"?[^"]*loop-watchdog\.ps1(?:"|\s|$)')
+}
+
 function Get-AliveRunnerLanes {
   $names = New-Object System.Collections.Generic.List[string]
   try {
     $procs = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-      Where-Object { $_.CommandLine -like '*loop-runner.ps1*' })
+      Where-Object { Test-IsRunnerProcess ([string]$_.CommandLine) })
     foreach ($p in $procs) {
       $m = [regex]::Match([string]$p.CommandLine, '(?i)-Lane(\s+|:|=)["'']?([\w\-]+)')
       if ($m.Success) {
@@ -596,7 +621,7 @@ function Get-WatchdogUptimeMinutes {
   $best = -1.0
   try {
     $procs = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
-      Where-Object { $_.CommandLine -like '*loop-watchdog.ps1*' })
+      Where-Object { $_.ProcessId -ne $PID -and (Test-IsWatchdogProcess ([string]$_.CommandLine)) })
     foreach ($p in $procs) {
       if ($p.CreationDate -is [datetime]) {
         $up = ($Now - $p.CreationDate).TotalMinutes
@@ -985,6 +1010,24 @@ if ($SelfTest) {
       Assert-Test "L9: the missing-since marker is NOT treated as a health banner" (-not (Test-IsHealthBanner -TrimmedLine "<!-- lane-missing-since: seo=2026-07-03T12:55:54 -->" -Stem $stemOld -KnownPrefixes $knownOld))
       Assert-Test "L10: empty stem falls back to the known prefix list only (never strips everything)" ((Test-IsHealthBanner -TrimmedLine $realUnrep -Stem "" -KnownPrefixes $knownOld) -and (-not (Test-IsHealthBanner -TrimmedLine $realAnr -Stem "" -KnownPrefixes $knownOld)))
     }
+
+    # R) Test-IsRunnerProcess: the alive-tiebreak (Get-AliveRunnerLanes) must count a real -File launch of
+    #    loop-runner.ps1 and must NOT count a -Command MENTION of the filename + a lane - the false match that
+    #    would calm a genuinely dead lane's health banner by reporting it "alive".
+    Assert-Test "R1: bare -File launch is a runner" (Test-IsRunnerProcess 'powershell -NoProfile -File C:\r\loop-runner.ps1 -Lane data')
+    Assert-Test "R2: quoted -File launch (spaced path) is a runner" (Test-IsRunnerProcess 'powershell -File "C:\Program Files\r\loop-runner.ps1" -Lane seo')
+    Assert-Test "R3: a -Command MENTION of the filename + lane is NOT a runner (spoof fix)" (-not (Test-IsRunnerProcess 'powershell -Command "gci | ? { $_.CommandLine -like ''*loop-runner.ps1*'' -and ''-Lane data'' }"'))
+    Assert-Test "R4: a watchdog -File launch is NOT a runner" (-not (Test-IsRunnerProcess 'powershell -File C:\r\loop-watchdog.ps1'))
+    Assert-Test "R5: empty command line is NOT a runner (null-safe)" (-not (Test-IsRunnerProcess ""))
+
+    # W) Test-IsWatchdogProcess: the wedge-gate uptime scan (Get-WatchdogUptimeMinutes) must count a real
+    #    -File launch of loop-watchdog.ps1 and must NOT count a -Command MENTION of the filename - the false
+    #    match that would inflate perceived watchdog uptime and wrongly flip a lane into the LOUD wedge banner.
+    Assert-Test "W1: bare -File launch is a watchdog" (Test-IsWatchdogProcess 'powershell -NoProfile -File C:\r\loop-watchdog.ps1 -IntervalSeconds 300')
+    Assert-Test "W2: quoted -File launch (spaced path) is a watchdog" (Test-IsWatchdogProcess 'powershell -File "C:\Program Files\r\loop-watchdog.ps1"')
+    Assert-Test "W3: a -Command MENTION of the filename is NOT a watchdog (spoof fix)" (-not (Test-IsWatchdogProcess 'powershell -Command "gci | ? { $_.CommandLine -like ''*loop-watchdog.ps1*'' }"'))
+    Assert-Test "W4: a runner -File launch is NOT a watchdog" (-not (Test-IsWatchdogProcess 'powershell -File C:\r\loop-runner.ps1 -Lane data'))
+    Assert-Test "W5: empty command line is NOT a watchdog (null-safe)" (-not (Test-IsWatchdogProcess ""))
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }

@@ -740,3 +740,21 @@
 **無読テスト**: `docs/third-party-reviews/scripts/industries-related-links-44px-check.mjs`（next start実機・Playwright・スマホ390×844）**6/6 PASS**（全リンクboundingBox実測=44.0px）。初回実行時はDOM内に同一hrefを持つモバイル非表示のサイドバーnavリンクが先にマッチし誤ってFAIL判定になったため、`:visible`フィルタ＋`.last()`で対象を絞り込んで再検証。
 
 **残課題**: PR #753・#756ともCI回収は次イテレーション。Explore調査での残存候補は使い果たしたため、次回は補充の指針（無読テスト再走査・404/パンくず確認）から再着手予定。
+
+---
+
+## 2026-07-03 ux-hub/breadcrumb-action-bar-analysis-panel-44px
+
+**イテレーション頭の回収**: 自班のCI待ちPR #768（サイネージ地図配下`signage-map/*`の44px化）がe2e/smoke/Vercel全緑になったためsquashマージ・ブランチ削除。`git checkout main && git pull --ff-only`でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.mdの未着手[ ]がゼロ（全件[x]）だったため、契約に従いExplore agentへ担当route全体の柱0未是正箇所調査を委任。個別ページはほぼ網羅済みと判明した一方、複数routeで再利用される共有コンポーネント側（breadcrumb・accidents/action-bar・accident-analysis-panel系）に未着手の高確信度候補が複数見つかった。
+
+**修正**: 4ファイル計11要素に`min-h-[44px]`を付与（純粋なクラス追加でレイアウト・遷移先・ロジック不変）。①`breadcrumb.tsx`のホームアイコンLink・各項目Link(担当route11ファイルで共用の可視パンくず)、②`accidents/action-bar.tsx`のKY起票/保護具/関連法令/関連裁判例/問われる責任5リンク(事故詳細のinline/sticky両モード共用アクションバー)、③`accident-analysis-panel.tsx`・`mhlw-accident-analysis-panel.tsx`各々の「このデータについて」アコーディオンボタン・CSVエクスポートボタン計4個(いずれもtop所有の`home-screen.tsx`経由で`/accidents`タブ切替時にのみ表示)。
+
+**テスト**: `breadcrumb-action-bar-analysis-panel-44px.test.ts`新設・11件（ソース走査、`signage-map-44px.test.ts`と同一パターン）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 299 files + 1 skipped・2545 tests 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/breadcrumb-action-bar-analysis-panel-44px-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**10/10 PASS**（/industries/construction のパンくず2要素・/accidents/[id] のアクションバー4リンク・/accidents のMHLW実データ分析/詳細事例（参考）タブ内パネル4要素、いずれも実boundingBox≧44px）。ESM実行時に`docs/third-party-reviews/scripts/`が`web/node_modules`の外にあり`@playwright/test`が解決できない問題に遭遇したため、実行時のみ`web/`直下へ一時コピーして検証（保存先は規定どおり`docs/`配下）。
+
+**残課題**: Explore調査での残存候補は使い果たしたため、次回は補充の指針（無読テスト再走査・404/パンくず確認）から再着手予定。

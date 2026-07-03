@@ -53,7 +53,7 @@ function CategoryChip({
       type="button"
       onClick={onToggle}
       aria-pressed={selected}
-      className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+      className={`min-h-[44px] rounded-full border px-3 py-1.5 text-xs font-medium transition ${
         selected
           ? "border-blue-500 bg-blue-600 text-white"
           : "border-slate-300 bg-white text-slate-700 hover:border-blue-400 hover:bg-blue-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
@@ -78,7 +78,7 @@ function WorkTagChip({
       type="button"
       onClick={onToggle}
       aria-pressed={selected}
-      className={`rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${
+      className={`min-h-[44px] rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${
         selected
           ? "border-amber-500 bg-amber-500 text-white"
           : "border-slate-200 bg-slate-50 text-slate-600 hover:border-amber-400 hover:bg-amber-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
@@ -275,7 +275,7 @@ export function CertFinderClient() {
                     type="button"
                     onClick={() => toggleScenario(s.id)}
                     aria-pressed={selectedScenarios.includes(s.id)}
-                    className={`rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${
+                    className={`min-h-[44px] rounded-full border px-2.5 py-1 text-[11px] font-medium transition ${
                       selectedScenarios.includes(s.id)
                         ? "border-amber-500 bg-amber-500 text-white"
                         : "border-amber-300 bg-white text-amber-800 hover:border-amber-500 hover:bg-amber-100 dark:border-amber-700 dark:bg-slate-800 dark:text-amber-300"
@@ -296,7 +296,7 @@ export function CertFinderClient() {
                   <button
                     type="button"
                     onClick={reset}
-                    className="flex items-center gap-1 text-xs text-slate-500 hover:text-red-600"
+                    className="flex min-h-[44px] items-center gap-1 text-xs text-slate-500 hover:text-red-600"
                     aria-label="条件をリセット"
                   >
                     <RotateCcw className="h-3.5 w-3.5" aria-hidden />
