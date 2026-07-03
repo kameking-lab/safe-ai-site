@@ -17,6 +17,7 @@ import {
   HardHat,
   Signpost,
   Newspaper,
+  LayoutGrid,
   ArrowRight,
   ExternalLink,
   Copy,
@@ -52,6 +53,7 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
     case 'equipment': return <HardHat className={cls} aria-hidden="true" />;
     case 'sign':      return <Signpost className={cls} aria-hidden="true" />;
     case 'article':   return <Newspaper className={cls} aria-hidden="true" />;
+    case 'feature':   return <LayoutGrid className={cls} aria-hidden="true" />;
   }
 }
 
