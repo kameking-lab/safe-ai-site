@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-04 S補充 — OGP画像 title/desc 過長時の縦溢れ是正（PR: seo/og-image-text-overflow-clamp）
+
+**契約1) 回収**: 冒頭で緑の自班PRを回収＝#837(かな畳み込み)・#845(教育コース収載)を squash マージ→main ff同期。連鎖で CONFLICTING 化した #845(教育)・#841(robots UAガード)へ `git merge origin/main`（force-push なし）で BACKLOG/cycle-log の追記衝突（両側保持）のみ解決し再push。#845 は再走緑を確認して即マージ、#841/#849(独立ハブ2件) は CI 進行中のため次イテレーション回収（本repoは auto-merge 無効のため即時マージ不可）。他班 OPEN PR は不可侵。
+
+**着手判断**: BACKLOG-seo 未着手キューは空（O17/T6 は Path A/オーナー承認待ち）のため補充指針に従い自領域から補充。in-flight の #841(robots)・#849(cross-search hub) と near-dup を避け（[[avoid-overlapping-followup-prs]]）、cross-search/robots 外の distinct な穴を探索。json-ld(19スキーマ・成熟)・manifest(資産実在ガード済み)・sitemap(逆カバレッジガード済み)を確認後、**`/api/og`** に着目＝data 由来で長さ不定の title/desc をそのまま描画するのに Satori は overflow をクリップせず、過長 title（実測最長39字・比較/事故ページは可変で更に伸びうる）が 630px を縦溢れして透かし/desc へ重なる＝SNS/検索プレビューの CTR を損なう発見性の穴。フォントも `>20?40:52` の2段階で37字以上の縦溢れ域を救えていなかった。
+
+**実装**: 純関数を OGヘルパー単一ソース `og-url.ts` へ追加＝(1)`clampOgText(text,max)` はコードポイント単位で数え上限超過のみ末尾「…」へ丸め（サロゲート/絵文字非分断・上限以下は byte-identical）。route の title/desc 双方へ適用（`OG_TITLE_MAX=56`・`OG_DESC_MAX=110`＝通常コンテンツは畳まず病的入力だけ安全側）。(2)`ogTitleFontSize(len)` で 20字以下=52px・21〜36字=40px の既存挙動を保ちつつ 37字以上を 32px へ。既存の短文・en 既定文（33字→40px 据置）は挙動不変。route は生の三項ハードコードを撤去し純関数呼び出しへ差し替え。
+
+**回帰**: `og-url.test.ts` に describe 4・14 it 追加＝clampOgText（境界ちょうど・超過丸め・総コードポイント=上限・絵文字非分断・desc 同規約）／ogTitleFontSize（20/21/36/37 各段）／route source-scan（title・desc の clampOgText 経由・font の ogTitleFontSize 経由・旧 `>20?` 撤去の機械固定）。
+
+**ゲート**: `tsc --noEmit`=0 / `lint`=errors0（既存warn23は無関係の別ファイル）/ `vitest run`=323ファイル2740 pass・1 skip（新規14含む）/ `build`=成功。再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json）は `git checkout` で復元。
+
+**残**: #841/#849 の CI 緑回収＆マージ（次イテレーション 1)）。O17/T6 実装はオーナー承認待ち。
+
+---
+
 ## 2026-07-04 柱C-2補充 横断検索に教育コース12件を /education/<slug> 深リンクで収載（講習名0件の是正）
 
 **課題（発見性の穴）**: 特別教育/法定教育/労働衛生教育の**12コースページ**（`/education/tokubetsu/fullharness`・`/education/hoteikyoiku/shokucho`・`/education/roudoueisei/youtsu-yobou` 等）は固有 title/description＋Course JSON-LD を持ち sitemap 収載済みの実在 indexable ランディング（講習形式・料金・法令根拠を載せた専用ページ）なのに、横断検索(/search・⌘K)の `buildSearchIndex` に import が皆無で丸ごと0件だった。「フルハーネス 特別教育」「足場 特別教育」「職長」「腰痛 予防」「酸欠 特別教育」と現場語彙で自分に要る講習を打った現場ユーザー（現場監督・一人親方・安全担当）が講習コースへ検索経由で着けなかった（#561 等と同型）。
