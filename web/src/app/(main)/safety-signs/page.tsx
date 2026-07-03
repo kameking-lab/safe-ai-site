@@ -228,7 +228,10 @@ export default function SafetySignsHubPage() {
         <h2 className="text-base font-bold text-slate-900">関連機能</h2>
         <ul className="mt-3 space-y-2 text-sm leading-6 text-slate-800">
           <li>
-            <Link href="/signage" className="font-semibold text-emerald-700 underline hover:text-emerald-800">
+            <Link
+              href="/signage"
+              className="inline-flex min-h-[44px] items-center font-semibold text-emerald-700 underline hover:text-emerald-800"
+            >
               サイネージ表示 →
             </Link>
             <span className="ml-1 text-slate-600">
@@ -236,7 +239,10 @@ export default function SafetySignsHubPage() {
             </span>
           </li>
           <li>
-            <Link href="/ky" className="font-semibold text-emerald-700 underline hover:text-emerald-800">
+            <Link
+              href="/ky"
+              className="inline-flex min-h-[44px] items-center font-semibold text-emerald-700 underline hover:text-emerald-800"
+            >
               KY簡易作成 →
             </Link>
             <span className="ml-1 text-slate-600">
@@ -246,7 +252,7 @@ export default function SafetySignsHubPage() {
           <li>
             <Link
               href="/industries/construction"
-              className="font-semibold text-emerald-700 underline hover:text-emerald-800"
+              className="inline-flex min-h-[44px] items-center font-semibold text-emerald-700 underline hover:text-emerald-800"
             >
               建設業のリスク・対策 →
             </Link>

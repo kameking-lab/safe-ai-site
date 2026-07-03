@@ -22,6 +22,7 @@ import { SERIOUS_CASES_META } from "@/lib/accident-news/serious-cases";
 import { buildNewsHubItems } from "@/lib/news-hub";
 import equipmentDb from "@/data/safety-equipment-db.json";
 import { getPublishedArticleIndex } from "@/lib/articles";
+import { CONCENTRATION_LIMITS } from "@/lib/mhlw-chemicals";
 import { latestIsoDate } from "@/lib/sitemap/lastmod";
 
 /** 各サイトマップセクションの実データ最新日（YYYY-MM-DD）。 */
@@ -38,6 +39,8 @@ export interface SitemapFreshness {
   accidentsDataUpdated: string;
   /** 保護具DBの生成日（sitemap-equipment.xml が列挙する /equipment 個別ページの実更新日）。 */
   equipmentDataUpdated: string;
+  /** 化学物質濃度基準DBの生成日（sitemap-chemicals.xml が列挙する /chemical-database/[cas] の実更新日）。 */
+  chemicalsDataUpdated: string;
   /** /articles 一覧の最新更新日（sitemap-articles.xml の正本）。 */
   freshestArticle: string;
   /** サイト全体（本体 sitemap.xml＝トップ）の最新日＝主要データ源の最大値。 */
@@ -79,6 +82,11 @@ export function computeSitemapFreshness(buildToday: string): SitemapFreshness {
     buildToday,
   );
   const equipmentDataUpdated = latestIsoDate([equipmentDb.generatedAt], "2026-04-29", buildToday);
+  const chemicalsDataUpdated = latestIsoDate(
+    [CONCENTRATION_LIMITS.generatedAt?.slice(0, 10)],
+    "2026-05-24",
+    buildToday,
+  );
   const freshestArticle = latestIsoDate(
     getPublishedArticleIndex().flatMap((a) => [a.publishedAt, a.lastReviewedAt]),
     "2026-04-28",
@@ -97,6 +105,7 @@ export function computeSitemapFreshness(buildToday: string): SitemapFreshness {
     freshestCourtCase,
     accidentsDataUpdated,
     equipmentDataUpdated,
+    chemicalsDataUpdated,
     freshestArticle,
     siteFreshest,
   };
