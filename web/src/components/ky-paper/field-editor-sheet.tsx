@@ -14,7 +14,7 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import type { KyInstructionRecordState } from "@/lib/types/operations";
-import { getKyPaperFieldDef, nextKyPaperFieldKey, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
+import { getKyPaperFieldDef, nextKyPaperFieldKey, parseRiskFieldKey, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
 import {
   MONTH_OPTIONS,
   dayOptions,
@@ -26,6 +26,8 @@ import {
 import { WEATHER_REGIONS } from "@/lib/ky/weather-autofill";
 import type { Worker } from "@/lib/ky/workers-master";
 import type { WorkerGroup } from "@/lib/ky/participant-select";
+import type { KyHazardSuggestion } from "@/lib/ky/gemini-suggest";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 export type FieldEditorSheetProps = {
   fieldKey: KyPaperFieldKey;
@@ -51,6 +53,15 @@ export type FieldEditorSheetProps = {
     addWorkers: (toAdd: Worker[]) => void;
     clearMasterWorkers: () => void;
   };
+  /** O10（第四弾）: 危険のポイント欄でのAI提案（従来UIの🤖危険箇所提案をエディタ内に統合）。 */
+  ai?: {
+    busy: boolean;
+    suggestions: KyHazardSuggestion[];
+    source: "gemini" | "fallback" | null;
+    onSuggest: () => void;
+    /** 提案をこの欄が属する危険行(index)へ反映 */
+    onApply: (s: KyHazardSuggestion, riskIndex: number) => void;
+  };
 };
 
 const selectCls =
@@ -64,10 +75,14 @@ export function FieldEditorSheet({
   onSelectField,
   weather,
   participants,
+  ai,
 }: FieldEditorSheetProps) {
   const def = getKyPaperFieldDef(fieldKey);
   const next = nextKyPaperFieldKey(fieldKey, record);
   const sheetRef = useRef<HTMLDivElement | null>(null);
+  // 危険のポイント欄（risk.N.hazard）のときだけAI提案を出す。対策/評価欄では出さない。
+  const riskMeta = parseRiskFieldKey(fieldKey);
+  const showAi = ai !== undefined && riskMeta?.part === "hazard";
 
   // 開いたら最初の入力へフォーカス（キーボード/音声にすぐ入れる）。
   // 参加者エディタはチップ選択が主操作でフォーカス移動が邪魔になるため対象外。
@@ -131,6 +146,47 @@ export function FieldEditorSheet({
             placeholder={def.placeholder}
             className="min-h-[88px] text-base"
           />
+        )}
+
+        {/* O10（第四弾）: 危険のポイント欄でのAI提案。従来UI（クラシック表示）と同じ /api/ky/suggest を共有。 */}
+        {showAi && ai && (
+          <div className="mt-2">
+            <button
+              type="button"
+              onClick={ai.onSuggest}
+              disabled={ai.busy}
+              className="min-h-[44px] w-full rounded-lg border border-indigo-300 bg-indigo-50 px-3 text-xs font-bold text-indigo-800 hover:bg-indigo-100 disabled:opacity-50"
+            >
+              {ai.busy ? "AIが分析中…" : "🤖 AIに危険箇所を提案させる"}
+            </button>
+            {ai.source && ai.suggestions.length > 0 && (
+              <div className="mt-2 space-y-1.5 rounded-lg border border-indigo-200 bg-indigo-50/40 p-2">
+                <p className="text-[11px] font-semibold text-indigo-900">
+                  {ai.source === "gemini" ? "本物のAI（Gemini）の提案" : "定型提案（AI未設定/応答不可のフォールバック）"}
+                  ：気になる項目を「反映」でこの欄へ取り込めます
+                </p>
+                {ai.suggestions.map((s, i) => (
+                  <div key={i} className="flex items-start justify-between gap-2 rounded border border-indigo-200 bg-white p-1.5">
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-slate-800">
+                        {s.hazard}
+                        <span className="ml-1 rounded bg-slate-100 px-1 text-[10px] text-slate-600">評価値{s.evaluation}（{s.riskLabel}）</span>
+                        {!s.grounded && <StatusBadge tone="warning" size="sm" className="ml-1">要確認</StatusBadge>}
+                      </p>
+                      <p className="text-[11px] text-slate-600">対策: {s.reduction || "—"}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => ai.onApply(s, riskMeta!.index)}
+                      className="shrink-0 rounded border border-indigo-300 bg-white px-2 py-1 text-[11px] font-bold text-indigo-700 hover:bg-indigo-50"
+                    >
+                      反映
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
 
         {def.type === "date3" && (

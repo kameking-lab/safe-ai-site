@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-03（5） — O10・第四弾 KY用紙Phase2続き＝zoom-to-cell＋AI提案のエディタ統合、およびPR #621 CI失敗の原因是正
+
+回収: 自班PR #621（O10・第一〜三弾）のCIを確認したところ `e2e` ジョブが `ky-canvas.spec.ts` の初期フィット2件（PC/スマホ）で失敗中（`smoke`は緑）。squashマージは見送り、原因調査を本イテレーションのスコープに含めて継続。
+
+着手: BACKLOG最上位「O10（続き・第四弾）」＝zoom-to-cell・AI提案のエディタ統合・canvas既定切替のうち、前者2点を実装。作業ブランチには前イテレーション終了時点で未コミットの実装（zoom-to-cell・AI提案統合）が作業ツリーに残っていたため、内容を検証のうえ引き継いだ。
+
+実装1（zoom-to-cell）: `paper-fields.ts`に`firstEmptyKyPaperFieldKey`を追加（`nextKyPaperFieldKey`の連鎖を先頭から辿り最初の未記入欄を返す＝危険行の動的増減に自動追従）。結論カード「のこりN項目」をボタン化し、タップで`PaperStage`に新設した`focusField`（ref経由のimperative handle）を呼び`data-field-key`一致セルへズーム＋そのままエディタを開く。
+
+実装2（AI提案のエディタ統合）: `FieldEditorSheet`に`ai`propを追加し、危険のポイント欄（`risk.N.hazard`）でのみ従来UIと同一の`/api/ky/suggest`ボタン・候補・反映UIを表示。反映は`applySuggestion`に`targetIndex`を追加し、canvas側は編集中のその行に直接（従来UIは最初の空き行）。副次是正: 作業内容が空のままAI提案を押した際の案内バーが従来UIにはありcanvasβでは欠落していたため、既存`notice`状態をcanvasモードのJSXにも表示するよう追加。
+
+原因調査と是正（CI失敗）: `e2e/ky-canvas.spec.ts`のPC/スマホ初期フィット2件を手元で再現し、`PaperStage`のCSS `h-[calc(100dvh-150px/200px)]`が想定する「上に積まれる高さ」(150px)が、実際のサイト共通ヘッダー/サブナビ＋当画面コンパクトバーの実測(192px)を下回っており、ステージが画面下端を最大42pxはみ出していたことを特定（他班所有のapp-shell分を含む高さは固定定数では原理的に追従できない）。`PaperStage`の高さをCSS固定値から実測（`useLayoutEffect`で`getBoundingClientRect().top`から残り高さを算出、親の`padding-bottom`も実測して二重確保しない、再計算はmount＋`window resize`のみ＝ズーム操作中のサブピクセルなbody変動まで拾うと`useZoomPan`のinteracted後は自動再フィットされずステージ枠だけ動いてズレるため意図的に限定）へ変更。この変更で下端の余白を使い切った結果、全画面共通の共有FAB（他班所有・fixed bottom-right）とステージ右下のズーム操作クラスタが新たに重なりPlaywrightのクリックが被さったSVGに阻まれてページスクロールを誘発する副作用が発覚（`Ctrl+ホイールで拡大→ボタンで縮小→全体表示`のe2eが新規に不安定化）。座標を握らず解決するため`FAB_CLEARANCE_PX`(72px)の緩衝を追加して両立。
+
+検証: `tsc --noEmit`=0 / `lint`=errors0（既存warning23件のみ）/ `vitest run`=242ファイル2061テスト全pass / `build`=成功 / `playwright test`（e2e全79件、本番相当ビルド起動）=79/79合格（対象の`ky-canvas.spec.ts`6/6を含む、10回連続再実行でも安定）。無読Playwright新規`ky-canvas-phase2-zoom-ai-2026-07-03.mjs`9/9合格。テスト実行で副生成される`docs/rag-metrics-latest.json`・`web/src/data/chatbot-eval-fresh-results.json`（他レーン所有）はcommitから除外。
+
+---
+
 ## 2026-07-03（4） — O10・第三弾 KY用紙Phase2続き＝参加者（チップ選択）をcanvas直接編集化
 
 回収: 自班PR #621（O10・第一弾/第二弾）はCI（e2e/smoke）が実行中のためこのイテレーションではマージ見送り（契約どおり次イテレーションで回収）。作業ブランチ`ux-rec/o10-ky-canvas-phase2-work-goal`はclean・origin同期済みのため、同一PRへの追加コミットとして継続（第一弾・第二弾と同じ積み上げ方式）。

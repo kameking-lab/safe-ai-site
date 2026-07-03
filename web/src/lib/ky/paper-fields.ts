@@ -252,6 +252,22 @@ export function nextKyPaperFieldKey(key: KyPaperFieldKey, record: KyInstructionR
   return isLastRow ? "teamGoal" : riskFieldKey(risk.index + 1, "hazard");
 }
 
+/**
+ * O10（第四弾・zoom-to-cell）: 記入順（紙の上から下、危険行の動的挿入込み）で
+ * 最初の未記入欄を返す。nextKyPaperFieldKey の連鎖をそのまま辿るため、
+ * 危険行の追加・行数変更にも自動追従する。
+ */
+export function firstEmptyKyPaperFieldKey(record: KyInstructionRecordState): KyPaperFieldKey | undefined {
+  let key: KyPaperFieldKey | undefined = KY_PAPER_FIELD_ORDER[0];
+  const seen = new Set<string>();
+  while (key && !seen.has(key)) {
+    if (getKyPaperFieldDef(key).isEmpty(record)) return key;
+    seen.add(key);
+    key = nextKyPaperFieldKey(key, record);
+  }
+  return undefined;
+}
+
 /** 未記入の欄キー集合（EditableCell のハイライトに渡す）。危険行は現在の行数ぶんを含む。 */
 export function emptyKyPaperFieldKeys(record: KyInstructionRecordState): Set<string> {
   const out = new Set<string>();

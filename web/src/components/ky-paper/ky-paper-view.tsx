@@ -8,7 +8,7 @@
  * （朝礼サイネージ /ky/morning とそのまま連携）。視覚確認はプレビュー環境で要実施。
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import { normalizeKyInstructionRecord, makeEmptyKyRiskRow } from "@/lib/services/operations-service";
@@ -56,9 +56,9 @@ import { detectChemicalWork, chemicalRaHref } from "@/lib/chemical/work-chemical
 import { detectAccidentWork, accidentsHref } from "@/lib/accidents/work-accident-hints";
 import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
 import { KyTranscribePanel } from "@/components/ky-paper/ky-transcribe-panel";
-import { PaperStage } from "@/components/ky-paper/paper-stage";
+import { PaperStage, type PaperStageHandle } from "@/components/ky-paper/paper-stage";
 import { FieldEditorSheet } from "@/components/ky-paper/field-editor-sheet";
-import { emptyKyPaperFieldKeys, riskFieldKey, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
+import { emptyKyPaperFieldKeys, firstEmptyKyPaperFieldKey, riskFieldKey, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
@@ -344,14 +344,15 @@ export function KyPaperView() {
     }
   };
 
-  // 提案を最初の空き危険欄に取り込む（埋まっていれば新しい行を追加）。
-  const applySuggestion = (s: KyHazardSuggestion) => {
+  // 提案の反映先。targetIndex 指定時（canvas: 危険行エディタから）はその行へ直接、
+  // 未指定時（従来UI）は最初の空き危険欄に取り込む（埋まっていれば新しい行を追加）。
+  const applySuggestion = (s: KyHazardSuggestion, targetIndex?: number) => {
     setRecord((prev) => {
       const rows = [...prev.riskRows];
-      const emptyIdx = rows.findIndex((r) => !r.hazard.trim());
-      const base = emptyIdx >= 0 ? rows[emptyIdx] : undefined;
+      const idx = targetIndex ?? rows.findIndex((r) => !r.hazard.trim());
+      const base = idx >= 0 && idx < rows.length ? rows[idx] : undefined;
       if (base) {
-        rows[emptyIdx] = {
+        rows[idx] = {
           ...base,
           hazard: s.hazard,
           reduction: s.reduction,
@@ -524,6 +525,15 @@ export function KyPaperView() {
   }, []);
   // F1/O10: 未記入の全欄（キャンバス上のうっすらハイライト用）
   const emptyPaperFieldKeys = useMemo(() => emptyKyPaperFieldKeys(record), [record]);
+  // O10（第四弾）: zoom-to-cell。「のこりN」タップで最初の未記入欄へズーム＋そのまま開く
+  // （行追加ホットスポットの「そのまま開く」と同じ作法の汎用化）。
+  const stageRef = useRef<PaperStageHandle>(null);
+  const firstEmptyFieldKey = useMemo(() => firstEmptyKyPaperFieldKey(record), [record]);
+  const handleZoomToNextEmpty = useCallback(() => {
+    if (!firstEmptyFieldKey) return;
+    stageRef.current?.focusField(firstEmptyFieldKey);
+    setActiveFieldKey(firstEmptyFieldKey);
+  }, [firstEmptyFieldKey]);
 
   // F1: 用紙キャンバス（β）。全hooks評価後の分岐＝クラシックUIと状態を完全共有する
   // （record/自動保存/クラウド同期/承認ロック/深リンクがそのまま効く）。
@@ -539,9 +549,15 @@ export function KyPaperView() {
                 キャンバスβ
               </span>
               {paperStatus.remaining !== undefined && paperStatus.remaining > 0 && (
-                <span className="rounded-full bg-sky-600 px-2.5 py-0.5 text-[11px] font-bold text-white">
-                  のこり{paperStatus.remaining}項目
-                </span>
+                <button
+                  type="button"
+                  onClick={handleZoomToNextEmpty}
+                  disabled={!firstEmptyFieldKey}
+                  title="最初の未記入セルへズームして開く"
+                  className="min-h-[28px] rounded-full bg-sky-600 px-2.5 py-0.5 text-[11px] font-bold text-white hover:bg-sky-700 disabled:opacity-60"
+                >
+                  のこり{paperStatus.remaining}項目 →
+                </button>
               )}
               {locked && (
                 <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800">
@@ -568,8 +584,19 @@ export function KyPaperView() {
           </div>
         </div>
 
+        {/* O10（第四弾）: 通知バー。従来表示にはあったがキャンバスβでは未提供だった＝
+            AI提案のエディタ統合で「先に作業内容を」等の案内が必要になったため追加。 */}
+        {notice && (
+          <div className="mx-auto mt-2 max-w-5xl px-3 print:hidden">
+            <div className={`flex items-start justify-between gap-3 rounded-xl border px-3 py-2 ${SAFETY_TONE[notice.tone].soft}`}>
+              <p className="text-xs font-semibold">{notice.text}</p>
+              <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="rounded px-1.5 hover:bg-black/10">×</button>
+            </div>
+          </div>
+        )}
+
         {/* 用紙キャンバス: 初期表示＝全体フィット。タップで入力、ピンチ/ホイール/ボタンでズーム */}
-        <PaperStage heightClassName="h-[calc(100dvh-200px)] min-h-[320px] sm:h-[calc(100dvh-150px)]">
+        <PaperStage ref={stageRef} heightClassName="h-[calc(100dvh-200px)] min-h-[320px] sm:h-[calc(100dvh-150px)]">
           <div className="bg-white p-3">
             <KyPrintSheet
               record={record}
@@ -597,6 +624,13 @@ export function KyPaperView() {
             onSelectField={(key) => setActiveFieldKey(key)}
             weather={{ region, setRegion, fetchWeather: () => void handleWeather(), busy: weatherBusy }}
             participants={{ workers, regularWorkers, workerGroups, selectedNames, toggleWorker, addWorkers, clearMasterWorkers }}
+            ai={{
+              busy: suggestBusy,
+              suggestions,
+              source: suggestSource,
+              onSuggest: () => void handleSuggest(),
+              onApply: (s, riskIndex) => applySuggestion(s, riskIndex),
+            }}
           />
         )}
 
