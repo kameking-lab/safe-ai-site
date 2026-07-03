@@ -107,6 +107,31 @@ function Test-ShouldReportDeadlineStop([string]$LaneTag, [int]$MaxIter) {
   return (($LaneTag -ne "") -and ($MaxIter -le 0))
 }
 
+# Hot-swap gate: whether the running runner's OWN script file has changed on disk since launch, i.e. an
+# ops fix to loop-runner.ps1 has been pulled into this lane's clone but the long-lived process is still
+# executing the OLD code. A persistent runner reads its whole script into the process at launch, so
+# runner-code fixes (backoff #590, deadline-stop #619, heartbeat #672) never reach an ALREADY-RUNNING
+# lane until the process restarts - and the launcher's single-instance guard refuses to restart a live
+# runner, so up to 5/6 lanes can execute stale runner code for days (the heartbeat fix could not even
+# activate for its own targets seo/ux-records). Pure function so -SelfTest can assert it without file IO:
+# a change is signalled ONLY when both hashes are non-empty and differ. An empty/failed current hash
+# (file briefly locked mid git-checkout) returns $false = fail-safe toward "unchanged", so a transient
+# read error can never spin the runner into a restart loop; an empty launch baseline also never restarts.
+function Test-ScriptChanged([string]$LaunchHash, [string]$CurrentHash) {
+  if ([string]::IsNullOrEmpty($LaunchHash)) { return $false }
+  if ([string]::IsNullOrEmpty($CurrentHash)) { return $false }
+  return ($LaunchHash -ne $CurrentHash)
+}
+
+# Content hash of a file, or "" on any failure (missing / locked mid-checkout). Never throws so the
+# hot-swap check degrades to "unchanged" instead of crashing the loop.
+function Get-ScriptHashSafe([string]$Path) {
+  try {
+    if (-not $Path -or -not (Test-Path $Path)) { return "" }
+    return (Get-FileHash -Algorithm SHA256 -Path $Path -ErrorAction Stop).Hash
+  } catch { return "" }
+}
+
 # Dry-run self-check of the backoff schedule. Runs BEFORE any Claude CLI / scheduler
 # dependency so it is safe to invoke on any machine: powershell -File loop-runner.ps1 -SelfTest
 if ($SelfTest) {
@@ -144,7 +169,24 @@ if ($SelfTest) {
     Write-Host ("[selftest] deadline-stop gate lane='" + $g.lane + "' max=" + $g.max + " -> " + $got + " (want " + $g.want + ") " + $(if ($pass) { "OK" } else { "FAIL" }))
   }
 
-  if ($ok -and $capReached -and $gateOk) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
+  # Hot-swap gate: the runner exits cleanly (for the watchdog/launcher to relaunch the new code) ONLY
+  # when its own script file genuinely changed on disk. Fail-safe: an empty/failed current hash, or no
+  # launch baseline, must never trigger a restart (no restart loop on a transient read failure).
+  $swapCases = @(
+    @{ launch = "AAAA"; cur = "AAAA"; want = $false },  # unchanged -> keep running
+    @{ launch = "AAAA"; cur = "BBBB"; want = $true },   # changed on disk -> relaunch new code
+    @{ launch = "AAAA"; cur = "";     want = $false },  # unreadable now (locked mid-checkout) -> no restart loop
+    @{ launch = "";     cur = "BBBB"; want = $false }   # no launch baseline -> never restart
+  )
+  $swapOk = $true
+  foreach ($s in $swapCases) {
+    $got = Test-ScriptChanged $s.launch $s.cur
+    $pass = ($got -eq $s.want)
+    if (-not $pass) { $swapOk = $false }
+    Write-Host ("[selftest] hotswap launch='" + $s.launch + "' cur='" + $s.cur + "' -> " + $got + " (want " + $s.want + ") " + $(if ($pass) { "OK" } else { "FAIL" }))
+  }
+
+  if ($ok -and $capReached -and $gateOk -and $swapOk) { Write-Host "[selftest] PASS"; exit 0 } else { Write-Host "[selftest] FAIL"; exit 1 }
 }
 
 if (-not $RepoPath -or $RepoPath -eq "") { $RepoPath = (Get-Location).Path }
@@ -218,6 +260,10 @@ if (-not (Test-Path $PromptFile)) {
 }
 
 $prompt = Get-Content -Raw -Encoding UTF8 -Path $PromptFile
+# Baseline content hash of THIS script for the hot-swap check (see Test-ScriptChanged). Captured once at
+# launch; each iteration compares the on-disk file to this so a runner-code fix pulled into the clone
+# triggers a clean relaunch onto the new version instead of running stale code indefinitely.
+$launchScriptHash = Get-ScriptHashSafe $PSCommandPath
 
 # Self-report a genuine deadline stop into the ONE central docs/loop-status.md via
 # loop-report-status.ps1. When UntilIso is reached the runner breaks and exits 0; historically that
@@ -287,6 +333,15 @@ while ($true) {
     try { if ((Get-Date) -ge [datetime]::Parse($UntilIso)) { Write-Log ("Deadline " + $UntilIso + " reached. Stop."); Report-DeadlineStop; break } } catch {}
   }
 
+  # Re-read the per-iteration prompt so a pulled prompt edit (contract/model/steering changes) reaches
+  # this long-lived runner WITHOUT a restart - the prompt was read once at launch, so a live runner used
+  # a frozen prompt forever. Keep the last good prompt if the file is briefly unreadable or empty (e.g.
+  # mid git-checkout) so a transient failure never sends a blank prompt to claude.
+  try {
+    $freshPrompt = Get-Content -Raw -Encoding UTF8 -Path $PromptFile -ErrorAction Stop
+    if ($null -ne $freshPrompt -and $freshPrompt -ne "") { $prompt = $freshPrompt }
+  } catch { Write-Log ("WARN: prompt re-read failed (keeping previous): " + $_.Exception.Message) }
+
   Write-Log ("----- iteration #" + $iter + " start -----")
   $claudeArgs = @("-p", "--dangerously-skip-permissions")
   if ($Model -ne "") { $claudeArgs += @("--model", $Model) }
@@ -324,6 +379,21 @@ while ($true) {
   if ($UntilIso -ne "") {
     try { if ((Get-Date) -ge [datetime]::Parse($UntilIso)) { Write-Log ("Deadline " + $UntilIso + " reached. Stop."); Report-DeadlineStop; break } } catch {}
   }
+  # Hot-swap: if a fix to THIS script was pulled into the clone since launch, exit cleanly so the
+  # watchdog (loop-watchdog.ps1) / next launcher pass relaunches the NEW code from the on-disk file. The
+  # single-instance guard blocks a self-spawn (the new process would see this one still alive and exit),
+  # so a clean exit + the existing -HealOnly resurrection path is the race-free way to upgrade a live
+  # runner: once this process is gone the heal launch finds no conflict and starts the fresh version.
+  # Checked BETWEEN iterations - the claude turn has fully ended and the tree is clean - so no work is in
+  # flight. Only persistent laned runs (never a one-shot planner/critic), same gate as the heartbeat.
+  if (Test-ShouldReportDeadlineStop $laneTag $MaxIterations) {
+    $curScriptHash = Get-ScriptHashSafe $PSCommandPath
+    if (Test-ScriptChanged $launchScriptHash $curScriptHash) {
+      Write-Log ("self-update: loop-runner.ps1 changed on disk (launch=" + $launchScriptHash.Substring(0, [Math]::Min(8, $launchScriptHash.Length)) + " now=" + $curScriptHash.Substring(0, [Math]::Min(8, $curScriptHash.Length)) + "); exiting cleanly so the watchdog/launcher relaunches the new version.")
+      break
+    }
+  }
+
   $waitSeconds = Get-BackoffSeconds $consecutiveShortFails $IntervalSeconds
   if ($consecutiveShortFails -ge 3) {
     Write-Log ("backoff engaged (" + $consecutiveShortFails + " consecutive short failures, likely usage limit): waiting " + $waitSeconds + "s before next iteration...")
