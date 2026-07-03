@@ -85,6 +85,7 @@ param(
   [string]$RepoPath = "",
   [string]$StringsPath = "",
   [int]$StaleMinutes = 120,
+  [int]$WedgeMinutes = 240,
   [switch]$HeartbeatOnly,
   [switch]$WhatIf,
   [switch]$SelfTest
@@ -339,7 +340,7 @@ function Format-MissingSinceMarker {
 # no detection). $AliveLanes defaults to empty, so callers that cannot scan processes (or older self-tests)
 # get exactly the prior behavior.
 function Get-LaneHealthLine {
-  param([string[]]$Rows, [datetime]$Now, [int]$StaleMinutes, [string[]]$ExpectedLanes, [hashtable]$MissingSince, [string[]]$AliveLanes = @())
+  param([string[]]$Rows, [datetime]$Now, [int]$StaleMinutes, [string[]]$ExpectedLanes, [hashtable]$MissingSince, [string[]]$AliveLanes = @(), [int]$WedgeMinutes = 240, [double]$WatchdogUpMinutes = -1)
   if (-not $LS.ContainsKey("laneHealthOk") -or -not $LS.ContainsKey("laneHealthStale")) { return $null }
   $rowTpl = S "reportLine"
   $all = @(Get-StaleLanes -Rows $Rows -Now $Now -StaleMinutes ([int]::MinValue) -RowTemplate $rowTpl)
@@ -362,8 +363,12 @@ function Get-LaneHealthLine {
   $stale = @(Get-StaleLanes -Rows $Rows -Now $Now -StaleMinutes $StaleMinutes -RowTemplate $rowTpl)
   $staleDead = @()
   $staleAlive = @()
+  # $anrAge maps each alive-no-report lane -> minutes it has been alive-but-silent. It feeds the wedge
+  # escalation below: a stale-alive lane's age is its own report age; a never-reported-alive lane's age is
+  # supplied from $MissingSince (0 when no stamp is known, so a clockless lane never trips the loud alarm).
+  $anrAge = @{}
   foreach ($s in $stale) {
-    if ($canAliveNoReport -and ($AliveLanes -contains $s.Lane)) { $staleAlive += $s.Lane } else { $staleDead += $s }
+    if ($canAliveNoReport -and ($AliveLanes -contains $s.Lane)) { $staleAlive += $s.Lane; $anrAge[$s.Lane] = [double]$s.AgeMinutes } else { $staleDead += $s }
   }
   if ($staleDead.Count -gt 0) {
     $items = @()
@@ -384,7 +389,13 @@ function Get-LaneHealthLine {
   $aliveNoReport = @($staleAlive)
   $quietMissing = @()
   foreach ($m in $missing) {
-    if ($canAliveNoReport -and ($AliveLanes -contains $m)) { $aliveNoReport += $m; continue }
+    if ($canAliveNoReport -and ($AliveLanes -contains $m)) {
+      $aliveNoReport += $m
+      $ageM = 0.0
+      if ($MissingSince -and $MissingSince.ContainsKey($m)) { $ageM = ($Now - $MissingSince[$m]).TotalMinutes }
+      $anrAge[$m] = $ageM
+      continue
+    }
     $since = $null
     if ($MissingSince -and $MissingSince.ContainsKey($m)) { $since = $MissingSince[$m] }
     # A lane confirmed alive is never born-dead even without the alive-no-report string: fold it to quiet.
@@ -396,6 +407,24 @@ function Get-LaneHealthLine {
     return (Fmt "laneHealthBornDead" @{ LANES = ($bornDead -join $sep); MIN = $StaleMinutes })
   }
   if ($aliveNoReport.Count -gt 0 -and $canAliveNoReport) {
+    # WEDGE escalation: alive-no-report is normally CALM because a below-floor runner is expected to be
+    # silent only until the cooperative drain (#727) cycles it to fresh code - which takes minutes once the
+    # heal watchdog is resident. But the runner's claude call has NO timeout (loop-runner.ps1), so a hung
+    # claude keeps a child alive forever -> the drain (which only cycles IDLE runners) defers it forever ->
+    # it stays below-floor-silent PERMANENTLY, yet the calm banner reads "auto-resolves". Escalate to a LOUD
+    # "wedge suspected" banner ONLY when BOTH gates hold: (a) the lane has been alive-but-silent >= WedgeMinutes
+    # (a generous multiple of StaleMinutes) AND (b) the heal watchdog (the drain engine) has itself been up
+    # >= WedgeMinutes. Gate (b) prevents a FALSE alarm right after the watchdog starts, when a lane's silence
+    # clock predates the drain ever getting a chance (the live 06:38 runners vs an 18:09 watchdog). Unknown
+    # watchdog uptime (-1, no scan / no watchdog) never escalates: no drain engine means this is a cold state,
+    # the logon launcher's job, not a wedge. Absent the string, fall through to the calm banner (never silent).
+    $canStalled = $LS.ContainsKey("laneHealthAliveNoReportStalled")
+    if ($canStalled -and $WatchdogUpMinutes -ge $WedgeMinutes) {
+      $stalled = @($aliveNoReport | Where-Object { $anrAge.ContainsKey($_) -and $anrAge[$_] -ge $WedgeMinutes })
+      if ($stalled.Count -gt 0) {
+        return (Fmt "laneHealthAliveNoReportStalled" @{ LANES = ($stalled -join $sep); MIN = $WedgeMinutes })
+      }
+    }
     # TOTAL is the denominator on the owner's watch line ("N/TOTAL running-but-silent"). This branch is the
     # ONLY one reachable with an EMPTY roster: $missing needs a roster, but $staleAlive is derived from rows
     # alone, so a config that is momentarily unreadable in a clone (mid git-checkout) while a lane is stale-
@@ -552,6 +581,30 @@ function Get-AliveRunnerLanes {
     }
   } catch {}
   return $names.ToArray()
+}
+
+# How long (minutes) the resurrection watchdog (loop-watchdog.ps1) has been resident, or -1 if none is
+# running (or the scan fails). The watchdog is the drain engine: it fires `launcher -HealOnly` every
+# interval, which cooperatively cycles idle below-floor runners to fresh code. Get-LaneHealthLine uses this
+# as the SECOND wedge gate so a lane that has been alive-but-silent is only escalated to the loud "wedge"
+# banner once the drain has HAD time to fix it - never in the transient right after the watchdog starts (when
+# a lane's silence clock predates the drain ever getting a chance). Returns the OLDEST watchdog's uptime
+# (max), so a brief self-respawn overlap does not reset the clock. Best-effort; any failure -> -1 (no
+# escalation), matching the safe-degradation contract of Get-AliveRunnerLanes.
+function Get-WatchdogUptimeMinutes {
+  param([datetime]$Now)
+  $best = -1.0
+  try {
+    $procs = @(Get-CimInstance Win32_Process -Filter "Name LIKE 'powershell%' OR Name LIKE 'pwsh%'" -ErrorAction Stop |
+      Where-Object { $_.CommandLine -like '*loop-watchdog.ps1*' })
+    foreach ($p in $procs) {
+      if ($p.CreationDate -is [datetime]) {
+        $up = ($Now - $p.CreationDate).TotalMinutes
+        if ($up -gt $best) { $best = $up }
+      }
+    }
+  } catch {}
+  return $best
 }
 
 # Whether the ground-truth process-liveness scan (Get-AliveRunnerLanes) must run this write. The scan feeds
@@ -806,6 +859,44 @@ if ($SelfTest) {
           # O2: regression - a KNOWN roster is unchanged (TOTAL stays the roster size, here 2), same as M1.
           $o2 = Get-LaneHealthLine -Rows @($rOps, $rDataStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data") -AliveLanes @("data")
           Assert-Test "O2: known roster still uses the roster size as TOTAL (no regression)" ($o2 -eq $m1exp)
+
+          # W) Wedge escalation: a below-floor runner whose claude call has hung keeps a child alive forever,
+          # so the cooperative drain (idle-only) defers it PERMANENTLY and it stays alive-but-silent for good.
+          # The calm alive-no-report banner ("auto-resolves") then lies. Escalate to a LOUD "wedge" banner ONLY
+          # when the lane has been silent >= WedgeMinutes AND the heal watchdog has itself been up >= WedgeMinutes
+          # (gate (b) prevents the false alarm right after the watchdog starts, when the clock predates any drain
+          # chance - the live 06:38 runners vs 18:09 watchdog). Fixtures below use WedgeMinutes=240.
+          if ($LS.ContainsKey("laneHealthAliveNoReportStalled")) {
+            $mapWedge = @{ "seo" = $hNow.AddMinutes(-300) }       # 300 min silent (>= 240 wedge threshold)
+            $mapMid = @{ "seo" = $hNow.AddMinutes(-100) }         # 100 min silent (< 240, still calm)
+            $wedgeExp = Fmt "laneHealthAliveNoReportStalled" @{ LANES = "seo"; MIN = 240 }
+            $calmSeoExp = Fmt "laneHealthAliveNoReport" @{ LANES = "seo"; MISSING = 1; TOTAL = 3 }
+            # W1: silent 300 min + watchdog up 300 min + ALIVE -> LOUD wedge naming seo.
+            $w1 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapWedge -AliveLanes @("seo") -WedgeMinutes 240 -WatchdogUpMinutes 300
+            Assert-Test "W1: alive lane silent past wedge + watchdog long-resident -> loud wedge banner" ($w1 -eq $wedgeExp)
+            # W2: SAME lane/clock but the watchdog only just started (up 11 min) -> stays CALM (the live-scenario
+            # regression guard: a fresh drain has not yet had a chance, so no false wedge alarm).
+            $w2 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapWedge -AliveLanes @("seo") -WedgeMinutes 240 -WatchdogUpMinutes 11
+            Assert-Test "W2: watchdog only just resident -> calm alive-no-report, NOT a false wedge alarm" ($w2 -eq $calmSeoExp)
+            # W3: clock too young (100 min < 240) even with a long-resident watchdog -> calm.
+            $w3 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapMid -AliveLanes @("seo") -WedgeMinutes 240 -WatchdogUpMinutes 300
+            Assert-Test "W3: lane silent under the wedge threshold stays calm" ($w3 -eq $calmSeoExp)
+            # W4: no watchdog scan (-1, default) never escalates, even with an old clock -> calm (safe degrade).
+            $w4 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo") -MissingSince $mapWedge -AliveLanes @("seo")
+            Assert-Test "W4: unknown watchdog uptime (default -1) never escalates -> calm" ($w4 -eq $calmSeoExp)
+            # W5: a genuinely born-dead lane still OUTRANKS a wedge (loud dead beats loud wedged).
+            $mapDeadAndWedge = @{ "seo" = $hNow.AddMinutes(-300); "ux-records" = $hNow.AddMinutes(-300) }
+            $w5 = Get-LaneHealthLine -Rows @($rOps, $rData) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data", "seo", "ux-records") -MissingSince $mapDeadAndWedge -AliveLanes @("seo") -WedgeMinutes 240 -WatchdogUpMinutes 300
+            $w5exp = Fmt "laneHealthBornDead" @{ LANES = "ux-records"; MIN = 120 }
+            Assert-Test "W5: a truly born-dead lane outranks a wedged-alive lane" ($w5 -eq $w5exp)
+            # W6: the report-then-silent (stale-alive) path also feeds the wedge clock: data reported 300 min ago,
+            # is alive, watchdog long-resident -> loud wedge naming data (age comes from its own report row).
+            $veryStaleTs = $hNow.AddMinutes(-300).ToString("yyyy-MM-dd HH:mm")
+            $rDataVeryStale = Fmt "reportLine" @{ LANE = "data"; LASTRUN = $veryStaleTs; PR = "#2"; OPEN = "5"; NOTE = "ok" }
+            $w6 = Get-LaneHealthLine -Rows @($rOps, $rDataVeryStale) -Now $hNow -StaleMinutes 120 -ExpectedLanes @("ops", "data") -AliveLanes @("data") -WedgeMinutes 240 -WatchdogUpMinutes 300
+            $w6exp = Fmt "laneHealthAliveNoReportStalled" @{ LANES = "data"; MIN = 240 }
+            Assert-Test "W6: a report-then-silent alive lane past wedge also escalates to the loud wedge banner" ($w6 -eq $w6exp)
+          }
         }
       }
     }
@@ -1001,7 +1092,7 @@ if ($WhatIf) {
   if ($LS.ContainsKey("laneHealthOk") -and $LS.ContainsKey("laneHealthStale") -and (Test-Path $StatusPath)) {
     try {
       $prev = @(Get-Content -Encoding UTF8 -Path $StatusPath)
-      $knownHealthPrefixes = @((Get-TplPrefix "laneHealthOk"), (Get-TplPrefix "laneHealthStale"), (Get-TplPrefix "laneHealthUnreported"), (Get-TplPrefix "laneHealthBornDead"), (Get-TplPrefix "laneHealthAliveNoReport"))
+      $knownHealthPrefixes = @((Get-TplPrefix "laneHealthOk"), (Get-TplPrefix "laneHealthStale"), (Get-TplPrefix "laneHealthUnreported"), (Get-TplPrefix "laneHealthBornDead"), (Get-TplPrefix "laneHealthAliveNoReport"), (Get-TplPrefix "laneHealthAliveNoReportStalled"))
       $healthStem = Get-CommonPrefix $knownHealthPrefixes
       $rows = New-Object System.Collections.Generic.List[string]
       $markerRows = New-Object System.Collections.Generic.List[string]
@@ -1026,8 +1117,9 @@ if ($WhatIf) {
       # lane is never falsely escalated to born-dead (#696) OR to a loud stale "stopped" alarm (#703).
       # Empty on any failure -> prior behavior.
       $aliveLanes = @()
-      if (Test-NeedsAliveScan -MissingCount $missingLanes.Count -Rows $rows.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -RowTemplate $rowTpl) { $aliveLanes = @(Get-AliveRunnerLanes) }
-      $hl = Get-LaneHealthLine -Rows $rows.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes -MissingSince $newMap -AliveLanes $aliveLanes
+      $wdUp = -1.0
+      if (Test-NeedsAliveScan -MissingCount $missingLanes.Count -Rows $rows.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -RowTemplate $rowTpl) { $aliveLanes = @(Get-AliveRunnerLanes); $wdUp = Get-WatchdogUptimeMinutes -Now $nowH }
+      $hl = Get-LaneHealthLine -Rows $rows.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes -MissingSince $newMap -AliveLanes $aliveLanes -WedgeMinutes $WedgeMinutes -WatchdogUpMinutes $wdUp
       if ($hl) { Write-Rep ("[WHATIF] would set the region health line to: " + $hl) }
       else { Write-Rep "[WHATIF] no health line would be written (no parseable lane rows)." }
       $mk = Format-MissingSinceMarker -Map $newMap
@@ -1111,7 +1203,7 @@ try {
       elseif ($lines[$k].Trim() -eq $endMarker) { $eIdx = $k; break }
     }
     if ($bIdx -ge 0 -and $eIdx -gt $bIdx) {
-      $knownHealthPrefixes = @((Get-TplPrefix "laneHealthOk"), (Get-TplPrefix "laneHealthStale"), (Get-TplPrefix "laneHealthUnreported"), (Get-TplPrefix "laneHealthBornDead"), (Get-TplPrefix "laneHealthAliveNoReport"))
+      $knownHealthPrefixes = @((Get-TplPrefix "laneHealthOk"), (Get-TplPrefix "laneHealthStale"), (Get-TplPrefix "laneHealthUnreported"), (Get-TplPrefix "laneHealthBornDead"), (Get-TplPrefix "laneHealthAliveNoReport"), (Get-TplPrefix "laneHealthAliveNoReportStalled"))
       $healthStem = Get-CommonPrefix $knownHealthPrefixes
       # Peel the region into: the persisted missing-since marker (captured, to keep prior clocks running)
       # and the real lane rows (health + marker lines stripped so they never accumulate).
@@ -1130,8 +1222,9 @@ try {
       # is never falsely escalated to born-dead (#696) OR to a loud stale "stopped" alarm (#703). Empty on any
       # failure (WMI outage / non-Windows) -> prior behavior.
       $aliveLanes = @()
-      if (Test-NeedsAliveScan -MissingCount $missingLanes.Count -Rows $inner.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -RowTemplate $rowTpl) { $aliveLanes = @(Get-AliveRunnerLanes) }
-      $healthLine = Get-LaneHealthLine -Rows $inner.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes -MissingSince $newMap -AliveLanes $aliveLanes
+      $wdUp = -1.0
+      if (Test-NeedsAliveScan -MissingCount $missingLanes.Count -Rows $inner.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -RowTemplate $rowTpl) { $aliveLanes = @(Get-AliveRunnerLanes); $wdUp = Get-WatchdogUptimeMinutes -Now $nowH }
+      $healthLine = Get-LaneHealthLine -Rows $inner.ToArray() -Now $nowH -StaleMinutes $StaleMinutes -ExpectedLanes $ExpectedLanes -MissingSince $newMap -AliveLanes $aliveLanes -WedgeMinutes $WedgeMinutes -WatchdogUpMinutes $wdUp
       $markerLine = Format-MissingSinceMarker -Map $newMap
       $rebuilt = New-Object System.Collections.Generic.List[string]
       for ($k = 0; $k -le $bIdx; $k++) { $rebuilt.Add($lines[$k]) }

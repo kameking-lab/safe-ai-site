@@ -21,4 +21,13 @@ describe("/glossary page (用語辞書)", () => {
     expect(kana.className).toContain("min-h-[44px]");
     expect(kana.className).toContain("min-w-[44px]");
   });
+
+  it("用語カードの関連ページリンクが 44px タップ標的を満たす", () => {
+    render(<GlossaryPage />);
+    const relatedLinks = screen.getAllByRole("link", { name: /法令チャット/ });
+    expect(relatedLinks.length).toBeGreaterThan(0);
+    for (const link of relatedLinks) {
+      expect(link.className).toContain("min-h-[44px]");
+    }
+  });
 });
