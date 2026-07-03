@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-03 /education-certification/finder の色の文法違反（法令義務バッジ等のred直書き）を是正（柱0磨き・巡回発見）
+
+回収: 自ブランチPR #792（バックアップ取り込みメッセージの色文法違反＋44px3箇所）がCI緑と確認しsquashマージ→main pull。PR #799（site-records/health-checkup-scheduler等44px14箇所+色文法2箇所）はmainとdirty（BACKLOG/cycle-logの同時追記のみ・コード競合なし）と判明したため、契約どおりorigin/mainを当該ブランチへ通常マージで解消（本ログ・BACKLOGとも直前2エントリを時系列順に統合）→ tsc=0/lint errors0/vitest 2622 pass/build成功を確認しpush。CI再走の緑は次イテレーションで回収。
+
+着手: 上位3件(O15/S2/S3)は引き続きdataレーンO14依存で全ブロック中のため、Exploreエージェントに`/education-certification`配下の柱0再巡回を依頼。**色の文法違反を新規発見**: `/education-certification/finder`（業務別必要資格判定ツール）の「法令義務」バッジ・その見出しアイコン（`AlertCircle`）・「条件をリセット」ボタンのhover色が`SAFETY_TONE`のdangerトークン(rose系)を経由せず`red-*`(`bg-red-100`/`text-red-700`/`text-red-500`/`hover:text-red-600`)を直書きしており、safety-tone.tsの「状態を伝える色は必ずこのトークン経由で塗る」規約（不可侵の柱0-0）に反していた。既存の`missing-checkup-tracker.tsx`のoverdueチップ等と同型の是正パターン。
+
+実装: `CertFinderClient.tsx`の対象3箇所（バッジ・見出しアイコン・リセットボタンhover）を`red-*`→`rose-*`へクラス名統一（構造・判定ロジックは無変更、色相のみ）。
+
+検証: `tsc --noEmit`=0 / `lint`=errors0（既存warn23件のみ）/ `vitest run`=309ファイル2622テスト全pass / `build`=成功（`○ /education-certification/finder`静的生成維持）。無読Playwright新規`docs/third-party-reviews/scripts/cert-finder-color-grammar-2026-07-03.mjs`をprod start(3100)で実行し10/10 PASS（高さ2m以上の高所作業シナリオを選択→「法令義務」バッジ・見出しアイコン・リセットボタンhoverのクラス名がrose-*であることを確認）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。PR #799はCI待ちで次回収。
+
+---
+
 ## 2026-07-03 バックアップ取り込みメッセージの色の文法違反＋44px未満3箇所を是正（柱0磨き・巡回発見）
 
 回収: 自ブランチPR #778（`/safety-diary`等44px9箇所）がCI緑と確認しsquashマージ。main pull後working tree clean。PR #785（S1第八弾・履歴サジェスト）はCI進行中のため次回収。

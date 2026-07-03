@@ -2,9 +2,13 @@ import { describe, it, expect } from 'vitest';
 import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getSitePageSearchEntries } from './site-pages-search-source';
+import {
+  getSitePageSearchEntries,
+  EXTRA_DESTINATION_PAGES,
+} from './site-pages-search-source';
 import { FLAGSHIP_FEATURES } from '@/config/flagship-nav';
 import { INDUSTRY_CONTENT_SLUGS } from '@/data/industries-content';
+import sitemap from '../app/sitemap';
 
 /**
  * 機能ページ横断検索の drift ガード（コンテンツと同じ「発見性の穴を CI で塞ぐ」方針）。
@@ -90,5 +94,51 @@ describe('site-pages-search-source（機能ページ射影の drift ガード）
       expect(e.subtitle.trim().length, `subtitle of ${e.id}`).toBeGreaterThan(0);
       expect(e.url, `url of ${e.id}`).toMatch(/^\//);
     }
+  });
+
+  /**
+   * 補充分（EXTRA_DESTINATION_PAGES）の drift ガード。
+   * FLAGSHIP ナビ外の目的地ページを手当てで載せるため、(1) 全 url が sitemap に実在＝indexable
+   * ・薄い/noindex ページの混入 0（幽霊URL 0 より強い保証）、(2) ナビ正本と非重複（二重管理を防ぐ）、
+   * (3) 期待の高検索意図ページ（助成金ハブ）が keyword 付きで結線されていることを固定する。
+   */
+  describe('補充: FLAGSHIP 外の indexable 目的地ページ', () => {
+    const sitemapUrls = new Set(
+      sitemap().map((e) => new URL(e.url).pathname.replace(/\/$/, '') || '/'),
+    );
+
+    it('全 url が sitemap に実在する＝indexable（薄い/noindex 混入 0）', () => {
+      const notInSitemap = EXTRA_DESTINATION_PAGES.map((e) => e.url).filter(
+        (url) => !sitemapUrls.has(url),
+      );
+      expect(notInSitemap, `sitemap 未収載の補充URL: ${notInSitemap.join(', ')}`).toEqual([]);
+    });
+
+    it('FLAGSHIP ナビのパスと重複しない（ナビ収載分の二重管理を回避）', () => {
+      const navPaths = new Set<string>();
+      for (const f of FLAGSHIP_FEATURES) {
+        navPaths.add(f.href.replace(/[#?].*$/, ''));
+        for (const sub of f.subItems) navPaths.add(sub.href.replace(/[#?].*$/, ''));
+      }
+      const overlap = EXTRA_DESTINATION_PAGES.map((e) => e.url).filter((url) =>
+        navPaths.has(url),
+      );
+      expect(overlap, `ナビと重複する補充URL: ${overlap.join(', ')}`).toEqual([]);
+    });
+
+    it('助成金ハブ /subsidies が「助成金」「補助金」keyword 付きで結線されている', () => {
+      const hub = entries.find((e) => e.url === '/subsidies');
+      expect(hub, '/subsidies が射影されていない').toBeTruthy();
+      expect(hub?.keywords).toContain('助成金');
+      expect(hub?.keywords).toContain('補助金');
+    });
+
+    it('補充 url が最終射影（getSitePageSearchEntries）にすべて含まれる', () => {
+      const covered = new Set(entries.map((e) => e.url));
+      const missing = EXTRA_DESTINATION_PAGES.map((e) => e.url).filter(
+        (url) => !covered.has(url),
+      );
+      expect(missing, `射影から漏れた補充URL: ${missing.join(', ')}`).toEqual([]);
+    });
   });
 });
