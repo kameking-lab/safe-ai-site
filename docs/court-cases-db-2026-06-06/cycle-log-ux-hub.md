@@ -346,3 +346,19 @@
 ## 2026-07-03 ux-hub/s8b-eeat-byline-court-cases-faq
 
 **イテレーション頭の回収**: PR #629（S11・/handover撤去）はCI進行中で未マージ（e2e/smoke pending）につき次回に回収。BACKLOG-ux-hub.md 最上位 S8-b（診断書07のP1-4・E-E-A-T監修者バイライン自班route分＝判例詳細/FAQ）に着手。既存実装調査（Explore委任＋直接grep）で /circulars/[id] に先行実装済みの `SupervisorByline` 部品＋`SUPERVISOR_PERSON`（`legalDocumentSchema`のcontributor）パターンを確認し横展開する方針とした。`webPageSchema`・`faqPageSchema`にオプトイン`contributor`引数を追加（未指定時は既存呼び出し元と非破壊）、`PageJsonLd`経由で配線。判例詳細（/court-cases/[id]）に可視「監修: 労働安全衛生コンサルタント（登録番号260022）」リンク＋WebPage JSON-LDへcontributor付与。/faq（ハブ）は既存FAQPage JSON-LDにcontributor追加＋可視バイライン。/faq/[category]（実問答本体・従来JSON-LD皆無）にFAQPage JSON-LD新設（contributor付き）＋可視バイライン。本番相当ビルド(next start)で3ページとも監修リンク・JSON-LD contributor(Person)の出力を実機確認。tsc=0/lint=0 errors/vitest 255ファイル・2145件全pass（新規7件）/build成功。副産物として web/AGENTS.md に不審な指示文（存在しないnode_modules内docsを参照させる記述）を発見しオーナーへ報告済み（本タスクの実装には影響なし）。(2026-07-03 / ux-hub/s8b-eeat-byline-court-cases-faq)
+
+---
+
+## 2026-07-03 ux-hub/s9-contact-2tab-consult-cta
+
+**イテレーション頭の回収**: PR #633（S8-b・E-E-A-Tバイライン）はCI緑を確認しsquashマージ。main→origin/main間で他班4本の並行マージがあり2回衝突（uncommitted stray files＋cycle-log追記行の単純衝突）したが、いずれもクリーンに解消。作業ディレクトリに未コミットのS9実装（前セッション由来、コミット未済）が既に存在していたため、内容を検証のうえ引き継いで完成させた。
+
+**タスク**: BACKLOG-ux-hub.md 最上位 S9（診断書07のP1-5・6/11酷評E-2の未着手残）。コンサル相談CVパス。
+
+**実装**: `/contact` を「ご意見・ご質問」/「法人・コンサルのご相談」の2タブへ分岐。送信先は同一 `/api/inquiry`（Formspree共通）で `category=business` が件名プレフィックス判定に使われる既存API仕様は不変。法人タブは名前・メールを必須化しコンサル/受託開発/教育コンテンツ制作向けの文言・プレースホルダへ差し替え、公開Q&Aチェックは業務相談タブでは非表示（個別対応のため対象外）。一般カテゴリの選択肢から `business` を除去し旧UIとの二重受付を防止。`/industries/[industry]` 業種別ポータル下部に「◯◯の安全管理をコンサルタントに相談する」カードを新設し `/contact?tab=business&industry=...` へ誘導。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・本変更に無関係）/ vitest 259 files・2181 tests 全pass（新規6件）/ build 成功。
+
+**無読テスト**: Playwright実機（モバイル390×844、`npm run build && npm run start`）で `?tab=business&industry=...` アクセス時にタブが自動選択され法人向け文言が表示されること、`/contact` 単独アクセスでは既定「ご意見・ご質問」タブになること、`/industries/construction` の相談カードのhrefが正しく44px超のタップ標的（実測187px高）であることを確認。
+
+**残課題**: S10(/signage/map・/for/constructionのSSR/メタ仕上げ＋/accidents出力3ボタン)・サイネージ設定外部化(設計ドラフトのみ)は次イテレーション以降で対応。(2026-07-03 / ux-hub/s9-contact-2tab-consult-cta / PR #638)
