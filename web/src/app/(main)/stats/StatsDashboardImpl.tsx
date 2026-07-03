@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+import { BarChart3 } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import type {
   PageAnalyticsResponse,
@@ -20,6 +21,7 @@ import { PageContainer } from "@/components/layout/page-container";
 import { Stack } from "@/components/layout/stack";
 import { LazyChart } from "@/components/charts/lazy-chart";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { computeStatsLiveness } from "@/lib/stats/liveness";
 
 const PERIODS: Array<{ id: StatsPeriod; label: string }> = [
@@ -122,6 +124,34 @@ export function StatsDashboardImpl() {
         Google Analytics 4 / Search Console を接続した期間の実数値のみを表示します。未接続時はサンプル数値を表示せず、準備中の案内を表示します。検索インデックスからは除外しています（noindex）。
       </CollapsibleDetail>
 
+      {/* 柱0: 結論カード＝いまの状態（接続状況とPV実績）を最上部に。値は既存 summary/liveness の転記のみ＝捏造ゼロ。 */}
+      {!loading && data ? (
+        ga4Live ? (
+          <ConclusionCard
+            tone="info"
+            icon={BarChart3}
+            value={formatNum(data.summary.pv)}
+            unit="PV"
+            title="アクセス実績"
+            description={`${PERIODS.find((p) => p.id === period)?.label ?? ""}のページビュー合計（GA4実測）`}
+          />
+        ) : anyLive ? (
+          <ConclusionCard
+            tone="info"
+            icon={BarChart3}
+            title="一部接続"
+            description="Search Console等は接続済みですが、GA4は未接続のためアクセス数は表示できません。"
+          />
+        ) : (
+          <ConclusionCard
+            tone="info"
+            icon={BarChart3}
+            title="未接続"
+            description="GA4 / Search Console が未接続のため、実データはまだありません。"
+          />
+        )
+      ) : null}
+
       {anyLive ? (
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div role="tablist" aria-label="期間切替" className="inline-flex rounded-full border border-slate-200 bg-slate-50 p-0.5 text-xs">
@@ -133,7 +163,7 @@ export function StatsDashboardImpl() {
                   role="tab"
                   aria-selected={active}
                   onClick={() => setPeriod(p.id)}
-                  className={`rounded-full px-3 py-1 font-semibold transition-colors ${
+                  className={`inline-flex min-h-[44px] items-center justify-center rounded-full px-3 py-1 font-semibold transition-colors ${
                     active
                       ? "bg-white text-emerald-700 shadow-sm"
                       : "text-slate-600 hover:text-slate-900"
