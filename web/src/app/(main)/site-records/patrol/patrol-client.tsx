@@ -278,16 +278,16 @@ export function PatrolClient() {
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2 print:hidden">
-          <button type="button" onClick={handleSave} className="inline-flex items-center gap-1 rounded-lg bg-rose-600 px-3 py-2 text-xs font-bold text-white hover:bg-rose-700">
+          <button type="button" onClick={handleSave} className="inline-flex items-center gap-1 rounded-lg bg-rose-600 min-h-[44px] px-3 py-2 text-xs font-bold text-white hover:bg-rose-700">
             <Save className="h-3.5 w-3.5" aria-hidden="true" /> この端末に保存
           </button>
-          <button type="button" onClick={handlePrint} className="inline-flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-2 text-xs font-bold text-white hover:bg-slate-800">
+          <button type="button" onClick={handlePrint} className="inline-flex items-center gap-1 rounded-lg bg-slate-700 min-h-[44px] px-3 py-2 text-xs font-bold text-white hover:bg-slate-800">
             <Printer className="h-3.5 w-3.5" aria-hidden="true" /> 巡視記録を印刷
           </button>
-          <button type="button" onClick={handleCsv} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+          <button type="button" onClick={handleCsv} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 min-h-[44px] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
             <Download className="h-3.5 w-3.5" aria-hidden="true" /> 指摘CSV
           </button>
-          <button type="button" onClick={handleNew} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+          <button type="button" onClick={handleNew} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 min-h-[44px] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
             <FilePlus2 className="h-3.5 w-3.5" aria-hidden="true" /> 新規
           </button>
           {savedNote && <span className="self-center text-xs font-semibold text-rose-700">{savedNote}</span>}

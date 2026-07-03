@@ -243,21 +243,21 @@ export function CommitteeClient() {
         </p>
 
         <div id="committee-actions" className="mt-4 flex scroll-mt-24 flex-wrap gap-2 print:hidden">
-          <button type="button" onClick={handleSave} className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-bold text-white hover:bg-indigo-700">
+          <button type="button" onClick={handleSave} className="inline-flex items-center gap-1 rounded-lg bg-indigo-600 min-h-[44px] px-3 py-2 text-xs font-bold text-white hover:bg-indigo-700">
             <Save className="h-3.5 w-3.5" aria-hidden="true" /> この端末に保存
           </button>
-          <button type="button" onClick={handlePrint} className="inline-flex items-center gap-1 rounded-lg bg-slate-700 px-3 py-2 text-xs font-bold text-white hover:bg-slate-800">
+          <button type="button" onClick={handlePrint} className="inline-flex items-center gap-1 rounded-lg bg-slate-700 min-h-[44px] px-3 py-2 text-xs font-bold text-white hover:bg-slate-800">
             <Printer className="h-3.5 w-3.5" aria-hidden="true" /> 議事録を印刷
           </button>
-          <button type="button" onClick={handleCsv} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+          <button type="button" onClick={handleCsv} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 min-h-[44px] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
             <Download className="h-3.5 w-3.5" aria-hidden="true" /> CSV出力
           </button>
           {list.length > 0 && (
-            <button type="button" onClick={handleCarryOverLatest} className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100">
+            <button type="button" onClick={handleCarryOverLatest} className="inline-flex items-center gap-1 rounded-lg border border-emerald-300 bg-emerald-50 min-h-[44px] px-3 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100">
               <CopyPlus className="h-3.5 w-3.5" aria-hidden="true" /> 前回をベースに新規（委員・場所を引き継ぎ）
             </button>
           )}
-          <button type="button" onClick={handleNew} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
+          <button type="button" onClick={handleNew} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 min-h-[44px] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
             <FilePlus2 className="h-3.5 w-3.5" aria-hidden="true" /> 新規（白紙）
           </button>
           {savedNote && <span className="self-center text-xs font-semibold text-indigo-700">{savedNote}</span>}
