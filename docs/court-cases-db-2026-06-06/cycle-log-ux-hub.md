@@ -1,5 +1,19 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: サイネージ ヘッダーナビ・パネル副リンク 柱0(44px)
+
+**イテレーション頭の回収**: 自班の唯一のオープンPR #747(/court-cases・/accidents残存44px一括是正)がe2e/smoke/Vercel全緑だったためsquashマージ・リモートブランチ削除。main pullでworking tree clean。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Exploreエージェントでサイネージ関連コンポーネント群を再調査し、これまでのバッチで手つかずだった`signage-header.tsx`ヘッダーナビ・`signage-morning-script.tsx`朝礼スクリプトボタン・`signage-risk-prediction.tsx`/`signage-site-safety.tsx`のパネル副リンクを発見。
+
+**修正**: 4ファイル計10要素（ヘッダーナビ5リンク・朝礼スクリプトボタン3個・「詳細予測 →」・「記録キット →」）に`inline-flex items-center min-h-[44px]`を付与。純粋なクラス追加でレイアウト・遷移先・ロジック不変。サイネージの「1画面フィット」不可侵条件への影響を懸念したため、修正後にnext start実機でscrollHeight≦viewportを実測確認。
+
+**テスト**: `signage-nav-panel-links-44px.test.ts`新設(ソース走査・10件)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 293 files・2491 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/signage-nav-panel-links-44px-2026-07-03.mjs`（next start実機・Playwright・1920×1080）**4/4 PASS**（ヘッダーナビ5/5・詳細予測1/1・朝礼スクリプトボタン3/3の実boundingBox height≧44px実測、かつ1画面フィット維持を確認）。「記録キット →」はsite-records記録の無い端末では非表示のためソース走査のみで検証。
+
 ## 2026-07-03 — 補充: /court-cases・/accidents 残存44px未満5箇所の一括是正
 
 **イテレーション頭の回収**: 自班のオープンPR #732(home-screen.tsx /accidents主タブ切替44px)と#739(use-cases業種ジャンプナビ＋事故詳細パンくず44px)がいずれもe2e/smoke緑を確認できたため両方squashマージ・リモートブランチ削除。main pullでworking tree clean。
