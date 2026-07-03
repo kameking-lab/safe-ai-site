@@ -21,6 +21,7 @@ import { AccidentCrossSection } from "@/components/chemical/accident-cross-secti
 import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
 import { CONSTRUCTION_PRIORITY_CAS_SET } from "@/lib/regulation-tag-labels";
 import { OshaRegulationsSection } from "@/components/chemical/osha-regulations-section";
+import { ReportPrintButton } from "@/components/accidents-reports/report-print-button";
 
 type Params = Promise<{ cas: string }>;
 
@@ -68,18 +69,21 @@ export default async function ChemicalDetailPage({
           { name },
         ]}
       />
-      <div className="mt-4 space-y-6">
+      <div className="mt-4 space-y-6 accident-report-print-root">
         <header className="space-y-2">
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              <FlaskConical className="w-7 h-7 text-amber-600" aria-hidden="true" />
-              {name}
-            </h1>
-            {isPriority && (
-              <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 text-xs font-medium">
-                建設業頻出
-              </span>
-            )}
+          <div className="flex items-baseline justify-between gap-3 flex-wrap">
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <FlaskConical className="w-7 h-7 text-amber-600" aria-hidden="true" />
+                {name}
+              </h1>
+              {isPriority && (
+                <span className="inline-flex items-center rounded-full bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 text-xs font-medium">
+                  建設業頻出
+                </span>
+              )}
+            </div>
+            <ReportPrintButton label="この物質の情報を印刷 / PDF保存" />
           </div>
           <p className="text-sm text-slate-600 dark:text-slate-400">
             CAS 番号: <span className="font-mono">{cas}</span>
@@ -251,7 +255,7 @@ function NiteGhsBlock({
 
 function CrossLinksBlock({ cas, name }: { cas: string; name: string }) {
   return (
-    <section className="rounded-2xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 p-5 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+    <section className="rounded-2xl border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 p-5 flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between print:hidden">
       <div>
         <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
           この物質でリスクアセスメントを開始

@@ -21,6 +21,7 @@ import {
 } from "@/lib/site-records/committee-store";
 import { committeeConclusion } from "@/lib/site-records/record-conclusions";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { SAFETY_TONE } from "@/lib/design/safety-tone";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
@@ -260,7 +261,7 @@ export function CommitteeClient() {
           <button type="button" onClick={handleNew} className="inline-flex items-center gap-1 rounded-lg border border-slate-300 min-h-[44px] px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100">
             <FilePlus2 className="h-3.5 w-3.5" aria-hidden="true" /> 新規（白紙）
           </button>
-          {savedNote && <span className="self-center text-xs font-semibold text-indigo-700">{savedNote}</span>}
+          {savedNote && <span role="status" className={`self-center text-xs font-semibold ${SAFETY_TONE.safe.text}`}>{savedNote}</span>}
         </div>
       </section>
 

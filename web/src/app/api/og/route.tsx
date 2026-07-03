@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 import { SITE_DISPLAY_HOST } from "@/lib/seo-metadata";
+import { clampOgText, ogTitleFontSize, OG_TITLE_MAX, OG_DESC_MAX } from "@/lib/og-url";
 
 export const runtime = "edge";
 
@@ -18,8 +19,10 @@ export function GET(req: NextRequest) {
         desc: "法改正・現場リスク・事故DB・KY用紙・Eラーニングを一つのポータルに集約",
         tagline: "安全AIポータル — 労働安全衛生コンサルタント監修",
       };
-  const title = searchParams.get("title") ?? defaults.title;
-  const desc = searchParams.get("desc") ?? defaults.desc;
+  // data 由来（記事/事故/通達…）の title/desc は長さ不定。Satori は overflow を
+  // クリップしないため、安全長へ畳んでから描画し 630px キャンバスの縦溢れを防ぐ。
+  const title = clampOgText(searchParams.get("title") ?? defaults.title, OG_TITLE_MAX);
+  const desc = clampOgText(searchParams.get("desc") ?? defaults.desc, OG_DESC_MAX);
 
   return new ImageResponse(
     (
@@ -67,7 +70,7 @@ export function GET(req: NextRequest) {
 
         <div
           style={{
-            fontSize: title.length > 20 ? "40px" : "52px",
+            fontSize: `${ogTitleFontSize(title.length)}px`,
             fontWeight: "900",
             color: "#ffffff",
             textAlign: "center",
