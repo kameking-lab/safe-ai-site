@@ -37,6 +37,20 @@ describe("decideFallbackTier", () => {
     expect(decideFallbackTier(0.49, 5)).toBe("out-of-scope");
     expect(decideFallbackTier(0, 0)).toBe("out-of-scope");
   });
+
+  it("T8: hadPins=true かつ score>=0.7 は articles>=2 で direct（診断04 Q7回帰）", () => {
+    expect(decideFallbackTier(0.73, 2, true)).toBe("direct");
+    expect(decideFallbackTier(0.7, 3, true)).toBe("direct");
+  });
+
+  it("T8: hadPins=true でも score<0.7 や articles<2 は adjacent のまま", () => {
+    expect(decideFallbackTier(0.69, 5, true)).toBe("adjacent");
+    expect(decideFallbackTier(0.73, 1, true)).toBe("adjacent");
+  });
+
+  it("hadPins 未指定（false 相当）は従来通り 0.75 未満で adjacent", () => {
+    expect(decideFallbackTier(0.73, 5)).toBe("adjacent");
+  });
 });
 
 describe("searchPartialMatches - ペルソナ失敗11件カバレッジ", () => {
@@ -142,6 +156,17 @@ describe("buildFallbackDecision", () => {
     expect(d.tier).toBe("adjacent");
     expect(d.headline).toContain("関連する一般条項");
     expect(d.egovFooter).toContain("e-Gov");
+  });
+
+  it("T8: hadPins=true・score0.73・articles2件は direct（誤ヘッダなし）", () => {
+    const d = buildFallbackDecision({
+      query: "職長教育の対象業種は?",
+      normalizedScore: 0.73,
+      articles: [ARTICLE_563, ARTICLE_563],
+      hadPins: true,
+    });
+    expect(d.tier).toBe("direct");
+    expect(d.headline).toBeUndefined();
   });
 
   it("out-of-scope tier (マッチあり): suggestions を埋め、headline 出す", () => {
