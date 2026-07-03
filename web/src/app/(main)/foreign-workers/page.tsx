@@ -214,7 +214,7 @@ export default function ForeignWorkersHubPage() {
             </div>
             <Link
               href="/foreign-workers/safety-training"
-              className="inline-flex items-center gap-1 rounded-lg bg-sky-700 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-800"
+              className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-sky-700 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-800"
             >
               教材を作る →
             </Link>
