@@ -380,8 +380,8 @@ export function MeetingPaperView() {
             {isSaved ? "✓ 保存一覧に保存済み" : savedLabel ? `未保存（${savedLabel}）` : "未保存"}
           </span>
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
-            <button type="button" onClick={handleSave} className="rounded-lg border border-emerald-300 bg-white px-4 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
+            <button type="button" onClick={() => window.print()} className="min-h-[44px] rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
+            <button type="button" onClick={handleSave} className="min-h-[44px] rounded-lg border border-emerald-300 bg-white px-4 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
           </div>
         </div>
       </div>
@@ -417,9 +417,9 @@ export function MeetingPaperView() {
             🗺 キャンバス(β)
           </button>
           <div className="flex items-center gap-1">
-            <button type="button" aria-label="縮小" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 10) / 10))} className="rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">－</button>
-            <button type="button" onClick={() => setZoom(1)} className="min-w-[3.5rem] rounded-full px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100">{Math.round(zoom * 100)}%</button>
-            <button type="button" aria-label="拡大" onClick={() => setZoom((z) => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 10) / 10))} className="rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">＋</button>
+            <button type="button" aria-label="縮小" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 10) / 10))} className="min-h-[44px] min-w-[44px] rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">－</button>
+            <button type="button" onClick={() => setZoom(1)} className="min-h-[44px] min-w-[3.5rem] rounded-full px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-100">{Math.round(zoom * 100)}%</button>
+            <button type="button" aria-label="拡大" onClick={() => setZoom((z) => Math.min(ZOOM_MAX, Math.round((z + ZOOM_STEP) * 10) / 10))} className="min-h-[44px] min-w-[44px] rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">＋</button>
           </div>
         </div>
       </div>
@@ -676,8 +676,8 @@ export function MeetingPaperView() {
             <div className="mb-3 flex items-center justify-between">
               <p className="text-sm font-bold text-slate-800">印刷プレビュー（A4横・打合せ書）</p>
               <div className="flex gap-2">
-                <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-700">印刷 / PDF</button>
-                <button type="button" onClick={() => setShowPrintPreview(false)} className="rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">閉じる</button>
+                <button type="button" onClick={() => window.print()} className="min-h-[44px] rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-700">印刷 / PDF</button>
+                <button type="button" onClick={() => setShowPrintPreview(false)} className="min-h-[44px] rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">閉じる</button>
               </div>
             </div>
             <div className="overflow-x-auto rounded border border-slate-200 p-2">
@@ -693,9 +693,9 @@ export function MeetingPaperView() {
           {isSaved ? "✓ 保存一覧に保存済み" : savedLabel ? `未保存（${savedLabel}）` : "未保存"}
         </span>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => setShowPrintPreview(true)} className="rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">印刷プレビュー</button>
-          <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
-          <button type="button" onClick={handleSave} className="rounded-lg border border-emerald-300 bg-white px-4 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
+          <button type="button" onClick={() => setShowPrintPreview(true)} className="min-h-[44px] rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">印刷プレビュー</button>
+          <button type="button" onClick={() => window.print()} className="min-h-[44px] rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
+          <button type="button" onClick={handleSave} className="min-h-[44px] rounded-lg border border-emerald-300 bg-white px-4 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
         </div>
       </div>
     </div>
