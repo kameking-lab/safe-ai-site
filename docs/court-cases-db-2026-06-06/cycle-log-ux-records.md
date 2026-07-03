@@ -647,6 +647,20 @@ Exploreエージェントで未監査route(safety-diary個別ページ5種・sit
 
 残: O15/S2/S3は引き続きdataレーンO14依存でブロック。補充対象の柱0/柱3巡回は次回収へ持ち越し。
 
+## 2026-07-04 柱0磨き 巡回発見・続き⑫＝site-records 8画面の保存フィードバック色文法の系統的崩れを是正
+
+契約ステップ1: 自レーンの未マージPR #844（`ux-rec/workers-loading-state-44px-2026-07-04`）はCI（e2e/smoke）が実行中でまだ緑化しておらず、契約どおりマージを見送り次回収へ回収を持ち越し。
+
+着手: BACKLOG-ux-records.md最上位の未着手3件(O15/S2/S3)はいずれもdataレーンO14が本回収時点でも`BACKLOG-data.md`で`[ ]`未着手のままで全ブロック中と確認。補充の指針どおりExploreエージェントで自領域の柱0/柱3巡回を実施（過去に何十回も巡回済みの44px・既存の色文法パターンとは別の切り口＝a11y・結果表示ページ・破壊的操作の確認漏れ等を重点的に探索するよう指示）。
+
+発見: site-records 8画面（induction/qualifications/patrol/incident-report/procedure/inspection/committee/near-miss）の保存フィードバック`savedNote`stateが、入力エラー文言と保存成功文言を同一stateで使い回しながら描画側は画面ごとの固定色クラスになっており、safety-tone.tsの「赤=危険・停止／緑=安全・OK・完了」の文法（不可侵の柱0-0）が画面によっては完全に反転していた: induction/qualificationsは`text-emerald-700`固定＝氏名未入力エラーまで緑で表示、patrol/incident-reportは逆に`text-rose-700`固定＝保存成功まで赤で表示、near-missは`text-amber-700`固定で両方同色のため判別不能、procedure/inspection/committeeは`text-blue-700`/`text-indigo-700`というSAFETY_TONE非経由の生色を直書き。#792(records-backup.tsx)・#814(distributed-input-bar.tsx)と同型の違反が、当班所有routeで最も操作頻度の高い日次記録フォーム群（受入教育・資格台帳・パトロール・労災報告・手順書・点検・委員会・ヒヤリハット）に系統的に残存していたと判明。
+
+実装: `records-backup.tsx`で確立済みのパターン（`SAFETY_TONE`をimport、`savedTone`state(danger/safe)をエラー/成功の分岐ごとに設定、描画を`role="status"`＋`SAFETY_TONE[savedTone].text`に統一）を6ファイル（induction/qualifications/patrol/incident-report/procedure/near-miss）に適用。inspection/committeeはエラー分岐が存在せず常に成功メッセージのみのため、savedTone stateを追加せず`SAFETY_TONE.safe.text`への直接置換のみで対応（不要な状態は増やさない）。保存・CSV出力・削除等の判定ロジックは無変更（足すだけ）。
+
+検証: 無読Playwright新規`docs/third-party-reviews/scripts/site-records-save-feedback-color-grammar-2026-07-04.mjs`39/39合格（8画面それぞれでバリデーションエラーを発火させ`role="status"`要素がrose系クラスであること、続けて正しく保存し emerald系クラスに切り替わること、旧固定色クラスに戻っていないことを実機で確認。ConclusionCardも`role="status"`を持つため`span[role="status"]`セレクタで区別）。
+
+ゲート: tsc=0・lint errors=0（既存warn23件のみ）・vitest 2711 pass（既存回帰のみ）・build成功（対象8route全て静的生成`○`維持）。working tree clean（PR #844は未マージのまま次回収で回収）。
+
 ## 2026-07-04 /ky/workersのクラウド確認中「登録なし」誤表示＋44px欠落14箇所を是正
 
 契約ステップ1: 自レーンのPR #821（タグチップ削除×等）・PR #834（/account DB照会失敗）ともCI緑と確認しsquashマージ。main側の進捗（PR #829等）との間で2回マージコンフリクト（BACKLOG-ux-records.mdの追記重複・cycle-log-ux-records.mdの追記重複、いずれも双方の巡回ログ本文を保持しBACKLOG側は⑨番号衝突を⑩⑪へ振り直して解決）が発生したため、契約どおり`git merge origin/main`で通常マージし解消→ゲート再検証後にpush・squashマージ→`git checkout main && git pull --ff-only`でclean確認。
