@@ -104,7 +104,7 @@ export function AccidentAiAnalyzer() {
               storeAccLang(next);
             }}
             aria-label="表示言語 / Display language"
-            className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700"
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs font-semibold text-slate-700"
           >
             {ACC_LANGS.map((l) => (
               <option key={l} value={l}>
@@ -121,7 +121,7 @@ export function AccidentAiAnalyzer() {
           value={category}
           onChange={(e) => setCategory(e.target.value as AccidentWorkCategory | "")}
           aria-label="業種"
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          className="min-h-[44px] rounded-lg border border-slate-300 px-3 py-2 text-sm"
         >
           <option value="">{L.industry}</option>
           {ALL_ACCIDENT_CATEGORIES.map((c) => (
@@ -135,14 +135,14 @@ export function AccidentAiAnalyzer() {
           onChange={(e) => setWorkContent(e.target.value)}
           placeholder={L.workContent}
           aria-label={L.workContent}
-          className="rounded-lg border border-slate-300 px-3 py-2 text-sm sm:col-span-2"
+          className="min-h-[44px] rounded-lg border border-slate-300 px-3 py-2 text-sm sm:col-span-2"
         />
       </div>
       <button
         type="button"
         onClick={() => void onAnalyze()}
         disabled={busy}
-        className="inline-flex items-center gap-1 rounded-lg bg-rose-600 px-4 py-2 text-sm font-bold text-white hover:bg-rose-700 disabled:opacity-50"
+        className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-rose-600 px-4 py-2 text-sm font-bold text-white hover:bg-rose-700 disabled:opacity-50"
       >
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
         {busy ? L.analyzing : L.analyze}
@@ -170,7 +170,7 @@ export function AccidentAiAnalyzer() {
               <li key={c.id}>
                 <Link
                   href={`/accidents/${c.id}`}
-                  className="flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50/60 p-2 hover:border-rose-300"
+                  className="flex min-h-[44px] items-start gap-2 rounded-lg border border-slate-200 bg-slate-50/60 p-2 hover:border-rose-300"
                 >
                   <span className="flex-1 text-sm text-slate-800">
                     {c.title}
