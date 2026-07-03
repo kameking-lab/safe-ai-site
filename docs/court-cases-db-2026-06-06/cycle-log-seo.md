@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-03 — 発見性 実在RSSフィード4本を全ページ<head>で自動発見可能化（PR: seo/rss-feed-autodiscovery / #674）
+
+回収: 自班の CI 緑 PR #657（化学物質 sitemap）を squashマージ→`git checkout main && git pull --ff-only`→clean。#666（安全標識 横断検索）が #657 マージで origin/main と CONFLICTING（BACKLOG/cycle-log の [x] 追記衝突2件のみ・コードは auto-merge）だったため当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決し push＝CI 再走を次イテレーションで回収。#670（保護具 横断検索）は CI 実行中のため持ち越し。
+
+着手判断: BACKLOG-seo 未着手キューは空（O17/T6・T7 は Path A 設計ドラフト=オーナー承認待ち）のため補充の指針§に従い自領域から補充。**発見性サーフェスの全域監査**を実施＝(1) sitemap: 全 [param] 動的ルート族（accidents/articles/chemical-database/circulars/court-cases/equipment/faq/features/foreign-workers/industries/safety-signs×3/illness-guide/accidents-reports）が子sitemap or sitemap.ts の `.map()` で収載済＝**穴なし**、(2) robots/manifest: 既達、(3) **RSSフィード**: `/feed/{news,law-revisions,accident-reports,serious-cases}.xml` の4本が実在・クロール可（robots で /feed 非Disallow）なのに**どのページ `<head>` からも `<link rel="alternate">` で広告されておらず自動発見不能**の真の穴を特定（`grep application/rss+xml src` は生成lib `lib/rss.ts` のみヒット＝alternate リンク0）。
+
+実装: `lib/seo/feeds.ts`（当班owned `lib/seo/**`）を単一ソースに新設＝`SITE_FEEDS` 登録簿(path+title)＋`rssAlternateTypes()`。ルート `layout.tsx`（当班 core/shell custodian）の `alternates` に `types: application/rss+xml` を追加。Next Metadata の `alternates.types`（node_modules 型定義で `AlternateLinkDescriptor[]` を確認）が全ページ共通 `<head>` に `<link rel="alternate" type="application/rss+xml" href title>` を出力＝`metadataBase` により相対path `/feed/*.xml` を絶対URLへ解決。既存 `canonical` は保持・`openGraph`/`twitter` は無改変（openGraph 浅マージ地雷を回避）。
+
+回帰: `feeds.test.ts` 5本＝(1)登録簿2本以上・path形式 (2)path重複0 (3)全 path が実在 `route.ts`(GETハンドラ)へ node:fs で解決＝**幽霊フィードリンク0**（manifest.test/sitemap孤立突合と同方針）(4)登録 title が各 route の RSS channel title と一致＝**drift ガード**（route 側のタイトル変更で失敗）(5)`rssAlternateTypes()` 網羅。**実測検証**＝build 後 `.next/server/app/*.html` を grep し4本の `rel=alternate type=application/rss+xml`（絶対URL・正 title）出力を確認。
+
+ゲート: `tsc --noEmit`=0 / `eslint`(3ファイル)=errors0 / `vitest run`=**全2304テスト緑**（新規5含む）/ `build`=成功（NODE_OPTIONS=--max-old-space-size=6144）。build 再生成物（rag-metrics-latest.json・ky-print-sheet snapshot・chatbot-eval-fresh-results.json）は `git checkout` で復元。working tree は layout.tsx＋新設 lib/seo/{feeds.ts,feeds.test.ts} の3ファイルのみで clean。
+
+残: 本 PR #674＋#666(再走)＋#670 の CI 緑回収＆マージ（次イテレーション 1)）。次の未着手は補充。
+
+---
+
 ## 2026-07-03 — 柱C-3-3 追補5 化学物質 個別詳細ページ約3,515本を子サイトマップ収載（PR: seo/c3-3-chemicals-sitemap）
 
 回収: 自班の CI 緑 PR #641（教育 全テーマ源拡張）を squashマージ→main を ff-only 同期。PR #647（FAQ収載）は #641 マージで search-index.ts が追記衝突→**origin/main を当該ブランチへ通常マージ**で解決（BACKLOG/cycle-log の追記衝突2件はどちらも [x] 完了エントリのため両方残す・コードは auto-merge・tsc0/search-index.test 45緑を確認）してpush＝CI再走を次イテレーションで回収。PR #653（PWAショートカット）はまだ e2e/smoke IN_PROGRESS で持ち越し。force-push 不可を厳守。
