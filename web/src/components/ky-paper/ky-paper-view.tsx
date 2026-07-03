@@ -126,9 +126,10 @@ export function KyPaperView() {
   const [showActions, setShowActions] = useState(false);
   // 柱1是正: 元請Excel様式への転記支援（項目別コピー・表TSV・CSV）
   const [showTranscribe, setShowTranscribe] = useState(false);
-  // F1（直接操作UI・方式確立）: 用紙キャンバス（β）。?canvas=1 で併存導入し、
-  // 「全体俯瞰→ズーム→セルタップ→その場入力」を正式書式そのものの上で行う。
-  const [canvasMode, setCanvasMode] = useState(false);
+  // F1（直接操作UI・方式確立）→ O10（第五弾・既定切替）: 用紙キャンバスを既定表示に。
+  // 「全体俯瞰→ズーム→セルタップ→その場入力」を正式書式そのものの上で行う。旧UIは
+  // ?canvas=0 または「従来表示」ボタンでいつでも戻れる（T7「旧UIトグル残置」）。
+  const [canvasMode, setCanvasMode] = useState(true);
   const [activeFieldKey, setActiveFieldKey] = useState<KyPaperFieldKey | null>(null);
   const [approvalActor, setApprovalActor] = useState("");
   const [approvalComment, setApprovalComment] = useState("");
@@ -188,7 +189,9 @@ export function KyPaperView() {
     } catch {
       params = null;
     }
-    if (params?.get("canvas") === "1") setCanvasMode(true);
+    // O10（第五弾）: 既定はcanvas。?canvas=0 で明示的に旧UIへ（共有リンク・ブックマーク互換）。
+    if (params?.get("canvas") === "0") setCanvasMode(false);
+    else if (params?.get("canvas") === "1") setCanvasMode(true);
     if (params && DEEP_LINK_KEYS.some((k) => params!.has(k))) {
       const res = applyKyDeepLink(params, baseRec ?? withTodayWorkDate(emptyKyRecord()));
       setRecord(res.record);
@@ -516,8 +519,10 @@ export function KyPaperView() {
     setActiveFieldKey(null);
     try {
       const url = new URL(window.location.href);
-      if (on) url.searchParams.set("canvas", "1");
-      else url.searchParams.delete("canvas");
+      // O10（第五弾）: 既定=canvasのため、canvas=1は不要（URLをきれいに戻す）。
+      // 旧UIへ切替時のみ canvas=0 を明示（再読込・共有しても従来表示が保たれる）。
+      if (on) url.searchParams.delete("canvas");
+      else url.searchParams.set("canvas", "0");
       window.history.replaceState(null, "", url.toString());
     } catch {
       /* URL操作不可の環境では state のみ */
@@ -535,115 +540,9 @@ export function KyPaperView() {
     setActiveFieldKey(firstEmptyFieldKey);
   }, [firstEmptyFieldKey]);
 
-  // F1: 用紙キャンバス（β）。全hooks評価後の分岐＝クラシックUIと状態を完全共有する
-  // （record/自動保存/クラウド同期/承認ロック/深リンクがそのまま効く）。
-  if (canvasMode) {
-    return (
-      <div className="min-h-screen bg-slate-100 pb-24 sm:pb-4 print:bg-white print:pb-0">
-        {/* コンパクトバー: 用紙が主役なので操作は1行に集約 */}
-        <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-3 py-1.5 backdrop-blur print:hidden">
-          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-900">KY用紙</span>
-              <span className="rounded-full border border-sky-300 bg-sky-50 px-2 py-0.5 text-[11px] font-bold text-sky-800">
-                キャンバスβ
-              </span>
-              {paperStatus.remaining !== undefined && paperStatus.remaining > 0 && (
-                <button
-                  type="button"
-                  onClick={handleZoomToNextEmpty}
-                  disabled={!firstEmptyFieldKey}
-                  title="最初の未記入セルへズームして開く"
-                  className="min-h-[28px] rounded-full bg-sky-600 px-2.5 py-0.5 text-[11px] font-bold text-white hover:bg-sky-700 disabled:opacity-60"
-                >
-                  のこり{paperStatus.remaining}項目 →
-                </button>
-              )}
-              {locked && (
-                <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800">
-                  {KY_APPROVAL_LABEL[approval.status]}・編集ロック中
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="hidden text-[11px] text-slate-500 sm:inline">{savedLabel}</span>
-              <Link
-                href="/ky/list"
-                className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
-              >
-                保存一覧
-              </Link>
-              <button
-                type="button"
-                onClick={() => toggleCanvasMode(false)}
-                className="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100"
-              >
-                従来表示
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* O10（第四弾）: 通知バー。従来表示にはあったがキャンバスβでは未提供だった＝
-            AI提案のエディタ統合で「先に作業内容を」等の案内が必要になったため追加。 */}
-        {notice && (
-          <div className="mx-auto mt-2 max-w-5xl px-3 print:hidden">
-            <div className={`flex items-start justify-between gap-3 rounded-xl border px-3 py-2 ${SAFETY_TONE[notice.tone].soft}`}>
-              <p className="text-xs font-semibold">{notice.text}</p>
-              <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="rounded px-1.5 hover:bg-black/10">×</button>
-            </div>
-          </div>
-        )}
-
-        {/* 用紙キャンバス: 初期表示＝全体フィット。タップで入力、ピンチ/ホイール/ボタンでズーム */}
-        <PaperStage ref={stageRef} heightClassName="h-[calc(100dvh-200px)] min-h-[320px] sm:h-[calc(100dvh-150px)]">
-          <div className="bg-white p-3">
-            <KyPrintSheet
-              record={record}
-              editing={
-                locked
-                  ? undefined
-                  : {
-                      onTapField: (key) => setActiveFieldKey(key),
-                      activeKey: activeFieldKey,
-                      emptyKeys: emptyPaperFieldKeys,
-                      onAddRiskRow: handleAddRiskRow,
-                    }
-              }
-            />
-          </div>
-        </PaperStage>
-
-        {/* 欄タップで開く入力エディタ（Phase 2: ヘッダー6欄＋本日の作業内容＋4R目標3欄＋危険行＋参加者） */}
-        {activeFieldKey && !locked && (
-          <FieldEditorSheet
-            fieldKey={activeFieldKey}
-            record={record}
-            patch={patch}
-            onClose={() => setActiveFieldKey(null)}
-            onSelectField={(key) => setActiveFieldKey(key)}
-            weather={{ region, setRegion, fetchWeather: () => void handleWeather(), busy: weatherBusy }}
-            participants={{ workers, regularWorkers, workerGroups, selectedNames, toggleWorker, addWorkers, clearMasterWorkers }}
-            ai={{
-              busy: suggestBusy,
-              suggestions,
-              source: suggestSource,
-              onSuggest: () => void handleSuggest(),
-              onApply: (s, riskIndex) => applySuggestion(s, riskIndex),
-            }}
-          />
-        )}
-
-        {/* 印刷経路は従来と同一（正式書式は editing なしの KyPrintSheet） */}
-        <div className="hidden print:block">
-          <KyPrintSheet record={record} />
-        </div>
-      </div>
-    );
-  }
-
   // P1-B: 元請確認・承認パネル。下書き中は記入の邪魔になるので用紙の下に置き、
   // 提出/承認/差し戻し中（actionable）は操作ボタンを見失わないよう用紙の上に置く。
+  // O10（第五弾）: canvas/クラシック共通（既定切替でcanvasからも保存・承認・共有・印刷が必須のため）。
   const approvalPanel = (
     <div id="ky-approval" className="mx-auto mt-3 max-w-5xl scroll-mt-24 px-4 print:hidden">
       <div className="rounded-xl border border-slate-200 bg-white p-3">
@@ -703,6 +602,283 @@ export function KyPaperView() {
     </div>
   );
 
+  // 転記支援（画面オーバーレイ。元請Excel様式への貼り付け用）。canvas/クラシック共通。
+  const transcribePanel = showTranscribe && <KyTranscribePanel record={record} onClose={() => setShowTranscribe(false)} />;
+
+  // 印刷プレビュー（画面オーバーレイ。印刷物には出さない）。canvas/クラシック共通。
+  const printPreviewOverlay = showPrintPreview && (
+    <div className="fixed inset-0 z-40 overflow-auto bg-slate-700/70 p-4 print:hidden">
+      <div className="mx-auto max-w-[210mm] rounded bg-white p-4 shadow-2xl">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-sm font-bold text-slate-800">印刷プレビュー（A4・確認印枠つき）</p>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-700">印刷 / PDF</button>
+            <button type="button" onClick={() => setShowPrintPreview(false)} className="rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">閉じる</button>
+          </div>
+        </div>
+        <div className="overflow-x-auto rounded border border-slate-200 p-2">
+          <KyPrintSheet record={record} />
+        </div>
+      </div>
+    </div>
+  );
+
+  // 柱C-9 操作集中: 下部バーは「保存（主ボタン・solid常設）」＋「…（その他）」の2つだけに絞る。
+  // 複製/共有/転記/印刷/連携は「…」シートへ退避し、保存が同格ボタンに埋もれないようにする。
+  // canvas/クラシック共通（O10第五弾＝既定切替後もcanvasから保存・共有・印刷・連携に到達できる必要があるため）。
+  const bottomActionBar = (
+    <div
+      className="fixed left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-2.5 shadow-lg backdrop-blur print:hidden"
+      style={{ bottom: "calc(var(--mobile-bottom-nav-h, 0px) + env(safe-area-inset-bottom, 0px))" }}
+    >
+      {/* モバイルは全画面共通の共有FAB(右下・z-30)があるため右端を空ける。PC(sm)はFABが画面端で
+          中央寄せの本バーと重ならないため余白不要。 */}
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 pr-16 sm:pr-0">
+        <span className="min-w-0 truncate text-[11px] text-slate-500">
+          {savedLabel}
+          <span className="ml-2 rounded bg-slate-100 px-2 py-0.5 font-semibold text-slate-600">{KY_SYNC_LABEL[syncStatus]}</span>
+          {shareCode && (
+            <span className="ml-2 rounded bg-violet-100 px-2 py-0.5 font-bold text-violet-800">共有コード {shareCode}</span>
+          )}
+        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => void handleSave()}
+            className="min-h-[44px] rounded-lg bg-emerald-600 px-7 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+          >
+            保存
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowActions(true)}
+            aria-haspopup="menu"
+            aria-expanded={showActions}
+            aria-label="その他の操作（複製・共有・転記・印刷）"
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base font-bold leading-none text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+          >
+            …
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  // 柱C-9: その他の操作シート（複製・共有・転記・印刷・連携）。下から出る・タップしやすい1列。canvas/クラシック共通。
+  const actionsSheet = showActions && (
+    <>
+      <div className="fixed inset-0 z-[45] bg-slate-900/40 print:hidden" onClick={() => setShowActions(false)} aria-hidden="true" />
+      <div
+        role="menu"
+        aria-label="その他の操作"
+        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[80vh] max-w-lg overflow-y-auto rounded-t-2xl border-t border-slate-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl print:hidden"
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-sm font-bold text-slate-800">その他の操作</p>
+          <button
+            type="button"
+            onClick={() => setShowActions(false)}
+            aria-label="閉じる"
+            className="min-h-[44px] rounded-lg px-3 text-lg leading-none text-slate-500 hover:bg-slate-100"
+          >
+            ×
+          </button>
+        </div>
+
+        <p className="mb-1.5 text-[11px] font-bold text-slate-400">記録</p>
+        <div className="mb-3 space-y-1.5">
+          <button type="button" role="menuitem" onClick={() => runAction(handleCopyLatest)} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-2.5 text-left hover:bg-amber-100">
+            <span className="text-sm font-bold text-amber-800">↻ 前回を複製</span>
+            <span className="text-[11px] font-normal text-amber-600">前回のKYを今日の分として引き継ぐ</span>
+          </button>
+        </div>
+
+        <p className="mb-1.5 text-[11px] font-bold text-slate-400">共有・連携</p>
+        <div className="mb-3 space-y-1.5">
+          <button type="button" role="menuitem" disabled={shareBusy} onClick={() => runAction(() => void handleShare())} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-violet-200 bg-violet-50/60 px-4 py-2.5 text-left hover:bg-violet-100 disabled:opacity-50">
+            <span className="text-sm font-bold text-violet-800">📡 {shareBusy ? "発行中…" : "別端末で共有"}</span>
+            <span className="text-[11px] font-normal text-violet-600">サイネージ用の共有コードを発行</span>
+          </button>
+          {isKyCloudEnabled() && (
+            <button type="button" role="menuitem" onClick={() => runAction(() => void handleFetchLatest())} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-left hover:bg-slate-50">
+              <span className="text-sm font-semibold text-slate-700">☁ クラウド最新取得</span>
+              <span className="text-[11px] font-normal text-slate-500">別端末で保存したKYを読み込む</span>
+            </button>
+          )}
+          <Link href="/ky/morning" role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center rounded-xl border border-violet-200 bg-white px-4 py-3 text-left text-sm font-semibold text-violet-700 hover:bg-violet-50">
+            🖥 朝礼サイネージへ →
+          </Link>
+          <button type="button" role="menuitem" onClick={() => runAction(() => setShowTranscribe(true))} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-left hover:bg-emerald-50" title="元請指定のExcel様式へ項目ごとにコピーして貼り付け">
+            <span className="text-sm font-semibold text-emerald-700">📋 Excel転記</span>
+            <span className="text-[11px] font-normal text-emerald-600">元請のExcel様式へ項目ごとにコピー</span>
+          </button>
+        </div>
+
+        <p className="mb-1.5 text-[11px] font-bold text-slate-400">印刷・PDF</p>
+        <div className="mb-1 space-y-1.5">
+          <button type="button" role="menuitem" onClick={() => runAction(() => setShowPrintPreview(true))} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-left hover:bg-sky-50">
+            <span className="text-sm font-semibold text-sky-700">🔍 印刷プレビュー</span>
+            <span className="text-[11px] font-normal text-sky-600">A4の体裁を確認してから印刷</span>
+          </button>
+          <button type="button" role="menuitem" onClick={() => { setShowActions(false); window.print(); }} className="flex min-h-[48px] w-full items-center rounded-xl bg-sky-600 px-4 py-3 text-left text-sm font-bold text-white hover:bg-sky-700">
+            🖨 印刷 / PDF
+          </button>
+        </div>
+
+        {(chemHint.matched || accHint.matched || (record.workRows[0]?.workDetail?.trim() ?? "") !== "") && (
+          <>
+            <p className="mb-1.5 mt-3 text-[11px] font-bold text-slate-400">この作業の関連情報</p>
+            <div className="space-y-1.5">
+              {chemHint.matched && (
+                <Link href={chemicalRaHref(chemHint)} role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3 text-left text-sm font-semibold text-amber-800 hover:bg-amber-100" title={`この作業（${chemHint.keywords.join("・")}）で扱う化学物質の規制・ばく露注意を確認`}>
+                  ⚗ 化学物質リスクを見る →
+                </Link>
+              )}
+              {accHint.matched && (
+                <Link href={accidentsHref(accHint)} role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-rose-200 bg-rose-50/60 px-4 py-3 text-left text-sm font-semibold text-rose-700 hover:bg-rose-100" title="この作業の類似労災事例・AI注意喚起を見る">
+                  ⚠ 類似の労災事例を見る →
+                </Link>
+              )}
+              {/* P1-3完: KY→チャットボット双方向動線。作業内容を文脈として渡す */}
+              {(record.workRows[0]?.workDetail?.trim() ?? "") !== "" && (
+                <Link
+                  href={`/chatbot?context=ky&work=${encodeURIComponent(
+                    (record.workRows[0]?.workDetail ?? "").trim().slice(0, 60),
+                  )}`}
+                  role="menuitem"
+                  onClick={() => setShowActions(false)}
+                  className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-left text-sm font-semibold text-blue-700 hover:bg-blue-100"
+                  title="この作業の法的根拠・必要な措置をAIチャットに質問"
+                >
+                  💬 法的根拠をAIに聞く →
+                </Link>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </>
+  );
+
+  // F1: 用紙キャンバス（β）。全hooks評価後の分岐＝クラシックUIと状態を完全共有する
+  // （record/自動保存/クラウド同期/承認ロック/深リンクがそのまま効く）。
+  if (canvasMode) {
+    return (
+      <div className="min-h-screen bg-slate-100 pb-28 print:bg-white print:pb-0">
+        {/* コンパクトバー: 用紙が主役なので操作は1行に集約 */}
+        <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-3 py-1.5 backdrop-blur print:hidden">
+          <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-sm font-bold text-slate-900">KY用紙</span>
+              {paperStatus.remaining !== undefined && paperStatus.remaining > 0 && (
+                <button
+                  type="button"
+                  onClick={handleZoomToNextEmpty}
+                  disabled={!firstEmptyFieldKey}
+                  title="最初の未記入セルへズームして開く"
+                  className="min-h-[28px] rounded-full bg-sky-600 px-2.5 py-0.5 text-[11px] font-bold text-white hover:bg-sky-700 disabled:opacity-60"
+                >
+                  のこり{paperStatus.remaining}項目 →
+                </button>
+              )}
+              {locked && (
+                <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800">
+                  {KY_APPROVAL_LABEL[approval.status]}・編集ロック中
+                </span>
+              )}
+              {/* O10（第五弾・既定切替）: 従来UIと対称の作業員マスター導線（クラシックUIのみに偏在していた欠落を解消） */}
+              <Link href="/ky/workers" className="rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100">
+                作業員マスター
+              </Link>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="hidden text-[11px] text-slate-500 sm:inline">{savedLabel}</span>
+              <Link
+                href="/ky/list"
+                className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
+              >
+                保存一覧
+              </Link>
+              <button
+                type="button"
+                onClick={() => toggleCanvasMode(false)}
+                className="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:bg-slate-100"
+              >
+                従来表示
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* O10（第四弾）: 通知バー。従来表示にはあったがキャンバスβでは未提供だった＝
+            AI提案のエディタ統合で「先に作業内容を」等の案内が必要になったため追加。 */}
+        {notice && (
+          <div className="mx-auto mt-2 max-w-5xl px-3 print:hidden">
+            <div className={`flex items-start justify-between gap-3 rounded-xl border px-3 py-2 ${SAFETY_TONE[notice.tone].soft}`}>
+              <p className="text-xs font-semibold">{notice.text}</p>
+              <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="rounded px-1.5 hover:bg-black/10">×</button>
+            </div>
+          </div>
+        )}
+
+        {/* O10（第五弾・既定切替）: 提出/承認/差し戻し中は用紙の上に、下書き中は用紙の下に＝クラシックUIと同じ配置規約 */}
+        {approval.status !== "draft" && approvalPanel}
+
+        {/* 用紙キャンバス: 初期表示＝全体フィット。タップで入力、ピンチ/ホイール/ボタンでズーム */}
+        <PaperStage ref={stageRef} heightClassName="h-[calc(100dvh-200px)] min-h-[320px] sm:h-[calc(100dvh-150px)]">
+          <div className="bg-white p-3">
+            <KyPrintSheet
+              record={record}
+              editing={
+                locked
+                  ? undefined
+                  : {
+                      onTapField: (key) => setActiveFieldKey(key),
+                      activeKey: activeFieldKey,
+                      emptyKeys: emptyPaperFieldKeys,
+                      onAddRiskRow: handleAddRiskRow,
+                    }
+              }
+            />
+          </div>
+        </PaperStage>
+
+        {approval.status === "draft" && approvalPanel}
+
+        {/* 欄タップで開く入力エディタ（Phase 2: ヘッダー6欄＋本日の作業内容＋4R目標3欄＋危険行＋参加者） */}
+        {activeFieldKey && !locked && (
+          <FieldEditorSheet
+            fieldKey={activeFieldKey}
+            record={record}
+            patch={patch}
+            onClose={() => setActiveFieldKey(null)}
+            onSelectField={(key) => setActiveFieldKey(key)}
+            weather={{ region, setRegion, fetchWeather: () => void handleWeather(), busy: weatherBusy }}
+            participants={{ workers, regularWorkers, workerGroups, selectedNames, toggleWorker, addWorkers, clearMasterWorkers }}
+            ai={{
+              busy: suggestBusy,
+              suggestions,
+              source: suggestSource,
+              onSuggest: () => void handleSuggest(),
+              onApply: (s, riskIndex) => applySuggestion(s, riskIndex),
+            }}
+          />
+        )}
+
+        {/* 印刷経路は従来と同一（正式書式は editing なしの KyPrintSheet） */}
+        <div className="hidden print:block">
+          <KyPrintSheet record={record} />
+        </div>
+
+        {/* O10（第五弾・既定切替）: 保存・複製・共有・転記・印刷・連携は既定表示でも必須のためクラシックUIと共通のconstsを表示 */}
+        {transcribePanel}
+        {printPreviewOverlay}
+        {bottomActionBar}
+        {actionsSheet}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 pb-28 print:bg-white print:pb-0">
       {/* 操作バー（印刷時は隠す） */}
@@ -727,14 +903,14 @@ export function KyPaperView() {
               </button>
             )}
           </div>
-          {/* F1: 用紙キャンバスβ（全体俯瞰→ズーム→タップ入力）への入口 */}
+          {/* O10（第五弾・既定切替）: 既定表示（用紙キャンバス）へ戻る入口。既定切替に伴い「β」表記は撤去。 */}
           <button
             type="button"
             onClick={() => toggleCanvasMode(true)}
-            title="用紙全体を1画面で見ながら、タップした欄をその場で入力できる新表示（β）"
+            title="用紙全体を1画面で見ながら、タップした欄をその場で入力できる既定の表示に戻る"
             className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
           >
-            🗺 キャンバスβ
+            🗺 新しい表示へ
           </button>
           {/* ズーム */}
           <div className="flex items-center gap-1 rounded-full border border-slate-300 bg-white p-0.5">
@@ -1045,162 +1221,11 @@ export function KyPaperView() {
         <KyPrintSheet record={record} />
       </div>
 
-      {/* 転記支援（画面オーバーレイ。元請Excel様式への貼り付け用） */}
-      {showTranscribe && <KyTranscribePanel record={record} onClose={() => setShowTranscribe(false)} />}
-
-      {/* 印刷プレビュー（画面オーバーレイ。印刷物には出さない） */}
-      {showPrintPreview && (
-        <div className="fixed inset-0 z-40 overflow-auto bg-slate-700/70 p-4 print:hidden">
-          <div className="mx-auto max-w-[210mm] rounded bg-white p-4 shadow-2xl">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-bold text-slate-800">印刷プレビュー（A4・確認印枠つき）</p>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-700">印刷 / PDF</button>
-                <button type="button" onClick={() => setShowPrintPreview(false)} className="rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">閉じる</button>
-              </div>
-            </div>
-            <div className="overflow-x-auto rounded border border-slate-200 p-2">
-              <KyPrintSheet record={record} />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 柱C-9 操作集中: 下部バーは「保存（主ボタン・solid常設）」＋「…（その他）」の2つだけに絞る。
-          複製/共有/転記/印刷/連携は「…」シートへ退避し、保存が同格ボタンに埋もれないようにする。 */}
-      {/* モバイルの全画面共通ボトムナビ(z-40・≤480px)の上に重ねる。--mobile-bottom-nav-h は
-          デスクトップで 0px のため、PCでは従来どおり画面最下部に固定される。 */}
-      <div
-        className="fixed left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-2.5 shadow-lg backdrop-blur print:hidden"
-        style={{ bottom: "calc(var(--mobile-bottom-nav-h, 0px) + env(safe-area-inset-bottom, 0px))" }}
-      >
-        {/* モバイルは全画面共通の共有FAB(右下・z-30)があるため右端を空ける。PC(sm)はFABが画面端で
-            中央寄せの本バーと重ならないため余白不要。 */}
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 pr-16 sm:pr-0">
-          <span className="min-w-0 truncate text-[11px] text-slate-500">
-            {savedLabel}
-            <span className="ml-2 rounded bg-slate-100 px-2 py-0.5 font-semibold text-slate-600">{KY_SYNC_LABEL[syncStatus]}</span>
-            {shareCode && (
-              <span className="ml-2 rounded bg-violet-100 px-2 py-0.5 font-bold text-violet-800">共有コード {shareCode}</span>
-            )}
-          </span>
-          <div className="flex shrink-0 items-center gap-2">
-            <button
-              type="button"
-              onClick={() => void handleSave()}
-              className="min-h-[44px] rounded-lg bg-emerald-600 px-7 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
-            >
-              保存
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowActions(true)}
-              aria-haspopup="menu"
-              aria-expanded={showActions}
-              aria-label="その他の操作（複製・共有・転記・印刷）"
-              className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base font-bold leading-none text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
-            >
-              …
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 柱C-9: その他の操作シート（複製・共有・転記・印刷・連携）。下から出る・タップしやすい1列。 */}
-      {showActions && (
-        <>
-          <div className="fixed inset-0 z-[45] bg-slate-900/40 print:hidden" onClick={() => setShowActions(false)} aria-hidden="true" />
-          <div
-            role="menu"
-            aria-label="その他の操作"
-            className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[80vh] max-w-lg overflow-y-auto rounded-t-2xl border-t border-slate-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl print:hidden"
-          >
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-bold text-slate-800">その他の操作</p>
-              <button
-                type="button"
-                onClick={() => setShowActions(false)}
-                aria-label="閉じる"
-                className="min-h-[44px] rounded-lg px-3 text-lg leading-none text-slate-500 hover:bg-slate-100"
-              >
-                ×
-              </button>
-            </div>
-
-            <p className="mb-1.5 text-[11px] font-bold text-slate-400">記録</p>
-            <div className="mb-3 space-y-1.5">
-              <button type="button" role="menuitem" onClick={() => runAction(handleCopyLatest)} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-2.5 text-left hover:bg-amber-100">
-                <span className="text-sm font-bold text-amber-800">↻ 前回を複製</span>
-                <span className="text-[11px] font-normal text-amber-600">前回のKYを今日の分として引き継ぐ</span>
-              </button>
-            </div>
-
-            <p className="mb-1.5 text-[11px] font-bold text-slate-400">共有・連携</p>
-            <div className="mb-3 space-y-1.5">
-              <button type="button" role="menuitem" disabled={shareBusy} onClick={() => runAction(() => void handleShare())} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-violet-200 bg-violet-50/60 px-4 py-2.5 text-left hover:bg-violet-100 disabled:opacity-50">
-                <span className="text-sm font-bold text-violet-800">📡 {shareBusy ? "発行中…" : "別端末で共有"}</span>
-                <span className="text-[11px] font-normal text-violet-600">サイネージ用の共有コードを発行</span>
-              </button>
-              {isKyCloudEnabled() && (
-                <button type="button" role="menuitem" onClick={() => runAction(() => void handleFetchLatest())} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-left hover:bg-slate-50">
-                  <span className="text-sm font-semibold text-slate-700">☁ クラウド最新取得</span>
-                  <span className="text-[11px] font-normal text-slate-500">別端末で保存したKYを読み込む</span>
-                </button>
-              )}
-              <Link href="/ky/morning" role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center rounded-xl border border-violet-200 bg-white px-4 py-3 text-left text-sm font-semibold text-violet-700 hover:bg-violet-50">
-                🖥 朝礼サイネージへ →
-              </Link>
-              <button type="button" role="menuitem" onClick={() => runAction(() => setShowTranscribe(true))} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-left hover:bg-emerald-50" title="元請指定のExcel様式へ項目ごとにコピーして貼り付け">
-                <span className="text-sm font-semibold text-emerald-700">📋 Excel転記</span>
-                <span className="text-[11px] font-normal text-emerald-600">元請のExcel様式へ項目ごとにコピー</span>
-              </button>
-            </div>
-
-            <p className="mb-1.5 text-[11px] font-bold text-slate-400">印刷・PDF</p>
-            <div className="mb-1 space-y-1.5">
-              <button type="button" role="menuitem" onClick={() => runAction(() => setShowPrintPreview(true))} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-left hover:bg-sky-50">
-                <span className="text-sm font-semibold text-sky-700">🔍 印刷プレビュー</span>
-                <span className="text-[11px] font-normal text-sky-600">A4の体裁を確認してから印刷</span>
-              </button>
-              <button type="button" role="menuitem" onClick={() => { setShowActions(false); window.print(); }} className="flex min-h-[48px] w-full items-center rounded-xl bg-sky-600 px-4 py-3 text-left text-sm font-bold text-white hover:bg-sky-700">
-                🖨 印刷 / PDF
-              </button>
-            </div>
-
-            {(chemHint.matched || accHint.matched || (record.workRows[0]?.workDetail?.trim() ?? "") !== "") && (
-              <>
-                <p className="mb-1.5 mt-3 text-[11px] font-bold text-slate-400">この作業の関連情報</p>
-                <div className="space-y-1.5">
-                  {chemHint.matched && (
-                    <Link href={chemicalRaHref(chemHint)} role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3 text-left text-sm font-semibold text-amber-800 hover:bg-amber-100" title={`この作業（${chemHint.keywords.join("・")}）で扱う化学物質の規制・ばく露注意を確認`}>
-                      ⚗ 化学物質リスクを見る →
-                    </Link>
-                  )}
-                  {accHint.matched && (
-                    <Link href={accidentsHref(accHint)} role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-rose-200 bg-rose-50/60 px-4 py-3 text-left text-sm font-semibold text-rose-700 hover:bg-rose-100" title="この作業の類似労災事例・AI注意喚起を見る">
-                      ⚠ 類似の労災事例を見る →
-                    </Link>
-                  )}
-                  {/* P1-3完: KY→チャットボット双方向動線。作業内容を文脈として渡す */}
-                  {(record.workRows[0]?.workDetail?.trim() ?? "") !== "" && (
-                    <Link
-                      href={`/chatbot?context=ky&work=${encodeURIComponent(
-                        (record.workRows[0]?.workDetail ?? "").trim().slice(0, 60),
-                      )}`}
-                      role="menuitem"
-                      onClick={() => setShowActions(false)}
-                      className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-left text-sm font-semibold text-blue-700 hover:bg-blue-100"
-                      title="この作業の法的根拠・必要な措置をAIチャットに質問"
-                    >
-                      💬 法的根拠をAIに聞く →
-                    </Link>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        </>
-      )}
+      {/* 転記支援・印刷プレビュー・下部操作バー（保存/…）・その他操作シート＝canvas/クラシック共通consts */}
+      {transcribePanel}
+      {printPreviewOverlay}
+      {bottomActionBar}
+      {actionsSheet}
     </div>
   );
 }

@@ -136,17 +136,52 @@ test.describe("KY用紙キャンバスβ（F1 方式確立）", () => {
       .toContain("E2Eビル新築工事");
   });
 
-  test("従来UIの「🗺 キャンバスβ」ボタンから到達でき、「従来表示」で戻れる", async ({ page }) => {
+  test("O10（第五弾・既定切替）: /ky/paper への通常アクセス（クエリ無し）で既定表示がキャンバスになる", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.addInitScript(() => {
+      localStorage.setItem("anzen-onboarding-v1-seen", "1");
+      localStorage.removeItem("ky-record");
+    });
+    await page.goto("/ky/paper");
+    await expect(page.getByTestId("paper-stage-content")).toBeVisible();
+    expect(page.url()).not.toContain("canvas=");
+  });
+
+  test("「従来表示」で旧UIに戻れ、「🗺 新しい表示へ」で既定表示に戻れる（?canvas=0で旧UIも維持）", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.addInitScript(() => {
       localStorage.setItem("anzen-onboarding-v1-seen", "1");
     });
     await page.goto("/ky/paper");
-    await page.getByRole("button", { name: "🗺 キャンバスβ" }).click();
     await expect(page.getByTestId("paper-stage-content")).toBeVisible();
-    expect(page.url()).toContain("canvas=1");
+
     await page.getByRole("button", { name: "従来表示" }).click();
     await expect(page.getByTestId("paper-stage-content")).toHaveCount(0);
-    expect(page.url()).not.toContain("canvas=1");
+    expect(page.url()).toContain("canvas=0");
+
+    // 明示的な旧UI指定（?canvas=0）は再読込しても保たれる（共有リンク・ブックマーク互換）。
+    await page.reload();
+    await expect(page.getByTestId("paper-stage-content")).toHaveCount(0);
+
+    await page.getByRole("button", { name: "🗺 新しい表示へ" }).click();
+    await expect(page.getByTestId("paper-stage-content")).toBeVisible();
+    expect(page.url()).not.toContain("canvas=0");
+  });
+
+  test("既定表示（キャンバス）からも保存主ボタン・「…」その他操作（複製/共有/転記/印刷）・元請確認欄に到達できる（機能パリティ）", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await gotoCanvas(page);
+
+    await expect(page.getByRole("button", { name: "保存" })).toBeVisible();
+    await page.getByRole("button", { name: "その他の操作（複製・共有・転記・印刷）" }).click();
+    const sheet = page.getByRole("menu", { name: "その他の操作" });
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByText("↻ 前回を複製")).toBeVisible();
+    await expect(sheet.getByRole("menuitem", { name: /朝礼サイネージへ/ })).toBeVisible();
+    await expect(sheet.getByText("🔍 印刷プレビュー")).toBeVisible();
+    await page.getByRole("button", { name: "閉じる" }).click();
+    await expect(sheet).toBeHidden();
+
+    await expect(page.getByText("元請確認・承認")).toBeVisible();
   });
 });
