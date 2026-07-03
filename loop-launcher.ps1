@@ -212,6 +212,35 @@ function Get-LanesToHeal {
 }
 
 # ---------------------------------------------------------------------------
+# Log retention: which files under logs/ are stale loop artifacts safe to delete. Nothing prunes the
+# logs/ dir today, so on a machine that stays logged in it grows without bound - every full launcher
+# pass (logon / 07:00) plus every watchdog heal spawn drops a fresh launcher-*/watchdog-* log, and
+# each runner restart drops a loop-*.log. Unbounded growth degrades the operator's primary diagnostic
+# surface (the reporting system) and, eventually, disk. This picks ONLY the loop's OWN generated logs
+# (launcher-*.log / loop-*.log / watchdog-*.log / planner-*.txt) - hand-authored progress/audit .md
+# files and every non-matching file are untouched - and NEVER prunes the KeepMin newest, so recent
+# diagnostics always survive even a burst; among the rest it deletes those older than RetentionDays.
+# Pure (takes a file list, does no IO) so -SelfTest covers it offline; a currently-open runner log is
+# further protected at the call site by Remove-Item's per-file failure on a Windows write lock.
+# ---------------------------------------------------------------------------
+function Get-LogsToPrune {
+  param($Files, [datetime]$Now, [int]$RetentionDays, [int]$KeepMin)
+  $eligible = @($Files | Where-Object {
+    $n = [string]$_.Name
+    ($n -like 'launcher-*.log') -or ($n -like 'loop-*.log') -or `
+    ($n -like 'watchdog-*.log') -or ($n -like 'planner-*.txt')
+  })
+  if ($eligible.Count -le $KeepMin) { return @() }
+  $sorted = @($eligible | Sort-Object LastWriteTime -Descending)
+  $cutoff = $Now.AddDays(-$RetentionDays)
+  $out = @()
+  for ($i = $KeepMin; $i -lt $sorted.Count; $i++) {
+    if ($sorted[$i].LastWriteTime -lt $cutoff) { $out += [string]$sorted[$i].Name }
+  }
+  return $out
+}
+
+# ---------------------------------------------------------------------------
 # Isolate the weekly critic in a dedicated git worktree. The critic runs as -Lane site and does
 # git checkout/commit/push; the ops persistent runner works the SAME main tree, so running the
 # critic in-place races git (index.lock contention / branch clobber) - the same family the planner
@@ -344,6 +373,23 @@ if ($SelfTest) {
     Assert-L "heal: a disabled lane is never healed even when absent" (-not (@(Get-LanesToHeal -Lanes $healLanes -Running $seoDeadToo) -contains "seo"))
     $noneAlive = @{}
     Assert-L "heal: empty scan yields all enabled lanes (caller gates on this to refuse under WMI outage)" ((@(Get-LanesToHeal -Lanes $healLanes -Running $noneAlive) -join ",") -eq "ops,data")
+    # L) Get-LogsToPrune: deletes ONLY old loop-generated logs beyond the KeepMin newest; never touches
+    #    hand-authored .md artifacts or non-matching files, and always keeps recent logs.
+    $nowL = [datetime]"2026-07-03T12:00:00"
+    $mk = { param($n, $daysOld) [pscustomobject]@{ Name = $n; LastWriteTime = $nowL.AddDays(-$daysOld) } }
+    $logFixture = @(
+      (& $mk "launcher-old.log" 40), (& $mk "loop-ops-old.log" 30), (& $mk "watchdog-old.log" 20),
+      (& $mk "planner-seo-old.txt" 25), (& $mk "launcher-recent.log" 2), (& $mk "loop-data-recent.log" 1),
+      (& $mk "audit-progress.md" 90), (& $mk "loop-status.dryrun.md" 99), (& $mk "note.txt" 88)
+    )
+    $pruned = @(Get-LogsToPrune -Files $logFixture -Now $nowL -RetentionDays 14 -KeepMin 2)
+    Assert-L "prune: an old launcher log beyond keep-min is deleted" ($pruned -contains "launcher-old.log")
+    Assert-L "prune: an old planner one-shot is deleted" ($pruned -contains "planner-seo-old.txt")
+    Assert-L "prune: a recent log is NEVER deleted" (-not ($pruned -contains "launcher-recent.log"))
+    Assert-L "prune: a hand-authored .md artifact is NEVER deleted" (-not ($pruned -contains "audit-progress.md") -and -not ($pruned -contains "loop-status.dryrun.md"))
+    Assert-L "prune: a non-loop .txt file is NEVER deleted" (-not ($pruned -contains "note.txt"))
+    Assert-L "prune: KeepMin newest matched logs are retained even when old" (@(Get-LogsToPrune -Files @((& $mk "loop-a.log" 40), (& $mk "loop-b.log" 41)) -Now $nowL -RetentionDays 14 -KeepMin 2).Count -eq 0)
+    Assert-L "prune: nothing to do on an empty logs dir" (@(Get-LogsToPrune -Files @() -Now $nowL -RetentionDays 14 -KeepMin 20).Count -eq 0)
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -1125,6 +1171,30 @@ if (-not $deadlinePassed) {
       Write-Launcher ("spawned heal watchdog (" + $watchdog + ").")
     }
   }
+}
+
+# Log retention sweep: bound the unbounded growth of logs/ so the operator's diagnostic surface stays
+# readable and disk cannot slowly fill. Runs on every full pass (NOT under -HealOnly, which exited
+# earlier) and regardless of the deadline - cleanup is always safe. Deletes only stale loop-generated
+# logs beyond the 20 newest (Get-LogsToPrune); a still-open runner log is Windows-write-locked so its
+# delete simply fails and is skipped. -WhatIf lists what WOULD be pruned and touches nothing.
+try {
+  $logItems = @(Get-ChildItem -LiteralPath $logDir -File -ErrorAction SilentlyContinue)
+  $toPrune = @(Get-LogsToPrune -Files $logItems -Now (Get-Date) -RetentionDays 14 -KeepMin 20)
+  if ($toPrune.Count -eq 0) {
+    Write-Launcher ("log retention: nothing to prune (" + $logItems.Count + " files, keep>=20 newest + last 14d).")
+  } elseif ($WhatIf) {
+    Write-Launcher ("[WHATIF] log retention: would prune " + $toPrune.Count + " stale log(s): " + (($toPrune | Select-Object -First 8) -join ", ") + $(if ($toPrune.Count -gt 8) { " ..." } else { "" }))
+  } else {
+    $deleted = 0
+    foreach ($name in $toPrune) {
+      $p = Join-Path $logDir $name
+      try { Remove-Item -LiteralPath $p -Force -ErrorAction Stop; $deleted++ } catch {}
+    }
+    Write-Launcher ("log retention: pruned " + $deleted + " of " + $toPrune.Count + " stale log(s) (kept 20 newest + last 14d).")
+  }
+} catch {
+  Write-Launcher ("WARN: log retention sweep failed (non-fatal): " + $_.Exception.Message)
 }
 
 Write-Launcher "=== loop-launcher end ==="
