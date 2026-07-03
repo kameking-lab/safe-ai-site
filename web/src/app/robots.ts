@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/seo-metadata";
 
 // 一般向け非公開パス（UA:* と AI検索系の両方に適用）
 const COMMON_DISALLOW = ["/admin/", "/api/", "/auth/", "/dev/", "/handover", "/lms", "/api-docs", "/dpa"];
@@ -90,6 +91,7 @@ export default function robots(): MetadataRoute.Robots {
       ...socialPreviewRules,
       ...trainingRules,
     ],
-    sitemap: "https://www.anzen-ai-portal.jp/sitemap-index.xml",
+    // 柱C-3 / S DRY: sitemap の絶対URLも seo-metadata.ts の SITE_URL 単一ソース（末尾スラッシュ無し）。
+    sitemap: `${SITE_URL}/sitemap-index.xml`,
   };
 }
