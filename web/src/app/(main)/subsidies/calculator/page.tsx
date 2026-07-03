@@ -115,7 +115,7 @@ function ResultCard({ est, investment }: { est: SubsidyEstimate; investment: num
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="mt-3 flex w-full items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            className="mt-3 flex min-h-[44px] w-full items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
           >
             申請期限・必要書類を見る
             {open ? (

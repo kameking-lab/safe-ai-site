@@ -166,7 +166,7 @@ export default async function AccidentNewsPage({
             const qs = p.toString();
             return qs ? `?${qs}` : "";
           })()}`}
-          className="rounded-lg border border-sky-300 bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-800 hover:bg-sky-100"
+          className="inline-flex min-h-[44px] items-center rounded-lg border border-sky-300 bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-800 hover:bg-sky-100"
         >
           🖨 説明資料を印刷（この絞り込みで）
         </Link>
