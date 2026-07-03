@@ -4,6 +4,20 @@
 
 ---
 
+## 2026-07-03 バックアップ取り込みメッセージの色の文法違反＋44px未満3箇所を是正（柱0磨き・巡回発見）
+
+回収: 自ブランチPR #778（`/safety-diary`等44px9箇所）がCI緑と確認しsquashマージ。main pull後working tree clean。PR #785（S1第八弾・履歴サジェスト）はCI進行中のため次回収。
+
+着手: 上位3件(O15/S2/S3)は引き続きdataレーンO14未着手で全ブロック中のため、Exploreエージェントに当班所有route/componentの柱0再巡回を依頼（過去の44px/結論カード是正と重複しない新規のみを対象化）。**色の文法違反(重大)を新規発見**: `records-backup.tsx`のバックアップ取り込み結果メッセージが成功・失敗どちらも`text-emerald-700`固定で、取り込み失敗（不正なJSON選択）時にも緑の安全色が出て「今の状態」を誤読させる状態だった。不可侵の柱0-0（safety-tone.tsの色の文法）違反のため最優先で是正。副次的に44px未満のタップ標的3箇所（KY/打合せ用紙canvasの「行を追加」ホットスポット2種・AI提案「反映」ボタン・/ky/morning共有コード入力「表示」ボタン）も発見。
+
+実装: `records-backup.tsx`に`SAFETY_TONE`(custodian基盤・importのみ)を導入し`msgTone`stateで成功=safe/失敗=dangerを出し分け（判定ロジック無変更・表示色のみ）。`ky-print-sheet.tsx`・`meeting-print-sheet.tsx`(2箇所)の「行を追加」ホットスポットは`min-h-[36px]`のまま残っていたため`min-h-[44px]`に統一。`field-editor-sheet.tsx`のAI提案「反映」ボタン・`ky-morning-signage.tsx`の共有コード「表示」ボタンに`min-h-[44px]`を追加（いずれも足すだけ）。
+
+検証: `tsc --noEmit`=0 / `lint`=errors0（既存warn23件のみ）/ `vitest run`=301ファイル2568テスト全pass（ky-print-sheet/meeting-print-sheetのA4印刷スナップショット無変更を個別確認済み）/ `build`=成功。無読Playwright新規`docs/third-party-reviews/scripts/records-backup-color-grammar-44px-2026-07-03.mjs`をprod start(3100)で実行し6/6 PASS（不正JSON取り込みで赤系クラス確認・緑固定化していないことを確認・KY canvasの「＋危険行を追加」/AI提案「反映」/共有コード「表示」の3ボタン）。canvas内ボタンはPaperStageのtransform:scaleにより実測boundingBoxがズーム率で変動するため、CSSのmin-height計算値(`getComputedStyle`)で検証する方式を採用（boundingBoxでの検証は初回誤FAILとなり原因特定・修正）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。PR #785はCI待ちで次回収。
+
+---
+
 ## 2026-07-03 教育コース詳細12ページの主要CTA3種を44px化（柱0磨き）
 
 回収: 自ブランチPR #749（ky/education 残存44px8箇所）がCI緑（e2e/smoke SUCCESS）と確認できたが、`main`とdirty（BACKLOG/cycle-logの同時追記による行競合のみ・コード競合なし）と判明。squashマージ前に契約どおり origin/main を当該ブランチへ通常マージで解消（本ログの直前エントリ2件を時系列順に並べ替えて統合）→ tsc=0/lint errors0/vitest 2492 pass/build成功を確認しpush。CI再走の緑は次イテレーションで回収（auto-merge無効のためこのイテレーションではマージ見送り）。

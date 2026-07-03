@@ -297,7 +297,7 @@ export function KyMorningSignage() {
               <button
                 type="submit"
                 disabled={!/^\d{6}$/.test(codeInput)}
-                className="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400 disabled:opacity-40"
+                className="min-h-[44px] rounded-lg bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400 disabled:opacity-40"
               >
                 表示
               </button>
