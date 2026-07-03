@@ -195,7 +195,7 @@ export function MeetingPrintSheet({ record, editing }: { record: MeetingRecord; 
                       type="button"
                       data-zoompan-skip="1"
                       onClick={() => editing.onAddContractorRow!(t)}
-                      className="min-h-[36px] rounded border border-dashed border-sky-400 bg-sky-50/70 px-3 py-1 text-xs font-bold text-sky-800 hover:bg-sky-100"
+                      className="min-h-[44px] rounded border border-dashed border-sky-400 bg-sky-50/70 px-3 py-1 text-xs font-bold text-sky-800 hover:bg-sky-100"
                     >
                       ＋{t}
                     </button>
@@ -238,7 +238,7 @@ export function MeetingPrintSheet({ record, editing }: { record: MeetingRecord; 
                         type="button"
                         data-zoompan-skip="1"
                         onClick={editing.onAddDeliveryRow}
-                        className="min-h-[36px] rounded border border-dashed border-sky-400 bg-sky-50/70 px-3 py-1 text-xs font-bold text-sky-800 hover:bg-sky-100"
+                        className="min-h-[44px] rounded border border-dashed border-sky-400 bg-sky-50/70 px-3 py-1 text-xs font-bold text-sky-800 hover:bg-sky-100"
                       >
                         ＋搬入出行を追加
                       </button>

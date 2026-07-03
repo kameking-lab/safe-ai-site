@@ -178,7 +178,7 @@ export function FieldEditorSheet({
                     <button
                       type="button"
                       onClick={() => ai.onApply(s, riskMeta!.index)}
-                      className="shrink-0 rounded border border-indigo-300 bg-white px-2 py-1 text-[11px] font-bold text-indigo-700 hover:bg-indigo-50"
+                      className="min-h-[44px] shrink-0 rounded border border-indigo-300 bg-white px-2 py-1 text-[11px] font-bold text-indigo-700 hover:bg-indigo-50"
                     >
                       反映
                     </button>

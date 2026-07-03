@@ -9,10 +9,12 @@ import {
   applyBackup,
   countSafeAiKeys,
 } from "@/lib/site-records/backup";
+import { SAFETY_TONE, type SafetyTone } from "@/lib/design/safety-tone";
 
 export function RecordsBackup() {
   const [keyCount, setKeyCount] = useState<number | null>(null);
   const [msg, setMsg] = useState("");
+  const [msgTone, setMsgTone] = useState<SafetyTone>("safe");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -35,6 +37,7 @@ export function RecordsBackup() {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+    setMsgTone("safe");
     setMsg(`${Object.keys(data).length}件のデータを書き出しました。`);
   }
 
@@ -49,6 +52,7 @@ export function RecordsBackup() {
     reader.onload = () => {
       const bundle = parseBackup(String(reader.result ?? ""));
       if (!bundle) {
+        setMsgTone("danger");
         setMsg("読み込めませんでした。正しいバックアップJSONを選んでください。");
         return;
       }
@@ -57,6 +61,7 @@ export function RecordsBackup() {
         return;
       }
       const applied = applyBackup(bundle);
+      setMsgTone("safe");
       setMsg(`${applied}件を取り込みました。画面を更新します…`);
       setTimeout(() => window.location.reload(), 800);
     };
@@ -82,7 +87,11 @@ export function RecordsBackup() {
           <Upload className="h-3.5 w-3.5" aria-hidden="true" /> バックアップを取り込む
         </button>
         <input ref={fileRef} type="file" accept="application/json,.json" onChange={handleFile} className="hidden" />
-        {msg && <span className="text-xs font-semibold text-emerald-700">{msg}</span>}
+        {msg && (
+          <span role="status" className={`text-xs font-semibold ${SAFETY_TONE[msgTone].text}`}>
+            {msg}
+          </span>
+        )}
       </div>
     </section>
   );
