@@ -176,6 +176,18 @@ function Resolve-CriticStamp {
   return $Now.AddDays(-$back)
 }
 
+# Pre-flight gate: after the side-effect-free rehearsal (Invoke-CriticRehearsal exercises the exact
+# fetch/worktree-add/verify/teardown the real critic uses), decide whether the expensive real critic
+# one-shot may fire. A FAILED rehearsal means the isolated-worktree plumbing is broken RIGHT NOW, so
+# the unattended real fire would fail the same way after burning setup and a blocking 30-min slot -
+# skip it and let the caller back-date (Resolve-CriticStamp treats the "rehearsal-failed" outcome as
+# non-ok -> ~1-day retry + a degraded dashboard note) instead of blackholing the whole critic season.
+# Pure so -SelfTest covers the skip-on-failure wiring offline (no git, no worktree, no Claude).
+function Test-CriticFireAfterRehearsal {
+  param([bool]$RehearsalOk)
+  return [bool]$RehearsalOk
+}
+
 # ---------------------------------------------------------------------------
 # Supply gate (planner): decide whether to fire a planner one-shot for a lane. The gate must NOT
 # fire when that lane's persistent runner is ALREADY running, because the one-shot and the live
@@ -439,6 +451,16 @@ if ($SelfTest) {
     Assert-L "rehearsal path never collides with a real critic worktree of the same launch stamp" ($rehWt -ne (Get-CriticWorktreePath -RepoRoot $repoFixture -Stamp "20260703-080000"))
     $rehDry = Invoke-CriticRehearsal -RepoRoot $repoFixture -Stamp "20260703-080000" -DryRun
     Assert-L "rehearsal dry-run reports ok and executes no git" ($rehDry.ok -and (($rehDry.steps -join " ") -like "*WHATIF*") -and (-not (Test-Path -LiteralPath $rehDry.worktree)))
+    # Q) Auto pre-flight wiring: the rehearsal result gates the real (expensive) critic fire. A PASSING
+    #    rehearsal lets the real one-shot proceed; a FAILING rehearsal skips it, and the "rehearsal-failed"
+    #    outcome then flows through the SAME back-date + degraded-note block as any other non-ok outcome.
+    Assert-L "preflight: a passing rehearsal lets the real critic fire" (Test-CriticFireAfterRehearsal -RehearsalOk $true)
+    Assert-L "preflight: a failing rehearsal skips the real critic fire" (-not (Test-CriticFireAfterRehearsal -RehearsalOk $false))
+    $rehFixed = [datetime]"2026-07-03T08:00:00"
+    $sReh = Resolve-CriticStamp -Outcome "rehearsal-failed" -Now $rehFixed -CriticEveryDays 7 -RetryDays 1
+    Assert-L "preflight: rehearsal-failed back-dates (NOT due 12h later)" ((($rehFixed.AddHours(12)) - $sReh).TotalDays -lt 7)
+    Assert-L "preflight: rehearsal-failed IS due ~1 day later (bounded retry, no 7d blackout)" ((($rehFixed.AddDays(1)) - $sReh).TotalDays -ge 7)
+    Assert-L "preflight: rehearsal-failed is a non-ok outcome so the degraded dashboard note fires" ("rehearsal-failed" -ne "ok")
     # K) Get-LanesToHeal: names exactly the enabled lanes that have no live runner. A disabled lane
     #    is never healed even when absent from the scan; an alive lane is never re-launched.
     $healLanes = @(
@@ -1116,12 +1138,24 @@ if ($criticDue -and (Test-Path $criticPrompt)) {
   Write-Launcher ("critic due (last=" + ([string]$state.lastCriticIso) + ", every=" + $criticEvery + "d). Firing critic one-shot in an ISOLATED git worktree (main tree untouched).")
   $state.lastCriticIso = $now.ToString("o")
   Save-State
+  # Pre-flight: rehearse the EXACT git-worktree plumbing (side-effect-free, no Claude) before spending
+  # a blocking 30-min one-shot. Invoke-CriticRehearsal runs the same fetch/worktree-add/verify/teardown
+  # under a non-colliding "rehearsal-" stamp; if that add/verify/teardown is broken RIGHT NOW, the
+  # unattended real fire would fail the same way after burning setup, so we skip it and back-date for a
+  # ~1-day retry (the block below) instead of silently blackholing the critic season. In -WhatIf the
+  # rehearsal is itself a dry-run (prints its plan, runs no git); the real fire then falls into its own
+  # plan-only branch, so a dry-run shows the full wiring: rehearse -> (pass) -> fire.
+  $preflight = Invoke-CriticRehearsal -RepoRoot $repoRoot -Stamp $launchStamp -DryRun:$WhatIf
+  foreach ($ln in $preflight.steps) { Write-Launcher ("critic pre-flight: " + $ln) }
   # Run the critic in a throwaway worktree so its checkout/commit/push never shares an index with
   # the ops persistent runner in the main tree. The critic prompt is fed by absolute path from the
   # main tree; the worktree is a full origin/main checkout, so it has its own loop-runner.ps1.
   $wtPath = Get-CriticWorktreePath -RepoRoot $repoRoot -Stamp $launchStamp
   $criticOutcome = $null
-  if (-not (Test-WorktreeIsIsolated -RepoRoot $repoRoot -WorktreePath $wtPath)) {
+  if (-not $WhatIf -and -not (Test-CriticFireAfterRehearsal -RehearsalOk ([bool]$preflight.ok))) {
+    Write-Launcher ("WARN: critic pre-flight rehearsal FAILED; NOT firing the real critic one-shot this pass (the isolated-worktree plumbing is broken now and the unattended fire would fail the same way). Back-dating for a ~1-day retry and blaring a dashboard note.")
+    $criticOutcome = "rehearsal-failed"
+  } elseif (-not (Test-WorktreeIsIsolated -RepoRoot $repoRoot -WorktreePath $wtPath)) {
     Write-Launcher ("WARN: computed critic worktree '" + $wtPath + "' is not isolated from the main tree; refusing to run critic in-place (would re-open the git race). Treating as failure.")
     $criticOutcome = "worktree-unsafe"
   } elseif ($WhatIf) {
