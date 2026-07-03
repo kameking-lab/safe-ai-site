@@ -15,7 +15,7 @@ type BrowserSpeechRecognition = {
   stop: () => void;
 };
 
-function describeVoiceError(err: string | undefined): string {
+export function describeVoiceError(err: string | undefined): string {
   switch (err) {
     case "not-allowed":
     case "NotAllowedError":
