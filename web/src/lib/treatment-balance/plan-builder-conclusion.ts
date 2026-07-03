@@ -29,7 +29,17 @@ export interface PlanBuilderConclusion {
 export function planBuilderConclusion(input: {
   submitted: boolean;
   conditionName?: string | null;
+  generationFailed?: boolean;
 }): PlanBuilderConclusion {
+  if (input.submitted && input.generationFailed) {
+    return {
+      tone: "warning",
+      title: "プラン生成に失敗しました",
+      description: "選択内容を確認し、もう一度「両立支援プランを生成」を押してください。",
+      settled: false,
+      action: { href: "#plan-form", label: "入力し直す" },
+    };
+  }
   if (!input.submitted || !input.conditionName) {
     return {
       tone: "info",
