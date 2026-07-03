@@ -6,7 +6,7 @@
 
 ### 2026-07-03 補充（S7完了により3件未満のため、診断04 §5.1-1 + fresh eval残欠陥から補充）
 - [ ] 【補充・小】fresh eval Q39「足場の組立て・変更後に必要な点検と記録」PIN trigger拡充。現状「足場の点検」PINは trigger未一致で567/568条を引けず安衛則565条ほかを誤取得（rag-search.tsのみで完結・data班領域には触れない）。完了条件: fresh eval Recall@5 99→100/100、main非退行。
-- [ ] 【補充・中】診断04 §5.1-1: 法令名正規化テーブルの単一ソース化。`chatbot-enrichment.ts`の`KNOWN_LAW_FULL_NAMES`・`synonyms.ts`・`notice-search`がそれぞれ独自に法令名⇄略称の対応を持ち重複・ドリフトの温床（O4のT1で場当たり的に前者へ追加した経緯あり）。`data/laws/index.ts`由来の単一ソースに統合し3箇所から参照させる。完了条件: 3箇所の法令名判定が同一データソース由来になり、main/fresh eval非退行。
+- [x] 【補充・中】診断04 §5.1-1: 法令名正規化テーブルの単一ソース化（2026-07-03 ux-tool/law-name-registry-single-source）。新規`web/src/lib/law-name-registry.ts`が`data/laws`（data班所有・LAW_METADATA、50法令）を単一ソースに`LAW_ALIAS_GROUPS`/`LAW_SHORT_SET`/`LAW_FULL_NAME_SET`/`isLawNameEquivalent`を自動生成し、字面が公式名と異なる通称のみ`EXTRA_ALIASES`で補う。`chatbot-enrichment.ts`の`KNOWN_LAW_SHORTS`（手動38件・50法令体制拡張後に追加された12法令が未登録で正当な引用まで誤って「範囲外」警告する既知ドリフトを内包）と`KNOWN_LAW_FULL_NAMES`（別の狭い`data/law-metadata.ts`33法令由来）を registry 参照に置換して是正。`rag/synonyms.ts`の`LAW_ALIASES`（56行のべた書き）も registry 参照に置換、`isLawShortEquivalent`は`isLawNameEquivalent`へ委譲。notice-search.tsのTOPIC_SYNONYMSは法令名⇄略称表ではなくトピック語彙（熱中症→WBGT等）で対象外と判断、共用は見送り（理由をcycle-logに明記）。fresh eval非退行（recall5: main 1.0/fresh 0.99 とも維持、再生成JSONはcheckoutで復元・未コミット）。vitest 2219 pass。
 - [ ] 【補充・次点／要data班確認】/law-search・/chemical-database のデータ鮮度表示（/circularsは2026-07-03に実施済＝#619参照）。両ページの対象データに機械可読な鮮度フィールドが無く、web/src/data/**はdata班所有のため、フィールド追加の要否をdata班へ申告してから着手する（自班のみでは実装不可）。
 
 ### 2026-07-02 Fable診断注入（診断書: docs/fable-diagnosis-2026-07-02/04・07）
