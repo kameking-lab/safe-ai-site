@@ -62,6 +62,16 @@
   (success OR incomplete) terminates the day immediately regardless. Bounds worst-case wasted prod Gemini
   budget on a persistently-broken day at MaxEvalAttempts x 23 questions.
 
+.PARAMETER RetryCooldownMinutes
+  Minimum real-time gap between the bounded no-report retries (default 40). MaxEvalAttempts bounds the COST
+  of retries; without this floor it does NOT bound their CLUSTERING: the ops loop pokes this script every
+  ~195s, so 3 retries fire within ~10 minutes and any prod deploy/outage lasting longer than that cluster
+  burns the whole day's measurement even though prod is healthy the other ~21 hours - the same silent data
+  loss the retry budget was added to kill. This cooldown decouples retry timing from the ops-tick cadence
+  so the MaxEvalAttempts retries SPREAD across the day (attempts at ~T, ~T+cooldown, ~T+2*cooldown), letting
+  a transient outage recover before the budget is spent. Bounded COST is unchanged (still <= MaxEvalAttempts
+  x 23Q/day). Set 0 to disable (retry on the very next tick, the pre-cooldown behaviour).
+
 .EXAMPLE
   powershell -NoProfile -ExecutionPolicy Bypass -File .\loop-eval-nightly.ps1
 
@@ -75,6 +85,7 @@ param(
   [string]$OutDir = "",
   [string]$RepoPath = "",
   [int]$MaxEvalAttempts = 3,
+  [int]$RetryCooldownMinutes = 40,
   [switch]$WhatIf,
   [switch]$SelfTest
 )
@@ -104,8 +115,16 @@ function Get-NightlyDailyPath {
 # Legacy failure records (pre-retry, no 'attempts' field) count as 0 attempts => retryable, recovering a
 # day the old logic wrongly burned. An unreadable or unknown-shape marker (no 'ok' field) is treated as
 # terminal - conservative: never re-hammer prod off a corrupt file.
+#
+# Retry COOLDOWN (returns $true while a non-terminal failure is still cooling down): MaxAttempts bounds the
+# retry COST but not its CLUSTERING - the ops loop pokes this script every ~195s, so without a real-time
+# floor the bounded retries fire within ~10 min and a prod deploy/outage longer than that burns the whole
+# day (prod healthy the other ~21h). When a caller supplies $Now (and $RetryCooldownMinutes > 0) and the
+# record's ranAt parses, a non-terminal failure younger than the cooldown is reported as "not runnable this
+# tick" so the retries SPREAD across the day (~T, ~T+cooldown, ...). Callers/tests that pass no clock, a
+# zero cooldown, or a record with an unparseable ranAt fall through to retry-now (backward compatible).
 function Test-AlreadyRanTonight {
-  param([string]$Dir, [string]$Stamp, [int]$MaxAttempts = 3)
+  param([string]$Dir, [string]$Stamp, [int]$MaxAttempts = 3, [datetime]$Now = ([datetime]::MinValue), [int]$RetryCooldownMinutes = 40)
   $path = Get-NightlyDailyPath -Dir $Dir -Stamp $Stamp
   if (-not (Test-Path -LiteralPath $path)) { return $false }
   $rec = $null
@@ -115,7 +134,14 @@ function Test-AlreadyRanTonight {
   if ($rec.ok) { return $true }                                          # measured: day done
   $attempts = 0
   if ($null -ne $rec.attempts) { $attempts = [int]$rec.attempts }
-  return ($attempts -ge $MaxAttempts)                                    # failure: done only once exhausted
+  if ($attempts -ge $MaxAttempts) { return $true }                       # failure: exhausted => terminal
+  # Retries remain. Hold this tick only while the last attempt is still inside the cooldown window.
+  if ($Now -ne [datetime]::MinValue -and $RetryCooldownMinutes -gt 0 -and $null -ne $rec.ranAt) {
+    $last = $null
+    try { $last = [datetime]::Parse([string]$rec.ranAt, [System.Globalization.CultureInfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::RoundtripKind) } catch { $last = $null }
+    if ($null -ne $last -and ($Now - $last).TotalMinutes -lt $RetryCooldownMinutes) { return $true }
+  }
+  return $false                                                          # retry now
 }
 
 # Regression classification. Kept separate so O18(b)'s dashboard banner reuses the SAME predicate the
@@ -451,6 +477,26 @@ if ($SelfTest) {
     $fail3 = ConvertTo-Json -Depth 5 -InputObject (New-FailureRecord -Stamp $stamp -RanAtIso "t" -ExitCode 1 -ErrorText "x" -Attempts 3 -MaxAttempts 3)
     Write-JsonNoBom -Path $daily -Text $fail3
     Assert-E "failure attempt 3/3: TERMINAL (retries exhausted, day burned)" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3)
+
+    # B3) Retry COOLDOWN: a non-terminal failure holds the tick while its last attempt is younger than the
+    # cooldown, then becomes runnable again once the cooldown elapses. Bounds retry CLUSTERING so a prod
+    # outage longer than the ~10 min it takes to poke this script MaxAttempts times does not burn the day.
+    $ranIso = "2026-07-04T02:34:00+09:00"
+    $ranAt = [datetime]::Parse($ranIso, [System.Globalization.CultureInfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::RoundtripKind)
+    $failCd = ConvertTo-Json -Depth 5 -InputObject (New-FailureRecord -Stamp $stamp -RanAtIso $ranIso -ExitCode 1 -ErrorText "x" -Attempts 1 -MaxAttempts 3)
+    Write-JsonNoBom -Path $daily -Text $failCd
+    Assert-E "cooldown: non-terminal failure 5 min old (<40) HOLDS the tick (do not re-hammer)" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3 -Now $ranAt.AddMinutes(5) -RetryCooldownMinutes 40)
+    Assert-E "cooldown: non-terminal failure 50 min old (>40) is RUNNABLE again (retry now)" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3 -Now $ranAt.AddMinutes(50) -RetryCooldownMinutes 40))
+    Assert-E "cooldown: no clock supplied => cooldown OFF => runnable (backward compatible)" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3))
+    Assert-E "cooldown: RetryCooldownMinutes 0 => cooldown OFF even inside the window => runnable" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3 -Now $ranAt.AddMinutes(5) -RetryCooldownMinutes 0))
+    # Exhausted attempts are terminal REGARDLESS of the cooldown clock (the day is genuinely spent).
+    $fail3Cd = ConvertTo-Json -Depth 5 -InputObject (New-FailureRecord -Stamp $stamp -RanAtIso $ranIso -ExitCode 1 -ErrorText "x" -Attempts 3 -MaxAttempts 3)
+    Write-JsonNoBom -Path $daily -Text $fail3Cd
+    Assert-E "cooldown: exhausted (3/3) stays TERMINAL even with a fresh clock (cooldown never revives it)" (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3 -Now $ranAt.AddMinutes(5) -RetryCooldownMinutes 40)
+    # An unparseable ranAt with a clock supplied falls through to retry-now (fail-open, never a stuck day).
+    $failBadTime = ConvertTo-Json -Depth 5 -InputObject (New-FailureRecord -Stamp $stamp -RanAtIso "not-a-date" -ExitCode 1 -ErrorText "x" -Attempts 1 -MaxAttempts 3)
+    Write-JsonNoBom -Path $daily -Text $failBadTime
+    Assert-E "cooldown: unparseable ranAt + clock => fall through to RUNNABLE (fail-open, no stuck day)" (-not (Test-AlreadyRanTonight -Dir $tmp -Stamp $stamp -MaxAttempts 3 -Now $ranAt.AddMinutes(5) -RetryCooldownMinutes 40))
   } finally {
     Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
   }
@@ -743,8 +789,10 @@ $historyPath = Join-Path $genDir "history.jsonl"
 Write-Log ("=== loop-eval-nightly start (date=" + $stamp + ", base=" + $BaseUrl + ", target=" + $Target + ") ===")
 
 # Budget guard: if today's marker already exists, this is a later ops iteration of the same day - no-op.
-if (Test-AlreadyRanTonight -Dir $genDir -Stamp $stamp -MaxAttempts $MaxEvalAttempts) {
-  Write-Log ("day already terminal for " + $stamp + " (measured, or no-report retries exhausted); skipping (idempotent - caps prod Gemini at 23Q/night). Daily record: " + $dailyPath)
+# Now-aware so a non-terminal no-report failure still inside its retry cooldown holds THIS tick (the retry
+# fires a later tick, once the cooldown elapses) instead of re-hammering prod at the ~195s ops cadence.
+if (Test-AlreadyRanTonight -Dir $genDir -Stamp $stamp -MaxAttempts $MaxEvalAttempts -Now $now -RetryCooldownMinutes $RetryCooldownMinutes) {
+  Write-Log ("day not runnable this tick for " + $stamp + " (measured, no-report retries exhausted, or a prior no-report failure still within its " + $RetryCooldownMinutes + "-min retry cooldown); skipping (idempotent - caps prod Gemini at 23Q/night). Daily record: " + $dailyPath)
   exit 0
 }
 
