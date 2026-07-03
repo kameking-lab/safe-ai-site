@@ -129,8 +129,8 @@ export const RAG_100_QUESTIONS: RagTestCase[] = [
   { id: 93, topic: "賃金", question: "最低賃金の決定方式は？", gold: [{ lawShort: "最賃法", articleNum: "第9条" }, { lawShort: "最賃法", articleNum: "第4条" }] },
 
   // K. 労災・契約・派遣等 (94-100)
-  { id: 94, topic: "労災", question: "労災保険の業務災害給付は？", gold: [{ lawShort: "労災保険法", articleNum: "第7条" }, { lawShort: "労災保険法", articleNum: "第12条の8" }] },
-  { id: 95, topic: "労災", question: "通勤災害の認定は？", gold: [{ lawShort: "労災保険法", articleNum: "第7条" }, { lawShort: "労災保険法", articleNum: "第7条第3項" }] },
+  { id: 94, topic: "労災", question: "労災保険の業務災害給付は？", gold: [{ lawShort: "労災保険法", articleNum: "第7条" }, { lawShort: "労災保険法", articleNum: "第14条" }] },
+  { id: 95, topic: "労災", question: "通勤災害の認定は？", gold: [{ lawShort: "労災保険法", articleNum: "第7条" }, { lawShort: "労災保険法", articleNum: "第7条第2項" }] },
   { id: 96, topic: "契約", question: "労働契約成立の原則は？", gold: [{ lawShort: "労契法", articleNum: "第1条" }, { lawShort: "労契法", articleNum: "第5条" }] },
   { id: 97, topic: "契約", question: "解雇権濫用法理は？", gold: [{ lawShort: "労契法", articleNum: "第16条" }] },
   { id: 98, topic: "契約", question: "有期労働契約の無期転換は？", gold: [{ lawShort: "労契法", articleNum: "第18条" }] },

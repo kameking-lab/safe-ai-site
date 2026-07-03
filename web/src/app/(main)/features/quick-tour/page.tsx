@@ -169,14 +169,14 @@ export default function QuickTourPage() {
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Link
                     href={s.href}
-                    className="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+                    className="inline-flex min-h-[44px] items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
                   >
                     {s.hrefLabel} →
                   </Link>
                   {idx < STEPS.length - 1 && (
                     <a
                       href={`#step-${s.step + 1}`}
-                      className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                      className="inline-flex min-h-[44px] items-center rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                     >
                       次のステップへ ↓
                     </a>
@@ -197,13 +197,13 @@ export default function QuickTourPage() {
         <div className="mt-4 flex flex-col items-center justify-center gap-2 sm:flex-row">
           <Link
             href="/features"
-            className="inline-flex items-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
+            className="inline-flex min-h-[44px] items-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
           >
             機能一覧で詳しく見る →
           </Link>
           <Link
             href="/contact"
-            className="inline-flex items-center rounded-lg border border-emerald-300 bg-white px-5 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50"
+            className="inline-flex min-h-[44px] items-center rounded-lg border border-emerald-300 bg-white px-5 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50"
           >
             導入相談を申し込む
           </Link>

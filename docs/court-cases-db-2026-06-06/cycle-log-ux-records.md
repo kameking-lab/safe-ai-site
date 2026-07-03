@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-07-03 バックアップ取り込みメッセージの色の文法違反＋44px未満3箇所を是正（柱0磨き・巡回発見）
+
+回収: 自ブランチPR #778（`/safety-diary`等44px9箇所）がCI緑と確認しsquashマージ。main pull後working tree clean。PR #785（S1第八弾・履歴サジェスト）はCI進行中のため次回収。
+
+着手: 上位3件(O15/S2/S3)は引き続きdataレーンO14未着手で全ブロック中のため、Exploreエージェントに当班所有route/componentの柱0再巡回を依頼（過去の44px/結論カード是正と重複しない新規のみを対象化）。**色の文法違反(重大)を新規発見**: `records-backup.tsx`のバックアップ取り込み結果メッセージが成功・失敗どちらも`text-emerald-700`固定で、取り込み失敗（不正なJSON選択）時にも緑の安全色が出て「今の状態」を誤読させる状態だった。不可侵の柱0-0（safety-tone.tsの色の文法）違反のため最優先で是正。副次的に44px未満のタップ標的3箇所（KY/打合せ用紙canvasの「行を追加」ホットスポット2種・AI提案「反映」ボタン・/ky/morning共有コード入力「表示」ボタン）も発見。
+
+実装: `records-backup.tsx`に`SAFETY_TONE`(custodian基盤・importのみ)を導入し`msgTone`stateで成功=safe/失敗=dangerを出し分け（判定ロジック無変更・表示色のみ）。`ky-print-sheet.tsx`・`meeting-print-sheet.tsx`(2箇所)の「行を追加」ホットスポットは`min-h-[36px]`のまま残っていたため`min-h-[44px]`に統一。`field-editor-sheet.tsx`のAI提案「反映」ボタン・`ky-morning-signage.tsx`の共有コード「表示」ボタンに`min-h-[44px]`を追加（いずれも足すだけ）。
+
+検証: `tsc --noEmit`=0 / `lint`=errors0（既存warn23件のみ）/ `vitest run`=301ファイル2568テスト全pass（ky-print-sheet/meeting-print-sheetのA4印刷スナップショット無変更を個別確認済み）/ `build`=成功。無読Playwright新規`docs/third-party-reviews/scripts/records-backup-color-grammar-44px-2026-07-03.mjs`をprod start(3100)で実行し6/6 PASS（不正JSON取り込みで赤系クラス確認・緑固定化していないことを確認・KY canvasの「＋危険行を追加」/AI提案「反映」/共有コード「表示」の3ボタン）。canvas内ボタンはPaperStageのtransform:scaleにより実測boundingBoxがズーム率で変動するため、CSSのmin-height計算値(`getComputedStyle`)で検証する方式を採用（boundingBoxでの検証は初回誤FAILとなり原因特定・修正）。working tree clean。
+
+残: O15/S2/S3は引き続きdataレーンO14依存でブロック。PR #785はCI待ちで次回収。
+
+---
 ## 2026-07-03 site-records/health-checkup-scheduler等の残存44px欠落14箇所＋色文法違反2箇所を是正（柱0磨き・巡回発見）
 
 回収: 自ブランチPR #785（打合せ用紙S1第八弾・履歴サジェスト）がCI緑（e2e/smoke/Vercel SUCCESS）と確認できたためsquashマージ→`main`をpull。未着手キュー(O15/S2/S3)は引き続きdataレーンO14未完了で全ブロック中のため、契約どおりExploreエージェントで柱0/柱3残存欠落を再巡回。過去の巡回（下部操作バー・行内リストボタン中心）が対象外だった「動的チェックリストの結果トグル」「モーダル/通知バーの閉じるボタン」「新規ファイル(health-checkup-scheduler/scheduler-form.tsx)の未対応」という3つの再発パターンで14箇所を発見・是正: `inspection-client.tsx`/`patrol-client.tsx`の良/不良/対象外トグル、`committee`/`patrol`/`procedure`/`qualifications`の行内ゴミ箱削除ボタン、`induction-client.tsx`「絞り込み解除」、`scheduler-form.tsx`（判定フォーム全ボタン・新規ファイルで未対応だった）、`missing-checkup-tracker.tsx`「入力した実施日をすべて消去」、`account/manage-plan-button.tsx`「プラン管理」＋エラー閉じるボタン、`ky/workers-master-client.tsx`「＋ 追加」、`ky-paper-view.tsx`「のこりN項目」（旧`min-h-[28px]`と44px未満が確定的だった）＋通知バー「×」2箇所、`meeting-paper-view.tsx`/`ky-list-client.tsx`の通知バー「×」に`min-h-[44px]`を追加（足すだけ・ロジック無変更）。副次発見の色文法違反2件も是正: `missing-checkup-tracker.tsx`のCHIP_CLASS/ROW_CLASS「期限超過」が兄弟ステータス（due-soon=amber・unrecorded=slate・ok=emerald）と異なり唯一`red-*`を直書き（`SAFETY_TONE.danger`のrose系と不一致）、`account/manage-plan-button.tsx`のエラーバナーも同型のred直書き。両方をrose系に統一（色相のみ変更・既存の濃淡パターンは維持）。/accountは開発環境でGoogle OAuth未設定のため未ログイン時はボタン非表示となりPlaywrightでは確認不可（既知の制約=/safety-diary/contribute等と同型、コードレビューで44px確認済み・スクリプト内でスキップと明記）。tsc=0・lint errors=0（既存warn23件のみ）・vitest 2580 pass・build成功。無読Playwright新規`docs/third-party-reviews/scripts/checkup-inspection-patrol-44px-color-2026-07-03.mjs`15/15合格。
