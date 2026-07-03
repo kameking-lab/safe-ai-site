@@ -307,7 +307,7 @@ export default function ShindouPage() {
               <a
                 href="/seminars/shindou.pptx"
                 download
-                className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-slate-800 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 min-h-[44px] text-sm font-bold text-white shadow-sm hover:bg-slate-800 transition-colors"
               >
                 <Download className="h-4 w-4" />
                 PPTXサンプルをダウンロード
@@ -378,14 +378,14 @@ export default function ShindouPage() {
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
             href="/contact?category=education&course=shindou"
-            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 min-h-[44px] text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"
           >
             <Mail className="h-4 w-4" />
             ご質問・改善提案を送る
           </Link>
           <Link
             href="/contact?category=education&course=shindou&type=document"
-            className="inline-flex items-center gap-2 rounded-lg border border-emerald-600 bg-white px-5 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg border border-emerald-600 bg-white px-5 py-2.5 min-h-[44px] text-sm font-bold text-emerald-700 hover:bg-emerald-50 transition-colors"
           >
             <FileText className="h-4 w-4" />
             教材についての質問
