@@ -4,6 +4,7 @@ import {
   countByCategory,
   buildSearchIndex,
   CATEGORY_META,
+  SEARCH_CATEGORIES,
   type SearchItem,
 } from './search-index';
 
@@ -106,6 +107,30 @@ describe('CATEGORY_META', () => {
       expect(CATEGORY_META[key].label).toBeTruthy();
       expect(CATEGORY_META[key].bgColor).toMatch(/^bg-/);
       expect(CATEGORY_META[key].textColor).toMatch(/^text-/);
+    }
+  });
+});
+
+describe('SEARCH_CATEGORIES — カテゴリタブ単一ソースのドリフト固定', () => {
+  // /search タブと ⌘K パレットが共有する表示順配列。CATEGORY_META（ラベル・配色の正本）と
+  // 集合が一致しなければ、どちらかのUIで新カテゴリのタブが欠落／幽霊タブが出る。
+  const metaKeys = Object.keys(CATEGORY_META).sort();
+
+  it('CATEGORY_META の全キーを過不足なく網羅する（両方向ドリフト検知）', () => {
+    const tabKeys = [...SEARCH_CATEGORIES].sort();
+    // メタに足したのにタブへ出し忘れ／タブにあるのにメタが無い、の両方を1つの等価で検知。
+    expect(tabKeys).toEqual(metaKeys);
+  });
+
+  it('重複カテゴリを含まない（同一タブの二重描画を防ぐ）', () => {
+    expect(new Set(SEARCH_CATEGORIES).size).toBe(SEARCH_CATEGORIES.length);
+  });
+
+  it('件数バッジ集計 countByCategory のキーと整合する（未集計カテゴリを防ぐ）', () => {
+    // 空クエリでも全カテゴリのキーが 0 で初期化されていること＝タブに出す全カテゴリが集計対象。
+    const counts = countByCategory([], '');
+    for (const cat of SEARCH_CATEGORIES) {
+      expect(counts[cat]).toBe(0);
     }
   });
 });

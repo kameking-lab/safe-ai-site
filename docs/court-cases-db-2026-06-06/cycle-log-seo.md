@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-07-03 — 横断検索カテゴリタブの単一ソース化（DRY・回帰／PR: seo/search-category-tabs-single-source）
+
+回収: 自班の CI 緑 PR を回収＝#670（保護具 横断検索）を squash マージ→`git checkout main && git pull --ff-only`→clean。#674（RSS フィード自動発見）は #670 マージで origin/main と CONFLICTING（BACKLOG/cycle-log の [x] 追記衝突2件のみ・コードは auto-merge）だったため当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決し push＝CI 再走を次イテレーションで回収。#680（notice-search 回帰テスト）は CI 実行中のため持ち越し。他班 OPEN PR は不可侵。
+
+着手判断: BACKLOG-seo 未着手キューは空（O17/T6・T7 は Path A 設計ドラフト=オーナー承認待ち）。補充候補にあった **横断検索カテゴリタブの単一ソース化**（着手条件=#670 マージ後＝対象3ファイルの in-flight 衝突回避）を、#670 マージ完了により着手。
+
+- **現状確認（実バグ＝ドリフト源）**: `/search` の `SearchResults.tsx` と ⌘K の `CommandPalette.tsx` が**同一の順序付き配列 `const CATEGORIES: SearchCategory[] = ['law','faq','precedent','notice','chemical','equipment','education','accident','glossary','sign']` をハンド重複**で保持。faq/sign/equipment 等の追補の度に両ファイルを手更新する必要があり、片方を忘れるとそのUIだけ新カテゴリのタブが欠落する（tsc も CATEGORIES 配列の欠落は検知しない＝アイコン switch のみ網羅検査される）。
+- **修正（自班所有のみ）**: `search-index.ts`（当班 owned）に表示順の単一ソース `export const SEARCH_CATEGORIES: readonly SearchCategory[]` を新設（CATEGORY_META の直後・JSDoc で SEARCH_CATEGORY_PRIORITY との別軸を明記）。両UIはこれを import し、ローカル `CATEGORIES` const を撤去＝`CATEGORIES.map`→`SEARCH_CATEGORIES.map`、URL の cat 検証 `(CATEGORIES as string[]).includes`→`(SEARCH_CATEGORIES as readonly string[]).includes`。アイコン switch（各UIの JSX 固有・className 差・tsc 網羅済）と表示ロジックは無改変＝二重管理だけを解消。
+- **テスト（両方向ドリフト検知）**: `search-index.test.ts` に describe「SEARCH_CATEGORIES — カテゴリタブ単一ソースのドリフト固定」3本追加＝(1)`[...SEARCH_CATEGORIES].sort()` == `Object.keys(CATEGORY_META).sort()`（メタに足してタブ出し忘れ／タブにあるのにメタ無しの**双方**を1つの等価で検知）(2)`new Set(SEARCH_CATEGORIES).size === length`（重複0＝同一タブ二重描画防止）(3)`countByCategory([], '')` の全 SEARCH_CATEGORIES キーが 0 初期化（未集計カテゴリ防止）。既存 CATEGORY_META テストは equipment を列挙漏れしていた（9型のみ）が、本 set 等価テストが全キーを網羅するため実質補強。
+- **ゲート**: `tsc --noEmit`=0 / `eslint`(4ファイル)=errors0（warn は SearchResults 既存の未使用 disable directive 1・当該行は無改変）/ `vitest run`=**全2314テスト緑**（新規3含む・搬入前 2311→2314）/ `build`=成功（NODE_OPTIONS=--max-old-space-size=6144）。build 再生成物（rag-metrics-latest.json・chatbot-eval-fresh-results.json・ky-print-sheet snapshot）は `git checkout` で復元。working tree は search-index.ts/test・SearchResults・CommandPalette の4ファイルのみで clean。
+- **要・他班なし**＝全て当班所有ファイル（search-index lib＋検索UI 2面）内で完結。
+
+残: 本 PR＋#674(再走)＋#680 の CI 緑回収＆マージ（次イテレーション 1)）。次の未着手は補充。
+
+---
+
 ## 2026-07-03 — 柱C-2 横断検索 notice-search.ts の回帰テスト新設（PR: seo/search-categories-single-source）
 
 回収: 前イテレーションの自班 CI 緑 PR #666（安全標識 横断検索）を squashマージ→`git checkout main && git pull --ff-only`→clean。#670（保護具 横断検索）は #666 マージで search-index.ts/SearchResults/CommandPalette/BACKLOG/cycle-log が衝突(DIRTY)→**origin/main を当該ブランチへ通常マージ**で解決＝`SearchCategory` union は equipment(HEAD)∪sign(main) の和集合に、CATEGORIES 配列・countByCategory・CategoryIcon も両方併存させ、BACKLOG/cycle-log の [x] 完了エントリは3本(保護具/標識/化学物質)を全て残す（force-push 不可を厳守）。tsc0・lint errors0・全2311テスト緑・build成功を確認して push＝CI 再走は次イテレーションで回収。#674(RSS)は CI pending のため持ち越し。他班 OPEN PR は不可侵。

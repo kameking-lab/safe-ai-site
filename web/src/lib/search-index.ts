@@ -55,6 +55,23 @@ export const CATEGORY_META: Record<
 };
 
 /**
+ * 横断検索UIが描画するカテゴリタブの表示順（単一ソース）。
+ *
+ * `/search`（結果ページのタブ）と ⌘K（コマンドパレットのフィルタ）は本配列を import して
+ * タブを生成する。かつては両UIが同一の配列をハンド重複で持ち、カテゴリ追加（faq/sign/equipment…）
+ * の度に両方を手で更新する必要があった＝片方を忘れるとそのUIだけ新カテゴリのタブが欠落する
+ * ドリフト源だったため、ここへ一本化した。
+ *
+ * 並びは現場の利用頻度・重要度で決めた表示順であり、同点スコアのタイブレーク順
+ * （{@link SEARCH_CATEGORY_PRIORITY}）とは別軸。**集合としては {@link CATEGORY_META} の全キーと
+ * 一致しなければならない**（回帰 search-index.test.ts で機械固定＝メタに足したのにタブへ出し
+ * 忘れる／タブにあるのにメタが無い、の両方向のドリフトを検知）。
+ */
+export const SEARCH_CATEGORIES: readonly SearchCategory[] = [
+  'law', 'faq', 'precedent', 'notice', 'chemical', 'equipment', 'education', 'accident', 'glossary', 'sign',
+];
+
+/**
  * インデックスをクエリで絞り込みスコア順に返す。
  *
  * マッチ規約は cross-search エンジン（{@link searchCrossIndex}）に一本化している:
