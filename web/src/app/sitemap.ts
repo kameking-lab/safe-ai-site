@@ -75,6 +75,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // /pdf の permanentRedirect 先だが本体URLは /ky/paper。孤立していたため収載する
     //（リダイレクト元 /pdf 自体は下記コメントの通り非収載）。
     { url: "/ky/paper", lastModified: "2026-05-25", priority: 0.75, changeFrequency: "monthly" },
+    // 作業員マスター（KY用紙の参加者を選ぶだけにする実在ツール・robots index:true・
+    // 自己canonical・PageJsonLd付）。/ky/paper と同じ KY全面再設計 Phase1-3（#285）で
+    // 追加されたが sitemap から漏れていた孤立ページ。lastmod は当該再設計の 2026-05-25。
+    { url: "/ky/workers", lastModified: "2026-05-25", priority: 0.7, changeFrequency: "monthly" },
     { url: "/risk", lastModified: "2026-04-19", priority: 0.8, changeFrequency: "daily" },
     { url: "/chatbot", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
     { url: "/law-search", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
