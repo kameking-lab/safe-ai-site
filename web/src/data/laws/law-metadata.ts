@@ -51,7 +51,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和47年労働省令第34号",
     latestRevision: "令和5年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/347M50002000034",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-03",
   },
   有機則: {
     fullName: "有機溶剤中毒予防規則",
