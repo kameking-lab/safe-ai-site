@@ -61,7 +61,7 @@ export function FavoriteButton({
         aria-pressed={favorited}
         aria-label={label}
         title={label}
-        className={`inline-flex h-7 w-7 items-center justify-center rounded-md border transition ${
+        className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-md border transition ${
           favorited
             ? "border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100"
             : "border-slate-200 bg-white text-slate-400 hover:border-amber-300 hover:text-amber-700"
@@ -82,7 +82,7 @@ export function FavoriteButton({
       onClick={handleToggle}
       aria-pressed={favorited}
       title={label}
-      className={`inline-flex items-center gap-1 rounded-lg border px-3 py-1 text-[11px] font-semibold transition ${
+      className={`inline-flex min-h-[44px] items-center gap-1 rounded-lg border px-3 py-1 text-[11px] font-semibold transition ${
         favorited
           ? "border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100"
           : "border-slate-200 bg-white text-slate-600 hover:border-amber-300 hover:bg-amber-50 hover:text-amber-700"

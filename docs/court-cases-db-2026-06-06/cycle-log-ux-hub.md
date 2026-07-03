@@ -1,5 +1,16 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-04 — 補充: FavoriteButton・CopyCitationButton（共有部品）の44px是正
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。共有部品`web/src/components/favorites/`配下のFavoriteButton・CopyCitationButtonをレビューし、compact variant(アイコンのみ`h-7 w-7`≈28px)・normal variant(アイコン+ラベル`px-3 py-1 text-[11px]`≈24〜28px)いずれも44px未満だった既存欠陥を発見。この2部品は`/accidents/[id]`（お気に入りnormal）・`/circulars`・`/law-search`（いずれもcompact、一覧行内）で使われる横断コンポーネント。
+
+**修正**: `favorite-button.tsx`・`copy-citation-button.tsx`の2ファイル、compact variantに`min-h-[44px] min-w-[44px]`、normal variantに`min-h-[44px]`を付与（純粋なクラス変更でレイアウト・ロジック不変）。
+
+**テスト**: `favorite-copy-citation-button-44px.test.ts`を新設（ソース走査でcompact/normal各variantブロックに`min-h`/`min-w`が付与されていることを確認）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 322 files（1 skipped）・2703 tests 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/favorite-copy-citation-button-44px-2026-07-04.mjs`（next start実機・Playwright・スマホ390×844）**5/5 PASS**（`/accidents/[id]` FavoriteButton normal=70.0×70.9px、`/circulars`のCopyCitationButton/FavoriteButton compact=44.0×44.0px、`/law-search`の同2部品=44.0×44.0px、いずれも実boundingBoxで44px以上を確認）。/accidents詳細への遷移はデフォルトタブが「全件検索」でサイト収録事例一覧は「list」タブ切替後にのみ動的マウントされる構造だったため、スクリプト側でタブクリック→要素可視待ち→scrollIntoViewIfNeeded→クリックの手順に修正して実測。
 ## 2026-07-04 — 補充: /quick「フルハーネス」ショートカットの誤配線是正（404どん詰まり解消）
 
 **イテレーション頭の回収**: 自班のオープンPR #852(court-cases-issue-color-consolidate)がe2e/smoke/full/Vercelいずれも緑・mergeStateStatus=CLEANのため squashマージ・リモートブランチ削除。`git checkout main && git pull --ff-only`でclean確認（PR #858(quicktour-safetysigns-44px)は本イテレーション時点でe2e/smoke実行中のため次回に回収）。
