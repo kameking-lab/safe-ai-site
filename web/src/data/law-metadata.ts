@@ -237,7 +237,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     lawShort: "女性則",
     fullName: "女性労働基準規則",
     issuer: "厚生労働省",
-    enactedOn: "昭和22年9月1日施行",
+    enactedOn: "昭和61年4月1日施行",
   },
   年少者則: {
     lawShort: "年少者則",
