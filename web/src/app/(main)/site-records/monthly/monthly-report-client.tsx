@@ -131,11 +131,11 @@ export function MonthlyReportClient() {
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2 print:hidden">
-          <button type="button" onClick={handlePrint} className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">
+          <button type="button" onClick={handlePrint} className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">
             <Printer className="h-4 w-4" aria-hidden="true" /> レポートを印刷／PDF
           </button>
           {report?.hasAny && (
-            <button type="button" onClick={handleToCommittee} className="inline-flex items-center gap-1 rounded-lg border border-indigo-300 bg-white px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-50">
+            <button type="button" onClick={handleToCommittee} className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-indigo-300 bg-white px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-50">
               <Users className="h-4 w-4" aria-hidden="true" /> この集計を委員会議事録に反映
             </button>
           )}

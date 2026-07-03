@@ -230,7 +230,7 @@ export function CourtCasesBrowser() {
             <button
               type="button"
               onClick={clearAll}
-              className="ml-2 font-semibold text-emerald-700 hover:underline dark:text-emerald-300"
+              className="ml-2 inline-flex min-h-[44px] items-center font-semibold text-emerald-700 hover:underline dark:text-emerald-300"
             >
               絞り込みを解除
             </button>

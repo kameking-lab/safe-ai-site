@@ -567,7 +567,7 @@ export function KyPaperView() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {(approval.status === "draft" || approval.status === "rejected") && (
-              <button type="button" onClick={handleSubmitApproval} className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-700">
+              <button type="button" onClick={handleSubmitApproval} className="min-h-[44px] rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-indigo-700">
                 元請に提出
               </button>
             )}
@@ -576,9 +576,9 @@ export function KyPaperView() {
                 <input value={approvalActor} onChange={(e) => setApprovalActor(e.target.value)} placeholder="確認者名" aria-label="確認者名" className="w-28 rounded border border-slate-300 px-2 py-1 text-xs" />
                 <input value={approvalComment} onChange={(e) => setApprovalComment(e.target.value)} placeholder="コメント(任意)" aria-label="コメント" className="w-40 rounded border border-slate-300 px-2 py-1 text-xs" />
                 {approval.status === "submitted" && (
-                  <button type="button" onClick={handleApprove} className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">承認</button>
+                  <button type="button" onClick={handleApprove} className="min-h-[44px] rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-700">承認</button>
                 )}
-                <button type="button" onClick={handleReject} className="rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50">差し戻し（編集可に）</button>
+                <button type="button" onClick={handleReject} className="min-h-[44px] rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50">差し戻し（編集可に）</button>
               </>
             )}
           </div>
@@ -612,8 +612,8 @@ export function KyPaperView() {
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm font-bold text-slate-800">印刷プレビュー（A4・確認印枠つき）</p>
           <div className="flex gap-2">
-            <button type="button" onClick={() => window.print()} className="rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-700">印刷 / PDF</button>
-            <button type="button" onClick={() => setShowPrintPreview(false)} className="rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">閉じる</button>
+            <button type="button" onClick={() => window.print()} className="min-h-[44px] rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-700">印刷 / PDF</button>
+            <button type="button" onClick={() => setShowPrintPreview(false)} className="min-h-[44px] rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">閉じる</button>
           </div>
         </div>
         <div className="overflow-x-auto rounded border border-slate-200 p-2">
@@ -1013,7 +1013,7 @@ export function KyPaperView() {
                       <option key={r.id} value={r.id}>{r.label}</option>
                     ))}
                   </select>
-                  <button type="button" onClick={handleWeather} disabled={weatherBusy} className="rounded border border-sky-300 bg-sky-50 px-2 py-1.5 text-xs font-bold text-sky-800 hover:bg-sky-100 disabled:opacity-50 print:hidden">
+                  <button type="button" onClick={handleWeather} disabled={weatherBusy} className="min-h-[44px] rounded border border-sky-300 bg-sky-50 px-2 py-1.5 text-xs font-bold text-sky-800 hover:bg-sky-100 disabled:opacity-50 print:hidden">
                     {weatherBusy ? "取得中…" : "自動取得"}
                   </button>
                   <input value={record.weather} onChange={(e) => patch({ weather: e.target.value })} placeholder="天気" className="w-16 rounded border border-slate-300 px-2 py-1.5 text-sm" />
@@ -1036,7 +1036,7 @@ export function KyPaperView() {
                   type="button"
                   onClick={() => void handleSuggest()}
                   disabled={suggestBusy}
-                  className="rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-800 hover:bg-indigo-100 disabled:opacity-50"
+                  className="min-h-[44px] rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-800 hover:bg-indigo-100 disabled:opacity-50"
                 >
                   {suggestBusy ? "AIが分析中…" : "🤖 AIに危険箇所を提案させる"}
                 </button>

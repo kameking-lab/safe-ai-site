@@ -1,6 +1,6 @@
 import { searchCrossIndex, normalizeArticleQuery, expandLawAliases } from './cross-search';
 
-export type SearchCategory = 'law' | 'notice' | 'chemical' | 'equipment' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq' | 'sign';
+export type SearchCategory = 'law' | 'notice' | 'chemical' | 'equipment' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq' | 'sign' | 'article' | 'feature';
 
 export interface SearchItem {
   id: string;
@@ -25,6 +25,9 @@ const SEARCH_CATEGORY_PRIORITY: readonly SearchCategory[] = [
   // FAQ は高意図の疑問（「衛生管理者は何人？」「SDS交付は義務？」）へ即答を返すため、
   // 同点時は判例・通達より上位に寄せる（条文・教育の次点）。
   'faq',
+  // 法改正記事（監修済みの解説コンテンツ）は法改正の背景・実装ガイドを平易にまとめる。
+  // 同点時は判例・通達より上位（FAQ の次点）に寄せ、条文・教育・FAQ には譲る。
+  'article',
   'precedent',
   'notice',
   'glossary',
@@ -33,6 +36,10 @@ const SEARCH_CATEGORY_PRIORITY: readonly SearchCategory[] = [
   'sign',
   'chemical',
   'accident',
+  // 機能・ツールの目的地ページ（サイネージ・KY・作業環境測定…）。機能名クエリでは
+  // タイトル一致のスコアで上位に来るが、コンテンツ系（条文・通達・判例…）の高意図クエリの
+  // 同点解決では権威を奪わないよう保護具の直上（下位ティア）に置く。
+  'feature',
   // 保護具は商品レコメンド（アフィリエイト）＝法令・通達・判例より権威が低いため、
   // 同点タイブレークでは最下位に置き、権威コンテンツの上位を決して奪わない。
   'equipment',
@@ -52,6 +59,8 @@ export const CATEGORY_META: Record<
   glossary:  { label: '用語',    bgColor: 'bg-indigo-100', textColor: 'text-indigo-700' },
   faq:       { label: 'FAQ',     bgColor: 'bg-sky-100',    textColor: 'text-sky-700' },
   sign:      { label: '標識',    bgColor: 'bg-amber-100',  textColor: 'text-amber-700' },
+  article:   { label: '記事',    bgColor: 'bg-violet-100', textColor: 'text-violet-700' },
+  feature:   { label: '機能',    bgColor: 'bg-slate-100',  textColor: 'text-slate-700' },
 };
 
 /**
@@ -68,7 +77,7 @@ export const CATEGORY_META: Record<
  * 忘れる／タブにあるのにメタが無い、の両方向のドリフトを検知）。
  */
 export const SEARCH_CATEGORIES: readonly SearchCategory[] = [
-  'law', 'faq', 'precedent', 'notice', 'chemical', 'equipment', 'education', 'accident', 'glossary', 'sign',
+  'law', 'faq', 'article', 'precedent', 'notice', 'feature', 'chemical', 'equipment', 'education', 'accident', 'glossary', 'sign',
 ];
 
 /**
@@ -111,7 +120,7 @@ export function countByCategory(
   query: string,
 ): Record<'all' | SearchCategory, number> {
   const counts: Record<'all' | SearchCategory, number> = {
-    all: 0, law: 0, notice: 0, chemical: 0, equipment: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0, sign: 0,
+    all: 0, law: 0, notice: 0, chemical: 0, equipment: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0, sign: 0, article: 0, feature: 0,
   };
   if (!query.trim()) return counts;
   // 上限なしで全件マッチを採り、カテゴリ別に集計する。
@@ -388,6 +397,47 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
             ...s.relatedLaws.flatMap((r) => (r.article ? [r.statute, r.article] : [r.statute])),
           ].filter(Boolean),
           url: `/safety-signs/sign/${s.id}`,
+        });
+      }
+    }),
+
+    // 法改正記事（src/data/articles/*.json＝監修済みの法改正・実装ガイド解説）。
+    // 正本 getPublishedArticleIndex は node:fs 依存でブラウザ非安全のため、client 検索は
+    // ブラウザ安全な射影源 `@/lib/articles-search-source` から引く（本文除外の軽量エントリ・
+    // drift ガードで実在ファイル集合と同期）。これまで法改正記事は /articles 一覧と
+    // sitemap-articles.xml に載っているのに横断検索(/search・⌘K)から 0 件だった発見性の穴
+    // （site-critique 01 S-1）を是正。url は /articles/<slug> 深リンク＝/articles/[slug] の
+    // generateStaticParams が公開済み slug 全件を解決するため必ず着地する（幽霊URL 0）。
+    // 時限公開（publishedAt が未来）の記事は実行時 now で除外する（正本と同セマンティクス）。
+    import('@/lib/articles-search-source').then(({ getPublishedArticleSearchEntries }) => {
+      for (const a of getPublishedArticleSearchEntries()) {
+        items.push({
+          id: `article-${a.slug}`,
+          title: a.title,
+          subtitle: a.description.slice(0, 90),
+          category: 'article',
+          // タグ・キーワードから引ける（例「熱中症 WBGT」「フルハーネス 墜落制止」）。
+          keywords: [...a.tags, ...a.keywords].filter(Boolean),
+          url: `/articles/${a.slug}`,
+        });
+      }
+    }),
+
+    // 機能・ツールの目的地ページ（FLAGSHIP_FEATURES 正本の射影）。これまで横断検索は
+    // コンテンツレコードのみ収載し、サイネージ・KY用紙・化学物質RA・作業環境測定・事故DB…
+    // の **機能ページそのもの** が 0 件ヒットだった（機能名を打っても目的地へ検索経由で
+    // 着けない発見性の穴）。⌘K の空クエリ用ショートカット4件とは別に、検索対象として収載する。
+    // url はベースパスで実在ルートへ解決（幽霊URL 0＝drift ガードで機械固定）。title=機能名で
+    // 打鍵一致を狙い、subtitle=カード見出し/配下説明で 2 語 AND を補助する。
+    import('@/lib/site-pages-search-source').then(({ getSitePageSearchEntries }) => {
+      for (const p of getSitePageSearchEntries()) {
+        items.push({
+          id: p.id,
+          title: p.title,
+          subtitle: p.subtitle.slice(0, 90),
+          category: 'feature',
+          keywords: p.keywords,
+          url: p.url,
         });
       }
     }),

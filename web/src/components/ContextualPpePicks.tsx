@@ -71,7 +71,7 @@ export function ContextualPpePicks({
         </div>
         <Link
           href="/equipment-finder"
-          className="shrink-0 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50"
+          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-50"
         >
           {isEn ? "AI finder →" : "AI診断 →"}
         </Link>
@@ -103,7 +103,7 @@ export function ContextualPpePicks({
                   href={item.amazonUrl}
                   target="_blank"
                   rel="noopener noreferrer sponsored"
-                  className="inline-flex items-center gap-1 rounded-md bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-amber-600"
+                  className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-amber-500 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-amber-600"
                 >
                   Amazon
                   <ExternalLink className="h-2.5 w-2.5" />
@@ -112,7 +112,7 @@ export function ContextualPpePicks({
                   href={item.rakutenUrl}
                   target="_blank"
                   rel="noopener noreferrer sponsored"
-                  className="inline-flex items-center gap-1 rounded-md bg-rose-500 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-600"
+                  className="inline-flex min-h-[44px] items-center gap-1 rounded-md bg-rose-500 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-600"
                 >
                   {isEn ? "Rakuten" : "楽天"}
                   <ExternalLink className="h-2.5 w-2.5" />

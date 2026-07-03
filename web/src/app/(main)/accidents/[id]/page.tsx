@@ -86,7 +86,10 @@ export default async function AccidentDetailPage({
       />
 
       <nav className="mb-5 flex items-center gap-1.5 text-xs text-slate-500">
-        <Link href="/accidents" className="flex items-center gap-1 hover:text-emerald-600 transition-colors">
+        <Link
+          href="/accidents"
+          className="inline-flex min-h-[44px] items-center gap-1 hover:text-emerald-600 transition-colors"
+        >
           <ChevronLeft className="h-3 w-3" />
           事故データベース
         </Link>
