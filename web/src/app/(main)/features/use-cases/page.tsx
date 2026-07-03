@@ -356,7 +356,7 @@ export default function UseCasesPage() {
             <a
               key={ind.slug}
               href={`#${ind.slug}`}
-              className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+              className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
               <span aria-hidden>{ind.emoji}</span>
               {ind.name}

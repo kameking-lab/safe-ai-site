@@ -11,4 +11,15 @@ describe("/features/use-cases 関連機能ピル（柱0 44px）", () => {
       expect(pill.className).toContain("min-h-[44px]");
     }
   });
+
+  it("業種ジャンプナビの各リンクが min-h-[44px] を持つ", () => {
+    const { container } = render(<UseCasesPage />);
+    const jumpNav = container.querySelector('nav[aria-label="業種ジャンプ"]');
+    expect(jumpNav).not.toBeNull();
+    const jumpLinks = jumpNav!.querySelectorAll('a[href^="#"]');
+    expect(jumpLinks.length).toBeGreaterThan(0);
+    for (const link of Array.from(jumpLinks)) {
+      expect(link.className).toContain("min-h-[44px]");
+    }
+  });
 });

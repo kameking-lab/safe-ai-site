@@ -1,5 +1,53 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: home-screen.tsx /accidents 主タブ切替 柱0(44px)
+
+**イテレーション頭の回収**: 自班の唯一のオープンPR #726(/court-cases ハブ最上部2リンク44px)はe2e/smokeが実行中(CI未緑)だったためマージ見送り、次イテレーションで回収。working treeはclean。
+
+**タスク源**: BACKLOG-ux-hub.md未着手0件のため補充。Explore調査で発見した「`home-screen.tsx`の/accidents主タブ切替(6ボタン)が44px未満・同ファイルは過去のタップ標的一斉是正から漏れていた」を採用。
+
+**修正**: `home-screen.tsx`のタブボタン(全件検索/死亡災害/業種別ランキング/MHLW実データ分析/サイト収録事例/詳細事例)className先頭に`inline-flex min-h-[44px] items-center`を付与(既存`accident-hub-nav.tsx`と同一パターン)。純粋なクラス追加でレイアウト・タブ切替ロジック不変。
+
+**テスト**: `home-screen.test.tsx`新設(vitest 1件)。HomeScreenは動的import/SWR依存が重くフルレンダーが困難なため、`page-json-ld.test.tsx`と同じソーステキスト検査方式でタブボタンのclassNameに`min-h-[44px]`/`inline-flex`/`items-center`を含むことを保証。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係） / vitest 288 files・2443 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/accidents-tab-44px-check.mjs`（next start実機・Playwright・スマホ390×844）**6/6 PASS**（全タブボタンboundingBox height=44px実測）。
+
+**残課題**: PR #726(court-cases 2リンク44px)のCI回収は次イテレーション。
+
+## 2026-07-03 — 補充: /features/use-cases 業種ジャンプナビ＋/accidents/[id] パンくずリンク 柱0(44px)
+
+**イテレーション頭の回収**: 自班の緑PR #734(/glossary 関連ページリンク＋/signage モーダル閉じるボタン44px化)をsquashマージ→`git checkout main && git pull --ff-only`でclean確認(CI e2e/smoke完了待ちで数分待機してから回収)。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手項目が0件だったため、Explore調査で担当route群の柱0未適用箇所を補充探索。既知の完了記録と重複しない新規候補として①`/features/use-cases`業種ジャンプナビ各ピル(`page.tsx:356-363`、`px-3 py-1.5 text-xs`≈28px)、②`/accidents/[id]`最上部パンくずの「事故データベース」リンク(`page.tsx:88-92`、パディング無し≈20px・下部の「事故DBに戻る →」は既に44px是正済みだったが上部パンくずは取り残されていた)を特定。ブランチ`ux-hub/use-cases-jump-nav-accident-breadcrumb-44px`（main起点）。
+
+**変更**: 両ファイルの対象要素に`min-h-[44px]`を付与。純粋なクラス追加でレイアウト・遷移先・ロジック不変。
+
+**テスト**: `features/use-cases/page.test.tsx`に1件追加(業種ジャンプナビ全リンクのclassName検証)。`accidents/[id]/page.test.tsx`に1件追加(パンくず「事故データベース」リンクのclassName検証、既存の「事故DBに戻る」テストと並列)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors / vitest 288 files・2469 tests 全pass(1 skipped) / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/use-cases-accident-breadcrumb-44px-2026-07-03.mjs` を **11/11 PASS**（next start実機・スマホ390×844・ジャンプナビ9ピル+パンくずリンク1件、全てheight≧44px）。
+
+**PR**: #739
+
+## 2026-07-03 — 補充: /glossary 関連ページリンク＋/signage モーダル閉じるボタン 柱0(44px)
+
+**イテレーション頭の回収**: 自班の緑PR #726(/court-cases ハブ最上部h1直下2リンク44px)をsquashマージ→`git checkout main && git pull --ff-only`でclean確認。PR #732(home-screen.tsx主タブ切替44px)はCI進行中のため次回に回収。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手項目が0件だったため、Explore調査で担当route群の柱0未適用箇所を補充探索。既知の完了記録と重複しない新規候補として①`/glossary`用語カードの「関連ページ」リンク(`page.tsx:272`、`px-2.5 py-0.5 text-xs`≈20px)、②`/signage`朝礼スクリプト・トレンドニュース拡大モーダルの「✕ 閉じる」ボタン(`page.tsx:839,871`、`px-3 py-1.5 text-xs`≈28px、2箇所とも同一クラス)を特定。ブランチ`ux-hub/glossary-signage-close-btn-44px`（main起点）。
+
+**変更**: 両ファイルの対象要素に`min-h-[44px]`を付与。純粋なクラス追加でレイアウト・遷移先・ロジック不変。
+
+**テスト**: `glossary/page.test.tsx`に1件追加(関連ページリンクのclassName検証、getAllByRoleで複数一致に対応)。`signage/page-refresh-config.test.ts`に1件追加(ソース走査で閉じるボタン2箇所とも`min-h-[44px]`を保証・page.tsxはfetch/state密結合でユニットテスト困難なため既存の定数ガードと同構え)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors / vitest 288 files・2458 tests 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/glossary-signage-close-btn-44px-2026-07-03.mjs` を **2/2 PASS**（next start実機・関連ページリンク height=44.0px／モーダル閉じるボタン height=44.0px）。
+
+**PR**: #734
+
 ## 2026-07-03 — 補充: トップ home-three-pillars.tsx 3柱・主CTA 柱0(44px)
 
 **イテレーション頭の回収**: 自班の緑PR #705(/industries/[industry] 副リンク6箇所＋キーワードピル44px)がmainとコンフリクト(BACKLOG-ux-hub.md同時追記)していたため、ブランチへ`origin/main`を通常マージしBACKLOG-ux-hub.mdの重複記載を解消→ゲート再実行→squashマージ→`git checkout main && git pull --ff-only`でclean確認。
