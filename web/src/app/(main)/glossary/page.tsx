@@ -269,7 +269,7 @@ export default function GlossaryPage() {
                         <Link
                           key={p.href}
                           href={p.href}
-                          className="inline-flex items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-xs text-indigo-700 hover:bg-indigo-100 transition"
+                          className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-xs text-indigo-700 hover:bg-indigo-100 transition"
                         >
                           <ExternalLink className="h-3 w-3" />
                           {p.label}

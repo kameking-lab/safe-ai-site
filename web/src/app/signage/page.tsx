@@ -836,7 +836,7 @@ export default function SignagePage() {
             <button
               type="button"
               onClick={() => setShowMorningScript(false)}
-              className="absolute right-3 top-3 rounded-full border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-slate-700"
+              className="absolute right-3 top-3 flex min-h-[44px] items-center rounded-full border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-slate-700"
               aria-label="閉じる"
             >
               ✕ 閉じる
@@ -868,7 +868,7 @@ export default function SignagePage() {
             <button
               type="button"
               onClick={() => setZoomedTrendIndex(null)}
-              className="absolute right-3 top-3 rounded-full border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-slate-700"
+              className="absolute right-3 top-3 flex min-h-[44px] items-center rounded-full border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-slate-700"
               aria-label="閉じる"
             >
               ✕ 閉じる

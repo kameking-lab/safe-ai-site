@@ -39,4 +39,12 @@ describe("サイネージ /signage の鮮度・自動復旧の定数", () => {
     expect(SOURCE).toMatch(/<SignageRotator[\s\S]*?items=\{trendItems\}/);
     expect(SOURCE).toMatch(/<SignageRotator[\s\S]*?items=\{topLaws\}/);
   });
+
+  it("朝礼スクリプト・トレンド拡大モーダルの「✕ 閉じる」ボタンが44pxタップ標的を満たす", () => {
+    const closeButtonBlocks = [...SOURCE.matchAll(/<button[\s\S]{0,400}?✕ 閉じる/g)];
+    expect(closeButtonBlocks.length).toBeGreaterThanOrEqual(2);
+    for (const block of closeButtonBlocks) {
+      expect(block[0]).toMatch(/min-h-\[44px\]/);
+    }
+  });
 });

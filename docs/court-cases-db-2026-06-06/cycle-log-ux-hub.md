@@ -1,5 +1,21 @@
 # cycle-log — ハブ・サイネージ・トップ班（ux-hub）
 
+## 2026-07-03 — 補充: /glossary 関連ページリンク＋/signage モーダル閉じるボタン 柱0(44px)
+
+**イテレーション頭の回収**: 自班の緑PR #726(/court-cases ハブ最上部h1直下2リンク44px)をsquashマージ→`git checkout main && git pull --ff-only`でclean確認。PR #732(home-screen.tsx主タブ切替44px)はCI進行中のため次回に回収。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手項目が0件だったため、Explore調査で担当route群の柱0未適用箇所を補充探索。既知の完了記録と重複しない新規候補として①`/glossary`用語カードの「関連ページ」リンク(`page.tsx:272`、`px-2.5 py-0.5 text-xs`≈20px)、②`/signage`朝礼スクリプト・トレンドニュース拡大モーダルの「✕ 閉じる」ボタン(`page.tsx:839,871`、`px-3 py-1.5 text-xs`≈28px、2箇所とも同一クラス)を特定。ブランチ`ux-hub/glossary-signage-close-btn-44px`（main起点）。
+
+**変更**: 両ファイルの対象要素に`min-h-[44px]`を付与。純粋なクラス追加でレイアウト・遷移先・ロジック不変。
+
+**テスト**: `glossary/page.test.tsx`に1件追加(関連ページリンクのclassName検証、getAllByRoleで複数一致に対応)。`signage/page-refresh-config.test.ts`に1件追加(ソース走査で閉じるボタン2箇所とも`min-h-[44px]`を保証・page.tsxはfetch/state密結合でユニットテスト困難なため既存の定数ガードと同構え)。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors / vitest 288 files・2458 tests 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/glossary-signage-close-btn-44px-2026-07-03.mjs` を **2/2 PASS**（next start実機・関連ページリンク height=44.0px／モーダル閉じるボタン height=44.0px）。
+
+**PR**: #734
+
 ## 2026-07-03 — 補充: トップ home-three-pillars.tsx 3柱・主CTA 柱0(44px)
 
 **イテレーション頭の回収**: 自班の緑PR #705(/industries/[industry] 副リンク6箇所＋キーワードピル44px)がmainとコンフリクト(BACKLOG-ux-hub.md同時追記)していたため、ブランチへ`origin/main`を通常マージしBACKLOG-ux-hub.mdの重複記載を解消→ゲート再実行→squashマージ→`git checkout main && git pull --ff-only`でclean確認。
