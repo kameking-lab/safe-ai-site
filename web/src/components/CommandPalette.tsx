@@ -19,6 +19,7 @@ import {
   MessageSquare,
   ListChecks,
   BarChart3,
+  ExternalLink,
 } from 'lucide-react';
 import {
   buildSearchIndex,
@@ -28,6 +29,7 @@ import {
   type SearchItem,
   type SearchCategory,
 } from '@/lib/search-index';
+import { EGOV_LAW_SEARCH_URL } from '@/lib/cross-search';
 import { trackEvent } from '@/components/Analytics';
 
 // 空クエリ時に表示する主要ショートカット（UX-007: モバイル検索とPC Ctrl+K の機能を統一）
@@ -268,8 +270,28 @@ export function CommandPalette({ onClose }: Props) {
               </p>
             </div>
           ) : results.length === 0 ? (
-            <div className="py-10 text-center text-slate-400 text-sm">
-              「{debouncedQuery}」の結果が見つかりませんでした
+            <div className="px-4 py-8 text-center">
+              <p className="text-sm font-medium text-slate-700">
+                「{debouncedQuery}」の結果が見つかりませんでした
+              </p>
+              <p className="mt-1.5 text-xs text-slate-500">
+                表記を変える（カタカナ／漢字）、語を短くしてお試しください。
+              </p>
+              {/* 収録範囲の明示：0件を「規定がない」と誤読させない安全ガード（/search の NoResults と同一方針）。 */}
+              <p className="mx-auto mt-3 max-w-md rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-left text-xs leading-relaxed text-amber-900">
+                <span className="font-semibold">見つからない＝「規定がない」ではありません。</span>
+                本サイトは主要法令の条文（抄録）・通達・判例などを収載しており、未収載の条文もあります。条文の有無・原文は政府公式の e-Gov 法令検索でご確認ください。
+              </p>
+              <a
+                href={EGOV_LAW_SEARCH_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent('search_zero_result_egov', { query: debouncedQuery })}
+                className="mt-3 inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                e-Gov法令検索で調べる
+              </a>
             </div>
           ) : (
             results.map((item, i) => {
