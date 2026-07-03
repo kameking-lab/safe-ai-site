@@ -1,6 +1,7 @@
 {
   "$comment": "Self-run loop configuration (single source of truth for ignition). Extend the run by editing untilIso on ONE line - the Task Scheduler is never re-registered. loop-launcher.ps1 reads this at every logon and every day at 07:00. Mutable runtime state (lastCriticIso) lives in the gitignored loop-state.json, NOT here, so the ops lane's clean-tree contract is never broken. See docs/fable-diagnosis-2026-07-02/O16-implementation-notes.md.",
-  "untilIso": "2026-07-31T23:00:00",
+  "untilIso": "2026-07-04T00:00:00+09:00",
+  "$pauseNote": "PAUSED 2026-07-04 (使用枠を他プロジェクトへ一時振替のため常設6レーン停止)。untilIso を過去時刻へ倒したので、logon/07:00 にスケジューラが launcher を起動しても『期限切れ→レーン非起動→loop-status.md に停止バナー』を書くだけで何も動かない(O16設計どおり)。タスクスケジューラ登録は温存=自動復活は再武装済み。再開は untilIso を将来時刻(例: 2026-08-31T23:00:00)へ1行戻すだけ(logon/毎朝07:00の自動起動を待つか、`powershell -ExecutionPolicy Bypass -File .\\loop-launcher.ps1` を手動実行)。",
   "runnerFloorIso": "2026-07-03T13:43:09+09:00",
   "$runnerFloorNote": "Version-floor marker: a persistent lane runner whose PROCESS started before this instant is executing loop-runner.ps1 code from BEFORE the self-update/heartbeat fixes (#672 heartbeat 13:30, #675 hot-swap self-update 13:43, both 2026-07-03 JST). Such a live-but-ancient runner can NEVER hot-swap itself (it lacks the self-update code) and is invisible to the watchdog (which only revives DEAD lanes), so it runs stale forever. The launcher cooperatively cycles below-floor runners ONLY when idle (zero child processes = between iterations = clean tree), so no in-flight Claude turn is ever broken. Bump this ONLY when a runner-code change must be force-deployed to already-running lanes; leave empty to disable cycling.",
   "lanesRoot": "..\\safe-ai-lanes",
