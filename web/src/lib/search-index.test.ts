@@ -328,6 +328,16 @@ describe('buildSearchIndex — 機能ページ（feature）の収載', () => {
     // 2 語 AND も subtitle（カード見出し/配下説明）で補助して機能へ収束する
     expect(searchItems(index, '事故 分析', 'feature').length).toBeGreaterThan(0);
   });
+
+  it('補充: FLAGSHIP 外の助成金ハブが「助成金」「補助金」で着地する（0 件だった穴の是正）', async () => {
+    const index = await buildSearchIndex();
+    expect(searchItems(index, '助成金', 'feature').some((i) => i.url === '/subsidies')).toBe(true);
+    expect(searchItems(index, '補助金', 'feature').some((i) => i.url === '/subsidies')).toBe(true);
+    // 試算ツールも支給額シミュレーションの語で着地する
+    expect(
+      searchItems(index, '助成金 試算', 'feature').some((i) => i.url === '/subsidies/calculator'),
+    ).toBe(true);
+  });
 });
 
 describe('buildSearchIndex — 治療と仕事の両立支援 病態別ガイド（feature）の収載', () => {

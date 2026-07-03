@@ -51,14 +51,14 @@ function formatJaMonth(iso: string): string {
 }
 
 const CHIP_CLASS: Record<CheckupTimingStatus, string> = {
-  overdue: "bg-red-100 text-red-800 border-red-300",
+  overdue: "bg-rose-100 text-rose-800 border-rose-300",
   "due-soon": "bg-amber-100 text-amber-800 border-amber-300",
   unrecorded: "bg-slate-100 text-slate-600 border-slate-300",
   ok: "bg-emerald-100 text-emerald-800 border-emerald-300",
 };
 
 const ROW_CLASS: Record<CheckupTimingStatus, string> = {
-  overdue: "border-red-300 bg-red-50",
+  overdue: "border-rose-300 bg-rose-50",
   "due-soon": "border-amber-300 bg-amber-50",
   unrecorded: "border-slate-200 bg-white",
   ok: "border-emerald-200 bg-emerald-50",
@@ -122,7 +122,7 @@ export function MissingCheckupTracker({ entries, storageKey }: Props) {
     <div className="mt-3">
       <p className="text-sm text-slate-600">
         各健診の「前回実施日」を入れると、法定間隔に対して
-        <span className="font-semibold text-red-700">期限超過</span>・
+        <span className="font-semibold text-rose-700">期限超過</span>・
         <span className="font-semibold text-amber-700">期限間近</span>・
         <span className="font-semibold text-emerald-700">適正</span>
         を自動で色分けします。入力はこの端末にのみ保存され、次回開いたときも残ります（個人の健康情報は入力しないでください）。
@@ -186,7 +186,7 @@ export function MissingCheckupTracker({ entries, storageKey }: Props) {
                     前回実施日を入力すると次回期限を判定します。
                   </span>
                 ) : timing.status === "overdue" ? (
-                  <span className="font-semibold text-red-800">
+                  <span className="font-semibold text-rose-800">
                     法定期限（{timing.nextDueDate ? formatJaMonth(timing.nextDueDate) : "—"}）を
                     {timing.monthsUntilDue !== null ? `${Math.abs(timing.monthsUntilDue)}か月` : ""}
                     超過。速やかに実施してください。
@@ -221,7 +221,7 @@ export function MissingCheckupTracker({ entries, storageKey }: Props) {
           <button
             type="button"
             onClick={clearAll}
-            className="rounded border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:border-slate-400 hover:bg-slate-50"
+            className="min-h-[44px] rounded border border-slate-300 px-3 py-1.5 text-xs text-slate-600 hover:border-slate-400 hover:bg-slate-50"
           >
             入力した実施日をすべて消去
           </button>

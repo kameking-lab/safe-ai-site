@@ -165,7 +165,7 @@ export function ProcedureClient() {
                   <textarea value={s.hazard} onChange={(e) => updateStep(s.id, { hazard: e.target.value })} rows={2} placeholder="危険・急所" className="rounded-md border border-rose-200 bg-rose-50/40 px-2 py-1.5 text-sm" />
                   <textarea value={s.measure} onChange={(e) => updateStep(s.id, { measure: e.target.value })} rows={2} placeholder="対策" className="rounded-md border border-emerald-200 bg-emerald-50/40 px-2 py-1.5 text-sm" />
                 </div>
-                <button type="button" onClick={() => removeStep(s.id)} className="mt-1 shrink-0 rounded p-1 text-rose-500 hover:bg-rose-50 print:hidden" aria-label={`手順${idx + 1}を削除`}>
+                <button type="button" onClick={() => removeStep(s.id)} className="mt-1 flex min-h-[44px] shrink-0 items-center rounded p-1 text-rose-500 hover:bg-rose-50 print:hidden" aria-label={`手順${idx + 1}を削除`}>
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>

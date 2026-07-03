@@ -192,7 +192,7 @@ export function WorkersMasterClient() {
             type="button"
             onClick={handleAdd}
             disabled={!draftName.trim()}
-            className="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700 disabled:opacity-40"
+            className="min-h-[44px] rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700 disabled:opacity-40"
           >
             ＋ 追加
           </button>

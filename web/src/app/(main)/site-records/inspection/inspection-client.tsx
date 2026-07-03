@@ -183,7 +183,7 @@ export function InspectionClient() {
                     key={r}
                     type="button"
                     onClick={() => setResult(it.key, r)}
-                    className={`rounded-md border px-2.5 py-1 text-xs font-bold transition ${
+                    className={`min-h-[44px] rounded-md border px-2.5 py-1 text-xs font-bold transition ${
                       it.result === r
                         ? r === "ok"
                           ? "border-emerald-500 bg-emerald-600 text-white"

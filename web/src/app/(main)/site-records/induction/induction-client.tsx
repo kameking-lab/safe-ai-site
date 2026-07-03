@@ -359,7 +359,7 @@ export function InductionClient() {
                 <button
                   type="button"
                   onClick={() => { setRosterSite(""); setRosterMonth(""); }}
-                  className="text-xs font-semibold text-slate-500 underline hover:text-slate-700"
+                  className="min-h-[44px] text-xs font-semibold text-slate-500 underline hover:text-slate-700"
                 >
                   絞り込み解除
                 </button>

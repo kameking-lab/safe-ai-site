@@ -31,17 +31,17 @@ export function ManagePlanButton() {
         onClick={open}
         disabled={loading}
         aria-busy={loading}
-        className="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="min-h-[44px] rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? "Stripeへ移動中..." : "プラン管理"}
       </button>
       {error && (
-        <div className="mt-2 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2">
-          <p className="flex-1 text-xs leading-5 text-red-700">{error}</p>
+        <div className="mt-2 flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2">
+          <p className="flex-1 text-xs leading-5 text-rose-700">{error}</p>
           <button
             type="button"
             onClick={() => setError(null)}
-            className="text-red-400 hover:text-red-600"
+            className="flex min-h-[44px] items-center text-rose-400 hover:text-rose-600"
             aria-label="エラーを閉じる"
           >
             ✕
