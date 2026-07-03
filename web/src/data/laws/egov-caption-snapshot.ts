@@ -4689,6 +4689,9 @@ export const OFFICIAL_CAPTIONS_RODO_KIJUN_SOKO: Record<string, string> = {
   // 以下は内容誤割当の再発防止のための近接条ラベル（旧コーパスが誤って参照していた条の実際の内容）
   "第24条の2の2": "専門業務型裁量労働制",
   "第35条": "業務上の疾病（法第75条第2項・別表第一の二）",
+};
+
+/**
  * 女性労働基準規則（昭和61年労働省令第3号）本則全4条の公式 ArticleCaption。
  * 出典: e-Gov 法令検索 API v2 law_data/361M50002000003
  *   （rev: 361M50002000003_20190507_501M60000100001 / 2026-07-04 生JSONの MainProvision を機械walk抽出）。
