@@ -166,7 +166,7 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     promulgation: "昭和44年法律第64号",
     latestRevision: "令和4年改正",
     eGovUrl: "https://laws.e-gov.go.jp/law/344AC0000000064",
-    auditedAt: "2026-05-17",
+    auditedAt: "2026-07-04",
   },
   ゴンドラ則: {
     fullName: "ゴンドラ安全規則",
