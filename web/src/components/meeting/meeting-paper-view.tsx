@@ -349,7 +349,7 @@ export function MeetingPaperView() {
         {notice && (
           <div className="mx-auto mt-2 flex max-w-5xl items-start justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-2.5 print:hidden">
             <p className="text-sm font-semibold text-emerald-900">{notice}</p>
-            <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="rounded px-1.5 text-emerald-700 hover:bg-emerald-100">×</button>
+            <button type="button" onClick={() => setNotice(null)} aria-label="閉じる" className="flex min-h-[44px] items-center rounded px-1.5 text-emerald-700 hover:bg-emerald-100">×</button>
           </div>
         )}
 
