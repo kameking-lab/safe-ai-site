@@ -32,7 +32,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { PaperStage, type PaperStageHandle } from "@/components/ky-paper/paper-stage";
 import { MeetingFieldEditorSheet } from "@/components/meeting/meeting-field-editor-sheet";
-import { emptyMeetingPaperFieldKeys, firstEmptyMeetingPaperFieldKey, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
+import { contractorFieldKey, emptyMeetingPaperFieldKeys, firstEmptyMeetingPaperFieldKey, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
 
 const ZOOM_MIN = 0.6;
 const ZOOM_MAX = 1.6;
@@ -73,8 +73,10 @@ export function MeetingPaperView() {
   const [history, setHistory] = useState<MeetingHistory | null>(null);
   // 「前回を複製」を上部にも出すための判定（端末に保存済みの打合せ書があるときだけ）。
   const [hasLatest, setHasLatest] = useState(false);
-  // S1（打合せ用紙 直接操作UI・第一弾）: 用紙キャンバス（β）。KYのF1と同じ方式で
-  // 既定はオフ（?canvas=1 または「🗺 キャンバス(β)」ボタンで切替）。第一弾はヘッダー7欄のみ対応。
+  // S1（打合せ用紙 直接操作UI・第一弾〜第三弾）: 用紙キャンバス（β）。KYのF1と同じ方式で
+  // 既定はオフ（?canvas=1 または「🗺 キャンバス(β)」ボタンで切替）。ヘッダー7欄・明日のイベント5欄・
+  // 統括安全責任者コメント・各社マトリクス7部位（会社名/階層・作業内容・使用機械・リスク・
+  // 安全衛生指示事項・協力会社責任者・実績人員）に対応。
   const [canvasMode, setCanvasMode] = useState(false);
   const [activeFieldKey, setActiveFieldKey] = useState<MeetingPaperFieldKey | null>(null);
   const stageRef = useRef<PaperStageHandle>(null);
@@ -159,6 +161,14 @@ export function MeetingPaperView() {
   const removeContractor = (id: string) =>
     setRecord((r) => ({ ...r, contractors: r.contractors.filter((c) => c.id !== id && c.parentId !== id) }));
 
+  // S1（第三弾）: 用紙キャンバスβの「＋元請/1次/2次/3次」ホットスポット。追加した行の
+  // 会社名・階層欄をそのまま開く（危険行追加(O10)と同じ「そのまま開く」作法）。
+  const handleAddContractorRow = useCallback((type: ContractorType) => {
+    const newRow = emptyContractorRow(type, null);
+    setRecord((prev) => ({ ...prev, contractors: [...prev.contractors, newRow] }));
+    setActiveFieldKey(contractorFieldKey(newRow.id, "company"));
+  }, []);
+
   const machines = useMemo(() => aggregateMachines(record.contractors), [record.contractors]);
   const hidden = useMemo(() => hiddenIds(record.contractors, collapsed), [record.contractors, collapsed]);
   // 柱0: いまの状態を1メッセージに（記入のこりN＝青 / 記入完了・未保存＝青 / 保存済み＝緑）。
@@ -172,7 +182,7 @@ export function MeetingPaperView() {
     () => computeMeetingPaperStatus(record, { saved: isSaved }),
     [record, isSaved]
   );
-  // S1（第一弾）: 用紙キャンバスβ用。未記入のヘッダー欄集合とzoom-to-cell。
+  // S1: 用紙キャンバスβ用。未記入欄集合とzoom-to-cell。
   const emptyPaperFieldKeys = useMemo(() => emptyMeetingPaperFieldKeys(record), [record]);
   const firstEmptyFieldKey = useMemo(() => firstEmptyMeetingPaperFieldKey(record), [record]);
   const handleZoomToNextEmpty = useCallback(() => {
@@ -274,9 +284,9 @@ export function MeetingPaperView() {
     }
   };
 
-  // S1（打合せ用紙 直接操作UI・第一弾）: 用紙キャンバス（β）。全hooks評価後の分岐＝
+  // S1（打合せ用紙 直接操作UI）: 用紙キャンバス（β）。全hooks評価後の分岐＝
   // クラシックUIと状態を完全共有する（record/自動保存/保存判定がそのまま効く）。
-  // KYのF1と同じく既定はオフ。第一弾はヘッダー7欄のみ対応、各社マトリクス等は後続弾で拡張。
+  // KYのF1と同じく既定はオフ。搬入出・点検項目・必要資格/予定人員/予想災害は後続弾で拡張。
   if (canvasMode) {
     const remaining = emptyPaperFieldKeys.size;
     return (
@@ -331,12 +341,13 @@ export function MeetingPaperView() {
                 onTapField: (key) => setActiveFieldKey(key),
                 activeKey: activeFieldKey,
                 emptyKeys: emptyPaperFieldKeys,
+                onAddContractorRow: handleAddContractorRow,
               }}
             />
           </div>
         </PaperStage>
 
-        {/* 欄タップで開く入力エディタ（第一弾: ヘッダー7欄） */}
+        {/* 欄タップで開く入力エディタ */}
         {activeFieldKey && (
           <MeetingFieldEditorSheet
             fieldKey={activeFieldKey}
@@ -384,11 +395,11 @@ export function MeetingPaperView() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          {/* S1（第一弾）: ヘッダー欄をタップ入力できる新しい表示（β）への入口。既定はまだクラシック表示。 */}
+          {/* S1: タップ入力できる新しい表示（β）への入口。既定はまだクラシック表示。 */}
           <button
             type="button"
             onClick={() => toggleCanvasMode(true)}
-            title="用紙全体を1画面で見ながら、タップした欄をその場で入力できる新しい表示を試す（β・ヘッダー欄のみ対応）"
+            title="用紙全体を1画面で見ながら、タップした欄をその場で入力できる新しい表示を試す（β）"
             className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
           >
             🗺 キャンバス(β)

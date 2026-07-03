@@ -1,15 +1,24 @@
 "use client";
 
 /**
- * S1（打合せ用紙 直接操作UI・第一弾）: 欄タップで開く入力エディタ。
+ * S1（打合せ用紙 直接操作UI・第一弾〜第三弾）: 欄タップで開く入力エディタ。
  * KYの FieldEditorSheet と同型（欄タップ＝タップ標的／入力は専用UIで行う／
- * 「次の欄へ」で紙の記入順を辿る／入力フォントは16px以上）。第一弾はヘッダー7欄のみ対応。
+ * 「次の欄へ」で紙の記入順を辿る／入力フォントは16px以上）。
+ * 第三弾で各社マトリクス7部位のうち会社名/階層・作業内容・使用機械・リスク（重大性/可能性）・
+ * 安全衛生指示事項・協力会社責任者・実績人員を追加（必要資格/予定人員/予想災害はタグ/固定
+ * プルダウン専用UIが要るため後続弾）。
  */
 
 import { useEffect, useRef } from "react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
-import { MEETING_WEATHER_OPTIONS, type MeetingRecord } from "@/lib/meeting/schema";
-import { getMeetingPaperFieldDef, nextMeetingPaperFieldKey, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
+import { CONTRACTOR_TYPES, MEETING_WEATHER_OPTIONS, PRIORITY_LABEL, type ContractorType, type MeetingRecord } from "@/lib/meeting/schema";
+import {
+  getMeetingPaperFieldDef,
+  nextMeetingPaperFieldKey,
+  setContractorCompanyField,
+  setContractorRiskField,
+  type MeetingPaperFieldKey,
+} from "@/lib/meeting/paper-fields";
 import { MONTH_OPTIONS, dayOptions, yearOptions } from "@/lib/ky/pulldown-options";
 
 export type MeetingFieldEditorSheetProps = {
@@ -25,8 +34,9 @@ const selectCls = "min-h-[44px] rounded-lg border border-slate-300 bg-white px-2
 
 export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSelectField }: MeetingFieldEditorSheetProps) {
   const def = getMeetingPaperFieldDef(fieldKey);
-  const next = nextMeetingPaperFieldKey(fieldKey);
+  const next = nextMeetingPaperFieldKey(fieldKey, record);
   const sheetRef = useRef<HTMLDivElement | null>(null);
+  const contractorRow = def.contractorId ? record.contractors.find((c) => c.id === def.contractorId) : undefined;
 
   // 開いたら最初の入力へフォーカス（キーボード/音声にすぐ入れる）。
   useEffect(() => {
@@ -158,6 +168,64 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
               className="min-h-[44px] w-28 rounded-lg border border-slate-300 px-2 text-base"
             />
             <span className="text-sm">℃</span>
+          </div>
+        )}
+
+        {def.type === "contractorCompany" && contractorRow && (
+          <div className="space-y-2">
+            <label className="flex items-center gap-1.5 text-sm text-slate-700">
+              階層
+              <select
+                aria-label="階層"
+                value={contractorRow.type}
+                onChange={(e) => patch(setContractorCompanyField(record, contractorRow.id, { type: e.target.value as ContractorType }))}
+                className={selectCls}
+              >
+                {CONTRACTOR_TYPES.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </label>
+            <InputWithVoice
+              value={contractorRow.companyName}
+              onChange={(e) => patch(setContractorCompanyField(record, contractorRow.id, { companyName: e.target.value }))}
+              placeholder="業者名"
+              className="min-h-[44px] text-base"
+            />
+          </div>
+        )}
+
+        {def.type === "contractorRisk" && contractorRow && (
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-1.5 text-sm text-slate-700">
+              重大性
+              <select
+                aria-label="重大性"
+                value={String(contractorRow.risk.severity)}
+                onChange={(e) => patch(setContractorRiskField(record, contractorRow.id, "severity", Number(e.target.value)))}
+                className={selectCls}
+              >
+                {[1, 2, 3].map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </label>
+            <span className="text-slate-400">×</span>
+            <label className="flex items-center gap-1.5 text-sm text-slate-700">
+              可能性
+              <select
+                aria-label="可能性"
+                value={String(contractorRow.risk.likelihood)}
+                onChange={(e) => patch(setContractorRiskField(record, contractorRow.id, "likelihood", Number(e.target.value)))}
+                className={selectCls}
+              >
+                {[1, 2, 3].map((n) => (
+                  <option key={n} value={n}>{n}</option>
+                ))}
+              </select>
+            </label>
+            <span className="text-slate-400">→</span>
+            <span className="rounded bg-slate-200 px-2 py-1 text-sm font-bold text-slate-700">{PRIORITY_LABEL[contractorRow.risk.priority]}</span>
           </div>
         )}
 

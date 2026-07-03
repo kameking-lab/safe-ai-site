@@ -3,13 +3,14 @@
  * 画面では非表示（hidden）、印刷時のみ表示（paper-view が hidden print:block で包む）。
  * 各社マトリクスを正式な表組みで再現。点検項目・使用機械・確認欄を含む。
  *
- * S1（打合せ用紙 直接操作UI・第一弾）: KYと同じ方式で省略可能な `editing` prop を追加。
- * 指定時のみヘッダー7欄がタップ標的（EditableCell）になる。**`editing` 未指定の出力HTMLは
- * 従来と完全一致**（meeting-print-sheet.test.tsx のスナップショットで機械的に固定＝A4正式書式は不可侵）。
+ * S1（打合せ用紙 直接操作UI・第一弾〜第三弾）: KYと同じ方式で省略可能な `editing` prop を追加。
+ * 指定時のみヘッダー7欄・明日のイベント5欄・統括安全責任者コメント・各社マトリクス7部位が
+ * タップ標的（EditableCell）になる。**`editing` 未指定の出力HTMLは従来と完全一致**
+ * （meeting-print-sheet.test.tsx のスナップショットで機械的に固定＝A4正式書式は不可侵）。
  */
 import type { ReactNode } from "react";
-import { PRIORITY_LABEL, type MeetingRecord, type ContractorType } from "@/lib/meeting/schema";
-import { getMeetingPaperFieldDef, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
+import { CONTRACTOR_TYPES, PRIORITY_LABEL, type MeetingRecord, type ContractorType } from "@/lib/meeting/schema";
+import { contractorFieldKey, getMeetingPaperFieldDef, type MeetingPaperFieldKey } from "@/lib/meeting/paper-fields";
 
 const th = "border border-black bg-slate-100 px-1 py-0.5 text-center align-middle font-bold";
 const td = "border border-black px-1 py-0.5 align-top";
@@ -23,6 +24,8 @@ export type MeetingPrintSheetEditing = {
   activeKey?: MeetingPaperFieldKey | null;
   /** 未記入の欄（うっすらアンバー＋点線表示） */
   emptyKeys?: ReadonlySet<string>;
+  /** 各社マトリクスの行追加ホットスポット（S1第三弾: 動的行）。省略時は「＋元請/1次/2次/3次」を出さない。 */
+  onAddContractorRow?: (type: ContractorType) => void;
 };
 
 /**
@@ -138,23 +141,58 @@ export function MeetingPrintSheet({ record, editing }: { record: MeetingRecord; 
             <tr key={c.id}>
               <td className={td}>
                 <span style={{ paddingLeft: TYPE_PAD[c.type] }} className="inline-block">
-                  <span className="mr-1 rounded bg-slate-200 px-1 text-[6.5pt]">{c.type}</span>
-                  {c.companyName}
+                  <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "company")}>
+                    <span className="mr-1 rounded bg-slate-200 px-1 text-[6.5pt]">{c.type}</span>
+                    {c.companyName}
+                  </EditableCell>
                 </span>
               </td>
-              <td className={`${td} whitespace-pre-wrap`}>{c.workContent}</td>
-              <td className={td}>{c.machines}</td>
+              <td className={`${td} whitespace-pre-wrap`}>
+                <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "workContent")}>{c.workContent}</EditableCell>
+              </td>
+              <td className={td}>
+                <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "machines")}>{c.machines}</EditableCell>
+              </td>
               <td className={td}>{c.qualifications.join("、")}</td>
               <td className={`${td} text-center`}>{c.plannedCount}</td>
               <td className={td}>{c.predictedDisasters.join("、")}</td>
-              <td className={`${td} text-center`}>{c.risk.severity}</td>
-              <td className={`${td} text-center`}>{c.risk.likelihood}</td>
+              <td className={`${td} text-center`}>
+                <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "risk")}>{c.risk.severity}</EditableCell>
+              </td>
+              <td className={`${td} text-center`}>
+                <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "risk")}>{c.risk.likelihood}</EditableCell>
+              </td>
               <td className={`${td} text-center`}>{PRIORITY_LABEL[c.risk.priority]}</td>
-              <td className={`${td} whitespace-pre-wrap`}>{c.safetyInstructions}</td>
-              <td className={td}>{c.responsibleName}</td>
-              <td className={`${td} text-center`}>{c.actualCount}</td>
+              <td className={`${td} whitespace-pre-wrap`}>
+                <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "safetyInstructions")}>{c.safetyInstructions}</EditableCell>
+              </td>
+              <td className={td}>
+                <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "responsibleName")}>{c.responsibleName}</EditableCell>
+              </td>
+              <td className={`${td} text-center`}>
+                <EditableCell editing={editing} fieldKey={contractorFieldKey(c.id, "actualCount")}>{c.actualCount}</EditableCell>
+              </td>
             </tr>
           ))}
+          {editing?.onAddContractorRow && (
+            <tr>
+              <td colSpan={12} className={`${td} text-center`}>
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  {CONTRACTOR_TYPES.map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      data-zoompan-skip="1"
+                      onClick={() => editing.onAddContractorRow!(t)}
+                      className="min-h-[36px] rounded border border-dashed border-sky-400 bg-sky-50/70 px-3 py-1 text-xs font-bold text-sky-800 hover:bg-sky-100"
+                    >
+                      ＋{t}
+                    </button>
+                  ))}
+                </div>
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
 

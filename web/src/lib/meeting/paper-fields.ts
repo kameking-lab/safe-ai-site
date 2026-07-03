@@ -5,11 +5,21 @@
  * 「印刷シートのセル＝タップ標的、入力は専用エディタ」でWYSIWYGを成立させる核心のデータ。
  * 第一弾はヘッダー7欄（打合せ日・作業日・天気気温・作業所名・作業所長・主任等・作成担当者）。
  * 第二弾で明日のイベント5欄＋統括安全責任者コメントを追加（記入順チェーンの続き）。
- * 各社マトリクス（動的・階層行）・搬入出・点検項目は後続弾で拡張する。
+ * 第三弾で各社マトリクス（インデックスではなくidキー "contractor.<id>.<part>"。KYの危険行と違い
+ * 行の並び替え・階層(元請/1次/2次/3次)・削除を持つため、位置ではなくidで欄を特定する）を追加。
+ * 対象はcompany(階層＋業者名)/workContent/machines/risk(重大性・可能性)/safetyInstructions/
+ * responsibleName/actualCount の7部位。qualifications・plannedCount・predictedDisasters・
+ * appendNote（タグ選択/固定プルダウン専用UIが要る・appendNoteは印刷シート非掲載）は後続弾で拡張する。
+ * 搬入出・点検項目は未着手。
  */
-import type { MeetingRecord } from "@/lib/meeting/schema";
+import {
+  computePriority,
+  type ContractorType,
+  type MeetingContractorRow,
+  type MeetingRecord,
+} from "@/lib/meeting/schema";
 
-/** 現時点の欄（紙の記入順＝タイトル行→ヘッダー表→下段左ブロック）。 */
+/** 現時点の静的な欄（紙の記入順＝タイトル行→ヘッダー表→下段左ブロック）。各社マトリクスは動的（後述）。 */
 export const MEETING_PAPER_FIELD_ORDER = [
   "meetingDate",
   "workDate",
@@ -26,28 +36,54 @@ export const MEETING_PAPER_FIELD_ORDER = [
   "supervisorComment",
 ] as const;
 
-export type MeetingPaperFieldKey = (typeof MEETING_PAPER_FIELD_ORDER)[number];
+export type MeetingPaperStaticFieldKey = (typeof MEETING_PAPER_FIELD_ORDER)[number];
+
+/** 各社マトリクス1行分の7部位（id始まりのキー。行の追加・削除・並び替えに追従する）。 */
+export type MeetingContractorFieldPart =
+  | "company"
+  | "workContent"
+  | "machines"
+  | "risk"
+  | "safetyInstructions"
+  | "responsibleName"
+  | "actualCount";
+
+export const CONTRACTOR_FIELD_PARTS: readonly MeetingContractorFieldPart[] = [
+  "company",
+  "workContent",
+  "machines",
+  "risk",
+  "safetyInstructions",
+  "responsibleName",
+  "actualCount",
+];
+
+export type MeetingContractorFieldKey = `contractor.${string}.${MeetingContractorFieldPart}`;
+
+export type MeetingPaperFieldKey = MeetingPaperStaticFieldKey | MeetingContractorFieldKey;
 
 export type MeetingPaperFieldDef = {
   key: MeetingPaperFieldKey;
   /** エディタ見出し（紙の欄名と一致させる） */
   label: string;
   /** エディタの出し分け */
-  type: "text" | "textarea" | "date" | "date3" | "weatherTemp";
+  type: "text" | "textarea" | "date" | "date3" | "weatherTemp" | "contractorCompany" | "contractorRisk";
   /** InputWithVoice/TextareaWithVoice を使うか（音声入力） */
   voice?: boolean;
   placeholder?: string;
-  /** 現在値の取得（type="text"|"textarea"|"date" のみ使用。date3/weatherTemp は専用UIで直接 record を読む） */
+  /** 現在値の取得（type="text"|"textarea"|"date" のみ使用。他は専用UIで直接 record を読む） */
   get?: (r: MeetingRecord) => string;
   /** イミュータブル更新（type="text"|"textarea"|"date" のみ使用） */
   set?: (r: MeetingRecord, v: string) => Partial<MeetingRecord>;
   /** 未記入判定（未記入セルのハイライトに使用） */
   isEmpty: (r: MeetingRecord) => boolean;
-  /** 記入順の次フィールド（エディタの「次の欄へ」送り） */
+  /** type="contractorCompany"|"contractorRisk" のときの対象行id */
+  contractorId?: string;
+  /** 記入順の次フィールド（エディタの「次の欄へ」送り）。静的欄のみ。各社マトリクスは nextMeetingPaperFieldKey で解決。 */
   next?: MeetingPaperFieldKey;
 };
 
-export const MEETING_PAPER_FIELDS: Record<MeetingPaperFieldKey, MeetingPaperFieldDef> = {
+export const MEETING_PAPER_FIELDS: Record<MeetingPaperStaticFieldKey, MeetingPaperFieldDef> = {
   meetingDate: {
     key: "meetingDate",
     label: "打合せ日（前日）",
@@ -113,6 +149,7 @@ export const MEETING_PAPER_FIELDS: Record<MeetingPaperFieldKey, MeetingPaperFiel
     get: (r) => r.author,
     set: (r, v) => ({ author: v }),
     isEmpty: (r) => r.author.trim() === "",
+    // 各社マトリクス（動的行）へ渡す。行が1件も無い場合のみここ(safetyMeeting)へ直接続く（nextMeetingPaperFieldKeyで分岐）。
     next: "safetyMeeting",
   },
   safetyMeeting: {
@@ -182,33 +219,200 @@ export const MEETING_PAPER_FIELDS: Record<MeetingPaperFieldKey, MeetingPaperFiel
   },
 };
 
+const CONTRACTOR_FIELD_KEY_RE = /^contractor\.([^.]+)\.(company|workContent|machines|risk|safetyInstructions|responsibleName|actualCount)$/;
+
+/** 各社マトリクスの欄キー組み立て（行id指定）。 */
+export function contractorFieldKey(id: string, part: MeetingContractorFieldPart): MeetingContractorFieldKey {
+  return `contractor.${id}.${part}`;
+}
+
+/** 各社マトリクスの欄キー分解。静的欄キーや不正な文字列には null を返す。 */
+export function parseContractorFieldKey(key: string): { id: string; part: MeetingContractorFieldPart } | null {
+  const m = CONTRACTOR_FIELD_KEY_RE.exec(key);
+  if (!m) return null;
+  return { id: m[1]!, part: m[2] as MeetingContractorFieldPart };
+}
+
 export function isMeetingPaperFieldKey(key: string): key is MeetingPaperFieldKey {
-  return (MEETING_PAPER_FIELD_ORDER as readonly string[]).includes(key);
+  if ((MEETING_PAPER_FIELD_ORDER as readonly string[]).includes(key)) return true;
+  return parseContractorFieldKey(key) !== null;
 }
 
-/** フィールド定義の解決（唯一の窓口。危険行のような動的欄が増えたら拡張する）。 */
+function findContractor(r: MeetingRecord, id: string): MeetingContractorRow | undefined {
+  return r.contractors.find((c) => c.id === id);
+}
+
+type ContractorTextPart = "workContent" | "machines" | "safetyInstructions" | "responsibleName" | "actualCount";
+
+function contractorTextGet(id: string, field: ContractorTextPart) {
+  return (r: MeetingRecord): string => findContractor(r, id)?.[field] ?? "";
+}
+
+function contractorTextSet(id: string, field: ContractorTextPart) {
+  return (r: MeetingRecord, v: string): Partial<MeetingRecord> => ({
+    contractors: r.contractors.map((c) => (c.id === id ? { ...c, [field]: v } : c)),
+  });
+}
+
+/** 各社マトリクス1行分のフィールド定義（7部位）を組み立てる。 */
+function buildContractorFieldDef(id: string, part: MeetingContractorFieldPart): MeetingPaperFieldDef {
+  const key = contractorFieldKey(id, part);
+  switch (part) {
+    case "company":
+      return {
+        key,
+        label: "業者名・階層",
+        type: "contractorCompany",
+        contractorId: id,
+        isEmpty: (r) => (findContractor(r, id)?.companyName ?? "").trim() === "",
+      };
+    case "workContent":
+      return {
+        key,
+        label: "作業内容",
+        type: "textarea",
+        voice: true,
+        placeholder: "例: 3F鉄骨建方、ボルト本締め",
+        get: contractorTextGet(id, "workContent"),
+        set: contractorTextSet(id, "workContent"),
+        isEmpty: (r) => (findContractor(r, id)?.workContent ?? "").trim() === "",
+      };
+    case "machines":
+      return {
+        key,
+        label: "使用機械",
+        type: "text",
+        voice: true,
+        placeholder: "例: バックホウ、ダンプ",
+        get: contractorTextGet(id, "machines"),
+        set: contractorTextSet(id, "machines"),
+        isEmpty: (r) => (findContractor(r, id)?.machines ?? "").trim() === "",
+      };
+    case "risk":
+      return {
+        key,
+        label: "リスク（重大性・可能性）",
+        type: "contractorRisk",
+        contractorId: id,
+        // 重大性・可能性は既定値(1)を必ず持ち「未記入」概念が無いためハイライト対象外（KYのriskEvalと同じ扱い）
+        isEmpty: () => false,
+      };
+    case "safetyInstructions":
+      return {
+        key,
+        label: "安全衛生指示事項",
+        type: "textarea",
+        voice: true,
+        placeholder: "指示内容",
+        get: contractorTextGet(id, "safetyInstructions"),
+        set: contractorTextSet(id, "safetyInstructions"),
+        isEmpty: (r) => (findContractor(r, id)?.safetyInstructions ?? "").trim() === "",
+      };
+    case "responsibleName":
+      return {
+        key,
+        label: "協力会社責任者",
+        type: "text",
+        voice: true,
+        placeholder: "氏名",
+        get: contractorTextGet(id, "responsibleName"),
+        set: contractorTextSet(id, "responsibleName"),
+        isEmpty: (r) => (findContractor(r, id)?.responsibleName ?? "").trim() === "",
+      };
+    case "actualCount":
+      return {
+        key,
+        label: "実績人員（当日）",
+        type: "text",
+        placeholder: "人数",
+        get: contractorTextGet(id, "actualCount"),
+        set: contractorTextSet(id, "actualCount"),
+        isEmpty: (r) => (findContractor(r, id)?.actualCount ?? "").trim() === "",
+      };
+  }
+}
+
+/** フィールド定義の解決（静的欄・各社マトリクスの両方に対応する唯一の窓口）。 */
 export function getMeetingPaperFieldDef(key: MeetingPaperFieldKey): MeetingPaperFieldDef {
-  return MEETING_PAPER_FIELDS[key];
+  const c = parseContractorFieldKey(key);
+  if (c) return buildContractorFieldDef(c.id, c.part);
+  return MEETING_PAPER_FIELDS[key as MeetingPaperStaticFieldKey];
 }
 
-/** 記入順の「次の欄」を返す（エディタの「次の欄へ」送り用）。 */
-export function nextMeetingPaperFieldKey(key: MeetingPaperFieldKey): MeetingPaperFieldKey | undefined {
-  return MEETING_PAPER_FIELDS[key].next;
+/**
+ * 記入順の「次の欄」を返す（エディタの「次の欄へ」送り用）。各社マトリクスは record.contractors の
+ * 並び順に追従するため、作成担当者(author)の次は1行目のcompany欄へ、最終行の最終部位の次は
+ * 安全大会(safetyMeeting)へ折り返す。行が1件も無い場合は author→safetyMeeting に直接続く。
+ */
+export function nextMeetingPaperFieldKey(key: MeetingPaperFieldKey, record: MeetingRecord): MeetingPaperFieldKey | undefined {
+  const c = parseContractorFieldKey(key);
+  if (!c) {
+    const staticDef = MEETING_PAPER_FIELDS[key as MeetingPaperStaticFieldKey];
+    if (key === "author" && record.contractors.length > 0) {
+      return contractorFieldKey(record.contractors[0]!.id, CONTRACTOR_FIELD_PARTS[0]!);
+    }
+    return staticDef.next;
+  }
+  const partIndex = CONTRACTOR_FIELD_PARTS.indexOf(c.part);
+  if (partIndex < CONTRACTOR_FIELD_PARTS.length - 1) {
+    return contractorFieldKey(c.id, CONTRACTOR_FIELD_PARTS[partIndex + 1]!);
+  }
+  const rowIndex = record.contractors.findIndex((row) => row.id === c.id);
+  const nextRow = rowIndex >= 0 ? record.contractors[rowIndex + 1] : undefined;
+  return nextRow ? contractorFieldKey(nextRow.id, CONTRACTOR_FIELD_PARTS[0]!) : "safetyMeeting";
 }
 
-/** 記入順（紙の上から下）で最初の未記入欄を返す（zoom-to-cell用）。 */
+/** 記入順（紙の上から下、各社マトリクスの動的挿入込み）で最初の未記入欄を返す（zoom-to-cell用）。 */
 export function firstEmptyMeetingPaperFieldKey(record: MeetingRecord): MeetingPaperFieldKey | undefined {
-  for (const key of MEETING_PAPER_FIELD_ORDER) {
-    if (MEETING_PAPER_FIELDS[key].isEmpty(record)) return key;
+  let key: MeetingPaperFieldKey | undefined = MEETING_PAPER_FIELD_ORDER[0];
+  const seen = new Set<string>();
+  while (key && !seen.has(key)) {
+    if (getMeetingPaperFieldDef(key).isEmpty(record)) return key;
+    seen.add(key);
+    key = nextMeetingPaperFieldKey(key, record);
   }
   return undefined;
 }
 
-/** 未記入の欄キー集合（EditableCell のハイライトに渡す）。 */
+/** 未記入の欄キー集合（EditableCell のハイライトに渡す）。各社マトリクスは現在の行数ぶんを含む。 */
 export function emptyMeetingPaperFieldKeys(record: MeetingRecord): Set<string> {
   const out = new Set<string>();
   for (const key of MEETING_PAPER_FIELD_ORDER) {
     if (MEETING_PAPER_FIELDS[key].isEmpty(record)) out.add(key);
   }
+  for (const c of record.contractors) {
+    for (const part of CONTRACTOR_FIELD_PARTS) {
+      const fieldKey = contractorFieldKey(c.id, part);
+      if (getMeetingPaperFieldDef(fieldKey).isEmpty(record)) out.add(fieldKey);
+    }
+  }
   return out;
+}
+
+/** リスク欄の重大性/可能性を更新し優先度を自動再計算する（エディタ・キャンバス共通で使う純粋関数）。 */
+export function setContractorRiskField(
+  record: MeetingRecord,
+  id: string,
+  field: "severity" | "likelihood",
+  value: number
+): Partial<MeetingRecord> {
+  return {
+    contractors: record.contractors.map((c) => {
+      if (c.id !== id) return c;
+      const risk = { ...c.risk, [field]: value };
+      risk.priority = computePriority(risk.severity, risk.likelihood);
+      return { ...c, risk };
+    }),
+  };
+}
+
+/** 業者名・階層(type)を更新する（エディタ・キャンバス共通で使う純粋関数）。 */
+export function setContractorCompanyField(
+  record: MeetingRecord,
+  id: string,
+  patch: { type?: ContractorType; companyName?: string }
+): Partial<MeetingRecord> {
+  return {
+    contractors: record.contractors.map((c) => (c.id === id ? { ...c, ...patch } : c)),
+  };
 }

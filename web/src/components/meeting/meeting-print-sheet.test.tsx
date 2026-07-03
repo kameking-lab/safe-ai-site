@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { MeetingPrintSheet } from "@/components/meeting/meeting-print-sheet";
 import { normalizeMeetingRecord } from "@/lib/meeting/schema";
-import { emptyMeetingPaperFieldKeys } from "@/lib/meeting/paper-fields";
+import { contractorFieldKey, emptyMeetingPaperFieldKeys } from "@/lib/meeting/paper-fields";
 
 describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
   const rec = normalizeMeetingRecord({
@@ -38,11 +38,12 @@ describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
     expect(container.innerHTML).toMatchSnapshot();
   });
 
-  it("editing 指定でヘッダー7欄＋明日のイベント5欄＋統括安全責任者コメントがタップ標的になり、タップでキーが飛ぶ", () => {
+  it("editing 指定でヘッダー7欄＋明日のイベント5欄＋統括安全責任者コメント＋各社マトリクス7部位がタップ標的になり、タップでキーが飛ぶ", () => {
     const onTapField = vi.fn();
     render(<MeetingPrintSheet record={rec} editing={{ onTapField }} />);
     const cells = screen.getAllByRole("button");
-    expect(cells).toHaveLength(13);
+    // 静的13欄 + 各社1行ぶん8タップ標的（company/workContent/machines/risk×2セル/safetyInstructions/responsibleName/actualCount）
+    expect(cells).toHaveLength(21);
     fireEvent.click(screen.getByRole("button", { name: "打合せ日（前日）を入力" }));
     expect(onTapField).toHaveBeenCalledWith("meetingDate");
     fireEvent.click(screen.getByRole("button", { name: "作業日を入力" }));
@@ -69,6 +70,41 @@ describe("MeetingPrintSheet (A4横印刷レイアウト)", () => {
     expect(onTapField).toHaveBeenCalledWith("free");
     fireEvent.click(screen.getByRole("button", { name: "統括安全責任者コメントを入力" }));
     expect(onTapField).toHaveBeenCalledWith("supervisorComment");
+    fireEvent.click(screen.getByRole("button", { name: "業者名・階層を入力" }));
+    expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "company"));
+    fireEvent.click(screen.getByRole("button", { name: "作業内容を入力" }));
+    expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "workContent"));
+    fireEvent.click(screen.getByRole("button", { name: "使用機械を入力" }));
+    expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "machines"));
+    // リスク欄は重大性/可能性の2セルが同一キーのタップ標的（KYのriskEvalと同型）
+    for (const cell of screen.getAllByRole("button", { name: "リスク（重大性・可能性）を入力" })) {
+      fireEvent.click(cell);
+      expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "risk"));
+    }
+    fireEvent.click(screen.getByRole("button", { name: "安全衛生指示事項を入力" }));
+    expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "safetyInstructions"));
+    fireEvent.click(screen.getByRole("button", { name: "協力会社責任者を入力" }));
+    expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "responsibleName"));
+    fireEvent.click(screen.getByRole("button", { name: "実績人員（当日）を入力" }));
+    expect(onTapField).toHaveBeenCalledWith(contractorFieldKey("c1", "actualCount"));
+  });
+
+  it("onAddContractorRow 指定時のみ「＋元請/1次/2次/3次」ホットスポットが出て、タップで型が渡る", () => {
+    const onTapField = vi.fn();
+    const onAddContractorRow = vi.fn();
+    render(<MeetingPrintSheet record={rec} editing={{ onTapField, onAddContractorRow }} />);
+    for (const t of ["元請", "1次", "2次", "3次"] as const) {
+      fireEvent.click(screen.getByRole("button", { name: `＋${t}` }));
+    }
+    expect(onAddContractorRow).toHaveBeenNthCalledWith(1, "元請");
+    expect(onAddContractorRow).toHaveBeenNthCalledWith(2, "1次");
+    expect(onAddContractorRow).toHaveBeenNthCalledWith(3, "2次");
+    expect(onAddContractorRow).toHaveBeenNthCalledWith(4, "3次");
+  });
+
+  it("onAddContractorRow 未指定では「＋元請」等のホットスポットが出ない", () => {
+    render(<MeetingPrintSheet record={rec} editing={{ onTapField: () => {} }} />);
+    expect(screen.queryByRole("button", { name: "＋元請" })).toBeNull();
   });
 
   it("キーボード（Enter/Space）でも欄を開ける（a11y）", () => {
