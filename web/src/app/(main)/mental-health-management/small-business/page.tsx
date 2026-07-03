@@ -10,6 +10,7 @@ import {
 import { PageContainer } from "@/components/layout";
 import { PageHeader } from "@/components/page-header";
 import { PageJsonLd } from "@/components/page-json-ld";
+import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { ogImageUrl } from "@/lib/og-url";
 import {
   SMALL_BUSINESS_ALTERNATIVES,
@@ -70,6 +71,16 @@ export default function SmallBusinessPage() {
         description="さんぽセンターを活用した9ステップ・約12ヶ月の低コスト実施ロードマップ"
         icon={Building2}
         iconColor="amber"
+      />
+
+      <ConclusionCard
+        tone="warning"
+        value={SMALL_BUSINESS_STEPS.length}
+        unit="ステップ"
+        title="努力義務"
+        description="50人未満事業場は安衛法上の努力義務。さんぽセンターの無料支援を使えば低コストで実施できます。"
+        action={{ href: "#roadmap", label: "実施ロードマップへ" }}
+        className="mt-6"
       />
 
       <section className="mt-6 rounded-2xl border border-amber-200 bg-amber-50/60 p-5">

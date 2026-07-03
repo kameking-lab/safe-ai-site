@@ -13,6 +13,8 @@ import {
   Scale,
   BookMarked,
   BookText,
+  HelpCircle,
+  Signpost,
   ArrowRight,
   ExternalLink,
   Copy,
@@ -29,7 +31,7 @@ import {
 import { EGOV_LAW_SEARCH_URL, egovHandoffQuery } from '@/lib/cross-search';
 import { trackEvent } from '@/components/Analytics';
 
-const CATEGORIES: SearchCategory[] = ['law', 'precedent', 'notice', 'chemical', 'education', 'accident', 'glossary'];
+const CATEGORIES: SearchCategory[] = ['law', 'faq', 'precedent', 'notice', 'chemical', 'education', 'accident', 'glossary', 'sign'];
 
 // /search はサイト内検索結果ページ（全件表示）。コマンドパレット(⌘K)が上位10件の
 // クイック移動なのに対し、こちらは件数無制限・URL共有可能・カテゴリ別タブを備える。
@@ -45,6 +47,8 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
     case 'accident':  return <AlertTriangle className={cls} aria-hidden="true" />;
     case 'precedent': return <Scale className={cls} aria-hidden="true" />;
     case 'glossary':  return <BookMarked className={cls} aria-hidden="true" />;
+    case 'faq':       return <HelpCircle className={cls} aria-hidden="true" />;
+    case 'sign':      return <Signpost className={cls} aria-hidden="true" />;
   }
 }
 

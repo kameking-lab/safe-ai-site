@@ -414,3 +414,41 @@
 **無読テスト**: `next start`実機で `/accidents` に「🏠 › 事故データベース」パンくずDOM出力、`/diversity/women` に「🏠 › 多様性と安全 › 女性向け PPE・妊産婦就業ガイド」パンくずDOM出力（旧「多様性と安全に戻る」テキストは消滅）をcurlで確認。
 
 **残課題**: なし（本タスクの範囲は完了）。次イテレーションはBACKLOG-ux-hub.md補充分から継続。(2026-07-03 / ux-hub/accidents-diversity-visible-breadcrumb)
+
+---
+
+## 2026-07-03 ux-hub/quick-wbgt-shortcut-fix
+
+**イテレーション頭の回収**: 自班の緑PR #650(S12・設計ドラフト)をsquashマージ。直後にPR #646(S10)がmainとdocコンフリクト(BACKLOG-ux-hub.md・cycle-log-ux-hub.mdの単純追記競合のみ・コード非衝突)になったため `git merge origin/main` で両エントリ共存の手動解決→ゲート緑（`web/src/app/signage/map/page.test.ts` がmainの型定義更新後の`tsc`で`metadata.twitter?.card`型不整合を検出したため`Record<string, unknown>`castへ追補修正）→push（PR #646はCI再走中のため今回はマージせず次イテレーションで回収）。`git checkout main && git pull --ff-only` でclean確認。
+
+**タスク源**: BACKLOG-ux-hub.md 未着手はS10のみで、これは既にPR #646として着手済み（重複回避）。補充指針（自領域routeの柱0未適用箇所・404どん詰まり解消）に従い、Explore委任で /quick 含む複数routeを実地調査。
+
+**発見した既存欠陥**: `/quick`（朝礼クイックアクセスハブ）の「熱中症WBGT」ショートカット（`QuickLauncher.tsx`）が `/education`（特別教育の一般カタログ・WBGT計算機なし）へ誤配線されており、隣の「フルハーネス」ショートカットと同一hrefだった。一人親方が朝礼3分で「今日のWBGTを見る」つもりでタップしても、実際のWBGT計算機・業種別リスク判定ハブ(`/heat-illness-prevention`、既存で稼働中)には到達できない行き止まりだった（測定可能な404どん詰まり相当の欠陥）。
+
+**修正**: `QuickLauncher.tsx` の該当hrefを `/education` → `/heat-illness-prevention` へ1行修正。他のショートカット・ヒーローボタンのhref/レイアウトは不変。
+
+**テスト**: `QuickLauncher.test.tsx` を新設（2ケース）。①「熱中症WBGT」リンクのhrefが`/heat-illness-prevention`であることを回帰ガード、②ショートカット/ヒーローボタン全リンクのhrefに重複がないことを保証（同種の誤配線の再発防止）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係）/ vitest 263 files・2226 tests 全pass / build 成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/quick-wbgt-shortcut-noread-2026-07-03.mjs`（build+start実機・Playwright・スマホ390×844）**3/3 PASS**。①ショートカットのhrefが`/heat-illness-prevention`、②実際にタップした遷移先が`/heat-illness-prevention`、③遷移先にWBGT計算機ハブの見出しが実在（行き止まりでないことを実地確認）。
+
+**残課題**: PR #646(S10)のCI回収。/quickは今回の1件以外は44px達成済み（ヒーローボタンmin-h-[140px]・ショートカットタイル共に余裕あり）。home-three-pillars.tsx のAlertGenerator送信ボタン(py-1 text-[11px]≈21-24px)・safety-signs親ハブの「関連機能」プレーンテキストリンク(text-sm≈24px)が次サイクルの柱0補充候補として残る（Explore調査で発見・未着手）。
+
+---
+
+## 2026-07-03 ux-hub/safety-signs-hub-related-links-44px
+
+**イテレーション頭の回収**: 自班のPR #668(トップhome-three-pillars 44px化)はCI進行中(e2e/smoke IN_PROGRESS)のため未マージ・今回は回収スキップ。`git checkout main && git pull --ff-only`でclean確認(mainは5コミット進行・data/seo/ux-records/ux-tools各班のマージ分)。
+
+**タスク源**: BACKLOG-ux-hub.md未着手最上位（前サイクルExplore調査で発見済み）＝「/safety-signs 親ハブ本体の『関連機能』セクションが44px未満」。
+
+**修正**: `web/src/app/(main)/safety-signs/page.tsx` の「関連機能」セクション（サイネージ表示／KY簡易作成／建設業のリスク・対策の3リンク、227-256行）にそれぞれ `min-h-[44px]`＋`inline-flex items-center` を付与。純粋なクラス追加でレイアウト・文言・遷移先は不変。サブページ（戻る/業種チップ）は既に是正済みだったが親ハブ自身の当該リンクのみ未着手だった。
+
+**テスト**: 既存 `safety-signs-tap-targets.test.tsx` に親ハブ用ケース1件を追加（3リンク全てのclassNameが`min-h-[44px]`を含むことを検証）。
+
+**ゲート結果（cd web）**: tsc=0 / lint=0 errors（既存warning 23件のみ・無関係）/ vitest 270 files・2289 tests + 1 skipped 全pass / build成功。
+
+**無読テスト**: `docs/third-party-reviews/scripts/safety-signs-hub-related-links-44px-noread-2026-07-03.mjs`（next start実機・Playwright・スマホ390×844）**3/3 PASS**（3リンク全てboundingBox height=44px実測）。
+
+**残課題**: PR #668（トップhome-three-pillars 44px化）のCI回収は次イテレーション。BACKLOG-ux-hub.mdの未着手件数が2件（トップhome-three-pillars=PR #668で着手済み・重複回避のため今回はスキップ）に減っていたため、Explore不要で直接コード確認した2件（`/features/use-cases`のrelated-featureピル・`/court-cases/employer-liability`のIssueLinkチップ、いずれも実コードで44px未満を確認済み）を補充。

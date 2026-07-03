@@ -85,6 +85,7 @@ param(
   [string]$RepoPath = "",
   [string]$StringsPath = "",
   [int]$StaleMinutes = 120,
+  [switch]$HeartbeatOnly,
   [switch]$WhatIf,
   [switch]$SelfTest
 )
@@ -139,6 +140,32 @@ function Get-EnabledLaneRoster {
     }
   } catch {}
   return $roster.ToArray()
+}
+
+# The roster's authoritative config is the one beside the CENTRAL status file (the MAIN tree the
+# launcher actually reads), NOT this reporter's own clone. The 5 non-ops lanes run in separate clones
+# under ..\safe-ai-lanes\<name>, each with its OWN committed loop-config.json; every lane WRITES to the
+# central status (via SAFE_AI_LOOP_STATUS) but was READING the roster from its local clone ($RepoPath),
+# so the health denominator/never-reported detection depended on WHICH lane happened to report and
+# could lag the owner's live edits to the main-tree config (untilIso bumps / lane toggles land in the
+# main working tree, unseen by a clone until its next pull). Anchor the roster to the status file's repo
+# so every lane shows the roster the launcher actually launched. StatusPath is <maintree>\docs\
+# loop-status.md, so its grandparent is <maintree>. Falls back to $RepoPath's config when the anchored
+# file is absent (standalone/manual runs, or an unusual status path) - preserving the safe-degradation
+# contract that a missing config never fabricates a false alarm.
+function Resolve-RosterConfigPath {
+  param([string]$StatusPath, [string]$RepoPath)
+  if ($StatusPath) {
+    $docsDir = Split-Path -Parent $StatusPath
+    if ($docsDir) {
+      $treeRoot = Split-Path -Parent $docsDir
+      if ($treeRoot) {
+        $anchored = Join-Path $treeRoot "loop-config.json"
+        if (Test-Path $anchored) { return $anchored }
+      }
+    }
+  }
+  return (Join-Path $RepoPath "loop-config.json")
 }
 
 # Acquire an exclusive lock on the status file (CreateNew = atomic "only if absent"), reclaiming a
@@ -352,6 +379,41 @@ function Get-TplPrefix([string]$key) {
   if ($i -ge 0) { return $t.Substring(0, $i) } else { return $t }
 }
 
+# ---- Heartbeat (runner-emitted liveness) ------------------------------------------------------
+# Reporting must NOT depend on the agent remembering step5.5. Observed live: seo and ux-records ran
+# 30+ iterations over ~6.5h, merged PRs, yet NEVER self-reported - so the per-lane health banner
+# (#628/#631/#640) kept flagging two ALIVE, working lanes as unreported/born-dead (a FALSE silent-death
+# alarm, the very class those fixes exist to remove). The persistent lane RUNNER therefore emits a
+# liveness heartbeat after every iteration (-HeartbeatOnly). To avoid clobbering a rich note the agent
+# DID write, a heartbeat swaps ONLY the {LASTRUN} timestamp of the lane's existing row; when the lane has
+# produced no row yet it writes a minimal row whose note honestly states the agent has not self-reported,
+# so the operator sees "alive, but its agent is skipping the report step" - never a false silent death.
+
+# Swap the {LASTRUN} timestamp (the first yyyy-MM-dd HH:mm, which structurally precedes the note in the
+# reportLine template) in an existing row for a fresh one, leaving PR/OPEN/NOTE byte-identical. Pure.
+function Set-RowTimestamp {
+  param([string]$ExistingRow, [string]$FreshLastRun)
+  if ($null -eq $ExistingRow) { return $ExistingRow }
+  return [regex]::Replace([string]$ExistingRow, '\d{4}-\d{2}-\d{2} \d{2}:\d{2}', $FreshLastRun, 1)
+}
+
+# The row a heartbeat should upsert: refresh the lane's existing row's timestamp (note preserved), or -
+# when the lane has produced no row yet - the supplied minimal placeholder row (honest no-self-report
+# note). Pure function of the current region rows so -SelfTest can verify both branches offline.
+function Get-HeartbeatRow {
+  param([string[]]$Rows, [string]$Lane, [string]$FreshLastRun, [string]$PlaceholderRow)
+  $prefix = "- " + $Lane + " :"
+  if ($Rows) {
+    foreach ($r in $Rows) {
+      if ($null -eq $r) { continue }
+      if (([string]$r).TrimStart().StartsWith($prefix)) {
+        return (Set-RowTimestamp -ExistingRow ([string]$r) -FreshLastRun $FreshLastRun)
+      }
+    }
+  }
+  return $PlaceholderRow
+}
+
 # ---- Self-test: offline verification of the lock's stale-orphan reclamation -------------------
 if ($SelfTest) {
   $fails = 0
@@ -409,6 +471,29 @@ if ($SelfTest) {
     Assert-Test "roster excludes the disabled lane" (-not ($roster -contains "seo"))
     $rosterNone = @(Get-EnabledLaneRoster -ConfigPath (Join-Path $tmp "does-not-exist.json"))
     Assert-Test "absent config yields empty roster (fallback)" ($rosterNone.Count -eq 0)
+
+    # E2) Resolve-RosterConfigPath anchors the roster to the CENTRAL status file's tree (main tree),
+    # not this clone's $RepoPath, so all lanes read one authoritative config. Simulate a non-ops lane:
+    # StatusPath points at the main tree's docs\loop-status.md (which has a config beside it) while
+    # RepoPath is a separate clone (which has its OWN, different config). The resolver must pick main's.
+    $mainTree = Join-Path $tmp "maintree"
+    $mainDocs = Join-Path $mainTree "docs"
+    New-Item -ItemType Directory -Path $mainDocs -Force | Out-Null
+    Set-Content -Path (Join-Path $mainTree "loop-config.json") -Encoding UTF8 -Value '{ "lanes": [ { "name": "ops", "enabled": true }, { "name": "data", "enabled": true }, { "name": "seo", "enabled": true } ] }'
+    $mainStatus = Join-Path $mainDocs "loop-status.md"
+    $cloneRepo = Join-Path $tmp "clone"
+    New-Item -ItemType Directory -Path $cloneRepo -Force | Out-Null
+    Set-Content -Path (Join-Path $cloneRepo "loop-config.json") -Encoding UTF8 -Value '{ "lanes": [ { "name": "ops", "enabled": true } ] }'
+    $resolved = Resolve-RosterConfigPath -StatusPath $mainStatus -RepoPath $cloneRepo
+    Assert-Test "resolver anchors config to the status file's tree, not the clone" ($resolved -eq (Join-Path $mainTree "loop-config.json"))
+    $anchoredRoster = @(Get-EnabledLaneRoster -ConfigPath $resolved)
+    Assert-Test "anchored roster is the main tree's 3 lanes, not the clone's 1" ($anchoredRoster.Count -eq 3)
+    # Fallback: when the status-anchored config is absent, fall back to $RepoPath's own config.
+    $noAnchor = Resolve-RosterConfigPath -StatusPath (Join-Path $tmp "nowhere\docs\loop-status.md") -RepoPath $cloneRepo
+    Assert-Test "resolver falls back to RepoPath config when anchor is absent" ($noAnchor -eq (Join-Path $cloneRepo "loop-config.json"))
+    # Blank StatusPath (standalone run before resolution) -> RepoPath config, never throws.
+    $blankAnchor = Resolve-RosterConfigPath -StatusPath "" -RepoPath $cloneRepo
+    Assert-Test "resolver with blank status path falls back to RepoPath config" ($blankAnchor -eq (Join-Path $cloneRepo "loop-config.json"))
 
     # F) Get-LaneHealthLine roster behavior. Rows are built from the REAL reportLine template (so the
     # regex-build path and the health strings are exercised end-to-end) while this source stays ASCII by
@@ -479,6 +564,22 @@ if ($SelfTest) {
         Assert-Test "missing lanes = enabled roster minus reported" (($ml.Count -eq 2) -and ($ml -contains "seo") -and ($ml -contains "ux-records"))
       }
     }
+
+    # H) Heartbeat helpers: the runner-emitted liveness upsert must preserve a rich note, swap only the
+    # timestamp, and (for a never-reported lane) fall back to the honest placeholder row. Pure - no I/O.
+    $hbFresh = "2026-07-03 13:20"
+    $richRow = "- seo : LR 2026-07-03 08:01 / PR #666 / open 1 / merged #666; sitemap fix landed (2026-07-03)"
+    $swapped = Set-RowTimestamp -ExistingRow $richRow -FreshLastRun $hbFresh
+    Assert-Test "H1: heartbeat swaps ONLY the leading timestamp to the fresh one" ($swapped -eq ("- seo : LR " + $hbFresh + " / PR #666 / open 1 / merged #666; sitemap fix landed (2026-07-03)"))
+    Assert-Test "H1b: a date inside the note is NOT touched (only the first timestamp)" ($swapped.EndsWith("(2026-07-03)"))
+    $placeholder = "- ux-records : LR " + $hbFresh + " / PR - / open 0 / runner heartbeat: agent not self-reporting"
+    $existRow = Get-HeartbeatRow -Rows @("- ops : LR 2026-07-03 13:00 / PR #1 / open 2 / ok", $richRow) -Lane "seo" -FreshLastRun $hbFresh -PlaceholderRow $placeholder
+    Assert-Test "H2: existing lane row -> its own row with a fresh timestamp (note preserved)" ($existRow -eq $swapped)
+    $newRow = Get-HeartbeatRow -Rows @("- ops : LR 2026-07-03 13:00 / PR #1 / open 2 / ok") -Lane "ux-records" -FreshLastRun $hbFresh -PlaceholderRow $placeholder
+    Assert-Test "H3: no row for the lane -> the honest placeholder row is used" ($newRow -eq $placeholder)
+    $emptyRow = Get-HeartbeatRow -Rows @() -Lane "seo" -FreshLastRun $hbFresh -PlaceholderRow $placeholder
+    Assert-Test "H4: empty region -> placeholder row (no throw)" ($emptyRow -eq $placeholder)
+    Assert-Test "H5: Set-RowTimestamp on a null/empty row is safe (no throw, empty result)" ((Set-RowTimestamp -ExistingRow $null -FreshLastRun $hbFresh) -eq "")
   } finally {
     try { Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue } catch {}
   }
@@ -499,10 +600,12 @@ try {
 } catch {}
 Write-Rep ("target status file = " + $StatusPath)
 
-# Enabled roster from loop-config.json (next to the repo the reporter runs in). Drives the health
-# line's denominator and its never-reported detection. Empty when config is absent/unreadable, in
-# which case the health line reverts to the legacy reported-count behavior (no false alarm).
-$configPath = Join-Path $RepoPath "loop-config.json"
+# Enabled roster from loop-config.json - anchored to the CENTRAL status file's tree (see
+# Resolve-RosterConfigPath), NOT this reporter's clone, so every lane's health line shares one
+# authoritative roster. Drives the health line's denominator and its never-reported detection. Empty
+# when config is absent/unreadable, in which case the health line reverts to the legacy reported-count
+# behavior (no false alarm).
+$configPath = Resolve-RosterConfigPath -StatusPath $StatusPath -RepoPath $RepoPath
 $ExpectedLanes = Get-EnabledLaneRoster -ConfigPath $configPath
 if ($ExpectedLanes.Count -gt 0) { Write-Rep ("enabled lane roster (" + $ExpectedLanes.Count + "): " + ($ExpectedLanes -join ", ")) }
 
@@ -540,13 +643,38 @@ try {
 } catch { $pr = "-" }
 
 $noteText = $Note.Trim()
-if ($noteText -eq "") { $noteText = S "reportEmptyNote" }
+if ($noteText -eq "") {
+  if ($HeartbeatOnly) {
+    # Placeholder note for a lane that has produced NO row yet: honestly says the agent is not
+    # self-reporting (ASCII fallback when the strings file lacks the key). Only used when creating a
+    # fresh row; an existing row's own note is preserved verbatim by Get-HeartbeatRow.
+    $hb = S "reportRunnerHeartbeat"
+    if ($hb -eq "reportRunnerHeartbeat") { $hb = "runner heartbeat: lane alive, but its agent has not run the step5.5 self-report" }
+    $noteText = $hb
+  } else {
+    $noteText = S "reportEmptyNote"
+  }
+}
 $laneLine = Fmt "reportLine" @{ LANE = $Lane; LASTRUN = $lastRun; PR = $pr; OPEN = $open; NOTE = $noteText }
 
 Write-Rep ("computed row: " + $laneLine)
 
 if ($WhatIf) {
   Write-Rep "[WHATIF] no file written, no lock taken."
+  # Heartbeat: preview the row we WOULD upsert (existing row's timestamp swapped, or the placeholder
+  # row when the lane has no row yet) so the health preview below reflects heartbeat semantics.
+  if ($HeartbeatOnly -and (Test-Path $StatusPath)) {
+    try {
+      $hbPrev = @(Get-Content -Encoding UTF8 -Path $StatusPath)
+      $hbB = -1; $hbE = -1
+      for ($k = 0; $k -lt $hbPrev.Count; $k++) {
+        if ($hbPrev[$k].Trim() -eq $beginMarker) { $hbB = $k } elseif ($hbPrev[$k].Trim() -eq $endMarker) { $hbE = $k; break }
+      }
+      $hbRows = @(); if ($hbB -ge 0 -and $hbE -gt $hbB) { for ($k = $hbB + 1; $k -lt $hbE; $k++) { $hbRows += $hbPrev[$k] } }
+      $laneLine = Get-HeartbeatRow -Rows $hbRows -Lane $Lane -FreshLastRun $lastRun -PlaceholderRow $laneLine
+    } catch {}
+    Write-Rep ("[WHATIF][HEARTBEAT] would upsert row: " + $laneLine)
+  }
   Write-Rep ("[WHATIF] would also refresh the top heartbeat line to: " + (Fmt "updated" @{ NOW = $lastRun }))
   # Read-only preview of the per-lane health line: take existing region rows + this lane's fresh row,
   # strip any prior health line, and show what would be computed (no file is touched, no lock taken).
@@ -605,6 +733,16 @@ try {
   for ($k = 0; $k -lt $lines.Count; $k++) {
     if ($lines[$k].Trim() -eq $beginMarker) { $beginIdx = $k }
     elseif ($lines[$k].Trim() -eq $endMarker) { $endIdx = $k; break }
+  }
+
+  # Heartbeat mode: refresh only this lane's timestamp (note preserved), or create the honest
+  # placeholder row when the lane has no row yet. Derived from the CURRENT region rows under the lock.
+  if ($HeartbeatOnly) {
+    $regionRows = @()
+    if ($beginIdx -ge 0 -and $endIdx -gt $beginIdx) {
+      for ($k = $beginIdx + 1; $k -lt $endIdx; $k++) { $regionRows += $lines[$k] }
+    }
+    $laneLine = Get-HeartbeatRow -Rows $regionRows -Lane $Lane -FreshLastRun $lastRun -PlaceholderRow $laneLine
   }
 
   $rowPrefix = "- " + $Lane + " :"

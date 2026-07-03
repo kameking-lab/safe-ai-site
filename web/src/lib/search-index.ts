@@ -1,6 +1,6 @@
 import { searchCrossIndex, normalizeArticleQuery, expandLawAliases } from './cross-search';
 
-export type SearchCategory = 'law' | 'notice' | 'chemical' | 'education' | 'accident' | 'precedent' | 'glossary';
+export type SearchCategory = 'law' | 'notice' | 'chemical' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq' | 'sign';
 
 export interface SearchItem {
   id: string;
@@ -22,9 +22,15 @@ export interface SearchItem {
 const SEARCH_CATEGORY_PRIORITY: readonly SearchCategory[] = [
   'law',
   'education',
+  // FAQ は高意図の疑問（「衛生管理者は何人？」「SDS交付は義務？」）へ即答を返すため、
+  // 同点時は判例・通達より上位に寄せる（条文・教育の次点）。
+  'faq',
   'precedent',
   'notice',
   'glossary',
+  // 安全標識（立入禁止・保護具着用など）は特定名の直接照会。用語と同じ参照系の
+  // ティアに置き、法令・教育・FAQ より下位・化学物質より上位で同点解決する。
+  'sign',
   'chemical',
   'accident',
 ];
@@ -40,6 +46,8 @@ export const CATEGORY_META: Record<
   accident:  { label: '事故',    bgColor: 'bg-red-100',    textColor: 'text-red-700' },
   precedent: { label: '判例',    bgColor: 'bg-emerald-100', textColor: 'text-emerald-700' },
   glossary:  { label: '用語',    bgColor: 'bg-indigo-100', textColor: 'text-indigo-700' },
+  faq:       { label: 'FAQ',     bgColor: 'bg-sky-100',    textColor: 'text-sky-700' },
+  sign:      { label: '標識',    bgColor: 'bg-amber-100',  textColor: 'text-amber-700' },
 };
 
 /**
@@ -82,7 +90,7 @@ export function countByCategory(
   query: string,
 ): Record<'all' | SearchCategory, number> {
   const counts: Record<'all' | SearchCategory, number> = {
-    all: 0, law: 0, notice: 0, chemical: 0, education: 0, accident: 0, precedent: 0, glossary: 0,
+    all: 0, law: 0, notice: 0, chemical: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0, sign: 0,
   };
   if (!query.trim()) return counts;
   // 上限なしで全件マッチを採り、カテゴリ別に集計する。
@@ -283,6 +291,61 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           category: 'glossary',
           keywords: [t.reading].filter(Boolean),
           url: `/glossary`,
+        });
+      }
+    }),
+
+    // FAQ（@/data/faqs の 4 バッチ＝高意図の疑問文クエリ「衛生管理者 何人」「SDS 交付 義務」
+    // 「特別教育 オンライン」等を横断検索へ収載）。これまで FAQ 200問は /faq/[category] に
+    // しか無く ⌘K・/search から 0 件で、用語(glossary=「○○とは」)とも別軸の質問インテント
+    // が丸ごと欠落していた。各結果は回答冒頭を subtitle に載せ検索結果一覧で即答し、リンクは
+    // カテゴリ一覧 /faq/<category>（sitemap 収載・自己canonical の実在ページ）へ寄せる＝
+    // faq.category は law-system/management/chemical/health-education のいずれかで必ず解決
+    // （幽霊リンク 0）。keywords に tags・関連法令を補い分類語・条番号からも引ける。
+    // 個別 FAQ への深リンク（/faq/<category>#<id>）は FAQItem にアンカー＋hashオープンが要る＝
+    // /faq ページ本文所有の UI 班マター（要・他班）のため今回はカテゴリ一覧へ寄せる（glossary と同方針）。
+    import('@/data/faqs').then(({ ALL_FAQS }) => {
+      for (const f of ALL_FAQS) {
+        items.push({
+          id: `faq-${f.id}`,
+          // 質問文の頭に「Q. 」を付す（FAQ 結果である旨の慣用表記）。表示上の意味に加えて
+          // ランキング上の意味も持つ＝概念名で始まる質問（例「就業制限（安衛法第61条）は…」）が
+          // タイトル前方一致(65点)で当該条文のキーワード完全一致(55点＝articleTitle=就業制限)を
+          // 上回り、bare な法令概念クエリの1位を FAQ が奪う退行（O8-a/T8 の locked 不変条件
+          // 「就業制限」1位=安衛法61条）を防ぐ。頭に「Q. 」が入ると概念名は前方一致(65)ではなく
+          // 部分一致(45)になり、権威ある条文本文が上位を保つ（FAQ は下位で引き続き発見可能）。
+          title: `Q. ${f.question}`,
+          subtitle: f.answer.slice(0, 80),
+          category: 'faq',
+          keywords: [...(f.tags ?? []), ...(f.relatedLaws ?? [])].filter(Boolean),
+          url: `/faq/${f.category}`,
+        });
+      }
+    }),
+
+    // 安全標識（@/data/safety-signs の JIS Z 9101 準拠 5 分類＝禁止/警告/指示/安全状態/防火）。
+    // 「立入禁止」「感電注意」「保護めがね着用」等の標識名は現場で頻用されるのに、これまで
+    // 横断検索(/search・⌘K)から 0 件ヒットだった（用語・FAQ とも別軸＝視覚標識の直接照会）。
+    // 各標識は既に sitemap 収載済みの実在詳細ページ /safety-signs/sign/<id> を持つが、
+    // 発見手段が /safety-signs ハブの回遊のみだった発見性の穴を是正。url は詳細ページへ深リンク＝
+    // 詳細 /safety-signs/sign/[id] の generateStaticParams が SAFETY_SIGNS 全件 id を解決し
+    // 未知 id は notFound() で弾くため、収載集合＝解決集合で必ず着地する（幽霊URL 0）。
+    // 名称(name)・英名(nameEn)・分類ラベル・関連法令（statute+article）・意味/用途語から引ける。
+    import('@/data/safety-signs').then(({ SAFETY_SIGNS, SIGN_CATEGORIES }) => {
+      const categoryLabel = new Map(SIGN_CATEGORIES.map((c) => [c.id, c.label]));
+      for (const s of SAFETY_SIGNS) {
+        const label = categoryLabel.get(s.category) ?? '安全標識';
+        items.push({
+          id: `sign-${s.id}`,
+          title: s.name,
+          subtitle: `${label}　${s.meaning}`.slice(0, 90),
+          category: 'sign',
+          keywords: [
+            s.nameEn,
+            label,
+            ...s.relatedLaws.flatMap((r) => (r.article ? [r.statute, r.article] : [r.statute])),
+          ].filter(Boolean),
+          url: `/safety-signs/sign/${s.id}`,
         });
       }
     }),

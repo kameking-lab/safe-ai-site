@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
 import { normalizeKyInstructionRecord } from "@/lib/services/operations-service";
-import { emptyKyHeaderFieldKeys } from "@/lib/ky/paper-fields";
+import { emptyKyPaperFieldKeys } from "@/lib/ky/paper-fields";
 
 describe("KyPrintSheet (A4印刷レイアウト)", () => {
   const rec = normalizeKyInstructionRecord({
@@ -39,7 +39,7 @@ describe("KyPrintSheet (A4印刷レイアウト)", () => {
   });
 });
 
-describe("F1: editing prop（印刷不可侵とタップ標的）", () => {
+describe("F1/O10: editing prop（印刷不可侵とタップ標的）", () => {
   // 印刷不可侵スナップショットは決定論でなければならない。作業日を明示固定しないと
   // normalize が既定で new Date()（今日）を埋め、実行日ごとにスナップショットが
   // 揺れて偽陽性で落ちる（この不具合を修理）。日付は固定センチネルにピン留めする。
@@ -67,15 +67,43 @@ describe("F1: editing prop（印刷不可侵とタップ標的）", () => {
     expect(screen.queryAllByRole("button")).toHaveLength(0);
   });
 
-  it("editing 指定でヘッダー6欄がタップ標的になり、タップでキーが飛ぶ", () => {
+  it("editing 指定でヘッダー6欄＋本日の作業内容＋4R目標3欄＋参加者がタップ標的になり、タップでキーが飛ぶ", () => {
     const onTapField = vi.fn();
     render(<KyPrintSheet record={rec} editing={{ onTapField }} />);
+    // 静的11欄(参加者含む) + 危険行(既定5行×3部位。可能性/重大性は2セルとも同じrisk.N.evalキー) = 11 + 5*4 = 31
     const cells = screen.getAllByRole("button");
-    expect(cells).toHaveLength(6);
+    expect(cells).toHaveLength(31);
     fireEvent.click(screen.getByRole("button", { name: "現場名を入力" }));
     expect(onTapField).toHaveBeenCalledWith("siteName");
     fireEvent.click(screen.getByRole("button", { name: "元請会社を入力" }));
     expect(onTapField).toHaveBeenCalledWith("coop1Name");
+    fireEvent.click(screen.getByRole("button", { name: "本日の作業内容を入力" }));
+    expect(onTapField).toHaveBeenCalledWith("workDetail");
+    fireEvent.click(screen.getByRole("button", { name: "指差呼称（ヨシ！）を入力" }));
+    expect(onTapField).toHaveBeenCalledWith("pointingCall");
+    fireEvent.click(screen.getByRole("button", { name: "参加者を入力" }));
+    expect(onTapField).toHaveBeenCalledWith("participants");
+  });
+
+  it("O10（続き）: 危険行の危険/対策/可能性・重大性がタップ標的になる", () => {
+    const onTapField = vi.fn();
+    render(<KyPrintSheet record={rec} editing={{ onTapField }} />);
+    fireEvent.click(screen.getByRole("button", { name: "危険のポイント（1）を入力" }));
+    expect(onTapField).toHaveBeenCalledWith("risk.0.hazard");
+    fireEvent.click(screen.getByRole("button", { name: "対策（1）を入力" }));
+    expect(onTapField).toHaveBeenCalledWith("risk.0.reduction");
+    expect(screen.getAllByRole("button", { name: "可能性・重大性（1）を入力" })).toHaveLength(2);
+    fireEvent.click(screen.getAllByRole("button", { name: "可能性・重大性（1）を入力" })[0]);
+    expect(onTapField).toHaveBeenCalledWith("risk.0.eval");
+  });
+
+  it("O10（続き）: onAddRiskRow 指定時のみ「＋危険行を追加」が出てタップで発火する", () => {
+    const onAddRiskRow = vi.fn();
+    const { rerender } = render(<KyPrintSheet record={rec} editing={{ onTapField: () => {} }} />);
+    expect(screen.queryByRole("button", { name: "＋ 危険行を追加" })).toBeNull();
+    rerender(<KyPrintSheet record={rec} editing={{ onTapField: () => {}, onAddRiskRow }} />);
+    fireEvent.click(screen.getByRole("button", { name: "＋ 危険行を追加" }));
+    expect(onAddRiskRow).toHaveBeenCalledOnce();
   });
 
   it("キーボード（Enter/Space）でも欄を開ける（a11y）", () => {
@@ -90,7 +118,7 @@ describe("F1: editing prop（印刷不可侵とタップ標的）", () => {
     render(
       <KyPrintSheet
         record={empty}
-        editing={{ onTapField: () => {}, emptyKeys: emptyKyHeaderFieldKeys(empty) }}
+        editing={{ onTapField: () => {}, emptyKeys: emptyKyPaperFieldKeys(empty) }}
       />
     );
     // siteName は記入済み → 値表示、foremanName 等は未記入 → プレースホルダ
