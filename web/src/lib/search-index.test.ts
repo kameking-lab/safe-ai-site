@@ -133,7 +133,7 @@ describe('buildSearchIndex — 用語集（glossary）の収載', () => {
     const index = await buildSearchIndex();
     const c = countByCategory(index, '安全');
     expect(c.all).toBe(
-      c.law + c.notice + c.chemical + c.education + c.accident + c.precedent + c.glossary + c.faq + c.sign,
+      c.law + c.notice + c.chemical + c.equipment + c.education + c.accident + c.precedent + c.glossary + c.faq + c.sign,
     );
   });
 });
@@ -318,6 +318,45 @@ describe('buildSearchIndex — 事故事例（accident）の収載', () => {
     expect(accident.some((i) => i.url === '/accidents')).toBe(false);
     // url の id と item.id が対応＝詳細ページが必ず解決する（幽霊URL なし）。
     expect(accident.every((i) => i.url === `/accidents/${i.id.replace(/^accident-/, '')}`)).toBe(true);
+  });
+});
+
+describe('buildSearchIndex — 保護具（equipment）の収載＋個別詳細への深リンク', () => {
+  it('正本 getAllEquipment と件数・ID集合が一致する（横断検索に丸ごと欠落していた穴の是正）', async () => {
+    const { getAllEquipment } = await import('@/lib/equipment-recommendation');
+    const index = await buildSearchIndex();
+    const equipment = index.filter((i) => i.category === 'equipment');
+
+    // 正本のID集合＝詳細 /equipment/[id] の generateStaticParams が解決する集合そのもの。
+    const datasetIds = new Set(getAllEquipment().map((e) => e.id));
+    const indexIds = new Set(equipment.map((i) => i.id.replace(/^equipment-/, '')));
+    expect(indexIds).toEqual(datasetIds);
+    expect(equipment.length).toBe(getAllEquipment().length);
+    // 非空虚性（1000件超の保護具DBが確かに収載されている）。
+    expect(equipment.length).toBeGreaterThan(500);
+  });
+
+  it('各結果は一覧トップではなく個別詳細 /equipment/<id> へ深リンクする（幽霊URL 0）', async () => {
+    const index = await buildSearchIndex();
+    const equipment = index.filter((i) => i.category === 'equipment');
+    expect(equipment.every((i) => /^\/equipment\/.+/.test(i.url))).toBe(true);
+    // 一覧トップ /equipment-finder や裸 /equipment へ落とさない。
+    expect(equipment.some((i) => i.url === '/equipment' || i.url === '/equipment-finder')).toBe(false);
+    // url の id と item.id が対応＝詳細ページが必ず解決する（正本 getAllEquipment 由来）。
+    expect(equipment.every((i) => i.url === `/equipment/${i.id.replace(/^equipment-/, '')}`)).toBe(true);
+  });
+
+  it('製品名・カテゴリ名・メーカー・JIS規格のいずれからも引ける（現場頻用の保護具名で発見可能）', async () => {
+    const index = await buildSearchIndex();
+    const equipment = index.filter((i) => i.category === 'equipment');
+    // 現場頻用の保護具カテゴリがヒットする（title=製品名 or keywords=カテゴリ名）。
+    const harness = searchItems(equipment, 'フルハーネス', 'equipment');
+    expect(harness.length).toBeGreaterThan(0);
+    // カテゴリ名は keywords 経由でも引ける。
+    const fallCat = searchItems(equipment, '墜落制止用器具', 'equipment');
+    expect(fallCat.length).toBeGreaterThan(0);
+    // subtitle にカテゴリ名＋規格を出して結果一覧で識別できる。
+    expect(equipment.every((i) => i.subtitle.length > 0)).toBe(true);
   });
 });
 

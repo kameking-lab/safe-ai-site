@@ -313,7 +313,7 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
               id="quick-industry"
               value={industryFilter}
               onChange={(e) => setIndustryFilter(e.target.value)}
-              className="rounded-md border border-emerald-400 bg-white px-2.5 py-1.5 text-sm font-semibold text-slate-900 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
+              className="min-h-[44px] rounded-md border border-emerald-400 bg-white px-2.5 py-1.5 text-sm font-semibold text-slate-900 focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
             >
               <option value="">― 選んでください ―</option>
               {industryOptions.map((opt) => (
@@ -418,7 +418,7 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
                 id="industry-filter"
                 value={industryFilter}
                 onChange={(e) => setIndustryFilter(e.target.value)}
-                className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="min-h-[44px] rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
                 <option value="">全業種</option>
                 {industryOptions.map((opt) => (
@@ -439,7 +439,7 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
                 id="type-filter"
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                className="min-h-[44px] rounded-md border border-slate-300 bg-white px-2 py-1.5 text-xs text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
               >
                 <option value="">全種類</option>
                 {typeOptions.map((opt) => (
@@ -456,7 +456,7 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
                   setIndustryFilter("");
                   setTypeFilter("");
                 }}
-                className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100"
+                className="min-h-[44px] rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-100"
               >
                 絞り込みをクリア
               </button>
@@ -883,7 +883,7 @@ function DetailsSection({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+        className="min-h-[44px] rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
         aria-expanded={open}
       >
         {open ? "詳細項目を折りたたむ ▲" : "詳細項目を展開 ▼"}

@@ -4,6 +4,19 @@
 
 ---
 
+## 2026-07-03 — 柱C-2 追補 横断検索に保護具(安全用品DB 1,050件)を収載（PR: seo/c2-equipment-cross-search）
+
+回収: 前イテレーションの自班 PR を CI 緑で回収＝#653（PWA ショートカット）を squash マージ→main を ff-only 同期。#657（化学物質 sitemap）は #653 の追記と BACKLOG-seo.md で衝突→`git merge origin/main` を当該ブランチへ通常マージして解決（両完了項目を併存・force-push 不可を遵守）し push、CI 再走は次イテレーションで回収。他班 OPEN PR は不可侵。
+
+着手: BACKLOG-seo 未着手キューは空（Fable診断の実装は消化済・O17/T6・T7 は Path A 設計ドラフトでオーナー承認待ち）。補充指針に従い自領域（横断検索の発見性）を再点検＝横断検索カテゴリと実在の indexable コンテンツ集合を機械突合。
+
+- **現状確認（実バグ）**: `search-index.ts` のカテゴリは law/notice/chemical/education/accident/precedent/glossary/faq の8型のみ。一方 `/equipment/[id]`（保護具 個別詳細・約1,050件）が実在し `sitemap-equipment.xml` に個別収載済み・`generateStaticParams` が `getAllEquipment()` の eq-NNNN 全件を解決・detail は自己canonical/indexable。**にもかかわらず横断検索(/search・⌘K)に equipment カテゴリが無く、フルハーネス・防じんマスク・安全帯・保護帽 等 現場が最も検索する保護具名が丸ごと0件**＝#561 accident・化学物質と同型の発見性の穴。sitemap 静的ルート全件（page.tsx 155本）を sitemap.ts と機械突合し新規孤立 sitemap 対象が無いことも確認済（/feedback・/safety-diary/new は redirect、/ky/list・/safety-diary/list・…/result は robots index:false で正しく非収載）。
+- **修正（自班所有のみ）**: `search-index.ts` に `equipment` カテゴリを新設。正本 `getAllEquipment()`（＝detail の generateStaticParams・sitemap-equipment と同一ソース）を dynamic import し title=製品名・subtitle=カテゴリ名＋規格・keywords=カテゴリ名/小分類/メーカー/JIS規格（industries/hazards は英語コード＝日本語検索に無意味なため除外＝ノイズ回避、regulations は法令権威クエリ汚染回避のため除外）・url=`/equipment/<id>`（正本由来＝必ず解決・幽霊URL0・データ追加に自動追従）。`SEARCH_CATEGORY_PRIORITY` の**末尾**に配置＝保護具は商品レコメンド(アフィリエイト)で権威が低く、同点タイブレークでも法令・通達・判例の上位を決して奪わない。`CATEGORY_META`(amber/保護具) と `countByCategory` の初期化 Record も拡張。UI(SearchResults/CommandPalette)へ保護具タブ＋`HardHat` アイコンを追加（既存 faq/glossary 追加と同パターン、検索UIのみ改変）。
+- **テスト**: `search-index.test.ts` に equipment describe（3 it）追加＝①正本 getAllEquipment と件数・ID集合一致＋500件超の非空虚性 ②全件 /equipment/<id> 深リンク・裸/equipment・/equipment-finder 不在・url↔id 対応(幽霊URL0) ③フルハーネス/墜落制止用器具/メーカー/JIS でヒット＋subtitle非空。既存 countByCategory 合計テストへ c.equipment を追加。**locked不変条件**（T1-T3＝「就業制限」1位=安衛法61条・「石綿 事前調査」1位=石綿則3条 等）が保護具追加後も不変であることを既存回帰で確認（末尾優先度＋keyword を JP有意語に限定した効果）。tsc0・lint errors0・全2267テスト緑（新規3含む）・build成功。
+- **要・他班（注記のみ・当班は非改変）**: 保護具一覧 `/equipment-finder` 本文の改善は所有 UI 班(ux-tools)の担当。当班は横断検索インデックスの発見性のみ是正した。
+
+---
+
 ## 2026-07-03 — 柱C-2追補 横断検索に安全標識(JIS Z 9101・約110種)を収載（PR: seo/c2-safety-signs-cross-search / #666）
 
 回収: 自班の緑・未マージ PR #647（FAQ200問）を squashマージ→`git checkout main && git pull --ff-only`→clean。#653（PWA/かな折り畳み却下）が origin/main と CONFLICTING（BACKLOG/cycle-log の追記衝突のみ・コードは auto-merge）だったため当該ブランチへ `origin/main` を通常マージ（force-push なし）で解決し push（CI 再走は次イテレーションで回収）。#657（化学物質 sitemap）は CI 実行中のため持ち越し。
