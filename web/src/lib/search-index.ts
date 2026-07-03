@@ -1,6 +1,6 @@
 import { searchCrossIndex, normalizeArticleQuery, expandLawAliases, chemicalDetailUrl } from './cross-search';
 
-export type SearchCategory = 'law' | 'notice' | 'chemical' | 'equipment' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq' | 'sign' | 'article' | 'feature';
+export type SearchCategory = 'law' | 'revision' | 'notice' | 'chemical' | 'equipment' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq' | 'sign' | 'article' | 'feature';
 
 export interface SearchItem {
   id: string;
@@ -28,6 +28,10 @@ const SEARCH_CATEGORY_PRIORITY: readonly SearchCategory[] = [
   // 法改正記事（監修済みの解説コンテンツ）は法改正の背景・実装ガイドを平易にまとめる。
   // 同点時は判例・通達より上位（FAQ の次点）に寄せ、条文・教育・FAQ には譲る。
   'article',
+  // 法改正記録（法令・省令・通達の構造化改正レコード）は監修解説記事（article）に次ぐ
+  // 権威系。特定の改正名クエリではタイトル一致で上位に来るが、bare な法令概念クエリの
+  // 同点解決では条文本文（law）の権威を奪わないよう判例・通達の直上（記事の次点）に置く。
+  'revision',
   'precedent',
   'notice',
   'glossary',
@@ -50,6 +54,7 @@ export const CATEGORY_META: Record<
   { label: string; bgColor: string; textColor: string }
 > = {
   law:       { label: '法令',    bgColor: 'bg-teal-100',   textColor: 'text-teal-700' },
+  revision:  { label: '法改正',  bgColor: 'bg-cyan-100',   textColor: 'text-cyan-700' },
   notice:    { label: '通達',    bgColor: 'bg-blue-100',   textColor: 'text-blue-700' },
   chemical:  { label: '化学物質', bgColor: 'bg-orange-100', textColor: 'text-orange-700' },
   equipment: { label: '保護具',   bgColor: 'bg-amber-100',  textColor: 'text-amber-700' },
@@ -77,7 +82,7 @@ export const CATEGORY_META: Record<
  * 忘れる／タブにあるのにメタが無い、の両方向のドリフトを検知）。
  */
 export const SEARCH_CATEGORIES: readonly SearchCategory[] = [
-  'law', 'faq', 'article', 'precedent', 'notice', 'feature', 'chemical', 'equipment', 'education', 'accident', 'glossary', 'sign',
+  'law', 'revision', 'faq', 'article', 'precedent', 'notice', 'feature', 'chemical', 'equipment', 'education', 'accident', 'glossary', 'sign',
 ];
 
 /**
@@ -120,7 +125,7 @@ export function countByCategory(
   query: string,
 ): Record<'all' | SearchCategory, number> {
   const counts: Record<'all' | SearchCategory, number> = {
-    all: 0, law: 0, notice: 0, chemical: 0, equipment: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0, sign: 0, article: 0, feature: 0,
+    all: 0, law: 0, revision: 0, notice: 0, chemical: 0, equipment: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0, sign: 0, article: 0, feature: 0,
   };
   if (!query.trim()) return counts;
   // 上限なしで全件マッチを採り、カテゴリ別に集計する。
@@ -174,6 +179,38 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           url: a.articleNum
             ? `/law-search?law=${encodeURIComponent(a.law)}&art=${encodeURIComponent(a.articleNum)}`
             : `/law-search?law=${encodeURIComponent(a.law)}`,
+        });
+      }
+    }),
+    // 法改正レコード（法令・省令・通達の構造化改正エントリ＝正本 lawRevisionCores）。
+    // これまで法改正は /laws 一覧・/whats-new・/feed/law-revisions.xml に載っているのに
+    // 横断検索(/search・⌘K)から丸ごと 0 件だった＝「フリーランス新法」「石綿則 改正」
+    // 「化学物質 自律的管理」等の法改正クエリで発見できない穴（accident/equipment/sign と同型）。
+    // lawRevisionCores は JSON＋純関数のみのブラウザ安全モジュール（node:fs 非依存）で、
+    // NEXT_PUBLIC_REVISIONS_INGEST_SOURCE で source を切替（server 専用 payload 環境変数は
+    // ブラウザでは undefined＝sample+egov+real の統合パスへフォールバックし常にデータを返す）。
+    // 個別の法改正詳細ページは未実装のため url は /laws 一覧ハブへ寄せる（glossary→/glossary・
+    // faq→/faq と同方針）。読込失敗時の placeholder（lr-fallback-*）は索引に載せない。
+    // kind は英語コード（law/ordinance/notice…）のため keywords から除外＝日本語検索のノイズ回避。
+    import('@/data/mock/law-revisions').then(({ lawRevisionCores }) => {
+      const seen = new Set<string>();
+      for (const r of lawRevisionCores) {
+        if (r.id.startsWith('lr-fallback')) continue;
+        if (seen.has(r.id)) continue;
+        seen.add(r.id);
+        items.push({
+          id: `revision-${r.id}`,
+          title: r.title,
+          subtitle: `${r.category}　${r.summary}`.slice(0, 90),
+          category: 'revision',
+          keywords: [
+            r.category,
+            r.revisionNumber,
+            r.issuer,
+            r.official_notice_number ?? '',
+            r.industry_detail ?? '',
+          ].filter(Boolean),
+          url: '/laws',
         });
       }
     }),
@@ -330,6 +367,44 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           // 業種・出典種別・レベルからも引けるよう keywords に補う（例「製造業 化学」）。
           keywords: [theme.sourceType, theme.level, theme.industry_detail ?? ''].filter(Boolean),
           url: `/e-learning?theme=${encodeURIComponent(theme.id)}#el-quiz`,
+        });
+      }
+    }),
+
+    // 教育コース（/education/<slug>＝特別教育・法定教育・労働衛生教育の 12 コース）。
+    // 各コースは固有 title/description＋Course JSON-LD を持ち sitemap 収載済みの実在
+    // indexable ページ（/education/tokubetsu/fullharness 等）だが、横断検索(/search・⌘K)
+    // からは丸ごと 0 件だった＝「フルハーネス 特別教育」「足場 特別教育」「職長 教育」
+    // 「腰痛 予防」「酸欠 特別教育」と現場語彙で自分に要る教育コースを打った現場ユーザー
+    // （現場監督・一人親方・安全担当）が、講習形式・法令根拠を載せた専用ランディングへ
+    // 検索経由で着けなかった発見性の穴（#561 等と同型）を是正。e-learning テーマ（/e-learning?theme=
+    // ＝クイズ演習）とは別軸の「講習コースそのもの」の発見性であり URL も別。
+    // 正本＝EDUCATION_CONTEXTS（slug↔ルート 1:1・title は各ページ TITLE と同値・型のみ import で
+    // ブラウザ安全）。url は `/education/<slug>` で実在ページへ解決（下記 search-index.test.ts の
+    // existsSync ガードで slug↔ページディレクトリの一致を機械固定＝幽霊URL 0）。
+    // keywords は法令マッチ・事故マッチの現場語彙＋講習種別ラベルで、法令名/ハザード語/種別から着地。
+    import('@/data/education-context').then(({ EDUCATION_CONTEXTS }) => {
+      const typeLabel = (slug: string): string =>
+        slug.startsWith('tokubetsu/')
+          ? '特別教育'
+          : slug.startsWith('hoteikyoiku/')
+            ? '法定教育'
+            : '労働衛生教育';
+      for (const ctx of Object.values(EDUCATION_CONTEXTS)) {
+        const label = typeLabel(ctx.slug);
+        items.push({
+          id: `education-course-${ctx.slug}`,
+          title: ctx.title,
+          subtitle: `${label}｜現場の安全教育コース`,
+          category: 'education',
+          keywords: Array.from(
+            new Set(
+              [label, ...ctx.lawMatch.keywords, ...(ctx.accidentMatch.keywords ?? [])].filter(
+                Boolean
+              )
+            )
+          ),
+          url: `/education/${ctx.slug}`,
         });
       }
     }),

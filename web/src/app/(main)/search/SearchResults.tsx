@@ -18,6 +18,7 @@ import {
   Signpost,
   Newspaper,
   LayoutGrid,
+  ScrollText,
   ArrowRight,
   ExternalLink,
   Copy,
@@ -43,6 +44,7 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
   const cls = 'h-4 w-4';
   switch (category) {
     case 'law':       return <BookText className={cls} aria-hidden="true" />;
+    case 'revision':  return <ScrollText className={cls} aria-hidden="true" />;
     case 'notice':    return <FileText className={cls} aria-hidden="true" />;
     case 'chemical':  return <TestTube2 className={cls} aria-hidden="true" />;
     case 'education': return <BookOpen className={cls} aria-hidden="true" />;

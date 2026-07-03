@@ -48,6 +48,10 @@ describe("pin-manager.tsx の操作4要素が44pxタップ標的を満たす", (
       expect(block).toMatch(/min-h-\[44px\]/);
     }
   });
+
+  it("ピン選択ボタン(onFocus)がmin-h-[44px]を含む", () => {
+    expect(elementBlock(SOURCE, "<button", "{p.label}")).toMatch(/min-h-\[44px\]/);
+  });
 });
 
 describe("signage-map-client.tsx の操作5要素が44pxタップ標的を満たす", () => {

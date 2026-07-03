@@ -51,4 +51,26 @@ describe("computeAccountConclusion", () => {
     const c = computeAccountConclusion({ planName: "standard", status: "past_due", periodEndLabel: "2026年8月1日" });
     expect(c.tone).toBe("danger");
   });
+
+  it("プラン照会が失敗した場合はneutralで「確認できません」を示し、フリープラン断定を回避する", () => {
+    const c = computeAccountConclusion({
+      planName: "free",
+      status: "active",
+      periodEndLabel: null,
+      lookupFailed: true,
+    });
+    expect(c.tone).toBe("neutral");
+    expect(c.title).toBe("プラン情報を確認できません");
+  });
+
+  it("照会失敗は他のどの状態よりも優先される", () => {
+    const c = computeAccountConclusion({
+      planName: "pro",
+      status: "past_due",
+      periodEndLabel: null,
+      lookupFailed: true,
+    });
+    expect(c.tone).toBe("neutral");
+    expect(c.title).toBe("プラン情報を確認できません");
+  });
 });

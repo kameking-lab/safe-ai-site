@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { JOB_CLASS_LABELS, type JobClass } from "@/types/mental-health";
 import { JOB_CLASS_OVERLAY } from "@/data/mental-health-rules";
 import { useRovingTablist } from "@/lib/a11y/use-roving-tablist";
@@ -12,6 +12,7 @@ export function JobClassTabs() {
   const bullets = JOB_CLASS_OVERLAY[active];
   const activeIndex = JOB_CLASSES.indexOf(active);
   const { getTabProps } = useRovingTablist(JOB_CLASSES.length, activeIndex, (i) => setActive(JOB_CLASSES[i]));
+  const panelId = useId();
 
   return (
     <div>
@@ -26,6 +27,7 @@ export function JobClassTabs() {
             role="tab"
             type="button"
             aria-selected={active === c}
+            aria-controls={panelId}
             onClick={() => setActive(c)}
             {...getTabProps(i)}
             className={`inline-flex min-h-[44px] items-center justify-center rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
@@ -40,6 +42,7 @@ export function JobClassTabs() {
       </div>
 
       <div
+        id={panelId}
         role="tabpanel"
         className="mt-4 rounded-xl border border-violet-200 bg-violet-50/40 p-4"
       >

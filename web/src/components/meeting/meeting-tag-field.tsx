@@ -18,7 +18,7 @@ export function MeetingTagField({ values, onChange }: { values: string[]; onChan
         {values.map((v) => (
           <span key={v} className="flex items-center gap-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[11px] text-emerald-800">
             {v}
-            <button type="button" onClick={() => onChange(values.filter((x) => x !== v))} className="text-emerald-600 hover:text-emerald-900" aria-label="削除">×</button>
+            <button type="button" onClick={() => onChange(values.filter((x) => x !== v))} className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-emerald-600 hover:text-emerald-900" aria-label="削除">×</button>
           </span>
         ))}
         <input
