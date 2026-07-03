@@ -82,6 +82,7 @@ param(
   [switch]$Register,
   [switch]$InstallUserStartup,
   [switch]$HealOnly,
+  [switch]$RehearseCritic,
   [switch]$WhatIf,
   [switch]$SelfTest,
   [string]$ConfigPath = "",
@@ -312,6 +313,58 @@ function Invoke-Git {
 }
 
 # ---------------------------------------------------------------------------
+# Exercise the EXACT git-worktree plumbing the weekly critic uses (fetch origin/main -> worktree add
+# --detach a sibling checkout -> verify it carries its own loop-runner.ps1 -> worktree remove --force
+# -> prune) WITHOUT spending a Claude one-shot. The real critic path (critic gate, ~line 1044) is
+# otherwise never exercised until it first fires UNATTENDED, and its own -WhatIf branch deliberately
+# does NOT create the worktree - so before this helper the plumbing had no side-effect-free rehearsal.
+# A distinct "rehearsal-" stamp guarantees the throwaway path can never collide with a live critic
+# worktree carrying the same launch stamp; teardown lives in finally so a mid-run failure never leaks a
+# worktree. Returns @{ ok; steps; worktree }. -DryRun reports the plan and runs NO git (mirrors the
+# critic -WhatIf branch). Fails only on real breakage: fetch/add failure, a checkout missing its own
+# loop-runner.ps1 (the one-shot's target), or a worktree left behind after teardown.
+# ---------------------------------------------------------------------------
+function Invoke-CriticRehearsal {
+  param([string]$RepoRoot, [string]$Stamp, [switch]$DryRun)
+  $steps = New-Object System.Collections.Generic.List[string]
+  $wtPath = Get-CriticWorktreePath -RepoRoot $RepoRoot -Stamp ("rehearsal-" + $Stamp)
+  if (-not (Test-WorktreeIsIsolated -RepoRoot $RepoRoot -WorktreePath $wtPath)) {
+    $steps.Add("FAIL: computed rehearsal worktree is not isolated from the main tree: " + $wtPath)
+    return @{ ok = $false; steps = $steps; worktree = $wtPath }
+  }
+  if ($DryRun) {
+    $steps.Add("[WHATIF] would fetch origin/main, add a detached worktree at " + $wtPath + " (git " + ((Get-WorktreeAddArgs -Path $wtPath -Ref 'origin/main') -join ' ') + "), verify it carries its own loop-runner.ps1, then remove it (git " + ((Get-WorktreeRemoveArgs -Path $wtPath) -join ' ') + "). No git executed in dry-run.")
+    return @{ ok = $true; steps = $steps; worktree = $wtPath }
+  }
+  $ok = $true
+  try {
+    $f = Invoke-Git -RepoRoot $RepoRoot -GitArgs @("fetch", "origin", "main", "--quiet")
+    $steps.Add("fetch origin main: " + $(if ($f.ok) { "ok" } else { "FAIL " + $f.out })); if (-not $f.ok) { $ok = $false }
+    $null = Invoke-Git -RepoRoot $RepoRoot -GitArgs @("worktree", "prune")
+    if (Test-Path -LiteralPath $wtPath) {
+      $null = Invoke-Git -RepoRoot $RepoRoot -GitArgs (Get-WorktreeRemoveArgs -Path $wtPath)
+      if (Test-Path -LiteralPath $wtPath) { try { Remove-Item -LiteralPath $wtPath -Recurse -Force -ErrorAction SilentlyContinue } catch {} }
+    }
+    $a = Invoke-Git -RepoRoot $RepoRoot -GitArgs (Get-WorktreeAddArgs -Path $wtPath -Ref "origin/main")
+    $steps.Add("worktree add --detach @origin/main: " + $(if ($a.ok) { "ok" } else { "FAIL " + $a.out })); if (-not $a.ok) { $ok = $false }
+    if ($a.ok) {
+      $hasRunner = Test-Path -LiteralPath (Join-Path $wtPath "loop-runner.ps1")
+      $steps.Add("checkout carries its own loop-runner.ps1 (one-shot target): " + $hasRunner); if (-not $hasRunner) { $ok = $false }
+      $steps.Add("checkout carries loop-prompt-critic.txt (origin/main sanity): " + (Test-Path -LiteralPath (Join-Path $wtPath "loop-prompt-critic.txt")))
+    }
+  } finally {
+    if (Test-Path -LiteralPath $wtPath) {
+      $null = Invoke-Git -RepoRoot $RepoRoot -GitArgs (Get-WorktreeRemoveArgs -Path $wtPath)
+      if (Test-Path -LiteralPath $wtPath) { try { Remove-Item -LiteralPath $wtPath -Recurse -Force -ErrorAction SilentlyContinue } catch {} }
+      $null = Invoke-Git -RepoRoot $RepoRoot -GitArgs @("worktree", "prune")
+    }
+    $leaked = (Test-Path -LiteralPath $wtPath)
+    $steps.Add("teardown: worktree removed; leaked=" + $leaked); if ($leaked) { $ok = $false }
+  }
+  return @{ ok = $ok; steps = $steps; worktree = $wtPath }
+}
+
+# ---------------------------------------------------------------------------
 # -SelfTest: offline verification of the shared status-lock helper (stale-orphan reclamation +
 # fresh-lock respect). Temp files only - no Claude, no real status file, no config, no network.
 # Exits 0 on PASS, 1 on FAIL. Runs before any config read so a broken config cannot block the test.
@@ -377,6 +430,15 @@ if ($SelfTest) {
     Assert-L "worktree add is detached at the given ref" (($addArgs -join " ") -eq ("worktree add --detach " + $wt + " origin/main"))
     $rmArgs = Get-WorktreeRemoveArgs -Path $wt
     Assert-L "worktree remove is forced" (($rmArgs -join " ") -eq ("worktree remove --force " + $wt))
+    # P) -RehearseCritic path derivation: the throwaway worktree is a SIBLING (isolated) and its
+    #    "rehearsal-" stamp can never collide with a real critic worktree carrying the same launch
+    #    stamp; the dry-run reports a plan and executes no git (mirrors the critic -WhatIf branch).
+    $rehWt = Get-CriticWorktreePath -RepoRoot $repoFixture -Stamp ("rehearsal-20260703-080000")
+    Assert-L "rehearsal worktree is a sibling of the repo (isolated)" (Test-WorktreeIsIsolated -RepoRoot $repoFixture -WorktreePath $rehWt)
+    Assert-L "rehearsal path carries the rehearsal- marker" ($rehWt -like "*safe-ai-critic-wt-rehearsal-20260703-080000")
+    Assert-L "rehearsal path never collides with a real critic worktree of the same launch stamp" ($rehWt -ne (Get-CriticWorktreePath -RepoRoot $repoFixture -Stamp "20260703-080000"))
+    $rehDry = Invoke-CriticRehearsal -RepoRoot $repoFixture -Stamp "20260703-080000" -DryRun
+    Assert-L "rehearsal dry-run reports ok and executes no git" ($rehDry.ok -and (($rehDry.steps -join " ") -like "*WHATIF*") -and (-not (Test-Path -LiteralPath $rehDry.worktree)))
     # K) Get-LanesToHeal: names exactly the enabled lanes that have no live runner. A disabled lane
     #    is never healed even when absent from the scan; an alive lane is never re-launched.
     $healLanes = @(
@@ -424,6 +486,22 @@ if ($SelfTest) {
   }
   if ($fails -eq 0) { Write-Launcher "[SELFTEST] ALL PASS"; exit 0 }
   Write-Launcher ("[SELFTEST] " + $fails + " FAILURE(S)"); exit 1
+}
+
+# ---------------------------------------------------------------------------
+# -RehearseCritic: prove the weekly critic's git-worktree plumbing works against the deployed HEAD
+# without spending a Claude one-shot, then exit. Needs only $repoRoot + git, so it runs before any
+# config read. Use it as a side-effect-free pre-flight before an unattended critic season (the real
+# critic first fires unattended, and its -WhatIf branch never creates the worktree). Add -WhatIf to
+# print the plan without touching git. Exits 0 when the full add/verify/teardown cycle succeeds and
+# leaves NO worktree behind, 1 on any breakage.
+# ---------------------------------------------------------------------------
+if ($RehearseCritic) {
+  Write-Launcher ("critic-rehearsal: exercising fetch/worktree-add/verify/teardown (no Claude one-shot)" + $(if ($WhatIf) { " [dry-run]" } else { "" }) + ".")
+  $reh = Invoke-CriticRehearsal -RepoRoot $repoRoot -Stamp $launchStamp -DryRun:$WhatIf
+  foreach ($s in $reh.steps) { Write-Launcher ("  " + $s) }
+  if ($reh.ok) { Write-Launcher "[REHEARSE-CRITIC] PASS (critic plumbing sound; no worktree leaked)."; exit 0 }
+  Write-Launcher "[REHEARSE-CRITIC] FAIL (see steps above; critic would break on plumbing)."; exit 1
 }
 
 # ---------------------------------------------------------------------------
