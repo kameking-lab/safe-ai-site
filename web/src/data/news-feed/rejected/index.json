@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-03T22:01:35.495Z",
+  "updatedAt": "2026-07-04T21:54:39.582Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -400,6 +400,31 @@
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)",
           "relevance 65 < 70 (not labor-safety related for type=accident_report)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "ebad8f2ad7475fb8",
+      "headline": "大阪 守口 交通トラブルで小学生をはねた建設作業員を逮捕",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260704/k10015168901000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 04 Jul 2026 18:55:51 +0900",
+        "fetchedAt": "2026-07-04T21:54:38.464Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 0,
+        "misinformationRisk": 0,
+        "duplication": 0,
+        "judgedAt": "2026-07-04T21:54:39.574Z",
+        "model": "prefilter",
+        "rejectionReasons": [
+          "prefilter:school-context"
         ]
       },
       "approved": false,
