@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-04T21:54:39.582Z",
+  "updatedAt": "2026-07-05T21:57:51.547Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -341,6 +341,32 @@
         "misinformationRisk": 5,
         "duplication": 10,
         "judgedAt": "2026-05-17T21:52:04.401Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "5451a29f478f2223",
+      "headline": "北海道 知床 ヒグマによる死亡事故で閉鎖の羅臼岳 登山道再開",
+      "aiSummary": "知床羅臼岳のヒグマ死亡事故で閉鎖された登山道が再開。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260705/k10015169171000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sun, 05 Jul 2026 16:02:27 +0900",
+        "fetchedAt": "2026-07-05T21:57:43.554Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-05T21:57:51.539Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"

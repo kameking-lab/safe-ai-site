@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-04T21:54:39.635Z",
+  "generatedAt": "2026-07-05T21:57:51.656Z",
   "counts": {
     "approved": 25,
-    "rejected": 28,
-    "total": 53,
-    "approvalRate": 0.472
+    "rejected": 29,
+    "total": 54,
+    "approvalRate": 0.463
   },
   "byDay": [
     {
@@ -223,6 +223,13 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-07-06",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -236,9 +243,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 3,
-      "rejected": 26,
-      "total": 29,
-      "approvalRate": 0.103
+      "rejected": 27,
+      "total": 30,
+      "approvalRate": 0.1
     }
   ],
   "byEstimatedWorkCategory": [
@@ -344,7 +351,7 @@
       "rejected": [
         2,
         8,
-        13,
+        14,
         1,
         1,
         0,
@@ -381,7 +388,7 @@
       ],
       "rejected": [
         4,
-        23,
+        24,
         1,
         0,
         0,
@@ -419,7 +426,7 @@
       ],
       "rejected": [
         18,
-        10,
+        11,
         0,
         0,
         0,
@@ -457,7 +464,7 @@
       ],
       "rejected": [
         2,
-        19,
+        20,
         0,
         0,
         0,
@@ -472,7 +479,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 24
+      "count": 25
     },
     {
       "reason": "duplication",
