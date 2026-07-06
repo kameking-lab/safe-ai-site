@@ -1,5 +1,5 @@
 {
-  "fetchedAt": "2026-06-29T04:13:20.216Z",
+  "fetchedAt": "2026-07-06T03:50:37.208Z",
   "source": "e-Gov 法令API v2（政府標準利用規約2.0・出典明示）",
   "total": 20,
   "skipped": 0,
@@ -334,24 +334,6 @@
       "source_url": "https://laws.e-gov.go.jp/law/347CO0000000318"
     },
     {
-      "id": "lr-egov-347M50002000032-20260401",
-      "title": "労働安全衛生規則（労働安全衛生規則及び電離放射線障害防止規則の一部を改正する省令）",
-      "publishedAt": "2025-10-29",
-      "revisionNumber": "令和七年厚生労働省令第百八号",
-      "kind": "ordinance",
-      "category": "省令",
-      "issuer": "厚生労働省",
-      "summary": "安衛則の最新改正（出典: e-Gov法令検索の構造データ）。改正法令「労働安全衛生規則及び電離放射線障害防止規則の一部を改正する省令」。公布 2025-10-29、施行日 2026-04-01。改正内容の詳細はe-Govの原文で必ずご確認ください。",
-      "source": {
-        "url": "https://laws.e-gov.go.jp/law/347M50002000032",
-        "label": "e-Gov 労働安全衛生規則"
-      },
-      "official_notice_number": "",
-      "publication_date": "2025-10-29",
-      "enforcement_date": "2026-04-01",
-      "source_url": "https://laws.e-gov.go.jp/law/347M50002000032"
-    },
-    {
       "id": "lr-egov-347AC0000000057-20260401",
       "title": "労働安全衛生法（労働安全衛生法及び作業環境測定法の一部を改正する法律）",
       "publishedAt": "2025-05-14",
@@ -392,6 +374,25 @@
         "chemical",
         "manufacturing"
       ]
+    },
+    {
+      "id": "lr-egov-347M50002000032-20260701",
+      "title": "労働安全衛生規則（労働安全衛生規則の一部を改正する省令）",
+      "publishedAt": "2024-04-25",
+      "revisionNumber": "令和六年厚生労働省令第七十九号",
+      "kind": "ordinance",
+      "category": "省令",
+      "issuer": "厚生労働省",
+      "summary": "安衛則の最新改正（出典: e-Gov法令検索の構造データ）。改正法令「労働安全衛生規則の一部を改正する省令」。公布 2024-04-25、施行日 2026-07-01。改正内容の詳細はe-Govの原文で必ずご確認ください。",
+      "source": {
+        "url": "https://laws.e-gov.go.jp/law/347M50002000032",
+        "label": "e-Gov 労働安全衛生規則"
+      },
+      "official_notice_number": "",
+      "publication_date": "2024-04-25",
+      "enforcement_date": "2026-07-01",
+      "enforcement_status": "enforced",
+      "source_url": "https://laws.e-gov.go.jp/law/347M50002000032"
     },
     {
       "id": "lr-egov-347M50002000043-20221201",
