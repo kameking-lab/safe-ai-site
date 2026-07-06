@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-05T21:57:51.656Z",
+  "generatedAt": "2026-07-06T22:10:27.224Z",
   "counts": {
-    "approved": 25,
+    "approved": 26,
     "rejected": 29,
-    "total": 54,
-    "approvalRate": 0.463
+    "total": 55,
+    "approvalRate": 0.473
   },
   "byDay": [
     {
@@ -230,15 +230,22 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-07-07",
+      "approved": 1,
+      "rejected": 0,
+      "total": 1,
+      "approvalRate": 1
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 22,
+      "approved": 23,
       "rejected": 2,
-      "total": 24,
-      "approvalRate": 0.917
+      "total": 25,
+      "approvalRate": 0.92
     },
     {
       "publisher": "日本放送協会",
@@ -346,7 +353,7 @@
         0,
         1,
         4,
-        20
+        21
       ],
       "rejected": [
         2,
@@ -376,7 +383,7 @@
       ],
       "approved": [
         3,
-        15,
+        16,
         7,
         0,
         0,
@@ -413,7 +420,7 @@
         "90-100"
       ],
       "approved": [
-        20,
+        21,
         5,
         0,
         0,
@@ -452,7 +459,7 @@
       ],
       "approved": [
         0,
-        24,
+        25,
         1,
         0,
         0,
@@ -558,6 +565,19 @@
         "publisher": "厚生労働省"
       },
       {
+        "headline": "第187回労働政策審議会安全衛生分科会（開催案内）",
+        "aiSummary": "厚生労働省が労働政策審議会安全衛生分科会の開催を案内。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-06T22:10:27.163Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
         "headline": "「第３回　労働安全衛生法に基づく一般健康診断の検査項目等に関する検討会」を開催します",
         "aiSummary": "厚生労働省が労働安全衛生法に基づく一般健康診断の検査項目に関する検討会を開催。",
         "score": {
@@ -605,19 +625,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-06-17T22:43:45.885Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "令和７年「労働災害動向調査（事業所調査（事業所規模100人以上）及び総合工事業調査）」の結果を公表します",
-        "aiSummary": "厚生労働省が令和7年の労働災害動向調査結果を公表。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 20,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-06-16T22:51:26.825Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"

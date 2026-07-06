@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-05T21:57:51.547Z",
+  "updatedAt": "2026-07-06T22:10:27.170Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -116,6 +116,29 @@
         "misinformationRisk": 5,
         "duplication": 10,
         "judgedAt": "2026-07-02T22:03:24.402Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "b24cdff10a27ef20",
+      "headline": "第187回労働政策審議会安全衛生分科会（開催案内）",
+      "aiSummary": "厚生労働省が労働政策審議会安全衛生分科会の開催を案内。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_74211.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-07-01T10:15:00+09:00",
+        "fetchedAt": "2026-07-06T22:10:16.280Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-06T22:10:27.163Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
