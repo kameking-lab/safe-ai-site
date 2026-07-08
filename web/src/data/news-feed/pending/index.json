@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-07T22:08:34.345Z",
+  "updatedAt": "2026-07-08T22:01:52.094Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -170,15 +170,15 @@
     {
       "id": "dececaf9da667db4",
       "headline": "滋賀 びわ湖 民放番組の会場設営中に作業員1人死亡 湖に転落か",
-      "aiSummary": "びわ湖での番組会場設営中、作業員が湖に転落し死亡した。",
+      "aiSummary": "びわ湖で番組会場設営中の作業員が転落し死亡。",
       "source": {
         "name": "NHK NEWS WEB（社会）",
         "url": "http://www3.nhk.or.jp/news/html/20260706/k10015170121000.html",
         "publisher": "日本放送協会",
         "publishedAt": "Mon, 06 Jul 2026 21:07:21 +0900",
-        "fetchedAt": "2026-07-07T22:08:25.628Z"
+        "fetchedAt": "2026-07-08T22:01:44.707Z"
       },
-      "estimatedAccidentType": "溺水",
+      "estimatedAccidentType": "墜落",
       "estimatedWorkCategory": "建設業",
       "newsType": "accident_report",
       "score": {
@@ -186,7 +186,7 @@
         "copyrightRisk": 15,
         "misinformationRisk": 10,
         "duplication": 70,
-        "judgedAt": "2026-07-07T22:08:34.338Z",
+        "judgedAt": "2026-07-08T22:01:52.086Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)"
