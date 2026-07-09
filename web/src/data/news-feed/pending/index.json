@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-08T22:01:52.094Z",
+  "updatedAt": "2026-07-09T22:18:24.138Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -176,17 +176,17 @@
         "url": "http://www3.nhk.or.jp/news/html/20260706/k10015170121000.html",
         "publisher": "日本放送協会",
         "publishedAt": "Mon, 06 Jul 2026 21:07:21 +0900",
-        "fetchedAt": "2026-07-08T22:01:44.707Z"
+        "fetchedAt": "2026-07-09T22:18:11.535Z"
       },
       "estimatedAccidentType": "墜落",
       "estimatedWorkCategory": "建設業",
       "newsType": "accident_report",
       "score": {
         "relevance": 90,
-        "copyrightRisk": 15,
+        "copyrightRisk": 20,
         "misinformationRisk": 10,
         "duplication": 70,
-        "judgedAt": "2026-07-08T22:01:52.086Z",
+        "judgedAt": "2026-07-09T22:18:24.130Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)"

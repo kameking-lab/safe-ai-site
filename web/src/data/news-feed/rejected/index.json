@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-08T22:01:52.094Z",
+  "updatedAt": "2026-07-09T22:18:24.138Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -290,6 +290,33 @@
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)",
           "relevance 40 < 70 (not labor-safety related for type=accident_report)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "7c8c1274037e23cc",
+      "headline": "東日本・西日本で10日も猛暑日予想 熱中症対策徹底を",
+      "aiSummary": "日本各地で猛暑が続き、熱中症への厳重な警戒が必要である。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260709/k10015172481000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 09 Jul 2026 20:19:53 +0900",
+        "fetchedAt": "2026-07-09T22:18:11.535Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-09T22:18:17.060Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
