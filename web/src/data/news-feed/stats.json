@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-09T22:18:24.191Z",
+  "generatedAt": "2026-07-10T21:57:54.762Z",
   "counts": {
-    "approved": 26,
-    "rejected": 30,
-    "total": 56,
-    "approvalRate": 0.464
+    "approved": 29,
+    "rejected": 32,
+    "total": 61,
+    "approvalRate": 0.475
   },
   "byDay": [
     {
@@ -244,22 +244,29 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-07-11",
+      "approved": 3,
+      "rejected": 2,
+      "total": 5,
+      "approvalRate": 0.6
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 23,
+      "approved": 25,
       "rejected": 2,
-      "total": 25,
-      "approvalRate": 0.92
+      "total": 27,
+      "approvalRate": 0.926
     },
     {
       "publisher": "日本放送協会",
-      "approved": 3,
-      "rejected": 28,
-      "total": 31,
-      "approvalRate": 0.097
+      "approved": 4,
+      "rejected": 30,
+      "total": 34,
+      "approvalRate": 0.118
     }
   ],
   "byEstimatedWorkCategory": [
@@ -303,9 +310,16 @@
     {
       "type": "熱中症",
       "approved": 4,
-      "rejected": 11,
-      "total": 15,
-      "approvalRate": 0.267
+      "rejected": 12,
+      "total": 16,
+      "approvalRate": 0.25
+    },
+    {
+      "type": "崩壊・倒壊",
+      "approved": 0,
+      "rejected": 3,
+      "total": 3,
+      "approvalRate": 0
     },
     {
       "type": "交通事故",
@@ -316,13 +330,6 @@
     },
     {
       "type": "車両",
-      "approved": 0,
-      "rejected": 2,
-      "total": 2,
-      "approvalRate": 0
-    },
-    {
-      "type": "崩壊・倒壊",
       "approved": 0,
       "rejected": 2,
       "total": 2,
@@ -359,13 +366,13 @@
         0,
         0,
         1,
-        4,
-        21
+        5,
+        23
       ],
       "rejected": [
         2,
-        8,
-        15,
+        9,
+        16,
         1,
         1,
         0,
@@ -390,8 +397,8 @@
       ],
       "approved": [
         3,
-        16,
-        7,
+        18,
+        8,
         0,
         0,
         0,
@@ -402,7 +409,7 @@
       ],
       "rejected": [
         4,
-        25,
+        27,
         1,
         0,
         0,
@@ -427,8 +434,8 @@
         "90-100"
       ],
       "approved": [
-        21,
-        5,
+        23,
+        6,
         0,
         0,
         0,
@@ -439,7 +446,7 @@
         0
       ],
       "rejected": [
-        19,
+        21,
         11,
         0,
         0,
@@ -466,7 +473,7 @@
       ],
       "approved": [
         0,
-        25,
+        28,
         1,
         0,
         0,
@@ -478,7 +485,7 @@
       ],
       "rejected": [
         2,
-        21,
+        23,
         0,
         0,
         0,
@@ -493,7 +500,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 26
+      "count": 28
     },
     {
       "reason": "duplication",
@@ -546,6 +553,45 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "改正労災保険法が成立 遺族補償年金の支給 性別の差を解消へ",
+        "aiSummary": "労災保険法が改正され、遺族補償年金の性別による支給格差が解消される。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 20,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-07-10T21:57:33.498Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "第６回「労働基準法における「労働者」に関する研究会」を開催します",
+        "aiSummary": "厚生労働省が労働基準法における労働者の定義を議論する研究会を開催。",
+        "score": {
+          "relevance": 85,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-10T21:57:54.707Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
+        "headline": "令和８年度第６回「石綿に係る疾病の業務上外に関する検討会」を開催します",
+        "aiSummary": "厚生労働省が石綿関連疾病の業務上外を議論する検討会を開催予定。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-10T21:57:50.417Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
         "headline": "労働基準監督官採用試験広報HP",
         "aiSummary": "厚生労働省が労働基準監督官採用試験の広報サイトを開設。",
         "score": {
@@ -593,45 +639,6 @@
           "misinformationRisk": 10,
           "duplication": 10,
           "judgedAt": "2026-06-30T22:13:34.810Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "令和８年度第５回「石綿に係る疾病の業務上外に関する検討会」を開催します",
-        "aiSummary": "厚生労働省が石綿関連疾病の業務上外を検討する会議を開催する。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-06-26T22:08:38.915Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "第５３回特定石綿被害建設業務労働者等認定審査会　開催案内",
-        "aiSummary": "厚生労働省が第53回特定石綿被害認定審査会の開催を案内。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-06-17T22:43:52.358Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "「令和７年度　石綿による疾病に関する労災保険給付などの請求・決定状況まとめ（速報値）」を公表します",
-        "aiSummary": "厚生労働省が、石綿関連疾病の労災保険給付の請求・決定状況（速報値）を公表した。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-06-17T22:43:45.885Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"

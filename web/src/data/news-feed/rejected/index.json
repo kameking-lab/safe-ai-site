@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-09T22:18:24.138Z",
+  "updatedAt": "2026-07-10T21:57:54.713Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -744,6 +744,60 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 15 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "03bd45aaae3305f0",
+      "headline": "長崎 南島原 熱中症疑いで搬送の89歳男性が死亡",
+      "aiSummary": "長崎県南島原市で高齢男性が熱中症とみられる症状で死亡した。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260710/k10015174011000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 10 Jul 2026 20:55:00 +0900",
+        "fetchedAt": "2026-07-10T21:57:21.057Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-10T21:57:28.243Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "41f4dd896ff6fb0c",
+      "headline": "ベネズエラ大地震 倒壊建物に多数の行方不明者 支援本格化",
+      "aiSummary": "ベネズエラで大規模地震が発生し、建物倒壊で多数の安否不明者が。国際的な支援活動が本格化している。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260710/k10015173521000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 10 Jul 2026 14:11:34 +0900",
+        "fetchedAt": "2026-07-10T21:57:21.057Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 10,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-10T21:57:39.560Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 10 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
