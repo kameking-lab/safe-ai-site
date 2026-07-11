@@ -36,6 +36,10 @@ export const SITE_FEEDS: readonly SiteFeed[] = [
     path: "/feed/serious-cases.xml",
     title: "安全AIポータル 重大災害事例（匿名・公表事実）",
   },
+  {
+    path: "/feed/weather-alerts.xml",
+    title: "安全AIポータル 気象警報（発表中の都道府県）",
+  },
 ] as const;
 
 /**

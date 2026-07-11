@@ -116,7 +116,7 @@ function StatsSlide({ s }: { s: HazardTypeSummary }) {
                 <XAxis dataKey="year" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
                 <YAxis tick={{ fontSize: 10 }} width={44} />
                 <Tooltip />
-                <Line type="monotone" dataKey="死傷者数" stroke="#0284c7" strokeWidth={2.5} dot={false} />
+                <Line type="monotone" dataKey="死傷者数" stroke="#0284c7" strokeWidth={2.5} dot={false} isAnimationActive={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -130,7 +130,7 @@ function StatsSlide({ s }: { s: HazardTypeSummary }) {
                 <XAxis type="number" tick={{ fontSize: 10 }} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={86} />
                 <Tooltip />
-                <Bar dataKey="件数" fill="#f59e0b" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="件数" fill="#f59e0b" radius={[0, 4, 4, 0]} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>

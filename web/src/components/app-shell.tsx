@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { FlagshipNav } from "@/components/flagship-nav";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { PAID_MODE } from "@/lib/paid-mode";
 // C-1: 件数は SITE_STATS の静的リテラルを使う。@/data/laws や @/lib/mhlw-chemicals を
 // ここで import すると法令コーパス・化学物質DB（数MB）が全ページのバンドルに同梱される。
@@ -510,6 +511,7 @@ export function AppShell({ children, userSlot }: AppShellProps) {
               >
                 <Search className="h-5 w-5" aria-hidden="true" />
               </button>
+              <NotificationBell />
               <ThemeToggle size="sm" />
               {userSlot}
               <button
@@ -689,6 +691,7 @@ export function AppShell({ children, userSlot }: AppShellProps) {
 
         {/* Desktop top bar — ⌘K検索ヒント + 屋外モードトグルを右上に常設 */}
         <div className="hidden items-center justify-end gap-2 border-b border-slate-200 bg-white/70 px-6 py-2 backdrop-blur lg:flex print:!hidden">
+          <NotificationBell />
           <button
             type="button"
             onClick={openCommandPalette}
