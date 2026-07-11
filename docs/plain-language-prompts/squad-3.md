@@ -16,3 +16,4 @@
 - 執筆で触ってよいのは web/src/data/plain/<担当法令>.ts（新規）と web/src/data/plain/index.ts への import＋登録1行のみ。コーパス原文（web/src/data/laws/**）・UI・lib・他部隊のファイルは変更禁止（fidelityで赤が出ても原文側を直さない）。
 - 捏造0: 原文に無い義務・数値・条件を書かない（fidelityゲートが検出するが、ゲートを騙す書き方も禁止）。省くものは omissions に明示宣言。
 - main直接コミット禁止・CI緑のみマージ・逆質問せず自分で判断（迷う条は保守的に原文寄りへ）。
+- 生成物（docs/plain-language-coverage.md・BACKLOG-plain-stale.md）はPRに含めない。npm run plain:status は確認用に回してよいが、commit前に `git checkout -- docs/plain-language-coverage.md BACKLOG-plain-stale.md` で戻す（各自の再生成版をコミットすると後続マージでPRがdirty化し、web-ciが一度も発火しなくなる。詳細: docs/plain-ci-web-ci-firing-handbook-2026-07-11.md）。dirtyになったら最新mainへrebase→pushでclean化してCI発火。
