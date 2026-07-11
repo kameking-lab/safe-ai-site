@@ -37,6 +37,13 @@ export type CasLawIndexEntry = {
   /** CAS番号（mock DB の混合物表記「—（混合物）」もキーとして許容） */
   cas: string;
   label: string;
+  /**
+   * 名称解決キー（CASレス告示名・群指定の第一級対応。2026-07-11 一窓化）。
+   * 「溶接ヒューム」等のCASを持たない令別表収載名や、「マンガン及びその化合物」の
+   * ような群指定名を、正規化名称の完全一致で引けるようにする。
+   * substance-legal-audit.test.ts が重複・未解決キーを検査する。
+   */
+  nameKeys?: readonly string[];
   /** 令別表第3（特化則）の該当号。無指定＝非該当を確認済み */
   beppyo3?: readonly Beppyo3Ref[];
   /** 令別表第6の2（有機則）の該当号。無指定＝非該当を確認済み */
@@ -210,13 +217,17 @@ export const CAS_LAW_INDEX: readonly CasLawIndexEntry[] = [
   {
     cas: "7439-96-5",
     label: "マンガン及びその化合物",
+    nameKeys: ["マンガン及びその化合物", "マンガン化合物"],
     beppyo3: [{ kubun: 2, go: "33", nameContains: "マンガン" }],
     scopeNote: "マンガン及びその化合物（群指定）",
   },
   {
     cas: "—（混合物）",
     label: "溶接ヒューム",
+    nameKeys: ["溶接ヒューム"],
     beppyo3: [{ kubun: 2, go: "34の2", nameContains: "溶接ヒューム" }],
+    notes:
+      "CASを持たない告示名（令和2年政令第148号で令別表第3第2号34の2に追加）。アーク溶接等の溶接ヒュームが対象",
   },
   {
     cas: "142844-00-6",
