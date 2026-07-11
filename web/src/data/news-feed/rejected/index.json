@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-10T21:57:54.713Z",
+  "updatedAt": "2026-07-11T21:44:04.118Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -377,6 +377,32 @@
       "provenance": "news_auto"
     },
     {
+      "id": "0cecfb73bb8be469",
+      "headline": "九州で危険な暑さ予想 熱中症対策を 北日本では発達した雨雲",
+      "aiSummary": "九州地方で高温が予想され熱中症に警戒。北日本では大雨に注意。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260712/k10015174761000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sun, 12 Jul 2026 06:31:06 +0900",
+        "fetchedAt": "2026-07-11T21:43:48.311Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-11T21:43:56.542Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
       "id": "5451a29f478f2223",
       "headline": "北海道 知床 ヒグマによる死亡事故で閉鎖の羅臼岳 登山道再開",
       "aiSummary": "知床羅臼岳のヒグマ死亡事故で閉鎖された登山道が再開。",
@@ -424,6 +450,31 @@
         "rejectionReasons": [
           "relevance 15 < 70 (not labor-safety related)",
           "duplication 85 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "ba3a3477a54e9260",
+      "headline": "中高生の熱中症 運動を伴う部活動が最多 客観データで対策を",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260711/k10015174511000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 11 Jul 2026 17:17:24 +0900",
+        "fetchedAt": "2026-07-11T21:43:48.311Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 0,
+        "misinformationRisk": 0,
+        "duplication": 0,
+        "judgedAt": "2026-07-11T21:43:56.542Z",
+        "model": "prefilter",
+        "rejectionReasons": [
+          "prefilter:sports-context"
         ]
       },
       "approved": false,
