@@ -11,11 +11,14 @@ describe("Phase 1c PRTR 統合", () => {
     expect(CONCENTRATION_LIMITS.summary.withPrtr).toBeGreaterThanOrEqual(300);
   });
 
-  it("prtrImport メタが書き込まれている", () => {
+  it("prtrImport メタが書き込まれている（O11で公式NITEリストへ置換済み）", () => {
     expect(CONCENTRATION_LIMITS.prtrImport).toBeDefined();
-    expect(CONCENTRATION_LIMITS.prtrImport?.class1Tagged).toBeGreaterThanOrEqual(300);
-    expect(CONCENTRATION_LIMITS.prtrImport?.class2Tagged).toBeGreaterThanOrEqual(50);
-    expect(CONCENTRATION_LIMITS.prtrImport?.mirror).toContain("ra-law-db");
+    // 2021(R3)改正政令の公式CAS収載リスト（第一種515・第二種134）由来
+    expect(CONCENTRATION_LIMITS.prtrImport?.class1Tagged).toBeGreaterThanOrEqual(800);
+    expect(CONCENTRATION_LIMITS.prtrImport?.class2Tagged).toBeGreaterThanOrEqual(130);
+    expect(CONCENTRATION_LIMITS.prtrImport?.class1Count).toBe(515);
+    expect(CONCENTRATION_LIMITS.prtrImport?.class2Count).toBe(134);
+    expect(CONCENTRATION_LIMITS.prtrImport?.sourceUrl).toContain("nite.go.jp");
   });
 
   it("sources マップに PRTR_KAKAN が登録されている", () => {
@@ -115,10 +118,10 @@ describe("Phase 1c+1d 主要建設業頻出物質の規制タグ確認", () => {
   }
 });
 
-describe("Phase 1b/1c/1d: バージョン情報", () => {
-  it("version が 3.3 系 (Phase 1b/1c/1d 統合済)", () => {
-    expect(CONCENTRATION_LIMITS.version).toContain("3.3");
-    expect(CONCENTRATION_LIMITS.version).toContain("chashin");
+describe("Phase 1b/1c/1d + O11: バージョン情報", () => {
+  it("version が 3.4 系 (O11 公式PRTR・毒劇法・化審法 正本置換済)", () => {
+    expect(CONCENTRATION_LIMITS.version).toContain("3.4");
+    expect(CONCENTRATION_LIMITS.version).toContain("official");
   });
 
   it("総物質数が 3,500 件以上で 6,000 件以下 (NITE+PRTR+化審法 統合範囲)", () => {

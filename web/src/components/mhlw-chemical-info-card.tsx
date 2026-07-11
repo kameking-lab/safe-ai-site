@@ -3,15 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AlertTriangle, BookOpen, Database, ExternalLink, Gauge, ArrowRight } from "lucide-react";
-import {
-  regulatoryLabels,
-  relatedLawTexts,
-  getSupplementalInfo,
-  MHLW_MERGED_CHEMICAL_COUNT,
-  EXTERNAL_REF_LABEL,
-  type MergedChemical,
-  type ConcentrationLimitEntry,
-} from "@/lib/mhlw-chemicals";
+import type { MergedChemical, ConcentrationLimitEntry } from "@/lib/mhlw-chemicals";
+import { regulatoryLabels, relatedLawTexts, EXTERNAL_REF_LABEL } from "@/lib/chemical/mhlw-labels";
+import { getSupplementalInfo } from "@/lib/chemical/supplemental-info";
+import { MHLW_MERGED_CHEMICAL_COUNT_SLIM as MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals-slim";
 import { RegulationTagBadgeList } from "@/components/regulation-tag-badge";
 import { RegulationTagsSection } from "@/components/regulation-tags-section";
 import {

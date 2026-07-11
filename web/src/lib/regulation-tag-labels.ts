@@ -364,56 +364,24 @@ export const CONSTRUCTION_PRIORITY_CAS_SET = new Set(
 );
 
 /**
- * P0-009 (usability-audit-day2-2026-05-24):
- * 主要物質の 安衛法 特別則 タグの CAS マッピング。
+ * 安衛法 特別則タグ（特化則・有機則・特別管理物質）の CAS マッピング。
  *
- * 出典:
- * - 特定化学物質障害予防規則 (347M50002000039) 別表第1
- * - 有機溶剤中毒予防規則 (347M50002000036) 別表第1
- * - 石綿障害予防規則 (417M60000100021)
- * - 厚生労働省 化学物質情報 (https://anzeninfo.mhlw.go.jp/anzen_pg/SAB_FND.aspx)
+ * 【O11 (2026-07-11) 全対象ETL展開】特化則1〜3類・有機則1〜3種・特別管理物質は
+ * cas-law-index.ts（人手レビュー層）× anei-beppyo-snapshot.ts（e-Gov生成物）から
+ * **機械導出**する。従来のハードコード表（約35CAS）は撤去した＝手書き区分は存在しない。
+ * substance-legal-audit.test.ts が導出結果と正本の全件突合を CI に常設しており、
+ * cas-law-index の号参照を1件でも誤るとテストが落ちる。
  *
- * 【F2 (2026-07-03) 突合パイプライン常設】この表の特化則/有機則/特別管理物質の主張は
- * e-Gov 正本スナップショット (src/data/legal/anei-beppyo-snapshot.ts) と CI で全件突合される
- * (src/data/legal/substance-legal-audit.test.ts)。誤区分を1件でも入れると vitest が落ちる。
- * 新しい CAS を追加する場合は src/data/legal/cas-law-index.ts に号参照を登録すること
- * (未登録のまま特別則タグを付けると index-missing で CI が落ちる)。
- * 全対象物質への展開 (特化則約75群・有機則44物質) は dataレーン O11。
- *
- * 「特別管理物質」(発がん性)に該当するものはコメントで明示。
+ * 業務・作業列挙型の規則（鉛則・四アルキル鉛則・石綿則・酸欠則・粉じん則）は
+ * 物質スナップショットから導出できないため、従来どおり限定的な手書きを維持する
+ * （付与先CASは substance-legal-audit.test.ts で凍結）。
  */
-export const OSHA_REGULATION_TAGS_BY_CAS: Readonly<Record<string, RegulationTag[]>> = {
-  // ---- 特化則 第二類 (特別管理物質含む) -----------------------
-  "75-09-2": ["tokutei-2"], // ジクロロメタン (特別管理物質・令別表第3第2号19の3)
-  "71-43-2": ["tokutei-2"], // ベンゼン (特別管理物質・同30)
-  "79-06-1": ["tokutei-2"], // アクリルアミド (同1。特化則38条の4の列挙外=特別管理物質ではない)
-  "50-00-0": ["tokutei-2"], // ホルムアルデヒド (特別管理物質・同31の2)
-  "75-21-8": ["tokutei-2"], // エチレンオキシド (特別管理物質・同5)
-  "127-18-4": ["tokutei-2"], // テトラクロロエチレン (特別管理物質・特別有機溶剤・同22の4)
-  "79-01-6": ["tokutei-2"], // トリクロロエチレン (特別管理物質・特別有機溶剤・同22の5)
-  "7782-50-5": ["tokutei-2"], // 塩素 (同7。第三類ではない)
-  "7664-39-3": ["tokutei-2"], // フッ化水素 (同28。第三類ではない)
-  "67-66-3": ["tokutei-2"], // クロロホルム (特別管理物質・特別有機溶剤・同11の2。平成26年改正で有機則第一種から移行)
-  "56-23-5": ["tokutei-2"], // 四塩化炭素 (特別管理物質・特別有機溶剤・同18の2。平成26年改正で有機則第一種から移行)
-  "1336-36-3": ["tokutei-1"], // PCB (塩素化ビフェニル・令別表第3第1号3)
-  "7439-97-6": ["tokutei-2"], // 水銀 (同22)
-  "7440-43-9": ["tokutei-2"], // カドミウム (同10)
-  // ---- 特化則 第三類 (大量漏えい・急性中毒予防) ----------------
-  "7647-01-0": ["tokutei-3"], // 塩化水素 (令別表第3第3号3)
-  "7697-37-2": ["tokutei-3"], // 硝酸 (同4)
-  // F2 (2026-07-03) ETL初版実証: 診断03で本番欠落を実測した代表物質を正本突合の上で追加
-  "7664-93-9": ["tokutei-3"], // 硫酸 (同8)
-  "7664-41-7": ["tokutei-3"], // アンモニア (同1)
-  // ---- 有機則 第二種 (主要溶剤) -------------------------------
-  "108-88-3": ["yuki-2"], // トルエン
-  "1330-20-7": ["yuki-2"], // キシレン
-  "67-64-1": ["yuki-2"], // アセトン
-  "78-93-3": ["yuki-2"], // メチルエチルケトン (MEK)
-  "141-78-6": ["yuki-2"], // 酢酸エチル
-  "67-56-1": ["yuki-2"], // メタノール (令別表第6の2第42号)
-  // ---- 有機則 第三種 (F2でタグ語彙を新設) -----------------------
-  "8006-61-9": ["yuki-3"], // ガソリン (令別表第6の2第48号)
-  // ---- 鉛則・四アルキル鉛則 (F2でタグ語彙を新設。令別表第4/第5=業務列挙のため人手検証) ----
+import { CAS_LAW_INDEX } from "@/data/legal/cas-law-index";
+import { deriveFromIndexEntry } from "@/data/legal/substance-legal-profile";
+
+/** 業務・作業列挙型の特別則（機械突合対象外）。付与先は監査テストで凍結 */
+const MANUAL_OSHA_TAGS: Readonly<Record<string, RegulationTag[]>> = {
+  // ---- 鉛則・四アルキル鉛則 (令別表第4/第5=業務列挙のため人手検証) ----
   "7439-92-1": ["namari"], // 鉛 (令別表第4の鉛業務)
   "78-00-2": ["yonalkyl"], // 四アルキル鉛 (令別表第5の四アルキル鉛等業務)
   // ---- 石綿則 ----------------------------------------------
@@ -421,20 +389,44 @@ export const OSHA_REGULATION_TAGS_BY_CAS: Readonly<Record<string, RegulationTag[
   "12172-73-5": ["sekimen"], // アモサイト
   "12001-29-5": ["sekimen"], // クリソタイル
   "12001-28-4": ["sekimen"], // クロシドライト
-  // ---- 酸欠則 (CAS 直接指定はないが代表ガス) -------------------
-  // 酸欠則は作業環境(酸素濃度18%未満)の規制であり物質単位ではないため、
-  // タグは作業環境関連物質(窒素・二酸化炭素・硫化水素)のみに付与。
+  // ---- 酸欠則 (作業環境規制。代表ガスのみ) -------------------
   "7727-37-9": ["sankketsu"], // 窒素 (酸素欠乏発生ガス)
   "124-38-9": ["sankketsu"], // 二酸化炭素 (高濃度で酸素欠乏発生)
-  "7783-06-4": ["tokutei-2", "sankketsu"], // 硫化水素 (酸欠則 第二種・特化則 第二類)
+  "7783-06-4": ["sankketsu"], // 硫化水素 (酸欠則 第二種。特化則第二類は導出側で付与)
   // ---- 粉じん則 (代表物質) --------------------------------
   "14808-60-7": ["funjin"], // 結晶質シリカ (石英)
   "14464-46-1": ["funjin"], // 結晶質シリカ (クリストバライト)
 };
 
+function buildDerivedOshaTags(): {
+  tags: Record<string, RegulationTag[]>;
+  special: Set<string>;
+} {
+  const tags: Record<string, RegulationTag[]> = {};
+  const special = new Set<string>();
+  for (const entry of CAS_LAW_INDEX) {
+    const derived = deriveFromIndexEntry(entry);
+    const list: RegulationTag[] = [];
+    for (const k of derived.tokkaKubun) list.push(`tokutei-${k}` as RegulationTag);
+    for (const k of derived.yukiClass) list.push(`yuki-${k}` as RegulationTag);
+    if (derived.specialControl) special.add(entry.cas);
+    if (list.length > 0) tags[entry.cas] = list;
+  }
+  for (const [cas, manual] of Object.entries(MANUAL_OSHA_TAGS)) {
+    tags[cas] = [...(tags[cas] ?? []), ...manual];
+  }
+  return { tags, special };
+}
+
+const derivedOsha = buildDerivedOshaTags();
+
+/** cas-law-index × e-Gov snapshot から機械導出した特別則タグ表（手書き禁止） */
+export const OSHA_REGULATION_TAGS_BY_CAS: Readonly<Record<string, RegulationTag[]>> =
+  derivedOsha.tags;
+
 /**
- * P0-009: CAS 番号から 安衛法 特別則 タグを取得。
- * 未登録の物質は空配列を返す (false-positive を避けるためマッピング外は表示しない)。
+ * CAS 番号から 安衛法 特別則 タグを取得。
+ * 未登録の物質は空配列を返す (false-positive を避けるため index 未突合は表示しない)。
  */
 export function oshaTagsForCas(cas: string | null | undefined): RegulationTag[] {
   if (!cas) return [];
@@ -443,23 +435,10 @@ export function oshaTagsForCas(cas: string | null | undefined): RegulationTag[] 
 }
 
 /**
- * P0-009: 特別管理物質 (特化則 第二類のうちがん原性等で30年記録保存対象) かどうか。
- * UI表示で「特別管理物質」バッジを併記するために使用。
- *
- * 注: 完全な特別管理物質リストは ETL 整備が必要。ここでは確実なものに限定。
+ * 特別管理物質 (特化則38条の4・がん原性等で30年記録保存対象) の集合。
+ * 第一類（塩素化ビフェニル等を除く）＋第2号の号レンジから機械導出。
  */
-export const SPECIAL_CONTROL_CAS_SET = new Set<string>([
-  // 特化則38条の4の列挙 (令別表第3第2号の号番号) と突合済み 2026-07-02
-  "75-09-2", // ジクロロメタン (19の3)
-  "71-43-2", // ベンゼン (30)
-  "50-00-0", // ホルムアルデヒド (31の2)
-  "75-21-8", // エチレンオキシド (5)
-  "127-18-4", // テトラクロロエチレン (22の4)
-  "79-01-6", // トリクロロエチレン (22の5)
-  "67-66-3", // クロロホルム (11の2)
-  "56-23-5", // 四塩化炭素 (18の2)
-  // アクリルアミド(79-06-1)は第二類だが38条の4の列挙外=特別管理物質ではないため含めない
-]);
+export const SPECIAL_CONTROL_CAS_SET: ReadonlySet<string> = derivedOsha.special;
 
 export function isSpecialControlSubstance(cas: string | null | undefined): boolean {
   if (!cas) return false;

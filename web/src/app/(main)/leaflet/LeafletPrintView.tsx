@@ -2,7 +2,7 @@
 
 import { Printer } from "lucide-react";
 import { SITE_STATS } from "@/data/site-stats";
-import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
+import { MHLW_MERGED_CHEMICAL_COUNT_SLIM as MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals-slim";
 
 const SITE_URL = "https://www.anzen-ai-portal.jp";
 // QR コードは Google Chart API は廃止のため、qrserver を利用（CDN フェールセーフ用に画像でフォールバック）。
