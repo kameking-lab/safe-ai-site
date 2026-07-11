@@ -15,10 +15,14 @@ import type { LawArticle } from "@/data/laws";
 import { plainSourceHash } from "@/lib/plain/text-hash";
 import type { PlainArticle } from "./types";
 import { plainSankketsuKisoku } from "./sankketsu-kisoku";
+import { plainFunjinKisoku } from "./funjin-kisoku";
+import { plainJinpaiHoSikokiregu } from "./jinpai-ho-sikokiregu";
 
 /** 法令別 plain ファイルの束（ファイル名 → エントリ配列） */
 export const PLAIN_LAW_FILES: Readonly<Record<string, readonly PlainArticle[]>> = {
   "sankketsu-kisoku": plainSankketsuKisoku,
+  "funjin-kisoku": plainFunjinKisoku,
+  "jinpai-ho-sikokiregu": plainJinpaiHoSikokiregu,
 };
 
 /** 全 plain エントリ（整合テスト・カバレッジ用） */
