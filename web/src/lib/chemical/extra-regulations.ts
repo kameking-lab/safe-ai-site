@@ -12,7 +12,7 @@
  *  - 物性型法律は個別物質の該当を断定せず、「物性により該当しうる—法令本文で要確認」とし e-Gov へ誘導する。
  */
 
-import { normalizeCas } from "@/lib/mhlw-chemicals";
+import { normalizeCas } from "@/lib/chemical/cas-text-helpers";
 
 // ── P1-6 土壌汚染対策法 特定有害物質（単一CAS対応 14物質） ──────────────
 export type SoilKind = "第一種(揮発性有機化合物)" | "第三種(農薬等)";

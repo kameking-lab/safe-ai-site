@@ -38,7 +38,7 @@ const outPath = resolve(
 );
 
 console.log(
-  `[chatbot-eval-phase2] 実機23問を測定中… (${
+  `[chatbot-eval-phase2] 実機51問を測定中… (${
     process.env.CHATBOT_GENQUALITY_INPUT
       ? `再採点: ${process.env.CHATBOT_GENQUALITY_INPUT}`
       : process.env.CHATBOT_EVAL_BASE_URL || "http://127.0.0.1:3000"

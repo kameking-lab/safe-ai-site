@@ -395,6 +395,372 @@ export const CAS_LAW_INDEX: readonly CasLawIndexEntry[] = [
     label: "ホウ酸",
     notes: "令別表第3・第6の2に非収載（リスクアセスメント対象物ではある）",
   },
+  // ---- O11 全対象展開（2026-07-11 e-Gov現行条文と突合・DB収載名で確認） ----
+  // ---- 特化則 第一類（残り全号） ----
+  {
+    cas: "91-94-1",
+    label: "3,3'-ジクロロベンジジン",
+    beppyo3: [{ kubun: 1, go: "1", nameContains: "ジクロルベンジジン" }],
+    scopeNote: "ジクロルベンジジン及びその塩（群指定・代表CASは遊離塩基）",
+  },
+  {
+    cas: "134-32-7",
+    label: "1-ナフチルアミン（アルファ―ナフチルアミン）",
+    beppyo3: [{ kubun: 1, go: "2", nameContains: "アルフア―ナフチルアミン" }],
+    scopeNote: "アルフア―ナフチルアミン及びその塩（群指定）",
+  },
+  {
+    cas: "119-93-7",
+    label: "3,3'-ジメチルベンジジン（オルト―トリジン）",
+    beppyo3: [{ kubun: 1, go: "4", nameContains: "トリジン" }],
+    scopeNote: "オルト―トリジン及びその塩（群指定）",
+  },
+  {
+    cas: "119-90-4",
+    label: "3,3'-ジメトキシベンジジン（ジアニシジン）",
+    beppyo3: [{ kubun: 1, go: "5", nameContains: "ジアニシジン" }],
+    scopeNote: "ジアニシジン及びその塩（群指定）",
+  },
+  {
+    cas: "98-07-7",
+    label: "ベンゾトリクロリド",
+    beppyo3: [{ kubun: 1, go: "7", nameContains: "ベンゾトリクロリド" }],
+  },
+  // ---- 特化則 第二類（残り全号） ----
+  {
+    cas: "107-13-1",
+    label: "アクリロニトリル",
+    beppyo3: [{ kubun: 2, go: "2", nameContains: "アクリロニトリル" }],
+  },
+  {
+    cas: "593-74-8",
+    label: "ジメチル水銀",
+    beppyo3: [{ kubun: 2, go: "3", nameContains: "アルキル水銀化合物" }],
+    scopeNote: "アルキル水銀化合物（アルキル基がメチル基又はエチル基のものに限る・群指定）",
+  },
+  {
+    cas: "151-56-4",
+    label: "エチレンイミン",
+    beppyo3: [{ kubun: 2, go: "4", nameContains: "エチレンイミン" }],
+  },
+  {
+    cas: "492-80-8",
+    label: "オーラミン",
+    beppyo3: [{ kubun: 2, go: "8", nameContains: "オーラミン" }],
+  },
+  {
+    cas: "95-53-4",
+    label: "オルト―トルイジン",
+    beppyo3: [{ kubun: 2, go: "8の2", nameContains: "オルト―トルイジン" }],
+  },
+  {
+    cas: "91-15-6",
+    label: "オルト―フタロジニトリル",
+    beppyo3: [{ kubun: 2, go: "9", nameContains: "オルト―フタロジニトリル" }],
+  },
+  {
+    cas: "107-30-2",
+    label: "クロロメチルメチルエーテル",
+    beppyo3: [{ kubun: 2, go: "12", nameContains: "クロロメチルメチルエーテル" }],
+  },
+  {
+    cas: "1314-62-1",
+    label: "五酸化バナジウム",
+    beppyo3: [{ kubun: 2, go: "13", nameContains: "五酸化バナジウム" }],
+  },
+  {
+    cas: "1309-64-4",
+    label: "三酸化二アンチモン",
+    beppyo3: [{ kubun: 2, go: "15の2", nameContains: "三酸化二アンチモン" }],
+  },
+  {
+    cas: "151-50-8",
+    label: "シアン化カリウム",
+    beppyo3: [{ kubun: 2, go: "16", nameContains: "シアン化カリウム" }],
+  },
+  {
+    cas: "143-33-9",
+    label: "シアン化ナトリウム",
+    beppyo3: [{ kubun: 2, go: "18", nameContains: "シアン化ナトリウム" }],
+  },
+  {
+    cas: "123-91-1",
+    label: "1,4-ジオキサン",
+    beppyo3: [{ kubun: 2, go: "18の3", nameContains: "ジオキサン" }],
+  },
+  {
+    cas: "107-06-2",
+    label: "1,2-ジクロロエタン",
+    beppyo3: [{ kubun: 2, go: "18の4", nameContains: "ジクロロエタン" }],
+  },
+  {
+    cas: "101-14-4",
+    label: "3,3'-ジクロロ-4,4'-ジアミノジフェニルメタン（MOCA）",
+    beppyo3: [{ kubun: 2, go: "19", nameContains: "ジアミノジフェニルメタン" }],
+  },
+  {
+    cas: "62-73-7",
+    label: "ジクロルボス（DDVP）",
+    beppyo3: [{ kubun: 2, go: "19の4", nameContains: "ＤＤＶＰ" }],
+  },
+  {
+    cas: "57-14-7",
+    label: "1,1-ジメチルヒドラジン",
+    beppyo3: [{ kubun: 2, go: "19の5", nameContains: "ジメチルヒドラジン" }],
+  },
+  {
+    cas: "74-83-9",
+    label: "臭化メチル（ブロモメタン）",
+    beppyo3: [{ kubun: 2, go: "20", nameContains: "臭化メチル" }],
+  },
+  {
+    cas: "79-34-5",
+    label: "1,1,2,2-テトラクロロエタン",
+    beppyo3: [{ kubun: 2, go: "22の3", nameContains: "テトラクロロエタン" }],
+  },
+  {
+    cas: "584-84-9",
+    label: "トルエン-2,4-ジイソシアネート（TDI）",
+    beppyo3: [{ kubun: 2, go: "23", nameContains: "トリレンジイソシアネート" }],
+    scopeNote: "トリレンジイソシアネート（異性体を含む群指定・代表CASは2,4-体）",
+  },
+  {
+    cas: "26471-62-5",
+    label: "TDI（混合異性体）",
+    beppyo3: [{ kubun: 2, go: "23", nameContains: "トリレンジイソシアネート" }],
+    scopeNote: "トリレンジイソシアネート（混合異性体）",
+  },
+  {
+    cas: "628-96-6",
+    label: "ニトログリコール",
+    beppyo3: [{ kubun: 2, go: "25", nameContains: "ニトログリコール" }],
+  },
+  {
+    cas: "60-11-7",
+    label: "パラ―ジメチルアミノアゾベンゼン",
+    beppyo3: [{ kubun: 2, go: "26", nameContains: "ジメチルアミノアゾベンゼン" }],
+  },
+  {
+    cas: "100-00-5",
+    label: "パラ―ニトロクロルベンゼン",
+    beppyo3: [{ kubun: 2, go: "27", nameContains: "ニトロクロルベンゼン" }],
+  },
+  {
+    cas: "57-57-8",
+    label: "ベータ―プロピオラクトン",
+    beppyo3: [{ kubun: 2, go: "29", nameContains: "プロピオラクトン" }],
+  },
+  {
+    cas: "87-86-5",
+    label: "ペンタクロロフェノール（PCP）",
+    beppyo3: [{ kubun: 2, go: "31", nameContains: "ペンタクロルフエノール" }],
+    scopeNote: "ペンタクロルフエノール及びそのナトリウム塩（群指定）",
+  },
+  {
+    cas: "131-52-2",
+    label: "ペンタクロロフェノールナトリウム",
+    beppyo3: [{ kubun: 2, go: "31", nameContains: "ペンタクロルフエノール" }],
+    scopeNote: "ペンタクロルフエノールのナトリウム塩",
+  },
+  {
+    cas: "632-99-5",
+    label: "マゼンタ",
+    beppyo3: [{ kubun: 2, go: "32", nameContains: "マゼンタ" }],
+  },
+  {
+    cas: "108-10-1",
+    label: "メチルイソブチルケトン",
+    beppyo3: [{ kubun: 2, go: "33の2", nameContains: "メチルイソブチルケトン" }],
+    notes: "特別有機溶剤（有機則別表第6の2からは平成26年改正で削除＝欠番33）",
+  },
+  {
+    cas: "74-88-4",
+    label: "沃化メチル",
+    beppyo3: [{ kubun: 2, go: "34", nameContains: "沃化メチル" }],
+  },
+  {
+    cas: "77-78-1",
+    label: "硫酸ジメチル",
+    beppyo3: [{ kubun: 2, go: "36", nameContains: "硫酸ジメチル" }],
+  },
+  // ---- 特化則 第三類（残り全号） ----
+  {
+    cas: "7446-09-5",
+    label: "二酸化硫黄",
+    beppyo3: [{ kubun: 3, go: "5", nameContains: "二酸化硫黄" }],
+  },
+  {
+    cas: "75-44-5",
+    label: "ホスゲン",
+    beppyo3: [{ kubun: 3, go: "7", nameContains: "ホスゲン" }],
+  },
+  // ---- 有機則（残り全号・DB収載分） ----
+  {
+    cas: "78-83-1",
+    label: "イソブタノール（イソブチルアルコール）",
+    beppyo62: [{ go: 2, nameContains: "イソブチルアルコール" }],
+  },
+  {
+    cas: "123-51-3",
+    label: "イソアミルアルコール（イソペンチルアルコール）",
+    beppyo62: [{ go: 4, nameContains: "イソペンチルアルコール" }],
+  },
+  {
+    cas: "60-29-7",
+    label: "ジエチルエーテル（エチルエーテル）",
+    beppyo62: [{ go: 5, nameContains: "エチルエーテル" }],
+  },
+  {
+    cas: "110-80-5",
+    label: "2-エトキシエタノール（セロソルブ）",
+    beppyo62: [{ go: 6, nameContains: "セロソルブ" }],
+  },
+  {
+    cas: "111-15-9",
+    label: "2-エトキシエチルアセテート（セロソルブアセテート）",
+    beppyo62: [{ go: 7, nameContains: "セロソルブアセテート" }],
+  },
+  {
+    cas: "111-76-2",
+    label: "2-ブトキシエタノール（ブチルセロソルブ）",
+    beppyo62: [{ go: 8, nameContains: "ブチルセロソルブ" }],
+  },
+  {
+    cas: "109-86-4",
+    label: "2-メトキシエタノール（メチルセロソルブ）",
+    beppyo62: [{ go: 9, nameContains: "メチルセロソルブ" }],
+  },
+  {
+    cas: "95-50-1",
+    label: "1,2-ジクロロベンゼン（オルト―ジクロルベンゼン）",
+    beppyo62: [{ go: 10, nameContains: "オルト―ジクロルベンゼン" }],
+  },
+  {
+    cas: "1319-77-3",
+    label: "クレゾール（混合異性体）",
+    beppyo62: [{ go: 12, nameContains: "クレゾール" }],
+  },
+  {
+    cas: "108-90-7",
+    label: "クロロベンゼン（クロルベンゼン）",
+    beppyo62: [{ go: 13, nameContains: "クロルベンゼン" }],
+  },
+  {
+    cas: "110-19-0",
+    label: "酢酸イソブチル",
+    beppyo62: [{ go: 15, nameContains: "酢酸イソブチル" }],
+  },
+  {
+    cas: "108-21-4",
+    label: "酢酸イソプロピル",
+    beppyo62: [{ go: 16, nameContains: "酢酸イソプロピル" }],
+  },
+  {
+    cas: "123-92-2",
+    label: "酢酸イソアミル（酢酸イソペンチル）",
+    beppyo62: [{ go: 17, nameContains: "酢酸イソペンチル" }],
+  },
+  {
+    cas: "123-86-4",
+    label: "酢酸n-ブチル",
+    beppyo62: [{ go: 19, nameContains: "酢酸ノルマル―ブチル" }],
+  },
+  {
+    cas: "109-60-4",
+    label: "酢酸n-プロピル",
+    beppyo62: [{ go: 20, nameContains: "酢酸ノルマル―プロピル" }],
+  },
+  {
+    cas: "628-63-7",
+    label: "酢酸n-アミル（酢酸ノルマル―ペンチル）",
+    beppyo62: [{ go: 21, nameContains: "酢酸ノルマル―ペンチル" }],
+  },
+  {
+    cas: "79-20-9",
+    label: "酢酸メチル",
+    beppyo62: [{ go: 22, nameContains: "酢酸メチル" }],
+  },
+  {
+    cas: "108-93-0",
+    label: "シクロヘキサノール",
+    beppyo62: [{ go: 24, nameContains: "シクロヘキサノール" }],
+  },
+  {
+    cas: "108-94-1",
+    label: "シクロヘキサノン",
+    beppyo62: [{ go: 25, nameContains: "シクロヘキサノン" }],
+  },
+  {
+    cas: "540-59-0",
+    label: "1,2-ジクロロエチレン",
+    beppyo62: [{ go: 28, nameContains: "ジクロルエチレン" }],
+    scopeNote: "一・二―ジクロルエチレン（cis/trans異性体を含む・第一種有機溶剤）",
+  },
+  {
+    cas: "156-59-2",
+    label: "cis-1,2-ジクロロエチレン",
+    beppyo62: [{ go: 28, nameContains: "ジクロルエチレン" }],
+    scopeNote: "一・二―ジクロルエチレンのcis異性体",
+  },
+  {
+    cas: "156-60-5",
+    label: "trans-1,2-ジクロロエチレン",
+    beppyo62: [{ go: 28, nameContains: "ジクロルエチレン" }],
+    scopeNote: "一・二―ジクロルエチレンのtrans異性体",
+  },
+  {
+    cas: "109-99-9",
+    label: "テトラヒドロフラン",
+    beppyo62: [{ go: 34, nameContains: "テトラヒドロフラン" }],
+  },
+  {
+    cas: "71-36-3",
+    label: "n-ブタノール（一―ブタノール）",
+    beppyo62: [{ go: 40, nameContains: "ブタノール" }],
+  },
+  {
+    cas: "78-92-2",
+    label: "sec-ブタノール（二―ブタノール）",
+    beppyo62: [{ go: 41, nameContains: "ブタノール" }],
+  },
+  {
+    cas: "25639-42-3",
+    label: "メチルシクロヘキサノール（異性体混合物）",
+    beppyo62: [{ go: 45, nameContains: "メチルシクロヘキサノール" }],
+  },
+  {
+    cas: "583-59-5",
+    label: "2-メチルシクロヘキサノール",
+    beppyo62: [{ go: 45, nameContains: "メチルシクロヘキサノール" }],
+    scopeNote: "メチルシクロヘキサノールの2-異性体",
+  },
+  {
+    cas: "1331-22-2",
+    label: "メチルシクロヘキサノン（異性体混合物）",
+    beppyo62: [{ go: 46, nameContains: "メチルシクロヘキサノン" }],
+  },
+  {
+    cas: "583-60-8",
+    label: "2-メチルシクロヘキサノン",
+    beppyo62: [{ go: 46, nameContains: "メチルシクロヘキサノン" }],
+    scopeNote: "メチルシクロヘキサノンの2-異性体",
+  },
+  {
+    cas: "591-78-6",
+    label: "メチル-n-ブチルケトン（2-ヘキサノン）",
+    beppyo62: [{ go: 47, nameContains: "メチル―ノルマル―ブチルケトン" }],
+  },
+  {
+    cas: "8030-30-6",
+    label: "ナフサ（石油ナフサ）",
+    beppyo62: [{ go: 51, nameContains: "石油ナフサ" }],
+    scopeNote: "CAS 8030-30-6 は石油ナフサ/石油ベンジンを包含する石油留分の総称CAS",
+  },
+  {
+    cas: "8006-64-2",
+    label: "テレピン油（テレビン油）",
+    beppyo62: [{ go: 53, nameContains: "テレビン油" }],
+  },
 ];
 
 export const CAS_LAW_INDEX_BY_CAS: ReadonlyMap<string, CasLawIndexEntry> = new Map(

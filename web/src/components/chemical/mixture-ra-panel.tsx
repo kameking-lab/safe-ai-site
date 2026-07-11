@@ -2,12 +2,8 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { FlaskConical, Plus, X, Loader2, Save, Sparkles } from "lucide-react";
-import {
-  searchMergedChemicals,
-  normalizeCas,
-  CONCENTRATION_LIMITS,
-  type MergedChemical,
-} from "@/lib/mhlw-chemicals";
+import type { MergedChemical } from "@/lib/mhlw-chemicals";
+import { searchMergedChemicalsSlim as searchMergedChemicals } from "@/lib/mhlw-chemicals-slim";
 import { REGULATION_TAGS, normalizeTags } from "@/lib/regulation-tag-labels";
 import {
   soilContaminationForCas,
@@ -45,8 +41,8 @@ function resolveComponent(chem: MergedChemical, percent: string): MixtureCompone
   const cas = chem.cas ?? "";
   const families: string[] = [];
   if (cas) {
-    const entry = CONCENTRATION_LIMITS.substances[normalizeCas(cas)];
-    for (const t of normalizeTags(entry?.regulationTags)) {
+    // スリム索引の details.limits は concentration-limits の regulationTags を保持している
+    for (const t of normalizeTags(chem.details?.limits?.regulationTags)) {
       const fam = CATEGORY_FAMILY[REGULATION_TAGS[t].category];
       if (fam && !families.includes(fam)) families.push(fam);
     }

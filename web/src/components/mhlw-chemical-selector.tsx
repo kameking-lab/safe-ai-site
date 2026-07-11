@@ -2,11 +2,11 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, FlaskConical, X } from "lucide-react";
+import type { MergedChemical } from "@/lib/mhlw-chemicals";
 import {
-  searchMergedChemicals,
-  MHLW_MERGED_CHEMICAL_COUNT,
-  type MergedChemical,
-} from "@/lib/mhlw-chemicals";
+  searchMergedChemicalsSlim as searchMergedChemicals,
+  MHLW_MERGED_CHEMICAL_COUNT_SLIM as MHLW_MERGED_CHEMICAL_COUNT,
+} from "@/lib/mhlw-chemicals-slim";
 
 /**
  * 厚労省データの全物質から CAS / 名称で検索し選択するコンボボックス。

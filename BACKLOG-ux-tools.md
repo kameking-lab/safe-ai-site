@@ -4,6 +4,12 @@
 
 ## 未着手（上から処理）
 
+### 2026-07-11 差し戻し（生成品質eval 51問拡張より・最優先）
+
+- [ ] 【差し戻し・51問evalギャップE1／retrieval】口語の解雇質問「クビにするなら何日前？」が労基法第20条に不達（GQ48・本番実測×＝RAGスコア0.52で均等法11条の3等の無関係top10になり「30日」欠落＋偽の範囲外警告）。是正=解雇予告PIN（`rag-search.ts`）のtriggerに口語（クビ/首にする 等）を拡充、または解雇系synonyms追加。**完了判定=`npm run eval:chatbot-gen`（本番）でGQ48が○**＋fixtureの`expectRetrievable`をtrue＋`chatbot-genquality.test.ts`の`KNOWN_RETRIEVAL_GAP_IDS`からGQ48を除去（ratchetが強制。固定フレーズだけ足す過学習はゆらぎペア設計で不成立）。一次記録: docs/chatbot-genquality-51q-baseline-2026-07-11.json。
+- [ ] 【差し戻し・51問evalギャップE2／retrieval】酸欠危険場所の現場語（マンホール/タンク内部/下水管）が酸欠則第11条・第12条に不達（GQ49・本番実測△＝score0.58で作環測法等の無関係top10、資格のgold引用なし）。是正=酸欠系synonyms/PINに安衛令別表第6の場所語彙（マンホール・暗きよ・タンク・ピット等）を拡充。**完了判定=GQ49が○**＋`expectRetrievable`true＋`KNOWN_RETRIEVAL_GAP_IDS`からGQ49除去。
+- [ ] 【差し戻し・51問evalリークE3／retrieval】範囲外質問「自動車の車検は何年ごと？」がRAGスコア0.62で範囲内扱いにリークし、無関係条文（騒音規制法16条・安衛則151条系）つき高確信回答になる（GQ51・本番実測×＝out-of-scope-mishandled）。是正=no-hit判定のドメイン外語の減点・自動車整備系語彙の文脈ガード等。**完了判定=GQ51の範囲外対応がOK**＋`KNOWN_SCOPE_LEAK_IDS`からGQ51除去（ratchetが強制）。
+
 ### 2026-07-11 法令ナビ連携（方式確立済み: docs/horei-navi-foundation-2026-07-11/01-diagnosis-and-design.md）
 - [ ] 【Sonnet・P1】LN-T1: /law-search の結果カード（law-search-results.tsx ArticleCard）に「条文ページで開く」導線を追加（対象条文が法令ナビ生成集合に在る場合のみ表示＝`articlePermalink()` が null なら出さない。幽霊リンク0）。0件時のフォールバック文にも法令ナビ分野ページへの提案を追加。完了条件=既存 law-search-results.test 全緑＋実機で「フォークリフト」検索→カード→/law-navi 条文ページ遷移のスクショ。
 

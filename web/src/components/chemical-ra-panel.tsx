@@ -14,13 +14,13 @@ import { ChemicalRaReportHeader, ChemicalRaSignoffBoxes } from "@/components/che
 import { ChemicalRaSaveButton } from "@/components/chemical/chemical-ra-save";
 import { getChemicalRaRecord } from "@/lib/chemical/ra-cloud";
 import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
+import type { MergedChemical } from "@/lib/mhlw-chemicals";
 import {
-  findByCas,
-  getSupplementalInfo,
-  searchMergedChemicals,
-  MHLW_MERGED_CHEMICAL_COUNT,
-  type MergedChemical,
-} from "@/lib/mhlw-chemicals";
+  findByCasSlim as findByCas,
+  searchMergedChemicalsSlim as searchMergedChemicals,
+  MHLW_MERGED_CHEMICAL_COUNT_SLIM as MHLW_MERGED_CHEMICAL_COUNT,
+} from "@/lib/mhlw-chemicals-slim";
+import { getSupplementalInfo } from "@/lib/chemical/supplemental-info";
 import { findChemicalEquipmentProfile } from "@/lib/chemical-equipment-mapping";
 import type {
   ChemicalRaResponse,
