@@ -7,7 +7,7 @@
 
 - [x] 酸欠則 現場ことば版（収載16条・fidelity全緑・見本）— 2026-07-11 完了（型の実証）
 - [ ] 粉じん則 現場ことば版（収載21条）— docs/plain-language-prompts/funjin-kisoku.md
-- [ ] 有機則 現場ことば版（収載21条）— docs/plain-language-prompts/yuki-kisoku.md
+- [x] 有機則 現場ことば版（収載21条）— docs/plain-language-prompts/yuki-kisoku.md
 - [ ] 特化則 現場ことば版（収載22条）— docs/plain-language-prompts/tokka-kisoku.md
 - [ ] 石綿則 現場ことば版（収載17条）— docs/plain-language-prompts/sekimen-kisoku.md
 - [ ] 鉛則 現場ことば版（収載15条）— docs/plain-language-prompts/en-kisoku.md
