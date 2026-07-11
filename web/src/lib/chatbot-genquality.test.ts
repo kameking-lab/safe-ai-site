@@ -48,15 +48,22 @@ function findCorpusArticles(ev: Pick<CorpusEvidence, "lawShort" | "articleNum">)
  * ここに載る質問は「実機では△/×になる既知欠陥」＝検出網としてfixtureに残し、
  * retrieval層の是正はレーン（ux-tools）へ差し戻す。是正されて到達可能になると
  * 下のratchetテストが落ち、fixtureのexpectRetrievableとこの台帳の更新を強制する。
+ *
+ * 2026-07-11 現場口語プロジェクト: GQ48（クビ→解雇予告）・GQ49（マンホール→
+ * 酸欠資格）は query-expansion の口語正規化＋PIN照合の展開後クエリ化で到達可能に
+ * なり台帳から除去（是正の実測は docs/field-vernacular-bench-2026-07-11.md）。
  */
-const KNOWN_RETRIEVAL_GAP_IDS = ["GQ48", "GQ49"] as const;
+const KNOWN_RETRIEVAL_GAP_IDS = [] as const;
 
 /**
  * 既知の範囲外判定リーク台帳: 範囲外質問なのにRAGスコアが閾値を超えて
- * 範囲内扱いになる既知欠陥（GQ51車検＝騒音規制法・車両系条文への誤ヒット）。
- * リークが解消（score < 0.5）するとratchetが落ち、台帳から除去を強制する。
+ * 範囲内扱いになる既知欠陥。リークが解消（score < 0.5）するとratchetが落ち、
+ * 台帳から除去を強制する。
+ *
+ * 2026-07-11: GQ51（車検）は rag/out-of-domain.ts のドメイン外語減点で
+ * no-hit経路に落ちるようになり台帳から除去（テストDの範囲外検証が全問カバー）。
  */
-const KNOWN_SCOPE_LEAK_IDS = ["GQ51"] as const;
+const KNOWN_SCOPE_LEAK_IDS = [] as const;
 
 describe("生成品質eval A: fixture整合性（正本アンカー）", () => {
   it("51問・ID重複なし（診断04の23問＋2026-07-11拡張の28問）", () => {
@@ -209,7 +216,7 @@ describe("生成品質eval D: テンプレ層回帰（診断04 T1/T3/T8/T9）", 
     }
   });
 
-  it("既知の範囲外判定リーク（GQ51車検）はまだリークしている＝解消したら台帳から除去する", () => {
+  it("既知の範囲外判定リーク台帳はまだリークしている＝解消したら台帳から除去する", () => {
     // ratchet: retrieval層が是正されたのに台帳が放置される「偽の欠陥記録」を防ぐ
     for (const id of KNOWN_SCOPE_LEAK_IDS) {
       const tc = GEN_QUALITY_CASES.find((c) => c.id === id)!;

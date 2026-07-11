@@ -1039,9 +1039,8 @@ const RAW_CASES: RawGenQualityCase[] = [
           "労働基準法（昭和22年法律第49号）第20条: 解雇は少なくとも30日前に予告、しない場合は30日分以上の平均賃金（解雇予告手当）",
       },
     ],
-    expectRetrievable: false,
     notes:
-      "GQ23（解雇予告）の口語ゆらぎペア（O5検出網）。実測: 「クビ」がRAG不達（score0.52で均等法11条の3等の無関係top10）＝既知到達性ギャップ。是正はretrieval層（解雇予告PINのtrigger拡充等）＝ux-toolsへ差し戻し。到達可能になったらexpectRetrievableをtrueへ（ratchetが強制）",
+      "GQ23（解雇予告）の口語ゆらぎペア（O5検出網）。2026-07-11是正済み: query-expansionの「クビ/辞めさせ→解雇・解雇予告」正規化＋PIN照合の展開後クエリ化で労基法20条へ到達（旧実測はscore0.52で無関係top10）。ゆらぎ検証は現場口語ベンチFV01〜03が3言い回しで常設",
   },
   {
     id: "GQ49",
@@ -1062,9 +1061,8 @@ const RAW_CASES: RawGenQualityCase[] = [
           "酸欠則（昭和47年労働省令第42号）第11条: 酸素欠乏危険作業主任者は技能講習修了者から選任（マンホール内部は安衛令別表第6の酸素欠乏危険場所）",
       },
     ],
-    expectRetrievable: false,
     notes:
-      "GQ02（酸欠の資格）の現場語ゆらぎペア（O5検出網）。実測: 「マンホール」「タンク内部」「下水管」いずれも酸欠則に不達（score0.58で作環測法等の無関係top10）＝既知到達性ギャップ。是正はretrieval層（酸欠危険場所の現場語synonyms）＝ux-toolsへ差し戻し。到達可能になったらexpectRetrievableをtrueへ",
+      "GQ02（酸欠の資格）の現場語ゆらぎペア（O5検出網）。2026-07-11是正済み: query-expansionの酸欠危険場所語彙（マンホール/下水/ピット/井戸/タンク内…→酸素欠乏）＋酸欠×資格の共起判定＋PIN照合の展開後クエリ化で酸欠則11条へ到達（旧実測はscore0.58で無関係top10）。ゆらぎ検証は現場口語ベンチFV07〜11が5場所語で常設",
   },
 
   // ── 2026-07-11拡張: 範囲外・誤誘導（軸6） ───────────────────────────
@@ -1089,7 +1087,7 @@ const RAW_CASES: RawGenQualityCase[] = [
     expectOutOfScope: true,
     expectRetrievable: false,
     notes:
-      "道路運送車両法域＝範囲外だが、実測score0.62で範囲内扱いにリーク（騒音規制法16条・安衛則151条系の無関係条文が引かれ、無関係出典つき回答になる）＝既知の範囲外判定リーク。是正はretrieval層（no-hit判定・ドメイン外語の減点）＝ux-toolsへ差し戻し。リークが解消したらchatbot-genquality.test.tsのKNOWN_SCOPE_LEAK_IDSから除去（ratchetが強制）",
+      "道路運送車両法域＝範囲外。2026-07-11是正済み: rag/out-of-domain.tsのドメイン外語減点（車検等×労働文脈ガード不在→score×0.5）でno-hit経路に落ちる（旧実測はscore0.62でリークし騒音規制法16条等の無関係条文つき高確信回答）。リーク検証は現場口語ベンチFV51〜55が5問で常設",
   },
 ];
 

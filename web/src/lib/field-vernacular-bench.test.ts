@@ -32,11 +32,13 @@ const TOP_K = 10; // route.ts と同一
 const CONFIDENCE_THRESHOLD = 0.5; // route.ts の CONFIDENCE_THRESHOLD と同一
 
 /**
- * 着地率の下限（ratchet）。2026-07-11 是正後の実測値に固定。
- * 是正前の実測: RAG 24/49（49.0%）・横断検索 28/49（57.1%）・範囲外 3/5。
+ * 着地率の下限（ratchet）。2026-07-11 是正後の実測値（100%）に固定。
+ * 是正前の実測: RAG 28/49（57.1%）・横断検索 25/50（50.0%）・範囲外 3/5（車検・インボイスがリーク）。
+ * 新たな口語ケースを追加して未着地の場合は、まず retrieval 層を是正すること
+ * （下限を下げる変更は非劣化原則に反する）。
  */
-const RAG_LANDING_FLOOR = 0; // before計測用（是正後に実測値へ引き上げる）
-const SEARCH_LANDING_FLOOR = 0;
+const RAG_LANDING_FLOOR = 1.0;
+const SEARCH_LANDING_FLOOR = 1.0;
 
 type CaseResult = {
   id: string;
