@@ -2,10 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Search, AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag, Gauge, Database, FileText, FolderOpen } from "lucide-react";
-import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
+import { AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag, Gauge, Database, FileText, FolderOpen } from "lucide-react";
+import { TextareaWithVoice } from "@/components/voice-input-field";
 import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
-import { MhlwChemicalSelector } from "@/components/mhlw-chemical-selector";
 import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
 import { SimpleMarkdown } from "@/components/simple-markdown";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
@@ -15,10 +14,11 @@ import { ChemicalRaSaveButton } from "@/components/chemical/chemical-ra-save";
 import { getChemicalRaRecord } from "@/lib/chemical/ra-cloud";
 import { MainFeatureNextActions } from "@/components/main-feature-next-actions";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
+import { UnifiedChemicalSearch, type LegalNameHit } from "@/components/chemical/unified-chemical-search";
+import { LegalConclusionCard } from "@/components/chemical/legal-conclusion-card";
 import {
   findByCasSlim as findByCas,
   searchMergedChemicalsSlim as searchMergedChemicals,
-  MHLW_MERGED_CHEMICAL_COUNT_SLIM as MHLW_MERGED_CHEMICAL_COUNT,
 } from "@/lib/mhlw-chemicals-slim";
 import { getSupplementalInfo } from "@/lib/chemical/supplemental-info";
 import { findChemicalEquipmentProfile } from "@/lib/chemical-equipment-mapping";
@@ -170,6 +170,7 @@ const LEVEL_BADGE: Record<"I" | "II" | "III" | "IV", string> = {
 
 const QUICK_CHEMICALS = [
   "トルエン",
+  "溶接ヒューム",
   "キシレン",
   "ノルマルヘキサン",
   "アセトン",
@@ -237,6 +238,8 @@ export function ChemicalRaPanel() {
   // 軸I: 結果の冒頭に「まず押さえる要点」を出すための抽出（GHS・対策・規制の再構成）。
   const keyPoints = useMemo(() => (result ? getChemicalKeyPoints(result) : null), [result]);
   const [mhlwSelected, setMhlwSelected] = useState<MergedChemical | null>(null);
+  // 一窓化: 法令名称（CASレス告示名・群指定名）で解決した選択
+  const [legalSelected, setLegalSelected] = useState<LegalNameHit | null>(null);
   // 台帳から保存済み記録を再表示しているときの実施日(ISO)。新規実施時は null（=当日）。
   const [restoredAt, setRestoredAt] = useState<string | null>(null);
   // 既定は2ステップウィザード（物質検索→作業方法）。詳細モードを ON にすると
@@ -347,9 +350,16 @@ export function ChemicalRaPanel() {
 
   const handleSelectMhlw = (m: MergedChemical | null) => {
     setMhlwSelected(m);
+    setLegalSelected(null);
     if (m) {
       setChemicalName(m.primaryName);
     }
+  };
+
+  const handleSelectLegal = (hit: LegalNameHit) => {
+    setLegalSelected(hit);
+    setMhlwSelected(null);
+    setChemicalName(hit.label);
   };
 
   // よく検索される物質チップ等から「1タップで判定まで実行」する。
@@ -483,9 +493,9 @@ export function ChemicalRaPanel() {
           <div>
             {/* P1-F: 「2ステップウィザード」では入口が3つ並ぶ実態と乖離するため、
                 「物質を選ぶ → 作業方法 → A4結果表」の3ステップで実態を表現する。 */}
-            <p className="text-xs font-bold text-emerald-700">3ステップで判定</p>
+            <p className="text-xs font-bold text-emerald-700">入力窓1つで判定まで</p>
             <p className="text-[11px] text-slate-500">
-              STEP 1 化学物質を選ぶ（3つの入口）→ STEP 2 作業方法を選ぶ → STEP 3 A4結果表
+              物質名か製品名を入れる → 該当法令の結論 → 作業状況を選ぶ → A4実施記録
             </p>
           </div>
           <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700">
@@ -499,76 +509,47 @@ export function ChemicalRaPanel() {
           </label>
         </div>
         <div className="space-y-4">
-          <div>
-            <label htmlFor="chemical-ra-mhlw-selector" className="block text-xs font-semibold text-slate-700 mb-1">
-              ① 厚労省 {MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()} 物質から選ぶ（推奨）— 濃度基準値・規制区分が即座に表示されます
-            </label>
-            <MhlwChemicalSelector id="chemical-ra-mhlw-selector" value={mhlwSelected} onSelect={handleSelectMhlw} />
-          </div>
-          <div>
-            <label htmlFor="chemical-ra-name-input" className="block text-xs font-semibold text-slate-700 mb-1">
-              ② 物質名を直接入力（リストにない物質・俗称・英語名）
-            </label>
-            <div className="flex gap-2">
-              <InputWithVoice
-                id="chemical-ra-name-input"
-                className="flex-1"
-                value={chemicalName}
-                onChange={(e) => {
-                  setChemicalName(e.target.value);
-                  if (mhlwSelected && e.target.value !== mhlwSelected.primaryName) {
-                    setMhlwSelected(null);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") void handleSearch();
-                }}
-                placeholder="例: トルエン、Toluene、2-エトキシエタノール"
-              />
-              <button
-                type="button"
-                onClick={() => void handleSearch()}
-                disabled={!chemicalName.trim() || loading}
-                aria-busy={loading}
-                className="flex items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-progress"
-              >
-                {loading ? (
-                  <>
-                    <span
-                      aria-hidden="true"
-                      className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent"
-                    />
-                    調査中…
-                  </>
-                ) : (
-                  <>
-                    <Search className="h-4 w-4" />
-                    AI 詳細調査
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-          <div>
-            <label htmlFor="chemical-ra-work-content" className="block text-xs font-semibold text-slate-700 mb-1">
-              作業内容（任意）— より精度の高い保護具推奨のために入力
-            </label>
-            <TextareaWithVoice
-              id="chemical-ra-work-content"
-              className="min-h-16"
-              value={workContent}
-              onChange={(e) => setWorkContent(e.target.value)}
-              placeholder="例: 塗装作業（局所排気なし）、溶接、配管洗浄など"
-            />
-          </div>
+          {/* 一窓化 (2026-07-11): 入力窓は1つ。物質名・CAS・法令名称（溶接ヒューム等）・
+              製品名らしき入力を1つの窓で受け、収載外は正直に明示して次の一歩を出す */}
+          <UnifiedChemicalSearch
+            query={chemicalName}
+            onQueryChange={(v) => {
+              setChemicalName(v);
+              if (mhlwSelected && v !== mhlwSelected.primaryName) setMhlwSelected(null);
+              if (legalSelected && v !== legalSelected.label) setLegalSelected(null);
+            }}
+            onPickDb={(m) => handleSelectMhlw(m)}
+            onPickLegal={handleSelectLegal}
+            onAiSearch={() => void handleSearch()}
+            loading={loading}
+          />
 
-          {/* STEP 2 作業方法の逆質問（簡易モード） */}
-          {!detailedMode && (
+          {/* 該当法令の結論カード（結論ファースト: 物質が決まった瞬間に一窓の直下へ） */}
+          {(displayedMhlw || legalSelected) && (
+            <LegalConclusionCard
+              q={legalSelected?.label ?? displayedMhlw?.cas ?? displayedMhlw?.primaryName ?? ""}
+            />
+          )}
+
+          {/* STEP 2 作業方法の逆質問（簡易モード・物質を決めると表示） */}
+          {!detailedMode && chemicalName.trim() !== "" && (
             <div className="rounded-lg border border-emerald-200 bg-emerald-50/40 p-3">
               <p className="text-xs font-bold text-emerald-900">STEP 2 作業の状況を選んでください</p>
               <p className="mt-0.5 text-[11px] text-slate-600">
                 2つ選ぶとリスクレベル（I〜IV）を判定します（作業時間は8時間=1日として判定。変更や測定濃度の入力は上の「詳細モード」をON）。
               </p>
+              <div className="mt-2">
+                <label htmlFor="chemical-ra-work-content" className="block text-[11px] font-semibold text-slate-700 mb-1">
+                  作業内容（任意）— より精度の高い保護具推奨のために入力
+                </label>
+                <TextareaWithVoice
+                  id="chemical-ra-work-content"
+                  className="min-h-14 bg-white"
+                  value={workContent}
+                  onChange={(e) => setWorkContent(e.target.value)}
+                  placeholder="例: 塗装作業（局所排気なし）、溶接、配管洗浄など"
+                />
+              </div>
               <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <label className="text-[11px] text-slate-700">
                   換気の状況
