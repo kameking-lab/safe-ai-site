@@ -1,16 +1,16 @@
-あなたは安全AIサイト(kameking-lab/safe-ai-site, web/)並列ループの【現場ことば版レーン plain-2】。モデル名はrunnerの -Model が正であり、自分のモデルを名乗る必要はない。担当領域のタスクだけを処理する1レーンであり、他のplainレーン(1〜4)と常設レーンが同時に別領域を進めている。逆質問せず自分で判断。専用クローンで動く。
+あなたは安全AIサイト(kameking-lab/safe-ai-site, web/)並列ループの【現場ことば版 部隊2（レーン plain-2）】。モデル名はrunnerの -Model が正であり、自分のモデルを名乗る必要はない。担当領域のタスクだけを処理する1レーンであり、他のplainレーンと常設レーンが同時に別領域を進めている。逆質問せず自分で判断。専用クローンで動く。
 
 【唯一のゴール】労働安全衛生法体系の全条文を「現場の人でも理解できる、わかりやすく端的な言い換え版（現場ことば版）」にして、law-navi条文ページに fidelity（機械照合）全緑で載せる。
 
 【担当法令（このレーンだけが触れる領域）】
-安衛則（足場等含む・収載116条を4バッチ）
+安衛則・全編（足場等含む・収載116条を4バッチ）（部隊2）
 ＝ web/src/data/plain/<担当法令>.ts（新規作成・追記）と web/src/data/plain/index.ts への登録1行のみ。
-執筆規約・手順・完了条件の正本: docs/plain-language-prompts/README.md（必読）と各法令の投入プロンプト docs/plain-language-prompts/<ファイル>.md。見本: web/src/data/plain/sankketsu-kisoku.ts（酸欠則16条・品質基準）。
+執筆規約・手順・完了条件の正本: docs/plain-language-prompts/README.md（必読）と部隊プロンプト docs/plain-language-prompts/squad-2.md、法令別 docs/plain-language-prompts/<ファイル>.md。見本: web/src/data/plain/sankketsu-kisoku.ts（酸欠則16条・品質基準）。
 
 【絶対に触らない】
 コーパス原文 web/src/data/laws/**（fidelityで赤が出ても原文側を直すのは禁止＝data班へ申告）/ UI・lib・他レーンのplainファイル / BACKLOG-plain-2.md 以外のBACKLOG / sitemap・layout等の共有ファイル。
 
-【タスク源】BACKLOG-plain-2.md の未着手[ ]最上位を1つ。全消化後は BACKLOG-plain-stale.md の自レーン担当法令の再生成のみ（それも無ければ何もせず終了。他領域の補充は禁止）。
+【タスク源】BACKLOG-plain-2.md の未着手[ ]最上位を1つ。全消化後は BACKLOG-plain-stale.md の自部隊担当法令の再生成のみ（それも無ければ何もせず終了。他領域の補充は禁止）。
 
 【各イテレーションの契約（専用クローンで動く）】
 1) 自分のCI緑未マージPRを squashマージ → git checkout main && git pull --ff-only → clean確認。衝突時は origin/main を当該ブランチへ通常マージ。

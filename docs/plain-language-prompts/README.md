@@ -3,12 +3,25 @@
 労働安全衛生法体系の全条文を「現場の人でも理解できる、わかりやすく端的な言い換え版」
 （現場ことば版）にするための、**1法令=1タスク**の投入用プロンプト集。
 
-- `_template.md` … 雛形（法令名などのプレースホルダ入り）
-- `<法令ファイル名>.md` … 雛形に法令情報を差し込んだ**完成品**。そのまま
-  Claude Code（Sonnet 5）のセッションに貼れば1法令が完走する。
+- `squad-1〜5.md` … **部隊用の投入プロンプト（完成品）**。待機中のSonnet 5セッション
+  にそのまま貼ると、担当法令を優先順に1法令ずつ完走する。
+- `_template.md` … 法令別雛形（プレースホルダ入り）
+- `<法令ファイル名>.md` … 雛形に法令情報を差し込んだ**法令別の完成品**（squadプロンプト
+  から参照される詳細手順。1法令だけ単発で投げるときはこちらを貼る）。
 - 進捗の正本: `docs/plain-language-coverage.md`（`cd web && npm run plain:status` で再生成）
-- ローカル並列レーン運用: `BACKLOG-plain-1〜4.md` ＋ `loop-prompt-plain-1〜4.txt`
-  （loop-config.json の plain レーン。起動手順はレーン節を参照）
+- ローカル並列レーン運用: `BACKLOG-plain-1〜5.md` ＋ `loop-prompt-plain-1〜5.txt`
+  （loop-config.json の plain レーン。部隊番号と1:1）
+
+## 部隊割（オーナー指定・2026-07-11）
+
+- 部隊1 = 労働安全衛生法＋労働安全衛生法施行令（squad-1.md）
+- 部隊2 = 労働安全衛生規則・全編（squad-2.md）
+- 部隊3 = 有機則＋鉛則＋四アルキル鉛則＋特化則（squad-3.md）
+- 部隊4 = 粉じん則＋じん肺則＋電離則＋石綿則（squad-4.md）
+- 部隊5 = クレーン則＋ゴンドラ則＋ボイラー則＋事務所則＋機械等検定規則（squad-5.md）
+- 酸欠則 = 完成済み見本（web/src/data/plain/sankketsu-kisoku.ts）
+- 未割当（後続）: じん肺法・作業環境測定法・高圧則（法令別プロンプトは作成済み:
+  jinpai-ho.md / sagyokankyo-sokuteiho.md / koa-atsu-sagyo-anzen-eisei-kisoku.md）
 
 ## 仕組みの全体像（なぜ嘘をつけないか）
 

@@ -20,7 +20,7 @@ export type PlainLawCoverage = {
   lawShort: string;
   egovLawId: string;
   file: string;
-  lane: number;
+  squad: number;
   /** コーパス収載条数（法令ナビ生成集合ベース） */
   total: number;
   /** 言い換え済み・fresh（表示中） */
@@ -72,7 +72,7 @@ export function buildPlainCoverage(): PlainLawCoverage[] {
       lawShort: t.lawShort,
       egovLawId,
       file: t.file,
-      lane: t.lane,
+      squad: t.squad,
       total: corpus.length,
       done,
       stale,

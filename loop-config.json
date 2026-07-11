@@ -8,7 +8,7 @@
   "warnWithinDays": 3,
   "criticEveryDays": 7,
   "criticModel": "claude-opus-4-8",
-  "$plainLanesNote": "plain-1..4 = 現場ことば版（安衛法体系の条文言い換え）執筆レーン。Sonnet 5×4本、タスク源は BACKLOG-plain-N.md、プロンプトは loop-prompt-plain-N.txt。初回はクローン作成が必要: powershell -ExecutionPolicy Bypass -File .\\scripts\\multilane\\setup-lanes.ps1 -Lanes plain-1,plain-2,plain-3,plain-4 。plainレーンだけ動かしたい場合は他レーンを enabled:false に。",
+  "$plainLanesNote": "plain-1..5 = 現場ことば版（安衛法体系の条文言い換え）執筆部隊レーン（部隊割はオーナー指定2026-07-11: 1=安衛法+安衛令/2=安衛則/3=有機・鉛・四アル・特化/4=粉じん・じん肺則・電離・石綿/5=クレーン・ゴンドラ・ボイラー・事務所・機械検定）。Sonnet 5×5本、タスク源は BACKLOG-plain-N.md、プロンプトは loop-prompt-plain-N.txt。初回はクローン作成が必要: powershell -ExecutionPolicy Bypass -File .\\scripts\\multilane\\setup-lanes.ps1 -Lanes plain-1,plain-2,plain-3,plain-4,plain-5 。plainレーンだけ動かしたい場合は他レーンを enabled:false に。クラウドのSonnet 5セッションで進める場合はこのレーンを使わず docs/plain-language-prompts/squad-N.md を貼る。",
   "lanes": [
     { "name": "ops",        "model": "claude-opus-4-8", "enabled": true, "intervalSeconds": 195, "repoPath": "." },
     { "name": "data",       "model": "claude-opus-4-8", "enabled": true, "intervalSeconds": 135 },
@@ -19,6 +19,7 @@
     { "name": "plain-1",    "model": "claude-sonnet-5", "enabled": true, "intervalSeconds": 140 },
     { "name": "plain-2",    "model": "claude-sonnet-5", "enabled": true, "intervalSeconds": 155 },
     { "name": "plain-3",    "model": "claude-sonnet-5", "enabled": true, "intervalSeconds": 170 },
-    { "name": "plain-4",    "model": "claude-sonnet-5", "enabled": true, "intervalSeconds": 185 }
+    { "name": "plain-4",    "model": "claude-sonnet-5", "enabled": true, "intervalSeconds": 185 },
+    { "name": "plain-5",    "model": "claude-sonnet-5", "enabled": true, "intervalSeconds": 200 }
   ]
 }
