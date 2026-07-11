@@ -310,15 +310,27 @@ function refCore(ref: string): string {
 const SENTENCE_END_RE = /(ます|です|ません|ましょう|ください)[)）」]?$/;
 
 /**
- * 端的さの上限（品質パトロール 2026-07-11 でゲート強化）。
+ * 端的さの上限（品質パトロール 2026-07-11 でゲート強化・ラチェット方式）。
  * 「目安2〜4文」だけでは1文がだらだら長い言い換えを止められないため、
- * 文字数でも機械的に止める。見本（酸欠則）の実測は最長文93字・最長217字。
+ * 文字数でも機械的に止める。
+ * - 判定は括弧書き（条参照・注記＝読み飛ばせる）を除いた実読長で行う。
+ *   参照保存要件（refs を本文に残す書き方）と長さ上限が衝突しないようにするため。
+ * - LENGTH_CAP_SINCE 以降に生成されたエントリのみ強制（ラチェット）。
+ *   それ以前の出荷分は適用外とし、分割改善は追い出しリスト（パトロール所見）で行う。
+ *   見本（酸欠則）の実測は最長文93字・最長217字、部隊初出荷（有機則）は括弧除外で最長204字。
  */
 const MAX_SENTENCE_CHARS = 120;
 const MAX_TOTAL_CHARS = 400;
+const LENGTH_CAP_SINCE = "2026-07-12";
 
-export function checkStyle(plainText: string): Violation[] {
+/** 括弧書き（全角・半角）を除いた実読テキスト。 */
+function stripParentheticals(text: string): string {
+  return text.replace(/（[^（）]*）|\([^()]*\)/g, "");
+}
+
+export function checkStyle(plain: Pick<PlainArticle, "plainText" | "generatedAt">): Violation[] {
   const v: Violation[] = [];
+  const plainText = plain.plainText;
   const sentences = plainText
     .split("。")
     .map((s) => s.trim())
@@ -329,12 +341,6 @@ export function checkStyle(plainText: string): Violation[] {
       message: `文数が規約外です（${sentences.length}文。目安2〜4文・最大5文）`,
     });
   }
-  if (plainText.length > MAX_TOTAL_CHARS) {
-    v.push({
-      kind: "style",
-      message: `全体が長すぎます（${plainText.length}字。上限${MAX_TOTAL_CHARS}字＝「端的」の機械上限。内容を絞るか omissions で省略宣言を）`,
-    });
-  }
   for (const s of sentences) {
     if (!SENTENCE_END_RE.test(s)) {
       v.push({
@@ -342,11 +348,25 @@ export function checkStyle(plainText: string): Violation[] {
         message: `です・ます体で終わっていない文があります: 「${s.slice(-24)}。」`,
       });
     }
-    if (s.length > MAX_SENTENCE_CHARS) {
+  }
+
+  // 端的さ上限（ラチェット: LENGTH_CAP_SINCE 以降の生成分のみ強制）
+  if (plain.generatedAt >= LENGTH_CAP_SINCE) {
+    const stripped = stripParentheticals(plainText);
+    if (stripped.length > MAX_TOTAL_CHARS) {
       v.push({
         kind: "style",
-        message: `1文が長すぎます（${s.length}字。上限${MAX_SENTENCE_CHARS}字）: 「${s.slice(0, 24)}…」を分割してください`,
+        message: `全体が長すぎます（括弧除き${stripped.length}字。上限${MAX_TOTAL_CHARS}字＝「端的」の機械上限。内容を絞るか omissions で省略宣言を）`,
       });
+    }
+    for (const s of stripped.split("。")) {
+      const t = s.trim();
+      if (t.length > MAX_SENTENCE_CHARS) {
+        v.push({
+          kind: "style",
+          message: `1文が長すぎます（括弧除き${t.length}字。上限${MAX_SENTENCE_CHARS}字）: 「${t.slice(0, 24)}…」を分割してください`,
+        });
+      }
     }
   }
   return v;
@@ -464,7 +484,7 @@ export function checkFidelity(article: LawArticle, plain: PlainArticle): Violati
   }
 
   /* --- 5. 文体規約 --- */
-  violations.push(...checkStyle(plain.plainText));
+  violations.push(...checkStyle(plain));
 
   return violations;
 }
