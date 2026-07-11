@@ -10,5 +10,5 @@
 - [ ] 有機則 現場ことば版（収載21条）— docs/plain-language-prompts/yuki-kisoku.md
 - [ ] 鉛則 現場ことば版（収載15条）— docs/plain-language-prompts/en-kisoku.md
 - [ ] 四アルキル鉛則 現場ことば版（収載16条）— docs/plain-language-prompts/shi-alkyl-en-kisoku.md
-- [ ] 特化則 現場ことば版（収載22条）— docs/plain-language-prompts/tokka-kisoku.md
+- [x] 特化則 現場ことば版（収載22条）— docs/plain-language-prompts/tokka-kisoku.md
 - [ ] （常設）BACKLOG-plain-stale.md に自部隊担当法令の stale があれば再生成して表示復帰
