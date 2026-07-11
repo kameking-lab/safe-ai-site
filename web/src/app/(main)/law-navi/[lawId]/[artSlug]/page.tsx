@@ -27,6 +27,7 @@ import {
   type LawNaviEntry,
 } from "@/lib/law-navi/permalink";
 import { matchGlossaryTerms } from "@/lib/law-navi/glossary-match";
+import { isIndexableLawNaviEntry } from "@/lib/law-navi/seo-gate";
 import { topicsForArticle } from "@/data/law-navi/topics";
 import { getLawMetadata } from "@/data/laws";
 import { ogImageUrl } from "@/lib/og-url";
@@ -55,10 +56,15 @@ export async function generateMetadata({
   const description = plain
     ? `${a.law} ${a.articleNum}の原文と現場ことば版。${plain.plainText.slice(0, 80)}…（正式には原文参照）`
     : `${a.law} ${a.articleNum}の原文と現場向けAI解説。${a.text.slice(0, 70)}…`;
+  // FT-D3 SEO ゲート（設計書 §5-3）: 付加価値条件を満たさない条（全文取込の生ミラー等）は
+  // noindex,follow。ページ生成・内部導線・前後ナビは維持しつつ検索インデックスからのみ外す。
+  // 条件を満たした時点（plain 執筆・topics 追加等）で seo-gate が自動的に index へ昇格する。
+  const indexable = isIndexableLawNaviEntry(entry);
   return {
     title,
     description,
     alternates: { canonical: entry.path },
+    ...(indexable ? {} : { robots: { index: false, follow: true } }),
     openGraph: {
       title,
       description,
