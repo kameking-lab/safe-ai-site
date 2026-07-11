@@ -17,12 +17,14 @@ import type { PlainArticle } from "./types";
 import { plainSankketsuKisoku } from "./sankketsu-kisoku";
 import { plainKikaiKenteiKisoku } from "./kikai-kentei-kisoku";
 import { plainGondolaAnzenKisoku } from "./gondola-anzen-kisoku";
+import { plainBoilerAtsuryokuYokiAnzenKisoku } from "./boiler-atsuryoku-yoki-anzen-kisoku";
 
 /** 法令別 plain ファイルの束（ファイル名 → エントリ配列） */
 export const PLAIN_LAW_FILES: Readonly<Record<string, readonly PlainArticle[]>> = {
   "sankketsu-kisoku": plainSankketsuKisoku,
   "kikai-kentei-kisoku": plainKikaiKenteiKisoku,
   "gondola-anzen-kisoku": plainGondolaAnzenKisoku,
+  "boiler-atsuryoku-yoki-anzen-kisoku": plainBoilerAtsuryokuYokiAnzenKisoku,
 };
 
 /** 全 plain エントリ（整合テスト・カバレッジ用） */

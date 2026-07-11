@@ -1,8 +1,8 @@
 # 現場ことば版 カバレッジレポート（安衛法体系）
 
-生成: 2026-07-11T20:53:55.762Z（`cd web && npm run plain:status` で再生成）
+生成: 2026-07-11T20:58:31.058Z（`cd web && npm run plain:status` で再生成）
 
-全体: 収載 512 条 / 言い換え済み(fresh) 53 条 / stale 0 条 / 未生成 459 条
+全体: 収載 512 条 / 言い換え済み(fresh) 78 条 / stale 0 条 / 未生成 434 条
 
 | 法令 | e-Gov ID | 収載条数 | 済(fresh) | stale | 未生成 | レーン | データファイル |
 |---|---|---|---|---|---|---|---|
@@ -19,7 +19,7 @@
 | 電離則 | 347M50002000041 | 20 | 0 | 0 | 20 | plain-4 | web/src/data/plain/denri-houshasen-kisoku.ts |
 | 四アルキル鉛則 | 347M50002000038 | 16 | 0 | 0 | 16 | plain-3 | web/src/data/plain/shi-alkyl-en-kisoku.ts |
 | 高圧則 | 347M50002000040 | 15 | 0 | 0 | 15 | plain-4 | web/src/data/plain/koa-atsu-sagyo-anzen-eisei-kisoku.ts |
-| ボイラー則 | 347M50002000033 | 25 | 0 | 0 | 25 | plain-4 | web/src/data/plain/boiler-atsuryoku-yoki-anzen-kisoku.ts |
+| ボイラー則 | 347M50002000033 | 25 | 25 | 0 | 0 | plain-4 | web/src/data/plain/boiler-atsuryoku-yoki-anzen-kisoku.ts |
 | ゴンドラ則 | 347M50002000035 | 20 | 20 | 0 | 0 | plain-4 | web/src/data/plain/gondola-anzen-kisoku.ts |
 | 事務所則 | 347M50002000043 | 26 | 0 | 0 | 26 | plain-1 | web/src/data/plain/jimusho-eisei-kijun-kisoku.ts |
 | 機械等検定規則 | 347M50002000045 | 17 | 17 | 0 | 0 | plain-1 | web/src/data/plain/kikai-kentei-kisoku.ts |
