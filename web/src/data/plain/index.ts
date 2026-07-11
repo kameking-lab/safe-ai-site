@@ -31,6 +31,7 @@ import { plainGondolaAnzenKisoku } from "./gondola-anzen-kisoku";
 import { plainBoilerAtsuryokuYokiAnzenKisoku } from "./boiler-atsuryoku-yoki-anzen-kisoku";
 import { plainJimushoEiseiKijunKisoku } from "./jimusho-eisei-kijun-kisoku";
 import { plainKikaiKenteiKisoku } from "./kikai-kentei-kisoku";
+import { plainKoaAtsuSagyoAnzenEiseiKisoku } from "./koa-atsu-sagyo-anzen-eisei-kisoku";
 
 /** 法令別 plain ファイルの束（ファイル名 → エントリ配列） */
 export const PLAIN_LAW_FILES: Readonly<Record<string, readonly PlainArticle[]>> = {
@@ -51,6 +52,7 @@ export const PLAIN_LAW_FILES: Readonly<Record<string, readonly PlainArticle[]>> 
   "boiler-atsuryoku-yoki-anzen-kisoku": plainBoilerAtsuryokuYokiAnzenKisoku,
   "jimusho-eisei-kijun-kisoku": plainJimushoEiseiKijunKisoku,
   "kikai-kentei-kisoku": plainKikaiKenteiKisoku,
+  "koa-atsu-sagyo-anzen-eisei-kisoku": plainKoaAtsuSagyoAnzenEiseiKisoku,
 };
 
 /** 全 plain エントリ（整合テスト・カバレッジ用） */
