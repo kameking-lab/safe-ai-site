@@ -21,6 +21,8 @@ yarn.lock
 /audit-out/
 # 生成品質evalの実測レポート出力（正本記録は docs/ に明示コピーする運用）
 /.genquality/
+# 現場口語ベンチの実測レポート出力（正本記録は docs/ に明示コピーする運用）
+/.bench/
 
 # next.js
 /.next/

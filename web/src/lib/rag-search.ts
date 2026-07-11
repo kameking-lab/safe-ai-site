@@ -5,6 +5,10 @@ import { expandQuery } from "@/lib/query-expansion";
 import { expandQueryRich } from "@/lib/rag/synonyms";
 import { bm25Score, getOrBuildIndex } from "@/lib/rag/bm25";
 import { rerank } from "@/lib/rag/reranker";
+import {
+  hasOutOfDomainSignal,
+  OUT_OF_DOMAIN_PENALTY_FACTOR,
+} from "@/lib/rag/out-of-domain";
 import { kanjiToArabic } from "@/lib/article-number-normalize";
 // C-1（モバイル実速度の構造是正）: カテゴリフィルタのUI選択肢は law-category-options.ts
 // に分離した。client（chatbot-panel）がこの定数のためだけに本モジュール経由で
@@ -787,13 +791,26 @@ export function searchRelevantArticlesWithScore(
   const normalizedScore = Math.min(topScore / 25, 1.0);
 
   const scoredArticles = reranked.slice(0, topK).map((item) => item.article);
-  const { articles: pinnedArticles, hadPins } = applyPinnedTopics(query, scoredArticles);
+  // 2026-07-11 現場口語プロジェクト: PIN照合は**展開後クエリ**で行う。
+  // 従来は生クエリのみ照合していたため、「クビ」「マンホール」等の口語が
+  // synonym層（expandQuery / expandQueryRich）で正式語に正規化されても
+  // PINには届かなかった。展開後クエリで照合することで、語彙正規化が
+  // スコアリングとPINの両方に一様に効く（excludeTriggers も同様＝
+  // 「シンナー→有機溶剤」の展開で事務所換気PINの誤発火も構造的に抑止される）。
+  const { articles: pinnedArticles, hadPins } = applyPinnedTopics(expandedQuery, scoredArticles);
   const finalArticles = pinnedArticles.slice(0, topK);
 
   // 強制ピンが刺さった場合は、ヒット扱いで信頼度を最低 0.7 まで引き上げる
   // （ピンは明示的トピックでの確定ソースのため、キーワードスコア不足でも
   //  「関連条文なし」扱いにならないようにする）
-  const adjustedScore = hadPins ? Math.max(normalizedScore, 0.7) : normalizedScore;
+  let adjustedScore = hadPins ? Math.max(normalizedScore, 0.7) : normalizedScore;
+
+  // 2026-07-11 E3（GQ51車検リーク）: PINが無く、かつクエリがドメイン外シグナル
+  // （車検・確定申告等）を持つ場合は信頼度を減点し、no-hit経路（範囲外テンプレ）へ
+  // 落とす。労働・現場文脈の語が併出する場合は減点しない（out-of-domain.ts参照）。
+  if (!hadPins && hasOutOfDomainSignal(query)) {
+    adjustedScore = normalizedScore * OUT_OF_DOMAIN_PENALTY_FACTOR;
+  }
 
   return {
     articles: finalArticles,
