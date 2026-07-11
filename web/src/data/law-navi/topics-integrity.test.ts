@@ -69,6 +69,46 @@ describe("LAW_NAVI_TOPICS — 分野インデックスの整合", () => {
     }
   });
 
+  it("第2陣13分野（2026-07-11 全域展開）が揃い、中核条文・俗称aliasを持つ", () => {
+    const SECOND_WAVE = [
+      "crane",
+      "tamagake",
+      "ashiba",
+      "fall-arrest",
+      "sanketsu",
+      "yuki-solvent",
+      "tokka",
+      "funjin",
+      "asbestos",
+      "heatstroke",
+      "denki",
+      "kensetsu-kikai",
+      "kosho-sagyosha",
+    ];
+    for (const id of SECOND_WAVE) {
+      expect(findLawNaviTopic(id), `${id} が無い`).toBeDefined();
+    }
+    // 中核データのスポット固定（e-Gov 現行の制度と一致する参照）
+    const crane = findLawNaviTopic("crane")!;
+    expect(crane.articles.some((a) => a.lawShort === "クレーン則" && a.articleNum === "第22条")).toBe(true); // 免許
+    const tamagake = findLawNaviTopic("tamagake")!;
+    expect(tamagake.aliases).toContain("スリング");
+    expect(tamagake.articles.some((a) => a.articleNum === "第221条")).toBe(true); // 技能講習
+    const sanketsu = findLawNaviTopic("sanketsu")!;
+    expect(sanketsu.aliases).toContain("酸欠");
+    expect(sanketsu.articles.some((a) => a.lawShort === "酸欠則" && a.articleNum === "第11条")).toBe(true); // 作業主任者
+    const asbestos = findLawNaviTopic("asbestos")!;
+    expect(asbestos.articles.some((a) => a.lawShort === "石綿則" && a.articleNum === "第3条")).toBe(true); // 事前調査
+    const heatstroke = findLawNaviTopic("heatstroke")!;
+    expect(heatstroke.articles.some((a) => a.articleNum === "第612条の2")).toBe(true); // R7義務化
+    const fallArrest = findLawNaviTopic("fall-arrest")!;
+    expect(fallArrest.aliases).toContain("安全帯"); // 2019改称前の旧称
+    expect(fallArrest.articles.some((a) => a.articleNum === "第520条")).toBe(true);
+    // 足場は（足場等）グルーピング条文（563条＝手すり・中さん）を含む＝カバレッジ拡大の成果
+    const ashiba = findLawNaviTopic("ashiba")!;
+    expect(ashiba.articles.some((a) => a.articleNum === "第563条")).toBe(true);
+  });
+
   it("フォークリフト分野: 4クエリ着地の中核データが揃っている", () => {
     const forklift = findLawNaviTopic("forklift")!;
     expect(forklift).toBeDefined();

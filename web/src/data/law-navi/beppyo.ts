@@ -71,7 +71,7 @@ export const BEPPYO_ENTRIES: readonly BeppyoEntry[] = [
       { lawShort: "特化則", articleNum: "第2条" },
       { lawShort: "安衛法", articleNum: "第57条" },
     ],
-    relatedTopicIds: [],
+    relatedTopicIds: ["tokka"],
     keywords: ["特定化学物質", "特化物", "特化則", "第1類物質", "第2類物質", "第3類物質", "許可物質"],
   },
   {
@@ -105,7 +105,7 @@ export const BEPPYO_ENTRIES: readonly BeppyoEntry[] = [
       { lawShort: "酸欠則", articleNum: "第2条" },
       { lawShort: "酸欠則", articleNum: "第11条" },
     ],
-    relatedTopicIds: [],
+    relatedTopicIds: ["sanketsu"],
     keywords: ["酸素欠乏危険場所", "酸欠", "酸素欠乏", "硫化水素", "マンホール", "ピット", "タンク内作業"],
   },
   {
@@ -119,7 +119,7 @@ export const BEPPYO_ENTRIES: readonly BeppyoEntry[] = [
       { lawShort: "有機則", articleNum: "第1条" },
       { lawShort: "有機則", articleNum: "第35条" },
     ],
-    relatedTopicIds: [],
+    relatedTopicIds: ["yuki-solvent"],
     keywords: ["有機溶剤", "有機則", "トルエン", "キシレン", "アセトン", "シンナー", "第二種有機溶剤"],
   },
   {
@@ -130,7 +130,7 @@ export const BEPPYO_ENTRIES: readonly BeppyoEntry[] = [
     summary:
       "動力を用いて自走できる建設機械（整地・運搬・積込み用、掘削用、基礎工事用、締固め用、コンクリート打設用、解体用）を列挙する表。車両系建設機械の範囲を画する。",
     relatedArticles: [{ lawShort: "安衛則", articleNum: "第164条" }],
-    relatedTopicIds: [],
+    relatedTopicIds: ["kensetsu-kikai"],
     keywords: ["建設機械", "車両系建設機械", "ユンボ", "バックホウ", "ブルドーザー", "パワーショベル", "解体用機械"],
   },
   {
@@ -140,7 +140,7 @@ export const BEPPYO_ENTRIES: readonly BeppyoEntry[] = [
     name: "鋼管足場用の部材・附属金具",
     summary: "鋼管足場に用いる部材および附属金具（わく組足場用の主わく・布わく・緊結金具等）を列挙する表。",
     relatedArticles: [],
-    relatedTopicIds: [],
+    relatedTopicIds: ["ashiba"],
     keywords: ["鋼管足場", "足場部材", "緊結金具", "わく組足場", "クランプ"],
   },
   {
