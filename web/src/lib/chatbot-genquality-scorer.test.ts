@@ -181,7 +181,7 @@ describe("採点器の部品", () => {
     expect(s.checks.conclusion).toBe("partial");
   });
 
-  it("summarizeScoresが診断04と同じ分母（範囲内21問/範囲外2問）で集計する", () => {
+  it("summarizeScoresが正しい分母（範囲内47問/範囲外4問・2026-07-11拡張後）で集計する", () => {
     const scores = GEN_QUALITY_CASES.map((tc) =>
       scoreGenQuality(tc, {
         answer: "ダミー",
@@ -190,8 +190,9 @@ describe("採点器の部品", () => {
       })
     );
     const summary = summarizeScores(GEN_QUALITY_CASES, scores);
-    expect(summary.total).toBe(23);
-    expect(summary.scorable).toBe(21); // in-scope 20 + boundary 1（労基法20条収録済のため）
-    expect(summary.outOfScope.total).toBe(2);
+    expect(summary.total).toBe(51);
+    // in-scope 41 + boundary 6（労基法・労施法域は収録済のため採点対象）
+    expect(summary.scorable).toBe(47);
+    expect(summary.outOfScope.total).toBe(4);
   });
 });

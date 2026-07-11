@@ -14,6 +14,8 @@
  *   CHATBOT_EVAL_BASE_URL         … 対象環境（default http://127.0.0.1:3000）
  *   CHATBOT_GENQUALITY_INPUT      … 過去レポートJSONを再採点（fetchなし・注入実証用）
  *   CHATBOT_GENQUALITY_OUT        … レポート出力先（default .genquality/chatbot-genquality-latest.json）
+ *   CHATBOT_EVAL_INTERVAL_MS      … 質問間隔ms（default 4000。51問化後の本番実測は
+ *                                   IPレート制限40回/10分に収まるよう16000を推奨）
  */
 
 import { describe, it, expect } from "vitest";
@@ -34,7 +36,11 @@ const INPUT = process.env.CHATBOT_GENQUALITY_INPUT;
 const OUT = resolve(
   process.env.CHATBOT_GENQUALITY_OUT || ".genquality/chatbot-genquality-latest.json"
 );
-const INTERVAL_MS = 4000; // 診断04の本番プローブと同じレート（レート制限対策）
+// 診断04の本番プローブと同じ4秒が既定。51問体制の本番実測は10分40回の
+// IPレート制限（chatbot-rate-limit.ts）に接触するため間隔を env で広げられる
+const INTERVAL_MS = Number(process.env.CHATBOT_EVAL_INTERVAL_MS || 4000);
+// 429（レート制限）時は Retry-After を尊重して1回だけ再試行する
+const RATE_LIMIT_RETRIES = 1;
 
 export type GenQualityRunResult = {
   id: string;
@@ -64,11 +70,19 @@ function sleep(ms: number) {
 }
 
 async function probeOne(tc: GenQualityCase): Promise<{ status: number; resp: GenQualityResponse }> {
-  const res = await fetch(`${BASE_URL}/api/chatbot`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: tc.question }),
-  });
+  let res: Response;
+  for (let attempt = 0; ; attempt++) {
+    res = await fetch(`${BASE_URL}/api/chatbot`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: tc.question }),
+    });
+    if (res.status !== 429 || attempt >= RATE_LIMIT_RETRIES) break;
+    // IPレート制限: Retry-After（秒）を待ってから1回だけ再試行
+    const retryAfterSec = Number(res.headers.get("Retry-After") || 60);
+    console.warn(`[genquality] ${tc.id} 429 rate-limited: ${retryAfterSec}s 待って再試行`);
+    await sleep(Math.min(retryAfterSec, 600) * 1000);
+  }
   const body = (await res.json()) as GenQualityResponse;
   return {
     status: res.status,
@@ -87,10 +101,10 @@ async function probeOne(tc: GenQualityCase): Promise<{ status: number; resp: Gen
   };
 }
 
-describe.runIf(LIVE)("生成品質eval 実機測定（診断04の23問）", () => {
+describe.runIf(LIVE)("生成品質eval 実機測定（51問golden）", () => {
   it(
-    `23問を採点しレポートを出力する（${INPUT ? "再採点" : BASE_URL}）`,
-    { timeout: 20 * 60 * 1000 },
+    `${GEN_QUALITY_CASES.length}問を採点しレポートを出力する（${INPUT ? "再採点" : BASE_URL}）`,
+    { timeout: 45 * 60 * 1000 },
     async () => {
       const results: GenQualityRunResult[] = [];
 
