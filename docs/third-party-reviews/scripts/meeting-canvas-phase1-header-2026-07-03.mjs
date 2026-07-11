@@ -29,14 +29,17 @@ function check(label, cond, detail = "") {
 await page.goto(`${BASE}/safety-diary`, { waitUntil: "networkidle" });
 await page.evaluate(() => window.localStorage.clear());
 
-// (0) 既定はクラシック表示のまま。トグルで opt-in。
+// (0) S1第九弾: 既定表示はキャンバス。従来表示は ?canvas=0 の opt-out。
 await page.goto(`${BASE}/safety-diary`, { waitUntil: "networkidle" });
 await page.waitForTimeout(300);
-check("既定表示はクラシック表示（キャンバス入口ボタンが見える）", await page.getByRole("button", { name: /キャンバス.?β/ }).isVisible().catch(() => false));
-await page.getByRole("button", { name: /キャンバス.?β/ }).click();
+check("既定表示はキャンバス（従来表示ボタンが見える）", await page.getByRole("button", { name: "従来表示" }).isVisible().catch(() => false));
+await page.getByRole("button", { name: "従来表示" }).click();
 await page.waitForTimeout(400);
-check("トグルでキャンバス表示に切り替わる（従来表示ボタンが見える）", await page.getByRole("button", { name: "従来表示" }).isVisible().catch(() => false));
-check("URLに ?canvas=1 が付く（共有/ブックマーク互換）", page.url().includes("canvas=1"));
+check("従来表示に切り替わる（『新しい表示へ』入口が見える）", await page.getByRole("button", { name: /新しい表示へ/ }).isVisible().catch(() => false));
+check("URLに ?canvas=0 が付く（共有/ブックマーク互換）", page.url().includes("canvas=0"));
+await page.getByRole("button", { name: /新しい表示へ/ }).click();
+await page.waitForTimeout(400);
+check("『新しい表示へ』でキャンバスに戻る", await page.getByRole("button", { name: "従来表示" }).isVisible().catch(() => false));
 
 // (1) 「作業所名」セルをタップ→エディタが開く→入力→用紙に反映。
 const siteCell = page.getByRole("button", { name: "作業所名を入力" });
@@ -86,10 +89,10 @@ check(
   printText.includes("○○ビル新築工事") && printText.includes("山田太郎")
 );
 
-// (5) クラシック表示へ戻ると canvas パラメータが消える（既定＝クラシック表示と一致するため明示不要）。
+// (5) S1第九弾: クラシック表示へ戻ると ?canvas=0 が付く（既定＝キャンバスのため opt-out を明示）。
 await page.getByRole("button", { name: "従来表示" }).click();
 await page.waitForTimeout(300);
-check("『従来表示』でクラシック表示に戻る（URLから canvas パラメータが消える）", !page.url().includes("canvas="));
+check("『従来表示』でクラシック表示に戻る（URLに canvas=0 が付く）", page.url().includes("canvas=0"));
 const siteInput = page.locator('input[list="mtg-sites"]');
 check("クラシック表示にも入力内容が反映（同一record共有）", (await siteInput.inputValue().catch(() => "")) === "○○ビル新築工事");
 

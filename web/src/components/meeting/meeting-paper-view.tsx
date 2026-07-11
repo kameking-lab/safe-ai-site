@@ -70,15 +70,18 @@ export function MeetingPaperView() {
   const [notice, setNotice] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  // 柱C-9: 「…」その他操作シート（KYのO10第五弾と同じ操作集中の型）
+  const [showActions, setShowActions] = useState(false);
   const [busyRow, setBusyRow] = useState<string | null>(null);
   const [history, setHistory] = useState<MeetingHistory | null>(null);
   // 「前回を複製」を上部にも出すための判定（端末に保存済みの打合せ書があるときだけ）。
   const [hasLatest, setHasLatest] = useState(false);
-  // S1（打合せ用紙 直接操作UI・第一弾〜第八弾）: 用紙キャンバス（β）。KYのF1と同じ方式で
-  // 既定はオフ（?canvas=1 または「🗺 キャンバス(β)」ボタンで切替）。ヘッダー7欄・明日のイベント5欄・
+  // S1（打合せ用紙 直接操作UI・第一弾〜第九弾）: 用紙キャンバス。ヘッダー7欄・明日のイベント5欄・
   // 統括安全責任者コメント・各社マトリクス10部位・搬入出（動的行）・点検項目8カテゴリ・
-  // 作業内容欄でのAI提案・履歴サジェスト（datalist）に対応。残＝既定切替（β外し）。
-  const [canvasMode, setCanvasMode] = useState(false);
+  // 作業内容欄でのAI提案・履歴サジェスト（datalist）・行操作（下位追加/削除/KY起票）に対応。
+  // 第九弾で機能パリティ（保存主ボタン・「…」その他操作・印刷プレビュー・分散入力・前回複製）を
+  // canvas側に確立したうえで既定をcanvasに切替（KYのO10第五弾と同じ手順）。?canvas=0 で従来表示へ。
+  const [canvasMode, setCanvasMode] = useState(true);
   const [activeFieldKey, setActiveFieldKey] = useState<MeetingPaperFieldKey | null>(null);
   const stageRef = useRef<PaperStageHandle>(null);
 
@@ -99,14 +102,15 @@ export function MeetingPaperView() {
     }
   }, []);
 
-  // S1: キャンバスβの切替（URLの ?canvas=1 と同期）。
+  // S1: キャンバス⇄従来表示の切替（既定=キャンバス。?canvas=0 で従来表示を明示、
+  // 旧共有リンクの ?canvas=1 も引き続き受け付ける）。
   const toggleCanvasMode = useCallback((on: boolean) => {
     setCanvasMode(on);
     setActiveFieldKey(null);
     try {
       const url = new URL(window.location.href);
-      if (on) url.searchParams.set("canvas", "1");
-      else url.searchParams.delete("canvas");
+      if (on) url.searchParams.delete("canvas");
+      else url.searchParams.set("canvas", "0");
       window.history.replaceState(null, "", url.toString());
     } catch {
       /* URL操作不可の環境では state のみ */
@@ -177,6 +181,18 @@ export function MeetingPaperView() {
     setRecord((prev) => ({ ...prev, deliveries: [...prev.deliveries, newRow] }));
     setActiveFieldKey(deliveryFieldKey(newRow.id, "item"));
   }, []);
+
+  // S1（第九弾）: canvasエディタ内の行操作（クラシックの＋下位/削除/KYを作成と同じ挙動）。
+  // 下位追加は追加した行の業者名欄をそのまま開く（行追加ホットスポットと同じ作法）。
+  const handleAddChildRow = (row: MeetingContractorRow) => {
+    const newRow = emptyContractorRow(nextType(row.type), row.id);
+    setRecord((prev) => ({ ...prev, contractors: [...prev.contractors, newRow] }));
+    setActiveFieldKey(contractorFieldKey(newRow.id, "company"));
+  };
+  const handleRemoveRow = (id: string) => {
+    setActiveFieldKey(null);
+    removeContractor(id);
+  };
 
   const machines = useMemo(() => aggregateMachines(record.contractors), [record.contractors]);
   const hidden = useMemo(() => hiddenIds(record.contractors, collapsed), [record.contractors, collapsed]);
@@ -308,9 +324,115 @@ export function MeetingPaperView() {
     </>
   );
 
-  // S1（打合せ用紙 直接操作UI）: 用紙キャンバス（β）。全hooks評価後の分岐＝
-  // クラシックUIと状態を完全共有する（record/自動保存/保存判定がそのまま効く）。
-  // KYのF1と同じく既定はオフ。搬入出・点検項目・必要資格/予定人員/予想災害は後続弾で拡張。
+  // 柱C-9（KYのO10第五弾と同型）: 印刷プレビュー・下部操作バー（保存＋「…」）・
+  // その他操作シートを canvas/クラシック共通の変数として分岐前に括り出す
+  //（ロジック二重化ゼロ＝既定切替後もどちらの表示からも同じ操作に到達できる）。
+  const runAction = (fn: () => void) => {
+    setShowActions(false);
+    fn();
+  };
+
+  const printPreviewOverlay = showPrintPreview && (
+    <div className="fixed inset-0 z-40 overflow-auto bg-slate-700/70 p-4 print:hidden">
+      <div className="mx-auto max-w-[300mm] rounded bg-white p-4 shadow-2xl">
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-sm font-bold text-slate-800">印刷プレビュー（A4横・打合せ書）</p>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => window.print()} className="min-h-[44px] rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-700">印刷 / PDF</button>
+            <button type="button" onClick={() => setShowPrintPreview(false)} className="min-h-[44px] rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">閉じる</button>
+          </div>
+        </div>
+        <div className="overflow-x-auto rounded border border-slate-200 p-2">
+          <MeetingPrintSheet record={record} />
+        </div>
+      </div>
+    </div>
+  );
+
+  const bottomActionBar = (
+    <div
+      className="fixed left-0 right-0 z-30 border-t border-slate-200 bg-white/95 px-4 py-2.5 shadow-lg backdrop-blur print:hidden"
+      style={{ bottom: "calc(var(--mobile-bottom-nav-h, 0px) + env(safe-area-inset-bottom, 0px))" }}
+    >
+      {/* モバイルは全画面共通の共有FAB(右下)があるため右端を空ける（KYと同じ回避） */}
+      <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 pr-16 sm:pr-0">
+        <span className={`min-w-0 truncate text-[11px] font-semibold ${isSaved ? "text-emerald-700" : "text-slate-500"}`}>
+          {isSaved ? "✓ 保存一覧に保存済み" : savedLabel ? `未保存（${savedLabel}）` : "未保存"}
+        </span>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={handleSave}
+            className="min-h-[44px] rounded-lg bg-emerald-600 px-7 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+          >
+            保存
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowActions(true)}
+            aria-haspopup="menu"
+            aria-expanded={showActions}
+            aria-label="その他の操作（複製・印刷・点検項目AI）"
+            className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-base font-bold leading-none text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2"
+          >
+            …
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  const actionsSheet = showActions && (
+    <>
+      <div className="fixed inset-0 z-[45] bg-slate-900/40 print:hidden" onClick={() => setShowActions(false)} aria-hidden="true" />
+      <div
+        role="menu"
+        aria-label="その他の操作"
+        className="fixed inset-x-0 bottom-0 z-50 mx-auto max-h-[80vh] max-w-lg overflow-y-auto rounded-t-2xl border-t border-slate-200 bg-white p-4 pb-[max(1rem,env(safe-area-inset-bottom))] shadow-2xl print:hidden"
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-sm font-bold text-slate-800">その他の操作</p>
+          <button type="button" onClick={() => setShowActions(false)} aria-label="閉じる" className="min-h-[44px] rounded-lg px-3 text-lg leading-none text-slate-500 hover:bg-slate-100">×</button>
+        </div>
+
+        <p className="mb-1.5 text-[11px] font-bold text-slate-400">記録</p>
+        <div className="mb-3 space-y-1.5">
+          <button type="button" role="menuitem" onClick={() => runAction(handleCopyLatest)} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-2.5 text-left hover:bg-amber-100">
+            <span className="text-sm font-bold text-amber-800">↻ 前回を複製</span>
+            <span className="text-[11px] font-normal text-amber-600">前回の打合せ書を翌日分として引き継ぐ</span>
+          </button>
+          <Link href="/safety-diary/list" role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center rounded-xl border border-sky-200 bg-white px-4 py-3 text-left text-sm font-semibold text-sky-700 hover:bg-sky-50">
+            📁 保存一覧を開く →
+          </Link>
+        </div>
+
+        <p className="mb-1.5 text-[11px] font-bold text-slate-400">点検項目</p>
+        <div className="mb-3 space-y-1.5">
+          <button type="button" role="menuitem" onClick={() => runAction(inferChecklistAll)} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-indigo-200 bg-indigo-50/60 px-4 py-2.5 text-left hover:bg-indigo-100">
+            <span className="text-sm font-bold text-indigo-800">🤖 AIで該当項目を推論</span>
+            <span className="text-[11px] font-normal text-indigo-600">各社の作業内容から点検8カテゴリの該当を自動判定</span>
+          </button>
+          <button type="button" role="menuitem" onClick={() => runAction(resetChecklist)} className="flex min-h-[48px] w-full items-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-semibold text-slate-600 hover:bg-slate-50">
+            公式版の点検項目に戻す
+          </button>
+        </div>
+
+        <p className="mb-1.5 text-[11px] font-bold text-slate-400">印刷・PDF</p>
+        <div className="mb-1 space-y-1.5">
+          <button type="button" role="menuitem" onClick={() => runAction(() => setShowPrintPreview(true))} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-left hover:bg-sky-50">
+            <span className="text-sm font-semibold text-sky-700">🔍 印刷プレビュー</span>
+            <span className="text-[11px] font-normal text-sky-600">A4横の体裁を確認してから印刷</span>
+          </button>
+          <button type="button" role="menuitem" onClick={() => { setShowActions(false); window.print(); }} className="flex min-h-[48px] w-full items-center rounded-xl bg-sky-600 px-4 py-3 text-left text-sm font-bold text-white hover:bg-sky-700">
+            🖨 印刷 / PDF
+          </button>
+        </div>
+      </div>
+    </>
+  );
+
+  // S1第九弾: 用紙キャンバスが既定表示。全hooks評価後の分岐＝クラシックUIと状態を
+  // 完全共有する（record/自動保存/保存判定がそのまま効く）。?canvas=0 で従来表示へ。
   if (canvasMode) {
     const remaining = emptyPaperFieldKeys.size;
     return (
@@ -332,6 +454,16 @@ export function MeetingPaperView() {
               )}
             </div>
             <div className="flex items-center gap-2">
+              {hasLatest && (
+                <button
+                  type="button"
+                  onClick={handleCopyLatest}
+                  title="前回の打合せ書を翌日分として複製（各社の作業・危険・対策を引き継ぎ、日付は翌日・当日記入はクリア）"
+                  className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-100"
+                >
+                  ↻ 前回を複製
+                </button>
+              )}
               <Link href="/safety-diary/list" className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100">
                 保存一覧
               </Link>
@@ -358,8 +490,19 @@ export function MeetingPaperView() {
 
         {historyDatalists}
 
+        {/* 協力会社 分散入力 → 元請 自動集約（クラウド設定時のみ表示。クラシックと同一部品） */}
+        <div className="mx-auto max-w-5xl px-3 pt-2 print:hidden">
+          <DistributedInputBar
+            meetingId={record.id}
+            siteName={record.siteName}
+            workDate={`${record.workDateYear}-${record.workDateMonth}-${record.workDateDay}`}
+            onImport={(merged) => patch({ contractors: merged })}
+            contractors={record.contractors}
+          />
+        </div>
+
         {/* 用紙キャンバス: 初期表示＝全体フィット。タップで入力、ピンチ/ホイール/ボタンでズーム */}
-        <PaperStage ref={stageRef} heightClassName="h-[calc(100dvh-200px)] min-h-[320px] sm:h-[calc(100dvh-150px)]">
+        <PaperStage ref={stageRef} heightClassName="h-[calc(100dvh-260px)] min-h-[320px] sm:h-[calc(100dvh-210px)]">
           <div className="bg-white p-3">
             <MeetingPrintSheet
               record={record}
@@ -384,6 +527,9 @@ export function MeetingPaperView() {
             onSelectField={(key) => setActiveFieldKey(key)}
             onSuggestRow={(id) => void suggestRow(id)}
             suggestBusyId={busyRow}
+            onAddChildRow={handleAddChildRow}
+            onRemoveRow={handleRemoveRow}
+            kyHrefForRow={kyHrefFromRow}
           />
         )}
 
@@ -392,21 +538,15 @@ export function MeetingPaperView() {
           <MeetingPrintSheet record={record} />
         </div>
 
-        <div className="sticky bottom-0 z-20 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-white/95 px-3 py-2 backdrop-blur print:hidden">
-          <span className={`text-[11px] font-semibold ${isSaved ? "text-emerald-700" : "text-slate-500"}`}>
-            {isSaved ? "✓ 保存一覧に保存済み" : savedLabel ? `未保存（${savedLabel}）` : "未保存"}
-          </span>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={() => window.print()} className="min-h-[44px] rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
-            <button type="button" onClick={handleSave} className="min-h-[44px] rounded-lg border border-emerald-300 bg-white px-4 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
-          </div>
-        </div>
+        {printPreviewOverlay}
+        {bottomActionBar}
+        {actionsSheet}
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen bg-slate-100 pb-24 print:pb-0">
       {/* 上部バー */}
       <div className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 bg-white/95 px-3 py-2 backdrop-blur print:hidden">
         <div className="flex items-center gap-2">
@@ -428,10 +568,10 @@ export function MeetingPaperView() {
           <button
             type="button"
             onClick={() => toggleCanvasMode(true)}
-            title="用紙全体を1画面で見ながら、タップした欄をその場で入力できる新しい表示を試す（β）"
+            title="用紙全体を1画面で見ながら、タップした欄をその場で入力できる新しい表示へ戻る（既定）"
             className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
           >
-            🗺 キャンバス(β)
+            🗺 新しい表示へ
           </button>
           <div className="flex items-center gap-1">
             <button type="button" aria-label="縮小" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 10) / 10))} className="min-h-[44px] min-w-[44px] rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">－</button>
@@ -674,35 +814,11 @@ export function MeetingPaperView() {
         <MeetingPrintSheet record={record} />
       </div>
 
-      {/* 印刷プレビュー（画面オーバーレイ。印刷物には出さない） */}
-      {showPrintPreview && (
-        <div className="fixed inset-0 z-40 overflow-auto bg-slate-700/70 p-4 print:hidden">
-          <div className="mx-auto max-w-[300mm] rounded bg-white p-4 shadow-2xl">
-            <div className="mb-3 flex items-center justify-between">
-              <p className="text-sm font-bold text-slate-800">印刷プレビュー（A4横・打合せ書）</p>
-              <div className="flex gap-2">
-                <button type="button" onClick={() => window.print()} className="min-h-[44px] rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-700">印刷 / PDF</button>
-                <button type="button" onClick={() => setShowPrintPreview(false)} className="min-h-[44px] rounded-lg border border-slate-300 px-4 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">閉じる</button>
-              </div>
-            </div>
-            <div className="overflow-x-auto rounded border border-slate-200 p-2">
-              <MeetingPrintSheet record={record} />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 下部アクションバー */}
-      <div id="mtg-actions" className="sticky bottom-0 z-20 flex scroll-mt-20 flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-white/95 px-3 py-2 backdrop-blur print:hidden">
-        <span className={`text-[11px] font-semibold ${isSaved ? "text-emerald-700" : "text-slate-500"}`}>
-          {isSaved ? "✓ 保存一覧に保存済み" : savedLabel ? `未保存（${savedLabel}）` : "未保存"}
-        </span>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => setShowPrintPreview(true)} className="min-h-[44px] rounded-lg border border-sky-300 bg-white px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50">印刷プレビュー</button>
-          <button type="button" onClick={() => window.print()} className="min-h-[44px] rounded-lg bg-sky-600 px-4 py-1.5 text-xs font-bold text-white shadow hover:bg-sky-700">印刷 / PDF</button>
-          <button type="button" onClick={handleSave} className="min-h-[44px] rounded-lg border border-emerald-300 bg-white px-4 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">保存</button>
-        </div>
-      </div>
+      {/* 印刷プレビュー・下部操作バー（保存/…）・その他操作シート＝canvas/クラシック共通consts */}
+      <span id="mtg-actions" className="block scroll-mt-20" aria-hidden="true" />
+      {printPreviewOverlay}
+      {bottomActionBar}
+      {actionsSheet}
     </div>
   );
 }
