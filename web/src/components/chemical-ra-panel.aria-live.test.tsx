@@ -21,13 +21,13 @@ describe("ChemicalRaPanel エラー表示のaria-live（スクリーンリーダ
     vi.unstubAllGlobals();
   });
 
-  it("AI調査失敗時のエラーメッセージがrole=alertでスクリーンリーダーに通知される", async () => {
+  it("判定失敗時のエラーメッセージがrole=alertでスクリーンリーダーに通知される", async () => {
     render(<ChemicalRaPanel />);
 
-    fireEvent.change(screen.getByLabelText(/物質名を直接入力/), {
+    fireEvent.change(screen.getByLabelText(/物質名・CAS番号・製品名を入力/), {
       target: { value: "トルエン" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /AI 詳細調査/ }));
+    fireEvent.click(screen.getByRole("button", { name: /STEP 3：リスクを判定して/ }));
 
     await waitFor(() => {
       expect(screen.getByRole("alert").textContent).toContain("AI呼び出しに失敗しました");

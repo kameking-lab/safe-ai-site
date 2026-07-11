@@ -72,8 +72,8 @@ export default function ChemicalRaPage() {
       </PageContainer>
       {/* 職種別クイックスタート: 物質名のクリックでRA入力を即プリフィル（exp: 入力の手間を削減） */}
       <PageContainer paddingY="none" className="pt-3 print:hidden">
-        <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-          <p className="text-sm font-bold text-slate-800 dark:text-slate-100">職種別クイックスタート</p>
+        <details className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+          <summary className="cursor-pointer text-sm font-bold text-slate-800 dark:text-slate-100">職種別クイックスタート（例から選ぶ）</summary>
           <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
             扱うことが多い化学物質の<strong className="font-semibold">例</strong>です。クリックするとその物質でリスクアセスメントを開始できます（実際の取扱物質はSDSでご確認ください）。
           </p>
@@ -107,28 +107,55 @@ export default function ChemicalRaPage() {
             <span className="mx-1 text-slate-300">|</span>
             <Link href="/court-cases?field=%E8%A3%BD%E9%80%A0%E3%83%BB%E9%80%A0%E8%88%B9" className="font-semibold text-emerald-700 underline decoration-emerald-300 underline-offset-2 hover:text-emerald-900 dark:text-emerald-300">関連判例</Link>
           </p>
-        </div>
+        </details>
       </PageContainer>
 
       {/* P1-G: メイン入力（RAパネル）をファーストビューに、現場リストは下部へ。
           初見ユーザーが「何のページか」を即理解できるよう順序を入れ替えた。 */}
       <PageContainer paddingY="none" className="pt-3 print:hidden">
-        {/* P2-1: SDS PDF/画像をAIが読み取り、RA・全法律規制へ誘導 */}
-        <SdsUploadPanel />
+        {/* P2-1: SDS PDF/画像をAIが読み取り、RA・全法律規制へ誘導。
+            一窓化: 主動線は上の1窓検索。SDS読取は折りたたみ（収載外カードから #sds-upload で着地） */}
+        <details id="sds-upload" className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+          <summary className="cursor-pointer text-sm font-bold text-slate-800 dark:text-slate-100">
+            SDS（PDF・写真）を読み取って物質を特定する
+          </summary>
+          <div className="mt-2">
+            <SdsUploadPanel />
+          </div>
+        </details>
       </PageContainer>
       <Suspense fallback={<PageSkeleton label="化学物質リスクアセスメントを読み込み中" />}>
         <ChemicalRaPanel />
       </Suspense>
       {/* P2-4: 混合物RA（複数成分の合成リスク集約） — 印刷=単一物質のA4記録には不要 */}
       <PageContainer paddingY="none" className="pt-3 print:hidden">
-        <MixtureRaPanel />
+        <details className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+          <summary className="cursor-pointer text-sm font-bold text-slate-800 dark:text-slate-100">
+            混合物RA（塗料・洗浄剤など複数成分をまとめて評価）
+          </summary>
+          <div className="mt-2">
+            <MixtureRaPanel />
+          </div>
+        </details>
       </PageContainer>
-      {/* P1-5: 保存したRA一覧（クラウド＋ローカル） */}
+      {/* P1-5: 保存したRA一覧（クラウド＋ローカル）。一窓化: 折りたたみで下部に集約 */}
       <PageContainer paddingY="none" className="pt-2 print:hidden">
-        <SavedRaList />
+        <details className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+          <summary className="cursor-pointer text-sm font-bold text-slate-800 dark:text-slate-100">
+            保存したリスクアセスメント一覧
+          </summary>
+          <div className="mt-2">
+            <SavedRaList />
+          </div>
+        </details>
       </PageContainer>
       <div className="print:hidden">
-        <ChemicalRaExtras />
+        <details className="mx-auto max-w-7xl px-4 lg:px-8">
+          <summary className="cursor-pointer rounded-xl border border-slate-200 bg-white p-3 text-sm font-bold text-slate-800 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+            現場の化学物質リスト・AI追加調査などの補助ツール
+          </summary>
+          <ChemicalRaExtras />
+        </details>
       </div>
       <div className="print:hidden">
       <RelatedPageCards
