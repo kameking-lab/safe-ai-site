@@ -14,6 +14,8 @@ import { JsonLd, legalDocumentSchema, breadcrumbSchema } from "@/components/json
 import { LawHubNav } from "@/components/law-hub-nav";
 import { ArticleAiExplain } from "@/components/law-navi/article-ai-explain";
 import { ArticleRefText } from "@/components/law-navi/article-ref-text";
+import { PlainLanguageSection } from "@/components/law-navi/plain-language-section";
+import { getFreshPlainArticle } from "@/data/plain";
 import { CopyCitationButton } from "@/components/favorites/copy-citation-button";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { formatArticleCitation } from "@/lib/favorites";
@@ -48,7 +50,11 @@ export async function generateMetadata({
   if (!entry) return {};
   const a = entry.article;
   const title = `${a.lawShort} ${a.articleNum}${a.articleTitle ? `（${a.articleTitle}）` : ""}｜法令ナビ`;
-  const description = `${a.law} ${a.articleNum}の原文と現場向けAI解説。${a.text.slice(0, 70)}…`;
+  // 現場ことば版がある条は、条文引用よりも検索スニペットとして伝わる言い換えを説明文に使う
+  const plain = getFreshPlainArticle(entry.egovLawId, a);
+  const description = plain
+    ? `${a.law} ${a.articleNum}の原文と現場ことば版。${plain.plainText.slice(0, 80)}…（正式には原文参照）`
+    : `${a.law} ${a.articleNum}の原文と現場向けAI解説。${a.text.slice(0, 70)}…`;
   return {
     title,
     description,
@@ -210,6 +216,9 @@ export default async function LawNaviArticlePage({
                 {meta?.latestRevision ? `（収録ベース: ${meta.latestRevision}）` : ""}。
               </p>
             </section>
+
+            {/* 現場ことば版（原文の直下・検証済みのみ表示。未生成/staleは区画ごと非表示） */}
+            <PlainLanguageSection egovLawId={entry.egovLawId} article={a} />
 
             {/* AI解説（原文の下・オンデマンド生成） */}
             <ArticleAiExplain law={a.law} articleNum={a.articleNum} text={a.text} />
