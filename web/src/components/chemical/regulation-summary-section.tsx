@@ -37,6 +37,7 @@ import {
  */
 
 const DOMAIN_LABEL: Record<LegalDomain, string> = {
+  "anei-ra": "リスクアセスメント対象物（表示・通知）",
   "anei-tokka": "特化則",
   "anei-yuki": "有機則",
   "anei-namari": "鉛則",

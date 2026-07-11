@@ -36,14 +36,15 @@ describe("getChemicalKeyPoints", () => {
   it("法規制タグはAI自由文（regulatoryNotes）からは導出しない＝否定文の言及で偽バッジが出ない", () => {
     // P0回帰（2026-07-11 本番カプサイシンで実発生）: 旧実装は言及正規表現で
     // 「特定化学物質障害予防規則：非該当」からも特化則バッジを点灯させた。
-    const kp = getChemicalKeyPoints({
+    const withAiNotes = {
       ...base,
       regulatoryNotes: [
         "特定化学物質障害予防規則：非該当とされています。",
         "有機溶剤中毒予防規則：非該当とされています。",
         "リスクアセスメント対象物に該当する。",
       ],
-    });
+    };
+    const kp = getChemicalKeyPoints(withAiNotes);
     expect(kp.regulations).toEqual([]);
   });
 
@@ -53,7 +54,7 @@ describe("getChemicalKeyPoints", () => {
   });
 
   it("空データでも落ちず、hasKeyPoints が false", () => {
-    const kp = getChemicalKeyPoints({ ghsHazards: [], safetyMeasures: [], regulatoryNotes: [] });
+    const kp = getChemicalKeyPoints({ ghsHazards: [], safetyMeasures: [] });
     expect(kp.hazards).toEqual([]);
     expect(kp.actions).toEqual([]);
     expect(kp.regulations).toEqual([]);

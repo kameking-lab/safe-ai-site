@@ -48,6 +48,7 @@ import kashinhoYusenSnapshot from "./kashinho-yusen-snapshot.json";
 
 /** 法令ドメイン（診断03 4-1。安衛法系は snapshot 突合済み、他は型のみ先行） */
 export type LegalDomain =
+  | "anei-ra" // RA対象物＝表示・通知対象物（令別表第9＋安衛則別表第2の名称突合）
   | "anei-tokka" // 特化則（令別表第3）
   | "anei-yuki" // 有機則（令別表第6の2）
   | "anei-namari" // 鉛則（令別表第4=業務列挙・機械突合対象外）

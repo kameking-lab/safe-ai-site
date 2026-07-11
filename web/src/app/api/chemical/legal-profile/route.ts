@@ -23,6 +23,7 @@ import {
 } from "@/lib/regulation-tag-labels";
 import { healthCheckupsFromTags } from "@/lib/chemical/health-checkup-from-tags";
 import { resolveLegalEntity } from "@/lib/chemical/legal-entity-resolver";
+import { checkRaTargetByName, RA_TARGET_NAMES_META } from "@/data/legal/ra-target-names";
 import {
   DUTIES_BY_TAG,
   DOKUGEKI_DUTIES,
@@ -102,8 +103,38 @@ export async function GET(req: NextRequest) {
   const clEntry = CONCENTRATION_LIMITS.substances[entity.key];
   const mergedTags = [...new Set([...(clEntry?.regulationTags ?? []), ...tags])];
   const checkups = healthCheckupsFromTags(mergedTags, entity.key);
-  const designations = profile?.designations ?? [];
-  const raTarget = raTargetFor(entity.key, entity.label);
+  const designations = [...(profile?.designations ?? [])];
+
+  // RA対象物（表示・通知対象物）の該否（P1-9）:
+  // 統合DBのフラグ（CASベース）→ 無ければ名称突合（令別表第9＋安衛則別表第2）。
+  // CASレス告示名（溶接ヒューム等）も designated / not-designated / unverified の
+  // 3値で正直に返す（#874 で断定を避けていた箇所の解消）。
+  const flagsRa = raTargetFor(entity.key, entity.label);
+  const nameRa = checkRaTargetByName(entity.label);
+  const raTarget = flagsRa || nameRa.status === "designated";
+  designations.push(
+    flagsRa && nameRa.status !== "designated"
+      ? {
+          domain: "anei-ra",
+          status: "designated",
+          classification: "リスクアセスメント対象物（表示・通知対象物）",
+          scopeNote: "厚労省 表示・通知対象物質リスト（統合DBのCAS収載）に基づく",
+          verifiedAt: RA_TARGET_NAMES_META.retrievedAt,
+        }
+      : {
+          domain: "anei-ra",
+          status: nameRa.status,
+          ...(nameRa.status === "designated"
+            ? { classification: "リスクアセスメント対象物（表示・通知対象物）" }
+            : {}),
+          ...(nameRa.basis ? { basis: nameRa.basis } : {}),
+          ...(nameRa.scopeNote ? { scopeNote: nameRa.scopeNote } : {}),
+          ...(nameRa.status !== "unverified"
+            ? { verifiedAt: RA_TARGET_NAMES_META.retrievedAt }
+            : {}),
+        },
+  );
+
   return NextResponse.json(
     {
       resolved: true,
