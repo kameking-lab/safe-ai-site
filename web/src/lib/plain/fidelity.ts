@@ -309,6 +309,14 @@ function refCore(ref: string): string {
 
 const SENTENCE_END_RE = /(ます|です|ません|ましょう|ください)[)）」]?$/;
 
+/**
+ * 端的さの上限（品質パトロール 2026-07-11 でゲート強化）。
+ * 「目安2〜4文」だけでは1文がだらだら長い言い換えを止められないため、
+ * 文字数でも機械的に止める。見本（酸欠則）の実測は最長文93字・最長217字。
+ */
+const MAX_SENTENCE_CHARS = 120;
+const MAX_TOTAL_CHARS = 400;
+
 export function checkStyle(plainText: string): Violation[] {
   const v: Violation[] = [];
   const sentences = plainText
@@ -321,11 +329,23 @@ export function checkStyle(plainText: string): Violation[] {
       message: `文数が規約外です（${sentences.length}文。目安2〜4文・最大5文）`,
     });
   }
+  if (plainText.length > MAX_TOTAL_CHARS) {
+    v.push({
+      kind: "style",
+      message: `全体が長すぎます（${plainText.length}字。上限${MAX_TOTAL_CHARS}字＝「端的」の機械上限。内容を絞るか omissions で省略宣言を）`,
+    });
+  }
   for (const s of sentences) {
     if (!SENTENCE_END_RE.test(s)) {
       v.push({
         kind: "style",
         message: `です・ます体で終わっていない文があります: 「${s.slice(-24)}。」`,
+      });
+    }
+    if (s.length > MAX_SENTENCE_CHARS) {
+      v.push({
+        kind: "style",
+        message: `1文が長すぎます（${s.length}字。上限${MAX_SENTENCE_CHARS}字）: 「${s.slice(0, 24)}…」を分割してください`,
       });
     }
   }
