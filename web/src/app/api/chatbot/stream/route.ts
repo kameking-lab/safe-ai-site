@@ -341,8 +341,9 @@ export async function POST(request: Request) {
         if (citationWarningNote) {
           scopeWarnings.push(citationWarningNote.trim());
         }
-        const hitLawShorts = relevantArticles.map((a: LawArticle) => a.lawShort);
-        const outOfScopeRefs = detectOutOfScopeLawReferences(answer, hitLawShorts);
+        // 短縮名に加えて正式名称も渡す（50法令レジストリ外の収録法令の偽警告防止）
+        const hitLawNames = relevantArticles.flatMap((a: LawArticle) => [a.lawShort, a.law]);
+        const outOfScopeRefs = detectOutOfScopeLawReferences(answer, hitLawNames);
         if (outOfScopeRefs.length > 0) {
           const sample = outOfScopeRefs.slice(0, 3).join("、");
           scopeWarnings.push(
