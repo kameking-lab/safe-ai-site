@@ -111,3 +111,13 @@
 - 一次記録: `local-eval-after-fix-2026-07-11.json`
 
 本番反映後に同evalを本番URLで再実測する（完了報告に記録）。
+
+## 7. 本番反映後の実測（2026-07-11・PR #870 squashマージ→Vercel本番デプロイ後）
+
+- 反映確認: 本番APIへ実質問をcurl→回答本文にテールブロック（📎出典・【関連通達・告示】等）
+  ・markdown記号・本文内免責が**ゼロ**、構造化フィールド（citations 5/attachedNotices 5/
+  sources 10）は健全。回答は結論ファースト712字・「・」箇条書き。
+- `CHATBOT_EVAL_BASE_URL=https://www.anzen-ai-portal.jp npm run eval:chatbot-gen`:
+  **完全正答 21/21 = 100%**（ベースライン90.5%→100%）。GQ02/GQ12/GQ23全て○、
+  false-scope-warning 0、placeholder-leak 0、範囲外対応 2/2、全問テール漏れゼロ。
+- 一次記録: `prod-eval-after-deploy-2026-07-11.json`（generated_at 2026-07-11T10:48:32Z）
