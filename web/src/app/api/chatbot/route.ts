@@ -31,6 +31,7 @@ import {
   searchPartialMatches,
 } from "@/lib/chatbot-fallback-logic";
 import { buildNoHitTemplate, NO_HIT_NOISE_FLOOR } from "@/lib/chatbot-no-hit-response";
+import { hasOutOfDomainSignal } from "@/lib/rag/out-of-domain";
 import { getClientIp, checkRateLimit, rateLimitMessage } from "@/lib/chatbot-rate-limit";
 // Phase 4 通達・リーフレット添付
 import {
@@ -347,8 +348,13 @@ export async function POST(request: Request) {
   if (!hasRagHits) {
     // T9: normalizedScore は先頭ヒットのスコアなので、これが下限未満ならslice内の
     // 全件がノイズ（診断04 Q21「明日の東京の天気」→港湾労働法第2条 の誤提示事例）。
+    // 2026-07-11 E3/GQ51: ドメイン外シグナルつきクエリ（車検等）では、低スコアの
+    // 「関連する可能性のある条文」自体が偶発ヒットのノイズ（騒音規制法16条等）なので
+    // 一切提示しない（クリーンなno-hit＝確定申告と同じ誠実な範囲外対応にする）。
     const relatedForNoHit =
-      normalizedScore >= NO_HIT_NOISE_FLOOR ? allRelevant.slice(0, 8) : [];
+      normalizedScore >= NO_HIT_NOISE_FLOOR && !hasOutOfDomainSignal(message)
+        ? allRelevant.slice(0, 8)
+        : [];
     const partialMatches = searchPartialMatches(message);
     const noHitAnswer = buildNoHitTemplate({
       query: message,

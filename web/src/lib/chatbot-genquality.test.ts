@@ -17,6 +17,8 @@
  */
 
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { allLawArticles } from "@/data/laws";
 import { searchRelevantArticlesWithScore } from "@/lib/rag-search";
 import { buildAllowedCitations } from "@/lib/chatbot-prompt-builder";
@@ -279,6 +281,21 @@ describe("生成品質eval D: テンプレ層回帰（診断04 T1/T3/T8/T9）", 
       ["クレーン則"]
     );
     expect(flagged).toEqual([]);
+  });
+
+  it("両APIルートのno-hit関連条文がドメイン外シグナルでガードされている（E3/GQ51回帰）", () => {
+    // 範囲外質問（車検等）のno-hit応答に偶発ヒットの「関連する可能性のある条文」が
+    // 載ると、範囲外対応が「条文引用つき回答」扱いに劣化する（本番実測 2026-07-11）。
+    // 両ルートが hasOutOfDomainSignal で related articles を抑止することを機械固定。
+    for (const p of ["../app/api/chatbot/route.ts", "../app/api/chatbot/stream/route.ts"]) {
+      const src = readFileSync(resolve(__dirname, p), "utf8");
+      expect(src, `${p} が out-of-domain ガードを import していない`).toContain(
+        'from "@/lib/rag/out-of-domain"'
+      );
+      expect(src, `${p} のno-hit関連条文選定に hasOutOfDomainSignal ガードがない`).toMatch(
+        /NO_HIT_NOISE_FLOOR && !hasOutOfDomainSignal\(message\)/
+      );
+    }
   });
 
   it("プレースホルダsanitizerがYYYY/第XX条を除去する（T3回帰）", () => {

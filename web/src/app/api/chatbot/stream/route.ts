@@ -55,6 +55,7 @@ import {
   NO_HIT_NOISE_FLOOR,
 } from "@/lib/chatbot-no-hit-response";
 import { getClientIp, checkRateLimit, rateLimitMessage } from "@/lib/chatbot-rate-limit";
+import { hasOutOfDomainSignal } from "@/lib/rag/out-of-domain";
 import type { LawArticle } from "@/data/laws";
 import {
   SYSTEM_PROMPT,
@@ -150,9 +151,11 @@ export async function POST(request: Request) {
         const noHitMode = !hasDirectHit;
         // T9: no-hit時は normalizedScore が下限未満ならslice内の全件がノイズ
         // （診断04 Q21「明日の東京の天気」→港湾労働法第2条 の誤提示事例）。
+        // 2026-07-11 E3/GQ51: ドメイン外シグナルつきクエリ（車検等）は関連条文の
+        // 提示自体が偶発ヒットのノイズのため一切出さない（route.ts と同一の判定）。
         const relevantArticles = hasDirectHit
           ? allRelevant
-          : normalizedScore >= NO_HIT_NOISE_FLOOR
+          : normalizedScore >= NO_HIT_NOISE_FLOOR && !hasOutOfDomainSignal(message)
             ? allRelevant.slice(0, 8)
             : [];
         const partialMatches = searchPartialMatches(message);

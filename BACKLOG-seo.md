@@ -5,7 +5,7 @@
 ## 未着手（上から処理）
 
 ### 2026-07-11 法令ナビ量産（方式確立済み: docs/horei-navi-foundation-2026-07-11/01-diagnosis-and-design.md）
-- [ ] 【Opus・P0】LN-S1: 俗称辞書の拡充＝現場口語ベンチ50語（爪のやつ型の言い回しを含む）を作り /search 着地率を実測→未対応語を query-expansion.ts（正規表現ルール）と topics.ts の aliases へ追補。**O5型の固定フレーズ登録は禁止**（正規表現の語幹一致・共起のみ。「〜のやつ」等の言い回しそのものを辞書に入れない）。完了条件=ベンチ50語の着地率を PR に実測記載（現状値→改善値）＋既存 search-index.test.ts / query-expansion.test.ts 全緑。
+- [x] 【Opus・P0】LN-S1: 俗称辞書の拡充＝現場口語ベンチ50語の /search 着地率実測→是正（2026-07-11 現場口語プロジェクト / PR #875・ux-toolsレーンで吸収）。ベンチ=`web/src/lib/field-vernacular-bench.fixture.ts`（in-domain 50語＋範囲外5語・chatQuery/searchQuery対・`npm run bench:field-terms`で再実行可能・着地率ratchetつき常設CI）。**完了条件達成=横断検索着地率 25/50（50.0%）→49/49（100%）を実測**（一次記録: docs/field-vernacular-bench-{before,after}-2026-07-11.json・解説 docs/field-vernacular-bench-2026-07-11.md）。是正=①query-expansion.tsへ語幹の正規表現ルール追補（解雇口語/酸欠場所語彙/バラシ/うるさい・耳栓/塗装/ほこり/重い荷物/労災/通勤。固定フレーズ登録なし） ②現場語彙辞書を`rag/field-terms.ts`へ単一ソース化しcross-search/score.tsと共有（ユンボ/残業/有給等のTERM_EXPANSIONSが/search・⌘Kでも発火。コーパス非依存＝クライアントバンドル不汚染） ③数量・疑問語（何分/何日前/1年/ルール等）の未マッチ時ソフト化でAND全滅を解消。search-index.test.ts / query-expansion.test.ts 含む全2892テスト緑。topics.ts（law-navi分野データ）のaliases追補は並行セッションB領域のため未接触=**要・B**（本ベンチの検索着地は topics.ts 非依存で100%達成済み。分野ページ側の俗称カバレッジ拡充は別途）。
 - [ ] 【Opus・P1】LN-S2: /api/law-summary の GET 化（クエリパラメータ law/articleNum/mode。POST は後方互換で残す）＋ Vercel edge キャッシュ実測（api-cache.ts 記載の「POST はエッジで no-op」問題の解消）。その上で AI解説の事前生成（キャッシュウォーム）対象選定＝GSC/アクセス上位の条文ページから順にウォームする cron 設計を docs に起票（実装は要オーナー確認=cron追加のため）。完了条件=同一条文の AI解説2回目リクエストがエッジキャッシュヒット（x-vercel-cache: HIT を実測）。
 - [ ] 【Sonnet・P2】LN-S3: sitemap-laws.xml の Search Console 送信状況と条文ページ（/law-navi/*）のインデックス状況を計測に追加（gsc-* 計測スクリプトの対象へ）。完了条件=計測レポートに /law-navi 系の indexed 件数が出る。
 
