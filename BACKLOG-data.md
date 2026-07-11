@@ -4,6 +4,17 @@
 
 ## 未着手（上から処理・法令単位で1つずつ）
 
+### 2026-07-12 コーパス全文収載（構造判断確定済み: docs/corpus-fulltext-architecture-2026-07-12.md。二層構成=全文スナップショット層 laws-fulltext/ 新設・curated はその部分集合＋注釈層。実装者は着手前に設計書 §3-4 取込検証ゲート・§5-2 非劣化ゲートを必読。FT-D は上から順に依存関係あり）
+- [ ] 【Opus・P0】FT-D1: 全文スナップショット基盤＋安衛則第1弾 — `web/scripts/etl/egov-fulltext-fetch.ts` 新設（`egov-revisions-fetch.ts` 作法踏襲: API v2 `law_data/{lawId}` XML→`FulltextLaw` JSON・revisionId/sha256/fetchedAt アンカー・diff-only・skip明示・政府標準利用規約2.0出典必須）→ `web/src/data/laws-fulltext/347M50002000032.json`（安衛則 全677条規模）チェックイン＋読み手 `web/src/lib/laws-fulltext/loader.ts`（server-only・法令単位 dynamic import＝クライアントバンドル不可侵）。枝番は `parseArticleNum` とのラウンドトリップテスト、ルビは基底のみ（除去件数計上）、別表・附則は対象外（設計書 §3-3）。完了条件=取込検証ゲート6種（空本文0・連番/削除条明示・caption snapshot 一致・curated⊆fulltext・itemNumberMap 号突合・規模アンカー・出典）を vitest 常設で全緑＋「第577条の2」「第61条の2」がデータ層で解決できる。設計参照 §3。
+- [ ] 【Opus・P0】FT-D2: 表示統合（前提=FT-D1） — law-navi 条文ページの本文解決を fulltext>curated へ、`LAW_NAVI_ENTRIES` を fulltext 条まで拡張（712→約1,290）、前後条ナビの実条連続化（fulltext 法令は「収録条文の前後」注記を外す）、出典表示を「取得日＋revisionId」へ。完了条件=既存712 URL 不変（追加のみ・permalink.test.ts で固定）＋first-load JS 非増加＋ビルド時間を実測記録。設計参照 §2-4/§5-4。
+- [ ] 【Opus・P0】FT-D3: SEO ゲート（前提=FT-D2） — 数千ページ化の thin/duplicate 防衛。index/sitemap 収載は付加価値条件（plain verified／topics メンバー／itemNumberMap 等の注釈シグナル）を満たす条のみ、条件未満は `noindex,follow`＋sitemap 非収載。既収載712条の sitemap は後退させない。sitemap-laws の lastmod を法令単位 revisionId 由来へ。完了条件=sitemap.test.ts 系で条件判定を機械固定。設計参照 §5-3。
+- [ ] 【Opus・P1】FT-D4: 検索統合（前提=FT-D2） — condex（fulltext 由来の条番号+見出しのみの軽量インデックス）を cross-search へ追加し「未収録条番号→0件」の誤読を恒久解消（S6 e-Gov フォールバックは異常系として維持）。RAG は母集団不変＋条番号直指定で curated に無い条のみ fulltext をサーバー側で文脈注入（全文の BM25 投入は禁止＝別途 eval ガード付き実験タスクでのみ）。完了条件=eval:chatbot-gen strictAccuracy ≥0.952 非劣化＋search-index.test.ts 回帰23クエリ全緑＋/law-search 応答 <200ms。設計参照 §2-4/§5-2。
+- [ ] 【Opus・P1】FT-D5: 安衛法（347AC0000000057）・安衛令（347CO0000000318）全文取込（前提=FT-D1。検証ゲート同一・1法令=1イテレーション）。設計参照 §4 Wave 3。
+- [ ] 【Opus・P2】FT-D6: 特別則第1陣=plain 済み5法令（酸欠則→粉じん則→電離則→石綿則→じん肺則。**FT-P1 の同波再検証とセットで1法令ずつ**＝現場ことば版が消えたページを放置しない）。設計参照 §4 Wave 4。
+- [ ] 【Opus・P2】FT-D7: 特別則第2陣以降（有機則・特化則・クレーン則・鉛則・高圧則・ボイラー則・ゴンドラ則→労基法系・じん肺法・作環測法）。1法令=1イテレーション・波ごとにビルド時間/first-load JS/検索応答を実測記録、Vercel ビルド上限80%で dynamic+キャッシュ緊急弁（設計書 §5-4）。設計参照 §4 Wave 5-6。
+- [ ] 【Sonnet・P1】FT-P1: plain 再検証 wave（前提=FT-D6 の各法令取込） — 表示原文の抄録→全文切替で sourceTextHash が stale になった既存 plain 条（5法令73条）を fulltext 原文でハッシュ更新＋fidelity 再照合（差分ある条は書き直し）。完了条件=対象法令の plain が verified で復帰・fidelity 全緑。設計参照 §2-4/§3-5。
+- [ ] 【Sonnet・P2】FT-P2: plain 新規対象の執筆 — fulltext で増えた条のうち topics（分野）メンバー条→検索流入上位→残り、の優先順で現場ことば版を執筆（BACKLOG-plain-1〜5 レーンへ分配可。fidelity ゲート・omissions 明示宣言の既存規律のまま）。設計参照 §2-4/§4 並行レーン。
+
 ### 2026-07-11 化学物質・法令データの完成（P0偽陽性根絶＋#871/#874残欠陥。Fable別セッションで実施済み＝二重実装禁止）
 - [x] 【Fable・P0】カプサイシン偽陽性バッジの根絶: RA結論カードの特化則/有機則バッジが key-points.ts の言及正規表現（Gemini自由文 regulatoryNotes の「非該当とされています」否定文にもマッチ）で点灯していた別タグ経路を廃止し、監査済み /api/chemical/legal-profile 起点（lib/chemical/legal-profile-tags.ts）へ一本化。表示レベル回帰「カプサイシンに特化則/有機則バッジが出たらCI落ち」（ra-conclusion.legal-badges.test.tsx）＋正例（溶接ヒューム=特化則2類/マンガン/トルエン=有機則）維持を常設。→ **PR #877（2026-07-11）**
 - [x] 【Fable・P1】毒劇タグ未突合71件の全件レビュー（#871開示の残欠陥）: 毒劇法別表＋指定令スナップショット突合で designated 62（号・ただし書つき索引化）／非該当確認7（タグ＋ミラー由来の偽chashinLawReferences除去）／unverified 2（根拠メモ付き維持: 6465-92-5カルクロホス=構造同定不能・13746-98-0硝酸タリウム(III)=別表52号のTl(III)包含判定不能）。監査凍結上限75→残実数2の完全一致へ。イタコン酸=指定令名「メチレンコハク酸」の名称ゆれ誤判定をスリム索引テストが検出→是正・再発防止常設。→ **PR #877（2026-07-11）**
