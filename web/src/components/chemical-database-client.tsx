@@ -23,7 +23,8 @@ import {
   type ChemicalCategory,
   type ChemicalSubstance,
 } from "@/data/mock/chemical-substances-db";
-import { getAllMergedChemicals, type MergedChemical } from "@/lib/mhlw-chemicals";
+import type { MergedChemical } from "@/lib/mhlw-chemicals";
+import { getAllMergedChemicalsSlim as getAllMergedChemicals } from "@/lib/mhlw-chemicals-slim";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import {
   ALL_REGULATION_TAGS,
