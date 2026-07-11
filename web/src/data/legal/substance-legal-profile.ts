@@ -331,7 +331,8 @@ export function buildSubstanceLegalProfile(cas: string): SubstanceLegalProfile |
   const entry = CAS_LAW_INDEX_BY_CAS.get(cas);
   const other = OTHER_LAWS_CAS_INDEX_BY_CAS.get(cas);
   const kakanho = deriveKakanho(cas);
-  if (!entry && !other && kakanho.length === 0) return undefined;
+  // 優先評価化学物質のみ該当のCASもプロファイル対象（#877取込の取り残し是正）
+  if (!entry && !other && kakanho.length === 0 && !deriveKashinhoYusen(cas)) return undefined;
 
   const src = {
     revisionId: ANEI_BEPPYO_SNAPSHOT_META.seirei.revisionId,
