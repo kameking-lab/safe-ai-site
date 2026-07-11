@@ -32,6 +32,17 @@ const FULL_NAME_TO_EGOV_ID: ReadonlyMap<string, string> = (() => {
 })();
 
 /**
+ * 条文 → egovLawId の解決。正式名称一致を第一とし、コーパスの law が
+ * 略称・グルーピング名のとき（「労働安全衛生規則（足場等）」「労働者派遣法(安全衛生関連)」
+ * 「育児・介護休業法」等）は lawShort キーで LAW_METADATA を引く
+ * （rag-search.ts の（足場等）正規化と同じ扱い）。指針・ガイドライン・協会規程は
+ * LAW_METADATA に egovLawId が無いため従来どおり対象外（捏造URLゼロ）。
+ */
+function egovLawIdFor(article: Pick<LawArticle, "law" | "lawShort">): string | undefined {
+  return FULL_NAME_TO_EGOV_ID.get(article.law) ?? LAW_METADATA[article.lawShort]?.egovLawId;
+}
+
+/**
  * 条番号 → artSlug。パース不能（「第1」など条マーカー無しの指針節番号等）は null。
  * 号レベルはURLにしない（条・枝番・項まで）。
  */
@@ -66,7 +77,7 @@ export const LAW_NAVI_ENTRIES: readonly LawNaviEntry[] = (() => {
   const out: LawNaviEntry[] = [];
   const seen = new Set<string>();
   for (const article of CURATED) {
-    const egovLawId = FULL_NAME_TO_EGOV_ID.get(article.law);
+    const egovLawId = egovLawIdFor(article);
     if (!egovLawId) continue;
     const artSlug = articleNumToSlug(article.articleNum);
     if (!artSlug) continue;
