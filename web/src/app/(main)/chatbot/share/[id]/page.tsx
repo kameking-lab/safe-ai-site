@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { formatAnswerForDisplay } from "@/lib/chatbot-answer-format";
 
 export const metadata: Metadata = {
   title: "共有チャット 安衛法チャットボット",
@@ -101,7 +102,10 @@ export default async function ChatSharePage({
                     : "border border-slate-200 bg-white text-slate-800"
                 }`}
               >
-                <p className="whitespace-pre-wrap">{msg.c}</p>
+                {/* 旧形式の共有URL（出典テール・markdown記号入り）も読める形に整形して表示 */}
+                <p className="whitespace-pre-wrap">
+                  {msg.r === "a" ? formatAnswerForDisplay(msg.c) : msg.c}
+                </p>
               </div>
               {msg.s && msg.s.length > 0 && (
                 <div className="mt-2 max-w-[88%] space-y-1">
