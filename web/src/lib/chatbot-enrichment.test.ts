@@ -2,7 +2,6 @@ import { describe, it, expect } from "vitest";
 import type { LawArticle } from "@/data/laws";
 import {
   buildStructuredCitations,
-  formatCitationTriples,
   suggestRelatedLaws,
   suggestDigDeeperLinks,
   detectOutOfScopeLawReferences,
@@ -41,20 +40,6 @@ describe("buildStructuredCitations", () => {
       articleNum: `第${i + 100}条`,
     }));
     expect(buildStructuredCitations(many)).toHaveLength(5);
-  });
-});
-
-describe("formatCitationTriples", () => {
-  it("formats triples with issuer and effective date", () => {
-    const citations = buildStructuredCitations([article]);
-    const text = formatCitationTriples(citations);
-    expect(text).toContain("📎 出典");
-    expect(text).toContain("発出：厚生労働省");
-    expect(text).toContain("令和7年6月1日");
-  });
-
-  it("returns empty string when no citations", () => {
-    expect(formatCitationTriples([])).toBe("");
   });
 });
 
@@ -137,6 +122,24 @@ describe("detectOutOfScopeLawReferences", () => {
       ["クレーン則"]
     );
     expect(result).toEqual([]);
+  });
+
+  it("does not flag 附則 of known laws (GQ12: ストレスチェック努力義務の根拠)", () => {
+    // 「労働安全衛生法附則第4条」は既知法令（安衛法）の附則＝範囲内扱いにする。
+    // 短縮名照合（安衛法⊄労働安全衛生法附則）だけではすり抜けて偽警告になっていた。
+    const result = detectOutOfScopeLawReferences(
+      "常時50人未満の事業場は、労働安全衛生法附則第4条により当分の間努力義務とされています。",
+      ["安衛法", "安衛則"]
+    );
+    expect(result).toEqual([]);
+  });
+
+  it("still flags unknown laws even after full-name containment relaxation", () => {
+    const result = detectOutOfScopeLawReferences(
+      "宇宙作業安全確保法第3条によれば…",
+      ["安衛則"]
+    );
+    expect(result).toContain("宇宙作業安全確保法");
   });
 });
 

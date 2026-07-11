@@ -317,18 +317,9 @@ export function buildStructuredCitations(articles: LawArticle[]): StructuredCita
   return out;
 }
 
-/**
- * 引用テキストを「○○則第XX条（施行日：YYYY/MM/DD、発出：厚生労働省）」形式で組み立てる。
- * Geminiレスポンス末尾に追記する用途。
- */
-export function formatCitationTriples(citations: StructuredCitation[]): string {
-  if (citations.length === 0) return "";
-  const lines = citations.map((c) => {
-    const eff = c.effectiveDate ? `・${c.effectiveDate}` : "";
-    return `- ${c.lawShort}${c.articleNum}（発出：${c.issuer}${eff}）`;
-  });
-  return `\n\n📎 出典（条文番号＋施行日＋発出機関）：\n${lines.join("\n")}`;
-}
+// formatCitationTriples（📎出典テールの本文追記）は 2026-07-11 に廃止。
+// 出典は構造化フィールド citations のみで返し、UI が折りたたみカードで表示する
+// （本文追記は二重表示＝「ごちゃごちゃブロック」の主因だった）。
 
 // lawShort⇄正式名称の既知集合は law-name-registry.ts（data/laws を単一ソースに自動生成）
 // を再利用する。以前はここに手動の重複リストを持っており、50法令体制拡張後に
@@ -362,10 +353,15 @@ export function detectOutOfScopeLawReferences(
     if (/^(同|本|上記|該当|当該|該|本件|先述|次の|前述)/.test(name)) continue;
     // KNOWN_LAW_SHORTS/KNOWN_LAW_FULL_NAMES に完全一致すれば安全。
     // それ以外は簡易チェックとして「含む」関係（略記の一部表記ゆれ等）でも安全とみなす。
+    // 正式名称の包含も安全側に判定する: 「労働安全衛生法附則第4条」のような
+    // 既知法令の附則・付随表記が短縮名照合をすり抜けて範囲外扱いされ、
+    // 正答に偽の範囲外警告が付く事故を防ぐ（2026-07-11 GQ12: ストレスチェック
+    // 50人未満の努力義務の根拠＝安衛法附則（平成26年法律第82号）への誤発火）。
     const safe =
       KNOWN_LAW_SHORTS.has(name) ||
       KNOWN_LAW_FULL_NAMES.has(name) ||
       [...KNOWN_LAW_SHORTS].some((k) => name.includes(k) || k.includes(name)) ||
+      [...KNOWN_LAW_FULL_NAMES].some((k) => name.includes(k)) ||
       [...hits].some((k) => name.includes(k) || k.includes(name));
     if (!safe) found.add(name);
   }
