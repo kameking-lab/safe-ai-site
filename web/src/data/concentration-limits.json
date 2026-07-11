@@ -18620,18 +18620,14 @@
         }
       },
       "regulationTags": [
-        "nite",
-        "poison-control"
+        "nite"
       ],
       "niteChripUrl": "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-75-94-5.html",
       "niteGhsClassifications": {
         "skinCorrIrr": "区分1",
         "eyeDamageIrr": "区分1",
         "stotSingle": "区分3（気道刺激性）"
-      },
-      "chashinLawReferences": [
-        "毒物及び劇物指定令 第二条（劇物）"
-      ]
+      }
     },
     "1066-45-1": {
       "name": "塩化トリメチル錫",
@@ -27646,18 +27642,14 @@
       "jsohOel": null,
       "acgihTlv": null,
       "regulationTags": [
-        "nite",
-        "poison-control"
+        "nite"
       ],
       "niteChripUrl": "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-75-79-6.html",
       "niteGhsClassifications": {
         "skinCorrIrr": "区分1",
         "eyeDamageIrr": "区分1",
         "stotSingle": "区分3（気道刺激性）"
-      },
-      "chashinLawReferences": [
-        "毒物及び劇物指定令 第二条（劇物）"
-      ]
+      }
     },
     "76-05-1": {
       "name": "トリフルオロ酢酸",
@@ -30818,8 +30810,7 @@
       "acgihTlv": null,
       "regulationTags": [
         "cwc",
-        "nite",
-        "poison-control"
+        "nite"
       ],
       "niteChripUrl": "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-111-91-1.html",
       "niteGhsClassifications": {
@@ -30828,8 +30819,7 @@
         "stotRepeat": "区分2 （心臓、呼吸器）"
       },
       "chashinLawReferences": [
-        "化学兵器禁止法施行令 407CO0000000192 別表",
-        "毒物及び劇物指定令 第一条（毒物）"
+        "化学兵器禁止法施行令 407CO0000000192 別表"
       ]
     },
     "111-92-2": {
@@ -35574,8 +35564,7 @@
       "acgihTlv": null,
       "regulationTags": [
         "cwc",
-        "nite",
-        "poison-control"
+        "nite"
       ],
       "niteChripUrl": "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-1761-71-3.html",
       "niteGhsClassifications": {
@@ -35586,8 +35575,7 @@
         "stotRepeat": "区分2（中枢神経系、眼、肝臓、筋肉、消化管）"
       },
       "chashinLawReferences": [
-        "化学兵器禁止法施行令 407CO0000000192 別表",
-        "毒物及び劇物指定令 第一条（毒物）"
+        "化学兵器禁止法施行令 407CO0000000192 別表"
       ]
     },
     "1762-95-4": {
@@ -39596,13 +39584,9 @@
       "name": "(トリフルオロメチル)ベンゼン",
       "source": "reference",
       "regulationTags": [
-        "nite",
-        "poison-control"
+        "nite"
       ],
-      "niteChripUrl": "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-98-08-8.html",
-      "chashinLawReferences": [
-        "毒物及び劇物指定令 第一条（毒物）"
-      ]
+      "niteChripUrl": "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-98-08-8.html"
     },
     "98-29-3": {
       "name": "ｔ－ブチルカテコール",
@@ -40268,16 +40252,12 @@
       "name": "（2-ブロモエチル）ベンゼン",
       "source": "reference",
       "regulationTags": [
-        "nite",
-        "poison-control"
+        "nite"
       ],
       "niteChripUrl": "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-103-63-9.html",
       "niteGhsClassifications": {
         "stotSingle": "区分2（全身毒性）"
-      },
-      "chashinLawReferences": [
-        "毒物及び劇物指定令 第一条（毒物）"
-      ]
+      }
     },
     "103-64-0": {
       "name": "ベータ-ブロモスチレン",
@@ -45238,13 +45218,9 @@
       "name": "（2-クロロエチル）ベンゼン",
       "source": "reference",
       "regulationTags": [
-        "nite",
-        "poison-control"
+        "nite"
       ],
-      "niteChripUrl": "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-622-24-2.html",
-      "chashinLawReferences": [
-        "毒物及び劇物指定令 第一条（毒物）"
-      ]
+      "niteChripUrl": "https://www.chem-info.nite.go.jp/chem/ghs/m-nite-622-24-2.html"
     },
     "623-46-1": {
       "name": "1, 2-ジクロロ-1-エトキシエタン",
@@ -64697,8 +64673,8 @@
     "source": "e-Gov 毒物及び劇物取締法(325AC0000000303)別表＋毒物及び劇物指定令(340CO0000000002)",
     "index": "src/data/legal/other-laws-cas-index.ts",
     "added": 0,
-    "removedFalsePositives": 0,
-    "keptUnverified": 71,
-    "note": "索引未収載の既存タグはミラー由来のまま未確認扱い（UI側で明示）"
+    "removedFalsePositives": 7,
+    "keptUnverified": 2,
+    "note": "2026-07-11 全71件レビュー完了: designated 62 / 非該当確認・タグ&偽参照除去 7 / 判定不能 unverified 2 (6465-92-5, 13746-98-0)。索引は other-laws-cas-index.ts"
   }
 }
