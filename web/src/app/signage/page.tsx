@@ -6,6 +6,7 @@ import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
 import { SignageConclusionStrip } from "@/components/signage/signage-conclusion-strip";
 import { SignageDailyValues } from "@/components/signage/signage-daily-values";
 import { SignageDangerAlert } from "@/components/signage/signage-danger-alert";
+import { SignageOsNotifier } from "@/components/signage/signage-os-notifier";
 import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture-warning-map";
 import { HazardOfTheDay } from "@/components/hazard-slides/hazard-of-the-day";
 import { SignageFloorPlanEditor } from "@/components/signage/signage-floor-plan-editor";
@@ -564,6 +565,7 @@ export default function SignagePage() {
                 >
                   教育
                 </button>
+                <SignageOsNotifier warnings={bundle?.selectedWarnings} regionLabel={bundle?.locationLabel ?? selectedLocation.label} />
                 <a
                   href={jmaLink}
                   target="_blank"

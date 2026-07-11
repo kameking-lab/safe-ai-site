@@ -49,14 +49,14 @@ await page.evaluate(
   { key: BYID_KEY, rec: HISTORY_RECORD }
 );
 
-// (0) クラシック表示側の既存挙動は不変＝datalistに履歴候補が入っている。
-await page.goto(`${BASE}/safety-diary`, { waitUntil: "networkidle" });
+// (0) クラシック表示（S1第九弾以降は ?canvas=0 の opt-out）側の既存挙動は不変＝datalistに履歴候補が入っている。
+await page.goto(`${BASE}/safety-diary?canvas=0`, { waitUntil: "networkidle" });
 await page.waitForTimeout(300);
 const classicSiteOptions = await page.locator("#mtg-sites option").evaluateAll((els) => els.map((el) => el.value));
 check("クラシック表示: 作業所名のdatalistに履歴候補が入る（既存挙動は不変）", classicSiteOptions.includes("履歴現場スカイビル"));
 
-// (1) キャンバス表示へ切替。
-await page.getByRole("button", { name: /キャンバス.?β/ }).click();
+// (1) キャンバス表示（既定）へ切替。
+await page.getByRole("button", { name: /新しい表示へ/ }).click();
 await page.waitForTimeout(400);
 check("キャンバス表示に切り替わる", await page.getByRole("button", { name: "従来表示" }).isVisible().catch(() => false));
 
