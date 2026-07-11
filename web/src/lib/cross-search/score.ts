@@ -10,6 +10,7 @@
  */
 import { normalizeSearchText } from '../fuzzy-search';
 import { expandQuery } from '../query-expansion';
+import { expandFieldTermsForSearch } from '../rag/field-terms';
 
 /**
  * スコアリングが必要とする最小構造。cross-search の {@link CrossSearchItem} だけでなく、
@@ -85,16 +86,36 @@ interface TermSpec {
   literal: string;
   /** シノニム展開（リテラルを除いた正規化済み・重複除去）。 */
   synonyms: string[];
+  /**
+   * 数量・疑問の口語（「何分」「何日前」「1年」「いつまで」…）。
+   * タイトル/キーワード索引に対して検索シグナルを持たないため、どこにも
+   * マッチしない場合は AND 失敗にせず読み飛ばす（ソフト語）。
+   * マッチする場合（例:「1年」がキーワードに実在）は通常どおり加点する。
+   */
+  soft: boolean;
 }
+
+/**
+ * 数量・疑問の口語判定。「クビ 何日前」「休憩 何分」「クレーン 点検 1年」の
+ * 数量・疑問部分が AND 全滅を招いていた（現場口語ベンチ 2026-07-11 before実測）。
+ * 語そのものは概念を持たないため、未マッチ時のみ無視する。
+ */
+const SOFT_TERM_RE =
+  /^(何[分日人回年円歳条件個台時間キロメートルセンチトンｍmMkKgG]*(前|後|まで|ごと|以内)?|いくら|いくつ|いつ(から|まで)?|どこ(で|に|まで)?|誰が?|だれ|なぜ|どう(する|やって|なる|すれば)?|[0-9０-９]+(年|ヶ月|か月|カ月|日|回|人|歳|センチ|メートル|キロ|トン|分|時間)(ごと|以上|以下|以内|未満)?|ルール|決まり|きまり|やり方|方法|日数|回数|人数)$/;
 
 function buildTermSpec(term: string): TermSpec | null {
   const literal = normalizeSearchText(term);
   if (!literal) return null;
-  const expanded = expandQuery(term)
-    .split(/\s+/)
+  // 正規表現ルール（query-expansion）＋現場語彙辞書（rag/field-terms＝RAGと共有）
+  // の二段でシノニムを集める。後者は 2026-07-11 に配線＝「ユンボ」「残業」「有給」等の
+  // TERM_EXPANSIONS 側の語彙が横断検索でも効くようにする（コーパス非依存モジュール）。
+  const expanded = [
+    ...expandQuery(term).split(/\s+/),
+    ...expandFieldTermsForSearch(term),
+  ]
     .map((p) => normalizeSearchText(p))
     .filter((p) => p && p !== literal);
-  return { literal, synonyms: Array.from(new Set(expanded)) };
+  return { literal, synonyms: Array.from(new Set(expanded)), soft: SOFT_TERM_RE.test(literal) };
 }
 
 /** 1 つの語（正規化済み variant 群のうちのひとつ）に対する field 重みの最大値。 */
@@ -166,15 +187,20 @@ export function searchCrossIndex<T extends ScorableItem>(
   for (const s of pool) {
     let total = 0;
     let allMatched = true;
+    let matchedCount = 0;
     for (const spec of specs) {
       const score = termScore(spec, s);
       if (score <= 0) {
+        // ソフト語（数量・疑問の口語）は未マッチでも AND 失敗にしない。
+        if (spec.soft) continue;
         allMatched = false;
         break;
       }
       total += score;
+      matchedCount += 1;
     }
-    if (allMatched) scored.push({ s, total });
+    // 全語がソフト語で1語もマッチしない場合は不採用（全件マッチ化の防止）。
+    if (allMatched && matchedCount > 0) scored.push({ s, total });
   }
 
   scored.sort((a, b) => {
