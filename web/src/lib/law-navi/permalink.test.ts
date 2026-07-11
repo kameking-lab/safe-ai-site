@@ -26,8 +26,37 @@ describe("articleNumToSlug — スラグ規則", () => {
 });
 
 describe("LAW_NAVI_ENTRIES — 生成集合の健全性", () => {
-  it("フォークリフト分野の中核条文を含む十分な規模がある（egovLawId保有21法令分≈477条）", () => {
-    expect(LAW_NAVI_ENTRIES.length).toBeGreaterThan(400);
+  it("フォークリフト分野の中核条文を含む十分な規模がある（egovLawId保有46法令分≈712条）", () => {
+    expect(LAW_NAVI_ENTRIES.length).toBeGreaterThan(700);
+  });
+
+  it("カバレッジ拡大（2026-07-11）: 略称・グルーピング名のコーパス法令も lawShort フォールバックで解決する", () => {
+    // 「労働安全衛生規則（足場等）」グルーピング（lawShort=安衛則）→ 安衛則本体の egovLawId
+    expect(findEntryByShort("安衛則", "第563条")?.path).toBe("/law-navi/347M50002000032/563");
+    expect(findEntryByShort("安衛則", "第539条の2")?.path).toBe("/law-navi/347M50002000032/539-2");
+    // 「労働者派遣法(安全衛生関連)」（lawShort=派遣法）
+    expect(findEntryByShort("派遣法", "第45条")?.egovLawId).toBe("360AC0000000088");
+    // 新規メタデータ法令（e-Gov API 突合済み）
+    expect(findEntryByShort("じん肺則", "第2条")?.egovLawId).toBe("335M50002000006");
+    expect(findEntryByShort("船員安衛則", "第51条")?.egovLawId).toBe("339M50000800053");
+    expect(findEntryByShort("毒劇法", "第17条")?.egovLawId).toBe("325AC0000000303");
+  });
+
+  it("e-Gov 法令番号を持たない指針・ガイドライン・通達・協会規程はページを作らない（捏造URLゼロ）", () => {
+    const lawsInEntries = new Set(LAW_NAVI_ENTRIES.map((e) => e.article.law));
+    for (const excluded of [
+      "熱中症対策通達",
+      "騒音障害防止指針",
+      "振動障害予防指針",
+      "建設業労働災害防止規程",
+      "メンタルヘルス指針",
+      "情報機器作業ガイドライン",
+      "化学物質リスクアセスメント指針",
+      "健康保持増進指針",
+      "過重労働対策通達",
+    ]) {
+      expect(lawsInEntries.has(excluded), `${excluded} が生成集合に混入`).toBe(false);
+    }
   });
 
   it("スラグは法令内で一意（slug衝突ゼロ）", () => {

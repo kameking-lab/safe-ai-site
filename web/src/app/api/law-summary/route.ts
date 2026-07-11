@@ -26,6 +26,39 @@ function buildFallback(
   };
 }
 
+/**
+ * GET /api/law-summary?law=<正式名称|略称>&articleNum=<第N条>&mode=<summary|explain>
+ *
+ * LN-S2（2026-07-11）: POST は Vercel エッジでキャッシュされない（api-cache.ts 記載の
+ * 「POST はエッジで no-op」）ため、キャッシュ可能な GET を第一経路にする。
+ * 条文本文はリクエストで受け取らず curated コーパスから law+articleNum で解決する
+ * （＝URL が短く安定し、同一条文は同一URLに収束して CDN キャッシュ（INDUSTRY 4h）が効く。
+ * 未知の条文は 404＝コーパスに無い本文で生成しない）。POST は後方互換で残す。
+ */
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const law = url.searchParams.get("law")?.trim() ?? "";
+  const articleNum = url.searchParams.get("articleNum")?.trim() ?? "";
+  const modeParam = url.searchParams.get("mode") ?? undefined;
+  const mode: "summary" | "explain" | undefined =
+    modeParam === "explain" ? "explain" : modeParam === "summary" ? "summary" : undefined;
+  if (!law || !articleNum) {
+    return NextResponse.json({ error: "law と articleNum は必須です" }, { status: 400 });
+  }
+  // 動的import: コーパスは GET 経路でのみ必要（POST 経路を重くしない）
+  const { allLawArticles } = await import("@/data/laws");
+  const article = allLawArticles.find(
+    (a) => (a.law === law || a.lawShort === law) && a.articleNum === articleNum
+  );
+  if (!article) {
+    return NextResponse.json(
+      { error: `条文が見つかりません: ${law} ${articleNum}` },
+      { status: 404 }
+    );
+  }
+  return generateSummaryResponse(article.law, article.articleNum, article.text, mode);
+}
+
 export async function POST(req: Request) {
   const { law, articleNum, text, mode } = (await req.json()) as {
     law: string;
@@ -38,7 +71,15 @@ export async function POST(req: Request) {
      */
     mode?: "summary" | "explain";
   };
+  return generateSummaryResponse(law, articleNum, text, mode);
+}
 
+async function generateSummaryResponse(
+  law: string,
+  articleNum: string,
+  text: string,
+  mode?: "summary" | "explain"
+) {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey || apiKey === "dummy") {
     const kind = mode === "explain" ? "解説" as const : "要約" as const;

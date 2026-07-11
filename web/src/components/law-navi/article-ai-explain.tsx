@@ -29,11 +29,11 @@ export function ArticleAiExplain({
   async function fetchExplanation() {
     setStatus("loading");
     try {
-      const res = await fetch("/api/law-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ law, articleNum, text, mode: "explain" }),
-      });
+      // GET（LN-S2）: 同一条文は同一URLに収束し Vercel エッジキャッシュが効く
+      // （POST はエッジで no-op）。本文はサーバ側が curated コーパスから解決する。
+      const res = await fetch(
+        `/api/law-summary?law=${encodeURIComponent(law)}&articleNum=${encodeURIComponent(articleNum)}&mode=explain`
+      );
       if (!res.ok) throw new Error("API error");
       const data = (await res.json()) as { summary: string };
       setExplanation(data.summary);
