@@ -49,7 +49,7 @@ type Coverage = {
   lawShort: string;
   egovLawId: string;
   file: string;
-  lane: number;
+  squad: number;
   total: number;
   done: number;
   stale: string[];
@@ -79,12 +79,12 @@ const lines: string[] = [
   "",
   `全体: 収載 ${totals.total} 条 / 言い換え済み(fresh) ${totals.done} 条 / stale ${totals.stale} 条 / 未生成 ${totals.missing} 条`,
   "",
-  "| 法令 | e-Gov ID | 収載条数 | 済(fresh) | stale | 未生成 | レーン | データファイル |",
+  "| 法令 | e-Gov ID | 収載条数 | 済(fresh) | stale | 未生成 | 部隊 | データファイル |",
   "|---|---|---|---|---|---|---|---|",
 ];
 for (const c of coverage) {
   lines.push(
-    `| ${c.lawShort} | ${c.egovLawId} | ${c.total} | ${c.done} | ${c.stale.length} | ${c.missing.length} | plain-${c.lane} | web/src/data/plain/${c.file}.ts |`
+    `| ${c.lawShort} | ${c.egovLawId} | ${c.total} | ${c.done} | ${c.stale.length} | ${c.missing.length} | ${c.squad === 0 ? "—" : `部隊${c.squad}`} | web/src/data/plain/${c.file}.ts |`
   );
 }
 lines.push(

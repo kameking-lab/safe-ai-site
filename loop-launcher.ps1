@@ -664,7 +664,7 @@ function Invoke-Git {
 # silent stray-file commit by the unattended critic.
 function Get-CriticInjectionTargets {
   return @('BACKLOG-data.md', 'BACKLOG-seo.md', 'BACKLOG-ux-hub.md', 'BACKLOG-ux-records.md', 'BACKLOG-ux-tools.md', 'BACKLOG-ops.md',
-           'BACKLOG-plain-1.md', 'BACKLOG-plain-2.md', 'BACKLOG-plain-3.md', 'BACKLOG-plain-4.md')
+           'BACKLOG-plain-1.md', 'BACKLOG-plain-2.md', 'BACKLOG-plain-3.md', 'BACKLOG-plain-4.md', 'BACKLOG-plain-5.md')
 }
 # Pure set-difference: which of $Targets do NOT exist as files directly under $Root. Offline-testable
 # (temp dir, no git) and null/blank-safe so -SelfTest covers the missing-target failure mode. A missing
@@ -948,7 +948,7 @@ if ($SelfTest) {
     # J) Critic injection targets: the rehearsal must catch a MISSING BACKLOG sink before the unattended
     #    fire silently misfires/commits a stray file. Get-MissingCriticTargets is the offline oracle.
     $targets = Get-CriticInjectionTargets
-    Assert-L "critic targets are the 5 lane BACKLOGs + ops sink + 4 plain lanes" ($targets.Count -eq 10 -and ($targets -contains 'BACKLOG-ops.md') -and ($targets -contains 'BACKLOG-ux-hub.md') -and ($targets -contains 'BACKLOG-plain-1.md') -and ($targets -contains 'BACKLOG-plain-4.md'))
+    Assert-L "critic targets are the 5 lane BACKLOGs + ops sink + 5 plain lanes" ($targets.Count -eq 11 -and ($targets -contains 'BACKLOG-ops.md') -and ($targets -contains 'BACKLOG-ux-hub.md') -and ($targets -contains 'BACKLOG-plain-1.md') -and ($targets -contains 'BACKLOG-plain-5.md'))
     $tgtRoot = Join-Path $tmp "tgtroot"
     New-Item -ItemType Directory -Path $tgtRoot -Force | Out-Null
     foreach ($t in $targets) { New-Item -ItemType File -Path (Join-Path $tgtRoot $t) -Force | Out-Null }
