@@ -62,3 +62,35 @@ describe('normalizeArticleQuery', () => {
     expect(normalizeArticleQuery('   ')).toBe('');
   });
 });
+
+// 法令ナビ §2-4（docs/horei-navi-foundation-2026-07-11）: 別表番号のゆらぎ正規化。
+// 診断 2026-07-11 で「別表第三」と「別表第3」の結果が割れていた取り逃しを固定する。
+describe('normalizeArticleQuery — 別表番号', () => {
+  it('漢数字の別表番号を算用数字へ（別表第三→別表第3）', () => {
+    expect(normalizeArticleQuery('別表第三')).toBe('別表第3');
+    expect(normalizeArticleQuery('安衛令 別表第九')).toBe('安衛令 別表第9');
+  });
+
+  it('別表の枝番（の）を正規化（別表第六の二→別表第6の2）', () => {
+    expect(normalizeArticleQuery('別表第六の二')).toBe('別表第6の2');
+    expect(normalizeArticleQuery('別表第6の2')).toBe('別表第6の2');
+  });
+
+  it('全角数字の別表番号も吸収（別表第３→別表第3）', () => {
+    expect(normalizeArticleQuery('別表第３')).toBe('別表第3');
+  });
+
+  it('既に正規形なら冪等・前後語は素通し（有機溶剤 別表第6の2）', () => {
+    expect(normalizeArticleQuery('別表第3')).toBe('別表第3');
+    expect(normalizeArticleQuery('有機溶剤 別表第6の2')).toBe('有機溶剤 別表第6の2');
+  });
+
+  it('「別表第」マーカーの無い語は変換しない（別表・第三 単体は素通し）', () => {
+    expect(normalizeArticleQuery('別表')).toBe('別表');
+    expect(normalizeArticleQuery('別表 一覧')).toBe('別表 一覧');
+  });
+
+  it('別表と条番号が混在しても両方正規化（安衛令別表第三 と 第六十一条）', () => {
+    expect(normalizeArticleQuery('安衛令別表第三 第六十一条')).toBe('安衛令 別表第3 第61条');
+  });
+});

@@ -61,3 +61,28 @@ describe("searchRelevantArticles + 4パターン質問", () => {
     }
   });
 });
+
+// 法令ナビ 俗称ゆらぎ解決層（docs/horei-navi-foundation-2026-07-11 §2-3）。
+// 固定フレーズではなく正規表現の語中一致＝言い回しに依存しないことを固定する。
+describe("expandQuery — 荷役運搬機械の現場俗称", () => {
+  it("「爪のやつ」（言い回し付き）をフォークリフトに展開する", () => {
+    const expanded = expandQuery("爪のやつ");
+    expect(expanded).toContain("フォークリフト");
+    expect(expanded).toContain("車両系荷役運搬機械");
+  });
+
+  it("「ツメの機械」「フォークの部分」等、別の言い回しでも発火する（固定フレーズ過学習でない）", () => {
+    expect(expandQuery("ツメの機械の点検")).toContain("フォークリフト");
+    expect(expandQuery("フォークの部分に人を乗せていい？")).toContain("フォークリフト");
+    expect(expandQuery("パレットに乗って作業")).toContain("フォークリフト");
+  });
+
+  it("RAG着地: 「爪のやつ」でフォークリフト関連条文（車両系荷役運搬機械）がヒットする", () => {
+    const articles = searchRelevantArticles("爪のやつの資格", 5);
+    expect(articles.length).toBeGreaterThan(0);
+    const allText = articles
+      .map((a) => `${a.articleTitle} ${a.text} ${a.keywords.join(" ")}`)
+      .join("\n");
+    expect(allText).toMatch(/フォークリフト|車両系荷役運搬機械/);
+  });
+});

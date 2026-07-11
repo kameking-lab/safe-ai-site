@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   BookOpen,
   CalendarClock,
+  Compass,
   FileText,
   MessageSquare,
   Network,
@@ -9,7 +10,7 @@ import {
 } from "lucide-react";
 
 type LawHubNavProps = {
-  current: "laws" | "law-search" | "law-hierarchy" | "circulars" | "glossary" | "chatbot";
+  current: "law-navi" | "laws" | "law-search" | "law-hierarchy" | "circulars" | "glossary" | "chatbot";
 };
 
 // P1-H: 各タブが何のためにあるか初見で分からない問題を、tooltip と現在タブ下の
@@ -23,6 +24,7 @@ const NAV_ITEMS: {
   icon: LucideIcon;
   description: string;
 }[] = [
+  { id: "law-navi", href: "/law-navi", label: "法令ナビ", icon: Compass, description: "分野別・現場の言葉（爪のやつ／35条／別表第3）から条文の原文へ最短で着地" },
   { id: "laws", href: "/laws", label: "法改正一覧", icon: CalendarClock, description: "施行日カウントダウン付きの改正カレンダー（時系列ビュー）" },
   { id: "law-search", href: "/law-search", label: "条文検索", icon: Search, description: "条文番号・キーワードで安衛法・安衛則を全文検索" },
   { id: "law-hierarchy", href: "/law-hierarchy", label: "法令体系", icon: Network, description: "法→政令→省令→告示の階層構造を俯瞰" },

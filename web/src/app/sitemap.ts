@@ -73,6 +73,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/e-learning", lastModified: "2026-04-19", priority: 0.9, changeFrequency: "weekly" },
     { url: "/laws", lastModified: freshestLawRevision, priority: 0.9, changeFrequency: "weekly" },
     { url: "/law-hierarchy", lastModified: "2026-05-14", priority: 0.8, changeFrequency: "monthly" },
+    // 法令ナビ（分野別・現場語で条文原文へ。docs/horei-navi-foundation-2026-07-11）。
+    // 個別条文（/law-navi/<lawId>/<artSlug> 約480件）は sitemap-laws.xml（役割分担は
+    // 通達・保護具・化学物質の個別sitemapと同型）。分野ページは数が少ないうちは本体に列挙。
+    { url: "/law-navi", lastModified: "2026-07-11", priority: 0.9, changeFrequency: "weekly" },
+    { url: "/law-navi/beppyo", lastModified: "2026-07-11", priority: 0.8, changeFrequency: "monthly" },
+    { url: "/law-navi/topics/forklift", lastModified: "2026-07-11", priority: 0.8, changeFrequency: "monthly" },
     // P0-011 (usability-audit-day2): /laws/notices-precedents は /circulars に統合済。301 redirect は next.config.ts。
     { url: "/ky", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
     { url: "/ky-examples", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },

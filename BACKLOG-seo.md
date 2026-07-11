@@ -4,6 +4,11 @@
 
 ## 未着手（上から処理）
 
+### 2026-07-11 法令ナビ量産（方式確立済み: docs/horei-navi-foundation-2026-07-11/01-diagnosis-and-design.md）
+- [ ] 【Opus・P0】LN-S1: 俗称辞書の拡充＝現場口語ベンチ50語（爪のやつ型の言い回しを含む）を作り /search 着地率を実測→未対応語を query-expansion.ts（正規表現ルール）と topics.ts の aliases へ追補。**O5型の固定フレーズ登録は禁止**（正規表現の語幹一致・共起のみ。「〜のやつ」等の言い回しそのものを辞書に入れない）。完了条件=ベンチ50語の着地率を PR に実測記載（現状値→改善値）＋既存 search-index.test.ts / query-expansion.test.ts 全緑。
+- [ ] 【Opus・P1】LN-S2: /api/law-summary の GET 化（クエリパラメータ law/articleNum/mode。POST は後方互換で残す）＋ Vercel edge キャッシュ実測（api-cache.ts 記載の「POST はエッジで no-op」問題の解消）。その上で AI解説の事前生成（キャッシュウォーム）対象選定＝GSC/アクセス上位の条文ページから順にウォームする cron 設計を docs に起票（実装は要オーナー確認=cron追加のため）。完了条件=同一条文の AI解説2回目リクエストがエッジキャッシュヒット（x-vercel-cache: HIT を実測）。
+- [ ] 【Sonnet・P2】LN-S3: sitemap-laws.xml の Search Console 送信状況と条文ページ（/law-navi/*）のインデックス状況を計測に追加（gsc-* 計測スクリプトの対象へ）。完了条件=計測レポートに /law-navi 系の indexed 件数が出る。
+
 ### 2026-07-02 Fable診断注入（診断書: docs/fable-diagnosis-2026-07-02/05-search-egov.md）
 （未着手の実装タスクなし。O17/T6 は下記 完了欄のとおり Path A 設計ドラフト化済み＝実装はオーナー承認待ち。3件未満のため次イテレーションは補充の指針§に従い自領域から補充。）
 

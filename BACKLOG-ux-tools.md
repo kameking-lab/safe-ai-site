@@ -10,6 +10,9 @@
 - [ ] 【差し戻し・51問evalギャップE2／retrieval】酸欠危険場所の現場語（マンホール/タンク内部/下水管）が酸欠則第11条・第12条に不達（GQ49・本番実測△＝score0.58で作環測法等の無関係top10、資格のgold引用なし）。是正=酸欠系synonyms/PINに安衛令別表第6の場所語彙（マンホール・暗きよ・タンク・ピット等）を拡充。**完了判定=GQ49が○**＋`expectRetrievable`true＋`KNOWN_RETRIEVAL_GAP_IDS`からGQ49除去。
 - [ ] 【差し戻し・51問evalリークE3／retrieval】範囲外質問「自動車の車検は何年ごと？」がRAGスコア0.62で範囲内扱いにリークし、無関係条文（騒音規制法16条・安衛則151条系）つき高確信回答になる（GQ51・本番実測×＝out-of-scope-mishandled）。是正=no-hit判定のドメイン外語の減点・自動車整備系語彙の文脈ガード等。**完了判定=GQ51の範囲外対応がOK**＋`KNOWN_SCOPE_LEAK_IDS`からGQ51除去（ratchetが強制）。
 
+### 2026-07-11 法令ナビ連携（方式確立済み: docs/horei-navi-foundation-2026-07-11/01-diagnosis-and-design.md）
+- [ ] 【Sonnet・P1】LN-T1: /law-search の結果カード（law-search-results.tsx ArticleCard）に「条文ページで開く」導線を追加（対象条文が法令ナビ生成集合に在る場合のみ表示＝`articlePermalink()` が null なら出さない。幽霊リンク0）。0件時のフォールバック文にも法令ナビ分野ページへの提案を追加。完了条件=既存 law-search-results.test 全緑＋実機で「フォークリフト」検索→カード→/law-navi 条文ページ遷移のスクショ。
+
 ### 2026-07-03 差し戻し（Fable差分監査F5より・最優先）
 - [x] 【差し戻し・O5残欠陥／PR #798マージ済・本番実測完了】酸欠×資格の同義語が固定フレーズ過学習で自然文に効かない件（2026-07-04 本番eval実測・追加コード変更なし）。retrieval層の是正（`synonyms.ts`固定フレーズ3件を`COOCCURRENCE_EXPANSIONS`共起判定へ置換）はPR #798で実装・マージ済み（main HEAD=8f1536cb）。**完了条件の生成品質eval実測**=`CHATBOT_EVAL_BASE_URL=https://www.anzen-ai-portal.jp npm run eval:chatbot-gen`を本番へ実行、GQ02=`correct`（httpStatus 200）を確認。初回実行はGQ22/GQ23が自ボット側IPレート制限（10分40回/`chatbot-rate-limit.ts`）で429・harness失敗となったため5分待機後に再実行し23問全問200で完走（完全正答20/21=95.2%、GQ12のみ既存の別件false-scope-warningで非退行）。
 - [x] 【差し戻し・GQ23到達性／PR #798マージ済・本番実測完了】「解雇予告のルールを教えてください」がRAGスコア0.12でno-hit経路に落ちる件（2026-07-04 本番eval実測・追加コード変更なし）。retrieval層の是正（`rag-search.ts`「解雇予告」PIN新設で労基法第20条強制ヒット化）はPR #798で実装・マージ済み。**完了条件の生成品質eval実測**=上記と同一の本番eval再実行でGQ23=`correct`（httpStatus 200、結論キーフレーズ「30日・予告」・労基法第20条引用とも充足）を確認。レポート=`web/.genquality/chatbot-genquality-latest.json`（generated_at 2026-07-03T17:49:00.943Z）。
