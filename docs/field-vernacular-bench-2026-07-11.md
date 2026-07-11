@@ -95,4 +95,19 @@ npm run eval:chatbot-gen`（全51問HTTP 200・429なし）。
 `hasOutOfDomainSignal` ガードを追加。ドメイン外クエリでは「関連する可能性のある条文」は
 偶発ヒットのノイズそのものなので一切提示せず、確定申告（GQ50）と同じクリーンno-hitにする。
 source-scanテスト（chatbot-genquality.test.ts テストD）で機械固定。
-最終の本番GQ51実測はフォローアップPR反映後に本ドキュメントへ追記する。
+
+## 7. 最終本番実測（フォローアップPR #880 マージ・Vercel反映後 2026-07-11T16:48Z）
+
+本番反映は「車検」質問の応答が sources=0・citations=0 のクリーンno-hitへ変わったことを
+curlで確認してから実施（16:27 UTC確認）。
+
+- **完全正答: 47/47 = 100.0%**（strictAccuracy 1.0・partial 0・incorrect 0）
+- **範囲外対応: 4/4**（天気・投資信託・確定申告・**車検=GQ51○**）
+- **GQ48=○・GQ49=○・GQ51=○**（本件の3構造穴すべて解消）
+- 失敗分類オールゼロ: conclusion-missing 0 / conclusion-wrong 0 / citation-missing 0 /
+  **false-scope-warning 0（偽警告0維持）** / out-of-scope-mishandled 0 / placeholder-leak 0
+- §6で×だったGQ20も本実測では○＝生成層のゆらぎ（既存事象）であることを確認
+- 一次記録: docs/chatbot-genquality-51q-final-2026-07-11.json
+
+推移: 90.5%（2026-07-03・23問）→100%（07-11朝・23問）→95.7%（07-11・51問ベースライン）
+→97.9%（#875反映後）→**100%（#880反映後・51問）**。
