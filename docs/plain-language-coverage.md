@@ -1,12 +1,12 @@
 # 現場ことば版 カバレッジレポート（安衛法体系）
 
-生成: 2026-07-11T17:30:18.098Z（`cd web && npm run plain:status` で再生成）
+生成: 2026-07-11T20:55:13.923Z（`cd web && npm run plain:status` で再生成）
 
-全体: 収載 512 条 / 言い換え済み(fresh) 16 条 / stale 0 条 / 未生成 496 条
+全体: 収載 512 条 / 言い換え済み(fresh) 78 条 / stale 0 条 / 未生成 434 条
 
 | 法令 | e-Gov ID | 収載条数 | 済(fresh) | stale | 未生成 | レーン | データファイル |
 |---|---|---|---|---|---|---|---|
-| 安衛法 | 347AC0000000057 | 62 | 0 | 0 | 62 | plain-1 | web/src/data/plain/rodo-anzen-eisei-ho.ts |
+| 安衛法 | 347AC0000000057 | 62 | 62 | 0 | 0 | plain-1 | web/src/data/plain/rodo-anzen-eisei-ho.ts |
 | 安衛令 | 347CO0000000318 | 5 | 0 | 0 | 5 | plain-1 | web/src/data/plain/rodo-anzen-eisei-ho-sikokiregu.ts |
 | 安衛則 | 347M50002000032 | 116 | 0 | 0 | 116 | plain-2 | web/src/data/plain/anzen-eisei-kisoku.ts |
 | 酸欠則 | 347M50002000042 | 16 | 16 | 0 | 0 | plain-3 | web/src/data/plain/sankketsu-kisoku.ts |
