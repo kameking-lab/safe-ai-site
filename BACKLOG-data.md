@@ -4,6 +4,12 @@
 
 ## 未着手（上から処理・法令単位で1つずつ）
 
+### 2026-07-11 化学物質・法令データの完成（P0偽陽性根絶＋#871/#874残欠陥。Fable別セッションで実施済み＝二重実装禁止）
+- [x] 【Fable・P0】カプサイシン偽陽性バッジの根絶: RA結論カードの特化則/有機則バッジが key-points.ts の言及正規表現（Gemini自由文 regulatoryNotes の「非該当とされています」否定文にもマッチ）で点灯していた別タグ経路を廃止し、監査済み /api/chemical/legal-profile 起点（lib/chemical/legal-profile-tags.ts）へ一本化。表示レベル回帰「カプサイシンに特化則/有機則バッジが出たらCI落ち」（ra-conclusion.legal-badges.test.tsx）＋正例（溶接ヒューム=特化則2類/マンガン/トルエン=有機則）維持を常設。→ **PR #877（2026-07-11）**
+- [x] 【Fable・P1】毒劇タグ未突合71件の全件レビュー（#871開示の残欠陥）: 毒劇法別表＋指定令スナップショット突合で designated 62（号・ただし書つき索引化）／非該当確認7（タグ＋ミラー由来の偽chashinLawReferences除去）／unverified 2（根拠メモ付き維持: 6465-92-5カルクロホス=構造同定不能・13746-98-0硝酸タリウム(III)=別表52号のTl(III)包含判定不能）。監査凍結上限75→残実数2の完全一致へ。イタコン酸=指定令名「メチレンコハク酸」の名称ゆれ誤判定をスリム索引テストが検出→是正・再発防止常設。→ **PR #877（2026-07-11）**
+- [x] 【Fable・P1】化審法 優先評価化学物質の取込（knownLimitation解消）: J-CHECK公式リスト221物質・CAS収載1,580件を scripts/etl/build-kashinho-yusen-snapshot.py で取込（revisionId/sha256/件数アンカー）。DB 3,515件中263件の化審法「未確認」を根拠付き「優先評価化学物質」表示へ。監視化学物質(36)は未取込＝非該当断定はしない。→ **PR #877（2026-07-11）**
+- [x] 【Fable・P1】RA対象物のCASレス該否判定層（#874の断定回避の解消）: 安衛令別表第9（群指定33号）＋安衛則別表第2（個別名称2,276・2026-07-01施行版）を scripts/etl/build-ra-target-names-snapshot.py でETLし、名称突合3値判定（ra-target-names.ts）。溶接ヒューム=not-designated根拠付き断定（構成成分注記）・群名称の粒度差はunverified維持。legal-profile APIに anei-ra ドメイン追加。→ **PR #877（2026-07-11）**。**注**: LN-D2（law-navi/beppyo.ts の別表インデックス）とはファイル・目的とも別物＝競合しない。
+
 ### 2026-07-11 法令ナビ量産（方式確立済み: docs/horei-navi-foundation-2026-07-11/01-diagnosis-and-design.md。Fable本セッションでフォークリフト1分野end-to-end稼働済み）
 - [ ] 【Opus・P0】LN-D1: 分野インデックス第2陣（クレーン・玉掛け／足場／酸素欠乏／有機溶剤／特定化学物質の5分野）を web/src/data/law-navi/topics.ts へ追加。手順=①`npx tsx scripts/law-navi-topic-scan.mjs <走査語>` で候補列挙 ②廃止通達・別機械の混入を人手レビューし reviewNote に判断根拠を記録 ③aliases に現場俗称（固定フレーズ禁止・語幹のみ。例: 玉掛け→「玉掛け」「スリング」「ワイヤ」）。完了条件=topics-integrity.test.ts 全緑（幽霊参照0）＋ /search 実測で各分野の代表俗称2語が分野ページに着地（ローカル本番ビルドで確認しPRに記録）。
 - [ ] 【Opus・P1】LN-D2: 別表インデックス全展開（じん肺法施行規則 別表＝粉じん作業、粉じん則 別表第1〜3、安衛則 別表第2=SDS裾切値 ほか）を web/src/data/law-navi/beppyo.ts へ追加。各エントリの name/summary は e-Gov 現行原文と突合（捏造0）。relatedArticles はコーパス実在条文のみ。完了条件=topics-integrity.test.ts（BEPPYO系）全緑＋「粉じん 別表」「じん肺 別表」で /search 着地。
