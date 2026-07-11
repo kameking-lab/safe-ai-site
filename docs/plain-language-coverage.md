@@ -1,8 +1,8 @@
 # 現場ことば版 カバレッジレポート（安衛法体系）
 
-生成: 2026-07-11T20:32:03.760Z（`cd web && npm run plain:status` で再生成）
+生成: 2026-07-11T21:12:30.276Z（`cd web && npm run plain:status` で再生成）
 
-全体: 収載 512 条 / 言い換え済み(fresh) 16 条 / stale 0 条 / 未生成 496 条
+全体: 収載 512 条 / 言い換え済み(fresh) 38 条 / stale 0 条 / 未生成 474 条
 
 | 法令 | e-Gov ID | 収載条数 | 済(fresh) | stale | 未生成 | 部隊 | データファイル |
 |---|---|---|---|---|---|---|---|
@@ -13,7 +13,7 @@
 | 有機則 | 347M50002000036 | 21 | 0 | 0 | 21 | 部隊3 | web/src/data/plain/yuki-kisoku.ts |
 | 鉛則 | 347M50002000037 | 15 | 0 | 0 | 15 | 部隊3 | web/src/data/plain/en-kisoku.ts |
 | 四アルキル鉛則 | 347M50002000038 | 16 | 0 | 0 | 16 | 部隊3 | web/src/data/plain/shi-alkyl-en-kisoku.ts |
-| 特化則 | 347M50002000039 | 22 | 0 | 0 | 22 | 部隊3 | web/src/data/plain/tokka-kisoku.ts |
+| 特化則 | 347M50002000039 | 22 | 22 | 0 | 0 | 部隊3 | web/src/data/plain/tokka-kisoku.ts |
 | 粉じん則 | 354M50002000018 | 21 | 0 | 0 | 21 | 部隊4 | web/src/data/plain/funjin-kisoku.ts |
 | じん肺則 | 335M50002000006 | 15 | 0 | 0 | 15 | 部隊4 | web/src/data/plain/jinpai-ho-sikokiregu.ts |
 | 電離則 | 347M50002000041 | 20 | 0 | 0 | 20 | 部隊4 | web/src/data/plain/denri-houshasen-kisoku.ts |
