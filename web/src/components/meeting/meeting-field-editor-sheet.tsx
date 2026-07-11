@@ -11,6 +11,7 @@
  * 無いためタッチ操作のみで完結し、他の型と異なりオートフォーカス対象外）を追加。
  */
 
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import { MeetingTagField } from "@/components/meeting/meeting-tag-field";
@@ -22,6 +23,7 @@ import {
   PRIORITY_LABEL,
   type ChecklistStatus,
   type ContractorType,
+  type MeetingContractorRow,
   type MeetingRecord,
 } from "@/lib/meeting/schema";
 import {
@@ -54,11 +56,15 @@ export type MeetingFieldEditorSheetProps = {
   onSuggestRow?: (id: string) => void;
   /** AI提案が実行中の行id（従来UIのbusyRowと同じstate） */
   suggestBusyId?: string | null;
+  /** S1（第九弾）: 会社名エディタ内の行操作（クラシックの＋下位/削除/KYを作成と同じ挙動） */
+  onAddChildRow?: (row: MeetingContractorRow) => void;
+  onRemoveRow?: (id: string) => void;
+  kyHrefForRow?: (row: MeetingContractorRow) => string;
 };
 
 const selectCls = "min-h-[44px] rounded-lg border border-slate-300 bg-white px-2 text-base text-slate-900";
 
-export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSelectField, onSuggestRow, suggestBusyId }: MeetingFieldEditorSheetProps) {
+export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSelectField, onSuggestRow, suggestBusyId, onAddChildRow, onRemoveRow, kyHrefForRow }: MeetingFieldEditorSheetProps) {
   const def = getMeetingPaperFieldDef(fieldKey);
   const next = nextMeetingPaperFieldKey(fieldKey, record);
   const sheetRef = useRef<HTMLDivElement | null>(null);
@@ -265,6 +271,35 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
               list={def.historyList}
               className="min-h-[44px] text-base"
             />
+            {/* S1（第九弾）: 行操作。クラシックの行ヘッダー（＋下位・KYを作成・削除）と同一挙動 */}
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {onAddChildRow && (
+                <button
+                  type="button"
+                  onClick={() => onAddChildRow(contractorRow)}
+                  className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  ＋下位の会社を追加
+                </button>
+              )}
+              {kyHrefForRow && (
+                <Link
+                  href={kyHrefForRow(contractorRow)}
+                  className="inline-flex min-h-[44px] items-center rounded-lg border border-emerald-300 bg-emerald-50 px-3 text-xs font-bold text-emerald-700 hover:bg-emerald-100"
+                >
+                  KYを作成
+                </Link>
+              )}
+              {onRemoveRow && (
+                <button
+                  type="button"
+                  onClick={() => onRemoveRow(contractorRow.id)}
+                  className="min-h-[44px] rounded-lg border border-rose-200 bg-white px-3 text-xs font-semibold text-rose-600 hover:bg-rose-50"
+                >
+                  この行を削除
+                </button>
+              )}
+            </div>
           </div>
         )}
 
