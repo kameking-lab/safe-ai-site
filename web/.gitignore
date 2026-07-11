@@ -59,3 +59,6 @@ scripts/r4-*.mjs
 .r4-*
 .r8-screens/
 scripts/adoption-probe.mjs
+
+# plain:status の中間集計（scripts/plain-status.ts が毎回再生成）
+.plain-status.json
