@@ -162,9 +162,26 @@ describe("BEPPYO_ENTRIES — 別表インデックスの整合", () => {
     expect(findBeppyo("anei-rei-beppyo-6-2")?.name).toBe("有機溶剤");
   });
 
-  it("label は正規形（別表第N（のM））＝クエリ正規化（別表第三→別表第3）と合流できる", () => {
+  it("label は正規形（別表第N（のM）または番号なしの別表）＝クエリ正規化（別表第三→別表第3）と合流できる", () => {
+    // じん肺則・クレーン則の別表は e-Gov 現行原文でも番号なしの「別表」1本のみ（2026-07-11 突合）
     for (const b of BEPPYO_ENTRIES) {
-      expect(b.label).toMatch(/^別表第[0-9]+(の[0-9]+)?$/);
+      expect(b.label).toMatch(/^別表(第[0-9]+(の[0-9]+)?)?$/);
     }
+  });
+
+  it("全展開（2026-07-11）: 安衛則・粉じん則・じん肺則・クレーン則・電離則の別表が引ける", () => {
+    // LN-D2 の中核: 意味（何の表か）が e-Gov 現行原文の関係条と一致していること
+    expect(findBeppyo("anei-soku-beppyo-2")?.name).toContain("裾切値"); // SDS/表示の裾切値（則30条・34条の2）
+    expect(findBeppyo("anei-soku-beppyo-1")?.name).toContain("作業主任者");
+    expect(findBeppyo("anei-soku-beppyo-3")?.name).toContain("就業制限");
+    expect(findBeppyo("anei-soku-beppyo-7")?.name).toContain("計画の届出");
+    expect(findBeppyo("funjin-soku-beppyo-1")?.name).toBe("粉じん作業");
+    expect(findBeppyo("funjin-soku-beppyo-2")?.name).toBe("特定粉じん発生源");
+    expect(findBeppyo("funjin-soku-beppyo-3")?.name).toContain("呼吸用保護具");
+    expect(findBeppyo("jinpai-soku-beppyo")?.name).toContain("粉じん作業");
+    expect(findBeppyo("crane-soku-beppyo")?.name).toContain("クレーン等の種類");
+    expect(findBeppyo("denri-soku-beppyo-3")?.name).toContain("表面汚染");
+    // 安衛則別表第8は現行 e-Gov で削除（欠番）＝幽霊の意味を与えない
+    expect(findBeppyo("anei-soku-beppyo-8")?.name).toBe("（削除）");
   });
 });

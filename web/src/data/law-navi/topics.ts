@@ -99,7 +99,7 @@ export const LAW_NAVI_TOPICS: readonly LawNaviTopic[] = [
       "mhlw-notice-0984", // 安全管理の徹底（転倒・人身事故防止）（通達）
       "mhlw-notice-0985", // 荷役作業における安全管理の徹底（通達）
     ],
-    beppyoIds: [],
+    beppyoIds: ["anei-soku-beppyo-3"],
     reviewNote:
       "2026-07-11 topic-scan: コーパス keywords『フォークリフト』『車両系荷役運搬機械』一致18条・通達タイトル一致10件から、貨物自動車固有条（151条の67・151条の74）と廃止済み指針（mhlw-notice-0778）・旧指針（0769）を人手で除外し採録。",
   },
@@ -185,7 +185,7 @@ export const LAW_NAVI_TOPICS: readonly LawNaviTopic[] = [
       "mhlw-notice-0876", // 移動式クレーン等技術指針の適用（通達）
       "mhlw-notice-0985", // 荷役作業の安全管理徹底（通達）
     ],
-    beppyoIds: [],
+    beppyoIds: ["crane-soku-beppyo", "anei-soku-beppyo-3"],
     reviewNote:
       "2026-07-11 topic-scan『クレーン』『移動式クレーン』: 条文候補55・通達候補22から採録。玉掛け系条文（クレーン則213〜222条）は玉掛け分野へ分離、女性則2条・年少者則8条（就業制限の別軸）・建災防規程13条（e-Gov法令番号無し=条文ページ対象外）・廃止済み再発防止講習規程（mhlw-notice-0861）・個別改正告示（0300/0954/0958）・限定免許系告示通達（0469/0489/0566）・構造規格57条適用除外（0411）を人手で除外。",
   },
@@ -225,7 +225,7 @@ export const LAW_NAVI_TOPICS: readonly LawNaviTopic[] = [
       "mhlw-notice-0840", // 玉掛け技能講習規程（告示）
       "mhlw-notice-0985", // 荷役作業の安全管理徹底（通達）
     ],
-    beppyoIds: [],
+    beppyoIds: ["anei-soku-beppyo-3"],
     reviewNote:
       "2026-07-11 topic-scan『玉掛け』『玉掛』: 条文候補11・通達候補3から採録。クレーン本体条（29条・24条の2・70条の2）はクレーン分野へ、女性則2条（就業制限の別軸）と廃止済み再発防止講習規程（mhlw-notice-0863＝平成21年廃止）を人手で除外。",
   },
@@ -556,7 +556,12 @@ export const LAW_NAVI_TOPICS: readonly LawNaviTopic[] = [
       "mhlw-notice-1006", // 坑内作業の粉じん対策強化（通達）
       "mhlw-notice-1007", // ずい道等建設工事の粉じん対策強化（通達・R6）
     ],
-    beppyoIds: [],
+    beppyoIds: [
+      "funjin-soku-beppyo-1",
+      "funjin-soku-beppyo-2",
+      "funjin-soku-beppyo-3",
+      "jinpai-soku-beppyo",
+    ],
     reviewNote:
       "2026-07-11 topic-scan『粉じん』: 条文候補55・通達候補23から採録。石綿則条文は石綿分野へ、特化則・鉛則・事務所則条文（別分野・別環境基準）・派遣法46条（適用特例の行政条）を分離。発破後の判断基準（mhlw-notice-0151）・ずい道ガイドライン解釈（0152/0182/0330）・有機粉じん個別通達（0242/0339）・同旨の改正施行通達（0342/0484）・資格者告示（0587〜0591）は代表通達に集約して人手で除外。粉じん則19条（点検）・21条（補修等）は運用細目のため主要導線から割愛。",
   },
@@ -743,7 +748,7 @@ export const LAW_NAVI_TOPICS: readonly LawNaviTopic[] = [
       "mhlw-notice-0851", // 運転技能講習規程・解体用（告示）
       "mhlw-notice-0953", // 安全装置等の規格の一部改正（告示）
     ],
-    beppyoIds: ["anei-rei-beppyo-7"],
+    beppyoIds: ["anei-rei-beppyo-7", "anei-soku-beppyo-3"],
     reviewNote:
       "2026-07-11 topic-scan『車両系建設機械』: 条文候補11・通達候補12から採録。建災防規程13条（e-Gov法令番号無し）・廃止/旧版の定期自主検査指針（mhlw-notice-0776/0777/0781）・廃止済み再発防止講習規程（0862＝平成21年廃止）・旧公表通達（0460＝現行指針0767と重複）を人手で除外。",
   },
@@ -779,7 +784,7 @@ export const LAW_NAVI_TOPICS: readonly LawNaviTopic[] = [
       "mhlw-notice-0959", // 特定自主検査の対象機械規格の一部改正（告示）
       "mhlw-notice-0960", // 構造規格の一部改正（告示・R8）
     ],
-    beppyoIds: [],
+    beppyoIds: ["anei-soku-beppyo-3"],
     reviewNote:
       "2026-07-11 topic-scan『高所作業車』: 条文候補3・通達候補9から採録。廃止済み定期自主検査指針（mhlw-notice-0782＝令和5年公示25号により廃止。現行0766を採用）を人手で除外。安衛則36条（第10号の5）・安衛法61条を体系根拠として追加採録（scan は keywords 未付与で拾えないが e-Gov 現行の号定めと一致）。",
   },
