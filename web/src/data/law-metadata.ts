@@ -67,7 +67,8 @@ export const LAW_METADATA: Record<string, LawMetadata> = {
     fullName: "特定化学物質障害予防規則",
     issuer: "厚生労働省",
     enactedOn: "昭和47年9月30日施行",
-    egovLawId: "347M50002000040",
+    // 昭和47年労働省令第39号。040は高圧則（重複登録で law-navi URL が衝突していた既存バグを是正）
+    egovLawId: "347M50002000039",
   },
   酸欠則: {
     lawShort: "酸欠則",

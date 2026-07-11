@@ -1,0 +1,158 @@
+/**
+ * fidelity ゲートの単体テスト＋「裏切り」検出の実証。
+ *
+ * 本丸は後半の改ざんデモ: 実データ（酸欠則の現場ことば版）に対して
+ *  - 義務主体を1箇所すり替える（事業者→労働者）
+ *  - 数値を変える（18%→20%）
+ *  - 限度方向を変える（以上→以下）
+ *  - 義務を努力義務に弱める
+ *  - 原文に無い数値を足す（捏造）
+ *  - 参照条を黙って落とす
+ * と、checkFidelity が必ず Violation を返す＝CI が落ちることを機械で固定する。
+ */
+
+import { describe, expect, it } from "vitest";
+import { sankketsuKisoku } from "@/data/laws/sankketsu-kisoku";
+import { plainSankketsuKisoku } from "@/data/plain/sankketsu-kisoku";
+import type { PlainArticle } from "@/data/plain/types";
+import {
+  checkFidelity,
+  extractLawDuties,
+  extractNumericFacts,
+  type Violation,
+} from "./fidelity";
+import { plainSourceHash } from "./text-hash";
+
+function article(articleNum: string) {
+  const a = sankketsuKisoku.find((x) => x.articleNum === articleNum);
+  if (!a) throw new Error(`corpus に ${articleNum} が無い`);
+  return a;
+}
+
+function plain(articleNum: string): PlainArticle {
+  const p = plainSankketsuKisoku.find((x) => x.articleNum === articleNum);
+  if (!p) throw new Error(`plain に ${articleNum} が無い`);
+  return p;
+}
+
+function kinds(violations: Violation[]): string[] {
+  return violations.map((v) => v.kind);
+}
+
+describe("数値事実の抽出", () => {
+  it("酸欠則2条: 18パーセント未満・100万分の10超・第1種/第2種を拾い、条参照や法令番号の数字は拾わない", () => {
+    const facts = extractNumericFacts(article("第2条").text);
+    const canon = facts.map((f) => `${f.canonical}${f.bound ? ":" + f.bound : ""}`);
+    expect(canon).toContain("pct:18:lt");
+    expect(canon).toContain("ppm:10:gt");
+    expect(canon).toContain("shu:1");
+    expect(canon).toContain("shu:2");
+    // 「昭和47年政令第318号」「令別表第6第3号の3」の数字は数値事実にしない
+    expect(canon.some((c) => c.includes(":47") || c.includes(":318") || c.includes(":6"))).toBe(false);
+  });
+
+  it("酸欠則3条: 保存期間3年間を拾う", () => {
+    const canon = extractNumericFacts(article("第3条").text).map((f) => f.canonical);
+    expect(canon).toContain("year:3");
+  });
+
+  it("ppm と 100万分のN は同値キーに正規化される", () => {
+    expect(extractNumericFacts("硫化水素の濃度が100万分の10を超える")[0]).toMatchObject({
+      canonical: "ppm:10",
+      bound: "gt",
+    });
+    expect(extractNumericFacts("硫化水素10ppmを超える状態")[0]).toMatchObject({
+      canonical: "ppm:10",
+      bound: "gt",
+    });
+  });
+});
+
+describe("義務主体×義務種別の抽出", () => {
+  it("酸欠則5条: (事業者, 義務) を抽出する", () => {
+    expect(extractLawDuties(article("第5条").text)).toEqual([
+      { subject: "事業者", modality: "obligation" },
+    ]);
+  });
+
+  it("酸欠則6条: 事業者の義務と労働者の使用義務を区別して抽出する", () => {
+    const duties = extractLawDuties(article("第6条").text);
+    expect(duties).toContainEqual({ subject: "事業者", modality: "obligation" });
+    expect(duties).toContainEqual({ subject: "労働者", modality: "obligation" });
+  });
+
+  it("酸欠則13条: 請負人への配慮義務（配慮しなければならない）を care として抽出する", () => {
+    const duties = extractLawDuties(article("第13条").text);
+    expect(duties).toContainEqual({ subject: "事業者", modality: "care" });
+  });
+});
+
+describe("正しい言い換えは全緑", () => {
+  it("酸欠則 現場ことば版 16条すべて violations 0", () => {
+    for (const p of plainSankketsuKisoku) {
+      const a = article(p.articleNum);
+      expect(plainSourceHash(a.text), `${p.articleNum} の sourceTextHash`).toBe(p.sourceTextHash);
+      const v = checkFidelity(a, p);
+      expect(v, `${p.articleNum}: ${v.map((x) => x.message).join(" / ")}`).toEqual([]);
+    }
+  });
+});
+
+describe("裏切り検出の実証（これが落ちなくなったらゲートの故障）", () => {
+  it("義務主体のすり替え（事業者→労働者）を検出する: 酸欠則5条", () => {
+    const p = plain("第5条");
+    const tampered: PlainArticle = {
+      ...p,
+      plainText: p.plainText.replace("事業者は", "労働者は"),
+    };
+    const v = checkFidelity(article("第5条"), tampered);
+    expect(kinds(v)).toContain("duty-fabricated"); // 労働者×義務は原文に無い
+    expect(kinds(v)).toContain("duty-missing"); // 事業者×義務が消えた
+  });
+
+  it("数値の改変（18%→20%）を検出する: 酸欠則5条", () => {
+    const p = plain("第5条");
+    const tampered = { ...p, plainText: p.plainText.replace(/18%/g, "20%") };
+    const v = checkFidelity(article("第5条"), tampered);
+    expect(kinds(v)).toContain("number-missing"); // 原文の18パーセントが消えた
+    expect(kinds(v)).toContain("number-fabricated"); // 20%は原文に無い
+  });
+
+  it("限度方向の改変（10ppm以下→10ppm以上）を検出する: 酸欠則5条", () => {
+    const p = plain("第5条");
+    const tampered = { ...p, plainText: p.plainText.replace("10ppm以下", "10ppm以上") };
+    expect(kinds(checkFidelity(article("第5条"), tampered))).toContain("bound-changed");
+  });
+
+  it("義務の弱体化（しなければなりません→努めましょう）を検出する: 酸欠則5条", () => {
+    const p = plain("第5条");
+    const tampered = {
+      ...p,
+      plainText: p.plainText.replace("保たなければなりません", "保つよう努めましょう"),
+    };
+    const v = checkFidelity(article("第5条"), tampered);
+    expect(kinds(v)).toContain("duty-fabricated"); // 事業者×努力義務は原文に無い
+    expect(kinds(v)).toContain("duty-missing"); // 事業者×義務が消えた
+  });
+
+  it("数値の捏造（原文に無い30分ルールの追加）を検出する: 酸欠則14条", () => {
+    const p = plain("第14条");
+    const tampered = {
+      ...p,
+      plainText: p.plainText.replace("退避させなければなりません。", "退避させなければなりません。30分は再入場できません。"),
+    };
+    expect(kinds(checkFidelity(article("第14条"), tampered))).toContain("number-fabricated");
+  });
+
+  it("参照条の黙った省略を検出する: 酸欠則29条（第24条第1項を落とす）", () => {
+    const p = plain("第29条");
+    const tampered = { ...p, plainText: p.plainText.replace("（第24条第1項）", "") };
+    expect(kinds(checkFidelity(article("第29条"), tampered))).toContain("ref-missing");
+  });
+
+  it("文体規約違反（である調）を検出する", () => {
+    const p = plain("第10条");
+    const tampered = { ...p, plainText: "事業者は近接作業場との連絡を保たねばならない。" };
+    expect(kinds(checkFidelity(article("第10条"), tampered))).toContain("style");
+  });
+});

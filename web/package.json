@@ -14,6 +14,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "eval:chatbot": "node scripts/chatbot-eval.ts",
+    "plain:status": "node scripts/plain-status.ts",
+    "plain:test": "vitest run src/lib/plain src/data/plain",
     "eval:chatbot-gen": "node scripts/chatbot-eval-phase2.ts",
     "smoke:chatbot-prod": "node scripts/chatbot-prod-smoke-probe.mjs",
     "bench:field-terms": "vitest run src/lib/field-vernacular-bench.test.ts",

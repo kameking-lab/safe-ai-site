@@ -5,6 +5,7 @@ import { ArrowRight, ChevronLeft, FileText } from "lucide-react";
 import { JsonLd, breadcrumbSchema } from "@/components/json-ld";
 import { LawHubNav } from "@/components/law-hub-nav";
 import { LAW_NAVI_TOPICS, findLawNaviTopic } from "@/data/law-navi/topics";
+import { getFreshPlainArticle } from "@/data/plain";
 import { findEntryByShort } from "@/lib/law-navi/permalink";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { ogImageUrl } from "@/lib/og-url";
@@ -113,6 +114,9 @@ export default async function LawNaviTopicPage({
                 <div className="space-y-2">
                   {rows.map(({ ref, entry }) => {
                     const a = entry?.article;
+                    // 現場ことば版（検証済み・fresh のみ）。分野ページでは1文目をスニペット表示
+                    const plain = entry && a ? getFreshPlainArticle(entry.egovLawId, a) : undefined;
+                    const plainSnippet = plain ? `${plain.plainText.split("。")[0]}。` : null;
                     return (
                       <article
                         key={`${ref.lawShort}-${ref.articleNum}`}
@@ -133,6 +137,12 @@ export default async function LawNaviTopicPage({
                             </Link>
                           )}
                         </div>
+                        {plainSnippet && (
+                          <p className="mt-2 rounded-lg bg-amber-50/70 px-3 py-2 text-xs leading-5 text-amber-900">
+                            <span className="font-bold">現場ことば: </span>
+                            {plainSnippet}
+                          </p>
+                        )}
                         {a && (
                           <details className="group mt-2">
                             <summary className="flex min-h-[44px] cursor-pointer list-none items-center text-xs text-slate-500 hover:text-emerald-700">

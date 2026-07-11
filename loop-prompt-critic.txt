@@ -4,7 +4,7 @@
 1) あなたはlauncherが用意した隔離 git worktree 内で origin/main の最新HEAD(detached)に置かれている。**`git checkout main` はするな**(mainは別treeで使用中＝git が拒否する)。fetch/pullも不要(launcherが起動直前に origin/main を取得済み)。この場で作業ブランチ `git checkout -b ops/critique-<今日の日付 YYYY-MM-DD>` を作って進める。
 2) 本番サイト(NEXT_PUBLIC_SITE_URL、無ければ本番URL)を Playwright 等で主要導線を実際に巡回する: トップ → 各機能カード → KY → 事故DB → 化学物質RA → 法改正/新着 → チャットボット → サイネージ。必ずスマホ幅とPC幅の両方。
 3) docs/site-critique-<今日の日付 YYYY-MM-DD>/ を新設し、観点別ファイルに指摘を記録する: SEO / UX・IA / 信頼性・コンテンツ / パフォーマンス / ペルソナ別導線。各指摘に重大度 S(致命)/A(重大)/B(軽微) を付ける。スクリーンショットや数値などの実測を必ず添える。憶測・伝聞での減点は禁止。
-4) S級・A級の指摘だけを、該当するレーンのBACKLOG(BACKLOG-data / seo / ux-hub / ux-records / ux-tools.md)の冒頭へ「- [ ] 【モデルタグ・優先度】要約: 完了条件(実測基準)」形式で注入する(既存行は書換えない・冒頭への挿入のみ)。どのレーンにも属さない運用機構の問題は BACKLOG-ops.md へ。B級はcritique docsに残すだけでよい。
+4) S級・A級の指摘だけを、該当するレーンのBACKLOG(BACKLOG-data / seo / ux-hub / ux-records / ux-tools.md、現場ことば版レーンは BACKLOG-plain-1 / BACKLOG-plain-2 / BACKLOG-plain-3 / BACKLOG-plain-4.md)の冒頭へ「- [ ] 【モデルタグ・優先度】要約: 完了条件(実測基準)」形式で注入する(既存行は書換えない・冒頭への挿入のみ)。どのレーンにも属さない運用機構の問題は BACKLOG-ops.md へ。B級はcritique docsに残すだけでよい。plainレーンへの注入は現場ことば版(law-navi条ページの言い換えの正確性・fidelity関連)の指摘のみとし、他領域の指摘を混ぜない。
 5) 変更(critique docs + 各BACKLOG冒頭注入)をブランチ ops/critique-<日付> で commit(末尾に Co-Authored-By 行)→ push → gh pr create。
 6) web/src は変更しない(点検と起票のみ。実装は各レーンの仕事)。指摘ゼロが正しいなら無理に作らず、その旨をcritiqueに記録して終える。
 
