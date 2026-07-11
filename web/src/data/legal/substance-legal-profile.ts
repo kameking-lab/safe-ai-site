@@ -24,6 +24,26 @@ import {
   type Beppyo3Entry,
 } from "./anei-beppyo-snapshot";
 import { CAS_LAW_INDEX_BY_CAS, type CasLawIndexEntry } from "./cas-law-index";
+import {
+  DOKUGEKI_HYO1,
+  DOKUGEKI_HYO2,
+  DOKUGEKI_HYO3,
+  DOKUGEKI_REI1,
+  DOKUGEKI_REI2,
+  DOKUGEKI_REI3,
+  KASHINHO_CLASS1,
+  KASHINHO_CLASS2,
+  KOUATSU_TOXIC_GAS,
+  KOUATSU_FLAMMABLE_GAS,
+  OTHER_LAWS_SNAPSHOT_META,
+  type LawItemEntry,
+} from "./other-laws-snapshot";
+import {
+  OTHER_LAWS_CAS_INDEX_BY_CAS,
+  type DokugekiTable,
+  type OtherLawsIndexEntry,
+} from "./other-laws-cas-index";
+import kakanhoSnapshot from "./kakanho-prtr-snapshot.json";
 
 /** 法令ドメイン（診断03 4-1。安衛法系は snapshot 突合済み、他は型のみ先行） */
 export type LegalDomain =
@@ -181,56 +201,266 @@ export function isTokkaKenshinExcluded(cas: string | null | undefined): boolean 
   return derived.tokkaKubun.length > 0 && !derived.tokkaKenshinTarget;
 }
 
-/** SubstanceLegalProfile を生成（安衛法系=突合済み、他ドメイン=unverified を明示） */
+// ---------------------------------------------------------------------------
+// 他法令ドメイン（毒劇法・化管法・化審法・高圧ガス）の導出（O11・2026-07-11）
+// ---------------------------------------------------------------------------
+
+export const DOKUGEKI_TABLES: Readonly<Record<DokugekiTable, readonly LawItemEntry[]>> = {
+  hyo1: DOKUGEKI_HYO1,
+  hyo2: DOKUGEKI_HYO2,
+  hyo3: DOKUGEKI_HYO3,
+  rei1: DOKUGEKI_REI1,
+  rei2: DOKUGEKI_REI2,
+  rei3: DOKUGEKI_REI3,
+};
+
+const DOKUGEKI_LAW_ID = "325AC0000000303";
+const DOKUGEKI_REI_LAW_ID = "340CO0000000002";
+const KASHINHO_REI_LAW_ID = "349CO0000000202";
+const KOUATSU_IPPAN_LAW_ID = "341M50000400053";
+const KAKANHO_REI_NOTE = "化管法施行令（2021(R3)改正）";
+
+export const DOKUGEKI_TABLE_LABEL: Readonly<Record<DokugekiTable, string>> = {
+  hyo1: "毒物及び劇物取締法 別表第一",
+  hyo2: "毒物及び劇物取締法 別表第二",
+  hyo3: "毒物及び劇物取締法 別表第三",
+  rei1: "毒物及び劇物指定令 第1条",
+  rei2: "毒物及び劇物指定令 第2条",
+  rei3: "毒物及び劇物指定令 第3条",
+};
+
+export function dokugekiEntryOf(table: DokugekiTable, go: string): LawItemEntry | undefined {
+  return DOKUGEKI_TABLES[table].find((e) => e.go === go);
+}
+
+export function kashinhoEntryOf(clazz: 1 | 2, go: string): LawItemEntry | undefined {
+  return (clazz === 1 ? KASHINHO_CLASS1 : KASHINHO_CLASS2).find((e) => e.go === go);
+}
+
+export type DokugekiClassification = "特定毒物" | "毒物" | "劇物";
+
+/** 毒劇法の区分を索引エントリの参照テーブルから導出（特定毒物＞毒物＞劇物） */
+export function dokugekiClassOfEntry(entry: OtherLawsIndexEntry): DokugekiClassification | undefined {
+  const tables = new Set((entry.dokugeki ?? []).map((r) => r.table));
+  if (tables.has("hyo3") || tables.has("rei3")) return "特定毒物";
+  if (tables.has("hyo1") || tables.has("rei1")) return "毒物";
+  if (tables.has("hyo2") || tables.has("rei2")) return "劇物";
+  return undefined;
+}
+
+// 化管法 正本スナップショット（NITE公式・CAS付き）→ CAS索引
+type KakanhoEntry = { seireiNo: string; clazz: number; name: string; alias?: string; cas: string[] };
+const KAKANHO_ENTRIES = (kakanhoSnapshot as { entries: KakanhoEntry[] }).entries;
+export const KAKANHO_META = (kakanhoSnapshot as {
+  meta: {
+    retrievedAt: string;
+    sourceSha256: string;
+    class1Count: number;
+    class2Count: number;
+    casMappedCount: number;
+  };
+}).meta;
+
+let _kakanhoByCas: Map<string, KakanhoEntry[]> | null = null;
+function kakanhoByCas(): Map<string, KakanhoEntry[]> {
+  if (_kakanhoByCas) return _kakanhoByCas;
+  const m = new Map<string, KakanhoEntry[]>();
+  for (const e of KAKANHO_ENTRIES) {
+    for (const cas of e.cas) {
+      const list = m.get(cas);
+      if (list) list.push(e);
+      else m.set(cas, [e]);
+    }
+  }
+  _kakanhoByCas = m;
+  return m;
+}
+
+/** 化管法（PRTR）指定を公式CAS収載リストから導出 */
+export function deriveKakanho(cas: string): KakanhoEntry[] {
+  return kakanhoByCas().get(cas) ?? [];
+}
+
+/**
+ * SubstanceLegalProfile を生成。
+ * - 安衛法系: cas-law-index × anei-beppyo-snapshot から導出
+ * - 毒劇法・化審法・高圧ガス: other-laws-cas-index × other-laws-snapshot から導出
+ * - 化管法: kakanho-prtr-snapshot（NITE公式CAS収載）から導出
+ * - 未突合ドメインは status="unverified" を明示（空白で欺かない）
+ */
 export function buildSubstanceLegalProfile(cas: string): SubstanceLegalProfile | undefined {
   const entry = CAS_LAW_INDEX_BY_CAS.get(cas);
-  if (!entry) return undefined;
+  const other = OTHER_LAWS_CAS_INDEX_BY_CAS.get(cas);
+  const kakanho = deriveKakanho(cas);
+  if (!entry && !other && kakanho.length === 0) return undefined;
+
   const src = {
     revisionId: ANEI_BEPPYO_SNAPSHOT_META.seirei.revisionId,
     sha256: ANEI_BEPPYO_SNAPSHOT_META.seirei.sha256,
   };
   const verifiedAt = ANEI_BEPPYO_SNAPSHOT_META.retrievedAt;
+  const otherVerifiedAt = OTHER_LAWS_SNAPSHOT_META.retrievedAt;
   const designations: LegalDesignation[] = [];
 
-  if (entry.beppyo3 && entry.beppyo3.length > 0) {
-    for (const ref of entry.beppyo3) {
+  // ---- 安衛法系（特化則・有機則） ----
+  if (entry) {
+    if (entry.beppyo3 && entry.beppyo3.length > 0) {
+      for (const ref of entry.beppyo3) {
+        designations.push({
+          domain: "anei-tokka",
+          status: "designated",
+          classification: KUBUN_LABEL[ref.kubun],
+          basis: { lawId: SEIREI_LAW_ID, provision: `別表第3第${ref.kubun}号${ref.go}` },
+          scopeNote: entry.scopeNote,
+          source: src,
+          verifiedAt,
+        });
+      }
+    } else {
+      designations.push({ domain: "anei-tokka", status: "not-designated", source: src, verifiedAt });
+    }
+    if (entry.beppyo62 && entry.beppyo62.length > 0) {
+      for (const ref of entry.beppyo62) {
+        const k = yukiClassOfGo(ref.go);
+        designations.push({
+          domain: "anei-yuki",
+          status: "designated",
+          classification: k ? `第${["一", "二", "三"][k - 1]}種有機溶剤` : undefined,
+          basis: { lawId: SEIREI_LAW_ID, provision: `別表第6の2第${ref.go}号` },
+          scopeNote: entry.scopeNote,
+          source: src,
+          verifiedAt,
+        });
+      }
+    } else {
+      designations.push({ domain: "anei-yuki", status: "not-designated", source: src, verifiedAt });
+    }
+  } else {
+    designations.push({ domain: "anei-tokka", status: "unverified" });
+    designations.push({ domain: "anei-yuki", status: "unverified" });
+  }
+
+  // ---- 毒劇法 ----
+  if (other) {
+    const cls = dokugekiClassOfEntry(other);
+    if (cls && other.dokugeki) {
+      for (const ref of other.dokugeki) {
+        const isRei = ref.table.startsWith("rei");
+        designations.push({
+          domain: "dokugeki",
+          status: "designated",
+          classification: cls,
+          basis: {
+            lawId: isRei ? DOKUGEKI_REI_LAW_ID : DOKUGEKI_LAW_ID,
+            provision: `${DOKUGEKI_TABLE_LABEL[ref.table]}第${ref.go}号`,
+          },
+          scopeNote: other.notes,
+          source: {
+            revisionId: isRei
+              ? OTHER_LAWS_SNAPSHOT_META.dokugekiRei.revisionId
+              : OTHER_LAWS_SNAPSHOT_META.dokugekiLaw.revisionId,
+            sha256: isRei
+              ? OTHER_LAWS_SNAPSHOT_META.dokugekiRei.sha256
+              : OTHER_LAWS_SNAPSHOT_META.dokugekiLaw.sha256,
+          },
+          verifiedAt: otherVerifiedAt,
+        });
+      }
+    } else if (other.dokugekiNone) {
       designations.push({
-        domain: "anei-tokka",
+        domain: "dokugeki",
+        status: "not-designated",
+        scopeNote: other.notes,
+        verifiedAt: otherVerifiedAt,
+      });
+    } else {
+      // 索引エントリはあるが毒劇法は未突合（化審法・高圧ガスのみのレビュー）
+      designations.push({ domain: "dokugeki", status: "unverified" });
+    }
+  } else {
+    designations.push({ domain: "dokugeki", status: "unverified" });
+  }
+
+  // ---- 化審法（第一種/第二種特定化学物質） ----
+  if (other?.kashinho && other.kashinho.length > 0) {
+    for (const ref of other.kashinho) {
+      designations.push({
+        domain: "kashinho",
         status: "designated",
-        classification: KUBUN_LABEL[ref.kubun],
-        basis: { lawId: SEIREI_LAW_ID, provision: `別表第3第${ref.kubun}号${ref.go}` },
-        scopeNote: entry.scopeNote,
-        source: src,
-        verifiedAt,
+        classification: ref.clazz === 1 ? "第一種特定化学物質" : "第二種特定化学物質",
+        basis: {
+          lawId: KASHINHO_REI_LAW_ID,
+          provision: `化審法施行令第${ref.clazz}条第${ref.go}号`,
+        },
+        source: {
+          revisionId: OTHER_LAWS_SNAPSHOT_META.kashinhoRei.revisionId,
+          sha256: OTHER_LAWS_SNAPSHOT_META.kashinhoRei.sha256,
+        },
+        verifiedAt: otherVerifiedAt,
       });
     }
   } else {
-    designations.push({ domain: "anei-tokka", status: "not-designated", source: src, verifiedAt });
+    // 特定化学物質(64件)以外の化審法区分（優先評価等）は未取込＝未確認を明示
+    designations.push({ domain: "kashinho", status: "unverified" });
   }
 
-  if (entry.beppyo62 && entry.beppyo62.length > 0) {
-    for (const ref of entry.beppyo62) {
-      const k = yukiClassOfGo(ref.go);
+  // ---- 化管法（PRTR第一種/第二種） ----
+  if (kakanho.length > 0) {
+    for (const ke of kakanho) {
       designations.push({
-        domain: "anei-yuki",
+        domain: "kakanho-prtr",
         status: "designated",
-        classification: k ? `第${["一", "二", "三"][k - 1]}種有機溶剤` : undefined,
-        basis: { lawId: SEIREI_LAW_ID, provision: `別表第6の2第${ref.go}号` },
-        scopeNote: entry.scopeNote,
-        source: src,
-        verifiedAt,
+        classification: ke.clazz === 1 ? "第一種指定化学物質" : "第二種指定化学物質",
+        basis: {
+          lawId: KAKANHO_REI_NOTE,
+          provision: `別表第${ke.clazz === 1 ? "一" : "二"} 政令番号${ke.seireiNo.slice(2).replace(/^0+/, "")}（${ke.name}）`,
+        },
+        source: { revisionId: `NITE公式CAS収載リスト ${KAKANHO_META.retrievedAt}`, sha256: KAKANHO_META.sourceSha256 },
+        verifiedAt: KAKANHO_META.retrievedAt,
       });
     }
   } else {
-    designations.push({ domain: "anei-yuki", status: "not-designated", source: src, verifiedAt });
+    // 公式CAS収載リスト非収載。群指定の名称該当の可能性は残る（メタ注記どおり）
+    designations.push({ domain: "kakanho-prtr", status: "unverified" });
   }
 
-  // 他法令ドメインは未突合であることを明示（正本ETLは dataレーン O11 で展開）
-  for (const domain of ["dokugeki", "kakanho-prtr", "kashinho", "shobo", "kouatsu-gas"] as const) {
-    designations.push({ domain, status: "unverified" });
+  // ---- 高圧ガス保安法（一般則2条の品名列挙） ----
+  if (other?.kouatsu && other.kouatsu.length > 0) {
+    for (const ref of other.kouatsu) {
+      designations.push({
+        domain: "kouatsu-gas",
+        status: "designated",
+        classification: ref.kind === "toxic" ? "毒性ガス" : "可燃性ガス",
+        basis: {
+          lawId: KOUATSU_IPPAN_LAW_ID,
+          provision: `一般高圧ガス保安規則第2条（${ref.kind === "toxic" ? "毒性ガス" : "可燃性ガス"}品名列挙）`,
+        },
+        scopeNote: "高圧ガス（常用温度で1MPa以上等）として貯蔵・消費する場合に適用",
+        source: {
+          revisionId: OTHER_LAWS_SNAPSHOT_META.kouatsuIppan.revisionId,
+          sha256: OTHER_LAWS_SNAPSHOT_META.kouatsuIppan.sha256,
+        },
+        verifiedAt: otherVerifiedAt,
+      });
+    }
+  } else {
+    designations.push({ domain: "kouatsu-gas", status: "unverified" });
   }
 
-  return { cas: entry.cas, label: entry.label, designations };
+  // ---- 消防法（別表第一は品名・性状分類のため物質単位の断定はしない） ----
+  designations.push({ domain: "shobo", status: "unverified" });
+
+  return {
+    cas,
+    label: entry?.label ?? other?.label ?? kakanho[0]?.name ?? cas,
+    designations,
+  };
 }
+
+/** 高圧ガス品名リスト（監査用の再輸出） */
+export const KOUATSU_GAS_NAMES = {
+  toxic: KOUATSU_TOXIC_GAS,
+  flammable: KOUATSU_FLAMMABLE_GAS,
+} as const;
 
 export { ARTICLE22_ITEM3_TEXT };
