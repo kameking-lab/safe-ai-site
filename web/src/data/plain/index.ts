@@ -19,6 +19,18 @@ import { plainFunjinKisoku } from "./funjin-kisoku";
 import { plainJinpaiHoSikokiregu } from "./jinpai-ho-sikokiregu";
 import { plainDenriHoushasenKisoku } from "./denri-houshasen-kisoku";
 import { plainSekimenKisoku } from "./sekimen-kisoku";
+import { plainRodoAnzenEiseiHo } from "./rodo-anzen-eisei-ho";
+import { plainRodoAnzenEiseiHoSikokiregu } from "./rodo-anzen-eisei-ho-sikokiregu";
+import { plainAnzenEiseiKisoku } from "./anzen-eisei-kisoku";
+import { plainYukiKisoku } from "./yuki-kisoku";
+import { plainEnKisoku } from "./en-kisoku";
+import { plainShiAlkylEnKisoku } from "./shi-alkyl-en-kisoku";
+import { plainTokkaKisoku } from "./tokka-kisoku";
+import { plainCraneKisoku } from "./crane-kisoku";
+import { plainGondolaAnzenKisoku } from "./gondola-anzen-kisoku";
+import { plainBoilerAtsuryokuYokiAnzenKisoku } from "./boiler-atsuryoku-yoki-anzen-kisoku";
+import { plainJimushoEiseiKijunKisoku } from "./jimusho-eisei-kijun-kisoku";
+import { plainKikaiKenteiKisoku } from "./kikai-kentei-kisoku";
 
 /** 法令別 plain ファイルの束（ファイル名 → エントリ配列） */
 export const PLAIN_LAW_FILES: Readonly<Record<string, readonly PlainArticle[]>> = {
@@ -27,6 +39,18 @@ export const PLAIN_LAW_FILES: Readonly<Record<string, readonly PlainArticle[]>> 
   "jinpai-ho-sikokiregu": plainJinpaiHoSikokiregu,
   "denri-houshasen-kisoku": plainDenriHoushasenKisoku,
   "sekimen-kisoku": plainSekimenKisoku,
+  "rodo-anzen-eisei-ho": plainRodoAnzenEiseiHo,
+  "rodo-anzen-eisei-ho-sikokiregu": plainRodoAnzenEiseiHoSikokiregu,
+  "anzen-eisei-kisoku": plainAnzenEiseiKisoku,
+  "yuki-kisoku": plainYukiKisoku,
+  "en-kisoku": plainEnKisoku,
+  "shi-alkyl-en-kisoku": plainShiAlkylEnKisoku,
+  "tokka-kisoku": plainTokkaKisoku,
+  "crane-kisoku": plainCraneKisoku,
+  "gondola-anzen-kisoku": plainGondolaAnzenKisoku,
+  "boiler-atsuryoku-yoki-anzen-kisoku": plainBoilerAtsuryokuYokiAnzenKisoku,
+  "jimusho-eisei-kijun-kisoku": plainJimushoEiseiKijunKisoku,
+  "kikai-kentei-kisoku": plainKikaiKenteiKisoku,
 };
 
 /** 全 plain エントリ（整合テスト・カバレッジ用） */

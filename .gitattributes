@@ -1,0 +1,9 @@
+# 自動生成される進捗レポートは `npm run plain:status` が毎回上書きする派生物。
+# 各翻訳ブランチが各自の再生成版をコミットすると、後続マージで main が進むたびに
+# これらでマージ競合＝ mergeable_state:dirty になり、GitHub が PR のマージ ref を
+# 作れず pull_request トリガの web-ci（smoke/full/e2e）が一度も生成されない。
+# union マージ指定で「競合で PR を止めない」安全網にする（重複行が出ても
+# 次の plain:status 実行で決定的に上書きされるため実害なし）。
+# 詳細と対処: docs/plain-ci-web-ci-firing-handbook-2026-07-11.md
+docs/plain-language-coverage.md merge=union
+BACKLOG-plain-stale.md merge=union
