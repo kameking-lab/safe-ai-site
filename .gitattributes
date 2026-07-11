@@ -7,3 +7,7 @@
 # 詳細と対処: docs/plain-ci-web-ci-firing-handbook-2026-07-11.md
 docs/plain-language-coverage.md merge=union
 BACKLOG-plain-stale.md merge=union
+
+# 全文スナップショット層（FT-D1）は egov-fulltext-fetch.ts の機械生成物・手書き禁止。
+# GitHub の言語統計・レビュー差分ノイズから除外する（正しさは ETL＋取込検証ゲートで担保）。
+web/src/data/laws-fulltext/*.json linguist-generated=true
