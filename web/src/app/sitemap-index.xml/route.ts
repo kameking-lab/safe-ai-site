@@ -32,6 +32,9 @@ export async function GET() {
     { loc: `${BASE}/sitemap-equipment.xml`, lastmod: equipmentDataUpdated },
     // 化学物質 個別ページ（約3,515物質）。濃度基準DBスナップショットの生成日。
     { loc: `${BASE}/sitemap-chemicals.xml`, lastmod: chemicalsDataUpdated },
+    // 法令ナビ 条文パーマリンク（約480条）。コーパスの e-Gov 突合日ベースの固定日
+    //（sitemap-laws.xml/route.ts の CORPUS_LASTMOD と同値。条文データ更新PRで更新）。
+    { loc: `${BASE}/sitemap-laws.xml`, lastmod: '2026-07-11' },
   ];
 
   const entries = children

@@ -551,6 +551,44 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
         });
       }
     }),
+
+    // 法令ナビ 分野ページ（/law-navi/topics/[id]＝分野・機械・作業→条文群の着地面。
+    // docs/horei-navi-foundation-2026-07-11 §2-3）。診断 2026-07-11 で「フォークリフト」は
+    // 通達タイトルの前方一致が条文を押し流し、「爪のやつ」は 0 件だった。分野ページを
+    // title=代表名（完全一致100点）+ keywords=現場語 alias（部分一致は variant.includes(k)
+    // を許すエンジン仕様＝「爪のやつ」⊇「爪」で当たる）で収載し、俗称からの着地面にする。
+    // url は generateStaticParams（dynamicParams=false）が LAW_NAVI_TOPICS 全 id を解決＝
+    // 幽霊URL 0。目的地ページ扱いで feature（機能）カテゴリ（疾患別ガイドと同方針）。
+    import('@/data/law-navi/topics').then(({ LAW_NAVI_TOPICS }) => {
+      for (const t of LAW_NAVI_TOPICS) {
+        items.push({
+          id: `law-navi-topic-${t.id}`,
+          title: t.name,
+          subtitle: `法令ナビ｜${t.fieldGroup}の条文${t.articles.length}件＋通達${t.circularIds.length}件を体系順に`,
+          category: 'feature',
+          keywords: [...t.aliases, t.fieldGroup, '法令ナビ', ...t.articles.map((a) => a.articleNum)],
+          url: `/law-navi/topics/${t.id}`,
+        });
+      }
+    }),
+
+    // 別表の意味インデックス（/law-navi/beppyo#id＝「別表第3=特定化学物質」の逆引き。
+    // 同 §2-5）。診断 2026-07-11 で「別表第3」は粉じん則27条等の言及条文しか出ず、
+    // 「何の表か」に着地できなかった。label（別表第3）と意味名・俗称 keywords で収載し、
+    // 条番号パーサの別表正規化（別表第三→別表第3）と合わせて表記ゆらぎも吸収する。
+    // 法令内容そのものなので category は law（条文と同じ権威ティア）。
+    import('@/data/law-navi/beppyo').then(({ BEPPYO_ENTRIES }) => {
+      for (const b of BEPPYO_ENTRIES) {
+        items.push({
+          id: `law-navi-beppyo-${b.id}`,
+          title: `${b.lawShort} ${b.label}（${b.name}）`,
+          subtitle: b.summary.slice(0, 90),
+          category: 'law',
+          keywords: [b.label, b.name, b.lawShort, ...b.keywords],
+          url: `/law-navi/beppyo#${b.id}`,
+        });
+      }
+    }),
   ]);
 
   cachedIndex = items;

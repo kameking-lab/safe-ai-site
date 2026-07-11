@@ -34,24 +34,43 @@ const ARTICLE_RE = new RegExp(
 );
 
 /**
+ * 別表番号表現の抽出（法令ナビ 別表意味インデックス。docs/horei-navi-foundation-2026-07-11 §2-4）。
+ * 「別表第」マーカー必須＝裸の数字・「第3章」等を誤変換しない。枝番は「の」区切り
+ * （例「別表第六の二」「別表第6の2」）。条番号と同じく漢数字・全角数字を吸収する。
+ */
+const BEPPYO_RE = new RegExp(`別表第\\s*(${NUM}+)(?:\\s*の\\s*(${NUM}+))?`, 'g');
+
+/**
  * 生クエリ中の条番号表現を「第N条」「第N条のM」の正規形へ書き換える。
  * 書き換えたトークンは前後を空白で区切り、法令名部分と別語（AND）として扱わせる。
  * 条番号表現が無ければ（空白正規化を除き）実質そのまま返す。
  *
  * 例: 「安衛法61条」→「安衛法 第61条」／「第六十一条」→「第61条」／
  *     「安衛則563条」→「安衛則 第563条」／「61-2条」→「第61条の2」
+ *
+ * あわせて別表番号のゆらぎも正規形へ寄せる（診断 2026-07-11: 「別表第三」と「別表第3」で
+ * 結果が割れていた）: 「別表第三」→「別表第3」／「別表第六の二」→「別表第6の2」。
+ * 別表は前段で処理する（条の正規表現が「別表第六の二」の「六」を条番号と誤認しないよう、
+ * 先に別表全体を消費して正規形トークンへ置き換える）。
  */
 export function normalizeArticleQuery(query: string): string {
   if (!query) return query;
-  const rewritten = query.replace(ARTICLE_RE, (full, n1, b1, n2, b2) => {
-    const numToken = (n1 ?? n2) as string | undefined;
-    if (!numToken) return full;
-    const num = toArabic(numToken);
-    if (!/^[0-9]+$/.test(num) || num === '0') return full; // 変換不能はそのまま
-    const branchToken = (b1 ?? b2) as string | undefined;
-    const branch = branchToken ? toArabic(branchToken) : '';
-    const canon = branch && /^[0-9]+$/.test(branch) ? `第${num}条の${branch}` : `第${num}条`;
-    return ` ${canon} `;
-  });
+  const rewritten = query
+    .replace(BEPPYO_RE, (full, nRaw, bRaw) => {
+      const num = toArabic(nRaw as string);
+      if (!/^[0-9]+$/.test(num) || num === '0') return full; // 変換不能はそのまま
+      const branch = bRaw ? toArabic(bRaw as string) : '';
+      return branch && /^[0-9]+$/.test(branch) ? ` 別表第${num}の${branch} ` : ` 別表第${num} `;
+    })
+    .replace(ARTICLE_RE, (full, n1, b1, n2, b2) => {
+      const numToken = (n1 ?? n2) as string | undefined;
+      if (!numToken) return full;
+      const num = toArabic(numToken);
+      if (!/^[0-9]+$/.test(num) || num === '0') return full; // 変換不能はそのまま
+      const branchToken = (b1 ?? b2) as string | undefined;
+      const branch = branchToken ? toArabic(branchToken) : '';
+      const canon = branch && /^[0-9]+$/.test(branch) ? `第${num}条の${branch}` : `第${num}条`;
+      return ` ${canon} `;
+    });
   return rewritten.replace(/\s+/g, ' ').trim();
 }
