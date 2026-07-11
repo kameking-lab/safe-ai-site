@@ -138,3 +138,23 @@ self.addEventListener("push", (event) => {
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
+
+// 通知タップで該当ページへ（鍵なし通知ライト③）。ページ生成の通知は各ページの
+// onclick で処理されるが、SW経由（将来のpush・一部ブラウザのtag再利用）でも
+// タップが無反応にならないようにする。data.url が無ければトップへ。
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url ?? "/notifications";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ("focus" in client) {
+          client.focus();
+          if ("navigate" in client) client.navigate(url);
+          return;
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});
