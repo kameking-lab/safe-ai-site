@@ -1,6 +1,7 @@
 import byYearFull from "@/data/aggregates-mhlw/accidents-by-year.json";
 import byIndustryFull from "@/data/aggregates-mhlw/accidents-by-industry.json";
 import metaJson from "@/data/aggregates-mhlw/meta.json";
+import { normalizeHazardLabel } from "@/lib/accidents/type-normalization";
 import { loadCombinedCases, type CombinedCase } from "./loader";
 import type {
   AnalyticsAggregates,
@@ -11,6 +12,15 @@ import type {
 } from "./types";
 
 type YearMap = Record<string, Record<string, number>>;
+
+/**
+ * 型別の集計は正規化ラベル（21分類正本）で数える。
+ * 死亡個票は「墜落、転落」、事例DBは「墜落」と表記が割れており、
+ * 生の文字列のまま数えると同じ型が二重計上される（是正済みバグ）。
+ */
+function caseHazardLabel(c: CombinedCase): string | null {
+  return c.type ? normalizeHazardLabel(c.type) : null;
+}
 
 const byYearFullData = byYearFull as YearMap;
 const byIndustryFullData = byIndustryFull as YearMap;
@@ -134,16 +144,17 @@ function aggregateIndustryTypeMatrix(cases: CombinedCase[]): IndustryTypeMatrix 
   const industries = allRanked(countBy(cases, (c) => c.industry))
     .slice(0, 7)
     .map((x) => x.name);
-  const types = allRanked(countBy(cases, (c) => c.type))
+  const types = allRanked(countBy(cases, caseHazardLabel))
     .slice(0, 8)
     .map((x) => x.name);
   const industryIdx = new Map(industries.map((n, i) => [n, i]));
   const typeIdx = new Map(types.map((n, i) => [n, i]));
   const matrix = industries.map(() => new Array(types.length).fill(0) as number[]);
   for (const c of cases) {
-    if (!c.industry || !c.type) continue;
+    const label = caseHazardLabel(c);
+    if (!c.industry || !label) continue;
     const i = industryIdx.get(c.industry);
-    const j = typeIdx.get(c.type);
+    const j = typeIdx.get(label);
     if (i === undefined || j === undefined) continue;
     matrix[i][j] += 1;
   }
@@ -151,11 +162,11 @@ function aggregateIndustryTypeMatrix(cases: CombinedCase[]): IndustryTypeMatrix 
 }
 
 function aggregateTypeRanking(cases: CombinedCase[]) {
-  return allRanked(countBy(cases, (c) => c.type));
+  return allRanked(countBy(cases, caseHazardLabel));
 }
 
 function aggregateTypeTrendByYear(cases: CombinedCase[]): YearTrendByType {
-  const topTypes = allRanked(countBy(cases, (c) => c.type))
+  const topTypes = allRanked(countBy(cases, caseHazardLabel))
     .slice(0, 5)
     .map((x) => x.name);
   const years = [...new Set(cases.map((c) => c.year).filter((y) => y > 0))].sort();
@@ -163,10 +174,11 @@ function aggregateTypeTrendByYear(cases: CombinedCase[]): YearTrendByType {
   for (const t of topTypes) seriesMap.set(t, new Array(years.length).fill(0));
   const yearIdx = new Map(years.map((y, i) => [y, i]));
   for (const c of cases) {
-    if (!c.type || !topTypes.includes(c.type)) continue;
+    const label = caseHazardLabel(c);
+    if (!label || !topTypes.includes(label)) continue;
     const i = yearIdx.get(c.year);
     if (i === undefined) continue;
-    const arr = seriesMap.get(c.type);
+    const arr = seriesMap.get(label);
     if (arr) arr[i] += 1;
   }
   return {

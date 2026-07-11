@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AccidentTypePictogram } from "@/components/accidents/accident-type-pictogram";
 import { ACCIDENT_TYPE_SHORT } from "@/lib/accidents/accident-pictogram-map";
 import { accidentTypeHref, type AccidentTypeCount } from "@/lib/accidents/accident-visual";
@@ -39,6 +40,14 @@ export function AccidentTypeGrid({ counts }: AccidentTypeGridProps) {
           </a>
         ))}
       </div>
+      <p className="mt-2 text-xs">
+        <Link
+          href="/education/hazard-slides"
+          className="inline-flex min-h-[44px] items-center font-semibold text-amber-700 underline decoration-amber-300 hover:text-amber-900"
+        >
+          型別の教育スライド（統計・原因・対策・クイズ）を見る →
+        </Link>
+      </p>
     </section>
   );
 }

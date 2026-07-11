@@ -5,6 +5,7 @@ import { SAFETY_SIGNS, SIGN_CATEGORIES } from "@/data/safety-signs";
 import { INDUSTRIES } from "@/data/safety-signs/industry-usage";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
 import { COURT_CASES } from "@/data/court-cases";
+import { CANONICAL_HAZARD_TYPES } from "@/lib/accidents/type-normalization";
 import { latestIsoDate } from "@/lib/sitemap/lastmod";
 import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
 import { SITE_URL } from "@/lib/seo-metadata";
@@ -294,6 +295,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "yearly",
   }));
 
+  // 災害の型別 教育スライド（/education/hazard-slides + 21型。dynamicParams=false の
+  // 静的生成対象）。統計データ（死亡災害DB）更新に連動するため lastmod は
+  // accidentsDataUpdated に追従。
+  const hazardSlidePages: typeof pages = [
+    {
+      url: "/education/hazard-slides",
+      lastModified: accidentsDataUpdated,
+      priority: 0.85,
+      changeFrequency: "monthly" as Freq,
+    },
+    ...CANONICAL_HAZARD_TYPES.map((t) => ({
+      url: `/education/hazard-slides/${t.slug}`,
+      lastModified: accidentsDataUpdated,
+      priority: 0.75,
+      changeFrequency: "monthly" as Freq,
+    })),
+  ];
+
   return [
     ...filtered,
     ...featureCategoryPages,
@@ -302,6 +321,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...safetySignDetailPages,
     ...illnessGuidePages,
     ...courtCasePages,
+    ...hazardSlidePages,
   ].map(
     ({ url, lastModified, priority, changeFrequency }) => {
       const absolute = `${base}${url}`;

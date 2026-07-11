@@ -625,6 +625,7 @@ describe('buildSearchIndex — Eラーニング（education）の全テーマ収
       import('@/data/mock/elearning-forestry-themes'),
       import('@/data/mock/elearning-food-themes'),
       import('@/data/mock/elearning-retail-themes'),
+      import('@/data/mock/elearning-hazard-types-theme'),
     ]);
     return new Set(
       [
@@ -637,6 +638,7 @@ describe('buildSearchIndex — Eラーニング（education）の全テーマ収
         ...mods[6].elearningForestryThemes,
         ...mods[7].elearningFoodThemes,
         ...mods[8].elearningRetailThemes,
+        ...mods[9].elearningHazardTypesTheme,
       ].map((t) => t.id),
     );
   }

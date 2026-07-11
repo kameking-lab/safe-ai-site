@@ -2,7 +2,9 @@ import type { LucideIcon } from "lucide-react";
 import {
   Bomb,
   Car,
+  CircleHelp,
   Cog,
+  Ellipsis,
   Flame,
   FlaskConical,
   Forklift,
@@ -41,6 +43,8 @@ const LUCIDE_GLYPH: Partial<Record<AccidentGlyphId, LucideIcon>> = {
   "harmful-ray": Radiation,
   toxic: Skull,
   vibration: Vibrate,
+  other: Ellipsis,
+  unclassifiable: CircleHelp,
 };
 
 /** 自作グリフ（viewBox 0 0 24 24・黒塗り＝currentColor）。 */
@@ -140,6 +144,42 @@ function CustomGlyph({ glyph }: { glyph: AccidentGlyphId }) {
       </svg>
     );
   }
+  if (glyph === "bump") {
+    // 激突: 壁に向かって突き当たる人（衝撃線つき）
+    return (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="h-full w-full">
+        <path d="M19 3h3v18h-3z" />
+        <path d="M16.5 8.2l1.6-1.6 1 1-1.6 1.6zM16.5 12.5h2.2v1.4h-2.2z" />
+        <circle cx="12.5" cy="6" r="2.2" />
+        <path d="M11.5 9.2c1-.3 2 .2 2.4 1.1l1.6 3.7-1.9.8-1.3-2.9-1.9 4.4 2.6 4.4-2.1 1-2.6-4.5c-.3-.5-.3-1.1 0-1.6l2-4.9c.2-.7.6-1.2 1.2-1.5z" />
+        <path d="M4 10.5l4.4-1.2.5 1.8-4.4 1.2z" />
+        <path d="M2 20.4h16v1.6H2z" />
+      </svg>
+    );
+  }
+  if (glyph === "rupture") {
+    // 破裂: 圧力容器と破裂の放射線
+    return (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="h-full w-full">
+        <path d="M9 8h6v10a3 3 0 0 1-3 3 3 3 0 0 1-3-3z" />
+        <path d="M10.5 5h3v2h-3z" />
+        <path d="M11.2 2h1.6v2h-1.6z" />
+        <path d="M5.2 6.2l2.3 2.3-1.1 1.1-2.3-2.3zM18.8 6.2l1.1 1.1-2.3 2.3-1.1-1.1zM2.5 12.2h3v1.6h-3zM18.5 12.2h3v1.6h-3z" />
+      </svg>
+    );
+  }
+  if (glyph === "stepping-through") {
+    // 踏み抜き: 釘の出た板を踏む足
+    return (
+      <svg viewBox="0 0 24 24" fill="currentColor" className="h-full w-full">
+        <path d="M8 3h6.5c1.4 0 2.5 1.1 2.5 2.5V10h-3.4l.9 4H8.8z" />
+        <path d="M8.8 15h5.4l.5 2.4c.2 1-.5 1.9-1.5 1.9H10c-.7 0-1.3-.5-1.4-1.2z" />
+        <path d="M11.2 21.5v-1h1.6v1z" />
+        <path d="M4 19.2h16v1.6H4z" />
+        <path d="M11.1 19.2l.9-4.6.9 4.6z" transform="translate(0 -6.5)" />
+      </svg>
+    );
+  }
   return null;
 }
 
@@ -151,15 +191,37 @@ type AccidentTypePictogramProps = {
 };
 
 export function AccidentTypePictogram({ type, size = "md", className = "" }: AccidentTypePictogramProps) {
-  const glyph = ACCIDENT_TYPE_GLYPH[type];
-  const outer = size === "sm" ? "h-6 w-6 rounded-md" : size === "lg" ? "h-14 w-14 rounded-xl" : "h-9 w-9 rounded-lg";
-  const inner = size === "sm" ? "h-4 w-4" : size === "lg" ? "h-9 w-9" : "h-5 w-5";
+  return <HazardGlyphBadge glyph={ACCIDENT_TYPE_GLYPH[type]} label={type} size={size} className={className} />;
+}
+
+type HazardGlyphBadgeProps = {
+  glyph: AccidentGlyphId;
+  /** aria-label・title 用の型名 */
+  label: string;
+  size?: "sm" | "md" | "lg" | "xl";
+  className?: string;
+};
+
+/**
+ * グリフID直指定版（災害の型 正規化層の21分類＝教育スライド用）。
+ * AccidentTypePictogram と同じ JIS 黄地＋黒グリフの文法。xl はスライド表紙用。
+ */
+export function HazardGlyphBadge({ glyph, label, size = "md", className = "" }: HazardGlyphBadgeProps) {
+  const outer =
+    size === "sm"
+      ? "h-6 w-6 rounded-md"
+      : size === "lg"
+        ? "h-14 w-14 rounded-xl"
+        : size === "xl"
+          ? "h-24 w-24 rounded-2xl"
+          : "h-9 w-9 rounded-lg";
+  const inner = size === "sm" ? "h-4 w-4" : size === "lg" ? "h-9 w-9" : size === "xl" ? "h-16 w-16" : "h-5 w-5";
   const Lucide = LUCIDE_GLYPH[glyph];
   return (
     <span
       role="img"
-      aria-label={`事故の型: ${type}`}
-      title={type}
+      aria-label={`事故の型: ${label}`}
+      title={label}
       data-testid={`accident-picto-${glyph}`}
       className={`inline-flex shrink-0 items-center justify-center bg-amber-400 text-slate-900 ${outer} ${className}`}
     >

@@ -7,6 +7,7 @@ import { SignageConclusionStrip } from "@/components/signage/signage-conclusion-
 import { SignageDailyValues } from "@/components/signage/signage-daily-values";
 import { SignageDangerAlert } from "@/components/signage/signage-danger-alert";
 import { JapanPrefectureWarningMap } from "@/components/signage/japan-prefecture-warning-map";
+import { HazardOfTheDay } from "@/components/hazard-slides/hazard-of-the-day";
 import { SignageFloorPlanEditor } from "@/components/signage/signage-floor-plan-editor";
 import { SignageHeader } from "@/components/signage/signage-header";
 import { SignageHourlyStrip } from "@/components/signage/signage-hourly-strip";
@@ -49,7 +50,7 @@ const LOCATION_STORAGE_KEY = "signage-location-id";
 const ORIENTATION_STORAGE_KEY = "signage-orientation";
 
 type Orientation = "landscape" | "portrait";
-type DisplayMode = "floorplan" | "map" | "workdocs";
+type DisplayMode = "floorplan" | "map" | "workdocs" | "education";
 
 type DashboardState = {
   mode: ApiMode;
@@ -488,7 +489,9 @@ export default function SignagePage() {
                     ? "現場レイアウト"
                     : displayMode === "map"
                       ? "気象庁 注意報・警報（都道府県）"
-                      : "本日の作業資料"}
+                      : displayMode === "education"
+                        ? "災害の型別 安全教育（本日の型）"
+                        : "本日の作業資料"}
                 </p>
                 <p className="mt-0.5 text-[9px] text-slate-400 sm:text-[10px] xl:text-sm">
                   {displayMode === "floorplan" && (
@@ -505,6 +508,9 @@ export default function SignagePage() {
                   )}
                   {displayMode === "workdocs" && (
                     <>本日使用する図面・指示書をアップロード表示します。</>
+                  )}
+                  {displayMode === "education" && (
+                    <>厚労省21分類の型が毎日替わります。?slide=fall のように固定も可能です。</>
                   )}
                 </p>
               </div>
@@ -545,6 +551,18 @@ export default function SignagePage() {
                   aria-pressed={displayMode === "workdocs"}
                 >
                   作業資料
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDisplayMode("education")}
+                  className={`flex items-center rounded-lg border px-2 py-2.5 text-[10px] font-semibold min-h-[44px] ${
+                    displayMode === "education"
+                      ? "border-emerald-500 bg-emerald-700 text-white"
+                      : "border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800"
+                  }`}
+                  aria-pressed={displayMode === "education"}
+                >
+                  教育
                 </button>
                 <a
                   href={jmaLink}
@@ -686,6 +704,11 @@ export default function SignagePage() {
               <JapanPrefectureWarningMap levelsByIso={prefectureLevels} highlightIso={selectedLocation.prefectureIso} />
             )}
             {displayMode === "workdocs" && <SignageTodayDocuments />}
+            {displayMode === "education" && (
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                <HazardOfTheDay variant="signage" />
+              </div>
+            )}
 
             <SignageHourlyStrip
               hourly={bundle?.hourly ?? []}

@@ -343,6 +343,7 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
       import('@/data/mock/elearning-forestry-themes'),
       import('@/data/mock/elearning-food-themes'),
       import('@/data/mock/elearning-retail-themes'),
+      import('@/data/mock/elearning-hazard-types-theme'),
     ]).then((mods) => {
       const themes = [
         ...mods[0].elearningIntroCourse,
@@ -354,6 +355,7 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
         ...mods[6].elearningForestryThemes,
         ...mods[7].elearningFoodThemes,
         ...mods[8].elearningRetailThemes,
+        ...mods[9].elearningHazardTypesTheme,
       ];
       const seen = new Set<string>();
       for (const theme of themes) {
@@ -517,6 +519,30 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
           category: 'feature',
           keywords: p.keywords,
           url: p.url,
+        });
+      }
+    }),
+
+    // 災害の型別 教育スライド（/education/hazard-slides/[slug]＝21分類。generateStaticParams
+    // dynamicParams=false で収載集合＝解決集合＝幽霊URL 0）。「墜落 教育」「熱中症 スライド」
+    // 「朝礼 ネタ 型」のような教育教材クエリで着地させる。
+    import('@/lib/accidents/type-normalization').then(({ CANONICAL_HAZARD_TYPES }) => {
+      items.push({
+        id: 'hazard-slides-hub',
+        title: '災害の型別 安全教育スライド',
+        subtitle: '厚労省21分類の統計→原因→対策→クイズを自動生成。投影16:9・A4横印刷対応',
+        category: 'feature',
+        keywords: ['安全教育', 'スライド', '教材', '朝礼', '型別', '雇入れ時教育', '職長教育'],
+        url: '/education/hazard-slides',
+      });
+      for (const t of CANONICAL_HAZARD_TYPES) {
+        items.push({
+          id: `hazard-slide-${t.slug}`,
+          title: `${t.label}の安全教育スライド`,
+          subtitle: '統計・多い原因・対策チェックリスト（根拠条文つき）・確認クイズの6枚構成',
+          category: 'feature',
+          keywords: [t.label, t.mhlwLabel, t.short, '安全教育', 'スライド', '対策', '教材'],
+          url: `/education/hazard-slides/${t.slug}`,
         });
       }
     }),
