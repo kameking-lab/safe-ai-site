@@ -44,6 +44,11 @@ import {
 import { AnswerConclusionCard } from "@/components/chatbot/answer-conclusion-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+// ごちゃごちゃブロック根絶（2026-07-11）: 旧形式の追記テール除去＋markdown記号の正規化。
+// 新しいAPI応答はサーバー側で除去済みだが、保存済みセッション・キャッシュ応答の
+// 後方互換のため表示直前にも同じ整形を通す。
+import { formatAnswerForDisplay, stripAnswerTailBlocks } from "@/lib/chatbot-answer-format";
+import { AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
 
 type ChatMessage = {
   id: string;
@@ -116,26 +121,31 @@ function saveSessions(sessions: SavedSession[]) {
 }
 
 function messagesToMarkdown(messages: ChatMessage[]): string {
-  return messages
+  const body = messages
     .map((m) => {
       const role = m.role === "user" ? "**あなた**" : "**安全AIポータル**";
-      const body = m.content;
+      // 旧形式の追記テール（出典・通達等）は構造化フィールド由来の参照条文行と
+      // 二重になるため除去してからエクスポートする
+      const content = m.role === "assistant" ? stripAnswerTailBlocks(m.content) : m.content;
       const sources =
         m.sources && m.sources.length > 0
           ? "\n\n> 参照条文: " + m.sources.map((s) => `${s.law} ${s.article}`).join(" / ")
           : "";
-      return `${role}\n\n${body}${sources}`;
+      return `${role}\n\n${content}${sources}`;
     })
     .join("\n\n---\n\n");
+  return `${body}\n\n---\n\n> ⚠️ ${AI_LEGAL_DISCLAIMER}`;
 }
 
 function messagesToText(messages: ChatMessage[]): string {
-  return messages
+  const body = messages
     .map((m) => {
       const role = m.role === "user" ? "あなた" : "安全AIポータル";
-      return `[${role}]\n${m.content}`;
+      const content = m.role === "assistant" ? formatAnswerForDisplay(m.content) : m.content;
+      return `[${role}]\n${content}`;
     })
     .join("\n\n");
+  return `${body}\n\n⚠️ ${AI_LEGAL_DISCLAIMER}`;
 }
 
 function downloadFile(content: string, filename: string, mimeType: string) {
@@ -161,7 +171,8 @@ function renderBold(text: string) {
 function encodeShare(messages: ChatMessage[]): string {
   const data = messages.map((m) => ({
     r: m.role === "user" ? "u" : "a",
-    c: m.content,
+    // 共有ビューはプレーンテキスト表示のため、表示用整形（テール除去＋markdown正規化）を通す
+    c: m.role === "assistant" ? formatAnswerForDisplay(m.content) : m.content,
     s: m.sources?.map((src) => ({ l: src.law, a: src.article })),
   }));
   return btoa(unescape(encodeURIComponent(JSON.stringify(data))));
@@ -195,7 +206,8 @@ export function ChatbotPanel() {
     const last = messages[messages.length - 1];
     if (last.role !== "assistant") return;
     if (typeof window === "undefined" || !window.speechSynthesis) return;
-    const utter = new SpeechSynthesisUtterance(last.content.slice(0, 400));
+    // 読み上げも表示と同じ整形後テキストを使う（markdown記号・出典テールを読み上げない）
+    const utter = new SpeechSynthesisUtterance(formatAnswerForDisplay(last.content).slice(0, 400));
     utter.lang = "ja-JP";
     utter.rate = 1.0;
     window.speechSynthesis.cancel();
@@ -815,9 +827,12 @@ export function ChatbotPanel() {
               // デカ表示し、残りは折りたたみへ。ストリーミング中はそのまま流す（手応え優先）。
               const isStreamingMsg =
                 msg.role === "assistant" && isSending && idx === messages.length - 1;
+              // 表示用整形: 旧形式の追記テール除去＋markdown記号の正規化（内容の語句は不変）
+              const displayContent =
+                msg.role === "assistant" ? formatAnswerForDisplay(msg.content) : msg.content;
               const conclusionView =
-                msg.role === "assistant" && !isStreamingMsg && msg.content.trim().length > 0
-                  ? splitAnswerConclusion(msg.content)
+                msg.role === "assistant" && !isStreamingMsg && displayContent.trim().length > 0
+                  ? splitAnswerConclusion(displayContent)
                   : null;
               const cardTone = conclusionView
                 ? answerCardTone({
@@ -857,7 +872,7 @@ export function ChatbotPanel() {
                       </AnswerConclusionCard>
                       {conclusionView.rest && (
                         <CollapsibleDetail
-                          summary={`詳しい説明（全文 ${msg.content.length}字）`}
+                          summary={`詳しい説明（全文 ${displayContent.length}字）`}
                         >
                           <div className="whitespace-pre-wrap text-sm leading-6 text-slate-700 dark:text-slate-300">
                             {renderBold(conclusionView.rest)}
@@ -881,7 +896,7 @@ export function ChatbotPanel() {
                     aria-atomic={isStreamingMsg ? "false" : undefined}
                   >
                     {msg.role === "assistant" ? (
-                      <div className="whitespace-pre-wrap">{renderBold(msg.content)}</div>
+                      <div className="whitespace-pre-wrap">{renderBold(displayContent)}</div>
                     ) : (
                       <p className="whitespace-pre-wrap">{msg.content}</p>
                     )}
@@ -893,7 +908,7 @@ export function ChatbotPanel() {
                 <div className={`mt-1 flex items-center gap-2 ${msg.role === "assistant" ? "ml-10" : ""}`}>
                   <button
                     type="button"
-                    onClick={() => handleCopyMessage(msg.id, msg.content)}
+                    onClick={() => handleCopyMessage(msg.id, displayContent)}
                     className="rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-400 hover:text-slate-600 transition"
                     aria-label="コピー"
                   >
