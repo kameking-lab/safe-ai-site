@@ -9,6 +9,7 @@ import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
 import { SimpleMarkdown } from "@/components/simple-markdown";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
 import { getChemicalKeyPoints, hasKeyPoints } from "@/lib/chemical/key-points";
+import { auditedRegulationTags, type LegalProfileTagSource } from "@/lib/chemical/legal-profile-tags";
 import { ChemicalRaReportHeader, ChemicalRaSignoffBoxes } from "@/components/chemical/chemical-ra-report-print";
 import { ChemicalRaSaveButton } from "@/components/chemical/chemical-ra-save";
 import { getChemicalRaRecord } from "@/lib/chemical/ra-cloud";
@@ -235,8 +236,9 @@ export function ChemicalRaPanel() {
   const [error, setError] = useState<string | null>(null);
   const [errorHint, setErrorHint] = useState<string | null>(null);
   const [result, setResult] = useState<ChemicalRaResponse | null>(null);
-  // 軸I: 結果の冒頭に「まず押さえる要点」を出すための抽出（GHS・対策・規制の再構成）。
-  const keyPoints = useMemo(() => (result ? getChemicalKeyPoints(result) : null), [result]);
+  // P0是正(2026-07-11): 結論カードの法規制バッジは監査済み legal-profile のみを源泉とする。
+  // 「どのクエリの結果か」を持ち、物質切替時に前物質のタグを誤って出さない。
+  const [legalTags, setLegalTags] = useState<{ q: string; tags: string[] } | null>(null);
   const [mhlwSelected, setMhlwSelected] = useState<MergedChemical | null>(null);
   // 一窓化: 法令名称（CASレス告示名・群指定名）で解決した選択
   const [legalSelected, setLegalSelected] = useState<LegalNameHit | null>(null);
@@ -275,6 +277,40 @@ export function ChemicalRaPanel() {
   }, [chemicalName, mhlwSelected]);
 
   const displayedMhlw = mhlwSelected ?? autoMhlw;
+
+  // P0是正: RA結果が出たら、その物質の監査済み法令プロファイルを取得してバッジ源にする。
+  // クエリの優先順位は法令名称選択 → DB選択のCAS → AI応答のCAS → 入力名
+  // （LegalConclusionCard と同じ解決点 /api/chemical/legal-profile を使う）。
+  const legalTagQuery = useMemo(() => {
+    if (!result) return null;
+    return (
+      legalSelected?.label ??
+      displayedMhlw?.cas ??
+      result.casNumber ??
+      result.chemicalName
+    );
+  }, [result, legalSelected, displayedMhlw]);
+
+  useEffect(() => {
+    if (!legalTagQuery) return;
+    const ac = new AbortController();
+    fetch(`/api/chemical/legal-profile?q=${encodeURIComponent(legalTagQuery)}`, { signal: ac.signal })
+      .then((r) => r.json())
+      .then((j: LegalProfileTagSource) =>
+        setLegalTags({ q: legalTagQuery, tags: auditedRegulationTags(j) }),
+      )
+      .catch(() => setLegalTags({ q: legalTagQuery, tags: [] }));
+    return () => ac.abort();
+  }, [legalTagQuery]);
+
+  // 軸I: 結果の冒頭に「まず押さえる要点」を出すための抽出（GHS・対策の再構成＋監査済み規制タグ）。
+  const keyPoints = useMemo(
+    () =>
+      result
+        ? getChemicalKeyPoints(result, legalTags?.q === legalTagQuery ? legalTags.tags : [])
+        : null,
+    [result, legalTags, legalTagQuery],
+  );
 
   // 判定ロジック: MHLW 8h 基準値 → 特化則・有機則 管理濃度 → AI exposureLimit の順で採用
   const activeLimit = useMemo(() => {

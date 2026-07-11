@@ -44,9 +44,11 @@ import {
   type OtherLawsIndexEntry,
 } from "./other-laws-cas-index";
 import kakanhoSnapshot from "./kakanho-prtr-snapshot.json";
+import kashinhoYusenSnapshot from "./kashinho-yusen-snapshot.json";
 
 /** 法令ドメイン（診断03 4-1。安衛法系は snapshot 突合済み、他は型のみ先行） */
 export type LegalDomain =
+  | "anei-ra" // RA対象物＝表示・通知対象物（令別表第9＋安衛則別表第2の名称突合）
   | "anei-tokka" // 特化則（令別表第3）
   | "anei-yuki" // 有機則（令別表第6の2）
   | "anei-namari" // 鉛則（令別表第4=業務列挙・機械突合対象外）
@@ -217,6 +219,7 @@ export const DOKUGEKI_TABLES: Readonly<Record<DokugekiTable, readonly LawItemEnt
 const DOKUGEKI_LAW_ID = "325AC0000000303";
 const DOKUGEKI_REI_LAW_ID = "340CO0000000002";
 const KASHINHO_REI_LAW_ID = "349CO0000000202";
+const KASHINHO_LAW_ID = "348AC0000000117";
 const KOUATSU_IPPAN_LAW_ID = "341M50000400053";
 const KAKANHO_REI_NOTE = "化管法施行令（2021(R3)改正）";
 
@@ -279,6 +282,42 @@ function kakanhoByCas(): Map<string, KakanhoEntry[]> {
 /** 化管法（PRTR）指定を公式CAS収載リストから導出 */
 export function deriveKakanho(cas: string): KakanhoEntry[] {
   return kakanhoByCas().get(cas) ?? [];
+}
+
+// 化審法 優先評価化学物質 正本スナップショット（J-CHECK・CAS付き）→ CAS索引（P1-8）
+type KashinhoYusenEntry = {
+  no: number;
+  name: string;
+  gazetteIds: string[];
+  designatedOn: string;
+  cas: string[];
+};
+const KASHINHO_YUSEN_ENTRIES = (kashinhoYusenSnapshot as { entries: KashinhoYusenEntry[] }).entries;
+export const KASHINHO_YUSEN_META = (kashinhoYusenSnapshot as {
+  meta: {
+    retrievedAt: string;
+    sourceSha256: string;
+    substanceCount: number;
+    casMappedCount: number;
+  };
+}).meta;
+
+let _yusenByCas: Map<string, KashinhoYusenEntry> | null = null;
+function yusenByCas(): Map<string, KashinhoYusenEntry> {
+  if (_yusenByCas) return _yusenByCas;
+  const m = new Map<string, KashinhoYusenEntry>();
+  for (const e of KASHINHO_YUSEN_ENTRIES) {
+    for (const cas of e.cas) {
+      if (!m.has(cas)) m.set(cas, e);
+    }
+  }
+  _yusenByCas = m;
+  return m;
+}
+
+/** 化審法 優先評価化学物質の該当を J-CHECK 公式CAS収載から導出 */
+export function deriveKashinhoYusen(cas: string): KashinhoYusenEntry | undefined {
+  return yusenByCas().get(cas);
 }
 
 /**
@@ -400,8 +439,29 @@ export function buildSubstanceLegalProfile(cas: string): SubstanceLegalProfile |
       });
     }
   } else {
-    // 特定化学物質(64件)以外の化審法区分（優先評価等）は未取込＝未確認を明示
-    designations.push({ domain: "kashinho", status: "unverified" });
+    // 優先評価化学物質（J-CHECK公式リスト221物質・CAS収載1,580件）から導出（P1-8）
+    const yusen = deriveKashinhoYusen(cas);
+    if (yusen) {
+      designations.push({
+        domain: "kashinho",
+        status: "designated",
+        classification: "優先評価化学物質",
+        basis: {
+          lawId: KASHINHO_LAW_ID,
+          provision: `化審法第2条第5項・優先評価化学物質 通し番号${yusen.no}（官報公示整理番号 ${yusen.gazetteIds.join("・") || "—"}）`,
+        },
+        scopeNote:
+          "J-CHECK（厚労省・経産省・環境省・NITE）のCAS収載による突合。官報公示整理番号とCAS RNの関連は最終確認されたものではない（J-CHECK免責）",
+        source: {
+          revisionId: `J-CHECK優先評価化学物質リスト ${KASHINHO_YUSEN_META.retrievedAt}`,
+          sha256: KASHINHO_YUSEN_META.sourceSha256,
+        },
+        verifiedAt: KASHINHO_YUSEN_META.retrievedAt,
+      });
+    } else {
+      // 監視化学物質(36)は未取込＝特定・優先評価に非収載でも「未確認」を維持（空白で欺かない）
+      designations.push({ domain: "kashinho", status: "unverified" });
+    }
   }
 
   // ---- 化管法（PRTR第一種/第二種） ----

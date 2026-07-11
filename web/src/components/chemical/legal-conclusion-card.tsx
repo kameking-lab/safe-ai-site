@@ -40,6 +40,7 @@ type ProfileResponse = {
 };
 
 const DOMAIN_LABEL: Record<string, string> = {
+  "anei-ra": "リスクアセスメント対象物（表示・通知）",
   "anei-tokka": "特化則",
   "anei-yuki": "有機則",
   dokugeki: "毒物及び劇物取締法",
@@ -117,6 +118,7 @@ export function LegalConclusionCard({ q }: { q: string }) {
   if (data.specialControl) badges.push("特別管理物質（記録30年保存）");
   for (const d of designated) {
     if (d.domain === "anei-tokka" || d.domain === "anei-yuki") continue; // タグで表示済み
+    if (d.domain === "anei-ra") continue; // raTarget バッジで表示済み（重複させない）
     const l = `${DOMAIN_LABEL[d.domain] ?? d.domain}${d.classification ? `：${d.classification}` : ""}`;
     if (!badges.includes(l)) badges.push(l);
   }
