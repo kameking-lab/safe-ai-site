@@ -25,21 +25,21 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import {
   searchRelevantArticlesWithScore,
   buildContextFromArticles,
-  formatSourceCitations,
   type LawCategoryFilter,
 } from "@/lib/rag-search";
-import { searchRelevantNotices, NOTICE_BINDING_LABELS } from "@/lib/notice-search";
+import { searchRelevantNotices } from "@/lib/notice-search";
 import { searchMlitResources } from "@/data/mlit-resources";
 import { AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
 import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 import {
   buildStructuredCitations,
-  formatCitationTriples,
   suggestRelatedLaws,
   suggestDigDeeperLinks,
   detectOutOfScopeLawReferences,
   detectUngroundedAssertions,
+  sanitizePlaceholderCitations,
 } from "@/lib/chatbot-enrichment";
+import { stripAnswerTailBlocks } from "@/lib/chatbot-answer-format";
 import {
   buildAllowedCitations,
   buildPromptWithWhitelist,
@@ -217,6 +217,7 @@ export async function POST(request: Request) {
         // Gemini streaming
         let answer = "";
         let citationLayer2Status: "skipped" | "passed" | "warned" = "skipped";
+        let citationWarningNote = "";
         try {
           await withCircuitBreaker(
             "gemini",
@@ -256,12 +257,12 @@ export async function POST(request: Request) {
           );
 
           // Phase 2 Layer 2: 応答完了後の条文番号検証 (retry は SSE では行わず警告のみ)
+          // 警告は answer 本文へ追記せず scopeWarnings（UIの警告枠）で返す（2026-07-11）
           const validation = validateCitations(answer, allowedCitations);
           if (validation.findings.length === 0) {
             citationLayer2Status = "passed";
           } else {
-            answer += validation.warningNote;
-            send("text", { chunk: validation.warningNote });
+            citationWarningNote = validation.warningNote;
             citationLayer2Status = "warned";
           }
         } catch (err) {
@@ -305,6 +306,12 @@ export async function POST(request: Request) {
           return;
         }
 
+        // ごちゃごちゃブロック根絶（2026-07-11）: 出典・通達・リーフレット・関連法令は
+        // answer 本文へテキスト追記せず、構造化フィールドのみで返す（UIが折りたたみ
+        // カードで表示するため本文追記は二重表示だった）。モデルが自前で書いた
+        // 免責・出典風テール、プレースホルダ（YYYY年MM月等）もここで除去する。
+        answer = stripAnswerTailBlocks(sanitizePlaceholderCitations(answer));
+
         // Phase 2 Layer 3 (adjacent)
         if (fallbackDecision.tier === "adjacent" && fallbackDecision.headline) {
           const headlineChunk = `\n\n[補足] ${fallbackDecision.headline}`;
@@ -312,7 +319,7 @@ export async function POST(request: Request) {
           send("text", { chunk: headlineChunk });
         }
 
-        // 出典・通達・リーフレット
+        // 出典・通達・リーフレット（構造化フィールド）
         const structuredCitations = buildStructuredCitations(relevantArticles);
         const relatedLaws = suggestRelatedLaws(message, relevantArticles);
         const digDeeperLinks = suggestDigDeeperLinks(message, relevantArticles);
@@ -322,63 +329,24 @@ export async function POST(request: Request) {
           query: message,
         });
 
-        // 末尾の整形テキストをチャンクで追記 (UI のスクロール体験のため text event で逐次送信)
-        let trailing = "";
-        if (structuredCitations.length > 0) {
-          trailing += formatCitationTriples(structuredCitations);
-        } else if (relevantArticles.length > 0) {
-          trailing += formatSourceCitations(relevantArticles);
-        }
-        if (mlitMatches.length > 0) {
-          const ministryRefs = [
-            ...new Set(mlitMatches.map((r) => `${r.publisher}（${r.bureau}）`)),
-          ].slice(0, 3);
-          trailing += `\n\n🏛 所管省庁資料: ${ministryRefs.join("、")}`;
-        }
-        if (attached.notices.length > 0) {
-          trailing += "\n\n【関連通達・告示】\n";
-          for (const n of attached.notices) {
-            const num = n.noticeNumber ? `${n.noticeNumber}・` : "";
-            const date = n.issuedDateRaw ? `${n.issuedDateRaw}・` : "";
-            trailing += `- ${num}${date}${n.title}（${NOTICE_BINDING_LABELS[n.bindingLevel]}）\n`;
-            trailing += `  原文: ${n.detailUrl}\n`;
-          }
-        }
-        if (attached.leaflets.length > 0) {
-          trailing += "\n\n【関連リーフレット・教材】\n";
-          for (const l of attached.leaflets) {
-            const date = l.publishedDateRaw ? `（${l.publishedDateRaw}）` : "";
-            trailing += `- ${l.title}${date}・${l.publisher}\n`;
-            const url = l.pdfUrl ?? l.sourceUrl;
-            trailing += `  原文: ${url}\n`;
-          }
-        }
-        if (relatedLaws.length > 0) {
-          trailing += "\n\n【合わせて確認すべき法令】\n";
-          for (const r of relatedLaws) {
-            trailing += `- ${r.lawShort}（${r.fullName}）: ${r.reason}\n`;
-          }
-        }
         // P1-5: 直接ヒット無しモードでは公式情報への誘導を必ず末尾に付与
         if (noHitMode) {
-          trailing += `\n${formatOfficialLinks()}`;
-        }
-        if (trailing) {
-          answer += trailing;
-          send("text", { chunk: trailing });
+          const officialChunk = `\n${formatOfficialLinks()}`;
+          answer += officialChunk;
+          send("text", { chunk: officialChunk });
         }
 
-        // ハルシネーション抑制系の警告
+        // ハルシネーション抑制系の警告（本文へは追記せず scopeWarnings で返す）
         const scopeWarnings: string[] = [];
+        if (citationWarningNote) {
+          scopeWarnings.push(citationWarningNote.trim());
+        }
         const hitLawShorts = relevantArticles.map((a: LawArticle) => a.lawShort);
         const outOfScopeRefs = detectOutOfScopeLawReferences(answer, hitLawShorts);
         if (outOfScopeRefs.length > 0) {
           const sample = outOfScopeRefs.slice(0, 3).join("、");
-          const note = `\n\n⚠️ 注記：回答中の「${sample}」は本ツールの収録データ（条文・通達DB）の範囲外の参照のため、e-Gov法令検索および厚生労働省公式情報で必ずご確認ください。`;
-          answer += note;
-          send("text", { chunk: note });
           scopeWarnings.push(
-            `回答中の参照「${sample}」は提供データ範囲外のため、内容の確からしさは保証できません。`,
+            `回答中の参照「${sample}」は本ツールの収録データ（条文・通達DB）の範囲外のため、内容の確からしさは保証できません。e-Gov法令検索および厚生労働省公式情報で必ずご確認ください。`,
           );
         }
         if (detectUngroundedAssertions(answer)) {

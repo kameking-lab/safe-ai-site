@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { searchRelevantArticlesWithScore, buildContextFromArticles, formatSourceCitations, type LawCategoryFilter } from "@/lib/rag-search";
-import { searchRelevantNotices, NOTICE_BINDING_LABELS, type NoticeHit } from "@/lib/notice-search";
+import { searchRelevantArticlesWithScore, buildContextFromArticles, type LawCategoryFilter } from "@/lib/rag-search";
+import { stripAnswerTailBlocks } from "@/lib/chatbot-answer-format";
+import { searchRelevantNotices, type NoticeHit } from "@/lib/notice-search";
 import type { LawArticle } from "@/data/laws";
 import { LAW_SOURCE_COUNT } from "@/data/laws";
 import { searchMlitResources, type MlitResource } from "@/data/mlit-resources";
-import { AI_DISCLAIMER_SYSTEM_INSTRUCTION, AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
+import { AI_LEGAL_DISCLAIMER } from "@/lib/gemini";
 import { withCircuitBreaker, CircuitOpenError } from "@/lib/external/circuit-breaker";
 import {
   buildStructuredCitations,
-  formatCitationTriples,
   suggestRelatedLaws,
   suggestDigDeeperLinks,
   detectOutOfScopeLawReferences,
@@ -128,11 +128,17 @@ export const SYSTEM_PROMPT = `あなたは労働安全衛生法の専門家AIア
 - 施行令第20条を引用する際は必ず「第○号」（例：第11号、第6号）の号番号を明示すること。号番号なしに「施行令第20条」とだけ書くことは禁止
 - 「明確な規定が見つかりません」型の回答は、参照条文に第61条・施行令第20条のいずれも含まれない場合に限る
 
-回答の形式：
-- まず質問への直接的な回答（結論）を述べる
-- 次に根拠となる条文を引用する（「根拠：安衛法第○条」等）
-- 必要に応じて補足説明を加える
-${AI_DISCLAIMER_SYSTEM_INSTRUCTION}`;
+回答の形式（スマホで3秒で結論が読める形にすること）：
+- まず質問への直接的な回答（結論）を1〜2文で述べる
+- 次に根拠となる条文を引用する（「根拠：安衛法第○条」等）。各条文の説明は要点1〜2文に要約し、条文全文の逐語引用はしないこと（条文全文は画面の「参照条文」欄に自動表示される）
+- 必要に応じて補足説明を加える。回答全体は結論→根拠→補足の順で簡潔に（目安600字以内）
+- 表示形式: 箇条書きは行頭を「・」で書くこと。markdown記法（「* 」「- 」「+ 」の箇条書き、「#」見出し、表、コードブロック、水平線「---」）は使用禁止。強調は**太字**のみ使用可
+- 出典一覧・関連通達・関連リーフレットの一覧を回答本文に書かないこと（画面が構造化して自動表示する）
+
+【重要：免責・表現ルール】
+- 回答は「～と考えられます」「～とされています」等の表現を使い、断定を避けること（ただし法的義務の明文はルール8のとおり断定形で書く）
+- 法令解釈が行政・判例によって異なる可能性がある場合は必ずその旨を明記すること
+- 免責文は画面側で常時表示されるため、回答本文に免責文を書かないこと`;
 
 // Phase 2 Layer 1 で buildPromptWithWhitelist に置換済み（旧 buildUserPrompt を削除）。
 // 設計参照: docs/chatbot-quality-research-2026-05-23/04-hallucination-prevention-design.md §2
@@ -401,6 +407,9 @@ export async function POST(request: Request) {
   // Phase 2 D6 段階的対応: Pattern A 検出時は最大1回まで retry
   let answer: string = "";
   let citationLayer2Status: "skipped" | "passed" | "warned" | "retried" = "skipped";
+  // Layer 2 の警告は answer 本文へ追記せず scopeWarnings（UIの警告枠）で返す
+  // （ごちゃごちゃブロック根絶 2026-07-11: 本文=回答、警告・出典=構造化フィールドに分離）
+  let citationWarningNote = "";
   try {
     const callGemini = async () => {
       return await withCircuitBreaker(
@@ -444,23 +453,23 @@ export async function POST(request: Request) {
           answer = retried;
           citationLayer2Status = "retried";
         } else if (!reValidation.retryRecommended) {
-          // retry 後 Pattern A 消失 → 採用し警告のみ追記
+          // retry 後 Pattern A 消失 → 採用し警告のみ付与
           answer = retried;
-          answer += reValidation.warningNote;
+          citationWarningNote = reValidation.warningNote;
           citationLayer2Status = "warned";
         } else {
-          // retry 後も Pattern A 残存 → 元の応答に警告追記
-          answer += validation.warningNote;
+          // retry 後も Pattern A 残存 → 元の応答に警告付与
+          citationWarningNote = validation.warningNote;
           citationLayer2Status = "warned";
         }
       } catch {
         // retry 失敗時は元応答 + 警告で続行
-        answer += validation.warningNote;
+        citationWarningNote = validation.warningNote;
         citationLayer2Status = "warned";
       }
     } else {
-      // Pattern B/C のみ: 警告追記、信頼度降格は呼出元で処理
-      answer += validation.warningNote;
+      // Pattern B/C のみ: 警告付与、信頼度降格は呼出元で処理
+      citationWarningNote = validation.warningNote;
       citationLayer2Status = "warned";
     }
   } catch (err) {
@@ -508,6 +517,12 @@ export async function POST(request: Request) {
     );
   }
 
+  // ごちゃごちゃブロック根絶（2026-07-11）: 出典・通達・リーフレット・関連法令は
+  // answer 本文へテキスト追記せず、構造化フィールド（citations / attachedNotices /
+  // attachedLeaflets / relatedLaws）のみで返す。UI が折りたたみカードで表示するため
+  // 本文追記は完全な二重表示だった。モデルが自前で書いた免責・出典風テールも除去する。
+  answer = stripAnswerTailBlocks(answer);
+
   // 構造化された出典・関連法令・もっと深く知る動線を計算
   const structuredCitations = buildStructuredCitations(relevantArticles);
   const relatedLaws = suggestRelatedLaws(message, relevantArticles);
@@ -528,57 +543,6 @@ export async function POST(request: Request) {
     }
   }
 
-  // 出典引用を「条文番号＋施行日＋発出機関」の3点セットで追記
-  if (structuredCitations.length > 0) {
-    answer += formatCitationTriples(structuredCitations);
-  } else if (relevantArticles.length > 0) {
-    answer += formatSourceCitations(relevantArticles);
-  }
-  if (mlitMatches.length > 0) {
-    const ministryRefs = [
-      ...new Set(mlitMatches.map((r) => `${r.publisher}（${r.bureau}）`)),
-    ].slice(0, 3);
-    answer += `\n\n🏛 所管省庁資料: ${ministryRefs.join("、")}`;
-  }
-
-  // 関連通達を回答末尾に追記（Phase 4: 3層統合済 attached.notices を使用）
-  if (attached.notices.length > 0) {
-    answer += "\n\n【関連通達・告示】\n";
-    for (const n of attached.notices) {
-      const num = n.noticeNumber ? `${n.noticeNumber}・` : "";
-      const date = n.issuedDateRaw ? `${n.issuedDateRaw}・` : "";
-      answer += `- ${num}${date}${n.title}（${NOTICE_BINDING_LABELS[n.bindingLevel]}）\n`;
-      // 原文URL を1行下に併記（detailUrl を厚労省/JAISH 公式直リンクとして）
-      answer += `  原文: ${n.detailUrl}\n`;
-    }
-  }
-
-  // Phase 4: 関連リーフレットを回答末尾に追記
-  if (attached.leaflets.length > 0) {
-    answer += "\n\n【関連リーフレット・教材】\n";
-    const targetLabel: Record<string, string> = {
-      general: "一般",
-      worker: "現場用",
-      employer: "管理者用",
-      "foreign-worker": "外国人労働者向け",
-    };
-    for (const l of attached.leaflets) {
-      const targetTxt = targetLabel[l.target] ?? l.target;
-      const date = l.publishedDateRaw ? `（${l.publishedDateRaw}）` : "";
-      answer += `- ${l.title}${date}・${l.publisher}・${targetTxt}\n`;
-      const url = l.pdfUrl ?? l.sourceUrl;
-      answer += `  原文: ${url}\n`;
-    }
-  }
-
-  // 合わせて確認すべき法令を回答本文末に追記
-  if (relatedLaws.length > 0) {
-    answer += "\n\n【合わせて確認すべき法令】\n";
-    for (const r of relatedLaws) {
-      answer += `- ${r.lawShort}（${r.fullName}）: ${r.reason}\n`;
-    }
-  }
-
   // sourcesを整形（質問に該当するスニペットも生成）
   const sources: ChatbotSource[] = [
     ...relevantArticles.map((a: LawArticle) => ({
@@ -593,16 +557,17 @@ export async function POST(request: Request) {
   ];
 
   // ハルシネーション抑制: 範囲外法令名 + 過剰な推測表現を検出して警告
+  // （警告は answer 本文へ追記せず scopeWarnings で返す＝UIの警告枠が表示する）
   const scopeWarnings: string[] = [];
+  if (citationWarningNote) {
+    scopeWarnings.push(citationWarningNote.trim());
+  }
   const hitLawShorts = relevantArticles.map((a: LawArticle) => a.lawShort);
   const outOfScopeRefs = detectOutOfScopeLawReferences(answer, hitLawShorts);
   if (outOfScopeRefs.length > 0) {
     const sample = outOfScopeRefs.slice(0, 3).join("、");
-    answer +=
-      `\n\n⚠️ 注記：回答中の「${sample}」は本ツールの提供データ（${LAW_SOURCE_COUNT}法令等＋通達DB）の範囲外の参照のため、` +
-      `e-Gov法令検索および厚生労働省公式情報で必ずご確認ください。`;
     scopeWarnings.push(
-      `回答中の参照「${sample}」は提供データ範囲外のため、内容の確からしさは保証できません。`
+      `回答中の参照「${sample}」は提供データ（${LAW_SOURCE_COUNT}法令等＋通達DB）の範囲外のため、内容の確からしさは保証できません。e-Gov法令検索および厚生労働省公式情報で必ずご確認ください。`
     );
   }
   // 既存の架空法令検出も維持（後方互換）
@@ -614,10 +579,9 @@ export async function POST(request: Request) {
       (m) => !Array.from(knownLawNames).some((law) => m.includes(law))
     );
     if (unverified.length > 0) {
-      answer +=
-        "\n\n⚠️ 注記：上記回答中の一部法令名・条文（例：" +
-        unverified.slice(0, 2).join("、") +
-        "）は提供条文データでは確認できませんでした。e-Gov法令検索でご確認ください。";
+      scopeWarnings.push(
+        `回答中の一部法令名・条文（例：${unverified.slice(0, 2).join("、")}）は提供条文データでは確認できませんでした。e-Gov法令検索でご確認ください。`
+      );
     }
   }
   // 推測表現が連発している場合の追加注記
