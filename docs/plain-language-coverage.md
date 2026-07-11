@@ -1,8 +1,8 @@
 # 現場ことば版 カバレッジレポート（安衛法体系）
 
-生成: 2026-07-11T21:04:07.385Z（`cd web && npm run plain:status` で再生成）
+生成: 2026-07-11T21:10:42.414Z（`cd web && npm run plain:status` で再生成）
 
-全体: 収載 512 条 / 言い換え済み(fresh) 104 条 / stale 0 条 / 未生成 408 条
+全体: 収載 512 条 / 言い換え済み(fresh) 152 条 / stale 0 条 / 未生成 360 条
 
 | 法令 | e-Gov ID | 収載条数 | 済(fresh) | stale | 未生成 | レーン | データファイル |
 |---|---|---|---|---|---|---|---|
@@ -13,7 +13,7 @@
 | 粉じん則 | 354M50002000018 | 21 | 0 | 0 | 21 | plain-3 | web/src/data/plain/funjin-kisoku.ts |
 | 有機則 | 347M50002000036 | 21 | 0 | 0 | 21 | plain-3 | web/src/data/plain/yuki-kisoku.ts |
 | 特化則 | 347M50002000039 | 22 | 0 | 0 | 22 | plain-3 | web/src/data/plain/tokka-kisoku.ts |
-| クレーン則 | 347M50002000034 | 48 | 0 | 0 | 48 | plain-4 | web/src/data/plain/crane-kisoku.ts |
+| クレーン則 | 347M50002000034 | 48 | 48 | 0 | 0 | plain-4 | web/src/data/plain/crane-kisoku.ts |
 | 石綿則 | 417M60000100021 | 17 | 0 | 0 | 17 | plain-3 | web/src/data/plain/sekimen-kisoku.ts |
 | 鉛則 | 347M50002000037 | 15 | 0 | 0 | 15 | plain-3 | web/src/data/plain/en-kisoku.ts |
 | 電離則 | 347M50002000041 | 20 | 0 | 0 | 20 | plain-4 | web/src/data/plain/denri-houshasen-kisoku.ts |
