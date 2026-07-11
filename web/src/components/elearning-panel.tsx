@@ -18,6 +18,7 @@ import { elearningTransportThemes } from "@/data/mock/elearning-transport-themes
 import { elearningForestryThemes } from "@/data/mock/elearning-forestry-themes";
 import { elearningFoodThemes } from "@/data/mock/elearning-food-themes";
 import { elearningRetailThemes } from "@/data/mock/elearning-retail-themes";
+import { elearningHazardTypesTheme } from "@/data/mock/elearning-hazard-types-theme";
 import type { LearningTheme as LearningThemeType } from "@/lib/types/operations";
 import { getSubcategories, INDUSTRY_SUBCATEGORIES, type IndustryParent } from "@/data/industry-subcategories";
 
@@ -29,7 +30,7 @@ const mergedExtraThemes: LearningThemeType[] = elearningExtraThemes.map((theme) 
 });
 
 // 入門コースを先頭に配置、製造業・医療福祉・運輸・林業・食品・小売サービステーマを末尾に追加
-const allThemes = [...elearningIntroCourse, ...elearningThemesCatalog, ...mergedExtraThemes, ...elearningManufacturingThemes, ...elearningHealthcareThemes, ...elearningTransportThemes, ...elearningForestryThemes, ...elearningFoodThemes, ...elearningRetailThemes];
+const allThemes = [...elearningIntroCourse, ...elearningHazardTypesTheme, ...elearningThemesCatalog, ...mergedExtraThemes, ...elearningManufacturingThemes, ...elearningHealthcareThemes, ...elearningTransportThemes, ...elearningForestryThemes, ...elearningFoodThemes, ...elearningRetailThemes];
 import { ELearningEditorPanel } from "@/components/elearning-editor-panel";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
 import type { LearningTheme } from "@/lib/types/operations";

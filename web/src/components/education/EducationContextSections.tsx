@@ -1,5 +1,6 @@
 import { EDUCATION_CONTEXTS, type EducationSlug } from "@/data/education-context";
 import { AccidentsByCategory } from "@/components/education/AccidentsByCategory";
+import { HazardSlidesForCourse } from "@/components/education/HazardSlidesForCourse";
 import { RelatedLawUpdates } from "@/components/education/RelatedLawUpdates";
 import { ChecklistDownload } from "@/components/education/ChecklistDownload";
 
@@ -16,6 +17,7 @@ export function EducationContextSections({ slug }: Props) {
 
   return (
     <>
+      <HazardSlidesForCourse context={ctx} />
       <AccidentsByCategory context={ctx} limit={4} />
       <RelatedLawUpdates context={ctx} limit={4} />
       <ChecklistDownload context={ctx} />

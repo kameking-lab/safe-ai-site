@@ -32,7 +32,14 @@ export type AccidentGlyphId =
   | "harmful-ray" // 有害光線: 放射
   | "toxic" // 有害物質: どくろ
   | "vibration" // 振動障害: 振動
-  | "overexertion"; // 動作の反動・無理な動作: 持ち上げ動作
+  | "overexertion" // 動作の反動・無理な動作: 持ち上げ動作
+  // --- 以下は災害の型 正規化層（type-normalization.ts）の21分類専用グリフ。
+  // AccidentType union には対応値が無いため ACCIDENT_TYPE_GLYPH には登場しない。
+  | "bump" // 激突（人が物に）: 壁にぶつかる人
+  | "rupture" // 破裂: 破裂する容器
+  | "stepping-through" // 踏み抜き: 釘を踏む足
+  | "other" // その他: 三点リーダ
+  | "unclassifiable"; // 分類不能: 疑問符
 
 export const ACCIDENT_TYPE_GLYPH: Record<AccidentType, AccidentGlyphId> = {
   墜落: "fall-person",

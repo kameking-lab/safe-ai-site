@@ -15,6 +15,7 @@ import {
 } from "@/lib/signage/signage-labels";
 import { readStoredSignageLang, storeSignageLang } from "@/lib/signage/signage-prefs";
 import { SignageAccidentEducation } from "@/components/accidents/signage-accident-education";
+import { HazardOfTheDay } from "@/components/hazard-slides/hazard-of-the-day";
 import { evalScore, riskGrade } from "@/lib/ky/pulldown-options";
 import { SAFETY_TONE, type SafetyTone } from "@/lib/design/safety-tone";
 
@@ -391,6 +392,9 @@ export function KyMorningSignage() {
 
                   {/* P2-2: 本日の安全啓発（過去の労災事例・日替わり・6言語見出し） */}
                   <SignageAccidentEducation lang={lang} />
+
+                  {/* 災害の型別・教育スライドの日替わりダイジェスト（?slide=<slug>で固定可） */}
+                  <HazardOfTheDay variant="signage" />
 
                   {/* 唱和カウントダウン */}
                   <section className="flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-emerald-700/30 p-4 sm:p-6 print:hidden">
