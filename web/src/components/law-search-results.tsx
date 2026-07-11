@@ -209,11 +209,10 @@ function AiSummaryModal({
   async function fetchSummary() {
     setStatus("loading");
     try {
-      const res = await fetch("/api/law-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ law: article.law, articleNum: article.articleNum, text: article.text }),
-      });
+      // GET（LN-S2）: 同一条文は同一URLに収束し Vercel エッジキャッシュが効く（POST は no-op）
+      const res = await fetch(
+        `/api/law-summary?law=${encodeURIComponent(article.law)}&articleNum=${encodeURIComponent(article.articleNum)}`
+      );
       if (!res.ok) throw new Error("API error");
       const data = (await res.json()) as { summary: string };
       setSummary(data.summary);
