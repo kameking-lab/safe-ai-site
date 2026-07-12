@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { Coffee, Map as MapIcon, Mic, Monitor, Smartphone, Sunrise, Sunset, X } from "lucide-react";
 import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
 import { SignageConclusionStrip } from "@/components/signage/signage-conclusion-strip";
 import { SignageDailyValues } from "@/components/signage/signage-daily-values";
@@ -381,7 +382,7 @@ export default function SignagePage() {
         {([
           {
             label: "朝礼前",
-            icon: "🌅",
+            icon: Sunrise,
             title: "朝礼前 — 現場レイアウトを表示し、朝礼の読み上げ原稿を開きます",
             active: displayMode === "floorplan" && showMorningScript,
             onSelect: () => {
@@ -391,7 +392,7 @@ export default function SignagePage() {
           },
           {
             label: "休憩時間",
-            icon: "☕",
+            icon: Coffee,
             title: "休憩時間 — 気象マップと最新ニュース確認",
             active: displayMode === "map",
             onSelect: () => {
@@ -401,7 +402,7 @@ export default function SignagePage() {
           },
           {
             label: "退場時",
-            icon: "🌆",
+            icon: Sunset,
             title: "退場時 — 本日の作業資料と法改正確認",
             active: displayMode === "workdocs",
             onSelect: () => {
@@ -421,7 +422,8 @@ export default function SignagePage() {
                 : "border-sky-700 bg-sky-900/60 text-sky-200 hover:bg-sky-800/60"
             }`}
           >
-            {s.icon} {s.label}
+            <s.icon className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+            {s.label}
           </button>
         ))}
         <div className="ml-auto flex items-center gap-2">
@@ -432,7 +434,7 @@ export default function SignagePage() {
             className="min-h-[44px] rounded border border-sky-400 bg-sky-600 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-sky-500"
             title="本日の気象・類似事故・法改正から朝礼の読み上げ原稿を生成します"
           >
-            🎤 朝礼スクリプト
+            <Mic className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />朝礼スクリプト
           </button>
           <button
             type="button"
@@ -440,7 +442,11 @@ export default function SignagePage() {
             className="min-h-[44px] rounded border border-slate-500 bg-slate-800 px-2.5 py-1 text-[11px] font-bold text-slate-100 hover:bg-slate-700"
             aria-pressed={isPortrait}
           >
-            {isPortrait ? "📱 縦長" : "🖥 横長"}
+            {isPortrait ? (
+              <><Smartphone className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />縦長</>
+            ) : (
+              <><Monitor className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />横長</>
+            )}
           </button>
           {/* 旧「🗺️ 地図」「📺 全画面」: 行き先はどちらも同じ防災地図キオスク（mapとdisplayは全画面か否かの差のみ）。
               「全画面」がこのダッシュボードの全画面版と誤解させていたため、1本に統合して役割を明示。 */}
@@ -449,7 +455,7 @@ export default function SignagePage() {
             title="全国の警報・地震を詳細地図で監視（台風・地震時）。TV用の全画面表示は地図内から切替できます"
             className="flex min-h-[44px] items-center rounded border border-sky-400 bg-sky-700 px-2 py-1 text-[11px] font-bold text-white hover:bg-sky-600"
           >
-            🗺️ 地図サイネージ（警報・地震）
+            <MapIcon className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />地図サイネージ（警報・地震）
           </Link>
         </div>
       </div>
@@ -864,7 +870,7 @@ export default function SignagePage() {
               className="absolute right-3 top-3 flex min-h-[44px] items-center rounded-full border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-slate-700"
               aria-label="閉じる"
             >
-              ✕ 閉じる
+              <X className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />閉じる
             </button>
             <div className="mt-8">
               <SignageMorningScript
@@ -896,7 +902,7 @@ export default function SignagePage() {
               className="absolute right-3 top-3 flex min-h-[44px] items-center rounded-full border border-slate-600 bg-slate-800 px-3 py-1.5 text-xs font-bold text-slate-200 hover:bg-slate-700"
               aria-label="閉じる"
             >
-              ✕ 閉じる
+              <X className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />閉じる
             </button>
             <p className="text-xs text-slate-400 sm:text-sm">{zoomedTrend.pubDate || "日時不明"}</p>
             <h3 className="mt-2 text-2xl font-bold leading-snug text-slate-50 sm:text-3xl lg:text-4xl">

@@ -30,7 +30,11 @@ html.dark {
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  /* 欧文・数字=Geist、日本語=各OSの高品質ゴシック（WindowsはUDフォント優先）。
+     Webフォント追加なし＝LCP影響ゼロで日本語UIの質感を上げる */
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+    "Hiragino Kaku Gothic ProN", "Hiragino Sans", "BIZ UDPGothic", "Yu Gothic UI",
+    Meiryo, sans-serif;
   --font-mono: var(--font-geist-mono);
   /* 安全AIポータル brand colors */
   --color-brand-primary: #1a7a4c;
@@ -41,7 +45,8 @@ html.dark {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* フォントは @theme の --font-sans に一元化（Arial直書きが日本語UIをチープに見せていた） */
+  font-family: var(--font-sans);
   /* PWAプルリフレッシュを有効にする */
   overscroll-behavior-y: auto;
   transition: background-color 200ms ease, color 200ms ease;
