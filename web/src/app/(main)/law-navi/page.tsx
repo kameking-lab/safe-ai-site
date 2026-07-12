@@ -9,6 +9,7 @@ import { LAW_NAVI_TOPICS } from "@/data/law-navi/topics";
 import { BEPPYO_ENTRIES } from "@/data/law-navi/beppyo";
 import { LAW_NAVI_ENTRIES } from "@/lib/law-navi/permalink";
 import { ogImageUrl } from "@/lib/og-url";
+import { Mascot } from "@/components/mascot";
 
 const SITE_BASE = "https://www.anzen-ai-portal.jp";
 
@@ -50,16 +51,19 @@ export default function LawNaviHubPage() {
       />
       <LawHubNav current="law-navi" />
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <header className="mb-6">
-          <h1 className="inline-flex items-center gap-2 text-2xl font-bold text-slate-900">
-            <Compass className="h-6 w-6 text-emerald-600" aria-hidden="true" />
-            法令ナビ
-          </h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            安衛法の体系（法律→政令→省令→通達）を、<strong>分野</strong>からも<strong>現場の言葉</strong>からも
-            <strong>条番号</strong>からも引けるナビです。どの入口からでも原文に最短で着地し、読みづらければ
-            AI解説・用語解説が補助します（原文が正・解説は補助）。
-          </p>
+        <header className="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <h1 className="inline-flex items-center gap-2 text-2xl font-bold text-slate-900">
+              <Compass className="h-6 w-6 text-emerald-600" aria-hidden="true" />
+              法令ナビ
+            </h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              安衛法の体系（法律→政令→省令→通達）を、<strong>分野</strong>からも<strong>現場の言葉</strong>からも
+              <strong>条番号</strong>からも引けるナビです。どの入口からでも原文に最短で着地し、読みづらければ
+              AI解説・用語解説が補助します（原文が正・解説は補助）。
+            </p>
+          </div>
+          <Mascot variant="law-reading" size="lg" alt="" className="hidden shrink-0 sm:block" />
         </header>
 
         {/* 検索窓（JS不要のGETフォーム＝横断検索へ合流。「爪のやつ」「三十五条」「別表第3」なんでも） */}

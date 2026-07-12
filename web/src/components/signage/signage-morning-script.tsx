@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Sparkles, Copy, Volume2 } from "lucide-react";
+import { Mascot } from "@/components/mascot";
 
 type Props = {
   jmaHeadline?: string | null;
@@ -57,7 +58,8 @@ export function SignageMorningScript(props: Props) {
   return (
     <section className="rounded-2xl border border-emerald-700/60 bg-emerald-950/40 p-3 text-emerald-50">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="flex items-center gap-1 text-sm font-bold tracking-wide">
+        <h2 className="flex items-center gap-2 text-sm font-bold tracking-wide">
+          <Mascot variant="megaphone" size="md" alt="" className="shrink-0" />
           <Sparkles className="h-4 w-4 text-emerald-300" />
           朝礼スクリプト（AI 生成・200字目安）
         </h2>

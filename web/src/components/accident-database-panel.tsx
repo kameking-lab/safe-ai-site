@@ -18,6 +18,7 @@ import { AccidentActionBar } from "@/components/accidents/action-bar";
 import { AccidentTypePictogram } from "@/components/accidents/accident-type-pictogram";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { SEVERITY_VISUAL } from "@/lib/accidents/accident-visual";
+import { Mascot } from "@/components/mascot";
 
 const PAGE_SIZE = 40;
 
@@ -223,6 +224,7 @@ export function AccidentDatabasePanel({
             件を収録。業種・種別・作業カテゴリで絞り込み、再発防止をKY・朝礼に接続できます。
           </p>
         </div>
+        <Mascot variant="detective" size="md" alt="" className="hidden shrink-0 sm:block" />
       </div>
 
       <div className="mt-3 space-y-3 print:hidden">

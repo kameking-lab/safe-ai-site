@@ -26,6 +26,7 @@ import {
 } from "@/lib/ky/record-list-filter";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { SAFETY_TONE, type SafetyTone } from "@/lib/design/safety-tone";
+import { EmptyState } from "@/components/empty-state";
 
 const AUTOSAVE_KEY = "ky-record";
 
@@ -228,11 +229,11 @@ export function KyListClient() {
       {/* 一覧 */}
       <div className="mt-4">
         {filtered.length === 0 ? (
-          <p className="rounded-2xl border border-slate-200 bg-white py-12 text-center text-sm text-slate-400">
-            {entries.length === 0
-              ? "保存されたKYがありません。まずは新規KYを作成・保存してください。"
-              : "条件に一致するKYがありません。"}
-          </p>
+          <EmptyState
+            variant="ky-writing"
+            title={entries.length === 0 ? "保存されたKYがありません" : "条件に一致するKYがありません"}
+            description={entries.length === 0 ? "まずは新規KYを作成・保存してください。" : undefined}
+          />
         ) : (
           <ul className="space-y-2">
             {filtered.map((e) => (

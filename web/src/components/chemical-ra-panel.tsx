@@ -34,6 +34,7 @@ import { GhsPictogram } from "@/components/chemical/ghs-pictogram";
 import { resolveGhsSymbol } from "@/lib/chemical/ghs-pictogram-map";
 import { PpePictogram } from "@/components/equipment/ppe-pictogram";
 import { resolvePpeItemIcon } from "@/lib/equipment/ppe-pictogram-map";
+import { Mascot } from "@/components/mascot";
 
 // 保護具AIファインダーへの連携URL（必要保護具のカテゴリ・ハザードを引き継ぐ）
 function buildEquipmentHref(chemicalName: string): string {
@@ -515,18 +516,21 @@ export function ChemicalRaPanel() {
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
       {/* ヘッダー（画面用イントロ。A4記録には ChemicalRaReportHeader が出るので印刷時は隠す）。
           ページ側 PageHeader が h1 を持つため、ここは h2（多重h1の是正・文言/見た目は不変）。 */}
-      <div className="print:hidden">
-        <div className="flex items-center gap-2">
-          <FlaskConical className="h-6 w-6 text-emerald-600" />
-          <h2 className="text-xl font-bold text-slate-900 lg:text-2xl">化学物質リスクアセスメント</h2>
-          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">Gemini AI</span>
+      <div className="flex items-start justify-between gap-4 print:hidden">
+        <div>
+          <div className="flex items-center gap-2">
+            <FlaskConical className="h-6 w-6 text-emerald-600" />
+            <h2 className="text-xl font-bold text-slate-900 lg:text-2xl">化学物質リスクアセスメント</h2>
+            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">Gemini AI</span>
+          </div>
+          <p className="mt-2 text-sm text-slate-600">
+            化学物質名を入力すると、SDS情報・GHS分類・必要保護具・安全対策チェックリストを表示します。
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            参考: 厚労省「職場のあんぜんサイト」・化管法SDS制度・労働安全衛生法 第57条の3
+          </p>
         </div>
-        <p className="mt-2 text-sm text-slate-600">
-          化学物質名を入力すると、SDS情報・GHS分類・必要保護具・安全対策チェックリストを表示します。
-        </p>
-        <p className="mt-1 text-xs text-slate-500">
-          参考: 厚労省「職場のあんぜんサイト」・化管法SDS制度・労働安全衛生法 第57条の3
-        </p>
+        <Mascot variant="chemical-lab" size="lg" alt="" className="hidden shrink-0 sm:block" />
       </div>
 
       {/* 検索フォーム（入力UI。印刷=A4実施記録では不要なので隠す） */}

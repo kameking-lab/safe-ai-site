@@ -337,7 +337,10 @@ function QuizSlide({ s, question }: { s: HazardTypeSummary; question: LearningQu
               : "border-amber-300 bg-amber-50 text-amber-950"
           }`}
         >
-          <p className="font-bold">
+          <p className="flex items-center gap-2 font-bold">
+            {selected === question.correctIndex && (
+              <Mascot variant="banzai" size="sm" alt="" className="shrink-0" />
+            )}
             {selected === question.correctIndex ? "正解！" : `残念。正解は「${question.options[question.correctIndex]}」`}
           </p>
           <p className="mt-1">{question.explanation}</p>
