@@ -35,6 +35,7 @@ import {
   type SearchCategory,
 } from '@/lib/search-index';
 import { EGOV_LAW_SEARCH_URL, egovHandoffQuery, egovArticleAnchor } from '@/lib/cross-search';
+import { useCondexLanding } from '@/lib/laws-fulltext/condex-client';
 import { trackEvent } from '@/components/Analytics';
 
 // /search はサイト内検索結果ページ（全件表示）。コマンドパレット(⌘K)が上位10件の
@@ -298,6 +299,10 @@ function EmptyPrompt() {
 function NoResults({ query }: { query: string }) {
   const [copied, setCopied] = useState(false);
   const handoff = egovHandoffQuery(query);
+  // FT-D4 condex: curated に無い条番号（例「安衛則630条」）でも、全文層に在れば当該の
+  // 全文条ページ（/law-navi/…）へ内部着地させる。0 件時にだけ condex を遅延取得して解決する
+  // （通常検索の索引・スコアには一切触れない＝0 件救済にのみ効く）。e-Gov 誘導より優先表示。
+  const condexLanding = useCondexLanding(query, true);
   // クエリが「法令名＋条番号」を明示していれば、当該法令の e-Gov 条アンカーへ直リンクする
   // （抄録未収載の条番号でも 1 タップで原文へ着地＝T4 後段）。条件を満たさなければ null で
   // 従来のポータルトップ導線に委ねる。
@@ -328,6 +333,26 @@ function NoResults({ query }: { query: string }) {
       <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
         表記を変える（カタカナ／漢字）、語を短くする、別のキーワードでお試しください。
       </p>
+
+      {/* FT-D4 condex: curated 未収録でも全文層に在る条番号は、内部の全文条ページへ直着地。
+          e-Gov 外部誘導より上に、内部ページの正着地として目立たせる（emerald）。 */}
+      {condexLanding && (
+        <Link
+          href={condexLanding.path}
+          onClick={() =>
+            trackEvent('search_zero_result_fulltext_article', {
+              query,
+              law: condexLanding.lawShort,
+              article: condexLanding.articleLabel,
+            })
+          }
+          className="mx-auto mt-4 flex min-h-[44px] max-w-xl items-center justify-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
+        >
+          <BookText className="h-3.5 w-3.5" aria-hidden="true" />
+          全文を読む：{condexLanding.lawShort} {condexLanding.articleLabel}
+          {condexLanding.caption ? condexLanding.caption : condexLanding.isDeleted ? '（削除）' : ''}
+        </Link>
+      )}
 
       {/* 収録範囲の明示：0件を「規定がない」と誤読させない（安全上の誤読防止）。 */}
       <p className="mx-auto mt-4 max-w-xl rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-left text-xs leading-relaxed text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">

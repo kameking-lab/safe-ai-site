@@ -56,6 +56,7 @@ import {
 } from "@/lib/chatbot-no-hit-response";
 import { getClientIp, checkRateLimit, rateLimitMessage } from "@/lib/chatbot-rate-limit";
 import { hasOutOfDomainSignal } from "@/lib/rag/out-of-domain";
+import { resolveFulltextRagArticles } from "@/lib/laws-fulltext/rag-fallback";
 import type { LawArticle } from "@/data/laws";
 import {
   SYSTEM_PROMPT,
@@ -141,6 +142,10 @@ export async function POST(request: Request) {
         // RAG 検索 (関数引数の型ガード上 message は trim 済の string)
         const { articles: allRelevant, normalizedScore, hadPins } =
           searchRelevantArticlesWithScore(message, 10, lawCategory);
+        // FT-D4 全文フォールバック: 条番号直指定で curated に無い条は全文層から1条だけ
+        // 文脈注入（RAG 母集団＝curated は不変・全文の BM25 投入なし）。条番号を直指定しない
+        // 通常質問では発火しない。
+        const fulltextArticles = await resolveFulltextRagArticles(message, lawCategory, allRelevant);
         const mlitMatches = searchMlitResources(message, 3);
         const relatedNotices = searchRelevantNotices(message, 3);
         const CONFIDENCE_THRESHOLD = 0.5;
@@ -148,19 +153,33 @@ export async function POST(request: Request) {
           normalizedScore >= CONFIDENCE_THRESHOLD && allRelevant.length > 0;
         // P1-5: 直接ヒットが無くても低スコアの関連条文を「参考」として根拠提示に使う。
         // 「該当条文無し」で突き放さず、関連条文＋一般原則＋公式誘導を返す。
-        const noHitMode = !hasDirectHit;
+        // 全文フォールバック条が刺さった場合は「確定条」なので no-hit モードにしない。
+        const noHitMode = !hasDirectHit && fulltextArticles.length === 0;
         // T9: no-hit時は normalizedScore が下限未満ならslice内の全件がノイズ
         // （診断04 Q21「明日の東京の天気」→港湾労働法第2条 の誤提示事例）。
         // 2026-07-11 E3/GQ51: ドメイン外シグナルつきクエリ（車検等）は関連条文の
         // 提示自体が偶発ヒットのノイズのため一切出さない（route.ts と同一の判定）。
-        const relevantArticles = hasDirectHit
+        const curatedRelevant = hasDirectHit
           ? allRelevant
           : normalizedScore >= NO_HIT_NOISE_FLOOR && !hasOutOfDomainSignal(message)
             ? allRelevant.slice(0, 8)
             : [];
+        // 全文フォールバック条は PIN と同型で先頭へ差し込む（curated の順位・母集団は不変）。
+        const relevantArticles =
+          fulltextArticles.length > 0
+            ? [
+                ...fulltextArticles,
+                ...curatedRelevant.filter(
+                  (a) => !fulltextArticles.some((f) => f.law === a.law && f.articleNum === a.articleNum),
+                ),
+              ].slice(0, 12)
+            : curatedRelevant;
         const partialMatches = searchPartialMatches(message);
         const context = buildContextFromArticles(relevantArticles);
-        const confidenceScore = Math.round(normalizedScore * 100) / 100;
+        // 全文フォールバックが刺さった場合は明示条番号の確定ソースのため信頼度を底上げ。
+        const scoreForConfidence =
+          fulltextArticles.length > 0 ? Math.max(normalizedScore, 0.7) : normalizedScore;
+        const confidenceScore = Math.round(scoreForConfidence * 100) / 100;
         const noApi = !apiKey || apiKey === "dummy";
 
         const buildSourceList = (): ChatbotSource[] => [
@@ -362,7 +381,7 @@ export async function POST(request: Request) {
         // 信頼度判定（no-hitモードは「参考」提示のため常に low）
         let finalConfidence: "high" | "medium" | "low" = noHitMode
           ? "low"
-          : normalizedScore >= 0.75 && relevantArticles.length >= 2
+          : scoreForConfidence >= 0.75 && relevantArticles.length >= 2
             ? "high"
             : "medium";
         if (citationLayer2Status === "warned") {
