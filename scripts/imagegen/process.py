@@ -48,7 +48,7 @@ def has_real_alpha(im):
     return lo < 250
 
 
-def process(src, dest, max_px, force_dewhite, pad=8):
+def process(src, dest, max_px, force_dewhite, pad=8, quality=90):
     im = Image.open(src).convert("RGBA")
     if force_dewhite or not has_real_alpha(im):
         im = dewhite(im)
@@ -63,7 +63,7 @@ def process(src, dest, max_px, force_dewhite, pad=8):
         ratio = max_px / max(im.size)
         im = im.resize((round(im.width * ratio), round(im.height * ratio)), Image.LANCZOS)
     os.makedirs(os.path.dirname(dest), exist_ok=True)
-    im.save(dest, "WEBP", quality=90, method=6)
+    im.save(dest, "WEBP", quality=quality, method=6)
     kb = os.path.getsize(dest) / 1024
     print(f"  {os.path.relpath(dest, ROOT)}  {im.width}x{im.height}  {kb:.1f}KB")
     return im.size, kb
@@ -76,10 +76,11 @@ def main():
     ap.add_argument("--max", type=int, default=480)
     ap.add_argument("--dewhite", action="store_true")
     ap.add_argument("--budget-kb", type=float, default=60.0)
+    ap.add_argument("--quality", type=int, default=90)
     args = ap.parse_args()
     src = args.src if os.path.isabs(args.src) else os.path.join(ROOT, args.src)
     dest = args.dest if os.path.isabs(args.dest) else os.path.join(ROOT, args.dest)
-    size, kb = process(src, dest, args.max, args.dewhite)
+    size, kb = process(src, dest, args.max, args.dewhite, quality=args.quality)
     if kb > args.budget_kb:
         print(f"  WARN: 重量予算超過 {kb:.1f}KB > {args.budget_kb}KB")
         sys.exit(2)

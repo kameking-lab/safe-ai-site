@@ -114,6 +114,23 @@ def download(page, src, out_path):
     return None
 
 
+def is_reference_echo(newfile, ref_path):
+    """参照画像のエコー（添付画像がそのまま応答側に現れたもの）を判定。
+
+    実測: fetch経由で取得されたエコーは参照とバイト同一。canvas再エンコードでも
+    ファイルサイズが完全一致した事例があるため、サイズ一致も破棄条件に含める。"""
+    if not ref_path or not os.path.exists(ref_path):
+        return False
+    try:
+        nb = open(newfile, "rb").read()
+        rb = open(ref_path, "rb").read()
+    except OSError:
+        return False
+    if len(nb) == len(rb):
+        return True
+    return hashlib.sha1(nb).hexdigest() == hashlib.sha1(rb).hexdigest()
+
+
 def is_duplicate(outdir, newfile):
     """保存済みファイルとバイト同一なら重複（同一画像がDOMに複数回現れる実測対策）。"""
     nh = hashlib.sha1(open(newfile, "rb").read()).hexdigest()
@@ -216,6 +233,7 @@ def gen_chatgpt(page, asset, outdir, per_asset):
     prompt = asset["prompt"]
     ref = asset.get("reference")
     got = existing_count(outdir, asset["id"])
+    refp = None
     if got:
         log(f"  resume: existing {got} files")
     limited = refused = False
@@ -257,7 +275,10 @@ def gen_chatgpt(page, asset, outdir, per_asset):
             got += 1
             outp = os.path.join(outdir, f"{asset['id']}_{got:02d}.png")
             how = download(page, src, outp)
-            if how and is_duplicate(outdir, outp):
+            if how and is_reference_echo(outp, refp if ref else None):
+                os.remove(outp); got -= 1
+                log("  skip reference echo")
+            elif how and is_duplicate(outdir, outp):
                 os.remove(outp); got -= 1
                 log("  skip duplicate image")
             elif how:
@@ -270,6 +291,29 @@ def gen_chatgpt(page, asset, outdir, per_asset):
 
 
 # ---------------------------------------------------------------- Gemini（pic実証セレクタ）
+
+def gemini_attach(page, path):
+    """Gemini: 「アップロードとツール」→「ファイルをアップロード」→file chooser（2026-07-12実測）。
+    Geminiのコンポーザーは input[type=file] を常設しないため、メニュー経由で添付する。"""
+    try:
+        b = page.locator('button[aria-label="アップロードとツール"], button[aria-label*="アップロード"]').first
+        if not b.is_visible(timeout=2500):
+            return False
+        b.click(); page.wait_for_timeout(800)
+        item = page.locator('[role="menuitem"]:has-text("ファイルをアップロード"), button:has-text("ファイルをアップロード")').first
+        with page.expect_file_chooser(timeout=6000) as fc:
+            item.click()
+        fc.value.set_files(path)
+        page.wait_for_timeout(5000)  # サムネイル出現＝アップロード完了待ち
+        return True
+    except Exception as e:
+        log(f"  gemini attach fail {str(e)[:80]}")
+        try:
+            page.keyboard.press("Escape")
+        except Exception:
+            pass
+        return False
+
 
 def gemini_streaming(page):
     return page.locator('button[aria-label="停止"], button[aria-label="回答を停止"], button[aria-label*="Stop"]').first.is_visible(timeout=600)
@@ -331,6 +375,7 @@ def gen_gemini(page, asset, outdir, per_asset):
     prompt = asset["prompt"]
     ref = asset.get("reference")
     got = existing_count(outdir, asset["id"])
+    refp = None
     if got:
         log(f"  resume: existing {got} files")
     limited = refused = False
@@ -341,7 +386,7 @@ def gen_gemini(page, asset, outdir, per_asset):
         page.keyboard.press("Escape")
         if ref:
             refp = ref if os.path.isabs(ref) else os.path.join(ROOT, ref)
-            if attach_file(page, refp):
+            if attach_file(page, refp) or gemini_attach(page, refp):
                 log("  reference attached")
             else:
                 log("  WARN: reference attach failed -> continue without ref")
@@ -370,7 +415,10 @@ def gen_gemini(page, asset, outdir, per_asset):
             got += 1
             outp = os.path.join(outdir, f"{asset['id']}_{got:02d}.png")
             how = download(page, src, outp)
-            if how and is_duplicate(outdir, outp):
+            if how and is_reference_echo(outp, refp if ref else None):
+                os.remove(outp); got -= 1
+                log("  skip reference echo")
+            elif how and is_duplicate(outdir, outp):
                 os.remove(outp); got -= 1
                 log("  skip duplicate image")
             elif how:
