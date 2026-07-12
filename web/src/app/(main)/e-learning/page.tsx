@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { ELearningPanel } from "@/components/elearning-panel";
 import { ElearningConclusionCard } from "@/components/elearning-conclusion-card";
 import { ElearningProgressBoard } from "@/components/elearning-progress-board";
+import { ElearningReceiptExport } from "@/components/elearning-receipt-print";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
 import { RelatedPageCards } from "@/components/related-page-cards";
@@ -62,6 +63,8 @@ export default function ELearningPage() {
         <LocalStorageWarningBanner />
         {/* P0-014: 受講者進捗ボード (履歴ゼロ時は非表示) */}
         <ElearningProgressBoard />
+        {/* NIQ-REC2: 社内記録用の受講記録 A4出力（履歴ゼロ時は非表示・修了証ではない） */}
+        <ElearningReceiptExport />
         <Suspense fallback={<PageSkeleton label="コース一覧を読み込み中" />}>
           <ELearningPanel />
         </Suspense>

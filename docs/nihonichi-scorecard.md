@@ -49,10 +49,10 @@
 | 2-1 | 俗称・現場ことば着地率（55ケースベンチ） | RAG **49/49=100%**・横断検索 **49/49=100%**・範囲外の正しい棄却 **5/5**（`docs/field-vernacular-bench-after-2026-07-11.json`） | e-Gov keyword API実測（07-12）: 「ユンボ」**0件**・「クビ」は野生動植物保護法等に誤着地・「バックホウ」安衛法系不達。正式語「車両系建設機械」なら87件中最上位が安衛法＝**正式語の世界** | **勝** |
 | 2-2 | 条番号ゆらぎ耐性（「61条」「第六十一条」「安衛法61条」） | 正規化パーサで吸収（`article-number-normalize.ts`・O8-b。診断G2で実測動作） | e-Gov: 吸収しない（`docs/fable-diagnosis-2026-07-02/05-search-egov.md` G2実測） | 勝 |
 | 2-3 | 検索品質eval（Recall@5） | rag-124問 **Recall@5 0.992・MRR 0.800**（`docs/rag-metrics-latest.json` 2026-07-11） | 競合に同種の公開evalなし＝比較対象不在 | 勝（単独計測） |
-| 2-4 | 応答速度 | クライアント内検索（ネットワーク往復なし）。**ms実測は未取得** | e-Gov keyword API 0.5s前後（curl） | **測定不能（自側未計測）** → 計測手段: Playwrightで⌘K入力→結果描画のperformance.mark実測をベンチに追加 |
+| 2-4 | 応答速度 | 入力→結果描画 **p50 206ms・p95 275ms**（代表10クエリ×4回=40サンプル実測 2026-07-12・`web/scripts/search-latency-bench.mjs`。ローカル本番ビルド計測。クライアント内検索でネットワーク往復なし） | e-Gov keyword API 0.5s前後（curl・サーバー往復あり） | 勝（自側実測206msでe-GovのAPI往復0.5sを下回る。※ローカル計測ゆえ本番URL実測は四半期再計測NIQ-OPS1で追加） |
 | 2-5 | 検索対象の広さ | 安衛法体系＋労基法系＋通達＋サイト内機能（横断） | e-Gov: **全法令**（土俵が広い） | 負（ただし当サイトの土俵=安衛法領域では影響小） |
 
-**再計測**: `cd web && npm run bench:field-terms` ＋ `npx vitest run src/lib/rag-metrics.test.ts src/lib/rag-100q.test.ts` ＋ e-Gov側 `curl -s "https://laws.e-gov.go.jp/api/2/keyword?keyword=ユンボ"`（0件のままか）
+**再計測**: `cd web && npm run bench:field-terms` ＋ `npx vitest run src/lib/rag-metrics.test.ts src/lib/rag-100q.test.ts` ＋ 応答ms=`npm run build && npm start` の別窓起動後に `node scripts/search-latency-bench.mjs`（§2-4のp50/p95更新・生成JSONはコミットしない）＋ e-Gov側 `curl -s "https://laws.e-gov.go.jp/api/2/keyword?keyword=ユンボ"`（0件のままか）
 
 ## 3. 安衛法チャットボット（/chatbot） — 判定: 勝（競合不在）
 
@@ -167,6 +167,7 @@
    - `npm run plain:status`（現場ことば版カバレッジ→§1-2更新）
    - `npm run bench:field-terms`（俗称着地率→§2-1更新）
    - `npx vitest run src/lib/rag-metrics.test.ts src/lib/rag-100q.test.ts`（→§2-3更新）
+   - 横断検索の応答ms（→§2-4更新）: `npm run build && npm start` を別窓で起動し `node scripts/search-latency-bench.mjs`（p50/p95を転記・生成JSONはコミットしない）
    - `CHATBOT_EVAL_BASE_URL=https://www.anzen-ai-portal.jp CHATBOT_EVAL_INTERVAL_MS=18000 npm run eval:chatbot-gen`（→§3-1更新）
    - `npm run test`（site-stats機械検証=各種件数→§4/5/6/7更新）
    - Lighthouseモバイル再実測（BACKLOG-ops既存タスクの `scripts/mobile-lighthouse.mjs`・静穏窓で→§S-3更新）

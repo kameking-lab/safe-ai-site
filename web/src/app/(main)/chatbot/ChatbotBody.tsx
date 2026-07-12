@@ -7,6 +7,7 @@ import { RelatedPageCards } from "@/components/related-page-cards";
 import { useTranslation } from "@/contexts/language-context";
 import { PageContainer } from "@/components/layout";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { ChatbotEvalBadge } from "@/components/chatbot/chatbot-eval-badge";
 import { CopilotStepNav } from "@/components/copilot/CopilotStepNav";
 import { CopilotMemo } from "@/components/copilot/CopilotMemo";
 // C-1: @/data/laws を client で import すると法令コーパス全体（チャンク生約1.4MB）が
@@ -88,6 +89,9 @@ export function ChatbotBody() {
         iconName="Scale"
         iconColor="blue"
       />
+
+      {/* NIQ-TOOL1: 公開evalの透明性表示（§3-5 第三者性なしの緩和）。誇張せず性質を併記。 */}
+      <ChatbotEvalBadge isEn={isEn} />
 
       {/* P0-020 (usability-audit-day4-final): CopilotStepNav/CopilotMemo を
           ファーストビューから退避。「Copilot」「引き継ぎ」「記憶」という語彙は
