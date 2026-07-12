@@ -15,7 +15,8 @@
  *   - チェックイン前に取込検証ゲート6種（§3-4）を全緑。落ちたら書かず異常終了
  *
  * 実行: npx tsx scripts/etl/egov-fulltext-fetch.ts [lawId ...]
- *   引数なしなら DEFAULT_TARGETS（FT-D1 は安衛則のみ）。
+ *   引数なしなら LAW_REGISTRY の全対象を diff-only 取得。引数で lawId を渡すと当該法令のみ
+ *   再取得（lawShort/expectMax は登録簿から引く。未登録 lawId は expectMax 無効化で取得のみ）。
  * 出力: web/src/data/laws-fulltext/<lawId>.json
  */
 
@@ -27,10 +28,14 @@ const API_BASE = "https://laws.e-gov.go.jp/api/2/law_data";
 const OUT_DIR = join(process.cwd(), "src/data/laws-fulltext");
 const SOURCE_LABEL = "e-Gov 法令API v2（政府標準利用規約2.0・出典明示）";
 
-// FT-D1 の取込対象。安衛則（実法令の最大の穴）。以降の波で TARGET_LAWS を拡張する。
-const DEFAULT_TARGETS: { lawId: string; lawShort: string; expectMax: number }[] = [
-  { lawId: "347M50002000032", lawShort: "安衛則", expectMax: 700 },
-];
+// 全文取込対象の登録簿。expectMax は「本則の最大基底条番号」の上限アンカー（改正差分の許容込み）。
+// 別表(AppdxTable)は本体級でも取込対象外＝§3-3（本則の条文本文のみを条ページ化する）。
+const LAW_REGISTRY: Record<string, { lawShort: string; expectMax: number }> = {
+  "347M50002000032": { lawShort: "安衛則", expectMax: 700 }, // FT-D1（本則 第1〜682条規模）
+  "347AC0000000057": { lawShort: "安衛法", expectMax: 130 }, // FT-D5（本則 第1〜123条・第64条=削除）
+  "347CO0000000318": { lawShort: "安衛令", expectMax: 40 }, // FT-D5（本則 第1〜27条・別表10表は §3-3 で本則外）
+};
+const DEFAULT_TARGETS = Object.keys(LAW_REGISTRY);
 
 // ---- 型（web/src/lib/laws-fulltext/types.ts と一致させること） -------------------
 
@@ -54,6 +59,7 @@ type FulltextLaw = {
   articleCount: number;
   rubyStripped: number; // 除去した <Rt> 件数（黙った変形をしない）
   skipped: { articleNum: string; reason: string }[];
+  appdxTables?: string[]; // 別表(AppdxTable)の題名一覧（生表記。本文は取込対象外＝§3-3）
   articles: FulltextArticle[];
 };
 
@@ -240,6 +246,27 @@ function extractMainArticles(xml: string): RawArticle[] {
   return out;
 }
 
+/**
+ * 別表(AppdxTable)の題名一覧を採録（生表記・出現順・重複除去）。
+ * 設計書 §3-3: 別表**本文**は取込対象外（beppyo 意味索引・anei-beppyo-snapshot が正本）。
+ * 題名だけを機械採録し、beppyo.ts の網羅性チェック（未収載別表の検出）に供する。
+ * AppdxTableTitle は MainProvision の外（本則の Article 抽出に混入しない）。
+ */
+function extractAppdxTableTitles(xml: string): string[] {
+  const re = /<AppdxTableTitle\b[^>]*>([\s\S]*?)<\/AppdxTableTitle>/g;
+  const out: string[] = [];
+  const seen = new Set<string>();
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(xml)) !== null) {
+    const t = inlineText(m[1]);
+    if (t && !seen.has(t)) {
+      seen.add(t);
+      out.push(t);
+    }
+  }
+  return out;
+}
+
 function buildArticles(raw: RawArticle[], skipped: { articleNum: string; reason: string }[]): FulltextArticle[] {
   const articles: FulltextArticle[] = [];
   for (const r of raw) {
@@ -365,6 +392,7 @@ function buildLaw(lawId: string, xml: string): FulltextLaw {
   const skipped: { articleNum: string; reason: string }[] = [];
   const raw = extractMainArticles(xml);
   const articles = buildArticles(raw, skipped);
+  const appdxTables = extractAppdxTableTitles(xml);
   const sha256 = createHash("sha256").update(canonicalArticlesJson(articles)).digest("hex");
 
   return {
@@ -377,6 +405,7 @@ function buildLaw(lawId: string, xml: string): FulltextLaw {
     articleCount: articles.length,
     rubyStripped: rubyStrippedCount,
     skipped,
+    appdxTables,
     articles,
   };
 }
@@ -393,11 +422,10 @@ function stripFetchedAt(json: string): string {
 
 async function main() {
   const argIds = process.argv.slice(2);
-  const targets = argIds.length
-    ? argIds.map((lawId) => ({ lawId, lawShort: lawId, expectMax: 9999 }))
-    : DEFAULT_TARGETS;
+  const targetIds = argIds.length ? argIds : DEFAULT_TARGETS;
 
-  for (const { lawId, lawShort, expectMax } of targets) {
+  for (const lawId of targetIds) {
+    const { lawShort, expectMax } = LAW_REGISTRY[lawId] ?? { lawShort: lawId, expectMax: 9999 };
     let xml: string | null = null;
     try {
       xml = await fetchXml(lawId);
