@@ -20,6 +20,7 @@ import {
   type ResidenceCategory,
   type ResidenceStatusRule,
 } from "@/types/foreign-worker";
+import { Mascot } from "@/components/mascot";
 
 const _title =
   "外国人労働者の安全衛生支援｜在留資格別ガイド・多言語安全教育教材";
@@ -90,12 +91,17 @@ export default function ForeignWorkersHubPage() {
       />
       <PageContainer width="wide" className="py-8 md:py-12">
         <header className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700">
-            Foreign Workers Safety Support
-          </p>
-          <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-            外国人労働者の安全衛生支援
-          </h1>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wider text-emerald-700">
+                Foreign Workers Safety Support
+              </p>
+              <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
+                外国人労働者の安全衛生支援
+              </h1>
+            </div>
+            <Mascot variant="world-friends" size="md" alt="" className="hidden shrink-0 sm:block" />
+          </div>
 
           {/* 柱0: 結論カード — 3秒で「いまの状態（国籍問わず法令適用）」と次アクションが分かる */}
           <ConclusionCard
