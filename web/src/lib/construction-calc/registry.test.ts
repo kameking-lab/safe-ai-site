@@ -51,6 +51,7 @@ describe("construction-calc registry: 整合性", () => {
     const expected: Record<string, [string, string]> = {
       "/law-navi/347M50002000032/356": ["安衛則", "第356条"],
       "/law-navi/347M50002000032/359": ["安衛則", "第359条"],
+      "/law-navi/347M50002000032/539": ["安衛則", "第539条"],
       "/law-navi/347M50002000034/213": ["クレーン則", "第213条"],
     };
     for (const c of CONSTRUCTION_CALCULATORS) {

@@ -56,6 +56,29 @@ export type CalcField = CalcSelectField | CalcNumberField;
 /** 計算機への入力値（正規化済み: number フィールドは number、select は string） */
 export type CalcValues = Record<string, string | number>;
 
+/**
+ * 発見層（/construction-calc ハブのカテゴリ束・横断検索・相互結線）のカテゴリID。
+ * 28機規模を見据えた分類軸。計算機は任意で `category` を宣言でき、宣言が無い部隊新機は
+ * keywords/slug から推定して束へ入れる（categories.ts の resolveCalcCategory）。
+ * "other" は明示・推定いずれにも当たらない計算機の受け皿（発見層から漏らさない）。
+ */
+export type CalcCategoryId =
+  | "tamakake" // 玉掛け・吊り
+  | "ashiba" // 足場・防護
+  | "doko" // 土工・支保工
+  | "concrete" // コンクリート・型枠
+  | "denki" // 電気
+  | "kansan" // 換算・幾何
+  | "other"; // その他（未分類の受け皿）
+
+/** 相互結線用: この計算機が根拠とする条文の参照（law-navi 条文ページ→計算機の逆リンク） */
+export type CalcArticleRef = {
+  /** 略称（例「安衛則」「クレーン則」）。law-navi permalink の lawShort と一致させる */
+  lawShort: string;
+  /** 条番号（例「第571条」「第539条」）。law-navi permalink の articleNum と一致させる */
+  articleNum: string;
+};
+
 /** 根拠（条文・告示・規格）。法令ナビ収載条文は lawNaviPath も持つ */
 export type CalcBasis = {
   /** 例: 「労働安全衛生規則 第356条（掘削面の勾配の基準）」 */
@@ -118,6 +141,17 @@ export type ConstructionCalculator = {
   examples: CalcExample[];
   /** AI入口のフォールバック・検索用キーワード */
   keywords: string[];
+  /**
+   * 発見層のカテゴリ束（任意）。未宣言の場合は categories.ts が keywords/slug から推定する。
+   * 部隊の新機は宣言しなくても推定で正しい束へ入るが、宣言すれば確実（推定より優先）。
+   */
+  category?: CalcCategoryId;
+  /**
+   * 相互結線（任意）: この計算機の根拠条文。law-navi の当該条文ページに
+   * 「関連する建設計算」として逆リンクを出すために使う（curated/fulltext いずれの条でも可）。
+   * basis.lawNaviPath（curated 限定・calc→law）とは別軸で、law→calc の逆写像を作る。
+   */
+  relatedArticles?: CalcArticleRef[];
   /** 決定論的計算（正規化済み値を受ける。AI はこの関数を呼ばない・書き換えない） */
   compute: (values: CalcValues) => CalcOutcome;
 };

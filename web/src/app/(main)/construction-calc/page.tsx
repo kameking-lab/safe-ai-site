@@ -1,28 +1,16 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import {
-  Calculator,
-  Cable,
-  Mountain,
-  Construction,
-  ChevronRight,
-  BookOpenCheck,
-  ShieldCheck,
-  Truck,
-  HardHat,
-  Layers,
-  Zap,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Calculator, ShieldCheck } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { CalcAiOnebox } from "@/components/construction-calc/calc-ai-onebox";
+import { ConstructionCalcHub, type CalcHubItem } from "@/components/construction-calc/calc-hub";
 import { CONSTRUCTION_CALCULATORS } from "@/lib/construction-calc/registry";
+import { resolveCalcCategory } from "@/lib/construction-calc/categories";
 import { CALC_DISCLAIMER } from "@/lib/construction-calc/schema";
 import { Mascot } from "@/components/mascot";
 
 const DESCRIPTION =
-  "玉掛けワイヤ（モード係数・逆引き）・単管足場・掘削勾配・土量換算・クレーン必要定格・型枠支保工・電線許容電流を、安衛則/クレーン則/内線規程の根拠つきで即計算。プルダウンと数値入力ですぐ使え、自由記述からAIが計算機を案内します。";
+  "玉掛けワイヤ（モード係数・逆引き）・単管足場・掘削勾配・土量換算・クレーン必要定格・型枠支保工・電線許容電流・安全ネットを、安衛則/クレーン則/告示/内線規程の根拠つきで即計算。分野の束と現場のことばで探せて、自由記述からAIが計算機を案内します。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/construction-calc" },
@@ -30,23 +18,15 @@ export const metadata: Metadata = {
   description: DESCRIPTION,
 };
 
-const CALC_ICONS: Record<string, LucideIcon> = {
-  "sling-wire-load": Cable,
-  "scaffold-tankan-check": Construction,
-  "excavation-slope": Mountain,
-  "soil-volume-conversion": Truck,
-  "crane-rated-load": HardHat,
-  "formwork-shoring-check": Layers,
-  "cable-ampacity": Zap,
-};
-
-/** 量産キュー（BACKLOG-construction-calc.md）の先頭から。空約束にしない範囲で予告 */
-const UPCOMING = [
-  "つりチェーン・繊維スリングの安全係数（クレーン則213条の2）",
-  "土止め支保工の部材基準（安衛則368〜375条）",
-  "昇降設備・はしご/脚立の基準（安衛則526〜528条）",
-  "酸素欠乏危険場所の換気量（酸欠則）",
-];
+/** registry → ハブ表示用のプレーンデータ（compute 関数を除いた serializable 射影）。 */
+const HUB_ITEMS: CalcHubItem[] = CONSTRUCTION_CALCULATORS.map((c) => ({
+  slug: c.slug,
+  shortTitle: c.shortTitle,
+  summary: c.summary,
+  basisLabel: c.basis[0].label.split("（")[0],
+  category: resolveCalcCategory(c),
+  keywords: c.keywords,
+}));
 
 export default function ConstructionCalcPage() {
   return (
@@ -72,55 +52,7 @@ export default function ConstructionCalcPage() {
 
         <CalcAiOnebox />
 
-        <section aria-label="計算機一覧" className="mt-6">
-          <h2 className="mb-3 text-lg font-bold text-slate-900 dark:text-white">計算機を選ぶ</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {CONSTRUCTION_CALCULATORS.map((calc) => {
-              const Icon = CALC_ICONS[calc.slug] ?? Calculator;
-              return (
-                <Link
-                  key={calc.slug}
-                  href={`/construction-calc/${calc.slug}`}
-                  className="group flex min-h-[44px] flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-amber-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800/60 sm:p-5"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/40">
-                      <Icon className="h-5 w-5 text-amber-700 dark:text-amber-400" aria-hidden="true" />
-                    </div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                      {calc.shortTitle}
-                    </h3>
-                  </div>
-                  <p className="mt-2 flex-1 text-xs leading-5 text-slate-600 dark:text-slate-400">
-                    {calc.summary}
-                  </p>
-                  <p className="mt-3 flex items-center gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
-                    <BookOpenCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                    根拠: {calc.basis[0].label.split("（")[0]}
-                  </p>
-                  <span className="mt-2 inline-flex items-center gap-0.5 text-xs font-bold text-amber-700 group-hover:underline dark:text-amber-400">
-                    計算する
-                    <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
-        <section aria-label="今後追加予定" className="mt-8">
-          <h2 className="mb-2 text-sm font-bold text-slate-700 dark:text-slate-300">今後追加予定の計算機</h2>
-          <ul className="flex flex-wrap gap-2">
-            {UPCOMING.map((u) => (
-              <li
-                key={u}
-                className="rounded-full border border-dashed border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-400"
-              >
-                {u}
-              </li>
-            ))}
-          </ul>
-        </section>
+        <ConstructionCalcHub calcs={HUB_ITEMS} />
 
         <section
           aria-label="このコーナーの考え方"
