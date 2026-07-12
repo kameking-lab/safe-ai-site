@@ -38,11 +38,9 @@ describe("端的さラチェット (CR2-D4)", () => {
       return total > MAX_TOTAL_CHARS || longest > MAX_SENTENCE_CHARS;
     });
 
-    // 2026-07-13 時点の実測 (fidelity v2 導入直後・79条 → v2-rewrite squad是正で71条。
-    // 別途進行中のPR #924・gondola-denri とはベースが異なるため、先にマージされた方に
-    // 合わせて後追いでrebase・再計算が必要)。
+    // 2026-07-13 時点の実測 (fidelity v2 導入直後・79条 → v2-rewrite squad是正で継続低下中)。
     // 増加は禁止・減少のみ許容。免除条を分割して書き直したらここを下げる。
-    const RATCHET_MAX = 71;
+    const RATCHET_MAX = 68;
     expect(
       exempted.length,
       `恒久免除条(長さ違反)がラチェット上限 ${RATCHET_MAX} を超えました (=${exempted.length}件)。` +
