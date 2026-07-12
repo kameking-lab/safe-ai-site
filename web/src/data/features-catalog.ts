@@ -316,6 +316,16 @@ export const FEATURES: FeatureItem[] = [
     category: "construction-calc",
     tags: ["型枠", "側圧", "JASS5"],
   },
+  {
+    slug: "shoring-member-check",
+    title: "土止め支保工の部材基準チェック（安衛則368〜375条）",
+    summary: "材料・組立図・部材の取付け・点検周期・作業主任者選任を一括判定",
+    description:
+      "材料・組立図・切りばりや腹おこしの取付け・継手・接続部の緊結・立入禁止・点検周期（7日以内ごと・地震/大雨後）・作業主任者の選任を、労働安全衛生規則第368条〜第375条の遵守事項に沿って一括判定します。掘削勾配計算機のNG時、土圧計算機の側圧算定後の受け皿として相互リンク。",
+    href: "/construction-calc/shoring-member-check",
+    category: "construction-calc",
+    tags: ["土止め支保工", "点検", "安衛則"],
+  },
   // 安全装備
   {
     slug: "equipment-finder",

@@ -307,6 +307,6 @@ export const earthPressureShoringCalculator: ConstructionCalculator = {
     "掘削",
     "矢板",
   ],
-  relatedSlugs: ["water-pressure"],
+  relatedSlugs: ["water-pressure", "shoring-member-check"],
   compute: computeEarthPressureShoring,
 };

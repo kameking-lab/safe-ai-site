@@ -14,6 +14,7 @@ import {
   Zap,
   Droplets,
   Boxes,
+  ClipboardCheck,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { PageContainer } from "@/components/layout";
@@ -42,12 +43,12 @@ const CALC_ICONS: Record<string, LucideIcon> = {
   "cable-ampacity": Zap,
   "water-pressure": Droplets,
   "formwork-lateral-pressure": Boxes,
+  "shoring-member-check": ClipboardCheck,
 };
 
 /** 量産キュー（BACKLOG-construction-calc.md）の先頭から。空約束にしない範囲で予告 */
 const UPCOMING = [
   "つりチェーン・繊維スリングの安全係数（クレーン則213条の2）",
-  "土止め支保工の部材基準（安衛則368〜375条）",
   "昇降設備・はしご/脚立の基準（安衛則526〜528条）",
   "酸素欠乏危険場所の換気量（酸欠則）",
 ];
