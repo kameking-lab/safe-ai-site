@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-11T21:44:04.118Z",
+  "updatedAt": "2026-07-12T21:43:42.907Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -634,6 +634,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 15 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "5f0241827ab0378a",
+      "headline": "西日本では連日の「危険な暑さ」予想 熱中症対策の徹底を",
+      "aiSummary": "西日本で危険な暑さが予想され、熱中症対策の徹底が呼びかけられている。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260713/k10015175321000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 13 Jul 2026 06:10:13 +0900",
+        "fetchedAt": "2026-07-12T21:43:34.924Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-12T21:43:42.896Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
