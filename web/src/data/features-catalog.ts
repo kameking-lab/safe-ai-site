@@ -306,6 +306,16 @@ export const FEATURES: FeatureItem[] = [
     category: "construction-calc",
     tags: ["水圧", "揚圧", "ボイリング"],
   },
+  {
+    slug: "formwork-lateral-pressure",
+    title: "型枠の側圧（コンクリート打込み・液圧近似）",
+    summary: "単位体積重量×打込み高さで型枠側圧の上限値P=W・Hを算定",
+    description:
+      "フレッシュコンクリートの単位体積重量と打込み高さから、型枠側圧の液圧近似（安全側の上限値）を算定します。打上り速度・温度による低減はJASS5／コンクリート標準示方書の最新版で個別確認が必要なため見込まず、常に上限側の値を返します。型枠支保工の基準チェックと相互リンク。",
+    href: "/construction-calc/formwork-lateral-pressure",
+    category: "construction-calc",
+    tags: ["型枠", "側圧", "JASS5"],
+  },
   // 安全装備
   {
     slug: "equipment-finder",
