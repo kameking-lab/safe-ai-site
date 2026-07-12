@@ -417,6 +417,16 @@ export const FEATURES: FeatureItem[] = [
     category: "education",
     tags: ["教育", "スライド"],
   },
+  {
+    slug: "edu-pack",
+    title: "法定教育スライドパック（無償）",
+    summary: "申請不要・編集可・法定対応表つきの無償教材",
+    description:
+      "特別教育の学科・労働衛生教育に使える無償の教育スライド（申請不要・編集可）。告示正本から構造化したカリキュラムレジストリとの機械照合（CI）で法定科目の網羅を検証し、法定対応表を同梱。統計は最新の災害データに自動追従。投影（16:9）とA4横印刷に対応。第1弾はフルハーネス・熱中症。教材の提供は教育の実施ではありません。",
+    href: "/education/pack",
+    category: "education",
+    tags: ["特別教育", "無償教材", "スライド", "熱中症", "フルハーネス"],
+  },
   // 管理ツール
   {
     slug: "plan-generator",

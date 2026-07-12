@@ -7,6 +7,7 @@ import { INDUSTRIES } from "@/data/safety-signs/industry-usage";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
 import { COURT_CASES } from "@/data/court-cases";
 import { CANONICAL_HAZARD_TYPES } from "@/lib/accidents/type-normalization";
+import { EDUCATION_DECKS } from "@/data/education-decks";
 import { latestIsoDate } from "@/lib/sitemap/lastmod";
 import { computeSitemapFreshness } from "@/lib/sitemap/freshness";
 import { SITE_URL } from "@/lib/seo-metadata";
@@ -325,8 +326,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   ];
 
+  // 無償教材パック（/education/pack + 宣言デッキ + 利用規約）。統計スライドは
+  // 死亡災害DB更新に連動するため lastmod は accidentsDataUpdated に追従。
+  const eduPackPages: typeof pages = [
+    { url: "/education/pack", lastModified: accidentsDataUpdated, priority: 0.85, changeFrequency: "monthly" as Freq },
+    { url: "/education/pack/terms", lastModified: "2026-07-12", priority: 0.6, changeFrequency: "yearly" as Freq },
+    ...EDUCATION_DECKS.map((d) => ({
+      url: `/education/pack/${d.slug}`,
+      lastModified: accidentsDataUpdated,
+      priority: 0.8,
+      changeFrequency: "monthly" as Freq,
+    })),
+  ];
+
   return [
     ...filtered,
+    ...eduPackPages,
     ...featureCategoryPages,
     ...constructionCalcPages,
     ...safetySignCategoryPages,

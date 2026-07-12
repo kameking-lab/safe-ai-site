@@ -147,7 +147,7 @@ const RELATED_LINKS = [
   { label: "振動障害予防教育", href: "/education/roudoueisei/shindou" },
   { label: "騒音障害防止教育", href: "/education/roudoueisei/souon" },
   { label: "腰痛予防教育", href: "/education/roudoueisei/youtsu-yobou" },
-  { label: "職長等教育", href: "/contact?category=education&course=職長等教育" },
+  { label: "職長等教育", href: "/contact?tab=business&topic=edu-pack&course=職長等教育" },
 ];
 
 export default function NecchuPage() {
@@ -300,32 +300,44 @@ export default function NecchuPage() {
         </div>
       </section>
 
-      {/* サンプル資料ダウンロード */}
-      <section id="course-sample" className="mb-8 scroll-mt-20 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 sm:p-6">
+      {/* フル教材（無償）— 投影・印刷・編集可 */}
+      <section id="course-sample" className="mb-8 scroll-mt-20 rounded-2xl border border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-slate-50 p-5 sm:p-6">
         <div className="flex flex-wrap items-start gap-4">
-          <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+          <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
             <FileText className="h-6 w-6" />
           </div>
           <div className="flex-1 min-w-[240px]">
             <h2 className="text-base font-bold text-slate-900">
-              サンプル資料ダウンロード <span className="ml-1 text-xs font-normal text-slate-500">PowerPoint 形式 / 10スライド</span>
+              フル教材（無償） <span className="ml-1 text-xs font-normal text-slate-500">申請不要・編集可</span>
             </h2>
             <p className="mt-1 text-xs leading-5 text-slate-600">
-              実際のカリキュラム構成に沿ったセミナー資料の一部を無料でご覧いただけます。表紙・目次・対策の4要素・WBGT基準値表・緊急時対応フロー・暑熱順化ステップ等、労働衛生教育の構成がそのまま把握できます。
+              基発0318第1号ガイドライン第3の5「管理者に対する教育（225分）」の事項を全てカバーしたフルデッキ。科目網羅をCIで機械検証し対応表を同梱。統計は最新の災害データに自動追従。
             </p>
+            <ul className="mt-2 space-y-1">
+              <li className="text-xs text-emerald-900">・出典を明記すれば、自社の教育で自由に投影・印刷・改変できます</li>
+              <li className="text-xs text-emerald-900">・改変された教材には法定対応表の保証は適用されません</li>
+              <li className="text-xs text-emerald-900">・教材そのものの販売・有償配布はできません（<Link href="/education/pack/terms" className="underline">利用規約全文</Link>）</li>
+            </ul>
             <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                href="/education/pack/necchu"
+                className="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 min-h-[44px] text-sm font-bold text-white shadow-sm hover:bg-emerald-800 transition-colors"
+              >
+                <FileText className="h-4 w-4" />
+                投影・印刷で開く（無償フルデッキ）
+              </Link>
               <a
                 href="/seminars/necchu.pptx"
                 download
-                className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 min-h-[44px] text-sm font-bold text-white shadow-sm hover:bg-slate-800 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 min-h-[44px] text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
               >
                 <Download className="h-4 w-4" />
-                PPTXサンプルをダウンロード
+                PPTX（編集用サンプル）
               </a>
-              <span className="inline-flex items-center text-xs text-slate-500">
-                ※ カスタマイズ版・講師派遣版はお問い合わせください
-              </span>
             </div>
+            <p className="mt-3 text-[11px] leading-5 text-slate-500">
+              本教材は安衛則第612条の2および基発0318第1号ガイドラインに基づく労働衛生教育用の教材です（特別教育ではありません）。教育の実施・記録は事業者の責任で行ってください。
+            </p>
           </div>
         </div>
       </section>
@@ -387,14 +399,14 @@ export default function NecchuPage() {
         <p className="mt-1 text-sm text-slate-600">教材内容のご質問・誤りの指摘・追加してほしいテーマなどをお寄せください。原則3営業日以内にご返信します。</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
-            href="/contact?category=education&course=necchu"
+            href="/contact?tab=business&topic=edu-pack&course=necchu"
             className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 min-h-[44px] text-sm font-bold text-white shadow-sm hover:bg-emerald-700 transition-colors"
           >
             <Mail className="h-4 w-4" />
             ご質問・改善提案を送る
           </Link>
           <Link
-            href="/contact?category=education&course=necchu&type=document"
+            href="/contact?tab=business&topic=edu-pack&course=necchu&type=document"
             className="inline-flex items-center gap-2 rounded-lg border border-emerald-600 bg-white px-5 py-2.5 min-h-[44px] text-sm font-bold text-emerald-700 hover:bg-emerald-50 transition-colors"
           >
             <FileText className="h-4 w-4" />

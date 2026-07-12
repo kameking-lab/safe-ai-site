@@ -4,7 +4,7 @@
   subtitle: WBGT・現場運用対応コース
   english_title: HEAT STROKE PREVENTION
   english_subtitle: Workplace Occupational Health Education
-  legal_basis: "基発0420第3号「職場における熱中症予防基本対策要綱」（令和3年4月20日付）準拠"
+  legal_basis: "安衛則第612条の2（令和7年6月1日施行）／基発0318第1号「職場における熱中症対策のためのガイドライン」準拠"
   duration: 約1.5時間
   supervisor: 安全AIポータル
   contact: "https://anzen-ai-portal.jp/contact"
@@ -19,7 +19,7 @@ slides:
     english_title: HEAT STROKE PREVENTION
     title: 熱中症予防 労働衛生教育
     subtitle: WBGT・現場運用対応コース
-    legal: 基発0420第3号準拠 ／ 約1.5時間
+    legal: 安衛則第612条の2・基発0318第1号準拠 ／ 約1.5時間
     supervisor: 安全AIポータル
 
   # =========================================================
@@ -106,7 +106,7 @@ slides:
       - ["やや重い", "重量物取扱い・重機作業等", "27.5℃", "作業時間短縮、こまめな休憩、単独作業禁止"]
       - ["重い", "つるはし・スコップ作業等の重作業", "26.5℃", "作業中止検討、暑熱順化未了者は配置回避"]
       - ["非常に重い", "全身を激しく使う作業", "25.0℃", "原則作業中止、冷却・休憩優先"]
-    footnote: 出典：JIS Z 8504 ／ 基発0420第3号 別添「職場における熱中症予防基本対策要綱」より要約
+    footnote: 出典：JIS Z 8504 ／ 基発0318第1号「職場における熱中症対策のためのガイドライン」別紙より要約
 
   # =========================================================
   # Slide 6 — フロー（緊急時対応 4STEP）
@@ -188,7 +188,7 @@ slides:
   - layout: duties
     title: 事業者の責務
     title_en: EMPLOYER'S DUTIES
-    intro: 安衛法第22条・第59条および基発0420第3号、2025年6月1日施行の安衛則改正に基づく取組み
+    intro: 安衛法第22条および安衛則第612条の2（2025年6月1日施行）・基発0318第1号ガイドラインに基づく取組み
     items:
       - num: "01"
         head: WBGT測定と記録

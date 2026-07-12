@@ -71,8 +71,25 @@ export default function InquiryForm() {
   const CATEGORIES = isEn ? CATEGORIES_EN : CATEGORIES_JA;
   const TABS = isEn ? TABS_EN : TABS_JA;
   const INDUSTRY_OPTIONS = isEn ? INDUSTRY_OPTIONS_EN : INDUSTRY_OPTIONS_JA;
+  // 教育パック導線（企画06章・EDU-R2）: course/topic を読み business タブ初期選択＋件名プレフィル。
+  // /api/inquiry のスキーマは不変（course は subject に載せる＝env追加なし）。
+  const courseParam = searchParams?.get("course") ?? "";
+  const topicParam = searchParams?.get("topic") ?? "";
+  const isEduContext = Boolean(courseParam) || topicParam === "edu-pack";
+  const COURSE_LABELS: Record<string, string> = {
+    fullharness: "フルハーネス型墜落制止用器具 特別教育",
+    necchu: "熱中症予防 労働衛生教育",
+  };
+  const courseLabel = courseParam ? (COURSE_LABELS[courseParam] ?? courseParam) : "";
+  const initialSubject = isEduContext
+    ? isEn
+      ? `[Education Pack] ${courseLabel || "Custom training"} — customization inquiry`
+      : `【教育パック】${courseLabel ? `${courseLabel} ` : ""}カスタマイズ相談`
+    : "";
   const initialTab: Tab =
-    searchParams?.get("tab") === "business" || searchParams?.get("category") === "business"
+    searchParams?.get("tab") === "business" ||
+    searchParams?.get("category") === "business" ||
+    isEduContext
       ? "business"
       : "general";
   const [tab, setTab] = useState<Tab>(initialTab);
@@ -81,7 +98,7 @@ export default function InquiryForm() {
     email: "",
     industry: searchParams?.get("industry") ?? "",
     category: (initialTab === "business" ? "business" : "question") as Category,
-    subject: "",
+    subject: initialSubject,
     message: "",
     publishOk: false,
   });
