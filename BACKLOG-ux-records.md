@@ -3,6 +3,9 @@
 担当領域・契約・絶対ルールは loop-prompt-ux-records.txt を参照。所有route=safety-diary/site-records/ky/ky-examples/education-certification/education/foreign-workers/health-checkup-scheduler/account。共有ビジュアル基盤(safety-tone.ts・ConclusionCard/StatusBadge/CollapsibleDetail)の custodian=当班（足すだけ・壊さない）。**着手前に現状確認**（走行中ループが柱0の多くを消化済み＝済みは[x]）。マスター BACKLOG.md は参照専用。
 
 ## 未着手（上から処理）
+### 2026-07-12 外部酷評第2ラウンド注入（出典: docs/site-critique-2026-07-12/ 01章縫い目4。実測証拠つき）
+- [ ] 【Sonnet・P0】CR2-R1: 教育スライド「5箇所配備」を実態化 — 申告5箇所の実測は2.5箇所: /e-learning からリンク0本（クイズデータ内部流用のみ）・親ハブ /education に子ルート hazard-slides へのリンク0本・/ky/morning はKYデータ無しだと空画面のみ。(1) /education ハブ先頭に「災害の型別スライド（21分類）」カード、(2) /e-learning のテーマカード・結論カードから対応スライドへ逆リンク（QUIZ_BY_TYPE 対応表は data/mock/elearning-hazard-types-theme.ts に既存）、(3) /ky/morning の空状態でも HazardOfTheDay を表示（record 分岐の外へ）。完了条件=3経路の実機スクショ＋既存テスト全緑。
+
 
 ### 2026-07-02 Fable診断注入（診断書: docs/fable-diagnosis-2026-07-02/02・06・07）
 - [x] 【Opus・P1】O13: /ky/paper の React error #418（hydration mismatch）毎ロード発生の原因特定と是正。原因確定: `KyPaperView` の `useState(makeToday)` 初期化子が `new Date()` をレンダー中に直接評価しており、`/ky/paper` はビルド時に静的プリレンダリング(`○`)されるため、HTMLに焼き込まれたビルド時刻の作業日とハイドレーション時の実時刻がズレて毎ロード不一致（`normalizeKyInstructionRecord({})`→`buildDefaultKyInstructionRecord()`内部の`new Date()`も同根）。是正: 初期状態を日付非依存の`emptyKyRecord()`に変更（SSR/CSRとも初回描画は空で一致）、保存データ・深リンクどちらも無い場合のみマウント後effect（クライアント専用）で`withTodayWorkDate`により「今日」を補う既存パターン（`ky-morning-signage.tsx`と同型）に統一。年/月/日プルダウンに`min-w-*`を追加しCLS抑止（実測でも空→実値の変化はCLSに寄与せず、既存の同期状態ラベル起因の微小CLS 0.0006〜0.0108は変更前後で不変=無関係と確認）。完了条件どおり本番相当ビルド(`npm run build && npm run start`)を3回巡回しコンソールエラー0・作業日は正しく当日値に収束。無読テストPlaywrightスクリプト`docs/third-party-reviews/scripts/ky-paper-hydration-cls-2026-07-02.mjs`に保存。vitest 1933 pass・tsc=0・lint errors=0（既存warn2件のみ）・build成功（`○ /ky/paper`静的生成を確認）。(2026-07-02, PR未確定)
