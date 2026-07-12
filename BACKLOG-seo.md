@@ -3,6 +3,12 @@
 担当領域・契約・絶対ルールは loop-prompt-seo.txt を参照。所有ファイル=sitemap*/robots/manifest/seo-lib/JSON-LDヘルパー/横断検索(search-index・fuzzy-search・notice-search・/search)/app-shell(検索UIのみ)/両layout(metadataのみ)。**着手前に必ず本番とコードの現状を確認**（走行中の全領域ループが先に消化している項目があるため、済みなら[x]にして次へ）。マスター BACKLOG.md は参照専用。
 
 ## 未着手（上から処理）
+### 2026-07-12 外部酷評第2ラウンド注入（出典: docs/site-critique-2026-07-12/ 01/03/04章。実測証拠つき）
+- [ ] 【Sonnet・P0】CR2-S1: /law-navi をグローバルナビへ — 本番トップHTML143リンク・モバイルメニュー・フッター・/features 全てに law-navi が0本（酷評01縫い目1）。app-shell.tsx のナビ「学ぶ」グループとフッターに「法令ナビ（現場の言葉から条文へ）」を追加。あわせて law-hub-nav の三者使い分け（ナビ=分野から読む/条文検索=全文/横断=サイト全部）を title 属性から可視1行キャプションへ昇格（モバイルはツールチップ不可視のため）。完了条件=本番トップHTMLに /law-navi リンク≥2＋モバイル390pxスクショ。
+- [ ] 【Sonnet・P0】CR2-S2: 横断検索インデックスへ現場ことば版を収載 — plain 512条が /search から不可視（酷評01縫い目3。条文ヒットは law-search 着地で plain 未収載= lib/search-index.ts L179）。search-index.ts に plain ソースを追加（title=「◯◯法 第◯条（現場ことば）」・url=law-navi 条文ページ・data/plain の dynamic import）。完了条件=「研削といし」「囲い」等で現場ことばヒットが出る回帰テスト＋既存23クエリ回帰全緑＋first-load JS 非増加。
+- [ ] 【Sonnet・P1】CR2-S3: 法改正ヒットの個別着地 — /search の法改正9ヒットが全部 /laws 一覧先頭落ち（lib/search-index.ts L213 が自認）。/laws 一覧の各改正項目に id を付与し `/laws#<改正id>` アンカー着地へ（詳細ページ実装を待たない応急処置。通知ベル CR2-H2 と共通基盤）。完了条件=検索→タップで当該改正項目が画面内に来る実機スクショ。
+- [ ] 【Opus・P1】CR2-S4: /search の性能是正 — Lighthouseモバイル Perf71・CLS0.185・TBT628ms（10ページ中最下位・酷評04章。クライアント検索索引構築コスト）。索引の遅延ロード/分割・結果リスト骨格の同寸プレースホルダでCLS<0.1・TBT<300ms・Perf90+へ。完了条件=Lighthouse再実測値をdocsに記録。
+
 
 ### 2026-07-11 法令ナビ量産（方式確立済み: docs/horei-navi-foundation-2026-07-11/01-diagnosis-and-design.md）
 - [x] 【Opus・P0】LN-S1: 俗称辞書の拡充＝現場口語ベンチ50語の /search 着地率実測→是正（2026-07-11 現場口語プロジェクト / PR #875・ux-toolsレーンで吸収）。ベンチ=`web/src/lib/field-vernacular-bench.fixture.ts`（in-domain 50語＋範囲外5語・chatQuery/searchQuery対・`npm run bench:field-terms`で再実行可能・着地率ratchetつき常設CI）。**完了条件達成=横断検索着地率 25/50（50.0%）→49/49（100%）を実測**（一次記録: docs/field-vernacular-bench-{before,after}-2026-07-11.json・解説 docs/field-vernacular-bench-2026-07-11.md）。是正=①query-expansion.tsへ語幹の正規表現ルール追補（解雇口語/酸欠場所語彙/バラシ/うるさい・耳栓/塗装/ほこり/重い荷物/労災/通勤。固定フレーズ登録なし） ②現場語彙辞書を`rag/field-terms.ts`へ単一ソース化しcross-search/score.tsと共有（ユンボ/残業/有給等のTERM_EXPANSIONSが/search・⌘Kでも発火。コーパス非依存＝クライアントバンドル不汚染） ③数量・疑問語（何分/何日前/1年/ルール等）の未マッチ時ソフト化でAND全滅を解消。search-index.test.ts / query-expansion.test.ts 含む全2892テスト緑。topics.ts（law-navi分野データ）のaliases追補は並行セッションB領域のため未接触=**要・B**（本ベンチの検索着地は topics.ts 非依存で100%達成済み。分野ページ側の俗称カバレッジ拡充は別途）。
