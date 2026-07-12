@@ -19,6 +19,10 @@ import { cableAmpacityCalculator } from "./calculators/cable-ampacity";
 import { windLoadTemporaryCalculator } from "./calculators/wind-load-temporary";
 import { earthPressureShoringCalculator } from "./calculators/earth-pressure-shoring";
 import { anchorPulloutCalculator } from "./calculators/anchor-pullout";
+import { chainSlingLoadCalculator } from "./calculators/chain-sling-load";
+import { fiberSlingLoadCalculator } from "./calculators/fiber-sling-load";
+import { riggingHardwareCheckCalculator } from "./calculators/rigging-hardware-check";
+import { hoistRatedCheckCalculator } from "./calculators/hoist-rated-check";
 
 export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   slingWireLoadCalculator,
@@ -31,6 +35,10 @@ export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   windLoadTemporaryCalculator,
   earthPressureShoringCalculator,
   anchorPulloutCalculator,
+  chainSlingLoadCalculator,
+  fiberSlingLoadCalculator,
+  riggingHardwareCheckCalculator,
+  hoistRatedCheckCalculator,
 ];
 
 const BY_SLUG: ReadonlyMap<string, ConstructionCalculator> = new Map(

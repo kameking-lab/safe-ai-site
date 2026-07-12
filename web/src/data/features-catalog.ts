@@ -296,6 +296,46 @@ export const FEATURES: FeatureItem[] = [
     category: "construction-calc",
     tags: ["アンカー", "引抜き", "あと施工"],
   },
+  {
+    slug: "chain-sling-load",
+    title: "つりチェーンの安全荷重計算",
+    summary: "掛け方・吊り角度・切断荷重から安全係数4/5を判定",
+    description:
+      "荷の質量・掛け方（1本/2点/3点4点）・吊り角度と、チェーン1本の切断荷重（製造者証明書の値）から、クレーン等安全規則第213条の2の安全係数（原則5以上、伸び0.5%以下かつ径減少10%以下の条件を満たせば4以上）を判定します。玉掛けワイヤの計算機と同じモード係数方式です。",
+    href: "/construction-calc/chain-sling-load",
+    category: "construction-calc",
+    tags: ["つりチェーン", "玉掛け", "クレーン則"],
+  },
+  {
+    slug: "fiber-sling-load",
+    title: "繊維スリングの使用荷重判定",
+    summary: "ストレート/バスケット/チョークで使用荷重を算定",
+    description:
+      "ベルトスリングの基本使用荷重（WLL・製品ラベル値）に掛け方（ストレート/バスケット/チョーク）と吊り角度の係数を掛けて使用荷重を求め、荷の質量と比較します。当て物・劣化・不適格品の使用禁止（クレーン則第218条）も明記します。",
+    href: "/construction-calc/fiber-sling-load",
+    category: "construction-calc",
+    tags: ["繊維スリング", "ベルトスリング", "玉掛け"],
+  },
+  {
+    slug: "rigging-hardware-check",
+    title: "玉掛用具（シャックル・アイボルト・フック）の使用荷重チェック",
+    summary: "WLLと作用荷重を比較。アイボルトの斜め引きは使用不可",
+    description:
+      "シャックル・アイボルト・フックの使用荷重（WLL・製品カタログ/証明書の値）と作用荷重を比較して使用可否を判定します（クレーン則第214条・第217条）。アイボルトへの斜め引きはメーカー確認が必要な範囲として原則使用不可で扱います。",
+    href: "/construction-calc/rigging-hardware-check",
+    category: "construction-calc",
+    tags: ["シャックル", "アイボルト", "フック"],
+  },
+  {
+    slug: "hoist-rated-check",
+    title: "つり上げ装置（巻上ワイヤ・フック）の安全係数チェック",
+    summary: "ワイヤ6以上・フック5以上を切断/破断荷重から同時判定",
+    description:
+      "実荷重に対して、巻上ワイヤの安全係数6以上（クレーン則第213条）・フックの安全係数5以上（同第214条）を同時に満たすかを、切断荷重・破断荷重の入力から判定します。クレーン必要定格総荷重（crane-rated-load）と相互リンクします。",
+    href: "/construction-calc/hoist-rated-check",
+    category: "construction-calc",
+    tags: ["クレーン", "安全係数", "クレーン則"],
+  },
   // 安全装備
   {
     slug: "equipment-finder",
