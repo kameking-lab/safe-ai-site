@@ -17,6 +17,7 @@ import {
   type CalcField,
   type ConstructionCalculator,
 } from "@/lib/construction-calc/schema";
+import { Mascot } from "@/components/mascot";
 
 /**
  * 建設計算 1計算機1画面のインタラクティブ部（入力→結論→計算過程→AI解説）。
@@ -222,6 +223,9 @@ export function CalculatorPanel({ slug }: { slug: string }) {
       >
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <ToneIcon className="h-10 w-10 shrink-0 sm:h-12 sm:w-12" aria-hidden="true" />
+          {outcome.tone === "safe" && (
+            <Mascot variant="calculator" size="md" alt="" className="order-last ml-auto hidden shrink-0 sm:block" />
+          )}
           <div className="flex min-w-0 flex-wrap items-baseline gap-x-3">
             {outcome.value !== undefined && (
               <span className={`text-5xl font-bold leading-none tracking-tight ${tone.text}`}>

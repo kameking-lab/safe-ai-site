@@ -10,6 +10,7 @@ import {
   type FeatureCategoryId,
 } from "@/data/features-catalog";
 import { useLanguage } from "@/contexts/language-context";
+import { Mascot } from "@/components/mascot";
 
 const QUICK_LINKS_JA = [
   { href: "/features/quick-tour", label: "5分ツアー", emoji: "⏱" },
@@ -40,7 +41,10 @@ export function FeaturesIndexClient() {
     <div className="px-4 py-6 sm:py-10">
       {/* Hero */}
       <section className="mx-auto max-w-5xl text-center">
-        <p className="text-xs font-bold tracking-widest text-emerald-700">FEATURES</p>
+        <div className="flex justify-center">
+          <Mascot variant="tablet-dx" size="lg" alt="" />
+        </div>
+        <p className="mt-2 text-xs font-bold tracking-widest text-emerald-700">FEATURES</p>
         <h1 className="mt-2 text-2xl font-bold leading-tight text-slate-900 sm:text-3xl md:text-4xl">
           {isEn ? "All Anzen AI Portal features, on one page." : "安全AIポータルの全機能を、1ページで。"}
         </h1>

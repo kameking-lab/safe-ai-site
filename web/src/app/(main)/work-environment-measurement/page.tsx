@@ -5,6 +5,7 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { JsonLd } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
 import { MEASUREMENT_CATEGORIES, FREQUENCY_LABEL, METHOD_LABEL } from "@/data/measurement-rules";
+import { Mascot } from "@/components/mascot";
 
 const _title = "作業環境測定 管理区分判定ツール";
 const _desc =
@@ -52,6 +53,7 @@ export default function WorkEnvironmentMeasurementPage() {
         {/* Page header */}
         <header className="mb-8">
           <div className="flex items-start gap-4">
+            <Mascot variant="measure-meter" size="lg" alt="" className="order-last ml-auto hidden shrink-0 sm:block" />
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-teal-600 shadow-sm">
               <Gauge className="h-6 w-6 text-white" aria-hidden />
             </div>

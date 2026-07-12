@@ -8,6 +8,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { COURT_CASE_COUNT } from "@/data/court-cases";
 import { CourtCasesBrowser } from "@/components/court-cases/court-cases-browser";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { Mascot } from "@/components/mascot";
 
 const _title = "労災・労働判例コーナー｜安全配慮義務・過労死から解雇・労働時間・就業規則まで（無料・出典付き）";
 const _desc =
@@ -38,6 +39,7 @@ export default function CourtCasesPage() {
         <header className="mb-4">
           {/* 柱0: 件数デカ数字＋1行結論。長い説明は詳細層へ（内容は不変） */}
           <div className="flex items-center gap-2.5">
+            <Mascot variant="court-scale" size="md" alt="" className="hidden shrink-0 sm:block" />
             <Scale className="h-7 w-7 shrink-0 text-emerald-600" aria-hidden="true" />
             <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 lg:text-2xl">労災・労働判例コーナー</h1>
             <span className="rounded-xl bg-emerald-100 px-2.5 py-1 text-2xl font-bold leading-none text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">

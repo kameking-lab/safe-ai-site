@@ -52,6 +52,24 @@ const VARIANT_MAP = {
   megaphone: { src: "/mascot/mascot-megaphone.webp", width: 283, height: 288 },
   /** 夏（タオル＋ひまわり）: トップ季節演出用 */
   "seasonal-summer": { src: "/mascot/mascot-seasonal-summer.webp", width: 291, height: 320 },
+  /** 天秤: 労災判例用 */
+  "court-scale": { src: "/mascot/mascot-court-scale.webp", width: 269, height: 320 },
+  /** 新聞: 新着・速報用 */
+  "news-read": { src: "/mascot/mascot-news-read.webp", width: 320, height: 315 },
+  /** 聴診器: 健診スケジューラ用 */
+  "health-check": { src: "/mascot/mascot-health-check.webp", width: 254, height: 320 },
+  /** 計測器: 作業環境測定用 */
+  "measure-meter": { src: "/mascot/mascot-measure-meter.webp", width: 282, height: 288 },
+  /** 印鑑: 現場記録・打合せ書用 */
+  "stamp-doc": { src: "/mascot/mascot-stamp-doc.webp", width: 281, height: 320 },
+  /** 空を見上げる: 防災・気象用 */
+  "weather-look": { src: "/mascot/mascot-weather-look.webp", width: 264, height: 320 },
+  /** タブレット: AI・DX系用 */
+  "tablet-dx": { src: "/mascot/mascot-tablet-dx.webp", width: 274, height: 320 },
+  /** 電卓: 建設計算（結果）用 */
+  calculator: { src: "/mascot/mascot-calculator.webp", width: 274, height: 320 },
+  /** トロフィー: 達成・実績用 */
+  trophy: { src: "/mascot/mascot-trophy.webp", width: 263, height: 320 },
 } as const;
 
 export type MascotVariant = keyof typeof VARIANT_MAP;
