@@ -56,3 +56,6 @@ docs/loop-status.md
 
 # マスコット画像生成パイプラインの生成物（採用分はweb/public/へ最適化して配置。生画像はコミットしない）
 scripts/imagegen/output/
+
+# 自動生成の法定対応表（npm run curriculum:status で再生成）
+docs/education-curriculum-coverage.md

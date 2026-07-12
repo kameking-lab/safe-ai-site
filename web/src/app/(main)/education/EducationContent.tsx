@@ -49,7 +49,7 @@ type Program = {
 };
 
 const PROGRAMS: Program[] = [
-  { slug: "kensaku-toishi", name: "研削といしの取替え・試運転の業務", basis: "安衛則第36条第1号 (OSH Rule Art.36-1)", hours: "4時間以上", category: "tokubetsu" },
+  { slug: "kensaku-toishi", name: "研削といしの取替え・試運転の業務", basis: "安衛則第36条第1号 (OSH Rule Art.36-1)", hours: "自由研削6h以上（学科4h＋実技2h）／機械研削10h以上（学科7h＋実技3h）", category: "tokubetsu" },
   { slug: "teiatsu-denki", name: "低圧電気取扱い業務", basis: "安衛則第36条第4号 (OSH Rule Art.36-4)", hours: "7〜14時間", category: "tokubetsu" },
   { slug: "ashiba", name: "足場の組立て・解体・変更の作業", basis: "安衛則第36条第39号 (OSH Rule Art.36-39)", hours: "6時間以上", category: "tokubetsu" },
   { slug: "fullharness", name: "フルハーネス型墜落制止用器具の使用", basis: "安衛則第36条第41号 (OSH Rule Art.36-41)", hours: "6時間以上", category: "tokubetsu" },

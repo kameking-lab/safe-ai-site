@@ -5,6 +5,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { JsonLd } from "@/components/json-ld";
 import { EducationContextSections } from "@/components/education/EducationContextSections";
 import { CourseConclusion } from "@/components/education/CourseConclusion";
+import { getCurriculum } from "@/data/education-curriculum";
 
 const TITLE = "フルハーネス型墜落制止用器具 特別教育";
 const DESCRIPTION =
@@ -87,13 +88,12 @@ const breadcrumbSchema = {
   ],
 };
 
-const CURRICULUM = [
-  { title: "作業に関する知識", minutes: 60, desc: "高所作業の種類・設備・取扱い、作業に伴う災害事例とその防止方法を解説。" },
-  { title: "墜落制止用器具に関する知識", minutes: 120, desc: "フルハーネス・ランヤード・接続器具の構造・規格・点検・選定基準を学習。" },
-  { title: "労働災害の防止に関する知識", minutes: 60, desc: "墜落防止措置、宙吊り対応、救助手順、応急処置を体系的に習得。" },
-  { title: "関係法令", minutes: 30, desc: "安衛法・安衛令・安衛則第36条第41号関連条項および構造規格・ガイドライン。" },
-  { title: "装着・使用方法（実技）", minutes: 90, desc: "ハーネス装着・取付け・始業前点検の実習。胸/腿ベルト調整とフック掛けの実演。" },
-];
+// カリキュラム正本レジストリ（規程第24条）から導出＝ページ表示・網羅ゲート・PPTXの単一正本（企画02章§3）
+const CURRICULUM = (getCurriculum("se-36-41-fullharness")?.tracks[0].units ?? []).map((u) => ({
+  title: u.kind === "jitsugi" ? `${u.subject}（実技）` : u.subject,
+  minutes: Math.round(u.minHours * 60),
+  desc: u.scopeItems.join("／"),
+}));
 
 const TARGETS = [
   "高さ2m以上の作業床がない箇所での作業者",
@@ -137,7 +137,7 @@ const FAQS = [
   },
   {
     q: "既受講者は再教育が必要ですか？",
-    a: "厚生労働省告示第11号に定められた科目と同等内容を受講済の場合、再教育は不要です。法定資格証や修了証で受講済みであることが確認できれば、受講免除の判断材料となります。",
+    a: "安全衛生特別教育規程第24条に定められた科目と同等内容を受講済の場合、再教育は不要です。法定資格証や修了証で受講済みであることが確認できれば、受講免除の判断材料となります。（教育科目の根拠は同規程第24号。墜落制止用器具の規格〔平31厚労省告示第11号〕は器具の構造規格で、別物です）",
   },
   {
     q: "屋外足場のみの作業も対象ですか？",
@@ -146,10 +146,10 @@ const FAQS = [
 ];
 
 const RELATED_LINKS = [
-  { label: "玉掛け特別教育（1t未満）", href: "/contact?category=education&course=玉掛け特別教育" },
-  { label: "酸素欠乏危険作業特別教育", href: "/contact?category=education&course=酸素欠乏危険作業特別教育" },
-  { label: "アーク溶接特別教育", href: "/contact?category=education&course=アーク溶接特別教育" },
-  { label: "低圧電気取扱業務特別教育", href: "/contact?category=education&course=低圧電気取扱業務特別教育" },
+  { label: "玉掛け特別教育（1t未満）", href: "/contact?tab=business&topic=edu-pack&course=玉掛け特別教育" },
+  { label: "酸素欠乏危険作業特別教育", href: "/contact?tab=business&topic=edu-pack&course=酸素欠乏危険作業特別教育" },
+  { label: "アーク溶接特別教育", href: "/contact?tab=business&topic=edu-pack&course=アーク溶接特別教育" },
+  { label: "低圧電気取扱業務特別教育", href: "/contact?tab=business&topic=edu-pack&course=低圧電気取扱業務特別教育" },
 ];
 
 export default function FullharnessPage() {
@@ -170,14 +170,14 @@ export default function FullharnessPage() {
         kind="special"
         duration="約6時間"
         basis="省令ベース"
-        summary="安衛則第36条第41号・厚労省告示第11号に基づく、高さ2m超の高所作業従事者向け特別教育（学科4.5h＋実技1.5h）。"
+        summary="安衛則第36条第41号・安全衛生特別教育規程第24条に基づく、高さ2m超の高所作業従事者向け特別教育（学科4.5h＋実技1.5h）。"
       />
 
       {/* ヘッダー */}
       <header className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">フルハーネス型墜落制止用器具 特別教育</h1>
         <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">
-          高さ2m以上の作業床がない箇所でフルハーネス型墜落制止用器具を用いて作業に従事する労働者を対象に、労働安全衛生規則第36条第41号および厚生労働省告示第11号に基づく特別教育を実施します。
+          高さ2m以上の作業床がない箇所でフルハーネス型墜落制止用器具を用いて作業に従事する労働者を対象に、労働安全衛生規則第36条第41号および安全衛生特別教育規程（昭47労告92号）第24条に基づく特別教育を実施します。
         </p>
       </header>
 
@@ -193,7 +193,7 @@ export default function FullharnessPage() {
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
             <dt className="w-28 shrink-0 font-semibold text-slate-700">関連条文</dt>
-            <dd className="text-slate-600">安衛則第518条〜第521条／厚生労働省告示第11号（2018年）</dd>
+            <dd className="text-slate-600">科目の根拠: 安全衛生特別教育規程（昭47労告92号）第24条（平30告示249号で追加）／墜落防止措置: 安衛則第518条〜第521条／墜落制止用器具の規格（平31厚労省告示第11号）は器具の構造規格（科目根拠ではない）</dd>
           </div>
           <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
             <dt className="w-28 shrink-0 font-semibold text-slate-700">指針原文</dt>
@@ -281,32 +281,44 @@ export default function FullharnessPage() {
         </div>
       </section>
 
-      {/* サンプル資料ダウンロード */}
-      <section id="course-sample" className="mb-8 scroll-mt-20 rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 via-white to-slate-50 p-5 sm:p-6">
+      {/* フル教材（無償）— 投影・印刷・編集可 */}
+      <section id="course-sample" className="mb-8 scroll-mt-20 rounded-2xl border border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-slate-50 p-5 sm:p-6">
         <div className="flex flex-wrap items-start gap-4">
-          <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+          <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
             <FileText className="h-6 w-6" />
           </div>
           <div className="flex-1 min-w-[240px]">
             <h2 className="text-base font-bold text-slate-900">
-              サンプル資料ダウンロード <span className="ml-1 text-xs font-normal text-slate-500">PowerPoint 形式 / 10スライド</span>
+              フル教材（無償） <span className="ml-1 text-xs font-normal text-slate-500">申請不要・編集可</span>
             </h2>
             <p className="mt-1 text-xs leading-5 text-slate-600">
-              実際のカリキュラム構成に沿ったセミナー資料の一部を無料でご覧いただけます。表紙・目次・学科法定4区分・装着4STEP・ランヤード選定・救助5ステップ等、特別教育の構成がそのまま把握できます。
+              規程第24条の学科4科目の範囲を全てカバーしたフルデッキ。法定科目の網羅をCIで機械検証し法定対応表を同梱します。統計は最新の災害データに自動追従。
             </p>
+            <ul className="mt-2 space-y-1">
+              <li className="text-xs text-emerald-900">・出典を明記すれば、自社の教育で自由に投影・印刷・改変できます</li>
+              <li className="text-xs text-emerald-900">・改変された教材には法定対応表の保証は適用されません</li>
+              <li className="text-xs text-emerald-900">・教材そのものの販売・有償配布はできません（<Link href="/education/pack/terms" className="underline">利用規約全文</Link>）</li>
+            </ul>
             <div className="mt-4 flex flex-wrap gap-3">
+              <Link
+                href="/education/pack/fullharness"
+                className="inline-flex items-center gap-2 rounded-lg bg-emerald-700 px-4 py-2 min-h-[44px] text-sm font-bold text-white shadow-sm hover:bg-emerald-800 transition-colors"
+              >
+                <FileText className="h-4 w-4" />
+                投影・印刷で開く（無償フルデッキ）
+              </Link>
               <a
                 href="/seminars/fullharness.pptx"
                 download
-                className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 min-h-[44px] text-sm font-bold text-white shadow-sm hover:bg-slate-800 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 min-h-[44px] text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
               >
                 <Download className="h-4 w-4" />
-                PPTXサンプルをダウンロード
+                PPTX（編集用サンプル）
               </a>
-              <span className="inline-flex items-center text-xs text-slate-500">
-                ※ カスタマイズ版・講師派遣版はお問い合わせください
-              </span>
             </div>
+            <p className="mt-3 text-[11px] leading-5 text-slate-500">
+              本教材の閲覧・配布は労働安全衛生法第59条第3項の特別教育の「実施」には当たりません。科目・時間の充足、講師の選定、実技教育の対面実施、記録の作成・3年保存（安衛則第38条）は、教育を実施する事業者の責任で行ってください。
+            </p>
           </div>
         </div>
       </section>
@@ -368,14 +380,14 @@ export default function FullharnessPage() {
         <p className="mt-1 text-sm text-slate-600">教材内容のご質問・誤りの指摘・追加してほしいテーマなどをお寄せください。原則3営業日以内にご返信します。</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <Link
-            href="/contact?category=education&course=fullharness"
+            href="/contact?tab=business&topic=edu-pack&course=fullharness"
             className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-5 py-2.5 min-h-[44px] text-sm font-bold text-white shadow-sm hover:bg-amber-700 transition-colors"
           >
             <Mail className="h-4 w-4" />
             ご質問・改善提案を送る
           </Link>
           <Link
-            href="/contact?category=education&course=fullharness&type=document"
+            href="/contact?tab=business&topic=edu-pack&course=fullharness&type=document"
             className="inline-flex items-center gap-2 rounded-lg border border-amber-600 bg-white px-5 py-2.5 min-h-[44px] text-sm font-bold text-amber-700 hover:bg-amber-50 transition-colors"
           >
             <FileText className="h-4 w-4" />
