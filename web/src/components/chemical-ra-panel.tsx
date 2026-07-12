@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag, Gauge, Database, FileText, FolderOpen } from "lucide-react";
 import { TextareaWithVoice } from "@/components/voice-input-field";
 import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
@@ -224,7 +223,14 @@ function parseLimitValue(limitStr: string | undefined): { value: number; unit: s
 }
 
 export function ChemicalRaPanel() {
-  const searchParams = useSearchParams();
+  // CR2-T3(LCP): useSearchParams() は静的プリレンダーを Suspense フォールバックへ落とし、
+  // 本パネル（STEP1 フォーム＝LCP要素）が「スケルトン先行→$RCスワップ」でしか描画されず
+  // LCP 4.1s の主因になっていた（/laws C-1 と同じ構造）。マウント後に window.location から
+  // 読み取り、静的HTMLにフォームを含める（page.tsx の Suspense も撤去）。
+  const [urlParams, setUrlParams] = useState<URLSearchParams | null>(null);
+  useEffect(() => {
+    setUrlParams(new URLSearchParams(window.location.search));
+  }, []);
   const [chemicalName, setChemicalName] = useState("");
   const [workContent, setWorkContent] = useState("");
   const [measuredConc, setMeasuredConc] = useState("");
@@ -351,7 +357,7 @@ export function ChemicalRaPanel() {
   // /chemical-ra?raId=... は台帳から保存済み実施記録を再表示（原本を再印刷するため、API再実行はしない）。
   // /chemical-ra?cas=... / ?name=... は新規実施の物質プリセット。
   useEffect(() => {
-    const raId = searchParams?.get("raId");
+    const raId = urlParams?.get("raId");
     if (raId) {
       let cancelled = false;
       void getChemicalRaRecord(raId).then((rec) => {
@@ -371,7 +377,7 @@ export function ChemicalRaPanel() {
         cancelled = true;
       };
     }
-    const cas = searchParams?.get("cas");
+    const cas = urlParams?.get("cas");
     if (cas) {
       const found = findByCas(cas);
       if (found) {
@@ -380,9 +386,9 @@ export function ChemicalRaPanel() {
         return;
       }
     }
-    const name = searchParams?.get("name");
+    const name = urlParams?.get("name");
     if (name) setChemicalName(name);
-  }, [searchParams]);
+  }, [urlParams]);
 
   const handleSelectMhlw = (m: MergedChemical | null) => {
     setMhlwSelected(m);
@@ -494,16 +500,16 @@ export function ChemicalRaPanel() {
   // 着地時に判定を自動実行する（押した先で「何も起きない」を解消。raId 再表示時は実行しない）。
   useEffect(() => {
     if (autoRanRef.current) return;
-    if (searchParams?.get("run") !== "1") return;
-    if (searchParams?.get("raId")) return;
-    const cas = searchParams?.get("cas");
-    const nameParam = searchParams?.get("name");
+    if (urlParams?.get("run") !== "1") return;
+    if (urlParams?.get("raId")) return;
+    const cas = urlParams?.get("cas");
+    const nameParam = urlParams?.get("name");
     const nameToRun = cas ? findByCas(cas)?.primaryName ?? null : nameParam;
     if (!nameToRun) return;
     autoRanRef.current = true;
     void handleSearch(nameToRun);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [urlParams]);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 lg:px-8">
