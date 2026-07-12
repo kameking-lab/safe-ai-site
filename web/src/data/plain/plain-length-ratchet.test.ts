@@ -40,7 +40,7 @@ describe("端的さラチェット (CR2-D4)", () => {
 
     // 2026-07-13 時点の実測 (fidelity v2 導入直後・79条 → v2-rewrite squad是正で継続低下中)。
     // 増加は禁止・減少のみ許容。免除条を分割して書き直したらここを下げる。
-    const RATCHET_MAX = 47;
+    const RATCHET_MAX = 36;
     expect(
       exempted.length,
       `恒久免除条(長さ違反)がラチェット上限 ${RATCHET_MAX} を超えました (=${exempted.length}件)。` +
@@ -65,8 +65,8 @@ describe("端的さラチェット (CR2-D4)", () => {
         worstAt = `${p.egovLawId} ${p.articleNum}`;
       }
     }
-    // 現状の実測=245字 (特化則第28条。施行令第6条=778字はv2-rewrite squadで是正済み)。分割 PR ごとに下げる。
-    const WORST_CEIL = 245;
+    // 現状の実測=227字 (安衛則第563条。特化則第28条=245字・施行令第6条=778字はv2-rewrite squadで是正済み)。分割 PR ごとに下げる。
+    const WORST_CEIL = 227;
     expect(
       worst,
       `恒久免除条内の最悪1文が上限 ${WORST_CEIL} 字を上回りました (=${worst}字, ${worstAt})。`
