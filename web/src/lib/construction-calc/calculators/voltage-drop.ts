@@ -220,5 +220,6 @@ export const voltageDropCalculator: ConstructionCalculator = {
     "断面積",
     "許容電圧降下",
   ],
+  relatedSlugs: ["cable-ampacity"],
   compute: computeVoltageDrop,
 };

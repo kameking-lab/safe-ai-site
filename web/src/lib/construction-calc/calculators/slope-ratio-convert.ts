@@ -192,5 +192,6 @@ export const slopeRatioConvertCalculator: ConstructionCalculator = {
     "すりつけ長",
     "傾斜",
   ],
+  relatedSlugs: ["excavation-slope"],
   compute: computeSlopeRatioConvert,
 };

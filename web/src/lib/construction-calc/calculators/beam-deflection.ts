@@ -338,5 +338,6 @@ export const beamDeflectionCalculator: ConstructionCalculator = {
     "仮設材",
     "支保工",
   ],
+  relatedSlugs: ["formwork-shoring-check"],
   compute: computeBeamDeflection,
 };

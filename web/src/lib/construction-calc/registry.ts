@@ -24,6 +24,16 @@ import { slingAngleGeometryCalculator } from "./calculators/sling-angle-geometry
 import { voltageDropCalculator } from "./calculators/voltage-drop";
 import { beamDeflectionCalculator } from "./calculators/beam-deflection";
 import { safetyNetCheckCalculator } from "./calculators/safety-net-check";
+import { scaffoldLoadSummaryCalculator } from "./calculators/scaffold-load-summary";
+import { protectiveCanopyCheckCalculator } from "./calculators/protective-canopy-check";
+import { suspendedScaffoldCheckCalculator } from "./calculators/suspended-scaffold-check";
+import { ladderStepladderCheckCalculator } from "./calculators/ladder-stepladder-check";
+import { workPlatformOpeningCheckCalculator } from "./calculators/work-platform-opening-check";
+import { waterPressureCalculator } from "./calculators/water-pressure";
+import { formworkLateralPressureCalculator } from "./calculators/formwork-lateral-pressure";
+import { shoringMemberCheckCalculator } from "./calculators/shoring-member-check";
+import { rebarMassCalculator } from "./calculators/rebar-mass";
+import { concreteVolumeCalculator } from "./calculators/concrete-volume";
 
 export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   slingWireLoadCalculator,
@@ -41,6 +51,16 @@ export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   voltageDropCalculator,
   beamDeflectionCalculator,
   safetyNetCheckCalculator,
+  scaffoldLoadSummaryCalculator,
+  protectiveCanopyCheckCalculator,
+  suspendedScaffoldCheckCalculator,
+  ladderStepladderCheckCalculator,
+  workPlatformOpeningCheckCalculator,
+  waterPressureCalculator,
+  formworkLateralPressureCalculator,
+  shoringMemberCheckCalculator,
+  rebarMassCalculator,
+  concreteVolumeCalculator,
 ];
 
 const BY_SLUG: ReadonlyMap<string, ConstructionCalculator> = new Map(

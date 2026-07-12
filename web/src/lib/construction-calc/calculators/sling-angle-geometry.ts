@@ -193,5 +193,6 @@ export const slingAngleGeometryCalculator: ConstructionCalculator = {
     "逆算",
     "角度計算",
   ],
+  relatedSlugs: ["sling-wire-load"],
   compute: computeSlingAngleGeometry,
 };

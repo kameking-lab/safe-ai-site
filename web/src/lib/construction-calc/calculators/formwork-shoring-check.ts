@@ -248,5 +248,6 @@ export const formworkShoringCheckCalculator: ConstructionCalculator = {
     "根太",
     "大引",
   ],
+  relatedSlugs: ["formwork-lateral-pressure", "beam-deflection"],
   compute: computeFormworkShoring,
 };

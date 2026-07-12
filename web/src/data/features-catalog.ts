@@ -346,6 +346,106 @@ export const FEATURES: FeatureItem[] = [
     category: "construction-calc",
     tags: ["安全ネット", "防網", "墜落防止"],
   },
+  {
+    slug: "scaffold-load-summary",
+    title: "足場荷重の集計（自重＋積載→建地1本負担）",
+    summary: "1スパン積載を400kg限度と比較、建地1本負担を集計",
+    description:
+      "足場の自重合計と作業床の積載荷重を入力すると、1スパンあたりの積載荷重（安衛則571条1項4号の400kg限度）と、建地1本あたりの負担荷重の目安を集計します。単管足場チェックと連携。",
+    href: "/construction-calc/scaffold-load-summary",
+    category: "construction-calc",
+    tags: ["足場荷重", "建地", "安衛則"],
+  },
+  {
+    slug: "protective-canopy-check",
+    title: "防護棚（朝顔）の設置基準チェック",
+    summary: "ふ角・水平距離から設置要否と段数・張出し幅を判定",
+    description:
+      "建築工事を行う部分の高さと前面道路・隣地までの水平距離から、建設工事公衆災害防止対策要綱（建築工事等編）第28条の防護棚（朝顔）の設置要否・必要段数・突出し幅・角度の基準適合をチェックします。",
+    href: "/construction-calc/protective-canopy-check",
+    category: "construction-calc",
+    tags: ["防護棚", "朝顔", "公衆災害防止"],
+  },
+  {
+    slug: "suspended-scaffold-check",
+    title: "吊り足場の基準チェック",
+    summary: "ワイヤ・鎖・支点の安全係数と作業床幅を判定",
+    description:
+      "つりワイヤロープ・つり鎖・つりフック・支点等の破断荷重と実荷重から安全係数（安衛則562条2項：ワイヤ10・鎖/フック5・支点鋼材2.5/木材5）を判定し、作業床の幅・隙間（574条）も併せてチェックします。",
+    href: "/construction-calc/suspended-scaffold-check",
+    category: "construction-calc",
+    tags: ["吊り足場", "つり足場", "安全係数"],
+  },
+  {
+    slug: "ladder-stepladder-check",
+    title: "移動はしご・脚立の基準チェック",
+    summary: "はしごの幅・脚立の開き角度・昇降設備要否を判定",
+    description:
+      "移動はしごの幅（安衛則527条）、脚立の開き角度75度以下（528条）への適合と、高さ1.5m超で必要となる昇降設備（526条）の要否をチェックします。",
+    href: "/construction-calc/ladder-stepladder-check",
+    category: "construction-calc",
+    tags: ["はしご", "脚立", "安衛則"],
+  },
+  {
+    slug: "work-platform-opening-check",
+    title: "作業床・開口部の基準チェック",
+    summary: "作業床の幅・隙間・手すり・開口部の囲いを一括判定",
+    description:
+      "足場の作業床の幅・隙間、手すり・中桟の高さ、開口部の囲いの設置状況を入力すると、安衛則第563条・第519条・第518条の基準に適合するかを一括チェックします。単管足場チェックと相互リンク。",
+    href: "/construction-calc/work-platform-opening-check",
+    category: "construction-calc",
+    tags: ["作業床", "開口部", "安衛則"],
+  },
+  {
+    slug: "water-pressure",
+    title: "水圧の概算（静水圧・揚圧・ボイリング）",
+    summary: "深さ・水位差から静水圧・浮き上がり安全率・ボイリング安全率を算定",
+    description:
+      "深さ・水位差から静水圧（側圧）を、押さえ荷重から揚圧（浮き上がり）安全率を、Gs・eから限界動水勾配に対するボイリング安全率を算定します。土圧計算機（土圧の概算）の水圧項の単独版・釜場排水/矢板の検討補助です。",
+    href: "/construction-calc/water-pressure",
+    category: "construction-calc",
+    tags: ["水圧", "揚圧", "ボイリング"],
+  },
+  {
+    slug: "formwork-lateral-pressure",
+    title: "型枠の側圧（コンクリート打込み・液圧近似）",
+    summary: "単位体積重量×打込み高さで型枠側圧の上限値P=W・Hを算定",
+    description:
+      "フレッシュコンクリートの単位体積重量と打込み高さから、型枠側圧の液圧近似（安全側の上限値）を算定します。打上り速度・温度による低減はJASS5／コンクリート標準示方書の最新版で個別確認が必要なため見込まず、常に上限側の値を返します。型枠支保工の基準チェックと相互リンク。",
+    href: "/construction-calc/formwork-lateral-pressure",
+    category: "construction-calc",
+    tags: ["型枠", "側圧", "JASS5"],
+  },
+  {
+    slug: "shoring-member-check",
+    title: "土止め支保工の部材基準チェック（安衛則368〜375条）",
+    summary: "材料・組立図・部材の取付け・点検周期・作業主任者選任を一括判定",
+    description:
+      "材料・組立図・切りばりや腹おこしの取付け・継手・接続部の緊結・立入禁止・点検周期（7日以内ごと・地震/大雨後）・作業主任者の選任を、労働安全衛生規則第368条〜第375条の遵守事項に沿って一括判定します。掘削勾配計算機のNG時、土圧計算機の側圧算定後の受け皿として相互リンク。",
+    href: "/construction-calc/shoring-member-check",
+    category: "construction-calc",
+    tags: ["土止め支保工", "点検", "安衛則"],
+  },
+  {
+    slug: "rebar-mass",
+    title: "鉄筋の質量・本数換算（JIS G 3112）",
+    summary: "呼び名（D10〜D51）の単位質量で長さ×本数⇔総質量を相互換算",
+    description:
+      "JIS G 3112の呼び名（D10〜D51）から公称直径ベースで単位質量を算定し、長さ×本数→総質量、または総質量→本数を相互換算します。径ズレ（呼び名の取り違え）を防ぐため公称直径から都度計算する方式。定尺ロス・継手・フックの割増は含みません。",
+    href: "/construction-calc/rebar-mass",
+    category: "construction-calc",
+    tags: ["鉄筋", "JIS", "質量計算"],
+  },
+  {
+    slug: "concrete-volume",
+    title: "生コンクリート数量の概算（打設量・発注量・車両台数）",
+    summary: "部材寸法×ロス率で発注量とアジテータ車の概算台数を算定",
+    description:
+      "部材寸法（縦×横×高さ）または体積の直接入力から打設量を求め、ロス率を加味した発注量と生コン車（アジテータ車）の概算台数を算定します。配合（水セメント比等）はJASS5等の参照表記に留め、数値は生コン工場の配合計画書で確認してください。鉄筋質量換算と相互リンク。",
+    href: "/construction-calc/concrete-volume",
+    category: "construction-calc",
+    tags: ["生コン", "コンクリート数量", "JASS5"],
+  },
   // 安全装備
   {
     slug: "equipment-finder",

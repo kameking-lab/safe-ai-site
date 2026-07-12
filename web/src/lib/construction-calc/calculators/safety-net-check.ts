@@ -249,5 +249,6 @@ export const safetyNetCheckCalculator: ConstructionCalculator = {
     "作業床",
     "たるみ",
   ],
+  relatedSlugs: ["work-platform-opening-check"],
   compute: computeSafetyNetCheck,
 };
