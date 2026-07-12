@@ -5,10 +5,12 @@ import {
   Sparkles,
   AlertTriangle,
   Loader2,
+  FileText,
 } from "lucide-react";
 import { SAFETY_TONE } from "@/lib/design/safety-tone";
 import { TONE_DEFAULT_ICON } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { CalcReportSheet } from "@/components/construction-calc/calc-report-sheet";
 import { getCalculator } from "@/lib/construction-calc/registry";
 import {
   normalizeValues,
@@ -95,6 +97,9 @@ export function CalculatorPanel({ slug }: { slug: string }) {
   const [raw, setRaw] = useState<RawValues>(() => (calc ? initialRawValues(calc) : {}));
   const [aiText, setAiText] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  // 計算書出力: 作成日時は印刷実行時にクライアントで確定する（SSRしない＝水和ズレなし）。
+  const [printedAt, setPrintedAt] = useState<string>("");
+  const [printSeq, setPrintSeq] = useState(0);
 
   // マウント後に URLクエリの初期値を反映（AI入口 /?loadKg=2000 等）。
   // サーバーの静的HTMLは既定値で描画済みなので、ここでの上書きは水和後に一度だけ走る。
@@ -110,6 +115,26 @@ export function CalculatorPanel({ slug }: { slug: string }) {
       setRaw((prev) => ({ ...prev, ...overrides }));
     }
   }, [calc]);
+
+  // 「計算書を出力」→ 作成日時を確定してから印刷ダイアログを開く。
+  // state 更新後の再描画（計算書に日時が載る）を待つため requestAnimationFrame 経由。
+  useEffect(() => {
+    if (printSeq === 0) return;
+    const id = window.requestAnimationFrame(() => window.print());
+    return () => window.cancelAnimationFrame(id);
+  }, [printSeq]);
+
+  const handlePrintReport = () => {
+    const stamp = new Date().toLocaleString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    setPrintedAt(stamp);
+    setPrintSeq((n) => n + 1);
+  };
 
   const result = useMemo(() => {
     if (!calc) return null;
@@ -145,7 +170,8 @@ export function CalculatorPanel({ slug }: { slug: string }) {
   };
 
   return (
-    <div className="space-y-4">
+    <>
+    <div className="space-y-4 print:hidden">
       {/* 入力 */}
       <section
         aria-label="計算条件の入力"
@@ -244,21 +270,31 @@ export function CalculatorPanel({ slug }: { slug: string }) {
           </ul>
         )}
 
-        {/* AI出口: 結果の平易な解説（計算はしない） */}
+        {/* AI出口＋計算書出力（提出用A4帳票を registry から自動生成して印刷/PDF化） */}
         <div className="mt-4">
-          <button
-            type="button"
-            onClick={fetchExplanation}
-            disabled={aiLoading}
-            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-sky-700 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-sky-800 disabled:opacity-60"
-          >
-            {aiLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
-            )}
-            この結果をAIがやさしく解説
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={fetchExplanation}
+              disabled={aiLoading}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-sky-700 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-sky-800 disabled:opacity-60"
+            >
+              {aiLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Sparkles className="h-4 w-4" aria-hidden="true" />
+              )}
+              この結果をAIがやさしく解説
+            </button>
+            <button
+              type="button"
+              onClick={handlePrintReport}
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-xl border border-emerald-700 bg-white px-4 py-2.5 text-sm font-bold text-emerald-800 shadow-sm transition hover:bg-emerald-50 dark:bg-slate-800 dark:text-emerald-300"
+            >
+              <FileText className="h-4 w-4" aria-hidden="true" />
+              計算書を出力（PDF/印刷）
+            </button>
+          </div>
           {aiText && (
             <div className="mt-3 whitespace-pre-wrap rounded-xl border border-sky-200 bg-sky-50 p-3 text-sm leading-6 text-slate-800 dark:border-sky-800 dark:bg-sky-950/40 dark:text-slate-200">
               {aiText}
@@ -276,5 +312,13 @@ export function CalculatorPanel({ slug }: { slug: string }) {
         </ol>
       </CollapsibleDetail>
     </div>
+
+    {/* 提出用計算書（画面では非表示・印刷/PDF時のみ）。registry 定義から自動生成。 */}
+    <div className="hidden print:block">
+      {printedAt && (
+        <CalcReportSheet calc={calc} values={values} outcome={outcome} printedAt={printedAt} />
+      )}
+    </div>
+    </>
   );
 }

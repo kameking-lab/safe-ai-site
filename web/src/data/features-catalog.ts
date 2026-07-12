@@ -264,6 +264,36 @@ export const FEATURES: FeatureItem[] = [
     category: "construction-calc",
     tags: ["電気", "許容電流", "内線規程"],
   },
+  {
+    slug: "wind-load-temporary",
+    title: "仮設足場・仮囲いの風荷重",
+    summary: "令87条の速度圧×充実率で足場の風力を概算",
+    description:
+      "基準風速・地表面粗度区分・高さから建築基準法施行令第87条・告示1454の速度圧を求め、風力係数と充実率（メッシュシート等）を掛けて足場・仮囲いの設計用風力を概算します。安全側（過大側）の概算で、仮設工業会指針の充実率・風力係数を出典明記で解説します。",
+    href: "/construction-calc/wind-load-temporary",
+    category: "construction-calc",
+    tags: ["風荷重", "足場", "仮囲い"],
+  },
+  {
+    slug: "earth-pressure-shoring",
+    title: "土圧の概算（ランキン＋静水圧）",
+    summary: "主働／静止土圧と静水圧の重ね合わせで側圧を算定",
+    description:
+      "土止め支保工の設計外力となる側圧を、ランキン主働土圧（または静止土圧）と静水圧の重ね合わせで概算します。土質定数（γ・φ・c）は土質調査値を入力し、道路土工「仮設構造物工指針」・安衛則の土止め支保工（第368条〜・作業主任者）に結線します。",
+    href: "/construction-calc/earth-pressure-shoring",
+    category: "construction-calc",
+    tags: ["土圧", "土止め", "山留め"],
+  },
+  {
+    slug: "anchor-pullout",
+    title: "あと施工アンカーの引抜き耐力",
+    summary: "コーン破壊／付着で許容引抜き荷重と安全率を判定",
+    description:
+      "コンクリート強度・埋込み長さ・アンカー径からコーン状破壊耐力を、証明書の付着強度から付着破壊耐力を求め、安全率で許容引抜き荷重を判定します。メーカー固有値は必ず認定・試験証明書の値を入力する方式（勝手な既定値は使いません）。",
+    href: "/construction-calc/anchor-pullout",
+    category: "construction-calc",
+    tags: ["アンカー", "引抜き", "あと施工"],
+  },
   // 安全装備
   {
     slug: "equipment-finder",
