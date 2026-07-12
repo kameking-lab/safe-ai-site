@@ -445,7 +445,8 @@ def load_queue():
     for a in q["assets"]:
         if not a.get("prompt"):
             a["prompt"] = q["base_prompt"].replace("{pose}", a.get("pose", ""))
-        if not a.get("reference"):
+        if "reference" not in a:
+            # キー省略時のみ既定参照を適用。明示 null は「参照なし」（アイコンシート等）
             a["reference"] = q.get("reference_default")
     return q
 

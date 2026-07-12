@@ -1,6 +1,6 @@
 {
   "reference_default": "web/public/mascot/mascot-chihuahua-4.png",
-  "base_prompt": "添付画像は労働安全ポータルサイトの公式マスコット（ロングコートチワワ）です。この参照画像とまったく同じキャラクター・同じ作風で、次のイラストを1枚生成してください。\n\n【キャラクター仕様（厳守）】\n- クリーム色のふわふわした長毛のロングコートチワワ（参照画像と同一個体に見えること）\n- 大きな丸い焦げ茶の瞳（白ハイライト）、黒い小さな鼻、控えめなにっこり\n- 大きな立ち耳、内側はピンク\n- 緑（#159968）の工事用ヘルメット、正面に白い十字（赤い十字は禁止）\n- 太い濃緑のアウトライン、フラットなセル塗り、ステッカー風\n\n【スタイル】\n- ベクター風フラットイラスト。グラデーションや写実的な陰影は使わない\n- 背景は完全に透過したPNG（アルファチャンネル）で出力\n- 全身2頭身デフォルメ、正面〜やや斜め\n\n【今回のポーズ】\n{pose}",
+  "base_prompt": "添付画像は労働安全ポータルサイトの公式マスコット（ロングコートチワワ）です。この参照画像とまったく同じキャラクター・同じ作風で、次のイラストを1枚生成してください。\n\n【キャラクター仕様（厳守）】\n- クリーム色のふわふわした長毛のロングコートチワワ（参照画像と同一個体に見えること）\n- 大きな丸い焦げ茶の瞳（白ハイライト）、黒い小さな鼻、控えめなにっこり\n- 大きな立ち耳、内側はピンク\n- 緑（#159968）の工事用ヘルメット、正面に必ず白色ではっきりした十字（暗い色・赤い十字は禁止）\n- 太い濃緑のアウトライン、フラットなセル塗り、ステッカー風\n\n【スタイル】\n- ベクター風フラットイラスト。グラデーションや写実的な陰影は使わない\n- 背景は完全に透過したPNG（アルファチャンネル）で出力\n- 全身2頭身デフォルメ、正面〜やや斜め\n\n【今回のポーズ】\n{pose}",
   "assets": [
     {
       "id": "bow",
@@ -33,7 +33,7 @@
       "spec": {
         "transparent": true,
         "ratio": "1:1",
-        "count": 2,
+        "count": 1,
         "use": "トップヒーロー"
       },
       "status": "pending"
@@ -105,22 +105,22 @@
       "spec": {
         "transparent": true,
         "ratio": "1:1",
-        "count": 2,
+        "count": 1,
         "use": "KY用紙の空状態"
       },
-      "status": "backlog"
+      "status": "pending"
     },
     {
       "id": "water-break",
       "site": "chatgpt",
-      "pose": "緑のヘルメットをかぶったまま、水筒から水を飲んで一休みしている。額に汗のしずく1滴。",
+      "pose": "緑のヘルメットをかぶったまま、麦茶の入ったコップを持って一休みしている。額に汗のしずく1滴、ほっとした表情。",
       "spec": {
         "transparent": true,
         "ratio": "1:1",
-        "count": 2,
+        "count": 1,
         "use": "熱中症WBGT記録簿・暑熱ページ"
       },
-      "status": "backlog"
+      "status": "pending"
     },
     {
       "id": "tamakake-signal",
@@ -129,10 +129,10 @@
       "spec": {
         "transparent": true,
         "ratio": "1:1",
-        "count": 2,
+        "count": 1,
         "use": "e-learning玉掛け・事故DB"
       },
-      "status": "backlog"
+      "status": "pending"
     },
     {
       "id": "seasonal-summer",
@@ -141,10 +141,325 @@
       "spec": {
         "transparent": true,
         "ratio": "1:1",
-        "count": 2,
+        "count": 1,
         "use": "トップの季節演出（運用フェーズ）"
       },
+      "status": "pending"
+    },
+    {
+      "id": "chemical-lab",
+      "site": "chatgpt",
+      "pose": "白衣を着てゴーグルを額に上げ、フラスコを掲げて観察している。ヘルメットは白衣でも着用したまま。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "化学物質RA・化学DB"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "law-reading",
+      "site": "chatgpt",
+      "pose": "分厚い六法全書を両前足で開いて真剣に読んでいる。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "法令ナビ・法改正・法令検索"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "chat-talk",
+      "site": "chatgpt",
+      "pose": "楽しそうに話している。頭の横に空の吹き出しがひとつ浮かんでいる。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "チャットボット"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "detective",
+      "site": "chatgpt",
+      "pose": "大きな虫眼鏡を片前足で構えて調査している。探偵風のきりっとした表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "事故DB・横断検索"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "megaphone",
+      "site": "chatgpt",
+      "pose": "拡声器（メガホン）を持って朝礼で呼びかけている。元気な表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "サイネージ・朝礼"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "binoculars",
+      "site": "chatgpt",
+      "pose": "双眼鏡を両前足で構えて遠くを探している。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "検索・見つける系"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "shovel-dig",
+      "site": "chatgpt",
+      "pose": "小さなスコップを持って土を掘っている。作業に集中した表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "建設計算(掘削)"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "banzai",
+      "site": "chatgpt",
+      "pose": "両前足を上げて満面の笑みでバンザイしている。周りに紙吹雪が少し。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "完了・お祝い画面"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "icon-sheet-1",
+      "site": "chatgpt",
+      "prompt": "労働安全ポータルサイトのUIアイコンセットを作ります。1024x1024の画像を3x3の均等なグリッドに分け、各セルに1つずつ、合計9個のアイコンを描いてください。\n\n【全アイコン共通スタイル（厳守）】\n- 太い濃緑（#0A1C10）のアウトライン、フラットなセル塗り、ステッカー風\n- 配色は緑（#159968）を基調に、クリーム（#FEF7E7）と白のみ。グラデーションなし\n- 背景は完全な透過。セルの中央に配置し、隣のアイコンとくっつけない\n- 小さく表示しても判別できるシンプルな形。文字は描かない\n\n【アイコン（左上から右へ、行ごとに）】\n1. クリップボードと鉛筆\n2. 重ねた2枚の書類と印鑑\n3. 三角フラスコ\n4. 丸い吹き出し\n5. 回転灯（パトランプ）\n6. 天秤\n7. テレビモニター\n8. 裁判官の木槌\n9. キラキラ光る星",
+      "reference": null,
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "UIアイコンセット1(KY/打合せ/化学/チャット/事故/法令/サイネージ/判例/新着)"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "icon-sheet-2",
+      "site": "chatgpt",
+      "prompt": "労働安全ポータルサイトのUIアイコンセットを作ります。1024x1024の画像を3x3の均等なグリッドに分け、各セルに1つずつ、合計9個のアイコンを描いてください。\n\n【全アイコン共通スタイル（厳守）】\n- 太い濃緑（#0A1C10）のアウトライン、フラットなセル塗り、ステッカー風\n- 配色は緑（#159968）を基調に、クリーム（#FEF7E7）と白のみ。グラデーションなし\n- 背景は完全な透過。セルの中央に配置し、隣のアイコンとくっつけない\n- 小さく表示しても判別できるシンプルな形。文字は描かない\n\n【アイコン（左上から右へ、行ごとに）】\n1. 書類フォルダ\n2. 角帽（卒業帽）\n3. 工事用ヘルメット\n4. 電卓\n5. 丸いアナログメーター\n6. 温度計と太陽\n7. 虫眼鏡\n8. カレンダー\n9. 聴診器",
+      "reference": null,
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "UIアイコンセット2(記録/教育/保護具/計算/測定/熱中症/検索/計画/健診)"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "court-scale",
+      "site": "chatgpt",
+      "pose": "小さな天秤を前足で持ち上げてじっと見ている。真剣な表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "労災判例DB"
+      },
       "status": "backlog"
+    },
+    {
+      "id": "ppe-check",
+      "site": "chatgpt",
+      "pose": "安全帯（フルハーネス）を前足で点検している。頼もしい表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "保護具DB"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "news-read",
+      "site": "chatgpt",
+      "pose": "広げた新聞を読んでいる。興味津々の表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "新着・事故速報"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "calendar-plan",
+      "site": "chatgpt",
+      "pose": "大きなカレンダーの前でチェックリストに印を付けている。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "年間計画ジェネレータ"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "health-check",
+      "site": "chatgpt",
+      "pose": "聴診器を首にかけてにっこりしている。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "健診スケジューラ"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "measure-meter",
+      "site": "chatgpt",
+      "pose": "丸いメーターの計測器を前足で持って目盛りを読んでいる。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "作業環境測定"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "world-friends",
+      "site": "chatgpt",
+      "pose": "小さな地球儀を抱えてにっこりしている。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "外国人労働者向けページ"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "stamp-doc",
+      "site": "chatgpt",
+      "pose": "書類に印鑑をぽんと押している。得意げな表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "現場記録・打合せ書"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "weather-look",
+      "site": "chatgpt",
+      "pose": "片前足を額にかざして空を見上げている。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "防災・気象マップ"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "first-aid",
+      "site": "chatgpt",
+      "pose": "白い十字の救急箱を提げている。優しい表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "労災・応急手当"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "sleeping",
+      "site": "chatgpt",
+      "pose": "ヘルメットを枕元に置いて、丸くなってすやすや眠っている。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "メンテナンス・おやすみ"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "tablet-dx",
+      "site": "chatgpt",
+      "pose": "タブレット端末を前足で操作している。画面は無地。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "AI・DX系ページ"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "calculator",
+      "site": "chatgpt",
+      "pose": "電卓を叩いている。集中した表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "建設計算"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "rain-coat",
+      "site": "chatgpt",
+      "pose": "黄色ではなく緑色のカッパを着て、雨の中でも元気な表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "雨天・気象警報"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "trophy",
+      "site": "chatgpt",
+      "pose": "小さな金色のトロフィーを両前足で掲げている。誇らしげ。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 1,
+        "use": "達成・実績画面"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "hero-bg-dawn",
+      "site": "chatgpt",
+      "reference": null,
+      "prompt": "労働安全ポータルサイトのトップページ背景用イラストを、横長（1536×1024）で1枚生成してください。\n\n【内容】夜明けの建設現場の遠景。シルエットのタワークレーンと足場、朝焼けのやわらかい空。\n【スタイル（厳守）】優しいフラットイラスト調。エメラルドグリーン（#159968系）〜クリーム（#FEF7E7）〜淡いオレンジの穏やかなグラデーション。全体的に淡く低コントラスト（上に濃色の文字を重ねるため、彩度・ディテールは控えめに）。人物・文字・ロゴは描かない。写実にしない。",
+      "spec": {
+        "transparent": false,
+        "ratio": "3:2",
+        "count": 1,
+        "use": "トップヒーロー背景（低コントラスト・文字重畳前提）"
+      },
+      "status": "pending"
     }
   ]
 }
