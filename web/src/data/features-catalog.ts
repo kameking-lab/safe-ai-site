@@ -197,12 +197,12 @@ export const FEATURES: FeatureItem[] = [
   {
     slug: "sling-wire-load",
     title: "玉掛けワイヤ安全荷重計算",
-    summary: "吊り角度・本数から安全係数6を即判定",
+    summary: "掛け方モード係数・逆引き対応で安全係数6を即判定",
     description:
-      "荷の質量・吊り本数・吊り角度・ワイヤ径から1本あたりの張力を計算し、クレーン等安全規則第213条の安全係数6以上を満たすか判定。使用可となる最小径も提案します。",
+      "荷の質量・掛け方（2点/あだ巻き/半掛け/目通し）・吊り角度・ワイヤ構成（6×24 A種/6×37 A種）からモード係数方式で張力を計算し、クレーン等安全規則第213条の安全係数6以上を判定。荷重から適合ワイヤ径を選ぶ逆引きにも対応します。",
     href: "/construction-calc/sling-wire-load",
     category: "construction-calc",
-    tags: ["玉掛け", "クレーン則"],
+    tags: ["玉掛け", "クレーン則", "逆引き"],
   },
   {
     slug: "scaffold-tankan-check",
@@ -223,6 +223,46 @@ export const FEATURES: FeatureItem[] = [
     href: "/construction-calc/excavation-slope",
     category: "construction-calc",
     tags: ["掘削", "安衛則"],
+  },
+  {
+    slug: "soil-volume-conversion",
+    title: "土量換算（地山・ほぐし・締固め）",
+    summary: "土量変化率で3状態を換算＋10tダンプ台数",
+    description:
+      "土質区分の土量変化率（L・C）で地山・ほぐし・締固めの3状態を相互換算し、運搬に必要な10tダンプの概算台数も算出。変化率は道路土工要綱等の参考代表値を出典明記で収録（手入力も可）。",
+    href: "/construction-calc/soil-volume-conversion",
+    category: "construction-calc",
+    tags: ["土工", "土量", "積算"],
+  },
+  {
+    slug: "crane-rated-load",
+    title: "クレーン必要定格総荷重の逆引き",
+    summary: "吊り荷＋吊り具から必要定格総荷重を算出",
+    description:
+      "吊り荷質量に吊り具（フック・玉掛用具）の質量を加えた必要定格総荷重を計算。メーカーの定格表は載せず、作業半径での可否は定格総荷重表で確認する運用に誘導します（クレーン則66条の2の作業計画つき）。",
+    href: "/construction-calc/crane-rated-load",
+    category: "construction-calc",
+    tags: ["クレーン", "揚重", "クレーン則"],
+  },
+  {
+    slug: "formwork-shoring-check",
+    title: "型枠支保工の基準チェック",
+    summary: "パイプサポートの継ぎ・水平つなぎを条文判定",
+    description:
+      "パイプサポート・鋼管支柱の継ぎ本数・継手ボルト数・水平つなぎ間隔から、労働安全衛生規則第242条の基準（3本以上継がない・継手4ボルト以上・高さ3.5m超は2m以内ごと水平つなぎ2方向）への適合を判定します。",
+    href: "/construction-calc/formwork-shoring-check",
+    category: "construction-calc",
+    tags: ["型枠", "支保工", "安衛則"],
+  },
+  {
+    slug: "cable-ampacity",
+    title: "電線（600V IV）の許容電流チェック",
+    summary: "電線サイズ×電流減少係数で許容電流を判定",
+    description:
+      "電線サイズと施設条件（同一管内の本数＝電流減少係数）から許容電流を求め、使用電流が範囲内かを判定。許容電流は内線規程の代表値を出典明記で収録し、停電・近接作業の安衛則（339・349条）にも結線します。",
+    href: "/construction-calc/cable-ampacity",
+    category: "construction-calc",
+    tags: ["電気", "許容電流", "内線規程"],
   },
   // 安全装備
   {

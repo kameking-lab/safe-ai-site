@@ -5,6 +5,10 @@ import { ChevronLeft } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { CalculatorPanel } from "@/components/construction-calc/calculator-panel";
+import {
+  CalcBasisSection,
+  CalcCautionsSection,
+} from "@/components/construction-calc/calc-reference";
 import { CONSTRUCTION_CALCULATORS, getCalculator } from "@/lib/construction-calc/registry";
 
 /**
@@ -62,6 +66,11 @@ export default async function ConstructionCalcDetailPage({
           <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">{calc.summary}</p>
         </header>
         <CalculatorPanel slug={slug} />
+        {/* 根拠・注意・免責は入力に依存しないためサーバーレンダリング（本番HTMLに実在＝SEO/LCP要件） */}
+        <div className="mt-4 space-y-4">
+          <CalcBasisSection basis={calc.basis} />
+          <CalcCautionsSection cautions={calc.cautions} />
+        </div>
       </PageContainer>
     </div>
   );

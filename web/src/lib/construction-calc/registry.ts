@@ -12,11 +12,19 @@ import type { ConstructionCalculator } from "./schema";
 import { slingWireLoadCalculator } from "./calculators/sling-wire-load";
 import { excavationSlopeCalculator } from "./calculators/excavation-slope";
 import { scaffoldTankanCheckCalculator } from "./calculators/scaffold-tankan-check";
+import { soilVolumeConversionCalculator } from "./calculators/soil-volume-conversion";
+import { craneRatedLoadCalculator } from "./calculators/crane-rated-load";
+import { formworkShoringCheckCalculator } from "./calculators/formwork-shoring-check";
+import { cableAmpacityCalculator } from "./calculators/cable-ampacity";
 
 export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   slingWireLoadCalculator,
   scaffoldTankanCheckCalculator,
   excavationSlopeCalculator,
+  soilVolumeConversionCalculator,
+  craneRatedLoadCalculator,
+  formworkShoringCheckCalculator,
+  cableAmpacityCalculator,
 ];
 
 const BY_SLUG: ReadonlyMap<string, ConstructionCalculator> = new Map(

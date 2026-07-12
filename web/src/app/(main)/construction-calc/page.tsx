@@ -8,6 +8,10 @@ import {
   ChevronRight,
   BookOpenCheck,
   ShieldCheck,
+  Truck,
+  HardHat,
+  Layers,
+  Zap,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { PageContainer } from "@/components/layout";
@@ -17,7 +21,7 @@ import { CONSTRUCTION_CALCULATORS } from "@/lib/construction-calc/registry";
 import { CALC_DISCLAIMER } from "@/lib/construction-calc/schema";
 
 const DESCRIPTION =
-  "玉掛けワイヤの安全荷重・単管足場の基準・掘削面の勾配を、安衛則・クレーン則の条文根拠つきで即計算。プルダウンと数値入力ですぐ使え、自由記述からAIが計算機を案内します。";
+  "玉掛けワイヤ（モード係数・逆引き）・単管足場・掘削勾配・土量換算・クレーン必要定格・型枠支保工・電線許容電流を、安衛則/クレーン則/内線規程の根拠つきで即計算。プルダウンと数値入力ですぐ使え、自由記述からAIが計算機を案内します。";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/construction-calc" },
@@ -29,14 +33,18 @@ const CALC_ICONS: Record<string, LucideIcon> = {
   "sling-wire-load": Cable,
   "scaffold-tankan-check": Construction,
   "excavation-slope": Mountain,
+  "soil-volume-conversion": Truck,
+  "crane-rated-load": HardHat,
+  "formwork-shoring-check": Layers,
+  "cable-ampacity": Zap,
 };
 
 /** 量産キュー（BACKLOG-construction-calc.md）の先頭から。空約束にしない範囲で予告 */
 const UPCOMING = [
-  "土量換算（地山・ほぐし・締固め）",
-  "クレーン必要定格荷重の逆引き",
-  "型枠支保工チェック（安衛則237〜242条）",
-  "電線の許容電流・電圧降下",
+  "つりチェーン・繊維スリングの安全係数（クレーン則213条の2）",
+  "土止め支保工の部材基準（安衛則368〜375条）",
+  "昇降設備・はしご/脚立の基準（安衛則526〜528条）",
+  "酸素欠乏危険場所の換気量（酸欠則）",
 ];
 
 export default function ConstructionCalcPage() {
