@@ -5,8 +5,22 @@ import { clampOgText, ogTitleFontSize, OG_TITLE_MAX, OG_DESC_MAX } from "@/lib/o
 
 export const runtime = "edge";
 
-export function GET(req: NextRequest) {
+export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
+  // マスコット頭部（円形切り抜き・14KB）。取得失敗時は絵文字にフォールバック
+  let mascotSrc: string | null = null;
+  try {
+    const res = await fetch(new URL("/mascot/mascot-head-256.png", req.url));
+    if (res.ok) {
+      const buf = await res.arrayBuffer();
+      let bin = "";
+      const bytes = new Uint8Array(buf);
+      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      mascotSrc = `data:image/png;base64,${btoa(bin)}`;
+    }
+  } catch {
+    mascotSrc = null;
+  }
   const lang = searchParams.get("lang") === "en" ? "en" : "ja";
   const defaults = lang === "en"
     ? {
@@ -41,10 +55,10 @@ export function GET(req: NextRequest) {
       >
         <div
           style={{
-            width: "96px",
-            height: "96px",
+            width: "104px",
+            height: "104px",
             borderRadius: "50%",
-            background: "rgba(255,255,255,0.15)",
+            background: "rgba(255,255,255,0.9)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -52,7 +66,12 @@ export function GET(req: NextRequest) {
             fontSize: "52px",
           }}
         >
-          ⛑️
+          {mascotSrc ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={mascotSrc} width={88} height={88} alt="" />
+          ) : (
+            "⛑️"
+          )}
         </div>
 
         <div

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { MessageSquare, ClipboardList, BarChart3, CalendarCheck, Search } from "lucide-react";
 import { SITE_STATS, SITE_STATS_META, type SiteStatKey } from "@/data/site-stats";
 import { useLanguage } from "@/contexts/language-context";
@@ -51,6 +52,20 @@ export function NewHomeHero() {
       aria-labelledby="home-hero-title"
       className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-slate-50 dark:from-emerald-950/40 dark:via-slate-900 dark:to-slate-950"
     >
+      {/* マスコット（指差呼称）: PC装飾。絶対配置＋明示寸法でCLS 0 */}
+      <div
+        className="pointer-events-none absolute bottom-2 right-6 hidden xl:block"
+        aria-hidden="true"
+      >
+        <Image
+          src="/mascot/mascot-pointing.webp"
+          alt=""
+          width={136}
+          height={160}
+          loading="lazy"
+          style={{ width: 136, height: 160, objectFit: "contain" }}
+        />
+      </div>
       <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14 lg:py-16">
         <div className="text-center">
           <p className="text-xs font-bold tracking-widest text-emerald-700 dark:text-emerald-300">

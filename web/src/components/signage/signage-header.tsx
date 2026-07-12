@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Mascot } from "@/components/mascot";
 
 type SignageHeaderProps = {
   regionLabel: string;
@@ -23,7 +24,10 @@ export function SignageHeader({
   return (
     <header className="flex shrink-0 flex-col gap-2 border-b border-slate-700/60 pb-2 sm:gap-3 sm:pb-3 lg:flex-row lg:items-end lg:justify-between">
       <div className="min-w-0">
-        <p className="text-xs font-semibold tracking-wide text-emerald-300 sm:text-sm lg:text-base xl:text-lg">安全AIポータル サイネージ</p>
+        <p className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-emerald-300 sm:text-sm lg:text-base xl:text-lg">
+          <Mascot size="xs" alt="" className="shrink-0 rounded" />
+          安全AIポータル サイネージ
+        </p>
         <h1 className="mt-0.5 text-xl font-bold leading-tight text-white sm:text-2xl lg:text-4xl">
           今日の現場リスクと安全要点
         </h1>

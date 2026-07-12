@@ -26,6 +26,7 @@ import {
   YAxis,
 } from "recharts";
 import { HazardGlyphBadge } from "@/components/accidents/accident-type-pictogram";
+import { Mascot } from "@/components/mascot";
 import type { FeaturedHazardCase, HazardTypeSummary } from "@/lib/hazard-slides/build-summary";
 import { useWakeLock } from "@/lib/signage/use-wake-lock";
 import type { LearningQuestion } from "@/lib/types/operations";
@@ -59,13 +60,17 @@ function CoverSlide({ s, present }: { s: HazardTypeSummary; present: boolean }) 
   const trend = s.kpi.trendPercent;
   return (
     <div className="flex h-full flex-col justify-between p-6 sm:p-10">
-      <div className="flex items-center gap-4 sm:gap-6">
-        <HazardGlyphBadge glyph={s.glyph} label={s.label} size="xl" className="shadow-sm" />
-        <div>
-          <p className="text-xs font-semibold tracking-widest text-slate-500">災害の型別 安全教育スライド</p>
-          <h2 className={`font-bold text-slate-900 ${present ? "text-6xl" : "text-3xl sm:text-5xl"}`}>{s.label}</h2>
-          <p className="mt-1 text-sm text-slate-500">{s.mhlwLabel !== s.label ? `厚労省分類: ${s.mhlwLabel}` : "厚労省「事故の型」分類"}</p>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4 sm:gap-6">
+          <HazardGlyphBadge glyph={s.glyph} label={s.label} size="xl" className="shadow-sm" />
+          <div>
+            <p className="text-xs font-semibold tracking-widest text-slate-500">災害の型別 安全教育スライド</p>
+            <h2 className={`font-bold text-slate-900 ${present ? "text-6xl" : "text-3xl sm:text-5xl"}`}>{s.label}</h2>
+            <p className="mt-1 text-sm text-slate-500">{s.mhlwLabel !== s.label ? `厚労省分類: ${s.mhlwLabel}` : "厚労省「事故の型」分類"}</p>
+          </div>
         </div>
+        {/* 講師マスコット（装飾）: 表紙のみ */}
+        <Mascot variant="teacher" size="lg" alt="" className="hidden shrink-0 sm:block" />
       </div>
       <div className="grid grid-cols-2 gap-4 sm:gap-6">
         <div className="rounded-2xl border-2 border-rose-200 bg-rose-50 p-4 sm:p-6">

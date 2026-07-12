@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Stripe from "stripe";
 import { CheckCircle } from "lucide-react";
+import { Mascot } from "@/components/mascot";
 
 export const metadata: Metadata = {
   title: "決済完了",
@@ -49,10 +50,13 @@ export default async function PricingSuccessPage({ searchParams }: Props) {
 
   return (
     <main className="mx-auto max-w-lg px-4 py-16 text-center">
-      <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-        <CheckCircle className="h-9 w-9 text-emerald-500" />
+      <div className="mx-auto mb-4 flex justify-center">
+        <Mascot variant="salute" size="lg" alt="敬礼するマスコット" />
       </div>
-      <h1 className="text-2xl font-bold text-slate-900 mb-3">決済が完了しました</h1>
+      <h1 className="mb-3 inline-flex items-center gap-2 text-2xl font-bold text-slate-900">
+        <CheckCircle className="h-6 w-6 text-emerald-500" aria-hidden="true" />
+        決済が完了しました
+      </h1>
       <p className="text-slate-600 text-sm leading-7 mb-8">
         {plan ? (
           <>
