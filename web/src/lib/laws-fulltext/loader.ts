@@ -19,8 +19,16 @@
 import type { FulltextArticle, FulltextLaw } from "./types";
 import { normalizeFullwidthAlnum, normalizeKanjiNumbers } from "../article-number-normalize";
 
-/** 全文層に収載済みの法令 ID。ここに無い lawId は fulltext 非対応（curated へフォールバック）。 */
-export const FULLTEXT_LAW_IDS = ["347M50002000032"] as const;
+/**
+ * 全文層に収載済みの法令 ID。ここに無い lawId は fulltext 非対応（curated へフォールバック）。
+ * FT-D1: 安衛則。FT-D5: 安衛法・安衛令（本則の条文本文のみ。別表は §3-3 で本則外＝取込対象外で
+ * 既存 beppyo 意味索引・anei-beppyo-snapshot が正本）。
+ */
+export const FULLTEXT_LAW_IDS = [
+  "347M50002000032", // 安衛則（FT-D1）
+  "347AC0000000057", // 安衛法（FT-D5）
+  "347CO0000000318", // 安衛令（FT-D5）
+] as const;
 
 export type FulltextLawId = (typeof FULLTEXT_LAW_IDS)[number];
 
@@ -32,6 +40,10 @@ export function hasFulltext(lawId: string): lawId is FulltextLawId {
 const LOADERS: Record<FulltextLawId, () => Promise<{ default: FulltextLaw }>> = {
   "347M50002000032": () =>
     import("../../data/laws-fulltext/347M50002000032.json") as Promise<{ default: FulltextLaw }>,
+  "347AC0000000057": () =>
+    import("../../data/laws-fulltext/347AC0000000057.json") as Promise<{ default: FulltextLaw }>,
+  "347CO0000000318": () =>
+    import("../../data/laws-fulltext/347CO0000000318.json") as Promise<{ default: FulltextLaw }>,
 };
 
 // 同一プロセス内での再読込を避ける軽量キャッシュ（ビルド時 SSG で多数条を引くため）。

@@ -56,5 +56,13 @@ export type FulltextLaw = {
   rubyStripped: number;
   /** 取得不能条の明示（黙って欠かさない） */
   skipped: { articleNum: string; reason: string }[];
+  /**
+   * 別表(AppdxTable)の題名一覧（e-Gov 掲載の生表記。例 "別表第三"・"別表第六の二"）。
+   * 設計書 §3-3: 別表本文は取込対象外（既存 beppyo 意味索引・anei-beppyo-snapshot が正本）。
+   * ここでは題名だけを機械採録し、beppyo.ts の網羅性チェック（未収載別表の検出・
+   * 幽霊別表の混入検出）に使う。別表を条文ページ化はしない（法令ナビ表示と二重化させない）。
+   * 別表を持たない法令では空配列。
+   */
+  appdxTables?: string[];
   articles: FulltextArticle[];
 };
