@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { PAID_MODE } from "@/lib/paid-mode";
 import { FEATURE_CATEGORIES } from "@/data/features-catalog";
+import { CONSTRUCTION_CALCULATORS } from "@/lib/construction-calc/registry";
 import { SAFETY_SIGNS, SIGN_CATEGORIES } from "@/data/safety-signs";
 import { INDUSTRIES } from "@/data/safety-signs/industry-usage";
 import { ILLNESS_CATEGORIES } from "@/data/illness-considerations";
@@ -257,6 +258,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
   }));
 
+  // 建設計算: ハブ＋個別計算機（registry から列挙＝計算機の量産に自動追従）
+  const constructionCalcPages: typeof pages = [
+    { url: "/construction-calc", lastModified: "2026-07-12", priority: 0.8, changeFrequency: "weekly" },
+    ...CONSTRUCTION_CALCULATORS.map((c) => ({
+      url: `/construction-calc/${c.slug}`,
+      lastModified: "2026-07-12",
+      priority: 0.8,
+      changeFrequency: "monthly" as Freq,
+    })),
+  ];
+
   const safetySignCategoryPages: typeof pages = SIGN_CATEGORIES.map((c) => ({
     url: `/safety-signs/category/${c.id}`,
     lastModified: "2026-05-16",
@@ -316,6 +328,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     ...filtered,
     ...featureCategoryPages,
+    ...constructionCalcPages,
     ...safetySignCategoryPages,
     ...safetySignIndustryPages,
     ...safetySignDetailPages,
