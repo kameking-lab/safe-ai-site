@@ -1,6 +1,6 @@
 import { searchCrossIndex, normalizeArticleQuery, expandLawAliases, chemicalDetailUrl } from './cross-search';
 
-export type SearchCategory = 'law' | 'revision' | 'notice' | 'chemical' | 'equipment' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq' | 'sign' | 'article' | 'feature';
+export type SearchCategory = 'law' | 'plain' | 'revision' | 'notice' | 'chemical' | 'equipment' | 'education' | 'accident' | 'precedent' | 'glossary' | 'faq' | 'sign' | 'article' | 'feature';
 
 export interface SearchItem {
   id: string;
@@ -21,6 +21,9 @@ export interface SearchItem {
  */
 const SEARCH_CATEGORY_PRIORITY: readonly SearchCategory[] = [
   'law',
+  // 現場ことば版（条文の言い換え）は法令本文の派生コンテンツ。原文条文（law）の権威は
+  // 奪わず、同点タイブレークでは law の直下（教育の上）に置く。
+  'plain',
   'education',
   // FAQ は高意図の疑問（「衛生管理者は何人？」「SDS交付は義務？」）へ即答を返すため、
   // 同点時は判例・通達より上位に寄せる（条文・教育の次点）。
@@ -54,6 +57,7 @@ export const CATEGORY_META: Record<
   { label: string; bgColor: string; textColor: string }
 > = {
   law:       { label: '法令',    bgColor: 'bg-teal-100',   textColor: 'text-teal-700' },
+  plain:     { label: '現場ことば', bgColor: 'bg-amber-100', textColor: 'text-amber-800' },
   revision:  { label: '法改正',  bgColor: 'bg-cyan-100',   textColor: 'text-cyan-700' },
   notice:    { label: '通達',    bgColor: 'bg-blue-100',   textColor: 'text-blue-700' },
   chemical:  { label: '化学物質', bgColor: 'bg-orange-100', textColor: 'text-orange-700' },
@@ -82,7 +86,7 @@ export const CATEGORY_META: Record<
  * 忘れる／タブにあるのにメタが無い、の両方向のドリフトを検知）。
  */
 export const SEARCH_CATEGORIES: readonly SearchCategory[] = [
-  'law', 'revision', 'faq', 'article', 'precedent', 'notice', 'feature', 'chemical', 'equipment', 'education', 'accident', 'glossary', 'sign',
+  'law', 'plain', 'revision', 'faq', 'article', 'precedent', 'notice', 'feature', 'chemical', 'equipment', 'education', 'accident', 'glossary', 'sign',
 ];
 
 /**
@@ -112,11 +116,34 @@ export function searchItems(
   category: 'all' | SearchCategory,
   limit = 10,
 ): SearchItem[] {
-  return searchCrossIndex(items, expandLawAliases(normalizeArticleQuery(query)), {
-    category,
+  const expandedQuery = expandLawAliases(normalizeArticleQuery(query));
+  if (category !== 'all') {
+    return searchCrossIndex(items, expandedQuery, {
+      category,
+      limit,
+      categoryPriority: SEARCH_CATEGORY_PRIORITY,
+    });
+  }
+  // 'all' 集約時、現場ことば版（plain）は原文条文・他カテゴリの枠を奪わない。
+  // TOP_K=10 は /search・⌘K・現場口語ベンチ（bench:field-terms）が共有する実務上の
+  // 狭い窓で、plain の追加で「報告」等の広い keywords/subtitle 一致が増えると、
+  // 既存の正当な上位ヒットを押し出しかねない（CR2-S2 導入時に FV39 で実測済み）。
+  // 非 plain の枠を先に確保し、余った枠だけを plain で埋める＝plain は加点のみ・
+  // 既存カテゴリの順位を一切押し出さない。
+  const nonPlain = items.filter((i) => i.category !== 'plain');
+  const primary = searchCrossIndex(nonPlain, expandedQuery, {
+    category: 'all',
     limit,
     categoryPriority: SEARCH_CATEGORY_PRIORITY,
   });
+  if (primary.length >= limit) return primary;
+  const plainOnly = items.filter((i) => i.category === 'plain');
+  const plainHits = searchCrossIndex(plainOnly, expandedQuery, {
+    category: 'all',
+    limit: limit - primary.length,
+    categoryPriority: SEARCH_CATEGORY_PRIORITY,
+  });
+  return [...primary, ...plainHits];
 }
 
 /** カテゴリ別に件数を集計する（/search 結果ページのタブ件数バッジ用）。 */
@@ -125,7 +152,7 @@ export function countByCategory(
   query: string,
 ): Record<'all' | SearchCategory, number> {
   const counts: Record<'all' | SearchCategory, number> = {
-    all: 0, law: 0, revision: 0, notice: 0, chemical: 0, equipment: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0, sign: 0, article: 0, feature: 0,
+    all: 0, law: 0, plain: 0, revision: 0, notice: 0, chemical: 0, equipment: 0, education: 0, accident: 0, precedent: 0, glossary: 0, faq: 0, sign: 0, article: 0, feature: 0,
   };
   if (!query.trim()) return counts;
   // 上限なしで全件マッチを採り、カテゴリ別に集計する。
@@ -615,6 +642,32 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
         });
       }
     }),
+
+    // 現場ことば版（条文のやさしい言い換え）。これまで /search・⌘K から丸ごと不可視で、
+    // 条文ヒットは law-search 着地のみだった（酷評01縫い目3）。表示可否の判定は
+    // getFreshPlainArticle に一元化（fidelity verified ＋ 原文ハッシュ一致のみ表示＝
+    // stale/draft は索引にも出さない）。curated 条（LAW_NAVI_ENTRIES）に対してのみ判定し、
+    // 各ヒットは条文原文ではなく法令ナビの言い換え条ページへ深リンクする
+    // （幽霊URL 0＝LAW_NAVI_ENTRIES.path は generateStaticParams の生成集合に含まれる）。
+    // カテゴリは law と別立ての 'plain' にし、T1/T2/T3（本番インデックス回帰）の
+    // 「1位は原文条文」という既存アサーションを一切揺らさない。
+    Promise.all([import('@/data/plain'), import('@/lib/law-navi/permalink')]).then(
+      ([{ getFreshPlainArticle }, { LAW_NAVI_ENTRIES }]) => {
+        for (const entry of LAW_NAVI_ENTRIES) {
+          const a = entry.article;
+          const plain = getFreshPlainArticle(entry.egovLawId, a);
+          if (!plain) continue;
+          items.push({
+            id: `plain-${entry.egovLawId}-${a.articleNum}`,
+            title: `${a.lawShort} ${a.articleNum}（現場ことば）`,
+            subtitle: plain.plainText.slice(0, 90),
+            category: 'plain',
+            keywords: [...a.keywords, a.articleTitle, a.law, a.lawShort, a.articleNum, '現場ことば', 'やさしい言い換え'].filter(Boolean),
+            url: entry.path,
+          });
+        }
+      }
+    ),
   ]);
 
   cachedIndex = items;

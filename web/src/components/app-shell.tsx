@@ -43,6 +43,8 @@ import {
   UserRound,
   Award,
   Gauge,
+  Compass,
+  LayoutGrid,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { FlagshipNav } from "@/components/flagship-nav";
@@ -144,7 +146,12 @@ export const NAV_CATEGORIES: NavCategory[] = [
     label: "学ぶ",
     description: "法令・通達・用語・コースで体系的に学習",
     items: [
-      { id: "law-search", label: "法令検索", href: "/law-search", icon: Search, description: "条文を全文検索・お気に入り保存" },
+      // CR2-S1: /law-navi がグローバルナビ・トップ・フッター・/features のどこからも
+      // 0リンクだった孤島状態を解消。法令系3入口(法令ナビ/法令検索/横断検索)の
+      // 役割の違いを一言説明で明示する。
+      { id: "law-navi", label: "法令ナビ", href: "/law-navi", icon: Compass, description: "分野・現場ことばから安衛法の原文条文へ最短到達（全文含め1,700件超を収載）" },
+      { id: "law-search", label: "法令検索", href: "/law-search", icon: Search, description: "条文だけを全文検索・お気に入り保存" },
+      { id: "search", label: "サイト内横断検索", href: "/search", icon: LayoutGrid, description: "事故・通達・化学物質・現場ことばまでサイト全体を横断検索" },
       { id: "circulars", label: "通達・判例", href: "/circulars", icon: Scale, description: "厚労省通達1069件+安全配慮義務判例30件" },
       { id: "laws", label: "法改正カレンダー", href: "/laws", icon: RefreshCw, description: "改正カレンダー・施行日カウントダウン" },
       { id: "law-hierarchy", label: "法令体系マップ", href: "/law-hierarchy", icon: LibraryBig, description: "法→政令→省令→告示の階層俯瞰" },

@@ -63,8 +63,18 @@ export function LawHubNav({ current }: LawHubNavProps) {
             );
           })}
         </div>
+        {/* P1-H/CR2-S1: 法令ナビ・条文検索・横断検索の三者使い分けは、モバイルで不可視な
+            title 属性のツールチップだけに頼らず、常時表示のキャプションでも明示する。 */}
+        <p className="mt-2 text-[11px] leading-snug text-slate-500">
+          <span className="font-semibold text-slate-600">使い分け：</span>
+          法令ナビ＝分野・現場ことばから読む／条文検索＝条文の全文検索／
+          <a href="/search" className="text-blue-700 underline underline-offset-2 hover:text-blue-800">
+            サイト内横断検索
+          </a>
+          ＝事故・通達・化学物質も含め全部から探す。
+        </p>
         {active && (
-          <p className="mt-2 text-[11px] leading-snug text-slate-600">
+          <p className="mt-1.5 text-[11px] leading-snug text-slate-600">
             <span className="font-semibold text-slate-700">{active.label}：</span>
             {active.description}
           </p>

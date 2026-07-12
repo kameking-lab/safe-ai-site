@@ -23,6 +23,7 @@ import {
   ExternalLink,
   Copy,
   Check,
+  MessageCircle,
 } from 'lucide-react';
 import {
   buildSearchIndex,
@@ -44,6 +45,7 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
   const cls = 'h-4 w-4';
   switch (category) {
     case 'law':       return <BookText className={cls} aria-hidden="true" />;
+    case 'plain':     return <MessageCircle className={cls} aria-hidden="true" />;
     case 'revision':  return <ScrollText className={cls} aria-hidden="true" />;
     case 'notice':    return <FileText className={cls} aria-hidden="true" />;
     case 'chemical':  return <TestTube2 className={cls} aria-hidden="true" />;

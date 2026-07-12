@@ -20,6 +20,7 @@ import {
   LayoutGrid,
   ScrollText,
   MessageSquare,
+  MessageCircle,
   ListChecks,
   BarChart3,
   ExternalLink,
@@ -55,6 +56,7 @@ function CategoryIcon({ category }: { category: SearchCategory }) {
   const cls = 'w-3.5 h-3.5';
   switch (category) {
     case 'law':       return <BookText className={cls} />;
+    case 'plain':     return <MessageCircle className={cls} />;
     case 'revision':  return <ScrollText className={cls} />;
     case 'notice':    return <FileText className={cls} />;
     case 'chemical':  return <TestTube2 className={cls} />;

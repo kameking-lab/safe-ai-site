@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { LawArticle } from "@/data/laws";
+import { allLawArticles } from "@/data/laws";
 import {
   buildStructuredCitations,
   suggestRelatedLaws,
@@ -40,6 +41,22 @@ describe("buildStructuredCitations", () => {
       articleNum: `第${i + 100}条`,
     }));
     expect(buildStructuredCitations(many)).toHaveLength(5);
+  });
+
+  // CR2-T2（酷評01縫い目3）: 現場ことば版がある条は参照条文カードに
+  // 「現場ことば版で読む」リンクを併記する（getFreshPlainArticle 判定）。
+  it("現場ことば版がある条は plainHref が法令ナビの条ページを指す（安衛則第36条＝フルハーネス特別教育）", () => {
+    const real = allLawArticles.find(
+      (a) => a.lawShort === "安衛則" && a.articleNum === "第36条"
+    );
+    expect(real, "安衛則第36条が corpus に無い").toBeTruthy();
+    const result = buildStructuredCitations([real as LawArticle]);
+    expect(result[0]?.plainHref).toBe("/law-navi/347M50002000032/36");
+  });
+
+  it("現場ことば版が無い/未検証の条は plainHref が付かない（架空の text で fidelity 不一致）", () => {
+    const result = buildStructuredCitations([article]);
+    expect(result[0]?.plainHref).toBeUndefined();
   });
 });
 
