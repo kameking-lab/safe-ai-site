@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { PageContainer } from "@/components/layout";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
@@ -24,8 +24,9 @@ import {
   type ChemicalSubstance,
 } from "@/data/mock/chemical-substances-db";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
-import { getAllMergedChemicalsSlim as getAllMergedChemicals } from "@/lib/mhlw-chemicals-slim";
+import { getAllMergedChemicalsSlim as getAllMergedChemicals, MHLW_MERGED_CHEMICAL_COUNT_SLIM } from "@/lib/mhlw-chemicals-slim";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
+import { ChemicalNotFoundRescue } from "@/components/chemical/chemical-not-found-rescue";
 import {
   ALL_REGULATION_TAGS,
   REGULATION_TAGS,
@@ -96,6 +97,15 @@ export function ChemicalDatabaseClient() {
   const [tagMatchMode, setTagMatchMode] = useState<"and" | "or">("and");
   const [constructionOnly, setConstructionOnly] = useState(false);
 
+  // CR2-T1: 他機能・横断検索から ?q=物質名 で深リンクできるよう、マウント後に URL から取り込む。
+  // useSearchParams は静的プリレンダーを Suspense フォールバックへ落とし LCP を悪化させるため
+  // 使わず、window.location から復元する（/laws と同方針）。
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (q && q.trim()) setQuery(q.trim());
+  }, []);
+
   const toggleTag = (t: RegulationTag) => {
     setSelectedTags((prev) => {
       const next = new Set(prev);
@@ -144,6 +154,12 @@ export function ChemicalDatabaseClient() {
   // 収録数・該当数は「OK/完了」ではないため緑(safe)を使わず案内色の info（青）。該当0だけ warning（黄）。
   const mhlwHasFilter =
     query.trim() !== "" || selectedTags.size > 0 || constructionOnly;
+
+  // CR2-T1: ゼロヒット（有効な検索語があるのに現在タブの結果が0件）判定。
+  // このときアフィリエイト保護具枠は隠し、RAと同じ脱出路（AI調査/SDS読取/製品名検索）を出す。
+  const activeEmpty = mode === "mhlw" ? filteredMhlw.length === 0 : filtered.length === 0;
+  const isZeroHit = activeEmpty && query.trim().length >= 2;
+  const raDeepLink = `/chemical-ra?name=${encodeURIComponent(query.trim())}&run=1`;
   const conclusion: {
     tone: SafetyTone;
     value?: string;
@@ -346,9 +362,17 @@ export function ChemicalDatabaseClient() {
             </div>
           </div>
           {filteredMhlw.length === 0 ? (
-            <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-              該当する物質が見つかりませんでした。別の語句でお試しください。
-            </p>
+            query.trim().length >= 2 ? (
+              <ChemicalNotFoundRescue
+                query={query}
+                ai={{ href: raDeepLink }}
+                catalogNote={`統合DB ${MHLW_MERGED_CHEMICAL_COUNT_SLIM.toLocaleString()}物質に見つかりません`}
+              />
+            ) : (
+              <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+                該当する物質が見つかりませんでした。別の語句でお試しください。
+              </p>
+            )
           ) : (
             <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
               <table className="w-full text-xs">
@@ -476,9 +500,13 @@ export function ChemicalDatabaseClient() {
           検索結果
         </h2>
         {filtered.length === 0 ? (
-          <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-            該当する物質が見つかりませんでした。別の語句や区分でお試しください。
-          </p>
+          query.trim().length >= 2 ? (
+            <ChemicalNotFoundRescue query={query} ai={{ href: raDeepLink }} />
+          ) : (
+            <p className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+              該当する物質が見つかりませんでした。別の語句や区分でお試しください。
+            </p>
+          )
         ) : (
           <ul className="space-y-3">
             {filtered.map((s) => (
@@ -593,13 +621,17 @@ export function ChemicalDatabaseClient() {
 
       </>)}
 
-      {/* この場面で必要な保護具: 化学物質 → 防塵防毒マスク・保護メガネ・保護手袋・保護衣 */}
-      <ContextualPpePicks
-        context="化学物質 有機溶剤 特化則 防塵 防毒 マスク 保護メガネ 保護手袋"
-        fallbackCategoryIds={["respiratory", "eye-ear-protection", "hand-foot"]}
-        heading="🛡 化学物質作業で必要な保護具"
-        description="呼吸用保護具・保護メガネ・耐薬品手袋など、SDS の指示に沿って選定するための候補。"
-      />
+      {/* この場面で必要な保護具: 化学物質 → 防塵防毒マスク・保護メガネ・保護手袋・保護衣
+          CR2-T1: ゼロヒット時は「調べ物に失敗したら物を売られた」体験を避けるため非表示にし、
+          救済動線（AI調査/SDS読取/製品名検索）を優先する。 */}
+      {!isZeroHit && (
+        <ContextualPpePicks
+          context="化学物質 有機溶剤 特化則 防塵 防毒 マスク 保護メガネ 保護手袋"
+          fallbackCategoryIds={["respiratory", "eye-ear-protection", "hand-foot"]}
+          heading="🛡 化学物質作業で必要な保護具"
+          description="呼吸用保護具・保護メガネ・耐薬品手袋など、SDS の指示に沿って選定するための候補。"
+        />
+      )}
 
       <aside className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
         <p className="flex items-center gap-2 font-semibold">

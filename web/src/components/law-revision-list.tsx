@@ -861,7 +861,8 @@ export function LawRevisionList({
           return (
             <li
               key={revision.id}
-              className={`rounded-xl border bg-white p-4 transition ${
+              id={`rev-${revision.id}`}
+              className={`scroll-mt-24 rounded-xl border bg-white p-4 transition ${
                 isSelected
                   ? "border-emerald-300 bg-emerald-50/30 ring-1 ring-emerald-200"
                   : isArticleMatch

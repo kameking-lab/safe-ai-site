@@ -8,6 +8,7 @@ import {
   type NotificationFeedResponse,
   type SiteNotification,
 } from "@/lib/notifications/feed-types";
+import { isRecent } from "@/lib/news-hub-types";
 import {
   loadNotificationSettings,
   loadReadIds,
@@ -111,7 +112,10 @@ export function NotificationBell() {
     };
   }, [open]);
 
-  const unread = items.filter((i) => !readIds.has(i.id));
+  // CR2-H2: 初回訪問でいきなり「未読30」を出さない。未読バッジは端末の既読が
+  // 無くても直近7日分だけを未読扱いにする（古い蓄積はノイズなので数えない）。
+  // 一覧の各項目の未読ドットは真の既読状態（readIds）のまま表示する。
+  const unread = items.filter((i) => !readIds.has(i.id) && isRecent(i.date, 7));
   const hasAlert = unread.some((i) => i.severity === "warning" || i.severity === "special");
 
   const markAllRead = () => {
@@ -199,6 +203,13 @@ export function NotificationBell() {
               );
             })}
           </ul>
+          <Link
+            href="/whats-new"
+            onClick={() => setOpen(false)}
+            className="flex min-h-[44px] items-center justify-center gap-1 border-t border-slate-200 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-slate-50 dark:border-slate-700 dark:text-sky-300 dark:hover:bg-slate-800"
+          >
+            新着をすべて見る →
+          </Link>
           <div className="flex items-center justify-between border-t border-slate-200 px-3 py-2 dark:border-slate-700">
             <Link
               href="/notifications"

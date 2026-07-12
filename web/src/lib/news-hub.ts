@@ -50,7 +50,9 @@ function lawRevisionItems(limit: number): NewsHubItem[] {
         summary: r.summary,
         date: toYmd(r.enforcement_date) || toYmd(r.publishedAt),
         url,
-        internalHref: "/laws",
+        // CR2-H2: カテゴリハブ（/laws 先頭）ではなく当該改正カードのアンカーへ着地。
+        // law-revision-list.tsx の各カードに id={`rev-<id>`} を付与済み。
+        internalHref: `/laws#rev-${r.id}`,
         badge: badge.label,
         enforcementDaysLeft: badge.daysLeft,
         // 業種別メール配信のセグメント用。空配列＝全業種向け。
@@ -71,7 +73,8 @@ function noticeItems(limit: number): NewsHubItem[] {
       summary: `${n.docType}${n.noticeNumber ? `・${n.noticeNumber}` : ""}（${n.issuer}）`,
       date: toYmd(n.issuedDate),
       url: n.detailUrl || n.sourceUrl || "https://www.mhlw.go.jp/hourei/",
-      internalHref: "/circulars",
+      // CR2-H2: 一覧ハブ（/circulars）ではなく当該通達の詳細ページへ（実在・generateStaticParams）。
+      internalHref: `/circulars/${n.id}`,
     }));
 }
 
@@ -92,7 +95,9 @@ function mediaItems(limit: number): NewsHubItem[] {
         summary: estType ? `${summary}（AI推定事故型: ${estType}）` : summary,
         date,
         url: String(src.url ?? ""),
-        internalHref: "/accidents",
+        // CR2-H2: 報道は /accidents（当該記事が無い検索ページ）ではなく元記事へ。
+        // internalHref を持たせないことで通知ベル・一覧が外部URLへ着地する。
+        internalHref: undefined,
         badge: estType || undefined,
       };
     })
