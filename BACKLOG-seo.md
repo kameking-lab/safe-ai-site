@@ -3,6 +3,12 @@
 担当領域・契約・絶対ルールは loop-prompt-seo.txt を参照。所有ファイル=sitemap*/robots/manifest/seo-lib/JSON-LDヘルパー/横断検索(search-index・fuzzy-search・notice-search・/search)/app-shell(検索UIのみ)/両layout(metadataのみ)。**着手前に必ず本番とコードの現状を確認**（走行中の全領域ループが先に消化している項目があるため、済みなら[x]にして次へ）。マスター BACKLOG.md は参照専用。
 
 ## 未着手（上から処理）
+### 2026-07-12 外部酷評第2ラウンド注入（出典: docs/site-critique-2026-07-12/ 01/03/04章。実測証拠つき）
+- [ ] 【Sonnet・P0】CR2-S1: /law-navi をグローバルナビへ — 本番トップHTML143リンク・モバイルメニュー・フッター・/features 全てに law-navi が0本（酷評01縫い目1）。app-shell.tsx のナビ「学ぶ」グループとフッターに「法令ナビ（現場の言葉から条文へ）」を追加。あわせて law-hub-nav の三者使い分け（ナビ=分野から読む/条文検索=全文/横断=サイト全部）を title 属性から可視1行キャプションへ昇格（モバイルはツールチップ不可視のため）。完了条件=本番トップHTMLに /law-navi リンク≥2＋モバイル390pxスクショ。
+- [ ] 【Sonnet・P0】CR2-S2: 横断検索インデックスへ現場ことば版を収載 — plain 512条が /search から不可視（酷評01縫い目3。条文ヒットは law-search 着地で plain 未収載= lib/search-index.ts L179）。search-index.ts に plain ソースを追加（title=「◯◯法 第◯条（現場ことば）」・url=law-navi 条文ページ・data/plain の dynamic import）。完了条件=「研削といし」「囲い」等で現場ことばヒットが出る回帰テスト＋既存23クエリ回帰全緑＋first-load JS 非増加。
+- [ ] 【Sonnet・P1】CR2-S3: 法改正ヒットの個別着地 — /search の法改正9ヒットが全部 /laws 一覧先頭落ち（lib/search-index.ts L213 が自認）。/laws 一覧の各改正項目に id を付与し `/laws#<改正id>` アンカー着地へ（詳細ページ実装を待たない応急処置。通知ベル CR2-H2 と共通基盤）。完了条件=検索→タップで当該改正項目が画面内に来る実機スクショ。
+- [ ] 【Opus・P1】CR2-S4: /search の性能是正 — Lighthouseモバイル Perf71・CLS0.185・TBT628ms（10ページ中最下位・酷評04章。クライアント検索索引構築コスト）。索引の遅延ロード/分割・結果リスト骨格の同寸プレースホルダでCLS<0.1・TBT<300ms・Perf90+へ。完了条件=Lighthouse再実測値をdocsに記録。
+
 
 ### 2026-07-12 日本一スコアカード注入（正本: docs/nihonichi-scorecard.md／戦略: docs/nihonichi-strategy-2026-07-12.md）
 - [ ] 【要オーナー・P0】NIQ-SEO1: GSC/GA4稼働化（**サイト全体で唯一残っている社長作業**・約30分）。2026-07-12本番実測で `/api/search-console` が `source:"mock"`・GA4 gtagタグ不在＝順位/インデックス/流入の計器ゼロ。手順は docs/ga4-gsc-status-2026-05-23/02-required-actions.md（Vercel環境変数6本＋Google側設定。コード側は全実装済み）。完了確認= `curl -s "https://www.anzen-ai-portal.jp/api/search-console?period=7d"` が `"source":"gsc"` ＋ 本番HTMLに gtag スクリプト。稼働後、LN-S3（/law-navi indexed計測）とスコアカードS-1/S-2セルの記入が可能になる。

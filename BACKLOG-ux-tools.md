@@ -3,6 +3,11 @@
 担当領域・契約・絶対ルールは loop-prompt-ux-tools.txt を参照。所有route=risk-prediction/risk/chemical-database/chemical-ra/chemical*/stress-check/mental-health*/treatment-work-balance/law-search/circulars/law-hierarchy/chatbot/stats/accidents-analytics/accidents-reports/accident-news/bcp/subsidies/insurance/organization/strategy/goods/leaflet/newsletter。**着手前に現状確認**（済みは[x]）。マスター BACKLOG.md は参照専用。
 
 ## 未着手（上から処理）
+### 2026-07-12 外部酷評第2ラウンド注入（出典: docs/site-critique-2026-07-12/ 01/04章。実測証拠つき）
+- [ ] 【Sonnet・P0】CR2-T1: 化学DBゼロヒットの行き止まり解消 — 収載外物質（カプサイシン実測）で /chemical-ra は「AI詳細調査/SDS読取/製品名検索」3脱出路＋57条の3注意を出すが、/chemical-database は「見つかりませんでした」＋アフィリエイト保護具カードで終了（酷評01縫い目2）。ゼロヒットUIを共通コンポーネント化して chemical-database-client.tsx へ移植、ゼロヒット時はアフィ枠非表示、`?q=` 初期値対応で深リンク可能に。完了条件=カプサイシンで両入口が同等の救済を出す実機スクショ。
+- [ ] 【Sonnet・P1】CR2-T2: law-search 結果カードとチャットボット出典に現場ことば版バッジ — plain が存在する条文（getFreshPlainArticle 判定）に「現場ことば版で読む→law-navi条文ページ」を併記（酷評01縫い目3。既存タスク LN-T1 とセットで1PR可）。チャットボット側は lib/chatbot-enrichment.ts の参照条文カードに同判定で併記。完了条件=「足場」検索と「フルハーネス特別教育」質問の両方で plain リンクが出る実機スクショ＋既存 law-search-results.test 全緑。
+- [ ] 【Opus・P1】CR2-T3: /chemical-ra の LCP 4.1s 是正 — Lighthouseモバイル Perf79（10ページ中唯一の要改善帯・酷評04章）。LCP要素の特定→SSR/プリロード/初期ペイロード削減で Perf90+・LCP<2.5s。完了条件=Lighthouse再実測値をdocsへ記録＋機能回帰なし（法令突合の結論ファーストUIは #874 の完了条件を維持）。
+
 
 ### 2026-07-12 日本一スコアカード注入（正本: docs/nihonichi-scorecard.md／戦略: docs/nihonichi-strategy-2026-07-12.md）
 - [ ] 【Sonnet・P2】NIQ-TOOL1: /chatbot に公開evalの透明性表示（スコアカード§3-5「評価の第三者性なし」の緩和策）。「安衛法特化で精度を公開している唯一のチャットボット」を可視化する: 51問公開eval・最終本番実測日・正答率・一次記録（docs/chatbot-genquality-51q-final-2026-07-11.json）への参照を、/chatbot の説明領域に簡潔表示（誇張禁止＝「自作評価・第三者検証なし」の性質と「網を広げれば下がり得る」旨を注記。KNOWN_*台帳が空でない場合は既知欠陥ありも表示）。数値のハードコード陳腐化を防ぐため、更新手順（eval再実行→表示更新）を四半期再計測NIQ-OPS1と連動させること。完了条件=表示のRTLテスト＋文言に誇張なしのレビュー。

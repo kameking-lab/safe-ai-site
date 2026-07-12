@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { INDEXABLE_LAW_NAVI_ENTRIES } from '@/lib/law-navi/seo-gate';
+import { INDEXABLE_LAW_NAVI_ENTRIES, isIndexableLawNaviEntry } from '@/lib/law-navi/seo-gate';
+import { getAllFulltextNaviEntries } from '@/lib/law-navi/fulltext-navi';
 import { SITE_URL } from '@/lib/seo-metadata';
 
 // 柱C-3 / S DRY: 絶対URLのオリジンは seo-metadata.ts の SITE_URL 単一ソース（末尾スラッシュ無し）。
@@ -8,10 +9,13 @@ const BASE = SITE_URL;
 /**
  * 法令ナビ 条文パーマリンク（/law-navi/[lawId]/[artSlug]）の個別 sitemap。
  *
- * 正本 = INDEXABLE_LAW_NAVI_ENTRIES（seo-gate.ts）＝生成集合 LAW_NAVI_ENTRIES のうち
- * 付加価値条件（現場ことば版・分野・用語/号注釈）を満たす、または curated 由来の条のみ。
+ * 正本 = curated 収載集合 INDEXABLE_LAW_NAVI_ENTRIES（seo-gate.ts）
+ *        ∪ 全文由来ギャップのうち付加価値条件を満たす条（FT-D2 表示統合）。
+ * 付加価値条件（現場ことば版・分野・用語/号注釈）を満たす、または curated 由来の条のみ収載。
  * FT-D3（SEO ゲート・設計書 §5-3）: 全文取込で条文ページが数千規模へ広がったとき、
  * e-Gov 原文の単純ミラー（thin/duplicate）を index/sitemap から締め出す防波堤。
+ * 全文由来ギャップは付加価値シグナル（plain/topics/用語/号）を満たす条だけが収載され、
+ * 付加価値ゼロの生ミラー条はページは生成されるが sitemap 非収載＋noindex（条文ページ側）。
  * 生成集合⊇収載集合の関係で幽霊URL 0 を維持する（載る URL は全て解決する）。
  * 既収載の curated 条は grandfather で収載を維持（後退させない・§5-3 末尾）。
  * lastmod はコーパスの e-Gov 突合日ベースの固定日（条文データ更新PRで更新する）。
@@ -23,7 +27,10 @@ function escapeXml(str: string): string {
 }
 
 export async function GET() {
-  const urls = INDEXABLE_LAW_NAVI_ENTRIES.map(
+  // curated 収載（grandfather）＋ 全文由来ギャップのうち付加価値条件を満たす条。
+  const fulltextIndexable = (await getAllFulltextNaviEntries()).filter(isIndexableLawNaviEntry);
+  const entries = [...INDEXABLE_LAW_NAVI_ENTRIES, ...fulltextIndexable];
+  const urls = entries.map(
     (e) => `  <url>
     <loc>${escapeXml(`${BASE}${e.path}`)}</loc>
     <lastmod>${CORPUS_LASTMOD}</lastmod>

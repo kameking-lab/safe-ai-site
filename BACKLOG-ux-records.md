@@ -3,6 +3,9 @@
 担当領域・契約・絶対ルールは loop-prompt-ux-records.txt を参照。所有route=safety-diary/site-records/ky/ky-examples/education-certification/education/foreign-workers/health-checkup-scheduler/account。共有ビジュアル基盤(safety-tone.ts・ConclusionCard/StatusBadge/CollapsibleDetail)の custodian=当班（足すだけ・壊さない）。**着手前に現状確認**（走行中ループが柱0の多くを消化済み＝済みは[x]）。マスター BACKLOG.md は参照専用。
 
 ## 未着手（上から処理）
+### 2026-07-12 外部酷評第2ラウンド注入（出典: docs/site-critique-2026-07-12/ 01章縫い目4。実測証拠つき）
+- [ ] 【Sonnet・P0】CR2-R1: 教育スライド「5箇所配備」を実態化 — 申告5箇所の実測は2.5箇所: /e-learning からリンク0本（クイズデータ内部流用のみ）・親ハブ /education に子ルート hazard-slides へのリンク0本・/ky/morning はKYデータ無しだと空画面のみ。(1) /education ハブ先頭に「災害の型別スライド（21分類）」カード、(2) /e-learning のテーマカード・結論カードから対応スライドへ逆リンク（QUIZ_BY_TYPE 対応表は data/mock/elearning-hazard-types-theme.ts に既存）、(3) /ky/morning の空状態でも HazardOfTheDay を表示（record 分岐の外へ）。完了条件=3経路の実機スクショ＋既存テスト全緑。
+
 
 ### 2026-07-12 日本一スコアカード注入（正本: docs/nihonichi-scorecard.md／戦略: docs/nihonichi-strategy-2026-07-12.md）
 - [ ] 【Opus・P1】NIQ-REC1: KY用紙×統合事故DBの接続＝作業内容/業種から類似災害事例をKY作成画面に提示。スコアカード§5-2で商用HACARUS KY（「約3,000件の災害事例から危険ポイント提案」公表）に規模負けと判定したが、当サイトは統合10年事故DB **5,026件**＋curated 292件を既に保有＝**結線するだけで規模逆転**できる（新規外部API・環境変数なし）。KY作成画面（ky-paper-view）で作業内容・業種の入力から関連事例カード（発生状況・対策・出典）を提示し、ワンタップでKYの「危険ポイント」へ取り込めること。完了条件=「足場組立」入力→墜落系の実在事例が提示されるPlaywright実測スクショ＋回帰テスト＋既存 ky系テスト全緑。既存 ky-assist（150事例ベース）との役割整理を実装時に明記。

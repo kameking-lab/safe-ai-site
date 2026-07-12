@@ -3,6 +3,11 @@
 担当領域・契約・絶対ルールは loop-prompt-ux-hub.txt を参照。所有route=quick/faq/glossary/guides/features/industries/diversity/resources/handover/notifications/favorites/safety-signs/accidents/court-cases/signage、およびトップ((main)/page.tsx・home-screen.tsx・home-three-pillars.tsx)。**着手前に現状確認**（済みは[x]）。マスター BACKLOG.md は参照専用。
 
 ## 未着手（上から処理）
+### 2026-07-12 外部酷評第2ラウンド注入（出典: docs/site-critique-2026-07-12/ 01章。実測証拠つき）
+- [ ] 【Sonnet・P0】CR2-H1: /features「全機能」カタログの追随 — law-navi・横断検索(/search)・教育スライド(/education/hazard-slides)・現場ことば版が未収載（酷評01縫い目8）。4件をカタログデータへ追加し、「新機能はリリースPRで /features への収載を完了条件に含める」を CLAUDE.md 運用ルールへ1行追記。完了条件=/features に4機能表示＋ルール追記。
+- [ ] 【Sonnet・P0】CR2-H2: 通知ベルの遷移先をitem固有へ — 全項目が lib/news-hub.ts の internalHref でカテゴリハブ固定（報道→/accidents で当該ニュース不在等・酷評01縫い目5）。通達→/circulars/<id>（詳細ページ実在確認済）、報道→元記事URL（urlフィールド既存。internalHref の上書きが原因）、法改正→/laws#<id>（CR2-S3 のアンカー）。ベルフッターに「すべて見る→/whats-new」、未読バッジに上限(9+)か「7日以内のみ未読」。完了条件=ベルから3種のitemがそれぞれ固有先へ着地する実機確認。
+- [ ] 【Sonnet・P1】CR2-H3: 発見層の穴3つ — (a)/equipment が404なのに横断検索は /equipment/[id] へ着地させる→index追加 or /equipment-finder へ redirect、(b)/articles 一覧がナビ0の孤島→メニュー「学ぶ」へ追加、(c)/search がアイコンのみでテキスト導線0→メニューかトップに明示リンク（酷評01縫い目8）。完了条件=3点とも実機確認＋リンク切れゼロ維持。
+
 
 ### 2026-07-12 日本一スコアカード注入（正本: docs/nihonichi-scorecard.md／戦略: docs/nihonichi-strategy-2026-07-12.md）
 - [ ] 【要オーナー・P1】NIQ-HUB1: VAPID鍵発行の可否判断（Path A解除の意思決定のみ・実装はしない）。スコアカード§8-3で「閉じている端末へのPush」だけが負けセル（タブ表示中OS通知・ベル・メール・RSSは完備）。互換設計・手順書は docs/vapid-push-setup-guide-2026-07-11.md に完成済みで、**鍵発行（環境変数追加）だけがオーナー専権で止まっている**。判断が「発行する」なら手順書どおりの実装タスクを本レーンに起票、「発行しない」なら本タスクを[x]にしてスコアカード§8-3の判定注記へ「オーナー判断で見送り」と記録（どちらでも計器は正直に保つ）。
