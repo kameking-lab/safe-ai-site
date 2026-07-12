@@ -991,6 +991,14 @@ export function ChatbotPanel() {
                                 e-Govで原文を見る
                               </a>
                             )}
+                            {c.plainHref && (
+                              <a
+                                href={c.plainHref}
+                                className="rounded border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-800 hover:bg-amber-100"
+                              >
+                                現場ことば版で読む
+                              </a>
+                            )}
                           </div>
                         </li>
                       ))}

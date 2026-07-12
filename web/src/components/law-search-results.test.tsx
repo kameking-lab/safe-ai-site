@@ -48,3 +48,21 @@ describe("LawSearchResults の AI要約モーダル フォーカス管理", () =
     expect(document.activeElement).toBe(generateButton);
   });
 });
+
+// CR2-T2（酷評01縫い目3）: 現場ことば版がある条には「現場ことば版で読む」バッジを併記し、
+// 法令ナビの条ページへ深リンクする（getFreshPlainArticle 判定）。
+describe("LawSearchResults の現場ことば版バッジ", () => {
+  it("安衛則第563条（足場）カードに現場ことば版リンクが出る", () => {
+    render(
+      <LawSearchResults
+        query=""
+        articleNumQuery="563条"
+        selectedLaw="all"
+        setSelectedLaw={vi.fn()}
+        isEn={false}
+      />
+    );
+    const link = screen.getByRole("link", { name: "現場ことば版で読む" });
+    expect(link.getAttribute("href")).toBe("/law-navi/347M50002000032/563");
+  });
+});

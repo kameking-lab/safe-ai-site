@@ -1,6 +1,8 @@
 import type { LawArticle } from "@/data/laws";
 import { getLawMetadata, getArticleEffectiveDate } from "@/data/law-metadata";
 import { LAW_SHORT_SET, LAW_FULL_NAME_SET } from "@/lib/law-name-registry";
+import { getFreshPlainArticle } from "@/data/plain";
+import { articlePermalink } from "@/lib/law-navi/permalink";
 
 /**
  * Structured citation for a single law article, exposing the
@@ -17,6 +19,8 @@ export type StructuredCitation = {
   searchHref: string;
   /** e-Gov 法令本文へのリンク（取得できる場合） */
   egovHref?: string;
+  /** 現場ことば版（やさしい言い換え）がある場合の法令ナビ条ページへの深リンク */
+  plainHref?: string;
 };
 
 export type RelatedLawLink = {
@@ -300,6 +304,7 @@ export function buildStructuredCitations(articles: LawArticle[]): StructuredCita
     const meta = getLawMetadata(a.lawShort);
     const effective =
       getArticleEffectiveDate(a.lawShort, a.articleNum) ?? meta.enactedOn;
+    const plain = meta.egovLawId ? getFreshPlainArticle(meta.egovLawId, a) : undefined;
     out.push({
       lawShort: a.lawShort,
       fullName: meta.fullName || a.law,
@@ -311,6 +316,7 @@ export function buildStructuredCitations(articles: LawArticle[]): StructuredCita
       egovHref: meta.egovLawId
         ? `https://laws.e-gov.go.jp/law/${meta.egovLawId}`
         : undefined,
+      plainHref: plain ? articlePermalink(a) ?? undefined : undefined,
     });
     if (out.length >= 5) break;
   }

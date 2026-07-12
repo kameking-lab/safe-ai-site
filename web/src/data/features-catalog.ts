@@ -207,6 +207,16 @@ export const FEATURES: FeatureItem[] = [
     tags: ["事故", "DB"],
   },
   {
+    slug: "law-navi",
+    title: "法令ナビ",
+    summary: "分野・現場ことばから条文原文へ最短到達",
+    description:
+      "労働安全衛生法体系を分野別・現場の言葉（俗称・条番号・別表の意味）から引ける条文ナビ。全文含め1,700件超の条文を収載し、AI解説・現場ことば版（やさしい言い換え）で読解を補助します。",
+    href: "/law-navi",
+    category: "databases",
+    tags: ["法令", "ナビ"],
+  },
+  {
     slug: "law-search",
     title: "法令検索",
     summary: "労働安全衛生法・規則を全文検索",
@@ -215,6 +225,26 @@ export const FEATURES: FeatureItem[] = [
     href: "/law-search",
     category: "databases",
     tags: ["法令", "検索"],
+  },
+  {
+    slug: "plain-language",
+    title: "現場ことば版（やさしい言い換え）",
+    summary: "条文を平易な言葉に言い換えて併記",
+    description:
+      "読みづらい条文の直下に、原文の意味を変えずに書き換えた「現場ことば版」を併記。法令ナビの各条文ページに収載し、正は原文であることを明示した上で理解を補助します。",
+    href: "/law-navi",
+    category: "databases",
+    tags: ["法令", "やさしい日本語"],
+  },
+  {
+    slug: "search",
+    title: "サイト内横断検索",
+    summary: "事故・通達・化学物質などを一括検索",
+    description:
+      "条文・現場ことば版・法改正・通達・化学物質・事故事例・判例・用語・FAQ・教育コースなど、サイト内の全コンテンツを1つの検索窓とカテゴリタブで横断検索できます（⌘K/Ctrl+Kでも起動可）。",
+    href: "/search",
+    category: "databases",
+    tags: ["検索", "横断"],
   },
   {
     slug: "circulars",
@@ -256,6 +286,16 @@ export const FEATURES: FeatureItem[] = [
     href: "/e-learning",
     category: "education",
     tags: ["Eラーニング"],
+  },
+  {
+    slug: "hazard-slides",
+    title: "災害の型別 安全教育スライド",
+    summary: "21分類×統計から自動生成する教育スライド",
+    description:
+      "厚労省「事故の型」21分類ごとに、統計→多い原因→対策チェック（根拠条文付き）→確認クイズのスライドを実データから自動生成。投影（16:9）とA4横印刷に対応し、朝礼・職長教育・サイネージで使えます。",
+    href: "/education/hazard-slides",
+    category: "education",
+    tags: ["教育", "スライド"],
   },
   // 管理ツール
   {

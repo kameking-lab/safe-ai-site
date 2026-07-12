@@ -86,6 +86,11 @@ export function Footer() {
             </p>
             <ul className="mt-2 space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
               <li>
+                <Link href="/law-navi" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
+                  法令ナビ（現場の言葉から条文へ）
+                </Link>
+              </li>
+              <li>
                 <Link href="/laws" className="inline-flex min-h-[44px] items-center hover:text-slate-900 hover:underline dark:hover:text-white">
                   法改正一覧
                 </Link>

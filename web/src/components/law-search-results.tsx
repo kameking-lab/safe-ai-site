@@ -9,6 +9,8 @@ import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { CopyCitationButton } from "@/components/favorites/copy-citation-button";
 import { formatArticleCitation } from "@/lib/favorites";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { getFreshPlainArticle } from "@/data/plain";
+import { findEntryByShort } from "@/lib/law-navi/permalink";
 
 /** 漢数字を算用数字に変換（例: 第二十一条 → 第21条） */
 function kanjiToNum(str: string): string {
@@ -86,6 +88,11 @@ function getEGovUrl(lawName: string): string | null {
 
 function ArticleCard({ article, onSummarize }: { article: LawArticle; onSummarize: (a: LawArticle) => void }) {
   const eGovUrl = getEGovUrl(article.law);
+  // lawShort キーで法令ナビの生成集合を引く（「労働安全衛生規則（足場等）」等の
+  // グルーピング表記でも lawShort は共通のため、EGOV_LAW_NUMBERS の未収載法令名でも解決する）。
+  const naviEntry = findEntryByShort(article.lawShort, article.articleNum);
+  const plain = naviEntry ? getFreshPlainArticle(naviEntry.egovLawId, article) : undefined;
+  const plainHref = plain ? naviEntry?.path : undefined;
   const { language } = useLanguage();
   const isEn = language === "en";
   return (
@@ -105,6 +112,14 @@ function ArticleCard({ article, onSummarize }: { article: LawArticle; onSummariz
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {plainHref && (
+            <a
+              href={plainHref}
+              className="min-h-[44px] inline-flex items-center rounded-lg border border-amber-300 bg-amber-50 px-3 py-1 text-[11px] font-semibold text-amber-800 hover:bg-amber-100 transition"
+            >
+              現場ことば版で読む
+            </a>
+          )}
           {eGovUrl && (
             <a
               href={eGovUrl}

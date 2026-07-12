@@ -64,6 +64,7 @@
 2. 変更後に npm run build + npm run lint が通ることを確認
 3. 見た目の変更はスクリーンショットで報告
 4. 何を直したか、何が残っているかを報告
+5. 新機能ページを追加するPRでは `web/src/data/features-catalog.ts`（/features カタログ）への収載を完了条件に含める（酷評CR2-H1: /law-navi・/search 等が長期間0リンクの孤島だった再発防止）
 
 ## 品質基準
 - Lighthouse Performance 90+, Accessibility 90+
