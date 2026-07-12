@@ -1,13 +1,21 @@
 /**
  * 現場ことば版 カバレッジ／stale（改正追従）集計。
  *
- * 対象法令（PLAIN_TARGETS）ごとに、コーパス実体（法令ナビ生成集合）と
- * plain レジストリを突合し、
+ * 対象法令（PLAIN_TARGETS）ごとに、コーパス実体（法令ナビ生成集合＋全文スナップショット
+ * 層）と plain レジストリを突合し、
  *  - done: 言い換え済み・原文ハッシュ一致（表示中）
  *  - stale: 言い換え済みだがコーパス原文が更新済み（UI非表示・要再生成）
  *  - missing: 未生成の条
  * を条単位で返す。`npm run plain:status` がこの結果から
  * カバレッジレポートと再生成キューを生成する。
+ *
+ * 幽霊（orphans）判定は「法令ナビ生成集合（curated）」だけでなく、全文スナップショット層
+ * （laws-fulltext。安衛則量産部隊 anei-fulltext-squad-*.md の照合先）にも articleNum が
+ * 実在すれば正当な条として扱う。curated は「既存 curated 条が正本」の dual-exclusion
+ * （lib/law-navi/fulltext-navi.ts）で全文条を LAW_NAVI_ENTRIES に混ぜない設計のため、
+ * curated 未収載だが全文層には実在する gap 条（fidelity v2 は
+ * plain-fulltext-anchor.test.ts が全文層を直接アンカーに照合済み）まで「データ不整合」と
+ * 誤検知しないようにする。
  */
 
 import { LAW_METADATA } from "@/data/law-metadata";
