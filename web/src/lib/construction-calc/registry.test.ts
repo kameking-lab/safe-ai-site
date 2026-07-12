@@ -64,6 +64,15 @@ describe("construction-calc registry: 整合性", () => {
     }
   });
 
+  it("relatedSlugs は registry に実在する slug のみ（幽霊リンク0）", () => {
+    for (const c of CONSTRUCTION_CALCULATORS) {
+      for (const s of c.relatedSlugs ?? []) {
+        expect(getCalculator(s), `${c.slug}.relatedSlugs の "${s}" が registry に存在しない`).toBeDefined();
+        expect(s, `${c.slug}.relatedSlugs が自分自身を指している`).not.toBe(c.slug);
+      }
+    }
+  });
+
   it("既定値・使用例の両方で compute が例外なく完走する", () => {
     for (const c of CONSTRUCTION_CALCULATORS) {
       const { values, errors } = normalizeValues(c, {});
