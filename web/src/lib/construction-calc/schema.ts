@@ -141,6 +141,8 @@ export type ConstructionCalculator = {
   examples: CalcExample[];
   /** AI入口のフォールバック・検索用キーワード */
   keywords: string[];
+  /** 相互リンクする関連計算機の slug（registry に実在するもののみ。幽霊リンク禁止） */
+  relatedSlugs?: string[];
   /**
    * 発見層のカテゴリ束（任意）。未宣言の場合は categories.ts が keywords/slug から推定する。
    * 部隊の新機は宣言しなくても推定で正しい束へ入るが、宣言すれば確実（推定より優先）。

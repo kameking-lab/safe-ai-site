@@ -8,6 +8,7 @@ import { CalculatorPanel } from "@/components/construction-calc/calculator-panel
 import {
   CalcBasisSection,
   CalcCautionsSection,
+  CalcRelatedSection,
 } from "@/components/construction-calc/calc-reference";
 import { CONSTRUCTION_CALCULATORS, getCalculator } from "@/lib/construction-calc/registry";
 
@@ -45,6 +46,9 @@ export default async function ConstructionCalcDetailPage({
   const { slug } = await params;
   const calc = getCalculator(slug);
   if (!calc) notFound();
+  const related = (calc.relatedSlugs ?? [])
+    .map((s) => getCalculator(s))
+    .filter((c): c is NonNullable<typeof c> => c !== undefined);
 
   return (
     <div className="min-h-[calc(100dvh-4rem)] bg-slate-50 dark:bg-slate-900">
@@ -70,6 +74,7 @@ export default async function ConstructionCalcDetailPage({
             印刷時は計算書（CalcReportSheet）側に同内容が入るため print:hidden で二重表示を避ける。 */}
         <div className="mt-4 space-y-4 print:hidden">
           <CalcBasisSection basis={calc.basis} />
+          <CalcRelatedSection related={related} />
           <CalcCautionsSection cautions={calc.cautions} />
         </div>
       </PageContainer>

@@ -35,10 +35,13 @@ describe("construction-calc 発見層: カテゴリ束", () => {
   });
 
   it("未宣言・中央マップ外の新機も keywords/slug から推定で束に入る", () => {
+    // 中央マップに未登録の将来スラッグで純粋に推定を検証する
+    expect(getCalculator("voltage-drop")).toBeUndefined();
     expect(resolveCalcCategory({ slug: "voltage-drop", keywords: ["電圧降下", "内線規程"] })).toBe("denki");
-    expect(resolveCalcCategory({ slug: "protective-canopy-check", keywords: ["朝顔", "防護棚"] })).toBe("ashiba");
-    expect(resolveCalcCategory({ slug: "sling-angle-geometry", keywords: ["吊り角度", "玉掛け"] })).toBe("tamakake");
-    expect(resolveCalcCategory({ slug: "formwork-lateral-pressure", keywords: ["側圧", "型枠"] })).toBe("concrete");
+    expect(resolveCalcCategory({ slug: "chain-fiber-sling", keywords: ["つりチェーン", "繊維スリング"] })).toBe("tamakake");
+    expect(resolveCalcCategory({ slug: "eaves-guard-check", keywords: ["朝顔", "防護棚"] })).toBe("ashiba");
+    expect(resolveCalcCategory({ slug: "column-side-pressure", keywords: ["側圧", "型枠"] })).toBe("concrete");
+    expect(resolveCalcCategory({ slug: "uplift-pressure", keywords: ["揚圧", "水圧"] })).toBe("doko");
   });
 
   it("グルーピングは表示順を保持し空の束を返さない・全件を保存する", () => {

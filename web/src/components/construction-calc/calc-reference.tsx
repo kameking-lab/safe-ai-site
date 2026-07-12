@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ExternalLink, BookOpenCheck, AlertTriangle } from "lucide-react";
-import { CALC_DISCLAIMER, type CalcBasis } from "@/lib/construction-calc/schema";
+import { ExternalLink, BookOpenCheck, AlertTriangle, ChevronRight, Link2 } from "lucide-react";
+import { CALC_DISCLAIMER, type CalcBasis, type ConstructionCalculator } from "@/lib/construction-calc/schema";
 
 /**
  * 建設計算の静的セクション（根拠・注意事項・免責）。
@@ -48,6 +48,38 @@ export function CalcBasisSection({ basis }: { basis: CalcBasis[] }) {
                 </a>
               )}
             </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** 相互リンクする関連計算機（土圧⇔水圧・型枠側圧⇔型枠支保工チェック 等）。実在する slug のみ渡すこと */
+export function CalcRelatedSection({ related }: { related: ConstructionCalculator[] }) {
+  if (related.length === 0) return null;
+  return (
+    <section
+      aria-label="関連する計算機"
+      className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/60 sm:p-5"
+    >
+      <h2 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+        <Link2 className="h-4 w-4 text-sky-600" aria-hidden="true" />
+        関連する計算機
+      </h2>
+      <ul className="mt-3 space-y-2">
+        {related.map((r) => (
+          <li key={r.slug}>
+            <Link
+              href={`/construction-calc/${r.slug}`}
+              className="flex min-h-[44px] items-center justify-between gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:border-sky-300 hover:text-sky-700 dark:border-slate-700 dark:text-slate-300 dark:hover:text-sky-400"
+            >
+              <span>
+                {r.shortTitle}
+                <span className="ml-2 text-xs font-normal text-slate-500 dark:text-slate-400">{r.summary}</span>
+              </span>
+              <ChevronRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+            </Link>
           </li>
         ))}
       </ul>

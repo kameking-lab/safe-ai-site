@@ -210,5 +210,6 @@ export const excavationSlopeCalculator: ConstructionCalculator = {
     "土砂",
     "トレンチ",
   ],
+  relatedSlugs: ["shoring-member-check"],
   compute: computeExcavationSlope,
 };

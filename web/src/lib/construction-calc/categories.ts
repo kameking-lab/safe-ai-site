@@ -86,16 +86,32 @@ export const CALC_CATEGORY_META: Readonly<Record<CalcCategoryId, CalcCategoryMet
  * 新機が `category` を宣言した場合はそちらが優先（resolveCalcCategory 参照）。
  */
 export const CATEGORY_BY_SLUG: Readonly<Record<string, CalcCategoryId>> = {
+  // 玉掛け・吊り
   "sling-wire-load": "tamakake",
   "crane-rated-load": "tamakake",
+  // 足場・防護
   "scaffold-tankan-check": "ashiba",
   "wind-load-temporary": "ashiba",
   "safety-net-check": "ashiba",
+  "scaffold-load-summary": "ashiba",
+  "protective-canopy-check": "ashiba",
+  "suspended-scaffold-check": "ashiba",
+  "ladder-stepladder-check": "ashiba",
+  "work-platform-opening-check": "ashiba",
+  // 土工・支保工
   "excavation-slope": "doko",
   "earth-pressure-shoring": "doko",
+  "shoring-member-check": "doko",
+  "water-pressure": "doko",
+  // コンクリート・型枠
   "formwork-shoring-check": "concrete",
   "anchor-pullout": "concrete",
+  "formwork-lateral-pressure": "concrete",
+  "rebar-mass": "concrete",
+  "concrete-volume": "concrete",
+  // 電気
   "cable-ampacity": "denki",
+  // 換算・幾何
   "soil-volume-conversion": "kansan",
 };
 
@@ -108,17 +124,27 @@ export const CATEGORY_BY_SLUG: Readonly<Record<string, CalcCategoryId>> = {
 const INFERENCE_RULES: { id: CalcCategoryId; slugParts: string[]; keywordParts: string[] }[] = [
   { id: "denki", slugParts: ["cable", "voltage", "ampacity", "electr"], keywordParts: ["電線", "電圧", "許容電流", "ケーブル", "内線規程"] },
   { id: "tamakake", slugParts: ["sling", "crane", "hoist", "lift"], keywordParts: ["玉掛", "ワイヤ", "スリング", "吊り", "つり", "揚重", "クレーン", "チェーン"] },
-  { id: "concrete", slugParts: ["formwork", "anchor", "concrete", "rebar"], keywordParts: ["型枠", "側圧", "コンクリート", "アンカー", "打設"] },
-  { id: "doko", slugParts: ["excavation", "earth-pressure", "shoring", "slope", "soil-retain"], keywordParts: ["掘削", "法面", "土止め", "土留め", "山留め", "土圧"] },
-  { id: "ashiba", slugParts: ["scaffold", "wind", "canopy", "net", "guardrail", "ladder"], keywordParts: ["足場", "建地", "壁つなぎ", "風荷重", "防護", "朝顔", "安全ネット", "防網", "墜落"] },
+  { id: "concrete", slugParts: ["formwork", "anchor", "concrete", "rebar"], keywordParts: ["型枠", "側圧", "コンクリート", "アンカー", "打設", "鉄筋", "生コン"] },
+  { id: "doko", slugParts: ["excavation", "earth-pressure", "shoring", "slope", "soil-retain", "water-pressure"], keywordParts: ["掘削", "法面", "土止め", "土留め", "山留め", "土圧", "水圧", "揚圧"] },
+  { id: "ashiba", slugParts: ["scaffold", "wind", "canopy", "net", "guardrail", "ladder", "platform", "opening"], keywordParts: ["足場", "建地", "壁つなぎ", "風荷重", "防護", "朝顔", "安全ネット", "防網", "墜落", "作業床", "開口部", "はしご", "脚立"] },
   { id: "kansan", slugParts: ["convert", "ratio", "soil-volume", "beam", "deflection", "geometry", "unit"], keywordParts: ["換算", "土量", "百分率", "たわみ", "幾何"] },
 ];
+
+/**
+ * slug の語（ハイフン区切り）に対して部分文字列の誤爆を避けて判定する。
+ * 単語 part（"lift" 等）は slug のセグメント完全一致で見る（"uplift" の "lift" 誤爆を防ぐ）。
+ * ハイフンを含む part（"earth-pressure" 等）は slug 全体の部分一致で見る。
+ */
+function slugMatchesPart(slug: string, part: string): boolean {
+  if (part.includes("-")) return slug.includes(part);
+  return slug.split("-").includes(part);
+}
 
 function inferCategory(calc: Pick<ConstructionCalculator, "slug" | "keywords">): CalcCategoryId | undefined {
   const slug = calc.slug.toLowerCase();
   const kws = calc.keywords ?? [];
   for (const rule of INFERENCE_RULES) {
-    if (rule.slugParts.some((p) => slug.includes(p))) return rule.id;
+    if (rule.slugParts.some((p) => slugMatchesPart(slug, p))) return rule.id;
   }
   for (const rule of INFERENCE_RULES) {
     if (rule.keywordParts.some((p) => kws.some((k) => k.includes(p)))) return rule.id;
