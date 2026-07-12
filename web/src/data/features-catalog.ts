@@ -296,6 +296,16 @@ export const FEATURES: FeatureItem[] = [
     category: "construction-calc",
     tags: ["アンカー", "引抜き", "あと施工"],
   },
+  {
+    slug: "water-pressure",
+    title: "水圧の概算（静水圧・揚圧・ボイリング）",
+    summary: "深さ・水位差から静水圧・浮き上がり安全率・ボイリング安全率を算定",
+    description:
+      "深さ・水位差から静水圧（側圧）を、押さえ荷重から揚圧（浮き上がり）安全率を、Gs・eから限界動水勾配に対するボイリング安全率を算定します。土圧計算機（土圧の概算）の水圧項の単独版・釜場排水/矢板の検討補助です。",
+    href: "/construction-calc/water-pressure",
+    category: "construction-calc",
+    tags: ["水圧", "揚圧", "ボイリング"],
+  },
   // 安全装備
   {
     slug: "equipment-finder",
