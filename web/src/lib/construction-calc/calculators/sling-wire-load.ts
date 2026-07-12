@@ -523,5 +523,6 @@ export const slingWireLoadCalculator: ConstructionCalculator = {
     "6x24",
     "6x37",
   ],
+  relatedSlugs: ["sling-angle-geometry"],
   compute: computeSlingWireLoad,
 };

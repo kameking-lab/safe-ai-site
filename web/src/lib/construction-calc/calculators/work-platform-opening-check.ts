@@ -234,5 +234,6 @@ export const workPlatformOpeningCheckCalculator: ConstructionCalculator = {
     "墜落防止",
     "足場 幅",
   ],
+  relatedSlugs: ["scaffold-tankan-check", "safety-net-check"],
   compute: computeWorkPlatformOpeningCheck,
 };

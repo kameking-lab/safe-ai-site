@@ -297,6 +297,56 @@ export const FEATURES: FeatureItem[] = [
     tags: ["アンカー", "引抜き", "あと施工"],
   },
   {
+    slug: "slope-ratio-convert",
+    title: "斜面勾配 割⇔角度⇔百分率 換算＋すりつけ長",
+    summary: "1:n・角度・百分率を相互換算しすりつけ長も算出",
+    description:
+      "1:n（割）⇔角度⇔百分率の勾配表記を相互換算し、高低差からのすりつけ長（水平距離）も計算します。掘削勾配チェック計算機の補助ツールで、法定上限勾配の判定は行いません。",
+    href: "/construction-calc/slope-ratio-convert",
+    category: "construction-calc",
+    tags: ["勾配", "換算", "法面"],
+  },
+  {
+    slug: "sling-angle-geometry",
+    title: "揚重ワイヤの必要長さ・吊り角度逆算",
+    summary: "吊り幅と高さ／ワイヤ長さから吊り角度を逆算",
+    description:
+      "吊り幅（アイ間距離）と、吊り点までの高さまたはワイヤ1本の長さのどちらかから、吊り角度と必要なワイヤ長さを幾何計算で逆算します。玉掛けワイヤの安全荷重計算機（sling-wire-load）の入力を現場寸法から求める補助ツールです。",
+    href: "/construction-calc/sling-angle-geometry",
+    category: "construction-calc",
+    tags: ["玉掛け", "吊り角度", "揚重"],
+  },
+  {
+    slug: "voltage-drop",
+    title: "電圧降下チェック（内線規程）",
+    summary: "こう長×電流×断面積で電圧降下率を判定",
+    description:
+      "こう長・電流・電線サイズから内線規程の簡略式（e=35.6LI/1000A・e=30.8LI/1000A）で電圧降下を計算し、標準電圧に対する許容電圧降下率と比較します。電線許容電流チェック（cable-ampacity）の姉妹版です。",
+    href: "/construction-calc/voltage-drop",
+    category: "construction-calc",
+    tags: ["電気", "電圧降下", "内線規程"],
+  },
+  {
+    slug: "beam-deflection",
+    title: "単純梁・片持ち梁のたわみ／曲げ応力概算",
+    summary: "単管・H形鋼のたわみと曲げ応力を許容値で判定",
+    description:
+      "仮設材（単管STK500・H形鋼）の単純梁（等分布荷重）・片持ち梁（先端集中荷重）の最大たわみ・最大曲げ応力を概算し、許容たわみ比・許容応力度で判定します。断面はプリセットまたはI・Z直接入力に対応します。",
+    href: "/construction-calc/beam-deflection",
+    category: "construction-calc",
+    tags: ["たわみ", "曲げ応力", "仮設材"],
+  },
+  {
+    slug: "safety-net-check",
+    title: "安全ネット（防網）の基準チェック",
+    summary: "告示の式で落下高さ・下部の空きを判定",
+    description:
+      "墜落防止用の安全ネット（防網）について、告示（墜落による危険を防止するためのネットの構造等の安全基準に関する技術上の指針）の式から落下高さの上限・ネット下部の空きの下限を求め、実際の設置条件が基準に適合するかチェックします。",
+    href: "/construction-calc/safety-net-check",
+    category: "construction-calc",
+    tags: ["安全ネット", "防網", "墜落防止"],
+  },
+  {
     slug: "scaffold-load-summary",
     title: "足場荷重の集計（自重＋積載→建地1本負担）",
     summary: "1スパン積載を400kg限度と比較、建地1本負担を集計",
