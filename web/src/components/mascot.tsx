@@ -79,6 +79,8 @@ type MascotProps = {
   variant?: MascotVariant;
   className?: string;
   alt?: string;
+  /** ファーストビュー配置でLCP要素になり得る場合はtrue（lazyだとLCPを遅らせる） */
+  eager?: boolean;
 };
 
 export function Mascot({
@@ -86,6 +88,7 @@ export function Mascot({
   variant = "default",
   className = "",
   alt = "安全AIポータル マスコット",
+  eager = false,
 }: MascotProps) {
   const px = SIZE_MAP[size];
   const v = VARIANT_MAP[variant];
@@ -98,7 +101,7 @@ export function Mascot({
       alt={alt}
       width={w}
       height={h}
-      loading="lazy"
+      loading={eager ? "eager" : "lazy"}
       className={className}
       style={{ objectFit: "contain", width: w, height: h }}
     />

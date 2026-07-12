@@ -801,7 +801,7 @@ export function ChatbotPanel() {
           <div className="flex h-full flex-col items-center justify-center gap-6 py-8">
             <div className="text-center">
               <div className="mb-3 flex justify-center">
-                <Mascot variant="chat-talk" size="lg" alt="" />
+                <Mascot variant="chat-talk" size="lg" alt="" eager />
               </div>
               <p className="text-sm font-semibold text-slate-700">
                 労働安全衛生法についてご質問ください
