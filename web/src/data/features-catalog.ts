@@ -326,6 +326,16 @@ export const FEATURES: FeatureItem[] = [
     category: "construction-calc",
     tags: ["土止め支保工", "点検", "安衛則"],
   },
+  {
+    slug: "rebar-mass",
+    title: "鉄筋の質量・本数換算（JIS G 3112）",
+    summary: "呼び名（D10〜D51）の単位質量で長さ×本数⇔総質量を相互換算",
+    description:
+      "JIS G 3112の呼び名（D10〜D51）から公称直径ベースで単位質量を算定し、長さ×本数→総質量、または総質量→本数を相互換算します。径ズレ（呼び名の取り違え）を防ぐため公称直径から都度計算する方式。定尺ロス・継手・フックの割増は含みません。",
+    href: "/construction-calc/rebar-mass",
+    category: "construction-calc",
+    tags: ["鉄筋", "JIS", "質量計算"],
+  },
   // 安全装備
   {
     slug: "equipment-finder",

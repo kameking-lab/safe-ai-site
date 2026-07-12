@@ -22,6 +22,7 @@ import { anchorPulloutCalculator } from "./calculators/anchor-pullout";
 import { waterPressureCalculator } from "./calculators/water-pressure";
 import { formworkLateralPressureCalculator } from "./calculators/formwork-lateral-pressure";
 import { shoringMemberCheckCalculator } from "./calculators/shoring-member-check";
+import { rebarMassCalculator } from "./calculators/rebar-mass";
 
 export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   slingWireLoadCalculator,
@@ -37,6 +38,7 @@ export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   waterPressureCalculator,
   formworkLateralPressureCalculator,
   shoringMemberCheckCalculator,
+  rebarMassCalculator,
 ];
 
 const BY_SLUG: ReadonlyMap<string, ConstructionCalculator> = new Map(

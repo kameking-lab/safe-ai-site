@@ -15,6 +15,7 @@ import {
   Droplets,
   Boxes,
   ClipboardCheck,
+  Ruler,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { PageContainer } from "@/components/layout";
@@ -44,6 +45,7 @@ const CALC_ICONS: Record<string, LucideIcon> = {
   "water-pressure": Droplets,
   "formwork-lateral-pressure": Boxes,
   "shoring-member-check": ClipboardCheck,
+  "rebar-mass": Ruler,
 };
 
 /** 量産キュー（BACKLOG-construction-calc.md）の先頭から。空約束にしない範囲で予告 */
