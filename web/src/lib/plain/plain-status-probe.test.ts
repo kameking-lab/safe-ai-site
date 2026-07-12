@@ -15,8 +15,8 @@ import { describe, expect, it } from "vitest";
 import { buildPlainCoverage } from "./coverage";
 
 describe("plain カバレッジ集計", () => {
-  it("全対象法令が egovLawId とコーパス条文を持ち、幽霊エントリが無い", () => {
-    const coverage = buildPlainCoverage();
+  it("全対象法令が egovLawId とコーパス条文を持ち、幽霊エントリが無い", async () => {
+    const coverage = await buildPlainCoverage();
     for (const c of coverage) {
       expect(c.egovLawId, `${c.lawShort} の egovLawId 未解決`).not.toBe("");
       expect(c.total, `${c.lawShort} のコーパス条文 0（対象定義ミス）`).toBeGreaterThan(0);

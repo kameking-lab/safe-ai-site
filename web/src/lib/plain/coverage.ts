@@ -13,6 +13,7 @@
 import { LAW_METADATA } from "@/data/law-metadata";
 import { allPlainArticles } from "@/data/plain";
 import { LAW_NAVI_ENTRIES } from "@/lib/law-navi/permalink";
+import { hasFulltext, loadFulltextLaw } from "@/lib/laws-fulltext/loader";
 import { plainSourceHash } from "./text-hash";
 import { PLAIN_TARGETS } from "./targets";
 
@@ -33,7 +34,20 @@ export type PlainLawCoverage = {
   orphans: string[];
 };
 
-export function buildPlainCoverage(): PlainLawCoverage[] {
+/**
+ * curated 非収載の articleNum を「幽霊エントリ」から除外するための、法令ごとの
+ * 全文層 articleNum 集合。安衛則等（FULLTEXT_LAW_IDS）は curated が抄録のため、
+ * 原文＝全文スナップショットを照合先にした gap 条（量産対象）が正当に存在する
+ * （plain-fulltext-anchor.test.ts が原文アンカーで別途 fidelity を保証する）。
+ */
+async function fulltextArticleNums(egovLawId: string): Promise<ReadonlySet<string> | null> {
+  if (!hasFulltext(egovLawId)) return null;
+  const law = await loadFulltextLaw(egovLawId);
+  if (!law) return null;
+  return new Set(law.articles.map((a) => a.articleNum));
+}
+
+export async function buildPlainCoverage(): Promise<PlainLawCoverage[]> {
   const plainByLaw = new Map<string, Map<string, (typeof allPlainArticles)[number]>>();
   for (const p of allPlainArticles) {
     let m = plainByLaw.get(p.egovLawId);
@@ -44,40 +58,45 @@ export function buildPlainCoverage(): PlainLawCoverage[] {
     m.set(p.articleNum, p);
   }
 
-  return PLAIN_TARGETS.map((t) => {
-    const egovLawId = LAW_METADATA[t.lawShort]?.egovLawId ?? "";
-    const corpus = LAW_NAVI_ENTRIES.filter((e) => e.egovLawId === egovLawId);
-    const plains = plainByLaw.get(egovLawId) ?? new Map();
+  return Promise.all(
+    PLAIN_TARGETS.map(async (t) => {
+      const egovLawId = LAW_METADATA[t.lawShort]?.egovLawId ?? "";
+      const corpus = LAW_NAVI_ENTRIES.filter((e) => e.egovLawId === egovLawId);
+      const plains = plainByLaw.get(egovLawId) ?? new Map();
+      const fulltextNums = await fulltextArticleNums(egovLawId);
 
-    let done = 0;
-    const stale: string[] = [];
-    const missing: string[] = [];
-    const corpusNums = new Set<string>();
+      let done = 0;
+      const stale: string[] = [];
+      const missing: string[] = [];
+      const corpusNums = new Set<string>();
 
-    for (const e of corpus) {
-      corpusNums.add(e.article.articleNum);
-      const p = plains.get(e.article.articleNum);
-      if (!p || p.checkStatus !== "verified") {
-        missing.push(e.article.articleNum);
-      } else if (p.sourceTextHash === plainSourceHash(e.article.text)) {
-        done++;
-      } else {
-        stale.push(e.article.articleNum);
+      for (const e of corpus) {
+        corpusNums.add(e.article.articleNum);
+        const p = plains.get(e.article.articleNum);
+        if (!p || p.checkStatus !== "verified") {
+          missing.push(e.article.articleNum);
+        } else if (p.sourceTextHash === plainSourceHash(e.article.text)) {
+          done++;
+        } else {
+          stale.push(e.article.articleNum);
+        }
       }
-    }
 
-    const orphans = [...plains.keys()].filter((num) => !corpusNums.has(num));
+      const orphans = [...plains.keys()].filter(
+        (num) => !corpusNums.has(num) && !fulltextNums?.has(num)
+      );
 
-    return {
-      lawShort: t.lawShort,
-      egovLawId,
-      file: t.file,
-      squad: t.squad,
-      total: corpus.length,
-      done,
-      stale,
-      missing,
-      orphans,
-    };
-  });
+      return {
+        lawShort: t.lawShort,
+        egovLawId,
+        file: t.file,
+        squad: t.squad,
+        total: corpus.length,
+        done,
+        stale,
+        missing,
+        orphans,
+      };
+    })
+  );
 }
