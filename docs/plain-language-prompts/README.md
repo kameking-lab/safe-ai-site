@@ -23,6 +23,30 @@
 - 未割当（後続）: じん肺法・作業環境測定法・高圧則（法令別プロンプトは作成済み:
   jinpai-ho.md / sagyokankyo-sokuteiho.md / koa-atsu-sagyo-anzen-eisei-kisoku.md）
 
+## 安衛則 原文(fulltext)量産の部隊割（2026-07-13〜・シャード並列）
+
+安衛則（347M50002000032）の全文ギャップ約1,000条を、curated 抄録ではなく**原文＝
+全文スナップショット（laws-fulltext）を照合先に**量産する。plain は 1 法令=1 ファイルだと
+複数 Sonnet 部隊が同一ファイルを書いて衝突するため、**編/章単位のシャードファイル群**
+（`web/src/data/plain/anei-kisoku/hen*.ts`。束ねは同 `index.ts`）へ分割済み。各部隊は
+重複なく編/章範囲を担当し、**1 シャード=1 PR** で埋める。原文本文と sourceTextHash は
+`node web/scripts/plain-fulltext-digest.mjs 347M50002000032 --from N --to M --live-only` で取得。
+fidelity v2 の fulltext アンカー（`plain-fulltext-anchor.test.ts` が全域照合。gap 条も含む）と
+端的さラチェットが CI で全緑を強制する。
+
+- 部隊1 = 第1編 通則＋第2編第1章 機械（第1条〜第151条・約275条・anei-fulltext-squad-1.md）
+  シャード: hen1-tsusoku.ts / hen2-01-kikai.ts
+- 部隊2 = 第2編 荷役運搬機械・建設機械等（第151条の2〜第236条・約273条・anei-fulltext-squad-2.md）
+  シャード: hen2-02-nieki-unpan.ts / hen2-03-kensetsu-kikai.ts
+- 部隊3 = 第2編 型枠・爆発火災・電気・掘削・荷役（第237条〜第476条・約241条・anei-fulltext-squad-3.md）
+  シャード: hen2-04-katawaku-bakuhatsu-denki.ts / hen2-05-kussaku-nieki-sagyo.ts
+- 部隊4 = 第2編後半＋第3編 衛生基準＋第4編 特別規制（第477条〜第682条・約214条・anei-fulltext-squad-4.md）
+  シャード: hen2-06-batsuboku-tsuiraku-tsuuro.ts / hen3-eisei.ts / hen4-tokubetsu.ts（空・要新規）
+- v2 リライト = fidelity v2 強制で違反した既存 84 条の是正キュー（全法令横断・v2-rewrite-squad.md）
+  正本: BACKLOG-plain-v2-rewrite.md ／ 逐条詳細: docs/plain-v2-audit-2026-07-13/violations.json
+
+見本（原文=fulltext アンカーで v2 全緑の実例）: anei-kisoku/hen2-01-kikai.ts の第117条。
+
 ## 仕組みの全体像（なぜ嘘をつけないか）
 
 1. 言い換えは `web/src/data/plain/<法令>.ts` に条単位で保存

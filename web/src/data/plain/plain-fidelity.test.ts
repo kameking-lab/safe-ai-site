@@ -16,11 +16,34 @@ import { describe, expect, it } from "vitest";
 import { LAW_NAVI_ENTRIES } from "@/lib/law-navi/permalink";
 import { checkFidelity } from "@/lib/plain/fidelity";
 import { plainSourceHash } from "@/lib/plain/text-hash";
+import type { FulltextLaw } from "@/lib/laws-fulltext/types";
 import { allPlainArticles } from "./index";
+import anzenFulltext from "../laws-fulltext/347M50002000032.json";
 
 const CORPUS_BY_KEY = new Map(
   LAW_NAVI_ENTRIES.map((e) => [`${e.egovLawId}|${e.article.articleNum}`, e.article])
 );
+
+/**
+ * 全文層（laws-fulltext）に実在する条キーの集合。
+ *
+ * 安衛則（347M50002000032）は curated コーパスに無い全文ギャップ約1,000条を
+ * 複数部隊が並列で現場ことば化する（照合先は原文=fulltext）。これらの gap 条は
+ * LAW_NAVI_ENTRIES（curated 由来）に無いため、実在性を curated だけで判定すると
+ * 「幽霊エントリ」で落ちてしまう。原文スナップショットに実在する条は正規の
+ * 執筆対象なので、実在集合に全文層も含める。fidelity 本体の原文照合は
+ * plain-fulltext-anchor.test.ts が fulltext アンカーで担う（下段の fidelity
+ * テストは curated 収録条のみ＝抄録層に対して検査する）。
+ */
+const FULLTEXT_EXISTENCE: ReadonlySet<string> = (() => {
+  const ft = anzenFulltext as unknown as FulltextLaw;
+  return new Set(ft.articles.map((a) => `${ft.lawId}|${a.articleNum}`));
+})();
+
+function existsInCorpusOrFulltext(egovLawId: string, articleNum: string): boolean {
+  const key = `${egovLawId}|${articleNum}`;
+  return CORPUS_BY_KEY.has(key) || FULLTEXT_EXISTENCE.has(key);
+}
 
 describe("plain レジストリの整合", () => {
   it("重複キーが無い", () => {
@@ -32,11 +55,11 @@ describe("plain レジストリの整合", () => {
     }
   });
 
-  it("全エントリがコーパス実在条（法令ナビ生成集合）に対応する", () => {
+  it("全エントリが実在条（法令ナビ生成集合 or 全文スナップショット）に対応する", () => {
     for (const p of allPlainArticles) {
       expect(
-        CORPUS_BY_KEY.has(`${p.egovLawId}|${p.articleNum}`),
-        `幽霊エントリ: ${p.egovLawId} ${p.articleNum}（コーパスに無い条）`
+        existsInCorpusOrFulltext(p.egovLawId, p.articleNum),
+        `幽霊エントリ: ${p.egovLawId} ${p.articleNum}（コーパスにも全文スナップショットにも無い条）`
       ).toBe(true);
     }
   });

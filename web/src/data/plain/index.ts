@@ -6,6 +6,12 @@
  * 完成したら import して PLAIN_LAW_FILES に1行足すだけ（並列執筆でも
  * このファイルの diff は1行なので衝突がほぼ起きない）。
  *
+ * 1 法令=1 ファイルが基本だが、条数が巨大で複数部隊が並列執筆する法令
+ * （安衛則・全文ギャップ約1,000条）は「1 法令=複数シャード」に対応する。
+ * PLAIN_LAW_FILES はファイル名（キー）→エントリ配列の平坦な Record なので、
+ * シャード束（例: ./anei-kisoku の ANEI_KISOKU_SHARDS）を spread するだけで
+ * 複数ファイル法令を収容できる（キーは "anei-kisoku/hen1-tsusoku" 等で衝突しない）。
+ *
  * 表示可否は getFreshPlainArticle が一元判定する:
  *   checkStatus === "verified" かつ sourceTextHash がコーパス現行原文と一致
  *   （改正でコーパスが更新された条は自動で非表示＝stale。空枠も出さない）。
@@ -21,7 +27,7 @@ import { plainDenriHoushasenKisoku } from "./denri-houshasen-kisoku";
 import { plainSekimenKisoku } from "./sekimen-kisoku";
 import { plainRodoAnzenEiseiHo } from "./rodo-anzen-eisei-ho";
 import { plainRodoAnzenEiseiHoSikokiregu } from "./rodo-anzen-eisei-ho-sikokiregu";
-import { plainAnzenEiseiKisoku } from "./anzen-eisei-kisoku";
+import { ANEI_KISOKU_SHARDS } from "./anei-kisoku";
 import { plainYukiKisoku } from "./yuki-kisoku";
 import { plainEnKisoku } from "./en-kisoku";
 import { plainShiAlkylEnKisoku } from "./shi-alkyl-en-kisoku";
@@ -44,7 +50,9 @@ export const PLAIN_LAW_FILES: Readonly<Record<string, readonly PlainArticle[]>> 
   "sekimen-kisoku": plainSekimenKisoku,
   "rodo-anzen-eisei-ho": plainRodoAnzenEiseiHo,
   "rodo-anzen-eisei-ho-sikokiregu": plainRodoAnzenEiseiHoSikokiregu,
-  "anzen-eisei-kisoku": plainAnzenEiseiKisoku,
+  // 安衛則は 1 法令=複数シャード（編/章単位・並列執筆の衝突回避）。
+  // ./anei-kisoku/index.ts が編/章シャードを ANEI_KISOKU_SHARDS に束ね、ここへ spread する。
+  ...ANEI_KISOKU_SHARDS,
   "yuki-kisoku": plainYukiKisoku,
   "en-kisoku": plainEnKisoku,
   "shi-alkyl-en-kisoku": plainShiAlkylEnKisoku,
