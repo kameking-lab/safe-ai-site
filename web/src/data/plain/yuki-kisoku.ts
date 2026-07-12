@@ -175,7 +175,8 @@ export const plainYukiKisoku: PlainArticle[] = [
   {
     ...META,
     articleNum: "第16条の2",
-    plainText: "プッシュプル型換気装置は、厚生労働大臣が定める構造・性能を備えている必要があります。",
+    generatedAt: "2026-07-13",
+    plainText: "プッシュプル型換気装置は、厚生労働大臣が定める構造・性能を備えていなければなりません。",
     sourceTextHash: "689596214db30527",
   },
 ];
