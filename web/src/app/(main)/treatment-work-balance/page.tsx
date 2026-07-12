@@ -123,6 +123,7 @@ export default function TreatmentWorkBalanceHubPage() {
         title="治療と仕事の両立支援"
         description="厚労省ガイドライン（令和5年改訂）に沿った企業向け実務ガイドと、両立支援プラン作成ツール"
         icon={HeartHandshake}
+        mascotVariant="first-aid"
         iconColor="emerald"
       />
 

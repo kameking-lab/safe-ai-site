@@ -2,13 +2,15 @@
 // Cache-first: static assets / Network-first: API calls
 // v2: モバイル LCP 改善のため主要ページをプリキャッシュ
 
-const CACHE_NAME = "anzen-ai-v2";
+const CACHE_NAME = "anzen-ai-v3";
 const OFFLINE_URL = "/offline.html";
 
 // 山田職長レベルのモバイルでも初回以降サクサク動くよう、
 // ボトムナビからの 5 ページ + ホーム関連を先読みキャッシュ。
 const PRECACHE_URLS = [
   OFFLINE_URL,
+  // オフライン画面のマスコット（おやすみ）。offline.htmlとセットでキャッシュ必須
+  "/mascot/mascot-sleeping.webp",
   "/",
   "/ky",
   "/law-search",

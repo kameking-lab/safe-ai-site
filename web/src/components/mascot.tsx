@@ -70,6 +70,14 @@ const VARIANT_MAP = {
   calculator: { src: "/mascot/mascot-calculator.webp", width: 274, height: 320 },
   /** トロフィー: 達成・実績用 */
   trophy: { src: "/mascot/mascot-trophy.webp", width: 263, height: 320 },
+  /** フルハーネス点検: 保護具DB用 */
+  "ppe-check": { src: "/mascot/mascot-ppe-check.webp", width: 316, height: 320 },
+  /** 救急箱（緑十字）: 両立支援・応急手当用 */
+  "first-aid": { src: "/mascot/mascot-first-aid.webp", width: 308, height: 320 },
+  /** おやすみ: オフライン・メンテ画面用 */
+  sleeping: { src: "/mascot/mascot-sleeping.webp", width: 320, height: 235 },
+  /** 地球儀: 外国人労働者向けページ用 */
+  "world-friends": { src: "/mascot/mascot-world-friends.webp", width: 301, height: 320 },
 } as const;
 
 export type MascotVariant = keyof typeof VARIANT_MAP;
