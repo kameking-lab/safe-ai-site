@@ -5,8 +5,7 @@
  * 値は type-normalization.ts の HazardTypeSlug union を使うため、未知キーはコンパイル時に検出される。
  * デッキの統計・事例スライドはこの辞書経由で build-summary の kpi/topCauses/featuredCases を引く。
  *
- * 網羅（全5教育分）は EDU-D3（Sonnet）で完成。ここでは第1波デッキ（フルハーネス・熱中症）が
- * 必要とする分と、正本レジストリに揃っている分を確定分として置く。
+ * 初期ラインナップ5教育分（フルハーネス・熱中症・粉じん・低圧電気・酸欠）を収載済み。
  */
 
 import type { HazardTypeSlug } from "@/lib/accidents/type-normalization";
@@ -16,6 +15,7 @@ export const CURRICULUM_HAZARD_MAP: Readonly<Record<string, readonly HazardTypeS
   "circular-necchu": ["hot-cold-contact"], // 高温・低温の物との接触
   "se-36-4-teiatsu": ["electric-shock"], // 感電
   "se-36-29-dust": ["harmful-substance"], // 粉じん＝有害物等との接触（じん肺）
+  "se-36-26-oxygen": ["harmful-substance"], // 酸欠・硫化水素中毒＝有害物等との接触
 };
 
 export function hazardSlugsFor(curriculumId: string): readonly HazardTypeSlug[] {
