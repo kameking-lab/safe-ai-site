@@ -1,7 +1,9 @@
+import { isGaEnabled } from "@/lib/analytics-env";
+
 // Server component: shows current GA4 deployment status based on env var.
 // Audit reference: harsh-third-party-2026-05-16 G-005.
 export function PrivacyCookieStatus() {
-  const gaEnabled = Boolean(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID);
+  const gaEnabled = isGaEnabled();
 
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
@@ -31,7 +33,7 @@ export function PrivacyCookieStatus() {
               <span className="ml-1 inline-flex items-center rounded-full bg-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-700">
                 未導入
               </span>
-              <span className="ml-2 text-slate-600">（環境変数未設定のため計測は行われていません）</span>
+              <span className="ml-2 text-slate-600">（環境変数未設定、または本番環境以外のため計測は行われていません）</span>
             </>
           )}
         </li>
