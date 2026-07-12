@@ -7,10 +7,11 @@ import type { EduDeck } from "./types";
 import { FULLHARNESS_DECK } from "./fullharness";
 import { NECCHU_DECK } from "./necchu";
 import { DUST_DECK } from "./dust";
+import { TEIATSU_DECK } from "./teiatsu";
 
 export type { EduDeck, EduSlide } from "./types";
 
-export const EDUCATION_DECKS: readonly EduDeck[] = [FULLHARNESS_DECK, NECCHU_DECK, DUST_DECK];
+export const EDUCATION_DECKS: readonly EduDeck[] = [FULLHARNESS_DECK, NECCHU_DECK, DUST_DECK, TEIATSU_DECK];
 
 const BY_SLUG = new Map(EDUCATION_DECKS.map((d) => [d.slug, d]));
 
