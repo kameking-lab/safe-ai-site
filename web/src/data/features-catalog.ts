@@ -336,6 +336,16 @@ export const FEATURES: FeatureItem[] = [
     category: "construction-calc",
     tags: ["鉄筋", "JIS", "質量計算"],
   },
+  {
+    slug: "concrete-volume",
+    title: "生コンクリート数量の概算（打設量・発注量・車両台数）",
+    summary: "部材寸法×ロス率で発注量とアジテータ車の概算台数を算定",
+    description:
+      "部材寸法（縦×横×高さ）または体積の直接入力から打設量を求め、ロス率を加味した発注量と生コン車（アジテータ車）の概算台数を算定します。配合（水セメント比等）はJASS5等の参照表記に留め、数値は生コン工場の配合計画書で確認してください。鉄筋質量換算と相互リンク。",
+    href: "/construction-calc/concrete-volume",
+    category: "construction-calc",
+    tags: ["生コン", "コンクリート数量", "JASS5"],
+  },
   // 安全装備
   {
     slug: "equipment-finder",

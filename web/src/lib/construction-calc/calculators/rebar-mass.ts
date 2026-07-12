@@ -215,5 +215,6 @@ export const rebarMassCalculator: ConstructionCalculator = {
     "定尺",
     "継手",
   ],
+  relatedSlugs: ["concrete-volume"],
   compute: computeRebarMass,
 };

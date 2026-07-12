@@ -16,6 +16,7 @@ import {
   Boxes,
   ClipboardCheck,
   Ruler,
+  Container,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { PageContainer } from "@/components/layout";
@@ -46,6 +47,7 @@ const CALC_ICONS: Record<string, LucideIcon> = {
   "formwork-lateral-pressure": Boxes,
   "shoring-member-check": ClipboardCheck,
   "rebar-mass": Ruler,
+  "concrete-volume": Container,
 };
 
 /** 量産キュー（BACKLOG-construction-calc.md）の先頭から。空約束にしない範囲で予告 */
