@@ -53,7 +53,6 @@ const CALC_ICONS: Record<string, LucideIcon> = {
 /** 量産キュー（BACKLOG-construction-calc.md）の先頭から。空約束にしない範囲で予告 */
 const UPCOMING = [
   "つりチェーン・繊維スリングの安全係数（クレーン則213条の2）",
-  "昇降設備・はしご/脚立の基準（安衛則526〜528条）",
   "酸素欠乏危険場所の換気量（酸欠則）",
 ];
 

@@ -19,6 +19,11 @@ import { cableAmpacityCalculator } from "./calculators/cable-ampacity";
 import { windLoadTemporaryCalculator } from "./calculators/wind-load-temporary";
 import { earthPressureShoringCalculator } from "./calculators/earth-pressure-shoring";
 import { anchorPulloutCalculator } from "./calculators/anchor-pullout";
+import { scaffoldLoadSummaryCalculator } from "./calculators/scaffold-load-summary";
+import { protectiveCanopyCheckCalculator } from "./calculators/protective-canopy-check";
+import { suspendedScaffoldCheckCalculator } from "./calculators/suspended-scaffold-check";
+import { ladderStepladderCheckCalculator } from "./calculators/ladder-stepladder-check";
+import { workPlatformOpeningCheckCalculator } from "./calculators/work-platform-opening-check";
 import { waterPressureCalculator } from "./calculators/water-pressure";
 import { formworkLateralPressureCalculator } from "./calculators/formwork-lateral-pressure";
 import { shoringMemberCheckCalculator } from "./calculators/shoring-member-check";
@@ -36,6 +41,11 @@ export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   windLoadTemporaryCalculator,
   earthPressureShoringCalculator,
   anchorPulloutCalculator,
+  scaffoldLoadSummaryCalculator,
+  protectiveCanopyCheckCalculator,
+  suspendedScaffoldCheckCalculator,
+  ladderStepladderCheckCalculator,
+  workPlatformOpeningCheckCalculator,
   waterPressureCalculator,
   formworkLateralPressureCalculator,
   shoringMemberCheckCalculator,
