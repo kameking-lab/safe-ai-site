@@ -109,10 +109,15 @@ export const CATEGORY_BY_SLUG: Readonly<Record<string, CalcCategoryId>> = {
   "formwork-lateral-pressure": "concrete",
   "rebar-mass": "concrete",
   "concrete-volume": "concrete",
+  // 玉掛け・吊り（部隊4追加）
+  "sling-angle-geometry": "tamakake",
   // 電気
   "cable-ampacity": "denki",
+  "voltage-drop": "denki",
   // 換算・幾何
   "soil-volume-conversion": "kansan",
+  "slope-ratio-convert": "kansan",
+  "beam-deflection": "kansan",
 };
 
 /**

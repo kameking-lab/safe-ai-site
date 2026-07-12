@@ -157,8 +157,12 @@ def attach_file(page, path):
     return False
 
 
-def wait_new_images(page, baseline, max_ms, streaming_fn, min_px=400):
-    """baseline以外の新画像がsrc安定＋ストリーミング終了で確定するまでポーリング。"""
+def wait_new_images(page, baseline, max_ms, streaming_fn, min_px=400, min_wait_ms=45000):
+    """baseline以外の新画像がsrc安定＋ストリーミング終了で確定するまでポーリング。
+
+    min_wait_ms: 早期リターン禁止時間。参照エコーが送信直後にDOMへ出て
+    「安定した新画像」と誤認される実測不良（world-friends 2026-07-13）への対策。
+    画像生成は最短でも30秒級のため、経過が短いうちは確定しない。"""
     base = set(baseline)
     start = time.time(); last = None; stable_since = 0
     while (time.time() - start) * 1000 < max_ms:
@@ -172,6 +176,8 @@ def wait_new_images(page, baseline, max_ms, streaming_fn, min_px=400):
             return {"ok": False, "limited": True, "txt": (txt or "")[-800:]}
         fresh = [g for g in (big_images(page, min_px) or []) if g["src"] not in base]
         if fresh:
+            if (time.time() - start) * 1000 < min_wait_ms:
+                continue
             cur = fresh[-1]["src"]
             st = streaming_fn(page)
             if cur == last:

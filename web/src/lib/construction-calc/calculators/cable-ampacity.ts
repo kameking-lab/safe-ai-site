@@ -171,5 +171,6 @@ export const cableAmpacityCalculator: ConstructionCalculator = {
     "感電",
     "停電作業",
   ],
+  relatedSlugs: ["voltage-drop"],
   compute: computeCableAmpacity,
 };

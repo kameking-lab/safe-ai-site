@@ -25,6 +25,9 @@ import { CONSTRUCTION_CALCULATORS } from "./registry";
  */
 export const RELATED_ARTICLES_BY_SLUG: Readonly<Record<string, CalcArticleRef[]>> = {
   "sling-wire-load": [{ lawShort: "クレーン則", articleNum: "第213条" }],
+  // 安衛則539条（防網）→ 安全ネット基準チェック。部隊4の安全ネット実装は relatedArticles を
+  // 持たないため（relatedSlugs 方式）、law→calc の逆リンクはここ中央管理で張る。
+  "safety-net-check": [{ lawShort: "安衛則", articleNum: "第539条" }],
   "scaffold-tankan-check": [
     { lawShort: "安衛則", articleNum: "第571条" },
     { lawShort: "安衛則", articleNum: "第570条" },
