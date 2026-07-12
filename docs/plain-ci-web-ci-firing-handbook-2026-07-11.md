@@ -67,3 +67,4 @@ push」＝再び mergeable になり CI が自動発火する。`paths: web/**` 
 - PR を開いたら Checks に `smoke`/`e2e` が出るか確認。Vercel だけなら **dirty を疑う**。
 - `mergeable_state` が `dirty`/`unknown` なら rebase→push で clean 化してから待つ。
 - 進捗レポート（coverage/backlog-stale）は翻訳PRに載せない。
+- 「CIが何時間も動いていない」は自分の待機ループ（wakeup配信）の停滞であることがある（#918実例）。rebase/close-reopenの前に必ず `get_check_runs` で実際のcheck-run状態を再取得し、実は既に緑（例: smoke completed/success）になっていないか確認してから対処を選ぶ。
