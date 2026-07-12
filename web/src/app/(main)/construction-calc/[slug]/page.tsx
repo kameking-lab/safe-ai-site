@@ -50,7 +50,7 @@ export default async function ConstructionCalcDetailPage({
     <div className="min-h-[calc(100dvh-4rem)] bg-slate-50 dark:bg-slate-900">
       <PageJsonLd name={calc.title} description={calc.summary} path={`/construction-calc/${slug}`} />
       <PageContainer width="prose" paddingY="none" className="pt-4 pb-12">
-        <nav aria-label="パンくず" className="mb-3">
+        <nav aria-label="パンくず" className="mb-3 print:hidden">
           <Link
             href="/construction-calc"
             className="inline-flex min-h-[44px] items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-700 dark:text-slate-400"
@@ -59,15 +59,16 @@ export default async function ConstructionCalcDetailPage({
             建設計算トップ
           </Link>
         </nav>
-        <header className="mb-4">
+        <header className="mb-4 print:hidden">
           <h1 className="text-xl font-bold leading-tight text-slate-900 dark:text-white sm:text-2xl">
             {calc.title}
           </h1>
           <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">{calc.summary}</p>
         </header>
         <CalculatorPanel slug={slug} />
-        {/* 根拠・注意・免責は入力に依存しないためサーバーレンダリング（本番HTMLに実在＝SEO/LCP要件） */}
-        <div className="mt-4 space-y-4">
+        {/* 根拠・注意・免責は入力に依存しないためサーバーレンダリング（本番HTMLに実在＝SEO/LCP要件）。
+            印刷時は計算書（CalcReportSheet）側に同内容が入るため print:hidden で二重表示を避ける。 */}
+        <div className="mt-4 space-y-4 print:hidden">
           <CalcBasisSection basis={calc.basis} />
           <CalcCautionsSection cautions={calc.cautions} />
         </div>
