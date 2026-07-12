@@ -59,6 +59,7 @@ describe("construction-calc registry: 整合性", () => {
       "/law-navi/347M50002000032/565": ["安衛則", "第565条"],
       "/law-navi/347M50002000032/526": ["安衛則", "第526条"],
       "/law-navi/347M50002000032/563": ["安衛則", "第563条"],
+      "/law-navi/347M50002000034/214": ["クレーン則", "第214条"],
     };
     for (const c of CONSTRUCTION_CALCULATORS) {
       for (const b of c.basis) {
