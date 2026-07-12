@@ -45,3 +45,7 @@
 - `03-data-driven-roadmap.md` — 実測データ取得後の SEO 深化ロードマップ
 - `docs/gsc-oauth-setup.md` — GSC OAuth 初期セットアップ手順
 - `docs/site-status-2026-05-19/report.md` 3.2 - 3.4 — 直前の調査結果
+
+## 測定ID差し替え注意 (2026-07-12 追記)
+
+- 本番 `NEXT_PUBLIC_GA_MEASUREMENT_ID` を 2026-07-12 に旧プロパティ 535618645（測定ID `G-HF1T2CX248`・データストリームURL `safe-ai-site.vercel.app`＝旧プレビュー用）から本番プロパティ 538662999（測定ID `G-FW2LMDPPPB`・GSC連携済み）へ差し替えた。**それ以前の本番アクセスは旧プロパティ 535618645 側に混入計測されているため、当該期間の集計・推移は 535618645 を参照すること（538662999 には遡及データが無い）。**
