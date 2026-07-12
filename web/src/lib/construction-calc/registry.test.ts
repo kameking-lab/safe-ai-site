@@ -153,6 +153,16 @@ describe("construction-calc ai-router: AI抽出値の検証", () => {
     const r = validateExtraction(sling, { loadKg: "2,000" });
     expect(r.values.loadKg).toBe(2000);
   });
+
+  it("現場ことばの掛け方（目通し・あだ巻き・半掛け・2点吊り）を入力値へ特定する", () => {
+    // AI/ラベル一致で掛け方モードの value を確定できる（読み取れない値は質問で返す原則を維持）
+    expect(validateExtraction(sling, { loadKg: 3000, mode: "目通し" }).values.mode).toBe("choke");
+    expect(validateExtraction(sling, { loadKg: 1500, mode: "あだ巻き" }).values.mode).toBe("wrap");
+    expect(validateExtraction(sling, { loadKg: 2000, mode: "半掛け" }).values.mode).toBe("half");
+    expect(validateExtraction(sling, { loadKg: 2000, mode: "2本つり" }).values.mode).toBe("s2");
+    // 逆引きモードも現場語（適合径・逆引き）から特定できる
+    expect(validateExtraction(sling, { calcMode: "逆引き" }).values.calcMode).toBe("reverse");
+  });
 });
 
 describe("construction-calc ai-router: マニフェスト", () => {
