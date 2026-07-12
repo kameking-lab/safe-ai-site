@@ -19,6 +19,7 @@ import { A11Y_HINT_INIT_SCRIPT } from "@/lib/a11y-hint";
 import Analytics from "@/components/Analytics";
 import AdSenseScript from "@/components/AdSenseScript";
 import { rssAlternateTypes } from "@/lib/seo/feeds";
+import { isGaEnabled } from "@/lib/analytics-env";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -131,7 +132,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://formspree.io" />
       </head>
       <body className="min-h-full bg-slate-50 font-sans text-slate-900 dark:bg-slate-900 dark:text-slate-100">
-        <Analytics />
+        {isGaEnabled() && <Analytics />}
         <AdSenseScript />
         <JsonLd schema={organizationSchema()} />
         <JsonLd schema={webSiteSchema()} />

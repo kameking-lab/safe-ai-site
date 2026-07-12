@@ -103,6 +103,7 @@
 | `NEXT_PUBLIC_STRIPE_PRICE_PRO` | Stripe プロプラン Price ID |
 | `NEXT_PUBLIC_STRIPE_PRICE_PREMIUM` | Stripe スタンダードプラン Price ID |
 | `NEXT_PUBLIC_SITE_URL` | 本番URL (Stripe リダイレクト用) |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4測定ID。Vercel Production envのみに設定（Preview/Devは`VERCEL_ENV`ガードでタグ未出力＝`web/src/lib/analytics-env.ts`） |
 | `NEXT_PUBLIC_REVISIONS_INGEST_SOURCE` | 法改正データソース切替 |
 | `NEXT_PUBLIC_PAID_MODE` | 課金機能フラグ (false/true) |
 
