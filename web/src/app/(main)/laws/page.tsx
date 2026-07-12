@@ -11,6 +11,7 @@ import { realLawRevisions } from "@/data/mock/real-law-revisions";
 import { lawRevisionCores } from "@/data/mock/law-revisions";
 import { computeLawsConclusion } from "@/lib/news-conclusions";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
+import { SITE_STATS } from "@/data/site-stats";
 
 const _title = "安全衛生法 改正情報一覧 最新";
 const _desc =
@@ -87,14 +88,14 @@ export default function LawsPage() {
           {
             href: "/circulars",
             label: "通達・告示・判例（第2層出典）",
-            description: "厚労省通達 1069件 + 安全配慮義務に関する最高裁判例 30件を統合。監督官・士業向けの実務出典集。",
+            description: `厚労省通達 ${SITE_STATS.mhlwNoticeCount}件 + 安全配慮義務に関する最高裁判例 ${SITE_STATS.courtPrecedentCount}件を統合。監督官・士業向けの実務出典集。`,
             color: "emerald",
             cta: "通達と判例を見る",
           },
           {
             href: "/resources",
             label: "厚労省一次資料DB",
-            description: "通達527件・告示244件・指針98件・リーフレット289件を分類検索。一次ソース直リンク。",
+            description: `通達${SITE_STATS.mhlwCircularCount}件・告示${SITE_STATS.mhlwKokujiCount}件・指針${SITE_STATS.mhlwShishinCount}件・リーフレット${SITE_STATS.mhlwLeafletCount}件を分類検索。一次ソース直リンク。`,
             color: "amber",
             cta: "一次資料DBを開く",
           },

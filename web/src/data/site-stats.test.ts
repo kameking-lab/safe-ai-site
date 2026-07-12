@@ -3,6 +3,10 @@ import { SITE_STATS } from "@/data/site-stats";
 import { allLawArticles, LAW_SOURCE_COUNT } from "@/data/laws";
 import { mhlwNotices } from "@/data/mhlw-notices";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
+import { LAW_NAVI_ENTRIES } from "@/lib/law-navi/permalink";
+import { getAllFulltextNaviEntries } from "@/lib/law-navi/fulltext-navi";
+import { mhlwLeaflets } from "@/data/mhlw-leaflets";
+import { courtPrecedents } from "@/data/mock/notices-and-precedents";
 import equipmentDb from "@/data/safety-equipment-db.json";
 import { realAccidentCases } from "@/data/mock/real-accident-cases";
 import { realAccidentCasesExtra } from "@/data/mock/real-accident-cases-extra";
@@ -53,5 +57,34 @@ describe("SITE_STATS リテラルと実データの整合", () => {
     expect(SITE_STATS.mhlwMergedChemicalCount).toBe(
       MHLW_MERGED_CHEMICAL_COUNT.toLocaleString("en-US"),
     );
+  });
+
+  it("lawNaviTotalArticleCount = LAW_NAVI_ENTRIES + 全文由来ギャップ の合算", async () => {
+    const fulltext = await getAllFulltextNaviEntries();
+    const total = LAW_NAVI_ENTRIES.length + fulltext.length;
+    expect(SITE_STATS.lawNaviTotalArticleCount).toBe(total.toLocaleString("en-US"));
+  });
+
+  it("mhlwCircularCount / mhlwKokujiCount / mhlwShishinCount = mhlw-notices.ts の docType別件数", () => {
+    const byType = { 通達: 0, 告示: 0, 指針: 0 } as Record<string, number>;
+    for (const n of mhlwNotices) {
+      byType[n.docType] = (byType[n.docType] ?? 0) + 1;
+    }
+    expect(SITE_STATS.mhlwCircularCount).toBe(byType["通達"].toLocaleString("en-US"));
+    expect(SITE_STATS.mhlwKokujiCount).toBe(byType["告示"].toLocaleString("en-US"));
+    expect(SITE_STATS.mhlwShishinCount).toBe(byType["指針"].toLocaleString("en-US"));
+  });
+
+  it("mhlwLeafletCount = mhlw-leaflets.ts の件数", () => {
+    expect(SITE_STATS.mhlwLeafletCount).toBe(mhlwLeaflets.length.toLocaleString("en-US"));
+  });
+
+  it("mhlwResourcesTotalCount = mhlwNoticeCount + mhlwLeafletCount", () => {
+    const total = mhlwNotices.length + mhlwLeaflets.length;
+    expect(SITE_STATS.mhlwResourcesTotalCount).toBe(total.toLocaleString("en-US"));
+  });
+
+  it("courtPrecedentCount = data/mock/notices-and-precedents.ts の件数", () => {
+    expect(SITE_STATS.courtPrecedentCount).toBe(courtPrecedents.length.toLocaleString("en-US"));
   });
 });

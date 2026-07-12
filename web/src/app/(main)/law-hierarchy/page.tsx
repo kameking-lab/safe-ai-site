@@ -6,6 +6,7 @@ import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { JsonLd, webPageSchema, breadcrumbSchema, dataCatalogSchema } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
+import { SITE_STATS } from "@/data/site-stats";
 import {
   SITE_URL,
   withSiteOpenGraph,
@@ -414,7 +415,7 @@ export default function LawHierarchyPage() {
                   実務出典・最高裁判例
                 </p>
                 <p className="mt-1 text-xs leading-5 text-slate-600">
-                  条文だけでは読めない行政解釈と最高裁判例 30件超。
+                  条文だけでは読めない行政解釈と最高裁判例 {SITE_STATS.courtPrecedentCount}件。
                 </p>
               </Link>
               <Link
@@ -450,7 +451,7 @@ export default function LawHierarchyPage() {
                   条文の根拠を提示する対話
                 </p>
                 <p className="mt-1 text-xs leading-5 text-slate-600">
-                  RAGコーパス 600条文超を背景に、根拠付きで回答。
+                  RAGコーパス {SITE_STATS.ragArticleCount}条文超を背景に、根拠付きで回答。
                 </p>
               </Link>
             </div>

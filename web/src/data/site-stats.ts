@@ -51,6 +51,24 @@ export const SITE_STATS = {
   mhlwNoticeCount: "1,069",
   /** 保護具AIファインダーが扱う商品点数（safety-equipment-db.json） */
   equipmentItemCount: "1,050",
+  /**
+   * 法令ナビ（/law-navi）の収載条文総数（curated 収載集合 LAW_NAVI_ENTRIES ＋
+   * 全文由来ギャップ getAllFulltextNaviEntries、非indexable分含む「全文含め」の総数）。
+   * sitemap-laws.xml の掲載件数（indexableのみ）とは異なる。
+   */
+  lawNaviTotalArticleCount: "1,961",
+  /** mhlw-notices.ts のうち docType==="通達" の件数 */
+  mhlwCircularCount: "682",
+  /** mhlw-notices.ts のうち docType==="告示" の件数 */
+  mhlwKokujiCount: "277",
+  /** mhlw-notices.ts のうち docType==="指針" の件数 */
+  mhlwShishinCount: "110",
+  /** 厚労省リーフレット収録件数（mhlw-leaflets.ts） */
+  mhlwLeafletCount: "289",
+  /** /resources の総件数（通達+告示+指針+リーフレット = mhlwNoticeCount + mhlwLeafletCount） */
+  mhlwResourcesTotalCount: "1,358",
+  /** 安全配慮義務に関する最高裁判例の収録件数（data/mock/notices-and-precedents.ts） */
+  courtPrecedentCount: "15",
 } as const;
 
 /**
@@ -128,5 +146,36 @@ export const SITE_STATS_META: Record<
   equipmentItemCount: {
     source: "保護具AIファインダー DB（safety-equipment-db.json）",
     asOf: "2026-05",
+  },
+  lawNaviTotalArticleCount: {
+    source: "法令ナビ curated 収載集合 ＋ 全文由来ギャップ（lib/law-navi/permalink.ts, fulltext-navi.ts）",
+    asOf: "2026-07",
+  },
+  mhlwCircularCount: {
+    source: "厚労省・中央労働災害防止協会 安全衛生情報センター（mhlw-notices.ts 自動生成、docType===\"通達\"）",
+    sourceUrl: "https://www.jaish.gr.jp/user/anzen/hor/tsutatsu.html",
+    asOf: "2026-07",
+  },
+  mhlwKokujiCount: {
+    source: "厚労省・中央労働災害防止協会 安全衛生情報センター（mhlw-notices.ts 自動生成、docType===\"告示\"）",
+    sourceUrl: "https://www.jaish.gr.jp/user/anzen/hor/tsutatsu.html",
+    asOf: "2026-07",
+  },
+  mhlwShishinCount: {
+    source: "厚労省・中央労働災害防止協会 安全衛生情報センター（mhlw-notices.ts 自動生成、docType===\"指針\"）",
+    sourceUrl: "https://www.jaish.gr.jp/user/anzen/hor/tsutatsu.html",
+    asOf: "2026-07",
+  },
+  mhlwLeafletCount: {
+    source: "厚労省リーフレットDB（mhlw-leaflets.ts）",
+    asOf: "2026-07",
+  },
+  mhlwResourcesTotalCount: {
+    source: "mhlwNoticeCount + mhlwLeafletCount（/resources 掲載総件数）",
+    asOf: "2026-07",
+  },
+  courtPrecedentCount: {
+    source: "安全配慮義務に関する最高裁判例 curated 集（data/mock/notices-and-precedents.ts）",
+    asOf: "2026-07",
   },
 };
