@@ -28,6 +28,12 @@ export type CalcSelectField = {
   defaultValue: string;
   /** 入力欄の下に出す1行ヘルプ */
   help?: string;
+  /**
+   * AI入口で「未指定なら質問せず既定値で進める」上級/任意フィールド。
+   * （例: ワイヤ構成種別・D/d比・計算モードなど。現場が言及しないことが多く、
+   *  毎回質問すると入口のUXを損なうため、欠落時は質問せず既定値を使う）
+   */
+  aiOptional?: boolean;
 };
 
 /** 数値セル入力（単位・範囲つき） */
@@ -41,6 +47,8 @@ export type CalcNumberField = {
   step?: number;
   defaultValue: number;
   help?: string;
+  /** AI入口で欠落時に質問しない任意フィールド（CalcSelectField 参照） */
+  aiOptional?: boolean;
 };
 
 export type CalcField = CalcSelectField | CalcNumberField;

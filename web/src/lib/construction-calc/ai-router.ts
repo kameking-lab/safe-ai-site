@@ -55,6 +55,8 @@ export function validateExtraction(
   for (const field of calc.fields) {
     const raw = extracted?.[field.id];
     if (raw === undefined || raw === null || raw === "") {
+      // 上級/任意フィールド（構成種別・D/d比・計算モード等）は質問せず既定値で進める
+      if (field.aiOptional) continue;
       questions.push(questionFor(calc, field.id));
       continue;
     }
