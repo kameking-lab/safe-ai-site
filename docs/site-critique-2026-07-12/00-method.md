@@ -29,4 +29,4 @@
 - 04-lighthouse.md — Lighthouse実測とモバイル動線（レンズ4）
 - 05-top10-followup.md — 前回Top10のその後（レンズ5）
 - 06-top10.md — 総括「最も痛い10件」
-- lh/ — Lighthouse生JSON
+- lh/summary.json — Lighthouse実測の要約（フルJSONは9.5MBのため非収載）
