@@ -12,6 +12,7 @@ export type FeatureCategoryId =
   | "ai-chat"
   | "chemical-ra"
   | "ky"
+  | "construction-calc"
   | "safety-equipment"
   | "databases"
   | "education"
@@ -67,6 +68,14 @@ export const FEATURE_CATEGORIES: FeatureCategory[] = [
     summary: "現場で5分、AI補助つきKYミーティング",
     description:
       "業種別プリセット、AIによるリスク抽出、署名つき記録、PDF出力までスマホ完結。ベテラン不在の現場でも質の高いKYが回せます。",
+    accent: "amber",
+  },
+  {
+    id: "construction-calc",
+    title: "建設計算",
+    summary: "玉掛け・足場・掘削勾配を法令根拠つきで即計算",
+    description:
+      "玉掛けワイヤの安全荷重、単管足場の基準チェック、掘削面の勾配判定など、建設現場の計算を安衛則・クレーン則の条文根拠つきで実行できます。計算は検証済みの計算式が行い、AIは自由記述からの計算機案内と結果の解説を担当します。",
     accent: "amber",
   },
   {
@@ -173,6 +182,47 @@ export const FEATURES: FeatureItem[] = [
     href: "/safety-diary",
     category: "ky",
     tags: ["打合せ書", "記録"],
+  },
+  // 建設計算
+  {
+    slug: "construction-calc",
+    title: "建設計算（現場計算機ポータル）",
+    summary: "法令根拠つきの現場計算機。自由記述からAIが案内",
+    description:
+      "玉掛け・足場・掘削などの現場計算を、プルダウンと数値入力で即実行。全計算機に安衛則等の根拠条文と注意事項を明記し、自由記述からはAIが計算機と入力値を用意します（計算は検証済みの計算式が実行）。",
+    href: "/construction-calc",
+    category: "construction-calc",
+    tags: ["計算", "建設", "AI"],
+  },
+  {
+    slug: "sling-wire-load",
+    title: "玉掛けワイヤ安全荷重計算",
+    summary: "吊り角度・本数から安全係数6を即判定",
+    description:
+      "荷の質量・吊り本数・吊り角度・ワイヤ径から1本あたりの張力を計算し、クレーン等安全規則第213条の安全係数6以上を満たすか判定。使用可となる最小径も提案します。",
+    href: "/construction-calc/sling-wire-load",
+    category: "construction-calc",
+    tags: ["玉掛け", "クレーン則"],
+  },
+  {
+    slug: "scaffold-tankan-check",
+    title: "単管足場の基準チェック",
+    summary: "建地間隔・積載荷重・壁つなぎを一括判定",
+    description:
+      "建地間隔（けた行1.85m・はり間1.5m）、建地間の積載荷重400kg、壁つなぎ間隔（垂直5m・水平5.5m）など安衛則第570条・第571条の基準への適合を一括チェックします。",
+    href: "/construction-calc/scaffold-tankan-check",
+    category: "construction-calc",
+    tags: ["足場", "安衛則"],
+  },
+  {
+    slug: "excavation-slope",
+    title: "掘削勾配チェック",
+    summary: "地山の種類×深さから法定上限勾配を判定",
+    description:
+      "地山の種類と掘削面の高さから、安衛則第356条・第357条の法定上限勾配を判定。予定勾配の適合チェックと作業主任者選任（第359条）の要否も表示します。",
+    href: "/construction-calc/excavation-slope",
+    category: "construction-calc",
+    tags: ["掘削", "安衛則"],
   },
   // 安全装備
   {
