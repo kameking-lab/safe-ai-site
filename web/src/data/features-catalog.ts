@@ -296,6 +296,56 @@ export const FEATURES: FeatureItem[] = [
     category: "construction-calc",
     tags: ["アンカー", "引抜き", "あと施工"],
   },
+  {
+    slug: "scaffold-load-summary",
+    title: "足場荷重の集計（自重＋積載→建地1本負担）",
+    summary: "1スパン積載を400kg限度と比較、建地1本負担を集計",
+    description:
+      "足場の自重合計と作業床の積載荷重を入力すると、1スパンあたりの積載荷重（安衛則571条1項4号の400kg限度）と、建地1本あたりの負担荷重の目安を集計します。単管足場チェックと連携。",
+    href: "/construction-calc/scaffold-load-summary",
+    category: "construction-calc",
+    tags: ["足場荷重", "建地", "安衛則"],
+  },
+  {
+    slug: "protective-canopy-check",
+    title: "防護棚（朝顔）の設置基準チェック",
+    summary: "ふ角・水平距離から設置要否と段数・張出し幅を判定",
+    description:
+      "建築工事を行う部分の高さと前面道路・隣地までの水平距離から、建設工事公衆災害防止対策要綱（建築工事等編）第28条の防護棚（朝顔）の設置要否・必要段数・突出し幅・角度の基準適合をチェックします。",
+    href: "/construction-calc/protective-canopy-check",
+    category: "construction-calc",
+    tags: ["防護棚", "朝顔", "公衆災害防止"],
+  },
+  {
+    slug: "suspended-scaffold-check",
+    title: "吊り足場の基準チェック",
+    summary: "ワイヤ・鎖・支点の安全係数と作業床幅を判定",
+    description:
+      "つりワイヤロープ・つり鎖・つりフック・支点等の破断荷重と実荷重から安全係数（安衛則562条2項：ワイヤ10・鎖/フック5・支点鋼材2.5/木材5）を判定し、作業床の幅・隙間（574条）も併せてチェックします。",
+    href: "/construction-calc/suspended-scaffold-check",
+    category: "construction-calc",
+    tags: ["吊り足場", "つり足場", "安全係数"],
+  },
+  {
+    slug: "ladder-stepladder-check",
+    title: "移動はしご・脚立の基準チェック",
+    summary: "はしごの幅・脚立の開き角度・昇降設備要否を判定",
+    description:
+      "移動はしごの幅（安衛則527条）、脚立の開き角度75度以下（528条）への適合と、高さ1.5m超で必要となる昇降設備（526条）の要否をチェックします。",
+    href: "/construction-calc/ladder-stepladder-check",
+    category: "construction-calc",
+    tags: ["はしご", "脚立", "安衛則"],
+  },
+  {
+    slug: "work-platform-opening-check",
+    title: "作業床・開口部の基準チェック",
+    summary: "作業床の幅・隙間・手すり・開口部の囲いを一括判定",
+    description:
+      "足場の作業床の幅・隙間、手すり・中桟の高さ、開口部の囲いの設置状況を入力すると、安衛則第563条・第519条・第518条の基準に適合するかを一括チェックします。単管足場チェックと相互リンク。",
+    href: "/construction-calc/work-platform-opening-check",
+    category: "construction-calc",
+    tags: ["作業床", "開口部", "安衛則"],
+  },
   // 安全装備
   {
     slug: "equipment-finder",
