@@ -11,8 +11,10 @@ export type FlagshipFeature = {
   id: string;
   /** ナビ表示用ラベル */
   label: string;
-  /** カードの絵文字 */
+  /** カードの絵文字（iconSrc未対応箇所のフォールバック） */
   icon: string;
+  /** 生成アイコン画像（統一タッチ・視覚刷新 2026-07-12）。あれば絵文字より優先 */
+  iconSrc?: string;
   /** トップ機能カード用の見出し */
   cardTitle: string;
   /** トップ機能カード用の説明文 */
@@ -28,6 +30,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     id: "safety-diary",
     label: "安全工程打合せ書",
     icon: "📋",
+    iconSrc: "/icons/icon-meeting.webp",
     cardTitle: "安全工程打合せ書・安全衛生指示書",
     cardDescription:
       "元請が前日5分で各社の作業・使用機械・予想災害・リスク・指示を1枚に。AI提案・点検項目・印刷・KY転記。",
@@ -41,6 +44,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     id: "ky",
     label: "KY簡易作成",
     icon: "📝",
+    iconSrc: "/icons/icon-ky.webp",
     cardTitle: "KY簡易作成",
     cardDescription:
       "業種別プリセット・音声入力対応。3分で危険予知活動表を作成し、サイネージや日誌に転記できます。",
@@ -56,6 +60,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     id: "chemical-ra",
     label: "化学物質RA",
     icon: "⚗️",
+    iconSrc: "/icons/icon-chemical.webp",
     cardTitle: "化学物質リスクアセスメント",
     cardDescription:
       "CREATE-SIMPLEに準拠した簡易RA。化学物質DB・SDS連携で、一般工業薬品から有機溶剤まで評価できます。",
@@ -70,6 +75,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     id: "signage",
     label: "サイネージ",
     icon: "📺",
+    iconSrc: "/icons/icon-signage.webp",
     cardTitle: "サイネージ表示",
     cardDescription:
       "事務所モニター・現場掲示用。気象警報・本日のリスク・現場の安全状態（この端末の記録）・法改正・ニュースを自動更新。",
@@ -83,6 +89,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     id: "laws",
     label: "法改正一覧",
     icon: "📚",
+    iconSrc: "/icons/icon-law.webp",
     cardTitle: "法改正・通達",
     cardDescription:
       "厚労省・国土交通省・経産省などの安衛法関連改正を時系列で整理。施行日カウントダウン付き。",
@@ -103,6 +110,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     id: "chatbot",
     label: "安衛法AIチャット",
     icon: "💬",
+    iconSrc: "/icons/icon-chat.webp",
     cardTitle: "安衛法AIチャット",
     cardDescription:
       "労働安全衛生法・関連省令・通達に特化したチャットボット。条文番号・出典付きで回答します。",
@@ -118,6 +126,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     id: "accidents",
     label: "事故事例・分析",
     icon: "🚨",
+    iconSrc: "/icons/icon-accident.webp",
     cardTitle: "事故事例データベース・分析",
     cardDescription:
       "厚労省の事例検索・業種別の自動分析レポート・統計ダッシュボード（約5,000件）・重大災害事例を横断できます。",
@@ -136,6 +145,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     id: "education-certification",
     label: "特別教育・技能講習",
     icon: "🎓",
+    iconSrc: "/icons/icon-education.webp",
     cardTitle: "特別教育・技能講習DB",
     cardDescription:
       "安衛則第36条の特別教育（約60種）・技能講習（約40種）を完全収録。業種・作業から必要資格を即時判定。根拠条文付き。",
@@ -172,6 +182,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     id: "industries",
     label: "業種から探す",
     icon: "🏭",
+    iconSrc: "/icons/icon-ppe.webp",
     cardTitle: "業種別ポータル 10業種",
     cardDescription:
       "建設・製造・運輸・医療福祉・サービス・小売・飲食・卸売・倉庫・事務系の10業種から、事故レポート・KY・通達・化学物質・特別教育・年次計画を横断的に活用。",
@@ -243,6 +254,7 @@ export const FLAGSHIP_FEATURES: FlagshipFeature[] = [
     id: "work-environment",
     label: "作業環境測定",
     icon: "🔬",
+    iconSrc: "/icons/icon-meter.webp",
     cardTitle: "作業環境測定 管理区分判定",
     cardDescription:
       "安衛令第21条の10種類の測定対象を自動判定。A測定・B測定から管理区分（第1〜第3）を算出し、区分別改善措置を提案。作業環境測定法準拠。",

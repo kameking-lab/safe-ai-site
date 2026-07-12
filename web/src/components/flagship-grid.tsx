@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { FLAGSHIP_FEATURES } from "@/config/flagship-nav";
 import { useLanguage } from "@/contexts/language-context";
@@ -133,9 +134,13 @@ export function FlagshipGrid() {
                   className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-md"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl" aria-hidden>
-                      {f.icon}
-                    </span>
+                    {f.iconSrc ? (
+                      <Image src={f.iconSrc} alt="" width={28} height={28} loading="lazy" aria-hidden style={{ width: 28, height: 28 }} />
+                    ) : (
+                      <span className="text-2xl" aria-hidden>
+                        {f.icon}
+                      </span>
+                    )}
                     <h3 className="text-sm font-bold text-slate-900 group-hover:text-emerald-700 sm:text-base">
                       {title}
                     </h3>
