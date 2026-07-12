@@ -1,0 +1,150 @@
+{
+  "reference_default": "web/public/mascot/mascot-chihuahua-4.png",
+  "base_prompt": "添付画像は労働安全ポータルサイトの公式マスコット（ロングコートチワワ）です。この参照画像とまったく同じキャラクター・同じ作風で、次のイラストを1枚生成してください。\n\n【キャラクター仕様（厳守）】\n- クリーム色のふわふわした長毛のロングコートチワワ（参照画像と同一個体に見えること）\n- 大きな丸い焦げ茶の瞳（白ハイライト）、黒い小さな鼻、控えめなにっこり\n- 大きな立ち耳、内側はピンク\n- 緑（#159968）の工事用ヘルメット、正面に白い十字（赤い十字は禁止）\n- 太い濃緑のアウトライン、フラットなセル塗り、ステッカー風\n\n【スタイル】\n- ベクター風フラットイラスト。グラデーションや写実的な陰影は使わない\n- 背景は完全に透過したPNG（アルファチャンネル）で出力\n- 全身2頭身デフォルメ、正面〜やや斜め\n\n【今回のポーズ】\n{pose}",
+  "assets": [
+    {
+      "id": "bow",
+      "site": "chatgpt",
+      "pose": "両前足を体の前に揃えて、ぺこりと深くお辞儀している。眉は申し訳なさそうに下がっているが、かわいらしさは保つ。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 2,
+        "use": "404/エラーページの挿絵"
+      },
+      "status": "done"
+    },
+    {
+      "id": "thinking",
+      "site": "chatgpt",
+      "pose": "首を少しかしげて、片方の前足を口元に当てて考え込んでいる。目線はやや上。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 2,
+        "use": "空状態・ローディングの挿絵"
+      },
+      "status": "done"
+    },
+    {
+      "id": "point-check",
+      "site": "chatgpt",
+      "pose": "右前足を斜め上にまっすぐ伸ばして指差し確認（指差呼称）をしている。表情は凛々しく、目はしっかり開いて指差す方向を見ている。ヘルメット正面の十字は必ず白色ではっきり描くこと（暗い色の十字は不可）。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 2,
+        "use": "トップヒーロー"
+      },
+      "status": "pending"
+    },
+    {
+      "id": "teacher",
+      "site": "chatgpt",
+      "pose": "講師姿。前足に指し棒を持って、少し胸を張って立っている。優しく教える表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 2,
+        "use": "教育スライド表紙・e-learning"
+      },
+      "status": "done"
+    },
+    {
+      "id": "salute",
+      "site": "chatgpt",
+      "pose": "右前足でビシッと敬礼している。誇らしげでにっこりした表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 2,
+        "use": "完了画面（KY保存・クイズ完了・決済success）"
+      },
+      "status": "done"
+    },
+    {
+      "id": "head-clean",
+      "site": "chatgpt",
+      "pose": "参照画像とまったく同じ頭部のみの構図。ただし背景の緑の円・白いリング・黒い角丸四角は描かず、頭部だけを完全な透過背景に置く。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 2,
+        "use": "ヘッダーロゴ・OGP"
+      },
+      "status": "done"
+    },
+    {
+      "id": "bow-gemini",
+      "site": "gemini",
+      "pose": "両前足を体の前に揃えて、ぺこりと深くお辞儀している。眉は申し訳なさそうに下がっているが、かわいらしさは保つ。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 2,
+        "use": "品質比較検体（ChatGPT bowと同一ポーズ）"
+      },
+      "status": "done"
+    },
+    {
+      "id": "thinking-gemini",
+      "site": "gemini",
+      "pose": "首を少しかしげて、片方の前足を口元に当てて考え込んでいる。目線はやや上。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 2,
+        "use": "品質比較検体（ChatGPT thinkingと同一ポーズ）"
+      },
+      "status": "done"
+    },
+    {
+      "id": "ky-writing",
+      "site": "chatgpt",
+      "pose": "クリップボードに挟んだKY用紙に鉛筆で書き込んでいる。真剣だがかわいい表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 2,
+        "use": "KY用紙の空状態"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "water-break",
+      "site": "chatgpt",
+      "pose": "緑のヘルメットをかぶったまま、水筒から水を飲んで一休みしている。額に汗のしずく1滴。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 2,
+        "use": "熱中症WBGT記録簿・暑熱ページ"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "tamakake-signal",
+      "site": "chatgpt",
+      "pose": "玉掛けの合図。片方の前足を垂直にまっすぐ上へ伸ばしている（クレーンへの「巻け」の合図）。きりっとした表情。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 2,
+        "use": "e-learning玉掛け・事故DB"
+      },
+      "status": "backlog"
+    },
+    {
+      "id": "seasonal-summer",
+      "site": "chatgpt",
+      "pose": "夏バージョン。ヘルメットはそのまま、首に白いタオルをかけて、背景なしでひまわりを1本添える。",
+      "spec": {
+        "transparent": true,
+        "ratio": "1:1",
+        "count": 2,
+        "use": "トップの季節演出（運用フェーズ）"
+      },
+      "status": "backlog"
+    }
+  ]
+}
