@@ -52,6 +52,19 @@ export function NewHomeHero() {
       aria-labelledby="home-hero-title"
       className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-white to-slate-50 dark:from-emerald-950/40 dark:via-slate-900 dark:to-slate-950"
     >
+      {/* 背景イラスト（夜明けの現場・生成画・20.9KB）: sm以上のみ＝モバイルLCP不可侵。
+          文字コントラストAAは白/濃紺オーバーレイで担保する */}
+      <div className="pointer-events-none absolute inset-0 hidden sm:block" aria-hidden="true">
+        <Image
+          src="/mascot/hero-bg-dawn.webp"
+          alt=""
+          fill
+          sizes="100vw"
+          loading="lazy"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/75 via-white/65 to-white/85 dark:from-slate-950/85 dark:via-slate-950/75 dark:to-slate-950/90" />
+      </div>
       {/* マスコット（指差呼称）: PC装飾。絶対配置＋明示寸法でCLS 0 */}
       <div
         className="pointer-events-none absolute bottom-2 right-6 hidden xl:block"
@@ -66,7 +79,7 @@ export function NewHomeHero() {
           style={{ width: 155, height: 150, objectFit: "contain" }}
         />
       </div>
-      <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14 lg:py-16">
+      <div className="relative mx-auto max-w-7xl px-4 py-10 sm:py-14 lg:py-16">
         <div className="text-center">
           <p className="text-xs font-bold tracking-widest text-emerald-700 dark:text-emerald-300">
             {isEn ? "Anzen AI Portal (Japan OSH research)" : "安全AIポータル"}
@@ -92,21 +105,21 @@ export function NewHomeHero() {
           <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-3">
             <Link
               href="/chatbot"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-b from-emerald-500 to-emerald-700 px-4 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:from-emerald-600 hover:to-emerald-800 hover:shadow-lg hover:shadow-emerald-600/30 active:translate-y-px"
             >
               <MessageSquare className="h-4 w-4" />
               {isEn ? "Ask the OSH-Law AI" : "労働安全衛生法をAIに質問"}
             </Link>
             <Link
               href="/accidents-reports"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-b from-emerald-500 to-emerald-700 px-4 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:from-emerald-600 hover:to-emerald-800 hover:shadow-lg hover:shadow-emerald-600/30 active:translate-y-px"
             >
               <BarChart3 className="h-4 w-4" />
               {isEn ? "Industry accident reports" : "業種別 事故分析レポート"}
             </Link>
             <Link
               href="/strategy/plan-generator"
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-md transition hover:bg-emerald-700"
+              className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-b from-emerald-500 to-emerald-700 px-4 py-3 text-sm font-bold text-white shadow-md shadow-emerald-600/25 transition hover:from-emerald-600 hover:to-emerald-800 hover:shadow-lg hover:shadow-emerald-600/30 active:translate-y-px"
             >
               <CalendarCheck className="h-4 w-4" />
               {isEn ? "Annual OSH plan generator" : "年次安全衛生計画を作成"}

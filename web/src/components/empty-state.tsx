@@ -27,7 +27,7 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className={`flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40 ${className}`}
+      className={`flex flex-col items-center justify-center rounded-2xl border border-dashed border-emerald-200 bg-[radial-gradient(ellipse_60%_60%_at_50%_38%,rgba(21,153,104,0.07),transparent)] bg-slate-50/60 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-900/40 ${className}`}
     >
       <Mascot variant={variant} size="lg" alt="" />
       <p className="mt-3 text-sm font-semibold text-slate-700 dark:text-slate-200">{title}</p>

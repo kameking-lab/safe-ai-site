@@ -131,7 +131,7 @@ export function FlagshipGrid() {
               <li key={f.id}>
                 <Link
                   href={f.href}
-                  className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-md"
+                  className="group flex h-full flex-col rounded-2xl border border-slate-200 bg-gradient-to-b from-white to-slate-50/60 p-4 shadow-sm ring-1 ring-slate-900/[0.03] transition hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-600/10"
                 >
                   <div className="flex items-center gap-2">
                     {f.iconSrc ? (
