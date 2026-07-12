@@ -346,6 +346,56 @@ export const FEATURES: FeatureItem[] = [
     category: "construction-calc",
     tags: ["作業床", "開口部", "安衛則"],
   },
+  {
+    slug: "water-pressure",
+    title: "水圧の概算（静水圧・揚圧・ボイリング）",
+    summary: "深さ・水位差から静水圧・浮き上がり安全率・ボイリング安全率を算定",
+    description:
+      "深さ・水位差から静水圧（側圧）を、押さえ荷重から揚圧（浮き上がり）安全率を、Gs・eから限界動水勾配に対するボイリング安全率を算定します。土圧計算機（土圧の概算）の水圧項の単独版・釜場排水/矢板の検討補助です。",
+    href: "/construction-calc/water-pressure",
+    category: "construction-calc",
+    tags: ["水圧", "揚圧", "ボイリング"],
+  },
+  {
+    slug: "formwork-lateral-pressure",
+    title: "型枠の側圧（コンクリート打込み・液圧近似）",
+    summary: "単位体積重量×打込み高さで型枠側圧の上限値P=W・Hを算定",
+    description:
+      "フレッシュコンクリートの単位体積重量と打込み高さから、型枠側圧の液圧近似（安全側の上限値）を算定します。打上り速度・温度による低減はJASS5／コンクリート標準示方書の最新版で個別確認が必要なため見込まず、常に上限側の値を返します。型枠支保工の基準チェックと相互リンク。",
+    href: "/construction-calc/formwork-lateral-pressure",
+    category: "construction-calc",
+    tags: ["型枠", "側圧", "JASS5"],
+  },
+  {
+    slug: "shoring-member-check",
+    title: "土止め支保工の部材基準チェック（安衛則368〜375条）",
+    summary: "材料・組立図・部材の取付け・点検周期・作業主任者選任を一括判定",
+    description:
+      "材料・組立図・切りばりや腹おこしの取付け・継手・接続部の緊結・立入禁止・点検周期（7日以内ごと・地震/大雨後）・作業主任者の選任を、労働安全衛生規則第368条〜第375条の遵守事項に沿って一括判定します。掘削勾配計算機のNG時、土圧計算機の側圧算定後の受け皿として相互リンク。",
+    href: "/construction-calc/shoring-member-check",
+    category: "construction-calc",
+    tags: ["土止め支保工", "点検", "安衛則"],
+  },
+  {
+    slug: "rebar-mass",
+    title: "鉄筋の質量・本数換算（JIS G 3112）",
+    summary: "呼び名（D10〜D51）の単位質量で長さ×本数⇔総質量を相互換算",
+    description:
+      "JIS G 3112の呼び名（D10〜D51）から公称直径ベースで単位質量を算定し、長さ×本数→総質量、または総質量→本数を相互換算します。径ズレ（呼び名の取り違え）を防ぐため公称直径から都度計算する方式。定尺ロス・継手・フックの割増は含みません。",
+    href: "/construction-calc/rebar-mass",
+    category: "construction-calc",
+    tags: ["鉄筋", "JIS", "質量計算"],
+  },
+  {
+    slug: "concrete-volume",
+    title: "生コンクリート数量の概算（打設量・発注量・車両台数）",
+    summary: "部材寸法×ロス率で発注量とアジテータ車の概算台数を算定",
+    description:
+      "部材寸法（縦×横×高さ）または体積の直接入力から打設量を求め、ロス率を加味した発注量と生コン車（アジテータ車）の概算台数を算定します。配合（水セメント比等）はJASS5等の参照表記に留め、数値は生コン工場の配合計画書で確認してください。鉄筋質量換算と相互リンク。",
+    href: "/construction-calc/concrete-volume",
+    category: "construction-calc",
+    tags: ["生コン", "コンクリート数量", "JASS5"],
+  },
   // 安全装備
   {
     slug: "equipment-finder",

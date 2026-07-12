@@ -118,6 +118,8 @@ export type ConstructionCalculator = {
   examples: CalcExample[];
   /** AI入口のフォールバック・検索用キーワード */
   keywords: string[];
+  /** 相互リンクする関連計算機の slug（registry に実在するもののみ。幽霊リンク禁止） */
+  relatedSlugs?: string[];
   /** 決定論的計算（正規化済み値を受ける。AI はこの関数を呼ばない・書き換えない） */
   compute: (values: CalcValues) => CalcOutcome;
 };
