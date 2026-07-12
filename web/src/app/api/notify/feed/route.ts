@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PREFECTURE_CENTROIDS } from "@/data/jma/prefecture-centroids";
 import { getJmaWarningsRuntime } from "@/lib/jma/fetch-jma-runtime";
 import { buildNewsHubItems } from "@/lib/news-hub";
+import { buildWeatherNotifications } from "@/lib/notifications/weather-notifications";
 import type { NotificationFeedResponse, SiteNotification } from "@/lib/notifications/feed-types";
 
 /**
@@ -30,28 +31,11 @@ export async function GET(req: NextRequest) {
 
   const items: SiteNotification[] = [];
 
-  // 1) 気象警報（対象都道府県のみ。注意報以上を通知にする）
+  // 1) 気象警報（対象都道府県のみ。注意報以上を通知にする）。判定は閉端末Pushと共通。
   if (prefectureIso) {
     try {
       const warnings = await getJmaWarningsRuntime();
-      const entry = warnings.byIso?.[prefectureIso];
-      const prefName = PREF_NAME.get(prefectureIso) ?? prefectureIso;
-      for (const w of entry?.entries ?? []) {
-        if (w.level === "none") continue;
-        const levelLabel = w.level === "special" ? "特別警報" : w.level === "warning" ? "警報" : "注意報";
-        items.push({
-          id: `jma-${prefectureIso}-${w.sourceCode}-${w.reportDatetime ?? "latest"}`,
-          category: "weather",
-          title: `${prefName}: ${levelLabel} 発表中`,
-          body: w.headline ?? undefined,
-          date: w.reportDatetime ?? warnings.fetchedAt,
-          url: "https://www.jma.go.jp/bosai/warning/",
-          // CR2-H2: 汎用サイネージ（/signage=間取り既定）ではなく、警報・地震を
-          // 地図で見る該当地域ビューへ。
-          internalHref: "/signage/map",
-          severity: w.level,
-        });
-      }
+      items.push(...buildWeatherNotifications(prefectureIso, warnings));
     } catch {
       // 気象データ取得失敗時は気象分を欠いたフィードを返す（新着分は生きる）
     }
