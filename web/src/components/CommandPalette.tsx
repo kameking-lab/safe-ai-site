@@ -34,6 +34,7 @@ import {
   type SearchCategory,
 } from '@/lib/search-index';
 import { EGOV_LAW_SEARCH_URL, egovArticleAnchor } from '@/lib/cross-search';
+import { useCondexLanding } from '@/lib/laws-fulltext/condex-client';
 import { trackEvent } from '@/components/Analytics';
 
 // 空クエリ時に表示する主要ショートカット（UX-007: モバイル検索とPC Ctrl+K の機能を統一）
@@ -116,6 +117,11 @@ export function CommandPalette({ onClose }: Props) {
     () => (debouncedQuery ? searchItems(index, debouncedQuery, activeCategory) : []),
     [debouncedQuery, index, activeCategory],
   );
+
+  // FT-D4 condex: curated に無い条番号（例「安衛則630条」）でも、全文層に在れば当該の
+  // 全文条ページ（/law-navi/…）へ内部着地させる。0 件時にだけ condex を遅延取得して解決する
+  // （通常検索の索引・スコアには一切触れない＝0 件救済にのみ効く）。/search NoResults とパリティ。
+  const condexLanding = useCondexLanding(debouncedQuery, results.length === 0 && !!debouncedQuery);
 
   // クエリが「法令名＋条番号」を明示していれば、当該法令の e-Gov 条アンカーへ直リンク
   // （抄録未収載の条番号でも 1 タップで原文へ着地＝/search NoResults の T4 後段パリティ）。
@@ -295,6 +301,27 @@ export function CommandPalette({ onClose }: Props) {
                 <span className="font-semibold">見つからない＝「規定がない」ではありません。</span>
                 本サイトは主要法令の条文（抄録）・通達・判例などを収載しており、未収載の条文もあります。条文の有無・原文は政府公式の e-Gov 法令検索でご確認ください。
               </p>
+              {/* FT-D4 condex: curated 未収録でも全文層に在る条番号は内部の全文条ページへ直着地
+                  （e-Gov 外部誘導より上に、内部ページの正着地として emerald で目立たせる）。 */}
+              {condexLanding && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    trackEvent('search_zero_result_fulltext_article', {
+                      query: debouncedQuery,
+                      law: condexLanding.lawShort,
+                      article: condexLanding.articleLabel,
+                    });
+                    router.push(condexLanding.path);
+                    onClose();
+                  }}
+                  className="mx-auto mt-3 flex min-h-[44px] max-w-md items-center justify-center gap-1.5 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-800 hover:bg-emerald-100"
+                >
+                  <BookText className="h-3.5 w-3.5" aria-hidden="true" />
+                  全文を読む：{condexLanding.lawShort} {condexLanding.articleLabel}
+                  {condexLanding.caption ? condexLanding.caption : condexLanding.isDeleted ? '（削除）' : ''}
+                </button>
+              )}
               {/* 法令名＋条番号が明示されたクエリは e-Gov の該当条へ直リンク（貼り付け不要で原文へ着地）。 */}
               {egovAnchor && (
                 <a

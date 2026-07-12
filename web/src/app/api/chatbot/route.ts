@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { searchRelevantArticlesWithScore, buildContextFromArticles, type LawCategoryFilter } from "@/lib/rag-search";
+import { resolveFulltextRagArticles } from "@/lib/laws-fulltext/rag-fallback";
 import { stripAnswerTailBlocks } from "@/lib/chatbot-answer-format";
 import { searchRelevantNotices, type NoticeHit } from "@/lib/notice-search";
 import type { LawArticle } from "@/data/laws";
@@ -321,6 +322,10 @@ export async function POST(request: Request) {
 
   // RAG: 関連条文の検索（スコア付き）
   const { articles: allRelevant, normalizedScore, hadPins } = searchRelevantArticlesWithScore(message, 10, lawCategory);
+  // FT-D4 全文フォールバック: 条番号を直指定していて curated に無い条は、全文層から
+  // サーバー側で1条だけ読んで文脈注入する（RAG の検索母集団＝curated は不変・全文の
+  // BM25 投入はしない）。条番号を直指定しない通常質問では 1 件も発火しない。
+  const fulltextArticles = await resolveFulltextRagArticles(message, lawCategory, allRelevant);
   // MLIT資料の関連検索（所管省庁資料の追加コンテキスト）
   const mlitMatches = searchMlitResources(message, 3);
 
@@ -329,19 +334,34 @@ export async function POST(request: Request) {
   // 有機則の主要条文まで拡充したことで、部分マッチでも十分に正答に寄与する条文が
   // 当たるようになったため（「6問テストで正解率を上げる」導線）。
   const CONFIDENCE_THRESHOLD = 0.5;
-  const relevantArticles = normalizedScore >= CONFIDENCE_THRESHOLD ? allRelevant : [];
+  const curatedRelevant = normalizedScore >= CONFIDENCE_THRESHOLD ? allRelevant : [];
+  // 全文フォールバック条（明示条番号の確定ソース）は PIN と同型で先頭へ差し込む
+  // ＝curated の順位・母集団は変えず、直指定条だけを追加する。
+  const relevantArticles =
+    fulltextArticles.length > 0
+      ? [
+          ...fulltextArticles,
+          ...curatedRelevant.filter(
+            (a) => !fulltextArticles.some((f) => f.law === a.law && f.articleNum === a.articleNum),
+          ),
+        ].slice(0, 12)
+      : curatedRelevant;
   const context = buildContextFromArticles(relevantArticles);
 
   const hasRagHits = relevantArticles.length > 0;
   const source_type: "rag" | "ai_inference" = hasRagHits ? "rag" : "ai_inference";
+  // 全文フォールバックが刺さった場合は明示条番号の確定ソースのため、PIN と同様に信頼度を
+  // 最低 0.7 まで底上げする（curated スコアが低くても「関連条文なし」扱いにしない）。
+  const scoreForConfidence =
+    fulltextArticles.length > 0 ? Math.max(normalizedScore, 0.7) : normalizedScore;
   // 信頼度判定の精度を向上：
   // - high  : スコア>=0.75 かつ 上位2件以上ヒット（複数条文が裏付け）
   // - medium: それ以外でRAGヒットあり
   // - low   : RAGヒットなし
   const confidence: "high" | "medium" | "low" = hasRagHits
-    ? (normalizedScore >= 0.75 && relevantArticles.length >= 2) ? "high" : "medium"
+    ? (scoreForConfidence >= 0.75 && relevantArticles.length >= 2) ? "high" : "medium"
     : "low";
-  const confidenceScore = Math.round(normalizedScore * 100) / 100;
+  const confidenceScore = Math.round(scoreForConfidence * 100) / 100;
 
   // P1-5: 直接ヒット無しでも「該当無し」で突き放さず、低スコアの関連条文＋一般原則＋
   // 公式誘導を返す。stream route と同じ buildNoHitTemplate を使い挙動を揃える。
