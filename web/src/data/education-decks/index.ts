@@ -8,10 +8,19 @@ import { FULLHARNESS_DECK } from "./fullharness";
 import { NECCHU_DECK } from "./necchu";
 import { DUST_DECK } from "./dust";
 import { TEIATSU_DECK } from "./teiatsu";
+import { OXYGEN_1_DECK } from "./oxygen-1";
+import { OXYGEN_2_DECK } from "./oxygen-2";
 
 export type { EduDeck, EduSlide } from "./types";
 
-export const EDUCATION_DECKS: readonly EduDeck[] = [FULLHARNESS_DECK, NECCHU_DECK, DUST_DECK, TEIATSU_DECK];
+export const EDUCATION_DECKS: readonly EduDeck[] = [
+  FULLHARNESS_DECK,
+  NECCHU_DECK,
+  DUST_DECK,
+  TEIATSU_DECK,
+  OXYGEN_1_DECK,
+  OXYGEN_2_DECK,
+];
 
 const BY_SLUG = new Map(EDUCATION_DECKS.map((d) => [d.slug, d]));
 
