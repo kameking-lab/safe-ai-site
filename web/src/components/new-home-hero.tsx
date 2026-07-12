@@ -60,10 +60,10 @@ export function NewHomeHero() {
         <Image
           src="/mascot/mascot-pointing.webp"
           alt=""
-          width={136}
-          height={160}
+          width={155}
+          height={150}
           loading="lazy"
-          style={{ width: 136, height: 160, objectFit: "contain" }}
+          style={{ width: 155, height: 150, objectFit: "contain" }}
         />
       </div>
       <div className="mx-auto max-w-7xl px-4 py-10 sm:py-14 lg:py-16">

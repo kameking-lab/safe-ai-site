@@ -23,7 +23,7 @@ const VARIANT_MAP = {
   /** 考え中: 空状態・ローディング用 */
   thinking: { src: "/mascot/mascot-thinking.webp", width: 314, height: 320 },
   /** 指差呼称: トップヒーロー用 */
-  pointing: { src: "/mascot/mascot-pointing.webp", width: 339, height: 400 },
+  pointing: { src: "/mascot/mascot-pointing.webp", width: 400, height: 388 },
   /** 講師姿: 教育スライド用 */
   teacher: { src: "/mascot/mascot-teacher.webp", width: 320, height: 320 },
   /** 敬礼: 完了画面用 */
