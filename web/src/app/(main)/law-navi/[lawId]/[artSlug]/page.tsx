@@ -26,6 +26,12 @@ import {
   resolveLawNaviEntry,
   type LawNaviEntry,
 } from "@/lib/law-navi/permalink";
+import {
+  adjacentReadingOrder,
+  getAllFulltextNaviEntries,
+  resolveFulltextNaviEntry,
+  type ReadingOrderLink,
+} from "@/lib/law-navi/fulltext-navi";
 import { matchGlossaryTerms } from "@/lib/law-navi/glossary-match";
 import { isIndexableLawNaviEntry } from "@/lib/law-navi/seo-gate";
 import { topicsForArticle } from "@/data/law-navi/topics";
@@ -37,8 +43,36 @@ const SITE_BASE = "https://www.anzen-ai-portal.jp";
 /** 生成集合＝解決集合（幽霊URL 0）。未知 slug は 404。 */
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  return LAW_NAVI_ENTRIES.map((e) => ({ lawId: e.egovLawId, artSlug: e.artSlug }));
+/**
+ * 生成集合 = curated（LAW_NAVI_ENTRIES）∪ 全文由来ギャップ（fulltext）。
+ * 既存 curated の 717 URL は不変（追加のみ・§5-2「既存712 URL は不変」）。全文由来は
+ * curated に無い条だけを埋める。全文 JSON は loader の dynamic import 経由でビルド時のみ
+ * 読む（クライアントバンドル非搭載＝FT-D1 の不可侵を維持）。
+ */
+export async function generateStaticParams() {
+  const curated = LAW_NAVI_ENTRIES.map((e) => ({ lawId: e.egovLawId, artSlug: e.artSlug }));
+  const fulltext = (await getAllFulltextNaviEntries()).map((e) => ({
+    lawId: e.egovLawId,
+    artSlug: e.artSlug,
+  }));
+  return [...curated, ...fulltext];
+}
+
+/** 表示の正本解決順: curated 優先 → 全文ギャップ。curated 条は表示本文・plain 等が不変。 */
+async function resolveEntry(
+  lawId: string,
+  artSlug: string,
+): Promise<
+  | { entry: LawNaviEntry; origin: "curated" | "fulltext"; isDeleted: boolean; revisionId?: string }
+  | null
+> {
+  const curated = resolveLawNaviEntry(lawId, artSlug);
+  if (curated) return { entry: curated, origin: "curated", isDeleted: false };
+  const ft = await resolveFulltextNaviEntry(lawId, artSlug);
+  if (ft) {
+    return { entry: ft, origin: "fulltext", isDeleted: ft.isDeleted, revisionId: ft.revisionId };
+  }
+  return null;
 }
 
 export async function generateMetadata({
@@ -47,8 +81,9 @@ export async function generateMetadata({
   params: Promise<{ lawId: string; artSlug: string }>;
 }): Promise<Metadata> {
   const { lawId, artSlug } = await params;
-  const entry = resolveLawNaviEntry(lawId, artSlug);
-  if (!entry) return {};
+  const resolved = await resolveEntry(lawId, artSlug);
+  if (!resolved) return {};
+  const { entry } = resolved;
   const a = entry.article;
   const title = `${a.lawShort} ${a.articleNum}${a.articleTitle ? `（${a.articleTitle}）` : ""}｜法令ナビ`;
   // 現場ことば版がある条は、条文引用よりも検索スニペットとして伝わる言い換えを説明文に使う
@@ -74,21 +109,31 @@ export async function generateMetadata({
   };
 }
 
-function AdjacentLink({ entry, dir }: { entry: LawNaviEntry; dir: "prev" | "next" }) {
-  const a = entry.article;
+/** 前後条リンク（curated=収録順・fulltext=実条連続、どちらも同じ見た目）。 */
+function AdjacentLink({
+  href,
+  articleNum,
+  articleTitle,
+  dir,
+}: {
+  href: string;
+  articleNum: string;
+  articleTitle: string;
+  dir: "prev" | "next";
+}) {
   return (
     <Link
-      href={entry.path}
+      href={href}
       className={`flex min-h-[44px] flex-1 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm transition hover:border-emerald-300 hover:bg-emerald-50 ${
         dir === "next" ? "justify-end text-right" : ""
       }`}
     >
       {dir === "prev" && <ArrowLeft className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />}
       <span>
-        <span className="block text-[11px] text-slate-500">{dir === "prev" ? "前の収録条文" : "次の収録条文"}</span>
+        <span className="block text-[11px] text-slate-500">{dir === "prev" ? "前の条文" : "次の条文"}</span>
         <span className="font-semibold text-slate-800">
-          {a.articleNum}
-          {a.articleTitle ? ` ${a.articleTitle}` : ""}
+          {articleNum}
+          {articleTitle ? ` ${articleTitle}` : ""}
         </span>
       </span>
       {dir === "next" && <ArrowRight className="h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />}
@@ -102,17 +147,32 @@ export default async function LawNaviArticlePage({
   params: Promise<{ lawId: string; artSlug: string }>;
 }) {
   const { lawId, artSlug } = await params;
-  const entry = resolveLawNaviEntry(lawId, artSlug);
-  if (!entry) notFound();
+  const resolved = await resolveEntry(lawId, artSlug);
+  if (!resolved) notFound();
 
+  const { entry, origin, isDeleted, revisionId } = resolved;
   const a = entry.article;
   const egovUrl = egovUrlForEntry(entry);
   const meta = getLawMetadata(a.lawShort);
-  const { prev, next } = adjacentEntries(entry);
   const topics = topicsForArticle(a.lawShort, a.articleNum);
   const glossaryHits = matchGlossaryTerms(a.text);
   const chatQuery = `${a.lawShort}${a.articleNum}${a.articleTitle ? `（${a.articleTitle}）` : ""}について、現場でのポイントを教えてください`;
   const itemMap = a.itemNumberMap ? Object.entries(a.itemNumberMap) : [];
+
+  // 前後条ナビ: curated ページは従来どおり収録順（既存挙動を後退させない）。
+  // 全文ギャップページは実条連続（curated / 全文どちらのページへも着地）。
+  let prev: { href: string; articleNum: string; articleTitle: string } | undefined;
+  let next: { href: string; articleNum: string; articleTitle: string } | undefined;
+  if (origin === "curated") {
+    const adj = adjacentEntries(entry);
+    if (adj.prev) prev = { href: adj.prev.path, articleNum: adj.prev.article.articleNum, articleTitle: adj.prev.article.articleTitle };
+    if (adj.next) next = { href: adj.next.path, articleNum: adj.next.article.articleNum, articleTitle: adj.next.article.articleTitle };
+  } else {
+    const adj = await adjacentReadingOrder(entry.egovLawId, a.articleNum);
+    const toLink = (l: ReadingOrderLink) => ({ href: l.path, articleNum: l.articleNum, articleTitle: l.articleTitle });
+    if (adj.prev) prev = toLink(adj.prev);
+    if (adj.next) next = toLink(adj.next);
+  }
 
   return (
     <>
@@ -155,12 +215,26 @@ export default async function LawNaviArticlePage({
                 <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-800">
                   {a.lawShort}
                 </span>
-                <span
-                  className="inline-flex items-center gap-0.5 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800"
-                  title={`本サイトのキュレーション条文。現行版（e-Gov準拠）の条番号・条文を採録しています。${meta ? `最終突合 ${meta.auditedAt}` : ""}`}
-                >
-                  <span aria-hidden>●</span> 現行（e-Gov準拠）
-                </span>
+                {origin === "curated" ? (
+                  <span
+                    className="inline-flex items-center gap-0.5 rounded-full border border-emerald-300 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-800"
+                    title={`本サイトのキュレーション条文。現行版（e-Gov準拠）の条番号・条文を採録しています。${meta ? `最終突合 ${meta.auditedAt}` : ""}`}
+                  >
+                    <span aria-hidden>●</span> 現行（e-Gov準拠）
+                  </span>
+                ) : (
+                  <span
+                    className="inline-flex items-center gap-0.5 rounded-full border border-sky-300 bg-sky-50 px-2 py-0.5 text-[10px] font-semibold text-sky-800"
+                    title={`e-Gov 法令API の全文収載条（機械取込）。${revisionId ? `収録リビジョン ${revisionId}` : ""}`}
+                  >
+                    <span aria-hidden>●</span> 全文収載（e-Gov準拠）
+                  </span>
+                )}
+                {isDeleted && (
+                  <span className="inline-flex items-center gap-0.5 rounded-full border border-slate-300 bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                    削除条
+                  </span>
+                )}
               </div>
               <h1 className="mt-2 text-2xl font-bold text-slate-900">
                 {a.articleNum}
@@ -174,7 +248,13 @@ export default async function LawNaviArticlePage({
               aria-label="条文原文"
               className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
             >
-              <ArticleRefText text={a.text} lawFullName={a.law} />
+              {isDeleted ? (
+                <p className="text-slate-600">
+                  本条は<span className="font-semibold">削除</span>されています（欠番ではなく削除条として収載）。
+                </p>
+              ) : (
+                <ArticleRefText text={a.text} lawFullName={a.law} />
+              )}
               {itemMap.length > 0 && (
                 <div className="mt-4 overflow-x-auto rounded-lg border border-slate-100 bg-slate-50 p-3">
                   <p className="mb-2 text-xs font-bold text-slate-600">号の対応（収録データより）</p>
@@ -217,10 +297,17 @@ export default async function LawNaviArticlePage({
                   href={entry.path}
                 />
               </div>
-              <p className="mt-2 text-[11px] leading-5 text-slate-500">
-                本ページは現場で引きやすいよう主要条文を採録したものです。改正の反映・正式な条文は e-Gov 法令検索が正本です
-                {meta?.latestRevision ? `（収録ベース: ${meta.latestRevision}）` : ""}。
-              </p>
+              {origin === "curated" ? (
+                <p className="mt-2 text-[11px] leading-5 text-slate-500">
+                  本ページは現場で引きやすいよう主要条文を採録したものです。改正の反映・正式な条文は e-Gov 法令検索が正本です
+                  {meta?.latestRevision ? `（収録ベース: ${meta.latestRevision}）` : ""}。
+                </p>
+              ) : (
+                <p className="mt-2 text-[11px] leading-5 text-slate-500">
+                  本ページは e-Gov 法令検索の全文収載（機械取込）に基づく現行条文です
+                  {revisionId ? `（収録リビジョン: ${revisionId}）` : ""}。改正の反映・正式な条文は e-Gov 法令検索が正本です。
+                </p>
+              )}
             </section>
 
             {/* 現場ことば版（原文の直下・検証済みのみ表示。未生成/staleは区画ごと非表示） */}
@@ -238,11 +325,11 @@ export default async function LawNaviArticlePage({
               この条文についてAIチャットで質問する
             </Link>
 
-            {/* 前後条（収録順） */}
+            {/* 前後条 */}
             {(prev || next) && (
-              <nav aria-label="前後の収録条文" className="flex flex-col gap-2 sm:flex-row">
-                {prev && <AdjacentLink entry={prev} dir="prev" />}
-                {next && <AdjacentLink entry={next} dir="next" />}
+              <nav aria-label="前後の条文" className="flex flex-col gap-2 sm:flex-row">
+                {prev && <AdjacentLink href={prev.href} articleNum={prev.articleNum} articleTitle={prev.articleTitle} dir="prev" />}
+                {next && <AdjacentLink href={next.href} articleNum={next.articleNum} articleTitle={next.articleTitle} dir="next" />}
               </nav>
             )}
           </main>
