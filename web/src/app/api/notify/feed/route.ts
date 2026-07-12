@@ -46,7 +46,9 @@ export async function GET(req: NextRequest) {
           body: w.headline ?? undefined,
           date: w.reportDatetime ?? warnings.fetchedAt,
           url: "https://www.jma.go.jp/bosai/warning/",
-          internalHref: "/signage",
+          // CR2-H2: 汎用サイネージ（/signage=間取り既定）ではなく、警報・地震を
+          // 地図で見る該当地域ビューへ。
+          internalHref: "/signage/map",
           severity: w.level,
         });
       }
@@ -65,7 +67,9 @@ export async function GET(req: NextRequest) {
       body: n.summary || undefined,
       date: n.date,
       url: n.url,
-      internalHref: n.internalHref ?? "/whats-new",
+      // CR2-H2: item固有の internalHref をそのまま通す（報道は internalHref 無し＝
+      // 外部の元記事URLへ着地）。ベル側で internalHref ?? url ?? /whats-new を解決する。
+      internalHref: n.internalHref,
       severity: n.category === "serious-case" ? "advisory" : "info",
     });
   }
