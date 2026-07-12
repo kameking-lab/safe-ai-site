@@ -17,6 +17,7 @@ import {
   type ProgressSummary,
   type ThemeProgress,
 } from "@/lib/elearning/progress";
+import { Mascot } from "@/components/mascot";
 
 function formatDate(iso: string): string {
   try {
@@ -66,6 +67,7 @@ export function ElearningProgressBoard() {
         <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-800">
           端末内のみ保存
         </span>
+        <Mascot variant="trophy" size="md" alt="" className="ml-auto shrink-0" />
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <SummaryStat label="受講テーマ" value={summary.totalThemes} unit="件" />

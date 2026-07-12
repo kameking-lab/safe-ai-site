@@ -11,6 +11,7 @@ import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { ALL_CHECKUP_RULES, ALL_JOB_PROFILES } from "@/data/health-checkup-rules";
 import { CHECKUP_TYPE_LABELS } from "@/types/health-checkup";
 import { ogImageUrl } from "@/lib/og-url";
+import { Mascot } from "@/components/mascot";
 
 // 結論カードのデカ数字はデータから算出（手書き禁止・常に実数と一致）。
 const RULE_COUNT = ALL_CHECKUP_RULES.length;
@@ -71,9 +72,12 @@ export default function HealthCheckupSchedulerPage() {
       />
       <PageContainer width="prose" className="py-8 md:py-12">
         <header className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-            健康診断スケジューラ
-          </h1>
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+              健康診断スケジューラ
+            </h1>
+            <Mascot variant="health-check" size="md" alt="" className="shrink-0" />
+          </div>
 
           <ConclusionCard
             className="mt-4"

@@ -47,6 +47,7 @@ export default function NotificationsPage() {
         description="気象警報・法改正・重大災害情報の通知とメール配信・RSS購読の設定"
         icon={Bell}
         iconColor="blue"
+        mascotVariant="weather-look"
       />
 
       <div className="mt-4">

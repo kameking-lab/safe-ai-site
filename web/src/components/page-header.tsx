@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { RubyText } from "@/components/ruby-text";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
+import { Mascot, type MascotVariant } from "@/components/mascot";
 
 type IconColor = "emerald" | "blue" | "amber" | "red";
 
@@ -10,6 +11,8 @@ interface PageHeaderProps {
   icon: LucideIcon;
   iconColor: IconColor;
   badge?: string;
+  /** ページ文脈のマスコット（視覚刷新 2026-07-12）。指定時のみ右端に表示 */
+  mascotVariant?: MascotVariant;
 }
 
 const iconBgMap: Record<IconColor, string> = {
@@ -26,7 +29,7 @@ const badgeBgMap: Record<IconColor, string> = {
   red: "bg-red-100 text-red-700",
 };
 
-export function PageHeader({ title, description, icon: Icon, iconColor, badge }: PageHeaderProps) {
+export function PageHeader({ title, description, icon: Icon, iconColor, badge, mascotVariant }: PageHeaderProps) {
   return (
     <header className="border-b border-slate-200 bg-white px-4 py-4 sm:px-6 sm:py-5">
       <div className="flex items-center gap-3">
@@ -52,6 +55,9 @@ export function PageHeader({ title, description, icon: Icon, iconColor, badge }:
             <EasyJapaneseText>{description}</EasyJapaneseText>
           </p>
         </div>
+        {mascotVariant && (
+          <Mascot variant={mascotVariant} size="md" alt="" className="hidden shrink-0 sm:block print:hidden" />
+        )}
       </div>
     </header>
   );

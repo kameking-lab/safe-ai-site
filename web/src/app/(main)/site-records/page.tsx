@@ -132,6 +132,7 @@ export default function SiteRecordsPage() {
         description="現場で日々・定期に作成する安全記録を、まとめて作成・印刷・保存。法令で求められる記録づくりを無料・登録不要で。"
         icon={ClipboardList}
         iconColor="emerald"
+        mascotVariant="stamp-doc"
       />
 
       <RecordsOverview />

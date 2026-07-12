@@ -6,6 +6,7 @@ import { ogImageUrl } from "@/lib/og-url";
 import { buildNewsHubItems, getNewsHubMeta } from "@/lib/news-hub";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { WhatsNewClient } from "./whats-new-client";
+import { Mascot } from "@/components/mascot";
 
 function fmtJst(iso: string | null): string | null {
   if (!iso) return null;
@@ -44,7 +45,10 @@ export default function WhatsNewPage() {
       />
       {/* 柱0: 文字ダイエット＝h1以外の説明・購読導線は折りたたみへ格納（情報は消さない） */}
       <header className="mb-3">
-        <h1 className="text-2xl font-bold text-slate-900">新着情報ハブ</h1>
+        <div className="flex items-center justify-between gap-3">
+            <h1 className="text-2xl font-bold text-slate-900">新着情報ハブ</h1>
+            <Mascot variant="news-read" size="md" alt="" className="shrink-0" />
+          </div>
         <CollapsibleDetail summary="RSS購読・メール通知・関連ページ・データ取得日" className="mt-2">
           <p>
             法改正（施行前／施行済）・労災の月次速報・厚労省通達・関連報道を、新着順に1画面で。
