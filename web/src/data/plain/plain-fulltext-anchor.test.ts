@@ -19,7 +19,8 @@ import { LAW_NAVI_ENTRIES } from "@/lib/law-navi/permalink";
 import type { LawArticle } from "@/data/laws";
 import { plainSourceHash } from "@/lib/plain/text-hash";
 import type { FulltextLaw } from "@/lib/laws-fulltext/types";
-import { plainAnzenEiseiKisoku } from "./anzen-eisei-kisoku";
+import type { PlainArticle } from "./types";
+import { plainAnzenEiseiKisoku } from "./anei-kisoku";
 import anzenFulltext from "../laws-fulltext/347M50002000032.json";
 import {
   normalizeFullwidthAlnum,
@@ -44,6 +45,27 @@ const CORPUS_BY_KEY = new Map(
   LAW_NAVI_ENTRIES.map((e) => [`${e.egovLawId}|${e.article.articleNum}`, e.article])
 );
 
+/** caption（"（見出し）"）の外側全角括弧を外す（fulltext-navi.ts と同じ整形）。 */
+function captionToTitle(caption: string): string {
+  const m = /^（([\s\S]*)）$/.exec(caption.trim());
+  return m ? m[1] : caption.trim();
+}
+
+/**
+ * 全文条 → 照合用 LawArticle。checkFidelity は article.text しか読まないが、
+ * 型を満たすため見出し等も埋める。curated に無い gap 条の原文アンカーに使う。
+ */
+function ftToLawArticle(a: FulltextLaw["articles"][number]): LawArticle {
+  return {
+    law: "労働安全衛生規則",
+    lawShort: "安衛則",
+    articleNum: a.articleNum,
+    articleTitle: captionToTitle(a.caption),
+    text: a.text,
+    keywords: [],
+  };
+}
+
 /**
  * 安衛則の plain のうち、コーパスと fulltext の text が「別文」だった条を洗い出す。
  * gap-fill 由来の抄録／簡略コーパスに紐づいた plain は原文照合が甘い可能性が高いので、
@@ -58,37 +80,39 @@ describe("安衛則 plain × fulltext スナップショット照合", () => {
   });
 
   it(
-    "コーパスと fulltext が同一の条は 原文=fulltext としてもゲートが緑（Ratchet アンカー）",
+    "全 安衛則 plain（verified・原文=fulltext ハッシュ一致）を fulltext に対して fidelity 全緑（全域アンカー）",
     () => {
+      // 照合先は原文（fulltext）。curated コーパスに無い gap 条（量産対象・約1,000条）も
+      // 含め、plain の sourceTextHash が当該 fulltext 原文と一致するエントリを直接アンカー
+      // 対象にする。ハッシュ不一致（＝旧コーパス由来の抄録に紐づく or 改正で原文更新）は
+      // 下段の divergence ratchet 側で扱い、ここでは fail させない。
       const failures: string[] = [];
-      let matchedCount = 0;
+      let anchored = 0;
+      let gapAnchored = 0;
       for (const p of plainAnzenEiseiKisoku) {
         if (p.checkStatus !== "verified") continue;
         const ftArticle = FT_BY_KEY.get(keyOf(p.articleNum) ?? "__none__");
-        const corpus = CORPUS_BY_KEY.get(`${LAW_ID}|${p.articleNum}`);
-        if (!ftArticle || !corpus) continue;
-        // コーパス text と fulltext text が違う条は gap-fill/簡略の疑い。
-        // ここでは「一致する条」だけを fulltext アンカーの直接テスト対象にする。
-        // 差分がある条は plain-fulltext-gap.report で別途一覧化する。
-        if (corpus.text !== ftArticle.text) continue;
-        matchedCount++;
+        if (!ftArticle) continue; // 実在性は前段テストが担保
+        // plain がこの fulltext 原文に対して書かれている条だけを直接アンカーする。
         if (plainSourceHash(ftArticle.text) !== p.sourceTextHash) continue;
-        const article: LawArticle = {
-          ...corpus,
-          text: ftArticle.text,
-        };
+        anchored++;
+        const corpus = CORPUS_BY_KEY.get(`${LAW_ID}|${p.articleNum}`);
+        // curated 収録条は curated の付加メタを保ちつつ原文だけ fulltext に差し替え。
+        // gap 条（curated 非収録＝量産分）は fulltext から合成した LawArticle を使う。
+        const article: LawArticle = corpus
+          ? { ...corpus, text: ftArticle.text }
+          : ftToLawArticle(ftArticle);
+        if (!corpus) gapAnchored++;
         const violations = checkFidelity(article, p);
         for (const v of violations) {
           failures.push(`${p.articleNum} [${v.kind}] ${v.message}`);
         }
       }
-      expect(
-        matchedCount,
-        "fulltext と一致するコーパス条 (アンカー対象) が 0 件（アンカー未成立）"
-      ).toBeGreaterThan(0);
+      expect(anchored, "fulltext アンカー対象が 0 件（アンカー未成立）").toBeGreaterThan(0);
       expect(
         failures,
-        `安衛則 plain × fulltext アンカー違反 ${failures.length} 件:\n${failures.join("\n")}`
+        `安衛則 plain × fulltext アンカー違反 ${failures.length} 件` +
+          `（gap 条アンカー ${gapAnchored} 件を含む全域照合）:\n${failures.join("\n")}`
       ).toEqual([]);
     }
   );
@@ -147,5 +171,68 @@ describe("安衛則 plain × fulltext スナップショット照合", () => {
       `安衛則 gap-fill/簡略乖離条が上限 ${RATCHET_MAX} を超えました (=${diverged.length}件)。` +
         `新しい gap-fill を足したか、簡略コーパスに戻したかを確認してください:\n  ${diverged.join(", ")}`
     ).toBeLessThanOrEqual(RATCHET_MAX);
+  });
+});
+
+/**
+ * gap 条（curated コーパス非収載＝量産対象）でも、v2 ゲートが fulltext を原文アンカーに
+ * して効くことの実証。量産部隊は curated に無い約1,000条を fulltext を照合先に書くため、
+ * 「curated に無い条の plain も原文照合で欠落・改変・捏造を検知できる」ことを固定する。
+ *
+ * 見本条: 第654条（架設通路についての措置）。curated 非収載・全文層のみに実在し、
+ * 注文者×義務・参照（法第31条第1項／第552条）を持つ短条。
+ */
+describe("gap 条（コーパス非収載）も fulltext アンカーで v2 照合が効く（量産の前提）", () => {
+  const SAMPLE = "第654条";
+  const ftArticle = FT_BY_KEY.get(keyOf(SAMPLE) ?? "__none__");
+
+  it("見本 gap 条は curated コーパスに無く、全文層に実在する", () => {
+    expect(ftArticle, `${SAMPLE} が全文層に無い`).toBeDefined();
+    expect(
+      CORPUS_BY_KEY.has(`${LAW_ID}|${SAMPLE}`),
+      `${SAMPLE} は curated 収録済み（gap 見本として不適）`
+    ).toBe(false);
+  });
+
+  it("原文に忠実な gap plain は fulltext アンカーで fidelity 全緑（v2 強制モード）", () => {
+    if (!ftArticle) throw new Error("見本条が解決できない");
+    // 注文者×義務・参照（法第31条第1項／第552条）を原文どおり保存した忠実版。
+    const faithful: PlainArticle = {
+      egovLawId: LAW_ID,
+      articleNum: SAMPLE,
+      plainText:
+        "注文者は、法第31条第1項に該当する場合に、請負人に係る作業従事者へ架設通路を使用させるときは、その架設通路を第552条に定める架設通路の基準に適合するものとしなければなりません。これは、注文者が請負人の作業従事者に使わせる設備にも、同じ架設通路の安全基準を確保させる趣旨です。",
+      sourceTextHash: plainSourceHash(ftArticle.text),
+      sourceRevisionId: "fulltext-anchor-proof",
+      generatedAt: "2026-07-13", // v2 強制モード
+      model: "claude-sonnet-5",
+      checkStatus: "verified",
+    };
+    const violations = checkFidelity(ftToLawArticle(ftArticle), faithful);
+    expect(
+      violations,
+      `忠実な gap plain に違反が出た:\n${violations.map((v) => `[${v.kind}] ${v.message}`).join("\n")}`
+    ).toEqual([]);
+  });
+
+  it("参照を落とした gap plain は fulltext アンカーが ref-missing で捕捉する", () => {
+    if (!ftArticle) throw new Error("見本条が解決できない");
+    // 第552条 の参照を省いた（omissions 宣言もしない）改変版。
+    const dropRef: PlainArticle = {
+      egovLawId: LAW_ID,
+      articleNum: SAMPLE,
+      plainText:
+        "注文者は、法第31条第1項に該当する場合に、請負人に係る作業従事者へ架設通路を使用させるときは、その架設通路を規定の基準に適合するものとしなければなりません。これは、注文者が請負人の作業従事者に使わせる設備の安全を確保させる趣旨です。",
+      sourceTextHash: plainSourceHash(ftArticle.text),
+      sourceRevisionId: "fulltext-anchor-proof",
+      generatedAt: "2026-07-13",
+      model: "claude-sonnet-5",
+      checkStatus: "verified",
+    };
+    const violations = checkFidelity(ftToLawArticle(ftArticle), dropRef);
+    expect(
+      violations.some((v) => v.kind === "ref-missing" && v.message.includes("第552条")),
+      `原文参照 第552条 の欠落を fulltext アンカーが検知できていない: ${JSON.stringify(violations)}`
+    ).toBe(true);
   });
 });
