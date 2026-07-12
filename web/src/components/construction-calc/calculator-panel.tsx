@@ -1,12 +1,8 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 import {
   Sparkles,
-  ExternalLink,
-  BookOpenCheck,
   AlertTriangle,
   Loader2,
 } from "lucide-react";
@@ -15,25 +11,32 @@ import { TONE_DEFAULT_ICON } from "@/components/ui/status-badge";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 import { getCalculator } from "@/lib/construction-calc/registry";
 import {
-  CALC_DISCLAIMER,
   normalizeValues,
   type CalcField,
   type ConstructionCalculator,
 } from "@/lib/construction-calc/schema";
 
 /**
- * 建設計算 1計算機1画面のクライアントパネル（化学ワンボックスと同じ思想）。
- * 入力 → デカ数字の結論（柱0: ConclusionCard 文法・1画面1メッセージ）→ 根拠 → 注意 の順。
- * 計算はレジストリの決定論 compute() のみ。AI は「結果の解説」ボタン（出口）だけ。
+ * 建設計算 1計算機1画面のインタラクティブ部（入力→結論→計算過程→AI解説）。
+ *
+ * 【SSR是正】以前は Suspense + useSearchParams を使っていたため、静的HTML内では
+ * この計算機の中身が丸ごとフォールバック（スケルトン）になり「空シェル」化していた
+ * （useSearchParams は静的生成時にクライアント境界へバイアウトする）。
+ * 現在は既定値で初期描画し（＝サーバー側の静的HTMLに入力欄・結果枠が実在する）、
+ * URLクエリの初期値はマウント後に window.location.search から反映する。
+ * これで SEO/LCP を保ったままAI入口からの初期値プリセットも維持する。
+ *
+ * 根拠・注意事項・免責は入力に依存しないためサーバーコンポーネント
+ * （CalcBasisSection / CalcCautionsSection）へ分離済み。ここは
+ * 入力値に依存する「このケース固有の警告」だけを持つ。
  */
 
 type RawValues = Record<string, string>;
 
-function initialRawValues(calc: ConstructionCalculator, params: URLSearchParams): RawValues {
+function initialRawValues(calc: ConstructionCalculator): RawValues {
   const raw: RawValues = {};
   for (const f of calc.fields) {
-    const fromQuery = params.get(f.id);
-    raw[f.id] = fromQuery ?? String(f.defaultValue);
+    raw[f.id] = String(f.defaultValue);
   }
   return raw;
 }
@@ -87,14 +90,26 @@ function FieldInput({
   );
 }
 
-function CalculatorPanelInner({ slug }: { slug: string }) {
-  const searchParams = useSearchParams();
+export function CalculatorPanel({ slug }: { slug: string }) {
   const calc = getCalculator(slug);
-  const [raw, setRaw] = useState<RawValues>(() =>
-    calc ? initialRawValues(calc, searchParams) : {},
-  );
+  const [raw, setRaw] = useState<RawValues>(() => (calc ? initialRawValues(calc) : {}));
   const [aiText, setAiText] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+
+  // マウント後に URLクエリの初期値を反映（AI入口 /?loadKg=2000 等）。
+  // サーバーの静的HTMLは既定値で描画済みなので、ここでの上書きは水和後に一度だけ走る。
+  useEffect(() => {
+    if (!calc) return;
+    const params = new URLSearchParams(window.location.search);
+    const overrides: RawValues = {};
+    for (const f of calc.fields) {
+      const q = params.get(f.id);
+      if (q !== null && q !== "") overrides[f.id] = q;
+    }
+    if (Object.keys(overrides).length > 0) {
+      setRaw((prev) => ({ ...prev, ...overrides }));
+    }
+  }, [calc]);
 
   const result = useMemo(() => {
     if (!calc) return null;
@@ -217,6 +232,18 @@ function CalculatorPanelInner({ slug }: { slug: string }) {
           })}
         </dl>
 
+        {/* このケース固有の警告（入力依存なのでクライアント側） */}
+        {outcome.warnings.length > 0 && (
+          <ul className="mt-4 space-y-1 rounded-xl border border-amber-300 bg-amber-50/80 p-3 text-xs leading-5 text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200" aria-label="この条件での注意">
+            {outcome.warnings.map((w) => (
+              <li key={w} className="flex items-start gap-1.5">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                {w}
+              </li>
+            ))}
+          </ul>
+        )}
+
         {/* AI出口: 結果の平易な解説（計算はしない） */}
         <div className="mt-4">
           <button
@@ -248,76 +275,6 @@ function CalculatorPanelInner({ slug }: { slug: string }) {
           ))}
         </ol>
       </CollapsibleDetail>
-
-      {/* 根拠 */}
-      <section
-        aria-label="根拠となる法令・基準"
-        className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800/60 sm:p-5"
-      >
-        <h2 className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
-          <BookOpenCheck className="h-4 w-4 text-emerald-600" aria-hidden="true" />
-          根拠となる法令・基準
-        </h2>
-        <ul className="mt-3 space-y-3">
-          {calc.basis.map((b) => (
-            <li key={b.label} className="text-sm">
-              <p className="font-semibold text-slate-800 dark:text-slate-200">{b.label}</p>
-              <p className="mt-0.5 text-xs leading-5 text-slate-600 dark:text-slate-400">{b.description}</p>
-              <div className="mt-1 flex flex-wrap gap-3">
-                {b.lawNaviPath && (
-                  <Link
-                    href={b.lawNaviPath}
-                    className="inline-flex min-h-[44px] items-center gap-1 text-xs font-semibold text-emerald-700 underline underline-offset-2 hover:text-emerald-800 dark:text-emerald-400"
-                  >
-                    条文を法令ナビで読む
-                  </Link>
-                )}
-                {b.egovUrl && (
-                  <a
-                    href={b.egovUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex min-h-[44px] items-center gap-1 text-xs font-semibold text-sky-700 underline underline-offset-2 hover:text-sky-800 dark:text-sky-400"
-                  >
-                    原文（e-Gov）
-                    <ExternalLink className="h-3 w-3" aria-hidden="true" />
-                  </a>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* 注意・免責 */}
-      <section
-        aria-label="注意事項と免責"
-        className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200 sm:p-5"
-      >
-        <h2 className="flex items-center gap-2 text-sm font-bold">
-          <AlertTriangle className="h-4 w-4" aria-hidden="true" />
-          ご利用上の注意
-        </h2>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-xs leading-5">
-          {outcome.warnings.map((w) => (
-            <li key={w}>{w}</li>
-          ))}
-          {calc.cautions.map((c) => (
-            <li key={c}>{c}</li>
-          ))}
-        </ul>
-        <p className="mt-3 border-t border-amber-200 pt-2 text-xs font-semibold leading-5 dark:border-amber-800">
-          {CALC_DISCLAIMER}
-        </p>
-      </section>
     </div>
-  );
-}
-
-export function CalculatorPanel({ slug }: { slug: string }) {
-  return (
-    <Suspense fallback={<div className="h-40 animate-pulse rounded-2xl bg-slate-100 dark:bg-slate-800" aria-hidden="true" />}>
-      <CalculatorPanelInner slug={slug} />
-    </Suspense>
   );
 }
