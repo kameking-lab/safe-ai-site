@@ -3,6 +3,11 @@
 担当領域: リポジトリ直下の loop-*.ps1 / loop-*.txt / loop-config.json / BACKLOG*.md の運用機構 / docs/loop-status.md / タスクスケジューラ登録 / 横断計測スクリプト。**web/src は原則触らない**（掃除系タスクのみ例外・他レーン停止時間帯に実行）。契約・絶対ルールは loop-prompt-ops.txt を参照。
 
 ## 未着手（上から処理）
+
+### 2026-07-12 日本一スコアカード注入（正本: docs/nihonichi-scorecard.md／戦略: docs/nihonichi-strategy-2026-07-12.md）
+- [ ] 【Sonnet・P1】NIQ-OPS1: 日本一スコアカードの四半期再計測（初回=2026-10月第1週。以降3ヶ月ごとに本タスクを複製して積み直す＝1回で消さない）。手順は docs/nihonichi-scorecard.md §10 の記載どおり: 自サイト側（plain:status／bench:field-terms／rag-metrics／eval:chatbot-gen 本番実測／npm run test のsite-stats検証／モバイルLighthouse静穏窓実測）＋競合側（§1〜8の再計測curl: e-Gov「ユンボ」0件のままか・CREATE-SIMPLE ver・あんぜんサイト死傷DB最新年・jaish Last-Modified）。スコアカードの現在値・判定・最終計測日を更新し、**判定が動いたセルをPR本文に明記**。生成物（.bench/*.json等）はコミットしない。GSC稼働後（NIQ-SEO1完了後）はS-1/S-2に実順位・indexed件数を記入。
+- [ ] 【Sonnet・P2】NIQ-OPS2: CLAUDE.md「優先度の高い課題」の陳腐化更新。2026-07-12実ファイル確認で 4(Eラーニング編集=elearning-editor-panel.tsx実装済)・5(KY音声入力=voice-input-field.tsx/PDF出力=ky-print-sheet.tsx実装済)・6(チャットボット=本番稼働・51問eval 100%) が完了済みなのに未完リストに残存＝新規セッションの判断を汚す。残課題（通知=閉端末Push未実装・サブスク課金=PAID_MODE off等）と最新状態（docs/nihonichi-scorecard.md参照）に合わせて同セクションを書き替える。完了条件=CLAUDE.mdの課題リストが実装実態と一致（スコアカードへの参照付き）。
+
 - [x] 【Opus・P0】O16-a: 点火の恒久解＝loop-config.json＋loop-launcher.ps1（引数ゼロ・configのlanes/model/untilIsoを読んで各レーンrunnerを冪等起動）＋タスクスケジューラ再登録（launcherを「ログオン時＋毎日07:00」・引数焼込みゼロ）。untilIso超過時は docs/loop-status.md に停止理由を書いてから終了（黙って死なない）。設計は docs/fable-diagnosis-2026-07-02/08-autonomous-operations.md §A。→ 2026-07-02完了(PR)。恒久解3層＋逸脱2点は docs/fable-diagnosis-2026-07-02/O16-implementation-notes.md 参照。
 - [x] 【Opus・P0】O16-b: 補給の自動化＝loop-prompt-planner.txt 新設（レーンBACKLOG open<3 で launcher が当該レーンで planner を1回先行起動。補充源の優先順=①診断docsの未起票タスク②直近critique S/A残③第三者レビュー自己診断。水増し禁止・実測完了条件必須を強制）。→ 2026-07-02完了(PR)。launcherに open<3 ゲート＋対象レーン注入の一時プロンプト＋別タグ非衝突ワンショットを実装。
 - [x] 【Opus・P1】O16-c: 点検の自動化＝loop-prompt-critic.txt 新設＋launcher連動（lastCriticIsoから7日超で通常レーンより先に1回起動→docs/site-critique-<date>/ 生成→S/A級を該当レーンBACKLOG冒頭へ注入→lastCriticIso更新）。→ 2026-07-02完了(PR)。lastCriticIsoは gitignore の loop-state.json に保持(逸脱1)。

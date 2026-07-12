@@ -4,6 +4,9 @@
 
 ## 未着手（上から処理）
 
+### 2026-07-12 日本一スコアカード注入（正本: docs/nihonichi-scorecard.md／戦略: docs/nihonichi-strategy-2026-07-12.md）
+- [ ] 【Sonnet・P2】NIQ-TOOL1: /chatbot に公開evalの透明性表示（スコアカード§3-5「評価の第三者性なし」の緩和策）。「安衛法特化で精度を公開している唯一のチャットボット」を可視化する: 51問公開eval・最終本番実測日・正答率・一次記録（docs/chatbot-genquality-51q-final-2026-07-11.json）への参照を、/chatbot の説明領域に簡潔表示（誇張禁止＝「自作評価・第三者検証なし」の性質と「網を広げれば下がり得る」旨を注記。KNOWN_*台帳が空でない場合は既知欠陥ありも表示）。数値のハードコード陳腐化を防ぐため、更新手順（eval再実行→表示更新）を四半期再計測NIQ-OPS1と連動させること。完了条件=表示のRTLテスト＋文言に誇張なしのレビュー。
+
 ### 2026-07-11 差し戻し（生成品質eval 51問拡張より・最優先）
 
 - [x] 【差し戻し・51問evalギャップE1／retrieval】口語の解雇質問「クビにするなら何日前？」が労基法第20条に不達（2026-07-11 現場口語プロジェクト / PR #875）。是正=固定フレーズではなく構造是正: query-expansionに解雇口語の語幹ルール（クビ/首にする/辞めさせ→解雇・解雇予告）＋**PIN照合を展開後クエリ化**（`rag-search.ts`＝synonym正規化が全PINに追従する構造変更）。完了判定達成=`npm run eval:chatbot-gen`（本番 2026-07-11T15:50Z・#875反映後）で**GQ48=○**（旧実測×=score0.52無関係top10→労基法20条到達・「30日」結論・偽警告なし）＋fixture`expectRetrievable`true＋`KNOWN_RETRIEVAL_GAP_IDS`からGQ48除去済み。ゆらぎ検証は現場口語ベンチFV01〜03（クビ×2・辞めさせる）が常設CI（`npm run bench:field-terms`・着地率ratchet）。一次記録: docs/field-vernacular-bench-2026-07-11.md。
