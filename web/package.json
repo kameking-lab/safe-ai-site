@@ -19,6 +19,7 @@
     "eval:chatbot-gen": "node scripts/chatbot-eval-phase2.ts",
     "smoke:chatbot-prod": "node scripts/chatbot-prod-smoke-probe.mjs",
     "bench:field-terms": "vitest run src/lib/field-vernacular-bench.test.ts",
+    "bench:search-latency": "node scripts/search-latency-bench.mjs",
     "test:e2e": "playwright test",
     "test:e2e:smoke": "playwright test --grep @smoke",
     "test:e2e:failure": "playwright test --grep @failure",

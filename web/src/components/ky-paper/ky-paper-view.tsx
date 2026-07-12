@@ -54,6 +54,8 @@ import { computeKySyncStatus, KY_SYNC_LABEL, type KySyncStatus } from "@/lib/ky/
 import { applyKyDeepLink } from "@/lib/ky/deep-link-prefill";
 import { detectChemicalWork, chemicalRaHref } from "@/lib/chemical/work-chemical-hints";
 import { detectAccidentWork, accidentsHref } from "@/lib/accidents/work-accident-hints";
+import type { KyRiskDraftFromAccident } from "@/lib/ky/accident-similar";
+import { KyAccidentCasesPanel } from "@/components/ky-paper/ky-accident-cases";
 import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
 import { KyTranscribePanel } from "@/components/ky-paper/ky-transcribe-panel";
 import { PaperStage, type PaperStageHandle } from "@/components/ky-paper/paper-stage";
@@ -381,6 +383,31 @@ export function KyPaperView() {
     setNotice("提案を危険のポイント欄に反映しました。現場に合わせて加筆・修正してください。");
   };
 
+  // NIQ-REC1: 類似労災事例（実在事例）を危険のポイント欄へ取り込む。空き行を優先し、
+  // 埋まっていれば新しい行を追加する（applySuggestion と同じ作法・出所は保有事例DB）。
+  const adoptAccidentDraft = useCallback(
+    (draft: KyRiskDraftFromAccident) => {
+      setRecord((prev) => {
+        const rows = [...prev.riskRows];
+        const idx = rows.findIndex((r) => !r.hazard.trim());
+        const patchRow = {
+          hazard: draft.hazard,
+          reduction: draft.reduction,
+          likelihood: draft.likelihood,
+          severity: draft.severity,
+        };
+        if (idx >= 0) {
+          rows[idx] = { ...rows[idx], ...patchRow };
+        } else {
+          rows.push({ ...makeEmptyKyRiskRow(rows.length), ...patchRow });
+        }
+        return { ...prev, riskRows: rows };
+      });
+      setNotice("類似災害事例を危険のポイントに取り込みました。現場に合わせて加筆・修正してください。");
+    },
+    [setNotice]
+  );
+
   // Phase 6: 現在のKYを別端末サイネージ用に共有（6桁コード発行）。
   const handleShare = async () => {
     if (!isKyCloudEnabled()) {
@@ -505,6 +532,11 @@ export function KyPaperView() {
   // P1-1（事故DB統合）: 作業内容があれば、類似の労災事例・AI注意喚起（/accidents）へ誘導。
   const accHint = useMemo(
     () => detectAccidentWork(record.workRows.map((w) => w.workDetail).filter(Boolean).join(" ")),
+    [record.workRows]
+  );
+  // NIQ-REC1: 類似事例カード提示用の作業テキスト（全作業行を結合）。
+  const accidentWorkText = useMemo(
+    () => record.workRows.map((w) => w.workDetail).filter(Boolean).join(" "),
     [record.workRows]
   );
 
@@ -845,6 +877,9 @@ export function KyPaperView() {
 
         {approval.status === "draft" && approvalPanel}
 
+        {/* NIQ-REC1: 作業内容から保有事故DBの類似実在事例を提示（危険予知の裏取り・ワンタップ取り込み）。 */}
+        {!locked && <KyAccidentCasesPanel workText={accidentWorkText} onAdopt={adoptAccidentDraft} />}
+
         {/* 欄タップで開く入力エディタ（Phase 2: ヘッダー6欄＋本日の作業内容＋4R目標3欄＋危険行＋参加者） */}
         {activeFieldKey && !locked && (
           <FieldEditorSheet
@@ -950,6 +985,9 @@ export function KyPaperView() {
           </div>
         </div>
       )}
+
+      {/* NIQ-REC1: 作業内容から保有事故DBの類似実在事例を提示（危険予知の裏取り・ワンタップ取り込み）。 */}
+      {!locked && <KyAccidentCasesPanel workText={accidentWorkText} onAdopt={adoptAccidentDraft} />}
 
       {/* 柱0: 初見の職長向け 3ステップ案内は折りたたみへ格納（結論カードが「次にやること」を常時案内するため）。 */}
       <div className="mx-auto mt-3 max-w-5xl px-4 print:hidden">
