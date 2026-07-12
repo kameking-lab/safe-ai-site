@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { FLAGSHIP_FEATURES } from "@/config/flagship-nav";
 
@@ -14,7 +15,11 @@ function FlagshipNavDesktop() {
               href={f.href}
               className="flex items-center gap-1 rounded-md px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-emerald-300"
             >
-              <span aria-hidden>{f.icon}</span>
+              {f.iconSrc ? (
+                <Image src={f.iconSrc} alt="" width={18} height={18} loading="lazy" aria-hidden style={{ width: 18, height: 18 }} />
+              ) : (
+                <span aria-hidden>{f.icon}</span>
+              )}
               {f.label}
               {f.subItems.length > 0 && (
                 <ChevronDown className="h-3 w-3 opacity-60 transition group-hover:rotate-180" aria-hidden />
