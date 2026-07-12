@@ -10,8 +10,27 @@ const SIZE_MAP = {
 
 type MascotSize = keyof typeof SIZE_MAP;
 
-// variant は将来の画像差し替え拡張用（現状 default のみ）
-export type MascotVariant = "default" | "happy" | "thinking" | "pointing";
+/**
+ * バリアント別マスコット画像（正: docs/mascot-style-guide-2026-07-12.md）。
+ * width/height は最適化済みwebpの実寸。表示は size(px) を長辺として比率維持で縮小し、
+ * 明示 width/height で CLS 0 を維持する。
+ */
+const VARIANT_MAP = {
+  /** 頭部バッジ（緑円＋角丸四角）: フッター・チャットアバター等の既定 */
+  default: { src: "/mascot/mascot-chihuahua-4.webp", width: 1024, height: 1024 },
+  /** お辞儀: 404・エラー画面用 */
+  bow: { src: "/mascot/mascot-bow.webp", width: 297, height: 320 },
+  /** 考え中: 空状態・ローディング用 */
+  thinking: { src: "/mascot/mascot-thinking.webp", width: 314, height: 320 },
+  /** 指差呼称: トップヒーロー用 */
+  pointing: { src: "/mascot/mascot-pointing.webp", width: 400, height: 388 },
+  /** 講師姿: 教育スライド用 */
+  teacher: { src: "/mascot/mascot-teacher.webp", width: 320, height: 320 },
+  /** 敬礼: 完了画面用 */
+  salute: { src: "/mascot/mascot-salute.webp", width: 309, height: 320 },
+} as const;
+
+export type MascotVariant = keyof typeof VARIANT_MAP;
 
 type MascotProps = {
   size?: MascotSize;
@@ -22,20 +41,24 @@ type MascotProps = {
 
 export function Mascot({
   size = "md",
-  variant: _variant = "default",
+  variant = "default",
   className = "",
   alt = "安全AIポータル マスコット",
 }: MascotProps) {
   const px = SIZE_MAP[size];
+  const v = VARIANT_MAP[variant];
+  const scale = px / Math.max(v.width, v.height);
+  const w = Math.round(v.width * scale);
+  const h = Math.round(v.height * scale);
   return (
     <Image
-      src="/mascot/mascot-chihuahua-4.webp"
+      src={v.src}
       alt={alt}
-      width={px}
-      height={px}
+      width={w}
+      height={h}
       loading="lazy"
       className={className}
-      style={{ objectFit: "contain", width: px, height: px }}
+      style={{ objectFit: "contain", width: w, height: h }}
     />
   );
 }

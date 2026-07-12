@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, CheckCircle } from "lucide-react";
+import { Mail } from "lucide-react";
 import type { Industry } from "@/lib/newsletter";
+import { Mascot } from "@/components/mascot";
 
 const INDUSTRIES: Industry[] = ["建設", "製造", "医療福祉", "運輸", "IT", "その他"];
 
@@ -46,7 +47,9 @@ export function NewsletterForm({ compact = false, onSuccess }: Props) {
   if (status === "success") {
     return (
       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center">
-        <CheckCircle className="mx-auto h-8 w-8 text-emerald-500 mb-2" aria-hidden="true" />
+        <div className="mb-2 flex justify-center">
+          <Mascot variant="salute" size="md" alt="敬礼するマスコット" />
+        </div>
         <p className="font-bold text-emerald-800">登録が完了しました！</p>
         <p className="mt-1 text-sm text-emerald-700">
           {email} に確認メールを送信しました。

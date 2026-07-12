@@ -6,6 +6,7 @@ import { Clock, MailCheck, ShieldCheck } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { PageContainer } from "@/components/layout";
 import { useLanguage } from "@/contexts/language-context";
+import { Mascot } from "@/components/mascot";
 
 const FORMSPREE_ID = process.env.NEXT_PUBLIC_FORMSPREE_ID;
 
@@ -267,6 +268,9 @@ export default function ContactForm() {
           aria-live="polite"
           className="rounded-xl border border-emerald-200 bg-emerald-50 px-6 py-10 text-center"
         >
+          <div className="mb-3 flex justify-center">
+            <Mascot variant="salute" size="lg" alt="敬礼するマスコット" />
+          </div>
           <p className="text-xl font-bold text-emerald-800">送信完了しました！</p>
           <p className="mt-2 text-sm text-emerald-700">
             {successMessage ??

@@ -13,6 +13,7 @@ import {
 import { fuzzyMatchAll } from "@/lib/fuzzy-search";
 import { resolveAccidentSource } from "@/lib/accident-source";
 import { EasyJapaneseText } from "@/components/easy-japanese-text";
+import { EmptyState } from "@/components/empty-state";
 import { AccidentActionBar } from "@/components/accidents/action-bar";
 import { AccidentTypePictogram } from "@/components/accidents/accident-type-pictogram";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -377,9 +378,10 @@ export function AccidentDatabasePanel({
             {errorMessage ?? "事故データを取得できませんでした。"}
           </p>
         ) : totalCasesForDisplay === 0 ? (
-          <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600">
-            条件に一致する事故データがありません。
-          </p>
+          <EmptyState
+            title="条件に一致する事故データがありません"
+            description="業種・事故の型・キーワードの絞り込みを見直してください。"
+          />
         ) : (
           pageItems.map((accident) => {
             const isExpanded = expandedId === accident.id;

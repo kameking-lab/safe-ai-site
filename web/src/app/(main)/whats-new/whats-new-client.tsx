@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { EmptyState } from "@/components/empty-state";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -331,11 +332,9 @@ export function WhatsNewClient({ items }: { items: NewsHubItem[] }) {
         </button>
       )}
       {filtered.length === 0 && (
-        <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-          {newOnly
-            ? "前回ご覧になった以降の新着はありません。"
-            : "該当する新着情報はありません。"}
-        </p>
+        <EmptyState
+          title={newOnly ? "前回ご覧になった以降の新着はありません" : "該当する新着情報はありません"}
+        />
       )}
     </div>
   );

@@ -29,7 +29,7 @@ export default function NotFound() {
       <div className="mx-auto max-w-xl">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex flex-col items-center py-4">
-            <Mascot size="xl" alt="迷子のマスコット" />
+            <Mascot variant="thinking" size="xl" alt="迷子のマスコット" />
             <p className="mt-4 text-base font-semibold text-slate-700 dark:text-slate-300">
               ページが見つかりません。迷子になったみたい…
             </p>

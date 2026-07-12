@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Mail } from "lucide-react";
 import { trackEvent } from "@/components/Analytics";
+import { Mascot } from "@/components/mascot";
 
 const PREFECTURES = [
   "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県",
@@ -48,7 +49,9 @@ export function SubscribeForm() {
   if (status === "success") {
     return (
       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5 text-center">
-        <p className="text-2xl mb-2">✅</p>
+        <div className="mb-2 flex justify-center">
+          <Mascot variant="salute" size="md" alt="敬礼するマスコット" />
+        </div>
         <p className="font-bold text-emerald-800">登録が完了しました</p>
         <p className="text-sm text-emerald-700 mt-1">
           {email} に確認メールを送信しました。気象警報の発令時にお知らせします。

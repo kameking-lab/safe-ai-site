@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { EmptyState } from "@/components/empty-state";
 import { Scale, Search, ExternalLink, Printer } from "lucide-react";
 import {
   COURT_CASES,
@@ -270,9 +271,10 @@ export function CourtCasesBrowser() {
       )}
 
       {filtered.length === 0 && (
-        <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 py-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800/50">
-          条件に合う判例がありません。絞り込みを解除してください。
-        </p>
+        <EmptyState
+          title="条件に合う判例がありません"
+          description="絞り込みを解除してください。"
+        />
       )}
 
       {/* 出典・免責（文字ダイエット: 詳細層へ・内容は不変） */}
