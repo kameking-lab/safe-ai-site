@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="667" viewBox="0 0 375 667">
+  <defs>
+    <linearGradient id="gsoilvolumeconversion" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d97706" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#d97706" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="#f8fafc"/>
+  <rect width="100%" height="100%" fill="url(#gsoilvolumeconversion)"/>
+  <rect x="20" y="20" width="335" height="64" rx="12" fill="#d97706" opacity="0.85"/>
+  <text x="187.5" y="62" font-family="-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,&apos;Hiragino Sans&apos;,sans-serif" font-size="22" font-weight="700" fill="white" text-anchor="middle">安全AIポータル</text>
+  <text x="187.5" y="303.5" font-family="-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,&apos;Hiragino Sans&apos;,sans-serif" font-size="16" font-weight="700" fill="#d97706" text-anchor="middle">土量換算（地山・ほぐし・締固め）</text>
+  <text x="187.5" y="343.5" font-family="-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,&apos;Hiragino Sans&apos;,sans-serif" font-size="12" fill="#475569" text-anchor="middle">/construction-calc/soil-volume-conversion</text>
+  <text x="187.5" y="627" font-family="-apple-system,BlinkMacSystemFont,&apos;Segoe UI&apos;,&apos;Hiragino Sans&apos;,sans-serif" font-size="12" fill="#94a3b8" text-anchor="middle">プレビュー画像（375×667）</text>
+</svg>
