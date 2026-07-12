@@ -19,6 +19,11 @@ import { cableAmpacityCalculator } from "./calculators/cable-ampacity";
 import { windLoadTemporaryCalculator } from "./calculators/wind-load-temporary";
 import { earthPressureShoringCalculator } from "./calculators/earth-pressure-shoring";
 import { anchorPulloutCalculator } from "./calculators/anchor-pullout";
+import { slopeRatioConvertCalculator } from "./calculators/slope-ratio-convert";
+import { slingAngleGeometryCalculator } from "./calculators/sling-angle-geometry";
+import { voltageDropCalculator } from "./calculators/voltage-drop";
+import { beamDeflectionCalculator } from "./calculators/beam-deflection";
+import { safetyNetCheckCalculator } from "./calculators/safety-net-check";
 
 export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   slingWireLoadCalculator,
@@ -31,6 +36,11 @@ export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   windLoadTemporaryCalculator,
   earthPressureShoringCalculator,
   anchorPulloutCalculator,
+  slopeRatioConvertCalculator,
+  slingAngleGeometryCalculator,
+  voltageDropCalculator,
+  beamDeflectionCalculator,
+  safetyNetCheckCalculator,
 ];
 
 const BY_SLUG: ReadonlyMap<string, ConstructionCalculator> = new Map(
