@@ -127,15 +127,32 @@ async function networkFirst(request, fallbackToOffline) {
   }
 }
 
-// ----- Push Notification (将来用のプレースホルダー) -----
+// ----- Push Notification (閉端末Web Push・NIQ-HUB1) -----
+// サーバー（/api/notify/push-weather-alert）が SiteNotification を
+// { title, body, tag, data:{ url } } の payload で送ってくる。
+// tag は SiteNotification.id（例 jma-JP-13-...）＝同一警報の重複表示をOS側で抑止し、
+// ベル/OS通知（同じidで既読管理）との二重表示も避ける。
 self.addEventListener("push", (event) => {
-  const data = event.data ? event.data.json() : {};
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    // 非JSON（プレーンテキスト）payload の保険
+    data = { body: event.data ? event.data.text() : "" };
+  }
   const title = data.title ?? "安全AIポータル";
   const options = {
     body: data.body ?? "新しい通知があります",
     icon: "/icon-192x192.png",
     badge: "/icon-192x192.png",
+    // notificationclick が data.url を読む。未指定なら通知センターへ。
+    data: { url: data.data?.url ?? data.url ?? "/notifications" },
   };
+  if (data.tag) {
+    options.tag = data.tag;
+    // 同一tagの再送は既存通知を静かに差し替える（警報継続中の再通知スパムを抑止）
+    options.renotify = false;
+  }
   event.waitUntil(self.registration.showNotification(title, options));
 });
 

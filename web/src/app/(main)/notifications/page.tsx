@@ -6,6 +6,7 @@ import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { SubscribeForm } from "./subscribe-form";
 import { NotificationSettingsPanel } from "./notification-settings";
+import { PushSubscribePanel } from "./push-subscribe-panel";
 import { ogImageUrl } from "@/lib/og-url";
 
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -51,15 +52,21 @@ export default function NotificationsPage() {
       <div className="mt-4">
         <ConclusionCard
           tone="safe"
-          value={4}
+          value={5}
           unit="経路"
           title="通知を受け取る方法 提供中"
-          description="ヘッダーのベル（通知センター）／画面表示中のOS通知／メール配信／RSS購読の4経路。閉じている端末へのプッシュ配信は通知鍵の発行後に追加予定です。"
+          description="ヘッダーのベル（通知センター）／閉じている端末にも届くプッシュ通知（Web Push）／画面表示中のOS通知／メール配信／RSS購読の5経路。"
           icon={Bell}
         >
           <StatusBadge tone="safe" size="sm">ベル=全ページ常設</StatusBadge>
+          <StatusBadge tone="safe" size="sm">プッシュ=閉端末にも到達</StatusBadge>
           <StatusBadge tone="neutral" size="sm">既読はこの端末内のみ</StatusBadge>
         </ConclusionCard>
+      </div>
+
+      {/* 閉端末プッシュ通知（Web Push）購読 */}
+      <div className="mt-6">
+        <PushSubscribePanel />
       </div>
 
       {/* OS通知（画面表示中）設定 */}
@@ -118,6 +125,7 @@ export default function NotificationsPage() {
             <ul className="mt-3 space-y-2">
               {[
                 "サイト内通知センター（ヘッダーのベル）: 気象警報・法改正・重大災害事例・事故速報を集約、既読管理つき",
+                "閉じている端末にも届くプッシュ通知（Web Push）: 上の購読ボタンで有効化。ブラウザを閉じていても警報級の気象警報が届く",
                 "画面表示中のOS通知: サイネージ・常時表示端末で警報級の新着をポップアップ（上の設定でON）",
                 "気象警報のメール配信（登録フォーム）",
                 "RSS購読フィード（法改正・警報・重大災害・新着すべて）",
@@ -131,13 +139,13 @@ export default function NotificationsPage() {
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-slate-800">通知鍵（VAPID）発行後に追加</span>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">準備済み・鍵待ち</span>
+              <span className="text-sm font-bold text-slate-800">今後の拡張予定</span>
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">設計済み</span>
             </div>
             <ul className="mt-3 space-y-2">
               {[
-                "閉じている端末にも届く本来のプッシュ通知（Web Push）",
-                "現場エリア別のプッシュ配信ルール",
+                "気象警報に続く法改正・KY承認のプッシュ配信",
+                "現場エリア別のきめ細かい配信ルール",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2 text-xs text-slate-700">
                   <CheckCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden="true" />
@@ -146,8 +154,7 @@ export default function NotificationsPage() {
               ))}
             </ul>
             <p className="mt-2 text-[11px] leading-4 text-slate-500">
-              現在の通知はページを開いている画面にのみ届きます（鍵なし構成の正直な制約）。
-              鍵発行は5分で完了する手順書を用意済みです（管理者向け docs/vapid-push-setup-guide-2026-07-11.md）。
+              プッシュ通知の第1弾は気象警報です。法改正・KY承認への拡張は送信APIの拡張ポイントとして設計済みです。
             </p>
           </div>
         </div>
