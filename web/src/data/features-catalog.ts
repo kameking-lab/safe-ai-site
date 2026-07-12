@@ -8,6 +8,8 @@
  * - /features/print
  */
 
+import { SITE_STATS } from "@/data/site-stats";
+
 export type FeatureCategoryId =
   | "ai-chat"
   | "chemical-ra"
@@ -331,7 +333,7 @@ export const FEATURES: FeatureItem[] = [
     title: "法令ナビ",
     summary: "分野・現場ことばから条文原文へ最短到達",
     description:
-      "労働安全衛生法体系を分野別・現場の言葉（俗称・条番号・別表の意味）から引ける条文ナビ。全文含め1,700件超の条文を収載し、AI解説・現場ことば版（やさしい言い換え）で読解を補助します。",
+      `労働安全衛生法体系を分野別・現場の言葉（俗称・条番号・別表の意味）から引ける条文ナビ。全文含め${SITE_STATS.lawNaviTotalArticleCount}件超の条文を収載し、AI解説・現場ことば版（やさしい言い換え）で読解を補助します。`,
     href: "/law-navi",
     category: "databases",
     tags: ["法令", "ナビ"],
@@ -449,6 +451,16 @@ export const FEATURES: FeatureItem[] = [
     tags: ["助成金"],
   },
   // LMS entry removed: pre-launch β waitlist only. Audit reference F-001.
+  {
+    slug: "notifications",
+    title: "通知センター・配信設定",
+    summary: "気象警報・法改正・重大災害情報を見逃さない",
+    description:
+      "ヘッダーの通知センター（ベル）、画面表示中のOS通知、メール配信、RSS購読の4経路で気象警報・法改正・重大災害情報を通知します。",
+    href: "/notifications",
+    category: "management",
+    tags: ["通知", "配信"],
+  },
   {
     slug: "stats",
     title: "サイト統計・運営者情報",

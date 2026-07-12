@@ -817,13 +817,13 @@ export function RiskPredictionPanel() {
             <MonthlyTrendsPanel cases={allCases} />
           ) : results.length === 0 ? (
             <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-              <p className="text-sm text-slate-400">サイト収録 300 件の事故事例には該当が見つかりませんでした（MHLW 実データの結果は上記参照）</p>
+              <p className="text-sm text-slate-400">サイト収録 {allCases.length} 件の事故事例には該当が見つかりませんでした（MHLW 実データの結果は上記参照）</p>
               <p className="mt-1 text-xs text-slate-400">別の作業内容や、より具体的なキーワードで試してください</p>
             </div>
           ) : (
             <div className="space-y-3">
               <p className="text-xs font-semibold text-slate-600">
-                サイト収録事例（300 件）からの類似結果
+                サイト収録事例（{allCases.length} 件）からの類似結果
               </p>
               <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-1">
                 {results.map((c, i) => (

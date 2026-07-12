@@ -8,6 +8,7 @@ import {
   Network,
   Search,
 } from "lucide-react";
+import { SITE_STATS } from "@/data/site-stats";
 
 type LawHubNavProps = {
   current: "law-navi" | "laws" | "law-search" | "law-hierarchy" | "circulars" | "glossary" | "chatbot";
@@ -28,7 +29,7 @@ const NAV_ITEMS: {
   { id: "laws", href: "/laws", label: "法改正一覧", icon: CalendarClock, description: "施行日カウントダウン付きの改正カレンダー（時系列ビュー）" },
   { id: "law-search", href: "/law-search", label: "条文検索", icon: Search, description: "条文番号・キーワードで安衛法・安衛則を全文検索" },
   { id: "law-hierarchy", href: "/law-hierarchy", label: "法令体系", icon: Network, description: "法→政令→省令→告示の階層構造を俯瞰" },
-  { id: "circulars", href: "/circulars", label: "通達DB", icon: FileText, description: "厚労省 通達・告示・指針 1,069 件をキーワード+期間+種別で検索" },
+  { id: "circulars", href: "/circulars", label: "通達DB", icon: FileText, description: `厚労省 通達・告示・指針 ${SITE_STATS.mhlwNoticeCount} 件をキーワード+期間+種別で検索` },
   { id: "glossary", href: "/glossary", label: "用語集", icon: BookOpen, description: "労働安全衛生の用語を辞書形式で解説" },
   { id: "chatbot", href: "/chatbot", label: "AIチャット", icon: MessageSquare, description: "条文番号と出典付きで自然文の質問に回答" },
 ];

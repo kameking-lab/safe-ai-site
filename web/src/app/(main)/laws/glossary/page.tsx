@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd, webPageSchema, breadcrumbSchema, definedTermSetSchema } from "@/components/json-ld";
 import { SITE_URL } from "@/lib/seo-metadata";
+import { SITE_STATS } from "@/data/site-stats";
 
 const _title = "労働安全衛生 法令用語集（条文・通達・行政用語）";
 const _desc =
@@ -280,7 +281,7 @@ export default function LawsGlossaryPage() {
             <Link href="/resources" className="text-blue-700 underline">
               厚労省 一次資料DB
             </Link>{" "}
-            — 通達 527 件・告示 244 件・指針 98 件
+            — 通達 {SITE_STATS.mhlwCircularCount} 件・告示 {SITE_STATS.mhlwKokujiCount} 件・指針 {SITE_STATS.mhlwShishinCount} 件
           </li>
           <li>
             ・{" "}

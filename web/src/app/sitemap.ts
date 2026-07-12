@@ -83,6 +83,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: "/law-navi/beppyo", lastModified: "2026-07-11", priority: 0.8, changeFrequency: "monthly" },
     { url: "/law-navi/topics/forklift", lastModified: "2026-07-11", priority: 0.8, changeFrequency: "monthly" },
     // P0-011 (usability-audit-day2): /laws/notices-precedents は /circulars に統合済。301 redirect は next.config.ts。
+    // /ky は component-level permanentRedirect → /ky/paper だが、リダイレクト先がクエリ次第の
+    // 動的文字列のため sitemap.test.ts の redirect スタブ自動検知（文字列リテラル限定）に
+    // 掛からず、非収載にすると逆カバレッジガードで missing 扱いになる。掲載を維持する
+    // （全域リンク監査で確認・現状維持と判断。/pdf のような単純リテラル redirect とは別扱い）。
     { url: "/ky", lastModified: "2026-04-01", priority: 0.8, changeFrequency: "monthly" },
     { url: "/ky-examples", lastModified: "2026-05-16", priority: 0.85, changeFrequency: "monthly" },
     // KY入力の正規ページ（robots index:true・自己canonical・HowTo JSON-LD付の実在ツール）。

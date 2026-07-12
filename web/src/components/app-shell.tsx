@@ -152,10 +152,10 @@ export const NAV_CATEGORIES: NavCategory[] = [
       // CR2-S1: /law-navi がグローバルナビ・トップ・フッター・/features のどこからも
       // 0リンクだった孤島状態を解消。法令系3入口(法令ナビ/法令検索/横断検索)の
       // 役割の違いを一言説明で明示する。
-      { id: "law-navi", label: "法令ナビ", href: "/law-navi", icon: Compass, description: "分野・現場ことばから安衛法の原文条文へ最短到達（全文含め1,700件超を収載）" },
+      { id: "law-navi", label: "法令ナビ", href: "/law-navi", icon: Compass, description: `分野・現場ことばから安衛法の原文条文へ最短到達（全文含め${SITE_STATS.lawNaviTotalArticleCount}件超を収載）` },
       { id: "law-search", label: "法令検索", href: "/law-search", icon: Search, description: "条文だけを全文検索・お気に入り保存" },
       { id: "search", label: "サイト内横断検索", href: "/search", icon: LayoutGrid, description: "事故・通達・化学物質・現場ことばまでサイト全体を横断検索" },
-      { id: "circulars", label: "通達・判例", href: "/circulars", icon: Scale, description: "厚労省通達1069件+安全配慮義務判例30件" },
+      { id: "circulars", label: "通達・判例", href: "/circulars", icon: Scale, description: `厚労省通達${SITE_STATS.mhlwNoticeCount}件+安全配慮義務判例${SITE_STATS.courtPrecedentCount}件` },
       { id: "laws", label: "法改正カレンダー", href: "/laws", icon: RefreshCw, description: "改正カレンダー・施行日カウントダウン" },
       { id: "law-hierarchy", label: "法令体系マップ", href: "/law-hierarchy", icon: LibraryBig, description: "法→政令→省令→告示の階層俯瞰" },
       { id: "glossary", label: "安全用語辞書", href: "/glossary", icon: BookMarked, description: "労働安全衛生の主要用語を五十音で引ける用語集" },
