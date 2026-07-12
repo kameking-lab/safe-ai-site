@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -11,7 +10,6 @@ import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { LocalStorageWarningBanner } from "@/components/local-storage-warning-banner";
 import { RelatedPageCards } from "@/components/related-page-cards";
 import { PageContainer } from "@/components/layout";
-import { PageSkeleton } from "@/components/skeleton";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
@@ -124,9 +122,11 @@ export default function ChemicalRaPage() {
           </div>
         </details>
       </PageContainer>
-      <Suspense fallback={<PageSkeleton label="化学物質リスクアセスメントを読み込み中" />}>
-        <ChemicalRaPanel />
-      </Suspense>
+      {/* CR2-T3(LCP): Suspense で包むと client モジュールの非同期ロードで境界がサスペンドし、
+          静的HTMLに「スケルトン先行→$RCスワップ」が焼き込まれて LCP がスワップ完了まで
+          遅延する（LCP 4.1s の主因）。パネル側で useSearchParams を撤去したので境界は不要。
+          STEP1 フォーム（LCP要素）を静的シェルに含める（/laws C-1 と同方針）。 */}
+      <ChemicalRaPanel />
       {/* P2-4: 混合物RA（複数成分の合成リスク集約） — 印刷=単一物質のA4記録には不要 */}
       <PageContainer paddingY="none" className="pt-3 print:hidden">
         <details className="rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">

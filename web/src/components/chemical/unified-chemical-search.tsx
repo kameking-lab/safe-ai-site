@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { FlaskConical, Search, ChevronDown, HelpCircle, Upload, PackageSearch } from "lucide-react";
-import Link from "next/link";
+import { FlaskConical, Search, ChevronDown } from "lucide-react";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
 import { searchMergedChemicalsSlim, MHLW_MERGED_CHEMICAL_COUNT_SLIM } from "@/lib/mhlw-chemicals-slim";
+import { ChemicalNotFoundRescue } from "@/components/chemical/chemical-not-found-rescue";
 
 /**
  * 一窓検索（一窓化 2026-07-11）: 物質名・CAS番号・法令上の名称（溶接ヒューム等の
@@ -15,27 +15,6 @@ import { searchMergedChemicalsSlim, MHLW_MERGED_CHEMICAL_COUNT_SLIM } from "@/li
  * - それでも無ければ「収載外」を正直に明示し、次の一歩（SDSのCAS確認・
  *   製品検索・AI調査）とリスクアセスメントの一般案内を返す（空白で欺かない）
  */
-
-/** 製品名らしさの手掛かり（成分特定への導線を出すためのヒューリスティック） */
-const PRODUCT_HINT_WORDS = [
-  "シンナー",
-  "塗料",
-  "ペンキ",
-  "スプレー",
-  "洗浄剤",
-  "クリーナー",
-  "接着剤",
-  "ボンド",
-  "オイル",
-  "グリス",
-  "ワックス",
-  "うすめ液",
-  "剥離剤",
-  "さび止め",
-  "防錆",
-  "コーキング",
-  "シーリング",
-];
 
 export type LegalNameHit = { key: string; label: string; casless: boolean };
 
@@ -64,7 +43,6 @@ export function UnifiedChemicalSearch({
   const q = query.trim();
   const candidates = q.length >= 1 ? searchMergedChemicalsSlim(q, 8) : [];
   const noDbHit = q.length >= 2 && candidates.length === 0;
-  const productHint = PRODUCT_HINT_WORDS.some((w) => q.includes(w));
 
   // DBに候補が無いときだけ、法令名称（CASレス告示名・群指定名）の解決を試す
   useEffect(() => {
@@ -187,54 +165,15 @@ export function UnifiedChemicalSearch({
         </button>
       )}
 
-      {/* 収載外（正直な明示＋次の一歩） */}
+      {/* 収載外（正直な明示＋次の一歩）— 共通コンポーネント（CR2-T1）。
+          RAは AI詳細調査を in-page action、SDSは同一ページ内 #sds-upload アンカーで解決。 */}
       {noDbHit && legalChecked && !legalHit && (
-        <div
-          role="status"
-          className="space-y-2.5 rounded-xl border border-slate-300 bg-slate-50 p-4"
-        >
-          <p className="flex items-center gap-1.5 text-sm font-bold text-slate-800">
-            <HelpCircle className="h-4 w-4 text-slate-500" aria-hidden="true" />
-            「{q.slice(0, 30)}」は収載外です（統合DB {MHLW_MERGED_CHEMICAL_COUNT_SLIM.toLocaleString()}
-            物質・法令名称索引のいずれにも見つかりません）
-          </p>
-          {productHint && (
-            <p className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900">
-              製品名の可能性があります。製品の<strong className="font-semibold">SDS（安全データシート）の「組成・成分情報」欄にあるCAS番号</strong>
-              で検索すると確実に特定できます。
-            </p>
-          )}
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={onAiSearch}
-              disabled={loading}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white shadow hover:bg-emerald-700 disabled:opacity-60"
-            >
-              <Search className="h-4 w-4" aria-hidden="true" />
-              この名前でAI詳細調査
-            </button>
-            <a
-              href="#sds-upload"
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-            >
-              <Upload className="h-4 w-4" aria-hidden="true" />
-              SDSを読み取って特定
-            </a>
-            <Link
-              href="/chemical-ra/product-search"
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-            >
-              <PackageSearch className="h-4 w-4" aria-hidden="true" />
-              製品名から成分を探す
-            </Link>
-          </div>
-          <p className="text-[11px] leading-relaxed text-slate-600">
-            収載外でも安全とは限りません。リスクアセスメント対象物（ラベル・SDS交付義務物質）に該当する場合は
-            リスクアセスメントが義務（安衛法57条の3）、それ以外の化学物質も実施が努力義務です（安衛法28条の2）。
-            SDSの入手 → 成分CAS番号で再検索 → 判定、の順で進めてください。
-          </p>
-        </div>
+        <ChemicalNotFoundRescue
+          query={q}
+          ai={{ onClick: onAiSearch, loading }}
+          sdsHref="#sds-upload"
+          catalogNote={`統合DB ${MHLW_MERGED_CHEMICAL_COUNT_SLIM.toLocaleString()}物質・法令名称索引のいずれにも見つかりません`}
+        />
       )}
     </div>
   );

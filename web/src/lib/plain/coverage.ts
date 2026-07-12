@@ -21,36 +21,33 @@
 import { LAW_METADATA } from "@/data/law-metadata";
 import { allPlainArticles } from "@/data/plain";
 import { LAW_NAVI_ENTRIES } from "@/lib/law-navi/permalink";
-import { normalizeFullwidthAlnum, normalizeKanjiNumbers } from "@/lib/article-number-normalize";
 import type { FulltextLaw } from "@/lib/laws-fulltext/types";
-import anzenSokuFulltext from "@/data/laws-fulltext/347M50002000032.json";
-import anzenHoFulltext from "@/data/laws-fulltext/347AC0000000057.json";
-import anzenReiFulltext from "@/data/laws-fulltext/347CO0000000318.json";
 import { plainSourceHash } from "./text-hash";
 import { PLAIN_TARGETS } from "./targets";
+import anzenHouFulltext from "@/data/laws-fulltext/347AC0000000057.json";
+import anzenReiFulltext from "@/data/laws-fulltext/347CO0000000318.json";
+import anzenKisokuFulltext from "@/data/laws-fulltext/347M50002000032.json";
 
-/** egovLawId → 全文スナップショット（FULLTEXT_LAW_IDS と同一の3法令。loader.ts は server-only 動的importのためテスト/集計から使えず、ここは読み取り専用の静的import）。 */
-const FULLTEXT_BY_EGOV: ReadonlyMap<string, FulltextLaw> = new Map([
-  ["347M50002000032", anzenSokuFulltext as unknown as FulltextLaw],
-  ["347AC0000000057", anzenHoFulltext as unknown as FulltextLaw],
-  ["347CO0000000318", anzenReiFulltext as unknown as FulltextLaw],
-]);
+/**
+ * egovLawId → 全文スナップショットに実在する articleNum の集合。
+ *
+ * 安衛則等では curated コーパス（LAW_NAVI_ENTRIES）に無い全文ギャップ約1,000条を
+ * 複数部隊が原文(fulltext)を照合先に量産している（plain-fulltext-anchor.test.ts）。
+ * orphans 判定を curated だけで行うと、それら正規の gap 条 plain が軒並み
+ * 「幽霊エントリ」に見えてしまう。plain-fidelity.test.ts の
+ * FULLTEXT_EXISTENCE と同じ考え方をここにも適用し、全文層に実在する条は
+ * orphan から除外する（コーパスにも全文層にも無い条は従来どおり orphan）。
+ * 全文スナップショットが無い法令（有機則等）はこの集合が空のため影響なし。
+ */
+const FULLTEXT_EXISTENCE_BY_LAW: ReadonlyMap<string, ReadonlySet<string>> = new Map(
+  ([anzenHouFulltext, anzenReiFulltext, anzenKisokuFulltext] as unknown as FulltextLaw[]).map(
+    (ft) => [ft.lawId, new Set(ft.articles.map((a) => a.articleNum))]
+  )
+);
 
-/** 条番号 → [条, 枝…] 正規化キー（loader.ts の keyOf と同一規約）。 */
-function fulltextKeyOf(articleNum: string): string | null {
-  const norm = normalizeKanjiNumbers(normalizeFullwidthAlnum(articleNum));
-  const m = /^第?([0-9]+)条((?:の[0-9]+)*)/.exec(norm);
-  if (!m) return null;
-  const parts = [m[1]];
-  if (m[2]) for (const b of m[2].split("の").filter(Boolean)) parts.push(b);
-  return parts.join("-");
-}
-
-/** egovLawId → 全文層に実在する articleNum の正規化キー集合。全文非対応法令は空集合。 */
-function fulltextKeysOf(egovLawId: string): ReadonlySet<string> {
-  const law = FULLTEXT_BY_EGOV.get(egovLawId);
-  if (!law) return new Set();
-  return new Set(law.articles.map((a) => fulltextKeyOf(a.articleNum)).filter((k): k is string => k !== null));
+/** テスト用に公開: egovLawId の全文スナップショットに articleNum が実在するか。 */
+export function hasFulltextArticle(egovLawId: string, articleNum: string): boolean {
+  return FULLTEXT_EXISTENCE_BY_LAW.get(egovLawId)?.has(articleNum) ?? false;
 }
 
 export type PlainLawCoverage = {
@@ -103,9 +100,9 @@ export function buildPlainCoverage(): PlainLawCoverage[] {
       }
     }
 
-    const fulltextKeys = fulltextKeysOf(egovLawId);
+    const fulltextNums = FULLTEXT_EXISTENCE_BY_LAW.get(egovLawId) ?? new Set<string>();
     const orphans = [...plains.keys()].filter(
-      (num) => !corpusNums.has(num) && !fulltextKeys.has(fulltextKeyOf(num) ?? "__none__")
+      (num) => !corpusNums.has(num) && !fulltextNums.has(num)
     );
 
     return {

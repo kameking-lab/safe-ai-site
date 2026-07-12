@@ -45,6 +45,7 @@ import {
   Gauge,
   Compass,
   LayoutGrid,
+  Calculator,
 } from "lucide-react";
 import { Footer } from "@/components/footer";
 import { FlagshipNav } from "@/components/flagship-nav";
@@ -133,6 +134,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
       { id: "chemical-ra", label: "化学物質RA", href: "/chemical-ra", icon: TestTube2, description: "CREATE-SIMPLE簡易判定" },
       // exp-05: フラグシップ機能なのにサイドバー未収録だった作業環境測定を補完
       { id: "work-environment", label: "作業環境測定", href: "/work-environment-measurement", icon: Gauge, description: "A測定・B測定値から管理区分(第1〜第3)を判定・改善措置を提案" },
+      { id: "construction-calc", label: "建設計算", href: "/construction-calc", icon: Calculator, badge: "NEW", badgeUntil: "2026-08-31", description: "玉掛け・単管足場・掘削勾配を法令根拠つきで即計算" },
     ],
   },
   {
