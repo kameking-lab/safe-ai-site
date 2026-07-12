@@ -236,6 +236,8 @@ def gen_chatgpt(page, asset, outdir, per_asset):
     refp = None
     if got:
         log(f"  resume: existing {got} files")
+    if got >= per_asset:
+        return {"got": got, "limited": False, "refused": False, "skipped": True}
     limited = refused = False
     for attempt in range(1, per_asset + 1):
         if got >= per_asset:
@@ -378,6 +380,8 @@ def gen_gemini(page, asset, outdir, per_asset):
     refp = None
     if got:
         log(f"  resume: existing {got} files")
+    if got >= per_asset:
+        return {"got": got, "limited": False, "refused": False, "skipped": True}
     limited = refused = False
     for attempt in range(1, per_asset + 1):
         if got >= per_asset:
@@ -529,7 +533,8 @@ def main():
                     log(f"{aid} limit hit -> 同サイトの残りをスキップして続行")
                     # 上限が出たサイトの残り資産はスキップ
                     assets = [a for a in assets if a["site"] != asset["site"] or a["id"] == aid]
-                if i < len(assets) - 1:
+                # resume済みスキップ（送信ゼロ）の後は人間ペース待機を省く
+                if i < len(assets) - 1 and not r.get("skipped"):
                     human_pause(page)
         finally:
             page.wait_for_timeout(500)

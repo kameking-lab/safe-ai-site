@@ -37,6 +37,7 @@ import {
 import { EGOV_LAW_SEARCH_URL, egovHandoffQuery, egovArticleAnchor } from '@/lib/cross-search';
 import { useCondexLanding } from '@/lib/laws-fulltext/condex-client';
 import { trackEvent } from '@/components/Analytics';
+import { Mascot } from "@/components/mascot";
 
 // /search はサイト内検索結果ページ（全件表示）。コマンドパレット(⌘K)が上位10件の
 // クイック移動なのに対し、こちらは件数無制限・URL共有可能・カテゴリ別タブを備える。
@@ -285,7 +286,9 @@ function CategoryTab({
 function EmptyPrompt() {
   return (
     <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center dark:border-slate-700 dark:bg-slate-800/50">
-      <Search className="mx-auto h-8 w-8 text-slate-300" aria-hidden="true" />
+      <div className="flex justify-center">
+        <Mascot variant="binoculars" size="lg" alt="" />
+      </div>
       <p className="mt-3 text-sm font-medium text-slate-700 dark:text-slate-300">
         キーワードを入力して検索してください
       </p>

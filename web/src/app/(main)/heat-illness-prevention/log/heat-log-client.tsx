@@ -34,6 +34,7 @@ import { RISK_ORDER, RISK_VISUAL } from "@/lib/heat-illness/risk-visual";
 import { WbgtConclusion } from "@/components/heat-illness/wbgt-conclusion";
 import { ConclusionCard } from "@/components/ui/conclusion-card";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
+import { EmptyState } from "@/components/empty-state";
 
 /** 本日の記録のうち最も危険な測定（リスク区分降順→WBGT降順）。結論カードの主役。 */
 function worstEntry(entries: HeatLogEntry[]): HeatLogEntry | null {
@@ -465,9 +466,11 @@ export function HeatLogClient() {
         </div>
 
         {entries.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 py-10 text-center text-sm text-slate-400">
-            まだ記録がありません。上の「測定を追加」から作業前・日中のWBGTを記録してください。
-          </p>
+          <EmptyState
+            variant="water-break"
+            title="まだ記録がありません"
+            description="上の「測定を追加」から作業前・日中のWBGTを記録してください。"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">

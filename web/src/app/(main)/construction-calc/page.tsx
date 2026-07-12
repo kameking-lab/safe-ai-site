@@ -19,6 +19,7 @@ import { PageJsonLd } from "@/components/page-json-ld";
 import { CalcAiOnebox } from "@/components/construction-calc/calc-ai-onebox";
 import { CONSTRUCTION_CALCULATORS } from "@/lib/construction-calc/registry";
 import { CALC_DISCLAIMER } from "@/lib/construction-calc/schema";
+import { Mascot } from "@/components/mascot";
 
 const DESCRIPTION =
   "玉掛けワイヤ（モード係数・逆引き）・単管足場・掘削勾配・土量換算・クレーン必要定格・型枠支保工・電線許容電流を、安衛則/クレーン則/内線規程の根拠つきで即計算。プルダウンと数値入力ですぐ使え、自由記述からAIが計算機を案内します。";
@@ -52,7 +53,7 @@ export default function ConstructionCalcPage() {
     <div className="min-h-[calc(100dvh-4rem)] bg-slate-50 dark:bg-slate-900">
       <PageJsonLd name="建設計算" description={DESCRIPTION} path="/construction-calc" />
       <PageContainer paddingY="none" className="pt-6 pb-12">
-        <header className="mb-5">
+        <header className="mb-5 flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500 shadow-sm">
               <Calculator className="h-5 w-5 text-white" aria-hidden="true" />
@@ -66,6 +67,7 @@ export default function ConstructionCalcPage() {
               </p>
             </div>
           </div>
+          <Mascot variant="tamakake-signal" size="lg" alt="" className="hidden shrink-0 sm:block" />
         </header>
 
         <CalcAiOnebox />

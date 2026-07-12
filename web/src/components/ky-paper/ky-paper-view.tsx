@@ -76,6 +76,7 @@ import {
   KY_APPROVAL_LABEL,
   type KyApproval,
 } from "@/lib/ky/approval";
+import { Mascot } from "@/components/mascot";
 
 const AUTOSAVE_KEY = "ky-record";
 const ZOOM_MIN = 0.6;
@@ -801,7 +802,7 @@ export function KyPaperView() {
         <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-3 py-1.5 backdrop-blur print:hidden">
           <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-bold text-slate-900">KY用紙</span>
+              <Mascot variant="ky-writing" size="xs" alt="" className="shrink-0" /><span className="text-sm font-bold text-slate-900">KY用紙</span>
               {paperStatus.remaining !== undefined && paperStatus.remaining > 0 && (
                 <button
                   type="button"
@@ -920,7 +921,7 @@ export function KyPaperView() {
       <div className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-2 backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm font-bold text-slate-900">KY用紙</span>
+            <Mascot variant="ky-writing" size="xs" alt="" className="shrink-0" /><span className="text-sm font-bold text-slate-900">KY用紙</span>
             <Link href="/ky/workers" className="rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100">
               作業員マスター
             </Link>

@@ -28,6 +28,30 @@ const VARIANT_MAP = {
   teacher: { src: "/mascot/mascot-teacher.webp", width: 320, height: 320 },
   /** 敬礼: 完了画面用 */
   salute: { src: "/mascot/mascot-salute.webp", width: 309, height: 320 },
+  /** KY記入中: KY用紙・KY一覧用 */
+  "ky-writing": { src: "/mascot/mascot-ky-writing.webp", width: 270, height: 320 },
+  /** 麦茶で一休み: 熱中症・暑熱ページ用 */
+  "water-break": { src: "/mascot/mascot-water-break.webp", width: 316, height: 320 },
+  /** 玉掛け合図（巻け）: 建設計算用 */
+  "tamakake-signal": { src: "/mascot/mascot-tamakake-signal.webp", width: 272, height: 320 },
+  /** 白衣+フラスコ: 化学物質RA・化学DB用 */
+  "chemical-lab": { src: "/mascot/mascot-chemical-lab.webp", width: 249, height: 320 },
+  /** 六法全書を読む: 法令ナビ・法改正用 */
+  "law-reading": { src: "/mascot/mascot-law-reading.webp", width: 241, height: 300 },
+  /** 吹き出しで会話: チャットボット用 */
+  "chat-talk": { src: "/mascot/mascot-chat-talk.webp", width: 320, height: 310 },
+  /** 虫眼鏡で調査: 事故DB用 */
+  detective: { src: "/mascot/mascot-detective.webp", width: 271, height: 320 },
+  /** 双眼鏡: 検索用 */
+  binoculars: { src: "/mascot/mascot-binoculars.webp", width: 264, height: 320 },
+  /** スコップで掘削: 建設計算（掘削）用 */
+  "shovel-dig": { src: "/mascot/mascot-shovel-dig.webp", width: 320, height: 307 },
+  /** バンザイ: クイズ正解・お祝い用 */
+  banzai: { src: "/mascot/mascot-banzai.webp", width: 320, height: 295 },
+  /** 拡声器: サイネージ朝礼用 */
+  megaphone: { src: "/mascot/mascot-megaphone.webp", width: 283, height: 288 },
+  /** 夏（タオル＋ひまわり）: トップ季節演出用 */
+  "seasonal-summer": { src: "/mascot/mascot-seasonal-summer.webp", width: 291, height: 320 },
 } as const;
 
 export type MascotVariant = keyof typeof VARIANT_MAP;
