@@ -4,6 +4,10 @@
 
 ## 未着手（上から処理）
 
+### 2026-07-12 閉端末Web Push本実装（VAPID鍵は本番env投入済み・オーナーgo済／設計正本: docs/vapid-push-setup-guide-2026-07-11.md＋docs/fable-diagnosis-2026-07-02/T8-signage-settings-and-web-push-design-drafts.md Part B）
+> **前提（2026-07-12 鍵発行セッション申し送り）**: VAPID鍵ペアを発行し **Vercel 本番(Production)環境へ投入済み** — `NEXT_PUBLIC_VAPID_PUBLIC_KEY`（公開鍵・ブラウザ公開）／`VAPID_PRIVATE_KEY`（秘密鍵・サーバー専用）／`VAPID_SUBJECT`（`mailto:kenshi.ycc@gmail.com`）の3件。鍵の再発行は不要（実装は既存envを読むだけ）。**未了の前提2点**: ①`push_subscriptions` テーブルは手順書§3のDDLでSupabaseに未作成の可能性あり＝実装着手前に存在を確認し、無ければオーナーにSQL Editor実行を依頼（service_roleのみ・anonポリシー無し）。②env投入は本番のみ＝Preview/Developmentで動かす場合は同一鍵ペアを追加投入（設計ドラフトは全環境推奨）。公開鍵は `NEXT_PUBLIC_VAPID_PUBLIC_KEY` としてクライアント購読設定に用いる（`applicationServerKey`）。
+- [ ] 【Opus・P1】NIQ-HUB1: 閉じている端末へのPush通知の本実装（スコアカード§8-3 負けの解消・現在の通知ライト＝2026-07-11③章が互換の土台）。設計ドラフトどおり以下を実装: ①`web-push` npm依存の追加（この着手＝依存追加の承認済み前提）②購読API `POST /api/push/subscribe`（endpoint/p256dh/auth/prefecture を `push_subscriptions` へupsert・service_role経由）③送信API `POST /api/notify/push-weather-alert`（既存 `CRON_SECRET` 認証・Resendメールと並走・`/api/notify/feed` と同じ警報級判定をサーバー側cronへ移設）④`/notifications` に「プッシュ通知を有効にする」ボタン（`NEXT_PUBLIC_VAPID_PUBLIC_KEY` を `applicationServerKey` に用いた `pushManager.subscribe` → subscribe API POST）⑤`public/sw.js` の push ハンドラを実データ化（`SiteNotification` payload を `showNotification(title,{body,data:{url}})` に流す・`notificationclick` は実装済）。互換設計のポイントは手順書「互換設計のポイント」節（`SiteNotification` 型そのまま流用・既読/設定は端末内localStorageで購読テーブルと非競合）。完了条件=実端末（ブラウザを閉じた状態）へ警報級の実プッシュが1通到達する実物確認＋購読/送信APIのテスト＋既存の通知ライト（ベル・タブ表示中OS通知）非破壊＋`web/src/data/features-catalog.ts` への影響確認（新規ページ増設が無ければ対象外）。**web/src を触るため ops レーンの「web/src原則不可侵」の例外＝実装はクラウドOpusが hub/該当レーンで拾う想定。ここ(ops)は鍵発行セッションからの引き継ぎ置き場**。
+
 ### 2026-07-12 外部酷評第2ラウンド注入（出典: docs/site-critique-2026-07-12/ 02章）
 - [ ] 【Sonnet・P1】CR2-O1: 数値申告のratchet化第1弾=first-load JS 上限テスト常設 — 完了申告の抜き打ち15PRで崩れていたのは「CIで機械固定されていない数値主張」のみ（#871: 申告1,720KBに対し実測2,488KB=後続PRで再増加）。next build の First Load JS を主要route（/chemical-ra・/chemical-database・/chatbot・/law-search・/search・トップ）についてスナップショットし、閾値超過でfailするテスト（増やすPRは閾値を明示更新=ratchet）を常設。完了条件=現状値で緑・+10%仕込みで赤の実証＋handbook へ運用1行追記。
 
