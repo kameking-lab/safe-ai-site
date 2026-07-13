@@ -5,6 +5,8 @@ import { FeedbackGateModal } from "@/components/FeedbackGateModal";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { CopilotProvider } from "@/components/copilot/CopilotProvider";
 import { UserMenu } from "@/components/user-menu";
+import { FlagshipNav } from "@/components/flagship-nav";
+import { Footer } from "@/components/footer";
 
 // C-1: layout 直下で await auth() すると (main) 全ページの静的プリレンダーが
 // app/loading.tsx 境界ごとサスペンドし、「スケルトン先行ペイント→本文スワップ」が
@@ -27,6 +29,8 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   return (
     <CopilotProvider>
       <AppShell
+        flagshipNavSlot={<FlagshipNav />}
+        footerSlot={<Footer />}
         userSlot={
           <Suspense fallback={<UserMenu user={null} />}>
             <UserMenuSlot />

@@ -1,10 +1,7 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { MessageSquare, ClipboardList, BarChart3, CalendarCheck, Search } from "lucide-react";
 import { SITE_STATS, SITE_STATS_META, type SiteStatKey } from "@/data/site-stats";
-import { useLanguage } from "@/contexts/language-context";
 
 type StatItem = {
   key: SiteStatKey;
@@ -44,8 +41,7 @@ const STATS: StatItem[] = [
 
 /** 新トップページヒーロー: 「現場の安全を、AIで変える。」 */
 export function NewHomeHero() {
-  const { language } = useLanguage();
-  const isEn = language === "en";
+  const isEn = false;
 
   return (
     <section

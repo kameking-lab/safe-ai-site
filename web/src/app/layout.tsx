@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { FuriganaProvider } from "@/contexts/furigana-context";
 import { EasyJapaneseProvider } from "@/contexts/easy-japanese-context";
-import { LanguageProvider } from "@/contexts/language-context";
 import { JsonLd, organizationSchema, webSiteSchema } from "@/components/json-ld";
 import {
   SITE_URL,
@@ -139,15 +138,13 @@ export default function RootLayout({
         <ServiceWorkerRegistrar />
         <InstallPwaPrompt />
         <ThemeProvider>
-          <LanguageProvider>
-            <FuriganaProvider>
-              <EasyJapaneseProvider>
-                <CommandPaletteProvider>
-                  {children}
-                </CommandPaletteProvider>
-              </EasyJapaneseProvider>
-            </FuriganaProvider>
-          </LanguageProvider>
+          <FuriganaProvider>
+            <EasyJapaneseProvider>
+              <CommandPaletteProvider>
+                {children}
+              </CommandPaletteProvider>
+            </EasyJapaneseProvider>
+          </FuriganaProvider>
         </ThemeProvider>
       </body>
     </html>
