@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, Shield, FlaskConical, BookOpen, ShoppingBag, Gauge, Database, FileText, FolderOpen } from "lucide-react";
+import { AlertTriangle, BookOpen, Database, FileText, FlaskConical, FolderOpen, Gauge, Printer, Shield, ShoppingBag } from "lucide-react";
 import { TextareaWithVoice } from "@/components/voice-input-field";
 import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
 import { MhlwChemicalInfoCard } from "@/components/mhlw-chemical-info-card";
@@ -55,14 +55,14 @@ function ghsSignalBadge(signal: string | undefined) {
   if (signal === "危険") {
     return (
       <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700">
-        🔴 危険
+        危険
       </span>
     );
   }
   if (signal === "警告") {
     return (
       <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-700">
-        🟡 警告
+        警告
       </span>
     );
   }
@@ -717,7 +717,7 @@ export function ChemicalRaPanel() {
                 }`}
               >
                 <p className="font-bold">
-                  {concentrationVerdict.level === "danger" ? "⚠ " : ""}
+                  
                   {concentrationVerdict.label}
                 </p>
                 <p className="mt-0.5">{concentrationVerdict.detail}</p>
@@ -772,7 +772,7 @@ export function ChemicalRaPanel() {
           </button>
           <p className="mt-1.5 text-center text-[11px] text-slate-500">
             {chemicalName.trim()
-              ? "判定後、結果の下に「🖨 A4実施レポート印刷 / PDF保存」ボタンと、厚労省様式相当（実施日・事業場名・確認印枠3つ）の記録が表示されます。"
+              ? "判定後、結果の下に「A4実施レポート印刷 / PDF保存」ボタンと、厚労省様式相当（実施日・事業場名・確認印枠3つ）の記録が表示されます。"
               : "STEP 1 で物質を選ぶ（または名称を入力する）と、ここから判定して記録を作成できます。"}
           </p>
         </div>
@@ -850,7 +850,7 @@ export function ChemicalRaPanel() {
               <FolderOpen className="h-4 w-4 shrink-0 text-sky-600" aria-hidden="true" />
               <span>
                 <strong className="font-semibold">保存済みの実施記録を表示中</strong>（実施日: {new Date(restoredAt).toLocaleDateString("ja-JP")}）。
-                このまま「🖨 A4実施レポート印刷 / PDF保存」で<strong className="font-semibold">原本を再発行</strong>できます（実施日は保存当時のまま）。
+                このまま「A4実施レポート印刷 / PDF保存」で<strong className="font-semibold">原本を再発行</strong>できます（実施日は保存当時のまま）。
               </span>
             </div>
           )}
@@ -870,7 +870,7 @@ export function ChemicalRaPanel() {
                 onClick={() => window.print()}
                 className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50"
               >
-                🖨 A4実施レポート印刷 / PDF保存
+                <Printer className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />A4実施レポート印刷 / PDF保存
               </button>
             </div>
           </div>
@@ -934,7 +934,7 @@ export function ChemicalRaPanel() {
               </details>
               {result.createSimple.level === "IV" && (
                 <p className="mt-2 rounded-md bg-white/90 px-2 py-1 text-xs font-bold text-rose-900">
-                  ⚠ 直ちに作業を中止し、代替化・密閉化・局所排気装置の即時設置が必要です
+                  <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />直ちに作業を中止し、代替化・密閉化・局所排気装置の即時設置が必要です
                 </p>
               )}
             </div>
@@ -1091,7 +1091,7 @@ export function ChemicalRaPanel() {
           <ContextualPpePicks
             context={`${result.chemicalName} 化学物質 SDS 防塵 防毒 マスク 保護メガネ 耐薬品 手袋 保護衣`}
             fallbackCategoryIds={["respiratory", "eye-ear-protection", "hand-foot"]}
-            heading={`🛡 ${result.chemicalName} 取扱い時に推奨される保護具`}
+            heading={`${result.chemicalName} 取扱い時に推奨される保護具`}
             description="GHS 分類・SDS の指示に沿って選定する候補。最終判断は公式 SDS と専門家の指導に従ってください。"
           />
 

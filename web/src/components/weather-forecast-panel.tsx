@@ -1,5 +1,7 @@
 "use client";
 
+import { Sun, CloudSun, CloudRain, Snowflake, CloudLightning } from "lucide-react";
+
 import { useEffect, useMemo, useState } from "react";
 import {
   japanRegionMeta,
@@ -96,13 +98,14 @@ function levelBadge(level: MapAlertLevel | ForecastDay["alertLevel"]): string {
   return "異常なし";
 }
 
-function weatherIcon(code: number): string {
-  if (code <= 1) return "☀️";
-  if (code <= 3) return "⛅";
-  if (code >= 51 && code <= 67) return "🌧️";
-  if (code >= 71 && code <= 77) return "❄️";
-  if (code >= 95) return "⛈️";
-  return "🌤️";
+function weatherIcon(code: number) {
+  const cls = "inline h-[1em] w-[1em] align-[-0.1em]";
+  if (code <= 1) return <Sun className={`${cls} text-amber-500`} aria-label="晴れ" />;
+  if (code <= 3) return <CloudSun className={`${cls} text-slate-500`} aria-label="晴れときどきくもり" />;
+  if (code >= 51 && code <= 67) return <CloudRain className={`${cls} text-sky-500`} aria-label="雨" />;
+  if (code >= 71 && code <= 77) return <Snowflake className={`${cls} text-sky-400`} aria-label="雪" />;
+  if (code >= 95) return <CloudLightning className={`${cls} text-amber-500`} aria-label="雷" />;
+  return <CloudSun className={`${cls} text-slate-500`} aria-label="くもり時々晴れ" />;
 }
 
 function formatDate(dateStr: string): string {

@@ -1,15 +1,17 @@
 "use client";
 
 import type { SignageHourlyPoint } from "@/lib/types/signage-weather";
+import { Umbrella, Snowflake, CloudLightning, Sun, Cloud, CloudRain, CloudSun } from "lucide-react";
 
 function weatherIcon(code: number, precipMm: number) {
-  if (precipMm >= 0.5 && code >= 51) return "☂️";
-  if (code >= 71 && code <= 77) return "❄️";
-  if (code >= 95) return "⛈️";
-  if (code <= 1) return "☀️";
-  if (code <= 3) return "☁️";
-  if (code >= 51) return "🌧️";
-  return "🌤️";
+  const cls = "inline h-[1em] w-[1em] align-[-0.1em]";
+  if (precipMm >= 0.5 && code >= 51) return <Umbrella className={`${cls} text-sky-300`} aria-label="雨" />;
+  if (code >= 71 && code <= 77) return <Snowflake className={`${cls} text-sky-200`} aria-label="雪" />;
+  if (code >= 95) return <CloudLightning className={`${cls} text-amber-300`} aria-label="雷" />;
+  if (code <= 1) return <Sun className={`${cls} text-amber-300`} aria-label="晴れ" />;
+  if (code <= 3) return <Cloud className={`${cls} text-slate-300`} aria-label="くもり" />;
+  if (code >= 51) return <CloudRain className={`${cls} text-sky-300`} aria-label="雨" />;
+  return <CloudSun className={`${cls} text-slate-300`} aria-label="晴れときどきくもり" />;
 }
 
 type SignageHourlyStripProps = {

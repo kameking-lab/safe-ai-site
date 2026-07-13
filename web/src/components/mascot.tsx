@@ -78,6 +78,8 @@ const VARIANT_MAP = {
   sleeping: { src: "/mascot/mascot-sleeping.webp", width: 320, height: 235 },
   /** 地球儀: 外国人労働者向けページ用 */
   "world-friends": { src: "/mascot/mascot-world-friends.webp", width: 301, height: 320 },
+  /** 手帳に計画: 年次計画ジェネレータ用 */
+  "calendar-plan": { src: "/mascot/mascot-calendar-plan.webp", width: 302, height: 320 },
 } as const;
 
 export type MascotVariant = keyof typeof VARIANT_MAP;

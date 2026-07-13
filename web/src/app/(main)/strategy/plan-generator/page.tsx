@@ -16,6 +16,7 @@ import { CopilotMemo } from "@/components/copilot/CopilotMemo";
 import { CopilotNextSteps } from "@/components/copilot/CopilotNextSteps";
 import { INDUSTRY_LABELS, SCALE_LABELS } from "@/types/safety-plan";
 import { ogImageUrl } from "@/lib/og-url";
+import { Mascot } from "@/components/mascot";
 
 const _title = "年次安全衛生計画 業種別 ジェネレーター｜13業種×3規模・無料・PDF";
 const _desc =
@@ -71,9 +72,12 @@ export default function PlanGeneratorPage() {
       />
       <PageContainer width="prose" className="py-8 md:py-12">
         <header className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-            年次安全衛生計画ジェネレーター
-          </h1>
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
+              年次安全衛生計画ジェネレーター
+            </h1>
+            <Mascot variant="calendar-plan" size="md" alt="" className="shrink-0" />
+          </div>
           {/* P1-D: 説明文を 1 行に圧縮。詳細は <details> 内に移動して
               ファーストビューで業種・規模選択が見えるようにする。 */}
           <p className="mt-2 text-sm text-slate-700">
