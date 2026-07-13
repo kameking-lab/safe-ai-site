@@ -41,7 +41,7 @@ export function FeaturesIndexClient() {
   return (
     <div className="px-4 py-6 sm:py-10">
       {/* Hero */}
-      <section className="mx-auto max-w-5xl text-center">
+      <section className="mx-auto max-w-5xl text-center rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-transparent p-4 dark:from-emerald-950/25 dark:via-slate-900 sm:p-5">
         <div className="flex justify-center">
           <Mascot variant="tablet-dx" size="lg" alt="" />
         </div>

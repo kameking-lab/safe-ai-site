@@ -33,7 +33,7 @@ export default function ConstructionCalcPage() {
     <div className="min-h-[calc(100dvh-4rem)] bg-slate-50 dark:bg-slate-900">
       <PageJsonLd name="建設計算" description={DESCRIPTION} path="/construction-calc" />
       <PageContainer paddingY="none" className="pt-6 pb-12">
-        <header className="mb-5 flex items-start justify-between gap-4">
+        <header className="mb-5 flex items-start justify-between gap-4 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-transparent p-4 dark:from-emerald-950/25 dark:via-slate-900 sm:p-5">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500 shadow-sm">
               <Calculator className="h-5 w-5 text-white" aria-hidden="true" />
