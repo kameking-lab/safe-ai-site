@@ -54,6 +54,7 @@ import { computeKySyncStatus, KY_SYNC_LABEL, type KySyncStatus } from "@/lib/ky/
 import { applyKyDeepLink } from "@/lib/ky/deep-link-prefill";
 import { detectChemicalWork, chemicalRaHref } from "@/lib/chemical/work-chemical-hints";
 import { detectAccidentWork, accidentsHref } from "@/lib/accidents/work-accident-hints";
+import { routeByKeywords } from "@/lib/construction-calc/ai-router";
 import type { KyRiskDraftFromAccident } from "@/lib/ky/accident-similar";
 import { KyAccidentCasesPanel } from "@/components/ky-paper/ky-accident-cases";
 import { KyPrintSheet } from "@/components/ky-paper/ky-print-sheet";
@@ -542,6 +543,17 @@ export function KyPaperView() {
     [record.workRows]
   );
 
+  // 建設計算コーナー統合: 作業内容に玉掛け・足場・掘削・型枠・電線等が含まれる場合、
+  // その作業に効く計算機（法令根拠つき）へ誘導する。判定は registry 駆動の
+  // routeByKeywords（各計算機の keywords マッチ）＝部隊の新機も自動で候補に入る。
+  const calcHint = useMemo(() => {
+    const text = record.workRows.map((w) => w.workDetail).filter(Boolean).join(" ");
+    if (!text.trim()) return undefined;
+    const top = routeByKeywords(text)[0];
+    // 2文字以上のキーワードが最低1つ当たった（score>=2）確度のみ提示＝弱い一致で誤誘導しない
+    return top && top.score >= 2 ? top : undefined;
+  }, [record.workRows]);
+
   // 柱0: 画面最上部の結論カード用の状態（記入の進み具合＋承認フロー）。
   const paperStatus = useMemo(() => computeKyPaperStatus(record), [record]);
   // 柱C-9・A2: 記入の4段（基本情報→危険→対策→確認）進行ナビ。用紙ファーストは不変、用紙の上に進行を可視化。
@@ -759,10 +771,15 @@ export function KyPaperView() {
           </button>
         </div>
 
-        {(chemHint.matched || accHint.matched || (record.workRows[0]?.workDetail?.trim() ?? "") !== "") && (
+        {(chemHint.matched || accHint.matched || calcHint || (record.workRows[0]?.workDetail?.trim() ?? "") !== "") && (
           <>
             <p className="mb-1.5 mt-3 text-[11px] font-bold text-slate-400">この作業の関連情報</p>
             <div className="space-y-1.5">
+              {calcHint && (
+                <Link href={`/construction-calc/${calcHint.slug}`} role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/60 px-4 py-3 text-left text-sm font-semibold text-emerald-800 hover:bg-emerald-100" title={`この作業に関連する建設計算（${calcHint.title}）を法令根拠つきで計算`}>
+                  🧮 {calcHint.title}を計算する →
+                </Link>
+              )}
               {chemHint.matched && (
                 <Link href={chemicalRaHref(chemHint)} role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3 text-left text-sm font-semibold text-amber-800 hover:bg-amber-100" title={`この作業（${chemHint.keywords.join("・")}）で扱う化学物質の規制・ばく露注意を確認`}>
                   <FlaskConical className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />化学物質リスクを見る →

@@ -356,6 +356,33 @@ describe('buildSearchIndex — 機能ページ（feature）の収載', () => {
   });
 });
 
+describe('buildSearchIndex — 建設計算コーナー（feature）の収載＋現場語での着地', () => {
+  it('registry の全計算機が feature カテゴリで収載され url が /construction-calc/<slug> に解決する', async () => {
+    const [index, { getCalcSearchEntries }] = await Promise.all([
+      buildSearchIndex(),
+      import('@/lib/construction-calc/search-source'),
+    ]);
+    const entries = getCalcSearchEntries();
+    const calcItems = index.filter((i) => i.id.startsWith('calc-'));
+    // 収載集合＝射影集合（欠落 0）。url は [slug] の generateStaticParams が解決＝幽霊URL 0。
+    expect(calcItems.length).toBe(entries.length);
+    expect(calcItems.every((i) => /^\/construction-calc\/[a-z-]+$/.test(i.url))).toBe(true);
+  });
+
+  it('代表現場語5クエリが目的の計算機へ着地する（横断検索の発見性）', async () => {
+    const index = await buildSearchIndex();
+    const lands = (q: string, url: string) =>
+      searchItems(index, q, 'all').some((i) => i.url === url);
+    // 1) 安全ネット（今回解錠・新機） 2) あだ巻き（玉掛けの現場語）
+    expect(lands('安全ネット', '/construction-calc/safety-net-check')).toBe(true);
+    expect(lands('あだ巻き', '/construction-calc/sling-wire-load')).toBe(true);
+    // 3) 単管足場 4) 掘削 勾配（2語AND） 5) 許容電流
+    expect(lands('単管足場', '/construction-calc/scaffold-tankan-check')).toBe(true);
+    expect(lands('掘削 勾配', '/construction-calc/excavation-slope')).toBe(true);
+    expect(lands('許容電流', '/construction-calc/cable-ampacity')).toBe(true);
+  });
+});
+
 describe('buildSearchIndex — 治療と仕事の両立支援 病態別ガイド（feature）の収載', () => {
   it('ILLNESS_CATEGORIES の全疾患が feature カテゴリで illness-guide 深リンクへ着地（幽霊URL 0）', async () => {
     const [index, { ILLNESS_CATEGORIES }] = await Promise.all([

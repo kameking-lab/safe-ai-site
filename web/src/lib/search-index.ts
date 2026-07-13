@@ -550,6 +550,25 @@ export async function buildSearchIndex(): Promise<SearchItem[]> {
       }
     }),
 
+    // 建設計算コーナーの各計算機（/construction-calc/[slug]＝registry 駆動の射影）。これまで
+    // 横断検索(/search・⌘K)から各計算機は 0 件ヒットで、発見手段はハブ回遊のみだった＝「あだ巻き」
+    // 「朝顔」「側圧」「安全ネット」等の現場語で目的の計算機へ検索経由で着けない発見性の穴を是正。
+    // 各計算機の keywords（現場語 alias を含む）＋分類束ラベルで着地し、url は [slug] の
+    // generateStaticParams が registry 全 slug を解決＝収載集合＝解決集合で必ず着地する（幽霊URL 0）。
+    // 目的地ページ扱いで feature（機能）カテゴリ（法令ナビ分野ページ・災害スライドと同方針）。
+    import('@/lib/construction-calc/search-source').then(({ getCalcSearchEntries }) => {
+      for (const e of getCalcSearchEntries()) {
+        items.push({
+          id: e.id,
+          title: e.title,
+          subtitle: e.subtitle.slice(0, 90),
+          category: 'feature',
+          keywords: e.keywords,
+          url: e.url,
+        });
+      }
+    }),
+
     // 災害の型別 教育スライド（/education/hazard-slides/[slug]＝21分類。generateStaticParams
     // dynamicParams=false で収載集合＝解決集合＝幽霊URL 0）。「墜落 教育」「熱中症 スライド」
     // 「朝礼 ネタ 型」のような教育教材クエリで着地させる。

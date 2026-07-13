@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
+  Calculator,
   ChevronLeft,
   ExternalLink,
   MessageSquare,
@@ -35,6 +36,7 @@ import {
 import { matchGlossaryTerms } from "@/lib/law-navi/glossary-match";
 import { isIndexableLawNaviEntry } from "@/lib/law-navi/seo-gate";
 import { topicsForArticle } from "@/data/law-navi/topics";
+import { relatedCalculatorsForArticle } from "@/lib/construction-calc/related-articles";
 import { getLawMetadata } from "@/data/laws";
 import { ogImageUrl } from "@/lib/og-url";
 
@@ -155,6 +157,7 @@ export default async function LawNaviArticlePage({
   const egovUrl = egovUrlForEntry(entry);
   const meta = getLawMetadata(a.lawShort);
   const topics = topicsForArticle(a.lawShort, a.articleNum);
+  const relatedCalcs = relatedCalculatorsForArticle(a.lawShort, a.articleNum);
   const glossaryHits = matchGlossaryTerms(a.text);
   const chatQuery = `${a.lawShort}${a.articleNum}${a.articleTitle ? `（${a.articleTitle}）` : ""}について、現場でのポイントを教えてください`;
   const itemMap = a.itemNumberMap ? Object.entries(a.itemNumberMap) : [];
@@ -377,6 +380,31 @@ export default async function LawNaviArticlePage({
                       >
                         {t.name}（{t.fieldGroup}）
                         <ArrowRight className="h-4 w-4 text-emerald-400" aria-hidden="true" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {relatedCalcs.length > 0 && (
+              <section aria-label="この条文に関連する建設計算" className="rounded-xl border border-amber-200 bg-amber-50/60 p-4">
+                <p className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold text-amber-800">
+                  <Calculator className="h-3.5 w-3.5" aria-hidden="true" />
+                  この条文に関連する建設計算
+                </p>
+                <ul className="space-y-1.5">
+                  {relatedCalcs.map((calc) => (
+                    <li key={calc.slug}>
+                      <Link
+                        href={`/construction-calc/${calc.slug}`}
+                        className="flex min-h-[44px] items-center justify-between rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm font-semibold text-amber-800 transition hover:bg-amber-100"
+                      >
+                        <span>
+                          {calc.shortTitle}
+                          <span className="ml-1 font-normal text-amber-600/80">で計算する</span>
+                        </span>
+                        <ArrowRight className="h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />
                       </Link>
                     </li>
                   ))}
