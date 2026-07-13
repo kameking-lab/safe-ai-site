@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-12T21:43:43.027Z",
+  "generatedAt": "2026-07-13T21:52:38.951Z",
   "counts": {
     "approved": 29,
-    "rejected": 35,
-    "total": 64,
-    "approvalRate": 0.453
+    "rejected": 37,
+    "total": 66,
+    "approvalRate": 0.439
   },
   "byDay": [
     {
@@ -265,6 +265,13 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-07-14",
+      "approved": 0,
+      "rejected": 2,
+      "total": 2,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -278,9 +285,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 4,
-      "rejected": 33,
-      "total": 37,
-      "approvalRate": 0.108
+      "rejected": 35,
+      "total": 39,
+      "approvalRate": 0.103
     }
   ],
   "byEstimatedWorkCategory": [
@@ -324,9 +331,9 @@
     {
       "type": "熱中症",
       "approved": 4,
-      "rejected": 13,
-      "total": 17,
-      "approvalRate": 0.235
+      "rejected": 15,
+      "total": 19,
+      "approvalRate": 0.211
     },
     {
       "type": "崩壊・倒壊",
@@ -386,8 +393,8 @@
       "rejected": [
         3,
         9,
-        18,
-        1,
+        19,
+        2,
         1,
         0,
         1,
@@ -423,7 +430,7 @@
       ],
       "rejected": [
         5,
-        29,
+        31,
         1,
         0,
         0,
@@ -461,7 +468,7 @@
       ],
       "rejected": [
         24,
-        11,
+        13,
         0,
         0,
         0,
@@ -499,7 +506,7 @@
       ],
       "rejected": [
         3,
-        25,
+        27,
         0,
         0,
         0,
@@ -514,7 +521,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 30
+      "count": 32
     },
     {
       "reason": "duplication",
@@ -793,6 +800,22 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "西日本に続き きょう東日本でも猛暑日予想 熱中症対策の徹底を",
+        "aiSummary": "西日本に続き東日本でも猛暑日予想。労働現場での熱中症対策を徹底するよう呼びかけ。",
+        "score": {
+          "relevance": 30,
+          "copyrightRisk": 15,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-07-13T21:52:33.282Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 30 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "「嵐」最終公演の東京ドームに作業員など装い侵入か 3人逮捕",
         "aiSummary": "東京ドーム「嵐」公演に作業員を装い侵入、3人逮捕。",
         "score": {
@@ -801,22 +824,6 @@
           "misinformationRisk": 10,
           "duplication": 10,
           "judgedAt": "2026-06-02T22:59:39.283Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 10 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "大分 九重町 土砂崩れ 住宅1棟巻き込まれ 住人の女性大けが",
-        "aiSummary": "大分県九重町で土砂崩れが発生し、住宅が巻き込まれ住人女性が重傷。",
-        "score": {
-          "relevance": 10,
-          "copyrightRisk": 10,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-06-18T22:54:28.248Z",
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
             "relevance 10 < 70 (not labor-safety related for type=general_news)"

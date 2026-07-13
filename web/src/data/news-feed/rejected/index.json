@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-12T21:43:42.907Z",
+  "updatedAt": "2026-07-13T21:52:38.898Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -209,6 +209,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "83e3b333b24b991c",
+      "headline": "西日本に続き きょう東日本でも猛暑日予想 熱中症対策の徹底を",
+      "aiSummary": "西日本に続き東日本でも猛暑日予想。労働現場での熱中症対策を徹底するよう呼びかけ。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260714/k10015176071000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 14 Jul 2026 06:19:51 +0900",
+        "fetchedAt": "2026-07-13T21:52:22.639Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 30,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-13T21:52:33.282Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 30 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
@@ -634,6 +661,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 15 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "b1640a26d9ff55b3",
+      "headline": "急な気温上昇 体が対応できないおそれも 熱中症対策は",
+      "aiSummary": "急激な気温上昇で熱中症の危険が高まるため、対策を徹底するよう注意喚起。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260713/k10015175581000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 13 Jul 2026 20:07:28 +0900",
+        "fetchedAt": "2026-07-13T21:52:22.639Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-13T21:52:38.890Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
