@@ -45,16 +45,16 @@ export default function HomePage() {
           選択バンドへ拡張。初見の訪問者が「自分の立場」(建設現場/一人親方/
           企業の安全衛生担当者/専門家) から 1 タップで実務エントリに入れる。
           建設業は引き続き先頭カードとして最も目立つ位置を確保。 */}
-      <div className="bg-gradient-to-b from-white to-emerald-50/50 pb-8 dark:from-slate-950 dark:to-emerald-950/20">
+      <div className="bg-gradient-to-b from-white to-emerald-50/50 pb-8 [content-visibility:auto] [contain-intrinsic-size:auto_420px] dark:from-slate-950 dark:to-emerald-950/20">
         <HomePersonaEntry />
       </div>
       <SectionWave tone="white" flip className="bg-emerald-50/50 dark:bg-emerald-950/20" />
 
-      <div className="mx-auto max-w-7xl px-4 pt-6">
+      <div className="mx-auto max-w-7xl px-4 pt-6 [content-visibility:auto] [contain-intrinsic-size:auto_600px]">
         <HomeThreePillars {...threePillars} />
       </div>
       <SectionWave tone="emerald" className="mt-8" />
-      <div className="bg-emerald-50/80 px-4 py-8 dark:bg-emerald-950/30 sm:py-10">
+      <div className="bg-emerald-50/80 px-4 py-8 [content-visibility:auto] [contain-intrinsic-size:auto_900px] dark:bg-emerald-950/30 sm:py-10">
         <FlagshipGrid />
       </div>
     </main>
