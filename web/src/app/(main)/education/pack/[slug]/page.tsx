@@ -7,6 +7,7 @@ import { EduSlideDeck } from "@/components/education-pack/edu-slide-deck";
 import { EDUCATION_DECKS, getDeck } from "@/data/education-decks";
 import { getCurriculum, LICENSE_SUMMARY_3 } from "@/data/education-curriculum";
 import { getHazardTypeSummary, type HazardTypeSummary } from "@/lib/hazard-slides/build-summary";
+import { routeByKeywords } from "@/lib/construction-calc/ai-router";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
 
@@ -106,6 +107,28 @@ export default async function EduPackDeckPage({ params }: { params: Params }) {
         contactHref={contactHref}
         pageUrl={pageUrl}
       />
+
+      {(() => {
+        // 教育パックの主題に効く建設計算（法令根拠つき）へ誘導する。判定は registry 駆動の
+        // routeByKeywords（各計算機 keywords マッチ）＝部隊の新機も自動で候補に入る。
+        // 2文字以上のキーワードが当たった確度（score>=2）のみ提示＝弱い一致で誤誘導しない。
+        const calc = routeByKeywords(deck.title)[0];
+        if (!calc || calc.score < 2) return null;
+        return (
+          <div className="no-print mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+            <p className="text-sm font-bold text-emerald-900">この教育に関連する建設計算</p>
+            <p className="mt-1 text-xs text-emerald-800">
+              現場でそのまま使える法令根拠つきの計算機です（計算は検証済みの計算式が実行）。
+            </p>
+            <Link
+              href={`/construction-calc/${calc.slug}`}
+              className="mt-3 inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white hover:bg-emerald-700"
+            >
+              🧮 {calc.title}を開く
+            </Link>
+          </div>
+        );
+      })()}
 
       <div className="no-print mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-4">
         <p className="text-sm font-bold text-amber-900">貴社向けカスタマイズ・出張講習</p>
