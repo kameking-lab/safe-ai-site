@@ -34,6 +34,10 @@ import { formworkLateralPressureCalculator } from "./calculators/formwork-latera
 import { shoringMemberCheckCalculator } from "./calculators/shoring-member-check";
 import { rebarMassCalculator } from "./calculators/rebar-mass";
 import { concreteVolumeCalculator } from "./calculators/concrete-volume";
+import { chainSlingLoadCalculator } from "./calculators/chain-sling-load";
+import { fiberSlingLoadCalculator } from "./calculators/fiber-sling-load";
+import { riggingHardwareCheckCalculator } from "./calculators/rigging-hardware-check";
+import { hoistRatedCheckCalculator } from "./calculators/hoist-rated-check";
 
 export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   slingWireLoadCalculator,
@@ -61,6 +65,10 @@ export const CONSTRUCTION_CALCULATORS: ConstructionCalculator[] = [
   shoringMemberCheckCalculator,
   rebarMassCalculator,
   concreteVolumeCalculator,
+  chainSlingLoadCalculator,
+  fiberSlingLoadCalculator,
+  riggingHardwareCheckCalculator,
+  hoistRatedCheckCalculator,
 ];
 
 const BY_SLUG: ReadonlyMap<string, ConstructionCalculator> = new Map(
