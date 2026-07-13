@@ -7,7 +7,7 @@ describe("SignageDangerAlert", () => {
   // （p-2+h-6アイコンのみ≈40pxへの退行を防ぐ）。
   it("手動発動後、閉じるボタンが44×44pxタップ標的", () => {
     render(<SignageDangerAlert jmaHeadline={null} warnings={null} />);
-    fireEvent.click(screen.getByRole("button", { name: "🚨 アラート発動（手動）" }));
+    fireEvent.click(screen.getByRole("button", { name: "アラート発動（手動）" }));
 
     const closeBtn = screen.getByRole("button", { name: "アラートを閉じる" });
     expect(closeBtn.className).toContain("min-h-[44px]");

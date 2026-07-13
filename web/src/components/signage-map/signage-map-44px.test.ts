@@ -57,7 +57,7 @@ describe("pin-manager.tsx の操作4要素が44pxタップ標的を満たす", (
 describe("signage-map-client.tsx の操作5要素が44pxタップ標的を満たす", () => {
   const SOURCE = readSource("src/components/signage-map/signage-map-client.tsx");
   const cases: Array<[string, string]> = [
-    ["<button", "☰ パネルを開く"],
+    ["<button", "パネルを開く"],
     ["<button", "✕ 閉じる"],
     ["<Link", "← 朝礼ダッシュボードへ"],
     ["<button", "現在のURLをコピー"],

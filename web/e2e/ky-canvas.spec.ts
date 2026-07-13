@@ -176,7 +176,7 @@ test.describe("KY用紙キャンバスβ（F1 方式確立）", () => {
     await page.getByRole("button", { name: "その他の操作（複製・共有・転記・印刷）" }).click();
     const sheet = page.getByRole("menu", { name: "その他の操作" });
     await expect(sheet).toBeVisible();
-    await expect(sheet.getByText("↻ 前回を複製")).toBeVisible();
+    await expect(sheet.getByText("前回を複製")).toBeVisible();
     await expect(sheet.getByRole("menuitem", { name: /朝礼サイネージへ/ })).toBeVisible();
     await expect(sheet.getByText("印刷プレビュー")).toBeVisible();
     await page.getByRole("button", { name: "閉じる" }).click();
