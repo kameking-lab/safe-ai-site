@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { History, Mic, Trash2, Link2, FileText, FileType, FileJson, Check, Copy, AlertTriangle, BookOpen, Paperclip, Library, Search, Square, RotateCcw, Lightbulb, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import type { ChatbotSource, FollowupSuggestion } from "@/app/api/chatbot/route";
 import type { NoticeHit } from "@/lib/notice-search";
@@ -461,7 +462,7 @@ export function ChatbotPanel() {
         setMessages((prev) => {
           const next = streamedContent.trim()
             ? prev.map((m) =>
-                m.id === assistantId ? { ...m, content: streamedContent + "\n\n⏹ 生成を停止しました。" } : m,
+                m.id === assistantId ? { ...m, content: streamedContent + "\n\n（生成を停止しました）" } : m,
               )
             : prev.filter((m) => m.id !== assistantId);
           if (streamedContent.trim()) saveCurrentSession(next);
@@ -649,7 +650,7 @@ export function ChatbotPanel() {
             aria-label="保存済み会話を開く"
             title="保存済みの会話セッションを一覧表示します"
           >
-            🕐 保存した会話{sessions.length > 0 && <span className="text-blue-600">({sessions.length})</span>}
+            <History className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />保存した会話{sessions.length > 0 && <span className="text-blue-600">({sessions.length})</span>}
           </button>
           {/* 6.3: 音声完結モード */}
           <button
@@ -666,7 +667,7 @@ export function ChatbotPanel() {
             }`}
             title="音声で質問→AI回答を自動読み上げ (Web Speech API)。タップで切替"
           >
-            🎙 {voiceMode ? "音声で会話中 (タップで終了)" : "音声で会話する"}
+            <Mic className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />{voiceMode ? "音声で会話中 (タップで終了)" : "音声で会話する"}
           </button>
           {voiceMode && (
             <button
@@ -674,7 +675,7 @@ export function ChatbotPanel() {
               onClick={startVoiceInput}
               className="flex min-h-[44px] items-center gap-1 rounded-lg border border-emerald-400 bg-white px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-50"
             >
-              🎤 話して質問する
+              <Mic className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />話して質問する
             </button>
           )}
           {voiceMode && voiceInputError && (
@@ -695,7 +696,7 @@ export function ChatbotPanel() {
               className="flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 hover:border-rose-200 hover:bg-rose-50 hover:text-rose-700"
               title={`進行中の会話を削除（最大${CHAT_HISTORY_MAX_MESSAGES}件まで自動保存）`}
             >
-              🗑 履歴をクリア
+              <Trash2 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />履歴をクリア
             </button>
             {/* 共有ボタン */}
             <button
@@ -703,7 +704,7 @@ export function ChatbotPanel() {
               onClick={handleShare}
               className="flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
             >
-              🔗 共有URL
+              <Link2 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />共有URL
             </button>
             {/* エクスポートドロップダウン */}
             <div className="relative">
@@ -723,21 +724,21 @@ export function ChatbotPanel() {
                     onClick={handleExportMD}
                     className="flex min-h-[44px] w-full items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
                   >
-                    📄 Markdown (.md)
+                    <FileText className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />Markdown (.md)
                   </button>
                   <button
                     type="button"
                     onClick={handleExportTXT}
                     className="flex min-h-[44px] w-full items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
                   >
-                    📝 テキスト (.txt)
+                    <FileType className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />テキスト (.txt)
                   </button>
                   <button
                     type="button"
                     onClick={handleExportJSON}
                     className="flex min-h-[44px] w-full items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
                   >
-                    🗄 JSON (.json)
+                    <FileJson className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />JSON (.json)
                   </button>
                   <label className="flex min-h-[44px] w-full cursor-pointer items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50 border-t border-slate-100">
                     ⬆ JSONをインポート
@@ -778,7 +779,7 @@ export function ChatbotPanel() {
                         className="flex min-h-[44px] min-w-[44px] items-center justify-center text-slate-300 hover:text-red-500"
                         aria-label="削除"
                       >
-                        ✕
+                        <X className="h-4 w-4" aria-hidden="true" />
                       </span>
                     </span>
                   </button>
@@ -915,14 +916,14 @@ export function ChatbotPanel() {
                     className="rounded border border-slate-200 bg-white px-2 py-0.5 text-[10px] text-slate-400 hover:text-slate-600 transition"
                     aria-label="コピー"
                   >
-                    {copyStates[msg.id] ? "✓ コピー済" : "📋 コピー"}
+                    {copyStates[msg.id] ? <><Check className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />コピー済</> : <><Copy className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />コピー</>}
                   </button>
                 </div>
 
                 {/* 範囲外参照の警告（ハルシネーション抑制） */}
                 {msg.role === "assistant" && msg.scopeWarnings && msg.scopeWarnings.length > 0 && (
                   <div className="mt-2 ml-10 max-w-[88%] rounded-lg border border-rose-200 bg-rose-50 p-3">
-                    <p className="text-[11px] font-bold text-rose-800">⚠ 提供データ範囲外の参照を検出</p>
+                    <p className="text-[11px] font-bold text-rose-800"><AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />提供データ範囲外の参照を検出</p>
                     <ul className="mt-1 space-y-0.5 text-[11px] text-rose-700 leading-5">
                       {msg.scopeWarnings.map((w, i) => (
                         <li key={i}>・{w}</li>
@@ -936,7 +937,7 @@ export function ChatbotPanel() {
                 {msg.role === "assistant" && msg.sources && msg.sources.length > 0 && (
                   <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-slate-200 bg-white p-3">
                     <summary className="flex min-h-[44px] cursor-pointer items-center text-xs font-semibold text-slate-500 hover:text-slate-700">
-                      📖 参照条文 ({msg.sources.length}件) — タップで全文
+                      <BookOpen className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />参照条文 ({msg.sources.length}件) — タップで全文
                     </summary>
                     <div className="mt-2 space-y-2">
                       {msg.sources.map((src, i) => (
@@ -952,7 +953,7 @@ export function ChatbotPanel() {
                     className="mt-2 ml-10 max-w-[88%] rounded-lg border border-emerald-200 bg-emerald-50/60 p-3"
                   >
                     <summary className="flex min-h-[44px] cursor-pointer items-center text-xs font-semibold text-emerald-900 hover:text-emerald-700">
-                      📎 出典（条文番号＋施行日＋発出機関）{msg.citations.length}件
+                      <Paperclip className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />出典（条文番号＋施行日＋発出機関）{msg.citations.length}件
                     </summary>
                     <ul className="mt-2 space-y-1.5">
                       {msg.citations.map((c, i) => (
@@ -1016,7 +1017,7 @@ export function ChatbotPanel() {
                 {msg.role === "assistant" && msg.relatedLaws && msg.relatedLaws.length > 0 && (
                   <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-sky-200 bg-sky-50/70 p-3">
                     <summary className="cursor-pointer text-xs font-semibold text-sky-900 hover:text-sky-700">
-                      📚 合わせて確認すべき法令 ({msg.relatedLaws.length}件)
+                      <Library className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />合わせて確認すべき法令 ({msg.relatedLaws.length}件)
                     </summary>
                     <ul className="mt-2 space-y-1">
                       {msg.relatedLaws.map((r, i) => (
@@ -1038,7 +1039,7 @@ export function ChatbotPanel() {
                 {msg.role === "assistant" && msg.digDeeperLinks && msg.digDeeperLinks.length > 0 && (
                   <details className="mt-2 ml-10 max-w-[88%] rounded-lg border border-sky-200 bg-sky-50/50 p-3">
                     <summary className="cursor-pointer text-xs font-semibold text-sky-900 hover:text-sky-700">
-                      🔍 もっと深く知る ({msg.digDeeperLinks.length}件)
+                      <Search className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />もっと深く知る ({msg.digDeeperLinks.length}件)
                     </summary>
                     <ul className="mt-2 space-y-1.5">
                       {msg.digDeeperLinks.map((d, i) => (
@@ -1228,7 +1229,7 @@ export function ChatbotPanel() {
                   className="ml-2 rounded-full border border-slate-300 bg-white px-3 py-1 text-[11px] font-semibold text-slate-600 transition hover:bg-slate-100 active:scale-[0.98]"
                   aria-label="生成を停止"
                 >
-                  ⏹ 停止
+                  <Square className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />停止
                 </button>
               </div>
             )}
@@ -1254,7 +1255,7 @@ export function ChatbotPanel() {
               }}
               className="rounded-full border border-red-300 bg-white px-3 py-1 text-xs font-semibold text-red-700 transition hover:bg-red-100 active:scale-[0.98]"
             >
-              🔁 再試行
+              <RotateCcw className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />再試行
             </button>
           )}
         </div>
@@ -1335,7 +1336,7 @@ export function ChatbotPanel() {
 
       {/* C-005: disclaimer directly below send button, always visible on all viewports */}
       <p className="text-xs text-amber-800 leading-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
-        <span className="font-bold">⚠ 本回答は法的助言ではありません。</span>
+        <span className="font-bold"><AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />本回答は法的助言ではありません。</span>
         　具体的な判断は必ず専門家（労働安全コンサルタント等）にご相談ください。
         最新の法令は{" "}
         <a
@@ -1392,7 +1393,7 @@ function ChatbotSourceCard({ src }: { src: ChatbotSource }) {
       </div>
       {src.snippet && src.snippet !== src.text && (
         <p className="mt-1 rounded bg-yellow-50 px-1.5 py-1 text-[11px] text-amber-900 leading-5">
-          💡 該当箇所: {src.snippet}
+          <Lightbulb className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />該当箇所: {src.snippet}
         </p>
       )}
       <p className="mt-1 whitespace-pre-wrap text-slate-600 leading-5">

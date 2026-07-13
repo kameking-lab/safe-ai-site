@@ -77,6 +77,7 @@ import {
   type KyApproval,
 } from "@/lib/ky/approval";
 import { Mascot } from "@/components/mascot";
+import { Share2, CloudDownload, Monitor, ClipboardCopy, Search, Printer, FlaskConical, AlertTriangle, MessageSquare, Map, Sparkles, Star } from "lucide-react";
 
 const AUTOSAVE_KEY = "ky-record";
 const ZOOM_MIN = 0.6;
@@ -729,20 +730,20 @@ export function KyPaperView() {
         <p className="mb-1.5 text-[11px] font-bold text-slate-400">共有・連携</p>
         <div className="mb-3 space-y-1.5">
           <button type="button" role="menuitem" disabled={shareBusy} onClick={() => runAction(() => void handleShare())} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-violet-200 bg-violet-50/60 px-4 py-2.5 text-left hover:bg-violet-100 disabled:opacity-50">
-            <span className="text-sm font-bold text-violet-800">📡 {shareBusy ? "発行中…" : "別端末で共有"}</span>
+            <span className="text-sm font-bold text-violet-800"><Share2 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />{shareBusy ? "発行中…" : "別端末で共有"}</span>
             <span className="text-[11px] font-normal text-violet-600">サイネージ用の共有コードを発行</span>
           </button>
           {isKyCloudEnabled() && (
             <button type="button" role="menuitem" onClick={() => runAction(() => void handleFetchLatest())} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-left hover:bg-slate-50">
-              <span className="text-sm font-semibold text-slate-700">☁ クラウド最新取得</span>
+              <span className="text-sm font-semibold text-slate-700"><CloudDownload className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />クラウド最新取得</span>
               <span className="text-[11px] font-normal text-slate-500">別端末で保存したKYを読み込む</span>
             </button>
           )}
           <Link href="/ky/morning" role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center rounded-xl border border-violet-200 bg-white px-4 py-3 text-left text-sm font-semibold text-violet-700 hover:bg-violet-50">
-            🖥 朝礼サイネージへ →
+            <Monitor className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />朝礼サイネージへ →
           </Link>
           <button type="button" role="menuitem" onClick={() => runAction(() => setShowTranscribe(true))} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-emerald-200 bg-white px-4 py-2.5 text-left hover:bg-emerald-50" title="元請指定のExcel様式へ項目ごとにコピーして貼り付け">
-            <span className="text-sm font-semibold text-emerald-700">📋 Excel転記</span>
+            <span className="text-sm font-semibold text-emerald-700"><ClipboardCopy className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />Excel転記</span>
             <span className="text-[11px] font-normal text-emerald-600">元請のExcel様式へ項目ごとにコピー</span>
           </button>
         </div>
@@ -750,11 +751,11 @@ export function KyPaperView() {
         <p className="mb-1.5 text-[11px] font-bold text-slate-400">印刷・PDF</p>
         <div className="mb-1 space-y-1.5">
           <button type="button" role="menuitem" onClick={() => runAction(() => setShowPrintPreview(true))} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-left hover:bg-sky-50">
-            <span className="text-sm font-semibold text-sky-700">🔍 印刷プレビュー</span>
+            <span className="text-sm font-semibold text-sky-700"><Search className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />印刷プレビュー</span>
             <span className="text-[11px] font-normal text-sky-600">A4の体裁を確認してから印刷</span>
           </button>
           <button type="button" role="menuitem" onClick={() => { setShowActions(false); window.print(); }} className="flex min-h-[48px] w-full items-center rounded-xl bg-sky-600 px-4 py-3 text-left text-sm font-bold text-white hover:bg-sky-700">
-            🖨 印刷 / PDF
+            <Printer className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />印刷 / PDF
           </button>
         </div>
 
@@ -764,12 +765,12 @@ export function KyPaperView() {
             <div className="space-y-1.5">
               {chemHint.matched && (
                 <Link href={chemicalRaHref(chemHint)} role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-3 text-left text-sm font-semibold text-amber-800 hover:bg-amber-100" title={`この作業（${chemHint.keywords.join("・")}）で扱う化学物質の規制・ばく露注意を確認`}>
-                  ⚗ 化学物質リスクを見る →
+                  <FlaskConical className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />化学物質リスクを見る →
                 </Link>
               )}
               {accHint.matched && (
                 <Link href={accidentsHref(accHint)} role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-rose-200 bg-rose-50/60 px-4 py-3 text-left text-sm font-semibold text-rose-700 hover:bg-rose-100" title="この作業の類似労災事例・AI注意喚起を見る">
-                  ⚠ 類似の労災事例を見る →
+                  <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />類似の労災事例を見る →
                 </Link>
               )}
               {/* P1-3完: KY→チャットボット双方向動線。作業内容を文脈として渡す */}
@@ -783,7 +784,7 @@ export function KyPaperView() {
                   className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-left text-sm font-semibold text-blue-700 hover:bg-blue-100"
                   title="この作業の法的根拠・必要な措置をAIチャットに質問"
                 >
-                  💬 法的根拠をAIに聞く →
+                  <MessageSquare className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />法的根拠をAIに聞く →
                 </Link>
               )}
             </div>
@@ -946,7 +947,7 @@ export function KyPaperView() {
             title="用紙全体を1画面で見ながら、タップした欄をその場で入力できる既定の表示に戻る"
             className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
           >
-            🗺 新しい表示へ
+            <Map className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />新しい表示へ
           </button>
           {/* ズーム */}
           <div className="flex items-center gap-1 rounded-full border border-slate-300 bg-white p-0.5">
@@ -995,7 +996,7 @@ export function KyPaperView() {
         <CollapsibleDetail summary="はじめての方へ — 3ステップで完成">
           <ol className="space-y-1">
             <li><span className="font-bold">① 現場名と今日の作業を入力</span>（音声入力ボタンでも可）</li>
-            <li><span className="font-bold">② 「🤖 AIに危険箇所を提案」</span>を押すと、危険と対策が自動で下書きされます</li>
+            <li><span className="font-bold">② 「AIに危険箇所を提案」</span>を押すと、危険と対策が自動で下書きされます</li>
             <li><span className="font-bold">③ 「保存」→「印刷プレビュー」</span>または<span className="font-bold">「サイネージへ」</span>で朝礼の大画面に表示</li>
           </ol>
           <p className="mt-1.5">
@@ -1077,7 +1078,7 @@ export function KyPaperView() {
                   disabled={suggestBusy}
                   className="min-h-[44px] rounded-lg border border-indigo-300 bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-800 hover:bg-indigo-100 disabled:opacity-50"
                 >
-                  {suggestBusy ? "AIが分析中…" : "🤖 AIに危険箇所を提案させる"}
+                  {suggestBusy ? "AIが分析中…" : <><Sparkles className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />AIに危険箇所を提案させる</>}
                 </button>
                 {suggestSource && suggestions.length > 0 && (
                   <div className="mt-2 space-y-1.5 rounded-lg border border-indigo-200 bg-indigo-50/40 p-2">
@@ -1188,7 +1189,7 @@ export function KyPaperView() {
                         title="常用（毎日来る）作業員をまとめて参加者に追加します"
                         className="rounded-full border border-amber-400 bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-amber-800 transition hover:bg-amber-100 min-h-[44px]"
                       >
-                        ⭐ 常用{regularWorkers.length}名をまとめて選ぶ
+                        <Star className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />常用{regularWorkers.length}名をまとめて選ぶ
                       </button>
                     )}
                     {workerGroups.length > 1 &&

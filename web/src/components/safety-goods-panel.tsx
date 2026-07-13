@@ -16,12 +16,15 @@ import {
 import { generateAmazonAffiliateUrl, generateRakutenSearchUrl } from "@/lib/affiliate-url";
 import { trackAffiliateClick } from "@/lib/track-events";
 import { GoodsCategoryIcon } from "@/components/goods-icons";
+import { PpePictogram } from "@/components/equipment/ppe-pictogram";
+import type { PpeIconId } from "@/lib/equipment/ppe-pictogram-map";
+import { UserRound, LayoutGrid } from "lucide-react";
 import { trackEvent } from "@/components/Analytics";
 
 const SELECTION_GUIDES = [
   {
     id: "mask",
-    icon: "😷",
+    icon: "gas-mask",
     title: "防毒マスク の選び方",
     lawBasis: "労働安全衛生法 第22条・有機溶剤中毒予防規則 第33条",
     points: [
@@ -35,7 +38,7 @@ const SELECTION_GUIDES = [
   },
   {
     id: "harness",
-    icon: "🪢",
+    icon: "harness",
     title: "墜落制止用器具 の選び方",
     lawBasis: "労働安全衛生法施行令 第13条・安全衛生規則 第518条〜",
     points: [
@@ -49,7 +52,7 @@ const SELECTION_GUIDES = [
   },
   {
     id: "helmet",
-    icon: "⛑️",
+    icon: "helmet",
     title: "保護帽（ヘルメット）の選び方",
     lawBasis: "労働安全衛生規則 第539条・飛来落下物用規格（JIS T 8131）",
     points: [
@@ -63,7 +66,7 @@ const SELECTION_GUIDES = [
   },
   {
     id: "glasses",
-    icon: "🥽",
+    icon: "goggles",
     title: "保護メガネ の選び方",
     lawBasis: "労働安全衛生規則 第593条・JIS T 8147",
     points: [
@@ -77,7 +80,7 @@ const SELECTION_GUIDES = [
   },
   {
     id: "safety-boots",
-    icon: "👟",
+    icon: "safety-shoes",
     title: "安全靴 の選び方",
     lawBasis: "労働安全衛生規則 第558条・JIS T 8101",
     points: [
@@ -91,7 +94,7 @@ const SELECTION_GUIDES = [
   },
   {
     id: "ear-protection",
-    icon: "🎧",
+    icon: "ear-protection",
     title: "耳栓・イヤーマフ の選び方",
     lawBasis: "労働安全衛生規則 第595条・JIS T 8161",
     points: [
@@ -105,7 +108,7 @@ const SELECTION_GUIDES = [
   },
   {
     id: "gloves",
-    icon: "🧤",
+    icon: "gloves",
     title: "保護手袋 の選び方",
     lawBasis: "労働安全衛生規則 第594条・EN 388・EN 374",
     points: [
@@ -119,7 +122,7 @@ const SELECTION_GUIDES = [
   },
   {
     id: "heat-stress",
-    icon: "🌡️",
+    icon: "protective-clothing",
     title: "熱中症対策グッズ の選び方",
     lawBasis: "熱中症予防指針（厚労省・令和5年改訂）・WBGT管理",
     points: [
@@ -133,7 +136,7 @@ const SELECTION_GUIDES = [
   },
   {
     id: "safety-harness-wp",
-    icon: "🔗",
+    icon: "harness",
     title: "ワークポジショニング用器具（旧：安全帯）の選び方",
     lawBasis: "労働安全衛生規則 第521条・JIS T 8165",
     points: [
@@ -267,7 +270,7 @@ function SelectionGuideSection() {
             className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
           >
             <div className="flex items-center gap-2">
-              <span className="text-2xl">{guide.icon}</span>
+              <PpePictogram icon={guide.icon as PpeIconId} size="md" />
               <h3 className="text-base font-bold text-slate-900">{guide.title}</h3>
             </div>
             <p className="mt-1 text-[11px] text-emerald-700 font-medium">
@@ -402,7 +405,7 @@ export function SafetyGoodsPanel() {
                 : "border-slate-200 bg-white text-slate-700 hover:border-rose-200 hover:bg-rose-50"
             }`}
           >
-            <span>👩</span>
+            <UserRound className="h-4 w-4" aria-hidden="true" />
             女性向け
             {womenFilter && (
               <span className="ml-auto rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] text-rose-700">
@@ -420,7 +423,7 @@ export function SafetyGoodsPanel() {
                   : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
               }`}
             >
-              <span className="text-2xl">📦</span>
+              <LayoutGrid className="h-7 w-7 text-slate-500" aria-hidden="true" />
               <div>
                 <p className="text-sm font-bold text-slate-900">すべて</p>
                 <p className="text-[11px] text-slate-500">{safetyGoodsItems.length}件</p>
@@ -444,8 +447,9 @@ export function SafetyGoodsPanel() {
         <div className="min-w-0 flex-1">
           {selectedCategory && (
             <div className="mb-4 rounded-xl border border-emerald-200 bg-emerald-50/60 p-4">
-              <p className="text-lg font-bold text-slate-900">
-                {selectedCategory.icon} {selectedCategory.name}
+              <p className="flex items-center gap-2 text-lg font-bold text-slate-900">
+                <GoodsCategoryIcon categoryId={selectedCategory.id} size={28} />
+                {selectedCategory.name}
               </p>
               <p className="mt-1 text-sm text-slate-700">{selectedCategory.description}</p>
             </div>

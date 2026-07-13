@@ -1,19 +1,7 @@
 import type { Metadata } from "next";
 import { MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals";
 import Link from "next/link";
-import {
-  Building2,
-  ListChecks,
-  Brain,
-  Stethoscope,
-  FlaskConical,
-  RefreshCw,
-  CalendarDays,
-  MessageSquare,
-  ArrowRight,
-  ShieldCheck,
-  Scale,
-} from "lucide-react";
+import { AlertTriangle, ArrowRight, Brain, Building2, CalendarDays, FileText, FlaskConical, FolderOpen, Footprints, ListChecks, MessageSquare, RefreshCw, Scale, ShieldCheck, Stethoscope, UserRound, Users, Wrench } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { JsonLd, breadcrumbSchema, webPageSchema } from "@/components/json-ld";
 import { ogImageUrl } from "@/lib/og-url";
@@ -245,28 +233,28 @@ export default function ForManagerPage() {
       {/* 現場の安全記録・帳票 */}
       <section id="records" className="mt-12 scroll-mt-20">
         <h2 className="flex items-center gap-2 text-xl font-bold text-slate-900">
-          🗂 現場の安全記録・帳票（無料・登録不要・この端末に保存）
+          現場の安全記録・帳票（無料・登録不要・この端末に保存）
         </h2>
         <p className="mt-1 text-sm text-slate-600">
           受入教育・委員会議事録・パトロール・ヒヤリハット・点検・作業手順書を、その場で作成して印刷・CSV保存。監督指導時の証跡づくりに。
         </p>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {[
-            { href: "/site-records", icon: "🗂", label: "安全記録キット", sub: "状況も一目で" },
-            { href: "/site-records/induction", icon: "🧑‍🏭", label: "受入教育 記録", sub: "安衛則35条" },
-            { href: "/site-records/committee", icon: "👥", label: "委員会 議事録", sub: "毎月の証跡" },
-            { href: "/site-records/patrol", icon: "👣", label: "安全パトロール", sub: "是正管理" },
-            { href: "/site-records/near-miss", icon: "⚠️", label: "ヒヤリハット集計", sub: "型別傾向" },
-            { href: "/site-records/inspection", icon: "🔧", label: "作業開始前点検", sub: "機種別" },
-            { href: "/site-records/procedure", icon: "📑", label: "作業手順書", sub: "教育の土台" },
-            { href: "/court-cases/employer-liability", icon: "⚖️", label: "労災の法的責任", sub: "民事・刑事・行政" },
+            { href: "/site-records", icon: FolderOpen, label: "安全記録キット", sub: "状況も一目で" },
+            { href: "/site-records/induction", icon: UserRound, label: "受入教育 記録", sub: "安衛則35条" },
+            { href: "/site-records/committee", icon: Users, label: "委員会 議事録", sub: "毎月の証跡" },
+            { href: "/site-records/patrol", icon: Footprints, label: "安全パトロール", sub: "是正管理" },
+            { href: "/site-records/near-miss", icon: AlertTriangle, label: "ヒヤリハット集計", sub: "型別傾向" },
+            { href: "/site-records/inspection", icon: Wrench, label: "作業開始前点検", sub: "機種別" },
+            { href: "/site-records/procedure", icon: FileText, label: "作業手順書", sub: "教育の土台" },
+            { href: "/court-cases/employer-liability", icon: Scale, label: "労災の法的責任", sub: "民事・刑事・行政" },
           ].map((t) => (
             <Link
               key={t.href}
               href={t.href}
               className="flex flex-col items-center justify-center gap-0.5 rounded-xl border border-sky-200 bg-white px-2 py-3 text-center shadow-sm transition hover:border-sky-400 hover:bg-sky-50"
             >
-              <span className="text-xl leading-none" aria-hidden="true">{t.icon}</span>
+              <t.icon className="h-5 w-5 text-emerald-700" aria-hidden="true" />
               <span className="text-[12px] font-bold leading-tight text-slate-800">{t.label}</span>
               <span className="text-[10px] leading-tight text-slate-500">{t.sub}</span>
             </Link>
