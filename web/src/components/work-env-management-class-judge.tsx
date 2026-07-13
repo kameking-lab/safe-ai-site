@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ClipboardList, AlertTriangle, CheckCircle2, XCircle, Info } from "lucide-react";
+import { ClipboardList, AlertTriangle, CheckCircle2, Printer, XCircle, Info } from "lucide-react";
 import { determineManagementClass } from "@/lib/measurement-engine";
 import {
   MANAGEMENT_CLASS_ORDER,
@@ -378,7 +378,7 @@ function ManagementClassResultCard({
           onClick={() => window.print()}
           className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm hover:bg-slate-50"
         >
-          🖨 評価記録を印刷 / PDF保存
+          <Printer className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />評価記録を印刷 / PDF保存
         </button>
       </div>
 
@@ -437,7 +437,7 @@ function ManagementClassResultCard({
         {/* 次にやること（第3は停止級を最前面に） */}
         {result.managementClass === 3 && (
           <p className="mt-3 rounded-lg bg-rose-800 px-3 py-2 text-sm font-bold text-white">
-            ⚠ 直ちに改善 — 改善完了まで有効な呼吸用保護具の着用が必要です
+            <AlertTriangle className="mr-1 inline h-4 w-4 align-[-2px]" aria-hidden="true" />直ちに改善 — 改善完了まで有効な呼吸用保護具の着用が必要です
           </p>
         )}
         <p className="mt-3 text-sm font-semibold">

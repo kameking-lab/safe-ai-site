@@ -12,6 +12,7 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { Sparkles, Star } from "lucide-react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import type { KyInstructionRecordState } from "@/lib/types/operations";
 import { getKyPaperFieldDef, nextKyPaperFieldKey, parseRiskFieldKey, type KyPaperFieldKey } from "@/lib/ky/paper-fields";
@@ -184,7 +185,11 @@ export function FieldEditorSheet({
               disabled={ai.busy}
               className="min-h-[44px] w-full rounded-lg border border-indigo-300 bg-indigo-50 px-3 text-xs font-bold text-indigo-800 hover:bg-indigo-100 disabled:opacity-50"
             >
-              {ai.busy ? "AIが分析中…" : "🤖 AIに危険箇所を提案させる"}
+              {ai.busy ? (
+                "AIが分析中…"
+              ) : (
+                <><Sparkles className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />AIに危険箇所を提案させる</>
+              )}
             </button>
             {ai.source && ai.suggestions.length > 0 && (
               <div className="mt-2 space-y-1.5 rounded-lg border border-indigo-200 bg-indigo-50/40 p-2">
@@ -360,7 +365,7 @@ export function FieldEditorSheet({
                       title="常用（毎日来る）作業員をまとめて参加者に追加します"
                       className="min-h-[44px] rounded-full border border-amber-400 bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-100"
                     >
-                      ⭐ 常用{participants.regularWorkers.length}名をまとめて選ぶ
+                      <Star className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />常用{participants.regularWorkers.length}名をまとめて選ぶ
                     </button>
                   )}
                   {participants.workerGroups.length > 1 &&

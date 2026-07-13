@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Coffee, Map as MapIcon, Mic, Monitor, Smartphone, Sunrise, Sunset, X } from "lucide-react";
+import { AlertTriangle, Coffee, Map as MapIcon, Mic, Monitor, Smartphone, Sunrise, Sunset, X } from "lucide-react";
 import { AutoRefreshStatus } from "@/components/signage/auto-refresh-status";
 import { SignageConclusionStrip } from "@/components/signage/signage-conclusion-strip";
 import { SignageDailyValues } from "@/components/signage/signage-daily-values";
@@ -629,7 +629,7 @@ export default function SignagePage() {
                   </p>
                 ) : warningPanel.kind === "error" ? (
                   <p className="mt-1 text-[10px] font-semibold leading-snug text-rose-200 sm:text-xs xl:text-xl">
-                    ⚠ 気象データの取得に失敗しました。警報の有無を確認できません。
+                    <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />気象データの取得に失敗しました。警報の有無を確認できません。
                     <a href={jmaLink} target="_blank" rel="noreferrer" className="ml-1 text-rose-100 underline">
                       気象庁で確認 →
                     </a>
@@ -679,7 +679,7 @@ export default function SignagePage() {
             ) : null}
             {displayMode === "map" && warningPanel.kind === "error" ? (
               <p className="shrink-0 text-[11px] font-semibold leading-snug text-rose-200 sm:text-sm xl:text-xl">
-                ⚠ 気象データの取得に失敗しました。警報の有無を確認できません。
+                <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />気象データの取得に失敗しました。警報の有無を確認できません。
                 <a href={jmaLink} target="_blank" rel="noreferrer" className="ml-1 text-rose-100 underline">
                   気象庁で確認 →
                 </a>

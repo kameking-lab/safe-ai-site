@@ -11,6 +11,7 @@
  */
 
 import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { Maximize2 } from "lucide-react";
 import { useZoomPan } from "@/lib/ui/use-zoom-pan";
 
 /** O10（第四弾・zoom-to-cell）: 親から用紙キャンバスの特定セルへズーム誘導するための操作口。 */
@@ -157,7 +158,7 @@ export const PaperStage = forwardRef<
           onClick={fit}
           className="min-h-[44px] rounded-full px-3 text-xs font-bold text-sky-700 hover:bg-sky-50"
         >
-          ⛶ 全体
+          <Maximize2 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />全体
         </button>
       </div>
     </div>

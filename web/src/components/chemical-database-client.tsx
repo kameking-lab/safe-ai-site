@@ -223,7 +223,7 @@ export function ChemicalDatabaseClient() {
           {mhlwCount.toLocaleString()} 物質を CAS・物質名で横断検索。労働安全コンサルタントによる専門解説 50 物質も併読できます。
         </p>
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-          ⚠️ 最終判断は必ず厚生労働省 <Link href="https://anzeninfo.mhlw.go.jp/" className="font-semibold underline" target="_blank" rel="noopener noreferrer">職場のあんぜんサイト</Link>
+          <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />最終判断は必ず厚生労働省 <Link href="https://anzeninfo.mhlw.go.jp/" className="font-semibold underline" target="_blank" rel="noopener noreferrer">職場のあんぜんサイト</Link>
           と各物質の SDS をご確認ください。本データベースは管理補助を目的としています。
         </div>
       </header>
@@ -628,7 +628,7 @@ export function ChemicalDatabaseClient() {
         <ContextualPpePicks
           context="化学物質 有機溶剤 特化則 防塵 防毒 マスク 保護メガネ 保護手袋"
           fallbackCategoryIds={["respiratory", "eye-ear-protection", "hand-foot"]}
-          heading="🛡 化学物質作業で必要な保護具"
+          heading="化学物質作業で必要な保護具"
           description="呼吸用保護具・保護メガネ・耐薬品手袋など、SDS の指示に沿って選定するための候補。"
         />
       )}

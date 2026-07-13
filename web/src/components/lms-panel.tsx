@@ -13,6 +13,7 @@ import {
   PlusCircle,
   Building2,
   Briefcase,
+  Wrench,
 } from "lucide-react";
 
 const LmsReportChart = dynamic(() => import("@/components/lms-report-chart"), {
@@ -299,7 +300,7 @@ export function LmsPanel() {
           複数拠点・部署の安全教育を一元管理。受講状況・修了証・グループ研修を効率化します。
         </p>
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-          🛠 この機能は<strong>骨組み公開中</strong>です。
+          <Wrench className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />この機能は<strong>骨組み公開中</strong>です。
           モック画面でUIとフローをプレビューできます。本番リリースは<strong>2026年秋</strong>を予定。
         </div>
       </div>

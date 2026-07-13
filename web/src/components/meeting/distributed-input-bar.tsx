@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Link2, Download, Copy, Check, HelpCircle } from "lucide-react";
+import { Link2, Download, Copy, Check, HelpCircle, Lightbulb } from "lucide-react";
 import type { MeetingContractorRow } from "@/lib/meeting/schema";
 import { mergeContributionsIntoContractors } from "@/lib/meeting/distributed";
 import { isMeetingCloudEnabled, cloudCreateMeetingShare, cloudFetchMeetingContributions } from "@/lib/meeting/cloud";
@@ -41,7 +41,7 @@ export function DistributedInputBar(props: {
   if (!isMeetingCloudEnabled()) {
     return (
       <div className="mb-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] text-slate-500 print:hidden">
-        💡 協力会社による分散入力（共有リンクで各社が自社分を入力→自動集約）は、クラウド設定時に有効になります。
+        <Lightbulb className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />協力会社による分散入力（共有リンクで各社が自社分を入力→自動集約）は、クラウド設定時に有効になります。
       </div>
     );
   }

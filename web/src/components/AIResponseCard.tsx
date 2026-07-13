@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle } from "lucide-react";
 import { BINDING_BADGE, type SourceBindingLevel } from "@/lib/gemini";
 
 /** 出典の拘束力バッジ */
@@ -36,9 +37,7 @@ export function AIResponseCard({
     <div className={`rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden ${className}`}>
       {showDisclaimer && (
         <div className="flex items-start gap-2 px-4 py-2 bg-amber-50 border-b border-amber-200">
-          <span className="text-amber-600 shrink-0 mt-0.5" aria-hidden="true">
-            ⚠️
-          </span>
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" aria-hidden="true" />
           <p className="text-xs text-amber-800 leading-snug">
             本回答はAIによる情報提供であり、<strong>法的助言・法令解釈の確定ではありません</strong>。
             具体的な法的判断・実務対応は、労働安全コンサルタント・弁護士等の専門家にご相談ください。

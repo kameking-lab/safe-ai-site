@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import {
   ArrowUpRight,
   BookOpen,
+  ClipboardList,
   ShieldCheck,
   AlertTriangle,
   FileText,
@@ -13,6 +14,7 @@ import {
   ScrollText,
   Hash,
   MessageSquare,
+  Siren,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { Section } from "@/components/layout/section";
@@ -853,20 +855,20 @@ export default async function IndustryLandingPage({ params }: { params: Params }
                 href="/ky"
                 className="inline-flex min-h-[44px] items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700"
               >
-                📝 KYを作成
+                <ClipboardList className="h-4 w-4 shrink-0" aria-hidden="true" />KYを作成
               </Link>
               <Link
                 href={`/strategy/plan-generator?industry=${content.safetyPlanIndustry}`}
                 className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-sm font-medium text-emerald-800 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300"
               >
-                📋 年次計画を生成
+                <ClipboardList className="h-4 w-4 shrink-0" aria-hidden="true" />年次計画を生成
               </Link>
               {content.accidentAnalysisSlug && (
                 <Link
                   href={`/accidents-reports/${content.accidentAnalysisSlug}`}
                   className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-sm font-medium text-emerald-800 hover:bg-emerald-50 dark:bg-slate-900 dark:text-emerald-300"
                 >
-                  🚨 事故分析を見る
+                  <Siren className="h-4 w-4 shrink-0" aria-hidden="true" />事故分析を見る
                 </Link>
               )}
             </Cluster>

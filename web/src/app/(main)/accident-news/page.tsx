@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Printer } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { AccidentHubNav } from "@/components/accident-hub-nav";
 import { PageJsonLd } from "@/components/page-json-ld";
@@ -168,7 +169,8 @@ export default async function AccidentNewsPage({
           })()}`}
           className="inline-flex min-h-[44px] items-center rounded-lg border border-sky-300 bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-800 hover:bg-sky-100"
         >
-          🖨 説明資料を印刷（この絞り込みで）
+          <Printer className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+          説明資料を印刷（この絞り込みで）
         </Link>
       </div>
 

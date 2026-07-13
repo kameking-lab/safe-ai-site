@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle, CheckCircle2, Hourglass, Siren, type LucideIcon } from "lucide-react";
 import type { SignageConclusion, SignageConclusionTone } from "@/lib/signage/signage-conclusion";
 
 const TONE_FRAME: Record<SignageConclusionTone, string> = {
@@ -9,11 +10,11 @@ const TONE_FRAME: Record<SignageConclusionTone, string> = {
   slate: "border-slate-600 bg-slate-800 text-slate-200",
 };
 
-const TONE_ICON: Record<SignageConclusionTone, string> = {
-  red: "🚨",
-  amber: "⚠️",
-  green: "✅",
-  slate: "⏳",
+const TONE_ICON: Record<SignageConclusionTone, LucideIcon> = {
+  red: Siren,
+  amber: AlertTriangle,
+  green: CheckCircle2,
+  slate: Hourglass,
 };
 
 const CHIP_CLASS: Record<"red" | "amber", string> = {
@@ -31,6 +32,7 @@ type Props = {
  * 状態の決定ロジックは buildSignageConclusion（純関数）側に置く。
  */
 export function SignageConclusionStrip({ conclusion }: Props) {
+  const ToneIcon = TONE_ICON[conclusion.tone];
   return (
     <section
       role="status"
@@ -39,9 +41,10 @@ export function SignageConclusionStrip({ conclusion }: Props) {
       data-tone={conclusion.tone}
       className={`flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border-2 px-3 py-2 sm:rounded-2xl sm:px-4 xl:py-3 ${TONE_FRAME[conclusion.tone]}`}
     >
-      <span aria-hidden="true" className="text-2xl sm:text-3xl xl:text-5xl">
-        {TONE_ICON[conclusion.tone]}
-      </span>
+      <ToneIcon
+        aria-hidden="true"
+        className="h-6 w-6 shrink-0 sm:h-8 sm:w-8 xl:h-12 xl:w-12"
+      />
       <p
         data-signage-conclusion-label
         className="text-2xl font-extrabold leading-none tracking-wide sm:text-3xl xl:text-5xl"

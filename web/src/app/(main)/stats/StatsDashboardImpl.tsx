@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, AlertTriangle } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import type {
   PageAnalyticsResponse,
@@ -206,7 +206,7 @@ export function StatsDashboardImpl() {
       ) : !anyLive ? (
         // 実データ未接続: サンプル(モック)数値は表示せず、正直な準備中の案内のみ。
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-          <p className="text-3xl" aria-hidden>📊</p>
+          <BarChart3 className="mx-auto h-8 w-8 text-slate-400" aria-hidden="true" />
           <h2 className="mt-3 text-lg font-bold text-slate-900">利用統計は準備中です</h2>
           <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-slate-600">
             本ダッシュボードは Google Analytics 4 / Search Console を接続した期間の
@@ -304,7 +304,7 @@ function SectionSeoSummary({ gsc }: { gsc: SearchConsoleResponse }) {
     >
       {gsc.error && gsc.source !== "gsc" ? (
         <div className="mb-3 rounded-lg border border-amber-300 bg-amber-50 p-2 text-[11px] text-amber-900">
-          ⚠ GSC接続失敗: {gsc.error}
+          <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />GSC接続失敗: {gsc.error}
         </div>
       ) : null}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

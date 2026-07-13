@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Sparkles, Loader2, AlertTriangle, ArrowRight } from "lucide-react";
+import { Sparkles, Loader2, AlertTriangle, ArrowRight, Globe } from "lucide-react";
 import { ALL_ACCIDENT_CATEGORIES, type AccidentWorkCategory } from "@/lib/types/domain";
 import {
   ACC_LANGS,
@@ -95,7 +95,7 @@ export function AccidentAiAnalyzer() {
           {L.aiTitle}
         </h2>
         <label className="flex items-center gap-1 text-xs text-slate-500">
-          <span aria-hidden>🌐</span>
+          <Globe className="h-3.5 w-3.5" aria-hidden="true" />
           <select
             value={lang}
             onChange={(e) => {

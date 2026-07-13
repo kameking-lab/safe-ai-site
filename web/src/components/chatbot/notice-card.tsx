@@ -7,7 +7,7 @@
  *
  * 表示内容:
  * - 通達名 / noticeNumber / 発出日 / 発出機関 / bindingLevel バッジ
- * - 「📄 原文を見る」ボタン（detailUrl を新タブで開く）
+ * - 「原文を見る」ボタン（detailUrl を新タブで開く）
  * - 本文要約は表示しない（JAISH 編集解説の置換リスク回避）
  */
 
@@ -93,7 +93,7 @@ export function ChatbotNoticeCard({ notice }: { notice: AttachedNotice }) {
           className="inline-flex min-h-[32px] items-center gap-1 rounded border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-amber-800 hover:bg-amber-50 dark:border-amber-700 dark:bg-slate-800 dark:text-amber-300"
         >
           <ExternalLink className="h-3 w-3" aria-hidden="true" />
-          📄 原文を見る
+          原文を見る
         </a>
       </div>
     </article>

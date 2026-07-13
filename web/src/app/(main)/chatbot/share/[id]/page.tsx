@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
 import { formatAnswerForDisplay } from "@/lib/chatbot-answer-format";
 
 export const metadata: Metadata = {
@@ -82,7 +83,8 @@ export default async function ChatSharePage({
 
       <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-2 mb-4">
         <p className="text-xs text-amber-800">
-          ⚠ これは共有された会話の閲覧ビューです。回答は法的助言ではありません。
+          <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+          これは共有された会話の閲覧ビューです。回答は法的助言ではありません。
         </p>
       </div>
 

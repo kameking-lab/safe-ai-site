@@ -13,6 +13,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { Sparkles } from "lucide-react";
 import { InputWithVoice, TextareaWithVoice } from "@/components/voice-input-field";
 import { MeetingTagField } from "@/components/meeting/meeting-tag-field";
 import { STATUS_MARK } from "@/components/meeting/meeting-print-sheet";
@@ -173,7 +174,7 @@ export function MeetingFieldEditorSheet({ fieldKey, record, patch, onClose, onSe
             onClick={() => onSuggestRow(workContentContractorId)}
             className="mt-2 min-h-[44px] w-full rounded-lg border border-indigo-300 bg-indigo-50 px-3 text-sm font-bold text-indigo-700 hover:bg-indigo-100 disabled:opacity-50"
           >
-            {suggestBusyId === workContentContractorId ? "AI提案中…" : "🤖 AI提案（予想災害・指示・資格・リスクを自動入力）"}
+            {suggestBusyId === workContentContractorId ? "AI提案中…" : <><Sparkles className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />AI提案（予想災害・指示・資格・リスクを自動入力）</>}
           </button>
         )}
 

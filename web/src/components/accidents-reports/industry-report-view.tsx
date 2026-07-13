@@ -2,13 +2,17 @@ import Link from "next/link";
 import {
   ArrowUpRight,
   AlertTriangle,
+  BarChart3,
   ShieldCheck,
   BookOpen,
+  ClipboardList,
   TrendingUp,
   Clock,
   Building2,
   Gauge,
   ListChecks,
+  Scale,
+  Sparkles,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { Section } from "@/components/layout/section";
@@ -665,7 +669,7 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
             className="group flex items-center gap-3 rounded-xl border-2 border-emerald-300 bg-gradient-to-r from-emerald-50 to-white p-4 transition hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 dark:border-emerald-800 dark:from-emerald-950/30 dark:to-slate-950"
           >
             <span className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-emerald-600 text-white">
-              <span className="text-2xl" aria-hidden="true">⚖️</span>
+              <Scale className="h-6 w-6" aria-hidden="true" />
             </span>
             <div className="min-w-0 flex-1">
               <p className="text-base font-bold text-slate-900 dark:text-slate-100">
@@ -689,14 +693,14 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
               href="/ky"
               className="group rounded-lg border-2 border-emerald-300 bg-emerald-50 p-4 transition hover:border-emerald-500 hover:shadow-sm dark:border-emerald-700 dark:bg-emerald-950/40"
             >
-              <p className="text-sm font-bold text-emerald-900 dark:text-emerald-100">📝 KY用紙を起票</p>
+              <p className="text-sm font-bold text-emerald-900 dark:text-emerald-100"><ClipboardList className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />KY用紙を起票</p>
               <p className="mt-1 text-xs text-emerald-800 dark:text-emerald-300">本レポートの事故パターンを朝礼の危険予知活動に展開。業種別プリセット入り。</p>
             </Link>
             <Link
               href="/safety-diary"
               className="group rounded-lg border-2 border-sky-300 bg-sky-50 p-4 transition hover:border-sky-500 hover:shadow-sm dark:border-sky-700 dark:bg-sky-950/40"
             >
-              <p className="text-sm font-bold text-sky-900 dark:text-sky-100">📋 安全工程打合せ書を作成</p>
+              <p className="text-sm font-bold text-sky-900 dark:text-sky-100"><ClipboardList className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />安全工程打合せ書を作成</p>
               <p className="mt-1 text-xs text-sky-800 dark:text-sky-300">各社の作業・予想災害・指示を1枚に。月次まとめで類似事故と連動。</p>
             </Link>
           </CardGrid>
@@ -705,21 +709,21 @@ export function IndustryReportView({ report }: { report: IndustryReport }) {
               href="/accidents-analytics"
               className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
             >
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">📊 事故統計ダッシュボード</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100"><BarChart3 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />事故統計ダッシュボード</p>
               <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">25軸の多角分析で本業種以外も横断比較。</p>
             </Link>
             <Link
               href="/risk-prediction"
               className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
             >
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">🤖 AIリスク予測</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100"><Sparkles className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />AIリスク予測</p>
               <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">業種・作業内容を入力して潜在リスクを推定。</p>
             </Link>
             <Link
               href="/strategy/plan-generator"
               className="group rounded-lg border border-slate-200 bg-white p-4 transition hover:border-emerald-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
             >
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">📋 年次計画ジェネレーター</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100"><ClipboardList className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />年次計画ジェネレーター</p>
               <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">本レポートの結果を年次安全衛生計画書に反映。</p>
             </Link>
           </CardGrid>

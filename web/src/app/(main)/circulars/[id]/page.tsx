@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, ExternalLink, FileText, Share2 } from "lucide-react";
+import { AlertTriangle, ChevronLeft, ExternalLink, FileText, Share2, Shield } from "lucide-react";
 import { JsonLd, legalDocumentSchema, breadcrumbSchema } from "@/components/json-ld";
 import { RelatedContent, type RelatedContentGroup } from "@/components/RelatedContent";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
@@ -114,7 +114,7 @@ export default async function CircularDetailPage({
   const linked = relatedFromNotice(notice, { limit: 6 });
   const relatedGroups: RelatedContentGroup[] = [
     {
-      heading: "📜 関連する他の通達・告示",
+      heading: "関連する他の通達・告示",
       description: "同カテゴリ・同キーワードで命令的拘束力の参考になる通達群",
       accent: "sky",
       moreHref: "/circulars",
@@ -122,14 +122,14 @@ export default async function CircularDetailPage({
       items: linked.notices,
     },
     {
-      heading: "⚠️ 関連する事故事例（追加）",
+      heading: "関連する事故事例（追加）",
       accent: "amber",
       moreHref: "/accidents",
       moreLabel: "事故DB",
       items: linked.accidents,
     },
     {
-      heading: "🛡 推奨保護具（自動マッチ）",
+      heading: "推奨保護具（自動マッチ）",
       accent: "emerald",
       moreHref: "/equipment-finder",
       moreLabel: "保護具AI",
@@ -223,7 +223,7 @@ export default async function CircularDetailPage({
       </header>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900">📄 本通達の概要</h2>
+        <h2 className="text-sm font-bold text-slate-900"><FileText className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />本通達の概要</h2>
         <p className="mt-2 text-sm leading-7 text-slate-700">
           {description}
           詳細な本文は出典元のPDFまたは厚労省サイトでご確認ください。
@@ -296,7 +296,7 @@ export default async function CircularDetailPage({
 
       {/* 関連事故事例 */}
       <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900">⚠️ 関連する事故事例</h2>
+        <h2 className="text-sm font-bold text-slate-900"><AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />関連する事故事例</h2>
         {relatedAccidents.length === 0 ? (
           <p className="mt-2 text-xs text-slate-500">該当事例は見つかりませんでした。</p>
         ) : (
@@ -332,7 +332,7 @@ export default async function CircularDetailPage({
 
       {/* 関連保護具 */}
       <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900">🛡 推奨保護具</h2>
+        <h2 className="text-sm font-bold text-slate-900"><Shield className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />推奨保護具</h2>
         {relatedEquipment.length === 0 ? (
           <p className="mt-2 text-xs text-slate-500">
             自動マッチで該当が無いため、

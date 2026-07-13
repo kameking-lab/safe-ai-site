@@ -1,4 +1,4 @@
-import { Radio, ExternalLink, Bot } from "lucide-react";
+import { Radio, ExternalLink, Bot, AlertTriangle, Newspaper } from "lucide-react";
 import {
   getRecentNewsFeedEntries,
   getNewsFeedCount,
@@ -51,7 +51,7 @@ export function NewsFeedSection() {
           />
           <div>
             <h2 className="text-base font-bold text-orange-900">
-              📰 報道・自動収集（AI判定ゲート通過）
+              <Newspaper className="mr-1 inline h-4 w-4 align-[-2px]" aria-hidden="true" />報道・自動収集（AI判定ゲート通過）
             </h2>
             <p className="mt-0.5 text-xs text-orange-900/80">
               NHK NEWS WEB および厚労省記者発表の RSS から労働災害関連の見出しを
@@ -137,7 +137,7 @@ export function NewsFeedSection() {
       </ul>
 
       <p className="mt-3 rounded-md border border-orange-200 bg-white px-2.5 py-1.5 text-[10px] text-orange-900/80">
-        ⚠ 本セクションのエントリは AI が自動判定して公開しています。
+        <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />本セクションのエントリは AI が自動判定して公開しています。
         正確性は出典元（NHK・厚労省）の一次ソースをご確認ください。
         引用法 32 条に基づき見出し + 出典URL + 独自要約のみを掲載し、本文は転載していません。
       </p>

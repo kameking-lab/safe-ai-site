@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { Menu } from "lucide-react";
 import { EarthquakeAlertModal } from "./earthquake-alert-modal";
 import { MapLegend } from "./map-legend";
 import { PinManager } from "./pin-manager";
@@ -328,7 +329,7 @@ export function SignageMapClient({ initialFullscreen = false }: { initialFullscr
               onClick={() => setSidePanelOpen(true)}
               className="absolute right-2 top-12 z-[400] inline-flex min-h-[44px] items-center rounded border border-slate-600 bg-slate-900/85 px-3 text-xs font-bold text-slate-100 shadow hover:bg-slate-800"
             >
-              ☰ パネルを開く
+              <Menu className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />パネルを開く
             </button>
           ) : null}
         </div>

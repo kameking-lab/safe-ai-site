@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { Search } from "lucide-react";
 import type { AccidentType } from "@/lib/types/domain";
 import { accidentTypeHref } from "@/lib/accidents/accident-visual";
 import { ACCIDENT_TYPE_SHORT } from "@/lib/accidents/accident-pictogram-map";
@@ -44,7 +45,10 @@ export function QuickAccidentSearch() {
 
   return (
     <section className="mt-3 rounded-2xl border border-rose-200 bg-rose-50/50 p-4 shadow-sm">
-      <h2 className="text-sm font-bold text-rose-900">🔎 事例をすぐ検索</h2>
+      <h2 className="text-sm font-bold text-rose-900">
+        <Search className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+        事例をすぐ検索
+      </h2>
       <p className="mt-0.5 text-[11px] text-rose-800/80">
         キーワードか事故の型を選ぶと、収録事例の絞り込み結果へ直行します。
       </p>

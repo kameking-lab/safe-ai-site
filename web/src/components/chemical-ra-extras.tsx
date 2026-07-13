@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ClipboardList } from "lucide-react";
 import { loadProfile, saveProfile } from "@/lib/company-profile";
 import { useLanguage } from "@/contexts/language-context";
 
@@ -91,9 +91,10 @@ export function ChemicalRaExtras() {
       <section className="rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-sm font-bold text-emerald-900">
+            <ClipboardList className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
             {isEn
-              ? "📋 Site chemicals list (saved on this device)"
-              : "📋 現場の化学物質リスト（端末内に保存）"}
+              ? "Site chemicals list (saved on this device)"
+              : "現場の化学物質リスト（端末内に保存）"}
           </h2>
           <span className="text-[11px] text-slate-500">
             {isEn ? `${list.length} items` : `${list.length}件`}

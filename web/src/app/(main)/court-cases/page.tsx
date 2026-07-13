@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
-import { Scale, ClipboardList, Database, MessageSquare, FileText } from "lucide-react";
+import { Scale, ClipboardList, Database, MessageSquare, FileText, Printer } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
@@ -66,13 +66,13 @@ export default function CourtCasesPage() {
               href="/court-cases/employer-liability"
               className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-800 hover:bg-rose-100 dark:border-rose-500/40 dark:bg-rose-500/10 dark:text-rose-200"
             >
-              ⚖️ 労災で会社・現場監督が問われる「3つの責任」ガイド
+              <Scale className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />労災で会社・現場監督が問われる「3つの責任」ガイド
             </Link>
             <Link
               href="/court-cases/print"
               className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
             >
-              🖨 全{COURT_CASE_COUNT}件をA4まとめ資料で印刷／PDF保存
+              <Printer className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />全{COURT_CASE_COUNT}件をA4まとめ資料で印刷／PDF保存
             </Link>
           </div>
         </header>

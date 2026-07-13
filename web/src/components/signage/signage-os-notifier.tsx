@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Bell } from "lucide-react";
 import { levelLabel } from "@/lib/jma/jma-data";
 import { levelFromWarningCode } from "@/lib/jma/parse-jma-warning";
 import {
@@ -95,7 +96,7 @@ export function SignageOsNotifier({ warnings, regionLabel }: Props) {
           : "border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800"
       }`}
     >
-      🔔 OS通知{enabled ? " ON" : ""}
+      <Bell className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />OS通知{enabled ? " ON" : ""}
     </button>
   );
 }

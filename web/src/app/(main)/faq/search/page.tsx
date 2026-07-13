@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, ExternalLink, ArrowLeft, Tag } from "lucide-react";
+import { Search, ExternalLink, ArrowLeft, Tag, ClipboardList } from "lucide-react";
 import { searchFAQs, ALL_FAQS } from "@/data/faqs";
 import { FAQ_CATEGORY_LABELS, type FAQCategory } from "@/types/faq";
 import type { FAQ } from "@/types/faq";
@@ -47,7 +47,8 @@ function SearchResultItem({ faq }: { faq: FAQ }) {
             <div className="mt-2 flex flex-wrap gap-1.5">
               {faq.relatedLaws.map((law) => (
                 <span key={law} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
-                  📋 {law}
+                  <ClipboardList className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+                  {law}
                 </span>
               ))}
             </div>

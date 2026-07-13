@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
+import { Printer } from "lucide-react";
 import { FEATURES, FEATURE_CATEGORIES, getFeaturesByCategory, type FeatureCategoryId } from "@/data/features-catalog";
 
 export function PrintFeaturesClient() {
@@ -69,7 +70,8 @@ export function PrintFeaturesClient() {
                 onClick={() => window.print()}
                 className="inline-flex min-h-[44px] items-center gap-1 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow hover:bg-emerald-700"
               >
-                🖨 印刷する / PDF保存
+                <Printer className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+                印刷する / PDF保存
               </button>
               <Link
                 href="/features"

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 import { buildDailyActions, todayIso, type DailyAction } from "@/lib/site-records/daily-actions";
 import { getAllPatrolRecords } from "@/lib/site-records/patrol-store";
 import { getNearMissReports } from "@/lib/site-records/nearmiss-store";
@@ -140,7 +141,7 @@ export function SignageSiteSafety({ data }: { data: SignageSiteSafetyData | null
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-[10px] font-semibold leading-snug text-slate-50 sm:text-xs lg:text-sm xl:text-lg">
-                    {a.hazardHigh && <span aria-hidden="true">⚠ </span>}
+                    {a.hazardHigh && <AlertTriangle className="mr-1 inline h-[1em] w-[1em] align-[-2px]" aria-hidden="true" />}
                     {a.title}
                   </p>
                   {(a.detail || a.due) && (

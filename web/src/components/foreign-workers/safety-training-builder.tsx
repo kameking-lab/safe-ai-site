@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Image as ImageIcon } from "lucide-react";
 import {
   MATERIAL_INDUSTRY_LABELS_JA,
   MATERIAL_INDUSTRY_LABELS_EN,
@@ -304,7 +305,8 @@ export function SafetyTrainingBuilder({
                     ))}
                     {b.illustrationHint && (
                       <p className="mt-1 text-[11px] text-slate-500">
-                        🖼 イラスト推奨：{b.illustrationHint}
+                        <ImageIcon className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+                        イラスト推奨：{b.illustrationHint}
                       </p>
                     )}
                   </div>

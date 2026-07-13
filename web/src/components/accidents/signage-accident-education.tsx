@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AlertTriangle } from "lucide-react";
 // C-1: 事故データセット（生約340KB）の静的 import を廃止。サイネージ表示後の
 // dynamic import で取得する（本コンポーネントは /signage 系で client 表示専用。
 // 静的同梱だと /signage へ Link する全ページのプリフェッチにも同データが乗る）。
@@ -44,7 +45,10 @@ export function SignageAccidentEducation({ lang = "ja", category }: { lang?: str
 
   return (
     <section className="mt-6 rounded-3xl bg-white/95 p-6 text-slate-900 shadow-2xl sm:p-8 print:shadow-none print:border print:border-slate-300">
-      <p className="text-lg font-bold text-rose-700 sm:text-xl">⚠ {heading}</p>
+      <p className="text-lg font-bold text-rose-700 sm:text-xl">
+        <AlertTriangle className="mr-1.5 inline h-5 w-5 align-[-3px]" aria-hidden="true" />
+        {heading}
+      </p>
       <ul className="mt-3 space-y-3">
         {cases.map((c) => (
           <li key={c.id} className="rounded-2xl border-l-8 border-rose-400 bg-rose-50 p-4">
