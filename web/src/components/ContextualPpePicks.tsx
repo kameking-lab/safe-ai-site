@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Shield } from "lucide-react";
 import { safetyGoodsCategories, safetyGoodsItems, type SafetyGoodsItem } from "@/data/mock/safety-goods";
 import { relatedSafetyGoodsByText } from "@/lib/related-safety-goods";
 import { useLanguage } from "@/contexts/language-context";
@@ -47,7 +47,7 @@ export function ContextualPpePicks({
 
   const resolvedHeading = resolveText(
     heading,
-    { ja: "🛡 この場面で必要な保護具", en: "🛡 PPE for this situation" },
+    { ja: "この場面で必要な保護具", en: "PPE for this situation" },
     isEn,
   );
   const resolvedDescription = resolveText(
@@ -66,7 +66,7 @@ export function ContextualPpePicks({
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-bold text-amber-900 sm:text-base">{resolvedHeading}</h3>
+          <h3 className="text-sm font-bold text-amber-900 sm:text-base"><Shield className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />{resolvedHeading}</h3>
           <p className="mt-1 text-[11px] leading-5 text-slate-600">{resolvedDescription}</p>
         </div>
         <Link
@@ -86,9 +86,13 @@ export function ContextualPpePicks({
               className="flex flex-col rounded-xl border border-slate-200 bg-white p-3 shadow-sm"
             >
               <div className="flex items-center gap-1.5">
-                <span className="text-base" aria-hidden="true">
-                  {cat?.icon ?? "🛡"}
-                </span>
+                {cat?.icon ? (
+                  <span className="text-base" aria-hidden="true">
+                    {cat.icon}
+                  </span>
+                ) : (
+                  <Shield className="h-4 w-4 text-slate-500" aria-hidden="true" />
+                )}
                 <span className="text-[10px] font-bold uppercase tracking-wide text-slate-500">
                   {cat?.name ?? (isEn ? "PPE" : "保護具")}
                 </span>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertOctagon, Volume2, X } from "lucide-react";
+import { AlertOctagon, AlertTriangle, CircleDot, Siren, Volume2, X } from "lucide-react";
 
 type Props = {
   jmaHeadline?: string | null;
@@ -81,7 +81,7 @@ export function SignageDangerAlert({ jmaHeadline, warnings }: Props) {
           onClick={handleManualAlert}
           className="min-h-[44px] rounded border border-rose-400 bg-rose-700 px-2.5 py-1 text-[11px] font-bold text-white hover:bg-rose-600 xl:text-sm"
         >
-          🚨 アラート発動（手動）
+          <Siren className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />アラート発動（手動）
         </button>
         <label className={`inline-flex min-h-[44px] items-center gap-1 text-[11px] xl:text-sm ${isHighRisk ? "text-rose-100" : "text-slate-200"}`}>
           <input
@@ -96,12 +96,12 @@ export function SignageDangerAlert({ jmaHeadline, warnings }: Props) {
             再読込後も localStorage で復元されるため「いつの間にかOFF」を防ぐ。 */}
         {autoSpeak && !isHighRisk && (
           <span className="inline-flex items-center gap-1 rounded bg-emerald-700 px-1.5 py-0.5 text-[10px] font-bold text-emerald-50 xl:text-sm">
-            🟢 警報を監視中
+            <CircleDot className="h-3 w-3" aria-hidden="true" />警報を監視中
           </span>
         )}
         {isHighRisk && (
           <span className="rounded bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white xl:text-sm">
-            ⚠ 高リスク警報を検知中
+            <AlertTriangle className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden="true" />高リスク警報を検知中
           </span>
         )}
       </div>
@@ -122,7 +122,7 @@ export function SignageDangerAlert({ jmaHeadline, warnings }: Props) {
             <X className="h-6 w-6 text-white" />
           </button>
           <AlertOctagon className="h-32 w-32 animate-pulse" />
-          <p className="mt-6 text-5xl font-extrabold sm:text-7xl">⚠ 危険イベント</p>
+          <p className="mt-6 text-5xl font-extrabold sm:text-7xl"><AlertTriangle className="mr-3 inline h-[1em] w-[1em] align-[-0.1em]" aria-hidden="true" />危険イベント</p>
           <p className="mt-4 max-w-3xl px-6 text-center text-2xl font-bold leading-snug sm:text-4xl">
             {jmaHeadline ?? "現場で危険事象が発生しました。直ちに作業を中断してください。"}
           </p>

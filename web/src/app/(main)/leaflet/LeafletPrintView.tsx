@@ -1,6 +1,14 @@
 ﻿"use client";
 
-import { Printer } from "lucide-react";
+import {
+  ClipboardList,
+  FileType,
+  FlaskConical,
+  FolderOpen,
+  GraduationCap,
+  Printer,
+  type LucideIcon,
+} from "lucide-react";
 import { SITE_STATS } from "@/data/site-stats";
 import { MHLW_MERGED_CHEMICAL_COUNT_SLIM as MHLW_MERGED_CHEMICAL_COUNT } from "@/lib/mhlw-chemicals-slim";
 
@@ -8,29 +16,29 @@ const SITE_URL = "https://www.anzen-ai-portal.jp";
 // QR コードは Google Chart API は廃止のため、qrserver を利用（CDN フェールセーフ用に画像でフォールバック）。
 const QR_URL = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(SITE_URL)}`;
 
-const FEATURES = [
+const FEATURES: { icon: LucideIcon; title: string; desc: string }[] = [
   {
-    icon: "📋",
+    icon: ClipboardList,
     title: "通達・法令の即時参照",
     desc: `労働安全衛生関連 ${SITE_STATS.lawArticleCount} 条文と通達を一次出典付きで横断検索。RAG型チャットボットで条文根拠を提示。`,
   },
   {
-    icon: "🗂",
+    icon: FolderOpen,
     title: "事故データベース",
     desc: `厚労省全件 ${SITE_STATS.accidentDbCount} 件・死亡災害 ${SITE_STATS.mhlwDeathsCount} 件を業種・原因別に可視化。`,
   },
   {
-    icon: "🧪",
+    icon: FlaskConical,
     title: "化学物質情報",
     desc: `${MHLW_MERGED_CHEMICAL_COUNT.toLocaleString()} 物質の SDS・濃度限度値・発がん性区分を横断検索。RA 入力ツールも併設。`,
   },
   {
-    icon: "📝",
+    icon: FileType,
     title: "KY 用紙のデジタル化",
     desc: "シンプル/詳細モード、業種別プリセット、音声入力、PDF 出力で現場の朝礼を即時化。",
   },
   {
-    icon: "🎓",
+    icon: GraduationCap,
     title: "Eラーニング・演習問題",
     desc: "特別教育・法定教育・労働衛生の動画教材と演習問題 1,000 問超。多様な働き方に配慮した設計。",
   },
@@ -100,9 +108,7 @@ export function LeafletPrintView() {
                   key={f.title}
                   className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3"
                 >
-                  <span className="text-xl leading-none" aria-hidden="true">
-                    {f.icon}
-                  </span>
+                  <f.icon className="h-5 w-5 shrink-0 text-emerald-700" aria-hidden="true" />
                   <div>
                     <p className="text-sm font-bold text-slate-900">{f.title}</p>
                     <p className="mt-0.5 text-[11px] leading-5 text-slate-700">{f.desc}</p>

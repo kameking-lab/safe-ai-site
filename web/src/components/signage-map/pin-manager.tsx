@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Mail } from "lucide-react";
 import type { SignagePin } from "./signage-map-leaflet";
 
 type Props = {
@@ -131,7 +132,7 @@ export function PinManager({
               <p className="text-[10px] text-slate-400">
                 {p.lat.toFixed(4)}, {p.lng.toFixed(4)}
               </p>
-              {p.email ? <p className="text-[10px] text-emerald-300">📧 {p.email}</p> : null}
+              {p.email ? <p className="text-[10px] text-emerald-300"><Mail className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden="true" />{p.email}</p> : null}
             </button>
             <button
               type="button"

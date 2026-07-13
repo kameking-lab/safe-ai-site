@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { History, Mic, Trash2, Link2, FileText, FileType, FileJson, Check, Copy, AlertTriangle, BookOpen, Paperclip, Library, Search, Square, RotateCcw, Lightbulb, X } from "lucide-react";
+import { History, Mic, Trash2, Link2, FileText, FileType, FileJson, Check, Copy, AlertTriangle, BookOpen, Paperclip, Library, Search, Square, RotateCcw, Lightbulb, X, Download, Upload } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import type { ChatbotSource, FollowupSuggestion } from "@/app/api/chatbot/route";
 import type { NoticeHit } from "@/lib/notice-search";
@@ -715,7 +715,7 @@ export function ChatbotPanel() {
                 aria-expanded={exportOpen}
                 className="flex min-h-[44px] items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
               >
-                ⬇ エクスポート ▾
+                <Download className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />エクスポート ▾
               </button>
               {exportOpen && (
                 <div className="absolute right-0 top-full z-20 mt-1 w-44 rounded-lg border border-slate-200 bg-white shadow-lg">
@@ -741,7 +741,7 @@ export function ChatbotPanel() {
                     <FileJson className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />JSON (.json)
                   </button>
                   <label className="flex min-h-[44px] w-full cursor-pointer items-center px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50 border-t border-slate-100">
-                    ⬆ JSONをインポート
+                    <Upload className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />JSONをインポート
                     <input type="file" accept=".json" className="sr-only" onChange={handleImportJSON} />
                   </label>
                 </div>

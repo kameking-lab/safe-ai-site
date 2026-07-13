@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
+import { BarChart3, ClipboardList, Siren, Sparkles, Tag } from "lucide-react";
 import { AnalyticsDashboard } from "./AnalyticsDashboard";
 import { getAnalyticsAggregates } from "@/lib/accidents-analytics";
 import { JsonLd } from "@/components/json-ld";
@@ -107,7 +108,7 @@ export default function AccidentsAnalyticsPage() {
                 href="/accidents"
                 className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
               >
-                🚨 事故データベース
+                <Siren className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />事故データベース
               </Link>
             </li>
             <li>
@@ -115,7 +116,7 @@ export default function AccidentsAnalyticsPage() {
                 href="/accidents-reports"
                 className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
               >
-                🏷 業種別レポート
+                <Tag className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />業種別レポート
               </Link>
             </li>
             <li>
@@ -123,7 +124,7 @@ export default function AccidentsAnalyticsPage() {
                 href="/stats"
                 className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
               >
-                📊 サイト利用統計
+                <BarChart3 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />サイト利用統計
               </Link>
             </li>
             <li>
@@ -131,7 +132,7 @@ export default function AccidentsAnalyticsPage() {
                 href="/risk-prediction"
                 className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
               >
-                🤖 AIリスク予測
+                <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />AIリスク予測
               </Link>
             </li>
             <li>
@@ -139,7 +140,7 @@ export default function AccidentsAnalyticsPage() {
                 href="/ky"
                 className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-slate-700 hover:bg-slate-50"
               >
-                📝 KY用紙
+                <ClipboardList className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />KY用紙
               </Link>
             </li>
           </ul>

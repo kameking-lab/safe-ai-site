@@ -1,5 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import {
+  FlaskConical,
+  Factory,
+  HardHat,
+  HeartPulse,
+  Laptop,
+  Store,
+  TreePine,
+  Truck,
+  Utensils,
+  type LucideIcon,
+} from "lucide-react";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/features/use-cases" },
@@ -12,7 +24,7 @@ type UseCase = { title: string; problem: string; solution: string; relatedFeatur
 
 type Industry = {
   slug: string;
-  emoji: string;
+  icon: LucideIcon;
   name: string;
   hookline: string;
   cases: UseCase[];
@@ -21,7 +33,7 @@ type Industry = {
 const INDUSTRIES: Industry[] = [
   {
     slug: "construction",
-    emoji: "🏗",
+    icon: HardHat,
     name: "建設業",
     hookline: "墜落・はさまれ・重機接触などの重篤災害が多い業種。KY・特別教育・元方安全衛生管理が要。",
     cases: [
@@ -56,7 +68,7 @@ const INDUSTRIES: Industry[] = [
   },
   {
     slug: "manufacturing",
-    emoji: "🏭",
+    icon: Factory,
     name: "製造業",
     hookline: "化学物質管理・はさまれ・転倒対策が中心。改正安衛法（2024年4月）の対応が急務。",
     cases: [
@@ -91,7 +103,7 @@ const INDUSTRIES: Industry[] = [
   },
   {
     slug: "healthcare",
-    emoji: "🏥",
+    icon: HeartPulse,
     name: "医療・福祉",
     hookline: "腰痛・感染対策・ハラスメント対策・夜勤負荷など、人を支える人を守る視点が重要。",
     cases: [
@@ -125,7 +137,7 @@ const INDUSTRIES: Industry[] = [
   },
   {
     slug: "transport",
-    emoji: "🚛",
+    icon: Truck,
     name: "運輸・物流",
     hookline: "交通労働災害・荷役作業の腰痛・長時間労働対策が中心。改善基準告示の理解必須。",
     cases: [
@@ -159,7 +171,7 @@ const INDUSTRIES: Industry[] = [
   },
   {
     slug: "it",
-    emoji: "💻",
+    icon: Laptop,
     name: "IT・情報通信",
     hookline: "VDT・テレワーク・メンタル不調・ストレスチェックが主要テーマ。",
     cases: [
@@ -194,7 +206,7 @@ const INDUSTRIES: Industry[] = [
   },
   {
     slug: "chemical",
-    emoji: "⚗",
+    icon: FlaskConical,
     name: "化学",
     hookline: "改正安衛法（2024年4月施行）の化学物質管理が業種を問わず必須。化学業界はその先端。",
     cases: [
@@ -229,7 +241,7 @@ const INDUSTRIES: Industry[] = [
   },
   {
     slug: "forestry",
-    emoji: "🌲",
+    icon: TreePine,
     name: "林業",
     hookline: "重篤災害発生率が産業中で高く、チェーンソー・伐木作業の特別教育が要。",
     cases: [
@@ -253,7 +265,7 @@ const INDUSTRIES: Industry[] = [
   },
   {
     slug: "food",
-    emoji: "🍱",
+    icon: Utensils,
     name: "食品製造・外食",
     hookline: "切創・転倒・腰痛・熱中症が中心。食品衛生と安全衛生の両立が課題。",
     cases: [
@@ -287,7 +299,7 @@ const INDUSTRIES: Industry[] = [
   },
   {
     slug: "service",
-    emoji: "🛍",
+    icon: Store,
     name: "サービス業（小売・宿泊）",
     hookline: "転倒・カスハラ・腰痛・接客時のメンタル負荷が中心テーマ。",
     cases: [
@@ -358,7 +370,7 @@ export default function UseCasesPage() {
               href={`#${ind.slug}`}
               className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
             >
-              <span aria-hidden>{ind.emoji}</span>
+              <ind.icon className="h-4 w-4" aria-hidden="true" />
               {ind.name}
             </a>
           ))}
@@ -371,7 +383,7 @@ export default function UseCasesPage() {
           <article key={ind.slug} id={ind.slug} className="scroll-mt-24">
             <header className="mb-4 rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-50 to-white p-5 sm:p-6">
               <div className="flex items-start gap-3">
-                <span className="text-3xl" aria-hidden>{ind.emoji}</span>
+                <ind.icon className="h-8 w-8 shrink-0 text-emerald-700" aria-hidden="true" />
                 <div>
                   <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">{ind.name}</h2>
                   <p className="mt-1 text-sm leading-relaxed text-slate-700">{ind.hookline}</p>

@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle, BarChart3 } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 
 interface AccidentsMetaInfoProps {
@@ -88,7 +89,7 @@ export function AccidentsPreliminaryBanner() {
   const isEn = language === "en";
   return (
     <p className="mt-1 rounded-md border border-orange-200 bg-orange-50 px-2.5 py-1.5 text-[11px] text-orange-800">
-      ⚠{" "}
+      <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
       <strong>
         {isEn
           ? "2025-2026 cases include preliminary values."
@@ -118,7 +119,8 @@ export function AccidentsAnalyticsBanner({ totalLabel }: { totalLabel: string })
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-emerald-900 sm:text-base">
-            {isEn ? "📊 Accident statistics dashboard" : "📊 事故統計ダッシュボード"}
+            <BarChart3 className="mr-1 inline h-4 w-4 align-[-2px]" aria-hidden="true" />
+            {isEn ? "Accident statistics dashboard" : "事故統計ダッシュボード"}
           </p>
           <p className="mt-0.5 text-[11px] text-emerald-800 sm:text-xs">
             {isEn

@@ -78,7 +78,7 @@ import {
   type KyApproval,
 } from "@/lib/ky/approval";
 import { Mascot } from "@/components/mascot";
-import { Share2, CloudDownload, Monitor, ClipboardCopy, Search, Printer, FlaskConical, AlertTriangle, MessageSquare, Map, Sparkles, Star } from "lucide-react";
+import { Share2, CloudDownload, Monitor, ClipboardCopy, Search, Printer, FlaskConical, AlertTriangle, MessageSquare, Map, Sparkles, Star, RotateCcw, Calculator } from "lucide-react";
 
 const AUTOSAVE_KEY = "ky-record";
 const ZOOM_MIN = 0.6;
@@ -734,7 +734,7 @@ export function KyPaperView() {
         <p className="mb-1.5 text-[11px] font-bold text-slate-400">記録</p>
         <div className="mb-3 space-y-1.5">
           <button type="button" role="menuitem" onClick={() => runAction(handleCopyLatest)} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-amber-200 bg-amber-50/60 px-4 py-2.5 text-left hover:bg-amber-100">
-            <span className="text-sm font-bold text-amber-800">↻ 前回を複製</span>
+            <span className="text-sm font-bold text-amber-800"><RotateCcw className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />前回を複製</span>
             <span className="text-[11px] font-normal text-amber-600">前回のKYを今日の分として引き継ぐ</span>
           </button>
         </div>
@@ -777,7 +777,7 @@ export function KyPaperView() {
             <div className="space-y-1.5">
               {calcHint && (
                 <Link href={`/construction-calc/${calcHint.slug}`} role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50/60 px-4 py-3 text-left text-sm font-semibold text-emerald-800 hover:bg-emerald-100" title={`この作業に関連する建設計算（${calcHint.title}）を法令根拠つきで計算`}>
-                  🧮 {calcHint.title}を計算する →
+                  <Calculator className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />{calcHint.title}を計算する →
                 </Link>
               )}
               {chemHint.matched && (
@@ -953,7 +953,7 @@ export function KyPaperView() {
                 title="前回のKYを当日分として複製（現場・作業・危険・対策・参加者を引き継ぎ、日付は今日に）"
                 className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-800 hover:bg-amber-100"
               >
-                ↻ 前回を複製
+                <RotateCcw className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden="true" />前回を複製
               </button>
             )}
           </div>

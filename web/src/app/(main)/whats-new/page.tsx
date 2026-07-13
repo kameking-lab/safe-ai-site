@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Mail, Rss } from "lucide-react";
 import { PageContainer } from "@/components/layout";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { ogImageUrl } from "@/lib/og-url";
@@ -56,16 +57,16 @@ export default function WhatsNewPage() {
           </p>
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs">
             <a href="/feed/news.xml" className="font-semibold text-orange-700 hover:underline">
-              📡 新着すべて（RSS）
+              <Rss className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />新着すべて（RSS）
             </a>
             <a href="/feed/law-revisions.xml" className="font-semibold text-orange-700 hover:underline">
-              📡 法改正だけ（RSS）
+              <Rss className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />法改正だけ（RSS）
             </a>
             <a href="/feed/accident-reports.xml" className="font-semibold text-orange-700 hover:underline">
-              📡 事故速報だけ（RSS）
+              <Rss className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />事故速報だけ（RSS）
             </a>
             <a href="/feed/serious-cases.xml" className="font-semibold text-orange-700 hover:underline">
-              📡 重大災害事例だけ（RSS）
+              <Rss className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />重大災害事例だけ（RSS）
             </a>
             <Link href="/laws" className="font-semibold text-emerald-700 hover:underline">
               法改正一覧へ →
@@ -77,7 +78,7 @@ export default function WhatsNewPage() {
               重大災害事例ブラウザへ →
             </Link>
             <Link href="/notifications" className="font-semibold text-emerald-700 hover:underline">
-              ✉ メールで受け取る（無料・登録はメアドのみ）
+              <Mail className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />メールで受け取る（無料・登録はメアドのみ）
             </Link>
           </div>
           {/* P2-3: 反映ラグの可視化（最終取得日時） */}

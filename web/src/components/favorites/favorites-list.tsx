@@ -87,7 +87,7 @@ export function FavoritesList() {
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
         <p className="text-sm font-bold text-amber-900">まだお気に入りはありません</p>
         <p className="mt-2 text-xs leading-relaxed text-amber-800">
-          /law-search の条文カードや /circulars の通達一覧で「⭐ お気に入り」を押すと、ここに保存されます。
+          /law-search の条文カードや /circulars の通達一覧で「<Star className="inline h-3.5 w-3.5 align-[-2px] text-amber-500" aria-hidden="true" /> お気に入り」を押すと、ここに保存されます。
           最大 50 件まで端末内 (localStorage) に保持。
         </p>
         <div className="mt-3 flex flex-wrap gap-2">

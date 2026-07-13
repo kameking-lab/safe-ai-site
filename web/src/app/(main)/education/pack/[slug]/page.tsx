@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Calculator } from "lucide-react";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { PageJsonLd } from "@/components/page-json-ld";
 import { EduSlideDeck } from "@/components/education-pack/edu-slide-deck";
@@ -124,7 +125,8 @@ export default async function EduPackDeckPage({ params }: { params: Params }) {
               href={`/construction-calc/${calc.slug}`}
               className="mt-3 inline-flex min-h-[44px] items-center rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white hover:bg-emerald-700"
             >
-              🧮 {calc.title}を開く
+              <Calculator className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              {calc.title}を開く
             </Link>
           </div>
         );

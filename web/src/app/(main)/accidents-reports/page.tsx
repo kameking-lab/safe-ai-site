@@ -1,7 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { ArrowRight, GitCompare } from "lucide-react";
+import {
+  ArrowRight,
+  BarChart3,
+  BookOpen,
+  ClipboardList,
+  GitCompare,
+  MessageSquare,
+  Siren,
+  Sparkles,
+} from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { AccidentHubNav } from "@/components/accident-hub-nav";
 import { Section } from "@/components/layout/section";
@@ -225,43 +234,43 @@ export default function AccidentsReportsHubPage() {
               href="/guides/industry-accident-reports"
               className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
             >
-              📘 ガイド：労働災害 業種別 分析レポートの読み方
+              <BookOpen className="h-4 w-4 shrink-0" aria-hidden="true" />ガイド：労働災害 業種別 分析レポートの読み方
             </Link>
             <Link
               href="/strategy/plan-generator"
               className="inline-flex items-center gap-1 rounded-full border border-purple-200 bg-purple-50 px-3 py-1.5 text-sm font-semibold text-purple-800 hover:bg-purple-100 dark:border-purple-800 dark:bg-purple-950/40 dark:text-purple-200"
             >
-              📝 年次安全衛生計画ジェネレーター
+              <ClipboardList className="h-4 w-4 shrink-0" aria-hidden="true" />年次安全衛生計画ジェネレーター
             </Link>
             <Link
               href="/chatbot"
               className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-semibold text-blue-800 hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-200"
             >
-              💬 安衛法AIチャットボット
+              <MessageSquare className="h-4 w-4 shrink-0" aria-hidden="true" />安衛法AIチャットボット
             </Link>
             <Link
               href="/accidents"
               className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              🚨 事故データベース（全件）
+              <Siren className="h-4 w-4 shrink-0" aria-hidden="true" />事故データベース（全件）
             </Link>
             <Link
               href="/accidents-analytics"
               className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              📊 事故統計ダッシュボード（25軸）
+              <BarChart3 className="h-4 w-4 shrink-0" aria-hidden="true" />事故統計ダッシュボード（25軸）
             </Link>
             <Link
               href="/risk-prediction"
               className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              🤖 AIリスク予測
+              <Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />AIリスク予測
             </Link>
             <Link
               href="/ky"
               className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              📝 KY用紙を起票
+              <ClipboardList className="h-4 w-4 shrink-0" aria-hidden="true" />KY用紙を起票
             </Link>
           </Cluster>
         </Section>

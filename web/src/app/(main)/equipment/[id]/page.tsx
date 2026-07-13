@@ -1,7 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, ExternalLink } from "lucide-react";
+import {
+  AlertTriangle,
+  ChevronLeft,
+  ExternalLink,
+  Lightbulb,
+  ScrollText,
+  Shield,
+  ShoppingCart,
+  Star,
+} from "lucide-react";
 import { JsonLd, breadcrumbSchema } from "@/components/json-ld";
 import { AffiliateLink } from "@/components/affiliate-link";
 import { RelatedContent, type RelatedContentGroup } from "@/components/RelatedContent";
@@ -127,21 +136,21 @@ export default async function EquipmentDetailPage({
   const linked = relatedFromEquipment(item, { limit: 6 });
   const relatedGroupsExt: RelatedContentGroup[] = [
     {
-      heading: "⚠️ さらに参考になる事故事例",
+      heading: "さらに参考になる事故事例",
       accent: "amber",
       moreHref: "/accidents",
       moreLabel: "事故DB",
       items: linked.accidents,
     },
     {
-      heading: "📜 関連する通達・告示（追加）",
+      heading: "関連する通達・告示（追加）",
       accent: "sky",
       moreHref: "/circulars",
       moreLabel: "通達一覧",
       items: linked.notices,
     },
     {
-      heading: "🛡 同カテゴリの他保護具",
+      heading: "同カテゴリの他保護具",
       accent: "emerald",
       moreHref: "/equipment-finder",
       moreLabel: "保護具AI",
@@ -233,7 +242,7 @@ export default async function EquipmentDetailPage({
             <div>
               <dt className="inline font-bold text-slate-700">評価: </dt>
               <dd className="inline">
-                ★ {item.rating.toFixed(1)}（参考値・{item.reviewCount?.toLocaleString() ?? "—"}件）
+                <Star className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />{item.rating.toFixed(1)}（参考値・{item.reviewCount?.toLocaleString() ?? "—"}件）
               </dd>
             </div>
           ) : null}
@@ -246,14 +255,14 @@ export default async function EquipmentDetailPage({
 
       {item.recommendReason ? (
         <section className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5">
-          <h2 className="text-sm font-bold text-emerald-900">💡 推奨理由</h2>
+          <h2 className="text-sm font-bold text-emerald-900"><Lightbulb className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />推奨理由</h2>
           <p className="mt-2 text-sm leading-7 text-slate-800">{item.recommendReason}</p>
         </section>
       ) : null}
 
       {/* 購入リンク */}
       <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900">🛒 購入リンク</h2>
+        <h2 className="text-sm font-bold text-slate-900"><ShoppingCart className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />購入リンク</h2>
         <p className="mt-1 text-[11px] text-slate-500">
           ※ もしもアフィリエイト経由のプレースホルダーリンクです。発生報酬は研究プロジェクト運営費に充てます。
         </p>
@@ -288,7 +297,7 @@ export default async function EquipmentDetailPage({
 
       {/* 関連通達 */}
       <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900">📜 関連する厚労省通達・告示</h2>
+        <h2 className="text-sm font-bold text-slate-900"><ScrollText className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />関連する厚労省通達・告示</h2>
         {item.regulations && item.regulations.length > 0 ? (
           <ul className="mt-2 list-disc pl-4 text-[12px] leading-6 text-slate-700">
             {item.regulations.map((r, i) => (
@@ -322,7 +331,7 @@ export default async function EquipmentDetailPage({
 
       {/* 関連事故事例 */}
       <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900">⚠️ 関連する事故事例</h2>
+        <h2 className="text-sm font-bold text-slate-900"><AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />関連する事故事例</h2>
         {relatedAccidents.length === 0 ? (
           <p className="mt-2 text-xs text-slate-500">関連事例は見つかりませんでした。</p>
         ) : (
@@ -353,7 +362,7 @@ export default async function EquipmentDetailPage({
 
       {/* 同カテゴリ他商品 */}
       <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900">🛡 同カテゴリの他商品</h2>
+        <h2 className="text-sm font-bold text-slate-900"><Shield className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />同カテゴリの他商品</h2>
         {related.length === 0 ? (
           <p className="mt-2 text-xs text-slate-500">他の商品は見つかりませんでした。</p>
         ) : (

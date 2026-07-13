@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { FlaskConical, Plus, X, Loader2, Save, Sparkles } from "lucide-react";
+import { FlaskConical, Plus, X, Loader2, Save, Sparkles, Printer, AlertTriangle } from "lucide-react";
 import type { MergedChemical } from "@/lib/mhlw-chemicals";
 import { searchMergedChemicalsSlim as searchMergedChemicals } from "@/lib/mhlw-chemicals-slim";
 import { REGULATION_TAGS, normalizeTags } from "@/lib/regulation-tag-labels";
@@ -145,7 +145,7 @@ export function MixtureRaPanel() {
               onClick={() => window.print()}
               className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
             >
-              🖨 印刷
+              <Printer className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />印刷
             </button>
           </div>
         )}
@@ -223,7 +223,7 @@ export function MixtureRaPanel() {
             合成リスク集約（{agg.componentCount}成分 / 合計 {agg.totalPercent}%）
           </p>
           {agg.warnings.map((w) => (
-            <p key={w} className="text-xs font-semibold text-amber-700">⚠ {w}</p>
+            <p key={w} className="text-xs font-semibold text-amber-700"><AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />{w}</p>
           ))}
           {agg.hasCarcinogen && (
             <p className="rounded bg-rose-50 px-2 py-1 text-xs font-bold text-rose-700">

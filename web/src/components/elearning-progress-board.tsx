@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, Clock, GraduationCap } from "lucide-react";
+import { CheckCircle2, Clock, GraduationCap, Lightbulb } from "lucide-react";
 import {
   buildProgressSummary,
   loadProgressList,
@@ -122,7 +122,8 @@ export function ElearningProgressBoard() {
 
       {summary.inProgressThemes > 0 && (
         <p className="mt-3 rounded-md border border-sky-200 bg-sky-50 px-2.5 py-1.5 text-[11px] text-sky-900">
-          💡 進行中のテーマ {summary.inProgressThemes} 件あります。間違えた問題を再表示して全問正答を目指せます。
+          <Lightbulb className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+          進行中のテーマ {summary.inProgressThemes} 件あります。間違えた問題を再表示して全問正答を目指せます。
         </p>
       )}
     </section>

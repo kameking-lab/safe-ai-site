@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { BarChart3, Lightbulb } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -298,7 +299,7 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
         <section className="rounded-xl border-2 border-emerald-300 bg-emerald-50/70 p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="flex items-center gap-1.5 text-sm font-bold text-emerald-900 sm:text-base">
-              📊 まず、あなたの業種の要点を見る
+              <BarChart3 className="h-4 w-4 shrink-0" aria-hidden="true" />まず、あなたの業種の要点を見る
             </h2>
             <span className="text-[11px] text-emerald-700">3秒で「自業種で多い事故」が分かります</span>
           </div>
@@ -380,7 +381,7 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
 
               {insight.topTypes.length > 0 ? (
                 <p className="rounded-lg bg-emerald-100/60 px-3 py-2 text-xs font-semibold leading-relaxed text-emerald-900">
-                  💡 {insight.industry}でまず備えるべきは「{insight.topTypes[0].name}」。
+                  <Lightbulb className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />{insight.industry}でまず備えるべきは「{insight.topTypes[0].name}」。
                   KY・打合せ書ではこの型を最初の危険ポイントに。
                   <Link href={`/accidents?industry=${encodeURIComponent(insight.industry)}`} className="ml-1 underline hover:text-emerald-700">
                     {insight.industry}の事故事例を見る →
@@ -838,7 +839,7 @@ export function AnalyticsDashboardImpl({ aggregates }: AnalyticsDashboardProps) 
 
         {/* ===== Disclaimer footer ===== */}
         <section className="rounded-md border border-slate-200 bg-slate-50 p-3 text-[11px] text-slate-600 sm:text-xs">
-          <p className="font-semibold text-slate-800">📊 データソースと制限</p>
+          <p className="font-semibold text-slate-800"><BarChart3 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />データソースと制限</p>
           <ul className="mt-1 list-disc space-y-0.5 pl-5">
             <li>
               <strong>統合データセット</strong>（curated {formatNumber(aggregates.meta.curatedCases)} 件 ＋ 厚労省死亡災害DB {formatNumber(aggregates.meta.mhlwDeathsCount)} 件 / 2019〜2024）を主軸に集計。

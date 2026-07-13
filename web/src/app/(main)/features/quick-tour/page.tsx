@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { Timer, Smartphone } from "lucide-react";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/features/quick-tour" },
@@ -104,10 +105,12 @@ export default function QuickTourPage() {
         </p>
         <div className="mt-4 flex flex-wrap justify-center gap-2 text-xs">
           <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 font-semibold text-emerald-700">
-            ⏱ 所要時間：約5分
+            <Timer className="h-3.5 w-3.5" aria-hidden="true" />
+            所要時間：約5分
           </span>
           <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 font-semibold text-slate-700">
-            📱 スマホ・PC両対応
+            <Smartphone className="h-3.5 w-3.5" aria-hidden="true" />
+            スマホ・PC両対応
           </span>
           <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 font-semibold text-blue-700">
             登録不要で試せる機能あり

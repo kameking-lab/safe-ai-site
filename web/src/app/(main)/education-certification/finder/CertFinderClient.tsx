@@ -8,6 +8,7 @@ import {
   ChevronRight,
   RotateCcw,
   AlertCircle,
+  AlertTriangle,
   CheckCircle2,
   Clock,
   Scale,
@@ -140,7 +141,8 @@ function ResultCard({ result }: { result: RequiredCertResult }) {
 
         {cert.notes && (
           <p className="mt-1.5 rounded-md bg-amber-50 px-2 py-1.5 text-[11px] text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-            ⚠ {cert.notes}
+            <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+            {cert.notes}
           </p>
         )}
 

@@ -11,19 +11,20 @@ import {
 } from "@/data/features-catalog";
 import { useLanguage } from "@/contexts/language-context";
 import { Mascot } from "@/components/mascot";
+import { HardHat, Printer, Scale, Timer, type LucideIcon } from "lucide-react";
 
-const QUICK_LINKS_JA = [
-  { href: "/features/quick-tour", label: "5分ツアー", emoji: "⏱" },
-  { href: "/features/use-cases", label: "業種別の使い方", emoji: "🏗" },
-  { href: "/features/comparison", label: "従来比較", emoji: "⚖" },
-  { href: "/features/print", label: "印刷用一覧", emoji: "🖨" },
+const QUICK_LINKS_JA: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "/features/quick-tour", label: "5分ツアー", icon: Timer },
+  { href: "/features/use-cases", label: "業種別の使い方", icon: HardHat },
+  { href: "/features/comparison", label: "従来比較", icon: Scale },
+  { href: "/features/print", label: "印刷用一覧", icon: Printer },
 ];
 
-const QUICK_LINKS_EN = [
-  { href: "/features/quick-tour", label: "5-min tour", emoji: "⏱" },
-  { href: "/features/use-cases", label: "Use cases by industry", emoji: "🏗" },
-  { href: "/features/comparison", label: "Comparison", emoji: "⚖" },
-  { href: "/features/print", label: "Printable list", emoji: "🖨" },
+const QUICK_LINKS_EN: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "/features/quick-tour", label: "5-min tour", icon: Timer },
+  { href: "/features/use-cases", label: "Use cases by industry", icon: HardHat },
+  { href: "/features/comparison", label: "Comparison", icon: Scale },
+  { href: "/features/print", label: "Printable list", icon: Printer },
 ];
 
 export function FeaturesIndexClient() {
@@ -60,7 +61,7 @@ export function FeaturesIndexClient() {
               href={link.href}
               className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-50"
             >
-              <span aria-hidden>{link.emoji}</span>
+              <link.icon className="h-4 w-4" aria-hidden="true" />
               {link.label}
             </Link>
           ))}

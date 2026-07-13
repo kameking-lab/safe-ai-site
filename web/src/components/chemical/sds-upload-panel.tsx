@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
-import { Upload, FileText, Loader2, ArrowRight } from "lucide-react";
+import { Upload, FileText, Loader2, ArrowRight, Globe } from "lucide-react";
 import type { SdsExtraction } from "@/lib/chemical/sds-extraction";
 import {
   CHEM_LANGS,
@@ -90,7 +90,7 @@ export function SdsUploadPanel() {
           {L.sdsTitle}
         </h2>
         <label className="flex items-center gap-1 text-xs text-slate-500">
-          <span aria-hidden>🌐</span>
+          <Globe className="h-3.5 w-3.5" aria-hidden="true" />
           <select
             value={lang}
             onChange={(e) => {

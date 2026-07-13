@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { HardHat, History } from "lucide-react";
 import {
   INDUSTRY_LABELS,
   MEASURE_LABELS,
@@ -241,7 +242,7 @@ export function PlanGeneratorForm() {
           href="/for/construction"
           className="block rounded-lg border border-emerald-300 bg-emerald-50/70 px-3 py-2 text-xs text-emerald-900 hover:bg-emerald-100"
         >
-          🏗 建設業の関連資料 (KY・朝礼・法令早見・建設業頻出20物質) は <span className="font-bold underline">/for/construction</span> に集約されています
+          <HardHat className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />建設業の関連資料 (KY・朝礼・法令早見・建設業頻出20物質) は <span className="font-bold underline">/for/construction</span> に集約されています
         </a>
       )}
       <div className="grid gap-4 sm:grid-cols-2">
@@ -480,7 +481,7 @@ function RebuildFromLastButton() {
       className="flex items-center justify-between gap-3 rounded-lg border border-violet-300 bg-violet-50 px-3 py-2 text-xs font-semibold text-violet-900 hover:bg-violet-100"
     >
       <span>
-        🕒 直近の計画を開く: <span className="font-bold">{latestLabel}</span>
+        <History className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />直近の計画を開く: <span className="font-bold">{latestLabel}</span>
       </span>
       <span className="rounded-full bg-violet-200 px-2 py-0.5 text-[10px] font-bold text-violet-900">
         昨年から作成

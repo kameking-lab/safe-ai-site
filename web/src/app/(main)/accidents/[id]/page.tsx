@@ -1,7 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, ExternalLink, AlertTriangle, ShieldCheck, Building2, Calendar } from "lucide-react";
+import {
+  ChevronLeft,
+  ExternalLink,
+  AlertTriangle,
+  FileText,
+  Library,
+  RotateCcw,
+  ShieldCheck,
+  Building2,
+  Calendar,
+} from "lucide-react";
 import { JsonLd, breadcrumbSchema } from "@/components/json-ld";
 import { AccidentActionBar } from "@/components/accidents/action-bar";
 import { ContextualPpePicks } from "@/components/ContextualPpePicks";
@@ -146,7 +156,7 @@ export default async function AccidentDetailPage({
 
       {/* 事故概要 */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-sm font-bold text-slate-900">📄 事故概要</h2>
+        <h2 className="text-sm font-bold text-slate-900"><FileText className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />事故概要</h2>
         <p className="mt-2 text-sm leading-7 text-slate-700">{accident.summary}</p>
       </section>
 
@@ -194,7 +204,7 @@ export default async function AccidentDetailPage({
       {/* 出典 */}
       {source && (
         <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h2 className="text-sm font-bold text-slate-900">📚 出典</h2>
+          <h2 className="text-sm font-bold text-slate-900"><Library className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />出典</h2>
           <div className="mt-2 flex flex-wrap gap-2">
             <span className="text-xs text-slate-600">出典: {source.site}</span>
             {source.url && (
@@ -216,14 +226,14 @@ export default async function AccidentDetailPage({
       <ContextualPpePicks
         context={`${accident.title} ${accident.type} ${accident.workCategory}`}
         fallbackCategoryIds={related.categories.length > 0 ? related.categories.slice(0, 3) : ["head-protection", "fall-protection", "hand-foot"]}
-        heading="🛡 この事故の再発防止に有効な保護具"
+        heading="この事故の再発防止に有効な保護具"
         description="事故タイプ・業種から推奨される保護具カテゴリを抽出しました。"
       />
 
       {/* 類似事例 */}
       {similar.length > 0 && (
         <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <h2 className="text-sm font-bold text-slate-900">🔁 類似する事故事例</h2>
+          <h2 className="text-sm font-bold text-slate-900"><RotateCcw className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />類似する事故事例</h2>
           <ul className="mt-3 space-y-2">
             {similar.map((c) => (
               <li key={c.id} className="rounded-lg border border-slate-100 bg-slate-50 p-3">

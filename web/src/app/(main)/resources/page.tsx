@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Library } from "lucide-react";
+import { ArrowLeft, Library, AlertTriangle } from "lucide-react";
 import { ResourcesClient } from "@/components/resources-client";
 import { PageContainer } from "@/components/layout";
 import { LegalDocBadgeLegend } from "@/components/LegalDocBadge";
@@ -77,7 +77,8 @@ export default function ResourcesPage() {
           <Stat label="リーフレット" value={counts.leaflet} color="bg-rose-50 text-rose-900 border-rose-200" />
         </div>
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-          ⚠️ 本ページの全エントリは一次ソース（厚労省／安全衛生情報センター）からの自動収集です。
+          <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+          本ページの全エントリは一次ソース（厚労省／安全衛生情報センター）からの自動収集です。
           実務適用前に必ず原文を確認してください。
         </div>
         <LegalDocBadgeLegend />

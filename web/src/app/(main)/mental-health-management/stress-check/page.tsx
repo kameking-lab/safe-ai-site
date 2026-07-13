@@ -5,6 +5,7 @@ import {
   AlertCircle,
   ListChecks,
   ChevronLeft,
+  Clock,
   Route,
 } from "lucide-react";
 import { PageContainer } from "@/components/layout";
@@ -131,7 +132,8 @@ export default function StressCheckImplementationPage() {
                       {step.phase}
                     </span>
                     <span className="inline-block rounded bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600">
-                      🕒 {step.timing}
+                      <Clock className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+                      {step.timing}
                     </span>
                     {step.mandatoryOnly && (
                       <span className="inline-block rounded bg-violet-100 px-2 py-0.5 text-[11px] font-semibold text-violet-700">

@@ -16,7 +16,7 @@ import {
   Line,
   Legend,
 } from "recharts";
-import { Download, Info, ChevronDown, ChevronUp } from "lucide-react";
+import { Download, Info, ChevronDown, ChevronUp, AlertTriangle } from "lucide-react";
 import type { AccidentCase } from "@/lib/types/domain";
 import { SITE_STATS } from "@/data/site-stats";
 
@@ -79,7 +79,8 @@ function DataSourceNote({ yearRange, count }: { yearRange: string; count: number
 function SiteDataDisclaimer() {
   return (
     <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800">
-      ⚠ このタブは当サイト独自収集の参考事例です。統計的代表性はありません。
+      <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+      このタブは当サイト独自収集の参考事例です。統計的代表性はありません。
       厚労省公式統計（N={SITE_STATS.accidentDbCount}件・
       <a
         href="https://anzeninfo.mhlw.go.jp/anzen_pg/SAI_DET.aspx"

@@ -135,7 +135,7 @@ export default async function ArticleDetailPage({
 
   const relatedGroups: RelatedContentGroup[] = [
     {
-      heading: "📜 関連する厚労省 通達・告示",
+      heading: "関連する厚労省 通達・告示",
       accent: "sky",
       moreHref: "/circulars",
       moreLabel: "通達一覧",
@@ -154,7 +154,7 @@ export default async function ArticleDetailPage({
       })),
     },
     {
-      heading: "⚠️ 関連する事故事例",
+      heading: "関連する事故事例",
       accent: "amber",
       moreHref: "/accidents",
       moreLabel: "事故DB",
@@ -168,7 +168,7 @@ export default async function ArticleDetailPage({
       })),
     },
     {
-      heading: "🛡 推奨保護具",
+      heading: "推奨保護具",
       accent: "emerald",
       moreHref: "/equipment-finder",
       moreLabel: "保護具AI",

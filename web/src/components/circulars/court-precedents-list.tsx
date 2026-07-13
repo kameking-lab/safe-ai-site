@@ -11,7 +11,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { Gavel, ExternalLink } from "lucide-react";
+import { Gavel, ExternalLink, AlertTriangle } from "lucide-react";
 import type { LawRevisionCore } from "@/lib/types/domain";
 import { CollapsibleDetail } from "@/components/ui/collapsible-detail";
 
@@ -124,7 +124,8 @@ export function CourtPrecedentsList({ precedents }: CourtPrecedentsListProps) {
       )}
 
       <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
-        ⚠️ 判例要旨は概観のためのものです。引用・実務判断時は必ず裁判所公式の判例集で原文を確認してください。
+        <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+        判例要旨は概観のためのものです。引用・実務判断時は必ず裁判所公式の判例集で原文を確認してください。
       </p>
     </section>
   );

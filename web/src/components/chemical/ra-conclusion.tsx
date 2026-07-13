@@ -1,4 +1,4 @@
-import { Shield } from "lucide-react";
+import { Shield, AlertTriangle } from "lucide-react";
 import type { ChemicalRaResponse } from "@/app/api/chemical-ra/route";
 import type { ChemicalKeyPoints } from "@/lib/chemical/key-points";
 import {
@@ -132,7 +132,8 @@ export function RaConclusionCard({ result, keyPoints, equipmentHref }: RaConclus
       {/* 次にやること: まず行う対策（優先度順）＋レベルIVは作業中止を最前面に */}
       {conclusion.kind === "level" && conclusion.level === "IV" && (
         <p className="mt-3 rounded-lg bg-rose-800 px-3 py-2 text-sm font-bold text-white">
-          ⚠ 原則 作業中止 — 代替化・密閉化・局所排気装置の即時設置が必要です
+          <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+          原則 作業中止 — 代替化・密閉化・局所排気装置の即時設置が必要です
         </p>
       )}
       {keyPoints.actions.length > 0 && (

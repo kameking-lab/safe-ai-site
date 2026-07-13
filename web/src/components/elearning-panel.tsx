@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, Pencil } from "lucide-react";
 import { recordThemeAttempt } from "@/lib/elearning/progress";
 import { buildQuizConclusion } from "@/lib/elearning/learning-conclusion";
 import { SAFETY_TONE } from "@/lib/design/safety-tone";
@@ -310,7 +310,7 @@ export function ELearningPanel() {
           {themes.map((theme) => (
             <option key={theme.id} value={theme.id}>
               {theme.title}（{theme.sourceType} / {theme.level}）
-              {overrides[theme.id] ? " ✎" : ""}
+              {overrides[theme.id] ? "（編集済）" : ""}
             </option>
           ))}
         </select>
@@ -327,7 +327,7 @@ export function ELearningPanel() {
               onClick={() => setEditMode(true)}
               className="rounded-lg border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] font-semibold text-amber-800 hover:bg-amber-100"
             >
-              ✎ 編集
+              <Pencil className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden="true" />編集
             </button>
             {overrides[themeId] && (
               <button

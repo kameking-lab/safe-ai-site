@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, HelpCircle, ArrowLeft, ExternalLink } from "lucide-react";
+import { ChevronDown, ChevronUp, HelpCircle, ArrowLeft, ExternalLink, ClipboardList } from "lucide-react";
 import { JsonLd, faqPageSchema } from "@/components/json-ld";
 import { SupervisorByline } from "@/components/SupervisorByline";
 import { getFAQsByCategory } from "@/data/faqs";
@@ -52,7 +52,8 @@ function FAQItem({ faq }: { faq: FAQ }) {
                   key={law}
                   className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600"
                 >
-                  📋 {law}
+                  <ClipboardList className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+                  {law}
                 </span>
               ))}
             </div>

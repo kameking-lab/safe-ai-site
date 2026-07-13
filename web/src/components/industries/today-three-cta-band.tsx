@@ -15,7 +15,7 @@
  */
 
 import Link from "next/link";
-import { BarChart3, ClipboardList, CalendarCheck, ArrowRight } from "lucide-react";
+import { BarChart3, ClipboardList, CalendarCheck, ArrowRight, Zap } from "lucide-react";
 import type { IndustryContent, IndustryContentSlug } from "@/types/industry-content";
 import type { IndustrySlug } from "@/lib/industry-slugs";
 
@@ -66,7 +66,7 @@ export function TodayThreeCtaBand({ content }: TodayThreeCtaBandProps) {
       className="mt-3 rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50/60 via-white to-emerald-50/30 p-3 dark:from-emerald-950/30 dark:to-slate-950 sm:p-4"
     >
       <div className="mb-2 flex items-center gap-2">
-        <span aria-hidden="true" className="text-lg">⚡</span>
+        <Zap className="h-5 w-5 text-emerald-700 dark:text-emerald-300" aria-hidden="true" />
         <p className="text-xs font-bold text-emerald-900 dark:text-emerald-300 sm:text-sm">
           {label} ・ 今日の 3 アクション
         </p>

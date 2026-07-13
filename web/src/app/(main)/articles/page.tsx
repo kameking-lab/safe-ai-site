@@ -1,5 +1,6 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
+import { BookOpen, ClipboardList, HardHat, type LucideIcon } from "lucide-react";
 import { getPublishedArticleIndex } from "@/lib/articles";
 import { ogImageUrl } from "@/lib/og-url";
 import { PageContainer } from "@/components/layout";
@@ -29,10 +30,10 @@ export const metadata: Metadata = {
   },
 };
 
-const CATEGORY_LABELS: Record<string, string> = {
-  "law-update": "📋 法改正",
-  guide: "📖 運用ガイド",
-  industry: "🏗 業種別",
+const CATEGORY_LABELS: Record<string, { icon: LucideIcon; label: string }> = {
+  "law-update": { icon: ClipboardList, label: "法改正" },
+  guide: { icon: BookOpen, label: "運用ガイド" },
+  industry: { icon: HardHat, label: "業種別" },
 };
 
 export default function ArticlesIndexPage() {
@@ -57,14 +58,23 @@ export default function ArticlesIndexPage() {
         </p>
       ) : (
         <ul className="space-y-3">
-          {articles.map((a) => (
+          {articles.map((a) => {
+            const cat = CATEGORY_LABELS[a.category];
+            return (
             <li
               key={a.slug}
               className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:border-emerald-300"
             >
               <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
                 <span className="rounded bg-slate-100 px-1.5 py-0.5 font-bold text-slate-700">
-                  {CATEGORY_LABELS[a.category] ?? a.category}
+                  {cat ? (
+                    <>
+                      <cat.icon className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden="true" />
+                      {cat.label}
+                    </>
+                  ) : (
+                    a.category
+                  )}
                 </span>
                 <span>{a.publishedAt} 公開</span>
                 <span>・最終確認 {a.lastReviewedAt}</span>
@@ -89,7 +99,8 @@ export default function ArticlesIndexPage() {
                 ))}
               </div>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
     </PageContainer>

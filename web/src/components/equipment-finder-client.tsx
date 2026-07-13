@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, ArrowRight, Star, RefreshCw, FlaskConical } from "lucide-react";
+import { ArrowLeft, ArrowRight, Star, RefreshCw, FlaskConical, Scale, AlertTriangle } from "lucide-react";
 import { EQUIPMENT_CATEGORIES, getCategoryById, type RefineAnswers } from "@/config/equipment-categories";
 import { recommendItems } from "@/lib/equipment-finder/recommendations";
 import { deriveComplianceBadge, formatRegulations } from "@/lib/equipment-finder/compliance";
@@ -416,7 +416,7 @@ export function EquipmentFinderClient() {
 
               {formatRegulations(item.regulations).length > 0 && (
                 <div className="mt-2 rounded-lg border border-slate-100 bg-slate-50/70 p-2">
-                  <p className="text-[10px] font-bold text-slate-500">⚖ 根拠法令・規格</p>
+                  <p className="text-[10px] font-bold text-slate-500"><Scale className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden="true" />根拠法令・規格</p>
                   <ul className="mt-1 flex flex-wrap gap-1">
                     {formatRegulations(item.regulations).map((r) => (
                       <li
@@ -559,7 +559,7 @@ function IncomingContextBanner({
                     key={h}
                     className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-blue-800 ring-1 ring-blue-200"
                   >
-                    ⚠ {h}
+                    <AlertTriangle className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden="true" />{h}
                   </li>
                 ))}
               </ul>

@@ -7,7 +7,7 @@
  *
  * 表示内容:
  * - リーフレット名 / 発行者 / target（現場用/管理者用/一般）/ 発行日
- * - 「📕 PDFを開く」 or 「🔗 詳細ページを開く」
+ * - 「PDFを開く」 or 「詳細ページを開く」（lucideアイコン付き）
  * - 本文要約は表示しない
  */
 
@@ -32,7 +32,7 @@ export function ChatbotLeafletCard({ leaflet }: { leaflet: AttachedLeaflet }) {
   const targetTxt = TARGET_LABEL[leaflet.target] ?? leaflet.target;
   const targetCls = TARGET_TONE[leaflet.target] ?? TARGET_TONE.general;
   const primaryUrl = leaflet.pdfUrl ?? leaflet.sourceUrl;
-  const primaryLabel = leaflet.pdfUrl ? "📕 PDFを開く" : "🔗 詳細ページを開く";
+  const primaryLabel = leaflet.pdfUrl ? "PDFを開く" : "詳細ページを開く";
   const PrimaryIcon = leaflet.pdfUrl ? FileText : ExternalLink;
 
   return (

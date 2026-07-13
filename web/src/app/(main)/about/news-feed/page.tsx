@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
 import { TranslatedPageHeader } from "@/components/translated-page-header";
 import { PageContainer } from "@/components/layout";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
@@ -50,7 +51,8 @@ export default function NewsFeedAboutPage() {
 
       <div className="mt-4 rounded-2xl border-2 border-orange-300 bg-orange-50 p-4 sm:p-5">
         <p className="text-sm font-bold text-orange-900">
-          ⚠ 本セクションは <strong>完全自動運用</strong> です
+          <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />
+          本セクションは <strong>完全自動運用</strong> です
         </p>
         <p className="mt-2 text-[13px] text-orange-900/90">
           <Link href="/accidents" className="underline">

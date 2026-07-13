@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { HardHat } from "lucide-react";
 import { getUsageScore } from "@/lib/usage-tracker";
 import {
   detectInstallGuideKind,
@@ -130,8 +131,8 @@ export function InstallPwaPrompt() {
         className="fixed inset-x-3 bottom-[calc(var(--mobile-bottom-nav-h,0px)+12px)] z-30 mx-auto max-w-md rounded-2xl border border-emerald-200 bg-white p-4 shadow-xl dark:border-emerald-900 dark:bg-slate-900"
       >
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xl text-white">
-            ⛑️
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+            <HardHat className="h-5 w-5" aria-hidden="true" />
           </div>
           <div className="flex-1 text-sm">
             <p className="font-semibold text-slate-900 dark:text-slate-100">
@@ -192,8 +193,8 @@ export function InstallPwaPrompt() {
       className="fixed inset-x-3 bottom-[calc(var(--mobile-bottom-nav-h,0px)+12px)] z-30 mx-auto max-w-md rounded-2xl border border-emerald-200 bg-white p-4 shadow-xl dark:border-emerald-900 dark:bg-slate-900"
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xl text-white">
-          ⛑️
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
+          <HardHat className="h-5 w-5" aria-hidden="true" />
         </div>
         <div className="flex-1 text-sm">
           <p className="font-semibold text-slate-900 dark:text-slate-100">

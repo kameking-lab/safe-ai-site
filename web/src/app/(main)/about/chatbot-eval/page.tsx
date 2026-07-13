@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import Link from "next/link";
+import { CheckCircle2, XCircle } from "lucide-react";
 import results from "@/data/chatbot-eval-results.json";
 import freshResults from "@/data/chatbot-eval-fresh-results.json";
 import genqualitySnapshot from "@/data/chatbot-genquality-latest.json";
@@ -158,7 +160,13 @@ export default function ChatbotEvalPage() {
         <Stat label="目標値" value={formatPct(r.target)} />
         <Stat
           label="判定"
-          value={r.passed ? "✅ 達成" : "❌ 未達"}
+          value={
+            r.passed ? (
+              <><CheckCircle2 className="mr-1 inline h-5 w-5 align-[-3px] text-emerald-600" aria-hidden="true" />達成</>
+            ) : (
+              <><XCircle className="mr-1 inline h-5 w-5 align-[-3px] text-rose-600" aria-hidden="true" />未達</>
+            )
+          }
           accent={r.passed}
         />
       </section>
@@ -214,7 +222,7 @@ export default function ChatbotEvalPage() {
         <h2 className="text-lg font-bold text-slate-900">不正答ケース（{r.failures.length} 件）</h2>
         {r.failures.length === 0 ? (
           <p className="mt-2 text-sm text-emerald-700">
-            ✅ 100 問すべての RAG 検索で期待条文が上位 5 件に含まれました。
+            <CheckCircle2 className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />100 問すべての RAG 検索で期待条文が上位 5 件に含まれました。
           </p>
         ) : (
           <ul className="mt-3 space-y-3">
@@ -302,7 +310,7 @@ function Stat({
   accent = false,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
   accent?: boolean;
 }) {
   return (
@@ -352,7 +360,13 @@ function GenQualitySection({ g }: { g: GenQuality }) {
         <Stat label="有用回答率" value={formatPct(g.usefulRate)} />
         <Stat
           label="判定"
-          value={passed ? "✅ 達成" : "❌ 未達"}
+          value={
+            passed ? (
+              <><CheckCircle2 className="mr-1 inline h-5 w-5 align-[-3px] text-emerald-600" aria-hidden="true" />達成</>
+            ) : (
+              <><XCircle className="mr-1 inline h-5 w-5 align-[-3px] text-rose-600" aria-hidden="true" />未達</>
+            )
+          }
           accent={passed}
         />
       </div>
@@ -403,7 +417,13 @@ function FreshResultsSection({ r }: { r: EvalResult }) {
         <Stat label="目標値" value={formatPct(r.target)} />
         <Stat
           label="判定"
-          value={r.passed ? "✅ 達成" : "❌ 未達"}
+          value={
+            r.passed ? (
+              <><CheckCircle2 className="mr-1 inline h-5 w-5 align-[-3px] text-emerald-600" aria-hidden="true" />達成</>
+            ) : (
+              <><XCircle className="mr-1 inline h-5 w-5 align-[-3px] text-rose-600" aria-hidden="true" />未達</>
+            )
+          }
           accent={r.passed}
         />
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { Siren } from "lucide-react";
 import type { JmaEarthquake } from "@/lib/jma/jma-data";
 
 type Props = {
@@ -30,7 +31,7 @@ export function EarthquakeAlertModal({ earthquake, onClose }: Props) {
       <div className="w-full max-w-lg rounded-2xl border-2 border-rose-500 bg-rose-950 p-5 shadow-2xl">
         <div className="flex items-start justify-between gap-2">
           <h2 id="earthquake-alert-title" className="text-xl font-extrabold text-rose-100">
-            🚨 地震速報
+            <Siren className="mr-1.5 inline h-5 w-5 align-[-3px]" aria-hidden="true" />地震速報
           </h2>
           <button
             type="button"

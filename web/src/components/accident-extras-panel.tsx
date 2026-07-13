@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { AlertTriangle, Pin } from "lucide-react";
 import { searchMhlwSimilarStrict, getMhlwDeathsTotal, type ScoredMhlwCase } from "@/lib/mhlw-similar-cases";
 import { loadProfile, INDUSTRY_LABELS, type CompanyProfile } from "@/lib/company-profile";
 import type { AccidentCase } from "@/lib/types/domain";
@@ -212,7 +213,7 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
   if (!profile?.wizardCompleted) {
     return (
       <section className="rounded-2xl border border-emerald-200 bg-emerald-50/40 p-4 shadow-sm">
-        <h3 className="text-sm font-bold text-emerald-900">📌 自社類似事故Top5（プロファイル連動）</h3>
+        <h3 className="text-sm font-bold text-emerald-900"><Pin className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />自社類似事故Top5（プロファイル連動）</h3>
         <p className="mt-1 text-[11px] text-emerald-800">
           自社プロファイルを設定するとTop5が表示されます。
         </p>
@@ -233,7 +234,7 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
     <section className="rounded-2xl border border-rose-200 bg-rose-50/40 p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-sm font-bold text-rose-900">
-          📌 自社類似事故 Top{cases.length}（プロファイル: {INDUSTRY_LABELS[profile.industry]}）
+          <Pin className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />自社類似事故 Top{cases.length}（プロファイル: {INDUSTRY_LABELS[profile.industry]}）
         </h3>
         <Link
           href="/profile"
@@ -247,7 +248,7 @@ function ProfileRecommend({ profile }: { profile: CompanyProfile | null }) {
       </p>
       {isLoose && (
         <p className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-900">
-          ⚠ 業種厳密一致では該当なし。業種制限を外して全件から関連度順で表示しています。
+          <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />業種厳密一致では該当なし。業種制限を外して全件から関連度順で表示しています。
         </p>
       )}
       {cases.length === 0 ? (

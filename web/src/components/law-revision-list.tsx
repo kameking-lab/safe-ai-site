@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AlertTriangle, MessageSquare, Pencil, RotateCcw, Sparkles, Zap } from "lucide-react";
 import type { IndustryTag, LawRevision, RevisionImpact } from "@/lib/types/domain";
 import type { ServiceError } from "@/lib/types/api";
 import { fuzzyMatchAll, fuzzyMatch } from "@/lib/fuzzy-search";
@@ -525,7 +526,7 @@ export function LawRevisionList({
                 : "border border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50"
             }`}
           >
-            ✨ 自社に効く改正のみ
+            <Sparkles className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />自社に効く改正のみ
           </button>
         )}
       </div>
@@ -533,7 +534,7 @@ export function LawRevisionList({
         直近10年の主要な労働安全衛生関連の改正を収録。キーワード・年で絞り込みできます（音声入力対応）。
       </p>
       <p className="mt-1 text-[11px] leading-5 text-amber-700">
-        ⚠ 要約・条番号は<strong>施行当時</strong>のものです。現行条文は各カードの「e-Govで原文を確認」から最新版をご確認ください。
+        <AlertTriangle className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />要約・条番号は<strong>施行当時</strong>のものです。現行条文は各カードの「e-Govで原文を確認」から最新版をご確認ください。
       </p>
       {relevanceFallback && (
         <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px] leading-5 text-amber-900 print:hidden">
@@ -827,7 +828,7 @@ export function LawRevisionList({
               }}
               className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-700"
             >
-              ↺ 条件を全て解除して再検索
+              <RotateCcw className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />条件を全て解除して再検索
             </button>
             {articleHighlights.length > 0 && (
               <button
@@ -842,7 +843,7 @@ export function LawRevisionList({
               href="/chatbot"
               className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-bold text-amber-800 hover:bg-amber-50"
             >
-              💬 AIに類似条文を質問
+              <MessageSquare className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />AIに類似条文を質問
             </a>
           </div>
         </div>
@@ -877,7 +878,7 @@ export function LawRevisionList({
                       className="mr-2 inline-flex items-center rounded-full bg-violet-600 px-2 py-0.5 align-middle text-[10px] font-bold text-white"
                       title="事故由来 articles と一致した改正"
                     >
-                      ⚡ 該当
+                      <Zap className="mr-0.5 h-3 w-3" aria-hidden="true" />該当
                     </span>
                   )}
                   {revision.title}
@@ -965,7 +966,11 @@ export function LawRevisionList({
                         onClick={() => void handleRewrite(revision)}
                         className="inline-flex min-h-[44px] items-center justify-center rounded border border-violet-300 bg-violet-50 px-2 py-1 text-[11px] font-bold text-violet-800 hover:bg-violet-100 disabled:opacity-50"
                       >
-                        {rewriteBusyId === revision.id ? "生成中…" : "✏️ 自社版に書き換え"}
+                        {rewriteBusyId === revision.id ? (
+                          "生成中…"
+                        ) : (
+                          <><Pencil className="mr-1 inline h-3 w-3 align-[-2px]" aria-hidden="true" />自社版に書き換え</>
+                        )}
                       </button>
                     ) : (
                       <div className="rounded-lg border border-violet-200 bg-violet-50/60 p-2">

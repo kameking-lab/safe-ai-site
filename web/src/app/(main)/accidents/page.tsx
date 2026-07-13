@@ -161,8 +161,8 @@ export default function AccidentsPage() {
           context="墜落 転落 足場 ハーネス 保護帽 ヘルメット 安全靴 切創 はさまれ 巻き込まれ 熱中症 化学物質 中毒"
           fallbackCategoryIds={["fall-protection", "head-protection", "hand-foot", "heat-cold"]}
           heading={{
-            ja: "🛡 主要な労災を防ぐための予防保護具",
-            en: "🛡 PPE for preventing the most common workplace accidents",
+            ja: "主要な労災を防ぐための予防保護具",
+            en: "PPE for preventing the most common workplace accidents",
           }}
           description={{
             ja: "本データベースで多発する「墜落・転落・はさまれ・熱中症」など主要原因に直接効く保護具を厳選。",

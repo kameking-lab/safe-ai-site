@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { WifiOff } from "lucide-react";
 
 export function ServiceWorkerRegistrar() {
   const [isOffline, setIsOffline] = useState<boolean>(() => {
@@ -37,7 +38,7 @@ export function ServiceWorkerRegistrar() {
       aria-live="polite"
       className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full bg-slate-800 px-4 py-2 text-sm font-semibold text-white shadow-lg"
     >
-      📵 オフラインモード
+      <WifiOff className="mr-1 inline h-4 w-4 align-[-2px]" aria-hidden="true" />オフラインモード
     </div>
   );
 }

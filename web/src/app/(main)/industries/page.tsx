@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, AlertTriangle } from "lucide-react";
+import {
+  ArrowRight,
+  AlertTriangle,
+  ClipboardList,
+  GraduationCap,
+  MessageSquare,
+  ScrollText,
+  Siren,
+} from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
 import { Section } from "@/components/layout/section";
 import { CardGrid } from "@/components/layout/card-grid";
@@ -263,37 +271,37 @@ export default function IndustriesHubPage() {
               href="/accidents-reports"
               className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              🚨 業種別 事故分析レポート
+              <Siren className="h-4 w-4 shrink-0" aria-hidden="true" />業種別 事故分析レポート
             </Link>
             <Link
               href="/strategy/plan-generator"
               className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              📋 年次安全衛生計画ジェネレーター
+              <ClipboardList className="h-4 w-4 shrink-0" aria-hidden="true" />年次安全衛生計画ジェネレーター
             </Link>
             <Link
               href="/ky"
               className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              📝 KY用紙作成
+              <ClipboardList className="h-4 w-4 shrink-0" aria-hidden="true" />KY用紙作成
             </Link>
             <Link
               href="/chatbot"
               className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              💬 安衛法AIチャット
+              <MessageSquare className="h-4 w-4 shrink-0" aria-hidden="true" />安衛法AIチャット
             </Link>
             <Link
               href="/education-certification"
               className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              🎓 特別教育・技能講習
+              <GraduationCap className="h-4 w-4 shrink-0" aria-hidden="true" />特別教育・技能講習
             </Link>
             <Link
               href="/circulars"
               className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             >
-              📜 通達原文
+              <ScrollText className="h-4 w-4 shrink-0" aria-hidden="true" />通達原文
             </Link>
           </Cluster>
         </Section>
