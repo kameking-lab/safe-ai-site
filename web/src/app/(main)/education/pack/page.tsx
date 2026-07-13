@@ -7,6 +7,7 @@ import { EDUCATION_DECKS } from "@/data/education-decks";
 import { getCurriculum, LICENSE_SUMMARY_3 } from "@/data/education-curriculum";
 import { ogImageUrl } from "@/lib/og-url";
 import { withSiteOpenGraph, withSiteTwitter } from "@/lib/seo-metadata";
+import { Mascot } from "@/components/mascot";
 
 const TITLE = "無償・編集可の法定教育スライドパック";
 const DESCRIPTION =
@@ -29,7 +30,8 @@ export default function EduPackIndexPage() {
     <>
       <PageJsonLd name={TITLE} description={DESCRIPTION} path="/education/pack" />
       <Breadcrumb items={[{ name: "教育", href: "/education" }, { name: "無償教材パック" }]} />
-      <header className="mb-5">
+      <header className="mb-5 flex items-start justify-between gap-4 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-transparent p-4 dark:from-emerald-950/25 dark:via-slate-900 sm:p-5">
+        <div>
         <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800">
           <ShieldCheck aria-hidden="true" className="h-3.5 w-3.5" />
           無償・申請不要・編集可
@@ -40,6 +42,8 @@ export default function EduPackIndexPage() {
           各教材は<strong>告示正本から構造化したカリキュラムレジストリとの機械照合（CI）</strong>で法定科目の網羅を検証し、
           <strong>法定対応表</strong>を同梱します。統計は最新の災害データに自動追従します。
         </p>
+        </div>
+        <Mascot variant="teacher" size="lg" alt="" className="hidden shrink-0 sm:block" />
       </header>
 
       {/* 特徴 */}

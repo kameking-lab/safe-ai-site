@@ -51,7 +51,7 @@ export default function LawNaviHubPage() {
       />
       <LawHubNav current="law-navi" />
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <header className="mb-6 flex items-start justify-between gap-4">
+        <header className="mb-6 flex items-start justify-between gap-4 rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-transparent p-4 dark:from-emerald-950/25 dark:via-slate-900 sm:p-5">
           <div>
             <h1 className="inline-flex items-center gap-2 text-2xl font-bold text-slate-900">
               <Compass className="h-6 w-6 text-emerald-600" aria-hidden="true" />

@@ -81,6 +81,7 @@ export function ChatbotBody() {
 
   return (
     <PageContainer width="wide">
+      <div className="rounded-2xl bg-gradient-to-br from-emerald-50/80 via-white to-transparent p-4 dark:from-emerald-950/25 dark:via-slate-900 sm:p-5 mb-2">
       <TranslatedPageHeader
         titleJa="安衛法AIチャットボット"
         titleEn="Occupational Safety Law AI Chat"
@@ -89,6 +90,7 @@ export function ChatbotBody() {
         iconName="Scale"
         iconColor="blue"
       />
+      </div>
 
       {/* NIQ-TOOL1: 公開evalの透明性表示（§3-5 第三者性なしの緩和）。誇張せず性質を併記。 */}
       <ChatbotEvalBadge isEn={isEn} />
