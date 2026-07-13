@@ -40,7 +40,7 @@ test.describe("安全工程打合せ書", () => {
     await expect(page.getByLabel("作業所名", { exact: true })).toBeVisible();
     expect(page.url()).toContain("canvas=0");
     // 従来表示から「新しい表示へ」で復帰（URLの canvas=0 が外れる）
-    await page.getByRole("button", { name: "🗺 新しい表示へ" }).click();
+    await page.getByRole("button", { name: "新しい表示へ" }).click();
     await expect(page.getByTestId("paper-stage-content")).toBeVisible();
     expect(page.url()).not.toContain("canvas=0");
   });

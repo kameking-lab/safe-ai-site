@@ -1,5 +1,7 @@
 "use client";
 
+import { FolderOpen, Map as MapIcon, Printer, Search, Sparkles } from "lucide-react";
+
 /**
  * 安全工程打合せ書及び安全衛生指示書 — 用紙ファーストUI（Phase 1,2,4,5）。
  * KYの設計（ズーム・自動保存・用紙そのまま編集）を踏襲。AI/クラウド/印刷/一覧は後続Phaseで付加。
@@ -402,14 +404,14 @@ export function MeetingPaperView() {
             <span className="text-[11px] font-normal text-amber-600">前回の打合せ書を翌日分として引き継ぐ</span>
           </button>
           <Link href="/safety-diary/list" role="menuitem" onClick={() => setShowActions(false)} className="flex min-h-[48px] w-full items-center rounded-xl border border-sky-200 bg-white px-4 py-3 text-left text-sm font-semibold text-sky-700 hover:bg-sky-50">
-            📁 保存一覧を開く →
+            <FolderOpen className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />保存一覧を開く →
           </Link>
         </div>
 
         <p className="mb-1.5 text-[11px] font-bold text-slate-400">点検項目</p>
         <div className="mb-3 space-y-1.5">
           <button type="button" role="menuitem" onClick={() => runAction(inferChecklistAll)} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-indigo-200 bg-indigo-50/60 px-4 py-2.5 text-left hover:bg-indigo-100">
-            <span className="text-sm font-bold text-indigo-800">🤖 AIで該当項目を推論</span>
+            <span className="text-sm font-bold text-indigo-800"><Sparkles className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />AIで該当項目を推論</span>
             <span className="text-[11px] font-normal text-indigo-600">各社の作業内容から点検8カテゴリの該当を自動判定</span>
           </button>
           <button type="button" role="menuitem" onClick={() => runAction(resetChecklist)} className="flex min-h-[48px] w-full items-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-left text-sm font-semibold text-slate-600 hover:bg-slate-50">
@@ -420,11 +422,11 @@ export function MeetingPaperView() {
         <p className="mb-1.5 text-[11px] font-bold text-slate-400">印刷・PDF</p>
         <div className="mb-1 space-y-1.5">
           <button type="button" role="menuitem" onClick={() => runAction(() => setShowPrintPreview(true))} className="flex min-h-[48px] w-full flex-col items-start justify-center gap-0.5 rounded-xl border border-sky-200 bg-white px-4 py-2.5 text-left hover:bg-sky-50">
-            <span className="text-sm font-semibold text-sky-700">🔍 印刷プレビュー</span>
+            <span className="text-sm font-semibold text-sky-700"><Search className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />印刷プレビュー</span>
             <span className="text-[11px] font-normal text-sky-600">A4横の体裁を確認してから印刷</span>
           </button>
           <button type="button" role="menuitem" onClick={() => { setShowActions(false); window.print(); }} className="flex min-h-[48px] w-full items-center rounded-xl bg-sky-600 px-4 py-3 text-left text-sm font-bold text-white hover:bg-sky-700">
-            🖨 印刷 / PDF
+            <Printer className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />印刷 / PDF
           </button>
         </div>
       </div>
@@ -571,7 +573,7 @@ export function MeetingPaperView() {
             title="用紙全体を1画面で見ながら、タップした欄をその場で入力できる新しい表示へ戻る（既定）"
             className="rounded-full border border-sky-300 bg-sky-50 px-2.5 py-1 text-[11px] font-bold text-sky-800 hover:bg-sky-100"
           >
-            🗺 新しい表示へ
+            <MapIcon className="mr-1 inline h-3.5 w-3.5 align-[-2px]" aria-hidden="true" />新しい表示へ
           </button>
           <div className="flex items-center gap-1">
             <button type="button" aria-label="縮小" onClick={() => setZoom((z) => Math.max(ZOOM_MIN, Math.round((z - ZOOM_STEP) * 10) / 10))} className="min-h-[44px] min-w-[44px] rounded-full px-3 py-1 text-sm font-bold text-slate-700 hover:bg-slate-100">－</button>

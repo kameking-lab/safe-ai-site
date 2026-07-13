@@ -147,7 +147,7 @@ test.describe("KY用紙キャンバスβ（F1 方式確立）", () => {
     expect(page.url()).not.toContain("canvas=");
   });
 
-  test("「従来表示」で旧UIに戻れ、「🗺 新しい表示へ」で既定表示に戻れる（?canvas=0で旧UIも維持）", async ({ page }) => {
+  test("「従来表示」で旧UIに戻れ、「新しい表示へ」で既定表示に戻れる（?canvas=0で旧UIも維持）", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.addInitScript(() => {
       localStorage.setItem("anzen-onboarding-v1-seen", "1");
@@ -163,7 +163,7 @@ test.describe("KY用紙キャンバスβ（F1 方式確立）", () => {
     await page.reload();
     await expect(page.getByTestId("paper-stage-content")).toHaveCount(0);
 
-    await page.getByRole("button", { name: "🗺 新しい表示へ" }).click();
+    await page.getByRole("button", { name: "新しい表示へ" }).click();
     await expect(page.getByTestId("paper-stage-content")).toBeVisible();
     expect(page.url()).not.toContain("canvas=0");
   });
@@ -178,7 +178,7 @@ test.describe("KY用紙キャンバスβ（F1 方式確立）", () => {
     await expect(sheet).toBeVisible();
     await expect(sheet.getByText("↻ 前回を複製")).toBeVisible();
     await expect(sheet.getByRole("menuitem", { name: /朝礼サイネージへ/ })).toBeVisible();
-    await expect(sheet.getByText("🔍 印刷プレビュー")).toBeVisible();
+    await expect(sheet.getByText("印刷プレビュー")).toBeVisible();
     await page.getByRole("button", { name: "閉じる" }).click();
     await expect(sheet).toBeHidden();
 
