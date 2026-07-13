@@ -39,7 +39,7 @@ export function HomeQuickAccess() {
           <li key={t.href} className="relative">
             <Link
               href={t.href}
-              className="flex h-full min-h-[78px] flex-col items-center justify-center gap-1 rounded-xl border border-emerald-200 bg-gradient-to-b from-white to-emerald-50/40 px-1.5 py-2 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-md hover:shadow-emerald-600/10 dark:border-emerald-500/30 dark:from-slate-900 dark:to-slate-900"
+              className="flex h-full min-h-[78px] flex-col items-center justify-center gap-1 rounded-xl border border-emerald-200 bg-white px-1.5 py-2 text-center shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-400 hover:shadow-md hover:shadow-emerald-600/10 dark:border-emerald-500/30 dark:bg-slate-900"
             >
               <Image src={t.iconSrc} alt="" width={28} height={28} aria-hidden style={{ width: 28, height: 28 }} />
               <span className="text-[12px] font-bold leading-tight text-slate-800 dark:text-slate-100">{t.label}</span>
