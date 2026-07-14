@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-13T21:52:38.951Z",
+  "generatedAt": "2026-07-14T21:54:30.934Z",
   "counts": {
-    "approved": 29,
-    "rejected": 37,
-    "total": 66,
-    "approvalRate": 0.439
+    "approved": 31,
+    "rejected": 38,
+    "total": 69,
+    "approvalRate": 0.449
   },
   "byDay": [
     {
@@ -272,22 +272,29 @@
       "rejected": 2,
       "total": 2,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-07-15",
+      "approved": 2,
+      "rejected": 1,
+      "total": 3,
+      "approvalRate": 0.667
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 25,
+      "approved": 26,
       "rejected": 2,
-      "total": 27,
-      "approvalRate": 0.926
+      "total": 28,
+      "approvalRate": 0.929
     },
     {
       "publisher": "日本放送協会",
-      "approved": 4,
-      "rejected": 35,
-      "total": 39,
-      "approvalRate": 0.103
+      "approved": 5,
+      "rejected": 36,
+      "total": 41,
+      "approvalRate": 0.122
     }
   ],
   "byEstimatedWorkCategory": [
@@ -330,10 +337,10 @@
     },
     {
       "type": "熱中症",
-      "approved": 4,
-      "rejected": 15,
-      "total": 19,
-      "approvalRate": 0.211
+      "approved": 5,
+      "rejected": 16,
+      "total": 21,
+      "approvalRate": 0.238
     },
     {
       "type": "崩壊・倒壊",
@@ -385,15 +392,15 @@
         0,
         0,
         0,
-        0,
+        1,
         1,
         5,
-        23
+        24
       ],
       "rejected": [
         3,
         9,
-        19,
+        20,
         2,
         1,
         0,
@@ -418,7 +425,7 @@
       ],
       "approved": [
         3,
-        18,
+        20,
         8,
         0,
         0,
@@ -430,7 +437,7 @@
       ],
       "rejected": [
         5,
-        31,
+        32,
         1,
         0,
         0,
@@ -455,7 +462,7 @@
         "90-100"
       ],
       "approved": [
-        23,
+        25,
         6,
         0,
         0,
@@ -468,7 +475,7 @@
       ],
       "rejected": [
         24,
-        13,
+        14,
         0,
         0,
         0,
@@ -494,7 +501,7 @@
       ],
       "approved": [
         0,
-        28,
+        30,
         1,
         0,
         0,
@@ -506,7 +513,7 @@
       ],
       "rejected": [
         3,
-        27,
+        28,
         0,
         0,
         0,
@@ -521,7 +528,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 32
+      "count": 33
     },
     {
       "reason": "duplication",
@@ -578,6 +585,19 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "熱中症搬送 全国で4500人超 前週の3倍以上に 総務省消防庁",
+        "aiSummary": "総務省消防庁発表、全国の熱中症搬送者が前週比3倍超の4500人以上に増加。",
+        "score": {
+          "relevance": 65,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-14T21:54:20.067Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "改正労災保険法が成立 遺族補償年金の支給 性別の差を解消へ",
         "aiSummary": "労災保険法が改正され、遺族補償年金の性別による支給格差が解消される。",
         "score": {
@@ -589,6 +609,19 @@
           "model": "gemini-2.5-flash"
         },
         "publisher": "日本放送協会"
+      },
+      {
+        "headline": "第31回労働政策審議会安全衛生分科会じん肺部会　議事録",
+        "aiSummary": "労働政策審議会安全衛生分科会じん肺部会の議事録が公表された。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-14T21:54:30.869Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
       },
       {
         "headline": "第６回「労働基準法における「労働者」に関する研究会」を開催します",
@@ -638,32 +671,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-07-02T22:03:24.402Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "第187回労働政策審議会安全衛生分科会（開催案内）",
-        "aiSummary": "厚生労働省が労働政策審議会安全衛生分科会の開催を案内。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-06T22:10:27.163Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "「第３回　労働安全衛生法に基づく一般健康診断の検査項目等に関する検討会」を開催します",
-        "aiSummary": "厚生労働省が労働安全衛生法に基づく一般健康診断の検査項目に関する検討会を開催。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 20,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-06-30T22:13:34.810Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"
@@ -800,6 +807,22 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "高齢者の熱中症 対策は？【Q＆A】",
+        "aiSummary": "高齢者の熱中症予防と対処法について、Q&A形式で解説する記事。",
+        "score": {
+          "relevance": 20,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-07-14T21:54:24.850Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 20 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "西日本に続き きょう東日本でも猛暑日予想 熱中症対策の徹底を",
         "aiSummary": "西日本に続き東日本でも猛暑日予想。労働現場での熱中症対策を徹底するよう呼びかけ。",
         "score": {
@@ -811,22 +834,6 @@
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
             "relevance 30 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "「嵐」最終公演の東京ドームに作業員など装い侵入か 3人逮捕",
-        "aiSummary": "東京ドーム「嵐」公演に作業員を装い侵入、3人逮捕。",
-        "score": {
-          "relevance": 10,
-          "copyrightRisk": 15,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-06-02T22:59:39.283Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 10 < 70 (not labor-safety related for type=general_news)"
           ]
         },
         "publisher": "日本放送協会"

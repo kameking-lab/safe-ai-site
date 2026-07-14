@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-13T21:52:38.898Z",
+  "updatedAt": "2026-07-14T21:54:30.877Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -206,6 +206,33 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-05-18T22:00:23.529Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "247f630a794b0553",
+      "headline": "高齢者の熱中症 対策は？【Q＆A】",
+      "aiSummary": "高齢者の熱中症予防と対処法について、Q&A形式で解説する記事。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260714/k10015176331000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 14 Jul 2026 19:21:48 +0900",
+        "fetchedAt": "2026-07-14T21:54:09.591Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-14T21:54:24.850Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"

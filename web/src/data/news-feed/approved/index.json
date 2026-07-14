@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-13T21:52:38.898Z",
+  "updatedAt": "2026-07-14T21:54:30.877Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -75,6 +75,30 @@
       "provenance": "news_auto"
     },
     {
+      "id": "7d415f4698279785",
+      "headline": "熱中症搬送 全国で4500人超 前週の3倍以上に 総務省消防庁",
+      "aiSummary": "総務省消防庁発表、全国の熱中症搬送者が前週比3倍超の4500人以上に増加。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260714/k10015176821000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 14 Jul 2026 21:02:49 +0900",
+        "fetchedAt": "2026-07-14T21:54:09.591Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "statistics_release",
+      "score": {
+        "relevance": 65,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-14T21:54:20.067Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
       "id": "cf3c84f90851ecb2",
       "headline": "改正労災保険法が成立 遺族補償年金の支給 性別の差を解消へ",
       "aiSummary": "労災保険法が改正され、遺族補償年金の性別による支給格差が解消される。",
@@ -92,6 +116,29 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-07-10T21:57:33.498Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "b0bc6f1c90ff9e68",
+      "headline": "第31回労働政策審議会安全衛生分科会じん肺部会　議事録",
+      "aiSummary": "労働政策審議会安全衛生分科会じん肺部会の議事録が公表された。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_74615.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-07-14T13:39:00+09:00",
+        "fetchedAt": "2026-07-14T21:54:09.591Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-14T21:54:30.869Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
