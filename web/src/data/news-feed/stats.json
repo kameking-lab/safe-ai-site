@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-14T21:54:30.934Z",
+  "generatedAt": "2026-07-15T21:55:11.556Z",
   "counts": {
-    "approved": 31,
-    "rejected": 38,
-    "total": 69,
-    "approvalRate": 0.449
+    "approved": 32,
+    "rejected": 39,
+    "total": 71,
+    "approvalRate": 0.451
   },
   "byDay": [
     {
@@ -279,31 +279,38 @@
       "rejected": 1,
       "total": 3,
       "approvalRate": 0.667
+    },
+    {
+      "date": "2026-07-16",
+      "approved": 1,
+      "rejected": 1,
+      "total": 2,
+      "approvalRate": 0.5
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 26,
+      "approved": 27,
       "rejected": 2,
-      "total": 28,
-      "approvalRate": 0.929
+      "total": 29,
+      "approvalRate": 0.931
     },
     {
       "publisher": "日本放送協会",
       "approved": 5,
-      "rejected": 36,
-      "total": 41,
-      "approvalRate": 0.122
+      "rejected": 37,
+      "total": 42,
+      "approvalRate": 0.119
     }
   ],
   "byEstimatedWorkCategory": [
     {
       "category": "建設業",
-      "approved": 4,
+      "approved": 5,
       "rejected": 2,
-      "total": 6,
-      "approvalRate": 0.667
+      "total": 7,
+      "approvalRate": 0.714
     },
     {
       "category": "運輸交通業",
@@ -395,12 +402,12 @@
         1,
         1,
         5,
-        24
+        25
       ],
       "rejected": [
         3,
         9,
-        20,
+        21,
         2,
         1,
         0,
@@ -426,7 +433,7 @@
       "approved": [
         3,
         20,
-        8,
+        9,
         0,
         0,
         0,
@@ -437,7 +444,7 @@
       ],
       "rejected": [
         5,
-        32,
+        33,
         1,
         0,
         0,
@@ -462,7 +469,7 @@
         "90-100"
       ],
       "approved": [
-        25,
+        26,
         6,
         0,
         0,
@@ -474,7 +481,7 @@
         0
       ],
       "rejected": [
-        24,
+        25,
         14,
         0,
         0,
@@ -501,7 +508,7 @@
       ],
       "approved": [
         0,
-        30,
+        31,
         1,
         0,
         0,
@@ -513,7 +520,7 @@
       ],
       "rejected": [
         3,
-        28,
+        29,
         0,
         0,
         0,
@@ -528,7 +535,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 33
+      "count": 34
     },
     {
       "reason": "duplication",
@@ -611,6 +618,19 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "第５４回特定石綿被害建設業務労働者等認定審査会　開催案内",
+        "aiSummary": "厚生労働省が石綿被害建設業務労働者等認定審査会の開催を告知。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 20,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-15T21:55:11.490Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
         "headline": "第31回労働政策審議会安全衛生分科会じん肺部会　議事録",
         "aiSummary": "労働政策審議会安全衛生分科会じん肺部会の議事録が公表された。",
         "score": {
@@ -658,19 +678,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-07-03T22:01:35.487Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "第36回特定石綿被害建設業務労働者等認定審査会専門委員会　開催案内",
-        "aiSummary": "厚生労働省が石綿被害建設業務労働者の認定審査会専門委員会を開催する。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-02T22:03:24.402Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"

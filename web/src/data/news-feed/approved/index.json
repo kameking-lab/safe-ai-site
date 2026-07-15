@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-14T21:54:30.877Z",
+  "updatedAt": "2026-07-15T21:55:11.497Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -116,6 +116,30 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-07-10T21:57:33.498Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "8c83c4dde3918689",
+      "headline": "第５４回特定石綿被害建設業務労働者等認定審査会　開催案内",
+      "aiSummary": "厚生労働省が石綿被害建設業務労働者等認定審査会の開催を告知。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_74225.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-07-15T14:00:00+09:00",
+        "fetchedAt": "2026-07-15T21:54:59.682Z"
+      },
+      "estimatedWorkCategory": "建設業",
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 20,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-15T21:55:11.490Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
