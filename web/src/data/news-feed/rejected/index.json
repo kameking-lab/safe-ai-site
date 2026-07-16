@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-15T21:55:11.497Z",
+  "updatedAt": "2026-07-16T22:00:07.377Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -316,6 +316,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 10 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "4443f971d6524671",
+      "headline": "熊本 駐車場の車内に残された生後11か月の男児死亡 熱中症か",
+      "aiSummary": "熊本で生後11か月の男児が駐車中の車内で熱中症により死亡したとみられる。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260716/k10015178471000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 16 Jul 2026 18:33:29 +0900",
+        "fetchedAt": "2026-07-16T21:59:51.732Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-16T22:00:00.799Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-15T21:55:11.497Z",
+  "updatedAt": "2026-07-16T22:00:07.377Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -93,6 +93,29 @@
         "misinformationRisk": 5,
         "duplication": 10,
         "judgedAt": "2026-07-14T21:54:20.067Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "7945c35c3326460a",
+      "headline": "精神障害の労災認定1086人 過去最多",
+      "aiSummary": "精神障害による労災認定件数が1086件で過去最多を更新。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260716/k10015177861000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 16 Jul 2026 06:55:01 +0900",
+        "fetchedAt": "2026-07-16T21:59:51.732Z"
+      },
+      "newsType": "statistics_release",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-16T22:00:07.369Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,

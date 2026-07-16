@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-15T21:55:11.556Z",
+  "generatedAt": "2026-07-16T22:00:07.440Z",
   "counts": {
-    "approved": 32,
-    "rejected": 39,
-    "total": 71,
-    "approvalRate": 0.451
+    "approved": 33,
+    "rejected": 40,
+    "total": 73,
+    "approvalRate": 0.452
   },
   "byDay": [
     {
@@ -286,6 +286,13 @@
       "rejected": 1,
       "total": 2,
       "approvalRate": 0.5
+    },
+    {
+      "date": "2026-07-17",
+      "approved": 1,
+      "rejected": 1,
+      "total": 2,
+      "approvalRate": 0.5
     }
   ],
   "byPublisher": [
@@ -298,10 +305,10 @@
     },
     {
       "publisher": "日本放送協会",
-      "approved": 5,
-      "rejected": 37,
-      "total": 42,
-      "approvalRate": 0.119
+      "approved": 6,
+      "rejected": 38,
+      "total": 44,
+      "approvalRate": 0.136
     }
   ],
   "byEstimatedWorkCategory": [
@@ -345,9 +352,9 @@
     {
       "type": "熱中症",
       "approved": 5,
-      "rejected": 16,
-      "total": 21,
-      "approvalRate": 0.238
+      "rejected": 17,
+      "total": 22,
+      "approvalRate": 0.227
     },
     {
       "type": "崩壊・倒壊",
@@ -402,11 +409,11 @@
         1,
         1,
         5,
-        25
+        26
       ],
       "rejected": [
         3,
-        9,
+        10,
         21,
         2,
         1,
@@ -432,7 +439,7 @@
       ],
       "approved": [
         3,
-        20,
+        21,
         9,
         0,
         0,
@@ -444,7 +451,7 @@
       ],
       "rejected": [
         5,
-        33,
+        34,
         1,
         0,
         0,
@@ -469,7 +476,7 @@
         "90-100"
       ],
       "approved": [
-        26,
+        27,
         6,
         0,
         0,
@@ -482,7 +489,7 @@
       ],
       "rejected": [
         25,
-        14,
+        15,
         0,
         0,
         0,
@@ -508,7 +515,7 @@
       ],
       "approved": [
         0,
-        31,
+        32,
         1,
         0,
         0,
@@ -520,7 +527,7 @@
       ],
       "rejected": [
         3,
-        29,
+        30,
         0,
         0,
         0,
@@ -535,7 +542,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 34
+      "count": 35
     },
     {
       "reason": "duplication",
@@ -605,6 +612,19 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "精神障害の労災認定1086人 過去最多",
+        "aiSummary": "精神障害による労災認定件数が1086件で過去最多を更新。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-16T22:00:07.369Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "改正労災保険法が成立 遺族補償年金の支給 性別の差を解消へ",
         "aiSummary": "労災保険法が改正され、遺族補償年金の性別による支給格差が解消される。",
         "score": {
@@ -665,19 +685,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-07-10T21:57:50.417Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "労働基準監督官採用試験広報HP",
-        "aiSummary": "厚生労働省が労働基準監督官採用試験の広報サイトを開設。",
-        "score": {
-          "relevance": 85,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-03T22:01:35.487Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"
