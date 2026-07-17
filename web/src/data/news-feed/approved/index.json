@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-16T22:00:07.377Z",
+  "updatedAt": "2026-07-17T21:48:09.752Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -139,6 +139,29 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-07-10T21:57:33.498Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "1d60a093fb3ed24f",
+      "headline": "労働基準法における「労働者」に関する研究会 第６回資料",
+      "aiSummary": "厚生労働省が労働基準法上の労働者定義に関する研究会の第6回資料を公表。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_74075.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-07-17T15:00:00+09:00",
+        "fetchedAt": "2026-07-17T21:48:03.401Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 85,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-17T21:48:09.745Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,

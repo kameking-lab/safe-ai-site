@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-16T22:00:07.440Z",
+  "generatedAt": "2026-07-17T21:48:09.882Z",
   "counts": {
-    "approved": 33,
+    "approved": 34,
     "rejected": 40,
-    "total": 73,
-    "approvalRate": 0.452
+    "total": 74,
+    "approvalRate": 0.459
   },
   "byDay": [
     {
@@ -293,15 +293,22 @@
       "rejected": 1,
       "total": 2,
       "approvalRate": 0.5
+    },
+    {
+      "date": "2026-07-18",
+      "approved": 1,
+      "rejected": 0,
+      "total": 1,
+      "approvalRate": 1
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 27,
+      "approved": 28,
       "rejected": 2,
-      "total": 29,
-      "approvalRate": 0.931
+      "total": 30,
+      "approvalRate": 0.933
     },
     {
       "publisher": "日本放送協会",
@@ -408,7 +415,7 @@
         0,
         1,
         1,
-        5,
+        6,
         26
       ],
       "rejected": [
@@ -439,7 +446,7 @@
       ],
       "approved": [
         3,
-        21,
+        22,
         9,
         0,
         0,
@@ -476,7 +483,7 @@
         "90-100"
       ],
       "approved": [
-        27,
+        28,
         6,
         0,
         0,
@@ -515,7 +522,7 @@
       ],
       "approved": [
         0,
-        32,
+        33,
         1,
         0,
         0,
@@ -638,6 +645,19 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "労働基準法における「労働者」に関する研究会 第６回資料",
+        "aiSummary": "厚生労働省が労働基準法上の労働者定義に関する研究会の第6回資料を公表。",
+        "score": {
+          "relevance": 85,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-17T21:48:09.745Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
         "headline": "第５４回特定石綿被害建設業務労働者等認定審査会　開催案内",
         "aiSummary": "厚生労働省が石綿被害建設業務労働者等認定審査会の開催を告知。",
         "score": {
@@ -672,19 +692,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-07-10T21:57:54.707Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "令和８年度第６回「石綿に係る疾病の業務上外に関する検討会」を開催します",
-        "aiSummary": "厚生労働省が石綿関連疾病の業務上外を議論する検討会を開催予定。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-10T21:57:50.417Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"
