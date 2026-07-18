@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-17T21:48:09.752Z",
+  "updatedAt": "2026-07-18T21:45:19.500Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -457,6 +457,33 @@
       "provenance": "news_auto"
     },
     {
+      "id": "e8c97d46a65d04d0",
+      "headline": "栃木 足利 住宅に土砂流入し倒壊 行方不明者の捜索続く",
+      "aiSummary": "栃木県足利市で土砂流入により住宅が倒壊し、行方不明者の捜索が続く。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260719/k10015180561000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sun, 19 Jul 2026 05:21:51 +0900",
+        "fetchedAt": "2026-07-18T21:45:05.685Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-18T21:45:14.049Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
       "id": "25a6fe3f1b76a406",
       "headline": "東京都心でことし初の真夏日 あすも気温高く熱中症に注意",
       "aiSummary": "東京都心で今年初の真夏日を記録。明日も高温が予想され、熱中症への警戒を呼びかけ。",
@@ -530,6 +557,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "fb944c8f89778ead",
+      "headline": "栃木 足利 住宅に土砂流入し倒壊 現場から女性1人見つかる",
+      "aiSummary": "栃木県足利市で土砂流入により住宅が倒壊し、女性1人が発見された。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260718/k10015180441000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 18 Jul 2026 23:17:11 +0900",
+        "fetchedAt": "2026-07-18T21:45:05.685Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-18T21:45:19.493Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
