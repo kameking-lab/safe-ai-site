@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-18T21:45:19.500Z",
+  "updatedAt": "2026-07-19T21:47:17.408Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -457,6 +457,84 @@
       "provenance": "news_auto"
     },
     {
+      "id": "fb206d30fef3a8e2",
+      "headline": "福岡 太宰府で38度 20日も埼玉で危険な暑さ予想 熱中症対策を",
+      "aiSummary": "福岡・埼玉で猛暑が予想され、熱中症への警戒を呼びかけ。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260719/k10015180531000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sun, 19 Jul 2026 22:01:03 +0900",
+        "fetchedAt": "2026-07-19T21:47:00.016Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-19T21:47:11.354Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "e681bfc50aa62457",
+      "headline": "マンションから男性転落 23歳女性が巻き込まれ死亡 名古屋 栄",
+      "aiSummary": "名古屋市栄でマンションから男性が転落し、通行中の23歳女性が巻き込まれ死亡。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260719/k10015180661000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sun, 19 Jul 2026 17:32:28 +0900",
+        "fetchedAt": "2026-07-19T21:47:00.016Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-19T21:47:17.400Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "7b5845baed385e09",
+      "headline": "「SUP」中に海に転落 20歳の大学生が死亡 横浜",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260719/k10015180781000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sun, 19 Jul 2026 17:15:58 +0900",
+        "fetchedAt": "2026-07-19T21:47:00.016Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 0,
+        "misinformationRisk": 0,
+        "duplication": 0,
+        "judgedAt": "2026-07-19T21:47:17.400Z",
+        "model": "prefilter",
+        "rejectionReasons": [
+          "prefilter:school-context"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
       "id": "e8c97d46a65d04d0",
       "headline": "栃木 足利 住宅に土砂流入し倒壊 行方不明者の捜索続く",
       "aiSummary": "栃木県足利市で土砂流入により住宅が倒壊し、行方不明者の捜索が続く。",
@@ -742,6 +820,33 @@
         "model": "prefilter",
         "rejectionReasons": [
           "prefilter:school-context"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "a246c1d44ce599c9",
+      "headline": "東北から九州で猛烈な暑さ 埼玉で危険な暑さ予想 熱中症対策を",
+      "aiSummary": "全国的に猛暑が予想され、熱中症への厳重な警戒が呼びかけられている。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260720/k10015181031000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 20 Jul 2026 06:16:53 +0900",
+        "fetchedAt": "2026-07-19T21:47:00.016Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-19T21:47:06.052Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
