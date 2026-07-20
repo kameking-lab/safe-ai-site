@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-19T21:47:17.472Z",
+  "generatedAt": "2026-07-20T21:57:38.228Z",
   "counts": {
-    "approved": 34,
-    "rejected": 46,
-    "total": 80,
-    "approvalRate": 0.425
+    "approved": 35,
+    "rejected": 49,
+    "total": 84,
+    "approvalRate": 0.417
   },
   "byDay": [
     {
@@ -314,6 +314,13 @@
       "rejected": 4,
       "total": 4,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-07-21",
+      "approved": 1,
+      "rejected": 3,
+      "total": 4,
+      "approvalRate": 0.25
     }
   ],
   "byPublisher": [
@@ -326,10 +333,10 @@
     },
     {
       "publisher": "日本放送協会",
-      "approved": 6,
-      "rejected": 44,
-      "total": 50,
-      "approvalRate": 0.12
+      "approved": 7,
+      "rejected": 47,
+      "total": 54,
+      "approvalRate": 0.13
     }
   ],
   "byEstimatedWorkCategory": [
@@ -342,10 +349,10 @@
     },
     {
       "category": "運輸交通業",
-      "approved": 0,
+      "approved": 1,
       "rejected": 1,
-      "total": 1,
-      "approvalRate": 0
+      "total": 2,
+      "approvalRate": 0.5
     },
     {
       "category": "その他の事業",
@@ -364,6 +371,13 @@
       "approvalRate": 1
     },
     {
+      "type": "交通事故",
+      "approved": 1,
+      "rejected": 2,
+      "total": 3,
+      "approvalRate": 0.333
+    },
+    {
       "type": "有害物質",
       "approved": 1,
       "rejected": 2,
@@ -373,22 +387,15 @@
     {
       "type": "熱中症",
       "approved": 5,
-      "rejected": 19,
-      "total": 24,
-      "approvalRate": 0.208
+      "rejected": 20,
+      "total": 25,
+      "approvalRate": 0.2
     },
     {
       "type": "崩壊・倒壊",
       "approved": 0,
-      "rejected": 5,
-      "total": 5,
-      "approvalRate": 0
-    },
-    {
-      "type": "交通事故",
-      "approved": 0,
-      "rejected": 2,
-      "total": 2,
+      "rejected": 6,
+      "total": 6,
       "approvalRate": 0
     },
     {
@@ -396,6 +403,13 @@
       "approved": 0,
       "rejected": 2,
       "total": 2,
+      "approvalRate": 0
+    },
+    {
+      "type": "飛来・落下",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
       "approvalRate": 0
     },
     {
@@ -428,15 +442,15 @@
         0,
         0,
         1,
-        1,
+        2,
         6,
         26
       ],
       "rejected": [
         4,
-        12,
-        24,
-        2,
+        13,
+        25,
+        3,
         1,
         0,
         1,
@@ -460,7 +474,7 @@
       ],
       "approved": [
         3,
-        22,
+        23,
         9,
         0,
         0,
@@ -472,7 +486,7 @@
       ],
       "rejected": [
         6,
-        39,
+        42,
         1,
         0,
         0,
@@ -497,7 +511,7 @@
         "90-100"
       ],
       "approved": [
-        28,
+        29,
         6,
         0,
         0,
@@ -509,7 +523,7 @@
         0
       ],
       "rejected": [
-        29,
+        32,
         17,
         0,
         0,
@@ -537,7 +551,7 @@
       "approved": [
         0,
         33,
-        1,
+        2,
         0,
         0,
         0,
@@ -548,12 +562,12 @@
       ],
       "rejected": [
         4,
-        35,
+        37,
         0,
         0,
         0,
         0,
-        2,
+        3,
         4,
         1,
         0
@@ -563,11 +577,11 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 40
+      "count": 43
     },
     {
       "reason": "duplication",
-      "count": 7
+      "count": 8
     },
     {
       "reason": "prefilter:school-context",
@@ -646,6 +660,19 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "新名神高速6人死亡事故4か月 遺族「父親を返してほしい」",
+        "aiSummary": "新名神高速で発生した6人死亡事故から4か月、遺族が悲痛な思いを表明。",
+        "score": {
+          "relevance": 70,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 20,
+          "judgedAt": "2026-07-20T21:57:24.287Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "改正労災保険法が成立 遺族補償年金の支給 性別の差を解消へ",
         "aiSummary": "労災保険法が改正され、遺族補償年金の性別による支給格差が解消される。",
         "score": {
@@ -693,19 +720,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-07-14T21:54:30.869Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "第６回「労働基準法における「労働者」に関する研究会」を開催します",
-        "aiSummary": "厚生労働省が労働基準法における労働者の定義を議論する研究会を開催。",
-        "score": {
-          "relevance": 85,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-10T21:57:54.707Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"
@@ -810,6 +824,22 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "広い範囲で気温上昇 埼玉県では酷暑日予想 熱中症に厳重警戒",
+        "aiSummary": "全国的に気温が上昇し、埼玉県で酷暑日となる見込み。熱中症に厳重な警戒を。",
+        "score": {
+          "relevance": 20,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-20T21:57:13.597Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 20 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "熱中症 搬送者数 5月11～17日に全国で1000人以上 1人死亡",
         "aiSummary": "全国で5月11日から17日までに熱中症で1000人以上が搬送され、1人が死亡した。",
         "score": {
@@ -853,22 +883,6 @@
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
             "relevance 20 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "西日本に続き きょう東日本でも猛暑日予想 熱中症対策の徹底を",
-        "aiSummary": "西日本に続き東日本でも猛暑日予想。労働現場での熱中症対策を徹底するよう呼びかけ。",
-        "score": {
-          "relevance": 30,
-          "copyrightRisk": 15,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-07-13T21:52:33.282Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 30 < 70 (not labor-safety related for type=general_news)"
           ]
         },
         "publisher": "日本放送協会"

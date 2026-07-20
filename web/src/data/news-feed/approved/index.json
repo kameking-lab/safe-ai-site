@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-19T21:47:17.408Z",
+  "updatedAt": "2026-07-20T21:57:38.164Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -116,6 +116,31 @@
         "misinformationRisk": 5,
         "duplication": 10,
         "judgedAt": "2026-07-16T22:00:07.369Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "c2bea5978a7391be",
+      "headline": "新名神高速6人死亡事故4か月 遺族「父親を返してほしい」",
+      "aiSummary": "新名神高速で発生した6人死亡事故から4か月、遺族が悲痛な思いを表明。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260720/k10015181271000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 20 Jul 2026 18:36:20 +0900",
+        "fetchedAt": "2026-07-20T21:57:06.602Z"
+      },
+      "estimatedAccidentType": "交通事故",
+      "estimatedWorkCategory": "運輸交通業",
+      "newsType": "accident_report",
+      "score": {
+        "relevance": 70,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 20,
+        "judgedAt": "2026-07-20T21:57:24.287Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,

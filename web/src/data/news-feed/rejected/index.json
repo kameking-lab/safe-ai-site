@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-19T21:47:17.408Z",
+  "updatedAt": "2026-07-20T21:57:38.164Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -156,6 +156,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "31ec8799f4e66693",
+      "headline": "広い範囲で気温上昇 埼玉県では酷暑日予想 熱中症に厳重警戒",
+      "aiSummary": "全国的に気温が上昇し、埼玉県で酷暑日となる見込み。熱中症に厳重な警戒を。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260721/k10015181481000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 21 Jul 2026 06:04:38 +0900",
+        "fetchedAt": "2026-07-20T21:57:06.602Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-20T21:57:13.597Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
@@ -820,6 +847,61 @@
         "model": "prefilter",
         "rejectionReasons": [
           "prefilter:school-context"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "d18ab58218457875",
+      "headline": "栃木 足利 記録的大雨 倒壊住宅で死亡の2人は60代夫婦と確認",
+      "aiSummary": "栃木県足利市で記録的大雨により住宅が倒壊、60代夫婦が死亡。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260720/k10015181231000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 20 Jul 2026 16:39:26 +0900",
+        "fetchedAt": "2026-07-20T21:57:06.602Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-20T21:57:30.468Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "ea7a7a5689e2324f",
+      "headline": "マンション転落 巻き込まれ死亡の女性は食事後帰宅途中 名古屋",
+      "aiSummary": "名古屋でマンションから転落した人物に女性が巻き込まれ死亡。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260720/k10015181181000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 20 Jul 2026 12:25:26 +0900",
+        "fetchedAt": "2026-07-20T21:57:06.602Z"
+      },
+      "estimatedAccidentType": "飛来・落下",
+      "newsType": "accident_report",
+      "score": {
+        "relevance": 35,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 60,
+        "judgedAt": "2026-07-20T21:57:38.157Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "duplication 60 > 50 (already covered in accident DB)",
+          "relevance 35 < 70 (not labor-safety related for type=accident_report)"
         ]
       },
       "approved": false,
