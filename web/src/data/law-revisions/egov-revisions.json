@@ -1,26 +1,26 @@
 {
-  "fetchedAt": "2026-07-06T03:50:37.208Z",
+  "fetchedAt": "2026-07-20T03:25:50.717Z",
   "source": "e-Gov 法令API v2（政府標準利用規約2.0・出典明示）",
   "total": 20,
   "skipped": 0,
   "skippedLaws": [],
   "revisions": [
     {
-      "id": "lr-egov-322AC0000000049-20260624",
-      "title": "労働基準法（民法等の一部を改正する法律の施行に伴う関係法律の整備等に関する法律）",
-      "publishedAt": "2026-06-24",
-      "revisionNumber": "令和八年法律第四十六号",
+      "id": "lr-egov-322AC0000000049-20260717",
+      "title": "労働基準法（労働者災害補償保険法等の一部を改正する法律）",
+      "publishedAt": "2026-07-17",
+      "revisionNumber": "令和八年法律第六十号",
       "kind": "law",
       "category": "法律",
       "issuer": "厚生労働省",
-      "summary": "労基法の最新改正（出典: e-Gov法令検索の構造データ）。改正法令「民法等の一部を改正する法律の施行に伴う関係法律の整備等に関する法律」。公布 2026-06-24、施行日 2026-06-24。改正内容の詳細はe-Govの原文で必ずご確認ください。",
+      "summary": "労基法の最新改正（出典: e-Gov法令検索の構造データ）。改正法令「労働者災害補償保険法等の一部を改正する法律」。公布 2026-07-17、施行日 2026-07-17。改正内容の詳細はe-Govの原文で必ずご確認ください。",
       "source": {
         "url": "https://laws.e-gov.go.jp/law/322AC0000000049",
         "label": "e-Gov 労働基準法"
       },
       "official_notice_number": "",
-      "publication_date": "2026-06-24",
-      "enforcement_date": "2026-06-24",
+      "publication_date": "2026-07-17",
+      "enforcement_date": "2026-07-17",
       "enforcement_status": "enforced",
       "source_url": "https://laws.e-gov.go.jp/law/322AC0000000049"
     },
