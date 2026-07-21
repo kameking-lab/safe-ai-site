@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-20T21:57:38.164Z",
+  "updatedAt": "2026-07-21T22:00:39.052Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -22,6 +22,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "ee81652e84a36ef9",
+      "headline": "関東と東海「酷暑日」予想 熱中症に厳重警戒 東北では激しい雨",
+      "aiSummary": "関東・東海で酷暑日予想、熱中症に厳重警戒。東北は激しい雨。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260722/k10015182151000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 22 Jul 2026 06:14:38 +0900",
+        "fetchedAt": "2026-07-21T22:00:31.145Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-21T22:00:39.045Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
@@ -156,6 +183,31 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "87f131f8e44bc3f9",
+      "headline": "石川 小松 80代男性が自宅で倒れ死亡 熱中症か",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260721/k10015181871000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 21 Jul 2026 16:14:32 +0900",
+        "fetchedAt": "2026-07-21T22:00:31.145Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 0,
+        "misinformationRisk": 0,
+        "duplication": 0,
+        "judgedAt": "2026-07-21T22:00:39.045Z",
+        "model": "prefilter",
+        "rejectionReasons": [
+          "prefilter:home-context"
         ]
       },
       "approved": false,

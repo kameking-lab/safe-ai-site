@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-20T21:57:38.228Z",
+  "generatedAt": "2026-07-21T22:00:39.175Z",
   "counts": {
     "approved": 35,
-    "rejected": 49,
-    "total": 84,
-    "approvalRate": 0.417
+    "rejected": 51,
+    "total": 86,
+    "approvalRate": 0.407
   },
   "byDay": [
     {
@@ -321,6 +321,13 @@
       "rejected": 3,
       "total": 4,
       "approvalRate": 0.25
+    },
+    {
+      "date": "2026-07-22",
+      "approved": 0,
+      "rejected": 2,
+      "total": 2,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -334,9 +341,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 7,
-      "rejected": 47,
-      "total": 54,
-      "approvalRate": 0.13
+      "rejected": 49,
+      "total": 56,
+      "approvalRate": 0.125
     }
   ],
   "byEstimatedWorkCategory": [
@@ -387,9 +394,9 @@
     {
       "type": "熱中症",
       "approved": 5,
-      "rejected": 20,
-      "total": 25,
-      "approvalRate": 0.2
+      "rejected": 21,
+      "total": 26,
+      "approvalRate": 0.192
     },
     {
       "type": "崩壊・倒壊",
@@ -447,9 +454,9 @@
         26
       ],
       "rejected": [
-        4,
+        5,
         13,
-        25,
+        26,
         3,
         1,
         0,
@@ -485,8 +492,8 @@
         0
       ],
       "rejected": [
-        6,
-        42,
+        7,
+        43,
         1,
         0,
         0,
@@ -523,8 +530,8 @@
         0
       ],
       "rejected": [
-        32,
-        17,
+        33,
+        18,
         0,
         0,
         0,
@@ -561,8 +568,8 @@
         0
       ],
       "rejected": [
-        4,
-        37,
+        5,
+        38,
         0,
         0,
         0,
@@ -577,7 +584,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 43
+      "count": 44
     },
     {
       "reason": "duplication",
@@ -586,6 +593,10 @@
     {
       "reason": "prefilter:school-context",
       "count": 3
+    },
+    {
+      "reason": "prefilter:home-context",
+      "count": 1
     },
     {
       "reason": "prefilter:sports-context",
@@ -743,6 +754,22 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "関東と東海「酷暑日」予想 熱中症に厳重警戒 東北では激しい雨",
+        "aiSummary": "関東・東海で酷暑日予想、熱中症に厳重警戒。東北は激しい雨。",
+        "score": {
+          "relevance": 20,
+          "copyrightRisk": 15,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-07-21T22:00:39.045Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 20 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "エアコン使用でも熱中症で死亡 周囲が高齢者などに声かけを",
         "aiSummary": "エアコン使用環境下でも熱中症で死亡する事例が発生。高齢者などへの注意喚起を促す。",
         "score": {
@@ -824,6 +851,22 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "石川 小松 80代男性が自宅で倒れ死亡 熱中症か",
+        "aiSummary": "",
+        "score": {
+          "relevance": 0,
+          "copyrightRisk": 0,
+          "misinformationRisk": 0,
+          "duplication": 0,
+          "judgedAt": "2026-07-21T22:00:39.045Z",
+          "model": "prefilter",
+          "rejectionReasons": [
+            "prefilter:home-context"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "広い範囲で気温上昇 埼玉県では酷暑日予想 熱中症に厳重警戒",
         "aiSummary": "全国的に気温が上昇し、埼玉県で酷暑日となる見込み。熱中症に厳重な警戒を。",
         "score": {
@@ -851,38 +894,6 @@
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
             "relevance 25 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "きょうも季節外れの暑さ続く 猛暑日予想も 熱中症対策を",
-        "aiSummary": "季節外れの高温が続き、猛暑日も予想されるため、熱中症対策を呼びかけ。",
-        "score": {
-          "relevance": 20,
-          "copyrightRisk": 10,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-05-18T22:00:23.529Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 20 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "高齢者の熱中症 対策は？【Q＆A】",
-        "aiSummary": "高齢者の熱中症予防と対処法について、Q&A形式で解説する記事。",
-        "score": {
-          "relevance": 20,
-          "copyrightRisk": 10,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-07-14T21:54:24.850Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 20 < 70 (not labor-safety related for type=general_news)"
           ]
         },
         "publisher": "日本放送協会"
