@@ -47,8 +47,6 @@ import {
   LayoutGrid,
   Calculator,
 } from "lucide-react";
-import { Footer } from "@/components/footer";
-import { FlagshipNav } from "@/components/flagship-nav";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { PAID_MODE } from "@/lib/paid-mode";
 // C-1: 件数は SITE_STATS の静的リテラルを使う。@/data/laws や @/lib/mhlw-chemicals を
@@ -237,9 +235,11 @@ interface AppShellProps {
   /** C-1: 認証付きユーザーメニュー。layout が Suspense スロットとして注入する
    * （AppShell 内で await auth() に依存しないことで静的シェルを初回フラッシュで確定） */
   userSlot?: React.ReactNode;
+  flagshipNavSlot?: React.ReactNode;
+  footerSlot?: React.ReactNode;
 }
 
-export function AppShell({ children, userSlot }: AppShellProps) {
+export function AppShell({ children, userSlot, flagshipNavSlot, footerSlot }: AppShellProps) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { furiganaEnabled, toggleFurigana } = useFurigana();
@@ -746,13 +746,13 @@ export function AppShell({ children, userSlot }: AppShellProps) {
           </button>
         </div>
         <div className="print:hidden">
-          <FlagshipNav />
+          {flagshipNavSlot}
         </div>
         <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col scroll-mt-20 focus:outline-none">
           <div className="mx-auto w-full max-w-7xl flex-1">{children}</div>
         </main>
         <div className="print:hidden">
-          <Footer />
+          {footerSlot}
         </div>
       </div>
       <div className="print:hidden">

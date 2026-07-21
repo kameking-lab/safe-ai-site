@@ -1,10 +1,7 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { FLAGSHIP_FEATURES } from "@/config/flagship-nav";
-import { useLanguage } from "@/contexts/language-context";
 
 // P1-L: 「開く →」「配下機能 N件」の抽象ラベルを具体動詞へ。
 // 機能ごとに「何ができるか」が一瞬で分かる動詞ラベルを定義する。
@@ -89,8 +86,7 @@ const EN_FEATURE_COPY: Record<string, { title: string; description: string }> = 
 
 /** トップページの主要機能カードグリッド */
 export function FlagshipGrid() {
-  const { language } = useLanguage();
-  const isEn = language === "en";
+  const isEn = false;
 
   return (
     <section aria-labelledby="flagship-grid-title">
