@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-21T22:00:39.052Z",
+  "updatedAt": "2026-07-22T22:01:31.852Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -19,6 +19,60 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-05-28T22:40:07.064Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "af34967e871242aa",
+      "headline": "暑さ連続で“脱水蓄積” 熱中症リスク高まる可能性 専門家指摘",
+      "aiSummary": "連日の猛暑で体内の水分不足が進み、熱中症の危険性が高まると専門家が注意喚起。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260722/k10015182711000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 22 Jul 2026 19:23:01 +0900",
+        "fetchedAt": "2026-07-22T22:00:56.876Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-22T22:01:17.942Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "5f6f7eda3cf6bbe8",
+      "headline": "熱中症疑いで21日に287人搬送 都内でことし最多",
+      "aiSummary": "都内で熱中症疑い搬送が21日に287人、今年最多を記録。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260722/k10015182501000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 22 Jul 2026 13:30:51 +0900",
+        "fetchedAt": "2026-07-22T22:00:56.876Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-22T22:01:31.845Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 25 < 70 (not labor-safety related for type=general_news)"
@@ -368,6 +422,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 10 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "8ce870b9146b95ea",
+      "headline": "名古屋 岐阜 京都 甲府で「酷暑日」予想 熱中症に厳重警戒",
+      "aiSummary": "複数都市で酷暑日予測。熱中症への厳重な警戒が呼びかけられている。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260723/k10015183051000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 23 Jul 2026 06:33:39 +0900",
+        "fetchedAt": "2026-07-22T22:00:56.876Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-22T22:01:06.156Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,

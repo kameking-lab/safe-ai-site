@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-21T22:00:39.175Z",
+  "generatedAt": "2026-07-22T22:01:31.917Z",
   "counts": {
-    "approved": 35,
-    "rejected": 51,
-    "total": 86,
-    "approvalRate": 0.407
+    "approved": 36,
+    "rejected": 54,
+    "total": 90,
+    "approvalRate": 0.4
   },
   "byDay": [
     {
@@ -328,6 +328,13 @@
       "rejected": 2,
       "total": 2,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-07-23",
+      "approved": 1,
+      "rejected": 3,
+      "total": 4,
+      "approvalRate": 0.25
     }
   ],
   "byPublisher": [
@@ -340,10 +347,10 @@
     },
     {
       "publisher": "日本放送協会",
-      "approved": 7,
-      "rejected": 49,
-      "total": 56,
-      "approvalRate": 0.125
+      "approved": 8,
+      "rejected": 52,
+      "total": 60,
+      "approvalRate": 0.133
     }
   ],
   "byEstimatedWorkCategory": [
@@ -393,10 +400,10 @@
     },
     {
       "type": "熱中症",
-      "approved": 5,
-      "rejected": 21,
-      "total": 26,
-      "approvalRate": 0.192
+      "approved": 6,
+      "rejected": 24,
+      "total": 30,
+      "approvalRate": 0.2
     },
     {
       "type": "崩壊・倒壊",
@@ -450,13 +457,13 @@
         0,
         1,
         2,
-        6,
+        7,
         26
       ],
       "rejected": [
         5,
         13,
-        26,
+        29,
         3,
         1,
         0,
@@ -481,7 +488,7 @@
       ],
       "approved": [
         3,
-        23,
+        24,
         9,
         0,
         0,
@@ -493,7 +500,7 @@
       ],
       "rejected": [
         7,
-        43,
+        46,
         1,
         0,
         0,
@@ -518,7 +525,7 @@
         "90-100"
       ],
       "approved": [
-        29,
+        30,
         6,
         0,
         0,
@@ -530,8 +537,8 @@
         0
       ],
       "rejected": [
-        33,
-        18,
+        34,
+        20,
         0,
         0,
         0,
@@ -557,7 +564,7 @@
       ],
       "approved": [
         0,
-        33,
+        34,
         2,
         0,
         0,
@@ -569,7 +576,7 @@
       ],
       "rejected": [
         5,
-        38,
+        41,
         0,
         0,
         0,
@@ -584,7 +591,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 44
+      "count": 47
     },
     {
       "reason": "duplication",
@@ -614,6 +621,19 @@
           "misinformationRisk": 10,
           "duplication": 10,
           "judgedAt": "2026-05-27T22:28:56.737Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "全国の熱中症搬送急増 1週間でことし初1万人超  前週の2倍以上",
+        "aiSummary": "全国で熱中症による救急搬送が急増し、1週間で1万人超を記録した。",
+        "score": {
+          "relevance": 85,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-22T22:01:12.285Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "日本放送協会"
@@ -721,19 +741,6 @@
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"
-      },
-      {
-        "headline": "第31回労働政策審議会安全衛生分科会じん肺部会　議事録",
-        "aiSummary": "労働政策審議会安全衛生分科会じん肺部会の議事録が公表された。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-14T21:54:30.869Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
       }
     ],
     "rejected": [
@@ -746,6 +753,38 @@
           "misinformationRisk": 10,
           "duplication": 10,
           "judgedAt": "2026-05-28T22:40:07.064Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 25 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "暑さ連続で“脱水蓄積” 熱中症リスク高まる可能性 専門家指摘",
+        "aiSummary": "連日の猛暑で体内の水分不足が進み、熱中症の危険性が高まると専門家が注意喚起。",
+        "score": {
+          "relevance": 25,
+          "copyrightRisk": 15,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-07-22T22:01:17.942Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 25 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "熱中症疑いで21日に287人搬送 都内でことし最多",
+        "aiSummary": "都内で熱中症疑い搬送が21日に287人、今年最多を記録。",
+        "score": {
+          "relevance": 25,
+          "copyrightRisk": 15,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-07-22T22:01:31.845Z",
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
             "relevance 25 < 70 (not labor-safety related for type=general_news)"
@@ -862,38 +901,6 @@
           "model": "prefilter",
           "rejectionReasons": [
             "prefilter:home-context"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "広い範囲で気温上昇 埼玉県では酷暑日予想 熱中症に厳重警戒",
-        "aiSummary": "全国的に気温が上昇し、埼玉県で酷暑日となる見込み。熱中症に厳重な警戒を。",
-        "score": {
-          "relevance": 20,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-20T21:57:13.597Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 20 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "熱中症 搬送者数 5月11～17日に全国で1000人以上 1人死亡",
-        "aiSummary": "全国で5月11日から17日までに熱中症で1000人以上が搬送され、1人が死亡した。",
-        "score": {
-          "relevance": 25,
-          "copyrightRisk": 10,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-05-19T22:12:48.966Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 25 < 70 (not labor-safety related for type=general_news)"
           ]
         },
         "publisher": "日本放送協会"

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-21T22:00:39.052Z",
+  "updatedAt": "2026-07-22T22:01:31.852Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -22,6 +22,34 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 65 < 70 (not labor-safety related for type=administrative_notice)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "450e7e427d15a0ed",
+      "headline": "プロ野球2軍公式戦がノーゲームに 複数選手が熱中症の症状訴え",
+      "aiSummary": "プロ野球2軍戦で複数選手が熱中症を発症し、試合が中止された。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260722/k10015182781000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 22 Jul 2026 17:36:05 +0900",
+        "fetchedAt": "2026-07-22T22:00:56.876Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "estimatedWorkCategory": "その他の事業",
+      "newsType": "accident_report",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 70,
+        "judgedAt": "2026-07-22T22:01:25.267Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "duplication 70 > 50 (already covered in accident DB)"
         ]
       },
       "approved": false,

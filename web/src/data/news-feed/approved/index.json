@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-21T22:00:39.052Z",
+  "updatedAt": "2026-07-22T22:01:31.852Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -20,6 +20,30 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-05-27T22:28:56.737Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "16a5ec420bdf3526",
+      "headline": "全国の熱中症搬送急増 1週間でことし初1万人超  前週の2倍以上",
+      "aiSummary": "全国で熱中症による救急搬送が急増し、1週間で1万人超を記録した。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260722/k10015182831000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 22 Jul 2026 19:46:20 +0900",
+        "fetchedAt": "2026-07-22T22:00:56.876Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "statistics_release",
+      "score": {
+        "relevance": 85,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-22T22:01:12.285Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
