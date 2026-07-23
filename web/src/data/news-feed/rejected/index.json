@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-22T22:01:31.852Z",
+  "updatedAt": "2026-07-23T22:01:58.826Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -422,6 +422,61 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 10 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "7c77990e7b33a39a",
+      "headline": "サッカーJリーグ 新シーズンの熱中症対策を発表 実施条件拡大",
+      "aiSummary": "Jリーグが新シーズンに向け、熱中症対策の実施条件を拡大すると発表。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260723/k10015184181000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 23 Jul 2026 18:32:07 +0900",
+        "fetchedAt": "2026-07-23T22:01:19.155Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "estimatedWorkCategory": "その他の事業",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-23T22:01:46.239Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "3e9cada1f508dd5f",
+      "headline": "東京 22日 熱中症疑いで453人搬送 2010年以降最多",
+      "aiSummary": "東京都で22日に熱中症で搬送された人数が過去最多を記録した。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260723/k10015183611000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 23 Jul 2026 11:56:35 +0900",
+        "fetchedAt": "2026-07-23T22:01:19.155Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-23T22:01:51.681Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
