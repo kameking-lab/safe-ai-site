@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-23T22:01:58.826Z",
+  "updatedAt": "2026-07-24T22:01:35.000Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -1331,6 +1331,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "d3a0555bdbaf7676",
+      "headline": "4日連続の酷暑日 25日も40度迫る暑さの見込み 熱中症厳重警戒",
+      "aiSummary": "連日の猛暑で気温が40度に迫る見込み。熱中症への厳重な警戒を呼びかけ。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260724/k10015184721000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 24 Jul 2026 22:25:28 +0900",
+        "fetchedAt": "2026-07-24T22:01:07.224Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-24T22:01:14.638Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-23T22:01:58.826Z",
+  "updatedAt": "2026-07-24T22:01:35.000Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -30,13 +30,13 @@
     {
       "id": "450e7e427d15a0ed",
       "headline": "プロ野球2軍公式戦がノーゲームに 複数選手が熱中症の症状訴え",
-      "aiSummary": "プロ野球2軍戦で複数選手が熱中症を発症し、試合が中止された。",
+      "aiSummary": "プロ野球2軍の試合中に複数選手が熱中症を発症し、試合が中止された。",
       "source": {
         "name": "NHK NEWS WEB（社会）",
         "url": "http://www3.nhk.or.jp/news/html/20260722/k10015182781000.html",
         "publisher": "日本放送協会",
         "publishedAt": "Wed, 22 Jul 2026 17:36:05 +0900",
-        "fetchedAt": "2026-07-23T22:01:19.155Z"
+        "fetchedAt": "2026-07-24T22:01:07.224Z"
       },
       "estimatedAccidentType": "熱中症",
       "estimatedWorkCategory": "その他の事業",
@@ -46,7 +46,7 @@
         "copyrightRisk": 20,
         "misinformationRisk": 10,
         "duplication": 70,
-        "judgedAt": "2026-07-23T22:01:58.819Z",
+        "judgedAt": "2026-07-24T22:01:34.993Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)"
@@ -142,22 +142,23 @@
     {
       "id": "ef7a59a063b7cfa1",
       "headline": "和歌山 草刈り中の男性2人がため池に転落 病院搬送も死亡",
-      "aiSummary": "和歌山県で草刈り作業中の男性2名がため池に転落し死亡。",
+      "aiSummary": "和歌山で草刈り作業中の男性2名がため池に転落し、死亡した。",
       "source": {
         "name": "NHK NEWS WEB（社会）",
         "url": "http://www3.nhk.or.jp/news/html/20260723/k10015183481000.html",
         "publisher": "日本放送協会",
         "publishedAt": "Thu, 23 Jul 2026 19:55:11 +0900",
-        "fetchedAt": "2026-07-23T22:01:19.155Z"
+        "fetchedAt": "2026-07-24T22:01:07.224Z"
       },
       "estimatedAccidentType": "墜落",
+      "estimatedWorkCategory": "その他の事業",
       "newsType": "accident_report",
       "score": {
-        "relevance": 80,
+        "relevance": 90,
         "copyrightRisk": 15,
-        "misinformationRisk": 10,
+        "misinformationRisk": 5,
         "duplication": 70,
-        "judgedAt": "2026-07-23T22:01:29.645Z",
+        "judgedAt": "2026-07-24T22:01:22.060Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)"
@@ -169,23 +170,23 @@
     {
       "id": "67474a75d9ceaf52",
       "headline": "川崎クレーン事故 遺体は行方不明の作業員と確認 死者4人に",
-      "aiSummary": "川崎のクレーン事故で、行方不明の作業員が死亡確認され、死者は計4名に。",
+      "aiSummary": "川崎のクレーン事故で、行方不明の作業員が死亡確認。死者計4名。",
       "source": {
         "name": "NHK NEWS WEB（社会）",
         "url": "http://www3.nhk.or.jp/news/html/20260723/k10015184251000.html",
         "publisher": "日本放送協会",
         "publishedAt": "Thu, 23 Jul 2026 19:41:55 +0900",
-        "fetchedAt": "2026-07-23T22:01:19.155Z"
+        "fetchedAt": "2026-07-24T22:01:07.224Z"
       },
       "estimatedAccidentType": "崩壊・倒壊",
       "estimatedWorkCategory": "建設業",
       "newsType": "accident_report",
       "score": {
         "relevance": 90,
-        "copyrightRisk": 10,
+        "copyrightRisk": 15,
         "misinformationRisk": 5,
         "duplication": 70,
-        "judgedAt": "2026-07-23T22:01:35.397Z",
+        "judgedAt": "2026-07-24T22:01:28.659Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)"
