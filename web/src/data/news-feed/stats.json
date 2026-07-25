@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-24T22:01:35.061Z",
+  "generatedAt": "2026-07-25T21:55:38.437Z",
   "counts": {
     "approved": 36,
-    "rejected": 57,
-    "total": 93,
-    "approvalRate": 0.387
+    "rejected": 59,
+    "total": 95,
+    "approvalRate": 0.379
   },
   "byDay": [
     {
@@ -349,6 +349,13 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-07-26",
+      "approved": 0,
+      "rejected": 2,
+      "total": 2,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -362,9 +369,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 8,
-      "rejected": 55,
-      "total": 63,
-      "approvalRate": 0.127
+      "rejected": 57,
+      "total": 65,
+      "approvalRate": 0.123
     }
   ],
   "byEstimatedWorkCategory": [
@@ -399,13 +406,6 @@
       "approvalRate": 1
     },
     {
-      "type": "交通事故",
-      "approved": 1,
-      "rejected": 2,
-      "total": 3,
-      "approvalRate": 0.333
-    },
-    {
       "type": "有害物質",
       "approved": 1,
       "rejected": 2,
@@ -413,11 +413,18 @@
       "approvalRate": 0.333
     },
     {
+      "type": "交通事故",
+      "approved": 1,
+      "rejected": 3,
+      "total": 4,
+      "approvalRate": 0.25
+    },
+    {
       "type": "熱中症",
       "approved": 6,
-      "rejected": 27,
-      "total": 33,
-      "approvalRate": 0.182
+      "rejected": 28,
+      "total": 34,
+      "approvalRate": 0.176
     },
     {
       "type": "崩壊・倒壊",
@@ -476,9 +483,9 @@
       ],
       "rejected": [
         5,
-        13,
+        14,
         32,
-        3,
+        4,
         1,
         0,
         1,
@@ -514,8 +521,8 @@
       ],
       "rejected": [
         7,
-        49,
-        1,
+        50,
+        2,
         0,
         0,
         0,
@@ -552,7 +559,7 @@
       ],
       "rejected": [
         37,
-        20,
+        22,
         0,
         0,
         0,
@@ -590,7 +597,7 @@
       ],
       "rejected": [
         5,
-        44,
+        46,
         0,
         0,
         0,
@@ -605,7 +612,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 50
+      "count": 52
     },
     {
       "reason": "duplication",

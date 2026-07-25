@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-24T22:01:35.000Z",
+  "updatedAt": "2026-07-25T21:55:38.387Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -850,6 +850,60 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "a146f8afda91540d",
+      "headline": "5日連続「酷暑日」で最長に 26日も各地猛暑予想 熱中症対策を",
+      "aiSummary": "全国的な猛暑が続き、熱中症への警戒が呼びかけられている。5日連続の酷暑日を記録し、今後も厳しい暑さが予想される。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260725/k10015185701000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 25 Jul 2026 22:36:20 +0900",
+        "fetchedAt": "2026-07-25T21:51:05.066Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 30,
+        "copyrightRisk": 20,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-25T21:54:40.411Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 30 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "a0110f35532e6a27",
+      "headline": "新名神高速6人死亡事故 5人家族の遺族「理不尽に命奪われた」",
+      "aiSummary": "新名神高速での多人数死亡事故で、遺族が理不尽な被害を訴えた。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260725/k10015186051000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 25 Jul 2026 20:11:06 +0900",
+        "fetchedAt": "2026-07-25T21:51:05.066Z"
+      },
+      "estimatedAccidentType": "交通事故",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 15,
+        "judgedAt": "2026-07-25T21:55:18.528Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
