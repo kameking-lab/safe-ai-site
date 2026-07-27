@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-26T21:55:32.020Z",
+  "updatedAt": "2026-07-27T22:02:16.972Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -1037,6 +1037,33 @@
         "model": "prefilter",
         "rejectionReasons": [
           "prefilter:school-context"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "b286f0a9c633ee09",
+      "headline": "飲酒死亡事故か 危険運転致死の疑いで逮捕 法改正後初 警視庁",
+      "aiSummary": "飲酒運転による死亡事故で、危険運転致死容疑者が逮捕された。法改正後初の適用。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260727/k10015187391000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 27 Jul 2026 20:01:50 +0900",
+        "fetchedAt": "2026-07-27T22:01:49.231Z"
+      },
+      "estimatedAccidentType": "交通事故",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-27T22:01:56.742Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
