@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-27T22:02:16.972Z",
+  "updatedAt": "2026-07-28T22:00:37.275Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -188,6 +188,29 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-07-10T21:57:33.498Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "78cb176efdacbd81",
+      "headline": "「労働安全衛生法に基づく化学物質管理に関する説明会」の開催について",
+      "aiSummary": "厚生労働省が労働安全衛生法に基づく化学物質管理の説明会を開催。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_74553.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-07-28T17:00:00+09:00",
+        "fetchedAt": "2026-07-28T21:59:17.073Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-28T22:00:37.267Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,

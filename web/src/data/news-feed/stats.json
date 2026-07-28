@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-27T22:02:17.032Z",
+  "generatedAt": "2026-07-28T22:00:37.342Z",
   "counts": {
-    "approved": 36,
-    "rejected": 60,
-    "total": 96,
-    "approvalRate": 0.375
+    "approved": 37,
+    "rejected": 68,
+    "total": 105,
+    "approvalRate": 0.352
   },
   "byDay": [
     {
@@ -363,22 +363,29 @@
       "rejected": 1,
       "total": 1,
       "approvalRate": 0
+    },
+    {
+      "date": "2026-07-29",
+      "approved": 1,
+      "rejected": 8,
+      "total": 9,
+      "approvalRate": 0.111
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 28,
+      "approved": 29,
       "rejected": 2,
-      "total": 30,
-      "approvalRate": 0.933
+      "total": 31,
+      "approvalRate": 0.935
     },
     {
       "publisher": "日本放送協会",
       "approved": 8,
-      "rejected": 58,
-      "total": 66,
-      "approvalRate": 0.121
+      "rejected": 66,
+      "total": 74,
+      "approvalRate": 0.108
     }
   ],
   "byEstimatedWorkCategory": [
@@ -399,8 +406,8 @@
     {
       "category": "その他の事業",
       "approved": 0,
-      "rejected": 2,
-      "total": 2,
+      "rejected": 3,
+      "total": 3,
       "approvalRate": 0
     }
   ],
@@ -429,15 +436,15 @@
     {
       "type": "熱中症",
       "approved": 6,
-      "rejected": 28,
-      "total": 34,
-      "approvalRate": 0.176
+      "rejected": 30,
+      "total": 36,
+      "approvalRate": 0.167
     },
     {
       "type": "崩壊・倒壊",
       "approved": 0,
-      "rejected": 6,
-      "total": 6,
+      "rejected": 9,
+      "total": 9,
       "approvalRate": 0
     },
     {
@@ -445,6 +452,13 @@
       "approved": 0,
       "rejected": 2,
       "total": 2,
+      "approvalRate": 0
+    },
+    {
+      "type": "溺水",
+      "approved": 0,
+      "rejected": 1,
+      "total": 1,
       "approvalRate": 0
     },
     {
@@ -486,14 +500,14 @@
         1,
         2,
         7,
-        26
+        27
       ],
       "rejected": [
         5,
-        14,
-        33,
-        4,
-        1,
+        16,
+        37,
+        5,
+        2,
         0,
         1,
         0,
@@ -516,7 +530,7 @@
       ],
       "approved": [
         3,
-        24,
+        25,
         9,
         0,
         0,
@@ -528,7 +542,7 @@
       ],
       "rejected": [
         7,
-        51,
+        59,
         2,
         0,
         0,
@@ -553,7 +567,7 @@
         "90-100"
       ],
       "approved": [
-        30,
+        31,
         6,
         0,
         0,
@@ -565,8 +579,8 @@
         0
       ],
       "rejected": [
-        38,
-        22,
+        43,
+        25,
         0,
         0,
         0,
@@ -592,7 +606,7 @@
       ],
       "approved": [
         0,
-        34,
+        35,
         2,
         0,
         0,
@@ -604,8 +618,8 @@
       ],
       "rejected": [
         5,
-        47,
-        0,
+        54,
+        1,
         0,
         0,
         0,
@@ -619,7 +633,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 53
+      "count": 61
     },
     {
       "reason": "duplication",
@@ -745,6 +759,19 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "「労働安全衛生法に基づく化学物質管理に関する説明会」の開催について",
+        "aiSummary": "厚生労働省が労働安全衛生法に基づく化学物質管理の説明会を開催。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-28T22:00:37.267Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "厚生労働省"
+      },
+      {
         "headline": "労働基準法における「労働者」に関する研究会 第６回資料",
         "aiSummary": "厚生労働省が労働基準法上の労働者定義に関する研究会の第6回資料を公表。",
         "score": {
@@ -753,19 +780,6 @@
           "misinformationRisk": 5,
           "duplication": 10,
           "judgedAt": "2026-07-17T21:48:09.745Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "第５４回特定石綿被害建設業務労働者等認定審査会　開催案内",
-        "aiSummary": "厚生労働省が石綿被害建設業務労働者等認定審査会の開催を告知。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 20,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-15T21:55:11.490Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"
@@ -902,33 +916,33 @@
         "publisher": "日本放送協会"
       },
       {
-        "headline": "熱中症 搬送者数 全国で1100人余1人死亡（5月18日～24日）",
-        "aiSummary": "5月18～24日の全国熱中症搬送者は1100人超、1名死亡。",
+        "headline": "震度7 熊本 宇城の住宅倒壊 1人が巻き込まれ救助活動",
+        "aiSummary": "地震で家屋が倒壊し、中にいた1名が閉じ込められ救助中。",
         "score": {
-          "relevance": 25,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-05-26T22:17:47.080Z",
+          "relevance": 40,
+          "copyrightRisk": 15,
+          "misinformationRisk": 10,
+          "duplication": 20,
+          "judgedAt": "2026-07-28T21:59:26.524Z",
           "model": "gemini-2.5-flash",
           "rejectionReasons": [
-            "relevance 25 < 70 (not labor-safety related for type=general_news)"
+            "relevance 40 < 70 (not labor-safety related for type=accident_report)"
           ]
         },
         "publisher": "日本放送協会"
       },
       {
-        "headline": "石川 小松 80代男性が自宅で倒れ死亡 熱中症か",
-        "aiSummary": "",
+        "headline": "東京 小金井 小1プール死亡事故で元学童責任者ら4人を書類送検",
+        "aiSummary": "東京小金井市の小学校プールで児童が死亡した事故で、元学童責任者ら4人が書類送検された。",
         "score": {
-          "relevance": 0,
-          "copyrightRisk": 0,
-          "misinformationRisk": 0,
-          "duplication": 0,
-          "judgedAt": "2026-07-21T22:00:39.045Z",
-          "model": "prefilter",
+          "relevance": 20,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-28T21:59:35.362Z",
+          "model": "gemini-2.5-flash",
           "rejectionReasons": [
-            "prefilter:home-context"
+            "relevance 20 < 70 (not labor-safety related for type=general_news)"
           ]
         },
         "publisher": "日本放送協会"
