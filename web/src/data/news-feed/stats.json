@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-28T22:00:37.342Z",
+  "generatedAt": "2026-07-29T21:57:15.130Z",
   "counts": {
     "approved": 37,
-    "rejected": 68,
-    "total": 105,
-    "approvalRate": 0.352
+    "rejected": 76,
+    "total": 113,
+    "approvalRate": 0.327
   },
   "byDay": [
     {
@@ -370,6 +370,13 @@
       "rejected": 8,
       "total": 9,
       "approvalRate": 0.111
+    },
+    {
+      "date": "2026-07-30",
+      "approved": 0,
+      "rejected": 8,
+      "total": 8,
+      "approvalRate": 0
     }
   ],
   "byPublisher": [
@@ -383,9 +390,9 @@
     {
       "publisher": "日本放送協会",
       "approved": 8,
-      "rejected": 66,
-      "total": 74,
-      "approvalRate": 0.108
+      "rejected": 74,
+      "total": 82,
+      "approvalRate": 0.098
     }
   ],
   "byEstimatedWorkCategory": [
@@ -436,15 +443,15 @@
     {
       "type": "熱中症",
       "approved": 6,
-      "rejected": 30,
-      "total": 36,
-      "approvalRate": 0.167
+      "rejected": 33,
+      "total": 39,
+      "approvalRate": 0.154
     },
     {
       "type": "崩壊・倒壊",
       "approved": 0,
-      "rejected": 9,
-      "total": 9,
+      "rejected": 12,
+      "total": 12,
       "approvalRate": 0
     },
     {
@@ -504,8 +511,8 @@
       ],
       "rejected": [
         5,
-        16,
-        37,
+        18,
+        43,
         5,
         2,
         0,
@@ -542,7 +549,7 @@
       ],
       "rejected": [
         7,
-        59,
+        67,
         2,
         0,
         0,
@@ -579,8 +586,8 @@
         0
       ],
       "rejected": [
-        43,
-        25,
+        49,
+        27,
         0,
         0,
         0,
@@ -618,7 +625,7 @@
       ],
       "rejected": [
         5,
-        54,
+        62,
         1,
         0,
         0,
@@ -633,7 +640,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 61
+      "count": 69
     },
     {
       "reason": "duplication",
@@ -787,6 +794,86 @@
     ],
     "rejected": [
       {
+        "headline": "【29日】熊本で震度7 同程度地震に1週間ほど注意 熱中症対策を",
+        "aiSummary": "熊本県で震度7の地震が発生。同程度の余震と熱中症への警戒を呼びかけ。",
+        "score": {
+          "relevance": 15,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-29T21:56:48.178Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 15 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "高市首相「イオンモール熊本で発生した建物崩壊で3人死亡」",
+        "aiSummary": "熊本の商業施設で建物崩壊、3名死亡と首相が発表。",
+        "score": {
+          "relevance": 25,
+          "copyrightRisk": 15,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-29T21:56:55.802Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 25 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "真夏の避難生活 熱中症対策のポイントとは？【詳しく】",
+        "aiSummary": "災害時の避難生活における熱中症予防策を解説。",
+        "score": {
+          "relevance": 15,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-29T21:57:02.625Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 15 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "九州で危険な暑さ 熊本も猛暑日に 熱中症対策の徹底を",
+        "aiSummary": "九州地方で猛暑が続き、熱中症対策の徹底が呼びかけられている。",
+        "score": {
+          "relevance": 20,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 10,
+          "judgedAt": "2026-07-29T21:57:08.467Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 20 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
+        "headline": "熊本 氷川町 住宅倒壊で2人心肺停止の状態",
+        "aiSummary": "熊本県氷川町で住宅が倒壊し、2名が心肺停止状態。",
+        "score": {
+          "relevance": 20,
+          "copyrightRisk": 10,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-07-29T21:57:15.058Z",
+          "model": "gemini-2.5-flash",
+          "rejectionReasons": [
+            "relevance 20 < 70 (not labor-safety related for type=general_news)"
+          ]
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "山形県 クマ「特別警報」新設を検討 死亡事故など受け",
         "aiSummary": "山形県はクマによる死亡事故を受け、新たな特別警報制度の導入を検討している。",
         "score": {
@@ -863,86 +950,6 @@
           "rejectionReasons": [
             "relevance 20 < 70 (not labor-safety related)",
             "duplication 70 > 50 (already covered in accident DB)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "新名神高速6人死亡事故の初公判 検察「スマホ13秒脇見」",
-        "aiSummary": "新名神高速6人死亡事故の初公判で、検察は運転手のスマホ脇見が原因と主張した。",
-        "score": {
-          "relevance": 30,
-          "copyrightRisk": 10,
-          "misinformationRisk": 10,
-          "duplication": 10,
-          "judgedAt": "2026-06-10T22:50:12.629Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 30 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "ベネズエラ地震被災地 大雨で土砂崩れや建物倒壊のおそれも",
-        "aiSummary": "ベネズエラ地震被災地で大雨、土砂崩れや建物倒壊の危険増大。",
-        "score": {
-          "relevance": 15,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-01T22:15:14.726Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 15 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "和歌山 タンクローリー海転落 救助の81歳男性らに感謝状",
-        "aiSummary": "和歌山でタンクローリーが海に転落した事故で、救助活動を行った市民に感謝状が贈呈された。",
-        "score": {
-          "relevance": 25,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-06-30T22:13:29.115Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 25 < 70 (not labor-safety related for type=general_news)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "震度7 熊本 宇城の住宅倒壊 1人が巻き込まれ救助活動",
-        "aiSummary": "地震で家屋が倒壊し、中にいた1名が閉じ込められ救助中。",
-        "score": {
-          "relevance": 40,
-          "copyrightRisk": 15,
-          "misinformationRisk": 10,
-          "duplication": 20,
-          "judgedAt": "2026-07-28T21:59:26.524Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 40 < 70 (not labor-safety related for type=accident_report)"
-          ]
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "東京 小金井 小1プール死亡事故で元学童責任者ら4人を書類送検",
-        "aiSummary": "東京小金井市の小学校プールで児童が死亡した事故で、元学童責任者ら4人が書類送検された。",
-        "score": {
-          "relevance": 20,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-28T21:59:35.362Z",
-          "model": "gemini-2.5-flash",
-          "rejectionReasons": [
-            "relevance 20 < 70 (not labor-safety related for type=general_news)"
           ]
         },
         "publisher": "日本放送協会"

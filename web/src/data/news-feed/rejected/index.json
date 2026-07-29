@@ -1,6 +1,140 @@
 {
-  "updatedAt": "2026-07-28T22:00:37.275Z",
+  "updatedAt": "2026-07-29T21:57:15.065Z",
   "entries": [
+    {
+      "id": "a46c1f7e07303299",
+      "headline": "【29日】熊本で震度7 同程度地震に1週間ほど注意 熱中症対策を",
+      "aiSummary": "熊本県で震度7の地震が発生。同程度の余震と熱中症への警戒を呼びかけ。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260729/k10015189251000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 29 Jul 2026 23:24:37 +0900",
+        "fetchedAt": "2026-07-29T21:56:12.737Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-29T21:56:48.178Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "7dcc3e186890226e",
+      "headline": "高市首相「イオンモール熊本で発生した建物崩壊で3人死亡」",
+      "aiSummary": "熊本の商業施設で建物崩壊、3名死亡と首相が発表。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260729/k10015189461000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 29 Jul 2026 19:48:32 +0900",
+        "fetchedAt": "2026-07-29T21:56:12.737Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-29T21:56:55.802Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "99c9c6c27e76d7fa",
+      "headline": "真夏の避難生活 熱中症対策のポイントとは？【詳しく】",
+      "aiSummary": "災害時の避難生活における熱中症予防策を解説。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260729/k10015189771000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 29 Jul 2026 17:28:26 +0900",
+        "fetchedAt": "2026-07-29T21:56:12.737Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-29T21:57:02.625Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "8aa79ce075fd68d9",
+      "headline": "九州で危険な暑さ 熊本も猛暑日に 熱中症対策の徹底を",
+      "aiSummary": "九州地方で猛暑が続き、熱中症対策の徹底が呼びかけられている。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260729/k10015189271000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 29 Jul 2026 16:19:00 +0900",
+        "fetchedAt": "2026-07-29T21:56:12.737Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-29T21:57:08.467Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "c63737e7ceac9c60",
+      "headline": "熊本 氷川町 住宅倒壊で2人心肺停止の状態",
+      "aiSummary": "熊本県氷川町で住宅が倒壊し、2名が心肺停止状態。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260729/k10015189571000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 29 Jul 2026 13:55:06 +0900",
+        "fetchedAt": "2026-07-29T21:56:12.737Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-29T21:57:15.058Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
     {
       "id": "b02353d74cdda5c4",
       "headline": "山形県 クマ「特別警報」新設を検討 死亡事故など受け",
@@ -637,6 +771,86 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 10 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "56110d8f74a7d15f",
+      "headline": "きょうも危険な暑さ 熊本では猛暑日予想 熱中症対策の徹底を",
+      "aiSummary": "熊本で猛暑日予想。危険な暑さのため、熱中症対策の徹底を呼びかけ。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260730/k10015190281000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 30 Jul 2026 06:53:31 +0900",
+        "fetchedAt": "2026-07-29T21:56:12.737Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-29T21:56:20.653Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "12c438cd4829393e",
+      "headline": "熊本県で震度7 同程度の地震に注意 きょうも熱中症対策を",
+      "aiSummary": "熊本県で震度7の地震が発生。同程度の揺れに警戒し、熱中症対策も継続するよう注意喚起。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260730/k10015190291000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 30 Jul 2026 06:05:48 +0900",
+        "fetchedAt": "2026-07-29T21:56:12.737Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-29T21:56:27.755Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "72a1ad82eb6db04d",
+      "headline": "【被害情報】熊本 氷川町 複数の建物が倒壊 5人が心肺停止",
+      "aiSummary": "熊本県氷川町で建物倒壊が発生し、5名が心肺停止状態。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260730/k10015190301000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 30 Jul 2026 05:16:06 +0900",
+        "fetchedAt": "2026-07-29T21:56:12.737Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-29T21:56:33.669Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,

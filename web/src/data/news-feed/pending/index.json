@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-28T22:00:37.275Z",
+  "updatedAt": "2026-07-29T21:57:15.065Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -134,6 +134,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "53511843b61d02f6",
+      "headline": "熊本地震 熱中症対策やガソリン供給など重点的に取り組む 政府",
+      "aiSummary": "政府は熊本地震の復旧支援として、熱中症対策や燃料供給を重点的に実施する方針を示した。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260730/k10015190321000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 30 Jul 2026 05:13:41 +0900",
+        "fetchedAt": "2026-07-29T21:56:12.737Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 50,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-29T21:56:41.884Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 50 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
