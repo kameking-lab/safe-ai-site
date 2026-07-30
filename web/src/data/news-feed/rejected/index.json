@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-29T21:57:15.065Z",
+  "updatedAt": "2026-07-30T22:02:42.331Z",
   "entries": [
     {
       "id": "a46c1f7e07303299",
@@ -777,6 +777,59 @@
       "provenance": "news_auto"
     },
     {
+      "id": "c16706395498ba17",
+      "headline": "熊本地震“耐震性能劣る建物は倒壊するほどの揺れ” 専門家",
+      "aiSummary": "専門家が熊本地震を例に、耐震性不足の建物は倒壊する危険性があると指摘。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260730/k10015191171000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 30 Jul 2026 21:14:40 +0900",
+        "fetchedAt": "2026-07-30T22:02:20.668Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-30T22:02:29.266Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "98988c198c3331e7",
+      "headline": "熊本 八代 「金波楼」 門や塀が倒壊 国の登録有形文化財",
+      "aiSummary": "熊本県八代市の登録有形文化財「金波楼」の門と塀が倒壊。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260730/k10015191201000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 30 Jul 2026 20:56:57 +0900",
+        "fetchedAt": "2026-07-30T22:02:20.668Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-30T22:02:36.412Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
       "id": "56110d8f74a7d15f",
       "headline": "きょうも危険な暑さ 熊本では猛暑日予想 熱中症対策の徹底を",
       "aiSummary": "熊本で猛暑日予想。危険な暑さのため、熱中症対策の徹底を呼びかけ。",
@@ -848,6 +901,32 @@
         "misinformationRisk": 5,
         "duplication": 10,
         "judgedAt": "2026-07-29T21:56:33.669Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "53511843b61d02f6",
+      "headline": "熊本地震 熱中症対策やガソリン供給など重点的に取り組む 政府",
+      "aiSummary": "政府は熊本地震の復旧で熱中症対策と燃料供給を重点的に実施する方針。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260730/k10015190321000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 30 Jul 2026 05:13:41 +0900",
+        "fetchedAt": "2026-07-30T22:02:20.668Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-30T22:02:42.323Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"
