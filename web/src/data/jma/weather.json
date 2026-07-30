@@ -1,13 +1,6 @@
 {
-  "fetchedAt": "2026-07-30T16:15:35.797Z",
+  "fetchedAt": "2026-07-30T17:57:44.495Z",
   "byIso": {
-    "JP-01": {
-      "label": "北海道（石狩・空知・後志）",
-      "reportDatetime": "2026-07-30T17:00:00+09:00",
-      "publishingOffice": "札幌管区気象台",
-      "todayWeatherCode": "214",
-      "todayWeatherText": "くもり　夜遅く　雨　所により　雷　を伴う"
-    },
     "JP-04": {
       "label": "宮城県",
       "reportDatetime": "2026-07-30T21:00:00+09:00",
