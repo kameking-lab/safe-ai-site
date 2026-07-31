@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-30T22:02:42.331Z",
+  "updatedAt": "2026-07-31T22:01:03.891Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -301,6 +301,32 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "duplication 70 > 50 (already covered in accident DB)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "4965ced4edccbded",
+      "headline": "熱中症対策閣僚会議 避難所の良好な環境整備を指示 高市首相",
+      "aiSummary": "首相が熱中症対策閣僚会議で、避難所の環境整備を指示した。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260731/k10015192301000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 31 Jul 2026 18:52:01 +0900",
+        "fetchedAt": "2026-07-31T22:00:20.509Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 60,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-07-31T22:00:41.323Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 60 < 70 (not labor-safety related for type=administrative_notice)"
         ]
       },
       "approved": false,

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-30T22:02:42.331Z",
+  "updatedAt": "2026-07-31T22:01:03.891Z",
   "entries": [
     {
       "id": "a46c1f7e07303299",
@@ -1551,6 +1551,33 @@
       "provenance": "news_auto"
     },
     {
+      "id": "5260e7af392d2d49",
+      "headline": "きょうも熊本など猛烈な暑さ予想 できるかぎりの熱中症対策を",
+      "aiSummary": "熊本などでの猛暑予想を受け、熱中症予防のため最大限の対策を促す。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260731/k10015191291000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 01 Aug 2026 00:11:55 +0900",
+        "fetchedAt": "2026-07-31T22:00:20.509Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-31T22:00:28.014Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
       "id": "b286f0a9c633ee09",
       "headline": "飲酒死亡事故か 危険運転致死の疑いで逮捕 法改正後初 警視庁",
       "aiSummary": "飲酒運転による死亡事故で、危険運転致死容疑者が逮捕された。法改正後初の適用。",
@@ -1867,6 +1894,86 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "b03a39a1927632cc",
+      "headline": "熊本 八代 倒壊住宅から女性救出 ベトナム人ら地元住民が協力",
+      "aiSummary": "熊本県八代市で住宅倒壊、地元住民と在住外国人の協力で女性を救出。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260731/k10015192771000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 31 Jul 2026 20:21:51 +0900",
+        "fetchedAt": "2026-07-31T22:00:20.509Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-31T22:00:34.573Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "c49cee17dde64974",
+      "headline": "熊本で震度7 同程度の地震注意 猛烈な暑さ予想 熱中症対策を",
+      "aiSummary": "熊本で震度7の地震が発生し、同程度の揺れに警戒が必要。猛暑も予想されるため、熱中症対策が呼びかけられている。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260731/k10015191461000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 31 Jul 2026 18:50:14 +0900",
+        "fetchedAt": "2026-07-31T22:00:20.509Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 20,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-07-31T22:00:49.060Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "27284934ef087867",
+      "headline": "熊本 八代 倒壊ビルから救助された男性「圧迫死してしまうと」",
+      "aiSummary": "熊本県八代市でビル倒壊事故が発生。救助された男性は圧迫死の危険を感じていた。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260731/k10015191851000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 31 Jul 2026 12:13:28 +0900",
+        "fetchedAt": "2026-07-31T22:00:20.509Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "newsType": "accident_report",
+      "score": {
+        "relevance": 40,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 50,
+        "judgedAt": "2026-07-31T22:00:58.383Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 40 < 70 (not labor-safety related for type=accident_report)"
         ]
       },
       "approved": false,
