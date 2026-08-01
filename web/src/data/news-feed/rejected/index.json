@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-31T22:01:03.891Z",
+  "updatedAt": "2026-08-01T21:51:31.941Z",
   "entries": [
     {
       "id": "a46c1f7e07303299",
@@ -1364,6 +1364,32 @@
       "provenance": "news_auto"
     },
     {
+      "id": "70cc674ec785fc4c",
+      "headline": "熊本地震 関連調査中含め36人死亡 避難所の熱中症対策を強化へ",
+      "aiSummary": "熊本地震で36人が死亡。避難所の熱中症対策を強化。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260802/k10015193881000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sun, 02 Aug 2026 05:26:50 +0900",
+        "fetchedAt": "2026-08-01T21:50:57.261Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-08-01T21:51:06.558Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
       "id": "a146f8afda91540d",
       "headline": "5日連続「酷暑日」で最長に 26日も各地猛暑予想 熱中症対策を",
       "aiSummary": "全国的な猛暑が続き、熱中症への警戒が呼びかけられている。5日連続の酷暑日を記録し、今後も厳しい暑さが予想される。",
@@ -1545,6 +1571,59 @@
         "model": "prefilter",
         "rejectionReasons": [
           "prefilter:school-context"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "7201f0367138ee22",
+      "headline": "熊本震度7 同程度の地震注意 猛暑予想 熱中症対策を",
+      "aiSummary": "熊本で震度7級の地震と猛暑に警戒を呼びかけ、熱中症対策の徹底を促す。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260801/k10015193161000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 01 Aug 2026 22:52:06 +0900",
+        "fetchedAt": "2026-08-01T21:50:57.261Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-08-01T21:51:12.317Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "055bc8b2ce32e69a",
+      "headline": "40度に迫る暑さ 2日は大分で酷暑日予想 熱中症対策の徹底を",
+      "aiSummary": "大分県で酷暑日予想、熱中症対策の徹底を呼びかけ。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260801/k10015193191000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 01 Aug 2026 22:47:05 +0900",
+        "fetchedAt": "2026-08-01T21:50:57.261Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-01T21:51:18.597Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,

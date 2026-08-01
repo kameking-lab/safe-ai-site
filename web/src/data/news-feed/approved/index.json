@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-31T22:01:03.891Z",
+  "updatedAt": "2026-08-01T21:51:31.941Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -140,6 +140,31 @@
         "misinformationRisk": 5,
         "duplication": 10,
         "judgedAt": "2026-07-16T22:00:07.369Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "21b0a53ad2d7d394",
+      "headline": "愛知 犬山 航空自衛隊練習機墜落事故 直接的な原因特定できず",
+      "aiSummary": "航空自衛隊の練習機が墜落したが、事故の直接原因は不明と発表された。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260801/k10015192931000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 01 Aug 2026 09:36:44 +0900",
+        "fetchedAt": "2026-08-01T21:50:57.261Z"
+      },
+      "estimatedAccidentType": "墜落",
+      "estimatedWorkCategory": "その他の事業",
+      "newsType": "accident_report",
+      "score": {
+        "relevance": 85,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 20,
+        "judgedAt": "2026-08-01T21:51:25.063Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,

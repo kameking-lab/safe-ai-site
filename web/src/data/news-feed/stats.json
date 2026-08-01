@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-07-31T22:01:03.949Z",
+  "generatedAt": "2026-08-01T21:51:31.999Z",
   "counts": {
-    "approved": 38,
-    "rejected": 83,
-    "total": 121,
-    "approvalRate": 0.314
+    "approved": 39,
+    "rejected": 86,
+    "total": 125,
+    "approvalRate": 0.312
   },
   "byDay": [
     {
@@ -391,6 +391,13 @@
       "rejected": 4,
       "total": 5,
       "approvalRate": 0.2
+    },
+    {
+      "date": "2026-08-02",
+      "approved": 1,
+      "rejected": 3,
+      "total": 4,
+      "approvalRate": 0.25
     }
   ],
   "byPublisher": [
@@ -403,10 +410,10 @@
     },
     {
       "publisher": "日本放送協会",
-      "approved": 8,
-      "rejected": 81,
-      "total": 89,
-      "approvalRate": 0.09
+      "approved": 9,
+      "rejected": 84,
+      "total": 93,
+      "approvalRate": 0.097
     }
   ],
   "byEstimatedWorkCategory": [
@@ -426,10 +433,10 @@
     },
     {
       "category": "その他の事業",
-      "approved": 0,
+      "approved": 1,
       "rejected": 3,
-      "total": 3,
-      "approvalRate": 0
+      "total": 4,
+      "approvalRate": 0.25
     }
   ],
   "byEstimatedAccidentType": [
@@ -439,6 +446,13 @@
       "rejected": 0,
       "total": 1,
       "approvalRate": 1
+    },
+    {
+      "type": "墜落",
+      "approved": 1,
+      "rejected": 1,
+      "total": 2,
+      "approvalRate": 0.5
     },
     {
       "type": "有害物質",
@@ -457,9 +471,9 @@
     {
       "type": "熱中症",
       "approved": 6,
-      "rejected": 34,
-      "total": 40,
-      "approvalRate": 0.15
+      "rejected": 35,
+      "total": 41,
+      "approvalRate": 0.146
     },
     {
       "type": "崩壊・倒壊",
@@ -484,13 +498,6 @@
     },
     {
       "type": "飛来・落下",
-      "approved": 0,
-      "rejected": 1,
-      "total": 1,
-      "approvalRate": 0
-    },
-    {
-      "type": "墜落",
       "approved": 0,
       "rejected": 1,
       "total": 1,
@@ -520,13 +527,13 @@
         0,
         1,
         2,
-        7,
+        8,
         28
       ],
       "rejected": [
         5,
         20,
-        47,
+        50,
         5,
         3,
         0,
@@ -551,7 +558,7 @@
       ],
       "approved": [
         3,
-        25,
+        26,
         10,
         0,
         0,
@@ -563,7 +570,7 @@
       ],
       "rejected": [
         7,
-        73,
+        76,
         3,
         0,
         0,
@@ -588,7 +595,7 @@
         "90-100"
       ],
       "approved": [
-        31,
+        32,
         7,
         0,
         0,
@@ -600,8 +607,8 @@
         0
       ],
       "rejected": [
-        51,
-        32,
+        52,
+        34,
         0,
         0,
         0,
@@ -628,7 +635,7 @@
       "approved": [
         0,
         36,
-        2,
+        3,
         0,
         0,
         0,
@@ -639,7 +646,7 @@
       ],
       "rejected": [
         5,
-        68,
+        71,
         1,
         0,
         0,
@@ -654,7 +661,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 76
+      "count": 79
     },
     {
       "reason": "duplication",
@@ -754,6 +761,19 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "愛知 犬山 航空自衛隊練習機墜落事故 直接的な原因特定できず",
+        "aiSummary": "航空自衛隊の練習機が墜落したが、事故の直接原因は不明と発表された。",
+        "score": {
+          "relevance": 85,
+          "copyrightRisk": 10,
+          "misinformationRisk": 5,
+          "duplication": 20,
+          "judgedAt": "2026-08-01T21:51:25.063Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "新名神高速6人死亡事故4か月 遺族「父親を返してほしい」",
         "aiSummary": "新名神高速で発生した6人死亡事故から4か月、遺族が悲痛な思いを表明。",
         "score": {
@@ -788,19 +808,6 @@
           "misinformationRisk": 10,
           "duplication": 10,
           "judgedAt": "2026-07-31T22:01:03.884Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "厚生労働省"
-      },
-      {
-        "headline": "「労働安全衛生法に基づく化学物質管理に関する説明会」の開催について",
-        "aiSummary": "厚生労働省が労働安全衛生法に基づく化学物質管理の説明会を開催。",
-        "score": {
-          "relevance": 90,
-          "copyrightRisk": 10,
-          "misinformationRisk": 5,
-          "duplication": 10,
-          "judgedAt": "2026-07-28T22:00:37.267Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "厚生労働省"
