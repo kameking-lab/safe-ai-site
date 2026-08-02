@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-01T21:51:31.941Z",
+  "updatedAt": "2026-08-02T21:51:43.243Z",
   "entries": [
     {
       "id": "a46c1f7e07303299",
@@ -1355,6 +1355,87 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-07-05T21:57:51.539Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "598f1d69f3c82fb5",
+      "headline": "熊本 地震活動が活発 震度7程度に注意 危険な暑さ熱中症対策を",
+      "aiSummary": "熊本で地震活動が活発化、震度7に警戒。危険な暑さによる熱中症対策も。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260802/k10015193991000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sun, 02 Aug 2026 20:48:23 +0900",
+        "fetchedAt": "2026-08-02T21:51:16.178Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-02T21:51:26.602Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "e618174446eea08f",
+      "headline": "記録的な暑さ 3日は熊本市など九州で酷暑日予想 熱中症対策を",
+      "aiSummary": "九州地方で記録的猛暑が予想され、熱中症への厳重な警戒が呼びかけられている。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260802/k10015193981000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sun, 02 Aug 2026 19:28:34 +0900",
+        "fetchedAt": "2026-08-02T21:51:16.178Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-02T21:51:31.637Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "a3d35b81ce1a6dc2",
+      "headline": "熱中症“初期症状見逃さないで”脱水状態に注意【専門家ＱＡ】",
+      "aiSummary": "熱中症の初期症状と脱水状態への注意を専門家が解説。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260802/k10015194121000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sun, 02 Aug 2026 12:09:36 +0900",
+        "fetchedAt": "2026-08-02T21:51:16.178Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-02T21:51:36.134Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"
