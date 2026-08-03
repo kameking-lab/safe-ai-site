@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-02T21:51:43.243Z",
+  "updatedAt": "2026-08-03T22:04:31.495Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -315,7 +315,7 @@
         "url": "http://www3.nhk.or.jp/news/html/20260731/k10015192301000.html",
         "publisher": "日本放送協会",
         "publishedAt": "Fri, 31 Jul 2026 18:52:01 +0900",
-        "fetchedAt": "2026-08-02T21:51:16.178Z"
+        "fetchedAt": "2026-08-03T22:04:10.505Z"
       },
       "newsType": "administrative_notice",
       "score": {
@@ -323,7 +323,7 @@
         "copyrightRisk": 10,
         "misinformationRisk": 5,
         "duplication": 10,
-        "judgedAt": "2026-08-02T21:51:43.235Z",
+        "judgedAt": "2026-08-03T22:04:31.487Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 60 < 70 (not labor-safety related for type=administrative_notice)"

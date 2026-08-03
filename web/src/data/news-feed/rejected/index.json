@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-02T21:51:43.243Z",
+  "updatedAt": "2026-08-03T22:04:31.495Z",
   "entries": [
     {
       "id": "a46c1f7e07303299",
@@ -2027,6 +2027,59 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 15 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "002ecd1978700311",
+      "headline": "東京 多摩動物公園 ライオン3頭が相次ぎ死ぬ 熱中症か",
+      "aiSummary": "多摩動物公園でライオン3頭が熱中症の疑いで死亡。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260803/k10015195441000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 03 Aug 2026 22:50:43 +0900",
+        "fetchedAt": "2026-08-03T22:04:10.505Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 15,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 20,
+        "judgedAt": "2026-08-03T22:04:18.161Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 15 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "c6b1f8b66e74174e",
+      "headline": "災害医療の3学会“高齢者の熱中症患者相次ぐ 対策徹底を”",
+      "aiSummary": "災害医療学会が高齢者の熱中症増加に警鐘を鳴らし、対策徹底を要請。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260803/k10015195411000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 03 Aug 2026 22:29:15 +0900",
+        "fetchedAt": "2026-08-03T22:04:10.505Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-08-03T22:04:23.934Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
