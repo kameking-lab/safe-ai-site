@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-03T22:04:31.495Z",
+  "updatedAt": "2026-08-04T22:08:16.505Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -75,6 +75,31 @@
       "provenance": "news_auto"
     },
     {
+      "id": "b29ec0dd54143849",
+      "headline": "熊本 震度5強程度以上の地震注意 復旧作業の際は熱中症対策を",
+      "aiSummary": "熊本での地震復旧作業において、熱中症予防の徹底を呼びかける注意喚起。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260805/k10015196771000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 05 Aug 2026 05:35:16 +0900",
+        "fetchedAt": "2026-08-04T22:07:31.367Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "estimatedWorkCategory": "その他の事業",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 80,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-04T22:07:44.827Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
       "id": "23ad59aaf82bd940",
       "headline": "5月の全国熱中症搬送4176人 2015年以降2番目の多さ",
       "aiSummary": "全国の5月熱中症搬送者数は4176人。2015年以降で2番目に多い。",
@@ -117,6 +142,30 @@
         "misinformationRisk": 5,
         "duplication": 10,
         "judgedAt": "2026-07-14T21:54:20.067Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "c0bb8db50ec3e970",
+      "headline": "熱中症搬送者数 8月2日までの1週間 全国で9180人 熊本で309人",
+      "aiSummary": "8月2日までの1週間で全国の熱中症搬送者は9180人、熊本県は309人。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260804/k10015196271000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 04 Aug 2026 21:41:12 +0900",
+        "fetchedAt": "2026-08-04T22:07:31.367Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "statistics_release",
+      "score": {
+        "relevance": 75,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-04T22:07:51.753Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
@@ -213,6 +262,29 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-07-10T21:57:33.498Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "9ca8122ab3e00b46",
+      "headline": "第130回労働政策審議会労働条件分科会労災保険部会資料",
+      "aiSummary": "厚生労働省が労働政策審議会労災保険部会の会議資料を公開した。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_75267.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-08-04T12:22:00+09:00",
+        "fetchedAt": "2026-08-04T22:07:31.367Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-04T22:08:16.497Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,

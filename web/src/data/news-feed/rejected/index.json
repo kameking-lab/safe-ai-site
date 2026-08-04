@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-03T22:04:31.495Z",
+  "updatedAt": "2026-08-04T22:08:16.505Z",
   "entries": [
     {
       "id": "a46c1f7e07303299",
@@ -745,6 +745,58 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 30 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "03c703eadbc7b4e7",
+      "headline": "車中泊時の熱中症対策などチラシに 熊本で周知始める 環境省",
+      "aiSummary": "環境省が熊本で車中泊時の熱中症予防を呼びかけるチラシを配布。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260804/k10015196191000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 04 Aug 2026 19:48:59 +0900",
+        "fetchedAt": "2026-08-04T22:07:31.367Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-04T22:07:57.658Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "6ce745eb3f48d55e",
+      "headline": "ライオン3頭が死ぬ 熱中症の疑い 多摩動物公園",
+      "aiSummary": "多摩動物公園でライオン3頭が熱中症とみられる原因で死亡。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260804/k10015195681000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 04 Aug 2026 17:36:14 +0900",
+        "fetchedAt": "2026-08-04T22:07:31.367Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-04T22:08:04.117Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
@@ -2134,6 +2186,32 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 15 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "4965ced4edccbded",
+      "headline": "熱中症対策閣僚会議 避難所の良好な環境整備を指示 高市首相",
+      "aiSummary": "首相が熱中症対策会議で、避難所の環境改善を指示。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260731/k10015192301000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 31 Jul 2026 18:52:01 +0900",
+        "fetchedAt": "2026-08-04T22:07:31.367Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-04T22:08:11.377Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
