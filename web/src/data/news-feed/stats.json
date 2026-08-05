@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-04T22:08:16.563Z",
+  "generatedAt": "2026-08-05T22:08:41.062Z",
   "counts": {
-    "approved": 42,
-    "rejected": 94,
-    "total": 136,
-    "approvalRate": 0.309
+    "approved": 43,
+    "rejected": 97,
+    "total": 140,
+    "approvalRate": 0.307
   },
   "byDay": [
     {
@@ -419,22 +419,29 @@
       "rejected": 3,
       "total": 6,
       "approvalRate": 0.5
+    },
+    {
+      "date": "2026-08-06",
+      "approved": 1,
+      "rejected": 3,
+      "total": 4,
+      "approvalRate": 0.25
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 31,
+      "approved": 32,
       "rejected": 2,
-      "total": 33,
-      "approvalRate": 0.939
+      "total": 34,
+      "approvalRate": 0.941
     },
     {
       "publisher": "日本放送協会",
       "approved": 11,
-      "rejected": 92,
-      "total": 103,
-      "approvalRate": 0.107
+      "rejected": 95,
+      "total": 106,
+      "approvalRate": 0.104
     }
   ],
   "byEstimatedWorkCategory": [
@@ -492,9 +499,9 @@
     {
       "type": "熱中症",
       "approved": 8,
-      "rejected": 39,
-      "total": 47,
-      "approvalRate": 0.17
+      "rejected": 41,
+      "total": 49,
+      "approvalRate": 0.163
     },
     {
       "type": "崩壊・倒壊",
@@ -548,13 +555,13 @@
         0,
         1,
         3,
-        9,
+        10,
         29
       ],
       "rejected": [
-        5,
+        6,
         21,
-        57,
+        59,
         5,
         3,
         0,
@@ -579,7 +586,7 @@
       ],
       "approved": [
         3,
-        29,
+        30,
         10,
         0,
         0,
@@ -590,8 +597,8 @@
         0
       ],
       "rejected": [
-        7,
-        84,
+        8,
+        86,
         3,
         0,
         0,
@@ -616,7 +623,7 @@
         "90-100"
       ],
       "approved": [
-        35,
+        36,
         7,
         0,
         0,
@@ -628,8 +635,8 @@
         0
       ],
       "rejected": [
-        59,
-        35,
+        61,
+        36,
         0,
         0,
         0,
@@ -655,7 +662,7 @@
       ],
       "approved": [
         0,
-        39,
+        40,
         3,
         0,
         0,
@@ -666,8 +673,8 @@
         0
       ],
       "rejected": [
-        5,
-        78,
+        6,
+        80,
         2,
         0,
         0,
@@ -682,7 +689,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 87
+      "count": 89
     },
     {
       "reason": "duplication",
@@ -690,7 +697,7 @@
     },
     {
       "reason": "prefilter:school-context",
-      "count": 3
+      "count": 4
     },
     {
       "reason": "prefilter:home-context",

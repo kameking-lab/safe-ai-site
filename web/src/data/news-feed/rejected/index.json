@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-04T22:08:16.505Z",
+  "updatedAt": "2026-08-05T22:08:41.001Z",
   "entries": [
     {
       "id": "a46c1f7e07303299",
@@ -291,6 +291,33 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 30 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "b8e53ad5f24eb6f4",
+      "headline": "台風13号沖縄接近へ 影響長引くおそれ 熱中症対策も徹底を",
+      "aiSummary": "台風13号が沖縄に接近し、影響長期化の懸念。熱中症への警戒を呼びかけ。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260805/k10015196631000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 05 Aug 2026 21:59:38 +0900",
+        "fetchedAt": "2026-08-05T22:08:21.535Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 25,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-05T22:08:35.685Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 25 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,
@@ -1196,6 +1223,58 @@
         "misinformationRisk": 5,
         "duplication": 10,
         "judgedAt": "2026-07-09T22:18:17.060Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "a02aef5beb001cd5",
+      "headline": "熊本地震 被災地での熱中症予防で対策アプリ開発 産業医科大学",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260806/k10015197561000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 06 Aug 2026 05:51:52 +0900",
+        "fetchedAt": "2026-08-05T22:08:21.535Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 0,
+        "misinformationRisk": 0,
+        "duplication": 0,
+        "judgedAt": "2026-08-05T22:08:23.584Z",
+        "model": "prefilter",
+        "rejectionReasons": [
+          "prefilter:school-context"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "d3d1fce4ffb292ca",
+      "headline": "熊本は危険な暑さ予想も 熱中症対策を 台風影響にも注意を",
+      "aiSummary": "熊本で危険な暑さと台風が予想されるため、熱中症対策と災害への注意が必要。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260806/k10015197571000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 06 Aug 2026 05:46:46 +0900",
+        "fetchedAt": "2026-08-05T22:08:21.535Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 10,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-08-05T22:08:30.059Z",
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 20 < 70 (not labor-safety related for type=general_news)"

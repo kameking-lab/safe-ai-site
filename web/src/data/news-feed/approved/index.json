@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-04T22:08:16.505Z",
+  "updatedAt": "2026-08-05T22:08:41.001Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -262,6 +262,29 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-07-10T21:57:33.498Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "3c07f576036b4d86",
+      "headline": "第６回労働基準法における「労働者」に関する研究会　議事録",
+      "aiSummary": "厚生労働省が労働基準法上の労働者定義に関する第6回研究会の議事録を公開。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_74078.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-08-05T15:00:00+09:00",
+        "fetchedAt": "2026-08-05T22:08:21.535Z"
+      },
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 85,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-05T22:08:40.994Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
