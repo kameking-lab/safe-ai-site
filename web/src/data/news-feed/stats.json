@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-08-05T22:08:41.062Z",
+  "generatedAt": "2026-08-07T01:00:18.243Z",
   "counts": {
-    "approved": 43,
-    "rejected": 97,
-    "total": 140,
-    "approvalRate": 0.307
+    "approved": 45,
+    "rejected": 98,
+    "total": 143,
+    "approvalRate": 0.315
   },
   "byDay": [
     {
@@ -426,25 +426,39 @@
       "rejected": 3,
       "total": 4,
       "approvalRate": 0.25
+    },
+    {
+      "date": "2026-08-07",
+      "approved": 2,
+      "rejected": 1,
+      "total": 3,
+      "approvalRate": 0.667
     }
   ],
   "byPublisher": [
     {
       "publisher": "厚生労働省",
-      "approved": 32,
+      "approved": 33,
       "rejected": 2,
-      "total": 34,
-      "approvalRate": 0.941
+      "total": 35,
+      "approvalRate": 0.943
     },
     {
       "publisher": "日本放送協会",
-      "approved": 11,
-      "rejected": 95,
-      "total": 106,
-      "approvalRate": 0.104
+      "approved": 12,
+      "rejected": 96,
+      "total": 108,
+      "approvalRate": 0.111
     }
   ],
   "byEstimatedWorkCategory": [
+    {
+      "category": "製造業",
+      "approved": 1,
+      "rejected": 0,
+      "total": 1,
+      "approvalRate": 1
+    },
     {
       "category": "建設業",
       "approved": 5,
@@ -454,10 +468,10 @@
     },
     {
       "category": "運輸交通業",
-      "approved": 1,
+      "approved": 2,
       "rejected": 1,
-      "total": 2,
-      "approvalRate": 0.5
+      "total": 3,
+      "approvalRate": 0.667
     },
     {
       "category": "その他の事業",
@@ -499,16 +513,16 @@
     {
       "type": "熱中症",
       "approved": 8,
-      "rejected": 41,
-      "total": 49,
-      "approvalRate": 0.163
+      "rejected": 42,
+      "total": 50,
+      "approvalRate": 0.16
     },
     {
       "type": "崩壊・倒壊",
-      "approved": 0,
+      "approved": 1,
       "rejected": 15,
-      "total": 15,
-      "approvalRate": 0
+      "total": 16,
+      "approvalRate": 0.063
     },
     {
       "type": "車両",
@@ -556,12 +570,12 @@
         1,
         3,
         10,
-        29
+        31
       ],
       "rejected": [
         6,
         21,
-        59,
+        60,
         5,
         3,
         0,
@@ -586,8 +600,8 @@
       ],
       "approved": [
         3,
-        30,
-        10,
+        31,
+        11,
         0,
         0,
         0,
@@ -598,7 +612,7 @@
       ],
       "rejected": [
         8,
-        86,
+        87,
         3,
         0,
         0,
@@ -624,7 +638,7 @@
       ],
       "approved": [
         36,
-        7,
+        9,
         0,
         0,
         0,
@@ -635,7 +649,7 @@
         0
       ],
       "rejected": [
-        61,
+        62,
         36,
         0,
         0,
@@ -662,7 +676,7 @@
       ],
       "approved": [
         0,
-        40,
+        42,
         3,
         0,
         0,
@@ -674,7 +688,7 @@
       ],
       "rejected": [
         6,
-        80,
+        81,
         2,
         0,
         0,
@@ -689,7 +703,7 @@
   "rejectionReasonRanks": [
     {
       "reason": "relevance",
-      "count": 89
+      "count": 90
     },
     {
       "reason": "duplication",
@@ -815,6 +829,19 @@
         "publisher": "日本放送協会"
       },
       {
+        "headline": "経産省 日本製紙の煙突倒壊受け自家発事業者に報告求める通知",
+        "aiSummary": "経産省が日本製紙の煙突倒壊事故を受け、自家発電事業者へ安全報告を通知。",
+        "score": {
+          "relevance": 90,
+          "copyrightRisk": 15,
+          "misinformationRisk": 10,
+          "duplication": 10,
+          "judgedAt": "2026-08-07T01:00:08.381Z",
+          "model": "gemini-2.5-flash"
+        },
+        "publisher": "日本放送協会"
+      },
+      {
         "headline": "愛知 犬山 航空自衛隊練習機墜落事故 直接的な原因特定できず",
         "aiSummary": "航空自衛隊の練習機が墜落したが、事故の直接原因は不明と発表された。",
         "score": {
@@ -823,19 +850,6 @@
           "misinformationRisk": 5,
           "duplication": 20,
           "judgedAt": "2026-08-01T21:51:25.063Z",
-          "model": "gemini-2.5-flash"
-        },
-        "publisher": "日本放送協会"
-      },
-      {
-        "headline": "新名神高速6人死亡事故4か月 遺族「父親を返してほしい」",
-        "aiSummary": "新名神高速で発生した6人死亡事故から4か月、遺族が悲痛な思いを表明。",
-        "score": {
-          "relevance": 70,
-          "copyrightRisk": 15,
-          "misinformationRisk": 5,
-          "duplication": 20,
-          "judgedAt": "2026-07-20T21:57:24.287Z",
           "model": "gemini-2.5-flash"
         },
         "publisher": "日本放送協会"

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-05T22:08:41.001Z",
+  "updatedAt": "2026-08-07T01:00:18.182Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -195,6 +195,31 @@
       "provenance": "news_auto"
     },
     {
+      "id": "b55375a2271f73b5",
+      "headline": "経産省 日本製紙の煙突倒壊受け自家発事業者に報告求める通知",
+      "aiSummary": "経産省が日本製紙の煙突倒壊事故を受け、自家発電事業者へ安全報告を通知。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260806/k10015198631000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 06 Aug 2026 23:50:45 +0900",
+        "fetchedAt": "2026-08-07T01:00:01.252Z"
+      },
+      "estimatedAccidentType": "崩壊・倒壊",
+      "estimatedWorkCategory": "製造業",
+      "newsType": "administrative_notice",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 15,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-08-07T01:00:08.381Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
       "id": "21b0a53ad2d7d394",
       "headline": "愛知 犬山 航空自衛隊練習機墜落事故 直接的な原因特定できず",
       "aiSummary": "航空自衛隊の練習機が墜落したが、事故の直接原因は不明と発表された。",
@@ -262,6 +287,30 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-07-10T21:57:33.498Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "997eb8f29f9af2cc",
+      "headline": "労働基準監督署等が自動車運転者を使用する事業場に対して行った令和７年の監督指導、送検等の状況を公表します",
+      "aiSummary": "労基署が自動車運転事業場への監督指導・送検状況を公表。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_75192.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-08-06T14:00:00+09:00",
+        "fetchedAt": "2026-08-07T01:00:01.252Z"
+      },
+      "estimatedWorkCategory": "運輸交通業",
+      "newsType": "statistics_release",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 20,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-08-07T01:00:18.175Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
