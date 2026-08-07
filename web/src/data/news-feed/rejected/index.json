@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-07T01:00:18.182Z",
+  "updatedAt": "2026-08-07T21:34:35.557Z",
   "entries": [
     {
       "id": "a46c1f7e07303299",
@@ -1762,6 +1762,32 @@
       "provenance": "news_auto"
     },
     {
+      "id": "29fb05f2d8437305",
+      "headline": "熊本 8日も猛烈な暑さ 熱中症対策を 台風13号で強風にも注意",
+      "aiSummary": "熊本県で猛暑と台風による強風が予想され、熱中症と強風への注意を呼びかけ。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260808/k10015199781000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 08 Aug 2026 06:24:12 +0900",
+        "fetchedAt": "2026-08-07T21:34:13.153Z"
+      },
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-07T21:34:20.352Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
       "id": "fc2fa1d9d83278e5",
       "headline": "タンクローリー転落 81歳男性が海に飛び込み運転手救出 和歌山",
       "aiSummary": "和歌山でタンクローリーが海に転落し、運転手が救助された。",
@@ -2559,6 +2585,60 @@
         "model": "gemini-2.5-flash",
         "rejectionReasons": [
           "relevance 10 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "ee57fb424d4cdb4f",
+      "headline": "地震被害の熊本 夜も気温下がらず 熱中症対策 揺れにも備えを",
+      "aiSummary": "地震被災地の熊本で夜間も高温が続き、熱中症と余震への警戒が必要。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260807/k10015198731000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 07 Aug 2026 18:41:47 +0900",
+        "fetchedAt": "2026-08-07T21:34:13.153Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 20,
+        "copyrightRisk": 20,
+        "misinformationRisk": 10,
+        "duplication": 10,
+        "judgedAt": "2026-08-07T21:34:25.601Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 20 < 70 (not labor-safety related for type=general_news)"
+        ]
+      },
+      "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "0bcebcde1f08179a",
+      "headline": "全国的に気温上昇 鳥取39度 北海道も猛暑 熱中症対策徹底を",
+      "aiSummary": "全国的な猛暑で熱中症リスク増大。予防策の徹底を促す。",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260807/k10015199021000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 07 Aug 2026 12:50:15 +0900",
+        "fetchedAt": "2026-08-07T21:34:13.153Z"
+      },
+      "estimatedAccidentType": "熱中症",
+      "newsType": "general_news",
+      "score": {
+        "relevance": 30,
+        "copyrightRisk": 10,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-07T21:34:31.493Z",
+        "model": "gemini-2.5-flash",
+        "rejectionReasons": [
+          "relevance 30 < 70 (not labor-safety related for type=general_news)"
         ]
       },
       "approved": false,

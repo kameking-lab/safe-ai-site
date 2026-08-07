@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-07T01:00:18.182Z",
+  "updatedAt": "2026-08-07T21:34:35.557Z",
   "entries": [
     {
       "id": "c731005124d77b89",
@@ -287,6 +287,29 @@
         "misinformationRisk": 10,
         "duplication": 10,
         "judgedAt": "2026-07-10T21:57:33.498Z",
+        "model": "gemini-2.5-flash"
+      },
+      "approved": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "aec9233b901b4089",
+      "headline": "令和７年「労働安全衛生調査（実態調査）」の結果を公表します",
+      "aiSummary": "厚生労働省が令和7年度の労働安全衛生に関する実態調査結果を発表。",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/toukei/list/r07-46-50b.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-08-07T14:00:00+09:00",
+        "fetchedAt": "2026-08-07T21:34:13.153Z"
+      },
+      "newsType": "statistics_release",
+      "score": {
+        "relevance": 90,
+        "copyrightRisk": 15,
+        "misinformationRisk": 5,
+        "duplication": 10,
+        "judgedAt": "2026-08-07T21:34:35.549Z",
         "model": "gemini-2.5-flash"
       },
       "approved": true,
