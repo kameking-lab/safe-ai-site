@@ -54,8 +54,11 @@ benchmark-output
 playwright*.config.*
 vitest*.config.*
 lighthouse*.config.*
+lh5d-noimg*.json
 *.tsbuildinfo
 *.log
+*.lhr.json
+*.tmp
 *.trace
 Desktop.ini
 ._*

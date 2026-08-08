@@ -15,21 +15,61 @@ function Resolve-RepositoryRoot {
         throw "The script location is not inside a Git repository: $candidate"
     }
 
-    $gitRootOutput = @(& git -C $candidate rev-parse --show-toplevel 2>$null)
-    if ($LASTEXITCODE -ne 0 -or $gitRootOutput.Count -eq 0) {
-        throw "Unable to resolve the Git repository root from: $candidate"
+    $insideWorkTree = @(& git -C $candidate rev-parse --is-inside-work-tree 2>$null)
+    if ($LASTEXITCODE -ne 0 -or $insideWorkTree.Count -ne 1 -or $insideWorkTree[0] -ne 'true') {
+        throw "Unable to verify the Git work tree from: $candidate"
+    }
+    $prefix = @(& git -C $candidate rev-parse --show-prefix 2>$null)
+    if ($LASTEXITCODE -ne 0 -or -not [string]::IsNullOrEmpty(($prefix -join ''))) {
+        throw "The script-derived repository path is not the Git work-tree root: $candidate"
     }
 
-    $gitRoot = [System.IO.Path]::GetFullPath([string]$gitRootOutput[0])
-    if (-not [string]::Equals(
-        $candidate.TrimEnd('\', '/'),
-        $gitRoot.TrimEnd('\', '/'),
-        [System.StringComparison]::OrdinalIgnoreCase
-    )) {
-        throw "Script root and Git root differ. Script: $candidate Git: $gitRoot"
-    }
+    return $candidate.TrimEnd('\', '/')
+}
 
-    return $gitRoot.TrimEnd('\', '/')
+function Invoke-GitUtf8PathList {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$Arguments
+    )
+
+    # Windows PowerShell 5.1 decodes native stdout with the active console code
+    # page. Read Git's NUL-delimited bytes directly so Japanese paths remain
+    # lossless regardless of CP932/UTF-8 console settings.
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = 'git'
+    $startInfo.Arguments = $Arguments
+    $startInfo.WorkingDirectory = $Root
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $startInfo
+    $memory = New-Object System.IO.MemoryStream
+    try {
+        if (-not $process.Start()) {
+            throw 'Unable to start Git.'
+        }
+        $errorTask = $process.StandardError.ReadToEndAsync()
+        $process.StandardOutput.BaseStream.CopyTo($memory)
+        $process.WaitForExit()
+        [void]$errorTask.Result
+        if ($process.ExitCode -ne 0) {
+            throw "Git path listing failed with exit code $($process.ExitCode)."
+        }
+
+        $decoded = [System.Text.Encoding]::UTF8.GetString($memory.ToArray())
+        if ($decoded.Length -eq 0) {
+            return @()
+        }
+        return @($decoded.Split([char]0, [System.StringSplitOptions]::RemoveEmptyEntries))
+    }
+    finally {
+        $memory.Dispose()
+        $process.Dispose()
+    }
 }
 
 function Test-IsReparsePoint {
@@ -89,10 +129,10 @@ function Test-DirectoryContainsTrackedFiles {
     )
 
     $relativePath = Convert-ToGitPath -Root $Root -Path $Path
-    $tracked = @(& git -c core.quotepath=false -C $Root ls-files -- "$relativePath/")
-    if ($LASTEXITCODE -ne 0) {
-        throw "git ls-files failed while checking: $relativePath"
+    if ($relativePath -match '[\s"]') {
+        throw "Unexpected generated-output path syntax: $relativePath"
     }
+    $tracked = @(Invoke-GitUtf8PathList -Root $Root -Arguments "ls-files -z -- $relativePath/")
     return ($tracked.Count -gt 0)
 }
 
@@ -105,7 +145,15 @@ function Get-DirectoryMeasurement {
     $containsSensitiveEntry = $false
     $protectedReasons = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
     $rootName = (Split-Path -Leaf $Path).ToLowerInvariant()
-    $isGenericOutput = $rootName -in @('logs', 'tmp', 'temp', '.tmp', 'cache', '.cache')
+    $isAmbiguousOutput = $rootName -in @(
+        'out', 'build', 'dist', 'logs', 'tmp', 'temp', '.tmp', 'cache', '.cache',
+        'audit-out', '.maintenance-snapshots', 'local-snapshots',
+        'benchmark-output', '.benchmark-output'
+    )
+    if ($isAmbiguousOutput) {
+        $containsSensitiveEntry = $true
+        [void]$protectedReasons.Add('ambiguous output requires an explicit regeneration or retention review')
+    }
     $stack = New-Object 'System.Collections.Generic.Stack[string]'
     $stack.Push($Path)
 
@@ -119,12 +167,15 @@ function Get-DirectoryMeasurement {
                 continue
             }
             if ($child.PSIsContainer) {
-                if ($child.Name.ToLowerInvariant() -eq '.git') {
+                if (
+                    $child.Name.ToLowerInvariant() -eq '.git' -or
+                    $child.Name.ToLowerInvariant().EndsWith('.git')
+                ) {
                     $containsSensitiveEntry = $true
                     [void]$protectedReasons.Add('nested Git metadata')
                     continue
                 }
-                if ($isGenericOutput -and $child.Name.ToLowerInvariant() -in @(
+                if ($isAmbiguousOutput -and $child.Name.ToLowerInvariant() -in @(
                     'src', 'public', 'data', 'prisma', 'schema', 'schemas',
                     'migration', 'migrations', 'laws-fulltext'
                 )) {
@@ -157,18 +208,24 @@ function Get-DirectoryMeasurement {
                     $containsSensitiveEntry = $true
                     [void]$protectedReasons.Add('nested Git metadata')
                 }
-                if ($isGenericOutput -and (
+                if ($isAmbiguousOutput -and (
                     $lowerExtension -in @(
                         '.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs',
+                        '.py', '.pyw', '.ps1', '.psm1', '.psd1', '.go', '.rs',
+                        '.java', '.kt', '.kts', '.cs', '.c', '.h', '.cpp', '.hpp',
+                        '.rb', '.php', '.sh', '.bash', '.zsh',
                         '.css', '.scss', '.sass', '.less', '.md', '.mdx',
                         '.json', '.yaml', '.yml', '.toml', '.xml', '.prisma',
                         '.sql', '.sqlite', '.sqlite3', '.db',
+                        '.zip', '.tar', '.gz', '.tgz', '.7z', '.rar',
+                        '.exe', '.dll', '.so', '.dylib', '.wasm', '.jar', '.class', '.bin',
                         '.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg', '.ico'
                     ) -or
                     $lowerName -in @(
                         'package.json', 'package-lock.json', 'tsconfig.json',
                         'next.config.js', 'next.config.mjs', 'next.config.ts'
-                    )
+                    ) -or
+                    [string]::IsNullOrEmpty($lowerExtension)
                 )) {
                     $containsSensitiveEntry = $true
                     [void]$protectedReasons.Add('source, runtime data, asset, or configuration file in a generic output directory')
@@ -254,14 +311,16 @@ function Get-GeneratedDirectoryCandidates {
             Assert-SafePath -Root $Root -Path $parent
         }
         foreach ($directory in @(Get-ChildItem -LiteralPath $safeParent -Force -Directory -ErrorAction Stop)) {
-            if ((Test-IsAllowedOutputDirectoryName -Name $directory.Name) -and -not (Test-IsReparsePoint -Item $directory)) {
+            if (Test-IsAllowedOutputDirectoryName -Name $directory.Name) {
                 [void]$candidates.Add($directory.FullName)
             }
         }
 
         $vercelOutput = Join-Path -Path $safeParent -ChildPath '.vercel\output'
         if (Test-Path -LiteralPath $vercelOutput -PathType Container) {
-            [void]$candidates.Add((Assert-SafePath -Root $Root -Path $vercelOutput))
+            # Validation is centralized in the caller so a reparse point is
+            # reported as REVIEW_REQUIRED instead of terminating the run.
+            [void]$candidates.Add($vercelOutput)
         }
     }
 
@@ -275,16 +334,11 @@ function Get-UntrackedEvidencePaths {
     if (-not (Test-Path -LiteralPath $evidenceRoot -PathType Container)) {
         return @()
     }
+    [void](Assert-SafePath -Root $Root -Path $evidenceRoot)
 
     $relativeEvidenceRoot = 'docs/audits/evidence'
-    $normalUntracked = @(& git -c core.quotepath=false -C $Root ls-files --others --exclude-standard -- $relativeEvidenceRoot)
-    if ($LASTEXITCODE -ne 0) {
-        throw 'git ls-files failed while listing untracked evidence.'
-    }
-    $ignoredUntracked = @(& git -c core.quotepath=false -C $Root ls-files --others --ignored --exclude-standard -- $relativeEvidenceRoot)
-    if ($LASTEXITCODE -ne 0) {
-        throw 'git ls-files failed while listing ignored evidence.'
-    }
+    $normalUntracked = @(Invoke-GitUtf8PathList -Root $Root -Arguments "ls-files -z --others --exclude-standard -- $relativeEvidenceRoot")
+    $ignoredUntracked = @(Invoke-GitUtf8PathList -Root $Root -Arguments "ls-files -z --others --ignored --exclude-standard -- $relativeEvidenceRoot")
 
     return @($normalUntracked + $ignoredUntracked | Sort-Object -Unique)
 }
@@ -300,6 +354,11 @@ function Get-EmptyEvidenceDirectoryCandidates {
     $evidenceRoot = Join-Path -Path $Root -ChildPath 'docs\audits\evidence'
     if (-not (Test-Path -LiteralPath $evidenceRoot -PathType Container)) {
         return @()
+    }
+    $evidenceRoot = Assert-SafePath -Root $Root -Path $evidenceRoot
+    $evidenceMeasurement = Get-DirectoryMeasurement -Path $evidenceRoot
+    if ($evidenceMeasurement.ContainsSensitiveEntry) {
+        throw 'Evidence tree contains protected content: ' + ($evidenceMeasurement.ProtectedReasons -join ', ')
     }
 
     $scheduled = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
@@ -375,13 +434,57 @@ function Test-IsRawEvidence {
     return $true
 }
 
+function Test-IsProtectedEvidenceContent {
+    param(
+        [Parameter(Mandatory = $true)][string]$RelativePath,
+        [Parameter(Mandatory = $true)][System.IO.FileInfo]$Item
+    )
+
+    $normalized = $RelativePath.Replace('\', '/').ToLowerInvariant()
+    if ($normalized -match '(^|/)(?:\.git|[^/]+\.git)(/|$)') {
+        return $true
+    }
+
+    $extension = $Item.Extension.ToLowerInvariant()
+    $transparentRawExtensions = @(
+        '.har', '.trace', '.log', '.html', '.htm', '.lcov',
+        '.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif',
+        '.mp4', '.webm'
+    )
+    if ($extension -in $transparentRawExtensions) {
+        return $false
+    }
+
+    # Structured dumps are eligible only inside a directory that explicitly
+    # identifies them as raw output. Else they may be canonical/runtime data.
+    $isExplicitRawTree = $normalized -match '(^|/)(raw|screenshots|traces?|videos|playwright-report|test-results|lighthouse-runs?|logs|coverage)(/|$)'
+    if ($isExplicitRawTree -and $extension -in @('.json', '.jsonl', '.csv')) {
+        return $false
+    }
+
+    # Fail closed for source, configuration, datasets, archives, PDFs and any
+    # future opaque format. A reviewer may archive/delete them after inspection.
+    return $true
+}
+
 $repositoryRoot = Resolve-RepositoryRoot
 $mode = if ($Apply) { 'apply' } else { 'dry-run' }
 $cutoffUtc = [DateTime]::UtcNow.AddDays(-1 * $EvidenceRetentionDays)
 $targets = New-Object 'System.Collections.Generic.List[object]'
 $skipped = New-Object 'System.Collections.Generic.List[object]'
 
-foreach ($directoryPath in @(Get-GeneratedDirectoryCandidates -Root $repositoryRoot)) {
+$generatedDirectoryPaths = @()
+try {
+    $generatedDirectoryPaths = @(Get-GeneratedDirectoryCandidates -Root $repositoryRoot)
+}
+catch {
+    [void]$skipped.Add([pscustomobject]@{
+        Path = 'generated-output-roots'
+        Reason = $_.Exception.Message
+        Disposition = 'REVIEW_REQUIRED'
+    })
+}
+foreach ($directoryPath in $generatedDirectoryPaths) {
     try {
         $safePath = Assert-SafePath -Root $repositoryRoot -Path $directoryPath
         if (Test-DirectoryContainsTrackedFiles -Root $repositoryRoot -Path $safePath) {
@@ -420,7 +523,18 @@ foreach ($directoryPath in @(Get-GeneratedDirectoryCandidates -Root $repositoryR
     }
 }
 
-foreach ($relativePath in @(Get-UntrackedEvidencePaths -Root $repositoryRoot)) {
+$untrackedEvidencePaths = @()
+try {
+    $untrackedEvidencePaths = @(Get-UntrackedEvidencePaths -Root $repositoryRoot)
+}
+catch {
+    [void]$skipped.Add([pscustomobject]@{
+        Path = 'docs/audits/evidence'
+        Reason = $_.Exception.Message
+        Disposition = 'REVIEW_REQUIRED'
+    })
+}
+foreach ($relativePath in $untrackedEvidencePaths) {
     if ([string]::IsNullOrEmpty([string]$relativePath)) {
         continue
     }
@@ -435,6 +549,9 @@ foreach ($relativePath in @(Get-UntrackedEvidencePaths -Root $repositoryRoot)) {
         }
         if (-not (Test-IsRawEvidence -RelativePath ([string]$relativePath) -Item $item -CutoffUtc $cutoffUtc)) {
             continue
+        }
+        if (Test-IsProtectedEvidenceContent -RelativePath ([string]$relativePath) -Item $item) {
+            throw "Refusing source, runtime data, or Git metadata under evidence: $relativePath"
         }
         [void]$targets.Add([pscustomobject]@{
             Kind = 'expired-untracked-evidence'
@@ -457,16 +574,36 @@ foreach ($relativePath in @(Get-UntrackedEvidencePaths -Root $repositoryRoot)) {
 $scheduledEvidenceFiles = @($targets | Where-Object {
     $_.Kind -eq 'expired-untracked-evidence'
 } | ForEach-Object { [string]$_.FullPath })
-foreach ($directoryPath in @(Get-EmptyEvidenceDirectoryCandidates -Root $repositoryRoot -ScheduledFilePaths $scheduledEvidenceFiles)) {
-    $safePath = Assert-SafePath -Root $repositoryRoot -Path $directoryPath
-    [void]$targets.Add([pscustomobject]@{
-        Kind = 'empty-evidence-directory'
-        Path = Convert-ToGitPath -Root $repositoryRoot -Path $safePath
-        FullPath = $safePath
-        Bytes = [int64]0
-        FileCount = [int64]0
-        DirectoryCount = [int64]1
+$emptyEvidenceDirectories = @()
+try {
+    $emptyEvidenceDirectories = @(Get-EmptyEvidenceDirectoryCandidates -Root $repositoryRoot -ScheduledFilePaths $scheduledEvidenceFiles)
+}
+catch {
+    [void]$skipped.Add([pscustomobject]@{
+        Path = 'docs/audits/evidence'
+        Reason = $_.Exception.Message
+        Disposition = 'REVIEW_REQUIRED'
     })
+}
+foreach ($directoryPath in $emptyEvidenceDirectories) {
+    try {
+        $safePath = Assert-SafePath -Root $repositoryRoot -Path $directoryPath
+        [void]$targets.Add([pscustomobject]@{
+            Kind = 'empty-evidence-directory'
+            Path = Convert-ToGitPath -Root $repositoryRoot -Path $safePath
+            FullPath = $safePath
+            Bytes = [int64]0
+            FileCount = [int64]0
+            DirectoryCount = [int64]1
+        })
+    }
+    catch {
+        [void]$skipped.Add([pscustomobject]@{
+            Path = $directoryPath
+            Reason = $_.Exception.Message
+            Disposition = 'REVIEW_REQUIRED'
+        })
+    }
 }
 
 $deletedBytes = [int64]0

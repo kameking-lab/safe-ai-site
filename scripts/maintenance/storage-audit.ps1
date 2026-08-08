@@ -12,21 +12,58 @@ function Resolve-RepositoryRoot {
         throw "The script location is not inside a Git repository: $candidate"
     }
 
-    $gitRootOutput = @(& git -C $candidate rev-parse --show-toplevel 2>$null)
-    if ($LASTEXITCODE -ne 0 -or $gitRootOutput.Count -eq 0) {
-        throw "Unable to resolve the Git repository root from: $candidate"
+    $insideWorkTree = @(& git -C $candidate rev-parse --is-inside-work-tree 2>$null)
+    if ($LASTEXITCODE -ne 0 -or $insideWorkTree.Count -ne 1 -or $insideWorkTree[0] -ne 'true') {
+        throw "Unable to verify the Git work tree from: $candidate"
+    }
+    $prefix = @(& git -C $candidate rev-parse --show-prefix 2>$null)
+    if ($LASTEXITCODE -ne 0 -or -not [string]::IsNullOrEmpty(($prefix -join ''))) {
+        throw "The script-derived repository path is not the Git work-tree root: $candidate"
     }
 
-    $gitRoot = [System.IO.Path]::GetFullPath([string]$gitRootOutput[0])
-    if (-not [string]::Equals(
-        $candidate.TrimEnd('\', '/'),
-        $gitRoot.TrimEnd('\', '/'),
-        [System.StringComparison]::OrdinalIgnoreCase
-    )) {
-        throw "Script root and Git root differ. Script: $candidate Git: $gitRoot"
-    }
+    return $candidate.TrimEnd('\', '/')
+}
 
-    return $gitRoot.TrimEnd('\', '/')
+function Invoke-GitUtf8PathList {
+    param(
+        [Parameter(Mandatory = $true)][string]$Root,
+        [Parameter(Mandatory = $true)][string]$Arguments
+    )
+
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = 'git'
+    $startInfo.Arguments = $Arguments
+    $startInfo.WorkingDirectory = $Root
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $startInfo
+    $memory = New-Object System.IO.MemoryStream
+    try {
+        if (-not $process.Start()) {
+            throw 'Unable to start Git.'
+        }
+        $errorTask = $process.StandardError.ReadToEndAsync()
+        $process.StandardOutput.BaseStream.CopyTo($memory)
+        $process.WaitForExit()
+        [void]$errorTask.Result
+        if ($process.ExitCode -ne 0) {
+            throw "Git path listing failed with exit code $($process.ExitCode)."
+        }
+
+        $decoded = [System.Text.Encoding]::UTF8.GetString($memory.ToArray())
+        if ($decoded.Length -eq 0) {
+            return @()
+        }
+        return @($decoded.Split([char]0, [System.StringSplitOptions]::RemoveEmptyEntries))
+    }
+    finally {
+        $memory.Dispose()
+        $process.Dispose()
+    }
 }
 
 function Test-IsReparsePoint {
@@ -196,10 +233,7 @@ function Measure-RepositoryTree {
 function Measure-UntrackedFiles {
     param([Parameter(Mandatory = $true)][string]$Root)
 
-    $paths = @(& git -c core.quotepath=false -C $Root ls-files --others --exclude-standard)
-    if ($LASTEXITCODE -ne 0) {
-        throw 'git ls-files failed while measuring untracked files.'
-    }
+    $paths = @(Invoke-GitUtf8PathList -Root $Root -Arguments 'ls-files -z --others --exclude-standard')
 
     $rootPrefix = $Root.TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
     $fileCount = [int64]0

@@ -130,7 +130,7 @@ jobs:
           def is_generated_artifact(path: str) -> bool:
               parts = PurePosixPath(path).parts
               if "node_modules" in parts:
-                  return False
+                  return True
               if "screenshots" in parts and not path.startswith("web/public/screenshots/"):
                   return True
               generated_prefixes = (
@@ -139,7 +139,10 @@ jobs:
               )
               if any(part in GENERATED_SEGMENTS or part.startswith(generated_prefixes) for part in parts):
                   return True
-              return path.endswith((".lhr.json", ".trace"))
+              basename = PurePosixPath(path).name
+              return path.endswith((".lhr.json", ".trace", ".log", ".tmp")) or (
+                  basename.startswith("lh5d-noimg") and basename.endswith(".json")
+              )
 
           def is_audit_evidence(path: str) -> bool:
               return path.startswith("docs/audits/evidence/") or "/docs/audits/evidence/" in f"/{path}"
@@ -153,11 +156,16 @@ jobs:
               "web/dist/result.js",
               "web/lighthouse-raw-1/result.json",
               "web/logs/run.log",
+              "root-debug.log",
+              "artifact.tmp",
+              "lh5d-noimg-run.json",
           )
           if any(not is_generated_artifact(path) for path in classifier_probes):
               failures.append("storage classifier self-test failed")
           if is_generated_artifact("web/public/screenshots/runtime-guide.png"):
               failures.append("runtime screenshot classifier self-test failed")
+          if not is_generated_artifact("web/node_modules/pkg/dist/index.js"):
+              failures.append("node_modules classifier self-test failed")
           if sum(
               1 for index in range(MAX_UNTRACKED_COUNT + 1)
               if is_generated_artifact(f"web/test-results-probe/{index}.json")
@@ -216,8 +224,8 @@ jobs:
           }
           untracked_generated = [
               path for path in untracked_paths
-              if is_generated_artifact(path)
-              or is_audit_evidence(path)
+              if "node_modules" not in PurePosixPath(path).parts
+              and (is_generated_artifact(path) or is_audit_evidence(path))
           ]
           if len(untracked_generated) > MAX_UNTRACKED_COUNT:
               failures.append(

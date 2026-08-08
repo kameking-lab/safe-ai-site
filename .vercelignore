@@ -19,6 +19,16 @@ lighthouse-raw
 lighthouse-raw-*
 lighthouse-trace
 lighthouse-trace-*
+lighthouse-results
+.lighthouseci
+.turbo
+.tmp
+tmp
+trace
+traces
+videos
+benchmark-output
+.benchmark-output
 docs/audits
 coverage
 .bench
@@ -78,6 +88,8 @@ web/lighthouse*.config.*
 lh5d-noimg*.json
 *.tsbuildinfo
 *.log
+*.lhr.json
+*.tmp
 *.trace
 Desktop.ini
 ._*
