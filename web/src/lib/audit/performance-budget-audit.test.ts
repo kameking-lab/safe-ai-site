@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync, statSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import {
   attributeClientScripts,
@@ -17,23 +17,64 @@ const PERFORMANCE_ROUTES = Object.keys(
   JSON.parse(readFileSync("config/performance-budgets.json", "utf8")).routes,
 );
 
-function finalEvidenceCandidate(sessionId: string) {
-  const path = resolve(
-    FINAL_LIGHTHOUSE_ROOT,
-    sessionId,
-    "lighthouse-summary.json",
+function finalEvidenceCandidate(
+  sessionId: string,
+  pages: string[],
+  mtimeMs: number,
+) {
+  const sourceInventorySha256 = "fixture-source-inventory";
+  const buildId = "fixture-build";
+  const runs = pages.flatMap((page) =>
+    Array.from({ length: page === "resources" ? 3 : 1 }, (_, index) => ({
+      adopted: true,
+      success: true,
+      profile: "mobile",
+      pageId: page,
+      measurementId: `${sessionId}:${page}:${index + 1}`,
+      runKind: "final",
+      route: page === "home" ? "/" : `/${page}`,
+      sourceInventorySha256,
+      buildId,
+      sessionId,
+    })),
   );
   return {
-    path,
-    mtimeMs: statSync(path).mtimeMs,
-    summary: JSON.parse(readFileSync(path, "utf8")),
+    path: resolve(FINAL_LIGHTHOUSE_ROOT, sessionId, "lighthouse-summary.json"),
+    mtimeMs,
+    summary: {
+      sessionId,
+      runKind: "final",
+      executionsComplete: false,
+      method: {
+        concurrentLighthouseRuns: 1,
+        runsPerProfile: 3,
+        profiles: ["mobile"],
+      },
+      provenance: { sourceInventorySha256, buildId },
+      runs,
+      medians: pages.map((page) => ({
+        page,
+        path: page === "home" ? "/" : `/${page}`,
+        profile: "mobile",
+        adoptedRunCount: page === "resources" ? 3 : 1,
+      })),
+    },
   };
 }
 
 function finalCompositeFixtures() {
+  const mainPages = PERFORMANCE_ROUTES.filter((page) => page !== "resources");
   return {
-    main: finalEvidenceCandidate("20260802T220655-jst-63c54a6d"),
-    supplemental: finalEvidenceCandidate("20260802T222137-jst-164dca47"),
+    main: finalEvidenceCandidate(
+      "20260802T220655-jst-63c54a6d",
+      mainPages,
+      100,
+    ),
+    supplemental: finalEvidenceCandidate(
+      "20260802T222137-jst-164dca47",
+      ["resources"],
+      200,
+    ),
   };
 }
 
