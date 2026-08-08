@@ -63,6 +63,34 @@ const expectedCorpora = [
 const sha256 = (value: Uint8Array | string) =>
   createHash("sha256").update(value).digest("hex");
 
+const canonicalTextSourcePattern = /\.(?:json|jsonl|ts)$/u;
+
+const canonicalizeContent = (
+  content: Buffer,
+  repositoryPath: string,
+): Buffer => {
+  if (!canonicalTextSourcePattern.test(repositoryPath)) return content;
+
+  // Git may materialize text sources with CRLF on Windows. Normalize only
+  // complete CRLF byte pairs. Avoid decoding so invalid UTF-8 cannot be hidden.
+  const canonical = Buffer.allocUnsafe(content.byteLength);
+  let outputOffset = 0;
+  for (let inputOffset = 0; inputOffset < content.byteLength; inputOffset += 1) {
+    if (
+      content[inputOffset] === 0x0d &&
+      content[inputOffset + 1] === 0x0a
+    ) {
+      continue;
+    }
+    canonical[outputOffset] = content[inputOffset];
+    outputOffset += 1;
+  }
+  return canonical.subarray(0, outputOffset);
+};
+
+const readCanonicalContent = (path: string, repositoryPath: string): Buffer =>
+  canonicalizeContent(readFileSync(path), repositoryPath);
+
 const collectFiles = (path: string): string[] => {
   if (statSync(path).isFile()) return [path];
 
@@ -91,7 +119,7 @@ const inventory = (roots: readonly string[]) => {
     );
 
   const lines = files.map(({ path, repositoryPath }) => {
-    const content = readFileSync(path);
+    const content = readCanonicalContent(path, repositoryPath);
     return {
       bytes: content.byteLength,
       line: `${sha256(content)}  ${repositoryPath}\n`,
@@ -115,7 +143,7 @@ describe("legal source preservation manifest", () => {
     expect(manifest).toMatchObject({
       schemaVersion: 1,
       algorithm:
-        "sha256(sorted lines: <file-sha256><two spaces><repo-relative-path><LF>)",
+        "sha256(sorted lines: <canonical-file-sha256><two spaces><repo-relative-path><LF>); CRLF in .ts/.json/.jsonl is normalized to LF; all other files are raw",
       excludes: [
         "test files",
         "raw evidence",
@@ -159,5 +187,13 @@ describe("legal source preservation manifest", () => {
       ]),
     );
     expect(actualByCorpus).toEqual(expectedByCorpus);
+  }, 15_000);
+
+  it("normalizes only CRLF pairs in known text source formats", () => {
+    const content = Buffer.from("first\r\nsecond\rthird\n", "utf8");
+    expect(canonicalizeContent(content, "fixture.ts").toString("utf8")).toBe(
+      "first\nsecond\rthird\n",
+    );
+    expect(canonicalizeContent(content, "fixture.pdf")).toEqual(content);
   });
 });
