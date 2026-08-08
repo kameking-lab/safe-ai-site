@@ -1,5 +1,8 @@
 {
-  "fetchedAt": "2026-07-13T13:08:28.564Z",
+  "fetchedAt": "2026-08-08T11:12:15.628Z",
+  "lastSuccessfulAt": "2026-08-08T11:12:15.628Z",
+  "lastAttemptAt": "2026-08-08T11:12:15.628Z",
+  "status": "success",
   "source": "気象庁 (Japan Meteorological Agency)",
   "sourceUrl": "https://www.jma.go.jp/bosai/",
   "license": "気象庁ホームページ コンテンツ利用ルール（出典明記）",
@@ -7,6 +10,34 @@
     "warningsPrefectures": 47,
     "forecastOffices": 7,
     "earthquakes": 0
+  },
+  "quality": {
+    "warnings": {
+      "expectedRequests": 57,
+      "successfulRequests": 57,
+      "failedRequests": 0,
+      "failureRate": 0,
+      "maximumFailureRate": 0,
+      "expectedPrefectures": 47,
+      "effectivePrefectures": 47
+    },
+    "forecast": {
+      "expectedRequests": 7,
+      "successfulRequests": 7,
+      "failedRequests": 0,
+      "failureRate": 0,
+      "maximumFailureRate": 0,
+      "expectedOffices": 7,
+      "effectiveOffices": 7
+    },
+    "earthquakes": {
+      "expectedRequests": 1,
+      "successfulRequests": 1,
+      "failedRequests": 0,
+      "failureRate": 0,
+      "validPayload": true,
+      "matchingItems": 0
+    }
   },
   "errors": {
     "warnings": [],
