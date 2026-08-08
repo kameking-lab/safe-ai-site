@@ -144,7 +144,7 @@ function Test-PathIndicatesProtectedMaterial {
     # even when the host code page is CP932. .NET regular expressions expand
     # these Unicode escapes at match time.
     $protectedJapanese = '(?:\u6cd5\u4ee4\u539f\u5178|\u6cd5\u6e90|\u4e00\u6b21\u8cc7\u6599|\u516c\u5f0f\u539f\u6587|\u6b63\u672c|\u5b98\u5831|\u901a\u9054|\u544a\u793a|\u539a\u751f\u52b4\u50cd\u7701|\u30ed\u30fc\u30eb\u30d0\u30c3\u30af|\u672c\u756a\u5fa9\u65e7|\u5fa9\u5143\u7528|\u30c1\u30a7\u30c3\u30af\u30b5\u30e0|\u30cf\u30c3\u30b7\u30e5)'
-    $protectedAscii = '(?:external[-_]?sources?|official[-_]?sources?|primary[-_]?sources?|law[-_]?sources?|legal[-_]?sources?|source[-_]?(?:snapshot|hash|checksum|manifest)|sources[-_]?manifest|official[-_]?source|primary[-_]?source|e[-_]?gov|mhlw|kanpou|gazette|rollback|production[-_]?rollback|rollback[-_]?(?:info|metadata|manifest)|checksum[-_]?manifest|hash[-_]?manifest)'
+    $protectedAscii = '(?:(?:external|official|primary|law|legal)[-_ ]?sources?|sources?[-_ ]?(?:snapshots?|hash(?:es)?|checksums?|manifests?)|e[-_ ]?gov|mhlw|kanpou|gazette|rollback|production[-_ ]?rollback|rollback[-_ ]?(?:info|metadata|manifest)|checksum[-_ ]?manifest|hash[-_ ]?manifest)'
     return (
         $normalized -match "(^|/)$protectedAscii(/|$)" -or
         $normalized -match "(^|/)[^/]*$protectedAscii[^/]*(/|$)" -or
