@@ -27,7 +27,10 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # A cold hosted runner currently needs about 15 minutes for install, lint,
+    # build, all unit tests, browser install, and live smoke. Leave bounded
+    # headroom so a fully successful final step is not cancelled at teardown.
+    timeout-minutes: 25
     defaults:
       run:
         working-directory: web
