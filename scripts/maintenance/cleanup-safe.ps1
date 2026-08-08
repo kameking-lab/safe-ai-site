@@ -480,9 +480,14 @@ function Get-EmptyEvidenceDirectoryCandidates {
         return @()
     }
     $evidenceRoot = Assert-SafePath -Root $Root -Path $evidenceRoot
-    $evidenceMeasurement = Get-DirectoryMeasurement -Path $evidenceRoot
-    if ($evidenceMeasurement.ContainsSensitiveEntry) {
-        throw 'Evidence tree contains protected content: ' + ($evidenceMeasurement.ProtectedReasons -join ', ')
+    $evidenceRootItem = Get-Item -LiteralPath $evidenceRoot -Force -ErrorAction Stop
+    if (Test-IsReparsePoint -Item $evidenceRootItem) {
+        throw 'Evidence root is a reparse point.'
+    }
+    $evidenceReparsePoints = @(Get-ChildItem -LiteralPath $evidenceRoot -Recurse -Force -ErrorAction Stop |
+        Where-Object { Test-IsReparsePoint -Item $_ })
+    if ($evidenceReparsePoints.Count -gt 0) {
+        throw 'Evidence tree contains a reparse point.'
     }
 
     $scheduled = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
