@@ -61,6 +61,7 @@ jobs:
               "README.md",
               "manifest.json",
               "checksum-manifest.json",
+              "independent-review.md",
               "quality-gates-automated.json",
               "preview-conversation-audit.json",
               "conversation-evaluation.json",
