@@ -9,7 +9,10 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # The production build, Chromium setup, and the full browser matrix take
+    # more than 20 minutes on a cold hosted runner. Keep a bounded ceiling
+    # while allowing the complete suite to finish instead of cancelling it.
+    timeout-minutes: 35
     defaults:
       run:
         working-directory: web
@@ -21,7 +24,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Pin the current patched Node 22 LTS security release.
+          node-version: "22.23.2"
           cache: "npm"
           cache-dependency-path: web/package-lock.json
 
@@ -33,6 +37,14 @@ jobs:
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
+
+      - name: Verify production strict CSP
+        env:
+          # Run this before the dev suite can replace the production .next
+          # output. The full functional suite remains in its fixture-ready dev
+          # mode, while this step proves the nonce/strict-dynamic branch.
+          PLAYWRIGHT_SERVER_MODE: production
+        run: npx playwright test e2e/csp-runtime.spec.ts
 
       - name: Run E2E tests
         run: npm run test:e2e:ci

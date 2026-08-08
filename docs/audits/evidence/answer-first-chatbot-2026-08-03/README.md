@@ -1,11 +1,9 @@
 # Answer-first chatbot evidence（2026-08-03 JST基準）
 
-このディレクトリは今回の変更だけの検証証跡を収録する。法令回答の基準日は2026-08-03 JST、実装・評価の再検証日は2026-08-08 JST。リリース日は本番反映後に記録し、古い成功報告を現行実測の代用にしない。
+このディレクトリは今回の変更だけの最小検証証跡を収録する。法令回答の基準日は2026-08-03 JST、実装・評価の再検証日は2026-08-09 JST。リリース日は本番反映後に記録し、古い成功報告を現行実測の代用にしない。
 
-- `conversation-evaluation.json`: JSON、SSE、legacy、実ブラウザーの固定12ケース統合集計。
-- `browser/conversation-evaluation-browser.json`: 実ブラウザー12ケース。
-- `browser/service-first-browser-audit.json` / `.csv`: copy budget、responsive、400%、composer、forced colors、reduced motion、JavaScript無効。
-- `full-gate/`: 最終source freeze後に一度だけ実行するfull gateとLighthouse。
+- `conversation-evaluation.json`: JSON、SSE、legacyの固定12ケース候補集計。
+- `full-gate-final/quality-gates-automated.json`: 最終source freeze後の123-suite full gate要約。
 - `preview/`: 唯一のPreview URL、SSO、noindex、robots、停止系、12ケースAPI/ブラウザー。
 - `production/`: 新旧Deployment ID、candidate/public smoke、rollback判定。
 - `independent-review.md`: 実装担当外の読み取り専用Ultraレビュー。

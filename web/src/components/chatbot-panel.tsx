@@ -107,8 +107,7 @@ const ANSWER_SECTION_RE =
 
 function AnswerContent({ text }: { text: string }) {
   const blocks: Array<
-    | { type: "heading"; text: string }
-    | { type: "body"; text: string }
+    { type: "heading"; text: string } | { type: "body"; text: string }
   > = [];
   let bodyLines: string[] = [];
   const flushBody = () => {
@@ -153,7 +152,8 @@ function structuredConditions(message: ChatMessage): string[] {
     .map((item) => item.trim())
     .filter(
       (item, index, items) =>
-        Boolean(item) && items.findIndex((candidate) => candidate === item) === index,
+        Boolean(item) &&
+        items.findIndex((candidate) => candidate === item) === index,
     )
     .slice(0, 3);
 }
@@ -187,7 +187,9 @@ export function ChatbotPanel({
   const [input, setInput] = useState(initialQuestion ?? "");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [retryableQuestion, setRetryableQuestion] = useState<string | null>(null);
+  const [retryableQuestion, setRetryableQuestion] = useState<string | null>(
+    null,
+  );
   const [copyStates, setCopyStates] = useState<Record<string, boolean>>({});
   const [localSafetyNotice, setLocalSafetyNotice] = useState<{
     kind: "emergency" | "privacy";
@@ -241,7 +243,12 @@ export function ChatbotPanel({
     onTransferBlockedChange?.(
       Boolean(localSafetyNotice || lastAssistant?.requiresHumanReview),
     );
-  }, [localSafetyNotice, messages, onSafetyStateChange, onTransferBlockedChange]);
+  }, [
+    localSafetyNotice,
+    messages,
+    onSafetyStateChange,
+    onTransferBlockedChange,
+  ]);
 
   async function handleSend(question?: string) {
     const text = (question ?? input).trim();
@@ -351,10 +358,14 @@ export function ChatbotPanel({
         signal: controller.signal,
       });
 
-      if (!response.ok && (response.status === 422 || response.status === 428)) {
-        const blocked = (await response.json().catch(() => null)) as
-          | { error?: string; message?: string }
-          | null;
+      if (
+        !response.ok &&
+        (response.status === 422 || response.status === 428)
+      ) {
+        const blocked = (await response.json().catch(() => null)) as {
+          error?: string;
+          message?: string;
+        } | null;
         setMessages((previous) =>
           previous.filter(
             (message) =>
@@ -652,7 +663,7 @@ export function ChatbotPanel({
                 index === messages.length - 1;
               const hasStructuredAnswer = Boolean(
                 message.role === "assistant" &&
-                  message.substantiveAnswer?.trim(),
+                message.substantiveAnswer?.trim(),
               );
               const answer =
                 message.role === "assistant" && !hasStructuredAnswer
@@ -664,25 +675,39 @@ export function ChatbotPanel({
                   : [];
               const clarificationQuestion =
                 message.role === "assistant"
-                  ? message.clarificationQuestion ??
+                  ? (message.clarificationQuestion ??
                     message.clarification?.question ??
-                    null
+                    null)
                   : null;
               const quickReplies =
                 message.role === "assistant" ? quickRepliesFor(message) : [];
+              const scopeWarnings =
+                message.role === "assistant"
+                  ? (message.scopeWarnings ?? [])
+                      .map((warning) => warning.trim())
+                      .filter(Boolean)
+                      .slice(0, 3)
+                  : [];
               const hasEvidence =
                 message.role === "assistant" &&
                 ((message.sources?.length ?? 0) > 0 ||
                   (message.citations?.length ?? 0) > 0 ||
-                  (message.attachedNotices?.length ?? 0) > 0);
+                  (message.attachedNotices?.length ?? 0) > 0 ||
+                  (message.attachedLeaflets?.length ?? 0) > 0);
               return (
                 <article
                   key={message.id}
-                  className={message.role === "user" ? "ml-auto max-w-[88%]" : "max-w-2xl"}
+                  className={
+                    message.role === "user"
+                      ? "ml-auto max-w-[88%]"
+                      : "max-w-2xl"
+                  }
                   aria-label={
                     message.role === "user" ? "あなたの質問" : "安衛法AIの回答"
                   }
-                  data-chatbot-answer={message.role === "assistant" ? "" : undefined}
+                  data-chatbot-answer={
+                    message.role === "assistant" ? "" : undefined
+                  }
                 >
                   {message.role === "user" ? (
                     <p className="rounded-2xl rounded-br-md bg-blue-700 px-4 py-2.5 text-sm leading-6 text-white">
@@ -697,7 +722,10 @@ export function ChatbotPanel({
                         安衛法AIの回答 {assistantAnswerNumber}
                       </h2>
                       {hasStructuredAnswer ? (
-                        <div className="space-y-3" data-chatbot-structured-answer="">
+                        <div
+                          className="space-y-3"
+                          data-chatbot-structured-answer=""
+                        >
                           <section aria-label="結論">
                             <h3 className="text-sm font-bold">結論</h3>
                             <p className="mt-1 whitespace-pre-wrap">
@@ -706,7 +734,9 @@ export function ChatbotPanel({
                           </section>
                           {conditionItems.length > 0 && (
                             <section aria-label="条件で変わる点">
-                              <h3 className="text-sm font-bold">条件で変わる点</h3>
+                              <h3 className="text-sm font-bold">
+                                条件で変わる点
+                              </h3>
                               <ul className="mt-1 space-y-1 pl-5">
                                 {conditionItems.map((condition) => (
                                   <li key={condition} className="list-disc">
@@ -742,6 +772,24 @@ export function ChatbotPanel({
                   )}
 
                   {message.role === "assistant" &&
+                    !isStreaming &&
+                    scopeWarnings.length > 0 && (
+                      <aside
+                        role="note"
+                        aria-label="確認が必要"
+                        data-chatbot-scope-warning=""
+                        className="mt-3 border-l-2 border-amber-400 pl-3 text-xs leading-5 text-amber-950 dark:text-amber-100"
+                      >
+                        <p className="font-semibold">確認が必要</p>
+                        <ul className="mt-1 space-y-1">
+                          {scopeWarnings.map((warning) => (
+                            <li key={warning}>{warning}</li>
+                          ))}
+                        </ul>
+                      </aside>
+                    )}
+
+                  {message.role === "assistant" &&
                     message.id === activeReplyMessage?.id &&
                     quickReplies.length > 0 && (
                       <div
@@ -766,12 +814,9 @@ export function ChatbotPanel({
 
                   {message.role === "assistant" &&
                     !isStreaming &&
-                    hasEvidence && (
-                      <SourceDetails message={message} />
-                    )}
+                    hasEvidence && <SourceDetails message={message} />}
 
-                  {message.role === "assistant" &&
-                    !isStreaming && (
+                  {message.role === "assistant" && !isStreaming && (
                     <div
                       className="mt-2 flex min-h-11 items-center gap-3"
                       data-chatbot-answer-actions=""
@@ -793,15 +838,16 @@ export function ChatbotPanel({
                         )}
                         {copyStates[message.id] ? "コピー済み" : "コピー"}
                       </button>
-                      {!message.safetyKind && !(answer?.rest && hasEvidence) && (
-                        <button
-                          type="button"
-                          onClick={() => composerRef.current?.focus()}
-                          className="min-h-11 px-1 text-xs font-medium text-slate-500 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-slate-400 dark:hover:text-white"
-                        >
-                          条件を追加
-                        </button>
-                      )}
+                      {!message.safetyKind &&
+                        !(answer?.rest && hasEvidence) && (
+                          <button
+                            type="button"
+                            onClick={() => composerRef.current?.focus()}
+                            className="min-h-11 px-1 text-xs font-medium text-slate-500 hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-slate-400 dark:hover:text-white"
+                          >
+                            条件を追加
+                          </button>
+                        )}
                     </div>
                   )}
                 </article>
@@ -931,6 +977,7 @@ function SourceDetails({ message }: { message: ChatMessage }) {
   const relatedNotices = (message.attachedNotices ?? []).filter(
     (notice) => notice.evidenceRole === "related-material",
   );
+  const relatedLeaflets = (message.attachedLeaflets ?? []).slice(0, 2);
   const matchedCitationIndexes = new Set<number>();
   const entries: Array<{
     source?: ChatbotSource;
@@ -964,7 +1011,9 @@ function SourceDetails({ message }: { message: ChatMessage }) {
   const count = entries.length;
   const summary = [
     `根拠 ${count}件`,
-    relatedNotices.length > 0 ? `関連資料 ${relatedNotices.length}件` : null,
+    relatedNotices.length + relatedLeaflets.length > 0
+      ? `関連資料 ${relatedNotices.length + relatedLeaflets.length}件`
+      : null,
   ]
     .filter(Boolean)
     .join("・");
@@ -976,56 +1025,63 @@ function SourceDetails({ message }: { message: ChatMessage }) {
       <summary className="flex min-h-11 cursor-pointer items-center py-2 text-xs font-semibold text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 dark:text-slate-200">
         {summary}
       </summary>
-      {entries.length > 0 && <ol className="space-y-3 pb-3">
-        {entries.map(({ source, citation }, index) => {
-          const officialUrl = citation?.egovHref ?? source?.url;
-          const excerpt = (source?.snippet ?? source?.text ?? "該当箇所を取得できません").slice(
-            0,
-            240,
-          );
-          const applicationStatus = source?.applicationStatus ?? "unknown";
-          return (
-            <li key={`${citation?.lawShort ?? source?.law ?? "source"}-${index}`} className="text-xs leading-5">
-              <p className="font-semibold text-slate-900 dark:text-white">
-                ［{index + 1}］{citation?.fullName ?? source?.law} {citation?.articleNum ?? source?.article}
-              </p>
-              {(source?.paragraph || source?.item) && (
-                <p className="text-slate-600 dark:text-slate-300">
-                  {[source.paragraph, source.item].filter(Boolean).join("・")}
+      {entries.length > 0 && (
+        <ol className="space-y-3 pb-3">
+          {entries.map(({ source, citation }, index) => {
+            const officialUrl = citation?.egovHref ?? source?.url;
+            const excerpt = (
+              source?.snippet ??
+              source?.text ??
+              "該当箇所を取得できません"
+            ).slice(0, 240);
+            const applicationStatus = source?.applicationStatus ?? "unknown";
+            return (
+              <li
+                key={`${citation?.lawShort ?? source?.law ?? "source"}-${index}`}
+                className="text-xs leading-5"
+              >
+                <p className="font-semibold text-slate-900 dark:text-white">
+                  ［{index + 1}］{citation?.fullName ?? source?.law}{" "}
+                  {citation?.articleNum ?? source?.article}
                 </p>
-              )}
-              {citation?.articleTitle && (
-                <p className="text-slate-600 dark:text-slate-300">
-                  {citation.articleTitle}
+                {(source?.paragraph || source?.item) && (
+                  <p className="text-slate-600 dark:text-slate-300">
+                    {[source.paragraph, source.item].filter(Boolean).join("・")}
+                  </p>
+                )}
+                {citation?.articleTitle && (
+                  <p className="text-slate-600 dark:text-slate-300">
+                    {citation.articleTitle}
+                  </p>
+                )}
+                {source?.lawNumber && (
+                  <p className="text-slate-600 dark:text-slate-300">
+                    法令番号: {source.lawNumber}
+                  </p>
+                )}
+                <p className="mt-1 text-slate-600 dark:text-slate-300">
+                  施行状態: {statusLabel[applicationStatus]}
+                  {source?.effectiveOn ? `（${source.effectiveOn}）` : ""}
+                  {source?.asOf ? `・対象 ${source.asOf}` : ""}
                 </p>
-              )}
-              {source?.lawNumber && (
-                <p className="text-slate-600 dark:text-slate-300">
-                  法令番号: {source.lawNumber}
+                <p className="mt-1 text-slate-700 dark:text-slate-200">
+                  該当箇所: {excerpt}
                 </p>
-              )}
-              <p className="mt-1 text-slate-600 dark:text-slate-300">
-                施行状態: {statusLabel[applicationStatus]}
-                {source?.effectiveOn ? `（${source.effectiveOn}）` : ""}
-                {source?.asOf ? `・対象 ${source.asOf}` : ""}
-              </p>
-              <p className="mt-1 text-slate-700 dark:text-slate-200">
-                該当箇所: {excerpt}
-              </p>
-              {officialUrl && (
-                <a
-                  href={officialUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-1 inline-flex min-h-11 items-center font-semibold text-blue-800 underline-offset-4 hover:underline dark:text-blue-300"
-                >
-                  公式原文
-                </a>
-              )}
-            </li>
-          );
-        })}
-      </ol>}
+                {officialUrl && (
+                  <a
+                    href={officialUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1 inline-flex min-h-11 items-center font-semibold text-blue-800 underline-offset-4 hover:underline dark:text-blue-300"
+                  >
+                    公式原文
+                  </a>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
       {relatedNotices.length > 0 && (
         <section
           aria-labelledby={`chatbot-related-notices-heading-${message.id}`}
@@ -1089,6 +1145,76 @@ function SourceDetails({ message }: { message: ChatMessage }) {
           </ul>
         </section>
       )}
+      {relatedLeaflets.length > 0 && (
+        <section
+          aria-labelledby={`chatbot-related-leaflets-heading-${message.id}`}
+          className="border-t border-slate-200 pb-3 pt-3 dark:border-slate-800"
+        >
+          <h3
+            id={`chatbot-related-leaflets-heading-${message.id}`}
+            className="text-xs font-semibold text-slate-900 dark:text-white"
+          >
+            公式リーフレット（条文本文とは別）
+          </h3>
+          <ul className="mt-2 space-y-3">
+            {relatedLeaflets.map((leaflet) => {
+              const officialUrl = safeMhlwMaterialUrl(
+                leaflet.pdfUrl,
+                leaflet.sourceUrl,
+                leaflet.detailUrl,
+              );
+              return (
+                <li
+                  key={leaflet.id}
+                  className="text-xs leading-5 text-slate-700 dark:text-slate-200"
+                  data-chatbot-related-leaflet=""
+                >
+                  <p className="font-semibold text-slate-900 dark:text-white">
+                    {leaflet.title}
+                  </p>
+                  <p className="text-slate-600 dark:text-slate-300">
+                    {[leaflet.publisher, leaflet.publishedDateRaw]
+                      .filter(Boolean)
+                      .join("・")}
+                  </p>
+                  {officialUrl && (
+                    <a
+                      href={officialUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-flex min-h-11 items-center font-semibold text-blue-800 underline-offset-4 hover:underline dark:text-blue-300"
+                    >
+                      公式資料
+                    </a>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
     </details>
   );
+}
+
+function safeMhlwMaterialUrl(...values: Array<string | null>): string | null {
+  for (const value of values) {
+    if (!value) continue;
+    try {
+      const url = new URL(value);
+      const host = url.hostname.toLowerCase();
+      if (
+        url.protocol === "https:" &&
+        !url.username &&
+        !url.password &&
+        !url.port &&
+        (host === "mhlw.go.jp" || host.endsWith(".mhlw.go.jp"))
+      ) {
+        return url.toString();
+      }
+    } catch {
+      // Ignore malformed or non-official resource URLs.
+    }
+  }
+  return null;
 }

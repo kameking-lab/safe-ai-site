@@ -6,12 +6,17 @@ on:
     - cron: "30 18 * * 1"
   pull_request:
     paths:
-      - "web/src/components/**"
-      - "web/src/app/**"
-      - "web/src/lib/**"
-      - "web/src/data/**"
+      - "web/src/**"
+      - "web/public/**"
+      - "web/package.json"
+      - "web/package-lock.json"
+      - "web/next.config.ts"
+      - "web/postcss.config.mjs"
+      - "web/tsconfig.json"
       - "web/scripts/audit/best-in-class-lighthouse.mjs"
       - "web/scripts/audit/performance-budget.mjs"
+      - "web/scripts/audit/performance-budget-core.mjs"
+      - "web/scripts/audit/start-local-production-server.mjs"
       - "web/config/performance-budgets.json"
       - ".github/workflows/performance-budget.yml"
 
@@ -30,7 +35,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Pin the current patched Node 22 LTS security release.
+          node-version: "22.23.2"
           cache: npm
           cache-dependency-path: web/package-lock.json
       - run: npm ci
@@ -59,7 +65,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Keep collection on the exact toolchain used for the safety build.
+          node-version: "22.23.2"
           cache: npm
           cache-dependency-path: web/package-lock.json
       - run: npm ci
@@ -71,11 +78,37 @@ jobs:
         env:
           LOCAL_AUDIT_EVIDENCE_ROOT: ../.ci-performance-evidence/server
           LOCAL_AUDIT_PORT: "3320"
+          # Measure the same nonce/strict-dynamic policy already verified and
+          # enforced by production, not the compatibility report-only policy.
+          CSP_STRICT_ENFORCEMENT_VERIFIED: "true"
         run: node scripts/audit/start-local-production-server.mjs
       - name: Record server identity
         run: |
           echo "LIGHTHOUSE_SERVER_PID=$(cat ../.ci-performance-evidence/server/production-server.pid)" >> "$GITHUB_ENV"
           echo "LIGHTHOUSE_SERVER_COMMAND=node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3320" >> "$GITHUB_ENV"
+      - name: Verify strict CSP measurement mode
+        run: |
+          node --input-type=module <<'NODE'
+          const response = await fetch("http://127.0.0.1:3320/");
+          if (!response.ok) throw new Error(`audit server returned ${response.status}`);
+          const enforced = response.headers.get("content-security-policy") ?? "";
+          const reportOnly =
+            response.headers.get("content-security-policy-report-only") ?? "";
+          const scriptSource =
+            enforced
+              .split(";")
+              .map((value) => value.trim())
+              .find((value) => value.startsWith("script-src ")) ?? "";
+          if (
+            reportOnly ||
+            !scriptSource.includes("'strict-dynamic'") ||
+            !/'nonce-[^']+'/u.test(scriptSource) ||
+            scriptSource.includes("'unsafe-inline'") ||
+            scriptSource.includes("'unsafe-eval'")
+          ) {
+            throw new Error("performance server is not enforcing strict nonce CSP");
+          }
+          NODE
       - name: Three-run sequential mobile Lighthouse
         env:
           LIGHTHOUSE_RUN_KIND: final

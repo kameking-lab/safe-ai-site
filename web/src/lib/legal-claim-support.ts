@@ -39,9 +39,7 @@ function normalizeEvidence(value: string): string {
 }
 
 function citationIndexes(value: string): number[] {
-  return [...value.matchAll(/［(\d+)］/g)].map(
-    (match) => Number(match[1]) - 1,
-  );
+  return [...value.matchAll(/［(\d+)］/g)].map((match) => Number(match[1]) - 1);
 }
 
 function withoutMarkers(value: string): string {
@@ -147,9 +145,7 @@ function hasDangerousUnsupportedContradiction(value: string): boolean {
   );
   const normalized = normalizeEvidence(withoutGuardedWarning);
   return (
-    /無資格で(?:運転|作業|行|操作).*(?:でき|よい|構わない)/.test(
-      normalized,
-    ) ||
+    /無資格で(?:運転|作業|行|操作).*(?:でき|よい|構わない)/.test(normalized) ||
     /(?:資格|免許|技能講習|特別教育|教育|作業主任者の選任|墜落制止用器具の使用)(?:は|が)?不要(?:です|である|だ)?$/.test(
       normalized,
     ) ||
@@ -213,10 +209,10 @@ function inlineReviewedLocatorSupported(input: {
   const article = input.articles[input.claim.citationIndexes[0]!];
   return Boolean(
     article &&
-      article.lawShort === "安衛則" &&
-      /^第?194条の22$/.test(article.articleNum) &&
-      /高所作業車/.test(article.text) &&
-      /要求性能墜落制止用器具等/.test(article.text),
+    article.lawShort === "安衛則" &&
+    /^第?194条の22$/.test(article.articleNum) &&
+    /高所作業車/.test(article.text) &&
+    /要求性能墜落制止用器具等/.test(article.text),
   );
 }
 
@@ -243,13 +239,18 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
     ]);
   }
   if (/つり足場を除く足場の作業床は、幅40cm以上/.test(text)) {
-    return evidenceHasAll(evidence, ["つり足場の場合を除き", "幅は40センチメートル以上"]);
+    return evidenceHasAll(evidence, [
+      "つり足場の場合を除き",
+      "幅は40センチメートル以上",
+    ]);
   }
   if (/床材間の隙間は3cm以下/.test(text)) {
     return evidenceHasAll(evidence, ["床材間の隙間は3センチメートル以下"]);
   }
   if (/床材と建地との隙間は(?:原則)?12cm未満/.test(text)) {
-    return evidenceHasAll(evidence, ["床材と建地との隙間は12センチメートル未満"]);
+    return evidenceHasAll(evidence, [
+      "床材と建地との隙間は12センチメートル未満",
+    ]);
   }
   if (
     /^12cm以上でも、墜落防止措置を講じた上で、両端の隙間の和が24cm未満の場合、または作業上24cm未満が困難な場合には例外/.test(
@@ -263,11 +264,7 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "二十四センチメートル未満とすることが作業の性質上困難",
     ]);
   }
-  if (
-    /床材と建地との隙間は原則12cm未満.*両端の隙間の和が24cm未満/.test(
-      text,
-    )
-  ) {
+  if (/床材と建地との隙間は原則12cm未満.*両端の隙間の和が24cm未満/.test(text)) {
     return evidenceHasAll(evidence, [
       "床材と建地との隙間は十二センチメートル未満",
       "床材と建地との隙間が十二センチメートル以上",
@@ -293,7 +290,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "35センチメートル以上50センチメートル以下",
     ]);
   }
-  if (/わく組足場以外の手すり等として確認する場合、.*基準を満たしません/.test(text)) {
+  if (
+    /わく組足場以外の手すり等として確認する場合、.*基準を満たしません/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "わく組足場以外",
       "85センチメートル以上",
@@ -314,13 +315,21 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "技能講習を修了した者",
     ]);
   }
-  if (/安衛則36条5号は、最大荷重1トン未満のフォークリフト運転を掲げています/.test(text)) {
+  if (
+    /安衛則36条5号は、最大荷重1トン未満のフォークリフト運転を掲げています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "最大荷重一トン未満のフォークリフト",
       "運転の業務",
     ]);
   }
-  if (/最大荷重1トン以上のフォークリフト運転は、安衛令20条11号の就業制限業務/.test(text)) {
+  if (
+    /最大荷重1トン以上のフォークリフト運転は、安衛令20条11号の就業制限業務/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "最大荷重",
       "基準荷重中心",
@@ -328,7 +337,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "運転",
     ]);
   }
-  if (/安衛法61条は、その業務を技能講習修了者等の所定資格を持つ者に限っています/.test(text)) {
+  if (
+    /安衛法61条は、その業務を技能講習修了者等の所定資格を持つ者に限っています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "政令で定めるものについては",
       "免許を受けた者",
@@ -337,7 +350,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "当該業務に就かせてはならない",
     ]);
   }
-  if (/「最大荷重」は、車両の構造・材料に応じて基準荷重中心に負荷できる最大の荷重/.test(text)) {
+  if (
+    /「最大荷重」は、車両の構造・材料に応じて基準荷重中心に負荷できる最大の荷重/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "フォークリフトの構造及び材料に応じて",
       "基準荷重中心に負荷させることができる最大の荷重",
@@ -353,7 +370,9 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "特別の教育を行",
     ]);
   }
-  if (/フォークリフトは、最大荷重1トン以上なら.*1トン未満でも特別教育/.test(text)) {
+  if (
+    /フォークリフトは、最大荷重1トン以上なら.*1トン未満でも特別教育/.test(text)
+  ) {
     return evidenceHasAll(evidence, [
       "最大荷重",
       "1トン以上",
@@ -393,13 +412,21 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       ])
     );
   }
-  if (/電気工事士法上の「電気工事」は、一般用電気工作物等または自家用電気工作物を設置・変更する工事/.test(text)) {
+  if (
+    /電気工事士法上の「電気工事」は、一般用電気工作物等または自家用電気工作物を設置・変更する工事/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "一般用電気工作物等又は自家用電気工作物を設置し又は変更する工事",
       "軽微な工事を除く",
     ]);
   }
-  if (/電気工事士法3条は、設備・工事区分に応じて、電気工事士免状または認定証等を持つ者に従事を限っています/.test(text)) {
+  if (
+    /電気工事士法3条は、設備・工事区分に応じて、電気工事士免状または認定証等を持つ者に従事を限っています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "第一種電気工事士免状",
       "第二種電気工事士免状",
@@ -410,7 +437,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "従事してはならない",
     ]);
   }
-  if (/安衛法59条3項は、省令で定める危険・有害業務に就かせるとき、特別教育を行うよう定めています/.test(text)) {
+  if (
+    /安衛法59条3項は、省令で定める危険・有害業務に就かせるとき、特別教育を行うよう定めています/.test(
+      text,
+    )
+  ) {
     return (
       evidenceHasAll(evidence, [
         "危険又は有害な業務で厚生労働省令で定めるもの",
@@ -421,7 +452,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       ])
     );
   }
-  if (/安衛法59条3項により、省令で定める危険・有害業務に就かせるときは特別教育が必要/.test(text)) {
+  if (
+    /安衛法59条3項により、省令で定める危険・有害業務に就かせるときは特別教育が必要/.test(
+      text,
+    )
+  ) {
     return (
       evidenceHasAll(evidence, [
         "危険又は有害な業務で厚生労働省令で定めるもの",
@@ -432,7 +467,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       ])
     );
   }
-  if (/電気では、安衛則36条4号に充電電路の敷設・点検・修理・操作等が掲げられています/.test(text)) {
+  if (
+    /電気では、安衛則36条4号に充電電路の敷設・点検・修理・操作等が掲げられています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "高圧",
       "特別高圧",
@@ -442,7 +481,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "充電部分が露出している開閉器の操作の業務",
     ]);
   }
-  if (/電気工事士法3条の区分は、自家用・一般用・特殊・簡易の各電気工事で異なります/.test(text)) {
+  if (
+    /電気工事士法3条の区分は、自家用・一般用・特殊・簡易の各電気工事で異なります/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "自家用電気工作物に係る電気工事",
       "一般用電気工作物等に係る電気工事",
@@ -450,14 +493,22 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "簡易電気工事",
     ]);
   }
-  if (/安衛則36条4号は、高圧・特別高圧では充電電路または支持物の敷設・点検・修理・操作を掲げています/.test(text)) {
+  if (
+    /安衛則36条4号は、高圧・特別高圧では充電電路または支持物の敷設・点検・修理・操作を掲げています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "高圧",
       "特別高圧",
       "充電電路若しくは当該充電電路の支持物の敷設点検修理若しくは操作",
     ]);
   }
-  if (/低圧では、充電電路の敷設・修理と、充電部分が露出した開閉器の操作が同号に掲げられています/.test(text)) {
+  if (
+    /低圧では、充電電路の敷設・修理と、充電部分が露出した開閉器の操作が同号に掲げられています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "低圧",
       "充電電路",
@@ -465,17 +516,31 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "充電部分が露出している開閉器の操作の業務",
     ]);
   }
-  if (/安衛法14条は、対象作業の区分に応じて作業主任者を選任し、労働者の指揮等を行わせるよう定めています/.test(text)) {
+  if (
+    /安衛法14条は、対象作業の区分に応じて作業主任者を選任し、労働者の指揮等を行わせるよう定めています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "政令で定めるものについては",
       "作業主任者を選任し",
       "当該作業に従事する労働者の指揮その他の厚生労働省令で定める事項を行わせなければならない",
     ]);
   }
-  if (/安衛令6条は、「法第十四条の政令で定める作業」（指定された作業）を列挙しています/.test(text)) {
-    return evidenceHasAll(evidence, ["法第十四条の政令で定める作業は次のとおり"]);
+  if (
+    /安衛令6条は、「法第十四条の政令で定める作業」（指定された作業）を列挙しています/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "法第十四条の政令で定める作業は次のとおり",
+    ]);
   }
-  if (/電気作業では、安衛則350条が安衛則339条・341条1項・342条1項・344条1項・345条1項の作業を行うときに作業の指揮者を定めるよう求めています/.test(text)) {
+  if (
+    /電気作業では、安衛則350条が安衛則339条・341条1項・342条1項・344条1項・345条1項の作業を行うときに作業の指揮者を定めるよう求めています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "第三百三十九条",
       "第三百四十一条第一項",
@@ -486,7 +551,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "作業を直接指揮",
     ]);
   }
-  if (/安衛則36条4号には、高圧・特別高圧の充電電路または支持物の敷設・点検・修理・操作と、一定の低圧業務が掲げられています/.test(text)) {
+  if (
+    /安衛則36条4号には、高圧・特別高圧の充電電路または支持物の敷設・点検・修理・操作と、一定の低圧業務が掲げられています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "高圧",
       "特別高圧",
@@ -496,7 +565,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "充電部分が露出している開閉器の操作の業務",
     ]);
   }
-  if (/低圧か高圧・特別高圧かに加え、敷設・点検・修理・操作のどれを行うかを確認します/.test(text)) {
+  if (
+    /低圧か高圧・特別高圧かに加え、敷設・点検・修理・操作のどれを行うかを確認します/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "高圧",
       "特別高圧",
@@ -598,8 +671,7 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
         "第三百四十四条第一項",
         "第三百四十五条第一項",
         "作業の指揮者を定めて",
-      ]) &&
-      !evidenceHasAny(evidence, ["低圧活線作業", "低圧活線近接作業"])
+      ]) && !evidenceHasAny(evidence, ["低圧活線作業", "低圧活線近接作業"])
     );
   }
   if (/最大荷重1トンちょうどは技能講習側/.test(text)) {
@@ -628,7 +700,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "玉掛けの業務",
     ]);
   }
-  if (/「つり上げ荷重」は、機械の構造・材料に応じて負荷できる最大の荷重/.test(text)) {
+  if (
+    /「つり上げ荷重」は、機械の構造・材料に応じて負荷できる最大の荷重/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "構造及び材料に応じて負荷させることができる最大の荷重",
     ]);
@@ -643,7 +719,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "玉掛け技能講習を修了した者",
     ]);
   }
-  if (/つり上げ荷重1トン以上のクレーン・移動式クレーン・デリックの玉掛けは、就業制限の対象/.test(text)) {
+  if (
+    /つり上げ荷重1トン以上のクレーン・移動式クレーン・デリックの玉掛けは、就業制限の対象/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "つり上げ荷重が一トン以上のクレーン",
       "移動式クレーン",
@@ -658,7 +738,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "当該業務に就かせてはならない",
     ]);
   }
-  if (/クレーン・移動式クレーン・デリックの玉掛けは、つり上げ荷重1トン以上/.test(text)) {
+  if (
+    /クレーン・移動式クレーン・デリックの玉掛けは、つり上げ荷重1トン以上/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "つり上げ荷重が1トン以上",
       "玉掛け",
@@ -667,7 +751,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "特別の教育",
     ]);
   }
-  if (/基準は実際の(?:つり荷|荷の重さ)ではなく、機械の構造・材料に応じた最大荷重/.test(text)) {
+  if (
+    /基準は実際の(?:つり荷|荷の重さ)ではなく、機械の構造・材料に応じた最大荷重/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "構造及び材料に応じて負荷させることができる最大の荷重",
     ]);
@@ -696,7 +784,9 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "特別の教育",
     ]);
   }
-  if (/つり上げ荷重1トン以上5トン未満.*小型移動式クレーン運転技能講習/.test(text)) {
+  if (
+    /つり上げ荷重1トン以上5トン未満.*小型移動式クレーン運転技能講習/.test(text)
+  ) {
     return evidenceHasAll(evidence, [
       "つり上げ荷重が1トン以上5トン未満の移動式クレーン",
       "小型移動式クレーン運転技能講習を修了した者",
@@ -766,27 +856,41 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "作業床が接地面に対し垂直にのみ上昇し又は下降する構造のものを除く",
     ]);
   }
-  if (/作業床の高さが2m以上のものが、安衛令10条7号の「高所作業車」です/.test(text)) {
+  if (
+    /作業床の高さが2m以上のものが、安衛令10条7号の「高所作業車」です/.test(text)
+  ) {
     return evidenceHasAll(evidence, [
       "作業床を最も高く上昇させた場合",
       "床面の高さ",
       "二メートル以上の高所作業車",
     ]);
   }
-  if (/作業床の高さが10m未満の高所作業車運転が、安衛則36条10号の5に掲げられています/.test(text)) {
+  if (
+    /作業床の高さが10m未満の高所作業車運転が、安衛則36条10号の5に掲げられています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "作業床の高さ",
       "十メートル未満の高所作業車",
       "運転の業務",
     ]);
   }
-  if (/作業床の高さが10m以上の高所作業車運転は、安衛令20条15号の就業制限業務/.test(text)) {
+  if (
+    /作業床の高さが10m以上の高所作業車運転は、安衛令20条15号の就業制限業務/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "作業床の高さが十メートル以上の高所作業車",
       "運転の業務",
     ]);
   }
-  if (/安衛法61条は、政令で定める就業制限業務を技能講習修了者等の所定資格を持つ者に限っています/.test(text)) {
+  if (
+    /安衛法61条は、政令で定める就業制限業務を技能講習修了者等の所定資格を持つ者に限っています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "政令で定めるものについては",
       "免許を受けた者",
@@ -795,14 +899,22 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "当該業務に就かせてはならない",
     ]);
   }
-  if (/安衛法59条1項は、労働者を雇い入れたとき、その業務に関する安全・衛生教育を行うよう事業者に求めています/.test(text)) {
+  if (
+    /安衛法59条1項は、労働者を雇い入れたとき、その業務に関する安全・衛生教育を行うよう事業者に求めています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "労働者を雇い入れたとき",
       "その従事する業務に関する安全又は衛生のための教育",
       "行なわなければならない",
     ]);
   }
-  if (/安衛則35条は、当該労働者へ遅滞なく必要事項を教育するよう定めています/.test(text)) {
+  if (
+    /安衛則35条は、当該労働者へ遅滞なく必要事項を教育するよう定めています/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "当該労働者に対し",
       "遅滞なく",
@@ -810,13 +922,21 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "教育を行なわなければならない",
     ]);
   }
-  if (/作業内容を変更したときも、従事する業務に必要な安全・衛生教育が必要/.test(text)) {
+  if (
+    /作業内容を変更したときも、従事する業務に必要な安全・衛生教育が必要/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "労働者の作業内容を変更したとき",
       "従事する業務に関する安全又は衛生のための教育",
     ]);
   }
-  if (/教育事項には、危険・有害性と取扱い、安全装置・保護具、作業手順・開始時点検、疾病予防、整理整頓、事故時の応急措置・退避などが含まれます/.test(text)) {
+  if (
+    /教育事項には、危険・有害性と取扱い、安全装置・保護具、作業手順・開始時点検、疾病予防、整理整頓、事故時の応急措置・退避などが含まれます/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "危険性又は有害性及びこれらの取扱い方法",
       "安全装置",
@@ -828,7 +948,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "事故時等における応急措置及び退避",
     ]);
   }
-  if (/十分な知識・技能があると認められる事項は、その教育を省略できます/.test(text)) {
+  if (
+    /十分な知識・技能があると認められる事項は、その教育を省略できます/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "十分な知識及び技能を有していると認められる労働者",
       "当該事項についての教育を省略することができる",
@@ -840,7 +964,9 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "運転の業務",
     ]);
   }
-  if (/銘板・仕様上の作業床最高高さが2m以上10m未満の高所作業車運転/.test(text)) {
+  if (
+    /銘板・仕様上の作業床最高高さが2m以上10m未満の高所作業車運転/.test(text)
+  ) {
     return evidenceHasAll(evidence, [
       "作業床の高さ",
       "2メートル以上",
@@ -884,7 +1010,9 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "技能講習を修了した者",
     ]);
   }
-  if (/判定は当日の作業高さではなく、作業床を最大まで上げたときの高さ/.test(text)) {
+  if (
+    /判定は当日の作業高さではなく、作業床を最大まで上げたときの高さ/.test(text)
+  ) {
     return evidenceHasAll(evidence, [
       "作業床を最も高く上昇させた場合",
       "2メートル以上",
@@ -971,7 +1099,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "同等以上の知識を有すると認められる者",
     ]);
   }
-  if (/建築物の解体・改修前の事前調査は、原則として一般建築物石綿含有建材調査者/.test(text)) {
+  if (
+    /建築物の解体・改修前の事前調査は、原則として一般建築物石綿含有建材調査者/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "解体又は改修",
       "一般建築物石綿含有建材調査者",
@@ -992,11 +1124,10 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "特定建築物石綿含有建材調査者",
     ]);
   }
-  if (/対象工作物と除去する材料の区分で、告示上の調査者が変わります/.test(text)) {
-    return evidenceHasAll(evidence, [
-      "特定工作物告示",
-      "材料除去等の作業",
-    ]);
+  if (
+    /対象工作物と除去する材料の区分で、告示上の調査者が変わります/.test(text)
+  ) {
+    return evidenceHasAll(evidence, ["特定工作物告示", "材料除去等の作業"]);
   }
   if (/石綿の事前調査を行える人は対象で変わります/.test(text)) {
     return evidenceHasAll(evidence, [
@@ -1011,10 +1142,16 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "解体又は改修",
     ]);
   }
-  if (/建築物のうち一戸建て住宅等では、一戸建て等石綿含有建材調査者/.test(text)) {
+  if (
+    /建築物のうち一戸建て住宅等では、一戸建て等石綿含有建材調査者/.test(text)
+  ) {
     return evidenceHasAll(evidence, ["一戸建て等石綿含有建材調査者"]);
   }
-  if (/同条3項各号の方法による場合は、同条4項の調査者要件から除かれます/.test(text)) {
+  if (
+    /同条3項各号の方法による場合は、同条4項の調査者要件から除かれます/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, ["前項各号に規定する場合を除き"]);
   }
   if (/屋内作業場等で第一種または第二種の有機溶剤業務/.test(text)) {
@@ -1065,7 +1202,9 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "タンク等の内部",
     ]);
   }
-  if (/まずSDSで成分・含有率と作業内容を確認.*第一種・第二種有機溶剤等/.test(text)) {
+  if (
+    /まずSDSで成分・含有率と作業内容を確認.*第一種・第二種有機溶剤等/.test(text)
+  ) {
     return evidenceHasAll(evidence, [
       "第1種有機溶剤等又は第2種有機溶剤等",
       "屋内作業場等",
@@ -1085,12 +1224,20 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
     return evidenceHasAll(evidence, ["重量の5パーセントを超えて含有"]);
   }
   if (/第三種有機溶剤等は扱いが異なり、タンク等の内部では全体換気/.test(text)) {
-    return evidenceHasAll(evidence, ["第3種有機溶剤等", "タンク等の内部", "全体換気装置"]);
+    return evidenceHasAll(evidence, [
+      "第3種有機溶剤等",
+      "タンク等の内部",
+      "全体換気装置",
+    ]);
   }
   if (/臨時作業または短時間作業には設備の適用除外・特例/.test(text)) {
     return evidenceHasAll(evidence, ["臨時に有機溶剤業務", "短時間"]);
   }
-  if (/第三種有機溶剤等は、タンク等の内部で使う場合、原則として密閉設備/.test(text)) {
+  if (
+    /第三種有機溶剤等は、タンク等の内部で使う場合、原則として密閉設備/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "タンク等の内部",
       "第3種有機溶剤等",
@@ -1101,16 +1248,17 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "吹付け",
     ]);
   }
-  if (/第三種有機溶剤等について、有機則6条の設備義務はタンク等の内部/.test(text)) {
-    return evidenceHasAll(evidence, [
-      "タンク等の内部",
-      "第3種有機溶剤等",
-    ]);
+  if (
+    /第三種有機溶剤等について、有機則6条の設備義務はタンク等の内部/.test(text)
+  ) {
+    return evidenceHasAll(evidence, ["タンク等の内部", "第3種有機溶剤等"]);
   }
   if (/SDSで第三種への該当と、実際の作業方法を確認/.test(text)) {
     return evidenceHasAll(evidence, ["第3種有機溶剤"]);
   }
-  if (/第6条の設備義務は、第三種有機溶剤等をタンク等の内部で使う場合/.test(text)) {
+  if (
+    /第6条の設備義務は、第三種有機溶剤等をタンク等の内部で使う場合/.test(text)
+  ) {
     return evidenceHasAll(evidence, ["タンク等の内部", "第3種有機溶剤等"]);
   }
   if (/まずSDSで第三種への該当と作業方法を確認/.test(text)) {
@@ -1133,7 +1281,9 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "第5条の規定にかかわらず",
     ]);
   }
-  if (/第三種有機溶剤等の臨時作業は、タンク等の内部か、吹付け作業か/.test(text)) {
+  if (
+    /第三種有機溶剤等の臨時作業は、タンク等の内部か、吹付け作業か/.test(text)
+  ) {
     return evidenceHasAll(evidence, [
       "タンク等の内部",
       "吹付けによる第3種有機溶剤等",
@@ -1193,7 +1343,11 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       ])
     );
   }
-  if (/条文は「者を置く等」と定めており、専任の監視人だけを唯一の方法とはしていません/.test(text)) {
+  if (
+    /条文は「者を置く等」と定めており、専任の監視人だけを唯一の方法とはしていません/.test(
+      text,
+    )
+  ) {
     return evidenceHasAll(evidence, [
       "常時作業の状況を監視",
       "通報する者を置く等",
@@ -1229,9 +1383,7 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
     ]);
   }
   if (
-    /酸素欠乏危険作業では、原則として酸素濃度を18%以上に保つよう換気/.test(
-      text,
-    )
+    /酸素欠乏危険作業では、原則として酸素濃度を18%以上に保つよう換気/.test(text)
   ) {
     return evidenceHasAll(evidence, [
       "酸素欠乏危険作業",
@@ -1285,9 +1437,7 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
     ]);
   }
   if (
-    /特別教育は、危険・有害な業務として厚生労働省令で指定された作業/.test(
-      text,
-    )
+    /特別教育は、危険・有害な業務として厚生労働省令で指定された作業/.test(text)
   ) {
     return (
       evidenceHasAll(evidence, [
@@ -1318,7 +1468,9 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       ]) && evidenceHasAll(evidence, ["フルハーネス型のものを用いて行う作業"])
     );
   }
-  if (/高さ2m以上でも、一律にフルハーネス型と決まるわけではありません/.test(text)) {
+  if (
+    /高さ2m以上でも、一律にフルハーネス型と決まるわけではありません/.test(text)
+  ) {
     return evidenceHasAll(evidence, [
       "高さが2メートル以上",
       "作業床を設けることが困難",
@@ -1356,6 +1508,120 @@ function knownClaimSupported(text: string, evidence: string): boolean | null {
       "使用を命じられたとき",
       "使用しなければならない",
     ]);
+  }
+  if (/^労働者死傷病報告の期限は休業日数で分かれます/.test(text)) {
+    return evidenceHasAll(evidence, [
+      "死亡し又は休業したとき",
+      "遅滞なく",
+      "休業の日数が4日に満たないとき",
+      "1月から3月まで",
+      "4月から6月まで",
+      "7月から9月まで",
+      "10月から12月まで",
+      "最後の月の翌月末日まで",
+    ]);
+  }
+  if (
+    /^死亡または休業4日以上は安衛則97条1項により「遅滞なく」、休業4日未満は同条2項/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "死亡し又は休業したとき",
+      "遅滞なく",
+      "休業の日数が4日に満たないとき",
+      "1月から3月まで",
+      "4月から6月まで",
+      "7月から9月まで",
+      "10月から12月まで",
+      "最後の月の翌月末日まで",
+    ]);
+  }
+  if (
+    /^報告先は所轄労働基準監督署長で、電子情報処理組織を使用して報告します/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "電子情報処理組織を使用して",
+      "所轄労働基準監督署長に報告しなければならない",
+    ]);
+  }
+  if (/^労働者死傷病報告の報告先は、所轄労働基準監督署長です/.test(text)) {
+    return evidenceHasAll(evidence, [
+      "所轄労働基準監督署長に報告しなければならない",
+    ]);
+  }
+  if (
+    /^安衛則97条1項の死亡・休業4日以上の報告も、同条2項の休業4日未満の報告も同じ報告先です/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "死亡し又は休業したとき",
+      "休業の日数が4日に満たないとき",
+      "所轄労働基準監督署長に報告しなければならない",
+    ]);
+  }
+  if (
+    /^死亡または休業4日以上は「遅滞なく」、休業1〜3日は四半期ごと/.test(text)
+  ) {
+    return evidenceHasAll(evidence, [
+      "死亡し又は休業したとき",
+      "遅滞なく",
+      "休業の日数が4日に満たないとき",
+      "1月から3月まで",
+      "4月から6月まで",
+      "7月から9月まで",
+      "10月から12月まで",
+      "最後の月の翌月末日まで",
+    ]);
+  }
+  if (/^休業日数が4日に満たない場合/.test(text)) {
+    return evidenceHasAll(evidence, [
+      "休業の日数が4日に満たないとき",
+      "1月から3月まで",
+      "4月から6月まで",
+      "7月から9月まで",
+      "10月から12月まで",
+      "最後の月の翌月末日まで",
+      "所轄労働基準監督署長に報告しなければならない",
+    ]);
+  }
+  if (
+    /^休業4日以上.*この四半期報告ではなく、同条1項の「遅滞なく」の報告/.test(
+      text,
+    )
+  ) {
+    return evidenceHasAll(evidence, [
+      "死亡し又は休業したとき",
+      "遅滞なく",
+      "休業の日数が4日に満たないとき",
+    ]);
+  }
+  if (/^休業4日以上.*労働者死傷病報告を行います/.test(text)) {
+    return evidenceHasAll(evidence, [
+      "死亡し又は休業したとき",
+      "遅滞なく",
+      "電子情報処理組織を使用して",
+      "所轄労働基準監督署長に報告しなければならない",
+    ]);
+  }
+  if (/^同項は「何日以内」という日数ではなく「遅滞なく」/.test(text)) {
+    return evidenceHasAll(evidence, ["遅滞なく"]);
+  }
+  if (/^休業日数が4日に満たない場合は、四半期ごとにまとめ/.test(text)) {
+    return evidenceHasAll(evidence, [
+      "休業の日数が4日に満たないとき",
+      "1月から3月まで",
+      "4月から6月まで",
+      "7月から9月まで",
+      "10月から12月まで",
+      "最後の月の翌月末日まで",
+    ]);
+  }
+  if (/^死亡した場合も、同条1項による「遅滞なく」の報告対象/.test(text)) {
+    return evidenceHasAll(evidence, ["死亡し又は休業したとき", "遅滞なく"]);
   }
   return null;
 }
@@ -1418,11 +1684,7 @@ export function validateServiceFirstLegalClaimSupport(input: {
     }),
   );
   const claimSignature = (claim: Claim) =>
-    JSON.stringify([
-      claim.section,
-      claim.raw,
-      claim.citationIndexes,
-    ]);
+    JSON.stringify([claim.section, claim.raw, claim.citationIndexes]);
   if (
     claims.length !== canonicalClaims.length ||
     claims.some(
@@ -1457,7 +1719,9 @@ export function validateServiceFirstLegalClaimSupport(input: {
         statusArticles,
         input.now,
       )
-    ] ?? statusCandidateIndexes[0] ?? 0;
+    ] ??
+    statusCandidateIndexes[0] ??
+    0;
 
   for (const claim of claims) {
     const markersValid =
@@ -1492,16 +1756,16 @@ export function validateServiceFirstLegalClaimSupport(input: {
       /^対象日の施行内容を確認できないため、回答を保留します/.test(
         claim.text,
       ) ||
-      /^対象日版の公式本文または公布済みの改正法令を確認/.test(
-        claim.text,
-      )
+      /^対象日版の公式本文または公布済みの改正法令を確認/.test(claim.text)
     ) {
       if (!expectedStatusLine.startsWith("確認不能（")) {
         failures.push(`${claim.section}:future-source-state`);
       }
       continue;
     }
-    if (/^対象時点では、収録しているこの条文本文はまだ施行前/.test(claim.text)) {
+    if (
+      /^対象時点では、収録しているこの条文本文はまだ施行前/.test(claim.text)
+    ) {
       if (!input.answer.includes("当時未施行")) {
         failures.push("結論:past-effective-date");
       }
@@ -1538,9 +1802,7 @@ export function validateServiceFirstLegalClaimSupport(input: {
       /^収録している現行本文だけでは当時の内容を確定できないため、回答を保留します/.test(
         claim.text,
       ) ||
-      /^対象日版の公式本文または法令履歴を直接確認してください/.test(
-        claim.text,
-      )
+      /^対象日版の公式本文または法令履歴を直接確認してください/.test(claim.text)
     ) {
       // 現行本文を過去時点の本文として扱わないための保留。法的内容は断定しない。
       continue;

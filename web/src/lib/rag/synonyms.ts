@@ -32,7 +32,11 @@ const LAW_ALIASES: string[][] = LAW_ALIAS_GROUPS;
  * groupA/groupB は「口語が一段正規化された後の語」で書けばよい
  * （例: マンホール→酸素欠乏 は query-expansion 側が展開済み）。
  */
-const COOCCURRENCE_EXPANSIONS: { groupA: string[]; groupB: string[]; additions: string[] }[] = [
+const COOCCURRENCE_EXPANSIONS: {
+  groupA: string[];
+  groupB: string[];
+  additions: string[];
+}[] = [
   {
     // 酸欠系語 × 資格系語 → 役割別の根拠（作業主任者=11条、従事者の特別教育=12条）
     // マンホール/下水管/ピット等の現場語は query-expansion.ts が「酸素欠乏」へ
@@ -52,13 +56,25 @@ const COOCCURRENCE_EXPANSIONS: { groupA: string[]; groupB: string[]; additions: 
     // 玉掛け × ワイヤ/ロープ系 → 玉掛用具（クレーン則第213〜215条）
     groupA: ["玉掛け", "玉掛", "玉かけ"],
     groupB: ["ワイヤ", "ロープ", "フック", "シャックル", "つり具", "用具"],
-    additions: ["玉掛用具", "ワイヤロープ", "クレーン則第213条", "クレーン則第214条", "クレーン則第215条"],
+    additions: [
+      "玉掛用具",
+      "ワイヤロープ",
+      "クレーン則第213条",
+      "クレーン則第214条",
+      "クレーン則第215条",
+    ],
   },
   {
     // 移動式クレーン（ユニック等の俗称含む） × 資格系 → 就業制限（クレーン則第68条）
     groupA: ["移動式クレーン", "ユニック", "レッカー", "ラフター"],
     groupB: ["資格", "免許", "講習", "運転", "操作"],
-    additions: ["移動式クレーン運転士", "小型移動式クレーン", "クレーン則第68条", "安衛法第61条", "安衛令第20条"],
+    additions: [
+      "移動式クレーン運転士",
+      "小型移動式クレーン",
+      "クレーン則第68条",
+      "安衛法第61条",
+      "安衛令第20条",
+    ],
   },
   {
     // 高所作業車 × 資格系 → 就業制限（安衛法第61条・安衛令第20条第15号）
@@ -73,8 +89,19 @@ const COOCCURRENCE_EXPANSIONS: { groupA: string[]; groupB: string[]; additions: 
     additions: ["特別教育", "特別の教育", "安衛則第36条"],
   },
   {
-    // ケガ/負傷 × 報告系 → 労働者死傷病報告（安衛則第97条）
-    groupA: ["ケガ", "けが", "怪我", "負傷", "死亡"],
+    // ケガ/負傷/労災/休業 × 報告系 → 労働者死傷病報告（安衛則第97条）
+    groupA: [
+      "ケガ",
+      "けが",
+      "怪我",
+      "負傷",
+      "死亡",
+      "労災",
+      "労災事故",
+      "労働災害",
+      "休業災害",
+      "休業",
+    ],
     groupB: ["報告", "届出", "届け", "労基署", "労働基準監督署"],
     additions: ["労働者死傷病報告", "死傷病報告", "安衛則第97条"],
   },
@@ -119,7 +146,11 @@ export function expandQueryRich(query: string): string {
     }
   }
 
-  for (const { groupA, groupB, additions: coAdditions } of COOCCURRENCE_EXPANSIONS) {
+  for (const {
+    groupA,
+    groupB,
+    additions: coAdditions,
+  } of COOCCURRENCE_EXPANSIONS) {
     if (
       groupA.some((a) => normalizedQuery.includes(a.normalize("NFKC"))) &&
       groupB.some((b) => normalizedQuery.includes(b.normalize("NFKC")))
@@ -145,9 +176,17 @@ export function isLawShortEquivalent(a: string, b: string): boolean {
 }
 
 /** デバッグ用に辞書統計を返す。テスト/ドキュメントから参照する。 */
-export function getSynonymStats(): { laws: number; terms: number; lawTokens: number; termTokens: number } {
+export function getSynonymStats(): {
+  laws: number;
+  terms: number;
+  lawTokens: number;
+  termTokens: number;
+} {
   const lawTokens = LAW_ALIASES.reduce((s, g) => s + g.length, 0);
-  const termTokens = Object.values(TERM_EXPANSIONS).reduce((s, v) => s + v.length, 0);
+  const termTokens = Object.values(TERM_EXPANSIONS).reduce(
+    (s, v) => s + v.length,
+    0,
+  );
   return {
     laws: LAW_ALIASES.length,
     terms: Object.keys(TERM_EXPANSIONS).length,

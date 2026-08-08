@@ -24,12 +24,7 @@ export type ChatbotSafetyDecision = {
 };
 
 export type ChatbotSensitiveDataKind =
-  | "name"
-  | "address"
-  | "employee-id"
-  | "phone"
-  | "email"
-  | "health";
+  "name" | "address" | "employee-id" | "phone" | "email" | "health";
 
 export type ChatbotTextRecord = {
   role: "user" | "assistant";
@@ -65,7 +60,18 @@ const SEVERE_BLEEDING_PATTERNS = [
   /大量(?:に)?血が出て(?:いる|います|る)?/,
   /大量出血|大出血|出血(?:が|は)?ひどい|血が止まらない/,
   /血が(?:噴き出|吹き出).{0,12}(?:止まらない|止まりません)/,
+  /頭(?:部)?から大量(?:に)?出血(?:して(?:いる|います)|中)/,
 ];
+
+const VOMITING_SYMPTOM_SOURCE =
+  "(?:(?:何度も|何回も|繰り返し|二度|二回|2度|2回|２度|２回)(?:吐(?:いた|いて(?:いる|います|る)|きました|き続け(?:ている|ています))|嘔吐(?:した|しました|している|しています|が(?:ある|あります)))|嘔吐(?:した|しました|している|しています|が(?:ある|あります)|を繰り返(?:している|しています|す))|吐(?:いた|いて(?:いる|います)|きました))";
+
+const HEAD_TRAUMA_SYMPTOM_SOURCE = `(?:頭|頭部)(?:を)?(?:(?:強く|激しく)?打(?:った|って|ち|ちました)|強打(?:後|した|して|し|しました)?|(?:[^。！？!?]{0,8}に)?(?:強く|激しく)?ぶつけ(?:た|て|ました)).{0,32}${VOMITING_SYMPTOM_SOURCE}`;
+
+const CRANE_ENTRAPMENT_SYMPTOM_SOURCE =
+  "(?:(?:作業員|同僚|人)(?:が|は))?(?:クレーン|吊り荷|つり荷)(?:の(?:ブーム|旋回体|本体))?(?:(?:と|や)(?:壁|柱|構造物|建物)(?:(?:と)?の間)?)?(?:に|で)(?:(?:作業員|同僚|人)(?:が|は))?(?:挟まれ|はさまれ|挟まっ|はさまっ)(?:た|ました|ている|ています|てる|てます)";
+
+const HEAD_TRAUMA_PATTERNS = [new RegExp(HEAD_TRAUMA_SYMPTOM_SOURCE)];
 
 const SEIZURE_PATTERNS = [/けいれん|痙攣/];
 const CHEST_PAIN_PATTERNS = [
@@ -84,6 +90,7 @@ const COLLAPSE_OR_IMMOBILE_PATTERNS = [
 const EMERGENCY_PATTERNS = [
   ...UNRESPONSIVE_OR_BREATHING_PATTERNS,
   ...SEVERE_BLEEDING_PATTERNS,
+  ...HEAD_TRAUMA_PATTERNS,
   ...SEIZURE_PATTERNS,
   ...CHEST_PAIN_PATTERNS,
   ...COLLAPSE_OR_IMMOBILE_PATTERNS,
@@ -94,27 +101,107 @@ const EMERGENCY_PATTERNS = [
  * non-negated symptom in the same message remains available to the detector.
  */
 function withoutExplicitlyNegatedEmergencyStatements(message: string): string {
-  const symptom =
-    "(?:意識(?:が|は)?(?:ない|無い|なし|もうろう|朦朧)|呼びかけても(?:反応|返事|返答|応答)(?:が|は)?(?:しない|ない|無い|なし)|呼びかけ(?:に|ても).{0,8}(?:応じない|応じません)|ぐったり.{0,12}(?:応じない|応じません|反応(?:が|は)?ない|返事(?:が|は)?ない)|(?:反応|返事|返答|応答)(?:が|は)?(?:しない|ない|無い|なし|鈍い|にぶい)|(?:呼吸|息)(?:が|は)?(?:ない|無い|なし|分からない|わからない|判らない|できない|できません|苦しい|苦しそう|しづらい|しにくい)|呼吸困難|窒息(?:した|しました|している|しています|してる|してます)|(?:脈|脈拍)(?:が|は)?(?:ない|ありません|触れない|分からない)|(?:呼吸|息)(?:を)?して(?:い)?(?:ない|ません)|気を失(?:った|いました|っている|っています|ってる|ってます)|気絶(?:した|しました|している|しています|してる|してます)|倒れ(?:て|込んで).{0,16}(?:反応|返事|返答|応答)(?:が|は)?(?:しない|ない|無い|なし|ありません)|大量(?:に)?血が出て(?:いる|います|る)?|大量出血|大出血|出血(?:が|は)?ひどい|血が止まらない|血が(?:噴き出|吹き出).{0,12}(?:止まらない|止まりません)|けいれん|痙攣|胸(?:が|は)?(?:痛い|苦しい|苦しそう)|胸痛|胸.{0,16}(?:締め付け|締めつけ|圧迫).{0,16}(?:痛|苦し)|(?:人|作業員|同僚|職員|従業員|誰か)?(?:が|は)?倒れ(?:た|ている|ています|てる|てます|ました)|倒れ(?:て|込んで).{0,10}(?:起きない|起きません|動かない|動きません)|動け(?:ない|ません)|心停止|心肺停止|(?:フォークリフト|車両|重機).*(?:ひかれ|轢かれ)(?:た|ました|ています|て)|(?:機械|回転体|ロール|ベルト|重機).*(?:巻き込まれ|挟まれ|はさまれ)(?:た|ました|ています|て)|(?:指|腕|手|足).*(?:切断された|切断されました|切断した)|(?:目|眼).*(?:異物|破片|釘|金属片).*(?:刺さった|刺さりました|刺さって))";
+  const symptom = `(?:意識(?:が|は)?(?:ない|無い|なし|もうろう|朦朧)|意識不明(?:になった|です|だった)?|呼びかけても(?:反応|返事|返答|応答)(?:が|は)?(?:しない|ない|無い|なし)|呼びかけ(?:に|ても).{0,8}(?:応じない|応じません)|ぐったり.{0,12}(?:応じない|応じません|反応(?:が|は)?ない|返事(?:が|は)?ない)|(?:反応|返事|返答|応答)(?:が|は)?(?:しない|ない|無い|なし|鈍い|にぶい)|(?:呼吸|息)(?:が|は)?(?:ない|無い|なし|分からない|わからない|判らない|できない|できません|苦しい|苦しそう|しづらい|しにくい)|呼吸困難|窒息(?:した|しました|している|しています|してる|してます)|(?:脈|脈拍)(?:が|は)?(?:ない|ありません|触れない|分からない)|(?:呼吸|息)(?:を)?して(?:い)?(?:ない|ません)|気を失(?:った|いました|っている|っています|ってる|ってます)|気絶(?:した|しました|している|しています|してる|してます)|倒れ(?:て|込んで).{0,16}(?:反応|返事|返答|応答)(?:が|は)?(?:しない|ない|無い|なし|ありません)|大量(?:に)?血が出て(?:いる|います|る)?|大量出血|大出血|出血(?:が|は)?ひどい|血が止まらない|血が(?:噴き出|吹き出).{0,12}(?:止まらない|止まりません)|頭(?:部)?から大量(?:に)?出血(?:して(?:いる|います)|中)|${HEAD_TRAUMA_SYMPTOM_SOURCE}|けいれん|痙攣|胸(?:が|は)?(?:痛い|苦しい|苦しそう)|胸痛|胸.{0,16}(?:締め付け|締めつけ|圧迫).{0,16}(?:痛|苦し)|(?:人|作業員|同僚|職員|従業員|誰か)?(?:が|は)?倒れ(?:た|ている|ています|てる|てます|ました)|倒れ(?:て|込んで).{0,10}(?:起きない|起きません|動かない|動きません)|動け(?:ない|ません)|心停止|心肺停止|(?:フォークリフト|車両|重機).*(?:ひかれ|轢かれ)(?:た|ました|ています|て)|(?:機械|回転体|ロール|ベルト|重機).*(?:巻き込まれ|挟まれ|はさまれ)(?:た|ました|ています|て)|${CRANE_ENTRAPMENT_SYMPTOM_SOURCE}|(?:指|腕|手|足).*(?:切断された|切断されました|切断した)|(?:目|眼).*(?:異物|破片|釘|金属片).*(?:刺さった|刺さりました|刺さって))`;
   const negation =
-    "(?:(?:という|との)?(?:こと|わけ|事実|状態|報告)?(?:では|じゃ|は)(?:ない|ありません|なかった|ありませんでした)|(?:こと|わけ)(?:では|じゃ)(?:ない|ありません)|(?:人|者|作業員)?(?:は|が)(?:いない|いません|おりません))";
-  return message.replace(new RegExp(`${symptom}.{0,8}${negation}`, "g"), "");
+    "(?:(?:という|との)?(?:こと|わけ|事実|状態|報告)?(?:では|じゃ|は)(?:ない|ありません|なかった|ありませんでした)|(?:こと|わけ)(?:では|じゃ)(?:ない|ありません)|(?:人|者|作業員)?(?:は|が)(?:いない|いません|おりません)|(?:事故|災害|事態|状況)(?:は|が)?(?:発生(?:して)?|起き(?:て)?|起こ(?:って)?)(?:いない|いません|おりません|いなかった|いませんでした|ない|ません|なかった|ませんでした))";
+  const explicitlyAbsentIncident =
+    "(?:事故|災害|事態|状況)(?:は|が)?(?:ない|ありません|なかった|ありませんでした|起こりませんでした|確認されていません)";
+  return message
+    .replace(new RegExp(`${symptom}${explicitlyAbsentIncident}`, "g"), "")
+    .replace(new RegExp(`${symptom}${negation}`, "g"), "");
 }
 
 function isClearlyNonActiveEmergencyExample(message: string): boolean {
-  return (
-    /(?:訓練|教育|教材|資料|マニュアル|手順書|クイズ|例文|用語|意味|定義|仮定|想定|(?:場合|とき|時)の対応).*(?:作|教|説明|確認|検討|知り)/.test(
+  const outsideQuotedText = message.replace(
+    /「[^」]{0,240}」|『[^』]{0,240}』/g,
+    "",
+  );
+  const lastTrainingMarker = Math.max(
+    ...[
+      "訓練",
+      "例文",
+      "想定",
+      "仮定",
+      "演習",
+      "練習問題",
+      "デモンストレーション",
+      "ドリル",
+    ].map((marker) => outsideQuotedText.lastIndexOf(marker)),
+  );
+  const postTrainingText =
+    lastTrainingMarker >= 0
+      ? outsideQuotedText.slice(lastTrainingMarker)
+      : outsideQuotedText;
+  const postTrainingTextIsHypothetical =
+    /(?:今後|もし).{0,48}(?:場合|とき|時)|同じ(?:事故|状況|事態|こと)(?:が|は)?(?:起きた|発生した|なった)場合/.test(
+      postTrainingText,
+    );
+  const hasActualIncidentOverride =
+    !postTrainingTextIsHypothetical &&
+    [
+      /(?:今(?!後)|現在|目の前|現場で|発生中|たった今|さっき|先ほど).{0,32}(?:同じ|事故|災害|事態|状況|起き|発生|倒れ|反応|意識|呼吸|挟まれ|吐|嘔吐|出血|実際|現実|本当)/,
+      /(?:その後|実際に).{0,32}(?:同じ|事故|災害|事態|状況|起き|発生|挟まれ|吐|嘔吐|出血|現実|本当)/,
+      /同じ(?:事故|状況|事態|こと)(?:が|は)?(?:起き|発生|です|にな|とな|起こ)/,
+      /本当に.{0,16}(?:発生|起き|事故|同じ)/,
+      /(?:これは|こちらは)?(?:実際|現実|本当|実)(?:の)?事故(?:です|である|が)/,
+      /(?:では|じゃ)?なく.{0,8}(?:実際|現実|本当)/,
+      /(?:至急|緊急|119)/,
+    ].some((pattern) => pattern.test(postTrainingText));
+  const quotedTrainingExample =
+    /(?:「[^」]{1,240}」|『[^』]{1,240}』).{0,40}(?:訓練|教育|教材|資料|マニュアル|手順書|クイズ|例文|仮定|想定)|(?:訓練|教育|教材|資料|マニュアル|手順書|クイズ|例文|仮定|想定).{0,40}(?:「[^」]{1,240}」|『[^』]{1,240}』)/.test(
+      message,
+    ) && !hasActualIncidentOverride;
+  const labeledTrainingExample =
+    /(?:という|との)(?:(?:救護|救助)?訓練|研修|教育|教材|マニュアル)?(?:用)?の?(?:例文|文|設定|ケース|シナリオ|想定|仮定)(?:です|を|として|$)/.test(
+      message,
+    ) && !hasActualIncidentOverride;
+  const explicitlyLabeledSimulation =
+    /(?:(?:という|との)|(?:想定|仮定|場合|とき|時)の)(?:(?:模擬|救護|救助|机上)?訓練|(?:模擬|机上)?演習(?:用)?(?:シナリオ|ケース)?|練習問題|デモンストレーション|ドリル|ケーススタディ|ロールプレイ|シミュレーション)(?:です|でした|である|として|$)/.test(
+      message,
+    ) && !hasActualIncidentOverride;
+  const activeStateFollowedByResponseRequest =
+    /(?:ています|てます|ました|です|(?:挟まれ|はさまれ|吐い|嘔吐し)た)[。！？!?]*この(?:場合|とき|時)の(?:対応|手順|救助手順)/.test(
+      message,
+    );
+  const clearlyHypotheticalEmergency =
+    /(?:場合|とき|時)の(?:対応|手順|救助手順|救護手順|訓練|救護訓練|救助訓練)/.test(
       message,
     ) &&
+    !hasActualIncidentOverride &&
+    !activeStateFollowedByResponseRequest;
+  const clearlyLabeledHypothetical =
+    /(?:想定|仮定)(?:です|である|で(?:の)?訓練(?:します|する|です|である)|の訓練(?:です|である)|(?:を)?した訓練(?:です|である))/.test(
+      message,
+    ) && !hasActualIncidentOverride;
+  const clearlyConditionalQuestion =
+    /(?:もし|仮に).{0,120}(?:場合|とき|時)(?:は|に)?.{0,40}(?:どうする|どうすれば|対応|手順|救助|119|通報)/.test(
+      message,
+    ) && !hasActualIncidentOverride;
+
+  if (
+    quotedTrainingExample ||
+    labeledTrainingExample ||
+    explicitlyLabeledSimulation ||
+    clearlyHypotheticalEmergency ||
+    clearlyLabeledHypothetical ||
+    clearlyConditionalQuestion
+  ) {
+    return true;
+  }
+
+  return (
+    /(?:訓練|教育|教材|資料|マニュアル|手順書|クイズ|例文|演習|練習問題|デモンストレーション|ドリル|用語|意味|定義|仮定|想定|(?:場合|とき|時)の対応).*(?:作|教|説明|確認|検討|知り)/.test(
+      message,
+    ) &&
+    !hasActualIncidentOverride &&
+    !activeStateFollowedByResponseRequest &&
     !/(?:今|現在|目の前|現場で|発生中|助けて|至急|緊急|119|作業員が|同僚が|人が)/.test(
       message,
     )
   );
 }
 
-function emergencyCategoryFor(
-  normalized: string,
-): ChatbotEmergencyCategory {
+function emergencyCategoryFor(normalized: string): ChatbotEmergencyCategory {
   if (SEVERE_BLEEDING_PATTERNS.some((pattern) => pattern.test(normalized))) {
     return "severe-bleeding";
   }
@@ -132,9 +219,7 @@ function emergencyCategoryFor(
     return "chest-pain";
   }
   if (
-    COLLAPSE_OR_IMMOBILE_PATTERNS.some((pattern) =>
-      pattern.test(normalized),
-    )
+    COLLAPSE_OR_IMMOBILE_PATTERNS.some((pattern) => pattern.test(normalized))
   ) {
     return "collapse-or-immobile";
   }
@@ -159,6 +244,7 @@ const ACTIVE_WORKPLACE_EMERGENCY_PATTERNS = [
   /熱中症.*(?:意識|けいれん|痙攣|動け|反応|吐|高体温|ふらつ)|(?:意識|けいれん|痙攣|動け|反応).*(?:熱中症|暑熱)/,
   /(?:フォークリフト|車両|重機).*(?:ひかれ|轢かれ)(?:た|ました|ています|て)/,
   /(?:機械|回転体|ロール|ベルト|重機).*(?:腕|手|指|足|体)?.*(?:巻き込まれ|挟まれ|はさまれ)(?:た|ました|ています|て)/,
+  new RegExp(CRANE_ENTRAPMENT_SYMPTOM_SOURCE),
   /(?:クレーン|吊り荷|つり荷|荷).*(?:落ち|落下).*(?:頭|体|作業員).*(?:当たり|当たりました|直撃)/,
   /(?:指|腕|手|足).*(?:切断された|切断されました|切断した|切断して.*出血しています)/,
   /(?:目|眼).*(?:異物|破片|釘|金属片).*(?:刺さった|刺さりました|刺さって|入って.*激痛)/,
@@ -178,12 +264,21 @@ const GENERIC_ACTIVE_WORKPLACE_INCIDENT_PATTERN =
   /(?=.*(?:今|現在|たった今|目の前|現場で|発生中))(?=.*(?:事故|災害|負傷|けが|怪我))(?=.*(?:起き|発生|どうすれば|助け|至急|緊急))/;
 
 const LABELED_VALUE_PATTERNS: Array<[ChatbotSensitiveDataKind, RegExp]> = [
-  ["name", /(?:氏名|本名|フルネーム|名前)[は:：=]?[一-龠々〆ヶぁ-んァ-ヶー・]{2,24}/],
+  [
+    "name",
+    /(?:氏名|本名|フルネーム|名前)[は:：=]?[一-龠々〆ヶぁ-んァ-ヶー・]{2,24}/,
+  ],
   ["address", /(?:住所|居住地|所在地)[は:：=]?(?!未記入|なし)[^、。]{4,80}/],
-  ["employee-id", /(?:社員|職員|従業員|作業員)(?:番号|ID|コード)[は:：=]?[A-Z0-9-]{3,24}/i],
+  [
+    "employee-id",
+    /(?:社員|職員|従業員|作業員)(?:番号|ID|コード)[は:：=]?[A-Z0-9-]{3,24}/i,
+  ],
   ["phone", /(?:電話|携帯|連絡先)(?:番号)?[は:：=]?[+()0-9ー―‐−-]{8,24}/],
   ["email", /(?:メール|Eメール)(?:アドレス)?[は:：=]?[^、。\s]{3,80}/i],
-  ["health", /(?:病歴|既往歴|診断名|健診結果|健康診断結果|服薬|投薬|障害名)[は:：=]?(?!なし|特になし|未記入)[^、。]{2,80}/],
+  [
+    "health",
+    /(?:病歴|既往歴|診断名|健診結果|健康診断結果|服薬|投薬|障害名)[は:：=]?(?!なし|特になし|未記入)[^、。]{2,80}/,
+  ],
   [
     "name",
     /(?:担当者|責任者|作業員名?|作業者名?|講師|被災者|負傷者|死亡者|班長|現場代理人|連絡担当|作業主任者|作業指揮者|安全衛生責任者|監督者?|管理者|主任(?!者)|職長|所長)[は:：=]?(?!(?:未定|不明|匿名|なし|未記入|何人|何名|何条|何号|何を|どこ|いつ|必要|選任|教育|研修|講習|技能|特別|資格|職務|責務|制度|会議|作業|対象|業務|作業者[A-ZＡ-Ｚ]|作業員[A-ZＡ-Ｚ]))[一-龠々〆ヶ]{2,12}(?:です|さん|氏|様|君)?/,
@@ -200,8 +295,120 @@ const HEALTH_VALUE_PATTERNS = [
   /(?:妊娠|術後)\d+(?:週|か月|ヶ月)/,
 ];
 
+const SENSITIVE_SENTENCE_START_SOURCE =
+  "(?:^|[\\s、,，:：;；。！？!?]|(?:しかし|ただし|一方|それでも|ところが|現場では)[、,，]?)";
+const SENSITIVE_SENTENCE_END_SOURCE =
+  "(?=$|[\\s、,，:：;；。！？!?]|(?:が|けれど|けど|ものの|ので|ため|から|し)(?:、|[一-龠々ぁ-んァ-ヶ]))";
+const DEFINITIVE_SENTENCE_END_SOURCE = "(?=$|[。！？!?])";
+const PERSONAL_HEALTH_PERSON_SOURCE =
+  "(?:私|わたし|僕|自分|本人|同僚|作業員[A-ZＡ-Ｚ0-9０-９]?|労働者|従業員)(?:は|が)";
+const PERSONAL_HEALTH_CONTEXT_SOURCE = `(?:${PERSONAL_HEALTH_PERSON_SOURCE}|(?:私|本人)の(?:検査|検査結果)(?:は|が)?|(?:検査|健診|健康診断)(?:で|の結果(?:は|が)?))`;
+const BLOOD_BORNE_VIRUS_SOURCE = "(?:HIV|HBV|HCV)";
+const BLOOD_BORNE_CONDITION_SOURCE = "(?:HIV|HBV|HCV|B型肝炎|C型肝炎)";
+const PERSONAL_INFECTION_TERM_SOURCE =
+  "(?:HIV|HBV|HCV|B型肝炎|C型肝炎|HIV感染症|AIDS|エイズ)";
+const PERSONAL_INFECTION_STATUS_SOURCE = `(?:${BLOOD_BORNE_VIRUS_SOURCE}(?:抗体|抗原|検査(?:結果)?)?(?:は|が|:：)?陽性|(?:B型肝炎|C型肝炎|HIV感染症|AIDS|エイズ)(?:に(?:(?:感染|罹患)して(?:いる|います)|かかって(?:いる|います)))?)`;
+const PERSONAL_HEALTH_QUOTE_OPEN_SOURCE = "[「『]?";
+const PERSONAL_DIAGNOSIS_SUFFIX_SOURCE =
+  "[」』]?(?:と(?:診断|判明)され(?:ました|ています|た|ている))";
+
+const PERSONAL_INFECTION_DISCLOSURE_PATTERNS = [
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:${PERSONAL_HEALTH_CONTEXT_SOURCE})?${PERSONAL_HEALTH_QUOTE_OPEN_SOURCE}${BLOOD_BORNE_VIRUS_SOURCE}(?:抗体|抗原|検査)?(?:は|が|:：)?陽性(?:(?:です|でした|だ|だった|になりました|になった)(?:${PERSONAL_DIAGNOSIS_SUFFIX_SOURCE})?|${PERSONAL_DIAGNOSIS_SUFFIX_SOURCE})${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:${PERSONAL_HEALTH_PERSON_SOURCE})?${BLOOD_BORNE_VIRUS_SOURCE}(?:抗体|抗原|検査)?(?:は|が|:：)?陽性${DEFINITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:${PERSONAL_HEALTH_PERSON_SOURCE})?${PERSONAL_HEALTH_QUOTE_OPEN_SOURCE}(?:B型肝炎|C型肝炎|HIV感染症|AIDS|エイズ)(?:(?:です|でした|だ|だった|になりました|になった)(?:${PERSONAL_DIAGNOSIS_SUFFIX_SOURCE})?|${PERSONAL_DIAGNOSIS_SUFFIX_SOURCE})${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:${PERSONAL_HEALTH_PERSON_SOURCE})?${PERSONAL_HEALTH_QUOTE_OPEN_SOURCE}${BLOOD_BORNE_CONDITION_SOURCE}(?:に(?:(?:感染|罹患)(?:しています|している|しました|した)|かか(?:っています|っている|りました|った))|を患(?:っています|っている|いました|った))(?:${PERSONAL_DIAGNOSIS_SUFFIX_SOURCE})?${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:${PERSONAL_HEALTH_PERSON_SOURCE})?${PERSONAL_HEALTH_QUOTE_OPEN_SOURCE}(?:HIV感染者|(?:B型肝炎|C型肝炎)(?:の)?(?:患者|キャリア)|(?:HBV|HCV)(?:感染者|キャリア))(?:です|でした|だ|だった)?(?:${PERSONAL_DIAGNOSIS_SUFFIX_SOURCE})?${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}${PERSONAL_HEALTH_PERSON_SOURCE}(?:B型肝炎|C型肝炎)${DEFINITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:${PERSONAL_HEALTH_CONTEXT_SOURCE})?${PERSONAL_HEALTH_QUOTE_OPEN_SOURCE}${PERSONAL_INFECTION_STATUS_SOURCE}(?:(?:です|でした|だ|だった|である)?(?:こと)?(?:が|と))(?:(?:分か|わか)(?:りました|った)|判明(?:しました|した))${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:${PERSONAL_HEALTH_CONTEXT_SOURCE})?${PERSONAL_HEALTH_QUOTE_OPEN_SOURCE}${PERSONAL_INFECTION_STATUS_SOURCE}(?:との|という)結果(?:です|でした|になりました|だった)${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:${BLOOD_BORNE_VIRUS_SOURCE})の?(?:抗体|抗原)?検査結果(?:は|が)陽性(?:です|でした|だった|になりました|になった)${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:検査|健診|健康診断)(?:の)?結果(?:は|が)${PERSONAL_INFECTION_STATUS_SOURCE}(?:です|でした|だった|になりました|になった)${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:${PERSONAL_HEALTH_PERSON_SOURCE})?(?:医師|医者)(?:から|に)${PERSONAL_INFECTION_STATUS_SOURCE}(?:です|でした|だ|だった)?と(?:言われ|告げられ)(?:ました|た)${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:(?:私|わたし|僕|自分|本人|同僚|作業員[A-ZＡ-Ｚ0-9０-９]?|労働者|従業員)(?:は|が))?[「『](?:私(?:は|が))?${PERSONAL_INFECTION_STATUS_SOURCE}(?:です|でした|だ|だった)?[」』]と(?:話しました|申告しました|告げました|伝えました|言いました|報告しました|連絡しました)${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:本人|同僚|作業員[A-ZＡ-Ｚ0-9０-９]?|労働者|従業員)から[「『](?:私(?:は|が))?${PERSONAL_INFECTION_STATUS_SOURCE}(?:です|でした|だ|だった)?[」』]と(?:申告|報告|連絡|話)(?:が)?(?:ありました|あった)${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:(?:しかし|ただし|一方|それでも|また)[、,，]?)?(?:実際(?:の|には?|は)|現実(?:の|には?|は)|本当(?:の|は)|なお)(?:[^。！？!?]{0,64})${PERSONAL_INFECTION_STATUS_SOURCE}(?:です|でした|だ|だった|になりました|になった)?(?:(?:と|との)(?:申告|報告|連絡|話)(?:が)?(?:ありました|あった|されました|された))?${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+  new RegExp(
+    `${SENSITIVE_SENTENCE_START_SOURCE}(?:本人|同僚|作業員[A-ZＡ-Ｚ0-9０-９]?|労働者|従業員)(?:から|は|が)${PERSONAL_INFECTION_STATUS_SOURCE}(?:です|でした|だ|だった)?(?:と(?:の)?|という)?(?:申告|報告|連絡|話)(?:が)?(?:ありました|あった|されました|された)${SENSITIVE_SENTENCE_END_SOURCE}`,
+    "i",
+  ),
+];
+
+const CLEARLY_LABELED_INFECTION_EXAMPLE_PATTERN = new RegExp(
+  `${PERSONAL_INFECTION_TERM_SOURCE}(?:(?!${PERSONAL_INFECTION_TERM_SOURCE}|[。！？!?]).){0,48}(?:という|との)(?:(?:訓練|研修|教育|教材|マニュアル|演習|サンプル)(?:用)?(?:の)?(?:例文|文|設定|ケース|シナリオ)|ケーススタディ|(?:架空|仮定|想定)(?:の)?(?:例文|文|設定|ケース|シナリオ)?)(?:です|である|でした)?(?:$|[。！？!?])`,
+  "i",
+);
+const PRELABELED_INFECTION_EXAMPLE_PATTERN = new RegExp(
+  `(?:(?:訓練|研修|教育|教材|マニュアル|演習)(?:用)?(?:の)?(?:例文|文|例|設定|ケース|シナリオ)|ケース(?:用)?(?:の)?例|例文|サンプル文|ケーススタディ)(?:は|です)?(?:[\\s。:：]*)[「『](?:私(?:は|が))?${PERSONAL_INFECTION_STATUS_SOURCE}(?:です|でした|だ|だった)?[」』]`,
+  "i",
+);
+
+function hasPersonalInfectionDisclosureOutsideExample(
+  message: string,
+): boolean {
+  // A clearly labelled example is safe only for that exact span. Masking the
+  // example rather than exempting the whole message ensures that a real
+  // disclosure before or after it is still blocked.
+  const maskedExamples = [
+    CLEARLY_LABELED_INFECTION_EXAMPLE_PATTERN,
+    PRELABELED_INFECTION_EXAMPLE_PATTERN,
+  ].reduce(
+    (value, pattern) =>
+      value.replace(new RegExp(pattern.source, "gi"), (matched) =>
+        " ".repeat(matched.length),
+      ),
+    message,
+  );
+  return PERSONAL_INFECTION_DISCLOSURE_PATTERNS.some((pattern) =>
+    pattern.test(maskedExamples),
+  );
+}
+
 function normalizedForms(message: string) {
-  const spaced = message.normalize("NFKC").replace(/[\u200B-\u200D\uFEFF]/g, "");
+  const spaced = message
+    .normalize("NFKC")
+    .replace(/[\u200B-\u200D\uFEFF]/g, "");
   const compact = spaced.replace(/\s+/g, "");
   const joined = compact.replace(/[・･,，、:：;；()（）\[\]【】]/g, "");
   return { spaced, compact, joined };
@@ -211,7 +418,9 @@ function normalizedForms(message: string) {
  * 高確信度の実値を検出する。日本語の任意の氏名を完全には判定できないため、
  * この検査を通った場合もUIの送信前確認を別の安全境界として維持する。
  */
-export function detectChatbotSensitiveData(message: string): ChatbotSensitiveDataKind[] {
+export function detectChatbotSensitiveData(
+  message: string,
+): ChatbotSensitiveDataKind[] {
   const { spaced, compact, joined } = normalizedForms(message);
   const kinds = new Set<ChatbotSensitiveDataKind>();
 
@@ -222,12 +431,19 @@ export function detectChatbotSensitiveData(message: string): ChatbotSensitiveDat
   // 空白や全角記号で崩された値も、NFKC後の結合表現で検査する。
   if (/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i.test(joined)) kinds.add("email");
   const digits = joined.replace(/[ー―‐−-]/g, "");
-  if (/(?:^|\D)(?:\+81\d{9,10}|0\d{9,10})(?:\D|$)/.test(digits)) kinds.add("phone");
-  if (/(?:^|[^A-Z0-9])[A-Z]{1,4}[-ー―‐−]?\d{4,10}(?:[^A-Z0-9]|$)/i.test(compact)) {
+  if (/(?:^|\D)(?:\+81\d{9,10}|0\d{9,10})(?:\D|$)/.test(digits))
+    kinds.add("phone");
+  if (
+    /(?:^|[^A-Z0-9])[A-Z]{1,4}[-ー―‐−]?\d{4,10}(?:[^A-Z0-9]|$)/i.test(compact)
+  ) {
     kinds.add("employee-id");
   }
   if (/〒?\d{3}[-ー―‐−]?\d{4}/.test(compact)) kinds.add("address");
-  if (/(?:東京都|北海道|(?:京都|大阪)府|.{2,3}県).{1,30}(?:市|区|町|村).{0,30}(?:\d+丁目|\d+番地|\d+-\d+)/.test(compact)) {
+  if (
+    /(?:東京都|北海道|(?:京都|大阪)府|.{2,3}県).{1,30}(?:市|区|町|村).{0,30}(?:\d+丁目|\d+番地|\d+-\d+)/.test(
+      compact,
+    )
+  ) {
     kinds.add("address");
   }
   if (
@@ -238,7 +454,11 @@ export function detectChatbotSensitiveData(message: string): ChatbotSensitiveDat
     kinds.add("address");
   }
   // 姓名の間に明示的な空白・中黒がある日本語名だけを高確信度で扱う。
-  if (/(?:^|[\s、。])(?:[一-龠々〆ヶ]{1,5})[\s　・･]+(?:[一-龠々〆ヶぁ-んァ-ヶー]{1,8})(?:$|[\s、。])/.test(spaced)) {
+  if (
+    /(?:^|[\s、。])(?:[一-龠々〆ヶ]{1,5})[\s　・･]+(?:[一-龠々〆ヶぁ-んァ-ヶー]{1,8})(?:$|[\s、。])/.test(
+      spaced,
+    )
+  ) {
     kinds.add("name");
   }
   // よくある姓＋漢字名が助詞や敬称を伴う場合も、作業記録に含まれる実名として遮断する。
@@ -324,7 +544,18 @@ export function detectChatbotSensitiveData(message: string): ChatbotSensitiveDat
   ) {
     kinds.add("name");
   }
-  if (HEALTH_VALUE_PATTERNS.some((pattern) => pattern.test(compact))) kinds.add("health");
+  if (HEALTH_VALUE_PATTERNS.some((pattern) => pattern.test(compact)))
+    kinds.add("health");
+  // Preserve hard sentence boundaries before removing whitespace. Otherwise a
+  // real disclosure on one line can be accidentally joined to a labelled
+  // training example on the next line and exempted as one synthetic sentence.
+  const infectionStructured = spaced
+    .replace(/[\r\n\u2028\u2029]+/g, "。")
+    .replace(/(?: {2,}|\t+)/g, "。")
+    .replace(/\s+/g, "");
+  if (hasPersonalInfectionDisclosureOutsideExample(infectionStructured)) {
+    kinds.add("health");
+  }
   // 日本語では主語を省くため、本人の状態だと明示する短い健康自己申告も遮断する。
   // 「妊娠中の作業者」のような一般的な法令質問は対象にしない。
   if (
@@ -378,7 +609,9 @@ const QUALIFICATION_DECISION_PATTERNS = [
   /(?:必要|要否|受講すべき|受けるべき).*(?:特別教育|技能講習)/,
   /(?:特別教育|技能講習).*(?:どちら|どっち)/,
 ];
-const QUALIFICATION_CONTEXT = [/作業内容|職種|高さ|足場|作業床|機械|設備|電圧|材料|対象物|役割|運転|操作|玉掛/];
+const QUALIFICATION_CONTEXT = [
+  /作業内容|職種|高さ|足場|作業床|機械|設備|電圧|材料|対象物|役割|運転|操作|玉掛/,
+];
 const QUALIFICATION_OVERVIEW_PATTERN =
   /フルハーネス.*いつ.*(?:特別教育|教育)|高所作業車に特別教育(?:は|が)?必要/;
 const LEGAL_REFERENCE_OR_DEFINITION_PATTERN =
@@ -410,9 +643,9 @@ function isAnswerFirstMaterialPresentation(normalized: string): boolean {
   if (UNIVERSAL_LEGAL_MATERIAL_FOLLOWUP_PATTERN.test(normalized)) return true;
   return Boolean(
     ANSWER_FIRST_MATERIAL_TOPIC_PATTERN.test(normalized) &&
-      LEGAL_MATERIAL_PRESENTATION_SUFFIX_PATTERN.test(normalized) &&
-      !UNVERIFIED_OR_FRESH_MATERIAL_PATTERN.test(normalized) &&
-      !SPECIFIC_MATERIAL_IDENTITY_PATTERN.test(normalized),
+    LEGAL_MATERIAL_PRESENTATION_SUFFIX_PATTERN.test(normalized) &&
+    !UNVERIFIED_OR_FRESH_MATERIAL_PATTERN.test(normalized) &&
+    !SPECIFIC_MATERIAL_IDENTITY_PATTERN.test(normalized),
   );
 }
 const DANGEROUS_WORK_EDUCATION_PATTERN =
@@ -584,23 +817,169 @@ export const CHATBOT_SOURCE_GAP_RESPONSE =
 export const CHATBOT_APPROVED_CORPUS_GAP_RESPONSE =
   "結論\n確認できる公式本文が不足しているため、別の法令で代用せず回答を保留します。e-Gov法令検索または所管省庁の公式資料を確認してください。\n\n次の質問\n法令名・文書名・対象日のどれかを教えてください。";
 
-export function evaluateChatbotSafety(message: string): ChatbotSafetyDecision | null {
+function matchesEmergencyIndicators(value: string): boolean {
+  return (
+    EMERGENCY_PATTERNS.some((pattern) => pattern.test(value)) ||
+    ACTIVE_WORKPLACE_EMERGENCY_PATTERNS.some((pattern) =>
+      pattern.test(value),
+    ) ||
+    (WORKPLACE_HAZARD_PATTERN.test(value) &&
+      ACTIVE_INCIDENT_PATTERN.test(value)) ||
+    STANDALONE_ACTIVE_FIRE_PATTERN.test(value) ||
+    GENERIC_ACTIVE_WORKPLACE_INCIDENT_PATTERN.test(value)
+  );
+}
+
+function hasActiveEmergencyBeforeTrainingMarker(value: string): boolean {
+  const maskedQuotes = value.replace(
+    /「[^」]{0,240}」|『[^』]{0,240}』/g,
+    (quoted) => "Q".repeat(quoted.length),
+  );
+  const markerIndexes = [
+    "訓練",
+    "教育",
+    "教材",
+    "研修",
+    "資料",
+    "マニュアル",
+    "手順書",
+    "クイズ",
+    "例文",
+    "仮定",
+    "想定",
+    "演習",
+    "練習問題",
+    "デモンストレーション",
+    "ドリル",
+  ]
+    .map((marker) => maskedQuotes.indexOf(marker))
+    .filter((index) => index >= 0);
+  if (markerIndexes.length === 0) return false;
+  const firstMarker = Math.min(...markerIndexes);
+  const hardSentenceEnd = Math.max(
+    ...["。", "！", "!", "？", "?", "\n", "\r", "\u2028", "\u2029"].map(
+      (separator) => maskedQuotes.lastIndexOf(separator, firstMarker),
+    ),
+  );
+  if (hardSentenceEnd >= 0) {
+    return matchesEmergencyIndicators(
+      withoutExplicitlyNegatedEmergencyStatements(
+        maskedQuotes.slice(0, hardSentenceEnd + 1),
+      ),
+    );
+  }
+
+  // Japanese users also join two independent clauses with a comma. Treat a
+  // comma as a boundary only when the following text clearly starts a separate
+  // training/example aside (or the first clause has an explicit active cue).
+  // This preserves safe hypothetical phrases such as "…、という訓練例文".
+  const structuralSeparators = [
+    ...maskedQuotes.matchAll(/[\t:：/／・|｜]| {2,}/g),
+  ]
+    .filter((match) => (match.index ?? -1) < firstMarker)
+    .map((match) => (match.index ?? 0) + match[0].length - 1);
+  const softClauseEnd = Math.max(
+    ...["、", "，", ",", "；", ";"].map((separator) =>
+      maskedQuotes.lastIndexOf(separator, firstMarker),
+    ),
+    ...structuralSeparators,
+  );
+  if (softClauseEnd < 0) return false;
+  const connector = maskedQuotes.slice(softClauseEnd + 1, firstMarker);
+  const separateAside = /(?:別件|なお|また|一方|それとは別)/.test(connector);
+  if (/(?:という|との|場合|仮定|想定)/.test(connector) && !separateAside) {
+    return false;
+  }
+  const prefix = maskedQuotes.slice(0, softClauseEnd + 1);
+  const explicitActiveCue =
+    /(?:^|[、，,。！？!?])(?:今|現在|たった今|目の前|現場で|発生中|助けて|至急|緊急)(?:$|[、，,。！？!?]|[一-龠々ぁ-んァ-ヶ])/.test(
+      prefix,
+    );
+  return (
+    (separateAside || explicitActiveCue) &&
+    !/(?:場合|仮定|想定|訓練|教材|例文|今後)/.test(prefix) &&
+    matchesEmergencyIndicators(
+      withoutExplicitlyNegatedEmergencyStatements(prefix),
+    )
+  );
+}
+
+function hasActiveEmergencyAfterTrainingSentence(value: string): boolean {
+  const maskedQuotes = value.replace(
+    /「[^」]{0,240}」|『[^』]{0,240}』/g,
+    (quoted) => "Q".repeat(quoted.length),
+  );
+  const markerIndexes = [
+    "訓練",
+    "教育",
+    "教材",
+    "研修",
+    "資料",
+    "マニュアル",
+    "手順書",
+    "クイズ",
+    "例文",
+    "仮定",
+    "想定",
+    "演習",
+    "練習問題",
+    "デモンストレーション",
+    "ドリル",
+  ]
+    .map((marker) => maskedQuotes.indexOf(marker))
+    .filter((index) => index >= 0);
+  if (markerIndexes.length === 0) return false;
+  const firstMarker = Math.min(...markerIndexes);
+  const sentenceEnds = [
+    "。",
+    "！",
+    "!",
+    "？",
+    "?",
+    "、",
+    "，",
+    ",",
+    "；",
+    ";",
+    "\n",
+    "\r",
+    "\u2028",
+    "\u2029",
+  ]
+    .map((separator) => maskedQuotes.indexOf(separator, firstMarker))
+    .filter((index) => index >= 0);
+  if (sentenceEnds.length === 0) return false;
+  const suffix = withoutExplicitlyNegatedEmergencyStatements(
+    maskedQuotes.slice(Math.min(...sentenceEnds) + 1),
+  );
+  return (
+    matchesEmergencyIndicators(suffix) &&
+    !isClearlyNonActiveEmergencyExample(suffix)
+  );
+}
+
+export function evaluateChatbotSafety(
+  message: string,
+): ChatbotSafetyDecision | null {
   const forms = normalizedForms(message);
   const emergencyNormalized = withoutExplicitlyNegatedEmergencyStatements(
     forms.joined,
   );
+  const emergencyStructured = withoutExplicitlyNegatedEmergencyStatements(
+    forms.compact,
+  );
+  const matchesEmergency = matchesEmergencyIndicators(emergencyNormalized);
+  const hasStructuredActiveEmergency =
+    hasActiveEmergencyBeforeTrainingMarker(forms.spaced) ||
+    hasActiveEmergencyAfterTrainingSentence(forms.spaced);
   if (
-    !isClearlyNonActiveEmergencyExample(emergencyNormalized) &&
-    (EMERGENCY_PATTERNS.some((pattern) => pattern.test(emergencyNormalized)) ||
-    ACTIVE_WORKPLACE_EMERGENCY_PATTERNS.some((pattern) =>
-      pattern.test(emergencyNormalized),
-    ) ||
-    (WORKPLACE_HAZARD_PATTERN.test(emergencyNormalized) &&
-      ACTIVE_INCIDENT_PATTERN.test(emergencyNormalized)) ||
-    STANDALONE_ACTIVE_FIRE_PATTERN.test(emergencyNormalized) ||
-    GENERIC_ACTIVE_WORKPLACE_INCIDENT_PATTERN.test(emergencyNormalized))
+    (matchesEmergency || hasStructuredActiveEmergency) &&
+    (!isClearlyNonActiveEmergencyExample(emergencyNormalized) ||
+      hasStructuredActiveEmergency)
   ) {
-    const emergencyCategory = emergencyCategoryFor(emergencyNormalized);
+    const emergencyCategory = emergencyCategoryFor(
+      matchesEmergency ? emergencyNormalized : emergencyStructured,
+    );
     return {
       kind: "emergency",
       response:
@@ -614,11 +993,17 @@ export function evaluateChatbotSafety(message: string): ChatbotSafetyDecision | 
 
   const normalized = forms.compact;
   const sensitiveKinds = detectChatbotSensitiveData(message);
-  const asksAboutPrivacy = PRIVACY_INTENT_PATTERNS.some((pattern) => pattern.test(normalized));
+  const asksAboutPrivacy = PRIVACY_INTENT_PATTERNS.some((pattern) =>
+    pattern.test(normalized),
+  );
   // Health data and direct identifiers are each sensitive on their own. Do
   // not require them to appear together before stopping persistence/network.
   if (sensitiveKinds.length > 0 || asksAboutPrivacy) {
-    return { kind: "privacy", response: CHATBOT_PRIVACY_RESPONSE, safeUserText: "[個人情報・健康情報を含む可能性がある入力を遮断]" };
+    return {
+      kind: "privacy",
+      response: CHATBOT_PRIVACY_RESPONSE,
+      safeUserText: "[個人情報・健康情報を含む可能性がある入力を遮断]",
+    };
   }
 
   const assertsJointCommitteeMandate =
@@ -748,7 +1133,11 @@ export function evaluateChatbotSafety(message: string): ChatbotSafetyDecision | 
     !LEGAL_REFERENCE_OR_DEFINITION_PATTERN.test(normalized) &&
     !QUALIFICATION_OVERVIEW_PATTERN.test(normalized)
   ) {
-    return { kind: "ambiguous", response: CHATBOT_AMBIGUOUS_RESPONSE, safeUserText: message };
+    return {
+      kind: "ambiguous",
+      response: CHATBOT_AMBIGUOUS_RESPONSE,
+      safeUserText: message,
+    };
   }
   if (
     SAFETY_MANAGER_SCOPE_PATTERN.test(normalized) &&
@@ -773,9 +1162,7 @@ export function evaluateChatbotSafety(message: string): ChatbotSafetyDecision | 
     };
   }
   if (
-    /安全衛生教育.*記録.*保存|教育記録.*保存.*安全衛生/.test(
-      normalized,
-    ) &&
+    /安全衛生教育.*記録.*保存|教育記録.*保存.*安全衛生/.test(normalized) &&
     !/特別教育/.test(normalized)
   ) {
     return {
@@ -830,7 +1217,9 @@ export function evaluateChatbotSafety(message: string): ChatbotSafetyDecision | 
     };
   }
   if (
-    /(?:じん肺|粉じん作業).*(?:健康診断|健診).*(?:対象|条文|根拠)/.test(normalized) &&
+    /(?:じん肺|粉じん作業).*(?:健康診断|健診).*(?:対象|条文|根拠)/.test(
+      normalized,
+    ) &&
     !/(?:雇い入れ|雇入れ|配置替え|定期|過去に従事|離職)/.test(normalized)
   ) {
     return {
@@ -892,9 +1281,7 @@ export function evaluateChatbotSafety(message: string): ChatbotSafetyDecision | 
       safeUserText: message,
     };
   }
-  if (
-    /機械等.*製造時.*届出|製造時.*機械等.*届出/.test(normalized)
-  ) {
+  if (/機械等.*製造時.*届出|製造時.*機械等.*届出/.test(normalized)) {
     return {
       kind: "wrong-premise",
       response: CHATBOT_MACHINE_NOTICE_RESPONSE,
@@ -935,9 +1322,7 @@ export function evaluateChatbotSafety(message: string): ChatbotSafetyDecision | 
     };
   }
   if (
-    /業務上.*負傷.*療養補償給付.*請求|療養補償給付.*請求.*条文/.test(
-      normalized,
-    )
+    /業務上.*負傷.*療養補償給付.*請求|療養補償給付.*請求.*条文/.test(normalized)
   ) {
     return {
       kind: "source-gap",
@@ -974,7 +1359,9 @@ export function evaluateChatbotSafety(message: string): ChatbotSafetyDecision | 
   return null;
 }
 
-export function inspectChatbotHistory(history: ChatbotTextRecord[]): ChatbotHistoryInspection {
+export function inspectChatbotHistory(
+  history: ChatbotTextRecord[],
+): ChatbotHistoryInspection {
   const blockedIndexes: number[] = [];
   const kinds = new Set<ChatbotSafetyKind>();
   history.forEach((turn, index) => {
@@ -987,11 +1374,17 @@ export function inspectChatbotHistory(history: ChatbotTextRecord[]): ChatbotHist
       kinds.add(decision.kind);
     }
   });
-  return { safe: blockedIndexes.length === 0, kinds: [...kinds], blockedIndexes };
+  return {
+    safe: blockedIndexes.length === 0,
+    kinds: [...kinds],
+    blockedIndexes,
+  };
 }
 
 /** 旧版・インポート由来の危険なターンを、生値をログへ出さず破棄する。 */
-export function migrateChatbotHistory<T extends ChatbotTextRecord>(history: T[]): {
+export function migrateChatbotHistory<T extends ChatbotTextRecord>(
+  history: T[],
+): {
   messages: T[];
   removedCount: number;
   kinds: ChatbotSafetyKind[];

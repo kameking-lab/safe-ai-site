@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAtJst": "2026-08-08T21:14:53+09:00",
+  "generatedAtJst": "2026-08-09T01:48:10+09:00",
   "algorithm": "sha256(sorted lines: <file-sha256><two spaces><repo-relative-path><LF>)",
   "excludes": [
     "test files",
@@ -25,7 +25,7 @@
       ],
       "fileCount": 69,
       "bytes": 7879571,
-      "manifestSha256": "0cd6e492d82ade9337a471ae29779045e170acdc07a3a72e8fb0504ddd72e4f1"
+      "manifestSha256": "f3dcbd0d6526c0978d31c48ccc5368da5e86abb27c1127b5b2826da84184ce3e"
     },
     {
       "id": "verified-notices-and-circulars",
@@ -37,16 +37,16 @@
         "web/src/data/article-notice-map.ts",
         "web/src/data/source-registry.ts"
       ],
-      "fileCount": 9,
-      "bytes": 846765,
-      "manifestSha256": "5d1cabeedb488873616feb84dd2f106c2cfeeba2697a0c78be86b053867172b8"
+      "fileCount": 10,
+      "bytes": 1442705,
+      "manifestSha256": "46517bda914b5bc0a61f47fb30ffb1d93481d0cb670c8dd59d129fbc2617c911"
     },
     {
       "id": "surrounding-legal-snapshots",
       "roots": ["web/src/data/legal"],
       "fileCount": 11,
       "bytes": 835372,
-      "manifestSha256": "c147a2f9534dc102bba95c38e82f5c76bfc80011740e1acdb8111c90cd9d0c0c"
+      "manifestSha256": "2da086398cde3d8a0807ff5643f10c2b227f8edb4167b84cb9928e9b32aeb527"
     }
   ],
   "reviewRequired": [

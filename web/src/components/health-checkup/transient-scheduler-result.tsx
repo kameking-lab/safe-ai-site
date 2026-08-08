@@ -36,7 +36,7 @@ export function TransientSchedulerResult() {
 
   if (!profile || !decision || !tracker) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-10">
+      <div className="mx-auto max-w-3xl px-4 py-10">
         <h1 className="text-2xl font-bold text-slate-950">健診条件を入力してください</h1>
         <p className="mt-3 text-sm text-slate-700">
           入力内容はこのタブの画面遷移時だけ引き継ぎます。再読込後は残りません。
@@ -47,7 +47,7 @@ export function TransientSchedulerResult() {
         >
           入力へ戻る
         </Link>
-      </main>
+      </div>
     );
   }
 

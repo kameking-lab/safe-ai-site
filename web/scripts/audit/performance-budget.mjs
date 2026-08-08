@@ -24,7 +24,11 @@ import { fileURLToPath } from "node:url";
 import {
   attributeClientScripts,
   collectBuildRouteInventory,
+  evaluateLighthouseScoreTargets,
+  evaluatePerformanceBudget,
+  lighthouseNoindexSeoPolicyCompliant,
   median,
+  validateLighthouseReport,
 } from "./performance-budget-core.mjs";
 
 globalThis.AsyncLocalStorage ??= AsyncLocalStorage;
@@ -33,6 +37,7 @@ const require = createRequire(import.meta.url);
 const repositoryRoot = resolve(process.cwd(), "..");
 const DEFAULT_SERVICE_FIRST_EVIDENCE =
   "../docs/audits/evidence/service-first-copy-reduction-2026-08-02";
+const REQUIRED_NOINDEX_PAGE_IDS = new Set(["heat-hub"]);
 
 export function resolvePerformanceBudgetRuntimePaths({
   env = process.env,
@@ -318,6 +323,7 @@ function artifactPath(repoRelativePath) {
 async function main() {
 const selection = latestFinalSummary();
 const { summary, summaryPaths } = selection;
+const parsedPerformanceBaseUrl = new URL(baseUrl);
 if (summary.runKind !== "final" || !summary.executionsComplete) {
   throw new Error("Performance budgets require a complete final session");
 }
@@ -336,10 +342,23 @@ for (const run of summary.runs ?? []) {
   if (!existsSync(absolute) || sha256File(absolute) !== raw.sha256) {
     throw new Error(`Raw report hash mismatch: ${raw.path}`);
   }
-  rawByMeasurement.set(
-    run.measurementId,
-    JSON.parse(readFileSync(absolute, "utf8")),
-  );
+  const report = JSON.parse(readFileSync(absolute, "utf8"));
+  if (typeof run.route !== "string" || !run.route.startsWith("/")) {
+    throw new Error(`Invalid configured route for ${run.measurementId}`);
+  }
+  const expectedUrl = new URL(run.route, parsedPerformanceBaseUrl);
+  if (expectedUrl.origin !== parsedPerformanceBaseUrl.origin) {
+    throw new Error(`Configured route escaped the audit origin: ${run.route}`);
+  }
+  const validation = validateLighthouseReport(report, {
+    expectedUrl: expectedUrl.href,
+  });
+  if (!validation.valid) {
+    throw new Error(
+      `Invalid raw Lighthouse report for ${run.measurementId}: ${validation.failures.join(", ")}`,
+    );
+  }
+  rawByMeasurement.set(run.measurementId, report);
 }
 
 const mobileMedians = (summary.medians ?? []).filter(
@@ -391,6 +410,7 @@ const scriptAttribution = attributeClientScripts(
 const { commonClientJsBytes, commonScriptUrls } = scriptAttribution;
 
 const routeActuals = {};
+const lighthouseScoreFailures = [];
 for (const row of mobileMedians) {
   const routeRuns = (summary.runs ?? []).filter(
     (run) =>
@@ -418,6 +438,35 @@ for (const row of mobileMedians) {
         total + Number(item.totalBytes ?? item.transferSize ?? 0),
       0,
     );
+  const lighthouseScores = {
+    performance: median(
+      reports.map((report) => report.categories.performance.score * 100),
+    ),
+    accessibility: median(
+      reports.map((report) => report.categories.accessibility.score * 100),
+    ),
+    bestPractices: median(
+      reports.map(
+        (report) => report.categories["best-practices"].score * 100,
+      ),
+    ),
+    seo: median(reports.map((report) => report.categories.seo.score * 100)),
+  };
+  const seoPolicyCompliant =
+    REQUIRED_NOINDEX_PAGE_IDS.has(row.page) &&
+    reports.every(lighthouseNoindexSeoPolicyCompliant);
+  const scoreEvaluation = evaluateLighthouseScoreTargets({
+    profile: "mobile",
+    scores: lighthouseScores,
+    seoPolicyCompliant,
+  });
+  lighthouseScoreFailures.push(
+    ...scoreEvaluation.failures.map((failure) => ({
+      ...failure,
+      id: `${row.page}:lighthouse-score:${failure.id}`,
+      category: failure.id,
+    })),
+  );
   routeActuals[row.page] = {
     path: row.path,
     totalClientJsBytes: row.javascriptTransferredBytes,
@@ -431,6 +480,8 @@ for (const row of mobileMedians) {
     ttfbMs: row.ttfbMs,
     cls: row.cls,
     tbtMs: row.tbtMs,
+    lighthouseScores,
+    seoPolicyCompliant,
     mainThreadWorkMs: row.mainThreadWorkMs,
     bootupTimeMs: row.bootupTimeMs,
     lcpPhasesMs: {
@@ -528,55 +579,15 @@ const prerenderManifestRouteCount = Object.keys(
 ).length;
 const staticPageCount = buildRouteInventory.concreteRouteCount;
 
-const failures = [];
-const warnings = [];
-function upperBound(id, actual, maximum) {
-  if (actual > maximum) failures.push({ id, actual, maximum });
-}
-function changeBand(id, actual, baseline, allowedFraction) {
-  const lower = Math.floor(baseline * (1 - allowedFraction));
-  const upper = Math.ceil(baseline * (1 + allowedFraction));
-  if (actual < lower || actual > upper) {
-    failures.push({ id, actual, expectedRange: [lower, upper], baseline });
-  }
-}
-
-upperBound(
-  "common-client-js",
+const budgetEvaluation = evaluatePerformanceBudget({
+  budget,
   commonClientJsBytes,
-  budget.shared.commonClientJsBytesMax,
-);
-for (const [page, routeBudget] of Object.entries(budget.routes)) {
-  const actual = routeActuals[page];
-  if (!actual) {
-    failures.push({ id: `route:${page}`, reason: "missing-measurement" });
-    continue;
-  }
-  for (const [field, maximum] of Object.entries(routeBudget)) {
-    if (!field.endsWith("Max")) continue;
-    const actualField = field.slice(0, -3);
-    upperBound(`${page}:${actualField}`, actual[actualField], maximum);
-  }
-  if (actual.adoptedRuns < budget.method.minimumRuns) {
-    failures.push({
-      id: `${page}:minimum-runs`,
-      actual: actual.adoptedRuns,
-      minimum: budget.method.minimumRuns,
-    });
-  }
-}
-changeBand(
-  "sitemap-url-count",
-  sitemapUrlCount,
-  budget.inventory.sitemapUrlCountBaseline,
-  budget.inventory.allowedChangeFraction,
-);
-changeBand(
-  "static-page-count",
-  staticPageCount,
-  budget.inventory.staticPageCountBaseline,
-  budget.inventory.allowedChangeFraction,
-);
+  routeActuals,
+  inventory: { sitemapUrlCount, staticPageCount },
+  lighthouseScoreFailures,
+});
+const { failures, sharedActuals } = budgetEvaluation;
+const warnings = [];
 
 if ((summary.executionFailures ?? []).length > 0) {
   warnings.push({
@@ -589,7 +600,8 @@ if ((summary.executionFailures ?? []).length > 0) {
 if ((summary.targetFailures ?? []).length > 0) {
   warnings.push({
     id: "lighthouse-product-targets",
-    note: "Budget headroom passed/failed separately from product targets.",
+    note:
+      "Raw Lighthouse score targets are hard-gated; this warning retains runner-level score and metric diagnostics.",
     targetFailures: summary.targetFailures,
   });
 }
@@ -622,6 +634,8 @@ const result = {
   },
   actual: {
     commonClientJsBytes,
+    commonCssBytes: sharedActuals.commonCssBytes,
+    renderBlockingCssBytes: sharedActuals.renderBlockingCssBytes,
     commonScriptUrls: [...commonScriptUrls],
     layoutCohorts: scriptAttribution.cohortActuals,
     routes: routeActuals,
@@ -654,6 +668,8 @@ process.stdout.write(
       outputPath,
       accepted: result.accepted,
       commonClientJsBytes,
+      commonCssBytes: sharedActuals.commonCssBytes,
+      renderBlockingCssBytes: sharedActuals.renderBlockingCssBytes,
       routeCount: Object.keys(routeActuals).length,
       sitemapUrlCount,
       childSitemapCount: childSitemapUrls.length,

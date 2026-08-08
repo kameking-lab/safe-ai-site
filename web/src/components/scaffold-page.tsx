@@ -75,7 +75,7 @@ export function ScaffoldPage({
     : [{ name: sectionName, href: backHref }];
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
+    <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
       {breadcrumbLd && (
         <JsonLd schema={breadcrumbLd} />
       )}
@@ -186,7 +186,7 @@ export function ScaffoldPage({
           </Link>
         </div>
       )}
-    </main>
+    </div>
   );
 }
 

@@ -1,5 +1,10 @@
+import { isAnaphoricLegalFollowup } from "@/lib/legal-conversation-context";
+
 const CONTEXT_DEPENDENT_QUERY =
-  /^(?:(?:それ|その件|その場合|この件|この場合|先ほど|さっき|前の質問|上記|直前)(?:について|の|は|を|が|で|と|どう|もう一度|詳しく|$)|(?:どの|何の)?(?:通達|指針|ガイドライン|告示|判例)(?:は|ですか|なの|[?？]|$)|(?:条文|何条|何項|何号|公式原文|いつから|施行日|適用日|根拠|法源|法律|法令|換気|測定|記録|保存|点検|養生|運転|操作|作業指揮者|指揮者|条件|例外)(?:は|ですか|なの|について|[?？]|$))/;
+  /^(?:(?:それ|その件|その場合|この件|この場合|先ほど|さっき|前の質問|上記|直前)(?:(?:について)?(?:どう|もう一度|詳しく)|(?:の)?(?:条件|内容)?(?:なら|の場合)|について|の|は|を|が|で|と)?|(?:どの|何の)?(?:通達|指針|ガイドライン|告示|判例)(?:は|ですか|なの)?|(?:条文|何条|何項|何号|公式原文|いつから|施行日|適用日|根拠|法源|法律|法令|換気|測定|記録|保存|点検|養生|運転|操作|作業指揮者|指揮者|条件|例外)(?:は|ですか|なの|について)?)$/;
+
+const REPORT_RECIPIENT_QUERY =
+  /^(?:(?:その)?(?:報告|連絡)(?:先)?(?:は|を)?(?:誰|どこ)(?:に|へ)?(?:報告|連絡)?(?:するの|する|しますか|します|すればいい|すべき|なの|ですか|か)?|(?:誰|どこ)(?:に|へ)(?:報告|連絡)(?:するの|する|しますか|します|すればいい|すべき|なの|ですか|か)?|(?:報告|連絡)先(?:は|が)?(?:誰|どこ)(?:ですか|なの|か)?)[?？]?$/;
 
 const LAW_NAME =
   /(?:労働安全衛生法施行令|労働安全衛生規則|労働安全衛生法|安衛法施行令|安衛令|安衛則|安衛法|クレーン等安全規則|クレーン則|有機溶剤中毒予防規則|有機則|特定化学物質障害予防規則|特化則|石綿障害予防規則|石綿則)/;
@@ -11,6 +16,7 @@ function normalize(value: string): string {
   return value
     .normalize("NFKC")
     .replace(/^[\s　、。,.!?！？「」『』（）()]+/, "")
+    .replace(/[\s　、。,.!?！？「」『』（）()]+$/, "")
     .replace(/\s+/g, "");
 }
 
@@ -23,7 +29,12 @@ export function needsPriorConversationContext(
   hasUsableHistory: boolean,
 ): boolean {
   if (hasUsableHistory) return false;
-  return CONTEXT_DEPENDENT_QUERY.test(normalize(query));
+  const normalized = normalize(query);
+  return (
+    CONTEXT_DEPENDENT_QUERY.test(normalized) ||
+    REPORT_RECIPIENT_QUERY.test(normalized) ||
+    isAnaphoricLegalFollowup(normalized)
+  );
 }
 
 /** True only when both a known law name and an article reference are explicit. */

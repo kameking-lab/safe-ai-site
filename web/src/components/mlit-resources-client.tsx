@@ -79,7 +79,7 @@ export function MlitResourcesClient() {
     query !== "" || activeCategory !== "ALL" || pdfOnly || bureauFilter !== "ALL";
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-6 md:py-10">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 md:py-10">
       <header className="mb-6 md:mb-8">
         <p className="mb-2 inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 ring-1 ring-sky-200">
           <Building2 className="h-3.5 w-3.5" />
@@ -294,6 +294,6 @@ export function MlitResourcesClient() {
           ※当サイトでは AI による要約や生成は一切行っておらず、各資料は公式サイト・公式PDFへの直リンクのみを提供します。
         </p>
       </footer>
-    </main>
+    </div>
   );
 }

@@ -24,6 +24,41 @@ describe("evaluateChatbotSafety", () => {
     },
   );
 
+  it("教材prefix 6 × 区切り6 × 実申告6の216組をすべてprivacy遮断する", () => {
+    const examplePrefixes = [
+      "研修用の例文です。「HIV陽性です」",
+      "例文は「HIV陽性です」です",
+      "サンプル文は「HIV陽性です」",
+      "訓練文は「HIV陽性です」です",
+      "教材文は「HIV陽性です」",
+      "ケース例：「HIV陽性です」",
+    ];
+    const separators = ["。", "、", "；", "\n", "：", "  "];
+    const actualDisclosures = [
+      "実際には本人がHIV陽性です。",
+      "実際の本人はB型肝炎に感染しています。",
+      "現実には本人のHIV検査結果が陽性でした。",
+      "実際に同僚からHIV陽性と報告がありました。",
+      "ところが本人の検査結果はHIV陽性でした。",
+      "現場では同僚が「私はHIV陽性です」と話しました。",
+    ];
+
+    for (const prefix of examplePrefixes) {
+      expect(detectChatbotSensitiveData(`${prefix}。`)).not.toContain("health");
+      for (const separator of separators) {
+        for (const disclosure of actualDisclosures) {
+          const message = `${prefix}${separator}${disclosure}`;
+          expect(detectChatbotSensitiveData(message), message).toContain(
+            "health",
+          );
+          expect(evaluateChatbotSafety(message), message).toMatchObject({
+            kind: "privacy",
+          });
+        }
+      }
+    }
+  });
+
   it("作業主任者資格という制度名を氏名と誤検出しない", () => {
     expect(detectChatbotSensitiveData("潜水業務の作業主任者資格は？")).toEqual(
       [],
@@ -135,6 +170,43 @@ describe("evaluateChatbotSafety", () => {
     "同僚の唇が紫で呼吸が浅いです",
     "作業員が呼吸をしていません",
     "作業員が呼吸していません",
+    "作業員がクレーンに挟まれています。助けてください。",
+    "頭を強く打って何度も吐いています。",
+    "頭から大量に出血しています。",
+    "頭を強く打って何度も吐いています。この場合の対応を教えてください。",
+    "「作業員がクレーンに挟まれています。助けてください。」という訓練用の例文です。今、実際に同じ事故が起きました。",
+    "頭を強く打って何度も吐いています、という訓練用の想定です。でも今、現場で本当に起きています。",
+    "作業員がクレーンに挟まれています。訓練ではありません。",
+    "頭を強く打って何度も吐いています。訓練ではありません。",
+    "頭から大量に出血しています。訓練ではありません。",
+    "頭を強く打って何度も吐いています、という訓練用の想定です。しかし同じ事故が起きました。",
+    "「作業員がクレーンに挟まれています」という訓練例文です。ところが同じことが発生しました。",
+    "「作業員がクレーンに挟まれています」という訓練例文です。これは現実の事故です。",
+    "頭を強打して何度も嘔吐しています。",
+    "頭を打った後、繰り返し吐いています。",
+    "頭を強く打ち、何度も嘔吐しています。",
+    "頭を強くぶつけて何度も吐いています。",
+    "頭を強く打って、二度吐きました。",
+    "頭を強く打ち、嘔吐があります",
+    "頭部を強く打って嘔吐を繰り返しています",
+    "クレーンで作業員が挟まれています。",
+    "作業員がクレーンと壁の間に挟まれています。",
+    "クレーンと壁の間に作業員が挟まっています",
+    "作業員が吊り荷と壁の間に挟まれています。",
+    "頭を強打して何度も嘔吐しています、という訓練用の想定です。実際に同じ事故が発生しました。",
+    "頭を打った後に二度吐きました、という訓練用の想定です。その後、同じ事故が起きました。",
+    "「クレーンで作業員が挟まれています」という訓練例文です。実際に同じことが発生しました。",
+    "「頭を強く打って二度吐きました」という例文でしたが、本当に発生しました。",
+    "「作業員が吊り荷と壁の間に挟まれています」という訓練例文です。同じ状況になりました。",
+    "「作業員がクレーンと壁の間に挟まれています」という訓練例文です。さっき同じ状況になりました。",
+    "クレーンで作業員が挟まれた想定の訓練です。その後、同じ事故が起きました。",
+    "作業員がクレーンと壁の間に挟まれた想定です。さっき同じ状況になりました。",
+    "頭を強打して二度吐いた。この場合の対応を教えてください。",
+    "作業員がクレーンと壁の間に挟まれた。この場合の救助手順を教えてください。",
+    "今、作業員が倒れて反応がありません。別件で「頭を打ったら119」という訓練用の例文です。",
+    "作業員がクレーンに挟まれています。別件の訓練例文は「けが人を動かさない」です。",
+    "頭を強く打って何度も吐いています。なお研修資料の例文も作りたいです。",
+    "今、作業員がクレーンに挟まれています、別件の訓練例文は「けが人を動かさない」です。",
   ])("PF-001: natural emergency gold set is intercepted: %s", (message) => {
     const result = evaluateChatbotSafety(message);
     expect(result).toMatchObject({
@@ -144,6 +216,19 @@ describe("evaluateChatbotSafety", () => {
     expect(result?.response).toContain("119番");
     expect(result?.response).not.toMatch(/法令検索|KYを作成|無料相談/);
   });
+
+  it.each([
+    "今、作業員が倒れて反応がありません、別件で「頭を打ったら119」という訓練用の例文です。",
+    "「意識がありません」という訓練用の例文です。今、作業員が倒れて反応がありません。",
+  ])(
+    "PF-001: a real emergency remains active before or after a training example: %s",
+    (message) => {
+      expect(evaluateChatbotSafety(message)).toMatchObject({
+        kind: "emergency",
+        safeUserText: "[緊急事象の相談を検知]",
+      });
+    },
+  );
 
   it.each([
     "意識がないわけではありません",
@@ -163,26 +248,66 @@ describe("evaluateChatbotSafety", () => {
     "機械に手を挟まれた事実はありません",
     "「意識がない」場合の訓練資料を作りたい",
     "意識がない場合の対応を教えて",
-  ])("PF-001: explicitly negated emergency statement is not treated as active: %s", (message) => {
-    expect(evaluateChatbotSafety(message)?.kind).not.toBe("emergency");
-  });
+    "作業員がクレーンに挟まれているわけではありません",
+    "頭を強く打って何度も吐いているわけではありません",
+    "頭から大量に出血しているわけではありません",
+    "「作業員がクレーンに挟まれています。助けてください。」という訓練用の例文です",
+    "「頭を強く打って何度も吐いています」という訓練例文を作りたい",
+    "「頭から大量に出血しています」という救護訓練の例文です",
+    "「頭を強く打って何度も吐いています」という、実際の事故ではなく架空の訓練例文です",
+    "「頭を強打して何度も嘔吐しています」という訓練例文です",
+    "頭を打った後に二度吐いた場合の対応を教えて",
+    "頭を強くぶつけて嘔吐したわけではありません",
+    "頭を強く打ちましたが嘔吐はありません",
+    "頭部を強く打って嘔吐を繰り返しているわけではありません",
+    "クレーンで作業員が挟まれているわけではありません",
+    "クレーンと壁の間に作業員が挟まっているわけではありません",
+    "作業員がクレーンと壁の間に挟まれた場合の救助手順を教えて",
+    "吊り荷と壁の間に挟まれた人はいません",
+    "クレーンで作業員が挟まれた場合の訓練です。",
+    "頭を強打して何度も嘔吐した場合の救護訓練です。",
+    "クレーンで作業員が挟まれた想定の訓練です。",
+    "作業員がクレーンと壁の間に挟まれた想定です。",
+    "頭を強打して二度吐いた仮定です。",
+    "吊り荷と壁の間に挟まれた想定をした訓練です。",
+    "「作業員がクレーンと壁の間に挟まれています」という訓練例文です。今後同じ状況が起きた場合の対応を検討します。",
+  ])(
+    "PF-001: explicitly negated emergency statement is not treated as active: %s",
+    (message) => {
+      expect(evaluateChatbotSafety(message)?.kind).not.toBe("emergency");
+    },
+  );
+
+  it.each([
+    "作業員が倒れて反応がない事故は発生していません。",
+    "作業員が倒れて反応がありません、という救護訓練のシナリオです。",
+  ])(
+    "PF-001: an explicit no-incident or rescue-training scenario is not active: %s",
+    (message) => {
+      expect(evaluateChatbotSafety(message)?.kind).not.toBe("emergency");
+    },
+  );
 
   it.each([
     "大量に血が出ている",
     "血が止まらない",
     "出血がひどい",
-  ])("PF-002: severe bleeding returns direct-pressure guidance: %s", (message) => {
-    const result = evaluateChatbotSafety(message);
-    expect(result).toMatchObject({
-      kind: "emergency",
-      emergencyCategory: "severe-bleeding",
-      response: CHATBOT_SEVERE_BLEEDING_RESPONSE,
-    });
-    expect(result?.response).toContain("直接圧迫");
-    expect(result?.response).toMatch(/手袋|ビニール袋/);
-    expect(result?.response).toContain("感染");
-    expect(result?.response).toContain("救急隊・通信指令員の指示を最優先");
-  });
+    "頭から大量に出血しています。",
+  ])(
+    "PF-002: severe bleeding returns direct-pressure guidance: %s",
+    (message) => {
+      const result = evaluateChatbotSafety(message);
+      expect(result).toMatchObject({
+        kind: "emergency",
+        emergencyCategory: "severe-bleeding",
+        response: CHATBOT_SEVERE_BLEEDING_RESPONSE,
+      });
+      expect(result?.response).toContain("直接圧迫");
+      expect(result?.response).toMatch(/手袋|ビニール袋/);
+      expect(result?.response).toContain("感染");
+      expect(result?.response).toContain("救急隊・通信指令員の指示を最優先");
+    },
+  );
 
   it.each([
     "社員番号はA123です",
@@ -240,38 +365,206 @@ describe("evaluateChatbotSafety", () => {
     "サトウタロウがフォークリフトを運転します。資格は？",
     "私、腰が痛くて薬を飲みました。高所作業はできますか？",
     "新宿区西新宿2-8-1の現場です",
+    "HIV陽性です",
+    "HIV陽性",
+    "私はC型肝炎です",
+    "私はB型肝炎",
+    "本人はB型肝炎と診断されました",
+    "健康診断でHBV陽性でした",
+    "私はHCV抗体陽性です",
+    "HCV陽性",
+    "私はHIV陽性だ",
+    "HIV陽性だった",
+    "HIV陽性になりました",
+    "私はエイズです",
+    "C型肝炎になりました",
+    "B型肝炎に感染した",
+    "HBV陽性だった",
+    "私はHIVにかかっています",
+    "私はHIVに罹患しています",
+    "HIV感染者です",
+    "B型肝炎にかかりました",
+    "C型肝炎の患者です",
+    "私はB型肝炎のキャリアです",
+    "HIV陽性でしたが就業できますか",
+    "HIVにかかっていると診断されました",
+    "B型肝炎のキャリアだと診断されました",
+    "私は「HIV感染者です」と診断されました",
+    "HCV陽性でしたけど作業できますか",
+    "本人はC型肝炎の患者だと診断されています",
+    "私はHIV陽性です。HIVという訓練用の例文です。",
+    "HIVという訓練用の例文です。私はHIV陽性です。",
+    "私はHIV陽性です、HIVという訓練用の例文です。",
+    "私はHIV陽性です;HIVという訓練用の例文です。",
+    "私はHIV陽性ですけど、HIVという訓練用の例文です。",
   ])("blocks either identifiers or health data on its own: %s", (message) => {
     const result = evaluateChatbotSafety(message);
     expect(result?.kind).toBe("privacy");
     expect(result?.safeUserText).not.toContain(message);
   });
 
+  it.each([
+    "健康診断でHIV陽性と分かりました",
+    "検査でHIV陽性とわかりました",
+    "HIV陽性と判明しました",
+    "HIV陽性が分かりました",
+    "私はHIV陽性だったと分かりました",
+    "本人がHCV陽性と判明しました",
+    "HIV陽性だとわかりました",
+    "HIV陽性であることが判明しました",
+    "HIVの検査結果が陽性でした",
+    "検査結果はHIV陽性でした",
+    "医師からHIV陽性と言われました",
+    "医師にHIV陽性と告げられました",
+    "B型肝炎だと分かりました",
+    "B型肝炎に感染していることが分かりました",
+    "HCV陽性との結果でした",
+    "HCV陽性という結果でした",
+    "本人は「HIV陽性です」と話しました。",
+    "同僚が「私はHIV陽性です」と話しました。",
+    "私は「HIV陽性です」と話しました。",
+    "「私はHIV陽性です」と申告しました。",
+    "同僚が「HIV陽性です」と言いました。",
+    "本人から「HIV陽性です」と申告がありました。",
+    "私はHIV陽性です\n別件はHIVという訓練用の例文です。",
+    "研修用の例文です。「HIV陽性です」\n実際には田中さんがHIV陽性です。",
+    "研修用の例文です。「HIV陽性です」、実際には田中さんがHIV陽性です。",
+    "例文：「HIV陽性です」。なお本人の診断はHIV陽性です。",
+    "例文は「HIV陽性です」；実際の検査結果はHIV陽性でした。",
+    "サンプル文は「HIV陽性です」。本人からHIV陽性との申告がありました。",
+    "訓練文は「HIV陽性です」です。しかし実際には本人がHIV陽性です。",
+    "マニュアル例は「HIV陽性です」。実際の本人はB型肝炎に感染しています。",
+    "教材文は「HIV陽性です」；現実には本人のHIV検査結果が陽性でした。",
+    "ケース例：「HIV陽性です」。実際に同僚からHIV陽性と報告がありました。",
+    "本人からHIV陽性と報告がありました。",
+    "同僚からHBV陽性と報告がありました。",
+    "同僚からHCV陽性と報告がありました。",
+    "例文は「HIV陽性です」です。同僚からHCV陽性と報告がありました。",
+    "ところが本人の検査結果はHIV陽性でした。",
+    "現場では同僚が「私はHIV陽性です」と話しました。",
+    "教材文は「HIV陽性です」。ところが本人の検査結果はHIV陽性でした。",
+    "研修用の例文です。「HIV陽性です」：実際には本人がHIV陽性です。",
+  ])(
+    "blocks an actual infection result, discovery, report, or mixed-line disclosure: %s",
+    (message) => {
+      expect(detectChatbotSensitiveData(message)).toContain("health");
+      expect(evaluateChatbotSafety(message)).toMatchObject({ kind: "privacy" });
+    },
+  );
+
+  it.each([
+    "「HIV陽性だと分かりました」という訓練用の例文です",
+    "HIV陽性だと分かった場合の対応を教えて",
+    "HIV陽性者は就業できますか",
+    "私はHIV陽性です、という研修用の例文です。",
+    "私はHIV陽性です、というマニュアル用の例文です。",
+    "私はHIV陽性です、という演習用の例文です。",
+    "私はHIV陽性です、というサンプル文です。",
+    "私はHIV陽性です、というケーススタディです。",
+    "例文は「HIV陽性です」。",
+    "サンプル文は「HIV陽性です」。",
+    "訓練文は「HIV陽性です」。",
+    "マニュアル例は「HIV陽性です」。",
+    "教材文は「HIV陽性です」。",
+    "ケース例：「HIV陽性です」。",
+  ])(
+    "does not treat a hypothetical or clearly labelled infection example as personal health data: %s",
+    (message) => {
+      expect(detectChatbotSensitiveData(message)).not.toContain("health");
+      expect(evaluateChatbotSafety(message)?.kind).not.toBe("privacy");
+    },
+  );
+
+  it.each([
+    "今、作業員が倒れて反応がありません\n別件で「頭を打ったら119」という訓練用の例文です。",
+    "今、作業員が倒れて反応がありません\u2028別件で「頭を打ったら119」という訓練用の例文です。",
+    "今、作業員が倒れて反応がありません\u2029別件で「頭を打ったら119」という訓練用の例文です。",
+    "今、作業員が倒れて反応がありません\t別件で「頭を打ったら119」という訓練用の例文です。",
+    "今、作業員が倒れて反応がありません：別件で「頭を打ったら119」という訓練用の例文です。",
+    "今、作業員が倒れて反応がありません／別件で「頭を打ったら119」という訓練用の例文です。",
+    "今、作業員が倒れて反応がありません・別件で「頭を打ったら119」という訓練用の例文です。",
+    "今、作業員が倒れて反応がありません｜別件で「頭を打ったら119」という訓練用の例文です。",
+    "今、作業員が倒れて反応がありません  別件で「頭を打ったら119」という訓練用の例文です。",
+    "「意識がありません」という訓練用の例文です、今、作業員が倒れて反応がありません。",
+    "「意識がありません」という訓練用の例文です；今、作業員が倒れて反応がありません。",
+    "「意識がありません」という訓練用の例文です\n今、作業員が倒れて反応がありません。",
+  ])("訓練例文と軟区切りで併記された実事故を緊急判定する: %s", (message) => {
+    expect(evaluateChatbotSafety(message)).toMatchObject({ kind: "emergency" });
+  });
+
+  it("実事故から別件の訓練例文へ移る14種の区切りをすべて緊急遮断する", () => {
+    for (const separator of [
+      "。",
+      "、",
+      ",",
+      "；",
+      ";",
+      "\n",
+      "\u2028",
+      "\u2029",
+      "\t",
+      "：",
+      "／",
+      "・",
+      "｜",
+      "  ",
+    ]) {
+      const message = `今、作業員が倒れて反応がありません${separator}別件で「頭を打ったら119」という訓練用の例文です。`;
+      expect(evaluateChatbotSafety(message), message).toMatchObject({
+        kind: "emergency",
+      });
+    }
+  });
+
+  it.each([
+    "作業員が倒れて反応がない事故は起きていません。",
+    "作業員が倒れて反応がない事故はありません。",
+    "作業員が倒れて反応がない事故は起こりませんでした。",
+    "作業員が倒れて反応がない事故は確認されていません。",
+    "作業員が倒れて反応がありません、という模擬訓練です。",
+    "作業員が倒れて反応がありません、という演習用シナリオです。",
+    "作業員が倒れて反応がありません、というケーススタディです。",
+    "作業員が倒れて反応がありません、という机上演習です。",
+    "作業員が倒れて反応がありません、という練習問題です。",
+    "作業員が倒れて反応がありません、というデモンストレーションです。",
+    "作業員が倒れて反応がありません、というドリルです。",
+    "作業員がクレーンに挟まれた想定の机上演習です。",
+    "作業員が倒れた場合の練習問題です。",
+    "作業員が倒れた想定のドリルです。",
+    "作業員がクレーンに挟まれた想定で訓練します。",
+    "もし作業員がクレーンに挟まれた場合はどうする？",
+    "作業員が意識不明になった事故は発生していません。",
+    "作業員が倒れた場合の救護手順を教えて。",
+  ])("明示された非発生・模擬訓練を緊急と誤判定しない: %s", (message) => {
+    expect(evaluateChatbotSafety(message)?.kind).not.toBe("emergency");
+  });
+
   it("氏名らしくない業務名を自己紹介と誤検出しない", () => {
-    expect(detectChatbotSensitiveData("林業です。安全管理者は必要？")).toEqual([]);
-    expect(
-      detectChatbotSensitiveData("妊娠中の作業者の規定は？"),
-    ).toEqual([]);
+    expect(detectChatbotSensitiveData("林業です。安全管理者は必要？")).toEqual(
+      [],
+    );
+    expect(detectChatbotSensitiveData("妊娠中の作業者の規定は？")).toEqual([]);
     expect(
       detectChatbotSensitiveData("被災者が負傷した場合の報告は？"),
     ).toEqual([]);
-    expect(
-      detectChatbotSensitiveData("負傷者が作業に戻る条件は？"),
-    ).toEqual([]);
+    expect(detectChatbotSensitiveData("負傷者が作業に戻る条件は？")).toEqual(
+      [],
+    );
     expect(
       detectChatbotSensitiveData("事業主が作業員に特別教育を行う義務は？"),
     ).toEqual([]);
     expect(
       detectChatbotSensitiveData("発注者が作業を指示する場合の責任は？"),
     ).toEqual([]);
-    expect(
-      detectChatbotSensitiveData("派遣元が担当する教育は？"),
-    ).toEqual([]);
+    expect(detectChatbotSensitiveData("派遣元が担当する教育は？")).toEqual([]);
   });
 
   it("asks for missing work conditions instead of answering qualification necessity", () => {
     const result = evaluateChatbotSafety("フォークリフトの資格は必要？");
     expect(result?.kind).toBe("ambiguous");
-    expect(result?.response).toContain("条件が不明なまま『資格不要』とは判断できません");
+    expect(result?.response).toContain(
+      "条件が不明なまま『資格不要』とは判断できません",
+    );
   });
 
   it("安全管理者と衛生管理者を取り違えず、業種不足なら選任要否を保留する", () => {
@@ -368,8 +661,7 @@ describe("evaluateChatbotSafety", () => {
       marker: "平成21年6月1日",
     },
     {
-      question:
-        "平成27年の改正で足場の中桟が初めて義務化された根拠を教えて。",
+      question: "平成27年の改正で足場の中桟が初めて義務化された根拠を教えて。",
       marker: "誤った改正年",
     },
   ])(
@@ -419,14 +711,14 @@ describe("evaluateChatbotSafety", () => {
       question: "ボイラーの設置届出の対象とその根拠条文は？",
       marker: "ボイラー区分",
     },
-  ])("適用条件が不足する法令質問を確定せず聞き返す: $question", ({
-    question,
-    marker,
-  }) => {
-    const result = evaluateChatbotSafety(question);
-    expect(result?.kind).toBe("ambiguous");
-    expect(result?.response).toContain(marker);
-  });
+  ])(
+    "適用条件が不足する法令質問を確定せず聞き返す: $question",
+    ({ question, marker }) => {
+      const result = evaluateChatbotSafety(question);
+      expect(result?.kind).toBe("ambiguous");
+      expect(result?.response).toContain(marker);
+    },
+  );
 
   it.each([
     {
@@ -510,14 +802,14 @@ describe("evaluateChatbotSafety", () => {
       question: "移動式クレーンを操作するにはどの免許が要りますか？",
       marker: "資格区分",
     },
-  ])("不足条件を補わず法的結論を保留する: $question", ({
-    question,
-    marker,
-  }) => {
-    const result = evaluateChatbotSafety(question);
-    expect(result?.kind).toBe("ambiguous");
-    expect(result?.response).toContain(marker);
-  });
+  ])(
+    "不足条件を補わず法的結論を保留する: $question",
+    ({ question, marker }) => {
+      const result = evaluateChatbotSafety(question);
+      expect(result?.kind).toBe("ambiguous");
+      expect(result?.response).toContain(marker);
+    },
+  );
 
   it.each([
     "労働者のメンタルヘルスケアの基本方針はどの指針？",
@@ -535,18 +827,17 @@ describe("evaluateChatbotSafety", () => {
   });
 
   it("対象未特定の通達質問は資料不足で遮断せず一問確認へ渡す", () => {
-    expect(evaluateChatbotSafety("この通達が根拠になりますか？")?.kind).not.toBe(
-      "source-gap",
-    );
+    expect(
+      evaluateChatbotSafety("この通達が根拠になりますか？")?.kind,
+    ).not.toBe("source-gap");
   });
 
-  it.each([
-    "どの通達？",
-    "指針は？",
-    "ガイドラインは？",
-  ])("文脈へ結合できる資料種別だけの追質問をsource-gapで先取りしない: %s", (question) => {
-    expect(evaluateChatbotSafety(question)?.kind).not.toBe("source-gap");
-  });
+  it.each(["どの通達？", "指針は？", "ガイドラインは？"])(
+    "文脈へ結合できる資料種別だけの追質問をsource-gapで先取りしない: %s",
+    (question) => {
+      expect(evaluateChatbotSafety(question)?.kind).not.toBe("source-gap");
+    },
+  );
 
   it.each([
     "電気作業の資格はどの通達？",
@@ -573,14 +864,16 @@ describe("evaluateChatbotSafety", () => {
     "酸欠作業の「監視人に関する指針」は？",
     "屋外作業における熱中症予防の主な指針はどこにありますか？",
     "振動工具取扱い作業者の健康管理に関するガイドラインは？",
-  ])("具体的・最新・未確認資料の要求は引き続きsource-gapで保留する: %s", (question) => {
-    expect(evaluateChatbotSafety(question)?.kind).toBe("source-gap");
-  });
+  ])(
+    "具体的・最新・未確認資料の要求は引き続きsource-gapで保留する: %s",
+    (question) => {
+      expect(evaluateChatbotSafety(question)?.kind).toBe("source-gap");
+    },
+  );
 
   it("未確認の新着通達を確定根拠にする要求は保留する", () => {
     expect(
-      evaluateChatbotSafety("昨日出た未確認の厚労省通達を確定根拠にして")
-        ?.kind,
+      evaluateChatbotSafety("昨日出た未確認の厚労省通達を確定根拠にして")?.kind,
     ).toBe("source-gap");
   });
 
@@ -612,13 +905,11 @@ describe("evaluateChatbotSafety", () => {
 
   it.each([
     {
-      question:
-        "作業員が倒れて反応がない。労働安全衛生法違反の罰則も教えて。",
+      question: "作業員が倒れて反応がない。労働安全衛生法違反の罰則も教えて。",
       kind: "emergency",
     },
     {
-      question:
-        "担当者は小野太郎です。安全衛生委員会の設置義務を教えて。",
+      question: "担当者は小野太郎です。安全衛生委員会の設置義務を教えて。",
       kind: "privacy",
     },
   ] as const)(
@@ -686,14 +977,11 @@ describe("evaluateChatbotSafety", () => {
     expect(detectChatbotSensitiveData("職長教育の対象者は？")).toEqual([]);
     expect(detectChatbotSensitiveData("作業主任者の職務は？")).toEqual([]);
     expect(detectChatbotSensitiveData("安全衛生責任者教育とは？")).toEqual([]);
-    expect(evaluateChatbotSafety("職長は小野太郎です")?.kind).toBe(
-      "privacy",
-    );
+    expect(evaluateChatbotSafety("職長は小野太郎です")?.kind).toBe("privacy");
   });
 
   it("速度設定と作業指揮者を含む複合法令質問を氏名扱いしない", () => {
-    const legalQuestion =
-      "フォークリフトの資格、速度設定、作業指揮者を教えて";
+    const legalQuestion = "フォークリフトの資格、速度設定、作業指揮者を教えて";
     expect(detectChatbotSensitiveData(legalQuestion)).toEqual([]);
     expect(evaluateChatbotSafety(legalQuestion)?.kind).not.toBe("privacy");
     expect(
@@ -727,11 +1015,58 @@ describe("evaluateChatbotSafety", () => {
 
   it("does not claim generic health or anonymized terms are actual personal values", () => {
     expect(evaluateChatbotSafety("定期健康診断の実施頻度は？")).toBeNull();
-    expect(evaluateChatbotSafety("作業者Aは持病ありとして計画します")).toBeNull();
+    expect(
+      evaluateChatbotSafety("作業者Aは持病ありとして計画します"),
+    ).toBeNull();
     expect(detectChatbotSensitiveData("担当者は未定です")).toEqual([]);
     expect(detectChatbotSensitiveData("責任者は匿名です")).toEqual([]);
     expect(detectChatbotSensitiveData("作業員Aが作業します")).toEqual([]);
   });
+
+  it.each([
+    "HIV陽性者の就業上の配慮に関する法令は？",
+    "HIV陽性とは何ですか？",
+    "HIV陽性だった場合の就業上の配慮は？",
+    "HIV検査を事業者が求めることはできますか？",
+    "B型肝炎・C型肝炎の一般的な感染対策は？",
+    "C型肝炎になった場合の届出義務は？",
+    "エイズに関する一般的な法令は？",
+    "HBV/HCVの感染対策に関する法令は？",
+    "C型肝炎と労災認定の一般的な関係は？",
+    "私はHIV陽性ではありません",
+    "本人はC型肝炎ではありません",
+    "「私はHBV陽性です」という訓練用の例文です",
+    "HIVにかかった場合の就業上の法令は？",
+    "HIV罹患者への就業上の配慮は？",
+    "HIV感染者に対する法的な配慮は？",
+    "B型肝炎にかかった労働者の配置基準は？",
+    "C型肝炎の患者に関する一般的な法令は？",
+    "B型肝炎キャリアの就業制限は法令で定められていますか？",
+    "私はHIVにかかっていません",
+    "私はHIVに罹患していません",
+    "HIV感染者ではありません",
+    "B型肝炎にかかっていません",
+    "C型肝炎の患者ではありません",
+    "私はB型肝炎のキャリアではありません",
+    "HIV陽性でしたが、という架空の設定です",
+    "「HIVにかかっていると診断されました」という訓練用の例文です",
+    "「B型肝炎のキャリアだと診断されました」という教材用の文です",
+    "「私はHIVにかかっています」という訓練用の例文です",
+    "「HIV感染者です」という教材用の例文です",
+    "「C型肝炎の患者です」という架空の設定です",
+    "「私はB型肝炎のキャリアです」という想定文です",
+    "私はHIVにかかっています、という訓練用の例文です",
+    "HIV感染者です、という教材用の文です",
+    "C型肝炎の患者です、という架空の設定です",
+    "私はB型肝炎のキャリアです、という想定です",
+    "私はエイズです、という架空の設定です",
+  ])(
+    "does not treat a general infection-law question as personal health data: %s",
+    (message) => {
+      expect(detectChatbotSensitiveData(message)).toEqual([]);
+      expect(evaluateChatbotSafety(message)?.kind).not.toBe("privacy");
+    },
+  );
 
   it("履歴中の明示実名も外部AI送信前に遮断する", () => {
     const result = inspectChatbotHistory([

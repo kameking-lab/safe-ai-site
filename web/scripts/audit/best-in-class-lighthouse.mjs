@@ -19,6 +19,12 @@ import { createHash, randomUUID } from "node:crypto";
 import { hostname, platform, release, arch } from "node:os";
 import { basename, relative, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import {
+  evaluateLighthouseScoreTargets,
+  lighthouseNoindexSeoPolicyCompliant,
+  lighthouseRunMustFail,
+  validateLighthouseReport,
+} from "./performance-budget-core.mjs";
 
 const LIGHTHOUSE_VERSION = "12.8.2";
 const DEFAULT_EVIDENCE_ROOT =
@@ -257,23 +263,26 @@ function round(value, digits = 1) {
   return Math.round(value * factor) / factor;
 }
 
+function scoreFailureMessage(failure) {
+  const labels = {
+    performance: "Performance",
+    accessibility: "Accessibility",
+    "best-practices": "Best Practices",
+    seo: "SEO",
+  };
+  const label = labels[failure.id] ?? failure.id;
+  if (failure.reason === "invalid-score") {
+    return `${label} has no valid score`;
+  }
+  if (Number.isFinite(failure.minimum)) {
+    return `${label} ${failure.actual} < ${failure.minimum}`;
+  }
+  return `${label} ${failure.actual} != ${failure.expected}`;
+}
+
 function findArtifact(directory, suffix) {
   const names = readdirSync(directory).filter((name) => name.endsWith(suffix));
   return names.length === 1 ? resolve(directory, names[0]) : null;
-}
-
-function completeReport(report) {
-  const required = [
-    report.categories?.performance?.score,
-    report.categories?.accessibility?.score,
-    report.categories?.["best-practices"]?.score,
-    report.categories?.seo?.score,
-    report.audits?.["largest-contentful-paint"]?.numericValue,
-    report.audits?.["first-contentful-paint"]?.numericValue,
-    report.audits?.["cumulative-layout-shift"]?.numericValue,
-    report.audits?.["total-blocking-time"]?.numericValue,
-  ];
-  return !report.runtimeError && required.every((value) => typeof value === "number");
 }
 
 function sumTransfer(items, resourceType) {
@@ -327,14 +336,16 @@ function metricsFromReport(report, context) {
     .sort();
   return {
     ...context,
-    performance: round(report.categories.performance.score * 100, 0),
-    accessibility: round(report.categories.accessibility.score * 100, 0),
+    performance: round(report.categories.performance.score * 100, 2),
+    accessibility: round(report.categories.accessibility.score * 100, 2),
     bestPractices: round(
       report.categories["best-practices"].score * 100,
-      0,
+      2,
     ),
-    seo: round(report.categories.seo.score * 100, 0),
+    seo: round(report.categories.seo.score * 100, 2),
     seoFailedAuditIds,
+    seoNoindexPolicyCompliant:
+      lighthouseNoindexSeoPolicyCompliant(report),
     lanternSimulatedLcpMs: round(
       report.audits["largest-contentful-paint"].numericValue,
     ),
@@ -489,6 +500,7 @@ for (const page of pages) {
         attemptNumber += 1
       ) {
       const measurementId = `${page.id}-${profile}-${runNumber}-attempt${attemptNumber}-${randomUUID().slice(0, 8)}`;
+      const pageUrl = new URL(page.path, parsedBaseUrl).href;
       const measurementRoot = resolve(sessionRoot, measurementId);
       mkdirSync(measurementRoot, { recursive: false });
       const outputBase = resolve(measurementRoot, "report");
@@ -498,7 +510,7 @@ for (const page of pages) {
       const args = [
         "--yes",
         `lighthouse@${LIGHTHOUSE_VERSION}`,
-        `${baseUrl}${page.path}`,
+        pageUrl,
         "--quiet",
         "--output=json",
         "--output=html",
@@ -535,12 +547,20 @@ for (const page of pages) {
       const devtoolsLogPath = findArtifact(measurementRoot, ".devtoolslog.json");
       let report = null;
       let reportIsComplete = false;
+      let reportValidationFailures = [];
       try {
         report = reportPath
           ? JSON.parse(readFileSync(reportPath, "utf8"))
           : null;
-        reportIsComplete = Boolean(report && completeReport(report));
-      } catch {
+        const validation = validateLighthouseReport(report, {
+          expectedUrl: pageUrl,
+        });
+        reportValidationFailures = validation.failures;
+        reportIsComplete = validation.valid;
+      } catch (error) {
+        reportValidationFailures = [
+          `report:unreadable:${error instanceof Error ? error.message : String(error)}`,
+        ];
         reportIsComplete = false;
       }
       const executionSucceeded = result.status === 0;
@@ -605,6 +625,7 @@ for (const page of pages) {
         traceSha256: traceArtifact?.sha256 ?? null,
         cliExitCode: result.status ?? 1,
         success: eligible,
+        reportValidationFailures,
         adopted,
         baseline: runKind === "baseline",
         final: runKind === "final",
@@ -670,6 +691,7 @@ for (const page of pages) {
 
 const medians = [];
 const targetFailures = [];
+const scoreTargetFailures = [];
 for (const page of pages) {
   for (const profile of profiles) {
     const rows = adoptedMetrics.filter(
@@ -741,30 +763,33 @@ for (const page of pages) {
     };
     const noindexSeoPolicyCompliant =
       page.requiredNoindex === true &&
-      rows.every(
-        (row) =>
-          row.seoFailedAuditIds?.length === 1 &&
-          row.seoFailedAuditIds[0] === "is-crawlable",
-      );
+      rows.every((row) => row.seoNoindexPolicyCompliant === true);
     summary.seoPolicyCompliant =
       noindexSeoPolicyCompliant || summary.seo === 100;
     medians.push(summary);
+    const scoreEvaluation = evaluateLighthouseScoreTargets({
+      profile,
+      scores: {
+        performance: summary.performance,
+        accessibility: summary.accessibility,
+        bestPractices: summary.bestPractices,
+        seo: summary.seo,
+      },
+      seoPolicyCompliant: noindexSeoPolicyCompliant,
+    });
+    const scoreFailureMessages = scoreEvaluation.failures.map(
+      scoreFailureMessage,
+    );
     const failures = [];
-    if (profile === "mobile" && summary.performance < 90) {
-      failures.push(`Performance ${summary.performance} < 90`);
-    }
+    failures.push(...scoreFailureMessages);
     if (summary.cls > 0.1) failures.push(`CLS ${summary.cls} > 0.1`);
     if (summary.tbtMs > 200) failures.push(`TBT ${summary.tbtMs} > 200`);
-    if (summary.accessibility !== 100) {
-      failures.push(`Accessibility ${summary.accessibility} != 100`);
-    }
-    if (summary.bestPractices !== 100) {
-      failures.push(`Best Practices ${summary.bestPractices} != 100`);
-    }
-    if (!summary.seoPolicyCompliant) {
-      failures.push(
-        `SEO ${summary.seo} != 100 (failed: ${summary.seoFailedAuditIds.join(",") || "unknown"})`,
-      );
+    if (scoreEvaluation.failures.length > 0) {
+      scoreTargetFailures.push({
+        page: page.id,
+        profile,
+        failures: scoreEvaluation.failures,
+      });
     }
     if (failures.length > 0) {
       targetFailures.push({ page: page.id, profile, failures });
@@ -799,6 +824,7 @@ const summary = {
   runs: runRecords,
   medians,
   targetFailures,
+  scoreTargetFailures,
   executionsComplete:
     runRecords.filter((item) => item.adopted).length === expectedRunCount &&
     medians.length === pages.length * profiles.length,
@@ -806,6 +832,10 @@ const summary = {
     runRecords.filter((item) => item.adopted).length === expectedRunCount &&
     medians.length === pages.length * profiles.length &&
     targetFailures.length === 0,
+  allScoreTargetsMet:
+    runRecords.filter((item) => item.adopted).length === expectedRunCount &&
+    medians.length === pages.length * profiles.length &&
+    scoreTargetFailures.length === 0,
   legacyEvidenceGap: {
     affectedRawReports: 4,
     restored: false,
@@ -834,17 +864,27 @@ process.stdout.write(
       adoptedRunCount: summary.adoptedRunCount,
       executionFailureCount: executionFailures.length,
       targetFailureCount: targetFailures.length,
+      scoreTargetFailureCount: scoreTargetFailures.length,
       allTargetsMet: summary.allTargetsMet,
+      allScoreTargetsMet: summary.allScoreTargetsMet,
     },
     null,
     2,
   )}\n`,
 );
-const enforceTargets = process.env.LIGHTHOUSE_ENFORCE_TARGETS !== "0";
+// LIGHTHOUSE_ENFORCE_TARGETS=0 keeps local/CI budget diagnostics available for
+// CLS and TBT, but product score targets are never downgraded to warnings.
+const enforceDiagnosticTargets =
+  process.env.LIGHTHOUSE_ENFORCE_TARGETS !== "0";
 if (
-  !summary.executionsComplete ||
-  summary.adoptedRunCount !== expectedRunCount ||
-  (enforceTargets && !summary.allTargetsMet)
+  lighthouseRunMustFail({
+    executionsComplete: summary.executionsComplete,
+    adoptedRunCount: summary.adoptedRunCount,
+    expectedRunCount,
+    allScoreTargetsMet: summary.allScoreTargetsMet,
+    allTargetsMet: summary.allTargetsMet,
+    enforceDiagnosticTargets,
+  })
 ) {
   process.exitCode = 1;
 }

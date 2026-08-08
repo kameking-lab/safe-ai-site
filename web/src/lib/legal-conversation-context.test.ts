@@ -30,10 +30,159 @@ describe("法令対話のmemory-only文脈", () => {
   it.each([
     "フルハーネス型墜落制止用器具の特別教育はいつ必要？",
     "墜落制止用器具の特別教育が必要な条件は？",
-  ])("器具と特別教育を明示した質問を一般的な墜落場所へ誤分岐しない: %s", (query) => {
-    expect(buildLegalClarification(query)?.question).not.toBe(
-      "墜落のおそれがある場所はどこですか？",
-    );
+  ])(
+    "器具と特別教育を明示した質問を一般的な墜落場所へ誤分岐しない: %s",
+    (query) => {
+      expect(buildLegalClarification(query)?.question).not.toBe(
+        "墜落のおそれがある場所はどこですか？",
+      );
+    },
+  );
+
+  it.each(["誰に報告するの？", "その報告は誰にしますか？"])(
+    "熱中症の報告先を尋ねる代名詞follow-upへ直前文脈を補う: %s",
+    (message) => {
+      const result = resolveLegalConversationQuery({
+        message,
+        history: [{ role: "user", content: "熱中症の報告義務は？" }],
+      });
+
+      expect(result.usedHistory).toBe(true);
+      expect(result.context.workType).toBe("暑熱作業の報告体制");
+      expect(result.query).toContain("暑熱作業の報告体制");
+      expect(result.query).toContain("報告");
+    },
+  );
+
+  it("先に尋ねた報告先の意図を、後続の法令topicへ安全に結合する", () => {
+    const result = resolveLegalConversationQuery({
+      message: "労働者死傷病報告についてです",
+      history: [{ role: "user", content: "報告はどこへ？" }],
+    });
+
+    expect(result.usedHistory).toBe(true);
+    expect(result.context.workType).toBe("労働者死傷病報告");
+    expect(result.query).toContain("労働者死傷病報告");
+    expect(result.query).toContain("報告先");
+  });
+
+  it.each([
+    ["労働者死傷病報告は誰に、いつまで提出？", "誰に？", "労働者死傷病報告"],
+    ["労働者死傷病報告は誰に、いつまで提出？", "どこへ？", "労働者死傷病報告"],
+    [
+      "労働者死傷病報告は誰に、いつまで提出？",
+      "いつまで？",
+      "労働者死傷病報告",
+    ],
+    [
+      "労働者死傷病報告は誰に、いつまで提出？",
+      "その報告は？",
+      "労働者死傷病報告",
+    ],
+    ["熱中症の報告義務は？", "その報告は？", "暑熱作業の報告体制"],
+    ["熱中症の報告義務は？", "どこへ報告しますか？", "暑熱作業の報告体制"],
+    ["熱中症の報告義務は？", "いつまでに報告するの？", "暑熱作業の報告体制"],
+    ["足場の点検は？", "その点検は？", "足場作業"],
+    ["足場の点検は必要？", "その点検は記録するの？", "足場作業"],
+    ["足場の点検は必要？", "その点検結果は残すの？", "足場作業"],
+    ["足場の点検は？", "誰が点検するの？", "足場作業"],
+    ["足場の点検は？", "どこを点検しますか？", "足場作業"],
+    ["足場の点検は？", "いつまでに点検するの？", "足場作業"],
+    ["フォークリフトの資格は？", "いつまで有効？", "フォークリフト運転"],
+    ["フォークリフトの資格は？", "誰が受ける？", "フォークリフト運転"],
+    ["フォークリフトの資格は？", "その教育は？", "フォークリフト運転"],
+    ["酸欠作業の特別教育は？", "いつまでに受ける？", "酸素欠乏危険作業"],
+    [
+      "第二種酸素欠乏危険作業の特別教育は必要ですか？",
+      "作業前に受ける必要がある？",
+      "第二種酸素欠乏危険作業",
+    ],
+    [
+      "第二種酸素欠乏危険作業の特別教育は必要ですか？",
+      "受講は作業前？",
+      "第二種酸素欠乏危険作業",
+    ],
+    [
+      "第二種酸素欠乏危険作業の特別教育は必要ですか？",
+      "作業を始める前？",
+      "第二種酸素欠乏危険作業",
+    ],
+    ["酸欠作業の特別教育は？", "その教育は？", "酸素欠乏危険作業"],
+  ])(
+    "主語を省いた短い法令aspectを直前topicへ安全に結合する: %s → %s",
+    (initial, message, workType) => {
+      const result = resolveLegalConversationQuery({
+        message,
+        history: [{ role: "user", content: initial }],
+      });
+
+      expect(result.usedHistory).toBe(true);
+      expect(result.context.workType).toBe(workType);
+      expect(result.query).toContain(workType);
+    },
+  );
+
+  it("役割の確認質問後に来た別topicの質問を条件回答として吸収しない", () => {
+    const result = resolveLegalConversationQuery({
+      message: "有機溶剤の換気は必要？",
+      history: [{ role: "user", content: "作業指揮者は必要？" }],
+      context: { role: "作業指揮者" },
+    });
+
+    expect(result.usedHistory).toBe(false);
+    expect(result.context.workType).toBe("有機溶剤業務");
+    expect(result.context.role).toBeUndefined();
+    expect(result.query).not.toContain("作業指揮者");
+  });
+
+  it.each([
+    ["熱中症の報告義務は？", "誰に？", /熱中症.*報告/],
+    [
+      "休業4日の労災事故はいつまでに報告しますか？",
+      "いつまで？",
+      /労災.*報告.*休業4日/,
+    ],
+    [
+      "フォークリフトの技能講習は必要？",
+      "いつまで有効？",
+      /フォークリフト.*技能講習/,
+    ],
+    [
+      "フォークリフトの技能講習は必要？",
+      "誰が受ける？",
+      /フォークリフト.*技能講習/,
+    ],
+    [
+      "酸欠則12条1項3号と4号は2種でも要る？",
+      "いつまでに受ける？",
+      /酸素欠乏.*特別教育/,
+    ],
+    [
+      "酸欠則12条1項3号と4号は2種でも要る？",
+      "誰が受ける？",
+      /酸素欠乏.*特別教育/,
+    ],
+  ])(
+    "代名詞follow-upへ直前の安全な法令intentだけを補う: %s → %s",
+    (initial, message, expectedIntent) => {
+      const result = resolveLegalConversationQuery({
+        message,
+        history: [{ role: "user", content: initial }],
+        context: extractLegalConversationContext(initial),
+      });
+
+      expect(result.usedHistory).toBe(true);
+      expect(result.query).toMatch(expectedIntent);
+    },
+  );
+
+  it("酸欠則12条を特別教育の安全な資格区分として保持する", () => {
+    expect(
+      extractLegalConversationContext("酸欠則12条1項3号と4号は2種でも要る？"),
+    ).toMatchObject({
+      workType: "酸素欠乏危険作業",
+      qualification: "特別教育",
+    });
   });
 
   it("固定済み曖昧質問の全quick replyで同じ確認を繰り返さない", () => {
@@ -101,6 +250,41 @@ describe("法令対話のmemory-only文脈", () => {
     },
   );
 
+  it.each([
+    [
+      "作業指揮者は必要？",
+      "フォークリフトを使う作業です",
+      "作業指揮者",
+      "フォークリフト",
+    ],
+    ["監視人は必要？", "酸欠作業です", "監視人", "酸素欠乏"],
+    ["作業主任者は必要？", "有機溶剤作業です", "作業主任者", "有機溶剤"],
+    [
+      "技能講習は必要？",
+      "フォークリフトを運転します",
+      "技能講習",
+      "フォークリフト",
+    ],
+  ])(
+    "自由入力で尋ねた作業条件を直前の役割・講習質問へ結合する: %s → %s",
+    (initial, message, expectedRoleOrQualification, expectedTopic) => {
+      const initialContext = extractLegalConversationContext(initial);
+      const result = resolveLegalConversationQuery({
+        message,
+        history: [{ role: "user", content: initial }],
+        context: initialContext,
+      });
+
+      expect(result.usedHistory).toBe(true);
+      expect(result.query).toContain(expectedRoleOrQualification);
+      expect(result.query).toContain(expectedTopic);
+      expect(result.context.workType).toContain(expectedTopic);
+      expect(result.context.role ?? result.context.qualification).toBe(
+        expectedRoleOrQualification,
+      );
+    },
+  );
+
   it("説明を添えた足場選択でも直前の手すり意図を保持する", () => {
     const result = resolveLegalConversationQuery({
       message: "足場の作業床です",
@@ -143,18 +327,15 @@ describe("法令対話のmemory-only文脈", () => {
   it.each([
     ["電気作業の資格は？", "強風の後に再開します"],
     ["フォークリフトの資格は？", "体調悪化時の報告体制についてです"],
-  ])(
-    "別トピックの固有表現は誤って継続しない: %s → %s",
-    (initial, message) => {
-      const result = resolveLegalConversationQuery({
-        message,
-        history: [{ role: "user", content: initial }],
-      });
+  ])("別トピックの固有表現は誤って継続しない: %s → %s", (initial, message) => {
+    const result = resolveLegalConversationQuery({
+      message,
+      history: [{ role: "user", content: initial }],
+    });
 
-      expect(result.usedHistory).toBe(false);
-      expect(result.query).toBe(message.replace("？", "?"));
-    },
-  );
+    expect(result.usedHistory).toBe(false);
+    expect(result.query).toBe(message.replace("？", "?"));
+  });
 
   it("前のフォークリフト質問へ荷重だけの追質問を安全に補う", () => {
     const result = resolveLegalConversationQuery({
@@ -190,13 +371,16 @@ describe("法令対話のmemory-only文脈", () => {
     ["低圧の電気作業の資格は？", "低圧"],
     ["高圧の充電部に近づく作業です", "高圧"],
     ["特高の活線作業です", "特別高圧"],
-  ])("電気作業と電圧区分だけを安全な文脈へ保持する: %s", (input, voltageClass) => {
-    expect(extractLegalConversationContext(input)).toMatchObject({
-      workType: "電気作業",
-      equipment: "電気設備",
-      voltageClass,
-    });
-  });
+  ])(
+    "電気作業と電圧区分だけを安全な文脈へ保持する: %s",
+    (input, voltageClass) => {
+      expect(extractLegalConversationContext(input)).toMatchObject({
+        workType: "電気作業",
+        equipment: "電気設備",
+        voltageClass,
+      });
+    },
+  );
 
   it("圧気作業の高圧室内作業を電気の高圧へ誤分類しない", () => {
     const context = extractLegalConversationContext(
@@ -236,6 +420,94 @@ describe("法令対話のmemory-only文脈", () => {
     ]);
     expect(clarification?.options.join(" ")).not.toMatch(/酸欠|有機溶剤|石綿/);
   });
+
+  it("安全管理者から作業主任者へ明示した話題変更では旧業種文脈を破棄する", () => {
+    const result = resolveLegalConversationQuery({
+      message: "作業主任者は必要？",
+      history: [
+        { role: "user", content: "安全管理者は必要？" },
+        { role: "assistant", content: "事業場の主な業種はどれですか？" },
+        { role: "user", content: "建設業" },
+        {
+          role: "assistant",
+          content: "建設業の安全管理者について回答します。",
+        },
+      ],
+      context: {
+        workType: "労働安全衛生法 安全管理者の選任義務",
+      },
+    });
+
+    expect(result.usedHistory).toBe(false);
+    expect(result.query).toBe("作業主任者は必要?");
+    expect(result.context).toMatchObject({
+      qualification: "作業主任者",
+      role: "作業主任者",
+    });
+    expect(result.context.workType).toBeUndefined();
+    expect(buildLegalClarification(result.query)).toEqual({
+      question:
+        "作業主任者の要否を確認するため、実際の作業名や扱う物質・設備を教えてください。",
+      options: [],
+    });
+  });
+
+  it.each([
+    ["安全管理者は必要？", "監視人は必要？", "安全管理者"],
+    ["安全管理者は必要？", "作業指揮者は必要？", "安全管理者"],
+    ["熱中症の報告義務は？", "作業主任者は必要？", "暑熱作業"],
+    ["足場の手すりは何センチ？", "監視人は必要？", "足場作業"],
+  ])(
+    "適合しない役割・講習の明示質問へ旧topicを混ぜない: %s → %s",
+    (initial, message, staleTopic) => {
+      const result = resolveLegalConversationQuery({
+        message,
+        history: [{ role: "user", content: initial }],
+        context: extractLegalConversationContext(initial),
+      });
+
+      expect(result.usedHistory).toBe(false);
+      expect(result.query).toBe(message.replace("？", "?"));
+      expect(result.query).not.toContain(staleTopic);
+      expect(result.context.workType).toBeUndefined();
+      expect(buildLegalClarification(result.query)?.question).toMatch(
+        /要否を確認するため|必要な講習を確認するため/,
+      );
+    },
+  );
+
+  it("安全管理者の後の技能講習は資格条件のfollow-upとして文脈を維持する", () => {
+    const result = resolveLegalConversationQuery({
+      message: "技能講習は必要？",
+      history: [{ role: "user", content: "安全管理者は必要？" }],
+      context: extractLegalConversationContext("安全管理者は必要？"),
+    });
+
+    expect(result.usedHistory).toBe(true);
+    expect(result.query).toContain("安全管理者");
+    expect(result.query).toContain("技能講習");
+    expect(result.context.workType).toBe("労働安全衛生法 安全管理者の選任義務");
+  });
+
+  it.each([
+    ["酸欠作業の監視人は必要？", "監視人は必要？", "酸素欠乏"],
+    ["電気作業の資格は？", "作業指揮者は必要？", "電気作業"],
+    ["フォークリフトの資格は？", "作業指揮者は必要？", "フォークリフト"],
+    ["フォークリフトの資格は？", "技能講習は必要？", "フォークリフト"],
+  ])(
+    "適合する役割・講習の短いfollow-upは直前topicを維持する: %s → %s",
+    (initial, message, expectedTopic) => {
+      const result = resolveLegalConversationQuery({
+        message,
+        history: [{ role: "user", content: initial }],
+        context: extractLegalConversationContext(initial),
+      });
+
+      expect(result.usedHistory).toBe(true);
+      expect(result.query).toContain(expectedTopic);
+      expect(result.context.workType).toBeDefined();
+    },
+  );
 
   it.each([
     "どの通達？",
@@ -370,7 +642,16 @@ describe("法令対話のmemory-only文脈", () => {
     },
   );
 
-  it.each(["根拠は？", "それの根拠は？", "条件は？", "詳しく", "対象は？", "なぜ？", "いつ？", "例外は？"])(
+  it.each([
+    "根拠は？",
+    "それの根拠は？",
+    "条件は？",
+    "詳しく",
+    "対象は？",
+    "なぜ？",
+    "いつ？",
+    "例外は？",
+  ])(
     "典型的な省略follow-upを直前の安全な電気作業文脈へ結合する: %s",
     (message) => {
       const result = resolveLegalConversationQuery({
@@ -420,12 +701,15 @@ describe("法令対話のmemory-only文脈", () => {
     ["平成30年の規定", "2018-01-01", "year"],
     ["昭和47年9月の規定", "1972-09-01", "month"],
     ["令和元年5月1日の規定", "2019-05-01", "day"],
-  ])("西暦・和暦の日・月・年を安全な文脈へ粒度付きで保持する: %s", (input, expected, precision) => {
-    expect(extractLegalConversationContext(input)).toMatchObject({
-      targetDate: expected,
-      targetDatePrecision: precision,
-    });
-  });
+  ])(
+    "西暦・和暦の日・月・年を安全な文脈へ粒度付きで保持する: %s",
+    (input, expected, precision) => {
+      expect(extractLegalConversationContext(input)).toMatchObject({
+        targetDate: expected,
+        targetDatePrecision: precision,
+      });
+    },
+  );
 
   it("確認回答でも初回質問の年だけの対象時点を失わない", () => {
     const result = resolveLegalConversationQuery({
@@ -450,7 +734,8 @@ describe("法令対話のmemory-only文脈", () => {
       history: [
         {
           role: "user",
-          content: "平成30年にフルハーネス型を使う作業には特別教育が必要でしたか?",
+          content:
+            "平成30年にフルハーネス型を使う作業には特別教育が必要でしたか?",
         },
         { role: "assistant", content: "作業床を設けられますか?" },
       ],
@@ -466,20 +751,39 @@ describe("法令対話のmemory-only文脈", () => {
   });
 
   it.each([
-    ["フルハーネスの教育は？", "作業床を設けにくい高さ7メートルの作業です", "墜落制止用器具"],
-    ["シンナー作業の健診は？", "屋内で第2種有機溶剤を使います", "有機溶剤健康診断"],
-    ["薬品の危険性評価は必要？", "SDS対象物を新しく使います", "化学物質リスクアセスメント"],
+    [
+      "フルハーネスの教育は？",
+      "作業床を設けにくい高さ7メートルの作業です",
+      "墜落制止用器具",
+    ],
+    [
+      "シンナー作業の健診は？",
+      "屋内で第2種有機溶剤を使います",
+      "有機溶剤健康診断",
+    ],
+    [
+      "薬品の危険性評価は必要？",
+      "SDS対象物を新しく使います",
+      "化学物質リスクアセスメント",
+    ],
     ["クレーンの点検を知りたい", "月例の自主検査です", "クレーン作業"],
-    ["安全管理者は必要？", "建設業で常時50人です", "労働安全衛生法 安全管理者の選任義務"],
-  ])("初回の安全な作業意図を条件追加入力へ継承する", (first, message, marker) => {
-    const result = resolveLegalConversationQuery({
-      message,
-      history: [{ role: "user", content: first }],
-    });
-    expect(result.usedHistory).toBe(true);
-    expect(result.query).toContain(marker);
-    expect(result.query).toContain(message);
-  });
+    [
+      "安全管理者は必要？",
+      "建設業で常時50人です",
+      "労働安全衛生法 安全管理者の選任義務",
+    ],
+  ])(
+    "初回の安全な作業意図を条件追加入力へ継承する",
+    (first, message, marker) => {
+      const result = resolveLegalConversationQuery({
+        message,
+        history: [{ role: "user", content: first }],
+      });
+      expect(result.usedHistory).toBe(true);
+      expect(result.query).toContain(marker);
+      expect(result.query).toContain(message);
+    },
+  );
 
   it("フルハーネスの教育意図を条件追答後も特別教育として保持する", () => {
     const result = resolveLegalConversationQuery({
@@ -571,6 +875,62 @@ describe("法令対話のmemory-only文脈", () => {
   });
 });
 
+describe("教育・資格の短い主語follow-up", () => {
+  it("酸欠特別教育の『誰が教える』を直前の教育文脈へ結合する", () => {
+    const result = resolveLegalConversationQuery({
+      message: "誰が教えるの？",
+      history: [{ role: "user", content: "酸欠作業の特別教育は？" }],
+      context: {
+        workType: "酸素欠乏危険作業",
+        equipment: "酸欠危険場所",
+        qualification: "特別教育",
+      },
+    });
+
+    expect(result.usedHistory).toBe(true);
+    expect(result.context).toMatchObject({
+      workType: "酸素欠乏危険作業",
+      qualification: "特別教育",
+    });
+    expect(result.query).toMatch(/酸素欠乏危険作業.*特別教育.*誰が教える/);
+  });
+
+  it("酸欠特別教育の『講師は誰』も直前の教育文脈へ結合する", () => {
+    const result = resolveLegalConversationQuery({
+      message: "講師は誰？",
+      history: [{ role: "user", content: "酸欠作業の特別教育は？" }],
+      context: {
+        workType: "酸素欠乏危険作業",
+        equipment: "酸欠危険場所",
+        qualification: "特別教育",
+      },
+    });
+
+    expect(result.usedHistory).toBe(true);
+    expect(result.context).toMatchObject({
+      workType: "酸素欠乏危険作業",
+      qualification: "特別教育",
+    });
+    expect(result.query).toMatch(/酸素欠乏危険作業.*特別教育.*講師は誰/);
+  });
+
+  it("フォークリフト資格の裸の『誰が』でも資格文脈を保持する", () => {
+    const result = resolveLegalConversationQuery({
+      message: "誰が？",
+      history: [{ role: "user", content: "フォークリフトの運転資格は？" }],
+      context: {
+        workType: "フォークリフト運転",
+        equipment: "フォークリフト",
+        qualification: "資格",
+      },
+    });
+
+    expect(result.usedHistory).toBe(true);
+    expect(result.context.qualification).toBe("資格");
+    expect(result.query).toMatch(/フォークリフト.*資格.*誰が/);
+  });
+});
+
 describe("曖昧質問の確認", () => {
   it("電気作業は目的を示す一問とcompactな3選択肢にする", () => {
     expect(buildLegalClarification("電気作業の資格は？")).toEqual({
@@ -620,12 +980,10 @@ describe("曖昧質問の確認", () => {
       question: "作業時の足元の高さはどれですか？",
       options: ["2m未満", "2m以上", "分からない"],
     });
-    expect(buildLegalClarification("脚立で作業していい高さは？")?.question).not.toMatch(
-      /(?:使う|どの)設備/,
-    );
     expect(
-      buildLegalClarification("脚立作業 脚立 高さ 脚立"),
-    ).toEqual({
+      buildLegalClarification("脚立で作業していい高さは？")?.question,
+    ).not.toMatch(/(?:使う|どの)設備/);
+    expect(buildLegalClarification("脚立作業 脚立 高さ 脚立")).toEqual({
       question: "作業時の足元の高さはどれですか？",
       options: ["2m未満", "2m以上", "分からない"],
     });
@@ -697,9 +1055,12 @@ describe("曖昧質問の確認", () => {
     "特定化学物質の健康診断です",
     "粉じん作業場の作業環境測定です",
     "石綿作業前の事前調査です",
-  ])("必要な対象・数値・文脈が揃っていれば同じスロットを再確認しない: %s", (query) => {
-    expect(buildLegalClarification(query)).toBeNull();
-  });
+  ])(
+    "必要な対象・数値・文脈が揃っていれば同じスロットを再確認しない: %s",
+    (query) => {
+      expect(buildLegalClarification(query)).toBeNull();
+    },
+  );
 
   it.each([
     ["クレーンを運転できますか？", ["クレーン", "移動式クレーン", "デリック"]],

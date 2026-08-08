@@ -35,16 +35,16 @@ export type LegalConfirmedChoice =
   (typeof SAFE_LEGAL_CONFIRMED_CHOICES)[number];
 
 type LegalConfirmedChoiceSlot =
-  | "electricalWork"
-  | "solventClass"
-  | "workPattern"
-  | "location"
-  | "workMethod";
+  "electricalWork" | "solventClass" | "workPattern" | "location" | "workMethod";
 
 function confirmedChoiceSlot(
   choice: LegalConfirmedChoice,
 ): LegalConfirmedChoiceSlot {
-  if (ELECTRICAL_WORK_CHOICES.includes(choice as (typeof ELECTRICAL_WORK_CHOICES)[number])) {
+  if (
+    ELECTRICAL_WORK_CHOICES.includes(
+      choice as (typeof ELECTRICAL_WORK_CHOICES)[number],
+    )
+  ) {
     return "electricalWork";
   }
   if (choice === "第1種" || choice === "第2種" || choice === "第3種") {
@@ -93,6 +93,7 @@ export const DEFAULT_LEGAL_CLARIFICATION: LegalClarification = {
   question: "判断に必要な作業条件を一つ教えてください。",
   options: [],
 };
+const SAFETY_MANAGER_WORK_TYPE = "労働安全衛生法 安全管理者の選任義務";
 
 const TOPICS: Array<{
   pattern: RegExp;
@@ -104,27 +105,107 @@ const TOPICS: Array<{
     workType: "電気作業",
     equipment: "電気設備",
   },
-  { pattern: /フォー?クリフト/i, workType: "フォークリフト運転", equipment: "フォークリフト" },
+  {
+    pattern: /フォー?クリフト/i,
+    workType: "フォークリフト運転",
+    equipment: "フォークリフト",
+  },
   { pattern: /玉掛(?:け)?/, workType: "玉掛け", equipment: "クレーン等" },
-  { pattern: /移動式クレーン/, workType: "移動式クレーン運転", equipment: "移動式クレーン" },
-  { pattern: /高所作業車/, workType: "高所作業車運転", equipment: "高所作業車" },
+  {
+    pattern: /移動式クレーン/,
+    workType: "移動式クレーン運転",
+    equipment: "移動式クレーン",
+  },
+  {
+    pattern: /高所作業車/,
+    workType: "高所作業車運転",
+    equipment: "高所作業車",
+  },
   { pattern: /(?:足場|あしば)/, workType: "足場作業", equipment: "足場" },
-  { pattern: /(?:開口部|作業床)/, workType: "墜落防止", equipment: "作業床・開口部" },
-  { pattern: /(?:フルハーネス|墜落制止用器具|安全帯)/, workType: "墜落制止用器具使用", equipment: "墜落制止用器具" },
+  {
+    pattern: /(?:開口部|作業床)/,
+    workType: "墜落防止",
+    equipment: "作業床・開口部",
+  },
+  {
+    pattern: /(?:フルハーネス|墜落制止用器具|安全帯)/,
+    workType: "墜落制止用器具使用",
+    equipment: "墜落制止用器具",
+  },
   { pattern: /脚立/, workType: "脚立作業", equipment: "脚立" },
   { pattern: /(?:はしご|梯子)/, workType: "はしご作業", equipment: "はしご" },
   { pattern: /作業台/, workType: "作業台作業", equipment: "作業台" },
-  { pattern: /(?:酸欠|酸素欠乏)/, workType: "酸素欠乏危険作業", equipment: "酸欠危険場所" },
-  { pattern: /(?=.*(?:有機溶剤|有機則|シンナー))(?=.*屋内)/, workType: "屋内有機溶剤業務", equipment: "有機溶剤" },
-  { pattern: /(?:(?:有機溶剤|有機則|シンナー).*(?:健診|健康診断)|(?:健診|健康診断).*(?:有機溶剤|有機則|シンナー))/, workType: "有機溶剤健康診断", equipment: "有機溶剤" },
-  { pattern: /(?:有機溶剤|有機則|シンナー)/, workType: "有機溶剤業務", equipment: "有機溶剤" },
-  { pattern: /(?:石綿|アスベスト)/, workType: "石綿作業", equipment: "石綿含有建材" },
+  {
+    pattern:
+      /(?:(?:第二種|第2種).*(?:酸欠|酸素欠乏)|(?:酸欠|酸素欠乏).*(?:第二種|第2種))/,
+    workType: "第二種酸素欠乏危険作業",
+    equipment: "酸欠危険場所",
+  },
+  {
+    pattern:
+      /(?:(?:第一種|第1種).*(?:酸欠|酸素欠乏)|(?:酸欠|酸素欠乏).*(?:第一種|第1種))/,
+    workType: "第一種酸素欠乏危険作業",
+    equipment: "酸欠危険場所",
+  },
+  {
+    pattern: /(?:酸欠|酸素欠乏)/,
+    workType: "酸素欠乏危険作業",
+    equipment: "酸欠危険場所",
+  },
+  {
+    pattern: /(?=.*(?:有機溶剤|有機則|シンナー))(?=.*屋内)/,
+    workType: "屋内有機溶剤業務",
+    equipment: "有機溶剤",
+  },
+  {
+    pattern:
+      /(?:(?:有機溶剤|有機則|シンナー).*(?:健診|健康診断)|(?:健診|健康診断).*(?:有機溶剤|有機則|シンナー))/,
+    workType: "有機溶剤健康診断",
+    equipment: "有機溶剤",
+  },
+  {
+    pattern: /(?:有機溶剤|有機則|シンナー)/,
+    workType: "有機溶剤業務",
+    equipment: "有機溶剤",
+  },
+  {
+    pattern: /(?:石綿|アスベスト)/,
+    workType: "石綿作業",
+    equipment: "石綿含有建材",
+  },
+  {
+    pattern: /(?=.*(?:熱中症|暑熱|WBGT))(?=.*(?:報告|連絡))/i,
+    workType: "暑熱作業の報告体制",
+  },
   { pattern: /(?:熱中症|暑熱|WBGT)/i, workType: "暑熱作業" },
-  { pattern: /(?:局所排気|局排)/, workType: "局所排気装置の使用", equipment: "局所排気装置" },
+  {
+    pattern:
+      /(?=.*(?:労働者死傷病報告|死傷病報告|労災事故|労働災害|休業災害))(?=.*休業(?:4|四)日)/,
+    workType: "休業4日以上の労働者死傷病報告",
+  },
+  {
+    pattern:
+      /(?=.*(?:労働者死傷病報告|死傷病報告|労災事故|労働災害|休業災害))(?=.*(?:休業(?:1|2|3|一|二|三)日|休業1日(?:から|～|〜|-)3日))/,
+    workType: "休業4日未満の労働者死傷病報告",
+  },
+  {
+    pattern:
+      /(?:労働者死傷病報告|死傷病報告|(?:労災事故|労働災害|休業災害).*(?:報告|提出|届出))/,
+    workType: "労働者死傷病報告",
+  },
+  {
+    pattern: /(?:局所排気|局排)/,
+    workType: "局所排気装置の使用",
+    equipment: "局所排気装置",
+  },
   { pattern: /(?:ボイラー|圧力容器)/, workType: "ボイラー・圧力容器取扱い" },
-  { pattern: /(?:薬品|化学物質).*(?:危険性評価|リスクアセスメント|RA)/i, workType: "化学物質リスクアセスメント", equipment: "化学物質" },
+  {
+    pattern: /(?:薬品|化学物質).*(?:危険性評価|リスクアセスメント|RA)/i,
+    workType: "化学物質リスクアセスメント",
+    equipment: "化学物質",
+  },
   { pattern: /クレーン/, workType: "クレーン作業", equipment: "クレーン" },
-  { pattern: /安全管理者/, workType: "労働安全衛生法 安全管理者の選任義務" },
+  { pattern: /安全管理者/, workType: SAFETY_MANAGER_WORK_TYPE },
 ];
 
 const QUALIFICATIONS: Array<{ pattern: RegExp; value: string }> = [
@@ -155,27 +236,70 @@ const QUALIFICATION_ONLY_FOLLOWUP =
 const UNIVERSAL_CONTEXT_FOLLOWUP =
   /^(?:(?:どの)?(?:通達|指針|ガイドライン|告示|判例)|(?:それの)?根拠|法律|条文|何条|何項|何号|公式原文|施行日|適用日|いつから|条件|例外)(?:は|について|です|ですか|なの)?$/;
 
+const REPORT_RECIPIENT_FOLLOWUP =
+  /^(?:(?:その)?(?:報告|連絡)(?:先)?(?:は|を)?(?:誰|どこ)(?:に|へ)?(?:報告|連絡)?(?:するの|する|しますか|します|すればいい|すべき|なの|ですか|か)?|(?:誰|どこ)(?:に|へ)(?:報告|連絡)(?:するの|する|しますか|します|すればいい|すべき|なの|ですか|か)?|(?:報告|連絡)先(?:は|が)?(?:誰|どこ)(?:ですか|なの|か)?)$/;
+
+const ANAPHORIC_LEGAL_SUBJECT =
+  "報告|連絡|点検|検査|記録|保存|資格|免許|技能講習|特別教育|教育|講習|講師|受講|更新|対象";
+const ANAPHORIC_LEGAL_ACTION =
+  "報告|連絡|点検|検査|記録|保存|残す|保管|受講|受け|教え|実施|行う|担当|更新|提出|届出|届け出|選任|有効|使用|対象";
+const ANAPHORIC_SUBJECT_ONLY = new RegExp(
+  `^(?:その|この)(?:${ANAPHORIC_LEGAL_SUBJECT})(?:先|期限|有効期間|結果)?(?:は|を|が)?$`,
+);
+const ANAPHORIC_WH_ONLY =
+  /^(?:(?:誰|どこ)(?:が|を|に|へ)?|いつ(?:まで)?(?:に)?)$/;
+const ANAPHORIC_WH_ACTION = new RegExp(
+  `^(?:誰|どこ|いつ(?:まで)?|何年|何日|どのくらい)(?:が|を|に|へ)?(?:${ANAPHORIC_LEGAL_ACTION})(?:する|します|した|る|行う|使える|必要)?(?:の|なの|ですか|ますか|ればいい|べき|か)?$`,
+);
+const ANAPHORIC_SUBJECT_WH = new RegExp(
+  `^(?:その|この)?(?:${ANAPHORIC_LEGAL_SUBJECT})(?:先|期限|有効期間|結果)?(?:は|を|が)?(?:誰|どこ|いつ|いつまで|何年|何日|どのくらい)(?:が|を|に|へ)?(?:${ANAPHORIC_LEGAL_ACTION})?(?:する|します|した|る|行う|使える|必要)?(?:の|なの|ですか|ますか|ればいい|べき|か)?$`,
+);
+const ANAPHORIC_SUBJECT_ACTION = new RegExp(
+  `^(?:その|この)(?:${ANAPHORIC_LEGAL_SUBJECT})(?:先|期限|有効期間|結果)?(?:は|を|が)?(?:${ANAPHORIC_LEGAL_ACTION})(?:する|します|した|る|行う|使える|必要|が必要|しなければならない)?(?:の|なの|ですか|ますか|ればいい|べき|か)?$`,
+);
+
+const OPEN_CLARIFICATION_CONDITION_ANSWER = /(?:です|ます)[。.!！]?$/;
+
 function isTopicAspectFollowup(
   value: string,
   previousContext: LegalConversationContext,
 ): boolean {
+  if (isAnaphoricLegalFollowup(value)) return true;
   const workType = previousContext.workType ?? "";
   const equipment = previousContext.equipment ?? "";
   if (
-    /暑熱/.test(workType) &&
-    /^(?:体調悪化時の)?(?:報告体制|悪化防止(?:手順)?|実施手順)(?:は|について|についてです|ですか)?$/.test(
+    /^(?:特別教育|技能講習)$/.test(previousContext.qualification ?? "") &&
+    /^(?:(?:(?:作業|業務|従事)(?:開始)?前に?|開始前に?|事前に?|先に|あらかじめ|いつ(?:まで)?(?:に)?|誰(?:が|に)?|どの人(?:が)?)(?:その)?(?:教育|講習)?(?:を)?(?:受け|受講)(?:る|ます|た|れば|る必要がある|が必要|しなければならない)?|(?:その)?(?:教育|講習|受講)(?:は|を)?(?:作業|業務|従事)(?:開始)?前(?:です|なの|か|ですか)?|(?:作業|業務|従事)(?:を)?始める前(?:です|なの|か|ですか)?)(?:の|なの|ですか|ますか|か)?$/.test(
       value,
     )
   ) {
     return true;
   }
-  if (/有機溶剤/.test(workType) && /^(?:換気|測定|記録|保存|点検)(?:は|について|ですか)?$/.test(value)) {
+  if (
+    /暑熱/.test(workType) &&
+    (/^(?:体調悪化時の)?(?:報告体制|悪化防止(?:手順)?|実施手順)(?:は|について|についてです|ですか)?$/.test(
+      value,
+    ) ||
+      REPORT_RECIPIENT_FOLLOWUP.test(value))
+  ) {
     return true;
   }
-  if (/酸素欠乏/.test(workType) && /^(?:換気|測定|記録|保存|監視|点検)(?:は|について|ですか)?$/.test(value)) {
+  if (
+    /有機溶剤/.test(workType) &&
+    /^(?:換気|測定|記録|保存|点検)(?:は|について|ですか)?$/.test(value)
+  ) {
     return true;
   }
-  if (/(?:足場|墜落防止)/.test(workType) && /^(?:点検|養生)(?:は|について|ですか)?$/.test(value)) {
+  if (
+    /酸素欠乏/.test(workType) &&
+    /^(?:換気|測定|記録|保存|監視|点検)(?:は|について|ですか)?$/.test(value)
+  ) {
+    return true;
+  }
+  if (
+    /(?:足場|墜落防止)/.test(workType) &&
+    /^(?:点検|養生)(?:は|について|ですか)?$/.test(value)
+  ) {
     return true;
   }
   if (
@@ -186,7 +310,10 @@ function isTopicAspectFollowup(
   ) {
     return true;
   }
-  if (/フォークリフト/.test(`${workType} ${equipment}`) && /^(?:運転|操作|点検)(?:は|について|ですか)?$/.test(value)) {
+  if (
+    /フォークリフト/.test(`${workType} ${equipment}`) &&
+    /^(?:運転|操作|点検)(?:は|について|ですか)?$/.test(value)
+  ) {
     return true;
   }
   if (
@@ -197,7 +324,10 @@ function isTopicAspectFollowup(
   ) {
     return true;
   }
-  return /電気/.test(workType) && /^(?:運転|操作|点検|作業指揮者|指揮者)(?:は|について|ですか)?$/.test(value);
+  return (
+    /電気/.test(workType) &&
+    /^(?:運転|操作|点検|作業指揮者|指揮者)(?:は|について|ですか)?$/.test(value)
+  );
 }
 
 function legalTopicFamily(workType: string | undefined): string | undefined {
@@ -208,6 +338,25 @@ function legalTopicFamily(workType: string | undefined): string | undefined {
   if (/墜落|足場|脚立|はしご|作業台/.test(workType)) return "fall";
   if (/クレーン|玉掛/.test(workType)) return "lifting";
   return workType;
+}
+
+function isCompatibleRoleOrTrainingFollowup(
+  current: LegalConversationContext,
+  previous: LegalConversationContext,
+): boolean {
+  if (current.workType || current.equipment) return true;
+  const priorTopic = `${previous.workType ?? ""} ${previous.equipment ?? ""}`;
+
+  if (current.role === "作業主任者") {
+    return /電気|酸素欠乏|有機溶剤|石綿|足場|ボイラー|圧力容器|化学物質/.test(
+      priorTopic,
+    );
+  }
+  if (current.role === "監視人") return /酸素欠乏/.test(priorTopic);
+  if (current.role === "作業指揮者") {
+    return /電気|フォークリフト|車両系荷役運搬/.test(priorTopic);
+  }
+  return true;
 }
 
 export function normalizeLegalConversationText(value: string): string {
@@ -279,6 +428,17 @@ export function buildUnknownLoadConditionHold(value: string): string | null {
 
 const normalize = normalizeLegalConversationText;
 
+export function isAnaphoricLegalFollowup(value: string): boolean {
+  const compact = normalize(value).replace(/[\s　、。,.!?！？]/g, "");
+  return (
+    ANAPHORIC_SUBJECT_ONLY.test(compact) ||
+    ANAPHORIC_SUBJECT_ACTION.test(compact) ||
+    ANAPHORIC_WH_ONLY.test(compact) ||
+    ANAPHORIC_WH_ACTION.test(compact) ||
+    ANAPHORIC_SUBJECT_WH.test(compact)
+  );
+}
+
 function firstMatchValue(
   text: string,
   values: Array<{ pattern: RegExp; value: string }>,
@@ -346,7 +506,8 @@ export function extractLegalConversationContext(
   const height = heightMatch
     ? `${normalizeNumber(heightMatch[1]!)}${heightMatch[2]}${heightMatch[3] ?? ""}`
     : undefined;
-  const loadKind = loadMatch?.[1] ??
+  const loadKind =
+    loadMatch?.[1] ??
     (topic?.equipment === "フォークリフト" ? "最大荷重" : "つり上げ荷重");
   const load = loadMatch
     ? `${loadKind}${normalizeNumber(loadMatch[2]!)}${loadMatch[3]}${loadMatch[4] ?? ""}`
@@ -354,6 +515,10 @@ export function extractLegalConversationContext(
 
   const qualification =
     firstMatchValue(text, QUALIFICATIONS) ??
+    (/酸素欠乏危険作業/.test(topic?.workType ?? "") &&
+    /(?:酸欠則|酸素欠乏症等防止規則)?第?12条/.test(text)
+      ? "特別教育"
+      : undefined) ??
     (topic?.equipment === "墜落制止用器具" && /教育/.test(text)
       ? "特別教育"
       : undefined);
@@ -379,6 +544,14 @@ export function extractLegalConversationContext(
     confirmedChoices.push("吹付け作業");
   }
 
+  const role = firstMatchValue(text, ROLES);
+  const safeRole =
+    role === "作業者" &&
+    /労働者死傷病報告/.test(text) &&
+    !/(?:作業員|作業者|労働者(?:本人|自身|が|は|を|に))/.test(text)
+      ? undefined
+      : role;
+
   return {
     workType: topic?.workType,
     equipment: topic?.equipment,
@@ -386,7 +559,7 @@ export function extractLegalConversationContext(
     load,
     voltageClass: extractVoltageClass(text, topic?.workType === "電気作業"),
     qualification,
-    role: firstMatchValue(text, ROLES),
+    role: safeRole,
     targetDate: targetPeriod?.start,
     targetDateEnd: targetPeriod?.end,
     targetDatePrecision: targetPeriod?.precision,
@@ -419,7 +592,10 @@ export function sanitizeLegalConversationContext(
     .join(" ");
   const sanitized = extractLegalConversationContext(safeText);
   const isoDate = /^\d{4}-\d{2}-\d{2}$/;
-  if (typeof context.targetDate === "string" && isoDate.test(context.targetDate)) {
+  if (
+    typeof context.targetDate === "string" &&
+    isoDate.test(context.targetDate)
+  ) {
     sanitized.targetDate = context.targetDate;
   }
   if (
@@ -469,7 +645,9 @@ export function mergeLegalConversationContext(
     }
   }
   if (confirmedChoices.length > 0) {
-    merged.confirmedChoices = confirmedChoices.slice(-SAFE_CONFIRMED_CHOICE_LIMIT);
+    merged.confirmedChoices = confirmedChoices.slice(
+      -SAFE_CONFIRMED_CHOICE_LIMIT,
+    );
   }
   return merged;
 }
@@ -495,6 +673,13 @@ function contextValues(context: LegalConversationContext): string[] {
       : undefined,
     targetDate,
   ].filter((value): value is string => Boolean(value));
+}
+
+/** Treat only populated allowlisted values as usable conversation memory. */
+export function hasLegalConversationContext(
+  context: LegalConversationContext | undefined,
+): boolean {
+  return contextValues(sanitizeLegalConversationContext(context)).length > 0;
 }
 
 const SAFE_CLARIFICATION_INTENTS = [
@@ -524,6 +709,14 @@ const SAFE_CLARIFICATION_INTENTS = [
   "届出",
   "有機溶剤",
   "シンナー",
+  "熱中症",
+  "労働者死傷病報告",
+  "死傷病報告",
+  "労災",
+  "労働災害",
+  "休業災害",
+  "報告",
+  "提出",
   "健診",
   "健康診断",
   "屋内",
@@ -573,20 +766,40 @@ const SAFE_CLARIFICATION_INTENTS = [
   "事前調査",
 ] as const;
 
-function safeClarificationIntent(value: string): string {
+export function safeClarificationIntent(value: string): string {
   const normalized = normalize(value);
   const intent = SAFE_CLARIFICATION_INTENTS.filter((term) =>
     normalized.includes(term),
   ).join(" ");
+  const compact = normalized.replace(/[\s　、。,.!?！？]/g, "");
+  const reportRecipientIntent = REPORT_RECIPIENT_FOLLOWUP.test(compact)
+    ? "報告先"
+    : "";
+  const abstractInjuryReportDuration =
+    /(?:労働者死傷病報告|死傷病報告|労災(?:事故)?|労働災害|休業災害)/.test(
+      normalized,
+    )
+      ? normalized.match(
+          /休業(?:日数)?(?:が|は)?([1-9１-９一二三四五六七八九十]+)日/,
+        )?.[1]
+      : undefined;
+  const safeIntent = [
+    intent,
+    reportRecipientIntent,
+    abstractInjuryReportDuration ? `休業${abstractInjuryReportDuration}日` : "",
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
   if (
     /(?:石綿|アスベスト).*事前調査|事前調査.*(?:石綿|アスベスト)/.test(
       normalized,
     ) &&
     /(?:誰|資格|できる|行える)/.test(normalized)
   ) {
-    return `${intent} 調査者`.trim();
+    return `${safeIntent} 調査者`.trim();
   }
-  return intent;
+  return safeIntent;
 }
 
 function normalizeClarificationChoice(value: string): string {
@@ -665,59 +878,90 @@ export function resolveLegalConversationQuery(input: {
     );
   }
   const compact = message.replace(/[\s　、。,.!?！？]/g, "");
-  const currentHasTopic = Boolean(currentContext.workType || currentContext.equipment);
+  const currentHasTopic = Boolean(
+    currentContext.workType || currentContext.equipment,
+  );
   const hasPriorContext =
     history.length > 0 || contextValues(previousContext).length > 0;
+  const answersOpenReportRecipientClarification = Boolean(
+    currentHasTopic &&
+    !previousContext.workType &&
+    !previousContext.equipment &&
+    latestUserQuestion &&
+    REPORT_RECIPIENT_FOLLOWUP.test(
+      normalize(latestUserQuestion).replace(/[\s　、。,.!?！？]/g, ""),
+    ) &&
+    OPEN_CLARIFICATION_CONDITION_ANSWER.test(message),
+  );
+  const answersOpenRoleOrTrainingClarification = Boolean(
+    answersOpenReportRecipientClarification ||
+    (currentHasTopic &&
+      !previousContext.workType &&
+      !previousContext.equipment &&
+      (previousContext.role || previousContext.qualification) &&
+      OPEN_CLARIFICATION_CONDITION_ANSWER.test(message) &&
+      (!latestUserQuestion || priorClarification?.options.length === 0)),
+  );
   const previousTopicFamily = legalTopicFamily(previousContext.workType);
   const currentTopicFamily = legalTopicFamily(currentContext.workType);
   const changesEquipment =
     currentContext.equipment !== previousContext.equipment;
-  const changesWorkType =
-    currentContext.workType !== previousContext.workType;
+  const changesWorkType = currentContext.workType !== previousContext.workType;
   const currentIsPriorTopicAspect =
     hasPriorContext &&
     compact.length <= 32 &&
     isTopicAspectFollowup(compact, previousContext);
   const explicitlyChangesTopic = Boolean(
     currentHasTopic &&
-      !isClarificationChoice &&
-      !currentIsPriorTopicAspect &&
-      (changesEquipment ||
-        (changesWorkType && !CONDITION_FOLLOWUP.test(message))),
+    !isClarificationChoice &&
+    !currentIsPriorTopicAspect &&
+    !answersOpenRoleOrTrainingClarification &&
+    (changesEquipment ||
+      (changesWorkType && !CONDITION_FOLLOWUP.test(message))),
   );
   const topicCompatible =
     !explicitlyChangesTopic &&
     (!previousTopicFamily ||
       !currentTopicFamily ||
       previousTopicFamily === currentTopicFamily);
+  const incompatibleRoleOrTrainingFollowup =
+    hasPriorContext &&
+    !currentHasTopic &&
+    !isCompatibleRoleOrTrainingFollowup(currentContext, previousContext);
   const hasExtractedCondition = Boolean(
     currentContext.height ||
-      currentContext.load ||
-      currentContext.voltageClass ||
-      currentContext.role ||
-      currentContext.targetDate ||
-      currentContext.confirmedChoices?.length ||
-      (!currentHasTopic && currentContext.qualification),
+    currentContext.load ||
+    currentContext.voltageClass ||
+    currentContext.role ||
+    currentContext.targetDate ||
+    currentContext.confirmedChoices?.length ||
+    (!currentHasTopic && currentContext.qualification),
   );
   const conditionFollowup =
     hasPriorContext &&
     topicCompatible &&
-    (hasExtractedCondition || CONDITION_FOLLOWUP.test(message));
+    (answersOpenRoleOrTrainingClarification ||
+      hasExtractedCondition ||
+      CONDITION_FOLLOWUP.test(message));
   const universalContextFollowup =
     hasPriorContext &&
     !currentHasTopic &&
     compact.length <= 32 &&
     UNIVERSAL_CONTEXT_FOLLOWUP.test(compact);
   const topicAspectFollowup =
-    hasPriorContext &&
-    compact.length <= 32 &&
-    currentIsPriorTopicAspect;
+    hasPriorContext && compact.length <= 32 && currentIsPriorTopicAspect;
+  const preservesPriorTraining = Boolean(
+    topicAspectFollowup &&
+    /^(?:特別教育|技能講習|資格)$/.test(previousContext.qualification ?? "") &&
+    /(?:受け|受講|教育|講習|有効|更新|いつ|期限|時期|誰|どの人)/.test(compact),
+  );
   const safeAspectFollowup = universalContextFollowup || topicAspectFollowup;
   const selectsEquipment = Boolean(
     isClarificationChoice && priorClarification?.question.includes("設備"),
   );
   const shouldUseHistory =
     hasPriorContext &&
+    !incompatibleRoleOrTrainingFollowup &&
     (!currentHasTopic ||
       conditionFollowup ||
       isClarificationChoice ||
@@ -734,16 +978,18 @@ export function resolveLegalConversationQuery(input: {
     ? {
         ...mergeLegalConversationContext(previousContext, currentContext),
         workType: selectsEquipment
-          ? currentContext.workType ?? previousContext.workType
-          : previousContext.workType ?? currentContext.workType,
+          ? (currentContext.workType ?? previousContext.workType)
+          : (previousContext.workType ?? currentContext.workType),
         equipment: selectsEquipment
-          ? currentContext.equipment ?? previousContext.equipment
-          : previousContext.equipment ?? currentContext.equipment,
+          ? (currentContext.equipment ?? previousContext.equipment)
+          : (previousContext.equipment ?? currentContext.equipment),
       }
     : currentContext;
   if (topicAspectFollowup) {
     if (!currentContext.role) delete context.role;
-    if (!currentContext.qualification) delete context.qualification;
+    if (!currentContext.qualification && !preservesPriorTraining) {
+      delete context.qualification;
+    }
   }
 
   if (
@@ -764,11 +1010,7 @@ export function resolveLegalConversationQuery(input: {
 
   const queryParts = [
     ...contextValues(context),
-    topicAspectFollowup
-      ? ""
-      : shouldUseHistory
-        ? priorSafeIntent
-        : clarificationIntent,
+    shouldUseHistory ? priorSafeIntent : clarificationIntent,
     message,
   ]
     .filter(Boolean)
@@ -847,7 +1089,11 @@ export function buildLegalClarification(
       options: ["1トン未満", "1トン以上", "分からない"],
     };
   }
-  if (context.equipment === "移動式クレーン" && asksQualification && !context.load) {
+  if (
+    context.equipment === "移動式クレーン" &&
+    asksQualification &&
+    !context.load
+  ) {
     return {
       question: "移動式クレーンのつり上げ荷重はどれですか？",
       options: ["1トン未満", "1〜5トン未満", "5トン以上"],
@@ -917,7 +1163,10 @@ export function buildLegalClarification(
       options: ["2m未満", "2m以上", "分からない"],
     };
   }
-  if (/(?:脚立|はしご|梯子)/.test(text) && !/(?:天板|またが|昇降|開き止め)/.test(text)) {
+  if (
+    /(?:脚立|はしご|梯子)/.test(text) &&
+    !/(?:天板|またが|昇降|開き止め)/.test(text)
+  ) {
     const mentions = text.match(/脚立|はしご|梯子/g)?.length ?? 0;
     if (mentions <= 1) {
       return {
@@ -936,25 +1185,37 @@ export function buildLegalClarification(
       options: ["天板に立つ", "段に立つ", "昇降だけ"],
     };
   }
-  if (/安全管理者/.test(text) && !/(?:建設|製造|運送|林業|鉱業|清掃|業種)/.test(text)) {
+  if (
+    /安全管理者/.test(text) &&
+    !/(?:建設|製造|運送|林業|鉱業|清掃|業種)/.test(text)
+  ) {
     return {
       question: "事業場の主な業種はどれですか？",
       options: ["建設業", "製造業", "その他"],
     };
   }
-  if (/(?:安全衛生委員会|安全委員会|衛生委員会|委員会)/.test(text) && !/(?:安全委員会|衛生委員会).*(?:どちら|両方)/.test(text)) {
+  if (
+    /(?:安全衛生委員会|安全委員会|衛生委員会|委員会)/.test(text) &&
+    !/(?:安全委員会|衛生委員会).*(?:どちら|両方)/.test(text)
+  ) {
     return {
       question: "どの委員会の要件を確認しますか？",
       options: ["安全委員会", "衛生委員会", "両方"],
     };
   }
-  if (/(?:局所排気|局排)/.test(text) && !/(?:有機溶剤|特定化学物質|鉛|粉じん|物質名)/.test(text)) {
+  if (
+    /(?:局所排気|局排)/.test(text) &&
+    !/(?:有機溶剤|特定化学物質|鉛|粉じん|物質名)/.test(text)
+  ) {
     return {
       question: "どの物質・作業に使う局所排気装置ですか？",
       options: ["有機溶剤", "特定化学物質", "粉じん"],
     };
   }
-  if (/(?:放射線|電離放射線|線量限度)/.test(text) && !/(?:作業者|女性|妊娠|水晶体|皮膚|実効線量)/.test(text)) {
+  if (
+    /(?:放射線|電離放射線|線量限度)/.test(text) &&
+    !/(?:作業者|女性|妊娠|水晶体|皮膚|実効線量)/.test(text)
+  ) {
     return {
       question: "線量を確認したい対象はどれですか？",
       options: ["放射線業務従事者", "妊娠中", "一般区域"],
@@ -1032,8 +1293,7 @@ export function buildLegalClarification(
     )
   ) {
     return {
-      question:
-        "必要な換気設備を絞るため、実際に行うのは吹付け作業ですか？",
+      question: "必要な換気設備を絞るため、実際に行うのは吹付け作業ですか？",
       options: ["吹付け作業", "吹付け以外", "不明"],
     };
   }
@@ -1043,7 +1303,10 @@ export function buildLegalClarification(
       options: ["作業主任者", "監視人", "作業者"],
     };
   }
-  if (/(?:圧力容器|ボイラー)/.test(text) && !/(?:第一種|第二種|小型|移動式)/.test(text)) {
+  if (
+    /(?:圧力容器|ボイラー)/.test(text) &&
+    !/(?:第一種|第二種|小型|移動式)/.test(text)
+  ) {
     return {
       question: "設備の区分はどれですか？",
       options: ["第一種", "第二種", "小型"],
@@ -1100,19 +1363,28 @@ export function buildLegalClarification(
       options: ["製品名", "SDS名", "CAS番号"],
     };
   }
-  if (/(?:通達|通知|告示|ガイドライン)/.test(text) && !/(?:文書番号|発出日|文書名|令和|平成|昭和|20\d{2}年)/.test(text)) {
+  if (
+    /(?:通達|通知|告示|ガイドライン)/.test(text) &&
+    !/(?:文書番号|発出日|文書名|令和|平成|昭和|20\d{2}年)/.test(text)
+  ) {
     return {
       question: "確認したい文書の手掛かりはどれですか？",
       options: ["通達名", "発出日", "文書番号"],
     };
   }
-  if (/(?:改正|施行|適用時点|対象日|今の法律|現行)/.test(text) && !/(?:20\d{2}|令和|平成|昭和|今日|\d{4}[-/.年]\d{1,2})/.test(text)) {
+  if (
+    /(?:改正|施行|適用時点|対象日|今の法律|現行)/.test(text) &&
+    !/(?:20\d{2}|令和|平成|昭和|今日|\d{4}[-/.年]\d{1,2})/.test(text)
+  ) {
     return {
       question: "どの時点の法令を確認しますか？",
       options: ["今日", "過去の日付", "将来の日付"],
     };
   }
-  if (/(?:騒音|デシベル|dB)/i.test(text) && !/(?:作業環境測定|個人ばく露|騒音計|等価騒音)/.test(text)) {
+  if (
+    /(?:騒音|デシベル|dB)/i.test(text) &&
+    !/(?:作業環境測定|個人ばく露|騒音計|等価騒音)/.test(text)
+  ) {
     return {
       question: "どの騒音測定を確認しますか？",
       options: ["等価騒音", "個人ばく露", "作業環境測定"],
@@ -1120,16 +1392,17 @@ export function buildLegalClarification(
   }
   if (
     /粉じん/.test(text) &&
-    !/(?:鉱物|研磨|切断|溶接|特定粉じん|じん肺|作業環境測定)/.test(
-      text,
-    )
+    !/(?:鉱物|研磨|切断|溶接|特定粉じん|じん肺|作業環境測定)/.test(text)
   ) {
     return {
       question: "粉じんが出る作業はどれですか？",
       options: ["特定粉じん", "研磨", "屋外作業"],
     };
   }
-  if (/鉛/.test(text) && !/(?:製錬|溶融|粉砕|研磨|はんだ|塗装|蓄電池)/.test(text)) {
+  if (
+    /鉛/.test(text) &&
+    !/(?:製錬|溶融|粉砕|研磨|はんだ|塗装|蓄電池)/.test(text)
+  ) {
     return {
       question: "鉛を扱う作業はどれですか？",
       options: ["溶融", "塗料除去", "はんだ付け"],
@@ -1137,8 +1410,30 @@ export function buildLegalClarification(
   }
   if (/作業主任者/.test(text) && !context.workType) {
     return {
-      question: "どの作業の作業主任者を確認しますか？",
-      options: ["酸欠", "有機溶剤", "石綿"],
+      question:
+        "作業主任者の要否を確認するため、実際の作業名や扱う物質・設備を教えてください。",
+      options: [],
+    };
+  }
+  if (/(?:監視人|監視者)/.test(text) && !context.workType) {
+    return {
+      question:
+        "監視人の要否を確認するため、実際の作業名と作業場所を教えてください。",
+      options: [],
+    };
+  }
+  if (/作業指揮者/.test(text) && !context.workType) {
+    return {
+      question:
+        "作業指揮者の要否を確認するため、実際の作業名と使用する設備を教えてください。",
+      options: [],
+    };
+  }
+  if (/技能講習/.test(text) && !context.workType && !context.equipment) {
+    return {
+      question:
+        "必要な講習を確認するため、実際の作業名と使用する設備を教えてください。",
+      options: [],
     };
   }
   if (/特別教育/.test(text) && !context.workType && !context.equipment) {
@@ -1147,7 +1442,11 @@ export function buildLegalClarification(
       options: ["高所作業車", "低圧電気", "研削といし"],
     };
   }
-  if (/(?:特別教育|資格|免許)/.test(text) && !context.workType && !context.equipment) {
+  if (
+    /(?:特別教育|資格|免許)/.test(text) &&
+    !context.workType &&
+    !context.equipment
+  ) {
     return {
       question: "資格・教育を確認したい作業はどれですか？",
       options: ["運転", "玉掛け", "作業主任者"],
@@ -1155,7 +1454,9 @@ export function buildLegalClarification(
   }
   if (
     (/(?:最大荷重|つり上げ荷重|吊り上げ荷重|荷重)/.test(text) ||
-      /(?:\d+(?:\.\d+)?|一|二|三|五)\s*(?:トン|t).*(?:講習|資格|教育)/i.test(text)) &&
+      /(?:\d+(?:\.\d+)?|一|二|三|五)\s*(?:トン|t).*(?:講習|資格|教育)/i.test(
+        text,
+      )) &&
     !context.equipment
   ) {
     return {
@@ -1184,11 +1485,14 @@ export function nextLegalClarification(
 ): LegalClarification | null {
   const candidate = buildLegalClarification(query);
   if (!candidate || !answered) return candidate;
-  const sameQuestion = normalize(candidate.question) === normalize(answered.question);
+  const sameQuestion =
+    normalize(candidate.question) === normalize(answered.question);
   const candidateOptions = candidate.options.map(normalizeClarificationChoice);
   const answeredOptions = answered.options.map(normalizeClarificationChoice);
   const sameOptions =
     candidateOptions.length === answeredOptions.length &&
-    candidateOptions.every((option, index) => option === answeredOptions[index]);
+    candidateOptions.every(
+      (option, index) => option === answeredOptions[index],
+    );
   return sameQuestion && sameOptions ? null : candidate;
 }

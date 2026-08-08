@@ -13,10 +13,81 @@
  * writes application data, or calls an external generative model. Pass
  * `--get-only` when rechecking read-only production state after a harness change.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { spawn } from "node:child_process";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
+export function assertProductionAliasDeployment({
+  expectedDeploymentId,
+  productionHostname,
+  linkedProject,
+  deploymentMetadata,
+  aliasMetadata,
+}) {
+  if (!/^dpl_[A-Za-z0-9]+$/u.test(expectedDeploymentId ?? "")) {
+    throw new Error("Expected deployment ID is invalid");
+  }
+  if (
+    typeof productionHostname !== "string" ||
+    productionHostname.length === 0
+  ) {
+    throw new Error("Production hostname is invalid");
+  }
+
+  function ownerId(metadata) {
+    return metadata?.ownerId ?? metadata?.team?.id ?? null;
+  }
+
+  function assertLinkedReadyProduction(metadata, source) {
+    if (
+      metadata?.id !== expectedDeploymentId ||
+      metadata?.projectId !== linkedProject.projectId ||
+      ownerId(metadata) !== linkedProject.orgId ||
+      metadata?.name !== linkedProject.projectName ||
+      metadata?.target !== "production" ||
+      metadata?.readyState !== "READY" ||
+      typeof metadata?.url !== "string" ||
+      !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.vercel\.app$/iu.test(
+        metadata.url,
+      )
+    ) {
+      throw new Error(
+        `${source} metadata does not prove the expected READY production deployment in the linked project`,
+      );
+    }
+  }
+
+  assertLinkedReadyProduction(deploymentMetadata, "deployment ID");
+  assertLinkedReadyProduction(aliasMetadata, "production alias");
+  if (aliasMetadata.url !== deploymentMetadata.url) {
+    throw new Error(
+      "Production alias and deployment ID resolved to different immutable URLs",
+    );
+  }
+  if (
+    !Array.isArray(aliasMetadata.alias) ||
+    !aliasMetadata.alias.includes(productionHostname)
+  ) {
+    throw new Error(
+      `Production alias metadata does not include ${productionHostname}`,
+    );
+  }
+
+  return {
+    deploymentId: expectedDeploymentId,
+    productionHostname,
+    projectId: linkedProject.projectId,
+    orgId: linkedProject.orgId,
+    target: deploymentMetadata.target,
+    readyState: deploymentMetadata.readyState,
+    immutableUrl: deploymentMetadata.url,
+    exactAliasMatch: true,
+  };
+}
+
+async function main() {
 const argv = process.argv.slice(2);
 const getOnly = argv.includes("--get-only");
 
@@ -41,6 +112,139 @@ const expectedDeploymentId = option("deployment-id", "");
 if (!/^dpl_[A-Za-z0-9]+$/.test(expectedDeploymentId)) {
   throw new Error("--deployment-id must be an exact Vercel deployment ID");
 }
+
+const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
+const repositoryRoot = path.resolve(scriptDirectory, "../../..");
+const linkedProject = JSON.parse(
+  readFileSync(path.join(repositoryRoot, ".vercel", "project.json"), "utf8"),
+);
+if (
+  linkedProject.projectId !== "prj_b2brgXdwQpnpmEN6gc3vtNFm6m7a" ||
+  linkedProject.orgId !== "team_fmzwEegB8SRsADNmwXkBUN34" ||
+  linkedProject.projectName !== "safe-ai-site" ||
+  linkedProject.settings?.rootDirectory !== "web"
+) {
+  throw new Error(".vercel/project.json is not the linked Safe AI web project");
+}
+
+function vercelCommand() {
+  if (process.platform !== "win32") return { command: "vercel", prefix: [] };
+  return {
+    command: process.execPath,
+    prefix: [
+      path.join(
+        process.env.APPDATA ?? "",
+        "npm",
+        "node_modules",
+        "vercel",
+        "dist",
+        "vc.js",
+      ),
+    ],
+  };
+}
+
+function sanitizedVercelEnvironment() {
+  const environment = { ...process.env };
+  delete environment.ANSWER_FIRST_PREVIEW_BYPASS_SECRET;
+  delete environment.VERCEL_AUTOMATION_BYPASS_SECRET;
+  delete environment.VERCEL_DEBUG;
+  delete environment.DEBUG;
+  return environment;
+}
+
+function redactVercelSecrets(value) {
+  let redacted = value;
+  for (const secret of [
+    process.env.VERCEL_TOKEN,
+    process.env.ANSWER_FIRST_PREVIEW_BYPASS_SECRET,
+    process.env.VERCEL_AUTOMATION_BYPASS_SECRET,
+  ]) {
+    if (secret) redacted = redacted.replaceAll(secret, "[REDACTED]");
+  }
+  return redacted;
+}
+
+function runVercelApi(endpoint) {
+  return new Promise((resolve, reject) => {
+    const executable = vercelCommand();
+    const child = spawn(
+      executable.command,
+      [...executable.prefix, "api", endpoint],
+      {
+        cwd: repositoryRoot,
+        env: sanitizedVercelEnvironment(),
+        windowsHide: true,
+        stdio: ["ignore", "pipe", "pipe"],
+      },
+    );
+    let stdout = "";
+    let stderr = "";
+    let outputExceeded = false;
+    child.stdout.setEncoding("utf8");
+    child.stderr.setEncoding("utf8");
+    child.stdout.on("data", (chunk) => {
+      if (stdout.length + chunk.length > 4 * 1024 * 1024) {
+        outputExceeded = true;
+        child.kill();
+        return;
+      }
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      if (stderr.length < 64 * 1024) stderr += chunk;
+    });
+    child.once("error", (error) => {
+      reject(
+        new Error(
+          `Unable to run authenticated Vercel metadata lookup: ${redactVercelSecrets(error.message)}`,
+        ),
+      );
+    });
+    child.once("close", (code) => {
+      if (outputExceeded) {
+        reject(new Error("Vercel metadata output exceeded the memory limit"));
+        return;
+      }
+      if (code !== 0) {
+        reject(
+          new Error(
+            `Vercel metadata lookup failed (${code ?? 1}): ${redactVercelSecrets(stderr).slice(-800)}`,
+          ),
+        );
+        return;
+      }
+      resolve(stdout);
+    });
+  });
+}
+
+async function readDeploymentMetadata(identifier) {
+  const endpoint = `/v13/deployments/${encodeURIComponent(
+    identifier,
+  )}?teamId=${encodeURIComponent(linkedProject.orgId)}`;
+  const output = await runVercelApi(endpoint);
+  try {
+    return JSON.parse(output);
+  } catch {
+    throw new Error("Vercel returned invalid deployment metadata");
+  }
+}
+
+// Both lookups are authenticated and read-only. Resolving the mutable
+// production hostname independently prevents a syntactically valid stale ID
+// from being accepted as the deployment currently serving production.
+const [deploymentMetadata, productionAliasMetadata] = await Promise.all([
+  readDeploymentMetadata(expectedDeploymentId),
+  readDeploymentMetadata(baseUrl.hostname),
+]);
+const deploymentVerification = assertProductionAliasDeployment({
+  expectedDeploymentId,
+  productionHostname: baseUrl.hostname,
+  linkedProject,
+  deploymentMetadata,
+  aliasMetadata: productionAliasMetadata,
+});
 
 const outputPath = path.resolve(
   option(
@@ -72,6 +276,12 @@ function record(id, passed, evidence, severity = "release") {
   checks.push(item);
   if (!item.passed) failures.push(item);
 }
+
+record(
+  "deployment:production-alias-exact-match",
+  deploymentVerification.exactAliasMatch,
+  deploymentVerification,
+);
 
 function headersFrom(response) {
   return Object.fromEntries(
@@ -377,7 +587,10 @@ record(
   },
   "documented-residual",
 );
-const flagshipPaths = [
+// Keep this list aligned with COMPACT_NAV_CATEGORIES. /resources remains a
+// public, indexable feature reached through /features; it is intentionally not
+// part of the compact one-click navigation contract.
+const compactNavigationPaths = [
   "/risk",
   "/heat-illness-prevention",
   "/ky/paper",
@@ -394,13 +607,25 @@ const flagshipPaths = [
   "/search",
   "/features",
 ];
-for (const href of flagshipPaths) {
+record(
+  "home:compact-navigation-contract",
+  compactNavigationPaths.length === 15 &&
+    new Set(compactNavigationPaths).size === 15 &&
+    !compactNavigationPaths.includes("/resources"),
+  {
+    expectedCount: 15,
+    actualCount: compactNavigationPaths.length,
+    uniqueCount: new Set(compactNavigationPaths).size,
+    resourcesIncluded: compactNavigationPaths.includes("/resources"),
+  },
+);
+for (const href of compactNavigationPaths) {
   record(`home:one-click:${href}`, home.body.includes(`href="${href}`), {
     href,
   });
 }
 const resourceDiscoveryResults = await Promise.all(
-  ["/features", "/search?q=%E5%A2%9C%E8%90%BD"].map((route) => request(route)),
+  ["/features"].map((route) => request(route)),
 );
 record(
   "resources:discoverable-from-site-navigation",
@@ -485,6 +710,11 @@ record(
     sitemapResult.body,
   ),
   { home: baseUrl.origin },
+);
+record(
+  "sitemap:resources-present",
+  sitemapResult.body.includes("/resources</loc>"),
+  { path: "/resources" },
 );
 for (const heatPath of heatPaths) {
   record(
@@ -872,9 +1102,9 @@ for (const target of browserTargets) {
   if (target.route === "/") {
     record(
       `${prefix}:primary-navigation`,
-      flagshipPaths.every((href) => snapshot.allHrefs.includes(href)),
+      compactNavigationPaths.every((href) => snapshot.allHrefs.includes(href)),
       {
-        missing: flagshipPaths.filter(
+        missing: compactNavigationPaths.filter(
           (href) => !snapshot.allHrefs.includes(href),
         ),
       },
@@ -1015,12 +1245,14 @@ record(
   noJsResponse?.status() === 200 &&
     noJsSnapshot.h1Count === 1 &&
     noJsSnapshot.mainCount === 1 &&
-    flagshipPaths.every((href) => noJsSnapshot.flagshipLinks.includes(href)),
+    compactNavigationPaths.every((href) =>
+      noJsSnapshot.flagshipLinks.includes(href),
+    ),
   {
     status: noJsResponse?.status() ?? null,
     h1Count: noJsSnapshot.h1Count,
     mainCount: noJsSnapshot.mainCount,
-    missing: flagshipPaths.filter(
+    missing: compactNavigationPaths.filter(
       (href) => !noJsSnapshot.flagshipLinks.includes(href),
     ),
   },
@@ -1084,6 +1316,7 @@ const report = {
   generatedAt: new Date().toISOString(),
   baseUrl: baseUrl.origin,
   expectedDeploymentId,
+  deploymentVerification,
   mode: getOnly
     ? "production-smoke-get-only"
     : "production-smoke-fixed-non-pii-fail-closed-probes",
@@ -1121,3 +1354,11 @@ console.log(
 );
 
 if (!report.passed) process.exitCode = 1;
+}
+
+if (
+  process.argv[1] &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
+  await main();
+}

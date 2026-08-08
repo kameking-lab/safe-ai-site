@@ -248,13 +248,16 @@ test.describe("チャットボット", () => {
       const page = await context.newPage();
       try {
         await page.goto(`${baseURL}/chatbot`);
-        const main = page.locator("main").last();
+        const main = page.locator("main");
+        const chatbotClient = main.locator("[data-chatbot-client]");
         const form = main.locator("form[action='/api/chatbot/no-script']");
         const textarea = form.locator("textarea[name='message']");
         const submit = form.getByRole("button", { name: "送信" });
         const bottomNav = page.locator("[data-mobile-nav='bottom']");
 
-        await expect(main.locator("[data-chatbot-client]")).toBeHidden();
+        await expect(main).toHaveCount(1);
+        await expect(chatbotClient).toHaveCount(1);
+        await expect(chatbotClient).toBeHidden();
         await expect(main.locator("textarea:visible")).toHaveCount(1);
         await expect(textarea).toBeVisible();
         await expect(form).toHaveAttribute("method", "post");
@@ -309,6 +312,100 @@ test.describe("チャットボット", () => {
       } finally {
         await context.close();
       }
+    }
+  });
+
+  test("JavaScript無効でも安全管理者の選択済み業種を多段質問へ引き継ぐ", async ({
+    browser,
+    baseURL,
+  }) => {
+    const context = await browser.newContext({
+      javaScriptEnabled: false,
+      viewport: { width: 390, height: 720 },
+      extraHTTPHeaders: { "x-forwarded-for": "198.51.100.119" },
+    });
+    const page = await context.newPage();
+    try {
+      await page.goto(`${baseURL}/chatbot`);
+      const form = page.locator("form[action='/api/chatbot/no-script']");
+      await form.locator("textarea[name='message']").fill("安全管理者は必要？");
+      await Promise.all([
+        page.waitForURL(/\/api\/chatbot\/no-script$/),
+        form.getByRole("button", { name: "送信" }).click(),
+      ]);
+
+      await expect(page.getByText("事業場の主な業種はどれですか？")).toBeVisible();
+      const construction = page.getByRole("button", {
+        name: "建設業",
+        exact: true,
+      });
+      const responsePromise = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === "/api/chatbot/no-script" &&
+          response.request().method() === "POST",
+      );
+      const [constructionResponse] = await Promise.all([
+        responsePromise,
+        construction.click(),
+      ]);
+
+      await expect(page.getByRole("heading", { name: "回答" })).toBeVisible();
+      await expect(page.locator("main")).toContainText("安全管理者");
+      await expect(page.locator("details")).toContainText(
+        "労働安全衛生法 第11条",
+      );
+      expect(constructionResponse.headers()["x-ai-used"]).toBe("false");
+
+      const continuationForm = page
+        .locator("form[action='/api/chatbot/no-script']")
+        .filter({ has: page.locator("textarea[name='message']") });
+      const selectedState = JSON.parse(
+        await continuationForm.locator("input[name='state']").inputValue(),
+      ) as { industry?: string };
+      expect(selectedState.industry).toBe("建設業");
+
+      await continuationForm.locator("textarea[name='message']").fill("条件");
+      const conditionsResponsePromise = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === "/api/chatbot/no-script" &&
+          response.request().method() === "POST",
+      );
+      const [conditionsResponse] = await Promise.all([
+        conditionsResponsePromise,
+        continuationForm.getByRole("button", { name: "送信" }).click(),
+      ]);
+
+      await expect(page.locator("main")).toContainText("安全管理者");
+      await expect(page.locator("details")).toContainText(
+        "労働安全衛生法 第11条",
+      );
+      await expect(
+        page.getByText("事業場の主な業種はどれですか？"),
+      ).toHaveCount(0);
+      expect(conditionsResponse.headers()["x-ai-used"]).toBe("false");
+
+      await continuationForm
+        .locator("textarea[name='message']")
+        .fill("建設業");
+      const repeatedIndustryResponsePromise = page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === "/api/chatbot/no-script" &&
+          response.request().method() === "POST",
+      );
+      await Promise.all([
+        repeatedIndustryResponsePromise,
+        continuationForm.getByRole("button", { name: "送信" }).click(),
+      ]);
+      await expect(page.locator("main")).toContainText("安全管理者");
+      await expect(page.locator("details")).toContainText(
+        "労働安全衛生法 第11条",
+      );
+      await expect(
+        page.getByText("事業場の主な業種はどれですか？"),
+      ).toHaveCount(0);
+      expect(new URL(page.url()).search).toBe("");
+    } finally {
+      await context.close();
     }
   });
 });
