@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-12T21:43:42.907Z",
+  "updatedAt": "2026-08-08T21:24:58.898Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -25,6 +25,60 @@
         ]
       },
       "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "b8e53ad5f24eb6f4",
+      "headline": "台風13号沖縄接近へ 影響長引くおそれ 熱中症対策も徹底を",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260805/k10015196631000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 05 Aug 2026 21:59:38 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "b29ec0dd54143849",
+      "headline": "熊本 暑さ続く見込み 熱中症対策を 6日以降台風影響にも注意",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260805/k10015196771000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Wed, 05 Aug 2026 19:14:13 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
       "provenance": "news_auto"
     },
     {
@@ -84,6 +138,87 @@
       "provenance": "news_auto"
     },
     {
+      "id": "c0bb8db50ec3e970",
+      "headline": "熱中症搬送者数 8月2日までの1週間 全国で9180人 熊本で309人",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260804/k10015196271000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 04 Aug 2026 21:41:12 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "03c703eadbc7b4e7",
+      "headline": "車中泊時の熱中症対策などチラシに 熊本で周知始める 環境省",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260804/k10015196191000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 04 Aug 2026 19:48:59 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "6ce745eb3f48d55e",
+      "headline": "ライオン3頭が死ぬ 熱中症の疑い 多摩動物公園",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260804/k10015195681000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Tue, 04 Aug 2026 17:36:14 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
       "id": "1c4af1d2219bedfc",
       "headline": "台風6号 停電の復旧中に作業員が感電か 搬送時に意識なし 沖縄",
       "aiSummary": "台風による停電復旧作業中に作業員が感電し、意識不明の重体で搬送された。",
@@ -109,6 +244,114 @@
         ]
       },
       "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "b55375a2271f73b5",
+      "headline": "経産省 日本製紙の煙突倒壊受け自家発事業者に報告求める通知",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260806/k10015198631000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 06 Aug 2026 23:50:45 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "48028a0327a9394e",
+      "headline": "7日も広い範囲で危険な暑さに 40度に迫る予想も 熱中症対策を",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260806/k10015197901000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 06 Aug 2026 22:03:40 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "969b45debb0af17c",
+      "headline": "ラグビーリーグワン フィジー出身選手が死亡 熱中症疑いで搬送",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260808/k10015200291000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 08 Aug 2026 20:29:37 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.897Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "c654d7a78ce53064",
+      "headline": "8日も猛暑日 熱中症対策徹底を 局地的に大雨のおそれも",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260808/k10015200031000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Sat, 08 Aug 2026 16:39:12 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
       "provenance": "news_auto"
     },
     {
@@ -193,6 +436,276 @@
         ]
       },
       "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "002ecd1978700311",
+      "headline": "東京 多摩動物公園 ライオン3頭が相次ぎ死ぬ 熱中症か",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260803/k10015195441000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 03 Aug 2026 22:50:43 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "c6b1f8b66e74174e",
+      "headline": "災害医療の3学会“高齢者の熱中症患者相次ぐ 対策徹底を”",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260803/k10015195411000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Mon, 03 Aug 2026 22:29:15 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "ee57fb424d4cdb4f",
+      "headline": "地震被害の熊本 夜も気温下がらず 熱中症対策 揺れにも備えを",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260807/k10015198731000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 07 Aug 2026 18:41:47 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "0bcebcde1f08179a",
+      "headline": "全国的に気温上昇 鳥取39度 北海道も猛暑 熱中症対策徹底を",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260807/k10015199021000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Fri, 07 Aug 2026 12:50:15 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "aec9233b901b4089",
+      "headline": "令和７年「労働安全衛生調査（実態調査）」の結果を公表します",
+      "aiSummary": "",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/toukei/list/r07-46-50b.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-08-07T14:00:00+09:00",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "997eb8f29f9af2cc",
+      "headline": "労働基準監督署等が自動車運転者を使用する事業場に対して行った令和７年の監督指導、送検等の状況を公表します",
+      "aiSummary": "",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_75192.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-08-06T14:00:00+09:00",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "3c07f576036b4d86",
+      "headline": "第６回労働基準法における「労働者」に関する研究会　議事録",
+      "aiSummary": "",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_74078.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-08-05T15:00:00+09:00",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "9ca8122ab3e00b46",
+      "headline": "第130回労働政策審議会労働条件分科会労災保険部会資料",
+      "aiSummary": "",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_75267.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-08-04T12:22:00+09:00",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "6530a1dfc56cbd23",
+      "headline": "令和８年度第７回「石綿に係る疾病の業務上外に関する検討会」を開催します",
+      "aiSummary": "",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_74567.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-07-31T14:00:00+09:00",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "78cb176efdacbd81",
+      "headline": "「労働安全衛生法に基づく化学物質管理に関する説明会」の開催について",
+      "aiSummary": "",
+      "source": {
+        "name": "厚生労働省 報道発表資料",
+        "url": "https://www.mhlw.go.jp/stf/newpage_74553.html",
+        "publisher": "厚生労働省",
+        "publishedAt": "2026-07-28T17:00:00+09:00",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "human-review-required",
+        "rejectionReasons": [
+          "human_review_required"
+        ]
+      },
+      "approved": false,
+      "humanReviewed": false,
+      "humanReviewRequired": true,
       "provenance": "news_auto"
     }
   ]

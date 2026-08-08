@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-12T21:43:42.907Z",
+  "updatedAt": "2026-08-08T21:24:58.898Z",
   "entries": [
     {
       "id": "b02353d74cdda5c4",
@@ -320,6 +320,32 @@
         ]
       },
       "approved": false,
+      "provenance": "news_auto"
+    },
+    {
+      "id": "a02aef5beb001cd5",
+      "headline": "熊本地震 被災地での熱中症予防で対策アプリ開発 産業医科大学",
+      "aiSummary": "",
+      "source": {
+        "name": "NHK NEWS WEB（社会）",
+        "url": "http://www3.nhk.or.jp/news/html/20260806/k10015197561000.html",
+        "publisher": "日本放送協会",
+        "publishedAt": "Thu, 06 Aug 2026 05:51:52 +0900",
+        "fetchedAt": "2026-08-08T21:24:57.876Z"
+      },
+      "score": {
+        "relevance": 0,
+        "copyrightRisk": 100,
+        "misinformationRisk": 100,
+        "duplication": 0,
+        "judgedAt": "2026-08-08T21:24:58.898Z",
+        "model": "deterministic-prefilter",
+        "rejectionReasons": [
+          "prefilter:school-context"
+        ]
+      },
+      "approved": false,
+      "humanReviewRequired": true,
       "provenance": "news_auto"
     },
     {
