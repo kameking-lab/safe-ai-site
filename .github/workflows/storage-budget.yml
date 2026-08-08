@@ -131,6 +131,11 @@ jobs:
               parts = PurePosixPath(path).parts
               if "node_modules" in parts:
                   return True
+              if any(
+                  parts[index] == ".vercel" and parts[index + 1] == "output"
+                  for index in range(len(parts) - 1)
+              ):
+                  return True
               if "screenshots" in parts and not path.startswith("web/public/screenshots/"):
                   return True
               generated_prefixes = (
@@ -155,6 +160,7 @@ jobs:
               "web/build/result.js",
               "web/dist/result.js",
               "web/lighthouse-raw-1/result.json",
+              "web/.vercel/output/functions/api.func/index.js",
               "web/logs/run.log",
               "root-debug.log",
               "artifact.tmp",
@@ -203,6 +209,50 @@ jobs:
               if suffix in MEDIA_OR_JSON_SUFFIXES and not is_runtime_allowed(path):
                   non_runtime_media.append((path, size))
 
+          history_blob_count = 0
+          if base:
+              object_lines = run_bytes(
+                  "git", "rev-list", "--objects", f"{base}..HEAD"
+              ).splitlines()
+              object_paths: dict[bytes, str] = {}
+              for line in object_lines:
+                  object_id, separator, raw_path = line.partition(b" ")
+                  if not separator or not raw_path:
+                      continue
+                  object_paths.setdefault(
+                      object_id,
+                      raw_path.decode("utf-8", errors="surrogateescape").replace("\\", "/"),
+                  )
+              if object_paths:
+                  inspected = subprocess.run(
+                      [
+                          "git",
+                          "cat-file",
+                          "--batch-check=%(objectname) %(objecttype) %(objectsize)",
+                      ],
+                      input=b"\n".join(object_paths) + b"\n",
+                      stdout=subprocess.PIPE,
+                      check=True,
+                  ).stdout.splitlines()
+                  for line in inspected:
+                      fields = line.split()
+                      if len(fields) != 3 or fields[1] != b"blob":
+                          continue
+                      object_id, _, raw_size = fields
+                      path = object_paths.get(object_id)
+                      if not path:
+                          continue
+                      history_blob_count += 1
+                      size = int(raw_size)
+                      if size > MAX_SINGLE_FILE:
+                          failures.append(
+                              f"history blob exceeds 100 MiB: {path} ({size} bytes)"
+                          )
+                      elif size >= MAX_NEW_TRACKED and not is_runtime_allowed(path):
+                          failures.append(
+                              f"history blob exceeds 5 MiB: {path} ({size} bytes)"
+                          )
+
           media_bytes = sum(size for _, size in non_runtime_media)
           if (
               len(non_runtime_media) > MAX_NON_RUNTIME_MEDIA_COUNT
@@ -235,6 +285,7 @@ jobs:
 
           print(f"Storage budget base: {base or '<initial tree>'}")
           print(f"New tracked files checked: {len(added)}")
+          print(f"New history blobs checked: {history_blob_count}")
           print(f"Untracked generated files (ignored included): {len(untracked_generated)}")
           if allowed_large:
               print("Reviewed runtime allowlist accepted these >5 MiB files:")

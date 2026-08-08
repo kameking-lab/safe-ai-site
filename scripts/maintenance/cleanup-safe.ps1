@@ -136,19 +136,35 @@ function Test-DirectoryContainsTrackedFiles {
     return ($tracked.Count -gt 0)
 }
 
+function Test-PathIndicatesProtectedMaterial {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $normalized = $Path.Replace('\', '/').ToLowerInvariant()
+    return (
+        $normalized -match '(^|/)(external-sources?|official-sources?|primary-sources?)(/|$)' -or
+        $normalized -match '(^|/)[^/]*(legal-source|official-source|source-snapshot|e-gov|mhlw|kanpou|gazette|rollback|production-rollback|checksum-manifest|source-manifest)[^/]*(/|$)' -or
+        $normalized -match '(^|/)(法令原典|法源|一次資料|公式原文|正本|官報|通達|告示|厚生労働省|ロールバック|本番復旧|復元用|チェックサム|ハッシュ)(/|$)' -or
+        $normalized -match '(^|/)[^/]*(法令原典|法源|一次資料|公式原文|正本|官報|通達|告示|厚生労働省|ロールバック|本番復旧|チェックサム|ハッシュ)[^/]*(/|$)' -or
+        $normalized -match '(^|/)(dpl|bld)_[a-z0-9]+(?:\.[^/]*)?($|/)' -or
+        $normalized -match '(^|/)[^/]*(runtime-dataset|canonical-dataset|database-backup|repository\.bundle)[^/]*(/|$)'
+    )
+}
+
 function Get-DirectoryMeasurement {
     param([Parameter(Mandatory = $true)][string]$Path)
 
     $fileCount = [int64]0
     $directoryCount = [int64]0
     $bytes = [int64]0
+    $newestWriteTimeUtc = [DateTime]::MinValue
     $containsSensitiveEntry = $false
     $protectedReasons = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
     $rootName = (Split-Path -Leaf $Path).ToLowerInvariant()
     $isAmbiguousOutput = $rootName -in @(
         'out', 'build', 'dist', 'logs', 'tmp', 'temp', '.tmp', 'cache', '.cache',
         'audit-out', '.maintenance-snapshots', 'local-snapshots',
-        'benchmark-output', '.benchmark-output'
+        'benchmark-output', '.benchmark-output', '.bench', '.genquality',
+        '.loop-eval', '.r4-screens', '.r8-screens'
     )
     if ($isAmbiguousOutput) {
         $containsSensitiveEntry = $true
@@ -167,6 +183,11 @@ function Get-DirectoryMeasurement {
                 continue
             }
             if ($child.PSIsContainer) {
+                if (Test-PathIndicatesProtectedMaterial -Path $child.FullName) {
+                    $containsSensitiveEntry = $true
+                    [void]$protectedReasons.Add('legal source, official record, rollback, or canonical material')
+                    continue
+                }
                 if (
                     $child.Name.ToLowerInvariant() -eq '.git' -or
                     $child.Name.ToLowerInvariant().EndsWith('.git')
@@ -175,7 +196,7 @@ function Get-DirectoryMeasurement {
                     [void]$protectedReasons.Add('nested Git metadata')
                     continue
                 }
-                if ($isAmbiguousOutput -and $child.Name.ToLowerInvariant() -in @(
+                if ($child.Name.ToLowerInvariant() -in @(
                     'src', 'public', 'data', 'prisma', 'schema', 'schemas',
                     'migration', 'migrations', 'laws-fulltext'
                 )) {
@@ -188,9 +209,16 @@ function Get-DirectoryMeasurement {
             else {
                 $fileCount++
                 $bytes += [int64]$child.Length
+                if ($child.LastWriteTimeUtc -gt $newestWriteTimeUtc) {
+                    $newestWriteTimeUtc = $child.LastWriteTimeUtc
+                }
 
                 $lowerName = $child.Name.ToLowerInvariant()
                 $lowerExtension = $child.Extension.ToLowerInvariant()
+                if (Test-PathIndicatesProtectedMaterial -Path $child.FullName) {
+                    $containsSensitiveEntry = $true
+                    [void]$protectedReasons.Add('legal source, official record, rollback, or canonical material')
+                }
                 if (
                     $lowerName -eq '.env' -or
                     $lowerName.StartsWith('.env.') -or
@@ -207,6 +235,60 @@ function Get-DirectoryMeasurement {
                 if ($lowerName -eq '.git') {
                     $containsSensitiveEntry = $true
                     [void]$protectedReasons.Add('nested Git metadata')
+                }
+                $isNextGeneratedType = (
+                    $rootName -eq '.next' -and
+                    $lowerExtension -eq '.ts' -and
+                    $child.FullName.Replace('\', '/').ToLowerInvariant() -match '/\.next/(dev/)?types/'
+                )
+                $isKnownGeneratedExtension = $lowerExtension -in @(
+                    '.js', '.mjs', '.cjs', '.json', '.map', '.sst', '.meta',
+                    '.avif', '.gz', '.body', '.css', '.png', '.jpg', '.jpeg',
+                    '.gif', '.webp', '.svg', '.ico', '.rsc', '.html', '.htm',
+                    '.wasm', '.old', '.rscinfo', '.tsbuildinfo', '.ttf', '.woff',
+                    '.woff2', '.previewinfo', '.log', '.trace', '.har', '.lcov',
+                    '.mp4', '.webm'
+                )
+                $isKnownGeneratedNoExtension = (
+                    [string]::IsNullOrEmpty($lowerExtension) -and (
+                        $lowerName -in @('build_id', 'trace', 'trace-build', 'turbopack', 'current', 'log') -or
+                        $lowerName -match '^[a-f0-9]{64}$'
+                    )
+                )
+                if (
+                    -not $isAmbiguousOutput -and
+                    -not $isKnownGeneratedExtension -and
+                    -not $isKnownGeneratedNoExtension -and
+                    -not $isNextGeneratedType
+                ) {
+                    $containsSensitiveEntry = $true
+                    [void]$protectedReasons.Add('unrecognized file type inside generated output')
+                }
+                if (
+                    -not $isAmbiguousOutput -and
+                    $lowerExtension -in @(
+                        '.tsx', '.jsx', '.py', '.pyw', '.ps1', '.psm1', '.psd1',
+                        '.go', '.rs', '.java', '.kt', '.kts', '.cs', '.c', '.h',
+                        '.cpp', '.hpp', '.rb', '.php', '.sh', '.bash', '.zsh',
+                        '.prisma', '.sql', '.sqlite', '.sqlite3', '.db'
+                    )
+                ) {
+                    $containsSensitiveEntry = $true
+                    [void]$protectedReasons.Add('source or runtime data inside generated output')
+                }
+                if (-not $isAmbiguousOutput -and $lowerExtension -eq '.ts' -and -not $isNextGeneratedType) {
+                    $containsSensitiveEntry = $true
+                    [void]$protectedReasons.Add('unrecognized TypeScript source inside generated output')
+                }
+                if (
+                    -not $isAmbiguousOutput -and
+                    $lowerExtension -in @(
+                        '.zip', '.tar', '.tgz', '.7z', '.rar', '.bundle', '.pdf',
+                        '.csv', '.geojson', '.parquet', '.xlsx', '.xls', '.doc', '.docx'
+                    )
+                ) {
+                    $containsSensitiveEntry = $true
+                    [void]$protectedReasons.Add('opaque archive, document, or dataset inside generated output')
                 }
                 if ($isAmbiguousOutput -and (
                     $lowerExtension -in @(
@@ -238,6 +320,7 @@ function Get-DirectoryMeasurement {
         Bytes = $bytes
         FileCount = $fileCount
         DirectoryCount = $directoryCount
+        NewestWriteTimeUtc = $newestWriteTimeUtc
         ContainsSensitiveEntry = $containsSensitiveEntry
         ProtectedReasons = @($protectedReasons)
     }
@@ -409,15 +492,7 @@ function Test-IsRawEvidence {
         return $false
     }
 
-    $normalized = $RelativePath.Replace('\', '/').ToLowerInvariant()
-    $isProtectedLegalSource = (
-        $normalized -match '(^|/)(external-sources?|official-sources?)(/|$)' -or
-        $normalized -match '(^|/)[^/]*(law|legal|official)[-_ ]sources?[^/]*(/|$)' -or
-        $normalized -match '(^|/)[^/]*sources?[-_ ]snapshots?[^/]*(/|$)' -or
-        $normalized -match '(^|/)[^/]*sources?[-_ ](hash|checksum|manifest)[^/]*(/|$)'
-    )
-    $isProtectedRollback = $normalized -match '(^|/)[^/]*rollback[^/]*(/|$)'
-    if ($isProtectedLegalSource -or $isProtectedRollback) {
+    if (Test-PathIndicatesProtectedMaterial -Path $RelativePath) {
         return $false
     }
     if ($Item.Name -eq '.env' -or $Item.Name.ToLowerInvariant().StartsWith('.env.')) {
@@ -446,6 +521,10 @@ function Test-IsProtectedEvidenceContent {
     }
 
     $extension = $Item.Extension.ToLowerInvariant()
+    $isExplicitRawTree = $normalized -match '(^|/)(raw|screenshots|traces?|videos|playwright-report|test-results|lighthouse-runs?|logs|coverage)(/|$)'
+    if (-not $isExplicitRawTree) {
+        return $true
+    }
     $transparentRawExtensions = @(
         '.har', '.trace', '.log', '.html', '.htm', '.lcov',
         '.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif',
@@ -457,7 +536,6 @@ function Test-IsProtectedEvidenceContent {
 
     # Structured dumps are eligible only inside a directory that explicitly
     # identifies them as raw output. Else they may be canonical/runtime data.
-    $isExplicitRawTree = $normalized -match '(^|/)(raw|screenshots|traces?|videos|playwright-report|test-results|lighthouse-runs?|logs|coverage)(/|$)'
     if ($isExplicitRawTree -and $extension -in @('.json', '.jsonl', '.csv')) {
         return $false
     }
@@ -470,6 +548,7 @@ function Test-IsProtectedEvidenceContent {
 $repositoryRoot = Resolve-RepositoryRoot
 $mode = if ($Apply) { 'apply' } else { 'dry-run' }
 $cutoffUtc = [DateTime]::UtcNow.AddDays(-1 * $EvidenceRetentionDays)
+$shortRawCutoffUtc = [DateTime]::UtcNow.AddDays(-3)
 $targets = New-Object 'System.Collections.Generic.List[object]'
 $skipped = New-Object 'System.Collections.Generic.List[object]'
 
@@ -501,6 +580,19 @@ foreach ($directoryPath in $generatedDirectoryPaths) {
                 Path = Convert-ToGitPath -Root $repositoryRoot -Path $safePath
                 Reason = 'contains protected content: ' + ($measurement.ProtectedReasons -join ', ')
                 Disposition = 'REVIEW_REQUIRED'
+            })
+            continue
+        }
+        $generatedRootName = (Split-Path -Leaf $safePath).ToLowerInvariant()
+        if (
+            $generatedRootName -in @('screenshots', 'trace', 'traces', 'videos') -and
+            $measurement.FileCount -gt 0 -and
+            $measurement.NewestWriteTimeUtc -ge $shortRawCutoffUtc
+        ) {
+            [void]$skipped.Add([pscustomobject]@{
+                Path = Convert-ToGitPath -Root $repositoryRoot -Path $safePath
+                Reason = 'within 3-day screenshot, trace, or video retention'
+                Disposition = 'KEEP'
             })
             continue
         }
@@ -547,7 +639,10 @@ foreach ($relativePath in $untrackedEvidencePaths) {
         if (Test-IsReparsePoint -Item $item) {
             throw "Refusing an evidence reparse point: $relativePath"
         }
-        if (-not (Test-IsRawEvidence -RelativePath ([string]$relativePath) -Item $item -CutoffUtc $cutoffUtc)) {
+        $itemCutoffUtc = if ($item.Extension.ToLowerInvariant() -in @(
+            '.har', '.trace', '.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.mp4', '.webm'
+        )) { $shortRawCutoffUtc } else { $cutoffUtc }
+        if (-not (Test-IsRawEvidence -RelativePath ([string]$relativePath) -Item $item -CutoffUtc $itemCutoffUtc)) {
             continue
         }
         if (Test-IsProtectedEvidenceContent -RelativePath ([string]$relativePath) -Item $item) {
@@ -610,9 +705,11 @@ $deletedBytes = [int64]0
 $deletedFiles = [int64]0
 $deletedDirectories = [int64]0
 $failed = New-Object 'System.Collections.Generic.List[object]'
+$reviewRequiredCount = @($skipped | Where-Object { $_.Disposition -eq 'REVIEW_REQUIRED' }).Count
+$applyBlocked = $Apply -and $reviewRequiredCount -gt 0
 
 foreach ($target in $targets) {
-    if ($Apply) {
+    if ($Apply -and -not $applyBlocked) {
         try {
             $safeDeletePath = Assert-SafePath -Root $repositoryRoot -Path $target.FullPath
             Remove-Item -LiteralPath $safeDeletePath -Force -Recurse -ErrorAction Stop
@@ -662,6 +759,7 @@ $result = [pscustomobject]@{
     TargetCount = $publicTargets.Count
     FailedCount = $failed.Count
     ReviewRequiredCount = @($skippedOutput | Where-Object { $_.Disposition -eq 'REVIEW_REQUIRED' }).Count
+    ApplyBlocked = $applyBlocked
     Targets = $publicTargets
     Skipped = $skippedOutput
     Failed = $failedOutput
@@ -686,6 +784,9 @@ else {
     "Skipped targets: $($result.Skipped.Count)"
     "Failed targets: $($result.FailedCount)"
     "Review required: $($result.ReviewRequiredCount)"
+    if ($applyBlocked) {
+        'Apply was blocked before deletion because REVIEW_REQUIRED items exist.'
+    }
     if (-not $Apply) {
         'Dry run only. Re-run with -Apply to remove the listed targets.'
     }
