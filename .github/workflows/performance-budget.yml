@@ -97,4 +97,4 @@ jobs:
           name: performance-budget-evidence
           path: .ci-performance-evidence
           include-hidden-files: true
-          retention-days: 14
+          retention-days: 7

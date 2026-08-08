@@ -45,7 +45,7 @@ jobs:
           path: |
             web/playwright-report
             web/test-results
-          retention-days: 14
+          retention-days: 7
 
       - name: Comment on PR (failure)
         if: failure()
