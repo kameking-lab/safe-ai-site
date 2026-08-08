@@ -1,7 +1,13 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { spawnSync } from "node:child_process";
 import { describe, expect, it } from "vitest";
+
+const collectTsxFiles = (directory: string): string[] =>
+  readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(directory, entry.name);
+    if (entry.isDirectory()) return collectTsxFiles(path);
+    return entry.isFile() && entry.name.endsWith(".tsx") ? [path] : [];
+  });
 
 describe("main landmark ownership", () => {
   it("keeps the sole main landmark in AppShell", () => {
@@ -11,12 +17,11 @@ describe("main landmark ownership", () => {
   });
 
   it("does not nest a second main element anywhere in the (main) route group", () => {
-    const result = spawnSync(
-      "rg",
-      ["-l", "<main|</main>", "src/app/(main)", "-g", "*.tsx"],
-      { cwd: process.cwd(), encoding: "utf8" },
-    );
-    expect(result.status).toBe(1);
-    expect(result.stdout.trim()).toBe("");
+    const routeGroup = join(process.cwd(), "src", "app", "(main)");
+    const offenders = collectTsxFiles(routeGroup)
+      .filter((path) => /<\/?main\b/u.test(readFileSync(path, "utf8")))
+      .map((path) => path.slice(process.cwd().length + 1));
+
+    expect(offenders).toEqual([]);
   });
 });
