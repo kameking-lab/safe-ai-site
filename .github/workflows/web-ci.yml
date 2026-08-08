@@ -62,6 +62,8 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: E2E smoke tests (live mode)
+        env:
+          PLAYWRIGHT_SERVER_MODE: production
         run: npm run test:e2e:smoke
 
       - name: Upload Playwright artifacts (smoke)
