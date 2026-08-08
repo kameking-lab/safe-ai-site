@@ -140,11 +140,16 @@ function Test-PathIndicatesProtectedMaterial {
     param([Parameter(Mandatory = $true)][string]$Path)
 
     $normalized = $Path.Replace('\', '/').ToLowerInvariant()
+    # Keep this script ASCII-only so Windows PowerShell 5.1 reads it correctly
+    # even when the host code page is CP932. .NET regular expressions expand
+    # these Unicode escapes at match time.
+    $protectedJapanese = '(?:\u6cd5\u4ee4\u539f\u5178|\u6cd5\u6e90|\u4e00\u6b21\u8cc7\u6599|\u516c\u5f0f\u539f\u6587|\u6b63\u672c|\u5b98\u5831|\u901a\u9054|\u544a\u793a|\u539a\u751f\u52b4\u50cd\u7701|\u30ed\u30fc\u30eb\u30d0\u30c3\u30af|\u672c\u756a\u5fa9\u65e7|\u5fa9\u5143\u7528|\u30c1\u30a7\u30c3\u30af\u30b5\u30e0|\u30cf\u30c3\u30b7\u30e5)'
+    $protectedAscii = '(?:external[-_]?sources?|official[-_]?sources?|primary[-_]?sources?|law[-_]?sources?|legal[-_]?sources?|source[-_]?(?:snapshot|hash|checksum|manifest)|sources[-_]?manifest|official[-_]?source|primary[-_]?source|e[-_]?gov|mhlw|kanpou|gazette|rollback|production[-_]?rollback|rollback[-_]?(?:info|metadata|manifest)|checksum[-_]?manifest|hash[-_]?manifest)'
     return (
-        $normalized -match '(^|/)(external-sources?|official-sources?|primary-sources?)(/|$)' -or
-        $normalized -match '(^|/)[^/]*(legal-source|official-source|source-snapshot|e-gov|mhlw|kanpou|gazette|rollback|production-rollback|checksum-manifest|source-manifest)[^/]*(/|$)' -or
-        $normalized -match '(^|/)(法令原典|法源|一次資料|公式原文|正本|官報|通達|告示|厚生労働省|ロールバック|本番復旧|復元用|チェックサム|ハッシュ)(/|$)' -or
-        $normalized -match '(^|/)[^/]*(法令原典|法源|一次資料|公式原文|正本|官報|通達|告示|厚生労働省|ロールバック|本番復旧|チェックサム|ハッシュ)[^/]*(/|$)' -or
+        $normalized -match "(^|/)$protectedAscii(/|$)" -or
+        $normalized -match "(^|/)[^/]*$protectedAscii[^/]*(/|$)" -or
+        $normalized -match "(^|/)$protectedJapanese(/|$)" -or
+        $normalized -match "(^|/)[^/]*$protectedJapanese[^/]*(/|$)" -or
         $normalized -match '(^|/)(dpl|bld)_[a-z0-9]+(?:\.[^/]*)?($|/)' -or
         $normalized -match '(^|/)[^/]*(runtime-dataset|canonical-dataset|database-backup|repository\.bundle)[^/]*(/|$)'
     )
@@ -157,6 +162,7 @@ function Get-DirectoryMeasurement {
     $directoryCount = [int64]0
     $bytes = [int64]0
     $newestWriteTimeUtc = [DateTime]::MinValue
+    $newestShortRawWriteTimeUtc = [DateTime]::MinValue
     $containsSensitiveEntry = $false
     $protectedReasons = New-Object 'System.Collections.Generic.HashSet[string]' ([System.StringComparer]::OrdinalIgnoreCase)
     $rootName = (Split-Path -Leaf $Path).ToLowerInvariant()
@@ -215,6 +221,15 @@ function Get-DirectoryMeasurement {
 
                 $lowerName = $child.Name.ToLowerInvariant()
                 $lowerExtension = $child.Extension.ToLowerInvariant()
+                if (
+                    $lowerExtension -in @(
+                        '.har', '.trace', '.png', '.jpg', '.jpeg', '.gif',
+                        '.webp', '.avif', '.mp4', '.webm'
+                    ) -and
+                    $child.LastWriteTimeUtc -gt $newestShortRawWriteTimeUtc
+                ) {
+                    $newestShortRawWriteTimeUtc = $child.LastWriteTimeUtc
+                }
                 if (Test-PathIndicatesProtectedMaterial -Path $child.FullName) {
                     $containsSensitiveEntry = $true
                     [void]$protectedReasons.Add('legal source, official record, rollback, or canonical material')
@@ -240,6 +255,26 @@ function Get-DirectoryMeasurement {
                     $rootName -eq '.next' -and
                     $lowerExtension -eq '.ts' -and
                     $child.FullName.Replace('\', '/').ToLowerInvariant() -match '/\.next/(dev/)?types/'
+                )
+                $normalizedChildPath = $child.FullName.Replace('\', '/').ToLowerInvariant()
+                $isTrustedCompiledOutput = (
+                    $rootName -eq '.next' -or
+                    $normalizedChildPath -match '/\.vercel/output/'
+                )
+                $isKnownCoverageReportFile = (
+                    $rootName -eq 'coverage' -and (
+                        $lowerName -in @('coverage-final.json', 'clover.xml', 'lcov.info') -or
+                        $normalizedChildPath -match '/coverage/lcov-report/.+\.(?:html|htm)$' -or
+                        $lowerName -in @(
+                            'base.css', 'block-navigation.js', 'favicon.png',
+                            'prettify.css', 'prettify.js', 'sort-arrow-sprite.png',
+                            'sorter.js'
+                        )
+                    )
+                )
+                $isKnownPlaywrightReportFile = (
+                    $rootName -match '^playwright-report(?:-.+)?$' -and
+                    $lowerName -eq 'index.html'
                 )
                 $isKnownGeneratedExtension = $lowerExtension -in @(
                     '.js', '.mjs', '.cjs', '.json', '.map', '.sst', '.meta',
@@ -267,11 +302,16 @@ function Get-DirectoryMeasurement {
                 if (
                     -not $isAmbiguousOutput -and
                     $lowerExtension -in @(
+                        '.js', '.mjs', '.cjs', '.json', '.css', '.html', '.htm',
                         '.tsx', '.jsx', '.py', '.pyw', '.ps1', '.psm1', '.psd1',
                         '.go', '.rs', '.java', '.kt', '.kts', '.cs', '.c', '.h',
                         '.cpp', '.hpp', '.rb', '.php', '.sh', '.bash', '.zsh',
-                        '.prisma', '.sql', '.sqlite', '.sqlite3', '.db'
-                    )
+                        '.prisma', '.sql', '.sqlite', '.sqlite3', '.db',
+                        '.yaml', '.yml', '.toml', '.xml', '.md', '.mdx'
+                    ) -and
+                    -not $isTrustedCompiledOutput -and
+                    -not $isKnownCoverageReportFile -and
+                    -not $isKnownPlaywrightReportFile
                 ) {
                     $containsSensitiveEntry = $true
                     [void]$protectedReasons.Add('source or runtime data inside generated output')
@@ -321,6 +361,7 @@ function Get-DirectoryMeasurement {
         FileCount = $fileCount
         DirectoryCount = $directoryCount
         NewestWriteTimeUtc = $newestWriteTimeUtc
+        NewestShortRawWriteTimeUtc = $newestShortRawWriteTimeUtc
         ContainsSensitiveEntry = $containsSensitiveEntry
         ProtectedReasons = @($protectedReasons)
     }
@@ -583,15 +624,13 @@ foreach ($directoryPath in $generatedDirectoryPaths) {
             })
             continue
         }
-        $generatedRootName = (Split-Path -Leaf $safePath).ToLowerInvariant()
         if (
-            $generatedRootName -in @('screenshots', 'trace', 'traces', 'videos') -and
-            $measurement.FileCount -gt 0 -and
-            $measurement.NewestWriteTimeUtc -ge $shortRawCutoffUtc
+            $measurement.NewestShortRawWriteTimeUtc -gt [DateTime]::MinValue -and
+            $measurement.NewestShortRawWriteTimeUtc -ge $shortRawCutoffUtc
         ) {
             [void]$skipped.Add([pscustomobject]@{
                 Path = Convert-ToGitPath -Root $repositoryRoot -Path $safePath
-                Reason = 'within 3-day screenshot, trace, or video retention'
+                Reason = 'contains screenshot, trace, HAR, or video within 3-day retention'
                 Disposition = 'KEEP'
             })
             continue
