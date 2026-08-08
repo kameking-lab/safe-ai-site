@@ -3,20 +3,22 @@
 /**
  * Read-mostly production smoke for the 2026-07-31 gap-closure release.
  *
- * The only POST requests use fixed, non-PII payloads and exercise deterministic
+ * By default, the only POST requests use fixed, non-PII payloads and exercise deterministic
  * fail-closed paths:
  * - emergency chatbot classification (before any model call),
  * - chemical ambiguity / name-CAS mismatch,
  * - unavailable automation intake (before request-body parsing or delivery).
  *
  * It never sends mail or push, creates a payment, submits Search Console data,
- * writes application data, or calls an external generative model.
+ * writes application data, or calls an external generative model. Pass
+ * `--get-only` when rechecking read-only production state after a harness change.
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { chromium } from "playwright";
 
 const argv = process.argv.slice(2);
+const getOnly = argv.includes("--get-only");
 
 function option(name, fallback) {
   const index = argv.indexOf(`--${name}`);
@@ -145,6 +147,19 @@ function h1Count(html) {
   return (html.match(/<h1\b/gi) ?? []).length;
 }
 
+function h1CountsByRenderMode(html) {
+  const noscriptBlocks =
+    html.match(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi) ?? [];
+  const noScript = noscriptBlocks.reduce(
+    (count, block) => count + h1Count(block),
+    0,
+  );
+  const interactive = h1Count(
+    html.replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, ""),
+  );
+  return { interactive, noScript };
+}
+
 function jsonLdCount(html) {
   return (
     html.match(
@@ -212,14 +227,18 @@ const routeResults = await Promise.all(
 for (const result of routeResults) {
   const robots = metaRobots(result.body);
   const canonicalUrl = canonical(result.body);
+  const h1ByMode = h1CountsByRenderMode(result.body);
   record(`${result.route}:http-200`, result.status === 200, {
     status: result.status,
     durationMs: result.durationMs,
     error: result.error,
   });
-  record(`${result.route}:single-h1`, h1Count(result.body) === 1, {
-    h1Count: h1Count(result.body),
-  });
+  record(
+    `${result.route}:single-h1-per-render-mode`,
+    h1ByMode.interactive === 1 &&
+      (h1ByMode.noScript === 0 || h1ByMode.noScript === 1),
+    h1ByMode,
+  );
   record(
     `${result.route}:canonical-production`,
     canonicalUrl.startsWith(baseUrl.origin),
@@ -247,15 +266,38 @@ for (const result of routeResults) {
 const protectedGovernanceRoutes = [
   {
     route: "/chemical-ra/ledger",
-    failClosedCopy: "接続状態: scope",
+    requiredCopies: [
+      "組織台帳は接続されていません",
+      "現在はfail-closed",
+    ],
+    validReasons: [
+      "authentication_not_configured",
+      "authentication_required",
+      "database_unavailable",
+      "membership_required",
+      "insufficient_role",
+      "ledger_unavailable",
+    ],
   },
   {
     route: "/education/progress",
-    failClosedCopy: "接続状態: scope",
+    requiredCopies: [
+      "組織の受講記録は接続されていません",
+      "確認できないためfail-closed",
+    ],
+    validReasons: [
+      "authentication_not_configured",
+      "authentication_required",
+      "database_unavailable",
+      "membership_required",
+      "insufficient_role",
+      "progress_unavailable",
+    ],
   },
   {
     route: "/signage/manage",
-    failClosedCopy: "端末未登録・接続未確認",
+    requiredCopies: ["端末未登録・接続未確認"],
+    validReasons: [],
   },
 ];
 const protectedGovernanceResults = await Promise.all(
@@ -264,6 +306,10 @@ const protectedGovernanceResults = await Promise.all(
 for (const [index, result] of protectedGovernanceResults.entries()) {
   const expectation = protectedGovernanceRoutes[index];
   const robots = metaRobots(result.body);
+  const renderedBody = withoutReactSsrMarkers(result.body);
+  const matchedReason = expectation.validReasons.find((reason) =>
+    renderedBody.includes(`接続状態: ${reason}`),
+  );
   record(`${result.route}:http-200`, result.status === 200, {
     status: result.status,
     durationMs: result.durationMs,
@@ -271,8 +317,15 @@ for (const [index, result] of protectedGovernanceResults.entries()) {
   });
   record(
     `${result.route}:fail-closed-without-scope`,
-    withoutReactSsrMarkers(result.body).includes(expectation.failClosedCopy),
-    { expectedState: "unscoped-and-unavailable" },
+    expectation.requiredCopies.every((copy) => renderedBody.includes(copy)) &&
+      (expectation.validReasons.length === 0 || Boolean(matchedReason)),
+    {
+      requiredCopiesPresent: expectation.requiredCopies.map((copy) => ({
+        copy,
+        present: renderedBody.includes(copy),
+      })),
+      matchedReason: matchedReason ?? null,
+    },
   );
   record(
     `${result.route}:noindex-noarchive`,
@@ -326,20 +379,42 @@ record(
 );
 const flagshipPaths = [
   "/risk",
+  "/heat-illness-prevention",
+  "/ky/paper",
+  "/signage",
   "/chatbot",
+  "/law-search",
   "/chemical-ra",
-  "/accident-news",
   "/laws",
-  "/resources",
-  "/education-certification",
+  "/accident-news",
   "/training/visual-ky",
+  "/education-certification",
   "/services/automation",
+  "/safety-ai",
+  "/search",
+  "/features",
 ];
 for (const href of flagshipPaths) {
   record(`home:one-click:${href}`, home.body.includes(`href="${href}`), {
     href,
   });
 }
+const resourceDiscoveryResults = await Promise.all(
+  ["/features", "/search?q=%E5%A2%9C%E8%90%BD"].map((route) => request(route)),
+);
+record(
+  "resources:discoverable-from-site-navigation",
+  resourceDiscoveryResults.some(
+    (result) => result.status === 200 && result.body.includes('href="/resources"'),
+  ),
+  {
+    routes: resourceDiscoveryResults.map((result) => ({
+      route: result.route,
+      status: result.status,
+      linked: result.body.includes('href="/resources"'),
+    })),
+  },
+);
 
 const heatPaths = [
   "/heat-illness-prevention",
@@ -492,96 +567,111 @@ record(
   },
 );
 
-const emergency = await request("/api/chatbot", {
-  method: "POST",
-  headers: {
-    "content-type": "application/json",
-    origin: baseUrl.origin,
-  },
-  body: JSON.stringify({
-    message: "呼吸がありません",
-    privacyConfirmed: true,
-  }),
-});
-const emergencyPayload = json(emergency.body);
-record("emergency:http-200", emergency.status === 200, {
-  status: emergency.status,
-});
-record(
-  "emergency:deterministic-safety-response",
-  emergencyPayload?.source_type === "safety" &&
-    emergencyPayload?.requiresHumanReview === true &&
-    emergencyPayload?.answer?.includes("119") &&
-    emergencyPayload?.answer?.includes("AED"),
-  {
-    sourceType: emergencyPayload?.source_type ?? null,
-    safetyKind: emergencyPayload?.safetyKind ?? null,
-    requiresHumanReview: emergencyPayload?.requiresHumanReview ?? null,
-    includes119: emergencyPayload?.answer?.includes("119") ?? false,
-    includesAed: emergencyPayload?.answer?.includes("AED") ?? false,
-  },
-);
-
-const [ambiguousChemical, mismatchChemical] = await Promise.all([
-  request("/api/chemical-ra", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      origin: baseUrl.origin,
+if (getOnly) {
+  record(
+    "smoke:get-only-post-probes-skipped",
+    true,
+    {
+      skipped: [
+        "/api/chatbot",
+        "/api/chemical-ra",
+        "/api/automation-consult",
+      ],
     },
-    body: JSON.stringify({ chemicalName: "キシレン" }),
-  }),
-  request("/api/chemical-ra", {
+    "informational",
+  );
+} else {
+  const emergency = await request("/api/chatbot", {
     method: "POST",
     headers: {
       "content-type": "application/json",
       origin: baseUrl.origin,
     },
     body: JSON.stringify({
-      chemicalName: "トルエン",
-      casNumber: "1330-20-7",
+      message: "呼吸がありません",
+      privacyConfirmed: true,
     }),
-  }),
-]);
-const ambiguousPayload = json(ambiguousChemical.body);
-const mismatchPayload = json(mismatchChemical.body);
-record(
-  "chemical:ambiguous-fail-closed",
-  ambiguousChemical.status === 422 &&
-    ambiguousPayload?.error?.code === "AMBIGUOUS",
-  {
-    status: ambiguousChemical.status,
-    code: ambiguousPayload?.error?.code ?? null,
-  },
-);
-record(
-  "chemical:name-cas-mismatch-fail-closed",
-  mismatchChemical.status === 422 &&
-    mismatchPayload?.error?.code === "CAS_MISMATCH",
-  {
-    status: mismatchChemical.status,
-    code: mismatchPayload?.error?.code ?? null,
-  },
-);
+  });
+  const emergencyPayload = json(emergency.body);
+  record("emergency:http-200", emergency.status === 200, {
+    status: emergency.status,
+  });
+  record(
+    "emergency:deterministic-safety-response",
+    emergencyPayload?.source_type === "safety" &&
+      emergencyPayload?.requiresHumanReview === true &&
+      emergencyPayload?.answer?.includes("119") &&
+      emergencyPayload?.answer?.includes("AED"),
+    {
+      sourceType: emergencyPayload?.source_type ?? null,
+      safetyKind: emergencyPayload?.safetyKind ?? null,
+      requiresHumanReview: emergencyPayload?.requiresHumanReview ?? null,
+      includes119: emergencyPayload?.answer?.includes("119") ?? false,
+      includesAed: emergencyPayload?.answer?.includes("AED") ?? false,
+    },
+  );
 
-const unavailableIntake = await request("/api/automation-consult", {
-  method: "POST",
-  headers: {
-    "content-type": "application/json",
-    origin: baseUrl.origin,
-  },
-  body: "{}",
-});
-const intakePayload = json(unavailableIntake.body);
-record(
-  "automation:intake-fail-closed-before-pii",
-  unavailableIntake.status === 503 &&
-    intakePayload?.error?.code === "intake_unavailable",
-  {
-    status: unavailableIntake.status,
-    code: intakePayload?.error?.code ?? null,
-  },
-);
+  const [ambiguousChemical, mismatchChemical] = await Promise.all([
+    request("/api/chemical-ra", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        origin: baseUrl.origin,
+      },
+      body: JSON.stringify({ chemicalName: "キシレン" }),
+    }),
+    request("/api/chemical-ra", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        origin: baseUrl.origin,
+      },
+      body: JSON.stringify({
+        chemicalName: "トルエン",
+        casNumber: "1330-20-7",
+      }),
+    }),
+  ]);
+  const ambiguousPayload = json(ambiguousChemical.body);
+  const mismatchPayload = json(mismatchChemical.body);
+  record(
+    "chemical:ambiguous-fail-closed",
+    ambiguousChemical.status === 422 &&
+      ambiguousPayload?.error?.code === "AMBIGUOUS",
+    {
+      status: ambiguousChemical.status,
+      code: ambiguousPayload?.error?.code ?? null,
+    },
+  );
+  record(
+    "chemical:name-cas-mismatch-fail-closed",
+    mismatchChemical.status === 422 &&
+      mismatchPayload?.error?.code === "CAS_MISMATCH",
+    {
+      status: mismatchChemical.status,
+      code: mismatchPayload?.error?.code ?? null,
+    },
+  );
+
+  const unavailableIntake = await request("/api/automation-consult", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      origin: baseUrl.origin,
+    },
+    body: "{}",
+  });
+  const intakePayload = json(unavailableIntake.body);
+  record(
+    "automation:intake-fail-closed-before-pii",
+    unavailableIntake.status === 503 &&
+      intakePayload?.error?.code === "intake_unavailable",
+    {
+      status: unavailableIntake.status,
+      code: intakePayload?.error?.code ?? null,
+    },
+  );
+}
 
 const jmaResult = await request("/api/signage/jma");
 const jmaPayload = json(jmaResult.body);
@@ -752,6 +842,9 @@ for (const target of browserTargets) {
       readonlyTemplateCount: document.querySelectorAll(
         "main textarea[readonly]",
       ).length,
+      mailDraftFormCount: document.querySelectorAll(
+        'main form[method="post"][action="/contact/automation-email/draft"]',
+      ).length,
       mascotCount: mascotImages.length,
       brokenMascotCount: mascotImages.filter(
         (image) =>
@@ -813,29 +906,38 @@ for (const target of browserTargets) {
     );
   }
   if (target.route === "/accidents") {
+    const syntheticLabelPattern = /架空の学習例/;
     record(
       `${prefix}:synthetic-labelled`,
-      /モック|合成|synthetic/i.test(snapshot.bodyText),
-      { labelPresent: /モック|合成|synthetic/i.test(snapshot.bodyText) },
+      syntheticLabelPattern.test(snapshot.bodyText),
+      { labelPresent: syntheticLabelPattern.test(snapshot.bodyText) },
     );
   }
   if (target.route === "/services/automation") {
     const emailPattern =
       /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i;
     record(
-      `${prefix}:preparing-no-pii-form`,
-      /受付(?:は|の)?準備中/.test(snapshot.bodyText) &&
-        snapshot.mainFormCount === 0 &&
+      `${prefix}:mail-client-no-pii-form`,
+      snapshot.bodyText.includes("メール相談受付中") &&
+        snapshot.bodyText.includes(
+          "Webフォームへ相談本文を入力する方式ではありません",
+        ) &&
+        snapshot.mainFormCount === 1 &&
         snapshot.piiInputCount === 0 &&
-        snapshot.submitButtonCount === 0 &&
+        snapshot.submitButtonCount === 1 &&
         snapshot.readonlyTemplateCount > 0 &&
+        snapshot.mailDraftFormCount === 1 &&
         !emailPattern.test(snapshot.bodyText),
       {
-        preparationLabel: /受付(?:は|の)?準備中/.test(snapshot.bodyText),
+        mailClientLabel: snapshot.bodyText.includes("メール相談受付中"),
+        webFormDisabledCopy: snapshot.bodyText.includes(
+          "Webフォームへ相談本文を入力する方式ではありません",
+        ),
         mainFormCount: snapshot.mainFormCount,
         piiInputCount: snapshot.piiInputCount,
         submitButtonCount: snapshot.submitButtonCount,
         readonlyTemplateCount: snapshot.readonlyTemplateCount,
+        mailDraftFormCount: snapshot.mailDraftFormCount,
         emailExposed: emailPattern.test(snapshot.bodyText),
       },
     );
@@ -982,7 +1084,9 @@ const report = {
   generatedAt: new Date().toISOString(),
   baseUrl: baseUrl.origin,
   expectedDeploymentId,
-  mode: "production-smoke-fixed-non-pii-fail-closed-probes",
+  mode: getOnly
+    ? "production-smoke-get-only"
+    : "production-smoke-fixed-non-pii-fail-closed-probes",
   guarantees: {
     credentialValuesRecorded: false,
     piiSubmitted: false,

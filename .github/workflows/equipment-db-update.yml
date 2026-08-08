@@ -39,7 +39,7 @@ jobs:
         with:
           name: equipment-lint-log
           path: logs/equipment-lint-*.log
-          retention-days: 90
+          retention-days: 7
 
       - name: Open issue on failure
         if: failure()

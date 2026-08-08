@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "generatedAtJst": "2026-08-08T21:14:53+09:00",
+  "algorithm": "sha256(sorted lines: <file-sha256><two spaces><repo-relative-path><LF>)",
+  "excludes": [
+    "test files",
+    "raw evidence",
+    "unverified or quarantined notices"
+  ],
+  "corpora": [
+    {
+      "id": "laws-fulltext",
+      "roots": ["web/src/data/laws-fulltext"],
+      "fileCount": 25,
+      "bytes": 6562218,
+      "manifestSha256": "ac988b993654b0b127b9ebb27713613dbc244e7f2d8a489ac968afb5f8b73d41"
+    },
+    {
+      "id": "laws-and-metadata",
+      "roots": [
+        "web/src/data/laws",
+        "web/src/data/laws-mhlw",
+        "web/src/data/law-revisions",
+        "web/src/data/law-navi"
+      ],
+      "fileCount": 69,
+      "bytes": 7879571,
+      "manifestSha256": "0cd6e492d82ade9337a471ae29779045e170acdc07a3a72e8fb0504ddd72e4f1"
+    },
+    {
+      "id": "verified-notices-and-circulars",
+      "roots": [
+        "web/src/data/circulars",
+        "web/src/data/source-snapshots",
+        "web/src/data/mhlw-notices.ts",
+        "web/src/data/public-mhlw-notices.ts",
+        "web/src/data/article-notice-map.ts",
+        "web/src/data/source-registry.ts"
+      ],
+      "fileCount": 9,
+      "bytes": 846765,
+      "manifestSha256": "5d1cabeedb488873616feb84dd2f106c2cfeeba2697a0c78be86b053867172b8"
+    },
+    {
+      "id": "surrounding-legal-snapshots",
+      "roots": ["web/src/data/legal"],
+      "fileCount": 11,
+      "bytes": 835372,
+      "manifestSha256": "c147a2f9534dc102bba95c38e82f5c76bfc80011740e1acdb8111c90cd9d0c0c"
+    }
+  ],
+  "reviewRequired": [
+    {
+      "record": "docs/audits/source-coverage-registry-2026-07-24.csv",
+      "reason": "18 source hashes and 14 review dates/reviewers are not yet recorded; files were retained, not inferred or deleted."
+    },
+    {
+      "record": "docs/audits/heat-illness-legal-review-pack-2026-07-29.csv",
+      "reason": "External expert review remains pending; files were retained and are not treated as verified legal authority."
+    }
+  ]
+}

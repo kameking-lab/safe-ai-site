@@ -1,0 +1,302 @@
+name: storage-budget
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: storage-budget-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repository-hygiene:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout complete history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enforce repository storage budgets
+        env:
+          STORAGE_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          import subprocess
+          import sys
+          from pathlib import Path, PurePosixPath
+
+          MIB = 1024 * 1024
+          MAX_NEW_TRACKED = 5 * MIB
+          MAX_SINGLE_FILE = 100 * MIB
+          MAX_UNTRACKED_COUNT = 1_000
+          MAX_NON_RUNTIME_MEDIA_COUNT = 100
+          MAX_NON_RUNTIME_MEDIA_BYTES = 20 * MIB
+
+          # Large source datasets are intentional only in these reviewed runtime trees.
+          # This includes legal, chemical, qualification, accident, KYT, source snapshots,
+          # public images, schema/migrations, and their committed test fixtures.
+          LARGE_RUNTIME_ALLOWLIST = (
+              "data/",
+              "web/src/data/",
+              "web/public/",
+              "web/prisma/",
+              "web/src/fixtures/",
+              "web/src/__fixtures__/",
+              "web/test/fixtures/",
+              "web/tests/fixtures/",
+              "web/e2e/fixtures/",
+          )
+
+          COMPACT_EVIDENCE_FILES = {
+              "README.md",
+              "manifest.json",
+              "checksum-manifest.json",
+              "quality-gates-automated.json",
+              "preview-conversation-audit.json",
+              "conversation-evaluation.json",
+              "production-smoke.json",
+              "external-boundary.json",
+          }
+          RAW_EVIDENCE_SUFFIXES = {
+              ".har", ".html", ".log", ".trace", ".zip", ".gz", ".tgz",
+              ".mp4", ".webm", ".png", ".jpg", ".jpeg", ".gif", ".webp",
+              ".jsonl", ".lcov",
+          }
+          MEDIA_OR_JSON_SUFFIXES = {
+              ".json", ".jsonl", ".png", ".jpg", ".jpeg", ".gif", ".webp",
+              ".avif", ".svg",
+          }
+          GENERATED_SEGMENTS = {
+              ".next", "out", "build", "dist", "coverage", "test-results", "playwright-report",
+              "audit-out", ".turbo", ".cache", "lighthouse-raw", "lighthouse-trace",
+              "lighthouse-results", ".lighthouseci", "trace", "traces", "videos",
+              "tmp", ".tmp", "benchmark-output", ".benchmark-output", ".bench", ".genquality",
+              ".local-evidence", ".ci-performance-evidence", ".maintenance-snapshots",
+              "local-snapshots", "logs",
+          }
+
+          def run_bytes(*args: str) -> bytes:
+              return subprocess.check_output(args)
+
+          def valid_commit(value: str) -> bool:
+              if not value or set(value) == {"0"}:
+                  return False
+              return subprocess.run(
+                  ["git", "cat-file", "-e", f"{value}^{{commit}}"],
+                  stdout=subprocess.DEVNULL,
+                  stderr=subprocess.DEVNULL,
+                  check=False,
+              ).returncode == 0
+
+          base = os.environ.get("STORAGE_BASE_SHA", "").strip()
+          if not valid_commit(base):
+              fallback = subprocess.run(
+                  ["git", "rev-parse", "HEAD^"],
+                  text=True,
+                  capture_output=True,
+                  check=False,
+              )
+              base = fallback.stdout.strip() if fallback.returncode == 0 else ""
+
+          if base:
+              raw = run_bytes(
+                  "git", "diff", "--diff-filter=ACMR", "--name-only", "-z", f"{base}...HEAD"
+              )
+          else:
+              raw = run_bytes("git", "ls-files", "-z")
+
+          added = [
+              item.decode("utf-8", errors="surrogateescape").replace("\\", "/")
+              for item in raw.split(b"\0")
+              if item
+          ]
+          failures: list[str] = []
+          allowed_large: list[str] = []
+          non_runtime_media: list[tuple[str, int]] = []
+
+          def is_runtime_allowed(path: str) -> bool:
+              return path.startswith(LARGE_RUNTIME_ALLOWLIST)
+
+          def is_generated_artifact(path: str) -> bool:
+              parts = PurePosixPath(path).parts
+              if "node_modules" in parts:
+                  return True
+              if any(
+                  parts[index] == ".vercel" and parts[index + 1] == "output"
+                  for index in range(len(parts) - 1)
+              ):
+                  return True
+              if "screenshots" in parts and not path.startswith("web/public/screenshots/"):
+                  return True
+              generated_prefixes = (
+                  "test-results-", "playwright-report-", "lighthouse-raw-",
+                  "lighthouse-trace-",
+              )
+              if any(part in GENERATED_SEGMENTS or part.startswith(generated_prefixes) for part in parts):
+                  return True
+              basename = PurePosixPath(path).name
+              return path.endswith((".lhr.json", ".trace", ".log", ".tmp")) or (
+                  basename.startswith("lh5d-noimg") and basename.endswith(".json")
+              )
+
+          def is_audit_evidence(path: str) -> bool:
+              return path.startswith("docs/audits/evidence/") or "/docs/audits/evidence/" in f"/{path}"
+
+          classifier_probes = (
+              ".local-evidence/run.log",
+              ".ci-performance-evidence/result.json",
+              ".maintenance-snapshots/tree.json",
+              "local-snapshots/tree.json",
+              "web/build/result.js",
+              "web/dist/result.js",
+              "web/lighthouse-raw-1/result.json",
+              "web/.vercel/output/functions/api.func/index.js",
+              "web/logs/run.log",
+              "root-debug.log",
+              "artifact.tmp",
+              "lh5d-noimg-run.json",
+          )
+          if any(not is_generated_artifact(path) for path in classifier_probes):
+              failures.append("storage classifier self-test failed")
+          if is_generated_artifact("web/public/screenshots/runtime-guide.png"):
+              failures.append("runtime screenshot classifier self-test failed")
+          if not is_generated_artifact("web/node_modules/pkg/dist/index.js"):
+              failures.append("node_modules classifier self-test failed")
+          if sum(
+              1 for index in range(MAX_UNTRACKED_COUNT + 1)
+              if is_generated_artifact(f"web/test-results-probe/{index}.json")
+          ) <= MAX_UNTRACKED_COUNT:
+              failures.append("untracked generated-file budget self-test failed")
+
+          for path in added:
+              file_path = Path(path)
+              if not file_path.is_file():
+                  continue
+              size = file_path.lstat().st_size
+              suffix = file_path.suffix.lower()
+              basename = file_path.name
+
+              if size > MAX_SINGLE_FILE:
+                  failures.append(f"single file exceeds 100 MiB: {path} ({size} bytes)")
+              elif size >= MAX_NEW_TRACKED:
+                  if is_runtime_allowed(path):
+                      allowed_large.append(f"{path} ({size} bytes)")
+                  else:
+                      failures.append(f"new tracked file exceeds 5 MiB: {path} ({size} bytes)")
+
+              if is_generated_artifact(path):
+                  failures.append(f"generated build/test artifact is tracked: {path}")
+
+              if is_audit_evidence(path):
+                  parts = PurePosixPath(path).parts
+                  raw_dir = any(
+                      part in {"raw", "screenshots", "traces", "videos", "playwright-report", "test-results", "lighthouse-runs"}
+                      for part in parts
+                  )
+                  if raw_dir or suffix in RAW_EVIDENCE_SUFFIXES or basename not in COMPACT_EVIDENCE_FILES:
+                      failures.append(f"raw/non-current audit evidence is tracked: {path}")
+
+              if suffix in MEDIA_OR_JSON_SUFFIXES and not is_runtime_allowed(path):
+                  non_runtime_media.append((path, size))
+
+          history_blob_count = 0
+          if base:
+              object_lines = run_bytes(
+                  "git", "rev-list", "--objects", f"{base}..HEAD"
+              ).splitlines()
+              object_paths: dict[bytes, str] = {}
+              for line in object_lines:
+                  object_id, separator, raw_path = line.partition(b" ")
+                  if not separator or not raw_path:
+                      continue
+                  object_paths.setdefault(
+                      object_id,
+                      raw_path.decode("utf-8", errors="surrogateescape").replace("\\", "/"),
+                  )
+              if object_paths:
+                  inspected = subprocess.run(
+                      [
+                          "git",
+                          "cat-file",
+                          "--batch-check=%(objectname) %(objecttype) %(objectsize)",
+                      ],
+                      input=b"\n".join(object_paths) + b"\n",
+                      stdout=subprocess.PIPE,
+                      check=True,
+                  ).stdout.splitlines()
+                  for line in inspected:
+                      fields = line.split()
+                      if len(fields) != 3 or fields[1] != b"blob":
+                          continue
+                      object_id, _, raw_size = fields
+                      path = object_paths.get(object_id)
+                      if not path:
+                          continue
+                      history_blob_count += 1
+                      size = int(raw_size)
+                      if size > MAX_SINGLE_FILE:
+                          failures.append(
+                              f"history blob exceeds 100 MiB: {path} ({size} bytes)"
+                          )
+                      elif size >= MAX_NEW_TRACKED and not is_runtime_allowed(path):
+                          failures.append(
+                              f"history blob exceeds 5 MiB: {path} ({size} bytes)"
+                          )
+
+          media_bytes = sum(size for _, size in non_runtime_media)
+          if (
+              len(non_runtime_media) > MAX_NON_RUNTIME_MEDIA_COUNT
+              or media_bytes > MAX_NON_RUNTIME_MEDIA_BYTES
+          ):
+              failures.append(
+                  "non-runtime JSON/image addition exceeds budget: "
+                  f"{len(non_runtime_media)} files, {media_bytes} bytes"
+              )
+
+          untracked_raw = run_bytes("git", "ls-files", "--others", "--exclude-standard", "-z")
+          ignored_raw = run_bytes(
+              "git", "ls-files", "--others", "--ignored", "--exclude-standard", "-z"
+          )
+          untracked_paths = {
+              item.decode("utf-8", errors="surrogateescape").replace("\\", "/")
+              for item in (untracked_raw + ignored_raw).split(b"\0")
+              if item
+          }
+          untracked_generated = [
+              path for path in untracked_paths
+              if "node_modules" not in PurePosixPath(path).parts
+              and (is_generated_artifact(path) or is_audit_evidence(path))
+          ]
+          if len(untracked_generated) > MAX_UNTRACKED_COUNT:
+              failures.append(
+                  "untracked generated-file budget exceeded: "
+                  f"{len(untracked_generated)} > {MAX_UNTRACKED_COUNT}"
+              )
+
+          print(f"Storage budget base: {base or '<initial tree>'}")
+          print(f"New tracked files checked: {len(added)}")
+          print(f"New history blobs checked: {history_blob_count}")
+          print(f"Untracked generated files (ignored included): {len(untracked_generated)}")
+          if allowed_large:
+              print("Reviewed runtime allowlist accepted these >5 MiB files:")
+              for entry in allowed_large:
+                  print(f"  - {entry}")
+
+          if failures:
+              print("::error::Repository storage budget failed")
+              for failure in sorted(set(failures)):
+                  print(f"  - {failure}")
+              sys.exit(1)
+
+          print("Repository storage budget passed.")
+          PY

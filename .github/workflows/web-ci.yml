@@ -69,6 +69,7 @@ jobs:
           path: |
             web/playwright-report
             web/test-results
+          retention-days: 7
 
   full:
     if: github.event_name == 'push' || github.event.inputs.run_full == 'true'
@@ -115,3 +116,4 @@ jobs:
           path: |
             web/playwright-report
             web/test-results
+          retention-days: 7
